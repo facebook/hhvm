@@ -16,8 +16,7 @@
 
 // Magic numbers associated with this cache.
 
-#ifndef incl_HPHP_MAGIC_NUMBERS_H_
-#define incl_HPHP_MAGIC_NUMBERS_H_
+#pragma once
 
 namespace HPHP {
 
@@ -30,4 +29,3 @@ const uint64_t kDataOfsPlaceholder = 0x000044448888aaaa;
 
 }  // namespace HPHP
 
-#endif  // incl_HPHP_MAGIC_NUMBERS_H_

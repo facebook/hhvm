@@ -1,13 +1,13 @@
-<?php
+<?hh
 /*
   Prototype: int fileperms ( string $filename )
   Description: Returns the permissions on the file, or FALSE in case of an error
 
   Prototype: bool chmod ( string $filename, int $mode )
-  Description: Attempts to change the mode of the file specified by 
+  Description: Attempts to change the mode of the file specified by
     filename to that given in mode
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions for fileperms(), chmod() ***\n";
 
 /* With standard files and dirs */
@@ -27,21 +27,19 @@ var_dump( fileperms("/no/such/file/dir") );
 echo "\n";
 
 /* With args less than expected */
-$fp = fopen(dirname(__FILE__)."/006_error.tmp", "w");
-fclose($fp);
-var_dump( chmod(dirname(__FILE__)."/006_error.tmp") );
-var_dump( chmod("nofile") );
-var_dump( chmod() );
-var_dump( fileperms() );
+$file_path = __SystemLib\hphp_test_tmppath('006_error.tmp');
+fclose(fopen($file_path, "w"));
+try { var_dump( chmod($file_path) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( chmod("nofile") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( chmod() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fileperms() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* With args greater than expected */
-var_dump( chmod(dirname(__FILE__)."/006_error.tmp", 0755, TRUE) );
-var_dump( fileperms(dirname(__FILE__)."/006_error.tmp", 0777) );
-var_dump( fileperms("nofile", 0777) );
+try { var_dump( chmod($file_path, 0755, TRUE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fileperms($file_path, 0777) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fileperms("nofile", 0777) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-unlink( dirname(__FILE__)."/006_error.tmp");
-?>
+
+unlink($file_path);
+}

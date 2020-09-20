@@ -12,5 +12,9 @@ async function foo() {
   return "finished!";
 }
 
-var_dump(HH\Asio\join(foo()));
 
+
+<<__EntryPoint>>
+function main_cycle() {
+var_dump(HH\Asio\join(foo()));
+}

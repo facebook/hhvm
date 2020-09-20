@@ -1,0 +1,6 @@
+(4,3)-(4,9) Type constants cannot be declared `public`
+(5,3)-(5,12) Type constants cannot be declared `protected`
+(6,3)-(6,10) Type constants cannot be declared `private`
+(7,3)-(7,9) Type constants cannot be declared `public`
+(8,3)-(8,12) Type constants cannot be declared `protected`
+(9,3)-(9,10) Type constants cannot be declared `private`

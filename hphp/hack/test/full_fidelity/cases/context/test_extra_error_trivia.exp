@@ -30,7 +30,7 @@
       (compound_statement (({) (end_of_line)) (missing)
        ((whitespace) (}) (end_of_line)))
       (missing))
-     (property_declaration
+     (property_declaration (missing)
       (list
        ((end_of_line) (whitespace) (single_line_comment) (end_of_line)
         (whitespace) (public) (whitespace)))
@@ -44,7 +44,7 @@
       (compound_statement (({) (end_of_line)) (missing)
        ((whitespace) (}) (end_of_line)))
       (missing))
-     (property_declaration
+     (property_declaration (missing)
       (list
        ((end_of_line) (whitespace) (single_line_comment) (end_of_line)
         (whitespace) (public) (whitespace)))
@@ -59,4 +59,5 @@
       (compound_statement (({) (end_of_line)) (missing)
        ((whitespace) (}) (end_of_line)))
       (missing)))
-    ((end_of_line) (}))))))
+    ((end_of_line) (}))))
+  (end_of_file ((end_of_file)))))

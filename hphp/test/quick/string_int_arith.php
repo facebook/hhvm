@@ -12,7 +12,9 @@ function main() {
 
   var_dump(foo() + zero());
   var_dump(foo() - zero());
-  var_dump(foo() / zero());
+  try {
+    var_dump(foo() / zero());
+  } catch (DivisionByZeroException $e) {}
   var_dump(foo() * zero());
 
   var_dump(twelve() + foo());
@@ -27,59 +29,61 @@ function main() {
 }
 
 function setop_main() {
-  $a = array(zero());
+  $a = varray[zero()];
   $a[0] += foo();
   var_dump($a[0]);
-  $a = array(zero());
+  $a = varray[zero()];
   $a[0] -= foo();
   var_dump($a[0]);
-  $a = array(zero());
+  $a = varray[zero()];
   $a[0] /= foo();
   var_dump($a[0]);
-  $a = array(zero());
+  $a = varray[zero()];
   $a[0] *= foo();
   var_dump($a[0]);
 
-  $a = array(foo());
+  $a = varray[foo()];
   $a[0] += zero();
   var_dump($a[0]);
-  $a = array(foo());
+  $a = varray[foo()];
   $a[0] -= zero();
   var_dump($a[0]);
-  $a = array(foo());
-  $a[0] /= zero();
-  var_dump($a[0]);
-  $a = array(foo());
+  $a = varray[foo()];
+  try {
+    $a[0] /= zero();
+    var_dump($a[0]);
+  } catch (DivisionByZeroException $e) {}
+  $a = varray[foo()];
   $a[0] *= zero();
   var_dump($a[0]);
 
-  $a = array(twelve());
+  $a = varray[twelve()];
   $a[0] += foo();
   var_dump($a[0]);
-  $a = array(twelve());
+  $a = varray[twelve()];
   $a[0] -= foo();
   var_dump($a[0]);
-  $a = array(twelve());
+  $a = varray[twelve()];
   $a[0] /= foo();
   var_dump($a[0]);
-  $a = array(twelve());
+  $a = varray[twelve()];
   $a[0] *= foo();
   var_dump($a[0]);
 
-  $a = array(foo());
+  $a = varray[foo()];
   $a[0] += twelve();
   var_dump($a[0]);
-  $a = array(foo());
+  $a = varray[foo()];
   $a[0] -= twelve();
   var_dump($a[0]);
-  $a = array(foo());
+  $a = varray[foo()];
   $a[0] /= twelve();
   var_dump($a[0]);
-  $a = array(foo());
+  $a = varray[foo()];
   $a[0] *= twelve();
   var_dump($a[0]);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 setop_main();
-
+}

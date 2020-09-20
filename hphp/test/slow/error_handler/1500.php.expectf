@@ -1,5 +1,5 @@
 handler_called
 
-Fatal error: %s
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function foo() on a non-object (null)' in %s/1500.php:7
 Stack trace:
-#0 {main}
+%a {main}

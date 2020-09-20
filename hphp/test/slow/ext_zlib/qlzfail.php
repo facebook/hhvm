@@ -14,4 +14,8 @@ function main() {
   var_dump($wx);
 }
 
+
+<<__EntryPoint>>
+function main_qlzfail() {
 main();
+}

@@ -1,15 +1,8 @@
-File "constraint_gen_fail3.php", line 23, characters 7-7:
-Class U does not correctly implement all required methods  (Typing[4110])
-File "constraint_gen_fail3.php", line 23, characters 20-20:
-Some methods are incompatible with those declared in type L
-Read the following to see why:
 File "constraint_gen_fail3.php", line 24, characters 19-21:
-Member get has the wrong type
-File "constraint_gen_fail3.php", line 23, characters 22-22:
-This is an object of type A
-File "constraint_gen_fail3.php", line 20, characters 27-27:
-  via this generic T
+The method `get` has the wrong type (Typing[4341])
+File "constraint_gen_fail3.php", line 20, characters 26-27:
+Expected `?A`
 File "constraint_gen_fail3.php", line 23, characters 9-9:
-It is incompatible with a value of generic type T
+But got `T`
 File "constraint_gen_fail3.php", line 24, characters 27-27:
-  via this generic T
+  via this generic `T`

@@ -1,0 +1,8 @@
+File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 3, characters 16-16:
+Class `B` does not correctly implement all required members  (Typing[4340])
+File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 3, characters 26-26:
+Some members are incompatible with those declared in type `A`
+File "abstract_redeclare_abstract_class_constant_bad.php--file1.php", line 5, characters 18-20:
+Expected `int`
+File "abstract_redeclare_abstract_class_constant_bad.php--file2.php", line 4, characters 18-25:
+But got `arraykey`

@@ -1,5 +1,5 @@
 *** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***
 
-Warning: %s
+Warning: delimiter must be a character
 bool(false)
 Done

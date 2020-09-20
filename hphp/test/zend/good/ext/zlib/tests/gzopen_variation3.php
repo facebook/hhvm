@@ -1,28 +1,4 @@
-<?php
-/* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
- * Description: Open a .gz-file and return a .gz-file pointer 
- * Source code: ext/zlib/zlib.c
- * Alias to functions: 
- */
-
-echo "*** Testing gzopen() : usage variation ***\n";
-
-// Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
-}
-set_error_handler('test_error_handler');
-
-// Initialise function arguments not being substituted (if any)
-$filename = dirname(__FILE__)."/004.txt.gz";
-$mode = 'r';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
+<?hh
 
 // define some classes
 class classWithToString
@@ -35,81 +11,99 @@ class classWithToString
 class classWithoutToString
 {
 }
+<<__EntryPoint>>
+function entrypoint_gzopen_variation3(): void {
+  /* Prototype  : resource gzopen(string filename, string mode [, int use_include_path])
+   * Description: Open a .gz-file and return a .gz-file pointer
+   * Source code: ext/zlib/zlib.c
+   * Alias to functions:
+   */
 
-// heredoc string
-$heredoc = <<<EOT
+  echo "*** Testing gzopen() : usage variation ***\n";
+
+  // Initialise function arguments not being substituted (if any)
+  $filename = dirname(__FILE__)."/004.txt.gz";
+  $mode = 'r';
+
+  //get an unset variable
+  $unset_var = 10;
+  unset ($unset_var);
+
+  // heredoc string
+  $heredoc = <<<EOT
 hello world
 EOT;
 
-// get a resource variable
-$fp = fopen(__FILE__, "r");
+  // get a resource variable
+  $fp = fopen(__FILE__, "r");
 
-// add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+  // add arrays
+  $index_array = varray [1, 2, 3];
+  $assoc_array = darray ['one' => 1, 'two' => 2];
 
-//array of values to iterate over
-$inputs = array(
+  //array of values to iterate over
+  $inputs = darray[
 
-      // float data
-      'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
-      'float 12.3456789000e10' => 12.3456789000e10,
-      'float -12.3456789000e10' => -12.3456789000e10,
-      'float .5' => .5,
+        // float data
+        'float 10.5' => 10.5,
+        'float -10.5' => -10.5,
+        'float 12.3456789000e10' => 12.3456789000e10,
+        'float -12.3456789000e10' => -12.3456789000e10,
+        'float .5' => .5,
 
-      // array data
-      'empty array' => array(),
-      'int indexed array' => $index_array,
-      'associative array' => $assoc_array,
-      'nested arrays' => array('foo', $index_array, $assoc_array),
+        // array data
+        'empty array' => varray[],
+        'int indexed array' => $index_array,
+        'associative array' => $assoc_array,
+        'nested arrays' => varray['foo', $index_array, $assoc_array],
 
-      // null data
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
+        // null data
+        'uppercase NULL' => NULL,
+        'lowercase null' => null,
 
-      // boolean data
-      'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
+        // boolean data
+        'lowercase true' => true,
+        'lowercase false' =>false,
+        'uppercase TRUE' =>TRUE,
+        'uppercase FALSE' =>FALSE,
 
-      // empty data
-      'empty string DQ' => "",
-      'empty string SQ' => '',
+        // empty data
+        'empty string DQ' => "",
+        'empty string SQ' => '',
 
-      // string data
-      'string DQ' => "string",
-      'string SQ' => 'string',
-      'mixed case string' => "sTrInG",
-      'heredoc' => $heredoc,
+        // string data
+        'string DQ' => "string",
+        'string SQ' => 'string',
+        'mixed case string' => "sTrInG",
+        'heredoc' => $heredoc,
 
-      // object data
-      'instance of classWithToString' => new classWithToString(),
-      'instance of classWithoutToString' => new classWithoutToString(),
+        // object data
+        'instance of classWithToString' => new classWithToString(),
+        'instance of classWithoutToString' => new classWithoutToString(),
 
-      // undefined data
-      'undefined var' => @$undefined_var,
+        // undefined data
+        'undefined var' => @$undefined_var,
 
-      // unset data
-      'unset var' => @$unset_var,
-      
-      // resource variable
-      'resource' => $fp      
-);
+        // unset data
+        'unset var' => @$unset_var,
 
-// loop through each element of the array for use_include_path
+        // resource variable
+        'resource' => $fp
+  ];
 
-foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      $res = gzopen($filename, $mode, $value);
-      var_dump($res);
-      if ($res === true) {
-         gzclose($res);
-      }
-};
+  // loop through each element of the array for use_include_path
 
-fclose($fp);
+  foreach($inputs as $key =>$value) {
+        echo "\n--$key--\n";
+  			$res = null;
+        try { $res = gzopen($filename, $mode, $value); } catch (Exception $e) { echo 'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  			var_dump($res);
+        if ($res === true) {
+           gzclose($res);
+        }
+  }
 
-?>
-===DONE===
+  fclose($fp);
+
+  echo "===DONE===\n";
+}

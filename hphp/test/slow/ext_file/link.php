@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_link() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 $tempfile2 = tempnam('/tmp', 'vmextfiletest');
 
@@ -15,3 +18,4 @@ var_dump(file_exists($tempfile2));
 
 unlink($tempfile);
 unlink($tempfile2);
+}

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class already declared: stdClass in %s/inter_06.php on line 3

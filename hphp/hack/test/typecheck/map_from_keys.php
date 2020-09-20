@@ -1,14 +1,14 @@
 ////file1.php
-<?hh
+<?hh // partial
+/* HH_FIXME[4110] */
 function getArray(): array {
-//UNSAFE
 }
 
-function mapFromKeys<Tk, Tv>(
+/* HH_FIXME[4110] */
+function mapFromKeys<Tk as arraykey, Tv>(
   Traversable<Tk> $keys,
   (function(Tk): Tv) $map_key_to_value_function,
 ): Map<Tk, Tv> {
-  //UNSAFE
 }
 
 ////file2.php

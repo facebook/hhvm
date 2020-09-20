@@ -1,0 +1,9 @@
+bool(true)
+bool(false)
+string(3) "Bar"
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Argument 1 passed to class_get_class_name() must be a class' in %s/class-builtins.php:9
+Stack trace:
+#0 %s/class-builtins.php(9): HH\class_get_class_name()
+#1 (): main()
+#2 {main}

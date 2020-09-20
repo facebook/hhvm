@@ -1,13 +1,13 @@
-<?php
+<?hh
 function Add($x,$y) {
   return $x+$y;
 }
 function Sub($x,$y) {
   return $x-$y;
 }
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction(array("Sub","Add"));
+<<__EntryPoint>> function main(): void {
+$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+$server->addfunction(varray["Sub","Add"]);
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -28,4 +28,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>
+}

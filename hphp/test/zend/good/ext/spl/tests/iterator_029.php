@@ -1,21 +1,18 @@
-<?php
-
-$ar = array(0, "123", 123, 22 => "abc", "a2b", 22, "a2d" => 7, 42);
+<?hh
+<<__EntryPoint>> function main(): void {
+$ar = darray[0 => 0, 1 => "123", 2 => 123, 22 => "abc", 23 => "a2b", 24 => 22, "a2d" => 7, 25 => 42];
 
 foreach(new RegexIterator(new ArrayIterator($ar), "/2/") as $k => $v)
 {
 	echo "$k=>$v\n";
 }
 
-?>
-===KEY===
-<?php
+echo "===KEY===\n";
 
 foreach(new RegexIterator(new ArrayIterator($ar), "/2/", 0, RegexIterator::USE_KEY) as $k => $v)
 {
 	echo "$k=>$v\n";
 }
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

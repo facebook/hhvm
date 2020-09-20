@@ -1,0 +1,4 @@
+File "new_classname_inconsistent.php", line 7, characters 7-8:
+Can't use `new` on `classname<A>`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
+File "new_classname_inconsistent.php", line 6, characters 17-17:
+This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute

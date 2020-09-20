@@ -1,17 +1,17 @@
-<?php
+<?hh
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_chunk() function with unexpected values for 'preserve_keys' 
+* Testing array_chunk() function with unexpected values for 'preserve_keys'
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
-$input = array(1, 2);
+$input = varray[1, 2];
 $size = 10;
 
 //get an unset variable
@@ -19,7 +19,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
         // int data
 /*1*/   0,
@@ -49,22 +49,16 @@ $values = array(
         // object data
 /*16*/  new stdclass(),
 
-        // undefined data
-/*17*/  @undefined_var,
-
-        // unset data
-/*18*/  @unset_var
-
-);
+];
 
 $count = 1;
 
 // loop through each element of the array for preserve_keys
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  var_dump( array_chunk($input, $size, $value) );
+  try { var_dump( array_chunk($input, $size, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 
 echo "Done";
-?>
+}

@@ -1,5 +1,7 @@
-<?php // $Id$
+<?hh // $Id$
 
+<<__EntryPoint>>
+function entrypoint_with_strings(): void {
 error_reporting(E_ALL);
 
 # This FAILS
@@ -12,9 +14,6 @@ HEREDOC;
 
 $blaat2 = bzdecompress(bzcompress($blaat));
 
-$tests = <<<TESTS
- \$blaat === \$blaat2
-TESTS;
-
 include(dirname(__FILE__) . '/../../../tests/quicktester.inc');
-
+quicktester(() ==> $blaat, () ==> $blaat2);
+}

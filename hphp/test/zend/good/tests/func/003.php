@@ -1,4 +1,4 @@
-<?php 
+<?hh
 
 function a()
 {
@@ -18,16 +18,6 @@ function c($i,$j)
     echo "$k\n";
   }
 }
-
-
-
-a();
-b("blah");
-a();
-b("blah","blah");
-c(7,14);
-
-a();
 
 
 function factorial($n)
@@ -50,16 +40,6 @@ function factorial2($start, $n)
 }
 
 
-for ($k=0; $k<10; $k++) {
-  for ($i=0; $i<=10; $i++) {
-    $n=factorial($i);
-    echo "factorial($i) = $n\n";
-  }
-}
-
-
-echo "and now, from a function...\n";
-
 function call_fact()
 {
   echo "(it should break at 5...)\n";
@@ -73,6 +53,35 @@ function call_fact()
 function return4() { return 4; }
 function return7() { return 7; }
 
+function andi($i, $j)
+{
+    for ($k=$i ; $k<=$j ; $k++) {
+        if ($k >5) continue;
+        echo "$k\n";
+    }
+}
+
+
+<<__EntryPoint>> function main(): void {
+a();
+b("blah");
+a();
+b("blah","blah");
+c(7,14);
+
+a();
+
+
+for ($k=0; $k<10; $k++) {
+  for ($i=0; $i<=10; $i++) {
+    $n=factorial($i);
+    echo "factorial($i) = $n\n";
+  }
+}
+
+
+echo "and now, from a function...\n";
+
 for ($k=0; $k<10; $k++) {
   call_fact();
 }
@@ -84,12 +93,5 @@ echo "$result\n";
 $result=factorial2(return4(),return7());
 echo "$result\n";
 
-function andi($i, $j)
-{
-	for ($k=$i ; $k<=$j ; $k++) {
-		if ($k >5) continue;
-		echo "$k\n";
-	}
-}
-
 andi (3,10);
+}

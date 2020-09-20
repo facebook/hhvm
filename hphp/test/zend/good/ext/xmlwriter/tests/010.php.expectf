@@ -2,11 +2,11 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: invalid attribute name: -1 in %s/010.php on line 10
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: invalid attribute name: " in %s/010.php on line 12
 bool(false)
 bool(false)
 bool(true)

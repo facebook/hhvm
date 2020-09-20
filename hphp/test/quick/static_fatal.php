@@ -13,14 +13,12 @@ class three extends two {
 
 class doer {
   public function junk($x) {
-    $x->foo();
+    $x::foo();
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $d = new two;
   $x = new doer;
   $x->junk($d);
 }
-
-main();

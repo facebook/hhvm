@@ -7,7 +7,7 @@ string(4) "true"
 string(5) "false"
 bool(true)
 bool(false)
-object(stdClass)#%d (2) {
+object(stdClass) (2) {
   ["prop1"]=>
   int(1)
   ["prop2"]=>

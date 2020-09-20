@@ -1,0 +1,17 @@
+<?hh
+class A extends \A0 implements \I1 {}
+class C extends \A {}
+class D<Tfirst, Tsecond> extends \B {}
+class B implements \I1 {}
+function with_generics<Tfirst, Tsecond>(
+  D<Tfirst, Tsecond> $d,
+  E<Tfirst> $e,
+): int {
+  return generic<C>();
+}
+function generic<T>(): int {
+  throw new \Exception();
+}
+interface I1 {}
+class A0 {}
+class E<T> extends \D<T, int> {}

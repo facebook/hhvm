@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -40,63 +40,32 @@ namespace HPHP { namespace jit { namespace tc {
 
 namespace {
 
-void updateFuncPrologue(TCA start, ProfTransRec* rec) {
-  auto func = rec->func();
-  auto nArgs = rec->prologueArgs();
+void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
+                          PrologueMetaInfo& info,
+                          CodeMetaLock* locker) {
+  assertx(isPrologue(kind));
 
-  auto lock = rec->lockCallerList();
-  func->setPrologue(nArgs, start);
-
-  // Smash callers of the old prologue with the address of the new one.
-  for (auto toSmash : rec->mainCallers()) {
-    smashCall(toSmash, start);
-  }
-
-  // If the prologue has a matching guard, then smash its guard-callers as
-  // well.
-  auto const guard = funcGuardFromPrologue(start, func);
-  if (funcGuardMatches(guard, func)) {
-    for (auto toSmash : rec->guardCallers()) {
-      smashCall(toSmash, guard);
-    }
-  }
-  rec->clearAllCallers();
-}
-
-TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
   if (!newTranslation()) {
-    return nullptr;
+    info.start = nullptr;
+    return;
   }
 
+  auto& transID = info.transID;
+  auto&     loc = info.loc;
+  auto&  fixups = info.meta;
   const int nparams = func->numNonVariadicParams();
   const int paramIndex = argc <= nparams ? argc : nparams + 1;
 
   auto const funcBody =
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
 
-  profileSetHotFuncAttr();
-  auto codeView = code().view(kind);
-  TCA mainOrig = codeView.main().frontier();
-  CGMeta fixups;
-
-  // If we're close to a cache line boundary, just burn some space to
-  // try to keep the func and its body on fewer total lines.
-  align(codeView.main(), &fixups, Alignment::CacheLineRoundUp,
-        AlignContext::Dead);
-
-  TransLocMaker maker(codeView);
-  maker.markStart();
-
-  // Careful: this isn't necessarily the real entry point. For funcIsMagic
-  // prologues, this is just a possible prologue.
-  TCA aStart = codeView.main().frontier();
-
   // Give the prologue a TransID if we have profiling data.
-  auto const transID = [&]{
+  transID = [&]{
     if (kind == TransKind::ProfPrologue) {
       auto const profData = jit::profData();
       auto const id = profData->allocTransID();
-      profData->addTransProfPrologue(id, funcBody, paramIndex);
+      profData->addTransProfPrologue(id, funcBody, paramIndex,
+        0 /* asmSize: updated below after machine code is generated */);
       return id;
     }
     if (profData() && transdb::enabled()) {
@@ -105,18 +74,32 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
     return kInvalidTransID;
   }();
 
-  TCA start = genFuncPrologue(transID, kind, func, argc, codeView, fixups);
+  auto res = genFuncPrologue(transID, kind, func, argc, code(), fixups, locker);
+  auto mainOrig = std::get<1>(res);
+  loc = std::get<0>(res);
+  info.start = loc.entry();
+  auto codeView = std::get<2>(res);
 
-  auto loc = maker.markEnd().loc();
+  if (kind == TransKind::ProfPrologue) {
+    // Update the profiling prologue size now that we generated it.
+    profData()->transRec(transID)->setAsmSize(loc.mainSize());
+  }
 
   if (RuntimeOption::EvalEnableReusableTC) {
-    TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
-               cs = loc.coldStart(), ce = loc.coldEnd(),
-               fs = loc.frozenStart(), fe = loc.frozenEnd(),
-               oldStart = start;
+    if (locker) locker->lock();
+    SCOPE_EXIT { if (locker) locker->unlock(); };
+
+    assertOwnsCodeLock();
+    assertOwnsMetadataLock();
+
+    auto const entry = loc.entry();
+    auto const DEBUG_ONLY ms = loc.mainStart(), me = loc.mainEnd(),
+                          cs = loc.coldStart(), ce = loc.coldEnd(),
+                          fs = loc.frozenStart(), fe = loc.frozenEnd(),
+                          oldStart = info.start;
 
     auto const did_relocate = relocateNewTranslation(loc, codeView, fixups,
-                                                     &start);
+                                                     &info.start);
 
     if (did_relocate) {
       FTRACE_MOD(Trace::reusetc, 1,
@@ -126,7 +109,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
                  func->fullName()->data(), func->getFuncId(),
                  ms, me, cs, ce, fs, fe, loc.mainStart(), loc.mainEnd(),
                  loc.coldStart(), loc.coldEnd(), loc.frozenStart(),
-                 loc.frozenEnd(), oldStart, start);
+                 loc.frozenEnd(), oldStart, info.start);
     } else {
       FTRACE_MOD(Trace::reusetc, 1,
                  "Created prologue for func {} (id = {}) at "
@@ -135,46 +118,21 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
                  ms, me, cs, ce, fs, fe, oldStart);
     }
 
-    recordFuncPrologue(func, loc);
-    if (loc.mainStart() != aStart) {
+    if (loc.entry() != entry) {
       codeView.main().setFrontier(mainOrig); // we may have shifted to align
     }
   }
-  if (RuntimeOption::EvalPerfRelocate) {
-    GrowableVector<IncomingBranch> incomingBranches;
-    recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                       loc.coldCodeStart(), loc.coldEnd(),
-                       funcBody, paramIndex,
-                       incomingBranches,
-                       fixups);
-  }
-  fixups.process(nullptr);
 
-  assertx(funcGuardMatches(funcGuardFromPrologue(start, func), func));
-  assertx(code().isValidCodeAddress(start));
+  info.finalView = std::make_unique<CodeCache::View>(codeView);
 
-  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
-        func->fullName()->data(), argc, start);
-  func->setPrologue(paramIndex, start);
-
-  assertx(isPrologue(kind));
-
-  auto tr = maker.rec(funcBody, transID, kind);
-  transdb::addTranslation(tr);
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportTraceletToVtune(func->unit(), func, tr);
-  }
-
-  recordGdbTranslation(funcBody, func, codeView.main(), loc.mainStart(),
-                       loc.mainEnd(), false, true);
-  recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
-
-  return start;
+  assertx(code().isValidCodeAddress(info.start));
 }
 
-TCA emitFuncPrologueInternal(Func* func, int argc, TransKind kind) {
+void emitFuncPrologueInternal(Func* func, int argc, TransKind kind,
+                              PrologueMetaInfo& info,
+                              CodeMetaLock* locker) {
   try {
-    return emitFuncPrologueImpl(func, argc, kind);
+    emitFuncPrologueImpl(func, argc, kind, info, locker);
   } catch (const DataBlockFull& dbFull) {
 
     // Fail hard if the block isn't code.hot.
@@ -184,8 +142,9 @@ TCA emitFuncPrologueInternal(Func* func, int argc, TransKind kind) {
 
     // Otherwise, fall back to code.main and retry.
     code().disableHot();
+    info.meta.clear();
     try {
-      return emitFuncPrologueImpl(func, argc, kind);
+      emitFuncPrologueImpl(func, argc, kind, info, locker);
     } catch (const DataBlockFull& dbStillFull) {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
                          dbStillFull.name, dbStillFull.what());
@@ -196,73 +155,140 @@ TCA emitFuncPrologueInternal(Func* func, int argc, TransKind kind) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-TCA emitFuncPrologueOptInternal(ProfTransRec* rec) {
-  assertOwnsCodeLock();
+bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
+                             PrologueMetaInfo& info) {
   assertOwnsMetadataLock();
 
-  auto start = emitFuncPrologueInternal(
-    rec->func(),
-    rec->prologueArgs(),
-    TransKind::OptPrologue
-  );
-  updateFuncPrologue(start, rec);
-  return start;
+  const auto start = info.start;
+  if (start == nullptr) return false;
+
+  const auto transID = info.transID;
+  const auto&    loc = info.loc;
+  auto&         meta = info.meta;
+
+  auto codeView = *info.finalView;
+  auto const funcBody = SrcKey{func, func->getEntryForNumArgs(nArgs),
+                               SrcKey::PrologueTag{}};
+
+  if (RuntimeOption::EvalEnableReusableTC) {
+    recordFuncPrologue(func, loc);
+  }
+  meta.process(nullptr);
+
+  assertx(code().isValidCodeAddress(start));
+  assertx(isPrologue(kind));
+
+  TransRec tr{funcBody, transID, kind, loc.mainStart(), loc.mainSize(),
+      loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize()};
+  transdb::addTranslation(tr);
+  FuncOrder::recordTranslation(tr);
+  if (RuntimeOption::EvalJitUseVtuneAPI) {
+    reportTraceletToVtune(func->unit(), func, tr);
+  }
+
+  recordGdbTranslation(funcBody, codeView.main(), loc.mainStart(),
+                       loc.mainEnd(), false, true);
+  recordGdbTranslation(funcBody, codeView.cold(), loc.coldStart(),
+                       loc.coldEnd(), false, true);
+  recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
+  return true;
+}
+
+bool publishFuncPrologueCode(Func* func, int nArgs, PrologueMetaInfo& info) {
+  assertOwnsMetadataLock();
+
+  const auto start = info.start;
+  if (start == nullptr) return false;
+
+  const int nparams = func->numNonVariadicParams();
+  const int paramIndex = nArgs <= nparams ? nArgs : nparams + 1;
+
+  TRACE(2, "funcPrologue %s(%d) setting prologue %p\n",
+        func->fullName()->data(), nArgs, start);
+  func->setPrologue(paramIndex, start);
+  return true;
+}
+
+void smashFuncCallers(TCA start, ProfTransRec* rec) {
+  assertOwnsMetadataLock();
+  assertx(rec->isProflogue());
+
+  auto lock = rec->lockCallerList();
+
+  for (auto toSmash : rec->mainCallers()) {
+    smashCall(toSmash, start);
+  }
+
+  rec->clearAllCallers();
+}
+
+/*
+ * Emit an OptPrologue for the given `info', updating it accordingly.
+ */
+void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
+                                 CodeMetaLock* locker) {
+  if (!locker) {
+    assertOwnsCodeLock();
+    assertOwnsMetadataLock();
+  }
+
+  emitFuncPrologueInternal(info.transRec->func(), info.transRec->prologueArgs(),
+                           TransKind::OptPrologue, info, locker);
 }
 
 TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
+  tracing::Block _b{
+    "emit-func-prologue",
+    [&] {
+      return traceProps(func)
+        .add("argc", argc)
+        .add("trans_kind", show(kind));
+    }
+  };
+  tracing::Pause _p;
+
   VMProtect _;
 
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  return emitFuncPrologueInternal(func, argc, kind);
+  PrologueMetaInfo info{nullptr};
+  emitFuncPrologueInternal(func, argc, kind, info, nullptr);
+  publishFuncPrologueMeta(func, argc, kind, info);
+  publishFuncPrologueCode(func, argc, info);
+
+  updateCodeSizeCounters();
+  return info.start;
 }
 
-TCA emitFuncPrologueOpt(ProfTransRec* rec) {
+/*
+ * Emit and publish an OptPrologue for `rec'.
+ */
+void emitFuncPrologueOpt(ProfTransRec* rec) {
+  tracing::Block _b{
+    "emit-func-prologue-opt",
+    [&] {
+      return traceProps(rec->func())
+        .add("sk", show(rec->srcKey()))
+        .add("argc", rec->prologueArgs())
+        .add("trans_kind", show(rec->kind()));
+    }
+  };
+  tracing::Pause _p;
+
   VMProtect _;
 
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  return emitFuncPrologueOptInternal(rec);
-}
-
-TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
-                                 TransKind kind) {
-  auto const& view = code().view(kind);
-  auto const tca = genFuncBodyDispatch(func, dvs, view);
-
-  func->setFuncBody(tca);
-
-  TRACE(2, "emitFuncBodyDispatch: emitted code for %s (%s) at %p\n",
-        func->fullName()->data(), show(kind).c_str(), tca);
-
-  if (!RuntimeOption::EvalJitNoGdb) {
-    Debug::DebugInfo::Get()->recordStub(
-      Debug::TCRange(tca, view.main().frontier(), false),
-      Debug::lookupFunction(func, false, false, true));
+  PrologueMetaInfo info(rec);
+  emitFuncPrologueOptInternal(info, nullptr);
+  if (info.start) {
+    publishFuncPrologueMeta(rec->func(), rec->prologueArgs(),
+                            TransKind::OptPrologue, info);
+    publishFuncPrologueCode(rec->func(), rec->prologueArgs(), info);
+    smashFuncCallers(info.start, rec);
   }
-  if (RuntimeOption::EvalJitUseVtuneAPI) {
-    reportHelperToVtune(func->fullName()->data(),
-                        tca,
-                        view.main().frontier());
-  }
-  if (RuntimeOption::EvalPerfPidMap) {
-    Debug::DebugInfo::Get()->recordPerfMap(
-      Debug::TCRange(tca, view.main().frontier(), false),
-      SrcKey{}, func, false, false);
-  }
-
-  return tca;
-}
-
-TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
-  VMProtect _;
-
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  return emitFuncBodyDispatchInternal(func, dvs, kind);;
 }
 
 }}}

@@ -13,19 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
-#define incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
-struct Func;
 struct ActRec;
+struct ArrayData;
+struct Class;
+struct Func;
+struct NamedEntity;
 struct StringData;
 struct TypedValue;
-struct Class;
-struct NamedEntity;
 }
 
 namespace HPHP { namespace jit {
@@ -45,7 +45,7 @@ struct FuncCache {
   };
 
   static rds::Handle alloc();
-  static void lookup(rds::Handle, StringData* lookup, ActRec* ar, ActRec* fp);
+  static const Func* lookup(rds::Handle, StringData* lookup);
 
   Pair m_pairs[kNumLines];
 };
@@ -79,6 +79,26 @@ struct ClassCache {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Per-callsite dynamic type structure class lookups (where the type structure
+ * isn't known at translation time).  4-way cache.
+ */
+struct TSClassCache {
+  static constexpr uint32_t kNumLines = 4;
+
+  struct Pair {
+    ArrayData*  m_key;
+    LowPtr<const Class> m_value;
+  };
+
+  static LowPtr<const Class> write(rds::Handle, ArrayData* lookup);
+
+  Pair m_pairs[kNumLines];
+};
+
+
+//////////////////////////////////////////////////////////////////////
+
 struct StaticMethodCache {
   LowPtr<const Func> m_func;
   LowPtr<const Class> m_cls;
@@ -88,7 +108,7 @@ struct StaticMethodCache {
                       const char* ctxName);
   static const Func* lookup(rds::Handle chand,
                             const NamedEntity* ne, const StringData* cls,
-                            const StringData* meth, TypedValue* vmfp);
+                            const StringData* meth, const Class* ctx);
 };
 
 struct StaticMethodFCache {
@@ -99,7 +119,7 @@ struct StaticMethodFCache {
                       const StringData* meth,
                       const char* ctxName);
   static const Func* lookup(rds::Handle chand, const Class* cls,
-                            const StringData* meth, TypedValue* vmfp);
+                            const StringData* meth, const Class* ctx);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -110,31 +130,22 @@ namespace MethodCache {
  * One-way request-local cache for object method lookups.
  *
  * MethodCache entries cache the dispatch target for an object method call.
- * Each line consists of a Class* key (stored as a uintptr_t) and a Func*.  We
- * also pack bits into the key---the low bit is set if the function is a magic
- * call (in which case the cached Func* is, and the second lowest bit is set if
- * the cached Func has AttrStatic.
+ * Each line consists of a Class* key and a Func* (stored as a uintptr_t).
  */
 struct Entry {
-  uintptr_t m_key;
+  const Class* m_key;
   const Func* m_value;
 };
 
-template<bool fatal>
-void handlePrimeCacheInit(rds::Handle mce_handle,
-                          ActRec* ar,
-                          StringData* name,
-                          Class* cls,
-                          Class* ctx,
-                          uintptr_t rawTarget);
+const Func* handleDynamicCall(const Class* cls,
+                              const StringData* name,
+                              const Class* ctx);
 
-template<bool fatal>
-void handleSlowPath(rds::Handle mce_handle,
-                    ActRec* ar,
-                    StringData* name,
-                    Class* cls,
-                    Class* ctx,
-                    uintptr_t mcePrime);
+const Func* handleStaticCall(const Class* cls,
+                             const StringData* name,
+                             const Class* ctx,
+                             rds::Handle mce_handle,
+                             uintptr_t mcePrime);
 
 } // namespace MethodCache
 
@@ -142,4 +153,3 @@ void handleSlowPath(rds::Handle mce_handle,
 
 }}
 
-#endif

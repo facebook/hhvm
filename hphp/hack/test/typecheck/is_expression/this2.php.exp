@@ -1,0 +1,2 @@
+File "this2.php", line 4, characters 13-16:
+Cannot use `this` outside of a class (Naming[2045])

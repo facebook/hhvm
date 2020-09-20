@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_prob_prime(10));
 var_dump(gmp_prob_prime("7"));
 var_dump(gmp_prob_prime(17));
@@ -23,8 +23,8 @@ var_dump(gmp_prob_prime($n));
 $n = gmp_init(0);
 var_dump(gmp_prob_prime($n));
 
-var_dump(gmp_prob_prime());
-var_dump(gmp_prob_prime(array()));
+try { var_dump(gmp_prob_prime()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_prob_prime(varray[]));
 
 echo "Done\n";
-?>
+}

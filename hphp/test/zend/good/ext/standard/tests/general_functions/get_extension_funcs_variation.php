@@ -1,28 +1,28 @@
-<?php
+<?hh
 /* Prototype  : array get_extension_funcs  ( string $module_name  )
  * Description: Returns an array with the names of the functions of a module.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+//defining a class
+class sample  {
+  public function __toString() {
+    return "sample object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***\n";
 
 //get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
 
-//defining a class
-class sample  {
-  public function __toString() {
-    return "sample object";
-  } 
-}
-
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
 
 // array with different values for $str
-$inputs =  array (
+$inputs =  varray [
 
   // integer values
   0,
@@ -38,9 +38,9 @@ $inputs =  array (
   10.1234567e10,
 
   // array values
-  array(),
-  array(0),
-  array(1, 2),
+  varray[],
+  varray[0],
+  varray[1, 2],
 
   // boolean values
   true,
@@ -63,17 +63,17 @@ $inputs =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 // loop through with each element of the $inputs array to test get_extension_funcs() function
 $count = 1;
 foreach($inputs as $input) {
   echo "-- Iteration $count --\n";
-  var_dump( get_extension_funcs($input) );
+  try { var_dump( get_extension_funcs($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++;
 }
 
 fclose($file_handle);  //closing the file handle
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,0 +1,12 @@
+====================== 1 =======================
+
+Fatal error: You can't use dynamic_fun_force() in RepoAuthoritative mode in %s/force-builtin-repo.php on line 30
+====================== 2 =======================
+
+Fatal error: You can't use dynamic_fun_force() in RepoAuthoritative mode in %s/force-builtin-repo.php on line 33
+====================== 3 =======================
+
+Fatal error: You can't use dynamic_class_meth_force() in RepoAuthoritative mode in %s/force-builtin-repo.php on line 36
+====================== 4 =======================
+
+Fatal error: You can't use dynamic_class_meth_force() in RepoAuthoritative mode in %s/force-builtin-repo.php on line 39

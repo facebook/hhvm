@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Warning: line numbers are sensitive, do not change
 
@@ -22,10 +22,10 @@ private
     error_log('Constructor');
   }
 
-  public function __destruct() {
-    error_log('Destructor');
-  }
-};
+
+
+
+}
 
 // Test the following:
 // - Stepping over instructions that cause destructors to run.
@@ -53,4 +53,6 @@ function test($a) {
   foo($a);
 }
 
+<<__EntryPoint>> function main() {
 error_log('flow2.php done');
+}

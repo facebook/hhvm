@@ -1,0 +1,3 @@
+-vRuntime.Hack.Lang.Phpism.DisableAssert=1
+-vEval.AuthoritativeMode=false
+-vAuthoritative=false

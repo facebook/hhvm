@@ -1,96 +1,106 @@
 *** Testing log() : usage variations ***
 
 -- Iteration 1 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 2 --
-float(0)
+
+Warning: log() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 3 --
-float(4.091491094268)
+
+Warning: log() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 4 --
-float(NAN)
+
+Warning: log() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 5 --
-float(9.3319298653812)
+
+Warning: log() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 6 --
-float(1.0211892990699)
+
+Warning: log() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 7 --
-float(NAN)
+
+Warning: log() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 8 --
-float(11.091514977169)
+
+Warning: log() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 9 --
-float(-8.9084850228307)
+
+Warning: log() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 10 --
-float(-0.30102999566398)
+
+Warning: log() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 11 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 12 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 13 --
-float(0)
+
+Warning: log() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 14 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 15 --
-float(0)
+
+Warning: log() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 16 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 24 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 25 --
-float(-INF)
+
+Warning: log() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: log() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/log_variation1.php on line 79
 ===Done===

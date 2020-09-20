@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
@@ -124,6 +125,9 @@ void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
 void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
+
+  tracing::Block _{"vasm-emit", [&] { return traceProps(vunit); }};
+
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
   tc::assertOwnsCodeLock(code);
 
@@ -184,12 +188,18 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   auto frozen_start = frozen->frontier();
 
   folly::Optional<AsmInfo> optAI;
-  if (dumpIREnabled()) optAI.emplace(unit);
+  if (dumpIREnabled(unit.context().kind)) optAI.emplace(unit);
   auto ai = optAI.get_pointer();
 
   Vtext vtext{main, cold, *frozen, code.data()};
   bindDataPtrs(vunit, vtext.data());
   emit(vunit, vtext, meta, ai);
+
+  if (annotations != nullptr) {
+    annotations->insert(annotations->end(),
+                        vunit.annotations.begin(),
+                        vunit.annotations.end());
+  }
 
   assertx(code.isLocal() || cold_in.frontier() == cold_start);
   assertx(code.isLocal() || main_in.frontier() == main_start);

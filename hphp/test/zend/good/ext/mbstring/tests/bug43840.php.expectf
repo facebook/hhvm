@@ -1,3 +1,4 @@
+
 -- Offset is 20 --
 --Multibyte String:--
 int(20)
@@ -13,29 +14,29 @@ bool(false)
 -- Offset is 22 --
 --Multibyte String:--
 
-Warning: %s
+Warning: Offset not contained in string. in %s/bug43840.php on line 21
 bool(false)
 --ASCII String:--
 
-Warning: %s
+Warning: Offset not contained in string. in %s/bug43840.php on line 23
 bool(false)
 
 -- Offset is 53 --
 --Multibyte String:--
 
-Warning: %s
+Warning: Offset not contained in string. in %s/bug43840.php on line 21
 bool(false)
 --ASCII String:--
 
-Warning: %s
+Warning: Offset not contained in string. in %s/bug43840.php on line 23
 bool(false)
 
 -- Offset is 54 --
 --Multibyte String:--
 
-Warning: %s
+Warning: Offset not contained in string. in %s/bug43840.php on line 21
 bool(false)
 --ASCII String:--
 
-Warning: %s
+Warning: Offset not contained in string. in %s/bug43840.php on line 23
 bool(false)

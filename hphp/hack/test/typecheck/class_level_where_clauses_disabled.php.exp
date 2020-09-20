@@ -1,0 +1,2 @@
+File "class_level_where_clauses_disabled.php", line 12, characters 16-28:
+Cannot use unstable feature: `class_level_where` (Parsing[1002])

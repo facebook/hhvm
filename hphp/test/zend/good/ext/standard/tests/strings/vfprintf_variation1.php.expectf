@@ -13,8 +13,20 @@ string(0) ""
 int(0)
 string(38) "Testing 1001 6 2.550200 30 foobar f 41"
 int(38)
+
+Warning: ftruncate() expects parameter 1 to be resource, null given in %s/vfprintf_variation1.php on line 28
+
+Warning: rewind() expects parameter 1 to be resource, null given in %s/vfprintf_variation1.php on line 30
+
+Warning: stream_get_contents() expects parameter 1 to be resource, null given in %s/vfprintf_variation1.php on line 31
+NULL
 bool(false)
-bool(false)
-bool(false)
+
+Warning: ftruncate() expects parameter 1 to be resource, object given in %s/vfprintf_variation1.php on line 28
+
+Warning: rewind() expects parameter 1 to be resource, object given in %s/vfprintf_variation1.php on line 30
+
+Warning: stream_get_contents() expects parameter 1 to be resource, object given in %s/vfprintf_variation1.php on line 31
+NULL
 bool(false)
 ===DONE===

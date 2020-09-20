@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   private $pri = 'a-pri';
@@ -19,8 +19,6 @@ class B extends A {
     var_dump($this->pri);
   }
 }
-$obj = new B();
- $obj->bar();
 class C extends B {
   public $pri = 'c-pri';
   public $pro = 'c-pro';
@@ -29,10 +27,6 @@ class C extends B {
     var_dump($this->pro);
   }
 }
-$obj = new C;
- $obj->bar();
- $obj->bar2();
-var_dump(serialize($obj));
 class Base {
   protected $pro = 1;
   private $pri = 'base-pri';
@@ -62,16 +56,25 @@ class DD extends D {
     var_dump($this->pri);
   }
 }
-if (false) {
-  class R{
+
+<<__EntryPoint>>
+function main_686() {
+  $obj = new B();
+  $obj->bar();
+  $obj = new C;
+  $obj->bar();
+  $obj->bar2();
+  var_dump(serialize($obj));
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '686.inc';
+  }
+  $d = new D;
+  $d->qq();
+  $d->q();
+  $d->q0();
+  $d = new DD;
+  $d->qqq();
+  $d->qq();
+  $d->q();
+  $d->q0();
 }
-}
-$d = new D;
-$d->qq();
-$d->q();
-$d->q0();
-$d = new DD;
-$d->qqq();
-$d->qq();
-$d->q();
-$d->q0();

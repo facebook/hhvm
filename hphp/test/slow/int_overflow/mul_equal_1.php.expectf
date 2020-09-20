@@ -1,0 +1,29 @@
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+9223372036854775807 *= 2 = -2
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+9223372036854775807 *= -2 = 2
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+'9223372036854775807' *= 2 = -2
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+9223372036854775807 *= '2' = -2
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+'9223372036854775807' *= '2' = -2
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+-9223372036854775808 *= -2 = 0
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+-9223372036854775808 *= 2 = 0
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+'-9223372036854775808' *= -2 = 0
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+-9223372036854775808 *= '-2' = 0
+
+Warning: Integer overflow in %s/mul_equal_1.php on line 7
+'-9223372036854775808' *= '-2' = 0

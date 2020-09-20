@@ -34,8 +34,18 @@ SSATmp* canonical(SSATmp* value) {
 
   auto inst = value->inst();
 
-  while (inst->isPassthrough()) {
-    value = inst->getPassthroughValue();
+  while (true) {
+    if (inst->isPassthrough()) {
+      value = inst->getPassthroughValue();
+    } else if (inst->is(ConvPtrToLval)) {
+      // ConvPtrToLval is special in that its not a passthrough instruction
+      // (because the dest has a type incompatible with the source and might not
+      // be a nop), but we still want to peer through it in order to find the
+      // value's utimate origin.
+      value = inst->src(0);
+    } else {
+      break;
+    }
     inst = value->inst();
   }
   return value;

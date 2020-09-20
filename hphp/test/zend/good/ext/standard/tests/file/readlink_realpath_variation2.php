@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype: string readlink ( string $path );
    Description: Returns the target of a symbolic link
 
    Prototype: string realpath ( string $path );
    Description: Returns canonicalized absolute pathname
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
-$name_prefix = dirname(__FILE__);
+$name_prefix = __SystemLib\hphp_test_tmproot();
 // create temp dir
 mkdir("$name_prefix/readlink_realpath_variation2/home/tests/link/", 0777, true);
 // create the file
@@ -16,10 +16,10 @@ $fp = fopen($filename, "w");
 fclose($fp);
 
 echo "\n*** Testing readlink() and realpath() with linkname stored in an array ***\n";
-$link_arr = array (
+$link_arr = varray [
   "$name_prefix////readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp",
   "$name_prefix/./readlink_realpath_variation2/home/../home//tests//..//..//..//home//readlink_realpath_variation2_link.tmp/"
-);
+];
 
 echo "\n-- Testing readlink() and realpath() with softlink, linkname stored inside an array --\n";
 // creating the links 
@@ -48,13 +48,11 @@ unlink($link_arr[0]);
 unlink($link_arr[1]);  
   
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-$name_prefix = dirname(__FILE__)."/readlink_realpath_variation2";
+
+$name_prefix .= "/readlink_realpath_variation2";
 unlink("$name_prefix/home/tests/link/readlink_realpath_variation2.tmp");
 rmdir("$name_prefix/home/tests/link/");
 rmdir("$name_prefix/home/tests/");
 rmdir("$name_prefix/home/");
 rmdir("$name_prefix/");
-?>
+}

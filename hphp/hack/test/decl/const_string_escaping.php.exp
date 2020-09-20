@@ -1,0 +1,78 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\C" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+      sc_name = ([3:7-8], "\\C"); sc_tparams = []; sc_where_constraints = [];
+      sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts =
+      [{ Shallow_decl_defs.scc_abstract = false;
+         scc_name = ([4:16-22], "SINGLE");
+         scc_type =
+         (Rhint (root|const_string_escaping.php line 4, characters 9-14),
+          (Tprim Tstring))
+         };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([5:16-22], "DOUBLE");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 5, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([6:16-37], "SINGLE_ENDS_IN_SINGLE");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 6, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([7:16-37], "DOUBLE_ENDS_IN_DOUBLE");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 7, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([8:16-40], "SINGLE_ESCAPED_BACKSLASH");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 8, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([9:16-40], "DOUBLE_ESCAPED_BACKSLASH");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 9, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([10:16-37], "SINGLE_ESCAPED_DOLLAR");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 10, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([11:16-37], "DOUBLE_ESCAPED_DOLLAR");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 11, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([12:16-23], "HEREDOC");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 12, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_name = ([15:16-22], "NOWDOC");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 15, characters 9-14),
+           (Tprim Tstring))
+          }
+        ];
+      sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+      sc_constructor = None; sc_static_methods = []; sc_methods = [];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      } };
+  funs = {}; typedefs = {}; consts = {} }
+
+They matched!

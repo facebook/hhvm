@@ -1,9 +1,8 @@
-array(2) {
+darray(2) {
   ["a"]=>
   string(2) "va"
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(0)
   }
 }

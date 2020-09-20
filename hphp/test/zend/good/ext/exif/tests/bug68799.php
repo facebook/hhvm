@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * * Pollute the heap. Helps trigger bug. Sometimes not needed.
  * */
@@ -7,13 +7,13 @@ class A {
     $a = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa';
     $this->a = $a . $a . $a . $a . $a . $a;
   }
-};
+}
 
 function doStuff ($limit) {
 
   $a = new A;
 
-  $b = array();
+  $b = darray[];
   for ($i = 0; $i < $limit; $i++) {
     $b[$i] = clone $a;
   }
@@ -22,7 +22,7 @@ function doStuff ($limit) {
 
   gc_collect_cycles();
 }
-
+<<__EntryPoint>> function main(): void {
 $iterations = 3;
 
 doStuff($iterations);
@@ -31,5 +31,4 @@ doStuff($iterations);
 gc_collect_cycles();
 
 print_r(exif_read_data(__DIR__.'/bug68799.jpg'));
-
-?>
+}

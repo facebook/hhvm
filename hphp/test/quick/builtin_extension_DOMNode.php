@@ -1,8 +1,9 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_DOMNode extends DOMNode {
   public $___x;
 }
-test("DOMNode");
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("DOMNode");
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Root {
 }
@@ -13,13 +13,15 @@ abstract class Derived extends Root implements MyInterface {
 
 class Leaf extends Derived
 {
-	function MyInterfaceFunc() {}	
+	function MyInterfaceFunc() {}
 }
 
-var_dump(new Leaf);
+<<__EntryPoint>>
+function entrypoint_abstract_by_interface_001(): void {
 
-class Fails extends Root implements MyInterface {
+  var_dump(new Leaf);
+
+  require(__DIR__.'/abstract_by_interface_001.inc');
+
+  echo "===DONE===\n";
 }
-
-?>
-===DONE===

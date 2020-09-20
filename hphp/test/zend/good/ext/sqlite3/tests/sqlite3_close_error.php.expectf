@@ -1,4 +1,4 @@
 Testing SQLite3 close with one parameter
 
-Warning: %s
+Warning: SQLite3::close() expects exactly 0 parameters, 1 given in %s/sqlite3_close_error.php on line 5
 Done

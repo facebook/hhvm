@@ -1,0 +1,48 @@
+// defined on line 3 to 9 of %s/info.php.test
+class A {
+  // constants
+  const CONSTANT = "constant value";
+  // properties
+  public $y;
+  // methods
+  public function foo();
+}
+
+// defined on line 11 to 13 of %s/info.php.test
+function bar($x, $y, $z);
+
+// defined on line 6 to 8 of %s/info.php.test
+public function A::foo();
+
+// defined on line 11 to 13 of %s/info.php.test
+function bar($x, $y, $z);
+
+/**
+ * @param string $str1 - The first string.
+ * @param string $str2 - The second string.
+ *
+ * @return int - Returns < 0 if str1 is less than str2; > 0 if str1 is greater
+ *   than str2, and 0 if they are equal.
+ *
+ */
+function strcmp(HH\string $str1, HH\string $str2);
+
+  /**
+   * Invokes a hard breakpoint. This routine will break into the debugger if
+   * and only if the debugger is enabled and a debugger client is currently
+   * attached.
+   * @param bool $condition - Optional condition. If specified, the debugger
+   *  will only break if the condition evaluates to true.
+   * @return bool - TRUE if the program successfully broke in (and has since
+   *   resumed), FALSE if no debugger was attached.
+   */
+function hphp_debug_break(HH\bool $condition = true);
+
+  public $y;
+
+  const CONSTANT = "constant value";
+
+// defined on line 6 to 8 of %s/info.php.test
+public function A::foo();
+
+OK!

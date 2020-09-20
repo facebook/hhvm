@@ -3,11 +3,11 @@
 class Cov<+T> {}
 
 function UseAs<Tv, Tu as Tv>(Cov<Tv> $x, Cov<Tu> $y): Tu {
-  //UNSAFE
+  throw new Exception();
 }
 
 function UseSuper<Tv super Tu, Tu>(Cov<Tv> $x, Cov<Tu> $y): Tu {
-  //UNSAFE
+  throw new Exception();
 }
 
 class MyBase {}

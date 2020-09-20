@@ -1,0 +1,34 @@
+#!/bin/sh
+# Copyright (c) 2019, Facebook, Inc.
+# All rights reserved.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the "hack" directory of this source tree.
+
+# This file is processed by cmake; the produced file is intended for both
+# internal usage by the build system, and for direct usage by people working on
+# Hack itself from CMake builds:
+#
+#  source $BUILD_DIR/hphp/hack/dev_env.sh
+
+export CMAKE_SOURCE_DIR="@CMAKE_SOURCE_DIR@"
+export CMAKE_INSTALL_FULL_SYSCONFDIR="@CMAKE_INSTALL_FULL_SYSCONFDIR@"
+export CMAKE_INSTALL_FULL_BINDIR="@CMAKE_INSTALL_FULL_BINDIR@"
+
+export HACK_NO_CARGO_VENDOR=true
+export OPAMROOT="@OPAMROOT@"
+export PYTHONPATH="@HPHP_HOME@" # needed for verify.py for `hack_dune_test`
+export CARGO_HOME="@CMAKE_CURRENT_BINARY_DIR@/cargo_home"
+export RUSTC="@RUSTC_BIN_DIR@/rustc"
+export DUNE_BUILD_DIR="@DUNE_BUILD_DIR@"
+export HACK_SOURCE_ROOT="@CMAKE_CURRENT_SOURCE_DIR@"
+export HACK_BUILD_ROOT="@HACK_BUILD_ROOT@"
+export HACK_BIN_DIR="@CMAKE_BINARY_DIR@/hphp/hack/bin"
+export PATH="@RUSTC_BIN_DIR@:@CARGO_BIN_DIR@:$(dirname "@OPAM_EXECUTABLE@"):$PATH"
+
+export HACK_EXTRA_INCLUDE_PATHS="@extra_include_paths@"
+export HACK_EXTRA_LINK_OPTS="@extra_link_opts@"
+export HACK_EXTRA_LIB_PATHS="@extra_lib_paths@"
+export HACK_EXTRA_NATIVE_LIBRARIES="@extra_native_libraries@"
+
+eval $(opam env)

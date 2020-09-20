@@ -1,0 +1,2 @@
+File "print_in_rx8_2.php", line 5, characters 3-6:
+`echo` or `print` are not allowed in reactive functions. (Typing[4226])

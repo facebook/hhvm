@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
+#include <sstream>
 #include <type_traits>
 
 #include "hphp/runtime/base/stats.h"
@@ -105,11 +106,11 @@ struct FormatVisitor {
     case CallSpec::Kind::Direct:
     case CallSpec::Kind::Smashable:
       return imm((TCA)call.address());
-    case CallSpec::Kind::ArrayVirt:
-      str << sep() << folly::format("ArrayVirt({})", call.arrayTable());
-      break;
     case CallSpec::Kind::Destructor:
       str << sep() << folly::format("destructor({})", show(call.reg()));
+      break;
+    case CallSpec::Kind::ObjDestructor:
+      str << sep() << folly::format("obj-destructor({})", show(call.reg()));
       break;
     case CallSpec::Kind::Stub:
       return imm(call.stubAddr());
@@ -132,7 +133,6 @@ struct FormatVisitor {
     }
   }
   void imm(TransFlags f) {
-    if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
   }
   void imm(DestType dt) {
     str << sep() << destTypeName(dt);
@@ -184,19 +184,28 @@ struct FormatVisitor {
     print(unit.tuples[t]);
   }
 
-  void print(const VregList& regs) {
+  void print(const VregList& regs, const VcallArgs::Spills* spills = nullptr) {
     str << sep() << '{';
     comma = false;
-    for (auto r : regs) print(r);
+    for (int i = 0; i < regs.size(); ++i) {
+      print(regs[i]);
+      if (!spills) continue;
+      auto const it = spills->find(i);
+      if (it == spills->end()) continue;
+      str << '+';
+      comma = false;
+      print(it->second);
+    }
     comma = true;
     str << '}';
   }
 
   void print(VcallArgsId id) {
     auto& args = unit.vcallArgs[id];
-    print(args.args);
+    print(args.args, &args.argSpills);
     print(args.simdArgs);
-    print(args.stkArgs);
+    print(args.stkArgs, &args.stkSpills);
+    print(args.indRetArgs);
   }
 
   void print(RegSet regs) {
@@ -232,6 +241,29 @@ std::string show(Vreg r) {
   return str.str();
 }
 
+std::string show(const VregSet& s) {
+  std::ostringstream str;
+  auto comma = false;
+  str << '{';
+  for (auto const r : s) {
+    if (comma) str << ", ";
+    comma = true;
+    str << show(r);
+  }
+  str << '}';
+  return str.str();
+}
+
+std::string show(const VregList& l) {
+  using namespace folly::gen;
+  return folly::sformat(
+    "[{}]",
+    from(l)
+    | map([] (Vreg r) { return show(r); })
+    | unsplit<std::string>(", ")
+  );
+}
+
 std::string show(Vptr p) {
   std::string str;
   switch(arch()) {
@@ -240,11 +272,11 @@ std::string show(Vptr p) {
       // [%fs + %base + disp + %index * scale]
       str = "[";
       auto prefix = false;
-      if (p.seg == Vptr::FS) {
+      if (p.seg == Segment::FS) {
         str += "%fs";
         prefix = true;
       }
-      if (p.seg == Vptr::GS) {
+      if (p.seg == Segment::GS) {
         str += "%gs";
         prefix = true;
       }
@@ -291,7 +323,7 @@ std::string show(Vptr p) {
 }
 
 std::string show(Vconst c) {
-  auto str = folly::to<std::string>(c.val);
+  auto str = c.isUndef ? "undef:" : folly::to<std::string>(c.val);
   switch (c.kind) {
     case Vconst::Quad:
       str += 'q';
@@ -333,8 +365,9 @@ void printBlock(std::ostream& out, const Vunit& unit,
                 const IRInstruction*& origin) {
   auto& block = unit.blocks[b];
   out << '\n' << color(ANSI_COLOR_MAGENTA);
-  out << folly::format(" B{: <6} {}", size_t(b),
-           area_names[int(block.area_idx)]);
+  out << folly::format(" B{: <6} {} ({})", size_t(b),
+                       area_names[int(block.area_idx)],
+                       block.weight);
   for (auto p : preds[b]) out << ", B" << size_t(p);
   out << color(ANSI_COLOR_END) << '\n';
 

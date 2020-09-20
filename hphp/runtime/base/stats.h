@@ -13,14 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_STATS_H_
-#define incl_HPHP_STATS_H_
+#pragma once
 
 #include <atomic>
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/data-block.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
+
 
 namespace HPHP {
 namespace Stats {
@@ -41,18 +42,9 @@ namespace Stats {
   STAT(TC_CatchTrace) \
   STAT(TC_CatchSideExit) \
   STAT(TC_DecRef_NZ) \
-  STAT(TC_DecRef_Normal_Decl) \
-  STAT(TC_DecRef_Normal_Destroy) \
-  STAT(TC_DecRef_Likely_Decl) \
-  STAT(TC_DecRef_Likely_Destroy) \
   STAT(TC_DecRef_Profiled_100) \
   STAT(TC_DecRef_Profiled_0) \
   /* Execute pseudomain */ \
-  STAT(PseudoMain_Reentered) \
-  STAT(PseudoMain_Executed) \
-  STAT(PseudoMain_Skipped) \
-  STAT(PseudoMain_SkipDeep) \
-  STAT(PseudoMain_Guarded) \
   STAT(VMEnter) \
   /* Unit merging stats */ \
   STAT(UnitMerge_hoistable) \
@@ -66,21 +58,13 @@ namespace Stats {
   STAT(UnitMerge_mergeable_unique_persistent_cache) \
   STAT(UnitMerge_mergeable_define) \
   STAT(UnitMerge_mergeable_persistent_define) \
-  STAT(UnitMerge_mergeable_global) \
   STAT(UnitMerge_mergeable_class) \
-  STAT(UnitMerge_mergeable_require) \
+  STAT(UnitMerge_mergeable_record) \
   STAT(UnitMerge_mergeable_typealias) \
   STAT(UnitMerge_redo_hoistable) \
   /* stub reuse stats */ \
   STAT(Astub_New) \
   STAT(Astub_Reused) \
-  /* Switches */ \
-  STAT(Switch_Generic) \
-  STAT(Switch_Integer) \
-  STAT(Switch_String) \
-  /* ObjectData construction */ \
-  STAT(ObjectData_new_dtor_yes) \
-  STAT(ObjectData_new_dtor_no) \
   STAT(ObjMethod_total) \
   STAT(ObjMethod_known) \
   STAT(ObjMethod_methodslot) \
@@ -97,7 +81,12 @@ enum StatCounter {
 #undef O
 
 extern const char* g_counterNames[kNumStatCounters];
-extern __thread uint64_t tl_counters[kNumStatCounters];
+
+struct StatCounters {
+  uint64_t counters[kNumStatCounters];
+};
+
+extern RDS_LOCAL(StatCounters, rl_counters);
 
 inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);
@@ -113,12 +102,14 @@ inline bool enableInstrCount() {
 
 inline void inc(StatCounter stat, int n = 1) {
   if (enabled()) {
-    tl_counters[stat] += n;
+    rl_counters->counters[stat] += n;
   }
 }
 
-inline StatCounter opToTranslStat(Op opc) {
-  return StatCounter(STATS_PER_OPCODE * size_t(opc));
+// see stats-opcodeDef.h
+// which_ctr: 0 = Instr_InterpOne, 1 = InterpBB, 2 = Transl
+inline StatCounter opToTranslStat(Op opc, size_t which_ctr = 0) {
+  return StatCounter(which_ctr + STATS_PER_OPCODE * size_t(opc));
 }
 
 extern void init();
@@ -129,4 +120,3 @@ void incStatGrouped(const StringData* cat, const StringData* name, int n = 1);
 
 } }
 
-#endif

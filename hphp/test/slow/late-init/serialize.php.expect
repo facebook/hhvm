@@ -1,0 +1,187 @@
+===================== run_serialize_tests ====================
+=============== serialize_test ================
+Accessing <<__LateInit>> property 'A::y' before initialization
+string(58) "O:1:"A":3:{s:1:"x";i:123;s:1:"y";i:777;s:1:"z";s:3:"abc";}"
+Accessing <<__LateInit>> property 'A::y' before initialization
+=============== json_encode_test ================
+Accessing <<__LateInit>> property 'A::y' before initialization
+string(27) "{"x":123,"y":777,"z":"abc"}"
+Accessing <<__LateInit>> property 'A::y' before initialization
+=============== var_dump_test ================
+object(A) (2) {
+  ["x"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(A) (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(777)
+  ["z"]=>
+  string(3) "abc"
+}
+object(A) (2) {
+  ["x"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+=============== var_export_test ================
+A::__set_state(darray[
+  'x' => 123,
+  'z' => 'abc',
+])
+A::__set_state(darray[
+  'x' => 123,
+  'y' => 777,
+  'z' => 'abc',
+])
+A::__set_state(darray[
+  'x' => 123,
+  'z' => 'abc',
+])
+=============== print_r_test ================
+A Object
+(
+    [x] => 123
+    [z] => abc
+)
+A Object
+(
+    [x] => 123
+    [y] => 777
+    [z] => abc
+)
+A Object
+(
+    [x] => 123
+    [z] => abc
+)
+===================== run_serialize_tests ====================
+=============== serialize_test ================
+Accessing <<__LateInit>> property 'B::y' before initialization
+string(40) "O:1:"B":2:{s:1:"x";i:123;s:1:"y";i:777;}"
+Accessing <<__LateInit>> property 'B::y' before initialization
+=============== json_encode_test ================
+Accessing <<__LateInit>> property 'B::y' before initialization
+string(27) "{"x":123,"y":777,"z":"abc"}"
+Accessing <<__LateInit>> property 'B::y' before initialization
+=============== var_dump_test ================
+object(B) (2) {
+  ["x"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(B) (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(777)
+  ["z"]=>
+  string(3) "abc"
+}
+object(B) (2) {
+  ["x"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+=============== var_export_test ================
+B::__set_state(darray[
+  'x' => 123,
+  'z' => 'abc',
+])
+B::__set_state(darray[
+  'x' => 123,
+  'y' => 777,
+  'z' => 'abc',
+])
+B::__set_state(darray[
+  'x' => 123,
+  'z' => 'abc',
+])
+=============== print_r_test ================
+B Object
+(
+    [x] => 123
+    [z] => abc
+)
+B Object
+(
+    [x] => 123
+    [y] => 777
+    [z] => abc
+)
+B Object
+(
+    [x] => 123
+    [z] => abc
+)
+===================== run_serialize_tests ====================
+=============== serialize_test ================
+string(44) "O:1:"C":2:{s:1:"x";i:123;s:1:"z";s:3:"abc";}"
+string(44) "O:1:"C":2:{s:1:"x";i:123;s:1:"z";s:3:"abc";}"
+string(44) "O:1:"C":2:{s:1:"x";i:123;s:1:"z";s:3:"abc";}"
+=============== json_encode_test ================
+Accessing <<__LateInit>> property 'C::y' before initialization
+string(27) "{"x":123,"y":777,"z":"abc"}"
+Accessing <<__LateInit>> property 'C::y' before initialization
+=============== var_dump_test ================
+object(C) (2) {
+  ["x"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(C) (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(777)
+  ["z"]=>
+  string(3) "abc"
+}
+object(C) (2) {
+  ["x"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+=============== var_export_test ================
+C::__set_state(darray[
+  'x' => 123,
+  'z' => 'abc',
+])
+C::__set_state(darray[
+  'x' => 123,
+  'y' => 777,
+  'z' => 'abc',
+])
+C::__set_state(darray[
+  'x' => 123,
+  'z' => 'abc',
+])
+=============== print_r_test ================
+C Object
+(
+    [x] => 123
+    [z] => abc
+)
+C Object
+(
+    [x] => 123
+    [y] => 777
+    [z] => abc
+)
+C Object
+(
+    [x] => 123
+    [z] => abc
+)
+================= unserialize_test ======================
+int(777)
+================= unserialize_test ======================
+Accessing <<__LateInit>> property 'A::y' before initialization

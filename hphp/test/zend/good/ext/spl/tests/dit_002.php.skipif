@@ -1,1 +1,4 @@
-<?php if (!extension_loaded("spl") || !extension_loaded('reflection') || !defined('GLOB_ERR')) print "skip"; ?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded("spl") || !extension_loaded('reflection') || !defined('GLOB_ERR')) print "skip";
+}

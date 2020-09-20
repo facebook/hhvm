@@ -1,0 +1,10 @@
+varray(1) {
+  int(1)
+}
+NULL
+darray(1) {
+  ["A"]=>
+  varray(1) {
+    int(1)
+  }
+}

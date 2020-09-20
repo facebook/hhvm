@@ -1,2 +1,0 @@
-
-((Fatal error\: syntax error, unexpected '\=', expecting '\)' in [^\r\n]+\/bad\-call\-1\.php on line 3)|(Fatal error\: You cannot set an inout decorated argument while calling a function in [^\r\n]+\/bad\-call\-1\.php on line 3))

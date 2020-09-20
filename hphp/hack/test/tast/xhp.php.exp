@@ -1,87 +1,92 @@
-[(AnnotatedAST.Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([7:18-7:22], (Hprim Tvoid)));
-      f_name = ([7:10-7:14], "\\main"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params = [];
-      f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
-               (([9:4-9:21], Some \:foo),
-                (AnnotatedAST.Xml (([9:4-9:7], "\\:foo"),
-                   [(AnnotatedAST.Xhp_simple (([9:8-9:11], "bar"),
-                       (([9:12-9:18], Some string),
-                        (AnnotatedAST.String ([9:12-9:18], "herp")))
-                       ))
+[(Class
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict;
+      c_final = false; c_is_xhp = true; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([3:7-11], "\\:foo"); c_tparams = [];
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+      c_reqs = [];
+      c_implements = [([3:23-31], (Happly (([3:23-31], "\\XHPChild"), [])))];
+      c_where_constraints = []; c_consts = []; c_typeconsts = [];
+      c_vars =
+      [{ cv_final = false; cv_xhp_attr = (Some { xai_tag = None });
+         cv_abstract = false; cv_visibility = Public;
+         cv_type =
+         ((?string),
+          (Some ([4:13-34], (Hoption ([4:13-34], (Hprim Tstring))))));
+         cv_id = ([4:35-38], ":bar"); cv_expr = None;
+         cv_user_attributes = []; cv_doc_comment = None;
+         cv_is_promoted_variadic = false; cv_is_static = false;
+         cv_span = [4:35-38] }
+        ];
+      c_methods = []; c_attributes = []; c_xhp_children = [];
+      c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [7:1-19:2]; f_annotation = (); f_mode = Mstrict;
+       f_ret = ((void), (Some ([7:18-22], (Hprim Tvoid))));
+       f_name = ([7:10-14], "\\main"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_body =
+       { fb_ast =
+         [([9:3-22],
+           (Expr
+              (([9:3-21], :foo),
+               (Xml (([9:4-7], "\\:foo"),
+                  [(Xhp_simple (([9:8-11], "bar"),
+                      (([9:12-18], string), (String "herp"))))
+                    ],
+                  [])))));
+           ([10:3-18],
+            (Expr
+               (([10:3-17], string),
+                (Binop ((Eq None),
+                   (([10:3-8], string), (Lvar ([10:3-8], $derp))),
+                   (([10:11-17], string), (String "derp")))))));
+           ([11:3-23],
+            (Expr
+               (([11:3-22], :foo),
+                (Xml (([11:4-7], "\\:foo"),
+                   [(Xhp_simple (([11:8-11], "bar"),
+                       (([11:13-18], string), (Lvar ([11:13-18], $derp)))))
                      ],
-                   []))));
-             (AnnotatedAST.Expr
-                (([10:3-10:17], Some string),
-                 (AnnotatedAST.Binop ((Eq None),
-                    (([10:3-10:8], Some string),
-                     (AnnotatedAST.Lvar ([10:3-10:8], $derp))),
-                    (([10:11-10:17], Some string),
-                     (AnnotatedAST.String ([10:11-10:17], "derp")))
-                    ))));
-             (AnnotatedAST.Expr
-                (([11:4-11:22], Some \:foo),
-                 (AnnotatedAST.Xml (([11:4-11:7], "\\:foo"),
-                    [(AnnotatedAST.Xhp_simple (([11:8-11:11], "bar"),
-                        (([11:13-11:18], Some string),
-                         (AnnotatedAST.Lvar ([11:13-11:18], $derp)))
-                        ))
-                      ],
-                    []))));
-             (AnnotatedAST.Expr
-                (([14:4-18:9], Some \:foo),
-                 (AnnotatedAST.Xml (([14:4-14:7], "\\:foo"),
-                    [(AnnotatedAST.Xhp_simple (([14:8-14:11], "bar"),
-                        (([14:12-14:18], Some string),
-                         (AnnotatedAST.String ([14:12-14:18], "herp")))
-                        ))
-                      ],
-                    [(([15:6-17:11], Some \:foo),
-                      (AnnotatedAST.Xml (([15:6-15:9], "\\:foo"),
-                         [(AnnotatedAST.Xhp_simple (([15:10-15:13], "bar"),
-                             (([15:14-15:20], Some string),
-                              (AnnotatedAST.String ([15:14-15:20], "derp")))
-                             ))
-                           ],
-                         [(([16:8-16:25], Some \:foo),
-                           (AnnotatedAST.Xml (([16:8-16:11], "\\:foo"),
-                              [(AnnotatedAST.Xhp_simple (
-                                  ([16:12-16:15], "bar"),
-                                  (([16:16-16:22], Some string),
-                                   (AnnotatedAST.String
-                                      ([16:16-16:22], "herp")))
-                                  ))
-                                ],
-                              [])))
-                           ]
-                         )))
-                      ]
-                    ))))
-             ];
-           fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = true; c_kind = Cnormal; c_name = ([3:7-3:11], "\\:foo");
-       c_tparams = <opaque>; c_extends = []; c_uses = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = [];
-       c_implements =
-       [([3:23-3:31], (Happly (([3:23-3:31], "\\XHPChild"), [])))];
-       c_consts = []; c_typeconsts = []; c_static_vars = [];
-       c_vars =
-       [{ AnnotatedAST.cv_final = false; cv_is_xhp = true;
-          cv_visibility = Public;
-          cv_type =
-          (Some ([4:13-4:17], (Hoption ([4:13-4:17], (Hprim Tstring)))));
-          cv_id = ([4:35-4:38], ":bar"); cv_expr = None;
-          cv_user_attributes = [] }
-         ];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_user_attributes = []; c_enum = None })
+                   [])))));
+           ([14:3-18:10],
+            (Expr
+               (([14:3-18:9], :foo),
+                (Xml (([14:4-7], "\\:foo"),
+                   [(Xhp_simple (([14:8-11], "bar"),
+                       (([14:12-18], string), (String "herp"))))
+                     ],
+                   [(([15:5-17:11], :foo),
+                     (Xml (([15:6-9], "\\:foo"),
+                        [(Xhp_simple (([15:10-13], "bar"),
+                            (([15:14-20], string), (String "derp"))))
+                          ],
+                        [(([16:7-25], :foo),
+                          (Xml (([16:8-11], "\\:foo"),
+                             [(Xhp_simple (([16:12-15], "bar"),
+                                 (([16:16-22], string), (String "herp"))))
+                               ],
+                             [])))
+                          ]
+                        )))
+                     ]
+                   )))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None; f_static = false })
   ]

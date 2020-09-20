@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($a) {
  var_dump('f:'.$a);
@@ -22,5 +22,9 @@ function foo($a) {
   var_dump(false || $a);
   var_dump(false || f($a));
 }
+
+<<__EntryPoint>>
+function main_1454() {
 foo(34);
 foo(0);
+}

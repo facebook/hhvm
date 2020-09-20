@@ -1,9 +1,14 @@
-<?php
+<?hh
 /* Prototype  : float fmod  ( float $x  , float $y  )
  * Description: Returns the floating point remainder (modulo) of the division of the arguments.
  * Source code: ext/standard/math.c
  */
 
+// get a class
+class classA
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fmod() : usage variations ***\n";
 
 //get an unset variable
@@ -16,20 +21,15 @@ abc
 xyz
 EOT;
 
-// get a class
-class classA
-{
-}
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
        2147483647,
 
        // float data
@@ -48,20 +48,20 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // object data
-/*23*/ new classA(),       
-       
+/*23*/ new classA(),
+
        // undefined data
 /*24*/ @$undefined_var,
 
@@ -70,15 +70,15 @@ $inputs = array(
 
        // resource variable
 /*26*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of fmod()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(fmod(123456, $input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try { var_dump(fmod(123456, $input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+    $iterator++;
 };
 fclose($fp);
-?>
-===Done===
+echo "===Done===";
+}

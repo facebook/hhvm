@@ -1,0 +1,16 @@
+<?hh
+function with_traits(TraitBase $arg): void {
+  $arg->routine();
+}
+trait ImplementingAbstractBase {}
+class TraitBase extends \AbstractBase {
+  use \ImplementingAbstractBase;
+  use \T;
+}
+abstract class AbstractBase {}
+trait T {
+  require extends \AbstractBase;
+  public function routine(): void {
+    throw new \Exception();
+  }
+}

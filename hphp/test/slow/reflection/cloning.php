@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function t($instance) {
   try {
@@ -8,9 +8,13 @@ function t($instance) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_cloning() {
 t(new ReflectionParameter('t', 'instance'));
 t(new ReflectionProperty('ReflectionProperty', 'name'));
 t(new ReflectionExtension('zlib'));
 t(new ReflectionClass('ReflectionClass'));
 t(new ReflectionFunction('t'));
 t(new ReflectionMethod('ReflectionMethod', '__construct'));
+}

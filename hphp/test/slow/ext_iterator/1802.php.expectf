@@ -1,5 +1,4 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir
 "
 }

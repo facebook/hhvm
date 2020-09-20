@@ -1,0 +1,2 @@
+Notice: 'C::foo' called dynamically but is not __DynamicallyCallable in %s/dynamic_inst_meth.php on line 10
+int(1)

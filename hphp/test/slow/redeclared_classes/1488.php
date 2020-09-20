@@ -1,29 +1,14 @@
-<?php
+<?hh
 
-if (isset($g)) {
-  class X {
- function foo() {
- var_dump(__METHOD__);
- }
- }
-  class Y extends X {
+<<__EntryPoint>>
+function entrypoint_1488(): void {
+
+  if (isset($g)) {
+    include '1488-1.inc';
+  }
+  else {
+    include '1488-2.inc';
+  }
+  include '1488-classes.inc';
+  Z::bar();
 }
-}
- else {
-  class X {
- function foo() {
- var_dump(__METHOD__);
- }
- }
-  class Y {
-}
-}
-class Z extends Y {
-  function foo() {
- var_dump(__METHOD__);
- }
-  function bar() {
- X::foo();
- }
-}
-Z::bar();

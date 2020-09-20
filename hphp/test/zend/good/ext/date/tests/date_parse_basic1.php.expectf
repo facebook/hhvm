@@ -1,5 +1,5 @@
 *** Testing date_parse() : basic functionality ***
-array(12) {
+darray(12) {
   ["year"]=>
   int(2009)
   ["month"]=>
@@ -17,17 +17,17 @@ array(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-array(12) {
+darray(12) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -45,17 +45,17 @@ array(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
   ["is_localtime"]=>
   bool(false)
 }
-array(12) {
+darray(12) {
   ["year"]=>
   int(2009)
   ["month"]=>
@@ -73,12 +73,12 @@ array(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
   ["is_localtime"]=>
   bool(false)

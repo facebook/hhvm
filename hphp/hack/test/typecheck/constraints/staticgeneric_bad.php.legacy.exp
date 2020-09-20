@@ -1,0 +1,36 @@
+File "staticgeneric_bad.php", line 14, characters 8-8:
+Some type constraint(s) here are violated (Typing[4110])
+File "staticgeneric_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "staticgeneric_bad.php", line 4, characters 14-21:
+This is an array key (int | string)
+File "staticgeneric_bad.php", line 14, characters 14-17:
+It is incompatible with a bool
+File "staticgeneric_bad.php", line 15, characters 23-23:
+Some type constraint(s) here are violated (Typing[4110])
+File "staticgeneric_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "staticgeneric_bad.php", line 4, characters 14-21:
+This is an array key (int | string)
+File "staticgeneric_bad.php", line 15, characters 25-29:
+It is incompatible with a bool
+File "staticgeneric_bad.php", line 15, characters 10-31:
+Invalid return type (Typing[4110])
+File "staticgeneric_bad.php", line 13, characters 24-29:
+This is a string
+File "staticgeneric_bad.php", line 15, characters 25-29:
+It is incompatible with a bool
+File "staticgeneric_bad.php", line 15, characters 10-10:
+Some type constraint(s) here are violated (Typing[4110])
+File "staticgeneric_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "staticgeneric_bad.php", line 4, characters 14-21:
+This is an array key (int | string)
+File "staticgeneric_bad.php", line 15, characters 25-29:
+It is incompatible with a bool
+File "staticgeneric_bad.php", line 15, characters 10-31:
+Invalid return type (Typing[4110])
+File "staticgeneric_bad.php", line 13, characters 24-29:
+This is a string
+File "staticgeneric_bad.php", line 15, characters 25-29:
+It is incompatible with a bool

@@ -2,7 +2,7 @@
 
 <<__Rx>>
 function returnsReactive(): Rx<(function(): void)> {
-  // UNSAFE
+  throw new Exception();
 }
 
 <<__Rx>>

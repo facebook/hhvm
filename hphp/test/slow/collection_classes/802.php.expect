@@ -154,7 +154,7 @@ string(3) "foo"
 bool(true)
 bool(false)
 
-array(14) {
+darray(14) {
   [0]=>
   NULL
   [1]=>

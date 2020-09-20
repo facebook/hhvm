@@ -1,0 +1,35 @@
+In B
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+h
+i
+In C
+EX: Method C::f is not static
+g
+h
+i
+In H
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+h
+i
+In B
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+h
+i
+In W
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+EX: Method C::h is marked Protected
+i
+In main
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+EX: Method C::h is marked Protected
+i
+EX: Method A::f is not static
+EX: Unable to find method A::g
+EX: Method A::h is marked Protected
+i
+EX: Method A::j is abstract

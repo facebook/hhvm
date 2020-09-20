@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SOAP_H_
-#define incl_HPHP_EXT_SOAP_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/soap/soap.h"
@@ -110,7 +109,7 @@ struct SoapVar {
     if (!enc_type.isInitialized()) {
       raise_error("Encoding: SoapVar has no 'enc_type' property");
       not_reached();
-      assert(false);
+      assertx(false);
     }
     return enc_type.toInt64();
   }
@@ -124,7 +123,7 @@ struct SoapVar {
   }
 
   static void setEncValue(ObjectData* obj, const Variant& val) {
-    obj->setProp(nullptr, s_enc_value.get(), *val.asCell());
+    obj->setProp(nullptr, s_enc_value.get(), *val.asTypedValue());
   }
 
 #define X(Name, str_name) \
@@ -132,7 +131,7 @@ struct SoapVar {
     if (str.isNull()) { \
       obj->setProp(nullptr, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
     } else { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), str.asCell()); \
+      obj->setProp(nullptr, s_enc_##str_name.get(), str.asTypedValue()); \
     } \
   } \
   static String getEnc##Name(ObjectData* obj) { \
@@ -190,4 +189,3 @@ struct SoapHeader {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SOAP_H_

@@ -1,7 +1,7 @@
-<?php
+<?hh
 /* Prototype  : bool asort(array &array_arg [, int sort_flags])
  * Description: Sort an array and maintain index association
-                Elements will be arranged from lowest to highest when this function has completed. 
+                Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
@@ -12,7 +12,7 @@
  * 3. SORT_NUMERIC - compare items numerically
  * 4. SORT_STRING - compare items as strings
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing asort() : usage variations ***\n";
 
 // get an unset variable
@@ -23,7 +23,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, "r");
 
 //array of values with indices to iterate over
-$unexpected_values = array (
+$unexpected_values = darray [
 
   // int data
   0 => 0,
@@ -59,32 +59,26 @@ $unexpected_values = array (
   // object data
   19 => new stdclass(),
 
-  // undefined data
-  20 => @undefined_var,
-
-  // unset data
-  21 => @unset_var,
-
   // resource variable
-  22 => $fp
+  20 => $fp
 
-);
+];
 
 // loop though each element of the array and check the working of asort()
 // when $array argument is supplied with different values from $unexpected_values
 echo "\n-- Testing asort() by supplying different unexpected values for 'array' argument --\n";
-echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
+echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n";
 
 $counter = 1;
 for($index = 0; $index < count($unexpected_values); $index ++) {
   echo "-- Iteration $counter --\n";
   $value = $unexpected_values [$index];
-  var_dump( asort($value) ); // expecting : bool(false)
-  var_dump( asort($value, SORT_REGULAR) ); // expecting : bool(false)
-  var_dump( asort($value, SORT_NUMERIC) ); // expecting : bool(false)
-  var_dump( asort($value, SORT_STRING) ); // expecting : bool(false)
+  var_dump( asort(inout $value) ); // expecting : bool(false)
+  var_dump( asort(inout $value, SORT_REGULAR) ); // expecting : bool(false)
+  var_dump( asort(inout $value, SORT_NUMERIC) ); // expecting : bool(false)
+  var_dump( asort(inout $value, SORT_STRING) ); // expecting : bool(false)
   $counter++;
 }
 
 echo "Done";
-?>
+}

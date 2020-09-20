@@ -1,25 +1,26 @@
 <?hh // decl
 
-class ExitOnDestruct {
-  private function __destruct() {
-    echo "exiting\n";
-    exit(1);
-  }
+function boom() {
+  echo "exiting\n";
+  exit(1);
 }
 
 async function block() {
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
 }
 
+async function failme() { await block(); throw new Exception; }
+
 async function crash() {
   await block();
   $block = block();
-  $x = new ExitOnDestruct();
-  echo "triggering destructor\n";
-  $x = null;
-  echo "will exit once suspend hook is called\n";
-  await $block;
+  echo "triggering handler\n";
+  await failme();
   echo "should have exited!\n";
 }
 
-HH\Asio\join(crash());
+<<__EntryPoint>>
+function main_await_cpp_exception() {
+  ResumableWaitHandle::setOnFailCallback(($wh, $e) ==> boom());
+  HH\Asio\join(crash());
+}

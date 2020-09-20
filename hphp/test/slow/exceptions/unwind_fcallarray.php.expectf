@@ -1,5 +1,6 @@
 Fatal error: Uncaught exception 'Exception' with message 'die rebel scum' in %s/unwind_fcallarray.php:4
 Stack trace:
-#0 %s/unwind_fcallarray.php(11): handle_error()
-#1 %s/unwind_fcallarray.php(14): main()
-#2 {main}
+#0 (): handle_error()
+#1 %s/unwind_fcallarray.php(9): date_default_timezone_set()
+#2 %S(%S): main()
+#3 {main}

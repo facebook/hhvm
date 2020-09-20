@@ -1,6 +1,6 @@
-File "test_mutable_args3.php", line 21, characters 11-12:
+File "test_mutable_args3.php", line 21, characters 11-13:
 Invalid argument (Typing[4215])
 File "test_mutable_args3.php", line 10, characters 41-42:
 This parameter is marked mutable
-File "test_mutable_args3.php", line 21, characters 11-12:
+File "test_mutable_args3.php", line 21, characters 11-13:
 But this expression is not

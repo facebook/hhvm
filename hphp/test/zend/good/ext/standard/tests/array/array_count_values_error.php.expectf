@@ -2,16 +2,14 @@
 
 -- Testing array_count_values() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_count_values() expects exactly 1 parameter, 0 given in %s/array_count_values_error.php on line 16
 
 -- Testing array_count_values() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_count_values() expects exactly 1 parameter, 2 given in %s/array_count_values_error.php on line 22
 
 -- Testing array_count_values() function integer arguments --
 
-Warning: %s
+Warning: array_count_values() expects parameter 1 to be array, integer given in %s/array_count_values_error.php on line 26
 NULL
 Done

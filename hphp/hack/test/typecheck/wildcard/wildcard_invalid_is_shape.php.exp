@@ -1,0 +1,28 @@
+File "wildcard_invalid_is_shape.php", line 4, characters 9-23:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_shape.php", line 4, characters 22-22:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 5, characters 9-35:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_shape.php", line 5, characters 34-34:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 6, characters 9-38:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_shape.php", line 6, characters 22-22:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 7, characters 9-33:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_shape.php", line 7, characters 32-32:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 7, characters 22-22:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 8, characters 9-37:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_shape.php", line 8, characters 35-35:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 9, characters 9-47:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_shape.php", line 9, characters 45-45:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "wildcard_invalid_is_shape.php", line 9, characters 22-22:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)

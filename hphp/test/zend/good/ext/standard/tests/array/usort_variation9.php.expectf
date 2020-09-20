@@ -2,15 +2,15 @@
 
 -- Sorting $array_arg containing different references --
 bool(true)
-array(5) {
+darray(5) {
   [0]=>
-  &int(-5)
+  int(-5)
   [1]=>
-  &int(0)
+  int(0)
   [2]=>
   int(10)
   [3]=>
-  &int(100)
+  int(100)
   [4]=>
   int(200)
 }

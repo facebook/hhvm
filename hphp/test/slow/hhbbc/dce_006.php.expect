@@ -1,4 +1,4 @@
-array(1) {
+darray(1) {
   ["id"]=>
-  int(42)
+  string(2) "42"
 }

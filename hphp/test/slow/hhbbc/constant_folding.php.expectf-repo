@@ -1,0 +1,17 @@
+%A
+%w%d: Int 1
+%w%d: FCallFuncD <SkipRepack> 1 1 "" - "" "var_dump"
+%A
+%w%d: Int 2
+%w%d: FCallFuncD <SkipRepack> 1 1 "" - "" "var_dump"
+%A
+%w%d: Int 3
+%w%d: FCallFuncD <SkipRepack> 1 1 "" - "" "var_dump"
+%A
+%w%d: Int 3
+%w%d: FCallFuncD <SkipRepack> 1 1 "" - "" "var_dump"
+%A
+int(1)
+int(2)
+int(3)
+int(3)

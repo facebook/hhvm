@@ -1,0 +1,6 @@
+File "default_change_invalid.php", line 8, characters 14-14:
+Unable to satisfy constraint on this type constant (Typing[4110])
+File "default_change_invalid.php", line 4, characters 28-35:
+Expected `arraykey`
+File "default_change_invalid.php", line 8, characters 18-21:
+But got `bool`

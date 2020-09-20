@@ -1,0 +1,20 @@
+<?hh
+function only_variadic(int ...$args): void {
+  throw new \Exception();
+}
+final class Derived extends \ImplementingBase {
+  public function __construct(int $num) {
+    throw new \Exception();
+  }
+}
+function with_nontrivial_fun_decls(): void {
+  $num = 17;
+  variadic(inout $num, 18, 19);
+  only_variadic($num, 18, 19);
+  $d = new Derived($num);
+}
+class ImplementingBase extends \AbstractBase {}
+function variadic(inout int $arg, int ...$args): void {
+  throw new \Exception();
+}
+abstract class AbstractBase {}

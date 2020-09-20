@@ -1,8 +1,12 @@
-<?php
+<?hh
 
 function foo() {
     }
     function main() {
       var_dump(is_null(foo()));
     }
-    main();
+
+    <<__EntryPoint>>
+function main_1863() {
+main();
+}

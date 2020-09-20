@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Useful to handle errors occurred in static methods when there's no object
@@ -43,18 +43,6 @@ function intl_is_failure(int $errorCode): bool;
  *                       (except IDNA_ERROR_* constants).
  * @param int $varaitn - Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or
  *                       INTL_IDNA_VARIANT_UTS46 for UTS #46.
- * @param mixed &$info - This parameter can be used only if
- *                       INTL_IDNA_VARIANT_UTS46 was used for variant.
- *                       In that case, it will be filled with an array with
- *                       the keys 'result', the possibly illegal result of
- *                       the transformation, 'isTransitionalDifferent', a
- *                       boolean indicating whether the usage of the
- *                       transitional mechanisms of UTS #46 either has or
- *                       would have changed the result and 'errors',
- *                       which is an int representing a bitset of the error
- *                       constants IDNA_ERROR_*. In exceptional cases this
- *                       parameter can be empty array, then use
- *                       intl_get_error_code() to get info about error.
  *
  * @return mixed - Domain name encoded in ASCII-compatible form
  *                 or FALSE on failure.
@@ -62,8 +50,7 @@ function intl_is_failure(int $errorCode): bool;
 <<__Native>>
 function idn_to_ascii(string $domain,
                       int $options = 0,
-                      int $variant = 0,
-                      mixed &$info = null): mixed;
+                      int $variant = 0): mixed;
 
 /**
  * @param string $domain
@@ -71,34 +58,19 @@ function idn_to_ascii(string $domain,
  *                       (except IDNA_ERROR_* constants).
  * @param int $variant - Either INTL_IDNA_VARIANT_2003 for IDNA 2003 or
  *                       INTL_IDNA_VARIANT_UTS46 for UTS #46.
- * @param mixed &$info - This parameter can be used only if
- *                       INTL_IDNA_VARIANT_UTS46 was used for variant.
- *                       In that case, it will be filled with an array with
- *                       the keys 'result', the possibly illegal result of
- *                       the transformation, 'isTransitionalDifferent', a
- *                       boolean indicating whether the usage of the
- *                       transitional mechanisms of UTS #46 either has or
- *                       would have changed the result and 'errors',
- *                       which is an int representing a bitset of the error
- *                       constants IDNA_ERROR_*. In exceptional cases this
- *                       parameter can be empty array, then use
- *                       intl_get_error_code() to get info about error.
  *
  * @return mixed - Domain name in unicode or FALSE on failure.
  */
 <<__Native>>
 function idn_to_utf8(string $domain,
                      int $options = 0,
-                     int $variant = 0,
-                     mixed &$info = null): mixed;
+                     int $variant = 0): mixed;
 
 /**
  * @alias idn_to_utf8
  */
 function idn_to_unicode(string $domain,
                         int $options = 0,
-                        int $variant = 0,
-                        mixed &$info = null): mixed {
-  return idn_to_utf8($domain, $options, $variant, $info);
+                        int $variant = 0): mixed {
+  return idn_to_utf8($domain, $options, $variant);
 }
-

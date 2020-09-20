@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /* Create a MIME mail resource.
  * @return resource - Returns a handle that can be used to parse a message.
  */
@@ -77,7 +77,7 @@ function mailparse_msg_extract_part(resource $mimemail,
  * @return array
  */
 <<__Native>>
-function mailparse_msg_get_part_data(resource $mimemail): array;
+function mailparse_msg_get_part_data(resource $mimemail): darray;
 
 /* @param resource $mimemail
  * @param string $mimesection
@@ -91,7 +91,7 @@ function mailparse_msg_get_part(resource $mimemail,
  * @return array
  */
 <<__Native>>
-function mailparse_msg_get_structure(resource $mimemail): array;
+function mailparse_msg_get_structure(resource $mimemail): darray;
 
 /* @param string $addresses - A string containing addresses, like in: Wez
  * Furlong <wez@example.com>, doe@example.com  This string must not include
@@ -103,7 +103,7 @@ function mailparse_msg_get_structure(resource $mimemail): array;
  * newsgroup, FALSE otherwise.
  */
 <<__Native>>
-function mailparse_rfc822_parse_addresses(string $addresses): array;
+function mailparse_rfc822_parse_addresses(string $addresses): varray;
 
 /* Streams data from the source file pointer, apply encoding and write to the
  * destination file pointer.

@@ -1,4 +1,4 @@
-File "immvector_immutable2.php", line 16, characters 3-8:
+File "immvector_immutable2.php", line 16, characters 3-13:
 You cannot mutate this (Typing[4011])
 File "immvector_immutable2.php", line 15, characters 9-27:
-This is an object of type ImmVector
+This is an object of type ImmVector<int>

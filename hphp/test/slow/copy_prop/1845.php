@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($tr_data) {
   $temp_tr = null;
@@ -16,4 +16,8 @@ function test($tr_data) {
   }
   return null;
 }
-var_dump(test(array('a' => 1, 'b' => 45)));
+
+<<__EntryPoint>>
+function main_1845() {
+var_dump(test(darray['a' => 1, 'b' => 45]));
+}

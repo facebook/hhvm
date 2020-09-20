@@ -15,18 +15,25 @@
 */
 
 #include "hphp/util/brotli.h"
-#include <dec/decode.h>
-#include <enc/encode.h>
+#include "hphp/util/alloc.h"
+#include <brotli/decode.h>
+#include <brotli/encode.h>
 #include <folly/ScopeGuard.h>
 #include <folly/Range.h>
 
 #include <gtest/gtest.h>
 
-using namespace brotli;
 using namespace std;
 using namespace folly;
 
 namespace HPHP {
+namespace {
+struct BrotliDecDeleter {
+  void operator()(BrotliDecoderState *d) {
+    BrotliDecoderDestroyInstance(d);
+  }
+};
+}
 
 TEST(BrotliTest, Chunks) {
 
@@ -48,15 +55,17 @@ TEST(BrotliTest, Chunks) {
       "</html>\n",
   };
 
-  BrotliState state;
-  BrotliStateInit(&state);
-  SCOPE_EXIT{ BrotliStateCleanup(&state); };
 
-  size_t total = 0;
-  brotli::BrotliCompressor compressor{BrotliParams()};
+  std::unique_ptr<BrotliDecoderState, BrotliDecDeleter> decState(
+      BrotliDecoderCreateInstance(nullptr, nullptr, nullptr));
 
-  // generate a huge chunk
-  size_t hugeSize = compressor.input_block_size() + 20;
+  ASSERT_TRUE(decState != nullptr);
+
+  BrotliCompressor compressor(BROTLI_MODE_GENERIC, 5, BROTLI_MIN_INPUT_BLOCK_BITS);
+
+  // generate a huge chunk. use block size + 20
+  // blockSize is roughly (3 << BROTLI_MIN_INPUT_BLOCK_BITS)
+  size_t hugeSize = (3 << BROTLI_MIN_INPUT_BLOCK_BITS) + 20;
   string hugeChunk;
   hugeChunk.reserve(hugeSize);
   string filler = "The quick brown fox jumps over the lazy dog.";
@@ -72,29 +81,38 @@ TEST(BrotliTest, Chunks) {
     size_t size = chunk.size();
     bool last = ++i == chunks.size();
 
-    auto compressed = compressBrotli(&compressor, chunk.data(), size, last);
-    EXPECT_TRUE(compressed != nullptr);
-    SCOPE_EXIT { free((void*)compressed); };
+    auto compressed = compressor.compress(chunk.data(), size, last);
+    EXPECT_TRUE(compressed.data() != nullptr);
 
     size_t decompressedBufferSize = chunk.size();
-    auto decompressedBuffer = new uint8_t[decompressedBufferSize];
-    SCOPE_EXIT{ delete[] decompressedBuffer; };
+    auto decompressedBuffer = std::make_unique<uint8_t[]>(decompressedBufferSize);
 
-    uint8_t* decompressedPos = decompressedBuffer;
+    uint8_t* decompressedPos = decompressedBuffer.get();
     size_t decompressedAvailable = decompressedBufferSize;
 
-    const uint8_t* compressedPos = (const uint8_t*)compressed;
-    BrotliDecompressBufferStreaming(&size,
-                                    &compressedPos,
-                                    0,
-                                    &decompressedAvailable,
-                                    &decompressedPos,
-                                    &total,
-                                    &state);
+    auto compressedPos = reinterpret_cast<const uint8_t*>(compressed.data());
+    auto decompressResult = BrotliDecoderDecompressStream(
+        decState.get(),
+        &size,
+        &compressedPos,
+        &decompressedAvailable,
+        &decompressedPos,
+        nullptr);
+    if (decompressResult != BROTLI_DECODER_RESULT_SUCCESS) {
+      if (decompressResult == BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT && last) {
+        // We expect this result for all but the last.
+        FAIL() << "Decoder needs more input but input is complete";
+      } else if (decompressResult == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) {
+        FAIL() << "Decoder needs more output space";
+      } else if (decompressResult == BROTLI_DECODER_RESULT_ERROR) {
+        auto errCode = BrotliDecoderGetErrorCode(decState.get());
+        FAIL() << "Brotli error: " << BrotliDecoderErrorString(errCode);
+      }
+    }
     EXPECT_EQ(size, 0);
     EXPECT_EQ(chunk,
-              StringPiece((char*)decompressedBuffer,
-                          decompressedPos - decompressedBuffer));
+              StringPiece(reinterpret_cast<char*>(decompressedBuffer.get()),
+                          decompressedPos - decompressedBuffer.get()));
   }
 }
 

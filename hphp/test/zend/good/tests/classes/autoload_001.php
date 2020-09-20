@@ -1,12 +1,17 @@
-<?php
+<?hh
+<<__EntryPoint>>
+function entrypoint_autoload_001(): void {
 
-function __autoload($class_name)
-{
-	require_once(dirname(__FILE__) . '/' . $class_name . '.p5c');
-	echo __FUNCTION__ . '(' . $class_name . ")\n";
+  HH\autoload_set_paths(
+  	dict[
+  		'class' => dict[
+  			'autoload_root' => 'autoload_root.p5c',
+  		],
+  	],
+  	__DIR__.'/',
+  );
+
+  var_dump(class_exists('autoload_root'));
+
+  echo "===DONE===\n";
 }
-
-var_dump(class_exists('autoload_root'));
-
-?>
-===DONE===

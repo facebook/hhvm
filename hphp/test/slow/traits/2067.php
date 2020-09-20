@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
   function fruit() {
@@ -18,10 +18,14 @@ class C1 {
     T2::fruit as fruit2;
   }
 }
+
+<<__EntryPoint>>
+function main_2067() {
 $o = new C1;
 foreach ($o->fruit() as $fruit) {
   var_dump($fruit);
 }
 foreach ($o->fruit2() as $fruit) {
   var_dump($fruit);
+}
 }

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_TEXT_H_
-#define incl_HPHP_JIT_VASM_TEXT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -101,4 +100,3 @@ private:
 
 #include "hphp/runtime/vm/jit/vasm-text-inl.h"
 
-#endif

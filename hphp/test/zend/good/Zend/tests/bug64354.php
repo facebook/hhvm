@@ -1,4 +1,4 @@
-<?php
+<?hh
 class B implements Serializable {
     public function serialize() {
         throw new Exception("serialize");
@@ -8,12 +8,12 @@ class B implements Serializable {
     public function unserialize($data) {
     }
 }
-
-$data = array(new B);
+<<__EntryPoint>> function main(): void {
+$data = varray[new B];
 
 try {
     serialize($data);
-} catch (Exception $e) { 
+} catch (Exception $e) {
     var_dump($e->getMessage());
 }
-?>
+}

@@ -1,9 +1,6 @@
 
 <h2>yield and generator</h2>
 
-This feature requires the [[index.php?file=options.compiler | compiler option]]
-EnableHipHopSyntax=true, or interpreter option Eval.EnableHipHopSyntax=true.
-
 HipHop extends PHP to include Python and C#-style generators. If you're
 unfamiliar with the concept, see
 [[http://docs.python.org/tutorial/classes.html#generators | the Python docs]].

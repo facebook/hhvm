@@ -1,0 +1,6 @@
+File "tuple3.php", line 7, characters 7-8:
+Invalid argument (Typing[4110])
+File "tuple3.php", line 3, characters 12-29:
+Expected `(int, int, string)`
+File "tuple3.php", line 6, characters 13-25:
+But got `(int, string)`

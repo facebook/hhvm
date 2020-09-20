@@ -1,8 +1,0 @@
-file1.txtfile2.txtfile3.txt
-
-Warning: %s
-phar url "phar://" is unknown in %sopendir.php on line %d
-
-Warning: %s
-phar url "phar://hi.phar" is unknown in %sopendir.php on line %d
-===DONE===

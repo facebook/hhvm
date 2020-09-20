@@ -26,7 +26,7 @@
 #include "hphp/parser/scanner.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 #include <folly/String.h>
 

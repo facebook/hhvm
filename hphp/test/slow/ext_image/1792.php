@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1792() {
 for ($i = 0;
  $i < 100000;
  $i++) {
@@ -7,4 +10,5 @@ for ($i = 0;
   if ($str) {
     echo "$i: $str\n";
   }
+}
 }

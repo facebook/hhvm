@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TestHeader1 extends SoapHeader {
 	function __construct($data) {
 		parent::__construct("http://testuri.org", "Test1", $data);
@@ -12,16 +12,22 @@ class TestHeader2 extends SoapHeader {
 }
 
 function test() {
-	global $server;
-	$server->addSoapHeader(new TestHeader1("Hello Header!"));
-	$server->addSoapHeader(new TestHeader2("Hello Header!"));
+
+	ZendGoodExtSoapTestsServer024::$server->addSoapHeader(new TestHeader1("Hello Header!"));
+	ZendGoodExtSoapTestsServer024::$server->addSoapHeader(new TestHeader2("Hello Header!"));
 	return "Hello Body!";
 }
 
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
-$server->addfunction("test");
+abstract final class ZendGoodExtSoapTestsServer024 {
+  public static $server;
+}
+<<__EntryPoint>>
+function entrypoint_server024(): void {
 
-$HTTP_RAW_POST_DATA = <<<EOF
+  ZendGoodExtSoapTestsServer024::$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+  ZendGoodExtSoapTestsServer024::$server->addfunction("test");
+
+  $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
@@ -35,6 +41,6 @@ $HTTP_RAW_POST_DATA = <<<EOF
 </SOAP-ENV:Envelope>
 EOF;
 
-$server->handle($HTTP_RAW_POST_DATA);
-echo "ok\n";
-?>
+  ZendGoodExtSoapTestsServer024::$server->handle($HTTP_RAW_POST_DATA);
+  echo "ok\n";
+}

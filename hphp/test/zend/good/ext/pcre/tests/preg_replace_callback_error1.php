@@ -1,27 +1,40 @@
-<?php
+<?hh
 /*
 * proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
-error_reporting(E_ALL&~E_NOTICE);
+
+function integer_word($matches) {
+  // Maps from key values (0-9) to corresponding key written in words.
+  $replacement = varray['zero', 'one', 'two', 'three', 'four',
+                       'five', 'six', 'seven', 'eight', 'nine'];
+  try {
+    return $replacement[$matches[0]];
+  } catch (Exception $_) {
+    return null;
+  }
+}
+
+
+
+
+<<__EntryPoint>> function main(): void {
 /*
 * Testing how preg_replace_callback reacts to being passed the wrong type of regex argument
 */
 echo "*** Testing preg_replace_callback() : error conditions ***\n";
-$regex_array = array('abcdef', //Regex without delimiters
+$regex_array = varray['abcdef', //Regex without delimiters
 '/[a-zA-Z]', //Regex without closing delimiter
 '[a-zA-Z]/', //Regex without opening delimiter
-'/[a-zA-Z]/F', array('[a-z]', //Array of Regexes
-'[A-Z]', '[0-9]'), '/[a-zA-Z]/'); //Regex string
-$replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine');
-function integer_word($matches) {
-    global $replacement;
-    return $replacement[$matches[0]];
-}
+'/[a-zA-Z]/F', varray['[a-z]', //Array of Regexes
+'[A-Z]', '[0-9]'], '/[a-zA-Z]/']; //Regex string
 $subject = 'number 1.';
 foreach($regex_array as $regex_value) {
-    print "\nArg value is $regex_value\n";
-    var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
+    $text = HH\is_any_array($regex_value) ? 'Array' : $regex_value;
+    print "\nArg value is $text\n";
+    $count = -1;
+    var_dump(preg_replace_callback($regex_value, fun('integer_word'), $subject, -1, inout $count));
 }
-?>
-===Done===
+
+echo "===Done===";
+}

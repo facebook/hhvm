@@ -15,6 +15,6 @@ class TR<+Trv> implements MyIterable<Trv> {
   // under constraint Tu super Trv i.e. Trv <: Tu
   // So this should hold!
   public function concat<Tu super Trv>(): MyIterable<Trv> {
-    //UNSAFE
+    throw new Exception();
   }
 }

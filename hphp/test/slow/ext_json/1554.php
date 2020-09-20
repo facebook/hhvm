@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   public $a = 'foo';
@@ -8,5 +8,9 @@ class A {
     var_dump(json_encode($this));
   }
 }
+
+<<__EntryPoint>>
+function main_1554() {
 $obj = new A();
 $obj->aaaa();
+}

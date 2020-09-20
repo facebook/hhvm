@@ -1,8 +1,8 @@
 c:2
 m:1
 x:
-Notice: Undefined property: b::$x in %s/test/slow/exceptions/60.php on line 11
+Notice: Undefined property: b::$x in %s/test/slow/exceptions/60.php on line 10
 
 y:
-Notice: Undefined property: b::$y in %s/test/slow/exceptions/60.php on line 12
+Notice: Undefined property: b::$y in %s/test/slow/exceptions/60.php on line 11
 

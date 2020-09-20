@@ -58,6 +58,8 @@ static const char *tokNames[] = {
 
 namespace {
 
+const char* kPIDPlaceholder = "%{pid}";
+
 /*
  * Dummy class to get some code to run before main().
  */
@@ -89,15 +91,30 @@ public:
 
   static void EnsureInitFile(const char* file) {
     if (out && out != stderr) return;
-    if (!file) file = "/tmp/hphp.log";
-    out = fopen(file, "w");
+
+    auto const filename = [&] () -> std::string {
+      if (!file) return "/tmp/hphp.log";
+      std::string result{file};
+      size_t idx;
+      if ((idx = result.find(kPIDPlaceholder)) != std::string::npos) {
+        result.replace(idx, strlen(kPIDPlaceholder), std::to_string(getpid()));
+      }
+      return result;
+    }();
+
+    out = fopen(filename.c_str(),
+                getenv("HPHP_TRACE_APPEND") ? "a" : "w");
     if (!out) {
-      fprintf(stderr, "could not create log file (%s); using stderr\n", file);
+      fprintf(
+        stderr,
+        "could not create log file (%s); using stderr\n",
+        filename.c_str()
+      );
       out = stderr;
     }
   }
 
-  static void InitFromSpec(std::string spec, int* levels) {
+  static void InitFromSpec(folly::StringPiece spec, int* levels) {
     std::vector<folly::StringPiece> pieces;
     folly::split(",", spec, pieces);
     for (auto piece : pieces) {
@@ -152,9 +169,22 @@ void ensureInit(std::string outFile) {
   Init::EnsureInitFile(outFile.c_str());
 }
 
-void setTraceThread(const std::string& traceSpec) {
+void setTraceThread(folly::StringPiece traceSpec) {
   for (auto& level : tl_levels) level = 0;
   Init::InitFromSpec(traceSpec, tl_levels);
+}
+
+CompactVector<BumpRelease> bumpSpec(folly::StringPiece traceSpec) {
+  std::array<int, NumModules> modules{};
+
+  Init::InitFromSpec(traceSpec, modules.data());
+  CompactVector<BumpRelease> result;
+  for (int i = 0; i < NumModules; i++) {
+    if (modules[i]) {
+      result.emplace_back(static_cast<Module>(i), -modules[i]);
+    }
+  }
+  return result;
 }
 
 void vtrace(const char *fmt, va_list ap) {

@@ -1,19 +1,43 @@
-<?php
+<?hh
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-$tmpDir = 'fopenVar19.Dir';
-$realFilename = __FILE__.'.real';
-$sortFilename = __FILE__.'.soft';
-$hardFilename = __FILE__.'.hard';
-$linkOfLink = __FILE__.'.soft2';
+function readFile2($file) {
+   $h = fopen($file, 'r');
+   fpassthru($h);
+   fclose($h);
+   echo "\n";
+}
+
+function appendFile($file) {
+   $h = fopen($file, 'a+');
+   fwrite($h, ' again!');
+   fseek($h, 0);
+   fpassthru($h);
+   fclose($h);
+   echo "\n";
+}
+
+function writeFile($file) {
+   $h = fopen($file, 'w');
+   fwrite($h, 'Goodbye World');
+   fclose($h);
+   readFile2($file);
+}
+<<__EntryPoint>> function main(): void {
+$tmpDir = __SystemLib\hphp_test_tmppath('fopenVar19.Dir');
+$realFilename = basename(__FILE__).'.real';
+$sortFilename = basename(__FILE__).'.soft';
+$hardFilename = basename(__FILE__).'.hard';
+$linkOfLink = basename(__FILE__).'.soft2';
 
 echo "*** Testing fopen() : variation ***\n";
 // start the test
 mkdir($tmpDir);
+$oldDirPath = getcwd();
 chdir($tmpDir);
 
 $h = fopen($realFilename, "w");
@@ -54,32 +78,8 @@ unlink($linkOfLink);
 unlink($sortFilename);
 unlink($hardFilename);
 unlink($realFilename);
-chdir("..");
+chdir($oldDirPath);
 rmdir($tmpDir);
 
-function readFile2($file) {
-   $h = fopen($file, 'r');
-   fpassthru($h);
-   fclose($h);
-   echo "\n";
+echo "===DONE===\n";
 }
-
-function appendFile($file) {
-   $h = fopen($file, 'a+');
-   fwrite($h, ' again!');
-   fseek($h, 0);
-   fpassthru($h);
-   fclose($h);
-   echo "\n";
-}
-
-function writeFile($file) {
-   $h = fopen($file, 'w');
-   fwrite($h, 'Goodbye World');
-   fclose($h);
-   readFile2($file);
-}
-
-
-?>
-===DONE===

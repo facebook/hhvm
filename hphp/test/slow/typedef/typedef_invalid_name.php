@@ -1,3 +1,4 @@
 <?hh
 
 type Yo = IDontExist;
+

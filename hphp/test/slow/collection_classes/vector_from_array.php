@@ -6,9 +6,13 @@ function test($name, $a) {
 }
 
 function main() {
-  test('empty', []);
-  test('packed', [1, 2, 3]);
-  test('mixed', ['a' => 'b', 'c' => 'd']);
+  test('empty', varray[]);
+  test('packed', varray[1, 2, 3]);
+  test('mixed', darray['a' => 'b', 'c' => 'd']);
 }
 
+
+<<__EntryPoint>>
+function main_vector_from_array() {
 main();
+}

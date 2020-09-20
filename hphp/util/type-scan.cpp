@@ -21,8 +21,10 @@
 #include <memory>
 #include <vector>
 
+#include <folly/container/F14Set.h>
 #include <folly/Format.h>
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
 
 namespace {
@@ -31,7 +33,7 @@ namespace {
 
 // List of types which should be ignored (including any bases) by the generated
 // scanners. Add as needed.
-const std::unordered_set<std::string> ignored = {
+const folly::F14FastSet<std::string> ignored = {
   "pthread_cond_t",
   "std::condition_variable",
   "st_mysql_bind",
@@ -39,7 +41,7 @@ const std::unordered_set<std::string> ignored = {
 
 // List of templates which should not be used to store request heap allocated
 // values (because scanner aware variants exist).
-const std::unordered_set<std::string> forbidden_template = {
+const folly::F14FastSet<std::string> forbidden_template = {
   "boost::container::flat_map",
   "boost::container::flat_multimap",
   "boost::container::flat_multiset",
@@ -65,7 +67,7 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::vector"
 };
 
-const std::unordered_set<std::string> forced_conservative = {
+const folly::F14FastSet<std::string> forced_conservative = {
   "boost::variant",
   "folly::Optional",
   "std::optional",
@@ -139,19 +141,21 @@ bool isForcedConservativeTemplate(const std::string& name) {
 
 using namespace detail;
 
-void init() {
-#if defined(__clang__)
-  // Clang is currently broken... It doesn't emit uncalled member functions in a
+void init(const std::string& extractPath,
+          const std::string& fallbackPath,
+          bool trust) {
+#if defined(__clang__) && !defined(CLANG_STANDALONE_DEBUG)
+  // Older versions of clang don't emit uncalled member functions in a
   // template class, even when using ATTRIBUTE_USED. This prevents the custom
   // scanners from being emitted (silently), which causes all sorts of
-  // problems. Punt for now until we can figure out a fix. This means that we'll
-  // continue to just conservative scan everything. See t10336705.
+  // problems. Fixed in https://reviews.llvm.org/D56928. Clang builds also
+  // need -fstandalone-debug to emit full types in DWARF.
   return;
 #elif defined(__linux__) || defined(__FreeBSD__)
 
   using init_func_t = const Metadata*(*)(std::size_t&);
 
-  auto const scanner_init = [] () -> init_func_t {
+  auto const scanner_init = [&] () -> init_func_t {
     auto const result = dlsym(RTLD_DEFAULT, kInitFuncName);
     if (result != nullptr) return reinterpret_cast<init_func_t>(result);
 
@@ -163,8 +167,13 @@ void init() {
     }
 
     // Link in the embedded object.
-    char tmp_filename[] = "/tmp/hhvm_type_scanner_XXXXXX";
-    auto const handle = dlopen_embedded_data(data, tmp_filename);
+    auto const handle = dlopen_embedded_data(
+      data,
+      extractPath,
+      fallbackPath,
+      buildId().toString(),
+      trust
+    );
     if (!handle) {
       throw InitException{"Failed to dlopen embedded data"};
     }

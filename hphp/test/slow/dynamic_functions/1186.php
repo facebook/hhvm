@@ -1,8 +1,12 @@
-<?php
+<?hh
 
 function test($a, $b) {
  print $a.$b;
 }
- $a = 'Test';
- $y = array('k','q','q');
+
+ <<__EntryPoint>>
+function main_1186() {
+$a = 'Test';
+ $y = varray['k','q','q'];
  $a('o',$y[0]);
+}

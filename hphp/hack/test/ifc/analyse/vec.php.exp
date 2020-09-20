@@ -1,0 +1,56 @@
+Analyzing \empty:
+* pc: pc
+* This: None
+* Return: \HH\vec<\HH\vec, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: {}
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: {}
+Constraints:
+  [lump'2 = lump'1, \HH\vec'1 < \HH\vec]
+
+Analyzing \collection:
+* pc: pc
+* This: None
+* Return: \HH\vec<\HH\vec, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: {}
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: {}
+Constraints:
+  [lit < lump'2, lit'1 < lump'2, lump'2 = lump'1, \HH\vec'1 < \HH\vec]
+
+Analyzing \add:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $vec -> \HH\vec<\HH\vec, lump'1> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $vec -> \HH\vec<\HH\vec'1, lump'2> }
+Constraints:
+  [\HH\vec < weak, lit < lump'1, lump'1 = lump'2, weak < \HH\vec'1]
+
+Analyzing \retElem:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $vec -> \HH\vec<\HH\vec, lump'1> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $vec -> \HH\vec<\HH\vec, lump'1> }
+Constraints:
+  lump'1 < ret
+

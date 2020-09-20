@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $dt = new DateTime('@1200506699', new DateTimeZone('Europe/Berlin'));
 echo $dt->format(DATE_RFC822), "\n";
 echo $dt->format('T e Z'), "\n";
@@ -24,4 +24,4 @@ echo $dt->format(DATE_RFC822 . " e T O U"), "\n";
 
 $dt = new DateTime('16 Jan 08 13:04:59 America/Chicago', new DateTimeZone('Europe/Berlin'));
 echo $dt->format(DATE_RFC822 . " e T O U"), "\n";
-?>
+}

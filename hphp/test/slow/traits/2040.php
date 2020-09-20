@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL);
+<?hh
 
 trait A {
    public function smallTalk() {
@@ -29,10 +27,13 @@ class Talker {
 	}
 }
 
-$t = new Talker;
-$t->smallTalk();
-$t->bigTalk();
-$t->talk();
+<<__EntryPoint>>
+function main_entry(): void {
 
-?>
+  error_reporting(E_ALL);
 
+  $t = new Talker;
+  $t->smallTalk();
+  $t->bigTalk();
+  $t->talk();
+}

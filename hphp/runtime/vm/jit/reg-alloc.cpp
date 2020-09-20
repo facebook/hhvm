@@ -21,10 +21,12 @@
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/native-calls.h"
-#include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
+
+#include "hphp/runtime/base/packed-array.h"
 
 #include "hphp/util/arch.h"
 
@@ -32,8 +34,6 @@
 
 namespace HPHP { namespace jit {
 
-using namespace jit::reg;
-using NativeCalls::CallMap;
 
 TRACE_SET_MOD(hhir);
 
@@ -45,19 +45,29 @@ namespace {
  * Return true if this instruction can load a TypedValue using a 16-byte load
  * into a SIMD register.
  */
-bool loadsCell(Opcode op) {
-  switch (op) {
+bool loadsCell(const IRInstruction& inst) {
+  auto const arch_allows = [] {
+    switch (arch()) {
+    case Arch::X64: return true;
+    case Arch::ARM: return true;
+    case Arch::PPC64: return true;
+    }
+    not_reached();
+  }();
+
+  switch (inst.op()) {
+  case LdMem:
+    return arch_allows && (!wide_tv_val || inst.src(0)->isA(TPtrToCell));
+
+  case LdVecElem:
+    static_assert(PackedArray::stores_typed_values, "");
+    return arch_allows;
+
   case LdStk:
   case LdLoc:
-  case LdMem:
   case LdContField:
-  case LdElem:
-  case LdRef:
-  case LookupCns:
   case InitClsCns:
   case CGetProp:
-  case VGetProp:
-  case ArrayGet:
   case DictGet:
   case DictGetQuiet:
   case DictGetK:
@@ -66,18 +76,15 @@ bool loadsCell(Opcode op) {
   case KeysetGetK:
   case MapGet:
   case CGetElem:
-  case VGetElem:
-  case ArrayIdx:
   case DictIdx:
   case KeysetIdx:
-  case LdVecElem:
-  case LdPackedElem:
-    switch (arch()) {
-    case Arch::X64: return true;
-    case Arch::ARM: return true;
-    case Arch::PPC64: return true;
-    }
-    not_reached();
+  case MemoGetStaticValue:
+  case MemoGetStaticCache:
+  case MemoGetLSBValue:
+  case MemoGetLSBCache:
+  case MemoGetInstanceValue:
+  case MemoGetInstanceCache:
+    return arch_allows;
 
   default:
     return false;
@@ -100,15 +107,18 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // may give it an XMM register, and the instruction will store the whole 16
   // bytes into memory.  Therefore it's important *not* to return true if the
   // TypedValue.m_aux field in memory has important data.  This is the case for
-  // MixedArray elements, Map elements, and RefData inner values.  We don't
-  // have StMem in here since it sometimes stores to RefDatas.
+  // MixedArray elements, and Map elements.
   switch (inst.op()) {
   case StLoc:
     return srcIdx == 1;
-  case StElem:
-    return srcIdx == 2;
   case StStk:
     return srcIdx == 1;
+  case StClsInitElem:
+    return srcIdx == 1;
+  case InitVecElem:
+    return srcIdx == 1;
+  case StMem:
+    return srcIdx == 1 && (!wide_tv_val || inst.src(0)->isA(TPtrToCell));
   default:
     return false;
   }
@@ -117,21 +127,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-PhysReg forceAlloc(const SSATmp& tmp) {
-  if (tmp.type() <= TBottom) return InvalidReg;
-
-  auto inst = tmp.inst();
-  auto opc = inst->op();
-
-  // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
-  // we have a pointer to an AR that is not in rvmfp().
-  if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(TFramePtr)) {
-    return rvmfp();
-  }
-
-  return InvalidReg;
-}
 
 // Assign virtual registers to all SSATmps used or defined in reachable
 // blocks. This assigns a value register to constants defined by DefConst,
@@ -156,7 +151,7 @@ void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
       }
       for (auto& d : inst.dsts()) {
         tmps[d] = d;
-        if (!try_wide || inst.isControlFlow() || !loadsCell(inst.op())) {
+        if (!try_wide || inst.isControlFlow() || !loadsCell(inst)) {
           not_wide.set(d->id());
         }
       }
@@ -165,34 +160,31 @@ void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
   // visit each tmp, assign 1 or 2 registers to each.
   for (auto tmp : tmps) {
     if (!tmp) continue;
-    auto forced = forceAlloc(*tmp);
-    if (forced != InvalidReg) {
-      state.locs[tmp] = Vloc{forced};
-      UNUSED Reg64 r = forced;
-      FTRACE(kRegAllocLevel, "force t{} in {}\n", tmp->id(), reg::regname(r));
-      continue;
-    }
     if (tmp->inst()->is(DefConst)) {
-      auto const c = make_const(vunit, tmp->type());
-      state.locs[tmp] = Vloc{c};
-      FTRACE(kRegAllocLevel, "const t{} in %{}\n", tmp->id(), size_t(c));
+      auto const loc = make_const(vunit, tmp->type());
+      state.locs[tmp] = loc;
+      FTRACE(kVasmRegAllocDetailLevel, "const t{} in %{}\n", tmp->id(),
+             size_t(loc.reg(0)), size_t(loc.reg(1)));
     } else {
       if (tmp->numWords() == 2) {
         if (!not_wide.test(tmp->id())) {
           auto r = vunit.makeReg();
           state.locs[tmp] = Vloc{Vloc::kWide, r};
-          FTRACE(kRegAllocLevel, "def t{} in wide %{}\n", tmp->id(), size_t(r));
+          FTRACE(kVasmRegAllocDetailLevel,
+                 "def t{} in wide %{}\n", tmp->id(), size_t(r));
         } else {
           auto data = vunit.makeReg();
           auto type = vunit.makeReg();
           state.locs[tmp] = Vloc{data, type};
-          FTRACE(kRegAllocLevel, "def t{} in %{},%{}\n", tmp->id(),
+          FTRACE(kVasmRegAllocDetailLevel,
+                 "def t{} in %{},%{}\n", tmp->id(),
                  size_t(data), size_t(type));
         }
       } else {
         auto data = vunit.makeReg();
         state.locs[tmp] = Vloc{data};
-        FTRACE(kRegAllocLevel, "def t{} in %{}\n", tmp->id(), size_t(data));
+        FTRACE(kVasmRegAllocDetailLevel,
+               "def t{} in %{}\n", tmp->id(), size_t(data));
       }
     }
   }
@@ -206,21 +198,24 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callm:
     case Vinstr::callr:
     case Vinstr::calls:
+      defs = abi.all() - (abi.calleeSaved | rvmfp() | rsp());
+      break;
+
     case Vinstr::callstub:
-      defs = abi.all() - (abi.calleeSaved | rvmfp());
+      defs =
+        (abi.all() - (abi.calleeSaved | rvmfp() | rsp()))
+        | jit::abi(CodeKind::CrossTrace).unreserved();
       break;
 
     case Vinstr::callfaststub:
-      defs = abi.all() - abi.calleeSaved - abi.gpUnreserved;
+      defs = abi.all() - abi.calleeSaved - abi.gpUnreserved - (rvmfp() | rsp());
       break;
 
     case Vinstr::callphp:
-      defs = abi.all() - RegSet(rvmtl());
-      break;
-
-    case Vinstr::callarray:
+    case Vinstr::callphpr:
+    case Vinstr::callphps:
     case Vinstr::contenter:
-      defs = abi.all() - (rvmfp() | rvmtl());
+      defs = abi.all() - (rvmfp() | rvmtl() | rsp());
       break;
 
     case Vinstr::cqo:
@@ -235,9 +230,26 @@ void getEffects(const Abi& abi, const Vinstr& i,
       across = RegSet(reg::rcx);
       break;
 
+    case Vinstr::pushvmfp:
+    case Vinstr::popvmfp:
+      defs = RegSet(rvmfp());
+      break;
+
+    case Vinstr::pop:
+    case Vinstr::popf:
+    case Vinstr::popm:
+    case Vinstr::popp:
+    case Vinstr::poppm:
+    case Vinstr::push:
+    case Vinstr::pushf:
+    case Vinstr::pushm:
+    case Vinstr::pushp:
+    case Vinstr::pushpm:
+      uses = defs = RegSet(rsp());
+      break;
+
     case Vinstr::vcall:
     case Vinstr::vinvoke:
-    case Vinstr::vcallarray:
       always_assert(false && "Unsupported instruction in vxls");
 
     default:

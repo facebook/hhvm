@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private $x = null;
+  private $x = darray[];
   private $y = "string";
 
   public function heh(int $i) {
@@ -18,4 +18,8 @@ function main() {
   var_dump($a->getY());
   var_dump($a->getX());
 }
+
+<<__EntryPoint>>
+function main_private_props_011() {
 main();
+}

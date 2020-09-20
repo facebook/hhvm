@@ -46,5 +46,8 @@ function foo($a) {
 function main($a) {
   foo($a);
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-main(1);
+  main(1);
+}

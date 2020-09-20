@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_register_shutdown_function_nested() {
 var_dump('before reg');
 
 register_shutdown_function(function() {
@@ -19,3 +22,4 @@ register_shutdown_function(function() {
 });
 
 var_dump('after reg');
+}

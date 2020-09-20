@@ -1,0 +1,2 @@
+Notice: Unable to unserialize: [%s]. Mangled private object property. in %s/fast-malformed.php on line 7
+bool(false)

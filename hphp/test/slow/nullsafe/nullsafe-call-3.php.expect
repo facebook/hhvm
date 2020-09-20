@@ -1,9 +1,9 @@
-object(E)#3 (0) {
+object(E) (0) {
 }
 BadMethodCallException: Call to a member function bar() on a non-object (null)
 BadMethodCallException: Call to a member function bar() on a non-object (null)
 BadMethodCallException: Call to a member function bar() on a non-object (null)
-object(F)#8 (0) {
+object(F) (0) {
 }
 BadMethodCallException: Call to a member function bar() on a non-object (null)
 BadMethodCallException: Call to a member function bar() on a non-object (null)

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace {
 
@@ -192,7 +192,8 @@ function curl_multi_close(resource $mh): mixed;
  */
 <<__Native("NoFCallBuiltin")>>
 function curl_multi_exec(resource $mh,
-                         mixed &$still_running): ?int;
+                         <<__OutOnly("KindOfInt64")>>
+                         inout mixed $still_running): ?int;
 
 /**
  * Return the content of a cURL handle if  is set
@@ -221,7 +222,8 @@ function curl_multi_getcontent(resource $ch): ?string;
  */
 <<__Native>>
 function curl_multi_info_read(resource $mh,
-                              mixed &$msgs_in_queue = NULL): mixed;
+                              <<__OutOnly("KindOfInt64")>>
+                              inout mixed $msgs_in_queue): mixed;
 
 /**
  * Returns a new cURL multi handle
@@ -280,7 +282,7 @@ function curl_multi_select(resource $mh,
  *
  * @param $mh - A cURL multi handle returned from
  *              [`curl_multi_init`](http://php.net/manual/en/function.curl-multi-init.php).
- * @param $timeout - The time (in seconds) to wait for a response indicating some activity.
+ * @param $timeout - The time to wait for a response indicating some activity.
  *
  * @return Awaitable<int> - An `Awaitable` representing the `int` result of the
  *                          activity. If returned `int` is positive, that
@@ -291,21 +293,12 @@ function curl_multi_select(resource $mh,
  *
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-async function curl_multi_await(
-  resource $mh,
-  float $timeout = 1.0,
-): Awaitable<int> {
-  $finish_by = \microtime(true) + $timeout;
-  do {
-    $result = \curl_multi_select($mh, 0.0);
-    if ($result !== 0) {
-      return $result;
-    }
-    await \HH\Asio\later();
-  } while (\microtime(true) < $finish_by);
-  return 0;
-}
+<<__Native("NoFCallBuiltin")>>
+function curl_multi_await(resource $mh,
+                          float $timeout = 1.0): Awaitable<int>;
 
 /**
  * Wait for activity on any curl_multi connection
@@ -333,7 +326,7 @@ function curl_multi_setopt(resource $mh, int $option, mixed $value) : bool;
  */
 <<__Native>>
 function curl_setopt_array(resource $ch,
-                           array $options): bool;
+                           darray $options): bool;
 
 /**
  * Set an option for a cURL transfer
@@ -395,9 +388,15 @@ function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
  * @return mixed - Returns 0 on success, or one of the CURLM_XXX errors code.
  */
 <<__Native, __HipHopSpecific>>
-function fb_curl_multi_fdset(resource $mh, mixed &$read_fd_set,
-                             mixed &$write_fd_set, mixed &$exc_fd_set,
-                             ?int &$max_fd = null): mixed;
+function fb_curl_multi_fdset(resource $mh,
+                              <<__OutOnly("varray")>>
+                             inout mixed $read_fd_set,
+                              <<__OutOnly("varray")>>
+                             inout mixed $write_fd_set,
+                              <<__OutOnly("varray")>>
+                             inout mixed $exc_fd_set,
+                              <<__OutOnly("KindOfInt64")>>
+                             inout ?int $max_fd): mixed;
 
 /**
 * Returns a new cURL share handle
@@ -487,7 +486,7 @@ function curl_destroy_pool(string $poolName): bool;
  * @return array
  */
 <<__Native, __HipHopSpecific>>
-function curl_list_pools(): array;
+function curl_list_pools(): darray<string, darray>;
 
 
 } // namespace HH
@@ -516,26 +515,26 @@ namespace HH\Asio {
  */
 async function curl_exec(mixed $urlOrHandle,
                          bool $closeHandleIfHandle = false): Awaitable<string> {
-  if (is_string($urlOrHandle)) {
-    $ch = curl_init($urlOrHandle);
-  } else if (is_resource($urlOrHandle) &&
-             (get_resource_type($urlOrHandle) == "curl")) {
+  if (\is_string($urlOrHandle)) {
+    $ch = \curl_init($urlOrHandle);
+  } else if (\is_resource($urlOrHandle) &&
+             (\get_resource_type($urlOrHandle) == "curl")) {
     $ch = $urlOrHandle;
   } else {
-    throw new Exception(__FUNCTION__." expects string of cURL handle");
+    throw new \Exception(__FUNCTION__." expects string of cURL handle");
   }
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
 
-  $mh = curl_multi_init();
-  curl_multi_add_handle($mh, $ch);
+  $mh = \curl_multi_init();
+  \curl_multi_add_handle($mh, $ch);
   $sleep_ms = 10;
   do {
     $active = 1;
     do {
-      $status = curl_multi_exec($mh, $active);
-    } while ($status == CURLM_CALL_MULTI_PERFORM);
+      $status = \curl_multi_exec($mh, inout $active);
+    } while ($status == \CURLM_CALL_MULTI_PERFORM);
     if (!$active) break;
-    $select = await curl_multi_await($mh);
+    $select = await \curl_multi_await($mh);
     /* If cURL is built without ares support, DNS queries don't have a socket
      * to wait on, so curl_multi_await() (and curl_select() in PHP5) will return
      * -1, and polling is required.
@@ -548,16 +547,16 @@ async function curl_exec(mixed $urlOrHandle,
     } else {
       $sleep_ms = 10;
     }
-  } while ($status === CURLM_OK);
-  $content = (string)curl_multi_getcontent($ch);
-  curl_multi_remove_handle($mh, $ch);
+  } while ($status === \CURLM_OK);
+  $content = (string)\curl_multi_getcontent($ch);
+  \curl_multi_remove_handle($mh, $ch);
 
   /* close handle if string was passed or argument */
-  if (is_string($urlOrHandle) || ($closeHandleIfHandle === true)) {
-    curl_close($ch);
+  if (\is_string($urlOrHandle) || ($closeHandleIfHandle === true)) {
+    \curl_close($ch);
   }
 
-  curl_multi_close($mh);
+  \curl_multi_close($mh);
   return $content;
 }
 

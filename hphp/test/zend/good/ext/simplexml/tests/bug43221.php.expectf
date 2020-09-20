@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: Attribute requires prefix for namespace in %s/bug43221.php on line 5
 <?xml version="1.0" encoding="utf-8"?>
 <root><node xmlns:foo="http://bar.com" a="b" foo:e="f">value</node></root>
 ===DONE===

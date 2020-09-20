@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   public function foo($offset) {
@@ -11,3 +11,4 @@ class X {
     return $this->__array[$offset];
   }
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

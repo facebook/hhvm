@@ -1,7 +1,7 @@
 *** Testing getdate() : usage variation ***
 
 --hexadcimal 0x5--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(5)
   ["minutes"]=>
@@ -27,7 +27,7 @@ array(11) {
 }
 
 --hexadcimal 0xCAFE--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(6)
   ["minutes"]=>
@@ -53,7 +53,7 @@ array(11) {
 }
 
 --octal -0xCAFE--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(54)
   ["minutes"]=>

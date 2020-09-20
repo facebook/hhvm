@@ -1,0 +1,8 @@
+File "discarded_awaitables.php", line 10, characters 9-18:
+This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+File "discarded_awaitables.php", line 9, characters 33-54:
+This is why I think it is `Awaitable`
+File "discarded_awaitables.php", line 15, characters 9-18:
+This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+File "discarded_awaitables.php", line 9, characters 33-54:
+This is why I think it is `Awaitable`

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_114() {
 var_dump(1E1);
 var_dump(1E2);
 var_dump(1E3);
@@ -20,3 +23,4 @@ var_dump(1E17);
 var_dump(1E18);
 var_dump(1E19);
 var_dump(1E20);
+}

@@ -1,15 +1,17 @@
-<?php
+<?hh
 
-$i = 'gi';
- $s = 'gs';
- class A {
- public static function &dyn_test(&$a) {
- global $s;
- $a = $s;
- return $s;
+class A {
+  public static function dyn_test(inout $a) {
+    $s = "gs";
+    $a = $s;
+    return $s;
+  }
 }
+
+<<__EntryPoint>> function main(): void {
+$f = 'dyn_test';
+$d = null;
+$e = A::$f(inout $d);
+var_dump($d);
+var_dump($e);
 }
- $f = 'dyn_test';
- $e = A::$f($d);
- var_dump($d);
- var_dump($e);

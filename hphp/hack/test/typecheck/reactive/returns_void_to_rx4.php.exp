@@ -1,0 +1,6 @@
+File "returns_void_to_rx4.php", line 12, characters 19-19:
+The method `f` has the wrong type (Typing[4341])
+File "returns_void_to_rx4.php", line 12, characters 19-19:
+This is marked `<<__ReturnsVoidToRx>>`.
+File "returns_void_to_rx4.php", line 4, characters 19-19:
+This is not marked `<<__ReturnsVoidToRx>>`.

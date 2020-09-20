@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot access static:: when no class scope is active in %s/class_name_as_scalar_error_005.php on line 3

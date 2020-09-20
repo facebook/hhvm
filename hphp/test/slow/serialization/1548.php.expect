@@ -1,4 +1,4 @@
-object(X)#2 (3) {
+object(X) (3) {
   ["priv":"X":private]=>
   int(1)
   ["prot":protected]=>

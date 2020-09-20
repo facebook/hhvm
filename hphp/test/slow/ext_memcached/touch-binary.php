@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $m = new Memcached();
 
 $m->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
@@ -25,3 +25,4 @@ $m->get($key);
 echo "GET: " . $m->getResultMessage() . PHP_EOL;
 
 echo "DONE" . PHP_EOL;
+}

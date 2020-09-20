@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function gotoReferencingLabelInFinally($condition): void {
   goto L0;

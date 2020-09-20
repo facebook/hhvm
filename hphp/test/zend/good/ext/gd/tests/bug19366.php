@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 echo "Alive: create image\n";
 $width = 50;
 $height = 100;
@@ -34,4 +34,4 @@ echo "Alive: Send to browser\n";
 echo "Alive: Free resources\n";
 imagedestroy($ImHandle);
 echo "Alive: Done\n";
-?>
+}

@@ -4,4 +4,8 @@
 function main() {
   var_dump(pathinfo("\x00"));
 }
+
+<<__EntryPoint>>
+function main_dirname_null() {
 main();
+}

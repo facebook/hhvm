@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_STRING_DATA_INL_H_
-#define incl_HPHP_RUNTIME_BASE_STRING_DATA_INL_H_
+#pragma once
 
 namespace HPHP {
 
@@ -56,33 +55,33 @@ inline folly::StringPiece StringData::slice() const {
 }
 
 inline folly::MutableStringPiece StringData::bufferSlice() {
-  assert(!isImmutable());
+  assertx(!isImmutable());
   return folly::MutableStringPiece{mutableData(), capacity()};
 }
 
 inline void StringData::invalidateHash() {
-  assert(!isImmutable());
-  assert(!hasMultipleRefs());
+  assertx(!isImmutable());
+  assertx(!hasMultipleRefs());
   m_hash = 0;
-  assert(checkSane());
+  assertx(checkSane());
 }
 
 inline void StringData::setSize(int len) {
-  assert(!isImmutable() && !hasMultipleRefs());
-  assert(len >= 0 && len <= capacity());
+  assertx(!isImmutable() && !hasMultipleRefs());
+  assertx(len >= 0 && len <= capacity());
   mutableData()[len] = 0;
   m_lenAndHash = len;
-  assert(m_hash == 0);
-  assert(checkSane());
+  assertx(m_hash == 0);
+  assertx(checkSane());
 }
 
 inline void StringData::checkStack() const {
-  assert(uintptr_t(this) - s_stackLimit >= s_stackSize);
+  assertx(uintptr_t(this) - s_stackLimit >= s_stackSize);
 }
 
 inline const char* StringData::data() const {
   // TODO: t1800106: re-enable this assert
-  // assert(data()[size()] == 0); // all strings must be null-terminated
+  // assertx(data()[size()] == 0); // all strings must be null-terminated
 #ifdef NO_M_DATA
   return reinterpret_cast<const char*>(this + 1);
 #else
@@ -91,14 +90,15 @@ inline const char* StringData::data() const {
 }
 
 inline char* StringData::mutableData() const {
-  assert(!isImmutable());
+  assertx(!isImmutable());
   return const_cast<char*>(data());
 }
 
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return kSizeIndex2StringCapacity[m_aux16];
+  assertx(isRefCounted());
+  return kSizeIndex2StringCapacity[m_aux16 & 0xff];
 }
 
 inline size_t StringData::heapSize() const {
@@ -110,7 +110,7 @@ inline size_t StringData::heapSize() const {
 }
 
 inline size_t StringData::estimateCap(size_t size) {
-  assert(size <= MaxSize);
+  assertx(size <= MaxSize);
   return MemoryManager::sizeClass(size + kStringOverhead);
 }
 
@@ -133,8 +133,8 @@ inline bool StringData::isZero() const  {
 }
 
 inline StringData* StringData::modifyChar(int offset, char c) {
-  assert(offset >= 0 && offset < size());
-  assert(!hasMultipleRefs());
+  assertx(offset >= 0 && offset < size());
+  assertx(!hasMultipleRefs());
 
   auto const sd = isProxy() ? escalate(size()) : this;
   sd->mutableData()[offset] = c;
@@ -156,17 +156,18 @@ inline strhash_t StringData::hash() const {
 }
 
 inline bool StringData::same(const StringData* s) const {
-  assert(s);
+  assertx(s);
   if (m_len != s->m_len) return false;
   // The underlying buffer and its length are 8-byte aligned, ensured by
   // StringData layout, req::malloc, or malloc. So compare words.
-  assert(uintptr_t(data()) % 8 == 0);
-  assert(uintptr_t(s->data()) % 8 == 0);
+  assertx(uintptr_t(data()) % 8 == 0);
+  assertx(uintptr_t(s->data()) % 8 == 0);
   return wordsame(data(), s->data(), m_len);
 }
 
 inline bool StringData::isame(const StringData* s) const {
-  assert(s);
+  assertx(s);
+  if (this == s) return true;
   if (m_len != s->m_len) return false;
   return bstrcaseeq(data(), s->data(), m_len);
 }
@@ -206,7 +207,7 @@ struct string_data_hash {
 
 struct string_data_same {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
+    assertx(s1 && s2);
     return s1->same(s2);
   }
 };
@@ -219,7 +220,7 @@ struct string_data_eq_same {
 
 struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
+    assertx(s1 && s2);
     return s1->isame(s2);
   }
 };
@@ -248,4 +249,3 @@ struct string_data_lti {
 
 }
 
-#endif

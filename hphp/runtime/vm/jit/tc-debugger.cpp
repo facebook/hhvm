@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -26,9 +26,9 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -48,36 +48,38 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
   TCA realCode = sr->getTopTranslation();
   if (!realCode) return;  // No translations, nothing to do.
 
+  TCA dbgBranchGuardSrc = nullptr;
   auto const dbgGuard = vwrap(cb, data, fixups, [&] (Vout& v) {
     if (sk.resumeMode() == ResumeMode::None) {
       auto const off = sr->nonResumedSPOff();
       v << lea{rvmfp()[-cellsToBytes(off.offset)], rvmsp()};
     }
 
-    auto const tinfo = v.makeReg();
+    // TODO(T36048955): Use a simple vmtl offset to access RDS_LOCALs.
+    auto const rdslocalBase = v.makeReg();
     auto const attached = v.makeReg();
     auto const sf = v.makeReg();
 
     auto const done = v.makeBlock();
 
-    constexpr size_t dbgOff =
-      offsetof(ThreadInfo, m_reqInjectionData) +
-      RequestInjectionData::debuggerReadOnlyOffset();
+    const size_t dbgOff =
+      offsetof(RequestInfo, m_reqInjectionData) +
+      RequestInjectionData::debuggerReadOnlyOffset() +
+      RequestInfo::s_requestInfo.getRawOffset();
 
     v << ldimmq{reinterpret_cast<uintptr_t>(sk.pc()), rarg(0)};
-
-    emitTLSLoad(v, tls_datum(ThreadInfo::s_threadInfo), tinfo);
-    v << loadb{tinfo[dbgOff], attached};
+    auto const datum = tls_datum(rds::local::detail::rl_hotSection.rdslocal_base);
+    v << load{emitTLSAddr(v, datum), rdslocalBase};
+    v << loadb{rdslocalBase[dbgOff], attached};
     v << testbi{static_cast<int8_t>(0xffu), attached, sf};
 
     v << jcci{CC_NZ, sf, done, ustubs().interpHelper};
 
     v = done;
-    v << fallthru{};
-  }, CodeKind::Helper);
+    v << debugguardjmp{realCode, &dbgBranchGuardSrc};
+  }, CodeKind::Helper, false);
 
-  // Emit a jump to the actual code.
-  auto const dbgBranchGuardSrc = emitSmashableJmp(cb, fixups, realCode);
+  assertx(dbgBranchGuardSrc);
 
   // Add the guard to the SrcRec.
   sr->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);
@@ -86,17 +88,13 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool addDbgGuards(const Unit* unit) {
+bool addDbgGuards(const Func* func) {
   // TODO refactor
   // It grabs the write lease and iterates through whole SrcDB...
   struct timespec tsBegin, tsEnd;
   {
     auto codeLock = lockCode();
     auto metaLock = lockMetadata();
-
-    auto view = code().view();
-    auto& main = view.main();
-    auto& data = view.data();
 
     HPHP::Timer::GetMonotonicTime(tsBegin);
     // Doc says even find _could_ invalidate iterator, in practice it should
@@ -109,11 +107,6 @@ bool addDbgGuards(const Unit* unit) {
       if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = pair.second;
       auto srLock = sr->writelock();
-      if (sr->unitMd5() == unit->md5() &&
-          !sr->hasDebuggerGuard() &&
-          isSrcKeyInDbgBL(sk)) {
-        addDbgGuardImpl(sk, sr, main, data, fixups);
-      }
     }
     fixups.process(nullptr);
   }
@@ -126,9 +119,8 @@ bool addDbgGuards(const Unit* unit) {
   return true;
 }
 
-bool addDbgGuardHelper(const Func* func, Offset offset,
-                       ResumeMode resumeMode, bool hasThis) {
-  SrcKey sk{func, offset, resumeMode, hasThis};
+bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
+  SrcKey sk{func, offset, resumeMode};
   if (auto const sr = srcDB().find(sk)) {
     if (sr->hasDebuggerGuard()) {
       return true;
@@ -136,12 +128,6 @@ bool addDbgGuardHelper(const Func* func, Offset offset,
   } else {
     // no translation yet
     return true;
-  }
-  if (debug) {
-    if (!isSrcKeyInDbgBL(sk)) {
-      TRACE(5, "calling addDbgGuard on PC that is not in blacklist");
-      return false;
-    }
   }
 
   auto codeLock = lockCode();
@@ -153,13 +139,8 @@ bool addDbgGuardHelper(const Func* func, Offset offset,
     addDbgGuardImpl(sk, sr, view.main(), view.data(), fixups);
   }
   fixups.process(nullptr);
+  updateCodeSizeCounters();
   return true;
-}
-
-bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
-  auto const ret = addDbgGuardHelper(func, offset, resumeMode, false);
-  if (!ret || !func->cls() || func->isStatic()) return ret;
-  return addDbgGuardHelper(func, offset, resumeMode, true);
 }
 
 }}}

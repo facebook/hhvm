@@ -1,2 +1,0 @@
-File "get_called_class_bad.php", line 8, characters 8-25:
-'static' is undefined outside of a class (Typing[4061])

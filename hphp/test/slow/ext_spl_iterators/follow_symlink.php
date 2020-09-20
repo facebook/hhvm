@@ -1,5 +1,10 @@
-<?php
-$p = dirname(__FILE__) . '/recursivedirectoryiterator_followsymlink_test/';
+<?hh
+
+<<__EntryPoint>>
+function main_follow_symlink() {
+$p = __SystemLib\hphp_test_tmppath(
+  'recursivedirectoryiterator_followsymlink_test/'
+);
 
 mkdir($p . "test/dir1", 0777, true);
 touch($p . "test/dir1/file1.txt");
@@ -47,3 +52,4 @@ rmdir($p . "test/dir2");
 rmdir($p . "test/dir1");
 rmdir($p . "test");
 rmdir($p);
+}

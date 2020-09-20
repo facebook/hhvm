@@ -10,5 +10,7 @@ function f() { return "b"; }
 
 use A\f;
 use A\CO;
-var_dump(f());
-var_dump(CO);
+<<__EntryPoint>> function main(): void {
+\var_dump(f());
+\var_dump(CO);
+}

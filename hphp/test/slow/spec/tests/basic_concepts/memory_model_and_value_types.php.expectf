@@ -1,0 +1,25 @@
+----------------- simple assignment of value types ----------------------
+After '$a = 123', $a is 123
+After '$b = $a', $b is 123
+After '++$b', $b is 124, and $a is 123
+After '$a = 99', $b is 124, and $a is 99
+Done
+----------------- value argument passing of value types ----------------------
+After '$a = 123', $a is 123
+	Inside function f1, $b is 123
+After '$b = "abc"', $b is abc
+After 'f1($a)', $a is 123
+	Inside function f1, $b is 125
+After '$b = "abc"', $b is abc
+	Inside function f1, $b is 999
+After '$b = "abc"', $b is abc
+	Inside function f1, $b is 1
+After '$b = "abc"', $b is abc
+Done
+----------------- value returning of value types ----------------------
+After '$b = "abc"', $b is abc
+After '$a = f2()', $a is abc
+Done
+----- test using literals, constants, and arbitrary-complex expressions ----
+h1() is 15%A
+Done

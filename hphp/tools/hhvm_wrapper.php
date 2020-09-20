@@ -1,15 +1,13 @@
 #!/usr/local/bin/php
 <?hh
-// Run with --help for help.
-$FBCODE_ROOT = __DIR__.'/../..';
-require_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 
 //////////////////////////////////////////////////////////////////////
 
 function my_option_map(): OptionInfoMap {
   return Map {
 'help'            => Pair { 'h', 'Print help message' },
-'gdb'             => Pair { 'g', 'Run the whole command in gdb' },
+'bin:'            => Pair { 'b', 'Use a specific HHVM binary' },
+'gdb'             => Pair { 'g', 'Run the whole command in agdb' },
 'server'          => Pair { 's', 'Run a server, port 80, pwd as the root' },
 'interp'          => Pair { 'i', 'Disable the JIT compiler' },
 'opt-ir'          => Pair { 'o', 'Disable debug assertions in IR output' },
@@ -22,12 +20,15 @@ function my_option_map(): OptionInfoMap {
 'compile'         => Pair { 'c', 'Compile with hphpc; run RepoAuthoritative' },
 'create-repo'     => Pair { 'C', 'Compile unoptimized repo named hhvm.hhbc' },
 'repo:'           => Pair { 'R', 'Use an already-compiled repo' },
+'retranslate-all:'=> Pair { 'r', 'Emit optimized code after n profiling runs' },
 'php7'            => Pair { '7', 'Enable PHP7 mode' },
 'jit-gdb'         => Pair { '',  'Enable JIT symbols in GDB' },
+'jit-deserialize:'=> Pair { '', 'Enable jit deserialization' },
 'print-command'   => Pair { '',  'Just print the command, don\'t run it' },
 'region-mode:'    => Pair { '',
                             'Which region selector to use (e.g \'method\')' },
 'no-pgo'          => Pair { '',  'Disable PGO' },
+'bespoke'         => Pair { '',  'Emit bespoke logging arrays' },
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
                             'Disable global object destructors in CLI mode' },
@@ -42,9 +43,12 @@ function my_option_map(): OptionInfoMap {
   };
 }
 
-function get_paths(OptionMap $opts): Map<string,string> {
-  $root = __DIR__.'/..';
+function get_hhvm_path(OptionMap $opts): string {
+  if ($opts->containsKey('bin')) {
+    return $opts['bin'];
+  }
 
+  $root = __DIR__.'/..';
   $buck = __DIR__.'/../../buck-out/gen/hphp';
   if (is_dir($buck)) {
     $root = $buck;
@@ -67,17 +71,7 @@ function get_paths(OptionMap $opts): Map<string,string> {
     $root = realpath($opts['build-root']);
   }
 
-  if ($root === $buck) {
-    return Map {
-      'hhvm' => $root.'/hhvm/hhvm/hhvm',
-      'hphp' => $root.'/hhvm/symlinks=hphp/hphp',
-    };
-  }
-
-  return Map {
-    'hhvm' => $root.'/hhvm/hhvm',
-    'hphp' => $root.'/hhvm/hphp',
-  };
+  return $root === $buck ? $root.'/hhvm/hhvm/hhvm' : $root.'/hhvm/hhvm';
 }
 
 function determine_flags(OptionMap $opts): string {
@@ -107,10 +101,16 @@ function determine_flags(OptionMap $opts): string {
     }
   }
 
+  // Switch to single-threaded mode when tracing to avoid mixing traces.
+  if (determine_trace_env($opts)) {
+    $flags .=
+      '-v Eval.JitThreads=1 '.
+      '-v Eval.JitWorkerThreads=1 '.
+      '';
+  }
+
   if (!$opts->containsKey('no-defaults')) {
     $flags .=
-      '-v Eval.EnableHipHopSyntax=true '.
-      '-v Eval.EnableHipHopExperimentalSyntax=true '.
       '-v Eval.JitEnableRenameFunction=0 '.
       '-v Eval.GdbSyncChunks=1 '.
       '-v Eval.AllowHhas=true '.
@@ -125,6 +125,30 @@ function determine_flags(OptionMap $opts): string {
     $flags .=
       '-v Eval.Jit=1 '.
       '';
+  }
+
+  if ($opts->containsKey('jit-deserialize')) {
+    if (!$opts->containsKey('repo')) {
+      error('jit-deserialize requires that you specify a repo.');
+    }
+    if ($opts->containsKey('region-mode') && $opts['region-mode'] === 'method') {
+      error('jit-deserialize option is not compatible with region-mode==method');
+    }
+    if (!$opts->containsKey('retranslate-all')) {
+      $opts['retranslate-all'] = 1;
+    }
+    $jit_serdes_file = (string)$opts['jit-deserialize'];
+    $flags .= '-v Eval.JitSerdesFile='.$jit_serdes_file.' ';
+    $flags .= '-v Eval.JitSerdesMode=DeserializeOrFail ';
+  }
+
+  if ($opts->containsKey('retranslate-all')) {
+    $times = (int)$opts['retranslate-all'];
+    $flags .=
+        '--count='.(2 * $times).' '.
+        '-v Eval.JitRetranslateAllRequest='.$times.' '.
+        '-v Eval.JitRetranslateAllSeconds=300 '.
+        '';
   }
 
   if ($opts->containsKey('region-mode')) {
@@ -150,16 +174,16 @@ function determine_flags(OptionMap $opts): string {
 
   $simple_args = Map {
     'dump-hhbc'       => '-v Eval.DumpBytecode=1 ',
-    'dump-hhas'       => '-v Eval.DumpHhas=true ',
+    'dump-hhas'       => '-v Eval.DumpHhas=1 ',
     'dump-tc'         => '-v Eval.DumpTC=1 ',
     'php7'            => '-d hhvm.php7.all=1 ',
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
-    'no-obj-destruct' => '-v Eval.EnableObjDestructCall=0 ',
+    'bespoke'         => '-v Eval.BespokeArrayLikeMode=2 '.
+                         '-v Eval.EmitLoggingArraySampleRate=1000 ',
     'hphpd'           => '-m debug ',
-    'server'          => '-v Eval.JitPGOHotOnly=0 -m server ',
-    'arm'             => '-v Eval.SimulateARM=1 ',
+    'server'          => '-m server ',
   };
 
   if ($opts->containsKey('pgo-threshold')) {
@@ -192,12 +216,13 @@ function parse_config_options(Set $options, string $kind): Pair<string, bool> {
   return Pair {$flags, $has_file};
 }
 
-function determine_env(OptionMap $opts): string {
+// If we're tracing, colorize the trace and print it to stdout.
+// If we're not tracing, the result will be empty.
+function determine_trace_env(OptionMap $opts): string {
   $trace_opts = Map {
     'trace-hhir'     => 'hhir',
     'trace-printir'  => 'printir',
   };
-  $fixed_env = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
 
   $traces = Vector {};
   foreach ($trace_opts as $k => $v) {
@@ -205,17 +230,18 @@ function determine_env(OptionMap $opts): string {
       $traces->add("$v:".((string)$opts[$k]));
     }
   }
-  if ($traces->isEmpty()) return $fixed_env;
 
   $env = getenv("TRACE");
-  if ($env) $env .= ',';
-  return $fixed_env.
-         'TRACE=' . $env . implode(',', $traces->toArray()) . ' ';
+  if ($traces->isEmpty() && !$env) return '';
+
+  $formatting = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
+  if (!$traces->isEmpty() && $env) $env .= ',';
+  return $formatting.'TRACE='.$env.implode(',', vec($traces)).' ';
 }
 
 function argv_for_shell(): string {
   $ret = '';
-  foreach ($GLOBALS['argv'] as $arg) {
+  foreach (\HH\global_get('argv') as $arg) {
     $ret .= '"'.$arg.'" ';
   }
   return $ret;
@@ -225,11 +251,12 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $echo_command = $opts->containsKey('print-command');
   echo "Compiling with hphp...";
   $runtime_flags = determine_flags($opts);
-  $hphpc_flags = preg_replace("/-v\s*/", "-vRuntime.", $runtime_flags);
+  $hphpc_flags = $runtime_flags
+    |> preg_replace("/-v\s*/", "-vRuntime.", $$)
+    |> preg_replace("/--count=[0-9]+\s*/", "", $$);
   $hphp_out='/tmp/hphp_out'.posix_getpid();
-  $cmd = get_paths($opts)['hphp'].' '.
-    '-v EnableHipHopSyntax=1 '.
-    '-v EnableHipHopExperimentalSyntax=1 '.
+  $cmd = get_hhvm_path($opts).' '.
+    '--hphp '.
     ($unoptimized ? '-v UseHHBBC=0 ' : '').
     ($opts->containsKey('php7') ? '-d hhvm.php7.all=1 ' : '').
     '-t hhbc -k1 -l3 '.
@@ -239,7 +266,8 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   if ($echo_command) {
     echo "\n", $cmd, "\n";
   }
-  system($cmd);
+  $return_var = -1;
+  system($cmd, inout $return_var);
   echo "done.\n";
 
   $compile_dir = rtrim(shell_exec(
@@ -247,11 +275,12 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
     '| perl -pe \'s@.*(/tmp[^ ]*).*@$1@g\''
   ));
   $repo=$compile_dir.'/hhvm.hhbc';
-  system("rm -f $hphp_out");
+  system("rm -f $hphp_out", inout $return_var);
   if ($echo_command !== true) {
     register_shutdown_function(
       function() use ($compile_dir) {
-        system("rm -fr $compile_dir");
+        $return_var = -1;
+        system("rm -fr $compile_dir", inout $return_var);
       },
     );
   }
@@ -273,7 +302,8 @@ function compile_with_hphp(string $flags, OptionMap $opts): string {
 
 function create_repo(OptionMap $opts): void {
   $repo = compile_a_repo(true, $opts);
-  system("cp $repo ./hhvm.hhbc");
+  $return_var = -1;
+  system("cp $repo ./hhvm.hhbc", inout $return_var);
 }
 
 function run_hhvm(OptionMap $opts): void {
@@ -288,19 +318,19 @@ function run_hhvm(OptionMap $opts): void {
     $flags = compile_with_hphp($flags, $opts);
   }
 
-  $pfx = determine_env($opts);
-  $pfx .= $opts->containsKey('gdb') ? 'gdb --args ' : '';
+  $pfx = determine_trace_env($opts);
+  $pfx .= $opts->containsKey('gdb') ? 'agdb --args ' : '';
   if ($opts->containsKey('perf')) {
     $pfx .= 'perf record -g -o ' . $opts['perf'] . ' ';
   }
-  $hhvm = get_paths($opts)['hhvm'];
+  $hhvm = get_hhvm_path($opts);
   $cmd = "$pfx $hhvm $flags ".argv_for_shell();
   if ($opts->containsKey('print-command')) {
     echo "\n$cmd\n\n";
   } else {
     // Give the return value of the command back to the caller.
     $retval = null;
-    passthru($cmd, $retval);
+    passthru($cmd, inout $retval);
     exit($retval);
   }
 }
@@ -309,7 +339,9 @@ function ends_with(string $haystack, string $needle): bool {
   return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
+<<__EntryPoint>>
 function main(): void {
+  require_once __DIR__.'/command_line_lib.php';
   $opts = parse_options(my_option_map());
   if ($opts->containsKey('help')) {
     help();
@@ -370,5 +402,3 @@ function help(): void {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-main();

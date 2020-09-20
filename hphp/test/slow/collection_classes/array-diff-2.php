@@ -1,7 +1,7 @@
 <?hh
 function f($x) {
-  $arr = (array)$x;
-  uasort($arr, function($a,$b) {
+  $arr = darray($x);
+  uasort(inout $arr, function($a,$b) {
     if (is_int($a) != is_int($b)) {
       if (is_int($a)) return -1;
       return 1;
@@ -13,13 +13,13 @@ function f($x) {
   var_dump($arr);
 }
 function main() {
-  $a1 = array("1", 1, "2", 3, 4, "a", "7");
+  $a1 = varray["1", 1, "2", 3, 4, "a", "7"];
   $m1 = Map {0 => "1", 1 => 1, 2 => "2", 3 => 3, 4 => 4, 5 => "a", 6 => "7"};
   $s1 = Set {"1", 1, "2", 3, 4, "a", "7"};
-  $a2 = array(1, "3", 5, "a");
+  $a2 = varray[1, "3", 5, "a"];
   $m2 = Map {0 => 1, 1 => "3", 2 => 5, 3 => "a"};
   $s2 = Set {1, "3", 5, "a"};
-  $a3 = array("0", 7);
+  $a3 = varray["0", 7];
   $m3 = Map {0 => "0", 1 => 7};
   $s3 = Set {"0", 7};
   f(array_diff($a1, $a2));
@@ -60,5 +60,9 @@ function main() {
   f(array_diff($m1, $s2, $s3));
   f(array_diff($s1, $s2, $s3));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_diff_2() {
+main();
+}

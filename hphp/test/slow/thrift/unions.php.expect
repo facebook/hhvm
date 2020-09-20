@@ -1,4 +1,4 @@
-object(ComplexUnion)#5 (3) {
+object(ComplexUnion) (3) {
   ["intValue"]=>
   NULL
   ["stringValue"]=>
@@ -6,7 +6,7 @@ object(ComplexUnion)#5 (3) {
   ["_type":protected]=>
   int(2)
 }
-object(ComplexUnion)#8 (3) {
+object(ComplexUnion) (3) {
   ["intValue"]=>
   int(42)
   ["stringValue"]=>
@@ -14,7 +14,7 @@ object(ComplexUnion)#8 (3) {
   ["_type":protected]=>
   int(1)
 }
-object(ComplexUnion)#11 (3) {
+object(ComplexUnion) (3) {
   ["intValue"]=>
   NULL
   ["stringValue"]=>
@@ -22,7 +22,7 @@ object(ComplexUnion)#11 (3) {
   ["_type":protected]=>
   int(2)
 }
-object(ComplexUnion)#14 (3) {
+object(ComplexUnion) (3) {
   ["intValue"]=>
   int(42)
   ["stringValue"]=>

@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function heh() { return 4; }
-function bar() { return array('foo' => heh()); }
+function bar() { return darray['foo' => heh()]; }
 function foo() {
   $x = bar();
   $x['foo'] = 2;
@@ -11,4 +11,8 @@ function main() {
   $x = foo();
   echo $x['foo'] . "\n";
 }
+
+<<__EntryPoint>>
+function main_array_014() {
 main();
+}

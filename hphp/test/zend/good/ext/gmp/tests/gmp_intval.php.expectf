@@ -1,6 +1,5 @@
 
-Warning: %s
-NULL
+Warning: gmp_intval() expects exactly 1 parameter, 2 given in %s/gmp_intval.php on line 3
 int(0)
 int(1)
 int(1)
@@ -9,7 +8,7 @@ int(-1)
 int(-2349828)
 int(2342344)
 
-Notice: %s
+Notice: Object of class stdClass could not be converted to int in %s/gmp_intval.php on line 11
 int(1)
 int(0)
 int(%d)

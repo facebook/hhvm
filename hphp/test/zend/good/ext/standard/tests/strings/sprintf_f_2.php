@@ -1,4 +1,5 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(sprintf("%.3F", 100.426));
 var_dump(sprintf("%.2F", 100.426));
 var_dump(sprintf("%d",   100.426));
@@ -7,7 +8,6 @@ var_dump(sprintf("%o",   100.426));
 var_dump(sprintf("%o",   100.9));
 
 /* copy & paste from the docs */
-
 /* example#1: Argument swapping */
 $num = 100.1;
 $location = "world";
@@ -72,6 +72,6 @@ var_dump(sprintf("%01.2f", $money)); // output "123.10"
 
 /* example#9: scientific notation */
 $number = 362525200;
- 
+
 var_dump(sprintf("%.3e", $number)); // outputs 3.63e+8
-?>
+}

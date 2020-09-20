@@ -20,7 +20,7 @@ class Y {
   use T;
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $x = new X;
   $c = $x->f();
   var_dump($c(true));
@@ -29,5 +29,3 @@ function test() {
   $c = $y->f();
   var_dump($c("foo"));
 }
-
-test();

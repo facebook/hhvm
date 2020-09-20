@@ -33,7 +33,7 @@ class C extends B {
 
   public static int $static_prop = 100;
 
-  public static array<int> $array_prop = array();
+  public static array<int> $array_prop = varray[];
 
   public function get_self_prop(): int {
     return self::$static_prop;

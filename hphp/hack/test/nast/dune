@@ -1,0 +1,17 @@
+(alias
+    (name nast)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/nast/class_level_where_clauses/HH_FLAGS)
+          (glob_files %{project_root}/test/nast/class_level_where_clauses/*.php)
+          (glob_files %{project_root}/test/nast/class_level_where_clauses/*.exp)
+          (glob_files %{project_root}/test/nast/HH_FLAGS)
+          (glob_files %{project_root}/test/nast/*.php)
+          (glob_files %{project_root}/test/nast/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/nast
+    --program %{exe:../../src/hh_single_type_check.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias nast)))

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IP_BLOCK_MAP_H_
-#define incl_HPHP_IP_BLOCK_MAP_H_
+#pragma once
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -78,7 +77,7 @@ private:
     Acl();
     BinaryPrefixTrie m_networks; // prefix => true: allow; false: deny
   };
-  hphp_string_hash_map<std::shared_ptr<Acl>,Acl> m_acls; // location => acl
+  hphp_string_map<std::shared_ptr<Acl>> m_acls; // location => acl
 
   static void LoadIpList(std::shared_ptr<Acl> acl, const IniSetting::Map& ini,
                          const Hdf& hdf, const std::string& name, bool allow);
@@ -87,4 +86,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_IP_BLOCK_MAP_H_

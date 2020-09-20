@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_strtoupper(string $sourcestring [, string $encoding]
  * Description: Returns a uppercased version of $sourcestring
  * Source code: ext/mbstring/mbstring.c
@@ -8,7 +8,7 @@
  * Pass a Japanese string and a mixed Japanese and ASCII string to mb_strtolower
  * to check correct conversion is occuring (Japanese characters should not be converted).
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strtoupper() : usage variations ***\n";
 
 $string_mixed_upper = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCUEhQLiAwMTIzNO+8le+8lu+8l++8mO+8meOAgg==');
@@ -20,20 +20,19 @@ echo "\n-- Mixed string (mulitbyte and ASCII characters) --\n";
 $a = mb_strtoupper($string_mixed_lower, 'UTF-8');
 var_dump(base64_encode($a));
 if ($a == $string_mixed_upper) {
-	echo "Correctly Converted\n";
+    echo "Correctly Converted\n";
 } else {
-	echo "Incorrectly Converted\n";
+    echo "Incorrectly Converted\n";
 }
 
 echo "\n-- Multibyte Only String--\n";
 $b = mb_strtoupper($string_all_mb, 'UTF-8');
 var_dump(base64_encode($b));
 if ($b == $string_all_mb) { // Japanese characters only - should not be any conversion
-	echo "Correctly Converted\n";
+    echo "Correctly Converted\n";
 } else {
-	echo "Incorrectly Converted\n";
+    echo "Incorrectly Converted\n";
 }
 
 echo "Done";
-?>
-
+}

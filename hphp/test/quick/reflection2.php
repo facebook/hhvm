@@ -21,44 +21,51 @@ class my_child extends my_class {
   function my_child_method() {}
 }
 
-$rc = new ReflectionClass('my_child');
-foreach ($rc->getMethods() as $ix => $meth) {
-  echo $ix, ': ', $meth->getName(), "\n";
-  echo 'modifiers: ';   var_dump($meth->getModifiers());
-  echo 'isFinal: ';     var_dump($meth->isFinal());
-  echo 'isAbstract: ';  var_dump($meth->isAbstract());
-  echo 'isPublic: ';    var_dump($meth->isPublic());
-  echo 'isProtected: '; var_dump($meth->isProtected());
-  echo 'isPrivate: ';   var_dump($meth->isPrivate());
-  echo 'isStatic: ';    var_dump($meth->isStatic());
-  var_dump($meth->getParameters());
-
-  try {
-    $proto = $meth->getPrototype();
-    echo 'Prototype: ', $proto->class, '::', $proto->name, "\n";
-  } catch (ReflectionException $re) {
-    echo get_class($re), ': ', $re->getMessage(), "\n";
-  }
-}
-
-function __autoload($cls) {
-  if ($cls == "MyClass") {
-    class MyClass {}
-  }
-}
-
 interface I {
   function f(MyClass $c);
 }
+<<__EntryPoint>>
+function entrypoint_reflection2(): void {
 
-try {
-  $r = new ReflectionClass('I');
-  foreach ($r->getMethods() as $m) {
-    foreach ($m->getParameters() as $p) {
-      $p->getClass();
-      var_dump($p);
+  $rc = new ReflectionClass('my_child');
+  foreach ($rc->getMethods() as $ix => $meth) {
+    echo $ix, ': ', $meth->getName(), "\n";
+    echo 'modifiers: ';   var_dump($meth->getModifiers());
+    echo 'isFinal: ';     var_dump($meth->isFinal());
+    echo 'isAbstract: ';  var_dump($meth->isAbstract());
+    echo 'isPublic: ';    var_dump($meth->isPublic());
+    echo 'isProtected: '; var_dump($meth->isProtected());
+    echo 'isPrivate: ';   var_dump($meth->isPrivate());
+    echo 'isStatic: ';    var_dump($meth->isStatic());
+    var_dump($meth->getParameters());
+
+    try {
+      $proto = $meth->getPrototype();
+      echo 'Prototype: ', $proto->class, '::', $proto->name, "\n";
+    } catch (ReflectionException $re) {
+      echo get_class($re), ': ', $re->getMessage(), "\n";
     }
   }
-} catch (Exception $e) {
-  var_dump($e->getMessage());
+
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'myclass' => 'reflection2-1.inc',
+      ],
+      'failure' => (...$args) ==> var_dump($args),
+    ],
+    __DIR__.'/',
+  );
+
+  try {
+    $r = new ReflectionClass('I');
+    foreach ($r->getMethods() as $m) {
+      foreach ($m->getParameters() as $p) {
+        $p->getClass();
+        var_dump($p);
+      }
+    }
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
 }

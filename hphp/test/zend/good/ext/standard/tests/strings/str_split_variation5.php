@@ -1,17 +1,17 @@
-<?php
+<?hh
 /* Prototype  : array str_split(string $str [, int $split_length] )
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
 
 /*
-* Passing different heredoc strings as 'str' argument to the str_split() 
-* with 'split_length' 10 
+* Passing different heredoc strings as 'str' argument to the str_split()
+* with 'split_length' 10
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : heredoc strings as 'str' argument ***\n";
 
 // Initializing required variables
@@ -61,7 +61,7 @@ which is single slash
 EOT8;
 
 //different heredoc strings for 'str'
-$heredoc_array = array(
+$heredoc_array = varray[
   $heredoc_null,
   $heredoc_blank,
   $heredoc_char,
@@ -70,7 +70,7 @@ $heredoc_array = array(
   $heredoc_spchar,
   $heredoc_escchar,
   $heredoc_quote_slash
-);
+];
 
 
 // loop through each element of the 'heredoc_array' for 'str'
@@ -80,6 +80,6 @@ foreach($heredoc_array as $str) {
   var_dump( str_split($str, $split_length) );
   $count++;
 };
- 
-echo "Done"
-?>
+
+echo "Done";
+}

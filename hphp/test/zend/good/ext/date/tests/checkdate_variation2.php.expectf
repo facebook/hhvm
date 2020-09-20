@@ -1,100 +1,98 @@
 *** Testing checkdate() : usage variation -  unexpected values to second argument $day***
 
 -- float 10.5 --
-bool(true)
+
+Warning: checkdate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- float -10.5 --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- float .5 --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- empty array --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- int indexed array --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- associative array --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- nested arrays --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- uppercase NULL --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- lowercase null --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- lowercase true --
-bool(true)
+
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- lowercase false --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- uppercase TRUE --
-bool(true)
+
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- uppercase FALSE --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- empty string DQ --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- empty string SQ --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- string DQ --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- string SQ --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- mixed case string --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- heredoc --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- instance of classWithToString --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- instance of classWithoutToString --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- undefined var --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- unset var --
-bool(false)
+
+Warning: checkdate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 
 -- resource --
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects parameter 2 to be integer, resource given in %s/zend/good/ext/date/tests/checkdate_variation2.php on line 90
 ===DONE===

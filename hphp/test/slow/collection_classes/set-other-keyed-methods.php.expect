@@ -1,5 +1,5 @@
 ==== Set ====
-object(HH\Map)#2 (4) {
+object(HH\Map) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -9,7 +9,7 @@ object(HH\Map)#2 (4) {
   [""]=>
   string(0) ""
 }
-object(HH\ImmMap)#2 (4) {
+object(HH\ImmMap) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -19,7 +19,7 @@ object(HH\ImmMap)#2 (4) {
   [""]=>
   string(0) ""
 }
-object(HH\Map)#3 (4) {
+object(HH\Map) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -29,7 +29,7 @@ object(HH\Map)#3 (4) {
   [""]=>
   string(0) ""
 }
-object(HH\ImmMap)#4 (4) {
+object(HH\ImmMap) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -40,7 +40,7 @@ object(HH\ImmMap)#4 (4) {
   string(0) ""
 }
 ----
-object(HH\Map)#6 (4) {
+object(HH\Map) (4) {
   [11]=>
   int(11)
   ["aba"]=>
@@ -50,7 +50,7 @@ object(HH\Map)#6 (4) {
   ["b"]=>
   string(1) "b"
 }
-object(HH\ImmMap)#8 (4) {
+object(HH\ImmMap) (4) {
   [11]=>
   int(11)
   ["aba"]=>
@@ -60,7 +60,7 @@ object(HH\ImmMap)#8 (4) {
   ["b"]=>
   string(1) "b"
 }
-object(HH\Map)#11 (4) {
+object(HH\Map) (4) {
   [5]=>
   int(11)
   ["a"]=>
@@ -70,7 +70,7 @@ object(HH\Map)#11 (4) {
   [""]=>
   string(1) "b"
 }
-object(HH\ImmMap)#14 (4) {
+object(HH\ImmMap) (4) {
   [5]=>
   int(11)
   ["a"]=>
@@ -81,7 +81,7 @@ object(HH\ImmMap)#14 (4) {
   string(1) "b"
 }
 ----
-object(HH\Vector)#14 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(5)
   [1]=>
@@ -91,7 +91,7 @@ object(HH\Vector)#14 (4) {
   [3]=>
   string(0) ""
 }
-object(HH\Vector)#16 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(5)
   [1]=>
@@ -104,7 +104,7 @@ object(HH\Vector)#16 (4) {
 int(5)
 string(0) ""
 ==== ImmSet ====
-object(HH\Map)#17 (4) {
+object(HH\Map) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -114,7 +114,7 @@ object(HH\Map)#17 (4) {
   [""]=>
   string(0) ""
 }
-object(HH\ImmMap)#17 (4) {
+object(HH\ImmMap) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -124,7 +124,7 @@ object(HH\ImmMap)#17 (4) {
   [""]=>
   string(0) ""
 }
-object(HH\Map)#18 (4) {
+object(HH\Map) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -134,7 +134,7 @@ object(HH\Map)#18 (4) {
   [""]=>
   string(0) ""
 }
-object(HH\ImmMap)#19 (4) {
+object(HH\ImmMap) (4) {
   [5]=>
   int(5)
   ["a"]=>
@@ -145,7 +145,7 @@ object(HH\ImmMap)#19 (4) {
   string(0) ""
 }
 ----
-object(HH\Map)#21 (4) {
+object(HH\Map) (4) {
   [11]=>
   int(11)
   ["aba"]=>
@@ -155,7 +155,7 @@ object(HH\Map)#21 (4) {
   ["b"]=>
   string(1) "b"
 }
-object(HH\ImmMap)#23 (4) {
+object(HH\ImmMap) (4) {
   [11]=>
   int(11)
   ["aba"]=>
@@ -165,7 +165,7 @@ object(HH\ImmMap)#23 (4) {
   ["b"]=>
   string(1) "b"
 }
-object(HH\Map)#26 (4) {
+object(HH\Map) (4) {
   [5]=>
   int(11)
   ["a"]=>
@@ -175,7 +175,7 @@ object(HH\Map)#26 (4) {
   [""]=>
   string(1) "b"
 }
-object(HH\ImmMap)#29 (4) {
+object(HH\ImmMap) (4) {
   [5]=>
   int(11)
   ["a"]=>
@@ -186,7 +186,7 @@ object(HH\ImmMap)#29 (4) {
   string(1) "b"
 }
 ----
-object(HH\ImmVector)#29 (4) {
+object(HH\ImmVector) (4) {
   [0]=>
   int(5)
   [1]=>
@@ -196,7 +196,7 @@ object(HH\ImmVector)#29 (4) {
   [3]=>
   string(0) ""
 }
-object(HH\Vector)#31 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(5)
   [1]=>

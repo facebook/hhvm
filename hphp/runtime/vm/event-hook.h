@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_EVENT_HOOK_H_
-#define incl_HPHP_VM_EVENT_HOOK_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -42,7 +41,6 @@ namespace HPHP {
 struct EventHook {
   enum {
     NormalFunc,
-    PseudoMain,
     Eval,
   };
   enum {
@@ -52,6 +50,9 @@ struct EventHook {
     ProfileFramePointers = 4,
     ProfileConstructors = 8,
     ProfileResumeAware = 16,
+    /* This flag enables access to $this when profiling instance methods. It
+     * is used for internal profiling tools. It *may break* in the future. */
+    ProfileThisObject = 32,
   };
 
 
@@ -156,13 +157,13 @@ private:
 
   static inline void ringbufferEnter(const ActRec* ar) {
     if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-      auto name = ar->m_func->fullName();
+      auto name = ar->func()->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncEntry);
     }
   }
   static inline void ringbufferExit(const ActRec* ar) {
     if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-      auto name = ar->m_func->fullName();
+      auto name = ar->func()->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncExit);
     }
   }
@@ -172,4 +173,3 @@ private:
 
 }
 
-#endif

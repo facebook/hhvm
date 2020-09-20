@@ -1,0 +1,139 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\f" ->
+    { fe_pos = [3:10-11];
+      fe_type =
+      (Rwitness (root|yield_deeper.php line 3, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 3, characters 10-10),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|yield_deeper.php line 3, characters 15-42),
+               (Tapply (([3:15-24], "\\Generator"),
+                  [(Rhint (root|yield_deeper.php line 3, characters 25-28),
+                    (Tprim Tbool));
+                    (Rhint (root|yield_deeper.php line 3, characters 31-36),
+                     (Tprim Tstring));
+                    (Rhint (root|yield_deeper.php line 3, characters 39-41),
+                     (Tprim Tint))
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\g" ->
+    { fe_pos = [7:10-11];
+      fe_type =
+      (Rwitness (root|yield_deeper.php line 7, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 7, characters 10-10),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|yield_deeper.php line 7, characters 15-18),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\h" ->
+    { fe_pos = [13:10-11];
+      fe_type =
+      (Rwitness (root|yield_deeper.php line 13, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 13, characters 10-10),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|yield_deeper.php line 13, characters 15-18),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\i" ->
+    { fe_pos = [19:16-17];
+      fe_type =
+      (Rwitness (root|yield_deeper.php line 19, characters 16-16),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 19, characters 16-16),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|yield_deeper.php line 19, characters 21-35),
+               (Tapply (([19:21-30], "\\HH\\Awaitable"),
+                  [(Rhint (root|yield_deeper.php line 19, characters 31-34),
+                    (Tprim Tvoid))]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\j" ->
+    { fe_pos = [26:16-17];
+      fe_type =
+      (Rwitness (root|yield_deeper.php line 26, characters 16-16),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 26, characters 16-16),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|yield_deeper.php line 26, characters 21-51),
+               (Tapply (([26:21-39], "\\HH\\AsyncKeyedIterator"),
+                  [(Rhint (root|yield_deeper.php line 26, characters 40-45),
+                    (Tprim Tstring));
+                    (Rhint (root|yield_deeper.php line 26, characters 48-50),
+                     (Tprim Tint))
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

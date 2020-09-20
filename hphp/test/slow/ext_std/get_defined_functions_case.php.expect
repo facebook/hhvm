@@ -1,4 +1,4 @@
-array(1) {
-  [0]=>
+varray(2) {
   string(5) "upper"
+  string(4) "main"
 }

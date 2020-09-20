@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // The same is true for the insteadof operator to resolve conflicts
 

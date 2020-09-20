@@ -1,0 +1,6 @@
+darray(2) {
+  ["kind"]=>
+  int(1)
+  ["nullable"]=>
+  bool(true)
+}

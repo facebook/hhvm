@@ -2,19 +2,6 @@
 # Try making some traits
 #
 
-.main {
-  DefCls 0
-  DefCls 1
-  DefCls 2
-  DefCls 3
-  DefCls 4
-  DefCls 5
-  DefCls 6
-  FPushFuncD 0 "main"
-  FCall 0
-  UnboxR
-  RetC
-}
 
 .class [trait] Frobbable {
   .default_ctor;
@@ -68,55 +55,76 @@
   }
 }
 
-.function main() {
-  FPushCtorD 0 "UseFrob"
-  FCall 0
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NewObjD "UseFrob"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "frob" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "frob"
+  PopC
 
-  FPushCtorD 0 "AliasFrob"
-  FCall 0
-  PopR
+  NewObjD "AliasFrob"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "heh" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "heh"
+  PopC
 
-  FPushCtorD 0 "Publicize"
-  FCall 0
-  PopR
+  NewObjD "Publicize"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "foo" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "foo"
+  PopC
 
-  FPushCtorD 0 "Resolution"
-  FCall 0
-  PopR
+  NewObjD "Resolution"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "frob" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "frob"
+  PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "yo" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "yo"
+  PopC
 
   Int 1
   RetC

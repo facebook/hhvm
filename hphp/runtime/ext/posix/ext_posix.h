@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_POSIX_H_
-#define incl_HPHP_EXT_POSIX_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <sys/types.h>
@@ -128,4 +127,3 @@ Variant HHVM_FUNCTION(posix_uname);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_POSIX_H_

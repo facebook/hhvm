@@ -1,17 +1,17 @@
-<?php
+<?hh
 function chk_enc($str, $n, $enc = "UTF-8", $with_bom = false) {
-	$src = bin2hex(mb_convert_encoding($str, "UCS-4BE", $enc));
-	$dst = str_repeat("0000fffd", $n);
-	if ($with_bom) {
-		$dst = "0000feff" . $dst;
-	}
-	if ($dst == $src) {
-		return false;
-	} else {
-		return $src;
-	}
+    $src = bin2hex(mb_convert_encoding($str, "UCS-4BE", $enc));
+    $dst = str_repeat("0000fffd", $n);
+    if ($with_bom) {
+        $dst = "0000feff" . $dst;
+    }
+    if ($dst == $src) {
+        return false;
+    } else {
+        return $src;
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 mb_substitute_character(0xfffd);
 
 
@@ -56,12 +56,12 @@ echo "UTF-8 and surrogates area\n";
 $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
-	$s = chk_enc(pack('C3', 0xe0 | ($i >> 12), 0x80 | ($i >> 6) & 0x3f, 0x80 | $i & 0x3f), 3);
-	if ($s === false) {
-		$cnt++;
-	} else {
-		$out .= $s;
-	}
+    $s = chk_enc(pack('C3', 0xe0 | ($i >> 12), 0x80 | ($i >> 6) & 0x3f, 0x80 | $i & 0x3f), 3);
+    if ($s === false) {
+        $cnt++;
+    } else {
+        $out .= $s;
+    }
 }
 var_dump($cnt);
 var_dump($out);
@@ -83,11 +83,11 @@ $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
     $s = chk_enc(pack('C4', $i >> 24, ($i >> 16) & 0xff, ($i >> 8) & 0xff, $i & 0xff), 1, "UTF-32BE");
-	if ($s === false) {
-		$cnt++;
-	} else {
-		$out .= $s;
-	}
+    if ($s === false) {
+        $cnt++;
+    } else {
+        $out .= $s;
+    }
 }
 var_dump($cnt);
 var_dump($out);
@@ -96,11 +96,11 @@ $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
     $s = chk_enc(pack('C4', $i & 0xff, ($i >> 8) & 0xff, ($i >> 16) & 0xff, ($i >> 24) & 0xff), 1, "UTF-32LE");
-	if ($s === false) {
-		$cnt++;
-	} else {
-		$out .= $s;
-	}
+    if ($s === false) {
+        $cnt++;
+    } else {
+        $out .= $s;
+    }
 }
 var_dump($cnt);
 var_dump($out);
@@ -109,11 +109,11 @@ $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
     $s = chk_enc(pack('C4', $i >> 24, ($i >> 16) & 0xff, ($i >> 8) & 0xff, $i & 0xff), 1, "UTF-32");
-	if ($s === false) {
-		$cnt++;
-	} else {
-		$out .= $s;
-	}
+    if ($s === false) {
+        $cnt++;
+    } else {
+        $out .= $s;
+    }
 }
 var_dump($cnt);
 var_dump($out);
@@ -123,13 +123,13 @@ echo "UTF-32 and surrogates area with BOM\n";
 $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
-    $s = chk_enc("\x00\x00\xfe\xff". pack('C4', $i >> 24, ($i >> 16) & 0xff, ($i >> 8) & 0xff, $i & 0xff), 
-				 1, "UTF-32", true);
-	if ($s === false) {
-		$cnt++;
-	} else {
-		$out .= $s;
-	}
+    $s = chk_enc("\x00\x00\xfe\xff". pack('C4', $i >> 24, ($i >> 16) & 0xff, ($i >> 8) & 0xff, $i & 0xff),
+                 1, "UTF-32", true);
+    if ($s === false) {
+        $cnt++;
+    } else {
+        $out .= $s;
+    }
 }
 var_dump($cnt);
 var_dump(str_replace("0000feff","",$out));
@@ -137,15 +137,14 @@ var_dump(str_replace("0000feff","",$out));
 $out = '';
 $cnt = 0;
 for ($i = 0xd7ff; $i <= 0xe000; ++$i) {
-    $s = chk_enc("\xff\xfe\x00\x00". pack('C4', $i & 0xff, ($i >> 8) & 0xff, ($i >> 16) & 0xff, ($i >> 24) & 0xff), 
-				 1, "UTF-32", true);
-	if ($s === false) {
-		$cnt++;
-	} else {
-		$out .= $s;
-	}
+    $s = chk_enc("\xff\xfe\x00\x00". pack('C4', $i & 0xff, ($i >> 8) & 0xff, ($i >> 16) & 0xff, ($i >> 24) & 0xff),
+                 1, "UTF-32", true);
+    if ($s === false) {
+        $cnt++;
+    } else {
+        $out .= $s;
+    }
 }
 var_dump($cnt);
 var_dump(str_replace("0000feff","",$out));
-
-?>
+}

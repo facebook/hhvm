@@ -784,6 +784,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   _scanner->setToken(yytext, yyleng, "hhvm", 4);
   return T_CONSTANT_ENCAPSED_STRING;
 }
+<ST_IN_SCRIPTING>"__FUNCTION_CREDENTIAL__" { RETTOKEN(T_FUNC_CRED_C); }
+
 
 <INITIAL>"#!"[^\n]*"\n" {
         SETTOKEN(T_HASHBANG);
@@ -869,41 +871,23 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%=" {
-        if (_scanner->aspTags()) {
-          if (YY_START == INITIAL) {
-            BEGIN(ST_IN_SCRIPTING);
-          } else {
-            yy_pop_state(yyscanner);
-          }
-          RETTOKEN(T_ECHO);
-        } else {
-          if (YY_START == INITIAL) {
-            BEGIN(ST_IN_SCRIPTING);
-            yy_push_state(ST_IN_HTML, yyscanner);
-          } else if (YY_START == ST_AFTER_HASHBANG) {
-            BEGIN(ST_IN_HTML);
-          }
-          RETTOKEN(T_INLINE_HTML);
+        if (YY_START == INITIAL) {
+          BEGIN(ST_IN_SCRIPTING);
+          yy_push_state(ST_IN_HTML, yyscanner);
+        } else if (YY_START == ST_AFTER_HASHBANG) {
+          BEGIN(ST_IN_HTML);
         }
+        RETTOKEN(T_INLINE_HTML);
 }
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<%" {
-        if (_scanner->aspTags()) {
-          if (YY_START == INITIAL) {
-            BEGIN(ST_IN_SCRIPTING);
-          } else {
-            yy_pop_state(yyscanner);
-          }
-          RETTOKEN(T_OPEN_TAG);
-        } else {
-          if (YY_START == INITIAL) {
-            BEGIN(ST_IN_SCRIPTING);
-            yy_push_state(ST_IN_HTML, yyscanner);
-          } else if (YY_START == ST_AFTER_HASHBANG) {
-            BEGIN(ST_IN_HTML);
-          }
-          RETTOKEN(T_INLINE_HTML);
+        if (YY_START == INITIAL) {
+          BEGIN(ST_IN_SCRIPTING);
+          yy_push_state(ST_IN_HTML, yyscanner);
+        } else if (YY_START == ST_AFTER_HASHBANG) {
+          BEGIN(ST_IN_HTML);
         }
+        RETTOKEN(T_INLINE_HTML);
 }
 
 <INITIAL,ST_IN_HTML,ST_AFTER_HASHBANG>"<?hh"([ \t]|{NEWLINE}) {
@@ -977,7 +961,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//")[^\r\n]*{NEWLINE}? {
-        const char* asptag = nullptr;
         const auto searchTwoChars = [](const char* str, size_t len, char d) {
                 for (auto t = str; t + 1 < str + len; t++) {
                         if (t[0] == d && t[1] == '>') {
@@ -986,17 +969,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
                 }
                 return (const char*)nullptr;
         };
-        if (_scanner->aspTags()) {
-                asptag = searchTwoChars(yytext, yyleng, '%');
-        }
-        auto phptag = searchTwoChars(yytext, yyleng, '?');
-        if (asptag && (!phptag || (asptag < phptag))) {
-                if (_scanner->isHHFile()) {
-                        _scanner->error("HH mode: %%> not allowed");
-                        RETTOKEN(T_HH_ERROR);
-                }
-                yyless(asptag - yytext);
-        } else if (phptag) {
+        const auto phptag = searchTwoChars(yytext, yyleng, '?');
+        if (phptag) {
                 if (_scanner->isHHFile()) {
                         _scanner->error("HH mode: ?> not allowed");
                         RETTOKEN(T_HH_ERROR);
@@ -1081,18 +1055,9 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
           _scanner->error("HH mode: %%> not allowed");
           return T_HH_ERROR;
         }
-        if (_scanner->aspTags()) {
-                yy_push_state(ST_IN_HTML, yyscanner);
-                if (_scanner->full()) {
-                  RETSTEP(T_CLOSE_TAG);
-                } else {
-                  RETSTEP(';');
-                }
-        } else {
-                yyless(1);
-                _scanner->setToken(yytext, 1, yytext, 1);
-                RETSTEP(yytext[0]);
-        }
+        yyless(1);
+        _scanner->setToken(yytext, 1, yytext, 1);
+        RETSTEP(yytext[0]);
 }
 
 <ST_IN_SCRIPTING>(b?[\"]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)[\"]) {

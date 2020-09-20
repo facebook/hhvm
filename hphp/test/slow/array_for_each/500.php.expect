@@ -1,6 +1,5 @@
-object(X)#1 (0) {
+object(X) (0) {
 }
 int(0)
-string(13) "X::__destruct"
 string(4) "done"
 string(4) "exit"

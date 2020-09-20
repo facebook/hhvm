@@ -1,20 +1,7 @@
-
-.main {
-  DefCls 0
-  FPushCtorD 0 "C"
-  FCall 0
-
-  CheckProp "foo"
-  InitProp "bar" NonStatic
-
-  PopR
-  RetC
-}
-
 .class C {
   .default_ctor;
 
-  .method [public] 86sinit() {
+  .method [static public] 86sinit() {
     String "default ::foo value"
     InitProp "foo" Static
 
@@ -22,11 +9,26 @@
     RetC
   }
 
-  .method [public] 86pinit() {
+  .method [static public] 86pinit() {
     CheckProp "bar"
     String "string"
     InitProp "baz" Static
 
     RetC
   }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NewObjD "C"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+
+  CheckProp "foo"
+  InitProp "bar" NonStatic
+
+  RetC
 }

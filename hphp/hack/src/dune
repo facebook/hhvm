@@ -1,0 +1,177 @@
+(env
+  (_ (flags (:standard -w @a-4-6-20-29-35-41-42-44-45-48-50 \ -strict-sequence))))
+
+(executable
+  (name hh_single_type_check)
+  (modules
+    hh_single_type_check)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    ai
+    ifc
+    client
+    default_injector_config
+    file_content
+    gen_deps
+    glean_dependency_graph_stubs
+    hhi
+    parent
+    server
+    server_env
+    sys_utils
+    tast
+    tast_typecheck
+    temp_file
+    typing
+    utils_core
+    utils_multifile))
+
+(executable
+  (name hh_server)
+  (modules
+    hh_server)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    client
+    default_injector_config
+    file_content
+    gen_deps
+    hhi
+    hh_server_monitor
+    parent
+    server
+    server_env
+    sys_utils
+    tast
+    typing
+    utils_core))
+
+(executable
+  (name hh_client)
+  (modules
+    hh_client)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    client
+    default_injector_config
+    file_content
+    gen_deps
+    hhi
+    hh_server_monitor
+    parent
+    server
+    server_env
+    sys_utils
+    tast
+    typing
+    utils_core
+    utils_exit))
+
+(executable
+  (name hh_single_compile)
+  (modules
+    hh_single_compile)
+  (libraries
+    compile_ffi
+    compiler_id
+    default_injector_config
+    facts
+    global_config
+    global_options
+    hhbc
+    hhi
+    heap_ident
+    logging
+    utils_multifile
+    naming
+    naming_elaborate_namespaces_endo)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp))))
+
+(executable
+  (name hh_parse)
+  (modules
+    hh_parse)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    default_injector_config
+    global_config
+    hackfmt
+    parser
+    utils_core))
+
+(executable
+  (name hackfmt)
+  (modules
+    hackfmt)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    default_injector_config
+    hackfmt
+    hackfmt_debug
+    utils_config_file
+    utils_ocaml_overrides))
+
+(executable
+  (name generate_full_fidelity)
+  (modules
+    generate_full_fidelity
+    generate_full_fidelity_data)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
+  (libraries
+    core_kernel
+    str
+    parser_schema
+    collections
+    utils_core))
+
+(alias
+  (name exe)
+  (deps
+    hackfmt.exe
+    hh_client.exe
+    hh_fanout/hh_fanout.exe
+    hh_parse.exe
+    hh_server.exe
+    hh_single_compile.exe
+    hh_single_type_check.exe
+    ai/zoncolan.exe
+    ))
+
+(alias
+  (name hh)
+  (deps
+    hh_server.exe
+    hh_client.exe))
+
+(alias
+  (name single)
+  (deps
+    hh_single_type_check.exe
+    hh_single_compile.exe
+    ))
+
+(alias
+  (name debug-single)
+  (deps
+    hh_single_type_check.bc
+    hh_single_compile.bc
+    ))
+
+(alias
+  (name debug)
+  (deps
+    hackfmt.bc
+    hh_client.bc
+    hh_fanout/hh_fanout.bc
+    hh_parse.bc
+    hh_server.bc
+    hh_single_compile.bc
+    hh_single_type_check.bc
+    ))

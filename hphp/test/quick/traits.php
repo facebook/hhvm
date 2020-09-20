@@ -1,5 +1,5 @@
 <?hh
-define("FOO", 123);
+const FOO = 123;
 trait T {
   private $blah = FOO;
   public function test() {
@@ -9,5 +9,7 @@ trait T {
 class C {
   use T;
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $obj->test();
+}

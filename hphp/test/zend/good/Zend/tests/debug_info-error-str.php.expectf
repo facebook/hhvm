@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: __debugInfo() must return an array in %s/debug_info-error-str.php on line 14

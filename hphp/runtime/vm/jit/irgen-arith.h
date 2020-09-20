@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_ARITH_H_
-#define incl_HPHP_JIT_IRGEN_ARITH_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -56,4 +55,3 @@ Opcode bitOp(Op);
 
 }}}
 
-#endif

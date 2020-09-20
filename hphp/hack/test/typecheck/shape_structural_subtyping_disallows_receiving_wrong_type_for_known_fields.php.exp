@@ -1,0 +1,6 @@
+File "shape_structural_subtyping_disallows_receiving_wrong_type_for_known_fields.php", line 16, characters 7-30:
+Invalid argument (Typing[4110])
+File "shape_structural_subtyping_disallows_receiving_wrong_type_for_known_fields.php", line 9, characters 10-12:
+Expected `int`
+File "shape_structural_subtyping_disallows_receiving_wrong_type_for_known_fields.php", line 16, characters 20-29:
+But got `string`

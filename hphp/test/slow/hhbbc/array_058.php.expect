@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["foo:a"]=>
   int(2)
   ["foo:b"]=>

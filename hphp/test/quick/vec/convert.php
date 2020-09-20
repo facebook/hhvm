@@ -50,8 +50,8 @@ function convert_from($v) {
   echo "====================================================\n";
   var_dump($v);
   echo "----------------------------------------------------\n";
-  var_dump((array)$v);
-  var_dump(dict($v));
+  var_dump(darray($v));
+  var_dump(dict(HH\array_unmark_legacy($v)));
 
   try {
     var_dump(keyset($v));
@@ -62,8 +62,11 @@ function convert_from($v) {
   var_dump((bool)$v);
   var_dump((int)$v);
   var_dump((float)$v);
-  var_dump((string)$v);
-  var_dump((object)$v);
+  try {
+    var_dump((string)$v);
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
   var_dump(new Vector($v));
   var_dump(new Map($v));
 
@@ -81,17 +84,17 @@ function convert_to($from) {
   var_dump($from);
   echo "----------------------------------------------------\n";
   try {
-    var_dump(vec($from));
+    var_dump(vec(HH\array_unmark_legacy($from)));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
   echo "====================================================\n";
 }
 
-function main() {
-  convert_to([]);
-  convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
-  convert_to([1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
+<<__EntryPoint>> function main(): void {
+  convert_to(varray[]);
+  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
+  convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
               'key4' => new stdclass]);
 
@@ -130,5 +133,3 @@ function main() {
   convert_from(vec[1, '1']);
   convert_from(vec['abc', 123, 123, 'abc']);
 }
-
-main();

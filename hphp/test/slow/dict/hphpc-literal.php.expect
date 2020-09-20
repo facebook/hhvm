@@ -52,6 +52,6 @@ bool(false)
 bool(true)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts

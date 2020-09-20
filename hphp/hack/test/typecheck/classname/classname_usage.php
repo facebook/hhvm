@@ -44,7 +44,8 @@ function make_vector<T>(classname<T> $classname): Vector<T> {
 }
 
 function factory<T>(classname<T> $classname): T {
-  // UNSAFE_BLOCK
+  // No way to make this function typecheck without appropriate constraints on T
+  throw new Exception();
 }
 
 function foo(): void {

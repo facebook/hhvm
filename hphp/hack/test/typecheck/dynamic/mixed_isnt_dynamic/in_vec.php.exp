@@ -1,0 +1,6 @@
+File "in_vec.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+File "in_vec.php", line 7, characters 34-40:
+Expected `dynamic`
+File "in_vec.php", line 7, characters 18-22:
+But got `mixed`

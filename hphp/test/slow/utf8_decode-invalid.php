@@ -1,4 +1,5 @@
-<?php
+<?hh
+
 
 // https://github.com/facebook/hhvm/issues/5010
 // utf8_decode() targets latin1, therefore any character
@@ -6,6 +7,8 @@
 // U+003F QUESTION MARK
 
 // U+00DF LATIN SMALL LETTER SHARP S
+<<__EntryPoint>>
+function main_utf8_decode_invalid() {
 $ss = "\u{DF}";
 var_dump(urlencode($ss));
 var_dump(urlencode(utf8_decode($ss)));
@@ -22,3 +25,4 @@ $A = "\xC1\x81";
 var_dump(urlencode($A));
 var_dump(urlencode(utf8_decode($A)));
 var_dump(json_encode(utf8_decode($A)));
+}

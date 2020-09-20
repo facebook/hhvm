@@ -1,0 +1,8 @@
+<?hh
+function with_enum_class_name(): void {
+  $_ = SomeEnum::class;
+}
+enum SomeEnum: int {
+  FIRST = 0;
+  SECOND = 0;
+}

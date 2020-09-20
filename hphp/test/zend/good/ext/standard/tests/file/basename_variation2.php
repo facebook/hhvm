@@ -1,6 +1,6 @@
-<?php
-
-$paths = array (
+<?hh
+<<__EntryPoint>> function main(): void {
+$paths = varray [
 
 	"foo",
 	"foo/",
@@ -13,9 +13,9 @@ $paths = array (
     "dir with spaces/foo.bar",
     "dir with spaces\\foo.bar",
 
-);
+];
 
-$suffixes = array (
+$suffixes = varray [
 
 	".bar",
 	".b",
@@ -27,7 +27,7 @@ $suffixes = array (
     "foo\\bar",
     "/",
     "\\",	
-);
+];
 
 foreach ($paths as $path) {
 	foreach ($suffixes as $suffix) {
@@ -37,5 +37,4 @@ foreach ($paths as $path) {
 }
 
 echo "\ndone\n";
-
-?>
+}

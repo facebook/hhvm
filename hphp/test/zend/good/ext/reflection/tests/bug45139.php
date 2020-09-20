@@ -1,21 +1,21 @@
-<?php
+<?hh
 
 class A {
-	private $foo;
+    private $foo;
 }
 
 class B extends A {
-	protected $bar;
-	private $baz;
-	private $quux;
+    protected $bar;
+    private $baz;
+    private $quux;
 }
 
 class C extends B {
-	public $foo;
-	private $baz;
-	protected $quux;
+    public $foo;
+    private $baz;
+    protected $quux;
 }
-
+<<__EntryPoint>> function main(): void {
 $rc = new ReflectionClass('C');
 $rp = $rc->getProperty('foo');
 var_dump($rp->getDeclaringClass()->getName()); // c
@@ -43,5 +43,4 @@ var_dump($rp->getDeclaringClass()->getName()); // B
 $rc = new ReflectionClass('C');
 $rp = $rc->getProperty('quux');
 var_dump($rp->getDeclaringClass()->getName()); // C
-
-?>
+}

@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_H
-#define incl_HPHP_ICU_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -23,8 +22,9 @@
 #include <unicode/ucnv.h>
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -123,7 +123,6 @@ struct IntlExtension final : Extension {
   void threadInit() override {
     bindIniSettings();
   }
-  void threadShutdown() override;
  private:
   void bindIniSettings();
   void bindConstants();
@@ -166,4 +165,3 @@ DECLARE_EXTERN_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#endif // incl_HPHP_ICU_H

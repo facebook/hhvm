@@ -120,8 +120,9 @@ class CPURegister {
 
   bool IsValidFPRegister() const {
     return IsFPRegister() &&
-           ((size_ == kSRegSize) || (size_ == kDRegSize)) &&
-           (code_ < kNumberOfFPRegisters);
+           (code_ < kNumberOfFPRegisters) &&
+           ((size_ == kSRegSize) || (size_ == kDRegSize) ||
+            (size_ == kVRegSize));
   }
 
   bool Is(const CPURegister& other) const {
@@ -242,7 +243,8 @@ const Register sp(kSPRegInternalCode, kXRegSize);
 
 #define DEFINE_FPREGISTERS(N)  \
 const FPRegister s##N(N, kSRegSize);  \
-const FPRegister d##N(N, kDRegSize);
+const FPRegister d##N(N, kDRegSize);  \
+const FPRegister v##N(N, kVRegSize);
 REGISTER_CODE_LIST(DEFINE_FPREGISTERS)
 #undef DEFINE_FPREGISTERS
 
@@ -1140,6 +1142,9 @@ class Assembler {
   // One-element structure store from one register.
   void st1(const VRegister& vt, const MemOperand& src);
 
+  // Vector move from Vreg to Vreg.
+  void mov(const VRegister& vd, const VRegister& vs);
+
   // Move instructions. The default shift of -1 indicates that the move
   // instruction will calculate an appropriate 16-bit immediate and left shift
   // that is equal to the 64-bit immediate argument. If an explicit left shift
@@ -1805,7 +1810,7 @@ class Assembler {
     assert(sizeof(instruction) == sizeof(uint32_t));
     CheckBufferSpace();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     finalized_ = false;
 #endif
 
@@ -1816,7 +1821,7 @@ class Assembler {
   void EmitData(void const * data, unsigned size) {
     CheckBufferSpace();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     finalized_ = false;
 #endif
 
@@ -1840,7 +1845,7 @@ class Assembler {
 
   friend class BlockLiteralPoolScope;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   bool finalized_;
 #endif
 };

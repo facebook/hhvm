@@ -1,0 +1,8 @@
+<?hh
+interface BaseInterface {}
+function with_interface(DerivedInterface $arg): void {
+  $arg->routine();
+}
+interface DerivedInterface extends \BaseInterface {
+  public function routine(): void;
+}

@@ -1,0 +1,3 @@
+Warning: Value returned from function f() must be of type C<@int, int>, C<string,int> given in %s on line 4
+
+Catchable fatal error: Value returned from function f() must be of type C<@int, int>, C<string,string> given in %s on line 7

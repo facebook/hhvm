@@ -39,7 +39,7 @@ void ZipFile::sweep() {
 }
 
 bool ZipFile::open(const String& filename, const String& mode) {
-  assert(m_gzFile == nullptr);
+  assertx(m_gzFile == nullptr);
 
   if (strchr(mode.c_str(), '+')) {
     raise_warning("cannot open a zlib stream for reading and writing "
@@ -70,17 +70,16 @@ bool ZipFile::open(const String& filename, const String& mode) {
 }
 
 bool ZipFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 
 bool ZipFile::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
     if (m_gzFile) {
-      s_pcloseRet = gzclose(m_gzFile);
-      ret = (s_pcloseRet == 0);
+      *s_pcloseRet = gzclose(m_gzFile);
+      ret = (*s_pcloseRet == 0);
       m_gzFile = nullptr;
     }
     setIsClosed(true);
@@ -99,7 +98,7 @@ bool ZipFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t ZipFile::readImpl(char *buffer, int64_t length) {
-  assert(m_gzFile);
+  assertx(m_gzFile);
   int64_t nread = gzread(m_gzFile, buffer, length);
   if (nread == 0 || gzeof(m_gzFile)) {
     setEof(true);
@@ -114,12 +113,12 @@ int64_t ZipFile::readImpl(char *buffer, int64_t length) {
 }
 
 int64_t ZipFile::writeImpl(const char *buffer, int64_t length) {
-  assert(m_gzFile);
+  assertx(m_gzFile);
   return gzwrite(m_gzFile, buffer, length);
 }
 
 bool ZipFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
-  assert(m_gzFile);
+  assertx(m_gzFile);
 
   if (whence == SEEK_CUR) {
     off_t result = gzseek(m_gzFile, 0, SEEK_CUR);
@@ -147,18 +146,18 @@ bool ZipFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 }
 
 int64_t ZipFile::tell() {
-  assert(m_gzFile);
+  assertx(m_gzFile);
   return getPosition();
 }
 
 bool ZipFile::eof() {
-  assert(m_gzFile);
+  assertx(m_gzFile);
   int64_t avail = bufferedLen();
   return avail > 0 ? false : getEof();
 }
 
 bool ZipFile::rewind() {
-  assert(m_gzFile);
+  assertx(m_gzFile);
   seek(0);
   setWritePosition(0);
   setReadPosition(0);
@@ -169,7 +168,7 @@ bool ZipFile::rewind() {
 }
 
 bool ZipFile::flush() {
-  assert(m_gzFile);
+  assertx(m_gzFile);
   return gzflush(m_gzFile, Z_SYNC_FLUSH);
 }
 

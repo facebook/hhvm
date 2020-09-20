@@ -21,8 +21,13 @@
 #include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
 
+#ifdef HAVE_NUMA
+#include <sys/prctl.h>
+#endif
+
 #include "hphp/util/alloc.h"
 #include "hphp/util/hugetlb.h"
+#include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
 
 namespace HPHP {
@@ -37,11 +42,21 @@ PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = nullptr;
 void* AsyncFuncImpl::s_finiFuncArg = nullptr;
 
 std::atomic<uint32_t> AsyncFuncImpl::s_count { 0 };
-std::atomic_int AsyncFuncImpl::s_curr_numa_node { 0 };
 
-AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func, bool hugeStack)
-  : m_obj(obj), m_func(func), m_hugeStack(hugeStack)
-{}
+AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func,
+                             int numaNode, unsigned hugeStackKb,
+                             unsigned tlExtraKb)
+  : m_obj(obj)
+  , m_func(func)
+  , m_node(numaNode)
+  , m_hugeStackKb(hugeStackKb / 4 * 4)  // align to 4K page boundary
+  , m_tlExtraKb((tlExtraKb + 3) / 4 * 4) {
+  if (m_tlExtraKb > (128 * 1024)) {
+    // Don't include a big additional per-thread storage to avoid running out of
+    // virtual memory.
+    throw std::runtime_error{"extra per-thread storage is too big"};
+  }
+}
 
 AsyncFuncImpl::~AsyncFuncImpl() {
   assert(m_stopped || m_threadId == 0);
@@ -51,9 +66,13 @@ AsyncFuncImpl::~AsyncFuncImpl() {
 void *AsyncFuncImpl::ThreadFunc(void *obj) {
   auto self = static_cast<AsyncFuncImpl*>(obj);
   init_stack_limits(self->getThreadAttr());
-  s_firstSlab = self->m_firstSlab;
-  assertx(!s_firstSlab.ptr || s_firstSlab.size);
+  s_tlSpace = MemBlock{self->m_tlExtraBase, self->m_tlExtraKb * 1024};
+  assertx(!s_tlSpace.ptr || s_tlSpace.size);
+  s_hugeRange = self->m_hugePages;
+  assertx(!s_hugeRange.ptr || s_hugeRange.size);
+
   set_numa_binding(self->m_node);
+  self->setThreadName();
   self->threadFuncImpl();
   return nullptr;
 }
@@ -62,102 +81,126 @@ void *AsyncFuncImpl::ThreadFunc(void *obj) {
 // Allocate a piece of memory using mmap(), with address range [start, end), so
 // that
 // (1) start + size == end,
-// (2) end % alignment == 0 when alignment is nonzero
-// (3) the memory can be used for stack and heap.
+// (2) (start + alignOffset) % alignment == 0, when alignment is nonzero
+// (3) the memory can be used for stack, thread-local storage, and heap.
 //
-// Both `size` and `alignment` need to be multiples of 16.
-static char* mmap_end_aligned(size_t size, size_t alignment) {
-  assertx(size % 16 == 0 && alignment % 16 == 0);
+// All input should be multiples of 16.
+static char* mmap_offset_aligned(size_t size, size_t alignOffset,
+                                 size_t alignment) {
+  assertx(size % 16 == 0 && alignOffset % 16 == 0 && alignment % 16 == 0);
+  assertx(alignOffset <= size);
+  assertx(folly::isPowTwo(alignment));
+  auto const alignMask = alignment - 1;
   auto const allocSize = size + (alignment > 16) * alignment;
   char* start = (char*)mmap(nullptr, allocSize,
                             PROT_READ | PROT_WRITE,
-                            MAP_PRIVATE | MAP_ANON,
+                            MAP_PRIVATE | MAP_ANONYMOUS,
                             -1, 0);
-  if (start == MAP_FAILED) return nullptr;
+  // Check if `mmap()` returned -1, and throw an exception in that case.
+  folly::checkUnixError(reinterpret_cast<intptr_t>(start),
+                        "mmap() failed with length = ", allocSize);
   if (alignment <= 16) return start;
-  char* end = start + allocSize;
-  size_t extraAfterEnd = reinterpret_cast<uintptr_t>(end) % alignment;
-  if (extraAfterEnd > 0) {
-    end -= extraAfterEnd;
-    munmap(end, extraAfterEnd);
+  auto const oldAlignPoint = reinterpret_cast<uintptr_t>(start) + alignOffset;
+  // Find out how many bytes we need to shift alignPoint to meet alignment
+  // requirement.
+  auto const offset =
+    ((oldAlignPoint + alignMask) & ~alignMask) - oldAlignPoint;
+  assertx((oldAlignPoint + offset) % alignment == 0);
+  auto const newStart = start + offset;
+  auto const newEnd = newStart + size;
+  // unmap extra space at both ends, if any.
+  if (offset) {
+    munmap(start, offset);
   }
-  char* realStart = end - size;
-  if (realStart != start) {
-    assertx(reinterpret_cast<uintptr_t>(realStart) >
-            reinterpret_cast<uintptr_t>(start));
-    munmap(start, realStart - start);
+  if (auto const extraAfterEnd = start + allocSize - newEnd) {
+    munmap(newEnd, extraAfterEnd);
   }
-  return realStart;
+  return newStart;
 }
 #endif
 
 void AsyncFuncImpl::start() {
   struct rlimit rlim;
-
-  m_node = next_numa_node(s_curr_numa_node);
-  // Allocate the thread-stack
-  pthread_attr_init(&m_attr);
-
   if (getrlimit(RLIMIT_STACK, &rlim) != 0 || rlim.rlim_cur == RLIM_INFINITY ||
       rlim.rlim_cur < kStackSizeMinimum) {
     rlim.rlim_cur = kStackSizeMinimum;
   }
+  // Limit the size of the stack to something reasonable, to avoid running out
+  // of virtual memory.
+  if (rlim.rlim_cur > kStackSizeMinimum * 16) {
+    rlim.rlim_cur = kStackSizeMinimum * 16;
+  }
 
-  size_t normalSize = 0;               // size of stack backed by non-huge pages
-#if defined(__x86_64__) && defined(__linux__) && defined(MADV_HUGEPAGE)
-  if (m_hugeStack) {
-    // Allocate a heap slab of at least 2M near the stack base on huge pages.
-    // The first s_hugeStackSizeKb of the stack is also on huge pages, the
-    // residual space (if any) is merged into the first slab.
+  if (m_hugeStackKb * 1024 > rlim.rlim_cur) {
+#ifndef NDEBUG
+    throw std::invalid_argument{"huge stack size exceeds rlimit"};
+#else
+    m_hugeStackKb = 0;
+#endif
+  }
+  pthread_attr_init(&m_attr);
+
+#if defined(__linux__)
+  if (m_hugeStackKb || m_tlExtraKb) {
+    // If m_hugeStackKb is nonzero but not multiple of the huge page size
+    // (size2m), the rest of the huge page is shared with part of the extra
+    // storage colocated with the stack, like the following.
     //
-    // m_threadStack + m_stackAllocSize ---> +------------+ ---------------
-    //                                       |            |             ^
-    //                                       | First Slab |             |
-    //                                       |            |             |
-    //     m_threadStack + rlimit_stack ---> +------------+ -----  huge pages
+    // m_threadStack + m_stackAllocSize ---> +------------+
+    //                                       . extra      .
+    //                                       . storage    .
+    //                                       | for the    | ---------------
+    //                                       | thread     |             ^
+    //                                       | (RDS/slab) |             |
+    //                        pthreads  ---> +------------+  huge page  |
     //                                       | TCB        |   ^         |
-    //                                       . TLS        . hugeStack   |
-    //                                       . Stack      .   v         v
+    //                                       | TLS        | hugeStack   |
+    //                                       | Stack      |   v         v
     //                                       .            . ---------------
     //                                       .            .
     //                    m_threadStack ---> +------------+
     //
-    auto const hugeStackSize = s_hugeStackSizeKb * 1024;
-    auto const stackPartialPageSize = hugeStackSize % size2m;
-    auto const nHugePages =
-      hugeStackSize / size2m /* number of pages purely for stack */
-      + (stackPartialPageSize != 0) /* partly stack and partly heap */;
-    auto slabSize =
-      size2m * (stackPartialPageSize != 0) - stackPartialPageSize;
-    // We don't want the first slab to be too small.
-    constexpr size_t kMinSlabSize = 256ull << 10;
-    if (slabSize != 0 && slabSize < kMinSlabSize) {
-      slabSize = kMinSlabSize;
+    assertx(m_hugeStackKb % 4 == 0);
+    auto const hugeStartOffset = rlim.rlim_cur - m_hugeStackKb * 1024;
+
+    constexpr unsigned hugePageSizeKb = 2048u;
+    auto const stackPartialHugeKb = m_hugeStackKb % hugePageSizeKb;
+    auto const nHugePages = m_hugeStackKb / hugePageSizeKb +
+      (stackPartialHugeKb != 0) /* partly stack */;
+    m_stackAllocSize = std::max(
+      rlim.rlim_cur + m_tlExtraKb * 1024,
+      hugeStartOffset + size2m * nHugePages
+    );
+    m_threadStack = mmap_offset_aligned(m_stackAllocSize,
+                                        hugeStartOffset,
+                                        nHugePages ? size2m : size4k);
+    madvise(m_threadStack, m_stackAllocSize, MADV_DONTNEED);
+    numa_bind_to(m_threadStack, m_stackAllocSize, m_node);
+    if (nHugePages) {
+      auto const hugeStart = m_threadStack + hugeStartOffset;
+      assertx(reinterpret_cast<uintptr_t>(hugeStart) % size2m == 0);
+      for (size_t i = 0; i < nHugePages; i++) {
+        remap_2m(hugeStart + i * size2m, m_node);
+      }
+      m_hugePages = MemBlock { hugeStart, nHugePages * size2m };
     }
-    m_stackAllocSize = rlim.rlim_cur + slabSize;
-    m_threadStack = mmap_end_aligned(m_stackAllocSize, size2m);
-    auto const end = m_threadStack + rlim.rlim_cur + slabSize;
-    assertx(reinterpret_cast<uintptr_t>(end) % size2m == 0);
-    if (m_threadStack) {
-      for (size_t i = 1; i <= nHugePages; i++) {
-        if (!mmap_2m(end - i * size2m, PROT_READ | PROT_WRITE, m_node,
-                     /* MAP_SHARED */ false, /* MAP_FIXED */ true)) {
-          // Try transparent huge pages if we are unable to get reserved ones.
-          hintHuge(end - i * size2m, size2m);
-        }
-      }
-      if (slabSize) {
-        m_firstSlab = MemBlock{end - slabSize, slabSize};
-      }
-      normalSize = m_stackAllocSize - size2m * nHugePages;
+    if (m_tlExtraKb) {
+      m_tlExtraBase = m_threadStack + rlim.rlim_cur;
     }
   }
 #endif
+
   if (!m_threadStack) {
-    m_threadStack = (char*)mmap(nullptr, rlim.rlim_cur, PROT_READ | PROT_WRITE,
-                                MAP_PRIVATE | MAP_ANON, -1, 0);
-    m_stackAllocSize = rlim.rlim_cur;
-    normalSize = m_stackAllocSize;
+    m_threadStack =
+      (char*)mmap(nullptr, rlim.rlim_cur, PROT_READ | PROT_WRITE,
+                  MAP_PRIVATE | MAP_ANON, -1, 0);
+    if (m_threadStack == MAP_FAILED) {
+      m_threadStack = nullptr;
+    } else {
+      m_stackAllocSize = rlim.rlim_cur;
+      madvise(m_threadStack, m_stackAllocSize, MADV_DONTNEED);
+      numa_bind_to(m_threadStack, m_stackAllocSize, m_node);
+    }
   }
 
   if (m_threadStack) {
@@ -165,10 +208,6 @@ void AsyncFuncImpl::start() {
     if (pthread_attr_getguardsize(&m_attr, &guardsize) == 0 && guardsize) {
       mprotect(m_threadStack, guardsize, PROT_NONE);
     }
-
-    madvise(m_threadStack, normalSize, MADV_DONTNEED);
-    numa_bind_to(m_threadStack, normalSize, m_node);
-
     pthread_attr_setstack(&m_attr, m_threadStack, rlim.rlim_cur);
   }
 
@@ -192,7 +231,11 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
           // wait timed out
           return false;
         }
+      } else if (seconds < 0) {
+        // Don't wait.
+        return false;
       } else {
+        // Wait with no timeout.
         m_stopMonitor.wait();
       }
     }
@@ -220,16 +263,30 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
   return true;
 }
 
+void AsyncFuncImpl::setThreadName() {
+#ifdef HAVE_NUMA
+  if (use_numa) {
+    static constexpr size_t kMaxCommNameLen = 16; // TASK_COMM_LEN in kernel
+    char name[kMaxCommNameLen];
+    snprintf(name, sizeof(name), "hhvmworker.ND%d", m_node);
+    prctl(PR_SET_NAME, name);
+  } else {
+    // On single-socket servers
+    prctl(PR_SET_NAME, "hhvmworker");
+  }
+#endif
+}
+
 void AsyncFuncImpl::threadFuncImpl() {
   if (s_initFunc && !m_noInitFini) {
     s_initFunc(s_initFuncArg);
   }
   try {
     m_func(m_obj);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     m_exception = e.clone();
-  } catch (std::exception &e) {
-    m_exception = new Exception("%s", e.what());
+  } catch (std::exception& e) {
+    m_exception = new Exception(std::string{e.what()});
   } catch (...) {
     m_exception = new Exception("(unknown exception)");
   }

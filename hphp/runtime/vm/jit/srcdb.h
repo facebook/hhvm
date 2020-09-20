@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_SRCDB_H_
-#define incl_HPHP_SRCDB_H_
+#pragma once
 
 #include <algorithm>
 #include <atomic>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/growable-vector.h"
 #include "hphp/util/trace.h"
@@ -48,7 +48,7 @@ struct RelocationInfo;
  * intact.
  */
 struct IncomingBranch {
-  enum class Tag {
+  enum class Tag : int16_t {
     JMP,
     JCC,
     ADDR,
@@ -104,7 +104,7 @@ struct TransLoc {
   void setFrozenStart(TCA newFrozen);
 
   void setMainSize(size_t size) {
-    assert(size < std::numeric_limits<uint32_t>::max());
+    assertx(size < std::numeric_limits<uint32_t>::max());
     m_mainLen = (uint32_t)size;
   }
 
@@ -113,6 +113,11 @@ struct TransLoc {
       (coldStart() <= loc && loc < coldEnd()) ||
       (frozenStart() <= loc && loc < frozenEnd());
   }
+
+  // The entry may be in any area; entryRange is the range of code for this
+  // translation in the entry's area (it does not contain any colder code).
+  TCA entry() const;
+  TcaRange entryRange() const;
 
   TCA mainStart() const;
   TCA coldStart() const;
@@ -154,9 +159,7 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
  * SrcRec: record of translator output for a given source location.
  */
 struct SrcRec final {
-  SrcRec(TCA anchor, const Func* func)
-    : m_anchorTranslation(anchor)
-    , m_unitMd5(func->unit()->md5())
+  explicit SrcRec(TCA anchor) : m_anchorTranslation(anchor)
   {}
 
   /*
@@ -195,7 +198,6 @@ struct SrcRec final {
   void chainFrom(IncomingBranch br);
   void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
-  const MD5& unitMd5() const { return m_unitMd5; }
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;
@@ -215,6 +217,7 @@ struct SrcRec final {
    * The following functions will implicitly acquire the lock for this SrcRec
    */
   void removeIncomingBranch(TCA toSmash);
+  void removeIncomingBranchesInRange(TCA start, TCA frontier);
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
   void replaceOldTranslations();
@@ -260,7 +263,6 @@ private:
 
   GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
-  MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
   LowTCA m_dbgBranchGuardSrc{nullptr};
 
@@ -274,7 +276,8 @@ struct SrcDB {
    * Maybe could be possible with a better hash function or lower max load
    * factor.  (See D450383.)
    */
-  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*, int64_hash>;
+  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*,
+                                      int64_hash, VMAllocator<char>>;
   using iterator       = THM::iterator;
   using const_iterator = THM::const_iterator;
 
@@ -301,7 +304,7 @@ struct SrcDB {
 
   SrcRec* insert(SrcKey sk, TCA anchor) {
     return *m_map.insert(
-      sk.toAtomicInt(), new SrcRec(anchor, sk.func())
+      sk.toAtomicInt(), new SrcRec(anchor)
     );
   }
 
@@ -312,4 +315,3 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

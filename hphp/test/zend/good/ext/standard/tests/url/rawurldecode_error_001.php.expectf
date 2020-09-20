@@ -2,11 +2,9 @@
 
 -- Testing rawurldecode() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: rawurldecode() expects exactly 1 parameter, 0 given in %s/rawurldecode_error_001.php on line 14
 
 -- Testing rawurldecode() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: rawurldecode() expects exactly 1 parameter, 2 given in %s/rawurldecode_error_001.php on line 20
 Done

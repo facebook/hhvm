@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
   public $foo;
   public $bar;
@@ -7,25 +7,20 @@ class Foo {
     $this->foo = $f;
     $this->bar = $b;
   }
-  public function __destruct() {
-    echo "Destructing a Foo\n";
-  }
   public function __sleep() {
     echo "I'm going to sleep\n";
-    return array('foo');
+    return varray['foo'];
   }
   public function __wakeup() {
     echo "I'm waking up\n";
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $foo1 = new Foo(1, 2);
   var_dump($foo1);
   apc_store('x', $foo1);
   unset($foo1);
-  $foo2 = apc_fetch('x');
+  $foo2 = __hhvm_intrinsics\apc_fetch_no_check('x');
   var_dump($foo2);
 }
-
-main();

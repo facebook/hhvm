@@ -1,26 +1,26 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : hexa formats with boolean values ***\n";
 
 // array of boolean values 
-$boolean_values = array(
+$boolean_values = varray[
   true,
   false,
   TRUE,
   FALSE,
-);
+];
 
 // array of hexa formats
-$hexa_formats = array(  
+$hexa_formats = varray[  
   "%x", "%xx", "%lx", 
   "%Lx", " %x", "%x ",
   "\t%x", "\n%x", "%4x",
   "%30x", "%[0-9A-Fa-f]", "%*x"
-);
+];
 
 $count = 1;
 foreach($boolean_values as $boolean_value) {
@@ -33,4 +33,4 @@ foreach($boolean_values as $boolean_value) {
 };
 
 echo "Done";
-?>
+}

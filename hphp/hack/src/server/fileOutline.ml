@@ -1,38 +1,93 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Hh_core
+open Hh_prelude
 open Reordered_argument_collections
 open SymbolDefinition
+open Aast
+module Parser = Full_fidelity_ast
 
 type outline = string SymbolDefinition.t list
 
-let modifiers_of_ast_kinds l =
-  List.map l begin function
-    | Ast.Final -> Final
-    | Ast.Static -> Static
-    | Ast.Abstract -> Abstract
-    | Ast.Private -> Private
-    | Ast.Public -> Public
-    | Ast.Protected -> Protected
-  end
+let modifiers_to_list ~is_final ~visibility ~is_abstract ~is_static =
+  let modifiers =
+    match visibility with
+    | Public -> [SymbolDefinition.Public]
+    | Private -> [SymbolDefinition.Private]
+    | Protected -> [SymbolDefinition.Protected]
+  in
+  let modifiers =
+    if is_final then
+      Final :: modifiers
+    else
+      modifiers
+  in
+  let modifiers =
+    if is_abstract then
+      Abstract :: modifiers
+    else
+      modifiers
+  in
+  let modifiers =
+    if is_static then
+      Static :: modifiers
+    else
+      modifiers
+  in
+  List.rev modifiers
 
 let get_full_name class_name name =
   match class_name with
   | None -> name
   | Some class_name -> class_name ^ "::" ^ name
 
-let summarize_property class_name kinds var =
-  let modifiers = modifiers_of_ast_kinds kinds in
-  let span, (pos, name), _expr_opt = var in
+let summarize_property class_name var =
+  let modifiers =
+    modifiers_to_list
+      ~is_final:var.cv_final
+      ~visibility:var.cv_visibility
+      ~is_abstract:var.cv_abstract
+      ~is_static:var.cv_is_static
+  in
+  let (pos, name) = var.cv_id in
   let kind = Property in
+  let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
+  {
+    kind;
+    name;
+    full_name;
+    id;
+    pos;
+    span = var.cv_span;
+    modifiers;
+    children = None;
+    params = None;
+    docblock = None;
+    reactivity_attributes = [];
+  }
+
+let maybe_summarize_property class_name ~skip var =
+  let (_, name) = var.cv_id in
+  if SSet.mem skip name then
+    []
+  else
+    [summarize_property class_name var]
+
+let summarize_const class_name cc =
+  let (pos, name) = cc.cc_id in
+  let (span, modifiers) =
+    match cc.cc_expr with
+    | Some (p, _) -> (Pos.btw pos p, [])
+    | None -> (pos, [Abstract])
+  in
+  let kind = Const in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
   {
@@ -46,59 +101,28 @@ let summarize_property class_name kinds var =
     children = None;
     params = None;
     docblock = None;
-  }
-
-let maybe_summarize_property class_name ~skip kinds var =
-  let _, (_, name), _ = var in
-  if SSet.mem skip name then [] else [summarize_property class_name kinds var]
-
-let summarize_const class_name ((pos, name), (expr_pos, _)) =
-  let span = (Pos.btw pos expr_pos) in
-  let kind = Const in
-  let id = get_symbol_id kind (Some class_name) name in
-  let full_name = get_full_name (Some class_name) name in
-  {
-    kind;
-    name;
-    full_name;
-    id;
-    pos;
-    span;
-    modifiers = [];
-    children = None;
-    params = None;
-    docblock = None;
-  }
-
-let summarize_abs_const class_name (pos, name) =
-  let kind = Const in
-  let id = get_symbol_id kind (Some class_name) name in
-  let full_name = get_full_name (Some class_name) name in
-  {
-    kind;
-    name;
-    full_name;
-    id;
-    pos = pos;
-    span = pos;
-    modifiers = [Abstract];
-    children = None;
-    params = None;
-    docblock = None;
+    reactivity_attributes = [];
   }
 
 let modifier_of_fun_kind acc = function
-  | Ast.FAsync | Ast.FAsyncGenerator -> Async :: acc
+  | Ast_defs.FAsync
+  | Ast_defs.FAsyncGenerator ->
+    Async :: acc
   | _ -> acc
 
 let modifier_of_param_kind acc = function
-  | Some Ast.Pinout -> Inout :: acc
+  | Some Ast_defs.Pinout -> Inout :: acc
   | _ -> acc
 
 let summarize_typeconst class_name t =
-  let pos, name = t.Ast.tconst_name in
+  let (pos, name) = t.c_tconst_name in
   let kind = Typeconst in
   let id = get_symbol_id kind (Some class_name) name in
+  let modifiers =
+    match t.c_tconst_abstract with
+    | TCAbstract _ -> [Abstract]
+    | _ -> []
+  in
   let full_name = get_full_name (Some class_name) name in
   {
     kind;
@@ -106,20 +130,32 @@ let summarize_typeconst class_name t =
     full_name;
     id;
     pos;
-    span = t.Ast.tconst_span;
-    modifiers = if t.Ast.tconst_abstract then [Abstract] else [];
+    span = t.c_tconst_span;
+    modifiers;
     children = None;
     params = None;
     docblock = None;
+    reactivity_attributes = [];
   }
 
 let summarize_param param =
-  let pos, name = param.Ast.param_id in
-  let param_start = Option.value_map param.Ast.param_hint ~f:fst ~default:pos in
-  let param_end = Option.value_map param.Ast.param_expr ~f:fst ~default:pos in
-  let modifiers = modifier_of_param_kind [] param.Ast.param_callconv in
-  let param_vis = Option.to_list param.Ast.param_modifier in
-  let modifiers = (modifiers_of_ast_kinds param_vis) @ modifiers in
+  let pos = param.param_pos in
+  let name = param.param_name in
+  let param_start =
+    Option.value_map
+      (hint_of_type_hint param.param_type_hint)
+      ~f:fst
+      ~default:pos
+  in
+  let param_end = Option.value_map param.param_expr ~f:fst ~default:pos in
+  let modifiers = modifier_of_param_kind [] param.param_callconv in
+  let modifiers =
+    match param.param_visibility with
+    | Some Public -> SymbolDefinition.Public :: modifiers
+    | Some Private -> SymbolDefinition.Private :: modifiers
+    | Some Protected -> SymbolDefinition.Protected :: modifiers
+    | _ -> modifiers
+  in
   let kind = Param in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
@@ -134,13 +170,41 @@ let summarize_param param =
     modifiers;
     params = None;
     docblock = None;
+    reactivity_attributes = [];
   }
 
+let get_reactivity_attributes attrs =
+  let rec go attrs acc =
+    match attrs with
+    | [] -> acc
+    | { ua_name = (_, n); _ } :: tl ->
+      let module SNUA = Naming_special_names.UserAttributes in
+      let acc =
+        if String.equal n SNUA.uaReactive then
+          Rx :: acc
+        else if String.equal n SNUA.uaShallowReactive then
+          Shallow :: acc
+        else if String.equal n SNUA.uaLocalReactive then
+          Local :: acc
+        else if String.equal n SNUA.uaOnlyRxIfImpl then
+          OnlyRxIfImpl :: acc
+        else if String.equal n SNUA.uaAtMostRxAsArgs then
+          AtMostRxAsArgs :: acc
+        else
+          acc
+      in
+      go tl acc
+  in
+  go attrs []
+
 let summarize_method class_name m =
-  let modifiers = modifier_of_fun_kind [] m.Ast.m_fun_kind in
-  let modifiers = (modifiers_of_ast_kinds m.Ast.m_kind) @ modifiers in
-  let params = Some (List.map m.Ast.m_params summarize_param) in
-  let name = snd m.Ast.m_name in
+  let modifiers = modifier_of_fun_kind [] m.m_fun_kind in
+  let modifiers =
+    modifiers_to_list m.m_final m.m_visibility m.m_abstract m.m_static
+    @ modifiers
+  in
+  let params = Some (List.map m.m_params summarize_param) in
+  let name = snd m.m_name in
   let kind = Method in
   let id = get_symbol_id kind (Some class_name) name in
   let full_name = get_full_name (Some class_name) name in
@@ -149,62 +213,107 @@ let summarize_method class_name m =
     name;
     full_name;
     id;
-    pos = (fst m.Ast.m_name);
-    span = m.Ast.m_span;
+    pos = fst m.m_name;
+    span = m.m_span;
     modifiers;
     children = None;
     params;
     docblock = None;
+    reactivity_attributes = get_reactivity_attributes m.m_user_attributes;
   }
 
 (* Parser synthesizes AST nodes for implicit properties (defined in constructor
  * parameter lists. We don't want them to show up in outline view *)
 let params_implicit_fields params =
-  List.filter_map params ~f:begin function
-    | { Ast.param_modifier = Some _vis; param_id; _ } ->
-        Some (String_utils.lstrip (snd param_id) "$" )
-    | _ -> None
-  end
+  List.filter_map params ~f:(function
+      | { param_visibility = Some _vis; param_name; _ } ->
+        Some (String_utils.lstrip param_name "$")
+      | _ -> None)
 
 let class_implicit_fields class_ =
-  List.concat_map class_.Ast.c_body ~f:begin function
-    | Ast.Method { Ast.m_name = _, "__construct"; m_params; _ } ->
-        params_implicit_fields m_params
-    | _ -> []
-  end
+  List.concat_map class_.c_methods ~f:(fun m ->
+      let (_, name) = m.m_name in
+      if String.equal name "__construct" then
+        params_implicit_fields m.m_params
+      else
+        [])
 
 let summarize_class class_ ~no_children =
-  let class_name = Utils.strip_ns (snd class_.Ast.c_name) in
-  let class_name_pos = fst class_.Ast.c_name in
-  let c_span = class_.Ast.c_span in
+  let class_name = Utils.strip_ns (snd class_.c_name) in
+  let class_name_pos = fst class_.c_name in
+  let c_span = class_.c_span in
   let modifiers =
-    if class_.Ast.c_final then [Final] else []
+    if class_.c_final then
+      [Final]
+    else
+      []
   in
-  let modifiers = match class_.Ast.c_kind with
-    | Ast.Cabstract -> Abstract :: modifiers
+  let modifiers =
+    match class_.c_kind with
+    | Ast_defs.Cabstract -> Abstract :: modifiers
     | _ -> modifiers
   in
-  let children = if no_children then None else begin
-    let implicit_props = List.fold (class_implicit_fields class_)
-      ~f:SSet.add ~init:SSet.empty
-    in
-    Some (List.concat_map class_.Ast.c_body ~f:begin function
-      | Ast.Method m -> [summarize_method class_name m]
-      | Ast.ClassVars { Ast.cv_kinds = kinds; Ast.cv_names = vars; _ } ->
-          List.concat_map vars
-            ~f:(maybe_summarize_property class_name ~skip:implicit_props kinds)
-      | Ast.XhpAttr (_, var, _, _) ->
-          maybe_summarize_property class_name ~skip:implicit_props [] var
-      | Ast.Const (_, cl) -> List.map cl ~f:(summarize_const class_name)
-      | Ast.AbsConst (_, id) -> [summarize_abs_const class_name id]
-      | Ast.TypeConst t -> [summarize_typeconst class_name t]
-      | _ -> []
-      end)
-  end in
-  let kind = match class_.Ast.c_kind with
-    | Ast.Cinterface -> Interface
-    | Ast.Ctrait -> Trait
-    | Ast.Cenum -> Enum
+  let children =
+    if no_children then
+      None
+    else
+      let implicit_props =
+        List.fold (class_implicit_fields class_) ~f:SSet.add ~init:SSet.empty
+      in
+      let acc =
+        (* Summarized class properties *)
+        List.fold_left
+          ~init:[]
+          ~f:(fun acc cv ->
+            List.fold_right
+              ~init:acc
+              ~f:List.cons
+              (maybe_summarize_property class_name ~skip:implicit_props cv))
+          class_.c_vars
+      in
+      let acc =
+        (* Summarized xhp_attrs *)
+        List.fold_left
+          ~init:acc
+          ~f:(fun acc (_, var, _, _) ->
+            List.fold_right
+              ~init:acc
+              ~f:List.cons
+              (maybe_summarize_property class_name ~skip:implicit_props var))
+          class_.c_xhp_attrs
+      in
+      let acc =
+        (* Summarized consts *)
+        List.fold_left
+          ~init:acc
+          ~f:(fun acc c -> summarize_const class_name c :: acc)
+          class_.c_consts
+      in
+      let acc =
+        (* Summarized type consts *)
+        List.fold_left
+          ~init:acc
+          ~f:(fun acc tc -> summarize_typeconst class_name tc :: acc)
+          class_.c_typeconsts
+      in
+      let acc =
+        (* Summarized methods *)
+        List.fold_left
+          ~init:acc
+          ~f:(fun acc m -> summarize_method class_name m :: acc)
+          class_.c_methods
+      in
+      let sort_by_line summaries =
+        let cmp x y = Int.compare (Pos.line x.pos) (Pos.line y.pos) in
+        List.sort ~compare:cmp summaries
+      in
+      Some (sort_by_line acc)
+  in
+  let kind =
+    match class_.c_kind with
+    | Ast_defs.Cinterface -> Interface
+    | Ast_defs.Ctrait -> Trait
+    | Ast_defs.Cenum -> Enum
     | _ -> Class
   in
   let name = class_name in
@@ -221,22 +330,16 @@ let summarize_class class_ ~no_children =
     children;
     params = None;
     docblock = None;
+    reactivity_attributes = [];
   }
 
-let typedef_kind_pos tk =
-  begin match tk with
-  | Ast.Alias (pos,_) -> pos
-  | Ast.NewType (pos,_) -> pos
-  end
-
-let summarize_typedef tdef =
-  let kind = Typedef in
-  let name = Utils.strip_ns (snd tdef.Ast.t_id) in
+let summarize_record_decl rd =
+  let kind = SymbolDefinition.RecordDef in
+  let name = Utils.strip_ns (snd rd.rd_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
-  let pos = fst tdef.Ast.t_id in
-  let kind_pos = typedef_kind_pos tdef.Ast.t_kind in
-  let span = (Pos.btw pos kind_pos) in
+  let pos = fst rd.rd_name in
+  let span = rd.rd_span in
   {
     kind;
     name;
@@ -248,13 +351,36 @@ let summarize_typedef tdef =
     children = None;
     params = None;
     docblock = None;
+    reactivity_attributes = [];
+  }
+
+let summarize_typedef tdef =
+  let kind = SymbolDefinition.Typedef in
+  let name = Utils.strip_ns (snd tdef.t_name) in
+  let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
+  let pos = fst tdef.t_name in
+  let kind_pos = fst tdef.t_kind in
+  let span = Pos.btw pos kind_pos in
+  {
+    kind;
+    name;
+    full_name;
+    id;
+    pos;
+    span;
+    modifiers = [];
+    children = None;
+    params = None;
+    docblock = None;
+    reactivity_attributes = [];
   }
 
 let summarize_fun f =
-  let modifiers = modifier_of_fun_kind [] f.Ast.f_fun_kind in
-  let params = Some (List.map f.Ast.f_params summarize_param) in
-  let kind = Function in
-  let name = Utils.strip_ns (snd f.Ast.f_name) in
+  let modifiers = modifier_of_fun_kind [] f.f_fun_kind in
+  let params = Some (List.map f.f_params summarize_param) in
+  let kind = SymbolDefinition.Function in
+  let name = Utils.strip_ns (snd f.f_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
   {
@@ -262,20 +388,21 @@ let summarize_fun f =
     name;
     full_name;
     id;
-    pos = fst f.Ast.f_name;
-    span = f.Ast.f_span;
+    pos = fst f.f_name;
+    span = f.f_span;
     modifiers;
     children = None;
     params;
     docblock = None;
+    reactivity_attributes = get_reactivity_attributes f.f_user_attributes;
   }
 
 let summarize_gconst cst =
-  let pos = fst cst.Ast.cst_name in
-  let gconst_start = Option.value_map cst.Ast.cst_type ~f:fst ~default:pos in
-  let gconst_end = fst cst.Ast.cst_value in
+  let pos = fst cst.cst_name in
+  let gconst_start = Option.value_map cst.cst_type ~f:fst ~default:pos in
+  let gconst_end = fst cst.cst_value in
   let kind = Const in
-  let name = Utils.strip_ns (snd cst.Ast.cst_name) in
+  let name = Utils.strip_ns (snd cst.cst_name) in
   let id = get_symbol_id kind None name in
   let full_name = get_full_name None name in
   {
@@ -289,6 +416,7 @@ let summarize_gconst cst =
     children = None;
     params = None;
     docblock = None;
+    reactivity_attributes = [];
   }
 
 let summarize_local name span =
@@ -306,73 +434,120 @@ let summarize_local name span =
     children = None;
     params = None;
     docblock = None;
+    reactivity_attributes = [];
   }
 
 let outline_ast ast =
-  let outline = List.filter_map ast ~f:begin function
-    | Ast.Fun f -> Some (summarize_fun f)
-    | Ast.Class c -> Some (summarize_class c ~no_children:false)
-    | _ -> None
-  end in
+  let outline =
+    List.filter_map ast ~f:(function
+        | Fun f -> Some (summarize_fun f)
+        | Class c -> Some (summarize_class c ~no_children:false)
+        | _ -> None)
+  in
   List.map outline SymbolDefinition.to_absolute
 
 let should_add_docblock = function
-  | Function| Class | Method | Property | Const | Enum
-  | Interface | Trait | Typeconst | Typedef -> true
-  | LocalVar | Param -> false
+  | Function
+  | Class
+  | Method
+  | Property
+  | Const
+  | Enum
+  | Interface
+  | Trait
+  | Typeconst
+  | Typedef
+  | RecordDef ->
+    true
+  | LocalVar
+  | Param ->
+    false
 
 let add_def_docblock finder previous_def_line def =
   let line = Pos.line def.pos in
-  let docblock = if should_add_docblock def.kind
-    then Docblock_finder.find_docblock finder previous_def_line line
-    else None
+  let docblock =
+    if should_add_docblock def.kind then
+      Docblock_finder.find_docblock finder previous_def_line line
+    else
+      None
   in
-  line, { def with docblock }
+  (line, { def with docblock })
 
 let add_docblocks defs comments =
   let finder = Docblock_finder.make_docblock_finder comments in
-
-  let rec map_def f acc def =
-    let acc, def = f acc def in
-    let acc, children = Option.value_map def.children
-      ~f:(fun defs ->
-        let acc, defs = map_def_list f acc defs in
-        acc, Some defs)
-      ~default:(acc, None)
+  let rec map_def f (acc : int) (def : string SymbolDefinition.t) =
+    let (acc, def) = f acc def in
+    let (acc, children) =
+      Option.value_map
+        def.children
+        ~f:(fun defs ->
+          let (acc, defs) = map_def_list f acc defs in
+          (acc, Some defs))
+        ~default:(acc, None)
     in
-    acc, { def with children }
-
-  and map_def_list f acc defs =
-    let acc, defs = List.fold_left defs
-      ~f:(fun (acc, defs) def ->
-        let acc, def = map_def f acc def in
-        acc, def :: defs)
-      ~init:(acc, []) in
-    acc, List.rev defs
-
+    (acc, { def with children })
+  and map_def_list f (acc : int) (defs : string SymbolDefinition.t list) =
+    let (acc, defs) =
+      List.fold_left
+        defs
+        ~f:(fun (acc, defs) def ->
+          let (acc, def) = map_def f acc def in
+          (acc, def :: defs))
+        ~init:(acc, [])
+    in
+    (acc, List.rev defs)
   in
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
 let outline popt content =
-  let {Parser_hack.ast; comments; _} =
-    Parser_hack.program
-      popt
-      Relative_path.default
-      content
-      ~include_line_comments:true
-      ~keep_errors:false
+  let { Parser_return.ast; comments; _ } =
+    let ast =
+      Errors.ignore_ (fun () ->
+          if Ide_parser_cache.is_enabled () then
+            Ide_parser_cache.(
+              with_ide_cache @@ fun () ->
+              get_ast popt Relative_path.default content)
+          else
+            let env =
+              Parser.make_env
+                ~parser_options:popt
+                ~include_line_comments:true
+                ~keep_errors:false
+                Relative_path.default
+            in
+            Parser.from_text_with_legacy env content)
+    in
+    ast
   in
   let result = outline_ast ast in
   add_docblocks result comments
 
+let outline_entry_no_comments
+    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
+    string SymbolDefinition.t list =
+  Ast_provider.compute_ast ~popt ~entry |> outline_ast
+
 let rec print_def ~short_pos indent def =
-  let
-    {name; kind; id; pos; span; modifiers; children; params; docblock;
-      full_name=_} = def
+  let {
+    name;
+    kind;
+    id;
+    pos;
+    span;
+    modifiers;
+    children;
+    params;
+    docblock;
+    full_name = _;
+    reactivity_attributes = _;
+  } =
+    def
   in
-  let print_pos, print_span = if short_pos
-    then Pos.string_no_file, Pos.multiline_string_no_file
-    else Pos.string, Pos.multiline_string
+  let (print_pos, print_span) =
+    if short_pos then
+      (Pos.string_no_file, Pos.multiline_string_no_file)
+    else
+      (Pos.string, Pos.multiline_string)
   in
   Printf.printf "%s%s\n" indent name;
   Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
@@ -380,24 +555,20 @@ let rec print_def ~short_pos indent def =
   Printf.printf "%s  position: %s\n" indent (print_pos pos);
   Printf.printf "%s  span: %s\n" indent (print_span span);
   Printf.printf "%s  modifiers: " indent;
-  List.iter modifiers
-    (fun x -> Printf.printf "%s " (string_of_modifier x));
-    Printf.printf "\n";
-  Option.iter params (fun x ->
-    Printf.printf "%s  params:\n" indent;
-    print ~short_pos (indent ^ "    ") x;
-  );
-  Option.iter docblock (fun x ->
-    Printf.printf "%s  docblock:\n" indent;
-    Printf.printf "%s\n" x;
-  );
+  List.iter modifiers (fun x -> Printf.printf "%s " (string_of_modifier x));
   Printf.printf "\n";
-  Option.iter children (fun x ->
-    print ~short_pos (indent ^ "  ") x
-  );
+  Option.iter params (fun x ->
+      Printf.printf "%s  params:\n" indent;
+      print ~short_pos (indent ^ "    ") x);
+  Option.iter docblock (fun x ->
+      Printf.printf "%s  docblock:\n" indent;
+      Printf.printf "%s\n" x);
+  Printf.printf "\n";
+  Option.iter children (fun x -> print ~short_pos (indent ^ "  ") x)
 
 and print ~short_pos indent defs =
   List.iter defs ~f:(print_def ~short_pos indent)
 
-let print_def ?short_pos:(short_pos = false) = print_def ~short_pos
-let print ?short_pos:(short_pos = false) = print ~short_pos ""
+let print_def ?(short_pos = false) = print_def ~short_pos
+
+let print ?(short_pos = false) = print ~short_pos ""

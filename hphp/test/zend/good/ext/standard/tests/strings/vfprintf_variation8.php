@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
  * Description: Write a formatted string to a stream
  * Source code: ext/standard/formatted_print.c
@@ -8,7 +8,7 @@
  * Test vfprintf() when different string formats and non-string values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing vfprintf() : string formats and non-string values ***\n";
@@ -23,41 +23,34 @@ $formats =
 
 // Arrays of non string values for the format defined in $format.
 // Each sub array contains non string values which correspond to each format in $format
-$args_array = array(
+$args_array = varray[
 
   // array of float values
-  array(2.2, .2, 10.2,
+  varray[2.2, .2, 10.2,
         123456.234, 123456.234, -1234.6789, +1234.6789,
         2.1234567e10, +2.7654321e10, -2.7654321e10,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
+        3.33, +4.44, 1.11,-2.22 ],
   
  // array of int values
- array(2, -2, +2,
+ varray[2, -2, +2,
        123456, 123456234, -12346789, +12346789,
        123200, +20000, -40000, 22212,
        12345780, 1211111, -12111111, -12345634,
-       3, +4, 1,-2 ),
+       3, +4, 1,-2 ],
 
-
-  // different arrays
-  array( array(0), array(1, 2), array(-1, -1),
-         array("123"), array('123'), array('-123'), array("-123"),
-         array(true), array(false), array(TRUE), array(FALSE),
-         array("123hello"), array("1", "2"), array('123hello'), array(12=>"12twelve"),
-         array("3"), array("4"), array("1"), array("2") ),
 
   // array of boolean data
-  array( true, TRUE, false,
+  varray[ true, TRUE, false,
          TRUE, 0, FALSE, 1,
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
-         1, TRUE, 0, FALSE),
+         1, TRUE, 0, FALSE],
   
-);
+];
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation8.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation8.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -76,5 +69,5 @@ echo "\n";
 
 unlink($data_file);
  
-?>
-===DONE===
+echo "===DONE===\n";
+}

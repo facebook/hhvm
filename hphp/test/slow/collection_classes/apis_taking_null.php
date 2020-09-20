@@ -1,4 +1,7 @@
 <?hh
+
+<<__EntryPoint>>
+function main_apis_taking_null() {
 $x = new Vector(null);
 var_dump($x);
 $x->addAll(null);
@@ -34,3 +37,4 @@ unset($x);
 $x = Set::fromKeysOf(null);
 var_dump($x);
 unset($x);
+}

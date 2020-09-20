@@ -1,6 +1,7 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 $support = gd_info();
 if (!isset($support['JPEG Support']) || $support['JPEG Support'] === false) {
-	print 'skip jpeg support not available';
+    print 'skip jpeg support not available';
 }
-?>
+}

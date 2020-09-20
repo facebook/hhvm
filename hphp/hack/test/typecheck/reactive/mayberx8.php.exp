@@ -1,0 +1,6 @@
+File "mayberx8.php", line 11, characters 10-68:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "mayberx8.php", line 4, characters 10-16:
+This function is normal.
+File "mayberx8.php", line 11, characters 18-67:
+This argument caused function to be normal.

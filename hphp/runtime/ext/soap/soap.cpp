@@ -125,15 +125,16 @@ void SoapData::reset() {
 
   m_cur_uniq_ns = 0;
   m_cur_uniq_ref = 0;
-  m_ref_map.reset();
+  m_ref_map = {};
+  m_node_map = {};
 
-  m_sdls.clear();
-  m_typemaps.clear();
+  m_sdls = {};
+  m_typemaps = {};
 
   for (auto& handler : m_encodings) {
     xmlCharEncCloseFunc(handler);
   }
-  m_encodings.clear();
+  m_encodings = {};
 }
 
 IMPLEMENT_REQUEST_LOCAL(SoapData, s_soap_data);

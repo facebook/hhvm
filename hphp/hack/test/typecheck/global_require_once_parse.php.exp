@@ -1,1 +1,2 @@
-No errors
+File "global_require_once_parse.php", line 12, characters 1-30:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])

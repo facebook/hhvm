@@ -16,6 +16,8 @@
 */
 #include "hphp/runtime/ext/icu/ext_icu_locale.h"
 #include "hphp/runtime/ext/icu/icu.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include <unicode/ures.h>
@@ -180,7 +182,7 @@ static Variant get_icu_value(const String &locale, LocaleTag tag,
     case LOC_VARIANT:      ulocfunc = uloc_getVariant;   break;
     case LOC_CANONICALIZE: ulocfunc = uloc_canonicalize; break;
     default:
-      assert(false);
+      assertx(false);
       return false;
   }
 
@@ -241,7 +243,7 @@ static Variant get_icu_display_value(const String& locale,
     case LOC_VARIANT:  ulocfunc = uloc_getDisplayVariant;  break;
     case LOC_DISPLAY:  ulocfunc = uloc_getDisplayName;     break;
     default:
-      assert(false);
+      assertx(false);
       return false;
   }
 
@@ -447,7 +449,7 @@ static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
   if (strval.empty()) {
     return Array();
   }
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   const char *s = strval.c_str(), *e = s + strval.size(), *p;
   for (p = s; p < e; ++p) {
     if (!isIDSeparator(*p)) continue;
@@ -514,7 +516,7 @@ static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
   if (!e) return Array();
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   const char *key;
   int key_len;
   String val(128, ReserveString);
@@ -685,7 +687,7 @@ static void add_array_entry(Array& ret,
 static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
   CHECK_LOCALELEN_OR_RETURN(locale, Array());
   String locname = localeOrDefault(locale);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   if (std::find(g_grandfathered.begin(),
                 g_grandfathered.end(), locale.data()) !=
                 g_grandfathered.end()) {

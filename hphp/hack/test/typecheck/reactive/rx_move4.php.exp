@@ -1,0 +1,4 @@
+File "rx_move4.php", line 11, characters 24-25:
+Variable `$a` is undefined, not always defined, or unset afterwards. (Naming[2050])
+File "rx_move4.php", line 9, characters 5-27:
+Did you mean `$b` instead?

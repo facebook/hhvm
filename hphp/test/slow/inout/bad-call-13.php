@@ -3,3 +3,4 @@
 function main() {
   foo(inout $GLOBALS['x']);
 }
+

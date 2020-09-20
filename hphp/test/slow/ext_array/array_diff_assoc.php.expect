@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   ["b"]=>
   string(5) "brown"
   ["c"]=>
@@ -6,7 +6,7 @@ array(3) {
   [0]=>
   string(3) "red"
 }
-array(2) {
+darray(2) {
   [0]=>
   int(0)
   [1]=>

@@ -1,1 +1,1 @@
---optimize-level=0 -d hhvm.php7.all=0
+-d hhvm.php7.all=0

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $x = new XMLWriter();
@@ -14,4 +14,8 @@ function main() {
   $x->endDocument();
   var_dump($x->outputMemory(true));
 }
+
+<<__EntryPoint>>
+function main_xmlwriter_null_prefix() {
 main();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   try {
@@ -14,4 +14,8 @@ label:
   return "return2";
 }
 
+
+<<__EntryPoint>>
+function main_goto_bare() {
 var_dump(foo());
+}

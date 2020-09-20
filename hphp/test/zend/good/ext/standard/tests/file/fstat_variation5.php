@@ -1,14 +1,14 @@
-<?php
-$variation_array = array (
+<?hh <<__EntryPoint>> function main(): void {
+$variation_array = darray [
     'int 0' => 0,
     'int 1' => 1,
     'int 12345' => 12345,
     'int -12345' => -2345,
-    );
+    ];
 
 
 foreach ( $variation_array as $var ) {
-  var_dump(fstat( $var  ) );
+  try { var_dump(fstat( $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

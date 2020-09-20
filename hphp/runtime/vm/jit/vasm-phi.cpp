@@ -136,22 +136,9 @@ void optimizePhis(Vunit& unit) {
             if (pred == label) continue;
             auto i2 = unit.blocks[pred].code.end();
             --i2;
-            if (i2->op == Vinstr::phijmp) {
-              assert(i2->phijmp_.target == label);
-              i2->phijmp_.target = phijmp.target;
-            } else {
-              assert(i2->op == Vinstr::phijcc);
-              int changes = 0;
-              if (i2->phijcc_.targets[0] == label) {
-                i2->phijcc_.targets[0] = phijmp.target;
-                changes++;
-              }
-              if (i2->phijcc_.targets[1] == label) {
-                i2->phijcc_.targets[1] = phijmp.target;
-                changes++;
-              }
-              assertx(changes > 0);
-            }
+            assertx(i2->op == Vinstr::phijmp);
+            assertx(i2->phijmp_.target == label);
+            i2->phijmp_.target = phijmp.target;
             preds[phijmp.target].push_back(pred);
           }
           preds[label].clear();

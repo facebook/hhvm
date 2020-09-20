@@ -1,4 +1,2 @@
 
-Warning: foo() expects exactly 1 parameter, 0 given in %s/slow/hhbbc/option_type_hint_001.php on line 6
-
-Catchable fatal error: Argument 1 to Foo::foo() must be of type ?Foo, undefined variable given in %s/slow/hhbbc/option_type_hint_001.php on line 9
+Catchable fatal error: Argument 1 to Foo::__construct() must be of type ?Foo, int given in %s/slow/hhbbc/option_type_hint_001.php on line 12

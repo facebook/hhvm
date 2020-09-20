@@ -1,5 +1,5 @@
 Basic test of POSIX times function
-array(5) {
+darray(5) {
   ["ticks"]=>
   int(%i)
   ["utime"]=>

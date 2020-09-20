@@ -1,6 +1,0 @@
-*** Testing strftime() : usage variation ***
-
--- Testing strftime() function with Day of the month as decimal single digit format --
-bool(false)
-bool(false)
-===DONE===

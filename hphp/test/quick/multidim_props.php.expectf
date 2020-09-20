@@ -1,16 +1,11 @@
-object(A)#1 (2) {
+object(A) (1) {
   ["x":"A":private]=>
   *RECURSION*
-  ["z":"A":private]=>
-  NULL
 }
-object(A)#1 (2) {
+object(A) (1) {
   ["x":"A":private]=>
   *RECURSION*
-  ["z":"A":private]=>
-  NULL
 }
-NULL
 
 Notice: Undefined property: A::$x in %s on line 14
 
@@ -33,20 +28,14 @@ Notice: Cannot access property on non-object in %s on line 16
 
 Notice: Cannot access property on non-object in %s on line 16
 NULL
-NULL
-object(A)#1 (2) {
+object(A) (1) {
   ["x":"A":private]=>
   *RECURSION*
-  ["z":"A":private]=>
-  NULL
 }
-object(A)#1 (2) {
+object(A) (1) {
   ["x":"A":private]=>
   *RECURSION*
-  ["z":"A":private]=>
-  NULL
 }
-NULL
 
 Notice: Undefined property: A::$x in %s on line 14
 
@@ -68,5 +57,4 @@ Notice: Cannot access property on non-object in %s on line 16
 Notice: Cannot access property on non-object in %s on line 16
 
 Notice: Cannot access property on non-object in %s on line 16
-NULL
 NULL

@@ -1,0 +1,2 @@
+(24,5)-(24,13) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new define()()`?
+(24,5)-(24,13) Unexpected node on right hand side of `new` or `instanceof`: `define_expression`

@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : int imagecolorstotal(resource im)
  * Description: Find out the number of colors in an image's palette 
  * Source code: ext/gd/gd.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
 
 // Palette image
@@ -24,5 +24,5 @@ $bg = imagecolorallocate( $img, 255, 255, 255 );
 var_dump( imagecolorstotal( $img ) );
 imagedestroy( $img );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

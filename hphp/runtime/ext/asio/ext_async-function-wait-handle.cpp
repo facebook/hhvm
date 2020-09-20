@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
@@ -28,7 +29,67 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/system/systemlib.h"
 
+#include <folly/SharedMutex.h>
+#include <folly/container/F14Map.h>
+
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+size_t s_numAsyncFrameIds = 1;
+SrcKey s_asyncFrames[kMaxAsyncFrameId + 1];
+folly::F14FastMap<SrcKey, AsyncFrameId, SrcKey::Hasher> s_asyncFrameMap;
+folly::SharedMutex s_asyncFrameLock;
+}
+
+AsyncFrameId getAsyncFrameId(SrcKey sk) {
+  {
+    folly::SharedMutex::ReadHolder lock(s_asyncFrameLock);
+    auto const it = s_asyncFrameMap.find(sk);
+    if (it != s_asyncFrameMap.end()) return it->second;
+    if (s_numAsyncFrameIds > kMaxAsyncFrameId) return kInvalidAsyncFrameId;
+  }
+  folly::SharedMutex::WriteHolder lock(s_asyncFrameLock);
+  auto const it = s_asyncFrameMap.insert({sk, s_numAsyncFrameIds});
+  if (!it.second) return it.first->second;
+  if (s_numAsyncFrameIds > kMaxAsyncFrameId) {
+    s_asyncFrameMap.erase(sk);
+    return kInvalidAsyncFrameId;
+  }
+  s_asyncFrames[s_numAsyncFrameIds++] = sk;
+  return s_numAsyncFrameIds - 1;
+}
+
+SrcKey getAsyncFrame(AsyncFrameId id) {
+  assertx(0 < id && id <= kMaxAsyncFrameId);
+  assertx(id != kInvalidAsyncFrameId);
+  return s_asyncFrames[id];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool c_AsyncFunctionWaitHandle::hasTailFrames() const {
+  return tailFrame(kNumTailFrames - 1) != kInvalidAsyncFrameId;
+}
+
+size_t c_AsyncFunctionWaitHandle::firstTailFrameIndex() const {
+  assertx(hasTailFrames());
+  for (auto i = 0; i < kNumTailFrames; i++) {
+    if (tailFrame(i) != kInvalidAsyncFrameId) return i;
+  }
+  assertx(false);
+  not_reached();
+}
+
+size_t c_AsyncFunctionWaitHandle::lastTailFrameIndex() const {
+  return kNumTailFrames;
+}
+
+AsyncFrameId c_AsyncFunctionWaitHandle::tailFrame(size_t index) const {
+  assertx(0 <= index && index < kNumTailFrames);
+  return m_tailFrameIds[kNumTailFrames - index - 1];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
@@ -36,7 +97,7 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
     return;
   }
 
-  assert(!isRunning());
+  assertx(!isRunning());
   frame_free_locals_inl_no_hook(actRec(), actRec()->func()->numLocals());
   decRefObj(m_children[0].getChild());
 }
@@ -45,50 +106,36 @@ namespace {
   const StaticString s__closure_("{closure}");
 }
 
-template <bool mayUseVV>
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
                                   jit::TCA resumeAddr,
-                                  Offset resumeOffset,
+                                  Offset suspendOffset,
                                   c_WaitableWaitHandle* child) {
-  assert(fp);
-  assert(!fp->resumed());
-  assert(fp->func()->isAsyncFunction());
-  assert(child);
-  assert(child->instanceof(c_WaitableWaitHandle::classof()));
-  assert(!child->isFinished());
+  assertx(fp);
+  assertx(!isResumed(fp));
+  assertx(fp->func()->isAsyncFunction());
+  assertx(child);
+  assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(!child->isFinished());
 
   const size_t frameSize = Resumable::getFrameSize(numSlots);
   const size_t totalSize = sizeof(NativeNode) + frameSize + sizeof(Resumable) +
                            sizeof(c_AsyncFunctionWaitHandle);
   auto const resumable = Resumable::Create(frameSize, totalSize);
-  resumable->initialize<false, mayUseVV>(fp,
-                                         resumeAddr,
-                                         resumeOffset,
-                                         frameSize,
-                                         totalSize);
+  resumable->initialize<false>(fp,
+                               resumeAddr,
+                               suspendOffset,
+                               frameSize,
+                               totalSize);
   auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
-  assert(waitHandle->hasExactlyOneRef());
+  assertx(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
-  assert(waitHandle->noDestruct());
+  waitHandle->m_packedTailFrameIds = -1;
+  assertx(!waitHandle->hasTailFrames());
   waitHandle->initialize(child);
   return waitHandle;
 }
-
-template c_AsyncFunctionWaitHandle*
-c_AsyncFunctionWaitHandle::Create<true>(const ActRec* fp,
-                                        size_t numSlots,
-                                        jit::TCA resumeAddr,
-                                        Offset resumeOffset,
-                                        c_WaitableWaitHandle* child);
-
-template c_AsyncFunctionWaitHandle*
-c_AsyncFunctionWaitHandle::Create<false>(const ActRec* fp,
-                                        size_t numSlots,
-                                        jit::TCA resumeAddr,
-                                        Offset resumeOffset,
-                                        c_WaitableWaitHandle* child);
 
 void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
                                              c_WaitableWaitHandle* child) {
@@ -104,8 +151,8 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 
 void c_AsyncFunctionWaitHandle::resume() {
   auto const child = m_children[0].getChild();
-  assert(getState() == STATE_READY);
-  assert(child->isFinished());
+  assertx(getState() == STATE_READY);
+  assertx(child->isFinished());
   setState(STATE_RUNNING);
 
   if (LIKELY(child->isSucceeded())) {
@@ -119,7 +166,7 @@ void c_AsyncFunctionWaitHandle::resume() {
 }
 
 void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
-  assert(!child->isFinished());
+  assertx(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
   asio::enter_context(child, getContextIdx());
@@ -141,24 +188,27 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   }
 }
 
-void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
+void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
+  if (RO::EvalEnableImplicitContext) {
+    this->m_implicitContext = *ImplicitContext::activeCtx;
+  }
 
   // Suspend the async function.
-  resumable()->setResumeAddr(nullptr, resumeOffset);
+  resumable()->setResumeAddr(nullptr, suspendOffset);
 
   // Set up the dependency.
   setState(STATE_BLOCKED);
   m_children[0].setChild(child.detach());
 }
 
-void c_AsyncFunctionWaitHandle::ret(Cell& result) {
-  assert(isRunning());
+void c_AsyncFunctionWaitHandle::ret(TypedValue& result) {
+  assertx(isRunning());
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  cellCopy(result, m_resultOrException);
+  tvCopy(result, m_resultOrException);
   parentChain.unblock();
 }
 
@@ -168,9 +218,9 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
  * - consumes reference of the given Exception object
  */
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
-  assert(isRunning());
-  assert(exception);
-  assert(exception->instanceof(SystemLib::s_ThrowableClass));
+  assertx(isRunning());
+  assertx(exception);
+  assertx(exception->instanceof(SystemLib::s_ThrowableClass));
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {
@@ -184,7 +234,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
 
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
-  cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
+  tvCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
 }
 
@@ -192,7 +242,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
  * Mark the wait handle as failed due to unexpected abrupt interrupt.
  */
 void c_AsyncFunctionWaitHandle::failCpp() {
-  assert(isRunning());
+  assertx(isRunning());
   auto const exception = AsioSession::Get()->getAbruptInterruptException();
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
@@ -246,13 +296,13 @@ c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     return m_children[0].getChild();
   } else {
-    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
+    assertx(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
 
 void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
+  assertx(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -261,7 +311,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assert(getContextIdx() <= ctx_idx);
+  assertx(getContextIdx() <= ctx_idx);
   if (getContextIdx() != ctx_idx) {
     decRefObj(this);
     return;
@@ -295,7 +345,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
       break;
 
     default:
-      assert(false);
+      assertx(false);
   }
 }
 
@@ -310,22 +360,9 @@ String c_AsyncFunctionWaitHandle::getFileName() {
 
 // Get the next execution offset
 Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
-  if (isFinished()) {
-    return InvalidAbsoluteOffset;
-  }
-
+  assertx(!isFinished());
   always_assert(!isRunning());
-  return resumable()->resumeOffset();
-}
-
-// Get the line number on which execution will proceed when execution resumes.
-int c_AsyncFunctionWaitHandle::getLineNumber() {
-  if (isFinished()) {
-    return -1;
-  }
-
-  always_assert(!isRunning());
-  return actRec()->func()->unit()->getLineNumber(resumable()->resumeOffset());
+  return resumable()->resumeFromAwaitOffset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

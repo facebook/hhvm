@@ -1,0 +1,6 @@
+File "dynamic_refine_then_invoke.php--file2.php", line 6, characters 8-9:
+Typing error (Typing[4110])
+File "dynamic_refine_then_invoke.php--file1.php", line 4, characters 25-31:
+Expected `nonnull`
+File "dynamic_refine_then_invoke.php--file1.php", line 4, characters 25-31:
+But got `dynamic`

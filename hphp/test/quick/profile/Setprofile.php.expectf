@@ -1,162 +1,117 @@
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(13) "fb_setprofile"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(15) "pure_function_2"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       int(3)
-      [1]=>
       int(4)
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(13) "pure_function"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(3)
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(13) "pure_function"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     int(7)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(13) "pure_function"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(4)
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(13) "pure_function"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     int(7)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(15) "pure_function_2"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     int(14)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(5) "srand"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(3735928559)
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(5) "srand"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(14) "test_exception"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(22) "Exception::__construct"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       string(4) "test"
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(22) "Exception::__construct"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(14) "test_exception"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["exception"]=>
-    object(Exception)#1 (7) {
+    object(Exception) (8) {
       ["message":protected]=>
       string(4) "test"
       ["string":"Exception":private]=>
@@ -168,9 +123,8 @@ array(3) {
       ["line":protected]=>
       int(16)
       ["trace":"Exception":private]=>
-      array(2) {
-        [0]=>
-        array(4) {
+      varray(3) {
+        darray(4) {
           ["file"]=>
           string(%d) "%s"
           ["line"]=>
@@ -178,304 +132,236 @@ array(3) {
           ["function"]=>
           string(14) "test_exception"
           ["args"]=>
-          array(0) {
+          varray(0) {
           }
         }
-        [1]=>
-        array(4) {
+        darray(4) {
           ["file"]=>
           string(%d) "%s"
           ["line"]=>
-          int(45)
+          int(47)
           ["function"]=>
           string(4) "main"
           ["args"]=>
-          array(0) {
+          varray(0) {
+          }
+        }
+        darray(2) {
+          ["function"]=>
+          string(21) "entrypoint_Setprofile"
+          ["args"]=>
+          varray(0) {
           }
         }
       }
       ["previous":"Exception":private]=>
       NULL
+      ["userMetadata":protected]=>
+      NULL
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(3) "gen"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(3) "gen"
-  [2]=>
   NULL
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(17) "Generator::rewind"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(3) "gen"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(3) "gen"
-  [2]=>
   NULL
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(17) "Generator::rewind"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(16) "Generator::valid"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(16) "Generator::valid"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     bool(true)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(18) "Generator::current"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(18) "Generator::current"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     int(1)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(15) "Generator::next"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(3) "gen"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(3) "gen"
-  [2]=>
   NULL
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(15) "Generator::next"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(16) "Generator::valid"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(16) "Generator::valid"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     bool(true)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(18) "Generator::current"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(18) "Generator::current"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     int(2)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(15) "Generator::next"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(3) "gen"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(3) "gen"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(15) "Generator::next"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     NULL
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(16) "Generator::valid"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "exit"
-  [1]=>
   string(16) "Generator::valid"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["return"]=>
     bool(false)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "enter"
-  [1]=>
   string(13) "fb_setprofile"
-  [2]=>
-  array(1) {
+  darray(1) {
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       NULL
     }
   }

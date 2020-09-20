@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require_once(dirname(__FILE__) . '/new_db.inc');
 
@@ -11,4 +11,3 @@ if (!$result) {
 echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
-?>

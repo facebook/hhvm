@@ -1,31 +1,31 @@
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(3) "A£"
     [1]=>
     string(2) "BC"
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(3) "A£"
     [1]=>
     string(2) "BC"
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(4) "€ "
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(4) "€ "
   }

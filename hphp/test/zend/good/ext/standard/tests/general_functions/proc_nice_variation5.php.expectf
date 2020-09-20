@@ -3,5 +3,5 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: Only a super user may attempt to increase the priority of a process in %s/proc_nice_variation5.php on line 17
 bool(false)

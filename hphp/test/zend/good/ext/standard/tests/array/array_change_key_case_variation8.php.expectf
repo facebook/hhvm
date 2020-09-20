@@ -1,56 +1,56 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- $case = default --
-array(10) {
+darray(10) {
   [""]=>
   int(2)
   ["\a"]=>
   int(3)
   ["\cx"]=>
   int(4)
-  ["%r\x1b%r"]=>
+  [""]=>
   int(5)
-  ["%r\x0c%r"]=>
+  [""]=>
   int(6)
   ["
 "]=>
   int(7)
-  ["%r\x09%r"]=>
+  ["	"]=>
   int(8)
   ["\xhh"]=>
   int(9)
   ["\ddd"]=>
   int(10)
-  ["%r\x0b%r"]=>
+  [""]=>
   int(11)
 }
 -- $case = upper --
-array(10) {
+darray(10) {
   [""]=>
   int(2)
   ["\A"]=>
   int(3)
   ["\CX"]=>
   int(4)
-  ["%r\x1b%r"]=>
+  [""]=>
   int(5)
-  ["%r\x0c%r"]=>
+  [""]=>
   int(6)
   ["
 "]=>
   int(7)
-  ["%r\x09%r"]=>
+  ["	"]=>
   int(8)
   ["\XHH"]=>
   int(9)
   ["\DDD"]=>
   int(10)
-  ["%r\x0b%r"]=>
+  [""]=>
   int(11)
 }
 
 -- $case = default --
-array(9) {
+darray(9) {
   ["lemon"]=>
   int(1)
   ["orange"]=>
@@ -71,7 +71,7 @@ array(9) {
   int(10)
 }
 -- $case = upper --
-array(9) {
+darray(9) {
   ["LEMON"]=>
   int(1)
   ["ORANGE"]=>

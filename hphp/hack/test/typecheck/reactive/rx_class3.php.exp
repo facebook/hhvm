@@ -1,0 +1,2 @@
+File "rx_class3.php", line 3, characters 3-11:
+The `__RxLocal` attribute cannot be used on a class. (Typing[4231])

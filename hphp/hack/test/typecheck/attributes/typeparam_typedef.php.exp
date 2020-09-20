@@ -1,0 +1,4 @@
+File "typeparam_typedef.php", line 8, characters 14-14:
+Too few arguments (required 1 but got 0) (Typing[4104])
+File "typeparam_typedef.php", line 5, characters 19-29:
+Definition is here

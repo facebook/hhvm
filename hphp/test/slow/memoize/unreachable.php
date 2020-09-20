@@ -81,7 +81,11 @@ function main() {
   $a = new Cls2();
   $b = new Cls3();
   $c = new Cls4();
-  run([$a, 'alwaysThrows1'], [$a, 'alwaysThrows1']);
-  run([$b, 'alwaysThrows'], [$c, 'alwaysThrows']);
+  run(varray[$a, 'alwaysThrows1'], varray[$a, 'alwaysThrows1']);
+  run(varray[$b, 'alwaysThrows'], varray[$c, 'alwaysThrows']);
 }
+
+<<__EntryPoint>>
+function main_unreachable() {
 main();
+}

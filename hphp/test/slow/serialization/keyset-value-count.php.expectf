@@ -1,0 +1,11 @@
+vec(3) {
+  keyset(2) {
+    int(1)
+    int(2)
+  }
+  object(stdClass) (0) {
+  }
+  object(stdClass) (0) {
+  }
+}
+bool(true)

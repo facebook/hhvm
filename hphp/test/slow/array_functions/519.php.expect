@@ -1,6 +1,6 @@
-array(2) {
+darray(2) {
   ["a1"]=>
-  array(3) {
+  darray(3) {
     ["x"]=>
     string(1) "y"
     [0]=>
@@ -9,7 +9,7 @@ array(2) {
     int(2)
   }
   ["a2"]=>
-  array(3) {
+  darray(3) {
     ["x"]=>
     string(1) "y"
     [0]=>

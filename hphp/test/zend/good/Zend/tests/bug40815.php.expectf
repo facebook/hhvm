@@ -1,1 +1,5 @@
+Fatal error: Uncaught exception 'Exception' with message 'Whiii' in %s/bug40815.php:11
+Stack trace:
+#0 (): main()
+#1 {main}
 foo

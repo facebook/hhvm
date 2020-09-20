@@ -1,0 +1,19 @@
+Notice: Undefined variable: z in %s/bad_intermediate.php on line 11
+
+Notice: Undefined variable: z in %s/bad_intermediate.php on line 16
+bool(true)
+
+Notice: Undefined variable: z in %s/bad_intermediate.php on line 17
+bool(true)
+
+Notice: Undefined variable: z in %s/bad_intermediate.php on line 18
+
+Notice: Undefined variable: z in %s/bad_intermediate.php on line 19
+bool(true)
+bool(true)
+bool(true)
+object(Foo) (1) {
+  ["foo"]=>
+  int(42)
+}
+bool(true)

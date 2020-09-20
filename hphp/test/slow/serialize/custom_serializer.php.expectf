@@ -1,16 +1,13 @@
-object(ArrayObject)#3 (2) {
-  ["props"]=>
-  object(A)#4 (0) {
-  }
-  ["storage":"ArrayObject":private]=>
-  array(0) {
+object(MySerializable) (1) {
+  ["foo"]=>
+  object(A) (0) {
   }
 }
 
-Warning: Class __PHP_Incomplete_Class has no unserializer in %s on line 9
-object(__PHP_Incomplete_Class)#3 (2) {
+Warning: Class __PHP_Incomplete_Class has no unserializer in %s/serialize/custom_serializer.php on line 21
+object(__PHP_Incomplete_Class) (2) {
   ["__PHP_Incomplete_Class_Name"]=>
-  string(11) "ArrayObject"
+  string(14) "MySerializable"
   ["serialized"]=>
-  string(108) "a:4:{s:7:"storage";a:0:{}s:5:"flags";i:0;s:13:"iteratorClass";s:13:"ArrayIterator";s:5:"props";O:1:"A":0:{}}"
+  string(12) "O:1:"A":0:{}"
 }

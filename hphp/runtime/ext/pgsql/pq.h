@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef incl_PQ_H_
-#define incl_PQ_H_
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -412,4 +411,3 @@ private:
 };
 }
 
-#endif//incl_PQ_H_

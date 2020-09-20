@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function id($x) {
  return $x;
@@ -16,4 +16,8 @@ function f($x) {
   default: echo 'default';
   }
 }
+
+<<__EntryPoint>>
+function main_1759() {
 f(32);
+}

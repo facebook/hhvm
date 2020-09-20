@@ -1,0 +1,5 @@
+ERROR: Value returned from function f() must be of type @int, float given on line 5
+ERROR: Value returned from function f() must be of type @int, bool given on line 5
+ERROR: Value returned from function f() must be of type @bool, int given on line 5
+ERROR: Value returned from function f() must be of type @C<shape('x' => int, 'y' => string)>, C<shape('x'=>int,'y'=>int)> given on line 5
+ERROR: Value returned from function f() must be of type @C<(int, string)>, C<(int,int)> given on line 5

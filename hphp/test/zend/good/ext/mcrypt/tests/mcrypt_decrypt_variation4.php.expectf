@@ -1,106 +1,106 @@
 *** Testing mcrypt_decrypt() : usage variation ***
 
 --int 0--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --int 1--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --int 12345--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --int -12345--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --float 10.5--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --float -10.5--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --float 12.3456789000e10--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --float -12.3456789000e10--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --float .5--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --empty array--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --int indexed array--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --associative array--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --nested arrays--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, array given, %s(%d)
-NULL
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --uppercase NULL--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --lowercase null--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --lowercase true--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --lowercase false--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --uppercase TRUE--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --uppercase FALSE--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --empty string DQ--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php(109)
 bool(false)
 
 --empty string SQ--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
+Error: 2 - mcrypt_decrypt(): Module initialization failed, %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php(109)
 bool(false)
 
 --instance of classWithToString--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, object given, %s(%d)
-NULL
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --undefined var--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --unset var--
-Error: 2 - mcrypt_decrypt(): Module initialization failed, %s(%d)
-bool(false)
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 
 --resource--
-Error: 2 - mcrypt_decrypt() expects parameter 4 to be string, resource given, %s(%d)
-NULL
+
+Warning: mcrypt_decrypt() expects parameter 4 to be string, resource given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation4.php on line 109
 ===DONE===

@@ -2,16 +2,14 @@
 
 -- Testing property_exists() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: property_exists() expects exactly 2 parameters, 3 given in %s/property_exists_error.php on line 16
 
 -- Testing property_exists() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: property_exists() expects exactly 2 parameters, 1 given in %s/property_exists_error.php on line 20
 
 -- Testing property_exists() function with incorrect arguments --
 
-Warning: %s
+Warning: First parameter must either be an object or the name of an existing class in %s/property_exists_error.php on line 23
 NULL
 ===DONE===

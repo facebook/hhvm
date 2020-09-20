@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $xml=<<<EOF
 <drinks xmlns:hot="http://www.example.com/hot">
  <hot:drink><hot:name>Coffee</hot:name></hot:drink>
@@ -19,5 +19,5 @@ foreach ($sxe->children('http://www.example.com/hot') as $element_name => $eleme
     print "$element_name is $element->name\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

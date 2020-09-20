@@ -1,0 +1,15 @@
+(alias
+    (name find_local)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/find_local/HH_FLAGS)
+          (glob_files %{project_root}/test/find_local/*.flags)
+          (glob_files %{project_root}/test/find_local/*.php)
+          (glob_files %{project_root}/test/find_local/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/find_local
+    --program %{exe:../../src/hh_single_type_check.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias find_local)))

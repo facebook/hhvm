@@ -1,4 +1,4 @@
-%unicode|string%(27) "B::func2: This should work!"
-%unicode|string%(27) "B::func3: This should work!"
+string(27) "B::func2: This should work!"
+string(27) "B::func3: This should work!"
 
-Warning: %s
+Warning: Invalid argument: function: method 'inexistent' not found in %s/bug48770_3.php on line 22

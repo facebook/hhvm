@@ -1,7 +1,10 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_error_log() {
 $log_string = 'hello world';
-$filename = tempnam(null, 'errorlog_test');
+$filename = __SystemLib\hphp_test_tmppath('errorlog_test');
 
 error_log($log_string, 3, $filename);
 $f = fopen($filename, 'r');
@@ -17,3 +20,4 @@ var_dump($content);
 fclose($f);
 
 unlink($filename);
+}

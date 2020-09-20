@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TType {
   const STOP   = 0;
@@ -44,7 +44,40 @@ class DummyTransport {
   }
 }
 class TestStruct {
-  static $_TSPEC;
+  const SPEC = darray[
+    -1 => darray[
+      'var' => 'aBool',
+      'type' => TType::BOOL,
+    ],
+    1 => darray[
+      'var' => 'anInt',
+      'type' => TType::I32,
+    ],
+    2 => darray[
+      'var' => 'aDouble',
+      'type' => TType::DOUBLE,
+    ],
+    3 => darray[
+      'var' => 'anInt64',
+      'type' => TType::I64,
+    ],
+    4 => darray[
+      'var' => 'anByte',
+      'type' => TType::BYTE,
+    ],
+    5 => darray[
+      'var' => 'anI16',
+      'type' => TType::I16,
+    ],
+    6 => darray[
+      'var' => 'aFloat',
+      'type' => TType::FLOAT,
+    ],
+    7 => darray[
+      'var' => 'bFloat',
+      'type' => TType::FLOAT,
+    ],
+  ];
   public $aBool = null;
   public $anInt = null;
   public $aDouble = null;
@@ -53,11 +86,7 @@ class TestStruct {
   public $anI16 = null;
   public $aFloat = null;
   public $bFloat = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(        -1 => array(          'var' => 'aBool',          'type' => TType::BOOL,                   ),        1 => array(          'var' => 'anInt',          'type' => TType::I32,                   ),        2 => array(          'var' => 'aDouble',          'type' => TType::DOUBLE,                   ),        3 => array(          'var' => 'anInt64',          'type' => TType::I64,                   ),        4 => array(          'var' => 'anByte',          'type' => TType::BYTE,                  ),        5 => array(          'var' => 'anI16',          'type' => TType::I16,                  ),        6 => array(          'var' => 'aFloat',          'type' => TType::FLOAT,                   ),        7 => array(          'var' => 'bFloat',          'type' => TType::FLOAT,                   ),                    );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 function test() {
   $p = new DummyProtocol();
@@ -73,4 +102,8 @@ function test() {
   thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
   var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
 }
+
+<<__EntryPoint>>
+function main_1557() {
 test();
+}

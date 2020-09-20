@@ -3,3 +3,4 @@
 function main() {
   await using ($x) {}
 }
+

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_ALGORITHM_H_
-#define incl_HPHP_UTIL_ALGORITHM_H_
+#pragma once
 
 #include <algorithm>
 #include <iterator>
@@ -69,4 +68,3 @@ sort_keys_by_value(const Container& input, Compare compare) {
 
 }
 
-#endif

@@ -1,22 +1,19 @@
-<?php
-
-array_pop($GLOBALS);
-
-$a = array("foo", "bar", "fubar");
-$b = array("3" => "foo", "4" => "bar", "5" => "fubar");
-$c = array("a" => "foo", "b" => "bar", "c" => "fubar");
+<?hh
+<<__EntryPoint>> function main(): void {
+$a = varray["foo", "bar", "fubar"];
+$b = darray["3" => "foo", "4" => "bar", "5" => "fubar"];
+$c = darray["a" => "foo", "b" => "bar", "c" => "fubar"];
 
 /* simple array */
-echo array_pop($a), "\n";
-array_push($a, "foobar");
+echo array_pop(inout $a), "\n";
+array_push(inout $a, "foobar");
 var_dump($a);
 
 /* numerical assoc indices */
-echo array_pop($b), "\n";
+echo array_pop(inout $b), "\n";
 var_dump($b);
 
 /* assoc indices */
-echo array_pop($c), "\n";
+echo array_pop(inout $c), "\n";
 var_dump($c);
-
-?>
+}

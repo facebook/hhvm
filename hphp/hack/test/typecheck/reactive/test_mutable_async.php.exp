@@ -1,2 +1,1 @@
-File "test_mutable_async.php", line 9, characters 25-27:
-Mutable methods must be synchronous. Try removing the async tag from the function. (NastCheck[3052])
+No errors

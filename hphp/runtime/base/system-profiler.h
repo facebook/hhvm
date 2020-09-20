@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SYSTEM_PROFILER_H_
-#define incl_HPHP_SYSTEM_PROFILER_H_
+#pragma once
 
 #include <string>
 
@@ -43,7 +42,7 @@ struct SystemProfiler {
   /*
    * Called when a PHP execution error is handled.
    */
-  virtual void errorCallBack(const ExtendedException &ee,
+  virtual void errorCallBack(const ExtendedException& ee,
                              int errnum,
                              const std::string &msg) = 0;
   /*
@@ -63,4 +62,3 @@ extern SystemProfiler *g_system_profiler;
 
 }
 
-#endif // incl_HPHP_SYSTEM_PROFILER_H_

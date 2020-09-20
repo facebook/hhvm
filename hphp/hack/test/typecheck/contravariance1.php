@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class Foo<-T> {
   public function __construct(T $x) {}

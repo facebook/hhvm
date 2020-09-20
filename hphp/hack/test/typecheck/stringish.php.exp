@@ -1,1 +1,3 @@
-No errors
+File "stringish.php", line 29, characters 28-29:
+You cannot use this object as a string
+Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])

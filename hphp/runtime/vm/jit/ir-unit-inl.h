@@ -48,13 +48,17 @@ struct InstructionBuilder {
   Ret go(Opcode op, BCContext bcctx, Args&&... args) {
     std::aligned_storage<sizeof(IRInstruction)>::type buffer;
     void* const vpBuffer = &buffer;
-    SCOPE_EXIT { if (debug) memset(&buffer, 0xc0, sizeof(buffer)); };
     Edge edges[2];
 
     new (vpBuffer) IRInstruction(op, bcctx, hasEdges(op) ? edges : nullptr);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
-    SCOPE_EXIT { inst->clearExtra(); };
+    SCOPE_EXIT {
+      inst->clearExtra();
+      inst->marker().reset();
+      if (debug) memset(&buffer, 0xc0, sizeof(buffer));
+    };
+
     return go2(inst, std::forward<Args>(args)...);
   }
 
@@ -204,7 +208,13 @@ SSATmp* IRUnit::newSSATmp(Args&&... args) {
 
 inline IRInstruction* IRUnit::clone(const IRInstruction* old,
                                     SSATmp* dst /* = nullptr */) {
-  auto inst = new (m_arena) IRInstruction(
+  auto instMem = m_arena.allocD<IRInstruction>(
+    [] (void* p) {
+      auto i = (IRInstruction*)p;
+      i->marker().reset();
+    }
+  );
+  auto inst = new (instMem) IRInstruction(
     m_arena, old, IRInstruction::Id(m_nextInstId++));
 
   if (dst) {
@@ -233,12 +243,8 @@ inline Block* IRUnit::entry() const {
   return m_entry;
 }
 
-inline uint32_t IRUnit::bcOff() const {
-  return m_context.initBcOffset;
-}
-
 inline SrcKey IRUnit::initSrcKey() const {
-  return m_context.srcKey();
+  return m_context.initSrcKey;
 }
 
 inline uint32_t IRUnit::numTmps() const {
@@ -266,21 +272,13 @@ inline uint32_t IRUnit::numIds(const IRInstruction*) const {
 }
 
 inline SSATmp* IRUnit::findSSATmp(uint32_t id) const {
-  assert(id < m_ssaTmps.size());
+  assertx(id < m_ssaTmps.size());
   return m_ssaTmps[id];
 }
 
 inline SSATmp* IRUnit::mainFP() const {
   assertx(!entry()->empty() && entry()->begin()->is(DefFP));
   return entry()->begin()->dst();
-}
-
-inline SSATmp* IRUnit::mainSP() const {
-  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
-  auto it = ++entry()->begin();
-  if (it != entry()->end() && it->is(FuncGuard)) ++it;
-  assertx(it != entry()->end() && it->is(DefSP));
-  return it->dst();
 }
 
 inline int64_t IRUnit::startNanos() const {

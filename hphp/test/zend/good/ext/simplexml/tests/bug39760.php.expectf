@@ -1,12 +1,12 @@
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(5) "text1"
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(5) "text1"
 }
-object(SimpleXMLElement)#%d (1) {
+object(SimpleXMLElement) (1) {
   [0]=>
   string(5) "text1"
 }

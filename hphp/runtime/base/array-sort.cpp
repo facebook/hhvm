@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include <folly/ScopeGuard.h>
@@ -42,7 +41,7 @@ template <typename AccessorT, class ArrayT>
 SortFlavor genericPreSort(ArrayT& arr,
                           const AccessorT& acc,
                           bool checkTypes) {
-  assert(arr.m_size > 0);
+  assertx(arr.m_size > 0);
   if (!checkTypes && arr.m_size == arr.m_used) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -83,7 +82,7 @@ SortFlavor genericPreSort(ArrayT& arr,
   }
 done:
   arr.m_used = start - arr.data();
-  assert(arr.m_size == arr.m_used);
+  assertx(arr.m_size == arr.m_used);
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   }
@@ -99,7 +98,7 @@ template <typename AccessorT>
 SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
   auto const oldUsed UNUSED = m_used;
   auto flav = genericPreSort(*this, acc, checkTypes);
-  assert(ClearElms(data() + m_used, oldUsed - m_used));
+  assertx(ClearElms(data() + m_used, oldUsed - m_used));
   return flav;
 }
 
@@ -109,10 +108,12 @@ SortFlavor SetArray::preSort(const AccessorT& acc, bool checkTypes) {
  * renumber the keys 0 thru n-1.
  */
 void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
-  assert(m_size > 0);
+  assertx(m_size > 0);
+  assertx(m_size == m_used);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
   if (resetKeys) {
+    mutableKeyTypes()->renumberKeys();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data()[pos];
       if (e.hasStrKey()) decRefStr(e.skey);
@@ -122,27 +123,29 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
     }
     m_nextKI = m_size;
   } else {
+    mutableKeyTypes()->makeCompact();
     auto data = this->data();
     for (uint32_t pos = 0; pos < m_used; ++pos) {
       auto& e = data[pos];
       *findForNewInsert(ht, mask, e.probe()) = pos;
     }
   }
+  assertx(checkInvariants());
 }
 
 /**
  * postSort() runs after the sort has been performed. For SetArray, postSort()
  * handles rebuilding the hash.
  */
-void SetArray::postSort() {   // nothrow guarantee
-  assert(m_size > 0);
+void SetArray::postSort(bool) {   // nothrow guarantee
+  assertx(m_size > 0);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
   auto elms = data();
-  assert(m_used == m_size);
+  assertx(m_used == m_size);
   for (uint32_t i = 0; i < m_used; ++i) {
     auto& elm = elms[i];
-    assert(!elm.isInvalid());
+    assertx(!elm.isInvalid());
     *findForNewInsert(ht, mask, elm.hash()) = i;
   }
 }
@@ -155,7 +158,7 @@ ArrayData* MixedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   // }
   if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copyMixed();
-    assert(ret->hasExactlyOneRef());
+    assertx(ret->hasExactlyOneRef());
     return ret;
   }
   return a;
@@ -165,37 +168,28 @@ ArrayData* SetArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   auto a = asSet(ad);
   if (UNLIKELY(hasUserDefinedCmp(sf) || a->cowCheck())) {
     auto ret = a->copySet();
-    assert(ret->hasExactlyOneRef());
+    assertx(ret->hasExactlyOneRef());
     return ret;
   }
   return a;
 }
 
 ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  if (sf == SORTFUNC_KSORT) {
-    return ad;                          // trivial for packed arrays.
-  }
+  assertx(checkInvariants(ad));
+  assertx(sf != SORTFUNC_KSORT);
   if (isSortFamily(sf)) {               // sort/rsort/usort
     if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
-      assert(ret->hasExactlyOneRef());
+      assertx(ret->hasExactlyOneRef());
       return ret;
     }
     return ad;
   }
-  if (ad->m_size <= 1) {
-    if (ad->isVecArray()) {
-      auto ret = PackedArray::ToDictVec(ad, ad->cowCheck());
-      assert(ret->hasExactlyOneRef());
-      return ret;
-    }
-    return ad;
-  }
-  assert(checkInvariants(ad));
-  auto ret = ad->isVecArray()
-    ? PackedArray::ToDictVec(ad, ad->cowCheck())
+  auto ret = ad->isVecKind()
+    // TODO(T39123862)
+    ? PackedArray::ToDict(ad, ad->cowCheck())
     : ToMixedCopy(ad);
-  assert(ret->hasExactlyOneRef());
+  assertx(ret->empty() || ret->hasExactlyOneRef());
   return ret;
 }
 
@@ -233,17 +227,8 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
 
 #define SORT_BODY(acc_type, resetKeys)                          \
   do {                                                          \
-    if (UNLIKELY(strong_iterators_exist())) {                   \
-      free_strong_iterators(a);                                 \
-    }                                                           \
-    if (!a->m_size) {                                           \
-      if (resetKeys) {                                          \
-        a->m_nextKI = 0;                                        \
-      }                                                         \
-      return;                                                   \
-    }                                                           \
+    if (!a->m_size) return;                                     \
     SortFlavor flav = a->preSort<acc_type>(acc_type(), true);   \
-    a->m_pos = ssize_t(0);                                      \
     try {                                                       \
       CALL_SORT(acc_type);                                      \
     } catch (...) {                                             \
@@ -265,6 +250,7 @@ void MixedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asMixed(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
+  a->m_nextKI = 0;
   SORT_BODY(AssocValAccessor<MixedArray::Elm>, true);
 }
 
@@ -279,29 +265,19 @@ void SetArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asSet(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
-  if (!a->m_size) return;
-  auto acc = AssocKeyAccessor<SetArray::Elm>();
-  SortFlavor flav = a->preSort(acc, true);
-  a->m_pos = 0;
-  SCOPE_EXIT {
-    /* Make sure we leave the array in a consistent state */
-    a->postSort();
-  };
-  CALL_SORT(AssocKeyAccessor<SetArray::Elm>);
+  SORT_BODY(AssocKeyAccessor<SetArray::Elm>, false);
 }
 
+#undef SORT_BODY
+
 void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
-  assert(checkInvariants(ad));
+  assertx(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return;
   }
-  assert(!ad->hasMultipleRefs());
+  assertx(!ad->hasMultipleRefs());
   auto a = ad;
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(a);
-  }
   SortFlavor flav = preSort(ad);
-  a->m_pos = 0;
   auto data_begin = packedData(ad);
   auto data_end = data_begin + a->m_size;
   CALL_SORT(TVAccessor);
@@ -313,23 +289,13 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
 
 #define USER_SORT_BODY(acc_type, resetKeys)                     \
   do {                                                          \
-    if (UNLIKELY(strong_iterators_exist())) {                   \
-      free_strong_iterators(a);                                 \
-    }                                                           \
-    if (!a->m_size) {                                           \
-      if (resetKeys) {                                          \
-        a->m_nextKI = 0;                                        \
-      }                                                         \
-      return true;                                              \
-    }                                                           \
+    if (!a->m_size) return true;                                \
     CallCtx ctx;                                                \
-    CallerFrame cf;                                             \
-    vm_decode_function(cmp_function, cf(), false, ctx);         \
+    vm_decode_function(cmp_function, ctx);                      \
     if (!ctx.func) {                                            \
       return false;                                             \
     }                                                           \
     a->preSort<acc_type>(acc_type(), false);                    \
-    a->m_pos = ssize_t(0);                                      \
     SCOPE_EXIT {                                                \
       /* Make sure we leave the array in a consistent state */  \
       a->postSort(resetKeys);                                   \
@@ -347,6 +313,7 @@ bool MixedArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 
 bool MixedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asMixed(ad);
+  a->m_nextKI = 0;
   USER_SORT_BODY(AssocValAccessor<MixedArray::Elm>, true);
 }
 
@@ -357,53 +324,44 @@ bool MixedArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
 
 bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asSet(ad);
-  if (!a->m_size) return true;
-  CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(cmp_function, cf(), false, ctx);
-  if (!ctx.func) {
-    return false;
-  }
-  auto acc = AssocKeyAccessor<SetArray::Elm>();
-  a->preSort(acc, false);
-  a->m_pos = 0;
-  SCOPE_EXIT {
-    /* Make sure we leave the array in a consistent state */
-    a->postSort();
-  };
-  ElmUCompare<AssocKeyAccessor<SetArray::Elm>> comp;
-  comp.ctx = &ctx;
-  HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp);
-  return true;
+  USER_SORT_BODY(AssocKeyAccessor<SetArray::Elm>, false);
 }
 
+#undef USER_SORT_BODY
+
 SortFlavor PackedArray::preSort(ArrayData* ad) {
-  assert(checkInvariants(ad));
-  auto const data = packedData(ad);
+  assertx(checkInvariants(ad));
+  assertx(ad->m_size > 0);
   TVAccessor acc;
-  uint32_t sz = ad->m_size;
   bool allInts = true;
   bool allStrs = true;
-  for (uint32_t i = 0; i < sz; ++i) {
-    allInts = (allInts && acc.isInt(data[i]));
-    allStrs = (allStrs && acc.isStr(data[i]));
-  }
-  return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
+  auto elm = packedData(ad);
+  auto const end = elm + ad->m_size;
+  do {
+    if (acc.isInt(*elm)) {
+      if (!allInts) return GenericSort;
+      allStrs = false;
+    } else if (acc.isStr(*elm)) {
+      if (!allStrs) return GenericSort;
+      allInts = false;
+    } else {
+      return GenericSort;
+    }
+  } while (++elm < end);
+  if (allInts) return IntegerSort;
+  assertx(allStrs);
+  return StringSort;
 }
 
 bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
-  assert(checkInvariants(ad));
+  assertx(checkInvariants(ad));
   if (ad->m_size <= 1) {
     return true;
   }
-  assert(!ad->hasMultipleRefs());
-  if (UNLIKELY(strong_iterators_exist())) {
-    free_strong_iterators(ad);
-  }
+  assertx(!ad->hasMultipleRefs());
   ElmUCompare<TVAccessor> comp;
   CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(cmp_function, cf(), false, ctx);
+  vm_decode_function(cmp_function, ctx);
   if (!ctx.func) {
     return false;
   }
@@ -412,8 +370,6 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   Sort::sort(data, data + ad->m_size, comp);
   return true;
 }
-
-#undef USER_SORT_BODY
 
 ///////////////////////////////////////////////////////////////////////////////
 }

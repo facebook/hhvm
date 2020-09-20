@@ -1,0 +1,8 @@
+File "enum_user_attributes.php", line 3, characters 18-20:
+Unbound name: `Bar` (an object type) (Naming[2049])
+File "enum_user_attributes.php", line 3, characters 3-5:
+Unbound name: `Foo` (an object type) (Naming[2049])
+File "enum_user_attributes.php", line 3, characters 3-5:
+Unrecognized user attribute: `Foo` does not have a class. Please declare a class for the attribute. (Naming[2049])
+File "enum_user_attributes.php", line 3, characters 18-20:
+Unrecognized user attribute: `Bar` does not have a class. Please declare a class for the attribute. (Naming[2049])

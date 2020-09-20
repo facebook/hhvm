@@ -1,12 +1,14 @@
-<?php
-	error_reporting(E_ALL & !E_STRICT);
+<?hh
 
-	class A {
-		function hello() {
-			echo "Hello World\n";
-		}
-	}
-	$y[0] = 'hello';
-	A::$y[0]();
-?>
-===DONE===
+class A {
+  static function hello(): void {
+    echo "Hello World\n";
+  }
+}
+
+<<__EntryPoint>> function main(): void {
+  error_reporting(E_ALL & ~E_STRICT);
+  $y = varray['hello'];
+  A::$y[0]();
+  echo "===DONE===\n";
+}

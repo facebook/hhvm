@@ -1,6 +1,6 @@
-<?php
-  class myclass
-  {
-      const myConst = "$myVar";
-  }
-?>
+<?hh
+class myclass
+{
+    const myConst = "$myVar";
+}
+

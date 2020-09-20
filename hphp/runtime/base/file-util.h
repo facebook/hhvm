@@ -16,8 +16,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef incl_HPHP_FILE_UTIL_H_
-#define incl_HPHP_FILE_UTIL_H_
+#pragma once
 
 #include "hphp/util/file.h"
 
@@ -95,7 +94,7 @@ std::string normalizeDir(const std::string &dirname);
 String dirname(const String& path);
 
 /**
- * Search for PHP or non-PHP files under a directory.
+ * Search for PHP, JS, or other files under a directory.
  */
 void find(std::vector<std::string> &out,
           const std::string &root, const std::string& path, bool php,
@@ -127,8 +126,19 @@ void checkPathAndError(const String& path,
                        const char* func_name,
                        int param_pos);
 
+/**
+ * If any parent of the directory the script cmd was run from includes the
+ * relative path suffix, and the file at that path is readable, then perform
+ * action() on that file. Continues processing up the directory tree until
+ * action() returns true.
+ */
+template <class Action>
+bool runRelative(std::string suffix, String cmd,
+                 const char* currentDir, Action action);
+
+bool isSystemName(folly::StringPiece path);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif

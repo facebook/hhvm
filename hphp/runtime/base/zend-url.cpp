@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
 
+#include <folly/lang/CString.h>
 #include <folly/portability/String.h>
 
 namespace HPHP {
@@ -176,7 +177,7 @@ bool url_parse(Url &output, const char *str, size_t length) {
   }
 
   /* check for login and password */
-  if ((p = (const char*)memrchr(s, '@', (e-s)))) {
+  if ((p = (const char*)folly::memrchr(s, '@', (e-s)))) {
     if ((pp = (const char*)memchr(s, ':', (p-s)))) {
       replace_controlchars(output.user, s, (pp - s));
 
@@ -196,7 +197,7 @@ bool url_parse(Url &output, const char *str, size_t length) {
        IPv6 embedded address */
     p = nullptr;
   } else {
-    p = (const char*)memrchr(s, ':', e - s);
+    p = (const char*)folly::memrchr(s, ':', e - s);
   }
 
   if (p) {
@@ -353,7 +354,7 @@ String url_decode(const char *s, size_t len) {
 }
 
 size_t url_decode_ex(char *value, size_t len) {
-  assert(value && *value); // check before calling this function
+  assertx(value && *value); // check before calling this function
   if (len == 0) return 0;
 
   size_t i = 0, o = 0;

@@ -1,15 +1,15 @@
-%string|unicode%(13) "\-oh really\?"
-array(1) {
+string(13) "\-oh really\?"
+darray(1) {
   [0]=>
   %string|unicode%(4) "a---"
 }
-array(1) {
+darray(1) {
   [0]=>
   %string|unicode%(1) "a"
 }
-array(1) {
+darray(1) {
   [0]=>
   %string|unicode%(5) "a----"
 }
-array(0) {
+darray(0) {
 }

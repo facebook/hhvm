@@ -66,5 +66,9 @@ function main($obj, $foo, $alpha, $beta, $one, $two, $bar, $arr1, $arr2) {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_method_dynamic() {
 main(new Foo, 'Foo', 'alpha', 'beta', 'one', 'two', new Bar,
-     array(new Foo, 'one'), array('Foo', 'two'));
+     varray[new Foo, 'one'], varray['Foo', 'two']);
+}

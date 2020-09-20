@@ -25,12 +25,12 @@ namespace HPHP {
 
 template<class T>
 void testSerializationExactEquality(const T& val) {
-  BlobEncoder encoder;
+  BlobEncoder encoder(false);
   T decodedVal;
 
   encoder(val);
 
-  BlobDecoder decoder(encoder.data(), encoder.size());
+  BlobDecoder decoder(encoder.data(), encoder.size(), false);
 
   decoder(decodedVal);
   decoder.assertDone();

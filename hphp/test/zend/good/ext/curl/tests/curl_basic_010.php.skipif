@@ -1,7 +1,8 @@
-<?php
-	if (!extension_loaded("curl")) print "skip";
-	$addr = "www.".uniqid().".".uniqid();
-	if (gethostbyname($addr) != $addr) {
-		print "skip catch all dns";
-	}
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded("curl")) print "skip";
+$addr = "www.".uniqid().".".uniqid();
+if (gethostbyname($addr) != $addr) {
+    print "skip catch all dns";
+}
+}

@@ -1,34 +1,35 @@
-<?php
-
-error_reporting(E_ALL);
+<?hh
 
 trait A {
-   public function foo() {
+   public function __construct() {
      echo 'a';
    }
 }
 
 trait B {
-   public function foo() {
+   public function __construct() {
      echo 'b';
    }
 }
 
 trait C {
-   public function foo() {
+   public function __construct() {
      echo 'c';
    }
 }
 
 class Foo {
     use C, A, B {
-		B::foo insteadof A, C;
+		B::__construct insteadof A, C;
 
 	}
 }
 
-$t = new Foo;
-$t->foo();
+<<__EntryPoint>>
+function main_entry(): void {
 
-?>
+  error_reporting(E_ALL);
 
+  $t = new Foo;
+  $t->__construct();
+}

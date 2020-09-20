@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $mc = new Memcached;
 $mc->addServer('127.0.0.1', 11211);
 $mc->addServer('127.0.0.1', 11212);
@@ -8,4 +8,5 @@ for ($i = 1; $i <= 10; $i++) {
     var_dump($mc->get($key) === 10);
     $mc->decrement($key, 1);
     var_dump($mc->get($key) === 9);
+}
 }

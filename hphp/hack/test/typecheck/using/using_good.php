@@ -45,7 +45,8 @@ async function testit():Awaitable<void> {
     // Nested
     using ($z = new Handle()) {
       // This is legal because var_dump is marked as <<__AcceptDisposable>>
-      var_dump($x, $z);
+      var_dump($x);
+      var_dump($z);
       $z->foo();
     }
     $z = 'a';

@@ -1,12 +1,16 @@
-<?php
+<?hh
 
-$a = 1;
- class A {
- public function t() {
- global $a;
- $b = 'a';
- var_dump($$b);
+class A {
+  public function t() {
+    var_dump(Object654::$a);
+  }
 }
+
+abstract final class Object654 {
+  public static $a;
 }
- $obj = new A();
- $obj->t();
+<<__EntryPoint>> function main(): void {
+Object654::$a = 1;
+$obj = new A();
+$obj->t();
+}

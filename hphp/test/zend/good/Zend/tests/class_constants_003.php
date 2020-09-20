@@ -1,26 +1,27 @@
-<?php
-
-$class_data = <<<DATA
-<?php
-class test {
-	const val = 1;
-}
-?>
-DATA;
-
-$filename = dirname(__FILE__)."/cc003.dat";
-file_put_contents($filename, $class_data);
+<?hh
 
 function foo($v = test::val) {
 	var_dump($v);
 }
+<<__EntryPoint>>
+function entrypoint_class_constants_003(): void {
 
-include $filename;
+  $class_data = <<<DATA
+<?hh
+class test {
+  const val = 1;
+}
+DATA;
 
-foo();
-foo(5);
+  $filename = __SystemLib\hphp_test_tmppath('cc003.dat');
+  file_put_contents($filename, $class_data);
 
-unlink($filename);
+  include $filename;
 
-echo "Done\n";
-?>
+  foo();
+  foo(5);
+
+  unlink($filename);
+
+  echo "Done\n";
+}

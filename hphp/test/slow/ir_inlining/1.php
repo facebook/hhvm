@@ -1,11 +1,8 @@
-<?php
+<?hh
 
 //////////////////////////////////////////////////////////////////////
 
 class Dtor {
- public function __destruct() {
- echo "dtor\n";
- }
  }
 
 function id($x) {
@@ -41,10 +38,14 @@ function test32() {
   echo "\n";
 }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_1() {
 test1();
 test2();
 test3();
 test31();
 test32();
+}

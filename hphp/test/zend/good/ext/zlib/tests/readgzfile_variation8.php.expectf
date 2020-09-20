@@ -1,13 +1,9 @@
 
-Warning: %s
-NULL
+Warning: readgzfile() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/readgzfile_variation8.php on line 19
 
-Warning: %s
-NULL
+Warning: readgzfile() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/readgzfile_variation8.php on line 19
 
-Warning: %s
-NULL
+Warning: readgzfile() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/readgzfile_variation8.php on line 19
 
-Warning: %s
-NULL
+Warning: readgzfile() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/readgzfile_variation8.php on line 19
 ===DONE===

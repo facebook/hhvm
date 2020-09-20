@@ -1,8 +1,9 @@
-<?php
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
+<?hh
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('SplFileObject_fputcsv.csv');
 $fo = new SplFileObject($file, 'w');
 
-$list = array (
+$list = darray [
   0 => 'aaa,bbb',
   1 => 'aaa,"bbb"',
   2 => '"aaa","bbb"',
@@ -23,35 +24,29 @@ $list = array (
   17 => 'aaa"\\"a","bbb"',
   18 => '"\\"","aaa"',
   19 => '"\\""",aaa',
-);
+];
 
 foreach ($list as $v) {
-	$fo->fputcsv(explode(',', $v));
+    $fo->fputcsv(varray(explode(',', $v)));
 }
 unset($fo);
 
 $res = file($file);
-foreach($res as &$val)
+foreach($res as $key => $val)
 {
-	$val = substr($val, 0, -1);
+    $res[$key] = substr($val, 0, -1);
 }
 echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
-$res = array();
+$res = varray[];
 while($l=fgetcsv($fp))
 {
-	$res[] = join(',',$l);
+    $res[] = join(',',$l);
 }
 fclose($fp);
 
 echo '$list = ';var_export($res);echo ";\n";
 
-?>
-===DONE===
-<?php exit(0); ?>
-<?php error_reporting(0); ?>
-<?php
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
-unlink($file);
-?>
+echo "===DONE===\n";
+}

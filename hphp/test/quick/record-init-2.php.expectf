@@ -1,0 +1,1 @@
+Fatal error: Record field 'Foo::x' not initialized in %s/record-init-2.php on line 8

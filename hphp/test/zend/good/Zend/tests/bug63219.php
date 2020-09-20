@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait TFoo {
     public function fooMethod(){}
 }
@@ -8,6 +8,6 @@ class C {
         Typo::fooMethod as tf;
     }
 }
-
+<<__EntryPoint>> function main(): void {
 echo "okey";
-?>
+}

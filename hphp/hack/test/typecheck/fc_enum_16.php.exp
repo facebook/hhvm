@@ -1,2 +1,1 @@
-File "fc_enum_16.php", line 3, characters 11-18:
-Enums must be int or string, not an array key (int/string) (Typing[4024])
+No errors

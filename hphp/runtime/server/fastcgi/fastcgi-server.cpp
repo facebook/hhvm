@@ -69,7 +69,7 @@ FastCGIServer::FastCGIServer(const std::string &address,
                              bool useFileSocket)
   : Server(address, port),
     m_worker(&m_eventBaseManager),
-    m_dispatcher(workers,
+    m_dispatcher(workers, workers,
                  RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
                  RuntimeOption::ServerThreadDropStack,
                  this,
@@ -80,7 +80,8 @@ FastCGIServer::FastCGIServer(const std::string &address,
   if (useFileSocket) {
     sock_addr.setFromPath(address);
   } else if (address.empty()) {
-    sock_addr.setFromLocalPort(port);
+    sock_addr.setFromHostPort("localhost", port);
+    assert(sock_addr.isLoopbackAddress());
   } else {
     sock_addr.setFromHostPort(address, port);
   }
@@ -102,7 +103,7 @@ void FastCGIServer::start() {
   try {
     m_socket->bind(m_socketConfig.bindAddress);
   } catch (const std::system_error& ex) {
-    LOG(ERROR) << ex.what();
+    Logger::Error(std::string(ex.what()));
     if (m_socketConfig.bindAddress.getFamily() == AF_UNIX) {
       throw FailedToListenException(m_socketConfig.bindAddress.getPath());
     }

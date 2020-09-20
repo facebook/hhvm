@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
     final function foo() {}
@@ -15,14 +15,18 @@ class A implements I1 {
     use T;
 }
 
-if (isset($g)) {
-  class A {}
-}
-
 abstract class B extends A implements I2 {
     use X;
 }
 
 class C extends B {}
 
-var_dump(new C);
+
+<<__EntryPoint>>
+function main_abstract_final_override() {
+  if (isset($g)) {
+    include 'abstract-final-override.inc';
+  }
+
+  var_dump(new C());
+}

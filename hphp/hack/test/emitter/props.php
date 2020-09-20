@@ -7,9 +7,9 @@ class Cns {
 class C {
   public int $arithmetic = 100+100;
   public int $intvar = 100;
-  public array<int> $arrayvar1 = array(100);
-  public array<array<int>> $arrayvar2 = array(array(100), array(200));
-  public array<int> $arrayvar3 = array();
+  public array<int> $arrayvar1 = varray[100];
+  public array<array<int>> $arrayvar2 = varray[varray[100], varray[200]];
+  public array<int> $arrayvar3 = varray[];
   public string $strvar1 = 'hello\n';
   public string $strvar2 = "hello\n";
   public bool $boolvar1 = true;

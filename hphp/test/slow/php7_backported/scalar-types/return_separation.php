@@ -1,20 +1,19 @@
-<?php
+<?hh
 
-function test1() : array {
-    $array = [];
-    $ref =& $array;
-    unset($ref);
-    return $array;
+function by_ref(inout $ref) {}
+
+function test1() : varray {
+  $array = varray[];
+  by_ref(inout $array);
+  return $array;
 }
 
 function test2() : string {
-    $int = 42;
-    $ref =& $int;
-    unset($ref);
-    return $int;
+  $int = 42;
+  by_ref(inout $int);
+  return $int;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(test1());
 var_dump(test2());
-
-?>
+}

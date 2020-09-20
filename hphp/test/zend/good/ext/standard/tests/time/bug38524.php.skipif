@@ -1,1 +1,4 @@
-<?php if (!function_exists('strptime')) echo "SKIP"; ?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!function_exists('strptime')) echo "SKIP";
+}

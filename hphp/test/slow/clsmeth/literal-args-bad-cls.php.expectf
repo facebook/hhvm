@@ -1,0 +1,2 @@
+
+Fatal error: class_meth() expects a literal class name or ::class constant, followed by a constant string that refers to a static method on that class in %s/literal-args-bad-cls.php on line 8

@@ -1,10 +1,60 @@
-array(2) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "C"
+  ["exact"]=>
+  bool(true)
 }
-string(%d) "%s/test/slow/type_annotation/type_annotation_autoloader-1.inc"
-string(%d) "%s/test/slow/type_annotation/type_annotation_autoloader-2.inc"
-string(%d) "%s/test/slow/type_annotation/type_annotation_autoloader-3.inc"
-string(%d) "%s/test/slow/type_annotation/type_annotation_autoloader-4.inc"
+darray(3) {
+  ["kind"]=>
+  int(16)
+  ["classname"]=>
+  string(17) "HH\KeyedContainer"
+  ["alias"]=>
+  string(12) "BuiltinClass"
+}
+darray(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+  ["alias"]=>
+  string(11) "LoadedClass"
+}
+darray(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(20) "TestAutoloadedClass1"
+  ["alias"]=>
+  string(14) "AutoloadClass1"
+}
+darray(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(20) "TestAutoloadedClass2"
+  ["alias"]=>
+  string(14) "AutoloadClass2"
+}
+darray(3) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(6) "HH\Map"
+  ["alias"]=>
+  string(13) "AutoloadType1"
+}
+darray(2) {
+  ["kind"]=>
+  int(7)
+  ["alias"]=>
+  string(13) "AutoloadType2"
+}
+darray(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(26) "TestTypeStructureTypeAlias"
+}

@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to accepts_reified_rcls_meth() must be an instance of HH\vec, reified clsmeth given in %s on line %d

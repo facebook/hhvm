@@ -1,4 +1,4 @@
-array(13) {
+darray(13) {
   ["test-1pix.bmp"]=>
   string(14) "image/x-ms-bmp"
   ["test1bpix.bmp"]=>

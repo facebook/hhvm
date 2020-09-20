@@ -1,7 +1,5 @@
 <?hh
 
-define("MY_CONSTANT", 4);
-
 function foo(int $a = MY_CONSTANT): void {}
 function bar(bool $b): void {}
 
@@ -14,6 +12,11 @@ class A {
 }
 
 function burp(string $s = A::CLASS_CONST): void {}
+
+
+const MY_CONSTANT = 4;
+<<__EntryPoint>>
+function main_reflection_parameter_is_default_constant_value() {
 
 $f = new \ReflectionFunction('foo');
 foreach ($f->getParameters() as $i => $param) {
@@ -38,4 +41,5 @@ foreach ($m->getParameters() as $i => $param) {
 $f = new \ReflectionFunction('burp');
 foreach ($f->getParameters() as $i => $param) {
   var_dump($param->isDefaultValueConstant());
+}
 }

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PLAIN_FILE_H_
-#define incl_HPHP_PLAIN_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -75,8 +74,8 @@ protected:
  * This is wrapper for fds that cannot be closed.
  */
 struct BuiltinFile : PlainFile {
-  explicit BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
-  explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
+  explicit BuiltinFile(FILE *stream);
+  explicit BuiltinFile(int fd);
   ~BuiltinFile() override;
   bool close() override;
   void sweep() override;
@@ -89,9 +88,12 @@ static_assert(sizeof(BuiltinFile) == sizeof(PlainFile),
  * STDIN, STDOUT, and STDERR.
  */
 struct BuiltinFiles final : RequestEventHandler {
-  static const Variant& GetSTDIN();
-  static const Variant& GetSTDOUT();
-  static const Variant& GetSTDERR();
+  static const Variant& getSTDIN();
+  static const Variant& getSTDOUT();
+  static const Variant& getSTDERR();
+  static Variant getSTDIN(const StringData* name);
+  static Variant getSTDOUT(const StringData* name);
+  static Variant getSTDERR(const StringData* name);
 
   void requestInit() override;
   void requestShutdown() override;
@@ -108,4 +110,3 @@ void setThreadLocalIO(FILE* in, FILE* out, FILE* err);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PLAIN_FILE_H_

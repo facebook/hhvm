@@ -66,11 +66,10 @@ void OfflineTransData::loadTCData(string dumpDir) {
   // Read translations
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     TransRec  tRec;
-    MD5Str    md5Str;
+    SHA1Str    sha1Str;
     uint32_t  kind;
     FuncId    funcId;
     int32_t   resumeMode;
-    int32_t   hasThis;
     uint64_t  annotationsCount;
     size_t    numBCMappings = 0;
     size_t    numBlocks = 0;
@@ -83,30 +82,29 @@ void OfflineTransData::loadTCData(string dumpDir) {
       READ_EMPTY();
       continue;
     }
-    READ(" src.md5 = %s", md5Str);
-    tRec.md5 = MD5(md5Str);
+    READ(" src.sha1 = %s", sha1Str);
+    tRec.sha1 = SHA1(sha1Str);
     READ(" src.funcId = %u", &funcId);
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
     READ(" src.resumeMode = %d", &resumeMode);
-    READ(" src.hasThis = %d", &hasThis);
     READ(" src.bcStart = %d", &tRec.bcStart);
 
     READ(" src.blocks = %lu", &numBlocks);
     for (size_t i = 0; i < numBlocks; ++i) {
-      MD5Str md5Tmp;
+      SHA1Str sha1Tmp;
       Offset start = kInvalidOffset;
       Offset past = kInvalidOffset;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %d %d", md5Tmp, &start, &past) != 3) {
+          sscanf(buf, "%s %d %d", sha1Tmp, &start, &past) != 3) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
         error(buf);
       }
 
-      tRec.blocks.emplace_back(TransRec::Block{MD5(md5Tmp), start, past});
+      tRec.blocks.emplace_back(TransRec::Block{SHA1(sha1Tmp), start, past});
     }
 
     READ(" src.guards = %lu", &numGuards);
@@ -166,11 +164,11 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ(" bcMapping = %lu", &numBCMappings);
     for (size_t i = 0; i < numBCMappings; i++) {
       TransBCMapping bcMap;
-      MD5Str md5Tmp;
+      SHA1Str sha1Tmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
           sscanf(buf, "%s %d %p %p %p",
-                 md5Tmp, &bcMap.bcStart,
+                 sha1Tmp, &bcMap.bcStart,
                  (void**)&bcMap.aStart,
                  (void**)&bcMap.acoldStart,
                  (void**)&bcMap.afrozenStart) != 5) {
@@ -182,12 +180,12 @@ void OfflineTransData::loadTCData(string dumpDir) {
         error(buf);
       }
 
-      bcMap.md5 = MD5(md5Tmp);
+      bcMap.sha1 = SHA1(sha1Tmp);
       tRec.bcMapping.push_back(bcMap);
     }
 
     // push a sentinel bcMapping so that we can figure out stop offsets later on
-    const TransBCMapping sentinel { tRec.md5, 0,
+    const TransBCMapping sentinel { tRec.sha1, 0,
                                     tRec.aStart + tRec.aLen,
                                     tRec.acoldStart + tRec.acoldLen,
                                     tRec.afrozenStart + tRec.afrozenLen };
@@ -201,7 +199,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
     } else {
       tRec.src = SrcKey {
         funcId, tRec.bcStart,
-        static_cast<ResumeMode>(resumeMode), static_cast<bool>(hasThis)
+        static_cast<ResumeMode>(resumeMode)
       };
     }
     always_assert_flog(tid == tRec.id,
@@ -309,20 +307,18 @@ void OfflineTransData::printTransRec(TransID transId,
 
   std::cout << folly::format(
     "Translation {} {{\n"
-    "  src.md5 = {}\n"
+    "  src.sha1 = {}\n"
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
     "  src.resumeMode = {}\n"
-    "  src.hasThis = {}\n"
     "  src.prologue = {}\n"
     "  src.bcStartOffset = {}\n"
     "  src.guards = {}\n",
     tRec->id,
-    tRec->md5,
+    tRec->sha1,
     tRec->src.funcID(),
     tRec->funcName,
     static_cast<int32_t>(tRec->src.resumeMode()),
-    tRec->src.hasThis(),
     tRec->src.prologue(),
     tRec->src.offset(),
     tRec->guards.size());
@@ -354,60 +350,26 @@ void OfflineTransData::printTransRec(TransID transId,
       std::cout << folly::format(
         "  annotation[\"{}\"]",
         annotation.first);
+      auto const& annotationValue = annotation.second;
       // Either read annotation from file or print inline.
-      if (annotationsVerbosity > 1 &&
-          annotation.second.substr(0, 5) == "file:") {
+      if (annotationsVerbosity > 1 && annotationValue.substr(0, 5) == "file:") {
         std::cout << '\n';
-        string fileName = annotation.second.substr(5);
-        // The actual file should be located in dumpDir.
-        size_t pos = fileName.find_last_of('/');
-        if (pos != std::string::npos) {
-          fileName = fileName.substr(pos+1);
-        }
-        uint64_t offset = 0;
-        uint64_t length = std::numeric_limits<decltype(length)>::max();
-        pos = fileName.find_first_of(':');
-        if (pos != std::string::npos) {
-          auto filePos = fileName.substr(pos+1);
-          fileName.resize(pos);
-          if (sscanf(filePos.c_str(), "%ld:%ld", &offset, &length) != 2) {
-            std::cout << annotation.second << '\n';
-            continue;
-          }
-        }
-        fileName = folly::sformat("{}/{}", dumpDir, fileName);
-        FILE *file = fopen(fileName.c_str(), "r");
-        if (!file) {
-          std::cout << folly::format("<Error opening file {}>\n",
-                                     fileName);
+        auto const maybeFileInfo = g_annotations->getFileInfo(annotationValue);
+
+        if (!maybeFileInfo) {
+          std::cout << annotationValue << '\n';
           continue;
         }
-        if (fseeko(file, offset, SEEK_SET) != 0) {
-          std::cout << folly::format("<Error positioning file {} at {}>\n",
-                                     fileName, offset);
-          fclose(file);
-          continue;
-        }
-        // zlib can read uncompressed files too.
-        gzFile compressedFile = gzdopen(fileno(file), "r");
-        if (!compressedFile) {
-          std::cout << folly::format("<Error opening file {} with gzdopen>\n",
-                                     fileName);
-          fclose(file);
-          continue;
-        }
-        SCOPE_EXIT{ gzclose(compressedFile); };
-        std::cout << '\n';
-        char buf[BUFLEN];
-        uint64_t bytesRead = 0;
-        while (gzgets(compressedFile, buf, BUFLEN) != Z_NULL &&
-               bytesRead < length) {
-          std::cout << folly::format("    {}", buf);
-          bytesRead += std::strlen(buf);
+        auto const& fileInfo = *maybeFileInfo;
+
+        auto const& maybeValue = g_annotations->getValue(fileInfo);
+        if (maybeValue) {
+          std::cout << '\n' << (folly::gen::split(*maybeValue, '\n') |
+                                folly::gen::unsplit("\n    "));
         }
         std::cout << '\n';
       } else {
-        std::cout << folly::format(" = {}\n", annotation.second);
+        std::cout << folly::format(" = {}\n", annotationValue);
       }
     }
   }

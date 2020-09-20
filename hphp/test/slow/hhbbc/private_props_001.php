@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test inference handles things which have side effects that could
@@ -34,4 +34,8 @@ function main() {
   $x = new Foo();
 }
 
+
+<<__EntryPoint>>
+function main_private_props_001() {
 main();
+}

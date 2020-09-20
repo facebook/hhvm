@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $id = new MongoId;
 if (getmypid() <= 65536) {
     $retval = $id->getPid() == getmypid();
@@ -16,4 +16,4 @@ var_dump($id->getPid(), $id->__toString());
 
 $id = new MongoID("4fe342a944415e5284000000");
 var_dump($id->getPid(), $id->__toString());
-?>
+}

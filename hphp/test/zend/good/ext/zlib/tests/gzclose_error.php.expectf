@@ -1,7 +1,5 @@
 
-Warning: %s
-bool(false)
+Warning: gzclose() expects exactly 1 parameter, 2 given in %s/gzclose_error.php on line 9
 
-Warning: %s
-bool(false)
+Warning: gzclose() expects exactly 1 parameter, 0 given in %s/gzclose_error.php on line 10
 ===DONE===

@@ -1,7 +1,7 @@
 int(1)
 int(2)
 int(3)
-array(3) {
+darray(3) {
   [2]=>
   int(3)
   [1]=>
@@ -13,15 +13,12 @@ f
 int(4)
 int(5)
 int(6)
-
-Notice: Undefined index: 1 in %s on line 23
-
-Notice: Undefined index: 0 in %s on line 23
-NULL
-NULL
+Out of bounds varray access: invalid index 1
+int(4)
+int(5)
 int(1)
 int(2)
 int(3)
-string(1) "d"
-string(1) "e"
+int(1)
+int(2)
 string(4) "derp"

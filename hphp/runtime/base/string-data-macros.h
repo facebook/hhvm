@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_DATA_MACROS_H_
-#define incl_HPHP_STRING_DATA_MACROS_H_
+#pragma once
+
+#include "hphp/util/low-ptr-def.h"
 
 #ifdef USE_LOWPTR
 #define NO_M_DATA 1
@@ -28,4 +29,3 @@
 #define SD_HASH   12
 #endif
 
-#endif

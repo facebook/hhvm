@@ -1,19 +1,21 @@
-<?php
+<?hh
 
-$LOG_ROOT = '/tmp/hhvm_server';
-require __DIR__ . '/../../util/server_tests.inc';
-require __DIR__ . '/../Adoy/Client.php';
+function init() {
+  require __DIR__ . '/../../util/server_tests.inc';
+  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  require __DIR__ . '/../Adoy/Client.php';
 
-$DOC_ROOT = dirname(__DIR__).'/server_root';
+  ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
+  ServerUtilServerTests::$request = fun('fastcgi_request');
+}
 
 function runTest($testController, $customArgs = '') {
-  global $DOC_ROOT;
   $pid = posix_getpid();
   try {
     $serverProc = $serverPort = $adminPort = null;
     $debugPort = false;
-    $serverProc = startServer($serverPort, $adminPort, $debugPort,
-                              dirname(__DIR__), $DOC_ROOT, $customArgs);
+    $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
+                              dirname(__DIR__), ServerUtilServerTests::$DOC_ROOT, $customArgs);
     $testController($serverPort);
     stopServer($adminPort, $serverProc);
   } catch (Exception $e) {
@@ -24,20 +26,18 @@ function runTest($testController, $customArgs = '') {
   }
 }
 
-function request($host, $port, $path, $post = [], $headers = [], $extra_args = []) {
-  global $test_run_id, $LOG_ROOT, $DOC_ROOT;
-
+function fastcgi_request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = http_build_query($post);
 
-    $args = array_merge(array(
+    $args = array_merge(darray[
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
-      'REQUEST_METHOD' => empty($post) ? 'GET' : 'POST',
+      'REQUEST_METHOD' => (!($post ?? false)) ? 'GET' : 'POST',
       'SERVER_SOFTWARE' => 'php/fcgiclient',
       'SERVER_PROTOCOL' => 'HTTP/1.1',
       'CONTENT_LENGTH' => strlen($content)
-    ), $extra_args);
+    ], $extra_args);
     foreach($headers as $k => $v) {
       $args["HTTP_" . strtoupper($k)] = $v;
     }
@@ -46,7 +46,7 @@ function request($host, $port, $path, $post = [], $headers = [], $extra_args = [
       $args['QUERY_STRING'] = substr($path, $pos + 1);
       $path = substr($path, 0, $pos);
     }
-    $doc_root = $DOC_ROOT;
+    $doc_root = ServerUtilServerTests::$DOC_ROOT;
     $pos = strpos($path, '//');
     if ($pos) {
       $doc_root .= '/' . substr($path, 0, $pos);
@@ -64,7 +64,7 @@ function request($host, $port, $path, $post = [], $headers = [], $extra_args = [
     }
     return trim($result);
   } catch (Exception $e) {
-    tlog("request exception: " . $e->getMessage());
+    tlog("request exception: " . $e->getMessage() .'('.$e->getTraceAsString().')');
     return "";
   }
 }

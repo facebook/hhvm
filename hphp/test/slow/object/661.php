@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 class A {
-  var $a;
-  var $b;
-  var $c;
-  var $d;
+  public $a;
+  public $b;
+  public $c;
+  public $d;
   public function __construct($p1, $p2, $p3, $p4) {
     $this->a = $p1;
     $this->b = $p2;
@@ -12,18 +12,19 @@ class A {
     $this->d = $p4;
   }
 }
-;
-$obj = new A(1, 2, 3, 4);
-foreach ($obj as $key => &$val) {
-  if($val == 2) {
-    $obj->$key = 0;
+
+<<__EntryPoint>>
+function main() {
+  $obj = new A(1, 2, 3, 4);
+  foreach ($obj as $key => $val) {
+    if ($val == 2) {
+      $obj->$key = 0;
+    } else if($val == 3) {
+      var_dump($key);
+      unset($obj->$key);
+    } else {
+      $obj->$key++;
+    }
   }
- else if($val == 3) {
-    var_dump($key);
-    unset($obj->$key);
-  }
- else {
-    $val++;
-  }
+  var_dump($obj);
 }
-var_dump($obj);

@@ -1,0 +1,4 @@
+File "uninvalidated_fake_member.php", line 15, characters 18-20:
+You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+File "uninvalidated_fake_member.php", line 8, characters 38-42:
+Definition is here

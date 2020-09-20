@@ -38,21 +38,12 @@ HHVM_EXTENSION_BUILD_SOURCE_LISTS()
 set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 set(HRE_LINK_LIBRARIES ${HRE_LIBARIES} CACHE INTERNAL "" FORCE)
 
-add_precompiled_header(
-  "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.h"
-  "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.cpp"
-  CXX_SOURCES
-)
-
 add_object_library(hphp_runtime_ext
   ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_runtime_ext" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
 add_dependencies(hphp_runtime_ext hphp_runtime_static)
-if (ENABLE_ASYNC_MYSQL)
-  add_dependencies(hphp_runtime_ext webscalesqlclient squangle)
-endif ()
-object_library_ld_link_libraries(hphp_runtime_ext hphp_zend hphp_facts_parser ${HRE_LINK_LIBRARIES})
+object_library_ld_link_libraries(hphp_runtime_ext hphp_zend ${HRE_LINK_LIBRARIES})
 object_library_hphp_link(hphp_runtime_ext)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_ext)
 

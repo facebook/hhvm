@@ -1,0 +1,2 @@
+File "self_in_trait.php", line 11, characters 10-13:
+Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity.  (Naming[2113])

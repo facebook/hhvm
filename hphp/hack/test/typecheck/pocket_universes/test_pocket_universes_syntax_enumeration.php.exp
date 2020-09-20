@@ -1,0 +1,8 @@
+File "test_pocket_universes_syntax_enumeration.php", line 5, characters 3-82:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_enumeration.php", line 6, characters 5-16:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_enumeration.php", line 7, characters 5-22:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_enumeration.php", line 8, characters 5-25:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])

@@ -275,7 +275,7 @@ struct JobQueueTest : testing::Test {
   void SetUp() override {
     m_clock.reset(new TickingClock());
     m_dispatcher.reset(
-      new JobQueueDispatcher<TickWorker>(180, 0, true, m_clock.get()));
+      new JobQueueDispatcher<TickWorker>(180, 180, 0, true, m_clock.get()));
     m_factory.reset(new TickRequestFactory(m_clock.get()));
   }
 

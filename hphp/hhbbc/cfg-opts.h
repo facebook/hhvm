@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CFG_OPTS_H_
-#define incl_HHBBC_CFG_OPTS_H_
+#pragma once
+
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -31,20 +32,38 @@ struct FuncAnalysis;
  * If options.RemoveDeadBlocks is off, this function just replaces
  * blocks we believe are unreachable with fatal opcodes.
  */
-void remove_unreachable_blocks(const FuncAnalysis&);
+void remove_unreachable_blocks(const FuncAnalysis&, php::WideFunc& func);
 
 /*
  * Simplify control flow, and create Switch and SSwitch bytecodes.
  */
-bool control_flow_opts(const FuncAnalysis&);
+bool control_flow_opts(const FuncAnalysis&, php::WideFunc& func);
 
 /*
- * Simplify the exception tree.
+ * Split critical edges.
+ *
+ * Some optimizations require or are better if we split critical edges in the
+ * cfg.  One example of this is UnsetL insertion.  With the following cfg:
+ *
+ *  B1
+ *  | \
+ *  |  B2
+ *  | /
+ *  B3
+ *
+ * Suppose in B1 we have local l1 holding a counted value.  B2 may leave local
+ * l1 uninit (after a move optisation is applied during a call).  Inserting an
+ * UnsetL(l1) at the start of block B3 will require a decref of
+ * Union(TCnt, TUninit), which is not great.  If we split critical edges, the
+ * UnsetL(l1) (and its decref) could sit on the edge from B1 to B2 making it
+ * a decref of TCnt.
+ *
+ * Critical edge blocks that remain a single nop will get folded away by
+ * control_flow_opts.
  */
-bool rebuild_exn_tree(const FuncAnalysis& ainfo);
+void split_critical_edges(const Index&, FuncAnalysis&, php::WideFunc& func);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

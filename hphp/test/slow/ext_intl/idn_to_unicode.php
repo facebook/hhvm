@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_idn_to_unicode() {
 var_dump(idn_to_unicode("www.xn--mnsjonasson-x8a.se") ===
     "www.m\xc3\xa5nsjonasson.se");
 var_dump(idn_to_unicode("www.facebook.com"));
@@ -8,3 +11,4 @@ var_dump(idn_to_unicode("www.xn--12345678901234567890123456789".
                     ===
     "www.12345678901234567890123456789".
     "012345678901234m\xc3\xa5nsjonasson.se");
+}

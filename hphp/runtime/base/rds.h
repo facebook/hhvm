@@ -13,27 +13,34 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_RDS_H_
-#define incl_HPHP_RUNTIME_RDS_H_
+#pragma once
 
-#include <atomic>
-#include <cstdlib>
-#include <cinttypes>
-#include <string>
-#include <unordered_map>
-#include <boost/variant.hpp>
-#include <folly/Range.h>
-#include <folly/Optional.h>
-
+#include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/base/types.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/type-scan.h"
 
-namespace HPHP {
-  struct Array;
-  struct StringData;
-  struct Class;
-}
+#include <folly/Optional.h>
+#include <folly/Range.h>
+
+#include <atomic>
+#include <cinttypes>
+#include <cstdlib>
+#include <string>
+#include <type_traits>
+
+#ifndef RDS_FIXED_PERSISTENT_BASE
+// If RDS_FIXED_PERSISTENT_BASE is defined from compiler command line, don't
+// mess with it.  This makes it possible not to use fixed persistent base when
+// linking against jemalloc 5+.
+#ifndef incl_HPHP_UTIL_ALLOC_H_
+#error "please include alloc.h before determining RDS implementation!"
+#endif
+#if USE_JEMALLOC_EXTENT_HOOKS
+#define RDS_FIXED_PERSISTENT_BASE 1
+#endif
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -56,24 +63,25 @@ namespace HPHP { namespace rds {
  * value across requests.  The final section contains shared "persistent" data,
  * which is data that retains the same values across requests.
  *
- * The shared persistent segment is           RDS Layout:
- * implemented by mapping the same physical
- * pages to different virtual addresses, so      +-------------+ <-- tl_base
- * are all accessible from the                   |  Header     |
- * per-thread RDS base.  The normal              +-------------+
- * region is perhaps analogous to .bss,          |             |
- * while the persistent region is                |  Normal     |
- * analogous to .rodata, and the local region    |    region   |
- * is similar to .data.                          |             | growing higher
- *                                               +-------------+  vvv
- * When we're running in C++, the base of RDS    | \ \ \ \ \ \ |
- * is available via a thread local exported      +-------------+  ^^^
- * from this module (tl_base).  When running     |  Local      | growing lower
- * in JIT-compiled code, a machine register      |    region   |
+ * The shared persistent segment is allocated     RDS Layout:
+ * within [1G, 4G) offset from the persistent
+ * base (0 if RDS_FIXED_PERSISTENT_BASE is       +-------------+ <-- tl_base
+ * defined as 1, which is safe if address from   |  Header     |
+ * lower_malloc() is below 4G).                  +-------------+
+ *                                               |             |
+ * The normal region is perhaps analogous to     |  Normal     |
+ * .bss, while the persistent region is          |    region   |
+ * analogous to .rodata, and the local region    |             | growing higher
+ * is similar to .data.                          +-------------+  vvv
+ *                                               | \ \ \ \ \ \ |
+ * When we're running in C++, the base of RDS    +-------------+  ^^^
+ * is available via a thread local exported      |  Local      | growing lower
+ * from this module (tl_base).  When running     |    region   |
+ * in JIT-compiled code, a machine register      +-------------+ higher address
  * is reserved to always point at the base of    +-------------+
  * RDS.                                          | Persistent  |
- *                                               |     region  | higher
- *                                               +-------------+   addresses
+ *                                               |     region  |
+ *                                               +-------------+
  *
  * Every element in the "normal" segment has an associated generation number,
  * and the segment as a whole has a "current" generation number.  A particular
@@ -117,6 +125,7 @@ void requestInit();
 void requestExit();
 void threadInit(bool shouldRegister = true);
 void threadExit(bool shouldUnregister = true);
+void processInit();
 
 /*
  * Flushing RDS means to madvise the memory away.  Should only be done
@@ -137,7 +146,6 @@ size_t usedPersistentBytes();
 
 folly::Range<const char*> normalSection();
 folly::Range<const char*> localSection();
-folly::Range<const char*> persistentSection();
 
 // Invoke F on each initialized allocation in the normal section. F is invoked
 // with a void* pointer to the data, the size of the data, and the stored
@@ -152,70 +160,48 @@ extern __thread void* tl_base;
 
 //////////////////////////////////////////////////////////////////////
 
+enum class Mode : unsigned {
+  Normal        = 1u << 0,
+  Local         = 1u << 1,
+  Persistent    = 1u << 2,
+
+  NonPersistent = Normal | Local,
+  NonLocal      = Normal | Persistent,
+  NonNormal     = Local  | Persistent,
+
+  Any           = Normal | Local | Persistent,
+};
+
+using ModeU = std::underlying_type<Mode>::type;
+
+template<Mode Mask> constexpr bool maybe(Mode mode) {
+  return !!(static_cast<ModeU>(mode) & static_cast<ModeU>(Mask));
+}
+
+template<Mode RHS> constexpr bool in(Mode LHS) {
+  return !(static_cast<ModeU>(LHS) & ~static_cast<ModeU>(RHS));
+}
+
+constexpr bool pure(Mode mask) {
+  return !(static_cast<ModeU>(mask) & (static_cast<ModeU>(mask) - 1));
+}
+
 /*
- * RDS symbols are centrally registered here.
+ * Handles into Request Data Segment.
  *
- * All StringData*'s below must be static strings.
- */
-
-/*
- * Symbol for function static locals.  These are RefData's allocated
- * in RDS.
- */
-struct StaticLocal { FuncId funcId;
-                     const StringData* name; };
-
-/*
- * Class constant values are TypedValue's stored in RDS.
- */
-struct ClsConstant { const StringData* clsName;
-                     const StringData* cnsName; };
-
-/*
- * StaticMethod{F,}Cache allocations.  These are used to cache static
- * method dispatch targets in a given class context.  The `name' field
- * here is a string that encodes the target class, property, and
- * source context.
- */
-struct StaticMethod  { const StringData* name; };
-struct StaticMethodF { const StringData* name; };
-
-/*
- * Profiling translations may store various kinds of junk under
- * symbols that are keyed on translation id.  These generally should
- * go in Mode::Local or Mode::Persistent, depending on the use case.
- */
-struct Profile { TransID transId;
-                 Offset bcOff;
-                 const StringData* name; };
-
-/*
- * Static class properties in Mode::Local
- */
-
-struct SPropCache { const Class* cls;
-                    Slot slot; };
-
-using Symbol = boost::variant< StaticLocal
-                             , ClsConstant
-                             , StaticMethod
-                             , StaticMethodF
-                             , Profile
-                             , SPropCache
-                             >;
-
-//////////////////////////////////////////////////////////////////////
-
-enum class Mode { Normal, Local, Persistent };
-
-/*
- * Handles into Request Data Segment.  These are offsets from rds::tl_base.
+ * For `Normal` and `Local` mode, it is an offset from rds::tl_base. The offset
+ * must be smaller than 1 << 30.
+ *
+ * For `Persistent` mode, the handle is an offset from `s_persistent_base`.
+ * When `RDS_FIXED_PERSISTENT_BASE` is defined, `s_persistent_base` is always 0,
+ * and the handle is the same as the address, and must be at least 1 << 30.
  */
 using Handle = uint32_t;
 constexpr Handle kUninitHandle = 0;
-constexpr Handle kInvalidHandleMask = 0x80000000;
-constexpr Handle kBeingBound = 0xffffffff;
-constexpr Handle kBeingBoundWithWaiters = 0xfffffffe;
+constexpr Handle kBeingBound = 1;
+constexpr Handle kBeingBoundWithWaiters = 2;
+constexpr Handle kMinPersistentHandle = 1u << 30;
+constexpr Handle kMaxHandle = std::numeric_limits<Handle>::max();
 
 /*
  * Normal segment element generation numbers.
@@ -234,7 +220,7 @@ constexpr GenNumber kInvalidGenNumber = 0;
 enum class NormalTag {};
 
 /*
- * rds::Link<T> is a thin, typed wrapper around an rds::Handle.
+ * rds::Link<T,M> is a thin, typed wrapper around an rds::Handle.
  *
  * Note that nothing prevents using non-POD types with this.  But nothing here
  * is going to run the constructor.  (In the non-persistent region, the space
@@ -244,43 +230,44 @@ enum class NormalTag {};
  * multiple threads, and the alloc() api guarantees only a single
  * caller will actually allocate new space in RDS.
  */
-template<class T, bool normal_only = false>
+template<class T, Mode M>
 struct Link {
-  explicit Link(Handle handle);
-  Link(const Link&);
-  ~Link() = default;
-
-  Link& operator=(const Link& r);
+  explicit Link(Handle handle = kUninitHandle);
 
   /*
-   * Ensure this Link is bound to an RDS allocation.  If it is not, allocate it
-   * using this Link itself as the symbol.
-   *
-   * This function internally synchronizes to avoid double-allocating.  It is
-   * legal to call it repeatedly with a link that may already be bound.  The
-   * `mode' parameter and `Align' parameters are ignored if the link is already
-   * bound, and only affects the call that allocates RDS memory.
-   *
-   * Post: bound()
+   * We allow copy construction or assignment from a Link of a narrower Mode,
+   * but it is a compile-time error if we try to do it the other way.
    */
-  template<size_t Align = alignof(T)> void bind(Mode mode = Mode::Normal);
+  Link(const Link<T,M>&);
+  Link<T,M>& operator=(const Link<T,M>&);
+
+  template<Mode OM> /* implicit */ Link(
+      const Link<T,OM>&,
+      typename std::enable_if<in<M>(OM), bool>::type = false);
+
+  template<Mode OM> typename std::enable_if<in<M>(OM),Link<T,M>>::type&
+  operator=(const Link<T,OM>&);
 
   /*
    * Ensure this Link is bound to an RDS allocation.
-   *  - if its already bound, do nothing;
-   *  - if another thread is already calling fun to bind it, wait until its
-   *    bound;
-   *  - otherwise call fun to obtain a handle.
    *
-   * The intent is to ensure that only one thread allocates the
-   * handle, and that in the case of persistent handles, fun has a
-   * chance to fill in the value before the Link is published (so that
-   * other threads only ever see an unbound handle, or a bound handle
-   * with a valid value.
+   * Allocation is atomic and idempotent.  This ensures that only one thread
+   * allocates the handle, and (in the cast of persistent handles) that the
+   * value is initialized as part of the operation.  The effect is that other
+   * threads only ever see an unbound handle or a bound handle with a valid
+   * value.
+   *
+   * rds::Link's are "keyed" by context---generally meaning that they're owned
+   * by an object with an independent means of enforcing uniqueness.  The `sym`
+   * argument should also be unique, but is used only for optimizations.
+   *
+   * If the Link is already bound, both `mode` and `Align` are ignored.  If the
+   * mode is not persistent, `init_val` is ignored.
    *
    * Post: bound()
    */
-  template<typename F> void bind(F fun);
+  template<size_t Align = alignof(T)>
+  void bind(Mode mode, Symbol sym, const T* init_val = nullptr);
 
   /*
    * Dereference a Link and access its RDS memory for the current thread.
@@ -333,7 +320,6 @@ struct Link {
    * Pre: bound()
    */
   bool isInit() const;
-  bool isInit(NormalTag) const;
 
   /*
    * Manually mark this element as initialized or uninitialized.
@@ -373,6 +359,10 @@ struct Link {
   }
 
 private:
+  template<class OT, Mode OM> friend struct Link;
+
+  void checkSanity();
+
   Handle raw() const { return m_handle.load(std::memory_order_relaxed); }
   std::atomic<Handle> m_handle;
 };
@@ -391,8 +381,8 @@ private:
  * region; it is allowed to be true only if `key' is only ever bound with
  * Mode::Normal.
  */
-template<class T, bool N = false, size_t Align = alignof(T)>
-Link<T,N> bind(Symbol key, Mode mode = Mode::Normal, size_t extraSize = 0);
+template<class T, Mode M, size_t Align = alignof(T)>
+Link<T,M> bind(Symbol key, size_t extraSize = 0);
 
 /*
  * Remove a bound link from RDS metadata. The actual space in RDS is
@@ -407,8 +397,8 @@ void unbind(Symbol, Handle);
  * fixed.  The `T' must be the same `T' that the symbol is mapped to,
  * if it's already mapped.
  */
-template<class T>
-Link<T> attach(Symbol key);
+template<class T, Mode M = Mode::Any>
+Link<T,M> attach(Symbol key);
 
 /*
  * Allocate anonymous memory from RDS.
@@ -416,8 +406,8 @@ Link<T> attach(Symbol key);
  * The memory is not keyed on any Symbol, so the handle in the returned Link
  * will be unique.
  */
-template<class T, size_t Align = alignof(T), bool N = false>
-Link<T,N> alloc(Mode mode = Mode::Normal);
+template<class T, Mode M = Mode::Normal, size_t Align = alignof(T)>
+Link<T,M> alloc();
 
 /*
  * Allocate a single anonymous bit from non-persistent RDS.  The bit
@@ -445,11 +435,19 @@ Handle currentGenNumberHandle();
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Dereference an un-typed rds::Handle, optionally specifying a
- * specific RDS base to use.
+ * Dereference an un-typed rds::Handle which is guaranteed to be in one of the
+ * `modes`, optionally specifying a specific RDS base to use.
  */
-template<class T> T& handleToRef(Handle h);
-template<class T> T& handleToRef(void* base, Handle h);
+template<class T, Mode M> T& handleToRef(Handle h);
+template<class T, Mode M> T& handleToRef(void* base, Handle h);
+
+/*
+ * Conversion between a pointer and an rds::Handle which is guaranteed to be in
+ * one of the modes specified in `M`.
+ */
+template<class T = void, Mode M> T* handleToPtr(Handle h);
+template<Mode M> Handle ptrToHandle(const void* ptr);
+template<Mode M> Handle ptrToHandle(uintptr_t ptr);
 
 /*
  * Whether `handle' looks valid---i.e., whether it lies within the RDS bounds.
@@ -521,28 +519,25 @@ void uninitHandle(Handle handle);
 /*
  * Used to record information about the rds handle h in the
  * perf-data-pid.map (if enabled).
- * The type indicates the type of entry (eg StaticLocal), and the
+ * The type indicates the type of entry (eg ClsConstant), and the
  * msg identifies this particular entry (eg function-name:local-name)
  */
 void recordRds(Handle h, size_t size,
-               const std::string& type, const std::string& msg);
+               folly::StringPiece type, folly::StringPiece msg);
 void recordRds(Handle h, size_t size, const Symbol& sym);
+
+void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun);
 
 /*
  * Return a list of all the tl_bases for any threads that are using RDS
  */
 std::vector<void*> allTLBases();
 
-/*
- * Values for dynamically defined constants are stored as key value
- * pairs in an array, accessible here.
- */
-Array& s_constants();
-
 //////////////////////////////////////////////////////////////////////
+
+extern rds::Link<bool, Mode::Persistent> s_persistentTrue;
 
 }}
 
 #include "hphp/runtime/base/rds-inl.h"
 
-#endif

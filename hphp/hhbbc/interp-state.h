@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_INTERP_STATE_H_
-#define incl_HHBBC_INTERP_STATE_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -39,65 +38,50 @@ struct FuncAnalysis;
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Types of a FPI regions.  (What sort of function call is being
- * made.)
- */
-enum class FPIKind {
-  Unknown,     // Nothing is known.
-  CallableArr, // May be an ObjMeth or a ClsMeth.
-  Func,        // Definitely a non-member function.
-  Ctor,        // Definitely a constructor for an object.
-  ObjMeth,     // Definitely a method on an object (possibly __call).
-  ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
-  ObjInvoke,   // Closure invoke or __invoke on an object.
-  Builtin,     // Resolved builtin call; we will convert params and FCall as
-               // we go
-};
-
-/*
- * Information about a pre-live ActRec.  Part of state tracked in
- * State.
- */
-struct ActRec {
-  explicit ActRec(FPIKind kind,
-                  Type calledOn,
-                  folly::Optional<res::Class> c = folly::none,
-                  folly::Optional<res::Func> f = folly::none,
-                  folly::Optional<res::Func> f2 = folly::none)
-    : kind(kind)
-    , cls(std::move(c))
-    , func(std::move(f))
-    , fallbackFunc(std::move(f2))
-    , context(std::move(calledOn))
-  {}
-
-  FPIKind kind;
-  bool foldable{false};
-  BlockId pushBlk{NoBlockId};
-  folly::Optional<res::Class> cls;
-  folly::Optional<res::Func> func;
-  // Possible fallback func if we cannot determine which will be called.
-  folly::Optional<res::Func> fallbackFunc;
-  Type context;
-};
-
-/*
  * State of an iterator in the program.
+ *
+ * We track iterator liveness precisely, so if an iterator is DeadIter, its
+ * definitely dead and vice-versa. We only track "normal" iterators (non-weak,
+ * non-mutable), so iterators not of those type are considered "dead".
+ *
+ * We use this state to check if the "local iterator" optimization is valid.
+ * In this optimization, we leave the iterator base in a local slot instead of
+ * inc-ref-ing it and storing it in the iter.
+ *
+ * Local iteration is only possible if the positions of the keys of the base
+ * iterator are unchanged. We call an update that leaves these key positions
+ * unchanged a "safe" update; the only one that we can account for is updating
+ * the value of the current iteration key, as in:
+ *
+ *  foreach ($base as $key => $value) {
+ *    $base[$key] = $value + 1;
+ *  }
+ *
+ * Finally, we also track a flag that is set whenever we see *any* update to
+ * the base (including "safe" updates). If we know the base is unchanged during
+ * iteration, we can further optimize the iterator in HHIR.
  */
-struct UnknownIter {};
-struct TrackedIter { IterTypes types; };
-using Iter = boost::variant< UnknownIter
-                           , TrackedIter
-                           >;
+struct DeadIter {};
+struct LiveIter {
+  IterTypes types;
+  // If the base came from a local, and all updates to it have been "safe",
+  // this field will be the id of that local. Otherwise, it will be NoLocalId.
+  LocalId baseLocal       = NoLocalId;
+  // The local that is known to be equivalent to the current key in the iter.
+  // Used to detect "safe" updates to the base.
+  LocalId keyLocal        = NoLocalId;
+  // The block id where this iterator was initialized. If there's more than one
+  // such block, it will be NoBlockId.
+  BlockId initBlock       = NoBlockId;
+  // Set whenever we see any mutation, even "safe" ones that don't affect keys.
+  bool baseUpdated        = false;
+  // Set whenever the base of the iterator cannot be an iterator
+  bool baseCannotBeObject = false;
+};
+using Iter = boost::variant<DeadIter, LiveIter>;
 
 /*
  * Tag indicating what sort of thing contains the current member base.
- *
- * The base is always the unboxed version of the type, and its location could be
- * inside of a Ref. So, for example, a base with BaseLoc::Frame could be located
- * inside of a Ref that is pointed to by the Frame. (We may want to distinguish
- * these two cases at some point if we start trying to track real information
- * about Refs, but not yet.)
  *
  * Note that if we're in an array-chain, the base location always reflects the
  * location of the array which started the array-chain.
@@ -190,30 +174,154 @@ struct Base {
 
 // An element on the eval stack
 struct StackElem {
+  static auto constexpr NoId = std::numeric_limits<uint32_t>::max();
+
   Type type;
   // A location which is known to have an equivalent value to this
   // stack value. This could be a valid LocalId, the special value
   // StackDupId to indicate that its equivalent to the stack element
-  // below it, or NoLocalId if it has no known equivalents.
+  // below it, the special value StackThisId to indicate that its the
+  // value of $this, or NoLocalId if it has no known equivalents.
   // Note that the location may not match the stack value wrt Uninit.
   LocalId equivLoc;
-
-  bool operator==(const StackElem& other) const {
-    return type == other.type && equivLoc == other.equivLoc;
-  }
+  uint32_t index;
+  uint32_t id;
 };
 
-/*
- * Used to track the state of the binding between locals, and their
- * corresponding static (if any).
- */
-enum class LocalStaticBinding {
-  // This local is not bound to a local static
-  None,
-  // This local might be bound to its local static
-  Maybe,
-  // This local is known to be bound to its local static
-  Bound
+struct InterpStack {
+private:
+  template<typename S>
+  struct Iterator {
+    friend struct InterpStack;
+    Iterator(S* owner, uint32_t idx) :
+        owner(owner), idx(idx) {
+      assertx(idx <= owner->size());
+    }
+    void operator++() {
+      assertx(idx < owner->size());
+      ++idx;
+    }
+    void operator--() {
+      assertx(idx);
+      --idx;
+    }
+    Iterator operator-(ssize_t off) {
+      return Iterator(owner, idx - off);
+    }
+    Iterator operator+(ssize_t off) {
+      return Iterator(owner, idx + off);
+    }
+    auto& operator*() const {
+      assertx(idx < owner->index.size());
+      return owner->elems[owner->index[idx]];
+    }
+    auto* operator->() const {
+      return &operator*();
+    }
+    // very special helper for use with Add*ElemC. To prevent
+    // quadratic time/space when appending to an array, we need to
+    // ensure we're appending to an array with a single reference; but
+    // popping from an InterpStack doesn't actually remove the
+    // element. This allows us to drop the type's datatag. It means
+    // that rewinding wouldn't see the original type; but Add*ElemC is
+    // very carefully coded anyway.
+    auto unspecialize() const {
+      auto t = std::move((*this)->type);
+      (*this)->type = loosen_values(t);
+      return t;
+    }
+    StackElem* next_elem(ssize_t off) const {
+      const size_t i = owner->index[idx] + off;
+      if (i > owner->elems.size()) return nullptr;
+      return &owner->elems[i];
+    }
+    template<typename T>
+    bool operator==(const Iterator<T>& other) const {
+      return owner == other.owner && idx == other.idx;
+    }
+    template<typename T>
+    bool operator!=(const Iterator<T>& other) const {
+      return !operator==(other);
+    }
+    template<typename T>
+    const Iterator& operator=(const Iterator<T>& other) const {
+      owner = other.owner;
+      idx = other.idx;
+      return *this;
+    }
+  private:
+    S* owner;
+    uint32_t idx;
+  };
+public:
+  using iterator = Iterator<InterpStack>;
+  using const_iterator = Iterator<const InterpStack>;
+  auto begin() { return iterator(this, 0); }
+  auto end() { return iterator(this, index.size()); }
+  auto begin() const { return const_iterator(this, 0); }
+  auto end() const { return const_iterator(this, index.size()); }
+  auto& operator[](size_t idx) { return *iterator(this, idx); }
+  auto& operator[](size_t idx) const { return *const_iterator(this, idx); }
+  auto& back() { return *iterator(this, index.size() - 1); }
+  auto& back() const { return *const_iterator(this, index.size() - 1); }
+  void push_elem(const StackElem& elm) {
+    assertx(elm.index == index.size());
+    index.push_back(elems.size());
+    elems.push_back(elm);
+  }
+  void push_elem(StackElem&& elm) {
+    assertx(elm.index == index.size());
+    index.push_back(elems.size());
+    elems.push_back(std::move(elm));
+  }
+  void push_elem(const Type& t, LocalId equivLoc,
+                 uint32_t id = StackElem::NoId) {
+    uint32_t isize = index.size();
+    push_elem({t, equivLoc, isize, id});
+  }
+  void push_elem(Type&& t, LocalId equivLoc, uint32_t id = StackElem::NoId) {
+    uint32_t isize = index.size();
+    push_elem({std::move(t), equivLoc, isize, id});
+  }
+  void pop_elem() {
+    index.pop_back();
+  }
+  void erase(iterator i1, iterator i2) {
+    assertx(i1.owner == i2.owner);
+    assertx(i1.idx < i2.idx);
+    i1.owner->index.erase(i1.owner->index.begin() + i1.idx,
+                          i1.owner->index.begin() + i2.idx);
+  }
+  bool empty() const { return index.empty(); }
+  size_t size() const { return index.size(); }
+  void clear() {
+    index.clear();
+    elems.clear();
+  }
+  void compact() {
+    uint32_t i = 0;
+    for (auto& ix : index) {
+      if (ix != i) {
+        assertx(ix > i);
+        std::swap(elems[i], elems[ix]);
+        ix = i;
+      }
+      ++i;
+    }
+    elems.resize(i);
+  }
+  // rewind the stack to the state it was in before the last
+  // instruction ran (which is known to have popped numPop items and
+  // pushed numPush items).
+  void rewind(int numPop, int numPush);
+  void peek(int numPop, const StackElem** values, int numPush) const;
+  void kill(int numPop, int numPush, uint32_t id);
+  void insert_after(int numPop, int numPush, const Type* types,
+                    uint32_t numInst, uint32_t id);
+private:
+  void refill(size_t elemIx, size_t indexLow, int numPop, int numPush);
+  CompactVector<uint32_t> index;
+  CompactVector<StackElem> elems;
 };
 
 /*
@@ -230,54 +338,35 @@ enum class LocalStaticBinding {
  *    o It allows us to determine arbitrary mid-block positions where code
  *      becomes unreachable, and eliminate that code in optimize.cpp.
  *
- *    o HHBC invariants can complicate removing unreachable code in FPI
- *      regions---see the rules in bytecode.specification.  Inside FPI regions,
- *      we still do abstract interpretation of the unreachable code, but this
- *      flag is used when merging states to allow the interpreter to analyze
- *      blocks that are unreachable without pessimizing states for reachable
- *      blocks that would've been their successors.
+ *    o We may still do abstract interpretation of the unreachable code, but
+ *      this flag is used when merging states to allow the interpreter to
+ *      analyze blocks that are unreachable without pessimizing states for
+ *      reachable blocks that would've been their successors.
  *
- * One other note: having the interpreter visit blocks when they are
- * unreachable still potentially merges types into object properties that
- * aren't possible at runtime.  We're only doing this to handle FPI regions for
- * now, but it's not ideal.
+ * TODO: having the interpreter visit blocks when they are unreachable still
+ * potentially merges types into object properties that aren't possible at
+ * runtime.
+ *
+ * We split off a base class from State as a convenience to enable the use
+ * default copy construction and assignment.
  *
  */
-struct State {
-  bool initialized = false;
-  bool unreachable = false;
-  bool thisAvailable = false;
-  LocalId thisLocToKill = NoLocalId;
+struct StateBase {
+  StateBase() {
+    initialized = unreachable = false;
+  };
+  StateBase(const StateBase&) = default;
+  StateBase(StateBase&&) = default;
+  StateBase& operator=(const StateBase&) = default;
+  StateBase& operator=(StateBase&&) = default;
+
+  uint8_t initialized : 1;
+  uint8_t unreachable : 1;
+
+  LocalId thisLoc = NoLocalId;
+  Type thisType;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
-  CompactVector<Type> clsRefSlots;
-  CompactVector<StackElem> stack;
-  CompactVector<ActRec> fpiStack;
-
-  struct MInstrState {
-    /*
-     * The current member base. Updated as we move through bytecodes
-     * representing the operation.
-     */
-    Base base{};
-
-    /*
-     * Chains of member operations on array elements will affect the type of
-     * something further back in the member instruction. This vector tracks the
-     * base,key type pair that was used at each stage. See
-     * interp-minstr.cpp:resolveArrayChain().
-     */
-    using ArrayChain = CompactVector<std::pair<Type,Type>>;
-    ArrayChain arrayChain;
-  };
-  MInstrState mInstrState;
-  /*
-   * If we're calling a function with parameters of unknown refiness, we can't
-   * know statically whether a member instruction sequence is defining or
-   * not. In that case, we keep track of two parallel mInstrStates, one for the
-   * non-defining case, and one for the defining case.
-   */
-  copy_ptr<MInstrState> mInstrStateDefine;
 
   /*
    * Mapping of a local to other locals which are known to have
@@ -285,25 +374,56 @@ struct State {
    * compare types if they care.
    */
   CompactVector<LocalId> equivLocals;
+};
 
-  /*
-   * LocalStaticBindings. Only allocated on demand.
-   */
-  CompactVector<LocalStaticBinding> localStaticBindings;
+struct State : StateBase {
+  State() = default;
+  State(const State&) = default;
+  State(State&&) = default;
+
+  enum class Compact {};
+  State(const State& src, Compact) : StateBase(src) {
+    for (auto const& elm : src.stack) {
+      stack.push_elem(elm.type, elm.equivLoc);
+    }
+  }
+
+  // delete assignment operator, so we have to explicitly choose what
+  // we want to do from amongst the various copies.
+  State& operator=(const State&) = delete;
+  State& operator=(State&&) = delete;
+
+  void copy_from(const State& src) {
+    *static_cast<StateBase*>(this) = src;
+    stack = src.stack;
+  }
+
+  void copy_from(State&& src) {
+    *static_cast<StateBase*>(this) = std::move(src);
+    stack = std::move(src.stack);
+  }
+
+  void copy_and_compact(const State& src) {
+    *static_cast<StateBase*>(this) = src;
+    stack.clear();
+    for (auto const& elm : src.stack) {
+      stack.push_elem(elm.type, elm.equivLoc);
+    }
+  }
+
+  void swap(State& other) {
+    std::swap(static_cast<StateBase&>(*this), static_cast<StateBase&>(other));
+    std::swap(stack, other.stack);
+  }
+
+  InterpStack stack;
 };
 
 /*
- * States are EqualityComparable (provided they are in-states for the
- * same block).
+ * Return a copy of a State without copying the evaluation stack, pushing
+ * Throwable on the stack.
  */
-bool operator==(const ActRec&, const ActRec&);
-bool operator!=(const ActRec&, const ActRec&);
-
-/*
- * Return a copy of a State without copying either the evaluation
- * stack or FPI stack.
- */
-State without_stacks(const State&);
+State with_throwable_only(const Index& env, const State&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -326,12 +446,12 @@ struct PropertiesInfo {
   const PropState& privateProperties() const;
   const PropState& privateStatics() const;
 
-  bool isNonSerialized(SString name) const;
+  void setBadPropInitialValues();
+
 private:
   ClassAnalysis* const m_cls;
   PropState m_privateProperties;
   PropState m_privateStatics;
-  boost::container::flat_set<LSString> m_nonSerializedProps;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -340,9 +460,9 @@ private:
  * Map from closure classes to types for each of their used vars.
  * Shows up in a few different interpreter structures.
  */
-using ClosureUseVarMap = std::map<
-  borrowed_ptr<php::Class>,
-  std::vector<Type>
+using ClosureUseVarMap = hphp_fast_map<
+  php::Class*,
+  CompactVector<Type>
 >;
 
 /*
@@ -350,26 +470,34 @@ using ClosureUseVarMap = std::map<
  * `clo' into the destination map.
  */
 void merge_closure_use_vars_into(ClosureUseVarMap& dst,
-                                 borrowed_ptr<php::Class> clo,
-                                 std::vector<Type>);
+                                 php::Class* clo,
+                                 CompactVector<Type>);
 
 //////////////////////////////////////////////////////////////////////
 
 enum class CollectionOpts {
-  TrackConstantArrays = 1,
+  Speculating = 1,
   Inlining = 2,
   EffectFreeOnly = 4,
-  Optimizing = 8
+  Optimizing = 8,
 };
 
 inline CollectionOpts operator|(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(static_cast<int>(o1) |
-                                     static_cast<int>(o2));
+  return static_cast<CollectionOpts>(
+    static_cast<int>(o1) | static_cast<int>(o2)
+  );
 }
 
 inline CollectionOpts operator&(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(static_cast<int>(o1) &
-                                     static_cast<int>(o2));
+  return static_cast<CollectionOpts>(
+    static_cast<int>(o1) & static_cast<int>(o2)
+  );
+}
+
+inline CollectionOpts operator-(CollectionOpts o1, CollectionOpts o2) {
+  return static_cast<CollectionOpts>(
+    static_cast<int>(o1) & ~static_cast<int>(o2)
+  );
 }
 
 inline bool any(CollectionOpts o) { return static_cast<int>(o); }
@@ -382,22 +510,55 @@ struct CollectedInfo {
   explicit CollectedInfo(const Index& index,
                          Context ctx,
                          ClassAnalysis* cls,
-                         PublicSPropIndexer* publicStatics,
                          CollectionOpts opts,
                          const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
-  PublicSPropIndexer* const publicStatics;
-  ConstantMap cnsMap;
-  std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
-  bool mayUseVV{false};
+  hphp_fast_set<std::pair<const php::Func*, BlockId>>
+    unfoldableFuncs;
   bool effectFree{true};
-  bool readsUntrackedConstants{false};
-  const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
-  bool (*propagate_constants)(const Bytecode& bc, const State& state,
-                              std::vector<Bytecode>& out) = nullptr;
-  CompactVector<Type> localStaticTypes;
+  bool hasInvariantIterBase{false};
+  CollectionOpts opts{};
+  bool (*propagate_constants)(const Bytecode& bc, State& state,
+                              BytecodeVec& out) = nullptr;
+  /*
+   * See FuncAnalysisResult for details.
+   */
+  std::bitset<64> usedParams;
+
+  PublicSPropMutations publicSPropMutations;
+
+  struct MInstrState {
+    /*
+     * The current member base. Updated as we move through bytecodes
+     * representing the operation.
+     */
+    Base base{};
+
+    bool noThrow{false};
+    bool extraPop{false};
+
+    /*
+     * Chains of member operations on array elements will affect the type of
+     * something further back in the member instruction. This vector tracks the
+     * base,key type pair that was used at each stage. See
+     * interp-minstr.cpp:resolveArrayChain().
+     */
+    struct ArrayChainEnt {
+      Type base;
+      Type key;
+      LocalId keyLoc;
+    };
+    using ArrayChain = CompactVector<ArrayChainEnt>;
+    ArrayChain arrayChain;
+
+    void clear() {
+      base.loc = BaseLoc::None;
+      arrayChain.clear();
+    }
+  };
+  MInstrState mInstrState;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -407,7 +568,6 @@ struct CollectedInfo {
  *
  * These return true if the destination state changed.
  */
-bool merge_into(ActRec&, const ActRec&);
 bool merge_into(State&, const State&);
 
 /*
@@ -422,14 +582,12 @@ void widen_props(PropState&);
 /*
  * Functions to show various aspects of interpreter state as strings.
  */
-std::string show(const ActRec& a);
 std::string show(const php::Func&, const Base& b);
-std::string show(const php::Func&, const State::MInstrState&);
+std::string show(const php::Func&, const CollectedInfo::MInstrState&);
+std::string show(const php::Func&, const Iter&);
 std::string property_state_string(const PropertiesInfo&);
 std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

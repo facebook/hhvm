@@ -1,0 +1,355 @@
+Matches Only:
+---
+RE: /foo(bar)?/
+In: foo
+PHP:
+darray(1) {
+  [0]=>
+  string(3) "foo"
+}
+HSL:
+darray(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?/
+In: foo
+PHP:
+darray(1) {
+  [0]=>
+  string(3) "foo"
+}
+HSL:
+darray(3) {
+  [0]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foo
+PHP:
+darray(1) {
+  [0]=>
+  string(3) "foo"
+}
+HSL:
+darray(4) {
+  [0]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobar
+PHP:
+darray(3) {
+  [0]=>
+  string(6) "foobar"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+}
+HSL:
+darray(4) {
+  [0]=>
+  string(6) "foobar"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobaz
+PHP:
+darray(4) {
+  [0]=>
+  string(6) "foobaz"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(3) "baz"
+}
+HSL:
+darray(4) {
+  [0]=>
+  string(6) "foobaz"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(3) "baz"
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobarbaz
+PHP:
+darray(4) {
+  [0]=>
+  string(9) "foobarbaz"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+HSL:
+darray(4) {
+  [0]=>
+  string(9) "foobarbaz"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+Matches with Offsets:
+---
+RE: /foo(bar)?/
+In: foo
+PHP:
+darray(1) {
+  [0]=>
+  varray(2) {
+    string(3) "foo"
+    int(0)
+  }
+}
+HSL:
+darray(2) {
+  [0]=>
+  varray(2) {
+    string(3) "foo"
+    int(0)
+  }
+  [1]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+}
+---
+RE: /foo(?<bar>bar)?/
+In: foo
+PHP:
+darray(1) {
+  [0]=>
+  varray(2) {
+    string(3) "foo"
+    int(0)
+  }
+}
+HSL:
+darray(3) {
+  [0]=>
+  varray(2) {
+    string(3) "foo"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [1]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foo
+PHP:
+darray(1) {
+  [0]=>
+  varray(2) {
+    string(3) "foo"
+    int(0)
+  }
+}
+HSL:
+darray(4) {
+  [0]=>
+  varray(2) {
+    string(3) "foo"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [1]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [2]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobar
+PHP:
+darray(3) {
+  [0]=>
+  varray(2) {
+    string(6) "foobar"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [1]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+}
+HSL:
+darray(4) {
+  [0]=>
+  varray(2) {
+    string(6) "foobar"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [1]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [2]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobaz
+PHP:
+darray(4) {
+  [0]=>
+  varray(2) {
+    string(6) "foobaz"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [1]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [2]=>
+  varray(2) {
+    string(3) "baz"
+    int(3)
+  }
+}
+HSL:
+darray(4) {
+  [0]=>
+  varray(2) {
+    string(6) "foobaz"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [1]=>
+  varray(2) {
+    string(0) ""
+    int(-1)
+  }
+  [2]=>
+  varray(2) {
+    string(3) "baz"
+    int(3)
+  }
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobarbaz
+PHP:
+darray(4) {
+  [0]=>
+  varray(2) {
+    string(9) "foobarbaz"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [1]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [2]=>
+  varray(2) {
+    string(3) "baz"
+    int(6)
+  }
+}
+HSL:
+darray(4) {
+  [0]=>
+  varray(2) {
+    string(9) "foobarbaz"
+    int(0)
+  }
+  ["bar"]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [1]=>
+  varray(2) {
+    string(3) "bar"
+    int(3)
+  }
+  [2]=>
+  varray(2) {
+    string(3) "baz"
+    int(6)
+  }
+}

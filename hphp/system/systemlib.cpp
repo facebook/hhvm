@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/rx.h"
 
 #include <vector>
 
@@ -42,15 +43,23 @@ const Slot s_codeIdx{2};
 DEBUG_ONLY bool throwable_has_expected_props() {
   auto const erCls = s_ErrorClass;
   auto const exCls = s_ExceptionClass;
+  if (erCls->lookupDeclProp(s_message.get()) != s_messageIdx ||
+      exCls->lookupDeclProp(s_message.get()) != s_messageIdx ||
+      erCls->lookupDeclProp(s_code.get()) != s_codeIdx ||
+      exCls->lookupDeclProp(s_code.get()) != s_codeIdx) {
+    return false;
+  }
+  // Check that we have the expected type-hints on these props so we don't need
+  // to verify anything.
   return
-    erCls->lookupDeclProp(s_message.get()) == s_messageIdx &&
-    exCls->lookupDeclProp(s_message.get()) == s_messageIdx &&
-    erCls->lookupDeclProp(s_code.get()) == s_codeIdx &&
-    exCls->lookupDeclProp(s_code.get()) == s_codeIdx;
+    erCls->declPropTypeConstraint(s_messageIdx).isString() &&
+    exCls->declPropTypeConstraint(s_messageIdx).isString() &&
+    erCls->declPropTypeConstraint(s_codeIdx).isInt() &&
+    exCls->declPropTypeConstraint(s_codeIdx).isInt();
 }
 
 ALWAYS_INLINE
-Object createAndConstruct(Class* cls, const Variant& args) {
+Object createAndConstruct(Class* cls, const Array& args) {
   Object inst{cls};
   tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
   return inst;
@@ -75,7 +84,7 @@ Object createAndConstructThrowable(Class* cls, const Variant& message) {
   auto const message_prop = inst->propLvalAtOffset(s_messageIdx);
   assertx(isStringType(message_prop.type()));
   assertx(message_prop.val().pstr == staticEmptyString());
-  cellDup(*message.asCell(), message_prop);
+  tvDup(*message.asTypedValue(), message_prop);
   return inst;
 }
 
@@ -86,9 +95,8 @@ bool s_anyNonPersistentBuiltins = false;
 std::string s_source;
 Unit* s_unit = nullptr;
 Unit* s_hhas_unit = nullptr;
-Unit* s_nativeFuncUnit = nullptr;
-Unit* s_nativeClassUnit = nullptr;
 Func* s_nullFunc = nullptr;
+Func* s_singleArgNullFunc = nullptr;
 Func* s_nullCtor = nullptr;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -97,6 +105,11 @@ Func* s_nullCtor = nullptr;
   Class* s_ ## cls ## Class = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
+
+#define DEFINE_SYSTEMLIB_HH_CLASS(cls)       \
+  Class* s_HH_ ## cls ## Class = nullptr;
+SYSTEMLIB_HH_CLASSES(DEFINE_SYSTEMLIB_HH_CLASS)
+#undef DEFINE_SYSTEMLIB_HH_CLASS
 
 Class* s_ThrowableClass;
 Class* s_BaseExceptionClass;
@@ -152,6 +165,10 @@ Object AllocInvalidArgumentExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_InvalidArgumentExceptionClass, message);
 }
 
+Object AllocTypeAssertionExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_TypeAssertionExceptionClass, message);
+}
+
 Object AllocRuntimeExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_RuntimeExceptionClass, message);
 }
@@ -168,6 +185,11 @@ Object AllocDOMExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_DOMExceptionClass, message);
 }
 
+Object AllocDivisionByZeroExceptionObject() {
+  return createAndConstructThrowable(s_DivisionByZeroExceptionClass,
+                                     Strings::DIVISION_BY_ZERO);
+}
+
 Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& message,
                                  const Variant& actor /* = uninit_variant */,
@@ -176,29 +198,23 @@ Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& header /* = uninit_variant */) {
   return createAndConstruct(
     s_SoapFaultClass,
-    make_packed_array(code,
-                      message,
-                      actor,
-                      detail,
-                      name,
-                      header
-                     )
+    make_varray(code, message, actor, detail, name, header)
   );
 }
 
 Object AllocLazyKVZipIterableObject(const Variant& mp) {
   return createAndConstruct(s_LazyKVZipIterableClass,
-                            make_packed_array(mp));
+                            make_varray(mp));
 }
 
 Object AllocLazyIterableViewObject(const Variant& iterable) {
   return createAndConstruct(s_LazyIterableViewClass,
-                            make_packed_array(iterable));
+                            make_varray(iterable));
 }
 
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable) {
   return createAndConstruct(s_LazyKeyedIterableViewClass,
-                            make_packed_array(iterable));
+                            make_varray(iterable));
 }
 
 void throwExceptionObject(const Variant& message) {
@@ -237,6 +253,10 @@ void throwInvalidArgumentExceptionObject(const Variant& message) {
   throw_object(AllocInvalidArgumentExceptionObject(message));
 }
 
+void throwTypeAssertionExceptionObject(const Variant& message) {
+  throw_object(AllocTypeAssertionExceptionObject(message));
+}
+
 void throwRuntimeExceptionObject(const Variant& message) {
   throw_object(AllocRuntimeExceptionObject(message));
 }
@@ -251,6 +271,10 @@ void throwInvalidOperationExceptionObject(const Variant& message) {
 
 void throwDOMExceptionObject(const Variant& message) {
   throw_object(AllocDOMExceptionObject(message));
+}
+
+void throwDivisionByZeroExceptionObject() {
+  throw_object(AllocDivisionByZeroExceptionObject());
 }
 
 void throwSoapFaultObject(const Variant& code,
@@ -295,49 +319,47 @@ void mergePersistentUnits() {
   }
 }
 
-void setupNullCtor(Class* cls) {
-  assertx(!s_nullCtor);
-  if (!s_nullFunc) {
-    s_nullFunc =
-      Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
-    assertx(s_nullFunc);
-  }
-
-  auto clone = s_nullFunc->clone(cls, makeStaticString("86ctor"));
-  clone->setNewFuncId();
-  clone->setAttrs(static_cast<Attr>(
-                    AttrPublic | AttrNoInjection |
-                    AttrPhpLeafFn | AttrSkipFrame |
-                    AttrRequiresThis | AttrHasForeignThis));
-  s_nullCtor = clone;
-}
-
 namespace {
 
-#define PHP7_ROOT_ALIAS(x) \
-  auto x##Ne = NamedEntity::get(makeStaticString(#x)); \
-  x##Ne->m_cachedClass.bind(rds::Mode::Persistent); \
-  x##Ne->setCachedClass(SystemLib::s_##x##Class)
+Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
+  assertx(f && f->isPhpLeafFn());
+  auto clone = f->clone(cls, name);
+  clone->setNewFuncId();
+  clone->setAttrs(static_cast<Attr>(
+                    AttrPublic | AttrNoInjection | AttrDynamicallyCallable) |
+                    rxMakeAttr(RxLevel::Rx, false));
+  return clone;
+}
 
-InitFiniNode aliasPhp7Classes(
-  []() {
-    if (!RuntimeOption::PHP7_EngineExceptions) {
-      return;
-    }
-    PHP7_ROOT_ALIAS(Throwable);
-    PHP7_ROOT_ALIAS(Error);
-    PHP7_ROOT_ALIAS(ArithmeticError);
-    PHP7_ROOT_ALIAS(ArgumentCountError);
-    PHP7_ROOT_ALIAS(AssertionError);
-    PHP7_ROOT_ALIAS(DivisionByZeroError);
-    PHP7_ROOT_ALIAS(ParseError);
-    PHP7_ROOT_ALIAS(TypeError);
-  },
-  InitFiniNode::When::ProcessInit
-);
+Func* setup86ctorMethod(Class* cls) {
+  if (!s_nullFunc) {
+    s_nullFunc = Func::lookup(makeStaticString("__SystemLib\\__86null"));
+  }
+  return setupNullClsMethod(s_nullFunc, cls, s_86ctor.get());
+}
 
-#undef PHP7_ROOT_ALIAS
+Func* setup86ReifiedInitMethod(Class* cls) {
+  if (!s_singleArgNullFunc) {
+    s_singleArgNullFunc =
+      Func::lookup(makeStaticString("__SystemLib\\__86single_arg_null"));
+  }
+  return setupNullClsMethod(s_singleArgNullFunc, cls, s_86reifiedinit.get());
+}
+
 } // namespace
+
+void setupNullCtor(Class* cls) {
+  assertx(!s_nullCtor);
+  s_nullCtor = setup86ctorMethod(cls);
+  s_nullCtor->setHasForeignThis(true);
+}
+
+Func* getNull86reifiedinit(Class* cls) {
+  auto f = setup86ReifiedInitMethod(cls);
+  f->setBaseCls(cls);
+  f->setGenerated(true);
+  return f;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib

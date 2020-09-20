@@ -1,6 +1,4 @@
-<?php
-
-require "error_file.inc2";
+<?hh
 
 trait T {
   use U;

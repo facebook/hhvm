@@ -92,7 +92,7 @@ const StaticString
 #endif
 
 static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
-                                   VRefParam retInfo, bool toUtf8) {
+                                   bool toUtf8) {
 #ifdef UIDNA_INFO_INITIALIZER
   UErrorCode error = U_ZERO_ERROR;
   UIDNAInfo   info = UIDNA_INFO_INITIALIZER;
@@ -110,8 +110,6 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
                                  result.mutableData(), capacity,
                                  &info, &error);
   }
-  // retInfo will be empty array in case of error
-  retInfo.assignIfRef(Variant(staticEmptyArray()));
   if (len > capacity) {
     s_intl_error->setError(U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR);
     return false;
@@ -122,11 +120,6 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
   }
   result.setSize(len);
 
-  ArrayInit arr(3, ArrayInit::Map{});
-  arr.set(s_result, result);
-  arr.set(s_isTransitionalDifferent, (bool)info.isTransitionalDifferent);
-  arr.set(s_errors, (long)info.errors);
-  retInfo.assignIfRef(arr.toVariant());
   if (info.errors) {
     return false;
   }
@@ -139,29 +132,26 @@ static Variant doIdnTranslateUTS46(const String& domain, int64_t options,
 }
 
 inline Variant doIdnTranslate(const String& domain, int64_t options,
-                              IdnVariant variant, VRefParam info,
-                              bool toUtf8) {
+                              int variant, bool toUtf8) {
   switch (variant) {
     case INTL_IDNA_VARIANT_2003:
       return doIdnTranslate2003(domain, options, toUtf8);
     case INTL_IDNA_VARIANT_UTS46:
-      return doIdnTranslateUTS46(domain, options, info, toUtf8);
+      return doIdnTranslateUTS46(domain, options, toUtf8);
   }
   return false;
 }
 
 static Variant HHVM_FUNCTION(idn_to_ascii, const String& domain,
                                            int64_t options /*= 0 */,
-                                           int64_t variant /*= *_2003 */,
-                                           VRefParam info /*= null */) {
-  return doIdnTranslate(domain, options, (IdnVariant)variant, info, false);
+                                           int64_t variant /*= *_2003 */) {
+  return doIdnTranslate(domain, options, (int)variant, false);
 }
 
 static Variant HHVM_FUNCTION(idn_to_utf8, const String& domain,
                                           int64_t options /*= 0 */,
-                                          int64_t variant /*= *_2003 */,
-                                          VRefParam info /*= null */) {
-  return doIdnTranslate(domain, options, (IdnVariant)variant, info, true);
+                                          int64_t variant /*= *_2003 */) {
+  return doIdnTranslate(domain, options, (int)variant, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////

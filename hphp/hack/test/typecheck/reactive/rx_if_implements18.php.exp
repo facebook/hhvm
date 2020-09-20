@@ -1,0 +1,6 @@
+File "rx_if_implements18.php", line 20, characters 28-34:
+The method `mayberx` has the wrong type (Typing[4341])
+File "rx_if_implements18.php", line 15, characters 28-34:
+This function is conditionally shallow reactive (condition type: \Rx1).
+File "rx_if_implements18.php", line 20, characters 28-34:
+This function is conditionally shallow reactive (condition type: \Rx2).

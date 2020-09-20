@@ -2,14 +2,14 @@
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
   public function getIterator() {
-    return new ArrayIterator(array(1, 2, 3));
+    return new ArrayIterator(varray[1, 2, 3]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
   public function getIterator() {
-    return new ArrayIterator(array(1, 2, 3));
+    return new ArrayIterator(varray[1, 2, 3]);
   }
 }
 
@@ -42,10 +42,14 @@ function main() {
   };
 
   foreach ($concatable as $lhs) {
-    test ($lhs, array(1, 2, 3));
+    test ($lhs, varray[1, 2, 3]);
     foreach ($concatable as $rhs) {
       test($lhs, $rhs);
     }
   }
 }
+
+<<__EntryPoint>>
+function main_concat() {
 main();
+}

@@ -1,0 +1,2 @@
+(5,10)-(5,18) Interface methods cannot be declared `abstract`
+(8,7)-(8,9) Class `C1` contains an abstract method and must therefore be declared `abstract`

@@ -1,6 +1,6 @@
-<?hh
+<?hh // partial
 
-abstract class Class {
+abstract class C {
 
   public abstract function providesDarrayOfBoolToString(): darray<bool, string>;
   public abstract function takesDarrayOrVarrayOfTany(varray_or_darray $x): void;

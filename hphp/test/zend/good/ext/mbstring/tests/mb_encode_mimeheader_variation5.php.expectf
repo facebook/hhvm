@@ -17,89 +17,82 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
  =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
 
 -- Iteration 5 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66?=
- =?UTF-8?B?zrXOr868zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 6 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 7 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 8 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 9 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 10 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 11 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 12 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 13 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 14 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 15 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 16 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, object given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 22 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 23 --
-string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
- =?UTF-8?B?zrXOvc6/LiAwMTIzNDU2Nzg5Lg==?="
+
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, resource given in %s/zend/good/ext/mbstring/tests/mb_encode_mimeheader_variation5.php on line 94
 Done

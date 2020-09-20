@@ -2,16 +2,14 @@
 
 -- Testing join() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: join() expects at least 1 parameter, 0 given in %s/join_error.php on line 12
 
 -- Testing join() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: join() expects at most 2 parameters, 3 given in %s/join_error.php on line 20
 
 -- Testing join() with less than expected no. of arguments --
 
-Warning: %s
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/join_error.php on line 26
 NULL
 Done

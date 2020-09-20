@@ -2,48 +2,39 @@
 
 -- Iteration 1 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 2 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 3 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 4 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 5 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 6 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 7 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 8 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 9 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 10 --
 int(7)
@@ -53,19 +44,19 @@ int(7)
 
 -- Iteration 12 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 13 --
-int(7)
+
+Warning: iconv_strrpos() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 14 --
 
-Notice: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 15 --
-int(7)
+
+Warning: iconv_strrpos() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 16 --
 int(7)
@@ -83,7 +74,8 @@ int(7)
 int(7)
 
 -- Iteration 21 --
-int(7)
+
+Warning: iconv_strrpos() expects parameter 3 to be string, object given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 
 -- Iteration 22 --
 int(7)
@@ -93,6 +85,5 @@ int(7)
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: iconv_strrpos() expects parameter 3 to be string, resource given in %s/zend/good/ext/iconv/tests/iconv_strrpos_variation3.php on line 90
 Done

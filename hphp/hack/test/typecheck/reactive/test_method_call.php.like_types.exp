@@ -1,0 +1,6 @@
+File "test_method_call.php", line 24, characters 3-14:
+  ~<expr#1> as Something
+File "test_method_call.php", line 13, characters 16-24:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "test_method_call.php", line 3, characters 19-29:
+This function is normal.

@@ -1,0 +1,148 @@
+(library
+  (name naming_special_names)
+  (modules
+    naming_special_names)
+  (libraries
+    collections
+    core_kernel
+    utils_core)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name nast)
+  (modules
+    nast)
+  (libraries
+    annotated_ast
+    naming_special_names
+    errors)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name naming_attributes)
+  (modules
+    naming_attributes)
+  (libraries
+    annotated_ast
+    core_kernel)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_attributes_deprecated)
+  (modules
+    naming_attributes_deprecated)
+  (libraries
+    annotated_ast
+    naming_attributes
+    core_kernel
+    errors
+    naming_special_names
+    nast
+    nast_eval
+    pos)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name nast_eval)
+  (modules
+    nast_eval)
+  (libraries
+    annotated_ast
+    errors
+    nast
+    pos)
+  (preprocess (pps ppx_deriving.std)));
+
+(library
+  (name naming_types)
+  (modules
+    naming_types)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_sqlite)
+  (modules
+    naming_sqlite)
+  (libraries
+    file_info
+    fileutils
+    heap_shared_mem
+    heap_shared_mem_hash
+    naming_types
+    relative_path
+    sqlite3
+    sqlite_utils
+    typing_deps)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_heap)
+  (modules
+    naming_heap)
+  (libraries
+    ast_provider
+    db_path_provider
+    file_info
+    naming_sqlite
+    naming_types
+    provider_context
+    relative_path)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_table)
+  (modules
+    naming_table)
+  (libraries
+    ast_provider
+    db_path_provider
+    file_info
+    future
+    global_config
+    naming_provider
+    naming_sqlite
+    relative_path
+    temp_file)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_global)
+  (modules
+    naming_global)
+  (libraries
+    file_info
+    naming_provider
+    naming_table)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name naming_elaborate_namespaces_endo)
+  (modules
+    naming_elaborate_namespaces_endo)
+  (libraries
+    annotated_ast
+    parser)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name naming)
+  (modules
+    naming)
+  (libraries
+    ast
+    ast_provider
+    common
+    file_provider
+    fileutils
+    full_fidelity
+    naming_attributes
+    naming_elaborate_namespaces_endo
+    naming_table
+    naming_global
+    naming_provider
+    nast
+    partial_provider
+    provider_backend
+    typing_deps
+    typechecker_options)
+  (preprocess (pps ppx_deriving.std)))

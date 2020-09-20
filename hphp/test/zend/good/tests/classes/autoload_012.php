@@ -1,8 +1,5 @@
-<?php
-  function __autoload($name)
-  {
-      echo "In autoload: ";
-      var_dump($name);
-  }
-  call_user_func("UndefC::test");
-?>
+<?hh
+
+<<__EntryPoint>> function main(): void {
+call_user_func("UndefC::test");
+}

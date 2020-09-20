@@ -1,2 +1,1 @@
-File "test_rx_enabled4.php", line 6, characters 9-24:
-\HH\Rx\IS_ENABLED cannot be used inside lambdas. (Typing[4221])
+No errors

@@ -1,5 +1,4 @@
 <?hh
-error_reporting(0);
 
 function plusOne($x) { return $x + 1; }
 function multiply($x, $y) {
@@ -10,23 +9,23 @@ function multiply($x, $y) {
 
 function test_mapping() {
   echo "* ", __FUNCTION__, " *\n";
-  var_dump(array_map('plusOne', Vector {3, 5, 7}));
-  var_dump(array_map('plusOne', Map {2 => 0, 5 => 2, 6 => 4}));
-  var_dump(array_map('plusOne', Set {3}));
-  var_dump(array_map('plusOne', Pair {11, 22}));
+  var_dump(array_map(fun('plusOne'), Vector {3, 5, 7}));
+  var_dump(array_map(fun('plusOne'), Map {2 => 0, 5 => 2, 6 => 4}));
+  var_dump(array_map(fun('plusOne'), Set {3}));
+  var_dump(array_map(fun('plusOne'), Pair {11, 22}));
   echo "========\n";
-  var_dump(array_map('multiply', array(2 => 0, 4 => 2, 6 => 4), Vector {3, 5}));
-  var_dump(array_map('multiply', Map {2 => 0, 4 => 2}, array(3, 5, 7)));
-  var_dump(array_map('multiply', Map {4 => 2}, Set {3}));
-  var_dump(array_map('multiply', Pair {11, 22}, Pair {33, 44}));
+  var_dump(array_map(fun('multiply'), darray[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
+  var_dump(array_map(fun('multiply'), Map {2 => 0, 4 => 2}, varray[3, 5, 7]));
+  var_dump(array_map(fun('multiply'), Map {4 => 2}, Set {3}));
+  var_dump(array_map(fun('multiply'), Pair {11, 22}, Pair {33, 44}));
   echo "========\n";
   var_dump(array_map(null, Vector {3, 5, 7}));
   var_dump(array_map(null, Map {2 => 0, 4 => 2, 6 => 4}));
   var_dump(array_map(null, Set {3}));
   var_dump(array_map(null, Pair {11, 22}));
   echo "========\n";
-  var_dump(array_map(null, array(2 => 0, 4 => 2, 6 => 4), Vector {3, 5}));
-  var_dump(array_map(null, Map {2 => 0, 4 => 2}, array(3, 5, 7)));
+  var_dump(array_map(null, darray[2 => 0, 4 => 2, 6 => 4], Vector {3, 5}));
+  var_dump(array_map(null, Map {2 => 0, 4 => 2}, varray[3, 5, 7]));
   var_dump(array_map(null, Map {4 => 2}, Set {3}));
   var_dump(array_map(null, Pair {11, 22}, Pair {33, 44}));
   echo "\n";
@@ -37,7 +36,7 @@ function map_for_key_conversion($collection) {
   // serialization and not var_dump preserves whether keys are ints or strings
   var_dump($collection);
   $arr = array_map($x ==> $x, $collection);
-  $first_converted = array_map($x ==> $x, (array) $collection);
+  $first_converted = array_map($x ==> $x, darray($collection));
   var_dump($arr === $first_converted);
   echo serialize($arr), "\n";
   var_dump(count($arr) === count($collection));
@@ -56,4 +55,9 @@ function main() {
   test_mapping();
   test_key_conversion();
 }
+
+<<__EntryPoint>>
+function main_array_map() {
+error_reporting(0);
 main();
+}

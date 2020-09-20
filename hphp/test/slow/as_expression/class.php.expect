@@ -1,0 +1,21 @@
+object(D) (0) {
+}
+object(D) (0) {
+}
+object(D) (0) {
+}
+
+not D: stdClass
+not C: stdClass
+not I: stdClass
+
+not D: E
+object(E) (0) {
+}
+object(E) (0) {
+}
+
+not D: F
+not C: F
+object(F) (0) {
+}

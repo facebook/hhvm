@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   public function bar() {
@@ -13,4 +13,8 @@ class Foo {
 class Herp extends Foo {
 }
 
+
+<<__EntryPoint>>
+function main_late_static_binding_keywords() {
 (new Herp())->bar();
+}

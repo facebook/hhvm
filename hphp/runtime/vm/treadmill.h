@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TREADMILL_H_
-#define incl_HPHP_TREADMILL_H_
+#pragma once
 
 #include <stdint.h>
 #include <memory>
@@ -25,17 +24,46 @@ namespace HPHP { namespace Treadmill {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * List of potentiall users of the treadmill, useful for debugging halts
+ */
+enum class SessionKind {
+  None,
+  DebuggerClient,
+  APCPrime,
+  PreloadRepo,
+  Watchman,
+  Vsdebug,
+  FactsWorker,
+  CLIServer,
+  AdminPort,
+  HttpRequest,
+  RpcRequest,
+  TranslateWorker,
+  Retranslate,
+  ProfData,
+  UnitTests,
+  CompileRepo,
+  HHBBC,
+  CompilerEmit,
+  CompilerAnalysis,
+  CLISession
+};
+
+/*
+ * An invalid request index.
+ */
+constexpr int64_t kInvalidRequestIdx = -1;
+/*
  * Return the current thread's index.
  */
-constexpr int64_t kInvalidThreadIdx = -1;
-int64_t threadIdx();
+int64_t requestIdx();
 
 /*
  * The Treadmill allows us to defer work until all currently
  * outstanding requests have finished.  We hook request start and
  * finish to know when these events happen.
  */
-void startRequest();
+void startRequest(SessionKind session_kind);
 void finishRequest();
 
 /*
@@ -54,10 +82,20 @@ int64_t getOldestStartTime();
 int64_t getAgeOldestRequest();
 
 /*
+ * Returns the unique GenCount identifying this request.
+ */
+int64_t getRequestGenCount();
+
+/*
  * Ask for memory to be freed (as in free, not delete) by the next
  * appropriate treadmill round.
  */
 void deferredFree(void*);
+
+/*
+ * Used to get debug information about the treadmill.
+ */
+std::string dumpTreadmillInfo();
 
 /*
  * Schedule a function to run on the next appropriate treadmill round.
@@ -72,7 +110,7 @@ void deferredFree(void*);
 template<class F> void enqueue(F&& f);
 
 struct Session final {
-  Session() { startRequest(); }
+  Session(SessionKind session_kind) { startRequest(session_kind); }
   ~Session() { finishRequest(); }
   Session(Session&&) = delete;
   Session& operator=(Session&&) = delete;
@@ -84,4 +122,3 @@ struct Session final {
 
 #include "hphp/runtime/vm/treadmill-inl.h"
 
-#endif

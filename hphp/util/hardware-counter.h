@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_HARDWARE_COUNTER_H_
-#define incl_HPHP_UTIL_HARDWARE_COUNTER_H_
+#pragma once
 
 #include "hphp/util/thread-local.h"
 
@@ -63,6 +62,7 @@ struct HardwareCounter {
                    const std::string& events,
                    bool subProc,
                    bool excludeKernel,
+                   bool fastReads,
                    int exportInterval);
   static void RecordSubprocessTimes();
   static void ExcludeKernel();
@@ -120,7 +120,8 @@ struct HardwareCounter {
                    const std::string& events,
                    bool subProc,
                    bool excludeKernel,
-                   bool exportInterval) {}
+                   bool fastReads,
+                   int exportInterval) {}
   static void RecordSubprocessTimes() {}
   static void ExcludeKernel() {}
 
@@ -136,4 +137,3 @@ struct HardwareCounter {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

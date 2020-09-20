@@ -1,4 +1,4 @@
-<?php
+<?hh
 class testClass
 {
   /** private property */
@@ -23,6 +23,9 @@ class childClass extends testClass
   public static $publicStaticProperty;
 }
 
+
+<<__EntryPoint>>
+function main_reflection_property_get_doc_comment() {
 $privateProperty = new ReflectionProperty('testClass', 'privateProperty');
 var_dump($privateProperty->getDeclaringClass()->getName());
 var_dump($privateProperty->getDocComment());
@@ -50,3 +53,4 @@ $publicStaticProperty =
   new ReflectionProperty('childClass', 'publicStaticProperty');
 var_dump($publicStaticProperty->getDeclaringClass()->getName());
 var_dump($publicStaticProperty->getDocComment());
+}

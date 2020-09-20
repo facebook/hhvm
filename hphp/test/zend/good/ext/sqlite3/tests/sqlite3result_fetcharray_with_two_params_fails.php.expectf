@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: SQLite3Result::fetcharray() expects at most 1 parameter, 2 given in %s/sqlite3result_fetcharray_with_two_params_fails.php on line 8

@@ -1,14 +1,13 @@
 string(7) "handler"
 string(5) "hello"
-array(3) {
-  [0]=>
+string(7) "handler"
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
-array(0) {
+varray(0) {
 }
 string(7) "handler"
 string(5) "hello"
+string(7) "handler"

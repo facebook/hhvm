@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/sweepable.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/server/http-server.h"
@@ -39,6 +39,7 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
+#include <folly/CPortability.h>
 #include <folly/Random.h>
 #include <folly/ScopeGuard.h>
 #include <folly/portability/SysMman.h>
@@ -48,7 +49,6 @@
 
 namespace HPHP {
 
-const unsigned kInvalidSweepIndex = 0xffffffff;
 __thread bool tl_sweeping;
 THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 __thread size_t tl_heap_id; // thread's current heap instance id
@@ -61,6 +61,7 @@ std::atomic<MemoryManager::ReqProfContext*>
   MemoryManager::s_trigger{nullptr};
 
 bool MemoryManager::s_statsEnabled = false;
+std::atomic<ssize_t> MemoryManager::s_req_heap_usage;
 
 static std::atomic<size_t> s_heap_id; // global counter of heap instances
 
@@ -107,7 +108,7 @@ MemoryManager::MemoryManager() {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated);
 #endif
-  FTRACE(1, "heap-id {} new MM pid {}\n", tl_heap_id, getpid());
+  rl_gcdata.getCheck();
   resetAllStats();
   setMemoryLimit(std::numeric_limits<int64_t>::max());
   resetGC(); // so each thread has unique req_num at startup
@@ -162,8 +163,8 @@ void MemoryManager::traceStats(const char* event) {
 void MemoryManager::resetAllStats() {
   traceStats("resetAllStats pre");
   m_statsIntervalActive = false;
-  m_stats.mm_debt = 0;
-  m_stats.mm_allocated = 0;
+  m_stats.mm_udebt = 0;
+  m_stats.mm_uallocated = 0;
   m_stats.mm_freed = 0;
   m_stats.extUsage = 0;
   m_stats.malloc_cap = 0;
@@ -174,13 +175,13 @@ void MemoryManager::resetAllStats() {
   m_stats.totalAlloc = 0;
   m_stats.peakIntervalUsage = 0;
   m_stats.peakIntervalCap = 0;
-  if (m_bypassSlabAlloc) {
-    totalSmallAllocs.insert(totalSmallAllocs.begin(),
-        totalSmallAllocs.size(), 0);
-    currentSmallAllocs.insert(currentSmallAllocs.begin(),
-        currentSmallAllocs.size(), 0);
-  }
   m_enableStatsSync = false;
+
+  // Reset this memory managers portion of the bytes used across all memory
+  // managers.
+  s_req_heap_usage.fetch_sub(m_lastUsage, std::memory_order_relaxed);
+  m_lastUsage = 0;
+
   if (Trace::enabled) tl_heap_id = ++s_heap_id;
   if (s_statsEnabled) {
     m_resetDeallocated = *m_deallocated;
@@ -199,7 +200,7 @@ void MemoryManager::resetExternalStats() {
   traceStats("resetExternalStats pre");
   // extUsage and totalAlloc are only set by refreshStatsImpl, which we don't
   // enable until after this has been called.
-  assert(m_enableStatsSync ||
+  assertx(m_enableStatsSync ||
          (m_stats.extUsage == 0 && m_stats.totalAlloc == 0));
   m_enableStatsSync = s_statsEnabled; // false if !use_jemalloc
   if (s_statsEnabled) {
@@ -217,6 +218,10 @@ void MemoryManager::refreshStatsHelperExceeded() {
   if (RuntimeOption::LogNativeStackOnOOM) {
     log_native_stack("Exceeded memory limit");
   }
+  if (m_profctx.flag) {
+    // Dump out heap profile at peak usage.
+    jemalloc_pprof_dump("", false);
+  }
 }
 
 void MemoryManager::setMemThresholdCallback(size_t threshold) {
@@ -230,10 +235,6 @@ void MemoryManager::setMemThresholdCallback(size_t threshold) {
  * The stats parameter allows the updates to be applied to either
  * m_stats as in refreshStats() or to a separate MemoryUsageStats
  * struct as in getStatsCopy().
- *
- * The template variable live controls whether or not MemoryManager
- * member variables are updated and whether or not to call helper
- * methods in response to memory anomalies.
  */
 void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // Incrementally incorporate the difference between the previous and current
@@ -249,8 +250,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
   // code may well substantially exceed m_stats.usage.
   if (m_enableStatsSync) {
     // We can't currently handle wrapping so make sure this isn't happening.
-    assert(*m_allocated <= uint64_t(std::numeric_limits<int64_t>::max()));
-    assert(*m_deallocated <= uint64_t(std::numeric_limits<int64_t>::max()));
+    assertx(*m_allocated <= uint64_t(std::numeric_limits<int64_t>::max()));
+    assertx(*m_deallocated <= uint64_t(std::numeric_limits<int64_t>::max()));
     const int64_t curAllocated = *m_allocated;
     const int64_t curDeallocated = *m_deallocated;
 
@@ -280,7 +281,7 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
     FTRACE(1, "heap-id {} after sync extUsage {} totalAlloc: {}\n",
       tl_heap_id, stats.extUsage, stats.totalAlloc);
   }
-  assert(m_usageLimit > 0);
+  assertx(m_usageLimit > 0);
   auto usage = stats.usage();
   stats.peakUsage = std::max(stats.peakUsage, usage);
   if (m_statsIntervalActive) {
@@ -296,13 +297,21 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
 void MemoryManager::refreshStats() {
   refreshStatsImpl(m_stats);
   auto usage = m_stats.usage();
+  s_req_heap_usage.fetch_add(usage - m_lastUsage, std::memory_order_relaxed);
+  m_lastUsage = usage;
   if (usage > m_usageLimit && m_couldOOM) {
     refreshStatsHelperExceeded();
-  }
-  if (usage > m_memThresholdCallbackPeakUsage) {
+  } else if (usage > m_memThresholdCallbackPeakUsage) {
     m_memThresholdCallbackPeakUsage = SIZE_MAX;
     setSurpriseFlag(MemThresholdFlag);
   }
+}
+
+void MemoryManager::recordStats(StructuredLogEntry& entry) {
+  auto const stats = getStatsCopy();
+  entry.ints["mem-peak-usage"] =  stats.peakUsage;
+  entry.ints["mem-peak-capacity"] = stats.peakCap;
+  entry.ints["mem-total-alloc"] = stats.totalAlloc;
 }
 
 /*
@@ -310,13 +319,16 @@ void MemoryManager::refreshStats() {
  * time the fast path is interrupted.
  */
 void MemoryManager::updateMMDebt() {
-  auto const new_debt = m_nextGC - m_stats.mmUsage();
-  m_stats.mm_allocated = m_stats.mm_allocated - m_stats.mm_debt + new_debt;
-  m_stats.mm_debt = new_debt;
+  const int64_t delta_sample = m_nextSample - m_stats.mmAllocated();
+  const int64_t delta_gc = m_nextGC - m_stats.mmUsage();
+  auto const delta = static_cast<uint64_t>(std::min(delta_sample, delta_gc));
+  auto const new_debt = delta > std::numeric_limits<int64_t>::max() ? 0 : delta;
+  m_stats.mm_uallocated += new_debt - m_stats.mm_udebt;
+  m_stats.mm_udebt = new_debt;
 }
 
 void MemoryManager::sweep() {
-  assert(!sweeping());
+  assertx(!sweeping());
   tl_sweeping = true;
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
 
@@ -331,39 +343,22 @@ void MemoryManager::sweep() {
     }
     while (!m_natives.empty()) {
       num_natives++;
-      assert(m_natives.back()->sweep_index == m_natives.size() - 1);
+      assertx(m_natives.back()->sweep_index == m_natives.size() - 1);
       auto node = m_natives.back();
       m_natives.pop_back();
       auto obj = Native::obj(node);
       auto ndi = obj->getVMClass()->getNativeDataInfo();
       ndi->sweep(obj);
       // trash the native data but leave the header and object parsable
-      assert(memset(node+1, kSmallFreeFill, node->obj_offset - sizeof(*node)));
+      assertx(memset(node+1, kSmallFreeFill, node->obj_offset - sizeof(*node)));
     }
   } while (!m_sweepables.empty());
-
-  DEBUG_ONLY auto napcs = m_apc_arrays.size();
-  FTRACE(1, "heap-id {} sweep: sweepable {} native {} apc array {}\n",
-         tl_heap_id,
-         num_sweepables,
-         num_natives,
-         napcs);
-
-  // decref apc arrays referenced by this request.  This must happen here
-  // (instead of in resetAllocator), because the sweep routine may use
-  // g_context.
-  while (!m_apc_arrays.empty()) {
-    auto a = m_apc_arrays.back();
-    m_apc_arrays.pop_back();
-    a->sweep();
-    if (debug) a->m_sweep_index = kInvalidSweepIndex;
-  }
 
   if (debug) checkHeap("after MM::sweep");
 }
 
 void MemoryManager::resetAllocator() {
-  assert(m_natives.empty() && m_sweepables.empty() && tl_sweeping);
+  assertx(m_natives.empty() && m_sweepables.empty() && tl_sweeping);
   // decref apc strings referenced by this request
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
   FTRACE(1, "heap-id {} resetAllocator: strings {}\n", tl_heap_id, nstrings);
@@ -376,9 +371,6 @@ void MemoryManager::resetAllocator() {
   m_front = m_limit = 0;
   tl_sweeping = false;
   m_exiting = false;
-  if (StructuredLog::coinflip(RuntimeOption::TotalAllocSampleF)) {
-    publishStats("total", totalSmallAllocs, RuntimeOption::TotalAllocSampleF);
-  }
   resetAllStats();
   setGCEnabled(RuntimeOption::EvalEnableGC);
   resetGC();
@@ -388,7 +380,6 @@ void MemoryManager::resetAllocator() {
 void MemoryManager::flush() {
   always_assert(empty());
   m_heap.flush();
-  m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
   m_root_handles = std::vector<req::root_handle*>{};
 }
@@ -440,16 +431,21 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-const std::array<char*,NumHeaderKinds> header_names = {{
-  "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
-  "GlobalsArray", "DictArray", "VecArray", "KeysetArray",
-  "String", "Resource", "Ref",
+constexpr const std::array<char*,NumHeaderKinds> header_names = {{
+  "MixedArray", "BespokeDArray", "PackedArray", "BespokeVArray",
+  "Dict", "BespokeDict", "Vec", "BespokeVec", "Keyset", "BespokeKeyset",
+  "String", "Resource", "ClsMeth", "RClsMeth", "Record", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
   "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
-  "AsyncFuncFrame", "NativeData", "ClosureHdr",
-  "SmallMalloc", "BigMalloc", "BigObj",
+  "AsyncFuncFrame", "NativeData", "ClosureHdr", "MemoData", "Cpp",
+  "SmallMalloc", "BigMalloc",
   "Free", "Hole", "Slab"
 }};
+
+// you already get a compiler error for having too many header_names--
+// this should catch cases where there are too few header_names
+static_assert(header_names[NumHeaderKinds - 1] != nullptr,
+              "If you add a header kind, add an entry for it to header_names");
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {
@@ -461,12 +457,11 @@ void MemoryManager::initFree() {
     initHole(m_front, (char*)m_limit - (char*)m_front);
     Slab::fromPtr(m_front)->setStart(m_front);
   }
-  m_heap.sort();
   reinitFree();
 }
 
 void MemoryManager::reinitFree() {
-  for (auto i = 0; i < kNumSmallSizes; i++) {
+  for (size_t i = 0, e = m_freelists.size(); i < e; i++) {
     auto size = sizeIndex2Size(i);
     auto n = m_freelists[i].head;
     for (; n && n->kind() != HeaderKind::Free; n = n->next) {
@@ -475,7 +470,7 @@ void MemoryManager::reinitFree() {
     if (debug) {
       // ensure the freelist tail is already initialized.
       for (; n; n = n->next) {
-        assert(n->kind() == HeaderKind::Free && n->size() == size);
+        assertx(n->kind() == HeaderKind::Free && n->size() == size);
       }
     }
   }
@@ -483,7 +478,7 @@ void MemoryManager::reinitFree() {
 
 MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
   FreelistArray list;
-  for (auto i = 0; i < kNumSmallSizes; ++i) {
+  for (size_t i = 0, n = list.size(); i < n; ++i) {
     list[i].head = m_freelists[i].head;
     m_freelists[i].head = nullptr;
   }
@@ -492,7 +487,7 @@ MemoryManager::FreelistArray MemoryManager::beginQuarantine() {
 
 // turn free blocks into holes, restore original freelists
 void MemoryManager::endQuarantine(FreelistArray&& list) {
-  for (auto i = 0; i < kNumSmallSizes; i++) {
+  for (size_t i = 0, n = list.size(); i < n; i++) {
     auto size = sizeIndex2Size(i);
     while (auto n = m_freelists[i].likelyPop()) {
       memset(n, 0x8a, size);
@@ -519,12 +514,6 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Free:
         free_blocks.insert(h, alloc_size);
         break;
-      case HeaderKind::Apc:
-        if (static_cast<APCLocalArray*>(h)->m_sweep_index !=
-            kInvalidSweepIndex) {
-          apc_arrays.insert(h, alloc_size);
-        }
-        break;
       case HeaderKind::String:
         if (static_cast<StringData*>(h)->isProxy()) {
           apc_strings.insert(h, alloc_size);
@@ -532,11 +521,9 @@ void MemoryManager::checkHeap(const char* phase) {
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
+      case HeaderKind::Vec:
       case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::VecArray:
       case HeaderKind::Keyset:
-      case HeaderKind::Globals:
       case HeaderKind::Object:
       case HeaderKind::NativeObject:
       case HeaderKind::WaitHandle:
@@ -551,17 +538,26 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::ImmMap:
       case HeaderKind::ImmSet:
       case HeaderKind::Resource:
-      case HeaderKind::Ref:
+      case HeaderKind::ClsMeth:
+      case HeaderKind::RClsMeth:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::NativeData:
       case HeaderKind::ClosureHdr:
+      case HeaderKind::MemoData:
+      case HeaderKind::Cpp:
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
+      case HeaderKind::Record:
+      case HeaderKind::BespokeVArray:
+      case HeaderKind::BespokeDArray:
+      case HeaderKind::BespokeVec:
+      case HeaderKind::BespokeDict:
+      case HeaderKind::BespokeKeyset:
+      case HeaderKind::RFunc:
         break;
-      case HeaderKind::BigObj:
       case HeaderKind::Hole:
       case HeaderKind::Slab:
-        assert(false && "forEachHeapObject skips these kinds");
+        assertx(false && "forEachHeapObject skips these kinds");
         break;
     }
   });
@@ -569,20 +565,13 @@ void MemoryManager::checkHeap(const char* phase) {
   // check the free lists
   free_blocks.prepare();
   size_t num_free_blocks = 0;
-  for (auto i = 0; i < kNumSmallSizes; i++) {
-    for (auto n = m_freelists[i].head; n; n = n->next) {
-      assert(free_blocks.isStart(n));
+  for (auto& list : m_freelists) {
+    for (auto n = list.head; n; n = n->next) {
+      assertx(free_blocks.isStart(n));
       ++num_free_blocks;
     }
   }
-  assert(num_free_blocks == free_blocks.size());
-
-  // check the apc array list
-  assert(apc_arrays.size() == m_apc_arrays.size());
-  apc_arrays.prepare();
-  for (UNUSED auto a : m_apc_arrays) {
-    assert(apc_arrays.isStart(a));
-  }
+  assertx(num_free_blocks == free_blocks.size());
 
   // check the apc string list
   size_t num_apc_strings = 0;
@@ -590,11 +579,11 @@ void MemoryManager::checkHeap(const char* phase) {
   for (StringDataNode *next, *n = m_strings.next; n != &m_strings; n = next) {
     next = n->next;
     UNUSED auto const s = StringData::node2str(n);
-    assert(s->isProxy());
-    assert(apc_strings.isStart(s));
+    assertx(s->isProxy());
+    assertx(apc_strings.isStart(s));
     ++num_apc_strings;
   }
-  assert(num_apc_strings == apc_strings.size());
+  assertx(num_apc_strings == apc_strings.size());
 
   // heap check is done. If we are not exiting, check pointers using HeapGraph
   if (Trace::moduleEnabled(Trace::heapreport)) {
@@ -680,8 +669,8 @@ void storeTail(FreelistArray& freelists, void* tail, size_t tailBytes,
   void* rem = tail;
   for (auto remBytes = tailBytes; remBytes > 0;) {
     auto fragBytes = remBytes;
-    assert(fragBytes >= kSmallSizeAlign);
-    assert((fragBytes & kSmallSizeAlignMask) == 0);
+    assertx(fragBytes >= kSmallSizeAlign);
+    assertx((fragBytes & kSmallSizeAlignMask) == 0);
     auto fragInd = MemoryManager::size2Index(fragBytes + 1) - 1;
     auto fragUsable = MemoryManager::sizeIndex2Size(fragInd);
     auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
@@ -706,10 +695,10 @@ inline
 void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
                size_t split_bytes, size_t splitUsable, size_t index,
                Slab* slab) {
-  assert(tailBytes >= kSmallSizeAlign);
-  assert((tailBytes & kSmallSizeAlignMask) == 0);
-  assert((splitUsable & kSmallSizeAlignMask) == 0);
-  assert(split_bytes <= tailBytes);
+  assertx(tailBytes >= kSmallSizeAlign);
+  assertx((tailBytes & kSmallSizeAlignMask) == 0);
+  assertx((splitUsable & kSmallSizeAlignMask) == 0);
+  assertx(split_bytes <= tailBytes);
 
   // initialize the free objects, and push them onto the freelist.
   auto head = freelists[index].head;
@@ -728,7 +717,7 @@ void splitTail(FreelistArray& freelists, void* tail, size_t tailBytes,
   slab->setStarts(tail, rem, splitUsable, index);
 
   auto remBytes = tailBytes - split_bytes;
-  assert(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
+  assertx(uintptr_t(rem) + remBytes == uintptr_t(tail) + tailBytes);
   storeTail(freelists, rem, remBytes, slab);
 }
 }
@@ -744,13 +733,14 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
               Slab::fromPtr(m_front));
   }
   auto mem = m_heap.allocSlab(m_stats);
-  assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
+  always_assert(reinterpret_cast<uintptr_t>(mem) % kSlabAlign == 0);
   auto slab = static_cast<Slab*>(mem);
   auto slab_start = slab->init();
   m_front = slab_start + nbytes; // allocate requested object
   // we can't use any space after slab->end() even if the allocator allows
   // (indiciated by mem.size), because of the fixed-sized crossing map.
   m_limit = slab->end();
+  assertx(m_front <= m_limit);
   FTRACE(3, "newSlab: adding slab at {} to limit {}\n", slab_start, m_limit);
   slab->setStart(slab_start);
   return slab_start;
@@ -762,26 +752,8 @@ NEVER_INLINE void* MemoryManager::newSlab(size_t nbytes) {
 inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
   FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", nbytes, index,
             m_front, m_limit);
-  assert(nbytes == sizeIndex2Size(index));
-  assert(nbytes <= kSlabSize);
-  assert((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
-
-  if (UNLIKELY(m_bypassSlabAlloc)) {
-    totalSmallAllocs.resize(kNumSmallSizes, 0);
-    currentSmallAllocs.resize(kNumSmallSizes, 0);
-    ++totalSmallAllocs[index];
-    ++currentSmallAllocs[index];
-    if (StructuredLog::coinflip(RuntimeOption::PerAllocSampleF)) {
-      publishStats("current", currentSmallAllocs,
-          RuntimeOption::PerAllocSampleF);
-    }
-
-    // Stats correction; mallocBigSize() updates m_stats. Add to mm_debt rather
-    // than adding to mm_freed because we're adjusting for double-counting, not
-    // actually freeing anything.
-    m_stats.mm_debt += nbytes;
-    return mallocBigSize<Unzeroed>(nbytes);
-  }
+  assertx(nbytes == sizeIndex2Size(index));
+  assertx((uintptr_t(m_front) & kSmallSizeAlignMask) == 0);
 
   auto ptr = m_front;
   auto next = (void*)(uintptr_t(ptr) + nbytes);
@@ -791,6 +763,13 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
     slab = Slab::fromPtr(ptr);
     slab->setStart(ptr);
   } else {
+    if (UNLIKELY(index >= kNumSmallSizes) || UNLIKELY(m_bypassSlabAlloc)) {
+      // Stats correction; mallocBigSize() updates m_stats. Add to mm_udebt
+      // rather than mm_freed because we're adjusting for double-counting, not
+      // actually freeing anything.
+      m_stats.mm_udebt += nbytes;
+      return mallocBigSize(nbytes);
+    }
     ptr = newSlab(nbytes); // sets start bit at ptr
     slab = Slab::fromPtr(ptr);
   }
@@ -811,23 +790,29 @@ inline void* MemoryManager::slabAlloc(size_t nbytes, size_t index) {
 }
 
 NEVER_INLINE
-void* MemoryManager::mallocSmallIndexSlow(size_t bytes, size_t index) {
-  checkGC();
-  updateMMDebt();
-  return mallocSmallIndexTail(bytes, index);
-}
-
 void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
-  assert(nbytes == sizeIndex2Size(index));
-  assert(!m_freelists[index].head); // freelist[index] is empty
+  assertx(nbytes == sizeIndex2Size(index));
+
+  if (UNLIKELY(m_stats.mm_udebt > std::numeric_limits<int64_t>::max())) {
+    checkSampling(nbytes);
+    // Must be here to check gc; might still have free objects.
+    checkGC();
+    updateMMDebt();
+    auto clamped = std::min(index, kNumSmallSizes);
+    if (auto p = m_freelists[clamped].unlikelyPop()) {
+      FTRACE(3, "mallocSmallSizeSlow: check gc {} -> {}\n", nbytes, p);
+      return p;
+    }
+  }
+
   size_t contigInd = kContigIndexTab[index];
   for (auto i = contigInd; i < kNumSmallSizes; ++i) {
     FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): contigMin={}, "
               "contigInd={}, try i={}\n", nbytes, index, kContigTab[index],
               contigInd, i);
     if (auto p = m_freelists[i].unlikelyPop()) {
-      assert(i > index); // because freelist[index] was empty
-      assert(Slab::fromPtr(p)->isStart(p));
+      assertx(i > index); // because freelist[index] was empty
+      assertx(Slab::fromPtr(p)->isStart(p));
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n",
                 nbytes, index, kContigTab[index], contigInd, i,
@@ -852,91 +837,98 @@ inline void MemoryManager::updateBigStats() {
   refreshStats();
 }
 
-template<MemoryManager::MBS Mode> NEVER_INLINE
-void* MemoryManager::mallocBigSize(size_t bytes, HeaderKind kind,
-                                   type_scan::Index ty) {
+NEVER_INLINE
+void MemoryManager::freeSmallIndexSlow(void* ptr, size_t index, size_t bytes) {
+  if (UNLIKELY(index >= kNumSmallSizes) || UNLIKELY(m_bypassSlabAlloc)) {
+    return freeBigSize(ptr);
+  }
+  // copy of FreeList::push() fast path when head == nullptr
+  m_freelists[index].head = FreeNode::UninitFrom(ptr, nullptr);
+  m_stats.mm_freed += bytes;
+}
+
+NEVER_INLINE
+void* MemoryManager::mallocBigSize(size_t bytes, bool zero) {
   if (debug) tl_heap->requestEagerGC();
-  auto ptr = Mode == Zeroed ? m_heap.callocBig(bytes, kind, ty, m_stats) :
-             m_heap.allocBig(bytes, kind, ty, m_stats);
+  auto ptr = m_heap.allocBig(bytes, zero, m_stats);
   updateBigStats();
+  checkSampling(bytes);
   checkGC();
   FTRACE(3, "mallocBigSize: {} ({} requested)\n", ptr, bytes);
   return ptr;
 }
 
-template NEVER_INLINE
-void* MemoryManager::mallocBigSize<MemoryManager::Unzeroed>(
-    size_t, HeaderKind, type_scan::Index
-);
-template NEVER_INLINE
-void* MemoryManager::mallocBigSize<MemoryManager::Zeroed>(
-    size_t, HeaderKind, type_scan::Index
-);
-
-void* MemoryManager::resizeBig(MallocNode* n, size_t nbytes) {
-  assert(n->kind() == HeaderKind::BigMalloc);
-  auto block = m_heap.resizeBig(n + 1, nbytes, m_stats);
+MallocNode* MemoryManager::reallocBig(MallocNode* n, size_t nbytes) {
+  assertx(n->kind() == HeaderKind::BigMalloc);
+  auto n2 = static_cast<MallocNode*>(
+    m_heap.resizeBig(n, nbytes, m_stats)
+  );
+  n2->nbytes = nbytes;
   updateBigStats();
-  return block;
+  return n2;
 }
 
 NEVER_INLINE
 void MemoryManager::freeBigSize(void* vp) {
-  FTRACE(3, "freeBigSize: {} ({} bytes)\n", vp,
-         static_cast<MallocNode*>(vp)[-1].nbytes);
+  FTRACE(3, "freeBigSize: {}\n", vp);
   m_heap.freeBig(vp, m_stats);
 }
 
 // req::malloc api entry points, with support for malloc/free corner cases.
 namespace req {
 
-using MBS = MemoryManager::MBS;
-
-template<MBS Mode>
-static void* allocate(size_t nbytes, type_scan::Index ty) {
+static void* allocate(size_t nbytes, bool zero, type_scan::Index ty) {
   nbytes = std::max(nbytes, size_t(1));
   auto const npadded = nbytes + sizeof(MallocNode);
   if (LIKELY(npadded <= kMaxSmallSize)) {
     auto const ptr = static_cast<MallocNode*>(
         tl_heap->mallocSmallSize(npadded)
     );
-    ptr->nbytes = npadded;
     ptr->initHeader_32_16(HeaderKind::SmallMalloc, 0, ty);
-    return Mode == MBS::Zeroed ? memset(ptr + 1, 0, nbytes) : ptr + 1;
+    ptr->nbytes = npadded;
+    return zero ? memset(ptr + 1, 0, nbytes) : ptr + 1;
   }
-  return tl_heap->mallocBigSize<Mode>(nbytes, HeaderKind::BigMalloc, ty);
+  auto const ptr = static_cast<MallocNode*>(
+    tl_heap->mallocBigSize(npadded, zero)
+  );
+  ptr->initHeader_32_16(HeaderKind::BigMalloc, 0, ty);
+  ptr->nbytes = npadded;
+  return ptr + 1;
 }
 
 void* malloc(size_t nbytes, type_scan::Index tyindex) {
-  assert(type_scan::isKnownType(tyindex));
-  return allocate<MBS::Unzeroed>(nbytes, tyindex);
+  assertx(type_scan::isKnownType(tyindex));
+  return allocate(nbytes, false, tyindex);
 }
 
 void* calloc(size_t count, size_t nbytes, type_scan::Index tyindex) {
-  assert(type_scan::isKnownType(tyindex));
-  return allocate<MBS::Zeroed>(count * nbytes, tyindex);
+  assertx(type_scan::isKnownType(tyindex));
+  return allocate(count * nbytes, true, tyindex);
 }
 
 void* malloc_untyped(size_t nbytes) {
-  return tl_heap->mallocBigSize<MBS::Unzeroed>(
-      std::max(nbytes, 1ul),
-      HeaderKind::BigMalloc,
-      type_scan::kIndexUnknown
+  auto n = static_cast<MallocNode*>(
+    tl_heap->mallocBigSize(std::max(nbytes + sizeof(MallocNode), 1ul), false)
   );
+  n->initHeader_32_16(HeaderKind::BigMalloc, 0, type_scan::kIndexUnknown);
+  n->nbytes = nbytes + sizeof(MallocNode);
+  return n + 1;
 }
 
 void* calloc_untyped(size_t count, size_t bytes) {
-  return tl_heap->mallocBigSize<MBS::Zeroed>(
-      std::max(count * bytes, 1ul),
-      HeaderKind::BigMalloc,
-      type_scan::kIndexUnknown
+  auto nbytes = count * bytes + sizeof(MallocNode);
+  auto n = static_cast<MallocNode*>(
+    tl_heap->mallocBigSize(nbytes, true)
   );
+  n->initHeader_32_16(HeaderKind::BigMalloc, 0, type_scan::kIndexUnknown);
+  n->nbytes = nbytes;
+  return n + 1;
 }
 
 void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
-  assert(type_scan::isKnownType(tyindex));
+  assertx(type_scan::isKnownType(tyindex));
   if (!ptr) {
-    return allocate<MBS::Unzeroed>(nbytes, tyindex);
+    return allocate(nbytes, false, tyindex);
   }
   if (!nbytes) {
     req::free(ptr);
@@ -945,18 +937,20 @@ void* realloc(void* ptr, size_t nbytes, type_scan::Index tyindex) {
   FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
          ptr, nbytes, tyindex);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  assert(n->typeIndex() == tyindex);
+  assertx(n->typeIndex() == tyindex);
+  auto new_size = nbytes + sizeof(MallocNode);
   if (LIKELY(n->kind() == HeaderKind::SmallMalloc) ||
-      UNLIKELY(nbytes + sizeof(MallocNode) <= kMaxSmallSize)) {
+      UNLIKELY(new_size <= kMaxSmallSize)) {
     // either the old or new block will be small; force a copy.
-    auto newmem = allocate<MBS::Unzeroed>(nbytes, tyindex);
+    auto newmem = allocate(nbytes, false, tyindex);
     auto copy_size = std::min(n->nbytes - sizeof(MallocNode), nbytes);
     newmem = memcpy(newmem, ptr, copy_size);
     req::free(ptr);
     return newmem;
   }
   // it's a big allocation.
-  return tl_heap->resizeBig(n, nbytes);
+  auto n2 = tl_heap->reallocBig(n, new_size);
+  return n2 + 1;
 }
 
 void* realloc_untyped(void* ptr, size_t nbytes) {
@@ -971,9 +965,10 @@ void* realloc_untyped(void* ptr, size_t nbytes) {
   FTRACE(3, "MemoryManager::realloc: {} to {} [type_index: {}]\n",
          ptr, nbytes, type_scan::kIndexUnknown);
   auto const n = static_cast<MallocNode*>(ptr) - 1;
-  assert(n->kind() == HeaderKind::BigMalloc);
-  assert(n->typeIndex() == type_scan::kIndexUnknown);
-  return tl_heap->resizeBig(n, nbytes);
+  assertx(n->kind() == HeaderKind::BigMalloc);
+  assertx(n->typeIndex() == type_scan::kIndexUnknown);
+  auto n2 = tl_heap->reallocBig(n, nbytes + sizeof(MallocNode));
+  return n2 + 1;
 }
 
 char* strndup(const char* str, size_t len) {
@@ -992,8 +987,11 @@ void free(void* ptr) {
   if (LIKELY(n->kind() == HeaderKind::SmallMalloc)) {
     return tl_heap->freeSmallSize(n, n->nbytes);
   }
-  assert(n->kind() == HeaderKind::BigMalloc);
-  tl_heap->freeBigSize(ptr);
+  if (n->kind() == HeaderKind::Cpp) {
+    return tl_heap->objFree(n, n->nbytes);
+  }
+  assertx(n->kind() == HeaderKind::BigMalloc);
+  tl_heap->freeBigSize(n);
 }
 
 } // namespace req
@@ -1001,34 +999,19 @@ void free(void* ptr) {
 //////////////////////////////////////////////////////////////////////
 
 void MemoryManager::addNativeObject(NativeNode* node) {
-  if (debug) for (DEBUG_ONLY auto n : m_natives) assert(n != node);
+  if (debug) for (DEBUG_ONLY auto n : m_natives) assertx(n != node);
   node->sweep_index = m_natives.size();
   m_natives.push_back(node);
 }
 
 void MemoryManager::removeNativeObject(NativeNode* node) {
-  assert(node->sweep_index < m_natives.size());
-  assert(m_natives[node->sweep_index] == node);
+  assertx(node->sweep_index < m_natives.size());
+  assertx(m_natives[node->sweep_index] == node);
   auto index = node->sweep_index;
   auto last = m_natives.back();
   m_natives[index] = last;
   m_natives.pop_back();
   last->sweep_index = index;
-}
-
-void MemoryManager::addApcArray(APCLocalArray* a) {
-  a->m_sweep_index = m_apc_arrays.size();
-  m_apc_arrays.push_back(a);
-}
-
-void MemoryManager::removeApcArray(APCLocalArray* a) {
-  assert(a->m_sweep_index < m_apc_arrays.size());
-  assert(m_apc_arrays[a->m_sweep_index] == a);
-  auto index = a->m_sweep_index;
-  auto last = m_apc_arrays.back();
-  m_apc_arrays[index] = last;
-  m_apc_arrays.pop_back();
-  last->m_sweep_index = index;
 }
 
 void MemoryManager::addSweepable(Sweepable* obj) {
@@ -1068,6 +1051,14 @@ bool MemoryManager::triggerProfiling(const std::string& filename) {
 void MemoryManager::requestInit() {
   tl_heap->m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 
+  if (RuntimeOption::EvalHeapAllocSampleRequests > 0 &&
+      RuntimeOption::EvalHeapAllocSampleBytes > 0) {
+    if (!folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleRequests)) {
+      tl_heap->m_nextSample =
+        folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleBytes);
+    }
+  }
+
   // If the trigger has already been claimed, do nothing.
   auto trigger = s_trigger.exchange(nullptr);
   if (trigger == nullptr) return;
@@ -1076,7 +1067,7 @@ void MemoryManager::requestInit() {
 
   // Initialize the request-local context from the trigger.
   auto& profctx = tl_heap->m_profctx;
-  assert(!profctx.flag);
+  assertx(!profctx.flag);
 
   tl_heap->m_bypassSlabAlloc = true;
   profctx = *trigger;
@@ -1084,18 +1075,19 @@ void MemoryManager::requestInit() {
 
 #ifdef USE_JEMALLOC
   // Reset jemalloc stats.
-  if (mallctlCall("prof.reset", true) != 0) {
+  if (mallctlCall<true>("prof.reset") != 0) {
     return;
   }
 
   // Enable jemalloc thread-local heap dumps.
-  if (mallctlReadWrite("prof.active", &profctx.prof_active, true, true)
+  if (mallctlReadWrite<bool, true>("prof.active", &profctx.prof_active, true)
       != 0) {
     profctx = ReqProfContext{};
     return;
   }
-  if (mallctlReadWrite("thread.prof.active", &profctx.thread_prof_active,
-                       true, true) != 0) {
+  if (mallctlReadWrite<bool, true>("thread.prof.active",
+                                   &profctx.thread_prof_active,
+                                   true) != 0) {
     mallctlWrite("prof.active", profctx.prof_active);
     profctx = ReqProfContext{};
     return;
@@ -1104,8 +1096,12 @@ void MemoryManager::requestInit() {
 }
 
 void MemoryManager::requestShutdown() {
-  auto& profctx = tl_heap->m_profctx;
+  if (tl_heap->m_nextSample != kNoNextSample) {
+    reset_alloc_sampling();
+    tl_heap->m_nextSample = kNoNextSample;
+  }
 
+  auto& profctx = tl_heap->m_profctx;
   if (!profctx.flag) return;
 
 #ifdef USE_JEMALLOC
@@ -1136,20 +1132,6 @@ bool MemoryManager::isGCEnabled() {
 void MemoryManager::setGCEnabled(bool isGCEnabled) {
   m_gc_enabled = isGCEnabled;
   updateNextGc();
-}
-
-void MemoryManager::publishStats(const char* name,
-    const std::vector<int64_t> &stats, uint32_t sampleRate) {
-  if (stats.size() == 0) return;
-  StructuredLogEntry log;
-  for (size_t i = 0; i < stats.size(); ++i) {
-    std::array<char, 32> log_name;
-    snprintf(&log_name[0], log_name.size(), "%s[%lu]", name,
-        kSizeIndex2Size[i]);
-    log.setInt(&log_name[0], stats[i]);
-  }
-  log.setInt("sample_rate", sampleRate);
-  StructuredLog::log("hhvm_allocs", log);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

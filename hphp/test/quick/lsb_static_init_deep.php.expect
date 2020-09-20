@@ -1,0 +1,75 @@
+object(HH\Vector) (2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Map) (3) {
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(3) "bar"
+  [3]=>
+  string(3) "baz"
+}
+object(HH\Vector) (2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Map) (3) {
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(3) "bar"
+  [3]=>
+  string(3) "baz"
+}
+object(HH\Vector) (2) {
+  [0]=>
+  string(5) "hello"
+  [1]=>
+  string(5) "world"
+}
+object(HH\Set) (3) {
+  int(1)
+  int(2)
+  int(3)
+}
+object(HH\Map) (3) {
+  [1]=>
+  string(3) "foo"
+  [2]=>
+  string(3) "bar"
+  [3]=>
+  string(3) "baz"
+}
+object(HH\Vector) (0) {
+}
+object(HH\Set) (0) {
+}
+object(HH\Map) (0) {
+}
+object(HH\Vector) (0) {
+}
+object(HH\Set) (0) {
+}
+object(HH\Map) (0) {
+}
+object(HH\Vector) (0) {
+}
+object(HH\Set) (0) {
+}
+object(HH\Map) (0) {
+}

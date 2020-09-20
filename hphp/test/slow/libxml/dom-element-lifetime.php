@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. https://github.com/facebook/hhvm/issues/3096
 
 function one() {
@@ -21,6 +21,7 @@ function two() {
 
   var_dump($root->C14N());
 }
-
+<<__EntryPoint>> function main(): void {
 one();
 two();
+}

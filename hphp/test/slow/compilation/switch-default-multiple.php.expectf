@@ -1,2 +1,1 @@
-Fatal error: Switch statements may only contain one default: clause in %s/switch-default-multiple.php on line 8
-
+Fatal error: Switch statements may only contain one 'default' clause. in %s/test/slow/compilation/switch-default-multiple.php on line 12

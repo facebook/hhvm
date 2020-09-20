@@ -1,17 +1,14 @@
 
-Warning: %s
-NULL
+Warning: bzcompress() expects at least 1 parameter, 0 given in %s/005.php on line 8
 string(%d) "BZ%a"
 int(-2)
 int(-2)
 int(-2)
 int(-2)
 
-Warning: %s
-bool(false)
+Warning: bzdecompress() expects at least 1 parameter, 0 given in %s/005.php on line 21
 
-Warning: %s
-bool(false)
+Warning: bzdecompress() expects at most 2 parameters, 3 given in %s/005.php on line 22
 int(-5)
 int(-5)
 int(-5)

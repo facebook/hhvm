@@ -1,2 +1,3 @@
-
-Warning: __construct() expects exactly 2 parameters, 1 given in %s/test/slow/new_object_expression/782.php on line 8
+Fatal error: Uncaught exception 'RuntimeException' with message 'foo::__construct() expects exactly 2 parameters, 1 given' in %s/782.php:8
+Stack trace:
+%A

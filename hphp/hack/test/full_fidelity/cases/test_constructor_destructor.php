@@ -8,6 +8,4 @@ class C {
   <<attr>> public function __construct ($a){}
   <<attr>> public function __construct ($a) {}
   public function __construct (public $a = null) {}
-  public function __destruct () {}
-  <<attr>> public function __destruct () {}
 }

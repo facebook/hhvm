@@ -1,162 +1,148 @@
 *** Testing date_parse() : usage variation -  unexpected values to first argument $date***
 
 -- int 0 --
-array(1) {
-  [0]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- int 1 --
-array(1) {
-  [0]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- int 12345 --
-array(1) {
-  [4]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- int -12345 --
-array(1) {
-  [5]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- float 10.5 --
-array(0) {
-}
+
+Warning: date_parse() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- float -10.5 --
-array(1) {
-  [4]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- float .5 --
-array(0) {
-}
+
+Warning: date_parse() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- empty array --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, varray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
 bool(false)
 
 -- int indexed array --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, varray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
 bool(false)
 
 -- associative array --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, darray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
 bool(false)
 
 -- nested arrays --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, varray given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
 bool(false)
 
 -- uppercase NULL --
-array(1) {
-  [0]=>
-  string(12) "Empty string"
-}
+
+Warning: date_parse() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- lowercase null --
-array(1) {
-  [0]=>
-  string(12) "Empty string"
-}
+
+Warning: date_parse() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- lowercase true --
-array(1) {
-  [0]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- lowercase false --
-array(1) {
-  [0]=>
-  string(12) "Empty string"
-}
+
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- uppercase TRUE --
-array(1) {
-  [0]=>
-  string(20) "Unexpected character"
-}
+
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- uppercase FALSE --
-array(1) {
-  [0]=>
-  string(12) "Empty string"
-}
+
+Warning: date_parse() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- empty string DQ --
-array(1) {
+darray(1) {
   [0]=>
   string(12) "Empty string"
 }
 
 -- empty string SQ --
-array(1) {
+darray(1) {
   [0]=>
   string(12) "Empty string"
 }
 
 -- string DQ --
-array(1) {
+darray(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- string SQ --
-array(1) {
+darray(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- mixed case string --
-array(1) {
+darray(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- heredoc --
-array(1) {
+darray(1) {
   [0]=>
   string(47) "The timezone could not be found in the database"
 }
 
 -- instance of classWithToString --
-array(2) {
-  [0]=>
-  string(47) "The timezone could not be found in the database"
-  [8]=>
-  string(29) "Double timezone specification"
-}
+
+Warning: date_parse() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
 bool(false)
 
 -- undefined var --
-array(1) {
-  [0]=>
-  string(12) "Empty string"
-}
+
+Warning: date_parse() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- unset var --
-array(1) {
-  [0]=>
-  string(12) "Empty string"
-}
+
+Warning: date_parse() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
+bool(false)
 
 -- resource --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, resource given in %s/zend/good/ext/date/tests/date_parse_variation1.php on line 97
 bool(false)
 ===DONE===

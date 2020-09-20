@@ -1,2 +1,6 @@
-File "printf_crash.php--use.php", line 5, characters 21-32:
-The type FormatString expects 1 type parameter(s) (Typing[4101])
+File "printf_crash.php--printf.php", line 5, characters 10-19:
+Invalid return type (Typing[4336])
+File "printf_crash.php--printf.php", line 5, characters 10-19:
+Expected `void` because this function does not always return a value
+File "printf_crash.php--printf.php", line 5, characters 64-69:
+But got `string`

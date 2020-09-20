@@ -26,4 +26,8 @@ function main() {
   reflect('foo');
   reflect('bar');
 }
+
+<<__EntryPoint>>
+function main_xhp() {
 main();
+}

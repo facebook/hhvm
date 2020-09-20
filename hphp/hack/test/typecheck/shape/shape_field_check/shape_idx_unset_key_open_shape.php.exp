@@ -1,0 +1,6 @@
+File "shape_idx_unset_key_open_shape.php", line 5, characters 3-22:
+You are calling `Shapes::idx()` on a field known to not exist (Typing[4251])
+File "shape_idx_unset_key_open_shape.php", line 4, characters 3-34:
+The type of the field `x` in this shape doesn't allow any values
+File "shape_idx_unset_key_open_shape.php", line 4, characters 3-34:
+It is nothing because the field `x` was unset here

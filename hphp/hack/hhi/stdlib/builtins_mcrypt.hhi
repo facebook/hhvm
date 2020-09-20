@@ -3,123 +3,124 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
-define('MCRYPT_ENCRYPT', 0);
-define('MCRYPT_DECRYPT', 1);
-define('MCRYPT_DEV_RANDOM', 0);
-define('MCRYPT_DEV_URANDOM', 1);
-define('MCRYPT_RAND', 2);
-define('MCRYPT_3DES', 'tripledes');
-define('MCRYPT_ARCFOUR_IV', 'arcfour-iv');
-define('MCRYPT_ARCFOUR', 'arcfour');
-define('MCRYPT_BLOWFISH', 'blowfish');
-define('MCRYPT_BLOWFISH_COMPAT', 'blowfish-compat');
-define('MCRYPT_CAST_128', 'cast-128');
-define('MCRYPT_CAST_256', 'cast-256');
-define('MCRYPT_CRYPT', 'crypt');
-define('MCRYPT_DES', 'des');
-define('MCRYPT_ENIGNA', 'crypt');
-define('MCRYPT_GOST', 'gost');
-define('MCRYPT_LOKI97', 'loki97');
-define('MCRYPT_PANAMA', 'panama');
-define('MCRYPT_RC2', 'rc2');
-define('MCRYPT_RIJNDAEL_128', 'rijndael-128');
-define('MCRYPT_RIJNDAEL_192', 'rijndael-192');
-define('MCRYPT_RIJNDAEL_256', 'rijndael-256');
-define('MCRYPT_SAFER64', 'safer-sk64');
-define('MCRYPT_SAFER128', 'safer-sk128');
-define('MCRYPT_SAFERPLUS', 'saferplus');
-define('MCRYPT_SERPENT', 'serpent');
-define('MCRYPT_THREEWAY', 'threeway');
-define('MCRYPT_TRIPLEDES', 'tripledes');
-define('MCRYPT_TWOFISH', 'twofish');
-define('MCRYPT_WAKE', 'wake');
-define('MCRYPT_XTEA', 'xtea');
-define('MCRYPT_IDEA', 'idea');
-define('MCRYPT_MARS', 'mars');
-define('MCRYPT_RC6', 'rc6');
-define('MCRYPT_SKIPJACK', 'skipjack');
-define('MCRYPT_MODE_CBC', 'cbc');
-define('MCRYPT_MODE_CFB', 'cfb');
-define('MCRYPT_MODE_ECB', 'ecb');
-define('MCRYPT_MODE_NOFB', 'nofb');
-define('MCRYPT_MODE_OFB', 'ofb');
-define('MCRYPT_MODE_STREAM', 'stream');
+
+const int MCRYPT_ENCRYPT = 0;
+const int MCRYPT_DECRYPT = 1;
+const int MCRYPT_DEV_RANDOM = 0;
+const int MCRYPT_DEV_URANDOM = 1;
+const int MCRYPT_RAND = 2;
+const string MCRYPT_3DES = 'tripledes';
+const string MCRYPT_ARCFOUR_IV = 'arcfour-iv';
+const string MCRYPT_ARCFOUR = 'arcfour';
+const string MCRYPT_BLOWFISH = 'blowfish';
+const string MCRYPT_BLOWFISH_COMPAT = 'blowfish-compat';
+const string MCRYPT_CAST_128 = 'cast-128';
+const string MCRYPT_CAST_256 = 'cast-256';
+const string MCRYPT_CRYPT = 'crypt';
+const string MCRYPT_DES = 'des';
+const string MCRYPT_ENIGNA = 'crypt';
+const string MCRYPT_GOST = 'gost';
+const string MCRYPT_LOKI97 = 'loki97';
+const string MCRYPT_PANAMA = 'panama';
+const string MCRYPT_RC2 = 'rc2';
+const string MCRYPT_RIJNDAEL_128 = 'rijndael-128';
+const string MCRYPT_RIJNDAEL_192 = 'rijndael-192';
+const string MCRYPT_RIJNDAEL_256 = 'rijndael-256';
+const string MCRYPT_SAFER64 = 'safer-sk64';
+const string MCRYPT_SAFER128 = 'safer-sk128';
+const string MCRYPT_SAFERPLUS = 'saferplus';
+const string MCRYPT_SERPENT = 'serpent';
+const string MCRYPT_THREEWAY = 'threeway';
+const string MCRYPT_TRIPLEDES = 'tripledes';
+const string MCRYPT_TWOFISH = 'twofish';
+const string MCRYPT_WAKE = 'wake';
+const string MCRYPT_XTEA = 'xtea';
+const string MCRYPT_IDEA = 'idea';
+const string MCRYPT_MARS = 'mars';
+const string MCRYPT_RC6 = 'rc6';
+const string MCRYPT_SKIPJACK = 'skipjack';
+const string MCRYPT_MODE_CBC = 'cbc';
+const string MCRYPT_MODE_CFB = 'cfb';
+const string MCRYPT_MODE_ECB = 'ecb';
+const string MCRYPT_MODE_NOFB = 'nofb';
+const string MCRYPT_MODE_OFB = 'ofb';
+const string MCRYPT_MODE_STREAM = 'stream';
+
 <<__PHPStdLib>>
-function mcrypt_module_open($algorithm, $algorithm_directory, $mode, $mode_directory) { }
+function mcrypt_module_open(string $algorithm, string $algorithm_directory, string $mode, string $mode_directory);
 <<__PHPStdLib>>
-function mcrypt_module_close($td) { }
+function mcrypt_module_close(resource $td);
 <<__PHPStdLib>>
-function mcrypt_list_algorithms($lib_dir = null) { }
+function mcrypt_list_algorithms(string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_list_modes($lib_dir = null) { }
+function mcrypt_list_modes(string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_get_algo_block_size($algorithm, $lib_dir = null) { }
+function mcrypt_module_get_algo_block_size(string $algorithm, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_get_algo_key_size($algorithm, $lib_dir = null) { }
+function mcrypt_module_get_algo_key_size(string $algorithm, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_get_supported_key_sizes($algorithm, $lib_dir = null) { }
+function mcrypt_module_get_supported_key_sizes(string $algorithm, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_is_block_algorithm_mode($mode, $lib_dir = null) { }
+function mcrypt_module_is_block_algorithm_mode(string $mode, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_is_block_algorithm($algorithm, $lib_dir = null) { }
+function mcrypt_module_is_block_algorithm(string $algorithm, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_is_block_mode($mode, $lib_dir = null) { }
+function mcrypt_module_is_block_mode(string $mode, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_module_self_test($algorithm, $lib_dir = null) { }
+function mcrypt_module_self_test(string $algorithm, string $lib_dir = "");
 <<__PHPStdLib>>
-function mcrypt_create_iv($size, $source = 0) { }
+function mcrypt_create_iv(int $size, int $source = 0);
 <<__PHPStdLib>>
-function mcrypt_encrypt($cipher, $key, $data, $mode, $iv = null) { }
+function mcrypt_encrypt(string $cipher, string $key, string $data, string $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_decrypt($cipher, $key, $data, $mode, $iv = null) { }
+function mcrypt_decrypt(string $cipher, string $key, string $data, string $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_cbc($cipher, $key, $data, $mode, $iv = null) { }
+function mcrypt_cbc(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_cfb($cipher, $key, $data, $mode, $iv = null) { }
+function mcrypt_cfb(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_ecb($cipher, $key, $data, $mode, $iv = null) { }
+function mcrypt_ecb(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_ofb($cipher, $key, $data, $mode, $iv = null) { }
+function mcrypt_ofb(string $cipher, string $key, string $data, $mode, $iv = null);
 <<__PHPStdLib>>
-function mcrypt_get_block_size($cipher, $module = null) { }
+function mcrypt_get_block_size(string $cipher, string $mode);
 <<__PHPStdLib>>
-function mcrypt_get_cipher_name($cipher) { }
+function mcrypt_get_cipher_name(string $cipher);
 <<__PHPStdLib>>
-function mcrypt_get_iv_size($cipher, $mode) { }
+function mcrypt_get_iv_size(string $cipher, string $mode);
 <<__PHPStdLib>>
-function mcrypt_get_key_size($cipher, $module) { }
+function mcrypt_get_key_size(string $cipher, string $module);
 <<__PHPStdLib>>
-function mcrypt_enc_get_algorithms_name($td) { }
+function mcrypt_enc_get_algorithms_name(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_get_block_size($td) { }
+function mcrypt_enc_get_block_size(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_get_iv_size($td) { }
+function mcrypt_enc_get_iv_size(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_get_key_size($td) { }
+function mcrypt_enc_get_key_size(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_get_modes_name($td) { }
+function mcrypt_enc_get_modes_name(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_get_supported_key_sizes($td) { }
+function mcrypt_enc_get_supported_key_sizes(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_is_block_algorithm_mode($td) { }
+function mcrypt_enc_is_block_algorithm_mode(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_is_block_algorithm($td) { }
+function mcrypt_enc_is_block_algorithm(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_is_block_mode($td) { }
+function mcrypt_enc_is_block_mode(resource $td);
 <<__PHPStdLib>>
-function mcrypt_enc_self_test($td) { }
+function mcrypt_enc_self_test(resource $td);
 <<__PHPStdLib>>
-function mcrypt_generic($td, $data) { }
+function mcrypt_generic(resource $td, string $data);
 <<__PHPStdLib>>
-function mcrypt_generic_init($td, $key, $iv) { }
+function mcrypt_generic_init(resource $td, string $key, string $iv);
 <<__PHPStdLib>>
-function mdecrypt_generic($td, $data) { }
+function mdecrypt_generic(resource $td, string $data);
 <<__PHPStdLib>>
-function mcrypt_generic_deinit($td) { }
+function mcrypt_generic_deinit(resource $td);
 <<__PHPStdLib>>
-function mcrypt_generic_end($td) { }
+function mcrypt_generic_end(resource $td);

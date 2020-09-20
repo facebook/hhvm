@@ -1,14 +1,19 @@
 *** Testing Invalid file types ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+
+Warning: is_file() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
 bool(false)
 bool(false)
 
-Warning: %s
-NULL
-bool(false)
-bool(false)
+Warning: is_file() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
+
+Warning: is_file() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
+
+Warning: is_file() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
+
+Warning: is_file() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
+
+Warning: is_file() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
+
+Warning: is_file() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_file_variation3.php on line 30
 
 *** Done ***

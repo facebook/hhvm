@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_stream_copy_to_stream_big() {
 $input = fopen('php://memory','r+');
 
 $str = 'Hello, World!';
@@ -18,3 +21,4 @@ stream_copy_to_stream($input, $output);
 rewind($output);
 
 echo stream_get_contents($output) . "\n";
+}

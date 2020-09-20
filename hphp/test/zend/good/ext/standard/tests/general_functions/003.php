@@ -1,22 +1,22 @@
-<?php 
+<?hh
 
 function test_me($title,$expect,$text1,$text2,$cost1=0,$cost2=0,$cost3=0) {
 
-  if($cost1==0) 
-	  $result=levenshtein($text1,$text2);
-	else
+  if($cost1==0)
+      $result=levenshtein($text1,$text2);
+    else
     $result=levenshtein($text1,$text2,$cost1,$cost2,$cost3);
 
-	if($result==$expect) return 0;
+    if($result==$expect) return 0;
 
-	echo "$title: result is $result instead of $expect ";
-	echo "for '$text1'/'$text2' ";
-	if($cost1) echo "($cost1:$cost2:$cost3)";
-	echo "\n";
-	
-	return 1;		
+    echo "$title: result is $result instead of $expect ";
+    echo "for '$text1'/'$text2' ";
+    if($cost1) echo "($cost1:$cost2:$cost3)";
+    echo "\n";
+
+    return 1;
 }
-
+<<__EntryPoint>> function main(): void {
 $n=0;
 
 $n += test_me("equal"      , 0, "12345", "12345");
@@ -49,5 +49,4 @@ $n += test_me("bug #16473", 2, "ax", "bcx");
 
 
 echo ($n==0)?"all passed\n":"$n failed\n";
-
-?>
+}

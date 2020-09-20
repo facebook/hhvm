@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_EXT_FILTER_H_
-#define incl_EXT_FILTER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -28,18 +27,9 @@ Variant HHVM_FUNCTION(filter_id,
                       const String& filtername);
 Variant HHVM_FUNCTION(filter_var,
                       const Variant& variable,
-                      int64_t filter = 516,
-                      const Variant& options = empty_array_ref);
-Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name);
-void HHVM_FUNCTION(_filter_snapshot_globals);
+                      int64_t filter,
+                      const Variant& options);
 
-extern const int64_t k_INPUT_POST;
-extern const int64_t k_INPUT_GET;
-extern const int64_t k_INPUT_COOKIE;
-extern const int64_t k_INPUT_ENV;
-extern const int64_t k_INPUT_SERVER;
-extern const int64_t k_INPUT_SESSION;
-extern const int64_t k_INPUT_REQUEST;
 extern const int64_t k_FILTER_FLAG_NONE;
 extern const int64_t k_FILTER_REQUIRE_SCALAR;
 extern const int64_t k_FILTER_REQUIRE_ARRAY;
@@ -91,4 +81,3 @@ extern const int64_t k_FILTER_FLAG_NO_PRIV_RANGE;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_EXT_FILTER_H_

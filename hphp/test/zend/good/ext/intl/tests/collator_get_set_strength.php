@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try to set/get collation strength.
@@ -27,6 +27,7 @@ function ut_main()
     return $res;
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    ut_run();
+}

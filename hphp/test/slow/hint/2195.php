@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f1() {
   $a = Vector {
@@ -42,7 +42,11 @@ function f4() {
   $a->setAll($b);
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_2195() {
 f1();
 f2();
 f3();
 f4();
+}

@@ -1,0 +1,4 @@
+<?hh
+function with_built_in_constant(): int {
+  return PHP_INT_MAX;
+}

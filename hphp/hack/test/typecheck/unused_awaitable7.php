@@ -17,11 +17,12 @@ function i(): void {
   $g = g();
   $h = h();
 
-  if ($f instanceof Awaitable) {
+  if ($f is Awaitable<_>) {
   }
-  if ($g instanceof Awaitable) {
+  if ($g is Awaitable<_>) {
   }
   if ($h === null) {
   }
   $x = $h ?? $f;
+  if ($x) {}
 }

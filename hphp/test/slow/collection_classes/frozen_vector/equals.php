@@ -28,4 +28,8 @@ function main() {
   var_dump($fv3 == ImmVector { ImmVector { ImmVector { Vector {1}}}});
 }
 
+
+<<__EntryPoint>>
+function main_equals() {
 main();
+}

@@ -1,24 +1,22 @@
-<?php
+<?hh
 /* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.  
-                Elements will be arranged from highest to lowest when this function has completed.
+ * Description: Sort an array and maintain index association.
+ *              Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
-*/
+ */
 
 /*
- * testing arsort() by providing integer/string object arrays with following flag values 
+ * testing arsort() by providing integer/string object arrays with following flag values
  * 1. Defualt flag value
-   2. SORT_REGULAR - compare items normally
-*/
-
-echo "*** Testing arsort() : object functionality ***\n";
+ * 2. SORT_REGULAR - compare items normally
+ */
 
 // class declaration for integer objects
 class for_integer_arsort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -33,7 +31,7 @@ class for_string_arsort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -46,18 +44,20 @@ class for_string_arsort
    return (string)$this->value;
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing arsort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = darray [
   1 => new for_integer_arsort(11, 33,2), 2 =>  new for_integer_asort(44, 66,3),
   3 => new for_integer_arsort(23, 32,6), 4 => new for_integer_asort(-88, -5,-4),
-);
+];
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = darray [
   "a" => new for_string_arsort("axx","AXX","d"), "b" => new for_string_asort("T", "t","q"),
   "c" => new for_string_arsort("w", "W","c"), "d" => new for_string_asort("PY", "py","s"),
-);
+];
 
 
 echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is default --\n";
@@ -84,4 +84,4 @@ var_dump(arsort($temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";
-?>
+}

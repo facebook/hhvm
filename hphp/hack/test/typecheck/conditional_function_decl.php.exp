@@ -1,0 +1,2 @@
+File "conditional_function_decl.php", line 13, characters 31-31:
+Inline function definitions are not supported in Hack (Parsing[1002])

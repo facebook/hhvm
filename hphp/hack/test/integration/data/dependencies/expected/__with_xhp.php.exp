@@ -1,0 +1,8 @@
+<?hh
+class :xhp implements \XHPChild {}
+class :foo extends :xhp {
+  attribute int bar @required;
+}
+function with_xhp(): :xhp {
+  return <foo bar={42} />;
+}

@@ -2,13 +2,13 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function nullthrows<T>(?T $x): T {
-  //UNSAFE
+  return $x as nonnull;
 }
 
 final class XorParam<Tx, Ty> {
   private function __construct(private ?Tx $x, private ?Ty $y) {
     invariant(
-      $x === null ^ $y === null,
+      ($x === null) !== ($y === null),
       "Exactly one input value must be null!",
     );
   }

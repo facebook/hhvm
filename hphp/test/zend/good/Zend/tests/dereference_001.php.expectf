@@ -1,7 +1,5 @@
 int(5)
-
-Notice: %s
-NULL
+%s
 int(1)
 string(1) "b"
 string(3) "bar"

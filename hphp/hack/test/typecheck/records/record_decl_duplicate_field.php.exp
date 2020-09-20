@@ -1,0 +1,4 @@
+File "record_decl_duplicate_field.php", line 6, characters 7-7:
+Duplicate record field `x` (NastCheck[3083])
+File "record_decl_duplicate_field.php", line 4, characters 7-7:
+Previous field is here

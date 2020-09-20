@@ -1,0 +1,5 @@
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded("sodium")) print "skip";
+if (!defined('SODIUM_CRYPTO_AEAD_AES256GCM_KEYBYTES')) print "skip";
+}

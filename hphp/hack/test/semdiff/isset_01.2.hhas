@@ -1,6 +1,0 @@
-# issetl + branch
-# this one should pass
-.main {
-  Int 1
-  RetC
-}

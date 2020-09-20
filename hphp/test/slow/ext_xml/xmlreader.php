@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -6,9 +6,13 @@ function VS($x, $y) {
 }
 
 
+
+<<__EntryPoint>>
+function main_xmlreader() {
 $reader = new XMLReader();
 $reader->xml("<?xml version=\"1.0\" encoding=\"UTF-8\"?><a y=\"\" z=\"1\"></a>");
 $reader->read();
 VS($reader->getattribute("x"), null);
 VS($reader->getattribute("y"), "");
 VS($reader->getattribute("z"), "1");
+}

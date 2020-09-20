@@ -1,10 +1,7 @@
 
-Warning: %s
-bool(false)
+Warning: gzwrite() expects at most 3 parameters, 4 given in %s/gzwrite_error.php on line 7
 
-Warning: %s
-bool(false)
+Warning: gzwrite() expects at least 2 parameters, 1 given in %s/gzwrite_error.php on line 8
 
-Warning: %s
-bool(false)
+Warning: gzwrite() expects at least 2 parameters, 0 given in %s/gzwrite_error.php on line 9
 ===DONE===

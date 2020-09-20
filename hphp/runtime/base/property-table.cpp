@@ -32,12 +32,12 @@ PropertyTable::PropertyTable(const PropertyTable& other)
   , m_base(nullptr)
 {
   if (!other.m_base) {
-    assert(!m_capacity);
-    assert(!other.m_capacity);
+    assertx(!m_capacity);
+    assertx(!other.m_capacity);
     return;
   }
 
-  assert(m_capacity == other.m_capacity);
+  assertx(m_capacity == other.m_capacity);
   m_base = malloc(bytesForCapacity(m_capacity));
   memcpy(m_base, other.m_base, bytesForCapacity(m_capacity));
 }
@@ -48,11 +48,11 @@ PropertyTable::~PropertyTable() {
 
 uint32_t PropertyTable::add(const StringData* property) {
   if (shouldGrow()) grow();
-  assert(offsetFor(property) == kInvalidOffset);
-  assert((m_size + 1) < m_capacity);
+  assertx(offsetFor(property) == kInvalidOffset);
+  assertx((m_size + 1) < m_capacity);
 
   auto offset = m_nextOffset++;
-  assert(offset != kInvalidOffset);
+  assertx(offset != kInvalidOffset);
   auto bucketIndex = bucketFor<Static>(property);
   offsets()[offset] = bucketIndex;
   entries()[bucketIndex] = Entry{ property, offset, property->hash() };
@@ -61,10 +61,10 @@ uint32_t PropertyTable::add(const StringData* property) {
 }
 
 void PropertyTable::grow() {
-  assert(shouldGrow());
+  assertx(shouldGrow());
   if (!m_capacity) {
     m_capacity = 2;
-    assert(!m_base);
+    assertx(!m_base);
     m_base = malloc(bytesForCapacity(m_capacity));
     memset(m_base, 0, bytesForCapacity(m_capacity));
     return;

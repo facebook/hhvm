@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x() {
   $y1 = new stdclass;
@@ -9,4 +9,8 @@ function x() {
   unset($y);
   var_dump(new stdclass);
 }
+
+<<__EntryPoint>>
+function main_oid_order() {
 x();
+}

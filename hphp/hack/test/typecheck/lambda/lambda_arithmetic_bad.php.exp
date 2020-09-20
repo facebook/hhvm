@@ -1,0 +1,6 @@
+File "lambda_arithmetic_bad.php", line 20, characters 11-32:
+Invalid argument (Typing[4110])
+File "lambda_arithmetic_bad.php", line 11, characters 18-18:
+Expected `E`
+File "lambda_arithmetic_bad.php", line 19, characters 37-43:
+But got `int` because this is the result of an integer arithmetic operation

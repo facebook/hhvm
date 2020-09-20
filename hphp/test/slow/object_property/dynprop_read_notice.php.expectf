@@ -1,0 +1,278 @@
+==== C may notice ====
+== read ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 8
+== read (dynamic name) ==
+
+Notice: Read dynamic property with dynamic name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 12
+== setOp ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 15
+== incDec ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 18
+== dim for read ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 22
+== dim for read (quiet) ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 25
+== get_object_vars ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 29
+== foreach ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 32
+== ReflectionProperty ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 35
+== ReflectionClass::getProperties ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 42
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 42
+== property_exists ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 46
+== print_r ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 49
+== var_export ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 52
+== var_dump ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 55
+object(C) (1) {
+  ["dynprop"]=>
+  %r&?%rint(3)
+}
+== debug_zval_dump ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
+object(C) (1) refcount(%d){
+  ["dynprop"]=>
+  %r&?%rlong(3) refcount(%d)
+}
+== json_encode ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
+== serialize ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 64
+== apc_store ==
+
+Notice: Read dynamic property with static name C::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 67
+==== C never notice ====
+== dim for write ==
+== clone ==
+== unset ==
+==== D may notice ====
+== read ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 8
+== read (dynamic name) ==
+
+Notice: Read dynamic property with dynamic name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 12
+== setOp ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 15
+== incDec ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 18
+== dim for read ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 22
+== dim for read (quiet) ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 25
+== get_object_vars ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 29
+== foreach ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 32
+== ReflectionProperty ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 35
+== ReflectionClass::getProperties ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 42
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 42
+== property_exists ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 46
+== print_r ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 49
+== var_export ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 52
+== var_dump ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 55
+object(D) (2) {
+  ["x"]=>
+  %r&?%rint(1)
+  ["dynprop"]=>
+  %r&?%rint(3)
+}
+== debug_zval_dump ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
+object(D) (2) refcount(%d){
+  ["x"]=>
+  %r&?%rlong(1) refcount(%d)
+  ["dynprop"]=>
+  %r&?%rlong(3) refcount(%d)
+}
+== json_encode ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
+== serialize ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 64
+== apc_store ==
+
+Notice: Read dynamic property with static name D::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 67
+==== D never notice ====
+== dim for write ==
+== clone ==
+== unset ==
+==== GMP may notice ====
+== read ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 8
+== read (dynamic name) ==
+
+Notice: Read dynamic property with dynamic name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 12
+== setOp ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 15
+== incDec ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 18
+== dim for read ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 22
+== dim for read (quiet) ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 25
+== get_object_vars ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 29
+== foreach ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 32
+== ReflectionProperty ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 35
+== ReflectionClass::getProperties ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 42
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 42
+== property_exists ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 46
+== print_r ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 49
+== var_export ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 52
+== var_dump ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 55
+object(GMP) (2) {
+  ["dynprop"]=>
+  %r&?%rint(3)
+  ["num"]=>
+  string(1) "0"
+}
+== debug_zval_dump ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 58
+object(GMP) (1) refcount(%d){
+  ["dynprop"]=>
+  %r&?%rlong(3) refcount(%d)
+}
+== json_encode ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 61
+== serialize ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 64
+== apc_store ==
+
+Notice: Read dynamic property with static name GMP::dynprop in %s/test/slow/object_property/dynprop_read_notice.php on line 67
+==== GMP never notice ====
+== dim for write ==
+== clone ==
+== unset ==
+==== stdClass may notice ====
+== read ==
+== read (dynamic name) ==
+== setOp ==
+== incDec ==
+== dim for read ==
+== dim for read (quiet) ==
+== get_object_vars ==
+== foreach ==
+== ReflectionProperty ==
+== ReflectionClass::getProperties ==
+== property_exists ==
+== print_r ==
+== var_export ==
+== var_dump ==
+object(stdClass) (1) {
+  ["dynprop"]=>
+  %r&?%rint(3)
+}
+== debug_zval_dump ==
+object(stdClass) (1) refcount(%d){
+  ["dynprop"]=>
+  %r&?%rlong(3) refcount(%d)
+}
+== json_encode ==
+== serialize ==
+== apc_store ==
+==== stdClass never notice ====
+== dim for write ==
+== clone ==
+== unset ==
+==== __PHP_Incomplete_Class may notice ====
+== read ==
+== read (dynamic name) ==
+== setOp ==
+== incDec ==
+== dim for read ==
+== dim for read (quiet) ==
+== get_object_vars ==
+== foreach ==
+== ReflectionProperty ==
+== property_exists ==
+== print_r ==
+== var_export ==
+== var_dump ==
+object(__PHP_Incomplete_Class) (2) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  %r&?%rstring(4) "Nope"
+  ["dynprop"]=>
+  %r&?%rint(3)
+}
+== debug_zval_dump ==
+object(__PHP_Incomplete_Class) (2) refcount(%d){
+  ["__PHP_Incomplete_Class_Name"]=>
+  %r&?%rstring(4) "Nope" refcount(%d)
+  ["dynprop"]=>
+  %r&?%rlong(3) refcount(%d)
+}
+== json_encode ==
+== serialize ==
+== apc_store ==
+==== __PHP_Incomplete_Class never notice ====
+== dim for write ==
+== clone ==
+== unset ==

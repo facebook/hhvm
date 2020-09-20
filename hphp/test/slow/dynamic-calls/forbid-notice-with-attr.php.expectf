@@ -1,0 +1,28 @@
+======== Called without using a function pointer ========
+
+
+Notice: 'foo' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line 30
+
+Notice: 'A::foo' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line 31
+
+Notice: 'A::bar' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line 32
+
+Notice: 'A::foo' called dynamically without using a function pointer in %s/forbid-notice-with-attr.php on line 33
+======== Negative tests (no notices) ========
+
+======== Not __DynamicallyCallable ========
+
+
+Notice: 'corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 48
+
+Notice: 'A1::corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 49
+
+Notice: 'A1::flob' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 50
+
+Notice: 'A1::corge' called dynamically but is not __DynamicallyCallable in %s/forbid-notice-with-attr.php on line 51
+======== Not marked dynamic ========
+
+
+Warning: Function corge not marked dynamic in %s/forbid-notice-with-attr.php on line 55
+
+Warning: Method A1::flob not marked dynamic in %s/forbid-notice-with-attr.php on line 56

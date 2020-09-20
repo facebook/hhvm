@@ -1,0 +1,47 @@
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+darray(3) {
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(1) "A"
+}
+darray(2) {
+  ["kind"]=>
+  int(1)
+  ["alias"]=>
+  string(1) "B"
+}
+darray(3) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  varray(2) {
+    darray(3) {
+      ["kind"]=>
+      int(1)
+      ["opaque"]=>
+      bool(true)
+      ["alias"]=>
+      string(1) "A"
+    }
+    darray(3) {
+      ["kind"]=>
+      int(1)
+      ["opaque"]=>
+      bool(true)
+      ["alias"]=>
+      string(1) "A"
+    }
+  }
+  ["alias"]=>
+  string(2) "A2"
+}

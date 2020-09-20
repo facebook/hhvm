@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Cloneable {}
 
@@ -33,9 +33,13 @@ function isCloneable($class_name) {
   return $info->isCloneable();
 }
 
+
+<<__EntryPoint>>
+function main_1596() {
 var_dump(isCloneable('Cloneable'));
 var_dump(isCloneable('NotCloneable_interface'));
 var_dump(isCloneable('NotCloneable_trait'));
 var_dump(isCloneable('NotCloneable_protectedClone'));
 var_dump(isCloneable('NotCloneable_privateClone'));
 var_dump(isCloneable('NotCloneable_abstractClone'));
+}

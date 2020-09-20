@@ -1,0 +1,12 @@
+File "eif.php", line 5, characters 14-15:
+Invalid argument (Typing[4110])
+File "eif.php", line 10, characters 21-23:
+Expected `int`
+File "eif.php", line 4, characters 17-18:
+But got `string`
+File "eif.php", line 6, characters 17-18:
+Invalid argument (Typing[4110])
+File "eif.php", line 11, characters 24-29:
+Expected `string`
+File "eif.php", line 4, characters 13-13:
+But got `int`

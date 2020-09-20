@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SYNCHRONIZABLE_H_
-#define incl_HPHP_SYNCHRONIZABLE_H_
+#pragma once
 
 #include "hphp/util/mutex.h"
 #include <pthread.h>
@@ -30,6 +29,8 @@ namespace HPHP {
 struct Synchronizable {
   Synchronizable();
   virtual ~Synchronizable();
+  Synchronizable(const Synchronizable&) = delete;
+  Synchronizable& operator=(const Synchronizable&) = delete;
 
   void wait();
   bool wait(long seconds); // false if timed out
@@ -37,7 +38,8 @@ struct Synchronizable {
   void notify();
   void notifyAll();
 
-  Mutex &getMutex() { return m_mutex;}
+  const Mutex& getMutex() const { return m_mutex; }
+  Mutex& getMutex() { return m_mutex; }
 
  private:
   Mutex m_mutex;
@@ -47,4 +49,3 @@ struct Synchronizable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SYNCHRONIZABLE_H_

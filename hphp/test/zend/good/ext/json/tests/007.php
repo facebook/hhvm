@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(json_decode("[1]"));
 var_dump(json_last_error(), json_last_error_msg());
 var_dump(json_decode("[[1]]", false, 2));
@@ -12,4 +12,4 @@ var_dump(json_last_error(), json_last_error_msg());
 
 
 echo "Done\n";
-?>
+}

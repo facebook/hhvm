@@ -1,0 +1,8 @@
+<?hh
+class A extends \A0 implements \I1 {}
+interface I1 {}
+class A0 {}
+function with_requiring_interface(IWithRequirement $arg): void {}
+interface IWithRequirement {
+  require extends \A;
+}

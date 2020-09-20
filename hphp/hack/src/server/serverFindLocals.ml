@@ -1,19 +1,15 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Ast
-open Hh_core
-
-type result = Pos.absolute list
-
-module PosSet = Set.Make(Pos)
+open Hh_prelude
+open Aast
+module PosSet = Caml.Set.Make (Pos)
 
 module LocalPositions = struct
   (**
@@ -29,13 +25,15 @@ module LocalPositions = struct
   let empty = IMap.empty
 
   let get ident locals =
-    let current = IMap.get ident locals in
+    let current = IMap.find_opt ident locals in
     Option.value ~default:PosSet.empty current
 
   let add ident pos locals =
     let positions = get ident locals in
     IMap.add ident (PosSet.add pos positions) locals
-end (* End of module LocalPositions *)
+end
+
+(* End of module LocalPositions *)
 
 module ScopeChain = struct
   (**
@@ -47,6 +45,7 @@ module ScopeChain = struct
    * the tail is checked.
    *)
   type scope = Ident.t SMap.t
+
   type t = scope list
 
   (*
@@ -60,10 +59,9 @@ module ScopeChain = struct
    * Therefore we head every scope chain with a "dummy" scope that can be
    * used for these error cases.
    *)
-  let empty = SMap.empty :: []
+  let empty = [SMap.empty]
 
-  let push scopechain =
-    SMap.empty :: scopechain
+  let push scopechain = SMap.empty :: scopechain
 
   let pop scopechain =
     match scopechain with
@@ -72,20 +70,24 @@ module ScopeChain = struct
 
   let add name ident scopechain =
     match scopechain with
-    | h :: t -> (SMap.add name ident h) :: t
+    | h :: t -> SMap.add name ident h :: t
     | _ -> failwith "adding name to empty scope chain"
 
   let rec get name scopechain =
     match scopechain with
     | [] -> None
     | h :: t ->
-      let result = SMap.get name h in
-      if result = None then get name t
-      else result
-end (* End of module ScopeChain *)
+      let result = SMap.find_opt name h in
+      if Option.is_none result then
+        get name t
+      else
+        result
+end
+
+(* End of module ScopeChain *)
 
 module ScopeChains = struct
-(**
+  (**
   * A "scope chain" is a stack of maps from names to idents. You might
   * think that would be sufficient, but unfortunately it is not.
   *
@@ -113,12 +115,12 @@ module ScopeChains = struct
     | _ :: t -> t
     | _ -> failwith "Scope chain stack is empty"
 
-  let replace_head scopechain scopechains  =
-    scopechain :: (pop scopechains)
+  let replace_head scopechain scopechains = scopechain :: pop scopechains
 
-  let push scopechain scopechains =
-    scopechain :: scopechains
-end (* End of module ScopeChains *)
+  let push scopechain scopechains = scopechain :: scopechains
+end
+
+(* End of module ScopeChains *)
 
 module LocalMap = struct
   (**
@@ -147,33 +149,30 @@ module LocalMap = struct
    * ident so that we can look up the associated positions later.
    *)
   type t = {
-    scopechains : ScopeChains.t;
-    locals : LocalPositions.t;
-    target_line : int;
-    target_char : int;
-    target_ident : Ident.t option
+    scopechains: ScopeChains.t;
+    locals: LocalPositions.t;
+    target_line: int;
+    target_char: int;
+    target_ident: Ident.t option;
   }
 
-  let make target_line target_char = {
-    scopechains = ScopeChain.empty :: [];
-    locals = LocalPositions.empty;
-    target_line;
-    target_char;
-    target_ident = None
-  }
+  let make target_line target_char =
+    {
+      scopechains = [ScopeChain.empty];
+      locals = LocalPositions.empty;
+      target_line;
+      target_char;
+      target_ident = None;
+    }
 
-  let current_scopechain localmap =
-    ScopeChains.head localmap.scopechains
+  let current_scopechain localmap = ScopeChains.head localmap.scopechains
 
-  let previous_scopechain localmap =
-    ScopeChains.previous localmap.scopechains
-
-  let previous_scopechains localmap =
-    ScopeChains.pop localmap.scopechains
+  let previous_scopechain localmap = ScopeChains.previous localmap.scopechains
 
   let replace_head scopechain localmap =
     let scopechains =
-      ScopeChains.replace_head scopechain localmap.scopechains in
+      ScopeChains.replace_head scopechain localmap.scopechains
+    in
     { localmap with scopechains }
 
   let push localmap =
@@ -193,13 +192,13 @@ module LocalMap = struct
     { localmap with scopechains }
 
   let overlaps pos localmap =
-    let pos_line, pos_start, pos_end = Pos.info_pos pos in
-    pos_line = localmap.target_line &&
-    pos_start <= localmap.target_char &&
-    localmap.target_char <= pos_end
+    let (pos_line, pos_start, pos_end) = Pos.info_pos pos in
+    pos_line = localmap.target_line
+    && pos_start <= localmap.target_char
+    && localmap.target_char <= pos_end
 
   let get_target_ident ident pos localmap =
-    if localmap.target_ident = None && overlaps pos localmap then
+    if Option.is_none localmap.target_ident && overlaps pos localmap then
       Some ident
     else
       localmap.target_ident
@@ -224,7 +223,8 @@ module LocalMap = struct
     let current = current_scopechain localmap in
     let scopechain = ScopeChain.add name ident current in
     let scopechains =
-      ScopeChains.replace_head scopechain localmap.scopechains in
+      ScopeChains.replace_head scopechain localmap.scopechains
+    in
     let locals = LocalPositions.add ident pos localmap.locals in
     let target_ident = get_target_ident ident pos localmap in
     { localmap with scopechains; locals; target_ident }
@@ -240,7 +240,8 @@ module LocalMap = struct
     let current = current_scopechain localmap in
     let scopechain = ScopeChain.add name ident current in
     let scopechains =
-      ScopeChains.replace_head scopechain localmap.scopechains in
+      ScopeChains.replace_head scopechain localmap.scopechains
+    in
     { localmap with scopechains }
 
   (* Returns an (ident, bool) where the bool is true if the ident was found. *)
@@ -256,20 +257,21 @@ module LocalMap = struct
    * got a binding for this name.
    *)
   let add name pos localmap =
-    let ident, found = find_or_create_ident name localmap in
+    let (ident, found) = find_or_create_ident name localmap in
     let scopechains =
       if found then
         localmap.scopechains
-      else begin
+      else
         let current = current_scopechain localmap in
         let scopechain = ScopeChain.add name ident current in
-        ScopeChains.replace_head scopechain localmap.scopechains end in
+        ScopeChains.replace_head scopechain localmap.scopechains
+    in
     let locals = LocalPositions.add ident pos localmap.locals in
     let target_ident = get_target_ident ident pos localmap in
     { localmap with scopechains; locals; target_ident }
 
   let add_from_use name pos localmap =
-    (**
+    (*
      * When adding an item from a use clause we've got to do a couple
      * things. First, the variables mentioned in the use clause are
      * mentions of those variables, so they need to go in the list of
@@ -281,37 +283,45 @@ module LocalMap = struct
     let canonical = ScopeChain.get name previous in
     (* The user may have given a variable in the use clause which does not
        exist. In that case, just make up a new ident. *)
-    let ident = match canonical with
-    | None -> Ident.make name
-    | Some ident -> ident in
+    let ident =
+      match canonical with
+      | None -> Ident.make name
+      | Some ident -> ident
+    in
     (* Regardless, this is a mention of that local. *)
     let locals = LocalPositions.add ident pos localmap.locals in
     let scopechain = ScopeChain.add name ident current in
     let scopechains =
-      ScopeChains.replace_head scopechain localmap.scopechains in
+      ScopeChains.replace_head scopechain localmap.scopechains
+    in
     let target_ident = get_target_ident ident pos localmap in
     { localmap with scopechains; locals; target_ident }
 
   let results localmap =
-    let results_set = match localmap.target_ident with
-    | Some ident -> LocalPositions.get ident localmap.locals
-    | _ -> PosSet.empty in
+    let results_set =
+      match localmap.target_ident with
+      | Some ident -> LocalPositions.get ident localmap.locals
+      | _ -> PosSet.empty
+    in
     PosSet.elements results_set
-end (* End of module LocalMap *)
+end
 
-(**
+(* End of module LocalMap *)
+
+(*
   * Here begins the code which walks the AST and accumulates the positions
   * of every local in this file.
   *)
 
-class local_finding_visitor = object(this)
-  inherit [LocalMap.t] Ast_visitor.ast_visitor as _super
+class local_finding_visitor =
+  object (this)
+    inherit [LocalMap.t] Nast.Visitor_DEPRECATED.visitor as _super
 
-  method! on_lvar localmap (pos, name) =
-    LocalMap.add name pos localmap
+    method! on_lvar localmap (pos, name) =
+      LocalMap.add (Local_id.get_name name) pos localmap
 
-  method! on_pipe localmap left right =
-    (**
+    method! on_pipe localmap _id left right =
+      (*
       A pipe expression has a left side and a right side. It introduces a
       new scope on the right side only which defines a new magic local
       called $$, which is equal to the value of the left side.
@@ -334,40 +344,43 @@ class local_finding_visitor = object(this)
       TODO: this should be tested.
 
       *)
-    let localmap = this#on_expr localmap left in
-    let localmap = LocalMap.push localmap in
-    let localmap = LocalMap.add_dollardollar localmap in
-    let localmap = this#on_expr localmap right in
-    LocalMap.pop localmap
+      let localmap = this#on_expr localmap left in
+      let localmap = LocalMap.push localmap in
+      let localmap = LocalMap.add_dollardollar localmap in
+      let localmap = this#on_expr localmap right in
+      LocalMap.pop localmap
 
-  method! on_method_ localmap m =
-    let localmap = LocalMap.push localmap in
-    let localmap =
-      List.fold_left m.m_params ~init:localmap ~f:this#on_fun_param in
-    let localmap = this#on_block localmap m.m_body in
-    LocalMap.pop localmap
+    method! on_method_ localmap m =
+      let localmap = LocalMap.push localmap in
+      let localmap =
+        List.fold_left m.m_params ~init:localmap ~f:this#on_fun_param
+      in
+      let localmap = this#on_block localmap m.m_body.fb_ast in
+      LocalMap.pop localmap
 
-  (**
+    (*
     * This is called for both top-level functions and lambdas, but not
     * anonymous functions.
     *)
-  method! on_fun_ localmap f =
-    let localmap = LocalMap.push localmap in
-    let localmap =
-      List.fold_left f.f_params ~init:localmap ~f:this#on_fun_param in
-    let localmap = this#on_block localmap f.f_body in
-    LocalMap.pop localmap
+    method! on_fun_ localmap f =
+      let localmap = LocalMap.push localmap in
+      let localmap =
+        List.fold_left f.f_params ~init:localmap ~f:this#on_fun_param
+      in
+      let localmap = this#on_block localmap f.f_body.fb_ast in
+      LocalMap.pop localmap
 
-  method! on_fun_param localmap p =
-      (**
+    method! on_lfun localmap f _idl = this#on_fun_ localmap f
+
+    method on_fun_param localmap p =
+      (*
         * A formal parameter always introduces a new local into the current
         * scope; we never want to unify a formal with a local seen previously.
         *)
-      let pos, name = p.param_id in
-      LocalMap.force_add name pos localmap
+      LocalMap.force_add p.param_name p.param_pos localmap
 
-  method! on_efun localmap fn use_list =
-   (**
+    method! on_efun localmap fn use_list =
+      (*
      * This is a traditional PHP nested function, and this is a bit tricky.
      * Consider first a normal case:
 
@@ -453,92 +466,50 @@ class local_finding_visitor = object(this)
      * All right, let's proceed.
 
      *)
+      let localmap = LocalMap.push_scopechain localmap in
+      let localmap = LocalMap.push localmap in
+      (* No need to pop; we're going to pop the whole scopechain. *)
+      let localmap =
+        List.fold_left use_list ~init:localmap ~f:(fun l (p, n) ->
+            LocalMap.add_from_use (Local_id.get_name n) p l)
+      in
+      let localmap = this#on_fun_ localmap fn in
+      LocalMap.pop_scopechain localmap
 
-     let localmap = LocalMap.push_scopechain localmap in
-     let localmap = LocalMap.push localmap in
-     (* No need to pop; we're going to pop the whole scopechain. *)
-     let localmap = List.fold_left use_list ~init:localmap
-       ~f:begin fun l ((p, n), _) -> LocalMap.add_from_use n p l end in
-     let localmap = this#on_fun_ localmap fn in
-     LocalMap.pop_scopechain localmap
-
-   method on_static_variable localmap static =
-     (**
-       * Introducing a static variable hides any existing variable in this
-       * scope of the same name. We model this by simply replacing the existing
-       * scope entry with the new one. See commentary to force_add, above.
-       *
-       * There are two forms we are concerned with:
-       *
-       * static $x;
-       * static $x = 123;
-       *
-       * If we have neither expected form then we do not attempt to add a
-       * local to the map.
-       *
-       * Note that in the second form we do scan the initializer looking for
-       * locals; if the program has one then it is an error because the
-       * initializer must be a constant. But we should look for the use of a
-       * local because that is still a usage of the local! One imagines that
-       * the IDE could for instance detect something like
-       *
-       * static $a = 123;
-       * static $b = $a;
-       *
-       * and fix up the error appropriately. We cannot do that if we cannot
-       * find the local inside the initializer.
-       *)
-     match static with
-     | _, Lvar (pos, name) -> LocalMap.force_add name pos localmap
-     | _, Binop(Eq None, (_, Lvar (pos, name)), init) ->
-       let localmap = LocalMap.force_add name pos localmap in
-       this#on_expr localmap init
-     | _ -> localmap
-
-  method! on_static_var localmap statics =
-    List.fold_left statics ~init:localmap
-      ~f:begin fun l s -> this#on_static_variable l s end
-
-  method! on_catch localmap (_, (pos, name), body) =
-    (**
+    method! on_catch localmap (_, (pos, name), body) =
+      (*
       * A catch block creates a local which is only in scope for the
       * body of the catch.
       *
       * The type name should never reasonably contain a local; we'll ignore it.
       *)
-    let localmap = LocalMap.push localmap in
-    let localmap = LocalMap.force_add name pos localmap in
-    let localmap = this#on_block localmap body in
-    LocalMap.pop localmap
-end
-
-let parse tcopt content =
-  Errors.ignore_ begin fun () ->
-    let {Parser_hack.ast; comments = _; file_mode = _; content = _; is_hh_file = _ } =
-      Parser_hack.program
-        tcopt
-        Relative_path.default
-        content
-    in ast
+      let localmap = LocalMap.push localmap in
+      let localmap = LocalMap.force_add (Local_id.get_name name) pos localmap in
+      let localmap = this#on_block localmap body in
+      LocalMap.pop localmap
   end
 
-let go_from_ast ast line char =
+let go_from_ast ~ast ~line ~char =
   let empty = LocalMap.make line char in
   let visitor = new local_finding_visitor in
   let localmap = visitor#on_program empty ast in
   LocalMap.results localmap
 
- (**
-  * This is the entrypoint to this module. The contents of a file, and a
-  * position within it, identifying a local, are given. The result is a
-  * list of the positions of other uses of that local in the file.
+(**
+  * This is the entrypoint to this module. The relative path of a file,
+  * the contents of a file, and a position within it, identifying a local, are given.
+  * The result is a list of the positions of other uses of that local in the file.
   *)
-let go tcopt content line char =
+let go ~ctx ~entry ~line ~char =
   try
-    let ast = parse tcopt content in
+    let ast =
+      Ast_provider.compute_ast ~popt:(Provider_context.get_popt ctx) ~entry
+    in
     let results_list = go_from_ast ast line char in
-    List.map results_list Pos.to_absolute
+    List.map results_list (fun pos ->
+        Pos.set_file entry.Provider_context.path pos)
   with Failure error ->
-    failwith (
-      (Printf.sprintf "Find locals service failed with error %s:\n" error) ^
-      (Printf.sprintf "line %d char %d\ncontent: \n%s\n" line char content))
+    let contents = Provider_context.read_file_contents_exn entry in
+    failwith
+      ( Printf.sprintf "Find locals service failed with error %s:\n" error
+      ^ Printf.sprintf "line %d char %d\ncontent: \n%s\n" line char contents )

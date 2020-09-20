@@ -22,60 +22,60 @@ array (
 )
  Result: true
 
-Test 4.a85a41ea78e45b651080cfd98c0b431d:
+Test 4.a053a7559d5aa4510bdb22d87aece31e:
 array (
-  7 => '',
-  2 => NULL,
-  5 => '!',
-  1 => 'abc',
+  '7' => '',
+  '2' => NULL,
+  '5' => '!',
+  '1' => 'abc',
 )
  Result: true
 
-Test 5.99dc71f405b286e03d489061b36e6900:
+Test 5.e47c72919429698285fa33d0f1da29bd:
 array (
-  2 => '25',
-  3 => '36',
-  1 => '100',
+  '2' => '25',
+  '3' => '36',
+  '1' => '100',
 )
  Result: true
 
-Test 6.bf5bba243307c9d12934e756ad4be190:
+Test 6.229a0cb6fe7924033b482f820d627643:
 array (
-  3 => 2,
-  1 => 5,
-  2 => '30',
+  '3' => 2,
+  '1' => 5,
+  '2' => '30',
 )
  Result: true
 
-Test 7.e4ee7024c61476e9e7a6c28b5e47df6f:
+Test 7.38071f1abfc721d5efb210f2e6835cec:
 array (
-  1 => '100',
-  2 => '25',
-  3 => '36',
+  '1' => '100',
+  '2' => '25',
+  '3' => '36',
 )
  Result: true
 
-Test 8.5fa7033dd43784be0db1474eb48b83c8:
+Test 8.cf580913f6f2e2e50b7f5058902e382f:
 array (
-  3 => 2,
-  2 => '30',
-  1 => 5,
+  '3' => 2,
+  '2' => '30',
+  '1' => 5,
 )
  Result: true
 
-Test 9.588cdf4692bc09aa92ffe7e48f9e4579:
+Test 9.e221a15f45e4ccf57b506336c7357c9f:
 array (
-  2 => '',
-  3 => ' a',
-  1 => 'd',
+  '2' => '',
+  '3' => ' a',
+  '1' => 'd',
 )
  Result: true
 
-Test 10.be02641a47ebcccd23e4183ca3a415f7:
+Test 10.75c201c940cceda1609eed96e8c4c6a1:
 array (
-  3 => 'i',
-  2 => 'k',
-  1 => 'y',
+  '3' => 'i',
+  '2' => 'k',
+  '1' => 'y',
 )
  Result: true
 
@@ -87,12 +87,12 @@ array (
 )
  Result: true
 
-Test 12.e1f5cb037b564dce39ffbd0a61562d59:
+Test 12.2292e701f6ebaf92659b48b913606902:
 array (
-  4 => '',
-  1 => 'п',
-  2 => 'пп',
-  7 => 'd',
+  '4' => '',
+  '1' => 'п',
+  '2' => 'пп',
+  '7' => 'd',
 )
  Result: true
 

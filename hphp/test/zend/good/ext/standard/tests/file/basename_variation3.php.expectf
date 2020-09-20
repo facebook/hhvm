@@ -1,65 +1,80 @@
 *** Testing basename() : usage variation ***
 
 --int 0--
-string(1) "0"
+
+Warning: basename() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --int 1--
-string(1) "1"
+
+Warning: basename() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --int 12345--
-string(5) "12345"
+
+Warning: basename() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --int -12345--
-string(5) "-2345"
+
+Warning: basename() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --float 10.5--
-string(4) "10.5"
+
+Warning: basename() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --float -10.5--
-string(5) "-10.5"
+
+Warning: basename() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --float 12.3456789000e10--
-string(12) "123456789000"
+
+Warning: basename() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --float -12.3456789000e10--
-string(13) "-123456789000"
+
+Warning: basename() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --float .5--
-string(3) "0.5"
+
+Warning: basename() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --empty array--
-Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --int indexed array--
-Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --associative array--
-Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --nested arrays--
-Error: 2 - basename() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --uppercase NULL--
-string(0) ""
+
+Warning: basename() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --lowercase null--
-string(0) ""
+
+Warning: basename() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --lowercase true--
-string(1) "1"
+
+Warning: basename() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --lowercase false--
-string(0) ""
+
+Warning: basename() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --uppercase TRUE--
-string(1) "1"
+
+Warning: basename() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --uppercase FALSE--
-string(0) ""
+
+Warning: basename() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --empty string DQ--
 string(0) ""
@@ -68,15 +83,18 @@ string(0) ""
 string(0) ""
 
 --instance of classWithToString--
-string(14) "Class A object"
+
+Warning: basename() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --instance of classWithoutToString--
-Error: 2 - basename() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: basename() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --undefined var--
-string(0) ""
+
+Warning: basename() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --unset var--
-string(0) ""
+
+Warning: basename() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 ===DONE===

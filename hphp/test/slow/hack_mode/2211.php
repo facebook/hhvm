@@ -1,3 +1,4 @@
 <?hh
-function foo(array<int> $x) {
+function foo(varray<int> $x) {
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

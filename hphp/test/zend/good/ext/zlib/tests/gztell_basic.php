@@ -1,7 +1,7 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
-$intervals = array(7, 22, 54, 17, 27, 15, 1000);
+$intervals = varray[7, 22, 54, 17, 27, 15, 1000];
 // tell should be 7, 29, 83, 100, 127, 142, 176 (176 is length of uncompressed file)
 
 var_dump(gztell($h));
@@ -11,5 +11,5 @@ foreach ($intervals as $interval) {
 }
 
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";
+}

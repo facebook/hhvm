@@ -1,23 +1,21 @@
 
-Warning: %s
+Warning: idate() expects at least 1 parameter, 0 given in %s/005.php on line 6
+
+Warning: idate() expects at most 2 parameters, 3 given in %s/005.php on line 7
+
+Warning: Invalid argument: unknown format char: 49 in %s/005.php on line 9
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/005.php on line 10
 bool(false)
 
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
-
-Warning: %s
+Warning: Invalid argument: unknown format char: 48 in %s/005.php on line 11
 bool(false)
 int(41)
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 91 in %s/005.php on line 14
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 39 in %s/005.php on line 15
 bool(false)
 Done

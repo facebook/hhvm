@@ -1,6 +1,5 @@
 *** Testing get_class_methods() : usage variations ***
-array(1) {
-  [0]=>
+varray(1) {
   string(8) "MyMeThOd"
 }
 Done

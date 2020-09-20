@@ -1,5 +1,5 @@
-<?php
-$regexes = array('', '/', '345', 'b');
+<?hh <<__EntryPoint>> function main(): void {
+$regexes = varray['', '/', '345', 'b'];
 
 foreach ($regexes as $regex) {
     try {
@@ -8,4 +8,4 @@ foreach ($regexes as $regex) {
         printf("%s: %d\n", get_class($e), $e->getCode());
     }
 }
-?>
+}

@@ -1,18 +1,11 @@
-<?php
-
-$data = new stdclass;
-$type = 'OCI-Lob';
-if ($data instanceof $type) {
-  echo 'true';
-}
+<?hh
 class X {
   static $foo;
 }
-;
 function test() {
   $x = new X;
   $foo = 'foo';
-  if (isset($x->$foo) || empty($x->$foo) ||      isset($x->{
+  if (isset($x->$foo) || !($x->$foo ?? false) ||      isset($x->{
 'bar'}
 )) {
     unset($x->$foo);
@@ -21,4 +14,15 @@ function test() {
 );
     echo true;
   }
+}
+
+
+<<__EntryPoint>>
+function main_1293() {
+$data = new stdclass;
+$type = 'OCI-Lob';
+if (is_a($data, $type)) {
+  echo 'true';
+}
+;
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $key      = "0123456789012345";
 $secret   = "PHP Testfest 2008";
 $cipher   = MCRYPT_RIJNDAEL_128;
@@ -11,4 +11,4 @@ echo trim(mcrypt_ofb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
 mcrypt_ofb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv);
-
+}

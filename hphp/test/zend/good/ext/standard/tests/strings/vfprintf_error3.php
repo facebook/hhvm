@@ -1,16 +1,16 @@
-<?php
+<?hh
 /* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream 
+ * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // Open handle
-$file = 'vfprintf_error3.phpt.txt';
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('vfprintf_error3.phpt.txt');
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
-var_dump( vfprintf( $fp, array( 'foo %d', 'bar %s' ), 3.55552 ) );
 
 rewind( $fp );
 var_dump( stream_get_contents( $fp ) );
@@ -27,12 +27,7 @@ rewind( $fp );
 // Close handle
 fclose( $fp );
 
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
+echo "===DONE===\n";
 
-$file = 'vfprintf_error3.phpt.txt';
 unlink( $file );
-
-?>
+}

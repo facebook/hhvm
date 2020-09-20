@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_EXN_MODE_H_
-#define incl_HPHP_VSDEBUG_EXN_MODE_H_
+#pragma once
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -30,4 +29,3 @@ enum ExceptionBreakMode {
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_EXN_MODE_H_

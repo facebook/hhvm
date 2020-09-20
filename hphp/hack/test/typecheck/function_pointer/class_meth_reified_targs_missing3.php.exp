@@ -1,0 +1,6 @@
+File "class_meth_reified_targs_missing3.php", line 8, characters 22-22:
+Invalid reified hint (Typing[4305])
+File "class_meth_reified_targs_missing3.php", line 8, characters 22-22:
+This is a wildcard, it cannot be used as a reified type argument
+File "class_meth_reified_targs_missing3.php", line 4, characters 45-46:
+`T2` is reified

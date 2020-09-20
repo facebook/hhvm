@@ -1,0 +1,28 @@
+Parsing[1002] Class E contains an abstract method and must therefore be declared abstract [1]
+
+abstract_private_method.php:3:7
+    1 | <?hh
+    2 | 
+[1] 3 | class E {
+    4 |   private abstract function f(): void;
+    5 | }
+
+Parsing[1002] Cannot declare abstract method E::f private [1]
+
+abstract_private_method.php:4:3
+    2 | 
+    3 | class E {
+[1] 4 |   private abstract function f(): void;
+    5 | }
+
+Typing[4047] This class must be declared abstract, or provide an implementation for the abstract method f [1]
+-> Declaration is here [2]
+
+abstract_private_method.php:3:7
+    1 | <?hh
+    2 | 
+[1] 3 | class E {
+[2] 4 |   private abstract function f(): void;
+    5 | }
+
+3 errors found.

@@ -1,10 +1,9 @@
-<?php
+<?hh
 
-abstract class abc { 
+abstract class abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
-?>

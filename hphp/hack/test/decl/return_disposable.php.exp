@@ -1,0 +1,73 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\Bar" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+      sc_name = ([3:13-16], "\\Bar"); sc_tparams = [];
+      sc_where_constraints = []; sc_extends = []; sc_uses = [];
+      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+      sc_implements =
+      [(Rhint (root|return_disposable.php line 3, characters 28-38),
+        (Tapply (([3:28-39], "\\IDisposable"), [])))];
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
+      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+      sc_methods =
+      [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+         sm_memoizelsb = false; sm_name = ([4:19-28], "__dispose");
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
+         sm_type =
+         (Rwitness (root|return_disposable.php line 4, characters 19-27),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|return_disposable.php line 4, characters 19-27),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|return_disposable.php line 4, characters 32-35),
+                  (Tprim Tvoid))
+                 };
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
+         sm_visibility = Public; sm_deprecated = None }
+        ];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      } };
+  funs =
+  { "\\gen" ->
+    { fe_pos = [8:16-19];
+      fe_type =
+      (Rwitness (root|return_disposable.php line 8, characters 16-18),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|return_disposable.php line 8, characters 16-18),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|return_disposable.php line 8, characters 23-36),
+               (Tapply (([8:23-32], "\\HH\\Awaitable"),
+                  [(Rhint (root|return_disposable.php line 8, characters 33-35),
+                    (Tapply (([8:33-36], "\\Bar"), [])))]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async none ~return_disposable:true
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

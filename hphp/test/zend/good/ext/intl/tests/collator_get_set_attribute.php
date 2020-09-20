@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try to set/get a collation attribute.
@@ -28,6 +28,7 @@ function ut_main()
     return $res;
 }
 
-include( 'ut_common.inc' );
-ut_run();
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include( 'ut_common.inc' );
+    ut_run();
+}

@@ -14,5 +14,9 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_collection_literal() {
 $x = new X;
 $x->fiz();
+}

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 echo "Procedural\n";
 $zip = zip_open(dirname(__FILE__) . '/test.zip');
 if (!is_resource($zip)) {
@@ -19,6 +19,5 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 } else {
 	die("Failure");
 }
-
-?>
-Done
+echo "Done";
+}

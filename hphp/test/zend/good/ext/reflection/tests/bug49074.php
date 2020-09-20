@@ -1,14 +1,14 @@
-<?php
+<?hh
 class Test {
-	private static $data1 = 1;
-	private static $data4 = 4;
+    private static $data1 = 1;
+    private static $data4 = 4;
 }
 
 class Test2 extends Test {
-	private static $data2 = 2;
-	public static $data3 = 3;
+    private static $data2 = 2;
+    public static $data3 = 3;
 }
-
+<<__EntryPoint>> function main(): void {
 $r = new ReflectionClass('Test2');
 $m = $r->getStaticProperties();
 
@@ -18,4 +18,4 @@ $m['data3'] = 300;
 $m['data4'] = 400;
 
 var_dump($r->getStaticProperties());
-?>
+}

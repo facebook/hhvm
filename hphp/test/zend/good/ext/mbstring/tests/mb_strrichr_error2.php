@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
  * Description: Finds the last occurrence of a character in a string within another, case insensitive 
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strrichr() : error conditions ***\n";
 
 
@@ -15,5 +15,5 @@ $encoding = 'unknown-encoding';
 $part = true;
 var_dump( mb_strrichr($haystack, $needle, $part, $encoding) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

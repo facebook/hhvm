@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -29,6 +30,7 @@
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -49,53 +51,51 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-RegionContext getContext(SrcKey sk) {
-  RegionContext ctx {
-    sk.func(), sk.offset(), liveSpOff(),
-    sk.resumeMode(), sk.hasThis()
-  };
+RegionContext getContext(SrcKey sk, bool profiling) {
+  RegionContext ctx { sk, liveSpOff() };
 
+  auto const func = sk.func();
   auto const fp = vmfp();
   auto const sp = vmsp();
 
-  always_assert(ctx.func == fp->m_func);
+  always_assert(func == fp->func());
+  auto const ctxClass = func->cls();
+  auto const addLiveType = [&](Location loc, tv_rval tv) {
+    auto const type = typeFromTV(tv, ctxClass);
+    if (profiling) {
+      // Generate a translation for vanilla arrays, even if the live types are
+      // bespoke.
+      auto const unspecialized =
+        tvIsArrayLike(tv) ? type.unspecialize().narrowToVanilla() : type;
+      assertx(IMPLIES(unspecialized != type, allowBespokeArrayLikes()));
+      ctx.liveTypes.push_back({loc, unspecialized});
+    } else {
+      auto const bespoke = tvIsArrayLike(tv) && !val(tv).parr->isVanilla();
+      ctx.liveTypes.push_back({loc, type});
+      ctx.liveBespoke |= bespoke;
+    }
 
-  auto const ctxClass = ctx.func->cls();
+    FTRACE(2, "Added live type: {}\n", show(ctx.liveTypes.back()));
+  };
+
   // Track local types.
-  for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
-    ctx.liveTypes.push_back(
-      { Location::Local{i}, typeFromTV(frame_local(fp, i), ctxClass) }
-    );
-    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
+  for (uint32_t i = 0; i < func->numLocals(); ++i) {
+    addLiveType(Location::Local{i}, frame_local(fp, i));
   }
 
-  // Track stack types and pre-live ActRecs.
+  // Track stack types.
   int32_t stackOff = 0;
   visitStackElems(
-    fp, sp, ctx.bcOffset,
-    [&] (const ActRec* ar, Offset) {
-      auto const objOrCls =
-        !ar->func()->cls() ? TNullptr :
-        (ar->hasThis()  ?
-         Type::SubObj(ar->getThis()->getVMClass()) :
-         Type::SubCls(ar->getClass()));
-
-      ctx.preLiveARs.push_back({ stackOff, ar->func(), objOrCls });
-      FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
-      stackOff += kNumActRecCells;
-    },
+    fp, sp,
     [&] (const TypedValue* tv) {
-      ctx.liveTypes.push_back(
-        { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv, ctxClass) }
-      );
+      addLiveType(Location::Stack{ctx.spOffset - stackOff}, tv);
       stackOff++;
-      FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
     }
   );
 
   // Get the bytecode for `ctx', skipping Asserts.
   auto const op = [&] {
-    auto pc = ctx.func->unit()->at(ctx.bcOffset);
+    auto pc = func->at(sk.offset());
     while (isTypeAssert(peek_op(pc))) {
       pc += instrLen(pc);
     }
@@ -109,19 +109,13 @@ RegionContext getContext(SrcKey sk) {
   if (isMemberDimOp(op) || isMemberFinalOp(op)) {
     auto const mbase = vmMInstrState().base;
     assertx(mbase != nullptr);
-
-    ctx.liveTypes.push_back({ Location::MBase{}, typeFromTV(mbase, ctxClass) });
-    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
+    addLiveType(Location::MBase{}, mbase);
   }
 
   return ctx;
 }
 
-bool liveFrameIsPseudoMain() {
-  auto const ar = vmfp();
-  if (!(ar->func()->attrs() & AttrMayUseVV)) return false;
-  return ar->hasVarEnv() && ar->getVarEnv()->isGlobalScope();
-}
+const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
 
 /*
  * Create a translation for the SrcKey specified in args.
@@ -133,13 +127,8 @@ TCA getTranslation(TransArgs args) {
   auto sk = args.sk;
   sk.func()->validate();
 
-  if (liveFrameIsPseudoMain() && !RuntimeOption::EvalJitPseudomain) {
-    SKTRACE(2, sk, "punting on pseudoMain\n");
-    return nullptr;
-  }
-
   if (!RID().getJit()) {
-    SKTRACE(2, sk, "punting because jitting was disabled\n");
+    SKTRACE(2, sk, "punting because jit was disabled\n");
     return nullptr;
   }
 
@@ -150,17 +139,31 @@ TCA getTranslation(TransArgs args) {
     }
   }
 
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    SKTRACE(2, sk, "punting because jitting code was disabled\n");
+    return nullptr;
+  }
+
+  if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
+    assertx(RO::EvalEnablePerFileCoverage);
+    SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
+    return nullptr;
+  }
+
+  if (UNLIKELY(!RO::EvalHHIRAlwaysInterpIgnoreHint &&
+               sk.func()->userAttributes().count(s_AlwaysInterp.get()))) {
+    SKTRACE(2, sk,
+            "punting because function is annotated with __ALWAYS_INTERP\n");
+    return nullptr;
+  }
+
   args.kind = tc::profileFunc(args.sk.func()) ?
     TransKind::Profile : TransKind::Live;
 
-  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+  if (!tc::shouldTranslate(args.sk, args.kind)) return nullptr;
 
   LeaseHolder writer(sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(sk.func(), args.kind)) return nullptr;
-
-  if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
-    return nullptr;
-  }
+  if (!writer || !tc::shouldTranslate(sk, args.kind)) return nullptr;
 
   tc::createSrcRec(sk, liveSpOff());
 
@@ -171,7 +174,7 @@ TCA getTranslation(TransArgs args) {
     return tca;
   }
 
-  return mcgen::retranslate(args, getContext(args.sk));
+  return mcgen::retranslate(args, getContext(args.sk, args.kind == TransKind::Profile));
 }
 
 TCA getFuncBody(Func* func) {
@@ -184,17 +187,14 @@ TCA getFuncBody(Func* func) {
   tca = func->getFuncBody();
   if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
 
-  auto const dvs = func->getDVFunclets();
-  if (dvs.size() || func->hasThisVaries()) {
-    auto const kind = tc::profileFunc(func) ? TransKind::Profile
-                                            : TransKind::Live;
-    tca = tc::emitFuncBodyDispatch(func, dvs, kind);
+  if (func->numRequiredParams() != func->numNonVariadicParams()) {
+    tca = tc::ustubs().resumeHelper;
   } else {
-    SrcKey sk(func, func->base(), ResumeMode::None, func->mayHaveThis());
+    SrcKey sk(func, func->base(), ResumeMode::None);
     tca = getTranslation(TransArgs{sk});
-    if (tca) func->setFuncBody(tca);
   }
 
+  if (tca) func->setFuncBody(tca);
   return tca;
 }
 
@@ -219,25 +219,26 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
 void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
   auto& regs = vmRegsUnsafe();
   regs.fp = fp;
-  regs.stack.top() = (Cell*)sp;
+  regs.stack.top() = (TypedValue*)sp;
+  regs.jitReturnAddr = nullptr;
 
   auto const nargs = fp->numArgs();
   auto const nparams = fp->func()->numNonVariadicParams();
   auto const& paramInfo = fp->func()->params();
 
-  auto firstDVI = InvalidAbsoluteOffset;
+  auto firstDVI = kInvalidOffset;
 
   for (auto i = nargs; i < nparams; ++i) {
     auto const dvi = paramInfo[i].funcletOff;
-    if (dvi != InvalidAbsoluteOffset) {
+    if (dvi != kInvalidOffset) {
       firstDVI = dvi;
       break;
     }
   }
-  if (firstDVI != InvalidAbsoluteOffset) {
-    regs.pc = fp->m_func->unit()->entry() + firstDVI;
+  if (firstDVI != kInvalidOffset) {
+    regs.pc = fp->func()->unit()->entry() + firstDVI;
   } else {
-    regs.pc = fp->m_func->getEntry();
+    regs.pc = fp->func()->entry();
   }
 }
 
@@ -247,11 +248,11 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
 
 TCA funcBodyHelper(ActRec* fp) {
   assert_native_stack_aligned();
-  void* const sp = reinterpret_cast<Cell*>(fp) - fp->func()->numSlotsInFrame();
+  void* const sp = reinterpret_cast<TypedValue*>(fp) - fp->func()->numSlotsInFrame();
   syncFuncBodyVMRegs(fp, sp);
   tl_regState = VMRegState::CLEAN;
 
-  auto const func = const_cast<Func*>(fp->m_func);
+  auto const func = const_cast<Func*>(fp->func());
   auto tca = getFuncBody(func);
   if (!tca) {
     tca = tc::ustubs().resumeHelper;
@@ -289,13 +290,11 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
-      sk = SrcKey{
-        liveFunc(), info.args[0].offset, liveResumeMode(), liveHasThis()
-      };
+      sk = SrcKey{ liveFunc(), info.args[0].offset, liveResumeMode() };
       auto trflags = info.args[1].trflags;
       auto args = TransArgs{sk};
       args.flags = trflags;
-      start = mcgen::retranslate(args, getContext(args.sk));
+      start = mcgen::retranslate(args, getContext(args.sk, tc::profileFunc(sk.func())));
       SKTRACE(2, sk, "retranslated @%p\n", start);
       break;
     }
@@ -305,7 +304,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       if (mcgen::retranslateOpt(sk.funcID())) {
         // Retranslation was successful. Resume execution at the new Optimize
         // translation.
-        vmpc() = sk.unit()->at(sk.offset());
+        vmpc() = sk.func()->at(sk.offset());
         start = tc::ustubs().resumeHelper;
       } else {
         // Retranslation failed, probably because we couldn't get the write
@@ -322,54 +321,26 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       auto ar = info.args[0].ar;
       auto const caller = info.args[1].ar;
       assertx(caller == vmfp());
-      // If caller is a resumable (aka a generator) then whats likely happened
-      // here is that we're resuming a yield from. That expression happens to
-      // cause an assumption that we made earlier to be violated (that `ar` is
-      // on the stack), so if we detect this situation we need to fix up the
-      // value of `ar`.
-      if (UNLIKELY(caller->resumed() &&
-                   caller->func()->isNonAsyncGenerator())) {
-        auto gen = frame_generator(caller);
-        if (gen->m_delegate.m_type == KindOfObject) {
-          auto delegate = gen->m_delegate.m_data.pobj;
-          // We only checked that our delegate is an object, but we can't get
-          // into this situation if the object itself isn't a Generator
-          assert(delegate->getVMClass() == Generator::getClass());
-          // Ok so we're in a `yield from` situation, we know our ar is garbage.
-          // The ar that we're looking for is the ar of the delegate generator,
-          // so grab that here.
-          ar = Generator::fromObject(delegate)->actRec();
-        }
-      }
-      Unit* destUnit = caller->func()->unit();
+      auto const destFunc = caller->func();
       // Set PC so logging code in getTranslation doesn't get confused.
-      vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
-      if (ar->isFCallAwait()) {
-        // If there was an interped FCallAwait, and we return via the
-        // jit, we need to deal with the suspend case here.
-        assert(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
-        if (ar->retSlot()->m_aux.u_fcallAwaitFlag) {
-          start = tc::ustubs().fcallAwaitSuspendHelper;
-          break;
+      vmpc() = skipCall(
+        destFunc->at(destFunc->base() + ar->callOffset()));
+      if (ar->isAsyncEagerReturn()) {
+        // When returning to the interpreted FCall, the execution continues at
+        // the next opcode, not honoring the request for async eager return.
+        // If the callee returned eagerly, we need to wrap the result into
+        // StaticWaitHandle.
+        assertx(ar->retSlot()->m_aux.u_asyncEagerReturnFlag + 1 < 2);
+        if (ar->retSlot()->m_aux.u_asyncEagerReturnFlag) {
+          auto const retval = tvAssertPlausible(*ar->retSlot());
+          auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retval);
+          tvCopy(make_tv<KindOfObject>(waitHandle), *ar->retSlot());
         }
       }
       assertx(caller == vmfp());
-      sk = liveSK();
-      start = getTranslation(TransArgs{sk});
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
-            ar->m_func->fullName()->data(),
-            caller->m_func->fullName()->data());
-      break;
-    }
-
-    case REQ_POST_DEBUGGER_RET: {
-      auto fp = vmfp();
-      auto caller = fp->func();
-      assert(g_unwind_rds.isInit());
-      vmpc() = caller->unit()->at(caller->base() +
-                                  g_unwind_rds->debuggerReturnOff);
-      FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
-             vmpc(), fp->func()->fullName()->data());
+            ar->func()->fullName()->data(),
+            destFunc->fullName()->data());
       sk = liveSK();
       start = getTranslation(TransArgs{sk});
       break;
@@ -383,7 +354,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   }
 
   if (start == nullptr) {
-    vmpc() = sk.unit()->at(sk.offset());
+    vmpc() = sk.pc();
     start = tc::ustubs().interpHelperSyncedPC;
   }
 
@@ -396,24 +367,15 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   return start;
 }
 
-TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
-  Func* func = const_cast<Func*>(calleeFrame->m_func);
-  int nArgs = calleeFrame->numArgs();
-  TRACE(2, "bindCall %s, ActRec %p\n", func->fullName()->data(), calleeFrame);
-  TCA start = mcgen::getFuncPrologue(func, nArgs);
-  TRACE(2, "bindCall -> %p\n", start);
-  if (start && !isImmutable) {
-    // We dont know we're calling the right function, so adjust start to point
-    // to the dynamic check of ar->m_func.
-    start = funcGuardFromPrologue(start, func);
-  } else {
-    TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
-  }
+TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs) {
+  TRACE(2, "bindCall %s, numArgs %d\n", func->fullName()->data(), numArgs);
+  TCA start = mcgen::getFuncPrologue(func, numArgs);
+  TRACE(2, "bindCall immutably %s -> %p\n", func->fullName()->data(), start);
 
-  if (start && !RuntimeOption::EvalFailJitPrologs) {
+  if (start) {
     // Using start is racy but bindCall will recheck the start address after
     // acquiring a lock on the ProfTransRec
-    tc::bindCall(toSmash, start, func, nArgs, isImmutable);
+    tc::bindCall(toSmash, start, func, numArgs);
   } else {
     // We couldn't get a prologue address. Return a stub that will finish
     // entering the callee frame in C++, then call handleResume at the callee's
@@ -422,20 +384,6 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
   }
 
   return start;
-}
-
-TCA handleFCallAwaitSuspend() {
-  assert_native_stack_aligned();
-  FTRACE(1, "handleFCallAwaitSuspend\n");
-
-  tl_regState = VMRegState::CLEAN;
-
-  vmJitCalledFrame() = vmfp();
-  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
-
-  auto start = suspendStack(vmpc());
-  tl_regState = VMRegState::DIRTY;
-  return start ? start : tc::ustubs().resumeHelper;
 }
 
 TCA handleResume(bool interpFirst) {
@@ -455,6 +403,7 @@ TCA handleResume(bool interpFirst) {
     start = getTranslation(TransArgs(sk));
   }
 
+  vmJitReturnAddr() = nullptr;
   vmJitCalledFrame() = vmfp();
   SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
 
@@ -463,6 +412,8 @@ TCA handleResume(bool interpFirst) {
   // created, if the lease holder dropped it).
   if (!start) {
     WorkloadStats guard(WorkloadStats::InInterp);
+
+    tracing::BlockNoTrace _{"dispatch-bb"};
 
     while (!start) {
       INC_TPC(interp_bb);

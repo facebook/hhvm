@@ -175,29 +175,22 @@ If no Unit is set, the raw IDs are printed instead.
     (gdb) hhx $3 25
     0x7f2b2f9460ae+0: This
     0x7f2b2f9460ae+1: AssertRATStk 0 SubObj
-    0x7f2b2f9460ae+8: FPushObjMethodD 1 "send" 0
     0x7f2b2f9460ae+15: AssertRATL 0 Cell
     0x7f2b2f9460ae+18: CGetL 0
-    0x7f2b2f9460ae+20: FPassC 0
-    0x7f2b2f9460ae+22: FCallD 1 "MyClient" "send"
-    0x7f2b2f9460ae+32: UnboxRNop
+    0x7f2b2f9460ae+22: FCallObjMethodD <> 1 1 - "MyClient" "send"
     0x7f2b2f9460ae+33: AssertRATL 1 Uninit
     0x7f2b2f9460ae+36: SetL 1
     0x7f2b2f9460ae+38: PopC
     0x7f2b2f9460ae+39: CGetM <vector>
-    0x7f2b2f9460ae+54: FPushObjMethodD 1 "genWait" 0
     0x7f2b2f9460ae+61: AssertRATL 1 InitCell
     0x7f2b2f9460ae+64: CGetL 1
-    0x7f2b2f9460ae+66: FPassC 0
-    0x7f2b2f9460ae+68: FCall 1
-    0x7f2b2f9460ae+70: UnboxR
+    0x7f2b2f9460ae+68: FCallObjMethodD <> 1 1 - "" "genWait"
     0x7f2b2f9460ae+71: Dup
     0x7f2b2f9460ae+72: IsTypeC 0
     0x7f2b2f9460ae+74: JmpNZ 28
     0x7f2b2f9460ae+79: Dup
     0x7f2b2f9460ae+80: InstanceOfD "HH\WaitHandle"
     0x7f2b2f9460ae+85: JmpNZ 15
-    0x7f2b2f9460ae+90: FPushObjMethodD 0 "getWaitHandle" 0
 
 
 Stacktraces

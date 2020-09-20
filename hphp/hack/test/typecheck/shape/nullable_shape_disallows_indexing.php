@@ -1,5 +1,5 @@
 <?hh //strict
 
-function foo(): void {
-  $bar = (true ? array('a' => 5) : null)['a'];
+function foo(bool $b): void {
+  $bar = ($b ? darray['a' => 5] : null)['a'];
 }

@@ -1,68 +1,68 @@
 ================ test1 ===================
 
-Fatal error: Cannot declare self-referencing constant 'A::FOO' in %s/recursive.php on line 28
+Fatal error: Cannot declare self-referencing constant 'A::FOO' in %s/recursive.php on line 6
 ================ test2 ===================
 
-Fatal error: Cannot declare self-referencing constant 'A::BAR' in %s/recursive.php on line 26
+Fatal error: Cannot declare self-referencing constant 'A::BAR' in %s/recursive.php on line 4
 ================ test3 ===================
 
-Fatal error: Cannot declare self-referencing constant 'A::BAZ' in %s/recursive.php on line 27
+Fatal error: Cannot declare self-referencing constant 'A::BAZ' in %s/recursive.php on line 5
 ================ test4 ===================
 
-Fatal error: Cannot declare self-referencing constant 'B::FOO' in %s/recursive.php on line 34
+Fatal error: Cannot declare self-referencing constant 'B::FOO' in %s/recursive.php on line 12
 ================ test5 ===================
 
-Fatal error: Cannot declare self-referencing constant 'B::BAZ' in %s/recursive.php on line 32
+Fatal error: Cannot declare self-referencing constant 'B::BAZ' in %s/recursive.php on line 10
 ================ test6 ===================
 
-Fatal error: Cannot declare self-referencing constant 'B::BAZ' in %s/recursive.php on line 32
+Fatal error: Cannot declare self-referencing constant 'B::BAZ' in %s/recursive.php on line 10
 ================ test7 ===================
 
-Fatal error: Cannot declare self-referencing constant 'C1::FOO' in %s/recursive.php on line 42
+Fatal error: Cannot declare self-referencing constant 'C1::FOO' in %s/recursive.php on line 20
 ================ test8 ===================
 
-Fatal error: Cannot declare self-referencing constant 'C2::BAR' in %s/recursive.php on line 38
+Fatal error: Cannot declare self-referencing constant 'C2::BAR' in %s/recursive.php on line 16
 ================ test9 ===================
 
-Fatal error: Cannot declare self-referencing constant 'D::FOO' in %s/recursive.php on line 46
+Fatal error: Cannot declare self-referencing constant 'D::FOO' in %s/recursive.php on line 24
 ================ test10 ===================
 
-Fatal error: Cannot declare self-referencing constant 'E::BAR1' in %s/recursive.php on line 51
+Fatal error: Cannot declare self-referencing constant 'E::BAR1' in %s/recursive.php on line 29
 ================ test11 ===================
 
-Fatal error: Cannot declare self-referencing constant 'E::BAR1' in %s/recursive.php on line 51
+Fatal error: Cannot declare self-referencing constant 'E::BAR1' in %s/recursive.php on line 29
 ================ test12 ===================
 
-Fatal error: Cannot declare self-referencing constant 'E::FOO2' in %s/recursive.php on line 53
+Fatal error: Cannot declare self-referencing constant 'E::FOO2' in %s/recursive.php on line 31
 ================ test13 ===================
 
-Fatal error: Cannot declare self-referencing constant 'E::FOO2' in %s/recursive.php on line 53
+Fatal error: Cannot declare self-referencing constant 'E::FOO2' in %s/recursive.php on line 31
 ================ test14 ===================
 
-Fatal error: Cannot declare self-referencing constant 'F::FOO' in %s/recursive.php on line 59
+Fatal error: Cannot declare self-referencing constant 'F::FOO' in %s/recursive.php on line 37
 ================ test15 ===================
 
-Fatal error: Cannot declare self-referencing constant 'F::BAR' in %s/recursive.php on line 58
+Fatal error: Cannot declare self-referencing constant 'F::BAR' in %s/recursive.php on line 36
 ================ test16 ===================
 int(100)
 ================ test17 ===================
 int(100)
 ================ test18 ===================
 
-Fatal error: Cannot declare self-referencing constant 'H1::FOO' in %s/recursive.php on line 9
+Fatal error: Cannot declare self-referencing constant 'H1::FOO' in %s/recursive-1.inc on line 4
 ================ test19 ===================
 int(123)
 ================ test20 ===================
 
-Fatal error: Cannot declare self-referencing constant 'I1::FOO' in %s/recursive.php on line 15
+Fatal error: Cannot declare self-referencing constant 'I1_Recursive::FOO' in %s/recursive-2.inc on line 4
 ================ test21 ===================
 int(123)
 ================ test22 ===================
 
-Fatal error: Cannot declare self-referencing constant 'J2::FOO' in %s/recursive.php on line 84
+Fatal error: Cannot declare self-referencing constant 'J2::FOO' in %s/recursive.php on line 66
 ================ test23 ===================
 
-Fatal error: Cannot declare self-referencing constant 'K::FOO' in %s/recursive.php on line 90
+Fatal error: Cannot declare self-referencing constant 'K::FOO' in %s/recursive.php on line 72
 ================ test24 ===================
 
-Fatal error: Cannot declare self-referencing constant 'K::BAR' in %s/recursive.php on line 89
+Fatal error: Cannot declare self-referencing constant 'K::BAR' in %s/recursive.php on line 71

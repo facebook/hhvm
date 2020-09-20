@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int iconv_strlen(string str [, string charset])
  * Description: Get character numbers of a string 
  * Source code: ext/iconv/iconv.c
@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv_strlen()
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_strlen() : basic functionality***\n";
 
 $string_ascii = b'abc def';
@@ -19,5 +19,5 @@ var_dump(iconv_strlen($string_ascii));
 
 echo "\n-- Multibyte String --\n";
 var_dump(iconv_strlen($string_mb, 'UTF-8'));
-?>
-===DONE===
+echo "===DONE===\n";
+}

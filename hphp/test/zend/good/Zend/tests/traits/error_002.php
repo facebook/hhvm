@@ -1,7 +1,6 @@
-<?php
+<?hh
 
 class A {
-	use abc;
+    use abc;
 }
 
-?>

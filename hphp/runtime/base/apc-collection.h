@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_APC_COLLECTION_H_
-#define incl_HPHP_APC_COLLECTION_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 
@@ -32,8 +31,8 @@ struct APCCollection {
   static void Delete(APCHandle*);
 
   static const APCCollection* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedCollection);
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedCollection);
     static_assert(offsetof(APCCollection, m_handle) == 0, "");
     return reinterpret_cast<const APCCollection*>(handle);
   }
@@ -55,4 +54,3 @@ private:
 
 }
 
-#endif

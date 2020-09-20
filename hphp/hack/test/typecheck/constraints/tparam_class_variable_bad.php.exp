@@ -1,0 +1,4 @@
+File "tparam_class_variable_bad.php", line 4, characters 12-24:
+You are trying to access the static property `$doesNotExist` but this is a value of generic type T (Typing[4252])
+File "tparam_class_variable_bad.php", line 3, characters 28-28:
+Definition is here

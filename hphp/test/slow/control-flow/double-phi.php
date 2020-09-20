@@ -17,12 +17,6 @@ function doMath() {
   return $sum;
 }
 
-$total = 0.0;
-for ($i = 0; $i < 200; ++$i) {
-  $total += doMath();
-}
-var_dump($total);
-
 function int_first() {
   $sum = 0;
   for ($i = 0; $i < 10; ++$i) {
@@ -50,8 +44,18 @@ function double_first() {
   return $sum;
 }
 
+
+<<__EntryPoint>>
+function main_double_phi() {
+$total = 0.0;
+for ($i = 0; $i < 200; ++$i) {
+  $total += doMath();
+}
+var_dump($total);
+
 for ($i = 0; $i < 200; ++$i) {
   $total += int_first();
   $total += double_first();
 }
 var_dump($total);
+}

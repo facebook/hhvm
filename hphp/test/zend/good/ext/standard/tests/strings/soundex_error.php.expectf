@@ -1,12 +1,9 @@
 *** Testing soundex error conditions ***-- Testing soundex() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: soundex() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/strings/soundex_error.php on line 10
 
 
 -- Testing soundex() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
- 
+Warning: soundex() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/strings/soundex_error.php on line 15
 ===DONE===

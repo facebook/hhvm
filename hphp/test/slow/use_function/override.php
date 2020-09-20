@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace foo {
   function bar() {
@@ -10,10 +10,8 @@ namespace {
   function bar() {
     return __FUNCTION__;
   }
-
-  var_dump(bar());
-
   use function foo\bar as bar;
 
-  var_dump(bar());
+  <<__EntryPoint>>
+  function main() {}
 }

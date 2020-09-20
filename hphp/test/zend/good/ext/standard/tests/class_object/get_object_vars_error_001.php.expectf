@@ -2,11 +2,9 @@
 
 -- Testing get_object_vars() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: get_object_vars() expects exactly 1 parameter, 0 given in %s/get_object_vars_error_001.php on line 12
 
 -- Testing get_object_vars() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: get_object_vars() expects exactly 1 parameter, 2 given in %s/get_object_vars_error_001.php on line 18
 Done

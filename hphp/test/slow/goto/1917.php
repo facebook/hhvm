@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g($x) {
   var_dump($x);
@@ -61,8 +61,12 @@ function f($x) {
     echo "0\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1917() {
 f(1);
 f(2);
 f(3);
 f(4);
 f(123);
+}

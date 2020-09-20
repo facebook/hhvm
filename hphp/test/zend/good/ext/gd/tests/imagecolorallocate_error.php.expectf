@@ -2,14 +2,11 @@
 
 -- Testing imagecolorallocate() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects exactly 4 parameters, 5 given in %s/imagecolorallocate_error.php on line 17
 
 -- Testing imagecolorallocate() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects exactly 4 parameters, 0 given in %s/imagecolorallocate_error.php on line 21
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects exactly 4 parameters, 3 given in %s/imagecolorallocate_error.php on line 22
 ===DONE===

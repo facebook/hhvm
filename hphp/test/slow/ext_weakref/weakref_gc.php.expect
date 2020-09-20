@@ -1,13 +1,13 @@
 bool(false)
 NULL
 bool(true)
-object(Leaker)#4 (1) {
+object(Leaker) (1) {
   ["ptr":"Leaker":private]=>
-  object(Leaker)#5 (1) {
+  object(Leaker) (1) {
     ["ptr":"Leaker":private]=>
-    object(Leaker)#4 (1) {
+    object(Leaker) (1) {
       ["ptr":"Leaker":private]=>
-      object(Leaker)#5 (1) {
+      object(Leaker) (1) {
         ["ptr":"Leaker":private]=>
         *RECURSION*
       }
@@ -15,7 +15,7 @@ object(Leaker)#4 (1) {
   }
 }
 bool(true)
-object(stdClass)#7 (0) {
+object(stdClass) (0) {
 }
 bool(false)
 NULL
@@ -24,5 +24,5 @@ NULL
 bool(false)
 NULL
 bool(true)
-object(WeakRef)#15 (0) {
+object(WeakRef) (0) {
 }

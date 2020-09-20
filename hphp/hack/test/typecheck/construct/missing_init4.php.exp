@@ -1,0 +1,4 @@
+File "missing_init4.php", line 13, characters 19-29:
+Class `B` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "missing_init4.php", line 6, characters 17-23:
+`$this->A_Test` is not initialized.

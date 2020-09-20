@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. http://3v4l.org/S4isH
 
 function foo() {
@@ -12,8 +12,9 @@ function foo() {
 
   return $c->childNodes;
 }
-
+<<__EntryPoint>> function main(): void {
 foreach (foo() as $x) {
   var_dump($x->nodeValue);
 }
 var_dump($x->nodeValue);
+}

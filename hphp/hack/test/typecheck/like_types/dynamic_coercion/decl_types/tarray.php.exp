@@ -1,0 +1,12 @@
+File "tarray.php", line 11, characters 10-14:
+Invalid return type (Typing[4110])
+File "tarray.php", line 10, characters 19-28:
+Expected `varray<int>`
+File "tarray.php", line 4, characters 17-23:
+But got `dynamic`
+File "tarray.php", line 15, characters 10-14:
+Invalid return type (Typing[4110])
+File "tarray.php", line 14, characters 19-36:
+Expected `darray<int, string>`
+File "tarray.php", line 4, characters 17-23:
+But got `dynamic`

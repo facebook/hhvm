@@ -14,4 +14,8 @@ function main() {
   var_dump((Pair {1, 2})->toImmSet() == ImmSet {1, 2});
 }
 
+
+<<__EntryPoint>>
+function main_materialization() {
 main();
+}

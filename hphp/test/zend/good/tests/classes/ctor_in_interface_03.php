@@ -1,7 +1,7 @@
-<?php
+<?hh
 interface constr
 {
-	function __construct();
+    function __construct();
 }
 
 abstract class implem implements constr
@@ -10,9 +10,8 @@ abstract class implem implements constr
 
 class derived extends implem
 {
-	function __construct($a)
-	{
-	}
+    function __construct($a)
+    {
+    }
 }
 
-?>

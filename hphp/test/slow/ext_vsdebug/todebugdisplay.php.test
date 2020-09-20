@@ -1,0 +1,19 @@
+<?hh
+
+class A {
+  public int $a = 42;
+
+  public function __toDebugDisplay(): string {
+    return "A({$this->a})";
+  }
+}
+
+function innerFunc() {
+  $a = new A();
+
+  echo "lol\n";
+}
+<<__EntryPoint>> function main() {
+innerFunc();
+echo "hello world 2\n";
+}

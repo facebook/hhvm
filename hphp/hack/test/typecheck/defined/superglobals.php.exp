@@ -1,0 +1,2 @@
+File "superglobals.php", line 4, characters 8-15:
+Variable `$_SERVER` is undefined, or not always defined. (Naming[2050])

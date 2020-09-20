@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /* Prototype  : string ltrim  ( string $str  [, string $charlist  ] )
  * Description: Strip whitespace (or other characters) from the beginning of a string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ltrim() : basic functionality ***\n";
 
 $text  = " \t\r\n\0\x0B ---These are a few words---  ";
@@ -28,5 +28,5 @@ var_dump(ltrim($alpha, "A..Z"));
 echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(ltrim($binary, "\x00..\x1F"));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

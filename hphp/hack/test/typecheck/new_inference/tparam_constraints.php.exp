@@ -1,0 +1,6 @@
+File "tparam_constraints.php", line 5, characters 34-35:
+Invalid argument (Typing[4110])
+File "tparam_constraints.php", line 4, characters 56-58:
+Expected `int`
+File "tparam_constraints.php", line 4, characters 46-49:
+But got `null`

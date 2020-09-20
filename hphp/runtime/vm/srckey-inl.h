@@ -23,73 +23,63 @@ namespace HPHP {
 inline SrcKey::SrcKey()
   : m_funcID{InvalidFuncId}
   , m_offset{0}
-  , m_hasThis{false}
   , m_resumeModeAndPrologue{encodeResumeMode(ResumeMode::None)}
 {}
 
-inline SrcKey::SrcKey(const Func* f, Offset off, ResumeMode resumeMode,
-                      bool hasThis)
+inline SrcKey::SrcKey(const Func* f, Offset off, ResumeMode resumeMode)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)off}
-  , m_hasThis{hasThis}
   , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
-  assert((uint32_t)off >> 31 == 0);
+  assertx((uint32_t)off >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(const Func* f, PC pc, ResumeMode resumeMode, bool hasThis)
+inline SrcKey::SrcKey(const Func* f, PC pc, ResumeMode resumeMode)
   : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
-  , m_hasThis{hasThis}
+  , m_offset{(uint32_t)f->offsetOf(pc)}
   , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
-  assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
+  assertx((uint32_t)f->offsetOf(pc) >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode,
-                      bool hasThis)
+inline SrcKey::SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode)
   : m_funcID{funcId}
   , m_offset{(uint32_t)off}
-  , m_hasThis{hasThis}
   , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
-  assert((uint32_t)off >> 31 == 0);
+  assertx((uint32_t)off >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)off}
-  , m_hasThis{false}
   , m_resumeModeAndPrologue{encodePrologue()}
 {
-  assert((uint32_t)off >> 31 == 0);
+  assertx((uint32_t)off >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(const Func* f, PC pc, PrologueTag)
   : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
-  , m_hasThis{false}
+  , m_offset{(uint32_t)f->offsetOf(pc)}
   , m_resumeModeAndPrologue{encodePrologue()}
 {
-  assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
+  assertx((uint32_t)f->offsetOf(pc) >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(FuncId funcId, Offset off, PrologueTag)
   : m_funcID{funcId}
   , m_offset{(uint32_t)off}
-  , m_hasThis{false}
   , m_resumeModeAndPrologue{encodePrologue()}
 {
-  assert((uint32_t)off >> 31 == 0);
+  assertx((uint32_t)off >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(SrcKey other, Offset off)
   : m_funcID{other.funcID()}
   , m_offset{(uint32_t)off}
-  , m_hasThis{other.hasThis()}
   , m_resumeModeAndPrologue{other.m_resumeModeAndPrologue}
 {
-  assert((uint32_t)off >> 31 == 0);
+  assertx((uint32_t)off >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(AtomicInt in)
@@ -111,7 +101,7 @@ inline SrcKey::AtomicInt SrcKey::toAtomicInt() const {
 }
 
 inline FuncId SrcKey::funcID() const {
-  assert(m_funcID != InvalidFuncId);
+  assertx(m_funcID != InvalidFuncId);
   return m_funcID;
 }
 
@@ -120,7 +110,8 @@ inline int SrcKey::offset() const {
 }
 
 inline bool SrcKey::hasThis() const {
-  return m_hasThis;
+  if (!func()->cls()) return false;
+  return prologue() ? !func()->isStaticInPrologue() : !func()->isStatic();
 }
 
 inline bool SrcKey::prologue() const {
@@ -149,31 +140,31 @@ inline const Unit* SrcKey::unit() const {
 }
 
 inline Op SrcKey::op() const {
-  return unit()->getOp(offset());
+  return func()->getOp(offset());
 }
 
 inline PC SrcKey::pc() const {
-  return unit()->at(offset());
+  return func()->at(offset());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void SrcKey::setOffset(Offset o) {
-  assert((uint32_t)o >> 31 == 0);
+  assertx((uint32_t)o >> 31 == 0);
   m_offset = (uint32_t)o;
 }
 
 inline OffsetSet SrcKey::succOffsets() const {
-  return instrSuccOffsets(pc(), unit());
+  return instrSuccOffsets(pc(), func());
 }
 
-inline void SrcKey::advance(const Unit* u) {
-  m_offset += instrLen((u ? u : unit())->at(offset()));
+inline void SrcKey::advance(const Func* f) {
+  m_offset += instrLen((f ? f : func())->at(offset()));
 }
 
-inline SrcKey SrcKey::advanced(const Unit* u) const {
+inline SrcKey SrcKey::advanced(const Func* f) const {
   auto tmp = *this;
-  tmp.advance(u);
+  tmp.advance(f);
   return tmp;
 }
 

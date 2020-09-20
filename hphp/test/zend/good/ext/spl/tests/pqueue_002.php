@@ -1,10 +1,10 @@
-<?php
+<?hh
 class myPQueue extends SplPriorityQueue {
     public function compare($a, $b) {
         throw new exception("foo");
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $h = new myPQueue;
 
 try {
@@ -49,6 +49,5 @@ try {
 } catch(Exception $e) {
     echo "Exception: ".$e->getMessage()."\n";
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

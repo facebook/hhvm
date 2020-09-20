@@ -1,8 +1,9 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_DOMDocumentFragment extends DOMDocumentFragment {
   public $___x;
 }
-test("DOMDocumentFragment");
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("DOMDocumentFragment");
+}

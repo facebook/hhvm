@@ -1,5 +1,3 @@
-<?php
+<?hh
 
-Interface AutoInterface {}
-
-?>
+interface AutoInterface {}

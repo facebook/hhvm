@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
  * Description: Write a formatted string to a stream
  * Source code: ext/standard/formatted_print.c
@@ -8,7 +8,7 @@
  * Test vfprintf() when different string formats and string values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : string formats with strings ***\n";
 
 
@@ -29,7 +29,7 @@ $heredoc_empty_string = <<<EOT
 EOT;
 
 // defining array of string formats
-$formats = array(
+$formats = varray[
   "%s",
   "%+s %-s %S",
   "%ls %Ls, %4s %-4s",
@@ -37,23 +37,23 @@ $formats = array(
   "%'#2s %'2s %'$2s %'_2s",
   "%% %%s %10 s%",
   '%3$s %4$s %1$s %2$s'
-);
+];
 
 // Arrays of string values for the format defined in $format.
 // Each sub array contains string values which correspond to each format string in $format
-$args_array = array(
-  array(" "),
-  array("hello\0world", "hello\0", "\0hello"),
-  array("@#$%&*", "@#$%&*", "\x55F", "\001"),
-  array("sunday", 'monday', "tuesday", 'wednesday'),
-  array($heredoc_string, "abcdef", $heredoc_numeric_string, $heredoc_empty_string),
-  array("one", "two", 'three', 'four'),
-  array("three", 'four', 'one', "two")
+$args_array = varray[
+  varray[" "],
+  varray["hello\0world", "hello\0", "\0hello"],
+  varray["@#$%&*", "@#$%&*", "\x55F", "\001"],
+  varray["sunday", 'monday', "tuesday", 'wednesday'],
+  varray[$heredoc_string, "abcdef", $heredoc_numeric_string, $heredoc_empty_string],
+  varray["one", "two", 'three', 'four'],
+  varray["three", 'four', 'one', "two"]
 
-);
+];
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation7.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation7.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -72,5 +72,5 @@ echo "\n";
 
 unlink($data_file);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

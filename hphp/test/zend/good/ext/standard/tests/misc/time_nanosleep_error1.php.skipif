@@ -1,1 +1,4 @@
-<?php if (!function_exists('time_nanosleep')) die("skip"); ?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!function_exists('time_nanosleep')) die("skip");
+}

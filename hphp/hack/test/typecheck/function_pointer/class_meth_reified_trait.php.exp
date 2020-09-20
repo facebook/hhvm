@@ -1,0 +1,4 @@
+File "class_meth_reified_trait.php", line 8, characters 3-31:
+Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])
+File "class_meth_reified_trait.php", line 10, characters 3-26:
+Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])

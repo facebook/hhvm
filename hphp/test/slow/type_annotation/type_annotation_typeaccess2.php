@@ -17,7 +17,11 @@ class E {
   const type T = bool;
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation_typeaccess2() {
 var_dump(type_structure(C::class, 'U'));
 var_dump(type_structure(C::class, 'V'));
 var_dump(type_structure(D::class, 'U'));
 var_dump(type_structure(D::class, 'V'));
+}

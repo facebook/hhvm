@@ -1,6 +1,6 @@
-<?php
+<?hh
 print "Test 11: php:function Support\n";
-  Class foo {
+  class foo {
        function foo() {}
        function __toString() { return "not a DomNode object";}
   }
@@ -9,12 +9,12 @@ $dom = new domDocument();
   $dom->load(dirname(__FILE__)."/xslt011.xsl");
   $proc = new xsltprocessor;
   $xsl = $proc->importStylesheet($dom);
-  
+
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
   $proc->registerPHPFunctions();
   print $proc->transformToXml($xml);
- 
+
   function foobar($id, $secondArg = "" ) {
     if (is_array($id)) {
         return $id[0]->value . " - " . $secondArg;
@@ -23,7 +23,7 @@ $dom = new domDocument();
     }
   }
   function nodeSet($id = null) {
-      if ($id and is_array($id)) {
+      if ($id && is_array($id)) {
           return $id[0];
       } else {
           $dom = new domdocument;
@@ -34,10 +34,9 @@ $dom = new domDocument();
   function nonDomNode() {
     return  new foo();
   }
-  
-  class aClass {
+
+  class aclass {
     static function aStaticFunction($id) {
         return $id;
     }
   }
-  

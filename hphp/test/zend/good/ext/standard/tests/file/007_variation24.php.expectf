@@ -11,5 +11,5 @@ int(37)
 bool(true)
 string(7) "Unknown"
 
-Warning: %s
+Warning: File exists in %s/007_variation24.php on line 36
 *** Done ***

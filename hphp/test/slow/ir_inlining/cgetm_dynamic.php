@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class CGetMDynProp {
   public function __construct() {
@@ -15,4 +15,8 @@ function test6() {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_cgetm_dynamic() {
 test6();
+}

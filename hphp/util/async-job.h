@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ASYNC_JOB_H_
-#define incl_HPHP_ASYNC_JOB_H_
+#pragma once
 
 #include <algorithm>
+#include <random>
 
 #include <folly/portability/SysTime.h>
 
@@ -103,7 +103,8 @@ struct JobDispatcher {
       m_jobs(std::move(jobs)),
       m_showStatus(showStatus),
       m_lastPercent(0) {
-    std::random_shuffle(m_jobs.begin(), m_jobs.end());
+    std::mt19937 prng(42);
+    std::shuffle(m_jobs.begin(), m_jobs.end(), prng);
     if (workerCount > m_jobs.size()) {
       workerCount = m_jobs.size();
     }
@@ -191,4 +192,3 @@ struct JobDispatcher {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ASYNC_JOB_H_

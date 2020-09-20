@@ -1,0 +1,6 @@
+File "memoize_mutable4.php", line 4, characters 3-89:
+`__Mutable` and `__MaybeMutable` annotations are not allowed on static methods. (Parsing[1002])
+File "memoize_mutable4.php", line 4, characters 25-33:
+Memoized functions cannot have mutable `$this`. (Parsing[1002])
+File "memoize_mutable4.php", line 5, characters 26-26:
+`memoize` is not allowed on static methods in classes that aren't final  (NastCheck[3041])

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TRANS_DB_H_
-#define incl_HPHP_JIT_TRANS_DB_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -63,4 +62,3 @@ size_t getNumTranslations();
 
 }}}
 
-#endif

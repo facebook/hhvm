@@ -4,9 +4,7 @@ enum S: string {
   C = "A" . "B";
 }
 
-function f() {
+<<__EntryPoint>> function f(): void {
   $a = S::C;
   print (S::isValid($a));
 }
-
-f();

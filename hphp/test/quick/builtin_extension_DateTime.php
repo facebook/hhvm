@@ -1,7 +1,5 @@
 <?hh
 
-date_default_timezone_set('America/Los_Angeles');
-
 class A_DateTime extends DateTime {
   public $___x;
   public function __clone() {
@@ -9,7 +7,7 @@ class A_DateTime extends DateTime {
   }
 }
 
-function test($cls, $args = array()) {
+function test($cls, $args = varray[]) {
   echo $cls . "\n";
   $a = (new ReflectionClass($cls))->newInstanceArgs($args);
   var_dump($a);
@@ -44,8 +42,6 @@ function test($cls, $args = array()) {
   var_dump(get_class_methods($a));
 }
 
-test("DateTime", array("2012-06-23T11:00:00"));
-
 function main() {
   echo "================\n";
 
@@ -60,7 +56,6 @@ function main() {
   var_dump($y2);
   var_dump($y2->format('Y-m-d'));
 }
-main();
 
 function DataTimeFromString() {
   echo "================\n";
@@ -109,5 +104,12 @@ function DataTimeFromString() {
     echo 'Error in createFromFormat when filling option is OFF\n';
   }
 }
+<<__EntryPoint>> function main_entry(): void {
+date_default_timezone_set('America/Los_Angeles');
+
+test("DateTime", varray["2012-06-23T11:00:00"]);
+
+main();
 
 DataTimeFromString();
+}

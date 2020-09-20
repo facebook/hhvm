@@ -3,11 +3,9 @@ EXT
 MD5
 BLO
 
-Notice: %s
-string(%d) "%s"
+Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s/crypt.php on line 18
+string(34) "$1$bJoWf/..$V6Bfi7.4Xu0zVFzgX/sY91"
 
-Warning: %s
-NULL
+Warning: crypt() expects at least 1 parameter, 0 given in %s/crypt.php on line 19
 
-Warning: %s
-NULL
+Warning: crypt() expects at most 2 parameters, 3 given in %s/crypt.php on line 20

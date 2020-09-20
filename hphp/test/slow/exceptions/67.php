@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function runstuff() {
   throw new Exception;
@@ -14,4 +14,8 @@ function main() {
       var_dump($elapsed);
     }
 }
+
+<<__EntryPoint>>
+function main_67() {
 main();
+}

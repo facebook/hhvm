@@ -40,8 +40,8 @@ COUNT_NORMAL is 4
 COUNT_RECURSIVE is 4
 
 -- Iteration 5 --
-COUNT_NORMAL is 5
-COUNT_RECURSIVE is 5
+COUNT_NORMAL is 6
+COUNT_RECURSIVE is 6
 
 -- Iteration 6 --
 COUNT_NORMAL is 6
@@ -70,34 +70,13 @@ COUNT_NORMAL: should be 3, is 3
 -- Testing count() on resource type --
 int(2)
 
--- Testing count() on arrays containing references --
-For mode '0' count is => int(3)
-For mode '1' count is => int(9)
-For mode '0' count is => int(3)
-For mode '1' count is => int(9)
-For mode '-1' count is => int(3)
-For mode '-1.45' count is => int(3)
-For mode '2' count is => int(3)
-For mode '1' count is => int(9)
-For mode '' count is => int(3)
-For mode '' count is => int(3)
-
 -- Testing error conditions --
-Warning: %s
-NULL
+Warning: count() expects at least 1 parameter, 0 given in %s/count_recursive.php on line 101
 
-Warning: %s
-NULL
+Warning: count() expects at most 2 parameters, 3 given in %s/count_recursive.php on line 102
 
-Notice: %s
+Warning: count() expects parameter 2 to be integer, string given in %s/count_recursive.php on line 105
 
-Warning: %s
-NULL
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
+Warning: count() expects parameter 2 to be integer, string given in %s/count_recursive.php on line 106
 
 Done

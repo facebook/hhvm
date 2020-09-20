@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string chop ( string $str [, string $charlist] )
  * Description: Strip whitespace (or other characters) from the end of a string
  * Source code: ext/standard/string.c
@@ -8,6 +8,13 @@
  * Testing chop() : with different unexpected values for charlist argument passes to the function
 */
 
+// declaring class
+class sample  {
+  public function __toString()  {
+  return "@# $%12345";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : with different unexpected values for charlist argument ***\n";
 // initialize all required variables
 $str = 'hello world12345 ';
@@ -16,18 +23,11 @@ $str = 'hello world12345 ';
 $unset_var = 'string_val';
 unset($unset_var);
 
-// declaring class
-class sample  {
-  public function __toString()  {
-  return "@# $%12345";
-  }
-}
-
 // defining a resource
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
-$values =  array (
+$values =  varray [
 
   // integer values
   0,
@@ -43,11 +43,11 @@ $values =  array (
   .5,
 
   // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -68,14 +68,14 @@ $values =  array (
 
   // resource
   $file_handle,
-  
+
   // undefined variable
   $undefined_var,
 
   // unset variable
   $unset_var
-  
-);
+
+];
 
 
 // loop through each element of the array and check the working of chop()
@@ -87,7 +87,7 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $charlist = $values [$index];
 
-  var_dump( chop($str, $charlist) );
+  try { var_dump( chop($str, $charlist) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }
@@ -96,4 +96,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($file_handle);
 
 echo "Done\n";
-?>
+}

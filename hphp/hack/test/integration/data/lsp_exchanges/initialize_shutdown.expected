@@ -15,16 +15,26 @@
         },
         "hoverProvider": true,
         "completionProvider": {
-          "resolveProvider": false,
+          "resolveProvider": true,
           "triggerCharacters": [
             "$",
             ">",
             "\\",
             ":",
-            "<"
+            "<",
+            "[",
+            "'",
+            "\""
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
           ]
         },
         "definitionProvider": true,
+        "typeDefinitionProvider": true,
         "referencesProvider": true,
         "documentHighlightProvider": true,
         "documentSymbolProvider": true,
@@ -32,18 +42,17 @@
         "codeActionProvider": false,
         "documentFormattingProvider": true,
         "documentRangeFormattingProvider": true,
-        "renameProvider": false,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "implementationProvider": true,
         "typeCoverageProvider": true,
         "rageProvider": true
       }
-    }
-  },
-  {
-    "jsonrpc": "2.0",
-    "method": "telemetry/event",
-    "params": {
-      "type": 4,
-      "message": "Version in hhconfig=[NoVersion]"
     }
   },
   {

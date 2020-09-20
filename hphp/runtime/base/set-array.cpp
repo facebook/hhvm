@@ -20,9 +20,8 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -47,10 +46,11 @@ struct SetArray::Initializer {
   Initializer() {
     auto const ad = reinterpret_cast<SetArray*>(&s_theEmptySetArray);
     ad->initHash(SetArray::SmallScale);
-    ad->m_sizeAndPos = 0;
+    ad->m_size = 0;
+    ad->m_extra = 0;
     ad->m_scale_used = SetArray::SmallScale;
     ad->initHeader(HeaderKind::Keyset, StaticValue);
-    assert(ad->checkInvariants());
+    assertx(ad->checkInvariants());
   }
 };
 SetArray::Initializer SetArray::s_initializer;
@@ -58,16 +58,16 @@ SetArray::Initializer SetArray::s_initializer;
 //////////////////////////////////////////////////////////////////////
 
 SetArray* SetArray::asSet(ArrayData* ad) {
-  assert(ad->isKeyset());
+  assertx(ad->isKeysetKind());
   auto a = static_cast<SetArray*>(ad);
-  assert(a->checkInvariants());
+  assertx(a->checkInvariants());
   return a;
 }
 
 const SetArray* SetArray::asSet(const ArrayData* ad) {
-  assert(ad->isKeyset());
+  assertx(ad->isKeysetKind());
   auto a = static_cast<const SetArray*>(ad);
-  assert(a->checkInvariants());
+  assertx(a->checkInvariants());
   return a;
 }
 
@@ -84,29 +84,31 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
 
-  assert(ClearElms(Data(ad), Capacity(scale)));
+  assertx(ClearElms(Data(ad), Capacity(scale)));
 
   ad->initHash(scale);
   ad->initHeader(HeaderKind::Keyset, OneReference);
-  ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
+  ad->m_size         = 0;
+  ad->m_extra        = 0;
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
-  assert(ad->kind() == kKeysetKind);
-  assert(!ad->isZombie());
-  assert(ad->m_size == 0);
-  assert(ad->m_pos == 0);
-  assert(ad->hasExactlyOneRef());
-  assert(ad->m_scale == scale);
-  assert(ad->m_used == 0);
-  assert(ad->checkInvariants());
+  assertx(ad->kind() == kKeysetKind);
+  assertx(!ad->isZombie());
+  assertx(ad->m_size == 0);
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_scale == scale);
+  assertx(ad->m_used == 0);
+  assertx(ad->checkInvariants());
   return ad;
 }
 
 ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
   for (uint32_t i = 0; i < size; ++i) {
     auto& tv = values[i];
-    if (!isIntType(tv.m_type) && !isStringType(tv.m_type)) {
-      throwInvalidArrayKeyException(&tv, staticEmptyKeysetArray());
+    if (!isIntType(tv.m_type) &&
+        !isStringType(tv.m_type) &&
+        !isClassType(tv.m_type))  {
+      throwInvalidArrayKeyException(&tv, ArrayData::CreateKeyset());
     }
   }
   auto ad = asSet(MakeReserveSet(size));
@@ -118,53 +120,81 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
      */
     if (isIntType(tv.m_type)) {
       ad->insert(tv.m_data.num);
-    } else {
+    } else if (isStringType(tv.m_type)) {
       ad->insert(tv.m_data.pstr);
       decRefStr(tv.m_data.pstr); // FIXME
+    } else {
+      assertx(isClassType(tv.m_type));
+      auto const keyStr =
+        const_cast<StringData*>(classToStringHelper(tv.m_data.pclass));
+      ad->insert(keyStr);
     }
   }
   return ad;
 }
 
-ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
+ArrayData* SetArray::MakeUncounted(ArrayData* array,
+                                   bool withApcTypedValue,
+                                   DataWalker::PointerMap* seen) {
+  auto const updateSeen = seen && array->hasMultipleRefs();
+  if (updateSeen) {
+    auto it = seen->find(array);
+    assertx(it != seen->end());
+    if (auto const arr = static_cast<ArrayData*>(it->second)) {
+      if (arr->uncountedIncRef()) {
+        return arr;
+      }
+    }
+  }
   auto src = asSet(array);
   assertx(!src->empty());
   auto const scale = src->scale();
   auto const used = src->m_used;
-  char* mem =
-    static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
-  auto const dest = reinterpret_cast<SetArray*>(mem + extra);
+  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
+  auto const dest = uncountedAlloc(scale, extra);
 
-  assert((extra % 16) == 0);
-  assert(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
-  assert(reinterpret_cast<uintptr_t>(src) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(src) % 16 == 0);
   memcpy16_inline(dest, src, sizeof(SetArray) + sizeof(Elm) * used);
-  assert(ClearElms(Data(dest) + used, Capacity(scale) - used));
+  assertx(ClearElms(Data(dest) + used, Capacity(scale) - used));
   CopyHash(HashTab(dest, scale), src->hashTab(), scale);
-  dest->m_count = UncountedValue;
+  dest->initHeader_16(HeaderKind::Keyset, UncountedValue,
+                      withApcTypedValue ? ArrayData::kHasApcTv : 0);
 
   // Make sure all strings are uncounted.
   auto const elms = dest->data();
   for (uint32_t i = 0; i < used; ++i) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
-    assert(!elm.isEmpty());
-    StringData*& skey = elm.tv.m_data.pstr;
+    assertx(!elm.isEmpty());
     if (elm.hasStrKey()) {
       elm.tv.m_type = KindOfPersistentString;
-      if (!skey->isStatic()) {
-        if (auto const st = lookupStaticString(skey)) {
-          skey = st;
-        } else {
-          skey = StringData::MakeUncounted(skey->slice());
-        }
+      StringData*& skey = elm.tv.m_data.pstr;
+
+      if (!skey->isStatic() &&
+          (!skey->isUncounted() || !skey->uncountedIncRef())) {
+        skey = [&] {
+          if (auto const st = lookupStaticString(skey)) return st;
+          HeapObject** seenStr = nullptr;
+          if (seen && skey->hasMultipleRefs()) {
+            seenStr = &(*seen)[skey];
+            if (auto const st = static_cast<StringData*>(*seenStr)) {
+              if (st->uncountedIncRef()) return st;
+            }
+          }
+          auto const st = StringData::MakeUncounted(skey->slice());
+          if (seenStr) *seenStr = st;
+          return st;
+        }();
       }
     }
   }
+
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
 
+  if (updateSeen) (*seen)[array] = dest;
   return dest;
 }
 
@@ -175,10 +205,10 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     ? reqAlloc(scale)
     : staticAlloc(scale);
 
-  assert(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
-  assert(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
   memcpy16_inline(ad, &other, sizeof(SetArray) + sizeof(Elm) * used);
-  assert(ClearElms(Data(ad) + used, Capacity(scale) - used));
+  assertx(ClearElms(Data(ad) + used, Capacity(scale) - used));
   CopyHash(HashTab(ad, scale), other.hashTab(), scale);
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   ad->initHeader(HeaderKind::Keyset, count);
@@ -188,69 +218,48 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   for (uint32_t i = 0; i < used; ++i) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
-    assert(!elm.isEmpty());
+    assertx(!elm.isEmpty());
     tvIncRefGen(elm.tv);
   }
 
-  assert(ad->m_kind == HeaderKind::Keyset);
-  assert(ad->m_size == other.m_size);
-  assert(ad->m_pos == other.m_pos);
-  assert(mode == AllocMode::Request ?
-         ad->hasExactlyOneRef() : ad->isStatic());
-  assert(ad->m_scale == scale);
-  assert(ad->m_used == used);
-  assert(ad->checkInvariants());
-  return ad;
-}
-
-SetArray* SetArray::CopyReserve(const SetArray* src, size_t expectedSize) {
-  assert(expectedSize >= src->size());
-  auto const ad = asSet(MakeReserveSet(expectedSize));
-  auto const used = src->m_used;
-  auto const elms = src->data();
-  auto const table = ad->hashTab();
-  auto const mask = ad->mask();
-  for (uint32_t i = 0; i < used; ++i) {
-    auto& elm = elms[i];
-    if (UNLIKELY(elm.isTombstone())) continue;
-    assert(!elm.isEmpty());
-    auto const loc = ad->findForNewInsert(table, mask, elm.hash());
-    auto newElm = ad->allocElm(loc);
-    if (elm.hasIntKey()) {
-      newElm->setIntKey(elm.intKey(), elm.hash());
-    } else {
-      newElm->setStrKey(elm.strKey(), elm.hash());
-    }
-  }
-  if (src->m_pos == used) {
-    ad->m_pos = ad->m_used;
-  } else {
-    ad->m_pos = ad->findElm(elms[src->m_pos]);
-  }
-  assert(ad->kind() == ArrayKind::kKeysetKind);
-  assert(ad->m_size == src->m_size);
-  assert(ad->hasExactlyOneRef());
-  assert(ad->m_used == src->m_size);
-  assert(ad->checkInvariants());
+  assertx(ad->m_kind == HeaderKind::Keyset);
+  assertx(ad->m_size == other.m_size);
+  assertx(mode == AllocMode::Request ?
+          ad->hasExactlyOneRef() : ad->isStatic());
+  assertx(ad->m_scale == scale);
+  assertx(ad->m_used == used);
+  assertx(ad->checkInvariants());
   return ad;
 }
 
 ArrayData* SetArray::MakeSetFromAPC(const APCArray* apc) {
-  assert(apc->isKeyset());
+  assertx(apc->isKeyset());
   auto const apcSize = apc->size();
   KeysetInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) init.add(apc->getValue(i)->toLocal());
   return init.create();
 }
 
-ArrayData* SetArray::AddToSet(ArrayData* ad, int64_t i, bool copy) {
-  auto a = asSet(ad)->prepareForInsert(copy);
+ArrayData* SetArray::AddToSet(ArrayData* ad, int64_t i) {
+  auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
   a->insert(i);
   return a;
 }
 
-ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s, bool copy) {
-  auto a = asSet(ad)->prepareForInsert(copy);
+ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, int64_t i) {
+  auto a = asSet(ad)->prepareForInsert(false);
+  a->insert(i);
+  return a;
+}
+
+ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s) {
+  auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
+  a->insert(s);
+  return a;
+}
+
+ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, StringData* s) {
+  auto a = asSet(ad)->prepareForInsert(false);
   a->insert(s);
   return a;
 }
@@ -258,8 +267,9 @@ ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s, bool copy) {
 //////////////////////////////////////////////////////////////////////
 
 void SetArray::Release(ArrayData* in) {
-  assert(in->isRefCounted());
-  assert(in->hasExactlyOneRef());
+  in->fixCountForRelease();
+  assertx(in->isRefCounted());
+  assertx(in->hasExactlyOneRef());
   auto const ad = asSet(in);
 
   if (!ad->isZombie()) {
@@ -267,20 +277,18 @@ void SetArray::Release(ArrayData* in) {
     auto const used = ad->m_used;
     for (uint32_t i = 0; i < used; ++i) {
       auto& elm = elms[i];
-      if (UNLIKELY(elm.isTombstone())) continue;
-      assert(!elm.isEmpty());
+      // It is OK to decref a TypedValue with kInvalidDataType.  It will appear
+      // uncounted.
+      assertx(!elm.isEmpty());
       tvDecRefGen(&elm.tv);
     }
-
-    // We better not have strong iterators associated with keysets.
-    assert(!has_strong_iterator(ad));
   }
   tl_heap->objFree(ad, ad->heapSize());
   AARCH64_WALKABLE_FRAME();
 }
 
-void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
-  assert(in->isUncounted());
+void SetArray::ReleaseUncounted(ArrayData* in) {
+  assertx(in->isUncounted());
   auto const ad = asSet(in);
 
   if (!ad->isZombie()) {
@@ -289,36 +297,34 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
     for (uint32_t i = 0; i < used; ++i) {
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
-      assert(!elm.isEmpty());
+      assertx(!elm.isEmpty());
       if (elm.hasStrKey()) {
         auto const skey = elm.strKey();
-        assert(!skey->isRefCounted());
+        assertx(!skey->isRefCounted());
         if (skey->isUncounted()) {
-          skey->destructUncounted();
+          StringData::ReleaseUncounted(skey);
         }
       }
     }
-
-    // We better not have strong iterators associated with keysets.
-    assert(!has_strong_iterator(ad));
   }
   if (APCStats::IsCreated()) {
     APCStats::getAPCStats().removeAPCUncountedBlock();
   }
-  free_huge(reinterpret_cast<char*>(ad) - extra);
+  uncounted_free(reinterpret_cast<char*>(ad) -
+           (ad->hasApcTv() ? sizeof(APCTypedValue) : 0));
 }
 
 //////////////////////////////////////////////////////////////////////
 
 ssize_t SetArray::findElm(const Elm& e) const {
-  assert(!e.isInvalid());
+  assertx(!e.isInvalid());
   return e.hasIntKey()
     ? find(e.intKey(), e.hash())
     : find(e.strKey(), e.hash());
 }
 
 void SetArray::insert(int64_t k, inthash_t h) {
-  assert(!isFull());
+  assertx(!isFull());
   auto const loc = findForInsert(k, h);
   if (isValidIns(loc)) {
     auto elm = allocElm(loc);
@@ -328,7 +334,7 @@ void SetArray::insert(int64_t k, inthash_t h) {
 void SetArray::insert(int64_t k) { return insert(k, hash_int64(k)); }
 
 void SetArray::insert(StringData* k, strhash_t h) {
-  assert(!isFull());
+  assertx(!isFull());
   auto const loc = findForInsert(k, h);
   if (isValidIns(loc)) {
     auto elm = allocElm(loc);
@@ -337,17 +343,13 @@ void SetArray::insert(StringData* k, strhash_t h) {
 }
 void SetArray::insert(StringData* k) { return insert(k, k->hash()); }
 
-void SetArray::erase(int32_t pos) {
-  assert(pos < m_used);
-  assert(0 <= pos);
+void SetArray::erase(RemovePos pos) {
+  assertx(pos.valid() && pos.elmIdx < m_used);
+  hashTab()[pos.probeIdx] = Tombstone;
+
   auto const elms = data();
-
-  if (m_pos == pos) {
-    m_pos = nextElm(elms, pos);
-  }
-
-  auto& elm = elms[pos];
-  assert(!elm.isInvalid());
+  auto& elm = elms[pos.elmIdx];
+  assertx(!elm.isInvalid());
   tvDecRefGen(&elm.tv);
   elm.setTombstone();
   --m_size;
@@ -362,8 +364,8 @@ void SetArray::erase(int32_t pos) {
 
 //////////////////////////////////////////////////////////////////////
 
-Cell SetArray::getElm(ssize_t ei) const {
-  assert(0 <= ei && ei < m_used);
+TypedValue SetArray::getElm(ssize_t ei) const {
+  assertx(0 <= ei && ei < m_used);
   return data()[ei].getKey();
 }
 
@@ -371,21 +373,22 @@ Cell SetArray::getElm(ssize_t ei) const {
 
 NEVER_INLINE
 SetArray* SetArray::grow(bool copy) {
-  assert(m_size > 0);
+  assertx(m_size > 0);
   auto const oldUsed = m_used;
   auto const newScale = m_scale * 2;
-  assert(Capacity(newScale) >= m_size);
-  assert(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
+  assertx(Capacity(newScale) >= m_size);
+  assertx(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
 
   auto ad            = reqAlloc(newScale);
-  ad->m_sizeAndPos   = m_sizeAndPos;
+  ad->m_size         = m_size;
+  ad->m_extra        = 0;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
   ad->initHeader(HeaderKind::Keyset, OneReference);
 
-  assert(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
-  assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
   memcpy16_inline(Data(ad), data(), sizeof(Elm) * oldUsed);
-  assert(ClearElms(Data(ad) + oldUsed, Capacity(newScale) - oldUsed));
+  assertx(ClearElms(Data(ad) + oldUsed, Capacity(newScale) - oldUsed));
 
   auto const table = ad->initHash(newScale);
   auto const mask = ad->mask();
@@ -410,19 +413,18 @@ SetArray* SetArray::grow(bool copy) {
     setZombie();
   }
 
-  assert(ad->hasExactlyOneRef());
-  assert(ad->kind() == kind());
-  assert(ad->m_size == m_size);
-  assert(ad->m_pos == m_pos);
-  assert(ad->m_scale == newScale);
-  assert(ad->m_used == oldUsed);
-  assert(ad->checkInvariants());
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->kind() == kind());
+  assertx(ad->m_size == m_size);
+  assertx(ad->m_scale == newScale);
+  assertx(ad->m_used == oldUsed);
+  assertx(ad->checkInvariants());
   return ad;
 }
 
 ALWAYS_INLINE
 SetArray* SetArray::prepareForInsert(bool copy) {
-  assert(checkInvariants());
+  assertx(checkInvariants());
   if (isFull()) return grow(copy);
   if (copy) return copySet();
   return this;
@@ -430,11 +432,6 @@ SetArray* SetArray::prepareForInsert(bool copy) {
 
 void SetArray::compact() {
   auto const elms = data();
-  Elm posElm;
-  if (m_pos < m_used) {
-    posElm = elms[m_pos];
-  }
-
   auto const table = initHash(m_scale);
   auto const mask = this->mask();
   uint32_t j = 0;
@@ -442,23 +439,16 @@ void SetArray::compact() {
   for (uint32_t i = 0; i < used; ++i) {
     auto& elm = elms[i];
     if (elm.isTombstone()) continue;
-    assert(!elm.isEmpty());
+    assertx(!elm.isEmpty());
     if (j != i) elms[j] = elms[i];
     *findForNewInsert(table, mask, elm.hash()) = j;
     ++j;
   }
-  assert(ClearElms(elms + j, m_used - j));
+  assertx(ClearElms(elms + j, m_used - j));
 
-  if (m_pos == m_used) {
-    m_pos = j;
-  } else {
-    assert(m_pos < m_used);
-    m_pos = findElm(posElm);
-  }
   m_used = j;
-
-  assert(m_size == m_used);
-  assert(checkInvariants());
+  assertx(m_size == m_used);
+  assertx(checkInvariants());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -479,35 +469,28 @@ void SetArray::compact() {
  * Zombie state:
  *
  *   m_used = UINT_MAX
- *   no MArrayIter's are pointing to this array
  *
  * Non-zombie:
  *
  *   m_size <= m_used
  *   m_used <= capacity()
- *   m_pos and all external iterators can't be on a tombstone
- *     or an empty element
- *
- * kKeysetKind:
- *   0 <= m_pos <= m_used
  */
 bool SetArray::checkInvariants() const {
   static_assert(sizeof(SetArray) % 16 == 0, "Some memcpy16 can fail.");
   static_assert(sizeof(Elm) <= 16, "Don't loose the precious memory gainz!");
 
   // All arrays:
-  assert(checkCount());
-  assert(isNotDVArray());
-  assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
-  assert(HashSize(m_scale) == folly::nextPowTwo<uint64_t>(capacity()));
+  assertx(checkCount());
+  assertx(isNotDVArray());
+  assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
+  assertx(HashSize(m_scale) == folly::nextPowTwo<uint64_t>(capacity()));
+  assertx(m_extra == 0);
 
   if (isZombie()) return true;
 
   // Non-zombie:
-  assert(m_size <= m_used);
-  assert(m_used <= capacity());
-  assert(0 <= m_pos && m_pos <= m_used);
-  assert(m_pos == m_used || !data()[m_pos].isInvalid());
+  assertx(m_size <= m_used);
+  assertx(m_used <= capacity());
 
 #if 0
   /*
@@ -518,13 +501,13 @@ bool SetArray::checkInvariants() const {
   for (uint32_t i = 0; i < capacity(); ++i) {
     auto& elm = elms[i];
     if (i >= m_used) {
-      assert(elm.isEmpty());
+      assertx(elm.isEmpty());
     } else {
-      assert(!elm.isEmpty());
+      assertx(!elm.isEmpty());
       if (!elm.isTombstone()) nonempty++;
     }
   }
-  assert(nonempty == m_size);
+  assertx(nonempty == m_size);
 
   uint32_t nused = 0;
   nonempty = 0;
@@ -533,14 +516,14 @@ bool SetArray::checkInvariants() const {
   for (uint32_t i = 0; i < HashSize(m_scale); ++i) {
     if (hash[i] != Empty) {
       if (hash[i] != Tombstone) {
-        assert(hash[i] < m_used);
+        assertx(hash[i] < m_used);
         nonempty++;
       }
       nused++;
     }
   }
-  assert(nused == m_used);
-  assert(nonempty == m_size);
+  assertx(nused == m_used);
+  assertx(nonempty == m_size);
 #endif
 
   return true;
@@ -555,25 +538,10 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-member_rval::ptr_u SetArray::NvTryGetInt(const ArrayData* ad, int64_t ki) {
-  auto const tv = SetArray::NvGetInt(ad, ki);
-  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
-  return tv;
-}
-
-member_rval::ptr_u SetArray::NvTryGetStr(const ArrayData* ad,
-                                        const StringData* ks) {
-  auto const ptr = SetArray::NvGetStr(ad, ks);
-  if (UNLIKELY(!ptr)) throwOOBArrayKeyException(ks, ad);
-  return ptr;
-}
-
-size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
-
-member_rval::ptr_u SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+TypedValue SetArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
-  assert(0 <= pos && pos < a->m_used);
-  return a->tvOfPos(pos);
+  assertx(0 <= pos && pos < a->m_used);
+  return *a->tvOfPos(pos);
 }
 
 bool SetArray::IsVectorData(const ArrayData* ad) {
@@ -602,97 +570,41 @@ bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  return asSet(ad)->findForExists(k, k->hash());
+  return NvGetStr(ad, k).is_init();
 }
 
-member_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval int)"
-  );
+arr_lval SetArray::LvalInt(ArrayData*, int64_t) {
+  throwInvalidKeysetOperation();
 }
 
-member_lval SetArray::LvalIntRef(ArrayData* ad, int64_t, bool) {
-  throwRefInvalidArrayValueException(ad);
+arr_lval SetArray::LvalStr(ArrayData*, StringData*) {
+  throwInvalidKeysetOperation();
 }
 
-member_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval string)"
-  );
+ArrayData* SetArray::SetInt(ArrayData*, int64_t, TypedValue) {
+  throwInvalidKeysetOperation();
 }
 
-member_lval SetArray::LvalStrRef(ArrayData* ad, StringData*, bool) {
-  throwRefInvalidArrayValueException(ad);
+ArrayData* SetArray::SetStr(ArrayData*, StringData*, TypedValue) {
+  throwInvalidKeysetOperation();
 }
 
-member_lval SetArray::LvalNew(ArrayData*, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval new)"
-  );
-}
-
-member_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
-  throwRefInvalidArrayValueException(ad);
-}
-
-ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, member_lval, bool) {
-  throwRefInvalidArrayValueException(ad);
-}
-
-ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, member_lval, bool) {
-  throwRefInvalidArrayValueException(ad);
-}
-
-ArrayData* SetArray::SetInt(ArrayData*, int64_t, Cell, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set int)"
-  );
-}
-
-ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set string)"
-  );
-}
-
-ArrayData* SetArray::SetWithRefInt(ArrayData*, int64_t, TypedValue, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set with ref int)"
-  );
-}
-
-ArrayData* SetArray::SetWithRefStr(ArrayData*, StringData*, TypedValue, bool) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set with ref string)"
-  );
-}
-
-ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+template<class K> ArrayData*
+SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
   auto a = asSet(ad);
+  auto const pos = a->findForRemove(k, h);
+  if (!pos.valid()) return a;
   if (copy) a = a->copySet();
-  auto const h = hash_int64(k);
-  auto const loc = a->findForRemove(k, h);
-  if (validPos(loc)) {
-    a->erase(loc);
-  }
+  a->erase(pos);
   return a;
 }
 
-ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
-  auto a = asSet(ad);
-  if (copy) a = a->copySet();
-  auto const h = k->hash();
-  auto const loc = a->findForRemove(k, h);
-  if (validPos(loc)) {
-    a->erase(loc);
-  }
-  return a;
+ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k) {
+  return RemoveImpl(ad, k, ad->cowCheck(), hash_int64(k));
 }
 
-bool SetArray::AdvanceMArrayIter(ArrayData*, MArrayIter&) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (strong iteration)"
-  );
+ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k) {
+  return RemoveImpl(ad, k, ad->cowCheck(), k->hash());
 }
 
 void SetArray::Sort(ArrayData*, int, bool) {
@@ -717,12 +629,13 @@ ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
   return CopySet(*a, AllocMode::Static);
 }
 
-ArrayData* SetArray::Append(ArrayData* ad, Cell v, bool copy) {
-  auto a = asSet(ad)->prepareForInsert(copy);
+ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
   if (isIntType(v.m_type)) {
+    auto a = asSet(ad)->prepareForInsert(copy);
     a->insert(v.m_data.num);
     return a;
   } else if (isStringType(v.m_type)) {
+    auto a = asSet(ad)->prepareForInsert(copy);
     a->insert(v.m_data.pstr);
     return a;
   } else {
@@ -730,18 +643,8 @@ ArrayData* SetArray::Append(ArrayData* ad, Cell v, bool copy) {
   }
 }
 
-ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  return Append(ad, tvToInitCell(v), copy);
-}
-
-ArrayData* SetArray::AppendRef(ArrayData* ad, member_lval, bool) {
-  throwRefInvalidArrayValueException(ad);
-}
-
-ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {
-  assertx(asSet(ad)->checkInvariants());
-  throwInvalidAdditionException(ad);
+ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
+  return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
 ArrayData* SetArray::Merge(ArrayData*, const ArrayData*) {
@@ -755,21 +658,16 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   if (a->cowCheck()) a = a->copySet();
   if (a->m_size) {
     ssize_t pos = a->getIterLast();
-    cellCopy(a->getElm(pos), *value.asTypedValue());
+    tvDup(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
-    auto loc = a->findForRemove(pelm->hash(),
+    auto const loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
     );
-    assert(loc != Empty);
+    assertx(loc.valid());
     a->erase(loc);
   } else {
     value = uninit_null();
   }
-  /*
-   * To conform to PHP5 behavior, the pop operation resets the array's
-   * internal iterator.
-   */
-  a->m_pos = a->getIterBegin();
   return a;
 }
 
@@ -778,36 +676,34 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   if (a->cowCheck()) a = a->copySet();
   if (a->m_size) {
     ssize_t pos = a->getIterBegin();
-    cellCopy(a->getElm(pos), *value.asTypedValue());
+    tvDup(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
-    auto loc = a->findForRemove(pelm->hash(),
+    auto const loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
     );
-    assert(loc != Empty);
+    assertx(loc.valid());
     a->erase(loc);
   } else {
     value = uninit_null();
   }
-  /*
-   * To conform to PHP5 behavior, the shift operation resets the array's
-   * internal iterator.
-   */
-  a->m_pos = a->getIterBegin();
   return a;
 }
 
-ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
-  auto a = asSet(ad);
-  if (copy) a = a->copySet();
+ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
   Elm e;
-  assert(ClearElms(&e, 1));
-  if (isIntType(v.m_type)) {
-    e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
-  } else if (isStringType(v.m_type)) {
-    e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
-  } else {
-    throwInvalidArrayKeyException(&v, ad);
-  }
+  assertx(ClearElms(&e, 1));
+  auto a = [&]{
+    if (isIntType(v.m_type)) {
+      e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
+      return asSet(RemoveInt(ad, v.m_data.num));
+    } else if (isStringType(v.m_type)) {
+      e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
+      return asSet(RemoveStr(ad, v.m_data.pstr));
+    } else {
+      throwInvalidArrayKeyException(&v, ad);
+    }
+  }();
+  if (a->cowCheck()) a = a->copySet();
 
   auto elms = a->data();
   if (!elms[0].isTombstone()) {
@@ -815,17 +711,16 @@ ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
     elms = a->data();
     memmove(&elms[1], &elms[0], a->m_used * sizeof(Elm));
     ++a->m_used;
-    ++a->m_pos;
   }
 
   ++a->m_size;
   elms[0] = e;
-  assert(!elms[0].isInvalid());
+  assertx(!elms[0].isInvalid());
   a->compact(); // Rebuild the hash table.
   return a;
 }
 
-void SetArray::Renumber(ArrayData*) {
+ArrayData* SetArray::Renumber(ArrayData*) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (renumbering)"
   );
@@ -838,55 +733,43 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
   for (uint32_t i = 0; i < used; ++i) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
-    assert(!elm.isEmpty());
+    assertx(!elm.isEmpty());
     tvAsVariant(&elm.tv).setEvalScalar();
   }
 }
 
-ArrayData* SetArray::Escalate(const ArrayData* ad) {
-  return const_cast<ArrayData*>(ad);
-}
+ArrayData* SetArray::ToDArrayImpl(const SetArray* ad) {
+  auto const size = ad->size();
+  if (!size) return ArrayData::CreateDArray();
+  DArrayInit init{size};
 
-template <typename Init> ALWAYS_INLINE
-ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
-  auto a = asSet(ad);
-  auto size = a->size();
-
-  if (!size) return toDArray ? staticEmptyDArray() : staticEmptyArray();
-
-  Init init{size};
-
-  auto const elms = a->data();
-  auto const used = a->m_used;
+  auto const elms = ad->data();
+  auto const used = ad->m_used;
   for (uint32_t i = 0; i < used; ++i) {
-    auto& elm = elms[i];
+    auto const& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     if (elm.hasIntKey()) {
       init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
-      auto const key = elm.strKey();
-      int64_t n;
-      if (key->isStrictlyInteger(n)) {
-        init.set(n, make_tv<KindOfInt64>(n));
-      } else {
-        init.set(key, tvAsCVarRef(&elm.tv));
-      }
+      init.set(elm.strKey(), tvAsCVarRef(&elm.tv));
     }
   }
 
-  auto out = init.create();
+  auto const out = init.create();
   assertx(MixedArray::asMixed(out));
   return out;
 }
 
-ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit>(ad, false);
-  assertx(out->isNotDVArray());
-  return out;
-}
-
-ArrayData* SetArray::ToDArray(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<DArrayInit>(ad, true);
+ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto out = ToDict(ad, copy);
+    if (RuntimeOption::EvalHackArrDVArrMark) {
+      if (out->cowCheck()) out = out->copy();
+      out->setLegacyArray(true);
+    }
+    return out;
+  }
+  auto out = ToDArrayImpl(SetArray::asSet(ad));
   assertx(out->isDArray());
   return out;
 }
@@ -899,8 +782,8 @@ ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {
 ALWAYS_INLINE
 bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                            bool strict) {
-  assert(asSet(ad1)->checkInvariants());
-  assert(asSet(ad2)->checkInvariants());
+  assertx(asSet(ad1)->checkInvariants());
+  assertx(asSet(ad2)->checkInvariants());
 
   if (ad1 == ad2) return true;
   if (ad1->size() != ad2->size()) return false;
@@ -929,7 +812,7 @@ bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       } else {
         assertx(elm1->hasStrKey());
         if (!elm2->hasStrKey()) return false;
-        if (!same(elm1->strKey(), elm2->strKey())) return false;
+        if (!HPHP::same(elm1->strKey(), elm2->strKey())) return false;
       }
       ++elm1;
       ++elm2;
@@ -959,9 +842,9 @@ bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
       if (elm.hasIntKey()) {
-        if (!NvGetInt(ad2, elm.intKey())) return false;
+        if (!ExistsInt(ad2, elm.intKey())) return false;
       } else {
-        if (!NvGetStr(ad2, elm.strKey())) return false;
+        if (!ExistsStr(ad2, elm.strKey())) return false;
       }
     }
   }

@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_806() {
 $v = new Vector;
 $v[] = 7;
 $v[] = 'foo';
@@ -16,3 +19,4 @@ print_r($v2);
 echo json_encode($v2) . "\n";
 var_export($v2);
  echo "\n";
+}

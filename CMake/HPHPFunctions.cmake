@@ -134,23 +134,28 @@ function(embed_sections TARGET DEST)
   add_custom_command(TARGET ${TARGET} PRE_BUILD
     # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
-    COMMAND "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-build-id.txt"
+    COMMAND
+      "INSTALL_DIR=${CMAKE_BINARY_DIR}/hphp/util"
+      "${HPHP_HOME}/hphp/hhvm/generate-buildinfo.sh"
     WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
     COMMENT "Generating Repo Schema ID and Compiler ID"
     VERBATIM)
 
   if (APPLE)
-    set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
-    set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
-    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA})
+    set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt")
+    set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt")
+    set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt")
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA} ${BUILD_ID})
   elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}#include \"${HPHP_HOME}/hphp/runtime/version.h\"\n")
-    file(READ "${HPHP_HOME}/hphp/hhvm/hhvm.rc" VERSION_INFO)
-    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${HPHP_HOME}/hphp/util/generated-compiler-id.txt\"\n")
-    set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}#include \"${CMAKE_BINARY_DIR}/hphp/runtime/version.h\"\n")
+    file(READ "${CMAKE_BINARY_DIR}/hphp/hhvm/hhvm.rc" VERSION_INFO)
+    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}build_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
     set(i 0)
     foreach (nm ${${TARGET}_SLIBS_NAMES})
@@ -162,12 +167,14 @@ function(embed_sections TARGET DEST)
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"
-      ARGS "--add-section" "compiler_id=${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
-           "--add-section" "repo_schema_id=${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
+      ARGS "--add-section" "compiler_id=${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt"
+           "--add-section" "repo_schema_id=${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt"
+           "--add-section" "build_id=${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt"
            ${${TARGET}_SLIBS}
            ${DEST}
-      DEPENDS "${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
-              "${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
+      DEPENDS "${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt"
+              "${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt"
+              "${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt"
       COMMENT "Embedding php in ${TARGET}")
   endif()
 endfunction(embed_sections)
@@ -351,26 +358,6 @@ function(auto_source_group rootName rootDir)
   endforeach()
 endfunction()
 
-macro(add_precompiled_header PrecompiledHead PrecompiledSrc SourcesVar)
-  if (MSVC AND MSVC_ENABLE_PCH)
-    get_filename_component(PrecompiledHeader "${PrecompiledHead}" ABSOLUTE)
-    get_filename_component(PrecompiledSource "${PrecompiledSrc}" ABSOLUTE)
-    get_filename_component(PrecompiledBasename "${PrecompiledHeader}" NAME_WE)
-    get_filename_component(PrecompiledHeaderFilename "${PrecompiledHeader}" NAME)
-    set(PrecompiledBinary "${CMAKE_CURRENT_BINARY_DIR}/${PrecompiledBasename}.pch")
-    set(Sources ${${SourcesVar}})
-
-    set_source_files_properties(${PrecompiledSource} PROPERTIES
-      COMPILE_FLAGS "/Yc\"${PrecompiledHeaderFilename}\" /Fp\"${PrecompiledBinary}\""
-      OBJECT_OUTPUTS "${PrecompiledBinary}")
-    set_source_files_properties(${Sources} PROPERTIES
-      COMPILE_FLAGS "/Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\""
-      OBJECT_DEPENDS "${PrecompiledBinary}")
-
-    list(APPEND ${SourcesVar} ${PrecompiledSource} ${PrecompiledHeader})
-  endif()
-endmacro()
-
 function(parse_version PREFIX VERSION)
   if (NOT ${VERSION} MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-.+)?$")
     message(FATAL_ERROR "VERSION must conform to X.Y(.Z)?(-.+)?")
@@ -459,8 +446,8 @@ endfunction()
 # This should be called for object libraries, rather than calling
 # hphp_link directly.
 function(object_library_hphp_link target)
-  # Gold doesn't need this, and MSVC can't have it. (see below)
-  if (NOT ENABLE_LD_GOLD AND NOT MSVC)
+  # MSVC can't have it. (see below)
+  if (NOT MSVC)
     hphp_link(${target})
   endif()
 endfunction()
@@ -476,3 +463,107 @@ function(object_library_ld_link_libraries target)
     endif()
   endif()
 endfunction()
+
+set(
+  HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX
+  ""
+  CACHE
+  STRING
+  "URL prefix containing cache of third-party dependencies"
+)
+set(
+  HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX
+  ""
+  CACHE
+  STRING
+  "URL suffix for third-party dependency cache"
+)
+set(
+  HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE
+  OFF
+  CACHE
+  BOOL
+  "Do not download sources that are not in cache; may cause build to fail."
+)
+set(
+  HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT
+  ""
+  CACHE
+  STRING
+  "Path to a text file to put a list of sources that should be in the cache"
+)
+
+# Usage:
+#  SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+#    MY_VAR_NAME
+#    SOURCE_URL https://example.com/
+#    SOURCE_HASH SHA256=deadbeef
+#  )
+#  ... or ...
+#  SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+#    MY_VAR_NAME
+#    Linux_URL https://example.com/linux.tar.bz2
+#    Linux_HASH SHA256=deadbeef
+#    Darwin_URL https://example.com/macos.tar.bz2
+#    Darwin_HASH SHA256=deadbeef
+#  )
+#
+macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME)
+  cmake_parse_arguments(
+    # Prefix (FOO becomes _arg_FOO - trailing _ implied)
+    _arg
+    # No-arg parameter (none):
+    ""
+    # Single-argument parameters
+    "SOURCE_URL;SOURCE_HASH;Linux_URL;Linux_HASH;Darwin_URL;Darwin_HASH"
+    # Multi-argument parameters (none)
+    ""
+    ${ARGN}
+  )
+
+  # Try source, but fall back to platform-specific
+  if (NOT "${_arg_SOURCE_URL}" STREQUAL "")
+    set(_URL "${_arg_SOURCE_URL}")
+    set("${VAR_NAME}" URL_HASH "${_arg_SOURCE_HASH}")
+    if (NOT "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" STREQUAL "")
+      FILE(
+        APPEND
+        "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}"
+        "${_arg_SOURCE_URL}\n"
+      )
+    endif()
+  else()
+    set(_URL "${_arg_${CMAKE_HOST_SYSTEM_NAME}_URL}")
+    set("${VAR_NAME}" URL_HASH "${_arg_${CMAKE_HOST_SYSTEM_NAME}_HASH}")
+    if (NOT "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" STREQUAL "")
+      FILE(
+        APPEND
+        "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}"
+        "${_arg_Linux_URL}\n"
+        "${_arg_Darwin_URL}\n"
+      )
+    endif()
+  endif()
+
+  if ("${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}" STREQUAL "")
+    list(APPEND ${VAR_NAME} URL "${_URL}")
+    if (${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
+      message(
+        FATAL_ERROR
+        "HHVM_THIRD_PARTY_ONLY_USE_CACHE is set, but cache is not configured"
+      )
+    endif()
+  else()
+
+    get_filename_component("_URL_NAME" "${_URL}" NAME)
+    list(
+      APPEND "${VAR_NAME}"
+      URL
+      "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${_URL_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}"
+    )
+    if (NOT ${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
+      list(APPEND "${VAR_NAME}" "${_URL}")
+    endif()
+    list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${_URL_NAME}")
+  endif()
+endmacro()

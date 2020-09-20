@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MY_BASE {
   public $x = "123";
@@ -12,6 +12,7 @@ class MY_CLASS extends MY_BASE {
     var_dump($this->x);
   }
 }
+<<__EntryPoint>> function main(): void {
 $o = new MY_CLASS;
 $o->printX();
-?>
+}

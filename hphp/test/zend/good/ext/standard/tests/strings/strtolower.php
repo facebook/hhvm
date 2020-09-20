@@ -1,9 +1,9 @@
-<?php
-/* Prototype: 
+<?hh
+/* Prototype:
      string strtolower ( string $str );
    Description:
-     Returns string with all alphabetic characters converted to lowercase.
-*/
+     Returns string with all alphabetic characters converted to lowercase. */
+<<__EntryPoint>> function main(): void {
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   setlocale(LC_ALL, 'C');
 } else {
@@ -21,8 +21,8 @@ $str = "Mary Had A liTTle LAmb and ShE loveD IT So\n";
 var_dump(strtolower($str));
 
 echo "\n*** Testing strtolower() with various strings ***";
-/* strings to pass strtolower() */ 
-$strings = array ( 
+/* strings to pass strtolower() */
+$strings = varray [
   "",
   "string",
   "stRINg0234",
@@ -32,14 +32,14 @@ $strings = array (
   NULL,
   TRUE,
   FALSE,
-  array()
-);
+  varray[]
+];
 
 $count = 0;
 /* loop through to check possible variations */
 foreach ($strings as $string) {
   echo "\n-- Iteration $count --\n";
-  var_dump( strtolower($string) );
+  try { var_dump( strtolower($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 
@@ -50,8 +50,8 @@ else
   echo "strings are not same\n";
 
 echo "\n*** Testing error conditions ***";
-var_dump( strtolower() ); /* Zero arguments */
-var_dump( strtolower("a", "b") ); /* Arguments > Expected */
+try { var_dump( strtolower() ); /* Zero arguments */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( strtolower("a", "b") ); /* Arguments > Expected */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "*** Done ***";
-?>
+}

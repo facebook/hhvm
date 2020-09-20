@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."), true);
 
 $idx = 0;
@@ -15,5 +15,5 @@ foreach($it as $file)
 	}
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

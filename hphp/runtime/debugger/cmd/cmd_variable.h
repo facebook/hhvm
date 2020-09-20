@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
@@ -52,7 +51,7 @@ private:
   /* Serialization limit on a single variable value.  -1 means unlimited. */
   int m_formatMaxLen{200};
 
-  /* Set true by onServer if it used g_context->m_globalVarEnv. */
+  /* Set true by onServer if it used g_context->m_globalNVTable. */
   bool m_global;
 
   req::root<String> m_varName;
@@ -62,4 +61,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_

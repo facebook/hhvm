@@ -1,0 +1,26 @@
+(3,7)-(3,8) Class `E` contains an abstract method and must therefore be declared `abstract`
+(4,10)-(4,17) Methods cannot have multiple visibility modifiers
+(5,3)-(5,35) Redeclared method `E::f`
+(5,9)-(5,14) Methods cannot have duplicate modifiers
+(6,3)-(6,45) Redeclared method `E::f`
+(6,19)-(6,24) Cannot declare abstract method `E::f` `final`
+(7,3)-(7,19) Cannot declare abstract method `E::f` `private`
+(7,3)-(7,40) Redeclared method `E::f`
+(8,3)-(8,46) Redeclared method `E::f`
+(9,3)-(9,46) Redeclared method `E::f`
+(10,3)-(10,30) Redeclared method `E::f`
+(10,31)-(10,32) Non-abstract method `E::f` must contain body
+(11,3)-(11,16) Constructor `E::__construct()` cannot be static
+(12,3)-(12,46) Redeclared method `E::__construct`
+(13,3)-(13,42) Redeclared method `E::__construct`
+(14,3)-(14,42) Redeclared method `E::__construct`
+(15,3)-(15,43) Redeclared method `E::f`
+(15,22)-(15,35) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
+(16,3)-(16,39) Redeclared method `E::__construct`
+(16,36)-(16,39) A constructor cannot have a non-`void` type annotation.
+(17,3)-(17,40) Redeclared method `E::__construct`
+(18,3)-(18,33) Redeclared method `E::f`
+(19,3)-(19,34) Redeclared method `E::f`
+(19,25)-(19,26) A variadic parameter `...` may not be followed by a comma.
+(20,3)-(20,41) Redeclared method `E::f`
+(20,22)-(20,25) A variadic parameter `...` may only appear at the end of a parameter list.

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FILES_MATCH_H_
-#define incl_HPHP_FILES_MATCH_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -41,4 +40,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_FILES_MATCH_H_

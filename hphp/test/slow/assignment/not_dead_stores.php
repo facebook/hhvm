@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function getTestArray() {
-  return array('opera', '12', '16');
+  return varray['opera', '12', '16'];
 }
 
 function stringFunc() {
@@ -9,7 +9,7 @@ function stringFunc() {
   var_dump($results);
   if (!$results) return null;
 
-  $groups = array();
+  $groups = varray[];
   $prefix = 'foo.browser';
 
   if ($results[0]) {
@@ -32,7 +32,7 @@ function intFunc() {
   var_dump($results);
   if (!$results) return null;
 
-  $groups = array();
+  $groups = varray[];
   $prefix = 1;
 
   if ($results[0]) {
@@ -50,5 +50,9 @@ function intFunc() {
   return $groups;
 }
 
+
+<<__EntryPoint>>
+function main_not_dead_stores() {
 var_dump(stringFunc());
 var_dump(intFunc());
+}

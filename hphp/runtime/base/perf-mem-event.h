@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PERF_EVENT_H_
-#define incl_HPHP_PERF_EVENT_H_
+#pragma once
 
 #include "hphp/util/perf-event.h"
 
@@ -29,4 +28,3 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample);
 
 }
 
-#endif

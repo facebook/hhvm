@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__NativeData("Generator")>>
 final class Generator implements HH\KeyedIterator {
@@ -6,36 +6,36 @@ final class Generator implements HH\KeyedIterator {
   private function __construct(): void {}
 
   <<__Native("OpCodeImpl")>>
-  function current(): mixed;
+  public function current(): mixed;
 
   <<__Native("OpCodeImpl")>>
-  function key(): mixed;
+  public function key(): mixed;
 
   <<__Native("OpCodeImpl")>>
-  function next(): mixed;
+  public function next(): mixed;
 
   <<__Native("OpCodeImpl")>>
   private function throw(object $ex): mixed;
 
   <<__Native("OpCodeImpl")>>
-  function rewind(): mixed;
+  public function rewind(): mixed;
 
   <<__Native("OpCodeImpl")>>
-  function valid(): bool;
+  public function valid(): bool;
 
   <<__Native("OpCodeImpl")>>
-  function send(mixed $v): mixed;
+  public function send(mixed $v): mixed;
 
   <<__Native("OpCodeImpl")>>
-  function raise(mixed $v): mixed;
+  public function raise(mixed $v): mixed;
 
   <<__Native("OpCodeImpl")>>
-  function getReturn(): mixed;
+  public function getReturn(): mixed;
 
   <<__Native>>
-  function getOrigFuncName(): string;
+  public function getOrigFuncName(): string;
 
   <<__Native>>
-  function getCalledClass(): string;
+  public function getCalledClass(): string;
 
 }

@@ -1,5 +1,5 @@
 *** Testing array_merge() : usage variations ***
-array(8) {
+darray(8) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -17,7 +17,7 @@ array(8) {
   [""]=>
   string(4) "null"
 }
-array(8) {
+darray(8) {
   [0]=>
   string(5) "float"
   [1]=>

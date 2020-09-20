@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait TraitFoo {
   public function getStringThroughProtectedMethod() {
@@ -23,6 +23,10 @@ class A {
     return 'in a privateMethod';
   }
 }
+
+<<__EntryPoint>>
+function main_2065() {
 $a = new A();
 echo $a->getStringThroughProtectedMethod()."\n";
 echo $a->getStringThroughPrivateMethod()."\n";
+}

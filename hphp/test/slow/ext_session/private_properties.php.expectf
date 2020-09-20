@@ -1,4 +1,0 @@
-object(MyClass)#%d (1) {
-  ["id":"MyClass":private]=>
-  int(12)
-}

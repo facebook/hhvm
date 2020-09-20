@@ -14,18 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
-#define incl_HPHP_VARIABLE_SERIALIZER_H_
+#pragma once
 
+#include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-vector.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
-#include <boost/noncopyable.hpp>
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +52,14 @@ struct VariableSerializer {
     APCSerialize, //used in APC serialization (controlled by switch)
     DebuggerSerialize, //used by hphp debugger for client<->proxy communication
     PHPOutput, //used by compiler to output scalar values into byte code
+    Last = PHPOutput,
   };
+
+  /*
+   * Set in m_option for APCSerialize to disable serializing static
+   * datastructures as their address
+   */
+  static constexpr auto kAPC_PRIME_SERIALIZE = 1;
 
   /**
    * Constructor and destructor.
@@ -61,12 +70,18 @@ struct VariableSerializer {
   VariableSerializer& operator=(const VariableSerializer&) = delete;
 
   // Use UnlimitSerializationScope to suspend this temporarily.
-  static __thread int64_t serializationSizeLimit;
+  struct SerializationLimitWrapper {
+    int64_t value = StringData::MaxSize;
+  };
+  static RDS_LOCAL(SerializationLimitWrapper, serializationSizeLimit);
 
   /**
    * Top level entry function called by f_ functions.
    */
-  String serialize(const Variant& v, bool ret, bool keepCount = false);
+  String serialize(const_variant_ref v, bool ret, bool keepCount = false);
+  String serialize(const Variant& var, bool ret, bool keepCount = false) {
+    return serialize(const_variant_ref{var}, ret, keepCount);
+  }
   String serializeValue(const Variant& v, bool limit);
 
   // Serialize with limit size of output, always return the serialized string.
@@ -84,7 +99,55 @@ struct VariableSerializer {
   // arrays. This flag can override that behavior.
   void keepDVArrays() { m_keepDVArrays = true; }
 
-  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray };
+  // Force Hack arrays to serialize as PHP arrays.
+  void setForcePHPArrays() { m_forcePHPArrays = true; }
+
+  // Force PHP arrays to serialize as Hack arrays. This mode is preferred.
+  // In this mode, all decisions are driven by types. E.g., for JSON:
+  //   - varrays and vecs are encoded as lists: [...]
+  //   - darrays and dicts are encoded as maps: {...}
+  void setForceHackArrays() { m_forceHackArrays = true; }
+
+  // Emit a HAC notice on serialization of the specified kind of array.
+  void setHackWarn()  { m_hackWarn = true; }
+  void setDictWarn()  { m_dictWarn = true; }
+  void setKeysetWarn()  { m_keysetWarn = true; }
+  void setPHPWarn()   { m_phpWarn = true; }
+  void setEmptyDArrayWarn()    { m_edWarn = true; }
+  void setVecLikeDArrayWarn()  { m_vdWarn = true; }
+  void setDictLikeDArrayWarn() { m_ddWarn = true; }
+
+  // ignore uninitialized late init props and do not attempt to serialize them
+  void setIgnoreLateInit() { m_ignoreLateInit = true; }
+
+  // Serialize legacy bit and provenance tag, using same format as
+  // Type::Internal serializer. This is only supported Type::Serialize.
+  void setSerializeProvenanceAndLegacy() {
+    assertx(getType() == Type::Serialize);
+    m_serializeProvenanceAndLegacy = true;
+  }
+
+  // MarkedVArray and MarkedDArray are used for serialization formats, which
+  // can distinguish between all 3 possible array states (unmarked varray,
+  // unmarked vec, marked varray/vec).
+  // In post-EvalHackArrDVArrs MarkedVArray/MarkedDArray correspond to marked
+  // vec/dict.
+  enum class ArrayKind { PHP, Dict, Vec, Keyset, VArray, DArray,
+                         MarkedVArray, MarkedDArray };
+
+  // One entry for each vec or dict in the value being serialized (in a
+  // pre-order walk). If the bool is true, and mode is PHPOutput, the vec or
+  // dict will be output like a varray or darray.
+  using DVOverrides = std::vector<bool>;
+  void setDVOverrides(const DVOverrides* overrides) {
+    m_dvOverrides = overrides;
+  }
+
+  void setUnitFilename(const StringData* name) {
+    assertx(name->isStatic());
+    assertx(getType() == Type::Internal);
+    m_unitFilename = name;
+  }
 
 private:
   /**
@@ -102,11 +165,11 @@ private:
 
   void write(const String& v);
   void write(const Object& v);
-  void write(const Variant& v, bool isArrayKey = false);
+  void write(const_variant_ref v, bool isArrayKey = false);
 
   void writeNull();
   // what to write if recursive level is over limit?
-  void writeOverflow(const TypedValue& tv);
+  void writeOverflow(tv_rval tv);
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
@@ -126,37 +189,69 @@ private:
    * Helpers.
    */
   void indent();
-  void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
-  bool incNestedLevel(const TypedValue& tv);
-  void decNestedLevel(const TypedValue& tv);
-  void pushObjectInfo(const String& objClass, int objId, char objCode);
+  bool incNestedLevel(tv_rval tv);
+  void decNestedLevel(tv_rval tv);
+  void pushObjectInfo(const String& objClass, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
   void popResourceInfo();
 
   ArrayKind getKind(const ArrayData* arr) const;
 
-  // Sentinel used to indicate that a member of SavedRefMap has a count but no ID.
+  // The func parameter will be invoked only if there is no overflow.
+  // Otherwise, writeOverflow will be invoked instead.
+  void preventOverflow(const Object& v, const std::function<void()>& func);
+  void writePropertyKey(const String& prop);
+
+  // Serialize a Variant recursively.
+  // The last param noQuotes indicates to serializer to not put the output in
+  // double quotes (used when printing the output of a __toDebugDisplay() of
+  // an object when it is a string.
+  void serializeVariant(tv_rval value,
+                        bool isArrayKey = false,
+                        bool skipNestCheck = false,
+                        bool noQuotes = false);
+  void serializeObject(const Object&);
+  void serializeObject(const ObjectData*);
+  void serializeObjectImpl(const ObjectData* obj);
+  void serializeCollection(ObjectData* obj);
+  void serializeObjProps(Array&);
+  void serializeArray(const ArrayData*, bool skipNestCheck = false);
+  void serializeArrayImpl(const ArrayData* arr, bool isVectorData);
+  void serializeResource(const ResourceData*);
+  void serializeResourceImpl(const ResourceData* res);
+  void serializeString(const String&);
+  void serializeRFunc(const RFuncData* func);
+  void serializeFunc(const Func* func);
+  void serializeClass(const Class* cls);
+  void serializeLazyClass(LazyClassData);
+  void serializeClsMeth(ClsMethDataRef clsMeth, bool skipNestCheck = false);
+  void serializeRClsMeth(RClsMethData* rclsMeth);
+
+  Array getSerializeProps(const ObjectData* obj) const;
+
+private:
+  // Sentinel used to indicate that a member of SavedRefMap has a count but no
+  // ID.
   static constexpr int NO_ID = -1;
 
   struct SavedRefMap {
     ~SavedRefMap();
 
-    struct MapData : boost::noncopyable {
-      MapData() : m_count(0), m_id(-1) { }
-      int m_count;
-      int m_id;
+    struct MapData {
+      int m_count{0};
+      int m_id{-1};
     };
 
-    MapData& operator[](const TypedValue& tv) {
-      auto& elm = m_mapping[tv];
-      if (!elm.m_count) tvIncRefGen(tv);
+    MapData& operator[](tv_rval tv) {
+      auto& elm = m_mapping[*tv];
+      if (!elm.m_count) tvIncRefGen(*tv);
       return elm;
     }
 
-    const MapData& operator[](const TypedValue& tv) const {
-      return m_mapping.at(tv);
+    const MapData& operator[](tv_rval tv) const {
+      return m_mapping.at(*tv);
     }
 
   private:
@@ -172,28 +267,47 @@ private:
       }
     };
 
-    req::hash_map<TypedValue, MapData, TvHash, TvEq> m_mapping;
+    req::fast_map<TypedValue, MapData, TvHash, TvEq> m_mapping;
   };
 
+private:
   Type m_type;
   int m_option;                  // type specific extra options
-  StringBuffer *m_buf;
-  int m_indent;
+  StringBuffer *m_buf{nullptr};
+  int m_indent{0};
   SavedRefMap m_refs;            // reference ids and counts for objs/arrays
-  int m_valueCount;              // Current ref index
-  bool m_referenced;             // mark current array element as reference
+  int m_valueCount{0};           // current ref index
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
-  int m_refCount;                // current variable's reference count
+  bool m_forcePHPArrays{false};  // serialize PHP and Hack arrays as PHP arrays
+  bool m_forceHackArrays{false}; // serialize PHP and Hack arrays as Hack arrays
+  bool m_serializeProvenanceAndLegacy{false}; // serialize provenance tags and
+                                              // legacy bit
+  bool m_hackWarn{false};        // warn when attempting on Hack arrays
+  bool m_dictWarn{false};        // warn when attempting on dicts
+  bool m_keysetWarn{false};        // warn when attempting on keysets
+  bool m_phpWarn{false};         // warn when attempting on PHP arrays
+  bool m_edWarn{false};          // warn when attempting on empty darrays
+  bool m_vdWarn{false};          // warn when attempting on vec-like darrays
+  bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
+  bool m_ignoreLateInit{false};  // ignore uninitalized late init props
+  bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
+  bool m_hasDictWarned{false};   // have we already warned on dicts?
+  bool m_hasKeysetWarned{false};   // have we already warned on dicts?
+  bool m_hasPHPWarned{false};    // have we already warned on PHP arrays?
+  bool m_hasEDWarned{false};     // have we already warned on empty darrays?
+  bool m_hasVDWarned{false};     // have we already warned on vec-like darrays?
+  bool m_hasDDWarned{false};  // have we already warned on non-vec-like darrays?
+  int m_refCount{1};             // current variable's reference count
   String m_objClass;             // for object serialization
-  int m_objId;                   // for object serialization
-  char m_objCode;                // for object serialization
+  char m_objCode{0};             // for object serialization
   String m_rsrcName;             // for resource serialization
-  int m_rsrcId;                  // for resource serialization
+  int m_rsrcId{0};               // for resource serialization
   int m_maxCount;                // for max recursive levels
-  int m_levelDebugger;           // keep track of levels for DebuggerSerialize
-  int m_maxLevelDebugger;        // for max level of DebuggerSerialize
-  size_t m_currentDepth;         // current depth (nasted objects/arrays)
-  size_t m_maxDepth;             // max depth limit before an error (0 -> none)
+  int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
+  int m_maxLevelDebugger{0};     // for max level of DebuggerSerialize
+  size_t m_currentDepth{0};      // current depth (nasted objects/arrays)
+  size_t m_maxDepth{0};          // max depth limit before an error (0 -> none)
+  bool m_keyPrinted{false};
 
   struct ArrayInfo {
     bool is_object;     // nested arrays or objects
@@ -206,39 +320,18 @@ private:
 
   struct ObjectInfo {
     String objClass;
-    int    objId;
     char   objCode;
     String rsrcName;
     int    rsrcId;
   };
   req::vector<ObjectInfo> m_objectInfos;
 
-  // The func parameter will be invoked only if there is no overflow.
-  // Otherwise, writeOverflow will be invoked instead.
-  void preventOverflow(const Object& v, const std::function<void()>& func);
-  void writePropertyKey(const String& prop);
-
-  void serializeRef(const TypedValue* tv, bool isArrayKey);
-  // Serialize a Variant recursively.
-  // The last param noQuotes indicates to serializer to not put the output in
-  // double quotes (used when printing the output of a __toDebugDisplay() of
-  // an object when it is a string.
-  void serializeVariant(const Variant&,
-                        bool isArrayKey = false,
-                        bool skipNestCheck = false,
-                        bool noQuotes = false);
-  void serializeObject(const Object&);
-  void serializeObject(const ObjectData*);
-  void serializeObjectImpl(const ObjectData* obj);
-  void serializeCollection(ObjectData* obj);
-  void serializeArray(const Array&, bool isObject = false);
-  void serializeArray(const ArrayData*, bool skipNestCheck = false);
-  void serializeArrayImpl(const ArrayData* arr);
-  void serializeResource(const ResourceData*);
-  void serializeResourceImpl(const ResourceData* res);
-  void serializeString(const String&);
-
-  Array getSerializeProps(const ObjectData* obj) const;
+  /* unitFilename should be set when we are serializing
+   * an adata for a unit in the repo--it is needed to correctly
+   * compress the provenance tag */
+  const StringData* m_unitFilename{nullptr};
+  const DVOverrides* m_dvOverrides{nullptr};
+  size_t m_dvOverridesIndex{0};
 };
 
 inline String internal_serialize(const Variant& v) {
@@ -256,7 +349,8 @@ template<typename T> struct TmpAssign {
 
 struct UnlimitSerializationScope {
   static constexpr int32_t kTmpLimit = StringData::MaxSize;
-  TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit, kTmpLimit};
+  TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit->value,
+                       kTmpLimit};
   TmpAssign<int64_t> rs{RuntimeOption::SerializationSizeLimit, kTmpLimit};
   TmpAssign<int32_t> rm{RuntimeOption::MaxSerializedStringSize, kTmpLimit};
 };
@@ -266,4 +360,3 @@ extern const StaticString s_serializedNativeDataKey;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_VARIABLE_SERIALIZER_H_

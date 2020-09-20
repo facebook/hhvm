@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : mixed array_rand(array input [, int num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -9,77 +9,79 @@
 * to see that function works with unexpeced data and generates warning message as required.
 */
 
-echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
-
-// Initialise function arguments
-$input = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //define a class
-class test
-{
-  var $t = 10;
-  function __toString()
-  {
+class test {
+  public $t = 10;
+  function __toString() {
     return "3object";
   }
 }
 
-//array of values to iterate over
-$values = array(
+<<__EntryPoint>>
+function main(): void {
+  echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
 
-        // int data
-/*1*/   0,
-        1,
-        12345,
-        -2345,
+  // Initialise function arguments
+  $input = varray[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
-        // float data
-/*5*/   10.5,
-        -10.5,
-        12.3456789000e10,
-        12.3456789000E-10,
-        .5,
+  //get an unset variable
+  $unset_var = 10;
+  unset($unset_var);
 
-        // null data
-/*10*/  NULL,
-        null,
+  //array of values to iterate over
+  $values = varray[
+          // int data
+  /*1*/   0,
+          1,
+          12345,
+          -2345,
 
-        // boolean data
-/*12*/  true,
-        false,
-        TRUE,
-        FALSE,
+          // float data
+  /*5*/   10.5,
+          -10.5,
+          12.3456789000e10,
+          12.3456789000E-10,
+          .5,
 
-        // empty data
-/*16*/  "",
-        '',
+          // null data
+  /*10*/  NULL,
+          null,
 
-        // string data
-/*18*/  "string",
-        'string',
+          // boolean data
+  /*12*/  true,
+          false,
+          TRUE,
+          FALSE,
 
-        // object data
-/*20*/  new test(),
+          // empty data
+  /*16*/  "",
+          '',
 
-        // undefined data
-/*21*/  @$undefined_var,
+          // string data
+  /*18*/  "string",
+          'string',
 
-        // unset data
-/*22*/  @$unset_var,
-);
+          // object data
+  /*20*/  new test(),
 
+          // undefined data
+  /*21*/  @$undefined_var,
 
-// loop through each element of the array for different values for 'num_req' argument
-$count = 1;
-foreach($values as $value) {
-  echo "\n-- Iteration $count --\n";
-  var_dump( array_rand($input,$value) );  
-  $count++;
-};
+          // unset data
+  /*22*/  @$unset_var,
+  ];
 
-echo "Done";
-?>
+  // loop through each element of the array for different values for 'num_req' argument
+  $count = 1;
+  foreach ($values as $value) {
+    echo "\n-- Iteration $count --\n";
+    try {
+      var_dump(array_rand($input, $value));
+    } catch (Exception $e) {
+      echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n";
+    }
+    $count++;
+  }
+
+  echo "Done";
+}

@@ -1,0 +1,6 @@
+File "explicit_type_collection_passing_vec1.php", line 5, characters 7-21:
+Invalid argument (Typing[4110])
+File "explicit_type_collection_passing_vec1.php", line 3, characters 18-20:
+Expected `int`
+File "explicit_type_collection_passing_vec1.php", line 5, characters 11-18:
+But got `arraykey`

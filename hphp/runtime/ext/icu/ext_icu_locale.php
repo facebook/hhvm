@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A "Locale" is an identifier used to get language, culture, or
@@ -63,7 +63,7 @@ class Locale {
    * @return string - The corresponding locale identifier.
    */
   <<__Native>>
-  public static function composeLocale(array $subtags): mixed;
+  public static function composeLocale(darray $subtags): mixed;
 
   /**
    * Checks if a language tag filter matches with locale
@@ -79,7 +79,7 @@ class Locale {
                                        $locale,
                                        $canonicalize = false): bool {
     if ($locale == '*') return true;
-    if (empty($locale)) $locale = self::getDefault();
+    if (!($locale ?? false)) $locale = self::getDefault();
     if ($canonicalize) {
       $locale  = self::canonicalize($locale);
       $langtag = self::canonicalize($langtag);
@@ -101,7 +101,7 @@ class Locale {
    *   for the locale or NULL if not present
    */
   <<__Native>>
-  public static function getAllVariants(string $locale): array<string>;
+  public static function getAllVariants(string $locale): varray<string>;
 
   /**
    * Gets the default locale value from the INTL global 'default_locale'
@@ -193,7 +193,7 @@ class Locale {
    *   for this locale
    */
   <<__Native>>
-  public static function getKeywords(string $locale): array<string,string>;
+  public static function getKeywords(string $locale): darray<string,string>;
 
   /**
    * Gets the primary language for the input locale
@@ -243,8 +243,8 @@ class Locale {
    * @return string - The closest matching language tag or default
    *   value.
    */
-  <<__Native, __ParamCoerceModeFalse>>
-  public static function lookup(array $langtag,
+  <<__Native>>
+  public static function lookup(varray $langtag,
                                 string $locale,
                                 bool $canonicalize = false,
                                 string $default = ""): string;
@@ -264,7 +264,7 @@ class Locale {
    *   variant0=varX , variant1=varY , variant2=varZ
    */
   <<__Native>>
-  public static function parseLocale(string $locale): array<string,string>;
+  public static function parseLocale(string $locale): darray<string,string>;
 
   /**
    * sets the default runtime locale
@@ -320,7 +320,7 @@ function locale_canonicalize(string $locale): mixed {
  *
  * @return string - The corresponding locale identifier.
  */
-function locale_compose(array $subtags) {
+function locale_compose(darray $subtags) {
   return Locale::composeLocale($subtags);
 }
 
@@ -501,7 +501,7 @@ function locale_get_script(string $locale): mixed {
  *
  * @return string - The closest matching language tag or default value.
  */
-function locale_lookup(array $langtag,
+function locale_lookup(varray $langtag,
                        string $locale,
                        bool $canonicalize = false,
                        string $default = ""): string {
@@ -522,7 +522,7 @@ function locale_lookup(array $langtag,
  *   '-varX-varY-varZ' then the returned array will have variant0=varX ,
  *   variant1=varY , variant2=varZ
  */
-function locale_parse(string $locale): array<string,string> {
+function locale_parse(string $locale): darray<string,string> {
   return Locale::parseLocale($locale);
 }
 

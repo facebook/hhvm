@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PHP_GLOBALS_INL_H_
-#define incl_HPHP_PHP_GLOBALS_INL_H_
+#pragma once
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -26,27 +25,21 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline void php_global_set(const StaticString& name, Variant var) {
-  auto& lval = tvAsVariant(g_context->m_globalVarEnv->lookupAdd(name.get()));
+  variant_ref lval{g_context->m_globalNVTable->lookupAdd(name.get())};
   lval = std::move(var);
 }
 
-inline void php_global_bind(const StaticString& name, Variant& v) {
-  auto to = g_context->m_globalVarEnv->lookupAdd(name.get());
-  tvBind(*v.asTypedValue(), *to);
-}
-
 inline Variant php_global_exchange(const StaticString& name, Variant newV) {
-  Variant ret;
-  auto& lval = tvAsVariant(g_context->m_globalVarEnv->lookupAdd(name.get()));
-  ret = lval;
+  variant_ref lval{g_context->m_globalNVTable->lookupAdd(name.get())};
+  Variant ret{lval};
   lval = std::move(newV);
   return ret;
 }
 
 inline Variant php_global(const StaticString& name) {
-  auto const tv = g_context->m_globalVarEnv->lookup(name.get());
+  auto const tv = g_context->m_globalNVTable->lookup(name.get());
   // Note: Variant is making unnecessary KindOfUninit checks here.
-  return tv ? tvAsCVarRef(tv) : uninit_null();
+  return tv ? Variant{variant_ref{tv}} : uninit_null();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -54,4 +47,3 @@ inline Variant php_global(const StaticString& name) {
 }
 
 
-#endif

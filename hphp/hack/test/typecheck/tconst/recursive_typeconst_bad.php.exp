@@ -1,0 +1,12 @@
+File "recursive_typeconst_bad.php", line 6, characters 14-26:
+Cyclic type constant:
+  `MyParent::MyParentShape` -> `MyParentFix::MyParentShapeFix` -> `MyParent::MyParentShape` (Typing[4131])
+File "recursive_typeconst_bad.php", line 15, characters 14-25:
+Cyclic type constant:
+  `MyChild::MyChildShape` -> `MyChildFix::MyChildShapeFix` -> `MyChild::MyChildShape` (Typing[4131])
+File "recursive_typeconst_bad.php", line 26, characters 14-29:
+Cyclic type constant:
+  `MyParentFix::MyParentShapeFix` -> `MyParent::MyParentShape` -> `MyParentFix::MyParentShapeFix` (Typing[4131])
+File "recursive_typeconst_bad.php", line 29, characters 16-30:
+Cyclic type constant:
+  `MyChildFix::MyChildShapeFix` -> `MyChild::MyChildShape` -> `MyChildFix::MyChildShapeFix` (Typing[4131])

@@ -1,3 +1,2 @@
-Test begin
 
-Fatal error: Declaration of C::foo() must be compatible with that of I::foo() in %s on line 8
+Fatal error: Declaration of C::foo() must be compatible with that of I::foo() in %s on line 6

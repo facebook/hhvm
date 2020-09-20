@@ -2,7 +2,7 @@ f() was called
 foo() was called
 g() was called
 bar() was called
-object(C)#1 (0) {
+object(C) (0) {
 }
 f() was called
 g() was called

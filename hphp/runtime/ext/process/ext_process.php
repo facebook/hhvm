@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Creates a timer that will send a SIGALRM signal to the process after the
@@ -33,7 +33,7 @@ function pcntl_alarm(int $seconds): int;
  *
  */
 <<__Native>>
-function pcntl_exec(string $path, array $args = [], array $envs = []): void;
+function pcntl_exec(string $path, varray $args = varray[], darray $envs = darray[]): void;
 
 /**
  * The pcntl_fork() function creates a child process that differs from the
@@ -126,7 +126,12 @@ function pcntl_signal(int $signo,
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
-function pcntl_sigprocmask(int $how, array $set, mixed &$oldset = null): bool;
+function pcntl_sigprocmask(
+  int $how,
+  varray $set,
+  <<__OutOnly("varray")>>
+  inout mixed $oldset
+): bool;
 
 /**
  * The wait function suspends execution of the current process until a child
@@ -157,7 +162,11 @@ function pcntl_sigprocmask(int $how, array $set, mixed &$oldset = null): bool;
  *
  */
 <<__Native>>
-function pcntl_wait(mixed &$status, int $options = 0): int;
+function pcntl_wait(
+  <<__OutOnly("KindOfInt64")>>
+  inout mixed $status,
+  int $options = 0
+): int;
 
 /**
  * Suspends execution of the current process until a child as specified by the
@@ -191,7 +200,8 @@ function pcntl_wait(mixed &$status, int $options = 0): int;
  */
 <<__Native>>
 function pcntl_waitpid(int $pid,
-                       mixed &$status,
+                       <<__OutOnly("KindOfInt64")>>
+                       inout mixed $status,
                        int $options = 0): int;
 
 /**

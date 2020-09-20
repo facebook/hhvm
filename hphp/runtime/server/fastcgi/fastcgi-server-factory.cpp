@@ -24,7 +24,7 @@ struct FastCGIServerFactory : ServerFactory {
   ServerPtr createServer(const ServerOptions& options) override {
     // We currently do not support FastCGIServer with less-than-maximum
     // initial threads.
-    assert(options.m_maxThreads == options.m_initThreads);
+    assertx(options.m_maxThreads == options.m_initThreads);
     return std::make_unique<FastCGIServer>(options.m_address,
                                              options.m_port,
                                              options.m_maxThreads,

@@ -1,7 +1,10 @@
-<?php
+<?hh
+
 
 // From https://github.com/facebook/hhvm/issues/2337
 
+<<__EntryPoint>>
+function main_filter_unsafe_raw_strip() {
 var_dump(
   filter_var(
     "a\ta",
@@ -9,3 +12,4 @@ var_dump(
     FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES
   )
 );
+}

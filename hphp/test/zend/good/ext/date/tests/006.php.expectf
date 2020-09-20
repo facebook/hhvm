@@ -1,6 +1,5 @@
 
-Warning: %s
-bool(false)
+Warning: checkdate() expects exactly 3 parameters, 0 given in %s/006.php on line 4
 bool(true)
 bool(false)
 bool(false)

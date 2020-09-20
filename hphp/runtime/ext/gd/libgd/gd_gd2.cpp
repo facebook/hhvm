@@ -681,7 +681,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
   }
   if (im->trueColor) {
     fmt += 2;
-                assert(fmt == GD2_FMT_TRUECOLOR_RAW ||
+                assertx(fmt == GD2_FMT_TRUECOLOR_RAW ||
                        fmt == GD2_FMT_TRUECOLOR_COMPRESSED);
   }
   /* Make sure chunk size is valid. These are arbitrary values; 64 because it seems

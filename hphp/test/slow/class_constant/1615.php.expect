@@ -1,5 +1,5 @@
 string(3) "new"
-array(1) {
+darray(1) {
   ["X"]=>
   string(3) "new"
 }

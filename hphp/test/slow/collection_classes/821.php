@@ -36,4 +36,8 @@ function main() {
   var_dump($m == 1);
   var_dump($m == "Map");
 }
+
+<<__EntryPoint>>
+function main_821() {
 main();
+}

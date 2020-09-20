@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string chop ( string $str [, string $charlist] )
  * Description: Strip whitespace (or other characters) from the end of a string
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 /*
  * Testing chop() : with heredoc strings
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : with heredoc strings ***\n";
 
 // defining different heredoc strings
@@ -39,14 +39,14 @@ hello\0world\0hello
 \0hello\0
 EOT;
 
-$heredoc_strings = array(
+$heredoc_strings = varray[
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,
- 		   $heredoc_with_newline_and_tabs,
- 		   $heredoc_with_alphanumerics,
-		   $heredoc_with_embedded_nulls
-		   );
+            $heredoc_with_newline_and_tabs,
+            $heredoc_with_alphanumerics,
+           $heredoc_with_embedded_nulls
+           ];
 $count = 1;
 foreach($heredoc_strings as $string)  {
   echo "\n--- Iteration $count ---\n";
@@ -56,4 +56,4 @@ foreach($heredoc_strings as $string)  {
 }
 
 echo "Done\n";
-?>
+}

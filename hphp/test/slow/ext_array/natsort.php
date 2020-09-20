@@ -1,9 +1,13 @@
-<?php
+<?hh
 
-$array1 = array("img12.png", "img10.png", "img2.png", "img1.png");
+
+<<__EntryPoint>>
+function main_natsort() {
+$array1 = varray["img12.png", "img10.png", "img2.png", "img1.png"];
 $array2 = $array1;
-sort($array1);
+sort(inout $array1);
 var_dump($array1);
 
-natsort($array2);
+natsort(inout $array2);
 var_dump($array2);
+}

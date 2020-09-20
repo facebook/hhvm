@@ -1,0 +1,275 @@
+(library
+  (name typing_defs)
+  (wrapped false)
+  (modules
+    coverage_level_defs
+    deferred_decl
+    pp_type
+    typing_defs
+    typing_defs_core
+    typing_defs_flags
+    tanySentinel
+    typing_reason)
+  (libraries
+    ast
+    core_kernel
+    heap_ident
+    hh_autoimport
+    ide_rpc_api_types
+    nast
+    pos
+    relative_path
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_heap)
+  (wrapped false)
+  (modules
+    typing_classes_heap
+    typing_heap
+    typing_lazy_heap)
+  (libraries
+    core_kernel
+    decl
+    counters
+    decl_ancestors
+    decl_inheritance
+    naming_provider
+    shallow_decl_defs
+    typing_defs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name tast)
+  (wrapped false)
+  (modules
+    ide_tast_cache
+    tast_env
+    tast_expand
+    tast_utils
+    tast_visitor
+    nast_visitor
+    nast_check_env
+    stateful_aast_visitor
+    type_mapper
+    type_parameter_env_ops
+    type_validator
+    typing_async
+    typing_coercion
+    typing_cont_key
+    typing_continuations
+    typing_deferred_members
+    typing_dependent_type
+    typing_enforceability
+    typing_enum
+    typing_env
+    typing_env_from_def
+    typing_env_return_info
+    typing_env_types
+    typing_equality_check
+    typing_expand
+    typing_fake_members
+    typing_generic
+    typing_generic_constraint
+    typing_generic_rules
+    typing_local_types
+    typing_intersection
+    typing_kinding
+    typing_log
+    typing_logic_helpers
+    typing_mutability
+    typing_object_get
+    typing_ordered_solver
+    typing_ops
+    typing_per_cont_env
+    typing_per_cont_ops
+    typing_phase
+    typing_pocket_universes
+    typing_print
+    typing_reactivity
+    typing_solver
+    typing_solver_utils
+    typing_special_fun
+    typing_substring
+    typing_subtype
+    typing_subtype_method
+    typing_subtype_tconst
+    typing_subtype_pocket_universes
+    typing_taccess
+    typing_tdef
+    typing_unify
+    typing_union
+    typing_utils
+    typing_variance
+    typing_visibility
+    typing_global_inference
+    typing_xhp)
+  (libraries
+    common
+    decl
+    decl_provider
+    hackfmt_doc
+    hackfmt_env
+    hackfmt
+    logging
+    naming_attributes
+    naming
+    symbol
+    typechecker_options
+    type_mapper_generic
+    typing_ast
+    typing_defs
+    global_config)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name tast_type_collector)
+  (wrapped false)
+  (modules
+    tast_type_collector)
+  (libraries
+    core_kernel
+    full_fidelity
+    tast)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing)
+  (wrapped false)
+  (modules
+    nastInitCheck
+    typing
+    typing_alias
+    typing_ast_print
+    typing_arithmetic
+    typing_array_access
+    typing_attributes
+    typing_check_decls
+    typing_debug
+    typing_disposable
+    typing_extends
+    typing_exts
+    typing_func_terminality
+    typing_helpers
+    typing_inheritance
+    typing_lenv
+    typing_memoize
+    typing_regex
+    typing_requirements
+    typing_return
+    typing_sequencing
+    typing_shapes
+    typing_structure
+    typing_toplevel
+    typing_try)
+  (libraries
+    logging
+    naming_special_names
+    pcre
+    procs_procs
+    tast
+    tast_check
+    nast_check)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name type_mapper_generic)
+  (wrapped false)
+  (modules
+    type_mapper_generic)
+  (libraries
+    common
+    core_kernel
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name type_mapper_forget)
+  (wrapped false)
+  (modules
+    type_mapper_forget)
+  (libraries
+    common
+    core_kernel
+    type_mapper_generic
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_ast)
+  (wrapped false)
+  (modules
+    internal_type_set
+    tast
+    typing_kinding_defs
+    type_parameter_env
+    typing_log_value
+    typing_logic
+    typing_mutability_env
+    typing_set
+    typing_inference_env
+    typing_make_type
+    typing_tyvar_occurrences
+    type_visitor)
+  (libraries
+    annotated_ast
+    ast
+    common
+    core_kernel
+    errors
+    naming_attributes
+    nast
+    type_mapper_forget
+    typing_defs
+    typechecker_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name coverage_level)
+  (wrapped false)
+  (modules
+    coverage_level)
+  (libraries
+    core_kernel
+    ide_rpc_api_types
+    tast
+    typing_defs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name typing_check)
+  (wrapped false)
+  (modules
+    typing_check_service
+    typing_check_utils)
+  (libraries
+    core_kernel
+    decl_service
+    errors
+    file_info
+    nast
+    global_options
+    heap_global_storage
+    procs_bucket
+    server_monitor
+    counters
+    typing
+    typing_defs
+    typing_service_api
+    typing_service_api_stubs
+    vfs)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name tast_typecheck)
+  (wrapped false)
+  (modules
+    delta
+    tast_typecheck)
+  (libraries
+    core_kernel
+    tast
+    typing
+    utils_core)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208

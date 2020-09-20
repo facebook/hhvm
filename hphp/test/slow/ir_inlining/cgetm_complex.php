@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Obj {
   public $val;
@@ -11,7 +11,7 @@ class CGetM {
   private $x;
 
   public function __construct() {
-    $this->x = array(new Obj);
+    $this->x = varray[new Obj];
   }
 
   public function getVal() {
@@ -23,4 +23,8 @@ function main(CGetM $k) {
   return $k->getVal();
 }
 
+
+<<__EntryPoint>>
+function main_cgetm_complex() {
 main(new CGetM());
+}

@@ -1,17 +1,13 @@
 *** Testing strncmp() function: error conditions ***
 
-Warning: %s
-NULL
+Warning: strncmp() expects exactly 3 parameters, 0 given in %s/strncmp_error.php on line 15
 
-Warning: %s
-NULL
+Warning: strncmp() expects exactly 3 parameters, 1 given in %s/strncmp_error.php on line 16
 
-Warning: %s
-NULL
+Warning: strncmp() expects exactly 3 parameters, 2 given in %s/strncmp_error.php on line 17
 
-Warning: %s
-NULL
+Warning: strncmp() expects exactly 3 parameters, 4 given in %s/strncmp_error.php on line 18
 
-Warning: %s
+Warning: Length must be greater than or equal to 0 in %s/strncmp_error.php on line 22
 bool(false)
 *** Done ***

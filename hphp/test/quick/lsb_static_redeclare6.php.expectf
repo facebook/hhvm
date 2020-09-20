@@ -1,0 +1,2 @@
+
+Fatal error: Cannot redeclare static A::$x as non-static C::$x in %s on line 10

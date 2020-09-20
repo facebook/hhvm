@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: Class foo may not inherit from final class (abc) in %s/error_009.php on line 5

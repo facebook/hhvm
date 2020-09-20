@@ -28,10 +28,11 @@
 #include <folly/gen/String.h>
 
 #include "hphp/hhbbc/cfg.h"
-#include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/type-system.h"
 
 #include "hphp/util/text-util.h"
 
@@ -54,10 +55,13 @@ std::string indent(int level, const std::string& s) {
     boost::replace_all_copy(s, "\n", "\n" + space)) + "\n";
 }
 
-void appendExnTreeString(std::string& ret,
-                         borrowed_ptr<const php::ExnNode> p) {
-  ret += " " + folly::to<std::string>(p->id);
-  if (p->parent) appendExnTreeString(ret, p->parent);
+void appendExnTreeString(const php::Func& func,
+                         std::string& ret,
+                         ExnNodeId p) {
+  do {
+    ret += " " + folly::to<std::string>(p);
+    p = func.exnNodes[p].parent;
+  } while (p != NoExnNodeId);
 }
 
 std::string escaped_string(SString str) {
@@ -77,6 +81,12 @@ std::string array_string(SArray arr) {
   return str;
 }
 
+std::string provtag_string(ProvTag tag) {
+  if (tag == ProvTag::Top) return "";
+  if (tag == ProvTag::NoTag) return " [none]";
+  return folly::sformat(" [{}]", tag.get().toString());
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -84,22 +94,168 @@ std::string array_string(SArray arr) {
 namespace php {
 
 std::string local_string(const Func& func, LocalId lid) {
+  if (lid == StackDupId) return "Dup";
+  if (lid == StackThisId) return "This";
+  assertx(lid <= MaxLocalId);
   auto const& loc = func.locals[lid];
   return loc.name
     ? folly::to<std::string>("$", loc.name->data())
     : folly::to<std::string>("$<unnamed:", lid, ">");
 };
 
+std::string show(const Func& func, const Bytecode& bc) {
+  std::string ret;
+
+  auto append_vsa = [&] (const CompactVector<LSString>& keys) {
+    ret += "<";
+    auto delim = "";
+    for (auto& s : keys) {
+      ret += delim + escaped_string(s);
+      delim = ",";
+    }
+    ret += ">";
+  };
+
+  auto append_switch = [&] (const SwitchTab& tab) {
+    ret += "<";
+    for (auto& target : tab) {
+      folly::toAppend(target, " ", &ret);
+    }
+    ret += ">";
+  };
+
+  auto append_sswitch = [&] (const SSwitchTab& tab) {
+    ret += "<";
+    for (auto& kv : tab) {
+      folly::toAppend(escaped_string(kv.first), ":", kv.second, " ", &ret);
+    }
+    ret += ">";
+  };
+
+  auto append_mkey = [&](MKey mkey) {
+    ret += memberCodeString(mkey.mcode);
+
+    switch (mkey.mcode) {
+      case MEL: case MPL:
+        folly::toAppend(':', local_string(func, mkey.local.id), &ret);
+        break;
+      case MEC: case MPC:
+        folly::toAppend(':', mkey.idx, &ret);
+        break;
+      case MEI:
+        folly::toAppend(':', mkey.int64, &ret);
+        break;
+      case MET: case MPT: case MQT:
+        folly::toAppend(
+          ":\"", escapeStringForCPP(mkey.litstr->data(), mkey.litstr->size()),
+          '"', &ret
+        );
+        break;
+      case MW:
+        break;
+    }
+  };
+
+  auto append_lar = [&](const LocalRange& range) {
+    if (!range.count) {
+      folly::toAppend("L:-", &ret);
+    } else {
+      folly::toAppend("L:", local_string(func, range.first), "+",
+                      range.count, &ret);
+    }
+  };
+
+  auto append_ita = [&](const IterArgs& ita) {
+    auto const print = [&](int32_t local) { return local_string(func, local); };
+    folly::toAppend(show(ita, print), &ret);
+  };
+
+#define IMM_BLA(n)     ret += " "; append_switch(data.targets);
+#define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
+#define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
+#define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
+#define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
+#define IMM_NLA(n)     ret += " " + local_string(func, data.nloc##n.id);
+#define IMM_ILA(n)     ret += " " + local_string(func, data.loc##n);
+#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
+#define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
+#define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
+#define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
+#define IMM_AA(n)      ret += " " + array_string(data.arr##n);
+#define IMM_BA(n)      folly::toAppend(" <blk:", data.target##n, ">", &ret);
+#define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
+#define IMM_OA(type)   IMM_OA_IMPL
+#define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
+#define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
+#define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
+#define IMM_ITA(n)     ret += " "; append_ita(data.ita);
+#define IMM_FCA(n)     do {                                        \
+  auto const aeTarget = data.fca.asyncEagerTarget() != NoBlockId   \
+    ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget())    \
+    : "-";                                                         \
+  folly::toAppend(                                                 \
+    " ", show(data.fca.base(), data.fca.inoutArgs(), aeTarget,     \
+              data.fca.context()), &ret);                          \
+} while (false);
+
+#define IMM_NA
+#define IMM_ONE(x)                IMM_##x(1)
+#define IMM_TWO(x, y)             IMM_##x(1); IMM_##y(2);
+#define IMM_THREE(x, y, z)        IMM_TWO(x, y); IMM_##z(3);
+#define IMM_FOUR(x, y, z, n)      IMM_THREE(x, y, z); IMM_##n(4);
+#define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n); IMM_##m(5);
+#define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m); IMM_##o(6);
+
+#define O(opcode, imms, inputs, outputs, flags) \
+  case Op::opcode:                              \
+    {                                           \
+      UNUSED auto const& data = bc.opcode;      \
+      UNUSED auto const curOpcode = Op::opcode; \
+      folly::toAppend(#opcode, &ret);           \
+      IMM_##imms                                \
+    }                                           \
+    break;
+
+  switch (bc.op) { OPCODES }
+
+#undef O
+
+#undef IMM_BLA
+#undef IMM_SLA
+#undef IMM_IVA
+#undef IMM_I64A
+#undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
+#undef IMM_IA
+#undef IMM_DA
+#undef IMM_SA
+#undef IMM_RATA
+#undef IMM_AA
+#undef IMM_BA
+#undef IMM_OA_IMPL
+#undef IMM_OA
+#undef IMM_KA
+#undef IMM_LAR
+#undef IMM_FCA
+
+#undef IMM_NA
+#undef IMM_ONE
+#undef IMM_TWO
+#undef IMM_THREE
+#undef IMM_FOUR
+#undef IMM_FIVE
+#undef IMM_SIX
+
+  return ret;
+}
+
 std::string show(const Func& func, const Block& block) {
   std::string ret;
 
-  if (block.section != php::Block::Section::Main) {
-    folly::toAppend("(fault funclet)\n", &ret);
-  }
-
-  if (block.exnNode) {
+  if (block.exnNodeId != NoExnNodeId) {
     ret += "(exnNode:";
-    appendExnTreeString(ret, block.exnNode);
+    appendExnTreeString(func, ret, block.exnNodeId);
     ret += ")\n";
   }
 
@@ -113,12 +269,9 @@ std::string show(const Func& func, const Block& block) {
       &ret
     );
   }
-  if (!block.factoredExits.empty()) {
-    ret += "(factored exits:";
-    for (auto ex : block.factoredExits) {
-      folly::toAppend(" blk:", ex, &ret);
-    }
-    ret += ")\n";
+
+  if (block.throwExit != NoBlockId) {
+    ret += folly::sformat("(throw: blk:{})\n", block.throwExit);
   }
 
   return ret;
@@ -135,34 +288,31 @@ std::string dot_instructions(const Func& func, const Block& b) {
 }
 
 // Output DOT-format graph.  Paste into dot -Txlib or similar.
-std::string dot_cfg(const Func& func) {
+std::string dot_cfg(const php::WideFunc& func) {
   std::string ret;
-  for (auto& b : rpoSortAddDVs(func)) {
+  for (auto const bid : rpoSortAddDVs(func)) {
+    auto const b = func.blocks()[bid].get();
     ret += folly::format(
       "B{} [ label = \"blk:{}\\n\"+{} ]\n",
-      b->id, b->id, dot_instructions(func, *b)).str();
+      bid, bid, dot_instructions(*func, *b)).str();
     bool outputed = false;
     forEachNormalSuccessor(*b, [&] (BlockId target) {
-      ret += folly::format("B{} -> B{};", b->id, target).str();
+      ret += folly::format("B{} -> B{};", bid, target).str();
       outputed = true;
     });
     if (outputed) ret += "\n";
-    outputed = false;
-    if (!is_single_nop(*b)) {
-      for (auto ex : b->factoredExits) {
-        ret += folly::sformat("B{} -> B{} [color=blue];", b->id, ex);
-        outputed = true;
-      }
+    if (!is_single_nop(*b) && b->throwExit != NoBlockId) {
+      ret += folly::sformat("B{} -> B{} [color=red];\n", bid, b->throwExit);
     }
-    if (outputed) ret += "\n";
   }
   return ret;
 }
 
-std::string show(const Func& func) {
+std::string show(const Func& f) {
   std::string ret;
+  auto const func = php::WideFunc::cns(&f);
 
-#define X(what) if (func.what) folly::toAppend(#what "\n", &ret)
+#define X(what) if (func->what) folly::toAppend(#what "\n", &ret)
   X(isClosureBody);
   X(isAsync);
   X(isGenerator);
@@ -172,38 +322,33 @@ std::string show(const Func& func) {
   if (getenv("HHBBC_DUMP_DOT")) {
     folly::format(&ret,
                   "digraph {} {{\n  node [shape=box];\n{}}}\n",
-                  func.name, indent(2, dot_cfg(func)));
+                  func->name, indent(2, dot_cfg(func)));
   }
 
-  for (auto& blk : func.blocks) {
-    if (blk->id == NoBlockId) continue;
-    folly::format(&ret, "block #{} (section {})\n{}",
-                  blk->id, static_cast<size_t>(blk->section),
-                  indent(2, show(func, *blk)));
+  for (auto const bid : func.blockRange()) {
+    auto const blk = func.blocks()[bid].get();
+    if (blk->dead) continue;
+    folly::format(&ret, "block #{}\n{}", bid, indent(2, show(*func, *blk)));
   }
 
-  visitExnLeaves(func, [&] (const php::ExnNode& node) {
-    folly::format(&ret, "exn node #{} ", node.id);
-    if (node.parent) {
-      folly::format(&ret, "(^{}) ", node.parent->id);
+  visitExnLeaves(*func, [&] (const php::ExnNode& node) {
+    folly::format(&ret, "exn node #{} ", node.idx);
+    if (node.parent != NoExnNodeId) {
+      folly::format(&ret, "(^{}) ", node.parent);
     }
-    ret += match<std::string>(
-      node.info,
-      [&] (const FaultRegion& fr) {
-        return folly::to<std::string>("fault->", fr.faultEntry);
-      },
-      [&] (const CatchRegion& cr) {
-        return folly::to<std::string>("catch->", cr.catchEntry);
-      }
-    ) + '\n';
+    ret += folly::to<std::string>("catch->", node.region.catchEntry) + '\n';
   });
 
   return ret;
 }
 
-std::string show(const Class& cls) {
+std::string show(const Class& cls, bool normalizeClosures) {
   std::string ret;
-  folly::toAppend("class ", cls.name->data(), &ret);
+  folly::toAppend(
+    "class ",
+    normalizeClosures ? normalized_class_name(cls) : cls.name->data(),
+    &ret
+  );
   if (cls.parentName) {
     folly::toAppend(" extends ", cls.parentName->data(), &ret);
   }
@@ -222,18 +367,16 @@ std::string show(const Class& cls) {
   return ret;
 }
 
-std::string show(const Unit& unit) {
+std::string show(const Unit& unit, bool normalizeClosures) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
-    "  function pseudomain:\n",
-    indent(4, show(*unit.pseudomain)),
     &ret
   );
 
   for (auto& c : unit.classes) {
     folly::toAppend(
-      indent(2, show(*c)),
+      indent(2, show(*c, normalizeClosures)),
       &ret
     );
   }
@@ -268,152 +411,14 @@ std::string show(SrcLoc loc) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const php::Func& func, const Bytecode& bc) {
-  std::string ret;
-
-  auto append_vsa = [&] (const CompactVector<LSString>& keys) {
-    ret += "<";
-    auto delim = "";
-    for (auto& s : keys) {
-      ret += delim + escaped_string(s);
-      delim = ",";
-    }
-    ret += ">";
-  };
-
-  auto append_switch = [&] (const SwitchTab& tab) {
-    ret += "<";
-    for (auto& target : tab) {
-      folly::toAppend(target, " ", &ret);
-    }
-    ret += ">";
-  };
-
-  auto append_sswitch = [&] (const SSwitchTab& tab) {
-    ret += "<";
-    for (auto& kv : tab) {
-      folly::toAppend(escaped_string(kv.first), ":", kv.second, " ", &ret);
-    }
-    ret += ">";
-  };
-
-  auto append_itertab = [&] (const IterTab& tab) {
-    ret += "<";
-    for (auto& kv : tab) {
-      folly::toAppend(kv.first, ",", kv.second, " ", &ret);
-    }
-    ret += ">";
-  };
-
-  auto append_argv = [&] (const CompactVector<uint32_t>& argv) {
-    if (!argv.empty()) {
-      ret += folly::sformat(" <{}>", folly::join(", ", argv));
-    }
-  };
-
-  auto append_mkey = [&](MKey mkey) {
-    ret += memberCodeString(mkey.mcode);
-
-    switch (mkey.mcode) {
-      case MEL: case MPL:
-        folly::toAppend(':', local_string(func, mkey.local), &ret);
-        break;
-      case MEC: case MPC:
-        folly::toAppend(':', mkey.idx, &ret);
-        break;
-      case MEI:
-        folly::toAppend(':', mkey.int64, &ret);
-        break;
-      case MET: case MPT: case MQT:
-        folly::toAppend(
-          ":\"", escapeStringForCPP(mkey.litstr->data(), mkey.litstr->size()),
-          '"', &ret
-        );
-        break;
-      case MW:
-        break;
-    }
-  };
-
-  auto append_lar = [&](const LocalRange& range) {
-    folly::toAppend("L:", local_string(func, range.first), "+",
-                    range.restCount, &ret);
-  };
-
-#define IMM_BLA(n)     ret += " "; append_switch(data.targets);
-#define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
-#define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
-#define IMM_I32LA(n)   append_argv(data.argv);
-#define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
-#define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
-#define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
-#define IMM_CAR(n)     folly::toAppend(" rslot:", data.slot, &ret);
-#define IMM_CAW(n)     folly::toAppend(" wslot:", data.slot, &ret);
-#define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
-#define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
-#define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
-#define IMM_AA(n)      ret += " " + array_string(data.arr##n);
-#define IMM_BA(n)      folly::toAppend(" <blk:", data.target, ">", &ret);
-#define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
-#define IMM_OA(type)   IMM_OA_IMPL
-#define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
-#define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
-#define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
-
-#define IMM_NA
-#define IMM_ONE(x)           IMM_##x(1)
-#define IMM_TWO(x, y)        IMM_##x(1);         IMM_##y(2);
-#define IMM_THREE(x, y, z)   IMM_TWO(x, y);      IMM_##z(3);
-#define IMM_FOUR(x, y, z, n) IMM_THREE(x, y, z); IMM_##n(4);
-
-#define O(opcode, imms, inputs, outputs, flags) \
-  case Op::opcode:                              \
-    {                                           \
-      UNUSED auto const& data = bc.opcode;      \
-      UNUSED auto const curOpcode = Op::opcode; \
-      folly::toAppend(#opcode, &ret);           \
-      IMM_##imms                                \
-    }                                           \
-    break;
-
-  switch (bc.op) { OPCODES }
-
-#undef O
-
-#undef IMM_BLA
-#undef IMM_SLA
-#undef IMM_ILA
-#undef IMM_I32LA
-#undef IMM_IVA
-#undef IMM_I64A
-#undef IMM_LA
-#undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
-#undef IMM_DA
-#undef IMM_SA
-#undef IMM_RATA
-#undef IMM_AA
-#undef IMM_BA
-#undef IMM_OA_IMPL
-#undef IMM_OA
-#undef IMM_KA
-#undef IMM_LAR
-
-#undef IMM_NA
-#undef IMM_ONE
-#undef IMM_TWO
-#undef IMM_THREE
-#undef IMM_FOUR
-
-  return ret;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 std::string show(const Type& t) {
   std::string ret;
+
+  if (t.couldBe(TUninit) && is_nullish(t)) {
+    auto tinit = unnullish(t);
+    if (t.couldBe(TInitNull)) tinit = opt(std::move(tinit));
+    return "TUninit|" + show(tinit);
+  }
 
   assert(t.checkInvariants());
 
@@ -440,7 +445,7 @@ std::string show(const Type& t) {
     return ret;
   case DataTag::Obj:
   case DataTag::Cls:
-  case DataTag::RefInner:
+  case DataTag::Record:
   case DataTag::ArrLikePacked:
   case DataTag::ArrLikePackedN:
   case DataTag::ArrLikeMap:
@@ -457,7 +462,7 @@ std::string show(const Type& t) {
   }
 
   auto showElem = [&] (const Type& key, const Type& val) -> std::string {
-    if (t.subtypeOf(TOptKeyset)) return show(key);
+    if (t.subtypeOrNull(BKeyset)) return show(key);
     return show(key) + ":" + show(val);
   };
 
@@ -494,21 +499,29 @@ std::string show(const Type& t) {
       folly::toAppend(" this", &ret);
     }
     break;
-  case DataTag::RefInner:
-    folly::toAppend("(", show(*t.m_data.inner), ")", &ret);
+  case DataTag::Record:
+    switch (t.m_data.drec.type) {
+    case DRecord::Exact:
+      folly::toAppend("=", show(t.m_data.drec.rec), &ret);
+      break;
+    case DRecord::Sub:
+      folly::toAppend("<=", show(t.m_data.drec.rec), &ret);
+      break;
+    }
     break;
   case DataTag::None:
     break;
   case DataTag::ArrLikePacked:
     folly::format(
       &ret,
-      "({})",
+      "({}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.packed->elems)
           | map([&] (const Type& t) { return show(t); })
           | unsplit<std::string>(",");
-      }()
+      }(),
+      provtag_string(t.m_data.packed->provenance)
     );
     break;
   case DataTag::ArrLikePackedN:
@@ -517,15 +530,23 @@ std::string show(const Type& t) {
   case DataTag::ArrLikeMap:
     folly::format(
       &ret,
-      "({})",
+      "({}{}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.map->map)
-          | map([&] (const std::pair<Cell,Type>& kv) {
+          | map([&] (const std::pair<TypedValue,Type>& kv) {
               return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");
-      }()
+      }(),
+      [&] {
+        if (!t.m_data.map->hasOptElements()) return std::string{};
+        return folly::sformat(
+          ",...[{}]",
+          showElem(t.m_data.map->optKey, t.m_data.map->optVal)
+        );
+      }(),
+      provtag_string(t.m_data.map->provenance)
     );
     break;
   case DataTag::ArrLikeMapN:
@@ -543,20 +564,18 @@ std::string show(const Type& t) {
 //////////////////////////////////////////////////////////////////////
 
 std::string show(Context ctx) {
-  auto ret = std::string{};
-  if (is_pseudomain(ctx.func)) {
-    ret = ctx.func->unit->filename->data();
-    ret += ";pseudomain";
-    return ret;
+  if (!ctx.func) {
+    return ctx.cls->name->toCppString();
   }
+  auto ret = std::string{};
   if (ctx.cls) {
-    ret = ctx.cls->name->data();
+    ret = ctx.cls->name->toCppString();
     if (ctx.cls != ctx.func->cls) {
       folly::format(&ret, "({})", ctx.func->cls->name);
     }
     ret += "::";
   }
-  ret += ctx.func->name->data();
+  ret += ctx.func->name->toCppString();
   return ret;
 }
 

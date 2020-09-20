@@ -1,8 +1,8 @@
 ---- empty
-object(HH\Vector)#1 (0) {
+object(HH\Vector) (0) {
 }
 ---- packed
-object(HH\Vector)#1 (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -11,7 +11,7 @@ object(HH\Vector)#1 (3) {
   int(3)
 }
 ---- mixed
-object(HH\Vector)#1 (2) {
+object(HH\Vector) (2) {
   [0]=>
   string(1) "b"
   [1]=>

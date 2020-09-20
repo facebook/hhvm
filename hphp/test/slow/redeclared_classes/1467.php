@@ -1,42 +1,23 @@
-<?php
+<?hh
 
 function f($i) {
   $j = 1;
   var_dump($j);
   if ($i == 1) {
-    class p {
-      public $data1;
-    }
-    class c extends p {
-    }
-    function r() {
- echo "r1\n";
- }
+    include '1467-1.inc';
   }
  else {
-    class p {
-      public $data2;
-    }
-    class c extends p {
-    }
-    function r() {
- echo "r2\n";
- }
-  }
-}
-if ($i == 1) {
-  class p {
-    public $data1;
-  }
-  class c extends p {
-  }
-  function r() {
- echo "r3\n";
+    include '1467-2.inc';
  }
 }
-f(1);
-$obj = new p();
-var_dump($obj);
-$obj = new c();
-var_dump($obj);
-r();
+<<__EntryPoint>>
+function entrypoint_1467(): void {
+  if ($i == 1) {
+    include '1467-3.inc';
+  }
+  f(1);
+  $obj = new p();
+  var_dump($obj);
+  $obj = new c();
+  var_dump($obj);
+}

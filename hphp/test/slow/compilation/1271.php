@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  public function getA() {
@@ -14,5 +14,9 @@ class A {
  public function test(){
 }
 }
+
+<<__EntryPoint>>
+function main_1271() {
 $obj = new A();
  $obj->getA()->test();
+}

@@ -1,27 +1,24 @@
-<?php
-
-$LOG_ROOT = '/tmp/hhvm_server';
-require __DIR__ . '/../../util/server_tests.inc';
+<?hh
 
 function runTakeoverTest() {
-  global $test_run_id;
+
   $pid = posix_getpid();
-  $takeoverFile = '/tmp/takeover.'.$test_run_id;
+  $takeoverFile = '/tmp/takeover.'.ServerUtilServerTests::test_run_id();
   $serverProc = $serverPort = $adminPort = null;
   $debugPort = false;
   $serverHome = __DIR__.'/..';
   $serverRoot = __DIR__.'/../server_root';
-  $customArgs = " -vServer.TakeoverFilename=${takeoverFile}";
+  $customArgs = " -vServer.TakeoverFilename={$takeoverFile}";
 
   try {
-    $serverProc = startServer($serverPort, $adminPort, $debugPort,
+    $serverProc = startServer(inout $serverPort, inout $adminPort, inout $debugPort,
                               $serverHome, $serverRoot,
                               $customArgs);
     if ($serverProc === null) {
       echo('failed to start first server');
       return;
     }
-    $takeoverid = 'new'.$test_run_id;
+    $takeoverid = 'new'.ServerUtilServerTests::test_run_id();
     $customArgs = '';
     $newServerProc = takeoverOldServer($serverPort, $adminPort,
                                        $serverHome, $serverRoot,
@@ -34,7 +31,7 @@ function runTakeoverTest() {
     // Check and make sure that the server is always online, and old
     // server exits after a finite amount of time.  It is OK if both
     // servers are working at the same time.
-    $testids = array($test_run_id, $takeoverid);
+    $testids = varray[ServerUtilServerTests::test_run_id(), $takeoverid];
     for ($i = 1; ; $i++) {
       if (!checkServerId($serverPort, $testids)) {
         return;
@@ -71,4 +68,9 @@ function runTakeoverTest() {
   echo 'takeover successful';
 }
 
-runTakeoverTest();
+<<__EntryPoint>>
+function main() {
+  require __DIR__ . '/../../util/server_tests.inc';
+  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  runTakeoverTest();
+}

@@ -1,5 +1,4 @@
-<?php
-set_error_handler('handler');
+<?hh
 function handler() {
   throw new Exception;
 }
@@ -9,5 +8,10 @@ function main($a) {
     test(...$a);
   } catch (Exception $e) {}
 }
+
+<<__EntryPoint>>
+function main_unpack_badtype() {
+set_error_handler(fun('handler'));
 main(new stdclass);
 echo "OK\n";
+}

@@ -1,21 +1,15 @@
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with less than expected no. of arguments --
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
+string(55) "hash_hmac_file() expects at least 3 parameters, 0 given"
+string(55) "hash_hmac_file() expects at least 3 parameters, 1 given"
+string(55) "hash_hmac_file() expects at least 3 parameters, 2 given"
 
 -- Testing hash_hmac_file() function with more than expected no. of arguments --
 
-Warning: %s
+Warning: No such file or directory in %s/hash_hmac_file_error.php on line 21
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
 
-Warning: %s
+Warning: Unknown hashing algorithm: foo in %s/hash_hmac_file_error.php on line 24
 ===Done===

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/func.h"
@@ -40,6 +41,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+#include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
 #include "hphp/util/arena.h"
@@ -126,7 +128,13 @@ void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<bool move>
+enum MoveKind {
+  Consume,
+  MustMove,
+  MayMove,
+};
+
+template<MoveKind move>
 bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
   if (!inst->consumesReferences()) {
     return false;
@@ -138,61 +146,91 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case ConcatStr3:
     case ConcatStr4:
       // Call a helper that decrefs the first argument
-      return !move && srcNo == 0;
+      return move == Consume && srcNo == 0;
+
+    case ConstructClosure:
+      return srcNo == 0;
 
     case StClosureArg:
-    case StClosureCtx:
     case StContArValue:
     case StContArKey:
       return srcNo == 1;
+
+    case ContEnter:
+      return move != MustMove && srcNo == 4;
+
+    case Call:
+      return move != MustMove && srcNo == 3;
+
+    case EnterTCUnwind:
+      return srcNo == 0;
+
+    case RaiseTooManyArg:
+      // RaiseTooManyArg decrefs the unpack arguments.
+      return move == Consume && srcNo == 0;
 
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
-    case ArraySet:
-    case ArraySetRef:
     case VecSet:
-    case VecSetRef:
     case DictSet:
-    case DictSetRef:
-    case AddNewElem:
+      // Consumes the reference to its input array, and moves input value
+      return move == Consume && (srcNo == 0 || srcNo == 2);
+
+    case MapSet:
+    case VectorSet:
+      // Moves input value
+      return move == Consume && srcNo == 2;
+
     case AddNewElemKeyset:
     case AddNewElemVec:
       // Only consumes the reference to its input array
-      return !move && srcNo == 0;
+      return move == Consume && srcNo == 0;
 
-    case CheckNullptr:
-      return !move && srcNo == 0;
+    case LdSwitchStrIndex:
+    case LdSwitchObjIndex:
+      // consumes the switch input
+      return move == Consume && srcNo == 0;
 
     case CreateAFWH:
-    case CreateAFWHNoVV:
-      return !move && srcNo == 4;
+      return srcNo == 4;
 
     case CreateAGWH:
-      return !move && srcNo == 3;
+      return srcNo == 3;
 
-    case InitPackedLayoutArray:
+    case CreateSSWH:
+      return srcNo == 0;
+
+    case InitVecElem:
       return srcNo == 1;
 
-    case InitPackedLayoutArrayLoop:
+    case InitVecElemLoop:
       return srcNo > 0;
 
     case NewPair:
     case NewColFromArray:
       return true;
 
+    case VerifyPropCoerce:
+    case VerifyPropCoerceAll:
+      return move != MustMove && srcNo == 2;
+
     default:
-      return !move;
+      return move != MustMove;
   }
 }
 
 bool IRInstruction::consumesReference(int srcNo) const {
-  return consumesRefImpl<false>(this, srcNo);
+  return consumesRefImpl<Consume>(this, srcNo);
 }
 
 bool IRInstruction::movesReference(int srcNo) const {
-  return consumesRefImpl<true>(this, srcNo);
+  return consumesRefImpl<MustMove>(this, srcNo);
+}
+
+bool IRInstruction::mayMoveReference(int srcNo) const {
+  return consumesRefImpl<MayMove>(this, srcNo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -226,29 +264,17 @@ Type thisTypeFromFunc(const Func* func) {
 
 namespace {
 
-Type unboxPtr(Type t) {
-  assertx(t <= TPtrToGen);
-  auto const pcell = t & TPtrToCell;
-  auto const pref = t & TPtrToBoxedInitCell;
-  return pref.deref().inner().ptr(Ptr::Ref) | pcell;
-}
-
-Type boxPtr(Type t) {
-  assertx(t <= TPtrToGen);
-  auto const rawBoxed = t.deref().unbox().box();
-  auto const noNull = rawBoxed - TBoxedUninit;
-  return noNull.ptr(t.ptrKind() - Ptr::Ref);
-}
-
 Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
+    case ConstructClosure:
     case ConstructInstance:
-      return Type::ExactObj(inst->extra<ConstructInstance>()->cls);
+      return Type::ExactObj(inst->extra<ClassData>()->cls);
 
     case NewInstanceRaw:
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
+    case AllocObjReified:
       return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
         : TObj;
@@ -260,7 +286,6 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(AsyncGenerator::getClass());
 
     case CreateAFWH:
-    case CreateAFWHNoVV:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
 
     case CreateAGWH:
@@ -272,28 +297,74 @@ Type allocObjReturn(const IRInstruction* inst) {
     case CreateSSWH:
       return Type::ExactObj(c_StaticWaitHandle::classof());
 
+    case FuncCred:
+      return Type::ExactObj(FunctionCredential::classof());
+
     default:
       always_assert(false && "Invalid opcode returning AllocObj");
   }
 }
 
-Type arrElemReturn(const IRInstruction* inst) {
-  assertx(inst->is(ArrayGet, MixedArrayGetK, ArrayIdx, LdPackedElem));
-  assertx(inst->src(0)->isA(TArr));
+Type dictSetReturn(const IRInstruction* inst) {
+  assertx(inst->is(DictSet));
+  assertx(inst->src(0)->type().subtypeOfAny(TDict, TDArr));
+  return inst->src(0)->type().modified();
+}
 
-  auto elem =
-    arrElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
+Type vecSetReturn(const IRInstruction* inst) {
+  assertx(inst->is(VecSet, AddNewElemVec));
+  assertx(inst->src(0)->type().subtypeOfAny(TVec, TVArr));
+  return inst->src(0)->type().modified();
+}
+
+/*
+* Analyze the type of return element (key or value) for different container.
+*/
+Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
+  assertx(inst->is(VecFirst, VecLast));
+  assertx(inst->src(0)->type().subtypeOfAny(TVArr, TVec));
+
+  auto elem = vecFirstLastType(inst->src(0)->type(), first, inst->ctx());
   if (!elem.second) {
-    if (inst->is(ArrayGet)) elem.first |= TInitNull;
-    if (inst->is(ArrayIdx)) elem.first |= inst->src(2)->type();
+    elem.first |= TInitNull;
   }
-  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
+  if (inst->hasTypeParam()) {
+    elem.first &= inst->typeParam();
+  }
+  return elem.first;
+}
+
+Type dictFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
+  assertx(inst->is(DictFirst, DictLast, DictFirstKey, DictLastKey));
+  assertx(inst->src(0)->type().subtypeOfAny(TDArr, TDict));
+
+  auto elem = dictFirstLastType(inst->src(0)->type(), isKey, first);
+  if (!elem.second) {
+    elem.first |= TInitNull;
+  }
+  if (inst->hasTypeParam()) {
+    elem.first &= inst->typeParam();
+  }
+  return elem.first;
+}
+
+Type keysetFirstLastReturn(const IRInstruction* inst, bool first) {
+  assertx(inst->is(KeysetFirst, KeysetLast));
+  assertx(inst->src(0)->isA(TKeyset));
+
+  auto elem = keysetFirstLastType(inst->src(0)->type(), first);
+  if (!elem.second) {
+    elem.first |= TInitNull;
+  }
+  if (inst->hasTypeParam()) {
+    elem.first &= inst->typeParam();
+  }
   return elem.first;
 }
 
 Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->is(LdVecElem));
-  assertx(inst->src(0)->isA(TVec));
+  assertx(inst->src(0)->type().subtypeOfAny(TVec, TVArr));
   assertx(inst->src(1)->isA(TInt));
 
   auto resultType =
@@ -304,7 +375,7 @@ Type vecElemReturn(const IRInstruction* inst) {
 
 Type dictElemReturn(const IRInstruction* inst) {
   assertx(inst->is(DictGet, DictGetK, DictGetQuiet, DictIdx));
-  assertx(inst->src(0)->isA(TDict));
+  assertx(inst->src(0)->type().subtypeOfAny(TDict, TDArr));
   assertx(inst->src(1)->isA(TInt | TStr));
 
   auto elem = dictElemType(inst->src(0)->type(), inst->src(1)->type());
@@ -330,47 +401,17 @@ Type keysetElemReturn(const IRInstruction* inst) {
   return elem.first;
 }
 
-Type ctxReturn(const IRInstruction* inst) {
-  auto const func = inst->func();
-  if (!func) return TCtx;
-
-  if (func->requiresThisInBody()) {
-    return thisTypeFromFunc(func);
-  }
-  if (func->hasForeignThis()) {
-    return func->isStatic() ? TCctx : TCtx;
-  }
-  auto const cls = inst->ctx();
-  if (inst->is(LdCctx) || func->isStatic()) {
-    if (cls->attrs() & AttrNoOverride) {
-      return Type::cns(ConstCctx::cctx(cls));
-    }
-    return TCctx;
-  }
-  return thisTypeFromFunc(func) | TCctx;
-}
-
-Type ctxClsReturn(const IRInstruction* inst) {
-  // If we aren't loading the cls from the ctx of the current function doing
-  // this makes no sense.
-  if (!canonical(inst->src(0))->inst()->is(LdCtx, LdCctx)) return TCls;
-
-  auto const func = inst->func();
-  if (!func || func->hasForeignThis()) return TCls;
-  return Type::SubCls(inst->ctx());
-}
-
 Type setElemReturn(const IRInstruction* inst) {
   assertx(inst->op() == SetElem);
-  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
+  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().derefIfPtr();
 
-  // If the base is a Str, the result will always be a CountedStr (or
+  // If the base is a Str, the result will always be a StaticStr (or
   // an exception). If the base might be a str, the result wil be
-  // CountedStr or Nullptr. Otherwise, the result is always Nullptr.
+  // StaticStr or Nullptr. Otherwise, the result is always Nullptr.
   if (baseType <= TStr) {
-    return TCountedStr;
+    return TStaticStr;
   } else if (baseType.maybe(TStr)) {
-    return TCountedStr | TNullptr;
+    return TStaticStr | TNullptr;
   }
   return TNullptr;
 }
@@ -379,7 +420,7 @@ Type newColReturn(const IRInstruction* inst) {
   assertx(inst->is(NewCol, NewPair, NewColFromArray));
   auto getColClassType = [&](CollectionType ct) -> Type {
     auto name = collections::typeToString(ct);
-    auto cls = Unit::lookupUniqueClassInContext(name, inst->ctx());
+    auto cls = Class::lookupUniqueInContext(name, inst->ctx(), nullptr);
     if (cls == nullptr) return TObj;
     return Type::ExactObj(cls);
   };
@@ -398,36 +439,89 @@ Type builtinReturn(const IRInstruction* inst) {
 }
 
 Type callReturn(const IRInstruction* inst) {
-  assertx(inst->is(Call, CallArray));
+  assertx(inst->is(Call));
 
-  if (inst->is(Call)) {
-    // FCallAwait needs to load TVAux
-    if (inst->extra<Call>()->fcallAwait) return TInitGen;
-    auto callee = inst->extra<Call>()->callee;
-    return callee ? irgen::callReturnType(callee) : TInitGen;
-  }
-  if (inst->is(CallArray)) {
-    auto callee = inst->extra<CallArray>()->callee;
-    return callee ? irgen::callReturnType(callee) : TInitGen;
-  }
-  not_reached();
+  // Do not use the inferred Func* if we are forming a region. We may have
+  // inferred the target of the call based on specialized type information
+  // that won't be available when the region is translated. If we allow the
+  // FCall to specialize using this information, we may infer narrower type
+  // for the return value, erroneously preventing the region from breaking
+  // on unknown type.
+
+  // Async eager return needs to load TVAux
+  if (inst->extra<Call>()->asyncEagerReturn) return TInitCell;
+  if (inst->extra<Call>()->numOut) return TInitCell;
+  if (inst->extra<Call>()->formingRegion) return TInitCell;
+  return inst->src(2)->hasConstVal(TFunc)
+    ? irgen::callReturnType(inst->src(2)->funcVal()) : TInitCell;
 }
 
 Type genIterReturn(const IRInstruction* inst) {
   assertx(inst->is(ContEnter));
   return inst->extra<ContEnter>()->isAsync
-    ? Type::SubObj(c_WaitHandle::classof())
+    ? Type::SubObj(c_Awaitable::classof())
     : TInitNull;
 }
 
 // Integers get mapped to integer memo keys, everything else gets mapped to
 // strings.
 Type memoKeyReturn(const IRInstruction* inst) {
-  assertx(inst->is(GetMemoKey));
+  assertx(inst->is(GetMemoKey, GetMemoKeyScalar));
   auto const srcType = inst->src(0)->type();
   if (srcType <= TInt) return TInt;
   if (!srcType.maybe(TInt)) return TStr;
   return TInt | TStr;
+}
+
+Type ptrToLvalReturn(const IRInstruction* inst) {
+  auto const ptr = inst->src(0)->type();
+  assertx(ptr <= TPtrToCell);
+  return ptr.deref().mem(Mem::Lval, ptr.ptrKind());
+}
+
+// A pointer iterator type has three components:
+//   - The pointer type: it's always PtrToElem, for now
+//   - The target type: the union of the possible values of the base array
+//   - The constant value: e.g. a specific pointer to the end of a static array
+//
+// The target type is the key aspect of this type. Because it's the union of
+// the possible values of the base array, the type of the pointer iterator
+// doesn't change when we advance it. This definition also allows us to type
+// the pointer to the end of an array (even though its target is invalid).
+//
+// This definition makes sense by analogy to regular int* types in C: the type
+// of the end of the array is an int* even though its target is invalid.
+Type ptrIterReturn(const IRInstruction* inst) {
+  if (inst->is(AdvanceDictPtrIter, AdvanceVecPtrIter)) {
+    auto const ptr = inst->src(0)->type();
+    assertx(ptr <= TPtrToElemCell);
+    return ptr;
+  }
+  assertx(inst->is(GetDictPtrIter, GetVecPtrIter));
+  auto const arr = inst->src(0)->type();
+  assertx(arr <= TArrLike);
+  auto const value = [&]{
+    if (arr <= TArr)  return arrElemType(arr, TInt | TStr, inst->ctx()).first;
+    if (arr <= TVec)  return vecElemType(arr, TInt, inst->ctx()).first;
+    if (arr <= TDict) return dictElemType(arr, TInt | TStr).first;
+    return TCell;
+  }();
+  return value.ptr(Ptr::Elem);
+}
+
+Type ptrIterValReturn(const IRInstruction* inst) {
+  auto const ptr = inst->src(0)->type();
+  assertx(ptr <= TPtrToElemCell);
+  return ptr.deref();
+}
+
+Type loggingArrLikeReturn(const IRInstruction* inst) {
+  assertx(inst->is(NewLoggingArray));
+  auto const arr = inst->src(0)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  return arr.unspecialize();
 }
 
 template <uint32_t...> struct IdxSeq {};
@@ -445,16 +539,27 @@ inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
 } // namespace
 
 Type outputType(const IRInstruction* inst, int /*dstId*/) {
+  // Don't produce vanilla types if the bespoke runtime checks flag is off,
+  // because we never use these types. Otherwise, apply layout-dependence.
+  auto const checkLayoutFlags = [&](Type t) {
+    if (!allowBespokeArrayLikes()) return t;
+    if (inst->isLayoutPreserving()) {
+      assertx(inst->src(0)->type() <= TArrLike);
+      return inst->src(0)->type().arrSpec().vanilla() ? t.narrowToVanilla() : t;
+    } else if (inst->isLayoutAgnostic()) {
+      return t;
+    } else {
+      return t.narrowToVanilla();
+    }
+  };
   using namespace TypeNames;
   using TypeNames::TCA;
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
-#define D(type)         return type;
+#define D(type)         return checkLayoutFlags(type);
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
 #define DParamMayRelax(t) return inst->typeParam();
 #define DParam(t)       return inst->typeParam();
-#define DParamPtr(k)    assertx(inst->typeParam() <= TGen.ptr(Ptr::k)); \
-                        return inst->typeParam();
 #define DLdObjCls {                                                \
   if (auto spec = inst->src(0)->type().clsSpec()) {                \
     auto const cls = spec.cls();                                   \
@@ -462,18 +567,27 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   }                                                                \
   return TCls;                                                     \
 }
-#define DUnboxPtr       return unboxPtr(inst->src(0)->type());
-#define DBoxPtr         return boxPtr(inst->src(0)->type());
 #define DAllocObj       return allocObjReturn(inst);
-#define DArrElem        return arrElemReturn(inst);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
+#define DDictSet        return dictSetReturn(inst);
+#define DVecSet         return vecSetReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
-#define DArrPacked      return Type::Array(ArrayData::kPackedKind);
-#define DArrMixed       return Type::Array(ArrayData::kMixedKind);
+// Get the type of first or last element for different array type
+#define DVecFirstElem     return vecFirstLastReturn(inst, true);
+#define DVecLastElem      return vecFirstLastReturn(inst, false);
+#define DVecKey           return TInt | TInitNull;
+#define DDictFirstElem    return dictFirstLastReturn(inst, true, false);
+#define DDictLastElem     return dictFirstLastReturn(inst, false, false);
+#define DDictFirstKey     return dictFirstLastReturn(inst, true, true);
+#define DDictLastKey      return dictFirstLastReturn(inst, false, true);
+#define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
+#define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
+#define DLoggingArrLike   return loggingArrLikeReturn(inst);
+#define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
+#define DDArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TDict : TDArr);
+#define DStaticDArr     return (TStaticDict | TStaticArr) & [&]{ DDArr }();
 #define DCol            return newColReturn(inst);
-#define DCtx            return ctxReturn(inst);
-#define DCtxCls         return ctxClsReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
 #define DBuiltin        return builtinReturn(inst);
@@ -485,6 +599,9 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
                                TVec | TDict | TKeyset | TRes;
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 #define DMemoKey        return memoKeyReturn(inst);
+#define DLvalOfPtr      return ptrToLvalReturn(inst);
+#define DPtrIter        return ptrIterReturn(inst);
+#define DPtrIterVal     return ptrIterValReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -501,20 +618,27 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DRefineS
 #undef DParamMayRelax
 #undef DParam
-#undef DParamPtr
 #undef DLdObjCls
-#undef DUnboxPtr
-#undef DBoxPtr
 #undef DAllocObj
-#undef DArrElem
 #undef DVecElem
 #undef DDictElem
+#undef DDictSet
+#undef DVecSet
 #undef DKeysetElem
-#undef DArrPacked
-#undef DArrMixed
+#undef DVecFirstElem
+#undef DVecLastElem
+#undef DVecKey
+#undef DDictFirstElem
+#undef DDictLastElem
+#undef DDictFirstKey
+#undef DDictLastKey
+#undef DKeysetFirstElem
+#undef DKeysetLastElem
+#undef DLoggingArrLike
+#undef DVArr
+#undef DDArr
+#undef DStaticDArr
 #undef DCol
-#undef DCtx
-#undef DCtxCls
 #undef DMulti
 #undef DSetElem
 #undef DBuiltin
@@ -524,6 +648,9 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DCns
 #undef DUnion
 #undef DMemoKey
+#undef DLvalOfPtr
+#undef DPtrIter
+#undef DPtrIterVal
 }
 
 }}

@@ -24,7 +24,7 @@
 #include <folly/Conv.h>
 #include <folly/MapUtil.h>
 #include <folly/Random.h>
-#include <folly/stats/Histogram-defs.h>
+#include <folly/stats/Histogram.h>
 
 #include "hphp/util/portability.h"
 
@@ -81,6 +81,27 @@ void ExportedTimeSeries::exportAll(const std::string& prefix,
       }
     }
   }
+}
+
+folly::Optional<int64_t>
+ExportedTimeSeries::getCounter(StatsType type, int seconds) {
+  SYNCHRONIZED(m_timeseries) {
+    m_timeseries.update(detail::nowAsSeconds());
+    for (unsigned i = 0; i < m_timeseries.numLevels(); ++i) {
+      auto& level = m_timeseries.getLevel(i);
+      if ((level.isAllTime() && seconds <= 0) ||
+          level.duration().count() == seconds) {
+        switch (type) {
+          case StatsType::AVG:   return level.avg();
+          case StatsType::SUM:   return level.sum();
+          case StatsType::RATE:  return level.rate();
+          case StatsType::COUNT: return level.count();
+          case StatsType::PCT:   return level.avg() * 100;
+        }
+      }
+    }
+  }
+  return folly::none;
 }
 
 int64_t ExportedTimeSeries::getSum() {
@@ -268,19 +289,66 @@ struct Impl {
   }
 
   folly::Optional<int64_t> exportCounterByKey(const std::string& key) {
-    auto const it = m_counterMap.find(key);
-    if (it != m_counterMap.end()) {
-      return it->second->getValue();
-    } else {
-      std::map<std::string, int64_t> statsMap;
-      SYNCHRONIZED_CONST(m_counterFuncs) {
-        for (auto& pair : m_counterFuncs) {
-          pair.second(statsMap);
-        }
-      }
-
-      return folly::get_optional(statsMap, key);
+    if (key.empty()) return folly::none;
+    auto const counterIter = m_counterMap.find(key);
+    if (counterIter != m_counterMap.end()) {
+      return counterIter->second->getValue();
     }
+    // Check callbacks
+    std::map<std::string, int64_t> statsMap;
+    SYNCHRONIZED_CONST(m_counterFuncs) {
+      for (auto& pair : m_counterFuncs) {
+        pair.second(statsMap);
+      }
+    }
+    auto const iter = statsMap.find(key);
+    if (iter != statsMap.end()) return iter->second;
+    // Check time series
+    // Does it look like a time series?
+    auto const data = key.c_str();
+    ServiceData::StatsType type = ServiceData::StatsType::AVG;
+    int duration = 0;
+    size_t index = key.size() - 1;
+    while (isdigit(data[index])) {
+      if (index == 0) return folly::none;
+      --index;
+    }
+    if (data[index] == '.') {
+      sscanf(data + index + 1, "%d", &duration);
+      --index;
+    }
+    // Find the StatsType from: avg, sum, pct, rate, count
+    auto const typeEnd = index;
+    while (index > 0 && data[index] != '.') --index;
+    if (index == 0) return folly::none;
+    if (typeEnd - index == 3) {
+      if (!memcmp(data + index, ".avg", 4)) {
+        type = ServiceData::StatsType::AVG;
+      } else if (!memcmp(data + index, ".sum", 4)) {
+        type = ServiceData::StatsType::SUM;
+      } else if (!memcmp(data + index, ".pct", 4)) {
+        type = ServiceData::StatsType::PCT;
+      } else {
+        return folly::none;
+      }
+    } else if (typeEnd - index == 4) {
+      if (!memcmp(data + index, ".rate", 5)) {
+        type = ServiceData::StatsType::RATE;
+      } else {
+        return folly::none;
+      }
+    } else if (typeEnd - index == 5) {
+      if (!memcmp(data + index, ".count", 6)) {
+        type = ServiceData::StatsType::COUNT;
+      } else {
+        return folly::none;
+      }
+    }
+    auto const tsName = key.substr(0, index);
+    auto const tsIter = m_timeseriesMap.find(tsName);
+    if (tsIter == m_timeseriesMap.end()) return folly::none;
+    auto const ts = tsIter->second;
+    return ts->getCounter(type, duration);
   }
 
  private:

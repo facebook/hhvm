@@ -1,5 +1,6 @@
 <?hh
-if (false) {
-  class Arraykey {}
-}
+
+class Arraykey {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

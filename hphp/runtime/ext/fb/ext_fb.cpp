@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -43,19 +42,21 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/vm/unwind.h"
-
-#include "hphp/parser/parser.h"
+#include "hphp/zend/zend-string.h"
 
 namespace HPHP {
 
 // fb_serialize options
 const int64_t k_FB_SERIALIZE_HACK_ARRAYS = 1<<1;
+const int64_t k_FB_SERIALIZE_VARRAY_DARRAY = 1<<2;
+const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS = 1<<3;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -65,6 +66,7 @@ static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 #define FB_UNSERIALIZE_UNEXPECTED_END            0x0002
 #define FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE  0x0003
 #define FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE 0x0004
+#define FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED        0x0005
 
 #ifdef FACEBOOK
 # define HHVM_FACEBOOK true
@@ -106,12 +108,32 @@ enum TType {
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
   try {
     if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
-      size_t len =  HPHP::serialize
+      size_t len = HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
         ::serializedSize(thing);
       String s(len, ReserveString);
       HPHP::serialize
         ::FBSerializer<VariantControllerUsingHackArrays>
+        ::serialize(thing, s.mutableData());
+      s.setSize(len);
+      return s;
+    } else if (options & k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS) {
+      size_t len = HPHP::serialize
+        ::FBSerializer<VariantControllerUsingHackArraysAndKeyset>
+        ::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize
+        ::FBSerializer<VariantControllerUsingHackArraysAndKeyset>
+        ::serialize(thing, s.mutableData());
+      s.setSize(len);
+      return s;
+    } else if (options & k_FB_SERIALIZE_VARRAY_DARRAY) {
+      size_t len = HPHP::serialize
+        ::FBSerializer<VariantControllerUsingVarrayDarray>
+        ::serializedSize(thing);
+      String s(len, ReserveString);
+      HPHP::serialize
+        ::FBSerializer<VariantControllerUsingVarrayDarray>
         ::serialize(thing, s.mutableData());
       s.setSize(len);
       return s;
@@ -126,7 +148,8 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
     }
   } catch (const HPHP::serialize::KeysetSerializeError&) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Keysets cannot be serialized with fb_serialize"
+      "Serializing Keysets requires the FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS "
+      "option to be provided"
     );
   } catch (const HPHP::serialize::HackArraySerializeError&) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -140,42 +163,55 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
 
 Variant HHVM_FUNCTION(fb_unserialize,
                       const Variant& thing,
-                      VRefParam success,
+                      bool& success,
                       int64_t options) {
   if (thing.isString()) {
     String sthing = thing.toString();
 
     if (sthing.size() && (sthing.data()[0] & 0x80)) {
+      Variant error;
       return fb_compact_unserialize(sthing.data(), sthing.size(),
-                                    success);
+                                    success, error);
     } else {
       return fb_unserialize(sthing.data(), sthing.size(), success, options);
     }
   }
 
-  success.assignIfRef(false);
+  success = false;
   return false;
 }
 
 Variant fb_unserialize(const char* str,
                        int len,
-                       VRefParam success,
+                       bool& success,
                        int64_t options) {
   try {
     if (options & k_FB_SERIALIZE_HACK_ARRAYS) {
       auto res = HPHP::serialize
         ::FBUnserializer<VariantControllerUsingHackArrays>
         ::unserialize(folly::StringPiece(str, len));
-      success.assignIfRef(true);
+      success = true;
+      return res;
+    } else if (options & k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS) {
+      auto res = HPHP::serialize
+        ::FBUnserializer<VariantControllerUsingHackArraysAndKeyset>
+        ::unserialize(folly::StringPiece(str, len));
+      success = true;
+      return res;
+    } else if (options & k_FB_SERIALIZE_VARRAY_DARRAY) {
+      auto res = HPHP::serialize
+        ::FBUnserializer<VariantControllerUsingVarrayDarray>
+        ::unserialize(folly::StringPiece(str, len));
+      success = true;
       return res;
     } else {
       auto res = HPHP::serialize::FBUnserializer<VariantController>
         ::unserialize(folly::StringPiece(str, len));
-      success.assignIfRef(true);
+      success = true;
       return res;
     }
   } catch (const HPHP::serialize::UnserializeError&) {
-    success.assignIfRef(false);
+    success = false;
     return false;
   }
 }
@@ -292,7 +328,7 @@ const uint64_t kCodePrefix          = 0xf0;
 
 static void fb_compact_serialize_code(StringBuffer& sb,
                                       FbCompactSerializeCode code) {
-  assert(code == (code & kCodeMask));
+  assertx(code == (code & kCodeMask));
   uint8_t v = (kCodePrefix | code);
   sb.append(reinterpret_cast<char*>(&v), 1);
 }
@@ -393,7 +429,7 @@ static void fb_compact_serialize_array_as_list_map(
 static void fb_compact_serialize_vec(
     StringBuffer& sb, const Array& arr, int depth) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
-  PackedArray::IterateV(
+  IterateV(
     arr.get(),
     [&](TypedValue v) {
       fb_compact_serialize_variant(sb, VarNR(v), depth + 1);
@@ -407,7 +443,7 @@ static void fb_compact_serialize_array_as_map(
   fb_compact_serialize_code(sb, FB_CS_MAP);
   IterateKV(
     arr.get(),
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       if (isStringType(k.m_type)) {
         fb_compact_serialize_string(sb, StrNR{k.m_data.pstr});
       } else {
@@ -423,8 +459,8 @@ static void fb_compact_serialize_array_as_map(
 static void fb_compact_serialize_keyset(
     StringBuffer& sb, const Array& arr) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
-  SetArray::Iterate(
-    SetArray::asSet(arr.get()),
+  IterateV(
+    arr.get(),
     [&](TypedValue v) {
       if (isStringType(v.m_type)) {
         fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});
@@ -472,13 +508,16 @@ static int fb_compact_serialize_variant(
 
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass:
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 
     case KindOfPersistentVec:
     case KindOfVec: {
       Array arr = var.toArray();
-      assert(arr->isVecArray());
+      assertx(arr->isVecType());
       fb_compact_serialize_vec(sb, std::move(arr), depth);
       return 0;
     }
@@ -486,7 +525,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentDict:
     case KindOfDict: {
       Array arr = var.toArray();
-      assert(arr->isDict());
+      assertx(arr->isDictType());
       fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
       return 0;
     }
@@ -494,16 +533,22 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       Array arr = var.toArray();
-      assert(arr->isKeyset());
+      assertx(arr->isKeysetType());
       fb_compact_serialize_keyset(sb, std::move(arr));
       return 0;
     }
 
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray: {
       Array arr = var.toArray();
-      assert(arr->isPHPArray());
+      assertx(arr->isPHPArrayType());
       int64_t index_limit;
+      if (arrprov::arrayWantsTag(arr.get())) {
+        raise_array_serialization_notice(
+          SerializationSite::FBCompactSerialize, arr.get());
+      }
       if (fb_compact_serialize_is_list(arr, index_limit)) {
         fb_compact_serialize_array_as_list_map(
           sb, std::move(arr), index_limit, depth);
@@ -513,12 +558,40 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
+    case KindOfClsMeth: {
+      Array arr = var.toArray();
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        assertx(arr->isVecType());
+        fb_compact_serialize_vec(sb, std::move(arr), depth);
+      } else {
+        assertx(arr->isPHPArrayType());
+        int64_t index_limit;
+        fb_compact_serialize_is_list(arr, index_limit);
+        fb_compact_serialize_array_as_list_map(
+          sb, std::move(arr), index_limit, depth);
+      }
+      return 0;
+    }
+
+    case KindOfRClsMeth: {
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize reified class method pointer"
+      );
+      break;
+    }
+
     case KindOfObject:
     case KindOfResource:
-    case KindOfRef:
+    case KindOfRecord: // TODO(T41025646)
       fb_compact_serialize_code(sb, FB_CS_NULL);
       raise_warning(
-        "fb_compact_serialize(): unable to serialize object/resource/ref"
+        "fb_compact_serialize(): unable to serialize "
+        "object/resource/ref/func/class/record"
+      );
+      break;
+    case KindOfRFunc:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize reified function pointer"
       );
       break;
   }
@@ -559,10 +632,10 @@ Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing) {
 }
 
 /* Check if there are enough bytes left in the buffer */
-#define CHECK_ENOUGH(bytes, pos, num) do {                      \
-    if ((int)(bytes) > (int)((num) - (pos))) {                  \
-      return FB_UNSERIALIZE_UNEXPECTED_END;                     \
-    }                                                           \
+#define CHECK_ENOUGH(bytes, pos, num) do {                                \
+    if ((int64_t)(bytes) > (int64_t)((num) - (pos)) || bytes < 0) {       \
+      return FB_UNSERIALIZE_UNEXPECTED_END;                               \
+    }                                                                     \
   } while (0)
 
 
@@ -628,7 +701,10 @@ int fb_compact_unserialize_int64_from_buffer(
 const StaticString s_empty("");
 
 int fb_compact_unserialize_from_buffer(
-  Variant& out, const char* buf, int n, int& p) {
+    Variant& out, const char* buf, int n, int& p, size_t depth) {
+  if (UNLIKELY(depth > 1024)) {
+    return FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED;
+  }
 
   CHECK_ENOUGH(1, p, n);
   int code = (unsigned char)buf[p];
@@ -686,16 +762,36 @@ int fb_compact_unserialize_from_buffer(
         }
       }
 
-      CHECK_ENOUGH(len, p, n);
+    CHECK_ENOUGH(len, p, n);
       out = Variant::attach(StringData::Make(buf + p, len, CopyString));
       p += len;
       break;
     }
 
-    case FB_CS_LIST_MAP:
     case FB_CS_VECTOR:
     {
-      Array arr = Array::Create();
+      Array arr = Array::CreateVArray();
+      while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
+        Variant value;
+        int err =
+          fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
+        if (err) {
+          return err;
+        }
+        arr.append(value);
+      }
+
+      // Consume STOP
+      CHECK_ENOUGH(1, p, n);
+      p += 1;
+
+      out = arr;
+      break;
+    }
+
+    case FB_CS_LIST_MAP:
+    {
+      Array arr = Array::CreateDArray();
       int64_t i = 0;
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         if (buf[p] == (char)(kCodePrefix | FB_CS_SKIP)) {
@@ -703,7 +799,8 @@ int fb_compact_unserialize_from_buffer(
           ++p;
         } else {
           Variant value;
-          int err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+          int err =
+            fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
           if (err) {
             return err;
           }
@@ -721,15 +818,15 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_MAP:
     {
-      Array arr = Array::Create();
+      Array arr = Array::CreateDArray();
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         Variant key;
-        int err = fb_compact_unserialize_from_buffer(key, buf, n, p);
+        int err = fb_compact_unserialize_from_buffer(key, buf, n, p, depth + 1);
         if (err) {
           return err;
         }
         Variant value;
-        err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+        err = fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
         if (err) {
           return err;
         }
@@ -737,7 +834,8 @@ int fb_compact_unserialize_from_buffer(
           arr.set(key.toInt64(), value);
         } else if (key.getType() == KindOfString ||
                    key.getType() == KindOfPersistentString) {
-          arr.set(key, value);
+          mapSetConvertStatic<IntishCast::Cast>(
+            arr, key.asStrRef().get(), std::move(value));
         } else {
           return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
         }
@@ -759,39 +857,38 @@ int fb_compact_unserialize_from_buffer(
 }
 
 Variant fb_compact_unserialize(const char* str, int len,
-                               VRefParam success,
-                               VRefParam errcode /* = uninit_variant */) {
+                               bool& success,
+                               Variant& errcode) {
 
   Variant ret;
   int p = 0;
-  int err = fb_compact_unserialize_from_buffer(ret, str, len, p);
+  int err = fb_compact_unserialize_from_buffer(ret, str, len, p, 0);
   if (err) {
-    success.assignIfRef(false);
-    errcode.assignIfRef(err);
+    success = false;
+    errcode = err;
     return false;
   }
-  success.assignIfRef(true);
-  errcode.assignIfRef(init_null());
+  success = true;
+  errcode = init_null();
   return ret;
 }
 
 Variant HHVM_FUNCTION(fb_compact_unserialize,
-                      const Variant& thing, VRefParam success,
-                      VRefParam errcode /* = uninit_variant */) {
+                      const Variant& thing, bool& success,
+                      Variant& errcode) {
   if (!thing.isString()) {
-    success.assignIfRef(false);
-    errcode.assignIfRef(FB_UNSERIALIZE_NONSTRING_VALUE);
+    success = false;
+    errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
     return false;
   }
 
   String s = thing.toString();
-  return fb_compact_unserialize(s.data(), s.size(), ref(success),
-                                ref(errcode));
+  return fb_compact_unserialize(s.data(), s.size(), success, errcode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
+bool HHVM_FUNCTION(fb_utf8ize, Variant& input) {
   String s = input.toString();
   const char* const srcBuf = s.data();
   int32_t srcLenBytes = s.size();
@@ -863,8 +960,8 @@ bool HHVM_FUNCTION(fb_utf8ize, VRefParam input) {
     // We know that resultBuffer > total possible length.
     U8_APPEND_UNSAFE(dstBuf, dstPosBytes, curCodePoint);
   }
-  assert(dstPosBytes <= dstMaxLenBytes);
-  input.assignIfRef(dstStr.shrink(dstPosBytes));
+  assertx(dstPosBytes <= dstMaxLenBytes);
+  input = dstStr.shrink(dstPosBytes);
   return true;
 }
 
@@ -912,8 +1009,8 @@ static String fb_utf8_substr_simple(const String& str,
   const char* const srcBuf = str.data();
   int32_t srcLenBytes = str.size(); // May truncate; checked before use below.
 
-  assert(firstCodePoint >= 0);  // Wrapper fixes up negative starting positions.
-  assert(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
+  assertx(firstCodePoint >= 0); // Wrapper fixes up negative starting positions.
+  assertx(numDesiredCodePoints > 0); // Wrapper fixes up negative/zero length.
   if (str.size() <= 0 ||
       str.size() > INT_MAX ||
       firstCodePoint >= srcLenBytes) {
@@ -965,7 +1062,7 @@ static String fb_utf8_substr_simple(const String& str,
     }
   }
 
-  assert(dstPosBytes <= dstMaxLenBytes);
+  assertx(dstPosBytes <= dstMaxLenBytes);
   if (dstPosBytes > 0) {
     dstStr.shrink(dstPosBytes);
     return dstStr;
@@ -1006,20 +1103,18 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str, int64_t start,
 
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
                                  const Variant& data /* = uninit_variant */) {
-  return register_intercept(name, handler, data);
+  return register_intercept(name, handler, data, true, false);
 }
 
-bool is_dangerous_varenv_function(const StringData* name) {
-  auto const f = Unit::lookupBuiltin(name);
-  // Functions can which can access the caller's frame are always builtin.
-  return f && f->accessesCallerFrame();
+bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler) {
+  return register_intercept(name, handler, uninit_variant, true, true);
 }
 
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                                        const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
       orig_func_name.get()->isame(new_func_name.get())) {
-    throw_invalid_argument("unable to rename %s", orig_func_name.data());
+    raise_invalid_argument_warning("unable to rename %s", orig_func_name.data());
     return false;
   }
 
@@ -1027,14 +1122,6 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
     raise_warning("fb_rename_function(%s, %s) failed: %s does not exist!",
                   orig_func_name.data(), new_func_name.data(),
                   orig_func_name.data());
-    return false;
-  }
-
-  if (is_dangerous_varenv_function(orig_func_name.get())) {
-    raise_warning(
-      "fb_rename_function(%s, %s) failed: rename of functions that "
-      "affect variable environments is not allowed",
-      orig_func_name.data(), new_func_name.data());
     return false;
   }
 
@@ -1052,42 +1139,13 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// call_user_func extensions
-// Linked in via fb.json.idl for now - Need OptFunc solution...
-
-Array HHVM_FUNCTION(fb_call_user_func_safe,
-                    const Variant& function,
-                    const Array& argv) {
-  return HHVM_FN(fb_call_user_func_array_safe)(function, argv);
-}
-
-Variant HHVM_FUNCTION(fb_call_user_func_safe_return,
-                      const Variant& function,
-                      const Variant& def,
-                      const Array& argv) {
-  if (is_callable(function)) {
-    return vm_call_user_func(function, argv);
-  }
-  return def;
-}
-
-Array HHVM_FUNCTION(fb_call_user_func_array_safe,
-                    const Variant& function,
-                    const Array& params) {
-  if (is_callable(function)) {
-    return make_packed_array(true, vm_call_user_func(function, params));
-  }
-  return make_packed_array(false, uninit_variant);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   if (ti->m_reqInjectionData.getCoverage()) {
-    Array ret = ti->m_coverage->Report();
+    Array ret = ti->m_coverage.Report();
     if (flush) {
-      ti->m_coverage->Reset();
+      ti->m_coverage.Reset();
     }
     return ret;
   }
@@ -1095,22 +1153,43 @@ Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
 }
 
 void HHVM_FUNCTION(fb_enable_code_coverage) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
-  ti->m_coverage->Reset();
-  ti->m_reqInjectionData.setCoverage(true);;
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
+  ti->m_coverage.Reset();
+  ti->m_reqInjectionData.setCoverage(true);
   if (g_context->isNested()) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
   }
-  throw VMSwitchModeBuiltin();
+  if (RuntimeOption::EvalEnableCodeCoverage == 0) {
+    SystemLib::throwRuntimeExceptionObject(
+      "Calling fb_enable_code_coverage without enabling the setting "
+      "Eval.EnableCodeCoverage");
+  }
+  if (RuntimeOption::EvalEnableCodeCoverage == 1) {
+    auto const tport = g_context->getTransport();
+    if (!tport ||
+        tport->getParam("enable_code_coverage").compare("true") != 0) {
+      SystemLib::throwRuntimeExceptionObject(
+        "Calling fb_enable_code_coverage without adding "
+        "'enable_code_coverage' in request params");
+    }
+  }
 }
 
-Variant HHVM_FUNCTION(fb_disable_code_coverage) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+Array disable_code_coverage_helper(bool report_frequency) {
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
-  Array ret = ti->m_coverage->Report();
-  ti->m_coverage->Reset();
+  auto ret = ti->m_coverage.Report(report_frequency);
+  ti->m_coverage.Reset();
   return ret;
+}
+
+Array HHVM_FUNCTION(fb_disable_code_coverage) {
+  return disable_code_coverage_helper(/* report frequency */ false);
+}
+
+Array HHVM_FUNCTION(HH_disable_code_coverage_with_frequency) {
+  return disable_code_coverage_helper(/* report frequency */ true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1173,6 +1252,49 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
   return StatCache::realpath(filename.c_str());
 }
 
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str) {
+  Md5Digest md5(str.get()->data(), str.get()->size());
+  int64_t pre_decode;
+  // Work around "strict aliasing" with memcpy
+  memcpy(&pre_decode, md5.digest, sizeof(pre_decode));
+  // When PHP/Hack users decode MD5 hex, they treat it as big endian.
+  // Replicate that here.
+  return folly::Endian::big(pre_decode);
+}
+
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_lower, StringArg str) {
+  Md5Digest md5(str.get()->data(), str.get()->size());
+  int64_t pre_decode;
+  // Work around "strict aliasing" with memcpy
+  memcpy(&pre_decode, md5.digest + 8, sizeof(pre_decode));
+  // When PHP/Hack users decode MD5 hex, they treat it as big endian.
+  // Replicate that here.
+  return folly::Endian::big(pre_decode);
+}
+
+int64_t HHVM_FUNCTION(HH_int_mul_overflow, int64_t a, int64_t b) {
+  // On x86_64, this compiles down to mov+mul+mov+retq
+  uint64_t ua = a;
+  uint64_t ub = b;
+  __uint128_t full_product =
+    static_cast<__uint128_t>(ua) * static_cast<__uint128_t>(ub);
+  // Return only the part that would overflow 64-bit multiplication.
+  return static_cast<int64_t>(full_product >> 64);
+}
+
+int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
+                      int64_t a, int64_t b, int64_t bias) {
+  uint64_t ua = a;
+  uint64_t ub = b;
+  uint64_t umbias = static_cast<uint64_t>(-1 - bias);
+  __uint128_t full =
+    static_cast<__uint128_t>(ua) * static_cast<__uint128_t>(ub);
+  // The assembly for this looks faster than 128-bit add to 'full'
+  // (8 instructions vs. 11)
+  uint64_t full_lower = static_cast<uint64_t>(full);
+  return static_cast<int64_t>(full >> 64) + (full_lower > umbias);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 EXTERNALLY_VISIBLE
@@ -1187,13 +1309,17 @@ struct FBExtension : Extension {
 
   void moduleInit() override {
     HHVM_RC_BOOL_SAME(HHVM_FACEBOOK);
-    HHVM_RC_BOOL(HHVM_NO_DESTRUCTORS, one_bit_refcount);
+    HHVM_RC_BOOL(HHVM_ONE_BIT_REFCOUNT, one_bit_refcount);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_NONSTRING_VALUE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED);
 
     HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS, k_FB_SERIALIZE_HACK_ARRAYS);
+    HHVM_RC_INT(FB_SERIALIZE_VARRAY_DARRAY, k_FB_SERIALIZE_VARRAY_DARRAY);
+    HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS,
+                k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS);
 
     HHVM_FE(fb_serialize);
     HHVM_FE(fb_unserialize);
@@ -1204,6 +1330,7 @@ struct FBExtension : Extension {
     HHVM_FE(fb_utf8_strlen_deprecated);
     HHVM_FE(fb_utf8_substr);
     HHVM_FE(fb_intercept);
+    HHVM_FE(fb_intercept2);
     HHVM_FE(fb_rename_function);
     HHVM_FE(fb_get_code_coverage);
     HHVM_FE(fb_enable_code_coverage);
@@ -1213,9 +1340,13 @@ struct FBExtension : Extension {
     HHVM_FE(fb_get_last_flush_size);
     HHVM_FE(fb_lazy_lstat);
     HHVM_FE(fb_lazy_realpath);
-    HHVM_FE(fb_call_user_func_safe);
-    HHVM_FE(fb_call_user_func_safe_return);
-    HHVM_FE(fb_call_user_func_array_safe);
+
+    HHVM_FALIAS(HH\\disable_code_coverage_with_frequency,
+                HH_disable_code_coverage_with_frequency);
+    HHVM_FALIAS(HH\\non_crypto_md5_upper, HH_non_crypto_md5_upper);
+    HHVM_FALIAS(HH\\non_crypto_md5_lower, HH_non_crypto_md5_lower);
+    HHVM_FALIAS(HH\\int_mul_overflow, HH_int_mul_overflow);
+    HHVM_FALIAS(HH\\int_mul_add_overflow, HH_int_mul_add_overflow);
 
     loadSystemlib();
   }

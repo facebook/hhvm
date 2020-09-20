@@ -1,4 +1,5 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 // create dom document
 $dom = new DOMDocument;
 $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -31,4 +32,4 @@ var_dump( $test );
  */
 
 echo "Done";
-?>
+}

@@ -1,5 +1,5 @@
 
-Fatal error: Uncaught exception 'Exception' with message 'test' in %s/test/slow/error_handler/1371.php:14
+Fatal error: Uncaught exception 'Exception' with message 'test' in %s/test/slow/error_handler/1371.php:13
 Stack trace:
-#0 {main}
+%a {main}
 string(15) "Exception: test"

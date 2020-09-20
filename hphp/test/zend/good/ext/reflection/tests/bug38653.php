@@ -1,14 +1,14 @@
-<?php
+<?hh
 
 class foo {
-	    const cons = 10;
-	    const cons1 = "";
-	    const cons2 = "test";
+        const cons = 10;
+        const cons1 = "";
+        const cons2 = "test";
 }
 
 class bar extends foo {
 }
-
+<<__EntryPoint>> function main(): void {
 $foo = new ReflectionClass("foo");
 var_dump($foo->getConstant("cons"));
 var_dump($foo->getConstant("cons1"));
@@ -16,4 +16,4 @@ var_dump($foo->getConstant("cons2"));
 var_dump($foo->getConstant("no such const"));
 
 echo "Done\n";
-?>
+}

@@ -1,0 +1,4 @@
+File "override_attr_10.php", line 14, characters 20-22:
+`BadC::foo`: combining private and override is nonsensical (Typing[4080])
+File "override_attr_10.php", line 14, characters 20-22:
+`BadC` has no parent class with a method `foo` to override (Typing[4087])

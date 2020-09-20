@@ -1,3 +1,4 @@
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -106,10 +107,9 @@ static UBool enumCharType_callback(CallCtx* ctx,
 
 void HHVM_STATIC_METHOD(IntlChar, enumCharTypes, const Variant& callback) {
   CallCtx ctx;
-  CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    vm_decode_function(callback, cf(), false, ctx);
+    vm_decode_function(callback, ctx);
   }
   if (!ctx.func) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,
@@ -178,10 +178,9 @@ void HHVM_STATIC_METHOD(IntlChar, enumCharNames,
   GETCP_VOID(vStart, start);
   GETCP_VOID(vLimit, limit);
   CallCtx ctx;
-  CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    vm_decode_function(callback, cf(), false, ctx);
+    vm_decode_function(callback, ctx);
   }
   if (!ctx.func) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,
@@ -264,7 +263,7 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
 
   UVersionInfo version;
   u_charAge(cp, version);
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for(int i = 0; i < U_MAX_VERSION_LENGTH; ++i) {
     ret.append(version[i]);
   }
@@ -274,11 +273,11 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
 Array HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
   UVersionInfo version;
   u_getUnicodeVersion(version);
-  Array ret = Array::Create();
+  VArrayInit ret(U_MAX_VERSION_LENGTH);
   for(int i = 0; i < U_MAX_VERSION_LENGTH; ++i) {
     ret.append(version[i]);
   }
-  return ret;
+  return ret.toArray();
 }
 
 Variant HHVM_STATIC_METHOD(IntlChar, getFC_NFKC_Closure, const Variant& arg) {

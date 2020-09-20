@@ -6,46 +6,25 @@ Displays the list of command line options with short descriptions.
 
 = -t, --target=TARGET
 
-This sets the mode of operation for hphp. TARGET is one of <b>lint</b>,
-<b>analyze</b>, <b>php</b>, <b>cpp</b>, <b>filecache</b>, and <b>run</b>
-(default).
+This sets the mode of operation for hphp. TARGET is one of <b>hhbc</b>,
+<b>filecache</b>, and <b>run</b> (default).
 
-lint: only parses the input files.
-analyze: runs the analysis phases of hphp but does not generate output files.
-php: runs analysis on the input files and generates php source files as output.
-cpp: runs analysis on the input files, generates c++ source files as output and optionally builds the program. See format options for cpp.
-run: is the same as cpp but also builds and executes the program.
+hhbc: runs analysis on the input files and generates a repo as output.
+run: is the same as hhbc but also runs the program.
 filecache: only builds the static file cache.
 
 = -f, --format=FORMAT
 
 The possible values of FORMAT depends on the chosen target.
 
-If the target is <b>lint</b> or <b>analyze</b>, the format option is unused.
+If the target is <b>lint</b> or <b>filecache</b>, the format option is unused.
 
-If the target is <b>php</b>, FORMAT is a comma separated list of the following:
+If the target is <b>hhbc</b> or <b>run</b>, FORMAT is one of the following:
 
-pickled: This outputs php code in a canonicalized format and stripped of comments.
-trimmed: This is the same as pickled, but also does not output functions that are never used.
-inlined: The same as pickled but generates a single file where all includes are inlined.
-typeinfo: The same as pickled, but also runs type inference on the php code and outputs the inferred types in comments.
-
-If the target is <b>cpp</b>, FORMAT is one of the following:
-
-cluster: (default) The generated C++ code is divided up among a fixed number of files. The number is set by the cluster-count option.
-file: There is one C++ source file generated for each input PHP file. The paths to generated C++ files mirror the paths to the PHP files.
-sys: This is used to generate the C++ used for the system library.
-exe: This is the same as cluster but also compiles the generated C++ into an executable.
-lib: The same as cluster but compiles the generated C++ into a library.
-
-If the target is <b>run</b>, FORMAT can be either cluster or file. These behave
-the same as the corresponding formats for cpp. However, with run the generated
-sources are always compiled into executables and run.
-
-= --cluster-count=COUNT
-
-COUNT is an integer and determines the number of output C++ files to generate
-when using the cluster format for cpp or run targets.
+binary: (default) A sqlite3 repo is produced.
+hhas: This is the same as binary, but also hhas is output for each input PHP file.
+text: This is the same as binary, but also bytecode is output as text for each input PHP file.
+exe: This is the same as binary, but also creates an executable with the repo embedded in it.
 
 = --input-dir=PATH
 
@@ -127,12 +106,6 @@ If this parameter is set, the compiler will first output to DIR, and then
 only copy over files that have changed to the output directory. This is to
 preserve their timestamps so that a make will not recompile unchanged files.
 
-= --optimize-level=INT (default: 1)
-
-This sets the severity of optimizations performed on the PHP code before
-being translated into C++. Currently, there are two levels of optimization.
-0 performs no optimizations, and 1 performs some optimizations.
-
 = --gen-stats=BOOL (default: false)
 
 If BOOL is true, then detected errors in the code and code statistics will
@@ -144,42 +117,10 @@ If no output directory is specified, the compiler will place generated sources
 into a directory in /tmp. If BOOL is true, then this directory will not be
 deleted after the program is compiled and, optionally, run.
 
-= --static-method-autofix=BOOL (default: true)
-
-If a method is found to be called statically but not declared static and BOOL
-is true, then it will be treated as a static method.
-
-= --db-stats=STRING
-
-If this parameter is given, and --gen-stats also set, the dependency graph
-and code errors will be stored in the database specified by STRING.
-The format is <username>:<password>@<host>:<port>/<db>.
-
-= --no-type-inference=BOOL (default: false)
-
-If BOOL is true, then no type inference will be performed before outputting
-the translated sources.
-
-= --no-min-include=BOOL (default: false)
-
-If BOOL is true, then minimum include analysis will not be performed for an
-analyze target.
-
-= --no-meta-info=BOOL (default: false)
-
-If BOOL is true, then generated C++ code will not include a class map, jump
-tables, or use macros. This is intended to produce readable but non-functional
-code.
-
 = --config=FILE
 
 This reads in a configuration file to set options. FILE should be in HDF
 format.
-
-= --db-config=STRING
-
-This reads configuration from a database. STRING is of the format
-<username>:<password>@<host>:<port>/<db>.
 
 = --config-dir=DIR (default: --input-dir)
 
@@ -191,7 +132,7 @@ directory.
 
 This sets a configuration option on the command line. STRING should be
 a line of HDF, e.g. Section.Name=Value. The options settable are the same
-as those set by --config or --db-config.
+as those set by --config.
 
 = -d, --define=STRING
 
@@ -214,6 +155,6 @@ This sets the level of logging output to standard out. The Levels are:
 Forces the compiler to generate output even if there are code errors
 encountered.
 
-= --filecache=FILE
+= --file-cache=FILE
 
 If this argument is given, a static file cache will be created with path FILE.

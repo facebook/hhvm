@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_SRC_LOC_H_
-#define incl_HHBBC_SRC_LOC_H_
+#pragma once
 
 #include <cstdint>
 #include <tuple>
@@ -70,4 +69,3 @@ std::string show(SrcLoc);
 
 }}
 
-#endif

@@ -57,4 +57,8 @@ function main() {
   retain_set();
 }
 
+
+<<__EntryPoint>>
+function main_retain() {
 main();
+}

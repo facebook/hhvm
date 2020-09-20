@@ -1,4 +1,4 @@
-array(6) {
+darray(6) {
   ["p"]=>
   string(1) "A"
   ["q"]=>
@@ -18,167 +18,140 @@ NULL
 NULL
 
 [1]
-array(6) {
-  [0]=>
-  array(1) {
+varray(6) {
+  darray(1) {
     [0]=>
     string(1) "A"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "B"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "C"
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "D"
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "E"
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "F"
   }
 }
-array(6) {
-  [0]=>
-  array(1) {
+varray(6) {
+  darray(1) {
     ["p"]=>
     string(1) "A"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     ["q"]=>
     string(1) "B"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["r"]=>
     string(1) "C"
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     ["s"]=>
     string(1) "D"
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     ["u"]=>
     string(1) "E"
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     ["v"]=>
     string(1) "F"
   }
 }
-array(6) {
-  [0]=>
-  array(1) {
+varray(6) {
+  darray(1) {
     [0]=>
     string(1) "A"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "B"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "C"
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "D"
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "E"
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "F"
   }
 }
 
 [2]
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "A"
     [1]=>
     string(1) "B"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "C"
     [1]=>
     string(1) "D"
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "E"
     [1]=>
     string(1) "F"
   }
 }
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
     string(1) "B"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     ["r"]=>
     string(1) "C"
     ["s"]=>
     string(1) "D"
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["u"]=>
     string(1) "E"
     ["v"]=>
     string(1) "F"
   }
 }
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "A"
     [1]=>
     string(1) "B"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "C"
     [1]=>
     string(1) "D"
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "E"
     [1]=>
@@ -187,9 +160,8 @@ array(3) {
 }
 
 [3]
-array(2) {
-  [0]=>
-  array(3) {
+varray(2) {
+  darray(3) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -197,8 +169,7 @@ array(2) {
     [2]=>
     string(1) "C"
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     string(1) "D"
     [1]=>
@@ -207,9 +178,8 @@ array(2) {
     string(1) "F"
   }
 }
-array(2) {
-  [0]=>
-  array(3) {
+varray(2) {
+  darray(3) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -217,8 +187,7 @@ array(2) {
     ["r"]=>
     string(1) "C"
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["s"]=>
     string(1) "D"
     ["u"]=>
@@ -227,9 +196,8 @@ array(2) {
     string(1) "F"
   }
 }
-array(2) {
-  [0]=>
-  array(3) {
+varray(2) {
+  darray(3) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -237,8 +205,7 @@ array(2) {
     [2]=>
     string(1) "C"
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     string(1) "D"
     [1]=>
@@ -249,9 +216,8 @@ array(2) {
 }
 
 [4]
-array(2) {
-  [0]=>
-  array(4) {
+varray(2) {
+  darray(4) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -261,17 +227,15 @@ array(2) {
     [3]=>
     string(1) "D"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "E"
     [1]=>
     string(1) "F"
   }
 }
-array(2) {
-  [0]=>
-  array(4) {
+varray(2) {
+  darray(4) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -281,17 +245,15 @@ array(2) {
     ["s"]=>
     string(1) "D"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     ["u"]=>
     string(1) "E"
     ["v"]=>
     string(1) "F"
   }
 }
-array(2) {
-  [0]=>
-  array(4) {
+varray(2) {
+  darray(4) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -301,8 +263,7 @@ array(2) {
     [3]=>
     string(1) "D"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "E"
     [1]=>
@@ -311,9 +272,8 @@ array(2) {
 }
 
 [5]
-array(2) {
-  [0]=>
-  array(5) {
+varray(2) {
+  darray(5) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -325,15 +285,13 @@ array(2) {
     [4]=>
     string(1) "E"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "F"
   }
 }
-array(2) {
-  [0]=>
-  array(5) {
+varray(2) {
+  darray(5) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -345,15 +303,13 @@ array(2) {
     ["u"]=>
     string(1) "E"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     ["v"]=>
     string(1) "F"
   }
 }
-array(2) {
-  [0]=>
-  array(5) {
+varray(2) {
+  darray(5) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -365,17 +321,15 @@ array(2) {
     [4]=>
     string(1) "E"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "F"
   }
 }
 
 [6]
-array(1) {
-  [0]=>
-  array(6) {
+varray(1) {
+  darray(6) {
     [0]=>
     string(1) "A"
     [1]=>
@@ -390,9 +344,8 @@ array(1) {
     string(1) "F"
   }
 }
-array(1) {
-  [0]=>
-  array(6) {
+varray(1) {
+  darray(6) {
     ["p"]=>
     string(1) "A"
     ["q"]=>
@@ -407,9 +360,8 @@ array(1) {
     string(1) "F"
   }
 }
-array(1) {
-  [0]=>
-  array(6) {
+varray(1) {
+  darray(6) {
     [0]=>
     string(1) "A"
     [1]=>

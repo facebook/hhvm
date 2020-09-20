@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_CLIENT_PREFS_H_
-#define incl_HPHP_VSDEBUG_CLIENT_PREFS_H_
+#pragma once
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -39,4 +38,3 @@ struct ClientPreferences {
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_CLIENT_PREFS_H_

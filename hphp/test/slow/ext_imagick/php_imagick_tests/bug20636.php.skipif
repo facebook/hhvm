@@ -1,4 +1,4 @@
-<?php require_once(__DIR__ . '/skipif.inc');
+<?hh require_once(__DIR__ . '/skipif.inc');
 //
 // There's some version specific bug with imagemagick.
 //
@@ -11,6 +11,5 @@
 // As of 16Jan2015 ubuntu 14.04 uses 6.7.7.10 and see this problem.
 //
 $v = Imagick::getVersion();
-if ($v['versionNumber'] >= 0x677 && $v['versionNumber] <= 0x685)
+if ($v['versionNumber'] >= 0x677 && $v['versionNumber'] <= 0x685)
   die ('skip too ImageMagick with cacheing bug');
-?>

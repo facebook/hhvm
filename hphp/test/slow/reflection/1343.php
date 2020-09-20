@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Doc comment on a function generator
@@ -6,8 +6,6 @@
 function foo() {
   yield null;
 }
-$rf = new ReflectionFunction('foo');
-var_dump($rf->getDocComment());
 
 class C {
   /**
@@ -17,5 +15,11 @@ class C {
     yield null;
   }
 }
+
+<<__EntryPoint>>
+function main_1343() {
+$rf = new ReflectionFunction('foo');
+var_dump($rf->getDocComment());
 $rm = new ReflectionMethod('C','bar');
 var_dump($rm->getDocComment());
+}

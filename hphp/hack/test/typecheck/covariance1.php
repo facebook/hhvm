@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class Ref<T> implements ReadRef<T>, WriteRef<T> {
   public function __construct(private T $x) {}

@@ -1,7 +1,4 @@
-<?php
-
-define('INIT1', 123);
-define('INIT2', 456);
+<?hh
 trait t2 {
  public $y = INIT2;
  }
@@ -12,6 +9,13 @@ trait t1 {
 class c {
  use t1;
  }
+
+
+const INIT1 = 123;
+const INIT2 = 456;
+<<__EntryPoint>>
+function main_2094() {
 $obj = new c;
 var_dump($obj->x);
 var_dump($obj->y);
+}

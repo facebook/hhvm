@@ -14,7 +14,14 @@ class D extends C {
   }
 }
 
+type E = D;
+
 function test() {
   C::foo();
   D::foo();
+  E::foo(); // TODO: This is not detected
+
+  class_meth(C::class, 'foo');
+  class_meth(D::class, 'foo');
+  class_meth(E::class, 'foo'); // TODO: This is not detected
 }

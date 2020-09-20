@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_808() {
 $m = new Map;
 $m[3] = 'foo';
 $m['bar'] = 7;
@@ -33,3 +36,4 @@ print_r($m2);
 echo json_encode($m2) . "\n";
 var_export($m2);
  echo "\n";
+}

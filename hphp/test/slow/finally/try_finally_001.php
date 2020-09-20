@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo ($a) {
    try {
      throw new Exception("ex");
@@ -6,6 +6,6 @@ function foo ($a) {
      var_dump($a);
    }
 }
-
+<<__EntryPoint>> function main(): void {
 foo("finally");
-?>
+}

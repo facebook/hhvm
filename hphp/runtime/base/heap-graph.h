@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HEAP_GRAPH_H_
-#define incl_HPHP_HEAP_GRAPH_H_
+#pragma once
 
 #include "hphp/util/type-scan.h"
 #include <vector>
@@ -126,4 +125,3 @@ bool checkPointers(const HeapGraph& g, const char* phase);
 
 }
 
-#endif

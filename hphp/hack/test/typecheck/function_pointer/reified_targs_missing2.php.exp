@@ -1,0 +1,10 @@
+File "reified_targs_missing2.php", line 8, characters 8-10:
+Expected 2 type parameters (Typing[4029])
+File "reified_targs_missing2.php", line 3, characters 10-12:
+Definition is here
+File "reified_targs_missing2.php", line 8, characters 8-10:
+Invalid reified hint (Typing[4305])
+File "reified_targs_missing2.php", line 8, characters 8-10:
+This is a wildcard, it cannot be used as a reified type argument
+File "reified_targs_missing2.php", line 3, characters 29-30:
+`T2` is reified

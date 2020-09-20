@@ -27,7 +27,7 @@ namespace HPHP {
 inline
 c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind,
                                            type_scan::Index tyindex) noexcept
-    : c_WaitHandle(cb, kind, tyindex) {
+    : c_Awaitable(cb, kind, tyindex) {
   m_parentChain.init();
 }
 
@@ -44,12 +44,12 @@ inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
 }
 
 inline context_idx_t c_WaitableWaitHandle::getContextIdx() const {
-  assert(!isFinished());
+  assertx(!isFinished());
   return m_contextIdx;
 }
 
 inline void c_WaitableWaitHandle::setContextIdx(context_idx_t ctx_idx) {
-  assert(!isFinished());
+  assertx(!isFinished());
   m_contextIdx = ctx_idx;
 }
 
@@ -58,12 +58,12 @@ inline bool c_WaitableWaitHandle::isInContext() const {
 }
 
 inline AsioContext* c_WaitableWaitHandle::getContext() const {
-  assert(isInContext());
+  assertx(isInContext());
   return AsioSession::Get()->getContext(getContextIdx());
 }
 
 inline AsioBlockableChain& c_WaitableWaitHandle::getParentChain() {
-  assert(!isFinished());
+  assertx(!isFinished());
   return m_parentChain;
 }
 

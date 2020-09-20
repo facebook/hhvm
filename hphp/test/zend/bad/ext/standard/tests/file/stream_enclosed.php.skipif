@@ -1,2 +1,0 @@
-<?php
-if (!function_exists('leak_variable')) die("skip only debug builds");

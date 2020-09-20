@@ -1,16 +1,16 @@
-<?php
-$args = array(
+<?hh <<__EntryPoint>> function main(): void {
+$args = darray[
   "curve_name" => "secp384r1",
   "private_key_type" => OPENSSL_KEYTYPE_EC,
-);
+];
 echo "Testing openssl_pkey_new\n";
 $key1 = openssl_pkey_new($args);
 var_dump($key1);
 
-$argsFailed = array(
+$argsFailed = darray[
   "curve_name" => "invalid_cuve_name",
   "private_key_type" => OPENSSL_KEYTYPE_EC,
-);
+];
 
 $keyFailed = openssl_pkey_new($argsFailed);
 var_dump($keyFailed);
@@ -30,25 +30,25 @@ $d2 = openssl_pkey_get_details($key2);
 var_dump($d1 === $d2);
 */
 
-$dn = array(
+$dn = darray[
   "countryName" => "BR",
   "stateOrProvinceName" => "Rio Grande do Sul",
   "localityName" => "Porto Alegre",
   "commonName" => "Henrique do N. Angelo",
   "emailAddress" => "hnangelo@php.net"
-);
+];
 
 // openssl_csr_new creates a new public key pair if the key argument is null
 echo "Testing openssl_csr_new with key generation\n";
 $keyGenerate = null;
 var_dump($keyGenerate);
-$csr = openssl_csr_new($dn, $keyGenerate, $args);
+$csr = openssl_csr_new($dn, inout $keyGenerate, $args);
 
 var_dump($keyGenerate);
 
 $args["digest_alg"] = "sha1";
 echo "Testing openssl_csr_new with existing ecc key\n";
-$csr = openssl_csr_new($dn, $key1, $args);
+$csr = openssl_csr_new($dn, inout $key1, $args);
 var_dump($csr);
 
 $pubkey1 = openssl_pkey_get_details(openssl_csr_get_public_key($csr));
@@ -75,4 +75,4 @@ foreach ($curve_names as $curve_name) {
     echo "Found secp384r1 in curve names\n";
   }
 }
-?>
+}

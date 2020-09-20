@@ -1,17 +1,19 @@
 # Test for hhas return types
 
-.adata A_0 = """a:0:{}""";
+.adata A_0 = """Y:0:{}""";
 
-.main {
-  FPushFuncD 0 "fail"
-  FCall 0
-  PopR
-  Int 1
+.function <"HH\\int" "HH\\int" extended_hint> fail() {
+  Array @A_0
+  VerifyRetTypeC
   RetC
 }
 
-.function <"HH\\int" "HH\\int" hh_type extended_hint> fail() {
-  Array @A_0
-  VerifyRetTypeC
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "fail"
+  PopC
+  Int 1
   RetC
 }

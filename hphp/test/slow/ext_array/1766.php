@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1766() {
 error_reporting(0);
 var_dump(range('', '', 1));
 var_dump(range('', '', -1));
@@ -24,3 +27,4 @@ var_dump(range(null, null, -2.5));
 var_dump(range(null, null, 3.5));
 var_dump(range(null, null, null));
 var_dump(range(3.5, -4.5, null));
+}

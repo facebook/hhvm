@@ -57,6 +57,13 @@ void initDebugInfo() {
   s_info = new DebugInfo();
 }
 
+void destroyDebugInfo() {
+  if (s_info) {
+    delete s_info;
+    s_info = nullptr;
+  }
+}
+
 DebugInfo* DebugInfo::Get() {
   return s_info;
 }
@@ -72,10 +79,6 @@ DebugInfo::DebugInfo() {
   m_dataMapName = folly::sformat("/tmp/perf-data-{}.map", getpid());
   if (RuntimeOption::EvalPerfDataMap) {
     m_dataMap = fopen(m_dataMapName.c_str(), "w");
-  }
-  m_relocMapName = folly::sformat("/tmp/hhvm-reloc-{}.map", getpid());
-  if (RuntimeOption::EvalPerfRelocate) {
-    m_relocMap = fopen(m_relocMapName.c_str(), "w+");
   }
   generatePidMapOverlay();
 }
@@ -100,11 +103,6 @@ DebugInfo::~DebugInfo() {
     if (!RuntimeOption::EvalKeepPerfPidMap) {
       unlink(m_dataMapName.c_str());
     }
-  }
-
-  if (m_relocMap) {
-    fclose(m_relocMap);
-    unlink(m_relocMapName.c_str());
   }
 }
 
@@ -254,14 +252,6 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 #undef O
   };
 
-  static const char* acoldOpcodeName[] = {
-    "OpAcoldStart",
-#define O(name, imm, push, pop, flags) \
-#name "-Acold",
-    OPCODES
-#undef O
-  };
-
   static const char* highOpcodeName[] = {
     "OpHighStart",
 #define O(name) \
@@ -276,8 +266,6 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
     const char* name;
     if (op < Op_count) {
       name = opcodeName[op];
-    } else if (op < OpAcoldCount) {
-      name = acoldOpcodeName[op - OpAcoldStart];
     } else {
       name = highOpcodeName[op - OpHighStart];
     }
@@ -307,17 +295,6 @@ void DebugInfo::recordDataMap(const void* from, const void* to,
             uint64_t((char*)to - (char*)from),
             desc.c_str());
     fflush(dataMap);
-  }
-}
-
-void DebugInfo::recordRelocMap(void* from, void* to,
-                               const std::string& transInfo) {
-  if (m_relocMap) {
-    fprintf(m_relocMap, "%" PRIxPTR " %" PRIxPTR " %s\n",
-            uintptr_t(from),
-            uintptr_t(to),
-            transInfo.c_str());
-    fflush(m_relocMap);
   }
 }
 

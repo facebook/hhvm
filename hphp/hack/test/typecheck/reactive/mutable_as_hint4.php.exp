@@ -1,0 +1,2 @@
+File "mutable_as_hint4.php", line 7, characters 22-31:
+Parameter with mutability hint cannot appear in non-reactive function type. (Naming[2098])

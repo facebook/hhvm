@@ -1,4 +1,4 @@
 string(%d) "%s"
 
-Warning: hash_final(): supplied resource is not a valid Hash Context resource in %s/hash_final_invalid.php on line 5
+Warning: hash_final(): supplied resource is not a valid Hash Context resource in %s/hash_final_invalid.php on line 8
 bool(false)

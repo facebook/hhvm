@@ -1,0 +1,17 @@
+(test
+  (name typeSimplifierTest)
+  (flags (:standard -w @a-4-27-44-48))
+  (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
+  (libraries
+    collections
+    core_kernel
+    default_injector_config
+    heap_ident
+    ounit2
+    pos
+    relative_path
+    tast
+    typechecker_options
+    typing_ast
+    typing_defs
+    utils_core))

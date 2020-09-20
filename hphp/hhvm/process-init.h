@@ -16,17 +16,19 @@
 #ifndef incl_HPHP_HHVM_PROCESS_INIT_H_
 #define incl_HPHP_HHVM_PROCESS_INIT_H_
 
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/compiler/analysis/emitter.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
 extern void (*g_vmProcessInit)();
 void hphp_process_init();
-
 void ProcessInit();
 void initialize_repo();
+
 /*
  * This must be called before execute_program_impl in an hhvm build.
  */
@@ -41,16 +43,15 @@ inline void register_process_init() {
  * real execution context or anything like that.)
  */
 inline void init_for_unit_test() {
+  HPHP::StaticString::CreateAll();
   register_process_init();
   initialize_repo();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   RuntimeOption::Load(ini, config);
-  compile_file(0, 0, MD5(), 0);
+  hphp_compiler_init();
   hphp_process_init();
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::UnitTests);
 }
-
 }
-
 #endif

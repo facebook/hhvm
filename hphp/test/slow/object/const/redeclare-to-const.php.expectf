@@ -1,0 +1,1 @@
+Fatal error: Cannot redeclare property p of class C with different constness in class D in %s/redeclare-to-const.php on line 4

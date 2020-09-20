@@ -1,5 +1,5 @@
 *** Testing getdate() : basic functionality ***
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(10)
   ["minutes"]=>
@@ -23,7 +23,7 @@ array(11) {
   [0]=>
   int(10)
 }
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(%d)
   ["minutes"]=>

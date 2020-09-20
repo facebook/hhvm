@@ -1,24 +1,16 @@
-array(9) {
-  [0]=>
+varray(9) {
   int(56)
-  [1]=>
   int(34)
-  [2]=>
   int(12)
-  [3]=>
   int(10)
-  [4]=>
   int(8)
-  [5]=>
   int(108)
-  [6]=>
   int(3)
-  [7]=>
   int(253)
-  [8]=>
   int(1)
 }
-array(9) {
+bool(true)
+darray(9) {
   ["tm_sec"]=>
   int(56)
   ["tm_min"]=>
@@ -38,3 +30,4 @@ array(9) {
   ["tm_isdst"]=>
   int(1)
 }
+bool(true)

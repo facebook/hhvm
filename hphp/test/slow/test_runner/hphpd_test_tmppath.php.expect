@@ -1,0 +1,10 @@
+string(16) "root ends with /"
+bool(true)
+string(21) "path starts with root"
+bool(true)
+string(22) "requested path is leaf"
+bool(true)
+string(25) "no double slashes in root"
+bool(true)
+string(25) "no double slashes in path"
+bool(true)

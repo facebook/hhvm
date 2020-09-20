@@ -1,5 +1,4 @@
-<?php
-
-var_dump(posix_mknod(NULL, NULL, NULL, NULL));
-
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+var_dump(posix_mknod('', 0, 0, 0));
+}

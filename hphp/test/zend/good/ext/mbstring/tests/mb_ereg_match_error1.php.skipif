@@ -1,4 +1,5 @@
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_ereg_match') or die("skip mb_ereg_match() is not available in this build");
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+extension_loaded('mbstring') || die('skip');
+function_exists('mb_ereg_match') || die("skip mb_ereg_match() is not available in this build");
+}

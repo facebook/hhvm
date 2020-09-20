@@ -2,6 +2,5 @@
 
 -- Testing getcwd() function with one argument --
 
-Warning: %s
-NULL
+Warning: getcwd() expects exactly 0 parameters, 1 given in %s/getcwd_error.php on line 16
 ===DONE===

@@ -14,13 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TYPE_SCAN_H_
-#define incl_HPHP_UTIL_TYPE_SCAN_H_
+#pragma once
 
 #include <cstdint>
 #include <stdexcept>
 #include <type_traits>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -202,7 +200,9 @@ inline bool hasConservativeScanner(Index index) {
 // getIndexForMalloc() will always return kIndexUnknown and any attempts to scan
 // will use conservative scanning. For this reason, its important to call init()
 // as early as possible.
-void init();
+void init(const std::string& extractPath,
+          const std::string& fallbackPath,
+          bool trust);
 
 // Thrown by init() if initialization fails.
 struct InitException: std::runtime_error {
@@ -232,11 +232,14 @@ struct Scanner {
   // enqueuing it, so do that.
   template <typename T>
   typename std::enable_if<std::is_pointer<T>::value>::type
-  scan(const T& ptr, DEBUG_ONLY std::size_t size = sizeof(T)) {
+  scan(const T& ptr, std::size_t size = sizeof(T)) {
     static_assert(!detail::UnboundedArray<T>::value,
                   "Trying to scan unbounded array");
-    assert(size == sizeof(T));
-    m_addrs.emplace_back((const void**)&ptr);
+    // scan contiguous array of pointers: insert addr of each pointer
+    assert(size % sizeof(T) == 0);
+    for (auto p = &ptr, e = p + size / sizeof(T); p < e; ++p) {
+      m_addrs.emplace_back((const void**)p);
+    }
   }
 
   // Overload for interesting non-pointer types.
@@ -409,4 +412,3 @@ struct Scanner {
 
 }}
 
-#endif

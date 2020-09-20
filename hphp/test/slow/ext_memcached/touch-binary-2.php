@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function resolve_to_constant($code)
 {
@@ -27,7 +27,7 @@ function status_print($op, $mem, $expected)
         echo PHP_EOL;
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $mem = new Memcached();
 
 $mem->setOption(Memcached::OPT_BINARY_PROTOCOL, true);
@@ -54,3 +54,4 @@ $mem->get($key);
 status_print('get', $mem, Memcached::RES_SUCCESS);
 
 echo "OK\n";
+}

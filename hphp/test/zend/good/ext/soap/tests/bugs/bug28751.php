@@ -1,13 +1,14 @@
-<?php
-function __autoload($className) {
-	class SoapServerActions {
-    function test() {
-      return "Hello World";
-    }
-	}
-}
-
-$server = new SoapServer(NULL, array('uri'=>"http://testuri.org"));
+<?hh
+<<__EntryPoint>> function main(): void {
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'soapserveractions' => 'bug28751.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
+$server = new SoapServer(NULL, darray['uri'=>"http://testuri.org"]);
 $server->setClass("SoapServerActions");
 
 $HTTP_RAW_POST_DATA = <<<EOF
@@ -26,4 +27,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>
+}

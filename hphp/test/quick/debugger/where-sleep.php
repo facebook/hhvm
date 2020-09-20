@@ -11,7 +11,7 @@ class Sleeper {
   public function __sleep() {
     echo "sleep\n";
     bar($this);
-    return array('foo');
+    return varray['foo'];
   }
 
   public function __wakeup() {
@@ -22,5 +22,8 @@ class Sleeper {
 function bar($b) {
   var_dump($b);
 }
+<<__EntryPoint>>
+function entrypoint_wheresleep(): void {
 
-bar(new Sleeper(1));
+  bar(new Sleeper(1));
+}

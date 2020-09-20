@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * A timer that periodically interrupts a request thread.
@@ -11,8 +11,8 @@ class IntervalTimer {
    * @param double $interval - frequency in seconds of timer interrupts.
    */
   <<__Native>>
-  public function __construct(double $interval,
-                              double $initial,
+  public function __construct(float $interval,
+                              float $initial,
                               mixed $callback);
 
   /**

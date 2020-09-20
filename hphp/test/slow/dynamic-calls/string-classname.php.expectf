@@ -1,0 +1,1 @@
+Fatal error: Dynamic class names are not allowed in compile-time `::class` fetch in %s on line %d

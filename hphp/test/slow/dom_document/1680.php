@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   $html = '<b>Hello</b><i>World</i>';
@@ -11,4 +11,8 @@ function foo() {
     var_dump($child->nodeValue);
   }
 }
+
+<<__EntryPoint>>
+function main_1680() {
 foo();
+}

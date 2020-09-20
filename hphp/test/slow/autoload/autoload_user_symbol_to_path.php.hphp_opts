@@ -1,0 +1,2 @@
+--ffile=test/slow/autoload/autoload_symbol_to_path.php
+--ffile=hphp/test/slow/autoload/autoload_symbol_to_path.php

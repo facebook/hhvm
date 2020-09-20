@@ -381,7 +381,7 @@ notXpg:
     if (gotXpg) {
 mixedXPG:
       if (nassign != staticAssign) req::free((char *)nassign);
-      throw_invalid_argument
+      raise_invalid_argument_warning
         ("format: cannot mix \"%%\" and \"%%n$\" conversion specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
     }
@@ -435,7 +435,7 @@ xpgCheckDone:
       /* problem - cc                                               */
       /*
         if (flags & SCAN_WIDTH) {
-        throw_invalid_argument
+        raise_invalid_argument_warning
         ("format: Field width may not be specified in %c conversion");
         }
         return SCAN_ERROR_INVALID_FORMAT;
@@ -468,12 +468,12 @@ xpgCheckDone:
       break;
     badSet:
       if (nassign != staticAssign) req::free((char *)nassign);
-      throw_invalid_argument("format: Unmatched [ in format string");
+      raise_invalid_argument_warning("format: Unmatched [ in format string");
       return SCAN_ERROR_INVALID_FORMAT;
 
     default:
       if (nassign != staticAssign) req::free((char *)nassign);
-      throw_invalid_argument("Bad scan conversion character \"%c\"", *ch);
+      raise_invalid_argument_warning("Bad scan conversion character \"%c\"", *ch);
       return SCAN_ERROR_INVALID_FORMAT;
     }
 
@@ -524,7 +524,7 @@ xpgCheckDone:
   for (i = 0; i < numVars; i++) {
     if (nassign[i] > 1) {
       if (nassign != staticAssign) req::free((char *)nassign);
-      throw_invalid_argument
+      raise_invalid_argument_warning
         ("format: Variable is assigned by multiple \"%%n$\" specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
     } else if (!xpgSize && (nassign[i] == 0)) {
@@ -533,7 +533,7 @@ xpgCheckDone:
        * used, and/or numVars != 0), then too many vars were given
        */
       if (nassign != staticAssign) req::free((char *)nassign);
-      throw_invalid_argument
+      raise_invalid_argument_warning
         ("format: Variable is not assigned by any conversion specifiers");
       return SCAN_ERROR_INVALID_FORMAT;
     }
@@ -545,10 +545,10 @@ xpgCheckDone:
 badIndex:
   if (nassign != staticAssign) req::free((char *)nassign);
   if (gotXpg) {
-    throw_invalid_argument
+    raise_invalid_argument_warning
       ("format: \"%%n$\" argument index out of range");
   } else {
-    throw_invalid_argument
+    raise_invalid_argument_warning
       ("format: Different numbers of variable names and field specifiers");
   }
   return SCAN_ERROR_INVALID_FORMAT;

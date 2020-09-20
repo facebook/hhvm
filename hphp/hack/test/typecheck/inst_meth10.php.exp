@@ -1,4 +1,4 @@
-File "inst_meth10.php", line 13, characters 19-20:
-This is a private method (Typing[4079])
-File "inst_meth10.php", line 26, characters 12-30:
-you cannot use it with inst_meth (whether you are in the same class or not).
+File "inst_meth10.php", line 27, characters 26-29:
+You cannot use this method with `inst_meth` (whether you are in the same class or not). (Typing[4079])
+File "inst_meth10.php", line 19, characters 20-21:
+It is declared as `private` here

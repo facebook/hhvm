@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
  Description: Format line as CSV and write to the file pointer 
@@ -6,7 +6,7 @@
 
 
 /* Testing fputcsv() to write to a file when the field has no CSV format */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with no CSV format in the field ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -14,18 +14,17 @@ echo "*** Testing fputcsv() : with no CSV format in the field ***\n";
    and 3rd element is csv fields
 */
 
-$fields = array( array('water_fruit\n'),
-                array("water_fruit\n"),
-                array("")
-         );
+$fields = varray[ varray['water_fruit\n'],
+                varray["water_fruit\n"],
+                varray[""]
+         ];
 
-$file_path = dirname(__FILE__);
-$filename = "$file_path/fputcsv_variation10.tmp";
+$filename = __SystemLib\hphp_test_tmppath('fputcsv_variation10.tmp');
 
-$file_modes = array ("r+", "r+b", "r+t",
+$file_modes = varray ["r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t"]; 
 
 $loop_counter = 1;
 foreach ($fields as $field) {
@@ -62,4 +61,4 @@ foreach ($fields as $field) {
 } // end of foreach
 
 echo "Done\n";
-?>
+}

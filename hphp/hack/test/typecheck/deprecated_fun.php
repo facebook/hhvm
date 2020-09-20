@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Deprecated('use bar() instead')>>
 function foo() {}

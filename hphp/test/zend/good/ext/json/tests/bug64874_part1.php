@@ -1,10 +1,10 @@
-<?php
+<?hh
 function decode($json) {
     var_dump(json_decode($json));
     var_dump(json_last_error() !== 0);
     echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 // Leading whitespace should be ignored
 decode(" true");
 decode("\ttrue");
@@ -36,3 +36,4 @@ decode("\rtrue\n");
 decode("\rtrue\r");
 
 echo "Done\n";
+}

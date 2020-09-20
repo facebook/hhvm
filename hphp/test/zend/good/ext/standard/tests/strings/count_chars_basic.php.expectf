@@ -1,5 +1,5 @@
 *** Testing count_chars() : basic functionality ***
-array(256) {
+darray(256) {
   [0]=>
   int(0)
   [1]=>
@@ -513,7 +513,7 @@ array(256) {
   [255]=>
   int(0)
 }
-array(256) {
+darray(256) {
   [0]=>
   int(0)
   [1]=>
@@ -1027,7 +1027,7 @@ array(256) {
   [255]=>
   int(0)
 }
-array(18) {
+darray(18) {
   [32]=>
   int(7)
   [82]=>
@@ -1065,7 +1065,7 @@ array(18) {
   [117]=>
   int(3)
 }
-array(238) {
+darray(238) {
   [0]=>
   int(0)
   [1]=>

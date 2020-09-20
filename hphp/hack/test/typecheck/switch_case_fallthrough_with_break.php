@@ -16,6 +16,7 @@ function f(int $c): C {
         break;
       }
       $x = new C();
+      // FALLTHROUGH
     case 2:
       break;
   }

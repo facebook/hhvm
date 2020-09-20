@@ -1,4 +1,4 @@
-array(5) {
+darray(5) {
   [1]=>
   int(0)
   [2]=>
@@ -8,10 +8,10 @@ array(5) {
   [6]=>
   bool(false)
   [7]=>
-  object(HH\Vector)#1 (0) {
+  object(HH\Vector) (0) {
   }
 }
-array(5) {
+darray(5) {
   [22]=>
   int(0)
   [33]=>
@@ -21,32 +21,32 @@ array(5) {
   [77]=>
   bool(false)
   [88]=>
-  object(HH\Vector)#1 (0) {
+  object(HH\Vector) (0) {
   }
 }
-array(1) {
+darray(1) {
   [22]=>
   string(1) "0"
 }
-array(1) {
-  [0]=>
+darray(1) {
+  ["0"]=>
   string(1) "0"
 }
-array(1) {
+darray(1) {
   [1]=>
   string(0) ""
 }
-array(1) {
+darray(1) {
   [0]=>
   string(1) "0"
 }
-array(1) {
+darray(1) {
   [0]=>
-  object(HH\Vector)#1 (0) {
+  object(HH\Vector) (0) {
   }
 }
 ========
-array(4) {
+darray(4) {
   [0]=>
   int(7)
   [4]=>
@@ -54,12 +54,12 @@ array(4) {
   [5]=>
   bool(true)
   [8]=>
-  object(HH\Vector)#2 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(1)
   }
 }
-array(4) {
+darray(4) {
   [11]=>
   int(7)
   [55]=>
@@ -67,34 +67,34 @@ array(4) {
   [66]=>
   bool(true)
   [99]=>
-  object(HH\Vector)#2 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(1)
   }
 }
-array(1) {
+darray(1) {
   [11]=>
   int(7)
 }
-array(1) {
+darray(1) {
   [7]=>
   int(7)
 }
-array(1) {
+darray(1) {
   ["foo"]=>
   string(3) "foo"
 }
-array(1) {
+darray(1) {
   [0]=>
   int(7)
 }
-array(1) {
+darray(1) {
   [1]=>
   string(3) "foo"
 }
-array(1) {
+darray(1) {
   [1]=>
-  object(HH\Vector)#2 (1) {
+  object(HH\Vector) (1) {
     [0]=>
     int(1)
   }

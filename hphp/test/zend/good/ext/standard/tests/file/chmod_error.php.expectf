@@ -2,14 +2,12 @@
 
 -- Testing chmod() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: chmod() expects exactly 2 parameters, 3 given in %s/chmod_error.php on line 16
 
 -- Testing chmod() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: chmod() expects exactly 2 parameters, 1 given in %s/chmod_error.php on line 21
 
-Warning: %s
+Warning: chmod(): No such file or directory in %s/chmod_error.php on line 25
 bool(false)
 ===DONE===

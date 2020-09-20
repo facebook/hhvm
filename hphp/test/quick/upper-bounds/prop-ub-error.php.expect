@@ -1,0 +1,4 @@
+string(61) "Property 'Foo1::x' upper-bounded by type num, string assigned"
+string(61) "Property 'Foo2::x' upper-bounded by type string, int assigned"
+string(66) "Static property 'Foo3::sx' upper-bounded by type Bar, int assigned"
+string(57) "Property 'Foo4::x' upper-bounded by type Ta, Bar assigned"

@@ -14,7 +14,7 @@ class :node {
     return $o;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $n1 =
   <node>
     <!--hey-->
@@ -40,3 +40,4 @@ echo
   (string)$n1.
   (string)$n2.
   "\n";
+}

@@ -1,0 +1,20 @@
+File "new.php", line 11, characters 5-28:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+File "new.php", line 5, characters 66-72:
+This may be the data source with policy `PRIVATE`
+File "new.php", line 16, characters 65-71:
+This may be the data sink with policy `PUBLIC`
+File "new.php", line 24, characters 5-28:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+File "new.php", line 5, characters 66-72:
+This may be the data source with policy `PRIVATE`
+File "new.php", line 16, characters 65-71:
+This may be the data sink with policy `PUBLIC`
+File "new.php", line 31, characters 5-19:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+File "new.php", line 5, characters 66-72:
+This may be the data source with policy `PRIVATE`
+File "new.php", line 16, characters 65-71:
+This may be the data sink with policy `PUBLIC`
+File "new.php", line 16, characters 65-71:
+Another program point contributing to the illegal flow

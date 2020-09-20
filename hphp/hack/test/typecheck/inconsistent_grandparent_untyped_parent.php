@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /*
  * Baz::f is inconsistent with Foo:f, but we don't detect this error because

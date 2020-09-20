@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_INDEXED_STRING_MAP_H_
-#define incl_HPHP_VM_INDEXED_STRING_MAP_H_
+#pragma once
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
@@ -63,7 +62,7 @@ struct IndexedStringMap {
    * builder below.
    */
   void create(const Builder& b) {
-    assert(!size() && "IndexedStringMap::create called more than once");
+    assertx(!size() && "IndexedStringMap::create called more than once");
     setSize(b.size());
     m_map.init(b.size(), size() * sizeof(T));
     if (!b.size()) {
@@ -109,7 +108,7 @@ struct IndexedStringMap {
   // Lookup entries by index.  Index must be in range or you get
   // undefined behavior.
   T& operator[](Index index) {
-    assert(index < size());
+    assertx(index < size());
     return mutableAccessList()[index];
   }
   const T& operator[](Index index) const {
@@ -176,11 +175,13 @@ public:
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end()   const { return m_map.end(); }
 
+  auto& ordered_range() const { return m_list; }
+
   bool contains(const StringData* key) const { return m_map.count(key); }
 
   T& operator[](Index idx) {
-    assert(idx >= 0);
-    assert(size_t(idx) < m_list.size());
+    assertx(idx >= 0);
+    assertx(size_t(idx) < m_list.size());
     return m_list[idx];
   }
 
@@ -194,7 +195,7 @@ public:
    */
   void add(const StringData* name, const T& t) {
     if (m_list.size() >= size_t(std::numeric_limits<Index>::max())) {
-      assert(false && "IndexedStringMap::Builder overflowed");
+      assertx(false && "IndexedStringMap::Builder overflowed");
       abort();
     }
 
@@ -218,15 +219,16 @@ public:
    */
 
   // Deserialization version.
-  template<class SerDe>
-  typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd) {
+  template<class SerDe, class F>
+  typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd,
+                                                            F lambda) {
     uint32_t size;
     sd(size);
     for (uint32_t i = 0; i < size; ++i) {
-      const StringData* name;
       T t;
-      sd(name)(t);
+      sd(t);
 
+      auto name = lambda(t);
       if (name) {
         add(name, t);
       } else {
@@ -236,19 +238,17 @@ public:
   }
 
   // Serialization version.
-  template<class SerDe>
-  typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd) {
-    std::vector<const StringData*> names(m_list.size());
-    for (typename Map::const_iterator it = m_map.begin();
-        it != m_map.end();
-        ++it) {
-      names[it->second] = it->first;
-    }
-
+  template<class SerDe, class F>
+  typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd,
+                                                             F lambda) {
     sd(uint32_t(m_list.size()));
     for (uint32_t i = 0; i < m_list.size(); ++i) {
-      sd(names[i])(m_list[i]);
+      sd(m_list[i]);
     }
+  }
+
+  const std::vector<T>& list() const {
+    return m_list;
   }
 
 private:
@@ -261,4 +261,3 @@ private:
 
 }
 
-#endif

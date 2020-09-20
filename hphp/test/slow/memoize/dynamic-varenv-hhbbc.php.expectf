@@ -1,0 +1,6 @@
+Deprecated: foo: deprecated function in %s/dynamic-varenv-hhbbc.php on line 7
+foo called
+int(123)
+
+Deprecated: foo: deprecated function in %s/dynamic-varenv-hhbbc.php on line 7
+int(123)

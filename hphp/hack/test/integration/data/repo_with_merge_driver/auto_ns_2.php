@@ -1,5 +1,5 @@
-        <?hh
-        function haha() {
-            Derp\Lib\Herp\f();
-            return 1;
-        }
+<?hh //partial
+function haha() {
+    Derp\Lib\Herp\f();
+    return 1;
+}

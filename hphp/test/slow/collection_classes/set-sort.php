@@ -8,14 +8,14 @@ function main() {
     }
     var_dump($s);
     switch ($i % 4) {
-      case 0: asort($s); break;
-      case 1: ksort($s); break;
+      case 0: asort(inout $s); break;
+      case 1: ksort(inout $s); break;
       case 2:
-        uasort($s,
+        uasort(inout $s,
           function ($l, $r) { return $l < $r ? -1 : ($l === $r ? 0 : 1); });
         break;
       case 3:
-        uksort($s,
+        uksort(inout $s,
           function ($l, $r) { return $l < $r ? -1 : ($l === $r ? 0 : 1); });
         break;
     }
@@ -24,4 +24,8 @@ function main() {
     echo "----\n";
   }
 }
+
+<<__EntryPoint>>
+function main_set_sort() {
 main();
+}

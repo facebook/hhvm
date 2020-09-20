@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TYPE_TRAITS_H_
-#define incl_HPHP_UTIL_TYPE_TRAITS_H_
+#pragma once
 
 #include <type_traits>
+#include <functional>
 
 namespace HPHP {
 
@@ -150,8 +150,12 @@ using maybe_const = std::enable_if<
   typename detail::maybe_const_result<T, K, Tail...>::type
 >;
 
+template <typename Fn, typename ... Args>
+struct is_invocable : public std::is_constructible<
+  std::function<void(Args ...)>, Fn&&
+  > {};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
 
-#endif

@@ -1,13 +1,13 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $im = new Imagick();
 $draw = new ImagickDraw();
 
 try {
-  $draw->polygon(array(
-          array('x' => 1, 'y' => 2),
-          array('x' => 'hello', 'y' => array())
-          ));
+  $draw->polygon(varray[
+          darray['x' => 1, 'y' => 2],
+          darray['x' => 'hello', 'y' => varray[]]
+          ]);
 
   echo "pass\n";
 
@@ -16,10 +16,9 @@ try {
 }
 
 try {
-  $draw->polygon(array(array()));
+  $draw->polygon(varray[varray[]]);
   echo "fail\n";
 } catch (ImagickDrawException $e) {
   echo "pass\n";
 }
-
-?>
+}

@@ -10,4 +10,8 @@ function main() {
   var_dump($v[0]);
 }
 
+
+<<__EntryPoint>>
+function main_cow_large() {
 main();
+}

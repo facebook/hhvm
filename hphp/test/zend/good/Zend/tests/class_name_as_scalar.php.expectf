@@ -5,7 +5,7 @@ string(11) "Foo\Bar\One"
 string(3) "Boo"
 string(7) "Bee\Bop"
 string(3) "Moo"
-object(Foo\Bar\One)#1 (0) {
+object(Foo\Bar\One) (0) {
 }
 string(11) "Foo\Bar\Two"
 string(11) "Foo\Bar\Two"

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Declaration of implem13::__construct() must be compatible with that of constr3::__construct() in %s/ctor_in_interface_02.php on line 23

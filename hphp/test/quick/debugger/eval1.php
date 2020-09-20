@@ -15,4 +15,6 @@ class cls {
   }
 }
 
-error_log('eval1.php loaded');
+<<__EntryPoint>> function main() {
+  error_log('eval1.php loaded');
+}

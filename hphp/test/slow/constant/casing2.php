@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace const_case {
   const lower = 'lower';
@@ -12,9 +12,11 @@ namespace {
   use const const_case\lower;
   use const const_case\UPPER;
 
-  var_dump(lower);
-  var_dump(LOWER);
+  <<__EntryPoint>> function main(): void {
+  \var_dump(lower);
+  \var_dump(LOWER);
 
-  var_dump(upper);
-  var_dump(UPPER);
+  \var_dump(upper);
+  \var_dump(UPPER);
+  }
 }

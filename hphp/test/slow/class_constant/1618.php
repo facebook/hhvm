@@ -1,21 +1,4 @@
-<?php
-
-if (isset($g)) {
-  interface I {
- const FOO = 1;
- }
-  class C {
- const FOO = 3;
- }
-}
- else {
-  interface I {
- const FOO = 2;
- }
-  class C {
- const FOO = 4;
- }
-}
+<?hh
 class X {
   function foo($x = C::FOO, $y = I::FOO) {
 }
@@ -29,6 +12,16 @@ function test() {
 function fiz($c) {
   var_dump($c::FOO);
 }
+
+
+<<__EntryPoint>>
+function main_1618() {
+if (isset($g)) {
+  include '1618-1.inc';
+} else {
+  include '1618-2.inc';
+}
 fiz('I');
 fiz('C');
 test();
+}

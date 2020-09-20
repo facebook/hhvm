@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_VSDEBUG_H_
-#define incl_HPHP_EXT_VSDEBUG_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
@@ -26,9 +25,6 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-#define VSDEBUG_NAME "vsdebug"
-#define VSDEBUG_VERSION "1.0"
-
 struct VSDebugExtension final : Extension {
   VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION) { }
   ~VSDebugExtension();
@@ -38,10 +34,15 @@ struct VSDebugExtension final : Extension {
   void moduleShutdown() override;
   void requestInit() override;
   void requestShutdown() override;
+  void threadShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }
 
-  static Debugger* getDebugger() { return s_debugger; }
+  static Debugger* getDebugger() {
+    std::atomic_thread_fence(std::memory_order_acquire);
+    return s_debugger;
+  }
   static bool s_launchMode;
+  static std::string getDomainSocketGroup();
 
 private:
 
@@ -53,10 +54,14 @@ private:
   static constexpr int DefaultListenPort = 8999;
   static bool s_configEnabled;
   static std::string s_logFilePath;
+  static std::string s_domainSocketGroup;
   static int s_attachListenPort;
+
+  // If specified and nonempty, the debugger will listen locally on a
+  // UNIX domain socket on this path, rather than using a TCP socket.
+  static std::string& getUnixSocketPath();
 };
 
 }
 }
 
-#endif // incl_HPHP_EXT_VSDEBUG_H_

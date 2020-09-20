@@ -1,0 +1,1 @@
+Fatal error: `yield` is not allowed in constructors or magic methods in %s/dispose.php on line 5

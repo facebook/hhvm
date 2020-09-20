@@ -38,4 +38,8 @@ function test() {
   var_dump($b2->func1());
   var_dump($b2->func2());
 }
+
+<<__EntryPoint>>
+function main_no_serialize2() {
 test();
+}

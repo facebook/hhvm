@@ -1,53 +1,79 @@
 *** Testing mb_strrchr() : usage variation ***
 
 --int 0--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --int 1--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --int 12345--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --int -12345--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --float 10.5--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --float -10.5--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --float 12.3456789000e10--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --float -12.3456789000e10--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --float .5--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --empty array--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 
 --int indexed array--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 
 --associative array--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 
 --nested arrays--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 
 --uppercase NULL--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --lowercase null--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --lowercase true--
 string(12) "737472696e67"
@@ -62,38 +88,57 @@ string(12) "737472696e67"
 string(8) "5f76616c"
 
 --empty string DQ--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --empty string SQ--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --string DQ--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --string SQ--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --mixed case string--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --heredoc--
-string(12) "737472696e67"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --instance of classWithToString--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, object given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, object given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 
 --undefined var--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --unset var--
-string(8) "5f76616c"
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
+bool(false)
 
 --resource--
-Error: 2 - mb_strrchr() expects parameter 3 to be boolean, resource given, %s(%d)
+
+Warning: mb_strrchr() expects parameter 3 to be boolean, resource given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation3.php on line 115
 bool(false)
 ===DONE===

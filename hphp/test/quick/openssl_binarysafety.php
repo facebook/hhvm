@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 // Patched a self-signed certificate to include validity timestamps
 // starting with nul byte
 $cert  = "-----BEGIN CERTIFICATE-----\n";
@@ -28,3 +28,4 @@ $info = openssl_x509_parse($cert);
 var_dump($info['validFrom_time_t']);
 var_dump($info['validTo_time_t']);
 var_dump($info['subject']['CN']);
+}

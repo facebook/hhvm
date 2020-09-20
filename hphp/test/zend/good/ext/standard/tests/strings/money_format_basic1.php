@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string money_format  ( string $format  , float $number  )
  * Description: Formats a number as a currency string
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 // ===========================================================================================
 // = We do not test for exact return-values, as those might be different between OS-versions =
 // ===========================================================================================
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing money_format() : basic functionality***\n";
 
 $value = 1234.5678;
@@ -45,5 +45,5 @@ echo "Format again suppress currency symbol\n";
 echo gettype(money_format('%=*!14#8.2n', $value))."\n";
 echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

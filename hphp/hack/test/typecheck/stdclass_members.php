@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function test(): void {
   $x = new stdClass();

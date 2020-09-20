@@ -1,5 +1,9 @@
 <?hh
 
+
+
+<<__EntryPoint>>
+function main_840() {
 $m = Map {
 'd' => 4}
 ;
@@ -13,7 +17,7 @@ Map {
 , $m, $m}
 ;
 apc_store('x0', $x0);
-$x1 = apc_fetch('x0');
+$x1 = __hhvm_intrinsics\apc_fetch_no_check('x0');
 $x1[3]['e'] = 5;
 var_dump($x1);
-
+}

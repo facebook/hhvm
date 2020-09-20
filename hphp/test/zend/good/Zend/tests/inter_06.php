@@ -1,5 +1,4 @@
-<?php
+<?hh
 
 interface stdClass { }
 
-?>

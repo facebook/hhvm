@@ -1,0 +1,2 @@
+File "rx_append1.php", line 5, characters 3-10:
+Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method. (Typing[4201])

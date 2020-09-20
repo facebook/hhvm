@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_DATA_H_
-#define incl_HPHP_JIT_VASM_DATA_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 
@@ -44,6 +43,13 @@ struct VdataPtr {
 
   VdataPtr(const VdataPtr& other) = default;
   VdataPtr& operator=(const VdataPtr& other) = default;
+
+  bool operator==(const VdataPtr& o) const {
+    return m_ptr == o.m_ptr && m_bound == o.m_bound;
+  }
+  bool operator!=(const VdataPtr& o) const {
+    return m_ptr != o.m_ptr || m_bound != o.m_bound;
+  }
 
   bool bound() const {
     return m_bound;
@@ -83,4 +89,3 @@ struct VdataBlock {
 
 }}
 
-#endif

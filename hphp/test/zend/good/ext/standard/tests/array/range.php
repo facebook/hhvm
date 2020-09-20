@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 echo "*** Testing range() function on basic operations ***\n";
 
 echo "\n-- Integers as Low and High --\n";
@@ -42,4 +42,4 @@ echo "\n-- Testing basic string with step --\n";
 var_dump( range("abcd", "mnop", 2) );
 
 echo "Done\n";
-?>
+}

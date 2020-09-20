@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -31,227 +30,216 @@ const IMAGETYPE_XBM = 16;
 const IMAGETYPE_ICO = 17;
 
 <<__PHPStdLib>>
-function gd_info() { }
+function gd_info();
 <<__PHPStdLib>>
-function getimagesize($filename, &$imageinfo = null) { }
+function getimagesize(string $filename, inout mixed $imageinfo);
 <<__PHPStdLib>>
-function image_type_to_extension($imagetype, $include_dot = true) { }
+function image_type_to_extension(int $imagetype, bool $include_dot = true);
 <<__PHPStdLib>>
-function image_type_to_mime_type($imagetype) { }
+function image_type_to_mime_type(int $imagetype);
 <<__PHPStdLib>>
-function image2wbmp($image, $filename = null, $threshold = -1) { }
+function image2wbmp(resource $image, string $filename = "", int $threshold = -1);
 <<__PHPStdLib>>
-function imageaffine($image, $affine = array(), $clip = array()) { }
+function imageaffine(resource $image, $affine = varray[], $clip = darray[]);
 <<__PHPStdLib>>
-function imageaffinematrixconcat($m1, $m2) { }
+function imageaffinematrixconcat($m1, $m2);
 <<__PHPStdLib>>
-function imageaffinematrixget($type, $options = array()) { }
+function imageaffinematrixget(int $type, $options = darray[]);
 <<__PHPStdLib>>
-function imagealphablending($image, $blendmode) { }
+function imagealphablending(resource $image, bool $blendmode);
 <<__PHPStdLib>>
-function imageantialias($image, $on) { }
+function imageantialias(resource $image, bool $on);
 <<__PHPStdLib>>
-function imagearc($image, $cx, $cy, $width, $height, $start, $end, $color) { }
+function imagearc(resource $image, int $cx, int $cy, int $width, int $height, int $start, int $end, int $color);
 <<__PHPStdLib>>
-function imagechar($image, $font, $x, $y, $c, $color) { }
+function imagechar(resource $image, int $font, int $x, int $y, string $c, int $color);
 <<__PHPStdLib>>
-function imagecharup($image, $font, $x, $y, $c, $color) { }
+function imagecharup(resource $image, int $font, int $x, int $y, string $c, int $color);
 <<__PHPStdLib>>
-function imagecolorallocate($image, $red, $green, $blue) { }
+function imagecolorallocate(resource $image, int $red, int $green, int $blue);
 <<__PHPStdLib>>
-function imagecolorallocatealpha($image, $red, $green, $blue, $alpha) { }
+function imagecolorallocatealpha(resource $image, int $red, int $green, int $blue, int $alpha);
 <<__PHPStdLib>>
-function imagecolorat($image, $x, $y) { }
+function imagecolorat(resource $image, int $x, int $y);
 <<__PHPStdLib>>
-function imagecolorclosest($image, $red, $green, $blue) { }
+function imagecolorclosest(resource $image, int $red, int $green, int $blue);
 <<__PHPStdLib>>
-function imagecolorclosestalpha($image, $red, $green, $blue, $alpha) { }
+function imagecolorclosestalpha(resource $image, int $red, int $green, int $blue, int $alpha);
 <<__PHPStdLib>>
-function imagecolorclosesthwb($image, $red, $green, $blue) { }
+function imagecolorclosesthwb(resource $image, int $red, int $green, int $blue);
 <<__PHPStdLib>>
-function imagecolordeallocate($image, $color) { }
+function imagecolordeallocate(resource $image, int $color);
 <<__PHPStdLib>>
-function imagecolorexact($image, $red, $green, $blue) { }
+function imagecolorexact(resource $image, int $red, int $green, int $blue);
 <<__PHPStdLib>>
-function imagecolorexactalpha($image, $red, $green, $blue, $alpha) { }
+function imagecolorexactalpha(resource $image, int $red, int $green, int $blue, int $alpha);
 <<__PHPStdLib>>
-function imagecolormatch($image1, $image2) { }
+function imagecolormatch(resource $image1, resource $image2);
 <<__PHPStdLib>>
-function imagecolorresolve($image, $red, $green, $blue) { }
+function imagecolorresolve(resource $image, int $red, int $green, int $blue);
 <<__PHPStdLib>>
-function imagecolorresolvealpha($image, $red, $green, $blue, $alpha) { }
+function imagecolorresolvealpha(resource $image, int $red, int $green, int $blue, int $alpha);
 <<__PHPStdLib>>
-function imagecolorset($image, $index, $red, $green, $blue) { }
+function imagecolorset(resource $image, int $index, int $red, int $green, int $blue);
 <<__PHPStdLib>>
-function imagecolorsforindex($image, $index) { }
+function imagecolorsforindex(resource $image, int $index);
 <<__PHPStdLib>>
-function imagecolorstotal($image) { }
+function imagecolorstotal(resource $image);
 <<__PHPStdLib>>
-function imagecolortransparent($image, $color = -1) { }
+function imagecolortransparent(resource $image, int $color = -1);
 <<__PHPStdLib>>
-function imageconvolution($image, $matrix, $div, $offset) { }
+function imageconvolution(resource $image, $matrix, float $div, float $offset);
 <<__PHPStdLib>>
-function imagecopy($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h) { }
+function imagecopy(resource $dst_im, resource $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h);
 <<__PHPStdLib>>
-function imagecopymerge($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct) { }
+function imagecopymerge(resource $dst_im, resource $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct);
 <<__PHPStdLib>>
-function imagecopymergegray($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct) { }
+function imagecopymergegray(resource $dst_im, resource $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct);
 <<__PHPStdLib>>
-function imagecopyresampled($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h) { }
+function imagecopyresampled(resource $dst_im, resource $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h);
 <<__PHPStdLib>>
-function imagecopyresized($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h) { }
+function imagecopyresized(resource $dst_im, resource $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_w, int $dst_h, int $src_w, int $src_h);
 <<__PHPStdLib>>
-function imagecreate($width, $height) { }
+function imagecreate(int $width, int $height);
 <<__PHPStdLib>>
-function imagecreatefromgd2part($filename, $srcx, $srcy, $width, $height) { }
+function imagecreatefromgd2part(string $filename, int $srcx, int $srcy, int $width, int $height);
 <<__PHPStdLib>>
-function imagecreatefromgd($filename) { }
+function imagecreatefromgd(string $filename);
 <<__PHPStdLib>>
-function imagecreatefromgd2($filename) { }
+function imagecreatefromgd2(string $filename);
 <<__PHPStdLib>>
-function imagecreatefromgif($filename) { }
+function imagecreatefromgif(string $filename);
 <<__PHPStdLib>>
-function imagecreatefromjpeg($filename) { }
+function imagecreatefromjpeg(string $filename);
 <<__PHPStdLib>>
-function imagecreatefrompng($filename) { }
+function imagecreatefrompng(string $filename);
 <<__PHPStdLib>>
-function imagecreatefromstring($data) { }
+function imagecreatefromstring(string $data);
 <<__PHPStdLib>>
-function imagecreatefromwbmp($filename) { }
+function imagecreatefromwbmp(string $filename);
 <<__PHPStdLib>>
-function imagecreatefromxbm($filename) { }
-function imagecreatefromxpm($filename) { }
+function imagecreatefromxbm(string $filename);
+function imagecreatefromxpm(string $filename);
 <<__PHPStdLib>>
-function imagecreatetruecolor($width, $height) { }
+function imagecreatetruecolor(int $width, int $height);
 <<__PHPStdLib>>
-function imagecrop($image, $rect) { }
+function imagecrop(resource $image, $rect);
 <<__PHPStdLib>>
-function imagecropauto($image, $mode = -1, $threshold = 0.5, $color = -1) { }
+function imagecropauto(resource $image, int $mode = -1, float $threshold = 0.5, int $color = -1);
 <<__PHPStdLib>>
-function imagedashedline($image, $x1, $y1, $x2, $y2, $color) { }
+function imagedashedline(resource $image, int $x1, int $y1, int $x2, int $y2, int $color);
 <<__PHPStdLib>>
-function imagedestroy($image) { }
+function imagedestroy(resource $image);
 <<__PHPStdLib>>
-function imageellipse($image, $cx, $cy, $width, $height, $color) { }
+function imageellipse(resource $image, int $cx, int $cy, int $width, int $height, int $color);
 <<__PHPStdLib>>
-function imagefill($image, $x, $y, $color) { }
+function imagefill(resource $image, int $x, int $y, int $color);
 <<__PHPStdLib>>
-function imagefilledarc($image, $cx, $cy, $width, $height, $start, $end, $color, $style) { }
+function imagefilledarc(resource $image, int $cx, int $cy, int $width, int $height, int $start, int $end, int $color, int $style);
 <<__PHPStdLib>>
-function imagefilledellipse($image, $cx, $cy, $width, $height, $color) { }
+function imagefilledellipse(resource $image, int $cx, int $cy, int $width, int $height, int $color);
 <<__PHPStdLib>>
-function imagefilledpolygon($image, $points, $num_points, $color) { }
+function imagefilledpolygon(resource $image, $points, int $num_points, int $color);
 <<__PHPStdLib>>
-function imagefilledrectangle($image, $x1, $y1, $x2, $y2, $color) { }
+function imagefilledrectangle(resource $image, int $x1, int $y1, int $x2, int $y2, int $color);
 <<__PHPStdLib>>
-function imagefilltoborder($image, $x, $y, $border, $color) { }
+function imagefilltoborder(resource $image, int $x, int $y, int $border, int $color);
 <<__PHPStdLib>>
-function imagefilter($image, $filtertype, $arg1 = 0, $arg2 = 0, $arg3 = 0, $arg4 = 0) { }
+function imagefilter(resource $image, int $filtertype, $arg1 = 0, $arg2 = 0, $arg3 = 0, $arg4 = 0);
 <<__PHPStdLib>>
-function imageflip($image, $mode = -1) { }
+function imageflip(resource $image, int $mode = -1);
 <<__PHPStdLib>>
-function imagefontheight($font) { }
+function imagefontheight(int $font);
 <<__PHPStdLib>>
-function imagefontwidth($font) { }
+function imagefontwidth(int $font);
 <<__PHPStdLib>>
-function imageftbbox($size, $angle, $font_file, $text, $extrainfo = null) { }
+function imageftbbox(float $size, float $angle, string $font_file, string $text, $extrainfo = null);
 <<__PHPStdLib>>
-function imagefttext($image, $size, $angle, $x, $y, $col, $font_file, $text, $extrainfo = null) { }
+function imagefttext(resource $image, $size, $angle, int $x, int $y, int $col, string $font_file, string $text, $extrainfo = null);
 <<__PHPStdLib>>
-function imagegammacorrect($image, $inputgamma, $outputgamma) { }
+function imagegammacorrect(resource $image, float $inputgamma, float $outputgamma);
 <<__PHPStdLib>>
-function imagegd2($image, $filename = null, $chunk_size = 0, $type = 0) { }
+function imagegd2(resource $image, string $filename = "", int $chunk_size = 0, int $type = 0);
 <<__PHPStdLib>>
-function imagegd($image, $filename = null) { }
+function imagegd(resource $image, string $filename = "");
 <<__PHPStdLib>>
-function imagegif($image, $filename = null) { }
+function imagegif(resource $image, string $filename = "");
 <<__PHPStdLib>>
-function imagegrabscreen() { }
+function imagegrabscreen();
 <<__PHPStdLib>>
-function imagegrabwindow($window, $client_area = 0) { }
+function imagegrabwindow($window, $client_area = 0);
 <<__PHPStdLib>>
-function imageinterlace($image, $interlace = 0) { }
+function imageinterlace(resource $image, ?int $interlace = null);
 <<__PHPStdLib>>
-function imageistruecolor($image) { }
+function imageistruecolor(resource $image);
 <<__PHPStdLib>>
-function imagejpeg($image, $filename = null, $quality = -1) { }
+function imagejpeg(resource $image, string $filename = "", int $quality = -1);
 <<__PHPStdLib>>
-function imagelayereffect($image, $effect) { }
+function imagelayereffect(resource $image, int $effect);
 <<__PHPStdLib>>
-function imageline($image, $x1, $y1, $x2, $y2, $color) { }
+function imageline(resource $image, int $x1, int $y1, int $x2, int $y2, int $color);
 <<__PHPStdLib>>
-function imageloadfont($file) { }
+function imageloadfont(string $file);
 <<__PHPStdLib>>
-function imagepalettecopy($destination, $source) { }
+function imagepalettecopy(resource $destination, resource $source);
 <<__PHPStdLib>>
-function imagepng($image, $filename = null, $quality = -1, $filters = -1) { }
-function imagewebp($image, $filename = null, $quality = 80) { }
+function imagepng(resource $image, string $filename = "", int $quality = -1, int $filters = -1);
 <<__PHPStdLib>>
-function imagepolygon($image, $points, $num_points, $color) { }
+function imagepolygon(resource $image, $points, int $num_points, int $color);
 <<__PHPStdLib>>
-function imagepsbbox($text, $font, $size, $space = 0, $tightness = 0, $angle = 0.0) { }
+function imagerectangle(resource $image, int $x1, int $y1, int $x2, int $y2, int $color);
 <<__PHPStdLib>>
-function imagepsencodefont($font_index, $encodingfile) { }
+function imagerotate(resource $source_image, float $angle, int $bgd_color, int $ignore_transparent = 0);
 <<__PHPStdLib>>
-function imagepsextendfont($font_index, $extend) { }
+function imagesavealpha(resource $image, bool $saveflag);
 <<__PHPStdLib>>
-function imagepsfreefont($fontindex) { }
+function imagesetbrush(resource $image, resource $brush);
 <<__PHPStdLib>>
-function imagepsloadfont($filename) { }
+function imagesetpixel(resource $image, int $x, int $y, int $color);
 <<__PHPStdLib>>
-function imagepsslantfont($font_index, $slant) { }
+function imagesetstyle(resource $image, $style);
 <<__PHPStdLib>>
-function imagepstext($image, $text, $font, $size, $foreground, $background, $x, $y, $space = 0, $tightness = 0, $angle = 0.0, $antialias_steps = 0) { }
+function imagesetthickness(resource $image, int $thickness);
 <<__PHPStdLib>>
-function imagerectangle($image, $x1, $y1, $x2, $y2, $color) { }
+function imagesettile(resource $image, resource $tile);
 <<__PHPStdLib>>
-function imagerotate($source_image, $angle, $bgd_color, $ignore_transparent = 0) { }
+function imagestring(resource $image, int $font, int $x, int $y, string $str, int $color);
 <<__PHPStdLib>>
-function imagesavealpha($image, $saveflag) { }
+function imagestringup(resource $image, int $font, int $x, int $y, string $str, int $color);
 <<__PHPStdLib>>
-function imagesetbrush($image, $brush) { }
+function imagesx(resource $image);
 <<__PHPStdLib>>
-function imagesetpixel($image, $x, $y, $color) { }
+function imagesy(resource $image);
 <<__PHPStdLib>>
-function imagesetstyle($image, $style) { }
+function imagetruecolortopalette(resource $image, bool $dither, int $ncolors);
 <<__PHPStdLib>>
-function imagesetthickness($image, $thickness) { }
+function imagettfbbox(float $size, float $angle, string $fontfile, string $text);
 <<__PHPStdLib>>
-function imagesettile($image, $tile) { }
+function imagettftext(resource $image, $size, $angle, int $x, int $y, int $color, string $fontfile, string $text);
 <<__PHPStdLib>>
-function imagestring($image, $font, $x, $y, $str, $color) { }
+function imagetypes();
 <<__PHPStdLib>>
-function imagestringup($image, $font, $x, $y, $str, $color) { }
+function imagewbmp(resource $image, string $filename = "", int $foreground = -1);
+
+function imagewebp(resource $image, string $filename = "", int $quality = 80);
+
+function imagexbm(resource $image, string $filename = "", int $foreground = -1);
 <<__PHPStdLib>>
-function imagesx($image) { }
+function iptcembed(string $iptcdata, string $jpeg_file_name, int $spool = 0);
 <<__PHPStdLib>>
-function imagesy($image) { }
+function iptcparse(string $iptcblock);
 <<__PHPStdLib>>
-function imagetruecolortopalette($image, $dither, $ncolors) { }
+function jpeg2wbmp(string $jpegname, string $wbmpname, int $dest_height, int $dest_width, int $threshold);
 <<__PHPStdLib>>
-function imagettfbbox($size, $angle, $fontfile, $text) { }
+function png2wbmp(string $pngname, string $wbmpname, int $dest_height, int $dest_width, int $threshold);
 <<__PHPStdLib>>
-function imagettftext($image, $size, $angle, $x, $y, $color, $fontfile, $text) { }
+function exif_imagetype(string $filename);
 <<__PHPStdLib>>
-function imagetypes() { }
+function exif_read_data(string $filename, string $sections = "", bool $arrays = false, bool $thumbnail = false);
 <<__PHPStdLib>>
-function imagewbmp($image, $filename = null, $foreground = -1) { }
-function imagexbm($image, $filename = null, $foreground = -1) { }
+function read_exif_data(string $filename, string $sections = "", bool $arrays = false, bool $thumbnail = false);
 <<__PHPStdLib>>
-function iptcembed($iptcdata, $jpeg_file_name, $spool = 0) { }
+function exif_tagname(int $index);
 <<__PHPStdLib>>
-function iptcparse($iptcblock) { }
-<<__PHPStdLib>>
-function jpeg2wbmp($jpegname, $wbmpname, $dest_height, $dest_width, $threshold) { }
-<<__PHPStdLib>>
-function png2wbmp($pngname, $wbmpname, $dest_height, $dest_width, $threshold) { }
-<<__PHPStdLib>>
-function exif_imagetype($filename) { }
-<<__PHPStdLib>>
-function exif_read_data($filename, $sections = null, $arrays = false, $thumbnail = false) { }
-<<__PHPStdLib>>
-function read_exif_data($filename, $sections = null, $arrays = false, $thumbnail = false) { }
-<<__PHPStdLib>>
-function exif_tagname($index) { }
-<<__PHPStdLib>>
-function exif_thumbnail($filename, &$width = null, &$height = null, &$imagetype = null) { }
+function exif_thumbnail(string $filename, inout $width,
+                        inout $height, inout $imagetype);

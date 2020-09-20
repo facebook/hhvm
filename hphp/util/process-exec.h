@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROCESS_EXEC_H_
-#define incl_HPHP_PROCESS_EXEC_H_
+#pragma once
 
 #include <string>
 
@@ -43,7 +42,16 @@ bool exec(const char* path, const char* argv[], const char* in,
 void daemonize(const char* stdoutFile = "/dev/null",
                const char* stderrFile = "/dev/null");
 
+/*
+ * RAII guard to temporarily re-enable forking.
+ */
+struct EnableForkInDebuggerGuard {
+  EnableForkInDebuggerGuard();
+  ~EnableForkInDebuggerGuard();
+
+  static bool isForkEnabledInDebugger();
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

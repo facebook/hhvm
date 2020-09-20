@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Toplevel include for all HHVM GDB Python bindings.
 
@@ -21,8 +23,11 @@ import nameof
 import pretty
 import repo
 import sizeof
-import stack
+try:
+    import unwind
+    import stack
+except:
+    pass
 import unit
-import unwind
 import util
 import ringbuffer

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/url-file.h"
 #include <vector>
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -28,7 +29,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_http_response_header("http_response_header");
 const StaticString s_http("http");
 const StaticString s_tcp_socket("tcp_socket");
 
@@ -125,22 +125,6 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     m_responseHeaders.append(responseHeaders[i]);
   }
-  VMRegAnchor vra;
-  ActRec* fp = vmfp();
-  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
-  auto id = fp->func()->lookupVarId(s_http_response_header.get());
-  if (id != kInvalidId) {
-    auto tvTo = frame_local(fp, id);
-    Variant varFrom(m_responseHeaders);
-    const auto tvFrom(varFrom.asTypedValue());
-    if (tvTo->m_type == KindOfRef) {
-      tvTo = tvTo->m_data.pref->tv();
-    }
-    tvDup(*tvFrom, *tvTo);
-  } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-    fp->getVarEnv()->set(s_http_response_header.get(),
-                         Variant(m_responseHeaders).asTypedValue());
-  }
 
   /*
    * If code == 0, Curl failed to connect; per PHP5, ignore_errors just means
@@ -163,13 +147,13 @@ bool UrlFile::open(const String& input_url, const String& mode) {
 }
 
 int64_t UrlFile::writeImpl(const char* /*buffer*/, int64_t /*length*/) {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   raise_fatal_error((std::string("cannot write a url stream: ") +
                              getName()).c_str());
 }
 
 bool UrlFile::flush() {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   raise_fatal_error((std::string("cannot flush a url stream: ") +
                              getName()).c_str());
 }

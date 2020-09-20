@@ -47,14 +47,14 @@ function test(): void {
   swap(inout$i    ,
     inout $s,
   );
-  swap(&  $i,   inout$s);
+  swap(inout  $i,   inout$s);
 swap(inout
-$i,&$s);
-  swap(&$i, &$s);
+$i,inout $s);
+  swap(inout $i, inout $s);
 
   $v = vec[];
   extend(    inout $v, vec[0, 1, 2]);
-  extend( &  $v, dict['spam' => 3, 'eggs' => 4]);
+  extend( inout  $v, dict['spam' => 3, 'eggs' => 4]);
   herp(fun('extend'),
        inout $v,
       );

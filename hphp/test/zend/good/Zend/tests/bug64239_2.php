@@ -1,30 +1,32 @@
-<?php
+<?hh
 class A {
-	use T1;
-	public function test() { $this->backtrace(); }
+    use T1;
+    public function test() { $this->backtrace(); }
 }
 
 class B {
-	use T2 { t2method as Bmethod; }
+    use T2 { t2method as Bmethod; }
 }
 
 class C extends A {
 }
 
 trait T1 {
-	protected function backtrace() {
-		$b = new B();
-		$b->Bmethod();
-	}
+    protected function backtrace() {
+        $b = new B();
+        $b->Bmethod();
+    }
 }
 trait T2 {
-	public function t2method() {
-		print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
-	}
+    public function t2method() {
+        print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1));
+    }
 }
+
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $a->test();
 
 $c = new C();
 $c->test();
-?>
+}

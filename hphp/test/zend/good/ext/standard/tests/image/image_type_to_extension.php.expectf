@@ -47,17 +47,13 @@ Constant: IMAGETYPE_XBM
 	With dot: .xbm
 	Without dot: xbm
 
-Warning: %s
+Warning: image_type_to_extension() expects parameter 2 to be boolean, %rv?%rarray given in %s/image_type_to_extension.php on line 24
+
+Warning: image_type_to_extension() expects parameter 1 to be integer, object given in %s/image_type_to_extension.php on line 25
 bool(false)
 
-Warning: %s
-bool(false)
-bool(false)
-
-Warning: %s
-bool(false)
+Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s/image_type_to_extension.php on line 27
 bool(false)
 
-Warning: %s
-bool(false)
+Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s/image_type_to_extension.php on line 29
 Done

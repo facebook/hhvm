@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -67,6 +67,10 @@ bool SetVariableCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic variables = folly::dynamic::array;
   auto& args = tryGetObject(getMessage(), "arguments", s_emptyArgs);
@@ -126,7 +130,7 @@ bool SetVariableCommand::executeImpl(
           break;
 
         default:
-          assert(false);
+          assertx(false);
       }
     } else if (obj->objectType() == ServerObjectType::Variable) {
       VariableObject* variable = static_cast<VariableObject*>(obj);
@@ -141,7 +145,7 @@ bool SetVariableCommand::executeImpl(
         );
       }
     }
-  } catch (DebuggerCommandException e) {
+  } catch (DebuggerCommandException &e) {
     m_debugger->sendUserMessage(
       e.what(),
       DebugTransport::OutputLevelError
@@ -166,15 +170,31 @@ bool SetVariableCommand::setLocalVariable(
   ScopeObject* scope,
   folly::dynamic* result
 ) {
-  VMRegAnchor regAnchor;
+  VMRegAnchor _regAnchor;
 
-  const auto fp = g_context->getFrameAtDepth(scope->m_frameDepth);
-  const auto func = fp->m_func;
+  const auto fp =
+    g_context->getFrameAtDepthForDebuggerUnsafe(scope->m_frameDepth);
+  if (fp == nullptr ||
+      fp->isInlined() ||
+      fp->skipFrame()) {
+    // Can't set variable in a frame with no context.
+    return false;
+  }
+
+  const auto func = fp->func();
+  if (func == nullptr) {
+    return false;
+  }
+
   const auto localCount = func->numNamedLocals();
 
   for (Id id = 0; id < localCount; id++) {
-    TypedValue* frameValue = frame_local(fp, id);
-    const std::string localName = func->localVarName(id)->toCppString();
+    // Check for unnamed local.
+    auto const localNameSd = func->localVarName(id);
+    if (!localNameSd) continue;
+
+    auto const frameValue = frame_local(fp, id);
+    const std::string localName = localNameSd->toCppString();
     if (localName == name) {
       setVariableValue(
         session,
@@ -216,7 +236,6 @@ bool SetVariableCommand::setConstant(
       return true;
     }
   }
-
   return false;
 }
 
@@ -230,7 +249,7 @@ bool SetVariableCommand::setArrayVariable(
   VMRegAnchor regAnchor;
 
   Variant& var = array->m_variable;
-  assert(var.isArray());
+  assertx(var.isArray());
 
   Array arr = var.toArray();
   for (ArrayIter iter(arr); iter; ++iter) {
@@ -249,10 +268,10 @@ bool SetVariableCommand::setArrayVariable(
       auto keyVariant = iter.first();
       if (keyVariant.isString()) {
         HPHP::String key = keyVariant.toString();
-        arr->set(key, tvToInitCell(*arrayValue), false);
+        arr.set(key, tvToInit(*arrayValue));
       } else if (keyVariant.isInteger()) {
         int64_t key = keyVariant.toInt64();
-        arr->set(key, tvToInitCell(*arrayValue), false);
+        arr.set(key, tvToInit(*arrayValue));
       } else {
         throw DebuggerCommandException("Unsupported array key type.");
       }
@@ -271,7 +290,7 @@ bool SetVariableCommand::setObjectVariable(
   folly::dynamic* result
 ) {
   Variant& var = object->m_variable;
-  assert(var.isObject());
+  assertx(var.isObject());
 
   HPHP::String key(name);
   ObjectData* obj = var.getObjectData();
@@ -320,29 +339,29 @@ void SetVariableCommand::setVariableValue(
   DebuggerSession* session,
   const std::string& name,
   const std::string& value,
-  TypedValue* typedVariable,
+  tv_lval typedVariable,
   request_id_t requestId,
   folly::dynamic* result
 ) {
-  switch (typedVariable->m_type) {
+  switch (type(typedVariable)) {
     case KindOfBoolean: {
         bool boolVal = getBooleanValue(value);
-        typedVariable->m_data.num = boolVal ? 1 : 0;
+        val(typedVariable).num = boolVal ? 1 : 0;
       }
       break;
 
     case KindOfInt64:
       try {
-        typedVariable->m_data.num = std::stoi(value, nullptr, 0);
-      } catch (std::exception e) {
+        val(typedVariable).num = std::stoi(value, nullptr, 0);
+      } catch (std::exception &e) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;
 
     case KindOfDouble:
       try {
-        typedVariable->m_data.dbl = std::stod(value);
-      } catch (std::exception e) {
+        val(typedVariable).dbl = std::stod(value);
+      } catch (std::exception &e) {
         throw DebuggerCommandException("Invalid value specified.");
       }
       break;
@@ -354,14 +373,13 @@ void SetVariableCommand::setVariableValue(
         CopyString
       );
 
-      if (typedVariable->m_type == KindOfString &&
-          typedVariable->m_data.pstr != nullptr) {
-
-        typedVariable->m_data.pstr->decRefCount();
+      if (type(typedVariable) == KindOfString &&
+          val(typedVariable).pstr != nullptr) {
+        val(typedVariable).pstr->decRefCount();
       }
 
-      typedVariable->m_data.pstr = newSd;
-      typedVariable->m_type = KindOfString;
+      val(typedVariable).pstr = newSd;
+      type(typedVariable) = KindOfString;
       break;
     }
 
@@ -373,13 +391,14 @@ void SetVariableCommand::setVariableValue(
     case KindOfResource:
     case KindOfPersistentVec:
     case KindOfVec:
-    case KindOfPersistentArray:
-    case KindOfArray:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfRef:
     case KindOfObject:
       // For complex types, we need to run PHP code to create a new object
       // or determine what reference to assign, making direct assignment via
@@ -398,9 +417,10 @@ void SetVariableCommand::setVariableValue(
       throw DebuggerCommandException("Unexpected variable type");
   }
 
-  Variant variable = tvAsVariant(typedVariable);
+  Variant variable{variant_ref{typedVariable}};
   *result = VariablesCommand::serializeVariable(
               session,
+              m_debugger,
               requestId,
               name,
               variable

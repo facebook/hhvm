@@ -16,10 +16,9 @@
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -88,13 +87,13 @@ void addRootNode(HeapGraph& g, const PtrMap<const HeapObject*>& blocks,
       }
     },
     [&](const void* p) {
-      auto weak = static_cast<const WeakRefDataHandle*>(p);
-      auto addr = &(weak->wr_data->pointee.m_data.pobj);
+      auto weak = static_cast<const WeakRefData*>(p);
+      if (!weak->isValid()) return;
+      auto addr = &weak->pointee.m_data.pobj;
       if (auto r = blocks.region(*addr)) {
         auto to = blocks.index(r);
-        // Note that offset is going to be meaningless because weak->wr_data is
-        // a shared_ptr, so &pointee.m_data.pobj will be inside the shared_ptr's
-        // internal node, allocated separately.
+        // Pointee sits within a shared_ptr internal node, so offset
+        // is meaningless here.
         addPtr(g, from, to, HeapGraph::Weak, 0);
       }
     }
@@ -172,7 +171,7 @@ HeapGraph makeHeapGraph(bool include_free) {
     auto h = g.nodes[i].h;
     scanHeapObject(h, scanner);
     auto from = blocks.index(h);
-    assert(from == i);
+    assertx(from == i);
     scanner.finish(
       [&](const void* p, std::size_t size) {
         conservativeScan(p, size, [&](const void** addr, const void* ptr) {
@@ -191,8 +190,9 @@ HeapGraph makeHeapGraph(bool include_free) {
         }
       },
       [&](const void* p) {
-        auto weak = static_cast<const WeakRefDataHandle*>(p);
-        auto addr = &(weak->wr_data->pointee.m_data.pobj);
+        auto weak = static_cast<const WeakRefData*>(p);
+        if (!weak->isValid()) return;
+        auto addr = &weak->pointee.m_data.pobj;
         if (auto r = blocks.region(*addr)) {
           auto to = blocks.index(r);
           addPtr(g, from, to, HeapGraph::Weak, 0);

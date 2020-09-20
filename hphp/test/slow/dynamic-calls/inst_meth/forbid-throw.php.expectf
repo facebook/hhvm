@@ -1,0 +1,11 @@
+=============== positive tests =====================
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::cmp' called dynamically but is not __DynamicallyCallable
+=============== negative tests =====================

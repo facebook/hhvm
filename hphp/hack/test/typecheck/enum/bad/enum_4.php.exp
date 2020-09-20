@@ -1,0 +1,6 @@
+File "enum_4.php", line 8, characters 19-22:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "enum_4.php", line 3, characters 16-19:
+Definition is here
+File "enum_4.php", line 8, characters 7-9:
+Enums must be `int` or `string` or `arraykey`, not `bool` (Typing[4024])

@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 class X {
   function f() {
     $y = new Y;
-    $y->foo();
+    $y->bar();
     static::g();
-    $y->foo();
+    $y->bar();
     self::g();
     Y::foo() && static::g();
   }
@@ -15,11 +15,14 @@ class X {
 }
 class Y extends X {
   static function g() {
- var_dump(__CLASS__);
- }
+    var_dump(__CLASS__);
+  }
   static function foo() {
- return true;
- }
+    return true;
+  }
+  function bar() {
+    return false;
+  }
 }
 function test() {
   $x = new X;
@@ -27,4 +30,8 @@ function test() {
   $x->f();
   $y->f();
 }
+
+<<__EntryPoint>>
+function main_1876() {
 test();
+}

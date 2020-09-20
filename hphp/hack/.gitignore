@@ -1,3 +1,6 @@
+/.cargo_vendor/
+/facebook/cargo/.package-cache
+/facebook/cargo/registry/
 bin/
 src/inotify-1.0/
 src/_build/
@@ -15,3 +18,9 @@ src/parsing/parser.mli
 _obuild/
 .ocp/
 hhi/**/INDEX
+facebook/opam
+facebook/opam2-mini-repository
+facebook/opam2-mini-repository-*
+facebook/opam2-mini-repository-*.tar.gz
+target/
+dev_env.sh

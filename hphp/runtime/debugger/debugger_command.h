@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
-#define incl_HPHP_EVAL_DEBUGGER_COMMAND_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -155,4 +154,3 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_COMMAND_H_

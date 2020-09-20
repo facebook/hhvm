@@ -13,100 +13,94 @@ string(24) "January 1, 1970, 4:25 am"
 string(26) "December 31, 1969, 9:34 pm"
 
 -- float 10.5 --
-string(24) "January 1, 1970, 1:00 am"
+
+Warning: date() expects parameter 2 to be integer, double given in %s/date_variation2.php on line 108
 
 -- float -10.5 --
-string(25) "January 1, 1970, 12:59 am"
+
+Warning: date() expects parameter 2 to be integer, double given in %s/date_variation2.php on line 108
 
 -- float .5 --
-string(24) "January 1, 1970, 1:00 am"
+
+Warning: date() expects parameter 2 to be integer, double given in %s/date_variation2.php on line 108
 
 -- empty array --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- int indexed array --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- associative array --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- nested arrays --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- uppercase NULL --
-string(24) "January 1, 1970, 1:00 am"
+bool(true)
 
 -- lowercase null --
-string(24) "January 1, 1970, 1:00 am"
+bool(true)
 
 -- lowercase true --
-string(24) "January 1, 1970, 1:00 am"
+
+Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line 108
 
 -- lowercase false --
-string(24) "January 1, 1970, 1:00 am"
+
+Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line 108
 
 -- uppercase TRUE --
-string(24) "January 1, 1970, 1:00 am"
+
+Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line 108
 
 -- uppercase FALSE --
-string(24) "January 1, 1970, 1:00 am"
+
+Warning: date() expects parameter 2 to be integer, boolean given in %s/date_variation2.php on line 108
 
 -- empty string DQ --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 108
 
 -- empty string SQ --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 108
 
 -- string DQ --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 108
 
 -- string SQ --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 108
 
 -- mixed case string --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 108
 
 -- heredoc --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 108
 
 -- instance of classWithToString --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, object given in %s/date_variation2.php on line 108
 
 -- instance of classWithoutToString --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, object given in %s/date_variation2.php on line 108
 
 -- undefined var --
-string(24) "January 1, 1970, 1:00 am"
+bool(true)
 
 -- unset var --
-string(24) "January 1, 1970, 1:00 am"
+bool(true)
 
 -- resource --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 2 to be integer, resource given in %s/date_variation2.php on line 108
 ===DONE===

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method 'test' declared in multiple traits (foo, baz) in %s/error_015.php on line 11

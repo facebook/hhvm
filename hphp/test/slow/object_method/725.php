@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class T {
  abstract function test();
@@ -11,6 +11,10 @@ class R extends T {
  var_dump('test');
  }
 }
- $obj = new R();
+
+ <<__EntryPoint>>
+function main_725() {
+$obj = new R();
  $obj->test();
  $obj->foo();
+}

@@ -37,9 +37,9 @@ Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
   if (wands == nullptr) {
     return Array();
   } else {
-    PackedArrayInit ret(num);
+    VArrayInit ret(num);
     for (int i = 0; i < num; ++i) {
-      ret.appendWithRef(createImagickPixel(wands[i], owner));
+      ret.append(createImagickPixel(wands[i], owner));
     }
     return ret.toArray();
   }
@@ -53,7 +53,7 @@ req::ptr<WandResource<PixelWand>> getPixelWand(const Variant& obj) {
     IMAGICKPIXEL_THROW(
       "The parameter must be an instance of ImagickPixel or a string");
   } else {
-    auto wand = getPixelWandResource(obj.toCObjRef());
+    auto wand = getPixelWandResource(obj.asCObjRef());
     return req::make<WandResource<PixelWand>>(wand->getWand(), false);
   }
 }
@@ -71,7 +71,7 @@ req::ptr<WandResource<PixelWand>> buildColorWand(const Variant& color) {
     return getPixelWand(color);
   }
   auto ret = newPixelWand();
-  auto status = PixelSetColor(ret->getWand(), color.toCStrRef().c_str());
+  auto status = PixelSetColor(ret->getWand(), color.asCStrRef().c_str());
   if (status == MagickFalse) {
     IMAGICKPIXEL_THROW("Unrecognized color string");
   }
@@ -122,7 +122,7 @@ static Array HHVM_METHOD(ImagickPixel, getColor, bool normalized) {
   };
   auto wand = getPixelWandResource(Object{this_});
 
-  ArrayInit ret(4, ArrayInit::Map{});
+  DArrayInit ret(4);
   for (int i = 0; i < 4; ++i) {
     double color = pixelGet[i](wand->getWand());
     if (i < 3 && !normalized) {
@@ -171,7 +171,7 @@ static Array HHVM_METHOD(ImagickPixel, getHSL) {
   auto wand = getPixelWandResource(Object{this_});
   double hue, saturation, luminosity;
   PixelGetHSL(wand->getWand(), &hue, &saturation, &luminosity);
-  return make_map_array(
+  return make_darray(
     s_hue, hue,
     s_saturation, saturation,
     s_luminosity, luminosity);
@@ -242,7 +242,7 @@ static bool HHVM_METHOD(ImagickPixel, setHSL,
 
 #undef IMAGICKPIXEL_THROW
 
-void loadImagickPixelClass() {
+void ImagickExtension::loadImagickPixelClass() {
   HHVM_ME(ImagickPixel, clear);
   HHVM_ME(ImagickPixel, __construct);
   HHVM_ME(ImagickPixel, destroy);

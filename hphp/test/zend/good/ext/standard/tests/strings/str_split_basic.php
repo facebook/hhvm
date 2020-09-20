@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array str_split(string $str [, int $split_length])
  * Description: Convert a string to an array. If split_length is 
                 specified, break the string down into chunks each 
@@ -6,7 +6,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing str_split() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -21,5 +21,5 @@ var_dump( str_split($str,$split_length) );
 echo "-- With split_length as default argument --\n";
 var_dump( str_split($str) );
 
-echo "Done"
-?>
+echo "Done";
+}

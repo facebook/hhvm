@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -20,7 +19,7 @@ type doc =
   | Text of string
   | Break of string
   | MustBreak
-  (** [Group x] represent two alternative layouts of [x]:
+      (** [Group x] represent two alternative layouts of [x]:
     * vertical layout is where Breaks are considered newline in the group
     * horizontal layout is where Breaks are considered spaces in the group
     * This decision is made independently in subgroups
@@ -36,7 +35,6 @@ type layout =
 
 (* docs are lazily evaluated *)
 module type Library = sig
-
   (* document type as specified in prettier printer paper *)
   type t = doc
 
@@ -45,13 +43,14 @@ module type Library = sig
   val cons : t -> t -> t (* put two DOC horizontally *)
 
   (* adopted notation from Lindig paper Strictly Pretty *)
-  val (^^) : t -> t -> t (* same as cons *)
+  val ( ^^ ) : t -> t -> t (* same as cons *)
 
   val nest : int -> t -> t (* DOC with i amount of indentation *)
 
   val text : string -> t (* creates a DOC that contains string s *)
 
   val break : t
+
   (* a "linebreak" followed by a string.
    * Note that line breaks here can be turned into space *)
   val breakwith : string -> t
@@ -66,7 +65,6 @@ module type Library = sig
   val pretty : int -> t -> string
 
   val dump : t -> string
-
 end
 
 (* DOCCOMPARE uses some criteria to make decision.
@@ -77,10 +75,8 @@ end
  * and the comparator uses these context, instead of a global config to
  * compare documents *)
 module type DocCompare = sig
-
   type t = doc
 
   (* from the choices, select best layout, considering initial indent [k] *)
   val best : int -> t -> layout
-
 end

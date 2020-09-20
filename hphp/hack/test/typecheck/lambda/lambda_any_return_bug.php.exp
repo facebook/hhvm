@@ -1,0 +1,15 @@
+File "lambda_any_return_bug.php", line 12, characters 3-24:
+  (function(): vec<int>)
+File "lambda_any_return_bug.php", line 12, characters 3-24:[2]
+  (function(): vec<int>)
+File "lambda_any_return_bug.php", line 12, characters 3-24:[3]
+  (function(): vec<int>)
+File "lambda_any_return_bug.php", line 13, characters 3-29:
+  (function(): vec<(int | string)>)
+File "lambda_any_return_bug.php", line 13, characters 3-29:[2]
+  (function(): vec<(int | string)>)
+File "lambda_any_return_bug.php", line 13, characters 3-29:[3]
+  (function(): vec<(int | string)>)
+File "lambda_any_return_bug.php", line 13, characters 3-29:[4]
+  (function(): vec<(int | string)>)
+No errors

@@ -1,2 +1,2 @@
-File "bad_inout_decl_generator.php", line 3, characters 28-29:
-Inout parameters cannot be defined on async functions, generators or coroutines. (NastCheck[3042])
+File "bad_inout_decl_generator.php", line 4, characters 3-10:
+Parameters may not be marked `inout` on generators (Parsing[1002])

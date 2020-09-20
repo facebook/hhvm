@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $headers = <<<HEADERS
 From: =?UTF-8?B?PGZvb0BleGFtcGxlLmNvbT4=?=
 Subject: =?ks_c_5601-1987?B?UkU6odk=?=
@@ -22,4 +22,4 @@ var_dump($decoded['Subject']);
 var_dump($decoded['X-Foo']);
 var_dump($decoded['X-Bar']);
 var_dump($decoded['To']);
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f1($x) {
   if ($x[1]) goto x_t;
@@ -43,9 +43,13 @@ function f6($x, $y, $z) {
     var_dump($x);
   }
 }
-f1(array(0, 0));
-f2(array(10));
-f3(array(10), false);
-f4(array(array(1, 2, 3)));
-f5(array(false, false));
-f6(array(true), false, false);
+
+<<__EntryPoint>>
+function main_543() {
+f1(varray[0, 0]);
+f2(varray[10]);
+f3(varray[10], false);
+f4(varray[varray[1, 2, 3]]);
+f5(varray[false, false]);
+f6(varray[true], false, false);
+}

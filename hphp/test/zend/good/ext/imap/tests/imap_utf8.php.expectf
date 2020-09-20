@@ -1,7 +1,6 @@
 string(0) ""
 string(1) "1"
 
-Warning: %s
-NULL
-string(4) "%s"
+Warning: imap_utf8() expects parameter 1 to be string, %rv?%rarray given in %s/imap_utf8.php on line 5
+string(4) "test"
 Done

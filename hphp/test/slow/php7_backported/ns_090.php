@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo\Bar\Baz {
     function foo(){echo __FUNCTION__,"\n";}
     function bar(){echo __FUNCTION__,"\n";}
@@ -12,12 +12,13 @@ namespace Foo\Bar\Baz {
 namespace Fiz\Biz\Buz {
 
     use Foo\Bar\Baz\{ A, B, C as AC, D };
-    use Foo\Bar\Baz\{ function foo, function bar as buz, const FOO, const BAR AS BOZ };
+    use Foo\Bar\Baz\{ function foo, function bar as buz, const FOO, const BAR as BOZ };
 
     class C { function __construct() {echo __METHOD__,"\n";}}
     function bar(){echo __FUNCTION__,"\n";}
     const BAR = 100;
 
+    <<__EntryPoint>> function main(): void {
     new A;
     new B;
     new AC;
@@ -26,8 +27,8 @@ namespace Fiz\Biz\Buz {
     foo();
     buz();
     bar();
-    var_dump(FOO);
-    var_dump(BOZ);
-    var_dump(BAR);
+    \var_dump(FOO);
+    \var_dump(BOZ);
+    \var_dump(BAR);
+    }
 }
-

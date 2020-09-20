@@ -16,11 +16,12 @@
 
 #include "hphp/util/hardware-counter.h"
 
-#include <gtest/gtest.h>
 #include <algorithm>
 #include <cstring>
 
 #include "hphp/util/hash.h"
+
+#include <folly/portability/GTest.h>
 
 namespace HPHP {
 
@@ -35,7 +36,7 @@ int64_t hash_alot(int64_t seed, int64_t reps) {
 
 TEST(HardwareCounterTest, InstructionCount) {
   const bool excludeKernel = true;
-  HardwareCounter::Init(true, "", false, excludeKernel, -1);
+  HardwareCounter::Init(true, "", false, excludeKernel, false, -1);
   HardwareCounter::s_counter.getCheck();
   auto begin = HardwareCounter::GetInstructionCount();
   const int64_t reps = 100000000;

@@ -1,0 +1,5 @@
+In handle_autoload(class, ITest)
+bool(false)
+
+Printing coverage:
+  %s/interface-definition.inc: []

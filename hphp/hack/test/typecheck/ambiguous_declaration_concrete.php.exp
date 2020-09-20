@@ -1,0 +1,14 @@
+File "ambiguous_declaration_concrete.php", line 9, characters 7-7:
+Class `C` does not correctly implement all required members  (Typing[4340])
+File "ambiguous_declaration_concrete.php", line 10, characters 7-8:
+Some members are incompatible with those declared in type `T1`
+File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
+The method `foo` has the wrong type
+File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
+`T2` and `T1` both declare ambiguous implementations of `foo`.
+File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
+`T2`'s definition is here.
+File "ambiguous_declaration_concrete.php", line 3, characters 19-21:
+`T1`'s definition is here.
+File "ambiguous_declaration_concrete.php", line 6, characters 19-21:
+Redeclare `foo` in `C` with a compatible signature.

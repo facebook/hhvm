@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_cmp(123123,-123123));
 var_dump(gmp_cmp("12345678900987654321","12345678900987654321"));
 var_dump(gmp_cmp("12345678900987654321","123456789009876543211"));
@@ -12,10 +12,10 @@ var_dump(gmp_cmp(0,$n) < 0);
 $n1 = gmp_init("827278512385463739");
 var_dump(gmp_cmp($n1,$n));
 
-var_dump(gmp_cmp($n1,$n,1));
-var_dump(gmp_cmp(array(),array()));
-var_dump(gmp_cmp(array()));
-var_dump(gmp_cmp());
+try { var_dump(gmp_cmp($n1,$n,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_cmp(varray[],varray[]));
+try { var_dump(gmp_cmp(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_cmp()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>
+}

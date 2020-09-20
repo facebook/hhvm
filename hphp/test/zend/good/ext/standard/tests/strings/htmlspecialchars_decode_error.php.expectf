@@ -2,11 +2,9 @@
 
 -- Testing htmlspecialchars_decode() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects at least 1 parameter, 0 given in %s/htmlspecialchars_decode_error.php on line 11
 
 -- Testing htmlspecialchars_decode() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects at most 2 parameters, 3 given in %s/htmlspecialchars_decode_error.php on line 18
 Done

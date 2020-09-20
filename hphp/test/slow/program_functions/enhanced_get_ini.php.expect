@@ -1,12 +1,9 @@
-string(2) "11"
 string(1) "2"
-array(2) {
-  [0]=>
+varray(2) {
   string(2) "ls"
-  [1]=>
   string(2) "cp"
 }
-array(3) {
+darray(3) {
   ["MYBOOL"]=>
   string(1) "1"
   ["MYINT"]=>
@@ -14,7 +11,7 @@ array(3) {
   ["MYSTR"]=>
   string(13) "Custom String"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(30) "Key will be next available int"
   [1]=>

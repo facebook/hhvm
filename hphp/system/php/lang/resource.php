@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 // Used to represent resources
 class __resource {

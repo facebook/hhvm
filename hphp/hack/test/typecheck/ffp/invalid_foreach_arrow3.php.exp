@@ -1,0 +1,4 @@
+File "invalid_foreach_arrow3.php", line 5, characters 16-17:
+Variable `$k` is undefined, or not always defined. (Naming[2050])
+File "invalid_foreach_arrow3.php", line 3, characters 42-43:
+Did you mean `$t` instead?

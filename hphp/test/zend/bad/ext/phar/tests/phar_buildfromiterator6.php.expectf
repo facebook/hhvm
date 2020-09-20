@@ -1,7 +1,0 @@
-rewind
-valid
-current
-key
-%s(24) "UnexpectedValueException"
-Iterator myIterator returned an invalid key (must return a string)
-===DONE===

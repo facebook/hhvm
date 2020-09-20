@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: getrandmax() expects exactly 0 parameters, 1 given in %s/getrandmax_error.php on line 2

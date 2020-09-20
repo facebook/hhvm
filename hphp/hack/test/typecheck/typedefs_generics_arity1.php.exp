@@ -1,0 +1,4 @@
+File "typedefs_generics_arity1.php", line 8, characters 20-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "typedefs_generics_arity1.php", line 3, characters 7-7:
+Definition is here

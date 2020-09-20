@@ -2,16 +2,13 @@
 
 -- Testing strcspn() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: strcspn() expects at least 2 parameters, 0 given in %s/strcspn_error.php on line 17
 
 -- Testing strcspn() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strcspn() expects at most 4 parameters, 5 given in %s/strcspn_error.php on line 28
 
 -- Testing strcspn() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strcspn() expects at least 2 parameters, 1 given in %s/strcspn_error.php on line 33
 Done

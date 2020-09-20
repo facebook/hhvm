@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_number_formatter_rounding_fa_ir() {
 include (__DIR__ . '/../NumberFormatter_rounding.inc');
 
 // TODO(t5921532) Add tests for ar_AE once icu has been updated to 53.1 or newer
@@ -26,3 +29,4 @@ test_rounding("fa_IR", 2, NumberFormatter::ROUND_HALFUP); // aka ROUND
 
 echo "Testing fa_IR, rounding mode half-even, 2 digits\n";
 test_rounding("fa_IR", 2, NumberFormatter::ROUND_HALFEVEN);
+}

@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_TIMEZONE_H
-#define incl_HPHP_ICU_TIMEZONE_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -39,8 +38,8 @@ struct IntlTimeZone : IntlError {
 
   static Object newInstance(icu::TimeZone *tz = nullptr, bool owned = true) {
     if (!c_IntlTimeZone) {
-      c_IntlTimeZone = Unit::lookupClass(s_IntlTimeZone.get());
-      assert(c_IntlTimeZone);
+      c_IntlTimeZone = Class::lookup(s_IntlTimeZone.get());
+      assertx(c_IntlTimeZone);
     }
     Object obj{c_IntlTimeZone};
     if (tz) {
@@ -93,4 +92,3 @@ struct IntlTimeZone : IntlError {
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_TIMEZONE_H

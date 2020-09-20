@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   private $foo, $bar;
@@ -8,8 +8,12 @@ class A {
 }
    public function __sleep() {
  $this->foo = 3;
- return array('foo');
+ return varray['foo'];
 }
  }
- $a = new A();
+
+ <<__EntryPoint>>
+function main_747() {
+$a = new A();
  var_dump(serialize($a));
+}

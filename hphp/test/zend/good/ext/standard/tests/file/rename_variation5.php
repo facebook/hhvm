@@ -1,17 +1,17 @@
-<?php
+<?hh
+// Test rename() by trying to rename an existing file/dir/link to the same name
+// and one another.
 
-/* test rename() by trying to rename an existing file/dir/link to the same name
-  and one another */
-// create a dir 
-$file_path = dirname(__FILE__);
-$dirname = "$file_path/rename_variation5_dir"; 
+<<__EntryPoint>> function main(): void {
+
+$dirname = __SystemLib\hphp_test_tmppath('rename_variation5_dir');
 mkdir($dirname);
 //create a file
-$filename = "$file_path/rename_variation5.tmp"; 
+$filename = __SystemLib\hphp_test_tmppath('rename_variation5.tmp');
 $fp = fopen($filename, "w");
 fclose($fp);
 // create a link
-$linkname = "$file_path/rename_variation5_link.tmp";
+$linkname = __SystemLib\hphp_test_tmppath('rename_variation5_link.tmp');
 symlink($filename, $linkname);
 
 echo "\n-- Renaming link to same link name --\n";
@@ -41,11 +41,8 @@ echo "\n-- Renaming existing directory to existing link name --\n";
 var_dump( rename($dirname, $linkname) );
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation5_link.tmp");
-unlink($file_path."/rename_variation5.tmp");
-rmdir($file_path."/rename_variation5_dir");
-?>
+
+unlink(__SystemLib\hphp_test_tmppath('rename_variation5_link.tmp'));
+unlink(__SystemLib\hphp_test_tmppath('rename_variation5.tmp'));
+rmdir(__SystemLib\hphp_test_tmppath('rename_variation5_dir'));
+}

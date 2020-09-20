@@ -1,0 +1,18 @@
+object(C) (1) {
+  ["i"]=>
+  int(1)
+}
+in m
+int(1)
+object(C) (1) {
+  ["i"]=>
+  int(2)
+}
+in m
+int(2)
+Cannot modify const property i of class C after construction
+object(C) (1) {
+  ["i"]=>
+  int(2)
+}
+int(2)

@@ -1,5 +1,3 @@
-
-
 Test 1.e8f1cd28133d79ecd660002f1c660d0e:
 array (
   0 => 'aaa',
@@ -143,364 +141,208 @@ array (
   1 => 'y',
   2 => 'k',
 )
- Result: truearray(5) {
-  [0]=>
+ Result: truevarray(5) {
   int(25)
-  [1]=>
   string(5) "30.12"
-  [2]=>
   string(4) "30.2"
-  [3]=>
   int(36)
-  [4]=>
   int(100)
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(100)
-  [1]=>
   int(25)
-  [2]=>
   string(5) "30.12"
-  [3]=>
   string(4) "30.2"
-  [4]=>
   int(36)
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(25)
-  [1]=>
   string(5) "30.12"
-  [2]=>
   string(4) "30.2"
-  [3]=>
   int(36)
-  [4]=>
   int(100)
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(2) "25"
-  [1]=>
   string(2) "36"
-  [2]=>
   string(3) "100"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "100"
-  [1]=>
   string(2) "25"
-  [2]=>
   string(2) "36"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(2) "25"
-  [1]=>
   string(2) "36"
-  [2]=>
   string(3) "100"
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   string(1) "2"
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   string(2) "30"
-  [7]=>
   string(2) "54"
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(10)
-  [1]=>
   int(11)
-  [2]=>
   int(17)
-  [3]=>
   string(1) "2"
-  [4]=>
   int(2)
-  [5]=>
   string(2) "30"
-  [6]=>
   int(5)
-  [7]=>
   string(2) "54"
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   string(1) "2"
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   string(2) "30"
-  [7]=>
   string(2) "54"
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   int(2)
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   int(30)
-  [7]=>
   int(54)
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(10)
-  [1]=>
   int(11)
-  [2]=>
   int(17)
-  [3]=>
   int(2)
-  [4]=>
   int(2)
-  [5]=>
   int(30)
-  [6]=>
   int(5)
-  [7]=>
   int(54)
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   int(2)
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   int(30)
-  [7]=>
   int(54)
-  [8]=>
   int(64)
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(25)
-  [1]=>
   string(5) "30.12"
-  [2]=>
   string(4) "30.2"
-  [3]=>
   int(36)
-  [4]=>
   int(100)
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(100)
-  [1]=>
   int(25)
-  [2]=>
   string(5) "30.12"
-  [3]=>
   string(4) "30.2"
-  [4]=>
   int(36)
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(25)
-  [1]=>
   string(5) "30.12"
-  [2]=>
   string(4) "30.2"
-  [3]=>
   int(36)
-  [4]=>
   int(100)
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(2) "25"
-  [1]=>
   string(2) "36"
-  [2]=>
   string(3) "100"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "100"
-  [1]=>
   string(2) "25"
-  [2]=>
   string(2) "36"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(2) "25"
-  [1]=>
   string(2) "36"
-  [2]=>
   string(3) "100"
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   string(1) "2"
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   string(2) "30"
-  [7]=>
   string(2) "54"
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(10)
-  [1]=>
   int(11)
-  [2]=>
   int(17)
-  [3]=>
   string(1) "2"
-  [4]=>
   int(2)
-  [5]=>
   string(2) "30"
-  [6]=>
   int(5)
-  [7]=>
   string(2) "54"
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   string(1) "2"
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   string(2) "30"
-  [7]=>
   string(2) "54"
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   int(2)
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   int(30)
-  [7]=>
   int(54)
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(10)
-  [1]=>
   int(11)
-  [2]=>
   int(17)
-  [3]=>
   int(2)
-  [4]=>
   int(2)
-  [5]=>
   int(30)
-  [6]=>
   int(5)
-  [7]=>
   int(54)
-  [8]=>
   int(64)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(2)
-  [1]=>
   int(2)
-  [2]=>
   int(5)
-  [3]=>
   int(10)
-  [4]=>
   int(11)
-  [5]=>
   int(17)
-  [6]=>
   int(30)
-  [7]=>
   int(54)
-  [8]=>
   int(64)
 }
 Locale: 'EN-US-ODESSA'

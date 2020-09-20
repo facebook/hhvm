@@ -2,34 +2,30 @@
 
 -- Testing convert_cyr_string() function with no arguments --
 
-Warning: %s
-NULL
+Warning: convert_cyr_string() expects exactly 3 parameters, 0 given in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 16
 
 -- Testing convert_cyr_string() function with no 'to' character set --
 
-Warning: %s
-NULL
+Warning: convert_cyr_string() expects exactly 3 parameters, 2 given in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 19
 
 -- Testing convert_cyr_string() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: convert_cyr_string() expects exactly 3 parameters, 4 given in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 22
 
 -- Testing convert_cyr_string() function with invalid 'from' character set --
 
-Warning: %s
+Warning: Invalid argument: Unknown source charset: ? in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 25
 string(10) "68656c6c6f"
 
 -- Testing convert_cyr_string() function with invalid 'to' character set --
 
-Warning: %s
+Warning: Invalid argument: Unknown destination charset: ? in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 28
 string(10) "68656c6c6f"
 
 -- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --
 
-Warning: %s
+Warning: Invalid argument: Unknown source charset: > in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 31
 
-Warning: %s
+Warning: Invalid argument: Unknown destination charset: ? in %s/test/zend/good/ext/standard/tests/strings/convert_cyr_string_error.php on line 31
 string(10) "68656c6c6f"
- 
 ===DONE===

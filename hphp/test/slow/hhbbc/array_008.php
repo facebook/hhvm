@@ -1,12 +1,12 @@
-<?php
+<?hh
 
 function get() {
-  return array(
+  return darray[
     'foo' => 'bar',
     'baz' => 24,
     13 => 42,
     'heh' => 1.0
-  );
+  ];
 }
 
 function a() { return get()['foo']; }
@@ -19,7 +19,11 @@ function main() {
   var_dump(a() === 'bar');
   var_dump(b() === 24);
   var_dump(c() === 42);
-  var_dump(d() === 42);
-  var_dump(e() === null);
+  try { var_dump(d() === null); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { var_dump(e() === null); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
+
+<<__EntryPoint>>
+function main_array_008() {
 main();
+}

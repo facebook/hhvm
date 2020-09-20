@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class D {
   function go() {
@@ -19,4 +19,8 @@ function go() {
   var_dump(is_object(Y::$boom));
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_003() {
 go();
+}

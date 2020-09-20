@@ -1,65 +1,80 @@
 *** Testing mcrypt_decrypt() : usage variation ***
 
 --int 0--
-string(16) "52833a00168e547f"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --int 1--
-string(16) "82011a0a93098a13"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --int 12345--
-string(16) "e8b71c21b6acc162"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --int -12345--
-string(16) "db3c458e975563a8"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --float 10.5--
-string(16) "6ee8764562f25913"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --float -10.5--
-string(16) "d63b39fd5f65678e"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --float 12.3456789000e10--
-string(32) "7712cc4828221be40672239d9c32e742"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --float -12.3456789000e10--
-string(32) "caa892cb5d28b53c2b75b1e0799427c3"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --float .5--
-string(16) "99880c86884385d9"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --empty array--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --int indexed array--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --associative array--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --nested arrays--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --uppercase NULL--
-string(16) "d27689f6fd9700f4"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --lowercase null--
-string(16) "d27689f6fd9700f4"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --lowercase true--
-string(16) "82011a0a93098a13"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --lowercase false--
-string(16) "d27689f6fd9700f4"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --uppercase TRUE--
-string(16) "82011a0a93098a13"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --uppercase FALSE--
-string(16) "d27689f6fd9700f4"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --empty string DQ--
 string(16) "d27689f6fd9700f4"
@@ -68,19 +83,22 @@ string(16) "d27689f6fd9700f4"
 string(16) "d27689f6fd9700f4"
 
 --instance of classWithToString--
-string(32) "46677e368bc07ef375bd580e0c4b2594"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, object given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --undefined var--
-string(16) "d27689f6fd9700f4"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --unset var--
-string(16) "d27689f6fd9700f4"
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, null given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 
 --resource--
-Error: 2 - mcrypt_decrypt() expects parameter 3 to be string, resource given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_decrypt() expects parameter 3 to be string, resource given in %s/zend/good/ext/mcrypt/tests/mcrypt_decrypt_variation3.php on line 109
 ===DONE===

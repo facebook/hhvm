@@ -16,6 +16,9 @@
 */
 
 #include "hphp/runtime/ext/ipc/ext_ipc.h"
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/ext/posix/ext_posix.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -191,11 +194,11 @@ bool HHVM_FUNCTION(msg_set_queue,
     value = data[s_msg_perm_uid];
     if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_perm_gid];
-    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
+    if (!value.isNull()) stat.msg_perm.gid = value.toInt64();
     value = data[s_msg_perm_mode];
-    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
+    if (!value.isNull()) stat.msg_perm.mode = value.toInt64();
     value = data[s_msg_qbytes];
-    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
+    if (!value.isNull()) stat.msg_qbytes = value.toInt64();
 
     return msgctl(q->id, IPC_SET, &stat) == 0;
   }
@@ -213,18 +216,18 @@ Array HHVM_FUNCTION(msg_stat_queue,
 
   struct msqid_ds stat;
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
-    Array data;
-    data.set(s_msg_perm_uid,  (int64_t)stat.msg_perm.uid);
-    data.set(s_msg_perm_gid,  (int64_t)stat.msg_perm.gid);
-    data.set(s_msg_perm_mode, (int32_t)stat.msg_perm.mode);
-    data.set(s_msg_stime,     (int64_t)stat.msg_stime);
-    data.set(s_msg_rtime,     (int64_t)stat.msg_rtime);
-    data.set(s_msg_ctime,     (int64_t)stat.msg_ctime);
-    data.set(s_msg_qnum,      (int64_t)stat.msg_qnum);
-    data.set(s_msg_qbytes,    (int64_t)stat.msg_qbytes);
-    data.set(s_msg_lspid,     stat.msg_lspid);
-    data.set(s_msg_lrpid,     stat.msg_lrpid);
-    return data;
+    return make_darray(
+      s_msg_perm_uid,  (int64_t)stat.msg_perm.uid,
+      s_msg_perm_gid,  (int64_t)stat.msg_perm.gid,
+      s_msg_perm_mode, (int32_t)stat.msg_perm.mode,
+      s_msg_stime,     (int64_t)stat.msg_stime,
+      s_msg_rtime,     (int64_t)stat.msg_rtime,
+      s_msg_ctime,     (int64_t)stat.msg_ctime,
+      s_msg_qnum,      (int64_t)stat.msg_qnum,
+      s_msg_qbytes,    (int64_t)stat.msg_qbytes,
+      s_msg_lspid,     stat.msg_lspid,
+      s_msg_lrpid,     stat.msg_lrpid
+    );
   }
 
   return Array();
@@ -234,9 +237,9 @@ bool HHVM_FUNCTION(msg_send,
                    const Resource& queue,
                    int64_t msgtype,
                    const Variant& message,
-                   bool serialize /* = true */,
-                   bool blocking /* = true */,
-                   VRefParam errorcode /* = null */) {
+                   bool serialize,
+                   bool blocking,
+                   Variant& errorcode) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -261,7 +264,7 @@ bool HHVM_FUNCTION(msg_send,
     int err = errno;
     raise_warning("Unable to send message: %s",
                     folly::errnoStr(err).c_str());
-    errorcode.assignIfRef(err);
+    errorcode = err;
     return false;
   }
   return true;
@@ -270,11 +273,12 @@ bool HHVM_FUNCTION(msg_send,
 bool HHVM_FUNCTION(msg_receive,
                    const Resource& queue,
                    int64_t desiredmsgtype,
-                   VRefParam msgtype,
-                   int64_t maxsize, VRefParam message,
-                   bool unserialize /* = true */,
-                   int64_t flags /* = 0 */,
-                   VRefParam errorcode /* = null */) {
+                   int64_t& msgtype,
+                   int64_t maxsize,
+                   Variant& message,
+                   bool unserialize,
+                   int64_t flags,
+                   Variant& errorcode) {
   auto q = cast<MessageQueue>(queue);
   if (!q) {
     raise_warning("Invalid message queue was specified");
@@ -300,18 +304,18 @@ bool HHVM_FUNCTION(msg_receive,
 
   int result = msgrcv(q->id, buffer, maxsize, desiredmsgtype, realflags);
   if (result < 0) {
-    errorcode.assignIfRef(errno);
+    errorcode = errno;
     return false;
   }
 
-  msgtype.assignIfRef((int)buffer->mtype);
+  msgtype = buffer->mtype;
   if (unserialize) {
     const char *bufText = (const char *)buffer->mtext;
     uint32_t bufLen = strlen(bufText);
     VariableUnserializer vu(bufText, bufLen,
                             VariableUnserializer::Type::Serialize);
     try {
-      message.assignIfRef(vu.unserialize());
+      message = vu.unserialize();
     } catch (ResourceExceededException&) {
       throw;
     } catch (Exception&) {
@@ -319,7 +323,7 @@ bool HHVM_FUNCTION(msg_receive,
       return false;
     }
   } else {
-    message.assignIfRef(String((const char *)buffer->mtext));
+    message = String((const char *)buffer->mtext);
   }
 
   return true;
@@ -357,6 +361,7 @@ union semun {
 struct Semaphore : SweepableResourceData {
   int key;          // For error reporting.
   int semid;        // Returned by semget()
+  int64_t pid;      // Used to only release semaphore on creating process.
   int count;        // Acquire count for auto-release.
   int auto_release; // flag that says to auto-release.
 
@@ -392,12 +397,21 @@ struct Semaphore : SweepableResourceData {
     return true;
   }
 
-  ~Semaphore() {
+  ~Semaphore() override {
     /*
      * if count == -1, semaphore has been removed
      * Need better way to handle this
      */
     if (count == -1 || !auto_release) {
+      return;
+    }
+
+    /*
+     * Some resources only need to be cleaned up in the process that created
+     * them.  Semaphores are one such resource.  The fork manpage reads: "The
+     * child does not inherit semaphore adjustments from its parent"
+     */
+    if (pid != f_posix_getpid()) {
       return;
     }
 
@@ -521,6 +535,7 @@ Variant HHVM_FUNCTION(sem_get,
   auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
+  sem_ptr->pid = f_posix_getpid();
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
   return Resource(sem_ptr);
@@ -650,7 +665,7 @@ static int put_shm_data(sysvshm_chunk_head *ptr, long key, char *data,
   }
 
   if (ptr->free < total_size) {
-    return -1; /* not enough memeory */
+    return -1; /* not enough memory */
   }
 
   shm_var = (sysvshm_chunk *) ((char *) ptr + ptr->end);

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SNAPSHOT_H_
-#define incl_HPHP_SNAPSHOT_H_
+#pragma once
 
 #include <stdio.h>
 #include <string>
@@ -57,4 +56,3 @@ struct SnapshotHeader {
 
 }
 
-#endif // incl_HPHP_SNAPSHOT_H_

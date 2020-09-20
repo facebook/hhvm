@@ -1,13 +1,4 @@
-<?php
-// TODO: Add more encoding, strings.....
-//$debug = true;
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
-
-// EUC-JP
-$euc_jp = '0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。';
-
-print  "1: ". mb_strwidth($euc_jp, 'EUC-JP') . "\n";
+<?hh
 /*
 
 print  "2: ". mb_strwidth($euc_jp, 'EUC-JP') . "\n";
@@ -21,5 +12,15 @@ $str = mb_strwidth($euc_jp, 100, -10,'...','EUC-JP');
 $str = mb_strwidth($euc_jp, -100, 10,'...','EUC-JP');
 ($str !== "") ?	print "6 OK: $str\n" : print "NG: $str\n";
 */
-?>
+<<__EntryPoint>>
+function main_entry(): void {
+  // TODO: Add more encoding, strings.....
 
+  ini_set('include_path', dirname(__FILE__));
+  include_once('common.inc');
+
+  // EUC-JP
+  $euc_jp = '0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。';
+
+  print  "1: ". mb_strwidth($euc_jp, 'EUC-JP') . "\n";
+}

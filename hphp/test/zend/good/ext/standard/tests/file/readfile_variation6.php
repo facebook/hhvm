@@ -1,10 +1,25 @@
-<?php
+<?hh
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
- * Description: Output a file or a URL 
+ * Description: Output a file or a URL
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+function runtest() {
+
+   $h = fopen(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile, "w");
+   fwrite($h, "File in include path");
+   fclose($h);
+   readfile(ZendGoodExtStandardTestsFileReadfileVariation6::$filename, true);
+   echo "\n";
+   unlink(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile);
+}
+
+abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
+  public static $secondFile;
+  public static $filename = "readfile_variation6.txt";
+}
+<<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
 
 echo "*** Testing readfile() : variation ***\n";
@@ -16,8 +31,8 @@ unlink($thisTestDir);
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = "readfile_variation6.txt";
-$secondFile = $dir2."/".$filename;
+
+ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::dir2()."/".ZendGoodExtStandardTestsFileReadfileVariation6::$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);
@@ -28,15 +43,5 @@ chdir("..");
 rmdir($thisTestDir);
 
 
-function runtest() {
-   global $secondFile, $filename;
-   $h = fopen($secondFile, "w");
-   fwrite($h, "File in include path");
-   fclose($h);
-   readfile($filename, true);
-   echo "\n";
-   unlink($secondFile);  
+echo "===DONE===\n";
 }
-
-?>
-===DONE===

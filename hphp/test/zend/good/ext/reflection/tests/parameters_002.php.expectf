@@ -13,7 +13,7 @@ getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(true)
+isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
@@ -50,10 +50,9 @@ isPassedByReference: bool(true)
 getClass: stdClass
 getDeclaringClass: NULL
 isArray: bool(false)
-allowsNull: bool(true)
-isOptional: bool(true)
-isDefaultValueAvailable: bool(true)
-getDefaultValue: NULL
+allowsNull: bool(false)
+isOptional: bool(false)
+isDefaultValueAvailable: bool(false)
 ===6===
 getName: string(3) "def"
 isPassedByReference: bool(false)
@@ -79,13 +78,13 @@ getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
-isArray: bool(true)
+isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
 getName: string(3) "ref"
-isPassedByReference: bool(true)
+isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
 isArray: bool(false)

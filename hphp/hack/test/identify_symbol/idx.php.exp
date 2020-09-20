@@ -1,27 +1,28 @@
-name: \idx, kind: function, span: line 5, characters 5-20, definition: 
- idx
+name: \HH\idx, kind: function, span: line 5, characters 5-7, is_declaration: false
+definition:
+ HH\idx
    kind: function
-   id: function::idx
-   position: line 23, characters 10-12
-   span: line 22, character 1 - line 24, character 21
+   id: function::HH\idx
+   position: line 31, characters 10-12
+   span: line 30, character 1 - line 35, character 4
    modifiers: 
    params:
      $collection
        kind: param
-       position: line 23, characters 46-56
-       span: line 23, character 22 - line 23, character 56
+       position: line 32, characters 27-37
+       span: line 32, character 3 - line 32, character 37
        modifiers: 
 
      $index
        kind: param
-       position: line 23, characters 59-64
-       span: line 23, character 59 - line 23, character 64
+       position: line 33, characters 7-12
+       span: line 33, character 3 - line 33, character 12
        modifiers: 
 
      $default
        kind: param
-       position: line 24, characters 3-10
-       span: line 24, character 3 - line 24, character 17
+       position: line 34, characters 3-10
+       span: line 34, character 3 - line 34, character 17
        modifiers: 
 
 

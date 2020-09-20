@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface A {
 }
@@ -6,4 +6,8 @@ interface A {
 }
  class C extends B implements A {
 }
- $obj = new C();
+
+ <<__EntryPoint>>
+function main_1241() {
+$obj = new C();
+}

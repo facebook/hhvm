@@ -1,0 +1,1 @@
+Fatal error: resolving type alias T failed. Have you declared all classes in the type alias in %s/recursion_type_structure_via_type_alias.php on line 11

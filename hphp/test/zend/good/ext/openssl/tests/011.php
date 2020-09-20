@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $data = "openssl_encrypt() and openssl_decrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";
@@ -19,4 +19,4 @@ $padded_data = $data . str_repeat(' ', 16 - (strlen($data) % 16));
 $encrypted = openssl_encrypt($padded_data, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
 $output = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
 var_dump(rtrim($output));
-?>
+}

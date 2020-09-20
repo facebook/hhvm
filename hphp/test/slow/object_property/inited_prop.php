@@ -15,9 +15,8 @@ class Thing {
     if (self::$thingsArray !== null) {
       return;
     }
-    self::$thingsArray = array();
-    $box = &self::$thingsArray;
-    $box[3] = 4;
+    self::$thingsArray = darray[];
+    self::$thingsArray[3] = 4;
   }
 }
 
@@ -25,4 +24,8 @@ function main() {
   Thing::doStuff(11, 22);
 }
 
+
+<<__EntryPoint>>
+function main_inited_prop() {
 main();
+}

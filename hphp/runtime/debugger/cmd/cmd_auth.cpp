@@ -29,21 +29,28 @@ TRACE_SET_MOD(debugger);
 void CmdAuth::sendImpl(DebuggerThriftBuffer& thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_token);
+  thrift.write(m_session);
   thrift.write(m_sandboxPath);
 }
 
 void CmdAuth::recvImpl(DebuggerThriftBuffer& thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_token);
+  thrift.read(m_session);
   thrift.read(m_sandboxPath);
 }
 
 void CmdAuth::onClient(DebuggerClient& client) {
-  auto const path = RuntimeOption::DebuggerAuthTokenScriptBin;
+  auto const token_path = RuntimeOption::DebuggerAuthTokenScriptBin;
+  auto const session_path = RuntimeOption::DebuggerSessionAuthScriptBin;
   const char *argv[] = { nullptr };
-  if (path.empty() || !proc::exec(path.data(), argv, nullptr, m_token,
-      nullptr)) {
+  if (token_path.empty() ||
+      !proc::exec(token_path.data(), argv, nullptr, m_token, nullptr)) {
     m_token.clear();
+  }
+  if (session_path.empty() ||
+      !proc::exec(session_path.data(), argv, nullptr, m_session, nullptr)) {
+    m_session.clear();
   }
 
   client.sendToServer(this);

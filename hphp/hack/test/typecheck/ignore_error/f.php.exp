@@ -1,0 +1,4 @@
+File "f.php", line 5, characters 3-7:
+You are trying to access an element of this container but the container could be `null`.  (Typing[4063])
+File "f.php", line 3, characters 14-18:
+This is what makes me believe it can be `null`.

@@ -6,5 +6,9 @@ class Vector {
   }
 }
 
+
+<<__EntryPoint>>
+function main_hh_vector5() {
 $x = new \Vector();
 $x->foo();
+}

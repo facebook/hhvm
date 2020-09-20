@@ -1,0 +1,65 @@
+--- CORRECT USAGE ---
+string(3) "123"
+int(123)
+float(1.23)
+bool(true)
+resource(%d) of type (stream)
+string(4) "herp"
+int(123)
+int(123)
+float(1.23)
+string(3) "123"
+int(123)
+float(1.23)
+bool(true)
+resource(%d) of type (stream)
+string(4) "herp"
+int(123)
+float(1.23)
+--- INCORRECT USAGE ---
+ERROR (2): Argument 1 to test_hh_string() must be of type @string, mystring given
+ ==> object(mystring) (0) {
+}
+ERROR (2): Argument 1 to test_hh_int() must be of type @int, myint given
+ ==> object(myint) (0) {
+}
+ERROR (2): Argument 1 to test_hh_float() must be of type @float, myfloat given
+ ==> object(myfloat) (0) {
+}
+ERROR (2): Argument 1 to test_hh_bool() must be of type @bool, mybool given
+ ==> object(mybool) (0) {
+}
+ERROR (2): Argument 1 to test_hh_resource() must be of type @resource, myresource given
+ ==> object(myresource) (0) {
+}
+ERROR (2): Argument 1 to test_hh_arraykey() must be of type @arraykey, myarraykey given
+ ==> object(myarraykey) (0) {
+}
+ERROR (2): Argument 1 to test_hh_arraykey() must be of type @arraykey, float given
+ ==> float(1.23)
+ERROR (2): Argument 1 to test_hh_num() must be of type @num, mynum given
+ ==> object(mynum) (0) {
+}
+ERROR (2): Argument 1 to test_hh_num() must be of type @num, string given
+ ==> string(3) "123"
+ERROR (2): Argument 1 to test_string() must be of type @string, mystring given
+ ==> object(mystring) (0) {
+}
+ERROR (2): Argument 1 to test_int() must be of type @int, myint given
+ ==> object(myint) (0) {
+}
+ERROR (2): Argument 1 to test_float() must be of type @float, myfloat given
+ ==> object(myfloat) (0) {
+}
+ERROR (2): Argument 1 to test_bool() must be of type @bool, mybool given
+ ==> object(mybool) (0) {
+}
+ERROR (2): Argument 1 to test_resource() must be of type @resource, myresource given
+ ==> object(myresource) (0) {
+}
+ERROR (2): Argument 1 to test_arraykey() must be of type @arraykey, myarraykey given
+ ==> object(myarraykey) (0) {
+}
+ERROR (2): Argument 1 to test_num() must be of type @num, mynum given
+ ==> object(mynum) (0) {
+}

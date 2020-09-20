@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function test($a) {
-  $x = array(
+  $x = darray[
     $a.'1' => $a.'1',
     $a.'2' => $a.'2',
     $a.'3' => $a.'3',
@@ -1502,7 +1502,11 @@ function test($a) {
     $a.'1498' => $a.'1498',
     $a.'1499' => $a.'1499',
     $a.'1500' => $a.'1500',
-  );
+  ];
   var_dump(count($x));
 }
+
+<<__EntryPoint>>
+function main_big_array() {
 test('hi');
+}

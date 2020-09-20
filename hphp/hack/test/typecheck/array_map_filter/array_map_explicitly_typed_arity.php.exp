@@ -1,0 +1,4 @@
+File "array_map_explicitly_typed_arity.php", line 5, characters 8-16:
+Expected 3 type parameters (Typing[4029])
+File "stdlib/builtins_array.hhi", line 118, characters 10-18:
+Definition is here

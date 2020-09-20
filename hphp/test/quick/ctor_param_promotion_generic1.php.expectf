@@ -1,2 +1,2 @@
 
-Fatal error: parameter modifiers not supported with type variable annotation in %s on line 4
+Fatal error: Generic type parameters are not allowed on constructors. Consider adding a type parameter to the class in %s on line 4

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A {
   function p() {
@@ -20,6 +20,7 @@ class ABC {
     A::p insteadof B, C;
   }
 }
+<<__EntryPoint>> function main(): void {
 $abc = new ABC();
 $abc->p();
-?>
+}

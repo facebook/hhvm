@@ -1,23 +1,23 @@
-<?php
+<?hh
 
 class ReflectionClassEx extends ReflectionClass
 {
-	public $bla;
+    public $bla;
 
-	function getMethodNames()
-	{
-		$res = array();
-		foreach($this->getMethods() as $m)
-		{
-			$res[] = $m->class . '::' . $m->name;
-		}
-		return $res;
-	}
+    function getMethodNames()
+    {
+        $res = varray[];
+        foreach($this->getMethods() as $m)
+        {
+            $res[] = $m->class . '::' . $m->name;
+        }
+        return $res;
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $r = new ReflectionClassEx('ReflectionClassEx');
 
-$exp = array (
+$exp = varray [
   'UMLClass::__clone',
   'UMLClass::export',
   'UMLClass::__construct',
@@ -51,25 +51,25 @@ $exp = array (
   'UMLClass::isIterateable',
   'UMLClass::implementsInterface',
   'UMLClass::getExtension',
-  'UMLClass::getExtensionName');
+  'UMLClass::getExtensionName'];
 
-$miss = array();
+$miss = varray[];
 
 $res = $r->getMethodNames();
 
 foreach($exp as $m)
 {
-	if (!in_array($m, $exp))
-	{
-		$miss[] = $m;
-	}
+    if (!in_array($m, $exp))
+    {
+        $miss[] = $m;
+    }
 }
 
 var_dump($miss);
 
 $props = array_keys(get_class_vars('ReflectionClassEx'));
-sort($props);
+sort(inout $props);
 var_dump($props);
 var_dump($r->name);
-?>
-===DONE===
+echo "===DONE===\n";
+}

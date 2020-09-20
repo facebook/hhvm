@@ -1,0 +1,11 @@
+Warning: is_nan() expects parameter 1 to be double, integer given in %s/bad_coercion.php on line %d
+
+Warning: is_nan() expects parameter 1 to be double, string given in %s/bad_coercion.php on line %d
+
+Warning: is_nan() expects parameter 1 to be double, string given in %s/bad_coercion.php on line %d
+
+Warning: is_nan() expects parameter 1 to be double, string given in %s/bad_coercion.php on line %d
+
+Warning: is_nan() expects parameter 1 to be double, string given in %s/bad_coercion.php on line %d
+
+Warning: is_nan() expects parameter 1 to be double, string given in %s/bad_coercion.php on line %d

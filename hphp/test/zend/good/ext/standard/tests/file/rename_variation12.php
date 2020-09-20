@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
  * Description: Rename a file 
  * Source code: ext/standard/file.c
@@ -6,11 +6,12 @@
  */
 
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rename() with absolute and relative paths ***\n";
 $mainDir = "renameVar11";
 $subDir = "renameVar11Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+
+$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
@@ -19,9 +20,9 @@ $fromFile = "renameMe.tmp";
 $toFile = "IwasRenamed.tmp";
 
 $old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__SystemLib\hphp_test_tmproot());
 
-$allDirs = array(
+$allDirs = varray[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -37,7 +38,7 @@ $allDirs = array(
    $mainDir."///".$subDir, 
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",  
-);
+];
 
 for($i = 0; $i<count($allDirs); $i++) {
   $j = $i+1;
@@ -58,4 +59,4 @@ rmdir($absSubDir);
 rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
-?>
+}

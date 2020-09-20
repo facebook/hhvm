@@ -2,12 +2,9 @@
 
 -- Testing bin2hex() function with no arguments --
 
-Warning: %s
-NULL
+Warning: bin2hex() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/strings/bin2hex_error.php on line 11
 
 -- Testing bin2hex() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
- 
+Warning: bin2hex() expects exactly 1 parameter, 2 given in %s/test/zend/good/ext/standard/tests/strings/bin2hex_error.php on line 15
 ===DONE===

@@ -2,6 +2,6 @@
 
 -- Testing mb_substr_count() function with an unknown encoding --
 
-Warning: %s
+Warning: Unknown encoding "unknown-encoding" in %s/mb_substr_count_error2.php on line 18
 bool(false)
 Done

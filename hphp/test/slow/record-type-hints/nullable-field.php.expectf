@@ -1,0 +1,8 @@
+NULL
+dict(1) {
+  ["a"]=>
+  int(42)
+}
+
+Catchable fatal error: Record field 'A::y' declared as type int, null assigned in %s/nullable-field.php on line 11
+

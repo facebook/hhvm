@@ -1,0 +1,8 @@
+File "explicit_type_collection_passing_keyset1.php", line 6, characters 3-13:
+  keyset<arraykey>
+File "explicit_type_collection_passing_keyset1.php", line 7, characters 7-8:
+Invalid argument (Typing[4110])
+File "explicit_type_collection_passing_keyset1.php", line 3, characters 21-23:
+Expected `int`
+File "explicit_type_collection_passing_keyset1.php", line 5, characters 15-22:
+But got `arraykey`

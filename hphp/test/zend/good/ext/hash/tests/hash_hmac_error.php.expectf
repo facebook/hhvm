@@ -1,23 +1,15 @@
 *** Testing hash_hmac() : error conditions ***
 
 -- Testing hash_hmac() function with less than expected no. of arguments --
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
+string(50) "hash_hmac() expects at least 3 parameters, 0 given"
+string(50) "hash_hmac() expects at least 3 parameters, 1 given"
+string(50) "hash_hmac() expects at least 3 parameters, 2 given"
 
 -- Testing hash_hmac() function with more than expected no. of arguments --
-
-Warning: %s
-NULL
+string(8) "96859101"
 
 -- Testing hash_hmac() function with invalid hash algorithm --
 
-Warning: %s
+Warning: Unknown hashing algorithm: foo in %s/hash_hmac_error.php on line 22
 bool(false)
 ===Done===

@@ -3,11 +3,11 @@
 // If anything breaks, it's should be easier to debug by running shell:
 // #export TRACE=objprof:3
 
-function get_instances(string $cls, ?array $objs) {
+function get_instances(string $cls, ?darray $objs) {
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "instances", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
 }
-function get_bytes_eq(string $cls, ?array $objs) {
+function get_bytes_eq(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   $bytes = get_bytes($cls, $objs);
   $bytesd = get_bytesd($cls, $objs);
@@ -16,13 +16,13 @@ function get_bytes_eq(string $cls, ?array $objs) {
   }
   return $bytes;
 }
-function get_bytes(string $cls, ?array $objs) {
+function get_bytes(string $cls, ?darray $objs) {
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, array()), "bytes", 0);
+  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
 }
-function get_bytesd(string $cls, ?array $objs) {
+function get_bytesd(string $cls, ?darray $objs) {
   if (!$objs) return 0;
-  return hphp_array_idx(hphp_array_idx($objs, $cls, array()),
+  return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
     "bytes_normalized", 0);
 }
 function getStr(int $len): string {
@@ -35,12 +35,6 @@ function getStr(int $len): string {
 
 // TEST: tracking works when enabled and not when disabled
 class EmptyClass {}
-$myClass = new EmptyClass();
-$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
-$emptyCount = get_instances("EmptyClass", $objs);
-$ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
-$myClass = null;
-$objs = null;
 
 
 // TEST: sizes of classes (including private props)
@@ -49,8 +43,60 @@ class SimpleProps { // 51:48
   protected int $prop2 = 2; // 16:16
   public bool $prop3 = true; // 16:16
 }
+
+
+// TEST: sizes of arrays
+class SimpleArrays {
+  public varray $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
+  public darray $arrMixed = darray[ // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
+    "somekey" => "someval", // 2 * (23:16) = 46:32
+    321 => 3, // 2 * (16:16) = 32:32
+  ];
+  public varray<int> $arrNums = varray[
+    2012, // 16:16
+    2013, // 16:16
+    2014 // 16:16
+  ]; // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
+}
+
+
+// TEST: sizes of dynamic props
+class DynamicClass {}
+class SharedStringClass {
+  public ?string $val_ref = null;
+  public function __construct(string $str) {
+    $this->val_ref = $str; // inc 2 + inc 3
+  }
+}
+
+
+class ExlcudeClass {}
+class SimpleClassForExclude {
+  public Map<string,mixed> $map;
+  public ExlcudeClass $fooCls1;
+  public ExlcudeClass $fooCls2;
+  public function __construct() {
+    $this->map = Map{ // $MapSize + 39:36 + 43:40
+      'foo' => getStr(4), // 19:16 + 20:20 = 39:36
+      'bar' => getStr(8), // 19:16 + 24:24 = 43:40
+    };
+    $this->fooCls1 = new ExlcudeClass(); // $ObjSize
+    $this->fooCls2 = new ExlcudeClass(); // $ObjSize
+  }
+}
+
+<<__EntryPoint>>
+function main_objprof_props() {
+$myClass = new EmptyClass();
+$objs = objprof_get_data(OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
+$emptyCount = get_instances("EmptyClass", $objs);
+$ObjSize = get_bytes("EmptyClass", $objs) / $emptyCount;
+$myClass = null;
+$objs = null;
 $myClass = new SimpleProps();
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleProps::prop1', $objs) == 1 &&
      get_instances('SimpleProps::prop2', $objs) == 1 &&
      get_instances('SimpleProps::prop3', $objs) == 1 &&
@@ -64,23 +110,9 @@ echo get_instances('SimpleProps::prop1', $objs) == 1 &&
       "(BAD) Bytes (props) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
 $objs = null;
-
-
-// TEST: sizes of arrays
-class SimpleArrays {
-  public array $arrEmpty = array(); // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = array( // 16 (tv) + 16 (ArrayData) + 46 + 32 = 110
-    "somekey" => "someval", // 2 * (23:16) = 46:32
-    321 => 3, // 2 * (16:16) = 32:32
-  );
-  public array<int> $arrNums = array(
-    2012, // 16:16
-    2013, // 16:16
-    2014 // 16:16
-  ); // 16 (tv) + 16 (ArrayData) + (16 * 3) = 80
-}
 $myClass = new SimpleArrays();
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleArrays::arrEmpty', $objs) == 1 &&
      get_instances('SimpleArrays::arrMixed', $objs) == 1 &&
      get_instances('SimpleArrays::arrNums', $objs) == 1 &&
@@ -94,16 +126,13 @@ echo get_instances('SimpleArrays::arrEmpty', $objs) == 1 &&
       "(BAD) Bytes (arrays) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
 $objs = null;
-
-
-// TEST: sizes of dynamic props
-class DynamicClass {}
 $myClass = new DynamicClass();
 $dynamic_field = 'abcd'; // 20:16
 $dynamic_field2 = 1234;  // 20:16 (dynamic properties - always string)
 $myClass->$dynamic_field = 1; // 16:16
 $myClass->$dynamic_field2 = 1; // 16:16
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('DynamicClass::abcd', $objs) == 1 &&
      get_instances('DynamicClass::1234', $objs) == 1 &&
      get_bytes('DynamicClass::abcd', $objs) == 36 &&
@@ -117,6 +146,7 @@ $objs = null;
 
 $myClass = Map{};
 $MapSize = get_bytes('HH\Map', objprof_get_data(OBJPROF_FLAGS_DEFAULT));
+__hhvm_intrinsics\launder_value($myClass);
 
 // TEST: map with int and string keys (Mixed). DEFAULT mode.
 $myClass = Map {
@@ -125,6 +155,7 @@ $myClass = Map {
   1234123 => 3 // 32:32
 };
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Map::abc', $objs) == 1 &&
      get_instances('HH\Map::1', $objs) == 1 &&
      get_instances('HH\Map::1234123', $objs) == 1 &&
@@ -148,6 +179,7 @@ $myClass = Map {
 };
 $objs =
   objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY | OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Map::abc', $objs) == 0 &&
      get_instances('HH\Map::1', $objs) == 0 &&
      get_instances('HH\Map::1234123', $objs) == 0 ?
@@ -163,6 +195,7 @@ $myClass = Vector {
   1, // 16:16
 };
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Vector::<index>', $objs) == 2 &&
      get_bytes('HH\Vector::<index>', $objs) == 35 &&
      get_bytesd('HH\Vector::<index>', $objs) == 32 ?
@@ -179,6 +212,7 @@ $myClass = Vector {
 };
 $objs =
   objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY | OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('HH\Vector::0', $objs) == 0 &&
      get_instances('HH\Vector::1', $objs) == 0 ?
       "(GOOD) Bytes (Vector) works in USER_TYPES_ONLY mode\n" :
@@ -189,15 +223,12 @@ $objs = null;
 
 // TEST: multiple ref counted strings
 $mystr = getStr(9); // inc 1, 25:16
-class SharedStringClass {
-  public string $val_ref = null;
-  public function __construct(string $str) {
-    $this->val_ref = $str; // inc 2 + inc 3
-  }
-}
 $myClass = new SharedStringClass($mystr);
 $myClass2 = new SharedStringClass($mystr);
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($mystr);
+__hhvm_intrinsics\launder_value($myClass);
+__hhvm_intrinsics\launder_value($myClass2);
 echo get_instances('SharedStringClass::val_ref', $objs) == 2 &&
      get_bytes('SharedStringClass::val_ref', $objs) == (25*2) &&
      get_bytesd('SharedStringClass::val_ref', $objs) == (16*2 + (9/3)*2) ?
@@ -206,24 +237,9 @@ echo get_instances('SharedStringClass::val_ref', $objs) == 2 &&
 $myClass = null;
 $myClass2 = null;
 $objs = null;
-
-
-class ExlcudeClass {}
-class SimpleClassForExclude {
-  public Map<string,mixed> $map;
-  public ExlcudeClass $fooCls1;
-  public ExlcudeClass $fooCls2;
-  public function __construct() {
-    $this->map = Map{ // $MapSize + 39:36 + 43:40
-      'foo' => getStr(4), // 19:16 + 20:20 = 39:36
-      'bar' => getStr(8), // 19:16 + 24:24 = 43:40
-    };
-    $this->fooCls1 = new ExlcudeClass(); // $ObjSize
-    $this->fooCls2 = new ExlcudeClass(); // $ObjSize
-  }
-}
 $myClass = new SimpleClassForExclude();
 $objs = objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
      get_instances('SimpleClassForExclude::fooCls1', $objs) == 1 &&
      get_instances('SimpleClassForExclude::fooCls2', $objs) == 1 &&
@@ -247,6 +263,7 @@ $objs = null;
 $myClass = new SimpleClassForExclude();
 $objs =
   objprof_get_data(OBJPROF_FLAGS_PER_PROPERTY | OBJPROF_FLAGS_USER_TYPES_ONLY);
+__hhvm_intrinsics\launder_value($myClass);
 echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
      get_instances('SimpleClassForExclude::fooCls1', $objs) == 1 &&
      get_instances('SimpleClassForExclude::fooCls2', $objs) == 1 &&
@@ -260,3 +277,4 @@ echo get_instances('SimpleClassForExclude::map', $objs) == 1 &&
       "(BAD) Bytes (Mixed Map) failed: " . var_export($objs, true) . "\n";
 $myClass = null;
 $objs = null;
+}

@@ -1,194 +1,194 @@
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(1)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(1)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(1)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(1)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(1)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(1)
-  [4]=>
+  ["4"]=>
   float(-20)
-  [5]=>
+  ["5"]=>
   float(-20)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(1)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(1)
-  [4]=>
+  ["4"]=>
   float(2147483392)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(1)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(1)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 14
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 17
 bool(false)
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 16
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 19
 bool(false)
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(0)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(0)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
-  float(0)
-}
-array(6) {
-  [0]=>
-  float(0)
-  [1]=>
-  float(0)
-  [2]=>
-  float(0)
-  [3]=>
-  float(0)
-  [4]=>
-  float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
+  float(0)
+  ["1"]=>
+  float(0)
+  ["2"]=>
+  float(0)
+  ["3"]=>
+  float(0)
+  ["4"]=>
+  float(0)
+  ["5"]=>
+  float(0)
+}
+darray(6) {
+  ["0"]=>
   float(-20)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(-20)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(2147483392)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(0)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(0)
-  [1]=>
+  ["1"]=>
   float(0)
-  [2]=>
+  ["2"]=>
   float(0)
-  [3]=>
+  ["3"]=>
   float(0)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 28
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 31
 bool(false)
 
-Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 30
+Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 33
 bool(false)
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(0.99984769515639)
-  [1]=>
+  ["1"]=>
   float(0.017452406437284)
-  [2]=>
+  ["2"]=>
   float(-0.017452406437284)
-  [3]=>
+  ["3"]=>
   float(0.99984769515639)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
-  float(0)
-}
-array(6) {
-  [0]=>
-  float(1)
-  [1]=>
-  float(0)
-  [2]=>
-  float(0.017455064928218)
-  [3]=>
-  float(1)
-  [4]=>
-  float(0)
-  [5]=>
+  ["5"]=>
   float(0)
 }
-array(6) {
-  [0]=>
+darray(6) {
+  ["0"]=>
   float(1)
-  [1]=>
+  ["1"]=>
+  float(0)
+  ["2"]=>
   float(0.017455064928218)
-  [2]=>
-  float(0)
-  [3]=>
+  ["3"]=>
   float(1)
-  [4]=>
+  ["4"]=>
   float(0)
-  [5]=>
+  ["5"]=>
+  float(0)
+}
+darray(6) {
+  ["0"]=>
+  float(1)
+  ["1"]=>
+  float(0.017455064928218)
+  ["2"]=>
+  float(0)
+  ["3"]=>
+  float(1)
+  ["4"]=>
+  float(0)
+  ["5"]=>
   float(0)
 }

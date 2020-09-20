@@ -1,25 +1,4 @@
-<?php
-
-$xmlstr = "<?xml version='1.0' standalone='yes'?>
-<!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
-[ <!ENTITY sp \"spanish\">
-]>
-<!-- lsfj  -->
-<chapter language='en'><title language='en'>Title</title>
-<para language='ge'>
-&sp;
-<!-- comment -->
-<informaltable language='&sp;kkk'>
-<tgroup cols='3'>
-<tbody>
-<row><entry>a1</entry><entry morerows='1'>b1</entry><entry>c1</entry></row>
-<row><entry>a2</entry><entry>c2</entry></row>
-<row><entry>a3</entry><entry>b3</entry><entry>c3</entry></row>
-</tbody>
-</tgroup>
-</informaltable>
-</para>
-</chapter> ";
+<?hh
 
 function print_node($node)
 {
@@ -50,6 +29,30 @@ function print_node_list($nodelist)
     print_node($node);
   }
 }
+
+
+<<__EntryPoint>>
+function main_1672() {
+$xmlstr = "<?xml version='1.0' standalone='yes'?>
+<!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'
+[ <!ENTITY sp \"spanish\">
+]>
+<!-- lsfj  -->
+<chapter language='en'><title language='en'>Title</title>
+<para language='ge'>
+&sp;
+<!-- comment -->
+<informaltable language='&sp;kkk'>
+<tgroup cols='3'>
+<tbody>
+<row><entry>a1</entry><entry morerows='1'>b1</entry><entry>c1</entry></row>
+<row><entry>a2</entry><entry>c2</entry></row>
+<row><entry>a3</entry><entry>b3</entry><entry>c3</entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</chapter> ";
 
 echo "Test 1: accessing single nodes from php
 ";
@@ -154,3 +157,4 @@ print_node($children->item(0));
 $rootnode->removeChild($children->item(0));
 print_node_list($rootnode->childNodes);
 print $dom->savexml();
+}

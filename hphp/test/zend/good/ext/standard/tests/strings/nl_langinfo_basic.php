@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /* Prototype  : string nl_langinfo  ( int $item  )
  * Description: Query language and locale information
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl_langinfo() : basic functionality ***\n";
 
 $original = setlocale(LC_ALL, 'C');
@@ -16,5 +16,5 @@ var_dump(nl_langinfo(MON_4));
 var_dump(nl_langinfo(RADIXCHAR));
 
 setlocale(LC_ALL, $original); 
-?>
-===DONE===
+echo "===DONE===\n";
+}

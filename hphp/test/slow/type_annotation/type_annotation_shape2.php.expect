@@ -1,17 +1,16 @@
 string(18) "HH\Set<HH\shape()>"
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Set"
   ["generic_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      array(0) {
+      darray(0) {
       }
     }
   }

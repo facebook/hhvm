@@ -1,9 +1,4 @@
-File "subsume_tconst5.php", line 8, characters 16-28:
-Class FullyAbstract does not correctly implement all required methods  (Typing[4142])
-File "subsume_tconst5.php", line 8, characters 38-54:
-Some methods are incompatible with those declared in type PartiallyAbstract
-Read the following to see why:
 File "subsume_tconst5.php", line 9, characters 23-24:
-Cannot re-declare this type constant as abstract
+Cannot re-declare this type constant as abstract (Typing[4142])
 File "subsume_tconst5.php", line 5, characters 14-15:
 Previously defined here

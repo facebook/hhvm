@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/util/managed-arena.h"
 #include "hphp/util/process.h"
 
 #include <algorithm>
@@ -29,9 +28,9 @@
 #include <sstream>
 #include <string>
 
-#include <folly/portability/Unistd.h>
-
 namespace HPHP {
+
+decltype(MemoryStats::s_allocSizes) MemoryStats::s_allocSizes;
 
 void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   std::ostringstream out;
@@ -41,33 +40,37 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   } else if (format == Writer::Format::HTML) {
     w.reset(new HTMLWriter(out));
   } else {
-    assert(format == Writer::Format::JSON);
+    assertx(format == Writer::Format::JSON);
     w.reset(new JSONWriter(out));
   }
 
   w->writeFileHeader();
 
-  MemStatus procStatus;                 // read /proc/self/status
-  if (!procStatus.valid()) {
+  ProcStatus::update();
+  if (!ProcStatus::valid()) {
     w->writeFileFooter();
     return;
   }
-  // Subtract unused size in hugetlb arenas
-#ifdef USE_JEMALLOC_EXTENT_HOOKS
-  auto const unused = ManagedArena::totalUnusedSize();
-  procStatus.registerUnused(unused >> 10); // convert to kB
-#endif
   w->beginObject("Memory");
 
-  w->writeEntry("VmSize", procStatus.VmSize);
-  w->writeEntry("VmRSS", procStatus.VmRSS);
-  w->writeEntry("PeakUsage", procStatus.VmHWM);
-  w->writeEntry("HugetlbPages", procStatus.HugetlbPages);
-  w->writeEntry("adjustedRSS", procStatus.adjustedRSS);
+  w->writeEntry("VmSize", ProcStatus::VmSizeKb.load(std::memory_order_relaxed));
+  w->writeEntry("VmRSS", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
+  w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
+  w->writeEntry("PeakUsage",
+                ProcStatus::VmHWMKb.load(std::memory_order_relaxed));
+  w->writeEntry("VmSwap", ProcStatus::VmSwapKb.load(std::memory_order_relaxed));
+  w->writeEntry("HugetlbPages",
+                ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed));
+  w->writeEntry("adjustedRSS", ProcStatus::adjustedRssKb());
+  w->writeEntry("mem.rss_adjusted", ProcStatus::adjustedRssKb());
 
-  // static string stats
   w->writeEntry("static_string_count", makeStaticStringCount());
-  w->writeEntry("static_string_size", GetStaticStringSize());
+  w->writeEntry("static_string_size", totalSize(AllocKind::StaticString));
+  w->writeEntry("static_array_count", loadedStaticArrayCount());
+  w->writeEntry("static_array_size", totalSize(AllocKind::StaticArray));
+  w->writeEntry("unit_size", totalSize(AllocKind::Unit));
+  w->writeEntry("class_size", totalSize(AllocKind::Class));
+  w->writeEntry("func_size", totalSize(AllocKind::Func));
 
   w->endObject("Memory");
   w->writeFileFooter();
@@ -76,20 +79,4 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   return;
 }
 
-MemoryStats* MemoryStats::GetInstance() {
-  static MemoryStats s_memoryStats;
-  return &s_memoryStats;
-}
-
-void MemoryStats::ResetStaticStringSize() {
-  m_staticStringSize.store(0);
-}
-
-void MemoryStats::LogStaticStringAlloc(size_t bytes) {
-  m_staticStringSize += bytes;
-}
-
-size_t MemoryStats::GetStaticStringSize() {
-  return m_staticStringSize.load();
-}
 }

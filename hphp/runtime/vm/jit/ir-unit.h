@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IR_UNIT_H_
-#define incl_HPHP_IR_UNIT_H_
+#pragma once
 
+#include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -85,7 +85,8 @@ struct IRUnit {
   /*
    * Construct an IRUnit with a single, empty entry Block.
    */
-  explicit IRUnit(TransContext context);
+  explicit IRUnit(TransContext context,
+                  std::unique_ptr<AnnotationData> = nullptr);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -156,9 +157,8 @@ struct IRUnit {
   // TODO(#3538578): The above should return `const Block*'.
 
   /*
-   * Starting positions, from the TransContext.
+   * Starting position, from the TransContext.
    */
-  uint32_t bcOff() const;
   SrcKey initSrcKey() const;
 
   /*
@@ -189,13 +189,6 @@ struct IRUnit {
    * instruction on the entry block.
    */
   SSATmp* mainFP() const;
-
-  /*
-   * Return the main StkPtr for the unit.  This is the result of the DefSP
-   * instruction on the entry block. (note that tere should be no other stack
-   * pointers in the unit).
-   */
-  SSATmp* mainSP() const;
 
   /*
    * Return the "start" timestamp when this IRUnit was constructed.
@@ -233,9 +226,10 @@ struct IRUnit {
   SSATmp* cns(Type type);
 
   /*
-   * Create a DefLabel instruction.
+   * Create a DefLabel with `numDst` dests at the start of `block`.
    */
-  IRInstruction* defLabel(unsigned numDst, BCContext bcctx);
+  IRInstruction* defLabel(unsigned numDst, Block* block,
+                          const BCContext& bcctx);
 
   /*
    * Add some extra destinations to a defLabel.
@@ -248,12 +242,8 @@ struct IRUnit {
   void expandJmp(IRInstruction* jmp, SSATmp* value);
 
   /////////////////////////////////////////////////////////////////////////////
-
-  /*
-   * For prologue contexts, the address of the start of the prologue
-   * (ie the address after the prologue guard) gets written here.
-   */
-  TCA prologueStart{nullptr};
+  // Annotation data
+  std::unique_ptr<AnnotationData> annotationData;
 
 private:
   template<class... Args> SSATmp* newSSATmp(Args&&...);
@@ -281,12 +271,18 @@ private:
   // Default hint value for new blocks in this unit.
   Block::Hint m_defHint{Block::Hint::Neither};
 
-  // "Cursor" for IRInstructions in the current bytecode.  Managed externally.
-  uint16_t m_iroff{0};
-
   int64_t m_startNanos; // Timestamp at construction time.
   mutable folly::Optional<StructuredLogEntry> m_logEntry;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+inline tracing::Props traceProps(const IRUnit& u) {
+  return traceProps(u.context())
+    .add("num_tmps", u.numTmps())
+    .add("num_blocks", u.numBlocks())
+    .add("num_insts", u.numInsts());
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -298,13 +294,12 @@ std::string show(const IRUnit&);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Find and return a unique block that ends the unit at lastSk.
+ * Find and return a vector of blocks that end the unit at lastSk.
  *
- * If one cannot be found, abort, unless the unit has 0 main exits and 1 or
- * more blocks that end with Unreachable, in which case return nullptr. This
- * indicates regions that ended early due to type contradictions.
+ * The return may be an empty vector, which indicates that the region ended
+ * early, typically due to type contradictions or always throwing an error.
  */
-Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk);
+jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -312,4 +307,3 @@ Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk);
 
 #include "hphp/runtime/vm/jit/ir-unit-inl.h"
 
-#endif

@@ -1,6 +1,6 @@
-<?php 
+<?hh 
 /* $Id$ */
-
+<<__EntryPoint>> function main(): void {
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, TRUE);
 xmlwriter_set_indent_string($xw, '   ');
@@ -20,4 +20,4 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 $output = xmlwriter_flush($xw, true);
 print $output;
-?>
+}

@@ -1,7 +1,7 @@
-<?php
+<?hh
 function start_elem($parser,$name,$attribs) {
-	print "$name ";
-    
+    print "$name ";
+
     foreach($attribs as $key => $value) {
         print "$key = $value ";
     }
@@ -10,7 +10,7 @@ function start_elem($parser,$name,$attribs) {
 function end_elem()
 {
 }
-
+<<__EntryPoint>> function main(): void {
 $xml = <<<HERE
 <a xmlns="http://example.com/foo"
     xmlns:bar="http://example.com/bar">
@@ -24,4 +24,4 @@ xml_set_element_handler($parser,'start_elem','end_elem');
 xml_parser_set_option($parser,XML_OPTION_CASE_FOLDING,0);
 xml_parse($parser, $xml);
 xml_parser_free($parser);
-?>
+}

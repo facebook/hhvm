@@ -16,27 +16,32 @@
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
-#include "hphp/runtime/vm/jit/irgen-ret.h"
-#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
+#include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
-#include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -52,74 +57,42 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 struct ParamPrep {
-  explicit ParamPrep(size_t count) : info(count) {}
+  explicit ParamPrep(size_t count, const Func* callee) : info{count} {}
+
+  void decRefParams(IRGS& env) const {
+    if (forNativeImpl) return;
+    if (ctx && ctx->type() <= TObj) {
+      decRef(env, ctx);
+    }
+    for (auto i = size(); i--;) {
+      decRef(env, info[i].value);
+    }
+  }
 
   struct Info {
     SSATmp* value{nullptr};
     bool passByAddr{false};
     bool needsConversion{false};
-    bool isOutputArg{false};
+    bool isInOut{false};
   };
 
   const Info& operator[](size_t idx) const { return info[idx]; }
   Info& operator[](size_t idx) { return info[idx]; }
   size_t size() const { return info.size(); }
 
-  SSATmp* thiz{nullptr};       // may be null if call is not a method
-  SSATmp* count{nullptr};      // if non-null, the count of arguments
+  // For free/class/instance methods, ctx is null/Class*/Object* respectively.
+  SSATmp* ctx{nullptr};
   jit::vector<Info> info;
   uint32_t numByAddr{0};
 
-  // if set, coerceFailure determines the target of a failed coercion;
-  // if not set, we side-exit to the next byte-code instruction (only
-  //   applies to an inlined NativeImpl, or an FCallBuiltin).
-  Block* coerceFailure{nullptr};
   bool forNativeImpl{false};
 };
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_is_a("is_a"),
-  s_is_subclass_of("is_subclass_of"),
-  s_method_exists("method_exists"),
-  s_count("count"),
-  s_sizeof("sizeof"),
-  s_ini_get("ini_get"),
-  s_86metadata("86metadata"),
-  s_set_frame_metadata("hh\\set_frame_metadata"),
-  s_in_array("in_array"),
-  s_get_class("get_class"),
-  s_get_called_class("get_called_class"),
-  s_sqrt("sqrt"),
-  s_strlen("strlen"),
-  s_clock_gettime_ns("clock_gettime_ns"),
-  s_microtime("microtime"),
-  s_max2("__SystemLib\\max2"),
-  s_min2("__SystemLib\\min2"),
-  s_ceil("ceil"),
-  s_floor("floor"),
-  s_abs("abs"),
-  s_ord("ord"),
-  s_chr("chr"),
-  s_func_num_args("func_num_args"),
-  s_array_key_cast("hh\\array_key_cast"),
-  s_one("1"),
-  s_empty("");
-
-//////////////////////////////////////////////////////////////////////
-
 // Will turn into either an int or a double in zend_convert_scalar_to_number.
 bool type_converts_to_number(Type ty) {
-  return ty.subtypeOfAny(
-    TDbl,
-    TInt,
-    TNull,
-    TObj,
-    TRes,
-    TStr,
-    TBool
-  );
+  return ty.subtypeOfAny(TDbl, TInt, TNull, TObj, TRes, TStr, TBool);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -129,38 +102,44 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
   env.irb->setCurMarker(makeMarker(env, nextBcOff(env)));
   env.irb->exceptionStackBoundary();
 
+  assertx(!env.irb->fs().stublogue());
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, nextBcOff(env)), exit);
   gen(env, BeginCatch);
-  for (auto i = params.size(); i--; ) {
-    decRef(env, params[i].value);
-  }
-  gen(env, EndCatch,
-      IRSPRelOffsetData { spOffBCFromIRSP(env) },
-      fp(env), sp(env));
+  params.decRefParams(env);
+  auto const data = EndCatchData {
+    spOffBCFromIRSP(env),
+    EndCatchData::CatchMode::UnwindOnly,
+    EndCatchData::FrameMode::Phplogue,
+    EndCatchData::Teardown::Full
+  };
+  gen(env, EndCatch, data, fp(env), sp(env));
   return exit;
 }
 
 SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
   if (params.size() != 3) return nullptr;
 
-  auto const allowString = params[2].value;
-  auto const classname   = params[1].value;
+  auto const allowClass  = params[2].value;
+  auto const cls_        = params[1].value;
   auto const obj         = params[0].value;
 
   if (!obj->isA(TObj) ||
-      !classname->hasConstVal(TStr) ||
-      !allowString->isA(TBool)) {
+      (!cls_->hasConstVal(TStr) && !cls_->isA(TCls)) ||
+      !allowClass->isA(TBool)) {
     return nullptr;
   }
 
   auto const objCls = gen(env, LdObjClass, obj);
 
-  auto const cls = Unit::lookupUniqueClassInContext(classname->strVal(),
-                                                    curClass(env));
-  if (!cls) return nullptr;
-
-  auto const testCls = cns(env, cls);
+  SSATmp* testCls = nullptr;
+  if (cls_->isA(TStr)) {
+    auto const cls = lookupUniqueClass(env, cls_->strVal());
+    if (!cls) return nullptr;
+    testCls = cns(env, cls);
+  } else {
+    testCls = cls_;
+  }
 
   // is_a() finishes here.
   if (!subclassOnly) return gen(env, InstanceOf, objCls, testCls);
@@ -202,11 +181,32 @@ SSATmp* opt_method_exists(IRGS& env, const ParamPrep& params) {
   return gen(env, MethodExists, cls, meth);
 }
 
+const StaticString
+  s_conv_clsmeth_to_varray("Implicit clsmeth to varray conversion"),
+  s_conv_clsmeth_to_vec("Implicit clsmeth to vec conversion");
+
+void raiseClsMethToVecWarningHelper(IRGS& env, const ParamPrep& params) {
+  if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
+    gen(
+      env,
+      RaiseNotice,
+      make_opt_catch(env, params),
+      cns(env, RuntimeOption::EvalHackArrDVArrs ?
+        s_conv_clsmeth_to_vec.get() : s_conv_clsmeth_to_varray.get())
+    );
+  }
+}
+
 SSATmp* opt_count(IRGS& env, const ParamPrep& params) {
   if (params.size() != 2) return nullptr;
 
   auto const mode = params[1].value;
   auto const val = params[0].value;
+
+  if (val->isA(TClsMeth)) {
+    raiseClsMethToVecWarningHelper(env, params);
+    return cns(env, 2);
+  }
 
   // Bail if we're trying to do a recursive count()
   if (!mode->hasConstVal(0)) return nullptr;
@@ -228,34 +228,6 @@ SSATmp* opt_ord(IRGS& env, const ParamPrep& params) {
     return gen(env, OrdStr, arg);
   }
 
-  if (params.forNativeImpl) return nullptr;
-
-  // In strict mode type mismatches won't be coerced (for legacy reasons in HH
-  // files builtins are always weak).
-  if (curFunc(env)->unit()->useStrictTypes() &&
-      !curFunc(env)->unit()->isHHFile() &&
-      !RuntimeOption::EnableHipHopSyntax) {
-    return nullptr;
-  }
-
-  // intercept constant, non-string ord() here instead of OrdStr simplify stage.
-  // OrdStr depends on a string as input for its vasm implementation.
-  if (arg->hasConstVal(TBool)) {
-    // ord((string)true)===ord("1"), ord((string)false)===ord("")
-    return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
-  }
-  if (arg_type <= TNull) {
-    return cns(env, int64_t{0});
-  }
-  if (arg->hasConstVal(TInt)) {
-    const auto conv = folly::to<std::string>(arg_type.intVal());
-    return cns(env, int64_t{conv[0]});
-  }
-  if (arg->hasConstVal(TDbl)) {
-    const auto conv = folly::to<std::string>(arg_type.dblVal());
-    return cns(env, int64_t{conv[0]});
-  }
-
   return nullptr;
 }
 
@@ -269,12 +241,6 @@ SSATmp* opt_chr(IRGS& env, const ParamPrep& params) {
   }
 
   return nullptr;
-}
-
-SSATmp* opt_func_num_args(IRGS& env, const ParamPrep& params) {
-  if (params.forNativeImpl) return nullptr;
-  if (params.size() != 0 || curFunc(env)->isPseudoMain()) return nullptr;
-  return gen(env, LdARNumParams, fp(env));
 }
 
 SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
@@ -295,7 +261,7 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
   // TC, but for non-system settings, we can optimize them as a load from the
   // known static address or thread-local address of where the setting lives.
   // This might be worth doing specifically for the zend.assertions setting,
-  // for which the emitter emits an ini_get around every call to assert().
+  // for which the emitter emits an ini_get around every call to assertx().
   auto const settingName = params[0].value->strVal()->toCppString();
   IniSetting::Mode mode = IniSetting::PHP_INI_NONE;
   if (!IniSetting::GetMode(settingName, mode)) {
@@ -318,10 +284,8 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
     return cns(env, makeStaticString(folly::to<std::string>(value.toInt64())));
   }
   if (value.isBoolean()) {
-    return cns(
-      env,
-      value.toBoolean() ? s_one.get() : s_empty.get()
-    );
+    static auto const s_one = makeStaticString("1");
+    return cns(env, value.toBoolean() ? s_one : staticEmptyString());
   }
   // ini_get() is now enhanced to return more than strings.
   // Get out of here if we are something else like an array.
@@ -329,8 +293,7 @@ SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
 }
 
 /*
- * Transforms in_array with a static haystack argument into an AKExistsArr with
- * the haystack flipped.
+ * Transforms in_array with a static haystack argument into an AKExistsKeyset.
  */
 SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
   if (params.size() != 3 && params.size() != 2) return nullptr;
@@ -338,7 +301,8 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
   // We will restrict this optimization to needles that are strings, and
   // haystacks that have only non-numeric string keys. This avoids a bunch of
   // complication around numeric-string array-index semantics.
-  if (!(params[0].value->type() <= TStr)) {
+  auto const needle = params[0].value;
+  if (!(needle->type() <= TStr)) {
     return nullptr;
   }
 
@@ -353,47 +317,36 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
     return cns(env, false);
   }
 
-  ArrayInit flipped{haystack->size(), ArrayInit::Map{}};
+  KeysetInit flipped{haystack->size()};
+  bool failed{false};
+  IterateVNoInc(
+    haystack,
+    [&](TypedValue key) {
 
-  for (auto iter = ArrayIter{haystack}; iter; ++iter) {
-    auto const key = iter.secondRval().unboxed();
-    int64_t ignoredInt;
-    double ignoredDbl;
+      if (!isStringType(type(key)) || val(key).pstr->isNumeric()) {
+        // Numeric strings will complicate matters because the loose comparisons
+        // done with array keys are not quite the same as loose comparisons done
+        // by in_array. For example: in_array('0', array('0000')) is true, but
+        // doing array('0000' => true)['0'] will say "undefined index".
+        // This seems unlikely to affect real-world usage.
+        failed = true;
+        return true;
+      }
 
-    if (!isStringType(key.type()) ||
-        key.val().pstr
-          ->isNumericWithVal(ignoredInt, ignoredDbl, false) != KindOfNull) {
-      // Numeric strings will complicate matters because the loose comparisons
-      // done with array keys are not quite the same as loose comparisons done
-      // by in_array. For example: in_array('0', array('0000')) is true, but
-      // doing array('0000' => true)['0'] will say "undefined index". This seems
-      // unlikely to affect real-world usage.
-      return nullptr;
+      flipped.add(val(key).pstr);
+      return false;
     }
-
-    flipped.set(StrNR(key.val().pstr), init_null_variant);
+  );
+  if (failed) {
+    return nullptr;
   }
 
-  auto const needle = params[0].value;
-  auto array = flipped.toArray();
-  if (RuntimeOption::EvalHackArrCompatNotices) {
-    // AKExistsArr can throw with HackArrCompatNotices enabled, so we need to
-    // manually provide a catch trace.
-    return gen(
-      env,
-      AKExistsArr,
-      make_opt_catch(env, params),
-      cns(env, ArrayData::GetScalarArray(std::move(array))),
-      needle
-    );
-  } else {
-    return gen(
-      env,
-      AKExistsArr,
-      cns(env, ArrayData::GetScalarArray(std::move(array))),
-      needle
-    );
-  }
+  return gen(
+    env,
+    AKExistsKeyset,
+    cns(env, ArrayData::GetScalarArray(flipped.toArray())),
+    needle
+  );
 }
 
 SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
@@ -401,12 +354,16 @@ SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
   auto const curName = [&] {
     return curCls != nullptr ? cns(env, curCls->name()) : nullptr;
   };
-  if (params.size() == 0) return curName();
+  if (params.size() == 0 && RuntimeOption::EvalGetClassBadArgument == 0) {
+    return curName();
+  }
   if (params.size() != 1) return nullptr;
 
   auto const val = params[0].value;
   auto const ty  = val->type();
-  if (ty <= TNull) return curName();
+  if (ty <= TNull && RuntimeOption::EvalGetClassBadArgument == 0) {
+    return curName();
+  }
   if (ty <= TObj) {
     auto const cls = gen(env, LdObjClass, val);
     return gen(env, LdClsName, cls);
@@ -415,13 +372,13 @@ SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_get_called_class(IRGS& env, const ParamPrep& params) {
-  if (params.forNativeImpl) return nullptr;
-  if (params.size() != 0) return nullptr;
-  if (!curClass(env)) return nullptr;
-  auto const ctx = ldCtx(env);
-  auto const cls = gen(env, LdClsCtx, ctx);
-  return gen(env, LdClsName, cls);
+SSATmp* opt_class_get_class_name(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->type() <= TCls) {
+    return gen(env, LdClsName, value);
+  }
+  return nullptr;
 }
 
 SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
@@ -430,10 +387,6 @@ SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   auto const ty  = val->type();
   if (ty <= TDbl) return gen(env, Sqrt, val);
-  if (ty <= TInt) {
-    auto const conv = gen(env, ConvIntToDbl, val);
-    return gen(env, Sqrt, conv);
-  }
   return nullptr;
 }
 
@@ -445,18 +398,6 @@ SSATmp* opt_strlen(IRGS& env, const ParamPrep& params) {
 
   if (ty <= TStr) {
     return gen(env, LdStrLen, val);
-  }
-
-  if (ty <= TNull) return cns(env, 0);
-  if (ty <= TBool) return gen(env, ConvBoolToInt, val);
-
-  if (ty.subtypeOfAny(TInt, TDbl)) {
-    auto str = ty <= TInt
-      ? gen(env, ConvIntToStr, val)
-      : gen(env, ConvDblToStr, val);
-    auto len = gen(env, LdStrLen, str);
-    decRef(env, str);
-    return len;
   }
 
   return nullptr;
@@ -525,7 +466,7 @@ SSATmp* opt_ceil(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   if (!type_converts_to_number(val->type())) return nullptr;
   // May throw
-  auto const dbl = gen(env, ConvCellToDbl, make_opt_catch(env, params), val);
+  auto const dbl = gen(env, ConvTVToDbl, make_opt_catch(env, params), val);
   return gen(env, Ceil, dbl);
 }
 
@@ -535,7 +476,7 @@ SSATmp* opt_floor(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   if (!type_converts_to_number(val->type())) return nullptr;
   // May throw
-  auto const dbl = gen(env, ConvCellToDbl, make_opt_catch(env, params), val);
+  auto const dbl = gen(env, ConvTVToDbl, make_opt_catch(env, params), val);
   return gen(env, Floor, dbl);
 }
 
@@ -556,26 +497,9 @@ SSATmp* opt_abs(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  if (params.forNativeImpl) return nullptr;
-  auto func = curFunc(env);
-  if (func->isPseudoMain() || (func->attrs() & AttrMayUseVV)) return nullptr;
-  auto const local = func->lookupVarId(s_86metadata.get());
-  if (local == kInvalidId) return nullptr;
-  auto oldVal = ldLoc(env, local, nullptr, DataTypeBoxAndCountness);
-  auto newVal = params[0].value;
-  stLocRaw(env, local, fp(env), newVal);
-  decRef(env, oldVal);
-  gen(env, IncRef, newVal);
-  return cns(env, TInitNull);
-}
-
 SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
-
-  env.irb->constrainValue(value, DataTypeSpecific);
 
   if (value->isA(TInt))  return value;
   if (value->isA(TNull)) return cns(env, staticEmptyString());
@@ -587,16 +511,134 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
+                                bool getName) {
+  if (params.size() != 2) return nullptr;
+  auto const clsNameTmp = params[0].value;
+  auto const cnsNameTmp = params[1].value;
+
+  if (!clsNameTmp->isA(TStr)) return nullptr;
+  if (!cnsNameTmp->hasConstVal(TStaticStr)) return nullptr;
+  auto const cnsName = cnsNameTmp->strVal();
+
+  auto const clsTmp = [&] () -> SSATmp* {
+    if (clsNameTmp->inst()->is(LdClsName)) {
+      return clsNameTmp->inst()->src(0);
+    }
+    return ldCls(env, clsNameTmp, make_opt_catch(env, params));
+  }();
+
+  if (!clsTmp->type().clsSpec()) return nullptr;
+  auto const cls = clsTmp->type().clsSpec().cls();
+
+  auto const cnsSlot = cls->clsCnsSlot(cnsName, true, true);
+  if (cnsSlot == kInvalidSlot) return nullptr;
+
+  auto const data = LdSubClsCnsData { cnsName, cnsSlot };
+  if (!getName) {
+    auto const ptr = gen(env, LdSubClsCns, data, clsTmp);
+    return cond(
+      env,
+      [&] (Block* taken) {
+        gen(env, CheckTypeMem, TUncountedInit, taken, ptr);
+        return gen(env, LdTypeCns, taken, gen(env, LdMem, TUncountedInit, ptr));
+      },
+      [&] (SSATmp* cns) { return cns; },
+      [&] /* taken */ {
+        return gen(
+          env, LdClsTypeCns, make_opt_catch(env, params), clsTmp, cnsNameTmp
+        );
+      }
+    );
+  }
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const clsNameFromTS = gen(env, LdSubClsCnsClsName, data, clsTmp);
+      return gen(env, CheckNonNull, taken, clsNameFromTS);
+    },
+    [&] (SSATmp* s) { return s; },
+    [&] {
+      return gen(
+        env,
+        LdClsTypeCnsClsName,
+        make_opt_catch(env, params),
+        clsTmp,
+        cnsNameTmp
+      );
+    }
+  );
+}
+
+SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
+  return impl_opt_type_structure(env, params, false);
+}
+SSATmp* opt_type_structure_classname(IRGS& env, const ParamPrep& params) {
+  return impl_opt_type_structure(env, params, true);
+}
+
+SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const type = params[0].value->type();
+  if (type <= TClsMeth) {
+    raiseClsMethToVecWarningHelper(env, params);
+    return cns(env, true);
+  }
+  if (!type.maybe(TArrLike)) return cns(env, false);
+  if (type.subtypeOfAny(TVArr, TVec)) return cns(env, true);
+  return nullptr;
+}
+
+SSATmp* opt_is_vec_or_varray(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const type = params[0].value->type();
+
+  if (type.subtypeOfAny(TVec, TVArr)) {
+    return cns(env, true);
+  }
+
+  if (type <= TClsMeth && RO::EvalIsCompatibleClsMethType) {
+    if (RO::EvalIsVecNotices) {
+      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC_OR_VARR);
+      gen(env, RaiseNotice, make_opt_catch(env, params), cns(env, msg));
+    }
+    return cns(env, true);
+  }
+
+  if (!type.maybe(TVec) && !type.maybe(TVArr) &&
+      !(type.maybe(TClsMeth) && RO::EvalIsCompatibleClsMethType)) {
+    return cns(env, false);
+  }
+
+  return nullptr;
+}
+
+SSATmp* opt_is_dict_or_darray(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const type = params[0].value->type();
+
+  if (type.subtypeOfAny(TDict, TDArr)) {
+    return cns(env, true);
+  }
+
+  if (!type.maybe(TDict) && !type.maybe(TDArr)) {
+    return cns(env, false);
+  }
+
+  return nullptr;
+}
+
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
                      uint32_t numNonDefaultArgs) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (!func->isFoldable()) return nullptr;
 
   const Class* cls = nullptr;
   if (func->isMethod()) {
-    if (!params.thiz || !func->isStatic()) return nullptr;
-    cls = params.thiz->type().clsSpec().exactCls();
+    if (!params.ctx || !func->isStatic()) return nullptr;
+    cls = params.ctx->type().clsSpec().exactCls();
     if (!cls) return nullptr;
   }
 
@@ -605,19 +647,22 @@ SSATmp* opt_foldable(IRGS& env,
   if (numNonDefaultArgs > func->numNonVariadicParams()) {
     assertx(params.size() == func->numParams());
     auto const variadic = params.info.back().value;
-    if (!variadic->type().hasConstVal()) return nullptr;
+    auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+    if (!variadic->type().hasConstVal(ty)) return nullptr;
 
     variadicArgs = variadic->variantVal().asCArrRef().get();
     numVariadicArgs = variadicArgs->size();
-    assertx(variadicArgs->isStatic() &&
-            (!numVariadicArgs || variadicArgs->hasPackedLayout()));
+
+    if (numVariadicArgs && !variadicArgs->isHAMSafeVArray()) return nullptr;
+
+    assertx(variadicArgs->isStatic());
     numNonDefaultArgs = func->numNonVariadicParams();
   }
 
   // Don't pop the args yet---if the builtin throws at compile time (because
   // it would raise a warning or something at runtime) we're going to leave
   // the call alone.
-  PackedArrayInit args(numNonDefaultArgs + numVariadicArgs);
+  VArrayInit args(numNonDefaultArgs + numVariadicArgs);
   for (auto i = 0; i < numNonDefaultArgs; ++i) {
     auto const t = params[i].value->type();
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
@@ -628,7 +673,7 @@ SSATmp* opt_foldable(IRGS& env,
   }
   if (variadicArgs) {
     for (auto i = 0; i < numVariadicArgs; i++) {
-      args.append(variadicArgs->get(i).tv());
+      args.append(variadicArgs->get(i));
     }
   }
 
@@ -645,19 +690,15 @@ SSATmp* opt_foldable(IRGS& env,
     // set to anything valid, so we need to do so here (for assertions and
     // backtraces in the invocation, among other things).
     auto const savedPC = vmpc();
-    vmpc() = vmfp() ? vmfp()->m_func->getEntry() : nullptr;
+    vmpc() = vmfp() ? vmfp()->func()->entry() : nullptr;
     SCOPE_EXIT{ vmpc() = savedPC; };
 
     assertx(!RID().getJitFolding());
     RID().setJitFolding(true);
     SCOPE_EXIT{ RID().setJitFolding(false); };
 
-    auto retVal = g_context->invokeFunc(func, args.toArray(),
-                                        nullptr, const_cast<Class*>(cls),
-                                        nullptr, nullptr,
-                                        ExecutionContext::InvokeNormal,
-                                        !func->unit()->useStrictTypes(),
-                                        false);
+    auto retVal = g_context->invokeFunc(func, args.toArray(), nullptr,
+                                        const_cast<Class*>(cls), false);
     SCOPE_EXIT { tvDecRefGen(retVal); };
     assertx(tvIsPlausible(retVal));
 
@@ -676,32 +717,31 @@ SSATmp* opt_foldable(IRGS& env,
         return cns(env, makeStaticString(retVal.m_data.pstr));
       case KindOfPersistentVec:
       case KindOfVec:
-        return cns(
-          env,
-          make_tv<KindOfPersistentVec>(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentVec>(scalar_array()));
       case KindOfPersistentDict:
       case KindOfDict:
-        return cns(
-          env,
-          make_tv<KindOfPersistentDict>(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentDict>(scalar_array()));
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        return cns(
-          env,
-          make_tv<KindOfPersistentKeyset>(scalar_array())
-        );
-      case KindOfPersistentArray:
-      case KindOfArray:
-        return cns(
-          env,
-          make_tv<KindOfPersistentArray>(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentKeyset>(scalar_array()));
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+        return cns(env, make_tv<KindOfPersistentDArray>(scalar_array()));
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        return cns(env, make_tv<KindOfPersistentVArray>(scalar_array()));
+      case KindOfLazyClass:
+        return cns(env, retVal.m_data.plazyclass.name());
       case KindOfUninit:
       case KindOfObject:
       case KindOfResource:
-      case KindOfRef:
+      case KindOfRFunc:
+      // TODO (T29639296)
+      case KindOfFunc:
+      case KindOfClass:
+      case KindOfClsMeth:
+      case KindOfRClsMeth:
+      case KindOfRecord: // TODO(arnabde)
         return nullptr;
     }
   } catch (...) {
@@ -709,6 +749,499 @@ SSATmp* opt_foldable(IRGS& env,
   }
   return nullptr;
 }
+
+/*
+* Container intrinsic for HH\traversable
+*/
+SSATmp* opt_container_first(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type.subtypeOfAny(TVArr, TVec)) {
+    auto const r = gen(env, VecFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  } else if (type.subtypeOfAny(TDArr, TDict)) {
+    auto const r = gen(env, DictFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  } else if (type <= TKeyset) {
+    auto const r = gen(env, KeysetFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+SSATmp* opt_container_last(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type.subtypeOfAny(TVArr, TVec)) {
+    auto const r = gen(env, VecLast, value);
+    gen(env, IncRef, r);
+    return r;
+  } else if (type.subtypeOfAny(TDArr, TDict)) {
+    auto const r = gen(env, DictLast, value);
+    gen(env, IncRef, r);
+    return r;
+  } else if (type <= TKeyset) {
+    auto const r = gen(env, KeysetLast, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+SSATmp* opt_container_first_key(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+
+  if (type.subtypeOfAny(TVArr, TVec)) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        auto const length = gen(env, CountVec, value);
+        gen(env, JmpZero, taken, length);
+      },
+      [&] { return cns(env, 0); },
+      [&] { return cns(env, TInitNull); }
+    );
+  } else if (type.subtypeOfAny(TDArr, TDict)) {
+    auto const r = gen(env, DictFirstKey, value);
+    gen(env, IncRef, r);
+    return r;
+  } else if (type <= TKeyset) {
+    auto const r = gen(env, KeysetFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+
+  if (type.subtypeOfAny(TVArr, TVec)) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        auto const length = gen(env, CountVec, value);
+        gen(env, JmpZero, taken, length);
+        return length;
+      },
+      [&] (SSATmp* next) { return gen(env, SubInt, next, cns(env, 1)); },
+      [&] { return cns(env, TInitNull); }
+    );
+  } else if (type.subtypeOfAny(TDArr, TDict)) {
+    auto const r = gen(env, DictLastKey, value);
+    gen(env, IncRef, r);
+    return r;
+  } else if (type <= TKeyset) {
+    auto const r = gen(env, KeysetLast, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+namespace {
+const StaticString
+  s_MCHELPER_ON_GET_CLS("MethCallerHelper is used on meth_caller_get_class()"),
+  s_MCHELPER_ON_GET_METH(
+    "MethCallerHelper is used on meth_caller_get_method()"),
+  s_BAD_ARG_ON_MC_GET_CLS(
+    "Argument 1 passed to meth_caller_get_class() must be a MethCaller"),
+  s_BAD_ARG_ON_MC_GET_METH(
+    "Argument 1 passed to meth_caller_get_method() must be a MethCaller"),
+  s_meth_caller_cls("__SystemLib\\MethCallerHelper"),
+  s_cls_prop("class"),
+  s_meth_prop("method");
+const Slot s_cls_idx{0};
+const Slot s_meth_idx{1};
+
+SSATmp* opt_fun_get_function(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type <= TFunc) {
+    return gen(env, LdFuncName, value);
+  }
+  return nullptr;
+}
+
+DEBUG_ONLY bool meth_caller_has_expected_prop(const Class *mcCls) {
+  return mcCls->lookupDeclProp(s_cls_prop.get()) == s_cls_idx &&
+        mcCls->lookupDeclProp(s_meth_prop.get()) == s_meth_idx &&
+        mcCls->declPropTypeConstraint(s_cls_idx).isString() &&
+        mcCls->declPropTypeConstraint(s_meth_idx).isString();
+}
+
+template<bool isCls>
+SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
+  if (value->isA(TFunc)) {
+    return cond(
+        env,
+        [&] (Block* taken) {
+          auto const attr = AttrData {static_cast<int32_t>(AttrIsMethCaller)};
+          auto isMC = gen(env, FuncHasAttr, attr, value);
+          gen(env, JmpZero, taken, isMC);
+        },
+        [&] {
+          return gen(env, LdMethCallerName, MethCallerData{isCls}, value);
+        },
+        [&] { // Taken: src is not a meth_caller
+          hint(env, Block::Hint::Unlikely);
+          updateMarker(env);
+          env.irb->exceptionStackBoundary();
+          gen(env, RaiseError, cns(env, isCls ?
+            s_BAD_ARG_ON_MC_GET_CLS.get() : s_BAD_ARG_ON_MC_GET_METH.get()));
+          // Dead-code, but needed to satisfy cond().
+          return cns(env, staticEmptyString());
+        }
+      );
+  }
+  if (value->isA(TObj)) {
+    auto loadProp = [&] (Class* cls, bool isGetCls, SSATmp* obj) {
+      auto const slot = isGetCls ? s_cls_idx : s_meth_idx;
+      auto const idx = cls->propSlotToIndex(slot);
+      auto const prop = gen(
+        env, LdPropAddr, IndexData{idx}, TStr.lval(Ptr::Prop), obj);
+      auto const ret = gen(env, LdMem, TStr, prop);
+      gen(env, IncRef, ret);
+      return ret;
+    };
+
+    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
+    assertx(mcCls && meth_caller_has_expected_prop(mcCls));
+    return cond(
+      env,
+      [&] (Block* taken) {
+        auto isMC = gen(
+          env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
+        gen(env, JmpZero, taken, isMC);
+      },
+      [&] {
+        if (RuntimeOption::EvalEmitMethCallerFuncPointers &&
+            RuntimeOption::EvalNoticeOnMethCallerHelperUse) {
+          updateMarker(env);
+          env.irb->exceptionStackBoundary();
+          auto const msg = cns(env, isCls ?
+            s_MCHELPER_ON_GET_CLS.get() : s_MCHELPER_ON_GET_METH.get());
+          gen(env, RaiseNotice, msg);
+        }
+        return loadProp(mcCls, isCls, value);
+      },
+      [&] { // Taken: src is not a meth_caller
+        hint(env, Block::Hint::Unlikely);
+        updateMarker(env);
+        env.irb->exceptionStackBoundary();
+        gen(env, RaiseError, cns(env, isCls ?
+          s_BAD_ARG_ON_MC_GET_CLS.get() : s_BAD_ARG_ON_MC_GET_METH.get()));
+        // Dead-code, but needed to satisfy cond().
+        return cns(env, staticEmptyString());
+      }
+    );
+  }
+  return nullptr;
+}
+}
+
+SSATmp* opt_class_meth_get_class(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->type() <= TClsMeth) {
+    return gen(env, LdClsName, gen(env, LdClsFromClsMeth, value));
+  }
+  return nullptr;
+}
+
+SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->type() <= TClsMeth) {
+    return gen(env, LdFuncName, gen(env, LdFuncFromClsMeth, value));
+  }
+  return nullptr;
+}
+
+SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
+  // We first check the number and types of each argument. If any check fails,
+  // we'll fall back to the native code which will raise an appropriate error.
+  auto const nparams = params.size();
+  if (nparams != 2 && nparams != 3) return nullptr;
+
+  // params[1] is an arraykey. We only optimize if it's narrowed to int or str.
+  auto const keyType = params[1].value->type();
+  if (!(keyType <= TInt || keyType <= TStr)) return nullptr;
+
+  // params[2] is an optional argument. If it's uninit, we convert it to null.
+  // We only optimize if we can distinguish between uninit and other types.
+  auto const defType = nparams == 3 ? params[2].value->type() : TUninit;
+  if (!(defType <= TUninit) && defType.maybe(TUninit)) return nullptr;
+  auto const def = defType <= TUninit ? cns(env, TInitNull) : params[2].value;
+
+  // params[0] is a ?darray, which may be a ?Dict or a ?DArr based on options.
+  auto const arrType = params[0].value->type();
+  if (!(RuntimeOption::EvalHackArrDVArrs ?
+        arrType <= TDict : arrType <= TDArr)) {
+    if (arrType <= TNull) {
+      gen(env, IncRef, def);
+      return def;
+    } else {
+      return nullptr;
+    }
+  }
+
+  // Do the array access, using array offset profiling to optimize it.
+  auto const arr = params[0].value;
+  auto const key = params[1].value;
+  // we might side-exit in profiledArrayAccess
+  env.irb->fs().incBCSPDepth(nparams);
+  auto const elm = profiledArrayAccess(
+    env, arr, key, MOpMode::None,
+    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
+      return gen(env, DictGetK, arr, key, pos);
+    },
+    [&] (SSATmp*) { return def; },
+    [&] (SSATmp* key, SizeHintData data) {
+      return gen(env, DictIdx, data, arr, key, def);
+    }
+  );
+  env.irb->fs().decBCSPDepth(nparams);
+
+  auto const finish = [&](SSATmp* val){
+    gen(env, IncRef, val);
+    return val;
+  };
+  return finish(profiledType(env, elm, [&] {
+    auto const cell = finish(elm);
+    params.decRefParams(env);
+    push(env, cell);
+  }));
+}
+
+const EnumValues* getEnumValues(IRGS& env, const ParamPrep& params) {
+  if (RO::EvalArrayProvenance) return nullptr;
+  if (!(params.ctx && params.ctx->hasConstVal(TCls))) return nullptr;
+  auto const cls = params.ctx->clsVal();
+  if (!(isEnum(cls) && classHasPersistentRDS(cls))) return nullptr;
+  return EnumCache::getValuesStatic(cls);
+}
+
+SSATmp* opt_enum_names(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
+  auto const enum_values = getEnumValues(env, params);
+  return enum_values ? cns(env, enum_values->names.get()) : nullptr;
+}
+
+SSATmp* opt_enum_values(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
+  auto const enum_values = getEnumValues(env, params);
+  return enum_values ? cns(env, enum_values->values.get()) : nullptr;
+}
+
+SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (!value->type().isKnownDataType()) return nullptr;
+  auto const enum_values = getEnumValues(env, params);
+  if (!enum_values) return nullptr;
+  auto const ad = MixedArray::asMixed(enum_values->names.get());
+  if (value->isA(TInt)) {
+    if (ad->keyTypes().mustBeStrs()) return cns(env, false);
+    return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);
+  } else if (value->isA(TStr)) {
+    // We're not doing intish-casts here, so we bail if ad has any int keys.
+    if (!ad->keyTypes().mustBeStrs()) return nullptr;
+    return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);
+  }
+  return cns(env, false);
+}
+
+SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
+  auto const valid = opt_enum_is_valid(env, params);
+  if (!valid) return nullptr;
+  return cond(env,
+    [&](Block* taken) { gen(env, JmpZero, taken, valid); },
+    [&]{
+      // We never need to coerce strs to ints here, but we may need to coerce
+      // ints to strs if the enum is a string type with intish values.
+      auto const value = params[0].value;
+      auto const isstr = isStringType(params.ctx->clsVal()->enumBaseTy());
+      if (value->isA(TInt) && isstr) return gen(env, ConvIntToStr, value);
+      gen(env, IncRef, value);
+      return value;
+    },
+    [&]{ return cns(env, TInitNull); }
+  );
+}
+
+SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
+
+  if (!(params.size() == 1 ||
+        (params.size() == 2 && params[1].value->isA(TInt)))) {
+    return nullptr;
+  }
+  auto const result = params[0].value;
+
+  auto emit_noop = [&]() {
+    gen(env, IncRef, result);
+    return result;
+  };
+
+  if (!RO::EvalArrayProvenance) {
+    return emit_noop();
+  }
+
+  if (!result->type().maybe(TArrLike)) {
+    return emit_noop();
+  }
+
+  return nullptr;
+}
+
+StaticString s_ARRAY_MARK_LEGACY_VEC(Strings::ARRAY_MARK_LEGACY_VEC);
+StaticString s_ARRAY_MARK_LEGACY_DICT(Strings::ARRAY_MARK_LEGACY_DICT);
+
+SSATmp* opt_array_mark_legacy(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (!RO::EvalHackArrDVArrs) {
+    if (value->isA(TVec)) {
+      gen(env,
+          RaiseWarning,
+          make_opt_catch(env, params),
+          cns(env, s_ARRAY_MARK_LEGACY_VEC.get()));
+    } else if (value->isA(TDict)) {
+      gen(env,
+          RaiseWarning,
+          make_opt_catch(env, params),
+          cns(env, s_ARRAY_MARK_LEGACY_DICT.get()));
+    }
+  }
+  if (value->isA(TVec)) {
+    return gen(env, SetLegacyVec, value);
+  } else if (value->isA(TDict)) {
+    return gen(env, SetLegacyDict, value);
+  }
+  return nullptr;
+}
+
+SSATmp* opt_array_unmark_legacy(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->isA(TVec)) {
+    return gen(env, UnsetLegacyVec, value);
+  } else if (value->isA(TDict)) {
+    return gen(env, UnsetLegacyDict, value);
+  }
+  return nullptr;
+}
+
+SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->isA(TFunc)) {
+    return gen(
+      env,
+      FuncHasAttr,
+      AttrData {static_cast<int32_t>(AttrIsMethCaller)},
+      value);
+  }
+  if (value->isA(TObj)) {
+    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
+    assertx(mcCls);
+    return gen(env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
+  }
+  return nullptr;
+}
+
+SSATmp* opt_meth_caller_get_class(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  return meth_caller_get_name<true>(env, params[0].value);
+}
+
+SSATmp* opt_meth_caller_get_method(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  return meth_caller_get_name<false>(env, params[0].value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Whitelists of builtins that we have optimized HHIR emitters for.
+// The first whitelist here simply lets us look up the functions above.
+
+using OptEmitFn = SSATmp* (*)(IRGS& env, const ParamPrep& params);
+
+const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
+  {"is_a", opt_is_a},
+  {"is_subclass_of", opt_is_subclass_of},
+  {"method_exists", opt_method_exists},
+  {"count", opt_count},
+  {"sizeof", opt_sizeof},
+  {"ini_get", opt_ini_get},
+  {"in_array", opt_in_array},
+  {"get_class", opt_get_class},
+  {"sqrt", opt_sqrt},
+  {"strlen", opt_strlen},
+  {"clock_gettime_ns", opt_clock_gettime_ns},
+  {"microtime", opt_microtime},
+  {"__SystemLib\\max2", opt_max2},
+  {"__SystemLib\\min2", opt_min2},
+  {"ceil", opt_ceil},
+  {"floor", opt_floor},
+  {"abs", opt_abs},
+  {"ord", opt_ord},
+  {"chr", opt_chr},
+  {"hh\\array_key_cast", opt_array_key_cast},
+  {"hh\\type_structure", opt_type_structure},
+  {"hh\\type_structure_classname", opt_type_structure_classname},
+  {"hh\\is_list_like", opt_is_list_like},
+  {"HH\\is_dict_or_darray", opt_is_dict_or_darray},
+  {"HH\\is_vec_or_varray", opt_is_vec_or_varray},
+  {"HH\\Lib\\_Private\\Native\\first", opt_container_first},
+  {"HH\\Lib\\_Private\\Native\\last", opt_container_last},
+  {"HH\\Lib\\_Private\\Native\\first_key", opt_container_first_key},
+  {"HH\\Lib\\_Private\\Native\\last_key", opt_container_last_key},
+  {"HH\\fun_get_function", opt_fun_get_function},
+  {"HH\\class_meth_get_class", opt_class_meth_get_class},
+  {"HH\\class_meth_get_method", opt_class_meth_get_method},
+  {"HH\\class_get_class_name", opt_class_get_class_name},
+  {"HH\\Shapes::idx", opt_shapes_idx},
+  {"HH\\BuiltinEnum::getNames", opt_enum_names},
+  {"HH\\BuiltinEnum::getValues", opt_enum_values},
+  {"HH\\BuiltinEnum::coerce", opt_enum_coerce},
+  {"HH\\BuiltinEnum::isValid", opt_enum_is_valid},
+  {"HH\\is_meth_caller", opt_is_meth_caller},
+  {"HH\\tag_provenance_here", opt_tag_provenance_here},
+  {"HH\\array_mark_legacy", opt_array_mark_legacy},
+  {"HH\\array_unmark_legacy", opt_array_unmark_legacy},
+  {"HH\\meth_caller_get_class", opt_meth_caller_get_class},
+  {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
+};
+
+// This second whitelist, a subset of the first, records which parameter
+// (if any) we need a vanilla input for to generate optimized HHIR.
+
+const hphp_fast_string_imap<int> s_vanilla_params{
+  {"HH\\Shapes::idx", 0},
+  {"HH\\Lib\\_Private\\Native\\first", 0},
+  {"HH\\Lib\\_Private\\Native\\last", 0},
+  {"HH\\Lib\\_Private\\Native\\first_key", 0},
+  {"HH\\Lib\\_Private\\Native\\last_key", 0},
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -721,80 +1254,92 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     auto const fname = func->fullName();
 
     if (auto const retVal = opt_foldable(env, func, params, numNonDefault)) {
-      return retVal;
+      // Check if any of the parameters are in-out. If not, we don't
+      // need any special handling.
+      auto const numInOut = std::count_if(
+        params.info.begin(), params.info.end(),
+        [] (const ParamPrep::Info& i) { return i.isInOut; }
+      );
+      if (!numInOut) return retVal;
+
+      // Otherwise, the return value is actually a tuple containing
+      // all of the results. We need to unpack the tuple and write the
+      // contents to their proper place on the stack.
+      auto const ad = retVal->arrLikeVal();
+      assertx(ad->isStatic());
+      assertx(ad->hasVanillaPackedLayout());
+      assertx(ad->size() == numInOut + 1);
+
+      size_t inOutIndex = 0;
+      for (auto const& param : params.info) {
+        if (!param.isInOut) continue;
+        // NB: The parameters to the builtin have already been popped
+        // at this point, so we don't need to account for them when
+        // calculating the stack offset.
+        auto const val = cns(env, ad->nvGetVal(inOutIndex + 1));
+        auto const offset = offsetFromIRSP(
+          env,
+          BCSPRelOffset{safe_cast<int32_t>(inOutIndex)}
+        );
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), val);
+        ++inOutIndex;
+      }
+
+      // The first element of the tuple is always the actual function
+      // return.
+      return cns(env, ad->nvGetVal(0));
     }
-#define X(x) \
-    if (fname->isame(s_##x.get())) return opt_##x(env, params);
 
-    X(get_called_class)
-    X(get_class)
-    X(in_array)
-    X(ini_get)
-    X(count)
-    X(sizeof)
-    X(is_a)
-    X(is_subclass_of)
-    X(method_exists)
-    X(sqrt)
-    X(strlen)
-    X(clock_gettime_ns)
-    X(microtime)
-    X(max2)
-    X(ceil)
-    X(floor)
-    X(abs)
-    X(ord)
-    X(chr)
-    X(func_num_args)
-    X(min2)
-    X(set_frame_metadata)
-    X(array_key_cast)
-
-#undef X
-
+    auto const it = s_opt_emit_fns.find(fname->data());
+    if (it != s_opt_emit_fns.end()) return it->second(env, params);
     return nullptr;
   }();
 
   if (result == nullptr) return nullptr;
 
-  // NativeImpl will do a RetC
-  if (!params.forNativeImpl) {
-    if (params.thiz && params.thiz->type() <= TObj) {
-      decRef(env, params.thiz);
-    }
-
-    // Decref and free args
-    for (int i = numNonDefault - 1; i >= 0; --i) {
-      decRef(env, params[i].value);
-    }
+  // We don't constrain types when loading parameters whose typehints don't
+  // imply any checks. However, optimized codegen for a builtin generally
+  // requires specific input types (and uses them to produce specific outputs).
+  //
+  // As a result, if we're returning optimized builtin codegen, we also need
+  // to constrain our input parameters as well.
+  //
+  // To play well with assumptions in tracelet region selection, our optimized
+  // codegen must obey the following restriction:
+  //   - IF we relax the inputs for an optimized builtin to DataTypeSpecific
+  //   - THEN the output must have its current type relaxed to DataTypeSpecific
+  //
+  // Here's a breaking example: a builtin that returns an int for one string
+  // input and null for a different string input. If any builtin behaves like
+  // this, it should place additional constraints on its inputs. (No current
+  // builtins need to do so - DataTypeSpecific is a good default.)
+  for (auto const& param : params.info) {
+    env.irb->constrainValue(param.value, DataTypeSpecific);
   }
-
+  params.decRefParams(env);
   return result;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Return the type that a parameter to a builtin function is supposed to be
- * coerced to.  What this means depends on how the builtin is dealing with
- * parameter coersion: new-style HNI builtins try to do a tvCoerceParamTo*,
- * while older ones use tvCastTo* semantics.
+ * Return the target type of  a parameter to a builtin function.
  *
  * If the builtin parameter has no type hints to cause coercion, this function
  * returns TBottom.
  */
-Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
+Type param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
-  if (tc.isNullable() && !callee->byRef(paramIdx)) {
+  if (tc.isNullable()) {
     auto const dt = tc.underlyingDataType();
     if (!dt) return TBottom;
     return TNull | Type(*dt);
   }
-  if (callee->byRef(paramIdx) && pi.nativeArg) {
-    return TBoxedCell;
+  if (!pi.builtinType) {
+    if (!tc.isVArrayOrDArray()) return TBottom;
+    return RO::EvalHackArrDVArrs ? TVec|TDict : TVArr|TDArr;
   }
-  if (!pi.builtinType) return TBottom;
   if (pi.builtinType == KindOfObject &&
       pi.defaultValue.m_type == KindOfNull) {
     return TNullableObj;
@@ -811,36 +1356,33 @@ Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
  */
 template <class LoadParam>
 ParamPrep
-prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
-               SSATmp* numArgsExpr, uint32_t numArgs, uint32_t numNonDefault,
-               Block* coerceFailure, LoadParam loadParam) {
-  auto ret = ParamPrep(numArgs);
-  ret.thiz = thiz;
-  ret.count = numArgsExpr;
-  ret.coerceFailure = coerceFailure;
-  ret.forNativeImpl = coerceFailure != nullptr;
+prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
+               uint32_t numArgs, uint32_t numNonDefault, bool forNativeImpl,
+               LoadParam loadParam) {
+  auto ret = ParamPrep{numArgs, callee};
+  ret.ctx = ctx;
+  ret.forNativeImpl = forNativeImpl;
 
   // Fill in in reverse order, since they may come from popC's (depending on
   // what loadParam wants to do).
   for (auto offset = uint32_t{numArgs}; offset-- > 0;) {
-    auto const ty = param_coerce_type(callee, offset);
+    auto const ty = param_target_type(callee, offset);
     auto& cur = ret[offset];
     auto& pi = callee->params()[offset];
 
     cur.value = loadParam(offset, ty);
-    cur.isOutputArg = pi.nativeArg && ty == TBoxedCell;
     // If ty > TBottom, it had some kind of type hint.
-    // A by-reference parameter thats defaulted will get a plain
-    // value (typically null), rather than a BoxedCell; so we still
-    // need to apply a conversion there.
-    cur.needsConversion = cur.isOutputArg ||
-      (offset < numNonDefault && ty > TBottom);
+    cur.needsConversion = (offset < numNonDefault && ty > TBottom);
+    cur.isInOut = callee->isInOut(offset);
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
-    // by address unless its flagged "nativeArg".
-    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg) {
+    // by address unless its flagged "NativeArg".
+    if (!pi.isTakenAsVariant() &&
+        (ty == TBool || ty == TInt || ty == TDbl ||
+         pi.isNativeArg() || pi.isTakenAsTypedValue())) {
       continue;
     }
+    if (cur.isInOut) continue;
 
     ++ret.numByAddr;
     cur.passByAddr = true;
@@ -861,10 +1403,9 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
  *      But we implement this by generating all the relevant NativeImpl code
  *      after the InlineReturn for the callee, to make it easier for DCE to
  *      eliminate the code that constructs the callee's activation record.
- *      This means the unwinder is going to see our PC as equal to the FCallD
- *      for the call to the function, which will be inside the FPI region for
- *      the call, so it'll try to pop an ActRec, so we'll need to reconstruct
- *      one for it during unwinding.
+ *      This means the unwinder is going to see our PC as equal to the FCall*
+ *      for the call to the function. We produce consistent state for unwinder
+ *      by decrefing and popping the arguments.
  *
  *    o HNI-style param coerce modes can force the entire function to return
  *      false or null if the coersions fail.  This is implemented via a
@@ -883,16 +1424,17 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
 struct CatchMaker {
   enum class Kind { NotInlining, Inlining };
 
-  explicit CatchMaker(IRGS& env,
-                      Kind kind,
-                      const Func* callee,
-                      const ParamPrep* params)
+  explicit CatchMaker(IRGS& env, Kind kind, const ParamPrep* params)
     : env(env)
     , m_kind(kind)
-    , m_callee(callee)
     , m_params(*params)
   {
-    assertx(!m_params.thiz || m_params.forNativeImpl || inlining());
+    // Native instance method calls are allowed from NativeImpl or in inlining.
+    // Native static method calls are *additionally* allowed from FCallBuiltin.
+    if (m_params.ctx == nullptr) return;
+    DEBUG_ONLY auto const this_type = m_params.ctx->type();
+    assertx(this_type <= TCls || this_type <= TObj);
+    assertx(this_type <= TCls || m_params.forNativeImpl || inlining());
   }
 
   CatchMaker(const CatchMaker&) = delete;
@@ -907,61 +1449,21 @@ struct CatchMaker {
   }
 
   Block* makeUnusualCatch() const {
+    assertx(!env.irb->fs().stublogue());
     auto const exit = defBlock(env, Block::Hint::Unlikely);
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);
     decRefParams();
     prepareForCatch();
-    gen(env, EndCatch,
-        IRSPRelOffsetData { spOffBCFromIRSP(env) },
+    gen(env,
+        EndCatch,
+        EndCatchData {
+          spOffBCFromIRSP(env),
+          EndCatchData::CatchMode::UnwindOnly,
+          EndCatchData::FrameMode::Phplogue,
+          EndCatchData::Teardown::Full
+        },
         fp(env), sp(env));
-    return exit;
-  }
-
-  Block* makeParamCoerceCatch() const {
-    auto const exit = defBlock(env, Block::Hint::Unlikely);
-
-    BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
-    gen(env, BeginCatch);
-
-    // Determine whether we're dealing with a TVCoercionException or a php
-    // exception.  If it's a php-exception, we'll go to the taken block.
-    ifThen(
-      env,
-      [&] (Block* taken) {
-        gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
-      },
-      [&] {
-        hint(env, Block::Hint::Unused);
-        decRefParams();
-        prepareForCatch();
-        gen(env, EndCatch,
-          IRSPRelOffsetData { spOffBCFromIRSP(env) },
-          fp(env), sp(env));
-      }
-    );
-
-    // prepareForCatch() in the ifThen() above messed with irb's marker, so we
-    // have to update it on the fallthru path here.
-    updateMarker(env);
-
-    if (m_params.coerceFailure) {
-      gen(env, Jmp, m_params.coerceFailure);
-    } else {
-      // From here on we're on the side-exit path, due to a failure to coerce.
-      // We need to push the unwinder value and then side-exit to the next
-      // instruction.
-      hint(env, Block::Hint::Unlikely);
-      decRefParams();
-      if (m_params.thiz && m_params.thiz->type() <= TObj) {
-        decRef(env, m_params.thiz);
-      }
-
-      auto const val = gen(env, LdUnwinderValue, TCell);
-      push(env, val);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
-    }
-
     return exit;
   }
 
@@ -989,15 +1491,8 @@ struct CatchMaker {
 
 private:
   void prepareForCatch() const {
-    if (inlining()) {
-      fpushActRec(env,
-                  cns(env, m_callee),
-                  m_params.thiz ? m_params.thiz : cns(env, TNullptr),
-                  m_params.size(),
-                  nullptr,
-                  /* This can be a lie, but we only care about the dynamic flag
-                   * in prologues, so its value doesn't matter here. */
-                  cns(env, false));
+    if (inlining() && m_params.ctx) {
+      decRef(env, m_params.ctx);
     }
     /*
      * We're potentially spilling to a different depth than the unwinder
@@ -1016,104 +1511,10 @@ private:
 private:
   IRGS& env;
   Kind const m_kind;
-  const Func* m_callee;
   const ParamPrep& m_params;
 };
 
 //////////////////////////////////////////////////////////////////////
-
-SSATmp* coerce_value(IRGS& env,
-                     const Type& ty,
-                     const Func* callee,
-                     SSATmp* oldVal,
-                     uint32_t paramIdx,
-                     const CatchMaker& maker) {
-  auto const result = [&] () -> SSATmp* {
-    if (!callee->isParamCoerceMode()) {
-      if (ty <= TInt) {
-        return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
-      }
-      if (ty <= TDbl) {
-        return gen(env, ConvCellToDbl, maker.makeUnusualCatch(), oldVal);
-      }
-      if (ty <= TBool) {
-        return gen(env, ConvCellToBool, oldVal);
-      }
-
-      always_assert(false);
-    }
-
-    if (ty <= TInt) {
-      return gen(env,
-                 CoerceCellToInt,
-                 FuncArgData(callee, paramIdx + 1),
-                 maker.makeParamCoerceCatch(),
-                 oldVal);
-    }
-    if (ty <= TDbl) {
-      return gen(env,
-                 CoerceCellToDbl,
-                 FuncArgData(callee, paramIdx + 1),
-                 maker.makeParamCoerceCatch(),
-                 oldVal);
-    }
-    if (ty <= TBool) {
-      return gen(env,
-                 CoerceCellToBool,
-                 FuncArgData(callee, paramIdx + 1),
-                 maker.makeParamCoerceCatch(),
-                 oldVal);
-    }
-
-    return nullptr;
-  }();
-
-  if (result) {
-    decRef(env, oldVal);
-    return result;
-  }
-
-  always_assert(ty.subtypeOfAny(TArr, TStr, TObj, TRes) &&
-                callee->params()[paramIdx].nativeArg);
-  auto const misAddr = gen(env, LdMIStateAddr,
-                           cns(env, offsetof(MInstrState, tvBuiltinReturn)));
-  gen(env, StMem, misAddr, oldVal);
-  gen(env, CoerceMem, ty,
-      CoerceMemData { callee, paramIdx + 1 },
-      maker.makeParamCoerceCatch(), misAddr);
-  return gen(env, LdMem, ty, misAddr);
-}
-
-void coerce_stack(IRGS& env,
-                  const Type& ty,
-                  const Func* callee,
-                  uint32_t paramIdx,
-                  BCSPRelOffset offset,
-                  const CatchMaker& maker) {
-  if (callee->isParamCoerceMode()) {
-    always_assert(ty.isKnownDataType());
-    gen(env,
-        CoerceStk,
-        ty,
-        CoerceStkData { offsetFromIRSP(env, offset), callee, paramIdx + 1 },
-        maker.makeParamCoerceCatch(),
-        sp(env));
-  } else {
-    always_assert(ty.isKnownDataType() || ty <= TNullableObj);
-    gen(env,
-        CastStk,
-        ty,
-        IRSPRelOffsetData { offsetFromIRSP(env, offset) },
-        maker.makeUnusualCatch(),
-        sp(env));
-  }
-
-  /*
-   * We can throw after writing to the stack above; inform IRBuilder about it.
-   * This is basically just for assertions right now.
-   */
-  env.irb->exceptionStackBoundary();
-}
 
 /*
  * Take the value in param, apply any needed conversions
@@ -1143,16 +1544,13 @@ SSATmp* realize_param(IRGS& env,
                       R realize) {
   if (param.needsConversion) {
     auto const baseTy = targetTy - TNull;
-    assert(baseTy.isKnownDataType());
-    auto const convertTy =
-      (!callee->isParamCoerceMode() &&
-       targetTy == TNullableObj) ? targetTy : baseTy;
+    assertx(baseTy.isKnownDataType() ||
+            (baseTy == (RO::EvalHackArrDVArrs ? TVec|TDict : TVArr|TDArr)));
 
     if (auto const value = cond(
           env,
           [&] (Block* convert) -> SSATmp* {
-            if (targetTy == baseTy ||
-                !callee->isParamCoerceMode()) {
+            if (targetTy == baseTy) {
               return checkType(baseTy, convert);
             }
             return cond(
@@ -1165,7 +1563,7 @@ SSATmp* realize_param(IRGS& env,
           },
           [&] (SSATmp* v) { return v; },
           [&] () -> SSATmp* {
-            return convertParam(convertTy);
+            return convertParam(baseTy);
           }
         )) {
       // Heads up on non-local state here: we have to update
@@ -1180,6 +1578,73 @@ SSATmp* realize_param(IRGS& env,
   return realize();
 }
 
+template<class U, class F>
+SSATmp* maybeCoerceValue(
+  IRGS& env,
+  SSATmp* val,
+  Type target,
+  uint32_t id,
+  const Func* func,
+  U update,
+  F fail
+) {
+  assertx(target.isKnownDataType() ||
+          (target == (RO::EvalHackArrDVArrs ? TVec|TDict : TVArr|TDArr)));
+
+  auto bail = [&] { fail(); return cns(env, TBottom); };
+  if (target <= TStr) {
+    if (!val->type().maybe(TCls)) return bail();
+
+    auto castW = [&] (SSATmp* val){
+      if (RuntimeOption::EvalClassStringHintNotices) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(env, makeStaticString(Strings::CLASS_TO_STRING_IMPLICIT))
+        );
+      }
+      return update(val);
+    };
+
+    return cond(
+      env,
+      [&] (Block* f) { return gen(env, CheckType, TCls, f, val); },
+      [&] (SSATmp* cval) { return castW(gen(env, LdClsName, cval)); },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        return bail();
+      }
+    );
+  }
+
+  if (target <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
+    if (!val->type().maybe(TClsMeth)) return bail();
+    auto const& tc = func->params()[id].typeConstraint;
+    if (!tc.convertClsMethToArrLike()) return bail();
+
+    return cond(
+      env,
+      [&] (Block* f) { return gen(env, CheckType, TClsMeth, f, val); },
+      [&] (SSATmp* methVal) {
+        if (RuntimeOption::EvalVecHintNotices) {
+          raiseClsmethCompatTypeHint(env, id, func, tc);
+        }
+        auto const ret = update(convertClsMethToVec(env, methVal));
+        decRef(env, methVal);
+        return ret;
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        return bail();
+      }
+    );
+  }
+
+  return bail();
+}
+
+StaticString s_varray_or_darray("varray_or_darray");
+
 /*
  * Prepare the actual arguments to the CallBuiltin instruction, by converting a
  * ParamPrep into a vector of SSATmps to pass to CallBuiltin.  If any of the
@@ -1189,50 +1654,22 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
                                     const Func* callee,
                                     ParamPrep& params,
                                     const CatchMaker& maker) {
-  auto const cbNumArgs = 2 + params.size() +
-    (params.thiz ? 1 : 0) + (params.count ? 1 : 0);
+  auto const cbNumArgs = 2 + params.size() + (params.ctx ? 1 : 0);
   auto ret = jit::vector<SSATmp*>(cbNumArgs);
   auto argIdx = uint32_t{0};
   ret[argIdx++] = fp(env);
   ret[argIdx++] = sp(env);
-  if (params.thiz) ret[argIdx++] = params.thiz;
-  if (params.count) ret[argIdx++] = params.count;
+  if (params.ctx) ret[argIdx++] = params.ctx;
 
-  assertx(!params.count || callee->attrs() & AttrNumArgs);
-
-  auto const needDVCheck = [&](uint32_t param, const Type& ty) {
-    if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
-    if (!callee->params()[param].typeConstraint.isArray()) return false;
-    return ty <= TArr;
-  };
-
-  auto const dvCheck = [&](uint32_t param, SSATmp* val) {
-    assertx(needDVCheck(param, val->type()));
-    auto const& tc = callee->params()[param].typeConstraint;
-
-    auto const check = [&](Block* taken) {
-      if (tc.isVArray()) return gen(env, CheckVArray, taken, val);
-      if (tc.isDArray()) return gen(env, CheckDArray, taken, val);
-      if (tc.isVArrayOrDArray()) {
-        return gen(env, JmpZero, taken, gen(env, IsDVArray, val));
-      }
-      return gen(env, JmpNZero, taken, gen(env, IsDVArray, val));
-    };
-
-    ifThen(
-      env,
-      check,
-      [&]{
-        gen(
-          env,
-          RaiseHackArrParamNotice,
-          RaiseHackArrParamNoticeData { tc.type() },
-          val,
-          cns(env, callee),
-          cns(env, param)
-        );
-      }
-    );
+  auto const genFail = [&](uint32_t param, SSATmp* val) {
+    auto const expected_type = [&]{
+      auto const& tc = callee->params()[param].typeConstraint;
+      if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
+      auto const dt = param_target_type(callee, param) - TNull;
+      return getDataTypeString(dt.toDataType()).get();
+    }();
+    auto const data = FuncArgTypeData { callee, param + 1, expected_type };
+    gen(env, ThrowParameterWrongType, data, maker.makeUnusualCatch(), val);
   };
 
   DEBUG_ONLY auto seenBottom = false;
@@ -1240,40 +1677,43 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto stackIdx = uint32_t{0};
   for (auto paramIdx = uint32_t{0}; paramIdx < params.size(); ++paramIdx) {
     auto& param = params[paramIdx];
-    auto const targetTy = param_coerce_type(callee, paramIdx);
+    auto const targetTy = param_target_type(callee, paramIdx);
 
     seenBottom |= (param.value->type() == TBottom);
 
-    if (param.value->type() <= TPtrToGen) {
+    if (param.value->type() <= TMemToCell) {
       ret[argIdx++] = realize_param(
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) -> SSATmp* {
           gen(env, CheckTypeMem, ty, fail, param.value);
-          if (needDVCheck(paramIdx, ty)) {
-            dvCheck(paramIdx, gen(env, LdMem, ty, param.value));
-          }
-          return param.isOutputArg ?
-            gen(env, LdMem, TBoxedCell, param.value) : nullptr;
+          return nullptr;
         },
         [&] (const Type& ty) -> SSATmp* {
           hint(env, Block::Hint::Unlikely);
-          if (param.isOutputArg) {
-            return cns(env, TNullptr);
-          }
-          if (callee->isParamCoerceMode()) {
-            gen(env, CoerceMem, ty, CoerceMemData { callee, paramIdx + 1 },
-                maker.makeParamCoerceCatch(), param.value);
-          } else {
-            gen(env, CastMem, ty, maker.makeUnusualCatch(), param.value);
-          }
+          auto val = gen(env, LdMem, TCell, param.value);
+          maybeCoerceValue(
+            env,
+            val,
+            ty,
+            paramIdx,
+            callee,
+            [&] (SSATmp* val) {
+              gen(env, StLoc, LocalId{paramIdx}, fp(env), val);
+              return val;
+            },
+            [&] { genFail(paramIdx, val); }
+          );
           return nullptr;
         },
         [&] {
-          if (!param.passByAddr && !param.isOutputArg) {
+          if (!param.passByAddr) {
+            assertx(!callee->params()[paramIdx].isTakenAsVariant());
             assertx(targetTy == TBool ||
                     targetTy == TInt ||
                     targetTy == TDbl ||
-                    callee->params()[paramIdx].nativeArg);
+                    callee->params()[paramIdx].isNativeArg() ||
+                    callee->params()[paramIdx].isTakenAsTypedValue() ||
+                    callee->isInOut(paramIdx));
             return gen(env, LdMem,
                        targetTy == TBottom ? TCell : targetTy,
                        param.value);
@@ -1290,12 +1730,19 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         [&] (const Type& ty, Block* fail) {
           auto ret = gen(env, CheckType, ty, fail, param.value);
           env.irb->constrainValue(ret, DataTypeSpecific);
-          if (needDVCheck(paramIdx, ty)) dvCheck(paramIdx, ret);
           return ret;
         },
-        [&] (const Type& ty) {
-          if (param.isOutputArg) return cns(env, TNullptr);
-          return coerce_value(env, ty, callee, oldVal, paramIdx, maker);
+        [&] (const Type& ty) -> SSATmp* {
+          hint(env, Block::Hint::Unlikely);
+          return maybeCoerceValue(
+            env,
+            param.value,
+            ty,
+            paramIdx,
+            callee,
+            [&] (SSATmp* val) { return val; },
+            [&] { genFail(paramIdx, oldVal); }
+          );
         },
         [&] {
           /*
@@ -1303,28 +1750,13 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
            *   - if we had a ref-counted type, and it was converted
            *     to a Bool, Int or Dbl above, we explicitly DecReffed it
            *     (in coerce_value).
-           *   - if we had a non-RefData nativeArg, we did a CoerceMem
-           *     which implicitly DecReffed the old value
+           *   - if we did a CoerceMem which implicitly DecReffed the old value
            * In either case, the old value is taken care of, and any future
            * DecRefs (from exceptions, or after the call on the normal flow
            * of execution) should DecRef param.value (ie the post-coercion
            * value).
-           *
-           * But if we had an OutputArg, we did not DecRef the old value,
-           * and the post-coercion value is a RefData* or nullptr.
-           * If its a RefData*, we need to DecRef that - but in that case
-           * the new value is the same as the old.
-           * If its Nullptr, we need to DecRef the old value.
-           *
-           * So in both cases we actually want to DecRef the *old* value, so
-           * we have to restore it here (because realize_param replaced it
-           * with the new value).
            */
-          auto v = param.value;
-          if (param.isOutputArg) {
-            param.value = oldVal;
-          }
-          return v;
+          return param.value;
         });
       continue;
     }
@@ -1339,16 +1771,25 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         auto irSPRel = offsetFromIRSP(env, offset);
         gen(env, CheckStk, IRSPRelOffsetData { irSPRel }, ty, fail, sp(env));
         env.irb->constrainStack(irSPRel, DataTypeSpecific);
-        if (needDVCheck(paramIdx, ty)) {
-          dvCheck(
-            paramIdx,
-            gen(env, LdStk, ty, IRSPRelOffsetData { irSPRel }, sp(env))
-          );
-        }
         return nullptr;
       },
       [&] (const Type& ty) -> SSATmp* {
-        coerce_stack(env, ty, callee, paramIdx, offset, maker);
+        hint(env, Block::Hint::Unlikely);
+        auto const off = IRSPRelOffsetData{ offsetFromIRSP(env, offset) };
+        auto const tv = gen(env, LdStk, TCell, off, sp(env));
+        maybeCoerceValue(
+          env,
+          tv,
+          ty,
+          paramIdx,
+          callee,
+          [&] (SSATmp* val) {
+            gen(env, StStk, off, sp(env), val);
+            env.irb->exceptionStackBoundary();
+            return val;
+          },
+          [&] { genFail(paramIdx, tv); }
+        );
         return nullptr;
       },
       [&] {
@@ -1365,17 +1806,26 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
+SSATmp* builtinInValue(IRGS& env, const Func* builtin, uint32_t i) {
+  auto const tv = Native::builtinInValue(builtin, i);
+  if (!tv) return nullptr;
+  return cns(env, *tv);
+}
+
 SSATmp* builtinCall(IRGS& env,
                     const Func* callee,
                     ParamPrep& params,
                     int32_t numNonDefault,
                     const CatchMaker& catchMaker) {
-  // Try to replace the builtin call with a specialized implementation of the
-  // builtin
-  auto optRet = optimizedFCallBuiltin(env, callee, params, numNonDefault);
-  if (optRet) return optRet;
+  assertx(callee->nativeFuncPtr());
 
   if (!params.forNativeImpl) {
+    // For FCallBuiltin, params are TypedValues, while for NativeImpl, they're
+    // pointers to these values on the frame. We only optimize native calls
+    // when we have the values.
+    auto const opt = optimizedFCallBuiltin(env, callee, params, numNonDefault);
+    if (opt) return opt;
+
     /*
      * Everything that needs to be on the stack gets spilled now.
      *
@@ -1407,27 +1857,83 @@ SSATmp* builtinCall(IRGS& env,
     env.irb->exceptionStackBoundary();
   }
 
-  // Make the actual call.
+  // Collect the realized parameters.
   auto realized = realize_params(env, callee, params, catchMaker);
+
+  // Store the inout parameters into their out locations.
+  if (callee->takesInOutParams()) {
+    int32_t idx = 0;
+    uint32_t aoff = params.ctx ? 3 : 2;
+    for (auto i = uint32_t{0}; i < params.size(); ++i) {
+      if (!params[i].isInOut) continue;
+      auto ty = [&] () -> folly::Optional<Type> {
+        auto const r = builtinOutType(callee, i);
+        if (r.isKnownDataType()) return r;
+        return {};
+      }();
+      if (auto const iv = builtinInValue(env, callee, i)) {
+        decRef(env, realized[i + aoff]);
+        realized[i + aoff] = iv;
+        ty = iv->type();
+        if (ty->maybe(TPersistentVArr)) *ty |= TVArr;
+        if (ty->maybe(TPersistentDArr)) *ty |= TDArr;
+        if (ty->maybe(TPersistentVec)) *ty |= TVec;
+        if (ty->maybe(TPersistentDict)) *ty |= TDict;
+        if (ty->maybe(TPersistentKeyset)) *ty |= TKeyset;
+        if (ty->maybe(TPersistentStr)) *ty |= TStr;
+      }
+      if (params.forNativeImpl) {
+        // Move the value to the caller stack to avoid an extra ref-count
+        gen(env, StLoc, LocalId{i}, fp(env), cns(env, TInitNull));
+        auto const addr = gen(env, LdOutAddr, IndexData(idx++), fp(env));
+        gen(env, StMem, ty, addr, realized[i + aoff]);
+        realized[i + aoff] = addr;
+        continue;
+      }
+      auto const offset =
+        BCSPRelOffset{safe_cast<int32_t>(params.numByAddr + idx++)};
+      auto const out = offsetFromIRSP(env, offset);
+      gen(env, StStk, IRSPRelOffsetData{out}, ty, sp(env), realized[i + aoff]);
+      params[i].value = cns(env, TInitNull);
+      realized[i + aoff] = gen(env, LdStkAddr, IRSPRelOffsetData{out}, sp(env));
+    }
+    env.irb->exceptionStackBoundary();
+  }
+
+  // Only record the return stack offset if we're inlining or if we're
+  // processing a FCallBuiltin. Otherwise we're processing a
+  // non-inlined NativeImpl. In that case, there shouldn't be anything
+  // on the stack and any out parameters point to the caller's stack,
+  // so there's nothing for FrameState to do.
+  auto const retOff = [&] () -> folly::Optional<IRSPRelOffset> {
+    if (params.forNativeImpl && !catchMaker.inlining()) {
+      assertx(env.irb->fs().bcSPOff() == env.context.initSpOffset);
+      return folly::none;
+    }
+    return offsetFromIRSP(
+      env,
+      BCSPRelOffset{safe_cast<int32_t>(params.numByAddr)}
+    );
+  }();
+
+  // Make the actual call.
   SSATmp** const decayedPtr = &realized[0];
   auto const ret = gen(
     env,
     CallBuiltin,
     CallBuiltinData {
       spOffBCFromIRSP(env),
+      retOff,
       callee,
-      params.count ? -1 : numNonDefault,
-      funcWritesLocals(callee),
-      funcReadsLocals(callee),
-      funcNeedsCallerFrame(callee)
+      numNonDefault
     },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)
   );
 
   if (!params.forNativeImpl) {
-    if (params.thiz && params.thiz->type() <= TObj) {
-      decRef(env, params.thiz);
+    if (params.ctx && params.ctx->type() <= TObj) {
+      decRef(env, params.ctx);
     }
     catchMaker.decRefParams();
   }
@@ -1438,7 +1944,7 @@ SSATmp* builtinCall(IRGS& env,
 /*
  * When we're inlining a NativeImpl opcode, we know this is the only opcode in
  * the callee method body aside from AssertRATs (bytecode invariant).  So in
- * order to make sure we can eliminate the SpillFrame, we do the CallBuiltin
+ * order to make sure we can eliminate the DefInlineFP, we do the CallBuiltin
  * instruction after we've left the inlined frame.
  *
  * We may need to pass some arguments to the builtin through the stack (e.g. if
@@ -1452,22 +1958,16 @@ void nativeImplInlined(IRGS& env) {
   assertx(callee->nativeFuncPtr());
 
   auto const numArgs = callee->numParams();
-  auto const paramThis = [&] () -> SSATmp* {
-    if (!callee->isMethod()) return nullptr;
-    auto ctx = ldCtx(env);
-    if (callee->isStatic()) return gen(env, LdClsCtx, ctx);
-    return castCtxThis(env, ctx);
-  }();
+  auto const paramThis = callee->isMethod() ? ldCtx(env) : nullptr;
 
-  auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numNonDefault;
+  auto numNonDefault = fp(env)->inst()->extra<BeginInlining>()->numArgs;
   auto params = prepare_params(
     env,
     callee,
     paramThis,
-    nullptr,
     numArgs,
     numNonDefault,
-    nullptr,
+    false,
     [&] (uint32_t i, const Type) {
       return ldLoc(env, i, nullptr, DataTypeSpecific);
     }
@@ -1478,7 +1978,6 @@ void nativeImplInlined(IRGS& env) {
   auto const catcher = CatchMaker {
     env,
     CatchMaker::Kind::Inlining,
-    callee,
     &params
   };
 
@@ -1491,10 +1990,15 @@ void nativeImplInlined(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+int getBuiltinVanillaParam(const char* name) {
+  auto const it = s_vanilla_params.find(name);
+  return it != s_vanilla_params.end() ? it->second : -1;
+}
+
 SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
   if (src->isA(TObj) && src->type().clsSpec()) {
     auto const cls = src->type().clsSpec().cls();
-    if (!env.irb->constrainValue(src, TypeConstraint(cls).setWeak())) {
+    if (!env.irb->constrainValue(src, GuardConstraint(cls).setWeak())) {
       // If we know the class without having to specialize a guard
       // any further, use it.
       return cns(env, cls != SystemLib::s___PHP_Incomplete_ClassClass);
@@ -1533,16 +2037,20 @@ SSATmp* optimizedCallIsObject(IRGS& env, SSATmp* src) {
 void emitFCallBuiltin(IRGS& env,
                       uint32_t numArgs,
                       uint32_t numNonDefault,
+                      uint32_t numOut,
                       const StringData* funcName) {
-  auto const callee = Unit::lookupBuiltin(funcName);
-
+  auto const callee = Func::lookupBuiltin(funcName);
   if (!callee) PUNT(Missing-builtin);
 
+  if (callee->numInOutParams() != numOut) PUNT(bad-inout);
+
+  emitCallerRxChecksKnown(env, callee);
+  assertx(!callee->isMethod() || (callee->isStatic() && callee->cls()));
+  auto const ctx = callee->isStatic() ? cns(env, callee->cls()) : nullptr;
+
   auto params = prepare_params(
-    env, callee,
-    nullptr, // no $this; FCallBuiltin never happens for methods
-    nullptr, // count is constant numNonDefault
-    numArgs, numNonDefault, nullptr, [&](uint32_t /*i*/, const Type ty) {
+    env, callee, ctx,
+    numArgs, numNonDefault, false, [&](uint32_t /*i*/, const Type ty) {
       auto specificity =
         ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
       return pop(env, specificity);
@@ -1551,7 +2059,6 @@ void emitFCallBuiltin(IRGS& env,
   auto const catcher = CatchMaker {
     env,
     CatchMaker::Kind::NotInlining,
-    callee,
     &params
   };
 
@@ -1566,7 +2073,8 @@ void emitNativeImpl(IRGS& env) {
   auto genericNativeImpl = [&]() {
     gen(env, NativeImpl, fp(env), sp(env));
     auto const retVal = gen(env, LdRetVal, callReturnType(callee), fp(env));
-    auto const data = RetCtrlData { offsetToReturnSlot(env), false };
+    auto const spAdjust = offsetToReturnSlot(env);
+    auto const data = RetCtrlData { spAdjust, false, AuxUnion{0} };
     gen(env, RetCtrl, data, sp(env), fp(env), retVal);
   };
 
@@ -1575,88 +2083,27 @@ void emitNativeImpl(IRGS& env) {
     return;
   }
 
-  auto thiz = callee->isMethod() ? ldCtx(env) : nullptr;
-  auto const numParams = gen(env, LdARNumParams, fp(env));
+  auto ctx = callee->isMethod() ? ldCtx(env) : nullptr;
 
-  ifThenElse(
+  auto params = prepare_params(
     env,
-    [&] (Block* fallback) {
-      if (thiz) {
-        if (!hasThis(env)) {
-          thiz = gen(env, LdClsCtx, thiz);
-        } else {
-          thiz = castCtxThis(env, thiz);
-        }
-      }
-
-      auto maxArgs = callee->numParams();
-      auto minArgs = callee->numNonVariadicParams();
-      while (minArgs) {
-        auto const& pi = callee->params()[minArgs - 1];
-        if (pi.funcletOff == InvalidAbsoluteOffset) {
-          break;
-        }
-        --minArgs;
-      }
-      if (callee->hasVariadicCaptureParam()) {
-        if (minArgs) {
-          auto const check = gen(env, LtInt, numParams, cns(env, minArgs));
-          gen(env, JmpNZero, fallback, check);
-        }
-      } else {
-        if (minArgs == maxArgs) {
-          auto const check = gen(env, EqInt, numParams, cns(env, minArgs));
-          gen(env, JmpZero, fallback, check);
-        } else {
-          if (minArgs) {
-            auto const checkMin = gen(env, LtInt,
-                                      numParams, cns(env, minArgs));
-            gen(env, JmpNZero, fallback, checkMin);
-          }
-          auto const checkMax = gen(env, GtInt, numParams, cns(env, maxArgs));
-          gen(env, JmpNZero, fallback, checkMax);
-        }
-      }
-    },
-    [&] {
-      auto const ret = cond(
-        env,
-        [&] (Block* fail) {
-          auto params = prepare_params(
-            env,
-            callee,
-            thiz,
-            callee->attrs() & AttrNumArgs ? numParams : nullptr,
-            callee->numParams(),
-            callee->numParams(),
-            fail,
-            [&] (uint32_t i, const Type) {
-              return gen(env, LdLocAddr, LocalId(i), fp(env));
-            }
-          );
-          auto const catcher = CatchMaker {
-            env,
-            CatchMaker::Kind::NotInlining,
-            callee,
-            &params
-          };
-
-          return builtinCall(env, callee, params,
-                             callee->numParams(), catcher);
-        },
-        [&] (SSATmp* ret) { return ret; },
-        [&] {
-          return callee->attrs() & AttrParamCoerceModeFalse ?
-            cns(env, false) : cns(env, TInitNull);
-        });
-      push(env, ret);
-      emitRetC(env);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      genericNativeImpl();
+    callee,
+    ctx,
+    callee->numParams(),
+    callee->numParams(),
+    true,
+    [&] (uint32_t i, const Type) {
+      return gen(env, LdLocAddr, LocalId(i), fp(env));
     }
   );
+  auto const catcher = CatchMaker {
+    env,
+    CatchMaker::Kind::NotInlining,
+    &params
+  };
+
+  push(env, builtinCall(env, callee, params, callee->numParams(), catcher));
+  emitRetC(env);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1713,6 +2160,56 @@ bool collectionMethodReturnsThis(const Func* callee) {
 
 }
 
+Type builtinOutType(const Func* builtin, uint32_t i) {
+  assertx(builtin->isCPPBuiltin());
+  assertx(builtin->isInOut(i));
+
+  auto const& pinfo = builtin->params()[i];
+  auto const& tc = pinfo.typeConstraint;
+  if (auto const dt = Native::builtinOutType(tc, pinfo.userAttributes)) {
+    const auto ty = Type{*dt};
+    return pinfo.typeConstraint.isNullable() ? TInitNull | ty : ty;
+  }
+
+  if (tc.isSoft() || tc.isMixed()) return TInitCell;
+
+  auto ty = [&] () -> Type {
+    switch (tc.metaType()) {
+    case AnnotMetaType::Precise:
+      return Type{*tc.underlyingDataType()};
+    case AnnotMetaType::Mixed:
+      return TInitCell;
+    case AnnotMetaType::Self:
+      return TObj;
+    case AnnotMetaType::Parent:
+      return TObj;
+    case AnnotMetaType::Callable:
+      return TInitCell;
+    case AnnotMetaType::Number:
+      return TInt | TDbl;
+    case AnnotMetaType::ArrayKey:
+      return TInt | TStr;
+    case AnnotMetaType::This:
+      return TObj;
+    case AnnotMetaType::VArrOrDArr:
+      assertx(!RO::EvalHackArrDVArrs);
+      return TVArr|TDArr;
+    case AnnotMetaType::VecOrDict:
+      assertx(RO::EvalHackArrDVArrs);
+      return TVec|TDict;
+    case AnnotMetaType::ArrayLike:
+      return TArrLike;
+    case AnnotMetaType::Nonnull:
+    case AnnotMetaType::NoReturn:
+    case AnnotMetaType::Nothing:
+      return TInitCell;
+    }
+    not_reached();
+  }();
+
+  return tc.isNullable() ? ty | TInitNull : ty;
+}
+
 Type builtinReturnType(const Func* builtin) {
   // Why do we recalculate the type here than just using HHBBC's inferred type?
   // Unlike for regular PHP functions, we have access to all the same
@@ -1721,7 +2218,7 @@ Type builtinReturnType(const Func* builtin) {
   // type.
   assertx(builtin->isCPPBuiltin());
 
-  // NB: It is *not* safe to be pessimistic here and return TGen (or any other
+  // NB: It is *not* safe to be pessimistic here and return TCell (or any other
   // approximation). The builtin's return type inferred here is used to control
   // code-gen when lowering the builtin call to vasm and must be no more general
   // than the HNI declaration (if present).
@@ -1733,83 +2230,28 @@ Type builtinReturnType(const Func* builtin) {
       return Type::ExactObj(builtin->implCls());
     }
     if (auto const hniType = builtin->hniReturnType()) {
-      if (isArrayType(*hniType)) {
-        auto const& constraint = builtin->returnTypeConstraint();
-        if (constraint.isVArray()) return Type::Array(ArrayData::kPackedKind);
-        if (constraint.isDArray()) return Type::Array(ArrayData::kMixedKind);
-      }
       return Type{*hniType};
     }
     return TInitCell;
   }();
 
-  // "Reference" types (not boxed, types represented by a pointer) can always be
-  // null.
+  // Allow builtins to return bespoke array likes if the flag is set.
+  assertx(!type.arrSpec().vanilla());
+  if (!allowBespokeArrayLikes()) type = type.narrowToVanilla();
+
+  // "Reference" types (types represented by a pointer) can always be null.
   if (type.isReferenceType()) {
     type |= TInitNull;
   } else {
     assertx(type == TInitCell || type.isSimpleType());
   }
 
-  // Functions which return by ref can always return null.
-  if (builtin->isReturnRef()) {
-    return (type.box() & TBoxedInitCell) | TInitNull;
-  }
   return type & TInitCell;
 }
 
 /////////////////////////////////////////////////////////////////////
 
 namespace {
-
-void implArrayIdx(IRGS& env) {
-  // These types are just used to decide what to do; once we know what we're
-  // actually doing we constrain the values with the popC()s later on in this
-  // function.
-  auto const keyType = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
-
-  if (keyType <= TNull) {
-    auto const def = popC(env, DataTypeGeneric);
-    auto const key = popC(env);
-    auto const base = popC(env);
-
-    // if the key is null it will not be found so just return the default
-    push(env, def);
-    decRef(env, base);
-    decRef(env, key);
-    return;
-  }
-  if (!(keyType <= TInt || keyType <= TStr)) {
-    interpOne(env, TCell, 3);
-    return;
-  }
-
-  auto const def = popC(env, DataTypeGeneric); // a helper will decref it but
-                                               // the translated code doesn't
-                                               // care about the type
-  auto const key = popC(env);
-  auto const base = popC(env);
-
-  auto const elem = profiledArrayAccess(env, base, key,
-    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
-      return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
-    },
-    [&] (SSATmp* key) {
-      return gen(env, ArrayIdx, base, key, def);
-    }
-  );
-
-  auto finish = [&](SSATmp* tmp) {
-    auto const value = unbox(env, tmp, nullptr);
-    pushIncRef(env, value);
-    decRef(env, base);
-    decRef(env, key);
-    decRef(env, def);
-  };
-
-  auto const pelem = profiledType(env, elem, [&] { finish(elem); });
-  finish(pelem);
-}
 
 void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const def = popC(env);
@@ -1826,6 +2268,11 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   if (key->isA(TNull | TStr)) return finish(def);
 
   if (!key->isA(TInt)) {
+    // TODO(T11019533): Fix the underlying issue with unreachable code rather
+    // than papering over it by pushing an unused value here.
+    finish(def);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -1833,12 +2280,12 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const use_base = loaded_collection_vec
     ? loaded_collection_vec
     : stack_base;
-  assertx(use_base->isA(TVec));
+  assertx(use_base->type().subtypeOfAny(TVec, TVArr));
 
   auto const elem = cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, use_base, key);
+      gen(env, CheckVecBounds, taken, use_base, key);
     },
     [&] { return gen(env, LdVecElem, use_base, key); },
     [&] { return def; }
@@ -1851,11 +2298,12 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
 void implDictKeysetIdx(IRGS& env,
                        bool is_dict,
                        SSATmp* loaded_collection_dict) {
-  auto const def = popC(env);
-  auto const key = popC(env);
-  auto const stack_base = popC(env);
+  auto const def = topC(env, BCSPRelOffset{0});
+  auto const key = convertClassKey(env, topC(env, BCSPRelOffset{1}));
+  auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
+    popC(env); popC(env); popC(env);
     pushIncRef(env, elem);
     decRef(env, def);
     decRef(env, key);
@@ -1865,6 +2313,11 @@ void implDictKeysetIdx(IRGS& env,
   if (key->isA(TNull)) return finish(def);
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
+    // TODO(T11019533): Fix the underlying issue with unreachable code rather
+    // than papering over it by pushing an unused value here.
+    finish(def);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -1873,15 +2326,18 @@ void implDictKeysetIdx(IRGS& env,
   auto const use_base = loaded_collection_dict
     ? loaded_collection_dict
     : stack_base;
-  assertx(use_base->isA(is_dict ? TDict : TKeyset));
+  assertx(is_dict ? use_base->type().subtypeOfAny(TDict, TDArr)
+                  : use_base->isA(TKeyset));
 
-  auto const elem = profiledArrayAccess(env, use_base, key,
-    [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
-      return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
-                 base, key);
+  auto const elem = profiledArrayAccess(
+    env, use_base, key, MOpMode::None,
+    [&] (SSATmp* base, SSATmp* key, SSATmp* pos) {
+      return gen(env, is_dict ? DictGetK : KeysetGetK, base, key, pos);
     },
-    [&] (SSATmp* key) {
-      return gen(env, is_dict ? DictIdx : KeysetIdx, use_base, key, def);
+    [&] (SSATmp*) { return def; },
+    [&] (SSATmp* key, SizeHintData data) {
+      return is_dict ? gen(env, DictIdx, data, use_base, key, def)
+                     : gen(env, KeysetIdx, use_base, key, def);
     }
   );
 
@@ -1889,26 +2345,11 @@ void implDictKeysetIdx(IRGS& env,
   finish(pelem);
 }
 
-const StaticString s_idx("hh\\idx");
-
-void implGenericIdx(IRGS& env) {
-  auto const def = popC(env, DataTypeSpecific);
-  auto const key = popC(env, DataTypeSpecific);
-  auto const base = popC(env, DataTypeSpecific);
-
-  SSATmp* const args[] = { base, key, def };
-
-  static auto func = Unit::lookupBuiltin(s_idx.get());
-  assert(func && func->numParams() == 3);
-
-  emitDirectCall(env, func, 3, args);
-}
-
 /*
- * Return the TypeConstraint that should be used to constrain baseType for an
+ * Return the GuardConstraint that should be used to constrain baseType for an
  * Idx bytecode.
  */
-TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
+GuardConstraint idxBaseConstraint(Type baseType, Type keyType,
                                  bool& useVec, bool& useDict) {
   if (baseType < TObj && baseType.clsSpec()) {
     auto const cls = baseType.clsSpec().cls();
@@ -1924,7 +2365,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
               collections::isType(cls, CollectionType::Set) ||
               collections::isType(cls, CollectionType::ImmSet);
 
-    if (useVec || useDict) return TypeConstraint(cls);
+    if (useVec || useDict) return GuardConstraint(cls);
   }
 
   useVec = useDict = false;
@@ -1937,17 +2378,14 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
-  if (arrType <= TVec) return implVecIdx(env, nullptr);
-  if (arrType <= TDict) return implDictKeysetIdx(env, true, nullptr);
-  if (arrType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
-
-  if (!(arrType <= TArr)) {
-    // raise fatal
-    interpOne(env, TCell, 3);
-    return;
+  if (arrType.subtypeOfAny(TVec, TVArr)) return implVecIdx(env, nullptr);
+  if (arrType.subtypeOfAny(TDict, TDArr)) {
+    return implDictKeysetIdx(env, true, nullptr);
   }
+  if (arrType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
+  if (arrType <= TClsMeth) PUNT(ArrayIdx_clsmeth);
 
-  implArrayIdx(env);
+  interpOne(env, TCell, 3);
 }
 
 void emitIdx(IRGS& env) {
@@ -1956,8 +2394,10 @@ void emitIdx(IRGS& env) {
   auto const keyType  = key->type();
   auto const baseType = base->type();
 
-  if (baseType <= TVec) return implVecIdx(env, nullptr);
-  if (baseType <= TDict) return implDictKeysetIdx(env, true, nullptr);
+  if (baseType.subtypeOfAny(TVec, TVArr)) return implVecIdx(env, nullptr);
+  if (baseType.subtypeOfAny(TDict, TDArr)) {
+    return implDictKeysetIdx(env, true, nullptr);
+  }
   if (baseType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
 
   if (keyType <= TNull || !baseType.maybe(TArr | TObj | TStr)) {
@@ -1970,16 +2410,8 @@ void emitIdx(IRGS& env) {
     return;
   }
 
-  auto const simple_key =
-    keyType <= TInt || keyType <= TStr;
-
-  if (!simple_key) {
-    implGenericIdx(env);
-    return;
-  }
-
-  if (baseType <= TArr) {
-    implArrayIdx(env);
+  if (!(keyType <= TInt || keyType <= TStr)) {
+    interpOne(env, TCell, 3);
     return;
   }
 
@@ -1999,196 +2431,422 @@ void emitIdx(IRGS& env) {
     return;
   }
 
-  implGenericIdx(env);
+  interpOne(env, TCell, 3);
 }
 
 void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
-  auto key = popC(env);
-
-  if (arr->isA(TVec)) {
-    if (key->isA(TNull | TStr)) {
-      push(env, cns(env, false));
-      decRef(env, arr);
-      decRef(env, key);
-      return;
-    }
-    if (!key->isA(TInt)) {
-      gen(env, ThrowInvalidArrayKey, arr, key);
-      return;
-    }
-    auto const result = cond(
-      env,
-      [&](Block* taken) {
-        gen(env, CheckPackedArrayDataBounds, taken, arr, key);
-      },
-      [&] { return cns(env, true); },
-      [&] { return cns(env, false); }
-    );
-    push(env, result);
-    decRef(env, arr);
-    return;
+  auto key = convertClassKey(env, popC(env));
+  if (key->isA(TFunc)) PUNT(AKExists_func_key);
+  if (!arr->type().subtypeOfAny(TKeyset, TVec, TVArr, TDict, TDArr, TObj)) {
+    PUNT(AKExists_unknown_array_or_obj_type);
   }
 
-  if (arr->isA(TDict) || arr->isA(TKeyset)) {
-    if (key->isA(TNull)) {
+  auto throwBadKey = [&] {
+    // TODO(T11019533): Fix the underlying issue with unreachable code rather
+    // than papering over it by pushing an unused value here.
+    push(env, cns(env, false));
+    decRef(env, arr);
+    decRef(env, key);
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+    gen(env, ThrowInvalidArrayKey, arr, key);
+  };
+
+  if (arr->type().subtypeOfAny(TVec, TVArr)) {
+    if (key->isA(TStr)) {
       push(env, cns(env, false));
       decRef(env, arr);
       decRef(env, key);
       return;
     }
-    if (!key->isA(TInt) && !key->isA(TStr)) {
-      gen(env, ThrowInvalidArrayKey, arr, key);
+    if (key->isA(TInt)) {
+      auto const result = cond(
+        env,
+        [&](Block* taken) {
+          gen(env, CheckVecBounds, taken, arr, key);
+        },
+        [&] { return cns(env, true); },
+        [&] { return cns(env, false); }
+      );
+      push(env, result);
+      decRef(env, arr);
       return;
     }
-    auto const val = gen(
-      env,
-      arr->isA(TDict) ? AKExistsDict : AKExistsKeyset,
-      arr,
-      key
-    );
+    return throwBadKey();
+  }
+
+  if (arr->type().subtypeOfAny(TDict, TDArr, TKeyset)) {
+    if (!key->type().subtypeOfAny(TInt, TStr)) {
+      return throwBadKey();
+    }
+    auto const op = arr->isA(TKeyset) ? AKExistsKeyset : AKExistsDict;
+    auto const val = gen(env, op, arr, key);
     push(env, val);
     decRef(env, arr);
     decRef(env, key);
     return;
   }
 
-  if (!arr->isA(TArr) && !arr->isA(TObj)) PUNT(AKExists_badArray);
-
-  if (key->isA(TInitNull)) {
-    if (arr->isA(TObj)) {
-      push(env, cns(env, false));
-      decRef(env, arr);
-      return;
-    }
-
-    if (RuntimeOption::EvalHackArrCompatNotices) {
-      gen(
-        env,
-        RaiseHackArrCompatNotice,
-        cns(
-          env,
-          makeStaticString(
-            makeHackArrCompatImplicitArrayKeyMsg(uninit_variant.asTypedValue())
-          )
-        )
-      );
-    }
-
-    key = cns(env, staticEmptyString());
-  }
-
   if (!key->isA(TStr) && !key->isA(TInt)) PUNT(AKExists_badKey);
 
-  auto const val =
-    gen(env, arr->isA(TArr) ? AKExistsArr : AKExistsObj, arr, key);
+  if (arr->isA(TObj) && key->isA(TInt) &&
+      collections::isType(arr->type().clsSpec().cls(), CollectionType::Vector,
+                          CollectionType::ImmVector)) {
+    auto const val =
+      gen(env, CheckRange, key, gen(env, CountCollection, arr));
+    push(env, val);
+    decRef(env, arr);
+    return;
+  }
+
+  auto const val = gen(env, AKExistsObj, arr, key);
   push(env, val);
   decRef(env, arr);
   decRef(env, key);
 }
 
 //////////////////////////////////////////////////////////////////////
+const StaticString
+  s_implicit_context_set("HH\\ImplicitContext::set"),
+  s_implicit_context_genSet("HH\\ImplicitContext::genSet");
 
-void emitGetMemoKeyL(IRGS& env, int32_t locId) {
-  auto const func = curFunc(env);
-  assertx(func->isMemoizeWrapper());
-  assertx(!func->anyByRef());
+void emitGetMemoKeyL(IRGS& env, NamedLocal loc) {
+  DEBUG_ONLY auto const func = curFunc(env);
+  assertx(func->isMemoizeWrapper() ||
+          func->fullName()->isame(s_implicit_context_set.get()) ||
+          func->fullName()->isame(s_implicit_context_genSet.get()));
 
-  // If this local corresponds to a function's parameter, and that parameter has
-  // an enforced type-constraint, we may be able to use a more specific
-  // memoization key scheme. These schemes need to agree with HHBBC and the
-  // interpreter.
-  using MK = MemoKeyConstraint;
-  auto const mkc = [&]{
-    if (!RuntimeOption::EvalHardTypeHints) return MK::None;
-    if (locId >= func->numParams()) return MK::None;
-    return memoKeyConstraintFromTC(func->params()[locId].typeConstraint);
-  }();
-
-  auto const value = ldLocInnerWarn(
+  auto const value = ldLocWarn(
     env,
-    locId,
-    makeExit(env),
+    loc,
     nullptr,
     DataTypeSpecific
   );
 
-  switch (mkc) {
-    case MK::Null:
-      // Null values are always mapped to 0
-      assertx(value->isA(TNull));
-      push(env, cns(env, 0));
-      break;
-    case MK::Int:
-    case MK::IntOrNull:
-      // Integers are always identity mappings, while null gets mapped to a
-      // static string.
-      assertx(value->isA(TInt | TNull));
-      push(
-        env,
-        gen(
+  // Use the generic scheme, which is implemented by GetMemoKey. The simplifier
+  // will catch any additional special cases.
+  push(env, gen(env, GetMemoKey, value));
+}
+
+namespace {
+
+void memoGetImpl(IRGS& env,
+                 Offset notfoundOff,
+                 Offset suspendedOff,
+                 LocalRange keys) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= curFunc(env)->numLocals());
+  assertx(suspendedOff == kInvalidOffset || curFunc(env)->isAsyncFunction());
+
+  CompactVector<bool> types;
+  for (auto i = keys.count; i > 0; --i) {
+    auto const type = env.irb->local(keys.first + i - 1, DataTypeSpecific).type;
+    if (type <= TStr) {
+      types.emplace_back(true);
+    } else if (type <= TInt) {
+      types.emplace_back(false);
+    } else {
+      // Let it fatal from the interpreter
+      PUNT(MemoGet);
+    }
+  }
+
+  auto const notFound = getBlock(env, bcOff(env) + notfoundOff);
+  assertx(notFound != nullptr);
+
+  auto const func = curFunc(env);
+
+  auto const loadAux = suspendedOff != kInvalidOffset;
+
+  auto const val = [&]{
+    // Any value we get from memoization must be the same type we return from
+    // this function. If we need to load the aux field, force the type to be
+    // InitCell so that we actually load the type. We'll assert the proper type
+    // once we've checked aux.
+    auto const retTy = loadAux
+      ? TInitCell
+      : typeFromRAT(func->repoReturnType(), curClass(env)) & TInitCell;
+
+    if (func->isMethod() && !func->isStatic()) {
+      auto const cls = func->cls();
+      assertx(cls != nullptr);
+      assertx(cls->hasMemoSlots());
+
+      auto const this_ = checkAndLoadThis(env);
+      if (!this_->isA(Type::SubObj(cls))) PUNT(MemoGet);
+
+      auto const memoInfo = cls->memoSlotForFunc(func->getFuncId());
+
+      if (keys.count == 0 && !memoInfo.second) {
+        return gen(
           env,
-          Select,
-          gen(env, IsType, TNull, value),
-          cns(env, s_nullMemoKey.get()),
-          value
-        )
-      );
-      break;
-    case MK::Bool:
-    case MK::BoolOrNull:
-      // Booleans are just converted to integers, while null gets mapped to 2
-      // (since bool will only ever be 0 or 1).
-      assertx(value->isA(TBool | TNull));
-      push(
+          MemoGetInstanceValue,
+          MemoValueInstanceData { memoInfo.first, func, folly::none, loadAux },
+          notFound,
+          retTy,
+          this_
+        );
+      }
+
+      return gen(
         env,
-        cond(
-          env,
-          [&](Block* taken) { gen(env, CheckType, TNull, taken, value); },
-          [&] { return cns(env, 2); },
-          [&] {
-            auto const refined = gen(env, AssertType, TBool, value);
-            return gen(env, ConvBoolToInt, refined);
-          }
-        )
+        MemoGetInstanceCache,
+        MemoCacheInstanceData {
+          memoInfo.first,
+          keys,
+          types.data(),
+          func,
+          memoInfo.second,
+          folly::none,
+          loadAux
+        },
+        notFound,
+        retTy,
+        fp(env),
+        this_
       );
-      return;
-    case MK::Str:
-    case MK::StrOrNull:
-      // Strings are identity mapped, while null is mapped to 0.
-      assertx(value->isA(TStr | TNull));
+    }
+
+    if (func->isMemoizeWrapperLSB()) {
+      /* For LSB memoization, we need the LSB class */
+      auto const lsbCls = ldCtxCls(env);
+      if (keys.count > 0) {
+        return gen(
+          env,
+          MemoGetLSBCache,
+          MemoCacheStaticData {
+            func,
+            keys,
+            types.data(),
+            folly::none,
+            loadAux
+          },
+          notFound,
+          retTy,
+          fp(env),
+          lsbCls
+        );
+      }
+      return gen(
+        env,
+        MemoGetLSBValue,
+        MemoValueStaticData { func, folly::none, loadAux },
+        notFound,
+        retTy,
+        lsbCls
+      );
+    }
+
+    /* Static (non-LSB) Memoization */
+    if (keys.count > 0) {
+      return gen(
+        env,
+        MemoGetStaticCache,
+        MemoCacheStaticData { func, keys, types.data(), folly::none, loadAux },
+        notFound,
+        retTy,
+        fp(env)
+      );
+    }
+    return gen(
+      env,
+      MemoGetStaticValue,
+      MemoValueStaticData { func, folly::none, loadAux },
+      notFound,
+      retTy
+    );
+  }();
+
+  if (!loadAux) {
+    pushIncRef(env, val);
+    return;
+  }
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const aux = gen(env, LdTVAux, LdTVAuxData {}, val);
+      auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
+      gen(env, JmpZero, taken, tst);
+    },
+    [&] {
       pushIncRef(
         env,
         gen(
           env,
-          Select,
-          gen(env, IsType, TNull, value),
-          cns(env, 0),
-          value
+          AssertType,
+          typeFromRAT(func->repoAwaitedReturnType(), curClass(env)) & TInitCell,
+          val
         )
       );
-      return;
-    case MK::IntOrStr:
-      // Integers and strings can never collide, so they're just identity
-      // mappings.
-      assertx(value->isA(TInt | TStr));
-      pushIncRef(env, value);
-      break;
-    case MK::None:
-      // Otherwise just use the generic scheme, which is implemented by
-      // GetMemoKey. The simplifier will catch any additional special cases.
-      push(env, gen(env, GetMemoKey, value));
-      break;
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      pushIncRef(
+        env,
+        gen(
+          env,
+          AssertType,
+          typeFromRAT(func->repoReturnType(), curClass(env)) & TInitCell,
+          val
+        )
+      );
+      jmpImpl(env, bcOff(env) + suspendedOff);
+    }
+  );
+}
+
+}
+
+void emitMemoGet(IRGS& env, Offset notfoundOff, LocalRange keys) {
+  memoGetImpl(env, notfoundOff, kInvalidOffset, keys);
+}
+
+void emitMemoGetEager(IRGS& env,
+                      Offset notfoundOff,
+                      Offset suspendedOff,
+                      LocalRange keys) {
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(resumeMode(env) == ResumeMode::None);
+  memoGetImpl(env, notfoundOff, suspendedOff, keys);
+}
+
+namespace {
+
+void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= curFunc(env)->numLocals());
+  assertx(!eager || curFunc(env)->isAsyncFunction());
+
+  CompactVector<bool> types;
+  for (auto i = keys.count; i > 0; --i) {
+    auto const type = env.irb->local(keys.first + i - 1, DataTypeSpecific).type;
+    if (type <= TStr) {
+      types.emplace_back(true);
+    } else if (type <= TInt) {
+      types.emplace_back(false);
+    } else {
+      // Let it fatal from the interpreter
+      PUNT(MemoSet);
+    }
   }
+
+  auto const ldVal = [&] (DataTypeCategory tc) {
+    return gen(
+      env,
+      AssertType,
+      TInitCell,
+      topC(env, BCSPRelOffset{ 0 }, tc)
+    );
+  };
+
+  auto const func = curFunc(env);
+
+  auto const asyncEager = [&] () -> folly::Optional<bool> {
+    if (!func->isAsyncFunction()) return folly::none;
+    return eager;
+  }();
+
+  if (func->isMethod() && !func->isStatic()) {
+    auto const cls = func->cls();
+    assertx(cls != nullptr);
+    assertx(cls->hasMemoSlots());
+
+    auto const this_ = checkAndLoadThis(env);
+    if (!this_->isA(Type::SubObj(cls))) PUNT(MemoSet);
+
+    auto const memoInfo = cls->memoSlotForFunc(func->getFuncId());
+
+    if (keys.count == 0 && !memoInfo.second) {
+      gen(
+        env,
+        MemoSetInstanceValue,
+        MemoValueInstanceData { memoInfo.first, func, asyncEager, false },
+        this_,
+        ldVal(DataTypeCountness)
+      );
+      return;
+    }
+
+    gen(
+      env,
+      MemoSetInstanceCache,
+      MemoCacheInstanceData {
+        memoInfo.first,
+        keys,
+        types.data(),
+        func,
+        memoInfo.second,
+        asyncEager,
+        false
+      },
+      fp(env),
+      this_,
+      ldVal(DataTypeGeneric)
+    );
+    return;
+  }
+
+  if (func->isMemoizeWrapperLSB()) {
+    /* For LSB memoization, we need the LSB class */
+    auto const lsbCls = ldCtxCls(env);
+    if (keys.count > 0) {
+      gen(
+        env,
+        MemoSetLSBCache,
+        MemoCacheStaticData { func, keys, types.data(), asyncEager, false },
+        fp(env),
+        lsbCls,
+        ldVal(DataTypeGeneric)
+      );
+      return;
+    }
+
+    gen(
+      env,
+      MemoSetLSBValue,
+      MemoValueStaticData { func, asyncEager, false },
+      ldVal(DataTypeCountness),
+      lsbCls
+    );
+    return;
+  }
+
+  if (keys.count > 0) {
+    gen(
+      env,
+      MemoSetStaticCache,
+      MemoCacheStaticData { func, keys, types.data(), asyncEager, false },
+      fp(env),
+      ldVal(DataTypeGeneric)
+    );
+    return;
+  }
+
+  gen(
+    env,
+    MemoSetStaticValue,
+    MemoValueStaticData { func, asyncEager, false },
+    ldVal(DataTypeCountness)
+  );
+}
+
+}
+
+void emitMemoSet(IRGS& env, LocalRange keys) {
+  memoSetImpl(env, keys, false);
+}
+
+void emitMemoSetEager(IRGS& env, LocalRange keys) {
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(resumeMode(env) == ResumeMode::None);
+  memoSetImpl(env, keys, true);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
-  // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR
-  // invariant).
-  if (curFunc(env)->isPseudoMain()) PUNT(PseudoMain-Silence);
-
   switch (subop) {
   case SilenceOp::Start:
     // We assume that whatever is in the local is dead and doesn't need to be

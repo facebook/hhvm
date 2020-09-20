@@ -1,13 +1,13 @@
-array(2) {
+darray(2) {
   ["a"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(2) "aa"
     [1]=>
     string(2) "aa"
   }
   ["b"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(2) "bb"
     [1]=>

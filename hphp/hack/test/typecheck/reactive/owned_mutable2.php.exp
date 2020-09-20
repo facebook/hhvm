@@ -1,0 +1,2 @@
+File "owned_mutable2.php", line 4, characters 5-18:
+The `__OwnedMutable` attribute cannot be used on a method. (Typing[4231])

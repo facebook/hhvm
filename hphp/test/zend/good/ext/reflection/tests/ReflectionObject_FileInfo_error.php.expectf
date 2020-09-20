@@ -1,21 +1,15 @@
-string(%d) "%s"
+string(%d) "%s/ReflectionObject_FileInfo_error.php"
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getFileName() expects exactly 0 parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
 int(2)
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getStartLine() expects exactly 0 parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getStartLine() expects exactly 0 parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10
 int(2)
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getEndLine() expects exactly 0 parameters, 1 given in %s/ReflectionObject_FileInfo_error.php on line 9
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getEndLine() expects exactly 0 parameters, 2 given in %s/ReflectionObject_FileInfo_error.php on line 10

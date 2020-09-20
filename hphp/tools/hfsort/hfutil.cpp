@@ -32,6 +32,8 @@ bool CallGraph::addFunc(
     auto& base = funcs[it->second];
     auto& baseTarget = targets[it->second];
     base.mangledNames.push_back(name);
+    // Store the same id for different symbol name with same start address
+    func2TargetId[name] = it->second;
     if (size > baseTarget.size) baseTarget.size = size;
     HFTRACE(2, "Func: adding '%s' to (%u)\n", name.c_str(), it->second);
     return true;

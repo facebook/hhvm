@@ -32,7 +32,7 @@ uint32_t AsioContext::registerTo(req::vector<TWaitHandle*>& vec,
 template <class TWaitHandle>
 void AsioContext::unregisterFrom(req::vector<TWaitHandle*>& vec,
                                  uint32_t idx) {
-  assert(idx < vec.size());
+  assertx(idx < vec.size());
   if (idx != vec.size() - 1) {
     vec[idx] = vec.back();
     vec[idx]->setContextVectorIndex(idx);

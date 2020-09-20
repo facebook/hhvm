@@ -30,21 +30,6 @@ TEST(Variant, Conversions) {
   EXPECT_TRUE(v.toInt32() == 123);
 }
 
-TEST(Variant, References) {
-  {
-    Variant v1("original");
-    Variant v2 = v1;
-    v2 = String("changed");
-    EXPECT_TRUE(equal(v1, String("original")));
-  }
-  {
-    Variant v1("original");
-    Variant v2(Variant::StrongBind{}, v1);
-    v2 = String("changed");
-    EXPECT_TRUE(equal(v1, String("changed")));
-  }
-}
-
 TEST(Variant, Refcounts) {
   {
     auto ptr = req::make<DummyResource>();
@@ -244,37 +229,6 @@ TEST(Variant, MoveCasts) {
     auto res3 = dyn_cast<c_Map>(
       Variant(req::make<c_Vector>()));
     EXPECT_EQ(res3, nullptr);
-  }
-  {
-    auto dummy = req::make<DummyResource>();
-    dummy->incRefCount(); // the RefData constructor steals it's input.
-    auto ref = req::ptr<RefData>::attach(
-      RefData::Make(*Variant(dummy).asTypedValue()));
-    Variant dummyRef(ref);
-    EXPECT_FALSE(ref->hasExactlyOneRef());
-    auto res = cast<DummyResource>(dummyRef);
-    EXPECT_EQ(res, dummy);
-  }
-  {
-    auto dummy = req::make<DummyResource>();
-    dummy->incRefCount(); // the RefData constructor steals it's input.
-    Variant dummyRef(
-      req::ptr<RefData>::attach(RefData::Make(*Variant(dummy).asTypedValue())));
-    //EXPECT_TRUE(dummyRef.getRefData()->hasExactlyOneRef());
-    auto res = cast<DummyResource>(std::move(dummyRef));
-    EXPECT_EQ(res, dummy);
-  }
-  {
-    auto dummy = req::make<DummyResource>();
-    dummy->incRefCount(); // the RefData constructor steals it's input.
-    auto ref = req::ptr<RefData>::attach(
-      RefData::Make(*Variant(dummy).asTypedValue()));
-    Variant dummyRef(ref.get());
-    EXPECT_FALSE(ref->hasExactlyOneRef());
-    auto res = cast<DummyResource>(std::move(dummyRef));
-    EXPECT_EQ(res, dummy);
-    EXPECT_TRUE(dummyRef.isNull());
-    EXPECT_TRUE(dummy->hasMultipleRefs());
   }
 }
 

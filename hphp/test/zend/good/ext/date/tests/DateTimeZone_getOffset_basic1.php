@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : int DateTimeZone::getOffset  ( DateTime $datetime  )
  * Description: Returns the timezone offset from GMT
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_offset_get()
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing DateTimeZone::getOffset() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -20,5 +20,5 @@ var_dump( $tz2->getOffset($date) );
 $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getOffset($date) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

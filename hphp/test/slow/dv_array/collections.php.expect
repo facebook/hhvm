@@ -1,0 +1,171 @@
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(3) {
+  int(100)
+  int(200)
+  int(300)
+}
+darray(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(2) {
+  int(100)
+  int(200)
+}
+darray(2) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(2) {
+  string(3) "abc"
+  string(3) "def"
+}
+darray(2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(3) {
+  int(100)
+  int(200)
+  int(300)
+}
+darray(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(2) {
+  int(100)
+  int(200)
+}
+darray(2) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)

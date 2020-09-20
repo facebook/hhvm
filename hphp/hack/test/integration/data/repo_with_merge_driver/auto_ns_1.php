@@ -1,5 +1,5 @@
-        <?hh
-        namespace Derp\Lib\Herp;
-        function f() {
-            return 1;
-        }
+<?hh //partial
+namespace Derp\Lib\Herp;
+function f() {
+    return 1;
+}

@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : scientific formats with resource values ***\n";
 
 // resource type variable
@@ -11,18 +11,18 @@ $fp = fopen (__FILE__, "r");
 $dfp = opendir ( dirname(__FILE__) );
 
 // array of resource types
-$resource_values = array (
+$resource_values = varray [
   $fp,
   $dfp
-);
+];
 
 // array of scientific formats
-$scientific_formats = array( 
+$scientific_formats = varray[ 
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e", 
   "%30e", "%[0-1]", "%*e"
-);
+];
 
 $count = 1;
 foreach($resource_values as $resource_value) {
@@ -38,5 +38,5 @@ foreach($resource_values as $resource_value) {
 fclose($fp);
 closedir($dfp);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,6 +1,5 @@
-<?php
-
-$arr = array('stdclass', 'b');
+<?hh
+<<__EntryPoint>> function main(): void {
+$arr = varray['stdclass', 'b'];
 $arr();
-
-?>
+}

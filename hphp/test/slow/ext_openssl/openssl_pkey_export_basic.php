@@ -1,10 +1,11 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $key = openssl_pkey_get_private('file://' . dirname(__FILE__) . '/private_ec.key');
 var_dump($key);
 
-$config_arg = array("config" => __DIR__ . DIRECTORY_SEPARATOR . "openssl.cnf");
+$config_arg = darray["config" => __DIR__ . DIRECTORY_SEPARATOR . "openssl.cnf"];
 
-var_dump(openssl_pkey_export($key, $output, NULL, $config_arg));
+$output = null;
+var_dump(openssl_pkey_export($key, inout $output, '', $config_arg));
 echo $output;
 
 // Load the private key from the exported pem string
@@ -12,7 +13,7 @@ $details = openssl_pkey_get_details(openssl_pkey_get_private($output));
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
 
 // Export key with passphrase
-openssl_pkey_export($key, $output, 'passphrase', $config_arg);
+openssl_pkey_export($key, inout $output, 'passphrase', $config_arg);
 
 $details = openssl_pkey_get_details(openssl_pkey_get_private($output, 'passphrase'));
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
@@ -26,10 +27,10 @@ var_dump(array_diff_assoc($details['ec'], $detailsPKey['ec']));
 
 // Export to file
 $tempname = tempnam(sys_get_temp_dir(), 'openssl_ec');
-var_dump(openssl_pkey_export_to_file($key, $tempname, NULL, $config_arg));
+var_dump(openssl_pkey_export_to_file($key, $tempname, '', $config_arg));
 $details = openssl_pkey_get_details(openssl_pkey_get_private('file://' . $tempname));
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
 
 // Clean the temporary file
 @unlink($tempname);
-?>
+}

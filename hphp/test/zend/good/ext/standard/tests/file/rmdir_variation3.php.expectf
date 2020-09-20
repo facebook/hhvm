@@ -7,10 +7,10 @@ Directory removed
 Directory removed
 -- removing rmdirVar3.tmp/../BADDIR/aSubDir --
 
-Warning: %s
+Warning: rmdir(): No such file or directory in %s/rmdir_variation3.php on line 47
 -- removing BADDIR/aSubDir --
 
-Warning: %s
+Warning: rmdir(): No such file or directory in %s/rmdir_variation3.php on line 47
 -- removing %s/rmdirVar3.tmp/aSubDir --
 Directory removed
 -- removing %s/./rmdirVar3.tmp/aSubDir --
@@ -19,7 +19,7 @@ Directory removed
 Directory removed
 -- removing %s/BADDIR/aSubDir --
 
-Warning: %s
+Warning: rmdir(): No such file or directory in %s/rmdir_variation3.php on line 47
 -- removing rmdirVar3.tmp/aSubDir/ --
 Directory removed
 -- removing %s/rmdirVar3.tmp/aSubDir/ --

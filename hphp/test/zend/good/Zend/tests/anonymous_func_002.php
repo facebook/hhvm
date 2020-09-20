@@ -1,10 +1,12 @@
-<?php 
+<?hh
 
-$test = create_function('$v', 'return $v;');
+<<__EntryPoint>>
+function entrypoint_anonymous_func_002(): void {
 
-$arr = array(create_function('', 'return $GLOBALS["arr"];'), 2);
+  $test = $v ==> $v;
 
-var_dump($arr[$test(1)]);
-var_dump($arr[$test(0)]() == $arr);
+  \HH\global_set('arr', varray[() ==> \HH\global_get('arr'), 2]);
 
-?>
+  var_dump(\HH\global_get('arr')[$test(1)]);
+  var_dump(\HH\global_get('arr')[$test(0)]() == \HH\global_get('arr'));
+}

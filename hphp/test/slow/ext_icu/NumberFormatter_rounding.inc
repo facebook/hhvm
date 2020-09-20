@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test_rounding($locale, $digits, $mode = null) {
   $formatter = NumberFormatter::create($locale, NumberFormatter::DEFAULT_STYLE);
   $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $digits);
@@ -6,7 +6,7 @@ function test_rounding($locale, $digits, $mode = null) {
     $formatter->setAttribute(NumberFormatter::ROUNDING_MODE, $mode);
   }
 
-  $values = array(
+  $values = varray[
     1.23,
     1.2327,
     1.2372,
@@ -15,7 +15,7 @@ function test_rounding($locale, $digits, $mode = null) {
     -1.2327,
     -1.2372,
     -1.235
-  );
+  ];
 
   foreach ($values as $value) {
     echo $value;

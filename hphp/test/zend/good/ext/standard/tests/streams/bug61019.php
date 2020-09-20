@@ -1,14 +1,15 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 echo "Test\n";
 
-$descriptorspec = array(
-	0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
-	1 => array("pipe", "w"),  // stdout is a pipe that the child will write to
-	2 => array("pipe", "w")   // stderr is a pipe that the child will write to
-);
+$descriptorspec = darray[
+	0 => varray["pipe", "r"],  // stdin is a pipe that the child will read from
+	1 => varray["pipe", "w"],  // stdout is a pipe that the child will write to
+	2 => varray["pipe", "w"]   // stderr is a pipe that the child will write to
+];
 
-$process=proc_open("echo testtext",$descriptorspec,$pipes);
+$pipes = null;
+$process=proc_open("echo testtext", $descriptorspec, inout $pipes);
 if(is_resource($process))
 {
 	stream_set_blocking($pipes[0],false);
@@ -20,17 +21,17 @@ if(is_resource($process))
 	$stdin_stream="";
 	$stderr_stream="";
 
-	echo "External command executed\n";   	
-	do                                     	
+	echo "External command executed\n";
+	do
 	{
 		$process_state=proc_get_status($process);
-		$tmp_stdin=stream_get_contents($pipes[1]);   	
-		if($tmp_stdin) 
+		$tmp_stdin=stream_get_contents($pipes[1]);
+		if($tmp_stdin)
 		{
 			$stdin_stream=$stdin_stream.$tmp_stdin;
 		}
 		$tmp_stderr=stream_get_contents($pipes[2]);
-		if($tmp_stderr) 
+		if($tmp_stderr)
 		{
 			$stderr_stream=$stderr_stream.$tmp_stderr;
 		}
@@ -39,13 +40,13 @@ if(is_resource($process))
 	echo "External command exit: ".$process_state['exitcode']."\n";
 
 	//read outstanding data
-	$tmp_stdin=stream_get_contents($pipes[1]);   	
-	if($tmp_stdin) 
+	$tmp_stdin=stream_get_contents($pipes[1]);
+	if($tmp_stdin)
 	{
 		$stdin_stream=$stdin_stream.$tmp_stdin;
 	}
 	$tmp_stderr=stream_get_contents($pipes[2]);
-	if($tmp_stderr) 
+	if($tmp_stderr)
 	{
 		$stderr_stream=$stderr_stream.$tmp_stderr;
 	}
@@ -54,7 +55,7 @@ if(is_resource($process))
 	fclose ($pipes[1]);
 	fclose ($pipes[2]);
 
-	proc_close($process);    
+	proc_close($process);
 
 	echo "STDOUT: ".$stdin_stream."\n";
 	echo "STDERR: ".$stderr_stream."\n";
@@ -63,5 +64,5 @@ else
 {
 	echo "Can't start external command\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,34 +1,30 @@
-<?php
+<?hh
 /*
  *  Prototype: float disk_free_space( string directory )
- *  Description: Given a string containing a directory, this function will 
- *               return the number of bytes available on the corresponding 
+ *  Description: Given a string containing a directory, this function will
+ *               return the number of bytes available on the corresponding
  *               filesystem or disk partition
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
-$file_path = dirname(__FILE__);
-var_dump( disk_free_space() ); // Zero Arguments
-var_dump( diskfreespace() );
 
-var_dump( disk_free_space( $file_path, "extra argument") ); // More than valid number of arguments
-var_dump( diskfreespace( $file_path, "extra argument") );
+try { var_dump( disk_free_space() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero Arguments
+try { var_dump( diskfreespace() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+
+try { var_dump( disk_free_space( "junk", "extra argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // More than valid number of arguments
+try { var_dump( diskfreespace( "junk", "extra argument") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
-var_dump( disk_free_space( $file_path."/dir1" )); // Invalid directory
-var_dump( diskfreespace( $file_path."/dir1" ));
+var_dump( disk_free_space( __SystemLib\hphp_test_tmppath('dir1') )); // Invalid directory
+var_dump( diskfreespace( __SystemLib\hphp_test_tmppath('dir1') ));
 
-$fh = fopen( $file_path."/disk_free_space.tmp", "w" );
-fwrite( $fh, (binary)" Garbage data for the temporary file" );
-var_dump( disk_free_space( $file_path."/disk_free_space.tmp" )); // file input instead of directory
-var_dump( diskfreespace( $file_path."/disk_free_space.tmp" ));
+$fh = fopen( __SystemLib\hphp_test_tmppath('disk_free_space.tmp'), "w" );
+fwrite( $fh, (string)" Garbage data for the temporary file" );
+var_dump( disk_free_space( __SystemLib\hphp_test_tmppath('disk_free_space.tmp') )); // file input instead of directory
+var_dump( diskfreespace( __SystemLib\hphp_test_tmppath('disk_free_space.tmp') ));
 fclose($fh);
 
 echo"\n-- Done --";
-?>
-<?php error_reporting(0); ?>
-<?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/disk_free_space.tmp");
 
-?>
+unlink(__SystemLib\hphp_test_tmppath('disk_free_space.tmp'));
+}

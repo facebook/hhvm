@@ -1,32 +1,32 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when default enclosure value is provided */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with default enclosure value ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = array (
-  array(',', '"', array('water,fruit') ),
-  array(',', '"', array('"water","fruit') ),
-  array(',', '"', array('"water","fruit"') ),
-  array(' ', '^', array('^water^ ^fruit^')),
-  array(':', '&', array('&water&:&fruit&')),
-  array('=', '=', array('=water===fruit=')),
-  array('-', '-', array('-water--fruit-air')),
-  array('-', '-', array('-water---fruit---air-')),
-  array(':', '&', array('&""""&:&"&:,:":&,&:,,,,'))
+$csv_lists = varray [
+  varray[',', '"', varray['water,fruit'] ],
+  varray[',', '"', varray['"water","fruit'] ],
+  varray[',', '"', varray['"water","fruit"'] ],
+  varray[' ', '^', varray['^water^ ^fruit^']],
+  varray[':', '&', varray['&water&:&fruit&']],
+  varray['=', '=', varray['=water===fruit=']],
+  varray['-', '-', varray['-water--fruit-air']],
+  varray['-', '-', varray['-water---fruit---air-']],
+  varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
 
-);
-$file_path = dirname(__FILE__);
-$file = "$file_path/fputcsv_variation11.tmp";
+];
 
-$file_modes = array ("r+", "r+b", "r+t",
+$file = __SystemLib\hphp_test_tmppath('fputcsv_variation11.tmp');
+
+$file_modes = varray ["r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t"]; 
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -60,4 +60,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
-?>
+}

@@ -18,4 +18,8 @@ class Something2 {}
 type SomethingElse = Something2;
 type SomethingElse = Something2;
 
+
+<<__EntryPoint>>
+function main_typedef_duplicate_ok() {
 echo "Yeah\n";
+}

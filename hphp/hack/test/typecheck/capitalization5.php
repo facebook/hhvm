@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function CamelCase(int $x): void {}
 

@@ -1,0 +1,6 @@
+File "instanceof_generic_bad_2.php", line 11, characters 12-13:
+Invalid return type (Typing[4110])
+File "instanceof_generic_bad_2.php", line 9, characters 40-40:
+Expected `T`
+File "instanceof_generic_bad_2.php", line 9, characters 33-33:
+But got `I`

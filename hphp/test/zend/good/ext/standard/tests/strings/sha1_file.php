@@ -1,32 +1,18 @@
-<?php
+<?hh
 
 /* Prototype: string sha1_file( string filename[, bool raw_output] )
  * Description: Calculate the sha1 hash of a file
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sha1_file() : basic functionality ***\n";
 
 /* Creating an empty file */
-if (($handle = fopen( "sha1_EmptyFile.txt", "w+")) == FALSE)
-return false;
+$empty_file = __SystemLib\hphp_test_tmppath('sha1_EmptyFile.txt');
+fclose(fopen($empty_file, 'w+'));
 
 /* Creating a data file */
-if (($handle2 = fopen( "sha1_DataFile.txt", "w+")) == FALSE)
-return false;
-
-/* Writing into file */ 
-$filename = "sha1_DataFile.txt";
-$content = b"Add this to the file\n";
-if (is_writable($filename)) {
-  if (fwrite($handle2, $content) === FALSE) {
-    echo "Cannot write to file ($filename)";
-    exit;
-  }
-}
-
-// close the files 
-fclose($handle);
-fclose($handle2);
+$data_file = __SystemLib\hphp_test_tmppath('sha1_DataFile.txt');
+file_put_contents($data_file, "Add this to the file\n");
 
 /* Testing error conditions */
 echo "\n*** Testing for error conditions ***\n";
@@ -37,33 +23,27 @@ var_dump( sha1_file("") );
 echo "\n-- invalid filename --\n";
 var_dump( sha1_file("rewncwYcn89q") );
 
-echo "\n-- Scalar value as filename --\n";
-var_dump( sha1_file(12) );
-
-echo "\n-- NULL as filename --\n";
-var_dump( sha1_file(NULL) );
-
 echo "\n-- Zero arguments --\n";
- var_dump ( sha1_file() );
+ try { var_dump ( sha1_file() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- More than valid number of arguments ( valid is 2) --\n";
-var_dump ( sha1_file("sha1_EmptyFile.txt", true, NULL) );
+try { var_dump ( sha1_file($empty_file, true, NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Hexadecimal Output for Empty file as Argument --\n";
-var_dump( sha1_file("sha1_EmptyFile.txt") );
+var_dump( sha1_file($empty_file) );
 
 echo "\n-- Raw Binary Output for Empty file as Argument --\n";
-var_dump( bin2hex(sha1_file("sha1_EmptyFile.txt", true)));
+var_dump( bin2hex(sha1_file($empty_file, true)));
 
 echo "\n-- Hexadecimal Output for a valid file with some contents --\n";
-var_dump( sha1_file("sha1_DataFile.txt") );
+var_dump( sha1_file($data_file) );
 
 echo "\n-- Raw Binary Output for a valid file with some contents --\n";
-var_dump ( bin2hex(sha1_file("sha1_DataFile.txt", true)));
+var_dump ( bin2hex(sha1_file($data_file, true)));
 
 // remove temp files
-unlink("sha1_DataFile.txt");
-unlink("sha1_EmptyFile.txt");
+unlink($data_file);
+unlink($empty_file);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

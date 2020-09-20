@@ -2,6 +2,5 @@
 
 -- Testing array_push() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_push() expects at least 2 parameters, 1 given in %s/array_push_error1.php on line 16
 Done

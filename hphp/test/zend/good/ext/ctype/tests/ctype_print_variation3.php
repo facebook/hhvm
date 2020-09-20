@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_print(mixed $c)
  * Description: Checks for printable character(s) 
  * Source code: ext/ctype/ctype.c
@@ -8,12 +8,12 @@
  * Pass strings containing different character types to ctype_print() to test
  * which are considered valid printable character only strings
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_print() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -37,7 +37,7 @@ $values = array(
        '',
        ' ', 
 /*23*/ base64_decode("w4DDoMOHw6fDiMOo") // non-ascii characters
-);
+];
 
 $iterator = 1;
 foreach($values as $value) {
@@ -47,5 +47,5 @@ foreach($values as $value) {
 };
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

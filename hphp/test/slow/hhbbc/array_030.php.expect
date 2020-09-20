@@ -1,7 +1,0 @@
-bool(false)
-bool(false)
-bool(true)
-array(1) {
-  ["z"]=>
-  &string(3) "heh"
-}

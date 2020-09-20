@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait THello {
   public function a() {
@@ -8,11 +7,12 @@ trait THello {
 }
 
 class TraitsTest {
-	use THello { THello::a as b; }
+    use THello { THello::a as b; }
 }
 
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
 $test = new TraitsTest();
 $test->a();
 $test->b();
-
-?>
+}

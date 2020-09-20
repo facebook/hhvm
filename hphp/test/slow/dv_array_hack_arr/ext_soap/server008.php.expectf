@@ -1,0 +1,5 @@
+vec(2) {
+  string(3) "Foo"
+  string(4) "test"
+}
+ok

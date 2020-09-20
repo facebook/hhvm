@@ -14,8 +14,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ZEND_PHP_CONFIG_H_
-#define incl_HPHP_ZEND_PHP_CONFIG_H_
+#pragma once
 
 /* $Id: acconfig.h,v 1.40.2.1.2.1 2007/01/01 09:35:45 sebastian Exp $ */
 #define ZEND_API
@@ -272,9 +271,6 @@
 
 /* Whether to build tokenizer as dynamic module */
 /* #undef COMPILE_DL_TOKENIZER */
-
-/* Whether to build wddx as dynamic module */
-/* #undef COMPILE_DL_WDDX */
 
 /* Whether to build xml as dynamic module */
 /* #undef COMPILE_DL_XML */
@@ -1967,9 +1963,6 @@
 #define HAVE_WCHAR_H 1
 
 /* */
-/* #undef HAVE_WDDX */
-
-/* */
 #define HAVE_XML 1
 
 /* Define to 1 if you have the <xmlparse.h> header file. */
@@ -2444,4 +2437,3 @@ int zend_sprintf(char *buffer, const char *format, ...);
  */
 /* #undef PTHREADS */
 
-#endif // incl_HPHP_ZEND_PHP_CONFIG_H_

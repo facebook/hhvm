@@ -1,0 +1,9 @@
+<?hh
+class WithRecursiveMethods {
+  public static function recursive_static(): void {
+    throw new \Exception();
+  }
+  public function recursive_instance(): void {
+    $this->recursive_instance();
+  }
+}

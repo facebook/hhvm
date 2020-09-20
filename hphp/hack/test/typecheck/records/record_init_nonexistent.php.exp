@@ -1,0 +1,4 @@
+File "record_init_nonexistent.php", line 7, characters 11-23:
+Unbound name: `NO_SUCH_CONST` (a global constant) (Naming[2049])
+File "record_init_nonexistent.php", line 7, characters 11-23:
+Unbound global constant (Typing) (Typing[4106])

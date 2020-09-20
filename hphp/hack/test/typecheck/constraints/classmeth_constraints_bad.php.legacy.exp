@@ -1,0 +1,8 @@
+File "classmeth_constraints_bad.php", line 10, characters 8-44:
+Some type constraint(s) here are violated (Typing[4110])
+  File "classmeth_constraints_bad.php", line 6, characters 34-34:
+  'T' is a constrained type parameter
+  File "classmeth_constraints_bad.php", line 6, characters 39-42:
+  This is an object of type Base
+  File "classmeth_constraints_bad.php", line 11, characters 6-6:
+  It is incompatible with an int

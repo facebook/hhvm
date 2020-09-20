@@ -1,5 +1,6 @@
-<?php
-$constants = array(
+<?hh
+<<__EntryPoint>> function main(): void {
+$constants = varray[
     "M_E",
     "M_LOG2E",
     "M_LOG10E",
@@ -17,8 +18,8 @@ $constants = array(
     "M_SQRT2",
     "M_SQRT1_2",
     "M_SQRT3"
-);
+];
 foreach($constants as $constant) {
     printf("%-10s: %s\n", $constant, constant($constant));
 }
-?>
+}

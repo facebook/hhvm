@@ -1,13 +1,12 @@
-<?php
+<?hh
 
 namespace A {
   function f() { return 'A/f'; }
 }
 
 namespace C {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     $name = '\\\\A\f';
-    var_dump($name());
+    \var_dump($name());
   }
-  main();
 }

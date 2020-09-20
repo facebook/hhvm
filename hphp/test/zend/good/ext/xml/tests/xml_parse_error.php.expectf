@@ -2,11 +2,9 @@
 
 -- Testing xml_parse() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_parse() expects at most 3 parameters, 4 given in %s/xml_parse_error.php on line 17
 
 -- Testing xml_parse() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_parse() expects at least 2 parameters, 1 given in %s/xml_parse_error.php on line 22
 Done

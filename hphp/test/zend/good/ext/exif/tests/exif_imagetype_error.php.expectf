@@ -2,16 +2,14 @@
 
 -- Testing exif_imagetype() function with no arguments --
 
-Warning: %s
-NULL
+Warning: exif_imagetype() expects exactly 1 parameter, 0 given in %s/exif_imagetype_error.php on line 11
 
 -- Testing exif_imagetype() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: exif_imagetype() expects exactly 1 parameter, 2 given in %s/exif_imagetype_error.php on line 15
 
 -- Testing exif_imagetype() function with an unknown file  --
 
-Warning: %s
+Warning: No such file or directory in %s/exif_imagetype_error.php on line 18
 bool(false)
 ===Done===

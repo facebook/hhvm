@@ -1,66 +1,78 @@
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
-string(1) "0"
+
+Warning: strip_tags() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 2 --
-string(1) "1"
+
+Warning: strip_tags() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 3 --
-string(5) "12345"
+
+Warning: strip_tags() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 4 --
-string(5) "-2345"
+
+Warning: strip_tags() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 5 --
-string(4) "10.5"
+
+Warning: strip_tags() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 6 --
-string(5) "-10.5"
+
+Warning: strip_tags() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 7 --
-string(12) "101234567000"
+
+Warning: strip_tags() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 8 --
-string(13) "1.07654321E-9"
+
+Warning: strip_tags() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 9 --
-string(3) "0.5"
+
+Warning: strip_tags() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 15 --
-string(0) ""
+
+Warning: strip_tags() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 16 --
-string(0) ""
+
+Warning: strip_tags() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 17 --
-string(1) "1"
+
+Warning: strip_tags() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 18 --
-string(0) ""
+
+Warning: strip_tags() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 19 --
-string(1) "1"
+
+Warning: strip_tags() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 20 --
-string(0) ""
+
+Warning: strip_tags() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 21 --
 string(0) ""
 -- Iteration 22 --
 string(0) ""
 -- Iteration 23 --
-string(14) "Class A object"
+
+Warning: strip_tags() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 24 --
-string(0) ""
+
+Warning: strip_tags() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 25 --
-string(0) ""
+
+Warning: strip_tags() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strip_tags_variation1.php on line 82
 ===DONE===

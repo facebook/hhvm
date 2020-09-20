@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * The purpose of this test is to make sure that '/tmp/foo/http://example.com'
@@ -20,4 +20,8 @@ function main() {
   rmdir($root);
 }
 
+
+<<__EntryPoint>>
+function main_file_path_contains_uri() {
 main();
+}

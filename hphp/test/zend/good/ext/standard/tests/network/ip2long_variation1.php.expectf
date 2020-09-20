@@ -1,65 +1,80 @@
 *** Testing ip2long() : usage variation ***
 
 --int 0--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --int 1--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --int 12345--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --int -12345--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --float 10.5--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --float -10.5--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --float 12.3456789000e10--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --float -12.3456789000e10--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --float .5--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --empty array--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --int indexed array--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --associative array--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --nested arrays--
-Error: 2 - ip2long() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --uppercase NULL--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --lowercase null--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --lowercase true--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --lowercase false--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --uppercase TRUE--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --uppercase FALSE--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --empty string DQ--
 bool(false)
@@ -68,19 +83,22 @@ bool(false)
 bool(false)
 
 --instance of classWithToString--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --instance of classWithoutToString--
-Error: 2 - ip2long() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --undefined var--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --unset var--
-bool(false)
+
+Warning: ip2long() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 
 --resource--
-Error: 2 - ip2long() expects parameter 1 to be string, resource given, %s(%d)
-NULL
+
+Warning: ip2long() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/network/ip2long_variation1.php on line 103
 ===DONE===

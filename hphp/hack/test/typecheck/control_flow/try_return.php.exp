@@ -1,0 +1,6 @@
+File "try_return.php", line 16, characters 18-19:
+Invalid argument (Typing[4110])
+File "try_return.php", line 4, characters 23-28:
+Expected `string`
+File "try_return.php", line 12, characters 12-15:
+But got `bool`

@@ -11,5 +11,6 @@ function foo<T, Q as A<T> >(Q $thing, T $item): T {
 class C<T as A<int>> {}
 class D<T as :x:base> {}
 class E<T as A<:x:base>> {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
-
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $a = pack("H3","181");
 $b = unpack("H3", $a);
 var_dump($b);
@@ -10,4 +10,4 @@ var_dump($b);
 $a = pack("H","1");
 $b = unpack("H", $a);
 var_dump($b);
-?>
+}

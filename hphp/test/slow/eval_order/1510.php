@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Q {
   public $val;
@@ -19,7 +19,11 @@ class A {
 function id($x) {
  return $x;
  }
+
+<<__EntryPoint>>
+function main_1510() {
 $x = new Q(0);
 $a = id(new A)->set($x);
 $x = id(new Q(1))->blah();
 var_dump($a);
+}

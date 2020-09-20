@@ -15,8 +15,11 @@
 */
 #include "hphp/util/afdt-util.h"
 #include <afdt.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
+
+#include "hphp/util/assertions.h"
 
 namespace HPHP {
 namespace afdt {
@@ -26,6 +29,8 @@ namespace detail {
 
 namespace {
 void append(std::vector<iovec>& iov, const void* addr, size_t size) {
+  if (!size) return;
+
   iovec io;
   io.iov_base = const_cast<void*>(addr);
   io.iov_len = size;
@@ -52,6 +57,8 @@ void rappend(int afdt_fd,
 }
 
 void send(int afdt_fd, std::vector<iovec>& iov) {
+  if (iov.size() == 0) return;
+
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
@@ -65,6 +72,8 @@ void send(int afdt_fd, std::vector<iovec>& iov) {
 }
 
 void recv(int afdt_fd, std::vector<iovec>& iov) {
+  if (iov.size() == 0) return;
+
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
@@ -91,6 +100,13 @@ bool send_fd(int afdt_fd, int fd) {
 }
 
 int recv_fd(int afdt_fd) {
+#ifdef __APPLE__
+  {
+    errno = 0;
+    int flags = fcntl(0, F_GETFD);
+    always_assert(flags != -1 || errno != EBADF);
+  }
+#endif
   int fd;
   afdt_error_t err = AFDT_ERROR_T_INIT;
   uint32_t afdt_len = 0;

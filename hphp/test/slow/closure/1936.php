@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   $s_path = serialize($x);
@@ -8,5 +8,9 @@ function test($x) {
 ;
   var_dump($filter(0));
 }
+
+<<__EntryPoint>>
+function main_1936() {
 test('hello');
-test(array(1,2,'foo'=>'bar'));
+test(darray[0 => 1, 1 => 2,'foo'=>'bar']);
+}

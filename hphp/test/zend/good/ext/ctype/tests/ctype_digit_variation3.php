@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_digit(mixed $c)
  * Description: Checks for numeric character(s) 
  * Source code: ext/ctype/ctype.c
@@ -8,12 +8,12 @@
  * Pass strings containing different character types to ctype_digit() to test
  * which are considered valid decimal digit only strings
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_digit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -45,7 +45,7 @@ $values = array(
        "  123",
 /*30*/ "123E4",
 /*31*/ "0x3F",
-);
+];
 
 $iterator = 1;
 foreach($values as $value) {
@@ -55,5 +55,5 @@ foreach($values as $value) {
 };
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

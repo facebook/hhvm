@@ -1,19 +1,15 @@
-<?php
+<?hh
 
-class ClassName
+class SomeClassName
 {
-	public $var = 'bla';
+    public $var = 'bla';
 }
 
 function test (OtherClassName $object) { }
 
-function __autoload($class)
-{
-    var_dump("__autload($class)");
-}
-
-$obj = new ClassName;
+<<__EntryPoint>> function main(): void {
+$obj = new SomeClassName;
 test($obj);
 
 echo "Done\n";
-?>
+}

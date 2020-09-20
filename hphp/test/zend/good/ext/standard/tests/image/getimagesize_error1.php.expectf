@@ -2,11 +2,9 @@
 
 -- Testing getimagesize() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: getimagesize() expects exactly 2 parameters, 0 given in %s/getimagesize_error1.php on line 12
 
 -- Testing getimagesize() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: getimagesize() expects exactly 2 parameters, 3 given in %s/getimagesize_error1.php on line 19
 ===DONE===

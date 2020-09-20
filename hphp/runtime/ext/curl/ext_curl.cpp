@@ -16,12 +16,14 @@
 */
 
 #include "hphp/runtime/ext/curl/ext_curl.h"
+#include "hphp/runtime/ext/curl/curl-multi-await.h"
 #include "hphp/runtime/ext/curl/curl-multi-resource.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"
 #include "hphp/runtime/ext/curl/curl-resource.h"
 #include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -30,6 +32,7 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -38,7 +41,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 #include <folly/Optional.h>
-#include <openssl/ssl.h>
+#include <folly/portability/OpenSSL.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <curl/multi.h>
@@ -126,20 +129,22 @@ const StaticString
 Array HHVM_FUNCTION(curl_list_pools) {
   ReadLock lock(CurlHandlePool::namedPoolsMutex);
   auto size = CurlHandlePool::namedPools.size();
-  if (!size) return empty_array();
+  if (!size) return empty_darray();
 
-  ArrayInit ret(size, ArrayInit::Map{});
+  DArrayInit ret(size);
   for (auto it: CurlHandlePool::namedPools) {
     auto pool = it.second;
-    auto stats = make_map_array(s_fetches, pool->statsFetches(),
-                                s_empty, pool->statsEmpty(),
-                                s_fetchMs, pool->statsFetchUs() / 1000);
-    ret.set(String(it.first), make_map_array(s_size, pool->size(),
-                                             s_connGetTimeout,
-                                             pool->connGetTimeout(),
-                                             s_reuseLimit,
-                                             pool->reuseLimit(),
-                                             s_stats, stats));
+    auto stats = make_darray(
+      s_fetches, pool->statsFetches(),
+      s_empty, pool->statsEmpty(),
+      s_fetchMs, pool->statsFetchUs() / 1000
+    );
+    ret.set(String(it.first), make_darray(s_size, pool->size(),
+                                          s_connGetTimeout,
+                                          pool->connGetTimeout(),
+                                          s_reuseLimit,
+                                          pool->reuseLimit(),
+                                          s_stats, stats));
   }
   return ret.toArray();
 }
@@ -213,19 +218,19 @@ Variant HHVM_FUNCTION(curl_exec, const Resource& ch) {
 
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 Array create_certinfo(struct curl_certinfo *ci) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   if (ci) {
     for (int i = 0; i < ci->num_of_certs; i++) {
       struct curl_slist *slist = ci->certinfo[i];
 
-      Array certData = Array::Create();
+      Array certData = Array::CreateDArray();
       while (slist) {
         Array parts = StringUtil::Explode(
           String(slist->data, CopyString),
           ":",
           2).toArray();
         if (parts.size() == 2) {
-          certData.set(parts.rvalAt(0).unboxed().tv(), parts.rvalAt(1).tv());
+          certData.set(parts.lookup(0), parts.lookup(1));
         } else {
           raise_warning("Could not extract hash key from certificate info");
         }
@@ -427,7 +432,7 @@ Variant HHVM_FUNCTION(curl_getinfo, const Resource& ch, int opt /* = 0 */) {
 #if LIBCURL_VERSION_NUM >= 0x070c03 /* Available since 7.12.3 */
     case CURLINFO_SLIST: {
       struct curl_slist *slist;
-      Array ret = Array::Create();
+      Array ret = Array::CreateVArray();
       if (curl_easy_getinfo(cp, (CURLINFO)opt, &slist) == CURLE_OK) {
         while (slist) {
           ret.append(slist->data);
@@ -506,28 +511,44 @@ Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
   }
 }
 
-Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
+Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh,
+                      const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
   curlm->add(ch);
   return curl_multi_add_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch) {
+Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh,
+                      const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);
   curlm->remove(curle);
   return curl_multi_remove_handle(curlm->get(), curle->get());
 }
 
-Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running) {
+Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
+                      int64_t& still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = 0;
   IOStatusHelper io("curl_multi_exec");
   SYNC_VM_REGS_SCOPED();
-  int result = curl_multi_perform(curlm->get(), &running);
+  if (curlm->anyInExec()) {
+    log_native_stack("unexpected reentry into curl_multi_exec");
+  }
+  curlm->setInExec(true);
+  // T29358191: curl_multi_perform should not throw... trust but verify
+  int result;
+  try {
+    result = curl_multi_perform(curlm->get(), &running);
+  } catch (...) {
+    curlm->setInExec(false);
+    log_native_stack("unexpected exception from curl_multi_perform");
+    throw;
+  }
+  curlm->setInExec(false);
   curlm->check_exceptions();
-  still_running.assignIfRef(running);
+  still_running = running;
   return result;
 }
 
@@ -593,13 +614,26 @@ Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh,
   return ret;
 }
 
+Object HHVM_FUNCTION(curl_multi_await, const Resource& mh,
+                                       double timeout /*=1.0*/) {
+  CHECK_MULTI_RESOURCE_THROW(curlm);
+  auto ev = new CurlMultiAwait(curlm, timeout);
+  try {
+    return Object{ev->getWaitHandle()};
+  } catch (...) {
+    assertx(false);
+    ev->abandon();
+    throw;
+  }
+}
+
 Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch) {
   CHECK_RESOURCE(curl);
   return curl->getContents();
 }
 
 Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for (int i=0; i<=max_fd; i++) {
     if (FD_ISSET(i, fd)) {
       ret.append(Variant(req::make<BuiltinFile>(i)));
@@ -609,10 +643,10 @@ Array curl_convert_fd_to_stream(fd_set *fd, int max_fd) {
 }
 
 Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
-                      VRefParam read_fd_set,
-                      VRefParam write_fd_set,
-                      VRefParam exc_fd_set,
-                      VRefParam max_fd /* = null_object */) {
+                      Array& read_fd_set,
+                      Array& write_fd_set,
+                      Array& exc_fd_set,
+                      int64_t& max_fd) {
   CHECK_MULTI_RESOURCE(curlm);
 
   fd_set read_set;
@@ -625,10 +659,10 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
   FD_ZERO(&exc_set);
 
   int r = curl_multi_fdset(curlm->get(), &read_set, &write_set, &exc_set, &max);
-  read_fd_set.assignIfRef(curl_convert_fd_to_stream(&read_set, max));
-  write_fd_set.assignIfRef(curl_convert_fd_to_stream(&write_set, max));
-  exc_fd_set.assignIfRef(curl_convert_fd_to_stream(&exc_set, max));
-  max_fd.assignIfRef(max);
+  read_fd_set = curl_convert_fd_to_stream(&read_set, max);
+  write_fd_set = curl_convert_fd_to_stream(&write_set, max);
+  exc_fd_set = curl_convert_fd_to_stream(&exc_set, max);
+  max_fd = max;
 
   return r;
 }
@@ -639,7 +673,7 @@ const StaticString
   s_handle("handle");
 
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
-                      VRefParam msgs_in_queue /* = null */) {
+                      int64_t& msgs_in_queue) {
   CHECK_MULTI_RESOURCE(curlm);
 
   int queued_msgs;
@@ -648,7 +682,7 @@ Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
   if (tmp_msg == nullptr) {
     return false;
   }
-  msgs_in_queue.assignIfRef(queued_msgs);
+  msgs_in_queue = queued_msgs;
 
   Array ret;
   ret.set(s_msg, tmp_msg->msg);
@@ -857,7 +891,16 @@ struct CurlExtension final : Extension {
     HHVM_RC_INT_SAME(CURLE_SSL_CONNECT_ERROR);
     HHVM_RC_INT_SAME(CURLE_SSL_ENGINE_NOTFOUND);
     HHVM_RC_INT_SAME(CURLE_SSL_ENGINE_SETFAILED);
-    HHVM_RC_INT_SAME(CURLE_SSL_PEER_CERTIFICATE);
+    if (CURLE_SSL_PEER_CERTIFICATE == CURLE_SSL_CACERT) {
+      // In older curl libraries, this was 51, but then it became
+      // equal to CURLE_SSL_CACERT, which breaks enums which include
+      // both values. Keep the old value for now. We can consider
+      // killing it later (after removing it from the hack code that
+      // uses it).
+      HHVM_RC_INT(CURLE_SSL_PEER_CERTIFICATE, 51);
+    } else {
+      HHVM_RC_INT_SAME(CURLE_SSL_PEER_CERTIFICATE);
+    }
     HHVM_RC_INT_SAME(CURLE_TELNET_OPTION_SYNTAX);
     HHVM_RC_INT_SAME(CURLE_TOO_MANY_REDIRECTS);
     HHVM_RC_INT_SAME(CURLE_UNKNOWN_TELNET_OPTION);
@@ -1398,9 +1441,26 @@ struct CurlExtension final : Extension {
 
 #if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
     HHVM_RC_INT_SAME(CURL_SSLVERSION_TLSv1_3)
-
     HHVM_RC_INT_SAME(CURLINFO_SCHEME)
     HHVM_RC_INT_SAME(CURLINFO_PROTOCOL)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_CAINFO)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_CAPATH)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_CRLFILE)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_KEYPASSWD)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_PINNEDPUBLICKEY)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSLCERT)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSLCERTTYPE)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSLKEY)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSLKEYTYPE)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSLVERSION)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSL_CIPHER_LIST)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSL_OPTIONS)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSL_VERIFYHOST)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_SSL_VERIFYPEER)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_TLSAUTH_PASSWORD)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_TLSAUTH_TYPE)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_TLSAUTH_USERNAME)
+    HHVM_RC_INT_SAME(CURLPROXY_HTTPS)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073500 /* Available since 7.53.0 */
@@ -1420,6 +1480,42 @@ struct CurlExtension final : Extension {
 #if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
     HHVM_RC_INT_SAME(CURLOPT_REQUEST_TARGET)
     HHVM_RC_INT_SAME(CURLOPT_SOCKS5_AUTH)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
+    HHVM_RC_INT_SAME(CURLOPT_SSH_COMPRESSION)
+    HHVM_RC_INT_SAME(CURL_VERSION_MULTI_SSL)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0 */
+    HHVM_RC_INT_SAME(CURL_VERSION_BROTLI)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073a00 /* Available since 7.58.0 */
+    HHVM_RC_INT_SAME(CURLSSH_AUTH_GSSAPI)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+    HHVM_RC_INT_SAME(CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS)
+    HHVM_RC_INT_SAME(CURLOPT_TIMEVALUE_LARGE)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
+    HHVM_RC_INT_SAME(CURLOPT_DNS_SHUFFLE_ADDRESSES)
+    HHVM_RC_INT_SAME(CURLOPT_HAPROXYPROTOCOL)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+    HHVM_RC_INT_SAME(CURLAUTH_BEARER)
+    HHVM_RC_INT_SAME(CURLOPT_DISALLOW_USERNAME_IN_URL)
+    HHVM_RC_INT_SAME(CURLOPT_PROXY_TLS13_CIPHERS)
+    HHVM_RC_INT_SAME(CURLOPT_TLS13_CIPHERS)
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
+    HHVM_RC_INT_SAME(CURLOPT_DOH_URL);
+    HHVM_RC_INT_SAME(CURLOPT_UPKEEP_INTERVAL_MS);
+    HHVM_RC_INT_SAME(CURLOPT_UPLOAD_BUFFERSIZE);
 #endif
 
 #if CURLOPT_FTPASCII != 0
@@ -1466,6 +1562,7 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_multi_remove_handle);
     HHVM_FE(curl_multi_exec);
     HHVM_FE(curl_multi_select);
+    HHVM_FE(curl_multi_await);
     HHVM_FE(curl_multi_getcontent);
     HHVM_FE(curl_multi_setopt);
     HHVM_FE(fb_curl_multi_fdset);
@@ -1477,7 +1574,7 @@ struct CurlExtension final : Extension {
     HHVM_FE(curl_share_close);
 
     Extension* ext = ExtensionRegistry::get("curl");
-    assert(ext);
+    assertx(ext);
 
     IniSetting::Bind(ext, IniSetting::PHP_INI_SYSTEM, "curl.namedPools",
       "", &s_namedPools);

@@ -1,11 +1,6 @@
-File "bad_subclass.php", line 17, characters 7-12:
-Class BadSub does not correctly implement all required methods  (Typing[4110])
-File "bad_subclass.php", line 17, characters 22-26:
-Some methods are incompatible with those declared in type Super
-Read the following to see why:
 File "bad_subclass.php", line 18, characters 19-33:
-Member nameOfISubclass has the wrong type
+The method `nameOfISubclass` has the wrong type (Typing[4341])
 File "bad_subclass.php", line 8, characters 57-57:
-This is an object of type I
+Expected `I`
 File "bad_subclass.php", line 18, characters 48-53:
-It is incompatible with an object of type C_notI
+But got `C_notI`

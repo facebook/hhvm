@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class YieldedException extends Exception {
 }
@@ -20,6 +20,9 @@ function gen() {
     var_dump('Got Reflected Exception');
   }
 }
+
+<<__EntryPoint>>
+function main_2176() {
 try {
   $g = gen();
   $g->next();
@@ -31,4 +34,5 @@ try {
  catch (Exception $e) {
     var_dump($e->getMessage());
   }
+}
 }

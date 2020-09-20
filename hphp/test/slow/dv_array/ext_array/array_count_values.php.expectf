@@ -1,0 +1,8 @@
+Warning: Can only count STRING and INTEGER values! in %s/test/slow/dv_array/ext_array/array_count_values.php on line 61
+
+Warning: Can only count STRING and INTEGER values! in %s/test/slow/dv_array/ext_array/array_count_values.php on line 61
+
+Warning: Can only count STRING and INTEGER values! in %s/test/slow/dv_array/ext_array/array_count_values.php on line 61
+
+Warning: array_count_values() expects parameter 1 to be array, string given in %s/test/slow/dv_array/ext_array/array_count_values.php on line 68
+DONE

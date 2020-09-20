@@ -1,2 +1,0 @@
-<?php include('skipif.inc'); ?>
-<?php if(substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>

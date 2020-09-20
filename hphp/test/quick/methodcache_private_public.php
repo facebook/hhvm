@@ -19,7 +19,7 @@ class two extends one {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $one = new one;
   $two = new two;
   $one->doit($one);
@@ -30,4 +30,3 @@ function main() {
   $one->doit($two);
   $one->doit($two);
 }
-main();

@@ -1,4 +1,4 @@
 string(9) "not catch"
 NULL
 
-Fatal error: %s
+Fatal error: Class undefined: NotExists in %s/bug65784.php on line 35

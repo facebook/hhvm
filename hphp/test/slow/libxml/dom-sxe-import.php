@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. https://github.com/facebook/hhvm/issues/2408
 
 function load($data) {
@@ -13,6 +13,9 @@ function load($data) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_dom_sxe_import() {
 $loadMergeDocument = '
    <fields>
       <field name="published" type="list">
@@ -38,3 +41,4 @@ $loadMergeDocument = '
 
 load($loadMergeDocument);
 echo "Done.\n";
+}

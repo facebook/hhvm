@@ -1,16 +1,16 @@
-<?php
+<?hh
 /* Prototype: bool is_bool ( mixed $var );
  * Description: Finds whether the given variable is a boolean  
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_bool() with valid boolean values ***\n";
 // different valid  boolean vlaues 
-$valid_bools = array(
+$valid_bools = varray[
   TRUE,
   FALSE,
   true,
   false,
-);
+];
 /* loop to check that is_bool() recognizes different 
    bool values, expected output: bool(true) */
 $loop_counter = 1;
@@ -34,7 +34,7 @@ unset ($unset_bool2);
 unset ($unset_var);
 
 // other types in a array 
-$not_bool_types = array (
+$not_bool_types = varray [
   /* integers */
   0,
   1,
@@ -97,25 +97,25 @@ $not_bool_types = array (
   NULL,
   
   /* arrays */
-  array(),
-  array(0),
-  array(1),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2],
 
   /* unset bool vars and undefined var */
   @$unset_bool1, 
   @$unset_bool2, 
   @$unset_var, 
   @$undefined_var
-);
+];
 /* loop through the $not_bool_types to see working of 
    is_bool() on non bull types, expected output: bool(false) */
 $loop_counter = 1;
@@ -126,15 +126,14 @@ foreach ($not_bool_types as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_bool() );
+try { var_dump( is_bool() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_bool(TRUE, FALSE) );
+try { var_dump( is_bool(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
 
 // close resources
 fclose($fp);
 closedir($dfp);
-
-?>
+}

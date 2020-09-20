@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace A;
 
@@ -41,14 +41,71 @@ class DummyTransport {
     $this->buff .= $buff;
   }
   function read($n) {
-    $r = substr($this->buff, $this->pos, $n);
+    $r = \substr($this->buff, $this->pos, $n);
     $this->pos += $n;
     return $r;
   }
 }
 
 class TestStruct {
-  static $_TSPEC;
+  const SPEC = darray[
+    -1 => darray[
+      'var' => 'aBool',
+      'type' => TType::BOOL,
+    ],
+    1 => darray[
+      'var' => 'anInt',
+      'type' => TType::I32,
+    ],
+    2 => darray[
+      'var' => 'aString',
+      'type' => TType::STRING,
+    ],
+    3 => darray[
+      'var' => 'aDouble',
+      'type' => TType::DOUBLE,
+    ],
+    4 => darray[
+      'var' => 'anInt64',
+      'type' => TType::I64,
+    ],
+    5 => darray[
+      'var' => 'aList',
+      'type' => TType::LST,
+      'etype' => TType::DOUBLE,
+      'elem' => darray[
+        'type' => TType::DOUBLE,
+      ],
+    ],
+    6 => darray[
+      'var' => 'aMap',
+      'type' => TType::MAP,
+      'ktype' => TType::I32,
+      'vtype' => TType::DOUBLE,
+      'key' => darray[
+        'type' => TType::I32,
+      ],
+      'val' => darray[
+        'type' => TType::DOUBLE,
+      ],
+    ],
+    7 => darray[
+      'var' => 'aSet',
+      'type' => TType::SET,
+      'etype' => TType::I32,
+      'elem' => darray[
+        'type' => TType::I32,
+      ],
+    ],
+    8 => darray[
+      'var' => 'anByte',
+      'type' => TType::BYTE,
+    ],
+    9 => darray[
+      'var' => 'anI16',
+      'type' => TType::I16,
+    ],
+  ];
   public $aBool = null;
   public $anInt = null;
   public $aString = null;
@@ -59,68 +116,7 @@ class TestStruct {
   public $aSet = null;
   public $anByte = null;
   public $anI16 = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(
-        -1 => array(
-          'var' => 'aBool',
-          'type' => TType::BOOL,
-        ),
-        1 => array(
-          'var' => 'anInt',
-          'type' => TType::I32,
-        ),
-        2 => array(
-          'var' => 'aString',
-          'type' => TType::STRING,
-        ),
-        3 => array(
-          'var' => 'aDouble',
-          'type' => TType::DOUBLE,
-        ),
-        4 => array(
-          'var' => 'anInt64',
-          'type' => TType::I64,
-        ),
-        5 => array(
-          'var' => 'aList',
-          'type' => TType::LST,
-          'etype' => TType::DOUBLE,
-          'elem' => array(
-            'type' => TType::DOUBLE,
-          ),
-        ),
-        6 => array(
-          'var' => 'aMap',
-          'type' => TType::MAP,
-          'ktype' => TType::I32,
-          'vtype' => TType::DOUBLE,
-          'key' => array(
-            'type' => TType::I32,
-          ),
-          'val' => array(
-            'type' => TType::DOUBLE,
-          ),
-        ),
-        7 => array(
-          'var' => 'aSet',
-          'type' => TType::SET,
-          'etype' => TType::I32,
-          'elem' => array(
-            'type' => TType::I32,
-          ),
-        ),
-        8 => array(
-          'var' => 'anByte',
-          'type' => TType::BYTE,
-        ),
-        9 => array(
-          'var' => 'anI16',
-          'type' => TType::I16,
-        ),
-      );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 
 function test() {
@@ -131,14 +127,18 @@ function test() {
   $v1->aString = 'abcdef';
   $v1->aDouble = 1.2345;
   $v1->anInt64 = 8589934592;
-  $v1->aList = array(13.3, 23.4, 3576.2);
-  $v1->aMap = array(10=>1.2, 43=>5.33);
-  $v1->aSet = array(10=>true, 11=>true);
+  $v1->aList = varray[13.3, 23.4, 3576.2];
+  $v1->aMap = darray[10=>1.2, 43=>5.33];
+  $v1->aSet = darray[10=>true, 11=>true];
   $v1->anByte = 123;
   $v1->anI16 = 1234;
-  var_dump($v1);
-  thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
-  var_dump(md5($p->getTransport()->buff));
-  var_dump(thrift_protocol_read_binary($p, '\A\TestStruct', true));
+  \var_dump($v1);
+  \thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
+  \var_dump(\md5($p->getTransport()->buff));
+  \var_dump(\thrift_protocol_read_binary($p, '\A\TestStruct', true));
 }
+
+<<__EntryPoint>>
+function main_namespace() {
 test();
+}

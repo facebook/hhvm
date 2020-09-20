@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   var_dump(
@@ -10,4 +10,8 @@ function main() {
   );
 }
 
+
+<<__EntryPoint>>
+function main_set_stderr_to_tempfile() {
 main();
+}

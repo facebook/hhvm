@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SOCKET_H_
-#define incl_HPHP_SOCKET_H_
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 
@@ -80,8 +79,8 @@ struct Socket : File {
 
   void setError(int err);
   int getError() const { return m_data->m_error;}
-  static int getLastError() { return s_lastErrno; }
-  static void clearLastError() { s_lastErrno = 0; }
+  static int getLastError() { return *s_lastErrno; }
+  static void clearLastError() {*s_lastErrno = 0; }
   int getType() const { return m_data->m_type;}
 
   // This is only for updating a local copy of timeouts set by setsockopt()
@@ -119,7 +118,7 @@ protected:
 private:
   void inferStreamType();
   SocketData* m_data;
-  static __thread int s_lastErrno;
+  static RDS_LOCAL(int, s_lastErrno);
 };
 
 // This class provides exactly the same functionality as Socket but reports as a
@@ -162,4 +161,3 @@ struct StreamSocket final : Socket {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SOCKET_H_

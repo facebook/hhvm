@@ -1,6 +1,4 @@
-<?php
-set_time_limit(1);
-register_shutdown_function("plop");
+<?hh
 
 function plop() {
     $ts = time();
@@ -11,6 +9,11 @@ function plop() {
         }
     }
 }
+
+<<__EntryPoint>> function main(): void {
+set_time_limit(1);
+register_shutdown_function(fun("plop"));
+
 plop();
-?>
-===DONE===
+echo "===DONE===\n";
+}

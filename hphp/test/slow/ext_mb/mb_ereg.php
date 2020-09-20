@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_mb_ereg() {
 var_dump(!mb_ereg_match("a", "some apples"));
 var_dump(mb_ereg_match("a", "a kiwi"));
 var_dump(mb_ereg_match(".*a", "some apples"));
@@ -9,7 +12,7 @@ var_dump(str_replace(" is", " was", $str));
 var_dump(mb_ereg_replace("( )is", "\\1was", $str));
 var_dump(mb_ereg_replace("(( )is)", "\\2was", $str));
 
-$num = 4;
+$num = '4';
 $str = "This string has four words.";
 $str = mb_ereg_replace("four", $num, $str);
 var_dump($str);
@@ -25,7 +28,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 var_dump(mb_ereg_search_getpos());
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
@@ -34,7 +37,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r == array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r == varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
 $reg = "\\w+";
@@ -42,7 +45,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r == array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r == varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 var_dump(mb_ereg_search_pos());
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
@@ -51,7 +54,7 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 $r = mb_ereg_search_regs();    // get next result
 var_dump($r);
 
@@ -61,10 +64,10 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 var_dump(mb_ereg_search_setpos(15));
 $r = mb_ereg_search_regs();    // get next result
-var_dump($r == array("p\xC3\x9C"));
+var_dump($r == varray["p\xC3\x9C"]);
 
 $str = "Pr\xC3\x9C\xC3\x9D"."fung abc p\xC3\x9C";
 mb_regex_encoding("UTF-8");
@@ -78,10 +81,11 @@ mb_regex_encoding("UTF-8");
 mb_ereg_search_init($str, $reg);
 $r = mb_ereg_search();
 $r = mb_ereg_search_getregs(); // get first result
-var_dump($r === array("Pr\xC3\x9C\xC3\x9D"."fung"));
+var_dump($r === varray["Pr\xC3\x9C\xC3\x9D"."fung"]);
 
 $date = "1973-04-30";
-mb_ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, $regs);
+$regs = null;
+mb_ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, inout $regs);
 var_dump($regs[3]);
 var_dump($regs[2]);
 var_dump($regs[1]);
@@ -100,9 +104,11 @@ $body = mb_eregi_replace($pattern, $replacement, $body, "ip");
 var_dump($body);
 
 $str = "XYZ";
-var_dump(mb_eregi("z", $str));
+$matches = null;
+var_dump(mb_eregi("z", $str, inout $matches));
 
 $str = "XYZ";
-$matches = array();
-var_dump(mb_eregi("z", $str, $matches));
+$matches = varray[];
+var_dump(mb_eregi("z", $str, inout $matches));
 var_dump($matches);
+}

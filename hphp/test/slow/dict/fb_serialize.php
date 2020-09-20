@@ -3,8 +3,9 @@
 
 function serde($v) {
   try {
+    $ret = null;
     $ser = fb_serialize($v, FB_SERIALIZE_HACK_ARRAYS);
-    $unser = fb_unserialize($ser, $ret, FB_SERIALIZE_HACK_ARRAYS);
+    $unser = fb_unserialize($ser, inout $ret, FB_SERIALIZE_HACK_ARRAYS);
     var_dump($ret);
     var_dump($unser);
   } catch (Exception $e) {
@@ -21,6 +22,9 @@ function serde($v) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_fb_serialize() {
 serde(dict[]);
 serde(dict[1 => 'a', 2 => 'b', 3 => 'c']);
 serde(dict['a' => 1, 'b' => 2, 'c' => 3]);
@@ -34,13 +38,14 @@ serde(dict[
         789 => 100,
         987 => 'abc']);
 serde(dict[
-        'a' => [1, 2, 3],
-        'b' => ['a', 'b', 'c'],
+        'a' => varray[1, 2, 3],
+        'b' => varray['a', 'b', 'c'],
         'c' => 100,
         'd' => 'abc']);
 serde(dict['1' => 100, 1 => 200]);
-serde(['a' => 1,
+serde(darray['a' => 1,
        'b' => 2,
        'c' => dict['a' => 1, 'b' => 2, 'c' => 3],
        'd' => dict[1 => 'a', 2 => 'b', 3 => 'c'],
        'e' => dict[]]);
+}

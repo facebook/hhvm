@@ -1,0 +1,2 @@
+File "includes-not-enum.bad.php", line 10, characters 6-6:
+Enum A includes C which is not an enum (Typing[4388])

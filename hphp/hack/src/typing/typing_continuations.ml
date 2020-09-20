@@ -1,29 +1,19 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-module Continuations = struct
-  type t =
-    | Next
-    | Continue
-    | Break
-    | Catch
+open Hh_prelude
+include Typing_cont_key
 
-  let compare = Pervasives.compare
+module Map = struct
+  let show _ = "<WrappedMap.Make(Continuations)>"
 
-  let to_string = function
-    | Next -> "Next"
-    | Continue -> "Continue"
-    | Break -> "Break"
-    | Catch -> "Catch"
+  let pp _ _ = Printf.printf "%s\n" "<WrappedMap.Make(Continuations)>"
+
+  include WrappedMap.Make (Typing_cont_key)
 end
-
-include Continuations
-
-module Map = MyMap.Make(Continuations)

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $host   = getenv("MYSQL_TEST_HOST")   ? getenv("MYSQL_TEST_HOST") : "localhost";
 $port   = getenv("MYSQL_TEST_PORT")   ? getenv("MYSQL_TEST_PORT") : 3306;
 $user   = getenv("MYSQL_TEST_USER")   ? getenv("MYSQL_TEST_USER") : "root";
@@ -9,5 +9,6 @@ $db     = getenv("MYSQL_TEST_DB")     ? getenv("MYSQL_TEST_DB") : "test";
 try {
   $pdo = new PDO("mysql:dbname=$db;host=$host", $user, $passwd);
 } catch (PDOException $e) {
-  die($e->getMessage());
+  die("skip: ".$e->getMessage());
+}
 }

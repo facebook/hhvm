@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#if defined(__x86_64__)
+
 #include "hphp/util/asm-x64.h"
 #include <gtest/gtest.h>
 
@@ -355,10 +357,8 @@ typedef void (Asm::*OpIR32)(Immed, Reg32);
 typedef void (Asm::*OpIR8)(Immed, Reg8);
 typedef void (Asm::*OpIM64)(Immed, MemoryRef);
 typedef void (Asm::*OpIM32)(Immed, MemoryRef);
-typedef void (Asm::*OpIM16)(Immed, MemoryRef);
 typedef void (Asm::*OpISM64)(Immed, MemoryRef);
 typedef void (Asm::*OpISM32)(Immed, MemoryRef);
-typedef void (Asm::*OpISM16)(Immed, MemoryRef);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -973,4 +973,24 @@ TEST(Asm, Psllq) {
   EXPECT_EQ(0x73, current[3]);
 }
 
+#if defined(USE_HWCRC) && defined(__SSE4_2__)
+TEST(Asm, Crc32q) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  a.   push   (rax);
+  a.   push   (rbx);
+  a.   movq   (0x15, rax);
+  a.   crc32q (rax, rbx);
+  expect_asm(a, R"(
+pushq %rax
+pushq %rbx
+mov $0x15, %rax
+crc32 %rax, %rbx
+)");
+}
+#endif
+
 }}
+
+#endif

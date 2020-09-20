@@ -1,0 +1,4 @@
+File "concurrent_use_error.php", line 5, characters 10-23:
+You are using the return value of a `void` function (Typing[4119])
+File "concurrent_use_error.php", line 5, characters 16-23:
+A `void` function doesn't return a value. because this function does not always return a value

@@ -1,2 +1,2 @@
 File "real_return_type.php", line 11, characters 17-20:
-Invalid Hack type. Using 'real' in Hack is considered an error. Use 'float' instead, to keep the codebase consistent. (Naming[2004])
+Invalid type hint `real`. Use `float` instead (Parsing[1002])

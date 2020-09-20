@@ -1,12 +1,12 @@
-<?php
+<?hh
 
 class bar {
     static function foo(callable $arg) {}
 }
 function foo(callable $bar) {
 }
+<<__EntryPoint>> function main(): void {
 $closure = function (callable $arg) {};
-
 $rf = new ReflectionFunction("foo");
 var_dump($rf->getParameters()[0]->isCallable());
 
@@ -15,5 +15,4 @@ var_dump($rm->getParameters()[0]->isCallable());
 
 $rc = new ReflectionFunction($closure);
 var_dump($rc->getParameters()[0]->isCallable());
-
-?>
+}

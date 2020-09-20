@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_FIXED_VECTOR_H_
-#define incl_HPHP_UTIL_FIXED_VECTOR_H_
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -34,14 +33,16 @@ namespace HPHP {
  * Useful when you know the exact size something will take, and don't
  * need more than that many elements.
  */
-template<typename T, typename Allocator = std::allocator<T>>
+template<typename T, typename Alloc = std::allocator<T>>
 struct FixedVector {
-  typedef uint32_t size_type;
-  typedef T value_type;
-  typedef T* iterator;
-  typedef const T* const_iterator;
-  typedef std::reverse_iterator<iterator> reverse_iterator;
-  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  using Allocator =
+    typename std::allocator_traits<Alloc>::template rebind_alloc<T>;
+  using size_type = uint32_t;
+  using value_type = T;
+  using iterator = T*;
+  using const_iterator = const T*;
+  using reverse_iterator = std::reverse_iterator<iterator>;
+  using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   /*
    * Default constructor leaves a FixedVector with size() == 0.
@@ -61,6 +62,11 @@ struct FixedVector {
 
   FixedVector(FixedVector<T>&& fv) {
     swap(fv);
+  }
+
+  FixedVector& operator=(FixedVector<T>&& fv) {
+    swap(fv);
+    return *this;
   }
 
   ~FixedVector() {
@@ -88,6 +94,7 @@ struct FixedVector {
 
   uint32_t size()  const { return m_impl.m_sp.size(); }
   bool     empty() const { return !size(); }
+  const T& back()  const { assertx(size()); return end()[-1]; }
 
   const T& operator[](uint32_t idx) const { return m_impl.m_sp.ptr()[idx]; }
         T& operator[](uint32_t idx)       { return m_impl.m_sp.ptr()[idx]; }
@@ -155,4 +162,3 @@ private:
 
 }
 
-#endif

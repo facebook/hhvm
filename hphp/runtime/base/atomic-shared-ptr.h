@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ATOMIC_SHARED_PTR_H_
-#define incl_HPHP_ATOMIC_SHARED_PTR_H_
+#pragma once
 
 #include "hphp/util/low-ptr.h"
 
@@ -127,7 +126,7 @@ struct AtomicSharedPtrImpl {
 
 protected:
   void overwrite_unsafe(T* ptr) {
-    assert(!m_px);
+    assertx(!m_px);
     m_px = ptr;
   }
 
@@ -143,4 +142,3 @@ using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, true>;
 
 }
 
-#endif

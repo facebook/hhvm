@@ -112,7 +112,7 @@ std::string GetPrimaryIPImpl(int af) {
 
   try {
     return folly::IPAddress(res->ai_addr).toFullyQualified();
-  } catch (folly::IPAddressFormatException &e) {
+  } catch (folly::IPAddressFormatException& e) {
     return s_empty;
   }
 }

@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
 /*
 * Test behaviour of array_rand() when keys of the 'input' array is heredoc string
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_rand() : with keys of input array as heredoc strings ***\n";
 
 // defining different heredoc strings
@@ -38,14 +38,14 @@ hello\0world\0hello
 \0hello\0
 EOT;
 
-$input = array(
+$input = darray[
   $empty_heredoc => "heredoc1",
   $heredoc_with_newline => "heredoc2",
   $heredoc_with_characters => "heredoc3",
   $heredoc_with_newline_and_tabs => "heredoc3",
   $heredoc_with_alphanumerics => "heredoc4",
   $heredoc_with_embedded_nulls => "heredoc5"
-);
+];
 
 // Test array_rand() function with different valid 'req_num' values
 echo "\n-- with default parameters --\n";
@@ -62,4 +62,4 @@ var_dump( array_rand($input, 6) );
 
 
 echo "Done";
-?>
+}

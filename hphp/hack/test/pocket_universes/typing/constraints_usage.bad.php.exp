@@ -1,0 +1,32 @@
+File "constraints_usage.bad.php", line 17, characters 12-20:
+Typing error (Typing[4110])
+File "constraints_usage.bad.php", line 17, characters 12-14:
+Expected `num` because this is used in an arithmetic operation
+File "constraints_usage.bad.php", line 15, characters 11-24:
+But got `TP:@T`
+File "constraints_usage.bad.php", line 15, characters 26-27:
+  where `TP:@T` is a type projected from this expression
+File "constraints_usage.bad.php", line 17, characters 12-20:
+Typing error (Typing[4110])
+File "constraints_usage.bad.php", line 17, characters 18-20:
+Expected `num` because this is used in an arithmetic operation
+File "constraints_usage.bad.php", line 16, characters 11-24:
+But got `TP:@T`
+File "constraints_usage.bad.php", line 16, characters 26-27:
+  where `TP:@T` is a type projected from this expression
+File "constraints_usage.bad.php", line 23, characters 12-20:
+Typing error (Typing[4110])
+File "constraints_usage.bad.php", line 23, characters 12-14:
+Expected `num` because this is used in an arithmetic operation
+File "constraints_usage.bad.php", line 21, characters 11-24:
+But got `<expr#1>:@T`
+File "constraints_usage.bad.php", line 21, characters 26-27:
+  where `<expr#1>` is a reference to this expression
+File "constraints_usage.bad.php", line 23, characters 12-20:
+Typing error (Typing[4110])
+File "constraints_usage.bad.php", line 23, characters 18-20:
+Expected `num` because this is used in an arithmetic operation
+File "constraints_usage.bad.php", line 22, characters 11-24:
+But got `<expr#2>:@T`
+File "constraints_usage.bad.php", line 22, characters 26-27:
+  where `<expr#2>` is a reference to this expression

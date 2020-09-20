@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_UTIL_H_
-#define incl_HPHP_VM_UNIT_UTIL_H_
+#pragma once
 
 #include <folly/Range.h>
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-structure.h"
 
 namespace HPHP {
 
@@ -48,13 +48,6 @@ inline bool notClassMethodPair(const StringData* name) {
   return strstr(name->data(), "::") == nullptr;
 }
 
-const char kInOutSuffix[] = "$inout";
-inline bool needsStripInOut(const StringData* name) {
-  return
-    name->size() > sizeof(kInOutSuffix) &&
-    !strcmp(name->data() + name->size() - strlen(kInOutSuffix), kInOutSuffix);
-}
-
 /*
  * Normalizes a given class or function name removing the leading '\'.
  * Leaves the name unchanged if more than one '\' is leading.
@@ -62,7 +55,7 @@ inline bool needsStripInOut(const StringData* name) {
  */
 inline const StringData* normalizeNS(const StringData* name) {
   if (needsNSNormalization(name)) {
-    assert(name->size() != 0);
+    assertx(name->size() != 0);
     auto const size  = static_cast<size_t>(name->size() - 1);
     auto const piece = folly::StringPiece{name->data() + 1, size};
     return makeStaticString(piece);
@@ -77,28 +70,18 @@ inline String normalizeNS(const String& name) {
   return name;
 }
 
-inline const StringData* stripInOutSuffix(const StringData* name) {
-  if (UNLIKELY(needsStripInOut(name))) {
-    assert(name->size() > sizeof(kInOutSuffix));
-    auto const s = name->data();
-    size_t len = name->size() - sizeof(kInOutSuffix);
-    for (; s[len] != '$'; --len) assert(len != 0);
-    return makeStaticString(folly::StringPiece(name->data(), len));
-  }
-  return name;
-}
+std::string mangleReifiedGenericsName(const ArrayData* tsList);
 
-inline StringData* stripInOutSuffix(StringData* name) {
-  return const_cast<StringData*>(
-    stripInOutSuffix((const StringData*)name)
-  );
-}
-
-inline String stripInOutSuffix(String& s) {
-  return String(stripInOutSuffix(s.get()));
+inline bool isMangledReifiedGenericInClosure(const StringData* name) {
+  // mangled name is of the form
+  // __captured$reifiedgeneric$class$ or __captured$reifiedgeneric$function$
+  // so it must be longer than 32 characters
+  return name->size() > 32 &&
+         folly::qfind(name->slice(),
+                      folly::StringPiece("__captured$reifiedgeneric$"))
+          != std::string::npos;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }
-#endif

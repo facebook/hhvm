@@ -1,0 +1,7 @@
+<?hh
+function with_generic_interface<T>(IGenericDerived<T> $arg): void {}
+interface IGenericDerived<T> extends \GenericInterface<T, int> {
+  require extends \GenericBase<float, T>;
+}
+class GenericBase<Tfirst, Tsecond> {}
+interface GenericInterface<Tfirst, Tsecond> {}

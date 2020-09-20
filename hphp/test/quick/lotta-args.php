@@ -154,7 +154,7 @@ function f($a0,
   echo $a75 . "\n";
   echo $a76 . "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 f(0,
   1,
   2,
@@ -232,3 +232,4 @@ f(0,
   74,
   75,
   76);
+}

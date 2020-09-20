@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ALIGNMENT_H_
-#define incl_HPHP_JIT_ALIGNMENT_H_
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -55,6 +54,11 @@ enum class Alignment : uint32_t {
   JmpTarget,
 
   /*
+   * Quad Word Smashable literals need to be 8 byte aligned on ARM.
+   */
+  QuadWordSmashable,
+
+  /*
    * Alignments needed by smashable instructions.
    */
   SmashMovq,
@@ -85,4 +89,3 @@ struct AlignInfo {
 
 }}
 
-#endif

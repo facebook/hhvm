@@ -47,11 +47,15 @@ OK_NEWLINE
 OK_STR
 OK_NEWLINE
 == INVALID PARAMETER TEST ==
-ERR: Warning
+
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/mb_stripos.php on line 103
 OK_NULL
-ERR: Warning
+
+Warning: mb_stripos() expects parameter 2 to be string, %rd?%rarray given in %s/mb_stripos.php on line 105
 OK_ARRAY
-ERR: Warning
+
+Warning: mb_stripos() expects parameter 2 to be string, object given in %s/mb_stripos.php on line 107
 OK_OBJECT
-ERR: Warning
+
+Warning: mb_stripos() expects parameter 2 to be string, object given in %s/mb_stripos.php on line 109
 OK_BAD_ENCODING

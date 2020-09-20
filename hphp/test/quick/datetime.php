@@ -8,7 +8,6 @@ function main() {
   }
   var_dump(DateTime::createFromFormat('2013-01-05', 'aoeu'));
 }
-main();
 
 function specialIntervals() {
   $d = new DateTime('2015-05-05');
@@ -19,4 +18,8 @@ function specialIntervals() {
   echo 'First day of the month of 2015-05-05 is ';
   echo $d->modify('first day of this month')->format('Y-m-d'), "\n";
 }
-specialIntervals();
+<<__EntryPoint>>
+function main_entry(): void {
+  main();
+  specialIntervals();
+}

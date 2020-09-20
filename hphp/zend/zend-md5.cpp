@@ -110,8 +110,8 @@ static unsigned char PADDING[64] = {
 static void MD5Transform(uint32_t *state, const unsigned char *block);
 
 /**
- * Encodes input (uint32_t) into output (unsigned char). Assumes len is
- * a multiple of 4.
+ * Encodes input (uint32_t) into output (unsigned char, little endian).
+ * Assumes len is a multiple of 4.
  */
 static void Encode(unsigned char *output, uint32_t *input, unsigned int len) {
   unsigned int i, j;
@@ -125,8 +125,8 @@ static void Encode(unsigned char *output, uint32_t *input, unsigned int len) {
 }
 
 /**
- * Decodes input (unsigned char) into output (uint32). Assumes len is
- * a multiple of 4.
+ * Decodes input (unsigned char, little endian) into output (uint32).
+ * Assumes len is a multiple of 4.
  */
 static void Decode(uint32_t *output, const unsigned char *input,
                    unsigned int len) {

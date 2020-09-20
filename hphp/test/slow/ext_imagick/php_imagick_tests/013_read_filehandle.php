@@ -1,6 +1,8 @@
-<?php
+<?hh
 
-$file = __DIR__ . '/__tmp_rose.jpg';
+<<__EntryPoint>>
+function main(): void {
+$file = __SystemLib\hphp_test_tmppath('__tmp_rose.jpg');
 
 $imagick = new Imagick('magick:rose');
 $imagick->setImageFormat('jpg');
@@ -14,5 +16,4 @@ $imagick->readImageFile($handle);
 unlink($file);
 
 echo 'success';
-
-?>
+}

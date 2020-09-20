@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_SRCKEY_H_
-#define incl_HPHP_SRCKEY_H_
+#pragma once
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -24,6 +23,8 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace arrprov { struct Tag; }
 
 struct Func;
 struct Unit;
@@ -44,6 +45,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   using AtomicInt = uint64_t;
 
   struct Hasher;
+  struct TbbHashCompare;
 
   /*
    * Used for SrcKeys corresponding to the prologue which precedes a function
@@ -60,9 +62,9 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    */
   SrcKey();
 
-  SrcKey(const Func* f, Offset off, ResumeMode resumeMode, bool hasThis);
-  SrcKey(const Func* f, PC pc, ResumeMode resumeMode, bool hasThis);
-  SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode, bool hasThis);
+  SrcKey(const Func* f, Offset off, ResumeMode resumeMode);
+  SrcKey(const Func* f, PC pc, ResumeMode resumeMode);
+  SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode);
 
   SrcKey(const Func* f, Offset off, PrologueTag);
   SrcKey(const Func* f, PC pc, PrologueTag);
@@ -126,13 +128,13 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    * advance past the end of the function, and potentially contain an invalid
    * bytecode offset.
    */
-  void advance(const Unit* u = nullptr);
+  void advance(const Func* f = nullptr);
 
   /*
    * Return a SrcKey representing the next instruction, without mutating this
    * SrcKey.
    */
-  SrcKey advanced(const Unit* u = nullptr) const;
+  SrcKey advanced(const Func* f = nullptr) const;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -162,8 +164,7 @@ private:
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset : 29;
-      uint32_t m_hasThis : 1;
+      uint32_t m_offset : 30;
       uint32_t m_resumeModeAndPrologue : 2;
     };
   };
@@ -181,6 +182,13 @@ using SrcKeySet = hphp_hash_set<SrcKey,SrcKey::Hasher>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct SrcKey::TbbHashCompare {
+  static size_t hash(const SrcKey& sk) { return hash_int64(sk.toAtomicInt()); }
+  static bool equal(const SrcKey& a, const SrcKey& b) { return a == b; }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::string show(SrcKey sk);
 std::string showShort(SrcKey sk);
 
@@ -195,4 +203,3 @@ void sktrace(SrcKey sk, ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
 
 #include "hphp/runtime/vm/srckey-inl.h"
 
-#endif

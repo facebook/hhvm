@@ -1,11 +1,11 @@
-<?php
+<?hh
 /* Prototype: bool is_numeric ( mixed $var );
- * Description: Finds whether a variable is a number or a numeric string  
+ * Description: Finds whether a variable is a number or a numeric string
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_numeric() with valid numeric values ***\n";
-// different valid numeric  vlaues 
-$numerics = array(
+// different valid numeric  vlaues
+$numerics = varray[
   0,
   1,
   -1,
@@ -29,8 +29,8 @@ $numerics = array(
   -0.70000000,
   1234567890123456,
   -1234567890123456,
-  984847472827282718178,
-  -984847472827282718178,
+  PHP_INT_MAX,
+  PHP_INT_MIN,
   123.56e30,
   123.56E30,
   426.45e-30,
@@ -50,22 +50,22 @@ $numerics = array(
   +1e+2,
   2245555555555555.444,
   1.444444444444444444,
-  0xff,	// hexa decimal numbers
+  0xff,    // hexa decimal numbers
   0xFF,
   //0x1111111111111111111111,
   -0x1111111,
   +0x6698319,
-  01000000000000000000000, 
+  01000000000000000000000,
   0123,
   0345900,
-  -0200001,  
-  -0200001.7,  
-  0200001.7,  
-  +0200001,  
-  +0200001.7,  
-  +0200001.7,  
+  -0200001,
+  -0200001.7,
+  0200001.7,
+  +0200001,
+  +0200001.7,
+  +0200001.7,
   2.00000000000000000000001, // a float value with more precision points
-  "1",	// numeric in the form of string
+  "1",    // numeric in the form of string
   "-1",
   "1e2",
   " 1",
@@ -85,8 +85,8 @@ $numerics = array(
   "+0123",
   '-0123',
   '+0123'
-);
-/* loop to check that is_numeric() recognizes different 
+];
+/* loop to check that is_numeric() recognizes different
    numeric values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($numerics as $num ) {
@@ -104,17 +104,17 @@ $dfp = opendir ( dirname(__FILE__) );
 $unset_var = 10.5;
 unset ($unset_var);
 
-// other types in a array 
-$not_numerics = array(
-  "-0x80001", 
-  "+0x80001", 
+// other types in a array
+$not_numerics = varray[
+  "-0x80001",
+  "+0x80001",
   "-0x80001.5",
-  "0x80001.5", 
+  "0x80001.5",
   new stdclass, // object
   $fp,  // resource
   $dfp,
-  array(),
-  array("string"),
+  varray[],
+  varray["string"],
   "",
   "1 ",
   "- 1",
@@ -124,7 +124,7 @@ $not_numerics = array(
   "20 test",
   "3.6test",
   "1,000",
-  "NULL", 
+  "NULL",
   "true",
   true,
   NULL,
@@ -134,8 +134,8 @@ $not_numerics = array(
   false,
   @$unset_var, // unset variable
   @$undefined_var
-);
-/* loop through the $not_numerics to see working of 
+];
+/* loop through the $not_numerics to see working of
    is_numeric() on non numeric values, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_numerics as $type ) {
@@ -145,15 +145,14 @@ foreach ($not_numerics as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_numeric() );
+try { var_dump( is_numeric() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-//arguments more than expected 
-var_dump( is_numeric("10", "20") );
- 
+//arguments more than expected
+try { var_dump( is_numeric("10", "20") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+
 echo "Done\n";
 
 // close the resources used
 fclose($fp);
 closedir($dfp);
-
-?>
+}

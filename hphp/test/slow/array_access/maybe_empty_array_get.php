@@ -4,31 +4,34 @@ class Gronk {
   private $gronks;
 
   function __construct() {
-    $this->gronks = array(new stdclass, new stdclass, new stdclass);
+    $this->gronks = varray[new stdclass, new stdclass, new stdclass];
   }
 
   public function gronkify(): void {
-    list($stuff, $gronk) = $this->getStuffAndGronk(
-      null
-    );
-
-    var_dump($stuff);
-    var_dump($gronk);
+    try {
+      list($stuff, $gronk) = $this->getStuffAndGronk(null);
+      var_dump($stuff);
+      var_dump($gronk);
+    } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
 
-  private function getStuffAndGronk(?int $count): array {
+  private function getStuffAndGronk(?int $count): varray {
     foreach ($this->gronks as $gronk) {
-      if ($GLOBALS['break']) {
-        $z = array(array(null, null), $gronk);
+      if (\HH\global_get('break')) {
+        $z = varray[varray[null, null], $gronk];
         $z[] = new stdclass;
         return $z;
       }
     }
-    return array();
+    return varray[];
   }
 }
 
+
+<<__EntryPoint>>
+function main_maybe_empty_array_get() {
 $y = new Gronk;
 
 $break = false;
 for ($i = 0; $i < 3; ++$i) $y->gronkify();
+}

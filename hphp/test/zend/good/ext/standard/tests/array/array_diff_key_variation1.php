@@ -1,14 +1,26 @@
-<?php
+<?hh
 /* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8);
-$array3 = array(1, 2, 3, 4, 5);
+$array2 = darray['green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan' => 8];
+$array3 = varray[1, 2, 3, 4, 5];
 
 //get an unset variable
 $unset_var = 10;
@@ -17,25 +29,13 @@ unset ($unset_var);
 //resource variable
 $fp = fopen(__FILE__, "r");
 
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -82,7 +82,7 @@ $inputs = array(
 
       // resource data
       'resource' => $fp,
-);
+];
 
 // loop through each element of the array for arr1
 foreach($inputs as $key =>$value) {
@@ -92,5 +92,5 @@ foreach($inputs as $key =>$value) {
 };
 
 fclose($fp);
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -87,7 +87,7 @@ void ScannerToken::xhpDecode() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Scanner::Scanner(const std::string& filename, int type, bool md5 /* = false */)
+Scanner::Scanner(const std::string& filename, int type, bool sha1 /* = false */)
     : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
       m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0) {
@@ -112,40 +112,40 @@ Scanner::Scanner(const std::string& filename, int type, bool md5 /* = false */)
     throw FileOpenException(m_filename);
   }
 #endif
-  if (md5) computeMd5();
+  if (sha1) computeSha1();
   init();
 }
 
 Scanner::Scanner(std::istream &stream, int type,
                  const char *fileName /* = "" */,
-                 bool md5 /* = false */)
+                 bool sha1 /* = false */)
     : m_filename(fileName), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
       m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0) {
   m_stream = &stream;
   m_streamOwner = false;
-  if (md5) computeMd5();
+  if (sha1) computeSha1();
   init();
 }
 
 Scanner::Scanner(const char *source, int len, int type,
-                 const char *fileName /* = "" */, bool md5 /* = false */)
+                 const char *fileName /* = "" */, bool sha1 /* = false */)
     : m_filename(fileName), m_stream(nullptr), m_source(source), m_len(len),
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(nullptr),
       m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isHHFile(0),
       m_lookaheadLtDepth(0) {
   assert(m_source);
   m_streamOwner = false;
-  if (md5) {
+  if (sha1) {
     m_stream = new std::istringstream(std::string(source, len));
     m_streamOwner = true;
-    computeMd5();
+    computeSha1();
   }
 
   init();
 }
 
-void Scanner::computeMd5() {
+void Scanner::computeSha1() {
   size_t startpos = m_stream->tellg();
   always_assert(startpos != -1 &&
                 startpos <= std::numeric_limits<int32_t>::max());
@@ -157,7 +157,7 @@ void Scanner::computeMd5() {
   auto const ptr = (char*)malloc(length);
   m_stream->read(ptr, length);
   m_stream->seekg(startpos, std::ios::beg);
-  m_md5 = string_md5(folly::StringPiece{ptr, length});
+  m_sha1 = string_sha1(folly::StringPiece{ptr, length});
   free(ptr);
 }
 

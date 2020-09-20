@@ -2,3 +2,4 @@
 
 <<__Memoize>>
 function foo(inout int $x): void {}
+

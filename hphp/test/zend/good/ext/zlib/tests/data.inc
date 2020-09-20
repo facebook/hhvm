@@ -1,6 +1,7 @@
+<?hh
 
-<?php
-$data = <<<QUOTE
+function data(): string {
+  return <<<QUOTE
 To be or not to be, that is the question;
 Whether 'tis nobler in the mind to suffer
 The Slings and Arrows of outrageous Fortune
@@ -84,5 +85,4 @@ Hear it not, Duncan; for it is a knell
 That summons thee to heaven or to hell.
 
 QUOTE;
-
-?>
+}

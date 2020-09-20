@@ -1,8 +1,11 @@
-<?php
+<?hh
 
 // Php doesn't support \u escapes.
 function u($x) { return json_decode("\"" . $x . "\""); }
 
+
+<<__EntryPoint>>
+function main_idn_to_ascii() {
 var_dump(idn_to_ascii("www.m\xc3\xa5nsjonasson.se") ===
     "www.xn--mnsjonasson-x8a.se");
 var_dump(idn_to_ascii("www.facebook.com"));
@@ -19,3 +22,4 @@ var_dump(idn_to_ascii(u('\u1937ai\u18ed-\u18f0.tk'), 1) ===
   "xn--ai--youq53b.tk");
 var_dump(idn_to_ascii(u('\u1937ai\u18ed-\u18f0.tk'), 0) ===
   false);
+}

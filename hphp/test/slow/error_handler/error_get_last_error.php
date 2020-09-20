@@ -1,7 +1,4 @@
-<?php
-
-// at the start it should be NULL
-var_dump(error_get_last());
+<?hh
 
 function handleError($errno, $errstr, $errfile, $errline) {
   echo "$errstr\n";
@@ -12,17 +9,23 @@ function handleError($errno, $errstr, $errfile, $errline) {
 function shutdownFunc() {
   var_dump(error_get_last()['line']);
 }
+<<__EntryPoint>>
+function entrypoint_error_get_last_error(): void {
 
-set_error_handler('handleError');
-register_shutdown_function('shutdownFunc');
+  // at the start it should be NULL
+  var_dump(error_get_last());
 
-if ($x) {
-  echo "x\n";
-} else {
-  echo "no x\n";
+  set_error_handler(fun('handleError'));
+  register_shutdown_function(fun('shutdownFunc'));
+
+  if ($x) {
+    echo "x\n";
+  } else {
+    echo "no x\n";
+  }
+
+  // it should been clean
+  var_dump(error_get_last());
+
+  nosuchfunc();
 }
-
-// it should been clean
-var_dump(error_get_last());
-
-nosuchfunc();

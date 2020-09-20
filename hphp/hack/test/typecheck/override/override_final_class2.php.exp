@@ -1,0 +1,2 @@
+File "override_final_class2.php", line 12, characters 1-20:
+Interfaces cannot be declared `final`. (Parsing[1002])

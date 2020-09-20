@@ -1,10 +1,8 @@
 
-Warning: %s
-NULL
+Warning: ldap_next_entry() expects exactly 2 parameters, 1 given in %s/ldap_next_entry_error.php on line 5
 
-Warning: %s
-NULL
+Warning: ldap_next_entry() expects exactly 2 parameters, 3 given in %s/ldap_next_entry_error.php on line 6
 
-Warning: %s
+Warning: Not a valid ldap result entry resource in %s/ldap_next_entry_error.php on line 7
 bool(false)
 ===DONE===

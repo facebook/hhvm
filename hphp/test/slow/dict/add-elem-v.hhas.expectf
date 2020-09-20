@@ -1,4 +1,0 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Dicts cannot contain references' in %s:-%d
-Stack trace:
-#0 %s(-%d): main()
-#1 {main}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait MyTrait {
   public static function callNew() {
@@ -8,13 +8,17 @@ trait MyTrait {
 }
 class MyBaseClass {
   public function __construct($arg) {
-    echo __class__ . ": " . $arg . "\n";
+    echo __CLASS__ . ": " . $arg . "\n";
   }
 }
 class MyDerivedClass extends MyBaseClass {
   use MyTrait;
   public function __construct($arg) {
-    echo __class__ . ": " . $arg . "\n";
+    echo __CLASS__ . ": " . $arg . "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_2053() {
 $o= MyDerivedClass::callNew();
+}

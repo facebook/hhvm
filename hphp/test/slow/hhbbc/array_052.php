@@ -1,11 +1,12 @@
-<?php
+<?hh
 
 class A { public function yo() { echo "hi\n"; } }
 
 function foo() {
-  $x = array(array(new A));
+  $x = varray[varray[new A]];
   for ($i = 0; $i < 10; ++$i) {
-    $x[][] = new A;
+    $x[] = varray[];
+    $x[$i + 1][] = new A;
   }
   return $x;
 }
@@ -14,4 +15,8 @@ function main() {
   var_dump($val);
   $val->yo();
 }
+
+<<__EntryPoint>>
+function main_array_052() {
 main();
+}

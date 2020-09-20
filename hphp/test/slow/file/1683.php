@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1683() {
 $fh = fopen('php://output', 'w');
 if (!$fh) {
   throw new Exception('foo');
@@ -21,3 +24,4 @@ if (!$fh) {
 fprintf($fh, "hello\n");
 var_dump(fflush($fh));
 var_dump(fclose($fh));
+}

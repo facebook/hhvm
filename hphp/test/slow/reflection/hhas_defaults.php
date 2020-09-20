@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   $x = new ReflectionFunction('array_filter');
@@ -7,4 +7,8 @@ function test() {
   var_dump($p1->getDefaultValueText());
 }
 
+
+<<__EntryPoint>>
+function main_hhas_defaults() {
 test();
+}

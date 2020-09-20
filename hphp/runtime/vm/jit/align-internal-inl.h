@@ -29,8 +29,9 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool is_aligned(TCA frontier, const AlignInfo& a) {
-  assertx(a.nbytes <= a.align);
-  assertx(folly::isPowTwo(a.align));
+  // 0 is no alignment constraint.
+  assertx(a.nbytes <= a.align || a.align == 0);
+  assertx(folly::isPowTwo(a.align) || a.align == 0);
 
   auto const mask = a.align - 1;
 

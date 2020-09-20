@@ -1,0 +1,4 @@
+File "class_meth_reified_targs_missing.php", line 8, characters 8-17:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "class_meth_reified_targs_missing.php", line 4, characters 26-28:
+Definition is here

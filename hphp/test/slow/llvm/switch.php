@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function is($i) {
@@ -33,5 +33,9 @@ function ss($s) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_switch() {
 var_dump(is(12346));
 var_dump(ss('hello there'));
+}

@@ -1,0 +1,2 @@
+File "dot_hack_is_implicity_strict.hack", line 1, characters 10-12:
+Was expecting a return type hint (Typing[4030])

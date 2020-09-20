@@ -5,10 +5,11 @@ string(4) "test"
 bool(true)
 
 *** array serialize-and-unserialize ***
-array(1) {
+darray(1) {
   [0]=>
   string(4) "test"
 }
+bool(true)
 bool(true)
 
 * array with flag on serialize and unserialize *
@@ -26,19 +27,19 @@ dict(1) {
 bool(true)
 
 * array with flag on only serialize *
-array(1) {
+darray(1) {
   [0]=>
   string(4) "test"
 }
 bool(true)
-array(2) {
+darray(2) {
   [0]=>
   string(4) "test"
   [1]=>
   int(42)
 }
 bool(true)
-array(2) {
+darray(2) {
   ["test"]=>
   string(7) "testval"
   [42]=>

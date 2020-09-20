@@ -67,7 +67,7 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    urls = Config::GetVector(ini, hdf, "URLs", urls, false);
+    urls = Config::GetStrVector(ini, hdf, "URLs", urls, false);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }
@@ -109,17 +109,20 @@ struct InternalPageServer : SatelliteServer {
                                       std::placeholders::_1));
   }
 
-  virtual void start() {
+  void start() override {
     m_server->start();
   }
-  virtual void stop() {
+  void stop() override {
     m_server->stop();
     m_server->waitForEnd();
   }
-  virtual int getActiveWorker() {
+  size_t getMaxThreadCount() override {
     return m_server->getActiveWorker();
   }
-  virtual int getQueuedJobs() {
+  int getActiveWorker() override {
+    return m_server->getActiveWorker();
+  }
+  int getQueuedJobs() override {
     return m_server->getQueuedJobs();
   }
 
@@ -156,17 +159,20 @@ struct RPCServer : SatelliteServer {
     });
   }
 
-  virtual void start() {
+  void start() override {
     m_server->start();
   }
-  virtual void stop() {
+  void stop() override {
     m_server->stop();
     m_server->waitForEnd();
   }
-  virtual int getActiveWorker() {
+  size_t getMaxThreadCount() override {
     return m_server->getActiveWorker();
   }
-  virtual int getQueuedJobs() {
+  int getActiveWorker() override {
+    return m_server->getActiveWorker();
+  }
+  int getQueuedJobs() override {
     return m_server->getQueuedJobs();
   }
 private:
@@ -191,7 +197,7 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
       satellite.reset(new RPCServer(info));
       break;
     default:
-      assert(false);
+      assertx(false);
     }
     if (satellite) {
       satellite->setName(info->getName());

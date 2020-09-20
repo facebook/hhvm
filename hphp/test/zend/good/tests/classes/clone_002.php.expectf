@@ -1,5 +1,5 @@
 Object
-object(test)#%d (3) {
+object(test) (3) {
   ["p1"]=>
   int(1)
   ["p2"]=>
@@ -8,7 +8,7 @@ object(test)#%d (3) {
   string(1) "B"
 }
 Clown
-object(test)#%d (3) {
+object(test) (3) {
   ["p1"]=>
   int(1)
   ["p2"]=>

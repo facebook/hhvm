@@ -2,23 +2,20 @@
 
 -- Testing stream_set_timeout() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: stream_set_timeout() expects at most 3 parameters, 4 given in %s/stream_set_timeout_error.php on line %d
 
 -- Testing stream_set_timeout() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: stream_set_timeout() expects at least 2 parameters, 1 given in %s/stream_set_timeout_error.php on line %d
 
 -- Testing stream_set_timeout() function with a closed socket --
 
-Warning: %s
+Warning: unable to set socket option [9]: Bad file descriptor in %s/stream_set_timeout_error.php on line %d
 bool(false)
 
 -- Testing stream_set_timeout() function with an invalid stream --
 
-Warning: %s
-NULL
+Warning: stream_set_timeout() expects parameter 1 to be resource, integer given in %s/stream_set_timeout_error.php on line %d
 
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --
 bool(false)

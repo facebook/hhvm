@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   ob_start(function($str) {
     throw new Exception('chickpeas');
     return $str.'!!!';
@@ -12,5 +12,3 @@ function main() {
 
   echo "DON'T PRINT ME!";
 }
-
-main();

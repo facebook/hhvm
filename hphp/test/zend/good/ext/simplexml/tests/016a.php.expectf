@@ -1,9 +1,0 @@
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(3) "Foo"
-}
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(6) "FooBar"
-}
-===DONE===

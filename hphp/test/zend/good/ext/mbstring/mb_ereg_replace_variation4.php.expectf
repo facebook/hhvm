@@ -1,31 +1,40 @@
 *** Testing mb_ereg_replace() : usage variations ***
 
 -- Iteration 1 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, integer given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 2 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, integer given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 3 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, integer given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 4 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, integer given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 5 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, double given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 6 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, double given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 7 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, double given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 8 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, double given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 9 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, double given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 10 --
 string(10) "str1n1_v1l"
@@ -34,16 +43,20 @@ string(10) "str1n1_v1l"
 string(10) "str1n1_v1l"
 
 -- Iteration 12 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 13 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 14 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 15 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, boolean given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 16 --
 string(10) "str1n1_v1l"
@@ -61,7 +74,8 @@ string(10) "str1n1_v1l"
 string(10) "str1n1_v1l"
 
 -- Iteration 21 --
-string(10) "str1n1_v1l"
+
+Warning: mb_ereg_replace() expects parameter 4 to be string, object given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 
 -- Iteration 22 --
 string(10) "str1n1_v1l"
@@ -71,6 +85,5 @@ string(10) "str1n1_v1l"
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_replace() expects parameter 4 to be string, resource given in %s/zend/good/ext/mbstring/mb_ereg_replace_variation4.php on line 88
 Done

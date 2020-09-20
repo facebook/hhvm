@@ -1,3 +1,4 @@
-<?php 
-	if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
+}

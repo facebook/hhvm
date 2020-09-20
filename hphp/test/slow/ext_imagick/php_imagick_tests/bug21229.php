@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ImagickTest extends Imagick {
 
@@ -17,7 +17,7 @@ class ImagickTest extends Imagick {
         return $this->test;
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $test = new ImagickTest("magick:logo");
 $test->setTestValue("test value");
 
@@ -26,6 +26,4 @@ echo "Value: " , $test->getTestValue() , PHP_EOL;
 var_dump($test->width, $test->height);
 
 echo "OK" , PHP_EOL;
-
-
-?>
+}

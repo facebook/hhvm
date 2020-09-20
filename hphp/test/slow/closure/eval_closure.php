@@ -1,13 +1,17 @@
-<?php
+<?hh
 
-function reproduce( $code ) {
-        $template = eval( $code );
-        return $template( array() );
+function reproduce( $code, $func ) {
+        eval( $code );
+        return $func( varray[] );
 }
 
-echo reproduce('return function () {
+
+<<__EntryPoint>>
+function main_eval_closure() {
+echo reproduce('function foo() {
     return (function() {return "first\n";})();
-};');
-echo reproduce('return function () {
+}', 'foo');
+echo reproduce('function bar() {
     return (function() {return "second\n";})();
-};');
+}', 'bar');
+}

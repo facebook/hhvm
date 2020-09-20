@@ -1,12 +1,13 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+open Typing_env_types
 
 (**
  * This is used in computing all possible attributes for XHP spreads.
@@ -16,17 +17,13 @@
  * XHP onto which we are spreading.
  *)
 val get_spread_attributes :
-  Typing_env.env ->
+  env ->
   Pos.t ->
-  Typing_heap.Classes.t ->
-  Typing_defs.locl Typing_defs.ty ->
-  Typing_env.env * (Nast.pstring * (Nast.PosAnnotation.t * Typing_defs.locl Typing_defs.ty)) list
+  Decl_provider.class_decl ->
+  Typing_defs.locl_ty ->
+  env * (Aast.pstring * (Pos.t * Typing_defs.locl_ty)) list
 
 (**
  * Verify that an XHP body expression is legal.
  *)
-val xhp_child :
-  Typing_env.env ->
-  Pos.t ->
-  Typing_defs.locl Typing_defs.ty ->
-  bool
+val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool

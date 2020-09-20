@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SIMPLEXML_H_
-#define incl_HPHP_EXT_SIMPLEXML_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
@@ -33,10 +32,9 @@ const Class* SimpleXMLElement_classof();
 const Class* SimpleXMLElementIterator_classof();
 const Class* SimpleXMLIterator_classof();
 
-bool SimpleXMLElement_propEmpty(const ObjectData* obj, const StringData* key);
-Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type);
+Array SimpleXMLElement_darrayCast(const ObjectData* obj);
+Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type);
 xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_EXT_SIMPLEXML_H_

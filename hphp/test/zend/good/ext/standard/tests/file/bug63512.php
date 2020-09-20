@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $array = parse_ini_string('
 		int = 123
 		constant = INSTALL_ROOT
@@ -10,3 +10,4 @@ $array = parse_ini_string('
 		d = INSTALL_ROOT "INSTALL_ROOT"', false, INI_SCANNER_RAW);
 
 var_dump($array);
+}

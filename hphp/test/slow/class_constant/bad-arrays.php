@@ -3,15 +3,12 @@
 
 const TESTS = vec[
   'class Cls1 { static public $a = 123; const BADARRAY = [$a]; };',
-  'class Cls1 { static public $a = 123; const BADARRAY = [&$a]; };',
   'class Cls1 { static public $a = 123; const BADARRAY = [100 + $a + 200]; };',
   'class Cls1 { const BADARRAY = [new stdclass]; };',
   'class Cls1 { const BADARRAY = [foobaz()]; };',
   'class Cls1 { const BADARRAY = [1, [2, new stdclass], 3]; };',
   'class Cls1 { const BADARRAY = [1, [2, foobaz()], 3]; };',
-  'class Cls1 { const BADARRAY = [$GLOBALS]; };',
   'class Cls1 { static public $a = 123; const BADARRAY = [1, [2, $a], 3]; };',
-  'class Cls1 { static public $a = 123; const BADARRAY = [1, [2, &$a], 3]; };',
   'class Cls1 { static public $a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3]; };',
 
   'class Cls1 { static public $a = 123; const BADVEC = vec[$a]; };',
@@ -20,7 +17,6 @@ const TESTS = vec[
   'class Cls1 { const BADVEC = vec[foobaz()]; };',
   'class Cls1 { const BADVEC = vec[1, vec[2, new stdclass], 3]; };',
   'class Cls1 { const BADVEC = vec[1, vec[2, foobaz()], 3]; };',
-  'class Cls1 { const BADVEC = vec[$GLOBALS]; };',
   'class Cls1 { static public $a = 123; const BADVEC = vec[1, vec[2, $a], 3]; };',
   'class Cls1 { static public $a = 123; const BADVEC = vec[1, vec[2, 100 + $a + 200], 3]; };',
 
@@ -30,7 +26,6 @@ const TESTS = vec[
   'class Cls1 { const BADDICT = dict[1 => foobaz()]; };',
   'class Cls1 { const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => new stdclass], 3 => 3]; };',
   'class Cls1 { const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => foobaz()], 3 => 3]; };',
-  'class Cls1 { const BADDICT = dict[1 => $GLOBALS]; };',
   'class Cls1 { static public $a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33]; };',
   'class Cls1 { static public $a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => 100 + $a + 200], 3 => 3]; };',
 
@@ -43,7 +38,7 @@ const TESTS = vec[
 ];
 
 function main() {
-  $count = apc_fetch('test-count');
+  $count = __hhvm_intrinsics\apc_fetch_no_check('test-count');
   if ($count === false) $count = 0;
   if ($count >= count(TESTS)) return;
 
@@ -55,4 +50,8 @@ function main() {
   $count++;
   apc_store('test-count', $count);
 }
+
+<<__EntryPoint>>
+function main_bad_arrays() {
 main();
+}

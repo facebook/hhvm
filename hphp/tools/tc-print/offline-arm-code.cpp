@@ -13,26 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/tools/tc-print/offline-code.h"
 
-#include <stdio.h>
-#include <cxxabi.h>
 #include <vector>
-#include <assert.h>
 #include <iomanip>
-#include <sys/stat.h>
 
-#include "hphp/tools/tc-print/tc-print.h"
-#include "hphp/tools/tc-print/offline-trans-data.h"
 
-#include "hphp/util/disasm.h"
-#include "hphp/vixl/a64/disasm-a64.h"
-#include "hphp/vixl/a64/instructions-a64.h"
 
 #define MAX_INSTR_ASM_LEN 128
 
-using std::string;
-using std::vector;
 
 namespace HPHP { namespace jit {
 
@@ -90,17 +78,20 @@ TCA OfflineCode::collectJmpTargets(FILE *file,
   return 0;
 }
 
+TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
+                                         TCA fileStartAddr,
+                                         TCA codeStartAddr,
+                                         uint64_t codeLen,
+                                         const PerfEventsMap<TCA>& perfEvents,
+                                         BCMappingInfo bcMappingInfo) {
+  if (codeLen == 0) return TCRegionInfo{bcMappingInfo.tcRegion};
 
-void OfflineCode::disasm(FILE* file,
-                         TCA fileStartAddr,
-                         TCA codeStartAddr,
-                         uint64_t codeLen,
-                         const PerfEventsMap<TCA>& perfEvents,
-                         BCMappingInfo bcMappingInfo,
-                         bool printAddr,
-                         bool printBinary) {
-
-  if (codeLen == 0) return;
+  auto const codeEndAddr = codeStartAddr + codeLen;
+  TCRegionInfo regionInfo{bcMappingInfo.tcRegion,
+                           getRanges(bcMappingInfo,
+                                     codeStartAddr,
+                                     codeEndAddr)};
+  auto& ranges = regionInfo.ranges;
 
   char codeStr[MAX_INSTR_ASM_LEN];
   Instruction* code = (Instruction*) alloca(codeLen);
@@ -109,15 +100,7 @@ void OfflineCode::disasm(FILE* file,
   size_t  currBC = 0;
 
   auto const offset = codeStartAddr - fileStartAddr;
-  if (fseek(file, offset, SEEK_SET)) {
-    error("disasm error: seeking file");
-  }
-
-  size_t readLen = fread(code, codeLen, 1, file);
-  if (readLen != 1) {
-    error("Failed to read {} bytes at offset {} from code file due to {}",
-          codeLen, offset, feof(file) ? "EOF" : "read error");
-  }
+  readDisasmFile(file, offset, codeLen, code);
 
   Decoder dec;
   Disassembler dis(codeStr, MAX_INSTR_ASM_LEN);
@@ -135,14 +118,6 @@ void OfflineCode::disasm(FILE* file,
 
   for (frontier = code, ip = codeStartAddr; frontier < code + codeLen; ) {
     dec.Decode(frontier);
-
-    currBC = printBCMapping(bcMappingInfo, currBC, (TCA)ip);
-    if (printAddr) printf("%14p: ", ip);
-
-    if (printBinary) {
-      printf("%08" PRIx32 , *reinterpret_cast<int32_t *>(frontier));
-      printf("%10s","");
-    }
 
     // Shadow potential call destinations based on fixed sequence.
     // This needs to match code generation in JIT.
@@ -171,17 +146,24 @@ void OfflineCode::disasm(FILE* file,
       callAddr = 0;
     }
 
-    if (! perfEvents.empty()) {
-      printEventStats((TCA)ip, kInstructionSize, perfEvents);
-    } else {
-      printf("%48s", "");
-    }
+    auto const binaryStr = [&] {
+      std::ostringstream binary_os;
+      binary_os << folly::format("{:08" PRIx32 "}",
+                                 *reinterpret_cast<int32_t*>(frontier));
+      binary_os << string(10, ' ');
+      return binary_os.str();
+    }();
 
-    printf("%s%s\n", codeStr, callDest.c_str());
+    while (currBC < ranges.size() - 1 && ip >= ranges[currBC].end) currBC++;
+
+    auto const disasmInfo = getDisasmInfo(ip, kInstructionSize, perfEvents,
+                                          binaryStr, callDest, codeStr);
+    ranges[currBC].disasm.push_back(disasmInfo);
 
     frontier += kInstructionSize;
     ip += kInstructionSize;
   }
+  return regionInfo;
 }
 
 #endif

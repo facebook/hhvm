@@ -15,10 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_THRIFT_H_
-#define incl_HPHP_EXT_THRIFT_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/native-data.h"
+#include "thrift/lib/cpp2/async/RequestCallback.h"
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,5 +62,45 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const String& obj_typename);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_RpcOptions("RpcOptions");
+
+struct RpcOptions {
+  RpcOptions() {}
+  RpcOptions& operator=(const RpcOptions& that_) {
+    return *this;
+  }
+
+  void sweep() { close(true); }
+
+  void close(bool /*sweeping*/ = false) {}
+
+  static Class* PhpClass() {
+    if (!c_RpcOptions) {
+      c_RpcOptions = Class::lookup(s_RpcOptions.get());
+      assert(c_RpcOptions);
+    }
+    return c_RpcOptions;
+  }
+
+  static Object newInstance() { return Object{PhpClass()}; }
+
+  static RpcOptions* GetDataOrThrowException(ObjectData* object_) {
+    if (object_ == nullptr) {
+      throw_null_pointer_exception();
+      not_reached();
+    }
+    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+      raise_error("RpcOptions expected");
+      not_reached();
+    }
+    return Native::data<RpcOptions>(object_);
+  }
+
+  apache::thrift::RpcOptions rpcOptions;
+ private:
+  static Class* c_RpcOptions;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }}
-#endif // incl_HPHP_EXT_THRIFT_H_

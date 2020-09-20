@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This is a test that checks that CGetM in the IR properly cleans the
@@ -7,7 +7,6 @@
 
 class Dtor {
   public function __construct() { echo "hi\n"; }
-  public function __destruct() { echo "ah\n"; }
 }
 
 class Something {
@@ -37,13 +36,14 @@ function thrower() {
 }
 
 function main() {
-  set_error_handler('thrower');
+  set_error_handler(fun('thrower'));
   $k = new Unsetter;
   $k->useX(new Something());
 }
-
+<<__EntryPoint>> function main_entry() {
 try {
   main();
 } catch (Exception $x) {
   echo "out\n";
+}
 }

@@ -1,5 +1,4 @@
-<?php
+<?hh
 
 function test(...$args = 123) {}
 
-?>

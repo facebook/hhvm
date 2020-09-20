@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // Repeated use of Tv bound to something different in each class is meant
 // to be a stress-test of tricksy typing_decl instantiation code

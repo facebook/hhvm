@@ -1,11 +1,11 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
@@ -85,7 +85,7 @@ class C {
   public ?Ty10 $ivar52;
   public string $ivar53;
 
-  public function __construct(?Indexish<string, mixed> $vals = null) {
+  public function __construct(?KeyedContainer<string, mixed> $vals = null) {
     $this->ivar1 = (string)untyped_idx($vals, 'ivar1', '');
     $this->ivar2 = (string)untyped_idx($vals, 'ivar2', '');
     $this->ivar3 = (string)untyped_idx($vals, 'ivar3', '');
@@ -141,7 +141,8 @@ class C {
     $this->ivar53 = (string)untyped_idx($vals, 'ivar53', '');
   }
 
-  public function read(TProtocol $input) : int {
+  public function read() : int {
+    $input = get_input();
     $xfer = 0;
     $fname = null;
     $ftype = 0;
@@ -790,3 +791,22 @@ class C {
   }
 
 }
+
+class Readable {
+  public function read($_) {}
+}
+
+class Ty1 extends Readable {}
+class Ty2 extends Readable {}
+class Ty3 extends Readable {}
+class Ty4 extends Readable {}
+class Ty5 extends Readable {}
+class Ty6 extends Readable {}
+class Ty7 extends Readable {}
+class Ty8 extends Readable {}
+class Ty9 extends Readable {}
+class Ty10 extends Readable {}
+
+function get_input() {}
+
+function untyped_idx($_, $_, $_) {}

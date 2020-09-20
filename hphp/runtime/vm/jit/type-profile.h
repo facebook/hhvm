@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_PROFILE_H_
-#define incl_HPHP_JIT_TYPE_PROFILE_H_
+#pragma once
+
+#include <folly/dynamic.h>
 
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -33,6 +34,11 @@ namespace HPHP { namespace jit {
 struct TypeProfile {
   std::string toString() const { return type.toString(); }
 
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object("profileType", "TypeProfile")
+                                 ("typeStr", type.toString());
+  }
+
   void report(TypedValue tv) {
     type |= typeFromTV(&tv, nullptr);
   }
@@ -41,8 +47,11 @@ struct TypeProfile {
     a.type |= b.type;
   }
 
+  void serialize(ProfDataSerializer& ser) const { type.serialize(ser); }
+  void deserialize(ProfDataDeserializer& ser) { type = Type::deserialize(ser); }
+
   Type type; // This gets initialized with 0, which is TBottom.
-  static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
+  static_assert(Type::kBottom.empty(), "Assuming TBottom is 0");
 
   // In RDS, but can't contain pointers to request-allocated data.
   TYPE_SCAN_IGNORE_ALL;
@@ -52,4 +61,3 @@ struct TypeProfile {
 
 }}
 
-#endif

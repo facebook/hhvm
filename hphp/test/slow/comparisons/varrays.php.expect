@@ -1,0 +1,180 @@
+Comparing [] and []:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing [] and [1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [] and [-1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [] and ["1"]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [] and [1,1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [] and [2]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [1] and []:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [1] and [1]:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing [1] and [-1]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [1] and ["1"]:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing [1] and [1,1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [1] and [2]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [-1] and []:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [-1] and [1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [-1] and [-1]:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing [-1] and ["1"]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [-1] and [1,1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [-1] and [2]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing ["1"] and []:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing ["1"] and [1]:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing ["1"] and [-1]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing ["1"] and ["1"]:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing ["1"] and [1,1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing ["1"] and [2]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [1,1] and []:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [1,1] and [1]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [1,1] and [-1]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [1,1] and ["1"]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [1,1] and [1,1]:
+  <  N
+  <= Y
+  >  N
+  >= Y
+Comparing [1,1] and [2]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [2] and []:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [2] and [1]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [2] and [-1]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [2] and ["1"]:
+  <  N
+  <= N
+  >  Y
+  >= Y
+Comparing [2] and [1,1]:
+  <  Y
+  <= Y
+  >  N
+  >= N
+Comparing [2] and [2]:
+  <  N
+  <= Y
+  >  N
+  >= Y

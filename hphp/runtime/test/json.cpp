@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"

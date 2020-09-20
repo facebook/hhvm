@@ -1,0 +1,64 @@
+(library
+  (name global_options)
+  (wrapped false)
+  (modules
+    globalOptions)
+  (libraries
+    collections
+    utils_find)
+  (preprocess (pps ppx_deriving.std)))
+
+(executable
+  (name discover)
+  (modules discover)
+  (libraries dune.configurator)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(rule
+  (targets generated_buildOptions.ml)
+  (action (run ./discover.exe)))
+
+(library
+  (name build_options)
+  (wrapped false)
+  (modules buildOptions)
+  (libraries (select buildOptions.ml from
+    (facebook -> facebook/buildOptions.ml)
+    (-> generated_buildOptions.ml)))
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name glean_options)
+  (wrapped false)
+  (modules
+    gleanOptions)
+  (libraries
+    global_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name parser_options)
+  (wrapped false)
+  (modules
+    parserOptions)
+  (libraries
+    global_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name symbol_write_options)
+  (wrapped false)
+  (modules
+    symbolWriteOptions)
+  (libraries
+    global_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typechecker_options)
+  (wrapped false)
+  (modules
+    typecheckerOptions)
+  (libraries
+    global_options)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208

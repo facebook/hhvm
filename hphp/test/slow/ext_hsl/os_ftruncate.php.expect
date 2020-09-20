@@ -1,0 +1,14 @@
+string(9) "foobarbaz"
+string(6) "foobar"
+string(3) "foo"
+string(0) ""
+string(34) "0000000000000000006865727064657270"
+int(0)
+string(8) "herpderp"
+int(0)
+string(8) "herpderp"
+int(0)
+string(8) "herpderp"
+int(4)
+string(12) "herpherpderp"
+string(25) "EINVAL on negative length"

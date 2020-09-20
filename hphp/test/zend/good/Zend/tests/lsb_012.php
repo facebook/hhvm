@@ -1,18 +1,19 @@
-<?php
+<?hh
 
 class Test1 {
-	static function ok() {
-		echo "bug";
-	}
-	static function test() {
-		call_user_func("static::ok");
-	}
+    static function ok() {
+        echo "bug";
+    }
+    static function test() {
+        call_user_func(static::class."::ok");
+    }
 }
 
 class Test2 extends Test1 {
-	static function ok() {
-		echo "ok";
-	}
+    static function ok() {
+        echo "ok";
+    }
 }
+<<__EntryPoint>> function main(): void {
 Test2::test();
-?>
+}

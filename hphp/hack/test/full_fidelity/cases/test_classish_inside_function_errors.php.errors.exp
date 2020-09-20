@@ -1,0 +1,6 @@
+(4,3)-(4,19) Declarations are not supported outside global scope
+(4,20)-(5,1) Declarations are not supported outside global scope
+(6,8)-(7,1) Declarations are not supported outside global scope
+(8,8)-(9,1) Declarations are not supported outside global scope
+(11,6)-(12,1) Inline function definitions are not supported in Hack
+(22,26)-(23,1) Declarations are not supported outside global scope

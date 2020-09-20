@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   function foo() {
@@ -13,6 +13,7 @@ class C {
     echo "BAR!\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 $x = new C();
 $x->foo();
-?>
+}

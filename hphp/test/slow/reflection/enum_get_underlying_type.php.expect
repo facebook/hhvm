@@ -1,0 +1,6 @@
+string(6) "HH\int"
+string(6) "HH\int"
+string(2) "nt"
+string(1) "t"
+string(42) "Trying to read the Enum-type of a non-Enum"
+string(42) "Trying to read the Enum-type of a non-Enum"

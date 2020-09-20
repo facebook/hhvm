@@ -1,4 +1,8 @@
-<?php
+<?hh
 class Foo { function bar() {} }
-header_register_callback([new Foo, 'bar']);
-header_register_callback([new Foo, 'baz']);
+
+<<__EntryPoint>>
+function main_callback() {
+header_register_callback(varray[new Foo, 'bar']);
+header_register_callback(varray[new Foo, 'baz']);
+}

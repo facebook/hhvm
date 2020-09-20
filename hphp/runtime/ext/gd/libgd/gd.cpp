@@ -1924,7 +1924,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
       if (x>x2+1) {
         FILL_PUSH(y, x2+1, x-1, -dy);
       }
-skip:     for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++);
+skip: for (x++; x<=x2 && (gdImageGetPixel(im, x, y)!=oc); x++) {}
 
       l = x;
     } while (x<=x2);
@@ -1996,7 +1996,7 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
       if (x>x2+1) {
         FILL_PUSH(y, x2+1, x-1, -dy);
       }
-skip:   for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++);
+skip: for(x++; x<=x2 && (pts[y][x] || gdImageGetPixel(im,x, y)!=oc); x++) {}
       l = x;
     } while (x<=x2);
   }

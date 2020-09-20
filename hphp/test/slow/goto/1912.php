@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1912() {
 for($i=0,$j=50;
  $i<100;
  $i++) {
@@ -9,3 +12,4 @@ for($i=0,$j=50;
 }
  echo 'no';
  end: echo 'yes';
+}

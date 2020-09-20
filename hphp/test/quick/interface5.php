@@ -7,5 +7,7 @@ class D extends C {
     echo "Done\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new D;
 $obj->foo();
+}

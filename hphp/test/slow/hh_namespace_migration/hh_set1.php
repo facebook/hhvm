@@ -5,7 +5,11 @@
 
 function main() {
   $s = Set {1, 2, 3};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
 
+
+<<__EntryPoint>>
+function main_hh_set1() {
 main();
+}

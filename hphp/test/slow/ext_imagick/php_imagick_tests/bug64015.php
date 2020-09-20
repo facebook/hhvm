@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $im = new Imagick(__DIR__ . '/php.gif');
 var_dump($im->getImageLength());
 
@@ -11,6 +11,4 @@ $cloned_im = clone $im;
 var_dump($im->getImageLength());
 
 echo "OK" , PHP_EOL;
-
-
-?>
+}

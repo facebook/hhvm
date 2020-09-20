@@ -1,7 +1,10 @@
-<?php
+<?hh
 
-$x = 1;
-switch ($x++ ?: -1) {
+<<__EntryPoint>>
+function main_1316() {
+  $x = 1;
+  switch ($x++ ?: -1) {
+    default: break;
+  }
+  var_dump($x);
 }
-;
-var_dump($x);

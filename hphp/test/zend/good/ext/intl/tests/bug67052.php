@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ut_main()
 {
@@ -10,7 +10,7 @@ function ut_main()
         return $res_str;
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-
-?>
+<<__EntryPoint>> function main_entry(): void {
+        include_once( 'ut_common.inc' );
+        ut_run();
+}

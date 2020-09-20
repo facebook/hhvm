@@ -1,3 +1,5 @@
-<?php if (!function_exists('time_nanosleep')) die("skip");
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!function_exists('time_nanosleep')) die("skip");
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-?>
+}

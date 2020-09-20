@@ -1,0 +1,4 @@
+File "pair-bad-arity.php", line 6, characters 8-32:
+Collection expression must have less than three type arguments (Parsing[1002])
+File "pair-bad-arity.php", line 5, characters 8-11:
+Too few arguments (Naming[2037])

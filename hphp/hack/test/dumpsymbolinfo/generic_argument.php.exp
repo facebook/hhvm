@@ -1,0 +1,22 @@
+{
+  "function_calls":[
+    {
+      "name":"C::foo",
+      "type":"Method",
+      "pos":{"filename":"generic_argument.php","line":8,"char_start":14,"char_end":16},
+      "caller":"test"
+    }
+  ],
+  "symbol_types":[
+    {
+      "pos":{"filename":"generic_argument.php","line":7,"char_start":25,"char_end":26},
+      "type":"T",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"generic_argument.php","line":8,"char_start":10,"char_end":11},
+      "type":"T",
+      "ident":0
+    }
+  ]
+}

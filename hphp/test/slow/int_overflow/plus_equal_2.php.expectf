@@ -1,0 +1,10 @@
+exception for 9223372036854775807 += 1: Integer overflow
+9223372036854775807 += -1 = 9223372036854775806
+exception for '9223372036854775807' += 1: Integer overflow
+exception for 9223372036854775807 += '1': Integer overflow
+exception for '9223372036854775807' += '1': Integer overflow
+exception for -9223372036854775808 += -1: Integer overflow
+-9223372036854775808 += 1 = -9223372036854775807
+exception for '-9223372036854775808' += -1: Integer overflow
+exception for -9223372036854775808 += '-1': Integer overflow
+exception for '-9223372036854775808' += '-1': Integer overflow

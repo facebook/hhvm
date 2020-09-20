@@ -1,1 +1,3 @@
-No errors
+File "string_expressions14.php", line 20, characters 9-13:
+You cannot use this object as a string
+Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ABI_PPC64_H_
-#define incl_HPHP_JIT_ABI_PPC64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -83,6 +82,46 @@ constexpr PhysReg rone()       { return ppc64_asm::reg::r28; }
 
 inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
 inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
+inline RegSet cross_jit_save() {
+  auto ret =
+    ppc64_asm::reg::r2 |
+    ppc64_asm::reg::r14 |
+    ppc64_asm::reg::r15 |
+    ppc64_asm::reg::r16 |
+    ppc64_asm::reg::r17 |
+    ppc64_asm::reg::r18 |
+    ppc64_asm::reg::r19 |
+    ppc64_asm::reg::r20 |
+    ppc64_asm::reg::r21 |
+    ppc64_asm::reg::r22 |
+    ppc64_asm::reg::r23 |
+    ppc64_asm::reg::r24 |
+    ppc64_asm::reg::r25 |
+    ppc64_asm::reg::r26 |
+    ppc64_asm::reg::r28 |
+    ppc64_asm::reg::r29 |
+    // not sure what we should do about these
+    // ppc64_asm::reg::cr2 |
+    // ppc64_asm::reg::cr3 |
+    // ppc64_asm::reg::cr4 |
+    ppc64_asm::reg::v20 |
+    ppc64_asm::reg::v21 |
+    ppc64_asm::reg::v22 |
+    ppc64_asm::reg::v23 |
+    ppc64_asm::reg::v24 |
+    ppc64_asm::reg::v25 |
+    ppc64_asm::reg::v26 |
+    ppc64_asm::reg::v27 |
+    ppc64_asm::reg::v28 |
+    ppc64_asm::reg::v29 |
+    ppc64_asm::reg::v30 |
+    ppc64_asm::reg::v31;
+#if !(__GNUC__ > 5 || (__GNUC__ == 5 && (__GNUC_MINOR__ >= 4) &&       \
+                      (__GNUC_PATCHLEVEL__ >= 1)))
+  ret |= ppc64_asm::reg::r30;
+#endif
+  return ret;
+}
 
 constexpr PhysReg rret_data() { return ppc64_asm::reg::r3; }
 constexpr PhysReg rret_type() { return ppc64_asm::reg::r4; }
@@ -124,4 +163,3 @@ inline Vflags required_flags(jit::ConditionCode /*cc*/) {
 
 }}}
 
-#endif

@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main(): void {
 $f = tmpfile();
 fwrite($f, "foo.bar.baz");
 fseek($f, 0);
@@ -13,3 +13,4 @@ fwrite($f,"guzzle");
 fseek($f, 0);
 var_dump(fread($f,1000));
 fclose($f);
+}

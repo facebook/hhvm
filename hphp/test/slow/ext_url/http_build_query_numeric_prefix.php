@@ -1,5 +1,8 @@
-<?php
-$query = array(
+<?hh
+
+<<__EntryPoint>>
+function main_http_build_query_numeric_prefix() {
+$query = darray[
     0                    => "4.6.1",
     'php'                => "7.0.99-hhvm",
     'locale'             => "de_DE",
@@ -9,6 +12,7 @@ $query = array(
     'users'              => 5,
     8                    => 0,
     'initial_db_version' => 27916,
-);
+];
 var_dump(http_build_query($query, null, "&"));
-var_dump(http_build_query($query, 52, "&"));
+var_dump(http_build_query($query, '52', "&"));
+}

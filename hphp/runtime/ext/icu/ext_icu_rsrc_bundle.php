@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Localized software products often require sets of data that are to be
@@ -17,7 +17,7 @@
  * ResourceBundle object for complex ones. All resources are read-only.
  */
 <<__NativeData("ResourceBundle")>>
-class ResourceBundle implements \Iterator, \ArrayAccess, \Countable {
+class ResourceBundle implements \HH\Iterator, \ArrayAccess, \Countable {
   /**
    * Create a resource bundle
    *
@@ -210,6 +210,6 @@ function resourcebundle_get(ResourceBundle $r,
  *
  * @return array - Returns the list of locales supported by the bundle.
  */
-function resourcebundle_locales(string $bundlename): array {
+function resourcebundle_locales(string $bundlename): varray {
   return ResourceBundle::getLocales($bundlename);
 }

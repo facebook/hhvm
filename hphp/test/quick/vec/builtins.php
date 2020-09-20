@@ -14,7 +14,7 @@ function main($v) {
 
   echo "array_pop: ";
   $copy_v = $v;
-  var_dump(array_pop($copy_v));
+  var_dump(array_pop(inout $copy_v));
   var_dump($copy_v);
 
   echo "array_product: ";
@@ -22,7 +22,7 @@ function main($v) {
 
   echo "array_push: ";
   $copy_v = $v;
-  var_dump(array_push($copy_v, "pushed1", "pushed2", "pushed3"));
+  var_dump(array_push(inout $copy_v, "pushed1", "pushed2", "pushed3"));
   var_dump($copy_v);
 
   echo "array_search (2): ";
@@ -36,7 +36,7 @@ function main($v) {
 
   echo "array_shift: ";
   $copy_v = $v;
-  var_dump(array_shift($copy_v));
+  var_dump(array_shift(inout $copy_v));
   var_dump($copy_v);
 
   echo "array_sum: ";
@@ -44,7 +44,7 @@ function main($v) {
 
   echo "array_unshift: ";
   $copy_v = $v;
-  var_dump(array_unshift($copy_v, "prepend1", "prepend2"));
+  var_dump(array_unshift(inout $copy_v, "prepend1", "prepend2"));
   var_dump($copy_v);
 
   echo "array_values: ";
@@ -54,7 +54,7 @@ function main($v) {
   var_dump(count($v));
 
   echo "empty: ";
-  var_dump(empty($v));
+  var_dump(!($v ?? false));
 
   echo "in_array (3): ";
   var_dump(in_array(3, $v));
@@ -67,32 +67,32 @@ function main($v) {
 
   echo "sort: ";
   $copy_v = $v;
-  var_dump(sort($copy_v));
+  var_dump(sort(inout $copy_v));
   var_dump($copy_v);
 
   echo "rsort: ";
   $copy_v = $v;
-  var_dump(rsort($copy_v));
+  var_dump(rsort(inout $copy_v));
   var_dump($copy_v);
 
   echo "asort: ";
   $copy_v = $v;
-  var_dump(asort($copy_v));
+  var_dump(asort(inout $copy_v));
   var_dump($copy_v);
 
   echo "arsort: ";
   $copy_v = $v;
-  var_dump(arsort($copy_v));
+  var_dump(arsort(inout $copy_v));
   var_dump($copy_v);
 
   echo "ksort: ";
   $copy_v = $v;
-  var_dump(ksort($copy_v));
+  var_dump(ksort(inout $copy_v));
   var_dump($copy_v);
 
   echo "krsort: ";
   $copy_v = $v;
-  var_dump(krsort($copy_v));
+  var_dump(krsort(inout $copy_v));
   var_dump($copy_v);
 
   echo "array_slice (0): ";
@@ -101,10 +101,11 @@ function main($v) {
   echo "array_slice (1): ";
   var_dump(array_slice($v, 1));
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(vec[]);
 main(vec[1, 2, 3, 4, 5]);
 main(vec[5, 4, 3, 2, 1]);
 main(vec["a", "b", "c"]);
 main(vec["b", "a", "a", "b"]);
 main(vec[100]);
+}

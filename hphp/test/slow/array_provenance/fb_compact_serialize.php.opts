@@ -1,0 +1,3 @@
+-vEval.ArrayProvenance=1
+-vEval.LogArrayProvenance=1
+-vEval.LogArrayProvenanceSampleRatio=1

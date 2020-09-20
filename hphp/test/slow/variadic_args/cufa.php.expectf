@@ -2,54 +2,39 @@
 
 * variadic_only_no_vv
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * variadic_only
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * variadic_some
 bool(true)
 bool(true)
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * variadic_hack_only
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * variadic_hack_some
 int(3)
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -61,39 +46,27 @@ array(3) {
 ========= static methods ==========
 
 * C::st_variadic_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_some
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_hack_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * C::st_variadic_hack_some
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -105,40 +78,28 @@ array(3) {
 ========= instance methods ==========
 
 * C::variadic_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::variadic_some
 bool(true)
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::variadic_hack_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * C::variadic_hack_some
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -151,98 +112,49 @@ array(3) {
 
 * variadic_only_no_vv
 bool(true)
-array(0) {
+varray(0) {
 }
 
 * variadic_only
 bool(true)
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
-
-Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* variadic_some
-bool(false)
-bool(true)
-array(0) {
-}
-bool(true)
-bool(true)
+string(53) "variadic_some() expects at least 1 parameter, 0 given"
 
 * variadic_hack_only
 int(0)
-array(0) {
+varray(0) {
 }
-
-Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* variadic_hack_some
-int(0)
-array(0) {
-}
+string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= static methods ==========
 
 * C::st_variadic_only
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
-
-Warning: st_variadic_some() expects at least 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::st_variadic_some
-array(0) {
-}
-bool(true)
-bool(true)
+string(59) "C::st_variadic_some() expects at least 1 parameter, 0 given"
 
 * C::st_variadic_hack_only
-array(0) {
+varray(0) {
 }
-
-Warning: st_variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::st_variadic_hack_some
-array(0) {
-}
+string(64) "C::st_variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= instance methods ==========
 
 * C::variadic_only
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
-
-Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::variadic_some
-bool(false)
-array(0) {
-}
-bool(true)
-bool(true)
+string(56) "C::variadic_some() expects at least 1 parameter, 0 given"
 
 * C::variadic_hack_only
-array(0) {
+varray(0) {
 }
-
-Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::variadic_hack_some
-array(0) {
-}
+string(61) "C::variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ********* test_cufa **********
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
@@ -250,54 +162,39 @@ array(3) {
 
 * variadic_only_no_vv
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * variadic_only
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * variadic_some
 bool(true)
 bool(true)
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * variadic_hack_only
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * variadic_hack_some
 int(3)
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -309,39 +206,27 @@ array(3) {
 ========= static methods ==========
 
 * C::st_variadic_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_some
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_hack_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * C::st_variadic_hack_some
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -353,40 +238,28 @@ array(3) {
 ========= instance methods ==========
 
 * C::variadic_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::variadic_some
 bool(true)
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-bool(true)
-bool(true)
 
 * C::variadic_hack_only
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * C::variadic_hack_some
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -396,8 +269,7 @@ array(3) {
 }
 
 ********* test_cufa **********
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
 
@@ -405,38 +277,31 @@ array(1) {
 
 * variadic_only_no_vv
 bool(true)
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
 
 * variadic_only
 bool(true)
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
-bool(true)
-bool(true)
 
 * variadic_some
 bool(true)
 bool(true)
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
 
 * variadic_hack_only
 int(1)
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
 
 * variadic_hack_some
 int(1)
-array(1) {
+darray(1) {
   [0]=>
   string(1) "a"
 }
@@ -444,27 +309,21 @@ array(1) {
 ========= static methods ==========
 
 * C::st_variadic_only
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_some
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
 
 * C::st_variadic_hack_only
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
 
 * C::st_variadic_hack_some
-array(1) {
+darray(1) {
   [0]=>
   string(1) "a"
 }
@@ -472,124 +331,72 @@ array(1) {
 ========= instance methods ==========
 
 * C::variadic_only
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
-bool(true)
-bool(true)
 
 * C::variadic_some
 bool(true)
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
 
 * C::variadic_hack_only
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "a"
 }
 
 * C::variadic_hack_some
-array(1) {
+darray(1) {
   [0]=>
   string(1) "a"
 }
 
 ********* test_cufa **********
-array(0) {
+varray(0) {
 }
 
 ========= functions ==========
 
 * variadic_only_no_vv
 bool(true)
-array(0) {
+varray(0) {
 }
 
 * variadic_only
 bool(true)
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
-
-Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* variadic_some
-bool(false)
-bool(true)
-array(0) {
-}
-bool(true)
-bool(true)
+string(53) "variadic_some() expects at least 1 parameter, 0 given"
 
 * variadic_hack_only
 int(0)
-array(0) {
+varray(0) {
 }
-
-Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* variadic_hack_some
-int(0)
-array(0) {
-}
+string(58) "variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= static methods ==========
 
 * C::st_variadic_only
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
-
-Warning: st_variadic_some() expects at least 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::st_variadic_some
-array(0) {
-}
-bool(true)
-bool(true)
+string(59) "C::st_variadic_some() expects at least 1 parameter, 0 given"
 
 * C::st_variadic_hack_only
-array(0) {
+varray(0) {
 }
-
-Warning: st_variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::st_variadic_hack_some
-array(0) {
-}
+string(64) "C::st_variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ========= instance methods ==========
 
 * C::variadic_only
-array(0) {
+varray(0) {
 }
-bool(true)
-bool(true)
-
-Warning: variadic_some() expects at least 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::variadic_some
-bool(false)
-array(0) {
-}
-bool(true)
-bool(true)
+string(56) "C::variadic_some() expects at least 1 parameter, 0 given"
 
 * C::variadic_hack_only
-array(0) {
+varray(0) {
 }
-
-Warning: variadic_hack_some() expects exactly 1 parameter, 0 given in %s/variadic_args/variadic_funcs.inc on line %d
-
-* C::variadic_hack_some
-array(0) {
-}
+string(61) "C::variadic_hack_some() expects at least 1 parameter, 0 given"
 
 ********* test_stack_should_not_overflow **********
 bool(true)

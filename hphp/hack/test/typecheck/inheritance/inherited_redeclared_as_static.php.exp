@@ -1,0 +1,16 @@
+File "inherited_redeclared_as_static.php", line 12, characters 24-43:
+The property `$non_static_property` is declared here as static (Typing[4091])
+File "inherited_redeclared_as_static.php", line 4, characters 13-18:
+But it conflicts with an inherited non-static declaration here
+File "inherited_redeclared_as_static.php", line 13, characters 17-32:
+The property `$static_property` is declared here as non-static (Typing[4091])
+File "inherited_redeclared_as_static.php", line 5, characters 20-25:
+But it conflicts with an inherited static declaration here
+File "inherited_redeclared_as_static.php", line 15, characters 29-43:
+The method `nonStaticMethod` is declared here as static (Typing[4091])
+File "inherited_redeclared_as_static.php", line 7, characters 22-36:
+But it conflicts with an inherited non-static declaration here
+File "inherited_redeclared_as_static.php", line 16, characters 22-33:
+The method `staticMethod` is declared here as non-static (Typing[4091])
+File "inherited_redeclared_as_static.php", line 8, characters 29-40:
+But it conflicts with an inherited static declaration here

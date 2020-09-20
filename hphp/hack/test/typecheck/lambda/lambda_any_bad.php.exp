@@ -1,0 +1,4 @@
+File "lambda_any_bad.php", line 6, characters 7-9:
+You are trying to access the method `foo` but this is an int (Typing[4062])
+File "lambda_any_bad.php", line 4, characters 29-29:
+Definition is here

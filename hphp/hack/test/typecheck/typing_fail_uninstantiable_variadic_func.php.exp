@@ -1,0 +1,4 @@
+File "typing_fail_uninstantiable_variadic_func.php", line 12, characters 24-51:
+`CannotBeInstantiatedWithT` is uninstantiable (Typing[4002])
+File "typing_fail_uninstantiable_variadic_func.php", line 11, characters 22-46:
+Declaration is here

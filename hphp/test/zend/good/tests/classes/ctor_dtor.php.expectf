@@ -1,6 +1,4 @@
-early::early
-early::early
-early::__destruct
+early::__construct
+early::__construct
 late::__construct
 Done
-late::__destruct

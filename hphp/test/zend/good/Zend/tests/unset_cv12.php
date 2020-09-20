@@ -1,6 +1,8 @@
-<?php
-$x = 1;
-function foo() {unset($GLOBALS["x"]);}
-call_user_func("foo");
-echo "ok\n";
-?>
+<?hh
+function foo() {\HH\global_unset("x");}
+<<__EntryPoint>>
+function main_entry(): void {
+  $x = 1;
+  call_user_func(fun("foo"));
+  echo "ok\n";
+}

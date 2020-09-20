@@ -8,7 +8,7 @@ function testCycleBackTrace() {
   Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 
   $ref = new Ref();
-  $ref->value = AwaitAllWaitHandle::fromArray(array(
+  $ref->value = AwaitAllWaitHandle::fromVec(vec[
     async {
       // asio checks first unfinished child
       await RescheduleWaitHandle::create(0, 2);
@@ -26,7 +26,7 @@ function testCycleBackTrace() {
       $bt = debug_backtrace();
       var_dump(array_map($frame ==> $frame['function'], $bt));
     }
-  ));
+  ]);
 
   try {
     HH\Asio\join($ref->value);
@@ -40,5 +40,8 @@ function testCycleBackTrace() {
     var_dump($e->getMessage());
   }
 }
+<<__EntryPoint>>
+function entrypoint_cycle_debug_backtrace(): void {
 
-testCycleBackTrace();
+  testCycleBackTrace();
+}

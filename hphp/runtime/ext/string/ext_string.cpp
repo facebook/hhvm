@@ -25,12 +25,12 @@
 #include "hphp/runtime/ext/string/ext_string.h" // nolint - see above
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-scanf.h"
@@ -41,8 +41,9 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/concurrent-lru-cache.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/zend/html-table.h"
 #include "hphp/zend/zend-string.h"
 
@@ -55,7 +56,7 @@ static Mutex s_mutex;
 
 const StaticString
   s_HPHP_TRIM_CHARLIST("HPHP_TRIM_CHARLIST"),
-  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ", 6);
+  k_HPHP_TRIM_CHARLIST("\n\r\t\x0b\x00 ");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -534,10 +535,24 @@ String HHVM_FUNCTION(implode,
                      const Variant& arg2 /* = uninit_variant */) {
   if (isContainer(arg1)) {
     return StringUtil::Implode(arg1, arg2.toString(), false);
+  } else if (arg1.isClsMeth()) {
+    raiseClsMethToVecWarningHelper(__FUNCTION__+2);
+    auto const clsMeth = arg1.toClsMethVal();
+    return concat3(
+      StrNR(clsMeth->getCls()->name()),
+      arg2.toString(),
+      StrNR(clsMeth->getFunc()->name()));
   } else if (isContainer(arg2)) {
     return StringUtil::Implode(arg2, arg1.toString(), false);
+  } else if (arg2.isClsMeth()) {
+    raiseClsMethToVecWarningHelper(__FUNCTION__+2);
+    auto const clsMeth = arg2.toClsMethVal();
+    return concat3(
+      StrNR(clsMeth->getCls()->name()),
+      arg1.toString(),
+      StrNR(clsMeth->getFunc()->name()));
   } else {
-    throw_bad_type_exception("implode() expects a container as "
+    raise_bad_type_warning("implode() expects a container as "
                              "one of the arguments");
     return String();
   }
@@ -627,7 +642,7 @@ TypedValue HHVM_FUNCTION(strtok, const String& str, const Variant& token) {
 namespace {
 
 Variant str_replace(const Variant& search, const Variant& replace,
-                    const String& subject, int &count, bool caseSensitive) {
+                    const String& subject, int64_t& count, bool caseSensitive) {
   count = 0;
   if (search.isArray()) {
     String ret = subject;
@@ -661,20 +676,20 @@ Variant str_replace(const Variant& search, const Variant& replace,
     return ret;
   }
 
-  if (replace.isArray()) {
-    raise_notice("Array to string conversion");
-  }
-  return string_replace(subject, search.toString(), replace.toString(), count,
-                        caseSensitive);
+  int icount;
+  auto ret = string_replace(subject, search.toString(), replace.toString(),
+                            icount, caseSensitive);
+  count = icount;
+  return ret;
 }
 
 Variant str_replace(const Variant& search, const Variant& replace,
-                    const Variant& subject, int &count, bool caseSensitive) {
+                    const Variant& subject, int64_t& count, bool caseSensitive) {
   count = 0;
   if (subject.isArray()) {
     Array arr = subject.toArray();
-    Array ret = Array::Create();
-    int c;
+    Array ret = Array::CreateDArray();
+    int64_t c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().isArray() || iter.second().is(KindOfObject)) {
         ret.set(iter.first(), iter.second());
@@ -694,27 +709,26 @@ Variant str_replace(const Variant& search, const Variant& replace,
 }
 
 Variant str_replace(const Variant& search, const Variant& replace,
-                    const Variant& subject, VRefParam count) {
-  int nCount = 0;
+                    const Variant& subject, int64_t& count) {
   Variant ret;
+  count = 0;
   if (LIKELY(search.isString() && replace.isString() && subject.isString())) {
+    int icount;
     // Short-cut for the most common (and simplest) case
     ret = string_replace(subject.asCStrRef(), search.asCStrRef(),
-                         replace.asCStrRef(), nCount, true);
+                         replace.asCStrRef(), icount, true);
+    count = icount;
   } else {
     // search, replace, and subject can all be arrays. str_replace() reduces all
     // the valid combinations to multiple string_replace() calls.
-    ret = str_replace(search, replace, subject, nCount, true);
+    ret = str_replace(search, replace, subject, count, true);
   }
-  if (auto ref = count.getRefDataOrNull()) *ref->var() = nCount;
   return ret;
 }
 
 Variant str_ireplace(const Variant& search, const Variant& replace,
-                     const Variant& subject, VRefParam count) {
-  int nCount = 0;
-  Variant ret = str_replace(search, replace, subject, nCount, false);
-  if (auto ref = count.getRefDataOrNull()) *ref->var() = nCount;
+                     const Variant& subject, int64_t& count) {
+  Variant ret = str_replace(search, replace, subject, count, false);
   return ret;
 }
 
@@ -722,13 +736,27 @@ Variant str_ireplace(const Variant& search, const Variant& replace,
 
 TypedValue HHVM_FUNCTION(str_replace,
                          const Variant& search, const Variant& replace,
-                         const Variant& subject, VRefParam count) {
+                         const Variant& subject) {
+  int64_t count;
+  return tvReturn(str_replace(search, replace, subject, count));
+}
+
+TypedValue HHVM_FUNCTION(str_replace_with_count,
+                         const Variant& search, const Variant& replace,
+                         const Variant& subject, int64_t& count) {
   return tvReturn(str_replace(search, replace, subject, count));
 }
 
 TypedValue HHVM_FUNCTION(str_ireplace,
                          const Variant& search, const Variant& replace,
-                         const Variant& subject, VRefParam count) {
+                         const Variant& subject) {
+  int64_t count;
+  return tvReturn(str_ireplace(search, replace, subject, count));
+}
+
+TypedValue HHVM_FUNCTION(str_ireplace_with_count,
+                         const Variant& search, const Variant& replace,
+                         const Variant& subject, int64_t& count) {
   return tvReturn(str_ireplace(search, replace, subject, count));
 }
 
@@ -743,17 +771,17 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
     }
     if (start.isArray()) {
       if (!length.isArray()) {
-        throw_invalid_argument("start and length should be of same type - "
+        raise_invalid_argument_warning("start and length should be of same type - "
                                "numerical or array");
         return str;
       }
       Array startArr = start.toArray();
       Array lengthArr = length.toArray();
       if (startArr.size() != lengthArr.size()) {
-        throw_invalid_argument("start and length: (different item count)");
+        raise_invalid_argument_warning("start and length: (different item count)");
         return str;
       }
-      throw_invalid_argument("start and length as arrays not implemented");
+      raise_invalid_argument_warning("start and length as arrays not implemented");
       return str;
     }
     return string_replace(str.toString(), start.toInt32(), length.toInt32(),
@@ -787,11 +815,11 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
       // If 'start' or 'length' are arrays and we've gone past the end, default
       // to 0 for start and the length of the input string for length.
       int nStart =
-        (opStart.hasValue()
+        (opStart.has_value()
          ? opStart.value()
          : (startIter ? startIter.second().toInt32() : 0));
       int nLength =
-        (opLength.hasValue()
+        (opLength.has_value()
          ? opLength.value()
          : (lengthIter ? lengthIter.second().toInt32() : str.length()));
       if (startIter) ++startIter;
@@ -812,11 +840,11 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
     for (ArrayIter iter(strArr); iter; ++iter) {
       auto str = iter.second().toString();
       int nStart =
-        (opStart.hasValue()
+        (opStart.has_value()
          ? opStart.value()
          : (startIter ? startIter.second().toInt32() : 0));
       int nLength =
-        (opLength.hasValue()
+        (opLength.has_value()
          ? opLength.value()
          : (lengthIter ? lengthIter.second().toInt32() : str.length()));
       if (startIter) ++startIter;
@@ -913,8 +941,8 @@ String HHVM_FUNCTION(str_repeat,
   }
 
   if (multiplier < 0) {
-    raise_warning("Second argument has to be greater than or equal to 0");
-    return String();
+    SystemLib::throwRuntimeExceptionObject(
+      "Second argument has to be greater than or equal to 0");
   }
 
   if (multiplier == 0) {
@@ -945,54 +973,49 @@ String HHVM_FUNCTION(str_repeat,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant sscanfImpl(const String& str,
-                   const String& format,
-                   const req::vector<Variant*>& args) {
+Variant HHVM_FUNCTION(sscanf, const String& str, const String& format) {
   Variant ret;
   int result;
-  result = string_sscanf(str.c_str(), format.c_str(), args.size(), ret);
+  result = string_sscanf(str.c_str(), format.c_str(), 0, ret);
   if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return init_null();
-  if (args.empty()) return ret;
-
-  if (ret.isArray()) {
-    auto& retArray = ret.toArrRef();
-    for (int i = 0; i < retArray.size(); i++) {
-      auto var = args.at(i);
-      if (var) {
-        *var->getRefData() = retArray[i];
-      }
-    }
-    return retArray.size();
-  }
-  if (ret.isNull()) return 0;
   return ret;
 }
 
-TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
-  String str{getArg<KindOfString>(ar, 0)};
-  if (ar->numArgs() < 1) {
-    return arReturn(ar, init_null());
-  }
-  String format{getArg<KindOfString>(ar, 1)};
-
-  req::vector<Variant*> args;
-  if (ar->numArgs() > 2) args.reserve(ar->numArgs() - 2);
-  for (int i = 2; i < ar->numArgs(); ++i) {
-    args.push_back(getArg<KindOfRef>(ar, i));
-  }
-  return arReturn(ar, sscanfImpl(str, format, args));
-}
-
 String HHVM_FUNCTION(chr, const Variant& ascii) {
-  // This is the only known occurance of ParamCoerceModeNullByte,
-  // so we treat it specially using an explicit tvCoerce call
-  Variant v(ascii);
-  auto tv = v.asTypedValue();
-  char c = 0;
-  if (tvCoerceParamToInt64InPlace(tv, true)) {
-    c = tv->m_data.num & 0xFF;
+  switch (ascii.getType()) {
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      return String::FromChar(ascii.toInt64() & 0xFF);
+    case KindOfPersistentString:
+    case KindOfString:
+      return String::FromChar(
+        ascii.toString().isNumeric() ? ascii.toInt64() & 0xFF : 0);
+    case KindOfNull:
+    case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
+    case KindOfPersistentDArray:
+    case KindOfPersistentVArray:
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
+    case KindOfDArray:
+    case KindOfVArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+    case KindOfRecord:
+      return String::FromChar(0);
   }
-  return String::FromChar(c);
+
+  not_reached();
 }
 
 int64_t HHVM_FUNCTION(ord,
@@ -1127,7 +1150,7 @@ TypedValue HHVM_FUNCTION(strstr,
                          bool before_needle /* = false */) {
   auto const tv = HHVM_FN(strpos)(haystack, needle);
   auto const& ret = tvAsCVarRef(&tv);
-  assert(!isRefcountedType(tv.m_type));
+  assertx(!isRefcountedType(tv.m_type));
 
   if (same(ret, false)) {
     return make_tv<KindOfBoolean>(false);
@@ -1145,7 +1168,7 @@ TypedValue HHVM_FUNCTION(stristr,
                          bool before_needle /* = false */) {
   auto const tv = HHVM_FN(stripos)(haystack, needle);
   auto const& ret = tvAsCVarRef(&tv);
-  assert(!isRefcountedType(tv.m_type));
+  assertx(!isRefcountedType(tv.m_type));
 
   if (same(ret, false)) {
     return make_tv<KindOfBoolean>(false);
@@ -1163,7 +1186,7 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
 
   auto const charListSz = char_list.size();
   auto const charListData = char_list.c_str();
-  assert(memchr(charListData, '\0', charListSz) != nullptr);
+  assertx(memchr(charListData, '\0', charListSz) != nullptr);
 
   // in order to use strcspn, remove all null byte(s) from char_list
   auto charListWithoutNull = (char*) req::malloc_noptrs(charListSz);
@@ -1174,7 +1197,7 @@ Variant strpbrk_char_list_has_nulls_slow(const String& haystack,
   for (auto ptr = charListData; ptr != charListStop; ++ptr) {
     if (*ptr != '\0') { *copy_ptr++ = *ptr; }
   }
-  assert((copy_ptr - charListWithoutNull) < charListSz);
+  assertx((copy_ptr - charListWithoutNull) < charListSz);
   // at least one of charListData chars was null, so there must be room:
   *copy_ptr = '\0';
 
@@ -1197,7 +1220,7 @@ template<bool existence_only>
 static ALWAYS_INLINE
 Variant strpbrk_impl(const String& haystack, const String& char_list) {
   if (char_list.empty()) {
-    throw_invalid_argument("char_list: (empty)");
+    raise_invalid_argument_warning("char_list: (empty)");
     return false;
   }
   if (haystack.empty()) {
@@ -1383,18 +1406,18 @@ TypedValue HHVM_FUNCTION(substr_count,
                          int length /* = 0x7FFFFFFF */) {
   int lenNeedle = needle.size();
   if (lenNeedle == 0) {
-    throw_invalid_argument("needle: (empty)");
+    raise_invalid_argument_warning("needle: (empty)");
     return make_tv<KindOfBoolean>(false);
   }
 
   if (offset < 0 || offset > haystack.size()) {
-    throw_invalid_argument("offset: (out of range)");
+    raise_invalid_argument_warning("offset: (out of range)");
     return make_tv<KindOfBoolean>(false);
   }
   if (length == 0x7FFFFFFF) {
     length = haystack.size() - offset;
   } else if (length <= 0 || length > haystack.size() - offset) {
-    throw_invalid_argument("length: (out of range)");
+    raise_invalid_argument_warning("length: (out of range)");
     return make_tv<KindOfBoolean>(false);
   }
 
@@ -1480,63 +1503,9 @@ TypedValue HHVM_FUNCTION(strcspn,
   return make_tv<KindOfInt64>(length);
 }
 
-TypedValue HHVM_FUNCTION(strlen,
-                         const Variant& vstr) {
-  auto const cell = vstr.asCell();
-  switch (cell->m_type) {
-    case KindOfPersistentString:
-    case KindOfString:
-      return make_tv<KindOfInt64>(cell->m_data.pstr->size());
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "vec given");
-      return make_tv<KindOfNull>();
-
-    case KindOfPersistentDict:
-    case KindOfDict:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "dict given");
-      return make_tv<KindOfNull>();
-
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "keyset given");
-      return make_tv<KindOfNull>();
-
-    case KindOfPersistentArray:
-    case KindOfArray:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "array given");
-      return make_tv<KindOfNull>();
-
-    case KindOfResource:
-      raise_warning("strlen() expects parameter 1 to be string, "
-                    "resource given");
-      return make_tv<KindOfNull>();
-
-    case KindOfObject:
-      if (!HHVM_FN(method_exists)(vstr, "__toString")) {
-        raise_warning("strlen() expects parameter 1 to be string, "
-                      "object given");
-        return make_tv<KindOfNull>();
-      }
-      // else fallback to default
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble: {
-      const String& str = vstr.toString();
-      return make_tv<KindOfInt64>(str.size());
-    }
-
-    case KindOfRef:
-      break;
-  }
-  not_reached();
+int64_t HHVM_FUNCTION(strlen,
+                      StringArg str) {
+  return str.get()->size();
 }
 
 Array HHVM_FUNCTION(str_getcsv,
@@ -1545,7 +1514,7 @@ Array HHVM_FUNCTION(str_getcsv,
                     const String& enclosure /* = "\"" */,
                     const String& escape /* = "\\" */) {
   if (str.empty()) {
-    return Array::Create(uninit_variant);
+    return make_varray(uninit_variant);
   }
 
   auto check_arg = [](const String& arg, char default_arg) {
@@ -1570,7 +1539,7 @@ Variant HHVM_FUNCTION(count_chars,
     chars[*buf++]++;
   }
 
-  Array retarr = Array::Create();
+  Array retarr = Array::CreateDArray();
   char retstr[256];
   int retlen = 0;
   switch (mode) {
@@ -1609,7 +1578,7 @@ Variant HHVM_FUNCTION(count_chars,
     return String(retstr, retlen, CopyString);
   }
 
-  throw_invalid_argument("mode: %" PRId64, mode);
+  raise_invalid_argument_warning("mode: %" PRId64, mode);
   return false;
 }
 
@@ -1642,7 +1611,7 @@ Variant HHVM_FUNCTION(str_word_count,
     }
     break;
   default:
-    throw_invalid_argument("format: %" PRId64, format);
+    raise_invalid_argument_warning("format: %" PRId64, format);
     return false;
   }
 
@@ -1670,7 +1639,7 @@ Variant HHVM_FUNCTION(str_word_count,
     e--;
   }
 
-  Array ret;
+  Array ret = Array::CreateDArray();
   while (p < e) {
     const char *s = p;
     while (p < e &&
@@ -1697,7 +1666,7 @@ Variant HHVM_FUNCTION(str_word_count,
   if (!format) {
     return word_count;
   }
-  return ret.isNull() ? Array::Create() : ret;
+  return ret;
 }
 
 int64_t HHVM_FUNCTION(levenshtein,
@@ -1713,11 +1682,9 @@ int64_t HHVM_FUNCTION(levenshtein,
 int64_t HHVM_FUNCTION(similar_text,
                       const String& first,
                       const String& second,
-                      VRefParam percent /* = uninit_null() */) {
-  float p;
+                      double& percent) {
   int ret = string_similar_text(first.data(), first.size(),
-                                second.data(), second.size(), &p);
-  percent.assignIfRef(p);
+                                second.data(), second.size(), &percent);
   return ret;
 }
 
@@ -1776,11 +1743,11 @@ String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
                      int flags /* = k_ENT_HTML_QUOTE_DOUBLE */,
                      const String& charset /* = "ISO-8859-1" */,
-                     const Variant& extra /* = empty_array_ref */) {
+                     const Variant& extra /* = varray[] */) {
   if (!extra.isNull() && !extra.isArray()) {
-    throw_expected_array_exception("fb_htmlspecialchars");
+    raise_expected_array_warning("fb_htmlspecialchars");
   }
-  const Array& arr_extra = extra.isNull() ? empty_array_ref : extra.toArray();
+  const Array& arr_extra = extra.isNull() ? empty_varray() : extra.toArray();
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
                                      charset.data(), false, arr_extra);
 }
@@ -1937,7 +1904,7 @@ private:
 };
 
 uint16_t inline PatAndRepl::hash(int start, int len) const {
-  assert(pat.size() >= start + len);
+  assertx(pat.size() >= start + len);
   return strtr_hash(pat.data() + start, len);
 };
 
@@ -1982,7 +1949,7 @@ void WuManberReplacement::initTables() {
       // init shift tab
       for (int j = 0; j < max_shift; j++) {
         uint16_t h2 = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
-        assert((long long) m - (long long) j - B >= 0);
+        assertx((long long) m - (long long) j - B >= 0);
         shift[h2] = MIN(shift[h2], m - j - B);
       }
       // init prefix
@@ -2061,9 +2028,9 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   memcpy(key.mutableData(), s + pos, maxlen);
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
-    auto const rval = arr->get(arr.convertKey(key));
-    if (!rval.is_dummy()) {
-      String replace = tvCastToString(rval.tv());
+    auto const tv = arr->get(key);
+    if (tv.is_init()) {
+      String replace = tvCastToString(tv);
       if (!replace.empty()) {
         result.append(replace);
       }
@@ -2139,7 +2106,7 @@ Variant HHVM_FUNCTION(strtr,
   }
 
   if (!from.isArray()) {
-    throw_invalid_argument("2nd argument: (not array)");
+    raise_invalid_argument_warning("2nd argument: (not array)");
     return false;
   }
 
@@ -2197,7 +2164,7 @@ Variant HHVM_FUNCTION(setlocale,
                       const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.isArray()) {
-    if (!argv.empty()) throw_invalid_argument("locale: not string)");
+    if (!argv.empty()) raise_invalid_argument_warning("locale: not string)");
     argv = locale; // ignore _argv
   }
 
@@ -2212,7 +2179,7 @@ Variant HHVM_FUNCTION(setlocale,
 
     const char *loc = slocale.c_str();
     if (slocale.size() >= 255) {
-      throw_invalid_argument("locale name is too long: %s", loc);
+      raise_invalid_argument_warning("locale name is too long: %s", loc);
       return false;
     }
     if (strcmp("0", loc) == 0) {
@@ -2257,7 +2224,7 @@ Array HHVM_FUNCTION(localeconv) {
     currlocdata = *res;
   }
 
-  Array ret;
+  Array ret = Array::CreateDArray();
 #define SET_LOCALE_STRING(x) ret.set(s_ ## x, String(currlocdata.x, CopyString))
   SET_LOCALE_STRING(decimal_point);
   SET_LOCALE_STRING(thousands_sep);
@@ -2538,7 +2505,7 @@ entity_doctype determine_doctype(int flags) {
 
 String encode_as_utf8(int code_point) {
   auto res = folly::codePointToUtf8(code_point);
-  return String::FromCStr(res.data());
+  return String(res);
 }
 
 Array HHVM_FUNCTION(get_html_translation_table,
@@ -2558,7 +2525,7 @@ Array HHVM_FUNCTION(get_html_translation_table,
 
   bool all = (table == k_HTML_ENTITIES);
 
-  Array ret;
+  Array ret = Array::CreateDArray();
   switch (table) {
   case k_HTML_ENTITIES: {
     if (charset == cs_utf_8) {
@@ -2608,6 +2575,9 @@ Array HHVM_FUNCTION(get_html_translation_table,
     }
     ret.set(s_amp, s_ampsemi);
     break;
+  }
+  if (ret.empty()) {
+    return Array();
   }
 
   return ret;
@@ -2661,7 +2631,9 @@ struct StringExtension final : Extension {
     HHVM_FE(chunk_split);
     HHVM_FE(strtok);
     HHVM_FE(str_replace);
+    HHVM_FE(str_replace_with_count);
     HHVM_FE(str_ireplace);
+    HHVM_FE(str_ireplace_with_count);
     HHVM_FE(substr_replace);
     HHVM_FE(substr);
     HHVM_FE(str_pad);

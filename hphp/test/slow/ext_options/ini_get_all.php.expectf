@@ -1,5 +1,5 @@
 int(0)
-array(3) {
+darray(3) {
   ["global_value"]=>
   string(1) "1"
   ["local_value"]=>
@@ -7,7 +7,7 @@ array(3) {
   ["access"]=>
   int(4)
 }
-array(3) {
+darray(3) {
   ["global_value"]=>
   string(1) "&"
   ["local_value"]=>
@@ -17,9 +17,9 @@ array(3) {
 }
 string(1) "1"
 string(1) "&"
-array(3) {
+darray(3) {
   ["hhvm.pcre.jit"]=>
-  array(3) {
+  darray(3) {
     ["global_value"]=>
     string(1) "1"
     ["local_value"]=>
@@ -28,7 +28,7 @@ array(3) {
     int(4)
   }
   ["pcre.backtrack_limit"]=>
-  array(3) {
+  darray(3) {
     ["global_value"]=>
     string(7) "1000000"
     ["local_value"]=>
@@ -37,7 +37,7 @@ array(3) {
     int(7)
   }
   ["pcre.recursion_limit"]=>
-  array(3) {
+  darray(3) {
     ["global_value"]=>
     string(6) "100000"
     ["local_value"]=>
@@ -46,7 +46,7 @@ array(3) {
     int(7)
   }
 }
-array(3) {
+darray(3) {
   ["hhvm.pcre.jit"]=>
   string(1) "1"
   ["pcre.backtrack_limit"]=>
@@ -54,11 +54,11 @@ array(3) {
   ["pcre.recursion_limit"]=>
   string(6) "100000"
 }
-array(2) {
+darray(2) {
   ["core: allow_url_fopen"]=>
   bool(true)
   ["core: pcre.backtrack_limit"]=>
   bool(false)
 }
 
-Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line 21
+Warning: Unable to find extension 'THIS_EXTENSION_SHOULD_NOT_EXIST' in %s/test/slow/ext_options/ini_get_all.php on line 24

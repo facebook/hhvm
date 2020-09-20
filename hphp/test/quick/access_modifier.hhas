@@ -1,32 +1,5 @@
 #tests that fields and methods with != 1 access modifier fail verification
 
-.main {
-  .declvars $x;
-  DefCls 0
-  FPushCtorD 1 "A"
-  String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  SetL $x
-  PopC
-  CGetL $x
-  FPushObjMethodD 1 "set" NullThrows
-  String "bar"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  FPushFuncD 1 "var_dump"
-  CGetL $x
-  FPushObjMethodD 0 "get" NullThrows
-  FCall 0
-  FPassR 0 Any
-  FCall 1
-  PopR
-  Int 1
-  RetC
-}
-
 .class A {
   .property [public private] attre =
     """N;""";
@@ -55,12 +28,35 @@
     Null
     RetC
   }
-  .method [public] <"" N  > __destruct() {
-    String ""
-    BaseH
-    SetM 0 PT:"attre"
-    PopC
-    Null
-    RetC
-  }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $x;
+  NewObjD "A"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  SetL $x
+  PopC
+  CGetL $x
+  NullUninit
+  NullUninit
+  String "bar"
+  FCallObjMethodD <> 1 1 "" - "" "" NullThrows "set"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $x
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "get"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
+  Int 1
+  RetC
 }

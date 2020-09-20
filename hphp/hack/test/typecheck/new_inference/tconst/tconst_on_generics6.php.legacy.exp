@@ -1,0 +1,8 @@
+File "tconst_on_generics6.php", line 46, characters 14-16:
+Invalid argument (Typing[4110])
+File "tconst_on_generics6.php", line 50, characters 21-23:
+This is an int
+File "tconst_on_generics6.php", line 38, characters 26-28:
+It is incompatible with the expression dependent type <expr#1>::T
+File "tconst_on_generics6.php", line 44, characters 20-21:
+  where '<expr#1>' is a reference to this expression

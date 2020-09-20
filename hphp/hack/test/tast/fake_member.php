@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C {
   private ?int $foo = null;

@@ -1,0 +1,12 @@
+Before:
+  prefetch-worker-off.php ==> true
+  A.inc ==> false
+  B.inc ==> false
+  C.inc ==> false
+  prefetch-worker.inc ==> false
+After:
+  prefetch-worker-off.php ==> true
+  A.inc ==> false
+  B.inc ==> false
+  C.inc ==> false
+  prefetch-worker.inc ==> true

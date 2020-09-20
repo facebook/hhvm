@@ -1,95 +1,114 @@
 *** Testing file_get_contents() : usage variation ***
 
 --int 0--
-string(13) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --int 1--
-string(13) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --int 12345--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --int -12345--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --float 10.5--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --float -10.5--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --float 12.3456789000e10--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --float -12.3456789000e10--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --float .5--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --empty array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --int indexed array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --associative array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --nested arrays--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --uppercase NULL--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --lowercase null--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --lowercase true--
-string(%d) "contents read"
+string(13) "contents read"
 
 --lowercase false--
-string(%d) "contents read"
+string(13) "contents read"
 
 --uppercase TRUE--
-string(%d) "contents read"
+string(13) "contents read"
 
 --uppercase FALSE--
-string(%d) "contents read"
+string(13) "contents read"
 
 --empty string DQ--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --empty string SQ--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --string DQ--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --string SQ--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --mixed case string--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --heredoc--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --instance of classWithToString--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --instance of classWithoutToString--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
-NULL
+
+Warning: file_get_contents() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --undefined var--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --unset var--
-string(%d) "contents read"
+
+Warning: file_get_contents() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 ===DONE===

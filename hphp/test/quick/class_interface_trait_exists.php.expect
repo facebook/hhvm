@@ -1,20 +1,15 @@
-bool(false)
-string(4) "fooo"
 bool(true)
 bool(false)
 bool(true)
 bool(false)
-string(4) "zzzz"
 bool(false)
 bool(false)
 bool(false)
 bool(true)
-string(4) "zzzz"
 bool(false)
 bool(true)
 bool(false)
 bool(false)
-string(4) "zzzz"
 bool(false)
 bool(false)
 bool(false)
@@ -25,9 +20,6 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-string(4) "zzzz"
 bool(false)
-string(4) "zzzz"
 bool(false)
-string(4) "zzzz"
 bool(false)

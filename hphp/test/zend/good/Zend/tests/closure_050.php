@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
     function foo() {
@@ -10,7 +10,7 @@ class A {
 }
 
 class B extends A {}
-
+<<__EntryPoint>> function main(): void {
 $b = new B;
 var_dump($b->foo());
-
+}

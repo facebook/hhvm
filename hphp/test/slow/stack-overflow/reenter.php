@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($x) {
   // just here to make sure foo isn't a leaf function
@@ -6,9 +6,13 @@ function bar($x) {
 }
 
 function foo($x) {
-  $x = (array)$x;
-  array_walk_recursive($x, "foo");
+  $x = varray[$x];
+  array_map(fun("foo"), $x);
   bar($x);
 }
 
+
+<<__EntryPoint>>
+function main_reenter() {
 foo(1);
+}

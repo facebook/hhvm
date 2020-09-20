@@ -14,56 +14,82 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_TYPE_H_
-#define incl_HPHP_TV_TYPE_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool cellIsNull(Cell tv) {
-  assert(cellIsPlausible(tv));
+ALWAYS_INLINE bool tvIsNull(TypedValue tv) {
+  assertx(tvIsPlausible(tv));
   return isNullType(tv.m_type);
 }
-ALWAYS_INLINE bool cellIsNull(const Cell* tv) {
-  return cellIsNull(*tv);
+ALWAYS_INLINE bool tvIsNull(const TypedValue* tv) {
+  return tvIsNull(*tv);
 }
 
-ALWAYS_INLINE bool tvIsString(const TypedValue* tv) {
-  return isStringType(tv->m_type);
+// We don't expose isVArrayType or isDArrayType. They shouldn't be used.
+ALWAYS_INLINE bool isHAMSafeDArrayType(DataType t) {
+  return RO::EvalHackArrDVArrs ? isDictType(t) : dt_with_rc(t) == KindOfDArray;
+}
+ALWAYS_INLINE bool isHAMSafeVArrayType(DataType t) {
+  return RO::EvalHackArrDVArrs ? isVecType(t) : dt_with_rc(t) == KindOfVArray;
+}
+ALWAYS_INLINE bool isHAMSafeDVArrayType(DataType t) {
+  if (RO::EvalHackArrDVArrs) return isVecType(t) || isDictType(t);
+  auto const dtrc = dt_with_rc(t);
+  return dtrc == KindOfVArray || dtrc == KindOfDArray;
 }
 
-ALWAYS_INLINE bool tvIsArray(const TypedValue* tv) {
-  return isArrayType(tv->m_type);
+#define CASE(ty)                                                        \
+  template<typename T>                                                  \
+  ALWAYS_INLINE enable_if_tv_val_t<T&&, bool> tvIs##ty(T&& tv) {        \
+    return is##ty##Type(type(tv));                                      \
+  }
+
+CASE(Null)
+CASE(Bool)
+CASE(Int)
+CASE(Double)
+CASE(String)
+CASE(Array)
+CASE(VecOrVArray)
+CASE(DictOrDArray)
+CASE(HAMSafeVArray)
+CASE(HAMSafeDArray)
+CASE(HAMSafeDVArray)
+CASE(ArrayLike)
+CASE(HackArray)
+CASE(Vec)
+CASE(Dict)
+CASE(Keyset)
+CASE(Object)
+CASE(Resource)
+CASE(Func)
+CASE(RFunc)
+CASE(Class)
+CASE(ClsMeth)
+CASE(RClsMeth)
+CASE(Record)
+
+#undef CASE
+
+template<typename T>
+ALWAYS_INLINE int64_t tvAssertInt(T&& tv) {
+  assertx(isIntType(type(tv)));
+  return val(tv).num;
 }
 
-ALWAYS_INLINE bool tvIsHackArray(const TypedValue* tv) {
-  return isHackArrayType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsVecArray(const TypedValue* tv) {
-  return isVecType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsDict(const TypedValue* tv) {
-  return isDictType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsKeyset(const TypedValue* tv) {
-  return isKeysetType(tv->m_type);
-}
-
-ALWAYS_INLINE bool tvIsReferenced(TypedValue tv) {
-  return tv.m_type == KindOfRef &&
-         tv.m_data.pref->isReferenced();
+template<typename T>
+ALWAYS_INLINE double tvAssertDouble(T&& tv) {
+  assertx(isDoubleType(type(tv)));
+  return val(tv).dbl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }
 
-#endif

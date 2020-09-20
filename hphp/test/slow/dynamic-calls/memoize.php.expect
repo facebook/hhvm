@@ -1,0 +1,26 @@
+====================== positive tests (A) ==================
+Exception: 'func1' called dynamically but is not __DynamicallyCallable
+Exception: 'func1$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'func4$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func2' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func2$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func2' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func2$memoize_impl' called dynamically but is not __DynamicallyCallable
+====================== positive tests (B) ==================
+Exception: 'func4$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'B::func5$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'B::func6$memoize_impl' called dynamically but is not __DynamicallyCallable
+Exception: 'B::func5$memoize_impl' called dynamically but is not __DynamicallyCallable
+====================== negative tests ======================

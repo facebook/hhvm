@@ -1,5 +1,4 @@
 
-Warning: %s
-NULL
-string(%d) %s
+Warning: get_current_user() expects exactly 0 parameters, 1 given in %s/get_current_user.php on line 3
+string(%d) "%s"
 Done

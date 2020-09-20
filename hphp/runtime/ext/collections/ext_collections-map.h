@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_MAP_H
-#define incl_HPHP_EXT_COLLECTIONS_MAP_H
+#pragma once
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
@@ -13,7 +12,7 @@ struct BaseVector;
 
 namespace collections {
 struct MapIterator;
-void deepCopy(TypedValue*);
+void deepCopy(tv_lval);
 }
 
 /**
@@ -32,7 +31,7 @@ public:
   // init(), used by Map::__construct()
   // expects an iterable of key=>value
   void init(const Variant& t) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAllImpl(t);
   }
   // addAllPairs(), used by Map::addAll()
@@ -58,17 +57,16 @@ public:
    * Append `v' to the Map and incref it if it's refcounted.
    */
   void add(TypedValue v);
-  void add(const Variant& v) { add(*v.asCell()); }
+  void add(const Variant& v) { add(*v.asTypedValue()); }
 
   /*
    * Add `k' => `v' to the Map, increffing each if it's refcounted.
    */
   void set(int64_t k, TypedValue v);
   void set(StringData* k, TypedValue v);
-  void set(int64_t k, const Variant& v) { set(k, *v.asCell()); }
-  void set(StringData* k, const Variant& v) { set(k, *v.asCell()); }
+  void set(int64_t k, const Variant& v) { set(k, *v.asTypedValue()); }
+  void set(StringData* k, const Variant& v) { set(k, *v.asTypedValue()); }
   void set(TypedValue k, TypedValue v) {
-    assert(k.m_type != KindOfRef);
     if (k.m_type == KindOfInt64) {
       set(k.m_data.num, v);
     } else if (isStringType(k.m_type)) {
@@ -78,18 +76,30 @@ public:
     }
   }
   void set(const Variant& k, const Variant& v) {
-    set(*k.asCell(), *v.asCell());
+    set(*k.asTypedValue(), *v.asTypedValue());
   }
+
+  /*
+   * Add `k` => `v` to the Map without inc-ref-ing the value.
+   */
+  void setMove(int64_t k, TypedValue v);
+  void setMove(StringData* k, TypedValue v);
 
   Variant pop();
   Variant popFront();
 
 public:
-  static Array ToArray(const ObjectData* obj);
+  template <IntishCast intishCast = IntishCast::None>
+  static Array ToArray(const ObjectData* obj) {
+    check_collection_cast_to_array();
+    return const_cast<BaseMap*>(
+      static_cast<const BaseMap*>(obj)
+    )->toPHPArrayImpl<intishCast>();
+  }
+
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
     auto map = static_cast<BaseMap*>(obj);
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? map->at(key->m_data.num)
@@ -105,7 +115,6 @@ public:
   static void OffsetSet(ObjectData* obj, const TypedValue* key,
                         const TypedValue* val);
   static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
@@ -179,19 +188,19 @@ protected:
   void addAllImpl(const Variant& iterable);
   void setAllImpl(const Variant& iterable);
 
-  template<bool raw> void setImpl(int64_t k, TypedValue v);
-  template<bool raw> void setImpl(StringData* k, TypedValue v);
+  // Set `k` to `v` in the Map. Do not inc-ref `v`. Do not check for mutation.
+  void setImpl(int64_t k, TypedValue v);
+  void setImpl(StringData* k, TypedValue v);
 
   // setRaw() assigns a value to the specified key in this Map, but doesn't
   // check for an immutable buffer, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
   void setRaw(int64_t k, TypedValue v);
   void setRaw(StringData* key, TypedValue v);
-  void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.asCell()); }
-  void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.asCell()); }
+  void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.asTypedValue()); }
+  void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.asTypedValue()); }
 
   void setRaw(TypedValue k, TypedValue v) {
-    assert(k.m_type != KindOfRef);
     if (k.m_type == KindOfInt64) {
       setRaw(k.m_data.num, v);
     } else if (isStringType(k.m_type)) {
@@ -201,16 +210,13 @@ protected:
     }
   }
   void setRaw(const Variant& k, const Variant& v) {
-    setRaw(*k.asCell(), *v.asCell());
+    setRaw(*k.asTypedValue(), *v.asTypedValue());
   }
 
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_differenceByKey(const Variant& it);
-
-  template<bool useKey>
-  Object php_retain(const Variant& callback);
 
   template<class TMap>
   typename std::enable_if<
@@ -226,11 +232,6 @@ protected:
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_skip(const Variant& n);
-
-  template<class TMap>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_skipWhile(const Variant& fn);
 
   template<class TMap>
   typename std::enable_if<
@@ -257,12 +258,12 @@ protected:
     auto target = req::make<TVector>();
     int64_t sz = m_size;
     target->reserve(sz);
-    assert(target->canMutateBuffer());
+    assertx(target->canMutateBuffer());
     target->setSize(sz);
-    auto* out = target->data();
+    int64_t out = 0;
     auto* eLimit = elmLimit();
     for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
-      cellDup(e->data, *out);
+      tvDup(e->data, target->dataAt(out));
     }
     return Object{std::move(target)};
   }
@@ -271,24 +272,23 @@ protected:
   Object php_keys() {
     auto vec = req::make<TVector>();
     vec->reserve(m_size);
-    assert(vec->canMutateBuffer());
+    assertx(vec->canMutateBuffer());
     auto* e = firstElm();
     auto* eLimit = elmLimit();
-    ssize_t j = 0;
+    int64_t j = 0;
     for (; e != eLimit; e = nextElm(e, eLimit), vec->incSize(), ++j) {
       if (e->hasIntKey()) {
-        vec->data()[j].m_data.num = e->ikey;
-        vec->data()[j].m_type = KindOfInt64;
+        tvCopy(make_tv<KindOfInt64>(e->ikey), vec->dataAt(j));
       } else {
-        assert(e->hasStrKey());
-        cellDup(make_tv<KindOfString>(e->skey), vec->data()[j]);
+        assertx(e->hasStrKey());
+        tvDup(make_tv<KindOfString>(e->skey), vec->dataAt(j));
       }
     }
     return Object{std::move(vec)};
   }
 
 private:
-  friend void collections::deepCopy(TypedValue*);
+  friend void collections::deepCopy(tv_lval);
 
   friend struct collections::CollectionsExtension;
   friend struct collections::MapIterator;
@@ -406,7 +406,7 @@ struct MapIterator {
   ~MapIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Unit::lookupClass(s_MapIterator.get());
+    static Class* cls = Class::lookup(s_MapIterator.get());
     assertx(cls);
     return Object{cls};
   }
@@ -418,7 +418,7 @@ struct MapIterator {
 
   Variant current() const {
     auto const mp = m_obj.get();
-    if (!mp->iter_valid(m_pos)) {
+    if (!mp->iter_valid_and_not_tombstone(m_pos)) {
       throw_iterator_not_valid();
     }
     return tvAsCVarRef(mp->iter_value(m_pos));
@@ -426,14 +426,14 @@ struct MapIterator {
 
   Variant key() const {
     auto const mp = m_obj.get();
-    if (!mp->iter_valid(m_pos)) {
+    if (!mp->iter_valid_and_not_tombstone(m_pos)) {
       throw_iterator_not_valid();
     }
     return mp->iter_key(m_pos);
   }
 
   bool valid() const {
-    return m_obj->iter_valid(m_pos);
+    return m_obj->iter_valid_and_not_tombstone(m_pos);
   }
 
   void next() {
@@ -453,4 +453,3 @@ struct MapIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

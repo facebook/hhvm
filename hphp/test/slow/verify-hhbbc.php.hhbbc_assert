@@ -1,0 +1,3 @@
+
+Verification Error (unit %s/verify-hhbbc.php func main): CheckProp cannot appear in main function\n
+The optimized unit for %s/verify-hhbbc.php did not pass verification, bailing because Eval.AbortBuildOnVerifyError is set

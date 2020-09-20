@@ -25,10 +25,10 @@ let test_truncate_long () =
     "truncate cuts the string short";
   true
 
-let tests = [
-  "test_truncate_short", test_truncate_short;
-  "test_truncate_long", test_truncate_long;
-]
+let tests =
+  [
+    ("test_truncate_short", test_truncate_short);
+    ("test_truncate_long", test_truncate_long);
+  ]
 
-let () =
-  Unit_test.run_all tests
+let () = Unit_test.run_all tests

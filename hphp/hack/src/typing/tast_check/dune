@@ -1,0 +1,10 @@
+(library
+  (name tast_check)
+  (wrapped false)
+  (libraries
+    ast
+    core_kernel
+    nast
+    tast
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))

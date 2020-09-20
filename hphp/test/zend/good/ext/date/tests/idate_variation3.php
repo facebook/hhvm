@@ -1,23 +1,23 @@
-<?php
+<?hh
 /* Prototype  : int idate(string format [, int timestamp])
- * Description: Format a local time/date as integer 
+ * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing idate() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $format = 'Y';
 date_default_timezone_set("Asia/Calcutta");
 
-echo "\n-- Testing idate() function with float 12.3456789000e10 to timestamp --\n";
-$timestamp = 12.3456789000e10;
+echo "\n-- Testing idate() function with int 123456789000 to timestamp --\n";
+$timestamp = 123456789000;
 var_dump( idate($format, $timestamp) );
 
-echo "\n-- Testing idate() function with float -12.3456789000e10 to timestamp --\n";
-$timestamp = -12.3456789000e10;
+echo "\n-- Testing idate() function with int -123456789000 to timestamp --\n";
+$timestamp = -123456789000;
 var_dump( idate($format, $timestamp) );
-      
-?>
-===DONE===
+
+echo "===DONE===\n";
+}

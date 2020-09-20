@@ -1,0 +1,22 @@
+=============== positive tests =====================
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'func' called dynamically but is not __DynamicallyCallable
+Exception: 'cmp' called dynamically but is not __DynamicallyCallable
+=============== negative tests =====================
+Exception: 'count' called dynamically without using a function pointer
+Exception: 'count' called dynamically without using a function pointer
+Exception: 'count' called dynamically without using a function pointer
+Exception: 'count' called dynamically without using a function pointer
+Exception: 'count' called dynamically without using a function pointer
+Exception: 'array_map' called dynamically without using a function pointer
+Exception: 'func2' called dynamically without using a function pointer
+Exception: 'async_func2' called dynamically without using a function pointer
+Exception: 'func2' called dynamically without using a function pointer
+Exception: 'func2' called dynamically without using a function pointer
+Exception: 'func2' called dynamically without using a function pointer
+Exception: 'func2' called dynamically without using a function pointer
+Exception: 'cmp2' called dynamically without using a function pointer

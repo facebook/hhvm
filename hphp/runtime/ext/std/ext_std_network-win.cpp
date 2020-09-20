@@ -273,9 +273,9 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store,
 
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
-                      VRefParam authnsRef /* = null */,
-                      VRefParam addtlRef /* = null */) {
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+                      Variant& authnsRef,
+                      Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
@@ -283,7 +283,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   int type2;
   Array authns;
   Array addtl;
@@ -297,9 +297,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
   bool first_query = true;
   bool store_results = true;
   for (;
-  type2 < (!addtlRef.isNull()
-        ? (PHP_DNS_NUM_TYPES + 2)
-        : PHP_DNS_NUM_TYPES) || first_query;
+  type2 < PHP_DNS_NUM_TYPES + 2 || first_query;
     type2++
     ) {
     first_query = false;
@@ -399,8 +397,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
 # define DnsSectionAdditional 3
 # endif
 #endif
-        if (!addtlRef.isNull() &&
-            pRec->Flags.S.Section == DnsSectionAdditional) {
+        if (pRec->Flags.S.Section == DnsSectionAdditional) {
           php_parserr(pRec, type_to_fetch, 1, &retval);
           if (!retval.empty()) {
             addtl.append(retval);
@@ -411,20 +408,20 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
       DnsRecordListFree(pResult, DnsFreeRecordListDeep);
     }
   }
-  authnsRef.assignIfRef(authns);
-  addtlRef.assignIfRef(addtl);
+  authnsRef = authns;
+  addtlRef = addtl;
   return ret;
 }
 
 bool HHVM_FUNCTION(getmxrr, const String& hostname,
-                            VRefParam mxhostsRef,
-                            VRefParam weightsRef /* = null */) {
+                            Variant& mxhostsRef,
+                            Variant& weightsRef) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   Array mxhosts;
   Array weights;
   SCOPE_EXIT {
-    mxhostsRef.assignIfRef(mxhosts);
-    weightsRef.assignIfRef(weights);
+    mxhostsRef = mxhosts;
+    weightsRef = weights;
   };
 
   DNS_STATUS      status;         /* Return value of DnsQuery_A() function */

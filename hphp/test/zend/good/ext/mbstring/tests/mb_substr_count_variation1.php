@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  :int mb_substr_count(string $haystack, string $needle [, string $encoding])
- * Description: Count the number of substring occurrences 
+ * Description: Count the number of substring occurrences
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -8,6 +8,14 @@
  * Pass different data types as $haystack argument to mb_substr_count() to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "hello, world";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 
@@ -18,14 +26,6 @@ $needle = 'world';
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return "hello, world";
-  }
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello, world
@@ -35,7 +35,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $haystack argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -59,7 +59,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*18*/ "hello, world",
        'hello, world',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -80,13 +80,13 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_substr_count()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_substr_count($input, $needle) );
+  try { var_dump( mb_substr_count($input, $needle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
@@ -94,4 +94,4 @@ fclose($fp);
 
 
 echo "Done";
-?>
+}

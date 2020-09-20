@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyException extends Exception {
 }
@@ -42,6 +42,10 @@ function foo($t) {
   }
   var_dump('after try1');
 }
+
+<<__EntryPoint>>
+function main_1916() {
 for ($i = 0;
  $i < 16;
  $i++) foo($i);
+}

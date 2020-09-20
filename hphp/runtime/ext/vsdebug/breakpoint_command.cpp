@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
@@ -31,13 +32,72 @@ SetBreakpointsCommand::SetBreakpointsCommand(
 SetBreakpointsCommand::~SetBreakpointsCommand() {
 }
 
+void SetBreakpointsCommand::setFnBreakpoints(
+   DebuggerSession* session,
+   const folly::dynamic& args,
+   folly::dynamic& responseBps
+) {
+  const folly::dynamic& bps = tryGetArray(args, "breakpoints");
+
+  // Remove existing function breakpoints. The protocol requires that the
+  // SetFunctionBreakpoints request includes the new, full, list of bps.
+  BreakpointManager* bpMgr = session->getBreakpointManager();
+  const auto existingBps = bpMgr->getFunctionBreakpoints();
+  for (const auto id : existingBps) {
+    bpMgr->removeBreakpoint(id);
+  }
+
+  for (const folly::dynamic& bp : bps) {
+    if (!bp.isObject()) {
+      continue;
+    }
+
+    const std::string& name = tryGetString(bp, "name", "");
+    if (name.empty()) {
+      continue;
+    }
+
+    const std::string& condition = tryGetString(bp, "condition", "");
+    const std::string& hitCondition = tryGetString(bp, "hitCondition", "");
+
+    // Create a new breakpoint.
+    int newBpId = bpMgr->addFunctionBreakpoint(
+      name,
+      condition,
+      hitCondition
+    );
+
+    m_debugger->onBreakpointAdded(newBpId);
+
+    folly::dynamic newBreakpointInfo = folly::dynamic::object;
+    newBreakpointInfo["id"] = newBpId;
+    newBreakpointInfo["verified"] = false;
+    responseBps.push_back(newBreakpointInfo);
+  }
+}
+
 bool SetBreakpointsCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
   folly::dynamic& message = getMessage();
+  const bool fnBreakpoint =
+    tryGetString(message, "command", "") == "setFunctionBreakpoints";
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const folly::dynamic& source = tryGetObject(args, "source", s_emptyArgs);
+
+  (*responseMsg)["body"] = folly::dynamic::object;
+  (*responseMsg)["body"]["breakpoints"] = folly::dynamic::array();
+  auto& responseBps = (*responseMsg)["body"]["breakpoints"];
+
+  if (fnBreakpoint) {
+    setFnBreakpoints(session, args, responseBps);
+
+    // Completion of this command does not resume the target.
+    return false;
+  }
+
+  // Otherwise, we have a source + line breakpoint.
 
   // SourceReference is not supported.
   int sourceRef = tryGetInt(source, "sourceReference", INT_MIN);
@@ -52,13 +112,20 @@ bool SetBreakpointsCommand::executeImpl(
     );
   }
 
-  const std::string& path = File::TranslatePath(String(filePath)).toCppString();
+  const auto realPath =
+    StatCache::realpath(
+      File::TranslatePathKeepRelative(String(filePath)).data());
+
+  const std::string& path = realPath.empty() && !filePath.empty()
+    ? filePath
+    : realPath;
+
   BreakpointManager* bpMgr = session->getBreakpointManager();
 
   // Make a map of line -> breakpoint for all breakpoints in this file before
   // this set breakpoints operation.
   std::unordered_map<int, Breakpoint*> oldBpLines;
-  const auto oldBpIds = bpMgr->getBreakpointIdsByFile(path);
+  const auto oldBpIds = bpMgr->getBreakpointIdsForPath(filePath);
   for (auto it = oldBpIds.begin(); it != oldBpIds.end(); it++) {
     Breakpoint* bp = bpMgr->getBreakpointById(*it);
     std::pair<int, Breakpoint*> pair;
@@ -69,10 +136,6 @@ bool SetBreakpointsCommand::executeImpl(
 
   const ClientPreferences& prefs = m_debugger->getClientPreferences();
   const std::string empty = "";
-
-  (*responseMsg)["body"] = folly::dynamic::object;
-  (*responseMsg)["body"]["breakpoints"] = folly::dynamic::array();
-  auto& responseBps = (*responseMsg)["body"]["breakpoints"];
 
   try {
     const folly::dynamic& sourceBps = args["breakpoints"];
@@ -110,7 +173,7 @@ bool SetBreakpointsCommand::executeImpl(
           auto bpIt = oldBpLines.find(line);
           if (bpIt == oldBpLines.end()) {
             // Create a new breakpoint.
-            int newBpId = bpMgr->addBreakpoint(
+            int newBpId = bpMgr->addSourceLineBreakpoint(
               line,
               column,
               path,
@@ -132,7 +195,7 @@ bool SetBreakpointsCommand::executeImpl(
             bool verified = bpMgr->isBreakpointResolved(bp->m_id);
             int responseLine = line;
             if (verified) {
-              responseLine = bp->m_resolvedLocation.m_startLine;
+              responseLine = bp->m_resolvedLocations[0].m_startLine;
               if (!prefs.linesStartAt1) {
                 responseLine--;
               }
@@ -158,7 +221,7 @@ bool SetBreakpointsCommand::executeImpl(
         bpMgr->removeBreakpoint(bp->m_id);
       }
     }
-  } catch (std::out_of_range e) {
+  } catch (std::out_of_range &e) {
   }
 
   // Completion of this command does not resume the target.
@@ -174,9 +237,8 @@ SetExceptionBreakpointsCommand::SetExceptionBreakpointsCommand(
 SetExceptionBreakpointsCommand::~SetExceptionBreakpointsCommand() {
 }
 
-bool SetExceptionBreakpointsCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool SetExceptionBreakpointsCommand::executeImpl(DebuggerSession* session,
+                                                 folly::dynamic* /*responseMsg*/
 ) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);

@@ -17,8 +17,7 @@
 // Individual in-memory component of the cache.
 // Usually normal files (web static resources).
 
-#ifndef incl_HPHP_CACHE_DATA_H_
-#define incl_HPHP_CACHE_DATA_H_
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -116,4 +115,3 @@ struct CacheData {
 
 }  // namespace HPHP
 
-#endif  // incl_HPHP_CACHE_DATA_H_

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // These are in a separate file so they can be loaded before the things that
 // use them
@@ -90,8 +90,8 @@ async function v<Tv>(
  * @fbdeprecated Use `genva()` instead.
  */
 async function va(...$awaitables): Awaitable/*<(...)>*/ {
-  await AwaitAllWaitHandle::fromArray($awaitables);
-  $ret = array();
+  await AwaitAllWaitHandle::fromVec(vec($awaitables));
+  $ret = varray[];
   foreach ($awaitables as $value) {
     $ret[] = \HH\Asio\result($value);
   }

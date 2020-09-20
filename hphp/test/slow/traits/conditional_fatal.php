@@ -1,19 +1,19 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_conditional_fatal() {
 $execute_fatal = false;
 if ($execute_fatal) {
-  class C1 {
-    use NonExistent;
-  }
+  include 'conditional_fatal-1.inc';
 }
 
 echo 'Good', "\n";
 
 $execute_fatal = true;
 if ($execute_fatal) {
-  class C2 {
-    use NonExistent;
-  }
+  include 'conditional_fatal-2.inc';
 }
 
 echo 'Bad', "\n";
+}

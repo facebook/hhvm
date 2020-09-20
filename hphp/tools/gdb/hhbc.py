@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB commands for inspecting HHVM bytecode.
 """
@@ -17,50 +19,73 @@ def as_idx(op):
     """Cast an HPHP::Op to a uint16_t."""
     return op.cast(T('uint16_t'))
 
+
 @memoized
 def op_table(name):
     """Get the symbol `name' as an int8_t[]."""
-    return gdb.parse_and_eval("&'" + name + "'").cast(T('int8_t').pointer())
-
+    try:
+        return V(name).address.cast(T('int8_t').pointer())
+    except:
+        # for some reason some of these tables have no type
+        # information.  for those cases, just take the address and
+        # cast to a pointer.  Note that this *doesn't* work for the
+        # tables with types, because gdb objects to the '&'!
+        return gdb.parse_and_eval("(unsigned char*)&'%s'" % (name))
 
 #------------------------------------------------------------------------------
 # Bytecode immediates.
 
+
 @memoized
 def iva_imm_types():
-    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA', 'CAR', 'CAW']]
+    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'ILA', 'IA']]
+
 
 @memoized
 def vec_imm_types():
-    return [V('HPHP::' + t) for t in ['BLA', 'ILA', 'VSA', 'SLA']]
+    # keep this in sync with vec_elm_sizes()
+    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA']]
+
 
 @memoized
-def cell_loc_mcodes():
-    return [V('HPHP::' + t) for t in ['MEC', 'MPC', 'MEL', 'MPL']]
+def vec_elm_sizes():
+    return [T(t).sizeof for t in [
+        'HPHP::Offset',      # BLA
+        'HPHP::Id',          # VSA
+        'HPHP::StrVecItem',  # SLA
+    ]]
+
+
+@memoized
+def tv_iva_mcodes():
+    return [V('HPHP::' + t) for t in ['MEC', 'MPC']]
+
+
+@memoized
+def tv_loc_mcodes():
+    return [V('HPHP::' + t) for t in ['MEL', 'MPL']]
+
 
 @memoized
 def str_imm_mcodes():
     return [V('HPHP::' + t) for t in ['MET', 'MPT', 'MQT']]
 
-@memoized
-def vec_elm_sizes():
-    return [T(t).sizeof for t in [
-        'uint8_t',
-        'HPHP::Offset',
-        'uint64_t',
-        'HPHP::Id',
-        'HPHP::StrVecItem'
-    ]]
 
 @memoized
 def rata_arrs():
-    return [V('HPHP::RepoAuthType::Tag::' + t) for t in
-            ['SArr', 'Arr', 'OptSArr', 'OptArr']]
+    return [V('HPHP::RepoAuthType::Tag::' + o + s + t)
+            for o in ['', 'Opt']
+            for s in ['', 'S']
+            for t in ['Arr', 'VArr', 'DArr', 'Vec', 'Dict', 'Keyset']]
+
 
 @memoized
 def rata_objs():
-    return [V('HPHP::RepoAuthType::Tag::' + t) for t in
-            ['ExactObj', 'SubObj', 'OptExactObj', 'OptSubObj']]
+    return [V('HPHP::RepoAuthType::Tag::' + o + s + t)
+            for o in ['', 'Opt']
+            for s in ['Exact', 'Sub']
+            for t in ['Obj', 'Cls']]
+
 
 @memoized
 def uints_by_size():
@@ -68,6 +93,7 @@ def uints_by_size():
             2: 'uint16_t',
             4: 'uint32_t',
             8: 'uint64_t'}
+
 
 class HHBC(object):
     """
@@ -103,7 +129,7 @@ class HHBC(object):
 
         if small & 0x80:
             large = pc.cast(T('uint32_t').pointer()).dereference()
-            info['value'] = ((large & 0xffffff00) >> 1) | (large & 0x7f);
+            info['value'] = ((large & 0xffffff00) >> 1) | (large & 0x7f)
             info['size'] = 4
         else:
             info['value'] = small
@@ -112,10 +138,40 @@ class HHBC(object):
         return info
 
     @staticmethod
+    def decode_named_local(pc):
+        """Decode the NLA immediate at `pc', returning a dict with 'value' and
+        'size' keys."""
+
+        info = {}
+        name = HHBC.decode_iva(pc)
+        size = name['size']
+        locId = HHBC.decode_iva(pc + size)
+        size += locId['size']
+        info['size'] = size
+        info['value'] = '%s (name: %s)' % (
+            str(locId['value'].cast(T('int32_t'))),
+            str(name['value'].cast(T('int32_t')) - 1)
+        )
+        return info
+
+    @staticmethod
+    def decode_ba(pc):
+        """Decode the BA immediate at `pc', returning a dict with 'value' and
+        'size' keys."""
+
+        info = {}
+
+        v = pc.cast(T('uint32_t').pointer()).dereference()
+        info['value'] = v
+        info['size'] = 4
+
+        return info
+
+    @staticmethod
     def op_name(op):
         """Return the name of HPHP::Op `op'."""
 
-        table_name = 'HPHP::opcodeToName(HPHP::Op)::namesArr'
+        table_name = 'HPHP::opcodeToNameTable'
         table_type = T('char').pointer().pointer()
         return op_table(table_name).cast(table_type)[as_idx(op)]
 
@@ -137,7 +193,7 @@ class HHBC(object):
     def num_imms(op):
         """Return the number of immediates for HPHP::Op `op'."""
 
-        table_name = 'HPHP::numImmediates(HPHP::Op)::values'
+        table_name = 'HPHP::numImmediatesTable'
         return op_table(table_name)[as_idx(op)]
 
     @staticmethod
@@ -146,10 +202,10 @@ class HHBC(object):
 
         op_count = V('HPHP::Op_count')
 
-        table_name = 'HPHP::immType(HPHP::Op, int)::argTypes'
-        # This looks like an int8_t[4][op_count], but in fact, it's actually an
-        # int8_t[op_count][4], as desired.
-        table_type = T('int8_t').array(4 - 1).array(op_count - 1).pointer()
+        table_name = 'HPHP::immTypeTable'
+        # This looks like an int8_t[6][op_count], but in fact, it's actually an
+        # int8_t[op_count][6], as desired.
+        table_type = T('int8_t').array(6 - 1).array(op_count - 1).pointer()
         table = op_table(table_name).cast(table_type).dereference()
 
         immtype = table[as_idx(op)][arg]
@@ -165,12 +221,17 @@ class HHBC(object):
         if immtype in iva_imm_types():
             info = HHBC.decode_iva(ptr)
 
+        elif immtype == V('HPHP::NLA'):
+            info = HHBC.decode_named_local(ptr)
+
         elif immtype in vec_imm_types():
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
+            vec_size = HHBC.decode_iva(ptr)
+            num_elms = vec_size['value']
+            if immtype == V('HPHP::BLLA'):
+                num_elms = (num_elms + 7) / 8
 
-            num_elms = ptr.cast(T('int32_t').pointer()).dereference()
-
-            info['size'] = T('int32_t').sizeof + elm_size * num_elms
+            info['size'] = vec_size['size'] + elm_size * num_elms
             info['value'] = '<vector>'
 
         elif immtype == V('HPHP::KA'):
@@ -181,9 +242,13 @@ class HHBC(object):
 
             imm_info = {}
 
-            if mcode in cell_loc_mcodes():
+            if mcode in tv_iva_mcodes():
                 imm_info = HHBC.decode_iva(ptr)
                 imm_info['kind'] = 'iva'
+
+            if mcode in tv_loc_mcodes():
+                imm_info = HHBC.decode_named_local(ptr)
+                imm_info['kind'] = 'local'
 
             elif mcode == V('HPHP::MEI'):
                 t = T('int64_t')
@@ -212,19 +277,25 @@ class HHBC(object):
 
         elif immtype == V('HPHP::RATA'):
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
+            imm = imm.cast(T('unsigned short'))
+            size = 1
+            if imm == 0xff:
+                imm += (ptr + size).cast(T('unsigned char').pointer()).dereference()
+                size += 1
 
+            imm = (imm >> 2) | (imm << 14)
             radb = V('HPHP::kRATArrayDataBit')
 
             tag = (imm & ~radb).cast(T('HPHP::RepoAuthType::Tag'))
             high_bit = (imm & radb)
 
             if tag in rata_arrs():
-                info['size'] = 5 if high_bit else 1
+                if high_bit:
+                    size += HHBC.decode_iva(ptr + size)['size']
             elif tag in rata_objs():
-                info['size'] = 5
-            else:
-                info['size'] = 1
+                size += HHBC.decode_iva(ptr + size)['size']
 
+            info['size'] = size
             info['value'] = str(tag)[len('HPHP::RepoAuthType::Tag::'):]
 
         elif immtype == V('HPHP::LAR'):
@@ -247,9 +318,65 @@ class HHBC(object):
 
             info['size'] = first_type.sizeof + count_type.sizeof
             info['value'] = 'L:' + str(first >> 1) + '+' + str(count >> 1)
+        elif immtype == V('HPHP::ITA'):
+            flags = ptr.cast(T('unsigned char').pointer()).dereference()
+            size = 1
+            itid = HHBC.decode_iva(ptr + size)
+            size += itid['size']
+            kid = HHBC.decode_iva(ptr + size)
+            size += kid['size']
+            vid = HHBC.decode_iva(ptr + size)
+            size += vid['size']
+
+            fstr = 'BaseConst ' if flags & V('HPHP::IterArgs::BaseConst') else ''
+            istr = str(int(itid['value']))
+            kstr = ' k:' + str(kid['value'] - 1) if kid['value'] > 0 else ''
+            vstr = ' v:' + str(int(vid['value']))
+            info['size'] = size
+            info['value'] = fstr + istr + kstr + vstr
+
+        elif immtype == V('HPHP::FCA'):
+            flags = ptr.cast(T('uint8_t').pointer()).dereference()
+            size = 1
+
+            flagList = []
+            if flags & 0x1: flagList.append('Unpack')
+            if flags & 0x2: flagList.append('Generics')
+            if flags & 0x4: flagList.append('LockWhileUnwinding')
+            if flags & 0x8: flagList.append('SkipRepack')
+
+            iva = HHBC.decode_iva(ptr + size)
+            numArgs = int(iva['value'])
+            size += iva['size']
+
+            numRets = 1
+            if flags & V('HPHP::FCallArgs::HasInOut'):
+                iva = HHBC.decode_iva(ptr + size)
+                numRets = int(iva['value'])
+                size += iva['size']
+
+            if flags & V('HPHP::FCallArgs::EnforceInOut'):
+                size += (numArgs + 7) // 8
+
+            asyncEagerOffset = ''
+            if flags & V('HPHP::FCallArgs::HasAsyncEagerOffset'):
+                off = HHBC.decode_ba(ptr + size)
+                asyncEagerOffset = ' aeo:' + str(off['value'])
+                size += off['size']
+
+            context = ''
+            if flags & V('HPHP::FCallArgs::ExplicitContext'):
+                id = (ptr + size).cast(T('uint32_t').pointer()).dereference()
+                context = ' context:' + str(HHBC.try_lookup_litstr(id))
+                size += 4
+
+            info['size'] = size
+            info['value'] = ('<' + ','.join(flagList) + '> '
+                             + str(numArgs) + ' ' + str(numRets)
+                             + asyncEagerOffset + context)
 
         else:
-            table_name = 'HPHP::immSize(unsigned char const*, int)::argTypeToSizes'
+            table_name = 'HPHP::immSizeTable'
             if immtype >= 0:
                 size = op_table(table_name)[as_idx(immtype)]
 
@@ -296,12 +423,14 @@ class HHBC(object):
 #------------------------------------------------------------------------------
 # `hhx' command.
 
+
 class HHXCommand(gdb.Command):
     """Print an HHBC stream.
 
-If two arguments are provided, the first is interpreted as the start PC, and
-the second, as the number of opcodes to print.  Subsequent calls to `hhx' may
-omit these argument to print the same number of opcodes starting wherever the
+If two arguments are provided, the first is interpreted as the start
+PC, and the second, as the number of opcodes to print, or the end
+address if it's > 0xffffffff.  Subsequent calls to `hhx' may omit these
+argument to print the same number of opcodes starting wherever the
 previous call left off.
 
 If only a single argument is provided, if it is in the range for bytecode
@@ -329,17 +458,27 @@ remains where it left off after the previous call.
                 self.count = 1
             else:
                 self.count = int(argv[0])
+            self.end = None
         else:
             self.bcpos = argv[0]
             self.bcoff = 0
-            self.count = int(argv[1])
+            if argv[1] > 0xffffffff:
+                self.end = argv[1].cast(T('void').pointer())
+                self.count = int(self.end) - int(self.bcpos)
+            else:
+                self.end = None
+                self.count = int(argv[1])
 
         bctype = T('HPHP::PC')
         self.bcpos = self.bcpos.cast(bctype)
 
         bcstart = self.bcpos - self.bcoff
 
-        for i in xrange(0, self.count):
+        for _i in xrange(0, self.count):
+            if self.end is not None and self.bcpos >= self.end:
+                self.bcpos = None
+                break
+
             instr = HHBC.instr_info(self.bcpos)
             if instr is None:
                 print('hhx: Bytecode dump failed')
@@ -362,5 +501,6 @@ remains where it left off after the previous call.
 
             self.bcpos += instr['len']
             self.bcoff += instr['len']
+
 
 HHXCommand()

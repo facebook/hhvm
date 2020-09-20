@@ -1,20 +1,5 @@
-<?php
+<?hh
 
-if (isset($g)) {
-  class X {
-}
-}
- else {
-  class X {
-    public $a = 1;
-    function __destruct() {
- var_dump(__METHOD__);
- }
-  }
-}
-class X1 extends X {
-  public $t = 1;
-}
 function test() {
   $x = new X1;
   $x->t = 5;
@@ -22,4 +7,15 @@ function test() {
   $y = clone $x;
   var_dump($y->a,$y->t);
 }
-test();
+<<__EntryPoint>>
+function entrypoint_1484(): void {
+
+  if (isset($g)) {
+    include '1484-1.inc';
+  }
+  else {
+    include '1484-2.inc';
+  }
+  include '1484-classes.inc';
+  test();
+}

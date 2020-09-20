@@ -1,8 +1,13 @@
-<?php
+<?hh
 
+<<__DynamicallyConstructible>>
 class dyn_A{
 }
  class B{
 }
- $cls = 'dyn_a';
+
+ <<__EntryPoint>>
+function main_1205() {
+$cls = 'dyn_a';
  $a = new $cls();
+}

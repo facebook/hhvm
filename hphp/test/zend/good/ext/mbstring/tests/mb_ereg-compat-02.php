@@ -1,7 +1,9 @@
-<?php
-/* (counterpart: ext/standard/tests/reg/005.phpt) */
+<?hh
+<<__EntryPoint>> function main(): void {
+  /* (counterpart: ext/standard/tests/reg/005.phpt) */
   $a="This is a nice and simple string";
-  echo mb_ereg(".*(is).*(is).*",$a,$registers);
+  $registers = null;
+  echo mb_ereg(".*(is).*(is).*",$a,inout $registers);
   echo "\n";
   echo $registers[0];
   echo "\n";
@@ -9,4 +11,4 @@
   echo "\n";
   echo $registers[2];
   echo "\n";
-?>
+}

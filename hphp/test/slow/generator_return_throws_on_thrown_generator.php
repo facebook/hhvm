@@ -1,11 +1,11 @@
-<?php
+<?hh
 function foo() {
     throw new Exception;
     yield 1;
     yield 2;
     return 42;
 }
-
+<<__EntryPoint>> function main(): void {
 $bar = foo();
 
 try {
@@ -14,3 +14,4 @@ try {
 }
 
 var_dump($bar->getReturn());
+}

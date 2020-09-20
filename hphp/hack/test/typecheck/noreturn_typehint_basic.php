@@ -5,7 +5,7 @@ function correct(): noreturn {
 }
 
 async function meh(): Awaitable<int> {
-  // UNSAFE
+  return 4;
 }
 
 async function generic(): Awaitable<noreturn> {

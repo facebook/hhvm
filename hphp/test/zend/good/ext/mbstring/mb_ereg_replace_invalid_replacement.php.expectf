@@ -1,0 +1,7 @@
+Warning: Replacement ends with unterminated UTF-8: 0xf1 in %s/mb_ereg_replace_invalid_replacement.php on line 5
+string(0) ""
+
+Fatal error: Uncaught Error: done in %s/mb_ereg_replace_invalid_replacement.php:6
+Stack trace:
+#0 (): main()
+#1 {main}

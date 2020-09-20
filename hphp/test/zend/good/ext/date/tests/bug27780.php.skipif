@@ -1,4 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
-	die("skip. Not the same TZ on windows.");
+  die("skip. Not the same TZ on windows.");
+}
 }

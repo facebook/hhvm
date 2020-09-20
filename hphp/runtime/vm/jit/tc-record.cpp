@@ -26,7 +26,9 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -46,33 +48,7 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
-void recordPerfRelocMap(
-    TCA start, TCA end,
-    TCA coldStart, TCA coldEnd,
-    SrcKey sk, int argNum,
-    const GrowableVector<IncomingBranch> &incomingBranchesIn,
-    CGMeta& fixups) {
-  auto info = perfRelocMapInfo(start, end,
-                               coldStart, coldEnd,
-                               sk, argNum,
-                               incomingBranchesIn,
-                               fixups);
-  Debug::DebugInfo::Get()->recordRelocMap(start, end, info);
-}
-
-void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
-                              CGMeta& fixups) {
-  if (!RuntimeOption::EvalPerfRelocate) return;
-
-  auto srLock = srcRec.readlock();
-  recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                     loc.coldCodeStart(), loc.coldEnd(),
-                     sk, -1,
-                     srcRec.tailFallbackJumps(),
-                     fixups);
-}
-
-void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
+void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
                           const TCA start, const TCA end, bool exit,
                           bool inPrologue) {
   assertx(cb.contains(start, end));
@@ -81,8 +57,8 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
     if (!RuntimeOption::EvalJitNoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
         Debug::TCRange(start, end, &cb == &code().cold()),
-        srcFunc,
-        srcFunc->unit() ? srcFunc->unit()->at(sk.offset()) : nullptr,
+        sk.func(),
+        sk.pc(),
         exit, inPrologue
       );
     }
@@ -90,7 +66,7 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
       Debug::DebugInfo::Get()->recordPerfMap(
         Debug::TCRange(start, end, &cb == &code().cold()),
         sk,
-        srcFunc,
+        sk.func(),
         exit,
         inPrologue
       );
@@ -105,8 +81,6 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-static std::atomic<bool> s_loggedJitMature{false};
 
 std::map<std::string, ServiceData::ExportedTimeSeries*>
 buildCodeSizeCounters() {
@@ -131,11 +105,6 @@ static InitFiniNode initCodeSizeCounters([] {
   s_counters = buildCodeSizeCounters();
 }, InitFiniNode::When::PostRuntimeOptions);
 
-ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
-  assert(!s_counters.empty());
-  return s_counters.at(name);
-}
-
 static std::atomic<bool> s_warmedUp{false};
 
 static ServiceData::CounterCallback s_warmedUpCounter(
@@ -144,62 +113,8 @@ static ServiceData::CounterCallback s_warmedUpCounter(
   }
 );
 
-/*
- * If the jit maturity counter is enabled, update it with the current amount of
- * emitted code.
- */
-void reportJitMaturity() {
-  auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
-  if (!jitMaturityCounter) return;
-  if (jitMaturityCounter->getValue() == 100) return;
-  // Optimized translations are faster than profiling translations, which are
-  // faster than the interpreter.  But when optimized translations are
-  // generated, some profiling translations will become dead.  We assume the
-  // incremental value of an optimized translation over the corresponding
-  // profiling translations is comparable to the incremental value of a
-  // profiling translation of similar size; thus we don't have to apply
-  // different weights to code in different regions.
-  auto codeSize = code().prof().used() + code().main().used();
-  // When retranslateAll is used, we only add ahot after retranslateAll
-  // finishes.
-  if (!mcgen::retranslateAllPending()) codeSize += code().hot().used();
-  // EvalJitMatureSize is supposed to to be set to approximately 20% of the
-  // code that will give us full performance, so recover the "fully mature"
-  // size with some math.
-  auto const fullSize = RuntimeOption::EvalJitMatureSize * 5;
-  // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
-  // warmupStatusString() is empty, which indicates that the JIT is warmed up
-  // based on the rate in which JITed code is being produced.
-  const bool warmedUp = RuntimeOption::EvalJitMatureAfterWarmup &&
-                        warmupStatusString().empty();
-  int64_t after;
-  if (warmedUp || codeSize >= fullSize) {
-    after = 100;
-  } else {
-    after = std::pow(codeSize / static_cast<double>(fullSize),
-                     RuntimeOption::EvalJitMaturityExponent) * 100;
-    if (after < 1) {
-      after = 1;
-    }
-  }
-  // Make sure jit maturity is less than 100 before the JIT stops.
-  if (after > 99 && code().main().used() < CodeCache::AMaxUsage && !warmedUp) {
-    after = 99;
-  }
-
-  auto const before = jitMaturityCounter->getValue();
-  if (after > before) {
-    jitMaturityCounter->setValue(after);
-
-    if (!s_loggedJitMature.load(std::memory_order_relaxed) &&
-        StructuredLog::enabled() &&
-        codeSize >= RuntimeOption::EvalJitMatureSize &&
-        !s_loggedJitMature.exchange(true, std::memory_order_relaxed)) {
-      StructuredLogEntry cols;
-      cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);
-      StructuredLog::log("hhvm_warmup", cols);
-    }
-  }
+void updateCodeSizeCounters() {
+  assertOwnsCodeLock();
 
   code().forEachBlock([&] (const char* name, const CodeBlock& a) {
     auto codeUsed = s_counters.at(name);
@@ -210,6 +125,55 @@ void reportJitMaturity() {
   // Manually add code.data.
   auto codeUsed = s_counters.at("data");
   codeUsed->addValue(code().data().used() - codeUsed->getSum());
+}
+
+/*
+ * Update JIT maturity with the current amount of emitted code and state of the
+ * JIT.
+ */
+void reportJitMaturity() {
+  auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
+  if (!jitMaturityCounter) return;
+  auto const before = jitMaturityCounter->getValue();
+  if (before == 100) return;
+
+  // Limit jit maturity to 70 before retranslateAll finishes (if enabled). If
+  // the JIT running in jumpstart seeer mode, don't consider retranslateAll to
+  // ever finish.
+  constexpr uint64_t kMaxMaturityBeforeRTA = 70;
+  auto const beforeRetranslateAll =
+    mcgen::retranslateAllPending() || isJitSerializing();
+  // If retranslateAll is enabled, wait until it finishes before counting in
+  // optimized translations.
+  auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();
+  // When we jit from serialized profile data, aprof is empty. In order to make
+  // jit maturity somewhat comparable between the two cases, we pretend to have
+  // some profiling code.
+  auto const profSize = std::max(code().prof().used(), hotSize);
+  auto const mainSize = code().main().used();
+
+  auto const fullSize = RuntimeOption::EvalJitMatureSize;
+  const uint64_t codeSize = profSize + mainSize + hotSize;
+  int64_t maturity = before;
+  if (beforeRetranslateAll) {
+    maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
+  } else if (codeSize >= fullSize) {
+    maturity = (mainSize >= CodeCache::AMaxUsage) ? 100 : 99;
+  } else {
+    maturity = std::pow(codeSize / static_cast<double>(fullSize),
+                        RuntimeOption::EvalJitMaturityExponent) * 99;
+  }
+
+  // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
+  // warmupStatusString() is empty, which indicates that the JIT is warmed up
+  // based on the rate in which JITed code is being produced.
+  if (RuntimeOption::EvalJitMatureAfterWarmup && warmupStatusString().empty()) {
+    maturity = 100;
+  }
+
+  if (maturity > before) {
+    jitMaturityCounter->setValue(maturity);
+  }
 }
 
 static void logFrame(const Vunit& unit, const size_t frame) {
@@ -230,7 +194,7 @@ static void logFrame(const Vunit& unit, const size_t frame) {
     return esc(e);                                                          \
   }) | folly::gen::as<std::vector>()
 
-  auto fullnames = MAP(f->fullDisplayName()->data());
+  auto fullnames = MAP(f->fullName()->data());
   auto names = MAP(f->name()->data());
   auto impl_classes = MAP(f->implCls() ? f->implCls()->name()->data() : "");
   auto base_classes = MAP(f->baseCls() ? f->baseCls()->name()->data() : "");
@@ -302,11 +266,12 @@ static void logFrame(const Vunit& unit, const size_t frame) {
   ent.setInt("num_inner_frames", unit.frames[frame].num_inner_frames);
   ent.setInt("entry_weight", unit.frames[frame].entry_weight);
 
+  auto const sk = unit.context->initSrcKey;
   ent.setStr("version", "6");
   ent.setStr("trans_kind", show(unit.context->kind));
-  ent.setStr("prologue", unit.context->prologue ? "true" : "false");
-  ent.setStr("has_this", unit.context->hasThis ? "true" : "false");
-  ent.setStr("resumed", unit.context->resumeMode != ResumeMode::None
+  ent.setStr("prologue", sk.prologue() ? "true" : "false");
+  ent.setStr("has_this", sk.hasThis() ? "true" : "false");
+  ent.setStr("resumed", sk.resumeMode() != ResumeMode::None
                         ? "true" : "false");
 
   logFunc(func, ent);
@@ -331,8 +296,25 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
   auto& context = env.unit->context();
   auto kind = show(context.kind);
   cols.setStr("trans_kind", !debug ? kind : kind + "_debug");
-  if (context.func) {
-    cols.setStr("func", context.func->fullName()->data());
+  if (context.initSrcKey.valid()) {
+    auto const func = context.initSrcKey.func();
+    cols.setStr("func", func->fullName()->data());
+    switch (RuntimeOption::EvalJitSerdesMode) {
+    case JitSerdesMode::Off:
+    case JitSerdesMode::Serialize:
+    case JitSerdesMode::SerializeAndExit:
+      break;
+    case JitSerdesMode::Deserialize:
+    case JitSerdesMode::DeserializeOrFail:
+    case JitSerdesMode::DeserializeOrGenerate:
+    case JitSerdesMode::DeserializeAndDelete:
+    case JitSerdesMode::DeserializeAndExit:
+      cols.setInt("func_id", func->getFuncId());
+      break;
+    }
+  }
+  if (context.kind == TransKind::Optimize) {
+    cols.setInt("opt_index", context.optIndex);
   }
   cols.setInt("jit_sample_rate", RuntimeOption::EvalJitSampleRate);
   // timing info
@@ -390,30 +372,42 @@ std::string warmupStatusString() {
   std::string status_str;
 
   if (!s_warmedUp.load(std::memory_order_relaxed)) {
-    // 1. Are we still profiling new functions?
-    if (shouldProfileNewFuncs()) {
-      status_str += "New functions are still being profiled.\n";
-    }
-    // 2. Has retranslateAll happened yet?
     if (jit::mcgen::retranslateAllPending()) {
-      status_str += "Waiting on retranslateAll().\n";
+      status_str = "Waiting on retranslateAll().\n";
+    } else {
+      auto checkCodeSize = [&](std::string name, uint32_t maxSize) {
+        assertx(!s_counters.empty());
+        auto series = s_counters.at(name);
+        if (!series) {
+          status_str = "initializing";
+          return;
+        }
+        auto const codeSize = series->getSum();
+        if (codeSize < maxSize / RuntimeOption::EvalJitWarmupMinFillFactor) {
+          folly::format(&status_str,
+                        "Code.{} is still to small to be considered warm. "
+                        "({} of max {})\n",
+                        name, codeSize, maxSize);
+          return;
+        }
+        auto const codeSizeRate = series->getRateByDuration(
+          std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
+        if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
+          folly::format(&status_str,
+                        "Code.{} is still increasing at a rate of {}\n",
+                        name, codeSizeRate);
+        }
+      };
+      checkCodeSize("main", CodeCache::ASize);
+      checkCodeSize("hot", CodeCache::AHotSize);
     }
-    // 3. Has code size in both main and hot plateaued?
-    auto checkCodeSize = [&](ServiceData::ExportedTimeSeries* series) {
-      auto const codeSizeRate = series->getRateByDuration(
-        std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
-      if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
-        folly::format(
-          &status_str,
-          "Code.main is still increasing at a rate of {}\n",
-          codeSizeRate
-        );
+    if (status_str.empty()) {
+      if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+        status_str = "JIT running in SerializeAndExit mode";
+      } else {
+        s_warmedUp.store(true, std::memory_order_relaxed);
       }
-    };
-    checkCodeSize(getCodeSizeCounter("main"));
-    checkCodeSize(getCodeSizeCounter("hot"));
-
-    if (status_str.empty()) s_warmedUp.store(true, std::memory_order_relaxed);
+    }
   }
   // Empty string means "warmed up".
   return status_str;

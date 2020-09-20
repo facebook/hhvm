@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor( 99, 99 ); 
 
 imagesetpixel($im, 0, 0, 0xFF);
@@ -15,4 +15,4 @@ var_dump(dechex(imagecolorat($im, 0, 0)));
 var_dump(dechex(imagecolorat($im, 0, 98)));
 var_dump(dechex(imagecolorat($im, 98, 0)));
 var_dump(dechex(imagecolorat($im, 98, 98)));
-?> 
+}

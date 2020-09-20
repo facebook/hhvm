@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 abstract class FooParent {
   private function __construct() {}

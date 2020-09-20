@@ -1,0 +1,6 @@
+File "ref_get_array_append.php", line 10, characters 3-11:
+Invalid assignment (Typing[4110])
+File "ref_get_array_append.php", line 9, characters 34-34:
+Expected `T`
+File "ref_get_array_append.php", line 9, characters 41-41:
+But got `dynamic` because it is an unenforceable type

@@ -1,61 +1,95 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-
 
 (*****************************************************************************)
 (* Error module                                                              *)
 (*****************************************************************************)
-open Hh_core
-open Utils
+open Hh_prelude
 
-let get_errorl_json el =
-  if el = [] then
-    Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool true;
-                  "errors", Hh_json.JSON_Array [];
-                  "version", Hh_json.JSON_String Build_id.build_id_ohai;
-                ]
-  else
-    let errors_json = List.map ~f:Errors.to_json el in
-    Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool false;
-                  "errors", Hh_json.JSON_Array errors_json;
-                  "version", Hh_json.JSON_String Build_id.build_id_ohai;
-                ]
+let get_save_state_result_props_json
+    (save_state_result : SaveStateServiceTypes.save_state_result) :
+    (string * Hh_json.json) list =
+  SaveStateServiceTypes.
+    [
+      ( "dep_table_edges_added",
+        Hh_json.int_ save_state_result.dep_table_edges_added );
+    ]
 
-let get_errorl_json_array errorl =
-  let el = Errors.get_sorted_error_list errorl in
-  let el = List.map ~f:Errors.to_absolute el in
-  let errors_json = List.map ~f:Errors.to_json el in
-  Hh_json.JSON_Array errors_json
+let get_save_state_result_json
+    (save_state_result : SaveStateServiceTypes.save_state_result) :
+    string * Hh_json.json =
+  ( "save_state_result",
+    Hh_json.JSON_Object (get_save_state_result_props_json save_state_result) )
 
-let print_errorl_json oc el =
-  let res = get_errorl_json el in
+let get_error_list_json
+    (error_list : Pos.absolute Errors.error_ list)
+    ~(save_state_result : SaveStateServiceTypes.save_state_result option)
+    ~(recheck_stats : Telemetry.t option) =
+  let (error_list, did_pass) =
+    match error_list with
+    | [] -> ([], true)
+    | error_list -> (List.map ~f:Errors.to_json error_list, false)
+  in
+  let (properties : (string * Hh_json.json) list) =
+    [
+      ("passed", Hh_json.JSON_Bool did_pass);
+      ("errors", Hh_json.JSON_Array error_list);
+      ("version", Hh_version.version_json);
+    ]
+  in
+  let properties =
+    match save_state_result with
+    | None -> properties
+    | Some save_state_result ->
+      let save_state_result_json =
+        get_save_state_result_json save_state_result
+      in
+      save_state_result_json :: properties
+  in
+  let properties =
+    match recheck_stats with
+    | None -> properties
+    | Some telemetry ->
+      ("last_recheck", Telemetry.to_json telemetry) :: properties
+  in
+  Hh_json.JSON_Object properties
+
+let print_error_list_json
+    (oc : Out_channel.t)
+    (error_list : Pos.absolute Errors.error_ list)
+    (save_state_result : SaveStateServiceTypes.save_state_result option)
+    (recheck_stats : Telemetry.t option) =
+  let res = get_error_list_json error_list ~save_state_result ~recheck_stats in
   Hh_json.json_to_output oc res;
-  flush oc
+  Out_channel.flush oc
 
-let print_errorl is_stale_msg use_json el oc =
-  if use_json then
-    print_errorl_json oc el
-  else begin
-    if el = []
-    then output_string oc "No errors!\n"
-    else
-      let sl = List.map ~f:Errors.to_string el in
-      let sl = List.dedup ~compare:String.compare sl in
-      List.iter ~f:begin fun s ->
-        if !debug then begin
-          output_string stdout s;
-          flush stdout;
-        end;
-        output_string oc s;
-        output_string oc "\n";
-      end sl
-  end;
-  Option.iter is_stale_msg ~f:(fun msg -> output_string oc msg);
-  flush oc
+let print_error_list
+    (oc : Out_channel.t)
+    ~(stale_msg : string option)
+    ~(output_json : bool)
+    ~(error_list : Pos.absolute Errors.error_ list)
+    ~(save_state_result : SaveStateServiceTypes.save_state_result option)
+    ~(recheck_stats : Telemetry.t option) =
+  ( if output_json then
+    print_error_list_json oc error_list save_state_result recheck_stats
+  else if List.is_empty error_list then
+    Out_channel.output_string oc "No errors!\n"
+  else
+    let sl = List.map ~f:Errors.to_string error_list in
+    let sl = List.dedup_and_sort ~compare:String.compare sl in
+    List.iter
+      ~f:
+        begin
+          fun s ->
+          Out_channel.output_string oc s;
+          Out_channel.output_string oc "\n"
+        end
+      sl );
+  Option.iter stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);
+  Out_channel.flush oc

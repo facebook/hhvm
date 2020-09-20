@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_PROTOCOL_H_
-#define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_PROTOCOL_H_
+#pragma once
 
 #include <folly/Bits.h>
 #include <folly/Portability.h>
@@ -247,4 +246,3 @@ FOLLY_PACK_POP
 
 ////////////////////////////////////////////////////////////////////////////////
 }}
-#endif

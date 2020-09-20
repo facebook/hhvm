@@ -1,0 +1,3 @@
+Warning: Value returned from function f() must be of type B<shape('x' => @int, 'y' => int)>, B<shape('x'=>string,'y'=>int)> given in %s on line 4
+
+Catchable fatal error: Value returned from function f() must be of type B<shape('x' => @int, 'y' => int)>, B<shape('x'=>string,'y'=>string)> given in %s on line 7

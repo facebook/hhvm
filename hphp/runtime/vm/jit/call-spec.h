@@ -14,17 +14,184 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_CALL_SPEC_H_
-#define incl_HPHP_JIT_CALL_SPEC_H_
+#pragma once
 
-#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/ext/asio/asio-blockable.h"
+
+#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-#include <cstdint>
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/record-data.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
 
-namespace HPHP { namespace jit {
+#include <array>
+#include <cstdint>
+#include <type_traits>
+#include <vector>
+
+namespace HPHP {
+
+struct ActRec;
+
+namespace jit {
+
+struct CallDest;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+/*
+ * Type::operator| can't reasonably be made constexpr. This macro constructs a
+ * constexpr Type that's the union of two other non-Mem, non-specialized Types.
+ */
+#define U(t1, t2) Type(Type::k##t1 | Type::k##t2, Ptr::NotPtr, Mem::NotMem)
+
+#define CPP_TYPES                \
+  T(ActRec*, TFramePtr)          \
+  T(AsioBlockableChain, TABC)    \
+  T(Class*, TCls)                \
+  T(Func*, TFunc)                \
+  T(RFuncData*, TRFunc)          \
+  T(ClsMethDataRef, TClsMeth)    \
+  T(RClsMethData*, TRClsMeth)    \
+  T(NamedEntity*, TNamedEntity)  \
+  T(ResourceHdr*, TRes)          \
+  T(StringData*, TStr)           \
+  T(TCA, TTCA)                   \
+  T(TypedValue&, TPtrToCell)     \
+  T(TypedValue*, TPtrToCell)     \
+  T(TypedValue, TCell)           \
+  T(bool, TBool)                 \
+  T(double, TDbl)                \
+  T(int32_t, TInt)               \
+  T(int64_t, TInt)               \
+  T(unsigned long, TInt)         \
+  T(unsigned long long, TInt)    \
+  T(unsigned int, U(Int, RDSHandle)) \
+  T(tv_lval, TLvalToCell)        \
+  T(tv_rval, TLvalToCell)
+
+/*
+ * jit_cpp_type<> handles all types that are the same for parameters and return
+ * values.
+ */
+template<typename T, typename Enable = void> struct jit_cpp_type;
+
+#define T(native_t, jit_t)                         \
+  template<> struct jit_cpp_type<native_t> {       \
+    static auto constexpr type() { return jit_t; } \
+  };
+CPP_TYPES
+#undef T
+#undef U
+#undef CPP_TYPES
+
+/*
+ * All subtypes of ObjectData and ArrayData map to TObj or TArrLike,
+ * respectively.
+ */
+template<typename O> struct jit_cpp_type<
+  O*, std::enable_if_t<std::is_base_of<ObjectData, O>::value>
+> {
+  static auto constexpr type() { return TObj; }
+};
+
+template<typename A> struct jit_cpp_type<
+  A*, std::enable_if_t<std::is_base_of<ArrayData, A>::value>
+> {
+  static auto constexpr type() { return TArrLike; }
+};
+
+template<typename A> struct jit_cpp_type<
+  A*, std::enable_if_t<std::is_base_of<RecordData, A>::value>
+> {
+  static auto constexpr type() { return TRecord; }
+};
+
+template<typename A> struct jit_cpp_type<
+  A*, std::enable_if_t<std::is_base_of<RecordDesc, A>::value>
+> {
+  static auto constexpr type() { return TRecDesc; }
+};
+/*
+ * Parameter types: Many helper functions take various enums or pointers to
+ * runtime types that have no jit::Type equivalent. These are usually passed as
+ * untyped arguments to ArgGroup, which come through as TBottom, but some are
+ * from constant TInt values. Default to TInt for types not handled by
+ * jit_cpp_type<>, which allows both TInt and TBottom arguments.
+ */
+template<typename T, typename Enable = Type>
+struct jit_param_type {
+  static auto constexpr type() { return TInt; }
+};
+
+template<typename T>
+struct jit_param_type<T, decltype(jit_cpp_type<T>::type())> {
+  static auto constexpr type() { return jit_cpp_type<T>::type(); }
+};
+
+/*
+ * Return types: Unlike argument types, we don't have a default Type for return
+ * types. All returned values must map to a valid hhir value, so we require a
+ * jit::Type for every possible C++ return type.
+ *
+ * There are two return types that should never be used as an hhir value: void
+ * and void*. Map those to TTop, so they aren't accepted by any desired return
+ * type.
+ */
+template<typename T> struct jit_ret_type : jit_cpp_type<T> {};
+
+template<> struct jit_ret_type<void>  {
+  static auto constexpr type() { return TTop; }
+};
+template<> struct jit_ret_type<void*> {
+  static auto constexpr type() { return TTop; }
+};
+
+
+template<typename T>
+struct strip_inner_const { using type = T; };
+
+template<typename T>
+struct strip_inner_const<T const*> { using type = T*; };
+
+template<typename T>
+using strip_t = typename strip_inner_const<std::remove_cv_t<T>>::type;
+
+}
+
+/*
+ * FuncType holds the signature of a C++ function, with jit::Type equivalents
+ * for all C++ types involved.
+ */
+struct FuncType {
+  FuncType() = default;
+
+  template<typename Ret, typename... Args>
+  FuncType(Ret (*f)(Args...))
+    : ret{detail::jit_ret_type<detail::strip_t<Ret>>::type()}
+    , params{detail::jit_param_type<detail::strip_t<Args>>::type()...}
+  {}
+
+  Type ret;
+  std::vector<Type> params;
+};
+
+/*
+ * Return a pointer to a static FuncType for the given function pointer.
+ */
+template<typename Ret, typename... Args>
+const FuncType* get_func_type(Ret (*f)(Args...)) {
+  static const FuncType type{f};
+  return &type;
+}
+
+/*
+ * Get the kind of the given subtype of TArr, if we know it statically.
+ */
+folly::Optional<ArrayData::ArrayKind> getArrayKind(Type type);
 
 /*
  * Information about how to make different sorts of calls from the JIT.
@@ -49,15 +216,6 @@ struct CallSpec {
     Smashable,
 
     /*
-     * Call to an ArrayData vtable function.
-     *
-     * This is used to call ArrayData APIs by loading the appropriate function
-     * table for the desired function family out of g_array_funcs, and indexing
-     * into it with the ArrayKind of the passed ArrayData* argument.
-     */
-    ArrayVirt,
-
-    /*
      * Call the appropriate destructor (i.e., release) function for the unitary
      * argument.
      *
@@ -74,6 +232,14 @@ struct CallSpec {
      * TODO(#8425101): Make this true.
      */
     Stub,
+
+    /*
+     * Call the appropriate release function for an object.
+     *
+     * A Vreg containing the object's class is used to determine the correct
+     * function to call.
+     */
+    ObjDestructor
   };
 
   CallSpec() = delete;
@@ -84,11 +250,18 @@ struct CallSpec {
   // Static constructors.
 
   /*
-   * A Direct call to the free C++ function `fp'.
+   * A Direct call to the free C++ function `fp'. By default, the signature
+   * will be inferred from the given function pointer. This can be avoided by
+   * explicitly passing nullptr for the FuncType.
    */
   template<class Ret, class... Args>
-  static CallSpec direct(Ret (*fp)(Args...)) {
-    return CallSpec { Kind::Direct, reinterpret_cast<void*>(fp) };
+  static CallSpec direct(Ret (*fp)(Args...), const FuncType* type) {
+    return CallSpec { Kind::Direct, reinterpret_cast<void*>(fp), type };
+  }
+
+  template<class F>
+  static CallSpec direct(F f) {
+    return direct(f, get_func_type(f));
   }
 
   /*
@@ -121,20 +294,47 @@ struct CallSpec {
   }
 
   /*
-   * An ArrayVirt call, for the array function table `p'.
+   * A call to an ArrayData method with type `arrType` and function table `p',
+   * along with `fp`, the ArrayData generic dispatch method for the table `p`.
+   * We take `arrType` so we can devirtualize this call when its kind is known;
+   * otherwise, we'll emit a method call to `fp`. Example usage:
    *
-   * Takes a pointer to an array of function pointers to use for the particular
-   * entry point.  For example,
+   *   CallSpec::array(arr_type, &g_array_funcs.release, &ArrayData::release);
    *
-   *   CallSpec::array(&g_array_funcs.nvGetInt)
+   * The call mechanism assumes that the first argument to the direct calls is
+   * an ArrayData*, and that the rest of the arguments are parallel between the
+   * direct calls in `p` and the method `fp`.
    *
-   * The call mechanism assumes that the first argument to the function is an
-   * ArrayData*, and loads the kind from there.
+   * Note that we also load the ArrayData's kind and use it to make an indirect
+   * call to a method in `p` in the JIT; in fact, we used to emit such code.
+   * However, doing so is a branch miss loss (in particular, for set methods)
+   * over calling `fp`. We're not sure why, but here are two hypotheses:
+   *
+   *   1. BOLT can inline the likely virtual target into the function `fp`.
+   *   2. We may be save on indirect-call prediction cache with only one call.
+   *
+   * In any case, making this change looks like it's neutral to a small win in
+   * load tests, in addition to generating cleaner code.
    */
   template<class Ret, class... Args>
-  static CallSpec array(Ret (*const (*p)[ArrayData::kNumKinds])(Args...)) {
-    const void* vp = p;
-    return CallSpec { Kind::ArrayVirt, const_cast<void*>(vp) };
+  static CallSpec array(
+      const Type& arr_type,
+      Ret (*const (*p)[ArrayData::kNumKinds])(ArrayData*, Args...),
+      Ret (ArrayData::*fp)(Args...)) {
+    if (auto const kind = getArrayKind(arr_type)) {
+      return direct((*p)[*kind]);
+    }
+    return method(fp);
+  }
+  template<class Ret, class... Args>
+  static CallSpec array(
+      const Type& arr_type,
+      Ret (*const (*p)[ArrayData::kNumKinds])(const ArrayData*, Args...),
+      Ret (ArrayData::*fp)(Args...) const) {
+    if (auto const kind = getArrayKind(arr_type)) {
+      return direct((*p)[*kind]);
+    }
+    return method(fp);
   }
 
   /*
@@ -151,13 +351,20 @@ struct CallSpec {
     return CallSpec { Kind::Stub, addr };
   }
 
+  /*
+   * A Destructor for an object with class `cls'.
+   */
+  static CallSpec objDestruct(Vreg cls) {
+    return CallSpec { Kind::ObjDestructor, cls };
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Accessors.
 
   /*
    * Return the type tag.
    */
-  Kind kind() const { return m_kind; }
+  Kind kind() const { return m_typeKind.tag(); }
 
   /*
    * The address of a C++ function, for Direct or Smashable calls.
@@ -169,18 +376,11 @@ struct CallSpec {
   }
 
   /*
-   * The table of array functions, for ArrayVirt calls.
-   */
-  void* arrayTable() const {
-    assertx(kind() == Kind::ArrayVirt);
-    return m_u.fp;
-  }
-
-  /*
    * The register containing the DataType, for Destructor calls.
    */
   Vreg reg() const {
-    assertx(m_kind == Kind::Destructor);
+    assertx(kind() == Kind::Destructor ||
+            kind() == Kind::ObjDestructor);
     return m_u.reg;
   }
 
@@ -188,11 +388,33 @@ struct CallSpec {
    * The address of the unique stub, for Stub calls.
    */
   TCA stubAddr() const {
-    assertx(m_kind == Kind::Stub);
+    assertx(kind() == Kind::Stub);
     return m_u.stub;
   }
 
+  /*
+   * If this CallSpec was constructed with a FuncKind, verify that the given
+   * argument types and expected return type match the FuncKind.
+   */
+  bool verifySignature(const CallDest& dest,
+                       const std::vector<Type>& args) const;
+
   /////////////////////////////////////////////////////////////////////////////
+
+  bool operator==(const CallSpec& o) const {
+    auto const k1 = kind();
+    auto const k2 = o.kind();
+    if (k1 != k2) return false;
+    switch (k1) {
+      case CallSpec::Kind::Direct:
+      case CallSpec::Kind::Smashable:  return address() == o.address();
+      case CallSpec::Kind::Destructor: return reg() == o.reg();
+      case CallSpec::Kind::Stub:       return stubAddr() == o.stubAddr();
+      case CallSpec::Kind::ObjDestructor: return reg() == o.reg();
+    }
+    always_assert(false);
+  }
+  bool operator!=(const CallSpec& o) const { return !(*this == o); }
 
 private:
   union U {
@@ -206,10 +428,13 @@ private:
   };
 
 private:
-  CallSpec(Kind k, U u) : m_kind(k), m_u(u) {}
+  CallSpec(Kind k, U u, const FuncType* type = nullptr)
+    : m_typeKind{k, type}
+    , m_u{u}
+  {}
 
 private:
-  Kind m_kind;
+  CompactTaggedPtr<const FuncType, Kind> m_typeKind;
   U m_u;
 };
 
@@ -217,4 +442,3 @@ private:
 
 }}
 
-#endif

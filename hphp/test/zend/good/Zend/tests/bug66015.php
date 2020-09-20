@@ -1,14 +1,14 @@
-<?php
+<?hh
 class Test
 {
    const FIRST = 1;
    const SECOND = 2;
    const THIRD = 3;
 
-   protected static $array = [
+   protected static $array = darray[
        self::FIRST => 'first',
-       'second',
-       'third'
+       self::SECOND => 'second',
+       self::THIRD => 'third'
    ];
 
    public function __construct()
@@ -16,6 +16,6 @@ class Test
        var_export(self::$array);
    }
 }
-
+<<__EntryPoint>> function main(): void {
 $test = new Test();
-?>
+}

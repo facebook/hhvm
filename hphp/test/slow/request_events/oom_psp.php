@@ -1,18 +1,17 @@
-<?php
-
-ini_set('memory_limit', '18M');
-function foo() {
-  $x = array();
+<?hh
+function foo(): void {
+  $x = varray[];
   while (true) {
-    $x[] = str_repeat("asd", 100);
+    $x[] = str_repeat("asd", 1000);
   }
 }
 
-function go() {
-  echo "hi\n";
+<<__EntryPoint>>
+function main_oom_psp(): void {
+  ini_set('memory_limit', '18M');
+  register_postsend_function(() ==> {
+    echo "hi\n";
+    foo();
+  });
   foo();
 }
-
-register_postsend_function('go');
-
-foo();

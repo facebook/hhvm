@@ -1,8 +1,8 @@
-array(3) {
+darray(3) {
   ["b"]=>
   string(1) "c"
   ["d"]=>
-  array(3) {
+  darray(3) {
     [0]=>
     string(1) "e"
     [1]=>
@@ -11,15 +11,15 @@ array(3) {
     string(1) "h"
   }
   ["i"]=>
-  array(1) {
+  darray(1) {
     [1]=>
-    array(1) {
+    darray(1) {
       [2]=>
-      array(2) {
+      darray(2) {
         [34]=>
         string(1) "j"
         [5]=>
-        array(1) {
+        darray(1) {
           [6]=>
           string(1) "k"
         }

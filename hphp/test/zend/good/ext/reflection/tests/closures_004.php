@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $closure = function() { echo "Invoked!\n"; };
 
 $method = new ReflectionFunction ($closure);
@@ -26,5 +26,5 @@ unset ($closure);
 $closure2 ();
 $closure2->__invoke ();
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

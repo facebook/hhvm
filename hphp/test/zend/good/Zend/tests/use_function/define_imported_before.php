@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace {
     function bar() {}
@@ -7,7 +7,7 @@ namespace {
 }
 
 namespace {
+    <<__EntryPoint>> function main(): void {
     echo "Done";
+    }
 }
-
-?>

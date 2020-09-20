@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_AS_SHARED_H_
-#define incl_HPHP_AS_SHARED_H_
+#pragma once
 
 #include <string>
 #include <folly/Optional.h>
@@ -44,6 +43,7 @@ enum class AttrContext {
   TraitImport   = 0x8,
   Alias         = 0x10,
   Parameter     = 0x20,
+  Constant      = 0x40,
 };
 
 /*
@@ -86,4 +86,3 @@ struct is_bareword {
 };
 }
 
-#endif

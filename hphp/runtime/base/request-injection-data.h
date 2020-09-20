@@ -14,14 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQUEST_INJECTION_DATA_H_
-#define incl_HPHP_REQUEST_INJECTION_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/ham-runtime-option.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/pc-filter.h"
+#include "hphp/util/process.h"
 
+#include <array>
 #include <atomic>
 #include <cassert>
 #include <cinttypes>
@@ -86,6 +88,13 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+enum TimeoutKindFlag : uint8_t {
+  TimeoutNone          = 0,
+  TimeoutTime          = 1ull << 1,
+  TimeoutCPUTime       = 1ull << 2,
+  TimeoutSoft          = 1ull << 3
+};
+
 /*
  * General-purpose bag of data and options for a request.
  *
@@ -112,9 +121,11 @@ struct RequestInjectionData {
 #if defined(__APPLE__) || defined(_MSC_VER)
     : m_timer(this)
     , m_cpuTimer(this)
+    , m_userTimeoutTimer(this)
 #else
     : m_timer(this, CLOCK_REALTIME)
     , m_cpuTimer(this, CLOCK_THREAD_CPUTIME_ID)
+    , m_userTimeoutTimer(this, CLOCK_REALTIME)
 #endif
     {}
 
@@ -132,15 +143,28 @@ struct RequestInjectionData {
 
   int getTimeout() const;
   void setTimeout(int seconds);
+  void triggerTimeout(TimeoutKindFlag kind);
+  bool checkTimeoutKind(TimeoutKindFlag kind);
+  void clearTimeoutFlag(TimeoutKindFlag kind);
+
+  /*
+   * Sets/Returns the amount of seconds until user time based callback is fired
+   */
+  int getUserTimeout() const;
+  void setUserTimeout(int seconds);
+  /*
+   * Triggers the user time based callback
+   */
+  void invokeUserTimeoutCallback(c_WaitableWaitHandle* wh = nullptr);
 
   int getCPUTimeout() const;
   void setCPUTimeout(int seconds);
 
   int getRemainingTime() const;
   int getRemainingCPUTime() const;
+  int getUserTimeoutRemainingTime() const;
 
-  void resetTimer(int seconds = 0);
-  void resetCPUTimer(int seconds = 0);
+  void resetTimers(int time_sec = 0, int cputime_sec = 0);
 
   void onTimeout(RequestTimer*);
 
@@ -152,10 +176,55 @@ struct RequestInjectionData {
   void setFlag(SurpriseFlag);
 
   /*
+   * Deliver a "POSIX signal" through the SignaledFlag.
+   */
+  void sendSignal(int signum);
+  /*
+   * Get the next pending signal for this request, and clear the corresponding
+   * bit to avoid reentering in the signal handler.  When there is no pending
+   * signal, return 0.
+   */
+  int getAndClearNextPendingSignal();
+
+  /*
+   * Flags for rquest-level OOM killer.  The `m_hostOutOfMemory` flag is set on
+   * all requests when host is low in memory, which triggers a memory check upon
+   * checking surprise flags.  The `m_OOMAbort` is set when we decide to kill
+   * the request.
+   */
+  void setHostOOMFlag() {
+    m_hostOutOfMemory.store(true, std::memory_order_release);
+    setFlag(MemExceededFlag);
+  }
+  void clearHostOOMFlag() {
+    clearFlag(MemExceededFlag);
+    m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+  }
+  bool hostOOMFlag() const {
+    return m_hostOutOfMemory.load(std::memory_order_acquire);
+  }
+  void setRequestOOMAbort() {
+    m_OOMAbort = true;
+  }
+  bool shouldOOMAbort() const {
+    return m_OOMAbort;
+  }
+
+  /*
    * Whether the JIT is enabled.
    */
   bool getJit() const;
   void updateJit();
+
+  /*
+   * Whether jitting is disabled.
+   *
+   * This is distinct from getJit(), in that it allows us to _run_ jitted code,
+   * but not to _compile_ it.  Also, the restriction applies only to jitting
+   * new code; optimizing retranslations is not affected.
+   */
+  bool isJittingDisabled() const;
+  void setJittingDisabled(bool);
 
   /*
    * Whether the JIT is performing function folding.
@@ -166,8 +235,11 @@ struct RequestInjectionData {
   /*
    * Whether to suppress the emission of Hack array compat notices.
    */
-  bool getSuppressHackArrayCompatNotices() const;
-  void setSuppressHackArrayCompatNotices(bool);
+#define HC(Opt, ...) \
+  bool getSuppressHAC##Opt##Notices() const;  \
+  void setSuppressHAC##Opt##Notices(bool);
+  HAC_CHECK_OPTS
+#undef HC
 
   /*
    * Whether coverage is being collected.
@@ -277,21 +349,28 @@ struct RequestInjectionData {
   // may be modified
   void setSafeFileAccess(bool b);
   bool hasSafeFileAccess() const;
-  bool hasTrackErrors() const;
   bool hasHtmlErrors() const;
 
   bool logFunctionCalls() const;
 
 private:
+  void resetTimer(int seconds = 0);
+  void resetCPUTimer(int seconds = 0);
+  void resetUserTimeoutTimer(int seconds = 0);
   RequestTimer m_timer;
   RequestTimer m_cpuTimer;
+  RequestTimer m_userTimeoutTimer;
 
   bool m_debuggerAttached{false};
   bool m_coverage{false};
   bool m_jit{false};
+  bool m_jittingDisabled{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};
-  bool m_suppressHackArrayCompatNotices{false};
+
+#define HC(Opt, ...) bool m_suppressHAC##Opt{false};
+  HAC_CHECK_OPTS
+#undef HC
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};
@@ -316,6 +395,20 @@ private:
   bool m_safeFileAccess{false};
   bool m_logFunctionCalls{false};
 
+  static constexpr size_t kSigMaskWords = (Process::kNSig + 63) / 64;
+  std::array<std::atomic<uint64_t>, kSigMaskWords> m_signalMask{};
+
+  /*
+   * `m_hostOutOfMemory` is a flag used together with MemExceededFlag, to
+   * indicate whether the host is running low on memory.  Note that the presence
+   * of this flag doesn't necessarily lead to the request being aborted.  A
+   * request is only affected when it satisfies some other criteria, e.g., when
+   * it uses more memory than RequestMemoryOOMKillBytes.  If we do decide to
+   * abort the request, `m_OOMAbort` is set.
+   */
+  std::atomic<bool> m_hostOutOfMemory{false};
+  bool m_OOMAbort{false};
+
   /* Pointer to surprise flags stored in RDS. */
   std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};
 
@@ -332,6 +425,7 @@ private:
   std::string m_defaultMimeType;
   std::string m_brotliEnabled;
   std::string m_brotliChunkedEnabled;
+  std::string m_zstdEnabled;
   std::string m_gzipCompressionLevel = "-1";
   std::string m_gzipCompression;
   std::string m_errorLog;
@@ -352,6 +446,15 @@ private:
   int64_t m_zendAssertions;
   int64_t m_brotliLgWindowSize;
   int64_t m_brotliQuality;
+  int64_t m_zstdLevel;
+  int64_t m_zstdChecksumRate;
+
+  /*
+   * Instead of using several surprise flags, we can track the timeout info
+   * in its own array of flags. This allows us to define different kind of
+   * of timeouts.
+   */
+  std::atomic<uint8_t> m_timeoutFlags;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can
@@ -375,4 +478,3 @@ private:
 #include "hphp/runtime/base/request-injection-data-inl.h"
 #undef incl_HPHP_REQUEST_INJECTION_DATA_INL_H_
 
-#endif

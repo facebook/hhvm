@@ -1,0 +1,20 @@
+File "obj_get_widen.php", line 22, characters 14-15:
+Typing error (Typing[4053])
+File "obj_get_widen.php", line 22, characters 18-18:
+No property `x` in `C`
+File "obj_get_widen.php", line 11, characters 38-43:
+Did you mean `y` instead?
+File "obj_get_widen.php", line 18, characters 33-33:
+This is why I think it is an object of type C
+File "obj_get_widen.php", line 10, characters 7-7:
+Declaration of `C` is here
+File "obj_get_widen.php", line 22, characters 23-24:
+Typing error (Typing[4053])
+File "obj_get_widen.php", line 22, characters 27-27:
+No property `y` in `B`
+File "obj_get_widen.php", line 5, characters 38-40:
+Did you mean `x` instead?
+File "obj_get_widen.php", line 18, characters 27-27:
+This is why I think it is an object of type B
+File "obj_get_widen.php", line 8, characters 7-7:
+Declaration of `B` is here

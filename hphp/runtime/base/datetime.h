@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DATETIME_H_
-#define incl_HPHP_DATETIME_H_
+#pragma once
 
 #include <memory>
 
@@ -24,7 +23,7 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/timezone.h"
 #include "hphp/runtime/base/dateinterval.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -315,8 +314,8 @@ private:
       m_errors = ec;
     }
     Array getLastWarnings() const {
-      if (!m_errors) return empty_array();
-      ArrayInit ret(m_errors->warning_count, ArrayInit::Map{});
+      if (!m_errors) return Array::CreateDArray();
+      DArrayInit ret(m_errors->warning_count);
       for(int i = 0; i < m_errors->warning_count; i++) {
         timelib_error_message *em = m_errors->warning_messages + i;
         ret.set(em->position, String(em->message, CopyString));
@@ -324,8 +323,8 @@ private:
       return ret.toArray();
     }
     Array getLastErrors() const {
-      if (!m_errors) return empty_array();
-      ArrayInit ret(m_errors->error_count, ArrayInit::Map{});
+      if (!m_errors) return Array::CreateDArray();
+      DArrayInit ret(m_errors->error_count);
       for(int i = 0; i < m_errors->error_count; i++) {
         timelib_error_message *em = m_errors->error_messages + i;
         ret.set(em->position, String(em->message, CopyString));
@@ -370,4 +369,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DATETIME_H_

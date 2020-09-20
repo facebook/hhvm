@@ -14,14 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ADMIN_REQUEST_HANDLER_H_
-#define incl_HPHP_ADMIN_REQUEST_HANDLER_H_
+#pragma once
 
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/server.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Admin Command Ext allow you to register more admin commands that are not
+ * located in the admin command file.
+ */
+struct AdminCommandExt {
+  AdminCommandExt() {
+    next = s_head;
+    s_head = this;
+  }
+
+  virtual std::string usage() = 0;
+  virtual bool handleRequest(Transport* transport) = 0;
+
+  template <typename L>
+  static bool iterate(L lambda) {
+    for (auto p = s_head; p; p = p->next) {
+      if (lambda(p)) return true;
+    }
+    return false;
+  }
+
+  AdminCommandExt* next{nullptr};
+  static AdminCommandExt* s_head;
+};
 
 struct AdminRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
@@ -44,6 +68,8 @@ private:
   bool handleProfileRequest(const std::string &cmd, Transport *transport);
   bool handleDumpCacheRequest (const std::string &cmd, Transport *transport);
   bool handleConstSizeRequest (const std::string &cmd, Transport *transport);
+  bool handleInvalidateUnitRequest(const std::string &cmd,
+                                   Transport *transport);
   bool handleStaticStringsRequest(const std::string &cmd,
                                   Transport *transport);
   bool handleDumpStaticStringsRequest(const std::string &cmd,
@@ -69,4 +95,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ADMIN_REQUEST_HANDLER_H_

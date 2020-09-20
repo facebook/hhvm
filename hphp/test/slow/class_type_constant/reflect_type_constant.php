@@ -9,6 +9,9 @@ abstract class C implements I {
   const type T = int;
   abstract const type X as int;
 }
+
+<<__EntryPoint>>
+function main_reflect_type_constant() {
 echo '=== get_class_constants ===' . PHP_EOL;
 var_dump(get_class_constants(C::class));
 
@@ -34,3 +37,4 @@ var_dump($rc->getConstant('X'));
 
 echo "=== ReflectionClass::getTypeConstants ===" . PHP_EOL;
 var_dump(array_map(fun('strval'), $rc->getTypeConstants()));
+}

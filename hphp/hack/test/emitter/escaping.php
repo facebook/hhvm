@@ -8,7 +8,7 @@ class Cns {
 }
 
 function dump(string $s): void {
-  $a = array();
+  $a = varray[];
   /* HH_FIXME[2049] */
   /* HH_FIXME[4107] */
   for ($i = 0; $i < strlen($s); $i++) {
@@ -24,7 +24,7 @@ function test(): void {
   echo 'hello\n';
   $x = "hello\n";
   $y = 'hello\n';
-  $a = array();
+  $a = darray[];
   $a[$x] = 5;
   $a["hello\n"]++;
   $a[$y] = 50;

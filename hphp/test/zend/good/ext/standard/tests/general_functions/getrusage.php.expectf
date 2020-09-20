@@ -2,6 +2,5 @@ string(5) "array"
 string(5) "array"
 string(5) "array"
 
-Warning: %s
-NULL
+Warning: getrusage() expects parameter 1 to be integer, %rv?%rarray given in %s/getrusage.php on line 6
 Done

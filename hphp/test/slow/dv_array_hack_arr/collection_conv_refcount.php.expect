@@ -1,0 +1,16 @@
+object(HH\Vector) (4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+object(HH\Map) (2) {
+  ["yes"]=>
+  string(2) "no"
+  ["zing"]=>
+  int(4)
+}

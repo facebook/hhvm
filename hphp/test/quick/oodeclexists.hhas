@@ -1,13 +1,14 @@
 # tests that OODeclExists with bad argument types properly punts to the interpreter
 
-.main {
-  FPushFuncD 1 "var_dump"
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
   String "abc"
   String "asdfasdf"
   OODeclExists Interface
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
   Int 1
   RetC
 }

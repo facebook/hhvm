@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 trait Singleton {
-  protected static $instances=array();
+  protected static $instances=darray[];
   abstract protected function __construct($config);
   public static function getInstance($config) {
     if (!isset(self::$instances[$serialize = serialize($config)])) {
@@ -19,11 +19,10 @@ class MyHelloWorld {
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $o= myHelloWorld::getInstance(1);
 $o= myHelloWorld::getInstance(1);
 $o= myHelloWorld::getInstance(2);
-$o= myHelloWorld::getInstance(array(1=>2));
-$o= myHelloWorld::getInstance(array(1=>2));
-
-?>
+$o= myHelloWorld::getInstance(darray[1=>2]);
+$o= myHelloWorld::getInstance(darray[1=>2]);
+}

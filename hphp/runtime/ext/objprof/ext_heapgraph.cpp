@@ -99,7 +99,10 @@ const StaticString
 
 // Extra information about a HeapGraph::Node.
 union CapturedNode {
-  rds::StaticLocal static_local; // only for rds::StaticLocalData
+  CapturedNode()  {}
+  CapturedNode(const CapturedNode& other) {
+    memcpy(this, &other, sizeof other);
+  }
   rds::SPropCache sprop_cache; // only for HPHP::SPropCache
   struct {
     HeaderKind kind;
@@ -116,7 +119,7 @@ struct CapturedPtr {
 struct HeapGraphContext : SweepableResourceData {
   explicit HeapGraphContext(const HeapGraph& hg) : hg(hg) {}
   explicit HeapGraphContext(HeapGraph&& hg) : hg(std::move(hg)) {}
-  ~HeapGraphContext() {}
+  ~HeapGraphContext() override {}
 
   bool isInvalid() const override {
     return false;
@@ -177,7 +180,7 @@ const StringData* edgeKindName(HeapGraph::PtrKind kind) {
 // return metadata about this pointer, in the form of a CapturedPtr
 CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
   // Try to drill down and resolve the edge name
-  assert(g.ptrs[ptr].from != -1 && g.ptrs[ptr].to != -1);
+  assertx(g.ptrs[ptr].from != -1 && g.ptrs[ptr].to != -1);
   auto& edge = g.ptrs[ptr];
   auto& from = g.nodes[edge.from];
   int prop_offset = edge.offset;
@@ -196,6 +199,9 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (from_hdr->kind() == HeaderKind::ClosureHdr) {
       from_obj = closureObj(from_hdr);
+      prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
+    } else if (from_hdr->kind() == HeaderKind::MemoData) {
+      from_obj = memoObj(from_hdr);
       prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
     } else if (isObjectKind(from_hdr->kind())) {
       from_obj = static_cast<const ObjectData*>(from_hdr);
@@ -225,7 +231,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       }
 
       case HeaderKind::Packed:
-      case HeaderKind::VecArray: {
+      case HeaderKind::Vec: {
         if (edge.offset >= sizeof(ArrayData)) {
           auto elm_offset = edge.offset - sizeof(ArrayData);
           uint32_t index = elm_offset / sizeof(TypedValue);
@@ -236,16 +242,13 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
       }
 
-      case HeaderKind::Apc: {
-        if (edge.offset >= sizeof(APCLocalArray)) {
-          auto elm_offset = edge.offset - sizeof(APCLocalArray);
-          uint32_t index = elm_offset / sizeof(TypedValue);
-          if (index < static_cast<const APCLocalArray*>(from_hdr)->size()) {
-            return {CapturedPtr::Value, index};
-          }
-        }
+      case HeaderKind::BespokeVArray:
+      case HeaderKind::BespokeDArray:
+      case HeaderKind::BespokeVec:
+      case HeaderKind::BespokeDict:
+      case HeaderKind::BespokeKeyset:
+        // TODO(kshaunak): Expose an address -> element API for bespokes.
         break;
-      }
 
       case HeaderKind::Pair: {
         if (edge.offset >= c_Pair::dataOffset()) {
@@ -260,7 +263,8 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
 
       case HeaderKind::AwaitAllWH:
       case HeaderKind::WaitHandle:
-      case HeaderKind::Ref:
+      case HeaderKind::ClsMeth:
+      case HeaderKind::RClsMeth:
         break;
 
       // cases that have explicit pointer name
@@ -269,13 +273,15 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::Closure:
         // the class of a c_Closure describes the captured variables
       case HeaderKind::NativeData:
+      case HeaderKind::MemoData:
       case HeaderKind::Object: {
         auto cls = from_obj->getVMClass();
         FTRACE(5, "HG: Getting connection name for class {} at {}\n",
                from_obj->getClassName().data(), from_obj);
         if (prop_offset >= sizeof(ObjectData)) {
-          uint32_t index = (prop_offset - sizeof(ObjectData)) /
-                           sizeof(TypedValue);
+          uint32_t index = ObjectProps::offset2Idx(
+            prop_offset - sizeof(ObjectData)
+          );
           if (index < cls->numDeclProperties()) {
             return {CapturedPtr::Property, index};
           }
@@ -293,18 +299,19 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::ImmSet:
       case HeaderKind::Map:
       case HeaderKind::ImmMap:
-      case HeaderKind::Empty:
-      case HeaderKind::Globals:
       case HeaderKind::String:
       case HeaderKind::Resource:
       case HeaderKind::BigMalloc:
+      case HeaderKind::Cpp:
       case HeaderKind::SmallMalloc:
       case HeaderKind::Free:
-      case HeaderKind::BigObj:
       case HeaderKind::Hole:
       case HeaderKind::Slab:
+      case HeaderKind::RFunc:
         // just provide raw prop_offset
         break;
+      case HeaderKind::Record:  // TODO(T41026982)
+        raise_error(Strings::RECORD_NOT_SUPPORTED);
     }
   }
 
@@ -313,19 +320,14 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
 
 void heapgraphCallback(Array fields, const Variant& callback) {
   VMRegAnchor _;
-  auto params = make_packed_array(fields);
+  auto params = make_vec_array(fields);
   vm_call_user_func(callback, params);
 }
 
 void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   VMRegAnchor _;
-  auto params = make_packed_array(fields, fields2);
+  auto params = make_vec_array(fields, fields2);
   vm_call_user_func(callback, params);
-}
-
-static bool isStaticLocal(const HeapGraph::Node& node) {
-  return node.tyindex == type_scan::getIndexForScan<rds::StaticLocalData>() &&
-         type_scan::hasNonConservative();
 }
 
 static bool isStaticProp(const HeapGraph::Node& node) {
@@ -351,7 +353,7 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     kind_str = s_Root.get(); // fake HeaderKind "Root"
   }
 
-  auto node_arr = make_map_array(
+  auto node_arr = make_darray(
     s_index, VarNR(index),
     s_kind, VarNR(kind_str),
     s_size, VarNR(int64_t(node.size))
@@ -368,17 +370,6 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     if (auto cls = cnode.heap_object.cls) {
       node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
     }
-  } else if (isStaticLocal(node)) {
-    node_arr.set(s_local,
-                 make_tv<KindOfPersistentString>(cnode.static_local.name));
-    auto func_id = cnode.static_local.funcId;
-    if (func_id != InvalidFuncId) {
-      auto func = Func::fromFuncId(cnode.static_local.funcId);
-      node_arr.set(s_func, make_tv<KindOfPersistentString>(func->name()));
-      if (auto cls = func->cls()) {
-        node_arr.set(s_class, make_tv<KindOfPersistentString>(cls->name()));
-      }
-    }
   } else if (isStaticProp(node)) {
     if (auto cls = cnode.sprop_cache.cls) {
       auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
@@ -394,7 +385,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
   const auto& cptr = hgptr->cptrs[index];
   const auto& cfrom = hgptr->cnodes[ptr.from];
 
-  auto ptr_arr = make_map_array(
+  auto ptr_arr = make_darray(
     s_index, VarNR(index),
     s_kind, VarNR(edgeKindName(ptr.ptr_kind)),
     s_from, VarNR(ptr.from),
@@ -408,7 +399,9 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
       ptr_arr.set(s_value, make_tv<KindOfInt64>(cptr.index));
       break;
     case CapturedPtr::Property: {
-      auto& prop = cfrom.heap_object.cls->declProperties()[cptr.index];
+      auto cls = cfrom.heap_object.cls;
+      auto slot = cls->propIndexToSlot(cptr.index);
+      auto& prop = cls->declProperties()[slot];
       ptr_arr.set(s_prop, make_tv<KindOfPersistentString>(prop.name));
       break;
     }
@@ -459,16 +452,8 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
       auto obj = innerObj(node.h);
       cnode.heap_object.kind = node.h->kind();
       cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;
-    } else if (isStaticLocal(node)) {
-      rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
-      auto sym = rds::reverseLink(handle);
-      if (sym) {
-        cnode.static_local = boost::get<rds::StaticLocal>(sym.value());
-      } else {
-        cnode.static_local = {InvalidFuncId, nullptr};
-      }
     } else if (isStaticProp(node)) {
-      rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
+      rds::Handle handle = rds::ptrToHandle<rds::Mode::Any>(node.ptr);
       auto sym = rds::reverseLink(handle);
       if (sym) {
         cnode.sprop_cache = boost::get<rds::SPropCache>(sym.value());
@@ -572,15 +557,15 @@ void HHVM_FUNCTION(heapgraph_dfs_edges,
 
 Array HHVM_FUNCTION(heapgraph_edge, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.ptrs.size()) return empty_array();
+  if (!hgptr) return Array::CreateDArray();
+  if (size_t(index) >= hgptr->hg.ptrs.size()) return Array::CreateDArray();
   return createPhpEdge(hgptr, index);
 }
 
 Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  if (!hgptr) return Array::CreateDArray();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateDArray();
   return createPhpNode(hgptr, index);
 }
 
@@ -589,11 +574,11 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  if (!hgptr) return Array::CreateVArray();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVArray();
   size_t num_edges{0};
   hgptr->hg.eachOutPtr(index, [&](int) { num_edges++; });
-  PackedArrayInit result(num_edges);
+  VArrayInit result(num_edges);
   hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
@@ -605,11 +590,11 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
   int64_t index
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  if (!hgptr) return Array::CreateVArray();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return Array::CreateVArray();
   size_t num_edges{0};
   hgptr->hg.eachInPtr(index, [&](int) { num_edges++; });
-  PackedArrayInit result(num_edges);
+  VArrayInit result(num_edges);
   hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
@@ -618,8 +603,8 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
 
 Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
-  if (!hgptr) return empty_array();
-  auto result = make_map_array(
+  if (!hgptr) return Array::CreateDArray();
+  auto result = make_darray(
     s_nodes, VarNR(int64_t(hgptr->hg.nodes.size())),
     s_edges, VarNR(int64_t(hgptr->hg.ptrs.size())),
     s_roots, VarNR(int64_t(hgptr->hg.root_ptrs.size())),

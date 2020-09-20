@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THREAD_LOCAL_H_
-#define incl_HPHP_THREAD_LOCAL_H_
+#pragma once
 
 #include <cerrno>
 #include <pthread.h>
@@ -23,6 +22,7 @@
 
 #include <folly/String.h>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/type-scan.h"
 
@@ -199,14 +199,18 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// ThreadLocal allocates by calling new without parameters and frees by calling
-// delete
+// ThreadLocal allocates in the local arena, created using local_malloc()
+// followed by placement new and destroyed by calling destructor followed by
+// local_free() delete.
 
 template<typename T>
 void ThreadLocalOnThreadExit(void * p) {
-  ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
-  delete pNode->m_p;
-  pNode->m_p = nullptr;
+  auto pNode = (ThreadLocalNode<T>*)p;
+  if (pNode->m_p) {
+    pNode->m_p->~T();
+    local_free(pNode->m_p);
+    pNode->m_p = nullptr;
+  }
 }
 
 /**
@@ -235,8 +239,11 @@ struct ThreadLocalImpl {
   bool isNull() const { return m_node.m_p == nullptr; }
 
   void destroy() {
-    delete m_node.m_p;
-    m_node.m_p = nullptr;
+    if (m_node.m_p) {
+      m_node.m_p->~T();
+      local_free(m_node.m_p);
+      m_node.m_p = nullptr;
+    }
   }
 
   void nullOut() {
@@ -268,52 +275,11 @@ void ThreadLocalImpl<Check,T>::create() {
     ThreadLocalManager::PushTop(m_node);
   }
   assert(m_node.m_p == nullptr);
-  m_node.m_p = new T();
+  m_node.m_p = new (local_malloc(sizeof(T))) T();
 }
 
 template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
 template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
-
-///////////////////////////////////////////////////////////////////////////////
-// some classes don't need new/delete at all
-
-template<typename T>
-struct ThreadLocalProxy {
-  T *get() const {
-    return m_p;
-  }
-
-  void set(T* obj) {
-    if (!m_node.m_on_thread_exit_fn) {
-      m_node.m_on_thread_exit_fn = onThreadExit;
-      ThreadLocalManager::PushTop(m_node);
-      assert(!m_node.m_p);
-      m_node.m_p = this;
-    } else {
-      assert(m_node.m_p == this);
-    }
-    m_p = obj;
-  }
-
-  bool isNull() const { return m_p == nullptr; }
-
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-  static void onThreadExit(void* p) {
-    auto node = (ThreadLocalNode<ThreadLocalProxy<T>>*)p;
-    node->m_p = nullptr;
-  }
-
-  T* m_p;
-  ThreadLocalNode<ThreadLocalProxy<T>> m_node;
-  TYPE_SCAN_IGNORE_FIELD(m_node);
-};
 
 // Wraps a __thread storage instance of T with a similar api to
 // ThreadLocalProxy. Importantly, inlining a method of T via operator-> or
@@ -329,9 +295,11 @@ struct ThreadLocalFlat {
   explicit operator bool() const { return !isNull(); }
   static void onThreadExit(void* p) {
     auto node = (ThreadLocalNode<ThreadLocalFlat<T>>*)p;
-    auto value = (T*)&node->m_p->m_value;
-    value->~T();
-    node->m_p = nullptr;
+    if (node->m_p) {
+      auto value = (T*)&node->m_p->m_value;
+      value->~T();
+      node->m_p = nullptr;
+    }
   }
   T* getCheck() {
     if (!m_node.m_p) {
@@ -379,7 +347,6 @@ struct ThreadLocalFlat {
 
 #define THREAD_LOCAL(T, f) __thread HPHP::ThreadLocal<T> f
 #define THREAD_LOCAL_NO_CHECK(T, f) __thread HPHP::ThreadLocalNoCheck<T> f
-#define THREAD_LOCAL_PROXY(T, f) __thread HPHP::ThreadLocalProxy<T> f
 #define THREAD_LOCAL_FLAT(T, f) __thread HPHP::ThreadLocalFlat<T> f
 
 } // namespace HPHP
@@ -390,4 +357,3 @@ struct ThreadLocalFlat {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // incl_HPHP_THREAD_LOCAL_H_

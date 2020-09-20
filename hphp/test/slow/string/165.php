@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a, $b) {
   $buf = 'hello';
@@ -10,7 +10,6 @@ function test($a, $b) {
   }
   var_dump($buf);
 }
-test(array('a', 'b', 'c'), array('u', 'v'));
 function test2($a, $b) {
   $buf = 'hello';
   foreach ($a as $v) {
@@ -22,7 +21,6 @@ function test2($a, $b) {
   }
   var_dump($buf);
 }
-test2(array('a', 'b', 'c'), array('u', 'v'));
 function test3($a, $b) {
   $buf = 'hello';
   foreach ($a as $v) {
@@ -33,4 +31,10 @@ function test3($a, $b) {
   }
   var_dump($buf);
 }
-test3(array('a', 'b', 'c'), array('u', 'v'));
+
+<<__EntryPoint>>
+function main_165() {
+test(varray['a', 'b', 'c'], varray['u', 'v']);
+test2(varray['a', 'b', 'c'], varray['u', 'v']);
+test3(varray['a', 'b', 'c'], varray['u', 'v']);
+}

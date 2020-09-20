@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STATE_MULTIMAP_H_
-#define incl_HPHP_JIT_STATE_MULTIMAP_H_
+#pragma once
 
 #include <type_traits>
 #include <map>
@@ -90,4 +89,3 @@ private:
 
 }}
 
-#endif

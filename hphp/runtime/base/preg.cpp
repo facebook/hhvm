@@ -46,10 +46,10 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 
-#include "hphp/compiler/json.h"
-
 #include "hphp/util/logger.h"
 #include "hphp/util/concurrent-scalable-cache.h"
+
+#include <folly/json.h>
 
 /* Only defined in pcre >= 8.32 */
 #ifndef PCRE_STUDY_JIT_COMPILE
@@ -125,7 +125,7 @@ public:
     }
 
     Accessor& operator=(const pcre_cache_entry* ptr) {
-      assert(m_kind == Kind::Empty || m_kind == Kind::Ptr);
+      assertx(m_kind == Kind::Empty || m_kind == Kind::Ptr);
       m_kind = Kind::Ptr;
       m_u.ptr = ptr;
       return *this;
@@ -175,7 +175,7 @@ public:
     }
 
     const EntryPtr& entryPtr() const {
-      assert(m_kind == Kind::SmartPtr);
+      assertx(m_kind == Kind::SmartPtr);
       return m_u.smart_ptr;
     }
 
@@ -230,19 +230,19 @@ private:
   std::atomic<StaticCache*> m_staticCache;
   std::unique_ptr<LRUCache> m_lruCache;
   std::unique_ptr<ScalableCache> m_scalableCache;
-  std::atomic<time_t> m_expire;
+  std::atomic<time_t> m_expire{};
   std::mutex m_clearMutex;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Data
 
-THREAD_LOCAL(PCREglobals, tl_pcre_globals);
+RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 static PCRECache s_pcreCache;
 
 // The last pcre error code is available for the whole thread.
-static __thread int tl_last_error_code;
+static RDS_LOCAL(int, rl_last_error_code);
 
 ///////////////////////////////////////////////////////////////////////////////
 // pcre_cache_entry implementation
@@ -295,7 +295,7 @@ pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
 }
 
 bool pcre_literal_data::isLiteral() const {
-  return literal_str.hasValue();
+  return literal_str.has_value();
 }
 
 bool pcre_literal_data::matches(const StringData* subject,
@@ -376,7 +376,7 @@ void PCRECache::DestroyStatic(StaticCache* cache) {
       "StaticCache must be an AtomicHashArray or this destructor is wrong.");
   for (auto& it : *cache) {
     if (it.first->isUncounted()) {
-      const_cast<StringData*>(it.first)->destructUncounted();
+      StringData::ReleaseUncounted(it.first);
     }
     delete it.second;
   }
@@ -422,7 +422,7 @@ bool PCRECache::find(Accessor& accessor,
   switch (m_kind) {
     case CacheKind::Static:
       {
-        assert(m_staticCache.load());
+        assertx(m_staticCache.load());
         StaticCache::iterator it;
         auto cache = m_staticCache.load(std::memory_order_acquire);
         if ((it = cache->find(regex)) != cache->end()) {
@@ -473,22 +473,23 @@ void PCRECache::insert(
   switch (m_kind) {
     case CacheKind::Static:
       {
-        assert(m_staticCache.load());
+        assertx(m_staticCache.load());
         // Clear the cache if we haven't refreshed it in a while
         if (time(nullptr) > m_expire) {
           clearStatic();
         }
-        auto cache = m_staticCache.load(std::memory_order_acquire);
-        auto key = regex->isStatic()
-          ? regex
-          : StringData::MakeUncounted(regex->slice());
+        auto const cache = m_staticCache.load(std::memory_order_acquire);
+        auto const key =
+          regex->isStatic() ||
+          (regex->isUncounted() && regex->uncountedIncRef()) ?
+          regex : StringData::MakeUncounted(regex->slice());
         auto pair = cache->insert(StaticCachePair(key, ent));
         if (pair.second) {
           // Inserted, container owns the pointer
           accessor = ent;
         } else {
           // Not inserted, caller needs to own the pointer
-          if (key != regex) const_cast<StringData*>(key)->destructUncounted();
+          if (regex->isUncounted()) StringData::ReleaseUncounted(key);
           accessor = EntryPtr(ent);
         }
       }
@@ -645,8 +646,13 @@ get_subpat_names(const pcre_cache_entry* pce) {
       raise_warning("Internal pcre_fullinfo() error %d", rc);
       return nullptr;
     }
+    // The table returned by PCRE_INFO_NAMETABLE is an array of fixed length
+    // strings of size PCRE_INFO_NAMEENTRYSIZE.  The first two bytes are a
+    // big-endian uint16_t defining the array index followed by the
+    // zero-terminated name string.
+    // (See https://www.pcre.org/original/doc/html/pcreapi.html)
     while (ni++ < name_count) {
-      name_idx = 0xff * (unsigned char)name_table[0] +
+      name_idx = 0x100 * (unsigned char)name_table[0] +
                  (unsigned char)name_table[1];
       subpat_names[name_idx] = name_table + 2;
       if (is_numeric_string(subpat_names[name_idx],
@@ -799,6 +805,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
 
     case ' ':
     case '\n':
+    case '\r':
       break;
 
     default:
@@ -868,10 +875,12 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
           HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
         }
         if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
+          std::string escaped_name;
+          folly::json::escapeString(name, escaped_name,
+                                    folly::json::serialization_opts());
           Debug::DebugInfo::Get()->recordPerfMap(
             Debug::TCRange(start, end, false),
-            SrcKey{}, nullptr, false, false,
-            HPHP::JSON::Escape(name.c_str())
+            SrcKey{}, nullptr, false, false, escaped_name
           );
         }
       }
@@ -887,10 +896,10 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       std::make_unique<pcre_literal_data>(std::move(literal_data));
   }
 
-  assert((poptions & ~0x1) == 0);
+  assertx((poptions & ~0x1) == 0);
   new_entry->preg_options = poptions;
 
-  assert((coptions & 0x80000000) == 0);
+  assertx((coptions & 0x80000000) == 0);
   new_entry->compile_options = coptions;
 
   /* Get pcre full info */
@@ -910,11 +919,26 @@ static int* create_offset_array(const pcre_cache_entry* pce,
   return (int *)req::malloc_noptrs(size_offsets * sizeof(int));
 }
 
-static inline void add_offset_pair(Array& result,
-                                   const String& str,
-                                   int offset,
-                                   const char* name) {
-  auto match_pair = make_packed_array(str, offset);
+static inline void add_offset_pair_split(Array& result,
+                                         const String& str,
+                                         int offset,
+                                         const char* name,
+                                         bool hackArrOutput) {
+  auto match_pair = hackArrOutput
+    ? make_vec_array(str, offset)
+    : make_varray(str, offset);
+  if (name) result.set(String(name), match_pair);
+  result.append(match_pair);
+}
+
+static inline void add_offset_pair_match(Array& result,
+                                         const String& str,
+                                         int offset,
+                                         const char* name,
+                                         bool hackArrOutput) {
+  auto match_pair = hackArrOutput
+    ? make_vec_array(str, offset)
+    : make_varray(str, offset);
   if (name) result.set(String(name), match_pair);
   result.append(match_pair);
 }
@@ -931,9 +955,6 @@ static void pcre_log_error(const char* func, int line, int pcre_code,
                            const char* repl, int repl_size,
                            int arg1 = 0, int arg2 = 0,
                            int arg3 = 0, int arg4 = 0) {
-  if (!RuntimeOption::EnableHipHopSyntax) {
-    return;
-  }
   const char* escapedPattern;
   const char* escapedSubject;
   const char* escapedRepl;
@@ -979,7 +1000,7 @@ static void pcre_handle_exec_error(int pcre_code) {
     preg_code = PHP_PCRE_INTERNAL_ERROR;
     break;
   }
-  tl_last_error_code = preg_code;
+  *rl_last_error_code = preg_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -998,9 +1019,11 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   }
   SmartFreeHelper freer(offsets);
 
+  const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
+
   /* Initialize return array */
-  Array ret = Array::Create();
-  tl_last_error_code = PHP_PCRE_NO_ERROR;
+  auto ret = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -1044,6 +1067,18 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+Array& forceToOutput(Variant& var, bool hackArrOutput) {
+  return hackArrOutput ? forceToDict(var) : forceToDArray(var);
+}
+
+Array& forceToOutput(tv_lval lval, bool hackArrOutput) {
+  return hackArrOutput ? forceToDict(lval) : forceToDArray(lval);
+}
+
+}
+
 static Variant preg_match_impl(const StringData* pattern,
                                const StringData* subject,
                                Variant* subpats, int flags, int start_offset,
@@ -1054,10 +1089,13 @@ static Variant preg_match_impl(const StringData* pattern,
   }
   const pcre_cache_entry* pce = accessor.get();
 
+  const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
+  const bool includeNonMatchingCaptures = flags & PREG_FB__PRIVATE__HSL_IMPL;
+
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
   if (subpats) {
-    *subpats = Array::Create();
+    *subpats = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
   }
   int exec_options = 0;
 
@@ -1103,16 +1141,18 @@ static Variant preg_match_impl(const StringData* pattern,
   }
 
   /* Allocate match sets array and initialize the values. */
-  Array match_sets; /* An array of sets of matches for each
-                       subpattern after a global match */
+
+  /* An array of sets of matches for each subpattern after a global match */
+  auto match_sets = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
   if (global && subpats_order == PREG_PATTERN_ORDER) {
     for (int i = 0; i < num_subpats; i++) {
-      match_sets.set(i, Array::Create());
+      match_sets.set(i,
+        hackArrOutput ? Array::CreateDict() : Array::CreateDArray());
     }
   }
 
   int matched = 0;
-  tl_last_error_code = PHP_PCRE_NO_ERROR;
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   int g_notempty = 0; // If the match should not be empty
   const char** stringlist; // Holds list of subpatterns
@@ -1166,15 +1206,17 @@ static Variant preg_match_impl(const StringData* pattern,
             /* For each subpattern, insert it into the appropriate array. */
             for (i = 0; i < count; i++) {
               if (offset_capture) {
-                auto const lval = match_sets.lvalAt(i);
-                add_offset_pair(forceToArray(lval),
-                                String(stringlist[i],
-                                       offsets[(i<<1)+1] - offsets[i<<1],
-                                       CopyString),
-                                offsets[i<<1], nullptr);
+                auto const lval = match_sets.lval(i);
+                add_offset_pair_match(forceToOutput(lval, hackArrOutput),
+                                      String(stringlist[i],
+                                             offsets[(i<<1)+1] - offsets[i<<1],
+                                             CopyString),
+                                      offsets[i<<1],
+                                      nullptr,
+                                      hackArrOutput);
               } else {
-                auto const lval = match_sets.lvalAt(i);
-                forceToArray(lval).append(
+                auto const lval = match_sets.lval(i);
+                forceToOutput(lval, hackArrOutput).append(
                   String(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                     CopyString)
                 );
@@ -1187,21 +1229,25 @@ static Variant preg_match_impl(const StringData* pattern,
              */
             if (count < num_subpats) {
               for (; i < num_subpats; i++) {
-                auto const lval = match_sets.lvalAt(i);
-                forceToArray(lval).append("");
+                auto const lval = match_sets.lval(i);
+                forceToOutput(lval, hackArrOutput).append("");
               }
             }
           } else {
-            Array result_set = Array::Create();
+            auto result_set = hackArrOutput
+              ? Array::CreateDict()
+              : Array::CreateDArray();
 
             /* Add all the subpatterns to it */
             for (i = 0; i < count; i++) {
               if (offset_capture) {
-                add_offset_pair(result_set,
-                                String(stringlist[i],
-                                       offsets[(i<<1)+1] - offsets[i<<1],
-                                       CopyString),
-                                offsets[i<<1], subpat_names[i]);
+                add_offset_pair_match(result_set,
+                                      String(stringlist[i],
+                                             offsets[(i<<1)+1] - offsets[i<<1],
+                                             CopyString),
+                                      offsets[i<<1],
+                                      subpat_names[i],
+                                      hackArrOutput);
               } else {
                 String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                              CopyString);
@@ -1211,25 +1257,74 @@ static Variant preg_match_impl(const StringData* pattern,
                 result_set.append(value);
               }
             }
+            if (includeNonMatchingCaptures && count < num_subpats) {
+              for (; i < num_subpats; i++) {
+                // We don't want to set the numeric key if there is a string
+                // key, but we have do it usually to make migration from
+                // preg_match() practical; given that existing code gets
+                // nothing for unmatched captures, we don't need to set both
+                // here.
+                if (offset_capture) {
+                  add_offset_pair_match(
+                    forceToOutput(*subpats, hackArrOutput),
+                    empty_string(),
+                    offsets[i<<1],
+                    subpat_names[i],
+                    hackArrOutput
+                  );
+                } else {
+                  if (subpat_names[i]) {
+                    result_set.set(String(subpat_names[i]), empty_string_tv());
+                  }
+                  result_set.append(empty_string());
+                }
+              }
+            }
             /* And add it to the output array */
-            forceToArray(*subpats).append(std::move(result_set));
+            forceToOutput(*subpats, hackArrOutput).append(
+              std::move(result_set)
+            );
           }
         } else {      /* single pattern matching */
           /* For each subpattern, insert it into the subpatterns array. */
           for (i = 0; i < count; i++) {
             if (offset_capture) {
-              add_offset_pair(forceToArray(*subpats),
-                              String(stringlist[i],
-                                     offsets[(i<<1)+1] - offsets[i<<1],
-                                     CopyString),
-                              offsets[i<<1], subpat_names[i]);
+              add_offset_pair_match(forceToOutput(*subpats, hackArrOutput),
+                                    String(stringlist[i],
+                                           offsets[(i<<1)+1] - offsets[i<<1],
+                                           CopyString),
+                                    offsets[i<<1],
+                                    subpat_names[i],
+                                    hackArrOutput);
             } else {
               String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                            CopyString);
               if (subpat_names[i]) {
-                forceToArray(*subpats).set(String(subpat_names[i]), value);
+                forceToOutput(*subpats, hackArrOutput).set(
+                  String(subpat_names[i]), value
+                );
               }
-              forceToArray(*subpats).append(value);
+              forceToOutput(*subpats, hackArrOutput).append(value);
+            }
+          }
+          if (includeNonMatchingCaptures && count < num_subpats) {
+            for (; i < num_subpats; i++) {
+              if (offset_capture) {
+                add_offset_pair_match(
+                  forceToOutput(*subpats, hackArrOutput),
+                  empty_string(),
+                  offsets[i<<1],
+                  subpat_names[i],
+                  hackArrOutput
+                );
+              } else {
+                if (subpat_names[i]) {
+                  forceToOutput(*subpats, hackArrOutput).set(
+                    String(subpat_names[i]), empty_string()
+                  );
+                }
+                forceToOutput(*subpats, hackArrOutput).append(empty_string());
+              }
             }
           }
         }
@@ -1271,9 +1366,11 @@ static Variant preg_match_impl(const StringData* pattern,
   if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     for (i = 0; i < num_subpats; i++) {
       if (subpat_names[i]) {
-        forceToArray(*subpats).set(String(subpat_names[i]), match_sets[i]);
+        forceToOutput(*subpats, hackArrOutput).set(
+          String(subpat_names[i]), match_sets[i]
+        );
       }
-      forceToArray(*subpats).append(match_sets[i]);
+      forceToOutput(*subpats, hackArrOutput).append(match_sets[i]);
     }
   }
   return matched;
@@ -1308,7 +1405,7 @@ Variant preg_match_all(const StringData* pattern, const StringData* subject,
 static String preg_do_repl_func(const Variant& function, const String& subject,
                                 int* offsets, const char* const* subpat_names,
                                 int count) {
-  Array subpats = Array::Create();
+  Array subpats = Array::CreateDArray();
   for (int i = 0; i < count; i++) {
     auto off1 = offsets[i<<1];
     auto off2 = offsets[(i<<1)+1];
@@ -1320,9 +1417,7 @@ static String preg_do_repl_func(const Variant& function, const String& subject,
     subpats.append(sub);
   }
 
-  Array args;
-  args.set(0, subpats);
-  return vm_call_user_func(function, args).toString();
+  return vm_call_user_func(function, make_varray(subpats)).toString();
 }
 
 static bool preg_get_backref(const char** str, int* backref) {
@@ -1370,22 +1465,9 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     return false;
   }
   const pcre_cache_entry* pce = accessor.get();
-  bool eval = pce->preg_options & PREG_REPLACE_EVAL;
-  if (eval) {
-    if (RuntimeOption::EvalAuthoritativeMode) {
-      throw Exception(
-        "You can't use eval in RepoAuthoritative mode. It breaks all sorts of "
-        "assumptions we use for speed. Switch to using preg_replace_callback()."
-      );
-    }
-    if (callable) {
-      raise_warning(
-        "Modifier /e cannot be used with replacement callback."
-      );
-      return init_null();
-    }
-    raise_deprecated(
-      "preg_replace(): The /e modifier is deprecated, use "
+  if (pce->preg_options & PREG_REPLACE_EVAL) {
+    throw Exception(
+      "preg_replace(): Support for the /e modifier has been removed, use "
       "preg_replace_callback instead"
     );
   }
@@ -1421,7 +1503,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     /* Initialize */
     const char* match = nullptr;
     int start_offset = 0;
-    tl_last_error_code = PHP_PCRE_NO_ERROR;
+    *rl_last_error_code = PHP_PCRE_NO_ERROR;
     pcre_extra extra;
     init_local_extra(&extra, pce->extra);
 
@@ -1456,12 +1538,11 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* Set the match location in subject */
         match = subject.data() + offsets[0];
 
-        /* If evaluating, do it and add the return string's length */
-        String eval_result;
+        String callable_result;
         if (callable) {
           /* Use custom function to get replacement string and its length. */
-          eval_result = preg_do_repl_func(replace_var, subject, offsets,
-                                          subpat_names, count);
+          callable_result = preg_do_repl_func(replace_var, subject, offsets,
+                                              subpat_names, count);
         } else { /* do regular substitution */
           walk = replace;
           walk_last = 0;
@@ -1475,16 +1556,6 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
               if (preg_get_backref(&walk, &backref)) {
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-                  if (eval) {
-                    String esc_match = HHVM_FN(addslashes)(
-                      String(
-                        subject.data() + offsets[backref<<1],
-                        match_len,
-                        CopyString
-                      )
-                    );
-                    match_len = esc_match.length();
-                  }
                 }
                 continue;
               }
@@ -1500,25 +1571,15 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* copy replacement and backrefs */
         int result_len = result.size();
 
-        /* If evaluating or using custom function, copy result to the buffer
-         * and clean up. */
         if (callable) {
-          result.append(eval_result.data(), eval_result.size());
-          result_len += eval_result.size();
+          /* Copy result from custom function to buffer and clean up. */
+          result.append(callable_result.data(), callable_result.size());
+          result_len += callable_result.size();
         } else { /* do regular backreference copying */
           walk = replace;
           walk_last = 0;
           Array params;
-          int lastStart = result.size();
           while (walk < replace_end) {
-            bool handleQuote = eval && '"' == *walk && walk_last != '\\';
-            if (handleQuote && lastStart != result.size()) {
-              String str(result.data() + lastStart, result.size() - lastStart,
-                         CopyString);
-              params.append(str);
-              lastStart = result.size();
-              handleQuote = false;
-            }
             if ('\\' == *walk || '$' == *walk) {
               if (walk_last == '\\') {
                 result.set(result.size() - 1, *walk++);
@@ -1528,69 +1589,16 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
               if (preg_get_backref(&walk, &backref)) {
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-                  if (eval) {
-                    String esc_match = HHVM_FN(addslashes)(
-                      String(
-                        subject.data() + offsets[backref<<1],
-                        match_len,
-                        CopyString
-                      )
-                    );
-                    match_len = esc_match.length();
-                    result.append(esc_match.data(), match_len);
-                  } else {
-                    result.append(
-                      subject.data() + offsets[backref<<1],
-                      match_len
-                    );
-                  }
+                  result.append(
+                    subject.data() + offsets[backref<<1],
+                    match_len
+                  );
                 }
                 continue;
               }
             }
             result.append(*walk++);
             walk_last = walk[-1];
-            if (handleQuote && lastStart != result.size()) {
-              lastStart = result.size();
-            }
-          }
-          auto full_len = result.size();
-          auto data = result.data() + result_len;
-          if (eval) {
-            VMRegAnchor _;
-            auto const ar = GetCallerFrame();
-            // reserve space for "<?php return " + code + ";"
-            String prefixedCode(full_len - result_len + 14, ReserveString);
-            prefixedCode +=
-              (ar->unit()->isHHFile() ? "<?hh return " : "<?php return ");
-            prefixedCode += folly::StringPiece{data, full_len - result_len};
-            prefixedCode += ";";
-            auto const unit = g_context->compileEvalString(prefixedCode.get());
-            auto const ctx = ar->func()->cls();
-            auto const func = unit->getMain(ctx);
-            ObjectData* thiz;
-            Class* cls;
-            if (ctx) {
-              if (ar->hasThis()) {
-                thiz = ar->getThis();
-                cls = thiz->getVMClass();
-              } else {
-                thiz = nullptr;
-                cls = ar->getClass();
-              }
-            } else {
-              thiz = nullptr;
-              cls = nullptr;
-            }
-            auto v = Variant::attach(
-              g_context->invokeFunc(func, init_null_variant,
-                                    thiz, cls, nullptr, nullptr,
-                                    ExecutionContext::InvokePseudoMain)
-            );
-            eval_result = v.toString();
-
-            result.resize(result_len);
-            result.append(eval_result.data(), eval_result.size());
           }
         }
 
@@ -1664,7 +1672,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                    callable, limit, replace_count);
 
     if (ret.isBoolean()) {
-      assert(!ret.toBoolean());
+      assertx(!ret.toBoolean());
       return init_null();
     }
 
@@ -1672,13 +1680,13 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
   }
 
   if (callable || !replace.isArray()) {
-    Array arr = regex.toArray();
+    Array arr = regex.toDArray();
     for (ArrayIter iterRegex(arr); iterRegex; ++iterRegex) {
       String regex_entry = iterRegex.second().toString();
       Variant ret = php_pcre_replace(regex_entry, subject, replace,
                                      callable, limit, replace_count);
       if (ret.isBoolean()) {
-        assert(!ret.toBoolean());
+        assertx(!ret.toBoolean());
         return init_null();
       }
       if (!ret.isString()) {
@@ -1692,8 +1700,8 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
     return subject;
   }
 
-  Array arrReplace = replace.toArray();
-  Array arrRegex = regex.toArray();
+  Array arrReplace = replace.toDArray();
+  Array arrRegex = regex.toDArray();
   ArrayIter iterReplace(arrReplace);
   for (ArrayIter iterRegex(arrRegex); iterRegex; ++iterRegex) {
     String regex_entry = iterRegex.second().toString();
@@ -1707,7 +1715,7 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
                                    callable, limit, replace_count);
 
     if (ret.isBoolean()) {
-      assert(!ret.toBoolean());
+      assertx(!ret.toBoolean());
       return init_null();
     }
     if (!ret.isString()) {
@@ -1722,9 +1730,9 @@ static Variant php_replace_in_subject(const Variant& regex, const Variant& repla
 }
 
 Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
-                          const Variant& subject, int limit, Variant* count,
+                          const Variant& subject, int limit, int64_t* count,
                           bool is_callable, bool is_filter) {
-  assert(!(is_callable && is_filter));
+  assertx(!(is_callable && is_filter));
   if (!is_callable &&
       replacement.isArray() && !pattern.isArray()) {
     raise_warning("Parameter mismatch, pattern is a string while "
@@ -1750,8 +1758,8 @@ Variant preg_replace_impl(const Variant& pattern, const Variant& replacement,
     return ret;
   }
 
-  Array return_value = Array::Create();
-  Array arrSubject = subject.toArray();
+  Array return_value = Array::CreateDArray();
+  Array arrSubject = subject.toDArray();
   for (ArrayIter iter(arrSubject); iter; ++iter) {
     auto old_replace_count = replace_count;
     String subject_entry = iter.second().toString();
@@ -1772,10 +1780,10 @@ int preg_replace(Variant& result,
                  const Variant& replacement,
                  const Variant& subject,
                  int limit /* = -1 */) {
-  Variant count;
+  int64_t count;
   result = preg_replace_impl(pattern, replacement, subject,
                              limit, &count, false, false);
-  return count.toInt32();
+  return count;
 }
 
 int preg_replace_callback(Variant& result,
@@ -1783,10 +1791,10 @@ int preg_replace_callback(Variant& result,
                           const Variant& callback,
                           const Variant& subject,
                           int limit /* = -1 */) {
-  Variant count;
+  int64_t count;
   result = preg_replace_impl(pattern, callback, subject,
                              limit, &count, true, false);
-  return count.toInt32();
+  return count;
 }
 
 int preg_filter(Variant& result,
@@ -1794,10 +1802,10 @@ int preg_filter(Variant& result,
                 const Variant& replacement,
                 const Variant& subject,
                 int limit /* = -1 */) {
-  Variant count;
+  int64_t count;
   result = preg_replace_impl(pattern, replacement, subject,
                              limit, &count, false, true);
-  return count.toInt32();
+  return count;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1829,12 +1837,14 @@ Variant preg_split(const String& pattern, const String& subject,
   int start_offset = 0;
   int next_offset = 0;
   const char* last_match = subject.data();
-  tl_last_error_code = PHP_PCRE_NO_ERROR;
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
 
+  const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
+
   // Get next piece if no limit or limit not yet reached and something matched
-  Array return_value = Array::Create();
+  Array return_value = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
   PCRECache::Accessor bump_accessor;
@@ -1862,11 +1872,13 @@ Variant preg_split(const String& pattern, const String& subject,
       if (!no_empty || subject.data() + offsets[0] != last_match) {
         if (offset_capture) {
           /* Add (match, offset) pair to the return value */
-          add_offset_pair(return_value,
-                          String(last_match,
-                                 subject.data() + offsets[0] - last_match,
-                                 CopyString),
-                          next_offset, nullptr);
+          add_offset_pair_split(return_value,
+                                String(last_match,
+                                       subject.data() + offsets[0] - last_match,
+                                       CopyString),
+                                next_offset,
+                                nullptr,
+                                hackArrOutput);
         } else {
           /* Add the piece to the return value */
           return_value.append(String(last_match,
@@ -1889,10 +1901,12 @@ Variant preg_split(const String& pattern, const String& subject,
           /* If we have matched a delimiter */
           if (!no_empty || match_len > 0) {
             if (offset_capture) {
-              add_offset_pair(return_value,
-                              String(subject.data() + offsets[i<<1],
-                                     match_len, CopyString),
-                              offsets[i<<1], nullptr);
+              add_offset_pair_split(return_value,
+                                    String(subject.data() + offsets[i<<1],
+                                           match_len, CopyString),
+                                    offsets[i<<1],
+                                    nullptr,
+                                    hackArrOutput);
             } else {
               return_value.append(subject.substr(offsets[i<<1], match_len));
             }
@@ -1965,9 +1979,9 @@ Variant preg_split(const String& pattern, const String& subject,
   if (!no_empty || start_offset < subject.size()) {
     if (offset_capture) {
       /* Add the last (match, offset) pair to the return value */
-      add_offset_pair(return_value,
-                      subject.substr(start_offset),
-                      start_offset, nullptr);
+      add_offset_pair_split(return_value,
+                            subject.substr(start_offset),
+                            start_offset, nullptr, hackArrOutput);
     } else {
       /* Add the last piece to the return value */
       return_value.append
@@ -2037,8 +2051,20 @@ String preg_quote(const String& str,
   return ret.setSize(q - out_str);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// last_error
+
 int preg_last_error() {
-  return tl_last_error_code;
+  return *rl_last_error_code;
+}
+
+PregWithErrorGuard::~PregWithErrorGuard() {
+  if (*rl_last_error_code == PHP_PCRE_NO_ERROR) {
+    error.setNull();
+  } else {
+    error = *rl_last_error_code;
+  }
+  *rl_last_error_code = prior_error;
 }
 
 size_t preg_pcre_cache_size() {
@@ -2096,7 +2122,7 @@ Variant php_split(const String& spliton, const String& str, int count,
     return false;
   }
 
-  Array return_value = Array::Create();
+  Array return_value = Array::CreateVArray();
   regmatch_t subs[1];
 
   /* churn through str, generating array entries as we go */

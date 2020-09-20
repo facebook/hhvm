@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : string formats with float values ***\n";
 
 // array of float values 
-$float_values = array(
+$float_values = varray[
   -2147483649,
   2147483648,
   -0x80000001, // float value, beyond max negative int
@@ -23,15 +23,15 @@ $float_values = array(
   -1.234567E9,
   10.0000000000000000005,
   10.123e+5
-);
+];
 
 // array of string formats
-$string_formats = array( 
+$string_formats = varray[ 
   "%s", "%hs", "%ls", 
   "%Ls"," %s", "%s ", 
   "\t%s", "\n%s", "%4s",
   "%30s", "%[a-zA-Z0-9]", "%*s"
-);
+];
 
 $count = 1;
 foreach($float_values as $float_value) {
@@ -44,4 +44,4 @@ foreach($float_values as $float_value) {
 };
 
 echo "Done";
-?>
+}

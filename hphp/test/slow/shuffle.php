@@ -2,15 +2,18 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test($a) {
-  var_dump(shuffle($a));
+  var_dump(shuffle(inout $a));
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_shuffle() {
 srand(1234);
 
-test([]);
-test([1, 2, 3, 4, 5]);
-test([1 => 'a', 2 => 'b', 3 => 'c']);
+test(varray[]);
+test(varray[1, 2, 3, 4, 5]);
+test(darray[1 => 'a', 2 => 'b', 3 => 'c']);
 
 test(vec[]);
 test(vec[1, 2, 3, 4, 5]);
@@ -30,6 +33,7 @@ test(false);
 test(123);
 test('abc');
 test(3.14);
-test(STDIN);
+test(fopen(__FILE__, 'r'));
 test(new stdclass);
 test(Vector{1, 2, 3, 4});
+}

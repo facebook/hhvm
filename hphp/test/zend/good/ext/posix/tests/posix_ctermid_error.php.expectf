@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: posix_ctermid() expects exactly 0 parameters, 1 given in %s/posix_ctermid_error.php on line 3

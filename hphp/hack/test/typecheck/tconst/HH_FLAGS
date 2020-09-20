@@ -1,0 +1,2 @@
+--allowed-fixme-codes-strict 2002,2049,3011,4124
+--allowed-decl-fixme-codes 2049

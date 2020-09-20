@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_INI_SETTING_H_
-#define incl_HPHP_INI_SETTING_H_
+#pragma once
 
 #include "hphp/runtime/base/type-variant.h"
 
@@ -47,7 +46,10 @@ bool ini_on_update(const Variant& value, std::string& p);
 bool ini_on_update(const Variant& value, String& p);
 bool ini_on_update(const Variant& value, Array& p);
 bool ini_on_update(const Variant& value, std::set<std::string>& p);
+bool ini_on_update(const Variant& value, std::vector<uint32_t>& p);
 bool ini_on_update(const Variant& value, std::vector<std::string>& p);
+bool ini_on_update(const Variant& value,
+                   std::unordered_map<std::string, int>& p);
 bool ini_on_update(const Variant& value,
                    std::map<std::string, std::string>& p);
 bool ini_on_update(const Variant& value,
@@ -72,7 +74,9 @@ Variant ini_get(std::string& p);
 Variant ini_get(String& p);
 Variant ini_get(Array& p);
 Variant ini_get(std::set<std::string>& p);
-Variant ini_get(std::vector<std::string>& p);
+template<typename T>
+Variant ini_get(std::vector<T>& p);
+Variant ini_get(std::unordered_map<std::string, int>& p);
 Variant ini_get(std::map<std::string, std::string>& p);
 Variant ini_get(std::map<std::string, std::string, stdltistr>& p);
 Variant ini_get(std::set<std::string, stdltistr>& p);
@@ -134,7 +138,6 @@ public:
   const IniSettingMap operator[](const String& key) const;
   String toString() const { return m_map.toString();}
   Array toArray() const { return m_map.toArray();}
-  Array& toArrRef() { return m_map.toArrRef(); }
   Object toObject() const { return m_map.toObject();}
   bool isNull() const { return m_map.isNull();}
   bool isString() const { return m_map.isString();}
@@ -153,6 +156,7 @@ struct IniSetting {
 private:
 
   struct CallbackData {
+    String active_name;
     Variant active_section;
     Variant arr;
   };
@@ -160,14 +164,20 @@ private:
 public:
   // can remove later in a diff that explicitly changes all uses of
   // IniSetting::Map to IniSettingMap
-  typedef IniSettingMap Map;
+  using Map = IniSettingMap;
   static const Extension* CORE;
   enum ScannerMode {
     NormalScanner,
     RawScanner,
   };
 
+  enum struct ParserCallbackMode {
+    DARRAY = 0,
+    DICT = 1,
+  };
+
   struct ParserCallback {
+    explicit ParserCallback(ParserCallbackMode mode) : mode_(mode) {}
     virtual ~ParserCallback() {};
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
@@ -180,17 +190,26 @@ public:
     virtual void onOp(std::string &result, char type, const std::string& op1,
                       const std::string& op2);
   protected:
-    void makeArray(Variant &hash, const std::string &offset,
+    void makeArray(tv_lval hash, const std::string &offset,
                    const std::string &value);
+
+    Array emptyArrayForMode() const;
+    Array& forceToArrayForMode(Variant& var) const;
+    Array& forceToArrayForMode(tv_lval var) const;
+
   private:
     // Substitution copy or symlink via @ or : markers in the config line
     void makeSettingSub(const String &key, const std::string &offset,
                         const std::string &value, Variant& cur_settings);
     void traverseToSet(const String &key, const std::string& offset,
-                       Variant& value, Variant& cur_settings,
+                       tv_lval value, Variant& cur_settings,
                        const std::string& stopChar);
+
+    ParserCallbackMode mode_;
   };
   struct SectionParserCallback : ParserCallback {
+    using ParserCallback::ParserCallback;
+
     void onSection(const std::string& name, void* arg) override;
     void onLabel(const std::string& name, void* arg) override;
     void onEntry(const std::string& key, const std::string& value, void* arg)
@@ -205,6 +224,8 @@ public:
     Variant* activeArray(CallbackData* data);
   };
   struct SystemParserCallback : ParserCallback {
+    using ParserCallback::ParserCallback;
+
     void onEntry(const std::string& key, const std::string& value, void* arg)
         override;
     void onPopEntry(
@@ -408,12 +429,6 @@ private:
     std::function<bool(const Variant&)>updateCallback,
     std::function<Variant()> getCallback,
     std::function<UserIniData *(void)> userDataCallback = nullptr);
-
-  /**
-   * Take a Variant full of KindOfRefs and unbox it.
-   */
-  static Variant Unbox(const Variant& boxed, std::set<ArrayData*>& seen,
-                       bool& use_defaults, const String& array_key);
 };
 
 int64_t convert_bytes_to_long(folly::StringPiece value);
@@ -426,4 +441,3 @@ void add_default_config_files_globbed(
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_INI_SETTING_H_

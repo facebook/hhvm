@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class SomeClass {
@@ -14,7 +14,7 @@ class Sleep {
 
   function __sleep() {
     echo "Sleep...\n";
-    return [];
+    return varray[];
   }
 }
 
@@ -31,20 +31,8 @@ class WakeupThrow {
   }
 }
 
-class Dtor {
-  public $val;
-
-  function __construct($val) {
-    $this->val = $val;
-  }
-
-  function __destruct() {
-    echo "Dtor... " . $this->val . "\n";
-  }
-}
-
 function get_count() {
-  $count = apc_fetch("count");
+  $count = __hhvm_intrinsics\apc_fetch_no_check("count");
   if (!$count) {
     $count = 0;
   }
@@ -54,28 +42,22 @@ function get_count() {
 }
 
 function read() {
-  var_dump(apc_fetch("val1"));
-  var_dump(apc_fetch("val2"));
-  var_dump(apc_fetch("val3"));
-  var_dump(apc_fetch("val4"));
-  var_dump(apc_fetch("val5"));
-  var_dump(apc_fetch("val6"));
-  var_dump(apc_fetch("val7"));
-  var_dump(apc_fetch("val8"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val1"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val2"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val3"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val4"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val5"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val6"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val7"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val8"));
 
   try {
-    var_dump(apc_fetch("val9"));
+    var_dump(__hhvm_intrinsics\apc_fetch_no_check("val9"));
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
 
-  try {
-    var_dump(apc_fetch("val10"));
-  } catch (Exception $e) {
-    var_dump($e->getMessage());
-  }
-
-  var_dump(apc_fetch("val11"));
+  var_dump(__hhvm_intrinsics\apc_fetch_no_check("val11"));
 }
 
 function write($count) {
@@ -96,15 +78,13 @@ function write($count) {
 
   apc_store("val8", vec[new Wakeup]);
   apc_store("val9", vec[new WakeupThrow]);
-  apc_store("val10", vec[new Dtor(1), new WakeupThrow, new Dtor(2)]);
   apc_store("val11", vec[new Sleep(123)]);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $count = get_count();
   echo "Count: $count\n";
   read();
   write($count);
   read();
 }
-main();

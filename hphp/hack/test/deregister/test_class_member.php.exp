@@ -1,0 +1,8 @@
+File "test_class_member.php", line 9, characters 8-9:
+Typing error (Typing[4053])
+File "test_class_member.php", line 9, characters 12-14:
+No property `bar` in `Foobar`
+File "test_class_member.php", line 8, characters 12-17:
+This is why I think it is an object of type Foobar
+File "test_class_member.php", line 2, characters 7-12:
+Declaration of `Foobar` is here

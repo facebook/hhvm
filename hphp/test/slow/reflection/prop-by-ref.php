@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   public $x;
@@ -10,12 +10,10 @@ function test($x) {
   var_dump($x->x);
 }
 
-function main() {
+<<__EntryPoint>>
+function main_prop_by_ref() {
   $x = new X;
   $x->x = 42;
-  $y = &$x->x;
 
   test($x);
 }
-
-main();

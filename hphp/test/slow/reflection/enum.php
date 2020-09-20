@@ -27,9 +27,7 @@ function reflection_funcs() {
   var_dump(get_class_constants(TestEnum::class));
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   reflection_class();
   reflection_funcs();
 }
-
-main();

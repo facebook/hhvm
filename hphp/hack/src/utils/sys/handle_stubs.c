@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
-
+#define CAML_NAME_SPACE
 #include <caml/mlvalues.h>
 #include <caml/unixsupport.h>
 #include <caml/intext.h>
@@ -38,10 +37,10 @@ value caml_hh_worker_create_handle(value x) {
 
 #ifdef _WIN32
 static void win_handle_serialize(value h, uintnat *wsize_32, uintnat *wsize_64) {
-  serialize_int_8((int64_t)Handle_val(h));
-  serialize_int_1(Descr_kind_val(h));
-  serialize_int_1(CRT_fd_val(h));
-  serialize_int_1(Flags_fd_val(h));
+  caml_serialize_int_8((int64_t)Handle_val(h));
+  caml_serialize_int_1(Descr_kind_val(h));
+  caml_serialize_int_1(CRT_fd_val(h));
+  caml_serialize_int_1(Flags_fd_val(h));
   *wsize_32 = sizeof(struct filedescr);
   *wsize_64 = sizeof(struct filedescr);
 }

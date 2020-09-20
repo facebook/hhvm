@@ -23,8 +23,8 @@
 namespace HPHP {
 
 std::string SrcKey::showInst() const {
-  auto const u = unit();
-  return instrToString(u->at(offset()), u);
+  auto const f = func();
+  return instrToString(f->at(offset()), f);
 }
 
 std::string show(SrcKey sk) {
@@ -36,8 +36,7 @@ std::string show(SrcKey sk) {
   }
   return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}",
                         filepath, unit->getLineNumber(sk.offset()),
-                        func->isPseudoMain() ? "pseudoMain"
-                                             : func->fullName()->data(),
+                        func->fullName()->data(),
                         (uint32_t)sk.funcID(), sk.offset(),
                         resumeModeShortName(sk.resumeMode()),
                         sk.hasThis()  ? "t" : "",
@@ -60,8 +59,8 @@ std::string showShort(SrcKey sk) {
 void sktrace(SrcKey sk, const char *fmt, ...) {
   if (!Trace::enabled) return;
 
-  auto const u = sk.unit();
-  auto inst = instrToString(u->at(sk.offset()), u);
+  auto const f = sk.func();
+  auto inst = instrToString(f->at(sk.offset()), f);
   Trace::trace("%s: %20s ", show(sk).c_str(), inst.c_str());
   va_list a;
   va_start(a, fmt);
@@ -75,14 +74,6 @@ std::string SrcKey::getSymbol() const {
 
   if (f->isBuiltin()) {
     return f->fullName()->data();
-  }
-
-  if (f->isPseudoMain()) {
-    return folly::format(
-      "{{pseudo-main}}::{}::line-{}",
-      u->filepath(),
-      u->getLineNumber(offset())
-    ).str();
   }
 
   if (f->isMethod() && !f->cls()) {

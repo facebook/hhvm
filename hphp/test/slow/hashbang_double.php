@@ -1,4 +1,8 @@
 #!hashbang
 #!hashbang
 
-<?php var_dump(true);
+<?hh
+<<__EntryPoint>>
+function main_hashbang_double() {
+var_dump(true);
+}

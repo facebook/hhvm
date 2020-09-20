@@ -13,6 +13,9 @@ function functionProvider((function ((function (int...):void)...): void) $fn) {
   );
 }
 
+
+<<__EntryPoint>>
+function main_lambdas_variadic_functions() {
 print "Function provider ...\$fns\n";
 functionProvider((...$fns) ==> {
   foreach ($fns as $fn) {
@@ -23,13 +26,6 @@ functionProvider((...$fns) ==> {
 print "Function provider (function (int...):void) ...\$fns\n";
 functionProvider(((function (int...):void) ...$fns) ==> {
   foreach ($fns as $fn) {
-    $fn(1, 2, 3);
-  }
-});
-
-print "Function provider (function (...):void) ...\$fns\n";
-functionProvider(((function (...):void) ...$fns) ==> {
-  foreach (func_get_args() as $fn) {
     $fn(1, 2, 3);
   }
 });
@@ -49,3 +45,4 @@ $lambda2 = ((function (int...):void) ...$fns) ==> {
 };
 
 functionProvider($lambda2);
+}

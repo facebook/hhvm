@@ -1,0 +1,1 @@
+Fatal error: Cannot declare constructors and magic methods like `__dispose` as `async` in %s/dispose.php on line 4

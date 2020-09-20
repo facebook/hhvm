@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <sstream>
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -139,7 +141,7 @@ bool php_mail(const String& to, const String& subject, const String& message,
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_zero("\0", 1),
+  s_zero("\0"),
   s_space(" ");
 
 bool HHVM_FUNCTION(mail,

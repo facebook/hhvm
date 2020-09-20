@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test_procedural() {
   $doc = new DOMDocument();
 
@@ -30,5 +30,9 @@ function test_objects() {
   var_dump($doc->saveHTML());
 }
 
+
+<<__EntryPoint>>
+function main_node_insert_before() {
 test_procedural();
 test_objects();
+}

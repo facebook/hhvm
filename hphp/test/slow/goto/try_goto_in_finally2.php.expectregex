@@ -1,2 +1,0 @@
-
-Fatal error\: 'goto' into finally statement is disallowed(\: \(Line\: 3, Char\: 13\))? in [^\r\n]+\/try_goto_in_finally2\.php on line \d

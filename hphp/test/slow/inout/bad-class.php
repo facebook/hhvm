@@ -1,3 +1,4 @@
 <?hh
 
 class inout {}
+

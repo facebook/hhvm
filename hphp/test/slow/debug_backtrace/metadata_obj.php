@@ -1,6 +1,7 @@
 <?hh
 
 class Baz {
+  <<__NEVER_INLINE>>
   private function bar($options) {
     var_dump(debug_backtrace($options));
   }
@@ -11,6 +12,9 @@ class Baz {
   }
 }
 
-$baz = new Baz();
-$baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT);
-$baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_PROVIDE_METADATA);
+<<__EntryPoint>>
+function main(): void {
+  $baz = new Baz();
+  $baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+  $baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_PROVIDE_METADATA);
+}

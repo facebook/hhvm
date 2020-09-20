@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class IssetM {
   public function hasX() {
@@ -12,4 +12,8 @@ function main() {
   var_dump($v);
 }
 
+
+<<__EntryPoint>>
+function main_issetm() {
 main();
+}

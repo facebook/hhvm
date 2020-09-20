@@ -14,11 +14,10 @@ function callfns($name, $name2) {
   echo "Calling $name2\n";
   $name2();
 }
-
+<<__EntryPoint>> function main(): void {
 callfns('a', 'b');
 fb_rename_function('a', 'old_a');
 fb_rename_function('b', 'a');
 fb_rename_function('old_a', 'b');
 callfns('a', 'b');
-fb_rename_function('extract', 'a');
-
+}

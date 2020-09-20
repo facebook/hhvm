@@ -22,7 +22,11 @@
 #include <cassert>
 #include <bitset>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <folly/Optional.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
@@ -32,30 +36,32 @@
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/dce.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/options-util.h"
-#include "hphp/hhbbc/peephole.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
-TRACE_SET_MOD(hhbbc);
+//////////////////////////////////////////////////////////////////////
+
+VisitContext::VisitContext(const Index& index, const FuncAnalysis& ainfo,
+                           CollectedInfo& collect, php::WideFunc& func)
+    : index(index), ainfo(ainfo), collect(collect), func(func) {
+  assertx(ainfo.ctx.func == func);
+}
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_86pinit("86pinit");
-const StaticString s_86sinit("86sinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -67,12 +73,8 @@ const StaticString s_86sinit("86sinit");
  */
 bool ignoresStackInput(Op op) {
   switch (op) {
-  case Op::UnboxRNop:
-  case Op::BoxRNop:
   case Op::UGetCUNop:
   case Op::CGetCUNop:
-  case Op::FPassVNop:
-  case Op::FPassC:
   case Op::PopU:
     return true;
   default:
@@ -85,13 +87,14 @@ template<class TyBC, class ArgType>
 folly::Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
                                      ArgType arg,
                                      Type t) {
+  if (t.subtypeOf(BBottom)) return folly::none;
   auto const rat = make_repo_type(arrTable, t);
   using T = RepoAuthType::Tag;
   if (options.FilterAssertions) {
-    // Gen and InitGen don't add any useful information, so leave them
+    // Cell and InitCell don't add any useful information, so leave them
     // out entirely.
-    if (rat == RepoAuthType{T::Gen})     return folly::none;
-    if (rat == RepoAuthType{T::InitGen}) return folly::none;
+    if (rat == RepoAuthType{T::Cell})     return folly::none;
+    if (rat == RepoAuthType{T::InitCell}) return folly::none;
   }
   return Bytecode { TyBC { arg, rat } };
 }
@@ -109,12 +112,9 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
   for (LocalId i = 0; i < state.locals.size(); ++i) {
     if (func.locals[i].killed) continue;
     if (options.FilterAssertions) {
-      // MemoGet and MemoSet read from a range of locals, but don't gain any
-      // benefit from knowing their types.
-      if (bcode.op == Op::MemoGet || bcode.op == Op::MemoSet) continue;
-      if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
-        continue;
-      }
+      // Do not emit assertions for untracked locals.
+      if (i >= mayReadLocalSet.size()) break;
+      if (!mayReadLocalSet.test(i)) continue;
     }
     auto const realT = state.locals[i];
     auto const op = makeAssert<bc::AssertRATL>(arrTable, i, realT);
@@ -132,7 +132,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    assert(!realT.subtypeOf(TCls));
     if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
       return;
     }
@@ -146,24 +145,18 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     if (op) gen(*op);
   };
 
-  /*
-   * This doesn't need to account for ActRecs on the fpiStack, because
-   * no instruction in an FPI region can ever consume a stack value
-   * from above the pre-live ActRec.
-   */
   for (auto i = size_t{0}; i < bcode.numPop(); ++i) assert_stack(i);
 
-  // The base instructions are special in that they don't pop anything, but do
-  // read from the stack. We want type assertions on the stack slots they'll
-  // read.
+  // The base instructions are special in that they may read from the
+  // stack without necessarily popping it. We want type assertions on
+  // the stack slots they'll read.
   switch (bcode.op) {
     case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
-    case Op::BaseNC:      assert_stack(bcode.BaseNC.arg1);      break;
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
-    case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
-    case Op::BaseR:       assert_stack(bcode.BaseR.arg1);       break;
-    case Op::FPassBaseNC: assert_stack(bcode.FPassBaseNC.arg2); break;
-    case Op::FPassBaseGC: assert_stack(bcode.FPassBaseGC.arg2); break;
+    case Op::BaseSC:
+      assert_stack(bcode.BaseSC.arg1);
+      assert_stack(bcode.BaseSC.arg2);
+      break;
     case Op::Dim: {
       switch (bcode.Dim.mkey.mcode) {
         case MEC: case MPC:
@@ -193,16 +186,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
  * subtypes and adding this to the opcode table.
  */
 bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
-  // Generally consider CGetL obvious because if we knew the type of the local,
-  // we'll assert that right before the CGetL.
-  auto cgetlObvious = [&] (LocalId l, int idx) {
-    return !interp.state.locals[l].couldBe(TRef) ||
-      !interp.state.stack[interp.state.stack.size() - idx - 1].
-         type.strictSubtypeOf(TInitCell);
-  };
   switch (op.op) {
-  case Op::Box:
-  case Op::BoxR:
   case Op::Null:
   case Op::NullUninit:
   case Op::True:
@@ -214,24 +198,21 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::Dict:
   case Op::Vec:
   case Op::Keyset:
-  case Op::NewArray:
   case Op::NewDArray:
   case Op::NewDictArray:
-  case Op::NewPackedArray:
   case Op::NewVArray:
-  case Op::NewStructArray:
   case Op::NewStructDArray:
   case Op::NewStructDict:
-  case Op::NewVecArray:
+  case Op::NewVec:
   case Op::NewKeysetArray:
   case Op::AddNewElemC:
-  case Op::AddNewElemV:
   case Op::NewCol:
   case Op::NewPair:
-  case Op::ClsRefName:
+  case Op::ClassName:
   case Op::File:
   case Op::Dir:
   case Op::Concat:
+  case Op::ConcatN:
   case Op::Not:
   case Op::Xor:
   case Op::Same:
@@ -249,37 +230,33 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::CastInt:
   case Op::CastDouble:
   case Op::CastString:
-  case Op::CastArray:
-  case Op::CastObject:
   case Op::CastDict:
   case Op::CastVec:
   case Op::CastKeyset:
   case Op::CastVArray:
   case Op::CastDArray:
+  case Op::DblAsBits:
   case Op::InstanceOfD:
+  case Op::IsLateBoundCls:
+  case Op::IsTypeStructC:
+  case Op::CombineAndResolveTypeStruct:
+  case Op::RecordReifiedGeneric:
   case Op::InstanceOf:
   case Op::Print:
   case Op::Exit:
   case Op::AKExists:
   case Op::IssetL:
-  case Op::IssetN:
+  case Op::IsUnsetL:
   case Op::IssetG:
   case Op::IssetS:
-  case Op::EmptyL:
-  case Op::EmptyN:
-  case Op::EmptyG:
-  case Op::EmptyS:
   case Op::IsTypeC:
   case Op::IsTypeL:
-  case Op::IsUninit:
   case Op::OODeclExists:
-  case Op::AliasCls:
-  case Op::FPassC:
     return true;
 
   case Op::This:
   case Op::BareThis:
-    if (auto tt = thisType(interp)) {
+    if (auto tt = thisType(interp.index, interp.ctx)) {
       auto t = interp.state.stack.back().type;
       if (is_opt(t)) t = unopt(std::move(t));
       return !t.strictSubtypeOf(*tt);
@@ -287,15 +264,11 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
     return true;
 
   case Op::CGetL:
-    return cgetlObvious(op.CGetL.loc1, 0);
   case Op::CGetQuietL:
-    return cgetlObvious(op.CGetQuietL.loc1, 0);
   case Op::CUGetL:
-    return cgetlObvious(op.CUGetL.loc1, 0);
   case Op::CGetL2:
-    return cgetlObvious(op.CGetL2.loc1, 1);
   case Op::PushL:
-    return cgetlObvious(op.PushL.loc1, 0);
+    return true;
 
   // The output of SetL is obvious if you know what its input is
   // (which we'll assert if we know).
@@ -312,31 +285,33 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   }
 }
 
-void insert_assertions(const Index& index,
-                       const FuncAnalysis& ainfo,
-                       CollectedInfo& collect,
-                       borrowed_ptr<php::Block> const blk,
-                       State state) {
-  std::vector<Bytecode> newBCs;
-  newBCs.reserve(blk->hhbcs.size());
+void insert_assertions(VisitContext& visit, BlockId bid, State state) {
+  BytecodeVec newBCs;
+  auto& func = visit.func;
+  auto const& cblk = func.blocks()[bid];
+  newBCs.reserve(cblk->hhbcs.size());
 
+  auto const& index = visit.index;
+  auto const& ainfo = visit.ainfo;
   auto& arrTable = *index.array_table_builder();
-  auto const ctx = ainfo.ctx;
+  auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
-  auto interp = Interp { index, ctx, collect, blk, state };
-  for (auto& op : blk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(ctx.func, op));
+  auto fallthrough = cblk->fallthrough;
+  auto interp = Interp { index, ctx, visit.collect, bid, cblk.get(), state };
+
+  for (auto& op : cblk->hhbcs) {
+    FTRACE(2, "  == {}\n", show(func, op));
 
     auto gen = [&] (const Bytecode& newb) {
       newBCs.push_back(newb);
       newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(ctx.func, newBCs.back()));
+      FTRACE(2, "   + {}\n", show(func, newBCs.back()));
     };
 
     if (state.unreachable) {
-      blk->fallthrough = NoBlockId;
+      fallthrough = NoBlockId;
       if (!(instrFlags(op.op) & TF)) {
         gen(bc::BreakTraceHint {});
         gen(bc::String { s_unreachable.get() });
@@ -350,7 +325,7 @@ void insert_assertions(const Index& index,
 
     insert_assertions_step(
       arrTable,
-      *ctx.func,
+      *func,
       op,
       preState,
       flags.mayReadLocalSet,
@@ -373,51 +348,22 @@ void insert_assertions(const Index& index,
     gen(op);
   }
 
-  blk->hhbcs = std::move(newBCs);
-}
-
-bool persistence_check(borrowed_ptr<php::Block> const blk) {
-  for (auto& op : blk->hhbcs) {
-    switch (op.op) {
-      case Op::Nop:
-      case Op::DefCls:
-      case Op::DefClsNop:
-      case Op::DefCns:
-      case Op::DefTypeAlias:
-      case Op::Null:
-      case Op::True:
-      case Op::False:
-      case Op::Int:
-      case Op::Double:
-      case Op::String:
-      case Op::Vec:
-      case Op::Dict:
-      case Op::Keyset:
-      case Op::Array:
-        continue;
-      case Op::PopC:
-        // Not strictly no-side effects, but as long as the rest of
-        // the unit is limited to the above, we're fine (and we expect
-        // one following a DefCns).
-        continue;
-      case Op::RetC:
-        continue;
-      default:
-        return false;
-    }
+  if (cblk->fallthrough != fallthrough || cblk->hhbcs != newBCs) {
+    auto const blk = func.blocks()[bid].mutate();
+    blk->fallthrough = fallthrough;
+    blk->hhbcs = std::move(newBCs);
   }
-  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 template<class Gen>
-bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
+bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
   auto const numPop  = op.numPop();
   auto const numPush = op.numPush();
   auto const stkSize = state.stack.size();
   constexpr auto numCells = 4;
-  Cell constVals[numCells];
+  TypedValue constVals[numCells];
 
   // All outputs of the instruction must have constant types for this
   // to be allowed.
@@ -432,64 +378,26 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     }
   }
 
-  auto const slot = visit(op, ReadClsRefSlotVisitor{});
-  if (slot != NoClsRefSlotId) gen(bc::DiscardClsRef { slot });
-
   // Pop the inputs, and push the constants.
   for (auto i = size_t{0}; i < numPop; ++i) {
-    switch (op.popFlavor(i)) {
-    case Flavor::C:  gen(bc::PopC {}); break;
-    case Flavor::V:  gen(bc::PopV {}); break;
-    case Flavor::R:
-      gen(bc::UnboxRNop {});
-      gen(bc::PopC {});
-      break;
-    case Flavor::F:  not_reached();    break;
-    case Flavor::U:  not_reached();    break;
-    case Flavor::CR: not_reached();    break;
-    case Flavor::CUV:
-      // We only support C's for CUV right now.
-      gen(bc::PopC {});
-      break;
-    case Flavor::CVU:
-      // Note that we only support C's for CVU so far (this only comes up with
-      // FCallBuiltin)---we'll fail the verifier if something changes to send
-      // V's or U's through here.
-      gen(bc::PopC {});
-      break;
-    }
+    DEBUG_ONLY auto flavor = op.popFlavor(i);
+    assertx(flavor != Flavor::U);
+    // Even for CU we only support C's.
+    gen(bc::PopC {});
   }
 
   for (auto i = size_t{0}; i < numPush; ++i) {
     auto const v = i < numCells ?
       constVals[i] : *tv(state.stack[stkSize - i - 1].type);
     gen(gen_constant(v));
-
-    // Special case for FPass* instructions.  We just put a C on the
-    // stack, so we need to get it to be an F.
-    if (isFPassStar(op.op)) {
-      if (state.fpiStack.back().kind != FPIKind::Builtin) {
-        // We should only ever const prop for FPassL right now.
-        always_assert(numPush == 1 && op.op == Op::FPassL);
-        gen(bc::FPassC { op.FPassL.arg1, op.FPassL.subop3 });
-      }
-      continue;
-    }
-
-    // Similar special case for FCallBuiltin.  We need to turn things into R
-    // flavors since opcode that followed the call are going to expect that
-    // flavor.
-    if (op.op == Op::FCallBuiltin) {
-      gen(bc::RGetCNop {});
-      continue;
-    }
+    state.stack[stkSize - i - 1].type = from_cell(v);
   }
 
   return true;
 }
 
-bool propagate_constants(const Bytecode& bc, const State& state,
-                         std::vector<Bytecode>& out) {
+bool propagate_constants(const Bytecode& bc, State& state,
+                         BytecodeVec& out) {
   return propagate_constants(bc, state, [&] (const Bytecode& bc) {
       out.push_back(bc);
     });
@@ -497,303 +405,364 @@ bool propagate_constants(const Bytecode& bc, const State& state,
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Create a block similar to another block (but with no bytecode in it yet).
- */
-borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
-                                    borrowed_ptr<const php::Block> srcBlk,
-                                    const State& state) {
-  FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
-  assert(ainfo.bdata.size() == ainfo.ctx.func->blocks.size());
-
-  auto newBlk           = std::make_unique<php::Block>();
-  newBlk->id            = ainfo.ctx.func->blocks.size();
-  newBlk->section       = srcBlk->section;
-  newBlk->exnNode       = srcBlk->exnNode;
-  newBlk->factoredExits = srcBlk->factoredExits;
-  auto const blk        = borrow(newBlk);
-  ainfo.ctx.func->blocks.push_back(std::move(newBlk));
-
-  ainfo.rpoBlocks.push_back(blk);
-  ainfo.bdata.push_back(FuncAnalysis::BlockData {
-    static_cast<uint32_t>(ainfo.rpoBlocks.size() - 1),
-    state
-  });
-
-  return blk;
-}
-
-borrowed_ptr<php::Block> make_fatal_block(FuncAnalysis& ainfo,
-                                          borrowed_ptr<const php::Block> srcBlk,
-                                          const State& state) {
-  auto blk = make_block(ainfo, srcBlk, state);
+// Create a new fatal error block. Update the given FuncAnalysis if
+// it is non-null - specifically, assign the new block an rpoId.
+BlockId make_fatal_block(php::WideFunc& func, const php::Block* srcBlk,
+                         FuncAnalysis* ainfo) {
+  FTRACE(1, " ++ new block {}\n", func.blocks().size());
+  auto bid = make_block(func, srcBlk);
+  auto const blk = func.blocks()[bid].mutate();
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
   blk->hhbcs = {
     bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
     bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
   };
   blk->fallthrough = NoBlockId;
-  blk->exnNode = nullptr;
-  return blk;
-}
+  blk->throwExit = NoBlockId;
+  blk->exnNodeId = NoExnNodeId;
 
-void first_pass(const Index& index,
-                FuncAnalysis& ainfo,
-                CollectedInfo& collect,
-                borrowed_ptr<php::Block> const blk,
-                State state) {
-  auto const ctx = ainfo.ctx;
-
-  std::vector<Bytecode> newBCs;
-  newBCs.reserve(blk->hhbcs.size());
-
-  auto interp = Interp { index, ctx, collect, blk, state };
-
-  if (options.ConstantProp) collect.propagate_constants = propagate_constants;
-
-  auto peephole = make_peephole(newBCs, index, ctx);
-  std::vector<std::pair<Op,bool>> srcStack(state.stack.size(),
-                                           {Op::Nop, false});
-
-  for (auto& op : blk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(ctx.func, op));
-
-    auto gen = [&] (const Bytecode& newBC) {
-      const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(ctx.func, newBC));
-      if (options.Peephole) {
-        peephole.append(newBC, srcStack);
-      } else {
-        newBCs.push_back(newBC);
-      }
-    };
-
-    auto const flags = step(interp, op);
-
-    // The peephole wants the old values of srcStack, so defer the update to the
-    // end of the loop.
-    SCOPE_EXIT {
-      if (op.op == Op::CGetL2) {
-        srcStack.emplace(srcStack.end() - 1,
-                         op.op, (state.stack.end() - 2)->type.subtypeOf(TStr));
-      } else {
-        FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
-        for (int i = 0; i < op.numPop(); i++) {
-          srcStack.pop_back();
-        }
-        for (int i = 0; i < op.numPush(); i++) {
-          srcStack.emplace_back(
-            op.op, state.stack[srcStack.size()].type.subtypeOf(TStr));
-        }
-      }
-    };
-
-    auto genOut = [&] (const Bytecode* op) -> Op {
-      if (options.ConstantProp && flags.canConstProp) {
-        if (propagate_constants(*op, state, gen)) {
-          assert(!flags.strengthReduced);
-          return Op::Nop;
-        }
-      }
-
-      if (flags.strengthReduced) {
-        for (auto const& bc : *flags.strengthReduced) {
-          gen(bc);
-        }
-        return flags.strengthReduced->back().op;
-      }
-
-      gen(*op);
-      return op->op;
-    };
-
-    if (state.unreachable) {
-      // We should still perform the requested transformations; we
-      // might be part way through converting an FPush/FCall to an
-      // FCallBuiltin, for example
-      auto opc = genOut(&op);
-      blk->fallthrough = NoBlockId;
-      if (!(instrFlags(opc) & TF)) {
-        gen(bc::BreakTraceHint {});
-        gen(bc::String { s_unreachable.get() });
-        gen(bc::Fatal { FatalOp::Runtime });
-      }
-      break;
-    }
-
-    if (options.RemoveDeadBlocks) {
-      if (flags.jmpDest != NoBlockId) {
-        switch (op.op) {
-          /*
-           * For jumps, we need to pop the cell that was on the stack for the
-           * conditional jump.  Note: for jumps this also conceptually
-           * needs to execute any side effects a conversion to bool can
-           * have.  (Currently that is none.)
-           */
-        case Op::JmpNZ:
-        case Op::JmpZ:
-        case Op::SSwitch:
-        case Op::Switch:
-          always_assert(!flags.wasPEI);
-          blk->fallthrough = flags.jmpDest;
-          gen(bc::PopC {});
-          continue;
-        case Op::IterInit:
-        case Op::IterInitK:
-          if (flags.jmpDest != blk->fallthrough) {
-            /*
-             * For iterators, if we'll always take the taken branch (which means
-             * there's nothing to iterate over), and the op cannot raise an
-             * exception, we can just pop the input and set the fall-through to
-             * the taken branch. If not, we have to keep the op, but we can make
-             * sure we'll fatal if we ever actually take the fall-through.
-             */
-            if (!flags.wasPEI) {
-              blk->fallthrough = flags.jmpDest;
-              gen(bc::PopC {});
-              continue;
-            }
-            blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-          } else {
-            /*
-             * We can't ever optimize away iteration initialization if we know
-             * we'll always fall-through (which means we enter the loop) because
-             * we need to initialize the iterator. We can ensure, however, that
-             * the taken branch is a fatal.
-             */
-            auto fatal = make_fatal_block(ainfo, blk, state)->id;
-            if (op.op == Op::IterInit) {
-              op.IterInit.target = fatal;
-            } else {
-              op.IterInitK.target = fatal;
-            }
-          }
-          break;
-        case Op::IterNext:
-          assertx(flags.jmpDest == blk->fallthrough);
-          /*
-           * If we're nexting an iterator and we know we'll always fall-through
-           * (which means the iteration is over), and we can't raise an
-           * exception when nexting the iterator, we can just free the iterator
-           * and let it fall-through. If not, we can at least ensure the taken
-           * branch is a fatal.
-           */
-          if (!flags.wasPEI) {
-            gen(bc::IterFree { op.IterNext.iter1 });
-            continue;
-          } else {
-            op.IterNext.target = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
-        case Op::IterNextK:
-          assertx(flags.jmpDest == blk->fallthrough);
-          if (!flags.wasPEI) {
-            gen(bc::IterFree { op.IterNextK.iter1 });
-            continue;
-          } else {
-            op.IterNextK.target = make_fatal_block(ainfo, blk, state)->id;
-            break;
-          }
-        default:
-          always_assert(0 && "unsupported jmpDest");
-        }
-      }
-    }
-
-    genOut(&op);
+  if (ainfo) {
+    assertx(ainfo->bdata.size() == bid);
+    assertx(bid + 1 == func.blocks().size());
+    auto const rpoId = safe_cast<uint32_t>(ainfo->rpoBlocks.size());
+    ainfo->rpoBlocks.push_back(bid);
+    ainfo->bdata.push_back(FuncAnalysis::BlockData { rpoId, State {} });
   }
 
-  if (options.Peephole) {
-    peephole.finalize();
-  }
-  blk->hhbcs = std::move(newBCs);
-  auto& fpiStack = ainfo.bdata[blk->id].stateIn.fpiStack;
-  auto it = std::remove_if(fpiStack.begin(), fpiStack.end(),
-                           [](const ActRec& ar) {
-                             return ar.kind == FPIKind::Builtin || ar.foldable;
-                           });
-
-  if (it != fpiStack.end()) {
-    fpiStack.erase(it, fpiStack.end());
-  }
+  return bid;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-template<class BlockContainer, class AInfo, class Fun>
-void visit_blocks_impl(const char* what,
-                       const Index& index,
-                       AInfo& ainfo,
-                       CollectedInfo& collect,
-                       const BlockContainer& rpoBlocks,
-                       Fun fun) {
+template<class Fun>
+void visit_blocks(const char* what, VisitContext& visit, Fun&& fun) {
+  BlockId curBlk = NoBlockId;
+  SCOPE_ASSERT_DETAIL(what) {
+    if (curBlk == NoBlockId) return std::string{"\nNo block processed\n"};
+    auto const& state = visit.ainfo.bdata[curBlk].stateIn;
+    auto const debug = state_string(*visit.func, state, visit.collect);
+    return folly::sformat("block #{}\nin-{}", curBlk, debug);
+  };
+
   FTRACE(1, "|---- {}\n", what);
-  for (auto& blk : rpoBlocks) {
-    FTRACE(2, "block #{}\n", blk->id);
-    auto const& state = ainfo.bdata[blk->id].stateIn;
+  for (auto const bid : visit.ainfo.rpoBlocks) {
+    curBlk = bid;
+    FTRACE(2, "block #{}\n", bid);
+    auto const& state = visit.ainfo.bdata[bid].stateIn;
     if (!state.initialized) {
       FTRACE(2, "   unreachable\n");
       continue;
     }
-    // TODO(#3732260): this should probably spend an extra interp pass
+    // TODO(#3732260): We should probably do an extra interp pass here
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    fun(index, ainfo, collect, blk, state);
+    fun(visit, bid, state);
   }
-  assert(check(*ainfo.ctx.func));
-}
-
-template<class Fun>
-void visit_blocks_mutable(const char* what,
-                          const Index& index,
-                          FuncAnalysis& ainfo,
-                          CollectedInfo& collect,
-                          Fun fun) {
-  // Make a copy of the block list so it can be mutated by the visitor.
-  auto const blocksCopy = ainfo.rpoBlocks;
-  visit_blocks_impl(what, index, ainfo, collect, blocksCopy, fun);
-}
-
-template<class Fun>
-void visit_blocks(const char* what,
-                  const Index& index,
-                  const FuncAnalysis& ainfo,
-                  CollectedInfo& collect,
-                  Fun fun) {
-  visit_blocks_impl(what, index, ainfo, collect, ainfo.rpoBlocks, fun);
+  assert(check(*visit.func));
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
-  FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
+IterId iterFromInit(const php::WideFunc& func, BlockId initBlock) {
+  auto const& op = func.blocks()[initBlock]->hhbcs.back();
+  if (op.op == Op::IterInit)  return op.IterInit.ita.iterId;
+  if (op.op == Op::LIterInit) return op.LIterInit.ita.iterId;
+  always_assert(false);
+}
+
+/*
+ * Attempt to convert normal iterators into liters. In order for an iterator to
+ * be converted to a liter, the following needs to be true:
+ *
+ * - The iterator is initialized with the value in a local at exactly one block.
+ *
+ * - That same local is not modified on all possible paths from the
+ *   initialization to every usage of that iterator.
+ *
+ * The first condition is actually more restrictive than necessary, but
+ * enforcing that the iterator is initialized at exactly one place simplifies
+ * the bookkeeping and is always true with how we currently emit bytecode.
+ */
+
+struct OptimizeIterState {
+  void operator()(VisitContext& visit, BlockId bid, State state) {
+    auto& func = visit.func;
+    auto const& ainfo = visit.ainfo;
+    auto const blk = func.blocks()[bid].get();
+    auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
+    auto interp = Interp { visit.index, ctx, visit.collect, bid, blk, state };
+    for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
+      // If we've already determined that nothing is eligible, we can just stop.
+      if (!eligible.any()) break;
+
+      auto const& op = blk->hhbcs[opIdx];
+      FTRACE(2, "  == {}\n", show(func, op));
+
+      if (state.unreachable) break;
+
+      // At every op, we check the known state of all live iterators and mark it
+      // as ineligible as necessary.
+      for (IterId it = 0; it < state.iters.size(); ++it) {
+        match<void>(
+          state.iters[it],
+          []  (DeadIter) {},
+          [&] (const LiveIter& ti) {
+            FTRACE(4, "   iter {: <2}  :: {}\n",
+                   it, show(*func, state.iters[it]));
+            // The init block is unknown. This can only happen if there's more
+            // than one block where this iterator was initialized. This makes
+            // tracking the iteration loop ambiguous, and can't happen with how
+            // we currently emit bytecode, so just pessimize everything.
+            if (ti.initBlock == NoBlockId) {
+              FTRACE(2, "   - pessimize all\n");
+              eligible.clear();
+              return;
+            }
+            // Otherwise, if the iterator doesn't have an equivalent local,
+            // either it was never initialized with a local to begin with, or
+            // that local got changed within the loop. Either way, this
+            // iteration loop isn't eligible.
+            if (eligible[ti.initBlock] && ti.baseLocal == NoLocalId) {
+              FTRACE(2, "   - blk:{} ineligible\n", ti.initBlock);
+              eligible[ti.initBlock] = false;
+            } else if (ti.baseUpdated) {
+              FTRACE(2, "   - blk:{} updated\n", ti.initBlock);
+              updated[ti.initBlock] = true;
+            }
+          }
+        );
+      }
+
+      auto const fixupForInit = [&] {
+        auto const base = topStkLocal(state);
+        if (base == NoLocalId && eligible[bid]) {
+          FTRACE(2, "   - blk:{} ineligible\n", bid);
+          eligible[bid] = false;
+        }
+        fixups.emplace_back(Fixup{bid, opIdx, bid, base});
+        FTRACE(2, "   + fixup ({})\n", fixups.back().show(*func));
+      };
+
+      auto const fixupFromState = [&] (IterId it) {
+        match<void>(
+          state.iters[it],
+          []  (DeadIter) {},
+          [&] (const LiveIter& ti) {
+            if (ti.initBlock != NoBlockId) {
+              assertx(iterFromInit(func, ti.initBlock) == it);
+              fixups.emplace_back(
+                Fixup{bid, opIdx, ti.initBlock, ti.baseLocal}
+              );
+              FTRACE(2, "   + fixup ({})\n", fixups.back().show(*func));
+            }
+          }
+        );
+      };
+
+      // Record a fixup for this iteration op. This iteration loop may not be
+      // ultimately eligible, but we'll check that before actually doing the
+      // transformation.
+      switch (op.op) {
+        case Op::IterInit:
+          assertx(opIdx == blk->hhbcs.size() - 1);
+          fixupForInit();
+          break;
+        case Op::IterNext:
+          fixupFromState(op.IterNext.ita.iterId);
+          break;
+        case Op::IterFree:
+          fixupFromState(op.IterFree.iter1);
+          break;
+        default:
+          break;
+      }
+
+      step(interp, op);
+    }
+  }
+
+  // We identify iteration loops by the block of the initialization op (which we
+  // enforce is exactly one block). A fixup describes a transformation to an
+  // iteration instruction which must be applied only if its associated loop is
+  // eligible.
+  struct Fixup {
+    BlockId block; // Block of the op
+    uint32_t op;   // Index into the block of the op
+    BlockId init;  // Block of the loop's initializer
+    LocalId base;  // Invariant base of the iterator
+
+    std::string show(const php::Func& f) const {
+      return folly::sformat(
+        "blk:{},{},blk:{},{}",
+        block, op, init,
+        base != NoLocalId ? local_string(f, base) : "-"
+      );
+    }
+  };
+  std::vector<Fixup> fixups;
+  // All of the associated iterator operations within an iterator loop can be
+  // optimized to liter if the iterator's initialization block is eligible.
+  boost::dynamic_bitset<> eligible;
+  // For eligible blocks, the "updated" flag tracks whether there was *any*
+  // change to the base initialized in that block (including "safe" changes).
+  boost::dynamic_bitset<> updated;
+};
+
+void optimize_iterators(VisitContext& visit) {
+  // Quick exit. If there's no iterators, or if no associated local survives
+  // to the end of the iterator, there's nothing to do.
+  auto& func = visit.func;
+  auto const& ainfo = visit.ainfo;
+  if (!func->numIters || !ainfo.hasInvariantIterBase) return;
+
+  OptimizeIterState state;
+  // All blocks starts out eligible. We'll remove initialization blocks as go.
+  // Similarly, the iterator bases for all blocks start out not being updated.
+  state.eligible.resize(func.blocks().size(), true);
+  state.updated.resize(func.blocks().size(), false);
+
+  // Visit all the blocks and build up the fixup state.
+  visit_blocks("optimize_iterators", visit, state);
+  if (!state.eligible.any()) return;
+
+  FTRACE(2, "Rewrites:\n");
+  for (auto const& fixup : state.fixups) {
+    auto const& cblk = func.blocks()[fixup.block];
+    auto const& op = cblk->hhbcs[fixup.op];
+
+    if (!state.eligible[fixup.init]) {
+      // This iteration loop isn't eligible, so don't apply the fixup
+      FTRACE(2, "   * ({}): {}\n", fixup.show(*func), show(func, op));
+      continue;
+    }
+
+    auto const flags = state.updated[fixup.init]
+      ? IterArgs::Flags::None
+      : IterArgs::Flags::BaseConst;
+
+    BytecodeVec newOps;
+    assertx(fixup.base != NoLocalId);
+
+    // Rewrite the iteration op to its liter equivalent:
+    switch (op.op) {
+      case Op::IterInit: {
+        auto args = op.IterInit.ita;
+        auto const target = op.IterInit.target2;
+        args.flags = flags;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::PopC {}),
+          bc_with_loc(op.srcLoc, bc::LIterInit{args, fixup.base, target})
+        };
+        break;
+      }
+      case Op::IterNext: {
+        auto args = op.IterNext.ita;
+        auto const target = op.IterNext.target2;
+        args.flags = flags;
+        newOps = {
+          bc_with_loc(op.srcLoc, bc::LIterNext{args, fixup.base, target}),
+        };
+        break;
+      }
+      case Op::IterFree:
+        newOps = {
+          bc_with_loc(
+            op.srcLoc,
+            bc::LIterFree { op.IterFree.iter1, fixup.base }
+          )
+        };
+        break;
+      default:
+        always_assert(false);
+    }
+
+    FTRACE(
+      2, "   ({}): {} ==> {}\n",
+      fixup.show(*func), show(func, op),
+      [&] {
+        using namespace folly::gen;
+        return from(newOps)
+          | map([&] (const Bytecode& bc) { return show(func, bc); })
+          | unsplit<std::string>(",");
+      }()
+    );
+
+    auto const blk = func.blocks()[fixup.block].mutate();
+    blk->hhbcs.erase(blk->hhbcs.begin() + fixup.op);
+    blk->hhbcs.insert(blk->hhbcs.begin() + fixup.op,
+                      newOps.begin(), newOps.end());
+  }
+
+  FTRACE(10, "{}", show(*func));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Use the information in the index to resolve a type-constraint to its
+ * underlying type, if possible.
+ */
+void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
+  if (!tc.isCheckable() || !tc.isObject() || tc.isResolved()) return;
+
+  if (interface_supports_non_objects(tc.typeName())) return;
+  auto const resolved = index.resolve_type_name(tc.typeName());
+
+  assertx(!RuntimeOption::EvalHackArrDVArrs ||
+          (resolved.type != AnnotType::VArray &&
+           resolved.type != AnnotType::DArray));
+
+  if (resolved.type == AnnotType::Object) {
+    auto const resolvedValue = match<folly::Optional<res::Class>>(
+      resolved.value,
+      [&] (boost::blank) { return folly::none; },
+      [&] (const res::Class& c) { return folly::make_optional(c); },
+      [&] (const res::Record&) { always_assert(false); return folly::none; }
+    );
+    if (!resolvedValue || !resolvedValue->resolved()) return;
+    // Can't resolve if it resolves to a magic interface. If we mark it as
+    // resolved, we'll think its an object and not do the special magic
+    // interface checks at runtime.
+    if (interface_supports_non_objects(resolvedValue->name())) return;
+    if (!resolvedValue->couldHaveMockedDerivedClass()) tc.setNoMockObjects();
+  }
+
+  tc.resolveType(resolved.type, tc.isNullable() || resolved.nullable);
+  FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void do_optimize(const Index& index, FuncAnalysis&& ainfo,
+                 php::WideFunc& func) {
+  FTRACE(2, "{:-^70} {}\n", "Optimize Func", func->name);
 
   bool again;
   folly::Optional<CollectedInfo> collect;
+  folly::Optional<VisitContext> visit;
+  collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
+  visit.emplace(index, ainfo, *collect, func);
 
-  collect.emplace(
-    index, ainfo.ctx, nullptr, nullptr,
-    CollectionOpts::TrackConstantArrays, &ainfo
-  );
+  update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
+  optimize_iterators(*visit);
 
   do {
     again = false;
-    visit_blocks_mutable("first pass", index, ainfo, *collect, first_pass);
-
-    FTRACE(10, "{}", show(*ainfo.ctx.func));
+    FTRACE(10, "{}", show(*func));
     /*
      * Note: it's useful to do dead block removal before DCE, so it can remove
      * code relating to the branch to the dead block.
      */
-    remove_unreachable_blocks(ainfo);
+    remove_unreachable_blocks(ainfo, func);
 
     if (options.LocalDCE) {
-      visit_blocks("local DCE", index, ainfo, *collect, local_dce);
+      visit_blocks("local DCE", *visit, local_dce);
     }
     if (options.GlobalDCE) {
-      global_dce(index, ainfo);
-      again = control_flow_opts(ainfo);
-      assert(check(*ainfo.ctx.func));
+      split_critical_edges(index, ainfo, func);
+      if (global_dce(index, ainfo, func)) again = true;
+      if (control_flow_opts(ainfo, func)) again = true;
+      assert(check(*func));
       /*
        * Global DCE can change types of locals across blocks.  See
        * dce.cpp for an explanation.
@@ -801,23 +770,20 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        * We need to perform a final type analysis before we do
        * anything else.
        */
-      ainfo = analyze_func(index,
-                           ainfo.ctx,
-                           CollectionOpts::TrackConstantArrays);
-      collect.emplace(
-        index, ainfo.ctx, nullptr, nullptr,
-        CollectionOpts::TrackConstantArrays, &ainfo
-      );
+      auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
+      ainfo = analyze_func(index, ctx, CollectionOpts{});
+      update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
+      collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
+      visit.emplace(index, ainfo, *collect, func);
     }
 
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
 
-  if (!isFinal) return;
-
-  auto const func = ainfo.ctx.func;
-  if (func->name == s_86pinit.get() || func->name == s_86sinit.get()) {
-    auto const& blk = *func->blocks[func->mainEntry];
+  if (func->name == s_86pinit.get() ||
+      func->name == s_86sinit.get() ||
+      func->name == s_86linit.get()) {
+    auto const& blk = *func.blocks()[func->mainEntry];
     if (blk.hhbcs.size() == 2 &&
         blk.hhbcs[0].op == Op::Null &&
         blk.hhbcs[1].op == Op::RetC) {
@@ -828,93 +794,27 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
                      [&](const std::unique_ptr<php::Func>& f) {
                        return f.get() == func;
                      }));
+      func.release();
       return;
-    }
-  }
-
-  auto pseudomain = is_pseudomain(func);
-  func->attrs = (pseudomain ||
-                 func->attrs & AttrInterceptable ||
-                 ainfo.mayUseVV) ?
-    Attr(func->attrs | AttrMayUseVV) : Attr(func->attrs & ~AttrMayUseVV);
-
-  if (pseudomain && func->unit->persistent.load(std::memory_order_relaxed)) {
-    auto persistent = true;
-    visit_blocks("persistence check", index, ainfo, *collect,
-                 [&] (const Index&,
-                      const FuncAnalysis&,
-                      CollectedInfo&,
-                      borrowed_ptr<php::Block> blk,
-                      const State&) {
-                   if (persistent && !persistence_check(blk)) {
-                     persistent = false;
-                   }
-                 });
-    if (!persistent) {
-      func->unit->persistent.store(persistent, std::memory_order_relaxed);
     }
   }
 
   if (options.InsertAssertions) {
-    visit_blocks("insert assertions", index, ainfo, *collect,
-                 insert_assertions);
+    visit_blocks("insert assertions", *visit, insert_assertions);
   }
 
-  auto fixTypeConstraint = [&] (TypeConstraint& tc, const Type& candidate) {
-    auto t = index.lookup_constraint(ainfo.ctx, tc, candidate);
-
-    if (is_specialized_obj(t) &&
-        !dobj_of(t).cls.couldHaveMockedDerivedClass()) {
-      tc.setNoMockObjects();
-    }
-
-    if (!tc.hasConstraint() ||
-        tc.isSoft() ||
-        tc.isTypeVar() ||
-        tc.isTypeConstant() ||
-        (tc.isThis() && RuntimeOption::EvalThisTypeHintLevel != 3) ||
-        tc.type() != AnnotType::Object) {
-      return;
-    }
-
-    auto const nullable = is_opt(t);
-    if (nullable) t = unopt(std::move(t));
-
-    auto retype = [&] (AnnotType t) {
-      tc.resolveType(t, nullable);
-      FTRACE(1, "Retype tc {} -> {}\n",
-             tc.typeName(), tc.displayName());
-    };
-
-    if (t.subtypeOf(TInitNull)) return retype(AnnotType::Null);
-    if (t.subtypeOf(TBool))     return retype(AnnotType::Bool);
-    if (t.subtypeOf(TInt))      return retype(AnnotType::Int);
-    if (t.subtypeOf(TDbl))      return retype(AnnotType::Float);
-    if (t.subtypeOf(TStr))      return retype(AnnotType::String);
-    if (t.subtypeOf(TPArr))     return retype(AnnotType::Array);
-    if (t.subtypeOf(TVArr))     return retype(AnnotType::VArray);
-    if (t.subtypeOf(TDArr))     return retype(AnnotType::DArray);
-    // if (t.subtypeOf(TObj))   return retype(AnnotType::Object);
-    if (t.subtypeOf(TRes))      return retype(AnnotType::Resource);
-    if (t.subtypeOf(TDict))     return retype(AnnotType::Dict);
-    if (t.subtypeOf(TVec))      return retype(AnnotType::Vec);
-    if (t.subtypeOf(TKeyset))   return retype(AnnotType::Keyset);
-  };
-
-  if (RuntimeOption::EvalHardTypeHints) {
-    for (auto& p : func->params) {
-      fixTypeConstraint(p.typeConstraint, TTop);
-    }
+  // NOTE: We shouldn't duplicate blocks that are shared between two Funcs
+  // in this loop. We shrink BytecodeVec at the time we parse the function,
+  // so we only shrink when we've already mutated (and COWed) the bytecode.
+  for (auto bid : func.blockRange()) {
+    auto const& block = func.blocks()[bid];
+    assertx(block->hhbcs.size());
+    if (block->hhbcs.capacity() == block->hhbcs.size()) continue;
+    func.blocks()[bid].mutate()->hhbcs.shrink_to_fit();
   }
 
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
-    auto const rtype = [&] {
-      if (!func->isAsync) return ainfo.inferredReturn;
-      if (!is_specialized_wait_handle(ainfo.inferredReturn)) return TGen;
-      return wait_handle_inner(ainfo.inferredReturn);
-    }();
-    fixTypeConstraint(func->retTypeConstraint, rtype);
-  }
+  for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
+  fixTypeConstraint(index, func->retTypeConstraint);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -923,7 +823,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
 //////////////////////////////////////////////////////////////////////
 
-Bytecode gen_constant(const Cell& cell) {
+Bytecode gen_constant(const TypedValue& cell) {
   switch (cell.m_type) {
     case KindOfUninit:
       return bc::NullUninit {};
@@ -946,39 +846,116 @@ Bytecode gen_constant(const Cell& cell) {
     case KindOfVec:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentVec:
-      assert(cell.m_data.parr->isVecArray());
+      assert(cell.m_data.parr->isVecType());
       return bc::Vec { cell.m_data.parr };
     case KindOfDict:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentDict:
-      assert(cell.m_data.parr->isDict());
+      assert(cell.m_data.parr->isDictType());
       return bc::Dict { cell.m_data.parr };
     case KindOfKeyset:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentKeyset:
-      assert(cell.m_data.parr->isKeyset());
+      assert(cell.m_data.parr->isKeysetType());
       return bc::Keyset { cell.m_data.parr };
-    case KindOfArray:
+    case KindOfDArray:
+    case KindOfVArray:
       assert(cell.m_data.parr->isStatic());
-    case KindOfPersistentArray:
-      assert(cell.m_data.parr->isPHPArray());
+    case KindOfPersistentDArray:
+    case KindOfPersistentVArray:
+      assert(cell.m_data.parr->isPHPArrayType());
       return bc::Array { cell.m_data.parr };
 
-    case KindOfRef:
     case KindOfResource:
     case KindOfObject:
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfLazyClass: // TODO (T68822846)
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+    case KindOfRecord:
       always_assert(0 && "invalid constant in propagate_constants");
   }
   not_reached();
 }
 
-void optimize_func(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
-  auto const bump = trace_bump_for(ainfo.ctx.cls, ainfo.ctx.func);
+void optimize_func(const Index& index, FuncAnalysis&& ainfo,
+                   php::WideFunc& func) {
+  auto const bump = trace_bump_for(ainfo.ctx.cls, func);
+
+  SCOPE_ASSERT_DETAIL("optimize_func") {
+    return "Optimizing:" + show(ainfo.ctx);
+  };
 
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
   Trace::Bump bumper3{Trace::hhbbc_dce, bump};
-  do_optimize(index, std::move(ainfo), isFinal);
+  do_optimize(index, std::move(ainfo), func);
+}
+
+void update_bytecode(php::WideFunc& func, BlockUpdates&& blockUpdates,
+                     FuncAnalysis* ainfo) {
+  for (auto& ent : blockUpdates) {
+    auto blk = func.blocks()[ent.first].mutate();
+    auto const srcLoc = blk->hhbcs.front().srcLoc;
+    if (!ent.second.unchangedBcs) {
+      if (ent.second.replacedBcs.size()) {
+        blk->hhbcs = std::move(ent.second.replacedBcs);
+      } else {
+        blk->hhbcs = { bc_with_loc(blk->hhbcs.front().srcLoc, bc::Nop {}) };
+      }
+    } else {
+      blk->hhbcs.erase(blk->hhbcs.begin() + ent.second.unchangedBcs,
+                       blk->hhbcs.end());
+      blk->hhbcs.reserve(blk->hhbcs.size() + ent.second.replacedBcs.size());
+      for (auto& bc : ent.second.replacedBcs) {
+        blk->hhbcs.push_back(std::move(bc));
+      }
+    }
+    if (blk->hhbcs.empty()) {
+      blk->hhbcs.push_back(bc_with_loc(srcLoc, bc::Nop {}));
+    }
+    auto fatal_block = NoBlockId;
+    auto fatal = [&] {
+      if (fatal_block == NoBlockId) {
+        fatal_block = make_fatal_block(func, blk, ainfo);
+      }
+      return fatal_block;
+    };
+    blk->fallthrough = ent.second.fallthrough;
+    auto hasCf = false;
+    forEachTakenEdge(blk->hhbcs.back(),
+                     [&] (BlockId& bid) {
+                       hasCf = true;
+                       if (bid == NoBlockId) bid = fatal();
+                     });
+    if (blk->fallthrough == NoBlockId &&
+        !(instrFlags(blk->hhbcs.back().op) & TF)) {
+      if (hasCf) {
+        blk->fallthrough = fatal();
+      } else {
+        blk->hhbcs.push_back(bc::BreakTraceHint {});
+        blk->hhbcs.push_back(bc::String { s_unreachable.get() });
+        blk->hhbcs.push_back(bc::Fatal { FatalOp::Runtime });
+      }
+    }
+  }
+  blockUpdates.clear();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void optimize_class_prop_type_hints(const Index& index, Context ctx) {
+  assertx(!ctx.func);
+  auto const bump = trace_bump_for(ctx.cls, nullptr);
+  Trace::Bump bumper{Trace::hhbbc, bump};
+  for (auto& prop : ctx.cls->properties) {
+    fixTypeConstraint(
+      index,
+      const_cast<TypeConstraint&>(prop.typeConstraint)
+    );
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

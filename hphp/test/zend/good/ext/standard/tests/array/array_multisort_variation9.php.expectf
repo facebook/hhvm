@@ -10,7 +10,7 @@ Notice: %s
 
 Notice: %s
 bool(true)
-array(10) {
+darray(10) {
   ["float -10.5"]=>
   float(-10.5)
   ["string DQ"]=>
@@ -24,15 +24,15 @@ array(10) {
   ["int 0"]=>
   int(0)
   [0]=>
-  array(0) {
+  varray(0) {
   }
   ["instance of classWithoutToString"]=>
-  object(classWithoutToString)#%d (0) {
+  object(classWithoutToString) (0) {
   }
   ["lowercase true"]=>
   bool(true)
   ["instance of classWithToString"]=>
-  object(classWithToString)#%d (0) {
+  object(classWithToString) (0) {
   }
 }
 ===DONE===

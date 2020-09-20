@@ -1,0 +1,6 @@
+File "mayberx18.php", line 15, characters 19-19:
+The method `f` has the wrong type (Typing[4341])
+File "mayberx18.php", line 8, characters 23-24:
+This parameter does not satisfy __OnlyRxIfImpl condition defined on matching parameter in function super type.
+File "mayberx18.php", line 15, characters 53-54:
+This is parameter declaration from the function super type.

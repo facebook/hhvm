@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace foo {
   function bar() {
@@ -26,20 +26,18 @@ namespace baz {
   }
 }
 
-namespace test_simple {
+namespace test_as {
   use function baz\bar;
   use function fizz\baz;
-
-  var_dump(bar());
-  var_dump(baz());
-}
-
-namespace test_as {
   use function foo\bar as foobar;
   use function fizz\baz as fizzbaz;
   use function baz\baz as bazbaz;
 
-  var_dump(foobar());
-  var_dump(fizzbaz());
-  var_dump(bazbaz());
+  <<__EntryPoint>> function main(): void {
+    \var_dump(bar());
+    \var_dump(baz());
+    \var_dump(foobar());
+    \var_dump(fizzbaz());
+    \var_dump(bazbaz());
+  }
 }

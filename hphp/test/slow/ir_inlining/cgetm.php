@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class CGetMTest {
   public function __construct() {
@@ -27,5 +27,9 @@ function test9() {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_cgetm() {
 test5();
 test9();
+}

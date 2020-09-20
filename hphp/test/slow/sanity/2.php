@@ -1,2 +1,2 @@
 #!/usr/bin/php
-<?php
+<?hh

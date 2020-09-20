@@ -1,101 +1,149 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
 (*****************************************************************************)
 (* Converts a type hint into a type  *)
 (*****************************************************************************)
-open Hh_core
-open Nast
+open Hh_prelude
+open Aast
 open Typing_defs
 
 (* Unpacking a hint for typing *)
-
 let rec hint env (p, h) =
   let h = hint_ p env h in
-  Typing_reason.Rhint p, h
+  mk (Typing_reason.Rhint p, h)
 
-and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint } =
+and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint; _ } =
   { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
+and aast_user_attribute_to_decl_user_attribute { ua_name; ua_params } =
+  {
+    Typing_defs.ua_name;
+    ua_classname_params =
+      List.filter_map ua_params ~f:(function
+          | (_, Class_const ((_, CI (_, cls)), (_, name)))
+            when String.equal name SN.Members.mClass ->
+            Some cls
+          | _ -> None);
+  }
+
+and aast_tparam_to_decl_tparam env t =
+  {
+    tp_variance = t.Aast.tp_variance;
+    tp_name = t.Aast.tp_name;
+    tp_tparams =
+      List.map ~f:(aast_tparam_to_decl_tparam env) t.Aast.tp_parameters;
+    tp_constraints =
+      List.map ~f:(Tuple.T2.map_snd ~f:(hint env)) t.Aast.tp_constraints;
+    tp_reified = t.Aast.tp_reified;
+    tp_user_attributes =
+      List.map
+        ~f:aast_user_attribute_to_decl_user_attribute
+        t.Aast.tp_user_attributes;
+  }
+
 and hint_ p env = function
-  | Hany -> Tany
+  | Hany -> Typing_defs.make_tany ()
+  | Herr -> Terr
   | Hmixed -> Tmixed
   | Hnonnull -> Tnonnull
   | Hthis -> Tthis
+  | Hdynamic -> Tdynamic
+  | Hnothing -> Tunion []
   | Harray (h1, h2) ->
-    if env.Decl_env.mode = FileInfo.Mstrict && h1 = None
-    then Errors.generic_array_strict p;
     let h1 = Option.map h1 (hint env) in
     let h2 = Option.map h2 (hint env) in
     Tarray (h1, h2)
-  | Hdarray (h1, h2) ->
-    Tdarray (hint env h1, hint env h2)
-  | Hvarray (h) ->
-    Tvarray (hint env h)
-  | Hvarray_or_darray h ->
-    Tvarray_or_darray (hint env h)
+  | Hdarray (h1, h2) -> Tdarray (hint env h1, hint env h2)
+  | Hvarray h -> Tvarray (hint env h)
+  | Hvarray_or_darray (h1, h2) ->
+    let t1 =
+      match h1 with
+      | Some h -> hint env h
+      | None -> mk (Typing_reason.Rvarray_or_darray_key p, Tprim Aast.Tarraykey)
+    in
+    Tvarray_or_darray (t1, hint env h2)
   | Hprim p -> Tprim p
-  | Habstr x ->
-    Tgeneric x
-  | Hoption (_, Hprim Tvoid) ->
-    Errors.option_return_only_typehint p `void;
-    Terr
-  | Hoption (_, Hprim Tnoreturn) ->
-    Errors.option_return_only_typehint p `noreturn;
-    Terr
-  | Hoption (_, Hmixed) ->
-    Errors.option_mixed p;
-    Terr
+  | Habstr (x, argl) ->
+    let argl = List.map argl (hint env) in
+    Tgeneric (x, argl)
   | Hoption h ->
     let h = hint env h in
     Toption h
-  | Hfun (is_reactive, is_coroutine, hl, kl, vh, h) ->
-    let make_param ((p, _ as x), k) =
-      { fp_pos = p;
+  | Hlike h -> Tlike (hint env h)
+  | Hfun
+      {
+        hf_reactive_kind = reactivity;
+        hf_param_tys = hl;
+        hf_param_kinds = kl;
+        hf_param_mutability = muts;
+        hf_variadic_ty = vh;
+        hf_return_ty = h;
+        hf_is_mutable_return = mut_ret;
+      } ->
+    let make_param ((p, _) as x) k mut =
+      let mutability =
+        match mut with
+        | Some PMutable -> Some Param_borrowed_mutable
+        | Some POwnedMutable -> Some Param_owned_mutable
+        | Some PMaybeMutable -> Some Param_maybe_mutable
+        | _ -> None
+      in
+      {
+        fp_pos = p;
         fp_name = None;
-        fp_type = hint env x;
-        fp_kind = get_param_mode ~is_ref:false k;
-        fp_accept_disposable = false;
-        fp_mutable = false;
+        fp_type = possibly_enforced_hint env x;
+        fp_flags =
+          make_fp_flags
+            ~mode:(get_param_mode k)
+            ~accept_disposable:false
+            ~mutability
+            ~has_default:false;
+        fp_rx_annotation = None;
       }
     in
-    let paraml = List.map (List.zip_exn hl kl) make_param in
-    let ret = hint env h in
-    let arity_min = List.length paraml in
-    let arity = match vh with
-      | Hvariadic Some(t) -> Fvariadic (arity_min, make_param (t, None))
-      | Hvariadic None -> Fvariadic (arity_min, make_param ((p, Hany), None))
-      | Hnon_variadic -> Fstandard (arity_min, arity_min)
+    let paraml = List.map3_exn hl kl muts ~f:make_param in
+    let implicit_params =
+      { capability = Typing_make_type.default_capability (Reason.Rhint p) }
     in
-    Tfun {
-      ft_pos = p;
-      ft_deprecated = None;
-      ft_abstract = false;
-      ft_is_coroutine = is_coroutine;
-      ft_arity = arity;
-      ft_tparams = [];
-      ft_where_constraints = [];
-      ft_params = paraml;
-      ft_ret = ret;
-      ft_ret_by_ref = false;
-      ft_reactive = if is_reactive then Reactive else Nonreactive;
-      ft_return_disposable = false;
-      ft_mutable = false;
-      ft_returns_mutable = false;
-    }
-  | Happly ((p, "\\Tuple"), _)
-  | Happly ((p, "\\tuple"), _) ->
-    Errors.tuple_syntax p;
-    Terr
+    let ret = possibly_enforced_hint env h in
+    let arity =
+      match vh with
+      | Some t -> Fvariadic (make_param t None None)
+      | None -> Fstandard
+    in
+    let reactivity =
+      match reactivity with
+      | FPure -> Pure None
+      | FReactive -> Reactive None
+      | FShallow -> Shallow None
+      | FLocal -> Local None
+      | FNonreactive -> Nonreactive
+    in
+    Tfun
+      {
+        ft_arity = arity;
+        ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params = paraml;
+        ft_implicit_params = implicit_params;
+        ft_ret = ret;
+        ft_flags =
+          make_ft_flags
+            Ast_defs.FSync
+            None
+            ~return_disposable:false
+            ~returns_void_to_rx:false
+            ~returns_mutable:mut_ret;
+        ft_reactive = reactivity;
+      }
   | Happly (((_p, c) as id), argl) ->
-    Decl_hooks.dispatch_class_id_hook id None;
     Decl_env.add_wclass env c;
     let argl = List.map argl (hint env) in
     Tapply (id, argl)
@@ -105,23 +153,35 @@ and hint_ p env = function
   | Htuple hl ->
     let tyl = List.map hl (hint env) in
     Ttuple tyl
+  | Hunion hl ->
+    let tyl = List.map hl (hint env) in
+    Tunion tyl
+  | Hintersection hl ->
+    let tyl = List.map hl (hint env) in
+    Tintersection tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
-    let optional_shape_fields_enabled =
-      not @@
-        TypecheckerOptions.experimental_feature_enabled
-          env.Decl_env.decl_tcopt
-          TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
-    let shape_fields_known =
-      match optional_shape_fields_enabled, nsi_allows_unknown_fields with
-        | _, true
-        | false, false ->
-          (* Fields are only partially known, because this shape type comes from
-           * type hint - shapes that contain listed fields can be passed here,
-           * but due to structural subtyping they can also contain other fields,
-           * that we don't know about. *)
-          FieldsPartiallyKnown ShapeMap.empty
-        | true, false ->
-          FieldsFullyKnown in
+    let shape_kind =
+      if nsi_allows_unknown_fields then
+        Open_shape
+      else
+        Closed_shape
+    in
     let fdm =
-      ShapeMap.map (shape_field_info_to_shape_field_type env) nsi_field_map in
-    Tshape (shape_fields_known, fdm)
+      List.fold_left
+        ~f:(fun acc i ->
+          ShapeMap.add
+            i.sfi_name
+            (shape_field_info_to_shape_field_type env i)
+            acc)
+        ~init:ShapeMap.empty
+        nsi_field_map
+    in
+    Tshape (shape_kind, fdm)
+  | Hsoft (p, h_) -> hint_ p env h_
+  | Hpu_access (base, sid) -> Tpu_access (hint env base, sid)
+
+and possibly_enforced_hint env h =
+  (* Initially we assume that a type is not enforced at runtime.
+   * We refine this during localization
+   *)
+  { et_enforced = false; et_type = hint env h }

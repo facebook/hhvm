@@ -1,0 +1,6 @@
+[2] Argument 2 returned from foo() as an inout parameter must be of type @int, string given
+[2] Argument 2 returned from foo() as an inout parameter must be of type @int, string given
+string(5) "hello"
+string(5) "hello"
+[2] Argument 2 to bar() must be of type @int, string given
+int(123)

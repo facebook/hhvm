@@ -1,0 +1,6 @@
+File "classes_const_attribute.php", line 5, characters 22-29:
+Properties cannot be declared `abstract` (Parsing[1002])
+File "classes_const_attribute.php", line 4, characters 16-16:
+Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])
+File "classes_const_attribute.php", line 8, characters 7-7:
+Cannot use experimental feature: The __Const attribute is not supported. (Other[0000])

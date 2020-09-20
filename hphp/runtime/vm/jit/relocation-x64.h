@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_JIT_RELOCATION_X64_H_
-#define incl_HPHP_RUNTIME_VM_JIT_RELOCATION_X64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
@@ -24,11 +23,9 @@ namespace HPHP { namespace jit { namespace x64 {
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
-void adjustMetaDataForRelocation(RelocationInfo&, AsmInfo*, CGMeta&);
 void findFixups(TCA start, TCA end, CGMeta& fixups);
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
                 TCA*, AreaIndex);
 
 }}}
 
-#endif

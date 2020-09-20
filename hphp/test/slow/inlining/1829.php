@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($e='e') {
   return '<a name="'.$e.'" id="'.$e.'"></a>';
@@ -6,4 +6,8 @@ function foo($e='e') {
 function test() {
   echo foo();
 }
+
+<<__EntryPoint>>
+function main_1829() {
 test();
+}

@@ -526,7 +526,7 @@ address:  /* mailbox / group */
     if (addrs) {
       a_start = i;
       a_count = j-i;
-      /* if an address is enclosed in <>, leave them out of the the
+      /* if an address is enclosed in <>, leave them out of the
        * address value that we return */
       if (toks->tokens[a_start].token == '<') {
         a_start++;
@@ -545,7 +545,7 @@ address:  /* mailbox / group */
     if (addrs) {
       a_start = start_tok;
       a_count = i - start_tok;
-      /* if an address is enclosed in <>, leave them out of the the
+      /* if an address is enclosed in <>, leave them out of the
        * address value that we return */
       if (toks->tokens[a_start].token == '<') {
         a_start++;

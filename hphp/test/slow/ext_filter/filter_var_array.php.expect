@@ -1,5 +1,5 @@
 No filters, Add empty
-array(7) {
+darray(7) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -16,7 +16,7 @@ array(7) {
   NULL
 }
 No filters
-array(6) {
+darray(6) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -31,7 +31,7 @@ array(6) {
   string(6) "string"
 }
 Require Scalar, Add empty
-array(7) {
+darray(7) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -48,7 +48,7 @@ array(7) {
   NULL
 }
 Require Scalar
-array(6) {
+darray(6) {
   ["null"]=>
   string(0) ""
   ["empty_array"]=>
@@ -63,14 +63,14 @@ array(6) {
   string(6) "string"
 }
 Require Array, Add empty
-array(7) {
+darray(7) {
   ["null"]=>
   bool(false)
   ["empty_array"]=>
-  array(0) {
+  darray(0) {
   }
   ["filled_array"]=>
-  array(3) {
+  darray(3) {
     [0]=>
     string(1) "1"
     [1]=>
@@ -88,14 +88,14 @@ array(7) {
   NULL
 }
 Require Array
-array(6) {
+darray(6) {
   ["null"]=>
   bool(false)
   ["empty_array"]=>
-  array(0) {
+  darray(0) {
   }
   ["filled_array"]=>
-  array(3) {
+  darray(3) {
     [0]=>
     string(1) "1"
     [1]=>

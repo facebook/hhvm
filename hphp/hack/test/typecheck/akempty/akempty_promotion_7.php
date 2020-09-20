@@ -5,7 +5,7 @@
  * statement level.
  */
 function test(): void {
-  $a = array();
+  $a = varray[];
   if ($a[] = 'aaa') {
 
   }

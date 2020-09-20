@@ -2,11 +2,9 @@
 
 -- Testing xml_set_external_entity_ref_handler() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_set_external_entity_ref_handler() expects exactly 2 parameters, 3 given in %s/xml_set_external_entity_ref_handler_error.php on line 16
 
 -- Testing xml_set_external_entity_ref_handler() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_set_external_entity_ref_handler() expects exactly 2 parameters, 1 given in %s/xml_set_external_entity_ref_handler_error.php on line 21
 Done

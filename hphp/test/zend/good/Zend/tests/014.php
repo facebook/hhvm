@@ -1,19 +1,21 @@
-<?php
+<?hh
+<<__EntryPoint>>
+function entrypoint_014(): void {
 
-var_dump(get_included_files());
+  var_dump(get_included_files());
 
-include(dirname(__FILE__)."/014.inc");
-var_dump(get_included_files());
+  include(dirname(__FILE__)."/014.inc");
+  var_dump(get_included_files());
 
-var_dump(get_included_files(1,1));
+  try { var_dump(get_included_files(1,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-include_once(dirname(__FILE__)."/014.inc");
-var_dump(get_included_files());
+  include_once(dirname(__FILE__)."/014.inc");
+  var_dump(get_included_files());
 
-var_dump(get_included_files(1));
+  try { var_dump(get_included_files(1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-include(dirname(__FILE__)."/014.inc");
-var_dump(get_included_files());
+  include(dirname(__FILE__)."/014.inc");
+  var_dump(get_included_files());
 
-echo "Done\n";
-?>
+  echo "Done\n";
+}

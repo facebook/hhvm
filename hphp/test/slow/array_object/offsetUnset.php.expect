@@ -1,7 +1,0 @@
-object(ArrayObject)#1 (1) {
-  ["storage":"ArrayObject":private]=>
-  array(1) {
-    [0]=>
-    string(4) "zero"
-  }
-}

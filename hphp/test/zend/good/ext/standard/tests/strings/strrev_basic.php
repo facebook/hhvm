@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : string strrev(string $str);
  * Description: Reverse a string 
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrev() : basic functionality ***\n";
 $heredoc = <<<EOD
 Hello, world
@@ -28,4 +28,4 @@ var_dump( strrev('Hello, World\n') );
 //heredoc string
 var_dump( strrev($heredoc) );
 echo "*** Done ***";
-?>
+}

@@ -1,4 +1,5 @@
 <?hh
+
 function f() {
   $x = 204; // 11001100 in binary
   $y = 170; // 10101010 in binary
@@ -11,8 +12,6 @@ function f() {
   echo (~$x);
   echo "\n";
 }
-f();
-
 
 // Pairwise probe.
 function probe($l, $r) {
@@ -25,14 +24,14 @@ function probe($l, $r) {
   $v = (~$l);     var_dump($v);
 }
 
+<<__EntryPoint>>
 function main() {
+  f();
   $i = 0x3;
-  $data = array(15, "7", "not an int. at all.");
+  $data = varray[15, "7", "not an int. at all."];
   foreach ($data as $left) {
     foreach ($data as $right) {
       probe($left, $right);
     }
   }
 }
-
-main();

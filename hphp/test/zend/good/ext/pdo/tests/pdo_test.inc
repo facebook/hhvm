@@ -1,18 +1,11 @@
-<?php
+<?hh
 # PDO test framework utilities
 
-if (getenv('PDOTEST_DSN') === false) {
-	$common = '';
-	$append = false;
-	foreach(file(dirname($_SERVER['PHP_SELF']).'/common.phpt') as $line) {
-		if ($append) {
-			$common .= $line;
-		} elseif (trim($line) == '--REDIRECTTEST--') {
-			$append = true;
-		}
+function updateEnv() {
+	if (getenv('PDOTEST_DSN') === false) {
+		$conf = PDOTest::get_config(dirname($_SERVER['PHP_SELF']).'/common.phpt');
+		foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 	}
-	$conf = eval($common);
-	foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 }
 
 class PDOTest {
@@ -29,8 +22,8 @@ class PDOTest {
 			$attr = null;
 		}
 
-		if ($user === false) $user = NULL;
-		if ($pass === false) $pass = NULL;
+		if ($user === false) $user = '';
+		if ($pass === false) $pass = '';
 
 		$db = new $classname($dsn, $user, $pass, $attr);
 
@@ -40,11 +33,11 @@ class PDOTest {
 
 		// clean up any crufty test tables we might have left behind
 		// on a previous run
-		static $test_tables = array(
+		$test_tables = varray[
 			'test',
 			'test2',
 			'classtypes'
-			);
+			];
 		if ($drop_test_tables) {
 			foreach ($test_tables as $table) {
 				$db->exec("DROP TABLE $table");
@@ -73,12 +66,11 @@ class PDOTest {
 		return self::factory();
 	}
 
+	<<__Memoize>>
 	static function get_config($file) {
 		$data = file_get_contents($file);
 		$data = preg_replace('/^.*--REDIRECTTEST--/s', '', $data);
-		$config = eval($data);
-
-		return $config;
+		eval($data);
+		return redirecttest();
 	}
 }
-?>

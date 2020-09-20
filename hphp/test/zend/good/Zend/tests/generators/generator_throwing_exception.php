@@ -1,13 +1,13 @@
-<?php
+<?hh
 
 function gen() {
     yield 'foo';
     throw new Exception('test');
     yield 'bar';
 }
-
+<<__EntryPoint>> function main(): void {
 $gen = gen();
-
+$gen->next();
 var_dump($gen->current());
 
 try {
@@ -17,5 +17,4 @@ try {
 }
 
 var_dump($gen->current());
-
-?>
+}

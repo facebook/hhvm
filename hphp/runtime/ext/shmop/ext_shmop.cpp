@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/util/rds-local.h"
 
 #include <sys/shm.h>
 
@@ -162,19 +162,19 @@ private:
 };
 
 struct ShmopRequestLocal final : RequestEventHandler {
-  virtual void requestInit() override {
+  void requestInit() override {
     // no-op
   }
 
-  virtual void requestShutdown() override {
+  void requestShutdown() override {
     m_records.clear();
   }
 
   ShmRec* findShm(const char* functionName, int64_t shmid) {
     auto const it = m_records.find(shmid);
     if (it == m_records.end()) {
-      raise_warning("%s(): no shared memory segment with an id of [%ld]",
-                    functionName, shmid);
+      raise_warning("%s(): no shared memory segment with an id of"
+                    " [%" PRId64 "]", functionName, shmid);
       return nullptr;
     } else {
       return it->second.get();
@@ -186,7 +186,7 @@ struct ShmopRequestLocal final : RequestEventHandler {
     // still valid when we use it but this way it's unique per process (although
     // it may get reused).
     int64_t shmid = reinterpret_cast<ssize_t>(p.get());
-    assert(LIKELY(m_records.find(shmid) == m_records.end()));
+    assertx(LIKELY(m_records.find(shmid) == m_records.end()));
     m_records.emplace(shmid, std::move(p));
     return shmid;
   }

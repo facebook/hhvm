@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A {
   abstract protected static function AAbsProtStat();
@@ -32,8 +32,12 @@ class D extends C {
   public function foo() {}
 }
 
+
+<<__EntryPoint>>
+function main_method_ordering() {
 $cls = new ReflectionClass('D');
 var_dump(array_map(
   function($meth) { return $meth->getName(); },
   $cls->getMethods()
 ));
+}

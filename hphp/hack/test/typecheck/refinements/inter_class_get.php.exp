@@ -1,0 +1,8 @@
+File "inter_class_get.php", line 26, characters 17-18:
+Invalid argument (Typing[4110])
+File "inter_class_get.php", line 26, characters 12-14:
+Expected `int`
+File "inter_class_get.php", line 30, characters 20-20:
+  via this generic `T`
+File "inter_class_get.php", line 13, characters 43-48:
+But got `string`

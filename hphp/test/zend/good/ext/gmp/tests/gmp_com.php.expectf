@@ -1,7 +1,7 @@
 string(2) "-1"
 string(2) "-1"
 
-Warning: %s
+Warning: gmp_com(): Unable to convert variable to GMP - string is not an integer in %s/gmp_com.php on line 5
 string(1) "0"
 string(14) "-2394876545679"
 string(3) "110"
@@ -10,11 +10,8 @@ string(4) "9875"
 string(9) "-98765468"
 string(12) "-98765463338"
 
-Warning: %s
+Warning: gmp_com(): Unable to convert variable to GMP - wrong type in %s/gmp_com.php on line 16
 string(1) "0"
 
-Warning: %s
-
-Warning: %s
-bool(false)
+Warning: gmp_com() expects exactly 1 parameter, 0 given in %s/gmp_com.php on line 17
 Done

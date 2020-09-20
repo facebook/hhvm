@@ -1,63 +1,72 @@
 *** Testing date() : usage variation -  unexpected values to first argument $format***
 
 -- int 0 --
-string(1) "0"
+
+Warning: date() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- int 1 --
-string(1) "1"
+
+Warning: date() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- int 12345 --
-string(5) "12345"
+
+Warning: date() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- int -12345 --
-string(6) "-12345"
+
+Warning: date() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- float 10.5 --
-string(4) "10.5"
+
+Warning: date() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- float -10.5 --
-string(5) "-10.5"
+
+Warning: date() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- float .5 --
-string(3) "0.5"
+
+Warning: date() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- empty array --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- int indexed array --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- associative array --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- nested arrays --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- uppercase NULL --
-string(0) ""
+
+Warning: date() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- lowercase null --
-string(0) ""
+
+Warning: date() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- lowercase true --
-string(1) "1"
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- lowercase false --
-string(0) ""
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- uppercase TRUE --
-string(1) "1"
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- uppercase FALSE --
-string(0) ""
+
+Warning: date() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- empty string DQ --
 string(0) ""
@@ -78,21 +87,22 @@ string(40) "30GMTFri, 27 Feb 2009 10:44:30 +00000210"
 string(76) "10Europe/LondonFridayFriday2009 52009Fri, 27 Feb 2009 10:44:30 +0000Friday27"
 
 -- instance of classWithToString --
-string(64) "CFridayam3030 AM 2009b27Europe/London2009-02-27T10:44:30+00:0028"
+
+Warning: date() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- instance of classWithoutToString --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- undefined var --
-string(0) ""
+
+Warning: date() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- unset var --
-string(0) ""
+
+Warning: date() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- resource --
 
-Warning: %s
-bool(false)
+Warning: date() expects parameter 1 to be string, resource given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 ===DONE===

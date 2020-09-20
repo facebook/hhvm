@@ -12,7 +12,7 @@ class A {
     FOO = shape(
       'foo' => 2,
       'bar' => null,
-      self::BAZ_KEY => array('a', 'b', 'c'),
+      self::BAZ_KEY => varray['a', 'b', 'c'],
     );
 
   public static function getBaz(): array<string> {

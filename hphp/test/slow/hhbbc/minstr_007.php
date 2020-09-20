@@ -1,7 +1,7 @@
 <?hh
 
-class A { public function go(&$x) {} }
-class B { public function go($x) {} }
+class A { public function go($x) {} }
+class B { public function go(inout $x) {} }
 
 class Foo {
   private $foo = "asd";
@@ -15,11 +15,11 @@ class Foo {
   public function getter() { return $this->foo; }
 }
 
-function main() {
+<<__EntryPoint>>
+function main_minstr_007() {
   $foo = new Foo;
   $a = new A;
   var_dump($foo->getter());
   var_dump($foo->heh($a, 'str'));
   var_dump($foo->getter());
 }
-main();

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $ch = curl_init();
 var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false));
 /* Case that should throw an error */
@@ -8,4 +8,4 @@ var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1));
 var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2));
 
 curl_close($ch);
-?>
+}

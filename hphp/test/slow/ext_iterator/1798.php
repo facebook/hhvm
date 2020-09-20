@@ -1,26 +1,29 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1798() {
 $sample_dir = __DIR__.'/../../sample_dir';
 
-$files = array();
+$files = varray[];
 foreach (new DirectoryIterator($sample_dir.'/') as $file) {
   $files[] = $file;
 }
 var_dump(count($files));
 
 $dir = new DirectoryIterator($sample_dir.'/');
-$files = array();
+$files = varray[];
  // order changes per machine
 foreach ($dir as $fileinfo) {
   if (!$fileinfo->isDot()) {
     $files[] = $fileinfo->getFilename();
   }
 }
-asort($files);
+asort(inout $files);
 var_dump(array_values($files));
 
 $iterator = new DirectoryIterator($sample_dir);
-$files = array();
+$files = darray[];
  // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
@@ -47,20 +50,20 @@ foreach ($iterator as $fileinfo) {
     $files[$name] = $str;
   }
 }
-ksort($files);
+ksort(inout $files);
 foreach ($files as $str) {
   echo $str;
 }
 
 $iterator = new RecursiveDirectoryIterator($sample_dir);
-$files = array();
+$files = darray[];
  // order changes per machine
 foreach ($iterator as $fileinfo) {
   if ($fileinfo->isFile()) {
     $files[$fileinfo->getFilename()] = $fileinfo;
   }
 }
-ksort($files);
+ksort(inout $files);
 foreach ($files as $name => $fileinfo) {
   echo $fileinfo->getFilename() . "\n";
    $fileinfo->getCTime() . "\n";
@@ -79,4 +82,5 @@ foreach ($files as $name => $fileinfo) {
    $fileinfo->isLink() . "\n";
    $fileinfo->isReadable() . "\n";
    $fileinfo->isWritable() . "\n";
+}
 }

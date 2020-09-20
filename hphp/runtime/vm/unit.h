@@ -14,33 +14,39 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_H_
-#define incl_HPHP_VM_UNIT_H_
+#pragma once
 
 #include "hphp/parser/location.h"
 
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/req-bitset.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/constant.h"
+#include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/runtime/vm/preclass.h"
+#include "hphp/runtime/vm/record.h"
+#include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/lock-free-ptr-wrapper.h"
-#include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/sha1.h"
 
 #include <map>
 #include <ostream>
 #include <string>
 #include <vector>
+#include <atomic>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,125 +71,39 @@ enum class UnitOrigin {
   Eval = 1
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// Location tables.
+/////////////////////////////////////////////////////////////////////////////
+//
+// Fatal info
 
 /*
- * Delimiter pairs for a location in the source code.
+ * Information regarding parse/runtime errors in units
  */
-struct SourceLoc {
-  /*
-   * Constructors.
-   */
-  SourceLoc() {}
-  explicit SourceLoc(const Location::Range& l);
-
-  /*
-   * Reset to, or check for, the invalid state.
-   */
-  void reset();
-  bool valid() const;
-
-  /*
-   * Set to a parser Location.
-   */
-  void setLoc(const Location::Range* l);
-
-  /*
-   * Equality.
-   */
-  bool same(const SourceLoc* l) const;
-  bool operator==(const SourceLoc& l) const;
-
-  /*
-   * Start and end lines and characters.
-   *
-   * The default {1, 1, 1, 1} is an invalid sentinel value.
-   */
-  int line0{1};
-  int char0{1};
-  int line1{1};
-  int char1{1};
+struct FatalInfo {
+  Location::Range m_fatalLoc;
+  FatalOp m_fatalOp;
+  std::string m_fatalMsg;
 };
 
-/*
- * Pair of (base, past) offsets.
- */
-struct OffsetRange {
-  OffsetRange() {}
+/////////////////////////////////////////////////////////////////////////////
+//
+// Symbol references
 
-  OffsetRange(Offset base, Offset past)
-    : base(base)
-    , past(past)
-  {}
-
-  Offset base{0};
-  Offset past{0};
+// Symbols referenced by an Unit. Used during prod builds to
+// automatically important files, and in Sandboxes to prefetch units.
+enum class SymbolRef : uint8_t {
+  Include,
+  Class,
+  Function,
+  Constant
 };
 
-using OffsetRangeVec = std::vector<OffsetRange>;
-
-/*
- * Generic entry for representing many-to-one mappings of Offset -> T.
- *
- * Each entry's `pastOffset' is expected to be the offset just past the range
- * of offsets which logically map to its `val'.  In this way, by maintaining a
- * relatively sparse set of entries in a vector, we can use least upper bound
- * searches on an offset key to find its corresponding T.
- *
- * The values of `pastOffset' in such a table are expected to be sorted and
- * unique, but the values of `val' need not be.
- */
-template<typename T>
-struct TableEntry {
-  /*
-   * Constructors.
-   */
-  TableEntry() {}
-
-  TableEntry(Offset pastOffset, T val)
-    : m_pastOffset(pastOffset)
-    , m_val(val)
-  {}
-
-  /*
-   * Accessors.
-   */
-  Offset pastOffset() const;
-  T val() const;
-
-  /*
-   * Comparison.
-   */
-  bool operator<(const TableEntry& other) const;
-
-  template<class SerDe> void serde(SerDe& sd);
-
-private:
-  Offset m_pastOffset{0};
-  T m_val;
-};
+using SymbolRefs =
+  CompactVector<std::pair<SymbolRef, CompactVector<std::string>>>;
 
 /*
  * Table specializations.
  */
-using LineEntry      = TableEntry<int>;
-using SourceLocEntry = TableEntry<SourceLoc>;
-using LineInfo       = std::pair<OffsetRange, int>;
-
-using LineTable      = std::vector<LineEntry>;
-using SourceLocTable = std::vector<SourceLocEntry>;
-using FuncTable      = CompactVector<const Func*>;
-
-/*
- * Get the line number or SourceLoc for Offset `pc' in `table'.
- */
-int getLineNumber(const LineTable& table, Offset pc);
-bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
-void stashLineTable(const Unit* unit, LineTable table);
-void stashExtendedLineTable(const Unit* unit, SourceLocTable table);
-
-const SourceLocTable& getSourceLocTable(const Unit*);
+using FuncTable      = VMCompactVector<const Func*>;
 
 /*
  * Sum of all Unit::m_bclen
@@ -238,14 +158,10 @@ public:
    * Allocated with a variable-length pointer array in m_mergeables, structured
    * as follows:
    *  - the Unit's pseudomain
-   *  - non-hoistable functions that might be DefFunc'd in the pseudomain
    *  - hoistable functions (i.e., toplevel functions that need to be available
    *    from the beginning of the pseudomain)
    *  - all other mergeable objects, with the bottom three bits of the pointer
    *    tagged with a MergeKind
-   *
-   * Note that the non-hoistable function list may include functions which are
-   * not mergeable, since DefFunc also uses this list as its mapping from ID's.
    */
   struct MergeInfo {
     using FuncRange = folly::Range<Func* const*>;
@@ -259,11 +175,10 @@ public:
     /*
      * Iterators.
      *
-     * funcHoistableBegin() is in (funcBegin, funcEnd].
+     * funcNonMain() is in (funcBegin, funcEnd].
      */
     Func** funcBegin() const;
     Func** funcEnd() const;
-    Func** funcHoistableBegin() const;
 
     /*
      * Ranges.
@@ -272,16 +187,12 @@ public:
      */
     FuncRange funcs() const;
     MutableFuncRange mutableFuncs() const;
-    MutableFuncRange nonMainFuncs() const;
-    MutableFuncRange hoistableFuncs() const;
 
     /*
      * Get a reference or pointer to the mergeable at index `idx'.
      */
     void*& mergeableObj(int idx);
-    void** mergeableData(int idx);
 
-    unsigned m_firstHoistableFunc;
     unsigned m_firstHoistablePreClass;
     unsigned m_firstMergeablePreClass;
     unsigned m_mergeablesSize;
@@ -297,12 +208,10 @@ public:
     Class               = 0,  // Class is required to be 0 for correctness.
     UniqueDefinedClass  = 1,
     Define              = 2,  // Toplevel scalar define.
-    PersistentDefine    = 3,  // Cross-request persistent toplevel defines.
-    Global              = 4,  // Global variable declarations.
-    TypeAlias           = 5,
-    ReqDoc              = 6,
-    Done                = 7,
-    // We cannot add more kinds here; this has to fit in 3 bits.
+    TypeAlias           = 3,
+    Record              = 4,
+    Done                = 5,
+    // We can add two more kind here; this has to fit in 3 bits.
   };
 
   /*
@@ -310,19 +219,15 @@ public:
    */
   using FuncRange = MergeInfo::FuncRange;
   using MutableFuncRange = MergeInfo::MutableFuncRange;
-
-  /*
-   * Cache for pseudomains for this unit, keyed by Class context.
-   */
-  using PseudoMainCacheMap = hphp_hash_map<
-    const Class*, Func*, pointer_hash<Class>
-  >;
+  using PreClassPtrVec = VMCompactVector<PreClassPtr>;
+  using TypeAliasVec = VMCompactVector<PreTypeAlias>;
+  using ConstantVec = VMFixedVector<Constant>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
 
   Unit();
-  ~Unit();
+  virtual ~Unit();
 
   /*
    * New and delete using low memory.
@@ -340,15 +245,25 @@ public:
   int64_t sn() const;
 
   /*
-   * MD5 of the Unit.
+   * SHA1 of the source code for Unit.
    */
-  MD5 md5() const;
+  SHA1 sha1() const;
+
+  /*
+   * SHA1 of the bytecode for Unit.
+   */
+  SHA1 bcSha1() const;
 
   /*
    * File and directory paths.
    */
   const StringData* filepath() const;
   const StringData* dirpath() const;
+
+  /*
+   * Was this unit created in response to an internal compiler error?
+   */
+  bool isICE() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
@@ -358,22 +273,6 @@ public:
    */
   PC entry() const;
   Offset bclen() const;
-
-  /*
-   * Convert between PC and Offset from entry().
-   */
-  PC at(Offset off) const;
-  Offset offsetOf(PC pc) const;
-
-  /*
-   * Is `pc' in this Unit?
-   */
-  bool contains(PC pc) const;
-
-  /*
-   * Get the Op at `instrOffset'.
-   */
-  Op getOp(Offset instrOffset) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
@@ -414,6 +313,45 @@ public:
    * impossible).
    */
   const Func* getFunc(Offset pc) const;
+
+  /*
+   * Check whether the coverage map has been enabled for this unit.
+   */
+  bool isCoverageEnabled() const;
+
+  /*
+   * Enable or disable the coverage map for this unit.
+   *
+   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   */
+  void enableCoverage();
+  void disableCoverage();
+
+  /*
+   * Reset the coverage map.
+   *
+   * Pre: isCoverageEnabled()
+   */
+  void clearCoverage();
+
+  /*
+   * Record that the bytecode at off was covered.
+   */
+  void recordCoverage(Offset off);
+
+  /*
+   * Generate a vec array where each entry is an integer indicating a covered
+   * line from this file.
+   */
+  Array reportCoverage() const;
+
+  /*
+   * Return an RDS handle that when initialized indicates that coverage is
+   * enabled for this unit.
+   *
+   * Pre: !RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage
+   */
+  rds::Handle coverageDataHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Litstrs and NamedEntitys.                                          [const]
@@ -462,43 +400,26 @@ public:
    const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Funcs and PreClasses.                                              [const]
+  // Funcs, PreClasses, and RecordDescs.                                [const]
 
   /*
-   * Look up a Func or PreClass by ID.
+   * Look up a Func or PreClass or PreRecordDesc by ID.
    */
   Func* lookupFuncId(Id id) const;
   PreClass* lookupPreClassId(Id id) const;
+  PreRecordDesc* lookupPreRecordId(Id id) const;
 
   /*
-   * Range over all Funcs or PreClasses in the Unit.
+   * Range over all Funcs or PreClasses or RecordDescs in the Unit.
    */
   FuncRange funcs() const;
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
+  folly::Range<PreRecordDescPtr*> prerecords();
+  folly::Range<const PreRecordDescPtr*> prerecords() const;
 
-  /*
-   * Get a pseudomain for the Unit with the context class `cls'.
-   *
-   * We clone the toplevel pseudomain for each context class and cache the
-   * results in m_pseudoMainCache.
-   */
-  Func* getMain(Class* cls) const;
-
-  /*
-   * The first hoistable Func in the Unit.
-   *
-   * This is only used for the create_function() implementation, to access the
-   * __lambda_func() we define for the user.
-   */
-  Func* firstHoistable() const;
-
-  /*
-   * Rename the Func in this Unit given by `oldName' to `newName'.
-   *
-   * This should only be called by ExecutionContext::createFunction().
-   */
-  void renameFunc(const StringData* oldName, const StringData* newName);
+  // Return the cached EntryPoint
+  Func* getCachedEntryPoint() const;
 
   /*
    * Visit all functions and methods in this unit.
@@ -506,127 +427,66 @@ public:
   template<class Fn> void forEachFunc(Fn fn) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Func lookup.                                                      [static]
+  // RecordDesc lookup.                                               [static]
 
   /*
-   * Define `func' for this request by initializing its RDS handle.
-   */
-  static void defFunc(Func* func, bool debugger);
-
-  /*
-   * Look up the defined Func in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
+   * Define a new RecordDesc from `record' for this request.
    *
-   * Return nullptr if the function is not yet defined in this request.
-   */
-  static Func* lookupFunc(const NamedEntity* ne);
-  static Func* lookupFunc(const StringData* name);
-
-  /*
-   * Look up, or autoload and define, the Func in this request with name `name',
-   * or with the name mapped to the NamedEntity `ne'.
-   *
-   * @requires: NamedEntity::get(name) == ne
-   */
-  static Func* loadFunc(const NamedEntity* ne, const StringData* name);
-  static Func* loadFunc(const StringData* name);
-
-  /*
-   * bind (or rebind) a func to the NamedEntity corresponding to its
-   * name.
-   */
-  static void bindFunc(Func* func);
-
-  /*
-   * Lookup the builtin in this request with name `name', or nullptr if none
-   * exists. This does not access RDS so it is safe to use from within the
-   * compiler. Note that does not mean imply that the name binding for the
-   * builtin is immutable. The builtin could be renamed or intercepted.
-   */
-  static Func* lookupBuiltin(const StringData* name);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Class lookup.                                                     [static]
-
-  /*
-   * Define a new Class from `preClass' for this request.
-   *
-   * Raises a fatal error in various conditions (e.g., Class already defined,
-   * parent Class not defined, etc.) if `failIsFatal' is set).
+   * Raises a fatal error in various conditions (e.g., RecordDesc already
+   * defined, etc.) if `failIsFatal' is set).
    *
    * Also always fatals if a type alias already exists in this request with the
-   * same name as that of `preClass', regardless of the value of `failIsFatal'.
+   * same name as that of `record', regardless of the value of `failIsFatal'.
    */
-  static Class* defClass(const PreClass* preClass, bool failIsFatal = true);
+  static RecordDesc* defRecordDesc(PreRecordDesc* record,
+                                   bool failIsFatal = true);
 
   /*
-   * Define a closure from preClass. Closures have unique names, so unlike
-   * defClass, this is a one time operation.
-   */
-  static Class* defClosure(const PreClass* preClass);
-
-  /*
-   * Set the NamedEntity for `alias' to refer to the class `original' in this
-   * request.
-   *
-   * Raises a warning and returns false if `alias' already refers to a
-   * Class in this request, or if original is not loaded, and autoload
-   * is false, or it can't be autoloaded. Returns true otherwise.
-   */
-  static bool aliasClass(const StringData* original, const StringData* alias,
-                         bool autoload);
-
-  /*
-   * Look up the Class in this request with name `name', or with the name
+   * Look up the RecordDesc in this request with name `name', or with the name
    * mapped to the NamedEntity `ne'.
    *
-   * Return nullptr if the class is not yet defined in this request.
+   * Return nullptr if the record is not yet defined in this request.
    */
-  static Class* lookupClass(const NamedEntity* ne);
-  static Class* lookupClass(const StringData* name);
+  static RecordDesc* lookupRecordDesc(const NamedEntity* ne);
+  static RecordDesc* lookupRecordDesc(const StringData* name);
 
   /*
-   * Finds a class which is guaranteed to be unique in the specified
-   * context. The class has not necessarily been loaded in the
-   * current request.
+   * Finds a record which is guaranteed to be unique.
+   * The record has not necessarily been loaded in the current request.
    *
-   * Return nullptr if there is no such class.
+   * Return nullptr if there is no such record.
    */
-  static const Class* lookupUniqueClassInContext(const NamedEntity* ne,
-                                                 const Class* ctx);
-  static const Class* lookupUniqueClassInContext(const StringData* name,
-                                                 const Class* ctx);
+  static const RecordDesc* lookupUniqueRecDesc(const StringData* name);
 
   /*
-   * Look up, or autoload and define, the Class in this request with name
-   * `name', or with the name mapped to the NamedEntity `ne'.
+   * Autoload the RecordDesc with name `name' and bind it `ne' in this request.
    *
    * @requires: NamedEntity::get(name) == ne
    */
-  static Class* loadClass(const NamedEntity* ne, const StringData* name);
-  static Class* loadClass(const StringData* name);
+  static RecordDesc* loadMissingRecordDesc(const NamedEntity* ne,
+                                           const StringData* name);
 
   /*
-   * Autoload the Class with name `name' and bind it `ne' in this request.
-   *
-   * @requires: NamedEntity::get(name) == ne
+   * Same as lookupRecordDesc(), but if `tryAutoload' is set, call and return
+   * loadMissingRecordDesc().
    */
-  static Class* loadMissingClass(const NamedEntity* ne, const StringData* name);
+  static RecordDesc* getRecordDesc(const NamedEntity* ne,
+                                   const StringData* name,
+                                   bool tryAutoload);
+  static RecordDesc* getRecordDesc(const StringData* name, bool tryAutoload);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Constants.
+
+  folly::Range<Constant*> constants();
+  folly::Range<const Constant*> constants() const;
 
   /*
-   * Same as lookupClass(), but if `tryAutoload' is set, call and return
-   * loadMissingClass().
+   * Define the constant given by `id'
    */
-  static Class* getClass(const NamedEntity* ne, const StringData* name,
-                         bool tryAutoload);
-  static Class* getClass(const StringData* name, bool tryAutoload);
+  void defCns(Id id);
 
-  /*
-   * Whether a Class with name `name' of type `kind' has been defined in this
-   * request, autoloading it if `autoload' is set.
-   */
-  static bool classExists(const StringData* name,
-                          bool autoload, ClassKind kind);
+  static Variant getCns(const StringData* name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
@@ -637,7 +497,7 @@ public:
    *
    * Return nullptr if no such constant is defined.
    */
-  static const Cell* lookupCns(const StringData* cnsName);
+  static TypedValue lookupCns(const StringData* cnsName);
 
   /*
    * Look up the value of the persistent constant with name `cnsName'.
@@ -645,55 +505,68 @@ public:
    * Return nullptr if no such constant exists, or the constant is not
    * persistent.
    */
-  static const Cell* lookupPersistentCns(const StringData* cnsName);
+  static const TypedValue* lookupPersistentCns(const StringData* cnsName);
 
   /*
    * Look up, or autoload and define, the value of the constant with name
    * `cnsName' for this request.
    */
-  static const Cell* loadCns(const StringData* cnsName);
-
-  /*
-   * Define a constant (either request-local or persistent) with name `cnsName'
-   * and value `value'.
-   *
-   * May raise notices or warnings if a constant with the given name is already
-   * defined or if value is invalid.
-   */
-  static bool defCns(const StringData* cnsName, const TypedValue* value);
+  static TypedValue loadCns(const StringData* cnsName);
 
   /*
    * Define a constant with name `cnsName' with a magic callback. The
-   * Cell should be KindOfUninit, with a Native::ConstantCallback in
-   * its m_data.pref.
+   * TypedValue should be KindOfUninit, with a Native::ConstantCallback in
+   * its m_data.pcnt.
    *
    * The canonical examples are STDIN, STDOUT, and STDERR.
    */
-  static bool defNativeConstantCallback(const StringData* cnsName, Cell cell);
+  static bool defNativeConstantCallback(const StringData* cnsName, TypedValue cell);
 
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
-  folly::Range<TypeAlias*> typeAliases();
-  folly::Range<const TypeAlias*> typeAliases() const;
+  folly::Range<PreTypeAlias*> typeAliases();
+  folly::Range<const PreTypeAlias*> typeAliases() const;
+
+  /*
+   * Look up without autoloading a type alias named `name'. Returns nullptr
+   * if one cannot be found.
+   *
+   * If the type alias is found and `persistent' is provided, it will be set to
+   * whether or not the TypeAlias's RDS handle is persistent.
+   */
+  static const TypeAlias* lookupTypeAlias(const StringData* name,
+                                          bool* persistent = nullptr);
 
   /*
    * Look up or attempt to autoload a type alias named `name'. Returns nullptr
    * if one cannot be found or autoloaded.
    *
    * If the type alias is found and `persistent' is provided, it will be set to
-   * whether or not the TypeAliasReq's RDS handle is persistent.
+   * whether or not the TypeAlias's RDS handle is persistent.
    */
-  static const TypeAliasReq* loadTypeAlias(const StringData* name,
-                                           bool* persistent = nullptr);
+  static const TypeAlias* loadTypeAlias(const StringData* name,
+                                        bool* persistent = nullptr);
 
   /*
    * Define the type alias given by `id', binding it to the appropriate
    * NamedEntity for this request.
    *
-   * returns true iff the bound type alias is persistent.
+   * Raises a fatal error if type alias already defined or cannot be defined
+   * unless failIsFatal is unset
+   *
+   * Returns:
+   *   Persistent: Type alias is successfully defined and is persistent
+   *   Normal: Type alias is successfully defined and is not persistent
+   *   Fail: Type alias is not successfully defined
    */
-  bool defTypeAlias(Id id);
+  enum class DefTypeAliasResult { Fail, Normal, Persistent };
+  Unit::DefTypeAliasResult defTypeAlias(Id id, bool failIsFatal = true);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // File attributes.
+
+  const UserAttributeMap& fileAttributes() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Merge.
@@ -704,23 +577,10 @@ public:
   void merge();
 
   /*
-   * Is it sufficient to merge the Unit, and skip invoking its pseudomain?
-   */
-  bool isMergeOnly() const;
-
-  /*
    * Is this Unit empty---i.e., does it define nothing and have no
    * side-effects?
    */
   bool isEmpty() const;
-
-  /*
-   * Get the return value of the pseudomain, or KindOfUninit if not
-   * known.
-   *
-   * @requires: isMergeOnly()
-   */
-  const TypedValue* getMainReturn() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Info arrays.                                                      [static]
@@ -741,63 +601,10 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
 
-  struct PrintOpts {
-    PrintOpts()
-      : startOffset(kInvalidOffset)
-      , stopOffset(kInvalidOffset)
-      , showLines(true)
-      , showFuncs(true)
-      , indentSize(1)
-    {}
-
-    PrintOpts& range(Offset start, Offset stop) {
-      startOffset = start;
-      stopOffset = stop;
-      return *this;
-    }
-
-    PrintOpts& noLineNumbers() {
-      showLines = false;
-      return *this;
-    }
-
-    PrintOpts& noFuncs() {
-      showFuncs = false;
-      return *this;
-    }
-
-    PrintOpts& indent(int i) {
-      indentSize = i;
-      return *this;
-    }
-
-    Offset startOffset;
-    Offset stopOffset;
-    bool showLines;
-    bool showFuncs;
-    int indentSize;
-  };
-
-  void prettyPrint(std::ostream&, PrintOpts = PrintOpts()) const;
   std::string toString() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.
-
-  /*
-   * Is this Unit a compile-time fatal?
-   *
-   * A compile-time fatal is encoded as a pseudomain that contains precisely:
-   *
-   *   String <id>; Fatal;
-   *
-   * Decode enough of pseudomain to determine whether it contains a
-   * compile-time fatal, and if so, extract the error message and line number.
-   *
-   * Parse-time fatals are a subset of compile-time fatals.
-   */
-  bool compileTimeFatal(const StringData*& msg, int& line) const;
-  bool parseFatal(const StringData*& msg, int& line) const;
 
   /*
    * Get or set whether this Unit is interpret-only.
@@ -809,32 +616,29 @@ public:
   void setInterpretOnly();
 
   /*
-   * Replace the Unit?
+   * Get parse/runtime failure information if this unit is created as
+   * a result of one.
    */
-  void* replaceUnit() const;
-
-  /*
-   * Does this unit correspond to a file with "<?hh" at the top, irrespective of
-   * EnableHipHopSyntax?
-   */
-  bool isHHFile() const;
-
-  /*
-   * Should calls from this unit use strict types? (This is always true for HH
-   * units).
-   *
-   * With strict types enabled only lossless int->float conversions are allowed
-   */
-  bool useStrictTypes() const;
-
-  /*
-   * Should calls from this unit to builtins use strict types?
-   *
-   * This is true for PHP7 files with declare(strict_types=1), but not for Hack
-   * files or force_hh */
-  bool useStrictTypesForBuiltins() const;
+  const FatalInfo* getFatalInfo() const;
 
   UserAttributeMap metaData() const;
+
+  /*
+   * Atomically "claim" the symbol refs in this Unit for
+   * prefetching. Returns nullptr if no symbol refs are present, or if
+   * they have already been claimed. If a valid pointer is returned,
+   * you have exclusive access to the symbol refs and no future call
+   * to this function will return them.
+   */
+  SymbolRefs* claimSymbolRefsForPrefetch();
+
+  // Return true, and set the m_serialized flag, iff this Unit hasn't
+  // been serialized yet (see prof-data-serialize.cpp).
+  bool serialize() const {
+    if (m_serialized) return false;
+    const_cast<Unit*>(this)->m_serialized = true;
+    return true;
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -849,9 +653,12 @@ public:
 private:
   void initialMerge();
   template<bool debugger>
-  void mergeImpl(void* tcbase, MergeInfo* mi);
+  void mergeImpl(MergeInfo* mi);
   UnitExtended* getExtended();
   const UnitExtended* getExtended() const;
+  MergeInfo* mergeInfo() const {
+    return m_mergeInfo.load(std::memory_order_acquire);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -862,36 +669,44 @@ private:
   unsigned char const* m_bc{nullptr};
   Offset m_bclen{0};
   LowStringPtr m_filepath{nullptr};
-  MergeInfo* m_mergeInfo{nullptr};
+  std::atomic<MergeInfo*> m_mergeInfo{nullptr};
 
   int8_t m_repoId{-1};
   /*
    * m_mergeState is read without a lock, but only written to under
    * unitInitLock (see unit.cpp).
    */
-  uint8_t m_mergeState{MergeState::Unmerged};
-  bool m_mergeOnly: 1;
+  std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
   bool m_interpretOnly : 1;
-  bool m_isHHFile : 1;
-  bool m_useStrictTypes : 1;
-  bool m_useStrictTypesForBuiltins : 1;
   bool m_extended : 1;
+  bool m_serialized : 1;
+  bool m_ICE : 1; // was this unit the result of an internal compiler error
   LowStringPtr m_dirpath{nullptr};
 
-  TypedValue m_mainReturn;
-  CompactVector<PreClassPtr> m_preClasses;
-  FixedVector<TypeAlias> m_typeAliases;
+  PreClassPtrVec m_preClasses;
+  TypeAliasVec m_typeAliases;
+  ConstantVec m_constants;
+  CompactVector<PreRecordDescPtr> m_preRecords;
+  /*
+   * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
+   * mergeImpl will drop the original EP.
+   */
+  Func* m_cachedEntryPoint{nullptr};
 
   /*
    * The remaining fields are cold, and arbitrarily ordered.
    */
 
   int64_t m_sn{-1};             // Note: could be 32-bit
-  MD5 m_md5;
-  FixedVector<const ArrayData*> m_arrays;
-  mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
-  mutable LockFreePtrWrapper<CompactVector<LineInfo>> m_lineMap;
+  SHA1 m_sha1;
+  SHA1 m_bcSha1;
+  VMFixedVector<const ArrayData*> m_arrays;
+  mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
+  UserAttributeMap m_fileAttributes;
+  std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
+
+  rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 };
 
 struct UnitExtended : Unit {
@@ -903,6 +718,9 @@ struct UnitExtended : Unit {
   NamedEntityPairTable m_namedInfo;
   ArrayTypeTable m_arrayTypeTable;
   FuncTable m_funcTable;
+
+  SymbolRefs m_symbolRefsForPrefetch;
+  std::atomic_flag m_symbolRefsPrefetched;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -912,4 +730,3 @@ struct UnitExtended : Unit {
 #include "hphp/runtime/vm/unit-inl.h"
 #undef incl_HPHP_VM_UNIT_INL_H_
 
-#endif // incl_HPHP_VM_UNIT_H_

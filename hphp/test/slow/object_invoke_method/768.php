@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // as a private/protected method
 class C6 {
@@ -11,9 +11,13 @@ class C7 {
     var_dump($a0);
   }
 }
+ // still works...
+
+<<__EntryPoint>>
+function main_768() {
 $c = new C6;
 $c(10);
  // still works...
 $c = new C7;
 $c(20);
- // still works...
+}

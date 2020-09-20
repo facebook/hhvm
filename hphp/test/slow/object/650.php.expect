@@ -1,11 +1,11 @@
-object(A)#1 (2) {
+object(A) (2) {
   ["a"]=>
   int(2)
   ["b"]=>
   int(1)
 }
 int(1)
-object(B)#2 (2) {
+object(B) (2) {
   ["b"]=>
   int(3)
   ["a"]=>

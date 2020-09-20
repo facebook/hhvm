@@ -1,0 +1,4 @@
+File "typing_fail_uninstantiable_variadic_meth.php", line 15, characters 33-60:
+`CannotBeInstantiatedWithT` is uninstantiable (Typing[4002])
+File "typing_fail_uninstantiable_variadic_meth.php", line 11, characters 22-46:
+Declaration is here

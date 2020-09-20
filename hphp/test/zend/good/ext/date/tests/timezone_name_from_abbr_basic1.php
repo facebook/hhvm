@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string timezone_name_from_abbr  ( string $abbr  [, int $gmtOffset= -1  [, int $isdst= -1  ]] )
  * Description: Returns the timezone name from abbrevation
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing timezone_name_from_abbr() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -36,5 +36,5 @@ var_dump( timezone_name_from_abbr("", -14400, 0) );
 echo "-- Tests with invalid offsets --\n"; 
 var_dump( timezone_name_from_abbr("", 5400) ); // offset = 1.5 hrs
 var_dump( timezone_name_from_abbr("", 62400) ); // offset = 24 hrs
-?>
-===DONE===
+echo "===DONE===\n";
+}

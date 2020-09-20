@@ -7,7 +7,7 @@ function normal(string $s): int {
 <<__Rx>>
 function rx1(): void {
   // OK - if lambda is not called
-  $l = () ==> {
+  $l = <<__NonRx>>() ==> {
     normal("text");
   };
 }
@@ -19,7 +19,7 @@ class C {
 <<__Rx>>
 function rx2(): void {
   // OK - if lambda is not called
-  $l = (bool $a, C $c) ==> {
+  $l = <<__NonRx>>(bool $a, C $c) ==> {
     if ($a) {
       normal("text1");
     } else {

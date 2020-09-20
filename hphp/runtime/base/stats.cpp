@@ -36,33 +36,34 @@ const char* g_counterNames[] = {
 #undef STAT
 #undef O
 };
-__thread uint64_t tl_counters[kNumStatCounters];
 
 typedef hphp_const_char_map<hphp_const_char_map<uint64_t>> StatGroupMap;
-__thread StatGroupMap* tl_stat_groups = nullptr;
+
+RDS_LOCAL(StatCounters, rl_counters);
+RDS_LOCAL(StatGroupMap*, rl_stat_groups);
 
 void init() {
   if (!enabledAny()) return;
-  assert(tl_stat_groups == nullptr);
-  tl_stat_groups = new StatGroupMap();
+  assertx(*rl_stat_groups == nullptr);
+  *rl_stat_groups = new StatGroupMap();
 }
 
-static __thread int64_t epoch;
+static RDS_LOCAL(int64_t, epoch);
 void dump() {
   if (!enabledAny()) return;
 
   auto url = g_context->getRequestUrl(50);
-  TRACE(0, "STATS %" PRId64 " %s\n", epoch, url.c_str());
+  TRACE(0, "STATS %" PRId64 " %s\n", *epoch, url.c_str());
 #include "hphp/runtime/vm/stats-opcodeDef.h"
 #define STAT(s) \
-  if (!tl_counters[s]) {} else                                  \
-    TRACE(0, "STAT %-50s %15" PRId64 "\n", #s, tl_counters[s]);
+  if (!rl_counters->counters[s]) {} else                                  \
+    TRACE(0, "STAT %-50s %15" PRId64 "\n", #s, rl_counters->counters[s]);
   STATS
 #undef STAT
 #undef O
 
   typedef std::pair<const char*, uint64_t> StatPair;
-  for (auto const& group : *tl_stat_groups) {
+  for (auto const& group : **rl_stat_groups) {
     std::string stats;
     auto const& map = group.second;
     uint64_t total = 0, accum = 0;
@@ -103,17 +104,17 @@ void dump() {
 
 void clear() {
   if (!enabledAny()) return;
-  ++epoch;
-  memset(&tl_counters[0], 0, sizeof(tl_counters));
+  ++*epoch;
+  memset(&rl_counters->counters[0], 0, sizeof(rl_counters->counters));
 
-  assert(tl_stat_groups);
-  delete tl_stat_groups;
-  tl_stat_groups = nullptr;
+  assertx(*rl_stat_groups);
+  delete *rl_stat_groups;
+  *rl_stat_groups = nullptr;
 }
 
 void incStatGrouped(const StringData* category, const StringData* name, int n) {
-  assert(tl_stat_groups);
-  (*tl_stat_groups)[category->data()][name->data()] += n;
+  assertx(*rl_stat_groups);
+  (**rl_stat_groups)[category->data()][name->data()] += n;
 }
 
 } }

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB commands for various HHVM ID lookups.
 """
@@ -20,6 +22,7 @@ class LookupCommand(gdb.Command):
         super(LookupCommand, self).__init__('lookup', gdb.COMMAND_DATA,
                                             gdb.COMPLETE_NONE, True)
 
+
 LookupCommand()
 
 
@@ -28,7 +31,16 @@ LookupCommand()
 
 def lookup_func(val):
     funcid = val.cast(T('HPHP::FuncId'))
-    return idx.atomic_vector_at(V('HPHP::s_funcVec'), funcid)
+    result = idx.atomic_low_ptr_vector_at(V('HPHP::Func::s_funcVec'), funcid)
+    return result.cast(T('HPHP::Func').pointer())
+
+
+def lookup_func_from_fp(fp):
+    try:
+        # if not lowptr, this should succeed
+        return lookup_func(fp['m_funcId'])
+    except:
+        return rawptr(fp['m_func'])
 
 
 class LookupFuncCommand(gdb.Command):
@@ -66,17 +78,21 @@ LookupFuncFunction()
 # `lookup litstr' command.
 
 def lookup_litstr(litstr_id, u):
-    gloff = V('HPHP::kGlobalLitstrOffset')
+    uloff = V('HPHP::kUnitLitstrOffset')
 
-    if litstr_id >= gloff:
-        litstr_id -= gloff
+    if litstr_id < uloff:
         u = V('HPHP::LitstrTable::s_litstrTable')
+    else:
+        litstr_id -= uloff
+        u = u.cast(T('HPHP::UnitExtended').pointer())
 
     val = u['m_namedInfo']
     # get the base type
     ty = val.type.fields()[0].type
     val = val.address.cast(ty.pointer()).dereference()
-    return idx.compact_vector_at(val, litstr_id)
+    elm = idx.compact_vector_at(val, litstr_id)
+    ty = elm.type.template_argument(0)
+    return elm.address.cast(ty.pointer()).dereference()
 
 
 class LookupLitstrCommand(gdb.Command):
@@ -107,5 +123,6 @@ If no Unit is given, the current unit (set by `unit') is used.
 
         litstr = lookup_litstr(litstr_id, u)
         gdbprint(litstr)
+
 
 LookupLitstrCommand()

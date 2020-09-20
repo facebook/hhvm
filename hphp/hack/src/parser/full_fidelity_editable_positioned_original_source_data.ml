@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -22,13 +21,16 @@ module Trivia = Full_fidelity_positioned_trivia
  *)
 type t = {
   source_text: SourceText.t;
-  offset: int; (* Beginning of first trivia *)
+  offset: int;
+  (* Beginning of first trivia *)
   leading_width: int;
-  width: int; (* Width of actual token, not counting trivia *)
+  width: int;
+  (* Width of actual token, not counting trivia *)
   trailing_width: int;
   leading: Trivia.t list;
   trailing: Trivia.t list;
 }
+[@@deriving show, eq]
 
 let empty =
   {
@@ -63,39 +65,41 @@ let from_positioned_syntax syntax =
     trailing = [];
   }
 
-let source_text data =
-  data.source_text
+let source_text data = data.source_text
 
-let leading_width data =
-  data.leading_width
+let leading_width data = data.leading_width
 
-let width data =
-  data.width
+let width data = data.width
 
-let trailing_width data =
-  data.trailing_width
+let trailing_width data = data.trailing_width
 
-let leading_start_offset data =
-  data.offset
+let leading_start_offset data = data.offset
 
-let leading data =
-  data.leading
+let leading data = data.leading
 
 let with_leading leading data =
   (* TODO: Do we need to update leading_width and offset? *)
   { data with leading }
 
-let trailing data =
-  data.trailing
+let trailing data = data.trailing
 
-let start_offset data =
-  leading_start_offset data + leading_width data
+let with_trailing trailing data =
+  (* TODO: Do we need to update trailing_width and offset? *)
+  { data with trailing }
+
+let start_offset data = leading_start_offset data + leading_width data
 
 let end_offset data =
-  start_offset data + width data
+  let w = width data - 1 in
+  let w =
+    if w < 0 then
+      0
+    else
+      w
+  in
+  start_offset data + w
 
-let full_width data =
-  leading_width data + width data + trailing_width data
+let full_width data = leading_width data + width data + trailing_width data
 
 let text data =
   SourceText.sub (source_text data) (start_offset data) (width data)
@@ -121,17 +125,18 @@ let spanning_between b e =
     source_text = b.source_text;
     offset = b.offset;
     leading_width = b.leading_width;
-    width = end_offset e - start_offset b;
+    width = end_offset e + 1 - start_offset b;
     trailing_width = e.trailing_width;
     leading = b.leading;
     trailing = e.trailing;
   }
 
 let to_json data =
-  let open Hh_json in
-  JSON_Object [
-    ("offset", int_ data.offset);
-    ("leading_width", int_ data.leading_width);
-    ("width", int_ data.width);
-    ("trailing_width", int_ data.trailing_width);
-  ]
+  Hh_json.(
+    JSON_Object
+      [
+        ("offset", int_ data.offset);
+        ("leading_width", int_ data.leading_width);
+        ("width", int_ data.width);
+        ("trailing_width", int_ data.trailing_width);
+      ])

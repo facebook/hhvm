@@ -1,6 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(parse_url("http://example.com/path/script.html?t=1#fragment?data"));
 var_dump(parse_url("http://example.com/path/script.html#fragment?data"));
-
-?>
+}

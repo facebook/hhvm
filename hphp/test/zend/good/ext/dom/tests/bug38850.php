@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $xml = <<<HERE
 <?xml version="1.0" ?>
 <foo xmlns="http://www.example.com/ns/foo" />
@@ -10,6 +10,4 @@ $doc->loadXML($xml);
 $root = $doc->documentElement;
 
 print $root->lookupNamespaceURI(NULL);
-
-
-?>
+}

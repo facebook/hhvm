@@ -1,0 +1,8 @@
+int(42)
+float(3.14)
+string(3) "abc"
+bool(true)
+bool(false)
+object(stdClass) (0) {
+}
+Argument 1 passed to takes_nonnull() must be an instance of nonnull, null given

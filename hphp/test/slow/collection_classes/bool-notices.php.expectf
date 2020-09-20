@@ -1,0 +1,72 @@
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 9
+bool(false)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 10
+bool(true)
+
+Notice: HH\Set to boolean cast in %s/bool-notices.php on line 11
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 12
+bool(true)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 14
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 15
+bool(true)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 17
+bool(false)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 18
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 9
+bool(false)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 10
+bool(true)
+
+Notice: HH\Set to boolean cast in %s/bool-notices.php on line 11
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 12
+bool(true)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 14
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 15
+bool(true)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 17
+bool(false)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 18
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 9
+bool(false)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 10
+bool(true)
+
+Notice: HH\Set to boolean cast in %s/bool-notices.php on line 11
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 12
+bool(true)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 14
+bool(false)
+
+Notice: HH\Vector to boolean cast in %s/bool-notices.php on line 15
+bool(true)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 17
+bool(false)
+
+Notice: HH\Map to boolean cast in %s/bool-notices.php on line 18
+bool(false)

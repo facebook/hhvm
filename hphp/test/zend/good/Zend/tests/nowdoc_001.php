@@ -1,7 +1,6 @@
-<?php
+<?hh
 
-require_once 'nowdoc.inc';
-
+<<__EntryPoint>> function main(): void {
 print <<<'ENDOFNOWDOC'
 This is a nowdoc test.
 
@@ -13,5 +12,4 @@ With another line in it.
 ENDOFNOWDOC;
 
 print "{$x}";
-
-?>
+}

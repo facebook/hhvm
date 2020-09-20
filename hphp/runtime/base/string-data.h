@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_DATA_H_
-#define incl_HPHP_STRING_DATA_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -38,6 +37,7 @@ struct APCString;
 struct Array;
 struct String;
 struct APCHandle;
+struct NamedEntity;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -60,7 +60,7 @@ enum CopyStringMode { CopyString };
  * StringDatas can also be allocated in multiple ways.  Normally, they
  * are created through one of the Make overloads, which drops them in
  * the request-local heap.  They can also be low-malloced (for static
- * strings), or malloc'd (MakeMalloc) for APC shared or uncounted strings.
+ * strings), or uncounted-malloced for APC shared or uncounted strings.
  *
  * Here's a breakdown of string modes, and which configurations are
  * allowed in which allocation mode:
@@ -143,6 +143,13 @@ struct StringData final : MaybeCountable,
   static StringData* MakeProxy(const APCString* apcstr);
 
   /*
+   * Initialize a static string on a pre-allocated range of memory. This is
+   * useful when we need to create static strings at designated addresses when
+   * optimizing locality.
+   */
+  static StringData* MakeStaticAt(folly::StringPiece, MemBlock);
+
+  /*
    * Allocate a string with malloc, using the low-memory allocator if
    * jemalloc is available, and setting it as a static string.
    *
@@ -155,7 +162,7 @@ struct StringData final : MaybeCountable,
   /*
    * Same as MakeStatic but the string allocated will *not* be in the static
    * string table, will not be in low-memory, and should be deleted using
-   * destructUncounted once the root goes out of scope.
+   * ReleaseUncounted once the root goes out of scope.
    */
   static StringData* MakeUncounted(folly::StringPiece);
 
@@ -203,21 +210,17 @@ struct StringData final : MaybeCountable,
 
   /*
    * StringData objects allocated with MakeUncounted should be freed
-   * using this function.
+   * using this function. It will remove a reference via
+   * uncountedDecRef, and if necessary destroy the StringData and
+   * return true.
    */
-  void destructUncounted();
-
-  /*
-   * root is the address of the top-level APCHandle which contains this string
-   * register {allocation, root} with APCGCManager
-   */
-  void registerUncountedAllocation(APCHandle* rootAPCHandle);
+  static void ReleaseUncounted(const StringData*);
 
   /*
    * Reference-counting related.
    */
   ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     if (decReleaseCheck()) release();
   }
 
@@ -416,6 +419,33 @@ struct StringData final : MaybeCountable,
   StringData* increment();
 
   /*
+   * We identify certain strings as "symbols", which store a small cache.
+   * This concept is just an optimization; nothing is required to be a symbol.
+   *
+   * After loading a majority of symbols, call StringData::markSymbolsLoaded
+   * to avoid allocating these extra caches on any more static strings.
+   */
+  bool isSymbol() const;
+  static void markSymbolsLoaded();
+
+  /*
+   * Get or set the cached class or named entity. Get will return nullptr
+   * if the corresponding cached value hasn't been set yet.
+   *
+   * Pre: isSymbol()
+   */
+  Class* getCachedClass() const;
+  NamedEntity* getNamedEntity() const;
+  void setCachedClass(Class* cls);
+  void setNamedEntity(NamedEntity* ne);
+
+  /*
+   * Helpers used to JIT access to the symbol cache.
+   */
+  static ptrdiff_t isSymbolOffset();
+  static ptrdiff_t cachedClassOffset();
+
+  /*
    * Type conversion functions.
    */
   bool toBoolean() const;
@@ -504,7 +534,9 @@ private:
 
 private:
   template<bool trueStatic>
-  static StringData* MakeShared(folly::StringPiece sl);
+  static MemBlock AllocateShared(folly::StringPiece sl);
+  template<bool trueStatic>
+  static StringData* MakeSharedAt(folly::StringPiece sl, MemBlock range);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
@@ -546,6 +578,16 @@ private:
     uint64_t m_lenAndHash;
   };
 };
+
+/*
+ * Some static StringData has a SymbolPrefix allocated right in front.
+ */
+struct SymbolPrefix {
+  AtomicLowPtr<NamedEntity> ne;
+  AtomicLowPtr<Class> cls;
+};
+
+static_assert(sizeof(SymbolPrefix) % alignof(StringData) == 0, "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -596,7 +638,7 @@ void decRefStr(StringData* s);
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Function objects the forward to the StringData member functions of
+ * Function objects that forward to the StringData member functions of
  * the same name.
  */
 struct string_data_hash;
@@ -657,4 +699,3 @@ template<> class FormatValue<HPHP::StringData*> {
 
 #include "hphp/runtime/base/string-data-inl.h"
 
-#endif

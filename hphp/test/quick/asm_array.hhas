@@ -2,56 +2,50 @@
 # Test arrays for hhbc asm.
 #
 
-.main {
-  String "main"
-  FPushFunc 0
-  FCall 0 # allow the JIT why not
-  PopR
-
-  Int 1
-  RetC
-}
-
-.adata my_array = """a:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
+.adata my_array = """Y:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
 
 .class ClassWithArray {
   .property [static public] arr =
-            """a:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
+            """Y:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
 }
 
 .function ArrayMember() {
-  .numclsrefslots 1;
-  FPushFuncD 1 "var_dump"
+  NullUninit
+  NullUninit
+  NullUninit
     String "arr"
     String "ClassWithArray"
-    ClsRefGetC 0
-    CGetS 0
-    FPassC 0 Any
-  FCall 1
-  PopR
+    ClassGetC
+    CGetS
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
 
   String "ClassWithArray"
   SetL $x
   PopC
 
-  FPushFuncD 1 "var_dump"
+  NullUninit
+  NullUninit
+  NullUninit
     String "arr"
     Int 2
-    ClsRefGetL $x 0
-    BaseSC 1 0
-    QueryM 2 CGet EC:0
-    FPassC 0 Any
-  FCall 1
-  PopR
+    CGetL $x
+    ClassGetC
+    BaseSC 2 0 Warn
+    QueryM 3 CGet EC:1
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
 
   True
   RetC
 }
 
-.function main() {
-  FPushFuncD 0 "ArrayMember"
-  FCall 0
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "ArrayMember"
+  PopC
 
   Array @my_array
   SetL $arr
@@ -84,7 +78,7 @@
 
   # Test that it's unset
   CGetL $arr
-  BaseC 0
+  BaseC 0 Warn
   QueryM 1 Isset EL:$key
   JmpZ unset_label
 
@@ -99,18 +93,21 @@ unset_label:  String "win\n"
               Print
               PopC
 
-              FPushFuncD 1 "var_dump"
-              FPassL 0 $arr Any
-              FCall 1
-              PopR
+              NullUninit
+              NullUninit
+              NullUninit
+              CGetL $arr
+              FCallFuncD <> 1 1 "" - "" "var_dump"
+              PopC
 
-              FPushFuncD 1 "var_dump"
+              NullUninit
+              NullUninit
+              NullUninit
               Int 1
               String "b"
-              NewPackedArray 2
-              FPassC 0 Any
-              FCall 1
-              PopR
+              NewVArray 2
+              FCallFuncD <> 1 1 "" - "" "var_dump"
+              PopC
 
               Null
               RetC

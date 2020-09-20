@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function test(string $key): void {
   $s = shape();

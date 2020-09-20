@@ -1,14 +1,18 @@
-<?php
+<?hh
 
 
-function callee(HH\Map &$c) {
+function callee(inout HH\Map $c) {
 
 }
 
 function main() {
   $c = HH\Map {};
-  callee($c);
+  callee(inout $c);
   var_dump($c);
 }
 
+
+<<__EntryPoint>>
+function main_specialized_inner() {
 main();
+}

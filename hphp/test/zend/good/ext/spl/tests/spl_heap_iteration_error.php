@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ext_heap extends SplMaxHeap {
   public $fail = false;
   public function compare($val1,$val2) {
@@ -7,11 +7,11 @@ class ext_heap extends SplMaxHeap {
     return 0;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $h = new ext_heap();
-$h->insert(array('foobar'));
-$h->insert(array('foobar1'));
-$h->insert(array('foobar2'));
+$h->insert(varray['foobar']);
+$h->insert(varray['foobar1']);
+$h->insert(varray['foobar2']);
 
 try {
   $h->fail=true;
@@ -22,4 +22,4 @@ try {
 }
 
 var_dump($h);
-?>
+}

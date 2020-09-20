@@ -1,5 +1,6 @@
 <?hh
-if (false) {
-  class Parent {}
-}
+
+class Parent {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

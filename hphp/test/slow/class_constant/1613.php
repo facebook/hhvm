@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  const A = 'a';
@@ -6,4 +6,8 @@ class A {
 class B extends A {
  const B = 'b';
  }
+
+<<__EntryPoint>>
+function main_1613() {
 var_dump(get_class_constants('B'));
+}

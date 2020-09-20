@@ -6,8 +6,12 @@ function main() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_unreachable() {
 try {
   main();
 } catch (Exception $e) {
   echo $e->getMessage() . "\n";
+}
 }

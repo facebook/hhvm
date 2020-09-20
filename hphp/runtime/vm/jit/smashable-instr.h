@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SMASHABLE_INSTR_H_
-#define incl_HPHP_JIT_SMASHABLE_INSTR_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -64,14 +63,17 @@ size_t smashableJmpLen();
 size_t smashableJccLen();
 
 /*
+ * Boundry to align the smashables to (normally cache line size).
+ */
+size_t smashableAlignTo();
+
+/*
  * Emit a smashable instruction and return the instruction's address.
  *
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).
  */
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp);
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target);
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
@@ -111,8 +113,15 @@ ConditionCode smashableJccCond(TCA inst);
  */
 TCA smashableCallFromRet(TCA ret);
 
+/*
+ * Optimize a smashable instruction in place after it has been smashed.  Returns
+ * whether or not the instruction was optimized.
+ */
+bool optimizeSmashedCall(TCA inst);
+bool optimizeSmashedJmp(TCA inst);
+bool optimizeSmashedJcc(TCA inst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

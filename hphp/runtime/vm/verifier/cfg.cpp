@@ -25,7 +25,7 @@ namespace Verifier {
  * Create all blocks and edges for one Func.
  */
 Graph* GraphBuilder::build() {
-  assert(!funcInstrs(m_func).empty());
+  assertx(!funcInstrs(m_func).empty());
   m_graph = new (m_arena) Graph();
   createBlocks();
   createExBlocks();
@@ -39,29 +39,26 @@ Graph* GraphBuilder::build() {
  * flow boundaries.  Calls are not treated as basic-block ends.
  */
 void GraphBuilder::createBlocks() {
-  PC bc = m_unit->entry();
-  m_graph->param_count = m_func->params().size();
-  m_graph->first_linear = createBlock(m_func->base());
+  PC bc = m_unit.entry();
+  m_graph->param_count = m_func.numParams();
+  m_graph->first_linear = createBlock(m_func.base());
   // DV entry points
   m_graph->entries = new (m_arena) Block*[m_graph->param_count + 1];
   int dv_index = 0;
-  for (auto& param : m_func->params()) {
+  for (size_t i = 0; i < m_func.numParams(); i++) {
+    auto& param = m_func.param(i);
     m_graph->entries[dv_index++] = !param.hasDefaultValue() ? 0 :
                                    createBlock(param.funcletOff);
   }
   // main entry point
-  assert(dv_index == m_graph->param_count);
-  m_graph->entries[dv_index] = createBlock(m_func->base());
+  assertx(dv_index == m_graph->param_count);
+  m_graph->entries[dv_index] = createBlock(m_func.base());
   // ordinary basic block boundaries
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
     if ((isCF(pc) || isTF(pc)) && !i.empty()) createBlock(i.front());
-    if (isSwitch(peek_op(pc))) {
-      foreachSwitchTarget(pc, [&](Offset o) { createBlock(pc + o); });
-    } else {
-      Offset target = instrJumpTarget(bc, pc - bc);
-      if (target != InvalidAbsoluteOffset) createBlock(target);
-    }
+    auto const targets = instrJumpTargets(bc, pc - bc);
+    for (auto const target : targets) createBlock(target);
   }
 }
 
@@ -70,47 +67,34 @@ void GraphBuilder::createBlocks() {
  * and end offsets
  */
 void GraphBuilder::linkBlocks() {
-  PC bc = m_unit->entry();
+  PC bc = m_unit.entry();
   Block* block = m_graph->first_linear;
   block->id = m_graph->block_count++;
   for (InstrRange i = funcInstrs(m_func); !i.empty(); ) {
     PC pc = i.popFront();
     block->last = pc;
     if (isCF(pc)) {
-      if (isSwitch(peek_op(pc))) {
-        int i = 0;
-        foreachSwitchTarget(pc, [&](Offset o) {
-          succs(block)[i++] = at(pc + o);
-        });
-      } else {
-        Offset target = instrJumpTarget(bc, pc - bc);
-        if (target != InvalidAbsoluteOffset) {
-          assert(numSuccBlocks(block) > 0);
-          succs(block)[numSuccBlocks(block) - 1] = at(target);
-        }
+      int i = 0;
+      auto const targets = instrJumpTargets(bc, pc - bc);
+      for (auto it = targets.rbegin(); it != targets.rend(); ++it) {
+        succs(block)[numSuccBlocks(block) - 1 - i] = at(*it);
+        ++i;
       }
     }
-    PC next_pc = !i.empty() ? i.front() : m_unit->at(m_func->past());
+    PC next_pc = !i.empty() ? i.front() : m_unit.at(m_func.past());
     Block* next = at(next_pc);
-    if (peek_op(pc) == Op::Unwind) { // exn block
-      if (auto const eh = m_func->findEHbyHandler(offset(pc))) {
-        // link the end of each fault handler to the beginning of its parent
-        succs(block)[0] = eh->m_parentIndex >= 0 ?
-          at(m_func->ehtab()[eh->m_parentIndex].m_handler) : nullptr;
-      }
-    }
     if (next) {
       block->next_linear = next;
       block->end = next_pc;
       if (!isTF(pc)) {
-        assert(numSuccBlocks(block) > 0);
+        assertx(numSuccBlocks(block) > 0);
         succs(block)[0] = next;
       }
       block = next;
       block->id = m_graph->block_count++;
     }
   }
-  block->end = m_unit->at(m_func->past());
+  block->end = m_unit.at(m_func.past());
 }
 
 /**
@@ -119,9 +103,10 @@ void GraphBuilder::linkBlocks() {
  * of each handler is also a boundary.
  */
 void GraphBuilder::createExBlocks() {
-  for (auto& handler : m_func->ehtab()) {
+  for (size_t i = 0; i < m_func.numEHEnts(); i++) {
+    auto& handler = m_func.ehent(i);
     createBlock(handler.m_base);
-    if (handler.m_past != m_func->past()) {
+    if (handler.m_past != m_func.past()) {
       createBlock(handler.m_past);
     }
     createBlock(handler.m_handler);
@@ -129,35 +114,24 @@ void GraphBuilder::createExBlocks() {
 }
 
 /**
- * return the next outermost handler or 0 if there aren't any
- */
-const EHEnt* nextOuter(const Func::EHEntVec& ehtab, const EHEnt* eh) {
-  return eh->m_parentIndex != -1 ? &ehtab[eh->m_parentIndex] : 0;
-}
-
-/**
  * Link primary body blocks to exception handler blocks as follows:
- * 1. For each block in the body, traverse from the innermost to
- *    outermost exception handler that includes the block.  For
- *    catch handlers, add an edge to each handler entry point. For
- *    fault handlers, add an edge to the fault handler and stop.
- * 2. For each fault handler block ending in Unwind, find the EH
- *    entry for the funclet, then traverse outwards starting from the
- *    next outermost.  Add any catch edges found, and stop at the first
- *    enclosing fault funclet, as in step 1.
- * The resulting linkage reflects exception control-flow; fault funclets
- * unconditionally handle any exception in their protected region, so they
- * "dominate" outer-more handlers.
+ *
+ * For each block in the body, traverse from the innermost to outermost
+ * exception handler that includes the block. For each handler, add an edge
+ * to each handler entry point.
+ *
+ * The resulting linkage reflects exception control-flow.
  */
 void GraphBuilder::linkExBlocks() {
   // For every block, add edges to reachable fault and catch handlers.
   for (LinearBlocks i = linearBlocks(m_graph); !i.empty(); ) {
     Block* b = i.popFront();
-    assert(m_func->findEH(offset(b->start)) == m_func->findEH(offset(b->last)));
+    assertx(m_func.findEH(offset(b->start)) ==
+            m_func.findEH(offset(b->last)));
     Offset off = offset(b->start);
-    const EHEnt* eh = m_func->findEH(off);
+    const EHEnt* eh = m_func.findEH(off);
     if (eh != nullptr) {
-      assert(eh->m_base <= off && off < eh->m_past);
+      assertx(eh->m_base <= off && off < eh->m_past);
       // the innermost exception handler is reachable from b
       b->exn = at(eh->m_handler);
     }

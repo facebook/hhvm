@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__Native>>
 function thrift_protocol_write_binary(object $transportobj,
@@ -36,3 +36,32 @@ function thrift_protocol_read_compact(object $transportobj,
 <<__Native>>
 function thrift_protocol_read_compact_struct(object $transportobj,
                                              string $obj_typename): object;
+
+<<__NativeData("RpcOptions")>>
+final class RpcOptions {
+  public function __construct(): void {}
+
+  /* Shared empty object for default use, e.g. in a generated code. */
+  <<__Memoize>>
+  public static function getSharedEmpty(): RpcOptions {
+    return new RpcOptions();
+  }
+
+  <<__Native>>
+  public function setChunkBufferSize(int $chunk_buffer_size): RpcOptions;
+
+  <<__Native>>
+  public function setRoutingKey(string $routing_key): RpcOptions;
+
+  <<__Native>>
+  public function setShardId(string $shard_id): RpcOptions;
+
+  <<__Native>>
+  public function setWriteHeader(string $key, string $value): RpcOptions;
+
+  <<__Native>>
+  public function setHeader(string $key, string $value): RpcOptions;
+
+  <<__Native>>
+  public function __toString(): string;
+}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Be aware that:

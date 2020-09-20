@@ -6,5 +6,9 @@
 class C {
 }
 
+
+<<__EntryPoint>>
+function main_user_attribute_concat() {
 $r = new ReflectionClass("C");
 var_dump($r->getAttributes());
+}

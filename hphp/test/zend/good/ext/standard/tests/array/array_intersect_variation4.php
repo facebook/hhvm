@@ -1,15 +1,15 @@
-<?php
+<?hh
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
 /*
-* Passing different types of arrays to $arr2 argument and testing whether 
-* array_intersect() behaves in expected way with the other arguments passed to the function.  
+* Passing different types of arrays to $arr2 argument and testing whether
+* array_intersect() behaves in expected way with the other arguments passed to the function.
 * The $arr1 argument is a fixed array.
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect() : Passing different types of arrays to \$arr2 argument ***\n";
 
 /* Different heredoc strings passed as argument to $arr2 */
@@ -43,42 +43,42 @@ $numeric_string = <<<EOT
 EOT;
 
 // array to be passsed to $arr1 argument
-$arr1 = array (
-  1, 1.1, "hello", "one", NULL, 2,
-  'world', true, false, false => 5, 'aaaa\r', "aaaa\r",
-  $numeric_string, $diff_whitespaces,
+$arr1 = darray[
+  0 => 1, 1 => 1.1, 2 => "hello", 3 => "one", 4 => NULL, 5 => 2,
+  6 => 'world', 7 => true, 8 => false, 0 => 5, 9 => 'aaaa\r', 10 => "aaaa\r",
+  11 => $numeric_string, 12 => $diff_whitespaces,
   "one" => "ten", 4 => "four", "two" => 2, 2 => "two",
-  '', null => "null", '' => 'emptys'
-);
+  13 => '', '' => "null", '' => 'emptys'
+];
 
 // arrays to be passed to $arr2 argument
-$arrays = array (
-/*1*/  array(1, 2), // array with default keys and numeric values
-       array(1.1, 2.2), // array with default keys & float values
-       array(false,true), // array with default keys and boolean values
-       array(), // empty array
-/*5*/  array(NULL), // array with NULL
-       array("a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // array with double quoted strings
-       array('a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // array with single quoted strings
-       array($blank_line, $multiline_string, $diff_whitespaces, $numeric_string),  // array with heredocs
+$arrays = varray [
+/*1*/  varray[1, 2], // array with default keys and numeric values
+       varray[1.1, 2.2], // array with default keys & float values
+       varray[false,true], // array with default keys and boolean values
+       varray[], // empty array
+/*5*/  varray[NULL], // array with NULL
+       varray["a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // array with double quoted strings
+       varray['a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // array with single quoted strings
+       varray[$blank_line, $multiline_string, $diff_whitespaces, $numeric_string],  // array with heredocs
 
        // associative arrays
-/*9*/  array(1 => "one", 2 => "two", 3 => "three"),  // explicit numeric keys, string values
-       array("one" => 1, "two" => 2, "three" => 3 ),  // string keys & numeric values
-       array( 1 => 10, 2 => 20, 4 => 40, 3 => 30),  // explicit numeric keys and numeric values
-       array( "one" => "ten", "two" => "twenty", "three" => "thirty"),  // string key/value
-       array("one" => 1, 2 => "two", 4 => "four"),  //mixed
+/*9*/  darray[1 => "one", 2 => "two", 3 => "three"],  // explicit numeric keys, string values
+       darray["one" => 1, "two" => 2, "three" => 3 ],  // string keys & numeric values
+       darray[ 1 => 10, 2 => 20, 4 => 40, 3 => 30],  // explicit numeric keys and numeric values
+       darray[ "one" => "ten", "two" => "twenty", "three" => "thirty"],  // string key/value
+       darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
-       array(true => "true", false => "false", "false" => false, "true" => true),
-       array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+/*14*/ darray['' => "NULL", '' => "null", "NULL" => NULL, "null" => null],
+       darray[1 => "true", 0 => "false", "false" => false, "true" => true],
+       darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
+       darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
+       darray['' => 1, "" => 2, '' => 3, '' => 4, 0 => 5, 1 => 6],
 
        // array with repetative keys
-/*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
-);
+/*19*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
+];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect()
 $iterator = 1;
@@ -95,4 +95,4 @@ foreach($arrays as $arr2) {
 }
 
 echo "Done";
-?>
+}

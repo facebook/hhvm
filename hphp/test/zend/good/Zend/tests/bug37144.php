@@ -1,11 +1,12 @@
-<?php
+<?hh
 function foo() {
   $x = new stdClass();
-  $x->bar = array(1);
+  $x->bar = darray[0 => 1];
   return $x;
 }
+<<__EntryPoint>> function main(): void {
 foo()->bar[1] = "123";
 foo()->bar[0]++;
 unset(foo()->bar[0]);
 echo "ok\n";
-?>
+}

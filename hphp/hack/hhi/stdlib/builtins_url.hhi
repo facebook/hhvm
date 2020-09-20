@@ -1,11 +1,10 @@
-<?hh // decl    /* -*- php -*- */
+<?hh    /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -21,23 +20,23 @@ const int PHP_URL_FRAGMENT = 7;
 const int PHP_QUERY_RFC1738 = 1;
 const int PHP_QUERY_RFC3986 = 2;
 
+<<__PHPStdLib, __Pure>>
+function base64_decode(string $data, bool $strict = false);
+<<__PHPStdLib, __Pure>>
+function base64_encode(string $data): string;
 <<__PHPStdLib>>
-function base64_decode($data, $strict = false);
+function get_headers(string $url, int $format = 0);
 <<__PHPStdLib>>
-function base64_encode($data);
+function get_meta_tags(string $filename, bool $use_include_path = false);
+<<__PHPStdLib, __Pure>>
+function http_build_query($formdata, $numeric_prefix = null, string $arg_separator = "", int $enc_type = PHP_QUERY_RFC1738): string;
 <<__PHPStdLib>>
-function get_headers($url, $format = 0);
-<<__PHPStdLib>>
-function get_meta_tags($filename, $use_include_path = false);
-<<__PHPStdLib>>
-function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null, $enc_type = PHP_QUERY_RFC1738): string;
-<<__PHPStdLib>>
-function parse_url($url, $component = -1);
-<<__PHPStdLib>>
-function rawurldecode($str);
-<<__PHPStdLib>>
-function rawurlencode($str);
-<<__PHPStdLib>>
-function urldecode($str);
-<<__PHPStdLib>>
-function urlencode($str);
+function parse_url(string $url, int $component = -1);
+<<__PHPStdLib, __Pure>>
+function rawurldecode(string $str): string;
+<<__PHPStdLib, __Pure>>
+function rawurlencode(string $str): string;
+<<__PHPStdLib, __Pure>>
+function urldecode(string $str): string;
+<<__PHPStdLib, __Pure>>
+function urlencode(string $str): string;

@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters 
+ * Description: Convert special HTML entities back to characters
  * Source code: ext/standard/html.c
 */
 
@@ -8,15 +8,15 @@
  * testing htmlspecialchars_decode() with unexpected input values for $string argument
 */
 
-echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
-
 //get a class
-class classA 
+class classA
 {
   function __toString() {
     return "ClassAObject";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 //get a resource variable
 $file_handle=fopen(__FILE__, "r");
@@ -26,7 +26,7 @@ $unset_var = 10;
 unset($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
       // int data
       0,
@@ -42,11 +42,11 @@ $values = array(
       .5,
 
       // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
+      varray[],
+      varray[0],
+      varray[1],
+      varray[1, 2],
+      darray['color' => 'red', 'item' => 'pen'],
 
       // null data
       NULL,
@@ -73,18 +73,18 @@ $values = array(
 
       //resource
       $file_handle
-);
+];
 
 // loop through each element of the array for string
 $iterator = 1;
 foreach($values as $value) {
       echo "-- Iterator $iterator --\n";
-      var_dump( htmlspecialchars_decode($value) );
+      try { var_dump( htmlspecialchars_decode($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       $iterator++;
 };
 
 // close the file resource used
 fclose($file_handle);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

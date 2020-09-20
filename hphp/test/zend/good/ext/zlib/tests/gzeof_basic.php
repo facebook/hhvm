@@ -1,7 +1,7 @@
-<?php
+<?hh
 // note that gzeof is an alias to gzeof. parameter checking tests will be
 // the same as gzeof
-
+<<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 
 echo "-- test 1 --\n";
@@ -26,5 +26,5 @@ gzclose($h);
 
 
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

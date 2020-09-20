@@ -1,24 +1,36 @@
-<?php
+<?hh
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
- * Description: Read the entire file into a string 
+ * Description: Read the entire file into a string
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-echo "*** Testing file_get_contents() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() != 0) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
-set_error_handler('test_error_handler');
+<<__EntryPoint>> function main(): void {
+echo "*** Testing file_get_contents() : usage variation ***\n";
+set_error_handler(fun('test_error_handler'));
 
 // Initialise function arguments not being substituted (if any)
-$filename = 'FileGetContentsVar3.tmp';
-$absFile = dirname(__FILE__).'/'.$filename;
+
+$absFile = __SystemLib\hphp_test_tmppath('FileGetContentsVar3.tmp');
 $h = fopen($absFile,"w");
 fwrite($h, "contents read");
 fclose($h);
@@ -30,29 +42,17 @@ fclose($h);
 $unset_var = 10;
 unset ($unset_var);
 
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -68,10 +68,10 @@ $inputs = array(
       'float .5' => .5,
 
       // array data
-      'empty array' => array(),
+      'empty array' => varray[],
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
-      'nested arrays' => array('foo', $index_array, $assoc_array),
+      'nested arrays' => varray['foo', $index_array, $assoc_array],
 
       // null data
       'uppercase NULL' => NULL,
@@ -102,16 +102,16 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-);
+];
 
 // loop through each element of the array for use_include_path
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( file_get_contents($absFile, $value) );
+      try { var_dump( file_get_contents($absFile, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 unlink($absFile);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

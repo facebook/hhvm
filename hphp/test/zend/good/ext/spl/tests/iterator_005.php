@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ArrayIteratorEx extends ArrayIterator
 {
@@ -9,29 +9,15 @@ class ArrayIteratorEx extends ArrayIterator
 	}
 }
 
-$it = new ArrayIteratorEx(range(0,3));
+<<__EntryPoint>>
+function main_entry(): void {
 
-foreach(new IteratorIterator($it) as $v)
-{
-	var_dump($v);
+  $it = new ArrayIteratorEx(range(0,3));
+
+  foreach(new IteratorIterator($it) as $v)
+  {
+  	var_dump($v);
+  }
+
+  echo "===DONE===\n";
 }
-
-class ArrayObjectEx extends ArrayObject
-{
-	function getIterator()
-	{
-		echo __METHOD__ . "\n";
-		return parent::getIterator();
-	}
-}
-
-$it = new ArrayObjectEx(range(0,3));
-
-foreach(new IteratorIterator($it) as $v)
-{
-	var_dump($v);
-}
-
-?>
-===DONE===
-<?php exit(0); ?>

@@ -1,2 +1,4 @@
-File "typedef_as4.php", line 12, characters 30-33:
-Cyclic typedef (Typing[4014])
+File "typedef_as4.php", line 12, characters 9-12:
+Cyclic type definition (Typing[4014])
+File "typedef_as4.php", line 12, characters 30-36:
+Cyclic use is here

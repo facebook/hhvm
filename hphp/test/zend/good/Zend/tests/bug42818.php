@@ -1,3 +1,3 @@
-<?php
-$foo = clone(array());
-?>
+<?hh <<__EntryPoint>> function main(): void {
+$foo = clone(varray[]);
+}

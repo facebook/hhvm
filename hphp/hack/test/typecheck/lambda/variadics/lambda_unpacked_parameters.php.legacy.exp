@@ -1,0 +1,28 @@
+File "lambda_unpacked_parameters.php", line 11, characters 14-24:
+Invalid argument (Typing[4110])
+File "lambda_unpacked_parameters.php", line 11, characters 14-24:
+This is an object of type Traversable<_> (it is unpacked with '...')
+File "lambda_unpacked_parameters.php", line 9, characters 17-17:
+It is incompatible with an int
+File "lambda_unpacked_parameters.php", line 14, characters 28-29:
+Invalid argument (Typing[4110])
+File "lambda_unpacked_parameters.php", line 14, characters 18-23:
+This is a string
+File "lambda_unpacked_parameters.php", line 15, characters 14-14:
+It is incompatible with an int
+File "lambda_unpacked_parameters.php", line 38, characters 25-29:
+This is a string (Typing[4110])
+File "lambda_unpacked_parameters.php", line 3, characters 69-70:
+It is incompatible with a varray (variadic argument)
+File "lambda_unpacked_parameters.php", line 38, characters 31-35:
+This is a string (Typing[4110])
+File "lambda_unpacked_parameters.php", line 3, characters 69-70:
+It is incompatible with a varray (variadic argument)
+File "lambda_unpacked_parameters.php", line 42, characters 32-34:
+You are trying to access the member foo but this is not an object, it is a string (Typing[4062])
+File "lambda_unpacked_parameters.php", line 3, characters 69-70:
+Definition is here
+File "lambda_unpacked_parameters.php", line 47, characters 16-18:
+You are trying to access the member foo but this is not an object, it is an int (Typing[4062])
+File "lambda_unpacked_parameters.php", line 46, characters 18-19:
+Definition is here

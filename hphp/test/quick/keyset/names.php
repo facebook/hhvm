@@ -20,6 +20,7 @@ function foo() { return 1; }
 
 namespace {
 
+<<__EntryPoint>>
 function main() {
   var_dump(\keyset\keyset());
   var_dump(\keyset\foo());
@@ -39,5 +40,5 @@ function main() {
   var_dump(beta\keyset\foo());
   var_dump(beta\keyset\STUFF);
 }
-main();
+
 }

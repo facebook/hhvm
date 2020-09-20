@@ -1,18 +1,18 @@
-<?php
+<?hh
 /* Prototype  : string strrchr(string $haystack, string $needle);
  * Description: Finds the last occurrence of a character in a string.
  * Source code: ext/standard/string.c
 */
 
 /* Test strrchr() function by passing various double quoted strings for 'haystack' & 'needle' */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrchr() function: with various double quoted strings ***";
 $haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
-$needle = array(
+$needle = varray[
   //regular strings
   "l",
   "L",
-  "HELLO", 
+  "HELLO",
   "hEllo",
 
   //escape characters
@@ -28,13 +28,13 @@ $needle = array(
   "\0",
   NULL,
   null,
-  
+
   //boolean false
   FALSE,
   false,
 
   //empty string
-  "",  
+  "",
 
   //special chars
   " ",
@@ -56,8 +56,8 @@ $needle = array(
   ">",
   "=>",
   "?",
-  "@", 
-  "@hEllo", 
+  "@",
+  "@hEllo",
 
   "12345", //decimal numeric string
   "\x23",  //hexadecimal numeric string
@@ -67,7 +67,7 @@ $needle = array(
   "456HEE",  //numerics + chars
   42, //needle as int(ASCII value of "*")
   $haystack  //haystack as needle
-);
+];
 
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
@@ -77,4 +77,4 @@ for($index=0; $index<count($needle); $index++) {
   $count++;
 }
 echo "*** Done ***";
-?>
+}

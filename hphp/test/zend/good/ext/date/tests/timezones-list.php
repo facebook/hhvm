@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $a = timezone_identifiers_list();
 $b = timezone_identifiers_list( DateTimezone::AMERICA );
 $c = timezone_identifiers_list( DateTimezone::ALL_WITH_BC );
@@ -23,4 +23,4 @@ echo in_array( "US/Eastern", $a ) ? "found" : "notfound", "\n";
 echo in_array( "US/Eastern", $b ) ? "found" : "notfound", "\n";
 echo in_array( "US/Eastern", $c ) ? "found" : "notfound", "\n";
 echo in_array( "US/Eastern", $d ) ? "found" : "notfound", "\n\n";
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_date_diff() {
   $dt1 = date_create("2010-08-02");
@@ -25,7 +25,11 @@ function test_timezone_location_get() {
   return $loc;
 }
 
+
+<<__EntryPoint>>
+function main_timelib_dependent() {
 var_dump(test_date_diff());
 var_dump(test_date_interval_create_from_date_string());
 var_dump(test_date_sub());
 var_dump(test_timezone_location_get());
+}

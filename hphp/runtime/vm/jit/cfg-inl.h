@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_CFG_INL_H_
-#define incl_HPHP_CFG_INL_H_
+#pragma once
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -78,4 +77,3 @@ void forEachInst(const BlockList& blocks, Body body) {
 }}
 
 
-#endif

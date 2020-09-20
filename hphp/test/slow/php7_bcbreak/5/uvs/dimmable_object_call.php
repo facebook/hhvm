@@ -1,14 +1,18 @@
-<?php
-
-error_reporting(-1);
-
-$foo = new stdclass();
-$foo->someprop = array('baz' => 'myfunc');
-
-$bar = 'someprop';
+<?hh
 
 function myfunc() {
   return 'quux';
 }
+<<__EntryPoint>>
+function entrypoint_dimmable_object_call(): void {
 
-var_dump($foo->$bar['baz']());
+
+  error_reporting(-1);
+
+  $foo = new stdclass();
+  $foo->someprop = darray['baz' => 'myfunc'];
+
+  $bar = 'someprop';
+
+  var_dump($foo->$bar['baz']());
+}

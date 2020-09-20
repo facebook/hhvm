@@ -1,9 +1,8 @@
-<?php
+<?hh
 
 /*
  * Compare various string pairs using various locales.
  */
-
 
 /*
  * Converts comparison result to a character.
@@ -55,52 +54,53 @@ function ut_main()
     $res_str = '';
 
     // Compare strings using en_US locale.
-    $test_params = array(
-        array( 'abc', 'abc' ),
-        array( 'Abc', 'abc' ),
-        array( 'a'  , 'abc' ),
-        array( 'a'  , ''    ),
-        array( ''  , ''     ),
-        array( 'a'  , 'b'   ),
-        array( 'ab'  , 'b'  ),
-        array( 'ab'  , 'a'  ),
-        array( 123  , 'abc' ),
-        array( 'ac' , null  ),
-        array( '.'  , '.'   ),
+    $test_params = varray[
+        varray[ 'abc', 'abc' ],
+        varray[ 'Abc', 'abc' ],
+        varray[ 'a'  , 'abc' ],
+        varray[ 'a'  , ''    ],
+        varray[ ''  , ''     ],
+        varray[ 'a'  , 'b'   ],
+        varray[ 'ab'  , 'b'  ],
+        varray[ 'ab'  , 'a'  ],
+        varray[ 123  , 'abc' ],
+        varray[ 'ac' , null  ],
+        varray[ '.'  , '.'   ],
         // Try to compare long strings.
-        array( 'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcde',
-               'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdea'),
-        array( null , null  )
-    );
+        varray[ 'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcde',
+               'abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdea'],
+        varray[ null , null  ]
+    ];
 
     $res_str .= compare_pairs( 'en_US', $test_params );
 
 
     // Compare strings using ru_RU locale.
-    $test_params = array(
-        array( 'а',   'б' ),
-        array( 'а',   'аа' ),
-        array( 'аб', 'ба' ),
-        array( 'а',   ',' ),
-        array( 'а',   'b' ),
-        array( 'а',   'bb' ),
-        array( 'а',   'ab' ),
-        array( 'а',   null )
-    );
+    $test_params = varray[
+        varray[ 'а',   'б' ],
+        varray[ 'а',   'аа' ],
+        varray[ 'аб', 'ба' ],
+        varray[ 'а',   ',' ],
+        varray[ 'а',   'b' ],
+        varray[ 'а',   'bb' ],
+        varray[ 'а',   'ab' ],
+        varray[ 'а',   null ]
+    ];
 
     $res_str .= compare_pairs( 'ru_RU', $test_params );
 
 
     // Compare strings using lt_LT locale.
-    $test_params = array(
-        array( 'y', 'k' )
-    );
+    $test_params = varray[
+        varray[ 'y', 'k' ]
+    ];
 
     $res_str .= compare_pairs( 'lt_LT', $test_params );
 
     return $res_str;
 }
-
-include_once( 'ut_common.inc' );
-ut_run();
-?>
+<<__EntryPoint>>
+function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    ut_run();
+}

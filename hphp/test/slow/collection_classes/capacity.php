@@ -5,4 +5,8 @@ function main() {
   $v->resize(0xffffffffffd0, 0);
 }
 
+
+<<__EntryPoint>>
+function main_capacity() {
 main();
+}

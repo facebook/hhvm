@@ -1,19 +1,13 @@
-<?php
+<?hh
 /* Prototype  : array array_merge_recursive(array $arr1[, array $...])
  * Description: Recursively merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Passing non array values to 'arr1' argument of array_merge_recursive() and see 
+ * Passing non array values to 'arr1' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
 */
-
-echo "*** Testing array_merge_recursive() : Passing non array values to \$arr1 argument ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 class A
 {
@@ -22,6 +16,12 @@ class A
     return "object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_merge_recursive() : Passing non array values to \$arr1 argument ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -32,7 +32,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arr1 argument
-$arrays = array (
+$arrays = varray [
 
        // int data
 /*1*/  0,
@@ -77,24 +77,24 @@ $arrays = array (
 
        // object data
 /*24*/ new A()
-);
+];
 
-// initialise the second argument 
-$arr2 = array(1, array("hello", 'world'));
+// initialise the second argument
+$arr2 = varray[1, varray["hello", 'world']];
 
 // loop through each element of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "\n-- Iteration $iterator --";
-  
+
   // with default argument
   echo "\n-- With default argument --";
   var_dump( array_merge_recursive($arr1) );
- 
+
   // with more arguments
   echo "-- With more arguments --";
   var_dump( array_merge_recursive($arr1, $arr2) );
- 
+
   $iterator++;
 }
 
@@ -102,4 +102,4 @@ foreach($arrays as $arr1) {
 fclose($fp);
 
 echo "Done";
-?>
+}

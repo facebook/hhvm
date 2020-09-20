@@ -1,0 +1,15 @@
+<?hh //partial
+
+class One {
+  public function foo() : <<__Soft>> int {
+    return 1;
+  }
+
+  public function bar () : <<__Soft>> ?int {
+    return null;
+  }
+
+  public function noparameter(<<__Soft>> int $x) : <<__Soft>> int {
+    return $x;
+  }
+}

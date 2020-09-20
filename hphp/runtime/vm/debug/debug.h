@@ -41,9 +41,6 @@ struct DebugInfo {
 
   static void recordDataMap(const void* from, const void* to,
                             const std::string& desc);
-  void recordRelocMap(void* from, void* to, const std::string& desc);
-  FILE* getRelocMap() const { return m_relocMap; }
-  const std::string& getRelocMapName() const { return m_relocMapName; }
 
   void debugSync();
   static DebugInfo* Get();
@@ -99,21 +96,15 @@ struct DebugInfo {
   FILE* m_dataMap{nullptr};
   std::string m_dataMapName;
 
-  /*
-   * Similar to perfMap, but with enough information about each
-   * translation to relocate it.
-   */
-  FILE* m_relocMap{nullptr};
-  std::string m_relocMapName;
-
   static void* pidMapOverlayStart;
   static void* pidMapOverlayEnd;
 };
 
 /*
- * Initialize the global DebugInfo
+ * Initialize/destroy the global DebugInfo
  */
 void initDebugInfo();
+void destroyDebugInfo();
 
 /*
  * Gets the fake symbol name we want to use for a php function.

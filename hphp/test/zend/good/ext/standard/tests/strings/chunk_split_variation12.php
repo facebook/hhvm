@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
@@ -6,10 +6,10 @@
 */
 
 /*
-* passing different heredoc strings as 'ending' argument to chunk_split() 
+* passing different heredoc strings as 'ending' argument to chunk_split()
 * 'chunklen' argument is set to 10
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : different heredoc strings for 'ending' argument ***\n";
 
 // Initializing required variables
@@ -58,7 +58,7 @@ $heredoc_quote_slash = <<<EOT8
 EOT8;
 
 // different heredoc strings for 'ending'
-$heredoc_arr = array(
+$heredoc_arr = varray[
   $heredoc_null,
   $heredoc_blank,
   $heredoc_char,
@@ -67,7 +67,7 @@ $heredoc_arr = array(
   $heredoc_spchar,
   $heredoc_escchar,
   $heredoc_quote_slash
-);
+];
 
 
 // loop through each element of the heredoc_arr for str
@@ -77,6 +77,6 @@ foreach($heredoc_arr as $value) {
   var_dump( chunk_split( $str, $chunklen, $value) );
   $count++;
 };
- 
-echo "Done"
-?>
+
+echo "Done";
+}

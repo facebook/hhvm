@@ -51,6 +51,7 @@
 #include "hphp/runtime/ext/asio/socket-event.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/logger.h"
 
@@ -118,16 +119,16 @@ struct WatchmanThreadEventBase : folly::Executor {
   { }
 
   // (INIT)
-  ~WatchmanThreadEventBase() {
+  ~WatchmanThreadEventBase() override {
     drain();
     m_eventBase.terminateLoopSoon();
     m_eventThread.join();
   }
 
   // (PHP)
-  virtual void add(folly::Func f) override {
+  void add(folly::Func f) override {
     m_eventBase.add([f = std::move(f)] () mutable { // (ASYNC entry-point)
-      std::lock_guard<std::mutex> g(HPHP::s_sharedDataMutex);
+      std::lock_guard<std::mutex> g(s_sharedDataMutex);
       f();
     });
   }
@@ -229,7 +230,8 @@ struct ActiveSubscription {
           processNextUpdate();
         }
       })
-      .then([this](watchman::SubscriptionPtr wm_sub) { // (ASYNC)
+      .via(WatchmanThreadEventBase::Get())
+      .thenValue([this](watchman::SubscriptionPtr wm_sub) { // (ASYNC)
         m_subscriptionPtr = wm_sub;
         return folly::unit;
       });
@@ -259,7 +261,8 @@ struct ActiveSubscription {
     // we just need to sync to make sure all the outstanding threads complete.
     if (checkConnection()) {
       unsubscribe_future = m_watchmanClient->unsubscribe(m_subscriptionPtr)
-        .then([this] (const folly::dynamic& result) { // (ASYNC)
+        .via(WatchmanThreadEventBase::Get())
+        .thenValue([this] (const folly::dynamic& result) { // (ASYNC)
           m_unsubscribeData = toJson(result).data();
           return sync(std::chrono::milliseconds::zero());
         });
@@ -276,7 +279,7 @@ struct ActiveSubscription {
       // only re-acquired after the sync promise is fulfilled in the AsyncFunc()
       // thread.
       .via(WatchmanThreadEventBase::Get())
-      .then([this] () { // (ASYNC)
+      .thenValue([this](auto&&){ // (ASYNC)
         // These should be finished by now due to the syncing above
         if (m_oldCallbackExecThread) {
           m_oldCallbackExecThread->waitForEnd();
@@ -292,7 +295,7 @@ struct ActiveSubscription {
   // (PHP-CALLBACK entry-point) This manually gets a lock where needed but
   // avoids holding one most of the time as this can be a quite slow operation.
   void runCallback() {
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::Watchman);
     auto context = g_context.getNoCheck();
     SCOPE_EXIT {
       hphp_context_exit();
@@ -317,13 +320,23 @@ struct ActiveSubscription {
       auto unit = lookupUnit(
         String(m_callbackFile.c_str()).get(),
         "",
-        &initial);
+        &initial,
+        Native::s_noNativeFuncs,
+        false);
       if (!unit) {
         throw std::runtime_error(
           folly::sformat("Unit '{}' no longer exists.", m_callbackFile));
       }
+      if (!RuntimeOption::EvalPreludePath.empty()) {
+        auto const doc = unit->filepath()->data();
+        invoke_prelude_script(
+            m_path.c_str(),
+            doc,
+            RuntimeOption::EvalPreludePath,
+            m_path.c_str());
+      }
       auto unit_result = Variant::attach(context->invokeUnit(unit));
-      auto func = Unit::loadFunc(String(m_callbackFunc.c_str()).get());
+      auto func = Func::load(String(m_callbackFunc.c_str()).get());
       if (!func) {
         throw std::runtime_error(
           folly::sformat("Callback '{}' no longer exists", m_callbackFunc));
@@ -334,18 +347,21 @@ struct ActiveSubscription {
       String str_json_data(json_data.c_str());
       String str_socket_path(m_socketPath.c_str());
       TypedValue args[] = {
-        str_path.asCell(),
-        str_query.asCell(),
-        str_name.asCell(),
-        str_json_data.asCell(),
-        str_socket_path.asCell(),
+        str_path.asTypedValue(),
+        str_query.asTypedValue(),
+        str_name.asTypedValue(),
+        str_json_data.asTypedValue(),
+        str_socket_path.asTypedValue(),
       };
       tvDecRefGen(
-          context->invokeFuncFew(func,
-                                 nullptr, // thisOrCls
-                                 nullptr, // invName
-                                 5, // argc
-                                 args)
+        context->invokeFuncFew(
+          func,
+          nullptr, // thisOrCls
+          5, // argc
+          args,
+          true, // dynamic
+          true  // allowDynCallNoPointer
+        )
       );
     } catch(Exception& e) {
       if (m_error.empty()) {
@@ -354,7 +370,7 @@ struct ActiveSubscription {
     } catch(Object& e) {
       if (m_error.empty()) {
         try {
-          m_error = e->invokeToString().data();
+          m_error = throwable_to_string(e.get()).data();
         } catch(...) {
           m_error = "PHP exception which cannot be turned into a string";
         }
@@ -420,7 +436,8 @@ struct ActiveSubscription {
   ) {
     return !checkConnection() || m_unsubcribeInProgress || !m_subscriptionPtr
       ? folly::makeFuture(folly::Optional<folly::dynamic>())
-      : m_watchmanClient->flushSubscription(m_subscriptionPtr, timeout);
+      : m_watchmanClient->flushSubscription(m_subscriptionPtr, timeout)
+          .via(WatchmanThreadEventBase::Get());
   }
 
   // (PHP / ASYNC)
@@ -431,10 +448,12 @@ struct ActiveSubscription {
     folly::Promise<bool> promise;
     auto res_future = promise.getFuture();
     if (timeout != std::chrono::milliseconds::zero()) {
-      res_future = res_future.within(timeout)
-        .onError([](folly::TimedOut) {
-          return false;
-        });
+      res_future = std::move(res_future).within(timeout)
+        .thenError(
+            folly::tag_t<folly::FutureTimeout>{},
+            [](folly::FutureTimeout) {
+              return false;
+            });
     }
     m_syncPromises.emplace_back(std::move(promise));
     return res_future;
@@ -466,10 +485,9 @@ std::unordered_map<std::string, ActiveSubscription> s_activeSubscriptions;
 
 template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP)
-  explicit FutureEvent(folly::Future<T>&& future) :
-    m_future(std::move(future))
+  explicit FutureEvent(folly::Future<T>&& future)
   {
-    m_future.then([this] (folly::Try<T> result) { // (ASYNC)
+    std::move(future).thenTry([this] (folly::Try<T> result) { // (ASYNC)
       if (result.hasException()) {
         m_exception = result.exception();
       } else {
@@ -484,7 +502,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // after the markAsFinished() above which is the only place mutating the state
   // of the data used here. markAsFinished() can only be called once as it is
   // only called (indirectly) from construction of this object instance.
-  void unserialize(Cell& result) {
+  void unserialize(TypedValue& result) override {
     if (m_exception) {
       SystemLib::throwInvalidOperationExceptionObject(
         m_exception.what().c_str());
@@ -497,28 +515,27 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP) no lock
   template<typename U = T>
   typename std::enable_if<std::is_same<U, std::string>::value>::type
-    unserializeImpl(Cell& result)
+    unserializeImpl(TypedValue& result)
   {
-    cellCopy(make_tv<KindOfString>(StringData::Make(m_result)), result);
+    tvCopy(make_tv<KindOfString>(StringData::Make(m_result)), result);
   }
 
   // (PHP) no lock
   template<typename U = T>
   typename std::enable_if<std::is_same<U, folly::Unit>::value>::type
-    unserializeImpl(Cell& result)
+    unserializeImpl(TypedValue& result)
   {
-    cellCopy(make_tv<KindOfNull>(), result);
+    tvCopy(make_tv<KindOfNull>(), result);
   }
 
   // (PHP) no lock
   template<typename U = T>
   typename std::enable_if<std::is_same<U, bool>::value>::type
-    unserializeImpl(Cell& result)
+    unserializeImpl(TypedValue& result)
   {
-    cellCopy(make_tv<KindOfBoolean>(m_result), result);
+    tvCopy(make_tv<KindOfBoolean>(m_result), result);
   }
 
-  folly::Future<T> m_future;
   T m_result;
   folly::exception_wrapper m_exception;
 };
@@ -535,7 +552,8 @@ getWatchmanClientForSocket(const std::string& socket_path) {
     [](folly::exception_wrapper& /*ex*/) { /* (ASYNC) error handler */ }
   );
   return client->connect()
-    .then([client](const folly::dynamic& /*connect_info*/) {
+    .via(WatchmanThreadEventBase::Get())
+    .thenValue([client](const folly::dynamic& /*connect_info*/) {
       // (ASYNC)
       return client;
     });
@@ -550,9 +568,9 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
   auto res_future = entry->second.unsubscribe()
     // I assume the items queued on the event base are drained in FIFO
     // order. So, after the unsubscribe should be safe to clean up.
-    .then([] (std::string&& result) {
+    .thenValue([] (std::string&& result) {
       // (ASYNC)
-      return result;
+      return std::move(result);
     })
     .ensure([name] {
       // (ASYNC)
@@ -574,11 +592,12 @@ Object HHVM_FUNCTION(HH_watchman_run,
 
   auto dynamic_query = folly::parseJson(json_query);
   auto res_future = getWatchmanClientForSocket(socket_path)
-    .then([dynamic_query] (std::shared_ptr<watchman::WatchmanClient> client) {
+    .thenValue([dynamic_query] (std::shared_ptr<watchman::WatchmanClient> client) {
       // (ASYNC)
       return client->run(dynamic_query)
+        .via(WatchmanThreadEventBase::Get())
         // pass client shared_ptr through to keep client alive
-        .then([client] (const folly::dynamic& result) {
+        .thenValue([client] (const folly::dynamic& result) {
           return std::string(toJson(result).data());
         });
     });
@@ -609,8 +628,8 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
   }
 
   // Validate callback
-  const Func* f = Unit::loadFunc(callback_function.get());
-  if (!f || !f->top() || f->hasVariadicCaptureParam() || f->numParams() != 5 ||
+  const Func* f = Func::load(callback_function.get());
+  if (!f || f->hasVariadicCaptureParam() || f->numParams() != 5 ||
     !f->fullName() || !f->filename())
   {
     SystemLib::throwInvalidOperationExceptionObject(
@@ -630,7 +649,7 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
       name));
   try {
     auto res_future = getWatchmanClientForSocket(socket_path)
-      .then([name] (std::shared_ptr<watchman::WatchmanClient> client)
+      .thenValue([name] (std::shared_ptr<watchman::WatchmanClient> client)
         -> folly::Future<folly::Unit>
       {
         // (ASYNC)
@@ -640,11 +659,13 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
         }
         return folly::unit;
       })
-      .onError([name] (std::exception const& e) -> folly::Unit {
-        // (ASNYC) delete active subscription
-        s_activeSubscriptions.erase(name);
-        throw std::runtime_error(e.what());
-      });
+      .thenError(
+          folly::tag_t<std::exception>{},
+          [name] (std::exception const& e) -> folly::Unit {
+            // (ASNYC) delete active subscription
+            s_activeSubscriptions.erase(name);
+            throw std::runtime_error(e.what());
+          });
     return Object{
       (new FutureEvent<folly::Unit>(std::move(res_future)))->getWaitHandle()
     };
@@ -707,9 +728,9 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
   auto start_time = std::chrono::steady_clock::now();
   try {
     auto res_future = sub_entry->second.watchmanFlush(timeout)
-      .then([timeout, start_time, name](folly::Optional<folly::dynamic> flush) {
+      .thenValue([timeout, start_time, name](folly::Optional<folly::dynamic> flush) {
         // (ASYNC)
-        if (!flush.hasValue()) {
+        if (!flush.has_value()) {
           // Subscription is broken - no updates to process.
           return folly::makeFuture(true);
         }
@@ -745,7 +766,7 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
               }
             }
             sub_entry->second.sync(remaining_timeout)
-              .then(
+              .thenTry(
                 [sync_promise= std::move(sync_promise)]
                 (folly::Try<bool> res) mutable { // (ASYNC)
                   sync_promise.setValue(res);
@@ -803,7 +824,7 @@ struct WatchmanExtension final : Extension {
   void moduleShutdown() override {
     std::vector<folly::Future<std::string>> unsub_futures;
     {
-      std::lock_guard<std::mutex> g(HPHP::s_sharedDataMutex);
+      std::lock_guard<std::mutex> g(s_sharedDataMutex);
       if (!WatchmanThreadEventBase::Exists()) {
         return;
       }

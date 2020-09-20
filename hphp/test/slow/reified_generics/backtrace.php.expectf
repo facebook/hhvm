@@ -1,0 +1,4 @@
+#0 %s(12): C<int,shape('a'=>int,'b'=>string)>->g<string>()
+#1 %s(19): C<int,shape('a'=>int,'b'=>string)>->f<string>()
+#2 (): entrypoint_backtrace()
+#3 {main}

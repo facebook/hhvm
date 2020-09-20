@@ -1,5 +1,6 @@
-<?php
-chdir(dirname(__FILE__));
+<?hh
+<<__EntryPoint>> function main(): void {
+chdir(__SystemLib\hphp_test_tmproot());
 $dirpath = "./tmp/foo//bar/logs";
 mkdir($dirpath, 0777, true);
 
@@ -12,4 +13,4 @@ rmdir("./tmp/foo/bar/logs");
 rmdir("./tmp/foo/bar/");
 rmdir("./tmp/foo/");
 rmdir("./tmp/");
-?>
+}

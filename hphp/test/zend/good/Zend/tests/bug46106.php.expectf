@@ -1,1 +1,3 @@
+
+Warning: str_pad() expects at least 2 parameters, 1 given in %s/bug46106.php on line 11
 DONE

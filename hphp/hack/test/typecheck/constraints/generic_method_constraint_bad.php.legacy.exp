@@ -1,0 +1,34 @@
+File "generic_method_constraint_bad.php", line 16, characters 7-11:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_method_constraint_bad.php", line 5, characters 25-25:
+'T' is a constrained type parameter
+File "generic_method_constraint_bad.php", line 5, characters 30-37:
+This is an array key (int | string)
+File "generic_method_constraint_bad.php", line 16, characters 13-15:
+It is incompatible with a float
+File "generic_method_constraint_bad.php", line 17, characters 6-10:
+Some type constraint(s) here are violated (Typing[4110])
+File "generic_method_constraint_bad.php", line 6, characters 32-32:
+'T' is a constrained type parameter
+File "generic_method_constraint_bad.php", line 6, characters 37-44:
+This is an array key (int | string)
+File "generic_method_constraint_bad.php", line 17, characters 12-15:
+It is incompatible with a bool
+File "generic_method_constraint_bad.php", line 18, characters 7-17:
+A 'where' type constraint is violated here (Typing[4110])
+File "generic_method_constraint_bad.php", line 9, characters 19-29:
+This is the method with 'where' type constraints
+File "generic_method_constraint_bad.php", line 9, characters 55-62:
+This is an array key (int | string)
+File "generic_method_constraint_bad.php", line 15, characters 14-18:
+It is incompatible with a float
+File "generic_method_constraint_bad.php", line 9, characters 49-50:
+  via this generic Td
+File "generic_method_constraint_bad.php", line 19, characters 6-16:
+A 'where' type constraint is violated here (Typing[4110])
+File "generic_method_constraint_bad.php", line 10, characters 26-36:
+This is the method with 'where' type constraints
+File "generic_method_constraint_bad.php", line 10, characters 62-69:
+This is an array key (int | string)
+File "generic_method_constraint_bad.php", line 19, characters 18-21:
+It is incompatible with a bool

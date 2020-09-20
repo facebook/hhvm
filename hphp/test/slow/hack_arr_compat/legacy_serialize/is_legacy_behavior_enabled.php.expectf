@@ -1,0 +1,25 @@
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+Warning: is_array_marked_legacy expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/is_legacy_behavior_enabled.php on line 34
+bool(false)
+
+Warning: is_array_marked_legacy expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/is_legacy_behavior_enabled.php on line 34
+bool(false)
+
+Warning: is_array_marked_legacy expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/is_legacy_behavior_enabled.php on line 34
+bool(false)

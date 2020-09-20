@@ -15,4 +15,8 @@ function main() {
   $custom_set = new ImmVector();
 }
 
+
+<<__EntryPoint>>
+function main_hh_frozenvector4() {
 main();
+}

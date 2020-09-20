@@ -1,7 +1,7 @@
 <?hh
 
 class Bar {
-  public $x = array(1,2,3);
+  public $x = varray[1,2,3];
 }
 
 class Whatever {
@@ -21,4 +21,8 @@ function main() {
   var_dump((new Whatever(0))->hey());
 }
 
+
+<<__EntryPoint>>
+function main_private_props_009() {
 main();
+}

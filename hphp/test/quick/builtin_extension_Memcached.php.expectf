@@ -1,115 +1,69 @@
 Memcached
-object(Memcached)#1 (0) {
+object(Memcached) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class Memcached in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(50) {
-  [0]=>
+varray(54) {
   string(11) "__construct"
-  [1]=>
   string(3) "add"
-  [2]=>
   string(8) "addByKey"
-  [3]=>
   string(9) "addServer"
-  [4]=>
   string(10) "addServers"
-  [5]=>
   string(6) "append"
-  [6]=>
   string(11) "appendByKey"
-  [7]=>
   string(3) "cas"
-  [8]=>
   string(8) "casByKey"
-  [9]=>
   string(9) "decrement"
-  [10]=>
   string(14) "decrementByKey"
-  [11]=>
   string(6) "delete"
-  [12]=>
   string(16) "deleteMultiByKey"
-  [13]=>
   string(11) "deleteMulti"
-  [14]=>
   string(11) "deleteByKey"
-  [15]=>
   string(5) "fetch"
-  [16]=>
   string(8) "fetchAll"
-  [17]=>
   string(5) "flush"
-  [18]=>
   string(3) "get"
-  [19]=>
+  string(15) "getWithCasToken"
   string(10) "getAllKeys"
-  [20]=>
   string(8) "getByKey"
-  [21]=>
+  string(20) "getByKeyWithCasToken"
   string(10) "getDelayed"
-  [22]=>
   string(15) "getDelayedByKey"
-  [23]=>
   string(8) "getMulti"
-  [24]=>
+  string(21) "getMultiWithCasTokens"
   string(13) "getMultiByKey"
-  [25]=>
+  string(26) "getMultiByKeyWithCasTokens"
   string(9) "getOption"
-  [26]=>
   string(13) "getResultCode"
-  [27]=>
   string(16) "getResultMessage"
-  [28]=>
   string(14) "getServerByKey"
-  [29]=>
   string(13) "getServerList"
-  [30]=>
   string(15) "resetServerList"
-  [31]=>
   string(8) "getStats"
-  [32]=>
   string(10) "getVersion"
-  [33]=>
   string(9) "increment"
-  [34]=>
   string(14) "incrementByKey"
-  [35]=>
   string(12) "isPersistent"
-  [36]=>
   string(10) "isPristine"
-  [37]=>
   string(7) "prepend"
-  [38]=>
   string(12) "prependByKey"
-  [39]=>
   string(4) "quit"
-  [40]=>
   string(7) "replace"
-  [41]=>
   string(12) "replaceByKey"
-  [42]=>
   string(3) "set"
-  [43]=>
   string(8) "setByKey"
-  [44]=>
   string(8) "setMulti"
-  [45]=>
   string(13) "setMultiByKey"
-  [46]=>
   string(9) "setOption"
-  [47]=>
   string(10) "setOptions"
-  [48]=>
   string(5) "touch"
-  [49]=>
   string(10) "touchByKey"
 }
 ================
 A_Memcached
-object(A_Memcached)#2 (1) {
+object(A_Memcached) (1) {
   ["___x"]=>
   NULL
 }
@@ -117,105 +71,59 @@ object(A_Memcached)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_Memcached in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(50) {
-  [0]=>
+varray(54) {
   string(11) "__construct"
-  [1]=>
   string(3) "add"
-  [2]=>
   string(8) "addByKey"
-  [3]=>
   string(9) "addServer"
-  [4]=>
   string(10) "addServers"
-  [5]=>
   string(6) "append"
-  [6]=>
   string(11) "appendByKey"
-  [7]=>
   string(3) "cas"
-  [8]=>
   string(8) "casByKey"
-  [9]=>
   string(9) "decrement"
-  [10]=>
   string(14) "decrementByKey"
-  [11]=>
   string(6) "delete"
-  [12]=>
   string(16) "deleteMultiByKey"
-  [13]=>
   string(11) "deleteMulti"
-  [14]=>
   string(11) "deleteByKey"
-  [15]=>
   string(5) "fetch"
-  [16]=>
   string(8) "fetchAll"
-  [17]=>
   string(5) "flush"
-  [18]=>
   string(3) "get"
-  [19]=>
+  string(15) "getWithCasToken"
   string(10) "getAllKeys"
-  [20]=>
   string(8) "getByKey"
-  [21]=>
+  string(20) "getByKeyWithCasToken"
   string(10) "getDelayed"
-  [22]=>
   string(15) "getDelayedByKey"
-  [23]=>
   string(8) "getMulti"
-  [24]=>
+  string(21) "getMultiWithCasTokens"
   string(13) "getMultiByKey"
-  [25]=>
+  string(26) "getMultiByKeyWithCasTokens"
   string(9) "getOption"
-  [26]=>
   string(13) "getResultCode"
-  [27]=>
   string(16) "getResultMessage"
-  [28]=>
   string(14) "getServerByKey"
-  [29]=>
   string(13) "getServerList"
-  [30]=>
   string(15) "resetServerList"
-  [31]=>
   string(8) "getStats"
-  [32]=>
   string(10) "getVersion"
-  [33]=>
   string(9) "increment"
-  [34]=>
   string(14) "incrementByKey"
-  [35]=>
   string(12) "isPersistent"
-  [36]=>
   string(10) "isPristine"
-  [37]=>
   string(7) "prepend"
-  [38]=>
   string(12) "prependByKey"
-  [39]=>
   string(4) "quit"
-  [40]=>
   string(7) "replace"
-  [41]=>
   string(12) "replaceByKey"
-  [42]=>
   string(3) "set"
-  [43]=>
   string(8) "setByKey"
-  [44]=>
   string(8) "setMulti"
-  [45]=>
   string(13) "setMultiByKey"
-  [46]=>
   string(9) "setOption"
-  [47]=>
   string(10) "setOptions"
-  [48]=>
   string(5) "touch"
-  [49]=>
   string(10) "touchByKey"
 }

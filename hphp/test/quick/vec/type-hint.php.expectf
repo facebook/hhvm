@@ -1,0 +1,302 @@
+====================================================
+vec(0) {
+}
+ERROR: string(%d) "Argument 1 to takes_dict() must be of type @HH\dict, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_dict() must be of type HH\dict, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_keyset() must be of type @HH\keyset, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_keyset() must be of type HH\keyset, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_bool() must be of type @bool, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_bool() must be of type bool, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_string() must be of type @string, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_string() must be of type string, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_array1() must be of type @%r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_array1() must be of type %r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?%r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_array2() must be of type ?%r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_foo() must be of type @Foo, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_foo() must be of type Foo, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_map_container() must be of type @HH\Map, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_map_container() must be of type HH\Map, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_null() must be of type @null, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_null() must be of type null, HH\vec given"
+vec(0) {
+}
+====================================================
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+ERROR: string(%d) "Argument 1 to takes_dict() must be of type @HH\dict, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_dict() must be of type HH\dict, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_keyset() must be of type @HH\keyset, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_keyset() must be of type HH\keyset, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_bool() must be of type @bool, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_bool() must be of type bool, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_string() must be of type @string, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_string() must be of type string, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_array1() must be of type @%r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_array1() must be of type %r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_array2() must be of type @?%r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_array2() must be of type ?%r(HH\\v)?%rarray, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_foo() must be of type @Foo, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_foo() must be of type Foo, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_vector_container() must be of type @HH\Vector, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_map_container() must be of type @HH\Map, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_map_container() must be of type HH\Map, HH\vec given"
+ERROR: string(%d) "Argument 1 to takes_null() must be of type @null, HH\vec given"
+ERROR: string(%d) "Value returned from function takes_null() must be of type null, HH\vec given"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+NULL
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, null given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, null given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, null given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, null given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, null given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, null given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, null given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, null given"
+NULL
+====================================================
+bool(false)
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, bool given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, bool given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, bool given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, bool given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, bool given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, bool given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, bool given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, bool given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, bool given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, bool given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, bool given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, bool given"
+bool(false)
+====================================================
+int(717)
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, int given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, int given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, int given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, int given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, int given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, int given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, int given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, int given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, int given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, int given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, int given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, int given"
+int(717)
+====================================================
+float(1.234)
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, float given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, float given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, float given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, float given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, float given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, float given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, float given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, float given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, float given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, float given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, float given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, float given"
+float(1.234)
+====================================================
+string(%d) "string"
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, string given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, string given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, string given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, string given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, string given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, string given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, string given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, string given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, string given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, string given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, string given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, string given"
+string(%d) "string"
+====================================================
+object(stdClass) (0) {
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, stdClass given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, stdClass given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, stdClass given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, stdClass given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, stdClass given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, stdClass given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, stdClass given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, stdClass given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, stdClass given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, stdClass given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, stdClass given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, stdClass given"
+object(stdClass) (0) {
+}
+====================================================
+varray(0) {
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, %rv?%rarray given"
+varray(0) {
+}
+====================================================
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, %rv?%rarray given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, %rv?%rarray given"
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+dict(0) {
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, HH\dict given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, HH\dict given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, HH\dict given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, HH\dict given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, HH\dict given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, HH\dict given"
+dict(0) {
+}
+====================================================
+dict(1) {
+  ["a"]=>
+  int(1)
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, HH\dict given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, HH\dict given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, HH\dict given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, HH\dict given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, HH\dict given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, HH\dict given"
+dict(1) {
+  ["a"]=>
+  int(1)
+}
+====================================================
+keyset(0) {
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, HH\keyset given"
+keyset(0) {
+}
+====================================================
+keyset(2) {
+  string(%d) "a"
+  int(1)
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, HH\keyset given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, HH\keyset given"
+keyset(2) {
+  string(%d) "a"
+  int(1)
+}
+====================================================
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, HH\Vector given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, HH\Vector given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, HH\Vector given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, HH\Vector given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, HH\Vector given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, HH\Vector given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, HH\Vector given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, HH\Vector given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, HH\Vector given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, HH\Vector given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, HH\Vector given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, HH\Vector given"
+object(HH\Vector) (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+====================================================
+object(HH\Map) (2) {
+  [1]=>
+  string(%d) "a"
+  [2]=>
+  string(%d) "b"
+}
+ERROR: string(%d) "Argument 1 to takes_vec1() must be of type @HH\vec, HH\Map given"
+ERROR: string(%d) "Value returned from function takes_vec1() must be of type HH\vec, HH\Map given"
+ERROR: string(%d) "Argument 1 to takes_vec2() must be of type @HH\vec, HH\Map given"
+ERROR: string(%d) "Value returned from function takes_vec2() must be of type HH\vec, HH\Map given"
+ERROR: string(%d) "Argument 1 to takes_vec3() must be of type @?HH\vec, HH\Map given"
+ERROR: string(%d) "Value returned from function takes_vec3() must be of type ?HH\vec, HH\Map given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict1() must be of type @HH\vec_or_dict, HH\Map given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict1() must be of type HH\vec_or_dict, HH\Map given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict2() must be of type @?HH\vec_or_dict, HH\Map given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict2() must be of type ?HH\vec_or_dict, HH\Map given"
+ERROR: string(%d) "Argument 1 to takes_vec_or_dict3() must be of type @HH\vec_or_dict, HH\Map given"
+ERROR: string(%d) "Value returned from function takes_vec_or_dict3() must be of type HH\vec_or_dict, HH\Map given"
+object(HH\Map) (2) {
+  [1]=>
+  string(%d) "a"
+  [2]=>
+  string(%d) "b"
+}

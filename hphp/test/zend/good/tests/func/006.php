@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ob_start();
 echo ob_get_level();
 echo 'A';
@@ -12,4 +12,4 @@ ob_end_clean();
 
 var_dump( $b ); // 2B
 var_dump( $a ); // 1A
-?>
+}

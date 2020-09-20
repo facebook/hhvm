@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_alpha(mixed $c)
  * Description: Checks for alphabetic character(s) 
  * Source code: ext/ctype/ctype.c
@@ -8,12 +8,12 @@
  * Pass strings containing different character types to ctype_alpha() to test
  * which are considered valid alphabetic character only strings
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_alpha() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -37,7 +37,7 @@ $values = array(
        '',
        ' ', 
 /*23*/ base64_decode("w4DDoMOHw6fDiMOo") // non-ascii characters
-);
+];
 
 
 // loop through each element of $values to test behaviour of ctype_alnum()
@@ -49,5 +49,5 @@ foreach($values as $value) {
 };
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

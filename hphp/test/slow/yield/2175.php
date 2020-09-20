@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen() {
   yield 1;
@@ -12,10 +12,14 @@ function gen() {
   }
   yield 5;
 }
+
+<<__EntryPoint>>
+function main_2175() {
 foreach (gen() as $x) {
  var_dump($x);
  }
 $g = gen();
+$g->next();
 var_dump($g->current());
 $g->next();
 var_dump($g->current());
@@ -25,3 +29,4 @@ $g->raise(new Exception('foobar'));
 var_dump($g->current());
 $g->next();
 var_dump($g->current());
+}

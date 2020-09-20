@@ -16,321 +16,139 @@
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
+
+#include "hphp/util/struct-log.h"
 
 namespace HPHP { namespace jit { namespace irgen {
+
+//////////////////////////////////////////////////////////////////////
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This function returns the offset of instruction i's branch target,
- * which is the offset corresponding to the branch being taken.
- */
-Offset iterBranchTarget(const NormalizedInstruction& i) {
-  assertx(instrJumpOffset(i.pc()) != nullptr);
-  return i.offset() + i.imm[1].u_BA;
+// `doneOffset` is the relative offset to jump to if the base has no elements.
+// `result` is a TBool that is true if the iterator has more items.
+void implIterInitJmp(IRGS& env, Offset doneOffset, SSATmp* result) {
+  auto const targetOffset = bcOff(env) + doneOffset;
+  auto const target = getBlock(env, targetOffset);
+  assertx(target != nullptr);
+  gen(env, JmpZero, target, result);
 }
 
-template<class Lambda>
-void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
-  // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
+// `loopOffset` is the relative offset to jump to if the base has more elements.
+// `result` is a TBool that is true if the iterator has more items.
+void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result) {
+  auto const targetOffset = bcOff(env) + loopOffset;
+  auto const target = getBlock(env, targetOffset);
+  assertx(target != nullptr);
 
-  auto const exit  = makeExit(env);
-  auto const pred  = env.irb->predictedStackInnerType(spOffBCFromIRSP(env));
-  auto const src   = topV(env);
-
-  if (!pred.subtypeOfAny(TArrLike, TObj)) {
-    PUNT(MIterInit-unsupportedSrcType);
+  if (loopOffset <= 0) {
+    ifThen(env,
+      [&](Block* taken) {
+        gen(env, JmpNZero, taken, result);
+      },
+      [&]{
+        surpriseCheckWithTarget(env, targetOffset);
+        gen(env, Jmp, target);
+      }
+    );
+  } else {
+    gen(env, JmpNZero, target, result);
   }
+}
 
-  // Guard the inner type before we call the helper.
-  gen(env, CheckRefInner, pred, exit, src);
+// If the iterator base is an empty array-like, this method will generate
+// trivial IR for the loop (just jump directly to done) and return true.
+bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base, bool local) {
+  auto const empty = base->hasConstVal(TArrLike) && base->arrLikeVal()->empty();
+  if (!empty) return false;
 
-  auto const res = genFunc(src, pred);
-  auto const out = popV(env);
-  decRef(env, out);
-  implCondJmp(env, bcOff(env) + relOffset, true, res);
+  // NOTE: `base` is static, so we can skip the dec-ref for non-local iters.
+  if (!local) discard(env, 1);
+  auto const targetOffset = bcOff(env) + doneOffset;
+  auto const target = getBlock(env, targetOffset);
+  assertx(target != nullptr);
+  gen(env, Jmp, target);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
 
+}  // namespace
+
+//////////////////////////////////////////////////////////////////////
+
+void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
+  auto const base = topC(env);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
+  if (iterInitEmptyBase(env, doneOffset, base, false)) return;
+  specializeIterInit(env, doneOffset, ita, kInvalidId);
+
+  discard(env, 1);
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  auto const op = ita.hasKey() ? IterInitK : IterInit;
+  auto const data = IterData(ita);
+  auto const result = gen(env, op, data, base, fp(env));
+  implIterInitJmp(env, doneOffset, result);
 }
 
-void emitIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
-                  int32_t valLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
-  auto const res = gen(
-    env,
-    IterInit,
-    TBool,
-    IterData(iterId, -1, valLocalId),
-    src,
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, true, res);
+void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
+  if (specializeIterNext(env, loopOffset, ita, kInvalidId)) return;
+
+  auto const op = ita.hasKey() ? IterNextK : IterNext;
+  auto const result = gen(env, op, IterData(ita), fp(env));
+  implIterNextJmp(env, loopOffset, result);
 }
 
-void emitIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
-                   int32_t valLocalId, int32_t keyLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
-  auto const res = gen(
-    env,
-    IterInitK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    src,
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, true, res);
+void emitLIterInit(IRGS& env, IterArgs ita,
+                   int32_t baseLocalId, Offset doneOffset) {
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
+  if (iterInitEmptyBase(env, doneOffset, base, true)) return;
+  specializeIterInit(env, doneOffset, ita, baseLocalId);
+
+  if (base->isA(TObj)) gen(env, IncRef, base);
+  auto const op = base->isA(TArrLike)
+    ? (ita.hasKey() ? LIterInitK : LIterInit)
+    : (ita.hasKey() ? IterInitK : IterInit);
+  auto const data = IterData(ita);
+  auto const result = gen(env, op, data, base, fp(env));
+  implIterInitJmp(env, doneOffset, result);
 }
 
-void emitIterNext(IRGS& env,
-                  int32_t iterId,
-                  Offset relOffset,
-                  int32_t valLocalId) {
-  surpriseCheck(env, relOffset);
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const res = gen(
-    env,
-    IterNext,
-    TBool,
-    IterData(iterId, -1, valLocalId),
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, false, res);
-}
+void emitLIterNext(IRGS& env, IterArgs ita,
+                   int32_t baseLocalId, Offset loopOffset) {
+  if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
 
-void emitIterNextK(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId,
-                   int32_t keyLocalId) {
-  surpriseCheck(env, relOffset);
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const res = gen(
-    env,
-    IterNextK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, false, res);
-}
-
-void emitWIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
-                   int32_t valLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInit);
-  auto const res = gen(
-    env,
-    WIterInit,
-    TBool,
-    IterData(iterId, -1, valLocalId),
-    src,
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, true, res);
-}
-
-void emitWIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
-                    int32_t valLocalId, int32_t keyLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInitK);
-  auto const res = gen(
-    env,
-    WIterInitK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    src,
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, true, res);
-}
-
-void emitWIterNext(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId) {
-  surpriseCheck(env, relOffset);
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const res = gen(
-    env,
-    WIterNext,
-    TBool,
-    IterData(iterId, -1, valLocalId),
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, false, res);
-}
-
-void emitWIterNextK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
-  surpriseCheck(env, relOffset);
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
-  auto const res = gen(
-    env,
-    WIterNextK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    fp(env)
-  );
-  implCondJmp(env, targetOffset, false, res);
-}
-
-void emitMIterInit(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId) {
-  implMIterInit(env, relOffset, [&] (SSATmp* src, Type type) {
-    return gen(
-      env,
-      MIterInit,
-      type,
-      IterData(iterId, -1, valLocalId),
-      src,
-      fp(env)
-    );
-  });
-}
-
-void emitMIterInitK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
-  implMIterInit(env, relOffset, [&] (SSATmp* src, Type type) {
-    return gen(
-      env,
-      MIterInitK,
-      type,
-      IterData(iterId, keyLocalId, valLocalId),
-      src,
-      fp(env)
-    );
-  });
-}
-
-void emitMIterNext(IRGS& env,
-                   int32_t iterId,
-                   Offset relOffset,
-                   int32_t valLocalId) {
-  surpriseCheck(env, relOffset);
-  auto const res = gen(
-    env,
-    MIterNext,
-    TBool,
-    IterData(iterId, -1, valLocalId),
-    fp(env)
-  );
-  implCondJmp(env, bcOff(env) + relOffset, false, res);
-}
-
-void emitMIterNextK(IRGS& env,
-                    int32_t iterId,
-                    Offset relOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId) {
-  surpriseCheck(env, relOffset);
-  auto const res = gen(
-    env,
-    MIterNextK,
-    TBool,
-    IterData(iterId, keyLocalId, valLocalId),
-    fp(env)
-  );
-  implCondJmp(env, bcOff(env) + relOffset, false, res);
+  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  auto const result = [&]{
+    if (base->isA(TArrLike)) {
+      auto const op = ita.hasKey() ? LIterNextK : LIterNext;
+      return gen(env, op, IterData(ita), base, fp(env));
+    }
+    auto const op = ita.hasKey() ? IterNextK : IterNext;
+    return gen(env, op, IterData(ita), fp(env));
+  }();
+  implIterNextJmp(env, loopOffset, result);
 }
 
 void emitIterFree(IRGS& env, int32_t iterId) {
   gen(env, IterFree, IterId(iterId), fp(env));
+  gen(env, KillIter, IterId(iterId), fp(env));
 }
 
-void emitMIterFree(IRGS& env, int32_t iterId) {
-  gen(env, MIterFree, IterId(iterId), fp(env));
-}
-
-void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
-  for (int iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
-    IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
-    Id       iterId   = iv.vec32()[iterIndex + 1];
-    switch (iterKind) {
-    case KindOfIter:  gen(env, IterFree,  IterId(iterId), fp(env)); break;
-    case KindOfMIter: gen(env, MIterFree, IterId(iterId), fp(env)); break;
-    case KindOfCIter: emitCIterFree(env, iterId); break;
-    }
-  }
-
-  jmpImpl(env, bcOff(env) + relOffset);
-}
-
-void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
-  auto const src        = topC(env);
-  auto const type       = src->type();
-
-  if (type <= TObj) {
-    auto const slowExit = makeExitSlow(env);
-    auto const cls      = gen(env, LdObjClass, src);
-    auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-    gen(env, StCufIterFunc, IterId(iterId), fp(env), func);
-    gen(env, StCufIterCtx, IterId(iterId), fp(env), src);
-    gen(env, StCufIterInvName, IterId(iterId), fp(env), cns(env, TNullptr));
-    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, false));
-    discard(env, 1);
-    return;
-  }
-
-  if (type.subtypeOfAny(TArr, TVec, TStr)) {
-    // Do this first, because DecodeCufIter will do a sanity check on the flag.
-    gen(env, StCufIterDynamic, IterId(iterId), fp(env), cns(env, true));
-    auto const res = gen(
-      env,
-      DecodeCufIter,
-      TBool,
-      IterId(iterId),
-      src,
-      fp(env)
-    );
-    discard(env, 1);
-    decRef(env, src);
-    implCondJmp(env, bcOff(env) + relOffset, true, res);
-  } else {
-    discard(env, 1);
-    decRef(env, src);
-    jmpImpl(env, bcOff(env) + relOffset);
-  }
-}
-
-void emitCIterFree(IRGS& env, int32_t iterId) {
-  auto const ctx = gen(
-    env,
-    LdCufIterCtx,
-    TCtx | TNullptr,
-    IterId(iterId),
-    fp(env)
-  );
-  auto const invName = gen(
-    env,
-    LdCufIterInvName,
-    TStr | TNullptr,
-    IterId(iterId),
-    fp(env)
-  );
-  ifNonNull(env, ctx, [&](SSATmp* t) { decRef(env, t); });
-  ifNonNull(env, invName, [&](SSATmp* t) { decRef(env, t); });
-  gen(env, KillCufIter, IterId(iterId), fp(env));
+void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
+  auto const baseType = env.irb->local(baseLocalId, DataTypeSpecific).type;
+  if (!(baseType <= TArrLike)) gen(env, IterFree, IterId(iterId), fp(env));
+  gen(env, KillIter, IterId(iterId), fp(env));
 }
 
 //////////////////////////////////////////////////////////////////////

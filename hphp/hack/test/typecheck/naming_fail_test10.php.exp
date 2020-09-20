@@ -1,0 +1,4 @@
+File "naming_fail_test10.php", line 9, characters 3-4:
+Variable `$B` is undefined, or not always defined. (Naming[2050])
+File "naming_fail_test10.php", line 3, characters 20-21:
+Did you mean `$~~b~~` instead (which only differs by case)?

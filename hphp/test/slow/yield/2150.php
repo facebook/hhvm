@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function nums() {
  $i = 0;
@@ -14,7 +14,11 @@ function nums() {
 }
  goto foo;
 }
- foreach (nums() as $num) {
+
+
+ <<__EntryPoint>>
+function main_2150() {
+foreach (nums() as $num) {
  var_dump($num);
 }
-
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
   Prototype: int fileperms ( string $filename );
   Description: Returns the permissions on the file, or FALSE in case of an error
@@ -9,17 +9,17 @@
 */
 
 /* Testing with miscellaneous Permission */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
-$file_name = dirname(__FILE__)."/006_variation2.tmp";
+$file_name = __SystemLib\hphp_test_tmppath('006_variation2.tmp');
 $file_handle = fopen($file_name, "w");
-fclose($file_handle);
-$dir_name = dirname(__FILE__)."/006_variation2";
+try { fclose($file_handle); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$dir_name = __SystemLib\hphp_test_tmppath('006_variation2');
 mkdir($dir_name);
 
 echo "\n*** Testing fileperms(), chmod() with miscellaneous permissions ***\n";
-$perms_array = array(
+$perms_array = varray[
   /* testing sticky bit */
   07777,
   00000,
@@ -43,28 +43,24 @@ $perms_array = array(
   "r+w+x",
   "u+rwx",
   "u+rwx, g+rw, o+wx"
-);
+];
 
 $count = 1;
 foreach($perms_array as $permission) {
   echo "-- Iteration $count --\n";
-  var_dump( chmod($file_name, $permission) );
+  try { var_dump( chmod($file_name, $permission) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   printf("%o", fileperms($file_name) );
   echo "\n";
   clearstatcache();
 
-  var_dump( chmod($dir_name, $permission) );
+  try { var_dump( chmod($dir_name, $permission) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   printf("%o", fileperms($dir_name) );
   echo "\n";
   clearstatcache();
   $count++;
 }
 echo "*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-chmod(dirname(__FILE__)."/006_variation2.tmp", 0777);
-chmod(dirname(__FILE__)."/006_variation2", 0777);
-unlink(dirname(__FILE__)."/006_variation2.tmp");
-rmdir(dirname(__FILE__)."/006_variation2");
-?>
+
+unlink($file_name);
+rmdir($dir_name);
+}

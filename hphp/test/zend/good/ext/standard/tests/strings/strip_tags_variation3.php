@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string 
+ * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
 */
 
@@ -8,6 +8,13 @@
  * testing functionality of strip_tags() by giving unexpected values for $str and $allowable_tags arguments
 */
 
+// get a class
+class classA{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // get a resource
@@ -17,15 +24,8 @@ $fp=fopen(__FILE__, "r");
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA{
-  public function __toString(){
-    return "Class A object";
-  }
-}
-
 //array of values to iterate over
-$values = array(
+$values = varray[
 
       // int data
       0,
@@ -41,11 +41,11 @@ $values = array(
       .5,
 
       // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
+      varray[],
+      varray[0],
+      varray[1],
+      varray[1, 2],
+      darray['color' => 'red', 'item' => 'pen'],
 
       // null data
       NULL,
@@ -73,15 +73,15 @@ $values = array(
       // resource variable
       $fp
 
-);
+];
 
 // loop through each element of the array for allowable_tags
 $iterator = 1;
 foreach($values as $value) {
       echo "-- Iteration $iterator --\n";
-      var_dump( strip_tags($value, $value) );
+      try { var_dump( strip_tags($value, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       $iterator++;
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

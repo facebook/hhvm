@@ -1,0 +1,6 @@
+File "primitive4.php", line 11, characters 5-6:
+Invalid argument (Typing[4110])
+File "primitive4.php", line 3, characters 12-14:
+Expected `int`
+File "primitive4.php", line 5, characters 12-16:
+But got `mixed`

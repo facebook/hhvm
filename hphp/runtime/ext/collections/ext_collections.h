@@ -1,15 +1,13 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_H
-#define incl_HPHP_EXT_COLLECTIONS_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-struct c_Vector;
-void triggerCow(c_Vector* vec);
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
 
 namespace collections {
@@ -41,8 +39,6 @@ extern const StaticString
     return req::make<c_##name>().detach();                  \
   }
 
-constexpr ObjectData::Attribute objectFlags = ObjectData::NoDestructor;
-
 /**
  * The "materialization" methods have the form "to[CollectionName]()" and
  * allow us to get an instance of a collection type from another.
@@ -59,7 +55,7 @@ Object materialize(ObjectData* obj) {
  * All native collection class have their m_size field at the same
  * offset in the object.
  */
-constexpr ptrdiff_t FAST_SIZE_OFFSET = use_lowptr ? 16 : 24;
+constexpr ptrdiff_t FAST_SIZE_OFFSET = 16;
 inline size_t getSize(const ObjectData* od) {
   assertx(od->isCollection());
   return *reinterpret_cast<const uint32_t*>(
@@ -96,21 +92,31 @@ struct CollectionsExtension : Extension {
     assertx(cls->isCollectionClass());
     assertx(cls->attrs() & AttrFinal);
     assertx(!cls->getNativeDataInfo());
-    assertx(!cls->instanceCtor());
+    assertx(!cls->instanceCtor<false>());
+    assertx(!cls->instanceCtor<true>());
     assertx(!cls->instanceDtor());
+    assertx(!cls->hasMemoSlots());
     cls->allocExtraData();
     cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
+    cls->m_extra.raw()->m_instanceCtorUnlocked = T::instanceCtor;
     cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
-    cls->initRTAttributes(
-        Class::UseGet |
-        Class::UseSet |
-        Class::UseIsset |
-        Class::UseUnset |
-        Class::CallToImpl
-    );
+    cls->m_releaseFunc = T::instanceDtor;
+    cls->initRTAttributes(Class::CallToImpl);
+  }
+};
+
+const StaticString s_isset{"isset"};
+
+struct CollectionPropHandler: Native::BasePropHandler {
+  static Variant issetProp(const Object&, const String&) {
+    return false;
+  }
+  static bool isPropSupported(const String&, const String& op) {
+    if (op.same(s_isset)) return true;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Cannot access a property on a collection");
   }
 };
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

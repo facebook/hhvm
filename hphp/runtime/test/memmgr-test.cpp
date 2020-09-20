@@ -22,12 +22,14 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 
 namespace HPHP {
 
 static void allocAndJoin(size_t size, bool free) {
   std::thread thread([&]() {
+      HPHP::rds::local::init();
+      SCOPE_EXIT { HPHP::rds::local::fini(); };
       tl_heap.getCheck();
       if (free) {
         String str(size, ReserveString);
@@ -41,7 +43,7 @@ static void allocAndJoin(size_t size, bool free) {
 TEST(MemoryManager, OnThreadExit) {
   allocAndJoin(42, true);
   allocAndJoin(kMaxSmallSize + 1, true);
-#ifdef DEBUG
+#ifndef NDEBUG
   EXPECT_DEATH(allocAndJoin(42, false), "");
   EXPECT_DEATH(allocAndJoin(kMaxSmallSize + 1, false), "");
 #endif
@@ -158,29 +160,18 @@ TEST(MemoryManager, realloc) {
   req::free(p2);
 }
 
-TEST(MemoryManager, Find) {
-  for (size_t index = 0; index < 1000; ++index) {
+TEST(MemoryManager, ContainsAnySize) {
+  for (size_t i = 0; i < 1000; ++i) {
     auto p = req::malloc_noptrs(kMaxSmallSize*2);
     auto const n = static_cast<MallocNode*>(p) - 1;
     auto p2 = req::malloc_noptrs(kMaxSmallSize/2);
     auto const n2 = static_cast<MallocNode*>(p2) - 1;
-    EXPECT_TRUE(tl_heap->find(n));
-    EXPECT_TRUE(tl_heap->find(n2));
+    EXPECT_TRUE(tl_heap->contains(n));
+    EXPECT_TRUE(tl_heap->contains(n2));
     req::free(p);
     req::free(p2);
-    EXPECT_FALSE(tl_heap->find(n));
-    EXPECT_TRUE(tl_heap->find(n2));
-  }
-}
-
-TEST(MemoryManager, Contains) {
-  // note that contains() does not check BigAlloc
-  for (size_t index = 0; index < 1000; ++index) {
-    auto p = req::malloc_noptrs(kMaxSmallSize/2);
-    auto const n = static_cast<MallocNode*>(p) - 1;
-    EXPECT_TRUE(tl_heap->contains(n));
-    req::free(p);
-    EXPECT_TRUE(tl_heap->contains(n));
+    EXPECT_FALSE(tl_heap->contains(n));
+    EXPECT_TRUE(tl_heap->contains(n2));
   }
 }
 
@@ -196,7 +187,7 @@ static void testLeak(size_t alloc_size) {
   auto const target_alloc = int64_t{5} << 30;
   auto const vec_cap = (alloc_size - sizeof(ArrayData)) / sizeof(TypedValue);
   auto const vec = [vec_cap] {
-    VecArrayInit vec{vec_cap};
+    VecInit vec{vec_cap};
     for (int j = 0; j < vec_cap; ++j) {
       vec.append(make_tv<KindOfNull>());
     }

@@ -1,12 +1,8 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_SimpleXMLElement extends SimpleXMLElement {
   public $___x;
 }
-test("SimpleXMLElement", "<?xml version='1.0'?><document></document>");
-
 
 function basicXML() {
   return
@@ -25,10 +21,17 @@ function testIteration() {
     echo ($i++) . "th nodes contents is: $e\n";
   }
 }
-testIteration();
 
 function testCanBeWrappedByIteratorIterator() {
   $i = new IteratorIterator(new SimpleXMLElement(basicXMl()));
   echo "Basic XML has " . iterator_count($i) . " root children\n";
 }
-testCanBeWrappedByIteratorIterator();
+
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("SimpleXMLElement", "<?xml version='1.0'?><document></document>");
+
+  testIteration();
+
+  testCanBeWrappedByIteratorIterator();
+}

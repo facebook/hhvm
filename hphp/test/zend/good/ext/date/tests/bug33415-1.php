@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 print "TZ=America/Jujuy  - Is it OK for this to be 2 AM, rather than 1
 AM as per most DST transitions?\n";
 date_default_timezone_set("America/Jujuy");
@@ -16,4 +16,4 @@ print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Sunday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Sunday            00:00:00\n\n";
-?>
+}

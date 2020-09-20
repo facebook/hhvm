@@ -16,81 +16,86 @@ float(0)
 float(123.4456789)
 
 -- Iteration 6 --
-float(123.4456789)
+
+Warning: round() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 7 --
-float(0)
+
+Warning: round() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 8 --
-float(123.4456789)
+
+Warning: round() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 9 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 10 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 11 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 12 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 13 --
-float(123.4)
+
+Warning: round() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 14 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 15 --
-float(123.4)
+
+Warning: round() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 16 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 24 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 25 --
-float(123)
+
+Warning: round() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: round() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 ===Done===

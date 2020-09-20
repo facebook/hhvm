@@ -1,0 +1,2 @@
+
+Fatal error: Cannot redeclare LSB static A::x as B::x in %s on line 7

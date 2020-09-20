@@ -1,0 +1,9 @@
+(library
+  (name ignore)
+  (wrapped false)
+  (modules filesToIgnore)
+  (libraries
+    (select filesToIgnore.ml from
+      (facebook -> ../../facebook/ignore/filesToIgnore.ml)
+      (-> ../../stubs/filesToIgnore.ml))))
+

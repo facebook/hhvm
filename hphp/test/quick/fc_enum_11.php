@@ -21,6 +21,7 @@ function test(): Foo {
 function test2(): Bar {
   return Bar::BAZ;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(test());
 var_dump(test2());
+}

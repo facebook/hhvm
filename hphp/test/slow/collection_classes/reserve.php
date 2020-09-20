@@ -31,4 +31,8 @@ function main() {
 
 }
 
+
+<<__EntryPoint>>
+function main_reserve() {
 main();
+}

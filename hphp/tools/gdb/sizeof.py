@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB command for printing the sizes of various containers.
 """
@@ -51,5 +53,6 @@ class SizeOfCommand(gdb.Command):
             gdbprint(size)
         else:
             print('sizeof: Unrecognized container.')
+
 
 SizeOfCommand()

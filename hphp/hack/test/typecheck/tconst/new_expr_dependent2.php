@@ -8,7 +8,7 @@ class C {
   const type T as arraykey = arraykey;
 
   public function get(): this::T {
-    // UNSAFE
+    throw new Exception();
   }
 
   public static function takesThis(this $c): void {}

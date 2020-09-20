@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1688() {
 $src = tmpfile();
 $dst = tmpfile();
 fwrite($src, 'a');
@@ -12,3 +15,4 @@ stream_copy_to_stream($src, $dst);
 fseek($dst, 0);
 $str = stream_get_contents($dst);
 echo $str;
+}

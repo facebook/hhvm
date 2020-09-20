@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   abstract public function bar();
@@ -14,6 +14,10 @@ class B {
 class C extends B {
   use T;
 }
+
+
+<<__EntryPoint>>
+function main_2056() {
 $o = new C;
 $o->foo();
-
+}

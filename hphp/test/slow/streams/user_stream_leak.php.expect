@@ -1,5 +1,0 @@
-open
-write w
-flush
-close
-int(1)

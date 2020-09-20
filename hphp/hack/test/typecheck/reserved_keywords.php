@@ -1,11 +1,11 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
@@ -52,7 +52,6 @@ class A {
   private int $children = 0;
   private int $category = 0;
   private int $clone = 0;
-  private int $__construct = 0;
   private int $parent = 0;
   private int $self = 0;
   private int $require_once = 0;
@@ -104,7 +103,6 @@ class A {
     $this->children = 10;
     $this->category = 10;
     $this->clone = 10;
-    $this->__construct = 10;
     $this->parent = 10;
     $this->self = 10;
     $this->require_once = 10;

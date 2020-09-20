@@ -25,7 +25,7 @@ omc
 rsfc
 int(10)
 
-Notice: Undefined variable: v in %s/test/slow/eval_order/1506.php on line 51
+Notice: Undefined variable: v in %s/test/slow/eval_order/1506.php on line %d
 NULL
 int(1)
 int(10)

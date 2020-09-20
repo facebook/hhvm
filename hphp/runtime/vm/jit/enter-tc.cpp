@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/ringbuffer.h"
@@ -29,17 +30,14 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace detail {
+namespace HPHP { namespace jit {
 
-void enterTC(TCA start, ActRec* stashedAR) {
-  if (debug) {
-    fflush(stdout);
-    fflush(stderr);
-  }
+namespace {
 
+ALWAYS_INLINE void preEnter(TCA start) {
   assertx(tc::isValidCodeAddress(start));
-  assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
-  assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
+  assertx(((uintptr_t)vmsp() & (sizeof(TypedValue) - 1)) == 0);
+  assertx(((uintptr_t)vmfp() & (sizeof(TypedValue) - 1)) == 0);
 
   INC_TPC(enter_tc);
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
@@ -48,11 +46,28 @@ void enterTC(TCA start, ActRec* stashedAR) {
   }
 
   tl_regState = VMRegState::DIRTY;
-  enterTCImpl(start, stashedAR);
+}
+
+ALWAYS_INLINE void postExit() {
   tl_regState = VMRegState::CLEAN;
   assertx(isValidVMStackAddress(vmsp()));
 
   vmfp() = nullptr;
+  vmpc() = nullptr;
 }
 
-}}}
+}
+
+void enterTC(TCA start) {
+  tracing::BlockNoTrace _{"enter-tc"};
+
+  preEnter(start);
+  assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
+              start, vmfp()->func(), vmfp()->func()->fullName());
+  auto& regs = vmRegsUnsafe();
+  tc::ustubs().enterTCHelper(start, regs.fp, rds::tl_base, regs.stack.top(),
+                             vmFirstAR());
+  postExit();
+}
+
+}}

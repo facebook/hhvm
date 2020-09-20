@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Guesses the encoding of an array of bytes in an
@@ -49,7 +49,7 @@ class EncodingDetector {
    *                                guesses of the encoding of the byte array
    */
   <<__Native>>
-  public function detectAll(): array<EncodingMatch>;
+  public function detectAll(): varray<EncodingMatch>;
 }
 
 /**

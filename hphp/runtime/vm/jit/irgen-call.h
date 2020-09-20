@@ -13,10 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_CALL_H_
-#define incl_HPHP_JIT_IRGEN_CALL_H_
+#pragma once
 
 #include <cstdint>
+
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 
 namespace HPHP {
 
@@ -34,22 +36,16 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
-void fpushActRec(IRGS& env,
-                 SSATmp* func,
-                 SSATmp* objOrClass,
-                 uint32_t numArgs,
-                 const StringData* invName,
-                 SSATmp* dynamicCall);
-
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);
 
-SSATmp* implFCall(IRGS& env, uint32_t numParams);
+void emitCallerRxChecksKnown(IRGS& env, const Func* callee);
 
 Type callReturnType(const Func* callee);
+Type awaitedCallReturnType(const Func* callee);
+Type callOutType(const Func* callee, uint32_t index);
 
 //////////////////////////////////////////////////////////////////////
 
 }}}
 
-#endif

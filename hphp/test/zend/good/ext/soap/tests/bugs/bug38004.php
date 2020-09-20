@@ -1,8 +1,8 @@
-<?php
+<?hh
 function Test($param) {
-	global $g;
-	$g = $param->strA."\n".$param->strB."\n";
-	return $g;
+
+	ZendGoodExtSoapTestsBugsBug38004::$g = $param->strA."\n".$param->strB."\n";
+	return ZendGoodExtSoapTestsBugsBug38004::$g;
 }
 
 class TestSoapClient extends SoapClient {
@@ -21,10 +21,19 @@ class TestSoapClient extends SoapClient {
   }
 }
 
-$client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
-$strA = 'test &amp; test';
-$strB = 'test & test';
-$res = $client->Test(array('strA'=>$strA, 'strB'=>$strB));
-print_r($res);
-print_r($g);
-?>
+abstract final class ZendGoodExtSoapTestsBugsBug38004 {
+  public static $g;
+}
+<<__EntryPoint>>
+function main_entry(): void {
+
+  $client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
+  $strA = 'test &amp; test';
+  $strB = 'test & test';
+  $res = $client->__soapcall(
+    'Test',
+    varray[darray['strA'=>$strA, 'strB'=>$strB]],
+  );
+  print_r($res);
+  print_r(ZendGoodExtSoapTestsBugsBug38004::$g);
+}

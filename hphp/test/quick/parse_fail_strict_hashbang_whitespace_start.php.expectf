@@ -1,0 +1,1 @@
+Fatal error: A .php file must begin with `<?hh`. in %s/test/quick/parse_fail_strict_hashbang_whitespace_start.php on line 1

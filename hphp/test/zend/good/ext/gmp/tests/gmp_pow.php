@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_strval(gmp_pow(2,10)));
 var_dump(gmp_strval(gmp_pow(-2,10)));
 var_dump(gmp_strval(gmp_pow(-2,11)));
@@ -16,12 +16,12 @@ var_dump(gmp_strval(gmp_pow($n,10)));
 $n = gmp_init("-20");
 var_dump(gmp_strval(gmp_pow($n,10)));
 
-var_dump(gmp_pow(2,10,1));
-var_dump(gmp_pow(2));
-var_dump(gmp_pow());
-var_dump(gmp_pow(array(), array()));
-var_dump(gmp_pow(2,array()));
-var_dump(gmp_pow(array(),10));
+try { var_dump(gmp_pow(2,10,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_pow(2)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_pow()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_pow(varray[], varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_pow(2,varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_pow(varray[],10));
 
 echo "Done\n";
-?>
+}

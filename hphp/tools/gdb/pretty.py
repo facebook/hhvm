@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB pretty printers for HHVM types.
 """
@@ -7,9 +9,9 @@ from compatibility import *
 import gdb
 import re
 
+import gdbutils
 from gdbutils import *
 from lookup import lookup_func
-from nameof import nameof
 from sizeof import sizeof
 import idx
 
@@ -47,6 +49,89 @@ class StringDataPrinter(object):
 #------------------------------------------------------------------------------
 # TypedValue.
 
+
+class SetTVRecurseCommand(gdb.Command):
+    """How many levels to recurse into TypedValue data ptrs when pretty-printing.
+    and an optional filter on keys to recurse on.
+    """
+
+    def __init__(self):
+        super(SetTVRecurseCommand, self).__init__('set tv-recurse',
+                                                  gdb.COMMAND_STATUS)
+
+    @errorwrap
+    def invoke(self, args, from_tty):
+        argv = gdb.string_to_argv(args)
+
+        argn = len(argv)
+        depth = None
+        regex = ""
+        if argn == 1:
+            depth = argv[0]
+        if argn == 2:
+            depth, regex = argv
+
+        if depth is not None:
+            gdbutils.tv_recurse_key = regex
+
+            if depth == 'true':
+                gdbutils.tv_recurse = True
+                return
+
+            if depth == 'false':
+                gdbutils.tv_recurse = 0
+                return
+
+            try:
+                gdbutils.tv_recurse = int(argv[0])
+                if gdbutils.tv_recurse >= 0:
+                    return
+            except:
+                pass
+
+        print(
+            'tv-recurse <depth> [<regex>]\n'
+            '  Valid values for <depth> are true, false or an integer depth (>=0)\n'
+            '  The optional <regex> determines which array keys or object properties '
+            'to recurse on\n'
+        )
+
+
+SetTVRecurseCommand()
+
+
+class SetTVBriefCommand(gdb.Command):
+    """
+    Select brief or verbose TV pretty printing
+    """
+
+    def __init__(self):
+        super(SetTVBriefCommand, self).__init__('set tv-brief',
+                                                  gdb.COMMAND_STATUS)
+
+    @errorwrap
+    def invoke(self, args, from_tty):
+        argv = gdb.string_to_argv(args)
+
+        argn = len(argv)
+        if argn == 1:
+            if argv[0] == 'true':
+                gdbutils.tv_brief = True
+                return
+
+            if argv[0] == 'false':
+                gdbutils.tv_brief = False
+                return
+
+        print(
+            'tv-brief <arg>\n'
+            '  Valid values for <arg> are true and false.\n'
+        )
+
+
+SetTVBriefCommand()
+
+
 class TypedValuePrinter(object):
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 
@@ -54,58 +139,7 @@ class TypedValuePrinter(object):
         self.val = val.cast(T('HPHP::TypedValue'))
 
     def to_string(self):
-        data = self.val['m_data']
-        t = self.val['m_type']
-        val = None
-        name = None
-
-        if t == V('HPHP::KindOfUninit') or t == V('HPHP::KindOfNull'):
-            pass
-
-        elif t == V('HPHP::KindOfBoolean'):
-            if data['num'] == 0:
-                val = False
-            elif data['num'] == 1:
-                val = True
-            else:
-                val = data['num']
-
-        elif t == V('HPHP::KindOfInt64'):
-            val = data['num']
-
-        elif t == V('HPHP::KindOfDouble'):
-            val = data['dbl']
-
-        elif (t == V('HPHP::KindOfString') or
-              t == V('HPHP::KindOfPersistentString')):
-            val = data['pstr'].dereference()
-
-        elif (t == V('HPHP::KindOfArray') or
-              t == V('HPHP::KindOfPersistentArray')):
-            val = data['parr']
-
-        elif t == V('HPHP::KindOfObject'):
-            val = data['pobj']
-            name = nameof(val)
-
-        elif t == V('HPHP::KindOfResource'):
-            val = data['pres']
-
-        elif t == V('HPHP::KindOfRef'):
-            val = data['pref'].dereference()
-
-        else:
-            t = 'Invalid(%d)' % t.cast(T('int8_t'))
-            val = "0x%x" % int(data['num'])
-
-        if val is None:
-            out = '{ %s }' % t
-        elif name is None:
-            out = '{ %s, %s }' % (t, str(val))
-        else:
-            out = '{ %s, %s ("%s") }' % (t, str(val), name)
-
-        return out
+        return pretty_tv(self.val['m_type'], self.val['m_data'])
 
 
 #------------------------------------------------------------------------------
@@ -130,7 +164,7 @@ class PtrPrinter(object):
         except gdb.MemoryError:
             s = None
 
-        out = '(%s) %s'  % (str(self._ptype()), str(self._pointer()))
+        out = '(%s) %s' % (str(self._ptype()), str(self._pointer()))
         return '%s "%s"' % (out, s) if s is not None else out
 
 
@@ -146,11 +180,13 @@ class ReqPtrPrinter(PtrPrinter):
     def _pointer(self):
         return self.val['m_px']
 
+
 class StringPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::(Static)?String$'
 
     def __init__(self, val):
         super(StringPrinter, self).__init__(val['m_str'])
+
 
 class ArrayPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Array$'
@@ -158,11 +194,13 @@ class ArrayPrinter(ReqPtrPrinter):
     def __init__(self, val):
         super(ArrayPrinter, self).__init__(val['m_arr'])
 
+
 class ObjectPrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Object$'
 
     def __init__(self, val):
         super(ObjectPrinter, self).__init__(val['m_obj'])
+
 
 class ResourcePrinter(ReqPtrPrinter):
     RECOGNIZE = '^HPHP::Resource$'
@@ -185,13 +223,30 @@ class LowPtrPrinter(PtrPrinter):
         storage = template_type(rawtype(self.val.type.template_argument(1)))
 
         if storage == 'HPHP::detail::AtomicStorage':
-            return idx.atomic_get(self.val['m_s']).cast(inner.pointer())
+            return atomic_get(self.val['m_s']).cast(inner.pointer())
         else:
             return self.val['m_s'].cast(inner.pointer())
 
 
 #------------------------------------------------------------------------------
+# folly::Optional
+
+class OptionalPrinter(object):
+    RECOGNIZE = '^(HPHP::req|folly)::Optional<.*>$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        if not self.val['storage_']['hasValue']:
+            return 'folly::none'
+        inner = self.val.type.template_argument(0)
+        ptr = self.val['storage_']['value'].address.cast(inner.pointer())
+        return ptr.dereference()
+
+#------------------------------------------------------------------------------
 # ArrayData.
+
 
 class ArrayDataPrinter(object):
     RECOGNIZE = '^HPHP::(ArrayData|MixedArray)$'
@@ -230,37 +285,65 @@ class ArrayDataPrinter(object):
             elt = self.cur
 
             try:
-                if elt['data']['m_type'] == -1:
-                    key = '<deleted>'
+                if elt['data']['m_type'] == -128:
+                    rawkey = key = '<deleted>'
                 elif elt['data']['m_aux']['u_hash'] < 0:
-                    key = '%d' % elt['ikey']
+                    rawkey = key = '%d' % elt['ikey']
                 else:
-                    key = '"%s"' % string_data_val(elt['skey'].dereference())
-            except gdb.MemoryError:
-                key = '<invalid>'
+                    rawkey = string_data_val(elt['skey'].dereference())
+                    key = '"%s"' % rawkey
 
+            except gdb.MemoryError:
+                rawkey = key = '<invalid>'
+
+            gdbutils.current_key = rawkey
             try:
                 data = elt['data'].cast(T('HPHP::TypedValue'))
             except gdb.MemoryError:
                 data = '<invalid>'
+            finally:
+                gdbutils.current_key = None
 
             self.cur = self.cur + 1
             return (key, data)
 
+    class _set_iterator(_BaseIterator):
+        def __init__(self, begin, end):
+            self.cur = begin
+            self.end = end
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            elt = self.cur
+
+            try:
+                if elt['tv']['m_type'] == -128:
+                    key = '<deleted>'
+                else:
+                    key = "%s" % elt['tv'].cast(T('HPHP::TypedValue'))
+            except gdb.MemoryError:
+                key = '<invalid>'
+
+            self.cur = self.cur + 1
+            return (key, key)
 
     def __init__(self, val):
         kind_ty = T('HPHP::ArrayData::ArrayKind')
         self.kind = val['m_kind'].cast(kind_ty)
 
-        if self.kind == self._kind('Mixed'):
+        if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
             self.val = val.cast(T('HPHP::MixedArray'))
+        elif self.kind == self._kind('Keyset'):
+            self.val = val.cast(T('HPHP::SetArray'))
         else:
             self.val = val
 
     def to_string(self):
         kind_int = int(self.kind.cast(T('uint8_t')))
 
-        if kind_int > 9:
+        if kind_int >= 14:
             return 'Invalid ArrayData (kind=%d)' % kind_int
 
         kind = str(self.kind)[len('HPHP::ArrayData::'):]
@@ -272,19 +355,22 @@ class ArrayDataPrinter(object):
         )
 
     def children(self):
-        data = self.val.address.cast(T('char').pointer()) + \
-               self.val.type.sizeof
+        data = (self.val.address.cast(T('char').pointer())
+                + self.val.type.sizeof)
 
-        if self.kind == self._kind('Packed'):
+        if self.kind == self._kind('Packed') or self.kind == self._kind('Vec'):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
             return self._packed_iterator(pelm, pelm + self.val['m_size'])
-        if self.kind == self._kind('Mixed'):
-            pelm = data.cast(T('HPHP::MixedArray::Elm').pointer())
+        if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
+            pelm = data.cast(T('HPHP::MixedArrayElm').pointer())
             return self._mixed_iterator(pelm, pelm + self.val['m_used'])
+        if self.kind == self._kind('Keyset'):
+            pelm = data.cast(T('HPHP::SetArrayElm').pointer())
+            return self._set_iterator(pelm, pelm + self.val['m_used'])
         return self._packed_iterator(0, 0)
 
     def _kind(self, kind):
-        return K('HPHP::ArrayData::k' + kind + 'Kind')
+        return K('HPHP::ArrayData::k' + kind + 'Kind', 'ArrayKind')
 
 
 #------------------------------------------------------------------------------
@@ -307,18 +393,19 @@ class ObjectDataPrinter(object):
             decl_props = self.cls['m_declProperties']
 
             try:
-                name = idx.indexed_string_map_at(decl_props, self.cur)['m_name']
-                try:
-                    val = idx.object_data_at(self.obj, name)
-                except gdb.MemoryError:
-                    val = None
+                name = idx.indexed_string_map_at(decl_props, self.cur)['name']
             except gdb.MemoryError:
                 name = '<invalid>'
 
-            self.cur = self.cur + 1
-
-            if val is None:
+            gdbutils.current_key = strinfo(name)['data']
+            try:
+                val = idx.object_data_at(self.obj, self.cls, self.cur)
+            except gdb.MemoryError:
                 val = '<unknown>'
+            finally:
+                gdbutils.current_key = None
+
+            self.cur = self.cur + 1
 
             return (str(deref(name)), val)
 
@@ -334,22 +421,9 @@ class ObjectDataPrinter(object):
     def children(self):
         return self._iterator(self.val)
 
-
-#------------------------------------------------------------------------------
-# RefData.
-
-class RefDataPrinter(object):
-    RECOGNIZE = '^HPHP::RefData$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def to_string(self):
-        return "RefData { %s }" % self.val['m_tv']
-
-
 #------------------------------------------------------------------------------
 # HHBBC::Bytecode
+
 
 class HhbbcBytecodePrinter(object):
     RECOGNIZE = '^HPHP::HHBBC::Bytecode$'
@@ -363,6 +437,8 @@ class HhbbcBytecodePrinter(object):
 
 #------------------------------------------------------------------------------
 # Lookup function.
+
+
 class CompactVectorPrinter(object):
     RECOGNIZE = '^HPHP::CompactVector(<.*>)$'
 
@@ -388,7 +464,6 @@ class CompactVectorPrinter(object):
             self.count = self.count + 1
             return (key, data)
 
-
     def __init__(self, val):
         inner = val.type.template_argument(0)
         self.inner = inner
@@ -398,8 +473,8 @@ class CompactVectorPrinter(object):
         else:
             self.len = val['m_data']['m_len']
             self.cap = val['m_data']['m_capacity']
-            self.elems = (val['m_data'].cast(T('char').pointer()) +
-                          val['elems_offset']).cast(inner.pointer())
+            self.elems = (val['m_data'].cast(T('char').pointer())
+                          + val['elems_offset']).cast(inner.pointer())
 
     def to_string(self):
         return "CompactVector<%s>: %d element(s) capacity=%d" % (
@@ -431,7 +506,6 @@ class SrcKeyPrinter(object):
 
         func = nameof(lookup_func(func_id))
         offset = self.val['m_offset']
-        this = 't' if self.val['m_hasThis'] else ''
 
         rmp = self.val['m_resumeModeAndPrologue']
         resume = prologue = ''
@@ -445,10 +519,11 @@ class SrcKeyPrinter(object):
         elif rmp == 3:
             prologue = 'p'
 
-        return '%s@%d%s%s%s' % (func, offset, resume, this, prologue)
+        return '%s@%d%s%s' % (func, offset, resume, prologue)
 
 #------------------------------------------------------------------------------
 # Lookup function.
+
 
 printer_classes = [
     TypedValuePrinter,
@@ -461,13 +536,14 @@ printer_classes = [
     StringDataPrinter,
     ArrayDataPrinter,
     ObjectDataPrinter,
-    RefDataPrinter,
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
     SrcKeyPrinter,
+    OptionalPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}
+
 
 def lookup_function(val):
     t = val.type
@@ -478,7 +554,7 @@ def lookup_function(val):
 
     # Get the type name.
     typename = t.tag
-    if typename == None:
+    if typename is None:
         return None
 
     # Iterate over local dict of types to determine if a printer is registered
@@ -489,5 +565,6 @@ def lookup_function(val):
 
     # Cannot find a pretty printer.  Return None.
     return None
+
 
 gdb.pretty_printers.append(lookup_function)

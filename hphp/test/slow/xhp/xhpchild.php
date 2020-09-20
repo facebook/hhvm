@@ -1,23 +1,23 @@
-<?php
+<?hh
 
 class :div implements XHPChild {}
 
 function f1(?XHPChild $x): void {
-  echo (int)($x instanceof XHPChild), ", ";
+  echo (int)($x is XHPChild), ", ";
   var_dump($x);
   echo "\n";
 }
 
 function f2(XHPChild $x): void {
-  echo (int)($x instanceof XHPChild), ", ";
+  echo (int)($x is XHPChild), ", ";
   var_dump($x);
   echo "\n";
 }
 
 function main() {
   // check array
-  f1(array(1,2,3,4));
-  f2(array(1,2,3,4));
+  f1(varray[1,2,3,4]);
+  f2(varray[1,2,3,4]);
 
   // check a static string
   f1("a boring string");
@@ -45,4 +45,8 @@ function main() {
   f1(null);
   f2(null);
 }
+
+<<__EntryPoint>>
+function main_xhpchild() {
 main();
+}

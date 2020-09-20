@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -44,6 +43,15 @@ value hh_sysinfo_uptime(void) {
 #else
   /* Not implemented */
   CAMLreturn(Val_long(0));
+#endif
+}
+
+CAMLprim value hh_sysinfo_is_apple_os(void) {
+  CAMLparam0();
+#ifdef __APPLE__
+  return Val_bool(1);
+#else
+  return Val_bool(0);
 #endif
 }
 

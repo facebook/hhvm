@@ -52,11 +52,11 @@ String StringUtil::StripHTMLTags(const String& input,
 Variant StringUtil::Explode(const String& input, const String& delimiter,
                             int64_t limit /* = PHP_INT_MAX */) {
   if (delimiter.empty()) {
-    throw_invalid_argument("delimiter: (empty)");
+    raise_invalid_argument_warning("delimiter: (empty)");
     return false;
   }
 
-  Array ret(Array::Create());
+  Array ret(Array::CreateVArray());
 
   if (input.empty()) {
     if (limit >= 0) {
@@ -131,7 +131,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     len += sitems.back().size() + lenDelim;
   }
   len -= lenDelim; // always one delimiter less than count of items
-  assert(sitems.size() == size);
+  assertx(sitems.size() == size);
 
   String s = String(len, ReserveString);
   char *buffer = s.mutableData();
@@ -149,21 +149,21 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     memcpy(p, item.data(), lenItem);
     p += lenItem;
   }
-  assert(p - buffer == len);
+  assertx(p - buffer == len);
   s.setSize(len);
   return s;
 }
 
 Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
   if (split_length <= 0) {
-    throw_invalid_argument(
+    raise_invalid_argument_warning(
       "The length of each segment must be greater than zero"
     );
     return false;
   }
 
   int len = str.size();
-  PackedArrayInit ret(len / split_length + 1, CheckAllocation{});
+  VArrayInit ret(len / split_length + 1);
   if (split_length >= len) {
     ret.append(str);
   } else {
@@ -177,7 +177,7 @@ Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
 Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
                                const String& end /* = "\r\n" */) {
   if (chunklen <= 0) {
-    throw_invalid_argument("chunklen: (non-positive)");
+    raise_invalid_argument_warning("chunklen: (non-positive)");
     return false;
   }
 
@@ -206,7 +206,7 @@ String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
                               const char *charset, bool dEncode, bool htmlEnt) {
   if (input.empty()) return input;
 
-  assert(charset);
+  assertx(charset);
   bool utf8 = true;
   if (strcasecmp(charset, "ISO-8859-1") == 0) {
     utf8 = false;
@@ -248,7 +248,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
                                    Array extra) {
   if (input.empty()) return input;
 
-  assert(charset);
+  assertx(charset);
   int flags = STRING_HTML_ENCODE_UTF8;
   if (nbsp) {
     flags |= STRING_HTML_ENCODE_NBSP;
@@ -312,7 +312,7 @@ String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
                               const char *charset, bool all) {
   if (input.empty()) return input;
 
-  assert(charset);
+  assertx(charset);
 
   int len = input.size();
   char *ret = string_html_decode(input.data(), len,
@@ -407,7 +407,7 @@ String StringUtil::DecodeFileUrl(const String& input) {
 // formatting
 
 String StringUtil::MoneyFormat(const char *format, double value) {
-  assert(format);
+  assertx(format);
   return string_money_format(format, value);
 }
 

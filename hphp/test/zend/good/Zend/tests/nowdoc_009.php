@@ -1,8 +1,11 @@
-<?php
+<?hh
 
-require_once 'nowdoc.inc';
+<<__EntryPoint>>
+function entrypoint_nowdoc_009(): void {
 
-print <<<'ENDOFNOWDOC'
+  require_once 'nowdoc.inc';
+
+  print <<<'ENDOFNOWDOC'
 ENDOFNOWDOC    ;
     ENDOFNOWDOC;
 ENDOFNOWDOC    
@@ -11,7 +14,7 @@ $ENDOFNOWDOC;
 
 ENDOFNOWDOC;
 
-$x = <<<'ENDOFNOWDOC'
+  $x = <<<'ENDOFNOWDOC'
 ENDOFNOWDOC    ;
     ENDOFNOWDOC;
 ENDOFNOWDOC    
@@ -20,6 +23,5 @@ $ENDOFNOWDOC;
 
 ENDOFNOWDOC;
 
-print "{$x}";
-
-?>
+  print "{$x}";
+}

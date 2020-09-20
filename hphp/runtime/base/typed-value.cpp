@@ -21,8 +21,8 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-const Cell immutable_null_base{0, KindOfNull};
-const Cell immutable_uninit_base{0, KindOfUninit};
+const TypedValue immutable_null_base{0, KindOfNull};
+const TypedValue immutable_uninit_base{0, KindOfUninit};
 
 std::string TypedValue::pretty() const {
   char buf[20];

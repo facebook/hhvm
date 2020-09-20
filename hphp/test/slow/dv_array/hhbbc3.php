@@ -16,9 +16,13 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_hhbbc3() {
 var_dump(
   A::foo(
-    __hhvm_intrinsics\launder_value(['a', 'b', 'c']),
-    __hhvm_intrinsics\launder_value([])
+    __hhvm_intrinsics\launder_value(varray['a', 'b', 'c']),
+    __hhvm_intrinsics\launder_value(varray[])
   )
 );
+}

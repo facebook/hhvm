@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   [0]=>
   string(12) "'a' 'b3' bcd"
   ["v"]=>
@@ -6,9 +6,7 @@ array(3) {
   [12]=>
   string(9) "'aa' 'bb'"
 }
-
-Notice: %s
-array(1) {
+darray(1) {
   [0]=>
   string(7) "'A'rray"
 }

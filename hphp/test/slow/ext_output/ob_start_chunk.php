@@ -1,6 +1,9 @@
-<?php
+<?hh
+
 
 // chunk size of 2
+<<__EntryPoint>>
+function main_ob_start_chunk() {
 ob_start(function ($s) { return 'ob: ' . $s; }, 2);
 
 for ($i = 1; $i <= 5; $i++) {
@@ -38,3 +41,4 @@ echo "I sure hope it does; ";
 echo "otherwise we debug!\n";
 
 ob_end_flush();
+}

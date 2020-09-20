@@ -13,13 +13,28 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_STATS_H_
-#define incl_HHBBC_STATS_H_
+#pragma once
 
 namespace HPHP { namespace HHBBC {
 
+struct Stats;
+
+struct StatsHolder {
+  StatsHolder();
+  ~StatsHolder();
+  StatsHolder(StatsHolder&& o) noexcept : stats{o.stats} { o.stats = nullptr; }
+  StatsHolder(const StatsHolder&) = delete;
+  StatsHolder& operator=(const StatsHolder&) = delete;
+  StatsHolder& operator=(StatsHolder&&) = delete;
+
+  operator bool() const { return stats; }
+
+  Stats* stats{};
+};
+
 namespace php {
 struct Program;
+struct Unit;
 }
 struct Index;
 
@@ -30,10 +45,11 @@ struct Index;
  * temporary file.  If it's greater than or equal to 2, also dump it
  * to stdout.
  */
-void print_stats(const Index&, const php::Program&);
+StatsHolder allocate_stats();
+void collect_stats(const StatsHolder&, const Index&, const php::Unit*);
+void print_stats(const StatsHolder&);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

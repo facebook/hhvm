@@ -1,0 +1,16 @@
+File "pu_atom_as_key.bad.php", line 8, characters 15-20:
+The field `tata` is undefined (Typing[4108])
+File "pu_atom_as_key.bad.php", line 7, characters 12-30:
+Definition is here
+File "pu_atom_as_key.bad.php", line 20, characters 10-20:
+Invalid index type for this dict (Typing[4324])
+File "pu_atom_as_key.bad.php", line 17, characters 15-18:
+This is the pocket universe C:@E
+File "pu_atom_as_key.bad.php", line 19, characters 30-35:
+It is incompatible with a string
+File "pu_atom_as_key.bad.php", line 25, characters 10-19:
+Invalid index type for this dict (Typing[4324])
+File "pu_atom_as_key.bad.php", line 17, characters 15-18:
+This is the pocket universe C:@E
+File "pu_atom_as_key.bad.php", line 25, characters 16-18:
+It is incompatible with a string

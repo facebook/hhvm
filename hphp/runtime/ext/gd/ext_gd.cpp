@@ -24,13 +24,14 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/ext/gd/libgd/gd.h"
 #include "hphp/runtime/ext/gd/libgd/gdfontt.h"  /* 1 Tiny font */
@@ -102,9 +103,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// sweep() { this->~Image(); }
-IMPLEMENT_RESOURCE_ALLOCATION(Image)
-
 void Image::reset() {
   if (m_gdImage) {
     gdImageDestroy(m_gdImage);
@@ -112,7 +110,6 @@ void Image::reset() {
   }
 }
 
-Image::~Image() { reset(); }
 
 struct ImageMemoryAlloc final : RequestEventHandler {
   ImageMemoryAlloc() : m_mallocSize(0) {}
@@ -123,7 +120,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
 #endif
-    assert(m_mallocSize == 0);
+    assertx(m_mallocSize == 0);
     m_mallocSize = 0;
   }
   void requestShutdown() override {
@@ -131,7 +128,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *ptrs[1000];
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
-    assert(m_mallocSize == 0);
+    assertx(m_mallocSize == 0);
 #endif
     m_mallocSize = 0;
   }
@@ -140,10 +137,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     if (m_mallocSize + size < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
-      void *ptr = malloc(sizeof(ln) + sizeof(size) + size);
+      void *ptr = local_malloc(sizeof(ln) + sizeof(size) + size);
       if (!ptr) return nullptr;
       memcpy(ptr, &ln, sizeof(ln));
       memcpy((char*)ptr + sizeof(ln), &size, sizeof(size));
@@ -151,7 +148,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
       m_alloced.insert(ptr);
       return ((char *)ptr + sizeof(ln) + sizeof(size));
 #else
-      void *ptr = malloc(sizeof(size) + size);
+      void *ptr = local_malloc(sizeof(size) + size);
       if (!ptr) return nullptr;
       memcpy(ptr, &size, sizeof(size));
       m_mallocSize += size;
@@ -165,11 +162,11 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
     if (m_mallocSize + bytes < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
-      void *ptr = malloc(sizeof(ln) + sizeof(size) + bytes);
+      void *ptr = local_malloc(sizeof(ln) + sizeof(size) + bytes);
       if (!ptr) return nullptr;
       memset(ptr, 0, sizeof(ln) + sizeof(size) + bytes);
       memcpy(ptr, &ln, sizeof(ln));
@@ -178,7 +175,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
       m_alloced.insert(ptr);
       return ((char *)ptr + sizeof(ln) + sizeof(size));
 #else
-      void *ptr = malloc(sizeof(size) + bytes);
+      void *ptr = local_malloc(sizeof(size) + bytes);
       if (!ptr) return nullptr;
       memcpy(ptr, &bytes, sizeof(bytes));
       memset((char *)ptr + sizeof(size), 0, bytes);
@@ -200,12 +197,12 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
-    assert(count == 1); // double free on failure
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
-    free(lnPtr);
+    assertx(count == 1); // double free on failure
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    local_free(lnPtr);
 #else
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
-    free(sizePtr);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    local_free(sizePtr);
 #endif
   }
 
@@ -215,7 +212,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -239,10 +236,10 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        !(tmp = realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
+        !(tmp = local_realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
-      assert(count == 1); // double free on failure
-      free(lnPtr);
+      assertx(count == 1); // double free on failure
+      local_free(lnPtr);
       return nullptr;
     }
     memcpy(tmp, &ln, sizeof(ln));
@@ -250,14 +247,14 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     m_mallocSize += diff;
     if (tmp != lnPtr) {
       int count = m_alloced.erase(lnPtr);
-      assert(count == 1);
+      assertx(count == 1);
       m_alloced.insert(tmp);
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
 #else
     if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
-        !(tmp = realloc(sizePtr, sizeof(size) + size))) {
-      free(sizePtr);
+        !(tmp = local_realloc(sizePtr, sizeof(size) + size))) {
+      local_free(sizePtr);
       return nullptr;
     }
     memcpy(tmp, &size, sizeof(size));
@@ -269,10 +266,9 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 #ifdef IM_MEMORY_CHECK
   void imDump(void *ptrs[], int &n) {
     int i = 0;
-    for (std::set<void*>::iterator iter = m_alloced.begin();
-         iter != m_alloced.end(); ++i, ++iter) {
+    for (auto iter = m_alloced.begin(); iter != m_alloced.end(); ++i, ++iter) {
       void *p = *iter;
-      assert(p);
+      assertx(p);
       if (i < n) ptrs[i] = p;
       int ln;
       size_t size;
@@ -781,8 +777,14 @@ static int php_read_APP(const req::ptr<File>& stream,
   }
   length -= 2;                /* length includes itself */
 
-  String buffer = stream->read(length);
-  if (buffer.empty()) {
+  String buffer;
+  if (length == 0) {
+    // avoid stream reads of length 0, they trigger a notice
+    buffer = empty_string();
+  } else {
+    buffer = stream->read(length);
+  }
+  if (buffer.length() != length) {
     return 0;
   }
 
@@ -1139,12 +1141,12 @@ static signed short php_ifd_get16s(void *Short, int motorola_intel) {
 /* Convert a 32 bit signed value from file's native byte order */
 static int php_ifd_get32s(void *Long, int motorola_intel) {
   if (motorola_intel) {
-    return ((( char *)Long)[0] << 24) |
+    return (((unsigned char *)Long)[0] << 24) |
            (((unsigned char *)Long)[1] << 16) |
            (((unsigned char *)Long)[2] << 8) |
            (((unsigned char *)Long)[3] << 0);
   } else {
-    return ((( char *)Long)[3] << 24) |
+    return (((unsigned char *)Long)[3] << 24) |
            (((unsigned char *)Long)[2] << 16) |
            (((unsigned char *)Long)[1] << 8) |
            (((unsigned char *)Long)[0] << 0);
@@ -1656,30 +1658,18 @@ gdImagePtr get_valid_image_resource(const Resource& image) {
   return img_res->get();
 }
 
-Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
+Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
   int itype = 0;
   struct gfxinfo *result = nullptr;
-  auto imageInfoPtr = imageinfo.getVariantOrNull();
-  if (imageInfoPtr) {
-    *imageInfoPtr = Array::Create();
-  }
 
+  imageinfo = Array::CreateDArray();
   itype = php_getimagetype(stream);
   switch( itype) {
   case IMAGE_FILETYPE_GIF:
     result = php_handle_gif(stream);
     break;
   case IMAGE_FILETYPE_JPEG:
-    {
-      Array infoArr;
-      if (imageInfoPtr) {
-        infoArr = Array::Create();
-      }
-      result = php_handle_jpeg(stream, infoArr);
-      if (imageInfoPtr) {
-        *imageInfoPtr = infoArr;
-      }
-    }
+    result = php_handle_jpeg(stream, imageinfo);
     break;
   case IMAGE_FILETYPE_PNG:
     result = php_handle_png(stream);
@@ -1726,7 +1716,7 @@ Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
   }
 
   if (result) {
-    ArrayInit ret(7, ArrayInit::Mixed{});
+    DArrayInit ret(7);
     ret.set(0, (int64_t)result->width);
     ret.set(1, (int64_t)result->height);
     ret.set(2, itype);
@@ -1750,7 +1740,7 @@ Variant getImageSize(const req::ptr<File>& stream, VRefParam imageinfo) {
 }
 
 Variant HHVM_FUNCTION(getimagesize, const String& filename,
-                      VRefParam imageinfo /*=null */) {
+                      Array& imageinfo) {
   if (auto stream = File::Open(filename, "rb")) {
     return getImageSize(stream, imageinfo);
   }
@@ -1758,7 +1748,7 @@ Variant HHVM_FUNCTION(getimagesize, const String& filename,
 }
 
 Variant HHVM_FUNCTION(getimagesizefromstring, const String& imagedata,
-                      VRefParam imageinfo /*=null */) {
+                      Array& imageinfo) {
   String data = "data://text/plain;base64,";
   data += StringUtil::Base64Encode(imagedata);
   if (auto stream = File::Open(data, "r")) {
@@ -2336,7 +2326,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
   }
   else {
     /* TODO: try and force the stream to be FILE* */
-    assert(false);
+    assertx(false);
   }
 
   if (!im && fp) {
@@ -2811,11 +2801,16 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
 
   /* return array with the text's bounding box */
-  Array ret;
-  for (int i = 0; i < 8; i++) {
-    ret.set(i, brect[i]);
-  }
-  return ret;
+  return make_varray(
+    brect[0],
+    brect[1],
+    brect[2],
+    brect[3],
+    brect[4],
+    brect[5],
+    brect[6],
+    brect[7]
+  );
 }
 #endif  /* ENABLE_GD_TTF */
 
@@ -2837,7 +2832,7 @@ const StaticString
   s_JIS_mapped_Japanese_Font_Support("JIS-mapped Japanese Font Support");
 
 Array HHVM_FUNCTION(gd_info) {
-  Array ret;
+  Array ret = Array::CreateDArray();
 
   ret.set(s_GD_Version, PHP_GD_VERSION_STRING);
 
@@ -2892,112 +2887,9 @@ Array HHVM_FUNCTION(gd_info) {
                      ((a & 0x000000ff) << 24))
 
 Variant HHVM_FUNCTION(imageloadfont, const String& /*file*/) {
-  // TODO: ind = 5 + zend_list_insert(font, le_gd_font);
   throw_not_supported(__func__, "NYI");
-#ifdef NEVER
-  Variant stream;
-  zval **file;
-  int hdr_size = sizeof(gdFont) - sizeof(char *);
-  int ind, body_size, n = 0, b, i, body_size_check;
-  gdFontPtr font;
-  php_stream *stream;
-
-
-  stream = File::Open(file, "rb");
-  if (!stream) {
-    raise_warning("failed to open file: %s", file.c_str());
-    return false;
-  }
-
-  /* Only supports a architecture-dependent binary dump format
-   * at the moment.
-   * The file format is like this on machines with 32-byte integers:
-   *
-   * byte 0-3:   (int) number of characters in the font
-   * byte 4-7:   (int) value of first character in the font (often 32, space)
-   * byte 8-11:  (int) pixel width of each character
-   * byte 12-15: (int) pixel height of each character
-   * bytes 16-:  (char) array with character data, one byte per pixel
-   *                    in each character, for a total of
-   *                    (nchars*width*height) bytes.
-   */
-  font = (gdFontPtr) IM_MALLOC(sizeof(gdFont));
-  CHECK_ALLOC_R(font, sizeof(gdFont), false);
-  b = 0;
-  String hdr = stream->read(hdr_size);
-  if (hdr.length() < hdr_size) {
-    IM_FREE(font);
-    if (stream->eof()) {
-      raise_warning("End of file while reading header");
-    } else {
-      raise_warning("Error while reading header");
-    }
-    stream->close();
-    return false;
-  }
-  memcpy((void*)font, hdr.c_str(), hdr.length());
-  i = int64_t(f_tell(stream));
-  stream->seek(0, SEEK_END);
-  body_size_check = int64_t(f_tell(stream)) - hdr_size;
-  stream->seek(i, SEEK_SET);
-
-  body_size = font->w * font->h * font->nchars;
-  if (body_size != body_size_check) {
-    font->w = FLIPWORD(font->w);
-    font->h = FLIPWORD(font->h);
-    font->nchars = FLIPWORD(font->nchars);
-    body_size = font->w * font->h * font->nchars;
-  }
-
-  if (font->nchars <= 0 ||
-      font->h <= 0 ||
-      font->nchars >= INT_MAX || font->h >= INT_MAX) {
-    raise_warning("Error reading font, invalid font header");
-    IM_FREE(font);
-    stream->close();
-    return false;
-  }
-
-  if ((font->nchars * font->h) <= 0 ||
-      font->w <= 0 ||
-      (font->nchars * font->h) >= INT_MAX || font->w >= INT_MAX) {
-    raise_warning("Error reading font, invalid font header");
-    IM_FREE(font);
-    stream->close();
-    return false;
-  }
-
-  if (body_size != body_size_check) {
-    raise_warning("Error reading font");
-    IM_FREE(font);
-    stream->close();
-    return false;
-  }
-
-  String body = stream->read(body_size);
-  if (body.length() < body_size) {
-    IM_FREE(font);
-    if (stream->eof()) {
-      raise_warning("End of file while reading body");
-    } else {
-      raise_warning("Error while reading body");
-    }
-    stream->close();
-    return false;
-  }
-  font->data = IM_MALLOC(body_size);
-  CHECK_ALLOC_R(font->data, body_size, false);
-  memcpy((void*)font->data, body.c_str(), body.length());
-  stream->close();
-
-  /* Adding 5 to the font index so we will never have font indices
-   * that overlap with the old fonts (with indices 1-5).  The first
-   * list index given out is always 1.
-   */
-  // ind = 5 + zend_list_insert(font, le_gd_font);
-
-  return ind;
-#endif
+  // If you decide to implement this, be careful to avoid the crash from
+  // https://github.com/php/php-src/commit/9a60aed6d1925c98b1b40c19b40f5b4b65baa
 }
 
 bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
@@ -3010,7 +2902,7 @@ bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
   CHECK_ALLOC_R(stylearr, malloc_size, false);
   index = 0;
   for (ArrayIter iter(style); iter; ++iter) {
-    stylearr[index++] = cellToInt(tvToCell(iter.secondVal()));
+    stylearr[index++] = tvToInt(iter.secondVal());
   }
   gdImageSetStyle(im, stylearr, index);
   IM_FREE(stylearr);
@@ -3265,7 +3157,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
   double dm1[6];
   double dm2[6];
   double dmr[6];
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
 
   if (nelem1 != 6 || nelem2 != 6) {
     raise_warning("imageaffinematrixconcat(): Affine array must "
@@ -3306,7 +3198,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
 Variant HHVM_FUNCTION(imageaffinematrixget,
                       int64_t type,
                       const Variant& options /* = Array() */) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   double affine[6];
   int res = GD_FALSE, i;
 
@@ -3364,7 +3256,7 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
 
     default:
       raise_warning("imageaffinematrixget():Invalid type for "
-                    "element %li", type);
+                    "element %" PRId64, type);
       return false;
   }
 
@@ -3447,9 +3339,9 @@ bool HHVM_FUNCTION(imagecopyresampled,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
-    double angle, int64_t bgd_color,
-    int64_t ignore_transparent /* = 0 */) {
+Variant
+HHVM_FUNCTION(imagerotate, const Resource& source_image, double angle,
+              int64_t bgd_color, int64_t /*ignore_transparent*/ /* = 0 */) {
   gdImagePtr im_src = get_valid_image_resource(source_image);
   if (!im_src) return false;
   gdImagePtr im_dst = gdImageRotateInterpolated(im_src, angle, bgd_color);
@@ -3463,6 +3355,7 @@ bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
   gdImagePtr til = get_valid_image_resource(tile);
   if (!til) return false;
   gdImageSetTile(im, til);
+  unsafe_cast_or_null<Image>(image)->m_tile = unsafe_cast_or_null<Image>(tile);
   return true;
 }
 
@@ -3473,6 +3366,8 @@ bool HHVM_FUNCTION(imagesetbrush,
   gdImagePtr tile = get_valid_image_resource(brush);
   if (!tile) return false;
   gdImageSetBrush(im, tile);
+  unsafe_cast_or_null<Image>(image)->m_brush =
+    unsafe_cast_or_null<Image>(brush);
   return true;
 }
 
@@ -3893,7 +3788,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
   if (!im) return false;
   if (index >= 0 &&
       (gdImageTrueColor(im) || index < gdImageColorsTotal(im))) {
-    return make_map_array(
+    return make_darray(
       s_red,  gdImageRed(im,index),
       s_green, gdImageGreen(im,index),
       s_blue, gdImageBlue(im,index),
@@ -4037,15 +3932,15 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
   return gdImageGetTransparent(im);
 }
 
-Variant HHVM_FUNCTION(imageinterlace, int64_t argc, const Resource& image,
-    int64_t interlace /* = 0 */) {
+TypedValue HHVM_FUNCTION(imageinterlace, const Resource& image,
+                         TypedValue interlace /* = 0 */) {
   gdImagePtr im = get_valid_image_resource(image);
-  if (!im) return false;
-  if (argc > 1) {
+  if (!im) return make_tv<KindOfBoolean>(false);
+  if (!tvIsNull(interlace)) {
     // has interlace argument
-    gdImageInterlace(im, interlace);
+    gdImageInterlace(im, tvAssertInt(interlace));
   }
-  return gdImageGetInterlaced(im);
+  return make_tv<KindOfInt64>(gdImageGetInterlaced(im));
 }
 
 bool HHVM_FUNCTION(imagepolygon, const Resource& image,
@@ -4408,7 +4303,7 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
       newheight = newwidth * src_y / src_x;
     }
   }
-  if (newheight <= 0 || newwidth <= 0) {
+  if (newheight <= 0 || newheight > INT_MAX || newwidth <= 0 || newwidth > INT_MAX) {
     return false;
   }
 
@@ -4545,7 +4440,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
       return false;
     }
 
-    auto& stat_arr = stat.toCArrRef();
+    auto& stat_arr = stat.asCArrRef();
     auto st_size = stat_arr[s_size].toInt64();
     if (st_size < 0) {
       raise_warning("unsupported stream type");
@@ -4698,7 +4593,10 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
     }
 
     String skey((const char *)key, CopyString);
-    auto const lval = ret.lvalAt(skey);
+    if (!ret.exists(skey)) {
+      ret.set(skey, Array::CreateVArray());
+    }
+    auto const lval = ret.lval(skey);
     forceToArray(lval).append(
       String((const char *)(buffer+inx), len, CopyString));
     inx += len;
@@ -6210,7 +6108,6 @@ static int exif_process_undefined(char **result, char *value,
 
 /* Copy a string in Exif header to a character string returns length of
    allocated buffer if any. */
-#if !EXIF_USE_MBSTRING
 static int exif_process_string_raw(char **result, char *value,
                                    size_t byte_count) {
   /* we cannot use strlcpy - here the problem is that we have to copy NUL
@@ -6227,7 +6124,6 @@ static int exif_process_string_raw(char **result, char *value,
   }
   return 0;
 }
-#endif
 
 /*
  * Copy a string in Exif header to a character string and return length of
@@ -6254,12 +6150,6 @@ static int
 exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
                           char** pszEncoding, char* szValuePtr, int ByteCount) {
   int   a;
-
-#if EXIF_USE_MBSTRING
-  char  *decode;
-  size_t len;
-#endif
-
   *pszEncoding = nullptr;
   /* Copy the comment */
   if (ByteCount>=8) {
@@ -6267,30 +6157,7 @@ exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
       szValuePtr = szValuePtr+8;
       ByteCount -= 8;
-#if EXIF_USE_MBSTRING
-      /* First try to detect BOM: ZERO WIDTH NOBREAK SPACE (FEFF 16)
-       * since we have no encoding support for the BOM yet we skip that.
-       */
-      if (!memcmp(szValuePtr, "\xFE\xFF", 2)) {
-        decode = "UCS-2BE";
-        szValuePtr = szValuePtr+2;
-        ByteCount -= 2;
-      } else if (!memcmp(szValuePtr, "\xFF\xFE", 2)) {
-        decode = "UCS-2LE";
-        szValuePtr = szValuePtr+2;
-        ByteCount -= 2;
-      } else if (ImageInfo->motorola_intel) {
-        decode = ImageInfo->decode_unicode_be;
-      } else {
-        decode = ImageInfo->decode_unicode_le;
-      }
-      *pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount,
-                                            ImageInfo->encode_unicode,
-                                            decode, &len);
-      return len;
-#else
       return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
-#endif
     } else
     if (!memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
@@ -6302,20 +6169,7 @@ exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
       szValuePtr = szValuePtr+8;
       ByteCount -= 8;
-#if EXIF_USE_MBSTRING
-      if (ImageInfo->motorola_intel) {
-        *pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount,
-                                              ImageInfo->encode_jis,
-                                              ImageInfo->decode_jis_be, &len);
-      } else {
-        *pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount,
-                                              ImageInfo->encode_jis,
-                                              ImageInfo->decode_jis_le, &len);
-      }
-      return len;
-#else
       return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
-#endif
     } else
     if (!memcmp(szValuePtr, "\0\0\0\0\0\0\0\0", 8)) {
       /* 8 NULL means undefined and should be ASCII... */
@@ -6345,16 +6199,9 @@ exif_process_unicode(image_info_type* /*ImageInfo*/, xp_field_type* xp_field,
   xp_field->value = nullptr;
 
   /* Copy the comment */
-#if EXIF_USE_MBSTRING
-  xp_field->value =
-    php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode,
-                            ImageInfo->decode_unicode_le, &xp_field->size);
-  return xp_field->size;
-#else
   xp_field->size =
     exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
   return xp_field->size;
-#endif
 }
 
 /* Process nested IFDs directories in Maker Note. */
@@ -6391,7 +6238,10 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
     break;
   }
 
-  if (maker_note->offset >= value_len) return 0;
+  if (value_len < 2 || maker_note->offset >= value_len - 1) {
+    raise_warning("IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
+    return 0;
+  }
 
   dir_start = value_ptr + maker_note->offset;
   ImageInfo->sections_found |= FOUND_MAKERNOTE;
@@ -6432,6 +6282,12 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
                     NumDirEntries, 2+NumDirEntries*12, value_len);
     return 0;
   }
+  if ((dir_start - value_ptr) > value_len - (2+NumDirEntries*12)) {
+    raise_warning("Illegal IFD size: 0x%04lX > 0x%04X",
+                  (dir_start - value_ptr) + (2+NumDirEntries*12),
+                  value_len);
+    return 0;
+  }
 
   for (de=0;de<NumDirEntries;de++) {
     if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
@@ -6443,6 +6299,13 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
   ImageInfo->motorola_intel = old_motorola_intel;
   return 0;
 }
+
+#define REQUIRE_NON_EMPTY() do { \
+  if (byte_count == 0) { \
+    raise_warning("Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname(tag, tagname, -12, tag_table)); \
+    return 0; \
+  } \
+} while (0)
 
 /* Process one of the nested IFDs directories. */
 static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
@@ -6580,6 +6443,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
   ImageInfo->sections_found |= FOUND_ANY_TAG;
   if (section_index==SECTION_THUMBNAIL) {
     if (!ImageInfo->Thumbnail.data) {
+      REQUIRE_NON_EMPTY();
       switch(tag) {
         case TAG_IMAGEWIDTH:
         case TAG_COMP_IMAGE_WIDTH:
@@ -6683,6 +6547,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       case TAG_FNUMBER:
         /* Simplest way of expressing aperture, so I trust it the most.
            (overwrite previously computed value if there is one) */
+        REQUIRE_NON_EMPTY();
         ImageInfo->ApertureFNumber =
           (float)exif_convert_any_format(value_ptr, format,
                                          ImageInfo->motorola_intel);
@@ -6693,6 +6558,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         /* More relevant info always comes earlier, so only use this
            field if we don't have appropriate aperture information yet. */
         if (ImageInfo->ApertureFNumber == 0) {
+          REQUIRE_NON_EMPTY();
           ImageInfo->ApertureFNumber
             = (float)exp(exif_convert_any_format(value_ptr, format,
                            ImageInfo->motorola_intel)*log(2)*0.5);
@@ -6705,6 +6571,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
            SHUTTERSPEED comes after EXPOSURE TIME
           */
         if (ImageInfo->ExposureTime == 0) {
+          REQUIRE_NON_EMPTY();
           ImageInfo->ExposureTime
             = (float)(1/exp(exif_convert_any_format(value_ptr, format,
                               ImageInfo->motorola_intel)*log(2)));
@@ -6715,12 +6582,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         break;
 
       case TAG_COMP_IMAGE_WIDTH:
+        REQUIRE_NON_EMPTY();
         ImageInfo->ExifImageWidth =
           exif_convert_any_to_int(value_ptr, format,
                                   ImageInfo->motorola_intel);
         break;
 
       case TAG_FOCALPLANE_X_RES:
+        REQUIRE_NON_EMPTY();
         ImageInfo->FocalplaneXRes =
           exif_convert_any_format(value_ptr, format,
                                   ImageInfo->motorola_intel);
@@ -6729,12 +6598,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       case TAG_SUBJECT_DISTANCE:
         /* Inidcates the distacne the autofocus camera is focused to.
            Tends to be less accurate as distance increases. */
+        REQUIRE_NON_EMPTY();
         ImageInfo->Distance =
           (float)exif_convert_any_format(value_ptr, format,
                                          ImageInfo->motorola_intel);
         break;
 
       case TAG_FOCALPLANE_RESOLUTION_UNIT:
+        REQUIRE_NON_EMPTY();
         switch((int)exif_convert_any_format(value_ptr, format,
                                             ImageInfo->motorola_intel)) {
           case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
@@ -6778,6 +6649,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       case TAG_GPS_IFD_POINTER:
       case TAG_INTEROP_IFD_POINTER:
         if (ReadNextIFD) {
+          REQUIRE_NON_EMPTY();
           char *Subdir_start;
           int sub_section_index = 0;
           switch(tag) {
@@ -6961,7 +6833,7 @@ static void exif_process_APP12(image_info_type *ImageInfo,
     exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company",
                      TAG_NONE, TAG_FMT_STRING, l1, buffer+2);
     if (length > 2+l1+1) {
-      l2 = php_strnlen(buffer+2+l1+1, length-2-l1+1);
+      l2 = php_strnlen(buffer+2+l1+1, length-2-l1-1);
       exif_iif_add_tag(ImageInfo, SECTION_APP12, "Info",
                        TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);
     }
@@ -7114,6 +6986,10 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
       case M_SOF13:
       case M_SOF14:
       case M_SOF15:
+        if ((itemlen - 2) < 6) {
+          return 0;
+        }
+
         exif_process_SOFn(Data, marker, &sof_info);
         ImageInfo->Width  = sof_info.width;
         ImageInfo->Height = sof_info.height;
@@ -7743,7 +7619,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
   size_t length=2, pos=0;
   jpeg_sof_info sof_info;
 
-  if (!data) {
+  if (!data || ImageInfo->Thumbnail.size < 4) {
     return 0; /* nothing to do here */
   }
   if (memcmp(data, "\xFF\xD8\xFF", 3)) {
@@ -7772,7 +7648,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
       return 0;
     marker = c;
     length = php_jpg_get16(data+pos);
-    if (pos+length>=ImageInfo->Thumbnail.size) {
+    if (length > ImageInfo->Thumbnail.size || pos >= ImageInfo->Thumbnail.size - length) {
       return 0;
     }
     switch (marker) {
@@ -7790,6 +7666,10 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
       case M_SOF14:
       case M_SOF15:
         /* handle SOFn block */
+        if (length < 8 || ImageInfo->Thumbnail.size - 8 < pos) {
+          /* exif_process_SOFn needs 8 bytes */
+          return 0;
+        }
         exif_process_SOFn(data+pos, marker, &sof_info);
         ImageInfo->Thumbnail.height   = sof_info.height;
         ImageInfo->Thumbnail.width    = sof_info.width;
@@ -7904,7 +7784,7 @@ static void add_assoc_image_info(Array &value, bool sub_array,
               break;
 
             case TAG_FMT_URATIONAL:
-              snprintf(buffer, sizeof(buffer), "%i/%i",
+              snprintf(buffer, sizeof(buffer), "%u/%u",
                        info_value->ur.num, info_value->ur.den);
               if (l==1) {
                 tmpi->set(String(name, CopyString),
@@ -8165,9 +8045,9 @@ Variant HHVM_FUNCTION(exif_read_data,
 }
 
 Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
-                         VRefParam width /* = null */,
-                         VRefParam height /* = null */,
-                         VRefParam imagetype /* = null */) {
+                         int64_t& width,
+                         int64_t& height,
+                         int64_t& imagetype) {
   image_info_type ImageInfo;
 
   memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -8184,11 +8064,13 @@ Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
   }
 
   if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
-    exif_scan_thumbnail(&ImageInfo);
+    if (!exif_scan_thumbnail(&ImageInfo)) {
+      ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
+    }
   }
-  width.assignIfRef((int64_t)ImageInfo.Thumbnail.width);
-  height.assignIfRef((int64_t)ImageInfo.Thumbnail.height);
-  imagetype.assignIfRef(ImageInfo.Thumbnail.filetype);
+  width = ImageInfo.Thumbnail.width;
+  height = ImageInfo.Thumbnail.height;
+  imagetype = ImageInfo.Thumbnail.filetype;
   String str(ImageInfo.Thumbnail.data, ImageInfo.Thumbnail.size, CopyString);
   exif_discard_imageinfo(&ImageInfo);
   return str;
@@ -8215,8 +8097,6 @@ struct ExifExtension final : Extension {
     HHVM_FE(exif_read_data);
     HHVM_FE(exif_tagname);
     HHVM_FE(exif_thumbnail);
-
-    HHVM_RC_INT(EXIF_USE_MBSTRING, 0);
 
     loadSystemlib();
   }

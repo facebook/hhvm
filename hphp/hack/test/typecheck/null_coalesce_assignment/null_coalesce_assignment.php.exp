@@ -1,0 +1,6 @@
+File "null_coalesce_assignment.php", line 26, characters 10-11:
+Invalid return type (Typing[4110])
+File "null_coalesce_assignment.php", line 22, characters 23-25:
+Expected `int`
+File "null_coalesce_assignment.php", line 25, characters 10-24:
+But got `vec<(int | string)>`

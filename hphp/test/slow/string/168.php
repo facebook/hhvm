@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $s = 'x';
 var_dump(strrpos($s.'0', $s));
 for ($i = -7;
@@ -7,4 +7,5 @@ for ($i = -7;
  $i++) {
   echo $i,':';
 var_dump(strrpos('xabcay', 'a',$i));
+}
 }

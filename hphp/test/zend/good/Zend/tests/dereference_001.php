@@ -1,40 +1,41 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 function a() {
-	return array(1,array(5));
+    return varray[1,varray[5]];
 }
-var_dump(a()[1][0]); // int(5)
 
 function b() {
-	return array();
+    return varray[];
 }
-var_dump(b()[0]); // Notice: Undefined offset: 0 
 
 class foo {
-	public $y = 1; 
-	
-	public function test() {
-		return array(array(array('foobar')));
-	}
+    public $y = 1;
+
+    public function test() {
+        return varray[varray[varray['foobar']]];
+    }
 }
 
 function c() {
-	return array(new foo);
+    return varray[new foo];
 }
-var_dump(c()[0]->y); // int(1)
 
 function d() {
-	$obj = new foo;
-	return $obj->test();
+    $obj = new foo;
+    return $obj->test();
 }
-var_dump(d()[0][0][0][3]); // string(1) "b"
 
 function e() {
-	$y = 'bar';
-	$x = array('a' => 'foo', 'b' => $y);
-	return $x;
+    $y = 'bar';
+    $x = darray['a' => 'foo', 'b' => $y];
+    return $x;
 }
-var_dump(e()['b']); // string(3) "bar"
 
-?>
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
+var_dump(a()[1][0]); // int(5)
+try { var_dump(b()[0]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+var_dump(c()[0]->y); // int(1)
+var_dump(d()[0][0][0][3]); // string(1) "b"
+var_dump(e()['b']); // string(3) "bar"
+}

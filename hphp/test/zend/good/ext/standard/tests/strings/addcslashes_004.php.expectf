@@ -1,11 +1,9 @@
+
 *** Testing error conditions ***
 
-Warning: %s
-NULL
+Warning: addcslashes() expects exactly 2 parameters, 0 given in %s/addcslashes_004.php on line 5
 
-Warning: %s
-NULL
+Warning: addcslashes() expects exactly 2 parameters, 1 given in %s/addcslashes_004.php on line 8
 
-Warning: %s
-NULL
+Warning: addcslashes() expects exactly 2 parameters, 3 given in %s/addcslashes_004.php on line 9
 Done

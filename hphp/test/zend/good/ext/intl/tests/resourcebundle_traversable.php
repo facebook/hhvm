@@ -1,8 +1,12 @@
-<?php
-	include "resourcebundle.inc";
+<?hh
 
-	$r = new ResourceBundle( 'es', BUNDLE );
+<<__EntryPoint>>
+function main_entry(): void {
+    include "resourcebundle.inc";
 
-	var_dump($r instanceof Traversable);
-	var_dump(iterator_to_array($r->get('testarray')));
-?>
+  	$r = new ResourceBundle( 'es', bundle() );
+
+  	// This is actually HH\Traversable due to autoimport
+  	var_dump($r is Traversable);
+  	var_dump(iterator_to_array($r->get('testarray')));
+}

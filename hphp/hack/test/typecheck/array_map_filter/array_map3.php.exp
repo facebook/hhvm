@@ -1,0 +1,6 @@
+File "array_map3.php", line 10, characters 23-24:
+Invalid argument (Typing[4110])
+File "array_map3.php", line 3, characters 26-28:
+Expected `int`
+File "array_map3.php", line 6, characters 27-30:
+But got `bool`

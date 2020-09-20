@@ -1,3 +1,4 @@
-<?php
-$x = "test4.inc";
+<?hh
+
+function test4() {}
 

@@ -1,6 +1,6 @@
 entry_open:  bool(true)
 entry_close: bool(true)
 entry_close: 
-Warning: %s
+Warning: zip_entry_close(): 5 is not a valid Zip Entry resource in %s/zip_entry_close.php on line 6
 bool(false)
 Done

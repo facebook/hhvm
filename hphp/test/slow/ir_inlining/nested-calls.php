@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_region($s) {
   echo "get_region\n";
@@ -13,7 +13,7 @@ function get_local_region() {
 class c {
   public function __construct() {
     $local1 = new stdclass;
-    $local2 = array();
+    $local2 = varray[];
     get_local_region();
   }
 
@@ -22,5 +22,9 @@ class c {
   }
 }
 
+
+<<__EntryPoint>>
+function main_nested_calls() {
 new c;
 echo "done\n";
+}

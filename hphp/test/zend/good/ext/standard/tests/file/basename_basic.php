@@ -1,6 +1,6 @@
-<?php
-
-$file_paths = array (
+<?hh
+<<__EntryPoint>> function main(): void {
+$file_paths = varray [
   /* simple paths (forward slashes) */
   "bar",
   "/foo/bar",
@@ -43,15 +43,13 @@ $file_paths = array (
   /* path with spaces */
   " ",
   ' ',
-  
+
   /* empty paths */
   "",
   '',
-  NULL,
-);
+];
 
 foreach ($file_paths as $file_path) {
 	var_dump(basename($file_path));
 }
-
-?>
+}

@@ -18,6 +18,10 @@ function baz(?A $a) {
   return $a->bar();
 }
 
+
+<<__EntryPoint>>
+function main_cgetl() {
 foo(new A);
 bar(new A);
 baz(new A);
+}

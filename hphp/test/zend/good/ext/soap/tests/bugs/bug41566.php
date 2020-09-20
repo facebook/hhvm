@@ -1,9 +1,9 @@
-<?php
+<?hh
 function test() {
   $aUser = new User();
   $aUser->sName = 'newUser';
 
-  $aUsers = Array();
+  $aUsers = varray[];
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
@@ -12,12 +12,12 @@ function test() {
 }
 
 /* Simple User definition */
-Class User {
+class User {
   /** @var string */
   public $sName;
 }
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2));
+<<__EntryPoint>> function main(): void {
+$server = new soapserver(null,darray['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
 $server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
@@ -39,8 +39,8 @@ echo "ok\n";
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" 
-  xmlns:ns1="http://testuri.org" 
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:ns1="http://testuri.org"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:enc="http://www.w3.org/2003/05/soap-encoding">
   <env:Body>
@@ -51,3 +51,4 @@ EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ob_flush();
+}

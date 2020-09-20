@@ -1,0 +1,4 @@
+File "enforceable_type_const_as.php", line 14, characters 10-20:
+Invalid `as` expression hint (Typing[4195])
+File "enforceable_type_const_as.php", line 10, characters 23-27:
+The `as` operator cannot be used with the abstract type constant TNotE because it is not marked `<<__Enforceable>>`

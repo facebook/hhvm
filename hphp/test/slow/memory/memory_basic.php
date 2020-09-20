@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $alloc = memory_get_usage();
@@ -20,4 +20,8 @@ function main() {
   var_dump($total_alloc);
 }
 
+
+<<__EntryPoint>>
+function main_memory_basic() {
 main();
+}

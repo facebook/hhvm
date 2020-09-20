@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_touch() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 touch($tempfile);
@@ -22,3 +25,4 @@ var_dump(file_exists($tempfile3));
 unlink($tempfile);
 unlink($tempfile2);
 unlink($tempfile3);
+}

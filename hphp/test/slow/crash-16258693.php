@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function func1($a) { return $a; }
-function func2(&$a) { return $a; }
+function func2(inout $a) { return $a; }
 
 function vec_foo($f, $k) {
   $d = vec['abc', 'def'];
@@ -22,6 +22,10 @@ function keyset_foo($f, $k) {
   return $f($d[$k]);
 }
 
-var_dump(vec_foo('func1', 1));
-var_dump(dict_foo('func1', 2));
-var_dump(keyset_foo('func1', 2));
+
+<<__EntryPoint>>
+function main_crash_16258693() {
+var_dump(vec_foo(fun('func1'), 1));
+var_dump(dict_foo(fun('func1'), 2));
+var_dump(keyset_foo(fun('func1'), 2));
+}

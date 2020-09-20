@@ -1,0 +1,2 @@
+File "decl1.bad.php", line 11, characters 16-16:
+Unbound name: `U` (Naming[2049])

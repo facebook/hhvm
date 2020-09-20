@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_
-#define incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_
+#pragma once
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,4 +24,3 @@ const char* getHphpCompilerVersion();
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#endif // incl_HPHP_CPP_BASE_HPHP_SYSTEM_H_

@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array 
+ * Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c
 */
 
@@ -8,18 +8,18 @@
  * Testing array_unshift() by giving all the possible values for $var argument
 */
 
-echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
-
-// array to be passed to $array argument
-$array = array('f' => "first", "s" => 'second', 1, 2.222);
-
-// get a class 
+// get a class
 class classA
 {
   public function __toString() {
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
+
+// array to be passed to $array argument
+$array = darray['f' => "first", "s" => 'second', 0 => 1, 1 => 2.222];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -34,14 +34,14 @@ $unset_var = 10;
 unset ($unset_var);
 
 // different types of values to be passed to $var argument
-$vars = array(
+$vars = varray[
 
        // int data
 /*1*/  0,
        1,
        12345,
        -2345,
- 
+
        // float data
 /*5*/  10.5,
        -10.5,
@@ -50,12 +50,12 @@ $vars = array(
        .5,
 
        // array data
-/*10*/ array(),
-       array(0),
-       array(1),
-       array(1, 2),
-       array('color' => 'red', 'item' => 'pen'),
- 
+/*10*/ varray[],
+       varray[0],
+       varray[1],
+       varray[1, 2],
+       darray['color' => 'red', 'item' => 'pen'],
+
        // null data
 /*15*/ NULL,
        null,
@@ -65,7 +65,7 @@ $vars = array(
        false,
        TRUE,
        FALSE,
- 
+
        // empty data
 /*21*/ "",
        '',
@@ -83,10 +83,10 @@ $vars = array(
 
        // unset data
        @$unset_var,
- 
+
        // resource variable
 /*29*/ $fp
-);
+];
 
 // loop through each element of $vars to check the functionality of array_unshift()
 $iterator = 1;
@@ -97,16 +97,16 @@ foreach($vars as $var) {
   /* with default argument */
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
-  var_dump( array_unshift($temp_array, $var) );
+  var_dump( array_unshift(inout $temp_array, $var) );
 
   // dump the resulting array
-  var_dump($temp_array);  
+  var_dump($temp_array);
 
   /* with optional arguments */
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   $temp_array = $array;
-  var_dump( array_unshift($temp_array, $var, "hello", 'world') );
+  var_dump( array_unshift(inout $temp_array, $var, "hello", 'world') );
 
   // dump the resulting array
   var_dump($temp_array);
@@ -117,4 +117,4 @@ foreach($vars as $var) {
 fclose($fp);
 
 echo "Done";
-?>
+}

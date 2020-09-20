@@ -1,27 +1,28 @@
-<?php
+<?hh
 namespace A;
 use A as B;
-class ArrayObject {
-	const STD_PROP_LIST = 2;
+class RegexIterator {
+    const GET_MATCH = 2;
 }
-function f1($x = ArrayObject::STD_PROP_LIST) {
-	var_dump($x);
+function f1($x = RegexIterator::GET_MATCH) {
+    \var_dump($x);
 }
-function f2($x = \ArrayObject::STD_PROP_LIST) {
-	var_dump($x);
+function f2($x = \RegexIterator::GET_MATCH) {
+    \var_dump($x);
 }
-function f3($x = \A\ArrayObject::STD_PROP_LIST) {
-	var_dump($x);
+function f3($x = \A\RegexIterator::GET_MATCH) {
+    \var_dump($x);
 }
-function f4($x = B\ArrayObject::STD_PROP_LIST) {
-	var_dump($x);
+function f4($x = B\RegexIterator::GET_MATCH) {
+    \var_dump($x);
 }
-var_dump(ArrayObject::STD_PROP_LIST);
-var_dump(\ArrayObject::STD_PROP_LIST);
-var_dump(B\ArrayObject::STD_PROP_LIST);
-var_dump(\A\ArrayObject::STD_PROP_LIST);
+<<__EntryPoint>> function main(): void {
+\var_dump(RegexIterator::GET_MATCH);
+\var_dump(\RegexIterator::GET_MATCH);
+\var_dump(B\RegexIterator::GET_MATCH);
+\var_dump(\A\RegexIterator::GET_MATCH);
 f1();
 f2();
 f3();
 f4();
-?>
+}

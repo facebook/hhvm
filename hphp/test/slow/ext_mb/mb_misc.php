@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_mb_misc() {
 var_dump(mb_http_input());
 var_dump(mb_http_output());
 var_dump(mb_language());
@@ -11,3 +14,4 @@ var_dump(mb_regex_encoding());
 var_dump(mb_regex_set_options());
 var_dump(mb_regex_set_options("pz"));
 var_dump(mb_regex_set_options());
+}

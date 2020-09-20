@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: Operation disallowed prior to mcrypt_generic_init(). in %s/bug41252.php on line 3
 I'm alive!

@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 
@@ -35,7 +36,6 @@ void checkHHConfig(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::LookForTypechecker ||
       s_foundHHConfig ||
-      !unit->isHHFile() ||
       isDebuggerAttached()) {
     return;
   }
@@ -72,7 +72,7 @@ void checkHHConfig(const Unit* unit) {
 /**
  * The default of "true" here is correct -- see autoTypecheckRequestInit().
  */
-static __thread bool tl_doneAutoTypecheck = true;
+static RDS_LOCAL_NO_CHECK(bool, tl_doneAutoTypecheck)(true);
 
 /**
  * autoTypecheckRequestInit() and autoTypecheckRequestExit() work together to
@@ -91,28 +91,27 @@ static __thread bool tl_doneAutoTypecheck = true;
  * merged.
  */
 void autoTypecheckRequestInit() {
-  tl_doneAutoTypecheck = false;
+  *tl_doneAutoTypecheck = false;
 }
 
 /**
  * See autoTypecheckRequestInit().
  */
 void autoTypecheckRequestExit() {
-  tl_doneAutoTypecheck = true;
+  *tl_doneAutoTypecheck = true;
 }
 
 void autoTypecheck(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::AutoTypecheck ||
-      tl_doneAutoTypecheck ||
-      !unit->isHHFile() ||
+      *tl_doneAutoTypecheck ||
       isDebuggerAttached()) {
     return;
   }
-  tl_doneAutoTypecheck = true;
+  *tl_doneAutoTypecheck = true;
 
   vm_call_user_func("\\HH\\Client\\typecheck_and_error",
-                    Variant{staticEmptyArray()});
+                    Variant{ArrayData::Create()});
 }
 
 }

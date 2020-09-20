@@ -80,7 +80,6 @@ Break at foo() on line 44 of %s/flow2.php
 
 next
 Constructor
-Destructor
 Break at foo() on line 45 of %s/flow2.php
   44   $c = new C1(6); // Runs a destructor
   45*  $d = $c;
@@ -112,8 +111,6 @@ Break at foo() on line 50 of %s/flow2.php
   51 
 
 next
-Destructor
-Destructor
 Break at test() on line 53 of %s/flow2.php
   52 function test($a) {
   53*  foo($a);
@@ -124,7 +121,7 @@ All breakpoints are cleared.
 continue
 int(8)
 int(1)
-object(C1)#2 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }
@@ -163,62 +160,10 @@ All breakpoints are cleared.
 continue
 Finished in genFoo
 Constructor
-Destructor
 Constructor
-Destructor
-Destructor
 int(9)
 int(1)
-object(C1)#3 (1) {
-  ["x":"C1":private]=>
-  int(0)
-}
-
-break flow2.php:26
-Breakpoint 1 set on line 26 of flow2.php
-@test(3)
-Constructor
-Finished in genFoo
-Constructor
-Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
-  25   public function __destruct() {
-  26*    error_log('Destructor');
-  27   }
-
-out
-Destructor
-Break at foo() on line 44 of %s/flow2.php
-  43 
-  44*  $c = new C1(6); // Runs a destructor
-  45   $d = $c;
-
-continue
-Constructor
-Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
-  25   public function __destruct() {
-  26*    error_log('Destructor');
-  27   }
-
-out
-Destructor
-Breakpoint 1 reached at C1::__destruct() on line 26 of %s/flow2.php
-  25   public function __destruct() {
-  26*    error_log('Destructor');
-  27   }
-
-out
-Destructor
-Break at test() on line 54 of %s/flow2.php
-  53   foo($a);
-  54*}
-  55 
-
-break clear all
-All breakpoints are cleared.
-continue
-int(10)
-int(1)
-object(C1)#4 (1) {
+object(C1) (1) {
   ["x":"C1":private]=>
   int(0)
 }

@@ -50,15 +50,11 @@ function foo10($x) {
   return $y !== 6;
 }
 
-function foo11($x) {
-  $y = $x xor 0;
-  return $y === 6;
-}
 
 function foo12($x) {
   return $x !== 6;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3());
@@ -69,5 +65,5 @@ var_dump(foo7());
 var_dump(foo8());
 var_dump(foo9(5));
 var_dump(foo10(5));
-var_dump(foo11("5"));
 var_dump(foo12("6"));
+}

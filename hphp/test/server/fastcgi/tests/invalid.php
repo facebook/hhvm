@@ -1,9 +1,7 @@
-<?php
-
-require_once('test_base.inc');
+<?hh
 
 function invalidTestController($port) {
-  $host = php_uname('n');
+  $host = 'localhost';
 
   $filename = __DIR__.'/request-doesnotexist.dat';
   $file = fopen($filename, 'rb');
@@ -15,7 +13,9 @@ function invalidTestController($port) {
   // use-after-free in the FastCGI support.
   $req_dat = $req_dat . $req_dat . $req_dat;
 
-  $sock = fsockopen($host, $port);
+  $errno = null;
+  $errstr = null;
+  $sock = fsockopen($host, $port, inout $errno, inout $errstr);
   fwrite($sock, $req_dat);
   fclose($sock);
 
@@ -24,5 +24,8 @@ function invalidTestController($port) {
   echo request($host, $port, 'hello.php');
   echo "\n";
 }
-
-runTest("invalidTestController");
+<<__EntryPoint>> function main(): void {
+  require_once('test_base.inc');
+  init();
+  runTest("invalidTestController");
+}

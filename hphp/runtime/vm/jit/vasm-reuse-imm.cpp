@@ -95,9 +95,13 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
     Vreg base;
     auto const off = reuseCandidate(env, ld.s.q(), base);
 
-    if (off.hasValue()) {
+    if (off.has_value()) {
       reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
-        v << addqi{off.value(), base, ld.d, v.makeReg()};
+        if (off.value() == 0) {
+          v << copy{base, ld.d};
+        } else {
+          v << addqi{off.value(), base, ld.d, v.makeReg()};
+        }
       });
       return;
     }

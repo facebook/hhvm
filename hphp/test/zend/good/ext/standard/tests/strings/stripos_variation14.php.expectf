@@ -1,68 +1,68 @@
 *** Testing stripos() function with unexpected values for offset ***
 -- Iteration 1 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 2 --
 
-Warning: %s
-bool(false)
+Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 3 --
 
-Warning: %s
-bool(false)
+Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 4 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 5 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 6 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 7 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 11 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 12 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 13 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 14 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 15 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, object given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 16 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 18 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 19 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 3 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 21 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 22 --
-int(6)
+
+Warning: stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 *** Done ***

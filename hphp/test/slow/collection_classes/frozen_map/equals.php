@@ -47,4 +47,8 @@ function main() {
   var_dump($fm3 == $fm4);
 }
 
+
+<<__EntryPoint>>
+function main_equals() {
 main();
+}

@@ -1,18 +1,18 @@
 *** Create soft link to file and then to itself ***
 bool(true)
 
-Warning: %s
+Warning: symlink(): File exists in %s/symlink_link_linkinfo_is_link_variation7.php on line 35
 bool(false)
 
 *** Create soft link to directory and then to itself ***
 bool(true)
 
-Warning: %s
+Warning: symlink(): File exists in %s/symlink_link_linkinfo_is_link_variation7.php on line 43
 bool(false)
 
 *** Create hard link to file and then to itself ***
 bool(true)
 
-Warning: %s
+Warning: link(): File exists in %s/symlink_link_linkinfo_is_link_variation7.php on line 51
 bool(false)
 Done

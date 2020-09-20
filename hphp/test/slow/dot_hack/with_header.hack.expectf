@@ -1,0 +1,1 @@
+Fatal error: Leading markup and `<?hh` are not permitted in `.hack` files, which are always `strict`. in %s/test/slow/dot_hack/with_header.hack on line 1

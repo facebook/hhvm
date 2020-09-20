@@ -1,19 +1,23 @@
 <?hh
 
 function err() { throw new exception; }
-set_error_handler('err');
 
 class somecls {
- public function x(&$k) {}
+ public function x(inout $k) {}
 }
 
 function foo(somecls $z) {
  try {
- $z->x($y?->z);
+ $z->x(inout $y?->z);
  } catch (exception $e) {
  set_error_handler(null);
  var_dump($y);
  }
 }
 
+<<__EntryPoint>>
+function main_nullsafe_nullbase() {
+set_error_handler(fun('err'));
+
 foo(new somecls);
+}

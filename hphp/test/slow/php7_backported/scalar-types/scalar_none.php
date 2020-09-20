@@ -1,8 +1,12 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_scalar_none() {
 require 'fix_exceptions.inc';
+fix_exceptions();
 
-$functions = [
+$functions = darray[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },
@@ -16,9 +20,10 @@ $functions = [
 foreach ($functions as $type => $function) {
     echo "Testing $type:", PHP_EOL;
     try {
-        var_dump($function());
+        var_dump($function(null));
     } catch (TypeError $e) {
         echo "*** Caught " . $e->getMessage() . PHP_EOL;
     }
 }
 echo PHP_EOL . "Done";
+}

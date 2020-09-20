@@ -14,20 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXECUTION_CONTEXT_H_
-#define incl_HPHP_EXECUTION_CONTEXT_H_
+#pragma once
 
-#include <list>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/thread-local.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/base/req-list.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -40,9 +31,22 @@
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
 
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
+#include "hphp/util/thread-local.h"
+
+#include <list>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
+struct ImplicitContext;
 struct Resumable;
 }
 
@@ -57,6 +61,9 @@ struct VMState {
   TypedValue* sp;
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
+  jit::TCA jitReturnAddr;
+  Either<ObjectData*, Exception*> exn;
+  bool unwinderSideEnter;
 };
 
 enum class InclOpFlags {
@@ -101,7 +108,7 @@ inline bool any(OBFlags f) { return f != OBFlags::None; }
 inline bool operator!(OBFlags f) { return f == OBFlags::None; }
 
 struct VMParserFrame {
-  std::string filename;
+  LowStringPtr filename;
   int lineNumber;
 };
 
@@ -119,6 +126,15 @@ private:
   bool m_throwAllErrors;
 };
 
+enum class FileLoadFlags {
+  kDup,
+  kHitMem,
+  kWaited,
+  kHitDisk,
+  kCompiled,
+  kEvicted
+};
+
 using InvokeArgs = folly::Range<const TypedValue*>;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,8 +143,8 @@ struct ExecutionContext {
   friend ThrowAllErrorsSetter;
 
   enum ShutdownType {
-    ShutDown,
-    PostSend,
+    ShutDown = 0,
+    PostSend = 1,
   };
 
   enum class ErrorThrowMode {
@@ -172,11 +188,13 @@ public:
    */
   Transport* getTransport();
   void setTransport(Transport*);
+  void setRequestTrace(rqtrace::Trace*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;
   void setContentType(const String& mimetype, const String& charset);
   String getCwd() const;
   void setCwd(const String&);
+  rqtrace::Trace* getRequestTrace();
 
   /**
    * Write to output.
@@ -197,7 +215,8 @@ public:
     virtual void operator()(const char* s, int len) = 0;
     virtual ~StdoutHook() {};
   };
-  void setStdout(StdoutHook*);
+  void addStdoutHook(StdoutHook*);
+  bool removeStdoutHook(StdoutHook*);
 
   /**
    * Output buffering.
@@ -231,10 +250,7 @@ public:
   std::size_t registerRequestEventHandler(RequestEventHandler* handler);
   void unregisterRequestEventHandler(RequestEventHandler* handler,
                                      std::size_t index);
-  void registerShutdownFunction(const Variant& function, Array arguments,
-                                ShutdownType type);
-  bool removeShutdownFunction(const Variant& function, ShutdownType type);
-  bool hasShutdownFunctions(ShutdownType type);
+  void registerShutdownFunction(const Variant& function, ShutdownType type);
   void onRequestShutdown();
   void onShutdownPreSend();
   void onShutdownPostSend();
@@ -255,13 +271,13 @@ public:
                    int errnum,
                    bool callUserHandler,
                    ErrorThrowMode mode,
-                   const std::string &prefix,
+                   const std::string& prefix,
                    bool skipFrame = false);
-  bool callUserErrorHandler(const Exception &e, int errnum,
+  bool callUserErrorHandler(const Exception& e, int errnum,
                             bool swallowExceptions);
-  void recordLastError(const Exception &e, int errnum = 0);
+  void recordLastError(const Exception& e, int errnum = 0);
   void clearLastError();
-  bool onFatalError(const Exception &e); // returns handled
+  bool onFatalError(const Exception& e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const;
   void setErrorState(ErrorState);
@@ -305,6 +321,15 @@ public:
 
   bool hasRequestEventHandlers() const;
 
+  const RepoOptions& getRepoOptionsForCurrentFrame() const;
+
+  const RepoOptions* getRepoOptionsForRequest() const;
+
+  // When a file is loaded inside of a request context we perform a consistency
+  // check to ensure that all files loaded within the request use the same
+  // options.
+  void onLoadWithOptions(const char* f, const RepoOptions& options);
+
 private:
   struct OutputBuffer {
     explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)
@@ -328,6 +353,7 @@ public:
   void enqueueAPCHandle(APCHandle* handle, size_t size);
 
   void manageAPCHandle();
+  void enqueueAPCDeferredExpire(const String&);
   void cleanup();
 
 public:
@@ -348,14 +374,14 @@ public:
   /*
    * Look up a class constant.
    *
-   * The returned Cell is guaranteed not to hold a reference counted
+   * The returned TypedValue is guaranteed not to hold a reference counted
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  Cell lookupClsCns(const NamedEntity* ne,
+  TypedValue lookupClsCns(const NamedEntity* ne,
                     const StringData* cls,
                     const StringData* cns);
-  Cell lookupClsCns(const StringData* cls,
+  TypedValue lookupClsCns(const StringData* cls,
                     const StringData* cns);
 
   // Get the next outermost VM frame, even across re-entry
@@ -363,16 +389,11 @@ public:
 
   ActRec* getStackFrame();
   ObjectData* getThis();
-  Class* getContextClass();
-  Class* getParentContextClass();
   StringData* getContainingFileName();
   int getLine();
-  Array getCallerInfo();
-  bool evalUnit(Unit* unit, PC& pc, int funcType);
-  TypedValue invokeUnit(const Unit* unit);
+  TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
-  StrNR createFunction(const String& args, const String& code);
 
   struct EvaluationResult {
     bool failed;
@@ -387,10 +408,12 @@ public:
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
-  void destructObjects();
+  void debuggerExecutePsps();
+
+  Array& getDebuggerEnv() { return m_debuggerEnv; }
 
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(Cell* savedSP);
+  void pushVMState(TypedValue* savedSP);
   void popVMState();
 
   /*
@@ -408,7 +431,8 @@ public:
   ActRec* getPrevVMState(const ActRec* fp,
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
-                         bool* fromVMEntry = nullptr);
+                         bool* fromVMEntry = nullptr,
+                         uint64_t* jitReturnAddr = nullptr);
   ActRec* getPrevVMStateSkipFrame(const ActRec* fp,
                                   Offset* prevPc = nullptr,
                                   TypedValue** prevSp = nullptr,
@@ -418,12 +442,12 @@ public:
    */
   const Func* getPrevFunc(const ActRec*);
 
-  ActRec* getFrameAtDepth(int frame = 0);
-  VarEnv* getOrCreateVarEnv(int frame = 0);
-  VarEnv* hasVarEnv(int frame = 0);
-  void setVar(StringData* name, const TypedValue* v);
-  void bindVar(StringData* name, TypedValue* v);
-  Array getLocalDefinedVariables(int frame);
+  /*
+   * Returns the call frame at the specified depth, intended only
+   * for use by the debugger. Use in other contexts may not be safe.
+   */
+  ActRec* getFrameAtDepthForDebuggerUnsafe(int frame = 0);
+  Array getLocalDefinedVariablesDebugger(int frame);
   Variant getEvaledArg(const StringData* val,
                        const String& namespacedName,
                        const Unit* funcUnit);
@@ -435,57 +459,50 @@ private:
 public:
   void syncGdbState();
 
-  enum InvokeFlags {
-    InvokeNormal,
-    InvokeCuf,
-    InvokePseudoMain
-  };
+  using ThisOrClass = Either<ObjectData*, Class*>;
 
   TypedValue invokeFunc(const Func* f,
                         const Variant& args_ = init_null_variant,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
-                        VarEnv* varEnv = nullptr,
-                        StringData* invName = nullptr,
-                        InvokeFlags flags = InvokeNormal,
-                        bool useWeakTypes = false,
                         bool dynamic = true,
-                        bool checkRefAnnot = false);
+                        bool checkRefAnnot = false,
+                        bool allowDynCallNoPointer = false,
+                        Array&& reifiedGenerics = Array());
 
   TypedValue invokeFunc(const CallCtx& ctx,
-                        const Variant& args_,
-                        VarEnv* varEnv = nullptr);
+                        const Variant& args_);
 
   TypedValue invokeFuncFew(const Func* f,
-                           void* thisOrCls,
-                           StringData* invName,
-                           int argc,
+                           ThisOrClass thisOrCls,
+                           uint32_t numArgs,
                            const TypedValue* argv,
-                           bool useWeakTypes = false,
-                           bool dynamic = true);
+                           bool dynamic = true,
+                           bool allowDynCallNoPointer = false);
 
   TypedValue invokeFuncFew(const Func* f,
-                           void* thisOrCls,
-                           StringData* invName = nullptr);
+                           ThisOrClass thisOrCls);
 
   TypedValue invokeFuncFew(const CallCtx& ctx,
-                           int argc,
+                           uint32_t numArgs,
                            const TypedValue* argv);
 
   TypedValue invokeMethod(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs()
+    InvokeArgs args = InvokeArgs(),
+    bool dynamic = true
   );
 
   Variant invokeMethodV(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs()
+    InvokeArgs args = InvokeArgs(),
+    bool dynamic = true
   );
 
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
-                       Cell awaitResult);
+                       TypedValue awaitResult);
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
@@ -494,15 +511,9 @@ public:
   template<class Fn> void sweepDynPropTable(Fn);
 
 private:
-  template<class FStackCheck, class FInitArgs, class FEnterVM>
-  TypedValue invokeFuncImpl(const Func* f,
-                            ObjectData* thiz, Class* cls, uint32_t argc,
-                            StringData* invName,
-                            bool useWeakTypes,
-                            bool dynamic,
-                            FStackCheck doStackCheck,
-                            FInitArgs doInitArgs,
-                            FEnterVM doEnterVM);
+  TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
+                            uint32_t numArgsInclUnpack, Array&& generics,
+                            bool dynamic, bool allowDynCallNoPointer);
 
   struct ExcLoggerHook final : LoggerHook {
     explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}
@@ -526,13 +537,14 @@ private:
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
-  StdoutHook* m_stdout;
+
+  std::unordered_set<StdoutHook*> m_stdoutHooks;
   size_t m_stdoutBytesWritten;
   String m_rawPostData;
 
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
-  Array m_shutdowns;
+  std::array<Array, 2> m_shutdowns;
   bool m_acceptRequestEventHandlers;
 
   // error handling
@@ -551,7 +563,7 @@ private:
   req::ptr<StreamContext> m_streamContext;
 
   // session backup/restore for RPCRequestHandler
-  Array m_shutdownsBackup;
+  std::array<Array, 2> m_shutdownsBackup;
   req::vector<std::pair<Variant,int>> m_userErrorHandlersBackup;
   req::vector<Variant> m_userExceptionHandlersBackup;
   Variant m_exitCallback;
@@ -560,34 +572,32 @@ private:
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
-  req::set<ObjectData*> m_liveBCObjs; // objects with destructors
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill
+  req::vector<StringData*> m_apcDeferredExpire;
 public:
   // Although the error handlers may want to access dynamic properties,
   // we cannot *call* the error handlers (or their destructors) while
   // destroying the context, so C++ order of destruction is not an issue.
-  req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+  req::fast_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   TYPE_SCAN_IGNORE_FIELD(dynPropTable);
-  VarEnv* m_globalVarEnv;
+  NameValueTable* m_globalNVTable;
   struct FileInfo {
     Unit* unit;
     time_t ts_sec; // timestamp seconds
     unsigned long ts_nsec; // timestamp nanoseconds (or 0 if ns not supported)
+    FileLoadFlags flags;
   };
-  req::hash_map<const StringData*, FileInfo, string_data_hash, string_data_same>
+  req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
-  req::vector<Unit*> m_createdFuncs;
-  req::vector<Fault> m_faults;
   int m_lambdaCounter;
   using VMStateVec = req::TinyVector<VMState, 32>;
   VMStateVec m_nestedVMs;
   TYPE_SCAN_IGNORE_FIELD(m_nestedVMs); // handled explicitly in heap-scan.h
   int m_nesting;
   bool m_dbgNoBreak;
-  bool m_unwindingCppException;
 private:
   Array m_evaledArgs;
   String m_lastErrorPath;
@@ -595,29 +605,48 @@ private:
 public:
   Variant m_setprofileCallback;
   Variant m_memThresholdCallback;
+  Variant m_timeThresholdCallback;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
+  req::fast_set<String,
+                hphp_string_hash, hphp_string_isame> m_setprofileFunctions;
 public:
-  Cell m_headerCallback;
+  TypedValue m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
 private:
   ExcLoggerHook m_logger_hook;
+  rqtrace::Trace* m_requestTrace{nullptr};
+
+  folly::Optional<RepoOptions> m_requestOptions;
+
+  Array m_debuggerEnv; // variables read/written in the REPL
+public:
+  req::vector<ImplicitContext*> m_implicitContexts;
+
+  VMParserFrame* m_parserFrame{nullptr};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // MSVC doesn't instantiate this, causing an undefined symbol at link time
 // if the template<> is present, but other compilers require it.
+namespace rds { namespace local {
 #ifndef _MSC_VER
 template<>
 #endif
-void ThreadLocalNoCheck<ExecutionContext>::destroy();
+void RDSLocal<ExecutionContext, Initialize::Explicitly>::destroy();
+}}
 
-extern THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+// Use AliasedRDSLocal for the ExecutionContext since it is accessed so
+// frequently, and AliasedRDSlocal may save up to 1 instruction and 1 load
+// per access.
+extern rds::local::AliasedRDSLocal<ExecutionContext,
+                                   rds::local::Initialize::Explicitly,
+                                   &rds::local::detail::HotRDSLocals::g_context
+                                  > g_context;
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
 #include "hphp/runtime/base/execution-context-inl.h"
 
-#endif

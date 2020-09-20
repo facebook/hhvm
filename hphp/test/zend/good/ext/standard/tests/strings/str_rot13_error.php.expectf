@@ -1,12 +1,10 @@
 *** Testing str_rot13() : error conditions ***
 -- Testing str_rot13() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: str_rot13() expects exactly 1 parameter, 0 given in %s/str_rot13_error.php on line 9
 
 
 -- Testing str_rot13() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: str_rot13() expects exactly 1 parameter, 2 given in %s/str_rot13_error.php on line 14
 ===DONE===

@@ -1,36 +1,33 @@
-<?php
+<?hh
 /* Prototype  : proto array array_count_values(array input)
- * Description: Return the value as key and the frequency of that value in input as value 
+ * Description: Return the value as key and the frequency of that value in input as value
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
  * Test behaviour with parameter variations
  */
 
-echo "*** Testing array_count_values() : parameter variations ***\n";
-
 class A {
-	static function hello() {
-	  echo "Hello\n";
-	}
+    static function hello() {
+      echo "Hello\n";
+    }
 }
-
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_count_values() : parameter variations ***\n";
+chdir(__SystemLib\hphp_test_tmproot());
 $ob = new A();
 
 $fp = fopen("array_count_file", "w+");
 
-$arrays = array ("bobk" => "bobv", "val", 6 => "val6",  $fp, $ob);
+$arrays = darray["bobk" => "bobv", 0 => "val", 6 => "val6", 7 => $fp, 8 => $ob];
 
 var_dump (@array_count_values ($arrays));
 echo "\n";
 
 
 echo "Done";
-?>
 
-<?php error_reporting(0); ?>
-<?php
 unlink("array_count_file");
-?>
+}

@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python2
 #
 # Helper for running hphp/test in fbconfig builds. Examples:
 #

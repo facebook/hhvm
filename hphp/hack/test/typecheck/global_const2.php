@@ -1,3 +1,3 @@
 <?hh // strict
 
-const int X = array();
+const int X = varray[];

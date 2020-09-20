@@ -40,8 +40,8 @@ function is_equal($obj1, $obj2) {
     $keys1 = $obj1->toKeysArray();
     $keys2 = $obj2->toKeysArray();
     if ($type1 === "HH\Map") {
-      sort($keys1);
-      sort($keys2);
+      sort(inout $keys1);
+      sort(inout $keys2);
     }
     if ($keys1 !== $keys2) {
       report("Incorrect keys", $keys1, $keys2);
@@ -58,129 +58,129 @@ function is_equal($obj1, $obj2) {
 }
 
 function main() {
-  $tests = array(
+  $tests = varray[
     // Scalar types tests from HHJsonDecodeTest.php
-    array(
+    darray[
       'input' => 'null',
       'options' => 0,
       'expected' => null,
-    ),
-    array(
+    ],
+    darray[
       'input' => '0',
       'options' => JSON_FB_LOOSE,
       'expected' => 0,
-    ),
-    array(
+    ],
+    darray[
       'input' => '"0"',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => '0',
-    ),
-    array(
+    ],
+    darray[
       'input' => 'true',
       'options' => JSON_FB_LOOSE,
       'expected' => true,
-    ),
+    ],
     // Parse Errors tests from HHJsonDecodeTest.php
-    array(
+    darray[
       'input' => '',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
-    ),
-    array(
+    ],
+    darray[
       'input' => '{[}',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
-    ),
-    array(
+    ],
+    darray[
       'input' => '[:(]',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
-    ),
-    array(
+    ],
+    darray[
       'input' => 'xxx',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
-    ),
-    array(
+    ],
+    darray[
       'input' => 'a {',
       'options' => JSON_FB_LOOSE,
       'expected' => null,
-    ),
+    ],
     // Maps checks from HHJsonDecodeTest.php
-    array(
+    darray[
       'input' => '{"0": 1, "a": "b"}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'0' => 1, 'a' => 'b'},
-    ),
+    ],
     // Vectors/Maps - some basic tests
-    array(
+    darray[
       'input' => '[1,2]',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Vector {1, 2},
-    ),
-    array(
+    ],
+    darray[
       'input' => '{}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {},
-    ),
-    array(
+    ],
+    darray[
       'input' => '{"{" : "}"}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'{' => '}'},
-    ),
-    array(
+    ],
+    darray[
       'input' => '{"0": 1, "a": "b", "[]": null, "#": false}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'a' => 'b', '0' => 1, '[]' => null, '#' => false},
-    ),
+    ],
     // Collections tests from HHJsonDecodeTest.php
-    array(
+    darray[
       'input' => '[]',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Vector {},
-    ),
-    array(
+    ],
+    darray[
       'input' => '[null, 0, "0", true]',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Vector {null, 0, '0', true},
-    ),
+    ],
     // LooseModeCollections from HHJsonDecodeTest.phpi
     // Single-quoted strings
-    array(
+    darray[
       'input' => '[\'value\']',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Vector {'value'},
-    ),
+    ],
     // Unquoted keys
-    array(
+    darray[
       'input' => '{key: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Map {'key' => 'value'},
-    ),
+    ],
     // Boolean keys
-    array(
+    darray[
       'input' => '{true: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Map {'true' => 'value'},
-    ),
+    ],
     // Null keys
-    array(
+    darray[
       'input' => '{null: "value"}',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Map {'null' => 'value'},
-    ),
+    ],
     // Nested collections
-    array(
+    darray[
       'input' =>  '[2,"4",{0:[]}]',
       'options' => JSON_FB_LOOSE | JSON_FB_COLLECTIONS,
       'expected' => Vector {2, '4', Map {'0' => Vector {}}},
-    ),
-    array(
+    ],
+    darray[
       'input' => '{"vec": [], "map": {}}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {'vec' => Vector {}, 'map' => Map {}},
-    ),
-    array(
+    ],
+    darray[
       'input' => '{"vec" : [{"z" : []}], "map" : {"a" : {"]" : "["}}}',
       'options' => JSON_FB_COLLECTIONS,
       'expected' => Map {
@@ -196,8 +196,8 @@ function main() {
           },
         },
       },
-    ),
-  );
+    ],
+  ];
   foreach ($tests as $test) {
     $output = json_decode($test['input'], true, 512, $test['options']);
     if (!is_equal($output, $test['expected'])) {
@@ -208,5 +208,9 @@ function main() {
   echo "Done\n";
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_json_decode_collections() {
+main();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   protected function f() {
@@ -16,5 +16,9 @@ class Bar extends Foo {
     return $this->f();
   }
 }
+
+<<__EntryPoint>>
+function main_2117() {
 $b = new Bar();
 echo $b->inv()."\n";
+}

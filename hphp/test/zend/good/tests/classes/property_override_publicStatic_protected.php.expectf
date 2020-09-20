@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot redeclare static A::$p as non-static B::$p in %s/property_override_publicStatic_protected.php on line 11

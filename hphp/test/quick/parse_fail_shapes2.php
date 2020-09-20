@@ -6,4 +6,3 @@ type BadPoint = shape(
   '124' => int,
 );
 
-

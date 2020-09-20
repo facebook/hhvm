@@ -1,0 +1,4 @@
+File "override_abstract_trait.php", line 9, characters 28-28:
+Cannot re-declare this method as abstract (Typing[4142])
+File "override_abstract_trait.php", line 4, characters 19-19:
+Previously defined here

@@ -1,32 +1,22 @@
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "c"
-  [1]=>
   string(1) "d"
-  [2]=>
   string(1) "e"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "c"
-  [1]=>
   string(1) "d"
-  [2]=>
   string(1) "e"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "d"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(5) {
+darray(5) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -38,85 +28,101 @@ array(5) {
   [4]=>
   string(1) "e"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "c"
-  [1]=>
   string(1) "d"
 }
-array(2) {
+darray(2) {
   [2]=>
   string(1) "c"
   [3]=>
   string(1) "d"
 }
-array(2) {
+darray(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(1) "b"
   [1]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(1) "b"
   [1]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   [1]=>
   string(1) "b"
   [2]=>
   string(1) "c"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   ["b"]=>
   string(1) "b"
   ["c"]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   ["b"]=>
   string(1) "b"
   ["c"]=>
   string(1) "c"
 }
-array(2) {
+darray(2) {
   [12]=>
   int(1)
   [6]=>
   int(2)
 }
-array(2) {
+darray(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+darray(2) {
+  [12]=>
+  int(1)
+  [6]=>
+  int(2)
+}
+darray(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+darray(1) {
+  [6]=>
+  int(2)
+}
+darray(2) {
   [0]=>
   int(1)
   [1]=>

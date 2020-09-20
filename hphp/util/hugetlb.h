@@ -14,15 +14,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_HUGETLB_H_
-#define incl_HPHP_UTIL_HUGETLB_H_
+#pragma once
 
 #include <cstddef>
 
 namespace HPHP {
 
-constexpr size_t size1g = 1u << 30;
-constexpr size_t size2m = 1u << 21;
+constexpr size_t size1g = 1ul << 30;
+constexpr size_t size2m = 1ul << 21;
+constexpr size_t size4k = 1ul << 12;
 
 // Note: these functions for managing 1GB huge pages are not designed to be
 // thread-safe.  They should execute during program initialization where only
@@ -42,30 +42,33 @@ bool find_hugetlbfs_path();
 bool auto_mount_hugetlbfs();
 
 // Get a huge page from NUMA node `node`, and return the mapped address
-// suggested by `addr` or nullptr on failure.  If `addr` is nullptr, the system
+// specified by `addr` or nullptr on failure.  If `addr` is nullptr, the system
 // will choose a proper address.  If the address range [addr, addr+1G) already
 // contains address in the process address space, nullptr is returned and the
 // mapping won't be changed.  If `node` is -1, any NUMA node is OK.
-void* mmap_1g(void* addr = nullptr, int node = -1);
+void* mmap_1g(void* addr, int node, bool map_fixed);
 
-// For 2M pages, we want more control over protection and mapping flags.  Note
-// that MAP_FIXED can overwrite the existing mapping without checking/failing.
-void* mmap_2m(void* addr, int prot, int node = -1,
-              bool map_shared = false, bool map_fixed = false);
+// mmap_2m() maps a 2M hugetlb page from the specified NUMA node.  It returns
+// nullptr upon failure. If node is set to -1, no NUMA policy is enforced.
+void* mmap_2m(int node);
+
+// remap_2m() is simiar to mmap_2m(), except that it is used to replace an
+// existing memory range [addr, addr + size2m) using hugetlb pages.  All data in
+// that range will be erased.
+void* remap_2m(void* addr, int node);
 
 // When you already have the memory mapped in, remap them it to use huge pages,
-// and try to interleave across all enabled numa nodes (no guarantee).  Return
-// the number of pages that are actually backed by huge pages.
+// and try to interleave across all enabled numa nodes.  Return the number of
+// pages that are actually backed by hugetlb pages (the rest may be implemented
+// as transparent huge pages).
 //
-// Beware this function wipes out data on existing pages, and yep, that is what
-// it is designed to do.
-size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
-                                  bool map_shared = false);
+// Beware this function wipes out data on existing pages.
+int remap_interleaved_2m_pages(void* addr, size_t pages);
 
 // Information from /sys/devices/system/node/node*/hugepages/*hugepages
 struct HugePageInfo {
-  int nr_hugepages;                     // total number of pages reserved
-  int free_hugepages;                   // number of pages free
+  unsigned nr_hugepages;                // total number of pages reserved
+  unsigned free_hugepages;              // number of pages free
 };
 
 // Get the total/available number of huge pages on a node, -1 means all
@@ -86,4 +89,3 @@ int mprotect_1g_pages(int prot);
 
 }
 
-#endif

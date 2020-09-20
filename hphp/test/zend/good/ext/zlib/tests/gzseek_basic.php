@@ -1,6 +1,6 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
-$h = gzopen($f, 'r'); 
+$h = gzopen($f, 'r');
 
 echo "move to the 50th byte\n";
 var_dump(gzseek( $h, 50 ) );
@@ -20,5 +20,5 @@ echo "tell=".gztell($h)."\n";
 //read the next 10
 var_dump(gzread($h, 10));
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";
+}

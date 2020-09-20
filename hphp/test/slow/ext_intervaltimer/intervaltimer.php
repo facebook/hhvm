@@ -1,19 +1,25 @@
 <?hh
 
-function busy() { return __hhvm_intrinsics\launder_value(42); }
+function busy() { sleep(0); }
 
-$x1 = null;
+class Ref {
+  public function __construct(public int $cnt) {}
+}
+
+<<__EntryPoint>>
+function main_intervaltimer() {
+$x1 = new Ref(0);
 $t1 = new IntervalTimer(
   0.1, 0.1,
-  function() use (&$x1) {
-    $x1++;
+  function() use ($x1) {
+    $x1->cnt++;
   });
 
-$x2 = null;
+$x2 = new Ref(0);
 $t2 = new IntervalTimer(
   0.5, 0.5,
-  function() use (&$x2) {
-    $x2++;
+  function() use ($x2) {
+    $x2->cnt++;
   });
 
 $t1->start();
@@ -26,6 +32,7 @@ while (microtime(true) < $now + 1) {
 $t2->stop();
 $t1->stop();
 
-var_dump($x1);
-var_dump($x2);
-var_dump($x1 > $x2);
+var_dump($x1->cnt);
+var_dump($x2->cnt);
+var_dump($x1->cnt > $x2->cnt);
+}

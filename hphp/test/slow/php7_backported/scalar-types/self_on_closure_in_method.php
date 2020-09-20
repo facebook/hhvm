@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
     public function test() {
@@ -7,7 +7,6 @@ class A {
         };
     }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(((new A)->test())());
-
-?>
+}

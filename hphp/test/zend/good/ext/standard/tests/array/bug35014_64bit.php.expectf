@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: Invalid operand type was used: array_product expects an array or collection as argument 1 in %s/bug35014_64bit.php on line 15
 NULL
 int(1)
 int(0)

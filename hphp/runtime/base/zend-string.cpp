@@ -15,12 +15,17 @@
    +----------------------------------------------------------------------+
 */
 
+// NOTE: See also "hphp/zend/zend-string.*".
+
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/base/zend-math.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
+
+#include "hphp/zend/zend-math.h"
+
+#include <algorithm>
 #include <cmath>
 
 #ifndef _MSC_VER
@@ -34,6 +39,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
+#include <folly/lang/CString.h>
 #include <folly/portability/String.h>
 
 #define PHP_QPRINT_MAXL 75
@@ -58,22 +64,22 @@ void string_charmask(const char *sinput, int len, char *mask) {
       /* Error, try to be as helpful as possible:
          (a range ending/starting with '.' won't be captured here) */
       if (end-len >= input) { /* there was no 'left' char */
-        throw_invalid_argument
+        raise_invalid_argument_warning
           ("charlist: Invalid '..'-range, missing left of '..'");
         continue;
       }
       if (input+2 >= end) { /* there is no 'right' char */
-        throw_invalid_argument
+        raise_invalid_argument_warning
           ("charlist: Invalid '..'-range, missing right of '..'");
         continue;
       }
       if (input[-1] > input[2]) { /* wrong order */
-        throw_invalid_argument
+        raise_invalid_argument_warning
           ("charlist: '..'-range needs to be incrementing");
         continue;
       }
       /* FIXME: better error (a..b..c is the only left possibility?) */
-      throw_invalid_argument("charlist: Invalid '..'-range");
+      raise_invalid_argument_warning("charlist: Invalid '..'-range");
       continue;
     } else {
       mask[c]=1;
@@ -81,161 +87,11 @@ void string_charmask(const char *sinput, int len, char *mask) {
   }
 }
 
-int string_copy(char *dst, const char *src, int siz) {
-  register char *d = dst;
-  register const char *s = src;
-  register size_t n = siz;
-
-  /* Copy as many bytes as will fit */
-  if (n != 0 && --n != 0) {
-    do {
-      if ((*d++ = *s++) == 0)
-        break;
-    } while (--n != 0);
-  }
-
-  /* Not enough room in dst, add NUL and traverse rest of src */
-  if (n == 0) {
-    if (siz != 0)
-      *d = '\0';    /* NUL-terminate dst */
-    while (*s++)
-      ;
-  }
-
-  return(s - src - 1);  /* count does not include NUL */
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// comparisons
-
-int string_ncmp(const char *s1, const char *s2, int len) {
-  for (int i = 0; i < len; i++) {
-    char c1 = s1[i];
-    char c2 = s2[i];
-    if (c1 > c2) return 1;
-    if (c1 < c2) return -1;
-  }
-  return 0;
-}
-
-static int compare_right(char const **a, char const *aend,
-                         char const **b, char const *bend) {
-  int bias = 0;
-
-  /* The longest run of digits wins.  That aside, the greatest
-     value wins, but we can't know that it will until we've scanned
-     both numbers to know that they have the same magnitude, so we
-     remember it in BIAS. */
-  for(;; (*a)++, (*b)++) {
-    if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
-        (*b == bend || !isdigit((int)(unsigned char)**b)))
-      return bias;
-    else if (*a == aend || !isdigit((int)(unsigned char)**a))
-      return -1;
-    else if (*b == bend || !isdigit((int)(unsigned char)**b))
-      return +1;
-    else if (**a < **b) {
-      if (!bias)
-        bias = -1;
-    } else if (**a > **b) {
-      if (!bias)
-        bias = +1;
-    }
-  }
-
-  return 0;
-}
-
-static int compare_left(char const **a, char const *aend,
-                        char const **b, char const *bend) {
-  /* Compare two left-aligned numbers: the first to have a
-     different value wins. */
-  for(;; (*a)++, (*b)++) {
-    if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
-        (*b == bend || !isdigit((int)(unsigned char)**b)))
-      return 0;
-    else if (*a == aend || !isdigit((int)(unsigned char)**a))
-      return -1;
-    else if (*b == bend || !isdigit((int)(unsigned char)**b))
-      return +1;
-    else if (**a < **b)
-      return -1;
-    else if (**a > **b)
-      return +1;
-  }
-
-  return 0;
-}
-
-int string_natural_cmp(char const *a, size_t a_len,
-                       char const *b, size_t b_len, int fold_case) {
-  char ca, cb;
-  char const *ap, *bp;
-  char const *aend = a + a_len, *bend = b + b_len;
-  int fractional, result;
-
-  if (a_len == 0 || b_len == 0)
-    return a_len - b_len;
-
-  ap = a;
-  bp = b;
-  while (1) {
-    ca = *ap; cb = *bp;
-
-    /* skip over leading spaces or zeros */
-    while (isspace((int)(unsigned char)ca))
-      ca = *++ap;
-
-    while (isspace((int)(unsigned char)cb))
-      cb = *++bp;
-
-    /* process run of digits */
-    if (isdigit((int)(unsigned char)ca)  &&  isdigit((int)(unsigned char)cb)) {
-      fractional = (ca == '0' || cb == '0');
-
-      if (fractional)
-        result = compare_left(&ap, aend, &bp, bend);
-      else
-        result = compare_right(&ap, aend, &bp, bend);
-
-      if (result != 0)
-        return result;
-      else if (ap == aend && bp == bend)
-        /* End of the strings. Let caller sort them out. */
-        return 0;
-      else {
-        /* Keep on comparing from the current point. */
-        ca = *ap; cb = *bp;
-      }
-    }
-
-    if (fold_case) {
-      ca = toupper((int)(unsigned char)ca);
-      cb = toupper((int)(unsigned char)cb);
-    }
-
-    if (ca < cb)
-      return -1;
-    else if (ca > cb)
-      return +1;
-
-    ++ap; ++bp;
-    if (ap >= aend && bp >= bend)
-      /* The strings compare the same.  Perhaps the caller
-         will want to call strcmp to break the tie. */
-      return 0;
-    else if (ap >= aend)
-      return -1;
-    else if (bp >= bend)
-      return 1;
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void string_to_case(String& s, int (*tocase)(int)) {
-  assert(!s.isNull());
-  assert(tocase);
+  assertx(!s.isNull());
+  assertx(tocase);
   auto data = s.mutableData();
   auto len = s.size();
   for (int i = 0; i < len; i++) {
@@ -252,7 +108,7 @@ void string_to_case(String& s, int (*tocase)(int)) {
 String string_pad(const char *input, int len, int pad_length,
                   const char *pad_string, int pad_str_len,
                   int pad_type) {
-  assert(input);
+  assertx(input);
   int num_pad_chars = pad_length - len;
 
   /* If resulting string turns out to be shorter than input string,
@@ -263,8 +119,8 @@ String string_pad(const char *input, int len, int pad_length,
 
   /* Setup the padding string values if specified. */
   if (pad_str_len == 0) {
-    throw_invalid_argument("pad_string: (empty)");
-    return String();
+    SystemLib::throwRuntimeExceptionObject(
+      "Invalid argument: pad_string: (empty)");
   }
 
   String ret(pad_length, ReserveString);
@@ -286,8 +142,8 @@ String string_pad(const char *input, int len, int pad_length,
     right_pad = num_pad_chars - left_pad;
     break;
   default:
-    throw_invalid_argument("pad_type: %d", pad_type);
-    return String();
+    SystemLib::throwRuntimeExceptionObject(
+      folly::sformat("Invalid argument: pad_type: {}", pad_type));
   }
 
   /* First we pad on the left. */
@@ -312,7 +168,7 @@ String string_pad(const char *input, int len, int pad_length,
 
 int string_find(const char *input, int len, char ch, int pos,
                 bool case_sensitive) {
-  assert(input);
+  assertx(input);
   if (pos < 0 || pos > len) {
     return -1;
   }
@@ -330,16 +186,16 @@ int string_find(const char *input, int len, char ch, int pos,
 
 int string_rfind(const char *input, int len, char ch, int pos,
                  bool case_sensitive) {
-  assert(input);
+  assertx(input);
   if (pos < -len || pos > len) {
     return -1;
   }
   const void *ptr;
   if (case_sensitive) {
     if (pos >= 0) {
-      ptr = memrchr(input + pos, ch, len - pos);
+      ptr = folly::memrchr(input + pos, ch, len - pos);
     } else {
-      ptr = memrchr(input, ch, len + pos + 1);
+      ptr = folly::memrchr(input, ch, len + pos + 1);
     }
   } else {
     if (pos >= 0) {
@@ -356,8 +212,8 @@ int string_rfind(const char *input, int len, char ch, int pos,
 
 int string_find(const char *input, int len, const char *s, int s_len,
                 int pos, bool case_sensitive) {
-  assert(input);
-  assert(s);
+  assertx(input);
+  assertx(s);
   if (!s_len || pos < 0 || pos > len) {
     return -1;
   }
@@ -375,8 +231,8 @@ int string_find(const char *input, int len, const char *s, int s_len,
 
 int string_rfind(const char *input, int len, const char *s, int s_len,
                  int pos, bool case_sensitive) {
-  assert(input);
-  assert(s);
+  assertx(input);
+  assertx(s);
   if (!s_len || pos < -len || pos > len) {
     return -1;
   }
@@ -385,13 +241,13 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
     if (pos >= 0) {
       ptr = bstrrstr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrstr(input, len + pos + s_len, s, s_len);
+      ptr = bstrrstr(input, len + std::min(pos + s_len, 0), s, s_len);
     }
   } else {
     if (pos >= 0) {
       ptr = bstrrcasestr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrcasestr(input, len + pos + s_len, s, s_len);
+      ptr = bstrrcasestr(input, len + std::min(pos + s_len, 0), s, s_len);
     }
   }
   if (ptr != nullptr) {
@@ -422,9 +278,9 @@ const char *string_memnstr(const char *haystack, const char *needle,
 
 String string_replace(const char *s, int len, int start, int length,
                       const char *replacement, int len_repl) {
-  assert(s);
-  assert(replacement);
-  assert(len >= 0);
+  assertx(s);
+  assertx(replacement);
+  assertx(len >= 0);
 
   // if "start" position is negative, count start position from the end
   // of the string
@@ -480,11 +336,11 @@ String string_replace(const char *input, int len,
                       const char *search, int len_search,
                       const char *replacement, int len_replace,
                       int &count, bool case_sensitive) {
-  assert(input);
-  assert(search && len_search);
-  assert(len >= 0);
-  assert(len_search >= 0);
-  assert(len_replace >= 0);
+  assertx(input);
+  assertx(search && len_search);
+  assertx(len >= 0);
+  assertx(len_search >= 0);
+  assertx(len_replace >= 0);
 
   if (len == 0) {
     return String();
@@ -696,8 +552,8 @@ String string_strip_tags(const char *s, const int len,
   int br, i=0, depth=0, in_q = 0;
   int state = 0, pos;
 
-  assert(s);
-  assert(allow);
+  assertx(s);
+  assertx(allow);
 
   String retString(s, len, CopyString);
   rbuf = retString.mutableData();
@@ -709,7 +565,7 @@ String string_strip_tags(const char *s, const int len,
   rp = rbuf;
   br = 0;
   if (allow_len) {
-    assert(allow);
+    assertx(allow);
 
     allowString = String(allow_len, ReserveString);
     char *atmp = allowString.mutableData();
@@ -1014,7 +870,7 @@ String string_quoted_printable_encode(const char *input, int len) {
 }
 
 String string_quoted_printable_decode(const char *input, int len, bool is_q) {
-  assert(input);
+  assertx(input);
   if (len == 0) {
     return String();
   }
@@ -1079,7 +935,7 @@ Variant string_base_to_numeric(const char *s, int len, int base) {
   int64_t cutoff;
   int cutlim;
 
-  assert(string_validate_base(base));
+  assertx(string_validate_base(base));
 
   cutoff = LONG_MAX / base;
   cutlim = LONG_MAX % base;
@@ -1126,7 +982,7 @@ String string_long_to_base(unsigned long value, int base) {
   char buf[(sizeof(unsigned long) << 3) + 1];
   char *ptr, *end;
 
-  assert(string_validate_base(base));
+  assertx(string_validate_base(base));
 
   end = ptr = buf + sizeof(buf) - 1;
 
@@ -1141,7 +997,7 @@ String string_long_to_base(unsigned long value, int base) {
 String string_numeric_to_base(const Variant& value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-  assert(string_validate_base(base));
+  assertx(string_validate_base(base));
   if ((!value.isInteger() && !value.isDouble())) {
     return empty_string();
   }
@@ -1176,15 +1032,15 @@ String string_numeric_to_base(const Variant& value, int base) {
 #define PHP_UU_ENC(c) \
   ((c) ? ((c) & 077) + ' ' : '`')
 #define PHP_UU_ENC_C2(c) \
-  PHP_UU_ENC(((*(c) << 4) & 060) | ((*((c) + 1) >> 4) & 017))
+  PHP_UU_ENC(((*(c) * 16) & 060) | ((*((c) + 1) >> 4) & 017))
 #define PHP_UU_ENC_C3(c) \
-  PHP_UU_ENC(((*(c + 1) << 2) & 074) | ((*((c) + 2) >> 6) & 03))
+  PHP_UU_ENC(((*(c + 1) * 4) & 074) | ((*((c) + 2) >> 6) & 03))
 #define PHP_UU_DEC(c) \
   (((c) - ' ') & 077)
 
 String string_uuencode(const char *src, int src_len) {
-  assert(src);
-  assert(src_len);
+  assertx(src);
+  assertx(src_len);
 
   int len = 45;
   char *p;
@@ -1661,7 +1517,7 @@ static int string_similar_char(const char *txt1, int len1,
 }
 
 int string_similar_text(const char *t1, int len1,
-                        const char *t2, int len2, float *percent) {
+                        const char *t2, int len2, double *percent) {
   if (len1 == 0 && len2 == 0) {
     if (percent) *percent = 0.0;
     return 0;
@@ -1726,7 +1582,7 @@ String string_money_format(const char *format, double value) {
       check = true;
       p++;
     } else {
-      throw_invalid_argument
+      raise_invalid_argument_warning
         ("format: Only a single %%i or %%n token can be used");
       return String();
     }
@@ -1765,10 +1621,15 @@ String string_number_format(double d, int dec,
   d = php_math_round(d, dec);
 
   // departure from PHP: we got rid of dependencies on spprintf() here.
+  // This actually means 63 bytes for characters + 1 byte for '\0'
   String tmpstr(63, ReserveString);
   tmpbuf = tmpstr.mutableData();
   tmplen = snprintf(tmpbuf, 64, "%.*F", dec, d);
-  if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
+  // From the man page of snprintf, the return value is:
+  // The number of characters that would have been written if n had been
+  // sufficiently large, not counting the terminating null character.
+  if (tmplen < 0) return empty_string();
+  if (tmplen < 64 && (tmpbuf == nullptr || !isdigit((int)tmpbuf[0]))) {
     tmpstr.setSize(tmplen);
     return tmpstr;
   }
@@ -1777,6 +1638,7 @@ String string_number_format(double d, int dec,
     tmpstr = String(tmplen, ReserveString);
     tmpbuf = tmpstr.mutableData();
     tmplen = snprintf(tmpbuf, tmplen + 1, "%.*F", dec, d);
+    if (tmplen < 0) return empty_string();
     if (tmpbuf == nullptr || !isdigit((int)tmpbuf[0])) {
       tmpstr.setSize(tmplen);
       return tmpstr;
@@ -1885,7 +1747,7 @@ String string_number_format(double d, int dec,
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
 String string_soundex(const String& str) {
-  assert(!str.empty());
+  assertx(!str.empty());
   int _small, code, last;
   String retString(4, ReserveString);
   char* soundex = retString.mutableData();
@@ -2533,7 +2395,7 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
   case 'K':
     break;
   default:
-    throw_invalid_argument("Unknown source charset: %c", from);
+    raise_invalid_argument_warning("Unknown source charset: %c", from);
     break;
   }
 
@@ -2546,7 +2408,7 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
   case 'K':
     break;
   default:
-    throw_invalid_argument("Unknown destination charset: %c", to);
+    raise_invalid_argument_warning("Unknown destination charset: %c", to);
     break;
   }
 
@@ -2578,7 +2440,7 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
 String
 string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
                              int convert_newlines) {
-  assert(!inStr.empty());
+  assertx(!inStr.empty());
   auto str = inStr.data();
   auto str_len = inStr.size();
   const char *tmp;

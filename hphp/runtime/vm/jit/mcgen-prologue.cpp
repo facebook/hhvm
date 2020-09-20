@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -78,16 +77,6 @@ TCA checkCachedPrologue(const Func* func, int paramIdx) {
   return nullptr;
 }
 
-template <class F>
-void withThis(const Func* func, F f) {
-  if (!func->hasThisVaries()) {
-    f(func->mayHaveThis());
-    return;
-  }
-  f(true);
-  f(false);
-}
-
 /**
  * Given the proflogueTransId for a TransProflogue translation, regenerate the
  * prologue (as a TransPrologue).
@@ -99,13 +88,23 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   auto rec = profData()->transRec(prologueTransId);
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
+  auto sk = rec->srcKey();
+
+  tracing::Block _b{
+    "regenerate-prologue",
+    [&] {
+      return traceProps(func)
+        .add("nargs", nArgs)
+        .add("sk", show(sk));
+    }
+  };
 
   func->resetPrologue(nArgs);
 
   // If we're regenerating a prologue, and we want to check shouldTranslate()
   // but ignore the code size limits.  We still want to respect the global
   // translation limit and other restrictions, though.
-  if (!tc::shouldTranslateNoSizeLimit(func, TransKind::OptPrologue)) {
+  if (!tc::shouldTranslateNoSizeLimit(sk, TransKind::OptPrologue)) {
     return false;
   }
 
@@ -125,25 +124,25 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     auto paramInfo = func->params()[nArgs];
     if (paramInfo.hasDefaultValue()) {
       bool ret = false;
-      auto genPrologue = [&] (bool hasThis) {
-        SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None, hasThis);
-        if (profData()->optimized(funcletSK)) return;
+      SrcKey funcletSK(func, paramInfo.funcletOff, ResumeMode::None);
+      if (!profData()->optimized(funcletSK)) {
         auto funcletTransId = profData()->dvFuncletTransId(funcletSK);
-        if (funcletTransId == kInvalidTransID) return;
-        auto args = TransArgs{funcletSK};
-        args.transId = funcletTransId;
-        args.kind = TransKind::Optimize;
-        args.region = selectHotRegion(funcletTransId);
-        auto const spOff = args.region->entry()->initialSpOffset();
-        if (auto res = translate(args, spOff, info.tcBuf.view())) {
-          // Flag that this translation has been retranslated, so that
-          // it's not retranslated again along with the function body.
-          profData()->setOptimized(funcletSK);
-          ret = true;
-          info.add(std::move(res.value()));
+        if (funcletTransId != kInvalidTransID) {
+          auto args = TransArgs{funcletSK};
+          args.transId = funcletTransId;
+          args.kind = TransKind::Optimize;
+          args.region = selectHotRegion(funcletTransId);
+          auto const spOff = args.region->entry()->initialSpOffset();
+          tc::createSrcRec(funcletSK, spOff);
+          if (auto res = translate(args, spOff, info.tcBuf.view())) {
+            // Flag that this translation has been retranslated, so that
+            // it's not retranslated again along with the function body.
+            profData()->setOptimized(funcletSK);
+            ret = true;
+            info.add(std::move(res.value()));
+          }
         }
-      };
-      withThis(func, genPrologue);
+      }
       if (ret) return true;
     }
   }
@@ -156,6 +155,14 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
 
 bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   std::vector<TransID> prologTransIDs;
+
+  tracing::Block _b{
+    "regenerate-prologues",
+    [&] {
+      return traceProps(func)
+        .add("num_prologues", func->numPrologues());
+    }
+  };
 
   VMProtect _;
 
@@ -189,20 +196,12 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   auto const includedBody = prologTransIDs.size() <= 1 &&
     func->past() - func->base() <= RuntimeOption::EvalJitPGOMaxFuncSizeDupBody;
 
-  auto funcBodySk = [&] (bool hasThis) {
-    return SrcKey{func, func->base(), ResumeMode::None, hasThis};
-  };
+  auto funcBodySk = SrcKey{func, func->base(), ResumeMode::None};
   if (!includedBody) {
-    withThis(func,
-            [&] (bool hasThis) {
-              profData()->setOptimized(funcBodySk(hasThis));
-            });
+    profData()->setOptimized(funcBodySk);
   }
   SCOPE_EXIT{
-    withThis(func,
-             [&] (bool hasThis) {
-               profData()->clearOptimized(funcBodySk(hasThis));
-             });
+    profData()->clearOptimized(funcBodySk);
   };
 
   bool emittedAnyDVInit = false;
@@ -217,6 +216,7 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
 }
 
 TCA getFuncPrologue(Func* func, int nPassed) {
+  ARRPROV_USE_POISONED_LOCATION();
   VMProtect _;
 
   func->validate();
@@ -227,9 +227,12 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   // Do a quick test before grabbing the write lease
   if (auto const p = checkCachedPrologue(func, paramIndex)) return p;
 
-  auto computeKind = [&] {
-    return tc::profileFunc(func) ? TransKind::ProfPrologue :
-                                   TransKind::LivePrologue;
+  // Fail if we were asked to fail.
+  if (UNLIKELY(RuntimeOption::EvalFailJitPrologs)) return nullptr;
+
+  auto const computeKind = [&] {
+    return tc::profileFunc(func) ? TransKind::ProfPrologue
+                                 : TransKind::LivePrologue;
   };
 
   const auto funcId = func->getFuncId();
@@ -249,7 +252,13 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   // profileFunc() changed.
   if (!writer.checkKind(kind)) return nullptr;
 
-  if (!tc::shouldTranslate(func, kind)) return nullptr;
+  SrcKey sk(func, func->getEntryForNumArgs(nPassed), SrcKey::PrologueTag());
+  if (!tc::shouldTranslate(sk, kind)) return nullptr;
+
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    TRACE(2, "punting because jitting code was disabled\n");
+    return nullptr;
+  }
 
   // Double check the prologue array now that we have the write lease
   // in case another thread snuck in and set the prologue already.

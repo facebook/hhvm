@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Test
 {
@@ -10,19 +10,17 @@ class Test
 
 class Derived extends Test
 {
-	function __construct()
-	{
+    function __construct()
+    {
         echo __METHOD__ . "()\n";
-		parent::__construct();
-	}
-	
-	static function f()
-	{
-		new Derived;
-	}
-}
+        parent::__construct();
+    }
 
-Derived::f();
+    static function f()
+    {
+        new Derived;
+    }
+}
 
 class TestPriv
 {
@@ -31,29 +29,31 @@ class TestPriv
         echo __METHOD__ . "()\n";
     }
 
-	static function f()
-	{
-		new TestPriv;
-	}
+    static function f()
+    {
+        new TestPriv;
+    }
 }
-
-TestPriv::f();
 
 class DerivedPriv extends TestPriv
 {
-	function __construct()
-	{
+    function __construct()
+    {
         echo __METHOD__ . "()\n";
-		parent::__construct();
-	}
-	
-	static function f()
-	{
-		new DerivedPriv;
-	}
+        parent::__construct();
+    }
+
+    static function f()
+    {
+        new DerivedPriv;
+    }
 }
+<<__EntryPoint>> function main(): void {
+Derived::f();
+
+TestPriv::f();
 
 DerivedPriv::f();
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /*
  * Note: test names match method names in a set of PHPUnit tests
  * in a userland package.  Please be so kind as to leave them.
  */
-
+function test(): void {
 date_default_timezone_set('America/New_York');
 
 
@@ -22,3 +22,4 @@ examine_diff('2009-01-07', '2009-01-14', 'P+0Y0M7DT0H0M0S', 7, true);
 //
 //7 - 14 = -7
 //14 - 7 = 7
+}

@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 class Y {
   static function baz($a) {
- var_dump(get_called_class());
+ var_dump(static::class);
  }
 }
 class X {
@@ -10,8 +10,12 @@ class X {
     Y::baz(static::bar());
   }
   static function bar() {
-    var_dump(get_called_class());
+    var_dump(static::class);
   }
 }
+
+<<__EntryPoint>>
+function main_1888() {
 $x = new X;
 $x->foo();
+}

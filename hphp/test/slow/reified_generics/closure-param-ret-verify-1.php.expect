@@ -1,0 +1,3 @@
+int(1)
+ERROR: string(72) "Argument 1 passed to __invoke() must be an instance of int, string given"
+ERROR: string(73) "Value returned from function __invoke() must be of type int, string given"

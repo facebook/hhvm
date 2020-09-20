@@ -1,0 +1,3 @@
+int(1)
+
+Catchable fatal error: Value returned from function foo() must be of type Foo, Bar given in %s/record-return.php on line 15

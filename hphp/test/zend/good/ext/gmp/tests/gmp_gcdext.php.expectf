@@ -29,18 +29,15 @@ string(3) "195"
 string(11) "46994884483"
 string(9) "-68772552"
 
-Warning: %s
+Warning: gmp_gcdexct(): Unable to convert variable to GMP - wrong type in %s/gmp_gcdext.php on line 26
 bool(false)
 
-Warning: %s
+Warning: gmp_gcdexct(): Unable to convert variable to GMP - wrong type in %s/gmp_gcdext.php on line 27
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_gcdext() expects exactly 2 parameters, 3 given in %s/gmp_gcdext.php on line 28
 
-Warning: %s
-NULL
+Warning: gmp_gcdext() expects exactly 2 parameters, 1 given in %s/gmp_gcdext.php on line 29
 
-Warning: %s
-NULL
+Warning: gmp_gcdext() expects exactly 2 parameters, 0 given in %s/gmp_gcdext.php on line 30
 Done

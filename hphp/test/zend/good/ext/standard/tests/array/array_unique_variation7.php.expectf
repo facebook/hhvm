@@ -1,5 +1,5 @@
 *** Testing array_unique() : array with binary data for $input argument ***
-array(3) {
+darray(3) {
   [0]=>
   string(1) "1"
   [1]=>

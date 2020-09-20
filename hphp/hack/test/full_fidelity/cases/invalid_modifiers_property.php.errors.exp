@@ -1,0 +1,6 @@
+(4,3)-(4,11) Properties cannot be declared `abstract`
+(4,3)-(4,63) Cannot declare abstract properties `private`.
+(4,12)-(4,17) Properties cannot be declared `final`
+(4,43)-(4,49) Properties cannot have multiple visibility modifiers
+(4,50)-(4,55) Properties cannot be declared `async`
+(6,10)-(6,16) Properties cannot have duplicate modifiers

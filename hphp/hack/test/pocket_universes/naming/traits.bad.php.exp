@@ -1,0 +1,4 @@
+File "traits.bad.php", line 7, characters 15-15:
+Case type is not allowed in traits (Naming[2107])
+File "traits.bad.php", line 13, characters 17-17:
+Case value is not allowed in traits (Naming[2107])

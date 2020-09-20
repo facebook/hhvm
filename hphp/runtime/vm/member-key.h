@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_MEMBER_KEY_H_
-#define incl_HPHP_VM_MEMBER_KEY_H_
+#pragma once
+
+#include "hphp/runtime/base/types.h"
 
 #include "hphp/util/hash.h"
 
@@ -83,17 +84,17 @@ constexpr bool mcodeIsElem(MemberCode mcode) {
 struct MemberKey {
   MemberKey()
     : mcode{MW}
-    , iva{0}
+    , int64{0}
   {}
 
-  MemberKey(MemberCode mcode, uint32_t iva)
+  MemberKey(MemberCode mcode, NamedLocal loc)
+    : mcode{mcode}
+    , local{loc}
+  {}
+
+  MemberKey(MemberCode mcode, int32_t iva)
     : mcode{mcode}
     , iva{iva}
-  {}
-
-  MemberKey(MemberCode mcode, int32_t int64)
-    : mcode{mcode}
-    , int64{int64}
   {}
 
   MemberKey(MemberCode mcode, int64_t int64)
@@ -108,7 +109,8 @@ struct MemberKey {
 
   MemberCode mcode;
   union {
-    int64_t iva;
+    NamedLocal local;
+    int32_t iva;
     int64_t int64;
     const StringData* litstr;
   };
@@ -125,4 +127,3 @@ std::string show(MemberKey);
 
 }
 
-#endif

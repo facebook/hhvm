@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_rewind() {
 $sample_dir = __DIR__.'/../../sample_dir';
 $iterator = new FilesystemIterator(
   $sample_dir,
@@ -13,3 +16,4 @@ $c = $iterator->key();
 
 var_dump($a == $b);
 var_dump($a == $c);
+}

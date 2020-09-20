@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $m1 = new Memcached('id1');
 $m1->setOption(Memcached::OPT_PREFIX_KEY, "foo_");
 var_dump($m1->isPristine());
@@ -13,3 +13,4 @@ $m3 = new Memcached('id2');
 var_dump($m3->isPristine());
 $m3 = new Memcached();
 var_dump($m3->isPristine());
+}

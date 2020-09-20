@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THRIFT_TRANSPORT_H_
-#define incl_HPHP_THRIFT_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -74,7 +73,7 @@ extern const StaticString
   s_format,
   s_collection,
   s_harray,
-  s_TSPEC,
+  s_SPEC,
   s_TProtocolException,
   s_TApplicationException;
 
@@ -187,11 +186,11 @@ struct PHPInputTransport {
   ~PHPInputTransport() {
     try {
       put_back();
-    } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+    } catch (Exception& e) {
+      Logger::Error(e.getMessage());
     } catch (Object &e) {
       try {
-        Logger::Error("%s", e.toString().c_str());
+        Logger::Error(throwable_to_string(e.get()).toCppString());
       } catch (...) {
         Logger::Error("(e.toString() failed)");
       }
@@ -264,7 +263,7 @@ struct PHPInputTransport {
 
 private:
   void refill(size_t len) {
-    assert(buffer_used == 0);
+    assertx(buffer_used == 0);
     len = std::max<size_t>(len, SIZE);
     buffer = m_transport->o_invoke_few_args(s_read, 1, (int64_t)len).toString();
     buffer_used = buffer.size();
@@ -281,4 +280,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

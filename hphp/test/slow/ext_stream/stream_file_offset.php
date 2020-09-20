@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_stream_file_offset() {
 $fd = fopen(__DIR__.'/stream_file_offset.php.sample', 'rb');
 
 // fgets moves the read position.
@@ -12,3 +15,4 @@ var_dump(trim(stream_get_contents($fd)));
 var_dump(trim(stream_get_contents($fd, -1, 5)));
 
 fclose($fd);
+}

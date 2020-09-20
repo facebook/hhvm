@@ -10,5 +10,9 @@ function foo(OptValidator $func) {
 
 function asd(mixed $k): bool { return true; }
 
-foo('asd');
+
+<<__EntryPoint>>
+function main_typedef_closure2() {
+foo(fun('asd'));
 foo(null);
+}

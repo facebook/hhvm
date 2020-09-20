@@ -1,22 +1,22 @@
-<?php
+<?hh
 
-error_reporting(E_ALL);
-	
 function bar() {
-	echo @$blah;
-	echo $undef2;
+    echo @$blah;
+    echo $undef2;
 }
 
 function foo() {
-	echo @$undef;
-	error_reporting(E_ALL|E_STRICT);
-	echo $blah;
-	return bar();
+    echo @$undef;
+    error_reporting(E_ALL|E_STRICT);
+    echo $blah;
+    return bar();
 }
-	
-@foo();					
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
+
+@foo();
 
 var_dump(error_reporting());
 
 echo "Done\n";
-?>
+}

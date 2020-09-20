@@ -5,7 +5,7 @@ async function block() {
 }
 
 async function awaitva(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($x ==> HH\Asio\join($x), $args);
 }
 
@@ -29,4 +29,8 @@ async function foo() {
   return $res1 + $res2 * $res3;
 }
 
+
+<<__EntryPoint>>
+function main_immed_lambda2() {
 var_dump(HH\Asio\join(foo()));
+}

@@ -1,29 +1,32 @@
-<?php
-	include "resourcebundle.inc";
+<?hh
 
-	// fall back
-	$r = new ResourceBundle( 'en_US', BUNDLE );
+<<__EntryPoint>>
+function main_entry(): void {
+    include "resourcebundle.inc";
 
-	foreach ($r as $onekey => $oneval) {
-		echo "Here comes $onekey:\n";
-		switch (gettype($oneval)) {
-		  case 'string':
-		    echo bin2hex( $oneval ) . "\n";
-		    break;
+ 	// fall back
+  	$r = new ResourceBundle( 'en_US', bundle() );
 
-		  case 'integer':
-		    echo "$oneval\n";
-		    break;
+  	foreach ($r as $onekey => $oneval) {
+  		echo "Here comes $onekey:\n";
+  		switch (gettype($oneval)) {
+  		  case 'string':
+  		    echo bin2hex( $oneval ) . "\n";
+  		    break;
 
-		  default:
-		    print_r( $oneval );
-		}
-		echo "\n";
-	}
+  		  case 'integer':
+  		    echo "$oneval\n";
+  		    break;
 
-	echo "Testarray Contents:\n";
-	$r = $r->get( 'testarray' );
-	foreach ($r as $onekey => $oneval) {
-	   echo "$onekey => $oneval\n";
-	}
-?>
+  		  default:
+  		    print_r( $oneval );
+  		}
+  		echo "\n";
+  	}
+
+  	echo "Testarray Contents:\n";
+  	$r = $r->get( 'testarray' );
+  	foreach ($r as $onekey => $oneval) {
+  	   echo "$onekey => $oneval\n";
+  	}
+}

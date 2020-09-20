@@ -1,8 +1,9 @@
-<?php 
-function F ($a) { 
-	eval($a);
+<?hh
+function F ($a) {
+    eval('function FImpl() { '.$a.' }');
+    FImpl();
 }
-
-error_reporting(0);
+<<__EntryPoint>> function main(): void {
+// error_reporting(0);
 F("echo \"Hello\";");
-?>
+}

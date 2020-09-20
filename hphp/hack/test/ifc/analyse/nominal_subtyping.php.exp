@@ -1,0 +1,97 @@
+Analyzing __construct:
+* pc: pc
+* This: \D<\D, lump'1>
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $pd -> <$pd> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $pd -> <$pd> }
+Constraints:
+  [\D < PD, pc < PD, $pd < PD]
+
+Analyzing __construct:
+* pc: pc
+* This: \E<\E, lump'1>
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $pd -> <$pd>; $pe -> <$pe> }
+* Final environment:
+  Deps: { "\\D#__construct" }
+  Locals:
+    lvars: { $pd -> <$pd>; $pe -> <$pe> }
+    pc: exn
+Constraints:
+  [\E < PD, pc < PD, $pd < PD, \E < PE, pc < PE, $pe < PE,
+   \D#__construct < pcjoin, pc < pcjoin,
+   {(this: \E<\E, lump'1>)->\D#__construct<pcjoin, \D#__construct>(<$pd>): <\D#__construct_ret> [\Exception<exn,
+                                                                    exn>]},
+   \D#__construct < \D#__construct_ret, exn = lump, exn < \Exception,
+   exn < \Exception]
+
+Analyzing \testPoliciedPropertiesED:
+* pc: pc
+* This: None
+* Return: \D<\D, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $e -> \E<\E, lump'2> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $e -> \E<\E, lump'2> }
+Constraints:
+  [lump'2 = lump'1, \E < \D]
+
+Analyzing __construct:
+* pc: pc
+* This: \F<\F, lump'1>
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $pd -> <$pd>; $pe -> <$pe>; $pf -> <$pf> }
+* Final environment:
+  Deps: { "\\E#__construct" }
+  Locals:
+    lvars: { $pd -> <$pd>; $pe -> <$pe>; $pf -> <$pf> }
+    pc: exn
+Constraints:
+  [\F < PD, pc < PD, $pd < PD, \F < PE, pc < PE, $pe < PE, \F < PF, pc < PF,
+   $pf < PF, \E#__construct < pcjoin, pc < pcjoin,
+   {(this: \F<\F, lump'1>)->\E#__construct<pcjoin, \E#__construct>(<$pd>,
+                                                                   <$pe>): <\E#__construct_ret> [\Exception<exn,
+                                                                    exn>]},
+   \E#__construct < \E#__construct_ret, exn = lump, exn < \Exception,
+   exn < \Exception]
+
+Analyzing \testPoliciedPropertiesFE:
+* pc: pc
+* This: None
+* Return: \E<\E, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $f -> \F<\F, lump'2> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $f -> \F<\F, lump'2> }
+Constraints:
+  [lump'2 = lump'1, \F < \E]
+
+Analyzing \testPoliciedPropertiesFD:
+* pc: pc
+* This: None
+* Return: \D<\D, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $f -> \F<\F, lump'2> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $f -> \F<\F, lump'2> }
+Constraints:
+  [lump'2 = lump'1, \F < \D]
+

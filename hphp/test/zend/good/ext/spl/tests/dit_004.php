@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $a = new DirectoryIterator(__DIR__);
 $b = clone $a;
 var_dump((string)$b == (string)$a);
@@ -9,5 +9,5 @@ $a->next();
 $c = clone $a;
 var_dump((string)$c == (string)$a);
 var_dump($a->key(), $c->key());
-?>
-===DONE===
+echo "===DONE===\n";
+}

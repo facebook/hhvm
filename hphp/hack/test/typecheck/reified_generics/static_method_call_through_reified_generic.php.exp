@@ -1,0 +1,4 @@
+File "static_method_call_through_reified_generic.php", line 5, characters 6-8:
+You are trying to access the static method `foo` but this is an array key (int | string) (Typing[4252])
+File "static_method_call_through_reified_generic.php", line 4, characters 26-33:
+Definition is here

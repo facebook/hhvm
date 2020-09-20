@@ -1,13 +1,19 @@
-<?php
+<?hh
 
 function foo() {
-  global $x;
-  $x = 'yep';
+
+  HhbbcPseudomain001::$x = 'yep';
   return 'hehehe';
 }
 
 function al() { return 2; }
-unset($x);
-$x = al();
-var_dump(foo());
-var_dump($x);
+
+abstract final class HhbbcPseudomain001 {
+  public static $x;
+}
+<<__EntryPoint>>
+function entrypoint_pseudomain_001(): void {
+  HhbbcPseudomain001::$x = al();
+  var_dump(foo());
+  var_dump(HhbbcPseudomain001::$x);
+}

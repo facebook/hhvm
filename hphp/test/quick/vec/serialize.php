@@ -1,10 +1,10 @@
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class NoisyClass {
   function __sleep() {
     echo "NoisyClass::__sleep()\n";
-    return [];
+    return varray[];
   }
   function __wakeup() {
     echo "NoisyClass::__wakeup()\n";
@@ -21,16 +21,6 @@ class SleepThrow {
 class WakeupThrow {
   function __wakeup() {
     throw new Exception("Wakeup exception");
-  }
-}
-
-class Dtor {
-  public $id;
-  function __construct($id) {
-    $this->id = $id;
-  }
-  function __destruct() {
-    echo "Dtor::__destruct(): " . $this->id . "\n";
   }
 }
 
@@ -63,7 +53,7 @@ function try_unserialize($val) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   roundtrip(vec[]);
   roundtrip(vec[1, 2, 3]);
   roundtrip(vec['a', 'b', 'c', 'd', 'e', 'f', 'g']);
@@ -72,7 +62,7 @@ function main() {
   roundtrip(vec[123, "123"]);
   roundtrip(vec[new stdclass(), true, false, 1.23, null]);
   roundtrip(vec[vec[], vec[100, 200], vec["key1", "key2", "key3"]]);
-  roundtrip(vec[[], [111, 222],
+  roundtrip(vec[varray[], varray[111, 222],
                 dict['a' => 50, 'b' => 60, 'c' => 70],
                 keyset["abc", 123, "def", 456]]);
   roundtrip(vec[new NoisyClass]);
@@ -101,11 +91,4 @@ function main() {
 
   try_serialize(vec[new SleepThrow]);
   try_unserialize("v:1:{O:11:\"WakeupThrow\":0:{}}");
-
-  // Ensure dtors of already unserialized elements run
-  try_unserialize("v:5:{O:4:\"Dtor\":1:{s:2:\"id\";i:1;}O:4:\"Dtor\":1:{s:2:\"id\";i:2;}O:4:\"Dtor\":1:{s:2:\"id\";i:3;}O:11:\"WakeupThrow\":0:{}O:4:\"Dtor\":1:{s:2:\"id\";i:4;}}");
-  try_unserialize("v:3:{v:1:{i:123;}R:2;O:4:\"Dtor\":1:{s:2:\"id\";i:1;}}");
-  try_unserialize("v:3:{O:4:\"Dtor\":1:{s:2:\"id\";i:1;}v:1:{i:123;}R:3;}");
 }
-
-main();

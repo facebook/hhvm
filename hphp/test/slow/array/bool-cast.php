@@ -1,11 +1,14 @@
-<?php
+<?hh
 
 
 function f($a) {
   var_dump((bool)$a);
 }
 
-f($GLOBALS);
-f(array('a' => 'b'));
-f(array('a'));
-f(array());
+
+<<__EntryPoint>>
+function main_bool_cast() {
+f(darray['a' => 'b']);
+f(varray['a']);
+f(varray[]);
+}

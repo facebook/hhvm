@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $list = new SplDoublyLinkedList();
 
 $list->push('o');
@@ -13,4 +13,4 @@ while ($tmp = $list->current()) {
   echo $tmp;
   $list->next();
 }
-?>
+}

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1372() {
 register_shutdown_function(function() {
   $error = error_get_last();
 
@@ -9,3 +12,4 @@ register_shutdown_function(function() {
 });
 
 Foo::bar();
+}

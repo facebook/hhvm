@@ -1,7 +1,5 @@
 string(3) "1.0"
-string(30) "MyDocument::__get: nonExisting"
 string(3) "Bar"
-string(29) "MyElement::__get: nonExisting"
 string(1) "x"
 string(1) "x"
 bool(true)

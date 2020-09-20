@@ -1,0 +1,2 @@
+File "reified_fun.php", line 6, characters 3-12:
+Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])

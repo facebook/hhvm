@@ -2,28 +2,23 @@
 # Test some function call junk
 #
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Null
-  RetC
-}
-
 .function caller($who, $arg) {
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $arg
   CGetL $who
-  FPushFunc 1
-  FPassL 0 $arg Any
-  FCall 1
-  UnboxR
+  FCallFunc <> 1 1 "" - ""
 
   SetL $ret
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   CGetL $ret
-  FPushFunc 0
-  FCall 0
-  PopR
+  FCallFunc <> 0 1 "" - ""
+  PopC
 
   True
   RetC
@@ -49,29 +44,34 @@
   RetC
 }
 
-.function byref(&$foo) {
+.function byref(inout $foo) {
+  Null
   Int 42
   SetL $foo
-  RetC
+  RetM 2
 }
 
-.function main() {
-  FPushFuncD 2 "caller"
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
   String "a"
-  FPassC 0 Any
   String "b"
-  FPassC 1 Any
-  FCall 2
-  PopR
+  FCallFuncD <> 2 1 "" - "" "caller"
+  PopC
 
   String "strval"
   SetL $funk
   PopC
-  FPushFuncD 1 "byref"
-  FPassL 0 $funk Any
-  FCall 1
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
   CGetL $funk
+  Null
+  PopL $funk
+  FCallFuncD <> 1 2 "1" - "" "byref"
+  PopC
   Print
   PopC
   String "\n"

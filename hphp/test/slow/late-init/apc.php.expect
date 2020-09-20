@@ -1,0 +1,5 @@
+============== store #1 =================
+Accessing <<__LateInit>> property 'A::y' before initialization
+============== store #2 =================
+============== store #3 =================
+Accessing <<__LateInit>> property 'A::y' before initialization

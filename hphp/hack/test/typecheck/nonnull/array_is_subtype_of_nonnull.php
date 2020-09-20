@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function cast_array(array $x): nonnull {
   return $x;
@@ -25,13 +25,13 @@ function cast_varray_or_darray<Tk>(varray_or_darray<Tk> $x): nonnull {
 }
 
 function empty_array(): nonnull {
-  return array();
+  return varray[];
 }
 
 function array_used_like_a_shape(): nonnull {
-  return array('pi' => 3.1415926, 'e' => 2.718281829459045);
+  return darray['pi' => 3.1415926, 'e' => 2.718281829459045];
 }
 
 function array_used_like_a_tuple(): nonnull {
-  return array(42, "meaning of life");
+  return varray[42, "meaning of life"];
 }

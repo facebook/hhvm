@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class c {
 function foo() {
@@ -13,4 +13,8 @@ function z() {
   $p->foo(meh());
   $p = null;
 }
+
+<<__EntryPoint>>
+function main_730() {
 z();
+}

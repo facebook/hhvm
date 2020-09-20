@@ -1,4 +1,4 @@
-array(12) {
+darray(12) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -16,12 +16,12 @@ array(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(3)
   ["errors"]=>
-  array(3) {
+  darray(3) {
     [0]=>
     string(51) "Meridian can only come after an hour has been found"
     [1]=>

@@ -1,1 +1,4 @@
-<?php echo strlen("abcdef")?>
+<?hh
+<<__EntryPoint>> function main(): void {
+echo strlen("abcdef");
+}

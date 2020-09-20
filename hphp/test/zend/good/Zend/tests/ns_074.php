@@ -1,15 +1,20 @@
-<?php
+<?hh
 
-namespace foo;
+namespace {
+  class bar {}
+}
 
-$x = function (\stdclass $x = NULL) { 
-	var_dump($x);	
-};
+namespace foo {
+  class bar extends \bar {}
 
-class stdclass extends \stdclass { }
+  <<__EntryPoint>>
+  function main() {
+    $x = function (\bar $x = NULL) {
+      \var_dump($x);
+    };
 
-$x(NULL);
-$x(new stdclass);
-$x(new \stdclass);
-
-?>
+    $x(NULL);
+    $x(new bar());
+    $x(new \bar());
+  }
+}

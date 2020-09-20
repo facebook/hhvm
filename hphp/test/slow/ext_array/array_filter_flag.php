@@ -1,10 +1,13 @@
 <?hh
 
+
 // --------------------------------
 // Arrays
 // --------------------------------
 
-$a = array('x' => 10, 'y' => 20);
+<<__EntryPoint>>
+function main_array_filter_flag() {
+$a = darray['x' => 10, 'y' => 20];
 
 array_filter($a, ($v, $k) ==> {
   var_dump($k);
@@ -23,14 +26,12 @@ array_filter($a, $v ==> {
   var_dump($v);
 }, 3); // unknown use is defaulted to value
 
-array_filter($a, $k ==> {}, ARRAY_FILTER_USE_KEY, 5); // too many params
-
 // --------------------------------
 // KeyedTraversable
 // --------------------------------
 
 $m = Map {'x' => 10, 'y' => 20};
-var_dump($m instanceof KeyedTraversable);
+var_dump($m is KeyedTraversable);
 
 array_filter($m, ($v, $k) ==> {
   var_dump($k);
@@ -48,3 +49,4 @@ array_filter($m, $v ==> {
 array_filter($m, $v ==> {
   var_dump($v);
 }, 3); // unknown use is defaulted to value
+}

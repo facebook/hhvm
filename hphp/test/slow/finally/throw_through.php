@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>>
 function foo() {
   try {
     throw new Exception('foo');
@@ -7,4 +7,3 @@ function foo() {
     var_dump("me first!");
   }
 }
-foo();

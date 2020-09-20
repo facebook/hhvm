@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
     function NotAConstructor ()
@@ -8,9 +8,8 @@ class A {
         }
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $t = new A ();
 
 print_r($t);
-
-?>
+}

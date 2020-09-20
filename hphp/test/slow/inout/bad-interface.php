@@ -7,3 +7,4 @@ interface I {
 class C implements I {
   function foo($x) {}
 }
+

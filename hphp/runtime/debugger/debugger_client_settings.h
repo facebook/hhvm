@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_
-#define incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_
+#pragma once
 
 #define HPHPD_CLIENT_SETTINGS \
   HPHPD_CLIENT_SETTING(BypassCheck,         bool,  false)         \
@@ -60,4 +59,3 @@ HPHPD_CLIENT_SETTINGS
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CLIENT_SETTINGS_H_

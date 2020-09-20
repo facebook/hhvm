@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $str = <<< HERE
 1:<!-- abc -  -->
 2:<!doctype -- >
@@ -11,4 +11,4 @@ HERE;
 
 echo strip_tags($str);
 echo strip_tags($str, '<abc>');
-?>
+}

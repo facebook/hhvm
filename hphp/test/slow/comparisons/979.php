@@ -1,334 +1,338 @@
-<?php
+<?hh
 
+<<__NEVER_INLINE>> function P(bool $v) { print $v ? 'Y' : 'N'; }
+
+<<__EntryPoint>>
+function main_979() {
 $i = 0;
  print ++$i;
  print "\t";
- print ('php'<true) ? 'Y' : 'N';
+ try { P('php'<true); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <true) ? 'Y' : 'N';
+ try { P($a <true); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = true;
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < true	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<false) ? 'Y' : 'N';
+ try { P('php'<false); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <false) ? 'Y' : 'N';
+ try { P($a <false); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = false;
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < false	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<1) ? 'Y' : 'N';
+ try { P('php'<1); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <1) ? 'Y' : 'N';
+ try { P($a <1); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = 1;
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < 1	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<0) ? 'Y' : 'N';
+ try { P('php'<0); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <0) ? 'Y' : 'N';
+ try { P($a <0); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = 0;
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < 0	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<-1) ? 'Y' : 'N';
+ try { P('php'<-1); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <-1) ? 'Y' : 'N';
+ try { P($a <-1); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = -1;
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < -1	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<'1') ? 'Y' : 'N';
+ try { P('php'<'1'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <'1') ? 'Y' : 'N';
+ try { P($a <'1'); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '1';
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < '1'	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<'0') ? 'Y' : 'N';
+ try { P('php'<'0'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <'0') ? 'Y' : 'N';
+ try { P($a <'0'); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '0';
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < '0'	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<'-1') ? 'Y' : 'N';
+ try { P('php'<'-1'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <'-1') ? 'Y' : 'N';
+ try { P($a <'-1'); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '-1';
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < '-1'	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<null) ? 'Y' : 'N';
+ try { P('php'<null); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <null) ? 'Y' : 'N';
+ try { P($a <null); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = null;
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < null	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array()) ? 'Y' : 'N';
+ try { P('php'<__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array()) ? 'Y' : 'N';
+ try { P($a <__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array();
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array()	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array(1)) ? 'Y' : 'N';
+ try { P('php'<varray[1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array(1)) ? 'Y' : 'N';
+ try { P($a <varray[1]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array(1);
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = varray[1];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array(1)	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array(2)) ? 'Y' : 'N';
+ try { P('php'<varray[2]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array(2)) ? 'Y' : 'N';
+ try { P($a <varray[2]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array(2);
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = varray[2];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array(2)	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array('1')) ? 'Y' : 'N';
+ try { P('php'<varray['1']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array('1')) ? 'Y' : 'N';
+ try { P($a <varray['1']); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array('1');
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = varray['1'];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array('1')	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array('0' => '1')) ? 'Y' : 'N';
+ try { P('php'<darray['0' => '1']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array('0' => '1')) ? 'Y' : 'N';
+ try { P($a <darray['0' => '1']); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array('0' => '1');
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = darray['0' => '1'];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array('0' => '1')	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array('a')) ? 'Y' : 'N';
+ try { P('php'<varray['a']); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array('a')) ? 'Y' : 'N';
+ try { P($a <varray['a']); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array('a');
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = varray['a'];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array('a')	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array('a' => 1)) ? 'Y' : 'N';
+ try { P('php'<darray['a' => 1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array('a' => 1)) ? 'Y' : 'N';
+ try { P($a <darray['a' => 1]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array('a' => 1);
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = darray['a' => 1];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array('a' => 1)	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array('b' => 1)) ? 'Y' : 'N';
+ try { P('php'<darray['b' => 1]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array('b' => 1)) ? 'Y' : 'N';
+ try { P($a <darray['b' => 1]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array('b' => 1);
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = darray['b' => 1];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array('b' => 1)	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array('a' => 1, 'b' => 2)) ? 'Y' : 'N';
+ try { P('php'<darray['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array('a' => 1, 'b' => 2)) ? 'Y' : 'N';
+ try { P($a <darray['a' => 1, 'b' => 2]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array('a' => 1, 'b' => 2);
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = darray['a' => 1, 'b' => 2];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array('a' => 1, 'b' => 2)	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array(array('a' => 1))) ? 'Y' : 'N';
+ try { P('php'<varray[darray['a' => 1]]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array(array('a' => 1))) ? 'Y' : 'N';
+ try { P($a <varray[darray['a' => 1]]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array(array('a' => 1));
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = varray[darray['a' => 1]];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array(array('a' => 1))	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<array(array('b' => 1))) ? 'Y' : 'N';
+ try { P('php'<varray[darray['b' => 1]]); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <array(array('b' => 1))) ? 'Y' : 'N';
+ try { P($a <varray[darray['b' => 1]]); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
- $b = array(array('b' => 1));
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ $b = varray[darray['b' => 1]];
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < array(array('b' => 1))	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<'php') ? 'Y' : 'N';
+ try { P('php'<'php'); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <'php') ? 'Y' : 'N';
+ try { P($a <'php'); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = 'php';
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < 'php'	";
  print "\n";
  print ++$i;
  print "\t";
- print ('php'<'') ? 'Y' : 'N';
+ try { P('php'<''); } catch (Throwable $_) { print 'E'; }
  $a = 1;
  $a = 't';
  $a = 'php';
- print ($a <'') ? 'Y' : 'N';
+ try { P($a <''); } catch (Throwable $_) { print 'E'; }
  $b = 1;
  $b = 't';
  $b = '';
- print ('php'<$b) ? 'Y' : 'N';
- print ($a <$b) ? 'Y' : 'N';
+ try { P('php'<$b); } catch (Throwable $_) { print 'E'; }
+ try { P($a <$b); } catch (Throwable $_) { print 'E'; }
  print "\t";
  print "'php' < ''	";
  print "\n";
-
+}

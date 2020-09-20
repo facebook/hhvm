@@ -1,15 +1,14 @@
-<?php
-/* 
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
+<?hh
+/*
+ * Prototype: int fileinode ( string $filename );
+ * Description: Returns the inode number of the file, or FALSE in case of an error.
+ */
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fileinode() with file, directory ***\n";
 
 /* Getting inode of created file */
-$file_path = dirname(__FILE__);
-fopen("$file_path/inode.tmp", "w");
-print( fileinode("$file_path/inode.tmp") )."\n";
+fopen(__SystemLib\hphp_test_tmppath('inode.tmp'), "w");
+print( fileinode(__SystemLib\hphp_test_tmppath('inode.tmp')) )."\n";
 
 /* Getting inode of current file */
 print( fileinode(__FILE__) )."\n";
@@ -19,8 +18,6 @@ print( fileinode(".") )."\n";
 print( fileinode("./..") )."\n";
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
-unlink (dirname(__FILE__)."/inode.tmp");
-?>
+
+unlink (__SystemLib\hphp_test_tmppath('inode.tmp'));
+}

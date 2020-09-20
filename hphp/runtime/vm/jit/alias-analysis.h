@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ALIAS_ANALYSIS_H_
-#define incl_HPHP_ALIAS_ANALYSIS_H_
+#pragma once
 
 #include <bitset>
 #include <string>
@@ -86,16 +85,12 @@ struct AliasAnalysis {
   LocationMap stack_ranges;
 
   /*
-   * Similar to `stack_ranges', if an AFrame covers multiple locations, it will
+   * Similar to `stack_ranges', if an ALocal covers multiple locations, it will
    * have an entry in this map.
    */
-  LocationMap local_sets;
+  LocationMap loc_expand_map;
 
-  /*
-   * Similar to `stack_ranges', if an AClsRefSlot covers multiple locations, it
-   * will have an entry in this map.
-   */
-  LocationMap clsref_sets;
+  LocationMap iter_expand_map;
 
   /*
    * Short-hand to find an alias class in the locations map, or get folly::none
@@ -109,16 +104,14 @@ struct AliasAnalysis {
    */
   ALocBits all_props;
   ALocBits all_elemIs;
-  ALocBits all_frame;
+  ALocBits all_elemSs;
+  ALocBits all_local;
   ALocBits all_stack;
-  ALocBits all_clsRefSlot;
-  ALocBits all_ref;
-  ALocBits all_iterPos;
-  ALocBits all_iterBase;
-  ALocBits all_cufIterFunc;
-  ALocBits all_cufIterCtx;
-  ALocBits all_cufIterInvName;
-  ALocBits all_cufIterDynamic;
+  ALocBits all_rds;
+  ALocBits all_iter;
+  ALocBits all_fcontext;
+  ALocBits all_ffunc;
+  ALocBits all_fmeta;
 
   /*
    * Return the number of distinct locations we're tracking by id
@@ -154,7 +147,7 @@ struct AliasAnalysis {
    *
    * Right now, this function will work for specific AliasClasses we've
    * assigned ids---for larger classes, it only supports stack ranges observed
-   * during alias collection, AFrameAny, and some cases of unions of those---if
+   * during alias collection, ALocalAny, and some cases of unions of those---if
    * you need more to work, the implementation will need some improvements.
    */
   ALocBits expand(AliasClass acls) const;
@@ -197,4 +190,3 @@ std::string show(ALocBits);
 
 }}
 
-#endif

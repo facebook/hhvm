@@ -1,12 +1,11 @@
 <?hh // decl
 
 class Wrapper {
-  public function __construct(public array $val) { var_dump("Make wrapper"); }
-  public function __destruct() { var_dump("Destroy wrapper"); }
+  public function __construct(public darray $val) { var_dump("Make wrapper"); }
 }
 
 function beep($x) {
-  if ($x instanceof Wrapper) {
+  if ($x is Wrapper) {
     var_dump("beep: <Wrapper>");
   } else if (is_array($x)) {
     var_dump("beep: <array>");
@@ -24,10 +23,10 @@ function unwrap($y) {
 
 function main($bar) {
   $foo = "Hello!";
-  $out = array(1, 2, 3)
+  $out = varray[1, 2, 3]
     |> array_map($x ==> $x + beep(1), $$)
     |> array_merge(
-      array(50, 60, 70)
+      varray[50, 60, 70]
         |> array_map($x ==> $x * beep(2), $$)
         |> array_filter($$, $x ==> $x != beep(100)),
       $$)
@@ -43,4 +42,8 @@ function main($bar) {
   var_dump($bar);
 }
 
+
+<<__EntryPoint>>
+function main_pipevar_4() {
 main("Goodbye");
+}

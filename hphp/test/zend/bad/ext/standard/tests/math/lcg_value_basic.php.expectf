@@ -1,9 +1,0 @@
-MATHS test script started
-
- lcg_value tests...
-PASSED
-
- lcg_value error cases..spurious args get ignored
-PASSED
-PASSED
-MATHS test script completed

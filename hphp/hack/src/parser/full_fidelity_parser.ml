@@ -1,117 +1,74 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
 module Env = Full_fidelity_parser_env
+
 module type SC_S = SmartConstructors.SmartConstructors_S
 
+module type SCWithToken_S = SmartConstructorsWrappers.SyntaxKind_S
+
 [@@@ocaml.warning "-60"] (* https://caml.inria.fr/mantis/view.php?id=7522 *)
-module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-module WithSmartConstructors (SCI : SC_S with type token = Syntax.Token.t) :
-sig
-  type t
-  val make : Env.t -> Full_fidelity_source_text.t -> t
-  val errors : t -> Full_fidelity_syntax_error.t list
-  val env : t -> Env.t
-  val parse_script : t -> t * Syntax.t
-end = struct
 
-module Lexer = Full_fidelity_lexer.WithToken(Syntax.Token)
-module SyntaxError = Full_fidelity_syntax_error
-module Context =
-  Full_fidelity_parser_context.WithToken(Syntax.Token)
+module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
+  module WithSmartConstructors (SCI : SC_S with module Token = Syntax.Token) : sig
+    type t
 
-module type ExpressionParser_S = Full_fidelity_expression_parser_type
-  .WithSyntax(Syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-  .ExpressionParser_S
+    val make : Env.t -> Full_fidelity_source_text.t -> t
 
-module ExpressionParserSyntax_ = Full_fidelity_expression_parser
-  .WithSyntax(Syntax)
-module ExpressionParserSyntax = ExpressionParserSyntax_
-  .WithSmartConstructors(SCI)
+    val errors : t -> Full_fidelity_syntax_error.t list
 
-module type StatementParser_S = Full_fidelity_statement_parser_type
-  .WithSyntax(Syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-  .StatementParser_S
+    val env : t -> Env.t
 
-module StatementParserSyntax_ = Full_fidelity_statement_parser
-  .WithSyntax(Syntax)
-module StatementParserSyntax = StatementParserSyntax_
-  .WithSmartConstructors(SCI)
+    val sc_state : t -> SCI.t
 
-module type DeclarationParser_S = Full_fidelity_declaration_parser_type
-  .WithSyntax(Syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-  .DeclarationParser_S
+    val parse_script : t -> t * SCI.r * Rust_pointer.t option
+  end = struct
+    module SCWithToken = SmartConstructorsWrappers.SyntaxKind (SCI)
+    module SourceText = Full_fidelity_source_text
+    module SyntaxError = Full_fidelity_syntax_error
 
-module DeclarationParserSyntax_ = Full_fidelity_declaration_parser
-  .WithSyntax(Syntax)
-module DeclarationParserSyntax = DeclarationParserSyntax_
-  .WithSmartConstructors(SCI)
+    type t = {
+      text: SourceText.t;
+      errors: SyntaxError.t list;
+      env: Env.t;
+      sc_state: SCWithToken.t;
+    }
 
-module type TypeParser_S = Full_fidelity_type_parser_type
-  .WithSyntax(Syntax)
-  .WithLexer(Full_fidelity_lexer.WithToken(Syntax.Token))
-  .TypeParser_S
+    let make (env : Env.t) text =
+      { text; errors = []; env; sc_state = SCWithToken.initial_state env }
 
-module TypeParserSyntax_ = Full_fidelity_type_parser
-  .WithSyntax(Syntax)
-module TypeParserSyntax = TypeParserSyntax_
-  .WithSmartConstructors(SCI)
+    let errors parser = parser.errors
 
-module rec ExpressionParser : (ExpressionParser_S with module SC = SCI) =
-  ExpressionParserSyntax.WithStatementAndDeclAndTypeParser
-    (StatementParser) (DeclParser) (TypeParser)
-and StatementParser : (StatementParser_S with module SC = SCI) =
-  StatementParserSyntax.WithExpressionAndDeclAndTypeParser
-    (ExpressionParser) (DeclParser) (TypeParser)
-and DeclParser : (DeclarationParser_S with module SC = SCI) =
-  DeclarationParserSyntax.WithExpressionAndStatementAndTypeParser
-    (ExpressionParser) (StatementParser) (TypeParser)
-and TypeParser : (TypeParser_S with module SC = SCI) =
-  TypeParserSyntax.WithExpressionParser(ExpressionParser)
+    let env parser = parser.env
 
-type t = {
-  lexer : Lexer.t;
-  errors : SyntaxError.t list;
-  context: Context.t;
-  env: Env.t;
-  sc_state : SCI.t;
-}
+    let sc_state parser = parser.sc_state
 
-let make env text =
-  { lexer = Lexer.make text
-  ; errors = []
-  ; context = Context.empty
-  ; env
-  ; sc_state = SCI.initial_state ()
-  }
+    let rust_parse_script parser =
+      let (sc_state, root, errors, rust_tree) =
+        SCI.rust_parse parser.text parser.env
+      in
+      (match rust_tree with
+      | Some tree -> Rust_pointer.register_leaked_pointer tree
+      | None -> ());
+      ({ parser with errors; sc_state }, root, rust_tree)
 
-let errors parser =
-  parser.errors @ (Lexer.errors parser.lexer)
+    let parse_script parser = rust_parse_script parser
+  end
 
-let env parser = parser.env
+  module SC = SyntaxSmartConstructors.WithSyntax (Syntax)
+  include WithSmartConstructors (SC)
+end
 
-let parse_script parser =
-  let decl_parser = DeclParser.make parser.env
-    parser.lexer parser.errors parser.context parser.sc_state in
-  let (decl_parser, node) = DeclParser.parse_script decl_parser in
-  let lexer = DeclParser.lexer decl_parser in
-  let errors = DeclParser.errors decl_parser in
-  let parser = { parser with lexer; errors } in
-  (parser, node)
+module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_minimal_syntax
+module Parser = WithSyntax (Syntax)
 
-end (* WithSmartConstructors *)
+let parse_mode = Rust_parser_ffi.parse_mode
 
-module SC = Full_fidelity_syntax_smart_constructors.WithSyntax(Syntax)
-include WithSmartConstructors(SC)
-
-end (* WithSyntax *)
+let () = Rust_parser_ffi.init ()

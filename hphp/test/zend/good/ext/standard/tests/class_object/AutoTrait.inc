@@ -1,5 +1,4 @@
-<?php
+<?hh
 
 trait AutoTrait {}
 
-?>

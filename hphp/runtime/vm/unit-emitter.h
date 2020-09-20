@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_EMITTER_H_
-#define incl_HPHP_VM_UNIT_EMITTER_H_
+#pragma once
 
 #include <list>
 #include <memory>
@@ -28,6 +27,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/repo-status.h"
@@ -35,15 +35,22 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/util/md5.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
+#include "hphp/util/sha1.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FuncEmitter;
 struct PreClassEmitter;
+struct RecordEmitter;
 struct StringData;
+struct TypeAliasEmitter;
+
+namespace Native {
+struct FuncTable;
+}
 
 /*
  * Report capacity of RepoAuthoritative mode bytecode arena.
@@ -51,6 +58,12 @@ struct StringData;
  * Returns 0 if !RuntimeOption::RepoAuthoritative.
  */
 size_t hhbc_arena_capacity();
+
+/*
+ * Whether we need to keep the extended line table (for debugging, or
+ * dumping to hhas).
+ */
+bool needs_extended_line_table();
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -64,41 +77,56 @@ struct UnitEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
-  explicit UnitEmitter(const MD5& md5);
+  explicit UnitEmitter(const SHA1& sha1,
+                       const SHA1& bcSha1,
+                       const Native::FuncTable&,
+                       bool useGlobalIds);
+  UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
+  void setSha1(const SHA1& sha1) { m_sha1 = sha1; }
   /*
    * Commit this unit to a repo.
    */
-  void commit(UnitOrigin unitOrigin);
+  void commit(UnitOrigin unitOrigin, bool usePreAllocatedUnitSn);
 
   /*
    * Insert this unit in a repo as part of transaction `txn'.
    */
-  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn);
+  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn,
+                    bool usePreAllocatedUnitSn);
 
   /*
    * Instatiate a runtime Unit*.
    */
-  std::unique_ptr<Unit> create(bool saveLineTable = false);
+  std::unique_ptr<Unit> create(bool saveLineTable = false) const;
 
-  template<class SerDe> void serdeMetaData(SerDe&);
+  template<typename SerDe> void serdeMetaData(SerDe&);
+  template<typename SerDe> void serde(SerDe&);
 
+  /*
+   * Run the verifier on this unit.
+   */
+  bool check(bool verbose) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic data.
 
   /*
-   * The MD5 hash of the Unit.
+   * The SHA1 hash of the source for Unit.
    */
-  const MD5& md5() const;
+  const SHA1& sha1() const;
+
+  /*
+   * The SHA1 hash of the bytecode for Unit.
+   */
+  const SHA1& bcSha1() const;
 
   /*
    * Bytecode pointer and current emit position.
    */
   const unsigned char* bc() const;
   Offset bcPos() const;
-  Offset offsetOf(const unsigned char* pc) const;
 
   /*
    * Set the bytecode pointer by allocating a copy of `bc' with size `bclen'.
@@ -119,6 +147,10 @@ struct UnitEmitter {
   const ArrayData* lookupArray(Id id) const;
   const RepoAuthType::Array* lookupArrayType(Id id) const;
 
+  Id numArrays() const { return m_arrays.size(); }
+  Id numLitstrs() const { return m_litstrs.size(); }
+
+  bool useGlobalIds() const { return m_useGlobalIds; }
   /*
    * Merge a literal string into either the global LitstrTable or the table for
    * the Unit.
@@ -138,34 +170,15 @@ struct UnitEmitter {
   /*
    * Clear and rebuild the array type table from the builder.
    */
-   void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);
+  void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncEmitters.
 
   /*
-   * The Unit's pseudomain emitter.
-   */
-  FuncEmitter* getMain();
-
-  /*
    * Const reference to all of the Unit's FuncEmitters.
    */
-  const std::vector<FuncEmitter*>& fevec() const;
-
-  /*
-   * Create the pseudomain emitter for the Unit.
-   *
-   * @requires: fevec().size() == 0
-   */
-  void initMain(int line1, int line2);
-
-  /*
-   * Create a trivial (i.e., Int 1; RetC) pseudomain emitter for the Unit.
-   *
-   * @requires: fevec().size() == 0
-   */
-  void addTrivialPseudoMain();
+  auto const& fevec() const;
 
   /*
    * Create a new FuncEmitter and add it to the FE vector.
@@ -182,24 +195,13 @@ struct UnitEmitter {
   /*
    * Add `fe' to the FE vector.
    */
-  void appendTopEmitter(FuncEmitter* fe);
-
-  /*
-   * Finish adding a FuncEmitter to the Unit and record its bytecode range.
-   *
-   * This can only be done once for each FuncEmitter, after it is added to the
-   * FE vector.  None of the bytecode ranges of FuncEmitters added to the Unit
-   * are allowed to overlap.
-   *
-   * Takes logical ownership of `fe'.
-   */
-  void recordFunction(FuncEmitter* fe);
+  void appendTopEmitter(std::unique_ptr<FuncEmitter>&& fe);
 
   /*
    * Create a new function for `fe'.
    *
    * This should only be called from fe->create(), and just constructs a new
-   * Func* and records it as emitted from `fe'.
+   * Func* and adds it to unit.m_funcTable if required.
    */
   Func* newFunc(const FuncEmitter* fe, Unit& unit, const StringData* name,
                 Attr attrs, int numParams);
@@ -247,19 +249,47 @@ struct UnitEmitter {
   PreClassEmitter* newBarePreClassEmitter(const std::string& name,
                                           PreClass::Hoistable hoistable);
 
+  RecordEmitter* newRecordEmitter(const std::string& name);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // RecordEmitters.
+
+  /*
+   * Number of RecordEmitters in the Unit.
+   */
+  size_t numRecords() const;
+
+  /*
+   * The RecordEmitter for `recordId'.
+   */
+  const RecordEmitter* re(Id recordId) const;
+  RecordEmitter* re(Id recordId);
+
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
   /*
    * Const reference to all of the Unit's type aliases.
    */
-  const std::vector<TypeAlias>& typeAliases() const;
+  auto const& typeAliases() const;
 
   /*
    * Add a new type alias to the Unit.
    */
-  Id addTypeAlias(const TypeAlias& td);
+  TypeAliasEmitter* newTypeAliasEmitter(const std::string& name);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Constants.
+
+  /*
+   * Const reference to all of the Unit's type aliases.
+   */
+  const std::vector<Constant>& constants() const;
+
+  /*
+   * Add a new constant to the Unit.
+   */
+  Id addConstant(const Constant& c);
 
   /////////////////////////////////////////////////////////////////////////////
   // Source locations.
@@ -304,34 +334,16 @@ struct UnitEmitter {
   void pushMergeableClass(PreClassEmitter* e);
 
   /*
-   * Add a Unit include to the UnitEmitter's list of mergeables.
-   *
-   * The `push' flavor first merges the litstr `unitName', and then appends the
-   * mergeable object reference to the list.  The `insert' flavor inserts the
-   * mergeable (kind, id) at `ix' in the list.
-   */
-  void pushMergeableInclude(Unit::MergeKind kind, const StringData* unitName);
-  void insertMergeableInclude(int ix, Unit::MergeKind kind, Id id);
-
-  /*
-   * Add a constant definition to the UnitEmitter's list of mergeables.
-   *
-   * The `push' flavor first merges the litstr `unitName', and then appends the
-   * mergeable object reference to the list.  The `insert' flavor inserts the
-   * mergeable (kind, id) at `ix' in the list.
-   *
-   * The mergeable value is appended or inserted likewise.
-   */
-  void pushMergeableDef(Unit::MergeKind kind, const StringData* name,
-                        const TypedValue& tv);
-  void insertMergeableDef(int ix, Unit::MergeKind kind, Id id,
-                          const TypedValue& tv);
-
-  /*
    * Add a TypeAlias to the UnitEmitter's list of mergeables.
    */
-  void pushMergeableTypeAlias(Unit::MergeKind kind, const Id id);
-  void insertMergeableTypeAlias(int ix, Unit::MergeKind kind, const Id id);
+  void pushMergeableId(Unit::MergeKind kind, const Id id);
+  void insertMergeableId(Unit::MergeKind kind, int ix, const Id id);
+
+  /*
+   * Add a Record to the UnitEmitter's list of mergeables.
+   */
+  void pushMergeableRecord(const Id id);
+  void insertMergeableRecord(int ix, const Id id);
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode emit.
@@ -342,12 +354,15 @@ struct UnitEmitter {
   void emitOp(Op op);
   void emitByte(unsigned char n, int64_t pos = -1);
 
+  void emitInt16(uint16_t n, int64_t pos = -1);
   void emitInt32(int n, int64_t pos = -1);
   void emitInt64(int64_t n, int64_t pos = -1);
   void emitDouble(double n, int64_t pos = -1);
 
   void emitIVA(bool) = delete;
   template<typename T> void emitIVA(T n);
+
+  void emitNamedLocal(NamedLocal loc);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -377,17 +392,24 @@ public:
   int64_t m_sn{-1};
   const StringData* m_filepath{nullptr};
 
-  bool m_mergeOnly{false};
-  bool m_isHHFile{false};
-  bool m_useStrictTypes{false};
-  bool m_useStrictTypesForBuiltins{false};
-  bool m_returnSeen{false};
-  int m_preloadPriority{0};
-  TypedValue m_mainReturn;
+  bool m_ICE{false}; // internal compiler error
+  bool m_useGlobalIds{0};
+  bool m_fatalUnit{false}; // parse/runtime error
   UserAttributeMap m_metaData;
+  UserAttributeMap m_fileAttributes;
+  SymbolRefs m_symbol_refs;
+  /*
+   * name=>NativeFuncInfo for native funcs in this unit
+   */
+  const Native::FuncTable& m_nativeFuncs;
+
+  Location::Range m_fatalLoc;
+  FatalOp m_fatalOp;
+  std::string m_fatalMsg;
 
 private:
-  MD5 m_md5;
+  SHA1 m_sha1;
+  SHA1 m_bcSha1;
 
   unsigned char* m_bc;
   size_t m_bclen;
@@ -416,19 +438,27 @@ private:
   /*
    * Type alias table.
    */
-  std::vector<TypeAlias> m_typeAliases;
+  std::vector<std::unique_ptr<TypeAliasEmitter>> m_typeAliases;
+
+  /*
+   * Constants table.
+   */
+  std::vector<Constant> m_constants;
 
   /*
    * FuncEmitter tables.
    */
-  std::vector<FuncEmitter*> m_fes;
-  hphp_hash_map<const FuncEmitter*, Func*,
-                pointer_hash<FuncEmitter>> m_fMap;
+  std::vector<std::unique_ptr<FuncEmitter> > m_fes;
 
   /*
    * PreClassEmitter table.
    */
   std::vector<PreClassEmitter*> m_pceVec;
+
+  /*
+   * RecordEmitter table.
+   */
+  std::vector<RecordEmitter*> m_reVec;
 
   /*
    * Hoistability tables.
@@ -443,7 +473,6 @@ private:
    * Mergeables tables.
    */
   std::vector<std::pair<Unit::MergeKind, Id>> m_mergeableStmts;
-  std::vector<std::pair<Id, TypedValue>> m_mergeableValues;
 
   /*
    * Source location tables.
@@ -458,7 +487,6 @@ private:
    * format we'll want it in when we go to create a Unit.
    */
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
-  std::vector<const FuncEmitter*> m_feTab;
   LineTable m_lineTable;
 };
 
@@ -474,27 +502,62 @@ struct UnitRepoProxy : public RepoProxy {
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-  std::unique_ptr<Unit> load(const std::string& name, const MD5& md5);
-  std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
-                                           const MD5& md5);
+  std::unique_ptr<Unit> load(const folly::StringPiece name, const SHA1& sha1,
+                             const Native::FuncTable&);
+  std::unique_ptr<UnitEmitter> loadEmitter(const folly::StringPiece name,
+                                           const SHA1& sha1,
+                                           const Native::FuncTable&);
 
-  void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
-                           LineTable& lineTable); // throws(RepoExc)
-  void getUnitLineTable(int repoId, int64_t unitSn, LineTable& lineTable);
-  // throws(RepoExc)
+  struct InsertUnitLineTableStmt : public RepoProxy::Stmt {
+    InsertUnitLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn,
+                int64_t unitSn,
+                LineTable& lineTable); // throws(RepoExc)
+  };
+  struct GetUnitLineTableStmt : public RepoProxy::Stmt {
+    GetUnitLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(int64_t unitSn, LineTable& lineTable);
+  };
+
+  struct InsertUnitTypeAliasStmt : public RepoProxy::Stmt {
+    InsertUnitTypeAliasStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(const UnitEmitter& ue,
+                RepoTxn& txn,
+                int64_t unitSn,
+                Id typeAliasId,
+                const TypeAliasEmitter& te); // throws(RepoExc)
+  };
+  struct GetUnitTypeAliasesStmt : public RepoProxy::Stmt {
+    GetUnitTypeAliasesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
+
+  struct InsertUnitConstantStmt : public RepoProxy::Stmt {
+    InsertUnitConstantStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(const UnitEmitter& ue,
+                RepoTxn& txn,
+                int64_t unitSn,
+                Id constantId,
+                const Constant& constant); // throws(RepoExc)
+  };
+  struct GetUnitConstantsStmt : public RepoProxy::Stmt {
+    GetUnitConstantsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(UnitEmitter& ue);
+  };
 
   struct InsertUnitStmt : public RepoProxy::Stmt {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const UnitEmitter& ue,
                 RepoTxn& txn,
                 int64_t& unitSn,
-                const MD5& md5,
+                const SHA1& sha1,
                 const unsigned char* bc,
-                size_t bclen); // throws(RepoExc)
+                size_t bclen,
+                bool usePreAllocatedUnitSn); // throws(RepoExc)
   };
   struct GetUnitStmt : public RepoProxy::Stmt {
     GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(UnitEmitter& ue, const MD5& md5);
+    RepoStatus get(UnitEmitter& ue, const SHA1& sha1);
   };
   struct InsertUnitLitstrStmt : public RepoProxy::Stmt {
     InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -508,7 +571,7 @@ struct UnitRepoProxy : public RepoProxy {
   struct InsertUnitArrayTypeTableStmt : public RepoProxy::Stmt {
     InsertUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
-                const ArrayTypeTable& att); // throws(RepoExc)
+                const UnitEmitter& ue); // throws(RepoExc)
   };
   struct GetUnitArrayTypeTableStmt : public RepoProxy::Stmt {
     GetUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -527,7 +590,7 @@ struct UnitRepoProxy : public RepoProxy {
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
                 int ix, Unit::MergeKind kind,
-                Id id, TypedValue* value); // throws(RepoExc)
+                Id id); // throws(RepoExc)
   };
   struct GetUnitMergeablesStmt : public RepoProxy::Stmt {
     GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -548,12 +611,18 @@ struct UnitRepoProxy : public RepoProxy {
 #define URP_OPS \
   URP_IOP(Unit) \
   URP_GOP(Unit) \
+  URP_IOP(UnitLineTable) \
+  URP_GOP(UnitLineTable) \
+  URP_IOP(UnitTypeAlias) \
+  URP_GOP(UnitTypeAliases) \
   URP_IOP(UnitLitstr) \
   URP_GOP(UnitLitstrs) \
   URP_IOP(UnitArrayTypeTable) \
   URP_GOP(UnitArrayTypeTable) \
   URP_IOP(UnitArray) \
   URP_GOP(UnitArrays) \
+  URP_IOP(UnitConstant) \
+  URP_GOP(UnitConstants) \
   URP_IOP(UnitMergeable) \
   URP_GOP(UnitMergeables) \
   URP_IOP(UnitSourceLoc) \
@@ -563,16 +632,14 @@ struct UnitRepoProxy : public RepoProxy {
   c##Stmt o[RepoIdCount];
   URP_OPS
 #undef URP_OP
-
-private:
-  RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
 };
 
 std::unique_ptr<UnitEmitter> createFatalUnit(
-  StringData* filename,
-  const MD5& md5,
+  const StringData* filename,
+  const SHA1& sha1,
   FatalOp op,
-  StringData* err
+  std::string err,
+  Location::Range loc = {-1,-1,-1,-1}
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -582,4 +649,3 @@ std::unique_ptr<UnitEmitter> createFatalUnit(
 #include "hphp/runtime/vm/unit-emitter-inl.h"
 #undef incl_HPHP_VM_UNIT_EMITTER_INL_H_
 
-#endif // incl_HPHP_VM_UNIT_EMITTER_H_

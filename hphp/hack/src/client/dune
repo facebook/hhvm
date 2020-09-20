@@ -1,0 +1,38 @@
+(library
+  (name client)
+  (wrapped false)
+  (modules
+    (:standard
+      \ clientLogCommand))
+  (libraries
+    connection_tracker
+    client_ide_service
+    clowder_paste
+    flytrap
+    glean_dependency_graph_stubs
+    hh_server_monitor
+    logging
+    lwt
+    lwt.unix
+    lwt_utils
+    messages
+    nuclide_rpc_message_printer
+    pos
+    server
+    server_command_types
+    server_monitor
+    server_utils
+    sys_utils
+    utils_config_file_lwt
+    version)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name client_log_command)
+  (modules
+    clientLogCommand)
+  (libraries
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208

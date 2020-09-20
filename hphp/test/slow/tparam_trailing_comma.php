@@ -10,5 +10,9 @@ class Foo<
   }
 }
 
+
+<<__EntryPoint>>
+function main_tparam_trailing_comma() {
 $foo = new Foo();
 var_dump($foo->getRandomNumber());
+}

@@ -1,0 +1,13 @@
+-- Valid input of reified
+bool(false)
+bool(true)
+-- Wildcards
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+-- Wrong number
+bool(false)
+bool(false)
+bool(false)
+bool(false)

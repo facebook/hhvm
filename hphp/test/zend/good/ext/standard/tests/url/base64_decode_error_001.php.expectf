@@ -2,11 +2,9 @@
 
 -- Testing base64_decode() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: base64_decode() expects at least 1 parameter, 0 given in %s/base64_decode_error_001.php on line 12
 
 -- Testing base64_decode() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: base64_decode() expects at most 2 parameters, 3 given in %s/base64_decode_error_001.php on line 19
 Done

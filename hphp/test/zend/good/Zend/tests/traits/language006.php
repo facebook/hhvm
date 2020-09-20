@@ -1,12 +1,11 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait Hello {
    public function sayHelloWorld() {
      echo 'Hello'.$this->getWorld();
    }
    abstract public function getWorld();
- }
+}
 
 class MyHelloWorld {
    private $world;
@@ -19,8 +18,9 @@ class MyHelloWorld {
    }
 }
 
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
 $o = new MyHelloWorld();
 $o->setWorld(' World!');
 $o->sayHelloWorld();
-
-?>
+}

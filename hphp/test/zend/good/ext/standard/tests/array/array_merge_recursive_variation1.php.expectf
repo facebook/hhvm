@@ -2,193 +2,193 @@
 
 -- Iteration 1 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 2 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 3 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 4 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 5 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 6 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 7 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 8 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 9 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 10 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 11 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 12 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 13 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 14 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 15 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 16 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 17 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 18 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 19 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 20 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 21 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 22 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 23 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 
 -- Iteration 24 --
 -- With default argument --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 92
 NULL
 -- With more arguments --
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_merge_recursive_variation1.php on line 96
 NULL
 Done

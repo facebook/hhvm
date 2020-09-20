@@ -2,11 +2,9 @@
 
 -- Testing iconv_strlen() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: iconv_strlen() expects at least 1 parameter, 0 given in %s/iconv_strlen_error1.php on line 15
 
 -- Testing iconv_strlen() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: iconv_strlen() expects at most 2 parameters, 3 given in %s/iconv_strlen_error1.php on line 22
 ===DONE===

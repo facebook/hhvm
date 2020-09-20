@@ -1,51 +1,33 @@
 SQLite3
-object(SQLite3)#1 (0) {
+object(SQLite3) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SQLite3 in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(18) {
-  [0]=>
+varray(18) {
   string(11) "__construct"
-  [1]=>
   string(4) "open"
-  [2]=>
   string(11) "busytimeout"
-  [3]=>
   string(5) "close"
-  [4]=>
   string(4) "exec"
-  [5]=>
   string(7) "version"
-  [6]=>
   string(15) "lastinsertrowid"
-  [7]=>
   string(13) "lasterrorcode"
-  [8]=>
   string(12) "lasterrormsg"
-  [9]=>
   string(13) "loadextension"
-  [10]=>
   string(7) "changes"
-  [11]=>
   string(12) "escapestring"
-  [12]=>
   string(7) "prepare"
-  [13]=>
   string(5) "query"
-  [14]=>
   string(11) "querysingle"
-  [15]=>
   string(14) "createfunction"
-  [16]=>
   string(15) "createaggregate"
-  [17]=>
   string(8) "openblob"
 }
 ================
 A_SQLite3
-object(A_SQLite3)#2 (1) {
+object(A_SQLite3) (1) {
   ["___x"]=>
   NULL
 }
@@ -53,41 +35,23 @@ object(A_SQLite3)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_SQLite3 in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(18) {
-  [0]=>
+varray(18) {
   string(11) "__construct"
-  [1]=>
   string(4) "open"
-  [2]=>
   string(11) "busytimeout"
-  [3]=>
   string(5) "close"
-  [4]=>
   string(4) "exec"
-  [5]=>
   string(7) "version"
-  [6]=>
   string(15) "lastinsertrowid"
-  [7]=>
   string(13) "lasterrorcode"
-  [8]=>
   string(12) "lasterrormsg"
-  [9]=>
   string(13) "loadextension"
-  [10]=>
   string(7) "changes"
-  [11]=>
   string(12) "escapestring"
-  [12]=>
   string(7) "prepare"
-  [13]=>
   string(5) "query"
-  [14]=>
   string(11) "querysingle"
-  [15]=>
   string(14) "createfunction"
-  [16]=>
   string(15) "createaggregate"
-  [17]=>
   string(8) "openblob"
 }

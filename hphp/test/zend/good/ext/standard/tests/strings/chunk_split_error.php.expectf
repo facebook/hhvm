@@ -1,8 +1,6 @@
 *** Testing chunk_split() : error conditions ***
 -- Testing chunk_split() function with Zero arguments --
-Warning: %s
-NULL
+Warning: chunk_split() expects at least 1 parameter, 0 given in %s/chunk_split_error.php on line 17
 -- Testing chunk_split() function with more than expected no. of arguments --
-Warning: %s
-NULL
+Warning: chunk_split() expects at most 3 parameters, 4 given in %s/chunk_split_error.php on line 25
 Done

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function id($x) {
  return $x;
@@ -10,7 +10,7 @@ class B {
  }
 class X extends B {
   function __construct() {
- parent::__construct(array());
+ parent::__construct(varray[]);
  }
   function foo() {
  echo "foo
@@ -25,4 +25,8 @@ function test($foo) {
   id(new X(bar()))->foo();
   id(new $foo(bar()))->foo();
 }
+
+<<__EntryPoint>>
+function main_1835() {
 test('X');
+}

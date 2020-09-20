@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Ensuring that the collision still occurs as expected.
 
@@ -15,11 +15,10 @@ trait TC2 {
 }
 
 class ReportCollision {
-	use TC1, TC2;
+    use TC1, TC2;
 }
 
-
+<<__EntryPoint>> function main(): void {
 echo "ReportCollision: ";
 $o = new ReportCollision;
-
-
+}

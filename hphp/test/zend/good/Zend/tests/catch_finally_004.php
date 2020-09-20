@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 function throw_exception($msg) {
     throw new Exception($msg);
 }
 
-function foo (&$ex) {
+function foo (inout $ex) {
    try {
       echo "1";
       try {
@@ -16,7 +16,7 @@ function foo (&$ex) {
       } finally {
         echo "4";
         throw_exception("finally");
-      } 
+      }
    } catch (Exception $e) {
       $ex = $e;
       echo "3";
@@ -25,10 +25,11 @@ function foo (&$ex) {
    }
    return 1;
 }
-
-var_dump(foo($ex));
+<<__EntryPoint>> function main(): void {
+$ex = null;
+var_dump(foo(inout $ex));
 
 do {
   var_dump($ex->getMessage());
 } while ($ex = $ex->getPrevious());
-?>
+}

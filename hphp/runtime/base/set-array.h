@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SET_ARRAY_H_
-#define incl_HPHP_SET_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -32,7 +32,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 namespace jit {
-struct ArrayOffsetProfile;
+struct ArrayAccessProfile;
 }
 struct APCArray;
 struct APCHandle;
@@ -53,25 +53,26 @@ struct SetArrayElm {
   static auto constexpr kEmpty = KindOfUninit;
 
   void setStrKey(StringData* k, strhash_t h) {
-    assert(isEmpty());
+    assertx(isEmpty());
     k->incRefCount();
     tv.m_type = KindOfString;
     tv.m_data.pstr = k;
     tv.hash() = h;
-    assert(!isInvalid());
+    assertx(!isInvalid());
   }
 
   void setIntKey(int64_t k, inthash_t h) {
-    assert(isEmpty());
+    assertx(isEmpty());
     tv.m_type = KindOfInt64;
     tv.m_data.num = k;
     tv.hash() = h | STRHASH_MSB;
-    assert(!isInvalid());
-    assert(hasIntKey());
+    assertx(!isInvalid());
+    assertx(hasIntKey());
   }
 
   void setTombstone() {
     tv.m_type = kTombstone;
+    static_assert(!isRefcountedType(kTombstone), "");
   }
 
   bool isEmpty() const {
@@ -90,17 +91,17 @@ struct SetArrayElm {
      * that we don't have to care about the MSB when working
      * with strhash_t.
      */
-    assert(!isInvalid());
+    assertx(!isInvalid());
     return tv.hash() >= 0;
   }
 
   ALWAYS_INLINE StringData* strKey() const {
-    assert(hasStrKey());
+    assertx(hasStrKey());
     return tv.m_data.pstr;
   }
 
   ALWAYS_INLINE bool hasIntKey() const {
-    assert(!isInvalid());
+    assertx(!isInvalid());
     return tv.hash() < 0;
   }
 
@@ -108,45 +109,31 @@ struct SetArrayElm {
     return tv.m_data.num;
   }
 
-  ALWAYS_INLINE
-  Cell getKey() const {
-    assert(!isInvalid());
-    Cell out;
-    cellDup(tv, out);
-    return out;
+  ALWAYS_INLINE TypedValue getKey() const {
+    assertx(!isInvalid());
+    return tv;
   }
-
 
   ALWAYS_INLINE hash_t hash() const {
     return tv.hash();
   }
 
   ALWAYS_INLINE bool isTombstone() const {
-    static_assert(
-      kEmpty == 0 && kTombstone < 0 &&
-      KindOfString > kEmpty && KindOfInt64 > kEmpty,
-      "Fix the check below."
-    );
-    return tv.m_type < kEmpty;
+    return tv.m_type == kTombstone;
   }
 
   ALWAYS_INLINE bool isInvalid() const {
-    // An element is invalid if it is a tombstone or empty.
-    static_assert(
-      kTombstone < kEmpty &&
-      kEmpty < KindOfInt64 &&
-      kEmpty < KindOfString &&
-      kEmpty < KindOfPersistentString,
-      "Revise m_type choices."
-    );
-    return tv.m_type <= kEmpty;
+    return tv.m_type == kEmpty || isTombstone();
   }
 
   static constexpr ptrdiff_t keyOff() {
     return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data.pstr);
   }
   static constexpr ptrdiff_t dataOff() {
-    return offsetof(SetArrayElm, tv);
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data);
+  }
+  static constexpr ptrdiff_t typeOff() {
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_type);
   }
   static constexpr ptrdiff_t hashOff() {
     return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_aux);
@@ -187,19 +174,17 @@ public:
    * Allocate an uncounted SetArray and copy the values from the
    * input 'array' into the uncounted one.
    *
-   * 'extra' bytes may be allocated in front of the returned pointer,
-   * must be a multiple of 16, and later be passed to ReleaseUncounted.
-   * (This is used to co-allocate a TypedValue with its array data.)
+   * If withApcTypedValue is true, space for an APCTypedValue will be
+   * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
+  static ArrayData* MakeUncounted(ArrayData* array,
+                                  bool withApcTypedValue = false,
+                                  DataWalker::PointerMap* m = nullptr);
+  static ArrayData* MakeUncounted(ArrayData* array, int) = delete;
+  static ArrayData* MakeUncounted(ArrayData* array, size_t) = delete;
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*, size_t extra = 0);
-  /*
-   * Recursively register {allocation, rootAPCHandle} with APCGCManager
-   */
-  static void RegisterUncountedAllocations(ArrayData* ad,
-                                              APCHandle* rootAPCHandle);
+  static void ReleaseUncounted(ArrayData*);
 
   /*
    * Safe downcast helpers.
@@ -212,8 +197,10 @@ public:
   /*
    * For array initialization using KeysetInit.
    */
-  static ArrayData* AddToSet(ArrayData*, int64_t, bool);
-  static ArrayData* AddToSet(ArrayData*, StringData*, bool);
+  static ArrayData* AddToSet(ArrayData*, int64_t);
+  static ArrayData* AddToSetInPlace(ArrayData*, int64_t);
+  static ArrayData* AddToSet(ArrayData*, StringData*);
+  static ArrayData* AddToSetInPlace(ArrayData*, StringData*);
 
 private:
   static bool ClearElms(Elm* elms, uint32_t count);
@@ -221,10 +208,9 @@ private:
   enum class AllocMode : bool { Request, Static };
 
   static SetArray* CopySet(const SetArray& other, AllocMode);
-  static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
-  template <typename Init> static ArrayData* ToArrayImpl(ArrayData*, bool);
+  static ArrayData* ToDArrayImpl(const SetArray*);
 
 private:
   SetArray() = delete;
@@ -236,7 +222,7 @@ private:
 // Iteration
 
 private:
-  Cell getElm(ssize_t ei) const;
+  TypedValue getElm(ssize_t ei) const;
 
 public:
   const TypedValue* tvOfPos(uint32_t) const;
@@ -270,7 +256,7 @@ public:
 private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
-  void postSort();
+  void postSort(bool);
 
 //////////////////////////////////////////////////////////////////////
 // Set Internals
@@ -289,7 +275,7 @@ private:
 
   ssize_t findElm(const Elm& e) const;
 
-  void erase(int32_t);
+  void erase(RemovePos);
 
   /*
    * Append idx at the end of the linked list containing the set
@@ -345,8 +331,8 @@ public:
 //////////////////////////////////////////////////////////////////////
 // JIT Supporting Routines
 
-  static constexpr ptrdiff_t tvOff(uint32_t pos) {
-    return dataOff() + pos * sizeof(Elm) + offsetof(Elm, tv);
+  static constexpr ptrdiff_t tvOff() {
+    return offsetof(Elm, tv);
   }
 
 //////////////////////////////////////////////////////////////////////
@@ -370,12 +356,8 @@ public:
 private:
   using ArrayData::exists;
   using ArrayData::at;
-  using ArrayData::rval;
   using ArrayData::lval;
-  using ArrayData::lvalNew;
   using ArrayData::set;
-  using ArrayData::setRef;
-  using ArrayData::add;
   using ArrayData::remove;
   using ArrayData::release;
 
@@ -385,10 +367,8 @@ private:
 private:
   friend struct array::HashTable<SetArray, SetArrayElm>;
   friend struct MemoryProfile;
-  friend struct jit::ArrayOffsetProfile;
-  friend struct EmptyArray;
+  friend struct jit::ArrayAccessProfile;
   friend struct PackedArray;
-  friend struct StructArray;
   friend struct MixedArray;
   friend struct HashCollection;
   friend struct BaseMap;
@@ -407,54 +387,29 @@ private:
 // ArrayData API
 
 public:
-  static member_rval::ptr_u NvTryGetInt(const ArrayData*, int64_t);
-  static member_rval::ptr_u NvTryGetStr(const ArrayData*, const StringData*);
-  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvTryGetInt(ad, k) };
-  }
-  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvTryGetStr(ad, k) };
-  }
-  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return member_rval { ad, GetValueRef(ad, pos) };
-  }
-  static size_t Vsize(const ArrayData*);
-  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static member_lval LvalInt(ArrayData*, int64_t, bool);
-  static member_lval LvalIntRef(ArrayData*, int64_t, bool);
-  static member_lval LvalStr(ArrayData*, StringData*, bool);
-  static member_lval LvalStrRef(ArrayData*, StringData*, bool);
-  static member_lval LvalNew(ArrayData*, bool);
-  static member_lval LvalNewRef(ArrayData*, bool);
-  static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* SetStr(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t, TypedValue, bool);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue, bool);
-  static ArrayData* SetRefInt(ArrayData*, int64_t, member_lval, bool);
-  static ArrayData* SetRefStr(ArrayData*, StringData*, member_lval, bool);
-  static ArrayData* RemoveInt(ArrayData*, int64_t, bool);
-  static ArrayData* RemoveStr(ArrayData*, const StringData*, bool);
-  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
-  static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
+  static arr_lval LvalInt(ArrayData*, int64_t);
+  static arr_lval LvalStr(ArrayData*, StringData*);
+  static ArrayData* SetInt(ArrayData*, int64_t, TypedValue);
+  static constexpr auto SetIntMove = &SetInt;
+  static ArrayData* SetStr(ArrayData*, StringData*, TypedValue);
+  static constexpr auto SetStrMove = &SetStr;
+  static ArrayData* RemoveInt(ArrayData*, int64_t);
+  static ArrayData* RemoveStr(ArrayData*, const StringData*);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell, bool);
-  static ArrayData* AppendRef(ArrayData*, member_lval, bool);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue, bool);
-  static ArrayData* PlusEq(ArrayData*, const ArrayData*);
+  static ArrayData* Append(ArrayData*, TypedValue);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
-  static ArrayData* Prepend(ArrayData*, Cell, bool);
-  static void Renumber(ArrayData*);
+  static ArrayData* Prepend(ArrayData*, TypedValue);
+  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData*);
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToVec = &ArrayCommon::ToVec;
-  static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);
@@ -464,6 +419,11 @@ public:
   static bool NotSame(const ArrayData*, const ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
+
+private:
+  template<class K>
+  static ArrayData* RemoveImpl(ArrayData*, K key, bool, SetArrayElm::hash_t);
+  static ArrayData* AppendImpl(ArrayData*, TypedValue, bool);
 
 private:
   struct Initializer;
@@ -477,4 +437,3 @@ HASH_TABLE_CHECK_OFFSETS(SetArray, SetArrayElm)
 
 }
 
-#endif // incl_HPHP_SET_ARRAY_H_

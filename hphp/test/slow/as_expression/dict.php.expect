@@ -1,0 +1,11 @@
+not dict: integer
+not dict: boolean
+not dict: double
+not dict: string
+not dict: resource
+not dict: object
+not dict: vec
+dict(0) {
+}
+not dict: keyset
+not dict: NULL

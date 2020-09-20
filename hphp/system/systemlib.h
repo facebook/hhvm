@@ -37,6 +37,7 @@ namespace HPHP { namespace SystemLib {
   x(Exception)                                  \
   x(BadMethodCallException)                     \
   x(InvalidArgumentException)                   \
+  x(TypeAssertionException)                     \
   x(RuntimeException)                           \
   x(OutOfBoundsException)                       \
   x(InvalidOperationException)                  \
@@ -52,27 +53,27 @@ namespace HPHP { namespace SystemLib {
   x(SoapFault)                                  \
   x(Serializable)                               \
   x(ArrayAccess)                                \
-  x(ArrayObject)                                \
   x(ArrayIterator)                              \
-  x(Iterator)                                   \
   x(IteratorAggregate)                          \
-  x(Traversable)                                \
   x(Countable)                                  \
   x(LazyKVZipIterable)                          \
   x(LazyIterableView)                           \
   x(LazyKeyedIterableView)                      \
-  x(Phar)                                       \
   x(CURLFile)                                   \
   x(__PHP_Incomplete_Class)                     \
-  x(APCIterator)
+  x(APCIterator)                                \
+  x(DivisionByZeroException)
+
+#define SYSTEMLIB_HH_CLASSES(x) \
+  x(Traversable)                \
+  x(Iterator)                   \
+/* */
 
 extern bool s_inited;
 extern bool s_anyNonPersistentBuiltins;
 extern std::string s_source;
 extern Unit* s_unit;
 extern Unit* s_hhas_unit;
-extern Unit* s_nativeFuncUnit;
-extern Unit* s_nativeClassUnit;
 extern Func* s_nullFunc;
 extern Func* s_nullCtor;
 
@@ -80,6 +81,11 @@ extern Func* s_nullCtor;
 extern Class* s_ ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
+
+#define DECLARE_SYSTEMLIB_HH_CLASS(cls) \
+extern Class* s_HH_ ## cls ## Class;
+  SYSTEMLIB_HH_CLASSES(DECLARE_SYSTEMLIB_HH_CLASS)
+#undef DECLARE_SYSTEMLIB_HH_CLASS
 
 extern Class* s_ThrowableClass;
 extern Class* s_BaseExceptionClass;
@@ -102,10 +108,12 @@ Object AllocParseErrorObject(const Variant& message);
 Object AllocTypeErrorObject(const Variant& message);
 Object AllocBadMethodCallExceptionObject(const Variant& message);
 Object AllocInvalidArgumentExceptionObject(const Variant& message);
+Object AllocTypeAssertionExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
 Object AllocOutOfBoundsExceptionObject(const Variant& message);
 Object AllocInvalidOperationExceptionObject(const Variant& message);
 Object AllocDOMExceptionObject(const Variant& message);
+Object AllocDivisionByZeroExceptionObject();
 Object AllocDirectoryObject();
 Object AllocPDOExceptionObject();
 Object AllocSoapFaultObject(const Variant& code,
@@ -130,12 +138,14 @@ Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 void throwBadMethodCallExceptionObject(const Variant& message);
 [[noreturn]]
 void throwInvalidArgumentExceptionObject(const Variant& message);
+[[noreturn]] void throwTypeAssertionExceptionObject(const Variant& message);
 [[noreturn]] void throwRuntimeExceptionObject(const Variant& message);
 [[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message);
 [[noreturn]]
 void throwInvalidOperationExceptionObject(const Variant& message);
 [[noreturn]]
 void throwDOMExceptionObject(const Variant& message);
+[[noreturn]] void throwDivisionByZeroExceptionObject();
 [[noreturn]]
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,
@@ -159,6 +169,11 @@ void mergePersistentUnits();
  * Setup the shared null constructor.
  */
 void setupNullCtor(Class* cls);
+
+/*
+ * Return a fresh 86reifiedinit method.
+ */
+Func* getNull86reifiedinit(Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib

@@ -2,10 +2,11 @@ name: string(1) "a"
 position: int(0)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(9) "HH\string"
     ["nullable"]=>
@@ -32,10 +33,11 @@ name: string(1) "b"
 position: int(1)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(6) "HH\int"
     ["nullable"]=>
@@ -62,10 +64,11 @@ name: string(1) "c"
 position: int(2)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(8) "HH\float"
     ["nullable"]=>
@@ -92,10 +95,11 @@ name: string(1) "d"
 position: int(3)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(7) "HH\bool"
     ["nullable"]=>
@@ -122,10 +126,11 @@ name: string(1) "e"
 position: int(4)
 canBePassedByValue: bool(false)
 isPassedByReference: bool(true)
+isInOut: bool(true)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(9) "Exception"
     ["nullable"]=>
@@ -152,10 +157,11 @@ name: string(1) "f"
 position: int(5)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(8) "callable"
     ["nullable"]=>
@@ -182,10 +188,11 @@ name: string(1) "g"
 position: int(6)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(true)
-getType: object(ReflectionType)#%d (1) {
+getType: object(ReflectionType) (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  darray(3) {
     ["name"]=>
     string(11) "HH\resource"
     ["nullable"]=>
@@ -212,6 +219,7 @@ name: string(6) "noType"
 position: int(7)
 canBePassedByValue: bool(true)
 isPassedByReference: bool(false)
+isInOut: bool(false)
 hasType: bool(false)
 getType: NULL
 type isBuiltin: bool(false)

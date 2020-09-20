@@ -1,0 +1,4 @@
+File "pending_if10.php", line 7, characters 10-11:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+File "pending_if10.php", line 3, characters 20-21:
+Did you mean `$b` instead?

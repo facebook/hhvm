@@ -1,17 +1,15 @@
-array(2) {
+darray(2) {
   ["color"]=>
-  array(1) {
+  darray(1) {
     ["favoritte"]=>
     string(3) "red"
   }
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(10)
-    [1]=>
-    array(1) {
+    darray(1) {
       ["color"]=>
-      array(2) {
+      darray(2) {
         ["favorite"]=>
         string(5) "green"
         [0]=>

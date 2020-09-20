@@ -1,0 +1,79 @@
+==== class D, extant ====
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+==== class D, bogus ====
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+==== stdClass, extant ====
+bool(false)
+bool(false)
+bool(true)
+==== stdClass, bogus ====
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+==== class A ====
+bool(false)
+bool(true)
+==== class B ====
+bool(true)
+bool(false)
+==== class E ====
+bool(true)
+bool(false)
+==== class F ====
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+==== Closure ====
+bool(false)
+bool(false)
+bool(false)
+==== DateTime, extant ====
+bool(true)
+bool(true)
+bool(true)
+==== DateTime, bogus ====
+bool(false)
+bool(false)
+==== SimpleXMLElement, extant ====
+bool(true)
+bool(true)
+==== SimpleXMLElement, bogus ====
+bool(false)
+bool(false)
+==== Vector, extant ====
+bool(true)
+bool(true)
+bool(true)
+==== Vector, bogus ====
+bool(false)
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+Only integer keys may be used with Vectors
+==== Pair, extant ====
+bool(true)
+bool(true)
+==== Pair, bogus ====
+bool(false)
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+Only integer keys may be used with Pairs
+==== Map, extant ====
+bool(true)
+bool(true)
+bool(true)
+==== Map, bogus ====
+bool(false)
+bool(false)
+bool(false)
+bool(false)

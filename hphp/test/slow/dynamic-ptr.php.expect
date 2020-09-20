@@ -1,0 +1,9 @@
+dyn
+no_dyn
+Cls::static_dyn
+Cls::static_no_dyn
+Caught: Method Cls::inst_dyn is not static
+Caught: Method Cls::inst_no_dyn is not static
+Caught: Unable to find function bad_func_name
+Caught: Unable to find method Cls::bad_meth_name
+Caught: Unable to find class BadClassName

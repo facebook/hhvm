@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot break/continue 1 level in %s/try_finally_008.php on line 7

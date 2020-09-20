@@ -1,2 +1,4 @@
-File "generic_new_bad_arity.php", line 9, characters 8-25:
-The type D expects 2 type parameter(s) (Typing[4101])
+File "generic_new_bad_arity.php", line 9, characters 12-12:
+Wrong number of type arguments (expected 2, got 1) (Typing[4101])
+File "generic_new_bad_arity.php", line 4, characters 7-7:
+Definition is here

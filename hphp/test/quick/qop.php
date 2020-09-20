@@ -1,10 +1,11 @@
 <?hh
-$arr = array(null, true, false, 0, 1, 0.0, 1.0, "", "foo", array(), array(1));
 
 function id($x) {
   var_dump($x);
   return $x;
 }
+<<__EntryPoint>> function main(): void {
+$arr = varray[null, true, false, 0, 1, 0.0, 1.0, "", "foo", varray[], varray[1]];
 
 for ($i = 0; $i < count($arr); ++$i) {
   $x = $arr[$i];
@@ -23,5 +24,4 @@ for ($i = 0; $i < count($arr); ++$i) {
   var_dump($y);
   echo "\n\n";
 }
-
-
+}

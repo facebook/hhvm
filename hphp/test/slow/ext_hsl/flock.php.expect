@@ -1,0 +1,21 @@
+Acquiring first exclusive lock
+Acquiring second lock
+- FAIL: EAGAIN
+Re-trying acquiring second lock
+- FAIL: EAGAIN
+Trying to get a shared lock
+- FAIL: EAGAIN
+Downgrading exclusive lock to shared lock
+Trying to get a second shared lock
+- OK
+Trying to get an exclusive lock while shared lock open
+- FAIL: EAGAIN
+Unlocking
+Opening a second fd with exclusive lock
+- OK
+Re-acquiring exclusive lock
+Attempting second lock
+- FAIL: EAGAIN
+Closing first fd
+Reopening with exclusive lock
+- OK

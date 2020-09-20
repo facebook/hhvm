@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DATA_BLOCK_H
-#define incl_HPHP_DATA_BLOCK_H
+#pragma once
 
 #include <cstdint>
 #include <cstring>
@@ -212,8 +211,9 @@ struct DataBlock {
     alloc<uint8_t>(1, nbytes);
   }
 
-  Address base() const { return m_base; }
+  Address     base() const { return m_base; }
   Address frontier() const { return m_frontier; }
+  size_t      size() const { return m_size; }
   std::string name() const { return m_name; }
 
   /*
@@ -230,6 +230,10 @@ struct DataBlock {
   void setFrontier(Address addr) {
     assertx(m_base <= addr && addr <= (m_base + m_size));
     m_frontier = addr;
+  }
+
+  void moveFrontier(int64_t offset) {
+    setFrontier(m_frontier + offset);
   }
 
   size_t capacity() const {
@@ -284,7 +288,7 @@ struct DataBlock {
   }
 
   static void syncDirect(Address begin,  Address end) {
-    if (arch() == Arch::ARM) {
+    if (arch() == Arch::ARM && begin < end) {
       __builtin___clear_cache(reinterpret_cast<char*>(begin),
                               reinterpret_cast<char*>(end));
 
@@ -356,4 +360,3 @@ struct CodeCursor : UndoMarker {
 };
 }
 
-#endif

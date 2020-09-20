@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -9,6 +9,9 @@ function VERIFY($x) {
   VS($x, true);
 }
 
+
+<<__EntryPoint>>
+function main_xmlwriter_object_oriented() {
 $xml = new XMLWriter();
 $xml->openMemory();
 var_dump($xml);
@@ -31,7 +34,7 @@ VERIFY($xml->startAttributeNS("fb", "attr2",
                                     "http://www.facebook.com/"));
 VERIFY($xml->endAttribute());
 VERIFY($xml->writeElementNS("prefix", "name",
-                                  "http://some.url/", 1337));
+                                  "http://some.url/", '1337'));
 VERIFY($xml->startElement("node"));
 VERIFY($xml->fullEndElement());
 VERIFY($xml->endElement());
@@ -54,7 +57,7 @@ VERIFY($xml->writeComment("More comments"));
 
 VERIFY($xml->startPi("lol"));
 VERIFY($xml->endPi());
-VERIFY($xml->writePi("php", "print 'Hello world!';"));
+VERIFY($xml->writePi("hh", "print 'Hello world!';"));
 
 VERIFY($xml->writeRaw("<node>Raw XML</node>"));
 
@@ -79,3 +82,4 @@ VERIFY($xml->endDocument());
 
 var_dump($xml->flush());
 var_dump($xml->outputMemory());
+}

@@ -1,46 +1,54 @@
 <?hh
 
-function f() {
-  $n = "x";
-  $g = "y";
-  global $$g;
-
-  print ":".isset($x).":\n";
-  print ":".isset($$n).":\n";
-  print ":".isset($$g).":\n";
-
-  $x = 0;
-  $$g = 0;
-  print ":".isset($x).":\n";
-  print ":".isset($$n).":\n";
-  print ":".isset($$g).":\n";
-
-  unset($x);
-  unset($$g);
-  print ":".isset($x).":\n";
-  print ":".isset($$n).":\n";
-  print ":".isset($$g).":\n";
-
-  $a = array();
-  $a["foo"] = null;
-  var_dump(isset($a["foo"]));
-  $q =& $a["foo"];
-  var_dump(isset($a["foo"]));
-  unset($q);
-  var_dump(isset($a["foo"]));
+abstract final class quickIsset {
+  public static $y;
 }
 
-f();
+function f() {
 
-/*********/
+
+  print ":".isset($x).":\n";
+  print ":".\HH\global_isset('y').":\n";
+  print ":".isset(quickIsset::$y).":\n";
+
+  $x = 0;
+  \HH\global_set('y', 0);
+  quickIsset::$y = 0;
+  print ":".isset($x).":\n";
+  print ":".\HH\global_isset('y').":\n";
+  print ":".isset(quickIsset::$y).":\n";
+
+  unset($x);
+  \HH\global_unset('y');
+  quickIsset::$y = null;
+  print ":".isset($x).":\n";
+  print ":".\HH\global_isset('y').":\n";
+  print ":".isset(quickIsset::$y).":\n";
+
+  $a = darray[];
+  $a["foo"] = null;
+  var_dump(isset($a["foo"]));
+}
 
 function get_index() {
   echo "I've made a huge mistake\n";
   return 0;
 }
 
+function g($dontTake, inout $toFillIn, $id, $key, $value) {
+  $toFillIn = darray[];
+  if (isset($toFillIn[$id])) {
+    $cur = $toFillIn[$id];
+  }
+  $toFillIn[$id] = $value;
+}
+
+/*********/
+<<__EntryPoint>> function main(): void {
+f();
+
 $a = 4;
-$arr = array("get_index should not be called");
+$arr = varray["get_index should not be called"];
 var_dump(isset($a, $b, $arr[get_index()]));
 
 /**
@@ -49,15 +57,7 @@ var_dump(isset($a, $b, $arr[get_index()]));
  * local to morph into a cell.
  */
 
-function g($dontTake, &$toFillIn, $id, $key, $value) {
-  $toFillIn = array();
-  if (isset($toFillIn[$id])) {
-    $cur = $toFillIn[$id];
-  }
-  $toFillIn[$id] = $value;
-}
-
 $a = null;
-g(null, $a, "127.0.0.1", null, null );
+g(null, inout $a, "127.0.0.1", null, null );
 var_dump($a);
-
+}

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 // NaN
 $nan = acos(1.01);
 var_dump($nan);
@@ -11,7 +11,7 @@ var_dump($nan==50);
 var_dump($nan=='500');
 var_dump($nan=='abc');
 var_dump($nan==$nan);
-// 
+//
 var_dump($nan==='');
 var_dump($nan===0.5);
 var_dump($nan===50);
@@ -30,12 +30,11 @@ var_dump($inf==50);
 var_dump($inf=='500');
 var_dump($inf=='abc');
 var_dump($inf==$inf);
-// 
+//
 var_dump($inf==='');
 var_dump($inf===0.5);
 var_dump($inf===50);
 var_dump($inf==='500');
 var_dump($inf==='abc');
 var_dump($inf===$inf);
-
-?>
+}

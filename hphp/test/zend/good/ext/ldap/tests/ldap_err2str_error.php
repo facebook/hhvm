@@ -1,10 +1,9 @@
-<?php
+<?hh
 // Too few args
-var_dump(ldap_err2str());
+try { var_dump(ldap_err2str()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Too many args
-var_dump(ldap_err2str(1, "Additional data"));
+try { var_dump(ldap_err2str(1, "Additional data")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-var_dump(ldap_err2str("weird"));
-?>
-===DONE===
+try { var_dump(ldap_err2str("weird")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+echo "===DONE===\n";

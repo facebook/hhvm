@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 list($a) = NULL;
 
 list($b) = 1;
@@ -11,5 +11,4 @@ list($d) = 'foo';
 list($e) = print '';
 
 var_dump($a, $b, $c, $d, $e);
-
-?>
+}

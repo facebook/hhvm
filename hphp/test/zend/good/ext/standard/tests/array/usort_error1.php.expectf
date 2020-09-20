@@ -2,11 +2,9 @@
 
 -- Testing usort() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: usort() expects exactly 2 parameters, 3 given in %s/usort_error1.php on line 18
 
 -- Testing usort() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: usort() expects exactly 2 parameters, 1 given in %s/usort_error1.php on line 23
 ===DONE===

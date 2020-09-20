@@ -1,0 +1,6 @@
+File "fun_id.php", line 9, characters 7-17:
+Unbound global function: `not_found` is not a valid name for fun() (Naming[2105])
+File "fun_id.php", line 9, characters 7-17:
+Unbound name: `not_found` (a global function) (Naming[2049])
+File "fun_id.php", line 9, characters 7-17:
+Unbound name (typing): `not_found` (Typing[4107])

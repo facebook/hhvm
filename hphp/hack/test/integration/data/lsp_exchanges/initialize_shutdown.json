@@ -11,6 +11,11 @@
         }
     },
     {
+      "jsonrpc": "2.0",
+      "method": "$test/waitForHhServerReady",
+      "params": {}
+    },
+    {
         "jsonrpc":"2.0",
         "id": 2,
         "method":"shutdown",

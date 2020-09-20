@@ -7,12 +7,13 @@ function make_key($i) {
   return $s;
 }
 
-function test(&$a, $b) {
+function test(inout $a, $b) {
   for ($i = 0; $i < 40000; $i++) {
     $a[make_key($i)] = $b;
   }
   var_dump($a);
 }
-
-$y = null;
-test($y, 5);
+<<__EntryPoint>> function main(): void {
+$y = darray[];
+test(inout $y, 5);
+}

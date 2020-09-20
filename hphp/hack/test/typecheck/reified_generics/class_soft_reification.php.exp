@@ -1,0 +1,32 @@
+File "class_soft_reification.php", line 12, characters 3-19:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "class_soft_reification.php", line 5, characters 7-17:
+Definition is here
+File "class_soft_reification.php", line 15, characters 3-15:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "class_soft_reification.php", line 6, characters 7-13:
+Definition is here
+File "class_soft_reification.php", line 28, characters 19-24:
+Invalid reified hint (Typing[4305])
+File "class_soft_reification.php", line 28, characters 19-24:
+This is not reified, it cannot be used as a reified type argument
+File "class_soft_reification.php", line 5, characters 36-36:
+`T` is reified
+File "class_soft_reification.php", line 29, characters 19-23:
+Invalid reified hint (Typing[4305])
+File "class_soft_reification.php", line 29, characters 19-23:
+This is soft reified, it cannot be used as a reified type argument
+File "class_soft_reification.php", line 5, characters 36-36:
+`T` is reified
+File "class_soft_reification.php", line 32, characters 15-20:
+Invalid reified hint (Typing[4305])
+File "class_soft_reification.php", line 32, characters 15-20:
+This is not reified, it cannot be used as a reified type argument
+File "class_soft_reification.php", line 6, characters 21-21:
+`T` is reified
+File "class_soft_reification.php", line 33, characters 15-19:
+Invalid reified hint (Typing[4305])
+File "class_soft_reification.php", line 33, characters 15-19:
+This is soft reified, it cannot be used as a reified type argument
+File "class_soft_reification.php", line 6, characters 21-21:
+`T` is reified

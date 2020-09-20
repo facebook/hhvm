@@ -9,13 +9,17 @@ class StringElem {
   public function bar() {
     return $this->x;
   }
-};
-
+}
 function main() {
   $x = new StringElem;
   var_dump($x->foo());
   var_dump($x->bar());
 }
 
-main();
 
+<<__EntryPoint>>
+function main_private_props_018() {
+;
+
+main();
+}

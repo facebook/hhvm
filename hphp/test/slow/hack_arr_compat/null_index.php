@@ -1,38 +1,13 @@
-<?php
+<?hh
 
-echo "=== indexing into null ===\n";
-$t = null[3];
-$t = null;
-var_dump($t[5]);
 
+<<__EntryPoint>>
+function main_null_index() {
 echo "=== indexing into a boolean ===\n";
-$t = false[2];
+$t = false[2]; //  QueryM 1 CGet EI:2, return ElemEmptyish
 
 echo "=== indexing into invalid keys ===\n";
-$arr = ['key' => 'val'];
-$t = $arr['invalid key']['invalid key 2'];
+$arr = __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['key' => 'val']);
+try { $t = $arr['invalid key']['invalid key 2']; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 $t = $arr['key']['invalid key 2'];
-
-echo "=== assigning to an index of null ===\n";
-$t = null;
-$t[0] = "foo";
-$t = null;
-$t[1] = "bar";
-$t = null;
-$t["foo"] = "bar";
-
-echo "=== assigning to an index of false ===\n";
-$b = false;
-$b[0] = "foo";
-$b = false;
-$b[1] = "foo";
-$b = false;
-$b["foo"] = "bar";
-
-echo "=== assigning to an index of true ===\n";
-$b = true;
-$b[0] = "foo";
-$b = true;
-$b[1] = "foo";
-$b = true;
-$b["foo"] = "bar";
+}

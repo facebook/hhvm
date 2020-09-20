@@ -1,8 +1,8 @@
-object(ClassA)#1 (0) {
+object(ClassA) (0) {
 }
 string(3) "val"
 int(2)
-object(ClassA)#1 (1) {
+object(ClassA) (1) {
   ["val"]=>
   int(2)
 }
@@ -11,7 +11,7 @@ Notice: Undefined variable: val in %s/test/slow/assignment/1704.php on line 16
 NULL
 int(2)
 int(3)
-object(ClassA)#1 (1) {
+object(ClassA) (1) {
   ["val"]=>
   int(3)
 }

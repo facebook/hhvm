@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait A {
    public function foo() {
@@ -25,7 +24,10 @@ class MyClass {
 	}
 }
 
-$t = new MyClass;
-$t->foo();
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(E_ALL);
 
-?>
+  $t = new MyClass;
+  $t->foo();
+}

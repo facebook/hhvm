@@ -1,15 +1,13 @@
-<?php
+<?hh
 
 class C {
-  function __destruct() {
-    echo "in __destruct\n";
-  }
 }
 
 function foo() {
   $x = new C;
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
 
 echo "End\n";
+}

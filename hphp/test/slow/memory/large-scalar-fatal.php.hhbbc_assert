@@ -1,0 +1,3 @@
+Encountered an internal error while processing HHAS for %s/large-scalar-fatal.php, bailing because Eval.AbortBuildOnCompilerError is set
+
+Maximum allowable size of scalar exceeded

@@ -1,6 +1,6 @@
 File "await_on_illegal_value.php", line 13, characters 3-10:
-await can only operate on an Awaitable (Typing[4110])
+`await` can only operate on an `Awaitable` (Typing[4110])
 File "await_on_illegal_value.php", line 13, characters 3-10:
-This is an object of type Awaitable
+Expected `Awaitable<[unresolved]>`
 File "await_on_illegal_value.php", line 13, characters 9-10:
-It is incompatible with an int
+But got `int`

@@ -13,12 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WRITELEASE_H_
-#define incl_HPHP_WRITELEASE_H_
+#pragma once
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -32,11 +30,10 @@ namespace jit {
 
 /*
  * Set whether or not the current thread is allowed to acquire the global write
- * lease or a concurrent (Func-specific) write lease. Used to enforce
- * Eval.NumSingleJitRequests.
+ * lease or a concurrent (Func-specific) write lease.  Used to disable jit for
+ * certain requests.
  */
 void setMayAcquireLease(bool f);
-void setMayAcquireConcurrentLease(bool f);
 
 bool couldAcquireOptimizeLease(const Func*);
 
@@ -92,4 +89,3 @@ struct LeaseHolder {
 
 }} // HPHP::jit
 
-#endif /* incl_HPHP_WRITELEASE_H_ */

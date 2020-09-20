@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ARRAY_COMMON_H_
-#define incl_HPHP_ARRAY_COMMON_H_
+#pragma once
 
 #include <sys/types.h>
 
@@ -24,7 +23,6 @@ namespace HPHP {
 
 struct ArrayData;
 struct ObjectData;
-struct MArrayIter;
 struct Variant;
 
 //////////////////////////////////////////////////////////////////////
@@ -44,12 +42,6 @@ struct ArrayCommon {
   static ssize_t ReturnInvalidIndex(const ArrayData*);
 
   /*
-   * The normal case for ValidMArrayIter is shared between packed and mixed
-   * arrays.
-   */
-  static bool ValidMArrayIter(const ArrayData*, const MArrayIter&);
-
-  /*
    * Generic Pop and Dequeue implementations in terms of other functions.
    */
   static ArrayData* Pop(ArrayData*, Variant&);
@@ -61,13 +53,6 @@ struct ArrayCommon {
 
   static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDArray(ArrayData*, bool);
-
-  enum class RefCheckResult {
-    Pass, // No refs
-    Fail, // Referenced ref
-    Collapse // Non-referenced ref
-  };
-  static RefCheckResult CheckForRefs(const ArrayData*);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -82,4 +67,3 @@ ArrayData* castObjToDArray(ObjectData*);
 
 }
 
-#endif

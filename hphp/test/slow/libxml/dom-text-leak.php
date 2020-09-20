@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. https://github.com/facebook/hhvm/issues/4084
 
 function foo() {
@@ -15,6 +15,10 @@ function test() {
   return $end - $start;
 }
 
+
+<<__EntryPoint>>
+function main_dom_text_leak() {
 $x = test();
 $x = test();
 echo $x, "\n";
+}

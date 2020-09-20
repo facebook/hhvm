@@ -1,0 +1,2 @@
+File "hack-invalid-mode.php", line 1, characters 1-35:
+Incorrect comment; possible values include `strict`, `partial`, or empty (Parsing[1002])

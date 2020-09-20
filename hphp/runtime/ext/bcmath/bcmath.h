@@ -29,8 +29,7 @@
 
 *************************************************************************/
 
-#ifndef incl_HPHP_BCMATH_H_
-#define incl_HPHP_BCMATH_H_
+#pragma once
 
 #include "hphp/runtime/ext/bcmath/config.h"
 #include <stdint.h>
@@ -167,4 +166,3 @@ extern struct BCMathGlobals *get_bcmath_globals();
 } /* extern "C" */
 #endif
 
-#endif

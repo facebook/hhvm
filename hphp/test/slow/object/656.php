@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class EE extends Exception {
 }
@@ -10,4 +10,8 @@ class E extends EE {
     parent::__construct();
   }
 }
+
+<<__EntryPoint>>
+function main_656() {
 new E;
+}

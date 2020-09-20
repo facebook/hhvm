@@ -1,8 +1,0 @@
-*** Testing ob_get_flush() : error conditions ***
-
-Warning: %s
-NULL
-
-Notice: %s
-bool(false)
-===DONE===

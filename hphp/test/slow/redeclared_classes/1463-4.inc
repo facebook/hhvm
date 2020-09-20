@@ -1,0 +1,3 @@
+<?hh
+
+class child3 {}

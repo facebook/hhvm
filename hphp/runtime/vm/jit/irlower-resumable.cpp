@@ -16,7 +16,9 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -37,6 +39,7 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -55,9 +58,9 @@ void cgStArResumeAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const addrOff = Resumable::resumeAddrOff() - Resumable::arOff();
-  auto const offsetOff = Resumable::resumeOffsetOff() - Resumable::arOff();
+  auto const offsetOff = Resumable::suspendOffsetOff() - Resumable::arOff();
   v << store{srcLoc(env, inst, 1).reg(), ar[addrOff]};
-  v << storeli{inst->extra<ResumeOffset>()->off, ar[offsetOff]};
+  v << storeli{inst->extra<SuspendOffset>()->off, ar[offsetOff]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,24 +81,28 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const genFP = srcLoc(env, inst, 2).reg();
   auto const target = srcLoc(env, inst, 3).reg();
+  auto const sendVal = srcLoc(env, inst, 4);
 
   auto const extra = inst->extra<ContEnter>();
   auto const spOff = extra->spOffset;
-  auto const returnOff = extra->returnBCOffset;
+  auto const callOffAndFlags = safe_cast<int32_t>(
+    ActRec::encodeCallOffsetAndFlags(extra->callBCOffset, 0));
 
   auto& v = vmain(env);
 
   auto const next = v.makeBlock();
 
   v << store{fp, genFP[AROFF(m_sfp)]};
-  v << storeli{returnOff, genFP[AROFF(m_soff)]};
+  v << storeli{callOffAndFlags, genFP[AROFF(m_callOffAndFlags)]};
 
-  v << copy{genFP, fp};
+  v << pushvmfp{genFP};
   auto const sync_sp = v.makeReg();
-  v << lea{sp[cellsToBytes(spOff.offset)], sync_sp};
+  v << lea{sp[cellsToBytes(spOff.offset - 1)], sync_sp};
   v << syncvmsp{sync_sp};
 
-  v << contenter{fp, target, cross_trace_regs_resumed(),
+  storeTV(v, sync_sp[0], sendVal, inst->src(4));
+
+  v << contenter{genFP, target, cross_trace_regs_resumed(),
                  {next, label(env, inst->taken())}};
   v = next;
 
@@ -279,7 +286,7 @@ void cgContArUpdateIdx(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using WH = c_WaitHandle;
+using WH = c_Awaitable;
 using AFWH = c_AsyncFunctionWaitHandle;
 
 namespace {
@@ -288,16 +295,70 @@ constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
   return off - AFWH::arOff();
 };
 
+/*
+ * Check if obj is an Awaitable. Passes CC_BE on sf if it is.
+ */
+void emitIsAwaitable(Vout& v, Vreg obj, Vreg sf) {
+  auto constexpr minwh = (int)HeaderKind::WaitHandle;
+  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
+  static_assert(maxwh - minwh == 2, "WH range check needs updating");
+
+  auto const kind = v.makeReg();
+  auto const wh_index = v.makeReg();
+  v << loadzbl{obj[HeaderKindOffset], kind};
+  v << subli{minwh, kind, wh_index, v.makeReg()};
+  v << cmpli{maxwh - minwh, wh_index, sf};
+}
+
 }
 
 IMPL_OPCODE_CALL(CreateAFWH)
-IMPL_OPCODE_CALL(CreateAFWHNoVV)
 IMPL_OPCODE_CALL(CreateAGWH)
-IMPL_OPCODE_CALL(CreateSSWH)
 IMPL_OPCODE_CALL(AFWHPrepareChild)
 
+void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const val = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  if (inst->src(0)->type() <= TNull) {
+    auto const handle = c_StaticWaitHandle::NullHandle.handle();
+    v << load{rvmtl()[handle], dst};
+    emitIncRef(v, dst, TRAP_REASON);
+    return;
+  }
+
+  if (inst->src(0)->type() <= TBool) {
+    auto const trueHandle = c_StaticWaitHandle::TrueHandle.handle();
+    auto const falseHandle = c_StaticWaitHandle::FalseHandle.handle();
+
+    if (inst->src(0)->hasConstVal(TBool)) {
+      auto const handle = inst->src(0)->boolVal() ? trueHandle : falseHandle;
+      v << load{rvmtl()[handle], dst};
+      emitIncRef(v, dst, TRAP_REASON);
+      return;
+    }
+
+    auto const sf = v.makeReg();
+    auto const hreg = v.makeReg();
+    v << testb{val, val, sf};
+    v << cmovq{CC_NZ, sf, v.cns(falseHandle), v.cns(trueHandle), hreg};
+    v << load{hreg[rvmtl()], dst};
+    emitIncRef(v, dst, TRAP_REASON);
+    return;
+  }
+
+  cgCallHelper(
+    v,
+    env,
+    CallSpec::direct(c_StaticWaitHandle::CreateSucceeded),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).typedValue(0)
+  );
+}
+
 void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<CreateAAWHData>();
 
   cgCallHelper(
@@ -307,9 +368,10 @@ void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
     callDest(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
-      .imm(extra->count)
+      .ssa(0)
+      .imm(extra->first)
+      .imm(extra->first + extra->count)
       .ssa(1)
-      .addr(fp, localOffset(extra->first))
   );
 }
 
@@ -318,27 +380,55 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CountWHNotDone>();
 
   auto& v = vmain(env);
-  auto const base = v.makeReg();
-  auto const loc = v.cns((extra->count - 1) * 2);
+
+  assertx(extra->count > 0);
+  auto const start_type_ptr = v.makeReg();
+  auto const start_data_ptr = v.makeReg();
+  auto const end_ptr = v.makeReg();
   auto const cnt = v.cns(0);
+  v << lea{ptrToLocalType(fp, extra->first), start_type_ptr};
+  v << lea{ptrToLocalData(fp, extra->first), start_data_ptr};
+  v << lea{ptrToLocalType(fp, extra->first + extra->count), end_ptr};
 
-  v << lea{fp[localOffset(extra->first + extra->count - 1)], base};
-
-  auto out = doWhile(v, CC_GE, {loc, cnt},
+  auto out = doWhile(v, CC_NE, {start_type_ptr, start_data_ptr, cnt},
     [&] (const VregList& in, const VregList& out) {
-      auto const loc_in  = in[0],  cnt_in  = in[1];
-      auto const loc_out = out[0], cnt_out = out[1];
-      auto const sf1 = v.makeReg();
-      auto const sf2 = v.makeReg();
+      auto const type_ptr_in = in[0];
+      auto const data_ptr_in = in[1];
+      auto const cnt_in = in[2];
+      auto const type_ptr_out = out[0];
+      auto const data_ptr_out = out[1];
+      auto const cnt_out = out[2];
+      auto const sf_is_wh = v.makeReg();
+      auto const sf_is_finished = v.makeReg();
+      auto const sf_cont = v.makeReg();
       auto const obj = v.makeReg();
+      auto const cnt_new = v.makeReg();
+      auto const loop_cont = v.makeBlock();
+
+      // Skip nulls.
+      emitTypeTest(
+        v, env, TNull, *type_ptr_in, *data_ptr_in, v.makeReg(),
+        [&] (ConditionCode cc, Vreg sf) {
+          ifThen(v, cc, sf, [&] (Vout& v) {
+            v << phijmp{loop_cont, v.makeTuple({cnt_in})};
+          });
+        }
+      );
+
+      // Take exit on non-objects.
+      emitTypeCheck(v, env, TObj, *type_ptr_in, *data_ptr_in, inst->taken());
+
+      // Take exit on non-Awaitables.
+      v << load{*data_ptr_in, obj};
+      emitIsAwaitable(v, obj, sf_is_wh);
+      fwdJcc(v, env, CC_A, sf_is_wh, inst->taken());
 
       // We depend on this in the test with 0x0E below.
-      static_assert(c_WaitHandle::STATE_SUCCEEDED == 0, "");
-      static_assert(c_WaitHandle::STATE_FAILED == 1, "");
+      static_assert(c_Awaitable::STATE_SUCCEEDED == 0, "");
+      static_assert(c_Awaitable::STATE_FAILED == 1, "");
 
-      v << load{base[loc_in * 8], obj};
-      v << testbim{0x0E, obj[WH::stateOff()], sf1};
-      cond(v, CC_NZ, sf1, cnt_out,
+      v << testbim{0x0E, obj[WH::stateOff()], sf_is_finished};
+      cond(v, CC_NZ, sf_is_finished, cnt_new,
         [&] (Vout& v) {
           auto ret = v.makeReg();
           v << incq{cnt_in, ret, v.makeReg()};
@@ -347,13 +437,19 @@ void cgCountWHNotDone(IRLS& env, const IRInstruction* inst) {
         [&] (Vout& v) { return cnt_in; }
       );
 
-      // Add 2 to the loop variable because we can only scale by at most 8.
-      v << subqi{2, loc_in, loc_out, sf2};
-      return sf2;
-    }
+      v << phijmp{loop_cont, v.makeTuple({cnt_new})};
+
+      v = loop_cont;
+      v << phidef{v.makeTuple({cnt_out})};
+
+      nextLocal(v, type_ptr_in, data_ptr_in, type_ptr_out, data_ptr_out);
+      v << cmpq{type_ptr_out, end_ptr, sf_cont};
+      return sf_cont;
+    },
+    extra->count
   );
 
-  v << copy{out[1], dstLoc(env, inst, 0).reg()};
+  v << copy{out[2], dstLoc(env, inst, 0).reg()};
 }
 
 void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
@@ -390,6 +486,51 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   // parent->m_child = child;
   auto const childOff = AFWH::childrenOff() + AFWH::Node::childOff();
   v << store{child, parentAR[ar_rel(childOff)]};
+
+  if (RO::EvalEnableImplicitContext) {
+    // parent->m_implicitContext = *ImplicitContext::activeCtx
+    auto const implicitContext = v.makeReg();
+    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
+    v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};
+  }
+}
+
+void cgAFWHPushTailFrame(IRLS& env, const IRInstruction* inst) {
+  auto const wh = srcLoc(env, inst, 0).reg();
+  auto const id = inst->src(1)->intVal();
+  auto const taken = label(env, inst->taken());
+  auto& v = vmain(env);
+
+  // We "own" this AFWH if it has exactly two references: one that we hold,
+  // and one that its child holds. This IR op is only used on blocked AFWHs.
+  auto constexpr kAFWHHeaderKind = (int32_t)HeaderKind::AsyncFuncWH;
+  auto constexpr kAFWHOwnedCount = int32_t{2};
+
+  auto const sf1 = v.makeReg();
+  auto const sf2 = v.makeReg();
+  v << cmpbim{kAFWHHeaderKind, wh[HeapObject::kind_offset()], sf1};
+  ifThen(v, CC_NE, sf1, taken);
+  v << cmplim{kAFWHOwnedCount, wh[HeapObject::count_offset()], sf2};
+  ifThen(v, CC_NE, sf2, taken);
+
+  // Check that we have room for another ID in m_tailFrameIds by testing its
+  // highest bit. See comments in async-function-wait-handle.h for details.
+  static_assert(AFWH::kNumTailFrames == 4, "");
+  static_assert(sizeof(AsyncFrameId) == 2, "");
+  always_assert(0 < id && id <= kMaxAsyncFrameId);
+  auto const sf3 = v.makeReg();
+  v << testbim{-0b10000000, wh[AFWH::tailFramesOff() + 7], sf3};
+  ifThen(v, CC_Z, sf3, taken);
+
+  // Push the new ID into the least-significant bits of m_tailFrameIds.
+  auto const old_val = v.makeReg();
+  auto const shifted = v.makeReg();
+  auto const new_val = v.makeReg();
+  auto const shift = safe_cast<int32_t>(8 * sizeof(AsyncFrameId));
+  v << load{wh[AFWH::tailFramesOff()], old_val};
+  v << shlqi{shift, old_val, shifted, v.makeReg()};
+  v << orqi{safe_cast<int32_t>(id), shifted, new_val, v.makeReg()};
+  v << store{new_val, wh[AFWH::tailFramesOff()]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -398,17 +539,10 @@ void cgIsWaitHandle(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-
   auto const sf = v.makeReg();
-  auto const kind = v.makeReg();
-  auto const wh_index = v.makeReg();
-  auto constexpr minwh = (int)HeaderKind::WaitHandle;
-  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
-  v << loadzbl{obj[HeaderKindOffset], kind};
-  v << subli{minwh, kind, wh_index, v.makeReg()};
-  v << cmpli{maxwh - minwh, wh_index, sf};
+
+  emitIsAwaitable(v, obj, sf);
   v << setcc{CC_BE, sf, dst};
-  static_assert(maxwh - minwh == 2, "WH range check needs updating");
 }
 
 void cgLdWHState(IRLS& env, const IRInstruction* inst) {
@@ -427,8 +561,8 @@ void cgLdWHNotDone(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   // We depend on this in the test with 0x0E below.
-  static_assert(c_WaitHandle::STATE_SUCCEEDED == 0, "");
-  static_assert(c_WaitHandle::STATE_FAILED == 1, "");
+  static_assert(c_Awaitable::STATE_SUCCEEDED == 0, "");
+  static_assert(c_Awaitable::STATE_FAILED == 1, "");
 
   auto const sf = v.makeReg();
   auto const result = v.makeReg();

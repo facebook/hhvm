@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/backtrace.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -23,6 +24,8 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -35,6 +38,8 @@
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+
 const StaticString
   s_file("file"),
   s_line("line"),
@@ -46,14 +51,61 @@ const StaticString
   s_include("include"),
   s_main("{main}"),
   s_metadata("metadata"),
-  s_86metadata("86metadata"),
   s_arrow("->"),
   s_double_colon("::");
 
-static c_WaitableWaitHandle* getParentWH(
-    c_WaitableWaitHandle* wh,
-    context_idx_t contextIdx,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+///////////////////////////////////////////////////////////////////////////////
+
+namespace backtrace_detail {
+
+BTContext::BTContext() {
+  // don't attempt to read locals
+  auto const flags = 1U << ActRec::LocalsDecRefd;
+  auto const handler = (intptr_t)jit::tc::ustubs().retInlHelper;
+  fakeAR[0].m_sfp = &fakeAR[1];
+  fakeAR[1].m_sfp = &fakeAR[0];
+  fakeAR[0].m_savedRip = fakeAR[1].m_savedRip = handler;
+  fakeAR[0].m_numArgs = fakeAR[1].m_numArgs = 0;
+  fakeAR[0].m_callOffAndFlags = fakeAR[1].m_callOffAndFlags =
+    ActRec::encodeCallOffsetAndFlags(0, flags);
+}
+
+const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
+#ifdef USE_LOWPTR
+  fakeAR[0].m_func = src.fakeAR[0].m_func;
+  fakeAR[1].m_func = src.fakeAR[1].m_func;
+#else
+  fakeAR[0].m_funcId = src.fakeAR[0].m_funcId;
+  fakeAR[1].m_funcId = src.fakeAR[1].m_funcId;
+#endif
+
+  fakeAR[0].m_callOffAndFlags = src.fakeAR[0].m_callOffAndFlags;
+  fakeAR[1].m_callOffAndFlags = src.fakeAR[1].m_callOffAndFlags;
+
+  stashedFrm = src.stashedFrm;
+  inlineStack = src.inlineStack;
+  prevIFID = src.prevIFID;
+  hasInlFrames = src.hasInlFrames;
+  afwhTailFrameIndex = src.afwhTailFrameIndex;
+  assertx(!!stashedFrm == (fp == &src.fakeAR[0] || fp == &src.fakeAR[1]));
+
+  return
+    fp == &src.fakeAR[0] ? &fakeAR[0] :
+    fp == &src.fakeAR[1] ? &fakeAR[1] :
+    fp;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+c_WaitableWaitHandle* getParentWH(
+  c_WaitableWaitHandle* wh,
+  context_idx_t contextIdx,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
   assertx(!wh->isFinished());
   auto p = wh->getParentChain().firstInContext(contextIdx);
   if (p == nullptr ||
@@ -67,49 +119,193 @@ static c_WaitableWaitHandle* getParentWH(
   return p;
 }
 
-// walks up the wait handle dependency chain, until it finds activation record
-static ActRec* getActRecFromWaitHandle(
-    c_WaitableWaitHandle* currentWaitHandle,
-    context_idx_t contextIdx,
-    Offset* prevPc,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+BTFrame getARFromWHImpl(
+  c_WaitableWaitHandle* currentWaitHandle,
+  context_idx_t contextIdx,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
   while (currentWaitHandle != nullptr) {
     assertx(!currentWaitHandle->isFinished());
-    if (currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncFunction) {
-      auto resumable = currentWaitHandle->asAsyncFunction()->resumable();
-      *prevPc = resumable->resumeOffset();
-      return resumable->actRec();
-    }
-    if (currentWaitHandle->getKind() == c_WaitHandle::Kind::AsyncGenerator) {
-      auto resumable = currentWaitHandle->asAsyncGenerator()->resumable();
-      *prevPc = resumable->resumeOffset();
-      return resumable->actRec();
-    }
 
+    if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncFunction) {
+      auto const resumable = currentWaitHandle->asAsyncFunction()->resumable();
+      return BTFrame { resumable->actRec(), resumable->suspendOffset() };
+    }
+    if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncGenerator) {
+      auto const resumable = currentWaitHandle->asAsyncGenerator()->resumable();
+      return BTFrame { resumable->actRec(), resumable->suspendOffset() };
+    }
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
   }
-  *prevPc = 0;
-  return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+  auto const fp = AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+  assertx(fp != nullptr && fp->func() != nullptr);
+  return BTFrame { fp, fp->func()->base() };
 }
 
-static ActRec* getPrevActRec(
-    const ActRec* fp, Offset* prevPc,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
-  c_WaitableWaitHandle* currentWaitHandle = nullptr;
+}
 
-  if (fp && fp->func() && fp->resumed()) {
-    if (fp->func()->isAsyncFunction()) {
-      currentWaitHandle = frame_afwh(fp);
-    } else if (fp->func()->isAsyncGenerator()) {
-      auto const gen = frame_async_generator(fp);
-      if (gen->isRunning() && !gen->isEagerlyExecuted()) {
-        currentWaitHandle = gen->getWaitHandle();
-      }
-    }
+BTFrame getARFromWH(
+  c_WaitableWaitHandle* currentWaitHandle,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
+  if (currentWaitHandle->isFinished()) return BTFrame{};
+
+  auto const contextIdx = currentWaitHandle->getContextIdx();
+  if (contextIdx == 0) return BTFrame{};
+
+  return getARFromWHImpl(currentWaitHandle, contextIdx, visitedWHs);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace backtrace_detail {
+
+BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
+  if (auto const stk = jit::inlineStackAt(ip)) {
+    assertx(stk->nframes != 0);
+
+    auto const ifr = jit::getInlineFrame(stk->frame);
+
+    auto const prevFP = &ctx.fakeAR[0];
+    prevFP->setFunc(ifr.func);
+    prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      ifr.callOff,
+      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+    );
+
+    ctx.prevIFID = stk->frame;
+    ctx.inlineStack = *stk;
+    ctx.inlineStack.frame = ifr.parent;
+    ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
+
+    ctx.stashedFrm = frm;
+
+    return BTFrame { prevFP, safe_cast<int>(stk->callOff) + ifr.func->base() };
   }
 
-  if (currentWaitHandle != nullptr) {
-    if (currentWaitHandle->isFinished()) {
+  // If we don't have an inlined frame, it's always safe to use pcOff() if
+  // initBTContextAt() is being called for a leaf frame.
+  if (frm.pc == kInvalidOffset) frm.pc = pcOff();
+
+  // The bytecode supports a limited form of inlining via FCallBuiltin. If the
+  // call itself was interpreted there won't be any fixup information, but
+  // we should still be able to extract the target from the bytecode on the
+  // stack and use that directly.
+  auto const getBuiltin = [&] () -> const Func* {
+    if (!frm) return nullptr;
+
+    auto const func = frm.fp->func();
+    auto const pc = func->unit()->entry() + frm.pc;
+    if (peek_op(pc) != OpFCallBuiltin) return nullptr;
+
+    auto const ne = func->unit()->lookupNamedEntityId(getImm(pc, 3).u_SA);
+    return Func::lookup(ne);
+  };
+
+  if (auto const f = getBuiltin()) {
+    auto const prevFP = &ctx.fakeAR[0];
+    prevFP->setFunc(f);
+    prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      frm.pc - frm.fp->func()->base(),
+      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+    );
+
+    ctx.stashedFrm = frm;
+
+    return BTFrame { prevFP, f->base() };
+  }
+
+  return frm;
+}
+
+BTFrame getPrevActRec(
+  BTContext& ctx, BTFrame frm,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
+  auto const fp = frm.fp;
+
+  // If we're already iterating over an AsyncFunctionWaitHandle's tail frames,
+  // either create a fake ActRec for the next tail frame, or go to the parent
+  // ActRec of the AFWH itself.
+  if (ctx.afwhTailFrameIndex) {
+    assertx(fp == &ctx.fakeAR[0] || fp == &ctx.fakeAR[1]);
+    assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
+    assertx(fp != fp->m_sfp);
+
+    auto const wh = frame_afwh(ctx.stashedFrm.fp);
+    if (ctx.afwhTailFrameIndex < wh->lastTailFrameIndex()) {
+      auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
+      auto const prevFP = fp->m_sfp;
+      prevFP->setFunc(sk.func());
+      return BTFrame{prevFP, sk.offset()};
+    }
+
+    // We could use stashedFrm.fp->savedRip as the return TCA here, but for
+    // suspended AFWH, that will always be a pointer to an async-ret stub.
+    ctx.afwhTailFrameIndex = 0;
+    ctx.stashedFrm = BTFrame{};
+    auto const contextIdx = wh->getContextIdx();
+    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
+    auto const prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
+    return initBTContextAt(ctx, (jit::TCA)0, prev);
+  }
+
+  if (UNLIKELY(ctx.hasInlFrames)) {
+    assertx(fp == &ctx.fakeAR[0] || fp == &ctx.fakeAR[1]);
+    assertx(fp->m_sfp == &ctx.fakeAR[0] || fp->m_sfp == &ctx.fakeAR[1]);
+    assertx(fp != fp->m_sfp);
+    assertx(ctx.inlineStack.nframes > 0);
+
+    auto const ifr = jit::getInlineFrame(ctx.inlineStack.frame);
+
+    auto prev = BTFrame{};
+    prev.fp = fp->m_sfp;
+    prev.fp->setFunc(ifr.func);
+    prev.fp->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      ifr.callOff,
+      1 << ActRec::LocalsDecRefd  // don't attempt to read locals
+    );
+    prev.pc = fp->callOffset() + ifr.func->base();
+
+    ctx.prevIFID = ctx.inlineStack.frame;
+    ctx.inlineStack.frame = ifr.parent;
+    ctx.hasInlFrames = --ctx.inlineStack.nframes > 0;
+
+    return prev;
+  }
+
+  if (auto prev = ctx.stashedFrm) {
+    if (prev.pc == kInvalidOffset) {
+      assertx(ctx.prevIFID != kInvalidIFrameID);
+      auto const ifr = jit::getInlineFrame(ctx.prevIFID);
+      prev.pc = prev.fp->func()->base() + ifr.callOff;
+    }
+    ctx.stashedFrm = BTFrame{};
+    ctx.prevIFID = kInvalidIFrameID;
+    return prev;
+  }
+
+  auto const wh = [&]() -> c_WaitableWaitHandle* {
+    if (!fp || !fp->func() || !isResumed(fp)) return nullptr;
+
+    if (fp->func()->isAsyncFunction()) {
+      return frame_afwh(fp);
+    }
+    if (fp->func()->isAsyncGenerator()) {
+      auto const gen = frame_async_generator(fp);
+      if (gen->isRunning() && !gen->isEagerlyExecuted()) {
+        return gen->getWaitHandle();
+      }
+    }
+    return nullptr;
+  }();
+
+  auto rip = fp ? fp->m_savedRip : 0;
+
+  auto prev = frm;
+
+  if (wh != nullptr) {
+    if (wh->isFinished()) {
       /*
        * It's possible in very rare cases (it will return a truncated stack):
        * 1) async function which WaitHandle is not referenced by anything
@@ -118,108 +314,130 @@ static ActRec* getPrevActRec(
        * 3) this destructor gets called as part of destruction of the
        *      WaitHandleobject, which happens right before FP is adjusted
       */
-      return nullptr;
+      return BTFrame{};
     }
 
-    auto const contextIdx = currentWaitHandle->getContextIdx();
+    // If we merged tail frames into this AsyncFunctionWaitHandle, iterate over
+    // those indices and retrieve the backtracing information.
+    if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
+        wh->asAsyncFunction()->hasTailFrames()) {
+      auto const afwh = wh->asAsyncFunction();
+      auto const index = afwh->firstTailFrameIndex();
+      auto const sk = getAsyncFrame(afwh->tailFrame(index));
 
-    currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
-    return getActRecFromWaitHandle(
-      currentWaitHandle, contextIdx, prevPc, visitedWHs);
+      ctx.afwhTailFrameIndex = index + 1;
+      ctx.stashedFrm.fp = afwh->actRec();
+      auto const prevFP = &ctx.fakeAR[0];
+      prevFP->setFunc(sk.func());
+      prevFP->m_callOffAndFlags =
+        ActRec::encodeCallOffsetAndFlags(0, 1 << ActRec::LocalsDecRefd);
+      return BTFrame{prevFP, sk.offset()};
+    }
+
+    auto const contextIdx = wh->getContextIdx();
+    auto const parent = getParentWH(wh, contextIdx, visitedWHs);
+    prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
+  } else {
+    prev.fp = g_context->getPrevVMState(fp, &prev.pc, nullptr, nullptr, &rip);
   }
 
-  return g_context->getPrevVMState(fp, prevPc);
+  return frm
+    ? initBTContextAt(ctx, (jit::TCA)rip, prev)
+    : prev;
 }
 
-// wrapper around getActRecFromWaitHandle, which does some extra validation
-static ActRec* getActRecFromWaitHandleWrapper(
-    c_WaitableWaitHandle* currentWaitHandle, Offset* prevPc,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
-  if (currentWaitHandle->isFinished()) {
-    return nullptr;
-  }
-
-  auto const contextIdx = currentWaitHandle->getContextIdx();
-  if (contextIdx <= 0) {
-    return nullptr;
-  }
-
-  return getActRecFromWaitHandle(
-    currentWaitHandle, contextIdx, prevPc, visitedWHs);
 }
+
+using namespace backtrace_detail;
+
+///////////////////////////////////////////////////////////////////////////////
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (btArgs.isCompact()) {
-    return createCompactBacktrace()->extract();
+    return createCompactBacktrace(btArgs.m_skipTop)->extract();
   }
 
-  auto bt = Array::Create();
+  auto bt = Array::CreateVArray();
   folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+
+  BTContext ctx;
+
+  if (g_context->m_parserFrame) {
+    bt.append(
+      make_darray(
+        s_file, VarNR(g_context->m_parserFrame->filename.get()),
+        s_line, g_context->m_parserFrame->lineNumber
+      )
+    );
+  }
 
   // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
     bt.append(
-      make_map_array(
-        s_file, btArgs.m_parserFrame->filename,
+      make_darray(
+        s_file, VarNR(btArgs.m_parserFrame->filename.get()),
         s_line, btArgs.m_parserFrame->lineNumber
       )
     );
   }
 
   int depth = 0;
-  ActRec* fp = nullptr;
-  Offset pc = 0;
+  auto frm = BTFrame{};
 
   if (btArgs.m_fromWaitHandle) {
-    fp = getActRecFromWaitHandleWrapper(
-      btArgs.m_fromWaitHandle, &pc, visitedWHs);
-    // no frames found, we are done
-    if (!fp) return bt;
+    frm = getARFromWH(btArgs.m_fromWaitHandle, visitedWHs);
+    // No frames found, we are done.
+    if (!frm) return bt;
   } else {
     VMRegAnchor _;
     // If there are no VM frames, we're done.
     if (!rds::header() || !vmfp()) return bt;
 
+    frm.fp = vmfp();
+
     // Get the fp and pc of the top frame (possibly skipping one frame).
 
+    if (!btArgs.m_skipInlined) {
+      frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
+    }
+
     if (btArgs.m_skipTop) {
-      fp = getPrevActRec(vmfp(), &pc, visitedWHs);
+      frm = getPrevActRec(ctx, frm, visitedWHs);
       // We skipped over the only VM frame, we're done.
-      if (!fp) return bt;
-    } else {
-      fp = vmfp();
-      auto const unit = fp->func()->unit();
-      assert(unit);
-      pc = unit->offsetOf(vmpc());
+      if (!frm) return bt;
     }
 
     if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
-      while (fp && (jit::TCA)fp->m_savedRip == jit::tc::ustubs().retInlHelper) {
-        fp = getPrevActRec(fp, &pc, visitedWHs);
+      while (frm && frm.fp->isInlined()) {
+        frm = getPrevActRec(ctx, frm, visitedWHs);
       }
-      if (!fp) return bt;
+      if (!frm) return bt;
     }
   }
 
   // Handle the top frame.
   if (btArgs.m_withSelf) {
     // Builtins don't have a file and line number, so find the first user frame
-    auto curFp = fp;
-    auto curPc = pc;
-    while (curFp && curFp->func()->isBuiltin()) {
-      curFp = g_context->getPrevVMState(curFp, &curPc);
+    BTContext ctxCopy;
+    auto curFrm = BTFrame {
+      const_cast<ActRec*>(ctxCopy.clone(ctx, frm.fp)),
+      frm.pc
+    };
+    while (curFrm && curFrm.fp->func()->isBuiltin()) {
+      curFrm = getPrevActRec(ctxCopy, curFrm, visitedWHs);
     }
-    if (curFp) {
-      auto const unit = curFp->func()->unit();
-      assert(unit);
-      auto const filename = curFp->func()->filename();
+    if (curFrm) {
+      auto const func = curFrm.fp->func();
+      assertx(func);
 
-      ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
-      frame.set(s_file, Variant{const_cast<StringData*>(filename)});
-      frame.set(s_line, unit->getLineNumber(curPc));
+      DArrayInit frame(btArgs.m_parserFrame ? 4 : 2);
+      frame.set(s_file, Variant{const_cast<StringData*>(func->filename())});
+      frame.set(s_line, func->unit()->getLineNumber(curFrm.pc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
-        frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
+        frame.set(s_args,
+                  make_varray(VarNR(btArgs.m_parserFrame->filename.get())));
       }
       bt.append(frame.toVariant());
       depth++;
@@ -227,65 +445,48 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   // Handle the subsequent VM frames.
-  Offset prevPc = 0;
-  for (auto prevFp = getPrevActRec(fp, &prevPc, visitedWHs);
-       fp != nullptr && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
-       fp = prevFp, pc = prevPc,
-         prevFp = getPrevActRec(fp, &prevPc, visitedWHs)) {
+  for (auto prev = getPrevActRec(ctx, frm, visitedWHs);
+       frm && (btArgs.m_limit == 0 || depth < btArgs.m_limit);
+       frm = prev, prev = getPrevActRec(ctx, frm, visitedWHs)) {
+    auto const fp = frm.fp;
+
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) continue;
 
-    ArrayInit frame(8, ArrayInit::Map{});
+    DArrayInit frame(8);
 
     auto const curUnit = fp->func()->unit();
-    auto const curOp = curUnit->getOp(pc);
-    auto const isReturning =
-      curOp == Op::RetC || curOp == Op::RetV ||
-      curOp == Op::CreateCont || curOp == Op::Await ||
-      fp->localsDecRefd();
 
-    // Builtins and generators don't have a file and line number
-    if (prevFp && !prevFp->func()->isBuiltin()) {
-      auto const prevUnit = prevFp->func()->unit();
-      auto prevFile = prevUnit->filepath();
-      if (prevFp->func()->originalFilename()) {
-        prevFile = prevFp->func()->originalFilename();
-      }
-      assert(prevFile);
+    // Builtins and generators don't have a file and line number.
+    if (prev.fp && !prev.fp->func()->isBuiltin()) {
+      auto const prevFunc = prev.fp->func();
+      auto const prevFile = prevFunc->originalFilename()
+        ? prevFunc->originalFilename()
+        : prevFunc->unit()->filepath();
+
+      assertx(prevFile != nullptr);
       frame.set(s_file, Variant{const_cast<StringData*>(prevFile)});
-
-      // In the normal method case, the "saved pc" for line number printing is
-      // pointing at the cell conversion (Unbox/Pop) instruction, not the call
-      // itself. For multi-line calls, this instruction is associated with the
-      // subsequent line which results in an off-by-n. We're subtracting one
-      // in order to look up the line associated with the FCall/FCallArray
-      // instruction. Exception handling and the other opcodes (ex. BoxR)
-      // already do the right thing. The emitter associates object access with
-      // the subsequent expression and this would be difficult to modify.
-      auto const opAtPrevPc = prevUnit->getOp(prevPc);
-      Offset pcAdjust = 0;
-      if (opAtPrevPc == Op::PopR ||
-          opAtPrevPc == Op::UnboxR ||
-          opAtPrevPc == Op::UnboxRNop) {
-        pcAdjust = 1;
-      }
-      frame.set(s_line,
-                prevFp->func()->unit()->getLineNumber(prevPc - pcAdjust));
+      frame.set(s_line, prevFunc->unit()->getLineNumber(prev.pc));
     }
 
     // Check for include.
-    String funcname{const_cast<StringData*>(fp->func()->displayName())};
+    String funcname{const_cast<StringData*>(fp->func()->name())};
     if (fp->func()->isClosureBody()) {
       // Strip the file hash from the closure name.
       String fullName{const_cast<StringData*>(fp->func()->baseCls()->name())};
       funcname = fullName.substr(0, fullName.find(';'));
     }
 
-    // Check for pseudomain.
-    if (funcname.empty()) {
-      if (!prevFp && !btArgs.m_withPseudoMain) continue;
-      else if (!prevFp) funcname = s_main;
-      else funcname = s_include;
+    if (RuntimeOption::EnableArgsInBacktraces &&
+        !fp->localsDecRefd() &&
+        fp->func()->hasReifiedGenerics()) {
+      // First local is always $0ReifiedGenerics which comes right after params
+      auto const generics = frame_local(fp, fp->func()->numParams());
+      if (type(generics) != KindOfUninit) {
+        assertx(tvIsHAMSafeVArray(generics));
+        auto const reified_generics = val(generics).parr;
+        funcname += mangleReifiedGenericsName(reified_generics);
+      }
     }
 
     frame.set(s_function, funcname);
@@ -294,19 +495,25 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->func()->isClosureBody()) {
-        frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
-        if (!isReturning && fp->hasThis()) {
-          if (btArgs.m_withThis) {
-            frame.set(s_object, Object(fp->getThis()));
-          }
-          frame.set(s_type, s_arrow);
-        } else {
-          frame.set(s_type, s_double_colon);
+        String clsname{const_cast<StringData*>(ctx->name())};
+        if (RuntimeOption::EnableArgsInBacktraces &&
+            !fp->localsDecRefd() &&
+            !fp->isInlined() &&
+            ctx->hasReifiedGenerics() &&
+            fp->hasThis()) {
+          auto const reified_generics = getClsReifiedGenericsProp(ctx, fp);
+          clsname += mangleReifiedGenericsName(reified_generics);
         }
+        frame.set(s_class, clsname);
+        if (!fp->localsDecRefd() &&
+            !fp->isInlined() &&
+            fp->hasThis() &&
+            btArgs.m_withThis) {
+          frame.set(s_object, Object(fp->getThis()));
+        }
+        frame.set(s_type, fp->func()->isStatic() ? s_double_colon : s_arrow);
       }
     }
-
-    bool const mayUseVV = fp->func()->attrs() & AttrMayUseVV;
 
     auto const withNames = btArgs.m_withArgNames;
     auto const withValues = btArgs.m_withArgValues;
@@ -315,76 +522,35 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       // do nothing
     } else if (funcname.same(s_include)) {
       auto filepath = const_cast<StringData*>(curUnit->filepath());
-      frame.set(s_args, make_packed_array(filepath));
-    } else if (isReturning) {
-      frame.set(s_args, empty_array());
+      frame.set(s_args, make_varray(filepath));
+    } else if (fp->localsDecRefd()) {
+      frame.set(s_args, empty_varray());
     } else {
-      auto args = Array::Create();
+      auto args = Array::CreateVArray();
       auto const nparams = fp->func()->numNonVariadicParams();
-      auto const nargs = fp->numArgs();
-      auto const nformals = std::min<int>(nparams, nargs);
 
-      if (UNLIKELY(mayUseVV) &&
-          UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
-        // VarEnv is attached to eval or debugger frame, other than the current
-        // frame. Access locals thru VarEnv.
-        auto varEnv = fp->getVarEnv();
-        auto func = fp->func();
-        for (int i = 0; i < nformals; i++) {
-          auto const argname = func->localVarName(i);
-          auto const tv = varEnv->lookup(argname);
+      for (int i = 0; i < nparams; i++) {
+        Variant val =
+          withValues ? Variant{variant_ref{frame_local(fp, i)}} : "";
 
-          auto val = init_null();
-          if (tv != nullptr) { // the variable hasn't been unset
-            val = withValues ? tvAsVariant(tv) : "";
-          }
-
-          if (withNames) {
-            args.set(String(const_cast<StringData*>(argname)), val);
-          } else {
-            args.append(val);
-          }
-        }
-      } else {
-        for (int i = 0; i < nformals; i++) {
-          Variant val = withValues ? tvAsVariant(frame_local(fp, i)) : "";
-
-          if (withNames) {
-            auto const argname = fp->func()->localVarName(i);
-            args.set(String(const_cast<StringData*>(argname)), val);
-          } else {
-            args.append(val);
-          }
+        if (withNames) {
+          auto const argname = fp->func()->localVarName(i);
+          args.set(String(const_cast<StringData*>(argname)), val);
+        } else {
+          args.append(val);
         }
       }
 
-      // Builtin extra args are not stored in varenv.
-      if (UNLIKELY(mayUseVV) && nargs > nparams && fp->hasExtraArgs()) {
-        for (int i = nparams; i < nargs; i++) {
-          auto arg = fp->getExtraArg(i - nparams);
-          if (arg->m_type == KindOfUninit) {
-            args.append(init_null());
-          } else {
-            args.append(tvAsVariant(arg));
-          }
-        }
-      }
       frame.set(s_args, args);
     }
 
-    if (btArgs.m_withMetadata && !isReturning) {
-      if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
-        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
-        if (tv != nullptr && tv->m_type != KindOfUninit) {
-          frame.set(s_metadata, tvAsVariant(tv));
-        }
-      } else {
-        auto local = fp->func()->lookupVarId(s_86metadata.get());
-        if (local != kInvalidId) {
-          auto tv = frame_local(fp, local);
-          if (tv->m_type != KindOfUninit) {
-            frame.set(s_metadata, tvAsVariant(tv));
-          }
+    if (btArgs.m_withMetadata && !fp->localsDecRefd()) {
+      auto local = fp->func()->lookupVarId(s_86metadata.get());
+      if (local != kInvalidId) {
+        auto const val = frame_local(fp, local);
+        if (type(val) != KindOfUninit) {
+          always_assert(tvIsPlausible(*val));
+          frame.set(s_metadata, Variant{variant_ref{val}});
         }
       }
     }
@@ -405,7 +571,7 @@ void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
     return *strings.insert(std::move(s)).first;
   };
   auto addVariant = [&] (const Variant& v) -> folly::StringPiece {
-    if (v.isString()) return v.toCStrRef().slice();
+    if (v.isString()) return v.asCStrRef().slice();
     return addString(v.toString().toCppString());
   };
   for (ArrayIter it(bt.get()); it; ++it) {
@@ -429,32 +595,17 @@ void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
   cols.setVec("php_lines", lines);
 }
 
-template<class L>
-static void walkStack(L func) {
-  VMRegAnchor _;
-  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
-  ActRec* fp = vmfp();
+///////////////////////////////////////////////////////////////////////////////
 
-  // If there are no VM frames, we're done.
-  if (!fp || !rds::header()) return;
-
-  // Handle the subsequent VM frames.
-  Offset prevPc = 0;
-  for (; fp != nullptr; fp = getPrevActRec(fp, &prevPc, visitedWHs)) {
-
-    // Do not capture frame for HPHP only functions.
-    if (fp->func()->isNoInjection()) continue;
-
-    func(fp, prevPc);
-  }
-}
-
-int64_t createBacktraceHash() {
+int64_t createBacktraceHash(bool consider_metadata) {
   // Settings constants before looping
-  int64_t hash = 0x9e3779b9;
+  uint64_t hash = 0x9e3779b9;
   Unit* prev_unit = nullptr;
 
   walkStack([&] (ActRec* fp, Offset) {
+    // Do not capture frame for HPHP only functions.
+    if (fp->func()->isNoInjection()) return;
+
     auto const curFunc = fp->func();
     auto const curUnit = curFunc->unit();
 
@@ -474,22 +625,64 @@ int64_t createBacktraceHash() {
     // implementation (boost::hash_combine)
     auto funchash = curFunc->fullName()->hash();
     hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+
+    if (consider_metadata && !fp->localsDecRefd()) {
+      tv_rval meta;
+      auto local = fp->func()->lookupVarId(s_86metadata.get());
+      if (local != kInvalidId) {
+        auto const val = frame_local(fp, local);
+        if (!isNullType(type(val))) meta = val;
+      }
+
+      if (meta) {
+        hash ^= val(meta).num + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        hash ^= static_cast<int>(type(meta))
+          + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      }
+    }
   });
 
   return hash;
 }
 
-req::ptr<CompactTrace> createCompactBacktrace() {
+void fillCompactBacktrace(CompactTraceData* trace, bool skipTop) {
+  walkStack([trace] (ActRec* fp, Offset prevPc) {
+    // Do not capture frame for HPHP only functions.
+    if (fp->func()->isNoInjection()) return;
+    trace->insert(fp, prevPc);
+  }, skipTop);
+}
+
+req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
   auto ret = req::make<CompactTrace>();
-  walkStack([&] (ActRec* fp, Offset prevPc) { ret->insert(fp, prevPc); });
+  fillCompactBacktrace(ret->get(), skipTop);
   return ret;
+}
+
+std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
+  VMRegAnchor _;
+  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  BTContext ctx;
+
+  auto frm = BTFrame { vmfp() };
+  frm = initBTContextAt(ctx, vmJitReturnAddr(), frm);
+
+  // Builtins don't have a file and line number, so find the first user frame
+  while (frm && frm.fp->func()->isBuiltin()) {
+    frm = getPrevActRec(ctx, frm, visitedWHs);
+  }
+  return std::make_pair(frm.fp ? frm.fp->func() : nullptr, frm.pc);
 }
 
 namespace {
 
 struct CTKHasher final {
-  int64_t hash(const CompactTrace::Key& k) const { return k.m_hash; }
-  bool equal(const CompactTrace::Key& k1, const CompactTrace::Key& k2) const;
+  uint64_t hash(const CompactTraceData::Ptr& k) const {
+    if (!k) return 0;
+    return k->hash();
+  }
+  bool equal(const CompactTraceData::Ptr& k1,
+             const CompactTraceData::Ptr& k2) const;
 };
 
 struct CacheDeleter final {
@@ -502,54 +695,54 @@ struct CacheDeleter final {
 };
 
 using CachedArray = std::shared_ptr<ArrayData>;
-using Cache = ConcurrentScalableCache<CompactTrace::Key,CachedArray,CTKHasher>;
+using Cache = ConcurrentScalableCache<CompactTraceData::Ptr,
+                                      CachedArray,CTKHasher>;
 Cache s_cache(1024);
 
-bool CTKHasher::equal(
-  const CompactTrace::Key& k1,
-  const CompactTrace::Key& k2
-) const {
-  if (k1.m_hash != k2.m_hash || k1.m_frames.size() != k2.m_frames.size()) {
+bool CTKHasher::equal(const CompactTraceData::Ptr& k1,
+                      const CompactTraceData::Ptr& k2) const {
+  assertx(k1 && k2);
+  if (k1->size() != k2->size() || k1->hash() != k2->hash()) {
     return false;
   }
-  for (int i = 0; i < k1.m_frames.size(); ++i) {
-    auto& a = k1.m_frames[i];
-    auto& b = k2.m_frames[i];
+  for (int i = 0; i < k1->frames().size(); ++i) {
+    const auto& a = k1->frames()[i];
+    const auto& b = k2->frames()[i];
     if (a.func != b.func || a.prevPcAndHasThis != b.prevPcAndHasThis) {
       return false;
     }
   }
   return true;
 }
+
 }
 
 IMPLEMENT_RESOURCE_ALLOCATION(CompactTrace)
 
-void CompactTrace::Key::insert(const ActRec* fp, int32_t prevPc) {
-  auto const funcHash = use_lowptr
-    ? (uintptr_t)fp->func() << 32
-    : (uintptr_t)fp->func();
-  m_hash ^= funcHash + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
-  m_hash ^= prevPc + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
-
-  auto const curUnit = fp->func()->unit();
-  auto const curOp = curUnit->getOp(prevPc);
-  auto const isReturning =
-    curOp == Op::RetC || curOp == Op::RetV ||
-    curOp == Op::CreateCont || curOp == Op::Await ||
-    fp->localsDecRefd();
-  m_frames.push_back(Frame{
-    fp->func(),
-    prevPc,
-    !isReturning && arGetContextClass(fp) && fp->hasThis()
-  });
+uint64_t CompactTraceData::hash() const {
+  if (m_hash != 0) return m_hash;
+  m_hash = 0xffffffff;
+  for (auto frame : m_frames) {
+    m_hash = hash_int64_pair(m_hash, frame.hash());
+  }
+  return m_hash;
 }
 
-Array CompactTrace::Key::extract() const {
-  PackedArrayInit aInit(m_frames.size(), CheckAllocation{});
+void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
+  m_hash = 0;                           // invalidate
+
+  m_frames.emplace_back(
+    fp->func(),
+    prevPc,
+    !fp->localsDecRefd() && fp->func()->hasThisInBody()
+  );
+}
+
+Array CompactTraceData::extract() const {
+  VArrayInit aInit(m_frames.size());
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
-    ArrayInit frame(6, ArrayInit::Map{});
+    DArrayInit frame(6);
     if (prev && !prev->func->isBuiltin()) {
       auto const prevUnit = prev->func->unit();
       auto prevFile = prevUnit->filepath();
@@ -558,21 +751,14 @@ Array CompactTrace::Key::extract() const {
       }
 
       auto const prevPc = prev->prevPc;
-      auto const opAtPrevPc = prevUnit->getOp(prevPc);
-      Offset pcAdjust = 0;
-      if (opAtPrevPc == Op::PopR ||
-          opAtPrevPc == Op::UnboxR ||
-          opAtPrevPc == Op::UnboxRNop) {
-        pcAdjust = 1;
-      }
       frame.set(s_file, StrNR(prevFile).asString());
-      frame.set(s_line, prevUnit->getLineNumber(prevPc - pcAdjust));
+      frame.set(s_line, prevUnit->getLineNumber(prevPc));
     }
 
     auto const f = m_frames[idx].func;
 
     // Check for include.
-    String funcname{const_cast<StringData*>(f->displayName())};
+    String funcname{const_cast<StringData*>(f->name())};
     if (f->isClosureBody()) {
       // Strip the file hash from the closure name.
       String fullName{const_cast<StringData*>(f->baseCls()->name())};
@@ -600,7 +786,7 @@ Array CompactTrace::Key::extract() const {
       }
     } else {
       auto filepath = const_cast<StringData*>(f->unit()->filepath());
-      frame.set(s_args, make_packed_array(filepath));
+      frame.set(s_args, make_varray(filepath));
     }
 
     aInit.append(frame.toVariant());
@@ -610,24 +796,26 @@ Array CompactTrace::Key::extract() const {
 }
 
 Array CompactTrace::extract() const {
-  if (m_key.m_frames.size() == 1) return empty_array();
+  if (size() <= 1) return Array::CreateVArray();
 
   Cache::ConstAccessor acc;
-  if (s_cache.find(acc, m_key)) {
+  if (s_cache.find(acc, m_backtrace)) {
     return Array(acc.get()->get());
   }
 
-  auto arr = m_key.extract();
+  auto arr = m_backtrace->extract();
   auto ins = CachedArray(
     arr.get()->empty()
-      ? staticEmptyArray()
-      : PackedArray::MakeUncounted(arr.get(), 0),
+      ? ArrayData::CreateVArray()
+      : PackedArray::MakeUncounted(arr.get()),
     CacheDeleter()
   );
-  if (!s_cache.insert(m_key, ins)) {
+  if (!s_cache.insert(m_backtrace, ins)) {
     return arr;
   }
   return Array(ins.get());
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 } // HPHP

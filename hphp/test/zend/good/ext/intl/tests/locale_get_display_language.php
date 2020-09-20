@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the display_language for different locales
@@ -9,9 +9,9 @@ function ut_main()
 {
     $res_str='';
 
-	$disp_locales=array('en','fr','de');
+    $disp_locales=varray['en','fr','de'];
 
-    $locales = array(
+    $locales = varray[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
         'root',
         'uk@currency=EURO',
@@ -62,20 +62,20 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc'
-    );
+    ];
 
 
     $res_str = '';
 
-   	foreach( $locales as $locale )
+    foreach( $locales as $locale )
     {
-       	$res_str .= "locale='$locale'\n";
-   		foreach( $disp_locales as $disp_locale )
-    	{
-        	$scr = ut_loc_get_display_language( $locale ,$disp_locale );
-        	$res_str .= "disp_locale=$disp_locale :  display_language=$scr";
-        	$res_str .= "\n";
-		} 
+        $res_str .= "locale='$locale'\n";
+        foreach( $disp_locales as $disp_locale )
+        {
+            $scr = ut_loc_get_display_language( $locale ,$disp_locale );
+            $res_str .= "disp_locale=$disp_locale :  display_language=$scr";
+            $res_str .= "\n";
+        }
         $res_str .= "-----------------\n";
     }
 
@@ -83,7 +83,7 @@ function ut_main()
 
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    ut_run();
+}

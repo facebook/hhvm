@@ -1,184 +1,122 @@
 *** Testing array_unshift() : different arrays for $array argument ***
 -- Iteration 1 --
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
 }
 int(5)
-array(5) {
-  [0]=>
+varray(5) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
-  [3]=>
   int(1)
-  [4]=>
   int(2)
 }
 -- Iteration 2 --
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
   float(1.1)
-  [2]=>
   float(2.2)
 }
 int(5)
-array(5) {
-  [0]=>
+varray(5) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
-  [3]=>
   float(1.1)
-  [4]=>
   float(2.2)
 }
 -- Iteration 3 --
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(2)
   }
-  [2]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
 }
 int(5)
-array(5) {
-  [0]=>
+varray(5) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
-  [3]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(2)
   }
-  [4]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
 }
 -- Iteration 4 --
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
   bool(false)
-  [2]=>
   bool(true)
 }
 int(5)
-array(5) {
-  [0]=>
+varray(5) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
-  [3]=>
   bool(false)
-  [4]=>
   bool(true)
 }
 -- Iteration 5 --
 int(1)
-array(1) {
-  [0]=>
+varray(1) {
   int(10)
 }
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
 }
 -- Iteration 6 --
 int(2)
-array(2) {
-  [0]=>
+varray(2) {
   int(10)
-  [1]=>
   NULL
 }
 int(4)
-array(4) {
-  [0]=>
+varray(4) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
-  [3]=>
   NULL
 }
 -- Iteration 7 --
 int(7)
-array(7) {
-  [0]=>
+varray(7) {
   int(10)
-  [1]=>
   string(1) "a"
-  [2]=>
   string(4) "aaaa"
-  [3]=>
   string(1) "b"
-  [4]=>
   string(4) "bbbb"
-  [5]=>
   string(1) "c"
-  [6]=>
   string(5) "ccccc"
 }
 int(9)
-array(9) {
-  [0]=>
+varray(9) {
   int(10)
-  [1]=>
   string(5) "hello"
-  [2]=>
   string(5) "world"
-  [3]=>
   string(1) "a"
-  [4]=>
   string(4) "aaaa"
-  [5]=>
   string(1) "b"
-  [6]=>
   string(4) "bbbb"
-  [7]=>
   string(1) "c"
-  [8]=>
   string(5) "ccccc"
 }
 -- Iteration 8 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   [1]=>
@@ -189,7 +127,7 @@ array(4) {
   string(5) "three"
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -205,7 +143,7 @@ array(6) {
 }
 -- Iteration 9 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   ["one"]=>
@@ -216,7 +154,7 @@ array(4) {
   int(3)
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -232,7 +170,7 @@ array(6) {
 }
 -- Iteration 10 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   int(10)
   [1]=>
@@ -245,7 +183,7 @@ array(5) {
   int(30)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   int(10)
   [1]=>
@@ -263,7 +201,7 @@ array(7) {
 }
 -- Iteration 11 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   ["one"]=>
@@ -274,7 +212,7 @@ array(4) {
   string(6) "thirty"
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -290,7 +228,7 @@ array(6) {
 }
 -- Iteration 12 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   ["one"]=>
@@ -301,7 +239,7 @@ array(4) {
   string(4) "four"
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -317,7 +255,7 @@ array(6) {
 }
 -- Iteration 13 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   [""]=>
@@ -328,7 +266,7 @@ array(4) {
   NULL
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -344,7 +282,7 @@ array(6) {
 }
 -- Iteration 14 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   int(10)
   [1]=>
@@ -357,7 +295,7 @@ array(5) {
   bool(true)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   int(10)
   [1]=>
@@ -375,7 +313,7 @@ array(7) {
 }
 -- Iteration 15 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   [""]=>
@@ -386,7 +324,7 @@ array(4) {
   string(0) ""
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -402,7 +340,7 @@ array(6) {
 }
 -- Iteration 16 --
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   int(10)
   [1]=>
@@ -419,7 +357,7 @@ array(7) {
   bool(true)
 }
 int(9)
-array(9) {
+darray(9) {
   [0]=>
   int(10)
   [1]=>
@@ -441,7 +379,7 @@ array(9) {
 }
 -- Iteration 17 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   [""]=>
@@ -452,7 +390,7 @@ array(4) {
   int(6)
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>
@@ -468,7 +406,7 @@ array(6) {
 }
 -- Iteration 18 --
 int(4)
-array(4) {
+darray(4) {
   [0]=>
   int(10)
   ["One"]=>
@@ -479,7 +417,7 @@ array(4) {
   int(3)
 }
 int(6)
-array(6) {
+darray(6) {
   [0]=>
   int(10)
   [1]=>

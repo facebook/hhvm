@@ -1,24 +1,31 @@
 <?hh
 
-function busy() { return __hhvm_intrinsics\launder_value(42); }
-
-$t = null;
-$x = 0;
 function ping($w) {
-  global $t;
-  global $x;
-  $x++;
-  $t = new IntervalTimer(
+
+
+  ExtIntervaltimerResetInCallback::$x++;
+  ExtIntervaltimerResetInCallback::$t = new IntervalTimer(
     0.1,
     0.1,
     ($w) ==> { ping($w); }
   );
-  $t->start();
-};
+  ExtIntervaltimerResetInCallback::$t->start();
+}
 
-$t = new IntervalTimer(0.1, 0.1, ($w) ==> { ping($w); });
-$t->start();
-$n = microtime(true);
-while ($x < 5) { busy(); }
-$t->stop();
-var_dump($x >= 5);
+abstract final class ExtIntervaltimerResetInCallback {
+  public static $t;
+  public static $x;
+}
+<<__EntryPoint>>
+function entrypoint_resetincallback(): void {
+
+  ExtIntervaltimerResetInCallback::$t = null;
+  ExtIntervaltimerResetInCallback::$x = 0;
+
+  ExtIntervaltimerResetInCallback::$t = new IntervalTimer(0.1, 0.1, ($w) ==> { ping($w); });
+  ExtIntervaltimerResetInCallback::$t->start();
+  $n = microtime(true);
+  while (ExtIntervaltimerResetInCallback::$x < 5) { usleep(1); }
+  ExtIntervaltimerResetInCallback::$t->stop();
+  var_dump(ExtIntervaltimerResetInCallback::$x >= 5);
+}

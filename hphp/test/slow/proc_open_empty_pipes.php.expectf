@@ -1,5 +1,5 @@
 resource(%d) of type (process)
-array(2) {
+darray(2) {
   [0]=>
   resource(%d) of type (stream)
   [1]=>

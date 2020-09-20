@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait Company {
   public function getName() {
@@ -32,7 +32,11 @@ class Portuguese extends Language {
     echo "Eu sou " . $this->getName() . "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1954() {
 $e = new English();
 $e->sayHello();
 $p = new Portuguese();
 $p->sayHello();
+}

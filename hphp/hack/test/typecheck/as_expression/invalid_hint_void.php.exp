@@ -1,0 +1,4 @@
+File "invalid_hint_void.php", line 5, characters 3-13:
+  err
+File "invalid_hint_void.php", line 4, characters 9-12:
+The `void` typehint can only be used to describe a function return type (Naming[2063])

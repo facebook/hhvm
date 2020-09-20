@@ -1,0 +1,15 @@
+<?hh
+class WithReactiveMethods {
+  <<__RxShallow>>
+  public function shallow_reactive(): void {
+    throw new \Exception();
+  }
+  <<__Rx>>
+  public function reactive(): void {
+    throw new \Exception();
+  }
+  <<__RxShallow>>
+  public function call_shallow_reactive(): void {
+    $this->shallow_reactive();
+  }
+}

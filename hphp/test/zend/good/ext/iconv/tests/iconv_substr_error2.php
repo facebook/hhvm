@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
  * Description: Returns part of a string 
  * Source code: ext/iconv/iconv.c
@@ -7,7 +7,7 @@
 /*
  * Pass an unknown encoding to iconv_substr() to test behaviour
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_substr() : error conditions ***\n";
 
 $str = 'Hello, world';
@@ -18,4 +18,4 @@ $encoding = 'unknown-encoding';
 var_dump( iconv_substr($str, $start, $length, $encoding));
 
 echo "Done";
-?>
+}

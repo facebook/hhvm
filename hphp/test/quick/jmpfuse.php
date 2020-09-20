@@ -12,11 +12,9 @@ function jmpfuse($str) {
   return true;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   foreach (range(1, 100) as $i) {
     jmpfuse("blah blah\n");
   }
   var_dump("jumps fused?");
 }
-
-main();

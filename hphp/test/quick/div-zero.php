@@ -2,8 +2,17 @@
 
 
 function main($num, $zero) {
-  $z = $num / 0;
-  $zz = $num / $zero;
-  var_dump($z, $zz);
+  try {
+    $z = $num / 0;
+  } catch (DivisionByZeroException $e) {
+    echo $e->getMessage(), "\n";
+  }
+  try {
+    $zz = $num / $zero;
+  } catch (DivisionByZeroException $e) {
+    echo $e->getMessage(), "\n";
+  }
 }
+<<__EntryPoint>> function main_entry(): void {
 main(123, 0);
+}

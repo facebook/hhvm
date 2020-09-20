@@ -26,20 +26,19 @@ function takes_container<T>(Container<T> $arg): ?T {
   return null;
 }
 
-function takes_keyed_container<Tk,Tv>(KeyedContainer<Tk,Tv> $c): void {}
+function takes_keyed_container<Tk as arraykey,Tv>(KeyedContainer<Tk,Tv> $c): void {}
 
 function takes_vec_array<Tv>(array<Tv> $c): void {}
 
 function takes_hash_array<Tk,Tv>(array<Tk,Tv> $c): void {}
 
 //// partial.php
-
 <?hh // partial
 
 function f2(string $x, ...$args): void {}
 
 class C0 {
-  public function meth(...): void {}
+  public function meth(...$args): void {}
 }
 
 class C1 extends C0 {

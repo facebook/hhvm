@@ -1,25 +1,27 @@
-<?php
+<?hh
 
-require_once('dom_test.inc');
+<<__EntryPoint>>
+function main_entry(): void {
 
-$dom = new DOMDocument;
-$dom->loadXML($xmlstr);
+  require_once('dom_test.inc');
 
-if( !$dom )
-{
-    echo "Error while parsing the document\n";
-    exit;
+  $dom = new DOMDocument;
+  $dom->loadXML($xmlstr);
+
+  if( !$dom )
+  {
+      echo "Error while parsing the document\n";
+      exit;
+  }
+
+  echo "Checking documented default value: ";
+  var_dump($dom->validateOnParse);
+
+  $dom->validateOnParse = TRUE;
+  echo "Setting validateOnParse to TRUE: ";
+  var_dump($dom->validateOnParse);
+
+  $dom->validateOnParse = FALSE;
+  echo "Setting validateOnParse to FALSE: ";
+  var_dump($dom->validateOnParse);
 }
-
-echo "Checking documented default value: ";
-var_dump($dom->validateOnParse);
-
-$dom->validateOnParse = TRUE;
-echo "Setting validateOnParse to TRUE: ";
-var_dump($dom->validateOnParse);
-
-$dom->validateOnParse = FALSE;
-echo "Setting validateOnParse to FALSE: ";
-var_dump($dom->validateOnParse);
-
-?>

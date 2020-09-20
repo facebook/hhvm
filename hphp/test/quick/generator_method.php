@@ -7,12 +7,13 @@ class A {
   }
 
   public static function SGen() {
-    var_dump(get_called_class());
+    var_dump(static::class);
     yield 4; yield 5; yield 6;
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $a = new A();
 foreach ($a->Gen() as $num) { var_dump($num); }
 foreach (A::SGen() as $num) { var_dump($num); }
+}

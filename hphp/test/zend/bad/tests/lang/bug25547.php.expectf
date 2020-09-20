@@ -1,6 +1,0 @@
-handler(Undefined index: foo)
-Array
-(
-    [foo] => 1
-)
-Done

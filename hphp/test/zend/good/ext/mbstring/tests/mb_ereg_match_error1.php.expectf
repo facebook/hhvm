@@ -2,16 +2,13 @@
 
 -- Testing mb_ereg_match() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_match() expects at most 3 parameters, 4 given in %s/mb_ereg_match_error1.php on line 20
 
 -- Testing mb_ereg_match() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_match() expects at least 2 parameters, 1 given in %s/mb_ereg_match_error1.php on line 25
 
 -- Testing mb_ereg_match() function with zero arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_match() expects at least 2 parameters, 0 given in %s/mb_ereg_match_error1.php on line 29
 Done

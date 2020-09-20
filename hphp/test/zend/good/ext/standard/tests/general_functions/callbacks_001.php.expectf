@@ -19,7 +19,4 @@ P|parent::who
 O
 $this|O::who
 O
-$this|B::who
-
-Warning: %s
 ===DONE===

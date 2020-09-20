@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SETLOCALE_H_
-#define incl_HPHP_SETLOCALE_H_
+#pragma once
 
 #include <vector>
 #include <string>
 #include "hphp/util/locale-portability.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
@@ -49,8 +49,7 @@ private:
 #endif
 };
 
-extern THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
+extern RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
 
 }
 
-#endif // incl_HPHP_SETLOCALE_H_

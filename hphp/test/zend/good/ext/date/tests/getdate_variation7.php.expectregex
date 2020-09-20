@@ -1,7 +1,7 @@
 \*\*\* Testing getdate\(\) : usage variation \*\*\*
 
--- Testing getdate\(\) function by passing float 12.3456789000e10 value to timestamp --
-array\(11\) {
+-- Testing getdate\(\) function by passing int 123456789000 value to timestamp --
+darray\(11\) {
   \["seconds"\]=>
   int\((.+)\)
   \["minutes"\]=>
@@ -26,14 +26,14 @@ array\(11\) {
   int\((-1097262584|123456789000)\)
 }
 
--- Testing getdate\(\) function by passing float -12.3456789000e10 value to timestamp --
-array\(11\) {
+-- Testing getdate\(\) function by passing int -123456789000 value to timestamp --
+darray\(11\) {
   \["seconds"\]=>
   int\((.+)\)
   \["minutes"\]=>
-  int\((39|23)\)
+  int\((39|23|51)\)
   \["hours"\]=>
-  int\((0|2|5)\)
+  int\((0|2|4|5)\)
   \["mday"\]=>
   int\((9|14|23)\)
   \["wday"\]=>

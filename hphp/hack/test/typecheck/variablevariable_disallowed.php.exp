@@ -1,2 +1,2 @@
-File "variablevariable_disallowed.php", line 6, characters 10-12:
-Variable variables are not legal; all variable identifiers must be static strings. (Naming[2081])
+File "variablevariable_disallowed.php", line 6, characters 10-10:
+Variable Variables are not legal (Parsing[1002])

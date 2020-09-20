@@ -1,0 +1,16 @@
+File "test_pocket_universes_syntax_attribute.php", line 6, characters 3-11:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 10, characters 3-57:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 11, characters 5-21:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 12, characters 5-20:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 12, characters 9-18:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 18, characters 3-35:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 19, characters 5-20:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])
+File "test_pocket_universes_syntax_attribute.php", line 19, characters 9-18:
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])

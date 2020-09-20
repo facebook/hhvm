@@ -1,0 +1,22 @@
+darray(0) {
+}
+darray(0) {
+}
+darray(3) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "baz"
+  [2]=>
+  string(3) "baz"
+}
+darray(1) {
+  [0]=>
+  string(3) "foo"
+}
+darray(0) {
+}
+darray(1) {
+  [0]=>
+  string(4) "bing"
+}

@@ -1,0 +1,8 @@
+File "prop_access_lambda4.php", line 11, characters 20-21:
+Typing error (Typing[4053])
+File "prop_access_lambda4.php", line 11, characters 24-24:
+No property `x` in `A`
+File "prop_access_lambda4.php", line 10, characters 15-15:
+This is why I think it is an object of type A
+File "prop_access_lambda4.php", line 4, characters 7-7:
+Declaration of `A` is here

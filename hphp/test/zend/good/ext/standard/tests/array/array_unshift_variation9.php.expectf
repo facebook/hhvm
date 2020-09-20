@@ -1,7 +1,7 @@
 *** Testing array_unshift() : heredoc strings for $var argument ***
 -- Iteration 1 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   string(0) ""
   ["f"]=>
@@ -14,7 +14,7 @@ array(5) {
   float(2.222)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   string(0) ""
   [1]=>
@@ -32,7 +32,7 @@ array(7) {
 }
 -- Iteration 2 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   string(1) "
 "
@@ -46,7 +46,7 @@ array(5) {
   float(2.222)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   string(1) "
 "
@@ -65,7 +65,7 @@ array(7) {
 }
 -- Iteration 3 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   string(86) "hello world
 The big brown fox jumped over;
@@ -81,7 +81,7 @@ This is a double quoted string"
   float(2.222)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   string(86) "hello world
 The big brown fox jumped over;
@@ -102,13 +102,12 @@ This is a double quoted string"
 }
 -- Iteration 4 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
-  string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+  string(88) "hello world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
   ["f"]=>
   string(5) "first"
   ["s"]=>
@@ -119,13 +118,12 @@ double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   float(2.222)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
-  string(88) "hello
- world%r\x09%r
-1111%r\x09\x09%r != 2222%r\x0b\x0b%r
+  string(88) "hello world	
+1111		 != 2222
 heredoc
-double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
+double quoted string. withdifferentwhitespaces"
   [1]=>
   string(5) "hello"
   [2]=>
@@ -141,10 +139,10 @@ double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 }
 -- Iteration 5 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   string(44) "11 < 12. 123 >22
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
   ["f"]=>
   string(5) "first"
@@ -156,10 +154,10 @@ array(5) {
   float(2.222)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   string(44) "11 < 12. 123 >22
-2222 != 1111.%r\x09%r 0000 = 0000
+2222 != 1111.	 0000 = 0000
 "
   [1]=>
   string(5) "hello"
@@ -176,7 +174,7 @@ array(7) {
 }
 -- Iteration 6 --
 int(5)
-array(5) {
+darray(5) {
   [0]=>
   string(123) "This's a string with quotes:
 "strings in double quote";
@@ -192,7 +190,7 @@ this\line is single quoted /with\slashes"
   float(2.222)
 }
 int(7)
-array(7) {
+darray(7) {
   [0]=>
   string(123) "This's a string with quotes:
 "strings in double quote";

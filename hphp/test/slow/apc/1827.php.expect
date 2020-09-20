@@ -1,22 +1,16 @@
-array(3) {
-  [0]=>
-  object(X)#2 (0) {
+varray(3) {
+  object(X) (0) {
   }
-  [1]=>
-  object(X)#2 (0) {
+  object(X) (0) {
   }
-  [2]=>
-  object(X)#2 (0) {
+  object(X) (0) {
   }
 }
-array(3) {
-  [0]=>
-  object(X)#3 (0) {
+varray(3) {
+  object(X) (0) {
   }
-  [1]=>
-  object(X)#3 (0) {
+  object(X) (0) {
   }
-  [2]=>
-  object(X)#3 (0) {
+  object(X) (0) {
   }
 }

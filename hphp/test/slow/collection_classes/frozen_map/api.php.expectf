@@ -18,19 +18,19 @@ int(2)
 
 = lazy =
 LazyKeyedIterableView [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
@@ -67,7 +67,7 @@ int(3)
 = differencebykey =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(3)
   [1]=>
@@ -78,19 +78,19 @@ object(HH\Pair)#%d (2) {
 = map =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(2)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(4)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
@@ -101,33 +101,33 @@ object(HH\Pair)#%d (2) {
 = mapwithkey =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
-  object(HH\Pair)#%d (2) {
+  object(HH\Pair) (2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
-  object(HH\Pair)#%d (2) {
+  object(HH\Pair) (2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
-  object(HH\Pair)#%d (2) {
+  object(HH\Pair) (2) {
     [0]=>
     int(2)
     [1]=>
@@ -139,7 +139,7 @@ object(HH\Pair)#%d (2) {
 = filter =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
@@ -150,13 +150,13 @@ object(HH\Pair)#%d (2) {
 = filterwithkey =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
@@ -167,19 +167,19 @@ object(HH\Pair)#%d (2) {
 = fromItems =
 bool(true)
 HH\ImmMap [
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(3)
   [1]=>
   int(4)
 }
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(5)
   [1]=>

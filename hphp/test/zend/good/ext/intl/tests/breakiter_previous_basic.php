@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 
@@ -7,5 +7,5 @@ $bi->setText('foo bar trans');
 
 var_dump($bi->last());
 var_dump($bi->previous());
-?>
-==DONE==
+echo "==DONE==";
+}

@@ -30,7 +30,6 @@
 #define MAX_INSTR_ASM_LEN 128
 
 using std::string;
-using std::vector;
 
 namespace HPHP { namespace jit {
 
@@ -116,14 +115,20 @@ TCA OfflineCode::collectJmpTargets(FILE  *file,
 // by fileStartAddr, for the address range given by
 // [codeStartAddr, codeStartAddr + codeLen)
 
-void OfflineCode::disasm(FILE* file,
-                            TCA   fileStartAddr,
-                            TCA   codeStartAddr,
-                            uint64_t codeLen,
-                            const PerfEventsMap<TCA>& perfEvents,
-                            BCMappingInfo bcMappingInfo,
-                            bool printAddr,
-                            bool printBinary) {
+TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
+                                         TCA   fileStartAddr,
+                                         TCA   codeStartAddr,
+                                         uint64_t codeLen,
+                                         const PerfEventsMap<TCA>& perfEvents,
+                                         BCMappingInfo bcMappingInfo) {
+  if (codeLen == 0) return TCRegionInfo{bcMappingInfo.tcRegion};
+
+  auto const codeEndAddr = codeStartAddr + codeLen;
+  TCRegionInfo regionInfo{bcMappingInfo.tcRegion,
+                           getRanges(bcMappingInfo,
+                                     codeStartAddr,
+                                     codeEndAddr)};
+  auto& ranges = regionInfo.ranges;
 
   char codeStr[MAX_INSTR_ASM_LEN];
   xed_uint8_t* code = (xed_uint8_t*) alloca(codeLen);
@@ -132,24 +137,13 @@ void OfflineCode::disasm(FILE* file,
   TCA          r10val = 0;
   size_t       currBC = 0;
 
-  if (codeLen == 0) return;
-
   auto const offset = codeStartAddr - fileStartAddr;
-  if (fseek(file, offset, SEEK_SET)) {
-    error("disasm error: seeking file");
-  }
-
-  size_t readLen = fread(code, codeLen, 1, file);
-  if (readLen != 1) {
-    error("Failed to read {} bytes at offset {} from code file due to {}",
-          codeLen, offset, feof(file) ? "EOF" : "read error");
-  }
+  readDisasmFile(file, offset, codeLen, code);
 
   xed_decoded_inst_t xedd;
 
   // Decode and print each instruction
   for (frontier = code, ip = codeStartAddr; frontier < code + codeLen; ) {
-
     xed_decoded_inst_zero_set_mode(&xedd, &xed_state);
     xed_decoded_inst_set_input_chip(&xedd, XED_CHIP_INVALID);
     xed_error_enum_t xed_error = xed_decode(&xedd, frontier, 15);
@@ -166,22 +160,7 @@ void OfflineCode::disasm(FILE* file,
       error("disasm error: xed_format_context failed");
     }
 
-    // Annotate the x86 with its bytecode.
-    currBC = printBCMapping(bcMappingInfo, currBC, (TCA)ip);
-
-    if (printAddr) printf("%14p: ", ip);
-
     uint32_t instrLen = xed_decoded_inst_get_length(&xedd);
-
-    if (printBinary) {
-      uint32_t i;
-      for (i=0; i < instrLen; i++) {
-        printf("%02X", frontier[i]);
-      }
-      for (; i < 16; i++) {
-        printf("  ");
-      }
-    }
 
     // For calls, we try to figure out the destination symbol name.
     // We look both at relative branches and the pattern:
@@ -227,16 +206,28 @@ void OfflineCode::disasm(FILE* file,
       }
     }
 
-    if (!perfEvents.empty()) {
-      printEventStats((TCA)ip, instrLen, perfEvents);
-    } else {
-      printf("%48s", "");
-    }
-    printf("%s%s\n", codeStr, callDest.c_str());
+    auto const binaryStr = [&] {
+      std::ostringstream binary_os;
+      uint32_t i;
+      for (i = 0; i < instrLen; i++) {
+        binary_os << folly::format("{:02X}", frontier[i]);
+      }
+      for (; i < 16; i++) {
+        binary_os << "  ";
+      }
+      return binary_os.str();
+    }();
+
+    while (currBC < ranges.size() - 1 && ip >= ranges[currBC].end) currBC++;
+
+    auto const disasmInfo = getDisasmInfo(ip, instrLen, perfEvents,
+                                          binaryStr, callDest, codeStr);
+    ranges[currBC].disasm.push_back(disasmInfo);
 
     frontier += instrLen;
     ip       += instrLen;
   }
+  return regionInfo;
 }
 #else
   // cmake should prevent this.

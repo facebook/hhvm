@@ -13,3 +13,4 @@ interface K {
 }
 
 class D implements I, J, K {}
+

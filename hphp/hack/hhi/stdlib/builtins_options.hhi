@@ -1,11 +1,10 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -15,22 +14,23 @@ const int CLOCK_REALTIME = 0;
 const int CLOCK_THREAD_CPUTIME_ID = 3;
 
 <<__PHPStdLib>>
-function assert_options($what, $value = null);
+function assert_options(int $what, $value = null);
+<<__PHPStdLib>>
 function assert($assertion);
 <<__PHPStdLib>>
-function dl($library);
+function dl(string $_library);
 <<__PHPStdLib>>
-function extension_loaded($name);
+function extension_loaded(string $name);
 <<__PHPStdLib>>
-function get_loaded_extensions($zend_extensions = false);
+function get_loaded_extensions(bool $zend_extensions = false);
 <<__PHPStdLib>>
-function get_extension_funcs($module_name);
+function get_extension_funcs(string $module_name);
 <<__PHPStdLib>>
-function get_cfg_var($option);
+function get_cfg_var(string $_option);
 <<__PHPStdLib>>
 function get_current_user();
 <<__PHPStdLib>>
-function get_defined_constants($categorize = null);
+function get_defined_constants(bool $categorize = false);
 <<__PHPStdLib>>
 function get_include_path();
 <<__PHPStdLib>>
@@ -40,13 +40,9 @@ function set_include_path($new_include_path);
 <<__PHPStdLib>>
 function get_included_files();
 <<__PHPStdLib>>
-function get_magic_quotes_gpc();
-<<__PHPStdLib>>
-function get_magic_quotes_runtime();
-<<__PHPStdLib>>
 function get_required_files();
 <<__PHPStdLib>>
-function getenv($varname);
+function getenv(string $varname);
 <<__PHPStdLib>>
 function getlastmod();
 <<__PHPStdLib>>
@@ -58,13 +54,13 @@ function getmypid();
 <<__PHPStdLib>>
 function getmyuid();
 <<__PHPStdLib>>
-function getopt($options, $longopts = null);
+function getopt(string $options, $longopts = null);
 <<__PHPStdLib>>
-function getrusage($who = 0);
+function getrusage(int $who = 0);
 <<__PHPStdLib>>
-function clock_getres($clk_id, &$sec, &$nsec);
+function clock_getres(int $clk_id, inout $sec, inout $nsec);
 <<__PHPStdLib>>
-function clock_gettime($clk_id, &$sec, &$nsec);
+function clock_gettime(int $clk_id, inout $sec, inout $nsec);
 <<__PHPStdLib>>
 function clock_gettime_ns(int $clk_id): int;
 <<__PHPStdLib>>
@@ -78,21 +74,21 @@ function hphp_memory_start_interval(): bool;
 <<__PHPStdLib>>
 function hphp_memory_stop_interval(): bool;
 <<__PHPStdLib>>
-function ini_alter($varname, $newvalue);
+function ini_alter(string $varname, $newvalue);
 <<__PHPStdLib>>
-function ini_get_all($extension = null);
+function ini_get_all(string $extension = "");
 <<__PHPStdLib>>
-function ini_get($varname);
+function ini_get(string $varname);
 <<__PHPStdLib>>
-function ini_restore($varname);
+function ini_restore(string $varname);
 <<__PHPStdLib>>
-function ini_set($varname, $newvalue);
+function ini_set(string $varname, $newvalue);
 <<__PHPStdLib>>
 function memory_get_allocation();
 <<__PHPStdLib>>
-function memory_get_peak_usage($real_usage = false);
+function memory_get_peak_usage(bool $real_usage = false);
 <<__PHPStdLib>>
-function memory_get_usage($real_usage = false);
+function memory_get_usage(bool $real_usage = false);
 <<__PHPStdLib>>
 function php_ini_scanned_files();
 <<__PHPStdLib>>
@@ -100,23 +96,23 @@ function php_logo_guid();
 <<__PHPStdLib>>
 function php_sapi_name();
 <<__PHPStdLib>>
-function php_uname($mode = null);
+function php_uname(string $mode = "");
 <<__PHPStdLib>>
 function phpcredits($flag = 0);
 <<__PHPStdLib>>
-function phpinfo($what = 0);
+function phpinfo(int $what = 0);
 <<__PHPStdLib>>
-function phpversion($extension = null);
+function phpversion(string $extension = "");
 <<__PHPStdLib>>
-function putenv($setting);
+function putenv(string $setting);
 <<__PHPStdLib>>
-function set_magic_quotes_runtime($new_setting);
-<<__PHPStdLib>>
-function set_time_limit($seconds);
+function set_time_limit(int $seconds);
+function set_pre_timeout_handler(
+  int $seconds, (function(HH\Awaitable<mixed>): void) $callback): void;
 <<__PHPStdLib>>
 function sys_get_temp_dir();
-<<__PHPStdLib>>
-function version_compare($version1, $version2, $sop = null);
+<<__PHPStdLib, __Pure>>
+function version_compare(string $version1, string $version2, string $sop = "");
 <<__PHPStdLib>>
 function gc_enabled();
 <<__PHPStdLib>>
@@ -129,9 +125,3 @@ function gc_collect_cycles();
 function gc_mem_caches();
 <<__PHPStdLib>>
 function gc_check_heap();
-<<__PHPStdLib>>
-function zend_logo_guid();
-<<__PHPStdLib>>
-function zend_thread_id();
-<<__PHPStdLib>>
-function zend_version();

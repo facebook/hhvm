@@ -1,2 +1,1 @@
-File "subclass_not_const.php", line 9, characters 7-7:
-Only __Const classes may extend a __Const class (Typing[4198])
+No errors

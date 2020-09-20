@@ -16,5 +16,6 @@ where
     [foo] => 1
 )
 )
-    at %s/where-serialize.php:25
+    at %s/where-serialize.php:27
+#2  entrypoint_whereserialize ()
 quit

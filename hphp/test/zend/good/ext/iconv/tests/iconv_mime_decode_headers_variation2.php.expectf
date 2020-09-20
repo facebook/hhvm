@@ -1,7 +1,7 @@
 *** Testing iconv_mime_decode_headers() : usage variations ***
 
 -- Iteration 1 --
-array(5) {
+darray(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -11,16 +11,14 @@ array(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 2 --
-array(5) {
+darray(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -30,16 +28,14 @@ array(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 3 --
-array(5) {
+darray(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -49,16 +45,14 @@ array(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 4 --
-array(5) {
+darray(5) {
   ["Subject"]=>
   string(13) "A Sample Test"
   ["To"]=>
@@ -68,293 +62,89 @@ array(5) {
   ["Message-Id"]=>
   string(21) "<example@example.com>"
   ["Received"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
     string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
   }
 }
 
 -- Iteration 5 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 6 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 7 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 8 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 9 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 10 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 11 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 12 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 13 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 14 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 15 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 16 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 17 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 18 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 19 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 20 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 21 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, object given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 22 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 23 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, resource given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_headers_variation2.php on line 103
 Done

@@ -89,7 +89,7 @@ bool match_bindjmp(const Vunit& unit, Vlabel b, Vptr* addr) {
  * a normal exit, then convert the jcc to a bindexit with the jcc's condition
  * and the original bindjmp's dest.
  */
-void optimizeExits(Vunit& unit) {
+void optimizeExits(Vunit& unit, MaybeVinstrId clobber) {
   auto const pred_counts = count_predecessors(unit);
 
   PostorderWalker{unit}.dfs([&](Vlabel b) {
@@ -102,6 +102,7 @@ void optimizeExits(Vunit& unit) {
     auto const t1 = ijcc.targets[1];
     if (t0 == t1) {
       code.back() = jmp{t0};
+      if (clobber) code.back().id = *clobber;
       return;
     }
     if (pred_counts[t0] != 1 || pred_counts[t1] != 1) return;
@@ -120,15 +121,21 @@ void optimizeExits(Vunit& unit) {
       hoist_sync(exit);
       code.back() = bindjcc{cc, ijcc.sf, bj.target, bj.spOff,
                             bj.trflags, bj.args};
+      if (clobber) code.back().id = *clobber;
       code.emplace_back(jmp{next}, irctx);
+    };
+
+    auto const is_colder = [&] (Vlabel succ) {
+      return unit.blocks[b].area_idx < unit.blocks[succ].area_idx;
     };
 
     // Try to replace jcc to normal exit with bindexit followed by jmp,
     // as long as the sp adjustment is harmless to hoist (disp==0)
     Vptr sp;
-    if (match_bindjmp(unit, t1, &sp) && sp == sp.base[0]) {
+    if (match_bindjmp(unit, t1, &sp) && sp == sp.base[0] && !is_colder(t0)) {
       fold_exit(ijcc.cc, t1, t0);
-    } else if (match_bindjmp(unit, t0, &sp) && sp == sp.base[0]) {
+    } else if (match_bindjmp(unit, t0, &sp) && sp == sp.base[0] &&
+               !is_colder(t1)) {
       fold_exit(ccNegate(ijcc.cc), t0, t1);
     }
   });

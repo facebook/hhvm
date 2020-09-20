@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Base {
   private $p1='sadf';
 
@@ -8,9 +8,9 @@ class Base {
 }
 
 class Child extends Base { }
-
+<<__EntryPoint>> function main(): void {
 $base=new Base();
 print_r($base->getFields(new Base()));
 $child=new Child();
 print_r($child->getFields(new Base()));
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 $gmt = IntlTimeZone::getGMT();
@@ -8,5 +8,5 @@ var_dump($gmt->useDaylightTime());
 
 var_dump(intltz_use_daylight_time($lsb));
 var_dump(intltz_use_daylight_time($gmt));
-?>
-==DONE==
+echo "==DONE==";
+}

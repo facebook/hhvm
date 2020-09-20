@@ -62,27 +62,27 @@ $sum = $number_with_long_identifier1 + // num1
 
 function_call(
   $num1 // num1
-  +
-  $num2, // num2
+    +
+    $num2, // num2
 );
 
 function_call(
   $number_with_long_identifier1 // num1
-  +
-  $number_with_long_identifier2 // num2
-  +
-  $number_with_long_identifier3, // num3
+    +
+    $number_with_long_identifier2 // num2
+    +
+    $number_with_long_identifier3, // num3
 );
 
 function_call(
   $num1 + // num1
-  $num2, // num2
+    $num2, // num2
 );
 
 function_call(
   $number_with_long_identifier1 + // num1
-  $number_with_long_identifier2 + // num2
-  $number_with_long_identifier3, // num3
+    $number_with_long_identifier2 + // num2
+    $number_with_long_identifier3, // num3
 );
 
 function_call(
@@ -170,33 +170,29 @@ function f(
   // ...
 }
 
-function getArray(
-): array<
+function getArray(): array<
   string, // strings
   string // strings
 > {
-  return array("foo" => "bar");
+  return darray["foo" => "bar"];
 }
 
-function getArray(
-): array<
+function getArray(): array<
   string // strings
   ,
   string // strings
 > {
-  return array("foo" => "bar");
+  return darray["foo" => "bar"];
 }
 
-function getDict(
-): dict<
+function getDict(): dict<
   string, // strings
   string, // strings
 > {
   return dict["foo" => "bar"];
 }
 
-function getDict(
-): dict<
+function getDict(): dict<
   string // strings
   ,
   string, // strings
@@ -214,7 +210,7 @@ function swap<
   Vector<U>, // U
   Vector<T>, // T
 > {
-  return Pair { $b, $a };
+  return Pair {$b, $a};
 }
 
 function swap<
@@ -230,5 +226,5 @@ function swap<
   ,
   Vector<T>, // T
 > {
-  return Pair { $b, $a };
+  return Pair {$b, $a};
 }

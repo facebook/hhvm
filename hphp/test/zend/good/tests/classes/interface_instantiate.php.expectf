@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot instantiate interface if_a in %s/interface_instantiate.php on line 7

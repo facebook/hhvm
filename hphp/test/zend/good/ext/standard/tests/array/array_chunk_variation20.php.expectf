@@ -1,25 +1,14 @@
-array(11) {
-  [0]=>
+varray(11) {
   int(0)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
-  [3]=>
   int(3)
-  [4]=>
   int(4)
-  [5]=>
   int(5)
-  [6]=>
   int(6)
-  [7]=>
   int(7)
-  [8]=>
   int(8)
-  [9]=>
   int(9)
-  [10]=>
   int(10)
 }
 [0]
@@ -28,310 +17,258 @@ NULL
 NULL
 
 [1]
-array(11) {
-  [0]=>
-  array(1) {
+varray(11) {
+  darray(1) {
     [0]=>
     int(0)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(1)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(2)
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(3)
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(4)
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(5)
   }
-  [6]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(6)
   }
-  [7]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(7)
   }
-  [8]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(8)
   }
-  [9]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(9)
   }
-  [10]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
-array(11) {
-  [0]=>
-  array(1) {
+varray(11) {
+  darray(1) {
     [0]=>
     int(0)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     int(1)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(2)
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     [3]=>
     int(3)
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     [4]=>
     int(4)
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [5]=>
     int(5)
   }
-  [6]=>
-  array(1) {
+  darray(1) {
     [6]=>
     int(6)
   }
-  [7]=>
-  array(1) {
+  darray(1) {
     [7]=>
     int(7)
   }
-  [8]=>
-  array(1) {
+  darray(1) {
     [8]=>
     int(8)
   }
-  [9]=>
-  array(1) {
+  darray(1) {
     [9]=>
     int(9)
   }
-  [10]=>
-  array(1) {
+  darray(1) {
     [10]=>
     int(10)
   }
 }
-array(11) {
-  [0]=>
-  array(1) {
+varray(11) {
+  darray(1) {
     [0]=>
     int(0)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(1)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(2)
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(3)
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(4)
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(5)
   }
-  [6]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(6)
   }
-  [7]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(7)
   }
-  [8]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(8)
   }
-  [9]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(9)
   }
-  [10]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
 
 [2]
-array(6) {
-  [0]=>
-  array(2) {
+varray(6) {
+  darray(2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(2)
     [1]=>
     int(3)
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(4)
     [1]=>
     int(5)
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(6)
     [1]=>
     int(7)
   }
-  [4]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(8)
     [1]=>
     int(9)
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
-array(6) {
-  [0]=>
-  array(2) {
+varray(6) {
+  darray(2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [2]=>
     int(2)
     [3]=>
     int(3)
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     [4]=>
     int(4)
     [5]=>
     int(5)
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     [6]=>
     int(6)
     [7]=>
     int(7)
   }
-  [4]=>
-  array(2) {
+  darray(2) {
     [8]=>
     int(8)
     [9]=>
     int(9)
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [10]=>
     int(10)
   }
 }
-array(6) {
-  [0]=>
-  array(2) {
+varray(6) {
+  darray(2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(2)
     [1]=>
     int(3)
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(4)
     [1]=>
     int(5)
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(6)
     [1]=>
     int(7)
   }
-  [4]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(8)
     [1]=>
     int(9)
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
 
 [3]
-array(4) {
-  [0]=>
-  array(3) {
+varray(4) {
+  darray(3) {
     [0]=>
     int(0)
     [1]=>
@@ -339,8 +276,7 @@ array(4) {
     [2]=>
     int(2)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(3)
     [1]=>
@@ -348,8 +284,7 @@ array(4) {
     [2]=>
     int(5)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(6)
     [1]=>
@@ -357,17 +292,15 @@ array(4) {
     [2]=>
     int(8)
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(9)
     [1]=>
     int(10)
   }
 }
-array(4) {
-  [0]=>
-  array(3) {
+varray(4) {
+  darray(3) {
     [0]=>
     int(0)
     [1]=>
@@ -375,8 +308,7 @@ array(4) {
     [2]=>
     int(2)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [3]=>
     int(3)
     [4]=>
@@ -384,8 +316,7 @@ array(4) {
     [5]=>
     int(5)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     [6]=>
     int(6)
     [7]=>
@@ -393,17 +324,15 @@ array(4) {
     [8]=>
     int(8)
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     [9]=>
     int(9)
     [10]=>
     int(10)
   }
 }
-array(4) {
-  [0]=>
-  array(3) {
+varray(4) {
+  darray(3) {
     [0]=>
     int(0)
     [1]=>
@@ -411,8 +340,7 @@ array(4) {
     [2]=>
     int(2)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(3)
     [1]=>
@@ -420,8 +348,7 @@ array(4) {
     [2]=>
     int(5)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(6)
     [1]=>
@@ -429,8 +356,7 @@ array(4) {
     [2]=>
     int(8)
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(9)
     [1]=>
@@ -439,9 +365,8 @@ array(4) {
 }
 
 [4]
-array(3) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(4) {
     [0]=>
     int(0)
     [1]=>
@@ -451,8 +376,7 @@ array(3) {
     [3]=>
     int(3)
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     [0]=>
     int(4)
     [1]=>
@@ -462,8 +386,7 @@ array(3) {
     [3]=>
     int(7)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(8)
     [1]=>
@@ -472,9 +395,8 @@ array(3) {
     int(10)
   }
 }
-array(3) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(4) {
     [0]=>
     int(0)
     [1]=>
@@ -484,8 +406,7 @@ array(3) {
     [3]=>
     int(3)
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     [4]=>
     int(4)
     [5]=>
@@ -495,8 +416,7 @@ array(3) {
     [7]=>
     int(7)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     [8]=>
     int(8)
     [9]=>
@@ -505,9 +425,8 @@ array(3) {
     int(10)
   }
 }
-array(3) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(4) {
     [0]=>
     int(0)
     [1]=>
@@ -517,8 +436,7 @@ array(3) {
     [3]=>
     int(3)
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     [0]=>
     int(4)
     [1]=>
@@ -528,8 +446,7 @@ array(3) {
     [3]=>
     int(7)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(8)
     [1]=>
@@ -540,9 +457,8 @@ array(3) {
 }
 
 [5]
-array(3) {
-  [0]=>
-  array(5) {
+varray(3) {
+  darray(5) {
     [0]=>
     int(0)
     [1]=>
@@ -554,8 +470,7 @@ array(3) {
     [4]=>
     int(4)
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(5)
     [1]=>
@@ -567,15 +482,13 @@ array(3) {
     [4]=>
     int(9)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
-array(3) {
-  [0]=>
-  array(5) {
+varray(3) {
+  darray(5) {
     [0]=>
     int(0)
     [1]=>
@@ -587,8 +500,7 @@ array(3) {
     [4]=>
     int(4)
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [5]=>
     int(5)
     [6]=>
@@ -600,15 +512,13 @@ array(3) {
     [9]=>
     int(9)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [10]=>
     int(10)
   }
 }
-array(3) {
-  [0]=>
-  array(5) {
+varray(3) {
+  darray(5) {
     [0]=>
     int(0)
     [1]=>
@@ -620,8 +530,7 @@ array(3) {
     [4]=>
     int(4)
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(5)
     [1]=>
@@ -633,17 +542,15 @@ array(3) {
     [4]=>
     int(9)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
 
 [6]
-array(2) {
-  [0]=>
-  array(6) {
+varray(2) {
+  darray(6) {
     [0]=>
     int(0)
     [1]=>
@@ -657,8 +564,7 @@ array(2) {
     [5]=>
     int(5)
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(6)
     [1]=>
@@ -671,9 +577,8 @@ array(2) {
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(6) {
+varray(2) {
+  darray(6) {
     [0]=>
     int(0)
     [1]=>
@@ -687,8 +592,7 @@ array(2) {
     [5]=>
     int(5)
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [6]=>
     int(6)
     [7]=>
@@ -701,9 +605,8 @@ array(2) {
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(6) {
+varray(2) {
+  darray(6) {
     [0]=>
     int(0)
     [1]=>
@@ -717,8 +620,7 @@ array(2) {
     [5]=>
     int(5)
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(6)
     [1]=>
@@ -733,9 +635,8 @@ array(2) {
 }
 
 [7]
-array(2) {
-  [0]=>
-  array(7) {
+varray(2) {
+  darray(7) {
     [0]=>
     int(0)
     [1]=>
@@ -751,8 +652,7 @@ array(2) {
     [6]=>
     int(6)
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     [0]=>
     int(7)
     [1]=>
@@ -763,9 +663,8 @@ array(2) {
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(7) {
+varray(2) {
+  darray(7) {
     [0]=>
     int(0)
     [1]=>
@@ -781,8 +680,7 @@ array(2) {
     [6]=>
     int(6)
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     [7]=>
     int(7)
     [8]=>
@@ -793,9 +691,8 @@ array(2) {
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(7) {
+varray(2) {
+  darray(7) {
     [0]=>
     int(0)
     [1]=>
@@ -811,8 +708,7 @@ array(2) {
     [6]=>
     int(6)
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     [0]=>
     int(7)
     [1]=>
@@ -825,9 +721,8 @@ array(2) {
 }
 
 [8]
-array(2) {
-  [0]=>
-  array(8) {
+varray(2) {
+  darray(8) {
     [0]=>
     int(0)
     [1]=>
@@ -845,8 +740,7 @@ array(2) {
     [7]=>
     int(7)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(8)
     [1]=>
@@ -855,9 +749,8 @@ array(2) {
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(8) {
+varray(2) {
+  darray(8) {
     [0]=>
     int(0)
     [1]=>
@@ -875,8 +768,7 @@ array(2) {
     [7]=>
     int(7)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [8]=>
     int(8)
     [9]=>
@@ -885,9 +777,8 @@ array(2) {
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(8) {
+varray(2) {
+  darray(8) {
     [0]=>
     int(0)
     [1]=>
@@ -905,8 +796,7 @@ array(2) {
     [7]=>
     int(7)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(8)
     [1]=>
@@ -917,9 +807,8 @@ array(2) {
 }
 
 [9]
-array(2) {
-  [0]=>
-  array(9) {
+varray(2) {
+  darray(9) {
     [0]=>
     int(0)
     [1]=>
@@ -939,17 +828,15 @@ array(2) {
     [8]=>
     int(8)
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(9)
     [1]=>
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(9) {
+varray(2) {
+  darray(9) {
     [0]=>
     int(0)
     [1]=>
@@ -969,17 +856,15 @@ array(2) {
     [8]=>
     int(8)
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [9]=>
     int(9)
     [10]=>
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(9) {
+varray(2) {
+  darray(9) {
     [0]=>
     int(0)
     [1]=>
@@ -999,8 +884,7 @@ array(2) {
     [8]=>
     int(8)
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(9)
     [1]=>
@@ -1009,9 +893,8 @@ array(2) {
 }
 
 [10]
-array(2) {
-  [0]=>
-  array(10) {
+varray(2) {
+  darray(10) {
     [0]=>
     int(0)
     [1]=>
@@ -1033,15 +916,13 @@ array(2) {
     [9]=>
     int(9)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(10) {
+varray(2) {
+  darray(10) {
     [0]=>
     int(0)
     [1]=>
@@ -1063,15 +944,13 @@ array(2) {
     [9]=>
     int(9)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [10]=>
     int(10)
   }
 }
-array(2) {
-  [0]=>
-  array(10) {
+varray(2) {
+  darray(10) {
     [0]=>
     int(0)
     [1]=>
@@ -1093,17 +972,15 @@ array(2) {
     [9]=>
     int(9)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(10)
   }
 }
 
 [11]
-array(1) {
-  [0]=>
-  array(11) {
+varray(1) {
+  darray(11) {
     [0]=>
     int(0)
     [1]=>
@@ -1128,9 +1005,8 @@ array(1) {
     int(10)
   }
 }
-array(1) {
-  [0]=>
-  array(11) {
+varray(1) {
+  darray(11) {
     [0]=>
     int(0)
     [1]=>
@@ -1155,9 +1031,8 @@ array(1) {
     int(10)
   }
 }
-array(1) {
-  [0]=>
-  array(11) {
+varray(1) {
+  darray(11) {
     [0]=>
     int(0)
     [1]=>

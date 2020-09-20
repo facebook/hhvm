@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ANALYSIS_H_
-#define incl_HPHP_ANALYSIS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/cfg.h"
 
@@ -39,6 +38,10 @@ struct Block;
 /*
  * Returns the canonical version of the given value by tracing through any
  * passthrough instructions (Mov, CheckType, etc...).
+ *
+ * Note that in general its not safe to replace a value with its canonical
+ * version. This should only be used for analyzing the origin of a particular
+ * value.
  */
 const SSATmp* canonical(const SSATmp*);
 SSATmp* canonical(SSATmp*);
@@ -90,4 +93,3 @@ SSATmp* least_common_ancestor(SSATmp*, SSATmp*);
 }}
 
 
-#endif

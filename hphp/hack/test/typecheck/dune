@@ -1,0 +1,141 @@
+(* -*- tuareg -*- *)
+
+(* dune doesn't support recursive global search so we implement it
+   ourselves since there are way too many files in test/typecheck
+*)
+let rec sub_folder f acc abs_path rel_path =
+  if Sys.file_exists abs_path && Sys.is_directory abs_path then
+    let acc = f (abs_path, rel_path) acc in
+    let sub = Sys.readdir abs_path in
+    Array.fold_left (fun acc name ->
+        sub_folder f acc (Filename.concat abs_path name)
+          (Filename.concat rel_path name)) acc sub
+  else acc
+
+let generate_sub_folders dir rel_dir =
+  sub_folder (fun x y -> x :: y) [] dir rel_dir
+
+let generate_glob file = Printf.sprintf "(glob_files %%{project_root}/%s)" file
+
+let generate_hh_flags dirs =
+  let aux acc (abs_dir, rel_dir) =
+    let absname = Filename.concat abs_dir "HH_FLAGS" in
+    let name = Filename.concat rel_dir "HH_FLAGS" in
+    if Sys.file_exists absname then
+      (generate_glob name) :: acc
+    else acc in
+  List.fold_left aux [] dirs
+
+let generate_patterns dirs pattern acc =
+  let aux acc (_, dir) =
+    let name = Filename.concat dir pattern in
+    (generate_glob name) :: acc in
+  List.fold_left aux acc dirs
+
+
+let () =
+  (* we are in test/typecheck *)
+  let test_dir = Sys.getcwd () in
+  let subdirs = generate_sub_folders test_dir "test/typecheck" in
+  let files_hh = generate_hh_flags subdirs in
+  let files_php = generate_patterns subdirs "*.php" files_hh in
+  let files_tc = generate_patterns subdirs "*.php-only-typecheck" files_php in
+  let files_tc = generate_patterns subdirs "*.exp" files_tc in
+  let files_dc = generate_patterns subdirs "*.decl_exp" files_php in
+  (* let files_tast = generate_patterns subdirs "*.tast_typecheck_exp" files_php in *)
+  let command batch flags = Printf.sprintf
+"    (action (run %%{project_root}/test/verify.py %%{project_root}/test/typecheck
+          --program %%{exe:../../src/hh_single_type_check.exe}
+          %s %s))" (if batch then "--batch" else "") flags in
+  let deps files =
+    Printf.sprintf
+"      (deps %%{exe:../../src/hh_single_type_check.exe}
+          %%{project_root}/test/verify.py
+          %%{project_root}/test/review.sh
+          %s)" (String.concat "\n          " files) in
+  (* typecheck *)
+  let typecheck_deps = deps files_tc in
+  let cmds = [ "--flags"
+             ; "--shallow-class-decl"
+             ; "--error-format raw"
+             ] in
+  let cmd = String.concat " " cmds in
+  let typecheck =
+    Printf.sprintf "; in %s
+(alias
+    (name typecheck)
+    %s
+    %s)" test_dir typecheck_deps (command true cmd) in
+  (* legacy decl *)
+  let cmds = [ "--out-extension .legacy_decl.out"
+             ; "--expect-extension .legacy_decl.exp"
+             ; "--fallback-expect-extension .exp"
+             ; "--flags"
+             ; "--out-extension .legacy_decl.out"
+             ; "--error-format raw" ] in
+  let cmd = String.concat " " cmds in
+  let typecheck_legacy_decl =
+    Printf.sprintf "
+
+(alias
+      (name typecheck_legacy_decl)
+      %s
+      %s)" (deps files_tc)
+    (command true cmd) in
+  (* like types *)
+  let cmds = [ "--out-extension .like_types.out"
+    ; "--expect-extension .like_types.exp"
+    ; "--fallback-expect-extension .exp"
+    ; "--flags"
+    ; "--like-types-all"
+    ; "--error-format raw"
+    ; "--out-extension .like_types.out" ] in
+  let cmd = String.concat " " cmds in
+  let typecheck_like_types =
+    Printf.sprintf "
+
+(alias
+      (name typecheck_like_types)
+      %s
+      %s)" (deps files_tc)
+    (command true cmd) in
+  (* decl_compare *)
+  let decl_compare =
+    Printf.sprintf "
+
+; when the test succeeds, the output file will be empty, so none of the
+; decl_exp files will ever exist for this test
+(alias
+    (name decl_compare)
+    %s
+    %s)" (deps files_dc)
+      (command true "--out-extension .decl_out --expect-extension .decl_exp --flags --decl-compare") in
+  (* tast_typecheck is marked as disabled, but it should look like this *)
+  (* let tast_typecheck = *)
+  (*   let cmds = [ "--out-extension .tast_typecheck_out" *)
+  (*              ; "--expect-extension .tast_typecheck_exp" *)
+  (*              ; "--default-expect-regex" *)
+  (*              ; "\"(No errors|Did not typecheck the TAST as there are typing errors.)\"" *)
+  (*              ; "--flags --tast-check" ] in *)
+  (*   let cmd = String.concat " " cmds in *)
+  (*   Printf.sprintf " *)
+
+(* (alias *)
+  (*   (name runtest) *)
+  (*   %s *)
+  (*   %s)" (deps files_tast) (command false cmd) in *)
+  let run_tests =
+    Printf.sprintf "
+
+(alias
+    (name runtest)
+    (deps
+      (alias typecheck)
+      (alias decl_compare)
+      (alias typecheck_legacy_decl)
+      (alias typecheck_like_types)))" in
+
+  let dune_file = typecheck ^
+                  typecheck_legacy_decl ^ typecheck_like_types ^ decl_compare ^
+                  run_tests in
+  Jbuild_plugin.V1.send dune_file

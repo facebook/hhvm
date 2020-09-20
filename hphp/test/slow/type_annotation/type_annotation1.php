@@ -1,12 +1,15 @@
 <?hh
 class C {
-  const type T = ?array<int, @bool>;
-  const type U = map<arraykey, Vector<array<int>>>;
+  const type T = ?darray<int, <<__Soft>> bool>;
+  const type U = Map<arraykey, Vector<varray<int>>>;
   const type V = (int, ?float, bool);
   const type W = (function (): void);
-  const type X = (function (mixed, resource): array);
+  const type X = (function (mixed, resource): arraylike);
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation1() {
 $x = new ReflectionTypeConstant('C', 'T');
 var_dump($x->getAssignedTypeText());
 var_dump($x->getTypeStructure());
@@ -26,3 +29,4 @@ var_dump($x->getTypeStructure());
 $x = new ReflectionTypeConstant('C', 'X');
 var_dump($x->getAssignedTypeText());
 var_dump($x->getTypeStructure());
+}

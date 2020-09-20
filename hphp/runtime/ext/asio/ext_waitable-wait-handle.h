@@ -34,7 +34,7 @@ namespace HPHP {
 struct AsioBlockable;
 struct AsioContext;
 
-struct c_WaitableWaitHandle : c_WaitHandle {
+struct c_WaitableWaitHandle : c_Awaitable {
   WAITHANDLE_CLASSOF(WaitableWaitHandle);
   WAITHANDLE_DTOR(WaitableWaitHandle);
 
@@ -56,13 +56,6 @@ struct c_WaitableWaitHandle : c_WaitHandle {
   AsioBlockableChain& getParentChain();
   void join();
   String getName();
-  Array getParents() {
-    // no parent data available if finished
-    if (isFinished()) {
-      return empty_array();
-    }
-    return getParentChain().toArray();
-  }
   Array getDependencyStack();
 
  protected:

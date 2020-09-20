@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface I { function foo(); }
 trait T0 implements I {}
 trait T implements I { use T0; }
@@ -9,3 +9,4 @@ class A {
     return self::class;
   }
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

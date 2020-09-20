@@ -1,4 +1,3 @@
 <?hh // strict
 
-define('X', 3);
-
+const int X = 3;

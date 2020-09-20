@@ -1,4 +1,5 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 if (!function_exists("time_sleep_until")) die('skip time_sleep_until() not available');
-?>
+}

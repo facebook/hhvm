@@ -1,9 +1,9 @@
 <?hh
 
-function ref(&$x) {
+function ref(inout $x) {
 }
 
-function foo($r, inout $a, inout $b, $q, inout $c, ...) {
+function foo($r, inout $a, inout $b, $q, inout $c, ...$_) {
   $a = 'FOO:A';
   $b = 'FOO:B';
   $c = 'FOO:C';
@@ -20,16 +20,9 @@ function launder($x) {
   return $x;
 }
 function get_arr() {
-  $x = array('alpha' => vec[dict['beta' => new Herp], null, new Herp, null]);
-  $x['alpha'][0]['beta'] = array('one' => '*BLANK*', 'two' => '*BLANK*');
+  $x = darray['alpha' => vec[dict['beta' => new Herp], null, new Herp, null]];
+  $x['alpha'][0]['beta'] = darray['one' => '*BLANK*', 'two' => '*BLANK*'];
   return $x;
-}
-
-function &get_arr_ref() {
-  static $a;
-  if (!isset($a)) $a = get_arr();
-  echo "get_arr_ref()\n";
-  return $a;
 }
 
 function main() {
@@ -48,17 +41,6 @@ function main() {
   var_dump($x);
 
   /* The following more general syntax is not allowed-
-  foo(
-    $i = 1,
-    inout get_arr_ref()[launder('alpha')][$i++],
-    inout get_arr_ref()[$t = launder('alpha')][$i++],
-    $a =& get_arr_ref(),
-    inout $a[$t][$i],
-    $i *= 2,
-    $t = 'red',
-  );
-  var_dump($a);
-
   $i = 0;
   $x = 'apple';
   Herp::$derp = get_arr();
@@ -94,27 +76,27 @@ function main() {
   $b = 'nope';
   $c = 'nope';
   foo(
-    &$a,
+    $a,
     inout $a,
     inout $b,
     $b,
     inout $c,
     $a,
-    &$c,
+    $c,
   );
   var_dump($a, $b, $c);
 
-  $a = array('nope');
-  $b = array('nope');
-  $c = array('yep');
+  $a = varray['yep'];
+  $b = varray['nope'];
+  $c = varray['yep'];
   foo(
-    &$a,
+    $a,
     inout $a[0],
     inout $b[0],
     $b,
     inout $c[0],
-    ref($a),
-    ref(ref(ref(&$c))),
+    ref(inout $a),
+    ref(inout $c),
   );
   var_dump($a[0], $b[0], $c[0]);
 
@@ -124,7 +106,7 @@ function main() {
   $a->y = 'two';
   $saved = $a;
   foo(
-    &$a,
+    inout $a,
     inout $a->x,
     inout $a,
     $a,
@@ -135,7 +117,7 @@ function main() {
   Herp::$derp = 'foo';
   $a = 'Herp';
   foo(
-    &$a,
+    inout $a,
     inout $a::$derp,
     inout $a,
     $a,
@@ -148,7 +130,7 @@ function main() {
   $a->y = 'two';
   $saved = $a;
   foo(
-    &$a,
+    inout $a,
     inout $a,
     inout $a->x,
     $a,
@@ -161,7 +143,7 @@ function main() {
   $a->y = 'two';
   $saved = $a;
   foo(
-    &$a,
+    inout $a,
     inout $a->x,
     inout $a->y,
     $a = 'oops',
@@ -171,4 +153,8 @@ function main() {
   */
 }
 
+
+<<__EntryPoint>>
+function main_side_effects() {
 main();
+}

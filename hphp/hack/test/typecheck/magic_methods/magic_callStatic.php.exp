@@ -1,0 +1,2 @@
+File "magic_callStatic.php", line 4, characters 3-37:
+Magic `__callStatic` methods are no longer supported (Parsing[1002])

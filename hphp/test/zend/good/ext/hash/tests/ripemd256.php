@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 echo hash('ripemd256', '') . "\n";
 echo hash('ripemd256', 'a') . "\n";
 echo hash('ripemd256', 'abc') . "\n";
@@ -8,3 +8,4 @@ echo hash('ripemd256', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq
 echo hash('ripemd256', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') . "\n";
 echo hash('ripemd256', '12345678901234567890123456789012345678901234567890123456789012345678901234567890') . "\n";
 echo hash('ripemd256', str_repeat('a', 1000000)) . "\n";
+}

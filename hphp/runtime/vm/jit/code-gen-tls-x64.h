@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_TLS_X64_H_
-#define incl_HPHP_VM_CODE_GEN_TLS_X64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -53,7 +52,23 @@ namespace HPHP { namespace jit { namespace x64 { namespace detail {
 template <typename T>
 Vptr emitTLSAddr(Vout& /*v*/, TLSDatum<T> datum) {
   uintptr_t vaddr = uintptr_t(datum.tls) - tlsBase();
-  return Vptr{baseless(vaddr), Vptr::FS};
+  return Vptr{baseless(vaddr), Segment::FS};
+}
+
+template<typename T>
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
+  auto const base = v.makeReg();
+  auto const addr = v.makeReg();
+  v << load{Vptr{baseless(0), Segment::FS}, base};
+
+  auto const tlsBaseAddr = tlsBase();
+  auto const datumAddr = uintptr_t(datum.tls) + offset;
+  if (datumAddr < tlsBaseAddr) {
+    v << subq{v.cns(tlsBaseAddr - datumAddr), base, addr, v.makeReg()};
+  } else {
+    v << addq{v.cns(datumAddr - tlsBaseAddr), base, addr, v.makeReg()};
+  }
+  return addr;
 }
 
 #else // __APPLE__
@@ -110,8 +125,15 @@ template<typename T>
 Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
   auto const scratch = v.makeReg();
 
-  v << load{Vptr{baseless(datum.raw[1] * 8), Vptr::GS}, scratch};
+  v << load{Vptr{baseless(datum.raw[1] * 8), Segment::GS}, scratch};
   return scratch[datum.raw[2]];
+}
+
+template<typename T>
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
+  auto const b = v.makeReg();
+  v << lea{detail::emitTLSAddr(v, datum) + offset, b};
+  return b;
 }
 
 #endif
@@ -120,4 +142,3 @@ Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
 
 }}}}
 
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_BISECTOR_H_
-#define incl_HPHP_UTIL_BISECTOR_H_
+#pragma once
 
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/trace.h"
@@ -88,4 +87,3 @@ private:
 
 }
 
-#endif

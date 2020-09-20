@@ -13,41 +13,55 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UNWIND_H_
-#define incl_HPHP_UNWIND_H_
+#pragma once
 
 #include <stdexcept>
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/either.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Unwind the PHP exception on the top of the fault stack.
- */
-void unwindPhp();
+enum UnwinderResult {
+   UnwindNone        = 0,
+   // Unwound an async function and placed the exception inside a failed static
+   // wait handle
+   UnwindFSWH        = (1u << 0),
+   // Unwound until the given fp, i.e. did not reach the end of the vm nesting
+   UnwindReachedGoal = (1u << 1),
+};
+
+constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {
+   return UnwinderResult((int)a | (int)b);
+}
+
+//////////////////////////////////////////////////////////////////////
 
 /*
- * Unwind the PHP exception.
+ * Locks the object on the top of the stack if the PC points to a FCallCtor and
+ * the FCallArgs indicates the necessity to lock
  */
-void unwindPhp(ObjectData* phpException);
+void lockObjectWhileUnwinding(PC pc, Stack& stack);
 
 /*
- * Unwind the C++ exception.
+ * Find a catch exception handler for a given raise location if the handler was
+ * found or kInvalidOffset.
  */
-void unwindCpp(Exception* cppException);
+Offset findCatchHandler(const Func* func, Offset raiseOffset);
 
 /*
- * Unwind the frame for a builtin.  Currently only used when switching modes
- * for hphpd_break, fb_enable_code_coverage, and xdebug_start_code_coverage.
+ * Unwind the exception.
  */
-void unwindBuiltinFrame();
+UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
+                        const ActRec* fpToUnwind = nullptr,
+                        bool teardown = true);
 
 /*
  * The main entry point to the unwinder.
@@ -57,54 +71,23 @@ void unwindBuiltinFrame();
  *
  * If the exception was not handled in this nesting of the VM, it will be
  * rethrown. Otherwise, either a catch or fault handler was identified and
- * the VM state has been prepared for entry to it, or end of execution was
- * reached and vmpc() will be zero.
+ * the VM state has been prepared for entry to it, or end of execution of
+ * the action callback was reached, in which case the VM state will be left
+ * in the same state as left by the callback.
+ *
+ * Return true iff the action succeeded.
  */
-template<class Action> void exception_handler(Action action);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * This exception is thrown when executing an Unwind bytecode, which
- * will reraise the current fault and resume propagating it.
- */
-struct VMPrepareUnwind : BaseException {
-  const char* what() const noexcept override { return "VMPrepareUnwind"; }
-};
+template<class Action> bool exception_handler(Action action);
 
 /*
- * Thrown when we need to "switch modes" by re-starting the current VM
- * invocation.  For example, if we need to break for the debugger, or
- * enable code coverage mode.
+ * top and prev must implement Throwable. Walk the chain of top's previous
+ * pointers, finding the first unset one. If there is a cycle in either top or
+ * prev's previous chains, do nothing. Otherwise, add prev to the end of top's
+ * previous chain.
+ *
+ * Either way, this function takes ownership of one existing reference to prev.
  */
-struct VMSwitchMode : BaseException {
-  const char* what() const noexcept override { return "VMSwitchMode"; }
-};
-
-/*
- * Similar to VMSwitchMode, but when we were in the middle of a
- * suspendStack operation.
- */
-struct VMSuspendStack : BaseException {
-  const char* what() const noexcept override { return "VMSuspendStack"; }
-};
-
-/*
- * Thrown for stack overflow in a jitted prologue.
- */
-struct VMStackOverflow : BaseException {
-  const char* what() const noexcept override {
-    return "VMStackOverflow";
-  }
-};
-
-/*
- * Same as VMSwitchMode, except for use from a builtin---the frame for
- * the builtin function should be unwound before resuming the VM.
- */
-struct VMSwitchModeBuiltin : BaseException {
-  const char* what() const noexcept override { return "VMSwitchModeBuiltin"; }
-};
+void chainFaultObjects(ObjectData* top, ObjectData* prev);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -114,4 +97,3 @@ struct VMSwitchModeBuiltin : BaseException {
 #include "hphp/runtime/vm/unwind-inl.h"
 #undef incl_HPHP_VM_UNWIND_INL_H_
 
-#endif

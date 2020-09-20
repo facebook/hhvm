@@ -1,0 +1,4 @@
+File "missing_init_generic.php--C.php", line 2, characters 7-7:
+Class `C` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "missing_init_generic.php--A.php", line 2, characters 32-33:
+`$this->x` is not initialized.

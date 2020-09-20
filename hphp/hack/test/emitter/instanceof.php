@@ -48,7 +48,7 @@ function test(): void {
   var_dump($c instanceof C);
   var_dump($c instanceof $b);
 
-  foreach (array($a, $b, $c, $d) as $i) {
+  foreach (varray[$a, $b, $c, $d] as $i) {
     B::test1($i);
     B::test2($i);
     C::test1($i);

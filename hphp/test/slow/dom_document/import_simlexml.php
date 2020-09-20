@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_import_simlexml() {
 $xml = simplexml_load_string(<<<XML
 <top>
     <first>
@@ -9,10 +12,11 @@ $xml = simplexml_load_string(<<<XML
 XML
 );
 
-$node = dom_import_simplexml($xml->first[0]->second);
+$node = dom_import_simplexml($xml->first->offsetGet(0)->second);
 var_dump($node->tagName);
 var_dump($node->parentNode->tagName);
 
-$node = dom_import_simplexml($xml->first[0]->second[0]);
+$node = dom_import_simplexml($xml->first->offsetGet(0)->second->offsetGet(0));
 var_dump($node->tagName);
 var_dump($node->parentNode->tagName);
+}

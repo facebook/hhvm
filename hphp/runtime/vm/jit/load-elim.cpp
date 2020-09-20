@@ -32,6 +32,9 @@
 
 #include "hphp/runtime/base/perf-warning.h"
 
+#include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/unwind.h"
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -40,6 +43,7 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
+#include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simplify.h"
@@ -106,11 +110,10 @@ struct State {
   ALocBits avail;
 
   /*
-   * If we know a class' sprops or props are already initialized at this
+   * If we know whether various RDS entries have been initialized at this
    * position.
    */
-  jit::flat_set<const Class*> initSProps{};
-  jit::flat_set<const Class*> initProps{};
+  jit::flat_set<rds::Handle> initRDS{};
 };
 
 struct BlockInfo {
@@ -185,7 +188,7 @@ struct Global {
   size_t loadsRemoved  = 0;
   size_t loadsRefined  = 0;
   size_t jumpsRemoved  = 0;
-  size_t callsResolved = 0;
+  size_t stackTeardownsOptimized = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -224,23 +227,10 @@ DEBUG_ONLY std::string show(const State& state) {
 
   folly::format(
     &ret,
-    "  initSProps: {}\n",
+    "  initRDS : {}\n",
     [&] {
       using namespace folly::gen;
-      return from(state.initSProps)
-        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
-        | unsplit<std::string>(",");
-    }()
-  );
-
-  folly::format(
-    &ret,
-    "  initProps: {}\n",
-    [&] {
-      using namespace folly::gen;
-      return from(state.initProps)
-        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
-        | unsplit<std::string>(",");
+      return from(state.initRDS) | unsplit<std::string>(",");
     }()
   );
 
@@ -279,9 +269,9 @@ struct FReducible { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 struct FRefinableLoad { Type refinedType; };
 
 /*
- * The instruction is a call to a callee who's identity has been determined.
+ * The instruction can be replaced with a nop.
  */
-struct FResolvable { const Func* callee; };
+struct FRemovable {};
 
 /*
  * The instruction can be legally replaced with a Jmp to either its next or
@@ -290,8 +280,18 @@ struct FResolvable { const Func* callee; };
 struct FJmpNext {};
 struct FJmpTaken {};
 
+/*
+ * The instruction can be turned into specialized frame teardown instructions
+ * followed by an EndCatch or an EnterTCUnwind that will omit the teardown
+ */
+constexpr uint32_t kMaxTrackedFrameElems = 64;
+struct FFrameTeardown {
+  int32_t numStackElems;
+  CompactVector<std::pair<uint32_t, Type>> elems;
+};
+
 using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
-                             FResolvable,FJmpNext,FJmpTaken>;
+                             FRemovable,FJmpNext,FJmpTaken,FFrameTeardown>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -300,14 +300,9 @@ bool refinable_load_eligible(const IRInstruction& inst) {
   switch (inst.op()) {
     case LdLoc:
     case LdStk:
-    case LdMBase:
-    case LdClsRef:
-    case LdCufIterFunc:
-    case LdCufIterCtx:
-    case LdCufIterInvName:
     case LdMem:
-    case LdARFuncPtr:
-    case LdARCtx:
+    case LdIterPos:
+    case LdIterEnd:
       assertx(inst.hasTypeParam());
       return true;
     default:
@@ -339,7 +334,7 @@ Flags load(Local& env,
 
   auto const meta = env.global.ainfo.find(acls);
   if (!meta) return FNone{};
-  assert(meta->index < kMaxTrackedALocs);
+  assertx(meta->index < kMaxTrackedALocs);
 
   auto& tracked = env.state.tracked[meta->index];
 
@@ -417,9 +412,48 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
   FTRACE(5, "       av: {}\n", show(env.state.avail));
 }
 
+bool handle_minstr(Local& env, const IRInstruction& inst, GeneralEffects m) {
+  if (!MInstrEffects::supported(&inst)) return false;
+  auto const base = inst.src(minstrBaseIdx(inst.op()));
+  if (!base->isA(TLvalToCell)) return false;
+  auto const acls = canonicalize(pointee(base));
+  auto const meta = env.global.ainfo.find(acls);
+  if (!meta || !env.state.avail[meta->index]) return false;
+
+  // We may not have any type info for old_val, but since base is an LvalToCell
+  // that points to this location, we can at least narrow it to a Cell.
+  auto const old_val = env.state.tracked[meta->index];
+  auto const effects = MInstrEffects(inst.op(), old_val.knownType & TCell);
+  store(env, m.stores, nullptr);
+
+  SCOPE_ASSERT_DETAIL("handle_minstr") { return inst.toString(); };
+  always_assert(!env.state.avail[meta->index]);
+  auto& new_val = env.state.tracked[meta->index];
+  if (effects.baseValChanged) {
+    new_val.knownValue = nullptr;
+    new_val.knownType  = effects.baseType;
+    FTRACE(5, "      Base changed. New type: {}\n", effects.baseType);
+  } else {
+    new_val.knownValue = old_val.knownValue;
+    new_val.knownType  = old_val.knownType;
+    FTRACE(5, "      Base unchanged. Keeping type: {}\n", old_val.knownType);
+  }
+  env.state.avail.set(meta->index);
+  return true;
+}
+
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
                              GeneralEffects m) {
+  if (inst.is(DecRef, DecRefNZ)) {
+    // DecRef can only free things, which means from load-elim's point
+    // of view it only has a kill set, which load-elim
+    // ignores. DecRefNZ is always a no-op.
+    return FNone{};
+  } else if (handle_minstr(env, inst, m)) {
+    return FNone{};
+  }
+
   auto handleCheck = [&](Type typeParam) -> folly::Optional<Flags> {
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta) return folly::none;
@@ -454,63 +488,64 @@ Flags handle_general_effects(Local& env,
   case CheckLoc:
   case CheckStk:
   case CheckMBase:
-  case CheckRefInner:
     if (auto flags = handleCheck(inst.typeParam())) return *flags;
     break;
 
   case CheckInitMem:
-    if (auto flags = handleCheck(TInitGen)) return *flags;
+    if (auto flags = handleCheck(TInitCell)) return *flags;
     break;
 
-  case CastStk:
-  case CoerceStk:
-    {
-      auto const stkOffset = [&]{
-        if (inst.is(CastStk)) return inst.extra<CastStk>()->offset;
-        if (inst.is(CoerceStk)) return inst.extra<CoerceStk>()->offset;
-        always_assert(false);
-      }();
-      auto const stk =
-        canonicalize(AliasClass { AStack { inst.src(0), stkOffset, 1 } });
-      always_assert(stk <= canonicalize(m.loads));
+  case CheckIter: {
+    auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+    if (!meta || !env.state.avail[meta->index]) break;
+    auto const& type = env.state.tracked[meta->index].knownType;
+    if (!type.hasConstVal(TInt)) break;
+    auto const match = type.intVal() == inst.extra<CheckIter>()->type.as_byte;
+    return match ? Flags{FJmpNext{}} : Flags{FJmpTaken{}};
+  }
 
-      auto const meta = env.global.ainfo.find(stk);
-      auto const tloc = find_tracked(env, meta);
-      if (!tloc) break;
-      if (inst.op() == CastStk &&
-          inst.typeParam() == TNullableObj &&
-          tloc->knownType <= TNull) {
-        // If we're casting Null to NullableObj, we still need to call
-        // tvCastToNullableObjectInPlace.  See comment there and t3879280 for
-        // details.
-        break;
-      }
-      if (tloc->knownType <= inst.typeParam()) {
-        return FJmpNext{};
-      }
-    }
-    break;
-
-  case CheckInitSProps:
   case InitSProps: {
-    auto cls = inst.extra<ClassData>()->cls;
-    if (env.state.initSProps.count(cls) > 0) return FJmpNext{};
-    do {
-      // If we initialized a class' sprops, then it implies that all of its
-      // parent's sprops are initialized as well.
-      env.state.initSProps.insert(cls);
-      cls = cls->parent();
-    } while (cls);
+    auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    env.state.initRDS.insert(handle);
     break;
   }
 
-  case CheckInitProps:
   case InitProps: {
-    auto cls = inst.extra<ClassData>()->cls;
-    if (env.state.initProps.count(cls) > 0) return FJmpNext{};
-    // Unlike InitSProps, InitProps implies nothing about the class' parent.
-    env.state.initProps.insert(cls);
+    auto const handle = inst.extra<ClassData>()->cls->propHandle();
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    env.state.initRDS.insert(handle);
     break;
+  }
+
+  case CheckRDSInitialized: {
+    auto const handle = inst.extra<CheckRDSInitialized>()->handle;
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    // set this unconditionally; we record taken state before every
+    // instruction, and next state after each instruction
+    env.state.initRDS.insert(handle);
+    break;
+  }
+
+  case MarkRDSInitialized: {
+    auto const handle = inst.extra<MarkRDSInitialized>()->handle;
+    if (env.state.initRDS.count(handle) > 0) return FRemovable{};
+    env.state.initRDS.insert(handle);
+    break;
+  }
+
+  case CheckVecBounds: {
+    assertx(inst.src(0)->type().subtypeOfAny(TVArr, TVec));
+    if (!inst.src(1)->hasConstVal(TInt)) break;
+
+    auto const idx = inst.src(1)->intVal();
+    auto const acls = canonicalize(AElemI { inst.src(0), idx });
+    auto const meta = env.global.ainfo.find(acls);
+    if (!meta) break;
+    if (!env.state.avail[meta->index]) break;
+    if (env.state.tracked[meta->index].knownType.maybe(TUninit)) break;
+
+    return Flags{FJmpNext{}};
   }
 
   default:
@@ -522,51 +557,20 @@ Flags handle_general_effects(Local& env,
   return FNone{};
 }
 
-Flags handle_call_effects(Local& env,
-                          const IRInstruction& inst,
-                          CallEffects effects) {
-  // If the callee isn't already known, see if we can determine it. We can
-  // determine it if we know the precise type of the Func stored in the spilled
-  // frame.
-  auto const knownCallee = [&]() -> const Func* {
-    if (inst.is(Call)) return inst.extra<Call>()->callee;
-    if (inst.is(CallArray)) return inst.extra<CallArray>()->callee;
-    return nullptr;
-  }();
-
-  Flags flags = FNone{};
-  auto writesLocals = effects.writes_locals;
-  if (!knownCallee) {
-    if (auto const meta = env.global.ainfo.find(canonicalize(effects.callee))) {
-      assertx(meta->index < kMaxTrackedALocs);
-      if (env.state.avail[meta->index]) {
-        auto const& tracked = env.state.tracked[meta->index];
-        if (tracked.knownType.hasConstVal(TFunc)) {
-          auto const callee = tracked.knownType.funcVal();
-          if (writesLocals) writesLocals = funcWritesLocals(callee);
-          flags = FResolvable { callee };
-        }
-      }
-    }
-  }
-
-  if (writesLocals) {
-    clear_everything(env);
-    return flags;
-  }
-
+void handle_call_effects(Local& env,
+                         const IRInstruction& inst,
+                         CallEffects effects) {
   /*
-   * Keep types for stack, locals, class-ref slots, and iterators, and throw
-   * away the values.  We are just doing this to avoid extending lifetimes
+   * Keep types for stack, locals, and iterators, and throw away the
+   * values.  We are just doing this to avoid extending lifetimes
    * across php calls, which currently always leads to spilling.
    */
-  auto const keep = env.global.ainfo.all_stack       |
-                    env.global.ainfo.all_frame       |
-                    env.global.ainfo.all_clsRefSlot  |
-                    env.global.ainfo.all_cufIterFunc |
-                    env.global.ainfo.all_cufIterCtx  |
-                    env.global.ainfo.all_cufIterInvName |
-                    env.global.ainfo.all_cufIterDynamic;
+  auto const keep = env.global.ainfo.all_stack    |
+                    env.global.ainfo.all_fcontext |
+                    env.global.ainfo.all_ffunc    |
+                    env.global.ainfo.all_fmeta    |
+                    env.global.ainfo.all_local    |
+                    env.global.ainfo.all_iter;
   env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
@@ -575,7 +579,11 @@ Flags handle_call_effects(Local& env,
     env.state.tracked[aloc].knownValue = nullptr;
   }
 
-  return flags;
+  // Any stack locations modified by the callee are no longer valid
+  store(env, effects.kills, nullptr);
+  store(env, effects.inputs, nullptr);
+  store(env, effects.actrec, nullptr);
+  store(env, effects.outputs, nullptr);
 }
 
 Flags handle_assert(Local& env, const IRInstruction& inst) {
@@ -583,7 +591,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
     switch (inst.op()) {
     case AssertLoc:
       return AliasClass {
-        AFrame { inst.src(0), inst.extra<AssertLoc>()->locId }
+        ALocal { inst.src(0), inst.extra<AssertLoc>()->locId }
       };
     case AssertStk:
       return AliasClass {
@@ -616,6 +624,184 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
   return FNone{};
 }
 
+void check_decref_eligible(
+  Local& env,
+  CompactVector<std::pair<uint32_t, Type>>& elems,
+  size_t index,
+  AliasClass acls) {
+    auto const meta = env.global.ainfo.find(canonicalize(acls));
+    auto const tloc = find_tracked(env, meta);
+    FTRACE(5, "    {}: {}\n", index, tloc ? show(*tloc) : "x");
+    if (!tloc) {
+      elems.push_back({index, TCell});
+    } else if (tloc->knownType.maybe(TCounted)) {
+      // The type needs to be at least a TCell for LdStk and LdLoc to work
+      auto const type = tloc->knownType <= TCell ? tloc->knownType : TCell;
+      elems.push_back({index, type});
+    }
+  };
+
+int32_t findSPOffset(const IRUnit& unit, const SSATmp* fp,
+                     const IRInstruction* defSP) {
+  assertx(fp->isA(TFramePtr));
+  auto const inst = fp->inst();
+
+  if (inst->is(BeginInlining)) {
+    return inst->extra<BeginInlining>()->spOffset.offset;
+  }
+  assertx(inst->is(DefFP, DefFuncEntryFP));
+  assertx(defSP->is(DefFrameRelSP, DefRegSP));
+  return defSP->extra<FPInvOffsetData>()->offset.offset;
+}
+
+Flags handle_end_catch(Local& env, const IRInstruction& inst) {
+  if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
+  assertx(inst.op() == EndCatch);
+  auto const data = inst.extra<EndCatchData>();
+  if (data->teardown != EndCatchData::Teardown::Full ||
+      inst.func()->isCPPBuiltin() ||
+      findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset) {
+    FTRACE(4, "      non-reducible EndCatch\n");
+    return FNone{};
+  }
+  auto pc = inst.marker().fixupSk().unit()->entry() + inst.marker().bcOff();
+  auto const op = decode_op(pc);
+  if (op == OpFCallCtor &&
+      decodeFCallArgs(op, pc, nullptr /*StringDecoder*/).lockWhileUnwinding()) {
+    FTRACE(4, "      non-reducible EndCatch -- lock while unwinding\n");
+    return FNone{};
+  }
+  assertx(data->stublogue != EndCatchData::FrameMode::Stublogue);
+  auto const numLocals = inst.func()->numLocals();
+  auto const astk = AStack { inst.src(1), data->offset, 0 };
+  auto const numStackElemsWithInlining =
+    inst.marker().resumeMode() != ResumeMode::None
+      ? -astk.offset.offset
+      : -astk.offset.offset - inst.func()->numSlotsInFrame();
+  assertx(numStackElemsWithInlining >= 0);
+
+  /*
+
+  Reference to guide around stack offset calculations:
+
+  +---------------------------------+
+  | ActRec for outer Func           |
+  +---------------------------------+ <-+ DefFp    <-+          <-+
+  | Local1 for outer Func           |   |            |            |
+  | Local2 for outer Func           |   |            |            |
+  | Local3 for outer Func           |   |            | defSP      |
+  | Local4 for outer Func           |   |            |  ->spOff   | findSpOffset
+  +---------------------------------+   |            |            |
+  |                                 |   |            |            |
+  | Stack slots for outer Func      |   |            |            |
+  |                                 | <-] inst.src(0) [ sp ]      | <-+
+  +---------------------------------+   |                         |   |
+  | ActRec for inlined func one     |   |                         |   |
+  +---------------------------------+ <-+ BeginInlining           |   |
+  | Locals for inlined func one     |   |                         |   |
+  +---------------------------------+   |                         |   |
+  | Stack slots for inlined func one|   |                         |   |
+  +---------------------------------+   |                         |   | EndCatch
+  | ActRec for inlined func two     |   |                         |   |  .offset
+  +---------------------------------+ <-+ inst.src(1) [ fp ]    <-+   |
+  | Local1 for inlined func two     |   |                         |   |
+  | Local2 for inlined func two     |   |                         |   |
+  +---------------------------------+ <-+                         |   |
+  | Stack slots for inlined func two|                                 |
+  +---------------------------------+                               <-+
+
+  */
+
+  auto const adjustSP = [&]() -> int32_t {
+    auto const fpReg = inst.src(0);
+    auto const defSP = inst.src(1)->inst();
+    auto const spOff = findSPOffset(env.global.unit, fpReg, defSP);
+    auto const defSPOff = defSP->extra<FPInvOffsetData>()->offset.offset;
+    assertx(!fpReg->inst()->is(DefFP, DefFuncEntryFP) || defSPOff == spOff);
+    return spOff - defSPOff;
+  }();
+
+  // We need to adjust the number of stack elements since we only want to emit
+  // decrefs for the most inlined frame
+  auto const numStackElems = numStackElemsWithInlining + adjustSP;
+
+  if (numStackElems + numLocals > kMaxTrackedFrameElems) {
+    FTRACE(4, "      non-reducible EndCatch - too many values\n");
+    return FNone{};
+  }
+
+  FTRACE(4, "      reducible EndCatch\n");
+  FTRACE(4, "Optimize EndCatch {}, num locals {}, num stack {}\n{}\n",
+    inst.func()->fullName()->data(), numLocals, numStackElems,
+    inst.marker().show());
+
+  CompactVector<std::pair<uint32_t, Type>> elems;
+
+  // If locals are decreffed, we shouldn't decref them again. This also implies
+  // that there are no stack elements.
+  if (data->mode != EndCatchData::CatchMode::LocalsDecRefd) {
+    for (uint32_t i = 0; i < numLocals; ++i) {
+      check_decref_eligible(
+        env,
+        elems,
+        i,
+        AliasClass { ALocal { inst.marker().fp(), i }});
+    }
+
+    // Iterate from higher addresses to lower so that tracing prints them in
+    // the memory layout order
+    for (int32_t i = numStackElems - 1; i >= 0; --i) {
+      auto const astk_ = AStack { inst.src(1), data->offset + i, 1 };
+      check_decref_eligible(
+        env,
+        elems,
+        numLocals + numStackElems - 1 - i,
+        AliasClass { astk_ });
+    }
+  }
+
+  if (elems.size() > RuntimeOption::EvalHHIRLoadStackTeardownMaxDecrefs) {
+    FTRACE(2, "      handle_end_catch: refusing -- too many decrefs {}\n",
+           elems.size());
+    return FNone{};
+  }
+
+  return FFrameTeardown { numStackElems, std::move(elems) };
+}
+
+Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
+  if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
+  assertx(inst.op() == EnterTCUnwind);
+  auto const data = inst.extra<EnterTCUnwindData>();
+  if (!data->teardown || inst.func()->isCPPBuiltin()) {
+    FTRACE(4, "      non-reducible EnterTCUnwind\n");
+    return FNone{};
+  }
+  auto const numLocals = inst.func()->numLocals();
+  if (numLocals > kMaxTrackedFrameElems) {
+    FTRACE(4, "      non-reducible EnterTCUnwind - too many locals\n");
+    return FNone{};
+  }
+
+  FTRACE(4, "      reducible EnterTCUnwind\n");
+  CompactVector<std::pair<uint32_t, Type>> locals;
+  for (uint32_t i = 0; i < numLocals; ++i) {
+    check_decref_eligible(
+      env,
+      locals,
+      i,
+      AliasClass { ALocal { inst.marker().fp(), i }});
+  }
+
+  if (locals.size() > RuntimeOption::EvalHHIRLoadThrowMaxDecrefs) {
+    FTRACE(2, "      handle_enter_tc_unwind: refusing -- too many decrefs {}\n",
+           locals.size());
+    return FNone{};
+  }
+
+  return FFrameTeardown { 0, std::move(locals) };
+}
+
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
   bitset_for_each_set(
     env.state.avail,
@@ -643,30 +829,62 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     effects,
     [&] (IrrelevantEffects) {},
     [&] (UnknownEffects)    { clear_everything(env); },
-    [&] (ExitEffects)       { clear_everything(env); },
+    [&] (ExitEffects)       {
+      if (inst.op() == EndCatch) flags = handle_end_catch(env, inst);
+      if (inst.op() == EnterTCUnwind) flags = handle_enter_tc_unwind(env, inst);
+      clear_everything(env);
+    },
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr);
-                              store(env, m.callee, m.calleeValue); },
-
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
+    [&] (PureInlineCall m)    { store(env, m.base, m.fp); },
+    [&] (PureInlineReturn m)  { store(env, m.base, m.callerFp); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
-    [&] (CallEffects x)     { flags = handle_call_effects(env, inst, x); }
+    [&] (CallEffects x)     { handle_call_effects(env, inst, x); }
   );
 
   switch (inst.op()) {
+  case AssertType:
   case CheckType:
   case CheckNonNull:
-  case CheckVArray:
-  case CheckDArray:
+    // Type information for one use of a pointer can't be transferred to
+    // other uses, because we may overwrite the pointer's target in between
+    // the uses (e.g. due to minstr escalation).
+    if (inst.hasTypeParam() && inst.typeParam() <= TMemToCell) break;
     refine_value(env, inst.dst(), inst.src(0));
     break;
   case AssertLoc:
   case AssertStk:
     flags = handle_assert(env, inst);
     break;
+  case LdIterPos: {
+    // For pointer iters, the type of the pointee of the pos is a lower bound
+    // on the union of the types of the base's values. The same is true for the
+    // pointee type of the end.
+    //
+    // Since the end is loop-invariant, we can use its type to refine the pos
+    // and so avoid value type-checks. Here, "dropConstVal" drops the precise
+    // value of the end (for static bases) but preserves the pointee type.
+    auto const iter = inst.extra<LdIterPos>()->iterId;
+    auto const end_cls = canonicalize(aiter_end(inst.src(0), iter));
+    auto const end = find_tracked(env, env.global.ainfo.find(end_cls));
+    if (end != nullptr) {
+      auto const end_type = end->knownType.dropConstVal();
+      if (end_type < inst.typeParam()) return FRefinableLoad { end_type };
+    }
+    break;
+  }
+  case StIterType: {
+    // StIterType stores an immediate to the iter's type fields. We construct a
+    // tmp to represent the immediate. (memory-effects can't do so w/o a unit.)
+    auto const iter = inst.extra<StIterType>()->iterId;
+    auto const type = inst.extra<StIterType>()->type;
+    auto const acls = canonicalize(aiter_type(inst.src(0), iter));
+    store(env, acls, env.global.unit.cns(type.as_byte));
+    break;
+  }
   default:
     break;
   }
@@ -730,7 +948,7 @@ SSATmp* resolve_phis_work(Global& env,
   if (block->front().is(DefLabel)) {
     env.unit.expandLabel(&block->front(), 1);
   } else {
-    block->prepend(env.unit.defLabel(1, block->front().bcctx()));
+    env.unit.defLabel(1, block, block->front().bcctx());
   }
   auto const label = &block->front();
   mutated_labels.push_back(label);
@@ -844,7 +1062,6 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   case CheckLoc:
   case CheckStk:
   case CheckMBase:
-  case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
     break;
 
@@ -884,35 +1101,84 @@ void refine_load(Global& env,
   ++env.loadsRefined;
 }
 
-void resolve_call(Global& env,
-                  IRInstruction& inst,
-                  const FResolvable& flags) {
-  FTRACE(2, "      resolvable: {} -> {}\n",
-         inst.toString(),
-         flags.callee->fullName());
+void optimize_end_catch(Global& env, IRInstruction& inst,
+                        int32_t numStackElems,
+                        CompactVector<std::pair<uint32_t, Type>>& elems) {
+  FTRACE(3, "Optimizing EndCatch\n{}\nNumStackElems: {}\n",
+            inst.marker().show(), numStackElems);
 
-  if (inst.is(Call)) {
-    auto& extra = *inst.extra<Call>();
-    assertx(extra.callee == nullptr);
-    extra.callee = flags.callee;
-    extra.writeLocals = funcWritesLocals(flags.callee);
-    extra.readLocals = funcReadsLocals(flags.callee);
-    extra.needsCallerFrame = funcNeedsCallerFrame(flags.callee);
-    retypeDests(&inst, &env.unit);
-    ++env.callsResolved;
-    return;
+  auto const numLocals = inst.func()->numLocals();
+  auto const block = inst.block();
+
+  auto add = [&](IRInstruction* loadInst, int locId = -1) {
+    block->insert(block->iteratorTo(&inst), loadInst);
+    auto const decref =
+      env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
+    block->insert(block->iteratorTo(&inst), decref);
+  };
+
+  auto const original = inst.extra<EndCatchData>();
+  if (original->mode != EndCatchData::CatchMode::LocalsDecRefd) {
+    block->insert(block->iteratorTo(&inst),
+      env.unit.gen(DbgCheckLocalsDecRefd, inst.bcctx(), inst.src(0)));
   }
 
-  if (inst.is(CallArray)) {
-    auto& extra = *inst.extra<CallArray>();
-    assertx(extra.callee == nullptr);
-    extra.callee = flags.callee;
-    extra.writeLocals = funcWritesLocals(flags.callee);
-    extra.readLocals = funcReadsLocals(flags.callee);
-    retypeDests(&inst, &env.unit);
-    ++env.callsResolved;
-    return;
+  for (auto elem : elems) {
+    auto const i = elem.first;
+    auto const type = elem.second;
+    if (i < numLocals) {
+      FTRACE(5, "    Emitting decref for LocalId {}\n", i);
+      add(env.unit.gen(LdLoc, inst.bcctx(), type, LocalId{i}, inst.src(0)),
+          i);
+      continue;
+    }
+    auto const index = i - numLocals;
+    auto const offset = IRSPRelOffsetData {
+      inst.extra<EndCatchData>()->offset + numStackElems - 1 - index
+    };
+    FTRACE(5, "    Emitting decref for StackElem {} at IRSPRel {}\n",
+            index, offset.offset.offset);
+    add(env.unit.gen(LdStk, inst.bcctx(), type, offset, inst.src(1)));
   }
+
+  auto const teardownMode =
+    original->mode != EndCatchData::CatchMode::LocalsDecRefd &&
+    inst.func()->hasThisInBody()
+      ? EndCatchData::Teardown::OnlyThis
+      : EndCatchData::Teardown::None;
+  auto const data = EndCatchData {
+    original->offset + numStackElems,
+    original->mode,
+    original->stublogue,
+    teardownMode
+  };
+  env.unit.replace(&inst, EndCatch, data, inst.src(0), inst.src(1));
+  env.stackTeardownsOptimized++;
+}
+
+void optimize_enter_tc_unwind(
+  Global& env,
+  IRInstruction& inst,
+  CompactVector<std::pair<uint32_t, Type>>& locals) {
+  FTRACE(3, "Optimizing EnterTCUnwind\n{}\n", inst.marker().show());
+
+  auto const block = inst.block();
+
+  for (auto local : locals) {
+    int locId = local.first;
+    auto const type = local.second;
+    FTRACE(5, "    Emitting decref for LocalId {}\n", locId);
+    auto const loadInst =
+      env.unit.gen(LdLoc, inst.bcctx(), type,
+                   LocalId{(uint32_t)locId}, inst.marker().fp());
+    block->insert(block->iteratorTo(&inst), loadInst);
+    auto const decref =
+      env.unit.gen(DecRef, inst.bcctx(), DecRefData{locId}, loadInst->dst());
+    block->insert(block->iteratorTo(&inst), decref);
+  }
+  auto const data = EnterTCUnwindData { false };
+  env.unit.replace(&inst, EnterTCUnwind, data, inst.src(0));
+  env.stackTeardownsOptimized++;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -931,7 +1197,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
              redundantFlags.knownType.toString(),
              resolved->toString());
 
-      if (resolved->type().subtypeOfAny(TGen, TCls)) {
+      if (resolved->type() <= TCell) {
         env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);
@@ -944,7 +1210,11 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
 
     [&] (FRefinableLoad f) { refine_load(env, inst, f); },
 
-    [&] (FResolvable f) { resolve_call(env, inst, f); },
+    [&] (FRemovable) {
+      FTRACE(2, "      removable\n");
+      assertx(!inst.isControlFlow());
+      inst.convertToNop();
+    },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
@@ -956,6 +1226,19 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.taken());
       ++env.jumpsRemoved;
+    },
+
+    [&] (FFrameTeardown f) {
+      FTRACE(2, "      frame teardown\n");
+      if (inst.op() == EndCatch) {
+        DEBUG_ONLY auto const data = inst.extra<EndCatchData>();
+        assertx(data->teardown == EndCatchData::Teardown::Full);
+        assertx(data->stublogue == EndCatchData::FrameMode::Phplogue);
+        optimize_end_catch(env, inst, f.numStackElems, f.elems);
+        return;
+      }
+      assertx(inst.op() == EnterTCUnwind && f.numStackElems == 0);
+      optimize_enter_tc_unwind(env, inst, f.elems);
     }
   );
 
@@ -1068,18 +1351,9 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
     }
   );
 
-  // Properties must be initialized along both paths
-  for (auto it = dst.initSProps.begin(); it != dst.initSProps.end();) {
-    if (!src.initSProps.count(*it)) {
-      it = dst.initSProps.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  for (auto it = dst.initProps.begin(); it != dst.initProps.end();) {
-    if (!src.initProps.count(*it)) {
-      it = dst.initProps.erase(it);
+  for (auto it = dst.initRDS.begin(); it != dst.initRDS.end();) {
+    if (!src.initRDS.count(*it)) {
+      it = dst.initRDS.erase(it);
     } else {
       ++it;
     }
@@ -1261,7 +1535,7 @@ void optimizeLoads(IRUnit& unit) {
   size_t loadsRemoved = 0;
   size_t loadsRefined = 0;
   size_t jumpsRemoved = 0;
-  size_t callsResolved = 0;
+  size_t stackTeardownsOptimized = 0;
   do {
     auto genv = Global { unit };
     if (genv.ainfo.locations.size() == 0) {
@@ -1293,7 +1567,7 @@ void optimizeLoads(IRUnit& unit) {
         !genv.loadsRemoved &&
         !genv.loadsRefined &&
         !genv.jumpsRemoved &&
-        !genv.callsResolved) {
+        !genv.stackTeardownsOptimized) {
       // Nothing changed so we're done
       break;
     }
@@ -1301,7 +1575,7 @@ void optimizeLoads(IRUnit& unit) {
     loadsRemoved += genv.loadsRemoved;
     loadsRefined += genv.loadsRefined;
     jumpsRemoved += genv.jumpsRemoved;
-    callsResolved += genv.callsResolved;
+    stackTeardownsOptimized += genv.stackTeardownsOptimized;
 
     FTRACE(2, "reflowing types\n");
     reflowTypes(genv.unit);
@@ -1316,7 +1590,7 @@ void optimizeLoads(IRUnit& unit) {
       logPerfWarning(
         "optimize_loads_max_iters", 1,
         [&](StructuredLogEntry& cols) {
-          auto const func = unit.context().func;
+          auto const func = unit.context().initSrcKey.func();
           cols.setStr("func", func->fullName()->slice());
           cols.setStr("filename", func->unit()->filepath()->slice());
           cols.setStr("hhir_unit", show(unit));
@@ -1332,7 +1606,8 @@ void optimizeLoads(IRUnit& unit) {
     entry->setInt("optimize_loads_loads_removed", loadsRemoved);
     entry->setInt("optimize_loads_loads_refined", loadsRefined);
     entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
-    entry->setInt("optimize_loads_calls_resolved", callsResolved);
+    entry->setInt("optimize_loads_stack_teardowns_optimized",
+      stackTeardownsOptimized);
   }
 }
 

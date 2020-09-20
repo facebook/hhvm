@@ -1,7 +1,0 @@
-string(2) "ok"
-
-Notice: Undefined variable: b in %s/test/slow/dynamic_variables/1151.php on line 6
-NULL
-
-Notice: Undefined variable: p_b in %s/test/slow/dynamic_variables/1151.php on line 7
-NULL

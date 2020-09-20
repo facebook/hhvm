@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_long_chain() {
 $i = 42;
 if( $i == 0 ){ echo $i; }
 else if( $i == 1 ){ echo $i; }
@@ -114,3 +117,4 @@ else if( $i == 109){ echo $i; }
 else if( $i == 110){ echo $i; }
 
 echo " - Done.\n";
+}

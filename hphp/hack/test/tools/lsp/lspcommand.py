@@ -7,8 +7,9 @@ import re
 import subprocess
 import urllib.parse
 import uuid
-from jsonrpc_stream import JsonRpcStreamReader
-from jsonrpc_stream import JsonRpcStreamWriter
+
+from jsonrpc_stream import JsonRpcStreamReader, JsonRpcStreamWriter
+
 
 class LspCommandProcessor:
     def __init__(self, proc, reader, writer):
@@ -22,11 +23,13 @@ class LspCommandProcessor:
         # yes shell = True is generally a bad idea, but
         # in this case we want to pick up your environment entirely because
         # hack depends heavily on it to work
-        proc = subprocess.Popen('hh_client lsp',
-                                shell=True,
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            "hh_client lsp",
+            shell=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
         reader = JsonRpcStreamReader(proc.stdout)
         writer = JsonRpcStreamWriter(proc.stdin)
@@ -48,20 +51,17 @@ class LspCommandProcessor:
     # notify_timeout is the number of seconds to wait for responses
     # from the server that aren't caused by a request.  these could
     # be errors or server notifications.
-    def communicate(self,
-                    json_commands,
-                    request_timeout=30,
-                    notify_timeout=1,
-                    verbose=False):
+    def communicate(
+        self, json_commands, request_timeout=30, notify_timeout=1, verbose=False
+    ):
 
         transcript = self._send_commands({}, json_commands, verbose)
 
         # we are expecting at least one response per request sent so
         # we read these giving the server more time to respond with them.
-        transcript = self._read_request_responses(transcript,
-                                                  json_commands,
-                                                  request_timeout,
-                                                  verbose)
+        transcript = self._read_request_responses(
+            transcript, json_commands, request_timeout, verbose
+        )
 
         # because it's possible the server sent us notifications
         # along with responses we need to try to keep reading
@@ -77,11 +77,7 @@ class LspCommandProcessor:
 
         return transcript
 
-    def _read_request_responses(self,
-                                transcript,
-                                commands,
-                                timeout_seconds,
-                                verbose):
+    def _read_request_responses(self, transcript, commands, timeout_seconds, verbose):
         for _ in self._requests_in(commands):
             response = self._try_read_logged(timeout_seconds, verbose)
             transcript = self._scribe(transcript, sent=None, received=response)
@@ -101,10 +97,10 @@ class LspCommandProcessor:
         id = self._transcript_id(sent, received)
 
         if sent and not received:
-            received = transcript[id]['received'] if id in transcript else None
+            received = transcript[id]["received"] if id in transcript else None
 
         if received and not sent:
-            sent = transcript[id]['sent'] if id in transcript else None
+            sent = transcript[id]["sent"] if id in transcript else None
 
         transcript[id] = {"sent": sent, "received": received}
 
@@ -140,15 +136,15 @@ class LspCommandProcessor:
 
     @staticmethod
     def _has_id(json):
-        return 'id' in json
+        return "id" in json
 
     @staticmethod
     def _client_notify_id():
-        return LspCommandProcessor._notify_id('NOTIFY_CLIENT_TO_SERVER_')
+        return LspCommandProcessor._notify_id("NOTIFY_CLIENT_TO_SERVER_")
 
     @staticmethod
     def _server_notify_id():
-        return LspCommandProcessor._notify_id('NOTIFY_SERVER_TO_CLIENT_')
+        return LspCommandProcessor._notify_id("NOTIFY_SERVER_TO_CLIENT_")
 
     @staticmethod
     def _notify_id(prefix):
@@ -156,7 +152,7 @@ class LspCommandProcessor:
 
     @staticmethod
     def _request_id(json_command):
-        return 'REQUEST_' + str(json_command['id'])
+        return "REQUEST_" + str(json_command["id"])
 
     @staticmethod
     def _eval_json(json):
@@ -165,7 +161,7 @@ class LspCommandProcessor:
         elif isinstance(json, list):
             return [LspCommandProcessor._eval_json(i) for i in json]
         elif isinstance(json, str):
-            match = re.match(r'>>>(.*)', json)
+            match = re.match(r">>>(.*)", json)
             if match is None:
                 return json
             return eval(match.group(1))  # noqa: P204

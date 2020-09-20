@@ -1,4 +1,4 @@
-<?php
+<?hh
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -10,11 +10,9 @@ var_dump(
 	$result = ldap_search($link, "o=test,$base", "(o=*)", array('o')),
 	ldap_get_entries($link, $result)
 );
-?>
-===DONE===
-<?php
+echo "===DONE===\n";
+<?hh
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
-?>

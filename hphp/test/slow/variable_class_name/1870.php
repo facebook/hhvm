@@ -1,12 +1,16 @@
-<?php
+<?hh
 
 class A {
   const C = 123;
   static public $foo = 456;
-  public function bar() {
+  public static function bar() {
     return 789;
   }
 }
+ // DynamicFunctionCall
+
+<<__EntryPoint>>
+function main_1870() {
 $cls = 'a';
 
 var_dump($cls::C);
@@ -23,4 +27,4 @@ var_dump($cls::bar());
 
 $func = 'bar';
 var_dump($cls::$func());
- // DynamicFunctionCall
+}

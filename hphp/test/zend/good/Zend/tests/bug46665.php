@@ -1,10 +1,16 @@
-<?php
+<?hh
+
+<<__EntryPoint>> function main(): void {
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'foo\\bar\\baz' => 'bug46665_autoload.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
 
 $baz = '\\Foo\\Bar\\Baz';
 new $baz();
-function __autoload($class) {
-    var_dump($class);
-    require __DIR__ .'/bug46665_autoload.inc';
+echo 'Done';
 }
-
-?>

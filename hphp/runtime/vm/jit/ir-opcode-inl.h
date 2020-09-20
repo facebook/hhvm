@@ -32,25 +32,18 @@ inline bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
 }
 
 inline bool hasEdges(Opcode opcode) {
-  if (opcodeHasFlags(opcode, Branch | MayRaiseError)) {
-    // AKExistsArr, ArrayIdx, and ArrayIsset are only marked as Er because of
-    // EvalHackArrCompatNotices. So, if its not enabled, treat them as if they
-    // aren't.
-    if (opcode == AKExistsArr || opcode == ArrayIdx || opcode == ArrayIsset) {
-      return RuntimeOption::EvalHackArrCompatNotices;
-    }
-    // Same thing for SameArr and NSameArr, but for
-    // EvalHackArrCompatDVCmpNotices.
-    if (opcode == SameArr || opcode == NSameArr) {
-      return RuntimeOption::EvalHackArrCompatDVCmpNotices;
-    }
-    return true;
-  }
-  return false;
+  return opcodeHasFlags(opcode, Branch) || opcodeMayRaise(opcode);
 }
 
 inline bool opHasExtraData(Opcode op) {
   return opcodeHasFlags(op, HasExtra);
+}
+
+inline folly::Optional<Opcode> nameToOpcode(const std::string& str) {
+#define O(name, ...) if (str == #name) return Opcode::name;
+  IR_OPCODES
+#undef O
+  return folly::none;
 }
 
 } // namespace jit

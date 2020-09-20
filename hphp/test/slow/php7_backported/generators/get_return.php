@@ -1,23 +1,14 @@
-<?php
+<?hh
 
 function gen1() {
     return 42;
     yield 24;
 }
 
-$gen = gen1();
-// Calling getReturn() directly here is okay due to auto-priming
-var_dump($gen->getReturn());
-
 function gen2() {
     yield 24;
     return 42;
 }
-
-$gen = gen2();
-var_dump($gen->current());
-$gen->next();
-var_dump($gen->getReturn());
 
 // ============================================================================
 // `gen3` was testing by-reference yields, which PHP 5/7 support but which
@@ -32,20 +23,10 @@ function gen4() {
     return 42;
 }
 
-$gen = gen4();
-var_dump($gen->current());
-$gen->next();
-var_dump($gen->getReturn());
-
 // Has no explicit return, but implicitly return NULL at the end
 function gen5() {
     yield 24;
 }
-
-$gen = gen5();
-var_dump($gen->current());
-$gen->next();
-var_dump($gen->getReturn());
 
 // Explicit value-less return also results in a NULL generator
 // return value and there is no interference with type hints
@@ -54,5 +35,32 @@ function gen6() {
     yield 24;
 }
 
-$gen = gen6();
-var_dump($gen->getReturn());
+
+<<__EntryPoint>>
+function main_get_return() {
+  $gen = gen1();
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen2();
+  $gen->next();
+  var_dump($gen->current());
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen4();
+  $gen->next();
+  var_dump($gen->current());
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen5();
+  $gen->next();
+  var_dump($gen->current());
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen6();
+  $gen->next();
+  var_dump($gen->getReturn());
+}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PIPE_H_
-#define incl_HPHP_PIPE_H_
+#pragma once
 
 #include "hphp/runtime/base/plain-file.h"
 
@@ -45,4 +44,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PIPE_H_

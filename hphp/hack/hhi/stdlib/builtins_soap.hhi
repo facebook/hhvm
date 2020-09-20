@@ -1,11 +1,10 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -89,7 +88,7 @@ const int WSDL_CACHE_DISK = 1;
 const int WSDL_CACHE_BOTH = 3;
 
 <<__PHPStdLib>>
-function use_soap_error_handler($handler = true);
+function use_soap_error_handler(bool $handler = true);
 <<__PHPStdLib>>
 function is_soap_fault($fault);
 <<__PHPStdLib>>
@@ -97,42 +96,42 @@ function _soap_active_version();
 
 class SoapServer {
   public function __construct($wsdl, $options = null);
-  public function setclass($name, ...);
+  public function setclass(string $name, ...$args);
   public function setobject($obj);
   public function addfunction($func);
   public function getfunctions();
   public function handle($request = null);
-  public function setpersistence($mode);
-  public function fault($code, $fault, $actor = null, $detail = null, $name = null);
+  public function setpersistence(int $mode);
+  public function fault($code, string $fault, $actor = null, $detail = null, $name = null);
   public function addsoapheader($fault);
 }
 
 class SoapClient {
   public function __construct($wsdl, $options = null);
-  public function __call($name, $args);
-  public function __soapcall($name, $args, $options = null, $input_headers = null, &$output_headers = null);
+  public function call__($name, $args);
+  public function __soapcall(string $name, $args, $options = null, $input_headers = null);
   public function __getlastrequest();
   public function __getlastresponse();
   public function __getlastrequestheaders();
   public function __getlastresponseheaders();
   public function __getfunctions();
   public function __gettypes();
-  public function __dorequest($buf, $location, $action, $version, $oneway = false);
-  public function __setcookie($name, $value = null);
+  public function __dorequest(string $buf, string $location, string $action, int $version, bool $oneway = false);
+  public function __setcookie(string $name, $value = null);
   public function __setlocation($new_location = null);
   public function __setsoapheaders($headers = null);
 }
 
 class SoapVar {
-  public function __construct($data, $type, $type_name = null, $type_namespace = null, $node_name = null, $node_namespace = null);
+  public function __construct($data, $type, string $type_name = "", string $type_namespace = "", string $node_name = "", string $node_namespace = "");
 }
 
 class SoapParam {
-  public function __construct($data, $name);
+  public function __construct($data, string $name);
 }
 
 class SoapHeader {
-  public function __construct($ns, $name, $data = null, $mustunderstand = false, $actor = null);
+  public function __construct(string $ns, string $name, $data = null, bool $mustunderstand = false, $actor = null);
 }
 
 class SoapFault extends Exception {

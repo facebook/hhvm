@@ -1,5 +1,5 @@
-<?php
-$booleans = array(
+<?hh <<__EntryPoint>> function main(): void {
+$booleans = darray[
 '1' => true,
 'On' => true,
 'Off' => true,
@@ -14,13 +14,13 @@ $booleans = array(
 'oFf' => false,
 
 '' => false
-);
+];
 
 foreach($booleans as $val=>$exp) {
     $res =filter_var($val, FILTER_VALIDATE_BOOLEAN);
-	    if ($res !== $exp) {
+        if ($res !== $exp) {
         echo "$val failed,'$exp' expect, '$res' received.\n";
     }
 }
 echo "Ok.";
-?>
+}

@@ -2,11 +2,9 @@
 
 -- Testing mb_split() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_split() expects at most 3 parameters, 4 given in %s/mb_split_error.php on line 21
 
 -- Testing mb_split() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_split() expects at least 2 parameters, 1 given in %s/mb_split_error.php on line 26
 Done

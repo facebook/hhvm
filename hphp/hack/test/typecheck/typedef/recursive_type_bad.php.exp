@@ -1,0 +1,16 @@
+File "recursive_type_bad.php", line 4, characters 6-18:
+Cyclic type definition (Typing[4014])
+File "recursive_type_bad.php", line 20, characters 25-37:
+Cyclic use is here
+File "recursive_type_bad.php", line 11, characters 6-17:
+Cyclic type definition (Typing[4014])
+File "recursive_type_bad.php", line 21, characters 24-35:
+Cyclic use is here
+File "recursive_type_bad.php", line 20, characters 6-21:
+Cyclic type definition (Typing[4014])
+File "recursive_type_bad.php", line 6, characters 14-29:
+Cyclic use is here
+File "recursive_type_bad.php", line 21, characters 6-20:
+Cyclic type definition (Typing[4014])
+File "recursive_type_bad.php", line 14, characters 14-28:
+Cyclic use is here

@@ -1,4 +1,4 @@
+
 Too many arguments
 
-Warning: %s
-NULL
+Warning: ob_end_clean() expects exactly 0 parameters, 1 given in %s/ob_end_clean_error_001.php on line 10

@@ -9,16 +9,12 @@ class C {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $obj = new C;
-  var_dump(call_user_func(array($obj, 'foo'), 123, 456));
-  var_dump(call_user_func(array($obj, 'bar'), 123, 456));
-  var_dump(call_user_func_array(array($obj, 'foo'), array(123, 456)));
-  var_dump(call_user_func_array(array($obj, 'bar'), array(123, 456)));
-  var_dump(call_user_func(array('C', 'foo'), 123, 456));
-  var_dump(call_user_func(array('C', 'bar'), 123, 456));
-  var_dump(call_user_func_array(array('C', 'foo'), array(123, 456)));
-  var_dump(call_user_func_array(array('C', 'bar'), array(123, 456)));
+  var_dump(call_user_func(varray[$obj, 'foo'], 123, 456));
+  var_dump(call_user_func(varray[$obj, 'bar'], 123, 456));
+  var_dump(call_user_func_array(varray[$obj, 'foo'], varray[123, 456]));
+  var_dump(call_user_func_array(varray[$obj, 'bar'], varray[123, 456]));
+  var_dump(call_user_func(varray['C', 'bar'], 123, 456));
+  var_dump(call_user_func_array(varray['C', 'bar'], varray[123, 456]));
 }
-main();
-

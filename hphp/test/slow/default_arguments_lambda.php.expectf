@@ -1,0 +1,2 @@
+
+Fatal error: `await` cannot be used as an expression in %s/default_arguments_lambda.php on line 12

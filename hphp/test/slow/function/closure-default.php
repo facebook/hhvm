@@ -9,9 +9,6 @@ function f(
   var_dump($func(124));
 }
 
-f();
-f($x ==> $x == 124);
-
 function g((function (int): bool) $func = ($x ==> $x == 123)) {
   echo "func(123) == ";
   var_dump($func(123));
@@ -19,5 +16,12 @@ function g((function (int): bool) $func = ($x ==> $x == 123)) {
   var_dump($func(124));
 }
 
+
+<<__EntryPoint>>
+function main_closure_default() {
+f();
+f($x ==> $x == 124);
+
 g();
 g(function (int $x) { return $x == 124; });
+}

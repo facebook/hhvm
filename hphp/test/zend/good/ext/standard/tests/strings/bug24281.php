@@ -1,8 +1,9 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $string = "He had had to have had it";
-$newstring = str_replace("had", "foo", $string, $count);
+$count = 0;
+$newstring = str_replace_with_count("had", "foo", $string, inout $count);
 print "$count changes were made.\n";
 $count = "foo";
-$newstring = str_replace("had", "foo", $string, $count);
+$newstring = str_replace_with_count("had", "foo", $string, inout $count);
 print "$count changes were made.\n";
-?>
+}

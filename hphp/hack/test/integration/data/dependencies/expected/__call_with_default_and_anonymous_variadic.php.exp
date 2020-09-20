@@ -1,0 +1,21 @@
+//// strict_toplevel.php
+<?hh
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}
+
+//// partial_toplevel.php
+<?hh // partial
+function call_with_default_and_anonymous_variadic(string $s): void {
+  with_default_and_anonymous_variadic(3.14);
+  with_default_and_anonymous_variadic(3.14, 'pi');
+  with_default_and_anonymous_variadic(3.14, '%s', $s);
+}
+function with_default_and_anonymous_variadic(
+  float $x,
+  ?string $y = \extract_standalone_make_default(),
+  ...
+): void {
+  throw new \Exception();
+}

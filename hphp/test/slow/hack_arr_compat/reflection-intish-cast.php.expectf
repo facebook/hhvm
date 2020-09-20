@@ -1,0 +1,5 @@
+
+Warning: Invalid argument: function: class not found in %s on line %d
+NULL
+string(36) "Property stdClass::42 does not exist"
+string(36) "Property stdClass::42 does not exist"

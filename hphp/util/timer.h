@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TIMER_H_
-#define incl_HPHP_TIMER_H_
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -103,4 +102,3 @@ int64_t gettime_diff_us(const timespec&, const timespec&);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_TIMER_H_

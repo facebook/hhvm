@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HASH_H_
-#define incl_HPHP_HASH_H_
+#pragma once
 
 #include <stdint.h>
 #include <cstring>
@@ -54,19 +53,19 @@ using inthash_t = int32_t;
 constexpr strhash_t STRHASH_MASK = 0x7fffffff;
 constexpr strhash_t STRHASH_MSB  = 0x80000000;
 
-inline size_t hash_int64_fallback(int64_t key) {
+inline size_t hash_int64_fallback(uint64_t key) {
   // "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
   // http://www.concentric.net/~ttwang/tech/inthash.htm
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
-  key = key ^ ((unsigned long long)key >> 24);
+  key = key ^ (key >> 24);
   key = (key + (key << 3)) + (key << 8); // key * 265
-  key = key ^ ((unsigned long long)key >> 14);
+  key = key ^ (key >> 14);
   key = (key + (key << 2)) + (key << 4); // key * 21
-  key = key ^ ((unsigned long long)key >> 28);
+  key = key ^ (key >> 28);
   return static_cast<size_t>(static_cast<uint32_t>(key));
 }
 
-ALWAYS_INLINE size_t hash_int64(int64_t k) {
+ALWAYS_INLINE size_t hash_int64(uint64_t k) {
 #if defined(USE_HWCRC) && defined(__SSE4_2__)
   size_t h = 0;
   __asm("crc32q %1, %0\n" : "+r"(h) : "rm"(k));
@@ -81,7 +80,7 @@ ALWAYS_INLINE size_t hash_int64(int64_t k) {
 }
 
 
-inline size_t hash_int64_pair(int64_t k1, int64_t k2) {
+inline size_t hash_int64_pair(uint64_t k1, uint64_t k2) {
 #if defined(USE_HWCRC) && defined(__SSE4_2__)
   // crc32 is commutative, so we need to perturb k1 so that (k1, k2) hashes
   // differently from (k2, k1).
@@ -327,4 +326,3 @@ extern "C" {
 }
 #endif
 
-#endif // incl_HPHP_HASH_H_

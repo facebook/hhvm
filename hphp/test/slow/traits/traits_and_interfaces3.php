@@ -13,4 +13,8 @@ function main() {
   $c = new C();
 }
 
+
+<<__EntryPoint>>
+function main_traits_and_interfaces3() {
 main();
+}

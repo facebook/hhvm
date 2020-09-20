@@ -44,4 +44,8 @@ function main(): void {
   var_dump($m2);
 }
 
+
+<<__EntryPoint>>
+function main_skipwhile_takewhile() {
 main();
+}

@@ -1,13 +1,16 @@
-<?php
+<?hh
+class State { static $x = 1; }
 function foo() {
-  static $x = 1;
-  $x += 10;
-  yield $x;
-  $x += 100;
-  yield $x;
-  $x += 1000;
-  yield $x;
+  State::$x += 10;
+  yield State::$x;
+  State::$x += 100;
+  yield State::$x;
+  State::$x += 1000;
+  yield State::$x;
 }
+
+<<__EntryPoint>>
+function main_g7() {
 $x = foo();
 $y1 = clone $x;
 $y2 = clone $x;
@@ -21,4 +24,5 @@ foreach ($y1 as $v) {
 echo "========\n";
 foreach ($y2 as $v) {
   echo $v . "\n";
+}
 }

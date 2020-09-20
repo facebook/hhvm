@@ -98,9 +98,9 @@ TEST(Simplifier, Count) {
 
   // Count($null) --> 0
   {
-    auto null = unit.gen(Conjure, dummy, TNull);
-    auto count = unit.gen(Count, dummy, null->dst());
-    auto result = simplify(unit, count);
+    auto const null = unit.gen(Conjure, dummy, TNull);
+    auto const count = unit.gen(Count, dummy, null->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(0, result.instrs.size());
@@ -109,44 +109,43 @@ TEST(Simplifier, Count) {
 
   // Count($bool_int_dbl_str) --> 1
   {
-    auto ty = TBool | TInt | TDbl | TStr | TRes;
-    auto val = unit.gen(Conjure, dummy, ty);
-    auto count = unit.gen(Count, dummy, val->dst());
-    auto result = simplify(unit, count);
+    auto const ty = TBool | TInt | TDbl | TStr | TRes;
+    auto const val = unit.gen(Conjure, dummy, ty);
+    auto const count = unit.gen(Count, dummy, val->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(0, result.instrs.size());
     EXPECT_EQ(1, result.dst->intVal());
   }
 
-  // Count($array_no_kind) --> CountArray($array_no_kind)
+  // Count($vec) --> CountVec($vec)
   {
-    auto arr = unit.gen(Conjure, dummy, TArr);
-    auto count = unit.gen(Count, dummy, arr->dst());
-    auto result = simplify(unit, count);
+    auto const arr = unit.gen(Conjure, dummy, TVec);
+    auto const count = unit.gen(Count, dummy, arr->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountVec, arr->dst());
   }
 
-  // Count($array_packed) --> CountArrayFast($array_packed)
+  // Count($varr) --> CountVec($varr)
   {
-    auto ty = Type::Array(ArrayData::kPackedKind);
-    auto arr = unit.gen(Conjure, dummy, ty);
-    auto count = unit.gen(Count, dummy, arr->dst());
-    auto result = simplify(unit, count);
+    auto const arr = unit.gen(Conjure, dummy, TVArr);
+    auto const count = unit.gen(Count, dummy, arr->dst());
+    auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountArrayFast, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountVec, arr->dst());
   }
 
   // Count($some_obj) --> Count($some_obj)
   {
-    auto obj = unit.gen(Conjure, dummy, TObj);
-    auto count = unit.gen(Count, dummy, obj->dst());
-    auto result = simplify(unit, count);
+    auto const obj = unit.gen(Conjure, dummy, TObj);
+    auto const count = unit.gen(Count, dummy, obj->dst());
+    auto const result = simplify(unit, count);
     EXPECT_NO_CHANGE(result);
   }
 
@@ -155,7 +154,7 @@ TEST(Simplifier, Count) {
 TEST(Simplifier, LdObjClass) {
   IRUnit unit{test_context};
   auto const dummy = BCContext { BCMarker::Dummy(), 0 };
-  auto const cls = SystemLib::s_IteratorClass;
+  auto const cls = SystemLib::s_HH_IteratorClass;
 
   // LdObjClass t1:Obj<=C doesn't simplify
   {
@@ -194,7 +193,7 @@ TEST(Simplifier, LdObjInvoke) {
   // LdObjInvoke t1:Cls(C), where C is persistent but has no __invoke
   // doesn't simplify.
   {
-    auto type = Type::cns(SystemLib::s_IteratorClass);
+    auto type = Type::cns(SystemLib::s_HH_IteratorClass);
     auto cls = unit.gen(Conjure, dummy, type);
     auto load = unit.gen(LdObjInvoke, dummy, taken, cls->dst());
     auto result = simplify(unit, load);

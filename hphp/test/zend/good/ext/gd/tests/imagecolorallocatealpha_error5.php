@@ -1,7 +1,7 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $img = imagecreatetruecolor(200, 200);
 
-imagecolorallocatealpha($img, 255, 255, 255, 'string-non-numeric');
-imagecolorallocatealpha($img, 255, 255, 255, array());
-imagecolorallocatealpha($img, 255, 255, 255, tmpfile());
-?>
+try { imagecolorallocatealpha($img, 255, 255, 255, 'string-non-numeric'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { imagecolorallocatealpha($img, 255, 255, 255, varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { imagecolorallocatealpha($img, 255, 255, 255, tmpfile()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

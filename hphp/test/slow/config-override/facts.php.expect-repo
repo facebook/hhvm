@@ -1,0 +1,15 @@
+darray(2) {
+  ["SoIsThis"]=>
+  varray(1) {
+    string(3) "ABC"
+  }
+  ["ThisIsAnAttribute"]=>
+  varray(0) {
+  }
+}
+darray(2) {
+  ["foo"]=>
+  int(2)
+  ["main"]=>
+  int(0)
+}

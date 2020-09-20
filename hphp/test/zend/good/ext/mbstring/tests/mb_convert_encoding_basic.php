@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_convert_encoding(string $str, string $to_encoding [, mixed $from_encoding])
  * Description: Returns converted string in desired encoding 
  * Source code: ext/mbstring/mbstring.c
@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_convert_encoding()
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_convert_encoding() : basic functionality ***\n";
 
 //All strings are the same when displayed in their respective encodings
@@ -49,4 +49,4 @@ var_dump(base64_encode(mb_convert_encoding($jis_string, 'UTF-8', 'JIS')));
 var_dump(base64_encode(mb_convert_encoding($euc_jp_string, 'UTF-8', 'EUC-JP')));
 
 echo "Done";
-?>
+}

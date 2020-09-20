@@ -84,14 +84,14 @@ class Thrower {
   function __toString() {
     throw new Exception("Compare exception");
   }
-};
+}
 
 function compare($a, $b) {
   single_compare($a, $b);
   single_compare($b, $a);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   single_compare(dict[], dict[]);
   single_compare(dict[0 => 1, 1 => 2, 2 => 3],
                  dict[0 => 1, 1 => 2, 2 => 3]);
@@ -130,10 +130,9 @@ function main() {
   compare(dict[], 1.2345);
   compare(dict[], 'abc');
   compare(dict[], new stdclass);
-  compare(dict[], []);
+  compare(dict[], varray[]);
   compare(dict[], vec[]);
   compare(dict[], keyset[]);
 
   single_compare(dict[0 => keyset[]], dict[0 => keyset[]]);
 }
-main();

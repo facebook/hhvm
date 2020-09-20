@@ -1,11 +1,9 @@
-array(1) {
+darray(1) {
   ["sitemap"]=>
-  array(3) {
+  darray(2) {
     ["/home"]=>
     string(13) "default:index"
     ["/info"]=>
     string(12) "default:info"
-    ["hhvm.php7.all"]=>
-    string(0) ""
   }
 }

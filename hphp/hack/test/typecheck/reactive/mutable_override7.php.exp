@@ -1,0 +1,8 @@
+File "mutable_override7.php", line 10, characters 19-19:
+The method `f` has the wrong type (Typing[4341])
+File "mutable_override7.php", line 4, characters 41-42:
+Incompatible mutabilities:
+File "mutable_override7.php", line 4, characters 41-42:
+This parameter is maybe-mutable
+File "mutable_override7.php", line 10, characters 23-24:
+This parameter is immutable

@@ -1,8 +1,7 @@
 
-Warning: %s
-NULL
+Warning: array_search() expects at least 2 parameters, 1 given in %s/array_search1.php on line 5
 
-Warning: %s
+Warning: array_search() expects parameter 2 to be an array or collection in %s/array_search1.php on line 6
 NULL
 int(1)
 bool(false)

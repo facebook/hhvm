@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class B {}
@@ -22,17 +22,21 @@ function main() {
   $x7 = is_subclass_of((new B()), 'A', false);
 
   // Shouldn't be optimized, types don't match.
-  $x8 = is_subclass_of('A', (new B()));
-  $x9 = is_subclass_of('A', (new B()), false);
+  try { is_subclass_of('A', (new B())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { is_subclass_of('A', (new B()), false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $x10 = is_subclass_of(get_sub_b(), 'B');
   $x11 = is_subclass_of(get_sub_b(), 'A');
 
-  return array($x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x8, $x9, $x10, $x11);
+  return varray[$x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x10, $x11];
 }
 
-@main();
-@main();
-@main();
+
+<<__EntryPoint>>
+function main_is_subclass_of_opt() {
+main();
+main();
+main();
 
 var_dump(main());
+}

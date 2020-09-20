@@ -1,101 +1,72 @@
 *** Testing array_fill() : usage variations ***
 --- Testing array_fill() with different values for 'num' arg ---
 -- Iteration 1 --
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 2 --
 
-Warning: %s
-bool(false)
+Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 3 --
-array(5) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(100)
-  [2]=>
-  int(100)
-  [3]=>
-  int(100)
-  [4]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 4 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 5 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 6 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 7 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 11 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 12 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 13 --
-array(1) {
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 14 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 15 --
-array(1) {
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 16 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: array_fill() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 22 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 23 --
-array(0) {
-}
+
+Warning: array_fill() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 Done

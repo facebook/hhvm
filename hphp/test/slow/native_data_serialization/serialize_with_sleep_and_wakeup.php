@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * This is more of a test for testing the behavior of
@@ -19,7 +19,7 @@ class Bar extends ReflectionClass {
     var_dump("__sleep invoked");
     var_dump($this->name);
     var_dump($this->getName());
-    return array('prop', 'meh');
+    return varray['name', 'prop', 'meh'];
   }
 
   public function __wakeup() {
@@ -32,9 +32,14 @@ class Bar extends ReflectionClass {
 
 }
 
+
+<<__EntryPoint>>
+function main_serialize_with_sleep_and_wakeup() {
 $rc = new Bar(Foo::class);
 $rc->prop = 1337;
+$rc->name = 'Foo';
 $rc->dontSerializeMe = "serialized";
 $serialized = serialize($rc);
 var_dump(json_encode($serialized));
 var_dump(unserialize($serialized));
+}

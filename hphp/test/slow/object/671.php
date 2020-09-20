@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   function foo() {
@@ -16,5 +16,9 @@ function test($x, $a) {
     $x->foo();
   }
 }
+
+<<__EntryPoint>>
+function main_671() {
 test(45, 0);
 test(77, 1);
+}

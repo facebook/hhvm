@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class autoload_implements implements autoload_interface {
 	function testFunction()
@@ -7,4 +7,3 @@ class autoload_implements implements autoload_interface {
 	}
 }
 
-?>

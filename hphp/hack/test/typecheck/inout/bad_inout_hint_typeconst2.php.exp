@@ -1,11 +1,6 @@
-File "bad_inout_hint_typeconst2.php", line 7, characters 7-8:
-Class C2 does not correctly implement all required methods  (Typing[4184])
-File "bad_inout_hint_typeconst2.php", line 7, characters 18-19:
-Some methods are incompatible with those declared in type C1
-Read the following to see why:
-File "bad_inout_hint_typeconst2.php", line 4, characters 23-23:
-Unable to satisfy constraint on this type constant
+File "bad_inout_hint_typeconst2.php", line 8, characters 14-14:
+Unable to satisfy constraint on this type constant (Typing[4184])
 File "bad_inout_hint_typeconst2.php", line 8, characters 34-36:
-This is an inout parameter
+This is an `inout` parameter
 File "bad_inout_hint_typeconst2.php", line 4, characters 38-40:
 It is incompatible with a normal parameter

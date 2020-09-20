@@ -2,11 +2,9 @@
 
 -- Testing md5() function with no arguments --
 
-Warning: %s
-NULL
+Warning: md5() expects at least 1 parameter, 0 given in %s/md5_error.php on line 10
 
 -- Testing md5() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: md5() expects at most 2 parameters, 3 given in %s/md5_error.php on line 17
 ===DONE==

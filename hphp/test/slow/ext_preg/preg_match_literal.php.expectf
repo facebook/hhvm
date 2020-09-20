@@ -41,43 +41,37 @@ int(1)
 int(0)
 int(1)
 
-Warning: No ending delimiter '/' found: [/abc\/] in %s/test/slow/ext_preg/preg_match_literal.php on line 71
+Warning: No ending delimiter '/' found: [/abc\/] in %s/test/slow/ext_preg/preg_match_literal.php on line %d
 bool(false)
 int(1)
 int(1)
 int(1)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "def"
-    [1]=>
     int(3)
   }
 }
 int(0)
-array(0) {
+darray(0) {
 }
 int(1)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(3)
   }
 }
 int(0)
-array(0) {
+darray(0) {
 }
 int(1)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "def"
-    [1]=>
     int(3)
   }
 }

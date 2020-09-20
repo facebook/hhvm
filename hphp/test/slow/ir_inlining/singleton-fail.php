@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function thing_get() {
   return thing::get();
@@ -7,12 +7,13 @@ function thing_get() {
 final class thing {
   function x() { echo "ok\n"; }
 
+  private static $getInstance = null;
+
   public static function get() {
-    static $instance = null;
-    if ($instance === null) {
-      $instance = new self();
+    if (self::$getInstance === null) {
+      self::$getInstance = new self();
     }
-    return $instance;
+    return self::$getInstance;
   }
 }
 
@@ -22,4 +23,8 @@ function go() {
   return $z->x();
 }
 
+
+<<__EntryPoint>>
+function main_singleton_fail() {
 go();
+}

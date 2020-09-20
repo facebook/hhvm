@@ -2,11 +2,9 @@
 
 -- Testing idate() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: idate() expects at least 1 parameter, 0 given in %s/idate_error.php on line 11
 
 -- Testing idate() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: idate() expects at most 2 parameters, 3 given in %s/idate_error.php on line 17
 ===DONE===

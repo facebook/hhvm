@@ -8,4 +8,8 @@ function main() {
   var_dump(array_key_exists(3, $fv));
 }
 
+
+<<__EntryPoint>>
+function main_array_key_exists() {
 main();
+}

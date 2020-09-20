@@ -4,7 +4,7 @@ abstract class :base {
   // This is necessary because the generated __xhpAttributeDeclaration() has a
   // call to parent::__xhpAttributeDeclaration().
   protected static function __xhpAttributeDeclaration() {
-    return array();
+    return darray[];
   }
 
   public static function xhpAttributeDeclaration() {
@@ -41,7 +41,7 @@ class :node4 extends :base {
 
 function mixedFn1(mixed $test) { return 'fn'; }
 function mixedFn2(string $a1, mixed $v2) { return 'fn'; }
-
+<<__EntryPoint>> function main(): void {
 echo
   :node1::xhpAttributeDeclaration()['checkme'][0].
   :node2::xhpAttributeDeclaration()['checkme'][0].
@@ -49,3 +49,4 @@ echo
   :node4::xhpAttributeDeclaration()['checkme'][0].
   mixedFn1(1).
   mixedFn2('a1', 'hi')."\n";
+}

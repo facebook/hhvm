@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REGION_PRUNE_ARCS_H_
-#define incl_HPHP_REGION_PRUNE_ARCS_H_
+#pragma once
 
 #include <vector>
 
@@ -37,4 +36,3 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input = nullptr);
 }}
 
 
-#endif

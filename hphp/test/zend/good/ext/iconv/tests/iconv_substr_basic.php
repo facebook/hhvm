@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
  * Description: Returns part of a string 
  * Source code: ext/iconv/iconv.c
@@ -7,7 +7,7 @@
 /*
  * Test Basic Functionality of iconv_substr with ASCII characters and multibyte strings.
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv_substr() : basic functionality ***\n";
 
 $string_ascii = b'ABCDEF';
@@ -29,4 +29,4 @@ $result_2 = iconv_substr($string_mb, 2, 7, 'utf-8');
 var_dump(bin2hex($result_2));
 
 echo "Done";
-?>
+}

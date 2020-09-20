@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function both_short() {
   print __FUNCTION__."\n";
@@ -51,15 +51,15 @@ function restarting_things() {
   var_dump(
     strtr(
       strpbrk("foo\x00bar\x00waaaaa", 'w'),
-      array("\x00" => '<0>')));
+      darray["\x00" => '<0>']));
   var_dump(
     strtr(
       strpbrk("foo\x00bar\x00waaaaa", 'r'),
-      array("\x00" => '<0>')));
+      darray["\x00" => '<0>']));
   var_dump(
     strtr(
       strpbrk("foo\x00bar\x00waaaaaz", 'z'),
-      array("\x00" => '<0>')));
+      darray["\x00" => '<0>']));
 }
 
 function main() {
@@ -72,4 +72,8 @@ function main() {
   restarting_things();
 }
 
+
+<<__EntryPoint>>
+function main_strpbrk_short_and_long() {
 main();
+}

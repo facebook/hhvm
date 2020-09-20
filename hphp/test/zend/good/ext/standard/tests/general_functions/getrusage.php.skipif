@@ -1,1 +1,4 @@
-<?php if (!function_exists("getrusage")) print "skip"; ?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!function_exists("getrusage")) print "skip";
+}

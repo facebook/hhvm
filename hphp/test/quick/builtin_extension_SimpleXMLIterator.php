@@ -14,26 +14,20 @@ function testInitialize() {
   $s = new SimpleXMLIterator(basicXML());
   echo "SimpleXMLIterator can be initialized :)\n";
 }
-testInitialize();
-
 
 function testMeta() {
   $s = new SimpleXMLIterator(basicXML());
   echo "SimpleXMLIterator is a SimpleXMLElement: ";
-  var_export($s instanceof SimpleXMLElement);echo "\n";
+  var_export($s is SimpleXMLElement);echo "\n";
 
   echo "SimpleXMLIterator is a RecursiveIterator: ";
-  var_export($s instanceof RecursiveIterator);echo "\n";
+  var_export($s is RecursiveIterator);echo "\n";
 }
-testMeta();
-
 
 function testGetBasicProperty() {
   $s = new SimpleXMLIterator(basicXML());
   echo "Node root/b has contents: {$s->b}\n";
 }
-testGetBasicProperty();
-
 
 function testFlatIteration() {
   $s = new SimpleXMLIterator(basicXML());
@@ -43,8 +37,6 @@ function testFlatIteration() {
   }
   echo "\n";
 }
-testFlatIteration();
-
 
 function testChildCountDuringIteration() {
   $s = new SimpleXMLIterator(basicXML());
@@ -54,8 +46,6 @@ function testChildCountDuringIteration() {
   }
   echo "\n";
 }
-testChildCountDuringIteration();
-
 
 function testHasChildrenDuringIteration() {
   $s = new SimpleXMLIterator(basicXML());
@@ -65,8 +55,6 @@ function testHasChildrenDuringIteration() {
   }
   echo "\n";
 }
-testHasChildrenDuringIteration();
-
 
 function testRecursiveIteration() {
   $s = new RecursiveIteratorIterator(new SimpleXMLIterator(basicXML()));
@@ -76,4 +64,19 @@ function testRecursiveIteration() {
   }
   echo "\n";
 }
+
+<<__EntryPoint>> function main(): void {
+testInitialize();
+
+testMeta();
+
+testGetBasicProperty();
+
+testFlatIteration();
+
+testChildCountDuringIteration();
+
+testHasChildrenDuringIteration();
+
 testRecursiveIteration();
+}

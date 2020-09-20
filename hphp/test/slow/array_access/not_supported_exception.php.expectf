@@ -1,1 +1,1 @@
-Fatal error: Object does not implement ArrayAccess in %s/slow/array_access/not_supported_exception.php on line %d
+Fatal error: Cannot use array access on an object in %s/slow/array_access/not_supported_exception.php on line %d

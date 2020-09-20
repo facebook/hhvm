@@ -1,0 +1,2 @@
+File "record_instance_other_type.php", line 6, characters 10-19:
+Expected a record type, but got `NotARecord`. (Typing[4364])

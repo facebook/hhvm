@@ -272,21 +272,15 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: %s
-bool(false)
+Warning: is_float() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line 131
 
-Warning: %s
-bool(false)
+Warning: is_double() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line 136
 
-Warning: %s
-bool(false)
+Warning: is_real() expects exactly 1 parameter, 0 given in %s/is_float_64bit.php on line 141
 
-Warning: %s
-bool(false)
+Warning: is_float() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line 148
 
-Warning: %s
-bool(false)
+Warning: is_double() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line 153
 
-Warning: %s
-bool(false)
+Warning: is_real() expects exactly 1 parameter, 2 given in %s/is_float_64bit.php on line 158
 Done

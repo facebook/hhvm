@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $im = new Imagick ();
 $im->clear ();
 $im->destroy ();
@@ -19,5 +19,4 @@ $im->clear ();
 $im->destroy ();
 
 echo 'success';
-
-?>
+}

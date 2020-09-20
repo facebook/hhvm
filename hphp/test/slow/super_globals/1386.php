@@ -1,14 +1,17 @@
-<?php
+<?hh
 
 class X {
   static function test() {
     var_dump(__FUNCTION__);
     var_dump(__CLASS__);
     var_dump(__METHOD__);
-    return array($GLOBALS[__FUNCTION__],                 $GLOBALS[__CLASS__],                 $GLOBALS[__METHOD__]);
+    return varray[\HH\global_get(__FUNCTION__),                 \HH\global_get(__CLASS__),                 \HH\global_get(__METHOD__)];
   }
 }
-$test = 'this_is_function_test';
-$X = 'this_is_class_x';
-$GLOBALS['X::test'] = 'this_is_method_test::x';
-var_dump(X::test());
+<<__EntryPoint>>
+function entrypoint_1386(): void {
+  \HH\global_set('test', 'this_is_function_test');
+  \HH\global_set('X', 'this_is_class_x');
+  \HH\global_set('X::test', 'this_is_method_test::x');
+  var_dump(X::test());
+}

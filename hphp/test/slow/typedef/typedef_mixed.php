@@ -7,4 +7,8 @@ function foo(Foo $x) {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_typedef_mixed() {
 foo(12);
+}

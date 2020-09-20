@@ -3,7 +3,9 @@
 #1  b() called at [%sdebug_print_backtrace_limit.php:3]
 #0  c() called at [%sdebug_print_backtrace_limit.php:7]
 #1  b() called at [%sdebug_print_backtrace_limit.php:3]
-#2  a() called at [%sdebug_print_backtrace_limit.php:17]
+#2  a() called at [%sdebug_print_backtrace_limit.php:19]
+#3  entrypoint_debug_print_backtrace_limit()
 #0  c() called at [%sdebug_print_backtrace_limit.php:7]
 #1  b() called at [%sdebug_print_backtrace_limit.php:3]
-#2  a() called at [%sdebug_print_backtrace_limit.php:17]
+#2  a() called at [%sdebug_print_backtrace_limit.php:19]
+#3  entrypoint_debug_print_backtrace_limit()

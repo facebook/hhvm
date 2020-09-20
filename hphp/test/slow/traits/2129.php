@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function show_without_extra_vardump_nonsense($arr) {
   echo 'array (' . count($arr) . ") {\n";
@@ -9,18 +9,18 @@ function show_without_extra_vardump_nonsense($arr) {
 }
 function do_wonderful_things_with($r) {
   echo "yall know what time it is. time to show you some properties\n";
-  $props = array();
+  $props = varray[];
   foreach ($r->getProperties() as $prop) {
     $props[] = $prop->getName();
   }
-  asort($props);
+  asort(inout $props);
   show_without_extra_vardump_nonsense($props);
-  $meths = array();
+  $meths = varray[];
   echo "yall know what time it is now too. time to show you some methods\n";
   foreach ($r->getMethods() as $meth) {
     $meths[] = $meth->getName();
   }
-  asort($meths);
+  asort(inout $meths);
   show_without_extra_vardump_nonsense($meths);
 }
 
@@ -73,8 +73,12 @@ class D extends C {
 
 }
 
+
+<<__EntryPoint>>
+function main_2129() {
 $r = new ReflectionClass('C');
 do_wonderful_things_with($r);
 
 $r = new ReflectionClass('D');
 do_wonderful_things_with($r);
+}

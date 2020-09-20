@@ -1,4 +1,0 @@
-File "call_time_reference1.php", line 4, characters 12-14:
-This argument should not be annotated with & (Typing[4181])
-File "call_time_reference1.php", line 3, characters 19-20:
-Because this parameter is passed by value

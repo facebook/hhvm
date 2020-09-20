@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_NETWORK_H_
-#define incl_HPHP_EXT_NETWORK_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -26,7 +25,7 @@
 
 namespace HPHP {
 
-Variant HHVM_FUNCTION(gethostname);
+TypedValue HHVM_FUNCTION(gethostname);
 Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address);
 String HHVM_FUNCTION(gethostbyname, const String& hostname);
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname);
@@ -36,23 +35,24 @@ Variant HHVM_FUNCTION(getservbyname, const String& service,
                                      const String& protocol);
 Variant HHVM_FUNCTION(getservbyport, int64_t port, const String& protocol);
 Variant HHVM_FUNCTION(inet_ntop, const String& in_addr);
+TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr);
+TypedValue HHVM_FUNCTION(inet_ntop_folly, const String& in_addr);
 Variant HHVM_FUNCTION(inet_pton, const String& address);
 Variant HHVM_FUNCTION(ip2long, const String& ip_address);
 String HHVM_FUNCTION(long2ip, const String& proper_address);
 bool HHVM_FUNCTION(checkdnsrr, const String& host,
                                const String& type = null_string);
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type = -1,
-                         VRefParam authnsRef = uninit_variant,
-                         VRefParam addtlRef = uninit_variant);
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+                                      Variant& authnsRef,
+                                      Variant& addtlRef);
 bool HHVM_FUNCTION(getmxrr, const String& hostname,
-                            VRefParam mxhostsRef,
-                            VRefParam weightsRef = uninit_variant);
+                            Variant& mxhostsRef,
+                            Variant& weightsRef);
 void HHVM_FUNCTION(header, const String& str, bool replace = true,
                    int http_response_code = 0);
 Variant HHVM_FUNCTION(http_response_code, int response_code = 0);
 Array HHVM_FUNCTION(headers_list);
-bool HHVM_FUNCTION(headers_sent, VRefParam file = uninit_variant,
-                                 VRefParam line = uninit_variant);
+bool HHVM_FUNCTION(headers_sent);
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback);
 void HHVM_FUNCTION(header_remove, const Variant& name = null_string);
 int64_t HHVM_FUNCTION(get_http_request_size);
@@ -78,4 +78,3 @@ bool validate_dns_arguments(const String& host, const String& type,
                             int& ntype);
 }
 
-#endif // incl_HPHP_EXT_NETWORK_H_

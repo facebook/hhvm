@@ -1,20 +1,32 @@
-<?php
+<?hh
 /* Prototype  : int intval(mixed var [, int base])
- * Description: Get the integer value of a variable using the optional base for the conversion 
+ * Description: Get the integer value of a variable using the optional base for the conversion
  * Source code: ext/standard/type.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-echo "*** Testing intval() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() != 0) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
-set_error_handler('test_error_handler');
+<<__EntryPoint>> function main(): void {
+echo "*** Testing intval() : usage variation ***\n";
+set_error_handler(fun('test_error_handler'));
 
 // Initialise function arguments not being substituted (if any)
 $base = 10;
@@ -23,29 +35,17 @@ $base = 10;
 $unset_var = 10;
 unset ($unset_var);
 
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -61,10 +61,10 @@ $inputs = array(
       'float .5' => .5,
 
       // array data
-      'empty array' => array(),
+      'empty array' => varray[],
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
-      'nested arrays' => array('foo', $index_array, $assoc_array),
+      'nested arrays' => varray['foo', $index_array, $assoc_array],
 
       // null data
       'uppercase NULL' => NULL,
@@ -95,7 +95,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-);
+];
 
 // loop through each element of the array for var
 
@@ -104,5 +104,5 @@ foreach($inputs as $key =>$value) {
       var_dump( intval($value, $base) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

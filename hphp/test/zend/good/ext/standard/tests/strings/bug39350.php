@@ -1,8 +1,8 @@
-<?php
-
-implode('', array(null));
-implode('', array(false));
-implode('', array(""));
+<?hh
+<<__EntryPoint>> function main(): void {
+implode('', varray[null]);
+implode('', varray[false]);
+implode('', varray[""]);
 
 echo "Done\n";
-?>
+}

@@ -4,6 +4,5 @@ PASSED
 
 Error cases:
 
-Warning: %s
-NULL
+Warning: get_include_path() expects exactly 0 parameters, 1 given in %s/get_include_path_basic.php on line 18
 ===DONE===

@@ -1,24 +1,23 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 
-$file_path = dirname(__FILE__);
-
-$dest_dir = "$file_path/rename_variation2_dir";
+$dest_dir = __SystemLib\hphp_test_tmppath('rename_variation2_dir');
 // create the $dest_dir
 mkdir($dest_dir);
 
 /* Testing rename() on soft and hard links with different permissions */
 echo "\n*** Testing rename() on soft links ***\n";
 // create the file
-$filename = $file_path."/rename_variation2.phpt2.tmp";
+$filename = __SystemLib\hphp_test_tmppath('rename_variation2.phpt2.tmp');
 @unlink($filename);
 var_dump(touch($filename));
 
 // create the soft links to the file
-$linkname = $file_path."/rename_variation2_soft_link1.tmp";
+$linkname = __SystemLib\hphp_test_tmppath('rename_variation2_soft_link1.tmp');
 var_dump(symlink($filename, $linkname));
 
 //rename the link to a new name in the same dir
-$dest_linkname = $file_path."/rename_variation2_soft_link2.tmp";
+$dest_linkname = __SystemLib\hphp_test_tmppath('rename_variation2_soft_link2.tmp');
 var_dump( rename( $linkname, $dest_linkname) );
 //ensure that link was renamed 
 clearstatcache();
@@ -36,10 +35,7 @@ var_dump( file_exists($dest_dir."/rename_variation2_soft_link2.tmp") ); // expec
 unlink($dest_dir."/rename_variation2_soft_link2.tmp");
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/rename_variation2.phpt2.tmp");
-rmdir($file_path."/rename_variation2_dir");
-?>
+
+unlink(__SystemLib\hphp_test_tmppath('rename_variation2.phpt2.tmp'));
+rmdir(__SystemLib\hphp_test_tmppath('rename_variation2_dir'));
+}

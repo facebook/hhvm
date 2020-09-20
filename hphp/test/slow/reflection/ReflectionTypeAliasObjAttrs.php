@@ -16,9 +16,10 @@ type MyOtherType = MyTypeNoAttrs;
 
 <<Attr2, Attr3>>
 type MyOtherOtherType = MyNewType;
-
+<<__EntryPoint>> function main(): void {
 var_dump((new ReflectionTypeAlias('MyTypeNoAttrs'))->getAttributes());
 var_dump((new ReflectionTypeAlias('MyType'))->getAttributes());
 var_dump((new ReflectionTypeAlias('MyNewType'))->getAttributes());
 var_dump((new ReflectionTypeAlias('MyOtherType'))->getAttributes());
 var_dump((new ReflectionTypeAlias('MyOtherOtherType'))->getAttributes());
+}

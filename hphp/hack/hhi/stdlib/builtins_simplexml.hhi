@@ -1,11 +1,10 @@
-<?hh // decl /* -*- mode: php -*- */
+<?hh /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -41,41 +40,38 @@ function libxml_get_last_error();
 <<__PHPStdLib>>
 function libxml_clear_errors();
 <<__PHPStdLib>>
-function libxml_use_internal_errors($use_errors = null);
+function libxml_use_internal_errors(bool $use_errors = false);
 <<__PHPStdLib>>
-function libxml_suppress_errors($suppress_errors);
+function libxml_suppress_errors(bool $suppress_errors);
 <<__PHPStdLib>>
-function libxml_set_streams_context($streams_context);
+function libxml_set_streams_context(resource $streams_context);
 <<__PHPStdLib>>
-function libxml_disable_entity_loader($disable = true);
+function libxml_disable_entity_loader(bool $disable = true);
 
 <<__PHPStdLib>>
-function simplexml_load_string($data, $class_name = "SimpleXMLElement", $options = 0, $ns = "", $is_prefix = false);
+function simplexml_load_string(string $data, string $class_name = "SimpleXMLElement", int $options = 0, string $ns = "", bool $is_prefix = false);
 <<__PHPStdLib>>
-function simplexml_load_file($filename, $class_name = "SimpleXMLElement", $options = 0, $ns = "", $is_prefix = false);
+function simplexml_load_file(string $filename, string $class_name = "SimpleXMLElement", int $options = 0, string $ns = "", bool $is_prefix = false);
+
 class SimpleXMLElement {
-  public function __construct($data, $options = 0, $data_is_url = false, $ns = "", $is_prefix = false);
+  public function __construct(string $data, int $options = 0, bool $data_is_url = false, string $ns = "", bool $is_prefix = false);
   public function offsetExists($index);
   public function offsetGet($index);
   public function offsetSet($index, $newvalue);
   public function offsetUnset($index);
   public function getIterator();
   public function count();
-  public function xpath($path);
-  public function registerXPathNamespace($prefix, $ns);
-  public function asXML($filename = "");
-  public function getNamespaces($recursive = false);
-  public function getDocNamespaces($recursive = false);
-  public function children($ns = "", $is_prefix = false);
+  public function xpath(string $path);
+  public function registerXPathNamespace(string $prefix, string $ns);
+  public function asXML(string $filename = "");
+  public function getNamespaces(bool $recursive = false);
+  public function getDocNamespaces(bool $recursive = false);
+  public function children(string $ns = "", bool $is_prefix = false);
   public function getName();
-  public function attributes($ns = "", $is_prefix = false);
-  public function addChild($qname, $value = null, $ns = null);
-  public function addAttribute($qname, $value = null, $ns = null);
+  public function attributes(string $ns = "", bool $is_prefix = false);
+  public function addChild(string $qname, string $value = "", $ns = null);
+  public function addAttribute(string $qname, string $value = "", string $ns = "");
   public function __toString();
-  public function __get($name);
-  public function __set($name, $value);
-  public function __isset($name);
-  public function __unset($name);
 }
 class LibXMLError {
   // php.net/manual/en/class.libxmlerror.php

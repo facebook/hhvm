@@ -1,1 +1,6 @@
-No errors
+File "akempty_promotion_9.php", line 15, characters 5-6:
+Invalid argument (Typing[4110])
+File "akempty_promotion_9.php", line 18, characters 12-29:
+Expected `darray<int, string>`
+File "akempty_promotion_9.php", line 8, characters 8-15:
+But got `varray<string>`

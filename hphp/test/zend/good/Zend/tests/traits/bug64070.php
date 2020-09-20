@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait first_trait
 {
     function first_function()
@@ -23,8 +23,8 @@ class first_class
 {
     use second_trait;
 }
-
+<<__EntryPoint>> function main(): void {
 $obj = new first_class();
 $obj->first_function();
 $obj->second_function();
-?>
+}

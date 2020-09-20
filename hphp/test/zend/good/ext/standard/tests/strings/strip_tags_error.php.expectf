@@ -2,11 +2,9 @@
 
 -- Testing strip_tags() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects at least 1 parameter, 0 given in %s/strip_tags_error.php on line 12
 
 -- Testing strip_tags() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strip_tags() expects at most 2 parameters, 3 given in %s/strip_tags_error.php on line 19
 Done

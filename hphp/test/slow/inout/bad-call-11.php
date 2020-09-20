@@ -2,9 +2,16 @@
 
 function foo(inout $x) {}
 
-function main() {
-  static $x;
-  foo(inout $x[1][2][3]);
+abstract final class MainStatics {
+  public static $x;
 }
 
+function main() {
+  foo(inout MainStatics::$x[1][2][3]);
+}
+
+
+<<__EntryPoint>>
+function main_bad_call_11() {
 main();
+}

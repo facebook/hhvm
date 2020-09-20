@@ -1,0 +1,5 @@
+(3,7)-(3,8) Shape field name must be a nonempty single-quoted string or a class constant
+(4,7)-(4,11) Shape field name must be a nonempty single-quoted string or a class constant
+(5,7)-(5,9) Shape field name must be a nonempty single-quoted string or a class constant
+(8,7)-(8,8) Shape field name must be a nonempty single-quoted string or a class constant
+(8,15)-(8,16) Shape field name must be a nonempty single-quoted string or a class constant

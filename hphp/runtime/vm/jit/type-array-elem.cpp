@@ -40,14 +40,13 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType,
   assertx(arrayType.subtypeOfAny(TArr, TVec));
   if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return PackedBounds::Out;
 
-  auto const const_check = [&] (const ArrayData* val) {
-    assertx(val->hasPackedLayout());
+  if (arrayType.hasConstVal()) {
+    auto const val = arrayType.arrLikeVal();
+    assertx(val->hasVanillaPackedLayout());
     if (val->empty()) return PackedBounds::Out;
     if (!idx) return PackedBounds::Unknown;
     return *idx < val->size() ? PackedBounds::In : PackedBounds::Out;
   };
-  if (arrayType.hasConstVal(TArr)) return const_check(arrayType.arrVal());
-  if (arrayType.hasConstVal(TVec)) return const_check(arrayType.vecVal());
 
   if (!idx) return PackedBounds::Unknown;
 
@@ -77,32 +76,28 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
   assertx(arr <= TArr);
 
   auto const dissected = [&]{
-    if (idx.hasConstVal(TStr)) {
-      int64_t val;
-      if (idx.strVal()->isStrictlyInteger(val)) return Type::cns(val);
-      return idx;
-    }
+    if (idx <= TStr) return idx;
     if (idx <= TInt) return idx;
     return TInt | TStr;
   }();
 
   if (arr.hasConstVal()) {
     if (dissected.hasConstVal(TInt)) {
-      auto const rval = arr.arrVal()->rval(dissected.intVal());
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = arr.arrVal()->get(dissected.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
     if (dissected.hasConstVal(TStr)) {
-      auto const rval = arr.arrVal()->rval(dissected.strVal());
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = arr.arrVal()->get(dissected.strVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
     auto type = TBottom;
     IterateKV(
       arr.arrVal(),
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
           if (dissected.maybe(TInt)) type |= Type::cns(v);
@@ -114,7 +109,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
     return {type, false};
   }
 
-  if (arr <= Type::Array(ArrayData::kPackedKind)) {
+  if (arr <= TVArr) {
     if (!dissected.maybe(TInt)) return {TBottom, false};
     if (dissected.hasConstVal(TInt)) {
       auto const intIdx = dissected.intVal();
@@ -122,7 +117,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
     }
   }
 
-  auto type = (arr <= TPersistentArr) ? TUncountedInit : TInitGen;
+  auto type = (arr <= TPersistentArr) ? TUncountedInit : TInitCell;
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -166,7 +161,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
 }
 
 std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
-  assertx(arr <= TVec);
+  assertx(arr.subtypeOfAny(TVec, TVArr));
   assertx(idx <= TInt);
 
   if (idx.hasConstVal()) {
@@ -178,26 +173,23 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal()) {
-      auto const idxVal = idx.intVal();
-      if (idxVal >= 0 && idxVal < arr.vecVal()->size()) {
-        auto const rval = PackedArray::RvalIntVec(arr.vecVal(), idxVal);
-        return {Type::cns(rval.tv()), true};
-      }
+      auto const tv = PackedArray::NvGetInt(arr.arrLikeVal(), idx.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
     // Otherwise we can constrain the type according to the union of all the
-    // types present in the vec.
+    // types present in the vec/varray.
     auto type = TBottom;
     PackedArray::IterateV(
-      arr.vecVal(),
+      arr.arrLikeVal(),
       [&](TypedValue v) { type |= Type::cns(v); }
     );
     return {type, false};
   }
 
-  // Vecs always contain initialized cells
-  auto type = (arr <= TPersistentVec) ? TUncountedInit : TInitCell;
+  // Array-likes always contain initialized cells.
+  auto type = arr <= TPersistent ? TUncountedInit : TInitCell;
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -233,23 +225,19 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
 }
 
 std::pair<Type, bool> dictElemType(Type arr, Type idx) {
-  assertx(arr <= TDict);
+  assertx(arr.subtypeOfAny(TDict, TDArr));
   assertx(idx <= (TInt | TStr));
 
   if (arr.hasConstVal()) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const idxVal = idx.intVal();
-      auto const rval = MixedArray::RvalIntDict(arr.dictVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = MixedArray::NvGetInt(arr.arrLikeVal(), idx.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
-    }
-
-    if (idx.hasConstVal(TStr)) {
-      auto const idxVal = idx.strVal();
-      auto const rval = MixedArray::RvalStrDict(arr.dictVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+    } else if (idx.hasConstVal(TStr)) {
+      auto const tv = MixedArray::NvGetStr(arr.arrLikeVal(), idx.strVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
@@ -257,8 +245,8 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // types present in the dict.
     auto type = TBottom;
     MixedArray::IterateKV(
-      MixedArray::asMixed(arr.dictVal()),
-      [&](Cell k, TypedValue v) {
+      MixedArray::asMixed(arr.arrLikeVal()),
+      [&](TypedValue k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
           if (idx.maybe(TInt)) type |= Type::cns(v);
@@ -270,8 +258,8 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     return {type, false};
   }
 
-  // Dicts always contain initialized cells
-  auto const type = (arr <= TPersistentDict) ? TUncountedInit : TInitCell;
+  // Array-likes always contain initialized cells.
+  auto const type = arr <= TPersistent ? TUncountedInit : TInitCell;
   return {type, false};
 }
 
@@ -283,16 +271,12 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const idxVal = idx.intVal();
-      auto const rval = SetArray::RvalInt(arr.keysetVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = SetArray::NvGetInt(arr.vecVal(), idx.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
-    }
-
-    if (idx.hasConstVal(TStr)) {
-      auto const idxVal = idx.strVal();
-      auto const rval = SetArray::RvalStr(arr.keysetVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+    } else if (idx.hasConstVal(TStr)) {
+      auto const tv = SetArray::NvGetStr(arr.vecVal(), idx.strVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
@@ -320,6 +304,84 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
   if (idx <= TInt) type &= TInt;
   if (idx <= TStr) type &= TStr;
   if (arr <= TPersistentKeyset) type &= TUncountedInit;
+  return {type, false};
+}
+
+std::pair<Type, bool> vecFirstLastType(Type arr,
+                                       bool isFirst,
+                                       const Class* ctx) {
+  assertx(arr.subtypeOfAny(TVArr, TVec));
+
+  if (arr.hasConstVal()) {
+    auto const val = arr.arrLikeVal();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    return {Type::cns(val->nvGetVal(pos)), true};
+  }
+
+  auto type = [&] {
+    if (arr <= TUncounted) return TUncountedInit;
+    if (arr <= TVec) return TInitCell;
+    return TInitCell;
+  }();
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) return {type, false};
+
+  using E = RepoAuthType::Array::Empty;
+  using T = RepoAuthType::Array::Tag;
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  switch (arrTy->tag()) {
+    case T::Packed: {
+      auto sz = arrTy->size();
+      if (sz == 0) return {TBottom, false};
+      if (isFirst) {
+        type &= typeFromRAT(arrTy->packedElem(0), ctx);
+      } else {
+        type &= typeFromRAT(arrTy->packedElem(sz - 1), ctx);
+      }
+      return {type, !maybeEmpty};
+    }
+    case T::PackedN: {
+      type &= typeFromRAT(arrTy->elemType(), ctx);
+      return {type, !maybeEmpty};
+    }
+  }
+  return {type, false};
+}
+
+std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
+  assertx(arr.subtypeOfAny(TDArr, TDict));
+
+  if (arr.hasConstVal()) {
+    auto const val = arr.arrLikeVal();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto const tv = isKey ? val->nvGetKey(pos) : val->nvGetVal(pos);
+    return {Type::cns(tv), true};
+  }
+
+  auto const type = [&] {
+    if (arr <= TUncounted) return TUncountedInit;
+    if (arr <= TDict) return TInitCell;
+    return TInitCell;
+  }();
+  return {type, false};
+}
+
+std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
+  assertx(arr <= TKeyset);
+
+  if (arr.hasConstVal()) {
+    auto val = arr.keysetVal();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    return {Type::cns(val->nvGetVal(pos)), true};
+  }
+
+  auto type = TStr | TInt;
+  if (arr <= TUncounted) type &= TUncountedInit;
   return {type, false};
 }
 

@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Goto to a label outside a finally block is not supported in %s/test/slow/finally/try_finally_007.php on line 4

@@ -1,9 +1,13 @@
 <?hh
 
 class Foo {
-  public function foo(?Foo $x) {
+  public function __construct(?Foo $x) {
     var_dump($x);
   }
 }
 
-new Foo();
+
+<<__EntryPoint>>
+function main_option_type_hint_001() {
+new Foo(1);
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   function foo() {
@@ -20,4 +20,8 @@ function test() {
   $b = new B;
   $b->bar();
 }
+
+<<__EntryPoint>>
+function main_2125() {
 test();
+}

@@ -6,7 +6,8 @@ enum Foo : int as int {
   BAR = 2;
   BAZ = 3;
 }
-
-var_dump(Foo::assertAll(array(Foo::WAT, Foo::BAZ, Foo::BAR)));
-var_dump(Foo::assertAll(array(Foo::WAT, 1, '3')));
-var_dump(Foo::assertAll(array(Foo::WAT, 1, '300')));
+<<__EntryPoint>> function main(): void {
+var_dump(Foo::assertAll(varray[Foo::WAT, Foo::BAZ, Foo::BAR]));
+var_dump(Foo::assertAll(varray[Foo::WAT, 1, '3']));
+var_dump(Foo::assertAll(varray[Foo::WAT, 1, '300']));
+}

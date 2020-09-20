@@ -1,16 +1,12 @@
-<?php
+<?hh
 
 class foo {
-	public function a() {
-	}
+    public function a() {
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $test = new foo;
 
 $test->a()->a;
 print "ok\n";
-
-$test->a()->a = 1;
-print "ok\n";
-
-?>
+}

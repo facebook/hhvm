@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 class Bar {
 }
-
+<<__EntryPoint>> function main(): void {
 $b = new Bar;
 
 var_dump($b == NULL);
@@ -23,4 +23,4 @@ var_dump($b == 1);
 
 
 echo "Done\n";
-?>
+}

@@ -31,8 +31,6 @@ Variant php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL);
 Variant php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL);
 Variant php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL);
 
-Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL);
-
 }
 
 #endif /* HPHP_EXT_FILTER_LOGICAL_FILTERS_H */

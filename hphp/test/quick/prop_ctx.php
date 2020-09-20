@@ -19,16 +19,15 @@ class b extends a {
   public $prop = 'I am public in b';
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $b = new b();
-  $b->f($b);
+  $b::f($b);
   t::f($b);
 
-  $b->set($b, 'new value');
+  $b::set($b, 'new value');
   t::set($b, 'newer value');
 
   $a = new a();
-  $a->f($a);
+  $a::f($a);
   t::f($a);
 }
-main();

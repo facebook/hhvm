@@ -8,91 +8,59 @@ function printFunc($rf) {
 }
 function printClass($rc) {
   $rms = $rc->getMethods();
-  $meths = array();
+  $meths = darray[];
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
-  ksort($meths);
+  ksort(inout $meths);
   foreach($meths as $meth) {
     printFunc($meth);
   }
   $rps = $rc->getProperties();
-  $props = array();
+  $props = darray[];
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
-  ksort($props);
+  ksort(inout $props);
   foreach($props as $prop) {
     var_dump($prop->getTypeText());
   }
 }
 function f() {
 }
-$rf = new ReflectionFunction('f');
-printFunc($rf);
 function f1(int $t) {
 }
-$rf = new ReflectionFunction('f1');
-printFunc($rf);
-function f2(@string $s) {
+function f2(<<__Soft>> string $s) {
 }
-$rf = new ReflectionFunction('f2');
-printFunc($rf);
 function f3(?:xhp:hello $x) {
 }
-$rf = new ReflectionFunction('f3');
-printFunc($rf);
 function f4(): noreturn {
   throw Exception('f4 doesn\'t return');
 }
-$rf = new ReflectionFunction('f4');
-printFunc($rf);
 function f100(): int {
 }
-$rf = new ReflectionFunction('f100');
-printFunc($rf);
 function f101(): string {
 }
-$rf = new ReflectionFunction('f101');
-printFunc($rf);
 function f102(): Vector<:xhp:element> {
 }
-$rf = new ReflectionFunction('f102');
-printFunc($rf);
 function f200((string, Template<A, B, ?C>, ?int, Vector<Map<C, B>>) $tuple): ?int {
 }
-$rf = new ReflectionFunction('f200');
-printFunc($rf);
-function f201((function (@int, Map<string, Map<int, Vector<string>>>):Vector<C>) $i): ClassA {
+function f201((function (<<__Soft>> int, Map<string, Map<int, Vector<string>>>):Vector<C>) $i): ClassA {
 }
-$rf = new ReflectionFunction('f201');
-printFunc($rf);
 function f202(:xhp:html-element $html): Map<string, Vector<:xhp:html-element>> {
 }
-$rf = new ReflectionFunction('f202');
-printFunc($rf);
-function f203((int, Vector<string>) $tupple): array<ClassA> {
+function f203((int, Vector<string>) $tupple): varray<ClassA> {
 }
-$rf = new ReflectionFunction('f203');
-printFunc($rf);
-function f204((function (int): Vector<string>) $f): array<string, ClassA> {
+function f204((function (int): Vector<string>) $f): darray<string, ClassA> {
 }
-$rf = new ReflectionFunction('f204');
-printFunc($rf);
-function f300<X, Y>(Y $y, ?double $d): X {
+function f300<X, Y>(Y $y, ?float $d): X {
 }
-$rf = new ReflectionFunction('f300');
-printFunc($rf);
-function f301<X, Y>((function (): Vector<Y>) $f): array<string, X> {
+function f301<X, Y>((function (): Vector<Y>) $f): darray<string, X> {
 }
-$rf = new ReflectionFunction('f301');
-printFunc($rf);
-function f302<X, Y>((Y, X, double, string) $f): ?Y {
+function f302<X, Y>((Y, X, float, string) $f): ?Y {
 }
-$rf = new ReflectionFunction('f302');
-printFunc($rf);
 class C {
-  public @int $a;
+  <<__Soft>> public int $a;
   public ?string $b;
   public Vector<C> $v;
   public (string, (function(?int, (string, string)):void)) $c;
@@ -100,17 +68,15 @@ class C {
 }
   static public function m1() {
 }
-  public function m2(@double $d) : void {
+  public function m2(<<__Soft>> float $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : @array<int, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : <<__Soft>> darray<int, ?Vector<string>> {
 }
-  public function m4((function(@int, (string, string)): void) $v) : array<Map<string, :xhp:html>> {
+  public function m4((function(<<__Soft>> int, (string, string)): void) $v) : varray<Map<string, :xhp:html>> {
 }
 }
-$rc = new ReflectionClass('C');
-printClass($rc);
 class CT<X, Y> {
-  public @int $a;
+  <<__Soft>> public int $a;
   public ?string $b;
   public Vector<X> $v;
   public (string, (function(?int, (X, Y)):void)) $c;
@@ -118,33 +84,70 @@ class CT<X, Y> {
 }
   static public function m1() {
 }
-  public function m2(@Y $d) : void {
+  public function m2(<<__Soft>> Y $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?X>>> $v, :xhp:html $x) : @array<Y, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?X>>> $v, :xhp:html $x) : <<__Soft>> darray<Y, ?Vector<string>> {
 }
-  public function m4((function(@int, (X, string)): void) $v) : array<Map<Y, :xhp:html>> {
+  public function m4((function(<<__Soft>> int, (X, string)): void) $v) : varray<Map<Y, :xhp:html>> {
 }
 }
-$rc = new ReflectionClass('CT');
-printClass($rc);
 trait T {
   static public function m1() {
 }
-  public function m2(@int $d) : void {
+  public function m2(<<__Soft>> int $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : @array<C, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : <<__Soft>> darray<C, ?Vector<string>> {
 }
-  public function m4((function(@int, (double, string)): void) $v) : array<Map<CT<int, string>, :xhp:html>> {
+  public function m4((function(<<__Soft>> int, (float, string)): void) $v) : varray<Map<CT<int, string>, :xhp:html>> {
 }
 }
 class TC {
   use T;
 }
+function ff(Vector<int> $i, ?string $s, <<__Soft>> C $c,
+            arraylike $a, arraykey $k, this $t) {
+}
+
+<<__EntryPoint>>
+function main_1366() {
+$rf = new ReflectionFunction('f');
+printFunc($rf);
+$rf = new ReflectionFunction('f1');
+printFunc($rf);
+$rf = new ReflectionFunction('f2');
+printFunc($rf);
+$rf = new ReflectionFunction('f3');
+printFunc($rf);
+$rf = new ReflectionFunction('f4');
+printFunc($rf);
+$rf = new ReflectionFunction('f100');
+printFunc($rf);
+$rf = new ReflectionFunction('f101');
+printFunc($rf);
+$rf = new ReflectionFunction('f102');
+printFunc($rf);
+$rf = new ReflectionFunction('f200');
+printFunc($rf);
+$rf = new ReflectionFunction('f201');
+printFunc($rf);
+$rf = new ReflectionFunction('f202');
+printFunc($rf);
+$rf = new ReflectionFunction('f203');
+printFunc($rf);
+$rf = new ReflectionFunction('f204');
+printFunc($rf);
+$rf = new ReflectionFunction('f300');
+printFunc($rf);
+$rf = new ReflectionFunction('f301');
+printFunc($rf);
+$rf = new ReflectionFunction('f302');
+printFunc($rf);
+$rc = new ReflectionClass('C');
+printClass($rc);
+$rc = new ReflectionClass('CT');
+printClass($rc);
 $rc = new ReflectionClass('TC');
 printClass($rc);
-function ff(Vector<int> $i, ?string $s, @C $c,
-            array $a, arraykey $k, this $t) {
-}
 $rf = new ReflectionFunction('ff');
 $rps = $rf->getParameters();
 foreach ($rps as $rp) {
@@ -154,4 +157,5 @@ foreach ($rps as $rp) {
   } else {
     var_dump("");
   }
+}
 }

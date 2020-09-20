@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $fnam = tempnam('/tmp', 'unittest');
@@ -11,4 +11,8 @@ function main() {
   gzclose($f);
 }
 
+
+<<__EntryPoint>>
+function main_zlib_nested_stream() {
 main();
+}

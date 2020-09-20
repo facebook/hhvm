@@ -9,3 +9,4 @@ abstract class P {
 }
 
 class C extends P implements I {}
+

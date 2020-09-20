@@ -1,0 +1,1 @@
+entrypoint-symlink2.inc

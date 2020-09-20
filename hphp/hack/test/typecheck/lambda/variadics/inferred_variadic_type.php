@@ -21,10 +21,10 @@ function test(): void {
   expect_variadic(
     (...$y) ==> {
       $x = $y[0];
-      if ($x instanceof C) {
+      if ($x is C) {
         return $x->foo();
       }
-      if (is_int($x)) {
+      if ($x is int) {
         return $x;
       }
       return 0;

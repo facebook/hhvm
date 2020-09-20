@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
@@ -39,7 +40,10 @@ void c_WaitableWaitHandle::join() {
   EagerVMRegAnchor _;
   auto const savedFP = vmfp();
 
-  assert(!isFinished());
+  assertx(!isFinished());
+
+  auto const context =
+    RO::EvalEnableImplicitContext ? *ImplicitContext::activeCtx : nullptr;
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -56,7 +60,10 @@ void c_WaitableWaitHandle::join() {
 
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
-  assert(isFinished());
+  assertx(isFinished());
+  if (RO::EvalEnableImplicitContext) {
+    *ImplicitContext::activeCtx = context;
+  }
 }
 
 String c_WaitableWaitHandle::getName() {
@@ -74,7 +81,7 @@ String c_WaitableWaitHandle::getName() {
 }
 
 c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
-  assert(!isFinished());
+  assertx(!isFinished());
 
   switch (getKind()) {
     case Kind::Static:              not_reached();
@@ -91,7 +98,7 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
 
 bool
 c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
-  assert(wait_handle);
+  assertx(wait_handle);
 
   while (wait_handle != this && wait_handle && !wait_handle->isFinished()) {
     wait_handle = wait_handle->getChild();
@@ -102,7 +109,7 @@ c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
 
 void
 c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
-  assert(isDescendantOf(child));
+  assertx(isDescendantOf(child));
 
   req::vector<std::string> exception_msg_items;
   exception_msg_items.push_back("Encountered dependency cycle.\n");
@@ -138,13 +145,13 @@ c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
 
 
 Array c_WaitableWaitHandle::getDependencyStack() {
-  if (isFinished()) return empty_array();
-  Array result = Array::Create();
+  if (isFinished()) return empty_varray();
+  auto result = Array::CreateVArray();
   hphp_hash_set<c_WaitableWaitHandle*> visited;
   auto current_handle = this;
   auto session = AsioSession::Get();
   while (current_handle != nullptr) {
-    result.append(Variant{current_handle});
+    result.append(make_tv<KindOfObject>(current_handle));
     visited.insert(current_handle);
     auto context_idx = current_handle->getContextIdx();
 

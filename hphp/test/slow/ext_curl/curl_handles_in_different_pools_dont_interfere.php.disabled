@@ -1,4 +1,4 @@
-<?php
+<?hh
 $ch1 = HH\curl_init_pooled('test', 'foo.com');
 $ch2 = HH\curl_init_pooled('test2', 'bar.com');
 var_dump(curl_getinfo($ch1)['url']);

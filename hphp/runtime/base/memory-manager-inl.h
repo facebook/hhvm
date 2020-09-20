@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMORY_MANAGER_INL_H
-#define incl_HPHP_MEMORY_MANAGER_INL_H
+#pragma once
 
 #include <limits>
 #include <utility>
@@ -35,7 +34,7 @@ static_assert(
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool SparseHeap::empty() const {
-  return m_slabs.empty() && m_bigs.empty();
+  return m_bigs.empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,8 +144,8 @@ inline void MemoryManager::FreeList::push(void* val) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline size_t MemoryManager::computeSize2Index(size_t size) {
-  assert(size > 1);
-  assert(size <= kMaxSizeClass);
+  assertx(size > 1);
+  assertx(size <= kMaxSizeClass);
   // We want to round size up to the nearest size class, and return the index
   // of that size class. The first 1 << kLgSizeClassesPerDoubling size classes
   // are denormal; their sizes are (class + 1) << kLgSmallSizeQuantum.
@@ -172,20 +171,20 @@ inline size_t MemoryManager::computeSize2Index(size_t size) {
   size_t exp = nBits - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
   size_t rawMantissa = size >> (nBits - kLgSizeClassesPerDoubling);
   size_t index = (exp << kLgSizeClassesPerDoubling) + rawMantissa;
-  assert(index < kNumSizeClasses);
+  assertx(index < kNumSizeClasses);
   return index;
 }
 
 inline size_t MemoryManager::lookupSmallSize2Index(size_t size) {
-  assert(size > 0);
-  assert(size <= kMaxSmallSizeLookup);
+  assertx(size > 0);
+  assertx(size <= kMaxSmallSizeLookup);
   auto const index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
   return index;
 }
 
 inline size_t MemoryManager::size2Index(size_t size) {
-  assert(size > 0);
-  assert(size <= kMaxSizeClass);
+  assertx(size > 0);
+  assertx(size <= kMaxSizeClass);
   if (LIKELY(size <= kMaxSmallSizeLookup)) {
     return lookupSmallSize2Index(size);
   }
@@ -197,63 +196,59 @@ inline size_t MemoryManager::sizeIndex2Size(size_t index) {
 }
 
 inline size_t MemoryManager::sizeClass(size_t size) {
-  assert(size > 1);
-  assert(size <= kMaxSizeClass);
+  assertx(size > 1);
+  assertx(size <= kMaxSizeClass);
   // Round up to the nearest kLgSizeClassesPerDoubling + 1 significant bits,
   // or to the nearest kLgSmallSizeQuantum, whichever is greater.
   ssize_t nInsignificantBits = fls64(--size) - kLgSizeClassesPerDoubling;
   size_t roundTo = (nInsignificantBits < ssize_t(kLgSmallSizeQuantum))
     ? kLgSmallSizeQuantum : nInsignificantBits;
   size_t ret = ((size >> roundTo) + 1) << roundTo;
-  assert(ret >= kSmallSizeAlign);
-  assert(ret <= kMaxSizeClass);
+  assertx(ret >= kSmallSizeAlign);
+  assertx(ret <= kMaxSizeClass);
   return ret;
 }
 
 inline void* MemoryManager::mallocSmallIndex(size_t index) {
-  assert(index < kNumSmallSizes);
-  if (debug) requestEagerGC();
-
-  auto bytes = sizeIndex2Size(index);
-  m_stats.mm_debt -= bytes;
-  if (UNLIKELY(m_stats.mm_debt < 0)) return mallocSmallIndexSlow(bytes, index);
-
-  return mallocSmallIndexTail(bytes, index);
+  return mallocSmallIndexSize(index, sizeIndex2Size(index));
 }
 
-ALWAYS_INLINE
-void* MemoryManager::mallocSmallIndexTail(size_t bytes, size_t index) {
-  auto p = m_freelists[index].likelyPop();
-  if (!p) {
-    p = mallocSmallSizeSlow(bytes, index);
+inline void* MemoryManager::mallocSmallIndexSize(size_t index, size_t bytes) {
+  if (debug) requestEagerGC();
+
+  m_stats.mm_udebt -= bytes;
+  if (LIKELY(m_stats.mm_udebt <= std::numeric_limits<int64_t>::max())) {
+    auto clamped = std::min(index, kNumSmallSizes);
+    if (auto p = m_freelists[clamped].likelyPop()) {
+      assertx((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
+      FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
+      return p;
+    }
   }
-  assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
-  FTRACE(3, "mallocSmallIndex: {} -> {}\n", bytes, p);
-  return p;
+  return mallocSmallSizeSlow(bytes, index);
 }
 
 inline void* MemoryManager::mallocSmallSize(size_t bytes) {
-  assert(bytes > 0);
-  assert(bytes <= kMaxSmallSize);
+  assertx(bytes > 0);
   // mallocSmallIndex() converts the size index back to a size to track the
   // size class's actual size, rather than the requested size.
   return mallocSmallIndex(size2Index(bytes));
 }
 
 inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
-  assert(index < kNumSmallSizes);
-  assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-
-  if (UNLIKELY(m_bypassSlabAlloc)) {
-    --currentSmallAllocs[index];
-    return freeBigSize(ptr);
-  }
+  assertx((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
 
   size_t bytes = sizeIndex2Size(index);
   FTRACE(3, "freeSmallIndex({}, {}), freelist {}\n", ptr, bytes, index);
 
-  m_freelists[index].push(ptr);
-  m_stats.mm_freed += bytes;
+  assertx(memset(ptr, kSmallFreeFill, bytes));
+  auto clamped = std::min(index, kNumSmallSizes);
+  if (LIKELY(m_freelists[clamped].head != nullptr)) {
+    m_freelists[clamped].push(ptr);
+    m_stats.mm_freed += bytes;
+  } else {
+    freeSmallIndexSlow(ptr, index, bytes);
+  }
 }
 
 inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
@@ -264,33 +259,29 @@ inline void MemoryManager::freeSmallSize(void* ptr, size_t bytes) {
 
 ALWAYS_INLINE
 void* MemoryManager::objMalloc(size_t size) {
-  if (LIKELY(size <= kMaxSmallSize)) return mallocSmallSize(size);
-  return mallocBigSize<Unzeroed>(size);
+  return mallocSmallSize(size);
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFree(void* vp, size_t size) {
-  if (LIKELY(size <= kMaxSmallSize)) return freeSmallSize(vp, size);
-  freeBigSize(vp);
+  freeSmallSize(vp, size);
 }
 
 ALWAYS_INLINE
 void* MemoryManager::objMallocIndex(size_t index) {
-  if (LIKELY(index < kNumSmallSizes)) return mallocSmallIndex(index);
-  return mallocBigSize<Unzeroed>(sizeIndex2Size(index));
+  return mallocSmallIndex(index);
 }
 
 ALWAYS_INLINE
 void MemoryManager::objFreeIndex(void* ptr, size_t index) {
-  if (LIKELY(index < kNumSmallSizes)) return freeSmallIndex(ptr, index);
-  return freeBigSize(ptr);
+  freeSmallIndex(ptr, index);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 inline int64_t MemoryManager::getAllocated() const {
   if (use_jemalloc) {
-    assert(m_allocated);
+    assertx(m_allocated);
     return *m_allocated;
   }
   return 0;
@@ -298,7 +289,7 @@ inline int64_t MemoryManager::getAllocated() const {
 
 inline int64_t MemoryManager::getDeallocated() const {
   if (use_jemalloc) {
-    assert(m_deallocated);
+    assertx(m_deallocated);
     return *m_deallocated;
   } else {
     return 0;
@@ -332,7 +323,7 @@ inline bool MemoryManager::startStatsInterval() {
   // negative. Make sure that doesn't occur here.
   m_stats.peakIntervalUsage = std::max<int64_t>(0, stats.usage());
   m_stats.peakIntervalCap = m_stats.capacity();
-  assert(m_stats.peakIntervalCap >= 0);
+  assertx(m_stats.peakIntervalCap >= 0);
   m_statsIntervalActive = true;
   return ret;
 }
@@ -372,7 +363,7 @@ inline bool MemoryManager::empty() const {
   return m_heap.empty();
 }
 
-inline bool MemoryManager::contains(void* p) const {
+inline bool MemoryManager::contains(const void* p) const {
   return m_heap.contains(p);
 }
 
@@ -401,6 +392,28 @@ inline StringDataNode& MemoryManager::getStringList() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace req {
+template<class T, class... Args> T* make_raw(Args&&... args) {
+  static_assert(alignof(T) <= sizeof(MallocNode) &&
+                alignof(T) <= kSmallSizeAlign, "");
+  auto constexpr size = sizeof(MallocNode) + sizeof(T);
+  auto n = static_cast<MallocNode*>(tl_heap->objMalloc(size));
+  n->initHeader_32_16(HeaderKind::Cpp, 0,
+                      type_scan::getIndexForMalloc<T>());
+  n->nbytes = size;
+  try {
+    return new (n + 1) T(std::forward<Args>(args)...);
+  } catch (...) {
+    tl_heap->objFree(n, size);
+    throw;
+  }
 }
 
-#endif
+template<class T> void destroy_raw(T* t) {
+  t->~T();
+  auto n = reinterpret_cast<MallocNode*>(t) - 1;
+  tl_heap->objFree(n, n->nbytes);
+}
+}
+
+}

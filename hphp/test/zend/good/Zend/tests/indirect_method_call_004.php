@@ -1,18 +1,17 @@
-<?php
+<?hh
 
 
 class bar {
-	public $z;
+    public $z;
 
-	public function __construct() {
-		$this->z = new stdclass;
-	}
-	public function getZ() {
-		return $this->z;
-	}
+    public function __construct() {
+        $this->z = new stdclass;
+    }
+    public function getZ() {
+        return $this->z;
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(clone (new bar)->z);
 var_dump(clone (new bar)->getZ());
-
-?>
+}

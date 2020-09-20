@@ -1,5 +1,5 @@
 <?hh
 class A {
-  public function a(int $a0 = array()) {}
+  public function a(int $a0 = varray[]) {}
 }
 

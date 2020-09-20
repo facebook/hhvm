@@ -1,5 +1,5 @@
-<?php 
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $test = <<<"TEST"
 TEST;
 
@@ -28,6 +28,4 @@ $test = <<<"TEST"
 TEST;
 
 var_dump(strlen($test) == 2);
-
-
-?>
+}

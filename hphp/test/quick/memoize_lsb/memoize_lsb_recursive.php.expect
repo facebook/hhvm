@@ -1,0 +1,50 @@
+int(89)
+vec(11) {
+  int(10)
+  int(9)
+  int(8)
+  int(7)
+  int(6)
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+  int(0)
+}
+int(8)
+vec(0) {
+}
+int(987)
+vec(5) {
+  int(15)
+  int(14)
+  int(13)
+  int(12)
+  int(11)
+}
+int(55)
+vec(11) {
+  int(10)
+  int(9)
+  int(8)
+  int(7)
+  int(6)
+  int(5)
+  int(4)
+  int(3)
+  int(2)
+  int(1)
+  int(0)
+}
+int(5)
+vec(0) {
+}
+int(610)
+vec(5) {
+  int(15)
+  int(14)
+  int(13)
+  int(12)
+  int(11)
+}

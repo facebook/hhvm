@@ -1,0 +1,1 @@
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/hphp/test/slow/array/array_filter_autoload.php on line 5

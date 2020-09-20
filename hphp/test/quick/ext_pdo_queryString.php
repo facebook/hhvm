@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main(): void {
 $tmp_sqllite = tempnam('/tmp', 'vmpdotest');
 $source = "sqlite:$tmp_sqllite";
 $dbh = new PDO($source);
@@ -8,3 +8,4 @@ echo $stmt->queryString;
 unset($stmt);
 unset($dbh);
 unlink($tmp_sqllite);
+}

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_draw_vector_graphics() {
 $draw = new ImagickDraw;
 
 $svg = <<<SVG
@@ -17,4 +20,5 @@ try {
   $draw->setVectorGraphics('invalid-svg');
 } catch (Exception $ex) {
   var_dump('setVectorGraphics');
+}
 }

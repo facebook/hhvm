@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANSLATOR_H_
-#define incl_HPHP_TRANSLATOR_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"
 
 #include <folly/Format.h>
@@ -107,31 +107,29 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
-  TransContext(TransID id, TransKind kind, TransFlags flags,
-               SrcKey sk, FPInvOffset spOff, Op callerFPushOp = Op::Nop);
-
-  /*
-   * The SrcKey for this translation.
-   */
-  SrcKey srcKey() const;
+  TransContext(const TransIDSet& transIDs, TransKind kind, TransFlags flags,
+               SrcKey sk, FPInvOffset spOff, int optIndex,
+               const RegionDesc* region);
 
   /*
    * Data members.
    *
    * The contents of SrcKey are re-laid out to avoid func table lookups.
    */
-  TransID transID;  // May be kInvalidTransID if not for a real translation.
+  TransIDSet transIDs;  // May be empty if not for a real translation.
+  int optIndex;
   TransKind kind{TransKind::Invalid};
   TransFlags flags;
   FPInvOffset initSpOffset;
-  Op callerFPushOp;
-  const Func* func;
-  Offset initBcOffset;
-  bool hasThis;
-  bool prologue;
-  ResumeMode resumeMode;
+  SrcKey initSrcKey;
+  const RegionDesc* region{nullptr};
 };
 
+inline tracing::Props traceProps(const TransContext& c) {
+  return traceProps(c.initSrcKey.func())
+    .add("sk", show(c.initSrcKey))
+    .add("trans_kind", show(c.kind));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Stack information.
@@ -159,7 +157,7 @@ enum class ControlFlowInfo {
 /*
  * Return the ControlFlowInfo for `instr'.
  */
-ControlFlowInfo opcodeControlFlowInfo(const Op op);
+ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining);
 
 /*
  * Return true if the instruction can potentially set PC to point to something
@@ -173,14 +171,19 @@ bool opcodeChangesPC(const Op op);
  * Most instructions that change PC will break the tracelet, though some do not
  * (e.g., FCall).
  */
-bool opcodeBreaksBB(const Op op);
+bool opcodeBreaksBB(const Op op, bool inlining);
+
+/*
+ * Return true if the instruction doesn't care about the inner types.
+ */
+bool opcodeIgnoresInnerType(const Op op);
 
 /*
  * Similar to opcodeBreaksBB but more strict.  We break profiling blocks after
  * any instruction that can side exit, including instructions with predicted
  * output, and before any control flow merge point.
  */
-bool instrBreaksProfileBB(const NormalizedInstruction* inst);
+bool instrBreaksProfileBB(const NormalizedInstruction& inst);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -204,30 +207,19 @@ public:
 
   // Never break the tracelet nor generate a guard on account of this input.
   bool dontGuard{false};
-
-  // Never guard the inner type if this input is KindOfRef.
-  bool dontGuardInner{false};
 };
 
 /*
- * Vector of InputInfo with some flags and a pretty-printer.
+ * Vector of InputInfo with a pretty-printer.
  */
 struct InputInfoVec : public std::vector<InputInfo> {
-  InputInfoVec()
-    : needsRefCheck(false)
-  {}
-
   std::string pretty() const;
-
-public:
-  bool needsRefCheck;
 };
 
 /*
- * Get input location info and flags for a NormalizedInstruction.  Some flags
- * on `ni' may be updated.
+ * Get input location info and flags for a NormalizedInstruction.
  */
-InputInfoVec getInputs(NormalizedInstruction&, FPInvOffset bcSPOff);
+InputInfoVec getInputs(const NormalizedInstruction&, FPInvOffset bcSPOff);
 
 /*
  * Return the index of op's local immediate.
@@ -251,8 +243,9 @@ enum OutTypeConstraints {
   OutBoolean,
   OutBooleanImm,
   OutInt64,
-  OutArray,
   OutArrayImm,
+  OutVArray,
+  OutDArray,
   OutVec,
   OutVecImm,
   OutDict,
@@ -260,6 +253,7 @@ enum OutTypeConstraints {
   OutKeyset,
   OutKeysetImm,
   OutObject,
+  OutRecord,
   OutResource,
   OutThisObject,        // Object from current environment
   OutFDesc,             // Blows away the current function desc
@@ -267,30 +261,30 @@ enum OutTypeConstraints {
   OutUnknown,           // Not known at tracelet compile-time
   OutPredBool,          // Boolean value predicted to be True or False
   OutCns,               // Constant; may be known at compile-time
-  OutVUnknown,          // type is V(unknown)
 
   OutSameAsInput1,      // type is the same as the first stack input
+  OutSameAsInput2,      // type is the same as the second stack input
   OutModifiedInput2,    // type is the same as the second stack input, but
                         // counted and unspecialized
   OutModifiedInput3,    // type is the same as the third stack input, but
                         // counted and unspecialized
   OutCInput,            // type is C(input)
-  OutVInput,            // type is V(input)
   OutCInputL,           // type is C(type) of local input
-  OutVInputL,           // type is V(type) of local input
-  OutFInputL,           // type is V(type) of local input if current param is
-                        //   by ref, else type is C(type) of local input
-  OutFInputR,           // Like FInputL, but for R's on the stack.
 
   OutArith,             // For Add, Sub, Mul
   OutArithO,            // For AddO, SubO, MulO
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL
-  OutFPushCufSafe,      // FPushCufSafe pushes two values of different
-                        // types and an ActRec
 
   OutIsTypeL,           // output for IsTypeL instructions
+
+  OutFunc,              // for function pointers
+  OutFuncLike,          // For ResolveRFunc instruction
+  OutClass,             // for class pointers
+  OutClsMeth,           // For ClsMeth pointers
+  OutClsMethLike,       // For ResolveRClsMeth* instructions
+  OutLazyClass,         // For lazy classes
 
   OutNone,
 };
@@ -309,13 +303,9 @@ enum Operands {
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
   StackIns1       = 1 << 3,  // Insert an element under top of stack
-  FuncdRef        = 1 << 4,  // Input to FPass*
-  FStack          = 1 << 5,  // output of FPushFuncD and friends
   Local           = 1 << 6,  // Writes to a local
   Iter            = 1 << 7,  // Iterator in imm[0]
-  AllLocals       = 1 << 8, // All locals (used by RetC)
   DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input
-  IgnoreInnerType = 1 << 10, // Instruction doesnt care about the inner types
   DontGuardAny    = 1 << 11, // Dont force a guard for any input
   This            = 1 << 12, // Input to CheckThis
   StackN          = 1 << 13, // pop N cells from stack; n = imm[0].u_IVA
@@ -326,6 +316,7 @@ enum Operands {
   MKey            = 1 << 17, // member lookup key
   LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
   DontGuardBase   = 1 << 19, // Dont force a guard for the base
+  StackI2         = 1 << 20, // Consume 1 cell at index imm_[1].u_IVA
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };
@@ -379,70 +370,15 @@ bool isAlwaysNop(const NormalizedInstruction& ni);
 void initInstrInfo();
 
 /*
- * This routine attempts to find the Func* that will be called for a given
- * target Class and function name, when called from ctxFunc.  This function
- * determines if a given Func* will be called in a request-insensitive way
- * (i.e. suitable for burning into the TC as a pointer).
- *
- * If exactClass is true, the class we are targeting is assumed to be
- * exactly `cls', and the returned Func* is definitely the one called.
- *
- * If exactClass is false, the class we are targeting may be a subclass of
- * cls, and the returned Func* may be overridden in a subclass.
- *
- * Its the caller's responsibility to ensure that the Class* is usable -
- * is AttrUnique, an instance of the ctx or guarded in some way.
- *
- * Returns nullptr if we can't determine the Func*.
- */
-const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup,
-                                  const Func* ctxFunc, bool exactClass);
-
-/*
- * If possible find the constructor for cls that would be run from the
- * context ctx if a new instance of cls were created there.  If the
- * constructor is inaccessible from the given context this function
- * will return nullptr. It is the caller's responsibility to ensure
- * that cls is the right Class* (ie its AttrUnique or bound to the
- * ctx, or otherwise guaranteed by guards).
- */
-const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
-
-/*
- * Find a function which always uniquely maps to the given name in the context
- * of the given unit. A function so returned can be used directly in the TC as
- * it will not change.
- *
- * This generally includes persistent functions, but can also include
- * non-persistent functions in certain situations. Note that even if the
- * function is immutable, the unit it is defined in may need loading. In that
- * case, the function is safe to use, but you have to emit code to ensure the
- * unit is loaded first.
- */
-struct ImmutableFuncLookup {
-  const Func* func;
-  // Does any use of this function require a check to ensure its unit is loaded?
-  bool needsUnitLoad;
-};
-ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
-                                        const StringData* name);
-
-/*
  * The offset, in cells, of this location from the frame pointer.
  */
 int locPhysicalOffset(int32_t localIndex);
 
 /*
- * Take a NormalizedInstruction and turn it into a call to the appropriate ht
- * functions.  Updates the bytecode marker, handles interp one flags, etc.
+ * Take a NormalizedInstruction and turn it into a call to the appropriate
+ * irgen emit functions. Assumes the bytecode marker has been updated.
  */
-void translateInstr(
-  irgen::IRGS&,
-  const NormalizedInstruction&,
-  bool checkOuterTypeOnly,
-  bool firstInst
-);
+void translateInstr(irgen::IRGS&, const NormalizedInstruction&);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
@@ -451,4 +387,3 @@ void translateInstr(
 #include "hphp/runtime/vm/jit/translator-inl.h"
 #undef incl_HPHP_TRANSLATOR_INL_H_
 
-#endif

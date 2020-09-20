@@ -1,224 +1,254 @@
-[(AnnotatedAST.Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([32:37-32:41], (Hprim Tvoid)));
-      f_name = ([32:10-32:14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params =
-      [{ AnnotatedAST.param_hint =
-         (Some ([32:15-32:28],
-                (Happly (([32:15-32:28], "\\MyPhonyVector"),
-                   [([32:29-32:30], (Happly (([32:29-32:30], "\\X"), [])))]))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [32:32-32:34]; param_name = "$v"; param_expr = None;
-         param_callconv = None; param_user_attributes = [] }
+[(Class
+    { c_span = [12:1-26:2]; c_annotation = (); c_mode = Mstrict;
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([12:7-20], "\\MyPhonyVector");
+      c_tparams =
+      [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
+         tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+         tp_user_attributes = [] }
         ];
-      f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
-               (([33:3-33:27], Some \MyPhonyVector),
-                (AnnotatedAST.Binop ((Eq None),
-                   (([33:3-33:5], Some \MyPhonyVector),
-                    (AnnotatedAST.Lvar ([33:3-33:5], $x))),
-                   (([33:8-33:27], Some \MyPhonyVector),
-                    (AnnotatedAST.New (
-                       ((Some \MyPhonyVector<[unresolved]>),
-                        (AnnotatedAST.CI
-                           (([33:12-33:25], "\\MyPhonyVector"), []))),
-                       [], [])))
-                   ))));
-             (AnnotatedAST.Expr
-                (([34:3-34:19], Some void),
-                 (AnnotatedAST.Call (Cnormal,
-                    (([34:3-34:10], Some (function(\X $x): void)),
-                     (AnnotatedAST.Obj_get (
-                        (([34:3-34:5], Some \MyPhonyVector),
-                         (AnnotatedAST.Lvar ([34:3-34:5], $x))),
-                        (([34:7-34:10], None),
-                         (AnnotatedAST.Id ([34:7-34:10], "add"))),
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+      c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts = []; c_typeconsts = [];
+      c_vars =
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+         cv_visibility = Private;
+         cv_type =
+         ((Vector<T>),
+          (Some ([13:11-20],
+                 (Happly (([13:11-17], "\\HH\\Vector"),
+                    [([13:18-19], (Habstr ("T", [])))])))));
+         cv_id = ([13:21-23], "x"); cv_expr = None; cv_user_attributes = [];
+         cv_doc_comment = None; cv_is_promoted_variadic = false;
+         cv_is_static = false; cv_span = [13:21-23] }
+        ];
+      c_methods =
+      [{ m_span = [15:3-17:4]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([15:19-30], "__construct"); m_tparams = [];
+         m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
+         m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+         m_body =
+         { fb_ast =
+           [([16:5-26],
+             (Expr
+                (([16:5-25], Vector<T>),
+                 (Binop ((Eq None),
+                    (([16:5-13], Vector<T>),
+                     (Obj_get ((([16:5-10], this), This),
+                        (([16:12-13], Vector<T>), (Id ([16:12-13], "x"))),
                         OG_nullthrows))),
-                    [],
-                    [(([34:11-34:18], Some \B),
-                      (AnnotatedAST.New (
-                         ((Some \B),
-                          (AnnotatedAST.CI (([34:15-34:16], "\\B"), []))),
-                         [], [])))
-                      ],
-                    []))));
-             (AnnotatedAST.Expr
-                (([35:3-35:19], Some void),
-                 (AnnotatedAST.Call (Cnormal,
-                    (([35:3-35:10], Some (function(\X $x): void)),
-                     (AnnotatedAST.Obj_get (
-                        (([35:3-35:5], Some \MyPhonyVector),
-                         (AnnotatedAST.Lvar ([35:3-35:5], $x))),
-                        (([35:7-35:10], None),
-                         (AnnotatedAST.Id ([35:7-35:10], "add"))),
-                        OG_nullthrows))),
-                    [],
-                    [(([35:11-35:18], Some \A),
-                      (AnnotatedAST.New (
-                         ((Some \A),
-                          (AnnotatedAST.CI (([35:15-35:16], "\\A"), []))),
-                         [], [])))
-                      ],
-                    []))));
-             (AnnotatedAST.Expr
-                (([36:3-36:11], Some void),
-                 (AnnotatedAST.Call (Cnormal,
-                    (([36:3-36:7], Some (function(\MyPhonyVector<\X> $v): void)),
-                     (AnnotatedAST.Id ([36:3-36:7], "\\test"))),
-                    [],
-                    [(([36:8-36:10], Some \MyPhonyVector),
-                      (AnnotatedAST.Lvar ([36:8-36:10], $x)))],
-                    []))))
+                    (([16:16-25], Vector<T>),
+                     (ValCollection (Vector, None, [])))
+                    )))))
              ];
-           fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([12:7-12:20], "\\MyPhonyVector"); c_tparams = <opaque>;
-       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = [];
-       c_vars =
-       [{ AnnotatedAST.cv_final = false; cv_is_xhp = false;
-          cv_visibility = Private;
-          cv_type =
-          (Some ([13:11-13:17],
-                 (Happly (([13:11-13:17], "\\Vector"),
-                    [([13:18-13:19], (Habstr "T"))]))));
-          cv_id = ([13:21-13:23], "x"); cv_expr = None;
-          cv_user_attributes = [] }
-         ];
-       c_constructor =
-       (Some { AnnotatedAST.m_annotation = (); m_final = false;
-               m_abstract = false; m_visibility = Public;
-               m_name = ([15:19-15:30], "__construct"); m_tparams = [];
-               m_where_constraints = [];
-               m_variadic = AnnotatedAST.FVnonVariadic; m_params = [];
-               m_body =
-               (AnnotatedAST.NamedBody
-                  { AnnotatedAST.fnb_nast =
-                    [(AnnotatedAST.Expr
-                        (([16:5-16:25], Some \Vector<T>),
-                         (AnnotatedAST.Binop ((Eq None),
-                            (([16:5-16:13], Some \Vector<T>),
-                             (AnnotatedAST.Obj_get (
-                                (([16:5-16:10], Some <static>),
-                                 AnnotatedAST.This),
-                                (([16:12-16:13], None),
-                                 (AnnotatedAST.Id ([16:12-16:13], "x"))),
-                                OG_nullthrows))),
-                            (([16:16-16:25], Some \Vector<T>),
-                             (AnnotatedAST.ValCollection (<vc_kind>, [])))
-                            ))))
-                      ];
-                    fnb_unsafe = false });
-               m_fun_kind = FSync; m_user_attributes = [];
-               m_ret =
-               (Some ([15:19-15:30], (Happly (([15:19-15:30], "void"), []))));
-               m_ret_by_ref = false });
-       c_static_methods = [];
-       c_methods =
-       [{ AnnotatedAST.m_annotation = (); m_final = false;
-          m_abstract = false; m_visibility = Public;
-          m_name = ([19:19-19:22], "add"); m_tparams = [];
-          m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
+           fb_annotation = () };
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = ((void), (Some ([15:19-30], (Hprim Tvoid))));
+         m_external = false; m_doc_comment = None };
+        { m_span = [19:3-21:4]; m_annotation = (); m_final = false;
+          m_abstract = false; m_static = false; m_visibility = Public;
+          m_name = ([19:19-22], "add"); m_tparams = [];
+          m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params =
-          [{ AnnotatedAST.param_hint = (Some ([19:23-19:24], (Habstr "T")));
-             param_is_reference = false; param_is_variadic = false;
-             param_pos = [19:25-19:27]; param_name = "$x"; param_expr = None;
-             param_callconv = None; param_user_attributes = [] }
+          [{ param_annotation = ([19:25-27], T);
+             param_type_hint = ((T), (Some ([19:23-24], (Habstr ("T", [])))));
+             param_is_variadic = false; param_pos = [19:25-27];
+             param_name = "$x"; param_expr = None; param_callconv = None;
+             param_user_attributes = []; param_visibility = None }
             ];
+          m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
           m_body =
-          (AnnotatedAST.NamedBody
-             { AnnotatedAST.fnb_nast =
-               [(AnnotatedAST.Expr
-                   (([20:5-20:20], Some T),
-                    (AnnotatedAST.Binop ((Eq None),
-                       (([20:5-20:15], Some T),
-                        (AnnotatedAST.Array_get (
-                           (([20:5-20:13], Some \Vector<T>),
-                            (AnnotatedAST.Obj_get (
-                               (([20:5-20:10], Some <static>),
-                                AnnotatedAST.This),
-                               (([20:12-20:13], None),
-                                (AnnotatedAST.Id ([20:12-20:13], "x"))),
-                               OG_nullthrows))),
-                           None))),
-                       (([20:18-20:20], Some T),
-                        (AnnotatedAST.Lvar ([20:18-20:20], $x)))
-                       ))))
-                 ];
-               fnb_unsafe = false });
+          { fb_ast =
+            [([20:5-21],
+              (Expr
+                 (([20:5-20], T),
+                  (Binop ((Eq None),
+                     (([20:5-15], T),
+                      (Array_get (
+                         (([20:5-13], Vector<T>),
+                          (Obj_get ((([20:5-10], this), This),
+                             (([20:12-13], Vector<T>), (Id ([20:12-13], "x"))),
+                             OG_nullthrows))),
+                         None))),
+                     (([20:18-20], T), (Lvar ([20:18-20], $x))))))))
+              ];
+            fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([19:30-19:34], (Hprim Tvoid))); m_ret_by_ref = false
-          };
-         { AnnotatedAST.m_annotation = (); m_final = false;
-           m_abstract = false; m_visibility = Public;
-           m_name = ([23:19-23:22], "get"); m_tparams = [];
-           m_where_constraints = []; m_variadic = AnnotatedAST.FVnonVariadic;
-           m_params =
-           [{ AnnotatedAST.param_hint = (Some ([23:23-23:26], (Hprim Tint)));
-              param_is_reference = false; param_is_variadic = false;
-              param_pos = [23:27-23:29]; param_name = "$x";
-              param_expr = None; param_callconv = None;
-              param_user_attributes = [] }
-             ];
-           m_body =
-           (AnnotatedAST.NamedBody
-              { AnnotatedAST.fnb_nast =
-                [(AnnotatedAST.Return ([24:5-24:24],
-                    (Some (([24:12-24:23], Some T),
-                           (AnnotatedAST.Array_get (
-                              (([24:12-24:20], Some \Vector<T>),
-                               (AnnotatedAST.Obj_get (
-                                  (([24:12-24:17], Some <static>),
-                                   AnnotatedAST.This),
-                                  (([24:19-24:20], None),
-                                   (AnnotatedAST.Id ([24:19-24:20], "x"))),
-                                  OG_nullthrows))),
-                              (Some (([24:21-24:22], Some int),
-                                     (AnnotatedAST.Int ([24:21-24:22], "0"))))
-                              ))))
-                    ))
-                  ];
-                fnb_unsafe = false });
-           m_fun_kind = FSync; m_user_attributes = [];
-           m_ret = (Some ([23:32-23:33], (Habstr "T"))); m_ret_by_ref = false
-           }
+          m_ret = ((void), (Some ([19:30-34], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None };
+        { m_span = [23:3-25:4]; m_annotation = (); m_final = false;
+          m_abstract = false; m_static = false; m_visibility = Public;
+          m_name = ([23:19-22], "get"); m_tparams = [];
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([23:27-29], int);
+             param_type_hint = ((int), (Some ([23:23-26], (Hprim Tint))));
+             param_is_variadic = false; param_pos = [23:27-29];
+             param_name = "$x"; param_expr = None; param_callconv = None;
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+          m_body =
+          { fb_ast =
+            [([24:5-24],
+              (Return
+                 (Some (([24:12-23], T),
+                        (Array_get (
+                           (([24:12-20], Vector<T>),
+                            (Obj_get ((([24:12-17], this), This),
+                               (([24:19-20], Vector<T>),
+                                (Id ([24:19-20], "x"))),
+                               OG_nullthrows))),
+                           (Some (([24:21-22], int), (Int "0")))))))))
+              ];
+            fb_annotation = () };
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = ((T), (Some ([23:32-33], (Habstr ("T", [])))));
+          m_external = false; m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = [];
+      c_doc_comment =
+      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
+      c_emit_id = None });
+  (Class
+     { c_span = [28:1-11]; c_annotation = (); c_mode = Mstrict;
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([28:7-8], "\\X"); c_tparams = [];
+       c_extends = []; c_uses = []; c_use_as_alias = [];
+       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+       c_reqs = []; c_implements = []; c_where_constraints = [];
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+  (Class
+     { c_span = [29:1-21]; c_annotation = (); c_mode = Mstrict;
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([29:7-8], "\\A"); c_tparams = [];
+       c_extends = [([29:17-18], (Happly (([29:17-18], "\\X"), [])))];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+  (Class
+     { c_span = [30:1-21]; c_annotation = (); c_mode = Mstrict;
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([30:7-8], "\\B"); c_tparams = [];
+       c_extends = [([30:17-18], (Happly (([30:17-18], "\\X"), [])))];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+  (Fun
+     { f_span = [32:1-37:2]; f_annotation = (); f_mode = Mstrict;
+       f_ret = ((void), (Some ([32:37-41], (Hprim Tvoid))));
+       f_name = ([32:10-14], "\\test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([32:32-34], MyPhonyVector<X>);
+          param_type_hint =
+          ((MyPhonyVector<X>),
+           (Some ([32:15-31],
+                  (Happly (([32:15-28], "\\MyPhonyVector"),
+                     [([32:29-30], (Happly (([32:29-30], "\\X"), [])))])))));
+          param_is_variadic = false; param_pos = [32:32-34];
+          param_name = "$v"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
          ];
-       c_user_attributes = []; c_enum = None });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal; c_name = ([28:7-28:8], "\\X");
-       c_tparams = <opaque>; c_extends = []; c_uses = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = []; c_implements = []; c_consts = [];
-       c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_user_attributes = []; c_enum = None });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal; c_name = ([29:7-29:8], "\\A");
-       c_tparams = <opaque>;
-       c_extends = [([29:17-29:18], (Happly (([29:17-29:18], "\\X"), [])))];
-       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
-       c_req_extends = []; c_req_implements = []; c_implements = [];
-       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_user_attributes = []; c_enum = None });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal; c_name = ([30:7-30:8], "\\B");
-       c_tparams = <opaque>;
-       c_extends = [([30:17-30:18], (Happly (([30:17-30:18], "\\X"), [])))];
-       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
-       c_req_extends = []; c_req_implements = []; c_implements = [];
-       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_user_attributes = []; c_enum = None })
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_body =
+       { fb_ast =
+         [([33:3-28],
+           (Expr
+              (([33:3-27], MyPhonyVector<X>),
+               (Binop ((Eq None),
+                  (([33:3-5], MyPhonyVector<X>), (Lvar ([33:3-5], $x))),
+                  (([33:8-27], MyPhonyVector<X>),
+                   (New (
+                      (([33:12-25], MyPhonyVector<X>),
+                       (CI ([33:12-25], "\\MyPhonyVector"))),
+                      [((X), ([33:12-25], (Happly (([Pos.none], "_"), []))))],
+                      [], None, ([33:12-25], (function(): void)))))
+                  )))));
+           ([34:3-20],
+            (Expr
+               (([34:3-19], void),
+                (Call (
+                   (([34:3-10], (function(X $x): void)),
+                    (Obj_get (
+                       (([34:3-5], MyPhonyVector<X>), (Lvar ([34:3-5], $x))),
+                       (([34:7-10], (function(X $x): void)),
+                        (Id ([34:7-10], "add"))),
+                       OG_nullthrows))),
+                   [],
+                   [(([34:11-18], B),
+                     (New ((([34:15-16], B), (CI ([34:15-16], "\\B"))), 
+                        [], [], None, ([34:15-16], _))))
+                     ],
+                   None)))));
+           ([35:3-20],
+            (Expr
+               (([35:3-19], void),
+                (Call (
+                   (([35:3-10], (function(X $x): void)),
+                    (Obj_get (
+                       (([35:3-5], MyPhonyVector<X>), (Lvar ([35:3-5], $x))),
+                       (([35:7-10], (function(X $x): void)),
+                        (Id ([35:7-10], "add"))),
+                       OG_nullthrows))),
+                   [],
+                   [(([35:11-18], A),
+                     (New ((([35:15-16], A), (CI ([35:15-16], "\\A"))), 
+                        [], [], None, ([35:15-16], _))))
+                     ],
+                   None)))));
+           ([36:3-12],
+            (Expr
+               (([36:3-11], void),
+                (Call (
+                   (([36:3-7], (function(MyPhonyVector<X> $v): void)),
+                    (Id ([36:3-7], "\\test"))),
+                   [],
+                   [(([36:8-10], MyPhonyVector<X>), (Lvar ([36:8-10], $x)))],
+                   None)))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None; f_static = false })
   ]

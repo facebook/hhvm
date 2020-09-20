@@ -23,15 +23,19 @@ function strict() {
 
 function nested() {
   echo '=== ', __FUNCTION__, " ===\n";
-  $a = Vector { array('p', 'h'), array('p', 'r'), 'o' };
-  var_dump(in_array(array('p', 'h'), $a));
-  var_dump(array_search(array('p', 'h'), $a));
-  var_dump(in_array(array('f', 'i'), $a));
-  var_dump(array_search(array('f', 'i'), $a));
+  $a = Vector { varray['p', 'h'], varray['p', 'r'], 'o' };
+  var_dump(in_array(varray['p', 'h'], $a));
+  var_dump(array_search(varray['p', 'h'], $a));
+  var_dump(in_array(varray['f', 'i'], $a));
+  var_dump(array_search(varray['f', 'i'], $a));
   var_dump(in_array('o', $a));
   var_dump(array_search('o', $a));
 }
 
+
+<<__EntryPoint>>
+function main_array_search_funcs() {
 basic();
 strict();
 nested();
+}

@@ -2,11 +2,9 @@
 
 -- Testing gmdate() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: gmdate() expects at least 1 parameter, 0 given in %s/gmdate_error.php on line 17
 
 -- Testing gmdate() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: gmdate() expects at most 2 parameters, 3 given in %s/gmdate_error.php on line 22
 ===DONE===

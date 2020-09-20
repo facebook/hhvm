@@ -1,2 +1,2 @@
 File "runtime_generic_bad.php", line 4, characters 10-10:
-Generics can only be used in type hints since they are erased at runtime. (Typing[4124])
+Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])

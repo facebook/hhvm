@@ -1,0 +1,148 @@
+==== C ====
+
+Notice: Created dynamic property with static name C::dynprop in %s/dynprop_write_notice.php on line 5
+
+Notice: Created dynamic property with dynamic name C::dynprop2 in %s/dynprop_write_notice.php on line 7
+
+Notice: Created dynamic property with static name C::dynprop3 in %s/dynprop_write_notice.php on line 8
+object(C) (3) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+
+Notice: Created dynamic property with dynamic name C::dynprop in %s/dynprop_write_notice.php on line 10
+
+Notice: Created dynamic property with dynamic name C::dynprop2 in %s/dynprop_write_notice.php on line 10
+
+Notice: Created dynamic property with dynamic name C::dynprop3 in %s/dynprop_write_notice.php on line 10
+object(C) (3) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+
+Notice: Created dynamic property with static name C::dynprop in %s/dynprop_write_notice.php on line 12
+
+Notice: Created dynamic property with dynamic name C::dynprop2 in %s/dynprop_write_notice.php on line 12
+
+Notice: Created dynamic property with static name C::dynprop3 in %s/dynprop_write_notice.php on line 12
+object(C) (3) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+==== GMP ====
+
+Notice: Created dynamic property with static name GMP::dynprop in %s/dynprop_write_notice.php on line 5
+
+Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/dynprop_write_notice.php on line 7
+
+Notice: Created dynamic property with static name GMP::dynprop3 in %s/dynprop_write_notice.php on line 8
+object(GMP) (4) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+  ["num"]=>
+  string(1) "0"
+}
+
+Notice: Created dynamic property with dynamic name GMP::dynprop in %s/dynprop_write_notice.php on line 10
+
+Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/dynprop_write_notice.php on line 10
+
+Notice: Created dynamic property with dynamic name GMP::dynprop3 in %s/dynprop_write_notice.php on line 10
+object(GMP) (4) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+  ["num"]=>
+  string(1) "0"
+}
+
+Notice: Created dynamic property with dynamic name GMP::dynprop in %s/dynprop_write_notice.php on line 12
+
+Notice: Created dynamic property with dynamic name GMP::dynprop2 in %s/dynprop_write_notice.php on line 12
+
+Notice: Created dynamic property with dynamic name GMP::dynprop3 in %s/dynprop_write_notice.php on line 12
+object(GMP) (4) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+  ["num"]=>
+  string(1) "0"
+}
+==== stdClass ====
+object(stdClass) (3) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+object(stdClass) (3) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+object(stdClass) (3) {
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+==== __PHP_Incomplete_Class ====
+object(__PHP_Incomplete_Class) (4) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(4) "Nope"
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+object(__PHP_Incomplete_Class) (4) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(4) "Nope"
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}
+object(__PHP_Incomplete_Class) (4) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(4) "Nope"
+  ["dynprop"]=>
+  int(3)
+  ["dynprop2"]=>
+  int(2)
+  ["dynprop3"]=>
+  int(1)
+}

@@ -2,10 +2,8 @@ int(123)
 int(456)
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }
 
@@ -13,10 +11,8 @@ int(123)
 int(456)
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }
 
@@ -24,10 +20,8 @@ int(123)
 int(456)
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }
 
@@ -35,26 +29,22 @@ int(123)
 int(456)
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }
 
 int(123)
 
 string(3) "foo"
-array(1) {
-  [0]=>
+varray(1) {
   int(123)
 }
 
 int(123)
 
 string(3) "foo"
-array(1) {
-  [0]=>
+varray(1) {
   int(123)
 }
 
@@ -62,10 +52,8 @@ int(123)
 int(456)
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }
 
@@ -73,26 +61,22 @@ int(123)
 int(456)
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }
 
 int(123)
 
 string(3) "foo"
-array(1) {
-  [0]=>
+varray(1) {
   int(123)
 }
 
 int(123)
 
 string(3) "foo"
-array(1) {
-  [0]=>
+varray(1) {
   int(123)
 }
 
@@ -100,10 +84,8 @@ int(11)
 string(1) "a"
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(11)
-  [1]=>
   string(1) "a"
 }
 
@@ -111,10 +93,7 @@ int(11)
 string(1) "a"
 
 string(3) "foo"
-array(2) {
-  [0]=>
+varray(2) {
   int(11)
-  [1]=>
   string(1) "a"
 }
-

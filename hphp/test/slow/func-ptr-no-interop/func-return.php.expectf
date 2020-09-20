@@ -1,0 +1,5 @@
+
+Warning: Value returned from function bar() must be of type @string, func given in %s/func-ptr-no-interop/func-return.php on line 4
+function(bar)
+
+Catchable fatal error: Value returned from function foo() must be of type string, func given in %s/func-ptr-no-interop/func-return.php on line 8

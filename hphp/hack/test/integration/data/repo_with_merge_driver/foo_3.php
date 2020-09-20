@@ -1,11 +1,11 @@
-        <?hh
-        function h(): string {
-            return "a";
-        }
+<?hh //partial
+function h(): string {
+    return "a";
+}
 
-        class Foo {}
+class Foo {}
 
-        function some_long_function_name() {
-            new Foo();
-            h();
-        }
+function some_long_function_name() {
+    new Foo();
+    h();
+}

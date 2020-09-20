@@ -1,3 +1,0 @@
-Bad memcached key prefix in memcached.sess_prefix
-Failed calling MemcachedSessionModule::open()
-Failed to initialize storage module: memcached (path: %s)

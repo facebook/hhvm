@@ -1,0 +1,13 @@
+<?hh
+
+const SIMPLE = 1;
+class C { const C = 2; }
+const RUNTIME_INIT = C::C;
+
+<<__EntryPoint>> function main() {
+  $x = 7; // set a local
+
+  echo "hello world 1\n";
+  $x = 9;
+  echo "hello world $x\n";
+}

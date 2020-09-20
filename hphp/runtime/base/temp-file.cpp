@@ -62,17 +62,18 @@ bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
 }
 
 bool TempFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 
 bool TempFile::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
-    assert(valid());
-    s_pcloseRet = ::fclose(m_stream);
-    ret = (s_pcloseRet == 0);
+    assertx(valid());
+    if (m_stream) {
+      *s_pcloseRet = ::fclose(m_stream);
+    }
+    ret = (*s_pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;
     setFd(-1);
@@ -88,7 +89,7 @@ bool TempFile::closeImpl() {
 }
 
 bool TempFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
-  assert(valid());
+  assertx(valid());
 
   if (whence == SEEK_CUR) {
     off_t result = lseek(getFd(), 0, SEEK_CUR);
@@ -127,13 +128,13 @@ bool TempFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 }
 
 int64_t TempFile::tell() {
-  assert(valid());
+  assertx(valid());
   if (getLength() < 0) return -1;
   return getPosition();
 }
 
 bool TempFile::truncate(int64_t size) {
-  assert(valid());
+  assertx(valid());
   seek(size, SEEK_SET);
   return ftruncate(getFd(), size) == 0;
 }

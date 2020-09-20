@@ -1,0 +1,4 @@
+--ffile=test/zend/good/tests/classes/autoload_derived.p5c
+--ffile=hphp/test/zend/good/tests/classes/autoload_derived.p5c
+--ffile=test/zend/good/tests/classes/autoload_root.p5c
+--ffile=hphp/test/zend/good/tests/classes/autoload_root.p5c

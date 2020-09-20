@@ -1,9 +1,16 @@
-array(2) {
+darray(2) {
   [0]=>
   string(4) "test"
   ["test"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
+    int(0)
+  }
+}
+darray(2) {
+  [0]=>
+  string(4) "test"
+  ["test"]=>
+  varray(1) {
     int(0)
   }
 }

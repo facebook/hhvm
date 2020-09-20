@@ -1,0 +1,11 @@
+Notice: 'SomeClass' constructed dynamically in %s/reflection-new-instance.php on line 9
+object(SomeClass) (0) {
+}
+
+Notice: 'SomeClass' constructed dynamically in %s/reflection-new-instance.php on line 14
+object(SomeClass) (0) {
+}
+
+Notice: 'ConstructClass' constructed dynamically in %s/reflection-new-instance.php on line 23
+object(ConstructClass) (0) {
+}

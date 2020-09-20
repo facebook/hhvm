@@ -1,2 +1,0 @@
-
-((Fatal error\: syntax error, unexpected T_INOUT in [^\r\n]+\/bad\-class\.php on line 3)|(Fatal error\: You may not use a reserved keyword for a class name in [^\r\n]+\/bad\-class\.php on line 3))

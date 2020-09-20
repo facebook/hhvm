@@ -1,6 +1,6 @@
-<?hh
+<?hh // partial
 
-function gotoReferencingLaterLabel(): void {
+function gotoReferencingEarlierLabel(): void {
   L0:
   goto L0;
 }

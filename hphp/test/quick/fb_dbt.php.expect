@@ -1,8 +1,6 @@
-array(3) {
-  [0]=>
+varray(4) {
   string(27) "test/quick/fb_dbt.php@11@h@"
-  [1]=>
-  string(30) "test/quick/fb_dbt.php@82@C::f@"
-  [2]=>
-  string(27) "test/quick/fb_dbt.php@84@g@"
+  string(30) "test/quick/fb_dbt.php@85@C::f@"
+  string(27) "test/quick/fb_dbt.php@90@g@"
+  string(28) "lib/intern/dummy.php@1@main@"
 }

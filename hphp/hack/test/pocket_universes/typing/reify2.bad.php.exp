@@ -1,0 +1,4 @@
+File "reify2.bad.php", line 17, characters 14-26:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "reify2.bad.php", line 6, characters 7-11:
+Definition is here

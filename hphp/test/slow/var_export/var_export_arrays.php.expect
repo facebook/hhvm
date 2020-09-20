@@ -21,7 +21,7 @@ array (
 )
 
 array (
-  4 => 'zuckval',
+  '4' => 'zuckval',
   '4bar' => 'barval',
 )
 

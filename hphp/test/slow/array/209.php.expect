@@ -1,4 +1,8 @@
-array(2) {
+varray(2) {
+  int(1)
+  int(3)
+}
+darray(2) {
   [0]=>
   int(1)
   ["test"]=>

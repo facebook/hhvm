@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 include 'server.inc';
+<<__EntryPoint>> function main(): void {
 $host = curl_cli_server_start();
-
 // start testing
 echo "*** Testing curl_setopt with CURLOPT_STDERR\n";
 
@@ -35,5 +35,4 @@ var_dump(preg_replace('/[\r\n]/', ' ', file_get_contents($temp_file)));
 @unlink($temp_file);
 
 curl_close($ch);
-
-?>
+}

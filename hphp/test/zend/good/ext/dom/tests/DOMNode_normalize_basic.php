@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Create an XML document
  * with structure
@@ -11,7 +11,7 @@
  * Normalize author. Calculate the number of title text nodes (2).
  * Normalize title. Calculate the number of title text nodes (1).
 */
-
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 
 $root = $doc->createElement('book');
@@ -48,5 +48,4 @@ $title->normalize();
 
 echo "Number of child nodes of title after normalizing title = ";
 var_dump($title->childNodes->length);
-
-?>
+}

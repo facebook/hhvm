@@ -1,0 +1,8 @@
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+  if (!function_exists('exif_read_data')) {
+    echo 'skip';
+  }
+}

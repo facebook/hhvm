@@ -68,7 +68,10 @@ bool CmdShell::onServer(DebuggerProxy &proxy) {
     argv[i] = (char*)m_args[i].c_str();
   }
   argv[m_args.size()] = nullptr;
-  proc::exec(argv[0], argv, nullptr, m_out, &m_out, true);
+  {
+    proc::EnableForkInDebuggerGuard g;
+    proc::exec(argv[0], argv, nullptr, m_out, &m_out, true);
+  }
   free(argv);
   return proxy.sendToClient(this);
 }

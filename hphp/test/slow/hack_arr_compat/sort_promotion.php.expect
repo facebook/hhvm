@@ -1,0 +1,83 @@
+====== never promote varray => darray ======
+==== sort 0 ====
+bool(true)
+bool(false)
+==== sort 1 ====
+bool(true)
+bool(false)
+==== sort 2 ====
+bool(true)
+bool(false)
+==== rsort 0 ====
+bool(true)
+bool(false)
+==== rsort 1 ====
+bool(true)
+bool(false)
+==== rsort 2 ====
+bool(true)
+bool(false)
+==== usort 0 ====
+bool(true)
+bool(false)
+==== usort 1 ====
+bool(true)
+bool(false)
+==== usort 2 ====
+bool(true)
+bool(false)
+==== ksort 0 ====
+bool(true)
+bool(false)
+==== ksort 1 ====
+bool(true)
+bool(false)
+==== ksort 2 ====
+bool(true)
+bool(false)
+====== always promote varray => darray ======
+==== krsort 0 ====
+bool(false)
+bool(true)
+==== krsort 1 ====
+bool(false)
+bool(true)
+==== krsort 2 ====
+bool(false)
+bool(true)
+==== uksort 0 ====
+bool(false)
+bool(true)
+==== uksort 1 ====
+bool(false)
+bool(true)
+==== uksort 2 ====
+bool(false)
+bool(true)
+==== asort 0 ====
+bool(false)
+bool(true)
+==== asort 1 ====
+bool(false)
+bool(true)
+==== asort 2 ====
+bool(false)
+bool(true)
+==== arsort 0 ====
+bool(false)
+bool(true)
+==== arsort 1 ====
+bool(false)
+bool(true)
+==== arsort 2 ====
+bool(false)
+bool(true)
+==== uasort 0 ====
+bool(false)
+bool(true)
+==== uasort 1 ====
+bool(false)
+bool(true)
+==== uasort 2 ====
+bool(false)
+bool(true)

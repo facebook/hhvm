@@ -50,6 +50,9 @@ class Disassembler: public DecoderVisitor {
   int64_t CodeRelativeAddress(const void* instr);
   void AppendCodeRelativeAddressToOutput(const Instruction* instr,
                                                const void* addr);
+  void AppendCodeRelativeLiteralToOutput(uint32_t width, const void* addr);
+
+  void setShouldDereferencePCRelativeLiterals(bool enable);
 
  protected:
   virtual void ProcessOutput(Instruction* instr);
@@ -104,6 +107,8 @@ class Disassembler: public DecoderVisitor {
   bool own_buffer_;
 
   int64_t code_address_offset_;
+
+  bool dereferenceLiterals_{false};
 };
 
 

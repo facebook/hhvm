@@ -1,10 +1,10 @@
-<?php
+<?hh
 function foo () {
-	try {
-		break;
-	} finally {
-	}
+    try {
+        break;
+    } finally {
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
-?>
+}

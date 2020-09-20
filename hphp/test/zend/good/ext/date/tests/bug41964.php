@@ -1,10 +1,11 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set("UTC");
 
 error_reporting(0);
 
 $res = date_parse('Ask the Experts');
-var_dump($res['zone'], $res['tz_abbr']);
+try { var_dump($res['zone']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { var_dump($res['tz_abbr']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\n";
 
 $res = date_parse('A ');
@@ -30,6 +31,4 @@ echo "\n";
 $res = date_parse('a nothing');
 var_dump($res['zone'], $res['tz_abbr']);
 echo "\n";
-
-
-?>
+}

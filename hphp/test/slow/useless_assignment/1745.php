@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bug( $flag ) {
   $tag = '';
@@ -9,4 +9,8 @@ function bug( $flag ) {
   if ( $flag ) ;
  else var_dump($tag);
 }
+
+<<__EntryPoint>>
+function main_1745() {
 bug(false);
+}

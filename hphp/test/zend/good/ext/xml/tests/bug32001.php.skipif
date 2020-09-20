@@ -1,4 +1,3 @@
-<?php
+<?hh
 require_once("skipif.inc");
 if (!extension_loaded('iconv')) die ("skip iconv extension not available");
-?>

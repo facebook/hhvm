@@ -19,4 +19,8 @@ function main() {
   $x->blah(new SomethingUnrelated);
   var_dump($x->getName());
 }
+
+<<__EntryPoint>>
+function main_minstr_005() {
 main();
+}

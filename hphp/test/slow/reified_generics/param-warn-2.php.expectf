@@ -1,0 +1,10 @@
+done
+
+Warning: Argument 1 passed to f() must be an instance of C<@int>, C<string> given in %s on line 6
+done
+done
+
+Warning: Argument 1 passed to g() must be an instance of B<C<@int>>, B<C<string>> given in %s on line 8
+done
+
+Catchable fatal error: Argument 1 passed to g() must be an instance of B<C<@int>>, B<string> given in %s on line 18

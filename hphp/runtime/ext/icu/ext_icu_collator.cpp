@@ -43,15 +43,14 @@ static void HHVM_METHOD(Collator, __construct, const String& locale) {
   }
 }
 
-static bool HHVM_METHOD(Collator, asort, VRefParam arr, int64_t flag) {
+static bool HHVM_METHOD(Collator, asort, Variant& arr, int64_t flag) {
   FETCH_COL(data, this_, false);
   if (!arr.isArray()) {
-    throw_expected_array_exception("Collator::asort");
+    raise_expected_array_warning("Collator::asort");
     return false;
   }
   data->clearError();
-  Variant ref(arr, Variant::WithRefBind{});
-  bool ret = collator_asort(ref, flag, true, data->collator(), data);
+  bool ret = collator_asort(arr, flag, true, data->collator(), data);
   if (U_FAILURE(data->getErrorCode())) {
     return false;
   }
@@ -187,7 +186,7 @@ static int collator_cmp_sort_keys(const void* p1, const void* p2, const void*) {
   return strcmp( key1, key2 );
 }
 
-static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
+static bool HHVM_METHOD(Collator, sortWithSortKeys, Variant& arr) {
   FETCH_COL(data, this_, false);
   data->clearError();
 
@@ -257,7 +256,7 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
                         strval.getBuffer(), strval.length(),
                         (uint8_t*)(sortKeys + sortKeysOffset),
                         sortKeysLength - sortKeysOffset);
-      assert(sortkey_len <= (sortKeysLength - sortKeysOffset));
+      assertx(sortkey_len <= (sortKeysLength - sortKeysOffset));
     }
 
     // Check for index buffer overflow
@@ -289,24 +288,23 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
              sizeof(collator_sort_key_index_t),
              collator_cmp_sort_keys, nullptr);
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for (int i = 0; i < sortIndexPos; ++i) {
     ret.append(hash->getValue(sortIndex[i].valPos));
   }
-  arr.assignIfRef(ret);
+  arr = ret;
   return true;
 }
 
-static bool HHVM_METHOD(Collator, sort, VRefParam arr,
+static bool HHVM_METHOD(Collator, sort, Variant& arr,
                         int64_t sort_flag /* = Collator::SORT_REGULAR */) {
   FETCH_COL(data, this_, false);
   if (!arr.isArray()) {
-    throw_expected_array_exception("Collator::sort");
+    raise_expected_array_warning("Collator::sort");
     return false;
   }
   data->clearError();
-  Variant ref(arr, Variant::WithRefBind{});
-  bool ret = collator_sort(ref, sort_flag, true, data->collator(), data);
+  bool ret = collator_sort(arr, sort_flag, true, data->collator(), data);
   if (U_FAILURE(data->getErrorCode())) {
     return false;
   }

@@ -1,37 +1,30 @@
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
+  int(3)
+}
+darray(0) {
+}
+darray(0) {
+}
+darray(0) {
+}
+varray(1) {
+  int(3)
+}
+darray(1) {
   [2]=>
   int(3)
 }
-array(0) {
+darray(0) {
 }
-array(0) {
-}
-array(0) {
-}
-array(1) {
-  [0]=>
-  int(3)
-}
-array(1) {
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(0) {
+darray(0) {
 }
 string(3) "foo"

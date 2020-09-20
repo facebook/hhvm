@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 
 $fmt = <<<EOD
@@ -6,5 +6,5 @@ $fmt = <<<EOD
 EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
-var_dump($mf->format(array(7)));
-
+var_dump($mf->format(darray[0 => 7]));
+}

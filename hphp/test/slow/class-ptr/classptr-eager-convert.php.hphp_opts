@@ -1,0 +1,2 @@
+-vRuntime.Eval.EmitClassPointers=1
+-vRuntime.Eval.RaiseClassConversionWarning=true

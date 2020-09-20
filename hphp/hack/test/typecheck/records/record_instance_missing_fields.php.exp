@@ -1,0 +1,8 @@
+File "record_instance_missing_fields.php", line 15, characters 16-16:
+Mising required field `x` in `B` (Typing[4354])
+File "record_instance_missing_fields.php", line 4, characters 7-7:
+Field definition is here
+File "record_instance_missing_fields.php", line 17, characters 42-53:
+Record `B` has no field `unexpected` (Typing[4355])
+File "record_instance_missing_fields.php", line 7, characters 8-8:
+Definition is here

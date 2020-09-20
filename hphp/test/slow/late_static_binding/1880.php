@@ -1,25 +1,18 @@
-<?php
+<?hh
 
 function f() {
  return true;
- }
-if (f()) {
-  class A {
-    static $a = 'A';
-    static function f() {
- echo static::$a;
- }
-    function g() {
- $this->f();
- }
+}
+<<__EntryPoint>>
+function entrypoint_1880(): void {
+  if (f()) {
+    include '1880-1.inc';
+  } else {
+    include '1880-2.inc';
   }
+
+  include '1880-classes.inc';
+
+  $b = new B;
+  $b->g();
 }
- else {
-  class A {
- }
-}
-class B extends A {
- static $a = 'B';
- }
-$b = new B;
-$b->g();

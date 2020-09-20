@@ -1,0 +1,8 @@
+<?hh
+
+class C {
+  private ?int $x;
+  private static ?int $x;
+  private function f(): void {}
+  private static function f(): void {}
+}

@@ -1,0 +1,8 @@
+File "smethod_id.php", line 13, characters 14-23:
+Unbound name: `NotFound` (an object type) (Naming[2049])
+File "smethod_id.php", line 16, characters 14-21:
+Unbound name: `NotFound` (an object type) (Naming[2049])
+File "smethod_id.php", line 13, characters 14-23:
+Unbound name (typing): `NotFound` (Typing[4107])
+File "smethod_id.php", line 16, characters 14-21:
+Unbound name (typing): `NotFound` (Typing[4107])

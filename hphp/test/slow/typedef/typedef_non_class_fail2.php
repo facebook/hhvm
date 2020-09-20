@@ -1,8 +1,8 @@
 <?hh
 
 type Point = shape(
-  'x' => real,
-  'y' => real,
+  'x' => float,
+  'y' => float,
 );
 
 function woot(Point $x) : Point {
@@ -13,4 +13,8 @@ function test(): void {
   woot(null);  // failure, expected Point
 }
 
+
+<<__EntryPoint>>
+function main_typedef_non_class_fail2() {
 test();
+}

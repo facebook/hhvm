@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Trait use aliases cannot be declared `abstract` in %s/language018.php on line 7

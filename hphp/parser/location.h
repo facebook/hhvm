@@ -38,10 +38,14 @@ struct Location {
     int char1{1};
 
     int compare(const Range& other) const {
-      if (line0 < other.line0) return -1; if (line0 > other.line0) return 1;
-      if (char0 < other.char0) return -1; if (char0 > other.char0) return 1;
-      if (line1 < other.line1) return -1; if (line1 > other.line1) return 1;
-      if (char1 < other.char1) return -1; if (char1 > other.char1) return 1;
+      if (line0 < other.line0) return -1;
+      if (line0 > other.line0) return 1;
+      if (char0 < other.char0) return -1;
+      if (char0 > other.char0) return 1;
+      if (line1 < other.line1) return -1;
+      if (line1 > other.line1) return 1;
+      if (char1 < other.char1) return -1;
+      if (char1 > other.char1) return 1;
       return 0;
     }
   };

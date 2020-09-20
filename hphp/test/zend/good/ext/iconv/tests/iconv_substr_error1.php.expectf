@@ -2,11 +2,9 @@
 
 -- Testing iconv_substr() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: iconv_substr() expects at most 4 parameters, 5 given in %s/iconv_substr_error1.php on line 20
 
 -- Testing iconv_substr() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: iconv_substr() expects at least 2 parameters, 1 given in %s/iconv_substr_error1.php on line 25
 Done

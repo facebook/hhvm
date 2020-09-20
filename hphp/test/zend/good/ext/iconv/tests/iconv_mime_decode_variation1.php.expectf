@@ -1,49 +1,64 @@
 *** Testing iconv_mime_decode() : usage variations ***
 
 -- Iteration 1 --
-string(1) "0"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 2 --
-string(1) "1"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 3 --
-string(5) "12345"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 4 --
-string(5) "-2345"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 5 --
-string(4) "10.5"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 6 --
-string(5) "-10.5"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 7 --
-string(12) "123456789000"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 8 --
-string(13) "1.23456789E-9"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 9 --
-string(3) "0.5"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 10 --
-string(0) ""
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 11 --
-string(0) ""
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 12 --
-string(1) "1"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 13 --
-string(0) ""
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 14 --
-string(1) "1"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 15 --
-string(0) ""
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 16 --
 string(0) ""
@@ -61,16 +76,18 @@ string(6) "string"
 string(11) "hello world"
 
 -- Iteration 21 --
-string(14) "Class A object"
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, object given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 22 --
-string(0) ""
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 23 --
-string(0) ""
+
+Warning: iconv_mime_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: iconv_mime_decode() expects parameter 1 to be string, resource given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation1.php on line 91
 Done

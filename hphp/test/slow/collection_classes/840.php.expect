@@ -1,27 +1,27 @@
-object(HH\Vector)#6 (5) {
+object(HH\Vector) (5) {
   [0]=>
-  object(HH\Map)#7 (1) {
+  object(HH\Map) (1) {
     ["a"]=>
     int(1)
   }
   [1]=>
-  object(HH\Map)#8 (1) {
+  object(HH\Map) (1) {
     ["b"]=>
     int(2)
   }
   [2]=>
-  object(HH\Set)#9 (1) {
+  object(HH\Set) (1) {
     string(1) "c"
   }
   [3]=>
-  object(HH\Map)#10 (2) {
+  object(HH\Map) (2) {
     ["d"]=>
     int(4)
     ["e"]=>
     int(5)
   }
   [4]=>
-  object(HH\Map)#10 (2) {
+  object(HH\Map) (2) {
     ["d"]=>
     int(4)
     ["e"]=>

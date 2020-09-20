@@ -1,96 +1,106 @@
 *** Testing hypot() : usage variations ***
 
 -- Iteration 1 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 2 --
-float(3.1622776601684)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 3 --
-float(12345.00036452)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 4 --
-float(2345.0019189758)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 5 --
-float(2147483647)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 6 --
-float(10.920164833921)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 7 --
-float(10.920164833921)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 8 --
-float(123456789000)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 9 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 10 --
-float(3.0413812651491)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 11 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 12 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 13 --
-float(3.1622776601684)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 14 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 15 --
-float(3.1622776601684)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 16 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 24 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 25 --
-float(3)
+
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: hypot() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/hypot_variation2.php on line 80
 ===Done===

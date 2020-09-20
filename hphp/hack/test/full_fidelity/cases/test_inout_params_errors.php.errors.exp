@@ -1,0 +1,5 @@
+(3,20)-(3,38) A variadic parameter `...` cannot have a modifier that changes the calling convention, like `inout`.
+(5,29)-(5,35) An `inout` parameter must not have a default value.
+(13,22)-(13,37) A variadic parameter `...` cannot have a modifier that changes the calling convention, like `inout`.
+(33,23)-(33,28) Parameters may not be marked `inout` on `async` functions
+(34,15)-(34,20) Parameters may not be marked `inout` on `async` functions

@@ -1,25 +1,18 @@
 DateInterval
-object(DateInterval)#1 (0) {
+object(DateInterval) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DateInterval in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(5) {
-  [0]=>
+varray(3) {
   string(11) "__construct"
-  [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
   string(20) "createFromDateString"
-  [4]=>
   string(6) "format"
 }
 ================
 A_DateInterval
-object(A_DateInterval)#2 (1) {
+object(A_DateInterval) (1) {
   ["___x"]=>
   NULL
 }
@@ -27,15 +20,8 @@ object(A_DateInterval)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_DateInterval in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(5) {
-  [0]=>
+varray(3) {
   string(11) "__construct"
-  [1]=>
-  string(5) "__get"
-  [2]=>
-  string(5) "__set"
-  [3]=>
   string(20) "createFromDateString"
-  [4]=>
   string(6) "format"
 }

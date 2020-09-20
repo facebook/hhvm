@@ -1,0 +1,6 @@
+File "typeparam_function.php", line 8, characters 16-18:
+Invalid argument (Typing[4110])
+File "typeparam_function.php", line 5, characters 31-33:
+Expected `int`
+File "typeparam_function.php", line 8, characters 16-18:
+But got `float`

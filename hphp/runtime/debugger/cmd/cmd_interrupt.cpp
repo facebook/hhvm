@@ -31,7 +31,7 @@ TRACE_SET_MOD(debugger);
 
 void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
-  assert(m_interrupt != ExceptionHandler); // Server-side only.
+  assertx(m_interrupt != ExceptionHandler); // Server-side only.
   thrift.write(m_interrupt);
   thrift.write(m_program);
   thrift.write(m_errorMsg);
@@ -124,7 +124,7 @@ std::string CmdInterrupt::desc() const {
     case HardBreakPoint:
     case BreakPointReached:
     case ExceptionThrown: {
-      assert(m_site);
+      assertx(m_site);
       if (m_site) {
         return m_site->desc();
       }
@@ -132,7 +132,7 @@ std::string CmdInterrupt::desc() const {
     }
   }
 
-  assert(false);
+  assertx(false);
   return "";
 }
 
@@ -298,7 +298,7 @@ bool CmdInterrupt::shouldBreak(DebuggerProxy &proxy,
     case ExceptionHandler:
       return false; // For flow control only at this time.
   }
-  assert(false);
+  assertx(false);
   return false;
 }
 

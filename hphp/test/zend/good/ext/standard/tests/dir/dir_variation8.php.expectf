@@ -1,16 +1,17 @@
 *** Testing dir() : checking with wildcard characters ***
+string(52) "mkdir() expects parameter 1 to be string, null given"
 -- wildcard = '*' --
 
-Warning: %s
+Warning: No such file or directory in %s/dir_variation8.php on line 26
 bool(false)
 
-Warning: %s
+Warning: No such file or directory in %s/dir_variation8.php on line 27
 bool(false)
 -- wildcard = '?' --
 
-Warning: %s
+Warning: No such file or directory in %s/dir_variation8.php on line 30
 bool(false)
 
-Warning: %s
+Warning: No such file or directory in %s/dir_variation8.php on line 31
 bool(false)
 Done

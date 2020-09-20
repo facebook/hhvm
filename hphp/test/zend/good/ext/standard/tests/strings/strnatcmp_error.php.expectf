@@ -1,12 +1,10 @@
 *** Testing strnatcmp() : error conditions ***
 -- Testing strnatcmp() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: strnatcmp() expects exactly 2 parameters, 0 given in %s/strnatcmp_error.php on line 9
 
 
 -- Testing strnatcmp() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strnatcmp() expects exactly 2 parameters, 3 given in %s/strnatcmp_error.php on line 15
 ===DONE===

@@ -1,0 +1,2 @@
+File "entry_point_variadic.php", line 6, characters 32-33:
+`__EntryPoint` functions cannot take arguments. (NastCheck[3085])

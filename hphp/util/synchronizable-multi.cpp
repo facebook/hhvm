@@ -86,6 +86,13 @@ void SynchronizableMulti::setNumGroups(int num_groups) {
   }
 }
 
+void SynchronizableMulti::notifySpecific(int id) {
+  assert(id >= 0 && id < m_conds.size());
+  auto& cond = m_conds[id];
+  pthread_cond_signal(cond);
+  cond.unlink();
+}
+
 void SynchronizableMulti::notify() {
   for (int i = 0, s = m_cond_list_vec.size(); i < s; i++) {
     assert(m_group < s);

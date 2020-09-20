@@ -1,0 +1,6 @@
+File "transitive_error.php", line 28, characters 11-12:
+Invalid argument (Typing[4110])
+File "transitive_error.php", line 18, characters 18-18:
+Expected `D`
+File "transitive_error.php", line 21, characters 17-17:
+But got `C`

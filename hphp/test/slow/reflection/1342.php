@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-Trait T {
+trait T {
  function bar() {
  yield 1;
  }
@@ -14,4 +14,8 @@ function test() {
     var_dump($m->name);
   }
 }
+
+<<__EntryPoint>>
+function main_1342() {
 test();
+}

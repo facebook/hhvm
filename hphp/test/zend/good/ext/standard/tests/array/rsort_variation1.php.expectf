@@ -2,409 +2,409 @@
 -- Iteration 1 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 2 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 3 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 4 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 5 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 6 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 7 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 8 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 9 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 10 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 11 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 12 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 13 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 14 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 15 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 16 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 17 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 18 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 19 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 20 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 21 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 22 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 23 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 -- Iteration 24 --
 Flag = default:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 86
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 88
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 90
 bool(false)
 Flag = SORT_STRING:
 
-Warning: %s
+Warning: Invalid operand type was used: rsort expects array(s) or collection(s) in %s/rsort_variation1.php on line 92
 bool(false)
 Done

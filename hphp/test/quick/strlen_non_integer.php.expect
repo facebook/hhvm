@@ -398,8 +398,8 @@
 
 
 
-foo: 0
-foo: 1
-foo: 0
-foo: 0
+string(53) "strlen() expects parameter 1 to be string, null given"
+string(56) "strlen() expects parameter 1 to be string, boolean given"
+string(53) "strlen() expects parameter 1 to be string, null given"
+string(56) "strlen() expects parameter 1 to be string, boolean given"
 done

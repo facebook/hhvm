@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "ALL (implicit):", PHP_EOL;
 echo count(DateTimeZone::listIdentifiers());
 echo PHP_EOL, "ALL (explicit):", PHP_EOL;

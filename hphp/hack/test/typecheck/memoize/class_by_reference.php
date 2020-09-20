@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class Bar implements IMemoizeParam {
   public function getInstanceKey(): string {

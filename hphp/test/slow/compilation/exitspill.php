@@ -1,6 +1,4 @@
-<?php
-
-define('FIZ', 32);
+<?hh
 
 class X {
   const FOO = 1;
@@ -18,11 +16,17 @@ function foo($a, $b) {
 function f() { return FIZ; }
 
 function test() {
-  foo(f(), array(X::FOO, X::BAZ,
+  foo(f(), varray[X::FOO, X::BAZ,
                  X::BAR, X::BAZ,
-                 X::BOO, X::BIZ));
+                 X::BOO, X::BIZ]);
 }
 
+
+
+
+const FIZ = 32;
+<<__EntryPoint>>
+function main_exitspill() {
+
 test();
-
-
+}

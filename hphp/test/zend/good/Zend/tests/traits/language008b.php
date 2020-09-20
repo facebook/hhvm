@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait HelloWorld {
    public function sayHello() {
@@ -15,10 +14,13 @@ class MyClass {
    }
 }
 
-$o = new MyClass();
-$o->sayHello();
-$o->callPrivateAlias();
-$o->sayHelloWorld();
 
+<<__EntryPoint>>
+function entrypoint_language008b(): void {
+  error_reporting(E_ALL);
 
-?>
+  $o = new MyClass();
+  $o->sayHello();
+  $o->callPrivateAlias();
+  $o->sayHelloWorld();
+}

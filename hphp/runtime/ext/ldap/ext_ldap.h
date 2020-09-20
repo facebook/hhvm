@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_LDAP_H_
-#define incl_HPHP_EXT_LDAP_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -75,7 +74,7 @@ bool HHVM_FUNCTION(ldap_unbind,
 bool HHVM_FUNCTION(ldap_get_option,
                    const Resource& link,
                    int option,
-                   VRefParam retval);
+                   Variant& retval);
 bool HHVM_FUNCTION(ldap_set_option,
                    const Variant& link,
                    int option,
@@ -160,14 +159,14 @@ Variant HHVM_FUNCTION(ldap_next_reference,
 bool HHVM_FUNCTION(ldap_parse_reference,
                    const Resource& link,
                    const Resource& result_entry,
-                   VRefParam referrals);
+                   Array& referrals);
 bool HHVM_FUNCTION(ldap_parse_result,
                    const Resource& link,
                    const Resource& result,
-                   VRefParam errcode,
-                   VRefParam matcheddn = uninit_null(),
-                   VRefParam errmsg = uninit_null(),
-                   VRefParam referrals = uninit_null());
+                   int64_t& errcode,
+                   String& matcheddn,
+                   String& errmsg,
+                   Array& referrals);
 bool HHVM_FUNCTION(ldap_free_result,
                    const Resource& result);
 Variant HHVM_FUNCTION(ldap_get_values_len,
@@ -186,8 +185,8 @@ bool HHVM_FUNCTION(ldap_control_paged_result,
 bool HHVM_FUNCTION(ldap_control_paged_result_response,
                    const Resource& link,
                    const Resource& result,
-                   VRefParam cookie = uninit_null(),
-                   VRefParam estimated = uninit_null());
+                   String& cookie,
+                   int64_t& estimated);
 String HHVM_FUNCTION(ldap_escape,
                      const String& value,
                      const String& ignores = empty_string(),
@@ -196,4 +195,3 @@ String HHVM_FUNCTION(ldap_escape,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_LDAP_H_

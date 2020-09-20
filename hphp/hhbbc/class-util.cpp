@@ -15,10 +15,12 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
-#include "hphp/runtime/base/collections.h"
-#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
+
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -29,7 +31,8 @@ namespace {
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Closure("Closure"),
-  s_MockClass("__MockClass");
+  s_MockClass("__MockClass"),
+  s_NoFlatten("__NoFlatten");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -45,11 +48,10 @@ bool is_collection(res::Class cls) {
   return collections::isTypeName(name);
 }
 
-borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class> cls,
-                                    SString name) {
+php::Func* find_method(const php::Class* cls, SString name) {
   for (auto& m : cls->methods) {
     if (m->name->isame(name)) {
-      return borrow(m);
+      return m.get();
     }
   }
   return nullptr;
@@ -60,8 +62,13 @@ bool is_special_method_name(SString name) {
   return p && p[0] == '8' && p[1] == '6';
 }
 
-bool is_mock_class(borrowed_ptr<const php::Class> cls) {
+bool is_mock_class(const php::Class* cls) {
   return cls->userAttributes.count(s_MockClass.get());
+}
+
+bool is_noflatten_trait(const php::Class* cls) {
+  assertx(cls->attrs & AttrTrait);
+  return cls->userAttributes.count(s_NoFlatten.get());
 }
 
 bool is_closure(const php::Class& c) {
@@ -76,6 +83,12 @@ bool is_unused_trait(const php::Class& c) {
 bool is_used_trait(const php::Class& c) {
   return
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
+}
+
+std::string normalized_class_name(const php::Class& cls) {
+  auto const name = cls.name->toCppString();
+  if (!PreClassEmitter::IsAnonymousClassName(name)) return name;
+  return name.substr(0, name.find_last_of(';'));
 }
 
 //////////////////////////////////////////////////////////////////////

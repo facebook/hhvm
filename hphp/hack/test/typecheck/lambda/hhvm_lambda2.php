@@ -1,18 +1,14 @@
-<?hh
+<?hh // partial
 
 // lambdas in class bodies
 
 class bar {
   private $x = "asd";
 
-  public function __destruct() {
-    echo "~bar()\n";
-  }
-
   public function foo() {
     return array_map(
       $y ==> $this->x,
-      array(1,2,3,4)
+      varray[1,2,3,4]
     );
   }
 

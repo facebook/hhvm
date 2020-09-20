@@ -1,8 +1,7 @@
-<?php
-
-require 'fix_exceptions.inc';
-
-$functions = [
+<?hh
+<<__EntryPoint>> function main(): void {
+require 'fix_exceptions.inc'; fix_exceptions();
+$functions = darray[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },
@@ -23,4 +22,4 @@ foreach ($functions as $type => $function) {
 }
 
 echo PHP_EOL . "Done";
-?>
+}

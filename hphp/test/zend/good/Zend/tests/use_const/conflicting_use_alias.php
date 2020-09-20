@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace {
     const foo = 'foo';
@@ -7,7 +7,7 @@ namespace {
 namespace x {
     use foo as bar;
     use const foo as bar;
-    var_dump(bar);
+    <<__EntryPoint>> function main(): void {
+    \var_dump(bar);
+    }
 }
-
-?>

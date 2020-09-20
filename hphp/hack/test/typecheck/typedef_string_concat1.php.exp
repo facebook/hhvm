@@ -1,4 +1,2 @@
-File "typedef_string_concat1.php--use.php", line 9, characters 33-40:
-This is a string (Typing[4110])
-File "typedef_string_concat1.php--use.php", line 5, characters 11-14:
-It is incompatible with an object of type TDef
+File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
+Expected an object convertible to string but got a value of type TDef (Typing[4318])

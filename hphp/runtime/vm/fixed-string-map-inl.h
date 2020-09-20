@@ -37,7 +37,7 @@ template<class V, bool CaseSensitive, class E>
 NEVER_INLINE
 void FixedStringMap<V,CaseSensitive,E>::clear() {
   if (m_table && m_table != (Elm*)&FSM::null_key + 1) {
-    free_huge(m_table - m_mask - 1);
+    vm_free(m_table - m_mask - 1);
   }
   m_table = nullptr;
   m_mask = 0;
@@ -57,25 +57,25 @@ void FixedStringMap<V,CaseSensitive,E>::init(int num, uint32_t numExtraBytes) {
   while (kLoadScale * num >= (kLoadScale - 1) * capac) {
     capac *= 2;
   }
-  TRACE_MOD(Trace::runtime, 1, "FixedStringMap::init: %d -> %d\n", num, capac);
-  assert(!m_table);
+  TRACE_MOD(Trace::runtime, 4, "FixedStringMap::init: %d -> %d\n", num, capac);
+  assertx(!m_table);
   auto const allocSize = capac * sizeof(Elm) + numExtraBytes;
-  auto ptr = malloc_huge(allocSize);
+  auto ptr = vm_malloc(allocSize);
   std::memset(ptr, 0, allocSize);
   m_table = (Elm*)ptr + capac;
-  assert(m_table);
+  assertx(m_table);
   m_mask = capac - 1;
 }
 
 template<class V, bool CaseSensitive, class E>
 NEVER_INLINE
 void FixedStringMap<V,CaseSensitive,E>::add(const StringData* sd, const V& v) {
-  assert(sd->isStatic());
+  assertx(sd->isStatic());
 
   Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
   UNUSED unsigned numProbes = 0;
   while (elm->sd) {
-    assert(numProbes++ < m_mask + 1);
+    assertx(numProbes++ < m_mask + 1);
     // Semantics for multiple insertion: new value wins.
     if (FSM::strEqual<CaseSensitive>(elm->sd, sd)) break;
     if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
@@ -90,7 +90,7 @@ V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd) const {
   Elm* elm = &m_table[-1 - int32_t(sd->hash() & m_mask)];
   UNUSED unsigned numProbes = 0;
   for(;;) {
-    assert(numProbes++ < m_mask + 1);
+    assertx(numProbes++ < m_mask + 1);
     if (UNLIKELY(nullptr == elm->sd)) return nullptr;
     if (FSM::strEqual<CaseSensitive>(elm->sd, sd)) return &elm->data;
     if (UNLIKELY(++elm == m_table)) elm -= m_mask + 1;
@@ -102,8 +102,8 @@ V* FixedStringMap<V,CaseSensitive,E>::find(const StringData* sd) const {
 template<class T, class V, bool case_sensitive, class E>
 inline
 T& FixedStringMapBuilder<T,V,case_sensitive,E>::operator[](V idx) {
-  assert(idx >= 0);
-  assert(size_t(idx) < m_list.size());
+  assertx(idx >= 0);
+  assertx(size_t(idx) < m_list.size());
   return m_list[idx];
 }
 
@@ -118,7 +118,7 @@ inline
 void FixedStringMapBuilder<T,V,case_sensitive,E>::add(const StringData* name,
                                                       const T& t) {
   if (m_list.size() >= size_t(std::numeric_limits<V>::max())) {
-    assert(false && "FixedStringMap::Builder overflowed");
+    assertx(false && "FixedStringMap::Builder overflowed");
     abort();
   }
   m_map[name] = m_list.size();

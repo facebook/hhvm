@@ -2,16 +2,13 @@
 
 -- Testing money_format() function with no arguments --
 
-Warning: %s
-NULL
+Warning: money_format() expects exactly 2 parameters, 0 given in %s/money_format_error.php on line 18
 
 -- Testing money_format() function with insufficient arguments --
 
-Warning: %s
-NULL
+Warning: money_format() expects exactly 2 parameters, 1 given in %s/money_format_error.php on line 21
 
 -- Testing money_format() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: money_format() expects exactly 2 parameters, 3 given in %s/money_format_error.php on line 25
 ===DONE===

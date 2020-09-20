@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 HH\curl_create_pool('unittest', 1);
 $ch1 = HH\curl_init_pooled('unittest');

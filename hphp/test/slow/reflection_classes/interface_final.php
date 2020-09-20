@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface I {
   function m();
@@ -14,6 +14,9 @@ abstract class C extends B implements I { }
 
 class D extends C { }
 
+
+<<__EntryPoint>>
+function main_interface_final() {
 $rc = new ReflectionClass('I');
 var_dump($rc->getMethods()[0]->isFinal());
 
@@ -28,3 +31,4 @@ var_dump($rc->getMethods()[0]->isFinal());
 
 $rc = new ReflectionClass('D');
 var_dump($rc->getMethods()[0]->isFinal());
+}

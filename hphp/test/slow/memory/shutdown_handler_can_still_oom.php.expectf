@@ -1,5 +1,5 @@
 
-Fatal error: request has exceeded memory limit in %s/hphp/test/slow/memory/shutdown_handler_can_still_oom.php on line %d
+Fatal error: request has exceeded memory limit in %s/shutdown_handler_can_still_oom.php on line %d
 IN SHUTDOWN
 
-Fatal error: request has exceeded memory limit in %s/hphp/test/slow/memory/shutdown_handler_can_still_oom.php on line %d
+Fatal error: request has exceeded memory limit in %s/shutdown_handler_can_still_oom.php on line %d

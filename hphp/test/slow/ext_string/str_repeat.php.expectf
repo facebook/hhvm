@@ -1,4 +1,3 @@
-Warning: %s
-NULL
+string(52) "Second argument has to be greater than or equal to 0"
 
-Fatal error: %s
+Fatal error: String length exceeded: 9223372036854775807 > %d in %s/str_repeat.php on line 13

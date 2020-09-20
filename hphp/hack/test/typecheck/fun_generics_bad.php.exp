@@ -1,6 +1,6 @@
-File "fun_generics_bad.php", line 24, characters 29-33:
-Invalid argument (Typing[4110])
-File "fun_generics_bad.php", line 4, characters 29-31:
-This is an int
-File "fun_generics_bad.php", line 19, characters 18-21:
-It is incompatible with a nullable type
+File "fun_generics_bad.php", line 9, characters 10-26:
+Invalid return type (Typing[4336])
+File "fun_generics_bad.php", line 9, characters 10-26:
+Expected `void` because this function does not always return a value
+File "fun_generics_bad.php", line 12, characters 4-17:
+But got `darray<int, T2>`

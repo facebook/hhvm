@@ -1,0 +1,2 @@
+File "test_toplevel_stmt_in_braced_namespace.php", line 6, characters 3-12:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Unimpl {
   static abstract function aa($x);
@@ -8,7 +8,7 @@ abstract class Unimpl {
   }
 
   static function doweirdthings() {
-    $k = array();
+    $k = varray[];
     return static::aa($k);
   }
 }
@@ -25,4 +25,8 @@ abstract class B extends Unimpl {
   }
 }
 
+
+<<__EntryPoint>>
+function main_func_family_011() {
 B::doit("asd");
+}

@@ -1,0 +1,75 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\test" ->
+    { fe_pos = [3:10-14];
+      fe_type =
+      (Rwitness (root|variadic_parameter.php line 3, characters 10-13),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [3:42-44]; fp_name = (Some "$f");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|variadic_parameter.php line 3, characters 15-40),
+                  (Tfun
+                     { ft_arity =
+                       (Fvariadic (
+                          { fp_pos = [3:25-30]; fp_name = None;
+                            fp_type =
+                            { et_enforced = false;
+                              et_type =
+                              (Rhint (root|variadic_parameter.php line 3, characters 25-29),
+                               Tmixed)
+                              };
+                            fp_flags =
+                            (make_fp_flags ~mutability:none
+                              ~accept_disposable:false ~has_default:false
+                              ~mode:FPnormal);
+                             }
+                          ));
+                       ft_tparams = []; ft_where_constraints = [];
+                       ft_params = [];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|variadic_parameter.php line 3, characters 15-40),
+                          (Tunion []))
+                         };
+                       ft_ret =
+                       { et_enforced = false;
+                         et_type =
+                         (Rhint (root|variadic_parameter.php line 3, characters 36-39),
+                          (Tprim Tvoid))
+                         };
+                       ft_flags =
+                       (make_ft_flags sync none ~return_disposable:false
+                         ~returns_mutable:false ~returns_void_to_rx:false);
+                       ft_reactive = Nonreactive }))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }
+              ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|variadic_parameter.php line 3, characters 10-13),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|variadic_parameter.php line 3, characters 47-50),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

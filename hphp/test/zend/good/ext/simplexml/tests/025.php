@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $xml =<<<EOF
 <?xml version='1.0'?>
 <xhtml:html xmlns:html='http://www.w3.org/1999/xhtml' xmlns:xhtml='http://www.w3.org/TR/REC-html40'>
@@ -40,6 +40,5 @@ $sxe = simplexml_load_string($xml);
 var_dump($sxe->getNamespaces());
 var_dump($sxe->getDocNamespaces());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

@@ -1,10 +1,10 @@
 <?hh
 
 function main() {
-  $ctypes = array(
+  $ctypes = darray[
     'Vector' => new Vector(),
     'Map' => new Map(),
-  );
+  ];
   foreach ($ctypes as $ctype => $c) {
     echo "=== $ctype ===\n";
     try {
@@ -62,4 +62,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_817() {
 main();
+}

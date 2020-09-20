@@ -1,0 +1,2 @@
+File "class_get_nested.php", line 5, characters 5-18:
+Only classnames and variables are allowed before `::`. (Parsing[1002])

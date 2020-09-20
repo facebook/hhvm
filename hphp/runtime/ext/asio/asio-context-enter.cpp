@@ -32,7 +32,7 @@ namespace HPHP { namespace asio {
 
 namespace {
   struct EnterContext final {
-    typedef c_WaitHandle::Kind Kind;
+    typedef c_Awaitable::Kind Kind;
 
     EnterContext(c_WaitableWaitHandle* root, context_idx_t ctx_idx)
       : m_importSet({root}), m_pending({root}), m_contextIdx(ctx_idx) {
@@ -65,14 +65,14 @@ namespace {
     }
 
     void discover(c_AwaitAllWaitHandle* node) {
-      assert(node->getState() == c_AwaitAllWaitHandle::STATE_BLOCKED);
+      assertx(node->getState() == c_AwaitAllWaitHandle::STATE_BLOCKED);
       node->forEachChild([this] (c_WaitableWaitHandle* child) {
         enqueue(child);
       });
     }
 
     void discover(c_ConditionWaitHandle* node) {
-      assert(node->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
+      assertx(node->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
       enqueue(node->getChild());
     }
 
@@ -111,24 +111,24 @@ namespace {
     }
 
     void enter(c_RescheduleWaitHandle* node) {
-      assert(node->getState() == c_RescheduleWaitHandle::STATE_SCHEDULED);
+      assertx(node->getState() == c_RescheduleWaitHandle::STATE_SCHEDULED);
       node->scheduleInContext();
     }
 
     void preEnter(c_SleepWaitHandle* node) {
-      assert(node->getState() == c_SleepWaitHandle::STATE_WAITING);
+      assertx(node->getState() == c_SleepWaitHandle::STATE_WAITING);
       if (node->isInContext()) {
         node->unregisterFromContext();
       }
     }
 
     void enter(c_SleepWaitHandle* node) {
-      assert(node->getState() == c_SleepWaitHandle::STATE_WAITING);
+      assertx(node->getState() == c_SleepWaitHandle::STATE_WAITING);
       node->registerToContext();
     }
 
     void preEnter(c_ExternalThreadEventWaitHandle* node) {
-      assert(node->getState() ==
+      assertx(node->getState() ==
              c_ExternalThreadEventWaitHandle::STATE_WAITING);
       if (node->isInContext()) {
         node->unregisterFromContext();
@@ -136,7 +136,7 @@ namespace {
     }
 
     void enter(c_ExternalThreadEventWaitHandle* node) {
-      assert(node->getState() ==
+      assertx(node->getState() ==
              c_ExternalThreadEventWaitHandle::STATE_WAITING);
       node->registerToContext();
     }
@@ -190,8 +190,8 @@ namespace {
 }
 
 void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
-  assert(!root->isFinished());
-  assert(root->getContextIdx() < ctx_idx);
+  assertx(!root->isFinished());
+  assertx(root->getContextIdx() < ctx_idx);
 
   EnterContext ctx(root, ctx_idx);
   ctx.discover();

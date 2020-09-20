@@ -1,3 +1,0 @@
-File "null_check_strict.php", line 16, characters 9-16:
-You are using a sketchy null check on a primitive type ...
-Use $x === null instead (Typing[4089])

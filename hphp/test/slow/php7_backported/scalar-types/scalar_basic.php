@@ -1,18 +1,4 @@
-<?php
-
-require 'fix_exceptions.inc';
-
-$errnames = [
-    E_NOTICE => 'E_NOTICE',
-    E_WARNING => 'E_WARNING',
-];
-
-$functions = [
-    'int' => function (int $i) { return $i; },
-    'float' => function (float $f) { return $f; },
-    'string' => function (string $s) { return $s; },
-    'bool' => function (bool $b) { return $b; }
-];
+<?hh
 
 class Stringable {
     public function __toString() {
@@ -20,7 +6,21 @@ class Stringable {
     }
 }
 
-$values = [
+<<__EntryPoint>> function main(): void {
+require 'fix_exceptions.inc'; fix_exceptions();
+$errnames = darray[
+    E_NOTICE => 'E_NOTICE',
+    E_WARNING => 'E_WARNING',
+];
+
+$functions = darray[
+    'int' => function (int $i) { return $i; },
+    'float' => function (float $f) { return $f; },
+    'string' => function (string $s) { return $s; },
+    'bool' => function (bool $b) { return $b; }
+];
+
+$values = varray[
     1,
     "1",
     1.0,
@@ -33,7 +33,7 @@ $values = [
     TRUE,
     FALSE,
     NULL,
-    [],
+    varray[],
     new StdClass,
     new Stringable,
     fopen("data:text/plain,foobar", "r")
@@ -52,4 +52,4 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
-?>
+}

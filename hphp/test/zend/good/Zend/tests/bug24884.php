@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test {
     function __copy()
     {
@@ -14,7 +14,8 @@ class Test {
         }
     }
 }
+<<__EntryPoint>> function main(): void {
 $test = new Test();
 $test2 = $test->__copy();
 var_dump($test2);
-?>
+}

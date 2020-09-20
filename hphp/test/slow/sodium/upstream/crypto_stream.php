@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $nonce = random_bytes(SODIUM_CRYPTO_STREAM_NONCEBYTES);
 $key = sodium_crypto_stream_keygen();
 
@@ -28,9 +28,8 @@ $stream6 = sodium_crypto_stream_xor($stream5, $nonce, $key);
 var_dump($stream6 === $stream);
 
 try {
-	sodium_crypto_stream($len, substr($nonce, 1), $key);
+    sodium_crypto_stream($len, substr($nonce, 1), $key);
 } catch (SodiumException $ex) {
-	var_dump(true);
+    var_dump(true);
 }
-
-?>
+}

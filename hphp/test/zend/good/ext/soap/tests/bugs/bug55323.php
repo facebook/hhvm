@@ -1,7 +1,4 @@
-<?php
-ini_set("soap.wsdl_cache_enabled",0);
-$timestamp = "2011-07-30T03:25:00-05:00";
-$wsdl = dirname(__FILE__)."/bug55323.wsdl";
+<?hh
 
 class TestSoapClient extends SoapClient {
 
@@ -25,9 +22,14 @@ EOF;
   }
 
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  ini_set("soap.wsdl_cache_enabled",0);
+  $timestamp = "2011-07-30T03:25:00-05:00";
+  $wsdl = dirname(__FILE__)."/bug55323.wsdl";
 
-$soapClient = new TestSoapClient($wsdl,
-        array('trace' => 1, 'exceptions' => 0));
-$result = $soapClient->getObject();
-var_dump($result);
-?>
+  $soapClient = new TestSoapClient($wsdl,
+          darray['trace' => 1, 'exceptions' => 0]);
+  $result = $soapClient->__soapcall('getObject', varray[]);
+  var_dump($result);
+}

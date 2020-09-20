@@ -1,22 +1,8 @@
-File "generic_self_type_access_failure.php", line 18, characters 36-50:
-Some type constraint(s) here are violated (Typing[4110])
-  File "generic_self_type_access_failure.php", line 11, characters 32-33:
-  'TX' is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 18, characters 52-52:
-  'T' is a constrained type parameter
-  File "generic_self_type_access_failure.php", line 11, characters 38-40:
-  This is an object of type Box
-  File "generic_self_type_access_failure.php", line 18, characters 30-33:
-  It is incompatible with an object of type Intf
-File "generic_self_type_access_failure.php", line 13, characters 13-13:
-Could not find type constant T in type Intf (Typing[4090])
-  File "generic_self_type_access_failure.php", line 5, characters 11-14:
-  Declaration of Intf is here
-File "generic_self_type_access_failure.php", line 20, characters 11-11:
-A 'where' type constraint is violated here (Typing[4090])
-  File "generic_self_type_access_failure.php", line 12, characters 28-28:
-  This method's where constraints contain a generic type access
-  File "generic_self_type_access_failure.php", line 13, characters 13-13:
-  Could not find type constant T in type Intf
-  File "generic_self_type_access_failure.php", line 5, characters 11-14:
-  Declaration of Intf is here
+File "generic_self_type_access_failure.php", line 18, characters 36-53:
+Some type constraint(s) here are violated (Typing[4323])
+File "generic_self_type_access_failure.php", line 11, characters 32-33:
+`TX` is a constrained type parameter
+File "generic_self_type_access_failure.php", line 11, characters 38-40:
+Expected `Box`
+File "generic_self_type_access_failure.php", line 18, characters 52-52:
+But got `T`

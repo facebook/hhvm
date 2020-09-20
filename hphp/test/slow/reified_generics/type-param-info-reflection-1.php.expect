@@ -1,0 +1,54 @@
+varray(0) {
+}
+varray(3) {
+  darray(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  darray(3) {
+    ["is_reified"]=>
+    bool(false)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  darray(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(true)
+    ["is_warn"]=>
+    bool(true)
+  }
+}
+varray(3) {
+  darray(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  darray(3) {
+    ["is_reified"]=>
+    bool(false)
+    ["is_soft"]=>
+    bool(false)
+    ["is_warn"]=>
+    bool(false)
+  }
+  darray(3) {
+    ["is_reified"]=>
+    bool(true)
+    ["is_soft"]=>
+    bool(true)
+    ["is_warn"]=>
+    bool(true)
+  }
+}

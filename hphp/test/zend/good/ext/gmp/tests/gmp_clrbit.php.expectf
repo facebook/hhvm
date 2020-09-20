@@ -1,18 +1,18 @@
 string(1) "0"
 
-Warning: %s
+Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s/gmp_clrbit.php on line 8
 string(2) "-1"
 
-Warning: %s
+Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s/gmp_clrbit.php on line 12
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
 
-Warning: %s
+Warning: gmp_clrbit(): supplied object is not a valid GMP object in %s/gmp_clrbit.php on line 26
 
-Warning: %s
+Warning: gmp_clrbit() expects exactly 2 parameters, 3 given in %s/gmp_clrbit.php on line 27
 
-Warning: %s
+Warning: gmp_clrbit() expects exactly 2 parameters, 1 given in %s/gmp_clrbit.php on line 28
 
-Warning: %s
+Warning: gmp_clrbit() expects exactly 2 parameters, 0 given in %s/gmp_clrbit.php on line 29
 Done

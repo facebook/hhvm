@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -23,19 +22,14 @@ module MinimalTrivia = Full_fidelity_minimal_trivia
 
 type t = {
   kind: TriviaKind.t;
-  source_text : SourceText.t;
-  offset : int;
-  width : int
+  source_text: SourceText.t;
+  offset: int;
+  width: int;
 }
+[@@deriving show, eq]
 
 let make_ignore_error source_text offset width =
   { kind = TriviaKind.IgnoreError; source_text; offset; width }
-
-let make_unsafe source_text offset width =
-  { kind = TriviaKind.Unsafe; source_text; offset; width }
-
-let make_unsafe_expression source_text offset width =
-  { kind = TriviaKind.UnsafeExpression; source_text; offset; width }
 
 let make_extra_token_error source_text offset width =
   { kind = TriviaKind.ExtraTokenError; source_text; offset; width }
@@ -58,23 +52,15 @@ let make_single_line_comment source_text offset width =
 let make_delimited_comment source_text offset width =
   { kind = TriviaKind.DelimitedComment; source_text; offset; width }
 
-let make_after_halt_compiler source_text offset width =
-  { kind = TriviaKind.AfterHaltCompiler; source_text; offset; width }
+let width trivia = trivia.width
 
-let width trivia =
-  trivia.width
+let kind trivia = trivia.kind
 
-let kind trivia =
-  trivia.kind
+let start_offset trivia = trivia.offset
 
-let start_offset trivia =
-  trivia.offset
+let end_offset trivia = trivia.offset + trivia.width - 1
 
-let end_offset trivia =
-  trivia.offset + trivia.width - 1
-
-let source_text trivia =
-  trivia.source_text
+let source_text trivia = trivia.source_text
 
 let text trivia =
   SourceText.sub (source_text trivia) (start_offset trivia) (width trivia)
@@ -90,13 +76,16 @@ let from_minimal_list source_text ts offset =
     | [] -> acc
     | h :: t ->
       let et = from_minimal source_text h offset in
-      aux (et :: acc) t (offset + (MinimalTrivia.width h)) in
+      aux (et :: acc) t (offset + MinimalTrivia.width h)
+  in
   List.rev (aux [] ts offset)
 
 let to_json trivia =
-  let open Hh_json in
-  JSON_Object [
-    ("kind", JSON_String (TriviaKind.to_string trivia.kind));
-    ("text", JSON_String (text trivia));
-    ("offset", int_ trivia.offset);
-    ("width", int_ trivia.width); ]
+  Hh_json.(
+    JSON_Object
+      [
+        ("kind", JSON_String (TriviaKind.to_string trivia.kind));
+        ("text", JSON_String (text trivia));
+        ("offset", int_ trivia.offset);
+        ("width", int_ trivia.width);
+      ])

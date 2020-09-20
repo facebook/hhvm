@@ -2,11 +2,9 @@
 
 -- Testing count() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: count() expects at least 1 parameter, 0 given in %s/count_error.php on line 15
 
 -- Testing count() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: count() expects at most 2 parameters, 3 given in %s/count_error.php on line 22
 Done

@@ -1,3 +1,0 @@
-*** test key_exists() by calling it with its expected arguments ***
-bool(true)
-bool(false)

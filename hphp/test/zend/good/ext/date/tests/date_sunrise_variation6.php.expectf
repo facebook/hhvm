@@ -1,194 +1,182 @@
 *** Testing date_sunrise() : usage variation ***
 
 --int 0--
-string(5) "05:48"
-float(5.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 93
 
 --int 1--
-string(5) "06:48"
-float(6.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 93
 
 --int 12345--
-string(5) "14:48"
-float(14.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 93
 
 --int -12345--
-string(5) "12:48"
-float(12.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/date_sunrise_variation6.php on line 93
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --uppercase NULL--
-string(5) "05:48"
-float(5.800%d)
+string(5) "10:48"
+float(10.800%d)
 int(1218174483)
 
 --lowercase null--
-string(5) "05:48"
-float(5.800%d)
+string(5) "10:48"
+float(10.800%d)
 int(1218174483)
 
 --lowercase true--
-string(5) "06:48"
-float(6.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 93
 
 --lowercase false--
-string(5) "05:48"
-float(5.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 93
 
 --uppercase TRUE--
-string(5) "06:48"
-float(6.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 93
 
 --uppercase FALSE--
-string(5) "05:48"
-float(5.800%d)
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 91
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 92
+
+Warning: date_sunrise() expects parameter 6 to be double, boolean given in %s/date_sunrise_variation6.php on line 93
 
 --empty string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 93
 
 --empty string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 93
 
 --string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 93
 
 --string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 93
 
 --mixed case string--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 93
 
 --heredoc--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, string given in %s/date_sunrise_variation6.php on line 93
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, object given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, object given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, object given in %s/date_sunrise_variation6.php on line 93
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, object given in %s/date_sunrise_variation6.php on line 91
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, object given in %s/date_sunrise_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 6 to be double, object given in %s/date_sunrise_variation6.php on line 93
 
 --undefined var--
-string(5) "05:48"
-float(5.800%d)
+string(5) "10:48"
+float(10.800%d)
 int(1218174483)
 
 --unset var--
-string(5) "05:48"
-float(5.800%d)
+string(5) "10:48"
+float(10.800%d)
 int(1218174483)
 ===DONE===

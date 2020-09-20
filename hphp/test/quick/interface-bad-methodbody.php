@@ -5,3 +5,4 @@ interface I {
     echo 'This is illegal';
   }
 }
+

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class D {
   // default constructor
@@ -24,7 +24,7 @@ function reflect($class_name) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }
   try {
-    $c2 = $rc->newInstanceArgs(array('a', 1, 2));
+    $c2 = $rc->newInstanceArgs(varray['a', 1, 2]);
   } catch (Exception $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
   }
@@ -35,4 +35,8 @@ function main() {
   reflect('C');
   reflect('P');
 }
+
+<<__EntryPoint>>
+function main_defaultconstructor_exceptions() {
 main();
+}

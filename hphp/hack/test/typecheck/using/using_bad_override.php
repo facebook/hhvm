@@ -24,21 +24,21 @@ class GoodDerived extends Base {
 }
 class RBase {
   <<__ReturnDisposable>>
-  public function foo(): mixed {}
-  public function bar(): mixed {}
+  public function foo(): void {}
+  public function bar(): void {}
 }
 class RBadDerived1 extends RBase {
-  public function foo(): mixed {}
-  public function bar(): mixed {}
+  public function foo(): void {}
+  public function bar(): void {}
 }
 class RBadDerived2 extends RBase {
   <<__ReturnDisposable>>
-  public function foo(): mixed {}
+  public function foo(): void {}
   <<__ReturnDisposable>>
-  public function bar(): mixed {}
+  public function bar(): void {}
 }
 class RGoodDerived extends RBase {
   <<__ReturnDisposable>>
-  public function foo(): mixed {}
-  public function bar(): mixed {}
+  public function foo(): void {}
+  public function bar(): void {}
 }

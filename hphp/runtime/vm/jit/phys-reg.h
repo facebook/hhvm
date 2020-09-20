@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_PHYSREG_H_
-#define incl_HPHP_JIT_PHYSREG_H_
+#pragma once
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
@@ -124,6 +123,8 @@ public:
   constexpr bool operator!=(Reg64 r) const { return Reg64(n) != r; }
   constexpr bool operator==(Reg32 r) const { return Reg32(n) == r; }
   constexpr bool operator!=(Reg32 r) const { return Reg32(n) != r; }
+
+  size_t hash() const { return n; }
 
   MemoryRef operator[](intptr_t p) const {
     assertx(type() == GP);
@@ -234,6 +235,7 @@ public:
 private:
   friend struct RegSet;
   friend struct Vreg;
+  friend struct VregSet;
   explicit constexpr PhysReg(int n) : n(n) {}
 
   uint8_t n;
@@ -369,7 +371,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (ffs64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         f(PhysReg(out + off));
       }
@@ -389,7 +391,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (ffs64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         r[i++] = out + off;
         if (i > 1) {
@@ -412,7 +414,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (fls64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         f(PhysReg(out + off));
       }
@@ -433,7 +435,7 @@ public:
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (fls64(bits, out)) {
-        assert(0 <= out && out < 64);
+        assertx(0 <= out && out < 64);
         bits &= ~(uint64_t{1} << out);
         r[i++] = out + off;
         if (i > 1) {
@@ -490,4 +492,13 @@ static_assert(std::is_trivially_destructible<RegSet>::value,
 
 }}
 
-#endif
+///////////////////////////////////////////////////////////////////////////////
+
+namespace std {
+  template<> struct hash<HPHP::jit::PhysReg> {
+    size_t operator()(HPHP::jit::PhysReg r) const { return r.hash(); }
+  };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+

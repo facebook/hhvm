@@ -1,6 +1,4 @@
-<?php 
-
-echo "Before function declaration...\n";
+<?hh
 
 function print_something_multiple_times($something,$times)
 {
@@ -17,6 +15,9 @@ function some_other_function()
 }
 
 
+// This is a lie.
+<<__EntryPoint>> function main(): void {
+echo "Before function declaration...\n";
 echo "After function declaration...\n";
 
 echo "Calling function for the first time...\n";
@@ -28,5 +29,4 @@ print_something_multiple_times("This like, really works and stuff...",3);
 echo "Returned from function call...\n";
 
 some_other_function();
-
-?>
+}

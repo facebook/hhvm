@@ -33,4 +33,8 @@ function main() {
   $test("splice", function ($v) { $v->splice(0, 1); });
 }
 
+
+<<__EntryPoint>>
+function main_cow() {
 main();
+}

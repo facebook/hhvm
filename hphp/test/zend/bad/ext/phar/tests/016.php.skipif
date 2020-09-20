@@ -1,2 +1,0 @@
-<?php if (!extension_loaded("phar")) die("skip");?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not present"); ?>

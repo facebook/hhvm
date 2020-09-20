@@ -1,13 +1,9 @@
 *** Test by calling method or function with incorrect numbers of arguments ***
 
-Warning: %s
-NULL
+Warning: posix_geteuid() expects exactly 0 parameters, 1 given in %s/posix_geteuid_error1.php on line 6
 
-Warning: %s
-NULL
+Warning: posix_geteuid() expects exactly 0 parameters, 1 given in %s/posix_geteuid_error1.php on line 9
 
-Warning: %s
-NULL
+Warning: posix_geteuid() expects exactly 0 parameters, 1 given in %s/posix_geteuid_error1.php on line 9
 
-Warning: %s
-NULL
+Warning: posix_geteuid() expects exactly 0 parameters, 1 given in %s/posix_geteuid_error1.php on line 9

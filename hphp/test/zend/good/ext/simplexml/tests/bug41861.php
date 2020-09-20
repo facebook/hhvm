@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $xml = simplexml_load_string('<root>
 	<first_node_no_ns />
 	<ns1:node1 xmlns:ns1="#ns1" />
@@ -14,7 +14,7 @@ echo "root(recursive): '$name' -- namespaces: ", implode(', ', $namespaces), "\n
 $namespaces = $xml->getNamespaces(False);
 echo "root(non-recursive): '$name' -- namespaces: ", implode(', ', $namespaces), "\n";
 
-foreach (array(null, '#ns1', '#ns2', '#ns3') as $ns)
+foreach (varray['', '#ns1', '#ns2', '#ns3'] as $ns)
 {
 	foreach ($xml->children($ns) as $child)
 	{
@@ -24,5 +24,5 @@ foreach (array(null, '#ns1', '#ns2', '#ns3') as $ns)
 		echo "children($ns): '$name' -- namespaces: ", implode(', ', $namespaces), "\n";
 	}
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($params) {
   $listId = (isset($params['id']) && trim($params['id']) != '') ?
@@ -7,4 +7,8 @@ function foo($params) {
   return $params;
 }
 
-var_dump(foo(array('id' => 42)));
+
+<<__EntryPoint>>
+function main_dce_006() {
+var_dump(foo(darray['id' => '42']));
+}

@@ -1,5 +1,6 @@
-<?php
-    if (version_compare(phpversion(), '5.2.7', '<')) {
-        die('skip old php, not eligible');
-    }
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (version_compare(phpversion(), '5.2.7', '<')) {
+    die('skip old php, not eligible');
+}
+}

@@ -1,13 +1,20 @@
-<?php
+<?hh
 /* Prototype  : string ucwords ( string $str )
  * Description: Uppercase the first character of each word in a string
  * Source code: ext/standard/string.c
 */
 
 /*
- * Test ucwords() by passing different values including scalar and non scalar values 
+ * Test ucwords() by passing different values including scalar and non scalar values
 */
 
+class my
+{
+  function __toString() {
+    return "myString";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ucwords() : usage variations ***\n";
 // initialize all required variables
 
@@ -17,15 +24,8 @@ unset($unset_var);
 
 $fp = fopen(__FILE__, "r");
 
-class my
-{
-  function __toString() {
-    return "myString";
-  }
-}
-
 // array with different values
-$values =  array (
+$values =  varray [
 
   // integer values
   0,
@@ -33,7 +33,7 @@ $values =  array (
   12345,
   -2345,
 
-  // hex values 
+  // hex values
   0x10,
   0X20,
   0xAA,
@@ -51,11 +51,11 @@ $values =  array (
   .5,
 
   // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -74,12 +74,12 @@ $values =  array (
   NULL,
   null,
 
-  // hex in string 
+  // hex in string
   "0x123",
   '0x123',
   "0xFF12",
   "-0xFF12",
-  
+
   // undefined variable
   @$undefined_var,
 
@@ -88,7 +88,7 @@ $values =  array (
 
   // resource variable
   $fp
-);
+];
 
 // loop through each element of the array and check the working of ucwords()
 // when $str argument is supplied with different values
@@ -98,7 +98,7 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str = $values [$index];
 
-  var_dump( ucwords($str) );
+  try { var_dump( ucwords($str) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }
@@ -106,4 +106,4 @@ for($index = 0; $index < count($values); $index ++) {
 // close the file handle
 fclose($fp);
 echo "Done\n";
-?>
+}

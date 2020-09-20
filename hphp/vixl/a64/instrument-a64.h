@@ -31,7 +31,6 @@
 #include "hphp/vixl/utils.h"
 #include "hphp/vixl/a64/decoder-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
-#include "hphp/vixl/a64/instrument-a64.h"
 
 namespace vixl {
 

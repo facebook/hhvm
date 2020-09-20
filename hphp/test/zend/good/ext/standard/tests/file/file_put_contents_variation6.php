@@ -1,19 +1,37 @@
-<?php
+<?hh
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
- * Description: Write/Create a file with contents data and return the number of bytes written 
+ * Description: Write/Create a file with contents data and return the number of bytes written
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
+
+function runtest() {
+
+
+   //correct php53 behaviour is to ignore the FILE_USE_INCLUDE_PATH unless the file already exists
+   // in the include path. In this case it doesn't so the file should be written in the current dir.
+
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename, (string)"File in include path", FILE_USE_INCLUDE_PATH);
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename, (string)". This was appended", FILE_USE_INCLUDE_PATH | FILE_APPEND);
+   $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename);
+   echo "$line\n";
+   unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename);
+}
+
+abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation6 {
+  public static $filename;
+}
+<<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
 
 echo "*** Testing file_put_contents() : variation ***\n";
 
-require_once('fopen_include_path.inc');
-
-$thisTestDir = basename(__FILE__, ".php") . ".dir";
+$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
 mkdir($thisTestDir);
+$oldDirPath = getcwd();
 chdir($thisTestDir);
 
-$filename = basename(__FILE__, ".php") . ".tmp";
+ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename = basename(__FILE__, ".php") . ".tmp";
 
 $newpath = create_include_path();
 set_include_path($newpath);
@@ -25,22 +43,9 @@ runtest();
 
 teardown_include_path();
 restore_include_path();
-chdir("..");
+chdir($oldDirPath);
 rmdir($thisTestDir);
 
 
-function runtest() {
-   global $filename;
-
-   //correct php53 behaviour is to ignore the FILE_USE_INCLUDE_PATH unless the file already exists 
-   // in the include path. In this case it doesn't so the file should be written in the current dir.
-
-   file_put_contents($filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
-   file_put_contents($filename, (binary) ". This was appended", FILE_USE_INCLUDE_PATH | FILE_APPEND);  
-   $line = file_get_contents($filename);
-   echo "$line\n";
-   unlink($filename); 
+echo "===DONE===\n";
 }
-
-?>
-===DONE===

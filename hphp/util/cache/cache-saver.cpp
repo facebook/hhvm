@@ -35,7 +35,6 @@ namespace HPHP {
 using folly::format;
 using folly::writeFull;
 using std::string;
-using std::vector;
 
 static const mode_t kDumpMode = S_IRUSR | S_IWUSR |
                                 S_IRGRP | S_IWGRP |

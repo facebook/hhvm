@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
  * Description: Write a formatted string to a stream
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : basic functionality - using string format ***\n";
 
 // Initialise all required variables
@@ -11,13 +11,13 @@ $format = "format";
 $format1 = "%s\n";
 $format2 = "%s %s\n";
 $format3 = "%s %s %s\n";
-$arg1 = array("one");
-$arg2 = array("one","two");
-$arg3 = array("one","two","three");
+$arg1 = varray["one"];
+$arg2 = varray["one","two"];
+$arg3 = varray["one","two","three"];
 
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic1.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic1.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -33,5 +33,5 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 //// partial.php
-<?hh
+<?hh // partial
 
 async function any() {
   return new D();
@@ -19,6 +19,6 @@ class D extends C {
 async function expload(): Awaitable<void> {
   $any = any();
   $x = await $any;
-  invariant($x instanceof C, '');
+  invariant($x is C, '');
   $x->dd();
 }

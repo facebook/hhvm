@@ -14,10 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IR_INSTR_TABLE_H_
-#define incl_HPHP_IR_INSTR_TABLE_H_
-
-#include <unordered_map>
+#pragma once
 
 #include <folly/Hash.h>
 
@@ -101,10 +98,9 @@ private:
   };
 
 private:
-  std::unordered_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> m_map;
+  jit::fast_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> m_map;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

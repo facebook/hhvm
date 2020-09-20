@@ -1,0 +1,4 @@
+File "trait_no_req.bad.php", line 8, characters 11-11:
+In Pocket Universe `myTrait0:@E`, atom `S` declares unknown type `T` (Naming[2109])
+File "trait_no_req.bad.php", line 8, characters 11-11:
+In Pocket Universe `myTrait0:@E`, atom `S` declares unknown value `val` (Naming[2109])

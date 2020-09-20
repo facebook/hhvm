@@ -1,0 +1,8 @@
+File "yield_send2.php", line 12, characters 14-19:
+Invalid argument (Typing[4110])
+File "yield_send2.php", line 5, characters 39-41:
+Expected `int`
+File "classes.hhi", line 25, characters 25-26:
+  via this generic `Ts`
+File "yield_send2.php", line 12, characters 14-19:
+But got `string`

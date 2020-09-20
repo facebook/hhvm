@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1234() {
 $nullherequote= <<<fail
 fail;
 echo "--$nullherequote--\n";
@@ -10,3 +13,4 @@ pass;x
 ss;
 pass;
 echo "$threestops\n";
+}

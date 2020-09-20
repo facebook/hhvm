@@ -1,16 +1,17 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+namespace {
 const int CURLAUTH_ANY = 0;
 const int CURLAUTH_ANYSAFE = 0;
 const int CURLAUTH_BASIC = 0;
+const int CURLAUTH_BEARER = 0;
 const int CURLAUTH_DIGEST = 0;
 const int CURLAUTH_DIGEST_IE = 0;
 const int CURLAUTH_GSSNEGOTIATE = 0;
@@ -87,6 +88,7 @@ const int CURLOPT_BINARYTRANSFER = 0;
 const int CURLOPT_COOKIESESSION = 0;
 const int CURLOPT_CRLF = 0;
 const int CURLOPT_DNS_USE_GLOBAL_CACHE = 0;
+const int CURLOPT_DOH_URL = 0;
 const int CURLOPT_FAILONERROR = 0;
 const int CURLOPT_FILETIME = 0;
 const int CURLOPT_FOLLOWLOCATION = 0;
@@ -114,6 +116,7 @@ const int CURLOPT_PORT = 0;
 const int CURLOPT_RESUME_FROM = 0;
 const int CURLOPT_TIMECONDITION = 0;
 const int CURLOPT_TIMEVALUE = 0;
+const int CURLOPT_TIMEVALUE_LARGE = 0;
 const int CURLOPT_COOKIE = 0;
 const int CURLOPT_COOKIEFILE = 0;
 const int CURLOPT_COOKIEJAR = 0;
@@ -190,10 +193,12 @@ const int CURLOPT_COOKIELIST = 0;
 const int CURLOPT_CRLFILE = 0;
 const int CURLOPT_DEFAULT_PROTOCOL = 0;
 const int CURLOPT_DIRLISTONLY = 0;
+const int CURLOPT_DISALLOW_USERNAME_IN_URL = 0;
 const int CURLOPT_DNS_INTERFACE = 0;
 const int CURLOPT_DNS_LOCAL_IP4 = 0;
 const int CURLOPT_DNS_LOCAL_IP6 = 0;
 const int CURLOPT_DNS_SERVERS = 0;
+const int CURLOPT_DNS_SHUFFLE_ADDRESSES = 0;
 const int CURLOPT_EXPECT_100_TIMEOUT_MS = 0;
 const int CURLOPT_FNMATCH_FUNCTION = 0;
 const int CURLOPT_FTP_ACCOUNT = 0;
@@ -206,6 +211,8 @@ const int CURLOPT_FTP_SSL = 0;
 const int CURLOPT_FTP_SSL_CCC = 0;
 const int CURLOPT_FTP_USE_PRET = 0;
 const int CURLOPT_GSSAPI_DELEGATION = 0;
+const int CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS = 0;
+const int CURLOPT_HAPROXYPROTOCOL = 0;
 const int CURLOPT_HTTP200ALIASES = 0;
 const int CURLOPT_HTTP_CONTENT_DECODING = 0;
 const int CURLOPT_HTTP_TRANSFER_DECODING = 0;
@@ -238,7 +245,25 @@ const int CURLOPT_PRIVATE = 0;
 const int CURLOPT_PROGRESSFUNCTION = 0;
 const int CURLOPT_PROTOCOLS = 0;
 const int CURLOPT_PROXYPASSWORD = 0;
+const int CURLOPT_PROXY_CAINFO = 0;
+const int CURLOPT_PROXY_CAPATH = 0;
+const int CURLOPT_PROXY_CRLFILE = 0;
+const int CURLOPT_PROXY_KEYPASSWD = 0;
+const int CURLOPT_PROXY_PINNEDPUBLICKEY = 0;
 const int CURLOPT_PROXY_SERVICE_NAME = 0;
+const int CURLOPT_PROXY_SSLCERT = 0;
+const int CURLOPT_PROXY_SSLCERTTYPE = 0;
+const int CURLOPT_PROXY_SSLKEY = 0;
+const int CURLOPT_PROXY_SSLKEYTYPE = 0;
+const int CURLOPT_PROXY_SSLVERSION = 0;
+const int CURLOPT_PROXY_SSL_CIPHER_LIST = 0;
+const int CURLOPT_PROXY_SSL_OPTIONS = 0;
+const int CURLOPT_PROXY_SSL_VERIFYHOST = 0;
+const int CURLOPT_PROXY_SSL_VERIFYPEER = 0;
+const int CURLOPT_PROXY_TLS13_CIPHERS = 0;
+const int CURLOPT_PROXY_TLSAUTH_PASSWORD = 0;
+const int CURLOPT_PROXY_TLSAUTH_TYPE = 0;
+const int CURLOPT_PROXY_TLSAUTH_USERNAME = 0;
 const int CURLOPT_PROXY_TRANSFER_MODE = 0;
 const int CURLOPT_PROXYUSERNAME = 0;
 const int CURLOPT_READDATA = 0;
@@ -257,6 +282,7 @@ const int CURLOPT_SOCKS5_AUTH = 0;
 const int CURLOPT_SOCKS5_GSSAPI_NEC = 0;
 const int CURLOPT_SOCKS5_GSSAPI_SERVICE = 0;
 const int CURLOPT_SSH_AUTH_TYPES = 0;
+const int CURLOPT_SSH_COMPRESSION = 0;
 const int CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 = 0;
 const int CURLOPT_SSH_KNOWNHOSTS = 0;
 const int CURLOPT_SSH_PRIVATE_KEYFILE = 0;
@@ -277,10 +303,13 @@ const int CURLOPT_TCP_NODELAY = 0;
 const int CURLOPT_TELNETOPTIONS = 0;
 const int CURLOPT_TFTP_BLKSIZE = 0;
 const int CURLOPT_TFTP_NO_OPTIONS = 0;
+const int CURLOPT_TLS13_CIPHERS = 0;
 const int CURLOPT_TLSAUTH_PASSWORD = 0;
 const int CURLOPT_TLSAUTH_TYPE = 0;
 const int CURLOPT_TLSAUTH_USERNAME = 0;
 const int CURLOPT_TRANSFER_ENCODING = 0;
+const int CURLOPT_UPKEEP_INTERVAL_MS = 0;
+const int CURLOPT_UPLOAD_BUFFERSIZE = 0;
 const int CURLOPT_UNIX_SOCKET_PATH = 0;
 const int CURLOPT_USERNAME = 0;
 const int CURLOPT_USE_SSL = 0;
@@ -379,10 +408,12 @@ const int CURLGSSAPI_DELEGATION_FLAG = 0;
 const int CURLGSSAPI_DELEGATION_POLICY_FLAG = 0;
 
 const int CURLVERSION_NOW = 0;
+const int CURL_VERSION_BROTLI = 0;
 const int CURL_VERSION_HTTP2 = 0;
 const int CURL_VERSION_IPV6 = 0;
 const int CURL_VERSION_KERBEROS4 = 0;
 const int CURL_VERSION_LIBZ = 0;
+const int CURL_VERSION_MULTI_SSL = 0;
 const int CURL_VERSION_SSL = 0;
 
 const int CURLPROTO_ALL = 0;
@@ -416,6 +447,7 @@ const int CURLPROTO_TELNET = 0;
 const int CURLPROTO_TFTP = 0;
 
 const int CURLPROXY_HTTP = 0;
+const int CURLPROXY_HTTPS = 0;
 const int CURLPROXY_SOCKS4 = 0;
 const int CURLPROXY_SOCKS4A = 0;
 const int CURLPROXY_SOCKS5 = 0;
@@ -424,6 +456,7 @@ const int CURLPROXY_SOCKS5_HOSTNAME = 0;
 const int CURLSSH_AUTH_AGENT = 0;
 const int CURLSSH_AUTH_ANY = 0;
 const int CURLSSH_AUTH_DEFAULT = 0;
+const int CURLSSH_AUTH_GSSAPI = 0;
 const int CURLSSH_AUTH_HOST = 0;
 const int CURLSSH_AUTH_KEYBOARD = 0;
 const int CURLSSH_AUTH_NONE = 0;
@@ -505,57 +538,53 @@ const int CURLSHOPT_UNSHARE = 0;
 <<__PHPStdLib>>
 function curl_init($url = null);
 <<__PHPStdLib>>
-function curl_init_pooled($pool_name, $url = null);
+function curl_init_pooled(string $pool_name, $url = null);
 <<__PHPStdLib>>
-function curl_copy_handle($ch);
+function curl_copy_handle(resource $ch);
 <<__PHPStdLib>>
-function curl_version($uversion = CURLVERSION_NOW);
+function curl_version(int $uversion = CURLVERSION_NOW);
 <<__PHPStdLib>>
-function curl_setopt($ch, $option, $value);
+function curl_setopt(resource $ch, int $option, $value);
 <<__PHPStdLib>>
-function curl_setopt_array($ch, $options);
+function curl_setopt_array(resource $ch, $options);
 <<__PHPStdLib>>
-function curl_exec($ch);
+function curl_exec(resource $ch);
 <<__PHPStdLib>>
-function curl_getinfo($ch, $opt = 0);
+function curl_getinfo(resource $ch, int $opt = 0);
 <<__PHPStdLib>>
-function curl_errno($ch);
+function curl_errno(resource $ch);
 <<__PHPStdLib>>
-function curl_error($ch);
+function curl_error(resource $ch);
 <<__PHPStdLib>>
-function curl_strerror($code);
+function curl_strerror(int $code);
 <<__PHPStdLib>>
-function curl_close($ch);
+function curl_close(resource $ch);
 <<__PHPStdLib>>
 function curl_multi_init();
 <<__PHPStdLib>>
-function curl_multi_strerror($errornum);
+function curl_multi_strerror(int $errornum);
 <<__PHPStdLib>>
-function curl_multi_add_handle($mh, $ch);
+function curl_multi_add_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
-function curl_multi_remove_handle($mh, $ch);
+function curl_multi_remove_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
-function curl_multi_exec($mh, &$still_running);
+function curl_multi_exec(resource $mh, inout $still_running);
 <<__PHPStdLib>>
-function curl_multi_select($mh, $timeout = 1.0);
+function curl_multi_select(resource $mh, float $timeout = 1.0);
 <<__PHPStdLib>>
-function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
+function curl_multi_await(resource $mh, float $timeout = 1.0): Awaitable<int>;
 <<__PHPStdLib>>
-function curl_multi_getcontent($ch);
+function curl_multi_getcontent(resource $ch);
 <<__PHPStdLib>>
-function curl_multi_info_read($mh, &$msgs_in_queue = null);
+function curl_multi_info_read(resource $mh, inout $msgs_in_queue);
 <<__PHPStdLib>>
-function curl_multi_close($mh);
+function curl_multi_close(resource $mh);
 <<__PHPStdLib>>
 function curl_share_init();
 <<__PHPStdLib>>
-function curl_share_close($sh);
+function curl_share_close(resource $sh);
 <<__PHPStdLib>>
-function curl_share_setopt($sh, $option, $value);
-
-namespace HH\Asio {
-  function curl_exec(mixed $url_or_handle): Awaitable<string>;
-}
+function curl_share_setopt(resource $sh, int $option, $value);
 
 class CURLFile {
   public string $name = '';
@@ -581,3 +610,8 @@ function curl_file_create(
   string $mime = '',
   string $postname = '',
 ): CURLFile;
+}
+
+namespace HH\Asio {
+  function curl_exec(mixed $url_or_handle): Awaitable<string>;
+}

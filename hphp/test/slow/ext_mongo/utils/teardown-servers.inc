@@ -1,4 +1,4 @@
-<?php
+<?hh
 include __DIR__."/../utils/cfg.inc";
 $fp = fsockopen("localhost", 8000, $errno, $errstr, 2);
 if (!$fp) {

@@ -1,6 +1,7 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 $support = gd_info();
 if (!isset($support['WBMP Support']) || $support['WBMP Support'] === false) {
-	print 'skip wbmp support not available';
+    print 'skip wbmp support not available';
 }
-?>
+}

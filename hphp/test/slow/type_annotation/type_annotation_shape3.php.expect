@@ -1,16 +1,16 @@
 string(41) "HH\shape(D::F1=>HH\int, D::F2=>HH\string)"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(2) {
+  darray(2) {
     [42]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
     ["bar"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }

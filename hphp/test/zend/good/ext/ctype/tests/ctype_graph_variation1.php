@@ -1,13 +1,21 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space 
- * Source code: ext/ctype/ctype.c 
+ * Description: Checks for any printable character(s) except space
+ * Source code: ext/ctype/ctype.c
  */
 
 /*
  * Pass different data types as $c argument to ctype_graph() to test behaviour
  */
 
+// get a class
+class classA
+{
+    public function __toString() {
+        return "myClass";
+    }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_graph() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -15,14 +23,6 @@ $orig = setlocale(LC_CTYPE, "C");
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-	public function __toString() {
-		return "myClass";
-	}
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -33,7 +33,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $c argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -57,17 +57,17 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -79,7 +79,7 @@ $inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of ctype_graph()
 $iterator = 1;
@@ -92,5 +92,5 @@ foreach($inputs as $input) {
 fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

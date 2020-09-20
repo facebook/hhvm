@@ -1,6 +1,7 @@
 <?hh
-class Foo {
-  public $x;
-}
-$this =& new Foo();
+class Foo { public $x; }
+
+<<__EntryPoint>> function main(): void {
+$this = new Foo();
 echo $this->x;
+}

@@ -1,5 +1,5 @@
 //// file1.php
-<?hh
+<?hh // partial
 
 const Y = 1;
 

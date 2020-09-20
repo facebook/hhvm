@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar() {
   echo "bar()\n";
@@ -13,6 +13,10 @@ function foo($a, $b = bar(), $c = 123) {
   echo ");\n";
 }
 
+
+<<__EntryPoint>>
+function main_non_static_default() {
 foo("Hello");
 foo("Hello");
 foo("Goodbye", "Land");
+}

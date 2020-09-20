@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -74,10 +73,10 @@ void IRMetadataUpdater::register_inst(const Vinstr& inst) {
   if (m_bcmap && m_origin) {
     auto const sk = inst.origin->marker().sk();
     if (m_bcmap->empty() ||
-        m_bcmap->back().md5 != sk.unit()->md5() ||
+        m_bcmap->back().sha1 != sk.unit()->sha1() ||
         m_bcmap->back().bcStart != sk.offset()) {
       m_bcmap->push_back(TransBCMapping{
-        sk.unit()->md5(),
+        sk.unit()->sha1(),
         sk.offset(),
         m_env.text.main().code.frontier(),
         m_env.text.cold().code.frontier(),
@@ -146,7 +145,9 @@ bool is_empty_catch(const Vblock& block) {
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
   // If the catch block is empty, we can just let tc_unwind_resume() and
   // tc_unwind_personality() skip over our frame.
-  if (is_empty_catch(env.unit.blocks[p.target])) return;
+  if (is_empty_catch(env.unit.blocks[p.target])) {
+    return;
+  }
 
   auto const catch_target = env.addrs[p.target];
   assertx(catch_target);
@@ -158,15 +159,16 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
 namespace {
 
 /*
- * Record in ProfData that the control-transfer instruction `jmp' is associated
- * with the current translation being emitted.
+ * For profiling translations, record in ProfData that the control-transfer
+ * instruction `jmp' is associated with the current translation being emitted.
  */
 void setJmpTransID(Venv& env, TCA jmp) {
-  if (!env.unit.context) return;
+  if (!env.unit.context || env.unit.context->kind != TransKind::Profile) return;
 
-  env.meta.setJmpTransID(
-    jmp, env.unit.context->transID, env.unit.context->kind
-  );
+  assertx(env.unit.context->transIDs.size() == 1);
+  auto const transID = *env.unit.context->transIDs.begin();
+
+  env.meta.setJmpTransID(jmp, transID, env.unit.context->kind);
 }
 
 void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
@@ -178,9 +180,11 @@ void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
 
 }
 
-bool emit(Venv& env, const callphp& i) {
-  const auto call = emitSmashableCall(*env.cb, env.meta, i.stub);
+bool emit(Venv& env, const callphps& i) {
+  const auto call = emitSmashableCall(*env.cb, env.meta, i.target);
   setJmpTransID(env, call);
+  env.meta.smashableCallData[call] = PrologueID(i.func, i.nargs);
+  setCallFuncId(env, call + smashableCallLen());
   return true;
 }
 
@@ -188,6 +192,7 @@ bool emit(Venv& env, const bindjmp& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
   setJmpTransID(env, jmp);
+  env.meta.smashableJumpData[jmp] = {i.target, CGMeta::JumpKind::Bindjmp};
   return true;
 }
 
@@ -196,6 +201,7 @@ bool emit(Venv& env, const bindjcc& i) {
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
   setJmpTransID(env, jcc);
+  env.meta.smashableJumpData[jcc] = {i.target, CGMeta::JumpKind::Bindjcc};
   return true;
 }
 
@@ -210,6 +216,7 @@ bool emit(Venv& env, const fallback& i) {
   auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
   env.stubs.push_back({jmp, nullptr, i});
   registerFallbackJump(env, jmp, CC_None);
+  env.meta.smashableJumpData[jmp] = {i.target, CGMeta::JumpKind::Fallback};
   return true;
 }
 
@@ -218,16 +225,42 @@ bool emit(Venv& env, const fallbackcc& i) {
     emitSmashableJcc(*env.cb, env.meta, env.cb->frontier(), i.cc);
   env.stubs.push_back({nullptr, jcc, i});
   registerFallbackJump(env, jcc, i.cc);
+  env.meta.smashableJumpData[jcc] = {i.target, CGMeta::JumpKind::Fallbackcc};
   return true;
 }
 
 bool emit(Venv& env, const retransopt& i) {
-  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(), i.spOff, i.sk);
+  svcreq::emit_retranslate_opt_stub(*env.cb, env.text.data(), env.meta,
+                                    i.spOff, i.sk);
   return true;
 }
 
-bool emit(Venv& env, const funcguard& i) {
-  emitFuncGuard(i.func, *env.cb, env.meta, i.watch);
+bool emit(Venv& env, const movqs& i) {
+  auto const mov = emitSmashableMovq(*env.cb, env.meta, i.s.q(), r64(i.d));
+  if (i.addr.isValid()) {
+    env.vaddrs[i.addr] = mov;
+  }
+  return true;
+}
+
+bool emit(Venv& env, const debugguardjmp& i) {
+  auto const jmp = emitSmashableJmp(*env.cb, env.meta, i.realCode);
+  if (i.watch) {
+    *i.watch = jmp;
+    env.meta.watchpoints.push_back(i.watch);
+  }
+  return true;
+}
+
+bool emit(Venv& env, const jmps& i) {
+  auto const jmp = emitSmashableJmp(*env.cb, env.meta, env.cb->frontier());
+  env.jmps.push_back({jmp, i.targets[0]});
+  if (i.jmp_addr.isValid()) {
+    env.vaddrs[i.jmp_addr] = jmp;
+  }
+  if (i.taken_addr.isValid()) {
+    env.pending_vaddrs.push_back({i.taken_addr, i.targets[1]});
+  }
   return true;
 }
 
@@ -276,7 +309,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
         auto const srcrec = tc::findSrcRec(i.target);
         always_assert(srcrec);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
+          ? svcreq::emit_retranslate_stub(frozen, env.text.data(), env.meta,
                                           i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
@@ -288,7 +321,7 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
         auto const srcrec = tc::findSrcRec(i.target);
         always_assert(srcrec);
         stub = i.trflags.packed
-          ? svcreq::emit_retranslate_stub(frozen, env.text.data(),
+          ? svcreq::emit_retranslate_stub(frozen, env.text.data(), env.meta,
                                           i.spOff, i.target, i.trflags)
           : srcrec->getFallbackTranslation();
       } break;
@@ -310,6 +343,98 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Computes inline frames for each block in unit. Inline frames are dominated
+ * by an inlinestart instruction and post-dominated by an inlineend instruction.
+ * This function annotates Vblocks with their associated frame, and populates
+ * the frame vector. Additionally, inlinestart and inlineend instructions are
+ * replaced by jmp instructions.
+ */
+void computeFrames(Vunit& unit) {
+  auto const topFunc = unit.context ? unit.context->initSrcKey.func() : nullptr;
+
+  auto const rpo = sortBlocks(unit);
+
+  unit.frames.emplace_back(
+    topFunc, 0, Vframe::Top, 0, unit.blocks[rpo[0]].weight
+  );
+  unit.blocks[rpo[0]].frame = 0;
+  unit.blocks[rpo[0]].pending_frames = 0;
+  for (auto const b : rpo) {
+    auto& block = unit.blocks[b];
+    int pending = block.pending_frames;
+    assert_flog(block.frame != -1, "Block frames cannot be uninitialized.");
+
+    if (block.code.empty()) continue;
+
+    auto const next_frame = [&] () -> int {
+      auto frame = block.frame;
+      for (auto& inst : block.code) {
+        auto origin = inst.origin;
+        switch (inst.op) {
+        case Vinstr::inlinestart:
+          // Each inlined frame will have a single start but may have multiple
+          // ends, and so we need to propagate this state here so that it only
+          // happens once per frame.
+          for (auto f = frame; f != Vframe::Top; f = unit.frames[f].parent) {
+            unit.frames[f].inclusive_cost += inst.inlinestart_.cost;
+            unit.frames[f].num_inner_frames++;
+          }
+
+          unit.frames.emplace_back(
+            inst.inlinestart_.func,
+            origin->marker().bcOff() - origin->marker().func()->base(),
+            frame,
+            inst.inlinestart_.cost,
+            block.weight
+          );
+          frame = inst.inlinestart_.id = unit.frames.size() - 1;
+          pending++;
+          break;
+        case Vinstr::inlineend:
+          frame = unit.frames[frame].parent;
+          pending--;
+          break;
+        case Vinstr::pushframe:
+          pending--;
+          break;
+        case Vinstr::popframe:
+          pending++;
+          break;
+        default: break;
+        }
+      }
+      return frame;
+    }();
+
+    for (auto const s : succs(block)) {
+      auto& sblock = unit.blocks[s];
+      assert_flog(
+        (sblock.frame == -1 || sblock.frame == next_frame) &&
+        (sblock.pending_frames == -1 || sblock.pending_frames == pending),
+        "Blocks must be dominated by a single inline frame at the same depth,"
+        "{} cannot have frames {} ({}) and {} ({}) at depths {} and {}.",
+        s,
+        sblock.frame,
+        unit.frames[sblock.frame].func
+          ? unit.frames[sblock.frame].func->fullName()->data()
+          : "(null)",
+        next_frame,
+        unit.frames[next_frame].func
+          ? unit.frames[next_frame].func->fullName()->data()
+          : "(null)",
+        sblock.pending_frames,
+        pending
+      );
+      sblock.frame = next_frame;
+      sblock.pending_frames = pending;
+    }
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 const uint64_t* alloc_literal(Venv& env, uint64_t val) {
@@ -319,7 +444,7 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
 
   if (auto addr = addrForLiteral(val)) return addr;
 
-  auto& pending = env.meta.literals;
+  auto& pending = env.meta.literalAddrs;
   auto it = pending.find(val);
   if (it != pending.end()) {
     DEBUG_ONLY auto realAddr =
@@ -334,6 +459,15 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
 
   pending.emplace(val, addr);
   return addr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCallFuncId(Venv& env, TCA callRetAddr) {
+  if (!env.unit.context) return;
+
+  env.meta.setCallFuncId(callRetAddr, env.unit.context->initSrcKey.funcID(),
+                         env.unit.context->kind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

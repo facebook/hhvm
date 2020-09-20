@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_BASE_H_
-#define incl_HPHP_EVAL_DEBUGGER_BASE_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -124,7 +123,7 @@ enum CodeColor {
 /**
  * "line", starting line number, or 0 for no line number display.
  * "lineFocus", the line to highlight, with gray background.
- * highlight_code() doesn't need <?php and will treat source entirely PHP.
+ * highlight_code() doesn't need <?hh and will treat source entirely PHP.
  */
 String highlight_php(const String& source, int line = 0, int lineFocus0 = 0,
                      int charFocus0 = 0, int lineFocus1 = 0,
@@ -232,6 +231,9 @@ struct Macro {
 struct DebuggerUsageLogger {
   virtual ~DebuggerUsageLogger() {}
   virtual void init() {}
+  virtual void clearClientInfo() {}
+  virtual void setClientInfo(const std::string& /*username*/, uid_t /*uid*/,
+                             pid_t /*clientPid*/) {}
   virtual void
   log(const std::string& /*mode*/, const std::string& /*sandboxId*/,
       const std::string& /*cmd*/, const std::string& /*data*/) {}
@@ -240,4 +242,3 @@ struct DebuggerUsageLogger {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_BASE_H_

@@ -1,26 +1,14 @@
 <?hh
 
 class V { const X = 10; }
-function &values() {
-  static $VALUES = array(
+function values() {
+  $VALUES = darray[
     'X'                        => V::X,
-  );
+  ];
   return $VALUES;
 }
 function foo() { var_dump(values()['X']); }
+<<__EntryPoint>> function main(): void {
 foo();
 foo();
-
-class T {
-  public $var;
-  function f() {
-    echo $this->var - 3;
-  }
 }
-
-$a = 33;
-$t = new T();
-$t->var = &$a;
-$t->f();
-$a = 10000;
-$t->f();

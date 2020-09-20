@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
@@ -34,7 +35,7 @@ namespace HPHP {
 struct MCrypt : SweepableResourceData {
   explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
-  ~MCrypt() {
+  ~MCrypt() override {
     MCrypt::close();
   }
 
@@ -282,12 +283,12 @@ Array HHVM_FUNCTION(mcrypt_list_algorithms,
   if (count == 0) {
     raise_warning("No algorithms found in module dir");
   }
-  Array ret = Array::Create();
+  VArrayInit ret(count);
   for (int i = 0; i < count; i++) {
     ret.append(String(modules[i], CopyString));
   }
   mcrypt_free_p(modules, count);
-  return ret;
+  return ret.toArray();
 }
 
 Array HHVM_FUNCTION(mcrypt_list_modes,
@@ -299,12 +300,12 @@ Array HHVM_FUNCTION(mcrypt_list_modes,
   if (count == 0) {
     raise_warning("No modes found in module dir");
   }
-  Array ret = Array::Create();
+  VArrayInit ret(count);
   for (int i = 0; i < count; i++) {
     ret.append(String(modules[i], CopyString));
   }
   mcrypt_free_p(modules, count);
-  return ret;
+  return ret.toArray();
 }
 
 int64_t HHVM_FUNCTION(mcrypt_module_get_algo_block_size,
@@ -331,12 +332,12 @@ Array HHVM_FUNCTION(mcrypt_module_get_supported_key_sizes,
   int *key_sizes = mcrypt_module_get_algo_supported_key_sizes
     ((char*)algorithm.data(), (char*)dir.data(), &count);
 
-  Array ret = Array::Create();
+  VArrayInit ret(count);
   for (int i = 0; i < count; i++) {
     ret.append(key_sizes[i]);
   }
   mcrypt_free(key_sizes);
-  return ret;
+  return ret.toArray();
 }
 
 bool HHVM_FUNCTION(mcrypt_module_is_block_algorithm_mode, const String& mode,
@@ -588,7 +589,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
   int *key_sizes =
     mcrypt_enc_get_supported_key_sizes(pm->m_td, &count);
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for (int i = 0; i < count; i++) {
     ret.append(key_sizes[i]);
   }

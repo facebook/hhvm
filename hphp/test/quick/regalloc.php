@@ -5,7 +5,7 @@
 // registers.  (For reference, this was written when three registers are
 // reserved for VM state.)  It will expose bugs more noticeably when register
 // poisoning is enabled.
-
+<<__EntryPoint>> function main(): void {
 $a = 1;
 $b = 1;
 $c = 2;
@@ -29,3 +29,4 @@ echo $i;
 echo $j;
 
 echo "\n";
+}

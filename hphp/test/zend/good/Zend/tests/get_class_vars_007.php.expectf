@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   ["a"]=>
   NULL
   ["aa"]=>
   NULL
 }
-array(6) {
+darray(6) {
   ["a"]=>
   NULL
   ["aa"]=>

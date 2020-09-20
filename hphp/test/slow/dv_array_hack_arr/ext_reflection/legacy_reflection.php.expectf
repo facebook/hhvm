@@ -1,0 +1,45 @@
+dict(1) {
+  ["Dog"]=>
+  vec(1) {
+    int(3)
+  }
+}
+vec(1) {
+  int(3)
+}
+dict(1) {
+  ["Hippo"]=>
+  vec(1) {
+    int(7)
+  }
+}
+vec(1) {
+  int(7)
+}
+dict(1) {
+  ["Cat"]=>
+  vec(1) {
+    int(4)
+  }
+}
+vec(1) {
+  int(4)
+}
+dict(1) {
+  ["Dolphin"]=>
+  vec(1) {
+    int(5)
+  }
+}
+vec(1) {
+  int(5)
+}
+dict(1) {
+  ["Baboon"]=>
+  vec(1) {
+    int(6)
+  }
+}
+vec(1) {
+  int(6)
+}

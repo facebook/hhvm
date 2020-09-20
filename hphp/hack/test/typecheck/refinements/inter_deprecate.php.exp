@@ -1,0 +1,4 @@
+File "inter_deprecate.php", line 17, characters 13-15:
+The method foo is deprecated: blah (Typing[4128])
+File "inter_deprecate.php", line 6, characters 19-21:
+Definition is here

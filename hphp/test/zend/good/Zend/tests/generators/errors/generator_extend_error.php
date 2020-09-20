@@ -1,5 +1,4 @@
-<?php
+<?hh
 
 class ExtendedGenerator extends Generator { }
 
-?>

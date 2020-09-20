@@ -1,4 +1,0 @@
-<?php
-if (!function_exists('fnmatch'))
-    die("skip fnmatch() function is not available");
-?>

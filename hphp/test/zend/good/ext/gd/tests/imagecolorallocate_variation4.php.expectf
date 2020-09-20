@@ -1,106 +1,106 @@
 *** Testing imagecolorallocate() : usage variations ***
 
 --float 10.5--
-int(657930)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, double given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --float -10.5--
-int(657910)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, double given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --float 10.1234567e10--
-bool(false)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, double given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --float 10.7654321E-10--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, double given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --float .5--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, double given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --empty array--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --int indexed array--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --associative array--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --nested arrays--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --uppercase NULL--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, null given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --lowercase null--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, null given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --lowercase true--
-int(657921)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --lowercase false--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --uppercase TRUE--
-int(657921)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --uppercase FALSE--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --empty string DQ--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --empty string SQ--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --string DQ--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --string SQ--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --mixed case string--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --heredoc--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --instance of classWithToString--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, object given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --instance of classWithoutToString--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, object given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --undefined var--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, null given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --unset var--
-int(657920)
+
+Warning: imagecolorallocate() expects parameter 4 to be integer, null given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 
 --file resource--
 
-Warning: %s
-NULL
+Warning: imagecolorallocate() expects parameter 4 to be integer, resource given in %s/zend/good/ext/gd/tests/imagecolorallocate_variation4.php on line 93
 ===DONE===

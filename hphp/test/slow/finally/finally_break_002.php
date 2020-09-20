@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function blah() {
-  $xs = array(1, 2, 3, 4, 5);
+  $xs = varray[1, 2, 3, 4, 5];
 
   foreach ($xs as $x) {
     try {
@@ -15,5 +15,9 @@ function blah() {
   }
 }
 
-blah();
 
+
+<<__EntryPoint>>
+function main_finally_break_002() {
+blah();
+}

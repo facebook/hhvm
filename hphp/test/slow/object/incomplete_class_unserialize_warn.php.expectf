@@ -1,0 +1,17 @@
+Warning: Attempted to unserialize class named 'X' but it doesn't exist in %s/test/slow/object/incomplete_class_unserialize_warn.php on line 6
+object(__PHP_Incomplete_Class) (2) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "X"
+  ["p"]=>
+  int(0)
+}
+
+Warning: Attempted to unserialize class named 'Y' but it doesn't exist in %s/test/slow/object/incomplete_class_unserialize_warn.php on line 8
+
+Warning: Class __PHP_Incomplete_Class has no unserializer in %s/test/slow/object/incomplete_class_unserialize_warn.php on line 8
+object(__PHP_Incomplete_Class) (2) {
+  ["__PHP_Incomplete_Class_Name"]=>
+  string(1) "Y"
+  ["serialized"]=>
+  string(3) "lol"
+}

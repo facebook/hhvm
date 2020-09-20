@@ -1,0 +1,1 @@
+Fatal error: Undefined constant 'SomeNamespace\AN_UNDEFINED_CONST' in %s on line %d

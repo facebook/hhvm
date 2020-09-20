@@ -1,0 +1,12 @@
+File "is-expression-generics-shapes-3.php", line 14, characters 9-41:
+Invalid `is` expression hint (Typing[4195])
+File "is-expression-generics-shapes-3.php", line 14, characters 24-24:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "is-expression-generics-shapes-3.php", line 15, characters 9-38:
+Invalid `is` expression hint (Typing[4195])
+File "is-expression-generics-shapes-3.php", line 15, characters 36-36:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)
+File "is-expression-generics-shapes-3.php", line 16, characters 9-41:
+Invalid `is` expression hint (Typing[4195])
+File "is-expression-generics-shapes-3.php", line 16, characters 39-39:
+The `is` operator cannot be used with _ in a shape (use `mixed` instead)

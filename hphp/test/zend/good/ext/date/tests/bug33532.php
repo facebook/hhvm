@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 setlocale(LC_ALL, 'C');
 
 print "TZ has NOT been set\n";
@@ -18,5 +18,4 @@ print "input    " . $input . "\n";
 $tStamp = strtotime($input);
 print "strftime " . strftime("%r %B%e %Y %Z %z", $tStamp) . "\n";
 print "datestr  " . date ("H:i:s A F j Y T", $tStamp) . "\n";
-
-?>
+}

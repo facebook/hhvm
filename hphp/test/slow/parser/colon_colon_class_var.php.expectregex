@@ -1,1 +1,0 @@
-((Fatal error\: \:\:class can only be used on scalars in [^\r\n]+\/test\/slow\/parser\/colon_colon_class_var\.php on line 3)|(Fatal error\: Dynamic class names are not allowed in compile\-time \:\:class fetch in [^\r\n]+\/parser\/colon_colon_class_var\.php on line 3))

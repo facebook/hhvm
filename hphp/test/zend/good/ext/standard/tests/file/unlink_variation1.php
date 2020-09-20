@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype : bool unlink ( string $filename [, resource $context] );
    Description : Deletes filename
 */
@@ -7,11 +7,11 @@
    Delete file having readonly permission but dir having default permission
 */
 
+<<__EntryPoint>> function main(): void {
 
-$file_path = dirname(__FILE__);
 
 // temp dir name used here
-$dirname = "$file_path/unlink_variation1";
+$dirname = __SystemLib\hphp_test_tmppath('unlink_variation1');
 // temp filename used here
 $filename = "$dirname/unlink_variation1.tmp";
 
@@ -51,4 +51,4 @@ var_dump( file_exists($filename) );  // expected: false
 var_dump( rmdir($dirname) );
 
 echo "Done\n";
-?>
+}

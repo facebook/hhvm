@@ -1,7 +1,8 @@
 <?hh
 namespace HH {
-  if (false) {
-    class Noreturn {}
-  }
-  echo "Done\n";
+
+class Noreturn {}
+<<__EntryPoint>> function main(): void {
+echo "Done\n";
+}
 }

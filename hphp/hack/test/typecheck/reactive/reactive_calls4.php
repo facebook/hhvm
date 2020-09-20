@@ -2,12 +2,12 @@
 
 <<__Rx>>
 function returnsReactive(): Rx<(function(): void)> {
-  // UNSAFE
+  return <<__Rx>> () ==> {};
 }
 
 <<__Rx>>
 function returnsNormal(): (function(): void) {
-  // UNSAFE
+  return () ==> {};
 }
 
 <<__Rx>>

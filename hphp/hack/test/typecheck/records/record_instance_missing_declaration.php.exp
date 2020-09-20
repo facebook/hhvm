@@ -1,0 +1,4 @@
+File "record_instance_missing_declaration.php", line 5, characters 10-21:
+Unbound name: `NoSuchRecord` (a record type) (Naming[2049])
+File "record_instance_missing_declaration.php", line 5, characters 10-21:
+Expected a record type, but got `NoSuchRecord`. (Typing[4364])

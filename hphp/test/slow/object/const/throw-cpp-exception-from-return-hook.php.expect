@@ -1,0 +1,32 @@
+-- at constructor entry --
+object(C) (2) {
+  ["i"]=>
+  int(0)
+  ["v"]=>
+  vec(1) {
+    int(1)
+  }
+}
+-- after constructor completes --
+object(C) (2) {
+  ["i"]=>
+  int(2)
+  ["v"]=>
+  vec(2) {
+    int(1)
+    int(3)
+  }
+}
+Cannot modify const property i of class C after construction
+Cannot modify const property v of class C after construction
+Class C does not allow use of dynamic (non-declared) properties
+-- at the end --
+object(C) (2) {
+  ["i"]=>
+  int(2)
+  ["v"]=>
+  vec(2) {
+    int(1)
+    int(3)
+  }
+}

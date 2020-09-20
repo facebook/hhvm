@@ -1,9 +1,4 @@
-File "superclass_prop_not_const.php", line 7, characters 7-7:
-Class B does not correctly implement all required methods  (Typing[4204])
-File "superclass_prop_not_const.php", line 7, characters 17-17:
-Some methods are incompatible with those declared in type A
-Read the following to see why:
-File "superclass_prop_not_const.php", line 4, characters 10-12:
-This property is not __Const
-File "superclass_prop_not_const.php", line 9, characters 10-12:
-This property is __Const
+File "superclass_prop_not_const.php", line 9, characters 14-15:
+This property is `__Const` (Typing[4204])
+File "superclass_prop_not_const.php", line 4, characters 14-15:
+This property is not `__Const`

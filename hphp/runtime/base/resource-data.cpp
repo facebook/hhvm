@@ -26,30 +26,30 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-static __thread int s_max_resource_id;
+static RDS_LOCAL(int, s_max_resource_id);
 
 void ResourceHdr::resetMaxId() {
-  s_max_resource_id = 0;
+  *s_max_resource_id = 0;
 }
 
 void ResourceHdr::setId(int id) {
-  assert(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
+  assertx(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
   if (m_id != id) {
-    if (m_id == s_max_resource_id) --s_max_resource_id;
+    if (m_id == *s_max_resource_id) --*s_max_resource_id;
     m_id = id;
   }
 }
 
 ResourceData::ResourceData() {
   // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
-  if (s_max_resource_id < 3) s_max_resource_id = 3;
-  hdr()->setRawId(++s_max_resource_id);
+  if (*s_max_resource_id < 3) *s_max_resource_id = 3;
+  hdr()->setRawId(++*s_max_resource_id);
 }
 
 ResourceData::~ResourceData() {
   auto id = getId();
-  if (id && id == s_max_resource_id) {
-    --s_max_resource_id;
+  if (id && id == *s_max_resource_id) {
+    --*s_max_resource_id;
   }
   hdr()->setRawId(-1);
 }
@@ -59,7 +59,7 @@ String ResourceData::o_toString() const {
 }
 
 Array ResourceData::o_toArray() const {
-  return make_packed_array(Variant(Resource(const_cast<ResourceData*>(this))));
+  return make_varray(Variant(Resource(const_cast<ResourceData*>(this))));
 }
 
 const StaticString s_Unknown("Unknown");

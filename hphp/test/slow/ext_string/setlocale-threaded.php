@@ -1,17 +1,47 @@
-<?php
+<?hh
 
+function send_to_pagelet($relative_file_path, $locale) {
+  $headers = darray[];
+  $task = pagelet_server_task_start(
+    "$relative_file_path/?pagelet=true&locale=$locale", $headers, 'dummy'
+  );
+  if (is_null($task)) {
+    echo "Failed to start pagelet task\n";
+    die();
+  }
+
+  $rc = 0;
+  $result = pagelet_server_task_result($task, inout $headers, inout $rc, 2000);
+  if ($rc != 200) {
+    echo "Failed to finish pagelet task, status = $rc\n";
+    die();
+  }
+
+  echo trim($result) . "\n";
+}
+
+function escape_non_ascii($str) {
+  $count = -1;
+  return preg_replace_callback('/([\x00-\x1F\x7F-\xFF]+)/',
+    function ($match) { return urlencode($match[1]); },
+    $str, -1, inout $count);
+}
+
+
+<<__EntryPoint>>
+function main_setlocale_threaded() {
 $cwd = getcwd();
 $file_path = __FILE__;
 $relative_file_path = str_replace($cwd, '', $file_path);
 
-$is_pagelet = !empty($_GET) && ($_GET['pagelet'] == 'true');
+$is_pagelet = ((bool)$_GET ?? false) && ($_GET['pagelet'] == 'true');
 
 if (!$is_pagelet) {
   // And now a good one that will work
   setlocale(LC_TIME, 'fr_FR');
   setlocale(LC_NUMERIC, 'fr_FR');
 } else {
-  if (!empty($_GET['locale'])) {
+  if ($_GET['locale'] ?? false) {
     setlocale(LC_TIME, $_GET['locale']);
   }
 }
@@ -48,29 +78,4 @@ if (!$is_pagelet) {
   // changed this output line to Dutch
   echo escape_non_ascii(strftime("%A %e %B %Y", mktime(0, 0, 0, 12, 22, 1978)));
 }
-
-function send_to_pagelet($relative_file_path, $locale) {
-  $headers = array();
-  $task = pagelet_server_task_start(
-    "$relative_file_path/?pagelet=true&locale=$locale", $headers, 'dummy'
-  );
-  if (is_null($task)) {
-    echo "Failed to start pagelet task\n";
-    die();
-  }
-
-  $rc = 0;
-  $result = pagelet_server_task_result($task, $headers, $rc, 2000);
-  if ($rc != 200) {
-    echo "Failed to finish pagelet task, status = $rc\n";
-    die();
-  }
-
-  echo trim($result) . "\n";
-}
-
-function escape_non_ascii($str) {
-  return preg_replace_callback('/([\x00-\x1F\x7F-\xFF]+)/',
-    function ($match) { return urlencode($match[1]); },
-    $str);
 }

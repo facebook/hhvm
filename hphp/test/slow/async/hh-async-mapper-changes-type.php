@@ -20,4 +20,8 @@ function main() {
   var_dump(\HH\Asio\join(HH\Asio\mmk($m, fun('gen_with_key_to_string'))));
 }
 
+
+<<__EntryPoint>>
+function main_hh_async_mapper_changes_type() {
 main();
+}

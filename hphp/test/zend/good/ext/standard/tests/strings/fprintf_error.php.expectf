@@ -1,11 +1,8 @@
 *** Testing Error Conditions ***
 
-Warning: %s
-NULL
+Warning: fprintf() expects at least 2 parameters, 0 given in %s/fprintf_error.php on line 7
 
-Warning: %s
-NULL
+Warning: fprintf() expects at least 2 parameters, 1 given in %s/fprintf_error.php on line 10
 
-Warning: %s
-NULL
+Warning: fprintf() expects at least 2 parameters, 1 given in %s/fprintf_error.php on line 13
 Done

@@ -1,26 +1,26 @@
-<?php
+<?hh
 /* Prototype  : array array_merge_recursive(array $arr1[, array $...])
  * Description: Recursively merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing the functionality of array_merge_recursive() by passing 
+ * Testing the functionality of array_merge_recursive() by passing
  * two dimensional arrays for $arr1 argument.
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_merge_recursive() : two dimensional array for \$arr1 argument ***\n";
 
 // initialize the 2-d array
-$arr1 = array( 
-  array(1, 2, 3, 1),
-  "array" => array("hello", "world", "str1" => "hello", "str2" => 'world'),
-  array(1 => "one", 2 => "two", "one", 'two'),
-  array(1, 2, 3, 1)
-);
+$arr1 = darray[
+  0 => varray[1, 2, 3, 1],
+  "array" => darray[0 => "hello", 1 => "world", "str1" => "hello", "str2" => 'world'],
+  1 => darray[1 => "one", 2 => "two", 3 => "one", 4 => 'two'],
+  2 => varray[1, 2, 3, 1]
+];
 
-// initialize the second argument 
-$arr2 = array(1, "hello", "array" => array("hello", 'world'));
+// initialize the second argument
+$arr2 = darray[0 => 1, 1 => "hello", "array" => varray["hello", 'world']];
 
 echo "-- Passing the entire 2-d array --\n";
 echo "-- With default argument --\n";
@@ -35,4 +35,4 @@ echo "-- With more arguments --\n";
 var_dump( array_merge_recursive($arr1["array"], $arr2["array"]) );
 
 echo "Done";
-?>
+}

@@ -1,25 +1,25 @@
-<?php
+<?hh
 
 class Foo
 {
-	function Test()
-	{
-		echo __METHOD__ . "\n";
-	}
+    function Test()
+    {
+        echo __METHOD__ . "\n";
+    }
 }
 
 class Bar extends Foo
 {
-	function Test()
-	{
-		echo __METHOD__ . "\n";
-	}
+    function Test()
+    {
+        echo __METHOD__ . "\n";
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $o = new Bar;
 $r = new ReflectionMethod('Foo','Test');
 
 $r->invoke($o);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

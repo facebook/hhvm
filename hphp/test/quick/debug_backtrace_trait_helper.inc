@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class P {
   public function foo() {
@@ -14,4 +14,8 @@ trait T {
   public function bar(stdClass $s) {
     print_backtrace();
   }
+}
+
+class C extends P {
+  use T;
 }

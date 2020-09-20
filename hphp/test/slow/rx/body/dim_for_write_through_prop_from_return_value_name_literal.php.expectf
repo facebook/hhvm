@@ -1,0 +1,3 @@
+Verification Error (unit %s/rx/body/dim_for_write_through_prop_from_return_value_name_literal.php func bad): Dim through object for write is only allowed on locals and $this in Rx functions
+
+Verification failed for unit %s/rx/body/dim_for_write_through_prop_from_return_value_name_literal.php. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -1,0 +1,4 @@
+File "mutability_flavors5.php", line 9, characters 5-6:
+Inconsistent mutability of local variable, here local is immutable (Typing[4293])
+File "mutability_flavors5.php", line 12, characters 5-6:
+But here it is mutably-owned

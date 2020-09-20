@@ -27,6 +27,7 @@ inline Vout& Vout::operator=(const Vout& v) {
   assertx(&v.m_unit == &m_unit);
   m_block = v.m_block;
   m_irctx = v.m_irctx;
+  m_weight_scale = v.m_weight_scale;
   return *this;
 }
 
@@ -45,6 +46,10 @@ inline AreaIndex Vout::area() const {
 
 inline Vreg Vout::makeReg() {
   return m_unit.makeReg();
+}
+
+inline Vaddr Vout::makeAddr() {
+  return m_unit.makeAddr();
 }
 
 inline Vtuple Vout::makeTuple(const VregList& regs) const {
@@ -86,6 +91,10 @@ TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
   }
 
   dummy_meta.process_literals();
+  if (!meta) {
+    dummy_meta.addressImmediates.clear();
+    dummy_meta.fallthru.reset();
+  }
   assertx(dummy_meta.empty());
 
   return start;

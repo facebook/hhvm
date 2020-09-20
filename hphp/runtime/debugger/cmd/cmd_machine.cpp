@@ -179,9 +179,10 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
       "Failed to attach to the sandbox. Maybe another client is debugging, \n"
       "or a client failed to detach cleanly.\n"
       "You can attach to another sandbox, or exit the other attached client, \n"
-      "or force this client to take over the sandbox with: \n"
+      "or force this client to take over the sandbox by typing this\n"
+      "command inside hphpd:\n"
       "\n"
-      "\t[m]achine [a]ttach [f]orce %s %s"
+      "\tlocalhost> machine attach force %s %s"
       "\n",
       sandbox->m_user.c_str(), sandbox->m_name.c_str());
   }
@@ -198,7 +199,7 @@ void CmdMachine::UpdateIntercept(DebuggerClient &client,
                                  const std::string &host, int port) {
   CmdMachine cmd;
   cmd.m_body = "rpc";
-  cmd.m_rpcConfig = make_map_array
+  cmd.m_rpcConfig = make_darray
     (s_host_string, String(host),
      s_port, port ? port : RuntimeOption::DebuggerDefaultRpcPort,
      s_auth, String(RuntimeOption::DebuggerDefaultRpcAuth),
@@ -314,11 +315,12 @@ bool CmdMachine::onServer(DebuggerProxy &proxy) {
   if (m_body == "rpc") {
     String host = m_rpcConfig[s_host_string].toString();
     if (host.empty()) {
-      register_intercept("", false, uninit_null());
+      register_intercept("", false, uninit_null(), false, false);
     } else {
       int port = m_rpcConfig[s_port].toInt32();
       LibEventHttpClient::SetCache(host.data(), port, 1);
-      register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
+      register_intercept("", "fb_rpc_intercept_handler",
+                         m_rpcConfig, false, false);
     }
     return proxy.sendToClient(this);
   }

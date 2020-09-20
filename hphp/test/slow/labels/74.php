@@ -1,6 +1,9 @@
-<?php
+<?hh
 
 function modalité($a) {
  var_dump($a);
 }
- modalité(123);
+ <<__EntryPoint>>
+function main_74() {
+modalité(123);
+}

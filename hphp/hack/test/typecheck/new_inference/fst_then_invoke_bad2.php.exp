@@ -1,0 +1,6 @@
+File "fst_then_invoke_bad2.php", line 24, characters 16-17:
+Invalid argument (Typing[4110])
+File "fst_then_invoke_bad2.php", line 22, characters 27-27:
+Expected `D`
+File "fst_then_invoke_bad2.php", line 22, characters 14-14:
+But got `C`

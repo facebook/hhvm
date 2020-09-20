@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : integer formats with integer values ***\n";
 
 // different valid  integer vlaues
-$valid_ints = array(
+$valid_ints = varray[
   0,
   1,
   -1,
@@ -26,14 +26,14 @@ $valid_ints = array(
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
   017777777777  // max positive integer as octal
-);
+];
 // various integer formats
-$int_formats = array(
+$int_formats = varray[
   "%d", "%hd", "%ld",
   "%Ld", " %d", "%d ",
   "\t%d", "\n%d", "%4d",
   "%30d", "%[0-9]", "%*d"
-);
+];
  
 $count = 1;
 foreach($valid_ints as $int_value) {
@@ -46,4 +46,4 @@ foreach($valid_ints as $int_value) {
 };
 
 echo "Done";
-?>
+}

@@ -1,0 +1,62 @@
+BYTECODE=
+
+ROOT=$(shell pwd)
+
+################################################################################
+#                                    Rules                                     #
+################################################################################
+
+.NOTPARALLEL:
+
+all: build-hack copy-hack-files
+
+debug: build-hack-debug copy-hack-debug-files
+
+clean:
+	find ./bin -mindepth 1 -not -path ./bin/README -delete
+	dune clean
+
+# First argument is the extension to use.
+# Second argument is a suffix for the rules name. Optional
+#
+# The only supported configuration are:
+# 1=exe 2=        (literaly nothing, not even a space)
+# 1=bc 2=-debug
+define build_hack
+$(eval ext := $(if $(filter $(2),-debug),".bc",""))
+build-hack$(2):
+	dune build \
+		src/hh_server.$(1) \
+		src/hh_client.$(1) \
+		src/hh_single_type_check.$(1) \
+		src/hackfmt.$(1) \
+		src/hh_parse.$(1) \
+		src/generate_full_fidelity.$(1) \
+		src/hh_single_compile.$(1) \
+		src/hh_fanout/hh_fanout.$(1)
+
+copy-hack$(2)-files: build-hack$(2)
+	mkdir -p "$(HACK_BIN_DIR)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_server.$(1)" "$(HACK_BIN_DIR)/hh_server$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_client.$(1)" "$(HACK_BIN_DIR)/hh_client$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_single_type_check.$(1)" "$(HACK_BIN_DIR)/hh_single_type_check$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hackfmt.$(1)" "$(HACK_BIN_DIR)/hackfmt$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_parse.$(1)" "$(HACK_BIN_DIR)/hh_parse$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/generate_full_fidelity.$(1)" "$(HACK_BIN_DIR)/generate_full_fidelity$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_single_compile.$(1)" "$(HACK_BIN_DIR)/hh_single_compile$(ext)"
+	cp "$(DUNE_BUILD_DIR)/default/src/hh_fanout/hh_fanout.$(1)" "$(HACK_BIN_DIR)/hh_fanout$(ext)"
+endef
+
+# Define rules for normal build / debug build
+# The name of the rules is important as it matches what is expected by cmake
+$(eval $(call build_hack,exe,))
+$(eval $(call build_hack,bc,-debug))
+
+
+.PHONY: test do-test
+test: build-hack copy-hack-files
+	$(MAKE) -f Makefile.dune do-test
+
+do-test:
+	dune runtest
+	# python3 ./test/integration/runner.py ./bin/hh_server ./bin/hh_client

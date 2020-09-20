@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : string date  ( string $format  [, int $timestamp  ] )
  * Description: Format a local time/date.
  * Source code: ext/date/php_date.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date() : error conditions ***\n";
 
 //Set the default time zone 
@@ -13,11 +13,10 @@ $format = "m.d.y";
 $timestamp = mktime(10, 44, 30, 2, 27, 2009);
 
 echo "\n-- Testing date function with no arguments --\n";
-var_dump (date());
+try { var_dump (date()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing date function with more than expected no. of arguments --\n";
 $extra_arg = true;
-var_dump (checkdate($format, $timestamp, $extra_arg));
-
-?>
-===DONE=== 
+try { var_dump (checkdate($format, $timestamp, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+echo "===DONE=== ";
+}

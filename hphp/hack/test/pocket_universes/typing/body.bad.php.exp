@@ -1,0 +1,28 @@
+File "body.bad.php", line 19, characters 16-16:
+Unbound name: `D` (Naming[2049])
+File "body.bad.php", line 22, characters 17-17:
+Unbound name: `D` (an object type) (Naming[2049])
+File "body.bad.php", line 22, characters 7-9:
+Wrong type hint (Typing[4350])
+File "body.bad.php", line 15, characters 10-10:
+Expected `T`
+File "body.bad.php", line 22, characters 17-17:
+But got `object`; this class name is unknown to Hack
+File "body.bad.php", line 30, characters 7-9:
+Wrong type hint (Typing[4110])
+File "body.bad.php", line 15, characters 10-10:
+Expected `T`
+File "body.bad.php", line 30, characters 17-17:
+But got `C`
+File "body.bad.php", line 30, characters 7-9:
+Wrong type hint (Typing[4350])
+File "body.bad.php", line 15, characters 10-10:
+Expected `T`
+File "body.bad.php", line 30, characters 17-17:
+But got `C`
+File "body.bad.php", line 37, characters 7-7:
+Wrong type hint (Typing[4350])
+File "body.bad.php", line 13, characters 10-15:
+Expected `string`
+File "body.bad.php", line 37, characters 11-11:
+But got `int`

@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function prettify_null($x) {
-  return strtr($x, array("\x00" => '<0>'));
+  return strtr($x, darray["\x00" => '<0>']);
 }
 
 function nulls_in_haystack() {
@@ -29,4 +29,8 @@ function main() {
   nulls_in_haystack();
 }
 
+
+<<__EntryPoint>>
+function main_strpbrk_null() {
 main();
+}

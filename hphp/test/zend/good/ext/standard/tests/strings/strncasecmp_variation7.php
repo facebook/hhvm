@@ -1,11 +1,11 @@
-<?php
+<?hh
 /* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
  * Description: Binary safe case-insensitive string comparison of the first n characters
  * Source code: Zend/zend_builtin_functions.c
 */
 
 /* Test strncasecmp() function with null terminated strings and binary values passed to 'str1' & 'str2' */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Test strncasecmp() function: with null terminated strings and binary inputs ***\n";
 
 /* A binary function should not expect a null terminated string, and it should treat input as a raw stream of data */
@@ -16,4 +16,4 @@ var_dump( strncasecmp($str1, $str2, 12) );
 var_dump( strncasecmp($str3, "Hello,world", 12) );
 
 echo "*** Done ***\n";
-?>
+}

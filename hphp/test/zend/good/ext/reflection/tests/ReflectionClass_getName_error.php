@@ -1,7 +1,7 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $r1 = new ReflectionClass("stdClass");
 
-var_dump($r1->getName('X'));
-var_dump($r1->getName('X', true));
-?> 
+try { var_dump($r1->getName('X')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump($r1->getName('X', true)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

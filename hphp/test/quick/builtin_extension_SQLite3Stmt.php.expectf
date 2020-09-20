@@ -1,31 +1,22 @@
 SQLite3Stmt
-object(SQLite3Stmt)#2 (0) {
+object(SQLite3Stmt) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(8) {
-  [0]=>
+varray(7) {
   string(11) "__construct"
-  [1]=>
   string(10) "paramcount"
-  [2]=>
   string(5) "close"
-  [3]=>
   string(5) "reset"
-  [4]=>
   string(5) "clear"
-  [5]=>
-  string(9) "bindparam"
-  [6]=>
   string(9) "bindvalue"
-  [7]=>
   string(7) "execute"
 }
 ================
 A_SQLite3Stmt
-object(A_SQLite3Stmt)#3 (1) {
+object(A_SQLite3Stmt) (1) {
   ["___x"]=>
   NULL
 }
@@ -33,21 +24,12 @@ object(A_SQLite3Stmt)#3 (1) {
 Warning: Attempted to serialize unserializable builtin class A_SQLite3Stmt in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(8) {
-  [0]=>
+varray(7) {
   string(11) "__construct"
-  [1]=>
   string(10) "paramcount"
-  [2]=>
   string(5) "close"
-  [3]=>
   string(5) "reset"
-  [4]=>
   string(5) "clear"
-  [5]=>
-  string(9) "bindparam"
-  [6]=>
   string(9) "bindvalue"
-  [7]=>
   string(7) "execute"
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   switch ($x) {
@@ -6,4 +6,8 @@ function test($x) {
     case 2:      var_dump(isset($y), $y);
   }
 }
+
+<<__EntryPoint>>
+function main_1439() {
 test(2);
+}

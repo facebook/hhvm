@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $heredoc = <<<	A
 
 foo
@@ -8,5 +8,4 @@ foo
 A;
 
 var_dump(strlen($heredoc) == 9);
-
-?>
+}

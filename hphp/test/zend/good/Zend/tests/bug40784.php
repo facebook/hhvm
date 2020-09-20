@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 class A {
-	  function A () { echo "I'm A\n"; }
+  function __construct () { echo "I'm A\n"; }
 }
 
 class B extends A {
@@ -11,7 +11,8 @@ class B extends A {
   }
 }
 
-$b = new B;
-
-echo "Done\n";
-?>
+<<__EntryPoint>>
+function main() {
+  $b = new B;
+  echo "Done\n";
+}

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $a = null;
  var_dump(+$a);
 $a = null;
@@ -774,3 +774,4 @@ $a = true;
  $b = '1.0';
  $a /= $b;
  var_dump($a);
+}

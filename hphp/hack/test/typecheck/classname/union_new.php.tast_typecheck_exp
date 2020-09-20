@@ -1,0 +1,149 @@
+[(Class
+    { c_span = [4:1-7:2]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([5:7-8], "\\C");
+      c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [6:3-41]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([6:19-30], "__construct"); m_tparams = [];
+         m_where_constraints = []; m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([6:35-37], int);
+            param_hint = (Some ([6:31-34], (Hprim Tint)));
+            param_is_variadic = false;
+            param_pos = [6:35-37]; param_name = "$s"; param_expr = None;
+            param_callconv = None; param_user_attributes = [] }
+           ];
+         m_body =
+         { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([6:19-30], (Happly (([6:19-30], "void"), []))));
+         m_external = false; m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>;
+      c_user_attributes =
+      [{ ua_name = ([4:3-24], "__ConsistentConstruct"); ua_params = [] }];
+      c_file_attributes = []; c_enum = None; c_pu_enums = [];
+      c_doc_comment = None });
+  (Class
+     { c_span = [8:1-10:2]; c_annotation = (); c_mode = <opaque>;
+       c_final = true; c_is_xhp = false; c_kind = Cnormal;
+       c_name = ([8:13-14], "\\D");
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_extends = []; c_uses = []; c_use_as_alias = [];
+       c_insteadof_alias = []; c_method_redeclarations = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
+       c_methods =
+       [{ m_span = [9:3-41]; m_annotation = (); m_final = false;
+          m_abstract = false; m_static = false; m_visibility = Public;
+          m_name = ([9:19-30], "__construct"); m_tparams = [];
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([9:35-37], int);
+             param_hint = (Some ([9:31-34], (Hprim Tint)));
+             param_is_variadic = false;
+             param_pos = [9:35-37]; param_name = "$f"; param_expr = None;
+             param_callconv = None; param_user_attributes = [] }
+            ];
+          m_body =
+          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some ([9:19-30], (Happly (([9:19-30], "void"), []))));
+          m_external = false; m_doc_comment = None }
+         ];
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = [];
+       c_file_attributes = []; c_enum = None; c_pu_enums = [];
+       c_doc_comment = None });
+  (Class
+     { c_span = [11:1-15]; c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = false; c_kind = Cinterface;
+       c_name = ([11:11-12], "\\I");
+       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
+       c_extends = []; c_uses = []; c_use_as_alias = [];
+       c_insteadof_alias = []; c_method_redeclarations = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
+       c_methods = []; c_attributes = []; c_xhp_children = [];
+       c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
+       c_file_attributes = []; c_enum = None; c_pu_enums = [];
+       c_doc_comment = None });
+  (Fun
+     { f_span = [13:1-20:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([13:28-32], (Hprim Tvoid)));
+       f_name = ([13:10-17], "\\test_it"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([13:23-25], bool);
+          param_hint = (Some ([13:18-22], (Hprim Tbool)));
+          param_is_variadic = false;
+          param_pos = [13:23-25]; param_name = "$b"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast =
+         [([14:3-18:4],
+           (If ((([14:7-9], bool), (Lvar ([14:7-9], $b))),
+              [([15:5-19],
+                (Expr
+                   (([15:5-18], classname<C>),
+                    (Binop ((Eq None),
+                       (([15:5-7], classname<C>), (Lvar ([15:5-7], $t))),
+                       (([15:10-18], classname<C>),
+                        (Class_const (
+                           (([15:10-11], C), (CI ([15:10-11], "\\C"))),
+                           ([15:13-18], "class"))))
+                       )))))
+                ],
+              [([17:5-19],
+                (Expr
+                   (([17:5-18], classname<D>),
+                    (Binop ((Eq None),
+                       (([17:5-7], classname<D>), (Lvar ([17:5-7], $t))),
+                       (([17:10-18], classname<D>),
+                        (Class_const (
+                           (([17:10-11], D), (CI ([17:10-11], "\\D"))),
+                           ([17:13-18], "class"))))
+                       )))))
+                ]
+              )));
+           ([19:3-18],
+            (Expr
+               (([19:3-17], (C | D)),
+                (Binop ((Eq None),
+                   (([19:3-5], (C | D)), (Lvar ([19:3-5], $x))),
+                   (([19:8-17], (C | D)),
+                    (New (
+                       (([19:12-14], (C | D)),
+                        (CIexpr
+                           (([19:12-14], classname<(C | D)>),
+                            (Lvar ([19:12-14], $t))))),
+                       [], [(([19:15-16], int), (Int "2"))], [],
+                       ([19:8-17], (function(int $s): _)))))
+                   )))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
+  (Stmt
+     ([23:1-15],
+      (Expr
+         (([23:1-14], void),
+          (Call (Cnormal,
+             (([23:1-8], (function(bool $b): void)),
+              (Id ([23:1-8], "\\test_it"))),
+             [], [(([23:9-13], bool), True)], []))))))
+  ]
+Typing[4291] Unexpected type in TAST: expected classname<(exact C | D)>, got classname<(exact C | D)>
+   --> union_new.php
+ 19 |   $x = new $t(2);
+    |            ^^
+

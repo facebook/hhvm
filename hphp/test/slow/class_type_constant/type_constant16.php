@@ -7,3 +7,4 @@ class P {
 class C extends P {
   const type T = string;
 }
+

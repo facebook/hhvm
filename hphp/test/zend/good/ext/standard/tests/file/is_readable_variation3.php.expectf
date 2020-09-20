@@ -1,15 +1,21 @@
 *** Testing is_readable(): usage variations ***
 
 *** Testing is_readable() on miscelleneous filenames ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+
+Warning: is_readable() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
+
+Warning: is_readable() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
+
+Warning: is_readable() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
+
+Warning: is_readable() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
+
+Warning: is_readable() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
+
+Warning: is_readable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
 bool(false)
 
-Warning: %s
-NULL
-bool(false)
+Warning: is_readable() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
+
+Warning: is_readable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_readable_variation3.php on line 28
 Done

@@ -1,2 +1,0 @@
-
-Fatal error: Parameter 1 on function foo was not declared inout but is declared inout on parent function P::foo in %s/bad-parent-4.php on line 7

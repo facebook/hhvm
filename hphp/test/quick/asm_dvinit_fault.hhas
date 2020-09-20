@@ -4,18 +4,7 @@
 # HHVM doesn't generate code like this, but it's legal bytecode.
 #
 
-.main {
-  FPushFuncD 1 "var_dump"
-    FPushFuncD 0 "main"
-    FCall 0
-    FPassR 0 Any
-  FCall 1
-  PopR
-  Int 1
-  RetC
-}
-
-.function main($x = dv_init1, $y = dv_init2) {
+.function foo($x = dv_init1, $y = dv_init2) {
 main_entry:
   CGetL $x
   CGetL2 $y
@@ -33,9 +22,13 @@ dv_init2:
       SetL $y
       PopC
 
-      FPushCtorD 0 "Exception"
-      FCall 0
-      PopR
+      NewObjD "Exception"
+      Dup
+      NullUninit
+      NullUninit
+      FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+      PopC
+      LockObj
       Throw
     } .catch {
       Int 4321
@@ -50,4 +43,18 @@ dv_init2:
 
 out_of_catch:
   Jmp main_entry
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  NullUninit
+  NullUninit
+  NullUninit
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallFuncD <> 0 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
+  Int 1
+  RetC
 }

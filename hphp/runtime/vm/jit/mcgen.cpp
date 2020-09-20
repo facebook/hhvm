@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -53,7 +52,7 @@ bool s_inited{false};
 void processInit() {
   TRACE(1, "mcgen startup\n");
 
-  g_unwind_rds.bind();
+  g_unwind_rds.bind(rds::Mode::Normal, rds::LinkID{"Unwind"});
 
   Debug::initDebugInfo();
   tc::processInit();
@@ -74,9 +73,9 @@ bool initialized() { return s_inited; }
 
 int64_t jitInitTime() { return s_startTime; }
 
-bool dumpTCAnnotation(const Func& func, TransKind transKind) {
+bool dumpTCAnnotation(TransKind transKind) {
   return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
-    (transKind == TransKind::Optimize && (func.attrs() & AttrHot));
+         transKind == TransKind::Optimize;
 }
 
 }}}

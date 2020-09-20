@@ -1,0 +1,9 @@
+Naming[2021] Using __CLASS__ outside a class or trait [1]
+
+magic_class_outside_class.php:4:21
+    2 | 
+    3 | function f(): void {
+[1] 4 |   echo "Inside >" . __CLASS__ . "<\n";
+    5 | }
+
+1 error found.

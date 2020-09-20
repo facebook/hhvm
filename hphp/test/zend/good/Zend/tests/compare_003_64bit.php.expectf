@@ -1,21 +1,21 @@
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > string(0) ""
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > int(1)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > float(2.5)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > int(0)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > string(6) "string"
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > string(3) "123"
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > string(3) "2.5"
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > NULL
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} <= bool(true)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > bool(false)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} <= object(stdClass)#%d (0) {}
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} <= object(stdClass)#%d (0) {}
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} <= object(test)#%d (0) {}
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > array(0) {}
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > int(-9223372036854775808)
-array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} > string(20) "-9223372036854775808"
-string(0) "" <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+varray(3) {  int(1)  int(2)  int(3)} <= varray(3) {  int(1)  int(2)  int(3)}
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to string(0) ""
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to int(1)
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to float(2.5)
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to int(0)
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to string(6) "string"
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to string(3) "123"
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to string(3) "2.5"
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to NULL
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to bool(true)
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to bool(false)
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to object(stdClass) (0) {}
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to object(stdClass) (0) {}
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to object(test) (0) {}
+varray(3) {  int(1)  int(2)  int(3)} > varray(0) {}
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to int(-9223372036854775808)
+varray(3) {  int(1)  int(2)  int(3)} cannot be compared to string(20) "-9223372036854775808"
+string(0) "" cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 string(0) "" <= string(0) ""
 string(0) "" <= int(1)
 string(0) "" <= float(2.5)
@@ -26,13 +26,13 @@ string(0) "" <= string(3) "2.5"
 string(0) "" <= NULL
 string(0) "" <= bool(true)
 string(0) "" <= bool(false)
-string(0) "" <= object(stdClass)#%d (0) {}
-string(0) "" <= object(stdClass)#%d (0) {}
-string(0) "" <= object(test)#%d (0) {}
-string(0) "" <= array(0) {}
+string(0) "" <= object(stdClass) (0) {}
+string(0) "" <= object(stdClass) (0) {}
+string(0) "" <= object(test) (0) {}
+string(0) "" cannot be compared to varray(0) {}
 string(0) "" > int(-9223372036854775808)
 string(0) "" <= string(20) "-9223372036854775808"
-int(1) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+int(1) cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 int(1) > string(0) ""
 int(1) <= int(1)
 int(1) <= float(2.5)
@@ -45,17 +45,17 @@ int(1) <= bool(true)
 int(1) > bool(false)
 int(1)
 Notice: %s
- <= object(stdClass)#%d (0) {}
+ <= object(stdClass) (0) {}
 int(1)
 Notice: %s
- <= object(stdClass)#%d (0) {}
+ <= object(stdClass) (0) {}
 int(1)
 Notice: %s
- <= object(test)#%d (0) {}
-int(1) <= array(0) {}
+ <= object(test) (0) {}
+int(1) cannot be compared to varray(0) {}
 int(1) > int(-9223372036854775808)
 int(1) > string(20) "-9223372036854775808"
-float(2.5) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+float(2.5) cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 float(2.5) > string(0) ""
 float(2.5) > int(1)
 float(2.5) <= float(2.5)
@@ -68,17 +68,17 @@ float(2.5) <= bool(true)
 float(2.5) > bool(false)
 float(2.5)
 Notice: %s
- > object(stdClass)#%d (0) {}
+ > object(stdClass) (0) {}
 float(2.5)
 Notice: %s
- > object(stdClass)#%d (0) {}
+ > object(stdClass) (0) {}
 float(2.5)
 Notice: %s
- > object(test)#%d (0) {}
-float(2.5) <= array(0) {}
+ > object(test) (0) {}
+float(2.5) cannot be compared to varray(0) {}
 float(2.5) > int(-9223372036854775808)
 float(2.5) > string(20) "-9223372036854775808"
-int(0) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+int(0) cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 int(0) <= string(0) ""
 int(0) <= int(1)
 int(0) <= float(2.5)
@@ -91,17 +91,17 @@ int(0) <= bool(true)
 int(0) <= bool(false)
 int(0)
 Notice: %s
- <= object(stdClass)#%d (0) {}
+ <= object(stdClass) (0) {}
 int(0)
 Notice: %s
- <= object(stdClass)#%d (0) {}
+ <= object(stdClass) (0) {}
 int(0)
 Notice: %s
- <= object(test)#%d (0) {}
-int(0) <= array(0) {}
+ <= object(test) (0) {}
+int(0) cannot be compared to varray(0) {}
 int(0) > int(-9223372036854775808)
 int(0) > string(20) "-9223372036854775808"
-string(6) "string" <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+string(6) "string" cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 string(6) "string" > string(0) ""
 string(6) "string" <= int(1)
 string(6) "string" <= float(2.5)
@@ -112,13 +112,13 @@ string(6) "string" > string(3) "2.5"
 string(6) "string" > NULL
 string(6) "string" <= bool(true)
 string(6) "string" > bool(false)
-string(6) "string" <= object(stdClass)#%d (0) {}
-string(6) "string" <= object(stdClass)#%d (0) {}
-string(6) "string" <= object(test)#%d (0) {}
-string(6) "string" <= array(0) {}
+string(6) "string" <= object(stdClass) (0) {}
+string(6) "string" <= object(stdClass) (0) {}
+string(6) "string" <= object(test) (0) {}
+string(6) "string" cannot be compared to varray(0) {}
 string(6) "string" > int(-9223372036854775808)
 string(6) "string" > string(20) "-9223372036854775808"
-string(3) "123" <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+string(3) "123" cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 string(3) "123" > string(0) ""
 string(3) "123" > int(1)
 string(3) "123" > float(2.5)
@@ -129,13 +129,13 @@ string(3) "123" > string(3) "2.5"
 string(3) "123" > NULL
 string(3) "123" <= bool(true)
 string(3) "123" > bool(false)
-string(3) "123" <= object(stdClass)#%d (0) {}
-string(3) "123" <= object(stdClass)#%d (0) {}
-string(3) "123" <= object(test)#%d (0) {}
-string(3) "123" <= array(0) {}
+string(3) "123" <= object(stdClass) (0) {}
+string(3) "123" <= object(stdClass) (0) {}
+string(3) "123" <= object(test) (0) {}
+string(3) "123" cannot be compared to varray(0) {}
 string(3) "123" > int(-9223372036854775808)
 string(3) "123" > string(20) "-9223372036854775808"
-string(3) "2.5" <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+string(3) "2.5" cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 string(3) "2.5" > string(0) ""
 string(3) "2.5" > int(1)
 string(3) "2.5" <= float(2.5)
@@ -146,13 +146,13 @@ string(3) "2.5" <= string(3) "2.5"
 string(3) "2.5" > NULL
 string(3) "2.5" <= bool(true)
 string(3) "2.5" > bool(false)
-string(3) "2.5" <= object(stdClass)#%d (0) {}
-string(3) "2.5" <= object(stdClass)#%d (0) {}
-string(3) "2.5" <= object(test)#%d (0) {}
-string(3) "2.5" <= array(0) {}
+string(3) "2.5" <= object(stdClass) (0) {}
+string(3) "2.5" <= object(stdClass) (0) {}
+string(3) "2.5" <= object(test) (0) {}
+string(3) "2.5" cannot be compared to varray(0) {}
 string(3) "2.5" > int(-9223372036854775808)
 string(3) "2.5" > string(20) "-9223372036854775808"
-NULL <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+NULL cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 NULL <= string(0) ""
 NULL <= int(1)
 NULL <= float(2.5)
@@ -163,13 +163,13 @@ NULL <= string(3) "2.5"
 NULL <= NULL
 NULL <= bool(true)
 NULL <= bool(false)
-NULL <= object(stdClass)#%d (0) {}
-NULL <= object(stdClass)#%d (0) {}
-NULL <= object(test)#%d (0) {}
-NULL <= array(0) {}
+NULL <= object(stdClass) (0) {}
+NULL <= object(stdClass) (0) {}
+NULL <= object(test) (0) {}
+NULL cannot be compared to varray(0) {}
 NULL <= int(-9223372036854775808)
 NULL <= string(20) "-9223372036854775808"
-bool(true) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+bool(true) cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 bool(true) > string(0) ""
 bool(true) <= int(1)
 bool(true) <= float(2.5)
@@ -180,13 +180,13 @@ bool(true) <= string(3) "2.5"
 bool(true) > NULL
 bool(true) <= bool(true)
 bool(true) > bool(false)
-bool(true) <= object(stdClass)#%d (0) {}
-bool(true) <= object(stdClass)#%d (0) {}
-bool(true) <= object(test)#%d (0) {}
-bool(true) > array(0) {}
+bool(true) <= object(stdClass) (0) {}
+bool(true) <= object(stdClass) (0) {}
+bool(true) <= object(test) (0) {}
+bool(true) cannot be compared to varray(0) {}
 bool(true) <= int(-9223372036854775808)
 bool(true) <= string(20) "-9223372036854775808"
-bool(false) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+bool(false) cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 bool(false) <= string(0) ""
 bool(false) <= int(1)
 bool(false) <= float(2.5)
@@ -197,105 +197,105 @@ bool(false) <= string(3) "2.5"
 bool(false) <= NULL
 bool(false) <= bool(true)
 bool(false) <= bool(false)
-bool(false) <= object(stdClass)#%d (0) {}
-bool(false) <= object(stdClass)#%d (0) {}
-bool(false) <= object(test)#%d (0) {}
-bool(false) <= array(0) {}
+bool(false) <= object(stdClass) (0) {}
+bool(false) <= object(stdClass) (0) {}
+bool(false) <= object(test) (0) {}
+bool(false) cannot be compared to varray(0) {}
 bool(false) <= int(-9223372036854775808)
 bool(false) <= string(20) "-9223372036854775808"
-object(stdClass)#%d (0) {} > array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-object(stdClass)#%d (0) {} > string(0) ""
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {} cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
+object(stdClass) (0) {} > string(0) ""
+object(stdClass) (0) {}
 Notice: %s
  <= int(1)
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {}
 Notice: %s
  <= float(2.5)
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {}
 Notice: %s
  > int(0)
-object(stdClass)#%d (0) {} > string(6) "string"
-object(stdClass)#%d (0) {} > string(3) "123"
-object(stdClass)#%d (0) {} > string(3) "2.5"
-object(stdClass)#%d (0) {} > NULL
-object(stdClass)#%d (0) {} <= bool(true)
-object(stdClass)#%d (0) {} > bool(false)
-object(stdClass)#%d (0) {} <= object(stdClass)#%d (0) {}
-object(stdClass)#%d (0) {} <= object(stdClass)#%d (0) {}
-object(stdClass)#%d (0) {} <= object(test)#%d (0) {}
-object(stdClass)#%d (0) {} > array(0) {}
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {} > string(6) "string"
+object(stdClass) (0) {} > string(3) "123"
+object(stdClass) (0) {} > string(3) "2.5"
+object(stdClass) (0) {} > NULL
+object(stdClass) (0) {} <= bool(true)
+object(stdClass) (0) {} > bool(false)
+object(stdClass) (0) {} <= object(stdClass) (0) {}
+object(stdClass) (0) {} <= object(stdClass) (0) {}
+object(stdClass) (0) {} <= object(test) (0) {}
+object(stdClass) (0) {} cannot be compared to varray(0) {}
+object(stdClass) (0) {}
 Notice: %s
  > int(-9223372036854775808)
-object(stdClass)#%d (0) {} > string(20) "-9223372036854775808"
-object(stdClass)#%d (0) {} > array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-object(stdClass)#%d (0) {} > string(0) ""
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {} > string(20) "-9223372036854775808"
+object(stdClass) (0) {} cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
+object(stdClass) (0) {} > string(0) ""
+object(stdClass) (0) {}
 Notice: %s
  <= int(1)
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {}
 Notice: %s
  <= float(2.5)
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {}
 Notice: %s
  > int(0)
-object(stdClass)#%d (0) {} > string(6) "string"
-object(stdClass)#%d (0) {} > string(3) "123"
-object(stdClass)#%d (0) {} > string(3) "2.5"
-object(stdClass)#%d (0) {} > NULL
-object(stdClass)#%d (0) {} <= bool(true)
-object(stdClass)#%d (0) {} > bool(false)
-object(stdClass)#%d (0) {} <= object(stdClass)#%d (0) {}
-object(stdClass)#%d (0) {} <= object(stdClass)#%d (0) {}
-object(stdClass)#%d (0) {} <= object(test)#%d (0) {}
-object(stdClass)#%d (0) {} > array(0) {}
-object(stdClass)#%d (0) {}
+object(stdClass) (0) {} > string(6) "string"
+object(stdClass) (0) {} > string(3) "123"
+object(stdClass) (0) {} > string(3) "2.5"
+object(stdClass) (0) {} > NULL
+object(stdClass) (0) {} <= bool(true)
+object(stdClass) (0) {} > bool(false)
+object(stdClass) (0) {} <= object(stdClass) (0) {}
+object(stdClass) (0) {} <= object(stdClass) (0) {}
+object(stdClass) (0) {} <= object(test) (0) {}
+object(stdClass) (0) {} cannot be compared to varray(0) {}
+object(stdClass) (0) {}
 Notice: %s
  > int(-9223372036854775808)
-object(stdClass)#%d (0) {} > string(20) "-9223372036854775808"
-object(test)#%d (0) {} > array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-object(test)#%d (0) {} > string(0) ""
-object(test)#%d (0) {}
+object(stdClass) (0) {} > string(20) "-9223372036854775808"
+object(test) (0) {} cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
+object(test) (0) {} > string(0) ""
+object(test) (0) {}
 Notice: %s
  <= int(1)
-object(test)#%d (0) {}
+object(test) (0) {}
 Notice: %s
  <= float(2.5)
-object(test)#%d (0) {}
+object(test) (0) {}
 Notice: %s
  > int(0)
-object(test)#%d (0) {} > string(6) "string"
-object(test)#%d (0) {} > string(3) "123"
-object(test)#%d (0) {} > string(3) "2.5"
-object(test)#%d (0) {} > NULL
-object(test)#%d (0) {} <= bool(true)
-object(test)#%d (0) {} > bool(false)
-object(test)#%d (0) {} <= object(stdClass)#%d (0) {}
-object(test)#%d (0) {} <= object(stdClass)#%d (0) {}
-object(test)#%d (0) {} <= object(test)#%d (0) {}
-object(test)#%d (0) {} > array(0) {}
-object(test)#%d (0) {}
+object(test) (0) {} > string(6) "string"
+object(test) (0) {} > string(3) "123"
+object(test) (0) {} > string(3) "2.5"
+object(test) (0) {} > NULL
+object(test) (0) {} <= bool(true)
+object(test) (0) {} > bool(false)
+object(test) (0) {} <= object(stdClass) (0) {}
+object(test) (0) {} <= object(stdClass) (0) {}
+object(test) (0) {} <= object(test) (0) {}
+object(test) (0) {} cannot be compared to varray(0) {}
+object(test) (0) {}
 Notice: %s
  > int(-9223372036854775808)
-object(test)#%d (0) {} > string(20) "-9223372036854775808"
-array(0) {} <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
-array(0) {} > string(0) ""
-array(0) {} > int(1)
-array(0) {} > float(2.5)
-array(0) {} > int(0)
-array(0) {} > string(6) "string"
-array(0) {} > string(3) "123"
-array(0) {} > string(3) "2.5"
-array(0) {} <= NULL
-array(0) {} <= bool(true)
-array(0) {} <= bool(false)
-array(0) {} <= object(stdClass)#%d (0) {}
-array(0) {} <= object(stdClass)#%d (0) {}
-array(0) {} <= object(test)#%d (0) {}
-array(0) {} <= array(0) {}
-array(0) {} > int(-9223372036854775808)
-array(0) {} > string(20) "-9223372036854775808"
-int(-9223372036854775808) <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+object(test) (0) {} > string(20) "-9223372036854775808"
+varray(0) {} <= varray(3) {  int(1)  int(2)  int(3)}
+varray(0) {} cannot be compared to string(0) ""
+varray(0) {} cannot be compared to int(1)
+varray(0) {} cannot be compared to float(2.5)
+varray(0) {} cannot be compared to int(0)
+varray(0) {} cannot be compared to string(6) "string"
+varray(0) {} cannot be compared to string(3) "123"
+varray(0) {} cannot be compared to string(3) "2.5"
+varray(0) {} cannot be compared to NULL
+varray(0) {} cannot be compared to bool(true)
+varray(0) {} cannot be compared to bool(false)
+varray(0) {} cannot be compared to object(stdClass) (0) {}
+varray(0) {} cannot be compared to object(stdClass) (0) {}
+varray(0) {} cannot be compared to object(test) (0) {}
+varray(0) {} <= varray(0) {}
+varray(0) {} cannot be compared to int(-9223372036854775808)
+varray(0) {} cannot be compared to string(20) "-9223372036854775808"
+int(-9223372036854775808) cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 int(-9223372036854775808) <= string(0) ""
 int(-9223372036854775808) <= int(1)
 int(-9223372036854775808) <= float(2.5)
@@ -308,17 +308,17 @@ int(-9223372036854775808) <= bool(true)
 int(-9223372036854775808) > bool(false)
 int(-9223372036854775808)
 Notice: %s
- <= object(stdClass)#%d (0) {}
+ <= object(stdClass) (0) {}
 int(-9223372036854775808)
 Notice: %s
- <= object(stdClass)#%d (0) {}
+ <= object(stdClass) (0) {}
 int(-9223372036854775808)
 Notice: %s
- <= object(test)#%d (0) {}
-int(-9223372036854775808) <= array(0) {}
+ <= object(test) (0) {}
+int(-9223372036854775808) cannot be compared to varray(0) {}
 int(-9223372036854775808) <= int(-9223372036854775808)
 int(-9223372036854775808) <= string(20) "-9223372036854775808"
-string(20) "-9223372036854775808" <= array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
+string(20) "-9223372036854775808" cannot be compared to varray(3) {  int(1)  int(2)  int(3)}
 string(20) "-9223372036854775808" > string(0) ""
 string(20) "-9223372036854775808" <= int(1)
 string(20) "-9223372036854775808" <= float(2.5)
@@ -329,10 +329,10 @@ string(20) "-9223372036854775808" <= string(3) "2.5"
 string(20) "-9223372036854775808" > NULL
 string(20) "-9223372036854775808" <= bool(true)
 string(20) "-9223372036854775808" > bool(false)
-string(20) "-9223372036854775808" <= object(stdClass)#%d (0) {}
-string(20) "-9223372036854775808" <= object(stdClass)#%d (0) {}
-string(20) "-9223372036854775808" <= object(test)#%d (0) {}
-string(20) "-9223372036854775808" <= array(0) {}
+string(20) "-9223372036854775808" <= object(stdClass) (0) {}
+string(20) "-9223372036854775808" <= object(stdClass) (0) {}
+string(20) "-9223372036854775808" <= object(test) (0) {}
+string(20) "-9223372036854775808" cannot be compared to varray(0) {}
 string(20) "-9223372036854775808" <= int(-9223372036854775808)
 string(20) "-9223372036854775808" <= string(20) "-9223372036854775808"
 Done

@@ -1,0 +1,2 @@
+File "trait_use_aliasing_hack.php", line 10, characters 5-12:
+Trait use as is a PHP feature that is unsupported in Hack (Naming[2102])

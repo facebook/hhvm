@@ -1,10 +1,14 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_doublylinkedlist_iteration() {
 $stack = new SplStack();
 
-$stack[] = "var1";
-$stack[] = "var2";
-$stack[] = "var3";
+$stack->push("var1");
+$stack->push("var2");
+$stack->push("var3");
 
 foreach ($stack as $var) {
     echo $var . "\n";
+}
 }

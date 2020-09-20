@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the region for different locales
@@ -9,7 +9,7 @@ function ut_main()
 {
     $res_str = '';
 
-    $locales = array(
+    $locales = varray[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
         'root',
         'uk@currency=EURO',
@@ -59,7 +59,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc'
-    );
+    ];
 
 
     $res_str = '';
@@ -75,7 +75,7 @@ function ut_main()
 
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    ut_run();
+}

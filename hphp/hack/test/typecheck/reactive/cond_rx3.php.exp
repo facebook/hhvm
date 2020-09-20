@@ -1,0 +1,4 @@
+File "cond_rx3.php", line 11, characters 5-8:
+Variable `$foo` is undefined, not always defined, or unset afterwards. (Naming[2050])
+File "cond_rx3.php", line 5, characters 59-63:
+Did you mean `$cond` instead?

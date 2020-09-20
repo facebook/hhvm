@@ -20,4 +20,8 @@ function f() {
   var_dump($x(3, $m));
   var_dump($x('3', $m));
 }
+
+<<__EntryPoint>>
+function main_841() {
 f();
+}

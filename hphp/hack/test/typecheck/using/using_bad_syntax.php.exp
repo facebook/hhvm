@@ -1,2 +1,6 @@
-File "using_bad_syntax.php", line 15, characters 5-33:
-Parse error: function-scoped 'using' statement not supported in a block scope (Parsing[1002])
+File "using_bad_syntax.php", line 12, characters 9-9:
+A left parenthesis `(` is expected here. (Parsing[1002])
+File "using_bad_syntax.php", line 12, characters 14-25:
+Cannot use `[]` for reading (NastCheck[3047])
+File "using_bad_syntax.php", line 12, characters 18-23:
+Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])

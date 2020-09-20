@@ -1,0 +1,17 @@
+<?hh
+function call_with_default_and_variadic(string $s): void {
+  with_default_and_variadic(42);
+  with_default_and_variadic(42, 'meaning of life');
+  with_default_and_variadic(42, '%s', $s);
+}
+function with_default_and_variadic(
+  mixed $x,
+  ?string $y = \extract_standalone_make_default(),
+  mixed ...$z
+): void {
+  throw new \Exception();
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}

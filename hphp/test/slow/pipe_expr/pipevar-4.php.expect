@@ -14,10 +14,9 @@ string(7) "beep: 3"
 string(7) "beep: 3"
 string(12) "Make wrapper"
 string(15) "beep: <Wrapper>"
-string(15) "Destroy wrapper"
 string(13) "beep: <array>"
 string(6) "Hello!"
-array(4) {
+darray(4) {
   [0]=>
   string(8) "STR: 120"
   [1]=>

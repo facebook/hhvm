@@ -1,16 +1,16 @@
-<?php
+<?hh
 function f1() { throw new Exception; }
 function f2() { echo "here\n"; }
-
+<<__EntryPoint>> function main(): void {
 try {
       // Currently it's the minimum required number of zeros
       // If you remove one, it won't crash
-	max(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    max(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, f1());
 } catch (Exception $e) {
-	echo "(((\n";
-	f2(0, 0, 0); // Won't crash if less than 3 zeros here
-	echo ")))\n";
+    echo "(((\n";
+    f2(0, 0, 0); // Won't crash if less than 3 zeros here
+    echo ")))\n";
 }
-?>
+}

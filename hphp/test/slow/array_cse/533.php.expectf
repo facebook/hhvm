@@ -1,19 +1,14 @@
 NULL
 int(0)
-
-Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 4
-NULL
-
-Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 5
+Invalid varray key: expected a key of type int, string given
 string(1) "a"
-HIstring(1) "a"
-HINULL
+HI
+string(1) "a"
+HI
+NULL
 int(0)
-
-Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 8
-NULL
-
-Notice: Undefined index: noidx in %s/test/slow/array_cse/533.php on line 9
+Invalid varray key: expected a key of type int, string given
 string(1) "a"
-HIstring(1) "a"
+HI
+string(1) "a"
 HI

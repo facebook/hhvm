@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_RDS_HEADER_H_
-#define incl_HPHP_RUNTIME_RDS_HEADER_H_
+#pragma once
 
 #include <atomic>
 #include <cstddef>
@@ -57,6 +56,10 @@ struct VMRegs {
    * one active call to handleResume() in each VM nesting level, which is why
    * this is just a single pointer. */
   ActRec* jitCalledFrame;
+
+  /* Holds the address at which execution will resume in the TC for the last
+     TC frame in this VM nesting. */
+  jit::TCA jitReturnAddr;
 
   TYPE_SCAN_CUSTOM() {
     // ActRecs are always interior pointers so the type-scanner won't
@@ -133,10 +136,11 @@ constexpr ptrdiff_t kVmpcOff           = kVmRegsOff + offsetof(VMRegs, pc);
 constexpr ptrdiff_t kVmFirstAROff      = kVmRegsOff + offsetof(VMRegs, firstAR);
 constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
                                            offsetof(VMRegs, mInstrState);
+constexpr ptrdiff_t kVmJitReturnAddrOff = kVmRegsOff +
+                                           offsetof(VMRegs, jitReturnAddr);
 
 static_assert((kVmMInstrStateOff % 16) == 0,
               "MInstrState should be 16-byte aligned in rds::Header");
 
 } }
 
-#endif

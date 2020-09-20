@@ -1,7 +1,7 @@
 <?hh // strict
 
 function ts<T>(typename<T> $tn): TypeStructure<T> {
-  // UNSAFE
+  throw new Exception();
 }
 
 function swap<T1, T2>(
@@ -10,6 +10,7 @@ function swap<T1, T2>(
   list($t1, $t2) = $ts['elem_types'];
   return tuple($t2, $t1);
 }
+function expectTSint(TypeStructure<int> $ts):void { }
 
 function test(
   typename<int> $t1,
@@ -21,7 +22,6 @@ function test(
 ): void {
   $ts1 = ts($t1);
   $ts2 = ts($t2);
-  hh_show($ts1);
-  hh_show($ts2);
-  hh_show(swap($ts2['fields']['y']));
+  expectTSint($ts1);
+  swap($ts2['fields']['y']);
 }

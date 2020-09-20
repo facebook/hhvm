@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_clone() {
 $dom = new DOMDocument();
 $dom->loadHTML('
 <html>
@@ -11,3 +14,4 @@ $clone = clone $dom;
 $body = $clone->getElementsByTagName('body')->item(0);
 $body->appendChild(new DOMElement('asdf'));
 var_dump($clone->saveHTML());
+}

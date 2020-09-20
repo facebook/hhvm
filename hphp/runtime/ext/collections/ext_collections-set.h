@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_SET_H
-#define incl_HPHP_EXT_COLLECTIONS_SET_H
+#pragma once
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
@@ -23,11 +22,11 @@ struct SetIterator;
  * any PHP-land class. That job is delegated to its c_-prefixed child classes.
  */
 struct BaseSet : HashCollection {
-  void addAllKeysOf(Cell container);
+  void addAllKeysOf(TypedValue container);
   void addAll(const Variant& t);
 
   void init(const Variant& t) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAll(t);
   }
 
@@ -37,8 +36,7 @@ protected:
 
   void addRaw(int64_t k);
   void addRaw(StringData* k);
-  void addRaw(Cell tv) {
-    assert(tv.m_type != KindOfRef);
+  void addRaw(TypedValue tv) {
     if (tv.m_type == KindOfInt64) {
       addRaw(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -47,7 +45,7 @@ protected:
       throwBadValueType();
     }
   }
-  void addRaw(const Variant& v) { addRaw(*v.asCell()); }
+  void addRaw(const Variant& v) { addRaw(*v.asTypedValue()); }
 
 public:
   /*
@@ -55,8 +53,7 @@ public:
    */
   void add(int64_t k);
   void add(StringData* k);
-  void add(Cell tv) {
-    assert(tv.m_type != KindOfRef);
+  void add(TypedValue tv) {
     if (tv.m_type == KindOfInt64) {
       add(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -65,7 +62,7 @@ public:
       throwBadValueType();
     }
   }
-  void add(const Variant& v) { add(*v.asCell()); }
+  void add(const Variant& v) { add(*v.asTypedValue()); }
 
   /*
    * Prepend an element to the Set, increffing it if it's refcounted.
@@ -92,12 +89,18 @@ public:
     std::is_base_of<BaseSet, TSet>::value, TSet*>::type
   static Clone(ObjectData* obj);
 
-  static Array ToArray(const ObjectData* obj);
+  template <IntishCast intishCast = IntishCast::None>
+  static Array ToArray(const ObjectData* obj) {
+    check_collection_cast_to_array();
+    return const_cast<BaseSet*>(
+      static_cast<const BaseSet*>(obj)
+    )->toPHPArrayImpl<intishCast>();
+  }
+
   static bool ToBool(const ObjectData* obj);
 
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
     auto set = static_cast<BaseSet*>(obj);
     ssize_t p;
     if (key->m_type == KindOfInt64) {
@@ -116,12 +119,11 @@ public:
     if (key->m_type == KindOfInt64) {
       collections::throwUndef(key->m_data.num);
     } else {
-      assert(isStringType(key->m_type));
+      assertx(isStringType(key->m_type));
       collections::throwUndef(key->m_data.pstr);
     }
   }
   static bool OffsetIsset(ObjectData* obj, const TypedValue* key);
-  static bool OffsetEmpty(ObjectData* obj, const TypedValue* key);
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
@@ -134,19 +136,6 @@ protected:
     vec->init(VarNR(this));
     return Object{std::move(vec)};
   }
-
-  template<class TSet, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_map(const Variant& callback);
-
-  template<class TSet, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_filter(const Variant& callback);
-
-  template<bool useKey>
-  Object php_retain(const Variant& callback);
 
   template<class TSet>
   typename std::enable_if<
@@ -161,17 +150,7 @@ protected:
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_takeWhile(const Variant& fn);
-
-  template<class TSet>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
   php_skip(const Variant& n);
-
-  template<class TSet>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_skipWhile(const Variant& fn);
 
   template<class TSet>
   typename std::enable_if<
@@ -199,7 +178,7 @@ protected:
     if (container.isNull()) {
       return Object(req::make<TSet>());
     }
-    const auto& cellContainer = container_as_cell(container);
+    auto const& cellContainer = container_as_tv(container);
     auto target = req::make<TSet>();
     target->addAllKeysOf(cellContainer);
     return Object(std::move(target));
@@ -220,7 +199,7 @@ protected:
     ssize_t pos_limit = ad->iter_end();
     for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
          pos = ad->iter_advance(pos)) {
-      set->addRaw(tvToCell(ad->atPos(pos)));
+      set->addRaw(ad->nvGetVal(pos));
     }
     set->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
     return Object(std::move(set));
@@ -297,7 +276,7 @@ struct c_Set : BaseSet {
   }
   Object php_addAllKeysOf(const Variant& container) {
     if (!container.isNull()) {
-      const auto& containerCell = container_as_cell(container);
+      auto const& containerCell = container_as_tv(container);
       addAllKeysOf(containerCell);
     }
     return Object{this};
@@ -375,7 +354,7 @@ struct SetIterator {
   ~SetIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Unit::lookupClass(s_SetIterator.get());
+    static Class* cls = Class::lookup(s_SetIterator.get());
     assertx(cls);
     return Object{cls};
   }
@@ -387,7 +366,7 @@ struct SetIterator {
 
   Variant current() const {
     auto st = m_obj.get();
-    if (!st->iter_valid(m_pos)) {
+    if (!st->iter_valid_and_not_tombstone(m_pos)) {
       throw_iterator_not_valid();
     }
     return tvAsCVarRef(st->iter_value(m_pos));
@@ -396,7 +375,7 @@ struct SetIterator {
   Variant key() const { return current(); }
 
   bool valid() const {
-    return m_obj->iter_valid(m_pos);
+    return m_obj->iter_valid_and_not_tombstone(m_pos);
   }
 
   void next() {
@@ -416,4 +395,3 @@ struct SetIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

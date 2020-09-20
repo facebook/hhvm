@@ -1,6 +1,4 @@
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "final"
-  [1]=>
   string(9) "protected"
 }

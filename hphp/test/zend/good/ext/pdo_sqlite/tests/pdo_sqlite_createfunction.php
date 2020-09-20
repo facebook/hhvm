@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $db = new pdo('sqlite::memory:');
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
@@ -16,5 +16,4 @@ foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
 }
 
 $db->query('DROP TABLE foobar');
-
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
     static protected $test = 'foo';
@@ -7,5 +7,9 @@ class C {
     }
 }
 
+
+<<__EntryPoint>>
+function main_static_property_exists() {
 $c = new C;
 $c->test();
+}

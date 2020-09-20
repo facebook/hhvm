@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait my_trait {
   abstract function foo();
@@ -13,5 +13,9 @@ class my_class {
     echo "I am foo\n";
   }
 }
+
+<<__EntryPoint>>
+function main_2054() {
 $o = new my_class;
 $o->bar();
+}

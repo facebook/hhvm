@@ -1,4 +1,4 @@
-array(7) {
+darray(7) {
   [0]=>
   string(14) "this is a_list"
   [1]=>
@@ -14,13 +14,13 @@ array(7) {
   [6]=>
   string(11) "parentheses"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(14) "this is a_list"
   [1]=>
   string(28) " Hello, world!_(parentheses)"
 }
-array(4) {
+darray(4) {
   [0]=>
   string(54) "this is a_list: value1, Test__, string; Hello, world!_"
   [1]=>
@@ -30,11 +30,11 @@ array(4) {
   [3]=>
   string(1) ")"
 }
-array(1) {
+darray(1) {
   [0]=>
   string(67) "this is a_list: value1, Test__, string; Hello, world!_(parentheses)"
 }
-array(10) {
+darray(10) {
   [0]=>
   string(1) " "
   [1]=>

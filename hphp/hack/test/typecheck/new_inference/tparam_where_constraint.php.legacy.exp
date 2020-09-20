@@ -1,0 +1,8 @@
+File "tparam_where_constraint.php", line 10, characters 3-3:
+A 'where' type constraint is violated here (Typing[4110])
+File "tparam_where_constraint.php", line 3, characters 10-10:
+This is the method with 'where' type constraints
+File "tparam_where_constraint.php", line 3, characters 66-68:
+This is an int
+File "tparam_where_constraint.php", line 10, characters 10-14:
+It is incompatible with a string

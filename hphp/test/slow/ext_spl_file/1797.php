@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1797() {
 $info = new SplFileInfo('does-not-exist-will-fail-on-getLinkTarget');
 //readlink('does-not-throw-but-warns');
 try{
@@ -10,3 +13,4 @@ catch (Exception $e) {
   return;
 }
 echo "failed to throw\n";
+}

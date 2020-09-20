@@ -1,15 +1,14 @@
-<?php
+<?hh
 
 class blah {
-  public function __destruct() { echo "~blah()\n"; }
-  public function foo() { return function() { return "hi"; }; }
+  private string $t = "";
+  public function __construct() { $this->t = "hi\n"; }
+  public function foo() { return function() { return $this->t; }; }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $k = (new blah)->foo(); // only reference to obj is in the closure
-  $k();
+  echo $k();
   unset($k);
   echo "done\n";
 }
-
-main();

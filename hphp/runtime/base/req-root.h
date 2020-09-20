@@ -14,11 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQ_ROOT_H_
-#define incl_HPHP_REQ_ROOT_H_
+#pragma once
 
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include <utility>
 
 namespace HPHP { namespace req {
@@ -146,4 +144,3 @@ template<> void root<TypedValue>::scan(type_scan::Scanner&) const;
 template<> void root<TypedValue>::detach();
 
 }}
-#endif

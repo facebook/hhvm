@@ -1,134 +1,164 @@
 *** Testing strspn() : with unexpected values for str argument ***
 
 -- Iteration with str value as "0"
-int(1)
-int(0)
-int(0)
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "1"
-int(1)
-int(0)
-int(0)
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "12345"
-int(5)
-int(4)
-int(4)
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "-2345"
-int(0)
-int(4)
-int(4)
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "10.5"
-int(2)
-int(1)
-int(1)
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "-10.5"
-int(0)
-int(2)
-int(2)
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "101234567000"
-int(12)
-int(11)
-int(10)
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "1.07654321E-9"
-int(1)
-int(0)
-int(0)
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "0.5"
-int(1)
-int(0)
-int(0)
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
-int(0)
-bool(false)
-bool(false)
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
-int(0)
-bool(false)
-bool(false)
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "1"
-int(1)
-int(0)
-int(0)
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
-int(0)
-bool(false)
-bool(false)
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as "1"
-int(1)
-int(0)
-int(0)
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
-int(0)
-bool(false)
-bool(false)
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
 int(0)
@@ -141,28 +171,34 @@ bool(false)
 bool(false)
 
 -- Iteration with str value as "object"
-int(2)
-int(1)
-int(1)
+
+Warning: strspn() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
-int(0)
-bool(false)
-bool(false)
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
 -- Iteration with str value as ""
-int(0)
-bool(false)
-bool(false)
 
--- Iteration with str value as "Resource id #%d"
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
 
-Warning: %s
-NULL
+Warning: strspn() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 
-Warning: %s
-NULL
+-- Iteration with str value as "Resource id #4"
+
+Warning: strspn() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 92
+
+Warning: strspn() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 93
+
+Warning: strspn() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strspn_variation1.php on line 94
 Done

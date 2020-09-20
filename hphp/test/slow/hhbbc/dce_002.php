@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function asd() { return 12; }
 function foo() {
@@ -9,4 +9,8 @@ function foo() {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_dce_002() {
 foo();
+}

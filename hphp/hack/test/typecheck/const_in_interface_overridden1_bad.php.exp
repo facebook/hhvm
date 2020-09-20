@@ -1,0 +1,8 @@
+File "const_in_interface_overridden1_bad.php", line 6, characters 16-16:
+Class `C` does not correctly implement all required members  (Typing[4340])
+File "const_in_interface_overridden1_bad.php", line 6, characters 29-29:
+Some members are incompatible with those declared in type `I`
+File "const_in_interface_overridden1_bad.php", line 7, characters 12-21:
+Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface.
+File "const_in_interface_overridden1_bad.php", line 4, characters 13-22:
+You could make `SOME_CONST` abstract in `I`.

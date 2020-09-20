@@ -50,14 +50,17 @@ function convert_from($ks) {
   echo "====================================================\n";
   var_dump($ks);
   echo "----------------------------------------------------\n";
-  var_dump((array)$ks);
+  var_dump(darray($ks));
   var_dump(vec($ks));
   var_dump(dict($ks));
   var_dump((bool)$ks);
   var_dump((int)$ks);
   var_dump((float)$ks);
-  var_dump((string)$ks);
-  var_dump((object)$ks);
+  try {
+    var_dump((string)$ks);
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
   var_dump(new Vector($ks));
   var_dump(new Map($ks));
 
@@ -82,18 +85,18 @@ function convert_to($from) {
   echo "====================================================\n";
 }
 
-function main() {
-  convert_to([]);
-  convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
-  convert_to([100, 200, 'a', 'b']);
-  convert_to(['1', 1]);
-  convert_to(['abc', 123, 'abc', 123]);
-  convert_to([1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
+<<__EntryPoint>> function main(): void {
+  convert_to(varray[]);
+  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
+  convert_to(varray[100, 200, 'a', 'b']);
+  convert_to(varray['1', 1]);
+  convert_to(varray['abc', 123, 'abc', 123]);
+  convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
               'key4' => new stdclass]);
-  convert_to(['a' => 100, 'b' => 200, 100 => 'a', 200 => 'b']);
-  convert_to(['a' => '1', 'b' => 1]);
-  convert_to([100 => 'abc', 200 => 123, 300 => 'abc', 400 => 123]);
+  convert_to(darray['a' => 100, 'b' => 200, 100 => 'a', 200 => 'b']);
+  convert_to(darray['a' => '1', 'b' => 1]);
+  convert_to(darray[100 => 'abc', 200 => 123, 300 => 'abc', 400 => 123]);
 
   convert_to(vec[]);
   convert_to(vec[1, 2, 'a', 'b', 3, 4, false, null, 5.67, new stdclass]);
@@ -122,7 +125,7 @@ function main() {
   convert_to(new IterableObj);
   convert_to(new ThrowIterableObj);
   convert_to(new stdclass);
-  convert_to(STDIN);
+  convert_to(fopen(__FILE__, 'r'));
   convert_to(Vector{1, 2, 3});
   convert_to(Vector{1, false, 3});
   convert_to(Map{'a' => 100, 200 => 'b'});
@@ -137,5 +140,3 @@ function main() {
   convert_from(keyset['z', 'y', 'x']);
   convert_from(keyset[1, '1', 2, '2']);
 }
-
-main();

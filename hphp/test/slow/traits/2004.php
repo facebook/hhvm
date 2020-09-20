@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
  function F() {
@@ -22,9 +22,13 @@ class C1 {
 class C2 {
   use T3;
 }
+
+<<__EntryPoint>>
+function main_2004() {
 $rc1 = new ReflectionClass('C1');
 var_dump($rc1->getTraitAliases());
 $rc2 = new ReflectionClass('C2');
 var_dump($rc2->getTraitAliases());
 $rc3 = new ReflectionClass('T3');
 var_dump($rc3->getTraitAliases());
+}

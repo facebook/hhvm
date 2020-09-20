@@ -1,0 +1,2 @@
+
+Fatal error: Call to undefined function foo() in %s/autoload_no_root.php on line 15

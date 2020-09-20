@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_XMLREADER_H_
-#define incl_HPHP_EXT_XMLREADER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/file.h"
@@ -54,4 +53,3 @@ struct XMLReader {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_XMLREADER_H_

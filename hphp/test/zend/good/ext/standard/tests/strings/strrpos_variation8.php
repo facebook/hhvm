@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of last occurrence of 'needle' in 'haystack'.
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 /* Test strrpos() function with strings containing multiple occurrences of 'needle' in the 'haystack'
  *  and with various needles & offsets 
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrpos() function: strings repetitive chars ***\n";
 $haystack = "ababababAbaBa";
 $needle = "aba";
@@ -20,4 +20,4 @@ for($offset = -1; $offset <= strlen($haystack); $offset++ ) {
   $count++;
 }
 echo "*** Done ***";
-?>
+}

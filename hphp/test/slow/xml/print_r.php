@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_print_r() {
 $xml = <<<XML
 <root>
   <A>Hello</A>
@@ -13,3 +16,4 @@ echo "--Document--\n";
 print_r($doc);
 echo "--Element--\n";
 print_r($doc->documentElement);
+}

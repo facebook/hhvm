@@ -1,0 +1,1 @@
+Fatal error: Shape field name must be a nonempty single-quoted string or a class constant in %s/test/slow/type_annotation/shape_usage_with_optional_field.php on line 4

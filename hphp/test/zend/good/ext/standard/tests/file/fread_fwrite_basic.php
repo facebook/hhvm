@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* 
  * proto int fwrite(resource fp, string str [, int length])
@@ -13,8 +13,8 @@
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
 
-
-$outputfile = __FILE__.".tmp";
+<<__EntryPoint>> function main(): void {
+$outputfile = __SystemLib\hphp_test_tmppath('fread_fwrite_basic.php.tmp');
 
 echo "--- testing rw moving about the file ---\n";
 $h = fopen($outputfile, 'wb+');
@@ -51,4 +51,4 @@ fclose($h);
 unlink($outputfile);
 
 echo "Done";
-?>
+}

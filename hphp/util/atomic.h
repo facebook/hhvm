@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ATOMIC_H_
-#define incl_HPHP_ATOMIC_H_
+#pragma once
 
 #include <stdint.h>
 #include <type_traits>
@@ -51,4 +50,3 @@ assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __ATOMIC_H__

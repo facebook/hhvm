@@ -1,0 +1,1 @@
+Fatal error: Parameter 2 on function foo was declared inout but is not declared inout on abstract function Base::foo in %s/func_family_006.php on line 10

@@ -1,5 +1,5 @@
 Called function foo:bar(1)
 
-Warning: %s
+Warning: Invalid argument: function: method 'bar' not found in %s/bug27504.php on line 13
 
-Fatal error: %s
+Fatal error: Call to private foo::bar() from invalid context in %s/bug27504.php on line 15

@@ -27,7 +27,7 @@ abstract class C {
       hh_show($c->get());
     }
 
-    // same id as finally
+    // FIXME: this should have the same id as finally
     hh_show($c->get());
   }
 }

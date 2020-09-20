@@ -5,10 +5,10 @@ function a() {
 }
 
 async function heh() {
-  await rescheduleWaitHandle::Create(0, 0);
+  await RescheduleWaitHandle::Create(0, 0);
   throw new exception('x');
 }
-
+<<__EntryPoint>> function main(): void {
 set_time_limit(6);
 AsyncFunctionWaitHandle::setOnFailCallback(() ==> a());
 $x = heh();
@@ -17,3 +17,4 @@ try {
 } catch (exception $y) {
 }
 while (true) { mt_rand(); }
+}

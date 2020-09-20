@@ -1,10 +1,9 @@
-<?hh // decl
+<?hh
 /* Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -49,46 +48,46 @@ function usleep(
   int $usecs,
 ): Awaitable<void> {}
 
-function mm<Tk, Tv, Tr>(
+function mm<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, Tr>> {}
 
-function mmk<Tk, Tv, Tr>(
+function mmk<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, Tr>> {}
 
-function mf<Tk, Tv>(
+function mf<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tv): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, Tv>> {}
 
-function mfk<Tk, Tv>(
+function mfk<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tk, Tv): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, Tv>> {}
 
-function mw<Tk, Tv>(
+function mw<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<Tv>>> {}
 
-function mmw<Tk, Tv, Tr>(
+function mmw<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<Tr>>> {}
 
-function mmkw<Tk, Tv, Tr>(
+function mmkw<Tk as arraykey, Tv, Tr>(
   KeyedTraversable<Tk, Tv> $inputs,
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<Tr>>> {}
 
-function mfw<Tk,T>(
+function mfw<Tk as arraykey,T>(
   KeyedTraversable<Tk, T> $inputs,
   (function (T): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<T>>> {}
 
-function mfkw<Tk, T>(
+function mfkw<Tk as arraykey, T>(
   KeyedTraversable<Tk, T> $inputs,
   (function (Tk, T): Awaitable<bool>) $callable,
 ): Awaitable<Map<Tk, ResultOrExceptionWrapper<T>>> {}
@@ -103,8 +102,8 @@ function vmk<Tk, Tv, Tr>(
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Vector<Tr>>;
 
-function vf<Tk, T>(
-  KeyedTraversable<Tk, T> $inputs,
+function vf<T>(
+  KeyedTraversable<mixed, T> $inputs,
   (function (T): Awaitable<bool>) $callable,
 ): Awaitable<Vector<T>> {}
 
@@ -127,8 +126,8 @@ function vmkw<Tk, Tv, Tr>(
   (function (Tk, Tv): Awaitable<Tr>) $callable,
 ): Awaitable<Vector<ResultOrExceptionWrapper<Tr>>> {}
 
-function vfw<Tk,T>(
-  KeyedTraversable<Tk, T> $inputs,
+function vfw<T>(
+  KeyedTraversable<mixed, T> $inputs,
   (function (T): Awaitable<bool>) $callable,
 ): Awaitable<Vector<ResultOrExceptionWrapper<T>>> {}
 
@@ -137,17 +136,12 @@ function vfkw<Tk, T>(
   (function (Tk, T): Awaitable<bool>) $callable,
 ): Awaitable<Vector<ResultOrExceptionWrapper<T>>> {}
 
-function m<Tk, Tv>(
+function m<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, Tv>> {}
 
 function v<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {}
-
-function va(
-  /* Awaitable<T1>, Awaitable<T2>, ..., Awaitable<Tn> */...$args
-/* HH_FIXME[4101] Cannot describe return type properly */
-): Awaitable/*<(T1,T2,...,Tn)>*/ {}
 
 } // namespace HH\Asio

@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_number_formatter_format_string_fa_ir() {
 $formatter = NumberFormatter::create("fa_IR", NumberFormatter::DEFAULT_STYLE);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
 echo $formatter->format(1.23);
@@ -13,3 +16,4 @@ echo $formatter->format(123450.67);
 echo "\n";
 echo $formatter->format("123456788.89");
 echo "\n";
+}

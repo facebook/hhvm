@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_MACRO_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_MACRO_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -36,4 +35,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_MACRO_H_

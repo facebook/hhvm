@@ -14,7 +14,7 @@ namespace Test {
 
   function foo() {
     $custom_set = new Set();
-    var_dump($custom_set instanceof \HH\Set); // False
+    \var_dump($custom_set is \HH\Set); // False
   }
 
 }
@@ -23,10 +23,11 @@ namespace {
 
   function bar() {
     $builtin_set = new Set();
-    var_dump($builtin_set instanceof HH\Set); // True
+    \var_dump($builtin_set is HH\Set); // True
   }
 
+  <<__EntryPoint>> function main(): void {
   Test\foo();
   bar();
+  }
 }
-

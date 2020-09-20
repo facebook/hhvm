@@ -1,7 +1,8 @@
-<?php
+<?hh
 namespace test\ns1;
 
 class Exception {
 }
-
-echo get_class(new \Exception()),"\n";
+<<__EntryPoint>> function main(): void {
+echo \get_class(new \Exception()),"\n";
+}

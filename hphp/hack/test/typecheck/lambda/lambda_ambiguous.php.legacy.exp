@@ -1,0 +1,6 @@
+File "lambda_ambiguous.php", line 5, characters 8-20:
+Lambda has parameter types that could not be determined at definition site. (Typing[4222])
+  File "lambda_ambiguous.php", line 5, characters 8-20:
+  1 distinct use types were determined: please add type hints to lambda parameters.
+  File "lambda_ambiguous.php", line 6, characters 3-7:
+  This use has type (function(int): int)

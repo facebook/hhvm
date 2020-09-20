@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /*
  * Note: test names match method names in a set of PHPUnit tests
  * in a userland package.  Please be so kind as to leave them.
  */
-
+function test(): void {
 date_default_timezone_set('America/New_York');
 
 
@@ -209,3 +209,4 @@ echo "test_time_fall_type2_stsec_type2_dtsec: ";
 $end   = new DateTime('2010-11-07 01:59:59 EDT');  // dtsec, zt2
 $start = new DateTime('2010-11-07 01:00:00 EST');  // stsec, zt2
 examine_diff($end, $start, 'P-0Y0M0DT0H0M1S', 0);
+}

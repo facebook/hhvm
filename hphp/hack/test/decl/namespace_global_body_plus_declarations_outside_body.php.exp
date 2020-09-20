@@ -1,0 +1,53 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\a" ->
+    { fe_pos = [4:12-13];
+      fe_type =
+      (Rwitness (root|namespace_global_body_plus_declarations_outside_body.php line 4, characters 12-12),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|namespace_global_body_plus_declarations_outside_body.php line 4, characters 12-12),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_global_body_plus_declarations_outside_body.php line 4, characters 17-20),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\b" ->
+    { fe_pos = [9:10-11];
+      fe_type =
+      (Rwitness (root|namespace_global_body_plus_declarations_outside_body.php line 9, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|namespace_global_body_plus_declarations_outside_body.php line 9, characters 10-10),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_global_body_plus_declarations_outside_body.php line 9, characters 15-18),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

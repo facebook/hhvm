@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 function blah() {
 
-  $xs = array(1, 2, 3, 4);
-  $ys = array(1, 2, 3, 4);
+  $xs = varray[1, 2, 3, 4];
+  $ys = varray[1, 2, 3, 4];
 
   before:
   echo "before label\n";
@@ -20,7 +20,7 @@ function blah() {
             goto after;
             echo "after goto after\n";
           }
-          if (empty($flag) && $x == 3 && $y == 2) {
+          if ((!($flag ?? false)) && $x == 3 && $y == 2) {
             echo "before goto before\n";
             $flag = 1;
             goto before;
@@ -44,4 +44,8 @@ function blah() {
   echo "after label\n";
 }
 
+
+<<__EntryPoint>>
+function main_finally_goto_003() {
 blah();
+}

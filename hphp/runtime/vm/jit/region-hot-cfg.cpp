@@ -19,6 +19,7 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-prune-arcs.h"
@@ -48,11 +49,13 @@ const StaticString s_switchProfile("SwitchProfile");
 //////////////////////////////////////////////////////////////////////
 
 struct DFS {
-  DFS(const ProfData* p, const TransCFG& c, int32_t maxBCInstrs, bool inlining)
+  DFS(const ProfData* p, const TransCFG& c, int32_t maxBCInstrs, bool inlining,
+      bool* truncated)
     : m_profData(p)
     , m_cfg(c)
     , m_numBCInstrs(maxBCInstrs)
     , m_inlining(inlining)
+    , m_truncated(truncated)
   {}
 
   RegionDescPtr formRegion(TransID head) {
@@ -93,12 +96,12 @@ private:
     Trace::Indent indent;
 
     auto sk = profRegion.blocks().back()->last();
-    assert(sk.op() == OpSwitch);
-    TargetProfile<SwitchProfile> profile(tid,
+    assertx(sk.op() == OpSwitch);
+    TargetProfile<SwitchProfile> profile({tid},
                                          TransKind::Optimize,
                                          sk.offset(),
                                          s_switchProfile.get());
-    assert(!profile.profiling());
+    assertx(!profile.profiling());
     if (!profile.optimizing()) {
       // We don't have profile data for this Switch, most likely because it saw
       // some weird input type during profiling.
@@ -122,7 +125,7 @@ private:
     // kMinSwitchPercent % of total profiling hits.
     uint32_t includedCases = 0;
     uint32_t includedHits = 0;
-    std::unordered_set<SrcKey, SrcKey::Hasher> allowedSks;
+    jit::fast_set<SrcKey, SrcKey::Hasher> allowedSks;
     for (auto const& item : data) {
       // We always have bounds checks for the default, so it doesn't count
       // against the case limit.
@@ -165,14 +168,6 @@ private:
   }
 
   void visit(TransID tid) {
-    auto rec = m_profData->transRec(tid);
-    auto tidRegion = rec->region();
-    auto tidInstrs = tidRegion->instrSize();
-    if (tidInstrs > m_numBCInstrs) {
-      ITRACE(5, "- visit: skipping {} due to region size\n", tid);
-      return;
-    }
-
     // Skip tid if its weight is below the JitPGOMinBlockPercent
     // percentage of the weight of the block where this region
     // started.
@@ -180,6 +175,27 @@ private:
     if (tidWeight < m_minBlockWeight) {
       ITRACE(5, "- visit: skipping {} due to low weight ({})\n",
              tid, tidWeight);
+      return;
+    }
+
+    auto rec = m_profData->transRec(tid);
+    auto tidRegion = rec->region();
+    auto tidInstrs = tidRegion->instrSize();
+    if (tidInstrs > m_numBCInstrs) {
+      ITRACE(5, "- visit: skipping {} due to region size\n", tid);
+      if (m_truncated) *m_truncated = true;
+      if (!m_inlining) {
+        logLowPriPerfWarning(
+          "selectHotCFG",
+          RO::EvalSelectHotCFGSampleRate * kDefaultPerfWarningRate,
+          [&](StructuredLogEntry& cols) {
+            cols.setInt("maxBCInstrSize", m_numBCInstrs);
+            cols.setInt("tidRegionInstrSize", tidInstrs);
+            auto sd = rec->func()->fullName();
+            cols.setStr("funcName", sd->data());
+          }
+        );
+      }
       return;
     }
 
@@ -253,16 +269,18 @@ private:
   double                       m_minBlockWeight;
   double                       m_minArcProb;
   bool                         m_inlining;
+  bool*                        m_truncated;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-RegionDescPtr selectHotCFG(HotTransContext& ctx) {
+RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
+  if (truncated) *truncated = false;
   ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", ctx.maxBCInstrs);
   auto const region =
-    DFS(ctx.profData, *ctx.cfg, ctx.maxBCInstrs, ctx.inlining)
+    DFS(ctx.profData, *ctx.cfg, ctx.maxBCInstrs, ctx.inlining, truncated)
       .formRegion(ctx.tid);
 
   if (region->empty()) return nullptr;

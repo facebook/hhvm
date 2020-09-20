@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function main() {
@@ -12,4 +12,8 @@ function main() {
   var_dump(unserialize(serialize($nzero)));
   print_r($nzero);
 }
+
+<<__EntryPoint>>
+function main_zero() {
 main();
+}

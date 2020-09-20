@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
   echo "4";
 }
@@ -15,6 +15,9 @@ function bar() {
     echo "5";
   }
 }
+
+<<__EntryPoint>>
+function main_try_finally_010() {
 try {
   echo "1";
   bar();
@@ -23,3 +26,4 @@ try {
   echo "6";
 }
 echo "\n";
+}

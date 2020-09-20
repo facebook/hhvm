@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -16,5 +16,5 @@ echo "\n-- Testing strftime() function with Day of the month as decimal single d
 $format = "%e";
 var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
-?>
-===DONE===
+echo "===DONE===\n";
+}

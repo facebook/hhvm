@@ -13,14 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_FUNCTIONAL_H_
-#define incl_HPHP_FUNCTIONAL_H_
+#pragma once
 
 #include <cstring>
 #include <string>
 
 #include <folly/portability/String.h>
+#include <folly/Range.h>
 
+#include "hphp/util/bstring.h"
 #include "hphp/util/hash.h"
 
 namespace HPHP {
@@ -59,8 +60,22 @@ struct stdltstr {
 };
 
 struct stdltistr {
+  using is_transparent = void;
+
   bool operator()(const std::string &s1, const std::string &s2) const {
     return strcasecmp(s1.c_str(), s2.c_str()) < 0;
+  }
+  bool operator()(const std::string &s1, folly::StringPiece s2) const {
+    return bstrcasecmp(s1, s2) < 0;
+  }
+  bool operator()(folly::StringPiece s1, const std::string &s2) const {
+    return bstrcasecmp(s1, s2) < 0;
+  }
+  bool operator()(const std::string &s1, const char* s2) const {
+    return strcasecmp(s1.c_str(), s2) < 0;
+  }
+  bool operator()(const char* s1, const std::string &s2) const {
+    return strcasecmp(s1, s2.c_str()) < 0;
   }
 };
 
@@ -73,12 +88,39 @@ struct string_hash {
   }
 };
 
-struct stringHashCompare {
-  bool equal(const std::string &s1, const std::string &s2) const {
+template <typename T>
+struct integralHashCompare {
+  bool equal(T s1, T s2) const {
+    static_assert(std::is_integral<T>::value, "");
     return s1 == s2;
   }
-  size_t hash(const std::string &s) const {
+  size_t hash(T s) const {
+    static_assert(sizeof(T) <= sizeof(int64_t), "");
+    return hash_int64(int64_t(s));
+  }
+};
+
+struct stringHashCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string& s) const {
     return hash_string_cs_unsafe(s.c_str(), s.size());
+  }
+};
+
+template <typename T, typename U, typename THash, typename UHash>
+struct pairHashCompare {
+  THash thash;
+  UHash uhash;
+
+  using PairType = std::pair<T, U>;
+  size_t hash(const PairType& pair) const {
+    return hash_int64_pair(thash.hash(pair.first), uhash.hash(pair.second));
+  }
+
+  bool equal(const PairType& a, const PairType& b) const {
+    return thash.equal(a.first, b.first) && uhash.equal(a.second, b.second);
   }
 };
 
@@ -160,4 +202,3 @@ struct string_lessi {
 
 }
 
-#endif

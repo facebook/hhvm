@@ -1,6 +1,5 @@
 Basic test of POSIX posix_getcwd function
 string(%d) "%s"
 
-Warning: %s
-NULL
+Warning: posix_getcwd() expects exactly 0 parameters, 1 given in %s/posix_getcwd_basic.php on line 4
 ===DONE===

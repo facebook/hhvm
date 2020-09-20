@@ -1,7 +1,6 @@
-array(3) {
+darray(3) {
   ["foo"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(3) "bar"
   }
   [0]=>

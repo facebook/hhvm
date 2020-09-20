@@ -43,21 +43,19 @@ bool isBlockEnd(const Vinstr& inst) {
     case Vinstr::jcc:
     case Vinstr::jcci:
     case Vinstr::jmp:
+    case Vinstr::jmps:
     case Vinstr::jmpr:
     case Vinstr::jmpm:
     case Vinstr::jmpi:
     case Vinstr::phijmp:
-    case Vinstr::phijcc:
+    case Vinstr::debugguardjmp:
     // terminal calls
     case Vinstr::tailcallstub:
-    case Vinstr::callphp:
-    case Vinstr::tailcallphp:
-    case Vinstr::calltc:
+    case Vinstr::tailcallstubr:
     case Vinstr::resumetc:
     // exception edges
     case Vinstr::unwind:
     case Vinstr::vinvoke:
-    case Vinstr::vcallarray:
     case Vinstr::contenter:
     // terminal
     case Vinstr::trap:
@@ -75,18 +73,17 @@ bool isBlockEnd(const Vinstr& inst) {
 bool isCall(Vinstr::Opcode op) {
   switch (op) {
     case Vinstr::call:
-    case Vinstr::callarray:
     case Vinstr::callfaststub:
     case Vinstr::callm:
     case Vinstr::callphp:
+    case Vinstr::callphpr:
+    case Vinstr::callphps:
     case Vinstr::callr:
     case Vinstr::calls:
     case Vinstr::callstub:
-    case Vinstr::calltc:
-    case Vinstr::tailcallphp:
     case Vinstr::tailcallstub:
+    case Vinstr::tailcallstubr:
     case Vinstr::vcall:
-    case Vinstr::vcallarray:
     case Vinstr::vinvoke:
       return true;
     default:
@@ -109,21 +106,33 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::copy:
     case Vinstr::copy2:
     case Vinstr::copyargs:
+    case Vinstr::debugguardjmp:
     case Vinstr::debugtrap:
     case Vinstr::fallthru:
     case Vinstr::ldimmb:
     case Vinstr::ldimmw:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
+    case Vinstr::ldundefq:
+    case Vinstr::movqs:
     case Vinstr::load:
     case Vinstr::store:
     case Vinstr::mcprep:
     case Vinstr::phidef:
-    case Vinstr::phijcc:
     case Vinstr::phijmp:
-    case Vinstr::funcguard:
     case Vinstr::inlinestart:
     case Vinstr::inlineend:
+    case Vinstr::pushframe:
+    case Vinstr::popframe:
+    case Vinstr::recordstack:
+    case Vinstr::recordbasenativesp:
+    case Vinstr::spill:
+    case Vinstr::spillbi:
+    case Vinstr::spillli:
+    case Vinstr::spillqi:
+    case Vinstr::spillundefq:
+    case Vinstr::reload:
+    case Vinstr::ssaalias:
     // native function abi
     case Vinstr::vcall:
     case Vinstr::vinvoke:
@@ -134,13 +143,18 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::ret:
     // stub function abi
     case Vinstr::stublogue:
+    case Vinstr::unstublogue:
     case Vinstr::stubret:
     case Vinstr::callstub:
     case Vinstr::callfaststub:
     case Vinstr::tailcallstub:
+    case Vinstr::tailcallstubr:
     case Vinstr::stubunwind:
     // php function abi
     case Vinstr::defvmsp:
+    case Vinstr::defvmfp:
+    case Vinstr::pushvmfp:
+    case Vinstr::popvmfp:
     case Vinstr::syncvmsp:
     case Vinstr::defvmretdata:
     case Vinstr::defvmrettype:
@@ -151,12 +165,10 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::loadstubret:
     case Vinstr::phpret:
     case Vinstr::callphp:
-    case Vinstr::tailcallphp:
-    case Vinstr::callarray:
-    case Vinstr::vcallarray:
+    case Vinstr::callphpr:
+    case Vinstr::callphps:
     case Vinstr::contenter:
     // vm entry abi
-    case Vinstr::calltc:
     case Vinstr::resumetc:
     case Vinstr::inittc:
     case Vinstr::leavetc:
@@ -171,7 +183,12 @@ Width width(Vinstr::Opcode op) {
     // restrict/unrestrict new virtuals
     case Vinstr::vregrestrict:
     case Vinstr::vregunrestrict:
-    // zero-extending/truncating copies
+    // sign/zero-extending/truncating copies
+    case Vinstr::movsbl:
+    case Vinstr::movswl:
+    case Vinstr::movsbq:
+    case Vinstr::movswq:
+    case Vinstr::movslq:
     case Vinstr::movzbw:
     case Vinstr::movzbl:
     case Vinstr::movzbq:
@@ -187,6 +204,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::jcc:
     case Vinstr::jcci:
     case Vinstr::jmp:
+    case Vinstr::jmps:
     case Vinstr::jmpr:
     case Vinstr::jmpm:
     case Vinstr::jmpi:
@@ -211,14 +229,12 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::idiv:
     case Vinstr::sarq:
     case Vinstr::shlq:
+    case Vinstr::shrq:
     // arm instructions
     case Vinstr::fcvtzs:
     case Vinstr::mrs:
     case Vinstr::msr:
     // ppc64 instructions
-    case Vinstr::extsb:
-    case Vinstr::extsw:
-    case Vinstr::extsl:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
     case Vinstr::fctidz:
@@ -230,6 +246,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::andbi:
     case Vinstr::andbim:
     case Vinstr::notb:
+    case Vinstr::orbi:
     case Vinstr::orbim:
     case Vinstr::xorb:
     case Vinstr::xorbi:
@@ -240,6 +257,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testb:
     case Vinstr::testbi:
     case Vinstr::testbim:
+    case Vinstr::testbm:
     case Vinstr::cmovb:
     case Vinstr::csincb:
     case Vinstr::setcc:
@@ -250,6 +268,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::storebi:
       return Width::Byte;
 
+    case Vinstr::addwm:
+    case Vinstr::andw:
+    case Vinstr::andwi:
     case Vinstr::incw:
     case Vinstr::incwm:
     case Vinstr::orwim:
@@ -262,6 +283,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testw:
     case Vinstr::testwi:
     case Vinstr::testwim:
+    case Vinstr::testwm:
     case Vinstr::loadw:
     case Vinstr::movw:
     case Vinstr::storew:
@@ -293,9 +315,11 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testl:
     case Vinstr::testli:
     case Vinstr::testlim:
+    case Vinstr::testlm:
     case Vinstr::movl:
     case Vinstr::loadl:
     case Vinstr::loadzbl:
+    case Vinstr::loadsbl:
     case Vinstr::loadtql:
     case Vinstr::storel:
     case Vinstr::storeli:
@@ -320,11 +344,14 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::srem:
     case Vinstr::neg:
     case Vinstr::not:
+    case Vinstr::orwi:
+    case Vinstr::orli:
     case Vinstr::orq:
     case Vinstr::orqi:
     case Vinstr::orqim:
     case Vinstr::sar:
     case Vinstr::shl:
+    case Vinstr::shr:
     case Vinstr::sarqi:
     case Vinstr::shlqi:
     case Vinstr::shrqi:
@@ -345,11 +372,13 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::csincq:
     case Vinstr::lea:
     case Vinstr::leap:
+    case Vinstr::leav:
     case Vinstr::lead:
     case Vinstr::loadqp:
     case Vinstr::loadqd:
     case Vinstr::loadzbq:
     case Vinstr::loadzlq:
+    case Vinstr::loadsbq:
     case Vinstr::storeqi:
     case Vinstr::addsd:
     case Vinstr::subsd:
@@ -362,6 +391,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::mulsd:
     case Vinstr::roundsd:
     case Vinstr::sqrtsd:
+    case Vinstr::crc32q:
       return Width::Quad;
 
     case Vinstr::loadups:

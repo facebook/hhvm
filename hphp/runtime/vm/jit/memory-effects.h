@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_MEMORY_EFFECTS_H_
-#define incl_HPHP_MEMORY_EFFECTS_H_
+#pragma once
 
 #include <string>
 
@@ -91,59 +90,54 @@ struct PureLoad       { AliasClass src; };
  * The effect of definitely storing `value' to a location, without performing
  * any other work.  Instructions with these memory effects can be removed if we
  * know the value being stored does not change the value of the location, or if
- * we know the location can never be loaded from again.
+ * we know the location can never be loaded from again. `value' can be a
+ * nullptr, in which case the store can still be elided if it is known to never
+ * be loaded afterwards.
+ *
+ * dep is a "base" address that the store is relative to. This is used
+ * so we can mark stores altered across its definition (which can only
+ * happen in loops).
  */
-struct PureStore    { AliasClass dst; SSATmp* value; };
+struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
 
 /*
- * Spilling pre-live ActRecs are somewhat unusual, but effectively still just
- * pure stores.  They store to a range of stack slots, and don't store a PHP
- * value, so they get their own branch of the union.
- *
- * The `stk' class is the entire stack range the instruction stores to, and the
- * `ctx' class is a subclass of `stk' that is the stack slot where it'll store
- * the context for the pre-live ActRec.
- *
- * The `stk' range should be interpreted as an exact AliasClass, not an upper
- * bound: it is guaranteed to be kNumActRecCells in size---no bigger than the
- * actual range of stack slots a SpillFrame instruction affects.
- *
- * The `callee' class is the memory location where the callee's Func* is written
- * to. The `callee' class should be a subset of the `stk' class.
+ * The effect of simulating a Call to an inlined function. This effect is a pure
+ * store of fp into the AFBasePtr location, base. The instruction also simulates
+ * a load of fields of ActRec which may be read by the VM once fp is live (e.g.
+ * the AFFunc and AFMeta locations).
  */
-struct PureSpillFrame { AliasClass stk;
-                        AliasClass ctx;
-                        AliasClass callee;
-                        SSATmp* calleeValue; };
+struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
+
+/*
+ * A PureInlineReturn represents the inverse operation of a PureInlineCall, it
+ * undoes a call into calleeFp, returning the frame to callerFp.
+ */
+struct PureInlineReturn { AliasClass base; SSATmp* calleeFp; SSATmp* callerFp;};
 
 /*
  * Calls are somewhat special enough that they get a top-level effect.
  *
- * The `writes_locals' flag indicates whether the call can write to locals in
- * the calling frame (e.g. extract() or parse_str(), when called with FCall).
- *
  * The `kills' set are locations that cannot be read by this instruction unless
  * it writes to them first, and which it generally may write to.  (This is used
- * for killing stack slots below the call depth.)
+ * for killing stack slots below the call depth and MInstrState locations)
  *
- * The `stack' set contains stack locations the call will read as arguments, as
- * well as stack locations it may read or write via other means. Locations in
- * any intersection between `stack' and `kills' may be assumed to be killed.
+ * The `inputs' set contains stack locations the call will read as arguments.
  *
- * The `locals` set contains frame locations that the call might read. (If the
- * call might write *any* local, then writes_local will be true).
+ * The `actrec' set contains stack locations the call will write ActRec to.
  *
- * The `callee' set contains the frame location that the call will read to
- * obtain the callee. It must be a subset of the `stack' set.
+ * The `outputs' set contains stack locations the call will write inout
+ * variables to.
+ *
+ * The `locals` set contains frame locations that the call might read.
  *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
-struct CallEffects    { bool writes_locals;
-                        AliasClass kills;
-                        AliasClass stack;
-                        AliasClass locals;
-                        AliasClass callee; };
+struct CallEffects    { AliasClass kills;
+                        AliasClass inputs;
+                        AliasClass actrec;
+                        AliasClass outputs;
+                        AliasClass locals; };
 
 /*
  * ReturnEffects is a return, either from the php function or an inlined
@@ -187,7 +181,8 @@ struct UnknownEffects {};
 using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
-                                 , PureSpillFrame
+                                 , PureInlineCall
+                                 , PureInlineReturn
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects
@@ -212,7 +207,7 @@ MemEffects canonicalize(MemEffects);
 
 /*
  * Return an alias class representing the pointee of the given value, which
- * must be <= TPtrToGen.
+ * must be <= TMemToCell.
  */
 AliasClass pointee(const SSATmp*);
 
@@ -223,19 +218,5 @@ std::string show(MemEffects);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Get the frame from a DefInlineFP.
- *
- * Returns: an (uncanonicalized, precise) AliasClass containing the stack slots
- * corresponding to the ActRec that is being converted from a pre-live to a
- * live ActRec by this instruction.
- *
- * Pre: inst->is(DefInlineFP)
- */
-AliasClass inline_fp_frame(const IRInstruction* inst);
-
-//////////////////////////////////////////////////////////////////////
-
 }}
 
-#endif

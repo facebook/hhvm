@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $fp = fopen(dirname(__FILE__) . "/cert.crt","r");
 $a = fread($fp,8192);
 fclose($fp);
@@ -15,4 +15,4 @@ var_dump(openssl_x509_check_private_key("", $key));
 var_dump(openssl_x509_check_private_key($cert, ""));
 var_dump(openssl_x509_check_private_key("", ""));
 var_dump(openssl_x509_check_private_key($a, $b));
-?>
+}

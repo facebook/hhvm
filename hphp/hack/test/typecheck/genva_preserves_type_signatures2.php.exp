@@ -1,6 +1,0 @@
-File "genva_preserves_type_signatures2.php", line 13, characters 10-36:
-Invalid return type (Typing[4110])
-File "genva_preserves_type_signatures2.php", line 12, characters 65-70:
-This is a string
-File "genva_preserves_type_signatures2.php", line 12, characters 98-100:
-It is incompatible with an int

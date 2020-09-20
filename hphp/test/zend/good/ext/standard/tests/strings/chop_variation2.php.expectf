@@ -1,72 +1,84 @@
 *** Testing chop() : with different unexpected values for charlist argument ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 73
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 76
 
 --- Testing chop() by supplying different values for 'charlist' argument ---
 -- Iteration 1 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 2 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 3 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 4 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 5 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 6 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 7 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 8 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 9 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 15 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 16 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 17 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 18 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 19 --
-string(11) "hello world"
+
+Warning: chop() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 20 --
 string(17) "hello world12345 "
 -- Iteration 21 --
 string(17) "hello world12345 "
 -- Iteration 22 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 23 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: chop() expects parameter 2 to be string, resource given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 25 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 26 --
-string(17) "hello world12345 "
+
+Warning: chop() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 Done

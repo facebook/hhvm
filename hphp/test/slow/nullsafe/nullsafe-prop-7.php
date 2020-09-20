@@ -8,6 +8,10 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_nullsafe_prop_7() {
 echo "not reached";
 
 new X;
+}

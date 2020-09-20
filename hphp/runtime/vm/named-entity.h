@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_NAMED_ENTITY_H_
-#define incl_HPHP_VM_NAMED_ENTITY_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/string-data.h"
@@ -35,6 +34,7 @@ namespace HPHP {
 
 struct Func;
 struct String;
+struct RecordDesc;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +44,7 @@ struct String;
  */
 struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(int64_t(s2) > 0);  // RHS is never a magic value.
+    assertx(int64_t(s2) > 0);  // RHS is never a magic value.
     return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };
@@ -85,11 +85,7 @@ struct NamedEntity {
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
 
-  explicit NamedEntity()
-    : m_cachedClass(rds::kUninitHandle)
-    , m_cachedFunc(rds::kUninitHandle)
-    , m_cachedTypeAlias(rds::kUninitHandle)
-  {}
+  explicit NamedEntity() {}
 
   NamedEntity(NamedEntity&& ne) noexcept;
 
@@ -101,7 +97,7 @@ struct NamedEntity {
    * Get the rds::Handle that caches this Func*, creating a (non-persistent)
    * one if it doesn't exist yet.
    */
-  rds::Handle getFuncHandle() const;
+  rds::Handle getFuncHandle(const StringData* name) const;
 
   /*
    * Set and get the cached Func*.
@@ -117,13 +113,29 @@ struct NamedEntity {
    * Get the rds::Handle that caches this Class*, creating a (non-persistent)
    * one if it doesn't exist yet.
    */
-  rds::Handle getClassHandle() const;
+  rds::Handle getClassHandle(const StringData* name) const;
 
   /*
    * Set and get the cached Class*.
    */
   void setCachedClass(Class* c);
   Class* getCachedClass() const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
+  // RecordDesc cache.
+
+  /*
+   * Get the rds::Handle that caches this RecordDesc*,
+   * creating a (non-persistent) one if it doesn't exist yet.
+   */
+  rds::Handle getRecordDescHandle(const StringData* name) const;
+
+  /*
+   * Set and get the cached RecordDesc*.
+   */
+  void setCachedRecordDesc(RecordDesc* c);
+  RecordDesc* getCachedRecordDesc() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -135,10 +147,19 @@ struct NamedEntity {
   bool isPersistentTypeAlias() const;
 
   /*
-   * Set and get the cached TypeAliasReq.
+   * Set and get the cached TypeAlias.
    */
-  void setCachedTypeAlias(const TypeAliasReq&);
-  const TypeAliasReq* getCachedTypeAlias() const;
+  void setCachedTypeAlias(const TypeAlias&);
+  const TypeAlias* getCachedTypeAlias() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Reified generic cache.
+
+  /*
+   * Set and get the cached ReifiedGenerics.
+   */
+  void setCachedReifiedGenerics(ArrayData*);
+  ArrayData* getCachedReifiedGenerics() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -176,6 +197,11 @@ struct NamedEntity {
   void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
+  // RecordDesc.
+  RecordDesc* recordList() const;
+  void pushRecordDesc(RecordDesc*);
+  void removeRecordDesc(RecordDesc*);
+  /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
 
   /*
@@ -195,6 +221,7 @@ struct NamedEntity {
   template<class Fn> static void foreach_class(Fn fn);
   template<class Fn> static void foreach_cached_class(Fn fn);
   template<class Fn> static void foreach_cached_func(Fn fn);
+  template<class Fn> static void foreach_name(Fn);
 
   /*
    * Size of the global NamedEntity table.
@@ -206,23 +233,31 @@ struct NamedEntity {
    */
   static std::vector<std::pair<const char*, int64_t>> tableStats();
 
+  template<class T>
+  const char* checkSameName();
+
 private:
-  template<class Fn> static void foreach_name(Fn);
   static Map* table();
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
-  mutable rds::Link<LowPtr<Class>> m_cachedClass;
-  mutable rds::Link<LowPtr<Func>> m_cachedFunc;
-  mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
+  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
+  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+  union {
+    mutable rds::Link<TypeAlias, rds::Mode::NonLocal> m_cachedTypeAlias{};
+    mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
+  };
+  mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;
 
+  template<class T>
+  using ListType = AtomicLowPtr<T, std::memory_order_acquire,
+                                   std::memory_order_release>;
 private:
-  AtomicLowPtr<Class, std::memory_order_acquire,
-               std::memory_order_release> m_clsList{nullptr};
-  AtomicLowPtr<Func, std::memory_order_acquire,
-               std::memory_order_release> m_uniqueFunc{nullptr};
+  ListType<Class> m_clsList{nullptr};
+  ListType<Func> m_uniqueFunc{nullptr};
+  ListType<RecordDesc> m_recordList{nullptr};
 };
 
 /*
@@ -236,4 +271,3 @@ using NamedEntityPair = std::pair<LowStringPtr,LowPtr<const NamedEntity>>;
 #include "hphp/runtime/vm/named-entity-inl.h"
 #undef incl_HPHP_VM_NAMED_ENTITY_INL_H_
 
-#endif

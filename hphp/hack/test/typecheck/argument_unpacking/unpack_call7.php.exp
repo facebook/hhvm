@@ -1,4 +1,6 @@
-File "unpack_call7.php", line 10, characters 3-28:
-Too many arguments (Typing[4105])
-  File "unpack_call7.php", line 4, characters 19-29:
-  Definition is here
+File "unpack_call7.php", line 10, characters 23-27:
+Invalid argument (Typing[4359])
+File "unpack_call7.php", line 10, characters 23-27:
+A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
+File "unpack_call7.php", line 4, characters 19-29:
+Definition is here

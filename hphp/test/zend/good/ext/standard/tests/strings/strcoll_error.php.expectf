@@ -2,19 +2,15 @@
 
 -- Testing strcoll() function with no arguments --
 
-Warning: %s
-NULL
+Warning: strcoll() expects exactly 2 parameters, 0 given in %s/strcoll_error.php on line 9
 
-Warning: %s
-NULL
+Warning: strcoll() expects exactly 2 parameters, 1 given in %s/strcoll_error.php on line 10
 
 -- Testing strcoll() function with one argument --
 
-Warning: %s
-NULL
+Warning: strcoll() expects exactly 2 parameters, 1 given in %s/strcoll_error.php on line 13
 
 -- Testing strcoll() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strcoll() expects exactly 2 parameters, 3 given in %s/strcoll_error.php on line 17
 ===Done===

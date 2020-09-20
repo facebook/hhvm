@@ -17,4 +17,8 @@ function main() {
   $custom_set = new Pair();
 }
 
+
+<<__EntryPoint>>
+function main_hh_pair4() {
 main();
+}

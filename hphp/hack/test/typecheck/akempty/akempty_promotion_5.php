@@ -1,11 +1,11 @@
 <?hh //strict
 
 /**
- * Test if AKempty local variable is upgraded to AKmap after [...] operation
+ * Test if AKempty local variable is upgraded to AKdarray after [...] operation
  * and error message points to [...] as the reason
  */
 function test(int $i): void {
-  $a = array();
+  $a = darray[];
   $a[$i] = 'aaa';
   f($a);
 }

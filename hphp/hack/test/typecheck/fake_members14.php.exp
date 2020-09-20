@@ -1,0 +1,9 @@
+File "fake_members14.php", line 16, characters 27-33:
+Invalid argument (Typing[4110])
+File "fake_members14.php", line 12, characters 21-23:
+Expected `int`
+File "fake_members14.php", line 5, characters 17-20:
+But got `?int`
+File "fake_members14.php", line 16, characters 9-34:
+All the local information about `C::$fld` has been invalidated by this lambda function.
+This is a limitation of the type-checker; use a local if that's the problem.

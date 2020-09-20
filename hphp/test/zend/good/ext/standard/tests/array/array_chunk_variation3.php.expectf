@@ -1,194 +1,66 @@
 *** Testing array_chunk() : usage variations ***
 
 -- Iteration 1 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 2 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 3 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 4 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 5 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 6 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 7 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 8 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 9 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 10 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 11 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 12 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 13 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 14 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 15 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+
+Warning: array_chunk() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 
 -- Iteration 16 --
 
-Warning: %s
-NULL
-
--- Iteration 17 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
-
--- Iteration 18 --
-array(1) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(2)
-  }
-}
+Warning: array_chunk() expects parameter 3 to be boolean, object given in %s/zend/good/ext/standard/tests/array/array_chunk_variation3.php on line 59
 Done

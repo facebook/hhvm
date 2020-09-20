@@ -1,0 +1,10 @@
+File "reflection.php", line 18, characters 8-24:
+Some type constraint(s) here are violated (Typing[4110])
+File "reflection.hhi", line 77, characters 43-43:
+'T' is a constrained type parameter
+File "reflection.hhi", line 77, characters 48-68:
+This is an object of type HH\ClassLikeAttribute
+File "reflection.php", line 18, characters 26-30:
+It is incompatible with an object of exactly the class FAttr
+File "reflection.php", line 18, characters 26-30:
+  where the class 'FAttr' was referenced here

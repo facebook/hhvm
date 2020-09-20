@@ -1,5 +1,5 @@
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: curl_share_setopt():Invalid curl share configuration option in %s/curl_share_setopt_basic001.php on line 6
 bool(false)

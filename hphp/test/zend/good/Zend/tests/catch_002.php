@@ -1,27 +1,22 @@
-<?php
+<?hh
 
 class MyObject
 {
-	function __construct()
-	{
-		throw new Exception();
-		echo __METHOD__ . "() Must not be reached\n";
-	}
-
-	function __destruct()
-	{
-		echo __METHOD__ . "() Must not be called\n";
-	}
+    function __construct()
+    {
+        throw new Exception();
+        echo __METHOD__ . "() Must not be reached\n";
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 try
 {
-	new MyObject();
+    new MyObject();
 }
 catch(Exception $e)
 {
-	echo "Caught\n";
+    echo "Caught\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

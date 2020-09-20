@@ -1,5 +1,5 @@
 Odd :
-array(3) {
+darray(3) {
   ["a"]=>
   int(1)
   ["c"]=>
@@ -7,7 +7,7 @@ array(3) {
   ["e"]=>
   int(5)
 }
-array(3) {
+darray(3) {
   [1]=>
   int(7)
   [3]=>
@@ -15,18 +15,18 @@ array(3) {
   [5]=>
   int(11)
 }
-array(1) {
+darray(1) {
   [0]=>
   bool(true)
 }
 Even:
-array(2) {
+darray(2) {
   ["b"]=>
   int(2)
   ["d"]=>
   int(4)
 }
-array(5) {
+darray(5) {
   [0]=>
   int(6)
   [2]=>
@@ -38,21 +38,18 @@ array(5) {
   [7]=>
   int(0)
 }
-array(2) {
+darray(2) {
   [1]=>
   bool(false)
   [2]=>
   NULL
 }
-array(0) {
+darray(0) {
 }
 
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter.php on line 26
 NULL
 
-Warning: %s
-NULL
-
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter.php on line 27
 NULL
 == DONE ==

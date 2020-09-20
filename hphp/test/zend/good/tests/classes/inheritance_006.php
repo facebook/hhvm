@@ -1,14 +1,14 @@
-<?php
-Class A {
-	private $c;
+<?hh
+class A {
+    private $c;
 }
 
-Class B extends A {
-	private $c;
+class B extends A {
+    private $c;
 }
 
-Class C extends B {
+class C extends B {
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(new C);
-?>
+}

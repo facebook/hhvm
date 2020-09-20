@@ -57,7 +57,8 @@ if (!$bind) {
   die("Unable to bind a local port");
 }
 $client = stream_socket_client("tcp://127.0.0.1:$port");
-$server = stream_socket_accept($bind);
+$peername = null;
+$server = stream_socket_accept($bind, -1.0, inout $peername);
 
 $send = put_async($server,
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, ".
@@ -70,6 +71,6 @@ $send = put_async($server,
   "Now is the time for all good men to come to the aid of their country.\n".
   "The quick brown fox jumped over the lazy dog.");
 $recv = get_async($client);
-HH\Asio\join(AwaitAllWaitHandle::fromArray(array($send, $recv)));
+HH\Asio\join(AwaitAllWaitHandle::fromVArray(varray[$send, $recv]));
 var_dump($send->result());
 var_dump($recv->result());

@@ -1,9 +1,9 @@
 <?hh
 
+// force existence of bar() frame
+<<__NEVER_INLINE>>
 function bar($name) {
   echo "calling bar($name)\n";
-  // do something silly to force existence of bar() frame
-  call_user_func('debug_backtrace');
 }
 
 function foo(string $name) {
@@ -15,7 +15,7 @@ function main() {
   foo('hello');
   foo('world');
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 
 $last = null;
@@ -29,4 +29,5 @@ foreach (xenon_get_data() as $sample) {
       }
     }
   }
+}
 }

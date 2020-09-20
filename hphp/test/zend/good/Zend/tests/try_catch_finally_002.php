@@ -1,7 +1,7 @@
-<?php
+<?hh
 
-class AE extends Exception {};
-class BE extends Exception {};
+class AE extends Exception {}
+class BE extends Exception {}
 
 function foo () {
     try {
@@ -32,6 +32,6 @@ function foo () {
     }
    return 7;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo());
-?>
+}

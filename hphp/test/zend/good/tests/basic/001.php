@@ -1,1 +1,4 @@
-<?php echo "Hello World"?>
+<?hh
+<<__EntryPoint>> function main(): void {
+echo "Hello World";
+}

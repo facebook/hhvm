@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Removing optional field allows omitting it even when fields are only
@@ -12,6 +12,6 @@ type t = shape(
 );
 
 function test(s $s): t {
-  Shapes::removeKey(&$s, 'z');
+  Shapes::removeKey(inout $s, 'z');
   return $s;
 }

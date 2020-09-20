@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class b {
   function z() {
@@ -13,11 +13,12 @@ class c extends b {
     $this->y();
   }
 }
-if (false) {
-  class b{
+
+<<__EntryPoint>>
+function main_1481() {
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '1481.inc';
+  }
+  $x = new c();
+  $x->z();
 }
-  class c{
-}
-}
-$x = new c();
-$x->z();

@@ -610,8 +610,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "pcre" OR
     ${libraryName} STREQUAL "readline" OR
     ${libraryName} STREQUAL "sqlite" OR
-    ${libraryName} STREQUAL "squangle" OR
-    ${libraryName} STREQUAL "webscalesql" OR
     ${libraryName} STREQUAL "zip" OR
     ${libraryName} STREQUAL "zlib"
   )
@@ -906,50 +904,9 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMEMCACHED")
     endif()
   elseif (${libraryName} STREQUAL "mysql")
-    # mysql checks - if we're using async mysql, we use webscalesqlclient from
-    # third-party/ instead
-    if (ENABLE_ASYNC_MYSQL)
-      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-      set(MYSQL_CLIENT_LIBS
-        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
-      )
-
-      if (${addPaths})
-        HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(
-          ${RE2_INCLUDE_DIR}
-          ${TP_DIR}/squangle/src/
-          ${TP_DIR}/webscalesqlclient/src/include/
-        )
-        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DENABLE_ASYNC_MYSQL=1")
-      endif()
-    else()
-      find_package(MySQL ${requiredVersion})
-      if (NOT MYSQL_LIB_DIR OR NOT MYSQL_INCLUDE_DIR OR NOT MYSQL_CLIENT_LIBS)
-        HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-        return()
-      endif()
-
-      if (${addPaths})
-        link_directories(${MYSQL_LIB_DIR})
-        HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${MYSQL_INCLUDE_DIR})
-      endif()
-    endif()
-
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(fbmysqlclient)
     MYSQL_SOCKET_SEARCH()
-    if (MYSQL_UNIX_SOCK_ADDR)
-      if (${addPaths})
-        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
-      endif()
-    elseif (NOT ${addPaths})
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    else()
-      message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-    endif()
-
-    if (${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${MYSQL_CLIENT_LIBS})
-    endif()
+    HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
   elseif (${libraryName} STREQUAL "pgsql")
     FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
       PATHS
@@ -1000,17 +957,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${SNAPPY_INCLUDE_DIRS})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${SNAPPY_LIBRARIES})
     endif()
-  elseif (${libraryName} STREQUAL "sodium")
-    find_package(LibSodium ${requiredVersion})
-    if (NOT LIBSODIUM_INCLUDE_DIRS OR NOT LIBSODIUM_LIBRARIES)
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    endif()
-
-    if (${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBSODIUM_INCLUDE_DIRS})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBSODIUM_LIBRARIES})
-    endif()
+  elseif (${libraryName} STREQUAL "squangle")
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(squangle)
   elseif (${libraryName} STREQUAL "vpx")
     find_package(LibVpx ${requiredVersion})
     if (NOT LIBVPX_INCLUDE_DIRS OR NOT LIBVPX_LIBRARIES)
@@ -1052,18 +1000,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DLIBXSLT_STATIC=1")
         HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DLIBEXSLT_STATIC=1")
       endif()
-    endif()
-  elseif (${libraryName} STREQUAL "uodbc")
-    find_package(LibUODBC ${requiredVersion})
-    if (NOT LIBUODBC_INCLUDE_DIRS OR NOT LIBUODBC_LIBRARIES)
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    endif()
-
-    if (${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBUODBC_INCLUDE_DIRS})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBUODBC_LIBRARIES})
-      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBUODBC")
     endif()
   elseif (${libraryName} STREQUAL "watchmanclient")
     find_package(libWatchmanClient ${requiredVersion})

@@ -4,5 +4,5 @@ namespace A {
 }
 namespace B {
   use A\f;
-  var_dump(f());
+  <<__EntryPoint>> function main(): void { \var_dump(f()); }
 }

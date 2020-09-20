@@ -1,14 +1,14 @@
-<?php
+<?hh
 
 class test {
-	const val = "string";
-	const val2 = 1;
+    const val = "string";
+    const val2 = 1;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(test::val);
 var_dump(test::val2);
 
 var_dump(test::val3);
 
 echo "Done\n";
-?>
+}

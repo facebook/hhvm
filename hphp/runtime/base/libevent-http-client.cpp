@@ -14,14 +14,16 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/libevent-http-client.h"
+
 #include <map>
+#include <sstream>
 #include <vector>
 
 #include <folly/Conv.h>
 
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 
@@ -34,13 +36,13 @@ struct evkeyvalq_ {
 // static handlers delegating work to instance ones
 
 static void on_request_completed(struct evhttp_request *req, void *obj) {
-  assert(obj);
+  assertx(obj);
   ((HPHP::LibEventHttpClient*)obj)->onRequestCompleted(req);
 }
 
 static void
 on_connection_closed(struct evhttp_connection* /*conn*/, void* obj) {
-  assert(obj);
+  assertx(obj);
   ((HPHP::LibEventHttpClient*)obj)->onConnectionClosed();
 }
 

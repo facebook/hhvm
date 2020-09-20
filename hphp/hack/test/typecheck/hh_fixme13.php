@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(string $s): void {}
 
@@ -10,3 +10,5 @@ function g(): void {
       {f(1)}
     </p>;
 }
+
+class :p {}

@@ -1,6 +1,6 @@
-<?php
+<?hh
 require_once('connect.inc');
-
+<<__EntryPoint>> function main(): void {
 $conn = mysql_connect($host, $user, $passwd);
 // No warnings from normal operation
 var_dump(create_test_table('warning'));
@@ -16,3 +16,4 @@ var_dump(mysql_warning_count($conn));
 // Dropping an existing table generates no warnings.
 var_dump(mysql_query("DROP TABLE IF EXISTS test_warning"));
 var_dump(mysql_warning_count($conn));
+}

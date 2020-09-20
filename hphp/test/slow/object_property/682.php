@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class c {
   public $d = 'd';
@@ -26,6 +26,9 @@ class d extends c {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_682() {
 $x = new d;
 $x->surprise = 1;
 $y = new d;
@@ -42,4 +45,5 @@ echo "t12
 $z->t1($x);
 foreach ($x as $k => $v) {
   var_dump($v);
+}
 }

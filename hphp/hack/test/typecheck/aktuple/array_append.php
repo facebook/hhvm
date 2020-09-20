@@ -3,12 +3,15 @@
 /* For now, we don't grow tuple-like arrays - appending to them just downgrades
  * them to vector-like arrays */
 
-function test(): void {
-  $a = array(4, 'aaa');
-  $a[] = true;
-  hh_show($a);
+enum E : int { A = 2; };
 
-  $a = Vector { array(4, 'aaa') };
-  $a[0][] = true;
-  hh_show($a[0]);
+function expectArrayAK(array<arraykey> $a):void { }
+
+function test(): void {
+  $a = varray[4, 'aaa'];
+  $a[] = E::A;
+  expectArrayAK($a);
+
+  $a = Vector { varray[4, 'aaa'] };
+  $a[0][] = E::A;
 }

@@ -1,0 +1,10 @@
+File "t28246566.php", line 12, characters 12-13:
+Invalid return type (Typing[4110])
+File "t28246566.php", line 10, characters 18-19:
+This is an array key (int | string)
+File "t28246566.php", line 11, characters 5-39:
+It was implicitly typed as an array key (int | string) during this operation
+File "t28246566.php", line 9, characters 41-43:
+It is incompatible with an int
+File "t28246566.php", line 9, characters 41-43:
+Considering that this type argument is invariant with respect to Vector

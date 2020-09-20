@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait ProvidesT implements I {}
 

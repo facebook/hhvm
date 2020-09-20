@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -53,7 +53,7 @@ void MemFile::sweep() {
 }
 
 bool MemFile::open(const String& filename, const String& mode) {
-  assert(m_len == -1);
+  assertx(m_len == -1);
   // mem files are read-only
   const char* mode_str = mode.c_str();
   if (strchr(mode_str, '+') || strchr(mode_str, 'a') || strchr(mode_str, 'w')) {
@@ -65,9 +65,9 @@ bool MemFile::open(const String& filename, const String& mode) {
     StaticContentCache::TheFileCache->read(filename.c_str(), len, compressed);
   // -1: PHP file; -2: directory
   if (len != INT_MIN && len != -1 && len != -2) {
-    assert(len >= 0);
+    assertx(len >= 0);
     if (compressed) {
-      assert(RuntimeOption::EnableOnDemandUncompress);
+      assertx(RuntimeOption::EnableOnDemandUncompress);
       data = gzdecode(data, len);
       if (data == nullptr) {
         raise_fatal_error("cannot unzip compressed data");
@@ -90,12 +90,11 @@ bool MemFile::open(const String& filename, const String& mode) {
 }
 
 bool MemFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 
 bool MemFile::closeImpl() {
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   setIsClosed(true);
   if (m_malloced && m_data) {
     free(m_data);
@@ -108,8 +107,8 @@ bool MemFile::closeImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64_t MemFile::readImpl(char *buffer, int64_t length) {
-  assert(m_len != -1);
-  assert(length > 0);
+  assertx(m_len != -1);
+  assertx(length > 0);
   int64_t remaining = m_len - m_cursor;
   if (remaining < length) length = remaining;
   if (length > 0) {
@@ -120,12 +119,12 @@ int64_t MemFile::readImpl(char *buffer, int64_t length) {
 }
 
 int MemFile::getc() {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   return File::getc();
 }
 
 bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   if (whence == SEEK_CUR) {
     if (offset > 0 && offset < bufferedLen()) {
       setReadPosition(getReadPosition() + offset);
@@ -142,7 +141,7 @@ bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   if (whence == SEEK_SET) {
     m_cursor = offset;
   } else {
-    assert(whence == SEEK_END);
+    assertx(whence == SEEK_END);
     m_cursor = m_len + offset;
   }
   setPosition(m_cursor);
@@ -150,12 +149,12 @@ bool MemFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
 }
 
 int64_t MemFile::tell() {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   return getPosition();
 }
 
 bool MemFile::eof() {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   int64_t avail = bufferedLen();
   if (avail > 0) {
     return false;
@@ -164,7 +163,7 @@ bool MemFile::eof() {
 }
 
 bool MemFile::rewind() {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   m_cursor = 0;
   setWritePosition(0);
   setReadPosition(0);
@@ -194,9 +193,9 @@ Array MemFile::getMetaData() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void MemFile::unzip() {
-  assert(m_len != -1);
-  assert(!m_malloced);
-  assert(m_cursor == 0);
+  assertx(m_len != -1);
+  assertx(!m_malloced);
+  assertx(m_cursor == 0);
   int len = m_len;
   char *data = gzdecode(m_data, len);
   if (data == nullptr) {

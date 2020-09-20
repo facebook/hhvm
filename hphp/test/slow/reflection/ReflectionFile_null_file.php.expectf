@@ -1,0 +1,2 @@
+
+Catchable fatal error: Argument 1 passed to ReflectionFile::__construct() must be an instance of string, null given in %s/ReflectionFile_null_file.php on line 4

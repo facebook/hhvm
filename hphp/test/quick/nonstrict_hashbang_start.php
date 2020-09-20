@@ -1,3 +1,5 @@
 #!/usr/bin/env hhvm
-<?php
-echo "Hashbang/shebang allowed before <?php\n";
+<?hh
+<<__EntryPoint>> function main(): void {
+echo "Hashbang/shebang allowed before <?hh\n";
+}

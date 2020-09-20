@@ -48,7 +48,7 @@ struct json_state {
     json_tokener_error parser_code;
 };
 
-THREAD_LOCAL(json_state, s_json_state);
+RDS_LOCAL(json_state, s_json_state);
 
 json_error_codes json_get_last_error_code() {
     return s_json_state->error_code;
@@ -108,8 +108,8 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
     case JSONContainerType::HACK_ARRAYS:
       var = Array::CreateVec();
       break;
-    case JSONContainerType::PHP_ARRAYS:
-      var = Array::Create();
+    case JSONContainerType::DARRAYS:
+      var = Array::CreateDArray();
       break;
   }
 
@@ -117,7 +117,7 @@ Variant json_type_array_to_variant(json_object *new_obj, const bool assoc,
     tmpvar = json_object_to_variant(json_object_array_get_idx(new_obj, i),
                                     assoc, container_type);
     if (container_type == JSONContainerType::COLLECTIONS) {
-      collections::append(var.getObjectData(), tmpvar.asCell());
+      collections::append(var.getObjectData(), tmpvar.asTypedValue());
     } else {
       var.asArrRef().append(tmpvar);
     }
@@ -141,8 +141,8 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
       case JSONContainerType::HACK_ARRAYS:
         var = Array::CreateDict();
         break;
-      case JSONContainerType::PHP_ARRAYS:
-        var = Array::Create();
+      case JSONContainerType::DARRAYS:
+        var = Array::CreateDArray();
         break;
     }
   }
@@ -157,7 +157,7 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
 
     if (!assoc) {
       if (key.empty()) {
-        var.getObjectData()->setProp(nullptr, s_empty.get(), *tmpvar.asCell());
+        var.getObjectData()->setProp(nullptr, s_empty.get(), *tmpvar.asTypedValue());
       } else {
         var.getObjectData()->o_set(key, tmpvar);
       }
@@ -165,14 +165,14 @@ Variant json_type_object_to_variant(json_object *new_obj, const bool assoc,
       switch (container_type) {
         case JSONContainerType::COLLECTIONS: {
           auto keyTV = make_tv<KindOfString>(key.get());
-          collections::set(var.getObjectData(), &keyTV, tmpvar.asCell());
+          collections::set(var.getObjectData(), &keyTV, tmpvar.asTypedValue());
           break;
         }
         case JSONContainerType::HACK_ARRAYS:
           forceToDict(var).set(key, tmpvar);
           break;
-        case JSONContainerType::PHP_ARRAYS:
-          forceToArray(var).set(key, tmpvar);
+        case JSONContainerType::DARRAYS:
+          forceToDArray(var).set(key, tmpvar);
           break;
       }
     }
@@ -247,7 +247,7 @@ bool JSON_parser(Variant &return_value, const char *data, int data_len,
     //if (!(options & k_JSON_FB_LOOSE)) {
     //    json_tokener_set_flags(tok, JSON_TOKENER_STRICT);
     //}
-    JSONContainerType container_type = JSONContainerType::PHP_ARRAYS;
+    JSONContainerType container_type = JSONContainerType::DARRAYS;
     if (options & (k_JSON_FB_STABLE_MAPS | k_JSON_FB_COLLECTIONS)) {
       assoc = true;
       container_type = JSONContainerType::COLLECTIONS;

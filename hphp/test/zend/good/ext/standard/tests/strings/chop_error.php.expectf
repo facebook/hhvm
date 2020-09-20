@@ -2,12 +2,10 @@
 
 -- Testing chop() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: chop() expects at least 1 parameter, 0 given in %s/chop_error.php on line 15
 
 -- Testing chop() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: chop() expects at most 2 parameters, 3 given in %s/chop_error.php on line 23
 string(11) "string_val "
 Done

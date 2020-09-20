@@ -1,8 +1,8 @@
 <?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
-function foo(array $data) {
-  $ret = current($data);
+function foo(varray $data) {
+  $ret = array_shift(inout $data);
   if ($ret === 'false') {
     $ret = false;
   } else {
@@ -10,5 +10,6 @@ function foo(array $data) {
   }
   return $ret;
 }
-
-var_dump(foo(array()));
+<<__EntryPoint>> function main(): void {
+var_dump(foo(varray[]));
+}

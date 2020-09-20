@@ -1,0 +1,4 @@
+File "skip_one_change_type.php", line 11, characters 23-23:
+Cannot re-declare this type constant as abstract (Typing[4142])
+File "skip_one_change_type.php", line 5, characters 23-23:
+Previously defined here

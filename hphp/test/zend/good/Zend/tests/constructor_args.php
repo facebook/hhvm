@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface foobar {
     function __construct();
 }
@@ -10,6 +10,7 @@ final class foo extends bar implements foobar {
     public function __construct($x = 1, $y = 2) {
     }
 }
+<<__EntryPoint>> function main(): void {
 new foo;
 print "ok!";
-?>
+}

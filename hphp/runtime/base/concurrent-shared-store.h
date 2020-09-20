@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONCURRENT_SHARED_STORE_H_
-#define incl_HPHP_CONCURRENT_SHARED_STORE_H_
+#pragma once
 
 #include <atomic>
 #include <utility>
@@ -33,10 +32,9 @@
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/apc/snapshot-loader.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
@@ -55,7 +53,7 @@ struct StoreValue {
   StoreValue() = default;
   StoreValue(const StoreValue& o)
     : tagged_data{o.data()}
-    , expire{o.expire}
+    , expireTime{o.expireTime.load(std::memory_order_relaxed)}
     , dataSize{o.dataSize}
     , kind(o.kind)
     , readOnly(o.readOnly)
@@ -78,23 +76,26 @@ struct StoreValue {
     tagged_data.store(v, std::memory_order_release);
   }
   APCKind getKind() const {
-    assert(data().left());
-    assert(data().left()->kind() == kind);
+    assertx(data().left());
+    assertx(data().left()->kind() == kind);
     return kind;
   }
   Variant toLocal() const {
-    return data().left()->toLocal(getKind());
+    return data().left()->toLocal();
   }
   void set(APCHandle* v, int64_t ttl);
   bool expired() const;
+  uint32_t rawExpire() const {
+    return expireTime.load(std::memory_order_acquire);
+  }
 
   int32_t getSerializedSize() const {
-    assert(data().right() != nullptr);
+    assertx(data().right() != nullptr);
     return abs(dataSize);
   }
 
   bool isSerializedObj() const {
-    assert(data().right() != nullptr);
+    assertx(data().right() != nullptr);
     return dataSize < 0;
   }
 
@@ -123,13 +124,14 @@ struct StoreValue {
    * HHVM might get confused after 2106 :)
    */
   mutable std::atomic<HandleOrSerial> tagged_data{HandleOrSerial()};
-  union { uint32_t expire; mutable SmallLock lock; };
+  union { mutable std::atomic<uint32_t> expireTime{}; mutable SmallLock lock; };
   int32_t dataSize{0};  // For file storage, negative means serialized object
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
   bool readOnly{false}; // Set for primed entries that will never change.
-  char padding[10];  // Make APCMap nodes cache-line sized (it static_asserts).
+  char padding[2];  // Make APCMap nodes cache-line sized (it static_asserts).
+  mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kIdleGenCount};
   uint32_t c_time{0}; // Creation time; 0 for primed values
   uint32_t mtime{0}; // Modification time
 };
@@ -160,6 +162,8 @@ struct EntryInfo {
     APCVec,
     APCDict,
     APCKeyset,
+    APCRFunc,
+    APCRClsMeth,
   };
 
   EntryInfo(const char* apckey,
@@ -271,12 +275,32 @@ struct ConcurrentTableSharedStore {
   bool exists(const String& key);
 
   /*
+   * Extend the expiration time to now + new_ttl if that is longer than
+   * the current TTL (or to infinity if new_ttl is zero). Returns true if
+   * it succeeds (the key exists in apc, is unexpired, and the expiration
+   * was actually adjusted), false otherwise.
+   */
+  bool bumpTTL(const String& key, int64_t new_ttl);
+
+  /*
+   * Returns the size of an entry if it exists. Sets `found` to true if it
+   * exists and false if not.
+   */
+  int64_t size(const String& key, bool& found);
+
+  /*
    * Remove the specified key, if it exists in the table.
    *
    * Returns: false if the key was not in the table, true if the key was in the
    * table **even if it was expired**.
    */
   bool eraseKey(const String& key);
+
+  /*
+   * Schedule deletion of expired entries.
+   */
+  void purgeExpired();
+  void purgeDeferred(req::vector<StringData*>&&);
 
   /*
    * Clear the entire APC table.
@@ -307,7 +331,18 @@ struct ConcurrentTableSharedStore {
     KeyAndMeta
   };
   void dump(std::ostream& out, DumpMode dumpMode);
-
+  /**
+   * Dump up to count keys that begin with the given prefix. This is a subset
+   * of what the dump `KeyAndValue` command would do.
+   */
+  void dumpPrefix(std::ostream& out, const std::string &prefix, uint32_t count);
+  /**
+   * Dump all non-primed keys that begin with one of the prefixes. Different
+   * keys are separated by \n in the output stream. Keys containing \r or \n
+   * will not be included.
+   */
+  void dumpKeysWithPrefixes(std::ostream& out,
+                            const std::vector<std::string>& prefixes);
   /*
    * Dump random key and entry size to output stream
    */
@@ -336,7 +371,7 @@ private:
   }
 
   static StringData* getStringData(const char* s) {
-    assert(reinterpret_cast<intptr_t>(s) < 0);
+    assertx(reinterpret_cast<intptr_t>(s) < 0);
     return reinterpret_cast<StringData*>(-reinterpret_cast<intptr_t>(s));
   }
 
@@ -347,18 +382,18 @@ private:
 private:
   struct CharHashCompare {
     bool equal(const char* s1, const char* s2) const {
-      assert(s1 && s2);
+      assertx(s1 && s2);
       // tbb implementation call equal with the second pointer being the
       // value in the table and thus not a StringData*. We are asserting
       // to make sure that is the case
-      assert(!isTaggedStringData(s2));
+      assertx(!isTaggedStringData(s2));
       if (isTaggedStringData(s1)) {
         s1 = getStringData(s1)->data();
       }
       return strcmp(s1, s2) == 0;
     }
     size_t hash(const char* s) const {
-      assert(s);
+      assertx(s);
       return isTaggedStringData(s) ? getStringData(s)->hash() :
              StringData::hash(s, strlen(s));
     }
@@ -367,13 +402,13 @@ private:
 private:
   template<typename Key, typename T, typename HashCompare>
   struct APCMap :
-      tbb::concurrent_hash_map<Key,T,HashCompare,HugeAllocator<char>> {
+      tbb::concurrent_hash_map<Key,T,HashCompare,APCAllocator<char>> {
     // Append a random entry to 'entries'. The map must be non-empty and not
     // concurrently accessed. Returns false if this operation is not supported.
     bool getRandomAPCEntry(std::vector<EntryInfo>& entries);
 
     using node = typename tbb::concurrent_hash_map<Key,T,HashCompare,
-                                                   HugeAllocator<char>>::node;
+                                                   APCAllocator<char>>::node;
     static_assert(sizeof(node) == 64, "Node should be cache-line sized");
   };
 
@@ -388,9 +423,9 @@ private:
   };
 
 private:
+  bool deferredExpire(const String& keyStr, Map::const_accessor& acc);
   bool eraseImpl(const char*, bool, int64_t, ExpMap::accessor* expAcc);
   bool storeImpl(const String&, const Variant&, int64_t, bool, bool);
-  void purgeExpired();
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
   APCHandle* unserialize(const String&, StoreValue*);
   void dumpKeyAndValue(std::ostream&);
@@ -434,8 +469,7 @@ private:
   tbb::concurrent_priority_queue<ExpirationPair,
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
-  std::atomic<uint64_t> m_purgeCounter{0};
-
+  std::atomic<time_t> m_lastPurgeTime{0};
   std::unique_ptr<SnapshotLoader> m_snapshotLoader;
 };
 
@@ -443,4 +477,3 @@ private:
 
 }
 
-#endif

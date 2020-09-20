@@ -46,24 +46,28 @@ function main() {
   try { var_dump(dict[1.234 => 123] === dict[5.678 => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   try { var_dump(dict[null => 123] === dict[null => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 
-  var_dump([dict[0 => 123], dict[0 => '123']] == [dict[0 => '123'], dict[0 => 123]]);
-  var_dump([dict[0 => 123], dict[0 => '123']] != [dict[0 => '123'], dict[0 => 123]]);
-  var_dump([dict[0 => 123], dict[0 => '123']] === [dict[0 => '123'], dict[0 => 123]]);
-  var_dump([dict[0 => 123], dict[0 => '123']] !== [dict[0 => '123'], dict[0 => 123]]);
-  try { var_dump([dict[0 => 123], dict[0 => '123']] < [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], dict[0 => '123']] <= [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], dict[0 => '123']] > [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], dict[0 => '123']] >= [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], dict[0 => '123']] <=> [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  var_dump(varray[dict[0 => 123], dict[0 => '123']] == varray[dict[0 => '123'], dict[0 => 123]]);
+  var_dump(varray[dict[0 => 123], dict[0 => '123']] != varray[dict[0 => '123'], dict[0 => 123]]);
+  var_dump(varray[dict[0 => 123], dict[0 => '123']] === varray[dict[0 => '123'], dict[0 => 123]]);
+  var_dump(varray[dict[0 => 123], dict[0 => '123']] !== varray[dict[0 => '123'], dict[0 => 123]]);
+  try { var_dump(varray[dict[0 => 123], dict[0 => '123']] < varray[dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], dict[0 => '123']] <= varray[dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], dict[0 => '123']] > varray[dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], dict[0 => '123']] >= varray[dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], dict[0 => '123']] <=> varray[dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 
-  var_dump([dict[0 => 123], vec['123']] == [vec['123'], dict[0 => 123]]);
-  var_dump([dict[0 => 123], vec['123']] != [vec['123'], dict[0 => 123]]);
-  var_dump([dict[0 => 123], vec['123']] === [vec['123'], dict[0 => 123]]);
-  var_dump([dict[0 => 123], vec['123']] !== [vec['123'], dict[0 => 123]]);
-  try { var_dump([dict[0 => 123], vec['123']] < [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], vec['123']] <= [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], vec['123']] > [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], vec['123']] >= [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
-  try { var_dump([dict[0 => 123], vec['123']] <=> [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  var_dump(varray[dict[0 => 123], vec['123']] == varray[vec['123'], dict[0 => 123]]);
+  var_dump(varray[dict[0 => 123], vec['123']] != varray[vec['123'], dict[0 => 123]]);
+  var_dump(varray[dict[0 => 123], vec['123']] === varray[vec['123'], dict[0 => 123]]);
+  var_dump(varray[dict[0 => 123], vec['123']] !== varray[vec['123'], dict[0 => 123]]);
+  try { var_dump(varray[dict[0 => 123], vec['123']] < varray[vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], vec['123']] <= varray[vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], vec['123']] > varray[vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], vec['123']] >= varray[vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(varray[dict[0 => 123], vec['123']] <=> varray[vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 }
+
+<<__EntryPoint>>
+function main_hphpc_literal() {
 main();
+}

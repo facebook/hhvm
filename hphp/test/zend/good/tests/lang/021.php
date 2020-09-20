@@ -1,9 +1,9 @@
-<?php 
-
+<?hh
+<<__EntryPoint>> function main(): void {
 for ($i=0; $i<=5; $i++)
 {
   echo "i=$i\n";
-  
+  $break_outer = false;
   switch($i) {
     case 0:
       echo "In branch 0\n";
@@ -16,7 +16,8 @@ for ($i=0; $i<=5; $i++)
       break;
     case 3:
       echo "In branch 3\n";
-      break 2;
+      $break_outer = true;
+      break;
     case 4:
       echo "In branch 4\n";
       break;
@@ -24,6 +25,7 @@ for ($i=0; $i<=5; $i++)
       echo "In default\n";
       break;
   }
+  if ($break_outer) break;
 }
 echo "hi\n";
-?>
+}

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1796() {
 chdir(__DIR__.'/../../..');
 
 $info = new SplFileInfo('test/sample_dir');
@@ -20,3 +23,4 @@ var_dump($info->getLinkTarget());
 var_dump($info->getRealPath());
 var_dump($info->getPath());
 var_dump($info->getPathName());
+}

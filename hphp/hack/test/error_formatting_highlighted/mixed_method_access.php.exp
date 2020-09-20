@@ -1,0 +1,11 @@
+Typing[4064] You are trying to access the method bar but this is a mixed value. Use a specific class or interface name. [1]
+-> Definition is here [2]
+
+mixed_method_access.php:4:9
+    1 | <?hh
+    2 | 
+[2] 3 | function mixed_method(mixed $foo): void {
+[1] 4 |   $foo->bar();
+    5 | }
+
+1 error found.

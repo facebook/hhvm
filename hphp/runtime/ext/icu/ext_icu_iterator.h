@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_ITERATOR_H
-#define incl_HPHP_ICU_ITERATOR_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -50,8 +49,8 @@ struct IntlIterator : IntlError {
 
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
     if (!c_IntlIterator) {
-      c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
-      assert(c_IntlIterator);
+      c_IntlIterator = Class::lookup(s_IntlIterator.get());
+      assertx(c_IntlIterator);
     }
     Object obj{c_IntlIterator};
     if (se) {
@@ -115,7 +114,7 @@ struct BugStringCharEnumeration : icu::StringEnumeration {
     return uenum_count(uenum, &status);
   }
 
-  const UnicodeString* snext(UErrorCode& status) override {
+  const icu::UnicodeString* snext(UErrorCode& status) override {
     int32_t length;
     const UChar* str = uenum_unext(uenum, &length, &status);
     if (str == 0 || U_FAILURE(status)) {
@@ -154,4 +153,3 @@ struct BugStringCharEnumeration : icu::StringEnumeration {
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_ITERATOR_H

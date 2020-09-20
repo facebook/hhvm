@@ -1,0 +1,2 @@
+File "trait_use_precedence_hack.php", line 15, characters 17-24:
+insteadof is a PHP feature that is unsupported in Hack (Naming[2103])

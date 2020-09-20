@@ -19,11 +19,6 @@ NULL
 sideEffect is called from 'nonLocalBase'
 string(1) "z"
 
-= varNameBase:
-
-sideEffect is called from 'varNameBase'
-NULL
-
 = xhpAttr:
 
 NULL

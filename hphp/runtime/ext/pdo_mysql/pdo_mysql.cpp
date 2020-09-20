@@ -36,6 +36,10 @@
 
 namespace HPHP {
 
+#if MYSQL_VERSION_ID >= 80004
+using my_bool = bool;
+#endif
+
 struct PDOMySqlStatement;
 
 IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_mysql, 1.0.2);
@@ -54,7 +58,7 @@ struct PDOMySqlError {
 
 struct PDOMySqlConnection : PDOConnection {
   PDOMySqlConnection();
-  virtual ~PDOMySqlConnection();
+  ~PDOMySqlConnection() override;
 
   bool create(const Array& options) override;
 
@@ -105,7 +109,7 @@ struct PDOMySqlStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOMySqlStatement);
 
   PDOMySqlStatement(req::ptr<PDOMySqlResource>&& conn, MYSQL* server);
-  virtual ~PDOMySqlStatement();
+  ~PDOMySqlStatement() override;
 
   bool create(const String& sql, const Array& options);
 
@@ -486,7 +490,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
   if (stmt && stmt->stmt()) {
     pdo_raise_impl_error(stmt->dbh, nullptr, pdo_err[0], einfo->errmsg);
   } else {
-    Array info = Array::Create();
+    Array info = Array::CreateVArray();
     info.append(String(*pdo_err, CopyString));
     if (stmt) {
       stmt->dbh->conn()->fetchErr(stmt, info);
@@ -494,7 +498,7 @@ int PDOMySqlConnection::handleError(const char *file, int line,
       info.append(Variant((unsigned long) einfo->errcode));
       info.append(String(einfo->errmsg, CopyString));
     }
-    throw_pdo_exception(String(*pdo_err, CopyString), info,
+    throw_pdo_exception(info,
                         "SQLSTATE[%s] [%d] %s",
                         pdo_err[0], einfo->errcode, einfo->errmsg);
   }
@@ -570,11 +574,11 @@ bool PDOMySqlConnection::begin() {
 }
 
 bool PDOMySqlConnection::commit() {
-  return mysql_commit(m_server) >= 0;
+  return !mysql_commit(m_server);
 }
 
 bool PDOMySqlConnection::rollback() {
-  return mysql_rollback(m_server) >= 0;
+  return !mysql_rollback(m_server);
 }
 
 bool PDOMySqlConnection::setAttribute(int64_t attr, const Variant& value) {
@@ -957,7 +961,7 @@ bool PDOMySqlStatement::support(SupportedMethod method) {
 }
 
 int PDOMySqlStatement::handleError(const char *file, int line) {
-  assert(m_conn);
+  assertx(m_conn);
   return m_conn->handleError(file, line, this);
 }
 
@@ -1116,7 +1120,7 @@ bool PDOMySqlStatement::getColumn(int colno, Variant &value) {
 bool PDOMySqlStatement::paramHook(PDOBoundParam* param,
                                   PDOParamEvent event_type) {
   MYSQL_BIND *b;
-  if (m_stmt && param->is_param) {
+  if (m_stmt) {
     switch (event_type) {
     case PDO_PARAM_EVT_ALLOC:
       /* sanity check parameter number range */
@@ -1225,7 +1229,7 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
     return false;
   }
 
-  Array flags = Array::Create();
+  Array flags = Array::CreateVArray();
 
   const MYSQL_FIELD *F = m_fields + colno;
   if (F->def) {

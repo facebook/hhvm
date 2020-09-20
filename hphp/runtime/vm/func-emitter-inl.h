@@ -21,21 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class SerDe>
-void EHEntEmitter::serde(SerDe& sd) {
-  sd(m_type)
-    (m_base)
-    (m_past)
-    (m_iterId)
-    (m_handler)
-    (m_end)
-    (m_itRef)
-    (m_parentIndex)
-    ;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 inline UnitEmitter& FuncEmitter::ue() const {
   return m_ue;
 }
@@ -49,8 +34,12 @@ inline int FuncEmitter::sn() const {
 }
 
 inline Id FuncEmitter::id() const {
-  assert(m_pce == nullptr);
+  assertx(m_pce == nullptr);
   return m_id;
+}
+
+inline bool FuncEmitter::useGlobalIds() const {
+  return m_ue.useGlobalIds();
 }
 
 inline void FuncEmitter::setIds(int sn, Id id) {
@@ -66,15 +55,12 @@ inline Id FuncEmitter::numLocals() const {
 }
 
 inline Id FuncEmitter::numNamedLocals() const {
-  return m_numLocals - m_numUnnamedLocals;
+  // Don't use m_numUnnamedLocals here, it isn't serialized to the repo
+  return m_localNames.size();
 }
 
 inline Id FuncEmitter::numIterators() const {
   return m_numIterators;
-}
-
-inline Id FuncEmitter::numClsRefSlots() const {
-  return m_numClsRefSlots;
 }
 
 inline Id FuncEmitter::numLiveIterators() const {
@@ -82,7 +68,7 @@ inline Id FuncEmitter::numLiveIterators() const {
 }
 
 inline void FuncEmitter::setNumIterators(Id numIterators) {
-  assert(m_numIterators == 0);
+  assertx(m_numIterators == 0);
   m_numIterators = numIterators;
 }
 
@@ -90,30 +76,19 @@ inline void FuncEmitter::setNumLiveIterators(Id id) {
   m_nextFreeIterator = id;
 }
 
-inline void FuncEmitter::setNumClsRefSlots(Id num) {
-  assert(m_numClsRefSlots == 0);
-  m_numClsRefSlots = num;
-}
-
 inline bool FuncEmitter::hasVar(const StringData* name) const {
-  assert(name != nullptr);
-  return m_localNames.find(name) != m_localNames.end();
+  assertx(name != nullptr);
+  return m_localNames.contains(name);
 }
 
 inline Id FuncEmitter::lookupVarId(const StringData* name) const {
-  assert(hasVar(name));
+  assertx(hasVar(name));
   return m_localNames.find(name)->second;
-}
-
-inline void FuncEmitter::freeUnnamedLocal(Id id) {
-  assertx(m_activeUnnamedLocals > 0);
-  assertx(id == numNamedLocals() - 1 + m_activeUnnamedLocals);
-  --m_activeUnnamedLocals;
 }
 
 inline void FuncEmitter::freeIterator(Id id) {
   --m_nextFreeIterator;
-  assert(id == m_nextFreeIterator);
+  assertx(id == m_nextFreeIterator);
 }
 
 inline void FuncEmitter::appendParam(const StringData* name,
@@ -129,20 +104,12 @@ inline const Func::NamedLocalsMap::Builder& FuncEmitter::localNameMap() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Helper accessors.
 
-inline bool FuncEmitter::isPseudoMain() const {
-  return name->empty();
-}
-
 inline bool FuncEmitter::isMethod() const {
-  return !isPseudoMain() && pce();
+  return pce();
 }
 
 inline bool FuncEmitter::isVariadic() const {
   return params.size() && params[(params.size() - 1)].isVariadic();
-}
-
-inline bool FuncEmitter::isVariadicByRef() const {
-  return isVariadic() && params[(params.size() -1)].byRef;
 }
 
 inline std::pair<int,int> FuncEmitter::getLocation() const {
@@ -157,48 +124,12 @@ inline void FuncEmitter::setLocation(int l1, int l2) {
   line2 = l2;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-// Serialization/Deserialization
+// Bytecode.
 
-template<class SerDe>
-void FuncEmitter::serdeMetaData(SerDe& sd) {
-  // NOTE: name, top, and a few other fields currently handled outside of this.
-  Offset past_delta;
-  if (!SerDe::deserializing) {
-    past_delta = past - base;
-  }
-
-  sd(line1)
-    (line2)
-    (base)
-    (past_delta)
-    (attrs)
-    (hniReturnType)
-    (repoReturnType)
-    (repoAwaitedReturnType)
-    (docComment)
-    (m_numLocals)
-    (m_numIterators)
-    (m_numClsRefSlots)
-    (maxStackCells)
-    (m_repoBoolBitset)
-
-    (params)
-    (m_localNames)
-    (staticVars)
-    (ehtab)
-    (fpitab)
-    (userAttributes)
-    (retTypeConstraint)
-    (retUserType)
-    (originalFilename)
-    ;
-
-  if (SerDe::deserializing) {
-    repoReturnType.resolveArray(ue());
-    repoAwaitedReturnType.resolveArray(ue());
-    past = base + past_delta;
-  }
+inline Offset FuncEmitter::offsetOf(const unsigned char* pc) const {
+  return pc - ue().bc();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

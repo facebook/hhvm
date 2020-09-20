@@ -6,7 +6,7 @@
 // We need this because some collections are not ordered.
 function printNormalized(ImmVector $fv) {
   $v = new Vector($fv);
-  sort($v); // sorting not supported for FV yet...
+  sort(inout $v); // sorting not supported for FV yet...
   foreach ($v as $e) {
     var_dump($e);
   }
@@ -34,4 +34,8 @@ function main() {
   testFromImmVector();
 }
 
+
+<<__EntryPoint>>
+function main_materialization() {
 main();
+}

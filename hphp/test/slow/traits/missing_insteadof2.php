@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T1 {
   function foo() {echo "T1\n";}
 }
@@ -10,3 +10,4 @@ class C {
     T1::foo insteadof T2;
   }
 }
+

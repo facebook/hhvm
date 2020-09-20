@@ -1,4 +1,4 @@
-<?php
+<?hh
 abstract class base {
   public $a = 'base';
 
@@ -11,4 +11,3 @@ class test extends base {
   public function __clone() {}
 }
 
-?>

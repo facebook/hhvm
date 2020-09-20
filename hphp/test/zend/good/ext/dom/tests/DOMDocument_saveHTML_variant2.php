@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $d = new DOMDocument();
 $str = <<<EOD
 <html>
@@ -14,3 +14,4 @@ $e = $d->getElementsByTagName("p");
 $e = $e->item(0);
 echo $d->saveXml($e),"\n";
 echo $d->saveHtml($e),"\n";
+}

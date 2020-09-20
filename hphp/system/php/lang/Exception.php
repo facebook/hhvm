@@ -1,6 +1,8 @@
-<?php
+<?hh // partial
 
-class Exception implements \__SystemLib\Throwable {
+namespace {
+
+class Exception implements Throwable {
   use \__SystemLib\BaseException;
 
   private static $traceOpts = 0;
@@ -24,8 +26,9 @@ class Exception implements \__SystemLib\Throwable {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
+  <<__Pure>>
   public function __construct($message = '', $code = 0,
-                              \__SystemLib\Throwable $previous = null) {
+                              <<__MaybeMutable>> ?Throwable $previous = null) {
 
     // Child classes may just override the protected property
     // without implementing a constructor or calling parent one.
@@ -41,4 +44,8 @@ class Exception implements \__SystemLib\Throwable {
 
     $this->previous = $previous;
   }
+}
+
+class DivisionByZeroException extends Exception {}
+
 }

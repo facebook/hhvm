@@ -1,0 +1,2 @@
+Warning: runtime/ext_thrift: Output buffer has 14 unflushed bytes in %s/slow/thrift/range_check_exception.php on line 50
+Value 2147483648 is out of range in field 1 of TestStruct

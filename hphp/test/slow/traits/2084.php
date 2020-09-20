@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 trait Too {
-  function bar() {
+  static function bar() {
     $abc = 123;
-    $a = function ($abc) use (&$abc, &$abc) {
+    $a = function ($abc) use ($abc, $abc) {
       var_dump($abc);
     }
 ;
@@ -13,5 +13,9 @@ trait Too {
 class Foo {
  use Too;
  }
+
+<<__EntryPoint>>
+function main_2084() {
 $a = Foo::bar();
 $a(456);
+}

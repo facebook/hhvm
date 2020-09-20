@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_register_postsend_function_exit() {
 register_postsend_function(function () {
     var_dump('first');
 });
@@ -17,3 +20,4 @@ register_postsend_function(function () {
 register_postsend_function(function () {
     var_dump('fourth');
 });
+}

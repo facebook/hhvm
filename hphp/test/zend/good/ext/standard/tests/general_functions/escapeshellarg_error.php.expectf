@@ -2,26 +2,21 @@
 
 -- Testing escapeshellarg() function with no arguments --
 
-Warning: %s
-NULL
+Warning: escapeshellarg() expects exactly 1 parameter, 0 given in %s/escapeshellarg_error.php on line 16
 
 -- Testing escapeshellarg() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: escapeshellarg() expects exactly 1 parameter, 2 given in %s/escapeshellarg_error.php on line 21
 
 -- Testing escapeshellarg() function with a object supplied for argument --
 
-Warning: %s
-NULL
+Warning: escapeshellarg() expects parameter 1 to be string, object given in %s/escapeshellarg_error.php on line 30
 
 -- Testing escapeshellarg() function with a resource supplied for argument --
 
-Warning: %s
-NULL
+Warning: escapeshellarg() expects parameter 1 to be string, resource given in %s/escapeshellarg_error.php on line 34
 
 -- Testing escapeshellarg() function with a array supplied for argument --
 
-Warning: %s
-NULL
+Warning: escapeshellarg() expects parameter 1 to be string, %rv?%rarray given in %s/escapeshellarg_error.php on line 39
 ===Done===

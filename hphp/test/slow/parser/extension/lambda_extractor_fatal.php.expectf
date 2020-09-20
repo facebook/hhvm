@@ -1,0 +1,23 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Files with multiple lambdas on the same line are not supported' in %s
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 (): Closure$HH\ExperimentalParserUtils\find_all_functions()
+#2 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#3 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#4 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#5 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#6 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#7 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#8 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#9 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#10 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#11 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#12 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#13 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#14 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#15 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#16 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#17 (): HH\ExperimentalParserUtils\ffp_json_dfs()
+#18 %s/lambda_extractor_fatal.php(6): HH\ExperimentalParserUtils\find_all_functions()
+#19 (): main()
+#20 {main}

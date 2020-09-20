@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_pqueue_clone() {
 $queue = new SplPriorityQueue();
 $queue->insert('first', 1);
 $queue->insert('second', 2);
@@ -21,4 +24,5 @@ echo "Clone items: " . $clone->count() . PHP_EOL;
 echo "Clone:".PHP_EOL;
 for ($i = 0; $i < 3; $i++) {
   echo ' ' . $clone->extract() . PHP_EOL;
+}
 }

@@ -1,54 +1,68 @@
 *** Testing convert_uuencode() function: with unexpected inputs for 'data' argument ***
 -- Iteration 1 --
-string(16) "212c6060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 2 --
-string(16) "212c3060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 3 --
-string(16) "232c4334550a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 4 --
-string(16) "232c4334560a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 5 --
-string(40) "2a2c4324542d5330582c5338542d5060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 6 --
-string(40) "2b2b3328512d233c542e232c562d2340600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 7 --
-string(24) "242c33604e2d3060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 8 --
-string(24) "252b3328502b4334600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 9 --
-string(40) "2c2c3360512c432c542d3338572c2360500a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 10 --
 
-Warning: %s
-string(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 11 --
 
-Warning: %s
-string(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 12 --
 
-Warning: %s
-string(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 13 --
-string(16) "212c3060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 14 --
-string(0) ""
+
+Warning: convert_uuencode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 15 --
-string(16) "212c3060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 16 --
-string(0) ""
+
+Warning: convert_uuencode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 17 --
-string(0) ""
+
+Warning: convert_uuencode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 18 --
-string(0) ""
+
+Warning: convert_uuencode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 19 --
-string(48) "2d3c56254d3c26514528265d423a4635433d6060600a600a"
+
+Warning: convert_uuencode() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 20 --
 
-Warning: %s
-string(0) ""
+Warning: convert_uuencode() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 21 --
-string(0) ""
+
+Warning: convert_uuencode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 -- Iteration 22 --
-string(0) ""
+
+Warning: convert_uuencode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/convert_uuencode_variation1.php on line 72
 ===DONE===

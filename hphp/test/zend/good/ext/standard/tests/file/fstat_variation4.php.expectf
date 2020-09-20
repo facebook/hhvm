@@ -1,16 +1,11 @@
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, double given in %s/fstat_variation4.php on line 12
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, double given in %s/fstat_variation4.php on line 12
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, double given in %s/fstat_variation4.php on line 12
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, double given in %s/fstat_variation4.php on line 12
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, double given in %s/fstat_variation4.php on line 12
 ===DONE===

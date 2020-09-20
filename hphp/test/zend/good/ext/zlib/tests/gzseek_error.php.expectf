@@ -1,10 +1,7 @@
 
-Warning: %s
-bool(false)
+Warning: gzseek() expects at most 3 parameters, 4 given in %s/gzseek_error.php on line 8
 
-Warning: %s
-bool(false)
+Warning: gzseek() expects at least 2 parameters, 1 given in %s/gzseek_error.php on line 9
 
-Warning: %s
-bool(false)
+Warning: gzseek() expects at least 2 parameters, 0 given in %s/gzseek_error.php on line 10
 ===DONE===

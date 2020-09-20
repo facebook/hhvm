@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $filename= './php.webp';
 
 // Create a blank image and add some text
@@ -26,3 +26,4 @@ if ($header["length"] != $size) echo "The length specified in the image header i
 fclose($fp);
 unlink($filename);
 echo "OK!\n";
+}

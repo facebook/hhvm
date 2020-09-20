@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
 }
@@ -11,4 +11,8 @@ function foo() {
   $x = new X;
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_1305() {
 foo();
+}

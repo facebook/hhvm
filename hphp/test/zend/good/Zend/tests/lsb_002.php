@@ -1,37 +1,37 @@
-<?php
+<?hh
 
 class TestClass {
-	protected static $staticVar = 'TestClassStatic';
-	const CLASS_CONST = 'TestClassConst';
+    protected static $staticVar = 'TestClassStatic';
+    const CLASS_CONST = 'TestClassConst';
 
-	protected static function staticFunction() {
-		return 'TestClassFunction';
-	}
-	
-	public function testStaticVar() {
-		return static::$staticVar;
-	}
+    protected static function staticFunction() {
+        return 'TestClassFunction';
+    }
 
-	public function testClassConst() {
-		return static::CLASS_CONST;
-	}
+    public function testStaticVar() {
+        return static::$staticVar;
+    }
 
-	public function testStaticFunction() {
-		return static::staticFunction();
-	}
+    public function testClassConst() {
+        return static::CLASS_CONST;
+    }
+
+    public function testStaticFunction() {
+        return static::staticFunction();
+    }
 }
 
 class ChildClass1 extends TestClass {
-	protected static $staticVar = 'ChildClassStatic';
-	const CLASS_CONST = 'ChildClassConst';
+    protected static $staticVar = 'ChildClassStatic';
+    const CLASS_CONST = 'ChildClassConst';
 
-	protected static function staticFunction() {
-		return 'ChildClassFunction';
-	}
+    protected static function staticFunction() {
+        return 'ChildClassFunction';
+    }
 }
 
 class ChildClass2 extends TestClass {}
-
+<<__EntryPoint>> function main(): void {
 $testClass = new TestClass();
 $childClass1 = new ChildClass1();
 $childClass2 = new ChildClass2();
@@ -48,5 +48,5 @@ echo $childClass1->testStaticFunction() . "\n";
 echo $childClass2->testStaticVar() . "\n";
 echo $childClass2->testClassConst() . "\n";
 echo $childClass2->testStaticFunction() . "\n";
-?>
-==DONE==
+echo "==DONE==";
+}

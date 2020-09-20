@@ -1,5 +1,7 @@
-<?php
-$HTTP_RAW_POST_DATA = <<<EOF
+<?hh
+<<__EntryPoint>>
+function entrypoint_T42(): void {
+  \HH\global_set('HTTP_RAW_POST_DATA', <<<EOF
 <?xml version="1.0"?>
 <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"
               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -25,6 +27,8 @@ $HTTP_RAW_POST_DATA = <<<EOF
     </test:echoStructArray>
   </env:Body>
 </env:Envelope>
-EOF;
-include "soap12-test.inc";
-?>
+EOF
+);
+  include "soap12-test.inc";
+  test();
+}

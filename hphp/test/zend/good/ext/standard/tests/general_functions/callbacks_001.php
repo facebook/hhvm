@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     public static function who() {
         echo "A\n";
@@ -17,16 +17,16 @@ class B extends A {
 class C extends B {
     public function call($cb) {
         echo join('|', $cb) . "\n";
-        call_user_func($cb);
+        $cb();
     }
     public function test() {
-        $this->call(array('parent', 'who'));
-        $this->call(array('C', 'parent::who'));
-        $this->call(array('B', 'parent::who'));
-        $this->call(array('E', 'parent::who'));
-        $this->call(array('A', 'who'));
-        $this->call(array('C', 'who'));
-        $this->call(array('B', 'who2'));
+        $this->call(varray['parent', 'who']);
+        $this->call(varray['C', 'parent::who']);
+        $this->call(varray['B', 'parent::who']);
+        $this->call(varray['E', 'parent::who']);
+        $this->call(varray['A', 'who']);
+        $this->call(varray['C', 'who']);
+        $this->call(varray['B', 'who2']);
     }
 }
 
@@ -41,9 +41,6 @@ class E extends D {
         echo "E\n";
     }
 }
-
-$o = new C;
-$o->test();
 
 class O {
     public function who() {
@@ -60,20 +57,22 @@ class P extends O {
     }
     public function call($cb) {
         echo join('|', $cb) . "\n";
-        call_user_func($cb);
+        $cb();
     }
     public function test() {
-        $this->call(array('parent', 'who'));
-        $this->call(array('P', 'parent::who'));
-        $this->call(array($this, 'O::who'));
-        $this->call(array($this, 'B::who'));
+        $this->call(varray['parent', 'who']);
+        $this->call(varray['P', 'parent::who']);
+        $this->call(varray[$this, 'O::who']);
     }
 }
+<<__EntryPoint>> function main(): void {
+$o = new C;
+$o->test();
 
 echo "===FOREIGN===\n";
 
 $o = new P;
 $o->test();
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

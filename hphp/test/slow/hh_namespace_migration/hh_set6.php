@@ -9,4 +9,8 @@ function main() {
   var_dump($s2->count());
 }
 
+
+<<__EntryPoint>>
+function main_hh_set6() {
 main();
+}

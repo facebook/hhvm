@@ -5,7 +5,7 @@
  * that aren't isConst().
  */
 function ar() { return null; }
-function foo() {
+<<__EntryPoint>> function foo(): void {
   $x = ar();
   echo $x != true;
   echo "\n";
@@ -16,4 +16,3 @@ function foo() {
   echo $x == false;
   echo "\n";
 }
-foo();

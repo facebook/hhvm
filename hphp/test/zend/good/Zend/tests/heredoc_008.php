@@ -1,7 +1,6 @@
-<?php
+<?hh
 
-require_once 'nowdoc.inc';
-
+<<__EntryPoint>> function main(): void {
 print <<<ENDOFHEREDOC
 ENDOFHEREDOC;
 
@@ -9,5 +8,4 @@ $x = <<<ENDOFHEREDOC
 ENDOFHEREDOC;
 
 print "{$x}";
-
-?>
+}

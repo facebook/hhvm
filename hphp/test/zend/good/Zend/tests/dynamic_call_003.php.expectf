@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Function name must be a string in %s/dynamic_call_003.php on line 6

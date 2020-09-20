@@ -1,4 +1,4 @@
-object(stdClass)#%d (3) {
+object(stdClass) (3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -6,7 +6,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   string(1) "c"
 }
-object(foo)#%d (3) {
+object(foo) (3) {
   ["a"]=>
   string(1) "a"
   ["b":"foo":private]=>

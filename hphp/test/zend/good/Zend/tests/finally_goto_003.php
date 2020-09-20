@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
 	try {
     } finally {
@@ -6,5 +6,7 @@ function foo() {
 test:
     }
 }
+
+<<__EntryPoint>> function main(): void {
 echo "okey";
-?>
+}

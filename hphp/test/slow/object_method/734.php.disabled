@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
 var_dump(is_callable('A::a_spub'));

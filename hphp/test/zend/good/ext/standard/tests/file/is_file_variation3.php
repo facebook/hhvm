@@ -1,16 +1,16 @@
-<?php
+<?hh
 /* Prototype: bool is_file ( string $filename );
    Description: Tells whether the filename is a regular file
      Returns TRUE if the filename exists and is a regular file
 */
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
+<<__EntryPoint>> function main(): void {
 
-$file_path = dirname(__FILE__);
-$file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
+$file_handle = fopen(__SystemLib\hphp_test_tmppath('is_file_variation3.tmp'), "w");
 
 echo "*** Testing Invalid file types ***\n";
-$filenames = array(
+$filenames = varray[
   /* Invalid filenames */
   -2.34555,
   " ",
@@ -23,19 +23,16 @@ $filenames = array(
   /* scalars */
   1234,
   0
-);
+];
    
 /* loop through to test each element the above array */
 foreach( $filenames as $filename ) {
-  var_dump( is_file($filename) );
+  try { var_dump( is_file($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   clearstatcache();
 }
 fclose($file_handle);
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
-$file_path = dirname(__FILE__);
-unlink($file_path."/is_file_variation3.tmp");
-?>
+
+unlink(__SystemLib\hphp_test_tmppath('is_file_variation3.tmp'));
+}

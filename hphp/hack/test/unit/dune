@@ -1,0 +1,25 @@
+(library
+  (name unit_test)
+  (wrapped false)
+  (modules unit_test)
+  (libraries utils_core))
+
+(executable
+  (name server_tests)
+  (modules server_tests)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
+  (libraries 
+    asserter
+    decl
+    default_injector_config
+    parsing_service
+    provider_utils
+    server_monitor
+    telemetry
+    typing_check
+    unit_test))
+
+(alias
+  (name server_tests)
+  (deps %{exe:server_tests.exe})
+  (action (run %{exe:server_tests.exe})))

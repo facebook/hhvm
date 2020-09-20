@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $data = "openssl_decrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";
@@ -14,10 +14,10 @@ var_dump(openssl_decrypt($wrong, $method, $password));
 var_dump(openssl_decrypt($wrong, $wrong, $password));
 var_dump(openssl_decrypt($encrypted, $wrong, $wrong));
 var_dump(openssl_decrypt($wrong, $wrong, $wrong));
-var_dump(openssl_decrypt(array(), $method, $password));
-var_dump(openssl_decrypt($encrypted, array(), $password));
-var_dump(openssl_decrypt($encrypted, $method, array()));
+try { var_dump(openssl_decrypt(varray[], $method, $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(openssl_decrypt($encrypted, varray[], $password)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(openssl_decrypt($encrypted, $method, varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // invalid using of an authentication tag
-var_dump(openssl_encrypt($data, $method, $password, 0, $iv, $wrong));
-?>
+var_dump(openssl_encrypt_with_tag($data, $method, $password, 0, $iv, inout $wrong));
+}

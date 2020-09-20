@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
  * Description: Produces output according to format .
  * Source code: ext/standard/formatted_print.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing printf() : basic functionality - using exponential format ***\n";
 
 // Initialise all required variables
@@ -34,5 +34,5 @@ echo "\n-- Calling printf() with three arguments --\n";
 $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
-?>
-===DONE===
+echo "===DONE===\n";
+}

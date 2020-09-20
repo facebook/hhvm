@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL | E_STRICT);
+<?hh
 
 class BaseWithPropA {
   private $hello = 0;
@@ -28,13 +27,16 @@ class SubclassB extends BaseWithTPropB {
     use AHelloProperty;
 }
 
-$classic = new SubclassClassicInheritance;
-var_dump($classic);
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(E_ALL | E_STRICT);
 
-$a = new SubclassA;
-var_dump($a);
+  $classic = new SubclassClassicInheritance;
+  var_dump($classic);
 
-$b = new SubclassB;
-var_dump($b);
+  $a = new SubclassA;
+  var_dump($a);
 
-?>
+  $b = new SubclassB;
+  var_dump($b);
+}

@@ -1,0 +1,6 @@
+File "reactivity_check.php", line 16, characters 15-15:
+Invalid argument (Typing[4110])
+File "reactivity_check.php", line 5, characters 38-43:
+Expected `string`
+File "reactivity_check.php", line 16, characters 15-15:
+But got `int`

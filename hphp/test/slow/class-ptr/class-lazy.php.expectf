@@ -1,0 +1,11 @@
+class(Bar)
+vec(2) {
+  class(Bar)
+  class(Fizz)
+}
+class(Foo)
+string(2) "sm"
+int(10)
+string(1) "m"
+
+Fatal error: Class undefined: Fizz in %s/class-lazy.php on line 27

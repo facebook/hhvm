@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. http://3v4l.org/FtFt6
 
 class MyElement extends DOMElement {
@@ -10,10 +10,6 @@ class MyElement extends DOMElement {
     echo "Initializing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
 
     return $this;
-  }
-
-  function __destruct() {
-    echo "Destructing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
   }
 
   function info() {
@@ -50,6 +46,10 @@ function bar() {
   echo "Leave bar()\n";
 }
 
+
+<<__EntryPoint>>
+function main_dom_node_destruction_v2() {
 echo "Enter main()\n";
 bar();
 echo "Leave main()\n";
+}

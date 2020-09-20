@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
  * Description: Sets the current substitute_character or returns the current substitute_character 
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substitute_character() : error conditions ***\n";
 
 
@@ -12,7 +12,7 @@ echo "*** Testing mb_substitute_character() : error conditions ***\n";
 echo "\n-- Testing mb_substitute_character() function with more than expected no. of arguments --\n";
 $substchar = 1;
 $extra_arg = 10;
-var_dump( mb_substitute_character($substchar, $extra_arg) );
+try { var_dump( mb_substitute_character($substchar, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

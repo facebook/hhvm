@@ -1,0 +1,2 @@
+--count=3
+-vServer.APC.DeferredExpiration=true

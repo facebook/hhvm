@@ -1,0 +1,116 @@
+Fanout calculation on line 43
+{'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
+ 'debug': {'dependencies': [{'hash': '1031499755', 'variant': 'Class Foo'}],
+           'fanout_dependents': ['1031499755', '1765419678'],
+           'relevant_dep_edges': [{'dependency': {'hash': '279114898',
+                                                  'variant': 'Cstr Foo'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '655429720',
+                                                  'variant': 'Method '
+                                                             'Bar::someMethod'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '578728560',
+                                                  'variant': 'Method '
+                                                             'Foo::getSomething'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '348143465',
+                                                  'variant': 'Class Bar'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '1031499755',
+                                                  'variant': 'Class Foo'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '1889107515',
+                                                  'variant': 'Class Throwable'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}},
+                                  {'dependency': {'hash': '896686089',
+                                                  'variant': 'Class Exception'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}},
+                                  {'dependency': {'hash': '2069089808',
+                                                  'variant': 'Cstr Exception'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}},
+                                  {'dependency': {'hash': '348143465',
+                                                  'variant': 'Class Bar'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}}]},
+ 'explanations': {'foo.php': {'added_symbols': [],
+                              'modified_symbols': [{'name': '\\Foo',
+                                                    'num_outgoing_edges': 2,
+                                                    'outgoing_files': ['uses_foo.php',
+                                                                       'foo.php'],
+                                                    'type': 'FileInfo.Class'}],
+                              'removed_symbols': []}},
+ 'files': ['foo.php', 'uses_foo.php'],
+ 'telemetry': '<telemetry-redacted-for-test>'}
+
+Typecheck for change set on line 44
+No errors!
+(Additionally, hh_fanout errors matched hh_server errors.)
+
+Fanout calculation on line 55
+{'cursor': 'cursor,4,integration-test,<hash-redacted-for-test>',
+ 'debug': {'dependencies': [{'hash': '1031499755', 'variant': 'Class Foo'}],
+           'fanout_dependents': ['1031499755', '1765419678'],
+           'relevant_dep_edges': [{'dependency': {'hash': '279114898',
+                                                  'variant': 'Cstr Foo'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '348136505',
+                                                  'variant': 'Class Baz'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '578728560',
+                                                  'variant': 'Method '
+                                                             'Foo::getSomething'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '348136505',
+                                                  'variant': 'Class Baz'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}},
+                                  {'dependency': {'hash': '1031499755',
+                                                  'variant': 'Class Foo'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '1889107515',
+                                                  'variant': 'Class Throwable'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}},
+                                  {'dependency': {'hash': '896686089',
+                                                  'variant': 'Class Exception'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}},
+                                  {'dependency': {'hash': '787900680',
+                                                  'variant': 'Method '
+                                                             'Baz::someMethod'},
+                                   'dependent': {'hash': '1765419678',
+                                                 'variant': 'Fun uses_foo'}},
+                                  {'dependency': {'hash': '2069089808',
+                                                  'variant': 'Cstr Exception'},
+                                   'dependent': {'hash': '1031499755',
+                                                 'variant': 'Class Foo'}}]},
+ 'explanations': {'foo.php': {'added_symbols': [],
+                              'modified_symbols': [{'name': '\\Foo',
+                                                    'num_outgoing_edges': 2,
+                                                    'outgoing_files': ['uses_foo.php',
+                                                                       'foo.php'],
+                                                    'type': 'FileInfo.Class'}],
+                              'removed_symbols': []}},
+ 'files': ['foo.php', 'uses_foo.php'],
+ 'telemetry': '<telemetry-redacted-for-test>'}
+
+Typecheck for change set on line 56
+File "/uses_foo.php", line 14, characters 10-33:
+Invalid return type (Typing[4110])
+File "/uses_foo.php", line 2, characters 22-24:
+Expected `int`
+File "/baz.php", line 3, characters 33-38:
+But got `string`
+(Additionally, hh_fanout errors matched hh_server errors.)

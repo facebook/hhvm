@@ -1,5 +1,5 @@
 *** Testing dir() : open a file instead of a directory ***
 
-Warning: %s
+Warning: Not a directory in %s/dir_variation5.php on line 16
 bool(false)
 Done

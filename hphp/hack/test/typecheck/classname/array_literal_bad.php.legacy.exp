@@ -1,0 +1,10 @@
+File "array_literal_bad.php", line 10, characters 3-15:
+  array<string, (classname<exact C1> | classname<exact C2> | classname<exact D>)>
+File "array_literal_bad.php", line 11, characters 10-13:
+Invalid return type (Typing[4110])
+File "array_literal_bad.php", line 8, characters 52-52:
+This is an object of type I
+File "array_literal_bad.php", line 9, characters 46-46:
+It is incompatible with an object of exactly the class D
+File "array_literal_bad.php", line 9, characters 46-46:
+  where the class 'D' was referenced here

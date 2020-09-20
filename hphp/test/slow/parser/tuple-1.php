@@ -1,4 +1,4 @@
-<?php
+<?hh
 function tuple($x) {
   echo "Inside tuple\n";
 }
@@ -12,7 +12,11 @@ class D {
     echo "Inside D::tuple\n";
   }
 }
+
+
+<<__EntryPoint>>
+function main_tuple_1() {
 tuple(5);
 (new C)->tuple(6);
 D::tuple(7);
-
+}

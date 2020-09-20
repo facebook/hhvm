@@ -1,4 +1,4 @@
-File "const_map2.php", line 13, characters 3-11:
+File "const_map2.php", line 13, characters 3-19:
 You cannot mutate this (Typing[4011])
-File "const_map2.php", line 12, characters 14-21:
-This is an object of type ConstMap
+File "const_map2.php", line 12, characters 14-37:
+This is an object of type ConstMap<string, string>

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait MY_TRAIT1 {
   public function sayHello() {
@@ -17,9 +17,10 @@ class MyHelloWorld{
     MY_TRAIT2::sayGoodbye as falaTchau;
   }
 }
+<<__EntryPoint>> function main(): void {
 $o = new MyHelloWorld();
 $o->falaOi();
 $o->falaTchau();
 $o->sayHello();
 $o->sayGoodbye();
-?>
+}

@@ -2,6 +2,6 @@ string(16) "bob, example.com"
 string(23) "bob, users, example.com"
 bool(false)
 
-Warning: %s
+Warning: ldap_dn2ufn() expects exactly 1 parameter, 2 given in %s/ldap_dn2ufn.php on line 13
 bool(false)
 Done

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C1 {
   public function __construct(
@@ -8,7 +8,7 @@ class C1 {
 }
 
 function test(): void {
-  $args = array(1, 2, 3);
+  $args = varray[1, 2, 3];
   // positional args should be typechecked
   new C1('string', ...$args);
 }

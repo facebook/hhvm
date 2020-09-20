@@ -1,0 +1,4 @@
+File "traits_multiple.bad.php", line 30, characters 17-24:
+type `T` is already assigned in `myTrait0:@E:@S` (Naming[2101])
+File "traits_multiple.bad.php", line 30, characters 17-24:
+value `val` is already assigned in `myTrait0:@E:@S` (Naming[2101])

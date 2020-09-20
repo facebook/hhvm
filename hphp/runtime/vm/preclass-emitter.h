@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CLASS_EMIT_H_
-#define incl_HPHP_VM_CLASS_EMIT_H_
+#pragma once
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/array-data.h"
@@ -30,7 +29,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string NewAnonymousClassName(const std::string& name);
+std::string NewAnonymousClassName(folly::StringPiece name);
+
+folly::StringPiece StripIdFromAnonymousClassName(folly::StringPiece name);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -51,59 +52,75 @@ struct BuiltinObjExtents {
 
 struct PreClassEmitter {
   typedef std::vector<FuncEmitter*> MethodVec;
+  using UpperBoundVec = CompactVector<TypeConstraint>;
+  using UpperBoundMap =
+    std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
 
   struct Prop {
     Prop()
       : m_name(nullptr)
       , m_mangledName(nullptr)
       , m_attrs(AttrNone)
-      , m_typeConstraint(nullptr)
+      , m_userType(nullptr)
       , m_docComment(nullptr)
       , m_repoAuthType{}
+      , m_userAttributes{}
     {}
 
     Prop(const PreClassEmitter* pce,
          const StringData* n,
          Attr attrs,
-         const StringData* typeConstraint,
+         const StringData* userType,
+         const TypeConstraint& typeConstraint,
+         const UpperBoundVec& ubs,
          const StringData* docComment,
          const TypedValue* val,
-         RepoAuthType repoAuthType);
+         RepoAuthType repoAuthType,
+         UserAttributeMap userAttributes);
     ~Prop();
 
     const StringData* name() const { return m_name; }
     const StringData* mangledName() const { return m_mangledName; }
     Attr attrs() const { return m_attrs; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
+    const StringData* userType() const { return m_userType; }
+    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
+    const UpperBoundVec& upperBounds() const { return m_ubs; }
     const StringData* docComment() const { return m_docComment; }
     const TypedValue& val() const { return m_val; }
     RepoAuthType repoAuthType() const { return m_repoAuthType; }
+    UserAttributeMap userAttributes() const { return m_userAttributes; }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_name)
-        (m_mangledName)
         (m_attrs)
-        (m_typeConstraint)
+        (m_userType)
         (m_docComment)
         (m_val)
         (m_repoAuthType)
+        (m_typeConstraint)
+        (m_ubs)
+        (m_userAttributes)
         ;
     }
 
   private:
     friend PreClassEmitter;
-    void resolveArray(const PreClassEmitter* pce) {
+    void updateAfterDeserialize(const PreClassEmitter* pce) {
       m_repoAuthType.resolveArray(pce->ue());
+      m_mangledName = PreClass::manglePropName(pce->name(), m_name, m_attrs);
     }
 
   private:
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;
-    LowStringPtr m_typeConstraint;
+    LowStringPtr m_userType;
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
+    TypeConstraint m_typeConstraint;
+    UpperBoundVec m_ubs{};
+    UserAttributeMap m_userAttributes;
   };
 
   struct Const {
@@ -120,7 +137,7 @@ struct PreClassEmitter {
       : m_name(n), m_typeConstraint(typeConstraint), m_phpCode(phpCode),
         m_typeconst(typeconst) {
       if (!val) {
-        m_val.clear();
+        m_val.reset();
       } else {
         m_val = *val;
       }
@@ -132,7 +149,7 @@ struct PreClassEmitter {
     const TypedValue& val() const { return m_val.value(); }
     const folly::Optional<TypedValue>& valOption() const { return m_val; }
     const StringData* phpCode() const { return m_phpCode; }
-    bool isAbstract()       const { return !m_val.hasValue(); }
+    bool isAbstract()       const { return !m_val.has_value(); }
     bool isTypeconst() const { return m_typeconst; }
 
     template<class SerDe> void serde(SerDe& sd) {
@@ -159,26 +176,38 @@ struct PreClassEmitter {
 
 
 
-  void init(int line1, int line2, Offset offset, Attr attrs,
+  void init(int line1, int line2, Attr attrs,
             const StringData* parent, const StringData* docComment);
 
   UnitEmitter& ue() const { return m_ue; }
+  bool useGlobalIds() const { return m_ue.useGlobalIds(); }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setHoistable(PreClass::Hoistable h) { m_hoistable = h; }
   PreClass::Hoistable hoistability() const { return m_hoistable; }
-  void setOffset(Offset off) { m_offset = off; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
   Id id() const { return m_id; }
   void setIfaceVtableSlot(Slot s) { m_ifaceVtableSlot = s; }
   const MethodVec& methods() const { return m_methods; }
-  FuncEmitter* findMethod(const StringData* name) { return m_methodMap[name]; }
+  bool hasMethod(const StringData* name) const {
+    return m_methodMap.find(name) != m_methodMap.end();
+  }
+  FuncEmitter* lookupMethod(const StringData* name) const {
+    return folly::get_default(m_methodMap, name);
+  }
+  size_t numProperties() const { return m_propMap.size(); }
+  bool hasProp(const StringData* name) const {
+    return m_propMap.find(name) != m_propMap.end();
+  }
   const PropMap::Builder& propMap() const { return m_propMap; }
   const ConstMap::Builder& constMap() const { return m_constMap; }
   const StringData* docComment() const { return m_docComment; }
   const StringData* parentName() const { return m_parent; }
+  static bool IsAnonymousClassName(const std::string& name) {
+    return name.find('$') != std::string::npos;
+  }
 
   void setDocComment(const StringData* sd) { m_docComment = sd; }
 
@@ -190,11 +219,13 @@ struct PreClassEmitter {
   void renameMethod(const StringData* oldName, const StringData *newName);
   bool addProperty(const StringData* n,
                    Attr attrs,
-                   const StringData* typeConstraint,
+                   const StringData* userType,
+                   const TypeConstraint& typeConstraint,
+                   const UpperBoundVec& ubs,
                    const StringData* docComment,
                    const TypedValue* val,
-                   RepoAuthType);
-  const Prop& lookupProp(const StringData* propName) const;
+                   RepoAuthType,
+                   UserAttributeMap);
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
                    const bool typeConst = false,
@@ -221,7 +252,6 @@ struct PreClassEmitter {
     return m_traitPrecRules;
   }
 
-  void addUserAttribute(const StringData* name, TypedValue tv);
   void setUserAttributes(UserAttributeMap map) {
     m_userAttributes = std::move(map);
   }
@@ -253,7 +283,6 @@ struct PreClassEmitter {
   UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
-  Offset m_offset;  // offset of the DefCls for this class
   LowStringPtr m_name;
   Attr m_attrs;
   LowStringPtr m_parent;
@@ -303,4 +332,3 @@ struct PreClassRepoProxy : RepoProxy {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

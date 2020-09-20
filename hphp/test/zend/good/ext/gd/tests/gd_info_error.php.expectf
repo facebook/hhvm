@@ -2,9 +2,7 @@
 
 -- Testing gd_info() function with more than expected number of arguments --
 
-Warning: %s
-bool(false)
+Warning: gd_info() expects exactly 0 parameters, 1 given in %s/gd_info_error.php on line 12
 
-Warning: %s
-bool(false)
+Warning: gd_info() expects exactly 0 parameters, 2 given in %s/gd_info_error.php on line 13
 ===DONE===

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test() {
   unlink('/tmp/1link');
   unlink('/tmp/1tmp');
@@ -18,5 +18,6 @@ function test() {
   unlink('/tmp/1tmp');
   unlink('/tmp/testfile1');
 }
+<<__EntryPoint>> function main(): void {
 @test();
-?>
+}

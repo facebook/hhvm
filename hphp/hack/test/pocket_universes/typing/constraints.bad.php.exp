@@ -1,0 +1,72 @@
+File "constraints.bad.php", line 23, characters 17-20:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 13, characters 15-16:
+`T1` is a constrained type parameter
+File "constraints.bad.php", line 13, characters 21-26:
+Expected `Middle`
+File "constraints.bad.php", line 23, characters 17-20:
+But got `Base`
+File "constraints.bad.php", line 24, characters 17-22:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 14, characters 15-16:
+`T2` is a constrained type parameter
+File "constraints.bad.php", line 14, characters 21-24:
+Expected `High`
+File "constraints.bad.php", line 24, characters 17-22:
+But got `Middle`
+File "constraints.bad.php", line 28, characters 17-20:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 13, characters 15-16:
+`T1` is a constrained type parameter
+File "constraints.bad.php", line 13, characters 21-26:
+Expected `Middle`
+File "constraints.bad.php", line 28, characters 17-20:
+But got `Base`
+File "constraints.bad.php", line 29, characters 17-20:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 14, characters 15-16:
+`T2` is a constrained type parameter
+File "constraints.bad.php", line 14, characters 21-24:
+Expected `High`
+File "constraints.bad.php", line 29, characters 17-20:
+But got `Base`
+File "constraints.bad.php", line 46, characters 17-22:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 36, characters 15-16:
+`T0` is a constrained type parameter
+File "constraints.bad.php", line 46, characters 17-22:
+Expected `Middle`
+File "constraints.bad.php", line 36, characters 24-27:
+But got `Base`
+File "constraints.bad.php", line 47, characters 17-20:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 37, characters 15-16:
+`T1` is a constrained type parameter
+File "constraints.bad.php", line 47, characters 17-20:
+Expected `High`
+File "constraints.bad.php", line 37, characters 24-29:
+But got `Middle`
+File "constraints.bad.php", line 51, characters 17-20:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 36, characters 15-16:
+`T0` is a constrained type parameter
+File "constraints.bad.php", line 51, characters 17-20:
+Expected `High`
+File "constraints.bad.php", line 36, characters 24-27:
+But got `Base`
+File "constraints.bad.php", line 52, characters 17-20:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 37, characters 15-16:
+`T1` is a constrained type parameter
+File "constraints.bad.php", line 52, characters 17-20:
+Expected `High`
+File "constraints.bad.php", line 37, characters 24-29:
+But got `Middle`
+File "constraints.bad.php", line 62, characters 16-21:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraints.bad.php", line 60, characters 15-15:
+`T` is a constrained type parameter
+File "constraints.bad.php", line 62, characters 16-21:
+Expected `string`
+File "constraints.bad.php", line 60, characters 35-37:
+But got `num`

@@ -2,11 +2,9 @@
 
 -- Testing array_intersect_assoc() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_intersect_assoc() expects at least 2 parameters, 0 given in %s/array_intersect_assoc_error.php on line 12
 
 -- Testing array_intersect_assoc() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_intersect_assoc() expects at least 2 parameters, 1 given in %s/array_intersect_assoc_error.php on line 17
 Done

@@ -1,0 +1,32 @@
+File "class_meth_generics_bad.php", line 20, characters 19-19:
+Some type constraint(s) here are violated (Typing[4110])
+File "class_meth_generics_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "class_meth_generics_bad.php", line 4, characters 14-21:
+This is an array key (int | string)
+File "class_meth_generics_bad.php", line 19, characters 24-27:
+It is incompatible with a bool
+File "class_meth_generics_bad.php", line 26, characters 19-19:
+Some type constraint(s) here are violated (Typing[4110])
+File "class_meth_generics_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "class_meth_generics_bad.php", line 4, characters 14-21:
+This is an array key (int | string)
+File "class_meth_generics_bad.php", line 25, characters 24-28:
+It is incompatible with a float
+File "class_meth_generics_bad.php", line 31, characters 8-49:
+Some type constraint(s) here are violated (Typing[4110])
+File "class_meth_generics_bad.php", line 11, characters 45-46:
+'Tu' is a constrained type parameter
+File "class_meth_generics_bad.php", line 11, characters 51-58:
+This is an array key (int | string)
+File "class_meth_generics_bad.php", line 30, characters 34-41:
+It is incompatible with an object of type vec<int>
+File "class_meth_generics_bad.php", line 31, characters 19-19:
+Some type constraint(s) here are violated (Typing[4110])
+File "class_meth_generics_bad.php", line 4, characters 9-9:
+'T' is a constrained type parameter
+File "class_meth_generics_bad.php", line 4, characters 14-21:
+This is an array key (int | string)
+File "class_meth_generics_bad.php", line 30, characters 24-28:
+It is incompatible with a float

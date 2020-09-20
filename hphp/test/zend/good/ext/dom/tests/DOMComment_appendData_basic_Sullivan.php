@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);
@@ -18,5 +18,4 @@ echo "Comment Length (two appends): " . $commentnode->length . "\n";
 echo "Comment Content: " . $commentnode->data . "\n";
 
 echo "\n" . $document->saveXML();
-
-?>
+}

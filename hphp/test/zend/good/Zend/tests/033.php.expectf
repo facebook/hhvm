@@ -1,12 +1,8 @@
 
-Notice: %s
+Notice: Undefined variable: arr in %s/033.php on line 3
 
-Notice: %s
+Notice: Undefined variable: arr in %s/033.php on line 5
 
-Notice: %s
+Notice: Undefined variable: arr in %s/033.php on line 7
 
-Notice: %s
-
-Warning: %s
-
-Warning: %s
+Notice: Cannot access property on non-object in %s/033.php on line 7

@@ -30,6 +30,7 @@
 #include <folly/portability/Stdlib.h>
 
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 
@@ -44,7 +45,7 @@ namespace {
 const StaticString s_invoke("__invoke");
 
 template<class Operation>
-void with_file(fs::path dir, borrowed_ptr<const php::Unit> u, Operation op) {
+void with_file(fs::path dir, const php::Unit* u, Operation op) {
   auto const file = dir / fs::path(u->filename->data());
   fs::create_directories(fs::path(file).remove_filename());
 
@@ -62,18 +63,7 @@ void with_file(fs::path dir, borrowed_ptr<const php::Unit> u, Operation op) {
   }
 }
 
-void dump_representation(fs::path dir, const php::Program& program) {
-  parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& u) {
-      with_file(dir, borrow(u), [&] (std::ostream& out) {
-        out << show(*u);
-      });
-    }
-  );
-}
-
-using NameTy = std::pair<SString,Type>;
+using NameTy = std::pair<SString,PropStateElem<>>;
 std::vector<NameTy> sorted_prop_state(const PropState& ps) {
   std::vector<NameTy> ret(begin(ps), end(ps));
   std::sort(
@@ -85,12 +75,14 @@ std::vector<NameTy> sorted_prop_state(const PropState& ps) {
 
 void dump_class_state(std::ostream& out,
                       const Index& index,
-                      borrowed_ptr<const php::Class> c) {
+                      const php::Class* c) {
+  auto const clsName = normalized_class_name(*c);
+
   if (is_closure(*c)) {
     auto const invoke = find_method(c, s_invoke.get());
     auto const useVars = index.lookup_closure_use_vars(invoke);
     for (auto i = size_t{0}; i < useVars.size(); ++i) {
-      out << c->name->data() << "->" << c->properties[i].name->data() << " :: "
+      out << clsName << "->" << c->properties[i].name->data() << " :: "
           << show(useVars[i]) << '\n';
     }
   } else {
@@ -98,81 +90,53 @@ void dump_class_state(std::ostream& out,
       index.lookup_private_props(c)
     );
     for (auto const& kv : pprops) {
-      out << c->name->data() << "->" << kv.first->data() << " :: "
-          << show(kv.second) << '\n';
+      out << clsName << "->" << kv.first->data() << " :: "
+          << show(kv.second.ty) << '\n';
     }
 
     auto const sprops = sorted_prop_state(
       index.lookup_private_statics(c)
     );
     for (auto const& kv : sprops) {
-      out << c->name->data() << "::$" << kv.first->data() << " :: "
-          << show(kv.second) << '\n';
+      out << clsName << "::$" << kv.first->data() << " :: "
+          << show(kv.second.ty) << '\n';
+    }
+
+    for (auto const& prop : c->properties) {
+      out << clsName << "::$" << prop.name->data() << " :: "
+          << show(index.lookup_public_static(Context{}, c, prop.name)) << '\n';
     }
   }
 
   for (auto const& constant : c->constants) {
     if (constant.val) {
       auto const ty = from_cell(*constant.val);
-      out << c->name->data() << "::" << constant.name->data() << " :: "
-          << (ty.subtypeOf(TUninit) ? "<dynamic>" : show(ty)) << '\n';
+      out << clsName << "::" << constant.name->data() << " :: "
+          << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty)) << '\n';
     }
   }
 }
 
 void dump_func_state(std::ostream& out,
                      const Index& index,
-                     borrowed_ptr<const php::Func> f) {
-  if (f->unit->pseudomain.get() == f) return;
-
+                     const php::Func* f) {
   auto const name = f->cls
-    ? folly::sformat("{}::{}()", f->cls->name->data(), f->name->data())
+    ? folly::sformat(
+        "{}::{}()",
+        normalized_class_name(*f->cls), f->name->data()
+      )
     : folly::sformat("{}()", f->name->toCppString());
 
   auto const retTy = index.lookup_return_type_raw(f);
   out << name << " :: " << show(retTy) << '\n';
-
-  auto const localStatics = index.lookup_local_static_types(f);
-  for (auto i = size_t{0}; i < localStatics.size(); ++i) {
-    if (localStatics[i].subtypeOf(TBottom)) continue;
-    out << name << "::" << local_string(*f, i)
-        << " :: " << show(localStatics[i]) << '\n';
-  }
-}
-
-void dump_index(fs::path dir,
-                const Index& index,
-                const php::Program& program) {
-  parallel::for_each(
-    program.units,
-    [&] (const std::unique_ptr<php::Unit>& u) {
-      if (!*u->filename->data()) {
-        // The native systemlibs: for now just skip.
-        return;
-      }
-
-      with_file(dir, borrow(u), [&] (std::ostream& out) {
-        for (auto& c : u->classes) {
-          dump_class_state(out, index, borrow(c));
-          for (auto& m : c->methods) {
-            dump_func_state(out, index, borrow(m));
-          }
-        }
-
-        for (auto& f : u->funcs) {
-          dump_func_state(out, index, borrow(f));
-        }
-      });
-    }
-  );
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void debug_dump_program(const Index& index, const php::Program& program) {
-  if (!Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) return;
+std::string debug_dump_to() {
+  if (!Trace::moduleEnabledRelease(Trace::hhbbc_dump, 1)) return "";
 
   trace_time tracer("debug dump");
 
@@ -192,19 +156,68 @@ void debug_dump_program(const Index& index, const php::Program& program) {
   }();
   fs::create_directory(dir);
 
-  FTRACE_MOD(Trace::hhbbc_dump, 1, "debug dump going to {}\n", dir.string());
+  Trace::ftraceRelease("debug dump going to {}\n", dir.string());
+  return dir.string();
+}
+
+void dump_representation(const std::string& dir, const php::Unit* unit) {
+  auto const rep_dir = fs::path{dir} / "representation";
+  with_file(rep_dir, unit, [&] (std::ostream& out) {
+      out << show(*unit, true);
+    }
+  );
+}
+
+void dump_index(const std::string& dir,
+                const Index& index,
+                const php::Unit* unit) {
+  if (!*unit->filename->data()) {
+    // The native systemlibs: for now just skip.
+    return;
+  }
+
+  auto ind_dir = fs::path{dir} / "index";
+
+  with_file(ind_dir, unit, [&] (std::ostream& out) {
+      for (auto& c : unit->classes) {
+        dump_class_state(out, index, c.get());
+        for (auto& m : c->methods) {
+          dump_func_state(out, index, m.get());
+        }
+      }
+
+      for (auto& f : unit->funcs) {
+        dump_func_state(out, index, f.get());
+      }
+    }
+  );
+}
+
+void debug_dump_program(const Index& index, const php::Program& program) {
+  auto const dir = debug_dump_to();
+  if (dir.empty()) return;
 
   if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
     trace_time tracer2("debug dump: representation");
-    dump_representation(dir / "representation", program);
+    parallel::for_each(
+      program.units,
+      [&] (const std::unique_ptr<php::Unit>& u) {
+        dump_representation(dir, u.get());
+      }
+    );
   }
 
   {
     trace_time tracer2("debug dump: index");
-    dump_index(dir / "index", index, program);
+    parallel::for_each(
+      program.units,
+      [&] (const std::unique_ptr<php::Unit>& u) {
+        dump_index(dir, index, u.get());
+      }
+    );
   }
 
-  FTRACE_MOD(Trace::hhbbc_dump, 1, "debug dump done\n");
+  Trace::ftraceRelease("debug dump done\n");
 }
 
 //////////////////////////////////////////////////////////////////////

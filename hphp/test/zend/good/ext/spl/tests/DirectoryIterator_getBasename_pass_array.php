@@ -1,16 +1,13 @@
-<?php
-   $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename2');
-   mkdir($targetDir);
-   touch($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');
-   $dir = new DirectoryIterator($targetDir.DIRECTORY_SEPARATOR);
-   while(!$dir->isFile()) {
-      $dir->next();
-   }
-   echo $dir->getBasename(array());
-?>
-<?php error_reporting(0); ?>
-<?php
-   $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename2');
-   unlink($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');
-   rmdir($targetDir);
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+
+  $file = __SystemLib\hphp_test_tmppath('getBasename_test.txt');
+  touch($file);
+  $dir = new DirectoryIterator(__SystemLib\hphp_test_tmproot());
+  while(!$dir->isFile()) {
+    $dir->next();
+  }
+  try { echo $dir->getBasename(varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+
+  unlink($file);
+}

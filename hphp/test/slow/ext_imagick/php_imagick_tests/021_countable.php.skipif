@@ -1,5 +1,4 @@
-<?php require_once(__DIR__ . '/skipif.inc');
+<?hh require_once(__DIR__ . '/skipif.inc');
 
 if (!extension_loaded ('spl'))
   die ('skip SPL is needed');
-?>

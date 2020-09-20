@@ -2,209 +2,209 @@
 
 --int 0--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --int 1--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --int 12345--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --int -12345--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --float 10.5--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --float -10.5--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --float 12.3456789000e10--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --float -12.3456789000e10--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --float .5--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --uppercase NULL--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --lowercase null--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --lowercase true--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --lowercase false--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --uppercase TRUE--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --uppercase FALSE--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --empty string DQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --empty string SQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --string DQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --string SQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --mixed case string--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --heredoc--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --undefined var--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --unset var--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 
 --resource var--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 2 to be an array or collection in %s/array_intersect_key_variation2.php on line 96
 NULL
 ===DONE===

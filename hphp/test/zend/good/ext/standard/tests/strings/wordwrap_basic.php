@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
  * Description: Wraps buffer to selected number of characters using string break char
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing wordwrap() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -31,4 +31,4 @@ $width = 10;
 $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 echo "Done\n";
-?>
+}

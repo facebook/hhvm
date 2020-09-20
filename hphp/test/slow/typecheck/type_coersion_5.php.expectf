@@ -1,0 +1,145 @@
+Boolean
+Builtin:
+User:
+Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, integer given
+User:
+WARNING: Argument 1 to {closure}() must be of type @boolean, integer given
+Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, double given
+User:
+WARNING: Argument 1 to {closure}() must be of type @boolean, float given
+Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, string given
+User:
+WARNING: Argument 1 to {closure}() must be of type @boolean, string given
+Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, %rv?%rarray given
+User:
+WARNING: Argument 1 to {closure}() must be of type @boolean, %rv?%rarray given
+Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, null given
+User:
+WARNING: Argument 1 to {closure}() must be of type @boolean, null given
+
+Int64
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, boolean given
+User:
+WARNING: Argument 1 to {closure}() must be of type @integer, boolean given
+Builtin:
+User:
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, double given
+User:
+WARNING: Argument 1 to {closure}() must be of type @integer, float given
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, string given
+User:
+WARNING: Argument 1 to {closure}() must be of type @integer, string given
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, %rv?%rarray given
+User:
+WARNING: Argument 1 to {closure}() must be of type @integer, %rv?%rarray given
+Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, null given
+User:
+WARNING: Argument 1 to {closure}() must be of type @integer, null given
+
+Double
+Builtin:
+WARNING: number_format() expects parameter 1 to be double, boolean given
+User:
+WARNING: Argument 1 to {closure}() must be of type @float, boolean given
+Builtin:
+WARNING: number_format() expects parameter 1 to be double, integer given
+User:
+WARNING: Argument 1 to {closure}() must be of type @float, integer given
+Builtin:
+User:
+Builtin:
+WARNING: number_format() expects parameter 1 to be double, string given
+User:
+WARNING: Argument 1 to {closure}() must be of type @float, string given
+Builtin:
+WARNING: number_format() expects parameter 1 to be double, %rv?%rarray given
+User:
+WARNING: Argument 1 to {closure}() must be of type @float, %rv?%rarray given
+Builtin:
+WARNING: number_format() expects parameter 1 to be double, null given
+User:
+WARNING: Argument 1 to {closure}() must be of type @float, null given
+
+String
+Builtin:
+WARNING: rtrim() expects parameter 1 to be string, boolean given
+User:
+WARNING: Argument 1 to {closure}() must be of type @string, boolean given
+Builtin:
+WARNING: rtrim() expects parameter 1 to be string, integer given
+User:
+WARNING: Argument 1 to {closure}() must be of type @string, integer given
+Builtin:
+WARNING: rtrim() expects parameter 1 to be string, double given
+User:
+WARNING: Argument 1 to {closure}() must be of type @string, float given
+Builtin:
+User:
+Builtin:
+WARNING: rtrim() expects parameter 1 to be string, %rv?%rarray given
+User:
+WARNING: Argument 1 to {closure}() must be of type @string, %rv?%rarray given
+Builtin:
+WARNING: rtrim() expects parameter 1 to be string, null given
+User:
+WARNING: Argument 1 to {closure}() must be of type @string, null given
+
+varray
+Builtin:
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, boolean given
+User:
+WARNING: Argument 1 to {closure}() must be of type @HH\varray, boolean given
+Builtin:
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, integer given
+User:
+WARNING: Argument 1 to {closure}() must be of type @HH\varray, integer given
+Builtin:
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, double given
+User:
+WARNING: Argument 1 to {closure}() must be of type @HH\varray, float given
+Builtin:
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, string given
+User:
+WARNING: Argument 1 to {closure}() must be of type @HH\varray, string given
+Builtin:
+User:
+Builtin:
+WARNING: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be %rv?%rarray, null given
+User:
+WARNING: Argument 1 to {closure}() must be of type @HH\varray, null given
+
+Object
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, boolean given
+User:
+WARNING: Argument 1 to {closure}() must be of type @object, boolean given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, integer given
+User:
+WARNING: Argument 1 to {closure}() must be of type @object, integer given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, double given
+User:
+WARNING: Argument 1 to {closure}() must be of type @object, float given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, string given
+User:
+WARNING: Argument 1 to {closure}() must be of type @object, string given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, %rv?%rarray given
+User:
+WARNING: Argument 1 to {closure}() must be of type @object, %rv?%rarray given
+Builtin:
+WARNING: get_object_vars() expects parameter 1 to be object, null given
+User:
+WARNING: Argument 1 to {closure}() must be of type @object, null given

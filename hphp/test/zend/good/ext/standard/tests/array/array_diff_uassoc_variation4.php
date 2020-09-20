@@ -1,16 +1,21 @@
-<?php
+<?hh
 /* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a 
- * 				user supplied callback function
+ * Description: Computes the difference of arrays with additional index check which is performed by a
+ *                 user supplied callback function
  * Source code: ext/standard/array.c
  */
 
-echo "*** Testing array_diff_uassoc() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
 
-//Initialize variables
-$array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
-$array2 = array("a" => "green", "yellow", "red");
-
+class classWithoutToString
+{
+}
 
 function key_compare_func($a, $b)
 {
@@ -19,6 +24,13 @@ function key_compare_func($a, $b)
     }
     return ($a > $b)? 1:-1;
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_diff_uassoc() : usage variation ***\n";
+
+//Initialize variables
+$array1 = darray["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
+$array2 = darray["a" => "green", 0 => "yellow", 1 => "red"];
+
 
 //get an unset variable
 $unset_var = 10;
@@ -27,29 +39,17 @@ unset ($unset_var);
 //resource variable
 $fp = fopen(__FILE__, "r");
 
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -96,7 +96,7 @@ $inputs = array(
 
       // resource data
       'resource' => $fp,
-);
+];
 
 // loop through each element of the array for arr2
 
@@ -106,5 +106,5 @@ foreach($inputs as $key =>$value) {
 };
 
 fclose($fp);
-?>
-===DONE===
+echo "===DONE===\n";
+}

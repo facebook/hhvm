@@ -1,21 +1,21 @@
-<?php
+<?hh
 class C {
-	const a = 'hello from C';
+    const a = 'hello from C';
 }
 class D extends C {
 }
 class E extends D {
 }
 class F extends E {
-	const a = 'hello from F';
+    const a = 'hello from F';
 }
 class X {
 }
-
-$classes = array('C', 'D', 'E', 'F', 'X');
+<<__EntryPoint>> function main(): void {
+$classes = varray['C', 'D', 'E', 'F', 'X'];
 foreach($classes as $class) {
-	echo "Constants from class $class: \n";
-	$rc = new ReflectionClass($class);
-	var_dump($rc->getConstants());
+    echo "Constants from class $class: \n";
+    $rc = new ReflectionClass($class);
+    var_dump($rc->getConstants());
 }
-?>
+}

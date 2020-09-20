@@ -1,6 +1,6 @@
 Testing: dict(0) {
 }
-array_pad (after): array(10) {
+array_pad (after): darray(10) {
   [0]=>
   string(3) "pad"
   [1]=>
@@ -22,7 +22,7 @@ array_pad (after): array(10) {
   [9]=>
   string(3) "pad"
 }
-array_pad (before): array(10) {
+array_pad (before): darray(10) {
   [0]=>
   string(3) "pad"
   [1]=>
@@ -44,7 +44,7 @@ array_pad (before): array(10) {
   [9]=>
   string(3) "pad"
 }
-array_pad (just one): array(1) {
+array_pad (just one): darray(1) {
   [0]=>
   string(3) "pad"
 }
@@ -100,9 +100,9 @@ dict(0) {
 krsort: bool(true)
 dict(0) {
 }
-array_slice (0): array(0) {
+array_slice (0): darray(0) {
 }
-array_slice (1): array(0) {
+array_slice (1): darray(0) {
 }
 Testing: dict(5) {
   [0]=>
@@ -116,7 +116,7 @@ Testing: dict(5) {
   [4]=>
   int(5)
 }
-array_pad (after): array(10) {
+array_pad (after): darray(10) {
   [0]=>
   int(1)
   [1]=>
@@ -138,7 +138,7 @@ array_pad (after): array(10) {
   [9]=>
   string(3) "pad"
 }
-array_pad (before): array(10) {
+array_pad (before): darray(10) {
   [0]=>
   string(3) "pad"
   [1]=>
@@ -160,7 +160,7 @@ array_pad (before): array(10) {
   [9]=>
   int(5)
 }
-array_pad (just one): array(5) {
+array_pad (just one): darray(5) {
   [0]=>
   int(1)
   [1]=>
@@ -320,7 +320,7 @@ dict(5) {
   [0]=>
   int(1)
 }
-array_slice (0): array(5) {
+array_slice (0): darray(5) {
   [0]=>
   int(1)
   [1]=>
@@ -332,7 +332,7 @@ array_slice (0): array(5) {
   [4]=>
   int(5)
 }
-array_slice (1): array(4) {
+array_slice (1): darray(4) {
   [0]=>
   int(2)
   [1]=>

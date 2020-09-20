@@ -1,0 +1,2 @@
+File "call_generic_multiple_bounds_2.php", line 5, characters 10-15:
+This call is invalid, this is not a function, it is a value of generic type T (Typing[4009])

@@ -1,24 +1,25 @@
-<?php
-
-$b = 123;
-if ($b) {
-  class Exception1 extends Exception {
-}
-}
- else {
-  class Exception1 extends Exception {
-}
-}
-class Exception2 extends Exception1 {
-}
+<?hh
 
 function foo() {
   $e = new Exception();
   try {
     throw new Exception2();
   }
- catch (Exception $e) {
+  catch (Exception $e) {
     var_dump($e->getCode());
   }
 }
-foo();
+<<__EntryPoint>>
+function entrypoint_1461(): void {
+
+  $b = 123;
+  if ($b) {
+    include '1461-1.inc';
+  } else {
+    include '1461-2.inc';
+  }
+
+  include '1461-classes.inc';
+
+  foo();
+}

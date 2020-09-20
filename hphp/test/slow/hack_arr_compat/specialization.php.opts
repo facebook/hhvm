@@ -1,0 +1,5 @@
+-vEval.CheckPropTypeHints=2
+-vEval.EmitClsMethPointers=1
+-vEval.IsCompatibleClsMethType=1
+
+--count 37

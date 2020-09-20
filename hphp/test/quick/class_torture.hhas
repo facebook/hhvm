@@ -1,52 +1,3 @@
-# tests various ways poorly defined classes should fail the verifier
-
-.main {
-  .declvars $x;
-
-  DefCls 0
-  FPushCtorD 1 "A"
-  String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  PopC
-
-  DefCls 0
-  FPushCtorD 1 "B"
-  String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  PopC
-
-  DefCls 0
-  FPushCtorD 1 "C"
-  String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  PopC
-
-  DefCls 0
-  FPushCtorD 1 "E"
-  String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  PopC
-
-  DefCls 0
-  FPushCtorD 1 "G"
-  String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  PopC
-
-  Int 1
-  RetC
-}
-
 .class [final interface] iface {
 
 }
@@ -78,4 +29,61 @@
 
 .class G extends F{
 
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $x;
+
+  NewObjD "A"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "B"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "C"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "E"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "G"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  Int 1
+  RetC
 }

@@ -61,7 +61,7 @@ function main() {
   try {
     baz(baz($q, inout $q), inout $q);
   } catch (Exception $e) {
-    var_dump(array_map($a ==> $a['function'], $e->getTrace()));
+    var_dump(array_map($a ==> $a['function'], array_slice($e->getTrace(),0,2)));
     var_dump($q);
   }
 
@@ -73,4 +73,8 @@ function main() {
   echo "$a $b\n";
 }
 
+
+<<__EntryPoint>>
+function main_call_static() {
 main();
+}

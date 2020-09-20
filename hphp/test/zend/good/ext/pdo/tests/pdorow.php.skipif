@@ -1,1 +1,4 @@
-<?php if (!extension_loaded('pdo')) die('skip'); ?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded('pdo')) die('skip');
+}

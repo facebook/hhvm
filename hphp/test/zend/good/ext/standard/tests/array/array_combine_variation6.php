@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_combine(array $keys, array $values)
  * Description: Creates an array by using the elements of the first parameter as keys
  *              and the elements of the second as the corresponding values
@@ -6,15 +6,15 @@
 */
 
 /*
-* Testing the behavior of array_combine() by passing array with 
-* binary values for $keys and $values argument. 
+* Testing the behavior of array_combine() by passing array with
+* binary values for $keys and $values argument.
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_combine() : binary safe checking ***\n";
 
 // array with binary values
-$arr_binary = array(b"hello", b"world");
-$arr_normal = array("hello", "world");
+$arr_binary = varray[b"hello", b"world"];
+$arr_normal = varray["hello", "world"];
 
 // array with binary value for $keys and $values argument
 var_dump( array_combine($arr_binary, $arr_binary) );
@@ -26,4 +26,4 @@ var_dump( array_combine($arr_normal, $arr_binary) );
 var_dump( array_combine($arr_binary, $arr_normal) );
 
 echo "Done";
-?>
+}

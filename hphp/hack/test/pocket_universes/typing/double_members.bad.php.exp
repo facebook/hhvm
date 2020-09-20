@@ -1,0 +1,10 @@
+File "double_members.bad.php", line 41, characters 12-13:
+Invalid argument (Typing[4110])
+File "double_members.bad.php", line 39, characters 14-27:
+Expected `<expr#2>:@T`
+File "double_members.bad.php", line 39, characters 29-36:
+  where `<expr#2>` is a reference to this expression
+File "double_members.bad.php", line 38, characters 14-30:
+But got `<expr#1>:@T`
+File "double_members.bad.php", line 38, characters 32-39:
+  where `<expr#1>` is a reference to this expression

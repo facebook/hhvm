@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function four() { return 4; }
-function arr() { return array('x' => four()); }
+function arr() { return darray['x' => four(), 'something' => new stdClass()]; }
 function go() {
   $x = arr();
   $x['something']->hahaha = "yeah";
@@ -12,4 +12,8 @@ function main() {
   var_dump($x['something']);
   var_dump(is_object($x['something']));
 }
+
+<<__EntryPoint>>
+function main_array_018() {
 main();
+}

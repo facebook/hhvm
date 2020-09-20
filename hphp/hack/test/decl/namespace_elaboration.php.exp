@@ -1,0 +1,115 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\braced_id" ->
+    { fe_pos = [39:10-19];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 39, characters 10-18),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [39:33-35]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 39, characters 20-31),
+                  (Tapply (([39:20-32], "\\MyNamespace\\MyBracedType"), [])))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }
+              ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|namespace_elaboration.php line 39, characters 10-18),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 39, characters 38-50),
+               (Tapply (([39:38-51], "\\MyNamespace\\MyBracedType"), [])))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\id" ->
+    { fe_pos = [31:10-12];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 31, characters 10-11),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [31:20-22]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 31, characters 13-18),
+                  (Tapply (([31:13-19], "\\MyNamespace\\MyType"), [])))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }
+              ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|namespace_elaboration.php line 31, characters 10-11),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 31, characters 25-31),
+               (Tapply (([31:25-32], "\\MyNamespace\\MyType"), [])))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\other_id" ->
+    { fe_pos = [35:10-18];
+      fe_type =
+      (Rwitness (root|namespace_elaboration.php line 35, characters 10-17),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [35:31-33]; fp_name = (Some "$x");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|namespace_elaboration.php line 35, characters 19-29),
+                  (Tapply (([35:19-30], "\\MyNamespace\\MyOtherType"), [])))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }
+              ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|namespace_elaboration.php line 35, characters 10-17),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|namespace_elaboration.php line 35, characters 36-47),
+               (Tapply (([35:36-48], "\\MyNamespace\\MyOtherType"), [])))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

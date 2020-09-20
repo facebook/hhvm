@@ -10,16 +10,7 @@ HHVM_DEFINE_EXTENSION("mysql"
     mysql_stats.h
   SYSTEMLIB
     ext_mysql.php
-    ext_mysql-async.php
   DEPENDS
     libFolly
     libMySQL
-)
-
-HHVM_DEFINE_EXTENSION("mysqli"
-  PRETTY_NAME "MySQLi"
-  SOURCES
-    ext_mysqli.cpp
-  SYSTEMLIB
-    ext_mysqli.php
 )

@@ -1,0 +1,10 @@
+File "print_like_type.php", line 13, characters 3-14:
+  ~int
+File "print_like_type.php", line 17, characters 3-14:
+  ~int
+File "print_like_type.php", line 27, characters 3-15:
+  ~int
+File "print_like_type.php", line 16, characters 12-15:
+Cannot use experimental feature: like-types (Other[0000])
+File "print_like_type.php", line 20, characters 12-15:
+Cannot use experimental feature: like-types (Other[0000])

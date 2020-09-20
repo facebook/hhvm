@@ -1,5 +1,7 @@
-<?php
+<?hh
 
+<<__EntryPoint>>
+function main_1686() {
 $name = tempnam(sys_get_temp_dir(), '1682');
 $input = fopen($name, 'w+');
 fwrite($input, 'hello world');
@@ -11,7 +13,7 @@ $bytes = fread($output, 1024);
 print "From file, without Maxlen: <".serialize($bytes).">.\n";
 fseek($input, 0);
 $output = fopen('php://memory', 'w+');
-stream_copy_to_stream($input, $output, null);
+stream_copy_to_stream($input, $output, 0);
 fseek($output, 0);
 $bytes = fread($output, 1024);
 print "From file, using Maxlen null: <".serialize($bytes).">.\n";
@@ -22,3 +24,4 @@ fseek($output, 0);
 $bytes = fread($output, 1024);
 print "From file, using Maxlen -1: <".serialize($bytes).">.\n";
 unlink($name);
+}

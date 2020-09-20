@@ -1,66 +1,58 @@
 *** Testing file() : variation ***
 
 -- Iteration 1 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 2 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 3 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 4 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_variation8.php on line 47
 bool(false)
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_variation8.php on line 47
 bool(false)
 
 -- Iteration 7 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 8 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 9 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 10 --
-array(1) {
-  [0]=>
+varray(1) {
   string(13) "contents read"
 }
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/file_variation8.php on line 47
 bool(false)
 
 *** Done ***

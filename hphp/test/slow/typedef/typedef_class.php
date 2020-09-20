@@ -23,4 +23,8 @@ function hinting(): void {
   target($x);
 }
 
+
+<<__EntryPoint>>
+function main_typedef_class() {
 hinting();
+}

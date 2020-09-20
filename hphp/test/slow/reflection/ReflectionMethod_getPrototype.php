@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function outputPrototype($rf) {
   try {
@@ -75,28 +75,28 @@ class PDOSubClass extends PDO {
 }
 
 function main() {
-  $tests = array(
-    array("Cls1", "method1"),
-    array("Cls1", "method2"),
-    array("Cls2", "method2"),
-    array("Cls3", "method1"),
-    array("Cls3", "method3"),
-    array("Cls4", "method1"),
-    array("Cls4", "method3"),
-    array("Cls5", "method3"),
-    array("Cls5", "method4"),
-    array("Cls6", "method3"),
-    array("Cls6", "method4"),
-    array("Cls6", "method1"),
-    array("Cls7", "method1"),
-    array("Cls7", "method7"),
-    array("Cls8", "method1"),
-    array("Cls8", "method7"),
+  $tests = varray[
+    varray["Cls1", "method1"],
+    varray["Cls1", "method2"],
+    varray["Cls2", "method2"],
+    varray["Cls3", "method1"],
+    varray["Cls3", "method3"],
+    varray["Cls4", "method1"],
+    varray["Cls4", "method3"],
+    varray["Cls5", "method3"],
+    varray["Cls5", "method4"],
+    varray["Cls6", "method3"],
+    varray["Cls6", "method4"],
+    varray["Cls6", "method1"],
+    varray["Cls7", "method1"],
+    varray["Cls7", "method7"],
+    varray["Cls8", "method1"],
+    varray["Cls8", "method7"],
     // builtin class
-    array("PDO", "commit"),
+    varray["PDO", "commit"],
     // sublcass of builtin class
-    array("PDOSubClass", "commit"),
-  );
+    varray["PDOSubClass", "commit"],
+  ];
 
   foreach ($tests as $test) {
     $rf = new ReflectionMethod($test[0], $test[1]);
@@ -104,5 +104,9 @@ function main() {
   }
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_reflection_method_get_prototype() {
+main();
+}

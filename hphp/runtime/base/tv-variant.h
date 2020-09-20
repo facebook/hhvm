@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_VARIANT_H_
-#define incl_HPHP_TV_VARIANT_H_
+#pragma once
 
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/tv-val.h"
 
 namespace HPHP {
 
@@ -36,45 +36,35 @@ struct Variant;
  */
 
 ALWAYS_INLINE Variant& tvAsVariant(TypedValue* tv) {
-  assert(tv != nullptr);
-  assert(tvIsPlausible(*tv));
+  assertx(tv != nullptr);
+  assertx(tvIsPlausible(*tv));
   return reinterpret_cast<Variant&>(*tv);
 }
 
 ALWAYS_INLINE Variant& tvAsUninitializedVariant(TypedValue* tv) {
   // A special case, for use when constructing a variant and we don't assume
   // initialization.
-  assert(tv != nullptr);
+  assertx(tv != nullptr);
   return reinterpret_cast<Variant&>(*tv);
 }
 
 ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue* tv) {
-  assert(tv != nullptr);
+  assertx(tv != nullptr);
+  assertx(tvIsPlausible(*tv));
   return reinterpret_cast<const Variant&>(*tv);
 }
 
-ALWAYS_INLINE Variant& cellAsVariant(Cell& cell) {
-  assert(cellIsPlausible(cell));
-  return reinterpret_cast<Variant&>(cell);
+ALWAYS_INLINE Variant& tvAsVariant(TypedValue& tv) {
+  assertx(tvIsPlausible(tv));
+  return reinterpret_cast<Variant&>(tv);
 }
 
-ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
-  assert(cellIsPlausible(cell));
-  return reinterpret_cast<const Variant&>(cell);
-}
-
-ALWAYS_INLINE Variant& refAsVariant(Ref& ref) {
-  assert(refIsPlausible(ref));
-  return reinterpret_cast<Variant&>(ref);
-}
-
-ALWAYS_INLINE const Variant& refAsCVarRef(const Ref& ref) {
-  assert(refIsPlausible(ref));
-  return reinterpret_cast<const Variant&>(ref);
+ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue& tv) {
+  assertx(tvIsPlausible(tv));
+  return reinterpret_cast<const Variant&>(tv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }
 
-#endif

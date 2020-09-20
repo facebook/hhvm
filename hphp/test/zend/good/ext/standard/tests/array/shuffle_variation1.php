@@ -1,6 +1,6 @@
-<?php
-/* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+<?hh
+/* Prototype  : bool shuffle(&array $array_arg)
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
@@ -9,84 +9,82 @@
 * argument and verify that function outputs required warning messages wherever applicable
 */
 
-echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
-
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
-//get a resource variable
-$fp = fopen(__FILE__, "r");
-
 //define a class
-class test
-{
-  var $t = 10;
-  function __toString()
-  {
+class test {
+  public $t = 10;
+  function __toString() {
     return "object";
   }
 }
 
-//array of values to iterate over
-$values = array(
+<<__EntryPoint>>
+function main(): void {
+  echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
 
-       // int data
-/*1*/  0,
-       1,
-       12345,
-       -2345,
+  //get an unset variable
+  $unset_var = 10;
+  unset($unset_var);
 
-       // float data
-/*5*/  10.5,
-       -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
-       .5,
+  //get a resource variable
+  $fp = fopen(__FILE__, "r");
 
-       // null data
-/*10*/ NULL,
-       null,
+  //array of values to iterate over
+  $values = varray[
+         // int data
+  /*1*/  0,
+         1,
+         12345,
+         -2345,
 
-       // boolean data
-/*12*/ true,
-       false,
-       TRUE,
-       FALSE,
+         // float data
+  /*5*/  10.5,
+         -10.5,
+         12.3456789000e10,
+         12.3456789000E-10,
+         .5,
 
-       // empty data
-/*16*/ "",
-       '',
+         // null data
+  /*10*/ NULL,
+         null,
 
-       // string data
-/*18*/ "string",
-       'string',
+         // boolean data
+  /*12*/ true,
+         false,
+         TRUE,
+         FALSE,
 
-       // object data
-/*20*/ new test(),
+         // empty data
+  /*16*/ "",
+         '',
 
-       // undefined data
-/*21*/ @$undefined_var,
+         // string data
+  /*18*/ "string",
+         'string',
 
-       // unset data
-/*22*/ @$unset_var,
+         // object data
+  /*20*/ new test(),
 
-/*23*/ // resource data
-       $fp
-);
+         // undefined data
+  /*21*/ @$undefined_var,
 
-// loop through the array to test shuffle() function
-// with each element of the array
-$count = 1;
-foreach($values as $value) {
-  echo "\n-- Iteration $count --\n";
-  var_dump( shuffle($value) );
-  $count++;
-};
+         // unset data
+  /*22*/ @$unset_var,
 
-// closing the resource
-fclose($fp);
+  /*23*/ // resource data
+         $fp
+  ];
 
-echo "Done";
-?>
+  // loop through the array to test shuffle() function
+  // with each element of the array
+  $count = 1;
+  foreach ($values as $value) {
+    echo "\n-- Iteration $count --\n";
+    var_dump(shuffle(inout $value));
+    $count++;
+  }
+
+  // closing the resource
+  fclose($fp);
+
+  echo "Done";
+}

@@ -1,7 +1,5 @@
 #!/usr/local/bin/php -j
-<?php
-
-require(__DIR__.'/perf-lib.php');
+<?hh
 
 # Returns true iff $sample contains a line containing $func.
 function contains_frame(Vector $sample, string $func): bool {
@@ -58,30 +56,55 @@ class Node {
       return;
     }
 
-    usort($items, ($a, $b) ==> $b[1]->count - $a[1]->count);
+    usort(inout $items, ($a, $b) ==> $b[1]->count - $a[1]->count);
     foreach ($items as $pair) {
       $pair[1]->show($total_count, $indent);
     }
   }
 }
 
-# Build and print a perf-annotated call graph of each stack trace in $samples,
-# truncated at the highest frame containing $top.
-function treeify($samples, $top) {
+# Build and print a perf-annotated call graph of each stack trace in $samples.
+# If $top is set, each trace will be truncated at the highest frame containing
+# $top, if $root_last == false, or the lowest frame containing $top, if
+# $root_last == true.
+function treeify(
+  Vector $samples,
+  bool $reverse,
+  bool $root_last,
+  ?string $top
+) {
   $root = new Node('', $samples->count());
+  $step = $reverse ? 1 : -1;
+  $search_step = $root_last ? -$step : $step;
 
   foreach ($samples as $stack) {
-    for ($i = $stack->count() - 1; $i >= 0; --$i) {
-      if (strpos($stack[$i], $top) !== false) break;
+    $first = $reverse ? 0 : $stack->count() - 1;
+    $last = $reverse ? $stack->count() - 1 : 0;
+    $search_first = $root_last ? $last : $first;
+    $search_last = $root_last ? $first : $last;
+
+    if ($top !== null) {
+      for ($i = $search_first; $i !== $search_last + $search_step;
+           $i += $search_step) {
+        if (strpos($stack[$i], $top) !== false) break;
+      }
+    } else {
+      $i = $first;
     }
 
     $node = $root;
-    for (; $i >= 0; --$i) {
-      $node = $node->followEdge($stack[$i]);
+    for (; $i !== $last + $step; $i += $step) {
+      $func = $stack[$i];
+      if ($func === 'HHVM::retInlHelper') continue;
+      $func = preg_replace('/^PHP::.+\.php::/', 'PHP::', $func);
+
+      $node = $node->followEdge($func);
     }
-    # Add a final entry for exclusive time spent in the body of the bottom
-    # function.
-    $node->followEdge('<body>');
+    if (!$reverse) {
+      # Add a final entry for exclusive time spent in the body of the bottom
+      # function.
+      $node->followEdge('<body>');
+    }
   }
 
   $root->show();
@@ -91,70 +114,81 @@ function usage($script_name) {
   echo <<<EOT
 Usage:
 
-$script_name [symbol]
+$script_name [--reverse] [--root-last] [--exe <name>] [symbol]...
 
 This script expects the output of "perf script --fields comm,ip,sym" on stdin.
-If the optional symbol argument is present, a call graph of all frames
-containing that symbol will be output, with the root of the frame truncated at
-the highest frame containing the symbol. Note that the symbol may appear
-anywhere in the function name, so using 'Foo::translate' will match both
-'Foo::translate' and 'Foo::translateFrob'. If you just want Foo::translate, use
-'Foo::translate('. If symbol is not present, the total number of samples present
-will be printed along with the number of samples that contain a few hardcoded
-functions.
+If no symbols are given, all samples will be combined into a single tree showing
+the call graph, annotated with the inclusive cost of each node.
 
+If one symbol is given, the call graph will instead be built from samples with
+at least one frame containing the symbol. Samples will be truncated at the
+highest frame containing the symbol (or the lowest, if --root-last is given).
+Note that the symbol may appear anywhere in the function name, so using
+'Foo::translate' will match both 'Foo::translate' and 'Foo::translateFrob'.
+If you just want Foo::translate, use 'Foo::translate('.
 
+Finally, if multiple symbols are given, a summary will be printed showing the
+total number of samples, and how many samples contain each symbol.
+
+If --reverse is given, the call graph will be inverted before tree formation,
+showing callers of any given symbols, rather than callees.
+
+By default, only samples from the 'hhvm' binary will be considered. Giving
+--exe with an argument overrides this.
 EOT;
 }
 
-function main($argv) {
+<<__EntryPoint>>
+function main() {
+  require(__DIR__.'/perf-lib.php');
+
+  $argv = $_SERVER['argv'];
   ini_set('memory_limit', '64G');
   if (posix_isatty(STDIN)) {
     usage($argv[0]);
-    return 1;
+    exit(1);
+  }
+  array_shift(inout $argv);
+
+  $reverse = false;
+  $root_last = false;
+  $functions = Set {};
+  $exe = 'hhvm';
+  for ($i = 0; $i < count($argv); ++$i) {
+    $arg = $argv[$i];
+    if ($arg=== '--reverse') {
+      $reverse = true;
+    } else if ($arg === '--root-last') {
+      $root_last = true;
+    } else if ($arg === '--exe') {
+      $exe = $argv[++$i];
+    } else {
+      $functions->add($arg);
+    }
   }
 
-  $samples = read_perf_samples(STDIN, 'hhvm');
-
-  if (count($argv) == 2) {
-    $functions = Set { $argv[1] };
-  } else {
-    $functions = Set {
-      'MCGenerator::translate',
-      'jit::selectTracelet(',
-      'Translator::translateRegion(',
-      'jit::optimizeRefcounts(',
-      'jit::optimize(',
-      'jit::allocateRegs(',
-      'jit::genCode(',
-      'getStackValue(',
-      'IRBuilder::constrain',
-      'relaxGuards(',
-      'MCGenerator::retranslateOpt(',
-      'IRTranslator::translateInstr(',
-      'Type::subtypeOf(',
-      'jit::regionizeFunc',
-    };
-  }
-
+  $samples = read_perf_samples(STDIN, $exe);
   $subsamples = Map {'all' => $samples};
   foreach ($functions as $f) {
     $subsamples[$f] = $samples->filter($s ==> contains_frame($s, $f));
   }
 
-  if (count($argv) == 2) {
-    $sub = $subsamples[$argv[1]];
+  if ($functions->isEmpty()) {
+    treeify($subsamples['all'], $reverse, $root_last, null);
+  } else if ($functions->count() === 1) {
+    $func = $functions->firstValue();
+    $sub = $subsamples[$func];
     printf("Looking for pattern *%s*. %d of %d total samples (%.2f%%)\n\n",
-           $argv[1], $sub->count(), $samples->count(),
+           $func, $sub->count(), $samples->count(),
            $sub->count() / $samples->count() * 100);
-    treeify($subsamples[$argv[1]], $argv[1]);
+    treeify($sub, $reverse, $root_last, $func);
   } else {
     foreach ($subsamples as $k => $v) {
-      printf("%5d %s\n", $v->count(), $k);
+      printf(
+        "%8d %5.1f %s\n", $v->count(), $v->count() / $samples->count() * 100, $k
+      );
     }
   }
 
-  return 0;
+  exit(0);
 }
-
-exit(main($argv));

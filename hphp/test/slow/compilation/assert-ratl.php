@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 final class X {
   private function foo() {
-    $r = array(1 => array());
+    $r = darray[1 => varray[]];
     $r[1][] = 55;
     $r[1][] = "foo";
 
@@ -22,4 +22,8 @@ final class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_assert_ratl() {
 (new X)->bar();
+}

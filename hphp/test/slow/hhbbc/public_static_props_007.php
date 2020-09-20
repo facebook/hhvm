@@ -11,4 +11,8 @@ class Asd {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_007() {
 (new Asd)->foo();
+}

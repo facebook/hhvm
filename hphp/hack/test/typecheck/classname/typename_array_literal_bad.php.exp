@@ -1,8 +1,12 @@
 File "typename_array_literal_bad.php", line 10, characters 3-15:
-  array<^(string), ^(classname<D as D> | typename<I>)>
+  darray<string, (classname<exact D> | typename<I>)>
 File "typename_array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
 File "typename_array_literal_bad.php", line 8, characters 51-51:
-This is an object of type I
-File "typename_array_literal_bad.php", line 9, characters 46-46:
-It is incompatible with an object of type D
+Expected `I`
+File "typename_array_literal_bad.php", line 9, characters 47-47:
+But got `D`
+File "typename_array_literal_bad.php", line 9, characters 47-47:
+  where the class `D` was referenced here
+File "classname.hhi", line 17, characters 35-35:
+  via this generic `T`

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REG_ALLOC_H_
-#define incl_HPHP_VM_REG_ALLOC_H_
+#pragma once
 
 #include <vector>
 
@@ -86,4 +85,3 @@ void getEffects(const Abi& abi, const Vinstr& i,
 
 }}
 
-#endif

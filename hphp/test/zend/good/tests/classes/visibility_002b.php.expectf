@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Access level to fail::f2() must be public (as in class same) or weaker in %s/visibility_002b.php on line 21

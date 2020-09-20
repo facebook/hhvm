@@ -1,9 +1,9 @@
-<?hh
+<?hh // partial
 
 /**
  * A "break iterator" is an ICU object that exposes methods for locating
  * boundaries in text (e.g. word or sentence boundaries). The PHP
- * IntlBreakIterator serves as the the base class for all types of ICU break
+ * IntlBreakIterator serves as the base class for all types of ICU break
  * iterators. Where extra functionality is available, the intl extension may
  * expose the ICU break iterator with suitable subclasses, such as
  * IntlRuleBasedBreakIterator or IntlCodePointBreaIterator.   This class

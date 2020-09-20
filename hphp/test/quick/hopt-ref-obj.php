@@ -2,10 +2,10 @@
 
 class Foo { }
 
-function run($a) {
-  $b =& $a;
-
+function run(inout $b) {
   return $b;
 }
-
-var_dump(run(new Foo()));
+<<__EntryPoint>> function main(): void {
+$a = new Foo();
+var_dump(run(inout $a));
+}

@@ -1,48 +1,59 @@
 *** Testing strtr() function: with unexpected inputs for 'str' ***
 -- Iteration 1 --
-string(1) "a"
+
+Warning: strtr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 2 --
-string(1) "t"
+
+Warning: strtr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 3 --
-string(2) "-m"
+
+Warning: strtr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 4 --
-string(4) "ta.5"
+
+Warning: strtr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 5 --
-string(5) "-ma.5"
+
+Warning: strtr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 6 --
-string(12) "tatm34567aaa"
+
+Warning: strtr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 7 --
 
-Warning: %s
-NULL
+Warning: strtr() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: strtr() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: strtr() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 10 --
-string(1) "t"
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 11 --
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 12 --
-string(1) "t"
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 13 --
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 14 --
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 15 --
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 16 --
-string(13) "s02ple objec1"
+
+Warning: strtr() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: strtr() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 18 --
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 19 --
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 ===DONE===

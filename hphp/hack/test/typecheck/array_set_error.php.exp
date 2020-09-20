@@ -1,0 +1,4 @@
+File "array_set_error.php", line 4, characters 3-13:
+Elements in a keyset cannot be assigned, use append instead. (Typing[4156])
+File "array_set_error.php", line 3, characters 14-24:
+Definition is here

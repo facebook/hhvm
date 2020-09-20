@@ -1,20 +1,24 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <folly/io/async/HHWheelTimer.h>
+#include <limits>
 #include <ostream>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/proxygen/proxygen-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 
 using namespace testing;
+using proxygen::HTTPCodec;
 using proxygen::HTTPException;
+using proxygen::HTTP_HEADER_EXPECT;
+using proxygen::HTTP_HEADER_CONTENT_LENGTH;
 using proxygen::HTTPMessage;
 using proxygen::HTTPMethod;
 using proxygen::HTTPTransaction;
 using proxygen::HTTPPushTransactionHandler;
 using proxygen::MockHTTPTransaction;
 using proxygen::TransportDirection;
-using proxygen::HTTPCodec;
 using proxygen::WheelTimerInstance;
 
 MATCHER_P(IsResponseStatusCode, statusCode, "") {
@@ -43,25 +47,30 @@ namespace HPHP {
 static ServerOptions s_options{std::string(""), 80, 1};
 
 struct MockProxygenServer : ProxygenServer {
-
   MockProxygenServer()
       : ProxygenServer(s_options) {}
 
   MOCK_METHOD1(onRequestError, void(Transport*));
 
   MOCK_METHOD1(onRequest, void(std::shared_ptr<ProxygenTransport>));
+
+  MOCK_METHOD0(decrementEnqueuedCount, void());
+};
+
+struct MockHPHPWorkerThread : HPHPWorkerThread {
+  explicit MockHPHPWorkerThread(MockProxygenServer* server)
+      : HPHPWorkerThread(nullptr, server) {}
+
   void putResponseMessage(ResponseMessage&& message) override {
     m_messageQueue.emplace_back(std::move(message));
   }
-
-  MOCK_METHOD0(decrementEnqueuedCount, void());
 
   void deliverMessages(int32_t n = -1) {
     while (n > 0 || (n < 0 && !m_messageQueue.empty())) {
       EXPECT_FALSE(m_messageQueue.empty());
       auto message = std::move(m_messageQueue.front());
-      auto m_transport = message.m_transport;
-      m_transport->messageAvailable(std::move(message));
+      auto transport = message.m_transport;
+      transport->messageAvailable(std::move(message));
       m_messageQueue.pop_front();
       n--;
     }
@@ -78,24 +87,43 @@ std::unique_ptr<HTTPMessage> getRequest(HTTPMethod type) {
   return req;
 }
 
-struct ProxygenTransportTest : testing::Test {
-  ProxygenTransportTest()
+struct ProxygenTransportBasicTest : testing::Test {
+  ProxygenTransportBasicTest()
       : m_timeouts(folly::HHWheelTimer::newTimer(
             &m_eventBase,
             std::chrono::milliseconds(
                 folly::HHWheelTimer::DEFAULT_TICK_INTERVAL),
             folly::AsyncTimeout::InternalEnum::NORMAL,
             std::chrono::milliseconds(100))),
+        m_worker(&m_server),
         m_txn(
             TransportDirection::DOWNSTREAM,
             HTTPCodec::StreamID(1),
             1,
             m_egressQueue,
             WheelTimerInstance(m_timeouts.get())) {
-    m_transport = std::make_shared<ProxygenTransport>(&m_server);
+    m_transport = std::make_shared<ProxygenTransport>(&m_server, &m_worker);
     m_transport->setTransactionReference(m_transport);
     m_transport->setTransaction(&m_txn);
   }
+
+  void SetUp() override {
+  }
+
+  void TearDown() override {
+  }
+
+ protected:
+  folly::EventBase m_eventBase;
+  folly::HHWheelTimer::UniquePtr m_timeouts;
+  proxygen::HTTP2PriorityQueue m_egressQueue;
+  StrictMock<MockProxygenServer> m_server;
+  StrictMock<MockHPHPWorkerThread> m_worker;
+  StrictMock<MockHTTPTransaction> m_txn;
+  std::shared_ptr<ProxygenTransport> m_transport;
+};
+
+struct ProxygenTransportTest : ProxygenTransportBasicTest {
 
   // Initiates a simple GET request to the transport
   void SetUp() override {
@@ -115,8 +143,8 @@ struct ProxygenTransportTest : testing::Test {
       return;
     }
     m_transport->finish(std::move(m_transport));
-    EXPECT_EQ(m_server.m_messageQueue.size(), 1);
-    m_server.deliverMessages();
+    EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
+    m_worker.deliverMessages();
     EXPECT_CALL(m_server, decrementEnqueuedCount());
     transport->detachTransaction();
   }
@@ -130,16 +158,22 @@ struct ProxygenTransportTest : testing::Test {
     auto id = m_transport->pushResource("foo", "/bar", pri, promiseHeaders,
                                         responseHeaders,  nullptr, 0, eom);
     EXPECT_GT(id, 0);
-    EXPECT_EQ(m_server.m_messageQueue.size(), 2);
+    EXPECT_EQ(m_worker.m_messageQueue.size(), 2);
     return id;
   }
 
   void expectPushPromiseAndHeaders(
     MockHTTPTransaction& pushTxn, uint8_t pri,
     HTTPPushTransactionHandler**pushHandlerPtr) {
-    EXPECT_CALL(m_txn, newPushedTransaction(_))
+#ifdef FACEBOOK
+    EXPECT_CALL(m_txn, newPushedTransaction(_,_))
       .WillOnce(DoAll(SaveArg<0>(pushHandlerPtr),
                       Return(&pushTxn)));
+#else
+    EXPECT_CALL(m_txn, newPushedTransaction(_))
+        .WillOnce(DoAll(SaveArg<0>(pushHandlerPtr),
+                        Return(&pushTxn)));
+#endif
     EXPECT_CALL(pushTxn, sendHeaders(_))
       .WillOnce(Invoke([pri] (const HTTPMessage& promise) {
             EXPECT_TRUE(promise.isRequest());
@@ -156,20 +190,12 @@ struct ProxygenTransportTest : testing::Test {
 
   void sendResponse(const std::string& body) {
     m_transport->sendImpl(body.data(), body.length(), 200, false, true);
-    EXPECT_EQ(m_server.m_messageQueue.size(), 1);
+    EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
     EXPECT_CALL(m_txn, sendHeaders(_));
     EXPECT_CALL(m_txn, sendBody(_));
     EXPECT_CALL(m_txn, sendEOM());
-    m_server.deliverMessages();
+    m_worker.deliverMessages();
   }
-
- protected:
-  folly::EventBase m_eventBase;
-  folly::HHWheelTimer::UniquePtr m_timeouts;
-  proxygen::HTTP2PriorityQueue m_egressQueue;
-  MockProxygenServer m_server;
-  MockHTTPTransaction m_txn;
-  std::shared_ptr<ProxygenTransport> m_transport;
 };
 
 struct ProxygenTransportRepostTest : ProxygenTransportTest {
@@ -191,6 +217,132 @@ TEST_F(ProxygenTransportTest, basic) {
   sendResponse("12345");
 }
 
+TEST_F(ProxygenTransportBasicTest, unsupported_method) {
+  auto req = getRequest(HTTPMethod::UNSUB);
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onEOM();
+}
+
+TEST_F(ProxygenTransportBasicTest, body_after_413) {
+  auto req = getRequest(HTTPMethod::POST);
+  m_transport->setMaxPost(RuntimeOption::MaxPostSize, 30);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize + 1);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  EXPECT_CALL(m_server, onRequestError(_));
+  // The WillOnces will call the non-mocked functions to move the state machine.
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(413)))
+  .WillOnce(Invoke(
+    [&](const HTTPMessage& m) {
+      m_txn.HTTPTransaction::sendHeaders(m);
+    }));
+  EXPECT_CALL(m_txn, sendEOM())
+  .WillOnce(Invoke(
+    [&]() {
+      m_txn.HTTPTransaction::sendEOM();
+    }));
+  EXPECT_CALL(m_txn, sendAbort());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onBody(folly::IOBuf::copyBuffer("I still have so much to say"));
+  m_transport->onBody(folly::IOBuf::copyBuffer("I still have so much to say"));
+}
+
+TEST_F(ProxygenTransportBasicTest, invalid_expect) {
+  auto req = getRequest(HTTPMethod::POST);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  req->getHeaders().add(HTTP_HEADER_EXPECT, "105-stop");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(417)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, valid_expect) {
+  auto req = getRequest(HTTPMethod::POST);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(100)));
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, valid_expect_overlarge_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize + 1);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(417)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, invalid_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "blarf");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, weird_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "25, 200");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, negative_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "-500");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, overflowed_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  std::string length(std::numeric_limits<long long>::digits10 + 1, '9');
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(413)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, no_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, overlarge_body) {
+  auto req = getRequest(HTTPMethod::POST);
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(413)))
+  .WillOnce(Invoke(
+    [&](const HTTPMessage& m) {
+      m_txn.HTTPTransaction::sendHeaders(m);
+    }));
+  EXPECT_CALL(m_txn, sendEOM())
+  .WillOnce(Invoke(
+    [&]() {
+      m_txn.HTTPTransaction::sendEOM();
+    }));
+  EXPECT_CALL(m_txn, sendAbort());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->setMaxPost(10, 5);
+  m_transport->onBody(folly::IOBuf::copyBuffer("More than 10 bytes"));
+  // Give it multiple bodies since realistically this can happen.
+  m_transport->onBody(folly::IOBuf::copyBuffer("Even more than 10 bytes"));
+}
+
 TEST_F(ProxygenTransportTest, push) {
   // Push a resource
   Array promiseHeaders;
@@ -204,7 +356,7 @@ TEST_F(ProxygenTransportTest, push) {
   // And some body bytes
   std::string body("12345");
   m_transport->pushResourceBody(id, body.data(), body.length(), false);
-  EXPECT_EQ(m_server.m_messageQueue.size(), 3);
+  EXPECT_EQ(m_worker.m_messageQueue.size(), 3);
 
   // Creates a new transaction and sends headers/body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
@@ -213,13 +365,13 @@ TEST_F(ProxygenTransportTest, push) {
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
   EXPECT_CALL(pushTxn, sendBody(_));
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
 
   // Send Push EOM
   m_transport->pushResourceBody(id, nullptr, 0, true);
-  EXPECT_EQ(m_server.m_messageQueue.size(), 1);
+  EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
   EXPECT_CALL(pushTxn, sendEOM());
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
   pushHandler->detachTransaction();
   // Send response
   sendResponse("12345");
@@ -231,9 +383,9 @@ TEST_F(ProxygenTransportTest, push_empty_body) {
   Array responseHeaders;
   uint8_t pri = 1;
 
-  promiseHeaders.add(String("hello"),
+  promiseHeaders.set(String("hello"),
                      String("world"));  // dict serializtion path
-  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  responseHeaders.set(String("foo"), String("bar"));  // dict serializtion path
   pushResource(promiseHeaders, responseHeaders, pri, true /* eom, no body */);
 
   // Creates a new transaction and sends headers and an empty body
@@ -243,7 +395,7 @@ TEST_F(ProxygenTransportTest, push_empty_body) {
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
   EXPECT_CALL(pushTxn, sendEOM());
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
 
   pushHandler->detachTransaction();
   // Send response
@@ -256,9 +408,9 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
   Array responseHeaders;
   uint8_t pri = 1;
 
-  promiseHeaders.add(String("hello"),
+  promiseHeaders.set(String("hello"),
                      String("world"));  // dict serializtion path
-  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  responseHeaders.set(String("foo"), String("bar"));  // dict serializtion path
   pushResource(promiseHeaders, responseHeaders, pri);
 
   // Creates a new transaction and sends headers, but not body
@@ -267,7 +419,7 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
   sendResponse("12345");
 
   EXPECT_CALL(pushTxn, sendAbort())
@@ -285,9 +437,9 @@ TEST_F(ProxygenTransportTest, push_abort) {
   Array responseHeaders;
   uint8_t pri = 1;
 
-  promiseHeaders.add(String("hello"),
+  promiseHeaders.set(String("hello"),
                      String("world"));  // dict serializtion path
-  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  responseHeaders.set(String("foo"), String("bar"));  // dict serializtion path
   auto id = pushResource(promiseHeaders, responseHeaders, pri);
 
   // Creates a new transaction and sends headers, but not body
@@ -296,7 +448,7 @@ TEST_F(ProxygenTransportTest, push_abort) {
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
 
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
                    "Stream aborted, streamID");
@@ -305,7 +457,7 @@ TEST_F(ProxygenTransportTest, push_abort) {
   pushTxn.onError(ex);
   pushHandler->detachTransaction();
   m_transport->pushResourceBody(id, nullptr, 0, true);
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
   sendResponse("12345");
 }
 
@@ -322,6 +474,8 @@ TEST_F(ProxygenTransportTest, client_timeout) {
   // invalid
   EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(true));
   EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(408)));
+  EXPECT_CALL(m_txn, sendEOM());
+  EXPECT_CALL(m_server, onRequestError(_));
   m_transport->onError(ex);
 }
 
@@ -346,6 +500,7 @@ TEST_F(ProxygenTransportRepostTest, no_body) {
   InSequence enforceOrder;
   auto req = getRequest(HTTPMethod::POST);
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendEOM());
   m_transport->onHeadersComplete(std::move(req));
@@ -359,6 +514,7 @@ TEST_F(ProxygenTransportRepostTest, mid_body) {
   auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
   auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_))
     .Times(2);
@@ -376,6 +532,7 @@ TEST_F(ProxygenTransportRepostTest, after_body) {
   auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
   auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_));
   EXPECT_CALL(m_txn, sendEOM());
@@ -392,9 +549,11 @@ TEST_F(ProxygenTransportRepostTest, mid_body_abort) {
   auto body1 = folly::IOBuf::copyBuffer(std::string("hello"));
   auto body2 = folly::IOBuf::copyBuffer(std::string("world"));
 
+  EXPECT_CALL(m_txn, canSendHeaders());
   EXPECT_CALL(m_txn, sendHeaders(_));
   EXPECT_CALL(m_txn, sendBody(_))
     .Times(2);
+  EXPECT_CALL(m_txn, sendAbort());
   m_transport->onHeadersComplete(std::move(req));
   m_transport->onBody(std::move(body1));
   m_transport->beginPartialPostEcho();

@@ -1,19 +1,23 @@
-<?php
+<?hh
 
 class dad {
-  function dad()  {
+  function __construct()  {
 }
 }
 class child extends dad {
-  function child()  {
+  function __construct()  {
     echo "I'm " , get_parent_class($this) , "'s son\n";
   }
 }
 class child2 extends dad {
-  function child2()  {
+  function __construct()  {
     echo "I'm " , get_parent_class('child2') , "'s son too
 ";
   }
 }
+
+<<__EntryPoint>>
+function main_1457() {
 $foo = new child();
 $bar = new child2();
+}

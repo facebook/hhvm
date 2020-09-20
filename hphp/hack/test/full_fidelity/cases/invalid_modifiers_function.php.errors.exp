@@ -1,0 +1,8 @@
+(4,7)-(4,15) Top-level functions cannot be declared `abstract`
+(4,16)-(4,21) Top-level functions cannot be declared `final`
+(4,22)-(4,28) Top-level functions cannot be declared `static`
+(4,29)-(4,36) Top-level functions cannot be declared `private`
+(4,37)-(4,46) Top-level functions cannot be declared `protected`
+(4,47)-(4,53) Top-level functions cannot have multiple visibility modifiers
+(4,47)-(4,53) Top-level functions cannot be declared `public`
+(6,7)-(6,12) Top-level functions cannot have duplicate modifiers

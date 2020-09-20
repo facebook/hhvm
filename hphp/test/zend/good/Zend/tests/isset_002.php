@@ -1,5 +1,4 @@
-<?php
-
-var_dump(isset($a, ${$b}, $$c, $$$$d, $e[$f->g]->d));
-
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+var_dump(isset($a, $e[$f->g]->d));
+}

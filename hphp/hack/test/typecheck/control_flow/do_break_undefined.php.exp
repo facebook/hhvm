@@ -1,0 +1,4 @@
+File "do_break_undefined.php", line 11, characters 10-11:
+Variable `$s` is undefined, or not always defined. (Naming[2050])
+File "do_break_undefined.php", line 4, characters 3-8:
+Did you mean `$i` instead?

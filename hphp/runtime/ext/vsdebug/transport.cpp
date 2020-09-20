@@ -30,8 +30,8 @@ void DebugTransport::setTransportFd(int fd) {
   Lock lock(m_mutex);
 
   // We shouldn't have a valid transport already.
-  assert(m_transportFd < 0);
-  assert(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
+  assertx(m_transportFd < 0);
+  assertx(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
 
   // Create a set of pipe file descriptors to use to inform the thread
   // polling for reads that it's time to exit.
@@ -43,7 +43,7 @@ void DebugTransport::setTransportFd(int fd) {
 
     // This is unexpected and treated as fatal because we won't be able
     // to stop the polling threads in an orderly fashion at this point.
-    assert(false);
+    assertx(false);
   }
 
   m_transportFd = fd;
@@ -66,8 +66,11 @@ void DebugTransport::shutdownOutputThread() {
   // message thread so that it exits.
   std::unique_lock<std::mutex> lock(m_outgoingMsgLock);
   m_terminating = true;
-  m_outgoingMessages.clear();
   m_outgoingMsgCondition.notify_all();
+}
+
+void DebugTransport::cleanupFd(int fd) {
+  close(fd);
 }
 
 void DebugTransport::shutdown() {
@@ -89,7 +92,7 @@ void DebugTransport::shutdown() {
   // Cleanup all fds.
   {
     Lock lock(m_mutex);
-    close(m_transportFd);
+    cleanupFd(m_transportFd);
     m_transportFd = -1;
   }
 }
@@ -108,11 +111,13 @@ const std::string DebugTransport::wrapOutgoingMessage(
 }
 
 void DebugTransport::enqueueOutgoingUserMessage(
+  request_id_t threadId,
   const char* message,
   const char* level
 ) {
   folly::dynamic userMessage = folly::dynamic::object;
 
+  userMessage["threadId"] = threadId;
   userMessage["category"] = level;
   userMessage["output"] = message;
   enqueueOutgoingEventMessage(userMessage, EventTypeOutput);
@@ -168,18 +173,32 @@ void DebugTransport::processOutgoingMessages() {
     return;
   }
 
+  constexpr int abortIdx = 0;
+  constexpr int transportIdx = 1;
+  std::array<struct pollfd, 2> pollFds;
+
+  pollFds[abortIdx] = {0};
+  pollFds[abortIdx].fd = m_abortPipeFd[0];
+  pollFds[abortIdx].events =
+    POLLIN | POLLERR | POLLHUP | g_platformPollFlags;
+
+  pollFds[transportIdx] = {0};
+  pollFds[transportIdx].fd = fd;
+  pollFds[transportIdx].events =
+    POLLOUT | POLLERR | POLLHUP | g_platformPollFlags;
+
   while (true) {
     std::list<std::string> messagesToSend;
     {
       // Take a local copy of any messages waiting to be sent under the
       // lock and clear the queue.
       std::unique_lock<std::mutex> lock(m_outgoingMsgLock);
-      while (!m_terminating && m_outgoingMessages.size() == 0) {
-        m_outgoingMsgCondition.wait(lock);
-      }
-
       if (m_terminating) {
         return;
+      }
+
+      while (!m_terminating && m_outgoingMessages.size() == 0) {
+        m_outgoingMsgCondition.wait(lock);
       }
 
       messagesToSend = std::list<std::string>(m_outgoingMessages);
@@ -193,15 +212,62 @@ void DebugTransport::processOutgoingMessages() {
 
       // Write out the entire string, *including* its terminating NULL char.
       const char* output = it->c_str();
-      if (write(fd, output, strlen(output) + 1) < 0) {
-        VSDebugLogger::Log(
-          VSDebugLogger::LogLevelError,
-          "Sending message failed:\n%s\nWrite returned %d",
-          output,
-          errno
-        );
-        onClientDisconnected();
-        return;
+      size_t bytesToSend = strlen(output) + 1;
+
+      while (bytesToSend > 0) {
+        int ret = poll(pollFds.data(), 2, -1);
+        if (ret < 0) {
+          if (ret == -EINTR) {
+            // Interrupted syscall, resume polling.
+            continue;
+          }
+
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelError,
+            "Polling inputs failed: %d (%s)",
+            errno,
+            folly::errnoStr(errno).c_str()
+          );
+          onClientDisconnected();
+          return;
+        }
+
+        if ((pollFds[transportIdx].revents & POLLOUT) != 0) {
+          // Output transport is ready to accept writes.
+          ret = write(fd, output, bytesToSend);
+          if (ret < 0) {
+            // Error writing.
+            VSDebugLogger::Log(
+              VSDebugLogger::LogLevelError,
+              "Sending message failed:\n%s\nWrite returned %d",
+              output,
+              errno
+            );
+            onClientDisconnected();
+            return;
+          }
+
+          bytesToSend -= ret;
+          output += ret;
+
+        } else if (pollFds[abortIdx].revents != 0) {
+          // Termination event received.
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelInfo,
+            "Transport write thread: termination signal received."
+          );
+          return;
+        } else {
+          // TransportFD hangup or error.
+          assertx((pollFds[transportIdx].revents &
+                  (POLLERR | POLLHUP | g_platformPollFlags)) != 0);
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelInfo,
+            "Transport write thread: error event on fd."
+          );
+          onClientDisconnected();
+          return;
+        }
       }
     }
   }
@@ -225,7 +291,8 @@ void DebugTransport::processIncomingMessages() {
   // Wait for data to be available, or a termination event to occur.
   constexpr int abortIdx = 0;
   constexpr int transportIdx = 1;
-  int eventMask = POLLIN | POLLERR | POLLHUP;
+
+  int eventMask = POLLIN | POLLERR | POLLHUP | g_platformPollFlags;
   struct pollfd pollFds[2];
   memset(pollFds, 0, sizeof(pollFds));
   pollFds[abortIdx].fd = m_abortPipeFd[0];
@@ -292,7 +359,7 @@ void DebugTransport::processIncomingMessages() {
         VSDebugLogger::LogLevelError,
         "Polling inputs failed: %d (%s)",
         errno,
-        strerror(errno)
+        folly::errnoStr(errno).c_str()
       );
       break;
     }
@@ -370,7 +437,7 @@ bool DebugTransport::tryProcessMessage(
   bool success = false;
 
   const char* bufferPos = buffer + *bufferPosition;
-  assert(bufferPos <= buffer + bufferSize);
+  assertx(bufferPos <= buffer + bufferSize);
 
   // Advance through the buffer until we locate the NULL separator between
   // client messages.

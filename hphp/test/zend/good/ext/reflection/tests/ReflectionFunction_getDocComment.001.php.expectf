@@ -1,5 +1,16 @@
-string(%d) "/**
+string(25) "/**
  * my doc comment
  */"
 bool(false)
-bool(false)
+string(490) "/**
+ * array_pop() pops and returns the last value of the array, shortening the
+ *   array by one element. If array is empty (or is not an array), NULL will be
+ *   returned. Will additionally produce a Warning when called on a non-array.
+ *   This function will reset() the array pointer after use.
+ *
+ * @param mixed $array - The array to get the value from.
+ *
+ * @return mixed - Returns the last value of array. If array is empty (or is
+ *   not an array), NULL will be returned.
+ *
+ */"

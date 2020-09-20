@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   function __construct() {
@@ -7,9 +7,6 @@ class A {
 }
 
 class B {
-  function __destruct() {
-    throw new Exception();
-  }
 }
 
 function foo($a, $b) {
@@ -17,5 +14,6 @@ function foo($a, $b) {
 
 function bar($a, $b) {
 }
-
+<<__EntryPoint>> function main(): void {
 bar(new B, foo(1, new A));
+}

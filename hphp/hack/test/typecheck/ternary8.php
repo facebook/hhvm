@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(?int $x): int {
   $x === null ? 1 : 2;

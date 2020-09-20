@@ -1,12 +1,10 @@
 
-Warning: %s
-NULL
+Warning: gmp_divexact() expects exactly 2 parameters, 3 given in %s/gmp_divexact.php on line 3
 
-Warning: %s
-NULL
+Warning: gmp_divexact() expects exactly 2 parameters, 0 given in %s/gmp_divexact.php on line 4
 string(1) "0"
 
-Warning: %s
+Warning: gmp_divexact(): Zero operand not allowed in %s/gmp_divexact.php on line 9
 string(1) "0"
 string(2) "10"
 string(3) "512"

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $mc = new Memcached();
 $mc->addServer('localhost', '11211');
 
@@ -13,3 +13,4 @@ $mc->set($key, 1, 5);
 var_dump($mc->getResultCode() == Memcached::RES_SUCCESS);
 
 echo "OK\n";
+}

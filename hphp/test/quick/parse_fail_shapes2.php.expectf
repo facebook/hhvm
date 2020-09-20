@@ -1,2 +1,2 @@
 
-Fatal error: Shape key names may not start with integers in %s on line 5
+Fatal error: Shape field name must not be an int-like string (i.e. "123") in %s on line 5

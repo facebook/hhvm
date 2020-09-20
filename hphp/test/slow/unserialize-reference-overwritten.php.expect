@@ -1,9 +1,81 @@
-object(stdClass)#1 (2) {
+
+=================================
+Iteration 1
+dict(2) {
   ["a"]=>
-  int(1)
+  int(17)
   ["b"]=>
-  object(stdClass)#2 (1) {
-    ["a"]=>
-    string(1) "a"
+  NULL
+}
+object(stdClass) (2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  *RECURSION*
+}
+
+=================================
+Iteration 2
+dict(2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  int(17)
+}
+object(stdClass) (2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  int(17)
+}
+
+=================================
+Iteration 3
+dict(2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  object(stdClass) (1) {
+    ["c"]=>
+    string(1) "d"
   }
+}
+object(stdClass) (2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  object(stdClass) (1) {
+    ["c"]=>
+    string(1) "d"
+  }
+}
+
+=================================
+Iteration 4
+dict(2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  string(1) "d"
+}
+object(stdClass) (2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  string(1) "d"
+}
+
+=================================
+Iteration 5
+dict(2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  int(17)
+}
+object(stdClass) (2) {
+  ["a"]=>
+  int(17)
+  ["b"]=>
+  int(17)
 }

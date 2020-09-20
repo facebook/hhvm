@@ -1,6 +1,6 @@
 SELECTING from invalid table
 
-Warning: %s
+Warning: Unable to prepare statement: 1, no such table: non_existent_table in %s/sqlite3_20_error.php on line 6
 Error Code: 1
 Error Msg: no such table: non_existent_table
 Closing database

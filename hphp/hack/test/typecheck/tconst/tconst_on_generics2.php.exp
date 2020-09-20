@@ -1,8 +1,44 @@
-File "tconst_on_generics2.php", line 50, characters 9-12:
-A 'where' type constraint is violated here (Typing[4110])
-File "tconst_on_generics2.php", line 40, characters 26-29:
-This method's where constraints contain a generic type access
-File "tconst_on_generics2.php", line 10, characters 18-20:
-This is an int
+File "tconst_on_generics2.php", line 50, characters 18-19:
+Invalid argument (Typing[4326])
 File "tconst_on_generics2.php", line 19, characters 18-23:
-It is incompatible with a string
+Expected `string`
+File "tconst_on_generics2.php", line 40, characters 82-82:
+  resulting from accessing the type constant 'T'
+File "tconst_on_generics2.php", line 48, characters 12-20:
+  on an object of exactly the class StringBox
+File "tconst_on_generics2.php", line 10, characters 18-20:
+But got `int`
+File "tconst_on_generics2.php", line 40, characters 88-88:
+  resulting from accessing the type constant 'T'
+File "tconst_on_generics2.php", line 49, characters 12-17:
+  on an object of exactly the class IntBox
+File "tconst_on_generics2.php", line 50, characters 18-19:
+Invalid argument (Typing[4326])
+File "tconst_on_generics2.php", line 10, characters 18-20:
+Expected `int`
+File "tconst_on_generics2.php", line 40, characters 88-88:
+  resulting from accessing the type constant 'T'
+File "tconst_on_generics2.php", line 49, characters 12-17:
+  on an object of exactly the class IntBox
+File "tconst_on_generics2.php", line 19, characters 18-23:
+But got `string`
+File "tconst_on_generics2.php", line 40, characters 82-82:
+  resulting from accessing the type constant 'T'
+File "tconst_on_generics2.php", line 48, characters 12-20:
+  on an object of exactly the class StringBox
+File "tconst_on_generics2.php", line 11, characters 19-22:
+Invalid return type (Typing[4336])
+File "tconst_on_generics2.php", line 11, characters 19-22:
+Expected `void` because this function does not always return a value
+File "tconst_on_generics2.php", line 10, characters 18-20:
+But got `int`
+File "tconst_on_generics2.php", line 11, characters 28-34:
+  resulting from expanding the type constant `this::T`
+File "tconst_on_generics2.php", line 11, characters 19-22:
+Invalid return type (Typing[4336])
+File "tconst_on_generics2.php", line 10, characters 18-20:
+Expected `int`
+File "tconst_on_generics2.php", line 11, characters 28-34:
+  resulting from expanding the type constant `this::T`
+File "tconst_on_generics2.php", line 11, characters 19-22:
+But got `void` because this function does not always return a value

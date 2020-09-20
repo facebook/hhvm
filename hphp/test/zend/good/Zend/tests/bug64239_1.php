@@ -1,14 +1,17 @@
-<?php
+<?hh
 class A {
-	use T2 { t2method as Bmethod; }
+    use T2 { t2method as Bmethod; }
 }
 
 class B extends A {
 }
 
 trait T2 {
-	public function t2method() {
-	}
+    public function t2method() {
+    }
 }
+
+<<__EntryPoint>> function main(): void {
 print_r(get_class_methods("A"));
 print_r(get_class_methods("B"));
+}

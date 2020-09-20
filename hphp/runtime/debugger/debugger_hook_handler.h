@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_EVAL_HOOK_HANDLER_H_
-#define incl_EVAL_HOOK_HANDLER_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -60,4 +59,3 @@ private:
 
 }}
 
-#endif

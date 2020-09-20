@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 final class SodiumException extends Exception { }
 
@@ -11,13 +11,13 @@ function sodium_bin2hex(string $binary): string;
 function sodium_hex2bin(string $hex, ?string $ignore = null): string;
 
 <<__PHPStdLib>>
-function sodium_memzero(mixed &$buffer): void;
+function sodium_memzero(inout mixed $buffer): void;
 
 <<__PHPStdLib>>
-function sodium_increment(mixed &$buffer): void;
+function sodium_increment(inout mixed $buffer): void;
 
 <<__PHPStdLib>>
-function sodium_add(mixed &$value, string $add): void;
+function sodium_add(inout mixed $value, string $add): void;
 
 <<__PHPStdLib>>
 function sodium_memcmp(string $a, string $b): int;
@@ -48,13 +48,13 @@ function sodium_crypto_generichash_init(
 
 <<__PHPStdLib>>
 function sodium_crypto_generichash_update(
-  mixed &$state,
+  inout mixed $state,
   string $msg,
 ): bool;
 
 <<__PHPStdLib>>
 function sodium_crypto_generichash_final(
-  mixed &$state,
+  inout mixed $state,
   ?int $length = null,
 ): string;
 

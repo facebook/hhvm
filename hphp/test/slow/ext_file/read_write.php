@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_read_write() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -13,3 +16,4 @@ fseek($f, 8);
 var_dump(fread($f, 8));
 
 unlink($tempfile);
+}

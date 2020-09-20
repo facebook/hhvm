@@ -1,7 +1,4 @@
-<?php
-
-$m = new Memcached();
-$m->addServer('localhost', '11211');
+<?hh
 
 function matches_results($original, $compare)
 {
@@ -13,23 +10,29 @@ function matches_results($original, $compare)
 
     return $original === $result;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$data = array(
-    'foo' => 'foo-data',
-    'bar' => 'bar-data',
-    '2' => '2-data',
-    '3' => '3-data',
-);
+  $m = new Memcached();
+  $m->addServer('localhost', '11211');
 
-$keys = array_keys($data);
+  $data = darray[
+      'foo' => 'foo-data',
+      'bar' => 'bar-data',
+      '2' => '2-data',
+      '3' => '3-data',
+  ];
 
-$null = null;
-$m->setMulti($data, 3600);
+  $keys = array_keys($data);
 
-/* Check that all keys were stored */
-var_dump(matches_results($data, $m->getMulti($keys)));
+  $null = null;
+  $m->setMulti($data, 3600);
 
-/* ---- same tests for byKey variants ---- */
-$m->setMultiByKey("hi", $data, 3600);
+  /* Check that all keys were stored */
+  var_dump(matches_results($data, $m->getMulti($keys)));
 
-var_dump(matches_results($data, $m->getMultiByKey('hi', $keys)));
+  /* ---- same tests for byKey variants ---- */
+  $m->setMultiByKey("hi", $data, 3600);
+
+  var_dump(matches_results($data, $m->getMultiByKey('hi', $keys)));
+}

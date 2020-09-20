@@ -1,3 +1,4 @@
 
-Warning: Invalid State Error in %s/append_invalid.php on line 12
-NULL
+Fatal error: Uncaught exception 'DOMException' with message 'Wrong Document Error' in %s/append_invalid.php:15
+Stack trace:
+%A

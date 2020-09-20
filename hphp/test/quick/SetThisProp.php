@@ -11,7 +11,7 @@ class C {
     $this->b = null;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $obj = new C();
 $obj->f();
-
+}

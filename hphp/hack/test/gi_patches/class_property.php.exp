@@ -1,0 +1,16 @@
+<?hh // partial
+
+const c = 5;
+
+enum E : int {
+  X = 0;
+}
+
+class X {
+  <<__Soft>> public string $a = "string";
+  <<__Soft>> protected string $b = "string";
+  <<__Soft>> static private int $c = 3;
+  <<__Soft>> public int $d = c;
+  <<__Soft>> public E $e = E::X;
+  <<__Soft>> private static float $f = 3.2;
+}

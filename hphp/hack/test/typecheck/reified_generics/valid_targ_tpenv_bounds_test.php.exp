@@ -1,0 +1,12 @@
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 5-9:
+Invalid reified hint (Typing[4305])
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 5-9:
+This is not reified, it cannot be used as a reified type argument
+File "valid_targ_tpenv_bounds_test.php", line 11, characters 9-16:
+`Tassuper` is reified
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 12-16:
+Invalid reified hint (Typing[4305])
+File "valid_targ_tpenv_bounds_test.php", line 16, characters 12-16:
+This is not reified, it cannot be used as a reified type argument
+File "valid_targ_tpenv_bounds_test.php", line 12, characters 9-11:
+`Teq` is reified

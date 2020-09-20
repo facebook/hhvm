@@ -1,15 +1,10 @@
-File "abstract_implement2.php", line 20, characters 7-12:
-Class BClass does not correctly implement all required methods  (Typing[4110])
-File "abstract_implement2.php", line 20, characters 22-27:
-Some methods are incompatible with those declared in type AClass
-Read the following to see why:
 File "abstract_implement2.php", line 21, characters 19-21:
-Member foo has the wrong type
+The method `foo` has the wrong type (Typing[4341])
 File "abstract_implement2.php", line 20, characters 29-32:
-This is a bool
+Expected `bool`
 File "abstract_implement2.php", line 18, characters 43-43:
-  via this generic T
+  via this generic `T`
 File "abstract_implement2.php", line 15, characters 26-26:
-  via this generic T
+  via this generic `T`
 File "abstract_implement2.php", line 21, characters 26-28:
-It is incompatible with an int
+But got `int`

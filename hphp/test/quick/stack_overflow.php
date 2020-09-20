@@ -1,14 +1,20 @@
 <?hh
 
-$g = array(1,2,3);
+abstract final class StackOverflow { public static $g; }
 function cmp($a, $b) {
-  global $g;
-  usort($g, 'cmp');
+  $g = StackOverflow::$g;
+  usort(inout $g, fun('cmp'));
+  StackOverflow::$g = $g;
   fiz();
 }
 
-cmp(0, 0);
-
 function fiz() {
   var_dump(1);
+}
+<<__EntryPoint>>
+function entrypoint_stack_overflow(): void {
+
+  StackOverflow::$g = varray[1,2,3];
+
+  cmp(0, 0);
 }

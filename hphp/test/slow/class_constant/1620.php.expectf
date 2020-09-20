@@ -1,0 +1,29 @@
+Warning: constant(): Couldn't find constant self::FOO in %s/test/slow/class_constant/1620.php on line 9
+NULL
+
+Warning: constant(): Couldn't find constant parent::FOO in %s/test/slow/class_constant/1620.php on line 10
+NULL
+
+Warning: constant(): Couldn't find constant static::FOO in %s/test/slow/class_constant/1620.php on line 11
+NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+Warning: constant(): Couldn't find constant self::FOO in %s/test/slow/class_constant/1620.php on line 9
+NULL
+
+Warning: constant(): Couldn't find constant parent::FOO in %s/test/slow/class_constant/1620.php on line 10
+NULL
+
+Warning: constant(): Couldn't find constant static::FOO in %s/test/slow/class_constant/1620.php on line 11
+NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -7,11 +7,50 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
+
+<<__EntryPoint>>
+function main_ext_mailparse() {
+$text =
+  "To: fred@bloggs.com\n".
+  "Content-Type: multipart/mixed;\n".
+  "\tboundary=\"----=_NextPart_\"\n".
+  "\n".
+  "This is a multi-part message in MIME format.\n".
+  "\n".
+  "------=_NextPart_\n".
+  "Content-Type: tex/plain;\n".
+  "\tcharset=\"us-ascii\"\n".
+  "Content-Transfer-Encoding: 7bit\n".
+  "\n".
+  "this is a regular mime attachment.\n".
+  "\n";
+
+# MAXPARTS is 300, but the error does not occur until the 302nd
+# MIME part is parsed.
+for ($i = 0; $i < 301; $i++) {
+  $text .=
+    "------=_NextPart_\n".
+    "Content-Type: application/octet-stream;\n".
+    "\tname=\"README{$i}\"\n".
+    "Content-Transfer-Encoding: 7bit\n".
+    "Content-Disposition: attachment;;\n".
+    "\tfilename=\"README{$i}\"\n".
+    "\n".
+    "Part{$i}\n".
+    "\n";
+}
+
+$text .= "------=_NextPart_--\n";
+
+$mime = mailparse_msg_create();
+$result = mailparse_msg_parse($mime, $text);
+VS($result, false);
 
 VS(ezmlm_hash("foo"), 40);
 
-$files = array("mime", "phpcvs1", "qp", "uue");
+$files = varray["mime", "phpcvs1", "qp", "uue"];
 
 foreach ($files as $file) {
   $testname = __DIR__."/test_ext_mailparse." . $file . ".txt";
@@ -43,7 +82,7 @@ foreach ($files as $file) {
 
     $data = mailparse_msg_get_part_data($subpart);
     echo "\n"; echo $indent; echo "Part "; echo $partname; echo "\n";
-    ksort($data);
+    ksort(inout $data);
     foreach ($data as $key => $second) {
       if ($key != "headers" && $key != "ending-pos-body") {
         echo $indent; echo $key; echo " => ";
@@ -165,11 +204,11 @@ foreach ($arr as $first => $second) {
   $section = mailparse_msg_get_part($mail, $second);
   $info = mailparse_msg_get_part_data($section);
   $received =
-    array("from mail pickup service by hotmail.com with Microsoft",
-                   "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;");
+    varray["from mail pickup service by hotmail.com with Microsoft",
+                   "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;"];
   VS($info,
-    array(
-           "headers" => array("received" => $received),
+    darray[
+           "headers" => darray["received" => $received],
            "starting-pos" => 0,
            "starting-pos-body" => 200,
            "ending-pos" => 200,
@@ -180,17 +219,17 @@ foreach ($arr as $first => $second) {
            "transfer-encoding" => "8bit",
            "content-type" => "text/plain",
            "content-base" => "/"
-    )
+    ]
   );
 }
 
 //////////////////////////////////////////////////////////////////////
 
 $addresses =
-  array("\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
+  varray["\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
                  "(I am the greatest) Ali @(the)Vegas.WBA",
                  "\"strange\":\":sysmail\"@ Some-Group. Some-Org, Muhammed.".
-                 "(I am the greatest) Ali @(the)Vegas.WBA;");
+                 "(I am the greatest) Ali @(the)Vegas.WBA;"];
 
 ob_start();
 
@@ -306,3 +345,4 @@ VS($output,
    "\n".
    "UUE\n".
    "this is a test\n");
+}

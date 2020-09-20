@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : number bindec  ( string $binary_string  )
  * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
  * Source code: ext/standard/math.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing bindec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -18,7 +18,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
@@ -41,17 +41,17 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
-       array(),
+       'Array',
 
        // string data
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*22*/ @$undefined_var,
 
@@ -60,15 +60,15 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of bindec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(bindec($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(bindec($input));
+    $iterator++;
 };
 fclose($fp);
-?>
-===Done===
+echo "===Done===";
+}

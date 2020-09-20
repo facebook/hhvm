@@ -1,0 +1,6 @@
+File "unpack_call_mixed.php", line 5, characters 9-13:
+Invalid argument (Typing[4110])
+File "unpack_call_mixed.php", line 5, characters 9-13:
+This is an object of type Traversable<_> (it is unpacked with '...')
+File "unpack_call_mixed.php", line 3, characters 25-35:
+It is incompatible with a nullable type

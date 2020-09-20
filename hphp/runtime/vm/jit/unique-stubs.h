@@ -14,13 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
-#define incl_HPHP_JIT_UNIQUE_STUBS_H_
+#pragma once
 
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/hhbc.h"
 
+#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 #include <string>
@@ -34,8 +37,6 @@ struct SrcKey;
 namespace Debug { struct DebugInfo; }
 
 namespace jit {
-
-struct CodeCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +94,7 @@ struct UniqueStubs {
    *  +---------+---------------------+---------+-----------+
    *  | native  | call{,r,m,s}        | ret     | N/A       |
    *  +---------+---------------------+---------+-----------+
-   *  | PHP     | phpcall, callarray  | phpret  | phplogue  |
+   *  | PHP     | phpcall             | phpret  | phplogue  |
    *  +---------+---------------------+---------+----------+
    *  | stub    | callstub            | stubret | stublogue |
    *  +---------+---------------------+---------+-----------+
@@ -115,13 +116,14 @@ struct UniqueStubs {
   // Function entry.
 
   /*
-   * Dynamically dispatch to the appropriate func prologue, when the called
-   * function fails the prologue's func guard.
+   * Dynamically dispatch to the appropriate func prologue based on the
+   * information in php_call_regs, while repacking arguments as needed.
    *
-   * @reached:  jmp from func guard
+   * @reached:  callphp from TC
    * @context:  func guard
    */
   TCA funcPrologueRedispatch;
+  TCA funcPrologueRedispatchUnpack;
 
   /*
    * Look up or emit a func prologue and jump to it---or, failing that, call
@@ -132,9 +134,11 @@ struct UniqueStubs {
    * prologue succeeds, we update the prologue table to point to the new
    * prologue instead of this stub.
    *
-   * @reached:  callphp from TC
-   *            jmp from bindCallStub
+   * @reached:  callphpr from TC
+   *            callphps from TC
+   *            jmp from immutableBindCallStub
    *            jmp from funcPrologueRedispatch
+   *            jmp from funcPrologueRedispatchUnpack
    * @context:  func prologue
    */
   TCA fcallHelperThunk;
@@ -149,7 +153,6 @@ struct UniqueStubs {
    * translation.
    *
    * @reached:  call from enterTCHelper$callTC
-   *            jmp from fcallArrayHelper
    * @context:  func body
    */
   TCA funcBodyHelperThunk;
@@ -207,20 +210,6 @@ struct UniqueStubs {
   TCA retInlHelper;
 
   /*
-   * Return from a function when the ActRec was called from jitted code but
-   * had its m_savedRip smashed by the debugger.
-   *
-   * These stubs call a helper that looks up the original catch trace from the
-   * call, executes it, then executes a REQ_POST_DEBUGGER_RET.
-   *
-   * @reached:  phpret from TC
-   * @context:  func body (after returning to caller)
-   */
-  TCA debuggerRetHelper;
-  TCA debuggerGenRetHelper;
-  TCA debuggerAsyncGenRetHelper;
-
-  /*
    * Return from a resumed async function.
    *
    * Store result into the AsyncFunctionWaitHandle, mark it as finished and
@@ -259,32 +248,12 @@ struct UniqueStubs {
   // Function calls.
 
   /*
-   * Stubs for immutable/non-immutable PHP calls.
+   * Stub for immutable PHP calls.
    *
-   * @reached:  callphp from TC
+   * @reached:  callphps from TC
    * @context:  func prologue
    */
-  TCA bindCallStub;
   TCA immutableBindCallStub;
-
-  /*
-   * Use interpreter functions to enter the pre-live ActRec that we place on
-   * the stack (along with the Array of parameters) in a CallArray instruction.
-   *
-   * @reached:  callarray from TC
-   * @context:  func prologue
-   */
-  TCA fcallArrayHelper;
-
-  /*
-   * Similar to fcallArrayHelper, but takes an additional arg specifying the
-   * total number of args, including the array parameter (which must be the
-   * last one).
-   *
-   * @reached:  callarray from TC
-   * @context:  func prologue
-   */
-  TCA fcallUnpackHelper;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -297,29 +266,11 @@ struct UniqueStubs {
    * Expects that all VM registers are synced.
    *
    * @reached:  jmp from funcBodyHelperThunk
+   *            jmp from fcallHelperThunk
    *            call from enterTCHelper
    * @context:  func body
    */
   TCA resumeHelper;
-
-  /*
-   * Like resumeHelper, but specifically for an interpreted FCall.
-   *
-   * @reached:  jmp from fcallHelperThunk
-   * @context:  func prologue
-   */
-  TCA resumeHelperRet;
-
-  /*
-   * Finish suspending a stack of FCallAwaits.  See comments for
-   * handleFCallAwaitSuspend.
-   *
-   * Expects that all VM registers are synced.
-   *
-   * @reached:  phpret from TC
-   * @context:  func body (after returning to caller)
-   */
-  TCA fcallAwaitSuspendHelper;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make
@@ -346,7 +297,7 @@ struct UniqueStubs {
    * @reached:  jmp from TC
    * @context:  func body
    */
-  std::unordered_map<Op, TCA> interpOneCFHelpers;
+  jit::fast_map<Op, TCA> interpOneCFHelpers;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -393,8 +344,8 @@ struct UniqueStubs {
    *
    * enterTCExit is the address returned to when we leave the TC.
    */
-  void (*enterTCHelper)(Cell* sp, ActRec* fp, TCA start,
-                        ActRec* firstAR, void* tl, ActRec* stashedAR);
+  void (*enterTCHelper)(TCA start, ActRec* fp, void* tl, TypedValue* sp,
+                        ActRec* firstAR);
   TCA enterTCExit;
 
   /*
@@ -412,17 +363,29 @@ struct UniqueStubs {
   /*
    * Perform dispatch at the end of a catch block.
    *
+   * The endCatchHelper passes the current vmfp() to the unwinder to determine
+   * the catch trace of the return address of the parent frame.
+   *
+   * The endCatchStublogueHelper passes the current vmfp() and RIP saved in
+   * the stublogue header. Unwinder uses it to determine the catch trace of
+   * the return adddress belonging to the same logical vmfp().
+   *
    * If the unwinder has set state indicating a return address to jump to, we
    * load vmfp and vmsp and jump there.  Otherwise, we call _Unwind_Resume.
    */
+  TCA resumeCPPUnwind;
+  TCA endCatchSkipTeardownHelper;
+  TCA endCatchTeardownThisHelper;
   TCA endCatchHelper;
   TCA endCatchHelperPast;
+  TCA endCatchStublogueHelper;
+  TCA unwinderAsyncRet;
+  TCA unwinderAsyncNullRet;
 
   /*
-   * Handle unknown exceptions that are thrown across php code
+   * Throws an exception from the unwinder to enter the itanium unwinder
    */
-  TCA unknownExceptionHandler;
-  TCA unknownExceptionHandlerPast;
+  TCA throwExceptionWhileUnwinding;
 
   /*
    * Service request helper.
@@ -435,21 +398,6 @@ struct UniqueStubs {
    */
   TCA handleSRHelper;
 
-  /*
-   * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
-   */
-  TCA throwSwitchMode;
-
-  /*
-   * Method lookup helpers. Normally point to the corresponding c++
-   * functions, but may be generated stubs if the c++ code is too far
-   * from the translation cache.
-   */
-  TCA handlePrimeCacheInit;
-  TCA handlePrimeCacheInitFatal;
-  TCA handleSlowPath;
-  TCA handleSlowPathFatal;
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -461,8 +409,12 @@ struct UniqueStubs {
    * Utility for logging stub addresses during startup and registering the gdb
    * symbols.  It's often useful to know where they were when debugging.
    */
-  TCA add(const char* name, TCA start, const CodeCache& code,
-          Debug::DebugInfo& dbg);
+  void add(const char* name,
+           const CodeCache& code,
+           TCA start,
+           CodeCache::View view,
+           TransLoc loc,
+           Debug::DebugInfo& dbg);
 
   /*
    * If the given address is within one of the registered stubs, return a
@@ -509,12 +461,10 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff);
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Wrapper around the enterTCHelper stub, called from enterTC().
+ * Wrappers around the enterTC*Helper stubs, called from enterTC*().
  */
-void enterTCImpl(TCA start, ActRec* stashedAR);
+void enterTCImpl(TCA start);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

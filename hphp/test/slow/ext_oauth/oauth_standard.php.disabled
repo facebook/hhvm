@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function oauth_dump($v)
 {
@@ -89,4 +89,3 @@ $x->setTimeout(-1);
 } catch (Exception $E) {
 echo "EXCEPTION {$E->getCode()}: {$E->getMessage()}\n";
 }
-?>

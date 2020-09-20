@@ -1,7 +1,8 @@
 <?hh
 namespace HH {
-  if (false) {
-    class Self {}
-  }
-  echo "Done\n";
+
+class Self {}
+<<__EntryPoint>> function main(): void {
+echo "Done\n";
+}
 }

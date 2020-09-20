@@ -1,0 +1,319 @@
+(library
+  (name server_env)
+  (wrapped false)
+  (modules
+    serverArgs
+    serverArgs_sig
+    serverConfig
+    serverEnv
+    serverLocalConfig)
+  (libraries
+    ai_options
+    build_options
+    ci_util
+    cli_args
+    config_state_loader
+    diagnostic_subscription
+    disk
+    errors
+    experiments_config_file_stubs
+    file_info
+    glean_options
+    symbol_write_options
+    parser_options
+    pos
+    procs_bucket
+    server_client_provider
+    server_command_types
+    server_monitor
+    state_loader
+    typechecker_options
+    typing_service_api
+    typing_service_api_stubs
+    utils_core
+    utils_www_root
+    version)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name diagnostic_subscription)
+  (wrapped false)
+  (modules
+    diagnostic_subscription)
+  (libraries
+    collections
+    core_kernel
+    errors
+    file_info
+    naming
+    pos
+    relative_path
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name server_utils)
+  (wrapped false)
+  (modules
+    serverFiles
+    serverUtils)
+  (libraries
+    core_kernel
+    find
+    decl
+    decl_class
+    hhi
+    global_config
+    procs_bucket
+    procs_procs
+    relative_path
+    server_monitor
+    sys_utils
+    utils_core
+    watchman)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name server_command_types)
+  (wrapped false)
+  (modules
+    autocompleteTypes
+    docblockService
+    hoverService
+    inferAtPosService
+    saveStateServiceTypes
+    serverCommandTypes
+    serverCommandTypesUtils
+    serverCoverageMetricTypes
+    serverFormatTypes
+    serverGlobalInferenceTypes
+    serverHighlightRefsTypes
+    serverLintTypes
+    serverNotifierTypes
+    serverRageTypes
+    serverRefactorTypes)
+  (libraries
+    connection_tracker
+    full_fidelity
+    hh_json
+    ide_rpc_api_types
+    lsp
+    lwt
+    pos
+    search_utils
+    symbol
+    typing_defs
+    utils_lint)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name server_client_provider)
+  (wrapped false)
+  (modules
+    clientProvider
+    clientProvider_sig
+    serverClientProvider
+    serverIdleGc
+    testClientProvider)
+  (libraries
+    libancillary
+    server_command_types
+    server_utils
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
+
+(library
+  (name server_services)
+  (wrapped false)
+  (modules
+    autocompleteService
+    cstSearchService
+    ffpAutocompleteContextParser
+    ffpAutocompleteGlobals
+    ffpAutocompleteKeywords
+    ffpAutocompleteService
+    ffpAutocompleteTypeCheck
+    fileOutline
+    findRefsService
+    identifySymbolService
+    methodJumps
+    saveStateService
+    serverAutoComplete
+    serverFindLocals
+    serverFunDepsBatch
+    serverFunIsLocallableBatch
+    serverGlobalState
+    serverIdentifyFunction
+    serverRxApiShared
+    serverSymbolDefinition
+    symbolFunCallService
+    symbolTypeService)
+  (libraries
+    ast
+    decl
+    decl_compare
+    decl_export
+    fileutils
+    heap_shared_mem
+    parser
+    provider_context
+    provider_utils
+    search
+    server_command_types
+    server_env
+    sys_utils
+    tast_check
+    tast_provider
+    tast_type_collector
+    typechecker_options
+    typing
+    typing_check
+    typing_deps
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
+
+(library
+  (name server_api)
+  (wrapped false)
+  (modules
+    serverApi)
+(libraries
+    decl_redecl_service
+    fileutils
+    hg
+    (select logging from
+      (facebook signed_source -> logging_fb)
+      (-> logging_stubs))
+    remote
+    server_env
+    sys_utils
+    typing
+    typing_check
+    typing_service_api
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name server)
+  (wrapped false)
+  (modules
+    codemodTypePrinter
+    colorFile
+    fullFidelityParseService
+    searchServiceRunner
+    serverBigCode
+    serverBusyStatus
+    serverCheckUtils
+    serverCheckpoint
+    serverColorFile
+    serverCoverageMetric
+    serverConcatenateAll
+    serverDebug
+    serverDocblockAt
+    serverDynamicView
+    serverEnvBuild
+    serverError
+    serverExtractStandalone
+    serverFileDependents
+    serverFileSync
+    serverFindRefs
+    serverFormat
+    serverGoToDefinition
+    serverGoToImpl
+    serverHighlightRefs
+    serverHotClasses
+    serverHotClassesDescription
+    serverHover
+    serverIdle
+    serverInferType
+    serverInferTypeBatch
+    serverInvalidateUnits
+    serverLint
+    serverMethodJumps
+    serverMethodJumpsBatch
+    serverPrecheckedFiles
+    serverRage
+    serverRecheckCapture
+    serverRefactor
+    serverRevisionTracker
+    serverRewriteLambdaParameters
+    serverRewriteTypeParamsType
+    serverSearch
+    serverSignatureHelp
+    serverStamp
+    serverStatusSingle
+    serverTypeCheck
+    serverTypeDefinition
+    serverWorker
+    symbolInfoService
+    serverGlobalInference)
+  (libraries
+    buffered_line_reader
+    coverage_level
+    decl_redecl_service
+    dfind
+    fileutils
+    hg
+    hhi
+    ide_rpc_api_types
+    linting
+    lsp
+    parsing_service
+    remote
+    search
+    security_stubs
+    server_api
+    server_env
+    server_remote_utils
+    server_services
+    sys_utils
+    tast_provider
+    typing
+    typing_service_api
+    utils_core
+    version
+    watchman_utils
+    (select serverHotClassesDescription.ml from
+    (facebook signed_source -> facebook/serverHotClassesDescription.ml)
+    (-> ../stubs/serverHotClassesDescription.ml))
+    (select serverInvalidateUnits.ml from
+    (facebook signed_source -> facebook/serverInvalidateUnits.ml)
+    (-> ../stubs/serverInvalidateUnits.ml))
+  )
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
+  (name hh_server_monitor)
+  (wrapped false)
+  (modules
+    hhMonitorInformant
+    hhMonitorInformant_sig
+    hhServerMonitor
+    hhServerMonitorConfig
+    serverAiInit
+    serverCommand
+    serverCommandLwt
+    serverEagerInit
+    serverInit
+    serverInitCommon
+    serverInitTypes
+    serverLazyInit
+    serverMain
+    serverRemoteInit
+    serverRpc)
+  (libraries
+    build
+    ci_util
+    folly_stubs
+    load_script
+    lwt
+    parent
+    provider_backend
+    security_stubs
+    server
+    state_loader
+    typing_service_api
+    vfs
+    watchman_client
+    write_symbol_info)
+  (preprocess (pps lwt_ppx ppx_deriving.std)))

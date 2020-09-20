@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL & ~E_NOTICE);
+<?hh
 function foo($x) {
 }
 function z() {
@@ -8,4 +6,10 @@ function z() {
   $snarf = 2;
   foo(1,foo(1), $yay,$snarf);
 }
+
+
+<<__EntryPoint>>
+function main_1712() {
+error_reporting(E_ALL & ~E_NOTICE);
 z();
+}

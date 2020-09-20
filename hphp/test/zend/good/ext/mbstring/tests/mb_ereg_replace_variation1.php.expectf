@@ -11,7 +11,7 @@ string(10) "string_val"
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: mbregex compile err: invalid code point value in %s/mb_ereg_replace_variation1.php on line 83
 bool(false)
 
 -- Iteration 5 --
@@ -19,7 +19,7 @@ string(10) "string_val"
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: mbregex compile err: invalid code point value in %s/mb_ereg_replace_variation1.php on line 83
 bool(false)
 
 -- Iteration 7 --

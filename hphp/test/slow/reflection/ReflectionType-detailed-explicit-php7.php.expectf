@@ -7,8 +7,8 @@ string(8) "stdClass"
 ** Function 0 - Parameter 1
 bool(true)
 bool(false)
-bool(true)
-string(5) "array"
+bool(false)
+string(12) "HH\arraylike"
 ** Function 0 - Parameter 2
 bool(true)
 bool(false)
@@ -25,22 +25,22 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-string(6) "string"
+string(9) "HH\string"
 ** Function 0 - Parameter 6
 bool(true)
 bool(false)
 bool(true)
-string(4) "bool"
+string(7) "HH\bool"
 ** Function 0 - Parameter 7
 bool(true)
 bool(false)
 bool(true)
-string(3) "int"
+string(6) "HH\int"
 ** Function 0 - Parameter 8
 bool(true)
 bool(false)
 bool(true)
-string(5) "float"
+string(8) "HH\float"
 ** Function 0 - Parameter 9
 bool(true)
 bool(false)
@@ -50,49 +50,49 @@ string(11) "NotExisting"
 bool(true)
 bool(true)
 bool(false)
-string(8) "stdClass"
+string(9) "?stdClass"
 ** Function 1 - Parameter 1
 bool(true)
 bool(true)
-bool(true)
-string(5) "array"
+bool(false)
+string(13) "?HH\arraylike"
 ** Function 1 - Parameter 2
 bool(true)
 bool(true)
 bool(true)
-string(8) "callable"
+string(9) "?callable"
 ** Function 1 - Parameter 3
 bool(true)
 bool(true)
 bool(false)
-string(8) "stdClass"
+string(9) "?stdClass"
 ** Function 1 - Parameter 4
 bool(false)
 ** Function 1 - Parameter 5
 bool(true)
 bool(true)
 bool(true)
-string(6) "string"
+string(10) "?HH\string"
 ** Function 1 - Parameter 6
 bool(true)
 bool(true)
 bool(true)
-string(4) "bool"
+string(8) "?HH\bool"
 ** Function 1 - Parameter 7
 bool(true)
 bool(true)
 bool(true)
-string(3) "int"
+string(7) "?HH\int"
 ** Function 1 - Parameter 8
 bool(true)
 bool(true)
 bool(true)
-string(5) "float"
+string(9) "?HH\float"
 ** Function 1 - Parameter 9
 bool(true)
 bool(true)
 bool(false)
-string(11) "NotExisting"
+string(12) "?NotExisting"
 ** Function 2 - Parameter 0
 bool(true)
 bool(false)
@@ -102,7 +102,7 @@ string(4) "Test"
 bool(true)
 bool(true)
 bool(false)
-string(4) "Test"
+string(5) "?Test"
 
 *** methods
 ** Method 0 - parameter 0
@@ -119,7 +119,7 @@ string(4) "self"
 bool(true)
 bool(true)
 bool(false)
-string(4) "self"
+string(5) "?self"
 ** Method 3 - parameter 0
 bool(true)
 bool(false)
@@ -134,7 +134,7 @@ string(4) "Test"
 bool(true)
 bool(true)
 bool(false)
-string(4) "Test"
+string(5) "?Test"
 
 *** return types
 ** Function/method return type 0
@@ -148,12 +148,12 @@ string(8) "stdClass"
 bool(true)
 bool(false)
 bool(true)
-string(3) "int"
+string(6) "HH\int"
 ** Function/method return type 3
 bool(true)
 bool(true)
 bool(true)
-string(3) "int"
+string(7) "?HH\int"
 ** Function/method return type 4
 bool(true)
 bool(false)
@@ -163,7 +163,7 @@ string(4) "self"
 bool(true)
 bool(true)
 bool(false)
-string(4) "self"
+string(5) "?self"
 ** Function/method return type 6
 bool(true)
 bool(false)
@@ -183,9 +183,9 @@ string(4) "Test"
 bool(true)
 bool(true)
 bool(false)
-string(4) "Test"
+string(5) "?Test"
 ** Function/method return type 10
 bool(true)
 bool(true)
 bool(false)
-string(4) "Test"
+string(5) "?Test"

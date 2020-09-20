@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string gmdate(string format [, long timestamp])
  * Description: Format a GMT date/time 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -15,5 +15,5 @@ echo "\n-- Testing gmdate() function with ISO-8601 week number of year format --
 var_dump( gmdate('W') );
 var_dump( gmdate('W', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

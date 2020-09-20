@@ -1,4 +1,4 @@
- === Single Array ===
+=== Single Array ===
 int(7)
 int(1)
 int(5)
@@ -13,63 +13,37 @@ int(2)
 string(10) "1236150163"
 string(10) "1236150163"
  === Multiple Arguments ===
-array(1) {
-  [0]=>
-  string(5) "hello"
-}
+int(0)
 bool(true)
 int(0)
 bool(true)
-array(1) {
-  [0]=>
-  int(0)
-}
+string(5) "hello"
 bool(true)
 string(5) "hello"
 bool(true)
-array(1) {
-  [0]=>
-  int(-1)
-}
-bool(true)
 string(5) "hello"
 bool(true)
-array(3) {
-  [0]=>
-  int(2)
-  [1]=>
+int(-1)
+bool(true)
+varray(3) {
+  varray(1) {
+    int(2)
+  }
   int(4)
-  [2]=>
   int(8)
 }
 bool(true)
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(1) {
+  varray(3) {
     int(2)
-    [1]=>
     int(5)
-    [2]=>
     int(1)
   }
 }
 bool(true)
-array(2) {
-  [0]=>
-  array(3) {
-    [0]=>
-    int(2)
-    [1]=>
-    int(5)
-    [2]=>
-    int(7)
-  }
-  [1]=>
-  int(42)
-}
+int(42)
 bool(true)
-string(6) "string"
+string(3) "foo"
 bool(true)
 int(1)
 bool(true)

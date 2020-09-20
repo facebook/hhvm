@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_open_basedir2() {
 $temp_file = tempnam("/tmp", "obd_test");
 file_put_contents($temp_file, "This is data");
 // delimiter :
@@ -16,3 +19,4 @@ var_dump(file_get_contents($temp_file));
 var_dump(ini_set("open_basedir", "/nonexistent:"));
 var_dump(file_get_contents($temp_file)); // still not fine
 var_dump(ini_get("open_basedir"));
+}

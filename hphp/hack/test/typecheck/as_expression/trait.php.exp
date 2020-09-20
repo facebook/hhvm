@@ -1,0 +1,4 @@
+File "trait.php", line 6, characters 9-12:
+`TFoo` is uninstantiable (Typing[4002])
+File "trait.php", line 3, characters 7-10:
+Declaration is here

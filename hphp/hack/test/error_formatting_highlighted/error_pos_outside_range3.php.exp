@@ -1,0 +1,15 @@
+Parsing[1002] A right parenthesis ) is expected here. [1]
+
+error_pos_outside_range3.php:6:5
+    4 | function main(): void {
+    5 |   g(1,
+[1] 6 |   2,_
+
+Parsing[1002] Encountered unexpected text ``, was expecting a expression. [1]
+
+error_pos_outside_range3.php:7:1
+    5 |   g(1,
+    6 |   2,
+[1] 7 | _
+
+2 errors found.

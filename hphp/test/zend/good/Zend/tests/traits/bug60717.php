@@ -1,12 +1,12 @@
-<?php
+<?hh
 
 namespace HTML
 {
 	interface Helper
 	{
 		function text($text);
-		function attributes(array $attributes = null);
-		function textArea(array $attributes = null, $value);
+		function attributes(arraylike $attributes = null);
+		function textArea(arraylike $attributes = null, $value);
 	}
 
 	trait TextUTF8
@@ -16,14 +16,14 @@ namespace HTML
 
 	trait TextArea
 	{
-		function textArea(array $attributes = null, $value) {}
-		abstract function attributes(array $attributes = null);
+		function textArea(arraylike $attributes = null, $value) {}
+		abstract function attributes(arraylike $attributes = null);
 		abstract function text($text);
 	}
 
 	trait HTMLAttributes
 	{
-		function attributes(array $attributes = null) {	}
+		function attributes(arraylike $attributes = null) {	}
 		abstract function text($text);
 	}
 
@@ -31,12 +31,12 @@ namespace HTML
 	{
 		use TextArea, HTMLAttributes, TextUTF8;
 	}
-	
+
 	class HTMLHelper2 implements Helper
 	{
 		use TextArea, TextUTF8, HTMLAttributes;
 	}
-	
+
 	class HTMLHelper3 implements Helper
 	{
 		use HTMLAttributes, TextArea, TextUTF8;
@@ -46,17 +46,18 @@ namespace HTML
 	{
 		use HTMLAttributes, TextUTF8, TextArea;
 	}
-	
+
 	class HTMLHelper5 implements Helper
 	{
 		use TextUTF8, TextArea, HTMLAttributes;
 	}
-	
+
 	class HTMLHelper6 implements Helper
 	{
 		use TextUTF8, HTMLAttributes, TextArea;
-	}	
+	}
 
+    <<__EntryPoint>> function main(): void {
 	$o = new HTMLHelper;
     $o = new HTMLHelper2;
     $o = new HTMLHelper3;
@@ -65,4 +66,4 @@ namespace HTML
     $o = new HTMLHelper6;
     echo 'Done';
 }
-
+}

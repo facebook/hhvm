@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Interface methods must be `public` or `protected` in %s/interface_method_private.php on line 4

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
  goto a;
@@ -7,4 +7,8 @@ function foo() {
 a: echo 'Bar';
  goto b;
 }
- foo();
+
+ <<__EntryPoint>>
+function main_1911() {
+foo();
+}

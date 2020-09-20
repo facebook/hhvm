@@ -1,4 +1,4 @@
-NULL
+string\(0\) ""
 z?sh: ?(1: )?(\/invalid_path\/: )?(?i:No such file or directory|not found)(: \/invalid_path\/)?
-NULL
-NULL
+string\(0\) ""
+string\(0\) ""

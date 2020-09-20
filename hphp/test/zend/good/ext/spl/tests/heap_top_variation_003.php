@@ -1,8 +1,8 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $h = new SplMinHeap();
 try {
-	$h->top();
+    $h->top();
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
-?>
+}

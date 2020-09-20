@@ -1,6 +1,6 @@
-<?php
-
-$filename = "gzwrite_basic.txt.gz";
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath("gzwrite_basic.txt.gz");
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;
@@ -13,5 +13,5 @@ gzpassthru($h);
 gzclose($h);
 echo "\n";
 unlink($filename);
-?>
-===DONE===
+echo "===DONE===\n";
+}

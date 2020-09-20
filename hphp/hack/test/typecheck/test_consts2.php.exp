@@ -1,6 +1,6 @@
 File "test_consts2.php", line 17, characters 10-13:
 Invalid return type (Typing[4110])
 File "test_consts2.php", line 16, characters 17-20:
-This is a bool
-File "test_consts2.php", line 13, characters 9-13:
-It is incompatible with an array (used like a vector)
+Expected `bool`
+File "test_consts2.php", line 13, characters 9-21:
+But got `varray<string>`

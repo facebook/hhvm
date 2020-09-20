@@ -1,0 +1,46 @@
+* test_is_type - vec:
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+* test_is_type - clsmeth:
+bool(false)
+
+Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 10
+bool(true)
+
+Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 11
+bool(true)
+
+Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 12
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+
+Notice: is_any_array() called on clsmeth in %s/is_as_type_warn.php on line 18
+bool(true)
+bool(true)
+
+Notice: Implicit clsmeth to HH\Container conversion in %s/is_as_type_warn.php on line 20
+bool(true)
+
+Notice: Implicit clsmeth to HH\Traversable conversion in %s/is_as_type_warn.php on line 21
+bool(true)
+bool(true)
+* test_as_type:
+
+Notice: is_vec() called on clsmeth in %s/is_as_type_warn.php on line 28
+classMeth{
+    class(A)
+    function(func1)
+}
+Caught: Expected int, got clsmeth

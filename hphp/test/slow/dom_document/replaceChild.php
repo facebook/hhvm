@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_replace_child() {
 $n = 32;
 while ( $n-- ) {
   $doc = new DOMDocument();
@@ -11,3 +14,4 @@ while ( $n-- ) {
   $content->appendChild( $doc->getElementById( 'test' ) );
 }
 echo "Done\n";
+}

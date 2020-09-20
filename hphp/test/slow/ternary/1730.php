@@ -1,6 +1,10 @@
-<?php
+<?hh
 
 function test($a) {
  $b = $a + 1 == 5 ? 5 : 7;
  }
- test(4);
+
+ <<__EntryPoint>>
+function main_1730() {
+test(4);
+}

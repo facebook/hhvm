@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MUTATION_H_
-#define incl_HPHP_JIT_MUTATION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -115,7 +114,8 @@ void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
  * inputs.size() must be greater than 1.
  * If there's already a suitable phi, it will be returned.
  */
-SSATmp* insertPhi(IRUnit&, Block* blk, const jit::vector<SSATmp*>& inputs);
+SSATmp* insertPhi(IRUnit&, Block* blk,
+                  const jit::hash_map<Block*, SSATmp*>& inputs);
 
 /*
  * Remove the i'th dest from `label' and all incoming Jmps, returning its
@@ -128,4 +128,3 @@ SSATmp* deletePhiDest(IRInstruction* label, unsigned i);
 
 }}
 
-#endif

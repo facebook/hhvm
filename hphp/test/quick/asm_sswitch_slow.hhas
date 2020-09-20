@@ -1,13 +1,6 @@
 # SSwitch with integer-like strings uses a different translator
 # implementation.
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  UnboxR
-  RetC
-}
-
 .function get_three() {
   String "3"
   RetC
@@ -42,16 +35,18 @@ fail:
 }
 
 .function case_three() {
-  FPushFuncD 0 "get_three"
-  FCall 0
-  UnboxR
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "get_three"
   SetL $foo
   PopC
 
-  FPushFuncD 1 "sswitch_on"
-  FPassL 0 $foo Any
-  FCall 1
-  UnboxR
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $foo
+  FCallFuncD <> 1 1 "" - "" "sswitch_on"
   RetC
 }
 
@@ -64,40 +59,51 @@ fail:
 }
 
 .function with_obj() {
-  FPushCtorD 0 "Obj"
-  FCall 0
-  PopR
+  NewObjD "Obj"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
-  FPushFuncD 1 "sswitch_on"
-  FPassL 0 $obj Any
-  FCall 1
-  UnboxR
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $obj
+  FCallFuncD <> 1 1 "" - "" "sswitch_on"
   RetC
 }
 
 .function case_default() {
-  FPushFuncD 1 "sswitch_on"
+  NullUninit
+  NullUninit
+  NullUninit
   String "kujhasekguheku"
-  FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "sswitch_on"
   RetC
 }
 
-.function main() {
-  FPushFuncD 0 "case_three"
-  FCall 0
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "case_three"
+  PopC
 
-  FPushFuncD 0 "with_obj"
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "with_obj"
+  PopC
 
-  FPushFuncD 0 "case_default"
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "case_default"
+  PopC
 
   String "Done\n"
   Print

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A extends RecursiveDirectoryIterator {
   function __construct($a) {
@@ -19,7 +19,11 @@ class A extends RecursiveDirectoryIterator {
   }
 }
 
+
+<<__EntryPoint>>
+function main_call_order() {
 $a = new A(__DIR__.'/../../sample_dir/');
 echo "done construct\n";
 foreach ($a as $filename => $cur) {
+}
 }

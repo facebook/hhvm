@@ -1,3 +1,0 @@
-<?php
-if (!function_exists('openssl_csr_new'))
-	die('skip no openssl extension');

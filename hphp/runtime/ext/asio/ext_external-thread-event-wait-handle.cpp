@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
@@ -48,7 +50,7 @@ void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
 }
 
 void c_ExternalThreadEventWaitHandle::sweep() {
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (m_event->cancel()) {
     // canceled; the processing thread will take care of cleanup
@@ -70,6 +72,11 @@ c_ExternalThreadEventWaitHandle::Create(
   ObjectData* priv_data
 ) {
   auto wh = req::make<c_ExternalThreadEventWaitHandle>();
+
+  if (auto const tag = arrprov::tagFromPC()) {
+    setTag(event, tag);
+  }
+
   wh->initialize(event, priv_data);
   return wh;
 }
@@ -94,6 +101,8 @@ void c_ExternalThreadEventWaitHandle::initialize(
 }
 
 void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
+  if (RO::EvalArrayProvenance) arrprov::clearTag(m_event);
+
   // destroy event and its private data
   m_event->release();
   m_event = nullptr;
@@ -109,8 +118,8 @@ void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
 }
 
 void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
-  assert(getState() == STATE_WAITING);
-  assert(hasExactlyOneRef() || sweeping);
+  assertx(getState() == STATE_WAITING);
+  assertx(hasExactlyOneRef() || sweeping);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -158,7 +167,7 @@ bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
 }
 
 void c_ExternalThreadEventWaitHandle::process() {
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -170,11 +179,24 @@ void c_ExternalThreadEventWaitHandle::process() {
   // clean up once event is processed
   auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
 
-  Cell result;
+  TypedValue result;
   try {
-    m_event->unserialize(result);
+    try {
+      if (!RO::EvalArrayProvenance) {
+        m_event->unserialize(result);
+      } else {
+        auto const tag = arrprov::getTag(m_event);
+        assertx(tag.concrete());
+        arrprov::TagOverride to{tag};
+        m_event->unserialize(result);
+      }
+    } catch (ExtendedException& exception) {
+      exception.recomputeBacktraceFromWH(this);
+      throw exception;
+    }
   } catch (const Object& exception) {
-    assert(exception->instanceof(SystemLib::s_ThrowableClass));
+    assertx(exception->instanceof(SystemLib::s_ThrowableClass));
+    throwable_recompute_backtrace_from_wh(exception.get(), this);
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
@@ -200,10 +222,10 @@ void c_ExternalThreadEventWaitHandle::process() {
     throw;
   }
 
-  assert(cellIsPlausible(result));
+  assertx(tvIsPlausible(result));
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  cellCopy(result, m_resultOrException);
+  tvCopy(result, m_resultOrException);
   parentChain.unblock();
 
   auto session = AsioSession::Get();
@@ -223,9 +245,9 @@ String c_ExternalThreadEventWaitHandle::getName() {
 }
 
 void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getState() == STATE_WAITING);
-  assert(getContextIdx() == ctx_idx);
+  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(getState() == STATE_WAITING);
+  assertx(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_WEAKREF_DATA_HANDLE_H_
-#define incl_HPHP_WEAKREF_DATA_HANDLE_H_
+#pragma once
 
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -37,9 +36,8 @@ struct WeakRefDataHandle final {
     if (wr_data) {
       if (acquire_count) {
         scanner.scan(wr_data->pointee);
-      } else {
-        scanner.weak(this);
       }
+      scanner.scan(*wr_data.get());
     }
   }
 
@@ -54,4 +52,3 @@ struct WeakRefDataHandle final {
 };
 
 }
-#endif // incl_HPHP_WEAKREF_DATA_HANDLE_H_

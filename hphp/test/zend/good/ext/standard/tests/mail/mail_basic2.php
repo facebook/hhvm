@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
  * Description: Send an email message 
  * Source code: ext/standard/mail.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mail() : basic functionality ***\n";
 
 
@@ -23,5 +23,5 @@ var_dump( mail($to, $subject, $message, $additional_headers, $additional_paramet
 
 echo file_get_contents($outFile);
 unlink($outFile);
-?>
-===DONE===
+echo "===DONE===\n";
+}

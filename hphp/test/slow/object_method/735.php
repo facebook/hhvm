@@ -1,10 +1,9 @@
-<?php
+<?hh
 
 function foo() {
  echo 'Caught';
  exit;
  }
-set_error_handler('foo', E_ALL);
 class X {
  function foo() {
  var_dump($this);
@@ -18,4 +17,9 @@ class Y {
 function test($y,$z) {
   $y->$z($y);
 }
+
+<<__EntryPoint>>
+function main_735() {
+set_error_handler(fun('foo'), E_ALL);
 test(new Y, 'bar');
+}

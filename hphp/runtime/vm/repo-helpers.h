@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REPO_HELPERS_H_
-#define incl_HPHP_VM_REPO_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/util/md5.h"
 #include "hphp/util/portability.h"
+#include "hphp/util/sha1.h"
 
 #include <sqlite3.h>
 
@@ -47,7 +46,7 @@ enum RepoId {
 struct RepoExc : std::exception {
   RepoExc(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
     ATTRIBUTE_PRINTF(2, 3) {
-    va_list(ap);
+    va_list ap;
     va_start(ap, fmt);
     char* msg;
     if (vasprintf(&msg, fmt, ap) == -1) {
@@ -89,7 +88,7 @@ struct RepoStmt {
 struct RepoQuery {
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
-    assert(m_stmt.prepared());
+    assertx(m_stmt.prepared());
   }
   ~RepoQuery() { m_stmt.reset(); }
 
@@ -97,7 +96,7 @@ struct RepoQuery {
                 bool isStatic=false);
   void bindBlob(const char* paramName, const BlobEncoder& blob,
                 bool isStatic=false);
-  void bindMd5(const char* paramName, const MD5& md5);
+  void bindSha1(const char* paramName, const SHA1& sha1);
   void bindTypedValue(const char* paramName, const TypedValue& tv);
   void bindText(const char* paramName, const char* text, size_t size,
                 bool isStatic=false);
@@ -131,8 +130,8 @@ struct RepoQuery {
   // Get the column value as the named type. If the value cannot be converted
   // into the named type then an error is thrown.
   void getBlob(int iCol, const void*& blob, size_t& size); // throws(RepoExc)
-  BlobDecoder getBlob(int iCol); // throws(RepoExc)
-  void getMd5(int iCol, MD5& md5); // throws(RepoExc)
+  BlobDecoder getBlob(int iCol, bool useGlobalIds); // throws(RepoExc)
+  void getSha1(int iCol, SHA1& sha1); // throws(RepoExc)
   void getTypedValue(int iCol, TypedValue& tv); // throws(RepoExc)
   void getText(int iCol, const char*& text); // throws(RepoExc)
   void getText(int iCol, const char*& text, size_t& size); // throws(RepoExc)
@@ -153,17 +152,21 @@ struct RepoQuery {
 };
 
 /*
- * Transaction guard object.
+ * Transaction guard object. Create with Repo::begin().
  *
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
 struct RepoTxn {
-  explicit RepoTxn(Repo& repo); // throws(RepoExc)
   ~RepoTxn();
 
   RepoTxn(const RepoTxn&) = delete;
   RepoTxn& operator=(const RepoTxn&) = delete;
+
+  constexpr RepoTxn(RepoTxn&& o) noexcept
+    : m_repo(o.m_repo), m_pending(o.m_pending), m_error(o.m_error) {
+    o.m_pending = false;
+  }
 
   /*
    * All these routines may throw if there is an error accessing the
@@ -179,7 +182,12 @@ struct RepoTxn {
   bool error() const { return m_error; }
 
  private:
+  friend struct Repo;
   friend struct RepoTxnQuery;
+
+  // Called from Repo::begin()
+  explicit RepoTxn(Repo& repo);
+
   void step(RepoQuery& query); // throws(RepoExc)
   void exec(RepoQuery& query); // throws(RepoExc)
   void rollback(); // nothrow
@@ -219,4 +227,3 @@ struct RepoProxy {
 
 }
 
-#endif

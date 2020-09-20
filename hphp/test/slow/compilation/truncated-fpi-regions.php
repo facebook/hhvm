@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($a, $b) {}
 
@@ -30,3 +30,5 @@ function test4($x) {
 function test5($x) {
   f(error(), $x ?? 42);
 }
+
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

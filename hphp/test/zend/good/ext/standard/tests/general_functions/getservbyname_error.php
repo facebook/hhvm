@@ -1,7 +1,7 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $service = "www";
-$protocol = "tcp"; 
+$protocol = "tcp";
 $extra_arg = 12;
-var_dump(getservbyname($service, $protocol, $extra_arg ) );
-var_dump(getservbyname($service));
-?>
+try { var_dump(getservbyname($service, $protocol, $extra_arg ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(getservbyname($service)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

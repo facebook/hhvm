@@ -1,49 +1,64 @@
 *** Testing mb_ereg_replace() : usage variations ***
 
 -- Iteration 1 --
-string(10) "000000_000"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 2 --
-string(10) "111111_111"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 3 --
-string(46) "123451234512345123451234512345_123451234512345"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 4 --
-string(46) "-2345-2345-2345-2345-2345-2345_-2345-2345-2345"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 5 --
-string(37) "10.510.510.510.510.510.5_10.510.510.5"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 6 --
-string(46) "-10.5-10.5-10.5-10.5-10.5-10.5_-10.5-10.5-10.5"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 7 --
-string(109) "123456789000123456789000123456789000123456789000123456789000123456789000_123456789000123456789000123456789000"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 8 --
-string(118) "1.23456789E-91.23456789E-91.23456789E-91.23456789E-91.23456789E-91.23456789E-9_1.23456789E-91.23456789E-91.23456789E-9"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 9 --
-string(28) "0.50.50.50.50.50.5_0.50.50.5"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 10 --
-string(1) "_"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 11 --
-string(1) "_"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 12 --
-string(10) "111111_111"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 13 --
-string(1) "_"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 14 --
-string(10) "111111_111"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 15 --
-string(1) "_"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 16 --
 string(1) "_"
@@ -61,16 +76,18 @@ string(46) "UTF-8UTF-8UTF-8UTF-8UTF-8UTF-8_UTF-8UTF-8UTF-8"
 string(46) "UTF-8UTF-8UTF-8UTF-8UTF-8UTF-8_UTF-8UTF-8UTF-8"
 
 -- Iteration 21 --
-string(46) "UTF-8UTF-8UTF-8UTF-8UTF-8UTF-8_UTF-8UTF-8UTF-8"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 22 --
-string(1) "_"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 23 --
-string(1) "_"
+
+Warning: mb_ereg_replace() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_replace() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_ereg_replace_variation2.php on line 88
 Done

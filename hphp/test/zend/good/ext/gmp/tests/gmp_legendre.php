@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 for ($i = -1; $i < 10; $i++) {
 	var_dump(gmp_strval(gmp_legendre(($i*$i)-1, 3)));
 }
@@ -15,13 +15,13 @@ var_dump(gmp_strval(gmp_legendre($n, $n1)));
 var_dump(gmp_strval(gmp_legendre($n, 3)));
 var_dump(gmp_strval(gmp_legendre(3, $n1)));
 
-var_dump(gmp_legendre(3, array()));
-var_dump(gmp_legendre(array(), 3));
-var_dump(gmp_legendre(array(), array()));
+var_dump(gmp_legendre(3, varray[]));
+var_dump(gmp_legendre(varray[], 3));
+var_dump(gmp_legendre(varray[], varray[]));
 
-var_dump(gmp_legendre(array(), array(), 1));
-var_dump(gmp_legendre(array()));
-var_dump(gmp_legendre());
+try { var_dump(gmp_legendre(varray[], varray[], 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_legendre(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_legendre()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>
+}

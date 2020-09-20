@@ -1,0 +1,6 @@
+File "subtype.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+File "subtype.php", line 4, characters 24-30:
+Expected `nothing`
+File "subtype.php", line 4, characters 15-17:
+But got `int`

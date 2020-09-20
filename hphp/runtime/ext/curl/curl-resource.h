@@ -1,7 +1,7 @@
-#ifndef incl_HPHP_CURL_RESOURCE_H
-#define incl_HPHP_CURL_RESOURCE_H
+#pragma once
 
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"
@@ -142,12 +142,14 @@ struct CurlResource : SweepableResourceData {
   ReadHandler  m_read;
   Variant      m_progress_callback;
 
+  bool m_in_callback{false};
+  bool m_in_exec{false};
   bool m_emptyPost;
   bool m_safeUpload;
   CurlHandlePoolPtr m_connPool;
   PooledCurlHandle* m_pooledHandle;
+  friend struct CurlMultiResource;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

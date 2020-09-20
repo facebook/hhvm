@@ -1,38 +1,39 @@
-<?php
+<?hh
 namespace NS;
-function main() {
-  class B {}
-  class A extends B {
-    public function b() {
-      var_dump(self::class);
-      var_dump(static::class);
-      var_dump(parent::class);
-    }
-  }
-  var_dump(A::class);
-  A::b();
 
-  function c($c = A::class) {
-    var_dump($c);
+class B {}
+class A extends B {
+  public static function b() {
+    \var_dump(self::class);
+    \var_dump(static::class);
+    \var_dump(parent::class);
   }
-  c();
-
-  var_dump(Vector::class);
-
-  trait C {
-    public function c() {
-      var_dump(self::class);
-      var_dump(static::class);
-      var_dump(parent::class);
-    }
-  }
-  class D extends B {
-    use C;
-  }
-  D::c();
-  var_dump(C::class);
-
-  interface E {}
-  var_dump(E::class);
 }
-main();
+
+function c($c = A::class) {
+  \var_dump($c);
+}
+
+trait C {
+  public static function c() {
+    \var_dump(self::class);
+    \var_dump(static::class);
+    \var_dump(parent::class);
+  }
+}
+class D extends B {
+  use C;
+}
+
+interface E {}
+
+<<__EntryPoint>>
+function main() {
+  \var_dump(A::class);
+  A::b();
+  c();
+  \var_dump(Vector::class);
+  D::c();
+  \var_dump(C::class);
+  \var_dump(E::class);
+}

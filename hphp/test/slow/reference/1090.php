@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   function t($a, $arr) {
@@ -16,18 +16,18 @@ function f() {
 }
 function test() {
   $v = 100;
-  $arr['hello'] = $v;
+  $arr = darray['hello' => $v];
   $a = new B();
   $a->t($arr['hello'], $arr);
 }
-test();
-$arr = array('hello' => 1);
-$x = &$arr['hello'];
-$arr['hello'] = $x;
-var_dump($arr);
-function test2(&$a, $b) {
+function test2(inout $a, $b) {
   $a = $b;
 }
-$v = 10;
-test2($v, $v);
-var_dump($v);
+
+<<__EntryPoint>>
+function main_1090() {
+  test();
+  $v = 10;
+  test2(inout $v, $v);
+  var_dump($v);
+}

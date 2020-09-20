@@ -2,13 +2,11 @@
 
 -- Testing strtok() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: strtok() expects at least 1 parameter, 0 given in %s/strtok_error.php on line 15
 
 -- Testing strtok() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strtok() expects at most 2 parameters, 3 given in %s/strtok_error.php on line 23
 string(13) "sample string"
 
 -- Testing strtok() with less than expected no. of arguments --

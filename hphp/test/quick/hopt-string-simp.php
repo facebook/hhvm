@@ -58,31 +58,37 @@ function foo11() {
 }
 
 function foo12() {
-  $x = Array();
-  return strlen($x);
+  $x = varray[];
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
 class A {}
 
 function foo13() {
   $x = new A();
-  return strlen($x);
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
 class B { public function __toString() { return "B"; } }
 
 function foo14() {
   $x = new B();
-  return strlen($x);
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
-class C { public function __call($meth, $args) { return "C"; } }
-
-function foo15() {
-  $x = new C();
-  return strlen($x);
-}
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3());
@@ -97,4 +103,4 @@ var_dump(foo11());
 var_dump(foo12());
 var_dump(foo13());
 var_dump(foo14());
-var_dump(foo15());
+}

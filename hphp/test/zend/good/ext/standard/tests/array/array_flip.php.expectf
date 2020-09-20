@@ -1,10 +1,10 @@
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip.php on line 12
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip.php on line 12
 
-Warning: %s
-array(6) {
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip.php on line 12
+darray(6) {
   [1]=>
   string(1) "b"
   [2]=>

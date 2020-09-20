@@ -1,21 +1,33 @@
-<?php
+<?hh
 /* Prototype  : array class_uses(mixed what [, bool autoload ])
  * Description: Return all traits used by a class
  * Source code: ext/spl/php_spl.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing class_uses() : variation ***\n";
-
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() != 0) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
-set_error_handler('test_error_handler');
+
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
+echo "*** Testing class_uses() : variation ***\n";
+
+set_error_handler(fun('test_error_handler'));
 
 // Initialise function arguments not being substituted (if any)
 $autoload = true;
@@ -27,29 +39,17 @@ $res = fopen(__FILE__,'r');
 $unset_var = 10;
 unset ($unset_var);
 
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -65,10 +65,10 @@ $inputs = array(
       'float .5' => .5,
 
       // array data
-      'empty array' => array(),
+      'empty array' => varray[],
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
-      'nested arrays' => array('foo', $index_array, $assoc_array),
+      'nested arrays' => varray['foo', $index_array, $assoc_array],
 
       // null data
       'uppercase NULL' => NULL,
@@ -93,10 +93,10 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       //resource
       'resource' => $res,
-);
+];
 
 // loop through each element of the array for pattern
 
@@ -107,5 +107,5 @@ foreach($inputs as $key =>$value) {
 
 fclose($res);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

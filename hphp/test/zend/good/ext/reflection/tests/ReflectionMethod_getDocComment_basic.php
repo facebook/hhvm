@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
  * My Doc Comment for A
  */
@@ -48,13 +48,15 @@ class B extends A {
     protected static function protStatf() {}
 
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-foreach (array('A', 'B') as $class) {
-    $rc = new ReflectionClass($class);
-    $rms = $rc->getMethods();
-    foreach ($rms as $rm) {
-        echo "\n\n---> Doc comment for $class::" . $rm->getName() . "():\n";
-        var_dump($rm->getDocComment());
-    }
+  foreach (varray['A', 'B'] as $class) {
+      $rc = new ReflectionClass($class);
+      $rms = $rc->getMethods();
+      foreach ($rms as $rm) {
+          echo "\n\n---> Doc comment for $class::" . $rm->getName() . "():\n";
+          var_dump($rm->getDocComment());
+      }
+  }
 }
-?>

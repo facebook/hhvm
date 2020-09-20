@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Bar{
 }
@@ -42,4 +42,8 @@ function main() {
 
   $k->setY(new Bar);
 }
+
+<<__EntryPoint>>
+function main_setter() {
 main();
+}

@@ -11,7 +11,7 @@ function typehint(callable $a) {
 
 function id() {}
 
-function main() {
+<<__EntryPoint>> function main(): void {
     check('');
     check('id');
     check('blarblah');
@@ -20,4 +20,3 @@ function main() {
     typehint($cl);
     typehint('id');
 }
-main();

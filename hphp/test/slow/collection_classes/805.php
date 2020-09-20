@@ -1,10 +1,13 @@
 <?hh
 
-$collections = array(
+
+<<__EntryPoint>>
+function main_805() {
+$collections = darray[
   'Vector' => new Vector(),
   'Map' => new Map(),
   'Set' => new Set(),
-);
+];
 try {
   foreach ($collections as $cls => $obj) {
     try {
@@ -34,3 +37,4 @@ try {
   echo "Fail!\n";
 }
 echo "Done\n";
+}

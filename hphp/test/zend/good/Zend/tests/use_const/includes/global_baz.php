@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 const baz = NULL;

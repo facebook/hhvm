@@ -1,30 +1,37 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+open Hh_prelude
+open Common
 module SourceText = Full_fidelity_source_text
 
 module type RewritableType = sig
   type t
+
   val children : t -> t list
+
   val from_children :
     Full_fidelity_source_text.t ->
     int ->
     Full_fidelity_syntax_kind.t ->
     t list ->
     t
-  val kind: t -> Full_fidelity_syntax_kind.t
+
+  val kind : t -> Full_fidelity_syntax_kind.t
 end
 
-module WithSyntax(Syntax: RewritableType) = struct
+module WithSyntax (Syntax : RewritableType) = struct
   module Result = struct
-    type 'a t = Remove | Keep | Replace of 'a
+    type 'a t =
+      | Remove
+      | Keep
+      | Replace of 'a
   end
 
   include Result
@@ -57,46 +64,55 @@ module WithSyntax(Syntax: RewritableType) = struct
         | (acc, Remove) -> ((acc, true), None)
       in
       let ((acc, child_changed), option_new_children) =
-        Hh_core.List.map_env (acc, false) (Syntax.children node) ~f:mapper in
+        List.map_env (acc, false) (Syntax.children node) ~f:mapper
+      in
       let node =
         if child_changed then
-          let new_children = Hh_core.List.filter_opt option_new_children in
-          Syntax.from_children SourceText.empty 0 (Syntax.kind node) new_children
+          let new_children = List.filter_opt option_new_children in
+          Syntax.from_children
+            SourceText.empty
+            0
+            (Syntax.kind node)
+            new_children
         else
           node
       in
       let (acc, result) = f parents node acc in
-      let result = match (result, child_changed) with
+      let result =
+        match (result, child_changed) with
         | (Keep, true) -> Replace node
-        | _ -> result in
+        | _ -> result
+      in
       (acc, result)
-      in (* end of aux *)
+    in
+    (* end of aux *)
     let (acc, result) = aux [] node init_acc in
-    let result_node = match result with
+    let result_node =
+      match result with
       | Keep -> node
       | Replace new_node -> new_node
-      | Remove -> failwith "rewriter removed the root node!" in
+      | Remove -> failwith "rewriter removed the root node!"
+    in
     (acc, result_node)
 
   (* The same as the above, except that f does not take parents. *)
   let aggregating_rewrite_post f node init_acc =
-    let f parents node acc = f node acc in
+    let f _parents node acc = f node acc in
     parented_aggregating_rewrite_post f node init_acc
 
   (* The same as the above, except that f does not take or return an
      accumulator. *)
   let parented_rewrite_post f node =
-    let f parents node acc = ([], f parents node) in
-    let (acc, result) = parented_aggregating_rewrite_post f node [] in
+    let f parents node _acc = ([], f parents node) in
+    let (_acc, result) = parented_aggregating_rewrite_post f node [] in
     result
 
   (* The same as the above, except that f does not take or return an
      accumulator, and f does not take parents *)
   let rewrite_post f node =
-    let f parents node acc = ([], f node) in
-    let (acc, result) = parented_aggregating_rewrite_post f node [] in
+    let f _parents node _acc = ([], f node) in
+    let (_acc, result) = parented_aggregating_rewrite_post f node [] in
     result
-
 
   (* As above, but the rewrite happens to the node first and then
      recurses on the children. *)
@@ -107,42 +123,107 @@ module WithSyntax(Syntax: RewritableType) = struct
         | (acc, Replace new_child) -> ((acc, true), Some new_child)
         | (acc, Keep) -> ((acc, changed), Some child)
         | (acc, Remove) -> ((acc, true), None)
-      in (* end of mapper *)
+      in
+      (* end of mapper *)
       let rewrite_children node_changed node acc =
         let children = Syntax.children node in
         let ((acc, child_changed), option_new_children) =
-          Hh_core.List.map_env (acc, false) children ~f:mapper in
+          List.map_env (acc, false) children ~f:mapper
+        in
         let result =
           if child_changed then
-            let new_children = Hh_core.List.filter_opt option_new_children in
-            let node = Syntax.from_children
-              SourceText.empty 0 (Syntax.kind node) new_children in
+            let new_children = List.filter_opt option_new_children in
+            let node =
+              Syntax.from_children
+                SourceText.empty
+                0
+                (Syntax.kind node)
+                new_children
+            in
             Replace node
           else if node_changed then
             Replace node
           else
-            Keep in
+            Keep
+        in
         (acc, result)
-      in (* end of rewrite_children *)
+      in
+      (* end of rewrite_children *)
       let (acc, result) = f parents node acc in
       match result with
       | Remove -> (acc, result)
       | Keep -> rewrite_children false node acc
       | Replace new_node -> rewrite_children true new_node acc
-    in (* end of aux *)
+    in
+    (* end of aux *)
     let (acc, result) = aux [] node init_acc in
-    let result_node = match result with
+    let result_node =
+      match result with
       | Keep -> node
       | Replace new_node -> new_node
-      | Remove -> failwith "rewriter removed the root node!" in
+      | Remove -> failwith "rewriter removed the root node!"
+    in
     (acc, result_node)
 
-
-    (* The same as the above, except that f does not take or return an
+  (* The same as the above, except that f does not take or return an
        accumulator, and f does not take parents *)
-    let rewrite_pre f node =
-      let f parents node acc = ([], f node) in
-      let (acc, result) = parented_aggregating_rewrite_pre f node [] in
-      result
+  let rewrite_pre f node =
+    let f _parents node _acc = ([], f node) in
+    let (_acc, result) = parented_aggregating_rewrite_pre f node [] in
+    result
 
+  (**
+     * The same as the above, except does not recurse on children when a node
+     * is rewritten to avoid additional traversal.
+     *)
+  let rewrite_pre_and_stop_with_acc f node init_acc =
+    let rec aux node acc =
+      let mapping_fun (acc, changed) child =
+        match aux child acc with
+        | (acc, Keep) -> ((acc, changed), Some child)
+        | (acc, Replace new_child) -> ((acc, true), Some new_child)
+        | (acc, Remove) -> ((acc, true), None)
+      in
+      (* end of mapping_fun *)
+      let rewrite_children node acc =
+        let children = Syntax.children node in
+        let ((acc, changed), option_new_children) =
+          List.map_env (acc, false) children ~f:mapping_fun
+        in
+        if not changed then
+          (acc, Keep)
+        else
+          let new_children = List.filter_opt option_new_children in
+          let node =
+            Syntax.from_children
+              SourceText.empty
+              0
+              (Syntax.kind node)
+              new_children
+          in
+          (acc, Replace node)
+      in
+      (* end of rewrite_children *)
+      let (acc, result) = f node acc in
+      match result with
+      | Keep -> rewrite_children node acc
+      | Replace _
+      | Remove ->
+        (acc, result)
+    in
+    (* end of aux *)
+    let (acc, result) = aux node init_acc in
+    match result with
+    | Keep -> (acc, node)
+    | Replace new_node -> (acc, new_node)
+    | Remove -> failwith "Cannot remove root node"
+
+  (**
+     * The same as the above, except does not recurse on children when a node
+     * is rewritten to avoid duplicate work.
+     *)
+  let rewrite_pre_and_stop f node =
+    let f node _acc = ([], f node) in
+    let (_, result) = rewrite_pre_and_stop_with_acc f node [] in
+    result
 end

@@ -3,3 +3,4 @@
 type ShapeWithOptionalField = shape(
   ???'a' => int
 );
+

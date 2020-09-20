@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
@@ -23,6 +24,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -36,6 +38,12 @@ void surpriseCheck(IRGS& env, Offset relOffset) {
   if (relOffset <= 0) {
     surpriseCheck(env);
   }
+}
+
+void surpriseCheckWithTarget(IRGS& env, Offset targetBcOff) {
+  auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
+  auto const exit = makeExitSurprise(env, targetBcOff);
+  gen(env, CheckSurpriseFlags, exit, ptr);
 }
 
 /*
@@ -65,7 +73,7 @@ void jmpImpl(IRGS& env, Offset offset) {
 void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
   auto const target = getBlock(env, taken);
   assertx(target != nullptr);
-  auto const boolSrc = gen(env, ConvCellToBool, src);
+  auto const boolSrc = gen(env, ConvTVToBool, src);
   decRef(env, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
 }
@@ -153,10 +161,9 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     PUNT(Switch-UnknownType);
   }
 
-  auto const dataSize = iv.size() * sizeof(SwitchProfile::cases[0]);
+  auto const dataSize = SwitchProfile::extraSize(iv.size());
   TargetProfile<SwitchProfile> profile(
-    env.unit.context(), env.irb->curMarker(), s_switchProfile.get(),
-    dataSize
+    env.context, env.irb->curMarker(), s_switchProfile.get(), dataSize
   );
 
   auto checkBounds = [&] {
@@ -278,6 +285,90 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
     dest,
     sp(env),
     fp(env)
+  );
+}
+
+const StaticString s_nonexhaustive_switch(Strings::NONEXHAUSTIVE_SWITCH);
+
+void emitThrowNonExhaustiveSwitch(IRGS& env) {
+  switch (RuntimeOption::EvalThrowOnNonExhaustiveSwitch) {
+    case 0:
+      return;
+    case 1:
+      gen(env, RaiseWarning, cns(env, s_nonexhaustive_switch.get()));
+      return;
+    default:
+      interpOne(env);
+      return;
+  }
+  not_reached();
+}
+
+const StaticString s_class_to_string(Strings::CLASS_TO_STRING);
+
+void emitRaiseClassStringConversionWarning(IRGS& env) {
+  if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_class_to_string.get()));
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitSelect(IRGS& env) {
+  auto const condSrc = popC(env);
+  auto const boolSrc = gen(env, ConvTVToBool, condSrc);
+  decRef(env, condSrc);
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) { gen(env, JmpZero, taken, boolSrc); },
+    [&] { // True case
+      auto const val = popC(env, DataTypeCountness);
+      popDecRef(env, DataTypeCountness);
+      push(env, val);
+    },
+    [&] { popDecRef(env, DataTypeCountness); } // False case
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitThrow(IRGS& env) {
+  auto const stackEmpty = spOffBCFromFP(env) == spOffEmpty(env) + 1;
+  auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+  auto const srcTy = topC(env)->type();
+  auto const maybeThrowable =
+    srcTy.maybe(Type::SubObj(SystemLib::s_ExceptionClass)) ||
+    srcTy.maybe(Type::SubObj(SystemLib::s_ErrorClass));
+
+  if (!stackEmpty || !maybeThrowable || !(srcTy <= TObj)) return interpOne(env);
+
+  auto const handleThrow = [&] {
+    if (offset != kInvalidOffset) return jmpImpl(env, offset);
+    // There are no more catch blocks in this function, we are at the top
+    // level throw
+    auto const exn = popC(env);
+    auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
+    gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
+    updateMarker(env);
+    gen(env, EnterTCUnwind, EnterTCUnwindData { true }, exn);
+  };
+
+  if (srcTy <= Type::SubObj(SystemLib::s_ThrowableClass)) return handleThrow();
+
+  ifThenElse(env,
+    [&] (Block* taken) {
+      assertx(srcTy <= TObj);
+      auto const srcClass = gen(env, LdObjClass, topC(env));
+      auto const ecdExc = ExtendsClassData { SystemLib::s_ExceptionClass };
+      auto const isException = gen(env, ExtendsClass, ecdExc, srcClass);
+      gen(env, JmpNZero, taken, isException);
+      auto const ecdErr = ExtendsClassData { SystemLib::s_ErrorClass };
+      auto const isError = gen(env, ExtendsClass, ecdErr, srcClass);
+      gen(env, JmpNZero, taken, isError);
+    },
+    [&] { gen(env, Jmp, makeExitSlow(env)); },
+    handleThrow
   );
 }
 

@@ -18,8 +18,8 @@
 #include <string.h>
 #include <math.h>
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/util/rds-local.h"
 
 /*
  * This class reimplements the setlocale() and localeconv() functions
@@ -48,8 +48,8 @@
 
 namespace HPHP {
 
-THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
-THREAD_LOCAL(struct lconv, g_thread_safe_localeconv_data);
+RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
+RDS_LOCAL(struct lconv, g_thread_safe_localeconv_data);
 
 static const locale_t s_null_locale = (locale_t) 0;
 

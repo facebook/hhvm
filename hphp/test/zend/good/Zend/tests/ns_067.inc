@@ -1,3 +1,6 @@
-<?php
+<?hh
 use Foo\Bar\Foo as Test;
-new Test();
+
+function test() {
+  new Test();
+}

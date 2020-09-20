@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
  * Description: Sort an array by key, maintaining key to data correlation 
  * Source code: ext/standard/array.c
@@ -10,24 +10,24 @@
  *  1.flag  value as defualt
  *  2.SORT_REGULAR - compare items normally
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing krsort() : usage variations ***\n";
 
 // array with diff sub arrays to be sorted 
-$various_arrays = array (
+$various_arrays = darray [
   // null array
-  1  => array(),
+  1  => varray[],
 
   // array contains null sub array
-  2 => array( 1 => array() ),
+  2 => darray[ 1 => varray[] ],
 
   // array of arrays along with some values
-  3 => array(4 => 44, 1 => 11, 3 => array(64,61) ),
+  3 => darray[4 => 44, 1 => 11, 3 => varray[64,61] ],
 
   // array contains sub arrays
-  4 => array ( 3 => array(33,-5,6), 1 => array(11), 
-               2 => array(22,-55), 0  => array() )
-);
+  4 => darray [ 3 => varray[33,-5,6], 1 => varray[11], 
+               2 => varray[22,-55], 0  => varray[] ]
+];
 
 
 $count = 1;
@@ -39,15 +39,15 @@ foreach ($various_arrays as $array) {
   echo "\n-- Iteration $count --\n"; 
   echo "- With defualt sort flag -\n";
   $temp_array = $array;
-  var_dump( krsort($temp_array) );
+  var_dump( krsort(inout $temp_array) );
   var_dump($temp_array);
 
   echo "- Sort flag = SORT_REGULAR -\n";
   $temp_array = $array;
-  var_dump( krsort($temp_array, SORT_REGULAR) );
+  var_dump( krsort(inout $temp_array, SORT_REGULAR) );
   var_dump($temp_array);
   $count++;
 }
 
 echo "Done\n";
-?>
+}

@@ -15,7 +15,7 @@ function do_isset($x, $k) {
 }
 function do_empty($x, $k) {
   try {
-    var_dump(empty($x[$k]));
+    var_dump(!($x[$k] ?? false));
   } catch (Exception $e) {
     echo $e->getMessage(), "\n";
   }
@@ -29,8 +29,8 @@ function main() {
   var_dump(isset($x[5]), isset($x['a']), isset($x[0]), isset($x['']));
   var_dump(isset($y[5]), isset($y['a']), isset($y[0]), isset($y['']));
   echo "----\n";
-  var_dump(empty($x[5]), empty($x['a']), empty($x[0]), empty($x['']));
-  var_dump(empty($y[5]), empty($y['a']), empty($y[0]), empty($y['']));
+  var_dump(!($x[5] ?? false), !($x['a'] ?? false), !($x[0] ?? false), !($x[''] ?? false));
+  var_dump(!($y[5] ?? false), !($y['a'] ?? false), !($y[0] ?? false), !($y[''] ?? false));
   echo "----\n";
   brackets($x, null);
   brackets($x, 3);
@@ -59,4 +59,8 @@ function main() {
   unset($x['b']);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_set_brackets_at_get() {
 main();
+}

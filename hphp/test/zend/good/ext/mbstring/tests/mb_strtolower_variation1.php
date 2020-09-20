@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_strtolower(string $sourcestring [, string $encoding])
  * Description: Returns a lowercased version of $sourcestring
  * Source code: ext/mbstring/mbstring.c
@@ -8,13 +8,6 @@
  * Pass different data types to $sourcestring argument to test behaviour of mb_strtolower()
  */
 
-echo "*** Testing mb_strtolower() : usage variations ***\n";
-
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -22,6 +15,13 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing mb_strtolower() : usage variations ***\n";
+
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -32,7 +32,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $sourcestring argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -56,7 +56,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -65,7 +65,7 @@ $inputs = array(
 /*18*/ "String",
        'String',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -77,17 +77,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_strtolower()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strtolower($input) );
+  try { var_dump( mb_strtolower($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
-?>
+}

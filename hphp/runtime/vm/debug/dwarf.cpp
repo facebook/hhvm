@@ -28,7 +28,6 @@
 #define USE_ELF_WRITER 1
 #endif
 
-using namespace HPHP::jit;
 
 namespace HPHP {
 namespace Debug {
@@ -98,17 +97,17 @@ const char *DwarfInfo::lookupFile(const Unit *unit) {
 }
 
 void DwarfInfo::addLineEntries(TCRange range,
-                               const Unit *unit,
+                               const Func* func,
                                PC instr,
                                FunctionInfo* f) {
-  if (unit == nullptr || instr == nullptr) {
+  if (func == nullptr || instr == nullptr) {
     // For stubs, just add line 0
     f->m_lineTable.push_back(LineEntry(range, 0));
     return;
   }
-  Offset offset = unit->offsetOf(instr);
+  Offset offset = func->offsetOf(instr);
 
-  int lineNum = unit->getLineNumber(offset);
+  int lineNum = func->unit()->getLineNumber(offset);
   if (lineNum >= 0) {
     f->m_lineTable.push_back(LineEntry(range, lineNum));
   }
@@ -162,10 +161,11 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
   if (name) {
     f->name = *name;
   } else {
-    assert(func != nullptr);
+    assertx(func != nullptr);
     f->name = lookupFunction(func, exit, inPrologue, true);
     auto names = func->localNames();
     for (int i = 0; i < func->numNamedLocals(); i++) {
+      if (!names[i]) continue;
       f->m_namedLocals.push_back(names[i]->toCppString());
     }
   }
@@ -188,14 +188,14 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     m_functions.erase(it);
     delete f;
     f = m_functions[end];
-    assert(f->m_chunk != nullptr);
+    assertx(f->m_chunk != nullptr);
     f->m_chunk->clearSynced();
     f->clearPerfSynced();
   } else {
     m_functions[end] = f;
   }
 
-  addLineEntries(TCRange(start, end, range.isAcold()), unit, instr, f);
+  addLineEntries(TCRange(start, end, range.isAcold()), func, instr, f);
 
   if (f->m_chunk == nullptr) {
     if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == nullptr) {

@@ -1,2 +1,1 @@
--vHardReturnTypeHints=1 -d hhvm.php7.all=0
--vRuntime.Eval.ThisTypeHintLevel=3 -d hhvm.php7.all=0
+-d hhvm.php7.all=0

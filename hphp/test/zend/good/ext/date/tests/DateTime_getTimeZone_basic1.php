@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : public DateTimeZone DateTime::getTimezone  ( void  )
  * Description: Return time zone relative to given DateTime
  * Source code: ext/date/php_date.c
  * Alias to functions: date_timezone_get
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing DateTime::getTimezone() : basic functionality ***\n";
 
 date_default_timezone_set("Europe/London");
@@ -20,5 +20,5 @@ $la_time = new DateTimeZone("America/Los_Angeles");
 $object->setTimeZone($la_time);
 var_dump( $object->getTimeZone()->getName() ); 
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

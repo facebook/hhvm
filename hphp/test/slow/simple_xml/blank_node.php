@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_blank_node() {
 $config = simplexml_load_string(<<<EOF
 <config>
   <global>
@@ -14,3 +17,4 @@ EOF
 );
 
 var_dump($config->global->index);
+}

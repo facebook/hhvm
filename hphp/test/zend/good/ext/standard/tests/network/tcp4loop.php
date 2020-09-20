@@ -1,35 +1,44 @@
-<?php # vim:ft=php:
+<?hh # vim:ft=php:
+<<__EntryPoint>>
+function main_entry(): void {
 
-  for ($i=0; $i<100; $i++) {
-    $port = rand(10000, 65000);
-    /* Setup socket server */
-    $server = @stream_socket_server("tcp://127.0.0.1:$port");
-    if ($server) {
-      break;
+    for ($i=0; $i<100; $i++) {
+      $port = rand(10000, 65000);
+      /* Setup socket server */
+      $errno = null;
+      $errstr = null;
+      $server = @stream_socket_server(
+        "tcp://127.0.0.1:$port",
+        inout $errno,
+        inout $errstr
+      );
+      if ($server) {
+        break;
+      }
     }
-  }
-	if (!$server) {
-		die('Unable to create AF_INET socket [server]');
-	}
+  	if (!$server) {
+  		die('Unable to create AF_INET socket [server]');
+  	}
 
-	/* Connect to it */
-	$client = stream_socket_client("tcp://127.0.0.1:$port");
-	if (!$client) {
-		die('Unable to create AF_INET socket [client]');
-	}
+  	/* Connect to it */
+  	$client = stream_socket_client("tcp://127.0.0.1:$port", inout $errno, inout $errstr);
+  	if (!$client) {
+  		die('Unable to create AF_INET socket [client]');
+  	}
 
-	/* Accept that connection */
-	$socket = stream_socket_accept($server);
-	if (!$socket) {
-		die('Unable to accept connection');
-	}
+  	/* Accept that connection */
+    $peername = null;
+	$socket = stream_socket_accept($server, -1.0, inout $peername);
+  	if (!$socket) {
+  		die('Unable to accept connection');
+  	}
 
-	fwrite($client, "ABCdef123\n");
+  	fwrite($client, "ABCdef123\n");
 
-	$data = fread($socket, 10);
-	var_dump($data);
+  	$data = fread($socket, 10);
+  	var_dump($data);
 
-	fclose($client);
-	fclose($socket);
-	fclose($server);
-?>
+  	fclose($client);
+  	fclose($socket);
+  	fclose($server);
+}

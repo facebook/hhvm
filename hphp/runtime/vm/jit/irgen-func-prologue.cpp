@@ -16,11 +16,15 @@
 
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
+#include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/reified-generics-info.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -29,6 +33,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -45,53 +50,73 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
-template <class Body>
-void prologDispatch(IRGS& env, const Func* func, Body body) {
-  assertx(env.irb->curMarker().prologue());
-
-  if (!func->mayHaveThis()) {
-    body(false);
-    return;
-  }
-
-  if (func->requiresThisInBody()) {
-    body(true);
-    return;
-  }
-
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const ctx = gen(env, LdCtx, fp(env));
-      gen(env, CheckCtxThis, taken, ctx);
-    },
-    [&] {
-      body(true);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      body(false);
-    }
-  );
-}
 
 /*
  * Initialize parameters.
  *
- * Set un-passed parameters to Uninit (or the empty array, for the variadic
- * capture parameter) and set up the ExtraArgs on the ActRec as needed.
+ * Set un-passed parameters to Uninit and set up the variadic capture parameter
+ * as neeeded.
  */
-void init_params(IRGS& env, const Func* func, uint32_t argc) {
-  /*
-   * Maximum number of default-value parameter initializations to unroll.
-   */
-  constexpr auto kMaxParamsInitUnroll = 5;
+void init_params(IRGS& env, const Func* func, uint32_t argc,
+                 SSATmp* callFlags) {
+  // Reified generics are not supported on closures yet.
+  assertx(!func->hasReifiedGenerics() || !func->isClosureBody());
 
+  // Maximum number of default-value parameter initializations to unroll.
+  auto constexpr kMaxParamsInitUnroll = 5;
   auto const nparams = func->numNonVariadicParams();
+
+  // If generics were expected and given, but not enough args were provided,
+  // move generics to the correct slot ($0ReifiedGenerics is the first
+  // non-parameter local).
+  // FIXME: leaks memory if generics were given but not expected.
+  if (func->hasReifiedGenerics()) {
+    ifThenElse(
+      env,
+      [&] (Block* taken) {
+        auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
+        auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
+        gen(env, JmpNZero, taken, hasGenerics);
+      },
+      [&] {
+        arrprov::TagOverride ap_override{arrprov::tagFromSK(env.bcState)};
+        // Generics not given. We will either fail later or raise a warning.
+        // Write empty array so that the local is properly initialized.
+        auto const emptyArr =
+          RuntimeOption::EvalHackArrDVArrs ? ArrayData::CreateVec()
+                                           : ArrayData::CreateVArray();
+        gen(
+          env,
+          StLoc,
+          LocalId{func->numParams()},
+          fp(env),
+          cns(env, emptyArr));
+      },
+      [&] {
+        // Already at the correct slot.
+        if (argc == func->numParams()) return;
+
+        auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+        auto const generics = [&] {
+          if (argc < func->numParams()) {
+            gen(env, AssertLoc, type, LocalId{argc}, fp(env));
+            return gen(env, LdLoc, type, LocalId{argc}, fp(env));
+          } else {
+            assertx(!isInlining(env));
+            auto const genericsOff = IRSPRelOffsetData(offsetFromIRSP(
+              env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc) - 1}));
+            gen(env, AssertStk, type, genericsOff, sp(env));
+            return gen(env, LdStk, type, genericsOff, sp(env));
+          }
+        }();
+        gen(env, StLoc, LocalId{func->numParams()}, fp(env), generics);
+      }
+    );
+  }
 
   if (argc < nparams) {
     // Too few arguments; set everything else to Uninit.
-    if (nparams - argc <= kMaxParamsInitUnroll || env.inlineLevel) {
+    if (nparams - argc <= kMaxParamsInitUnroll || isInlining(env)) {
       for (auto i = argc; i < nparams; ++i) {
         gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
       }
@@ -102,52 +127,11 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
   }
 
   if (argc <= nparams && func->hasVariadicCaptureParam()) {
+    ARRPROV_USE_RUNTIME_LOCATION();
     // Need to initialize `...$args'.
     gen(env, StLoc, LocalId{nparams}, fp(env),
-        cns(env, staticEmptyVArray()));
+        cns(env, ArrayData::CreateVArray()));
   }
-
-  if (!env.inlineLevel) {
-    // Null out or initialize the frame's ExtraArgs.
-    env.irb->exceptionStackBoundary();
-    gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
-  }
-}
-
-/*
- * Set up the closure object and class context.
- *
- * We swap out the Closure object stored in m_this, and replace it with the
- * closure's bound Ctx, which may be either an object or a class context.  We
- * then teleport the object onto the stack as the first local after the params.
- */
-SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closureOpt) {
-  assertx(func->isClosureBody());
-
-  auto const closure_type = Type::ExactObj(func->implCls());
-  auto const closure = [&] {
-    if (!closureOpt) {
-      return gen(env, LdClosure, closure_type, fp(env));
-    }
-    if (closureOpt->hasConstVal() || closureOpt->isA(closure_type)) {
-      return closureOpt;
-    }
-    return gen(env, AssertType, closure_type, closureOpt);
-  }();
-
-  auto const ctx = func->cls() ?
-    gen(env, LdClosureCtx, closure) : cns(env, nullptr);
-
-  gen(env, InitCtx, fp(env), ctx);
-  // We can skip the incref for static closures, which have a Cctx.
-  if (func->cls() && !func->isStatic()) {
-    gen(env, IncRef, ctx);
-  }
-
-  // Teleport the closure to the next local.  There's no need to incref since
-  // it came from m_this.
-  gen(env, StLoc, LocalId{func->numParams()}, fp(env), closure);
-  return closure;
 }
 
 /*
@@ -160,22 +144,21 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
 
   assertx(func->isClosureBody());
 
-  // Closure object properties are the use vars followed by the static locals
-  // (which are per-instance).
-  auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
-  ptrdiff_t use_var_off = sizeof(ObjectData);
+  // Closure object properties are the use vars.
+  auto const nuse = cls->numDeclProperties();
 
-  for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
-    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i), func->cls());
+  for (auto i = 0; i < nuse; ++i) {
+    auto const ty =
+      typeFromRAT(cls->declPropRepoAuthType(i), func->cls()) & TCell;
     auto const addr = gen(
       env,
       LdPropAddr,
-      ByteOffsetData { use_var_off },
-      ty.ptr(Ptr::Prop),
+      IndexData { cls->propSlotToIndex(i) },
+      ty.lval(Ptr::Prop),
       closure
     );
     auto const prop = gen(env, LdMem, ty, addr);
-    gen(env, StLoc, LocalId{nparams + 1 + i}, fp(env), prop);
+    gen(env, StLoc, LocalId{nparams + i}, fp(env), prop);
     gen(env, IncRef, prop);
   }
 }
@@ -198,10 +181,11 @@ void init_locals(IRGS& env, const Func* func) {
   auto num_inited = func->numParams();
 
   if (func->isClosureBody()) {
-    auto const nuse = func->implCls()->numDeclProperties() -
-                      func->numStaticLocals();
-    num_inited += 1 + nuse;
+    auto const nuse = func->implCls()->numDeclProperties();
+    num_inited += nuse;
   }
+
+  if (func->hasReifiedGenerics()) num_inited++;
 
   // We set to Uninit all locals beyond any params and any closure use vars.
   if (num_inited < nlocals) {
@@ -219,20 +203,10 @@ void init_locals(IRGS& env, const Func* func) {
 /*
  * Emit raise-warnings for any missing arguments.
  */
-void warn_missing_args(IRGS& env, uint32_t argc) {
-  auto const func = env.context.func;
-  auto const nparams = func->numNonVariadicParams();
-
-  if (!func->isCPPBuiltin()) {
-    auto const& paramInfo = func->params();
-
-    for (auto i = argc; i < nparams; ++i) {
-      if (paramInfo[i].funcletOff == InvalidAbsoluteOffset) {
-        env.irb->exceptionStackBoundary();
-        gen(env, RaiseMissingArg, FuncArgData { func, argc });
-        break;
-      }
-    }
+void warnOnMissingArgs(IRGS& env, const Func* callee, uint32_t argc) {
+  if (argc < callee->numRequiredParams()) {
+    env.irb->exceptionStackBoundary();
+    gen(env, ThrowMissingArg, FuncArgData { callee, argc });
   }
 }
 
@@ -248,7 +222,7 @@ enum class StackCheck {
 };
 
 StackCheck stack_check_kind(const Func* func, uint32_t argc) {
-  if (func->attrs() & AttrPhpLeafFn &&
+  if (func->isPhpLeafFn() &&
       func->maxStackCells() < kStackCheckLeafPadding) {
     return StackCheck::None;
   }
@@ -265,9 +239,8 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
    *
    * The only things we are going to do is write uninits to the non-passed
    * params and to the non-parameter locals, and possibly shuffle some of the
-   * locals into an ExtraArgs structure.  The stack overflow code knows how to
-   * handle the possibility of an ExtraArgs structure on the ActRec, and the
-   * uninits are harmless as long as we know we aren't going to segfault while
+   * locals into the variadic capture param.  The uninits are harmless to the
+   * stack overflow code as long as we know we aren't going to segfault while
    * we write them.
    *
    * There's always sSurprisePageSize extra space at the bottom (lowest
@@ -277,257 +250,297 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
    */
   auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
 
-  return func->numLocals() - argc < safeFromSEGV
+  return func->numLocals() < safeFromSEGV + argc
     ? StackCheck::Combine
     : StackCheck::Early;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitPrologueEntry(IRGS& env, uint32_t argc) {
-  auto const func = env.context.func;
+Type prologueCtxType(const Func* func) {
+  assertx(func->isClosureBody() || func->cls());
+  if (func->isClosureBody()) return Type::ExactObj(func->implCls());
+  if (func->isStatic()) return Type::SubCls(func->cls());
+  return thisTypeFromFunc(func);
+}
 
+void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc) {
   // Emit debug code.
-  if (Trace::moduleEnabled(Trace::ringbuffer) && !func->isMagic()) {
-    auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
+  if (Trace::moduleEnabled(Trace::ringbuffer)) {
+    auto msg = RBMsgData { Trace::RBTypeFuncPrologue, callee->fullName() };
     gen(env, RBTraceMsg, msg);
   }
 
-  gen(env, EnterFrame, fp(env));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Make sure we are at the right function.
+    auto const callFunc = gen(env, DefCallFunc);
+    auto const callFuncOK = gen(env, EqFunc, callFunc, cns(env, callee));
+    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), callFuncOK);
+
+    // Make sure we are at the right prologue.
+    auto const numArgs = gen(env, DefCallNumArgs);
+    auto const numArgsOK = gen(env, EqInt, numArgs, cns(env, argc));
+    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
+  }
+
+  gen(env, EnterPrologue);
 
   // Emit early stack overflow check if necessary.
-  if (stack_check_kind(func, argc) == StackCheck::Early) {
+  if (stack_check_kind(callee, argc) == StackCheck::Early) {
     env.irb->exceptionStackBoundary();
-    gen(env, CheckStackOverflow, fp(env));
+    gen(env, CheckStackOverflow, sp(env));
   }
 }
 
-void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
-  auto const func = env.context.func;
+void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
+                    SSATmp* callFlags, SSATmp* prologueCtx) {
+  auto const ctx = [&] {
+    if (!callee->isClosureBody()) return prologueCtx;
 
+    if (!callee->cls()) return cns(env, nullptr);
+    if (callee->isStatic()) {
+      return gen(env, LdClosureCls, Type::SubCls(callee->cls()), prologueCtx);
+    }
+    auto const closureThis =
+      gen(env, LdClosureThis, Type::SubObj(callee->cls()), prologueCtx);
+    gen(env, IncRef, closureThis);
+    return closureThis;
+  }();
+
+  // If we don't have variadics, unpack arg will be dropped.
+  auto const arNumArgs = std::min(argc, callee->numParams());
+
+  gen(env, DefFuncEntryFP, FuncData { callee },
+      fp(env), sp(env), callFlags, cns(env, arNumArgs), ctx);
+  auto const spOffset = FPInvOffset { callee->numSlotsInFrame() };
+  gen(env, DefFrameRelSP, FPInvOffsetData { spOffset }, fp(env));
+}
+
+void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,
+                      TransID transID, SSATmp* callFlags, SSATmp* closure) {
   // Increment profiling counter.
-  if (env.context.kind == TransKind::ProfPrologue) {
+  if (isProfiling(env.context.kind)) {
     gen(env, IncProfCounter, TransIDData{transID});
-    profData()->setProfiling(func->getFuncId());
+    profData()->setProfiling(callee->getFuncId());
   }
+
+  // Increment the count for the latest call for optimized translations if we're
+  // going to serialize the profile data.
+  if (env.context.kind == TransKind::OptPrologue && isJitSerializing() &&
+      RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+    gen(env, IncCallCounter, fp(env));
+  }
+
+  auto const unpackArgsForTooManyArgs = [&]() -> SSATmp* {
+    if (argc <= callee->numParams()) return nullptr;
+
+    // If too many arguments were passed, load the array containing the unpack
+    // args, as it is about to get overridden by emitPrologueLocals(). Need to
+    // use LdStk instead of LdLoc, as there may be no such local.
+    assertx(!callee->hasVariadicCaptureParam());
+    assertx(argc == callee->numNonVariadicParams() + 1);
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+    auto const unpackOff = IRSPRelOffsetData(offsetFromIRSP(
+      env, BCSPRelOffset{callee->numSlotsInFrame() - int32_t(argc)}));
+    gen(env, AssertStk, type, unpackOff, sp(env));
+    return gen(env, LdStk, type, unpackOff, sp(env));
+  }();
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  emitPrologueLocals(env, argc, func, nullptr);
-  // "Kill" all the class-ref slots initially. This normally won't do anything
-  // (the class-ref slots should be unoccupied at this point), but in debugging
-  // builds it will write poison values to them.
-  for (uint32_t slot = 0; slot < func->numClsRefSlots(); ++slot) {
-    killClsRef(env, slot);
+  emitPrologueLocals(env, callee, argc, callFlags, closure);
+
+  env.irb->exceptionStackBoundary();
+
+  warnOnMissingArgs(env, callee, argc);
+  if (unpackArgsForTooManyArgs != nullptr) {
+    // RaiseTooManyArg will free unpackArgsForTooManyArgs and also use it to
+    // report the correct numbers.
+    gen(env, RaiseTooManyArg, FuncData { callee }, unpackArgsForTooManyArgs);
   }
-  warn_missing_args(env, argc);
+
+  emitGenericsMismatchCheck(env, callee, callFlags);
+  emitCalleeDynamicCallCheck(env, callee, callFlags);
+  emitImplicitContextCheck(env, callee);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
   env.irb->exceptionStackBoundary();
-  if (stack_check_kind(func, argc) == StackCheck::Combine) {
-    gen(env, CheckSurpriseAndStack, FuncEntryData { func, argc }, fp(env));
+  if (stack_check_kind(callee, argc) == StackCheck::Combine) {
+    gen(env, CheckSurpriseAndStack, FuncEntryData { callee, argc }, fp(env));
   } else {
-    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
+    gen(env, CheckSurpriseFlagsEnter, FuncEntryData { callee, argc }, fp(env));
   }
 
-  emitDynamicCallCheck(env);
 
-  prologDispatch(
-    env, func,
-    [&] (bool hasThis) {
-      // Emit the bindjmp for the function body.
-      gen(
-        env,
-        ReqBindJmp,
-        ReqBindJmpData {
-          SrcKey { func, func->getEntryForNumArgs(argc), ResumeMode::None,
-                   hasThis },
-          FPInvOffset { func->numSlotsInFrame() },
-          spOffBCFromIRSP(env),
-          TransFlags{}
-        },
-        sp(env),
-        fp(env)
-      );
-    }
+  // Emit the bindjmp for the function body.
+  gen(
+    env,
+    ReqBindJmp,
+    ReqBindJmpData {
+      SrcKey { callee, callee->getEntryForNumArgs(argc), ResumeMode::None },
+      FPInvOffset { callee->numSlotsInFrame() },
+      spOffBCFromIRSP(env),
+      TransFlags{}
+    },
+    sp(env),
+    fp(env)
   );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  DEBUG_ONLY auto const func = env.context.func;
-  assertx(func->isMagic());
-  assertx(func->numParams() == 2);
-  assertx(!func->hasVariadicCaptureParam());
+}
 
-  Block* two_arg_prologue = nullptr;
+///////////////////////////////////////////////////////////////////////////////
 
-  emitPrologueEntry(env, argc);
+void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
+                        SSATmp* callFlags, SSATmp* closure) {
+  init_params(env, callee, argc, callFlags);
 
-  // If someone just called __call() or __callStatic() directly, branch to a
-  // normal non-magic prologue.
-  ifThen(
+  assertx(callee->isClosureBody() == (closure != nullptr));
+  if (callee->isClosureBody()) {
+    init_use_vars(env, callee, closure);
+    decRef(env, closure);
+  }
+
+  init_locals(env, callee);
+}
+
+void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
+                      TransID transID) {
+  assertx(argc <= callee->numNonVariadicParams() + 1);
+
+  // Define register inputs before doing anything else that may clobber them.
+  auto const callFlags = gen(env, DefCallFlags);
+  auto const prologueCtx = (callee->isClosureBody() || callee->cls())
+    ? gen(env, DefCallCtx, prologueCtxType(callee))
+    : cns(env, nullptr);
+  auto const closure = callee->isClosureBody() ? prologueCtx : nullptr;
+
+  emitPrologueEntry(env, callee, argc);
+  emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
+  emitPrologueBody(env, callee, argc, transID, callFlags, closure);
+}
+
+void emitGenericsMismatchCheck(IRGS& env, const Func* callee,
+                               SSATmp* callFlags) {
+  if (!callee->hasReifiedGenerics()) return;
+
+  // Fail if generics were not passed.
+  ifThenElse(
     env,
     [&] (Block* taken) {
-      gen(env, CheckARMagicFlag, taken, fp(env));
-      if (argc == 2) two_arg_prologue = taken;
+      auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
+      auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
+      gen(env, JmpZero, taken, hasGenerics);
     },
     [&] {
-      emitPrologueBody(env, argc, transID);
-    }
-  );
+      // Fail on generics count/wildcard mismatch.
+      auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+      auto const local = LocalId{callee->numParams()};
+      gen(env, AssertLoc, type, local, fp(env));
+      auto const generics = gen(env, LdLoc, type, local, fp(env));
 
-  // Pack the passed args into an array, then store it as the second param.
-  // This has to happen before we write the first param.
-  auto const args_arr = (argc == 0)
-    ? cns(env, staticEmptyVArray())
-    : gen(env, PackMagicArgs, fp(env));
-  gen(env, StLoc, LocalId{1}, fp(env), args_arr);
-
-  // Store the name of the called function to the first param, then null it out
-  // on the ActRec.
-  auto const inv_name = gen(env, LdARInvName, fp(env));
-  gen(env, StLoc, LocalId{0}, fp(env), inv_name);
-  gen(env, StARInvName, fp(env), cns(env, nullptr));
-
-  // Reset all the flags except for the dynamic call flag and set the argument
-  // count to 2.
-  auto const flag = gen(
-    env,
-    AndInt,
-    gen(env, LdARNumArgsAndFlags, fp(env)),
-    cns(env, static_cast<int32_t>(ActRec::Flags::DynamicCall))
-  );
-  auto combined = gen(
-    env,
-    OrInt,
-    flag,
-    cns(env, ActRec::encodeNumArgsAndFlags(2, ActRec::Flags::None))
-  );
-  gen(env, StARNumArgsAndFlags, fp(env), combined);
-
-  // Jmp to the two-argument prologue, or emit it if it doesn't exist yet.
-  if (two_arg_prologue) {
-    gen(env, Jmp, two_arg_prologue);
-  } else {
-    emitPrologueBody(env, 2, transID);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void emitPrologueLocals(IRGS& env, uint32_t argc,
-                        const Func* func, SSATmp* closureOpt) {
-  init_params(env, func, argc);
-  if (func->isClosureBody()) {
-    auto const closure = juggle_closure_ctx(env, func, closureOpt);
-    init_use_vars(env, func, closure);
-  }
-  init_locals(env, func);
-}
-
-void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  if (env.context.func->isMagic()) {
-    return emitMagicFuncPrologue(env, argc, transID);
-  }
-  emitPrologueEntry(env, argc);
-  emitPrologueBody(env, argc, transID);
-}
-
-void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
-  auto const func = env.context.func;
-  auto const num_args = gen(env, LdARNumParams, fp(env));
-
-  prologDispatch(
-    env, func,
-    [&] (bool hasThis) {
-      for (auto const& dv : dvs) {
-        ifThen(
-          env,
-          [&] (Block* taken) {
-            auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
-            gen(env, JmpNZero, taken, lte);
-          },
-          [&] {
-            gen(
-              env,
-              ReqBindJmp,
-              ReqBindJmpData {
-                SrcKey { func, dv.second, ResumeMode::None, hasThis },
-                FPInvOffset { func->numSlotsInFrame() },
-                spOffBCFromIRSP(env),
-                TransFlags{}
-              },
-              sp(env),
-              fp(env)
-            );
-          }
-        );
+      // Generics may be known if we are inlining.
+      if (generics->hasConstVal(type)) {
+        auto const genericsArr = generics->arrLikeVal();
+        auto const& genericsDef =
+          callee->getReifiedGenericsInfo().m_typeParamInfo;
+        if (genericsArr->size() == genericsDef.size()) {
+          bool match = true;
+          IterateKV(genericsArr, [&](TypedValue k, TypedValue v) {
+            assertx(tvIsInt(k) && tvIsArrayLike(v));
+            auto const idx = k.m_data.num;
+            auto const ts = v.m_data.parr;
+            if (isWildCard(ts) && genericsDef[idx].m_isReified) {
+              match = false;
+              return true;
+            }
+            return false;
+          });
+          if (match) return;
+        }
       }
 
-      gen(
+      ifThen(
         env,
-        ReqBindJmp,
-        ReqBindJmpData {
-          SrcKey { func, func->base(), ResumeMode::None, hasThis },
-          FPInvOffset { func->numSlotsInFrame() },
-          spOffBCFromIRSP(env),
-          TransFlags{}
+        [&] (Block* taken) {
+          auto const fd = FuncData { callee };
+          auto const match =
+            gen(env, IsFunReifiedGenericsMatched, fd, callFlags);
+          gen(env, JmpZero, taken, match);
         },
-        sp(env),
-        fp(env)
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          updateMarker(env);
+          env.irb->exceptionStackBoundary();
+          gen(env, CheckFunReifiedGenericMismatch, cns(env, callee), generics);
+        }
       );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+      if (areAllGenericsSoft(callee->getReifiedGenericsInfo())) {
+        gen(
+          env,
+          RaiseWarning,
+          cns(env, makeStaticString(folly::sformat(
+            "Generic at index 0 to Function {} must be reified, erased given",
+            callee->fullName()->data()))));
+        return;
+      }
+      gen(env, ThrowCallReifiedFunctionWithoutGenerics, cns(env, callee));
     }
   );
 }
 
-void emitDynamicCallCheck(IRGS& env) {
-  auto const func = curFunc(env);
-
-  if (!RuntimeOption::EvalNoticeOnAllDynamicCalls &&
-      !(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
-      !func->accessesCallerFrame()) {
+void emitCalleeDynamicCallCheck(IRGS& env, const Func* callee,
+                                SSATmp* callFlags) {
+  if (!RuntimeOption::EvalNoticeOnBuiltinDynamicCalls || !callee->isBuiltin()) {
     return;
   }
 
   ifThen(
     env,
     [&] (Block* taken) {
-      auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
-      auto test = gen(
-        env, AndInt, flags,
-        cns(env, static_cast<int32_t>(ActRec::Flags::DynamicCall))
-      );
-      gen(env, JmpNZero, taken, test);
+      auto constexpr flag = 1 << CallFlags::Flags::IsDynamicCall;
+      auto const isDynamicCall = gen(env, AndInt, callFlags, cns(env, flag));
+      gen(env, JmpNZero, taken, isDynamicCall);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
 
-      if (func->accessesCallerFrame()) {
-        gen(env, RaiseVarEnvDynCall, cns(env, func));
-      }
-
-      if (RuntimeOption::EvalNoticeOnAllDynamicCalls ||
-          (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
-           func->isBuiltin())) {
-        std::string msg;
-        string_printf(
-          msg,
-          Strings::FUNCTION_CALLED_DYNAMICALLY,
-          func->fullDisplayName()->data()
-        );
-        gen(env, RaiseNotice, cns(env, makeStaticString(msg)));
-      }
+      std::string errMsg;
+      auto const fmtString = callee->isDynamicallyCallable()
+        ? Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE
+        : Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
+      string_printf(errMsg, fmtString, callee->fullName()->data());
+      gen(env, RaiseNotice, cns(env, makeStaticString(errMsg)));
     }
   );
 }
 
+void emitImplicitContextCheck(IRGS& env, const Func* callee) {
+  if (!RO::EvalEnableImplicitContext || !callee->hasNoContextAttr()) return;
+  ifElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckImplicitContextNull, taken);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const str = folly::to<std::string>(
+        "Function ",
+        callee->fullName()->data(),
+        " has implicit context but is marked with __NoContext");
+      auto const msg = cns(env, makeStaticString(str));
+      gen(env, ThrowInvalidOperation, msg);
+    }
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

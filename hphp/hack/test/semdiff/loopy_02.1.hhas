@@ -1,6 +1,0 @@
-# loop equals loop test
-# this one should pass
-.main {
-  L0:
-  Jmp L0
-}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
   public $val;
@@ -9,6 +9,7 @@ class C {
     $this->val = $val;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C(0.0);
 var_dump($c);
+}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_URL_FILE_H_
-#define incl_HPHP_URL_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/mem-file.h"
@@ -68,4 +67,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_URL_FILE_H_

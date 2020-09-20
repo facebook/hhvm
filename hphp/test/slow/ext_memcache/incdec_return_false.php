@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $key = 'TEST_KEY_INCREMENT_DECREMENT';
 $memcache = new Memcache;
 $memcache->addServer('127.0.0.1', 11211);
@@ -18,3 +18,4 @@ $memcache->set($key, 0);
 var_dump($memcache->decrement($key, 1));
 
 $memcache->delete($key);
+}

@@ -24,6 +24,7 @@
 #include <folly/Format.h>
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -36,7 +37,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-__thread Timer::Counter s_counters[Timer::kNumTimers];
+std::array<Timer::Counter,Timer::kNumTimers> kCountersDefault{};
+using TimerType = std::array<Timer::Counter,Timer::kNumTimers>;
+RDS_LOCAL_NO_CHECK(TimerType, s_counters)(kCountersDefault);
 
 struct TimerName { const char* str; Timer::Name name; };
 const TimerName s_names[] = {
@@ -106,7 +109,7 @@ Timer::Counter Timer::CounterValue(Timer::Name name) {
 }
 
 void Timer::RequestInit() {
-  memset(&s_counters, 0, sizeof(s_counters));
+  memset(s_counters.get(), 0, sizeof(Timer::Counter[Timer::kNumTimers]));
 }
 
 void Timer::RequestExit() {

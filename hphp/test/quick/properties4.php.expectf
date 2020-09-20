@@ -1,8 +1,7 @@
-array(1) {
+darray(1) {
   ["w"]=>
   int(3)
 }
 Done
-looking up NonExistentClass
 
-Fatal error: Class undefined: NonExistentClass in %s on line 32
+Fatal error: Class undefined: NonExistentClass in %s on line 24

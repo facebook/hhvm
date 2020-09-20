@@ -1,7 +1,9 @@
 <?hh
 class X {
-  function test(self $s) {
+  static function test(self $s) {
     var_dump($s);
   }
 }
+<<__EntryPoint>> function main(): void {
 X::test("hello");
+}

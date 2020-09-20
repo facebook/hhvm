@@ -1,0 +1,14 @@
+int(1)
+bool(false)
+float(1.5)
+string(3) "foo"
+resource(%d) of type (stream)
+object(stdClass) (0) {
+}
+vec(0) {
+}
+dict(0) {
+}
+keyset(0) {
+}
+NULL

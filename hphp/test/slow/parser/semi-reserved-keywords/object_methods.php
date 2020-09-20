@@ -204,6 +204,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_object_methods() {
 echo Bar::forEach();
 $foo = new Foo();
 echo $foo->callable();
@@ -272,3 +275,4 @@ echo $foo->self();
 echo $foo->parent();
 echo $foo->unset();
 echo "Done\n";
+}

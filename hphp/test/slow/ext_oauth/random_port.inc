@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_random_port() {
   return rand(10000, 65000);

@@ -1,22 +1,12 @@
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
-hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
 
-Fatal error: %s
+Fatal error: An expression is expected here. in %s/019.php(11)(7e310375b1276d0225776f652db9e01e) : eval()'d code on line 1

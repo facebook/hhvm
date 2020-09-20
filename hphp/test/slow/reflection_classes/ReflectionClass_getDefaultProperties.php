@@ -7,21 +7,25 @@ class A {
   protected $baz = self::X;
 }
 
-$class = new ReflectionClass(A::class);
-var_dump($class->getDefaultProperties());
-
 class B extends A {
   const Y = 20;
   protected $qux = A::X;
   protected $val = self::Y;
 }
 
-$class = new ReflectionClass(B::class);
-var_dump($class->getDefaultProperties());
-
 class C {
   protected $data = 1;
 }
 
+
+<<__EntryPoint>>
+function main_reflection_class_get_default_properties() {
+$class = new ReflectionClass(A::class);
+var_dump($class->getDefaultProperties());
+
+$class = new ReflectionClass(B::class);
+var_dump($class->getDefaultProperties());
+
 $class = new ReflectionClass(C::class);
 var_dump($class->getDefaultProperties());
+}

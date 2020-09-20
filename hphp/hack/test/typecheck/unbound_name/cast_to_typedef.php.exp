@@ -1,0 +1,6 @@
+File "cast_to_typedef.php", line 6, characters 14-15:
+Encountered unexpected token `$x`. (Parsing[1002])
+File "cast_to_typedef.php", line 6, characters 4-12:
+Unbound name: `MyTypedef` (a global constant) (Naming[2049])
+File "cast_to_typedef.php", line 6, characters 4-12:
+Unbound global constant (Typing) (Typing[4106])

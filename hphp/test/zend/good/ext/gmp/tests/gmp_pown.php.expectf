@@ -8,36 +8,33 @@ string(3) "331"
 string(3) "171"
 string(3) "371"
 
-Warning: %s
+Warning: gmp_powm(): Modulus may not be zero in %s/gmp_pown.php on line 17
 bool(false)
 
-Warning: %s
+Warning: gmp_powm(): Modulus may not be zero in %s/gmp_pown.php on line 18
 bool(false)
 
-Warning: %s
+Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s/gmp_pown.php on line 20
 bool(false)
 
-Warning: %s
+Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s/gmp_pown.php on line 21
 bool(false)
 
-Warning: %s
+Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s/gmp_pown.php on line 22
 bool(false)
 
-Warning: %s
+Warning: gmp_powm(): Unable to convert variable to GMP - wrong type in %s/gmp_pown.php on line 23
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_powm() expects exactly 3 parameters, 2 given in %s/gmp_pown.php on line 24
 
-Warning: %s
-NULL
+Warning: gmp_powm() expects exactly 3 parameters, 1 given in %s/gmp_pown.php on line 25
 
-Warning: %s
-NULL
+Warning: gmp_powm() expects exactly 3 parameters, 0 given in %s/gmp_pown.php on line 26
 
-Warning: %s
+Warning: gmp_powm(): Exponent must not be negative in %s/gmp_pown.php on line 29
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(1) "1"
 }

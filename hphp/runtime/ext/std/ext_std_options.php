@@ -1,4 +1,6 @@
-<?hh
+<?hh // partial
+
+namespace {
 
 /* Set the various assert() control options or just query their current
  * settings.
@@ -8,15 +10,7 @@ function assert_options(int $what,
                         mixed $value = null): mixed;
 
 /* assert() will check the given assertion and take appropriate action if its
- * result is FALSE.  If the assertion is given as a string it will be
- * evaluated as PHP code by assert(). The advantages of a string assertion are
- * less overhead when assertion checking is off and messages containing the
- * assertion expression when an assertion fails. This means that if you pass a
- * boolean condition as assertion this condition will not show up as parameter
- * to the assertion function which you may have defined with the
- * assert_options() function, the condition is converted to a string before
- * calling that handler function, and the boolean FALSE is converted as the
- * empty string.  Assertions should be used as a debugging feature only. You
+ * result is FALSE.  Assertions should be used as a debugging feature only. You
  * may use them for sanity-checks that test for conditions that should always
  * be TRUE and that indicate some programming errors if not or to check for
  * the presence of certain features like extension functions or certain system
@@ -24,20 +18,9 @@ function assert_options(int $what,
  * operations like input parameter checks. As a rule of thumb your code should
  * always be able to work correctly if assertion checking is not activated.
  * The behavior of assert() may be configured by assert_options() or by
- * .ini-settings described in that functions manual page.  The
- * assert_options() function and/or ASSERT_CALLBACK configuration directive
- * allow a callback function to be set to handle failed assertions.  assert()
- * callbacks are particularly useful for building automated test suites
- * because they allow you to easily capture the code passed to the assertion,
- * along with information on where the assertion was made. While this
- * information can be captured via other methods, using assertions makes it
- * much faster and easier!  The callback function should accept three
- * arguments. The first argument will contain the file the assertion failed
- * in. The second argument will contain the line the assertion failed on and
- * the third argument will contain the expression that failed (if any -
- * literal values such as 1 or "two" will not be passed via this argument)
+ * .ini-settings described in that functions manual page.
  */
-<<__Native("ReadsCallerFrame", "WritesCallerFrame")>>
+<<__Native>>
 function assert(mixed $assertion, mixed $message = null): mixed;
 
 /* Loads the PHP extension given by the parameter library.  Use
@@ -46,8 +29,7 @@ function assert(mixed $assertion, mixed $message = null): mixed;
  * (either through php.ini or dl()). Warning: This function has been removed
  * from some SAPI's in PHP 5.3.
  */
-<<__Native>>
-function dl(string $library): int;
+function dl(string $_library): int { return 0; }
 
 /* Finds out whether the extension is loaded.
  */
@@ -58,7 +40,7 @@ function extension_loaded(string $name): bool;
  * the PHP interpreter.
  */
 <<__Native>>
-function get_loaded_extensions(bool $zend_extensions = false): array;
+function get_loaded_extensions(bool $zend_extensions = false): varray;
 
 /* This function returns the names of all the functions defined in the module
  * indicated by module_name or false if $module_name is not a valid extension.
@@ -73,18 +55,16 @@ function get_extension_funcs(string $module_name): mixed;
  * configuration setting. If this is available, a configuration file is being
  * used.
  */
-<<__Native>>
-function get_cfg_var(string $option): mixed;
+function get_cfg_var(string $_option): mixed { return false; }
 
 <<__Native>>
 function get_current_user(): string;
 
 /* Returns the names and values of all the constants currently defined. This
- * includes those created by extensions as well as those created with the
- * define() function.
+ * includes those created by extensions.
  */
 <<__Native>>
-function get_defined_constants(bool $categorize = false): array;
+function get_defined_constants(bool $categorize = false): darray;
 
 <<__Native>>
 function get_include_path(): string;
@@ -101,32 +81,10 @@ function set_include_path(mixed $new_include_path): string;
  * include_once(), require() or require_once().
  */
 <<__Native>>
-function get_included_files(): array;
+function get_included_files(): varray;
 
-function get_required_files(): array {
+function get_required_files(): varray {
   return get_included_files();
-}
-
-/* Returns the current configuration setting of magic_quotes_gpc  Keep in mind
- * that attempting to set magic_quotes_gpc at runtime will not work.  For more
- * information about magic_quotes, see this security section.
- */
-function get_magic_quotes_gpc(): ?bool {
-  if (($argc = func_num_args()) != 0) {
-    trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
-                  " $argc given", E_USER_WARNING);
-    return null;
-  }
-  return false;
-}
-
-function get_magic_quotes_runtime(): ?bool {
-  if (($argc = func_num_args()) != 0) {
-    trigger_error(__FUNCTION__ . "() expects exactly 0 parameters," .
-                  " $argc given", E_USER_WARNING);
-    return null;
-  }
-  return false;
 }
 
 <<__Native>>
@@ -167,27 +125,31 @@ function getmyuid(): mixed;
  */
 <<__Native>>
 function getopt(string $options,
-                mixed $longopts = null): array;
+                mixed $longopts = null): darray;
 
 /* This is an interface to getrusage(2). It gets data returned from the system
  * call.
  */
 <<__Native>>
-function getrusage(int $who = 0): array;
+function getrusage(int $who = 0): darray;
 
 /* Gets resolution of system clock. "man 3 clock_getres" for more details.
  */
 <<__Native>>
 function clock_getres(int $clk_id,
-                      mixed &$sec,
-                      mixed &$nsec): bool;
+                      <<__OutOnly('KindOfInt64')>>
+                      inout mixed $sec,
+                      <<__OutOnly('KindOfInt64')>>
+                      inout mixed $nsec): bool;
 
 /* Gets time of a system clock. "man 3 clock_gettime" for more details.
  */
 <<__Native>>
 function clock_gettime(int $clk_id,
-                       mixed &$sec,
-                       mixed &$nsec): bool;
+                       <<__OutOnly('KindOfInt64')>>
+                       inout mixed $sec,
+                       <<__OutOnly('KindOfInt64')>>
+                       inout mixed $nsec): bool;
 
 /* Same as clock_gettime(), but returns a single integer in nanoseconds.
  * Returns -1 if invalid or non-supported clock is specified.
@@ -214,7 +176,7 @@ function ini_get(string $varname): mixed;
  */
 <<__Native>>
 function ini_get_all(string $extension = "",
-                     bool $details = true): array;
+                     bool $details = true): darray;
 
 /* Restores a given configuration option to its original value.
  */
@@ -357,28 +319,6 @@ function phpversion(string $extension = ""): mixed;
 <<__Native>>
 function putenv(string $setting): bool;
 
-/* Set the current active configuration setting of magic_quotes_runtime.
- * Warning: This function has been DEPRECATED as of PHP 5.3.0. Relying on this
- * feature is highly discouraged.
- */
-function set_magic_quotes_runtime(mixed $new_setting): bool {
-  trigger_error("Function set_magic_quotes_runtime() is deprecated",
-                E_USER_DEPRECATED);
-
-  if ($new_setting) {
-    trigger_error(__FUNCTION__ . "() is not supported anymore", E_USER_ERROR);
-  }
-
-  return false;
-}
-
-/*
- * Alias of set_magic_quotes_runtime()
- */
-function magic_quotes_runtime(mixed $new_setting): bool {
-  return set_magic_quotes_runtime($new_setting);
-}
-
 /* Set the number of seconds a script is allowed to run. If this is reached,
  * the script returns a fatal error. The default limit is 30 seconds or, if it
  * exists, the max_execution_time value defined in the php.ini.  When called,
@@ -389,6 +329,13 @@ function magic_quotes_runtime(mixed $new_setting): bool {
  */
 <<__Native>>
 function set_time_limit(int $seconds): void;
+
+/* Set the number of seconds into the request to invoke a callback.
+ * The callback is invoked only once unless another call to this function is
+ * made. This can help debugging scripts that take a long time to run.
+ */
+<<__Native>>
+function set_pre_timeout_handler(int $seconds, mixed $callback): void;
 
 /* Returns the path of the directory PHP stores temporary files in by default.
  */
@@ -407,16 +354,12 @@ function sys_get_temp_dir(): string;
  * only versions with different levels like '4.1' and '4.1.2' can be compared
  * but also any PHP specific version containing development state.
  */
-<<__IsFoldable, __Native>>
+<<__IsFoldable, __Pure, __Native>>
 function version_compare(string $version1,
                          string $version2,
                          string $sop = ""): mixed;
 
-/* Returns a string containing the version of the currently running Zend
- * Engine.
- */
-<<__Native>>
-function zend_version(): string;
+} // root namespace
 
 namespace __SystemLib {
 
@@ -430,15 +373,15 @@ namespace __SystemLib {
       $this->body = $this->element('body');
     }
 
-    private function is_cli() { return php_sapi_name() == 'cli'; }
+    private function is_cli() { return \php_sapi_name() == 'cli'; }
 
-    private function appendChildren(\DOMElement $el, ?array $children) {
+    private function appendChildren(\DOMElement $el, ?varray $children) {
       if ($children) {
         foreach ($children as $v) {
           if ($v === null) {
-          } else if ($v instanceof \DOMElement) {
+          } else if ($v is \DOMElement) {
             $el->appendChild($v);
-          } else if (is_array($v)) {
+          } else if (\HH\is_any_array($v)) {
             $this->appendChildren($el, $v);
           } else {
             $el->appendChild($this->xml->createTextNode($v));
@@ -447,7 +390,7 @@ namespace __SystemLib {
       }
     }
 
-    private function element(string $tag, ?array $attr = null, ...$children) {
+    private function element(string $tag, ?darray $attr = null, ...$children) {
       $el = $this->xml->createElement($tag);
       if ($attr) {
         foreach ($attr as $k => $v) {
@@ -461,28 +404,28 @@ namespace __SystemLib {
     private function tr(string $l, mixed $d) {
       return
         $this->element(
-          'tr', [],
-          $this->element('td', ['class' => 'l'], $l),
-          $this->element('td', ['class' => 'r'], $d));
+          'tr', darray[],
+          $this->element('td', darray['class' => 'l'], $l),
+          $this->element('td', darray['class' => 'r'], $d));
     }
 
-    private function table(string $title, array $data) {
+    private function table(string $title, darray $data) {
       if ($this->is_cli()) {
         echo $title . "\n";
         echo "\n";
         foreach ($data as $k => $v) {
-          echo $k . " => " . print_r($v, true) . "\n";
+          echo $k . " => " . \print_r($v, true) . "\n";
         }
         echo "\n";
       } else {
-        $children = [];
+        $children = darray[];
         foreach ($data as $k => $v) {
-          array_push($children, $this->tr($k, print_r($v, true)));
+          \array_push(inout $children, $this->tr($k, \print_r($v, true)));
         }
-        return [
+        return varray[
           $this->element('hr'),
-          $this->element('h2', [], $title),
-          $this->element('table', [], $children)
+          $this->element('h2', darray[], $title),
+          $this->element('table', darray[], $children)
         ];
       }
     }
@@ -498,53 +441,52 @@ namespace __SystemLib {
 
       $html->appendChild(
         $this->element(
-          'head', [],
-          $this->element('title', [], "HHVM phpinfo"),
-          $this->element('style', ['type' => 'text/css'], $style)));
+          'head', darray[],
+          $this->element('title', darray[], "HHVM phpinfo"),
+          $this->element('style', darray['type' => 'text/css'], $style)));
     }
 
     private function reportVersionTitle() {
       if ($this->is_cli()) {
-        echo 'HHVM Version => ' . HHVM_VERSION . "\n";
+        echo 'HHVM Version => ' . \HHVM_VERSION . "\n";
       } else {
         $this->body->appendChild(
-          $this->element('h1', [], 'HHVM Version ' . HHVM_VERSION));
+          $this->element('h1', darray[], 'HHVM Version ' . \HHVM_VERSION));
       }
     }
 
     private function reportVersions() {
       if (!$this->is_cli()) {
-        $this->body->appendChild($this->element('h2', [], 'Version'));
+        $this->body->appendChild($this->element('h2', darray[], 'Version'));
       }
 
-      $data = array(
-        'Version' => HHVM_VERSION,
-        'Version ID' => HHVM_VERSION_ID,
-        'Debug' => HHVM_DEBUG,
-        'Compiler ID' => HHVM_COMPILER_ID,
-        'Repo Schema' => HHVM_REPO_SCHEMA,
-        'PHP Version' => phpversion(),
-        'Zend Version' => zend_version(),
-        'uname' => php_uname());
+      $data = darray[
+        'Version' => \HHVM_VERSION,
+        'Version ID' => \HHVM_VERSION_ID,
+        'Debug' => \HHVM_DEBUG,
+        'Compiler ID' => \HHVM_COMPILER_ID,
+        'Repo Schema' => \HHVM_REPO_SCHEMA,
+        'PHP Version' => \phpversion(),
+        'uname' => \php_uname()];
 
       $this->appendChildren($this->body, $this->table('Version', $data));
     }
 
     private function reportIni() {
       $this->appendChildren($this->body,
-                            $this->table('INI', ini_get_all('', false)));
+                            $this->table('INI', \ini_get_all('', false)));
     }
 
     private function reportHeaders() {
-      if (!function_exists('getallheaders')) return;
+      if (!\function_exists('getallheaders')) return;
       $this->appendChildren($this->body,
-                            $this->table('Headers', getallheaders()));
+                            $this->table('Headers', \getallheaders()));
     }
 
-    private function reportMap(string $name, array $map) {
-      $data = [];
+    private function reportMap(string $name, darray $map) {
+      $data = darray[];
       foreach ($map as $k => $v) {
-        $data[sprintf("%s['%s']", $name, $k)] = $v;
+        $data[\sprintf("%s['%s']", $name, $k)] = $v;
       }
       $this->appendChildren($this->body, $this->table($name, $data));
     }
@@ -574,7 +516,7 @@ namespace __SystemLib {
       if (!$this->is_cli()) {
         $this->body->appendChild($this->element('br'));
         $this->xml->appendChild($html);
-        header('content-type: text/html; charset=UTF-8');
+        \header('content-type: text/html; charset=UTF-8');
         echo $this->xml->saveHTML();
       }
     }

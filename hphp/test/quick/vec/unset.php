@@ -1,9 +1,6 @@
-<?php
+<?hh
 
 class Dtor {
-  function __destruct() {
-    echo "Dtor::__destruct\n";
-  }
 }
 
 function do_unset($v, $k) {
@@ -15,7 +12,7 @@ function do_unset($v, $k) {
   return $v;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $v1 = vec[1, 2, 3];
   var_dump($v1);
   $v1 = do_unset($v1, 2);
@@ -42,5 +39,3 @@ function main() {
   $v4 = do_unset($v4, 2);
   var_dump($v4);
 }
-
-main();

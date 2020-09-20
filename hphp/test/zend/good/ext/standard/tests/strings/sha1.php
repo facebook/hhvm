@@ -1,13 +1,13 @@
-<?php
-
-$filename = dirname(__FILE__)."/sha1.dat";
-$a = array(
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('sha1.dat');
+$a = varray[
 	"abc",
 	"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
 	"a",
 	"0123456701234567012345670123456701234567012345670123456701234567",
 	""
-);
+];
 
 foreach ($a as $str) {
 	var_dump($val1 = sha1($str));
@@ -24,4 +24,4 @@ var_dump(sha1_file($filename, true));
 sha1_file($filename);
 
 echo "Done\n";
-?>
+}

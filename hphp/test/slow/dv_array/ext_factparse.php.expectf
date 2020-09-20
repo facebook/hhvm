@@ -1,0 +1,666 @@
+darray(3) {
+  ["%s"]=>
+  darray(7) {
+    ["constants"]=>
+    varray(5) {
+      string(3) "CO0"
+      string(3) "CO1"
+      string(3) "CO2"
+      string(3) "CO3"
+      string(3) "CO4"
+    }
+    ["functions"]=>
+    varray(2) {
+      string(2) "f1"
+      string(24) "entrypoint_ext_factparse"
+    }
+    ["md5sum0"]=>
+    int(-4510344253095386689)
+    ["md5sum1"]=>
+    int(4671823585930114530)
+    ["sha1sum"]=>
+    string(40) "48307baf242787fe019b472b133d1f70df6f0c83"
+    ["typeAliases"]=>
+    varray(3) {
+      string(3) "TA0"
+      string(3) "TA1"
+      string(3) "TA2"
+    }
+    ["types"]=>
+    varray(13) {
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(5) {
+          string(3) "CL0"
+          string(2) "I0"
+          string(2) "I1"
+          string(3) "TR0"
+          string(3) "TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL2"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(1) {
+          string(14) "HH\BuiltinEnum"
+        }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(2) "E0"
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(2) {
+          string(2) "I0"
+          string(2) "I1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(2) "I2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(3) "CL1"
+        }
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA2"
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(4) {
+          string(2) "I0"
+          string(2) "I1"
+          string(3) "TR0"
+          string(3) "TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(3) "TR2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(3) "CL1"
+        }
+        ["requireImplements"]=>
+        varray(1) {
+          string(2) "I2"
+        }
+      }
+    }
+  }
+  ["%s"]=>
+  darray(7) {
+    ["constants"]=>
+    varray(5) {
+      string(6) "NS\CO0"
+      string(6) "NS\CO1"
+      string(6) "NS\CO2"
+      string(6) "NS\CO3"
+      string(6) "NS\CO4"
+    }
+    ["functions"]=>
+    varray(2) {
+      string(5) "NS\f1"
+      string(27) "NS\entrypoint_ext_factparse"
+    }
+    ["md5sum0"]=>
+    int(5272147912580324223)
+    ["md5sum1"]=>
+    int(6281803590603473432)
+    ["sha1sum"]=>
+    string(40) "30dddb20b49e3538bad21b7f428b0b0dc9531350"
+    ["typeAliases"]=>
+    varray(3) {
+      string(6) "NS\TA0"
+      string(6) "NS\TA1"
+      string(6) "NS\TA2"
+    }
+    ["types"]=>
+    varray(13) {
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(5) {
+          string(6) "NS\CL0"
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+          string(6) "NS\TR0"
+          string(6) "NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL2"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(1) {
+          string(14) "HH\BuiltinEnum"
+        }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(5) "NS\E0"
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(2) {
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(6) "NS\CL1"
+        }
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA2"
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(4) {
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+          string(6) "NS\TR0"
+          string(6) "NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(6) "NS\TR2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(6) "NS\CL1"
+        }
+        ["requireImplements"]=>
+        varray(1) {
+          string(5) "NS\I2"
+        }
+      }
+    }
+  }
+  ["%s"]=>
+  darray(7) {
+    ["constants"]=>
+    varray(5) {
+      string(9) "NS\NS\CO0"
+      string(9) "NS\NS\CO1"
+      string(9) "NS\NS\CO2"
+      string(9) "NS\NS\CO3"
+      string(9) "NS\NS\CO4"
+    }
+    ["functions"]=>
+    varray(2) {
+      string(8) "NS\NS\f1"
+      string(30) "NS\NS\entrypoint_ext_factparse"
+    }
+    ["md5sum0"]=>
+    int(5359441402941816566)
+    ["md5sum1"]=>
+    int(-7829954738973599347)
+    ["sha1sum"]=>
+    string(40) "e3a5ada74c73c48e2b7c6d8ae31dd8acf7fce996"
+    ["typeAliases"]=>
+    varray(3) {
+      string(9) "NS\NS\TA0"
+      string(9) "NS\NS\TA1"
+      string(9) "NS\NS\TA2"
+    }
+    ["types"]=>
+    varray(13) {
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(5) {
+          string(9) "NS\NS\CL0"
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+          string(9) "NS\NS\TR0"
+          string(9) "NS\NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL2"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(1) {
+          string(14) "HH\BuiltinEnum"
+        }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(8) "NS\NS\E0"
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(2) {
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(9) "NS\NS\CL1"
+        }
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA2"
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(4) {
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+          string(9) "NS\NS\TR0"
+          string(9) "NS\NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(9) "NS\NS\CL1"
+        }
+        ["requireImplements"]=>
+        varray(1) {
+          string(8) "NS\NS\I2"
+        }
+      }
+    }
+  }
+}
+PASSED md5sum
+darray(3) {
+  ["%s"]=>
+  NULL
+  ["garbage_filename"]=>
+  NULL
+  ["/tmp"]=>
+  NULL
+}
+PASSED erroneous files test
+PASSED path mangling test
+PASSED multi-threaded test
+PASSED version get test
+string(61) "HH\facts_parse() expects parameter 2 to be varray, null given"
+string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"
+string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"

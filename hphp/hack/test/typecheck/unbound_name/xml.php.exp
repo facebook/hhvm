@@ -1,0 +1,6 @@
+File "xml.php", line 11, characters 11-23:
+Unbound name: `:notfound:post` (an object type) (Naming[2049])
+File "xml.php", line 14, characters 11-11:
+Unbound name: `:T` (an object type) (Naming[2049])
+File "xml.php", line 17, characters 11-15:
+Unbound name: `:alias` (an object type) (Naming[2049])

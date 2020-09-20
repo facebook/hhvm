@@ -14,7 +14,7 @@ namespace Test {
 
   function foo() {
     $custom_map = new Map();
-    var_dump($custom_map instanceof \HH\Map); // False
+    \var_dump($custom_map is \HH\Map); // False
   }
 
 }
@@ -23,10 +23,11 @@ namespace {
 
   function bar() {
     $builtin_map = new Map();
-    var_dump($builtin_map instanceof HH\Map); // True
+    \var_dump($builtin_map is HH\Map); // True
   }
 
+  <<__EntryPoint>> function main(): void {
   Test\foo();
   bar();
+  }
 }
-

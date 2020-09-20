@@ -38,8 +38,8 @@ namespace HPHP {
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class *cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
-      s_class = Unit::lookupClass(s_className.get());                          \
-      assert(s_class);                                                         \
+      s_class = Class::lookup(s_className.get());                          \
+      assertx(s_class);                                                        \
     }                                                                          \
     return s_class;                                                            \
   }                                                                            \
@@ -53,7 +53,7 @@ struct php_sqlite3_agg_context {
 };
 
 static Variant get_column_value(sqlite3_stmt *stmt, int column) {
-  assert(stmt);
+  assertx(stmt);
   Variant data;
   switch (sqlite3_column_type(stmt, column)) {
   case SQLITE_INTEGER:
@@ -101,12 +101,12 @@ static void sqlite3_do_callback(sqlite3_context *context,
                                 int argc,
                                 sqlite3_value **argv,
                                 bool is_agg) {
-  Array params = Array::Create();
+  Array params = Array::CreateVArray();
   php_sqlite3_agg_context *agg_context = nullptr;
   if (is_agg) {
     agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context
       (context, sizeof(php_sqlite3_agg_context));
-    params.appendRef(agg_context->context);
+    params.append(agg_context->context);
     params.append(agg_context->row_count);
   }
   for (int i = 0; i < argc; i++) {
@@ -177,7 +177,7 @@ SQLite3::SQLite3() : m_raw_db(nullptr) {
 
 SQLite3::~SQLite3() {
   if (m_raw_db) {
-    sqlite3_close(m_raw_db);
+    sqlite3_close_v2(m_raw_db);
   }
 }
 
@@ -247,7 +247,7 @@ bool HHVM_METHOD(SQLite3, busytimeout,
 bool HHVM_METHOD(SQLite3, close) {
   auto *data = Native::data<SQLite3>(this_);
   if (data->m_raw_db) {
-    int errcode = sqlite3_close(data->m_raw_db);
+    int errcode = sqlite3_close_v2(data->m_raw_db);
     if (errcode != SQLITE_OK) {
       raise_warning("Unable to close database: %d, %s", errcode,
                     sqlite3_errmsg(data->m_raw_db));
@@ -279,7 +279,7 @@ const StaticString
   s_versionNumber("versionNumber");
 
 Array HHVM_STATIC_METHOD(SQLite3, version) {
-  return make_map_array(
+  return make_darray(
     s_versionString, String((char*)sqlite3_libversion(), CopyString),
     s_versionNumber, (int64_t)sqlite3_libversion_number()
   );
@@ -374,7 +374,7 @@ Variant HHVM_METHOD(SQLite3, query,
     Variant stmt = HHVM_MN(SQLite3, prepare)(this_, sql);
     if (!same(stmt, false)) {
       Object obj_stmt = stmt.toObject();
-      assert(obj_stmt.instanceof(SQLite3Stmt::getClass()));
+      assertx(obj_stmt.instanceof(SQLite3Stmt::getClass()));
       return HHVM_MN(SQLite3Stmt, execute)(obj_stmt.get());
     }
   }
@@ -391,13 +391,13 @@ Variant HHVM_METHOD(SQLite3, querysingle,
     Variant stmt = HHVM_MN(SQLite3, prepare)(this_, sql);
     if (!same(stmt, false)) {
       Object obj_stmt = stmt.toObject();
-      assert(obj_stmt.instanceof(SQLite3Stmt::getClass()));
+      assertx(obj_stmt.instanceof(SQLite3Stmt::getClass()));
       sqlite3_stmt *pstmt =
         Native::data<SQLite3Stmt>(obj_stmt)->m_raw_stmt;
       switch (sqlite3_step(pstmt)) {
       case SQLITE_ROW: /* Valid Row */
         if (entire_row) {
-          Array ret = Array::Create();
+          Array ret = Array::CreateDArray();
           for (int i = 0; i < sqlite3_data_count(pstmt); i++) {
             ret.set(String((char*)sqlite3_column_name(pstmt, i), CopyString),
                     get_column_value(pstmt, i));
@@ -509,7 +509,7 @@ void HHVM_METHOD(SQLite3Stmt, __construct,
                  const String& statement) {
   auto *data = Native::data<SQLite3Stmt>(this_);
   if (!statement.empty()) {
-    assert(dbobject.instanceof(SQLite3::getClass()));
+    assertx(dbobject.instanceof(SQLite3::getClass()));
     const SQLite3 *db = Native::data<SQLite3>(dbobject);
     db->validate();
     data->m_db = dbobject;
@@ -568,14 +568,14 @@ bool HHVM_METHOD(SQLite3Stmt, clear) {
   return true;
 }
 
-bool HHVM_METHOD(SQLite3Stmt, bindparam,
+bool HHVM_METHOD(SQLite3Stmt, bindvalue,
                  const Variant& name,
-                 VRefParam parameter,
+                 const Variant& parameter,
                  int64_t type /* = SQLITE3_TEXT */) {
   auto *data = Native::data<SQLite3Stmt>(this_);
   auto param = req::make_shared<SQLite3Stmt::BoundParam>();
   param->type = type;
-  param->value.setWithRef(parameter);
+  param->value = parameter;
 
   if (name.isString()) {
     String sname = name.toString();
@@ -593,14 +593,6 @@ bool HHVM_METHOD(SQLite3Stmt, bindparam,
 
   data->m_bound_params.push_back(param);
   return true;
-}
-
-bool HHVM_METHOD(SQLite3Stmt, bindvalue,
-                 const Variant& name,
-                 const Variant& parameter,
-                 int64_t type /* = SQLITE3_TEXT */) {
-  Variant v = parameter;
-  return HHVM_MN(SQLite3Stmt, bindparam)(this_, name, v, type);
 }
 
 Variant HHVM_METHOD(SQLite3Stmt, execute) {
@@ -713,6 +705,9 @@ int64_t HHVM_METHOD(SQLite3Result, columntype,
                     int64_t column) {
   auto *data = Native::data<SQLite3Result>(this_);
   data->validate();
+  if (!sqlite3_data_count(data->m_stmt->m_raw_stmt)) {
+    return false;
+  }
   return sqlite3_column_type(data->m_stmt->m_raw_stmt, column);
 }
 
@@ -725,7 +720,7 @@ Variant HHVM_METHOD(SQLite3Result, fetcharray,
   switch (sqlite3_step(data->m_stmt->m_raw_stmt)) {
   case SQLITE_ROW:
     if (mode & PHP_SQLITE3_BOTH) {
-      Array ret = Array::Create();
+      Array ret = Array::CreateDArray();
       for (int i = 0; i < sqlite3_data_count(data->m_stmt->m_raw_stmt); i++) {
         Variant value = get_column_value(data->m_stmt->m_raw_stmt, i);
         if (mode & PHP_SQLITE3_NUM) {
@@ -805,7 +800,6 @@ static struct SQLite3Extension final : Extension {
     HHVM_ME(SQLite3Stmt, close);
     HHVM_ME(SQLite3Stmt, reset);
     HHVM_ME(SQLite3Stmt, clear);
-    HHVM_ME(SQLite3Stmt, bindparam);
     HHVM_ME(SQLite3Stmt, bindvalue);
     HHVM_ME(SQLite3Stmt, execute);
     Native::registerNativeDataInfo<SQLite3Stmt>(SQLite3Stmt::s_className.get(),

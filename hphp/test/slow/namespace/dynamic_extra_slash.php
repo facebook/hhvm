@@ -1,13 +1,12 @@
-<?php
+<?hh
 
 namespace A {
-  class B {}
+  <<__DynamicallyConstructible>> class B {}
 }
 
 namespace C {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     $name = '\\\\A\B';
-    var_dump(new $name);
+    \var_dump(new $name);
   }
-  main();
 }

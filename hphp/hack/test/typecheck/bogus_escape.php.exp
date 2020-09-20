@@ -1,2 +1,2 @@
-File "bogus_escape.php", line 4, characters 9-17:
-invalid numeric escape (Parsing[1002])
+File "bogus_escape.php", line 4, characters 8-18:
+Malformed string literal <<\u{1000 k>> (Parsing[1002])

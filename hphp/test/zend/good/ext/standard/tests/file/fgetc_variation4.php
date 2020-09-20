@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: string fgetc ( resource $handle );
  Description: Gets character from file pointer
@@ -6,15 +6,15 @@
 
 /* read from fie using fgetc, file opened using different
    read read modes */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 
-$file_modes = array( "a+", "a+b", "a+t", 
+$file_modes = varray[ "a+", "a+b", "a+t", 
                      "x+", "x+b", "x+t", 
-                     "w+", "w+b", "w+t" );
+                     "w+", "w+b", "w+t" ];
 
-$filename = dirname(__FILE__)."/fgetc_variation4.tmp";
+$filename = __SystemLib\hphp_test_tmppath('fgetc_variation4.tmp');
 foreach ($file_modes as $file_mode ) {
   echo "-- File opened in mode : $file_mode --\n";
 
@@ -46,4 +46,4 @@ foreach ($file_modes as $file_mode ) {
 }
 
 echo "Done\n";
-?>
+}

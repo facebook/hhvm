@@ -123,7 +123,7 @@ static THREAD_LOCAL(XboxRequestHandler, s_xbox_request_handler);
 struct XboxWorker
   : JobQueueWorker<XboxTransport*,Server*,true,false,JobQueueDropVMStack>
 {
-  virtual void doJob(XboxTransport *job) {
+  void doJob(XboxTransport *job) override {
     try {
       // If this job or the previous job that ran on this thread have
       // a custom initial document, make sure we do a reset
@@ -156,7 +156,7 @@ private:
     }
   }
 
-  virtual void onThreadExit() {
+  void onThreadExit() override {
     if (!s_xbox_request_handler.isNull()) {
       s_xbox_request_handler.destroy();
     }
@@ -176,6 +176,7 @@ void XboxServer::Restart() {
       Lock l(s_dispatchMutex);
       s_dispatcher = new JobQueueDispatcher<XboxWorker>
         (RuntimeOption::XboxServerThreadCount,
+         RuntimeOption::XboxServerThreadCount,
          RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
          RuntimeOption::ServerThreadDropStack,
          nullptr);
@@ -188,13 +189,14 @@ void XboxServer::Restart() {
 }
 
 void XboxServer::Stop() {
-  if (s_dispatcher) {
-    s_dispatcher->stop();
+  if (!s_dispatcher) return;
 
-    Lock l(s_dispatchMutex);
-    delete s_dispatcher;
-    s_dispatcher = nullptr;
-  }
+  Lock l(s_dispatchMutex);
+  if (!s_dispatcher) return;
+
+  s_dispatcher->stop();
+  delete s_dispatcher;
+  s_dispatcher = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,6 +216,11 @@ bool XboxServer::SendMessage(const String& message,
                              Array& ret,
                              int timeout_ms,
                              const String& host /* = "localhost" */) {
+  // Make sure that we only ever return a darray or null.
+  if (!ret.isNull() && !ret.isDArray()) {
+    ret = Array::CreateDArray();
+  }
+
   if (isLocalHost(host)) {
     XboxTransport *job;
     {
@@ -225,7 +232,7 @@ bool XboxServer::SendMessage(const String& message,
       job = new XboxTransport(message.toCppString());
       job->incRefCount(); // paired with worker's decRefCount()
       job->incRefCount(); // paired with decRefCount() at below
-      assert(s_dispatcher);
+      assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
     }
 
@@ -238,6 +245,7 @@ bool XboxServer::SendMessage(const String& message,
     job->decRefCount(); // i'm done with this job
 
     if (code > 0) {
+      ret = Array::CreateDArray();
       ret.set(s_code, code);
       if (code == 200) {
         ret.set(
@@ -276,6 +284,7 @@ bool XboxServer::SendMessage(const String& message,
         int len = 0;
         char *response = http->recv(len);
         String sresponse(response, len, AttachString);
+        ret = Array::CreateDArray();
         ret.set(s_code, code);
         if (code == 200) {
           ret.set(
@@ -291,6 +300,7 @@ bool XboxServer::SendMessage(const String& message,
         return true;
       }
       // code wasn't correctly set by http client, treat it as not found
+      ret = Array::CreateDArray();
       ret.set(s_code, 404);
       ret.set(s_error, "http client failed");
     }
@@ -309,7 +319,7 @@ bool XboxServer::PostMessage(const String& message,
 
     XboxTransport *job = new XboxTransport(message.toCppString());
     job->incRefCount(); // paired with worker's decRefCount()
-    assert(s_dispatcher);
+    assertx(s_dispatcher);
     s_dispatcher->enqueue(job);
     return true;
 
@@ -357,7 +367,10 @@ struct XboxTask : SweepableResourceData {
     m_job->incRefCount();
   }
 
-  ~XboxTask() {
+  XboxTask(const XboxTask&) = delete;
+  XboxTask& operator=(const XboxTask&) = delete;
+
+  ~XboxTask() override {
     m_job->decRefCount();
   }
 
@@ -368,7 +381,7 @@ struct XboxTask : SweepableResourceData {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
 private:
-  XboxTransport *m_job;
+  XboxTransport *m_job{nullptr};
 };
 IMPLEMENT_RESOURCE_ALLOCATION(XboxTask)
 
@@ -398,7 +411,7 @@ Resource XboxServer::TaskStart(const String& msg,
         event->setJob(job);
       }
 
-      assert(s_dispatcher);
+      assertx(s_dispatcher);
       s_dispatcher->enqueue(job);
 
       return Resource(std::move(task));
@@ -428,7 +441,7 @@ void XboxServer::TaskStartFromNonRequest(
         XboxTransport *job = new XboxTransport(msg, reqInitDoc);
         job->incRefCount(); // paired with worker's decRefCount()
 
-        assert(s_dispatcher);
+        assertx(s_dispatcher);
         s_dispatcher->enqueue(job);
         return;
       }

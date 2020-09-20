@@ -1,0 +1,36 @@
+(library
+  (name process_types)
+  (wrapped false)
+  (modules
+    process_types)
+  (preprocess (pps ppx_deriving.std))
+  (libraries
+    core_kernel
+    utils_core
+    sys_utils))
+
+(library
+  (name process)
+  (wrapped false)
+  (modules
+    process)
+  (preprocess (pps ppx_deriving.std))
+  (libraries
+    exec_command
+    process_types
+    utils_core
+    utils_ocaml_overrides
+    stack_utils
+    sys_utils))
+
+(library
+  (name future)
+  (wrapped false)
+  (modules
+    future
+    future_sig)
+  (preprocess (pps ppx_deriving.std))
+  (libraries
+    process
+    process_types
+    promise))

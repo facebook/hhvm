@@ -1,0 +1,4 @@
+File "xhp_xhp_name.php", line 8, characters 13-13:
+An XHP name or category name is expected here. (Parsing[1002])
+File "xhp_xhp_name.php", line 16, characters 16-16:
+Encountered unexpected text `:`, was expecting a class element. (Parsing[1002])

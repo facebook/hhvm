@@ -3,13 +3,13 @@
 async function foo() {
   // Hide a bool in APC so static analysis can't see it.
   apc_store('mybool2', true);
-  return apc_fetch('mybool2');
+  return __hhvm_intrinsics\apc_fetch_no_check('mybool2');
 }
 
 function returningFalse() {
   // Hide a bool in APC so static analysis can't see it.
   apc_store('mybool', false);
-  return apc_fetch('mybool');
+  return __hhvm_intrinsics\apc_fetch_no_check('mybool');
 }
 
 class :x:frag {}
@@ -72,5 +72,9 @@ async function go() {
   await $x->genThings();
   await $x->genThings();
 }
+
+<<__EntryPoint>>
+function main_async_await_002() {
 $y = go();
 HH\Asio\join($y);
+}

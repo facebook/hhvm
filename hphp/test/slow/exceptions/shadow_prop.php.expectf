@@ -1,0 +1,4 @@
+Warning: Type-hint of 'MyException::file' must be string (as in class Exception), not mixed in %s/test/slow/exceptions/shadow_prop.php on line 11
+
+Warning: Type-hint of 'MyException::line' must be int (as in class Exception), not mixed in %s/test/slow/exceptions/shadow_prop.php on line 11
+DONE

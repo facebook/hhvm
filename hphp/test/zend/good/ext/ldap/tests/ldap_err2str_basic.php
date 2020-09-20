@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(ldap_err2str(2));
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : int strripos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of last occurrence of a case-insensitive 'needle' in a 'haystack'
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strripos() function: basic functionality ***\n";
 $heredoc_str = <<<EOD
 Hello, World
@@ -25,5 +25,5 @@ var_dump( strripos($heredoc_str, "Hello, WoRLd") );
 var_dump( strripos($heredoc_str, 'HelLO') );
 var_dump( strripos($heredoc_str, $heredoc_str) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

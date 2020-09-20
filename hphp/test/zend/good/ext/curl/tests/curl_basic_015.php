@@ -1,6 +1,7 @@
-<?php
-  $url = 'http://www.example.com/'; 
+<?hh
+<<__EntryPoint>> function main(): void {
+  $url = 'http://www.example.com/';
   $ch  = curl_init($url);
   var_dump($url == curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
-?>
-===DONE===
+  echo "===DONE===\n";
+}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HASH_TABLE_H_
-#define incl_HPHP_HASH_TABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/hash-table-x64.h"
 #include "hphp/runtime/base/string-data.h"
@@ -33,6 +32,7 @@
   static_assert(ElmType::keyOff() == ElmType ## _KEY, ""); \
   static_assert(ElmType::hashOff() == ElmType ## _HASH, ""); \
   static_assert(ElmType::dataOff() == ElmType ## _DATA, ""); \
+  static_assert(ElmType::typeOff() == ElmType ## _TYPE, ""); \
   static_assert(sizeof(ElmType) == ElmType ## _QUADWORDS * 8, "");
 
 #else
@@ -111,6 +111,14 @@ struct HashTableCommon {
     int32_t* ei;
   };
 
+  struct RemovePos {
+    bool valid() const {
+      return validPos(elmIdx);
+    }
+    size_t probeIdx{0};
+    int32_t elmIdx{Empty};
+  };
+
   static ALWAYS_INLINE
   bool isValidIns(Inserter e) {
     return e.isValid();
@@ -118,7 +126,7 @@ struct HashTableCommon {
 
   static ALWAYS_INLINE
   bool isValidPos(Inserter e) {
-    assert(isValidIns(e));
+    assertx(isValidIns(e));
     return (int32_t)(*e) >= 0;
   }
 protected:
@@ -200,11 +208,20 @@ struct HashTable : HashTableCommon {
   }
 
   static ALWAYS_INLINE
-  ArrayType* staticAlloc(uint32_t scale) {
-    auto const allocBytes = computeAllocBytes(scale);
-    return static_cast<ArrayType*>(RuntimeOption::EvalLowStaticArrays ?
-                                   low_malloc_data(allocBytes) :
-                                   malloc(allocBytes));
+  ArrayType* staticAlloc(uint32_t scale, size_t extra = 0) {
+    extra = (extra + 15) & ~15ull;
+    auto const size = computeAllocBytes(scale) + extra;
+    auto const mem = RuntimeOption::EvalLowStaticArrays
+      ? lower_malloc(size)
+      : uncounted_malloc(size);
+    return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
+  }
+
+  static ALWAYS_INLINE
+  ArrayType* uncountedAlloc(uint32_t scale, size_t extra = 0) {
+    auto const size = computeAllocBytes(scale) + extra;
+    auto const mem = uncounted_malloc(size);
+    return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
   }
 
   static ALWAYS_INLINE
@@ -229,17 +246,14 @@ struct HashTable : HashTableCommon {
   // Non variant interface
   /////////////////////////////////////////////////////////////////////////////
 
-  static member_rval::ptr_u NvGetInt(const ArrayData* ad, int64_t k);
-  static member_rval::ptr_u NvGetStr(const ArrayData* ad, const StringData* k);
+  static TypedValue NvGetInt(const ArrayData* ad, int64_t k);
+  static TypedValue NvGetStr(const ArrayData* ad, const StringData* k);
 
-  static member_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return member_rval { ad, NvGetInt(ad, k) };
-  }
-  static member_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return member_rval { ad, NvGetStr(ad, k) };
-  }
+  static ssize_t NvGetIntPos(const ArrayData* ad, int64_t k);
+  static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* k);
 
-  static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
+  // Return the key at the given element, without any refcount ops.
+  static TypedValue GetPosKey(const ArrayData* ad, ssize_t pos);
 
   /////////////////////////////////////////////////////////////////////////////
   // findForNewInsertImpl
@@ -283,8 +297,8 @@ struct HashTable : HashTableCommon {
   /////////////////////////////////////////////////////////////////////////////
 protected:
   ALWAYS_INLINE Elm* allocElm(Inserter ei) {
-    assert(!isValidPos(ei) && !isFull());
-    assert(array()->m_size <= m_used);
+    assertx(!isValidPos(ei) && !isFull());
+    assertx(array()->m_size <= m_used);
     ++(array()->m_size);
     size_t i = m_used;
     (*ei) = i;
@@ -302,14 +316,14 @@ protected:
   static void InitSmallHash(ArrayType* a);
 
   static ALWAYS_INLINE bool hitIntKey(const Elm& e, int64_t ki) {
-    assert(!e.isInvalid());
+    assertx(!e.isInvalid());
     return e.intKey() == ki && e.hasIntKey();
   }
 
   static ALWAYS_INLINE bool hitStrKey(const Elm& e,
                                       const StringData* ks,
                                       hash_t h) {
-    assert(!e.isInvalid());
+    assertx(!e.isInvalid());
     /*
      * We do not have to check e.hasStrKey() because it is
      * implicitely done by the check on the hash.
@@ -327,8 +341,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -338,8 +351,7 @@ public:
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -349,19 +361,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
-      );
-  }
-
-  ALWAYS_INLINE
-  bool findForExists(const StringData* ks, hash_t h0) const {
-    return findImpl<FindType::Exists>(
-        h0,
-        [ks, h0](const Elm& e) {
-          return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -371,8 +371,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -382,8 +381,7 @@ public:
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -393,8 +391,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -404,78 +401,53 @@ public:
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
   ALWAYS_INLINE
-  int32_t findForRemove(int64_t ki, hash_t h0) const {
+  auto findForRemove(int64_t ki, hash_t h0) const {
     return findImpl<FindType::Remove>(
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
   ALWAYS_INLINE
-  int32_t findForRemove(const StringData* ks, hash_t h0) const {
+  auto findForRemove(const StringData* ks, hash_t h0) const {
     return findImpl<FindType::Remove>(
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
-      );
-  }
-
-  template <typename Remove> ALWAYS_INLINE
-  int32_t findForRemove(int64_t ki, hash_t h0, Remove remove) const {
-    return findImpl<FindType::Remove>(
-        h0,
-        [ki](const Elm& e) {
-          return hitIntKey(e, ki);
-        },
-        remove
-      );
-  }
-
-  template <typename Remove> ALWAYS_INLINE
-  int32_t findForRemove(const StringData* ks, hash_t h0, Remove remove) const {
-    return findImpl<FindType::Remove>(
-        h0,
-        [ks, h0](const Elm& e) {
-          return hitStrKey(e, ks, h0);
-        },
-        remove
-      );
+        }
+    );
   }
 
   template <typename Hit> ALWAYS_INLINE
-  typename std::enable_if<!std::is_integral<Hit>::value
-                          && !std::is_pointer<Hit>::value, int32_t>::type
-  findForRemove(hash_t h0, Hit hit) const {
-    return findImpl<FindType::Remove>(
-        h0,
-        hit,
-        [](Elm&){}
-      );
+  auto findForRemove(
+      typename std::enable_if<!std::is_integral<Hit>::value &&
+                              !std::is_pointer<Hit>::value, hash_t>::type h0,
+      Hit hit) const {
+    return findImpl<FindType::Remove>(h0, hit);
   }
 
 protected:
-  template <FindType type, typename Hit, typename Remove>
+  template <FindType type, typename Hit>
   typename std::conditional<
-    type == HashTableCommon::FindType::Lookup ||
-    type == HashTableCommon::FindType::Remove,
+    type == HashTableCommon::FindType::Lookup,
     int32_t,
     typename std::conditional<
-      type == HashTableCommon::FindType::Exists,
-      bool,
-      typename HashTableCommon::Inserter
+      type == HashTableCommon::FindType::Remove,
+      typename HashTableCommon::RemovePos,
+      typename std::conditional<
+        type == HashTableCommon::FindType::Exists,
+        bool,
+        typename HashTableCommon::Inserter
+      >::type
     >::type
-  >::type findImpl(hash_t h0, Hit hit, Remove remove) const;
+  >::type findImpl(hash_t h0, Hit hit) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration helpers.
@@ -496,16 +468,16 @@ protected:
 private:
   static ALWAYS_INLINE
   ArrayType* asArrayType(ArrayData* ad) {
-    assert(ad->hasMixedLayout() || ad->isKeyset());
+    assertx(ad->hasVanillaMixedLayout() || ad->isKeysetKind());
     auto a = static_cast<ArrayType*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
   static ALWAYS_INLINE
   const ArrayType* asArrayType(const ArrayData* ad) {
-    assert(ad->hasMixedLayout() || ad->isKeyset());
+    assertx(ad->hasVanillaMixedLayout() || ad->isKeysetKind());
     auto a = static_cast<const ArrayType*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
 
@@ -522,4 +494,3 @@ private:
 
 #include "hphp/runtime/base/hash-table-inl.h"
 
-#endif  // incl_HPHP_HASH_TABLE_H_

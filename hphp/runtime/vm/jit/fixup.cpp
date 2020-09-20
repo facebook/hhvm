@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -28,13 +29,16 @@
 
 namespace HPHP {
 
-bool isVMFrame(const ActRec* ar) {
-  assert(ar);
+bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
+  assertx(ar);
   // Determine whether the frame pointer is outside the native stack, cleverly
   // using a single unsigned comparison to do both halves of the bounds check.
-  bool ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
-  assert(!ret || isValidVMStackAddress(ar) ||
-         (ar->m_func->validate(), ar->resumed()));
+  auto const ret = uintptr_t(ar) - s_stackLimit >= s_stackSize;
+  assertx(
+    !ret ||
+    may_be_non_runtime ||
+    (ar->func()->validate(), true)
+  );
   return ret;
 }
 
@@ -61,6 +65,7 @@ struct VMRegs {
   PC pc;
   TypedValue* sp;
   const ActRec* fp;
+  TCA retAddr;
 };
 
 struct IndirectFixup {
@@ -89,24 +94,31 @@ union FixupEntry {
   IndirectFixup indirect;
 };
 
-TreadHashMap<uint32_t,FixupEntry,std::hash<uint32_t>> s_fixups{kInitCapac};
+struct FixupHash {
+  size_t operator()(uint32_t k) const {
+    return hash_int64(k);
+  }
+};
+
+TreadHashMap<uint32_t,FixupEntry,FixupHash> s_fixups{kInitCapac};
 
 PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
   assertx(f);
-  return f->getEntry() + fixup.pcOffset;
+  return f->entry() + fixup.pcOffset;
 }
 
-void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
+void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     VMRegs* outRegs) {
-  const Func* f = ar->m_func;
+  const Func* f = ar->func();
   assertx(f);
   TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
         (void*)tca, fixup.pcOffset, fixup.spOffset);
   assertx(fixup.spOffset >= 0);
   outRegs->pc = pc(ar, f, fixup);
   outRegs->fp = ar;
+  outRegs->retAddr = tca;
 
-  if (UNLIKELY(ar->resumed())) {
+  if (UNLIKELY(isResumed(ar))) {
     TypedValue* stackBase = Stack::resumableStackBase(ar);
     outRegs->sp = stackBase - fixup.spOffset;
   } else {
@@ -117,7 +129,7 @@ void regsFromActRec(CTCA tca, const ActRec* ar, const Fixup& fixup,
 //////////////////////////////////////////////////////////////////////
 
 bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
-  CTCA tca = (CTCA)ar->m_savedRip;
+  TCA tca = (TCA)ar->m_savedRip;
 
   auto ent = s_fixups.find(tc::addrToOffset(tca));
   if (!ent) return false;
@@ -127,10 +139,10 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   if (ent->isIndirect()) {
     auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
                         ent->indirect.returnIpDisp;
-    ent = s_fixups.find(
-      tc::addrToOffset(*reinterpret_cast<CTCA*>(savedRIPAddr))
-    );
-    assertx(ent && !ent->isIndirect());
+    tca = *reinterpret_cast<TCA*>(savedRIPAddr);
+    ent = s_fixups.find(tc::addrToOffset(tca));
+    assertx(ent && "Missing fixup for indirect fixup");
+    assertx(!ent->isIndirect() && "Invalid doubly indirect fixup");
   }
 
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
@@ -165,7 +177,7 @@ const Fixup* findFixup(CTCA tca) {
 
 size_t size() { return s_fixups.size(); }
 
-void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
+bool fixupWork(ActRec* nextRbp, bool soft) {
   assertx(RuntimeOption::EvalJit);
 
   TRACE(1, "fixup(begin):\n");
@@ -173,25 +185,33 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
   while (true) {
     auto const rbp = nextRbp;
     nextRbp = rbp->m_sfp;
+
+    if (UNLIKELY(soft) && (!nextRbp || nextRbp == rbp)) return false;
     assertx(nextRbp && nextRbp != rbp && "Missing fixup for native call");
+
     TRACE(2, "considering frame %p, %p\n", rbp, (void*)rbp->m_savedRip);
 
-    if (isVMFrame(nextRbp)) {
+    if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
-               nextRbp->m_func->name()->data());
+            nextRbp->func()->name()->data());
       VMRegs regs;
       if (getFrameRegs(rbp, &regs)) {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
-              regs.fp->m_func->name()->data(),
+              regs.fp->func()->name()->data(),
               regs.fp, regs.sp, regs.pc);
         auto& vmRegs = vmRegsUnsafe();
         vmRegs.fp = const_cast<ActRec*>(regs.fp);
         vmRegs.pc = reinterpret_cast<PC>(regs.pc);
         vmRegs.stack.top() = regs.sp;
-        return;
+        vmRegs.jitReturnAddr = regs.retAddr;
+        return true;
+      } else {
+        if (LIKELY(soft)) return false;
+        always_assert(false && "Fixup expected for leafmost VM frame");
       }
     }
   }
+  return false;
 }
 
 /* This is somewhat hacky. It decides which helpers/builtins should
@@ -199,12 +219,8 @@ void fixupWork(ExecutionContext* /*ec*/, ActRec* nextRbp) {
  * vmreganchor for all helper calls is a perf regression. */
 bool eagerRecord(const Func* func) {
   const char* list[] = {
-    "func_get_args",
-    "get_called_class",
-    "func_num_args",
     "array_filter",
     "array_map",
-    "__SystemLib\\func_slice_args",
     "thrift_protocol_read_binary",
     "thrift_protocol_read_binary_struct",
     "thrift_protocol_read_compact",
@@ -213,7 +229,7 @@ bool eagerRecord(const Func* func) {
   };
 
   for (auto str : list) {
-    if (!strcmp(func->displayName()->data(), str)) return true;
+    if (!strcmp(func->name()->data(), str)) return true;
   }
 
   return false;
@@ -223,23 +239,18 @@ bool eagerRecord(const Func* func) {
 }
 
 namespace detail {
-void syncVMRegsWork() {
+void syncVMRegsWork(bool soft) {
   assertx(tl_regState != VMRegState::CLEAN);
 
   // Start looking for fixup entries at the current (C++) frame.  This
   // will walk the frames upward until we find a TC frame.
-
-  // In order to avoid tail call elimination optimization issues, grab the
-  // parent frame pointer in order make sure this pointer is valid. The
-  // fixupWork() looks for a TC frame, and we never call fixup() directly
-  // from the TC, so skipping this frame isn't a problem.
   DECLARE_FRAME_POINTER(framePtr);
   auto fp = tl_regState >= VMRegState::GUARDED_THRESHOLD ?
-    (ActRec*)tl_regState : framePtr->m_sfp;
+    (ActRec*)tl_regState : framePtr;
 
-  FixupMap::fixupWork(g_context.getNoCheck(), fp);
+  auto const synced = FixupMap::fixupWork(fp, soft);
 
-  tl_regState = VMRegState::CLEAN;
+  if (synced) tl_regState = VMRegState::CLEAN;
   Stats::inc(Stats::TC_Sync);
 }
 }

@@ -1,24 +1,27 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_024_ispixelsimilar() {
 $root3 = 1.732050807568877;
 
-$tests = array(
-  array ('rgb(245, 0, 0)',     'rgb(255, 0, 0)',        9 / $root3, false,),
-  array ('rgb(245, 0, 0)',     'rgb(255, 0, 0)',       10 / $root3, true,),
-  array ('rgb(0, 0, 0)',       'rgb(7, 7, 0)',          9 / $root3, false,),
-  array ('rgb(0, 0, 0)',       'rgb(7, 7, 0)',         10 / $root3, true,),
-  array ('rgba(0, 0, 0, 1)',   'rgba(7, 7, 0, 1)',      9 / $root3, false,),
-  array ('rgba(0, 0, 0, 1)',   'rgba(7, 7, 0, 1)',     10 / $root3, true,),
-  array ('rgb(128, 128, 128)', 'rgb(128, 128, 120)',    7 / $root3, false,),
-  array ('rgb(128, 128, 128)', 'rgb(128, 128, 120)',    8 / $root3, true,),
+$tests = varray[
+  varray ['rgb(245, 0, 0)',     'rgb(255, 0, 0)',        9 / $root3, false,],
+  varray ['rgb(245, 0, 0)',     'rgb(255, 0, 0)',       10 / $root3, true,],
+  varray ['rgb(0, 0, 0)',       'rgb(7, 7, 0)',          9 / $root3, false,],
+  varray ['rgb(0, 0, 0)',       'rgb(7, 7, 0)',         10 / $root3, true,],
+  varray ['rgba(0, 0, 0, 1)',   'rgba(7, 7, 0, 1)',      9 / $root3, false,],
+  varray ['rgba(0, 0, 0, 1)',   'rgba(7, 7, 0, 1)',     10 / $root3, true,],
+  varray ['rgb(128, 128, 128)', 'rgb(128, 128, 120)',    7 / $root3, false,],
+  varray ['rgb(128, 128, 128)', 'rgb(128, 128, 120)',    8 / $root3, true,],
 
-  array ('rgb(0, 0, 0)',       'rgb(255, 255, 255)',  254.9,        false,),
-  array ('rgb(0, 0, 0)',       'rgb(255, 255, 255)',    255,        true,),
-  array ('rgb(255, 0, 0)',     'rgb(0, 255, 255)',    254.9,        false,),
-  array ('rgb(255, 0, 0)',     'rgb(0, 255, 255)',      255,        true,),
-  array ('black',              'rgba(0, 0, 0)',         0.0,        true),
-  array ('black',              'rgba(10, 0, 0, 1.0)',  10.0 / $root3, true),
-);
+  varray ['rgb(0, 0, 0)',       'rgb(255, 255, 255)',  254.9,        false,],
+  varray ['rgb(0, 0, 0)',       'rgb(255, 255, 255)',    255,        true,],
+  varray ['rgb(255, 0, 0)',     'rgb(0, 255, 255)',    254.9,        false,],
+  varray ['rgb(255, 0, 0)',     'rgb(0, 255, 255)',      255,        true,],
+  varray ['black',              'rgba(0, 0, 0)',         0.0,        true],
+  varray ['black',              'rgba(10, 0, 0, 1.0)',  10.0 / $root3, true],
+];
 
 try {
   foreach ($tests as $testInfo) {
@@ -42,4 +45,5 @@ try {
 } catch (\Exception $e) {
   echo "Exception caught in ImagickPixel::isPixelSimilar test: ".
     $e->getMessage().PHP_EOL;
+}
 }

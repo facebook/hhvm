@@ -1,2 +1,3 @@
-<?php
-password_hash('foo', PASSWORD_BCRYPT, ["cost" => 3]);
+<?hh <<__EntryPoint>> function main(): void {
+password_hash('foo', PASSWORD_BCRYPT, darray["cost" => 3]);
+}

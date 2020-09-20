@@ -17,7 +17,7 @@
 #define _incl_HPHP_RUNTIME_VM_NATIVE_PROP_HANDLER_H
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP { namespace Native {
 //////////////////////////////////////////////////////////////////////////////
@@ -30,10 +30,10 @@ struct NativePropHandler {
   typedef Variant (*IssetFunc)(const Object& obj, const String& name);
   typedef Variant (*UnsetFunc)(const Object& obj, const String& name);
 
-  GetFunc get;      // native magic prop get (analogue of user's `__get`)
-  SetFunc set;      // native magic set (user's `__set`)
-  IssetFunc isset;  // native magic isset (user's `__isset`)
-  UnsetFunc unset;  // native magic unset (user's `__unset`)
+  GetFunc get;      // native magic prop get
+  SetFunc set;      // native magic set
+  IssetFunc isset;  // native magic isset
+  UnsetFunc unset;  // native magic unset
 };
 
 // Sigil value to use in property resolution in case
@@ -265,10 +265,6 @@ Variant getProp(const Object& obj, const String& name);
 Variant setProp(const Object& obj, const String& name, const Variant& value);
 Variant issetProp(const Object& obj, const String& name);
 Variant unsetProp(const Object& obj, const String& name);
-
-inline bool isPropHandled(Variant& propResult) {
-  return propResult.isInitialized();
-}
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

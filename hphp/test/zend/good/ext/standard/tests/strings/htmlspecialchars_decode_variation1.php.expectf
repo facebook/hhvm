@@ -1,66 +1,78 @@
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iterator 1 --
-string(1) "0"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 2 --
-string(1) "1"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 3 --
-string(5) "12345"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 4 --
-string(5) "-2345"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 5 --
-string(4) "10.5"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 6 --
-string(5) "-10.5"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 7 --
-string(12) "101234567000"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 8 --
-string(13) "1.07654321E-9"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 9 --
-string(3) "0.5"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 10 --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 11 --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 12 --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 13 --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 14 --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 15 --
-string(0) ""
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 16 --
-string(0) ""
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 17 --
-string(1) "1"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 18 --
-string(0) ""
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 19 --
-string(1) "1"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 20 --
-string(0) ""
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 21 --
 string(0) ""
 -- Iterator 22 --
 string(0) ""
 -- Iterator 23 --
-string(12) "ClassAObject"
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 24 --
-string(0) ""
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 25 --
-string(0) ""
+
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 26 --
 
-Warning: %s
-NULL
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 ===DONE===

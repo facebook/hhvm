@@ -1,5 +1,5 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 $agent = sprintf("%.5s", "James Bond, 007");
 
 echo("sprintf string truncate test:   ");
@@ -48,5 +48,4 @@ echo sprintf("%e\n", 1.234E-18);
 echo sprintf("%e\n", 1.234E+18);
 echo sprintf("%e\n", 9843243.12);
 echo sprintf("%e\n", -9843243.12);
-
-?>
+}

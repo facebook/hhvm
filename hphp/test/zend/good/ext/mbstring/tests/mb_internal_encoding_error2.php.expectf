@@ -1,5 +1,5 @@
 *** Testing mb_internal_encoding() : error conditions ***
 
-Warning: %s
+Warning: Unknown encoding "unknown-encoding" in %s/mb_internal_encoding_error2.php on line 14
 bool(false)
 Done

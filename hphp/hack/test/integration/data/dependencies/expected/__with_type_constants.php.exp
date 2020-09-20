@@ -1,0 +1,15 @@
+<?hh
+abstract class WithAbstractConst {
+  const type NESTED = \WithConst;
+}
+class WithConst {
+  const type WITH_THIS = this::WITH_CONSTRAINT;
+  const type WITH_CONSTRAINT = \A0;
+  const type TYPECONST as num = int;
+}
+function with_type_constants(
+  WithAbstractConst::NESTED::WITH_THIS $arg,
+): WithConst::TYPECONST {
+  return 1;
+}
+class A0 {}

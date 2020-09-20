@@ -1,5 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!function_exists('crypt') || !defined("CRYPT_BLOWFISH")) {
     die("SKIP crypt()-blowfish is not available");
 }
-?>
+}

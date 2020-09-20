@@ -1,0 +1,8 @@
+File "asyncgen9.php", line 4, characters 16-20:
+`await` can only be used inside `async` functions (NastCheck[3003])
+File "asyncgen9.php", line 4, characters 12-14:
+Invalid `foreach` (Typing[4110])
+File "asyncgen9.php", line 4, characters 12-14:
+Expected `AsyncIterator<[unresolved]>` because this is used in a `foreach` statement with `await as`
+File "asyncgen9.php", line 8, characters 15-28:
+But got `Awaitable<int>`

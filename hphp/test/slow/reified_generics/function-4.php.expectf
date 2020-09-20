@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to c() must be an instance of C<(function (int): void)>, C<(function(int,mixed...):void)> given in %s on line %d

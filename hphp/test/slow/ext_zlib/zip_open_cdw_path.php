@@ -1,7 +1,4 @@
-<?php
-
-$archive = "ziparchive_extractto.php.zip";
-$full_path = __DIR__.'/'.$archive;
+<?hh
 
 function run($filename) {
   $zip = zip_open($filename);
@@ -12,6 +9,12 @@ function run($filename) {
   var_dump($res);
 }
 
+
+<<__EntryPoint>>
+function main_zip_open_cdw_path() {
+$archive = "ziparchive_extractto.php.zip";
+$full_path = __DIR__.'/'.$archive;
+
 $initial_cwd = getcwd();
 
 // Relative from CWD path.
@@ -21,3 +24,4 @@ run($archive);
 // Absolute path.
 chdir($initial_cwd);
 run($full_path);
+}

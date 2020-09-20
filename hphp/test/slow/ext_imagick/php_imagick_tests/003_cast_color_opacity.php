@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 print "--- Testing casts\n";
 
 try {
@@ -21,5 +21,4 @@ try {
   echo "Setting color and opacity without cast failed: ",
     $e->getMessage() . PHP_EOL;
 }
-
-?>
+}

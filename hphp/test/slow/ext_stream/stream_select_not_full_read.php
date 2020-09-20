@@ -1,20 +1,25 @@
-<?php
+<?hh
 
-$descriptorspec = array(
-  array("pipe", "r"),
-  array("pipe", "w"),
-  array("pipe", "a"),
-);
-$process = proc_open('cat', $descriptorspec, $io);
+
+<<__EntryPoint>>
+function main_stream_select_not_full_read() {
+$descriptorspec = varray[
+  varray["pipe", "r"],
+  varray["pipe", "w"],
+  varray["pipe", "a"],
+];
+$io = null;
+$process = proc_open('cat', darray($descriptorspec), inout $io);
 fwrite($io[0], "a\nb\nc\n");
 
 // Just to have another thing in the $r array that has no data
-$process2 = proc_open('cat', $descriptorspec, $io2);
+$io2 = null;
+$process2 = proc_open('cat', darray($descriptorspec), inout $io2);
 
 while (!feof($io[1])) {
-  $r = array($io[1], $io2[1]);
+  $r = varray[$io[1], $io2[1]];
   $w = $e = null;
-  $i = stream_select($r, $w, $e, 1);
+  $i = stream_select(inout $r, inout $w, inout $e, 1);
   var_dump($i);
   if ($i) {
     foreach ($r as $resource) {
@@ -23,4 +28,5 @@ while (!feof($io[1])) {
   } else {
     break;
   }
+}
 }

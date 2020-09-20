@@ -1,7 +1,10 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1571() {
 $str = '';
-$arr1 = array('a', 'b');
+$arr1 = varray['a', 'b'];
 $arr2 = $arr1;
 foreach ($arr1 as $v1) {
   $str .= $v1;
@@ -13,3 +16,4 @@ foreach ($arr1 as $v1) {
   }
 }
 var_dump($str);
+}

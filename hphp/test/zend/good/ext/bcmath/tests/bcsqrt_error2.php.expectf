@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: bcsqrt() expects at least 1 parameter, 0 given in %s/bcsqrt_error2.php on line 2

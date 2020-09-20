@@ -1,13 +1,8 @@
-File "trait_matching1.php", line 23, characters 7-7:
-Class C does not correctly implement all required methods  (Typing[4110])
-File "trait_matching1.php", line 24, characters 7-13:
-Some methods are incompatible with those declared in type MyTrait
-Read the following to see why:
-File "trait_matching1.php", line 25, characters 13-18:
-Member x has the wrong type
-File "trait_matching1.php", line 25, characters 13-18:
+File "trait_matching1.php", line 25, characters 20-21:
+The property `x` has the wrong type (Typing[4341])
+File "trait_matching1.php", line 25, characters 20-21:
 Typing error
 File "trait_matching1.php", line 13, characters 14-16:
-This is an int
+Expected `int`
 File "trait_matching1.php", line 25, characters 13-18:
-It is incompatible with a string
+But got `string`

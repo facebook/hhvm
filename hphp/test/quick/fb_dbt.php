@@ -1,6 +1,6 @@
 <?hh
 
-$_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
+
 
 function h() {
     var_dump(fb_debug_backtrace());
@@ -10,6 +10,10 @@ class C {
   static function f() {
     h();
   }
+}
+
+abstract final class FbDebugBacktraceStatics {
+  public static $real = null;
 }
 
 /**
@@ -23,23 +27,22 @@ class C {
  * @author epriestley
  */
 function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
-  static $real = null;
 
-  if ($real === null) {
-    $real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
+  if (FbDebugBacktraceStatics::$real === null) {
+    FbDebugBacktraceStatics::$real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
   }
 
   if (!$bt) {  // fb_handle_error defaults to array() in PHP5
     $bt = debug_backtrace();
     // Remove fb_debug_backtrace from the backtrace
-    array_shift($bt);
+    array_shift(inout $bt);
   }
 
   // Remove all lib/core functions at the top of the stack
   if ($skip_top_libcore === true) {
     while (isset($bt[0]['file']) &&
-           substr(realpath($bt[0]['file']), $real, 9) === 'lib/core/') {
-      array_shift($bt);
+           substr(realpath($bt[0]['file']), FbDebugBacktraceStatics::$real, 9) === 'lib/core/') {
+      array_shift(inout $bt);
     }
   }
 
@@ -50,7 +53,7 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
   $last_line = 1;
   for ($k = count($bt) - 1; $k >= 0; $k--) {
     if (isset($bt[$k]['file'])) {
-      $real_file = substr(realpath($bt[$k]['file']), $real);
+      $real_file = substr(realpath($bt[$k]['file']), FbDebugBacktraceStatics::$real);
       $last_file = $real_file;
       $last_line = $bt[$k]['line'];
     } else {
@@ -81,5 +84,8 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
 function g() {
   C::f();
 }
-g();
 
+<<__EntryPoint>> function main(): void {
+$_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
+g();
+}

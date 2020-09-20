@@ -13,8 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_STATE_H_
-#define incl_HPHP_JIT_IRGEN_STATE_H_
+
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -24,26 +24,22 @@
 #include <functional>
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/inline-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
+#include "hphp/runtime/vm/jit/irgen-iter-spec.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
 
 struct NormalizedInstruction;
 struct SSATmp;
+struct TranslateRetryContext;
 
 namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
-
-struct ReturnTarget {
-  /*
-   * Block that will contain the InlineReturn and serve as a branch target for
-   * returning to the caller.
-   */
-  Block* target;
-};
 
 /*
  * IR-Generation State.
@@ -56,7 +52,9 @@ struct ReturnTarget {
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(IRUnit& unit, const RegionDesc* region);
+  explicit IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
+                TranslateRetryContext* retryContext,
+                bool prologueSetup = false);
 
   TransContext context;
   TransFlags transFlags;
@@ -66,33 +64,20 @@ struct IRGS {
 
   /*
    * Tracks information about the current bytecode offset and which function we
-   * are in. We push and pop as we deal with inlined calls.
+   * are in.
    */
-  std::vector<SrcKey> bcStateStack;
+  SrcKey bcState;
 
   /*
-   * The current inlining level.  0 means we're not inlining.
+   * Tracks information about the state of inlining.
    */
-  uint16_t inlineLevel{0};
+  InlineState inlineState;
 
   /*
-   * Return-to-caller block targets for inlined functions.  The last target is
-   * for the current inlining frame.
+   * The ids of the profiling translations for the code we're currently
+   * generating (may be empty).
    */
-  std::vector<ReturnTarget> inlineReturnTarget;
-
-  /*
-   * The id of the profiling translation for the code we're currently
-   * generating, if there was one, otherwise kInvalidTransID.
-   */
-  TransID profTransID{kInvalidTransID};
-
-  /*
-   * Some information is only passed through the nearly-dead
-   * NormalizedInstruction structure.  Don't add new uses since we're gradually
-   * removing this (the long, ugly name is deliberate).
-   */
-  const NormalizedInstruction* currentNormalizedInstruction{nullptr};
+  TransIDSet profTransIDs;
 
   /*
    * True if we're on the first HHBC instruction that will be executed
@@ -104,16 +89,33 @@ struct IRGS {
   bool firstBcInst{true};
 
   /*
-   * True if we're on the last HHBC instruction that will be emitted
-   * for this region.
+   * True if we are just forming a region. Used to pessimize return values of
+   * function calls that may have been inferred based on specialized type
+   * information that won't be available when the region is translated.
    */
-  bool lastBcInst{false};
+  bool formingRegion{false};
 
   /*
    * Profile-weight factor, to be multiplied by the region blocks'
    * profile-translation counters in PGO mode.
    */
   double profFactor{1};
+
+  /*
+   * The remaining bytecode instruction budget for this region translation.
+   */
+  int32_t budgetBCInstrs{0};
+
+  /*
+   * Context for translation retries.
+   */
+  TranslateRetryContext* retryContext;
+
+  /*
+   * Used to reuse blocks of code between specialized IterInits and IterNexts.
+   * See irgen-iter-spec for details.
+   */
+  jit::fast_map<Block*, std::unique_ptr<SpecializedIterator>> iters;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -126,5 +128,3 @@ std::string show(const IRGS&);
 //////////////////////////////////////////////////////////////////////
 
 }}}
-
-#endif

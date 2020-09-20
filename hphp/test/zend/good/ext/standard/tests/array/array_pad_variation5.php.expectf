@@ -1,49 +1,32 @@
 *** Testing array_pad() : Passing 2-d array to $pad_value argument ***
-array(5) {
-  [0]=>
+varray(5) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
-  array(3) {
-    [0]=>
-    array(1) {
-      [0]=>
+  varray(3) {
+    varray(1) {
       int(1)
     }
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(5) "hello"
-      [1]=>
       string(5) "world"
     }
-    [2]=>
-    array(2) {
+    darray(2) {
       ["one"]=>
       int(1)
       ["two"]=>
       int(2)
     }
   }
-  [4]=>
-  array(3) {
-    [0]=>
-    array(1) {
-      [0]=>
+  varray(3) {
+    varray(1) {
       int(1)
     }
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(5) "hello"
-      [1]=>
       string(5) "world"
     }
-    [2]=>
-    array(2) {
+    darray(2) {
       ["one"]=>
       int(1)
       ["two"]=>
@@ -51,56 +34,39 @@ array(5) {
     }
   }
 }
-array(5) {
-  [0]=>
-  array(3) {
-    [0]=>
-    array(1) {
-      [0]=>
+varray(5) {
+  varray(3) {
+    varray(1) {
       int(1)
     }
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(5) "hello"
-      [1]=>
       string(5) "world"
     }
-    [2]=>
-    array(2) {
+    darray(2) {
       ["one"]=>
       int(1)
       ["two"]=>
       int(2)
     }
   }
-  [1]=>
-  array(3) {
-    [0]=>
-    array(1) {
-      [0]=>
+  varray(3) {
+    varray(1) {
       int(1)
     }
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(5) "hello"
-      [1]=>
       string(5) "world"
     }
-    [2]=>
-    array(2) {
+    darray(2) {
       ["one"]=>
       int(1)
       ["two"]=>
       int(2)
     }
   }
-  [2]=>
   int(1)
-  [3]=>
   int(2)
-  [4]=>
   int(3)
 }
 Done

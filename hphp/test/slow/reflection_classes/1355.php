@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 abstract class c {
-  public static $arr = array();
+  public static $arr = varray[];
   function g() {
     $cl = new ReflectionClass(get_class($this));
     $p = $cl->getProperty('arr');
@@ -15,7 +15,11 @@ abstract class aa extends c {
   }
 }
 class a extends aa {
-  public static $arr = array('v');
+  public static $arr = varray['v'];
 }
+
+<<__EntryPoint>>
+function main_1355() {
 $x = new a;
 var_dump($x->g());
+}

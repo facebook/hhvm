@@ -2,11 +2,9 @@
 
 -- Testing exif_tagname() function with no arguments --
 
-Warning: %s
-NULL
+Warning: exif_tagname() expects exactly 1 parameter, 0 given in %s/exif_tagname_error.php on line 11
 
 -- Testing exif_tagname() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: exif_tagname() expects exactly 1 parameter, 2 given in %s/exif_tagname_error.php on line 15
 ===Done===

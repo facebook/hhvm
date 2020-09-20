@@ -1,0 +1,14 @@
+File "hint.php", line 11, characters 7-16:
+Expected a `trait` but got a type alias. (Naming[2052])
+File "hint.php", line 7, characters 6-15:
+Alias definition is here.
+File "hint.php", line 17, characters 18-28:
+Expected a `record` but got a type alias. (Naming[2052])
+File "hint.php", line 15, characters 6-16:
+Alias definition is here.
+File "hint.php", line 17, characters 18-28:
+Unbound name: `RecordAlias` (a record type) (Naming[2049])
+File "hint.php", line 7, characters 19-19:
+`T` is uninstantiable (Typing[4002])
+File "hint.php", line 6, characters 7-7:
+Declaration is here

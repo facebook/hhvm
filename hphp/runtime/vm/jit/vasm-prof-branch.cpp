@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/dataflow-worklist.h"
@@ -62,7 +63,7 @@ namespace {
 /*
  * Thread-local RDS branch-sampling counter.
  */
-rds::Link<uint32_t> s_counter{rds::kUninitHandle};
+rds::Link<uint32_t, rds::Mode::Local> s_counter;
 
 /*
  * Reset `s_counter'.
@@ -261,7 +262,10 @@ Vout vheader(Vunit& unit, Vlabel s, AreaIndex area_cap = AreaIndex::Main) {
  * Decrement the branch sampling counter, and return the resultant SF register.
  */
 Vreg check_counter(Vout& v) {
-  s_counter.bind(rds::Mode::Local);
+  s_counter.bind(
+    rds::Mode::Local,
+    rds::LinkID{"VasmProfBranchCounter"}
+  );
 
   auto const handle = s_counter.handle();
   auto const sf = v.makeReg();
@@ -292,7 +296,7 @@ struct Env {
    * we def'd a VregSF, branched, re-joined, and then used the VregSF after the
    * phi), so instead we just rename everything to RegSF{0}.
    */
-  std::unordered_set<unsigned> sf_renames;
+  jit::fast_set<unsigned> sf_renames;
 };
 
 /*
@@ -359,8 +363,8 @@ BranchID branch_id_for(Env& env, const jcci& from, Vlabel b) {
  *
  * `b' should be either the from-block or the to-block for `branch'.
  */
-void sample_branch(Vout& v, Env& env, const BranchID& branch,
-                   const Func* func, Vlabel b) {
+void sample_branch(Vout& v, Env& /*env*/, const BranchID& branch,
+                   const Func* func, Vlabel /*b*/) {
   auto const push_val = [&] (Vout& v, uint64_t val) {
     // This wacky nonsense is to try to force XLS to use the same register for
     // each immediate we want to push.
@@ -491,155 +495,7 @@ void profile(Env& env, jcci& inst, Vlabel b) {
   from = jcc{inst.cc, inst.sf, {inst.target, header}};
 }
 
-void profile(Env& env, phijcc& inst, Vlabel b) {
-  auto& unit = env.unit;
-
-  auto const fresh_tuple = [&] {
-    auto copy = unit.tuples[inst.uses];
-    for (auto& r : copy) r = unit.makeReg();
-    return unit.makeTuple(copy);
-  };
-
-  auto branch = branch_id_for(env, inst, b);
-  auto const taken = inst.targets[1];
-
-  for (auto& s : inst.targets) {
-    DEBUG_ONLY auto const& to = unit.blocks[s].code.front();
-    assertx(to.op == Vinstr::phidef);
-    assertx(unit.tuples[inst.uses].size() ==
-            unit.tuples[to.phidef_.defs].size());
-
-    auto const middlemen = fresh_tuple();
-
-    create_profiling_header(
-      env, branch.take(s == taken), s,
-      [&] (Vout& v, Vlabel) {
-        v << phidef{middlemen};
-      },
-      [&] (Vout& v, Vlabel header) {
-        v << phijmp{s, middlemen};
-        s = header;
-      }
-    );
-  };
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-
-const Abi sf_abi {
-  RegSet{}, RegSet{}, RegSet{}, RegSet{}, RegSet{},
-  RegSet{RegSF{0}}
-};
-
-/*
- * Determine whether any VregSF is live at the beginning of each block.
- */
-std::vector<Vreg> compute_sf_livein(const Vunit& unit,
-                                    const jit::vector<Vlabel>& rpo,
-                                    const PredVector& preds) {
-  auto livein = std::vector<Vreg>(unit.blocks.size());
-
-  auto workQ = dataflow_worklist<uint32_t>(unit.blocks.size());
-
-  auto const po_to_block = [&] {
-    auto blocks = rpo;
-    std::reverse(blocks.begin(), blocks.end());
-    return blocks;
-  }();
-  auto const block_to_po = [&] {
-    auto order = std::vector<uint32_t>(unit.blocks.size());
-
-    for (size_t po = 0; po < po_to_block.size(); ++po) {
-      workQ.push(po);
-      order[po_to_block[po]] = po;
-    }
-    return order;
-  }();
-
-  while (!workQ.empty()) {
-    auto const b = po_to_block[workQ.pop()];
-    auto const& block = unit.blocks[b];
-
-    auto live = Vreg{};
-    for (auto const s : succs(block)) {
-      auto const other = livein[s];
-      if (!other.isValid()) continue;
-
-      assertx(!live.isValid() || live == other);
-      live = other;
-    }
-
-    for (auto const& inst : boost::adaptors::reverse(block.code)) {
-      if (inst.op == Vinstr::phidef) {
-        // Skip phidef{}---if the def-tuple includes a VregSF, then it's
-        // actually live on the incoming edge.
-        continue;
-      }
-
-      RegSet implicit_uses, implicit_across, implicit_defs;
-      if (inst.op == Vinstr::vcall ||
-          inst.op == Vinstr::vinvoke ||
-          inst.op == Vinstr::vcallarray) {
-        // getEffects() would assert since these haven't been lowered yet.
-        implicit_defs |= RegSF{0};
-      } else {
-        getEffects(sf_abi, inst, implicit_uses, implicit_across, implicit_defs);
-        assertx(implicit_across.empty());
-      }
-
-      auto const visit_def = [&] (Vreg, Width w) {
-        if (w == Width::Flags) live = Vreg{};
-      };
-      auto const visit_use = [&] (Vreg r, Width w) {
-        if (w == Width::Flags) live = r;
-      };
-
-      // Determine liveness at `inst'.  We rely on the assumption that VregSF
-      // lifetimes can never overlap, which the checkSF() pass provides.
-      visitDefs(unit, inst, visit_def);
-      visit(unit, implicit_defs, visit_def);
-      visitUses(unit, inst, visit_use);
-      visit(unit, implicit_uses, visit_use);
-    }
-
-    if (live.isValid()) {
-      if (livein[b].isValid()) {
-        assertx(live == livein[b]);
-      } else {
-        livein[b] = live;
-        for (auto p : preds[b]) workQ.push(block_to_po[p]);
-      }
-    }
-  }
-
-  return livein;
-}
-
-/*
- * VregSF-renaming visitor.
- */
-struct FlagsVisitor {
-  explicit FlagsVisitor(Env& env) : m_env(env) {}
-
-  template<class F> void imm(const F&) {}
-  template<class R> void across(R&) {}
-  void across(VregSF&) = delete;
-
-  template<class R> void def(R&) {}
-  template<class R, class H> void defHint(R& r, H) { def(r); }
-  template<class R> void use(R&) {}
-  template<class R, class H> void useHint(R& r, H) { use(r); }
-
-  void use(VregSF& r) {
-    // Just rename everything to the physical flags register.  See the
-    // documentation for `sf_renames' for the justification.
-    if (m_env.sf_renames.count(r)) r = RegSF{0};
-  }
-  void def(VregSF& r) { use(r); }
-
- private:
-  Env& m_env;
-};
 
 }
 
@@ -671,14 +527,7 @@ void profile_branches(Vunit& unit) {
     }
   });
 
-  auto visitor = FlagsVisitor(env);
-
-  // Rename any VregSF's that had to be spilled.
-  for (auto& blk : unit.blocks) {
-    for (auto& inst : blk.code) {
-      visitOperands(inst, visitor);
-    }
-  }
+  rename_sf_regs(unit, env.sf_renames);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

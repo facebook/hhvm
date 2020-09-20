@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
-#define incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
+#pragma once
 
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -47,9 +47,7 @@ struct MInstrState {
   // it allows us to keep rds::Header below 128 bytes.
   TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
 
-  TypedValue tvRef;
-  TypedValue tvRef2;
-  TypedValue* base;
+  tv_lval base;
 
   // type-scan driven scanner
   TYPE_SCAN_IGNORE_FIELD(base);
@@ -57,4 +55,3 @@ struct MInstrState {
 
 }
 
-#endif

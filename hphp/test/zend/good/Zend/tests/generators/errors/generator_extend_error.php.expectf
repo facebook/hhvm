@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class ExtendedGenerator may not inherit from final class (Generator) in %s/generator_extend_error.php on line 3

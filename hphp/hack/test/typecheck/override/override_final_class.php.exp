@@ -1,0 +1,4 @@
+File "override_final_class.php", line 13, characters 7-7:
+You cannot extend final class `A` (Typing[4035])
+File "override_final_class.php", line 12, characters 13-13:
+Declaration is here

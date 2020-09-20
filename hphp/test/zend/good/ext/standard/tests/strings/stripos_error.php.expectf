@@ -1,14 +1,11 @@
 *** Testing stripos() function: error conditions ***
 
 -- With Zero arguments --
-Warning: %s
-NULL
+Warning: stripos() expects at least 2 parameters, 0 given in %s/stripos_error.php on line 9
 
 -- With less than expected number of arguments --
-Warning: %s
-NULL
+Warning: stripos() expects at least 2 parameters, 1 given in %s/stripos_error.php on line 12
 
 -- With more than expected number of arguments --
-Warning: %s
-NULL
+Warning: stripos() expects at most 3 parameters, 4 given in %s/stripos_error.php on line 15
 *** Done ***

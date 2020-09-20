@@ -1,0 +1,48 @@
+File "wildcard_funcall.php", line 10, characters 11-22:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 10, characters 7-7:
+This is a value of generic type T#1
+File "wildcard_funcall.php", line 10, characters 7-7:
+Considering that this type argument is invariant with respect to A
+File "wildcard_funcall.php", line 10, characters 17-19:
+It is incompatible with an int
+File "wildcard_funcall.php", line 11, characters 16-27:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 11, characters 7-12:
+This is a string
+File "wildcard_funcall.php", line 11, characters 7-12:
+Considering that this type argument is invariant with respect to A
+File "wildcard_funcall.php", line 11, characters 22-24:
+It is incompatible with an int
+File "wildcard_funcall.php", line 14, characters 11-25:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 14, characters 7-7:
+This is a value of generic type T#2
+File "wildcard_funcall.php", line 14, characters 7-7:
+Considering that this type argument is invariant with respect to A
+File "wildcard_funcall.php", line 14, characters 17-22:
+It is incompatible with an object of type A<int>
+File "wildcard_funcall.php", line 15, characters 14-28:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 15, characters 9-9:
+This is a value of generic type T#3
+File "wildcard_funcall.php", line 15, characters 22-24:
+It is incompatible with an int
+File "wildcard_funcall.php", line 16, characters 19-33:
+Invalid argument (Typing[4110])
+File "wildcard_funcall.php", line 16, characters 9-14:
+This is a string
+File "wildcard_funcall.php", line 16, characters 27-29:
+It is incompatible with an int
+File "wildcard_funcall.php", line 10, characters 7-7:
+_ is a wildcard, it cannot be used as a reified type argument (Typing[4305])
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified
+File "wildcard_funcall.php", line 14, characters 7-7:
+_ is a wildcard, it cannot be used as a reified type argument (Typing[4305])
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified
+File "wildcard_funcall.php", line 15, characters 9-9:
+_ is a wildcard, it cannot be used as a reified type argument (Typing[4305])
+File "wildcard_funcall.php", line 4, characters 15-15:
+T is reified

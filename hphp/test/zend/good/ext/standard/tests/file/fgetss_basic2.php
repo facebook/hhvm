@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
@@ -10,21 +10,21 @@
     x+, x+b, x+t
 */
 
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetss() : basic operations ***\n";
 
 /* string with html and php tags */
 $string_with_tags = <<<EOT
 <test>Testing fgetss() functions</test>
-<?php echo "this string is within php tag"; ?> {;}<{> this
+<?hh echo "this string is within php tag"; ?> {;}<{> this
 is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
-<html> html </html> <?php echo "php"; ?>
+<html> html </html> <?hh echo "php"; ?>
 EOT;
 
-$filename = dirname(__FILE__)."/fgetss_basic2.tmp"; 
+$filename = __SystemLib\hphp_test_tmppath('fgetss_basic2.tmp');
 
 /* try reading the file opened in different modes of reading */
-$file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");
+$file_modes = varray["w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t"];
 
 for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   echo "\n-- Testing fgetss() with file opened using $file_modes[$mode_counter] mode --\n";
@@ -64,4 +64,4 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 } // end of for - mode_counter
 
 echo "Done\n";
-?>
+}

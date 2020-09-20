@@ -2,15 +2,13 @@
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
 
-echo "Starting\n";
-
-// tests FPushFuncD
+// tests FCallFuncD
 function hello() {
   echo "hello";
   return 1;
 }
 
-// tests FPushFunc
+// tests FCallFunc
 function doCall($f) {
   echo "doCall(";
   if ($f()) {
@@ -51,9 +49,11 @@ class C {
     return 2;
   }
 }
-
+<<__EntryPoint>> function main(): void {
+echo "Starting\n";
 $c = new C;
 $val = $c->foo();
 echo $val;
 echo "\n";
 echo "Done\n";
+}

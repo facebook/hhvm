@@ -1,0 +1,27 @@
+//// strict_toplevel.php
+<?hh
+function with_mapped_namespace(): void {
+  PHP\ini_set('foo', 'bar');
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}
+/* HH_FIXME[4101] */
+type EXTRACT_STANDALONE_ANY = \EXTRACT_STANDALONE_ANY_;
+type EXTRACT_STANDALONE_ANY_<T> = T;
+
+//// partial_namespaces.php
+<?hh // partial
+namespace HH {
+  namespace Lib {
+    namespace PHP {
+      function ini_set(
+        string $varname,
+        $newvalue = \extract_standalone_make_default(),
+      ) {
+        throw new \Exception();
+      }
+    }
+  }
+}

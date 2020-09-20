@@ -1,16 +1,9 @@
 int(0)
 int(1)
-
-Warning: %s
-int(0)
+string(45) "test2() expects at least 1 parameter, 0 given"
 int(2)
 int(0)
-
-Warning: %s
-int(1)
+string(46) "test3() expects at least 2 parameters, 1 given"
 int(2)
 int(1)
-
-Warning: %s
-int(-1)
 Done

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot re-assign $this in %s/bug41117_1.php on line 3

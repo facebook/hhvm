@@ -65,14 +65,12 @@ function has_ref(
   $p61,
   $p62,
   $p63,
-  &$p_that_happens_to_be_by_reference,
+  inout $p_that_happens_to_be_by_reference,
 ) {
-  var_dump(func_get_args());
 }
 
+<<__EntryPoint>>
 function main() {
   $args = range(0, 64);
   has_ref(...$args);
 }
-
-main();

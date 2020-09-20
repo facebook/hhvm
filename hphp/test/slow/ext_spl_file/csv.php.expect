@@ -1,16 +1,10 @@
-array(3) {
-  [0]=>
+varray(3) {
   string(1) ";"
-  [1]=>
   string(1) """
-  [2]=>
   string(1) "\"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }

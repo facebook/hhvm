@@ -1,2 +1,2 @@
-<?php
+<?hh
 require_once(__DIR__.'/skipif.inc');

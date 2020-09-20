@@ -1,9 +1,8 @@
 
-Warning: %s
-NULL
+Warning: strncmp() expects exactly 3 parameters, 2 given in %s/004.php on line 3
 int(0)
 
-Warning: %s
+Warning: Length must be greater than or equal to 0 in %s/004.php on line 5
 bool(false)
 int(0)
 int(0)

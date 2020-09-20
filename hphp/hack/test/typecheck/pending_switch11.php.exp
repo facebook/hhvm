@@ -1,0 +1,2 @@
+File "pending_switch11.php", line 6, characters 12-13:
+Variable `$x` is undefined, or not always defined. (Naming[2050])

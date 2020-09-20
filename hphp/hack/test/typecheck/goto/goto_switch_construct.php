@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function gotoSwitchConstruct(int $x): void {
   switch ($x) {

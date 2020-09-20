@@ -1,25 +1,15 @@
-<?php
+<?hh
 
-class A {
- function fun() {
- return 'A';
- }
- }
-if (true) {
- class B {
+<<__EntryPoint>>
+function test() {
+  if (__hhvm_intrinsics\launder_value(true)) {
+    include '1480-1.inc';
+  } else {
+    include '1480-2.inc';
+  }
+
+  include '1480-classes.inc';
+
+  $c = new C();
+  $c->foo();
 }
-}
- else {
- class B {
-}
- }
-class C extends B {
-  public function foo() {
- $this->out(A::fun());
- }
-  public function out($arg) {
- var_dump($arg);
- }
-}
-$c = new C();
-$c->foo();

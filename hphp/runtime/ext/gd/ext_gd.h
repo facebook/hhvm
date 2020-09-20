@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_IMAGE_H_
-#define incl_HPHP_EXT_IMAGE_H_
+#pragma once
 
 
 #include "hphp/runtime/ext/extension.h"
@@ -37,23 +36,27 @@ struct gfxinfo {
 struct Image : SweepableResourceData {
   Image() : m_gdImage(nullptr) {}
   explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}
-  ~Image();
+  ~Image() { sweep(); }
   gdImagePtr get() { return m_gdImage;}
   void reset();
+  void sweep() { reset(); }
 
   CLASSNAME_IS("gd")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
   bool isInvalid() const override { return m_gdImage == nullptr; }
 
-  DECLARE_RESOURCE_ALLOCATION(Image)
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(Image)
+
+  req::ptr<Image> m_brush;
+  req::ptr<Image> m_tile;
 private:
   gdImagePtr m_gdImage;
 };
 
 Array HHVM_FUNCTION(gd_info);
 Variant HHVM_FUNCTION(getimagesize,
-  const String& filename, VRefParam imageinfo = uninit_null());
+  const String& filename, Array& imageinfo);
 Variant HHVM_FUNCTION(image_type_to_extension,
   int64_t imagetype, bool include_dot = true);
 String HHVM_FUNCTION(image_type_to_mime_type, int64_t imagetype);
@@ -190,8 +193,6 @@ bool HHVM_FUNCTION(imagegd, const Resource& image,
                             const String& filename = null_string);
 bool HHVM_FUNCTION(imagegif, const Resource& image,
                              const String& filename = null_string);
-Variant HHVM_FUNCTION(imageinterlace, int64_t argc, const Resource& image,
-  int64_t interlace = 0);
 bool HHVM_FUNCTION(imageistruecolor, const Resource& image);
 #ifdef HAVE_GD_JPG
 bool HHVM_FUNCTION(imagejpeg, const Resource& image,
@@ -262,11 +263,9 @@ Variant HHVM_FUNCTION(read_exif_data,
   bool arrays = false, bool thumbnail = false);
 Variant HHVM_FUNCTION(exif_tagname, int64_t index);
 Variant HHVM_FUNCTION(exif_thumbnail,
-  const String& filename, VRefParam width = uninit_null(),
-  VRefParam height = uninit_null(), VRefParam imagetype = uninit_null());
+  const String& filename, int64_t& width, int64_t& height, int64_t& imagetype);
 Variant HHVM_FUNCTION(imagepalettecopy,
   const Resource& dest, const Resource& src);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_IMAGE_H_

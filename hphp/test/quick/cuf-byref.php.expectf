@@ -1,44 +1,28 @@
-
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 6
-int(1)
-array(1) {
-  [0]=>
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
+varray(1) {
   int(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
-
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 8
-int(1)
-array(1) {
-  [0]=>
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
+varray(1) {
   int(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
-
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 10
-int(1)
-array(1) {
-  [0]=>
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
+varray(1) {
   int(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
-
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line 12
-int(1)
-array(1) {
-  [0]=>
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
+varray(1) {
   int(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }

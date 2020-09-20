@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class T {
  abstract function test();
@@ -8,6 +8,10 @@ abstract class T {
  var_dump('test');
  }
 }
- $obj = 1;
+
+ <<__EntryPoint>>
+function main_726() {
+$obj = 1;
  $obj = new R();
  $obj->test();
+}

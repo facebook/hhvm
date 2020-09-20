@@ -1,0 +1,10 @@
+(library
+  (name logging_stubs)
+  (wrapped false)
+  (modules
+    featureLogging
+    hackEventLogger
+    hackcEventLogger
+    hackfmtEventLogger
+    typingLogger)
+  (flags (:standard -w @a-27)))

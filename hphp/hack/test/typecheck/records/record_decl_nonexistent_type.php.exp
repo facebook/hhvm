@@ -1,0 +1,2 @@
+File "record_decl_nonexistent_type.php", line 4, characters 3-13:
+Unbound name: `NoSuchClass` (Naming[2049])

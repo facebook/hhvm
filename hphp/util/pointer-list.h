@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_POINTERLIST_H_
-#define incl_HPHP_POINTERLIST_H_
+#pragma once
 
 #include <stdlib.h>
 #include <cstring>
@@ -258,5 +257,4 @@ void PointerList<T>::pop() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif
 

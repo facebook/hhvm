@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function a() {
-  $input = array("php", 4.0, array("green", "red"));
+  $input = varray["php", 4.0, varray["green", "red"]];
   $result = array_reverse($input);
   var_dump($result);
   $result_keyed = array_reverse($input, true);
@@ -9,11 +9,15 @@ function a() {
 }
 
 function b() {
-  $input = array("php" => 4.0, 10 => 5.0, "blab" =>"b");
+  $input = darray["php" => 4.0, 10 => 5.0, "blab" =>"b"];
   $result = array_reverse($input);
   var_dump($result);
 }
 
+
+
+<<__EntryPoint>>
+function main_array_reverse() {
 a();
 b();
-
+}

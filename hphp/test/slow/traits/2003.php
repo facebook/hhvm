@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait Hello1 {
   public function sayNum() {
@@ -17,4 +17,8 @@ class MyClass {
   use Hello2 {
   }
 }
+
+<<__EntryPoint>>
+function main_2003() {
 var_dump(class_uses('MyClass'));
+}

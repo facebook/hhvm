@@ -11,3 +11,4 @@ interface B extends A {
 class C implements B {
   const FOO = 'DOH';
 }
+

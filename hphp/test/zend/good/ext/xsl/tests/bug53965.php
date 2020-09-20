@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $base = 'file://' . dirname(__FILE__) . DIRECTORY_SEPARATOR . '53965';
 
 $xml = new DOMDocument();
@@ -12,4 +12,4 @@ $proc = new XSLTProcessor;
 $proc->importStyleSheet($xsl);
 
 echo $proc->transformToXML($xml);
-?>
+}

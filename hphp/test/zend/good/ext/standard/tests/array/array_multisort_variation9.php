@@ -1,25 +1,25 @@
-<?php
+<?hh
 /* Prototype  : bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
- * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL 
+ * Description: Sort multiple arrays at once similar to how ORDER BY clause works in SQL
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
 // define some classes
 class classWithToString {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString { }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
-$inputs = array(
+$inputs = darray[
       'int 0' => 0,
       'float -10.5' => -10.5,
-      array(),
+      0 => varray[],
       'uppercase NULL' => NULL,
       'lowercase true' => true,
       'empty string DQ' => "",
@@ -27,10 +27,11 @@ $inputs = array(
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
       'undefined var' => @$undefined_var,
-);
+];
 
-var_dump(array_multisort($inputs, SORT_NUMERIC));
+$numeric = SORT_NUMERIC;
+var_dump(array_multisort2(inout $inputs, inout $numeric));
 var_dump($inputs);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

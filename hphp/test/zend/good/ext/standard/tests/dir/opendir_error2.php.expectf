@@ -2,11 +2,11 @@
 
 -- Pass a non-existent absolute path: --
 
-Warning: %s
+Warning: No such file or directory in %s/opendir_error2.php on line 15
 bool(false)
 
 -- Pass a non-existent relative path: --
 
-Warning: %s
+Warning: No such file or directory in %s/opendir_error2.php on line 19
 bool(false)
 ===DONE===

@@ -1,6 +1,6 @@
 #Tests that verifier rejects NewCol Pair and ColFromArray Pair
 
-.main {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NewCol Pair
   ColFromArray Pair
   RetC

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public static $x=1;
@@ -12,6 +12,9 @@ class C1 {
 class C2 {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2052() {
 $o1 = new C1;
 $o2 = new C2;
 var_dump(T::$x);
@@ -43,3 +46,4 @@ var_dump(C1::$x);
 var_dump(C2::$x);
 $o1->printX();
 $o2->printX();
+}

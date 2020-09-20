@@ -72,9 +72,6 @@ function test1() {
     dict['abc' => 100, 200 => 'def'],
     keyset[],
     keyset['a', 100, 'b'],
-    [],
-    [1, 2, 3],
-    ['a' => 100, 'b' => 200, 'c' => 300],
     varray[],
     varray[1, 2, 3],
     darray[],
@@ -165,12 +162,6 @@ function test3() {
   var_dump(is_varray(123));
   var_dump(is_darray(123));
 
-  var_dump(is_varray([]));
-  var_dump(is_darray([]));
-
-  var_dump(is_varray([1, 2, 3]));
-  var_dump(is_darray([1, 2, 3]));
-
   var_dump(is_varray(vec['a', 'b', 'c']));
   var_dump(is_darray(vec['a', 'b', 'c']));
 
@@ -206,6 +197,10 @@ function test3() {
   var_dump(is_darray(darray[0 => 'a', 1 => 'b', 2 => 'c']));
 }
 
+
+<<__EntryPoint>>
+function main_is_a() {
 test1();
 test2();
 test3();
+}

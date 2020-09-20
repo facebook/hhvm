@@ -1,6 +1,6 @@
 resource(1) of type (stream)
-bool(false)
-object(Foo)#1 (0) {
+bool(true)
+object(Foo) (0) {
 }
 bool(false)
 

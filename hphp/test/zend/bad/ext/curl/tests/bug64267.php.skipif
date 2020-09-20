@@ -1,3 +1,0 @@
-<?php
-extension_loaded("curl") or die("skip need ext/curl");
-?>

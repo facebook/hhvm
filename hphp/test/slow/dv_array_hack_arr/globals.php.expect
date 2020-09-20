@@ -1,0 +1,28 @@
+cookie:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true
+env:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true
+files:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true
+get:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true
+post:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true
+request:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true
+server:
+	HH\is_php_array: false
+	HH\is_darray: true
+	HH\is_dict: true

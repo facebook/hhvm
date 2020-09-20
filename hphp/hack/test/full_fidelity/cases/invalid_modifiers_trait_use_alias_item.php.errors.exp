@@ -1,0 +1,16 @@
+(5,13)-(5,21) Trait use aliases cannot be declared `abstract`
+(5,28)-(5,34) Trait use aliases cannot be declared `static`
+(5,53)-(5,59) Trait use aliases cannot have multiple visibility modifiers
+(5,60)-(5,65) Trait use aliases cannot be declared `async`
+(5,76)-(5,76) A right brace `}` is expected here.
+(5,77)-(5,77) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(5,78)-(6,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(7,6)-(7,6) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(7,8)-(7,8) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(7,10)-(7,10) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(7,13)-(7,13) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(7,13)-(7,21) Properties cannot be declared `abstract`
+(7,22)-(7,30) Properties cannot have duplicate modifiers
+(7,22)-(7,30) Properties cannot be declared `abstract`
+(7,32)-(7,32) A variable name is expected here.
+(9,2)-(10,1) An expression is expected here.

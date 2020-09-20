@@ -14,6 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/ext_icu_calendar.h"
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
@@ -53,7 +54,7 @@ IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
         : (new icu::GregorianCalendar(locale, error));
     calOwned = true;
   } else if (cal.isObject()) {
-    auto IntlCalendar_Class = Unit::lookupClass(s_IntlCalendar.get());
+    auto IntlCalendar_Class = Class::lookup(s_IntlCalendar.get());
     auto obj = cal.toObject();
     auto cls = obj->getVMClass();
     if (!IntlCalendar_Class ||
@@ -239,13 +240,13 @@ static Variant HHVM_METHOD(IntlCalendar, getActualMinimum, int64_t field) {
 }
 
 static Array HHVM_STATIC_METHOD(IntlCalendar, getAvailableLocales) {
-  Array ret = Array::Create();
   int32_t count;
   const icu::Locale *availLocales = icu::Calendar::getAvailableLocales(count);
+  VArrayInit ret(count);
   for (int i = 0; i < count; ++i) {
     ret.append(String(availLocales[i].getName(), CopyString));
   }
-  return ret;
+  return ret.toArray();
 }
 
 static int64_t HHVM_METHOD(IntlCalendar, getErrorCode) {
@@ -367,7 +368,7 @@ static bool HHVM_METHOD(IntlCalendar, isLenient) {
   return data->calendar()->isLenient();
 }
 
-static bool HHVM_METHOD(IntlCalendar, _isSet, int64_t field) {
+static bool HHVM_METHOD(IntlCalendar, isSet, int64_t field) {
   CAL_FETCH(data, this_, false);
   CAL_CHECK_FIELD(field, "intlcal_is_set");
   return data->calendar()->isSet((UCalendarDateFields)field);
@@ -391,66 +392,74 @@ static bool HHVM_METHOD(IntlCalendar, roll, int64_t field, const Variant& value)
   return true;
 }
 
-// TODO: Switch to AcrRec API once it lands
-static bool HHVM_METHOD(IntlCalendar, __set_array, const Array& args) {
-  assert(args.size() == 6);
+static bool HHVM_METHOD(IntlCalendar, set, int64_t yearOrField,
+                        int64_t monthOrValue, const Variant& dayOfMonth,
+                        const Variant& hour, const Variant& minute,
+                        const Variant& second) {
   CAL_FETCH(data, this_, false);
 
-  // Assume at least two args because of PHP signature
-  int32_t numargs;
-  for (numargs = 2; numargs < 6; ++numargs) {
-    if (args[numargs].isNull()) {
-      break;
-    }
-  }
-
-  if (numargs > 6) {
-    data->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                   "intlcal_set: too many arguments");
-    return false;
-  }
-
-  if (numargs == 2) {
-    int32_t field = args[0].toInt64();
-    CAL_CHECK_FIELD(field, "intcal_set");
-    data->calendar()->set((UCalendarDateFields)field,
-                          (int32_t)args[1].toInt64());
+  if (dayOfMonth.isNull()) {
+    // we only got 2 args, so the first 2 args are a field and a value
+    CAL_CHECK_FIELD(yearOrField, "intcal_set");
+    data->calendar()->set((UCalendarDateFields)yearOrField,
+                          (int32_t)monthOrValue);
     return true;
   }
 
-  int32_t intargs[6];
-  assert(numargs <= 6);
-  for (int i = 0; i < numargs; ++i) {
-    int64_t arg = args[i].toInt64();
-    if ((arg < INT32_MIN) || (arg > INT32_MAX)) {
-      data->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                     "intlcal_set: at least one of the arguments has an "
-                     "absolute value that is too large");
-      return false;
-    }
-    intargs[i] = (int32_t)arg;
+  auto outofrange = [&]() {
+    data->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                   "intlcal_set: at least one of the arguments has an "
+                   "absolute value that is too large");
+    return false;
+  };
+  if ((yearOrField < INT32_MIN) || (yearOrField > INT32_MAX)) {
+    return outofrange();
   }
+  auto y = (int32_t)yearOrField;
+  if ((monthOrValue < INT32_MIN) || (monthOrValue > INT32_MAX)) {
+    return outofrange();
+  }
+  auto m = (int32_t)monthOrValue;
 
-  switch (numargs) {
-    case 3: // year, month, day
-      data->calendar()->set(intargs[0], intargs[1], intargs[2]);
-      return true;
-    case 4:
-      data->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                     "intlcal_set: bad arguments");
-      return false;
-    case 5: // ..., hour, minute
-      data->calendar()->set(intargs[0], intargs[1], intargs[2],
-                            intargs[3], intargs[4]);
-      return true;
-    case 6: // ..., second
-      data->calendar()->set(intargs[0], intargs[1], intargs[2],
-                            intargs[3], intargs[4], intargs[5]);
-      return true;
-    default:
-      not_reached();
-      return false;
+  assertx(dayOfMonth.isInteger());
+  if ((dayOfMonth.asInt64Val() < INT32_MIN) ||
+      (dayOfMonth.asInt64Val() > INT32_MAX)) {
+    return outofrange();
   }
+  auto d = (int32_t)dayOfMonth.asInt64Val();
+
+  if (hour.isNull()) {
+    data->calendar()->set(y, m, d);
+    return true;
+  }
+  assertx(hour.isInteger());
+  if ((hour.asInt64Val() < INT32_MIN) || (hour.asInt64Val() > INT32_MAX)) {
+    return outofrange();
+  }
+  auto h = (int32_t)hour.asInt64Val();
+
+  if (minute.isNull()) {
+    data->setError(U_ILLEGAL_ARGUMENT_ERROR, "intlcal_set: bad arguments");
+    return false;
+  }
+  assertx(minute.isInteger());
+  if ((minute.asInt64Val() < INT32_MIN) || (minute.asInt64Val() > INT32_MAX)) {
+    return outofrange();
+  }
+  auto i = (int32_t)minute.asInt64Val();
+
+  if (second.isNull()) {
+    data->calendar()->set(y, m, d, h, i);
+    return true;
+  }
+  assertx(second.isInteger());
+  if ((second.asInt64Val() < INT32_MIN) || (second.asInt64Val() > INT32_MAX)) {
+    return outofrange();
+  }
+  auto s = (int32_t)second.asInt64Val();
+
+  data->calendar()->set(y, m, d, h, i, s);
+  return true;
 }
 
 static bool HHVM_METHOD(IntlCalendar, setFirstDayOfWeek, int64_t dow) {
@@ -617,100 +626,110 @@ static bool HHVM_METHOD(IntlCalendar, setSkippedWallTimeOption,
 /////////////////////////////////////////////////////////////////////////////
 // IntlGregorianCalendar
 
-static void HHVM_METHOD(IntlGregorianCalendar, __ctor_array,
-                        const Array& args) {
-  assert(args.size() == 6);
-
-  int32_t numargs;
-  for (numargs = 0; numargs < 6; ++numargs) {
-    if (args[numargs].isNull()) {
-      break;
-    }
-  }
-
-  if (numargs > 6) {
-    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                           "intlgregcal_create_instance: too many arguments");
-    return;
-  }
+static void HHVM_METHOD(IntlGregorianCalendar, __construct,
+                        const Variant& yearOrTz, const Variant& monthOrLocale,
+                        const Variant& day, const Variant& hour,
+                        const Variant& minute, const Variant& second) {
 
   icu::GregorianCalendar *gcal = nullptr;
   SCOPE_EXIT { if (gcal) { delete gcal; } };
   icu::TimeZone *tz = nullptr;
-  SCOPE_EXIT { if (gcal && tz) { delete tz; } };
+  SCOPE_EXIT { if (tz) { delete tz; } };
+  auto success = [&]() {
+    assertx(gcal);
+    // tz should be owned by gcal, so we should have cleared our local copy
+    assertx(!tz);
+    Native::data<IntlCalendar>(this_)->setCalendar(gcal);
+    gcal = nullptr;
+  };
 
-  UErrorCode error;
-  if (numargs < 3) {
-    tz = IntlTimeZone::ParseArg(args[0], "intlgregcal_create_instance",
-                                         s_intl_error.get());
-    String loc(localeOrDefault(args[1].toString()));
-    error = U_ZERO_ERROR;
-    gcal = new icu::GregorianCalendar(tz,
-               icu::Locale::createFromName(loc.c_str()), error);
+  if (day.isNull()) {
+    // we have 2 args, tz and locale
+    tz = IntlTimeZone::ParseArg(yearOrTz, "intlgregcal_create_instance",
+                                s_intl_error.get());
+    auto error = U_ZERO_ERROR;
+    gcal = new icu::GregorianCalendar(
+      tz,
+      icu::Locale::createFromName(
+        localeOrDefault(monthOrLocale.toString()).c_str()
+      ),
+      error
+    );
+    if (gcal) tz = nullptr; // gcal owns tz now
     if (U_FAILURE(error)) {
       s_intl_error->setError(error, "intlgregcal_create_instance: error "
-               "creating ICU GregorianCalendar from time zone and locale");
+                             "creating ICU GregorianCalendar from time zone "
+                             "and locale");
       return;
     }
-    goto success;
+    return success();
   }
 
-  int32_t intarg[6];
-  assert(numargs <= 6);
-  for (int i = 0; i < numargs; ++i) {
-    int64_t arg = args[i].toInt64();
+  auto arg_ok = true;
+  auto coerce_arg = [&](const Variant& v) {
+    int64_t arg = v.toInt64();
     if ((arg < INT32_MIN) || (arg > INT32_MAX)) {
       s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                              "intlgregcal_create_instance: at least one of "
                              "the arguments has an absolute value that is "
                              "too large");
+      arg_ok = false;
+      return 0;
+    }
+    return (int32_t)arg;
+  };
+
+  auto y = coerce_arg(yearOrTz);
+  if (!arg_ok) return;
+  auto m = coerce_arg(monthOrLocale);
+  if (!arg_ok) return;
+  auto d = coerce_arg(day);
+  if (!arg_ok) return;
+
+  auto error = U_ZERO_ERROR;
+  auto finish = [&]() {
+    if (U_FAILURE(error)) {
+      s_intl_error->setError(error, "intlgregcal_create_instance: error "
+                             "creating ICU GregorianCalendar from date");
       return;
     }
-    intarg[i] = (int32_t)arg;
-  }
+    assertx(gcal);
+    tz = IntlTimeZone::ParseArg(uninit_null(), "intlgregcal_create_instance",
+                                s_intl_error.get());
+    if (!tz) {
+      // error already set
+      return;
+    }
+    gcal->adoptTimeZone(tz);
+    tz = nullptr; // gcal owns tz now
+    return success();
+  };
 
-  error = U_ZERO_ERROR;
-  switch (numargs) {
-    case 3: // year, month, day
-      gcal = new icu::GregorianCalendar(intarg[0], intarg[1], intarg[2],
-                                        error);
-      break;
-    case 4:
-      s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
-                             "intlgregcal_create_instance: no variant with "
-                             "4 arguments (excluding trailing NULLs)");
-      return;
-    case 5: // ..., hour, minute
-      gcal = new icu::GregorianCalendar(intarg[0], intarg[1], intarg[2],
-                                        intarg[3], intarg[4],
-                                        error);
-      break;
-    case 6: // ..., second
-      gcal = new icu::GregorianCalendar(intarg[0], intarg[1], intarg[2],
-                                        intarg[3], intarg[4], intarg[5],
-                                        error);
-      break;
-    default:
-      not_reached();
-      return;
+  if (hour.isNull()) {
+    gcal = new icu::GregorianCalendar(y, m, d, error);
+    return finish();
   }
-  if (U_FAILURE(error)) {
-    s_intl_error->setError(error, "intlgregcal_create_instance: error "
-                                  "creating ICU GregorianCalendar from date");
+  auto h = coerce_arg(hour);
+  if (!arg_ok) return;
+
+  if (minute.isNull()) {
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                           "intlgregcal_create_instance: no variant with "
+                           "4 arguments (excluding trailing NULLs)");
     return;
   }
+  auto i = coerce_arg(minute);
+  if (!arg_ok) return;
 
-  tz = IntlTimeZone::ParseArg(uninit_null(), "intlgregcal_create_instance",
-                                             s_intl_error.get());
-  if (!tz) {
-    // error already set
-    return;
+  if (second.isNull()) {
+    gcal = new icu::GregorianCalendar(y, m, d, h, i, error);
+    return finish();
   }
-  gcal->adoptTimeZone(tz);
+  auto s = coerce_arg(second);
+  if (!arg_ok) return;
 
-success:
-  Native::data<IntlCalendar>(this_)->setCalendar(gcal);
-  gcal = nullptr; // prevent SCOPE_EXIT sweeps
+  gcal = new icu::GregorianCalendar(y, m, d, h, i, s, error);
+  return finish();
 }
 
 static bool HHVM_METHOD(IntlGregorianCalendar, isLeapYear, int64_t year) {
@@ -823,9 +842,9 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlCalendar, inDaylightTime);
   HHVM_ME(IntlCalendar, isEquivalentTo);
   HHVM_ME(IntlCalendar, isLenient);
-  HHVM_ME(IntlCalendar, _isSet);
+  HHVM_ME(IntlCalendar, isSet);
   HHVM_ME(IntlCalendar, roll);
-  HHVM_ME(IntlCalendar, __set_array);
+  HHVM_ME(IntlCalendar, set);
   HHVM_ME(IntlCalendar, setFirstDayOfWeek);
   HHVM_ME(IntlCalendar, setLenient);
   HHVM_ME(IntlCalendar, setMinimalDaysInFirstWeek);
@@ -847,7 +866,7 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlCalendar, setSkippedWallTimeOption);
 #endif
 
-  HHVM_ME(IntlGregorianCalendar, __ctor_array);
+  HHVM_ME(IntlGregorianCalendar, __construct);
   HHVM_ME(IntlGregorianCalendar, isLeapYear);
   HHVM_ME(IntlGregorianCalendar, getGregorianChange);
   HHVM_ME(IntlGregorianCalendar, setGregorianChange);

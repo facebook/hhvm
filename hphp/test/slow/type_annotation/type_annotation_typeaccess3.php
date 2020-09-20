@@ -22,4 +22,8 @@ class F {
   const type T = float;
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation_typeaccess3() {
 var_dump(type_structure(C::class, 'U'));
+}

@@ -1,19 +1,25 @@
 <?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
-// Note that this is not the case when compiling with WholeProgram
-// mode, and Option::HardTypeHints, so this test is disabled for repo.
-
 // Make sure we're tolerant of code that swallows typehint failures.
-function error_handler() {
-  var_dump(func_get_args());
+function error_handler(...$args) {
+  var_dump($args);
   return true;
 }
 
-function main(integer $foo) {
-  echo "in main\n";
+function test_soft(<<__Soft>> int $foo) {
+  echo "in test_soft\n";
   var_dump(is_int($foo));
 }
-set_error_handler('error_handler');
-main(0.0);
-echo "done with main\n";
+
+function test_hard(int $foo) {
+  echo "in test_hard (unreachable)\n";
+}
+
+<<__EntryPoint>>
+function main() {
+  set_error_handler(fun('error_handler'));
+  test_soft(0.0);
+  test_hard(0.0);
+  echo "done with main (unreachable)\n";
+}

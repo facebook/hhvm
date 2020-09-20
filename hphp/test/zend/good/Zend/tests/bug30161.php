@@ -1,4 +1,4 @@
-<?php
+<?hh
 class FIIFO {
 
         public function __construct() {
@@ -15,15 +15,15 @@ class hariCow extends FIIFO {
                 } catch(Exception $e) {
                 }
         }
-        
+
         public function __toString() {
                 return "ok\n";
         }
 
 }
 
-
+<<__EntryPoint>> function main(): void {
 $db = new hariCow;
 
 echo $db;
-?>
+}

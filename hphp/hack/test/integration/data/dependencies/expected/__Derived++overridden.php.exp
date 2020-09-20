@@ -1,0 +1,17 @@
+<?hh
+final class Derived extends \ImplementingBase {
+  private int $result;
+  public function __construct(int $num) {
+    throw new \Exception();
+  }
+  <<__Override>>
+  public function overridden(): int {
+    return $this->result;
+  }
+}
+class ImplementingBase extends \AbstractBase {
+  public function overridden(): int {
+    throw new \Exception();
+  }
+}
+abstract class AbstractBase {}

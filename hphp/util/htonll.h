@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTONLL_H_
-#define incl_HPHP_HTONLL_H_
+#pragma once
 
 /*
  * Tries to find a suitable implementation of htonll/ntohll if it doesn't
@@ -73,4 +72,3 @@
 # endif
 #endif
 
-#endif

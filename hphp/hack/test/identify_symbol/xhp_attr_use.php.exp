@@ -1,4 +1,5 @@
-name: \:xhp:foo-element, kind: type_id, span: line 6, characters 14-28, definition: 
+name: \:xhp:foo-element, kind: type_id, span: line 6, characters 13-28, is_declaration: false
+definition:
  :xhp:foo-element
    kind: class
    id: type_id:::xhp:foo-element

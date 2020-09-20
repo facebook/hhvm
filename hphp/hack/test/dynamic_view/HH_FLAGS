@@ -1,0 +1,2 @@
+--allowed-fixme-codes-strict 2049,4053
+--dynamic-view --no-builtins

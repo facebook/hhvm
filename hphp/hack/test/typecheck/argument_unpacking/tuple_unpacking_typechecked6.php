@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(int $integral, float $flt, string $str): void {}
 

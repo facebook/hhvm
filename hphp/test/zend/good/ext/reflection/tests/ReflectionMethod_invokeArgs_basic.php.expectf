@@ -1,12 +1,12 @@
 Public method:
 Called foo(), property = Hello
-object(TestClass)#%d (1) {
+object(TestClass) (1) {
   ["prop"]=>
   string(5) "Hello"
 }
 string(10) "Return Val"
 Called foo(), property = Hello
-object(TestClass)#%d (1) {
+object(TestClass) (1) {
   ["prop"]=>
   string(5) "Hello"
 }

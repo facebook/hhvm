@@ -1,6 +1,0 @@
-NULL
-object(Example)#%d (1) {
-  ["bar"]=>
-  int(42)
-}
-Done!

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Undefined constant 'foo\unknown' in %s/ns_077_4.php on line 4

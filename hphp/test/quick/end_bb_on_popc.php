@@ -8,6 +8,8 @@ abstract class Base {
 class Derived extends Base {
   public static $x;
 }
+<<__EntryPoint>> function main(): void {
 $a = new Derived();
-$a->foo();
+$a::foo();
 echo "Done\n";
+}

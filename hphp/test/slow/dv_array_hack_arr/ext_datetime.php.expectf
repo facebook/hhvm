@@ -1,0 +1,38 @@
+dict(4) {
+  ["country_code"]=>
+  string(2) "US"
+  ["latitude"]=>
+  float(%f)
+  ["longitude"]=>
+  float(%f)
+  ["comments"]=>
+  string(20) "Eastern (most areas)"
+}
+dict(4) {
+  ["warning_count"]=>
+  int(1)
+  ["warnings"]=>
+  dict(1) {
+    [4]=>
+    string(29) "Double timezone specification"
+  }
+  ["error_count"]=>
+  int(7)
+  ["errors"]=>
+  dict(7) {
+    [0]=>
+    string(20) "Unexpected character"
+    [1]=>
+    string(47) "The timezone could not be found in the database"
+    [3]=>
+    string(20) "Unexpected character"
+    [7]=>
+    string(20) "Unexpected character"
+    [8]=>
+    string(29) "Double timezone specification"
+    [17]=>
+    string(20) "Unexpected character"
+    [18]=>
+    string(25) "Double time specification"
+  }
+}

@@ -1,13 +1,19 @@
 # Tests that silence ends without silence starts fail the verifier
-.main {
+.function <"" N  > add($x, $y) {
+  CGetL $y
+  CGetL2 $x
+  AddO
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $z;
-  FPushFuncD 2 "add"
+  NullUninit
+  NullUninit
+  NullUninit
   Int 3
-  FPassCE 0 Any
   Int 2
-  FPassCE 1 Any
-  FCall 2
-  UnboxR
+  FCallFuncD <> 2 1 "" - "" "add"
   Silence $z Start
   SetL $z
   Silence $z End
@@ -28,21 +34,23 @@
   Silence _5 Start
   Silence _3 End
   Silence _8 End
-  FPushFuncD 1 "var_dump"
+  NullUninit
+  NullUninit
+  NullUninit
   Int 1
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
   Jmp L1
 L0:
   Silence _6 Start
   Silence _2 End
   Silence _9 End
-  FPushFuncD 1 "var_dump"
+  NullUninit
+  NullUninit
+  NullUninit
   Int 2
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
 L1:
   Silence _1 End
   Silence _5 End
@@ -51,12 +59,5 @@ L1:
   Silence _8 End
   Silence _9 End
   Int 1
-  RetC
-}
-
-.function <"" N  > add($x, $y) {
-  CGetL $y
-  CGetL2 $x
-  AddO
   RetC
 }

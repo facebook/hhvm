@@ -1,13 +1,10 @@
-<?php
+<?hh
 
 /**
  * my doc comment
  */
 function foo () {
-	static $c;
-	static $a = 1;
-	static $b = "hello";
-	$d = 5;
+    $d = 5;
 }
 
 /***
@@ -17,12 +14,11 @@ function bar () {}
 
 
 function dumpFuncInfo($name) {
-	$funcInfo = new ReflectionFunction($name);
-	var_dump($funcInfo->getDocComment());
+    $funcInfo = new ReflectionFunction($name);
+    var_dump($funcInfo->getDocComment());
 }
-
+<<__EntryPoint>> function main(): void {
 dumpFuncInfo('foo');
 dumpFuncInfo('bar');
-dumpFuncInfo('extract');
-
-?>
+dumpFuncInfo('array_pop');
+}

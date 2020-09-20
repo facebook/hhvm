@@ -1,0 +1,4 @@
+.function [rx_shallow rx_shallow] foo() {
+  Null
+  RetC
+}

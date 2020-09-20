@@ -1,16 +1,9 @@
-<?php
-$file = dirname(__FILE__).'/SplFileObject_fwrite_variation_001.txt';
-if(file_exists($file)) {
-	unlink($file);
-}
-$obj = New SplFileObject($file,'w');
+<?hh
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('SplFileObject_fwrite_variation_001.txt');
+$obj = new SplFileObject($file,'w');
 $obj->fwrite('test_write',4);
 var_dump(file_get_contents($file));
-?>
-<?php error_reporting(0); ?>
-<?php
-$file = dirname(__FILE__).'/SplFileObject_fwrite_variation_001.txt';
-if(file_exists($file)) {
-	unlink($file);
+
+unlink($file);
 }
-?>

@@ -9,5 +9,8 @@ function foo($fn, $options) {
   bar($options);
 }
 
-foo('HH\set_frame_metadata', 0);
-foo('HH\set_frame_metadata', DEBUG_BACKTRACE_PROVIDE_METADATA);
+<<__EntryPoint>>
+function main(): void {
+  foo('HH\set_frame_metadata', 0);
+  foo('HH\set_frame_metadata', DEBUG_BACKTRACE_PROVIDE_METADATA);
+}

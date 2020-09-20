@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_804() {
 try {
   $v = new Vector();
   $v->containsKey(1);
@@ -15,7 +18,7 @@ try {
  catch (Exception $e) {
     echo 'B';
   }
-  $methods = Vector::fromArray(array('containsKey','remove'));
+  $methods = Vector::fromArray(varray['containsKey','remove']);
   foreach ($methods as $method) {
     $m = new Map();
     $m->$method(1);
@@ -31,4 +34,5 @@ try {
 }
  catch (Exception $e) {
   echo "Test failed\n";
+}
 }

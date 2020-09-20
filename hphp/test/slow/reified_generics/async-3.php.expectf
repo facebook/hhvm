@@ -1,0 +1,3 @@
+yep
+
+Catchable fatal error: Value returned from function foo() must be of type string, int given in %s on line 11

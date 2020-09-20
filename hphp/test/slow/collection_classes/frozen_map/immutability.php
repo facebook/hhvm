@@ -14,7 +14,7 @@ function wrap_exception(callable $f) {
 
 function main() {
   // All of these should throw.
-  $funcs = array(
+  $funcs = varray[
     function ($fm) {
       $fm['a'] = 1;
     },
@@ -24,7 +24,7 @@ function main() {
     function ($fm) {
       unset($fm['a']);
     },
-  );
+  ];
 
   foreach ($funcs as $f) {
     echo wrap_exception($f) . "\n";
@@ -40,5 +40,9 @@ function nomutatorfuncs() {
   var_dump(method_exists($fm, 'remove'));
 }
 
+
+<<__EntryPoint>>
+function main_immutability() {
 main();
 nomutatorfuncs();
+}

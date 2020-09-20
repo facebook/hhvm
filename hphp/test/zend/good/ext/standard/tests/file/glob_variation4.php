@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $path = dirname(__FILE__);
 
 ini_set('open_basedir', $path);
@@ -11,5 +11,5 @@ var_dump(glob("$path/[aoeu]*.none"));
 var_dump(glob("$path/directly_not_exists"));
 
 var_dump($path == ini_get('open_basedir'));
-?>
-==DONE==
+echo "==DONE==";
+}

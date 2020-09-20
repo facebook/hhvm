@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  function foo($a = 123) {
@@ -16,4 +16,8 @@ class A {
   $obj = new B;
  $obj->foo();
 }
- bar();
+
+ <<__EntryPoint>>
+function main_77() {
+bar();
+}

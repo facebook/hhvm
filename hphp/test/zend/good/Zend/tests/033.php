@@ -1,15 +1,11 @@
-<?php 
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $arr[1][2][3][4][5];
 
 echo $arr[1][2][3][4][5];
 
 $arr[1][2][3][4][5]->foo;
 
-$arr[1][2][3][4][5]->foo = 1;
-
-$arr[][] = 2;
-
-$arr[][]->bar = 2;
-
-?>
+$arr = darray[1 => new stdClass()];
+$arr[1]->foo = 1;
+}

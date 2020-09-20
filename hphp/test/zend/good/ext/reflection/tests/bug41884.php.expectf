@@ -1,7 +1,7 @@
-array(2) {
-  ["fooStatic"]=>
-  string(3) "foo"
+darray(2) {
   ["foo"]=>
+  string(3) "foo"
+  ["fooStatic"]=>
   string(3) "foo"
 }
 Done

@@ -1,16 +1,28 @@
-<?php
+<?hh
 /* Prototype  : array array_uintersect_uassoc(array arr1, array arr2 [, array ...], callback data_compare_func, callback key_compare_func)
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks. 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrictive check. Both data and keys are compared by using user-supplied callbacks.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
+include('compare_function.inc');
 echo "*** Testing array_uintersect_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr1 = array(1, 2);
+$arr1 = varray[1, 2];
 
-include('compare_function.inc');
 $data_compare_func = 'compare_function';
 $key_compare_func = 'compare_function';
 
@@ -18,29 +30,17 @@ $key_compare_func = 'compare_function';
 $unset_var = 10;
 unset ($unset_var);
 
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -84,7 +84,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-);
+];
 
 // loop through each element of the array for arr2
 
@@ -93,5 +93,5 @@ foreach($inputs as $key =>$value) {
       var_dump( array_uintersect_uassoc($arr1, $value, $data_compare_func, $key_compare_func) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

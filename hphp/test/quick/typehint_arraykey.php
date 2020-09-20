@@ -26,6 +26,7 @@ function main() {
   try_takes_arraykey(null); // nope: force explicit cast to int or string
   try_takes_arraykey(new StdClass()); // nope: object
 }
-
-set_error_handler('my_handler');
+<<__EntryPoint>> function main_entry(): void {
+set_error_handler(fun('my_handler'));
 main();
+}

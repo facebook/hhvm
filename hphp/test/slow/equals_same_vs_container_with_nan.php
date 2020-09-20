@@ -29,8 +29,8 @@ function test_dictlike($name, $c, $d) {
 }
 
 function test() {
-  test_veclike('Packed Array', [1], [1]);
-  test_dictlike('Mixed Array', ['a' => 1], ['a' => 1]);
+  test_veclike('Packed Array', varray[1], varray[1]);
+  test_dictlike('Mixed Array', darray['a' => 1], darray['a' => 1]);
 
   test_veclike('Vec', vec[1], vec[1]);
   test_dictlike('Dict', dict['a' => 1], dict['a' => 1]);
@@ -39,4 +39,8 @@ function test() {
   test_dictlike('Map', Map {'a' => 1}, Map {'a' => 1});
 }
 
+
+<<__EntryPoint>>
+function main_equals_same_vs_container_with_nan() {
 test();
+}

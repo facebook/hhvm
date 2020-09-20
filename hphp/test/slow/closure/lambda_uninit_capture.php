@@ -63,7 +63,11 @@ function captureExplicitUninit() {
   var_dump($x); // 1
 }
 
+
+<<__EntryPoint>>
+function main_lambda_uninit_capture() {
 captureUninit();
 captureCatchUninit();
 captureUninitWarning();
 captureExplicitUninit();
+}

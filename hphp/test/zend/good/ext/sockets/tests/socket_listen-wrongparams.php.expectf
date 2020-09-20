@@ -1,6 +1,5 @@
 
-Warning: %s
-NULL
+Warning: socket_listen() expects parameter 1 to be resource, null given in %s/socket_listen-wrongparams.php on line 2
 
-Warning: %s
+Warning: unable to listen on socket [22]: Invalid argument in %s/socket_listen-wrongparams.php on line 4
 bool(false)

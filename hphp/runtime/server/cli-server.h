@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLI_SERVER_H_
-#define incl_HPHP_CLI_SERVER_H_
+#pragma once
 
 /*
  * CLI Server
@@ -83,9 +82,14 @@ struct ucred {
 #endif
 
 /*
- * Returns true if the current request is executing in CLI mode
+ * The API version of the CLI-Server protocol
  */
-bool is_cli_mode();
+uint64_t cli_server_api_version();
+
+/*
+ * Returns true if the current request is executing in CLI client/server mode.
+ */
+bool is_cli_server_mode();
 
 /*
  * Create a unix socket at socket_path and begin running a thread to handle
@@ -112,7 +116,8 @@ void teardown_cli_server();
  * The command will return iff the CLI server is unreachable.
  */
 void run_command_on_cli_server(const char* sock_path,
-                               const std::vector<std::string>& args);
+                               const std::vector<std::string>& args,
+                               int& count);
 
 /*
  * Returns the thread local ucred structure if the active thread is executing a
@@ -126,10 +131,22 @@ ucred* get_cli_ucred();
 bool cli_mkstemp(char* buf);
 
 /*
+ * Explicitly open a file via the CLI-server client.
+ *
+ * WARNING: use of this function should be considered a last resort, it's
+ * much better to get a CLIWrapper instance and use that. The problem with
+ * getting a raw fd is reads/writes will be unchecked, and if the client dies
+ * (e.g. the user presses ^C to "kill the script") nothing will immediately stop
+ * IO happening on this fd. So, the user may experience surprising behavior
+ * where files change even after the script is "dead".
+ */
+int cli_openfd_unsafe(const String& filename, int flags, mode_t mode,
+                      bool use_include_path, bool quiet);
+
+/*
  * Fetch the environment for the CLI process.
  */
 Array cli_env();
 
 }
 
-#endif

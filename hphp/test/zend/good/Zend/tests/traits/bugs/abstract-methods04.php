@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait THello {
   public abstract function hello();
@@ -7,24 +6,26 @@ trait THello {
 
 trait THelloImpl {
   public function hello() {
-	echo 'Hello';
+    echo 'Hello';
   }
 }
 
 class TraitsTest1 {
-	use THello;
-	use THelloImpl;  
+    use THello;
+    use THelloImpl;
 }
+
+class TraitsTest2 {
+    use THelloImpl;
+    use THello;
+}
+
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
 
 $test = new TraitsTest1();
 $test->hello();
 
-class TraitsTest2 {
-	use THelloImpl;
-	use THello;  
-}
-
 $test = new TraitsTest2();
 $test->hello();
-
-?>
+}

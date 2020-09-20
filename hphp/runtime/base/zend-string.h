@@ -15,8 +15,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_STRING_H_
-#define incl_HPHP_ZEND_STRING_H_
+#pragma once
+
+// NOTE: See also "hphp/zend/zend-string.*".
 
 #include "hphp/zend/zend-string.h"
 #include "hphp/runtime/base/type-string.h"
@@ -35,75 +36,6 @@ namespace HPHP {
  * 3. All functions work with binary strings and all returned strings are
  *    NULL terminated, regardless of whether it's a binary string.
  */
-
-/*
- * Copy src to string dst of size siz.  At most siz-1 characters
- * will be copied.  Always NUL terminates (unless siz == 0).
- * Returns strlen(src); if retval >= siz, truncation occurred.
- */
-int string_copy(char *dst, const char *src, int siz);
-
-/**
- * Compare two binary strings.
- */
-inline int string_strcmp(const char *s1, int len1, const char *s2, int len2) {
-  int minlen = len1 < len2 ? len1 : len2;
-  int retval;
-
-  retval = memcmp(s1, s2, minlen);
-  if (!retval) {
-    return (len1 - len2);
-  }
-
-  return (retval > 0) - (retval < 0);
-}
-/**
- * Compare two binary strings of the first n bytes.
- */
-inline int string_strncmp(const char *s1, int len1, const char *s2, int len2,
-                          int len) {
-  int minlen = len1 < len2 ? len1 : len2;
-  int retval;
-
-  if (len < minlen) {
-    if (UNLIKELY(len < 0)) len = 0;
-    minlen = len;
-  }
-  retval = memcmp(s1, s2, minlen);
-  if (!retval) {
-    return (len < len1 ? len : len1) - (len < len2 ? len : len2);
-  } else {
-    return retval;
-  }
-}
-/**
- * Compare two binary strings of the first n bytes, ignore case.
- */
-inline int string_strncasecmp(const char *s1, int len1,
-                              const char *s2, int len2, int len) {
-  int minlen = len1 < len2 ? len1 : len2;
-  int c1, c2;
-
-  if (len < minlen) {
-    if (UNLIKELY(len < 0)) len = 0;
-    minlen = len;
-  }
-  while (minlen--) {
-    c1 = tolower((int)*(unsigned char *)s1++);
-    c2 = tolower((int)*(unsigned char *)s2++);
-    if (c1 != c2) {
-      return c1 - c2;
-    }
-  }
-  return (len < len1 ? len : len1) - (len < len2 ? len : len2);
-}
-
-/**
- * Compare strings.
- */
-int string_ncmp(const char *s1, const char *s2, int len);
-int string_natural_cmp(char const *a, size_t a_len,
-                       char const *b, size_t b_len, int fold_case);
 
 /**
  * Changing string's cases in place. Return's length is always the same
@@ -246,7 +178,7 @@ String string_number_format(double d, int dec,
 int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
                        int cost_ins, int cost_rep, int cost_del);
 int string_similar_text(const char *t1, int len1,
-                        const char *t2, int len2, float *percent);
+                        const char *t2, int len2, double *percent);
 String string_soundex(const String& str);
 
 String string_metaphone(const char *input, int word_len, long max_phonemes,
@@ -273,4 +205,3 @@ void string_charmask(const char *input, int len, char *mask);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_STRING_H_

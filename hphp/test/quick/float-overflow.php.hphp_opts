@@ -1,2 +1,0 @@
--vEnableHipHopSyntax=false -d hhvm.php7.all=0
--vRuntime.Hack.Lang.IntsOverflowToInts=false -d hhvm.php7.all=0

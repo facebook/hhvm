@@ -1,6 +1,0 @@
-\f : float, int try num
-\g : int, string try arraykey
-\C::meth1 : string, string try string
-\h : int try int
-\k : void try void
-No errors

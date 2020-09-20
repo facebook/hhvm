@@ -6,8 +6,9 @@ class foo {
   }
 
 }
-
+<<__EntryPoint>> function main(): void {
 $c1 = new foo();
 $c2 = (new ReflectionClass('foo'))->newInstance();
-$c3 = (new ReflectionClass('foo'))->newInstanceArgs(array());
+$c3 = (new ReflectionClass('foo'))->newInstanceArgs(varray[]);
 $no_c = (new ReflectionClass('foo'))->newInstanceWithoutConstructor();
+}

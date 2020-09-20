@@ -1,9 +1,9 @@
 File "fake_members9.php", line 36, characters 12-21:
 Invalid return type (Typing[4110])
 File "fake_members9.php", line 31, characters 48-48:
-This is an object of type A
+Expected `A`
 File "fake_members9.php", line 25, characters 10-10:
-It is incompatible with an object of type I
+But got `I`
 File "fake_members9.php", line 35, characters 11-24:
-All the local information about the member foo has been invalidated during this call.
-This is a limitation of the type-checker, use a local if that's the problem.
+All the local information about `$this->foo` has been invalidated during this call.
+This is a limitation of the type-checker; use a local if that's the problem.

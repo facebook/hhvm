@@ -1,47 +1,56 @@
 *** Testing mcrypt_ecb() : usage variation ***
 
 --int 0--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --int 1--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --int 12345--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --int -12345--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, integer given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --float 10.5--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --float -10.5--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --float 12.3456789000e10--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --float -12.3456789000e10--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --float .5--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, double given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --empty array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --int indexed array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --associative array--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --nested arrays--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, array given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --uppercase NULL--
 string(32) "6438db90653c4d300909aa02fd6163c2"
@@ -50,16 +59,20 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --lowercase true--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --lowercase false--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --uppercase TRUE--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --uppercase FALSE--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, boolean given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --empty string DQ--
 string(32) "6438db90653c4d300909aa02fd6163c2"
@@ -68,11 +81,12 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --instance of classWithToString--
-string(32) "6438db90653c4d300909aa02fd6163c2"
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --instance of classWithoutToString--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, object given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, object given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --undefined var--
 string(32) "6438db90653c4d300909aa02fd6163c2"
@@ -81,6 +95,6 @@ string(32) "6438db90653c4d300909aa02fd6163c2"
 string(32) "6438db90653c4d300909aa02fd6163c2"
 
 --resource--
-Error: 2 - mcrypt_ecb() expects parameter 5 to be string, resource given, %s(%d)
-string(0) ""
+
+Warning: mcrypt_ecb() expects parameter 5 to be string, resource given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 ===DONE===

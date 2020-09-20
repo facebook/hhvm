@@ -1,0 +1,13 @@
+int(1)
+int(4)
+int(6)
+int(8)
+int(9)
+int(10)
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (D)' in %s/meth_caller.php:33
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 %s/meth_caller.php(33): MethCaller$D$dfunc()
+#2 (): entrypoint_meth_caller()
+#3 {main}

@@ -1,5 +1,6 @@
 <?hh
-if (false) {
-  class Noreturn {}
-}
+
+class Noreturn {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

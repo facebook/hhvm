@@ -1,0 +1,1 @@
+Fatal error: Assembler Error: line 1: anonymous class and closure names may not contain ids in hhas in %s/invalid-class-name.hhas on line -1

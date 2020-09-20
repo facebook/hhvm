@@ -1,0 +1,6 @@
+string(81) "Argument 1 passed to foo1() must be upper-bounded by interface Fooable, Meh given"
+string(79) "Value returned from function foo2() must be upper-bounded by Fooable, Meh given"
+string(69) "Argument 1 passed to foo3() must be upper-bounded by int, float given"
+string(70) "Argument 1 passed to foo3() must be upper-bounded by num, string given"
+string(69) "Argument 1 passed to foo4() must be upper-bounded by int, float given"
+string(70) "Argument 1 passed to foo4() must be upper-bounded by int, string given"

@@ -2,6 +2,5 @@
 
 -- Testing posix_getppid() function with one argument --
 
-Warning: %s
-NULL
+Warning: posix_getppid() expects exactly 0 parameters, 1 given in %s/posix_getppid_error.php on line 13
 Done

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_punct(mixed $c)
  * Description: Checks for any printable character which is not whitespace 
  * or an alphanumeric character 
@@ -9,12 +9,12 @@
  * Pass strings containing different character types to ctype_punct() to test
  * which are considered valid punctuation character only strings
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -41,7 +41,7 @@ $values = array(
        "!$%@\n",
 /*25*/ "\"?!\"",
 /*26*/ "|\ @~",
-);
+];
 
 $iterator = 1;
 foreach($values as $value) {
@@ -50,5 +50,5 @@ foreach($values as $value) {
       $iterator++;
 };
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

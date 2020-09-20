@@ -8,12 +8,12 @@ Array
     [height] => 10
 )
 
-Warning: %s
- in %sbug66356.php on line %d
+Warning: gd warning: one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
+ in %s/bug66356.php on line 12
 bool(false)
 resource(%d) of type (gd)
 resource(%d) of type (gd)
 
-Warning: %s
- in %sbug66356.php on line %d
+Warning: gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+ in %s/bug66356.php on line 21
 bool(false)

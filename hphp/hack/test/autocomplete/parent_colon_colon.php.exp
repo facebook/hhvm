@@ -1,0 +1,3 @@
+fun_instance (function(): void)
+class classname<this>
+fun_method (function(): void)

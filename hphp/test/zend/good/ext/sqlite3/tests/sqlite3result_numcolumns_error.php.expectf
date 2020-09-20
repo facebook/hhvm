@@ -4,6 +4,5 @@ Inserting data
 bool(true)
 Fetching number of columns
 
-Warning: %s
-NULL
+Warning: SQLite3Result::numcolumns() expects exactly 0 parameters, 1 given in %s/sqlite3result_numcolumns_error.php on line 11
 Done

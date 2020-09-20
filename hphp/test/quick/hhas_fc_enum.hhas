@@ -1,30 +1,32 @@
 # Test out making enums
 
-.main {
-  DefCls 0
-  FPushFuncD 1 "test"
-  ClsCnsD "FOO" "Foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  FPushFuncD 1 "test"
-  String "hi"
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  Int 1
-  RetC
-}
 
-.function test(<"Foo" "Foo" hh_type> $x) {
+.function test(<"Foo" "Foo"> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
 .class [enum final] Foo extends HH\BuiltinEnum {
-  .enum_ty <"HH\\int" hh_type extended_hint>;
+  .enum_ty <"HH\\int" extended_hint>;
 
   .const FOO = """i:1;""";
   .default_ctor;
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  ClsCnsD "FOO" "Foo"
+  FCallFuncD <> 1 1 "" - "" "test"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  String "hi"
+  FCallFuncD <> 1 1 "" - "" "test"
+  PopC
+  Int 1
+  RetC
 }

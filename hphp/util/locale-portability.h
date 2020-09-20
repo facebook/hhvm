@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_LOCALE_PORTABILITY_H_
-#define incl_HPHP_LOCALE_PORTABILITY_H_
+#pragma once
 
 #include <locale.h>
 
@@ -33,4 +32,3 @@ inline locale_t _current_locale() { return _get_current_locale(); }
 #include <langinfo.h>
 #endif
 
-#endif

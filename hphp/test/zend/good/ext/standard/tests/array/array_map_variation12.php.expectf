@@ -1,30 +1,15 @@
 *** Testing array_map() : built-in function ***
 -- with built-in function 'pow' and two parameters --
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(16)
-  [2]=>
   int(243)
 }
 -- with built-in function 'pow' and one parameter --
 
-Warning: %s
-
-Warning: %s
-
-Warning: %s
-array(3) {
-  [0]=>
-  NULL
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
+Warning: pow() expects exactly 2 parameters, 1 given in %s/array_map_variation12.php on line 20
 -- with language construct --
 
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation12.php on line 23
 NULL
 Done

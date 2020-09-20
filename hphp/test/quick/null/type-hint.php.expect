@@ -1,0 +1,7 @@
+NULL
+Argument 1 passed to takes_null() must be an instance of null, int given
+Argument 1 passed to takes_null() must be an instance of null, float given
+Argument 1 passed to takes_null() must be an instance of null, string given
+Argument 1 passed to takes_null() must be an instance of null, bool given
+Argument 1 passed to takes_null() must be an instance of null, bool given
+Argument 1 passed to takes_null() must be an instance of null, stdClass given

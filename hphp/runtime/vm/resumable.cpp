@@ -36,8 +36,15 @@ char* resumeModeShortName(ResumeMode resumeMode) {
   }
 }
 
+folly::Optional<ResumeMode> nameToResumeMode(const std::string& name) {
+  if (name == "") return ResumeMode::None;
+  if (name == "ra") return ResumeMode::Async;
+  if (name == "rg") return ResumeMode::GenIter;
+  return folly::none;
+}
+
 ResumeMode resumeModeFromActRecImpl(ActRec* ar) {
-  assertx(ar->resumed());
+  assertx(isResumed(ar));
   auto const func = ar->func();
   if (LIKELY(func->isAsyncFunction())) return ResumeMode::Async;
   if (func->isNonAsyncGenerator()) return ResumeMode::GenIter;

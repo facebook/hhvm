@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_TLS_H_
-#define incl_HPHP_VM_CODE_GEN_TLS_H_
+#pragma once
 
 #include "hphp/util/thread-local.h"
 
@@ -75,6 +74,14 @@ template<typename T>
 Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum);
 
 /*
+ * Like emitTLSAddr, but turns the address into a Vreg. You cannot necessarily
+ * just use a lea on the output of emitTLSAddr because of potential segment
+ * register issues.
+ */
+template<typename T>
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset = 0);
+
+/*
  * Load the value of the ThreadLocalNoCheck `datum' into `d'.
  */
 template<typename T>
@@ -91,4 +98,3 @@ void emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d);
 // This has to follow all the arch-specific includes.
 #include "hphp/runtime/vm/jit/code-gen-tls-inl.h"
 
-#endif

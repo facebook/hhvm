@@ -7,3 +7,4 @@ interface I {
 class C implements I {
   const type T = string;
 }
+

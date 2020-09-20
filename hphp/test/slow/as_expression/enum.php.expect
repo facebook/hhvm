@@ -1,0 +1,17 @@
+int(1)
+string(1) "1"
+int(2)
+not Foo: double
+not Foo: boolean
+not Foo: NULL
+not Foo: resource
+not Foo: object
+
+int(1)
+string(1) "1"
+string(1) "2"
+not Bar: double
+not Bar: boolean
+not Bar: NULL
+not Bar: resource
+not Bar: object

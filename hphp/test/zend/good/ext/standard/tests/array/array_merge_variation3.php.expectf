@@ -1,7 +1,7 @@
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1: int data --
-array(6) {
+darray(6) {
   [0]=>
   int(0)
   [1]=>
@@ -15,7 +15,7 @@ array(6) {
   [5]=>
   int(2)
 }
-array(6) {
+darray(6) {
   [0]=>
   int(1)
   [1]=>
@@ -31,7 +31,7 @@ array(6) {
 }
 
 -- Iteration 2: float data --
-array(7) {
+darray(7) {
   [0]=>
   float(10.5)
   [1]=>
@@ -47,7 +47,7 @@ array(7) {
   [6]=>
   int(2)
 }
-array(7) {
+darray(7) {
   [0]=>
   int(1)
   [1]=>
@@ -65,7 +65,7 @@ array(7) {
 }
 
 -- Iteration 3: null data --
-array(4) {
+darray(4) {
   [0]=>
   NULL
   [1]=>
@@ -75,7 +75,7 @@ array(4) {
   [3]=>
   int(2)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -87,7 +87,7 @@ array(4) {
 }
 
 -- Iteration 4: bool data --
-array(6) {
+darray(6) {
   [0]=>
   bool(true)
   [1]=>
@@ -101,7 +101,7 @@ array(6) {
   [5]=>
   int(2)
 }
-array(6) {
+darray(6) {
   [0]=>
   int(1)
   [1]=>
@@ -117,7 +117,7 @@ array(6) {
 }
 
 -- Iteration 5: empty string data --
-array(4) {
+darray(4) {
   [0]=>
   string(0) ""
   [1]=>
@@ -127,7 +127,7 @@ array(4) {
   [3]=>
   int(2)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -139,13 +139,13 @@ array(4) {
 }
 
 -- Iteration 6: empty array data --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
@@ -153,7 +153,7 @@ array(2) {
 }
 
 -- Iteration 7: string data --
-array(5) {
+darray(5) {
   [0]=>
   string(6) "string"
   [1]=>
@@ -165,7 +165,7 @@ array(5) {
   [4]=>
   int(2)
 }
-array(5) {
+darray(5) {
   [0]=>
   int(1)
   [1]=>
@@ -179,27 +179,27 @@ array(5) {
 }
 
 -- Iteration 8: object data --
-array(3) {
+darray(3) {
   [0]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
   [1]=>
   int(1)
   [2]=>
   int(2)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
   int(2)
   [2]=>
-  object(classA)#%d (0) {
+  object(classA) (0) {
   }
 }
 
 -- Iteration 9: undefined data --
-array(3) {
+darray(3) {
   [0]=>
   NULL
   [1]=>
@@ -207,7 +207,7 @@ array(3) {
   [2]=>
   int(2)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
@@ -217,7 +217,7 @@ array(3) {
 }
 
 -- Iteration 10: unset data --
-array(3) {
+darray(3) {
   [0]=>
   NULL
   [1]=>
@@ -225,7 +225,7 @@ array(3) {
   [2]=>
   int(2)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
@@ -235,20 +235,20 @@ array(3) {
 }
 
 -- Iteration 11: resource data --
-array(3) {
+darray(3) {
   [0]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
   [1]=>
   int(1)
   [2]=>
   int(2)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
   int(2)
   [2]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
 }
 Done

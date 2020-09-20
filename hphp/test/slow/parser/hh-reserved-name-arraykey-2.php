@@ -1,7 +1,8 @@
 <?hh
 namespace HH {
-  if (false) {
-    class Arraykey {}
-  }
-  echo "Done\n";
+
+class Arraykey {}
+<<__EntryPoint>> function main(): void {
+echo "Done\n";
+}
 }

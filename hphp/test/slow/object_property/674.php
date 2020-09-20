@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  static protected $foo = 11;
@@ -8,5 +8,9 @@ class A {
  class C extends B {
  static public $foo;
 }
- var_dump(C::$foo);
 
+
+ <<__EntryPoint>>
+function main_674() {
+var_dump(C::$foo);
+}

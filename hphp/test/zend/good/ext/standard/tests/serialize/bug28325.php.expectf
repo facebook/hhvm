@@ -1,8 +1,8 @@
-object(a)#%d (1) {
+object(a) (1) {
   ["b"]=>
-  object(b)#%d (1) {
+  object(b) (1) {
     ["c"]=>
-    object(c)#%d (1) {
+    object(c) (1) {
       ["d"]=>
       *RECURSION*
     }

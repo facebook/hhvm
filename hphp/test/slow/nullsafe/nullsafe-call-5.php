@@ -33,4 +33,8 @@ function main() {
   $x->bar();
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_nullsafe_call_5() {
 main();
+}

@@ -1,127 +1,9 @@
 <?hh // decl
 
-# !!! Please contact devx_www oncall if this breaks. !!!
-#
-# The Watchman extension is a core part of www infrastructure on devservers.
-
-require_once 'constants.inc';
-require_once 'callback.inc';
-
-// Borrowed and stripped down from Watchman project test infrastructure.
-class WatchmanInstance {
-  private $proc;
-  private $logfile;
-  private $sockname;
-  private $config_file;
-  private $repo_root;
-  private $run_details = '';
-  const TIMEOUT = 20;
-  private function tempfile() {
-    $temp = tempnam(sys_get_temp_dir(), 'wat');
-    return $temp;
-  }
-  function __construct($tmpdir) {
-    // Not atomic but PHP doesn't support this. Should be fine.
-    $this->repo_root = $tmpdir;
-    $this->logfile = $this->tempfile();
-    $this->sockname = $this->tempfile();
-    $this->config_file = $this->tempfile();
-    $config_json = '{}';
-    file_put_contents($this->config_file, $config_json);
-    $this->start();
-  }
-  function getFullSockName() {
-    return $this->sockname . '.sock';
-  }
-  function getRepoRoot() {
-    return $this->repo_root;
-  }
-  private function start() {
-    $cmd = "watchman --foreground --sockname=%s --logfile=%s " .
-            "--statefile=%s.state --log-level=2 --pidfile=%s";
-    putenv("WATCHMAN_CONFIG_FILE=".$this->config_file);
-    $cmd = sprintf(
-      $cmd,
-      $this->getFullSockName(),
-      $this->logfile,
-      $this->logfile,
-      $this->tempfile(),
-    );
-    $pipes = array();
-    $this->run_details = "Ran command: $cmd, in ".$this->repo_root;
-    $this->proc = proc_open($cmd, array(
-      0 => array('file', '/dev/null', 'r'),
-      1 => array('file', $this->logfile, 'a'),
-      2 => array('file', $this->logfile, 'a'),
-    ), $pipes, $this->repo_root);
-    if (!$this->proc) {
-      throw new Exception("Failed to spawn $cmd");
-    }
-    try {
-      $this->openSock();
-    } catch(Exception $e) {
-      $this->dumpLog();
-      throw $e;
-    }
-  }
-  public function dumpLog() {
-    print("Dumping log:\n");
-    system("cat $this->logfile");
-    print($this->run_details."\n");
-  }
-  private function openSock() {
-    $sockname = $this->getFullSockName();
-    $deadline = time() + 60;
-    do {
-      if (!file_exists($sockname)) {
-        usleep(30000);
-      }
-      $this->sock = @fsockopen('unix://' . $sockname);
-      if ($this->sock) {
-        break;
-      }
-    } while (time() <= $deadline);
-    if (!$this->sock) {
-      throw new Exception("Failed to talk to watchman on $sockname");
-    }
-    stream_set_timeout($this->sock, self::TIMEOUT);
-  }
-  private function waitForTerminate($timeout) {
-    if (!$this->proc) {
-      return false;
-    }
-    $deadline = time() + $timeout;
-    do {
-      $st = proc_get_status($this->proc);
-      if (!$st['running']) {
-        return $st;
-      }
-      usleep(30000);
-    } while (time() <= $deadline);
-    return $st;
-  }
-  function terminateProcess() {
-    if (!$this->proc) {
-      return;
-    }
-    proc_terminate($this->proc);
-    $st = $this->waitForTerminate(self::TIMEOUT);
-    if ($st['running']) {
-      echo "Didn't stop, sending bigger signal\n";
-      proc_terminate($this->proc, 9);
-      $st = $this->waitForTerminate(5);
-      $this->proc = null;
-    }
-  }
-  function __destruct() {
-    $this->terminateProcess();
-  }
-}
-
 function waitFor(string $filename, WatchmanInstance $wminst): void {
   print("Waiting for $filename\n");
   $timeout = 5;
-  while($timeout && !file_exists(TEST_FILE_GOT_FRESH)) {
+  while($timeout && !file_exists($filename)) {
     sleep(1);
     $timeout--;
   }
@@ -133,14 +15,13 @@ function waitFor(string $filename, WatchmanInstance $wminst): void {
   }
 }
 
-function test_core(string $tmpdir): void {
+function test_core(WatchmanInstance $wminst): void {
   if ((int)HH\ext_watchman_version()) {
     print "PASSED version get test\n";
   } else {
     print "FAILED version get test\n";
   }
 
-  $wminst = new WatchmanInstance($tmpdir);
   $sock = $wminst->getFullSockName();
   // Test one-shot
   print("Testing one-shot\n");
@@ -149,7 +30,7 @@ function test_core(string $tmpdir): void {
   $version = json_decode(HH\asio\join($version_h), true);
   if (
     !isset('capabilities', $version) ||
-    $version['capabilities'] !== array('relative_root' => true)
+    $version['capabilities'] !== darray['relative_root' => true]
   ) {
     throw new Exception("FAIL ('.var_export($version).')\n");
   } else {
@@ -250,8 +131,8 @@ function test_core(string $tmpdir): void {
   $touch_c = 0;
   $last_subscribe = null;
   $last_unsubscribe = null;
-  $exception_count = array(0, 0, 0);
-  $op_count = array(0, 0, 0);
+  $exception_count = varray[0, 0, 0];
+  $op_count = varray[0, 0, 0];
   srand(1);
   for ($i = 0; $i < 30000; $i++) {
     if ($i % 1000 === 0) {
@@ -264,8 +145,8 @@ function test_core(string $tmpdir): void {
         ),
         "All recent subscribe/unsubscribe operations failed",
       );
-      $exception_count = array(0, 0, 0);
-      $op_count = array(0, 0, 0);
+      $exception_count = varray[0, 0, 0];
+      $op_count = varray[0, 0, 0];
     }
     $op = rand() % 3;
     $op_count[$op]++;
@@ -309,7 +190,7 @@ function test_core(string $tmpdir): void {
   if (HH\watchman_check_sub(SUB_NAME)) {
     HH\asio\join(HH\watchman_unsubscribe(SUB_NAME));
   }
-  $hit_c = apc_fetch('stress_counter');
+  $hit_c = __hhvm_intrinsics\apc_fetch_no_check('stress_counter');
   if (!$subscribe_c || !$unsubscribe_c || !$touch_c || !$hit_c) {
     print("\nFAIL ($subscribe_c, $unsubscribe_c, $touch_c, $hit_c)\n");
   } else {
@@ -340,13 +221,6 @@ function test_core(string $tmpdir): void {
   }
   print("Sync expecting no timeout...\n");
   if (HH\asio\join(HH\watchman_sync_sub(SUB_NAME, 10000))) {
-    print("PASS\n");
-  } else {
-    print("FAIL\n");
-  }
-  print("Sync expecting immediate return...\n");
-  $synced = HH\watchman_sync_sub(SUB_NAME, 1) |> HH\asio\join($$);
-  if ($synced) {
     print("PASS\n");
   } else {
     print("FAIL\n");
@@ -435,23 +309,37 @@ function test_core(string $tmpdir): void {
   }
   HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 }
+<<__EntryPoint>>
+function entrypoint_ext_watchman(): void {
 
-$tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
-@unlink($tmpdir);
-if (!mkdir($tmpdir)) {
-  throw new Exception("FAIL failed creating dir '$tmpdir'\n");
-}
-try {
-  if (!chdir($tmpdir)) {
-    throw new Exception("FAIL (creating temporary directory)\n");
+  # !!! Please contact devx_www oncall if this breaks. !!!
+  #
+  # The Watchman extension is a core part of www infrastructure on devservers.
+
+  require_once 'constants.inc';
+  require_once 'callback.inc';
+  require_once 'wminst.inc';
+
+  $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
+  @unlink($tmpdir);
+  if (!mkdir($tmpdir)) {
+    throw new Exception("FAIL failed creating dir '$tmpdir'\n");
   }
-  test_core($tmpdir);
-} finally {
-  apc_delete('stress_counter');  // Stops async callback_checksub() if running
-  if (is_dir($tmpdir)) {
-    foreach (glob($tmpdir.'/*') as $file) {
-      unlink($file);
+  $wminst = null;
+  try {
+    if (!chdir($tmpdir)) {
+      throw new Exception("FAIL (creating temporary directory)\n");
     }
-    rmdir($tmpdir);
+    $wminst = new WatchmanInstance($tmpdir);
+    test_core($wminst);
+  } finally {
+    apc_delete('stress_counter');  // Stops async callback_checksub() if running
+    $wminst->terminateProcess();
+    if (is_dir($tmpdir)) {
+      foreach (glob($tmpdir.'/*') as $file) {
+        unlink($file);
+      }
+      rmdir($tmpdir);
+    }
   }
 }

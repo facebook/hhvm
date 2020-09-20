@@ -1,5 +1,5 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 goto A;
 
 {
@@ -19,5 +19,4 @@ A:
 		print "Done!\n";
 	}
 }
-
-?>
+}

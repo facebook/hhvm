@@ -1,1 +1,1 @@
--v Server.LightProcessCount=5
+-vServer.LightProcessFilePrefix=/tmp/lightprocess -vServer.LightProcessCount=5

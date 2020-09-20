@@ -1,0 +1,14 @@
+File "test_shapes.php", line 6, characters 31-41:
+  shape(NotRealClass::const => int)
+File "test_shapes.php", line 3, characters 14-25:
+Unbound name: `NotRealClass` (an object type) (Naming[2049])
+File "test_shapes.php", line 3, characters 14-32:
+A shape field name must be an `int` or `string` (Typing[4052])
+File "test_shapes.php", line 3, characters 14-25:
+Not a dynamic value
+File "test_shapes.php", line 7, characters 10-11:
+Invalid return type (Typing[4110])
+File "test_shapes.php", line 2, characters 19-21:
+Expected `int`
+File "test_shapes.php", line 3, characters 8-38:
+But got `shape(NotRealClass::const => int)`

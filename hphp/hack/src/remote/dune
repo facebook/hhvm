@@ -1,0 +1,10 @@
+(library
+  (name jobRunner_sig)
+  (wrapped false)
+  (modules
+    jobRunner_sig)
+  (libraries
+    core_kernel
+    future
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))  ; See T41851208

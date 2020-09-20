@@ -2,6 +2,5 @@
 
 -- Testing strftime() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: strftime() expects at most 2 parameters, 3 given in %s/strftime_error.php on line 16
 ===DONE===

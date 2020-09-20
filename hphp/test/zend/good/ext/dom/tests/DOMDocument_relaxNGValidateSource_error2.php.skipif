@@ -1,3 +1,2 @@
-<?php
+<?hh
 require_once('skipif.inc');
-?>

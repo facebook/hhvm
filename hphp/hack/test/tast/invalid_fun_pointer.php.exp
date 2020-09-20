@@ -1,0 +1,24 @@
+Errors:
+  [4:7-21] Unbound global function: `unbound_func` is not a valid name for fun()
+  [4:7-21] Unbound name: `unbound_func` (a global function)
+  [4:7-21] Unbound name (typing): `unbound_func`
+[(Fun
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid))));
+      f_name = ([3:10-14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_body =
+      { fb_ast =
+        [([4:3-23],
+          (Expr (([4:3-22], _), (Fun_id ([4:7-21], "\\unbound_func")))))];
+        fb_annotation = () };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false })
+  ]

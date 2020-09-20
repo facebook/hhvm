@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Date Formatter is a concrete class that enables locale-dependent
@@ -47,9 +47,9 @@ class IntlDateFormatter {
                               mixed $timezone = NULL, mixed $calendar = NULL,
                               string $pattern = ''): void;
 
-  public static function create($locale, $datetype, $timetype,
-                                $timezone = NULL, $calendar = NULL,
-                                $pattern = ''): mixed {
+  public static function create(string $locale, int $datetype, int $timetype,
+                                mixed $timezone = NULL, mixed $calendar = NULL,
+                                string $pattern = ''): mixed {
     try {
       return new IntlDateFormatter($locale, $datetype, $timetype,
                                    $timezone, $calendar, $pattern);
@@ -99,7 +99,7 @@ class IntlDateFormatter {
    *   IntlDateFormatter::TRADITIONAL or IntlDateFormatter::GREGORIAN.
    */
   <<__Native>>
-  function getCalendar(): int;
+  public function getCalendar(): int;
 
   /**
    * Get the datetype used for the IntlDateFormatter
@@ -202,7 +202,7 @@ class IntlDateFormatter {
    */
   <<__Native>>
   public function localtime(string $value,
-                            mixed &$position): mixed;
+                            inout mixed $position): mixed;
 
   /**
    * Parse string to a timestamp value
@@ -218,9 +218,15 @@ class IntlDateFormatter {
    * @return int - timestamp parsed value, or FALSE if value can't be
    *   parsed.
    */
+  public function parse(string $value): mixed {
+    $position = null;
+    $result = $this->parseWithPosition($value, inout $position);
+    return $result;
+  }
+
   <<__Native>>
-  public function parse(string $value,
-                        mixed &$position = null): mixed;
+  public function parseWithPosition(string $value,
+                                    inout mixed $position): mixed;
 
   /**
    * Sets the calendar type used by the formatter
@@ -236,7 +242,7 @@ class IntlDateFormatter {
    * @return bool -
    */
   <<__Native>>
-  function setCalendar(mixed $which): bool;
+  public function setCalendar(mixed $which): bool;
 
   /**
    * Set the leniency of the parser
@@ -507,8 +513,9 @@ function datefmt_is_lenient(IntlDateFormatter $fmt): bool {
  */
 function datefmt_localtime(IntlDateFormatter $fmt,
                            $value,
-                           &$position): mixed {
-  return $fmt->localTime($value, $position);
+                           inout $position): mixed {
+  $result = $fmt->localTime($value, inout $position);
+  return $result;
 }
 
 /**
@@ -528,8 +535,9 @@ function datefmt_localtime(IntlDateFormatter $fmt,
  */
 function datefmt_parse(IntlDateFormatter $fmt,
                        $value,
-                       &$position = null): mixed {
-  return $fmt->parse($value, $position);
+                       inout $position): mixed {
+  $result = $fmt->parseWithPosition($value, inout $position);
+  return $result;
 }
 
 /**

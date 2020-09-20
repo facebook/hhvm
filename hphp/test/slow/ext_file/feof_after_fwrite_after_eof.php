@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 function main() {
-  $inputs = array(
+  $inputs = varray[
     'php://temp',
     'php://memory',
-  );
+  ];
 
   foreach ($inputs as $input) {
     printf("---%s---\n", $input);
@@ -25,4 +25,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_feof_after_fwrite_after_eof() {
 main();
+}

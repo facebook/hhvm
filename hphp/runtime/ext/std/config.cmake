@@ -25,7 +25,6 @@ HHVM_DEFINE_EXTENSION("std" REQUIRED
     ext_std_errorfunc.h
     ext_std_file.h
     ext_std_function.h
-    ext_std_intrinsics.h
     ext_std_math.h
     ext_std_misc.h
     ext_std_network.h

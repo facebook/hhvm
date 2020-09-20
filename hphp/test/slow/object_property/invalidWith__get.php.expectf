@@ -1,9 +1,0 @@
-string(0) ""
-string(1) "1"
-string(0) ""
-string(3) "1.1"
-string(5) "Array"
-string(8) "006b6579"
-string(10) "bar string"
-
-Catchable fatal error: Object of class stdClass could not be converted to string in %s/test/slow/object_property/invalidWith__get.php on line 35

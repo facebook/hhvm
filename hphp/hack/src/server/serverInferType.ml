@@ -1,27 +1,25 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Hh_core
+open Hh_prelude
 open Option.Monad_infix
 
-(** Return the type of the smallest typed expression node whose associated span
+(** Return the type of the smallest expression node whose associated span
  * (the Pos.t in its Tast.ExprAnnotation.t) contains the given position.
  * "Smallest" here refers to the size of the node's associated span, in terms of
- * its byte length in the original source file. "Typed" means that the Tast.ty
- * option in the expression's Tast.ExprAnnotation.t is not None.
+ * its byte length in the original source file.
  *
- * If there is no single smallest node (i.e., multiple typed expression nodes
- * have spans of the same length containing the given position, where that
- * length is less than the length of all other spans containing the given
- * position), return the type of the first of these nodes visited in a preorder
- * traversal of the Tast.
+ * If there is no single smallest node (i.e., multiple expression nodes have
+ * spans of the same length containing the given position, where that length is
+ * less than the length of all other spans containing the given position),
+ * return the type of the first of these nodes visited in a preorder traversal
+ * of the Tast.
  *
  * This choice is somewhat arbitrary, and would seem to be unnecessary at first
  * blush (and indeed would be in a concrete syntax tree). In most situations,
@@ -51,103 +49,89 @@ open Option.Monad_infix
  * cannot assume that the structure of the CST is reflected in the TAST.
  *)
 
+let base_visitor line char =
+  object (self)
+    inherit [_] Tast_visitor.reduce as super
 
-class ['self] base_visitor line char = object (self : 'self)
-  inherit [_] Tast_visitor.reduce as super
-  inherit [Pos.t * _ * _] Ast.option_monoid
+    inherit [Pos.t * _ * _] Ast_defs.option_monoid
 
-  method private merge lhs rhs =
-    (* A node with position P is not always a parent of every other node with
-     * a position contained by P. Some desugaring can cause nodes to be
-     * rearranged so that this is no longer the case (e.g., `invariant`).
-     *
-     * To deal with this, we simply take the smaller node. *)
-    let lpos, _, _ = lhs in
-    let rpos, _, _ = rhs in
-    if Pos.length lpos <= Pos.length rpos then lhs else rhs
+    method private merge lhs rhs =
+      (* A node with position P is not always a parent of every other node with
+       * a position contained by P. Some desugaring can cause nodes to be
+       * rearranged so that this is no longer the case (e.g., `invariant`).
+       *
+       * To deal with this, we simply take the smaller node. *)
+      let (lpos, _, _) = lhs in
+      let (rpos, _, _) = rhs in
+      if Pos.length lpos <= Pos.length rpos then
+        lhs
+      else
+        rhs
 
-  method! on_expr env e =
-    let (pos, ty) = fst e in
-    let acc =
-      if Pos.inside pos line char
-      then ty >>| fun ty -> pos, env, ty
-      else None
-    in
-    self#plus acc (super#on_expr env e)
-end
+    method! on_'ex env (pos, ty) =
+      if Pos.inside pos line char then
+        Some (pos, env, ty)
+      else
+        None
 
-(** Same as `base_visitor`, except:
+    method! on_class_id env cid =
+      match cid with
+      (* Don't use the resolved class type (the expr_annotation on the class_id
+       type) when hovering over a CIexpr--we will want to show the type the
+       expression is annotated with (e.g., classname<C>) and it will not have a
+       smaller position. *)
+      | (_, Aast.CIexpr e) -> self#on_expr env e
+      | _ -> super#on_class_id env cid
+  end
 
-    If the smallest typed expression containing the given position has a
-    function type and is being invoked in a Call expression, return that
-    function's return type rather than the type of the function (i.e., the type
-    of the expression returned by the Call expression).
+(** Return the type of the node associated with exactly the given range.
 
+    When more than one node has the given range, return the type of the first
+    node visited in a preorder traversal.
 *)
-class ['self] function_following_visitor line char = object (self : 'self)
-  inherit ['self] base_visitor line char as super
+let range_visitor startl startc endl endc =
+  object
+    inherit [_] Tast_visitor.reduce
 
-  (* When the expression being applied has a Tfun type, replace that type with
-   * its return type. This matches with legacy behavior and is better-suited
-   * for IDE hover (at present, since full function types are presented in a
-   * way which makes them difficult to read). *)
-  method! on_Call env ct e hl el uel =
-    let open Typing_defs in
-    (* If the function has a Tanon or Tunresolved type, it is easier to use
-     * the type of the containing expression (which is the return type of this
-     * usage of the anonymous function, or a supertype of the return types
-     * of the members of the unresolved union), so we return None. *)
-    let rec use_containing_type env ty =
-      match snd ty with
-      | Tvar _ -> use_containing_type env (Typing_expand.fully_expand env ty)
-      | Tanon _ | Tunresolved [] -> ty, true
-      | Tunresolved [ty] -> use_containing_type env ty
-      | Tunresolved tys ->
-        let results = List.map tys (use_containing_type env) in
-        let ty = (fst ty, Tunresolved (List.map results fst)) in
-        let is_fun = function (_, Tfun _) -> true | _ -> false in
-        let use_containing =
-          List.exists results (fun (ty, uc) -> is_fun ty || uc) in
-        ty, use_containing
-      | _ -> ty, false
-    in
-    let return_type ty =
-      match snd ty with Tfun ft -> ft.ft_ret | _ -> ty
-    in
-    let (receiver_pos, _) = fst e in
-    if Pos.inside receiver_pos line char
-    then begin
-      self#on_expr env e >>= fun (p, env, ty) ->
-      let ty, use_containing = use_containing_type env ty in
-      if use_containing then None else Some (p, env, return_type ty)
-    end
-    else super#on_Call env ct e hl el uel
-end
+    inherit [_] Ast_defs.option_monoid
+
+    method merge x _ = x
+
+    method! on_'ex env (pos, ty) =
+      if Pos.exactly_matches_range pos startl startc endl endc then
+        Some (env, ty)
+      else
+        None
+  end
 
 let type_at_pos
-  (tast : Tast.program)
-  (line : int)
-  (char : int)
-: (Typing_env.env * Tast.ty) option =
-  (new base_visitor line char)#go tast
-  >>| (fun (_, env, ty) -> (env, ty))
+    (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
+    (Tast_env.env * Tast.ty) option =
+  (base_visitor line char)#go ctx tast >>| fun (_, env, ty) -> (env, ty)
 
-let returned_type_at_pos
-  (tast : Tast.program)
-  (line : int)
-  (char : int)
-: (Typing_env.env * Tast.ty) option =
-  (new function_following_visitor line char)#go tast
-  >>| (fun (_, env, ty) -> (env, ty))
+let expanded_type_at_pos
+    (ctx : Provider_context.t) (tast : Tast.program) (line : int) (char : int) :
+    (Tast_env.env * Tast.ty) option =
+  type_at_pos ctx tast line char
+  |> Option.map ~f:(fun (env, ty) -> (env, Tast_expand.expand_ty env ty))
 
-let go:
-  ServerEnv.env ->
-  (ServerUtils.file_input * int * int) ->
-  (string * string) option =
-fun env (file, line, char) ->
-  let ServerEnv.{tcopt; files_info; _} = env in
-  let _, tast = ServerIdeUtils.check_file_input tcopt files_info file in
-  returned_type_at_pos tast line char
-  >>| fun (env, ty) ->
-  Typing_print.full_strip_ns env ty,
-  Typing_print.to_json env ty |> Hh_json.json_to_string
+let type_at_range
+    (ctx : Provider_context.t)
+    (tast : Tast.program)
+    (start_line : int)
+    (start_char : int)
+    (end_line : int)
+    (end_char : int) : (Tast_env.env * Tast.ty) option =
+  (range_visitor start_line start_char end_line end_char)#go ctx tast
+
+let go_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int) : (string * string) option =
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
+  in
+  type_at_pos ctx tast line column >>| fun (env, ty) ->
+  ( Tast_env.print_ty env ty,
+    Tast_env.ty_to_json env ty |> Hh_json.json_to_string )

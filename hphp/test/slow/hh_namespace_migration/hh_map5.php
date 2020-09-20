@@ -6,7 +6,11 @@ namespace HH;
 
 function main() {
   $m = Map {1 => 1, 2 => 2, 3 => 3}; // Should work.
-  var_dump($m->count());
+  \var_dump($m->count());
 }
 
+
+<<__EntryPoint>>
+function main_hh_map5() {
 main();
+}

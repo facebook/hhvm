@@ -1,11 +1,11 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
 $r  = 0xff0000;
 $b = 0x0000ff;
 
-$style = array($r, $b);
+$style = varray[$r, $b];
 imagesetstyle($im, $style);
 
 // Horizontal line
@@ -19,14 +19,14 @@ $p5 = imagecolorat($im, 5,5) == $b;
 
 
 if ($p1 && $p2 && $p3 && $p4 && $p5) {
-	echo "Horizontal: ok\n";
+    echo "Horizontal: ok\n";
 }
 imagedestroy($im);
 
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
-$style = array($r, $b);
+$style = varray[$r, $b];
 imagesetstyle($im, $style);
 
 
@@ -39,7 +39,7 @@ $p5 = imagecolorat($im, 2,4) == $r;
 $p6 = imagecolorat($im, 2,5) == $b;
 
 if ($p1 && $p2 && $p3 && $p4 && $p5 && $p6) {
-	echo "Vertical: ok\n";
+    echo "Vertical: ok\n";
 }
 imagedestroy($im);
 
@@ -47,7 +47,7 @@ imagedestroy($im);
 $im = imagecreatetruecolor(6,6);
 imagefill($im, 0,0, 0xffffff);
 
-$style = array($r, $b);
+$style = varray[$r, $b];
 imagesetstyle($im, $style);
 
 imageline($im, 0,0, 5,5, IMG_COLOR_STYLED);
@@ -59,9 +59,7 @@ $p5 = imagecolorat($im, 4,4) == $r;
 $p6 = imagecolorat($im, 5,5) == $b;
 
 if ($p1 && $p2 && $p3 && $p4 && $p5 && $p6) {
-	echo "Diagonal: ok\n";
+    echo "Diagonal: ok\n";
 }
 imagedestroy($im);
-
-
-?>
+}

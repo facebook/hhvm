@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test1() {
  echo "test1
@@ -14,6 +14,9 @@ function baz($test1, $test2) {
   var_dump(function_exists($test1));
   var_dump(function_exists($test2));
 }
+
+<<__EntryPoint>>
+function main_1192() {
 baz("teSt1", "test2");
 fb_rename_function("test1", "test2");
 baz("TEst1", "test2");
@@ -21,3 +24,4 @@ fb_rename_function("test3", "test1");
 baz("test1", "test2");
 test1();
 test2();
+}

@@ -1,18 +1,12 @@
 *** Testing array_rand() : with associative array ***
 
 -- with all default and optional arguments --
-array(6) {
-  [0]=>
+varray(6) {
   string(%d) "%s"
-  [1]=>
   string(%d) "%s"
-  [2]=>
   string(%d) "%s"
-  [3]=>
   string(%d) "%s"
-  [4]=>
   string(%d) "%s"
-  [5]=>
   string(%d) "%s"
 }
 

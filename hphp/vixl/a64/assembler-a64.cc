@@ -366,7 +366,7 @@ Assembler::~Assembler() {
 
 
 void Assembler::Reset() {
-#ifdef DEBUG
+#ifndef NDEBUG
   assert(literal_pool_monitor_ == 0);
   cb_.zero();
   finalized_ = false;
@@ -381,7 +381,7 @@ void Assembler::FinalizeCode() {
   if (!literals_.empty()) {
     EmitLiteralPool();
   }
-#ifdef DEBUG
+#ifndef NDEBUG
   finalized_ = true;
 #endif
 }
@@ -1174,6 +1174,19 @@ void Assembler::ld1(const VRegister& vt,
 void Assembler::st1(const VRegister& vt,
                     const MemOperand& src) {
   LoadStoreStruct(vt, src, NEON_ST1_1v);
+}
+
+
+void Assembler::mov(const VRegister& vd, const VRegister& vs) {
+  assert(vd.IsSameSizeAndType(vs));
+  Instr format;
+  if (vd.Is64Bits()) {
+    format = NEON_8B;
+  } else {
+    assert(vd.Is128Bits());
+    format = NEON_16B;
+  }
+  Emit(format | NEON_ORR | Rm(vs) | Rn(vs) | Rd(vd));
 }
 
 

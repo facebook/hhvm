@@ -1,0 +1,109 @@
+====================================================
+darray(1) {
+  ["checkme"]=>
+  varray(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+====================================================
+darray(2) {
+  ["e"]=>
+  varray(4) {
+    int(5)
+    string(9) "Exception"
+    NULL
+    int(0)
+  }
+  ["checkme"]=>
+  varray(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+====================================================
+darray(4) {
+  ["num"]=>
+  varray(4) {
+    int(3)
+    NULL
+    NULL
+    int(0)
+  }
+  ["checkme"]=>
+  varray(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["beans"]=>
+  varray(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["cheese"]=>
+  varray(4) {
+    int(1)
+    NULL
+    NULL
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)
+====================================================
+darray(4) {
+  ["num"]=>
+  varray(4) {
+    int(3)
+    NULL
+    int(2)
+    int(0)
+  }
+  ["checkme"]=>
+  varray(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["beans"]=>
+  varray(4) {
+    int(6)
+    NULL
+    NULL
+    int(0)
+  }
+  ["cheese"]=>
+  varray(4) {
+    int(1)
+    NULL
+    string(2) "hi"
+    int(0)
+  }
+}
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(false)

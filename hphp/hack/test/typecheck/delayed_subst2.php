@@ -1,11 +1,12 @@
 ////file1.php
-<?hh
+<?hh // partial
 
 interface I<T> {}
 interface I2 extends I<int> {}
+
 /* HH_FIXME[4101] */
 function i(): I {
-  // UNSAFE
+  throw new Exception();
 }
 
 ////file2.php

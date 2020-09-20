@@ -1,4 +1,4 @@
-<?php // should pass
+<?hh // should fail
 
 interface I1 {
   // Has less args then the implementing function
@@ -16,4 +16,8 @@ interface I2 {
 class C2 extends PDO implements I2 {
 }
 
+
+<<__EntryPoint>>
+function main_01() {
 print("Success\n");
+}

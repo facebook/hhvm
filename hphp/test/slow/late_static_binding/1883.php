@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 class X {
   public function foo($y) {
-    call_user_func(array($y, 'foo'));
+    call_user_func(varray[$y, 'foo']);
     $y::foo();
   }
 }
@@ -15,6 +15,10 @@ class Y {
     var_dump(__METHOD__);
   }
 }
+
+<<__EntryPoint>>
+function main_1883() {
 $x = new X;
 $x->foo('y');
 $x->foo(new Y);
+}

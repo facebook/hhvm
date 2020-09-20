@@ -1,49 +1,64 @@
 *** Testing iconv_strlen() : usage variations ***
 
 --int 0--
-int(1)
+
+Warning: iconv_strlen() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --int 1--
-int(1)
+
+Warning: iconv_strlen() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --int 12345--
-int(5)
+
+Warning: iconv_strlen() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --int -12345--
-int(6)
+
+Warning: iconv_strlen() expects parameter 1 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --float 10.5--
-int(4)
+
+Warning: iconv_strlen() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --float -10.5--
-int(5)
+
+Warning: iconv_strlen() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --float 12.3456789000e10--
-int(12)
+
+Warning: iconv_strlen() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --float 12.3456789000e-10--
-int(13)
+
+Warning: iconv_strlen() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --float .5--
-int(3)
+
+Warning: iconv_strlen() expects parameter 1 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --uppercase NULL--
-int(0)
+
+Warning: iconv_strlen() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --lowercase null--
-int(0)
+
+Warning: iconv_strlen() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --lowercase true--
-int(1)
+
+Warning: iconv_strlen() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --lowercase false--
-int(0)
+
+Warning: iconv_strlen() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --uppercase TRUE--
-int(1)
+
+Warning: iconv_strlen() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --uppercase FALSE--
-int(0)
+
+Warning: iconv_strlen() expects parameter 1 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --empty string DQ--
 int(0)
@@ -64,16 +79,18 @@ int(6)
 int(11)
 
 --instance of class--
-int(14)
+
+Warning: iconv_strlen() expects parameter 1 to be string, object given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --undefined var--
-int(0)
+
+Warning: iconv_strlen() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --unset var--
-int(0)
+
+Warning: iconv_strlen() expects parameter 1 to be string, null given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 
 --resource--
 
-Warning: %s
-bool(false)
+Warning: iconv_strlen() expects parameter 1 to be string, resource given in %s/zend/good/ext/iconv/tests/iconv_strlen_variation1.php on line 99
 ===DONE===

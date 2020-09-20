@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of first occurrence of a case-insensitive string
  * Source code: ext/standard/string.c
@@ -6,28 +6,28 @@
 
 /* Test stripos() function with unexpected inputs for 'offset' argument */
 
+// defining a class
+class sample  {
+  public function __toString() {
+    return "object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function with unexpected values for offset ***\n";
 
 // get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
 
-// defining a class
-class sample  {
-  public function __toString() {
-    return "object";
-  } 
-}
-
 //getting the resource
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 //definition of input args
 $haystack = "hello world";
 $needle = "world";
 
 // array with different values
-$offsets =  array (
+$offsets =  varray [
 
   // float values
   1.5,
@@ -37,11 +37,11 @@ $offsets =  array (
   .5,
 
   // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -68,16 +68,16 @@ $offsets =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 
 // loop through each element of the array and check the working of stripos()
 $counter = 1;
 for($index = 0; $index < count($offsets); $index ++) {
   echo "-- Iteration $counter --\n";
-  var_dump( stripos($haystack, $needle, $offsets[$index]) );
+  try { var_dump( stripos($haystack, $needle, $offsets[$index]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 
 echo "*** Done ***";
-?>
+}

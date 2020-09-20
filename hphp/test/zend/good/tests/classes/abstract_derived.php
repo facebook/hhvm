@@ -1,12 +1,11 @@
-<?php
+<?hh
 
 class base {
 }
 
 class derived extends base {
-	abstract function show();
+    abstract function show();
 }
-
-?>
-===DONE===
-<?php exit(0); ?>
+<<__EntryPoint>> function main(): void {
+echo "===DONE===\n";
+}

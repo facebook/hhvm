@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PROPERTY_TABLE_H_
-#define incl_HPHP_PROPERTY_TABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/string-data.h"
 
@@ -170,8 +169,8 @@ inline uint32_t PropertyTable::bucketFor(
   const Entry* entries,
   size_t capacity
 ) const {
-  assert(propType == NotStatic || property->isStatic());
-  assert(m_size < m_capacity);
+  assertx(propType == NotStatic || property->isStatic());
+  assertx(m_size < m_capacity);
   auto hash = property->hash();
   auto start = hash & (capacity - 1);
   auto current = start;
@@ -191,4 +190,3 @@ inline uint32_t PropertyTable::bucketFor(
 
 }
 
-#endif

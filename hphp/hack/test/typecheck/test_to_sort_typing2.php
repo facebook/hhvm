@@ -1,11 +1,11 @@
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
@@ -82,7 +82,7 @@ function g($x){
 */
 
 function g($x){
-  $x = array('gg' => 0);
+  $x = darray['gg' => 0];
 
   if (true) {
     $x['d'] = 0;

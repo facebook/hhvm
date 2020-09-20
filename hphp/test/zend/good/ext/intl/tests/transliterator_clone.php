@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 $str = "a U+4E07";
 
@@ -9,4 +9,4 @@ $u = clone $t;
 echo $u->id, ": ", $u->transliterate($str), "\n";
 
 echo "Done.\n";
-
+}

@@ -1,7 +1,9 @@
-<?php
+<?hh
 
-require 'examine_diff.inc';
-define('PHPT_DATETIME_SHOW', PHPT_DATETIME_SHOW_SUB);
-require 'DateTime_data-february.inc';
+const PHPT_DATETIME_SHOW = PHPT_DATETIME_SHOW_SUB;
 
-?>
+<<__EntryPoint>> function main(): void {
+  require 'examine_diff.inc';
+  require 'DateTime_data-february.inc';
+  test();
+}

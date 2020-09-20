@@ -1,194 +1,182 @@
 *** Testing date_sunset() : usage variation ***
 
 --int 0--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --int 1--
-string(5) "17:44"
-float(17.749%d)
-int(1218197698)
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --int 12345--
-bool(false)
-bool(false)
-bool(false)
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --int -12345--
-string(5) "17:35"
-float(17.598%d)
-int(1218197155)
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --uppercase NULL--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+string(5) "18:24"
+float(18.413%d)
+int(1218200087)
 
 --lowercase null--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+string(5) "18:24"
+float(18.413%d)
+int(1218200087)
 
 --lowercase true--
-string(5) "17:44"
-float(17.749%d)
-int(1218197698)
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --lowercase false--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --uppercase TRUE--
-string(5) "17:44"
-float(17.749%d)
-int(1218197698)
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --uppercase FALSE--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+
+Warning: date_sunset() expects parameter 3 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --empty string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --empty string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --mixed case string--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --heredoc--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, string given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 3 to be double, object given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --undefined var--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+string(5) "18:24"
+float(18.413%d)
+int(1218200087)
 
 --unset var--
-string(5) "17:43"
-float(17.730%d)
-int(1218197630)
+string(5) "18:24"
+float(18.413%d)
+int(1218200087)
 ===DONE===

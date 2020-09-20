@@ -1,8 +1,10 @@
-File "gen6.php", line 25, characters 8-14:
-Some type constraint(s) here are violated (Typing[4110])
-File "gen6.php", line 12, characters 9-9:
-'T' is a constrained type parameter
-File "gen6.php", line 12, characters 14-14:
-This is an object of type A
 File "gen6.php", line 26, characters 11-17:
-It is incompatible with an object of type Z
+Invalid argument (Typing[4323])
+File "gen6.php", line 12, characters 14-17:
+Some type constraint(s) are violated here
+File "gen6.php", line 12, characters 9-9:
+`T` is a constrained type parameter
+File "gen6.php", line 12, characters 14-17:
+Expected `A<[unresolved]>`
+File "gen6.php", line 26, characters 15-15:
+But got `Z`

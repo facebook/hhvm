@@ -34,8 +34,13 @@ namespace HPHP {
 RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
                        const std::string &pathTranslation,
                        const std::string &sourceRoot)
-  :  m_rewritten(false), m_defaultDoc(false), m_done(false),
-     m_forbidden(false), m_ext(nullptr) {
+  : m_rewritten(false)
+  , m_defaultDoc(false)
+  , m_globalDoc(false)
+  , m_done(false)
+  , m_forbidden(false)
+  , m_ext(nullptr)
+{
   if (!process(vhost, transport, sourceRoot, pathTranslation,
                transport->getServerObject()) ||
       (m_forbidden && RuntimeOption::ForbiddenAs404)) {
@@ -64,7 +69,11 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
 }
 
 RequestURI::RequestURI(const std::string & rpcFunc)
-  :  m_rewritten(false), m_defaultDoc(false), m_done(false) {
+  : m_rewritten(false)
+  , m_defaultDoc(false)
+  , m_globalDoc(false)
+  , m_done(false)
+{
   m_originalURL = m_rewrittenURL = m_resolvedURL = String(rpcFunc);
 }
 
@@ -97,6 +106,25 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
       m_pathInfo = m_origPathInfo;
     }
     return true;
+  }
+
+  if (!RuntimeOption::GlobalDocument.empty()) {
+    // GlobalDocument option in use - never resolveURL and 404 if GlobalDocument
+    // does not exist. Still check for rewrites.
+
+    if (!rewriteURLNoDirCheck(vhost, transport, pathTranslation, sourceRoot)) {
+      // Redirection
+      m_done = true;
+      return true;
+    }
+
+    m_resolvedURL = String(RuntimeOption::GlobalDocument);
+    if (virtualFileExists(vhost, sourceRoot, pathTranslation,
+                          m_resolvedURL)) {
+      m_globalDoc = true;
+      return true;
+    }
+    return false;
   }
 
   // Fast path for files that exist
@@ -153,9 +181,22 @@ const StaticString s_https("https://");
  * Postcondition: Output is false and we are redirecting OR
  *  m_rewrittenURL is set and m_queryString is updated if needed
  */
-bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
-                            const std::string &pathTranslation,
-                            const std::string &sourceRoot) {
+bool RequestURI::rewriteURL(
+  const VirtualHost* vhost,
+  Transport* transport,
+  const std::string& pathTranslation,
+  const std::string& sourceRoot
+) {
+  return rewriteURLNoDirCheck(vhost, transport, pathTranslation, sourceRoot) &&
+         rewriteURLForDir(vhost, transport, pathTranslation, sourceRoot);
+}
+
+bool RequestURI::rewriteURLNoDirCheck(
+  const VirtualHost* vhost,
+  Transport* transport,
+  const std::string& pathTranslation,
+  const std::string& sourceRoot
+) {
   bool qsa = false;
   int redirect = 0;
   std::string host = transport->getHeader("host");
@@ -200,7 +241,15 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
     // A un-rewritten URL is always relative, so remove prepending /
     m_rewrittenURL = m_rewrittenURL.substr(1);
   }
+  return true;
+}
 
+bool RequestURI::rewriteURLForDir(
+  const VirtualHost* vhost,
+  Transport* transport,
+  const std::string& pathTranslation,
+  const std::string& sourceRoot
+) {
   // If the URL refers to a folder but does not end
   // with a slash, then we need to redictect
   String url = m_rewrittenURL;
@@ -229,7 +278,6 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
       return false;
     }
   }
-
   return true;
 }
 

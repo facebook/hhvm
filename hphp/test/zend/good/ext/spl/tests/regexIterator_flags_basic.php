@@ -1,6 +1,6 @@
-<?php
-
-$array = array('foo', 'bar', 'baz');
+<?hh
+<<__EntryPoint>> function main(): void {
+$array = varray['foo', 'bar', 'baz'];
 $iterator = new ArrayIterator($array);
 $regexIterator = new RegexIterator($iterator, "/f/", null, RegexIterator::USE_KEY);
 
@@ -11,5 +11,4 @@ $regexIterator->setFlags(3);
 var_dump($regexIterator->getFlags() === RegexIterator::USE_KEY);
 $regexIterator->setFlags(RegexIterator::USE_KEY);
 var_dump($regexIterator->getFlags() === RegexIterator::USE_KEY);
-
-?>
+}

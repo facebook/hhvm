@@ -1,4 +1,4 @@
-object(bar)#%d (1) {
+object(bar) (1) {
   [%u|b%"queryString"]=>
   %unicode|string%(8) "SELECT 1"
 }

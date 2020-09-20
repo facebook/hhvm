@@ -14,9 +14,13 @@ async function foo() {
   return await \HH\Asio\m(
     array_map(
       async $id ==> await bar($id),
-      array(1,2,3,4),
+      varray[1,2,3,4],
     )
   );
 }
 
+
+<<__EntryPoint>>
+function main_lambda2() {
 var_dump(HH\Asio\join(foo()));
+}

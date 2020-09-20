@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A {
   public function smallTalk() {
@@ -28,8 +28,9 @@ class Talker {
     B::bigTalk as bTalk;
   }
 }
+<<__EntryPoint>> function main(): void {
 $talker = new Talker();
 $talker->smallTalk();
 $talker->bigTalk(1);
 $talker->bTalk(2);
-?>
+}

@@ -1,23 +1,14 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
-trait THello1 {
-  public $hello = "foo";
+<<__EntryPoint>>
+function entrypoint_property004(): void {
+  error_reporting(E_ALL);
+
+  require_once(__DIR__.'/property004.traits.inc');
+
+  echo "PRE-CLASS-GUARD\n";
+
+  require_once(__DIR__.'/property004.class.inc');
+
+  $t = new TraitsTest;
 }
-
-trait THello2 {
-  private $hello = "bar";
-}
-
-echo "PRE-CLASS-GUARD\n";
-
-class TraitsTest {
-	use THello1;
-	use THello2;
-	public function getHello() {
-	    return $this->hello;
-	}
-}
-
-$t = new TraitsTest;
-?>

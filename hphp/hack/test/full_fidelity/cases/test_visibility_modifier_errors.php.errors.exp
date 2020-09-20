@@ -1,0 +1,10 @@
+(6,3)-(6,10) Interface methods must be `public` or `protected`
+(8,3)-(8,35) Cannot redeclare `i1()` (previously declared in test_visibility_modifier_errors.php:4)
+(8,10)-(8,15) Interface methods cannot be declared `final`
+(9,3)-(9,42) Cannot redeclare `i2()` (previously declared in test_visibility_modifier_errors.php:5)
+(9,10)-(9,15) Interface methods cannot be declared `final`
+(10,3)-(10,43) Cannot redeclare `i3()` (previously declared in test_visibility_modifier_errors.php:6)
+(10,10)-(10,15) Interface methods cannot be declared `final`
+(10,16)-(10,23) Interface methods must be `public` or `protected`
+(11,3)-(11,45) Cannot redeclare `i4()` (previously declared in test_visibility_modifier_errors.php:7)
+(11,10)-(11,15) Interface methods cannot be declared `final`

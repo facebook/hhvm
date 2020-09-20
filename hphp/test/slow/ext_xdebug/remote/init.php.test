@@ -1,8 +1,0 @@
-<?php
-
-try {
-  echo "About to throw an exception\n";
-  throw new Exception("Hello world!");
-} catch (Exception $e) {
-  echo "Caught the exception!\n";
-}

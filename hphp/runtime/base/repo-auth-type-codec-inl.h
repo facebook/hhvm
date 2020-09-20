@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_CODEC_INL_H_
-#define incl_HPHP_REPO_AUTH_TYPE_CODEC_INL_H_
+#pragma once
 
 namespace HPHP {
 
@@ -24,14 +23,25 @@ namespace HPHP {
  * We set the high bit in the tag if there's going to be a specialized
  * array id.  This should only be found when the tag is an array type.
  */
-constexpr uint8_t kRATArrayDataBit = 0x80;
+constexpr uint16_t kRATArrayDataBit = 0x8000;
 
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
 size_t encodedRATSize(const unsigned char* pc) {
   using T = RepoAuthType::Tag;
-  auto const rawTag = *pc;
+  uint16_t permutatedTag = static_cast<uint8_t>(*pc);
+  auto nextPcVal = *(pc + 1);
+  if (permutatedTag == 0xff) {
+    uint8_t tmp = static_cast<uint8_t>(nextPcVal);
+    assertx(tmp != 0xff);
+    permutatedTag = tmp + 0xff;
+    nextPcVal = *(pc + 2);
+  }
+  size_t tagSize = permutatedTag < 0xff ? 1 : 2;
+
+  // Move the kRATPtrBit(0x4000) and kRATArrayDataBit(0x8000) bit back
+  uint16_t rawTag = (permutatedTag >> 2) | (permutatedTag << 14);
   bool const highBitSet = rawTag & kRATArrayDataBit;
   auto const tag = static_cast<T>(rawTag & ~kRATArrayDataBit);
   switch (tag) {
@@ -52,19 +62,34 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptStr:
   case T::Obj:
   case T::OptObj:
+  case T::Func:
+  case T::OptFunc:
+  case T::ClsMeth:
+  case T::OptClsMeth:
+  case T::Record:
+  case T::OptRecord:
+  case T::Cls:
+  case T::OptCls:
+  case T::LazyCls:
+  case T::OptLazyCls:
   case T::UncArrKey:
   case T::ArrKey:
   case T::OptUncArrKey:
   case T::OptArrKey:
+  case T::UncStrLike:
+  case T::StrLike:
+  case T::OptUncStrLike:
+  case T::OptStrLike:
+  case T::UncArrKeyCompat:
+  case T::ArrKeyCompat:
+  case T::OptUncArrKeyCompat:
+  case T::OptArrKeyCompat:
   case T::InitUnc:
   case T::Unc:
   case T::InitCell:
   case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
-    assert(!highBitSet);
-    return 1;
+    assertx(!highBitSet);
+    return tagSize;
   case T::SArr:
   case T::OptSArr:
   case T::Arr:
@@ -89,13 +114,30 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-    return highBitSet ? 5 : 1;
+  case T::VArrCompat:
+  case T::VecCompat:
+  case T::OptVArrCompat:
+  case T::OptVecCompat:
+  case T::ArrCompat:
+  case T::OptArrCompat:
+    if (highBitSet) {
+      return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
+    }
+    return tagSize;
   case T::ExactObj:
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
-    assert(!highBitSet);
-    return 5;
+  case T::ExactCls:
+  case T::SubCls:
+  case T::OptExactCls:
+  case T::OptSubCls:
+  case T::ExactRecord:
+  case T::OptExactRecord:
+  case T::SubRecord:
+  case T::OptSubRecord:
+    assertx(!highBitSet);
+    return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
   }
   not_reached();
 }
@@ -104,4 +146,3 @@ size_t encodedRATSize(const unsigned char* pc) {
 
 }
 
-#endif

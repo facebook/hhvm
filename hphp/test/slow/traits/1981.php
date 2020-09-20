@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait HelloWorld {
   private function sayHello() {
@@ -23,10 +23,11 @@ class MyClass3 {
     return $this->sayHello();
   }
 }
+<<__EntryPoint>> function main(): void {
 $a = new MyClass1;
 $a->sayHello();
 $a = new MyClass2;
 $a->sayHello();
 $a = new MyClass3;
 $a->sayHi();
-?>
+}

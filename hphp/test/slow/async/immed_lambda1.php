@@ -16,4 +16,8 @@ async function foo() {
   return await $awaitable;
 }
 
+
+<<__EntryPoint>>
+function main_immed_lambda1() {
 var_dump(HH\Asio\join(foo()));
+}

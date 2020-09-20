@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
     use T1 {
        func as newFunc;
@@ -9,7 +9,7 @@ class Foo {
     }
 }
 
-trait T1 { 
+trait T1 {
     public function func() {
         echo "From T1\n";
     }
@@ -36,12 +36,12 @@ class Bar {
     }
 }
 
-trait T2 { 
+trait T2 {
     public function func2() {
         echo "From T2\n";
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $f = new Foo();
 
 $f->newFunc(); //from T1
@@ -54,3 +54,4 @@ $b->func2(); //from Bar
 $b->newFunc2(); //from T2
 $b->newFunc3(); //from T2
 $b->func3(); //from Bar
+}

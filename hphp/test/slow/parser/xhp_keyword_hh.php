@@ -84,4 +84,8 @@ class :foo {
   attribute enum { 'bar', 'baz' } newtype;
   attribute enum { 'bar', 'baz' } shape;
 }
+
+<<__EntryPoint>>
+function main_xhp_keyword_hh() {
 echo "Done\n";
+}

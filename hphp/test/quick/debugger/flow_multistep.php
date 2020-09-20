@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function a($a) {
@@ -26,10 +26,10 @@ private
     $x = $a;
   }
 
-  public function __destruct() {
-    echo "C1 destructor!\n";
-  }
-};
+
+
+
+}
 
 class C2 {
 private
@@ -40,13 +40,13 @@ private
     $x = $a;
   }
 
-  public function __destruct() {
-    echo "C2 destructor\n";
-    $c = new C1(42);
-    $c = null;
-    echo "C2 destructor done\n";
-  }
-};
+
+
+
+
+
+
+}
 
 function main() {
   $c1 = new C1(5);
@@ -57,7 +57,8 @@ function main() {
   var_dump($d);
   var_dump(a(42));
 }
+<<__EntryPoint>>
+function entrypoint_flow_multistep(): void {
 
-main();
-
-
+  main();
+}

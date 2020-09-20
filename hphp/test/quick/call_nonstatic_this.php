@@ -20,12 +20,9 @@ class E extends B {
     if (isset($this)) var_dump($this);
   }
 }
-function main() {
+<<__EntryPoint>> function main(): void {
   $d = new D;
   $d->test();
-  $d->test2();
   $e = new E;
-  $e->test();
   $e->test2();
 }
-main();

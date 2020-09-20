@@ -1,11 +1,10 @@
-<?hh // decl
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 class NumberFormatter {
@@ -84,20 +83,35 @@ class NumberFormatter {
   const TYPE_DOUBLE                        = 71;
   const TYPE_CURRENCY                      = 72;
 
+  <<__Pure>>
   public function __construct(string $locale, int $style, string $pattern = "#,##0.###");
+  <<__Pure, __MaybeMutable>>
   public function formatCurrency(float $value, string $currency) : string;
-  public function format(mixed $value, int $type = NumberFormatter::TYPE_DEFAULT) : string;
+  <<__Pure, __MaybeMutable>>
+ public function format(mixed $value, int $type = NumberFormatter::TYPE_DEFAULT) : string;
+  <<__Pure, __MaybeMutable>>
   public function getAttribute(int $attr) : int;
+  <<__Pure, __MaybeMutable>>
   public function getErrorCode() : int;
+  <<__Pure, __MaybeMutable>>
   public function getErrorMessage() : string;
+  <<__Pure, __MaybeMutable>>
   public function getLocale(int $type = Locale::ACTUAL_LOCALE) : string;
+  <<__Pure, __MaybeMutable>>
   public function getPattern() : string;
+  <<__Pure, __MaybeMutable>>
   public function getSymbol(int $attr) : string;
+  <<__Pure, __MaybeMutable>>
   public function getTextAttribute(int $attr) : string;
-  public function parseCurrency(string $value, string &$currency, int &$position = 0) : float;
-  public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, int &$position = 0) : mixed;
+  public function parseCurrency(string $value, inout string $currency, inout int $position) : float;
+  public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE) : mixed;
+  public function parseWithPosition(string $value, int $type, inout int $position) : mixed;
+  <<__Pure, __Mutable>>
   public function setAttribute(int $attr, int $value) : bool;
+  <<__Pure, __Mutable>>
   public function setPattern(string $pattern) : bool;
+  <<__Pure, __Mutable>>
   public function setSymbol(int $attr, string $value) : bool;
+  <<__Pure, __Mutable>>
   public function setTextAttribute(int $attr, string $value) : bool;
 }

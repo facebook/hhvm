@@ -1,0 +1,2 @@
+File "repeated_xhp_attrib.php", line 6, characters 23-25:
+Cannot redeclare foo (Parsing[1007])

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int vfprintf  ( resource $handle  , string $format , array $args  )
  * Description: Write a formatted string to a stream
  * Source code: ext/standard/formatted_print.c
@@ -8,30 +8,30 @@
  * Test vfprintf() when different unsigned formats and unsigned values
  * are passed to the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vfprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats
-$formats = array(
+$formats = varray[
   '%u %+u %-u', 
   '%lu %Lu %4u %-4u',
   '%10.4u %-10.4u %.4u', 
   '%\'#2u %\'2u %\'$2u %\'_2u',
   '%3$u %4$u %1$u %2$u'
-);
+];
 
 // Arrays of unsigned values for the format defined in $format.
 // Each sub array contains unsigned values which correspond to each format string in $format
-$args_array = array(
-  array(1234567, 01234567, 0 ),
-  array(12345678900, 12345678900, 1234, 12345),
-  array("1234000", 10.1234567e10, 1.2e2),
-  array(1, 0, 00, "10_"),
-  array(3, 4, 1, 2)
-);
+$args_array = varray[
+  varray[1234567, 01234567, 0 ],
+  varray[12345678900, 12345678900, 1234, 12345],
+  varray["1234000", 10.1234567e10, 1.2e2],
+  varray[1, 0, 00, "10_"],
+  varray[3, 4, 1, 2]
+];
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation15_64bit.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation15_64bit.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -50,5 +50,5 @@ echo "\n";
 
 unlink($data_file); 
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

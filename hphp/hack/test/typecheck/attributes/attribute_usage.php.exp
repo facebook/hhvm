@@ -1,0 +1,6 @@
+File "attribute_usage.php", line 17, characters 5-11:
+Invalid argument (Typing[4110])
+File "attribute_usage.php", line 8, characters 38-40:
+Expected `int`
+File "attribute_usage.php", line 17, characters 5-11:
+But got `string`

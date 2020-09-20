@@ -26,16 +26,6 @@ function base_define($ks, $k) {
   var_dump($ks);
 }
 
-function base_define_reffy($ks, $k) {
-  $str = 'abc';
-  try {
-    $ks[$k][0] = &$str;
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($ks);
-}
-
 function base_unset($ks, $k) {
   try {
     unset($ks[$k][0]);
@@ -47,14 +37,12 @@ function base_unset($ks, $k) {
 
 function base($ks) {
   echo "======= base_elem_warn =============================\n";
-  base_elem_warn($ks, 1);
   base_elem_warn($ks, 3);
   base_elem_warn($ks, '1');
   base_elem_warn($ks, 'foo');
   base_elem_warn($ks, true);
 
   echo "======= base_elem ==================================\n";
-  base_elem($ks, 1);
   base_elem($ks, 3);
   base_elem($ks, '1');
   base_elem($ks, 'foo');
@@ -66,13 +54,6 @@ function base($ks) {
   base_define($ks, '1');
   base_define($ks, 'foo');
   base_define($ks, true);
-
-  echo "======= base_define_reffy ==========================\n";
-  base_define_reffy($ks, 1);
-  base_define_reffy($ks, 3);
-  base_define_reffy($ks, '1');
-  base_define_reffy($ks, 'foo');
-  base_define_reffy($ks, true);
 
   echo "======= base_unset =================================\n";
   base_unset($ks, 1);
@@ -109,7 +90,7 @@ function base($ks) {
   echo "======= base_prop_set ==============================\n";
   try {
     $copy = $ks;
-    $copy->foobaz[0] = 123;
+    $copy->foobaz = varray[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -141,16 +122,6 @@ function dim_define($a, $k) {
   var_dump($a);
 }
 
-function dim_define_reffy($a, $k) {
-  $str = 'abc';
-  try {
-    $a[1][$k][0] = &$str;
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($a);
-}
-
 function dim_unset($a, $k) {
   try {
     unset($a[1][$k][0]);
@@ -162,14 +133,12 @@ function dim_unset($a, $k) {
 
 function dim($a) {
   echo "======= dim_elem_warn ==============================\n";
-  dim_elem_warn($a, 1);
   dim_elem_warn($a, 3);
   dim_elem_warn($a, '1');
   dim_elem_warn($a, 'foo');
   dim_elem_warn($a, true);
 
   echo "======= dim_elem ===================================\n";
-  dim_elem($a, 1);
   dim_elem($a, 3);
   dim_elem($a, '1');
   dim_elem($a, 'foo');
@@ -181,13 +150,6 @@ function dim($a) {
   dim_define($a, '1');
   dim_define($a, 'foo');
   dim_define($a, true);
-
-  echo "======= dim_define_reffy ===========================\n";
-  dim_define_reffy($a, 1);
-  dim_define_reffy($a, 3);
-  dim_define_reffy($a, '1');
-  dim_define_reffy($a, 'foo');
-  dim_define_reffy($a, true);
 
   echo "======= dim_unset ==================================\n";
   dim_unset($a, 1);
@@ -224,7 +186,7 @@ function dim($a) {
   echo "======= dim_prop_set ===============================\n";
   try {
     $copy = $a;
-    $copy[1]->foobaz[0] = 123;
+    $copy[1]->foobaz = varray[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -249,7 +211,7 @@ function fini_cget($a, $k) {
 
 function fini_empty($a, $k) {
   try {
-    var_dump(empty($a[1][$k]));
+    var_dump(!($a[1][$k] ?? false));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
@@ -261,16 +223,6 @@ function fini_isset($a, $k) {
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
-}
-
-function fini_vget($a, $k) {
-  try {
-    $v = &$a[1][$k];
-    var_dump($v);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($a);
 }
 
 function fini_set($a, $k) {
@@ -309,16 +261,6 @@ function fini_unset($a, $k) {
   var_dump($a);
 }
 
-function fini_bind($a, $k) {
-  $str = "some-str";
-  try {
-    $a[1][$k] = &$str;
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($a);
-}
-
 function fini($a) {
   echo "======= fini_cget_warn =============================\n";
   fini_cget_warn($a, 1);
@@ -347,23 +289,6 @@ function fini($a) {
   fini_isset($a, '1');
   fini_isset($a, 'foo');
   fini_isset($a, true);
-
-  echo "======= fini_vget ==================================\n";
-  fini_vget($a, 1);
-  fini_vget($a, 3);
-  fini_vget($a, '1');
-  fini_vget($a, 'foo');
-  fini_vget($a, true);
-
-  echo "======= fini_vget_new_elem =========================\n";
-  try {
-    $copy = $a;
-    $v = &$copy[1][];
-    var_dump($v);
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
 
   echo "======= fini_set ===================================\n";
   fini_set($a, 1);
@@ -420,23 +345,6 @@ function fini($a) {
   fini_unset($a, 'foo');
   fini_unset($a, true);
 
-  echo "======= fini_bind ==================================\n";
-  fini_bind($a, 1);
-  fini_bind($a, 3);
-  fini_bind($a, '1');
-  fini_bind($a, 'foo');
-  fini_bind($a, true);
-
-  echo "======= fini_bind_new_elem =========================\n";
-  try {
-    $copy = $a;
-    $str = "some-str";
-    $copy[1][] = &$str;
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-
   echo "======= fini_str_to_arr ============================\n";
   try {
     $copy = $a;
@@ -462,7 +370,8 @@ function fini($a) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 base(keyset[1, 2, '1']);
-dim([null, keyset[1, 2, '1', '']]);
-fini([null, keyset[1, 2, '1', '']]);
+dim(varray[null, keyset[1, 2, '1', '']]);
+fini(varray[null, keyset[1, 2, '1', '']]);
+}

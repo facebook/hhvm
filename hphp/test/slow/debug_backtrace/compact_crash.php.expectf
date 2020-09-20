@@ -1,20 +1,18 @@
 string(5) "hello"
-array(3) {
-  [0]=>
-  array(3) {
+varray(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
-    int(13)
+    int(14)
     ["function"]=>
     string(7) "profile"
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     ["file"]=>
     string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
     ["line"]=>
-    int(18)
+    int(19)
     ["function"]=>
     string(3) "foo"
     ["class"]=>
@@ -22,12 +20,7 @@ array(3) {
     ["type"]=>
     string(2) "::"
   }
-  [2]=>
-  array(3) {
-    ["file"]=>
-    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
-    ["line"]=>
-    int(21)
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }

@@ -1,9 +1,9 @@
-<?hh
+<?hh // partial
 
 function f(inout int $i): void {}
 
-function & g(): int {
-  static $x = 42;
+function g(): int {
+  $x = 42;
   return $x;
 }
 

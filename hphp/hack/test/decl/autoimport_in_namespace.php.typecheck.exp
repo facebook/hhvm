@@ -1,0 +1,4 @@
+File "autoimport_in_namespace.php", line 5, characters 12-23:
+Unbound name: `Traversable` (Naming[2049])
+File "autoimport_in_namespace.php", line 9, characters 14-25:
+Unbound name: `Traversable` (Naming[2049])

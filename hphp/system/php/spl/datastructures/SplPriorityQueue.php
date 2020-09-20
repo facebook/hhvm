@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class _SplPriorityQueueHeap extends SplMaxHeap {
 
@@ -109,7 +109,7 @@ class SplPriorityQueue implements \HH\Iterator, Countable {
    * @return     mixed   No value is returned.
    */
   public function insert($value, $priority) {
-    $data = array('data' => $value, 'priority' => $priority);
+    $data = darray['data' => $value, 'priority' => $priority];
     return $this->getHeap()->insert($data);
   }
 

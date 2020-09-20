@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $im = imagecreatefromgif(__DIR__ . DIRECTORY_SEPARATOR . 'bug74435.gif');
 var_dump($im);
 $width = imagesx($im);
@@ -13,4 +13,4 @@ for ($i = 0; $i < $width; $i += 16) {
         }
     }
 }
-?>
+}

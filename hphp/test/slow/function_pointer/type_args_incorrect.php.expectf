@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to accepts_string() must be an instance of string, reified function given in %s on line %d

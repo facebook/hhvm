@@ -1,17 +1,4 @@
-<?php
-
-
-$filename = $filename = dirname(__FILE__)."/004.txt.gz";
-
-
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-        if (error_reporting() != 0) {
-                // report non-silenced errors
-                echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-        }
-}
-set_error_handler('test_error_handler');
-
+<?hh
 
 
 class classWithToString
@@ -24,15 +11,20 @@ class classWithToString
 class classWithoutToString
 {
 }
-
-$variation = array(
-  'instance of classWithToString' => new classWithToString(),
-  'instance of classWithoutToString' => new classWithoutToString(),
-  );
+<<__EntryPoint>>
+function main_entry(): void {
 
 
-foreach ( $variation as $var ) {
-  var_dump(readgzfile( $filename, $var  ) );
+  $filename = $filename = dirname(__FILE__)."/004.txt.gz";
+
+  $variation = darray[
+    'instance of classWithToString' => new classWithToString(),
+    'instance of classWithoutToString' => new classWithoutToString(),
+    ];
+
+
+  foreach ( $variation as $var ) {
+    try { var_dump(readgzfile( $filename, $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  }
+  echo "===DONE===\n";
 }
-?>
-===DONE===

@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 /* Prototype  : string hash_hmac(string $algo, string $data, string $key [, int $length = 0 [, bool $raw_output = false]])
  * Description: Generate a keyed hash value using the HMAC method
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing hash_pbkdf2() : basic functionality ***\n";
 
 echo "sha1: " . hash_pbkdf2('sha1', 'password', 'salt', 1, 20)."\n";
@@ -18,6 +18,5 @@ echo "sha256(no length): " . hash_pbkdf2('sha256', 'password', 'salt', 1)."\n";
 echo "sha256(raw): " . bin2hex(hash_pbkdf2('sha256', 'password', 'salt', 1, 20, TRUE))."\n";
 echo "sha256(rounds): " . hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40)."\n";
 echo "sha256(rounds)(raw): " . bin2hex(hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40, TRUE))."\n";
-
-?>
-===Done===
+echo "===Done===";
+}

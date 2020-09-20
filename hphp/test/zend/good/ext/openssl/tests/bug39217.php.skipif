@@ -1,3 +1,4 @@
-<?php 
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!extension_loaded("openssl")) die("skip");
-?>
+}

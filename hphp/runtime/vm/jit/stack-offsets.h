@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STACK_OFFSETS_H_
-#define incl_HPHP_JIT_STACK_OFFSETS_H_
+#pragma once
 
 #include "hphp/util/safe-cast.h"
 
@@ -178,6 +177,7 @@ struct FPInvOffset {
    * A "lower" FPInvOffset means "closer to fp" (i.e., higher address).
    */
   bool operator==(FPInvOffset o) const { return offset == o.offset; }
+  bool operator!=(FPInvOffset o) const { return offset != o.offset; }
   bool operator< (FPInvOffset o) const { return offset <  o.offset; }
   bool operator<=(FPInvOffset o) const { return offset <= o.offset; }
   bool operator> (FPInvOffset o) const { return offset >  o.offset; }
@@ -242,6 +242,7 @@ struct FPRelOffset {
    * A "lower" FPInvOffset means "farther from fp" (i.e., lower address).
    */
   bool operator==(FPRelOffset o) const { return offset == o.offset; }
+  bool operator!=(FPRelOffset o) const { return offset != o.offset; }
   bool operator< (FPRelOffset o) const { return offset <  o.offset; }
   bool operator<=(FPRelOffset o) const { return offset <= o.offset; }
   bool operator> (FPRelOffset o) const { return offset >  o.offset; }
@@ -349,4 +350,3 @@ FPRelOffset::to<IRSPRelOffset>(FPInvOffset sp) const {
 
 }}
 
-#endif // incl_HPHP_JIT_STACK_OFFSETS_H_

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_graph(mixed $c)
  * Description: Checks for any printable character(s) except space 
  * Source code: ext/ctype/ctype.c 
@@ -8,12 +8,12 @@
  * Pass strings containing different character types to ctype_graph() to test
  * which are considered valid printable character only strings
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_graph() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-$values = array(
+$values = varray[
 /*1*/  "This string contains just letters and spaces", // Simple string
        "but this one contains some numbers too 123+456 = 678", // Mixed string
        "",
@@ -42,7 +42,7 @@ $values = array(
        "String\twith\ttabs",
        "Sample string with newline\n",
 /*28*/ "123 ABC XYZ",
-);
+];
 
 $iterator = 1;
 foreach($values as $value) {
@@ -52,5 +52,5 @@ foreach($values as $value) {
 };
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

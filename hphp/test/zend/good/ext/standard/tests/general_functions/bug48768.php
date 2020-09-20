@@ -1,6 +1,6 @@
-<?php
-
-$ini_location = dirname(__FILE__) . '/bug48768.tmp';
+<?hh
+<<__EntryPoint>> function main(): void {
+$ini_location = __SystemLib\hphp_test_tmppath('bug48768.tmp');
 
 // Build ini data
 $ini_data = <<< EOT
@@ -14,6 +14,5 @@ file_put_contents($ini_location, $ini_data);
 var_dump(parse_ini_file($ini_location, false, INI_SCANNER_RAW));
 var_dump(parse_ini_file($ini_location, false, INI_SCANNER_NORMAL));
 
-?>
-<?php error_reporting(0); ?>
-<?php @unlink(dirname(__FILE__) . '/bug48768.tmp'); ?>
+unlink($ini_location);
+}

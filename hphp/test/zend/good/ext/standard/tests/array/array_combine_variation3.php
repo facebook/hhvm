@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_combine(array $keys, array $values)
  * Description: Creates an array by using the elements of the first parameter as keys
  *              and the elements of the second as the corresponding values
@@ -6,10 +6,10 @@
 */
 
 /*
-* Passing different types of arrays to both $keys and $values arguments and testing whether 
+* Passing different types of arrays to both $keys and $values arguments and testing whether
 * array_combine() behaves in an expected way with the arguments passed to the function
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_combine() : Passing different types of arrays to both \$keys and \$values argument ***\n";
 /* Different heredoc strings passed as argument to arrays */
 // heredoc with blank line
@@ -42,33 +42,26 @@ $numeric_string = <<<EOT
 EOT;
 
 // arrays passed to $keys argument
-$arrays = array (
-/*1*/  array(1, 2), // with default keys and numeric values
-       array(1.1, 2.2), // with default keys & float values
-       array(false,true), // with default keys and boolean values
-       array(), // empty array
-/*5*/  array(NULL), // with NULL
-       array("a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
-       array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $numeric_string),  // with heredocs
+$arrays = varray [
+/*1*/  varray[1, 2], // with default keys and numeric values
+       varray[1.1, 2.2], // with default keys & float values
+       varray[false,true], // with default keys and boolean values
+       varray[], // empty array
+/*5*/  varray[NULL], // with NULL
+       varray["a\v\f","aaaa\r","b","b\tbbb","c","\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
+       varray['a\v\f','aaaa\r','b','b\tbbb','c','\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings
+       darray["h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, 0 => $numeric_string],  // with heredocs
 
        // associative arrays
-/*9*/  array(1 => "one", 2 => "two", 3 => "three"),  // explicit numeric keys, string values
-       array("one" => 1, "two" => 2, "three" => 3 ),  // string keys & numeric values
-       array( 1 => 10, 2 => 20, 4 => 40, 3 => 30),  // explicit numeric keys and numeric values
-       array( "one" => "ten", "two" => "twenty", "three" => "thirty"),  // string key/value
-       array("one" => 1, 2 => "two", 4 => "four"),  //mixed
-
-       // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
-       array(true => "true", false => "false", "false" => false, "true" => true),
-       array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-       array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
+/*9*/  darray[1 => "one", 2 => "two", 3 => "three"],  // explicit numeric keys, string values
+       darray["one" => 1, "two" => 2, "three" => 3 ],  // string keys & numeric values
+       darray[ 1 => 10, 2 => 20, 4 => 40, 3 => 30],  // explicit numeric keys and numeric values
+       darray[ "one" => "ten", "two" => "twenty", "three" => "thirty"],  // string key/value
+       darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // array with repetative keys
-/*19*/ array("One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3)
-);
+/*14*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
+];
 
 // loop through each sub-array within $arrays to check the behavior of array_combine()
 // same arrays are passed to both $keys and $values
@@ -80,4 +73,4 @@ foreach($arrays as $array) {
 }
 
 echo "Done";
-?>
+}

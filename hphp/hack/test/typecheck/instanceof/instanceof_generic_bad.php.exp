@@ -1,0 +1,4 @@
+File "instanceof_generic_bad.php", line 5, characters 18-18:
+Invalid `is` expression hint (Typing[4195])
+File "instanceof_generic_bad.php", line 5, characters 18-18:
+The `is` operator cannot be used with an erased generic type parameter

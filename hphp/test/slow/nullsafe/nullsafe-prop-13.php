@@ -1,10 +1,8 @@
 <?hh // strict
 
-function byRef(&$x) {}
+function byRef(inout $x) {}
 
 function test() {
   $x = null;
-  byRef($x?->y); // error
+  byRef(inout $x?->y); // error
 }
-
-test();

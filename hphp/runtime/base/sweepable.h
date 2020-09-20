@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SWEEPABLE_H_
-#define incl_HPHP_SWEEPABLE_H_
+#pragma once
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/type-scan.h"
@@ -54,7 +53,7 @@ struct Sweepable {
    * List manipulation methods; mainly for use by MemoryManager.
    */
   bool empty() const {
-    assert((this == m_prev) == (this == m_next)); // both==this or both!=this
+    assertx((this == m_prev) == (this == m_next)); // both==this or both!=this
     return this == m_next;
   }
   void init() { m_prev = m_next = this; }
@@ -107,4 +106,3 @@ struct SweepableMember : Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

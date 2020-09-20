@@ -24,42 +24,34 @@ namespace HPHP {
 struct StringData;
 struct ArrayData;
 
-namespace TypeStructure {
-ArrayData* resolve(const StringData* aliasName, const ArrayData* arr);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Static constructors.
 
-inline TypeAliasReq TypeAliasReq::Invalid(Unit* unit) {
-  assertx(unit);
-  TypeAliasReq req;
-  req.unit = unit;
+inline TypeAlias TypeAlias::Invalid(const PreTypeAlias& alias) {
+  TypeAlias req;
+  req.unit = alias.unit;
   req.invalid = true;
   return req;
 }
 
-inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
-  assert(alias.type != AnnotType::Object);
-  assertx(unit);
+inline TypeAlias TypeAlias::From(const PreTypeAlias& alias) {
+  assertx(alias.type != AnnotType::Object);
 
-  TypeAliasReq req;
-  req.unit = unit;
+  TypeAlias req;
+  req.unit = alias.unit;
   req.name = alias.name;
   req.type = alias.type;
   req.nullable = alias.nullable;
   req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isDArray());
+  assertx(req.typeStructure.isHAMSafeDArray());
   return req;
 }
 
-inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
-                                       const TypeAlias& alias) {
-  assert(alias.type == AnnotType::Object);
-  assertx(unit);
+inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias& alias) {
+  assertx(alias.type == AnnotType::Object);
 
-  req.unit = unit;
+  req.unit = alias.unit;
   if (req.invalid) {
     return req; // Do nothing.
   }
@@ -67,26 +59,27 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
   req.nullable |= alias.nullable;
   req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isDArray());
+  assertx(req.typeStructure.isHAMSafeDArray());
   return req;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
-inline bool TypeAliasReq::same(const TypeAliasReq& req) const {
+inline bool TypeAlias::same(const TypeAlias& req) const {
   return (invalid && req.invalid) ||
          (type == AnnotType::Mixed && req.type == AnnotType::Mixed) ||
-         (type == req.type && nullable == req.nullable && klass == req.klass);
+         (type == req.type && nullable == req.nullable &&
+          klass == req.klass && rec == req.rec);
 }
 
-inline bool operator==(const TypeAliasReq& l,
-                       const TypeAliasReq& r) {
+inline bool operator==(const TypeAlias& l,
+                       const TypeAlias& r) {
   return l.same(r);
 }
 
-inline bool operator!=(const TypeAliasReq& l,
-                       const TypeAliasReq& r) {
+inline bool operator!=(const TypeAlias& l,
+                       const TypeAlias& r) {
   return !l.same(r);
 }
 

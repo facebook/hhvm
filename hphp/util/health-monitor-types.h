@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
-#define incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
+#pragma once
 
 #include <string>
 
@@ -65,7 +64,7 @@ struct IHostHealthObserver {
  * Helper function to convert HealthLevel enum value to integer number that is
  * bigger for better health condition.
  */
-inline int64_t healthLeveltToInt(HealthLevel level) {
+inline int64_t healthLevelToInt(HealthLevel level) {
   constexpr int32_t kMaxHealth = 100;
   // Smaller HealthLevel indicates better health condition, under
   // which this function returns a bigger number.
@@ -83,4 +82,3 @@ inline int64_t healthLeveltToInt(HealthLevel level) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

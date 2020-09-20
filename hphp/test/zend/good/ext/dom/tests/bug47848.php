@@ -1,5 +1,5 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 $aDOM = new DOMDocument();
 $aDOM->appendChild($aDOM->createElementNS('http://friend2friend.net/','f2f:a'));
 
@@ -13,5 +13,4 @@ $att = $aDOM->importNode($attr);
 $aDOM->documentElement->appendChild($aDOM->importNode($attr, true));
 
 echo $aDOM->saveXML();
-
-?>
+}

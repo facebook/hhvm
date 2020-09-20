@@ -1,96 +1,118 @@
 *** Testing strftime() : usage variation ***
 
 --int 0--
-string(1) "0"
-string(1) "0"
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --int 1--
-string(1) "1"
-string(1) "1"
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --int 12345--
-string(5) "12345"
-string(5) "12345"
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --int -12345--
-string(6) "-12345"
-string(6) "-12345"
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --float 10.5--
-string(4) "10.5"
-string(4) "10.5"
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --float -10.5--
-string(5) "-10.5"
-string(5) "-10.5"
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --float 12.3456789000e10--
-string(12) "123456789000"
-string(12) "123456789000"
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --float -12.3456789000e10--
-string(13) "-123456789000"
-string(13) "-123456789000"
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --float .5--
-string(3) "0.5"
-string(3) "0.5"
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --uppercase NULL--
-bool(false)
-bool(false)
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --lowercase null--
-bool(false)
-bool(false)
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --lowercase true--
-string(1) "1"
-string(1) "1"
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --lowercase false--
-bool(false)
-bool(false)
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --uppercase TRUE--
-string(1) "1"
-string(1) "1"
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --uppercase FALSE--
-bool(false)
-bool(false)
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --empty string DQ--
 bool(false)
@@ -101,22 +123,26 @@ bool(false)
 bool(false)
 
 --instance of classWithToString--
-string(14) "Class A object"
-string(14) "Class A object"
+
+Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --undefined var--
-bool(false)
-bool(false)
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --unset var--
-bool(false)
-bool(false)
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+
+Warning: strftime() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 ===DONE===

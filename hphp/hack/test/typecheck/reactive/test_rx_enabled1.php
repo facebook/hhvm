@@ -9,10 +9,10 @@ function f(): int {
 }
 
 <<__Rx>>
-function rx() {
+function rx(): int {
   return 1;
 }
 
-function nonrx() {
+function nonrx(): int {
   return 1;
 }

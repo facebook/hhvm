@@ -21,7 +21,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 
@@ -429,7 +429,7 @@ static int utf32_to_utf8(unsigned char *buf, int k) {
   return retval;
 }
 
-using HtmlEntityMap = hphp_hash_map<const char*,std::string,cstr_hash,eqstr>;
+using HtmlEntityMap = hphp_const_char_map<std::string>;
 
 static volatile bool EntityMapInited = false;
 static Mutex EntityMapMutex;

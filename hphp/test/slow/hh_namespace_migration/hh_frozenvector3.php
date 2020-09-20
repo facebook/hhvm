@@ -7,4 +7,8 @@ function main() {
   $s = new ImmVector();
 }
 
+
+<<__EntryPoint>>
+function main_hh_frozenvector3() {
 main();
+}

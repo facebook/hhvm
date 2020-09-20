@@ -1,0 +1,14 @@
+File "return.php", line 7, characters 22-25:
+Cannot use experimental feature: like-types (Other[0000])
+File "return.php", line 12, characters 10-28:
+Invalid return type (Typing[4110])
+File "return.php", line 11, characters 27-29:
+This is an int
+File "return.php", line 12, characters 22-28:
+It is incompatible with a dynamic value
+File "return.php", line 16, characters 10-19:
+Invalid return type (Typing[4110])
+File "return.php", line 15, characters 27-29:
+This is an int
+File "return.php", line 7, characters 22-25:
+It is incompatible with a dynamic value

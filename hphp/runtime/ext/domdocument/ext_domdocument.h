@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DOMDOCUMENT_H_
-#define incl_HPHP_EXT_DOMDOCUMENT_H_
+#pragma once
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/extension.h"
@@ -43,9 +42,8 @@ Object newDOMDocument(bool construct = true);
 
 struct DOMNode {
   ~DOMNode() {
-    if (m_node) {
-      assert(m_node->getCache() &&
-             Native::data<DOMNode>(m_node->getCache()) == this);
+    if (m_node && m_node->getCache()) {
+      assertx(Native::data<DOMNode>(m_node->getCache()) == this);
       m_node->clearCache();
     }
   }
@@ -60,14 +58,14 @@ struct DOMNode {
   }
 
   void setDoc(req::ptr<XMLDocumentData>&& doc) {
-    assert(m_node);
+    assertx(m_node);
     m_node->setDoc(std::move(doc));
   }
 
   void setNode(XMLNode n) {
     if (m_node) {
-      assert(m_node->getCache() &&
-             Native::data<DOMNode>(m_node->getCache()) == this);
+      assertx(m_node->getCache() &&
+              Native::data<DOMNode>(m_node->getCache()) == this);
       m_node->clearCache();
     }
 
@@ -148,4 +146,3 @@ struct DOMXPath {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_DOMDOCUMENT_H_

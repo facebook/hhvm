@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface A {
 function foo();
@@ -9,8 +9,12 @@ class C implements B {
 function foo() {
 }
 }
+
+<<__EntryPoint>>
+function main_1361() {
 ;
 $klass = new ReflectionClass('C');
 var_dump($klass->implementsInterface('A'));
 $inter = new ReflectionClass('B');
 var_dump($inter->hasMethod('foo'));
+}

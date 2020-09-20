@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class W {
   const FOO = 0;
@@ -21,5 +21,9 @@ class Y extends X {
   const FOO = 2;
   const BAR = 1;
 }
+
+<<__EntryPoint>>
+function main_1620() {
 X::foo();
 Y::foo();
+}

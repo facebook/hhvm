@@ -1,13 +1,14 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
+<<__PHPStdLib>>
 class Memcached {
   const OPT_COMPRESSION = 0;
   const OPT_SERIALIZER = 0;
@@ -69,49 +70,51 @@ class Memcached {
   const RES_BAD_KEY_PROVIDED = 0;
   const RES_CONNECTION_SOCKET_CREATE_FAILURE = 0;
   const RES_PAYLOAD_FAILURE = 0;
-  public function __construct($persistent_id = null) { }
-  public function add($key, $value, $expiration = 0) { }
-  public function addByKey($server_key, $key, $value, $expiration = 0) { }
-  public function addServer($host, $port, $weight = 0) { }
-  public function addServers($servers) { }
-  public function append($key, $value) { }
-  public function appendByKey($server_key, $key, $value) { }
-  public function cas($cas_token, $key, $value, $expiration = 0) { }
-  public function casByKey($cas_token, $server_key, $key, $value, $expiration = 0) { }
-  public function decrement($key, $offset = 1) { }
-  public function delete($key, $time = 0) { }
-  public function deleteByKey($server_key, $key, $time = 0) { }
-  public function deleteMulti(array $keys, int $time = 0): mixed { }
-  public function deleteMultiByKey(string $server_key, array $keys,
-                                   int $time = 0): mixed { }
-  public function fetch() { }
-  public function fetchAll() { }
-  public function flush($delay = 0) { }
-  public function get($key, $cache_cb = null, &$cas_token = null) { }
-  public function getByKey($server_key, $key, $cache_cb = null, &$cas_token = null) { }
-  public function getDelayed($keys, $with_cas = false, $value_cb = null) { }
-  public function getDelayedByKey($server_key, $keys, $with_cas = false, $value_cb = null) { }
-  public function getMulti($keys, &$cas_tokens = null, $flags = 0) { }
-  public function getMultiByKey($server_key, $keys, &$cas_tokens = null, $flags = 0) { }
-  public function getOption($option) { }
-  public function getResultCode() { }
-  public function getResultMessage() { }
-  public function getServerByKey($server_key) { }
-  public function getServerList() { }
-  public function getStats() { }
-  public function getVersion() { }
-  public function increment($key, $offset = 1) { }
-  public function prepend($key, $value) { }
-  public function prependByKey($server_key, $key, $value) { }
-  public function replace($key, $value, $expiration = 0) { }
-  public function replaceByKey($server_key, $key, $value, $expiration = 0) { }
-  public function set($key, $value, $expiration = 0) { }
-  public function setByKey($server_key, $key, $value, $expiration = 0) { }
-  public function setMulti($items, $expiration = 0) { }
-  public function setMultiByKey($server_key, $items, $expiration = 0) { }
-  public function setOption($option, $value) { }
-  public function touch(string $key, int $expiration = 0): bool { }
-  public function touchByKey(string $server_key,
-                             string $key,
-                             int $expiration = 0): bool { }
+
+  public function __construct($persistent_id = null);
+  public function add($key, $value, int $expiration = 0);
+  public function addByKey(string $server_key, string $key, $value, int $expiration = 0);
+  public function addServer(string $host, int $port, int $weight = 0);
+  public function addServers($servers);
+  public function append($key, $value);
+  public function appendByKey(string $server_key, string $key, string $value);
+  public function cas(float $cas_token, string $key, $value, int $expiration = 0);
+  public function casByKey(float $cas_token, string $server_key, string $key, $value, int $expiration = 0);
+  public function decrement(string $key, int $offset = 1);
+  public function delete(string $key, int $time = 0);
+  public function deleteByKey(string $server_key, string $key, int $time = 0);
+  public function deleteMulti(varray<string> $keys, int $time = 0): mixed;
+  public function deleteMultiByKey(string $server_key, varray<string> $keys, int $time = 0): mixed;
+  public function fetch();
+  public function fetchAll();
+  public function flush(int $delay = 0);
+  public function get($key, $cache_cb = null);
+  public function getByKey(string $server_key, string $key, $cache_cb = null);
+  public function getWithCasToken($key, $cache_cb, inout $cas_token);
+  public function getByKeyWithCasToken(string $server_key, string $key, $cache_cb, inout $cas_token);
+  public function getDelayed($keys, $with_cas = false, $value_cb = null);
+  public function getDelayedByKey(string $server_key, $keys, bool $with_cas = false, $value_cb = null);
+  public function getMulti($keys, int $flags = 0);
+  public function getMultiByKey(string $server_key, $keys, int $flags = 0);
+  public function getMultiWithCasTokens($keys, inout $cas_tokens, int $flags = 0);
+  public function getMultiByKeyWithCasTokens(string $server_key, $keys, inout $cas_tokens, int $flags = 0);
+  public function getOption(int $option);
+  public function getResultCode();
+  public function getResultMessage();
+  public function getServerByKey(string $server_key);
+  public function getServerList();
+  public function getStats();
+  public function getVersion();
+  public function increment(string $key, int $offset = 1);
+  public function prepend($key, $value);
+  public function prependByKey(string $server_key, string $key, string $value);
+  public function replace($key, $value, int $expiration = 0);
+  public function replaceByKey(string $server_key, string $key, $value, int $expiration = 0);
+  public function set($key, $value, int $expiration = 0);
+  public function setByKey(string $server_key, string $key, $value, int $expiration = 0);
+  public function setMulti($items, int $expiration = 0);
+  public function setMultiByKey(string $server_key, $items, int $expiration = 0);
+  public function setOption(int $option, $value);
+  public function touch(string $key, int $expiration = 0): bool;
+  public function touchByKey(string $server_key, string $key, int $expiration = 0): bool;
 }

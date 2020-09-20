@@ -10,15 +10,6 @@ int(4)
 int(4)
 bool(false)
 
-Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 14
-bool(false)
-
-Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 15
-bool(false)
-
-Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 16
-bool(false)
-
 Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 17
 bool(false)
 
@@ -30,6 +21,15 @@ bool(false)
 
 Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 20
 bool(false)
+
+Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 21
+bool(false)
+
+Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 22
+bool(false)
+
+Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 23
+bool(false)
 **************************
 int(1)
 int(1)
@@ -40,7 +40,7 @@ int(4)
 int(4)
 bool(false)
 
-Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 30
+Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 33
 bool(false)
 int(4)
 int(1)
@@ -48,7 +48,7 @@ int(1)
 int(1)
 bool(false)
 
-Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 36
+Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 39
 bool(false)
 **************************
 int(0)
@@ -58,15 +58,6 @@ int(1)
 int(2)
 int(4)
 int(4)
-bool(false)
-
-Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 46
-bool(false)
-
-Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 47
-bool(false)
-
-Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 48
 bool(false)
 
 Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 49
@@ -80,6 +71,15 @@ bool(false)
 
 Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 52
 bool(false)
+
+Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 53
+bool(false)
+
+Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 54
+bool(false)
+
+Warning: Offset not contained in string in %s/test/slow/ext_string/1765.php on line 55
+bool(false)
 **************************
 int(1)
 int(1)
@@ -90,7 +90,7 @@ int(4)
 int(4)
 bool(false)
 
-Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 62
+Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 65
 bool(false)
 int(4)
 int(2)
@@ -98,5 +98,5 @@ int(2)
 int(1)
 int(0)
 
-Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 68
+Warning: Offset is greater than the length of haystack string in %s/test/slow/ext_string/1765.php on line 71
 bool(false)

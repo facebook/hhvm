@@ -1,0 +1,40 @@
+NULL
+ok
+object(HH\StaticWaitHandle) (0) {
+}
+ok
+object(HH\RescheduleWaitHandle) (0) {
+}
+ok
+int(0)
+Await on a non-Awaitable
+bool(true)
+Await on a non-Awaitable
+string(11) "hello world"
+Await on a non-Awaitable
+dict(0) {
+}
+Await on a non-Awaitable
+object(Foo) (0) {
+}
+Await on a non-Awaitable
+NULL
+ok
+object(HH\StaticWaitHandle) (0) {
+}
+ok
+object(HH\RescheduleWaitHandle) (0) {
+}
+ok
+int(0)
+Await on a non-Awaitable
+bool(true)
+Await on a non-Awaitable
+string(11) "hello world"
+Await on a non-Awaitable
+dict(0) {
+}
+Await on a non-Awaitable
+object(Foo) (0) {
+}
+Await on a non-Awaitable

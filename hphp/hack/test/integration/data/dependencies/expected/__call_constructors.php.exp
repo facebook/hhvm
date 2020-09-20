@@ -1,0 +1,12 @@
+<?hh
+final class Derived extends \ImplementingBase {
+  public function __construct(int $num) {
+    throw new \Exception();
+  }
+}
+function call_constructors(): void {
+  $a = new ImplementingBase();
+  $b = new Derived(0);
+}
+class ImplementingBase extends \AbstractBase {}
+abstract class AbstractBase {}

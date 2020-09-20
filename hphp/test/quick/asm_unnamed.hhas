@@ -2,15 +2,7 @@
 # unnamed vars
 #
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Null
-  RetC
-}
-
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 5
   SetL $x
   PopC

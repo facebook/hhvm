@@ -1,0 +1,2 @@
+File "enum_6.php--use.php", line 4, characters 7-8:
+Enums must be `int` or `string` or `arraykey`, not `foo` (Typing[4024])

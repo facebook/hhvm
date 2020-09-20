@@ -1,4 +1,5 @@
-<?
+<?hh
+<<__EntryPoint>> function main(): void {
 echo "Used a short tag\n";
-?>
-Finished
+echo "Finished";
+}

@@ -7,4 +7,8 @@ async function fibonacci($a) {
   return $b + $c;
 }
 
+
+<<__EntryPoint>>
+function main_recursion() {
 var_dump(HH\Asio\join(fibonacci(12)));
+}

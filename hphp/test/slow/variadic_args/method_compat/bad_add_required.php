@@ -7,3 +7,4 @@ interface DB {
 class MySQL implements DB {
   public function query($query, $foo, ...$params) { }
 }
+

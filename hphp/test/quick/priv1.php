@@ -14,10 +14,6 @@ class D1 extends C1 {
     echo "D1::foo\n";
   }
 }
-$obj = new C1;
-$obj->test();
-
-
 
 class C2 {
   private function foo() {
@@ -34,11 +30,6 @@ class D2 extends C2 {
 }
 class E2 extends D2 {
 }
-$obj = new E2;
-// This should call C2::foo, not D2::foo
-$obj->test();
-
-
 
 class C3 {
   private function foo() {
@@ -53,11 +44,6 @@ class D3 extends C3 {
     echo "D3::foo\n";
   }
 }
-$obj = new D3;
-// This should call C3::foo, not D3::foo
-$obj->test();
-
-
 
 class A4 {
   private function foo() {
@@ -77,8 +63,6 @@ class C4 {
     $obj->foo();
   }
 }
-C4::test(new B4);
-
 
 class A5 {
   private function __construct() {
@@ -89,5 +73,20 @@ class B5 extends A5 {
     return new A5;
   }
 }
-B5::test();
 
+<<__EntryPoint>> function main(): void {
+$obj = new C1;
+$obj->test();
+
+$obj = new E2;
+// This should call C2::foo, not D2::foo
+$obj->test();
+
+$obj = new D3;
+// This should call C3::foo, not D3::foo
+$obj->test();
+
+C4::test(new B4);
+
+B5::test();
+}

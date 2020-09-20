@@ -1,7 +1,7 @@
 bool(true)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/gzclose_basic.php on line 11
 bool(true)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/gzclose_basic.php on line 18
 ===DONE===

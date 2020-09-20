@@ -18,6 +18,8 @@
 #include <fstream>
 #include <vector>
 
+#include <folly/String.h>
+
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -41,7 +43,7 @@ namespace HPHP {
  *
  * Indeed on this toy cover.php file:
  *
- *  <?php
+ *  <?hh
  *
  *  echo "here\n";
  *  for($i = 0; $i < 2; $i++) {
@@ -86,20 +88,21 @@ namespace HPHP {
  * So right now it is just simpler to ignore line1.
  */
 void CodeCoverage::Record(const char *filename, int line0, int line1) {
+  assertx(m_hits.has_value());
   if (!filename || !*filename || line0 <= 0 || line1 <= 0 || line0 > line1) {
     return;
   }
   Logger::Verbose("%s, (%d, %d)\n", filename, line0, line1);
 
-  CodeCoverageMap::iterator iter = m_hits.find(filename);
-  if (iter == m_hits.end()) {
-    std::vector<int> &lines = m_hits[filename];
+  auto iter = m_hits->find(filename);
+  if (iter == m_hits->end()) {
+    auto& lines = (*m_hits)[filename];
     lines.resize(line1 + 1);
     for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
       lines[i] = 1;
     }
   } else {
-    std::vector<int> &lines = iter->second;
+    auto& lines = iter->second;
     if ((int)lines.size() < line1 + 1) {
       lines.resize(line1 + 1);
     }
@@ -109,27 +112,36 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
   }
 }
 
-Array CodeCoverage::Report(bool sys /* = true */) {
-  Array ret = Array::Create();
-  for (CodeCoverageMap::const_iterator iter = m_hits.begin();
-       iter != m_hits.end(); ++iter) {
-    if (!sys && Extension::IsSystemlibPath(iter->first)) {
+Array CodeCoverage::Report(bool report_frequency /* = false*/,
+                           bool sys /* = true */) {
+  assertx(m_hits.has_value());
+  Array ret = Array::CreateDArray();
+  for (const auto& iter : *m_hits) {
+    if (!sys && Extension::IsSystemlibPath(iter.first)) {
       continue;
     }
-    const std::vector<int> &lines = iter->second;
-    Array tmp = Array::Create();
-    for (int i = 1; i < (int)lines.size(); i++) {
-      if (lines[i]) {
-        tmp.set(i, Variant((int64_t)lines[i]));
+    const auto& lines = iter.second;
+
+    if (report_frequency) {
+      auto const count = std::count_if(lines.begin(), lines.end(),
+                                       [](int i) { return i != 0; });
+      ret.set(String(iter.first), Variant((int64_t)count));
+    } else {
+      auto tmp = Array::CreateDArray();
+      for (int i = 1; i < (int)lines.size(); i++) {
+        if (lines[i]) {
+          tmp.set(i, Variant((int64_t)lines[i]));
+        }
       }
+      ret.set(String(iter.first), Variant(tmp));
     }
-    ret.set(String(iter->first), Variant(tmp));
   }
 
   return ret;
 }
 
 void CodeCoverage::Report(const std::string &filename) {
+  assertx(m_hits.has_value());
   std::ofstream f(filename.c_str());
   if (!f) {
     Logger::Error("unable to open %s", filename.c_str());
@@ -137,19 +149,12 @@ void CodeCoverage::Report(const std::string &filename) {
   }
 
   f << "{\n";
-  for (CodeCoverageMap::const_iterator iter = m_hits.begin();
-       iter != m_hits.end();) {
-    const std::vector<int> &lines = iter->second;
+  for (CodeCoverageMap::const_iterator iter = m_hits->begin();
+       iter != m_hits->end();) {
     f << "\"" << iter->first << "\": [";
-    int count = lines.size();
-    for (int i = 0 /* not 1 */; i < count; i++) {
-      f << lines[i];
-      if (i < count - 1) {
-        f << ",";
-      }
-    }
+    f << folly::join(",", iter->second);
     f << "]";
-    if (++iter != m_hits.end()) {
+    if (++iter != m_hits->end()) {
       f << ",";
     }
     f << "\n";
@@ -160,10 +165,20 @@ void CodeCoverage::Report(const std::string &filename) {
 }
 
 void CodeCoverage::Reset() {
-  m_hits.clear();
+  assertx(m_hits.has_value());
+  m_hits->clear();
   resetCoverageCounters();
+}
+
+void CodeCoverage::onSessionInit() {
+  m_hits.emplace();
+}
+
+void CodeCoverage::onSessionExit() {
+  if (shouldDump) Report(RuntimeOption::CodeCoverageOutputFile);
+  shouldDump = false;
+  m_hits.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

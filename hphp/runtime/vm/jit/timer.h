@@ -14,11 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_JIT_TIMER_H_
-#define incl_HPHP_RUNTIME_VM_JIT_TIMER_H_
+#pragma once
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #define JIT_TIMERS                              \
@@ -38,8 +36,6 @@
   TIMER_NAME(optimize_phis)                     \
   TIMER_NAME(optimize_licm)                     \
   TIMER_NAME(hoist_type_checks)                 \
-  TIMER_NAME(partial_dce_DefInlineFP)           \
-  TIMER_NAME(regalloc)                          \
   TIMER_NAME(regionizeFunc)                     \
   TIMER_NAME(selectTracelet)                    \
   TIMER_NAME(mcg_translate)                     \
@@ -50,8 +46,8 @@
   TIMER_NAME(translateTracelet)                 \
   TIMER_NAME(translateTracelet_irGeneration)    \
   TIMER_NAME(vasm_layout)                       \
-  TIMER_NAME(vasm_xls)                          \
-  TIMER_NAME(vasm_xls_spill)                    \
+  TIMER_NAME(vasm_reg_alloc)                    \
+  TIMER_NAME(vasm_reg_alloc_spill)              \
   TIMER_NAME(vasm_jumps)                        \
   TIMER_NAME(vasm_bind_ptrs)                    \
   TIMER_NAME(vasm_emit)                         \
@@ -59,6 +55,7 @@
   TIMER_NAME(vasm_copy)                         \
   TIMER_NAME(vasm_optimize)                     \
   TIMER_NAME(vasm_dce)                          \
+  TIMER_NAME(vasm_sf_peepholes)                 \
 
 namespace HPHP {
 struct StructuredLogEntry;
@@ -127,4 +124,3 @@ struct Timer {
 
 } }
 
-#endif

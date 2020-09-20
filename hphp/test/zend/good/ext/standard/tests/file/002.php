@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $data = <<<EOD
 blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah
@@ -28,5 +28,4 @@ fclose($fp);
 echo file_get_contents($name);
 
 unlink($name);
-
-?>
+}

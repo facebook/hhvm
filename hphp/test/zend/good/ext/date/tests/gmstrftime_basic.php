@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string gmstrftime(string format [, int timestamp])
  * Description: Format a GMT/UCT time/date according to locale settings 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmstrftime() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -17,5 +17,5 @@ var_dump( gmstrftime($format, $timestamp) );
 // Calling gmstrftime() with mandatory arguments
 var_dump( gmstrftime($format) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

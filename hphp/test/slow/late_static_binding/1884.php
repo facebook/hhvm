@@ -1,15 +1,19 @@
-<?php
+<?hh
 
 class S {
-  public static function t() {
-    echo func_get_arg(0);
+  public static function t($arg) {
+    echo $arg;
   }
 }
 class C {
   public static function d() {
-    echo get_called_class();
-    S::t(get_called_class());
-    echo get_called_class();
+    echo static::class;
+    S::t(static::class);
+    echo static::class;
   }
 }
+
+<<__EntryPoint>>
+function main_1884() {
 C::d();
+}

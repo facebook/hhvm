@@ -1,11 +1,11 @@
 <?hh
 
-newtype Foo = Int;
-newtype Foo2 = Integer;
+newtype Foo = int;
+newtype Foo2 = int;
 
 function foo(Foo $x, Foo2 $y) {}
 
-newtype Bar = floAt;
+newtype Bar = float;
 
 function bar(Bar $k) {}
 
@@ -14,15 +14,15 @@ newtype Baz = BazCls;
 function baz(Baz $k) {}
 function baz2(Bazcls $k) {}
 
-type A = aRray;
-type B = iNt;
-type C = iNteger;
-type D = bOol;
-type E = bOolean;
-type F = sTring;
-type G = rEal;
-type H = fLoat;
-type I = dOuble;
+type A = varray;
+type B = int;
+type C = int;
+type D = bool;
+type E = bool;
+type F = string;
+type G = float;
+type H = float;
+type I = float;
 function lots(A $x,
               B $xx,
               C $xxx,
@@ -71,7 +71,7 @@ function main() {
   bar(1.0);
   baz(new Bazcls());
   baz2(new Bazcls());
-  lots(array(),
+  lots(varray[],
        12,
        12,
        false,
@@ -80,7 +80,7 @@ function main() {
        1.3,
        1.4,
        1.5);
-  lots2(array(),
+  lots2(varray[],
         12,
         12,
         false,
@@ -89,7 +89,7 @@ function main() {
         1.3,
         1.4,
         1.5);
-  lots3(array(),
+  lots3(varray[],
         12,
         12,
         false,
@@ -100,4 +100,8 @@ function main() {
         1.5);
 }
 
+
+<<__EntryPoint>>
+function main_typedef_mixed_case() {
 main();
+}

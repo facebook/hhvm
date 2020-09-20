@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+<<__EntryPoint>> function f(): void {
   $a = range(-3, 3);
   $a []= true;
   $a []= false;
@@ -9,10 +9,11 @@ function f() {
   $a []= "0";
   foreach ($a as $l) {
     foreach ($a as $r) {
-      var_dump($l % $r);
+      try {
+        var_dump($l % $r);
+      } catch (DivisionByZeroException $e) {
+        echo $e->getMessage(), "\n";
+      }
     }
   }
 }
-
-f();
-

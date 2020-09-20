@@ -5,9 +5,9 @@ function take_float(float $_): void {}
 function test(bool $b): void {
 
   if ($b) {
-    $a = array(4);
+    $a = varray[4];
   } else {
-    $a = array(3.14, 'aaa');
+    $a = varray[3.14, 'aaa'];
   }
 
   take_float($a[0]);

@@ -3,10 +3,7 @@
 class C {
   public $nonStaticInheritedProp;
 
-  public function nonStaticInheritedMethod() {
-    echo __METHOD__, ' of ', get_called_class(), "\n";
-    echo 'this: ', isset($this) ? 'defined' : 'undefined', "\n";
-  }
+  public function nonStaticInheritedMethod() {}
 }
 
 trait Tr {
@@ -14,10 +11,8 @@ trait Tr {
 
   public $nonStaticTraitProp;
 
-  public function nonStaticTraitMethod() {
-    echo __METHOD__, ' of ', get_called_class(), "\n";
-    echo 'this: ', isset($this) ? 'defined' : 'undefined', "\n";
-  }
+  public function nonStaticTraitMethod() {}
+
   public static function staticTraitMethod() {
 
     echo __METHOD__, "\n";
@@ -49,8 +44,6 @@ abstract final class Utils extends C {
 function main() {
   Utils::staticMethod();
   Utils::staticTraitMethod();
-  Utils::nonStaticInheritedMethod(); // works because $this isn't accessed
-  Utils::nonStaticTraitMethod(); // works because $this isn't accessed
 
   $rc = new ReflectionClass(Utils::class);
   echo 'ReflectionClass::isAbstract', ' => ';
@@ -60,6 +53,7 @@ function main() {
   echo 'ReflectionClass::isInstantiable', ' => ';
   var_dump($rc->isInstantiable());
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 echo 'Done', "\n";
+}

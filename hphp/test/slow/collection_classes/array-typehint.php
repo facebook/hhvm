@@ -1,5 +1,4 @@
 <?hh
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     throw new Exception("Type constraint failed");
@@ -11,41 +10,40 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 
 function helper($x) {
   var_dump($x);
-  if ($x instanceof Map) {
+  if ($x is Map) {
     $x['z'] = 4;
     var_dump($x);
-  } else if (is_array($x) || $x instanceof Collection) {
+  } else if (is_array($x) || $x is Collection) {
     $x[] = 4;
     var_dump($x);
   }
 }
-function helper_ref(&$x) {
+function helper_ref(inout $x) {
   var_dump($x);
-  if ($x instanceof Map) {
+  if ($x is Map) {
     $x['z'] = 4;
     var_dump($x);
-  } else if (is_array($x) || $x instanceof Collection) {
+  } else if (is_array($x) || $x is Collection) {
     $x[] = 4;
     var_dump($x);
   }
 }
 
-function f1(array $x) { helper($x); }
-function f2(?array $x) { helper($x); }
-function f3(@array $x) { helper($x); }
-function f4(@?array $x) { helper($x); }
-function f5(array &$x) { helper_ref($x); }
-function f6(?array &$x) { helper_ref($x); }
-function f7(@array &$x) { helper_ref($x); }
-function f8(@?array &$x) { helper_ref($x); }
+function f1(varray $x) { helper($x); }
+function f2(?varray $x) { helper($x); }
+function f3(<<__Soft>> varray $x) { helper($x); }
+function f4(<<__Soft>> ?varray $x) { helper($x); }
+function f5(inout varray $x) { helper_ref(inout $x); }
+function f6(inout ?varray $x) { helper_ref(inout $x); }
+function f7(<<__Soft>> inout varray $x) { helper_ref(inout $x); }
+function f8(<<__Soft>> inout ?varray $x) { helper_ref(inout $x); }
 
 function main() {
   $containers = Map {
-    'array' => array(1, 2, 3),
+    'array' => varray[1, 2, 3],
     'Vector' => Vector {1, 2, 3},
     'Map' => Map {'a' => 1, 'b' => 2, 'c' => 3},
     'Set' => Set {1, 2, 3},
@@ -57,9 +55,9 @@ function main() {
     for ($i = 1; $i <= 8; ++$i) {
       $fn = 'f' . $i;
       echo "$fn:\n";
-      $x = ($c instanceof Collection) ? clone $c : $c;
+      $x = ($c is Collection) ? clone $c : $c;
       try {
-        $fn($x);
+        $i <= 4 ? $fn($x) : $fn(inout $x);
       } catch (Exception $e) {
         echo $fn . "() threw an exception\n";
       }
@@ -67,4 +65,10 @@ function main() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_array_typehint() {
+error_reporting(-1);
+set_error_handler(fun('handler'));
 main();
+}

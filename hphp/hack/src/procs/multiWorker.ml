@@ -1,117 +1,121 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Hh_core
+module Hh_bucket = Bucket
+open Hh_prelude
 
-type 'a nextlist = 'a list Bucket.next
+(* Hide the worker type from our users *)
+type worker = WorkerController.worker
 
-type interrupt_handler = Unix.file_descr list -> bool
+type 'a interrupt_config = 'a MultiThreadedCall.interrupt_config
 
-type 'a bucket = 'a Bucket.bucket =
-  | Job of 'a
-  | Wait
-  | Done
-
-let single_threaded_call job merge neutral next =
-  let x = ref (next()) in
+let single_threaded_call_with_worker_id job merge neutral next =
+  let x = ref (next ()) in
   let acc = ref neutral in
   (* This is a just a sanity check that the job is serializable and so
    * that the same code will work both in single threaded and parallel
    * mode.
    *)
   let _ = Marshal.to_string job [Marshal.Closures] in
-  while !x <> Done do
+  while not (Hh_bucket.is_done !x) do
     match !x with
-    | Wait ->
-        (* this state should never be reached in single threaded mode, since
+    | Hh_bucket.Wait ->
+      (* this state should never be reached in single threaded mode, since
            there is no hope for ever getting out of this state *)
-        failwith "stuck!"
-    | Job l ->
-        let res = job neutral l in
-        acc := merge res !acc;
-        x := next()
-    | Done -> ()
+      failwith "stuck!"
+    | Hh_bucket.Job l ->
+      let res = job (0, neutral) l in
+      acc := merge (0, res) !acc;
+      x := next ()
+    | Hh_bucket.Done -> ()
   done;
   !acc
 
-let multi_threaded_call
-  (type a) (type b) (type c)
-  workers (job: c -> a -> b)
-  (merge: b -> c -> c)
-  (neutral: c)
-  (next: a Bucket.next)
-  (interrupt_fds: Unix.file_descr list)
-  (interrupt_handler: interrupt_handler) =
+let single_threaded_call job merge neutral next =
+  let job (_worker_id, a) b = job a b in
+  let merge (_worker_id, a) b = merge a b in
+  single_threaded_call_with_worker_id job merge neutral next
 
-  let check_cancel workers handles ready_fds =
-    if ready_fds <> [] && interrupt_handler ready_fds then begin
-      Worker.cancel handles;
-      true
-    end else false in
+module type CALLER = sig
+  type 'a result
 
-  let rec dispatch workers handles acc =
-    (* 'worker' represents available workers. *)
-    (* 'handles' represents pendings jobs. *)
-    (* 'acc' are the accumulated results. *)
+  val return : 'a -> 'a result
+
+  val multi_threaded_call :
+    WorkerController.worker list ->
+    (WorkerController.worker_id * 'c -> 'a -> 'b) ->
+    (WorkerController.worker_id * 'b -> 'c -> 'c) ->
+    'c ->
+    'a Hh_bucket.next ->
+    'c result
+end
+
+module CallFunctor (Caller : CALLER) : sig
+  val call :
+    WorkerController.worker list option ->
+    job:(WorkerController.worker_id * 'c -> 'a -> 'b) ->
+    merge:(WorkerController.worker_id * 'b -> 'c -> 'c) ->
+    neutral:'c ->
+    next:'a Hh_bucket.next ->
+    'c Caller.result
+end = struct
+  let call workers ~job ~merge ~neutral ~next =
     match workers with
-    | [] when handles = [] -> acc
-    | [] ->
-        (* No worker available: wait for some workers to finish. *)
-        collect [] handles acc
-    | worker :: workers ->
-        (* At least one worker is available... *)
-        match next () with
-        | Wait -> collect (worker :: workers) handles acc
-        | Done ->
-            (* ... but no more job to be distributed, let's collect results. *)
-            dispatch [] handles acc
-        | Job bucket ->
-            (* ... send a job to the worker.*)
-            let handle =
-              Worker.call worker
-                (fun xl -> job neutral xl)
-                bucket in
-            dispatch workers (handle :: handles) acc
-  and collect workers handles acc =
-    let { Worker.readys; waiters; ready_fds } =
-      Worker.select handles interrupt_fds in
-    let workers = List.map ~f:Worker.get_worker readys @ workers in
-    (* Collect the results. *)
-    let acc =
-      List.fold_left
-        ~f:(fun acc h -> merge (Worker.get_result h) acc)
-        ~init:acc
-        readys in
-    if check_cancel workers waiters ready_fds then acc else
-    (* And continue.. *)
-    dispatch workers waiters acc in
-  dispatch workers [] neutral
+    | None ->
+      Caller.return (single_threaded_call_with_worker_id job merge neutral next)
+    | Some workers -> Caller.multi_threaded_call workers job merge neutral next
+end
 
-let call workers ~job ~merge ~neutral ~next ~interrupt_fds ~interrupt_handler =
-  match workers with
-  | None -> single_threaded_call job merge neutral next
-  | Some workers ->
-    multi_threaded_call workers job merge neutral next
-      interrupt_fds interrupt_handler
+module Call = CallFunctor (struct
+  type 'a result = 'a
 
-let call_with_interrupt workers ~job ~merge ~neutral ~next ~interrupt_fds
-    ~interrupt_handler =
-  call workers ~job ~merge ~neutral ~next ~interrupt_fds ~interrupt_handler
+  let return x = x
+
+  let multi_threaded_call = MultiThreadedCall.call_with_worker_id
+end)
+
+let call_with_worker_id = Call.call
 
 let call workers ~job ~merge ~neutral ~next =
-  let interrupt_fds = [] in
-  let interrupt_handler = fun _ -> assert false in
-  call workers ~job ~merge ~neutral ~next ~interrupt_fds ~interrupt_handler
+  let job (_worker_id, a) b = job a b in
+  let merge (_worker_id, a) b = merge a b in
+  Call.call workers ~job ~merge ~neutral ~next
+
+(* If we ever want this in MultiWorkerLwt then move this into CallFunctor *)
+let call_with_interrupt
+    ?on_cancelled workers ~job ~merge ~neutral ~next ~interrupt =
+  match workers with
+  | Some workers when List.length workers <> 0 ->
+    Hh_logger.log
+      "MultiThreadedCall.call_with_interrupt called with %d workers"
+      (List.length workers);
+    MultiThreadedCall.call_with_interrupt
+      ?on_cancelled
+      workers
+      job
+      merge
+      neutral
+      next
+      interrupt
+  | _ ->
+    Hh_logger.log "single_threaded_call called with zero workers";
+    ( single_threaded_call job merge neutral next,
+      interrupt.MultiThreadedCall.env,
+      [] )
 
 let next ?progress_fn ?max_size workers =
-  Bucket.make
-    ~num_workers: (match workers with Some w -> List.length w | None -> 1)
+  Hh_bucket.make
+    ~num_workers:
+      (match workers with
+      | Some w -> List.length w
+      | None -> 1)
     ?progress_fn
     ?max_size
+
+let make = WorkerController.make

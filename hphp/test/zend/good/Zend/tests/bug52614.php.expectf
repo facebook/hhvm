@@ -1,12 +1,8 @@
-NULL
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-
-Warning: %s
-NULL
-object(stdClass)#%d (1) {
+object(stdClass) (1) {
   ["a"]=>
   int(1)
 }

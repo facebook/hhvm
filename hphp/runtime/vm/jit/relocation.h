@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_CODE_RELOCATION_H_
-#define incl_HPHP_CODE_RELOCATION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
@@ -55,7 +54,6 @@ namespace HPHP { namespace jit {
 
 struct AsmInfo;
 struct CGMeta;
-using TcaRange = folly::Range<TCA>;
 
 struct RelocationInfo {
   RelocationInfo() {}
@@ -76,6 +74,21 @@ struct RelocationInfo {
   void rewind(TCA start, TCA end);
   void markAddressImmediates(const std::set<TCA>& ai) {
     addressImmediates.insert(ai.begin(), ai.end());
+    // We should add the relocated address immediates as well.  During
+    // adjustForRelocation, relocated ranges may need to have their address
+    // immediates updated to point to other relocated ranges.  This requires
+    // adjustForRelocation to know which immediates are address immediates in
+    // the newly relocated range.
+    decltype(addressImmediates) updatedAI;
+    for (auto addrImm : ai) {
+      if (TCA adjusted = adjustedAddressAfter(addrImm)) {
+        updatedAI.insert(adjusted);
+      } else if (TCA odd = adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
+        // just for LdSmashable
+        updatedAI.insert((TCA)~uintptr_t(odd));
+      }
+    }
+    addressImmediates.insert(updatedAI.begin(), updatedAI.end());
   }
   bool isAddressImmediate(TCA ip) {
     return addressImmediates.count(ip);
@@ -121,4 +134,3 @@ size_t relocate(RelocationInfo& rel,
 
 }}
 
-#endif

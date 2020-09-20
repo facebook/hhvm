@@ -1,2 +1,1 @@
-
-Fatal error: jump out of a finally block is disallowed in %s/try_goto_out_finally.php on line 7
+Fatal error: Goto to a label outside a finally block is not supported in %s/test/slow/goto/try_goto_out_finally.php on line 2

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $dom = new DOMDocument();
 
 $doc = $dom->load(dirname(__FILE__) . "/book.xml", LIBXML_NOBLANKS);
@@ -14,7 +14,6 @@ assert('$new_node !== false');
 try {
     $parent_node->insertBefore($new_node, $ref_node);
 } catch(DOMException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
-
-?>
+}

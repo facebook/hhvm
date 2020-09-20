@@ -1,16 +1,16 @@
-<?php
+<?hh
 
 /* Testing Error Conditions */
+<<__EntryPoint>> function main(): void {
 echo "*** Testing Error Conditions ***\n";
-
 /* zero argument */
-var_dump( fprintf() );
+try { var_dump( fprintf() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* scalar argument */
-var_dump( fprintf(3) );
+try { var_dump( fprintf(3) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* NULL argument */
-var_dump( fprintf(NULL) );
+try { var_dump( fprintf(NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>
+}

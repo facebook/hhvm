@@ -1,0 +1,22 @@
+[(Fun
+    { f_span = [3:1-38]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([3:31-35], (Hprim Tvoid))));
+      f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+      f_variadic = FVnonVariadic; f_params = [];
+      f_cap =
+      ((),
+       (Some ([3:16-18], (Happly (([3:16-18], "\\HH\\Capabilities\\Rx"), [])))));
+      f_unsafe_cap =
+      ((),
+       (Some ([3:21-27],
+              (Happly (([3:21-27], "\\HH\\Capabilities\\NonDet"), [])))));
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false })
+  ]

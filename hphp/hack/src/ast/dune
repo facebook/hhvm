@@ -1,0 +1,12 @@
+(library
+  (name ast)
+  (wrapped false)
+  (modules
+    ast_defs
+    ast_defs_visitors_ancestors)
+  (libraries
+    file_info
+    namespace_env
+    naming_special_names)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std)))

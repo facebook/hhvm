@@ -1,10 +1,6 @@
-File "super_constraint_9.php", line 12, characters 16-17:
-Invalid argument (Typing[4110])
-File "super_constraint_9.php", line 6, characters 17-19:
-This is a mixed value
-File "super_constraint_9.php", line 12, characters 10-18:
-It was implicitly typed as a mixed value during this operation
-File "super_constraint_9.php", line 10, characters 32-34:
-It is incompatible with an int
-File "super_constraint_9.php", line 6, characters 49-51:
-Considering that this type argument is invariant with respect to Foo
+File "super_constraint_9.php", line 7, characters 10-10:
+Invalid return type (Typing[4336])
+File "super_constraint_9.php", line 7, characters 10-10:
+Expected `void` because this function does not always return a value
+File "super_constraint_9.php", line 7, characters 59-66:
+But got `Foo<Tk2>`

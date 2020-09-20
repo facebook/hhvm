@@ -1,19 +1,29 @@
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "test"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "test"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "test"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "test"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "test"
+  PopC
 
   Int 1
   RetC
@@ -24,7 +34,7 @@
   RetC
 }
 
-.function main() {
+.function test() {
   Int 0
   SetL $x
   PopC
@@ -189,10 +199,11 @@
   CGetL $x
   CGetL $x
 
-  FPushFuncD 0 "callee"
-  FCall 0
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "callee"
   AssertRATStk 0 Int
-  UnboxRNop
   PopC
 
   CGetL $x

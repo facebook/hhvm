@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_GENERATOR_H_
-#define incl_HPHP_EXT_GENERATOR_H_
+#pragma once
 
 
 #include "hphp/runtime/base/builtin-functions.h"
@@ -49,9 +48,6 @@ struct BaseGenerator {
   static constexpr ptrdiff_t resumeAddrOff() {
     return resumableOff() + Resumable::resumeAddrOff();
   }
-  static constexpr ptrdiff_t resumeOffsetOff() {
-    return resumableOff() + Resumable::resumeOffsetOff();
-  }
   static constexpr ptrdiff_t stateOff() {
     return offsetof(BaseGenerator, m_state);
   }
@@ -61,12 +57,12 @@ struct BaseGenerator {
    * Skips CreateCont and PopC opcodes.
    */
   static Offset userBase(const Func* func) {
-    assert(func->isGenerator());
+    assertx(func->isGenerator());
     auto base = func->base();
 
     // Skip past VerifyParamType and EntryNoop bytecodes
-    auto pc = func->unit()->at(base);
-    auto past = func->unit()->at(func->past());
+    auto pc = func->at(base);
+    auto past = func->at(func->past());
     while (peek_op(pc) != OpCreateCont) {
       pc += instrLen(pc);
       always_assert(pc < past);
@@ -74,10 +70,10 @@ struct BaseGenerator {
 
     auto DEBUG_ONLY op1 = decode_op(pc);
     auto DEBUG_ONLY op2 = decode_op(pc);
-    assert(op1 == OpCreateCont);
-    assert(op2 == OpPopC);
+    assertx(op1 == OpCreateCont);
+    assertx(op2 == OpPopC);
 
-    return func->unit()->offsetOf(pc);
+    return func->offsetOf(pc);
   }
 
   static size_t genSize(size_t ndSize, size_t frameSz) {
@@ -98,9 +94,8 @@ struct BaseGenerator {
     node->obj_offset = obj_offset;
     node->initHeader_32_16(HeaderKind::NativeData, ar_off, tyindex);
     auto const obj = new (objmem) ObjectData(cls, 0, HeaderKind::NativeObject);
-    assert((void*)obj == (void*)objmem);
-    assert(obj->hasExactlyOneRef());
-    assert(obj->noDestruct());
+    assertx((void*)obj == (void*)objmem);
+    assertx(obj->hasExactlyOneRef());
     return obj;
   }
 
@@ -174,9 +169,9 @@ struct Generator final : BaseGenerator {
   Generator& operator=(const Generator& other);
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
-                            jit::TCA resumeAddr, Offset resumeOffset);
+                            jit::TCA resumeAddr, Offset suspendOffset);
   static Class* getClass() {
-    assert(s_class);
+    assertx(s_class);
     return s_class;
   }
   static constexpr ptrdiff_t objectOff() {
@@ -186,7 +181,7 @@ struct Generator final : BaseGenerator {
     return Native::data<Generator>(obj);
   }
 
-  void yield(Offset resumeOffset, const Cell* key, Cell value);
+  void yield(Offset suspendOffset, const TypedValue* key, TypedValue value);
   void copyVars(const ActRec *fp);
   void ret(TypedValue tv) { done(tv); }
   void fail() { done(make_tv<KindOfUninit>()); }
@@ -200,9 +195,8 @@ private:
 
 public:
   int64_t m_index;
-  Cell m_key;
-  Cell m_value;
-  TypedValue m_delegate;
+  TypedValue m_key;
+  TypedValue m_value;
 
   static Class* s_class;
   static const StaticString s_className;
@@ -211,4 +205,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_GENERATOR_H_

@@ -1,0 +1,9 @@
+string(6) "Foo::f"
+string(6) "Foo::f"
+string(6) "Foo::f"
+string(6) "Bar::f"
+string(6) "Bar::g"
+string(6) "Bar::f"
+int(42)
+string(6) "Bar::g"
+Done

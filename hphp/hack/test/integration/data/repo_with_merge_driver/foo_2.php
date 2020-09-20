@@ -1,4 +1,4 @@
-        <?hh
-        function g(): int {
-            return 0;
-        }
+<?hh //partial
+function g(): int {
+    return 0;
+}

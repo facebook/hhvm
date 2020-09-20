@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PAGELET_SERVER_H_
-#define incl_HPHP_PAGELET_SERVER_H_
+#pragma once
 
 #include <string>
 #include <atomic>
@@ -104,7 +103,7 @@ struct PageletTransport final : Transport, Synchronizable {
   const void *getPostData(size_t &size) override;
   Method getMethod() override;
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap &headers) override;
+  const HeaderMap& getHeaders() override;
   void addHeaderImpl(const char *name, const char *value) override;
   void removeHeaderImpl(const char *name) override;
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
@@ -168,6 +167,11 @@ private:
 };
 
 struct PageletServerTaskEvent final : AsioExternalThreadEvent {
+
+  PageletServerTaskEvent() = default;
+  PageletServerTaskEvent(const PageletServerTaskEvent&) = delete;
+  PageletServerTaskEvent& operator=(const PageletServerTaskEvent&) = delete;
+
   ~PageletServerTaskEvent() override {
     if (m_job) m_job->decRefCount();
   }
@@ -182,12 +186,13 @@ struct PageletServerTaskEvent final : AsioExternalThreadEvent {
   }
 
 protected:
- void unserialize(Cell& result) final {
-   cellCopy(make_array_like_tv(m_job->getAsyncResults(false).detach()), result);
+ void unserialize(TypedValue& result) final {
+   tvCopy(make_array_like_tv(m_job->getAsyncResults(false).detach()), result);
   }
 
 private:
-  PageletTransport* m_job;
+
+  PageletTransport* m_job{nullptr};
   // string m_response;
   // Object m_next_wait_handle;
 };
@@ -195,4 +200,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PAGELET_SERVER_H_

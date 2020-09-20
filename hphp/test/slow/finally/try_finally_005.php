@@ -1,4 +1,6 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
 function foo () {
    try {
    } finally {
@@ -7,6 +9,3 @@ function foo () {
 label:
    return 1;
 }
-
-foo();
-?>

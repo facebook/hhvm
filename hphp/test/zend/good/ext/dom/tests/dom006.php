@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-Class books extends domDocument {
+class books extends domDocument {
     function addBook($title, $author) {
         $titleElement = $this->createElement("title");
         $titleElement->appendChild($this->createTextNode($title));
@@ -13,11 +13,12 @@ Class books extends domDocument {
         $bookElement->appendChild($authorElement);
         $this->documentElement->appendChild($bookElement);
     }
-   
-}
 
+}
+<<__EntryPoint>> function main(): void {
 $dom = new books;
 
 $dom->load(dirname(__FILE__)."/book.xml");
 $dom->addBook("PHP de Luxe", "Richard Samar, Christian Stocker");
 print $dom->saveXML();
+}

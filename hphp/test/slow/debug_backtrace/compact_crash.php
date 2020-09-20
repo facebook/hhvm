@@ -8,14 +8,13 @@ function profile($what, $fn) {
 }
 
 class X {
+  <<__NEVER_INLINE>>
   function foo() {
     var_dump('hello');
   }
 }
-
+<<__EntryPoint>>
 function main() {
   fb_setprofile('profile');
   (new X)->foo();
 }
-
-main();

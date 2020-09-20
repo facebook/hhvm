@@ -1,11 +1,11 @@
-<?php
+<?hh
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
 /*
-* With default callback function argument, array_filter() removes elements which are interpreted as false 
+* With default callback function argument, array_filter() removes elements which are interpreted as false
 * Here Testing all the false array element possibilities
 */
 
@@ -20,7 +20,7 @@ function always_false($input)
 {
   return false;
 }
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_filter() : usage variations - different false elements in 'input' ***\n";
 
 // unset variable
@@ -32,7 +32,7 @@ $empty_heredoc =<<<EOT
 EOT;
 
 // input array with different false elements
-$input = array(
+$input = varray[
   false,
   False,
   '',
@@ -43,22 +43,22 @@ $input = array(
   NULL,
   "0",
   '0',
-  array(),
+  varray[],
   !1,
   1==2,
   $empty_heredoc,
   @$unset_var,
   @$undefined_var,
-);
+];
 
 // With default callback function
-var_dump( array_filter($input) );  
+var_dump( array_filter($input) );
 
 // With callback function which returns always true
-var_dump( array_filter($input, 'always_true') ); 
+var_dump( array_filter($input, fun('always_true')) );
 
 // With callback function which returns always false
-var_dump( array_filter($input, 'always_false') );  
+var_dump( array_filter($input, fun('always_false')) );
 
-echo "Done"
-?>
+echo "Done";
+}

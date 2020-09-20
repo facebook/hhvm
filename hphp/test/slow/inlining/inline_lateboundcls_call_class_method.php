@@ -1,4 +1,4 @@
-<?
+<?hh
 
 abstract class A {
   static function heh() {
@@ -15,4 +15,8 @@ function x() {
   B::heh();
 }
 
+
+<<__EntryPoint>>
+function main_inline_lateboundcls_call_class_method() {
 x();
+}

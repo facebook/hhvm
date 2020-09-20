@@ -1,9 +1,0 @@
-.main {
-  Int 0
-  JmpNZ L1
-  Int 0
-  RetC
-  L1:
-    Int 1
-    RetC
-}

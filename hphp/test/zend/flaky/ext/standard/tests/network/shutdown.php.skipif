@@ -1,3 +1,0 @@
-<?php
-	function_exists('stream_socket_shutdown') or die('skip stream_socket_shutdown() is not supported.');
-?>

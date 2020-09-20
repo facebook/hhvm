@@ -1,16 +1,16 @@
 File "class_prop_as_this.php", line 12, characters 5-23:
-  <static> as this as C
+  this as C
 File "class_prop_as_this.php", line 13, characters 5-21:
-  <static> as this as C
+  this as C
 File "class_prop_as_this.php", line 17, characters 5-19:
 Invalid assignment (Typing[4110])
 File "class_prop_as_this.php", line 9, characters 24-24:
-This is the expression dependent type <expr#1>
-File "class_prop_as_this.php", line 17, characters 5-7:
-  where '<expr#1>' is a reference to this expression
+Expected `<expr#1>`
+File "class_prop_as_this.php", line 17, characters 5-10:
+  where `<expr#1>` is a reference to this expression
 File "class_prop_as_this.php", line 9, characters 31-31:
-It is incompatible with an object of type C
+But got `C`
 File "class_prop_as_this.php", line 9, characters 24-24:
-Since C is not final
+Since `C` is not final
 File "class_prop_as_this.php", line 9, characters 31-31:
-this might not be a C
+this might not be a `C`

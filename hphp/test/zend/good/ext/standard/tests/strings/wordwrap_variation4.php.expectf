@@ -2,57 +2,66 @@
 
 --- Testing wordwrap() by supplying different values for 'cut' argument ---
 -- Iteration 1 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 2 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 3 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 4 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 5 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 6 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 7 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 8 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 9 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 15 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 16 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects parameter 4 to be boolean, object given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 18 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 19 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 20 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 21 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+
+Warning: wordwrap() expects parameter 4 to be boolean, null given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 Done

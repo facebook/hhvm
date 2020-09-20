@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 function blah() {
 
-  $xs = array(1, 2, 3, 4);
-  $ys = array(1, 2, 3, 4);
+  $xs = varray[1, 2, 3, 4];
+  $ys = varray[1, 2, 3, 4];
 
   foreach ($xs as $x) {
     echo "outer loop\n";
@@ -37,4 +37,8 @@ function blah() {
   echo "after label\n";
 }
 
+
+<<__EntryPoint>>
+function main_finally_goto_002() {
 blah();
+}

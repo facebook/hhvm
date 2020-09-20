@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class Tester may not inherit from interface (Test) in %s/interface_and_extends.php on line 8

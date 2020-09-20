@@ -1,4 +1,29 @@
-Decoding: {"Organization": "PHP Documentation Team"} - No error
-Decoding: {'Organization': 'PHP Documentation Team'} - Syntax error
-Decoding:  - No error
-Decoding: {} - No error
+Decoding: {"Organization": "PHP Documentation Team"}
+0: No error
+NULL
+
+Decoding: {'Organization': 'PHP Documentation Team'}
+4: Syntax error
+varray(2) {
+  int(4)
+  string(12) "Syntax error"
+}
+
+Decoding: 
+0: No error
+NULL
+
+Decoding: {}
+0: No error
+NULL
+
+Encoding: hello
+0: No error
+NULL
+
+Encoding: Ÿ
+5: Malformed UTF-8 characters, possibly incorrectly encoded
+varray(2) {
+  int(5)
+  string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+}

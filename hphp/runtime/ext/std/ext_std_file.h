@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_FILE_H_
-#define incl_HPHP_EXT_FILE_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -107,7 +106,9 @@ Variant HHVM_FUNCTION(fgetss,
                       const Resource& handle,
                       int64_t length = 0,
                       const String& allowable_tags = null_string);
-TypedValue* HHVM_FN(fscanf)(ActRec* ar);
+Variant HHVM_FUNCTION(fscanf,
+                      const Resource& handle,
+                      const String& format);
 Variant HHVM_FUNCTION(fpassthru,
                       const Resource& handle);
 Variant HHVM_FUNCTION(fwrite,
@@ -134,7 +135,7 @@ bool HHVM_FUNCTION(ftruncate,
 bool HHVM_FUNCTION(flock,
                    const Resource& handle,
                    int operation,
-                   VRefParam wouldblock = uninit_null());
+                   bool& wouldblock);
 Variant HHVM_FUNCTION(fputcsv,
                       const Resource& handle,
                       const Array& fields,
@@ -346,4 +347,3 @@ void HHVM_FUNCTION(closedir,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_FILE_H_

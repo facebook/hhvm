@@ -1,11 +1,10 @@
-<?hh // decl /* -*- mode: php -*- */
+<?hh /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -458,8 +457,6 @@ class Imagick
   const DITHERMETHOD_RIEMERSMA = 2;
 
   // Methods
-  public function __get($name);
-  public function __isset($name);
   public function count(): int;
   public function key(): int;
   public function next(): void;
@@ -532,9 +529,9 @@ class Imagick
     Imagick $image,
     int $channelType,
     int $metricType,
-  ): array;
+  ): varray;
   public function compareImageLayers(int $method): Imagick;
-  public function compareImages(Imagick $compare, int $metric): array;
+  public function compareImages(Imagick $compare, int $metric): varray;
   public function compositeImage(
     Imagick $composite_object,
     int $composite,
@@ -550,7 +547,7 @@ class Imagick
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function convolveImage(
-    array $kernel,
+    varray $kernel,
     int $channel = \Imagick::CHANNEL_ALL,
   ): bool;
   public function cropImage(int $width, int $height, int $x, int $y): bool;
@@ -567,7 +564,7 @@ class Imagick
   public function displayImages(string $servername): bool;
   public function distortImage(
     int $method,
-    array $arguments,
+    varray $arguments,
     bool $bestfit,
   ): bool;
   public function drawImage(ImagickDraw $draw): bool;
@@ -588,7 +585,7 @@ class Imagick
     int $height,
     string $map,
     int $storage,
-  ): array;
+  ): varray;
   public function extentImage(int $width, int $height, int $x, int $y): bool;
   public function flattenImages(): Imagick;
   public function flipImage(): bool;
@@ -611,7 +608,7 @@ class Imagick
   ): bool;
   public function functionImage(
     int $function,
-    array $arguments,
+    varray $arguments,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function fxImage(
@@ -641,7 +638,7 @@ class Imagick
   public function getImageArtifact(string $artifact): string;
   public function getImageBackgroundColor(): ImagickPixel;
   public function getImageBlob(): string;
-  public function getImageBluePrimary(): array;
+  public function getImageBluePrimary(): darray;
   public function getImageBorderColor(): ImagickPixel;
   public function getImageChannelDepth(int $channel): int;
   public function getImageChannelDistortion(
@@ -654,13 +651,13 @@ class Imagick
     int $metric,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): float;
-  public function getImageChannelExtrema(int $channel): array;
+  public function getImageChannelExtrema(int $channel): darray;
   public function getImageChannelKurtosis(
     int $channel = \Imagick::CHANNEL_DEFAULT,
-  ): array;
-  public function getImageChannelMean(int $channel): array;
-  public function getImageChannelRange(int $channel): array;
-  public function getImageChannelStatistics(): array;
+  ): darray;
+  public function getImageChannelMean(int $channel): darray;
+  public function getImageChannelRange(int $channel): darray;
+  public function getImageChannelStatistics(): darray;
   public function getImageClipMask(): Imagick;
   public function getImageColormapColor(int $index): ImagickPixel;
   public function getImageColors(): int;
@@ -676,15 +673,15 @@ class Imagick
     int $metric,
   ): float;
   */
-  public function getImageExtrema(): array;
+  public function getImageExtrema(): darray;
   public function getImageFilename(): string;
   public function getImageFormat(): string;
   public function getImageGamma(): float;
-  public function getImageGeometry(): array;
+  public function getImageGeometry(): darray;
   public function getImageGravity(): int;
-  public function getImageGreenPrimary(): array;
+  public function getImageGreenPrimary(): darray;
   public function getImageHeight(): int;
-  public function getImageHistogram(): array;
+  public function getImageHistogram(): varray;
   public function getImageIndex(): int;
   public function getImageInterlaceScheme(): int;
   public function getImageInterpolateMethod(): int;
@@ -694,19 +691,19 @@ class Imagick
   public function getImageMatteColor(): ImagickPixel;
   public function getImageMimeType(): string;
   public function getImageOrientation(): int;
-  public function getImagePage(): array;
+  public function getImagePage(): darray;
   public function getImagePixelColor(int $x, int $y): ImagickPixel;
   public function getImageProfile(string $name): string;
   public function getImageProfiles(
     string $pattern = "*",
     bool $with_values = true,
-  ): array;
+  ): varray_or_darray;
   public function getImageProperties(
     string $pattern = "*",
     bool $with_values = true,
-  ): array;
+  ): varray_or_darray;
   public function getImageProperty(string $name): string;
-  public function getImageRedPrimary(): array;
+  public function getImageRedPrimary(): darray;
   public function getImageRegion(
     int $width,
     int $height,
@@ -714,7 +711,7 @@ class Imagick
     int $y,
   ): Imagick;
   public function getImageRenderingIntent(): int;
-  public function getImageResolution(): array;
+  public function getImageResolution(): darray;
   public function getImagesBlob(): string;
   public function getImageScene(): int;
   public function getImageSignature(): string;
@@ -724,14 +721,14 @@ class Imagick
   public function getImageType(): int;
   public function getImageUnits(): int;
   public function getImageVirtualPixelMethod(): int;
-  public function getImageWhitePoint(): array;
+  public function getImageWhitePoint(): darray;
   public function getImageWidth(): int;
   public function getInterlaceScheme(): int;
   public function getIteratorIndex(): int;
   public function getNumberImages(): int;
   public function getOption(string $key): string;
   public static function getPackageName(): string;
-  public function getPage(): array;
+  public function getPage(): darray;
   public function getPixelIterator(): ImagickPixelIterator;
   public function getPixelRegionIterator(
     int $x,
@@ -740,22 +737,22 @@ class Imagick
     int $rows,
   ): ImagickPixelIterator;
   public function getPointSize(): float;
-  public static function getQuantumDepth(): array;
-  public static function getQuantumRange(): array;
+  public static function getQuantumDepth(): darray;
+  public static function getQuantumRange(): darray;
   public static function getReleaseDate(): string;
   public static function getResource(int $type): int;
   public static function getResourceLimit(int $type): int;
-  public function getSamplingFactors(): array;
-  public function getSize(): array;
+  public function getSamplingFactors(): varray;
+  public function getSize(): darray;
   public function getSizeOffset(): int;
-  public static function getVersion(): array;
+  public static function getVersion(): darray;
   public function haldClutImage(
     Imagick $clut,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function hasNextImage(): bool;
   public function hasPreviousImage(): bool;
-  public function identifyImage(bool $appendRawOutput = false): array;
+  public function identifyImage(bool $appendRawOutput = false): darray;
   public function implodeImage(float $radius): bool;
   public function importImagePixels(
     int $x,
@@ -764,7 +761,7 @@ class Imagick
     int $height,
     string $map,
     int $storage,
-    array $pixels,
+    varray $pixels,
   ): bool;
   public function labelImage(string $label): bool;
   public function levelImage(
@@ -890,9 +887,9 @@ class Imagick
     ImagickDraw $properties,
     string $text,
     $multiline = null,
-  ): array;
-  public static function queryFonts(string $pattern = "*"): array;
-  public static function queryFormats(string $pattern = "*"): array;
+  ): darray;
+  public static function queryFonts(string $pattern = "*"): varray;
+  public static function queryFormats(string $pattern = "*"): varray;
   public function radialBlurImage(
     float $angle,
     int $channel = \Imagick::CHANNEL_ALL,
@@ -915,8 +912,8 @@ class Imagick
     resource $filehandle,
     string $fileName = "",
   ): bool;
-  public function readImages(array $files): bool;
-  public function recolorImage(array $matrix): bool;
+  public function readImages(varray $files): bool;
+  public function recolorImage(varray $matrix): bool;
   public function reduceNoiseImage(float $radius): bool;
   public function remapImage(Imagick $replacement, int $dither): bool;
   public function removeImage(): bool;
@@ -1031,7 +1028,7 @@ class Imagick
     float $y_resolution,
   ): bool;
   public static function setResourceLimit(int $type, int $limit): bool;
-  public function setSamplingFactors(array $factors): bool;
+  public function setSamplingFactors(varray $factors): bool;
   public function setSize(int $columns, int $rows): bool;
   public function setSizeOffset(int $columns, int $rows, int $offset): bool;
   public function setType(int $image_type): bool;
@@ -1071,7 +1068,7 @@ class Imagick
   public function solarizeImage(int $threshold): bool;
   public function sparseColorImage(
     int $SPARSE_METHOD,
-    array $arguments,
+    varray $arguments,
     int $channel = \Imagick::CHANNEL_DEFAULT,
   ): bool;
   public function spliceImage(int $width, int $height, int $x, int $y): bool;

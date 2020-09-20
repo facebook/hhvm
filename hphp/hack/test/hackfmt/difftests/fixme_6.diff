@@ -1,0 +1,6 @@
+diff --git a/fixme.php b/fixme.php
+--- a/fixme.php
++++ b/fixme.php
+@@ -9,1 +9,1 @@
+-    return vec[2,
++    return vec[1,

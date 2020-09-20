@@ -52,7 +52,6 @@ function main() {
   $i = new C2();
   $i->bar();
 }
-main();
 
 function reflect_requirements($name) {
   $rc = new ReflectionClass($name);
@@ -74,4 +73,9 @@ function reflection() {
   reflect_requirements(T1::class);
   reflect_requirements(T2::class);
 }
+
+<<__EntryPoint>>
+function main_require_constraint_basic() {
+main();
 reflection();
+}

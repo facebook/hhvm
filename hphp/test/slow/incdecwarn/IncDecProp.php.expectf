@@ -1,0 +1,30 @@
+Test begin
+--- C ---
+int(1)
+int(-1)
+int(0)
+int(0)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+int(1)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+C Object
+(
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+    [p] => 1
+    [q] => 
+    [r] => 1
+    [s] => 
+)
+Test end

@@ -1,0 +1,7 @@
+Verification Error (unit %s/rx/body/silence.php func bad): Silence cannot appear in Rx function
+
+Verification Error (unit %s/rx/body/silence.php func bad): Silence cannot appear in Rx function
+
+Verification Error (unit %s/rx/body/silence.php func bad): Silence cannot appear in Rx function
+
+Verification failed for unit %s/rx/body/silence.php. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

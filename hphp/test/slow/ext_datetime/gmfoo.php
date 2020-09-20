@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_gmfoo() {
 date_default_timezone_set("America/Los_Angeles");
 
 $d = mktime(0, 0, 0, 1, 1, 1998);
@@ -21,3 +24,4 @@ var_dump(strftime("%a %A %b %B %c %C %d %D %e %g %G %h %H %I %j %m %M %n %p ".
               "06/27/06 27 06 2006 Jun 00 12 178 06 00 \n AM 12:00:00 AM ".
               "00:00 00 \t 00:00:00 2 26 26 26 2 06/27/2006 12:00:00 AM ".
               "06 2006 PDT -0700 %");
+}

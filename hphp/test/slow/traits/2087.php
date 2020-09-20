@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 trait T {
   public function foo() {
-    $values = array(1, 2, 3);
+    $values = varray[1, 2, 3];
     $values = array_map(function($p) {
       return $this->goo($p);
     }
@@ -19,6 +19,10 @@ trait T {
 class A {
  use T;
 }
+
+<<__EntryPoint>>
+function main_2087() {
 $obj = new A;
 var_dump($obj->bar());
 $obj->foo();
+}

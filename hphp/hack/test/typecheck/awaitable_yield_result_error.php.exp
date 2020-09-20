@@ -1,6 +1,2 @@
-File "awaitable_yield_result_error.php", line 13, characters 10-13:
-Invalid return type (Typing[4110])
-File "awaitable_yield_result_error.php", line 12, characters 24-26:
-This is an int
-File "awaitable_yield_result_error.php", line 13, characters 3-14:
-It is incompatible with an object of type Awaitable
+File "awaitable_yield_result_error.php", line 16, characters 16-24:
+Was expecting an `Awaitable` return type hint (Typing[4174])

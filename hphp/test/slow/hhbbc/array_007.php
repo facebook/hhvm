@@ -1,13 +1,13 @@
-<?php
+<?hh
 
-function foo() { return array(1,2,3); }
-function bar() { return array(); }
+function foo() { return varray[1,2,3]; }
+function bar() { return varray[]; }
 function test($x) {
   $y = $x ? foo() : bar();
   return $y[0];
 }
+<<__EntryPoint>>
 function main() {
-  var_dump(test(true));
-  var_dump(test(false));
+  try { var_dump(test(true)); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { var_dump(test(false)); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
-main();

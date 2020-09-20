@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {}
 
@@ -11,6 +11,10 @@ function main(Foo $x = null) {
   return 2;
 }
 
+
+
+
+<<__EntryPoint>>
+function main_jmp_local_001() {
 main();
-
-
+}

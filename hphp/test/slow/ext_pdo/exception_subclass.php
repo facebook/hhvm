@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo extends PDOException {}
 
@@ -13,4 +13,8 @@ function main() {
   var_dump($foo->getPrevious() === $junk);
 }
 
+
+<<__EntryPoint>>
+function main_exception_subclass() {
 main();
+}

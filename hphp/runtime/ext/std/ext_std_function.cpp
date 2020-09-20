@@ -19,8 +19,11 @@
 #include <algorithm>
 #include <vector>
 
-#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -39,8 +42,8 @@ const StaticString
   s_user("user");
 
 Array HHVM_FUNCTION(get_defined_functions) {
-  return make_map_array(s_internal, Unit::getSystemFunctions(),
-                        s_user, Unit::getUserFunctions());
+  return make_darray(s_internal, Unit::getSystemFunctions(),
+                     s_user, Unit::getUserFunctions());
 }
 
 bool HHVM_FUNCTION(function_exists, const String& function_name,
@@ -52,211 +55,113 @@ bool HHVM_FUNCTION(function_exists, const String& function_name,
      function_exists(function_name));
 }
 
-bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
-                   OutputArg name /* = null */) {
-  return is_callable(v, syntax, name.get());
+bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */) {
+  return is_callable(v, syntax, nullptr);
+}
+
+bool HHVM_FUNCTION(is_callable_with_name, const Variant& v, bool syntax,
+                   Variant& name) {
+  return is_callable(v, syntax, &name);
 }
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
-  return vm_call_user_func(function, params, /* forward */ false,
-                           /* check ref */ true);
+    auto const warning = "call_user_func() is deprecated and subject"
+   " to removal from the Hack language";
+   switch (RuntimeOption::DisableCallUserFunc) {
+     case 0:  break;
+     case 1:  raise_warning(warning); break;
+     default: raise_error(warning);
+   }
+  return vm_call_user_func(function, params, /* check ref */ true);
 }
 
 Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
-                      const Array& params) {
-  return vm_call_user_func(function, params, /* forward */ false,
-                           /* check ref */ true);
-}
-
-Variant HHVM_FUNCTION(check_user_func_async, const Variant& /*handles*/,
-                      int /*timeout*/ /* = -1 */) {
-  raise_error("%s is no longer supported", __func__);
-  return init_null();
-}
-
-Variant HHVM_FUNCTION(end_user_func_async, const Object& /*handle*/,
-                      int /*default_strategy*/ /*= k_GLOBAL_STATE_IGNORE*/,
-                      const Variant& /*additional_strategies*/ /* = null */) {
-  raise_error("%s is no longer supported", __func__);
-  return init_null();
-}
-
-Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
-                      const Array& params) {
-  return HHVM_FN(forward_static_call)(function, params);
-}
-
-Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
-                              const Array& params /* = null_array */) {
-  // Setting the bound parameter to true tells vm_call_user_func()
-  // propogate the current late bound class
-  return vm_call_user_func(function, params, true, /* check ref */ true);
-}
-
-String HHVM_FUNCTION(create_function, const String& args, const String& code) {
-  return g_context->createFunction(args, code);
+                      const Variant& params) {
+  auto const warning = "call_user_func_array() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableCallUserFuncArray) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
+  if (UNLIKELY(!isContainer(params))) {
+    raise_warning("call_user_func_array() expects parameter 2 to be an array "
+                  "or collection, %s given",
+                  getDataTypeString(params.getType()).data());
+    return init_null();
+  }
+  return vm_call_user_func(function, params, /* check ref */ true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(func_get_arg, int arg_num) {
-  auto const ar = GetCallerFrameForArgs();
+const StaticString s_call_user_func("call_user_func");
+const StaticString s_call_user_func_array("call_user_func_array");
 
-  if (ar == nullptr) {
-    return false;
-  }
-  if (ar->func()->isPseudoMain()) {
-    raise_warning(
-      "func_get_arg():  Called from the global scope - no function context"
-    );
-    return false;
-  }
-  if (arg_num < 0) {
-    raise_warning(
-      "func_get_arg():  The argument number should be >= 0"
-    );
-    return false;
-  }
-  if (arg_num >= ar->numArgs()) {
-    raise_warning(
-      "func_get_arg():  Argument %d not passed to function", arg_num
-    );
-    return false;
+Array hhvm_get_frame_args(const ActRec* ar) {
+  ARRPROV_USE_RUNTIME_LOCATION();
+  while (ar && (ar->func()->name()->isame(s_call_user_func.get()) ||
+                ar->func()->name()->isame(s_call_user_func_array.get()))) {
+    ar = g_context->getPrevVMState(ar);
   }
 
-  const int numParams = ar->m_func->numNonVariadicParams();
+  auto ret = Array::CreateVArray();
+  if (!ar) return ret;
 
-  if (arg_num < numParams) {
-    // Formal parameter. Value is on the stack.
-    TypedValue* loc =
-      (TypedValue*)(uintptr_t(ar) - (arg_num + 1) * sizeof(TypedValue));
-    return tvAsVariant(loc);
+  int numNonVariadic = ar->func()->numNonVariadicParams();
+  for (int i = 0; i < numNonVariadic; ++i) {
+    auto const val = frame_local(ar, i);
+    // If there's a default argument that is not passed, variadic arguments
+    // must be empty
+    if (type(val) == KindOfUninit) return ret;
+    ret.append(tvAsCVarRef(*val));
   }
-
-  const int numArgs = ar->numArgs();
-  const int extraArgs = numArgs - numParams;
-
-  // Not a formal parameter.  Value is potentially in the
-  // ExtraArgs/VarEnv.
-  const int extraArgNum = arg_num - numParams;
-  if (extraArgNum < extraArgs) {
-    return tvAsVariant(ar->getExtraArg(extraArgNum));
+  if (!ar->func()->hasVariadicCaptureParam()) return ret;
+  assertx(numNonVariadic == ret.size());
+  auto const arr = frame_local(ar, numNonVariadic);
+  if (tvIsHAMSafeVArray(arr)) {
+    // If there are still args that haven't been accounted for, they have
+    // been shuffled into a packed array stored in the variadic capture param.
+    IterateVNoInc(val(arr).parr, [&](TypedValue v) { ret.append(v); });
   }
-
-  return false;
-}
-
-Array hhvm_get_frame_args(const ActRec* ar, int offset) {
-  if (ar == nullptr) {
-    return Array();
-  }
-  int numParams = ar->func()->numNonVariadicParams();
-  int numArgs = ar->numArgs();
-  bool variadic = ar->func()->hasVariadicCaptureParam() &&
-    !(ar->func()->attrs() & AttrMayUseVV);
-  auto local = reinterpret_cast<TypedValue*>(
-    uintptr_t(ar) - sizeof(TypedValue)
-  );
-  if (variadic && numArgs > numParams) {
-    auto arr = local - numParams;
-    if (isArrayType(arr->m_type) && arr->m_data.parr->hasPackedLayout()) {
-      numArgs = numParams + arr->m_data.parr->size();
-    } else {
-      numArgs = numParams;
-    }
-  }
-  local -= offset;
-  PackedArrayInit retInit(std::max(numArgs - offset, 0));
-  for (int i = offset; i < numArgs; ++i) {
-    if (i < numParams) {
-      // This corresponds to one of the function's formal parameters, so it's
-      // on the stack.
-      retInit.append(tvAsCVarRef(local));
-      --local;
-    } else if (variadic) {
-      retInit.append(tvAsCVarRef(local).asCArrRef()[i - numParams]);
-    } else {
-      // This is not a formal parameter, so it's in the ExtraArgs.
-      retInit.append(tvAsCVarRef(ar->getExtraArg(i - numParams)));
-    }
-  }
-
-  return retInit.toArray();
-}
-
-#define FUNC_GET_ARGS_IMPL(offset) do {                                        \
-  EagerCallerFrame cf;                                                         \
-  ActRec* ar = cf.actRecForArgs();                                             \
-  if (!ar || ar->func()->isPseudoMain()) {                                     \
-    raise_warning(                                                             \
-      "func_get_args():  Called from the global scope - no function context"   \
-    );                                                                         \
-    return false;                                                              \
-  }                                                                            \
-  return hhvm_get_frame_args(ar, offset);                                      \
-} while(0)
-
-Variant HHVM_FUNCTION(func_get_args) {
-  FUNC_GET_ARGS_IMPL(0);
-}
-
-// __SystemLib\func_slice_args
-Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset) {
-  if (offset < 0) {
-    offset = 0;
-  }
-  FUNC_GET_ARGS_IMPL(offset);
-}
-
-int64_t HHVM_FUNCTION(func_num_args) {
-  EagerCallerFrame cf;
-  ActRec* ar = cf.actRecForArgs();
-  if (ar == nullptr) {
-    return -1;
-  }
-  if (ar->func()->isPseudoMain()) {
-    raise_warning(
-      "func_num_args():  Called from the global scope - no function context"
-    );
-    return -1;
-  }
-  return ar->numArgs();
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void HHVM_FUNCTION(register_postsend_function, const Variant& function,
-                   const Array& params /* = null_array */) {
-  g_context->registerShutdownFunction(function, params,
-                                      ExecutionContext::PostSend);
+void HHVM_FUNCTION(register_postsend_function, const Variant& function) {
+  g_context->registerShutdownFunction(function, ExecutionContext::PostSend);
 }
 
-void HHVM_FUNCTION(register_shutdown_function, const Variant& function,
-                   const Array& params /* = null_array */) {
-  g_context->registerShutdownFunction(function, params,
-                                      ExecutionContext::ShutDown);
+void HHVM_FUNCTION(register_shutdown_function, const Variant& function) {
+  g_context->registerShutdownFunction(function, ExecutionContext::ShutDown);
 }
 
 void StandardExtension::initFunction() {
   HHVM_FE(get_defined_functions);
   HHVM_FE(function_exists);
   HHVM_FE(is_callable);
+  HHVM_FE(is_callable_with_name);
   HHVM_FE(call_user_func);
   HHVM_FE(call_user_func_array);
-  HHVM_FE(check_user_func_async);
-  HHVM_FE(end_user_func_async);
-  HHVM_FE(forward_static_call_array);
-  HHVM_FE(forward_static_call);
-  HHVM_FE(create_function);
-  HHVM_FE(func_get_arg);
-  HHVM_FE(func_get_args);
-  HHVM_FALIAS(__SystemLib\\func_slice_args, SystemLib_func_slice_args);
-  HHVM_FE(func_num_args);
   HHVM_FE(register_postsend_function);
   HHVM_FE(register_shutdown_function);
+  HHVM_FALIAS(HH\\fun_get_function, HH_fun_get_function);
 
   loadSystemlib("std_function");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+String HHVM_FUNCTION(HH_fun_get_function, TypedValue v) {
+  if (!tvIsFunc(v)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Argument 1 passed to {}() must be a fun",
+      __FUNCTION__+5));
+  }
+  auto const f = val(v).pfunc;
+  return f->nameStr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

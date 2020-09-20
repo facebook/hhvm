@@ -1,4 +1,4 @@
 string(1) "x"
 
-Warning: Attempted to serialize unserializable builtin class %s in %s/apc/1825.php on line 8
+Warning: Attempted to serialize unserializable builtin class %s in %s/apc/1825.php on line 12
 NULL

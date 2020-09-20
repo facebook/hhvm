@@ -1,0 +1,16 @@
+NULL
+
+Warning: Argument 1 to foo() must be upper-bounded by @int, string given in %s/test/quick/upper-bounds/soft-ubs.php on line 5
+
+Warning: Value returned from function foo() must be upper-bounded by @int, string given in %s/test/quick/upper-bounds/soft-ubs.php on line 4
+string(1) "a"
+
+Warning: Argument 1 to Bar::baz() must be upper-bounded by @?int, string given in %s/test/quick/upper-bounds/soft-ubs.php on line 12
+
+Warning: Value returned from method Bar::baz() must be upper-bounded by @?int, string given in %s/test/quick/upper-bounds/soft-ubs.php on line 11
+string(1) "b"
+
+Warning: Property 'Bar::x' upper-bounded by type @int, string assigned in %s/test/quick/upper-bounds/soft-ubs.php on line 22
+
+Warning: Property 'Bar::x' upper-bounded by type @int, float assigned in %s/test/quick/upper-bounds/soft-ubs.php on line 23
+float(3.14)

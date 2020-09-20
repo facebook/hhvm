@@ -1,36 +1,36 @@
-object(Foo)#%d (1) {
+object(Foo) (1) {
   ["instanceId":"Singleton":private]=>
   int(0)
 }
-object(Bar)#%d (1) {
+object(Bar) (1) {
   ["instanceId":"Singleton":private]=>
   int(1)
 }
-object(Baz)#%d (1) {
+object(Baz) (1) {
   ["instanceId":"Singleton":private]=>
   int(2)
 }
-object(Foo)#%d (1) {
+object(Foo) (1) {
   ["instanceId":"Singleton":private]=>
   int(0)
 }
-object(Bar)#%d (1) {
+object(Bar) (1) {
   ["instanceId":"Singleton":private]=>
   int(1)
 }
-object(Baz)#%d (1) {
+object(Baz) (1) {
   ["instanceId":"Singleton":private]=>
   int(2)
 }
-object(Foo)#%d (1) {
+object(Foo) (1) {
   ["instanceId":"Singleton":private]=>
   int(0)
 }
-object(Bar)#%d (1) {
+object(Bar) (1) {
   ["instanceId":"Singleton":private]=>
   int(1)
 }
-object(Baz)#%d (1) {
+object(Baz) (1) {
   ["instanceId":"Singleton":private]=>
   int(2)
 }

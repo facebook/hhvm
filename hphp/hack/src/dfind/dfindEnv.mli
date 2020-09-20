@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -18,36 +17,33 @@
  * where I checked the time stamp and now etc ...
  * So we maintain our own clock. It is incremented by one on every event.
  *)
-module Time: sig
+module Time : sig
   type t
 
-  val get: unit -> t
-  val compare: t -> t -> int
+  val get : unit -> t
+
+  val compare : t -> t -> int
 
   (* The beginning of times *)
-  val bot: t
+  val bot : t
 
-  val to_string: t -> string
+  val to_string : t -> string
 end
 
 (* Our fancy Avl (cf monoidAvl.ml) *)
-module TimeFiles: MonoidAvl.S
-with type elt = Time.t * string
-with type monoelt = Time.t
+module TimeFiles :
+  MonoidAvl.S with type elt = Time.t * string with type monoelt = Time.t
 
 type t = {
-    (* The fsnotify environment, we use this for interacting with fsnotify *)
-            fsnotify  : Fsnotify.env                          ;
-
-    (* The set of files with their timestamp *)
-    mutable files     : TimeFiles.t                           ;
-
-    (* The set of new files (files created during an event) *)
-    mutable new_files : SSet.t                                ;
-
-    (* The directories (and the files they contain) *)
-    mutable dirs      : SSet.t SMap.t                         ;
-  }
+  (* The fsnotify environment, we use this for interacting with fsnotify *)
+  fsnotify: Fsnotify.env;
+  (* The set of files with their timestamp *)
+  mutable files: TimeFiles.t;
+  (* The set of new files (files created during an event) *)
+  mutable new_files: SSet.t;
+  (* The directories (and the files they contain) *)
+  mutable dirs: SSet.t SMap.t;
+}
 
 (*****************************************************************************)
 (* Building the original environment, this call is called only once
@@ -55,4 +51,4 @@ type t = {
  *)
 (*****************************************************************************)
 
-val make: string list -> t
+val make : string list -> t

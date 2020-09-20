@@ -1,16 +1,21 @@
 <?hh
 
+abstract final class GuardBug { public static $x; }
+
 function k() {
-  global $x;
-  if (!isset($x)) {
-    $x = fopen(__FILE__, 'r');
+  // a comment!
+  if (!isset(GuardBug::$x)) {
+    GuardBug::$x = fopen(__FILE__, 'r');
   }
-  return $x;
+  return GuardBug::$x;
 }
 
-while ($line = fgets(k())) {
-    $parts = explode(' ', $line);
-    $file = $parts[0];
+<<__EntryPoint>>
+function main(): void {
+  while ($line = fgets(k())) {
+      $parts = explode(' ', $line);
+      $file = $parts[0];
 
-    echo "$file -\n";
+      echo "$file -\n";
+  }
 }

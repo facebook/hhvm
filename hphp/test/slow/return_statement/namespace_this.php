@@ -8,5 +8,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_namespace_this() {
 $foo = new Foo();
-var_dump($foo->foo());
+\var_dump($foo->foo());
+}

@@ -13,17 +13,19 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
-#define incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/runtime/vm/jit/target-cache.h"
 
 namespace HPHP {
   struct NamedEntity;
+  struct Class;
   struct Func;
   struct StringData;
+  struct MemoCacheBase;
 }
 
 namespace HPHP { namespace rds {
@@ -35,28 +37,42 @@ namespace HPHP { namespace rds {
  */
 
 /*
- * Static locals.
- *
- * For normal functions, static locals are allocated as RefData's that
- * live in RDS.  Note that we don't put closure locals here because
- * they are per-instance.
- */
-
-struct StaticLocalData {
-  RefData ref;
-  static size_t ref_offset() { return offsetof(StaticLocalData, ref); }
-};
-Link<StaticLocalData, true /* normal_only */>
-bindStaticLocal(const Func*, const StringData*);
-
-/*
  * Allocate storage for the value of a class constant in RDS.
  */
-Link<TypedValue, true /* normal_only */>
+Link<TypedValue, rds::Mode::Normal>
 bindClassConstant(const StringData* clsName, const StringData* cnsName);
+
+Link<TypedValue, rds::Mode::Normal>
+bindStaticMemoValue(const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindStaticMemoCache(const Func*);
+
+Link<TypedValue, rds::Mode::Normal>
+attachStaticMemoValue(const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachStaticMemoCache(const Func*);
+
+Link<TypedValue, rds::Mode::Normal>
+bindLSBMemoValue(const Class*, const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindLSBMemoCache(const Class*, const Func*);
+
+Link<TypedValue, rds::Mode::Normal>
+attachLSBMemoValue(const Class*, const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachLSBMemoCache(const Class*, const Func*);
+
+Link<jit::TSClassCache, rds::Mode::Local>
+bindTSCache(const Func*);
+
+Link<jit::TSClassCache, rds::Mode::Local>
+attachTSCache(const Func*);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

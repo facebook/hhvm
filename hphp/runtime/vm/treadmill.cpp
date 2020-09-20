@@ -22,7 +22,6 @@
 #include <memory>
 #include <algorithm>
 
-#include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <signal.h>
@@ -30,7 +29,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -46,11 +45,11 @@ TRACE_SET_MOD(treadmill);
  * they are densely packed.
  *
  * The plan here is that each thread starts with s_thisThreadIdx as
- * kInvalidThreadIdx.  And the first time a thread starts using the Treadmill
+ * kInvalidRequestIdx.  And the first time a thread starts using the Treadmill
  * it allocates a new thread id from s_nextThreadIdx with fetch_add.
  */
 std::atomic<int64_t> g_nextThreadIdx{0};
-__thread int64_t tl_thisThreadIdx{kInvalidThreadIdx};
+RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx){kInvalidRequestIdx};
 
 namespace {
 
@@ -58,14 +57,14 @@ namespace {
 
 const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 
-struct RequestInfo {
+struct TreadmillRequestInfo {
   GenCount  startTime;
   pthread_t pthreadId;
+  SessionKind sessionKind;
 };
 
 pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
-const GenCount kIdleGenCount = 0; // not processing any requests.
-std::vector<RequestInfo> s_inflightRequests;
+std::vector<TreadmillRequestInfo> s_inflightRequests;
 GenCount s_latestCount = 0;
 std::atomic<GenCount> s_oldestRequestInFlight(0);
 
@@ -168,44 +167,46 @@ void enqueueInternal(std::unique_ptr<WorkItem> gt) {
   }
 }
 
-void startRequest() {
-  auto const threadIdx = Treadmill::threadIdx();
+void startRequest(SessionKind session_kind) {
+  auto const requestIdx = Treadmill::requestIdx();
 
   GenCount startTime = getTime();
   {
     GenCountGuard g;
     refreshStats();
     checkOldest();
-    if (threadIdx >= s_inflightRequests.size()) {
-      s_inflightRequests.resize(threadIdx + 1, {kIdleGenCount, 0});
+    if (requestIdx >= s_inflightRequests.size()) {
+      s_inflightRequests.resize(
+        requestIdx + 1, {kIdleGenCount, 0, SessionKind::None});
     } else {
-      assert(s_inflightRequests[threadIdx].startTime == kIdleGenCount);
+      assertx(s_inflightRequests[requestIdx].startTime == kIdleGenCount);
     }
-    s_inflightRequests[threadIdx].startTime = correctTime(startTime);
-    s_inflightRequests[threadIdx].pthreadId = Process::GetThreadId();
-    FTRACE(1, "threadIdx {} pthreadId {} start @gen {}\n", threadIdx,
-           s_inflightRequests[threadIdx].pthreadId,
-           s_inflightRequests[threadIdx].startTime);
+    s_inflightRequests[requestIdx].startTime = correctTime(startTime);
+    s_inflightRequests[requestIdx].pthreadId = Process::GetThreadId();
+    s_inflightRequests[requestIdx].sessionKind = session_kind;
+    FTRACE(1, "requestIdx {} pthreadId {} start @gen {}\n", requestIdx,
+           s_inflightRequests[requestIdx].pthreadId,
+           s_inflightRequests[requestIdx].startTime);
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
-      s_oldestRequestInFlight = s_inflightRequests[threadIdx].startTime;
+      s_oldestRequestInFlight = s_inflightRequests[requestIdx].startTime;
     }
-    if (!ThreadInfo::s_threadInfo.isNull()) {
-      TI().changeGlobalGCStatus(ThreadInfo::Idle,
-                                ThreadInfo::OnRequestWithNoPendingExecution);
+    if (!RequestInfo::s_requestInfo.isNull()) {
+      RI().changeGlobalGCStatus(RequestInfo::Idle,
+                                RequestInfo::OnRequestWithNoPendingExecution);
     }
   }
 }
 
 void finishRequest() {
-  auto const threadIdx = Treadmill::threadIdx();
-  assert(threadIdx != -1);
-  FTRACE(1, "tid {} finish\n", threadIdx);
+  auto const requestIdx = Treadmill::requestIdx();
+  assertx(requestIdx != -1);
+  FTRACE(1, "tid {} finish\n", requestIdx);
   std::vector<std::unique_ptr<WorkItem>> toFire;
   {
     GenCountGuard g;
-    assert(s_inflightRequests[threadIdx].startTime != kIdleGenCount);
-    GenCount finishedRequest = s_inflightRequests[threadIdx].startTime;
-    s_inflightRequests[threadIdx].startTime = kIdleGenCount;
+    assertx(s_inflightRequests[requestIdx].startTime != kIdleGenCount);
+    GenCount finishedRequest = s_inflightRequests[requestIdx].startTime;
+    s_inflightRequests[requestIdx].startTime = kIdleGenCount;
 
     // After finishing a request, check to see if we've allowed any triggers
     // to fire and update the time of the oldest request in flight.
@@ -236,28 +237,28 @@ void finishRequest() {
       }
     }
     constexpr int limit = 100;
-    if (!ThreadInfo::s_threadInfo.isNull()) {
+    if (!RequestInfo::s_requestInfo.isNull()) {
       // If somehow we excessed the limit, GlobalGCTrigger will stay on
       // "Triggering" stage forever. No more global GC can be triggered.
       // But it should have no effect on APC GC -- The data will be freed
       // by treadmill's calling
       int i;
       for (i = 0; i < limit; ++i) {
-        if (TI().changeGlobalGCStatus(
-              ThreadInfo::OnRequestWithPendingExecution,
-              ThreadInfo::Idle)) {
+        if (RI().changeGlobalGCStatus(
+              RequestInfo::OnRequestWithPendingExecution,
+              RequestInfo::Idle)) {
           // Call globalGCTrigger to Run the pending execution
           // TODO(20074509)
           FTRACE(2, "treadmill executes pending global GC callbacks\n");
           break;
         }
-        if (TI().changeGlobalGCStatus(
-              ThreadInfo::OnRequestWithNoPendingExecution,
-              ThreadInfo::Idle)) {
+        if (RI().changeGlobalGCStatus(
+              RequestInfo::OnRequestWithNoPendingExecution,
+              RequestInfo::Idle)) {
           break;
         }
       }
-      assert(i < limit);
+      assertx(i < limit);
       if (i == limit) {
         Logger::Warning("Treadmill fails to set global GC status into Idle");
       }
@@ -288,8 +289,73 @@ int64_t getAgeOldestRequest() {
   return time / ONE_SEC_IN_MICROSEC;
 }
 
+int64_t getRequestGenCount() {
+  auto const requestIdx = Treadmill::requestIdx();
+  assertx(requestIdx != -1);
+  return s_inflightRequests[requestIdx].startTime;
+}
+
 void deferredFree(void* p) {
   enqueue([p] { free(p); });
+}
+
+char const* getSessionKindName(SessionKind value) {
+  switch(value) {
+    case SessionKind::None: return "None";
+    case SessionKind::DebuggerClient: return "DebuggerClient";
+    case SessionKind::APCPrime: return "APCPrime";
+    case SessionKind::PreloadRepo: return "PreloadRepo";
+    case SessionKind::Watchman: return "Watchman";
+    case SessionKind::Vsdebug: return "VSDebug";
+    case SessionKind::FactsWorker: return "FactsWorker";
+    case SessionKind::CLIServer: return "CLIServer";
+    case SessionKind::AdminPort: return "AdminRequest";
+    case SessionKind::HttpRequest: return "HttpRequest";
+    case SessionKind::RpcRequest: return "RpcRequest";
+    case SessionKind::TranslateWorker: return "TranslateWorker";
+    case SessionKind::Retranslate: return "Retranslate";
+    case SessionKind::ProfData: return "ProfData";
+    case SessionKind::UnitTests: return "UnitTests";
+    case SessionKind::CompileRepo: return "CompileRepo";
+    case SessionKind::HHBBC: return "HHBBC";
+    case SessionKind::CompilerEmit: return "CompilerEmit";
+    case SessionKind::CompilerAnalysis: return "CompilerAnalysis";
+    case SessionKind::CLISession: return "CLISession";
+  }
+  return "";
+}
+
+std::string dumpTreadmillInfo() {
+  std::string out;
+  GenCountGuard g;
+  int64_t oldestStart =
+    s_oldestRequestInFlight.load(std::memory_order_relaxed);
+
+  folly::format(
+      &out,
+      "OldestStartTime: {}\n",
+      oldestStart
+  );
+
+  folly::format(
+      &out,
+      "InflightRequestsSize: {}\n",
+      s_inflightRequests.size()
+  );
+
+  for (auto& req : s_inflightRequests) {
+    if (req.startTime != kIdleGenCount) {
+      folly::format(
+          &out,
+          "{} {} {}{}\n",
+          req.pthreadId,
+          req.startTime,
+          getSessionKindName(req.sessionKind),
+          req.startTime == oldestStart ? " OLDEST" : ""
+      );
+    }
+  }
+  return out;
 }
 
 }}

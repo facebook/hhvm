@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function hello_my_name_is_mwang($x) {
   bar(hello_my_name_is_mwang($x));
@@ -9,8 +9,12 @@ function bar($x) {
 }
 
 function main() {
-  $arr = array(1, 'foo', array('bar', 3), false);
-  array_walk_recursive($arr, 'hello_my_name_is_mwang');
+  $arr = varray[1, 'foo', varray['bar', 3], false];
+  array_map(fun('hello_my_name_is_mwang'), $arr);
 }
 
+
+<<__EntryPoint>>
+function main_fcall_helper_reentry() {
 main();
+}

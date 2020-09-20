@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
     $d = new DOMDocument;
@@ -8,5 +8,9 @@ function foo() {
     return $f;
 }
 
+
+<<__EntryPoint>>
+function main_append_invalid() {
 $c = new DOMDocument;
 var_dump($c->appendChild(foo()));
+}

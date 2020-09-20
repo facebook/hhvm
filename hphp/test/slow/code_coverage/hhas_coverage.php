@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   fb_enable_code_coverage();
@@ -6,4 +6,8 @@ function test($a) {
   fb_disable_code_coverage();
 }
 
-test(array(1,2,3));
+
+<<__EntryPoint>>
+function main_hhas_coverage() {
+test(varray[1,2,3]);
+}

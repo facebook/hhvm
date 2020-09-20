@@ -1,19 +1,16 @@
-<?php
+<?hh
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 // Note: basic use cases in Zend/tests/is_a.phpt
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
-set_error_handler('test_error_handler');
-
+<<__EntryPoint>> function main(): void {
+set_error_handler(fun('test_error_handler'));
 
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
@@ -25,7 +22,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
       // int data
       0,
@@ -39,13 +36,6 @@ $values = array(
       10.1234567e10,
       10.7654321E-10,
       .5,
-
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
 
       // null data
       NULL,
@@ -70,7 +60,7 @@ $values = array(
 
       // unset data
       $unset_var,
-);
+];
 
 // loop through each element of the array for object
 
@@ -80,4 +70,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
-?>
+}

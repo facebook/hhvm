@@ -1,5 +1,6 @@
+
 imagepng TEST
 
-Warning: %s
+Warning: Unable to open '%s' for writing in %s/imagepng_nullbyte_injection.php on line 13
 bool(false)
 bool(false)

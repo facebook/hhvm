@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   function info() {
@@ -13,6 +13,9 @@ class C1 {
 class C2 {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2073() {
 $o1 = new C1;
 foreach ($o1->info() as $info) {
   var_dump($info);
@@ -20,4 +23,5 @@ foreach ($o1->info() as $info) {
 $o2 = new C2;
 foreach ($o2->info() as $info) {
   var_dump($info);
+}
 }

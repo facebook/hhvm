@@ -1,3 +1,7 @@
-<?php
+<?hh
 
-var_dump(fopen(null, 'r'));
+
+<<__EntryPoint>>
+function main_fopen_empty() {
+var_dump(fopen('', 'r'));
+}

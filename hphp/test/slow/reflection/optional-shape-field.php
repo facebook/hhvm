@@ -8,4 +8,8 @@ function func(): shape(?'key1' => ?bool,
   return shape();
 }
 
+
+<<__EntryPoint>>
+function main_optional_shape_field() {
 var_dump((new ReflectionFunction('func'))->getReturnTypeText());
+}

@@ -4,27 +4,31 @@ function foo(): void {
   $a = 10;
   $b = $a ** 10; // num
   $c = 3 ** $b; // num
-  hh_show($b);
-  hh_show($c);
+  expect_num($b);
+  expect_num($c);
 
   $d = ($c === $a ** $b ** $c);
-  hh_show($d);
+  expect_bool($d);
 
   $e = ((int)$d) ** 3.5;
-  hh_show($e);
+  expect_float($e);
   $e = $e ** 100000;
-  hh_show($e);
+  expect_float($e);
 
   $i = 1;
   $f = 3.5;
 
   $a = 1 ** 1.0; // float
-  hh_show($a);
+  expect_float($a);
   $b = 1.0 ** 1; // float
-  hh_show($b);
+  expect_float($b);
   $c = 1.0 ** 1.0; // float
-  hh_show($c);
+  expect_float($c);
 
-  hh_show(100000000 ** 10000000); // num
-  hh_show(2 ** 2); // num
+  expect_num(100000000 ** 10000000); // num
+  expect_num(2 ** 2); // num
 }
+
+function expect_float(float $x): void {}
+function expect_num(num $x): void {}
+function expect_bool(bool $x): void {}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BITSET_UTILS_H_
-#define incl_HPHP_BITSET_UTILS_H_
+#pragma once
 
 #include <bitset>
 #include "hphp/util/assertions.h"
@@ -176,4 +175,3 @@ inline std::bitset<N>& fill0(std::bitset<N>& bitset,
 
 } // HPHP
 
-#endif

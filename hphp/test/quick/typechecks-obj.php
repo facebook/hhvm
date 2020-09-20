@@ -4,7 +4,7 @@ class C { }
 class D extends C { }
 
 function f(C $c = null) { var_dump($c);}
-function main() {
+<<__EntryPoint>> function main(): void {
 
   $c = new C();
   $d = new D();
@@ -14,5 +14,3 @@ function main() {
   f(new stdclass());
   echo "not reached\n";
 }
-main();
-

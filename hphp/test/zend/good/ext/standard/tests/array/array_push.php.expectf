@@ -1,12 +1,11 @@
 *** Testing Error Conditions ***
 
-Warning: %s
+Warning: array_push() expects at least 2 parameters, 0 given in %s/array_push.php on line 36
+
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 39
 NULL
 
-Warning: %s
-NULL
-
-Warning: %s
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 42
 NULL
 int(11)
 int(1)
@@ -119,14 +118,15 @@ Array
     [F] => FFF
     [blank] => 
     [3] => 3.7
-    [5] => Five
+    [5] => 7
     [6] => 8.6
+    [5] => Five
     [4name] => jonny
     [a] => 
 )
 
 Output after push is :
-int(14)
+int(15)
 
 -- Input Array for Iteration 9 is --
 Array
@@ -188,22 +188,14 @@ int(12)
 
 *** Checking for return value and the new array formed from push operation ***
 int(8)
-array(8) {
-  [0]=>
+varray(8) {
   string(3) "One"
-  [1]=>
   string(4) "_Two"
-  [2]=>
   string(5) "Three"
-  [3]=>
   string(4) "Four"
-  [4]=>
   string(4) "Five"
-  [5]=>
   int(22)
-  [6]=>
   int(33)
-  [7]=>
   string(2) "44"
 }
 

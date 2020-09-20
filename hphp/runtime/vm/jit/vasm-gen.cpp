@@ -60,12 +60,16 @@ bool Vout::closed() const {
 }
 
 Vout Vout::makeBlock() {
-  uint64_t weight = 0;
-  if (m_irctx.origin != nullptr) {
-    weight = m_irctx.origin->block()->profCount();
-  }
-  weight = weight * areaWeightFactor(area());
-  return {m_unit, m_unit.makeBlock(area(), weight), m_irctx};
+  auto weight = m_irctx.origin
+    ? m_irctx.origin->block()->profCount()
+    : 1;
+  weight *= (m_weight_scale * areaWeightFactor(area()));
+  return {m_unit, m_unit.makeBlock(area(), weight), m_irctx, m_weight_scale};
+}
+
+void Vout::addWeightScale(uint64_t scale) {
+  m_weight_scale *= scale;
+  m_unit.blocks[m_block].weight *= scale;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,6 +90,8 @@ Vout& Vasm::out(AreaIndex area) {
 // Vauto.
 
 Vauto::~Vauto() {
+  tracing::Block _{"vauto-finish", [&] { return traceProps(unit()); }};
+
   for (auto& b : unit().blocks) {
     if (!b.code.empty()) {
       // Found at least one nonempty block.  Finish up.
@@ -100,8 +106,14 @@ Vauto::~Vauto() {
         if (m_relocate) {
           auto& cold = m_text.cold().code;
           if (cold.canEmit(0x10000)) {
-            mainTmp.init(cold.frontier() + 0x8000, 0x4000, "vauto main tmp");
-            coldTmp.init(cold.frontier() + 0xc000, 0x4000, "vauto cold tmp");
+            mainTmp.init(cold.frontier() + 0x8000,
+                         cold.toDestAddress(cold.frontier() + 0x8000),
+                         0x4000,
+                         "vauto main tmp");
+            coldTmp.init(cold.frontier() + 0xc000,
+                         cold.toDestAddress(cold.frontier() + 0xc000),
+                         0x4000,
+                         "vauto cold tmp");
             return Vtext(mainTmp, coldTmp, m_text.data());
           }
           m_relocate = false;
@@ -109,6 +121,7 @@ Vauto::~Vauto() {
         return std::move(m_text);
       }();
 
+      SCOPE_ASSERT_DETAIL("vasm unit") { return show(unit()); };
       auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
@@ -154,6 +167,15 @@ Vauto::~Vauto() {
         break;
     }
   }
+}
+
+uint64_t areaWeightFactor(AreaIndex area) {
+  switch (area) {
+    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
+    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
+    case AreaIndex::Frozen: return 1;
+  };
+  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

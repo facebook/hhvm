@@ -1,6 +1,6 @@
-<?php 
+<?hh <<__EntryPoint>> function main(): void {
 $xml =<<<EOF
-<root s:att1="b" att1="a" 
+<root s:att1="b" att1="a"
       xmlns:s="urn::test" xmlns:t="urn::test-t">
    <child1>test</child1>
    <child1>test 2</child1>
@@ -37,5 +37,5 @@ $sxe->addChild('test4', 'myval');
 $sxe->addChild('s:test5', 'myval');
 
 echo $sxe->asXML();
-?>
-===DONE===
+echo "===DONE===\n";
+}

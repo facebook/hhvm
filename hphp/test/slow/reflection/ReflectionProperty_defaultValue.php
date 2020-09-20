@@ -4,6 +4,9 @@ class C {
   public int $foo = 123;
 }
 
+
+<<__EntryPoint>>
+function main_reflection_property_default_value() {
 $x = new C;
 $x->foo = 456;
 $x->bar = 'baz';
@@ -22,3 +25,4 @@ var_dump($rpn->isDefault());
 var_dump($rp->getValue($x));
 var_dump($rpc->getValue($x));
 var_dump($rpn->getValue($x));
+}

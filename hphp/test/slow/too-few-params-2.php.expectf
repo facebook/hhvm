@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'RuntimeException' with message 'f() expects at least 1 parameter, 0 given' in %s/too-few-params-2.php:%d
+Stack trace:
+%A

@@ -1,0 +1,4 @@
+File "missing_init6.php", line 7, characters 19-29:
+Class `B` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "missing_init6.php", line 5, characters 17-24:
+`$this->batchID` is not initialized.

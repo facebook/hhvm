@@ -15,7 +15,7 @@ class Bar {
 function foo($a) {
   return $a + 2;
 }
-
+<<__EntryPoint>> function main(): void {
 $foo = function ($a) {
   return $a + 3;
 };
@@ -51,3 +51,4 @@ var_dump(call_user_func($rf->getClosure(), 1));
 // Closure
 $rf = new ReflectionFunction($foo);
 var_dump(call_user_func($rf->getClosure(), 1));
+}

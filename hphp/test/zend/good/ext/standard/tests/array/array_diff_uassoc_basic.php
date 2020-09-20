@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * array array_diff_uassoc ( array $array1, array $array2 [, array $..., callback $key_compare_func] )
 * Function is implemented in ext/standard/array.c
@@ -9,8 +9,9 @@ function key_compare_func($a, $b) {
     }
     return ($a > $b) ? 1 : -1;
 }
-$array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
-$array2 = array("a" => "green", "yellow", "red");
-$result = array_diff_uassoc($array1, $array2, "key_compare_func");
+<<__EntryPoint>> function main(): void {
+$array1 = darray["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
+$array2 = darray["a" => "green", 0 => "yellow", 1 => "red"];
+$result = array_diff_uassoc($array1, $array2, fun("key_compare_func"));
 var_dump($result);
-?>
+}

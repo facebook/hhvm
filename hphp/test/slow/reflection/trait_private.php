@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait P1 {
   private $p1;
@@ -16,6 +16,9 @@ class C2 extends P2 {
   private $c2;
 }
 
+
+<<__EntryPoint>>
+function main_trait_private() {
 $p = new ReflectionClass(new P2);
 var_dump($p->hasProperty('p2'));
 var_dump($p->hasProperty('p1'));
@@ -26,3 +29,4 @@ var_dump($c->hasProperty('p2'));
 var_dump($c->hasProperty('p1'));
 var_dump(isset($c->getTraits()['P1']));
 var_dump($c->getTraits()['C1']->hasProperty('c1'));
+}

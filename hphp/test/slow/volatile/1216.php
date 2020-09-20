@@ -1,31 +1,11 @@
-<?php
+<?hh
 
 function bar() {
   for ($i = 0;
  $i < 4;
  $i++) {
-    if ($i > 1 && !function_exists('foo')) {
-      function foo() {
-        echo "foo called\n";
-      }
-    }
-    $foo = 'foo';
-    if (function_exists($foo)) {
-      foo();
-    }
- else {
-      echo "foo does not exists\n";
-    }
-  }
-  for ($i = 0;
- $i < 4;
- $i++) {
     if ($i > 1 && !class_exists('goo')) {
-      class goo {
-        function goo() {
-          echo "goo called\n";
-        }
-      }
+      include '1216.inc';
     }
     $goo = 'goo';
     if (class_exists($goo)) {
@@ -36,6 +16,14 @@ function bar() {
     }
   }
 }
+function later3() {
+  echo "later3 called\n";
+}
+class later4 {
+}
+
+<<__EntryPoint>>
+function main_1216() {
 if (function_exists('bar')) bar();
 $a = 'bar';
 if (function_exists($a)) bar();
@@ -67,14 +55,10 @@ if (class_exists($a)) {
  else {
   echo "later4 does not exists\n";
 }
-function later3() {
-  echo "later3 called\n";
-}
-class later4 {
-}
 if (function_exists('function_exists')) {
   echo "yes\n";
 }
 if (class_exists('exception')) {
   echo "yes\n";
+}
 }

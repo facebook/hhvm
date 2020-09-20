@@ -1,12 +1,12 @@
-<?php
- 
+<?hh
+
 class Foo {
     protected $unsetme = 1;
     protected $keepme = 2;
-     
+
     public function test() {
         $a = get_object_vars($this);
-         
+
         foreach ($a as $k => $v) {
             if ($k == 'unsetme') {
                 echo "Unsetting: $k\n";
@@ -17,12 +17,11 @@ class Foo {
                 $a['keepme'] = 43;
             }
         }
-         
+
         var_dump($a, array_keys($a));
     }
 }
- 
+<<__EntryPoint>> function main(): void {
 $f = new Foo;
 $f->test();
- 
-?>
+}

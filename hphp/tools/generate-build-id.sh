@@ -11,7 +11,7 @@ set -e
 cd "$FBCODE_DIR" || exit 2;
 
 function digest() {
-  openssl sha -sha1 "$@" | cut -f2 -d' '
+  openssl dgst -sha1 "$@" | cut -f2 -d' '
 }
 
 # if we're under source control,
@@ -41,4 +41,11 @@ else
     -print0 | xargs -0 cat | digest )
 fi;
 
-echo -n "$project-$buildid" >"$out"
+fullid="$project-$buildid"
+# For the OSS build, only having the hash is easier
+echo -n "$fullid" > "$out"
+
+# For Buck build, having a c file is easier
+cat > "$out.c" << EOF
+const char* const build_id = "$fullid";
+EOF

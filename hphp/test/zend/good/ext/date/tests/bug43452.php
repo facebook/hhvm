@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Europe/Oslo');
 // <day> is equivalent to 1 <day> and will *not* forward if the current day
 // (November 1st) is the same day of week.
@@ -43,5 +43,4 @@ $day = strtotime( "second Friday Nov 2007" );
 echo date( DateTime::ISO8601, $day ), "\n";
 $day = strtotime( "third Friday Nov 2007" );
 echo date( DateTime::ISO8601, $day ), "\n\n";
-
-?>
+}

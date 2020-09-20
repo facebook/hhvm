@@ -1,0 +1,3 @@
+int(1)
+
+Catchable fatal error: Property 'Foo::x' declared as type A, B assigned in %s/record-prop.php on line 22

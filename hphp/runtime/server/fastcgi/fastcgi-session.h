@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
-#define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
+#pragma once
 
 #include "hphp/runtime/server/fastcgi/fastcgi-protocol.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
@@ -200,7 +199,7 @@ struct FastCGISession
   bool isBusy() const override;
   void notifyPendingShutdown() override;
   void closeWhenIdle() override;
-  void dropConnection() override;
+  void dropConnection(const std::string& errorMsg = "") override;
   void dumpConnectionState(uint8_t loglevel) override;
 
 private:
@@ -411,5 +410,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_FASTCGI_FASTCGI_SESSION_H_
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Test sorting strings that have different length but otherwise equal.
  */
@@ -8,7 +8,7 @@ function sort_using_locale( $locale, $test_array )
     $coll = ut_coll_create( $locale );
 
     // Sort array.
-    ut_coll_sort_with_sort_keys( $coll, $test_array );
+    ut_coll_sort_with_sort_keys( $coll, inout $test_array );
 
     // And return the sorted array.
     return dump( $test_array ) . "\n";
@@ -20,8 +20,8 @@ function ut_main()
 
     // Define a couple of arrays.
     // Each array contains equal strings that differ only in their length.
-    $a1 = array( 'aa', 'aaa', 'a' );
-    $a2 = array( 'пп', 'ппп', 'п' );
+    $a1 = varray[ 'aa', 'aaa', 'a' ];
+    $a2 = varray[ 'пп', 'ппп', 'п' ];
 
     // Sort them.
     $res_str .= sort_using_locale( 'en_US', $a1 );
@@ -29,7 +29,9 @@ function ut_main()
 
     return $res_str;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-require_once( 'ut_common.inc' );
-ut_run();
-?>
+  require_once( 'ut_common.inc' );
+  ut_run();
+}

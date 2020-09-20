@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($a, $b, $c) {
   $i = 0;
@@ -24,6 +24,9 @@ function main($a, $b, $c) {
   var_dump($t);
 }
 
+
+<<__EntryPoint>>
+function main_store_elim() {
 for ($i = 0; $i < 2; $i++) {
   main(1, 42, 0);
   main(2, 42, 0);
@@ -34,4 +37,5 @@ for ($i = 0; $i < 2; $i++) {
   main(2, 42, 1);
   main(1, 43, 1);
   main(2, 43, 1);
+}
 }

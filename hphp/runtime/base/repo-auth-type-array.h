@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_DEFS_H_
-#define incl_HPHP_REPO_AUTH_TYPE_DEFS_H_
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -40,6 +39,8 @@ namespace HPHP {
  */
 struct ArrayTypeTable {
   struct Builder;
+  using Table = CompactVector<const RepoAuthType::Array*>;
+  using iterator = Table::const_iterator;
 
   /*
    * Re-populate an ArrayTypeTable using a builder object.
@@ -57,7 +58,7 @@ struct ArrayTypeTable {
    * Find an array type description by id.
    */
   const RepoAuthType::Array* lookup(uint32_t id) const {
-    assert(id < m_arrTypes.size());
+    assertx(id < m_arrTypes.size());
     return m_arrTypes[id];
   }
 
@@ -66,6 +67,9 @@ struct ArrayTypeTable {
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type serde(SerDe&);
 
+  iterator begin() const { return m_arrTypes.begin(); }
+  iterator end() const { return m_arrTypes.end(); }
+  size_t size() const { return m_arrTypes.size(); }
 private:
   /*
    * Check that the ArrayTypeTable is fully resolved after deserialization.
@@ -73,7 +77,7 @@ private:
   bool check(const RepoAuthType::Array*) const;
 
 private:
-  CompactVector<const RepoAuthType::Array*> m_arrTypes;
+  Table m_arrTypes;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -92,7 +96,7 @@ ArrayTypeTable& globalArrayTypeTable();
  * structure.
  */
 struct RepoAuthType::Array {
-  enum class Tag : uint8_t {
+  enum class Tag : uint16_t {
     /*
      * Known size with zero-based contiguous integer keys.
      *
@@ -154,7 +158,7 @@ struct RepoAuthType::Array {
    * Pre: tag() == Tag::Packed
    */
   uint32_t size() const {
-    assert(tag() == Tag::Packed);
+    assertx(tag() == Tag::Packed);
     return m_size;
   }
 
@@ -165,8 +169,8 @@ struct RepoAuthType::Array {
    *      idx < size()
    */
   RepoAuthType packedElem(uint32_t idx) const {
-    assert(tag() == Tag::Packed);
-    assert(idx < size());
+    assertx(tag() == Tag::Packed);
+    assertx(idx < size());
     return types()[idx];
   }
 
@@ -176,7 +180,7 @@ struct RepoAuthType::Array {
    * Pre: tag() == Tag::PackedN
    */
   RepoAuthType elemType() const {
-    assert(tag() == Tag::PackedN);
+    assertx(tag() == Tag::PackedN);
     return types()[0];
   }
 
@@ -273,4 +277,3 @@ std::string show(const RepoAuthType::Array&);
 
 #include "hphp/runtime/base/repo-auth-type-array-inl.h"
 
-#endif

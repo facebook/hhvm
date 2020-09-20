@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -58,12 +59,23 @@ namespace detail {
  */
 void emit_svcreq(CodeBlock& cb,
                  DataBlock& data,
+                 CGMeta& meta,
                  TCA start,
                  bool persist,
                  folly::Optional<FPInvOffset> spOff,
                  ServiceRequest sr,
                  const ArgVec& argv) {
   FTRACE(2, "svcreq @{} {}(", start, to_name(sr));
+
+  tracing::Pause _p;
+  tracing::Block _{
+    "emit-svcreq",
+    [&] {
+      return tracing::Props{}
+        .add("service_request", to_name(sr))
+        .add("persist", persist);
+    }
+  };
 
   auto const is_reused = start != cb.frontier();
 
@@ -74,10 +86,7 @@ void emit_svcreq(CodeBlock& cb,
   stub.init(start, realAddr, stub_size(), "svcreq_stub");
 
   {
-    CGMeta fixups;
-    SCOPE_EXIT { assert(fixups.empty()); };
-
-    Vauto vasm{stub, stub, data, fixups};
+    Vauto vasm{stub, stub, data, meta};
     auto& v = vasm.main();
 
     // If we have an spOff, materialize rvmsp() so that handleSRHelper() can do
@@ -90,7 +99,7 @@ void emit_svcreq(CodeBlock& cb,
 
     auto live_out = leave_trace_regs();
 
-    assert(argv.size() <= kMaxArgs);
+    assertx(argv.size() <= kMaxArgs);
 
     // Pick up CondCode arguments first---vasm may optimize immediate loads
     // into operations which clobber status flags.
@@ -156,6 +165,7 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
+    fixups,
     allocTCStub(cb, &fixups),
     target.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
@@ -178,6 +188,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     return emit_ephemeral(
       cb,
       data,
+      fixups,
       allocTCStub(cb, &fixups),
       target.resumeMode() != ResumeMode::None
         ? folly::none : folly::make_optional(spOff),
@@ -191,6 +202,7 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   return emit_ephemeral(
     cb,
     data,
+    fixups,
     allocTCStub(cb, &fixups),
     target.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
@@ -201,11 +213,13 @@ TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
   );
 }
 
-TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                          FPInvOffset spOff,
                           SrcKey target, TransFlags trflags) {
   return emit_persistent(
     cb,
     data,
+    fixups,
     target.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE,
@@ -214,65 +228,18 @@ TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
   );
 }
 
-TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                              FPInvOffset spOff,
                               SrcKey sk) {
   return emit_persistent(
     cb,
     data,
+    fixups,
     sk.resumeMode() != ResumeMode::None
       ? folly::none : folly::make_optional(spOff),
     REQ_RETRANSLATE_OPT,
     sk.toAtomicInt()
   );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace x64 {
-  static constexpr int kMovLen = 10;
-  static constexpr int kLeaVmSpLen = 7;
-}
-
-namespace arm {
-  // vasm lea is emitted in 4 bytes.
-  //   ADD imm
-  static constexpr int kLeaVmSpLen = 4;
-  // The largest of vasm setcc, copy, or leap is emitted in 16 bytes.
-  //   AND imm, MOV, LDR + B + dc32, or ADRP + ADD imm
-  static constexpr int kMovLen = 12;
-  // The largest of vasm copy or leap is emitted in 16 bytes.
-  //   MOV, LDR + B + dc32, or ADRP + ADD imm
-  static constexpr int kPersist = 12;
-  // vasm copy and jmpi is emitted in 16 bytes.
-  //   MOV + LDR + B + dc32
-  static constexpr int kSvcReqExit = 16;
-}
-
-namespace ppc64 {
-  // Standard ppc64 instructions are 4 bytes long
-  static constexpr int kStdIns = 4;
-  // Leap for ppc64, in worst case, have 5 standard ppc64 instructions.
-  static constexpr int kLeaVMSpLen = kStdIns * 5;
-}
-
-size_t stub_size() {
-  // The extra args are the request type and the stub address.
-  constexpr auto kTotalArgs = kMaxArgs + 2;
-
-  switch (arch()) {
-    case Arch::X64:
-      return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
-    case Arch::ARM:
-      return arm::kLeaVmSpLen +
-        kTotalArgs * arm::kMovLen +
-        arm::kPersist + arm::kSvcReqExit;
-    case Arch::PPC64:
-      // This calculus was based on the amount of emitted instructions in
-      // emit_svcreq.
-      return (ppc64::kStdIns + ppc64::kLeaVMSpLen) * kTotalArgs +
-          ppc64::kLeaVMSpLen + 3 * ppc64::kStdIns;
-  }
-  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,8 +254,8 @@ FPInvOffset extract_spoff(TCA stub) {
       if (!instr.isLea()) return FPInvOffset{0};
 
       auto const offBytes = safe_cast<int32_t>(instr.offset());
-      always_assert((offBytes % sizeof(Cell)) == 0);
-      return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+      always_assert((offBytes % sizeof(TypedValue)) == 0);
+      return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
     }
 
     case Arch::ARM: {
@@ -296,29 +263,29 @@ FPInvOffset extract_spoff(TCA stub) {
 
       if (instr->IsAddSubImmediate()) {
         auto const offBytes = safe_cast<int32_t>(instr->ImmAddSub());
-        always_assert((offBytes % sizeof(Cell)) == 0);
+        always_assert((offBytes % sizeof(TypedValue)) == 0);
 
         if (instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_w_imm ||
             instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_x_imm) {
-          return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
+          return FPInvOffset{offBytes / int32_t{sizeof(TypedValue)}};
         } else if (instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_w_imm ||
                    instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_x_imm) {
-          return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+          return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
         }
       } else if (instr->IsMovn()) {
         auto next = instr->NextInstruction();
         always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_w_shift ||
                       next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_x_shift);
         auto const offBytes = safe_cast<int32_t>(~instr->ImmMoveWide());
-        always_assert((offBytes % sizeof(Cell)) == 0);
-        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+        always_assert((offBytes % sizeof(TypedValue)) == 0);
+        return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
       } else if (instr->IsMovz()) {
         auto next = instr->NextInstruction();
         always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::SUB_w_shift ||
                       next->Mask(vixl::AddSubShiftedMask) == vixl::SUB_x_shift);
         auto const offBytes = safe_cast<int32_t>(instr->ImmMoveWide());
-        always_assert((offBytes % sizeof(Cell)) == 0);
-        return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
+        always_assert((offBytes % sizeof(TypedValue)) == 0);
+        return FPInvOffset{offBytes / int32_t{sizeof(TypedValue)}};
       } else {
         always_assert(false && "Expected an instruction that offsets SP");
       }
@@ -330,7 +297,7 @@ FPInvOffset extract_spoff(TCA stub) {
         return FPInvOffset{0};
       } else {
         auto const offBytes = safe_cast<int32_t>(instr.offset());
-        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+        return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
       }
     }
   }

@@ -1,2 +1,0 @@
-File "partial_in_strict.php--strict.php", line 4, characters 7-13:
-CStrict has a non-<?hh grandparent; this is not allowed in strict mode because that parent may define methods of unknowable name and type (Typing[4123])

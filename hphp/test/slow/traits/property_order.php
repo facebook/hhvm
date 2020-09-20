@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
   public $x1, $x2, $x3, $t5, $t6;
@@ -21,4 +21,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_property_order() {
 main();
+}

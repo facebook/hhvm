@@ -1,0 +1,2 @@
+Handler: E_NOTICE: my test in %s/test/slow/dynamic-calls/cls_meth/known-meth-name-errhandler.php:7
+Handler: E_USER_NOTICE: foobar in %s/test/slow/dynamic-calls/cls_meth/known-meth-name-errhandler.php:8

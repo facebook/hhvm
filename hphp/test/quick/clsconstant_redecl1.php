@@ -7,3 +7,4 @@ interface A {
 class B implements A {
   const FOO = 'BAR';
 }
+

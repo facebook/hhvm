@@ -1,5 +1,4 @@
 *** Testing clearstatcache() function: error conditions ***
 
-Warning: %s
-NULL
+Warning: clearstatcache() expects at most 2 parameters, 3 given in %s/clearstatcache_error.php on line 8
 *** Done ***

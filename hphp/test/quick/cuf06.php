@@ -1,7 +1,5 @@
 <?hh
 
-set_error_handler('handler');
-
 function handler($a, $b) {
   var_dump($a, $b);
 }
@@ -9,7 +7,7 @@ function handler($a, $b) {
 function foo() {}
 
 function test() {
-  call_user_func_array('foo', array());
+  call_user_func_array('foo', varray[]);
 }
 
 function main() {
@@ -17,5 +15,10 @@ function main() {
   fb_rename_function('foo', 'bar');
   test();
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-main();
+  set_error_handler(fun('handler'));
+
+  main();
+}

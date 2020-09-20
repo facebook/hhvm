@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_LIBXML_H_
-#define incl_HPHP_EXT_LIBXML_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -35,9 +34,7 @@ int libxml_streams_IO_write(void* context, const char* buffer, int len);
 int libxml_streams_IO_close(void* context);
 int libxml_streams_IO_nop_close(void* context);
 
-void php_libxml_node_free(xmlNodePtr node);
-void php_libxml_node_free_list(xmlNodePtr node);
-void php_libxml_node_free_resource(xmlNodePtr node);
+void php_libxml_node_free_resource(xmlNodePtr node, xmlNodePtr root = nullptr);
 
 bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
 
@@ -69,7 +66,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
  * exists.
  *
  * Any node properly connected to the root element of an xmlDoc* will remain
- * valid until such time the the owning xmlDoc* becomes invalid or the node
+ * valid until such time the owning xmlDoc* becomes invalid or the node
  * becomes orphaned from the root and its subtree is freed.
  *
  * Documents will remain valid until such time that there are no further
@@ -103,9 +100,20 @@ struct XMLNodeData : SweepableResourceData {
   explicit XMLNodeData(xmlNodePtr p);
   virtual ~XMLNodeData();
 
-  ObjectData* getCache() const { return m_cache; }
-  void clearCache() { m_cache = nullptr; }
-  void setCache(ObjectData* o) { m_cache = o; }
+  ObjectData* getCache() const {
+    if (m_cache && m_cache->isValid()) {
+      return m_cache->pointee.m_data.pobj;
+    }
+    return nullptr;
+  }
+
+  void clearCache() {
+    if (m_cache) {
+      m_cache.reset();
+    }
+  }
+
+  void setCache(ObjectData* o) { m_cache = WeakRefData::forObject(Object{o}); }
 
   void reset() { m_node = nullptr; }
   void setDoc(req::ptr<XMLDocumentData>&& doc);
@@ -116,11 +124,14 @@ struct XMLNodeData : SweepableResourceData {
   void unlink() { xmlUnlinkNode(m_node); }
 
 private:
-  ObjectData* m_cache {nullptr}; // XXX: to avoid a cycle this is a weak ref
+  // XXX: to avoid a cycle this is a weak ref
+  req::shared_ptr<WeakRefData> m_cache;
   xmlNodePtr m_node {nullptr};
+  xmlNodePtr m_lastSeenRoot {nullptr}; // subtree node last belonged too
   req::ptr<XMLDocumentData> m_doc {nullptr};
 
   friend struct XMLDocumentData;
+  friend struct LibXmlDeferredTrees;
 };
 
 struct XMLDocumentData : XMLNodeData {
@@ -137,7 +148,7 @@ struct XMLDocumentData : XMLNodeData {
     , m_recover(false)
     , m_destruct(false)
   {
-    assert(p->type == XML_HTML_DOCUMENT_NODE || p->type == XML_DOCUMENT_NODE);
+    assertx(p->type == XML_HTML_DOCUMENT_NODE || p->type == XML_DOCUMENT_NODE);
   }
 
   void copyProperties(req::ptr<XMLDocumentData> data) {
@@ -154,7 +165,7 @@ struct XMLDocumentData : XMLNodeData {
   xmlDocPtr docp() const { return (xmlDocPtr)m_node; }
   void attachNode() { m_liveNodes++; }
   void detachNode() {
-    assert(m_liveNodes);
+    assertx(m_liveNodes);
     if (!--m_liveNodes && m_destruct) cleanup();
   }
 
@@ -179,12 +190,35 @@ using XMLNode = req::ptr<XMLNodeData>;
 inline XMLNode libxml_register_node(xmlNodePtr p) {
   if (!p) return nullptr;
   if (p->_private) {
-    return XMLNode(reinterpret_cast<XMLNodeData*>(p->_private));
+    // The problem this logic tries to solve:
+    // - _private points to a resource
+    // - We use DecRefNZ to get the reference count of the resource down to 0
+    //   but it hasn't been destructed or sweeped yet. But the GC could sweep it
+    //   at any moment.
+    // - Some code now call libxml_register_node() which without the refcount
+    //   check would return true or the object.
+    // - Because we know that if the sweep or destructor had run the pointer
+    //   would have been cleaned up so if we have a pointer it is safe to look
+    //   at the object.
+    // - So we look at the refcount of the object and make sure it is > 0.
+    auto node = reinterpret_cast<XMLNodeData*>(p->_private);
+    if (node->hdr()->checkCount()) {
+      return XMLNode(node);
+    }
+
+    // If the node has a ref count of 0 we need to do 2 things
+    // - First we need to reset the pointer from the resource to the libxml node
+    //   because otherwise when destructing the resource it will break.
+    // - Secondly we need to reset the pointer from the libxml node to the
+    //   resource. Otherwise we can't create a new resource using this libxml
+    //   node.
+    node->reset();
+    p->_private = nullptr;
   }
 
   if (p->type == XML_HTML_DOCUMENT_NODE ||
       p->type == XML_DOCUMENT_NODE) {
-    assert(p->doc == (xmlDocPtr)p);
+    assertx(p->doc == (xmlDocPtr)p);
 
     return req::make<XMLDocumentData>((xmlDocPtr)p);
   }
@@ -196,8 +230,8 @@ inline XMLNode libxml_register_node(xmlDocPtr p) {
 }
 
 
-inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
-  assert(p && !p->_private);
+inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_cache(nullptr), m_node(p) {
+  assertx(p && !p->_private);
   m_node->_private = this;
 
   if (p->doc && p != (xmlNodePtr)p->doc) {
@@ -208,17 +242,17 @@ inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
 
 inline XMLNodeData::~XMLNodeData() {
   if (m_node) {
-    assert(!m_cache && m_node->_private == this);
+    assertx((!m_cache || !m_cache->isValid()) && m_node->_private == this);
 
     m_node->_private = nullptr;
-    php_libxml_node_free_resource(m_node);
+    php_libxml_node_free_resource(m_node, m_lastSeenRoot);
   }
   if (m_doc) m_doc->detachNode();
 }
 
 inline void XMLNodeData::setDoc(req::ptr<XMLDocumentData>&& doc) {
-  if (m_doc) m_doc->detachNode();
   if (doc) doc->attachNode();
+  if (m_doc) m_doc->detachNode();
   m_doc = std::move(doc);
 }
 
@@ -231,11 +265,11 @@ inline req::ptr<XMLDocumentData> XMLNodeData::doc() {
   }
 
   if (!m_doc) {
-    assert(!m_node->doc);
+    assertx(!m_node->doc);
     return nullptr;
   }
 
-  assert(m_doc.get() == libxml_register_node((xmlNodePtr)m_node->doc).get());
+  assertx(m_doc.get() == libxml_register_node((xmlNodePtr)m_node->doc).get());
   return m_doc;
 }
 
@@ -248,4 +282,3 @@ inline xmlDocPtr XMLNodeData::docp() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif

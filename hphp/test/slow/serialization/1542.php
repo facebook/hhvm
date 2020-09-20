@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class t {
   public $foo = 10;
@@ -9,6 +9,9 @@ class t2 extends t {
   private $derp2 = 40;
   protected $bar2 = 50;
 }
+
+<<__EntryPoint>>
+function main_1542() {
 $x = new t;
 print_r($x);
 var_dump($x);
@@ -19,3 +22,4 @@ print_r($x2);
 var_dump($x2);
 echo serialize($x2) . '
 ';
+}

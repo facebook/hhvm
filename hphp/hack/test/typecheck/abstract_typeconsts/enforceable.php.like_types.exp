@@ -1,0 +1,18 @@
+File "enforceable.php", line 6, characters 14-15:
+Invalid type (Typing[4302])
+File "enforceable.php", line 5, characters 5-17:
+Type constant `T1` was declared `__Enforceable` here
+File "enforceable.php", line 6, characters 19-26:
+This type is not enforceable because it has a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant
+File "enforceable.php", line 9, characters 23-24:
+Invalid type (Typing[4302])
+File "enforceable.php", line 8, characters 5-17:
+Type constant `T2` was declared `__Enforceable` here
+File "enforceable.php", line 9, characters 28-35:
+This type is not enforceable because it has a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant
+File "enforceable.php", line 12, characters 14-15:
+Invalid type (Typing[4302])
+File "enforceable.php", line 11, characters 5-17:
+Type constant `T3` was declared `__Enforceable` here
+File "enforceable.php", line 12, characters 36-43:
+This type is not enforceable because it has a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

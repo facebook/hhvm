@@ -1,48 +1,59 @@
 *** Testing bin2hex() function: with unexpected inputs for 'str' argument ***
 -- Iteration 1 --
-string(2) "30"
+
+Warning: bin2hex() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 2 --
-string(2) "31"
+
+Warning: bin2hex() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 3 --
-string(12) "313233343536"
+
+Warning: bin2hex() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 4 --
-string(8) "31302e35"
+
+Warning: bin2hex() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 5 --
-string(10) "2d32302e35"
+
+Warning: bin2hex() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 6 --
-string(24) "313031323334353637303030"
+
+Warning: bin2hex() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 7 --
 
-Warning: %s
-NULL
+Warning: bin2hex() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: bin2hex() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: bin2hex() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 10 --
-string(2) "31"
+
+Warning: bin2hex() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 11 --
-string(0) ""
+
+Warning: bin2hex() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 12 --
-string(2) "31"
+
+Warning: bin2hex() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 13 --
-string(0) ""
+
+Warning: bin2hex() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 14 --
-string(0) ""
+
+Warning: bin2hex() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 15 --
-string(0) ""
+
+Warning: bin2hex() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 16 --
-string(26) "73616d706c65206f626a656374"
+
+Warning: bin2hex() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: bin2hex() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 18 --
-string(0) ""
+
+Warning: bin2hex() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 19 --
-string(0) ""
+
+Warning: bin2hex() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 ===DONE===

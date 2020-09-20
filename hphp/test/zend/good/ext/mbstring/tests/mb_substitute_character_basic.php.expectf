@@ -7,6 +7,6 @@ int(1234)
 bool(true)
 string(4) "none"
 
-Warning: %s
+Warning: Unknown character. in %s/mb_substitute_character_basic.php on line 19
 bool(false)
 ===DONE===

@@ -1,0 +1,6 @@
+File "pipe_ternary_nested_pipe.php", line 14, characters 14-20:
+Invalid argument (Typing[4110])
+File "pipe_ternary_nested_pipe.php", line 20, characters 21-23:
+Expected `int`
+File "pipe_ternary_nested_pipe.php", line 10, characters 15-20:
+But got `string`

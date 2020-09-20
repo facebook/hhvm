@@ -1,0 +1,12 @@
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 8-27:
+Invalid index type for this keyset (Typing[4110])
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 15-17:
+Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 15-17:
+But got `float`
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 8-27:
+Invalid index type for this keyset (Typing[4110])
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 20-26:
+Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 24-24:
+But got `C`

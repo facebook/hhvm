@@ -48,12 +48,11 @@ bool OutputFile::open(const String& /*filename*/, const String& /*mode*/) {
 }
 
 bool OutputFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 
 bool OutputFile::closeImpl() {
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
     setIsClosed(true);
     return true;
@@ -66,7 +65,7 @@ bool OutputFile::closeImpl() {
 
 int64_t OutputFile::readImpl(char* /*buffer*/, int64_t /*length*/) {
   raise_warning("cannot read from a php://output stream");
-  return -1;
+  return 0;
 }
 
 int OutputFile::getc() {
@@ -75,7 +74,7 @@ int OutputFile::getc() {
 }
 
 int64_t OutputFile::writeImpl(const char *buffer, int64_t length) {
-  assert(length > 0);
+  assertx(length > 0);
   if (isClosed()) return 0;
   g_context->write(buffer, length);
   return length;

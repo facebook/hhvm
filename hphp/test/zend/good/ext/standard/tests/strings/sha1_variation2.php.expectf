@@ -1,68 +1,80 @@
 *** Testing sha1() : unexpected values for 'raw' ***
 -- Iteration 1 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 2 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 3 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 4 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 5 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 6 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 7 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 8 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 9 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 10 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 11 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 12 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 13 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 14 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 15 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 16 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 17 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 18 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 19 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 20 --
-string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
+
+Warning: sha1() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 21 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 22 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 23 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 24 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 25 --
-string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
+
+Warning: sha1() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 -- Iteration 26 --
 
-Warning: %s
-string(0) ""
+Warning: sha1() expects parameter 2 to be boolean, resource given in %s/zend/good/ext/standard/tests/strings/sha1_variation2.php on line 81
 ===DONE===

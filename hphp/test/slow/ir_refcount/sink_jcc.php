@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x() { return make_uniqid(microtime()); }
 
@@ -12,4 +12,8 @@ function make_uniqid($prefix = '') {
   return $uniqid;
 }
 
+
+<<__EntryPoint>>
+function main_sink_jcc() {
 x();x();x();x();x();x();x();
+}

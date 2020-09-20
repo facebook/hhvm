@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
  * Description: Return input as a new array with the order of the entries reversed
  * Source code: ext/standard/array.c
@@ -7,21 +7,21 @@
 /*
  * testing the functionality of array_reverse() by giving 2-D arrays for $array argument
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initializing the 2-d arrays
-$two_dimensional_array = array(
-     
+$two_dimensional_array = varray[
+
   // associative array
-  array('color' => 'red', 'item' => 'pen', 'place' => 'LA'),
+  darray['color' => 'red', 'item' => 'pen', 'place' => 'LA'],
 
    // numeric array
-   array(1, 2, 3, 4, 5),
+   varray[1, 2, 3, 4, 5],
 
    // combination of numeric and associative arrays
-   array('a' => 'green', 'red', 'brown', 33, 88, 'orange', 'item' => 'ball')
-); 
+   darray['a' => 'green', 0 => 'red', 1 => 'brown', 2 => 33, 3 => 88, 4 => 'orange', 'item' => 'ball']
+];
 
 // calling array_reverse() with various types of 2-d arrays
 // with default arguments
@@ -39,4 +39,4 @@ var_dump( array_reverse($two_dimensional_array[1], true) );
 var_dump( array_reverse($two_dimensional_array[1], false) );
 
 echo "Done";
-?>
+}

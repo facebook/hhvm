@@ -1,14 +1,21 @@
-<?php
+<?hh
 /* Prototype  : string nl2br(string $str)
  * Description: Inserts HTML line breaks before all newlines in a string.
  * Source code: ext/standard/string.c
 */
 
 /*
-* Test nl2br() function by passing different types of values other than 
+* Test nl2br() function by passing different types of values other than
 *   expected type for 'str' argument
 */
 
+//defining class
+class Sample {
+  public function __toString() {
+    return "My String";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //get an unset variable
@@ -18,15 +25,8 @@ unset ($unset_var);
 //getting resource
 $file_handle = fopen(__FILE__, "r");
 
-//defining class
-class Sample {
-  public function __toString() {
-    return "My String";
-  }
-}
-
 //array of values to iterate over
-$values = array(
+$values = varray[
 
   // int data
   0,
@@ -42,11 +42,11 @@ $values = array(
   .5,
 
   // array data
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // null data
   NULL,
@@ -69,13 +69,13 @@ $values = array(
 
   // unset data
   @$unset_var,
-);
+];
 
-// loop through $values array to test nl2br() function with each element 
+// loop through $values array to test nl2br() function with each element
 $count = 1;
 foreach($values as $value) {
   echo "-- Iteration $count --\n";
-  var_dump( nl2br($value) );
+  try { var_dump( nl2br($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count ++ ;
 };
 
@@ -83,4 +83,4 @@ foreach($values as $value) {
 fclose( $file_handle );
 
 echo "Done";
-?>
+}

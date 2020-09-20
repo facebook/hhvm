@@ -51,26 +51,6 @@ if (ENABLE_SPLIT_DWARF)
   target_link_libraries(hhvm debug "-Wl,--gdb-index")
 endif()
 
-# Check whether atomic operations require -latomic or not
-# See https://github.com/facebook/hhvm/issues/5217
-INCLUDE(CheckCXXSourceCompiles)
-set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
-CHECK_CXX_SOURCE_COMPILES("
-#include <atomic>
-int main() {
-    struct Test { int val; };
-    std::atomic<Test> s;
-    s.is_lock_free();
-}
-" NOT_REQUIRE_ATOMIC_LINKER_FLAG)
-
-if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
-    message(STATUS "-latomic is required to link hhvm")
-    target_link_libraries(hhvm atomic)
-endif()
-set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
-
 embed_all_systemlibs(hhvm "${CMAKE_CURRENT_BINARY_DIR}/.." "${CMAKE_CURRENT_BINARY_DIR}/hhvm")
 add_dependencies(hhvm systemlib)
 

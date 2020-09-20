@@ -1,4 +1,5 @@
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this build");
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+extension_loaded('mbstring') || die('skip');
+function_exists('mb_strrchr') || die("skip mb_strrchr() is not available in this build");
+}

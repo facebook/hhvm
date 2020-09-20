@@ -1,26 +1,26 @@
-<?php
+<?hh
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
  * Description: Write/Create a file with contents data and return the number of bytes written 
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : usage variation ***\n";
-
+chdir(__SystemLib\hphp_test_tmproot());
 $mainDir = "filePutContentsVar7.dir";
 $subDir = "filePutContentsVar7Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
-$old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+
+
 
 
 // Note invalid dirs in p8 result in (The system cannot find the path specified.)
 // rather than No Such File or Directory in php.net
-$allDirs = array(
+$allDirs = varray[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -36,7 +36,7 @@ $allDirs = array(
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",  
   
-);
+];
 
 $filename = 'FileGetContentsVar7.tmp';
 $absFile = $absSubDir.'/'.$filename;
@@ -63,9 +63,8 @@ for($i = 0; $i<count($allDirs); $i++) {
       
 }
 
-chdir($old_dir_path);
 rmdir($absSubDir);
 rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
-?>
+}

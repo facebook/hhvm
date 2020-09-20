@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $src_tc = imagecreatetruecolor(5,5);
 imagefill($src_tc, 0,0, 0xffffff);
 imagesetpixel($src_tc, 3,3, 0xff0000);
@@ -94,4 +94,4 @@ $p3 = imagecolorat($dst_tc, 4,4) == 0x00ff00;
 if ($p1 && $p2 && $p3) {
 	echo "P/TC: ok\n";
 }
-?>
+}

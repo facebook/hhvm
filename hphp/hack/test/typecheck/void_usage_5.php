@@ -1,15 +1,14 @@
 <?hh // strict
 
-function test(): void {
+function test(bool $b): void {
   $arr = array_map(
     $x ==> {
-      if (false) {
+      if ($b) {
         return $x;
       }
     },
-    array('test'),
+    varray['test'],
   );
-  hh_show($arr);
   foreach ($arr as $x) {
     if ($x) {
     }

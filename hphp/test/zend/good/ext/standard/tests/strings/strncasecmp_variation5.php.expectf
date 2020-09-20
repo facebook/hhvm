@@ -1,68 +1,72 @@
 *** Test strncasecmp() function: unexpected values for 'len' ***
 -- Iteration 1 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 2 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 3 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 4 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 5 --
 int(0)
 -- Iteration 6 --
 int(0)
 -- Iteration 7 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 13 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 14 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 15 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 16 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 17 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 18 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, string given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 21 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 22 --
-int(0)
+
+Warning: strncasecmp() expects parameter 3 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects parameter 3 to be integer, object given in %s/zend/good/ext/standard/tests/strings/strncasecmp_variation5.php on line 85
 *** Done ***

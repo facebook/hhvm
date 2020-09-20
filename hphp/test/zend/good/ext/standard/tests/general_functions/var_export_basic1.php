@@ -1,18 +1,18 @@
-<?php
+<?hh
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues 
-$valid_ints = array(
+// different integer vlaues
+$valid_ints = darray[
                 '0' => '0',
                 '1' => '1',
                 '-1' => '-1',
                 '-2147483648' => '-2147483648', // max negative integer value
-                '-2147483647' => '-2147483647', 
+                '-2147483647' => '-2147483647',
                 '2147483647' => 2147483647,  // max positive integer value
                 '2147483640' => 2147483640,
                 '0x123B' => 0x123B,      // integer as hexadecimal
@@ -26,18 +26,18 @@ $valid_ints = array(
                 "01912" => 01912,       // should be quivalent to octal 1
                 "-020000000000" => -020000000000, // max negative integer as octal
                 "017777777777" => 017777777777,  // max positive integer as octal
-);
+];
 
 /* Loop to check for above integer values with var_export() */
 echo "\n*** Output for integer values ***\n";
 foreach($valid_ints as $key => $int_value) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $int_value );
-	echo "\n";
-	var_export( $int_value, FALSE);
-	echo "\n";
-	var_dump( var_export( $int_value, TRUE) );
+    echo "\n-- Iteration: $key --\n";
+    var_export( $int_value );
+    echo "\n";
+    var_export( $int_value, FALSE);
+    echo "\n";
+    var_dump( var_export( $int_value, TRUE) );
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

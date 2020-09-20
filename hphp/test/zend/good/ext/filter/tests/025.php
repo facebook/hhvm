@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(filter_var("", FILTER_SANITIZE_STRING));
 var_dump(filter_var("<>", FILTER_SANITIZE_STRING));
 var_dump(filter_var("<>!@#$%^&*()'\"", FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES));
@@ -9,4 +9,4 @@ var_dump(filter_var("`123`", FILTER_SANITIZE_STRING));
 var_dump(filter_var(".", FILTER_SANITIZE_STRING));
 
 echo "Done\n";
-?>
+}

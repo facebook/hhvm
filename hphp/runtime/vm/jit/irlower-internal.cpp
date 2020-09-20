@@ -44,7 +44,12 @@ namespace {
  * Prepare `arg' for a call by shifting or zero-extending as appropriate, then
  * append its Vreg to `vargs'.
  */
-void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
+void prepareArg(const ArgDesc& arg,
+                Vout& v,
+                VregList& vargs,
+                VcallArgs::Spills* spills) {
+  assertx(IMPLIES(arg.aux(), arg.kind() == ArgDesc::Kind::Reg));
+
   switch (arg.kind()) {
     case ArgDesc::Kind::IndRet: {
       auto const tmp = v.makeReg();
@@ -56,10 +61,26 @@ void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
     case ArgDesc::Kind::Reg: {
       auto reg = arg.srcReg();
       if (arg.isZeroExtend()) {
+        assertx(!arg.aux());
         reg = v.makeReg();
         v << movzbq{arg.srcReg(), reg};
+        vargs.push_back(reg);
+      } else if (auto const aux = arg.aux()) {
+        // DataType is signed. We're using movzbq here to clear out the upper 7
+        // bytes of the register, not to actually extend the type value.
+        auto const extended = v.makeReg();
+        auto const result = v.makeReg();
+        v << movzbq{arg.srcReg(), extended};
+        v << orq{
+          extended,
+          v.cns(auxToMask(*aux)),
+          result,
+          v.makeReg()
+        };
+        vargs.push_back(result);
+      } else {
+        vargs.push_back(reg);
       }
-      vargs.push_back(reg);
       break;
     }
 
@@ -84,6 +105,14 @@ void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
       vargs.push_back(tmp);
       break;
     }
+
+    case ArgDesc::Kind::SpilledTV: {
+      assertx(spills);
+      assertx(arg.srcReg2().isValid());
+      spills->emplace(vargs.size(), arg.srcReg2());
+      vargs.push_back(arg.srcReg());
+      break;
+    }
   }
 }
 
@@ -95,18 +124,24 @@ void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
 
 Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   assertx(marker.valid());
+
+  // Stublogue code operates on behalf of the caller, so it needs an indirect
+  // fixup to obtain the real savedRip from the native frame.
+  if (sync == SyncOptions::SyncStublogue) return makeIndirectFixup(0);
+
   auto const stackOff = [&] {
     switch (sync) {
-      case SyncOptions::SyncAdjustOne:
-        return marker.spOff() -= 1;
-
       case SyncOptions::None:
         // We can get here if we are memory profiling, since we override the
         // normal sync settings and sync anyway.
-        always_assert(RuntimeOption::HHProfEnabled);
+        always_assert(RuntimeOption::EvalJitForceVMRegSync ||
+                      RuntimeOption::HHProfEnabled);
         // fallthru
       case SyncOptions::Sync:
         return marker.spOff();
+
+      case SyncOptions::SyncStublogue:
+        not_reached();
     }
     not_reached();
   }();
@@ -117,24 +152,28 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
 
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
                   SyncOptions sync, const ArgGroup& args) {
+  assertx(call.verifySignature(dstInfo, args.argTypes()));
   auto const inst = args.inst();
-  jit::vector<Vreg> vIndRetArgs, vargs, vSimdArgs, vStkArgs;
+  VregList vIndRetArgs, vargs, vSimdArgs, vStkArgs;
+  VcallArgs::Spills vArgSpills, vStkSpills;
 
   for (size_t i = 0; i < args.numIndRetArgs(); ++i) {
-    prepareArg(args.indRetArg(i), v, vIndRetArgs);
+    prepareArg(args.indRetArg(i), v, vIndRetArgs, nullptr);
   }
   for (size_t i = 0; i < args.numGpArgs(); ++i) {
-    prepareArg(args.gpArg(i), v, vargs);
+    prepareArg(args.gpArg(i), v, vargs, &vArgSpills);
   }
   for (size_t i = 0; i < args.numSimdArgs(); ++i) {
-    prepareArg(args.simdArg(i), v, vSimdArgs);
+    prepareArg(args.simdArg(i), v, vSimdArgs, nullptr);
   }
   for (size_t i = 0; i < args.numStackArgs(); ++i) {
-    prepareArg(args.stkArg(i), v, vStkArgs);
+    prepareArg(args.stkArg(i), v, vStkArgs, &vStkSpills);
   }
 
   auto const syncFixup = [&] {
-    if (RuntimeOption::HHProfEnabled || sync != SyncOptions::None) {
+    if (RuntimeOption::HHProfEnabled ||
+        RuntimeOption::EvalJitForceVMRegSync ||
+        sync != SyncOptions::None) {
       // If we are profiling the heap, we always need to sync because regs need
       // to be correct during allocations no matter what.
       return makeFixup(inst->marker(), sync);
@@ -184,7 +223,9 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
     std::move(vargs),
     std::move(vSimdArgs),
     std::move(vStkArgs),
-    std::move(vIndRetArgs)
+    std::move(vIndRetArgs),
+    std::move(vArgSpills),
+    std::move(vStkSpills)
   });
   auto const dstId = v.makeTuple(std::move(dstRegs));
 
@@ -215,16 +256,33 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
         return callDestTV(env, inst);
       case DestType::SSA:
       case DestType::Byte:
-        return callDest(env, inst);
       case DestType::Dbl:
-        return callDestDbl(env, inst);
-      case DestType::SSAPair:
-        always_assert(false && "SSAPair not implemented for cgCallNative");
+        return callDest(env, inst);
     }
     not_reached();
   }();
 
   cgCallHelper(v, env, info.func.call, dest, info.sync, args);
+}
+
+Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
+  auto& v = vmain(env);
+  auto const hash = v.makeReg();
+  if (arch() == Arch::X64) {
+#if defined(USE_HWCRC) && defined(__SSE4_2__)
+    v << crc32q{arr, v.cns(0), hash};
+    return hash;
+#endif
+  }
+  cgCallHelper(
+    v,
+    env,
+    CallSpec::direct(hash_int64),
+    callDest(hash),
+    SyncOptions::Sync,
+    argGroup(env, inst).reg(arr)
+  );
+  return hash;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

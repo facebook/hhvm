@@ -1,6 +1,2 @@
-File "for_condition_typechange.php", line 15, characters 4-11:
-Typing error (Typing[4110])
-File "for_condition_typechange.php", line 15, characters 10-11:
-This is a num (int/float) because this is used in an arithmetic operation
-File "for_condition_typechange.php", line 14, characters 15-18:
-It is incompatible with a bool
+File "for_condition_typechange.php", line 14, characters 10-11:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

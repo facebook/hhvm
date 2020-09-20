@@ -1,0 +1,4 @@
+File "hk_argument.php", line 3, characters 10-11:
+`TX` is a type parameter. Type parameters cannot themselves have type parameters (Naming[2047])
+File "hk_argument.php", line 3, characters 20-21:
+`TX` is a type parameter. Type parameters cannot take type arguments (e.g. `TX<int>` isn't allowed) (Naming[2047])

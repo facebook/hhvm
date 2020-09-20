@@ -1,0 +1,8 @@
+File "class_get_union.php--file1.php", line 7, characters 11-12:
+Invalid argument (Typing[4110])
+File "class_get_union.php--file2.php", line 11, characters 28-34:
+Expected `C2::T`
+File "class_get_union.php--file1.php", line 6, characters 27-28:
+  where the class `C2` was referenced here
+File "class_get_union.php--file1.php", line 5, characters 40-42:
+But got `int`

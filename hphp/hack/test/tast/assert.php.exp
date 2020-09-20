@@ -1,41 +1,56 @@
-[(AnnotatedAST.Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([14:22-14:26], (Hprim Tvoid)));
-      f_name = ([14:10-14:13], "\\foo"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
-      f_params =
-      [{ AnnotatedAST.param_hint =
-         (Some ([14:14-14:16],
-                (Hoption
-                   ([14:15-14:16], (Happly (([14:15-14:16], "\\A"), []))))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [14:17-14:19]; param_name = "$x"; param_expr = None;
-         param_callconv = None; param_user_attributes = [] }
-        ];
-      f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
-               (([15:3-15:26], Some void),
-                (AnnotatedAST.Assert
-                   (AnnotatedAST.AE_assert
-                      (([15:10-15:25], Some bool),
-                       (AnnotatedAST.InstanceOf (
-                          (([15:10-15:12], Some ?\A),
-                           (AnnotatedAST.Lvar ([15:10-15:12], $x))),
-                          ((Some \A),
-                           (AnnotatedAST.CI (([15:24-15:25], "\\A"), [])))
-                          )))))))
-             ];
-           fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal; c_name = ([12:7-12:8], "\\A");
-       c_tparams = <opaque>; c_extends = []; c_uses = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = []; c_implements = []; c_consts = [];
-       c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_user_attributes = []; c_enum = None })
+[(Class
+    { c_span = [12:1-11]; c_annotation = (); c_mode = Mstrict;
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([12:7-8], "\\A"); c_tparams = [];
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+      c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      c_pu_enums = [];
+      c_doc_comment =
+      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
+      c_emit_id = None });
+  (Fun
+     { f_span = [14:1-16:2]; f_annotation = (); f_mode = Mstrict;
+       f_ret = ((void), (Some ([14:22-26], (Hprim Tvoid))));
+       f_name = ([14:10-13], "\\foo"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([14:17-19], ?A);
+          param_type_hint =
+          ((?A),
+           (Some ([14:14-16],
+                  (Hoption ([14:15-16], (Happly (([14:15-16], "\\A"), [])))))));
+          param_is_variadic = false; param_pos = [14:17-19];
+          param_name = "$x"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
+         ];
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+       f_body =
+       { fb_ast =
+         [([15:3-19],
+           (Expr
+              (([15:3-18], void),
+               (Assert
+                  (AE_assert
+                     (([15:10-17], bool),
+                      (Is ((([15:10-12], ?A), (Lvar ([15:10-12], $x))),
+                         ([15:16-17], (Happly (([15:16-17], "\\A"), [])))))))))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None; f_static = false })
   ]

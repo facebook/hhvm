@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: dcgettext() expects exactly 3 parameters, 2 given in %s/gettext_dcgettext-wrongparams.php on line 2

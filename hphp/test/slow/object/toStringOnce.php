@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   private $count = 0;
@@ -13,4 +13,8 @@ function main() {
   var_dump((string)$a);
   var_dump((string) (new A));
 }
+
+<<__EntryPoint>>
+function main_to_string_once() {
 main();
+}

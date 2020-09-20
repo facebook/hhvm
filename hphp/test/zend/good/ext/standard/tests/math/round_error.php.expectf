@@ -2,7 +2,6 @@
 
 -- Wrong nmumber of arguments --
 
-Warning: %s
-NULL
+Warning: round() expects at least 1 parameter, 0 given in %s/round_error.php on line 15
 float(500)
 ===Done===

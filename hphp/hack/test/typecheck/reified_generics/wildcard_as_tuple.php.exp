@@ -1,0 +1,14 @@
+File "wildcard_as_tuple.php", line 5, characters 8-13:
+Invalid `as` expression hint (Typing[4195])
+File "wildcard_as_tuple.php", line 5, characters 9-9:
+The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_as_tuple.php", line 5, characters 12-12:
+The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_as_tuple.php", line 6, characters 8-13:
+Invalid `as` expression hint (Typing[4195])
+File "wildcard_as_tuple.php", line 6, characters 12-12:
+The `as` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_as_tuple.php", line 7, characters 8-13:
+Invalid `as` expression hint (Typing[4195])
+File "wildcard_as_tuple.php", line 7, characters 9-9:
+The `as` operator cannot be used with _ in a tuple (use `mixed` instead)

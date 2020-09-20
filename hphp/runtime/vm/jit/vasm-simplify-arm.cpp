@@ -85,13 +85,41 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
-  return if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
-    // loadb{s, tmp}; movzbl{tmp, d}; -> loadzbl{s, d};
+  if (if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
+      // loadb{s, tmp}; movzbl{tmp, d}; -> loadzbl{s, d};
+      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << loadzbl{inst.s, mov.d};
+        return 2;
+      }); })) {
+      return true;
+    }
+
+  return if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
+      // loadb{s, tmp}; movsbl{tmp, d}; -> loadsbl{s, d};
+      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
+
+      return simplify_impl(env, b, i, [&] (Vout& v) {
+        v << loadsbl{inst.s, mov.d};
+        return 2;
+      }); });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool simplify(Env& env, const ldimmq& inst, Vlabel b, size_t i) {
+  return if_inst<Vinstr::lea>(env, b, i + 1, [&] (const lea& ea) {
+    // ldimmq{s, index}; lea{base[index], d} -> lea{base[s],d}
     if (!(env.use_counts[inst.d] == 1 &&
-          inst.d == mov.s)) return false;
+          inst.s.q() <= 4095  &&
+          inst.s.q() >= -4095 &&
+          inst.d == ea.s.index &&
+          ea.s.disp == 0 &&
+          ea.s.base.isValid())) return false;
 
     return simplify_impl(env, b, i, [&] (Vout& v) {
-      v << loadzbl{inst.s, mov.d};
+      v << lea{ea.s.base[inst.s.l()], ea.d};
       return 2;
     });
   });

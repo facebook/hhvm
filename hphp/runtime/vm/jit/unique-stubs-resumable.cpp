@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/surprise-flags.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -31,6 +32,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -56,7 +58,15 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 void alignJmpTarget(CodeBlock& cb) {
-  align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
+  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+    align(cb, nullptr, Alignment::JmpTarget, AlignContext::Dead);
+  }
+}
+
+void alignCacheLine(CodeBlock& cb) {
+  if (RuntimeOption::EvalJitAlignUniqueStubs) {
+    align(cb, nullptr, Alignment::CacheLine, AlignContext::Dead);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,11 +125,11 @@ void storeAFWHResult(Vout& v, PhysReg data, PhysReg type) {
 
   // Set state to succeeded.
   v << storebi{
-    c_WaitHandle::toKindState(
-      c_WaitHandle::Kind::AsyncFunction,
-      c_WaitHandle::STATE_SUCCEEDED
+    c_Awaitable::toKindState(
+      c_Awaitable::Kind::AsyncFunction,
+      c_Awaitable::STATE_SUCCEEDED
     ),
-    rvmfp()[afwhToAr(c_WaitHandle::stateOff())]
+    rvmfp()[afwhToAr(c_Awaitable::stateOff())]
   };
 }
 
@@ -139,7 +149,7 @@ void unblockParents(Vout& v, Vreg firstBl) {
 }
 
 TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
     // Set rvmfp() to the suspending WaitHandle's parent frame.
@@ -168,11 +178,20 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
     // Set the AFHW's state to RUNNING.
     v << storebi{
       AFWH::toKindState(
-        c_WaitHandle::Kind::AsyncFunction,
+        c_Awaitable::Kind::AsyncFunction,
         AFWH::STATE_RUNNING
       ),
       afwh[AFWH::stateOff()]
     };
+
+    if (RO::EvalEnableImplicitContext) {
+      auto const implicitContext = v.makeReg();
+      v << load {
+        afwh[c_ResumableWaitHandle::implicitContextOff()],
+        implicitContext
+      };
+      v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
+    }
 
     auto const child = v.makeReg();
     v << load{afwh[AFWH::childrenOff() + AFWH::Node::childOff()], child};
@@ -292,11 +311,17 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   v << store{rvmfp(), rvmtl()[rds::kVmFirstAROff]};
 
   // setState(STATE_RUNNING)
-  auto const runningState = c_WaitHandle::toKindState(
-    c_WaitHandle::Kind::AsyncFunction,
+  auto const runningState = c_Awaitable::toKindState(
+    c_Awaitable::Kind::AsyncFunction,
     c_ResumableWaitHandle::STATE_RUNNING
   );
   v << storebi{runningState, parentBl[afwhToBl(AFWH::stateOff())]};
+
+  if (RO::EvalEnableImplicitContext) {
+    auto const implicitContext = v.makeReg();
+    v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
+    v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
+  }
 
   // Transfer control to the resume address.
   v << jmpm{rvmfp()[afwhToAr(AFWH::resumeAddrOff())], vm_regs_with_sp()};
@@ -324,7 +349,7 @@ void asyncFuncRetOnly(Vout& v, PhysReg data, PhysReg type, Vreg parentBl) {
 }
 
 TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl) {
-  alignJmpTarget(cb);
+  alignCacheLine(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
     auto const slowPath = Vlabel(v.makeBlock());
@@ -400,18 +425,34 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   auto view = code.view();
   auto& main = view.main();
   auto& cold = view.cold();
-  auto& hotBlock = code.view(TransKind::Optimize).main();
+  auto optView = code.view(TransKind::Optimize);
+  auto& hotBlock = optView.main();
   auto& data = view.data();
 
   auto const hot = [&]() -> CodeBlock& {
     return hotBlock.available() > 512 ? hotBlock : main;
   };
+  auto const hotView = [&]() -> CodeCache::View& {
+    return hotBlock.available() > 512 ? optView : view;
+  };
 
-#define ADD(name, stub) name = add(#name, (stub), code, dbg)
+#define EMIT(name, v_in, stub)                                     \
+  [&] {                                                            \
+    auto const& v = (v_in);                                        \
+    tc::TransLocMaker maker{v};                                    \
+    maker.markStart();                                             \
+    auto const start = (stub)();                                   \
+    add(name, code, start, v, maker.markEnd().loc(), dbg);         \
+    return start;                                                  \
+  }()
+
+#define ADD(name, v, stub) name = EMIT(#name, v, [&] { return (stub); })
   TCA inner_stub;
-  ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(main, data, &inner_stub));
-  ADD(asyncFuncRet,     emitAsyncFuncRet(hot(), data, inner_stub));
-  ADD(asyncFuncRetSlow, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
+  ADD(asyncSwitchCtrl,
+      hotView(),
+      emitAsyncSwitchCtrl(hot(), data, &inner_stub));
+  ADD(asyncFuncRet,     hotView(), emitAsyncFuncRet(hot(), data, inner_stub));
+  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
 #undef ADD
 }
 

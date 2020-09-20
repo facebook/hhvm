@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: Invalid argument: formdata: (need Array or Object) in %s/http_build_query_error.php on line 3

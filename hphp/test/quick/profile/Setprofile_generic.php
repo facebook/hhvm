@@ -1,7 +1,6 @@
-<?php
+<?hh
 
 class Foo {
-  public function __destruct() { echo "heh\n"; }
 }
 
 function pure_function_many_locals($a) {
@@ -26,18 +25,17 @@ function pure_function_no_profile() {
   echo "yep\n";
 }
 
-function profiler() {
+function profiler(...$args) {
   // Calling functions from within the profiler function should note
   // use the profile (it would cause an infinite loop)
   pure_function_no_profile();
-  var_dump(func_get_args());
+  var_dump($args);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   pure_function_2(1, 2);
   fb_setprofile('profiler');
   pure_function_2(3, 4);
   fb_setprofile(null);
   pure_function_2(5, 6);
 }
-main();

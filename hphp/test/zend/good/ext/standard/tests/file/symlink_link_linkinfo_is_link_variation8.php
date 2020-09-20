@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool symlink ( string $target, string $link );
    Description: creates a symbolic link to the existing target with the specified name link
 
@@ -13,14 +13,14 @@
 */
 
 /* Variation 8 : Create soft/hard link to different directory */
-
 /* creating link to a file in different dir with the same name as the file */
+<<__EntryPoint>> function main(): void {
 echo "\n*** Create hard link in different directory with same filename ***\n";
 // temp file used
-$file_path = dirname(__FILE__);
-$filename = "$file_path/symlink_link_linkinfo_is_link_variation8.tmp";
+
+$filename = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation8.tmp');
 // temp link name used
-$dirname = "$file_path/symlink_link_linkinfo_is_link1_variation8";
+$dirname = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link1_variation8');
 mkdir($dirname);
 $linkname = "symlink_link_linkinfo_is_link_variation8.tmp";
 // create temp file
@@ -28,7 +28,7 @@ $fp = fopen($filename, "w");
 fclose($fp);
 
 var_dump( link($filename, $dirname."/") ); // this fails indicating file exists
-// ok, creates "$file_path/symlink_link_linkinfo_is_link1_variation8/symlink_link_linkinfo_is_link_variation8.tmp" link
+// ok, creates "symlink_link_linkinfo_is_link1_variation8/symlink_link_linkinfo_is_link_variation8.tmp" link
 var_dump( link($filename, $dirname."/".$linkname) );  // this works fine
 // delete link
 unlink($dirname."/".$linkname);
@@ -38,9 +38,9 @@ unlink($filename);
 rmdir($dirname);
 
 echo "\n*** Create soft link in different directory with same filename ***\n";
-$filename = "$file_path/symlink_link_linkinfo_is_link_variation8.tmp";
+$filename = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation8.tmp');
 // temp link name used
-$dirname = "$file_path/symlink_link_linkinfo_is_link1_variation8";
+$dirname = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link1_variation8');
 mkdir($dirname);
 $linkname = "symlink_link_linkinfo_is_link_variation8.tmp";
 // create temp file
@@ -48,7 +48,7 @@ $fp = fopen($filename, "w");
 fclose($fp);
 
 var_dump( symlink($filename, $dirname."/") ); // this fails indicating file exists
-// ok, creates "$file_path/symlink_link_linkinfo_is_link1_variation8/symlink_link_linkinfo_is_link_variation8.tmp" link
+// ok, creates "symlink_link_linkinfo_is_link1_variation8/symlink_link_linkinfo_is_link_variation8.tmp" link
 var_dump( symlink($filename, $dirname."/".$linkname) );  // this works fine
 // delete link
 unlink($dirname."/".$linkname);
@@ -58,4 +58,4 @@ unlink($filename);
 rmdir($dirname);
 
 echo "Done\n";
-?>
+}

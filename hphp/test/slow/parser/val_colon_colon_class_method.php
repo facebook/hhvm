@@ -22,4 +22,8 @@ function main(): void {
   get_foo()::blah();
 }
 
+
+<<__EntryPoint>>
+function main_val_colon_colon_class_method() {
 main();
+}

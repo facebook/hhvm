@@ -1,1 +1,0 @@
-((Fatal error\: 'require implements' may not be used in interface scope; instead, use interface inheritance in [^\r\n]+\/test\/slow\/traits\/require_constraint_iface_implements_error\.php on line 7)|(Fatal error\: Only traits may use 'require implements'\. in [^\r\n]+\/traits\/require_constraint_iface_implements_error\.php on line 7))

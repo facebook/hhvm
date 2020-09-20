@@ -1,0 +1,4 @@
+File "mutable_as_hint5.php", line 13, characters 18-19:
+Variable `$z` is undefined, not always defined, or unset afterwards. (Naming[2050])
+File "mutable_as_hint5.php", line 10, characters 50-51:
+Did you mean `$a` instead?

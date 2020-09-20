@@ -1,6 +1,6 @@
 File "vec_literal_ok.php", line 6, characters 12-16:
 Invalid argument (Typing[4110])
 File "vec_literal_ok.php", line 10, characters 19-21:
-This is an int
-File "vec_literal_ok.php", line 4, characters 17-21:
-It is incompatible with a string
+Expected `int`
+File "vec_literal_ok.php", line 4, characters 18-22:
+But got `string`

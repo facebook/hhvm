@@ -1,5 +1,5 @@
-<?php
-$c = array('a' => 'aa','b' => 'bb'); 
+<?hh <<__EntryPoint>> function main(): void {
+$c = darray['a' => 'aa','b' => 'bb'];
 
-var_dump(array_merge_recursive($c, $c)); 
-?>
+var_dump(array_merge_recursive($c, $c));
+}

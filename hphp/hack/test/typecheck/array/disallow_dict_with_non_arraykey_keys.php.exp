@@ -1,0 +1,6 @@
+File "disallow_dict_with_non_arraykey_keys.php", line 8, characters 8-23:
+Invalid index type for this dict (Typing[4110])
+File "disallow_dict_with_non_arraykey_keys.php", line 8, characters 13-17:
+Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
+File "disallow_dict_with_non_arraykey_keys.php", line 4, characters 9-13:
+But got `float`

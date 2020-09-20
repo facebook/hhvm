@@ -1,138 +1,120 @@
-(**
+(*
  * Copyright (c) 2017; Facebook; Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
-*)
-
-(* The auto alias map for Hack types. This is adapted from the
- * Parser::AutoAliasMap in hphp/compiler/parser/{parser.cpp,parser.h}
  *)
 
-open Hh_core
+open Hh_prelude
 
-type alias =
-| HH_ONLY_TYPE of string
-| SCALAR_TYPE of string
-| HH_ALIAS of string * string
+let types =
+  [
+    "arraylike";
+    "AsyncFunctionWaitHandle";
+    "AsyncGenerator";
+    "AsyncGeneratorWaitHandle";
+    "AsyncIterator";
+    "AsyncKeyedIterator";
+    "Awaitable";
+    "AwaitAllWaitHandle";
+    "classname";
+    "Collection";
+    "ConditionWaitHandle";
+    "Container";
+    "darray";
+    "dict";
+    "ExternalThreadEventWaitHandle";
+    "IMemoizeParam";
+    "ImmMap";
+    "ImmSet";
+    "ImmVector";
+    "InvariantException";
+    "Iterable";
+    "Iterator";
+    "KeyedContainer";
+    "KeyedIterable";
+    "KeyedIterator";
+    "KeyedTraversable";
+    "keyset";
+    "Map";
+    "ObjprofObjectStats";
+    "ObjprofPathsStats";
+    "ObjprofStringStats";
+    "Pair";
+    "RescheduleWaitHandle";
+    "ResumableWaitHandle";
+    "Set";
+    "Shapes";
+    "SleepWaitHandle";
+    "StaticWaitHandle";
+    "Traversable";
+    "typename";
+    "TypeStructure";
+    "TypeStructureKind";
+    "varray_or_darray";
+    "varray";
+    "vec_or_dict";
+    "vec";
+    "Vector";
+    "WaitableWaitHandle";
+    "XenonSample";
+  ]
 
-(* Create map from name to (alias, is_php7_scalar_type) *)
-let add_alias m a =
-  let add k v =
-    SMap.add (String.lowercase_ascii k) v m in
-  match a with
-  | HH_ONLY_TYPE s ->
-    add s ("HH\\" ^ s, false)
-  | SCALAR_TYPE s ->
-    add s ("HH\\" ^ s, true)
-  | HH_ALIAS (s, alias) ->
-    add s (alias, false)
+let funcs =
+  [
+    "asio_get_current_context_idx";
+    "asio_get_running_in_context";
+    "asio_get_running";
+    "class_meth";
+    "darray";
+    "dict";
+    "fun";
+    "heapgraph_create";
+    "heapgraph_dfs_edges";
+    "heapgraph_dfs_nodes";
+    "heapgraph_edge";
+    "heapgraph_foreach_edge";
+    "heapgraph_foreach_node";
+    "heapgraph_foreach_root";
+    "heapgraph_node_in_edges";
+    "heapgraph_node_out_edges";
+    "heapgraph_node";
+    "heapgraph_stats";
+    "idx";
+    "inst_meth";
+    "invariant_callback_register";
+    "invariant_violation";
+    "invariant";
+    "is_darray";
+    "is_dict";
+    "is_keyset";
+    "is_varray";
+    "is_vec";
+    "keyset";
+    "meth_caller";
+    "objprof_get_data";
+    "objprof_get_paths";
+    "objprof_get_strings";
+    "server_warmup_status";
+    "thread_mark_stack";
+    "thread_memory_stats";
+    "type_structure";
+    "varray";
+    "vec";
+    "xenon_get_data";
+  ]
 
-let alias_map = List.fold_left ~f:add_alias ~init:SMap.empty
-[
-  HH_ONLY_TYPE("AsyncIterator");
-  HH_ONLY_TYPE("AsyncKeyedIterator");
-  HH_ONLY_TYPE("Traversable");
-  HH_ONLY_TYPE("Container");
-  HH_ONLY_TYPE("KeyedTraversable");
-  HH_ONLY_TYPE("KeyedContainer");
-  HH_ONLY_TYPE("Iterator");
-  HH_ONLY_TYPE("KeyedIterator");
-  HH_ONLY_TYPE("Iterable");
-  HH_ONLY_TYPE("KeyedIterable");
-  HH_ONLY_TYPE("Collection");
-  HH_ONLY_TYPE("Vector");
-  HH_ONLY_TYPE("Map");
-  HH_ONLY_TYPE("Set");
-  HH_ONLY_TYPE("Pair");
-  HH_ONLY_TYPE("ImmVector");
-  HH_ONLY_TYPE("ImmMap");
-  HH_ONLY_TYPE("ImmSet");
-  HH_ONLY_TYPE("InvariantException");
-  HH_ONLY_TYPE("IMemoizeParam");
-  HH_ONLY_TYPE("Shapes");
-  HH_ONLY_TYPE("TypeStructureKind");
-  HH_ONLY_TYPE("TypeStructure");
-  HH_ONLY_TYPE("dict");
-  HH_ONLY_TYPE("vec");
-  HH_ONLY_TYPE("keyset");
-  HH_ONLY_TYPE("varray");
-  HH_ONLY_TYPE("darray");
+let consts = []
 
-  HH_ONLY_TYPE("Awaitable");
-  HH_ONLY_TYPE("AsyncGenerator");
-  HH_ONLY_TYPE("StaticWaitHandle");
-  HH_ONLY_TYPE("WaitableWaitHandle");
-  HH_ONLY_TYPE("ResumableWaitHandle");
-  HH_ONLY_TYPE("AsyncFunctionWaitHandle");
-  HH_ONLY_TYPE("AsyncGeneratorWaitHandle");
-  HH_ONLY_TYPE("AwaitAllWaitHandle");
-  HH_ONLY_TYPE("ConditionWaitHandle");
-  HH_ONLY_TYPE("RescheduleWaitHandle");
-  HH_ONLY_TYPE("SleepWaitHandle");
-  HH_ONLY_TYPE("ExternalThreadEventWaitHandle");
+let namespaces = ["Rx"]
 
-  SCALAR_TYPE("bool");
-  SCALAR_TYPE("int");
-  SCALAR_TYPE("float");
-  SCALAR_TYPE("string");
-  SCALAR_TYPE("void");
+let is_hh_autoimport =
+  let h = HashSet.of_list types in
+  (fun x -> HashSet.mem h x)
 
-  HH_ONLY_TYPE("num");
-  HH_ONLY_TYPE("arraykey");
-  HH_ONLY_TYPE("resource");
-  HH_ONLY_TYPE("mixed");
-  HH_ONLY_TYPE("noreturn");
-  HH_ONLY_TYPE("this");
-  HH_ONLY_TYPE("varray_or_darray");
-  HH_ONLY_TYPE("vec_or_dict");
-
-  HH_ALIAS("classname", "string");
-  HH_ALIAS("typename", "string");
-  HH_ALIAS("boolean", "bool");
-  HH_ALIAS("integer", "int");
-  HH_ALIAS("double", "float");
-  HH_ALIAS("real", "float");
-  HH_ALIAS("dynamic", "mixed");
-
-(*
-  PHP7_TYPE("Throwable"; PHP7_EngineExceptions);
-  PHP7_TYPE("Error"; PHP7_EngineExceptions);
-  PHP7_TYPE("ArithmeticError"; PHP7_EngineExceptions);
-  PHP7_TYPE("AssertionError"; PHP7_EngineExceptions);
-  PHP7_TYPE("DivisionByZeroError"; PHP7_EngineExceptions);
-  PHP7_TYPE("ParseError"; PHP7_EngineExceptions);
-  PHP7_TYPE("TypeError"; PHP7_EngineExceptions);
-  *)
-]
-
-let rec normalize ~is_hack ~php7_scalar_types s =
-  if not (is_hack || php7_scalar_types)
-  then s
-  else
-  match SMap.get (String.lowercase_ascii s) alias_map with
-  | None -> s
-  | Some (a, is_scalar_type) ->
-    if is_hack || is_scalar_type
-    then normalize ~is_hack ~php7_scalar_types a
-    else s
-
-let opt_normalize ~is_hack ~php7_scalar_types s =
-  match String.lowercase_ascii s with
-  | "callable" -> Some "callable"
-  | "array" -> Some "array"
-  | s ->
-    if not (is_hack || php7_scalar_types)
-    then None
-    else
-    match SMap.get s alias_map with
-    | None -> None
-    | Some (a, is_scalar_type) ->
-      if is_hack || is_scalar_type
-      then Some (normalize ~is_hack ~php7_scalar_types a)
-      else None
-
-let is_hh_autoimport s = SMap.mem (String.lowercase_ascii s) alias_map
+let reverse_type id =
+  match String.chop_prefix ~prefix:"HH\\" id with
+  | Some stripped_id when is_hh_autoimport stripped_id -> stripped_id
+  | _ -> id

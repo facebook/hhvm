@@ -2,13 +2,11 @@
 
 -- Testing posix_kill() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: posix_kill() expects exactly 2 parameters, 3 given in %s/posix_kill_error.php on line 16
 
 -- Testing posix_kill() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: posix_kill() expects exactly 2 parameters, 1 given in %s/posix_kill_error.php on line 20
 
 -- Testing posix_kill() function with invalid signal --
 bool(false)

@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: SQLite3::version() expects exactly 0 parameters, 1 given in %s/sqlite3_version_noparam.php on line 3

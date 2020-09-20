@@ -1,0 +1,68 @@
+
+Testing varray base:
+  Basic iteration:
+  0 => null
+  1 => false
+  2 => 17
+  3 => 34
+  4 => "51"
+  Basic iteration (again):
+    0 => null
+    1 => false
+    2 => 17
+    3 => 34
+    4 => "51"
+  Iteration by hand:
+    0 => null ($valid = true)
+    1 => false ($valid = true)
+    2 => 17 ($valid = true)
+    3 => 34 ($valid = true)
+    4 => "51" ($valid = true)
+    null => null ($valid = false)
+    null => null ($valid = false)
+
+Testing darray base:
+  Basic iteration:
+  "a" => null
+  "b" => false
+  "" => 17
+  0 => 34
+  "e" => "51"
+  Basic iteration (again):
+    "a" => null
+    "b" => false
+    "" => 17
+    0 => 34
+    "e" => "51"
+  Iteration by hand:
+    "a" => null ($valid = true)
+    "b" => false ($valid = true)
+    "" => 17 ($valid = true)
+    0 => 34 ($valid = true)
+    "e" => "51" ($valid = true)
+    null => null ($valid = false)
+    null => null ($valid = false)
+
+Testing object base:
+  Basic iteration:
+  "a" => null
+  "b" => false
+  "c" => 17
+  "d" => 0
+  "e" => "51"
+  "f" => null
+  Basic iteration (again):
+    "a" => null
+    "b" => false
+    "c" => 17
+    "d" => 0
+    "e" => "51"
+    "f" => null
+  Iteration by hand:
+    "a" => null ($valid = true)
+    "b" => false ($valid = true)
+    "c" => 17 ($valid = true)
+    "d" => 0 ($valid = true)
+    "e" => "51" ($valid = true)
+    "f" => null ($valid = true)
+    null => null ($valid = false)

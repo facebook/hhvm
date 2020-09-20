@@ -1,0 +1,12 @@
+File "simple_re.php", line 11, characters 14-20:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "simple_re.php", line 12, characters 14-21:
+Bad regex pattern; unmatched parentheses [2]. (Typing[4275])
+File "simple_re.php", line 13, characters 14-18:
+Bad regex pattern; \ at end of pattern [1]. (Typing[4275])
+File "simple_re.php", line 14, characters 14-18:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "simple_re.php", line 15, characters 14-20:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "simple_re.php", line 16, characters 14-19:
+Bad regex pattern; missing terminating ] for character class [2]. (Typing[4275])

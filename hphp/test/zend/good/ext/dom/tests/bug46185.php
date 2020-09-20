@@ -1,4 +1,4 @@
-<?php 
+<?hh <<__EntryPoint>> function main(): void {
 $aDOM = new DOMDocument();
 $aDOM->loadXML('<?xml version="1.0"?>
 <ns1:a xmlns:ns1="urn::ns"/>');
@@ -12,4 +12,4 @@ $imported= $aDOM->importNode($ok->firstChild, true);
 $a->appendChild($imported);
 
 echo $aDOM->saveXML();
-?>
+}

@@ -1,0 +1,2 @@
+File "enum_7.php", line 13, characters 7-9:
+Enums must be `int` or `string` or `arraykey`, not `mixed` (Typing[4024])

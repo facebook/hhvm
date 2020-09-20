@@ -5,4 +5,8 @@ function main() {
   $x->differenceByKey($y);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_map_difference_by_key_bug() {
 main();
+}

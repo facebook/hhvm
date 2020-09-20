@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_INSTANCE_BITS_H_
-#define incl_HPHP_RUNTIME_VM_INSTANCE_BITS_H_
+#pragma once
 
 #include <atomic>
 #include <bitset>
@@ -25,7 +24,15 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 
-namespace HPHP { struct StringData; }
+namespace HPHP {
+
+struct StringData;
+namespace jit {
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -104,8 +111,13 @@ unsigned lookup(const StringData* name);
  */
 bool getMask(const StringData* name, int& offset, uint8_t& mask);
 
+/*
+ * Serialize and deserialize.
+ */
+void serialize(jit::ProfDataSerializer&);
+void deserialize(jit::ProfDataDeserializer&);
+
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

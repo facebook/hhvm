@@ -1,0 +1,8 @@
+(executable
+  (name discover)
+  (libraries
+    dune.configurator))
+
+(rule
+  (targets ld-opts.sexp)
+  (action (run ./discover.exe)))

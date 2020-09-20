@@ -5,7 +5,7 @@ function foo(inout $x) {
 }
 
 function bar(inout $a, inout $b) {
-  list($a, $b) = array($b, $a);
+  list($a, $b) = varray[$b, $a];
   return $a + $b;
 }
 
@@ -26,7 +26,11 @@ function main($a, $b, $c) {
   var_dump($foo, $bar1, $bar2, $baz);
 }
 
+
+<<__EntryPoint>>
+function main_call_dynamic() {
 if (!isset($x)) $x = 'foo';
 if (!isset($y)) $y = 'bar';
 if (!isset($z)) $z = 'baz';
 main($x, $y, $z);
+}

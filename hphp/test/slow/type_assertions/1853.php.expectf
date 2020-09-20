@@ -1,52 +1,29 @@
-array(0) {
+varray(0) {
 }
-
-Notice: Undefined index: 0 in %s/test/slow/type_assertions/1853.php on line 10
-NULL
-
-Notice: Undefined index: 0 in %s/test/slow/type_assertions/1853.php on line 11
-NULL
-array(2) {
-  [0]=>
+Out of bounds varray access: invalid index 0
+varray(2) {
   int(0)
-  [1]=>
   int(1)
 }
 int(0)
-
-Warning: Cannot use a scalar value as an array in %s/test/slow/type_assertions/1853.php on line 11
-NULL
-array(2) {
-  [0]=>
+varray(2) {
   int(0)
-  [1]=>
   int(1)
 }
-int(0)
-
-Warning: Cannot use a scalar value as an array in %s/test/slow/type_assertions/1853.php on line 17
-NULL
-array(1) {
-  [0]=>
-  array(1) {
+varray(1) {
+  darray(1) {
     [1]=>
     int(1)
   }
 }
-array(1) {
+darray(1) {
   [1]=>
   int(1)
 }
 int(1)
-array(1) {
-  [0]=>
-  array(1) {
+varray(1) {
+  darray(1) {
     [1]=>
     int(1)
   }
 }
-array(1) {
-  [1]=>
-  int(1)
-}
-int(1)

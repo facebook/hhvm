@@ -1,0 +1,14 @@
+(alias
+    (name dump_inheritance)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/dump_inheritance/HH_FLAGS)
+          (glob_files %{project_root}/test/dump_inheritance/*.php)
+          (glob_files %{project_root}/test/dump_inheritance/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/dump_inheritance
+    --program %{exe:../../src/hh_single_type_check.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias dump_inheritance)))

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class GetterInternal {
   private $foo;
@@ -21,4 +21,8 @@ function test10() {
   $k->doit();
 }
 
+
+<<__EntryPoint>>
+function main_getter_internal() {
 test10();
+}

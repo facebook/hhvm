@@ -1,0 +1,6 @@
+File "array_append_vector.php", line 5, characters 3-15:
+Invalid assignment (Typing[4110])
+File "array_append_vector.php", line 4, characters 22-24:
+Expected `int`
+File "array_append_vector.php", line 5, characters 11-15:
+But got `string`

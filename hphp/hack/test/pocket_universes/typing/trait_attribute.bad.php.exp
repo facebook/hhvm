@@ -1,0 +1,41 @@
+File "trait_attribute.bad.php", line 14, characters 7-8:
+Class/Trait `C0` does not need any `__Pu` attribute (Typing[4376])
+File "trait_attribute.bad.php", line 21, characters 7-8:
+Class/Trait `C1` does not need any `__Pu` attribute (Typing[4376])
+File "trait_attribute.bad.php", line 36, characters 8-15:
+Class/Trait `D0` has a useless attribute `name` for enumeration `E` (Typing[4376])
+File "trait_attribute.bad.php", line 44, characters 8-14:
+Class/Trait `D1` has a unknown attribute `foo` for enumeration `E` (Typing[4376])
+File "trait_attribute.bad.php", line 53, characters 7-8:
+Class/Trait `D2` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 59, characters 7-8:
+Class/Trait `D3` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 63, characters 8-20:
+Duplicated field `name` in `__Pu` attribute (Typing[4376])
+File "trait_attribute.bad.php", line 68, characters 18-25:
+Duplicated attribute `E` in `__Pu` attribute (Typing[4376])
+File "trait_attribute.bad.php", line 73, characters 3-6:
+Invalid `__Pu` attribute (Typing[4376])
+File "trait_attribute.bad.php", line 74, characters 7-8:
+Class/Trait `D6` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 79, characters 7-7:
+Class/Trait `E` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 96, characters 7-8:
+Class/Trait `F1` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 101, characters 7-8:
+Class/Trait `F2` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 107, characters 7-8:
+Class/Trait `TX` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
+File "trait_attribute.bad.php", line 131, characters 7-7:
+Class/Trait `N` should have the attribute:
+`__Pu("PU1: id, val", "PU0: msg")` (Typing[4376])
+File "trait_attribute.bad.php", line 135, characters 7-7:
+Class/Trait `P` should have the attribute:
+`__Pu("PU1: id, val")` (Typing[4376])

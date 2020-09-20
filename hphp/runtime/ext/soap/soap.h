@@ -23,11 +23,11 @@
 #include <memory>
 #include <vector>
 #include "hphp/runtime/ext/soap/sdl.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/http-client.h"
-#include "hphp/util/lock.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/rds-local.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines
@@ -90,8 +90,7 @@ private:
     sdlPtr sdl;
     time_t time;
   };
-  using sdlCache =
-        hphp_string_hash_map<std::shared_ptr<sdlCacheBucket>,sdlCacheBucket>;
+  using sdlCache = hphp_string_map<std::shared_ptr<sdlCacheBucket>>;
 
 public:
   SoapData();
@@ -131,7 +130,10 @@ public:
   // misc
   int m_cur_uniq_ns;
   int m_cur_uniq_ref;
-  Array m_ref_map; // reference handling
+
+  // reference handling
+  req::fast_map<xmlNodePtr, Variant> m_ref_map;
+  req::fast_map<HeapObject*, xmlNodePtr> m_node_map;
 
   int64_t m_cache;
 

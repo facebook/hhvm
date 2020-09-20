@@ -1,0 +1,19 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "node_pattern",
+    "kind": "function_declaration_header",
+    "children": {
+      "function_modifiers": {
+        "pattern_type": "not_pattern",
+        "pattern": {
+          "pattern_type": "descendant_pattern",
+          "pattern": {
+            "pattern_type": "raw_text_pattern",
+            "raw_text": "final"
+          }
+        }
+      }
+    }
+  }
+}

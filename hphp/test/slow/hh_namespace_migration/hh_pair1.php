@@ -5,7 +5,11 @@
 
 function main() {
   $s = Pair {1, 2};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
 
+
+<<__EntryPoint>>
+function main_hh_pair1() {
 main();
+}

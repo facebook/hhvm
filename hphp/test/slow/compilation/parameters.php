@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 class X {
-  function foo(&$a) {
+  function foo(inout $a) {
     return $this;
   }
 }
@@ -14,3 +14,5 @@ class Y {
     return $this;
   }
 }
+
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

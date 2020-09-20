@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once 'connect.inc';
 
 if ($skip_on_bind_failure) {
@@ -10,4 +10,3 @@ if ($skip_on_bind_failure) {
 
 	ldap_unbind($link);
 }
-?>

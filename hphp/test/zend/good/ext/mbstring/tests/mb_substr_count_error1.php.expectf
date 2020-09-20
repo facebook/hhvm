@@ -2,11 +2,9 @@
 
 -- Testing mb_substr_count() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mb_substr_count() expects at most 3 parameters, 4 given in %s/mb_substr_count_error1.php on line 20
 
 -- Testing mb_substr_count() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mb_substr_count() expects at least 2 parameters, 1 given in %s/mb_substr_count_error1.php on line 25
 Done

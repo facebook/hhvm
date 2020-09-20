@@ -1,90 +1,96 @@
-array(2) {
-  [0]=>
-  array(7) {
+varray(3) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(10)
+    int(11)
     ["function"]=>
     string(3) "bar"
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(1)
     }
   }
-  [1]=>
-  array(7) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(15)
+    int(18)
     ["function"]=>
     string(3) "foo"
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(1)
+    }
+  }
+  darray(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
     }
   }
 }
-array(2) {
-  [0]=>
-  array(7) {
+varray(3) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(10)
+    int(11)
     ["function"]=>
     string(3) "bar"
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(65537)
     }
   }
-  [1]=>
-  array(8) {
+  darray(8) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(16)
+    int(19)
     ["function"]=>
     string(3) "foo"
     ["class"]=>
     string(3) "Baz"
     ["object"]=>
-    object(Baz)#1 (0) {
+    object(Baz) (0) {
     }
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(65537)
     }
     ["metadata"]=>
     string(8) "I am foo"
+  }
+  darray(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
+    }
   }
 }

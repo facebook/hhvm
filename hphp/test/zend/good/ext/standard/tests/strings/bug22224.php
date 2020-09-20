@@ -1,16 +1,16 @@
-<?php
+<?hh
 class foo
 {
-	function __toString()
-	{
-		return "Object";
-	}
+    function __toString()
+    {
+        return "Object";
+    }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $a = new foo();
-			    
-$arr = array(0=>&$a, 1=>&$a);
+
+$arr = darray[0=>$a, 1=>$a];
 var_dump(implode(",",$arr));
-var_dump($arr)
-?>
+var_dump($arr);
+}

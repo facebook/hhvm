@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_2109() {
 $dom = new \DOMDocument();
 $dom->loadHTML('
 <html>
@@ -10,3 +13,4 @@ $dom->loadHTML('
 $form1 = $dom->getElementById('form_2');
 $form2 = $dom->getElementById('form_2');
 var_dump(spl_object_hash($form1) === spl_object_hash($form2));
+}

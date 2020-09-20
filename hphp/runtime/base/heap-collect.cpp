@@ -13,21 +13,17 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/apc-gc-manager.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/weakref-data.h"
-#include "hphp/runtime/ext/weakref/weakref-data-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/bloom-filter.h"
 #include "hphp/util/cycles.h"
-#include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -43,6 +39,9 @@
 namespace HPHP {
 TRACE_SET_MOD(gc);
 
+RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
+IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+
 namespace {
 
 struct Counter {
@@ -53,10 +52,6 @@ struct Counter {
     count++;
   }
 };
-
-bool hasNativeData(const HeapObject* h) {
-  return h->kind() == HeaderKind::NativeObject;
-}
 
 constexpr auto MinMark = GCBits(1);
 constexpr auto MaxMark = GCBits(3);
@@ -93,9 +88,6 @@ constexpr auto MaxMark = GCBits(3);
  *
  * Experimental options
  *
- * Eval.GCForAPC - enable whole-process APC collection. See APCGCManager.
- * Eval.GCForAPCTrigger - trigger threshold; see APCGCManager.
- *
  * Eval.TwoPhaseGC - perform tracing in two phases, the second of which
  * must only encounter exactly-scanned pointers, to enable object copying.
  */
@@ -104,29 +96,28 @@ constexpr auto MaxMark = GCBits(3);
  * Collector state needed during a single whole-heap mark-sweep collection.
  */
 struct Collector {
-  explicit Collector(HeapImpl& heap, APCGCManager* apcgc, GCBits mark_version)
-    : heap_(heap), mark_version_{mark_version}, apcgc_(apcgc)
+  explicit Collector(HeapImpl& heap, GCBits mark_version)
+    : heap_(heap), mark_version_{mark_version}
   {}
-  template<bool apcgc> void collect();
+  void collect();
   void init();
   void sweep();
-  template<bool apcgc> void traceAll();
-  template<bool apcgc> void traceConservative();
-  template<bool apcgc> void traceExact();
+  void traceAll();
+  void traceConservative();
+  void traceExact();
 
   // mark ambiguous pointers in the range [start,start+len)
-  template<bool apcgc>
   void conservativeScan(const void* start, size_t len);
 
   bool marked(const HeapObject* h) {
     return h->marks() == mark_version_;
   }
-  template<bool apcgc> void checkedEnqueue(const void* p);
-  template<bool apcgc> void exactEnqueue(const void* p);
+  void checkedEnqueue(const void* p);
+  void exactEnqueue(const void* p);
   HeapObject* find(const void*);
 
   size_t slab_index(const void* h) {
-    assert((char*)h >= (char*)slabs_range_.ptr &&
+    assertx((char*)h >= (char*)slabs_range_.ptr &&
            (char*)h < (char*)slabs_range_.ptr + slabs_range_.size);
     return (uintptr_t(h) - uintptr_t(slabs_range_.ptr)) >> kLgSlabSize;
   }
@@ -145,7 +136,6 @@ struct Collector {
   boost::dynamic_bitset<> slab_map_; // 1 bit per 2M
   type_scan::Scanner type_scanner_;
   std::vector<const HeapObject*> cwork_, xwork_;
-  APCGCManager* const apcgc_;
 };
 
 HeapObject* Collector::find(const void* ptr) {
@@ -158,19 +148,25 @@ HeapObject* Collector::find(const void* ptr) {
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
   switch (h->kind()) {
-    case HeaderKind::Apc:
-    case HeaderKind::Globals:
-    case HeaderKind::Ref:
     case HeaderKind::Resource:
+    case HeaderKind::ClsMeth:
+    case HeaderKind::RClsMeth:
     case HeaderKind::Packed:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::VecArray:
+    case HeaderKind::Vec:
     case HeaderKind::Keyset:
-    case HeaderKind::Empty:
+    case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
     case HeaderKind::String:
+    case HeaderKind::Record:
+    case HeaderKind::BespokeVArray:
+    case HeaderKind::BespokeDArray:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeKeyset:
+    case HeaderKind::RFunc:
       break;
     case HeaderKind::Free:
     case HeaderKind::Hole:
@@ -193,14 +189,14 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
     case HeaderKind::ClosureHdr:
+    case HeaderKind::MemoData:
       // these have inner objects, but we queued the outer one.
       break;
     case HeaderKind::Closure:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::NativeObject:
-      // These headers shouldn't be found during heap or slab iteration because
-      // they are appended to ClosureHdr, AsyncFuncFrame, or NativeData.
-    case HeaderKind::BigObj:
+      // These header types should not be found during heap or slab iteration
+      // because they are appended to ClosureHdr or AsyncFuncFrame.
     case HeaderKind::Slab:
       // These header types are not allocated objects; they are handled
       // earlier and should never be queued on the gc worklist.
@@ -218,7 +214,6 @@ bool willScanConservative(const HeapObject* h) {
          );
 }
 
-template <bool apcgc>
 void Collector::checkedEnqueue(const void* p) {
   if (auto h = find(p)) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
@@ -230,11 +225,8 @@ void Collector::checkedEnqueue(const void* p) {
       auto& work = willScanConservative(h) ? cwork_ : xwork_;
       work.push_back(h);
       max_worklist_ = std::max(max_worklist_, cwork_.size() + xwork_.size());
-      assert(checkEnqueuedKind(h));
+      assertx(checkEnqueuedKind(h));
     }
-  } else if (apcgc) {
-    // If p doesn't belong to any APC data, APCGCManager won't do anything
-    apcgc_->mark(p);
   }
 }
 
@@ -248,7 +240,6 @@ void Collector::checkedEnqueue(const void* p) {
 // owns it, will scan it using the container's iterator api; OR
 // * p could be a stale pointer of any interesting type, that randomly
 // is pointing to recycled memory. ignoring it is actually desireable.
-template <bool apcgc>
 void Collector::exactEnqueue(const void* p) {
   if (auto h = find(p)) {
     auto old = h->marks();
@@ -257,17 +248,13 @@ void Collector::exactEnqueue(const void* p) {
       ++marked_;
       xwork_.push_back(h);
       max_worklist_ = std::max(max_worklist_, xwork_.size());
-      assert(checkEnqueuedKind(h));
+      assertx(checkEnqueuedKind(h));
     }
-  } else if (apcgc) {
-    // If p doesn't belong to any APC data, APCGCManager won't do anything
-    apcgc_->mark(p);
   }
 }
 
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
-template <bool apcgc>
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {
   constexpr uintptr_t M{7}; // word size - 1
@@ -275,7 +262,7 @@ Collector::conservativeScan(const void* start, size_t len) {
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   cscanned_ += uintptr_t(e) - uintptr_t(s);
   for (; s < e; s++) {
-    checkedEnqueue<apcgc>(
+    checkedEnqueue(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
       (void*)(uintptr_t(*s) & (-1ULL >> 16))
@@ -307,7 +294,7 @@ inline int64_t cpu_ns() {
 NEVER_INLINE void Collector::init() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
-  tl_heap->initFree(); // calls HeapImpl::sort(), required below
+  tl_heap->initFree();
   initfree_ns_ = cpu_ns() - t0;
 
   slabs_range_ = heap_.slab_range();
@@ -315,17 +302,12 @@ NEVER_INLINE void Collector::init() {
 
   heap_.iterate(
     [&](HeapObject* h, size_t size) { // onBig
-      if (h->kind() == HeaderKind::BigMalloc) {
-        ptrs_.insert(h, size);
-        if (!type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
-          ++unknown_;
-          h->setmarks(mark_version_);
-          cwork_.push_back(h);
-        }
-      } else {
-        // put the inner big object in ptrs_ without the BigObj header
-        assert(h->kind() == HeaderKind::BigObj);
-        ptrs_.insert(static_cast<MallocNode*>(h)+1, size - sizeof(MallocNode));
+      ptrs_.insert(h, size);
+      if (h->kind() == HeaderKind::BigMalloc &&
+          !type_scan::isKnownType(static_cast<MallocNode*>(h)->typeIndex())) {
+        ++unknown_;
+        h->setmarks(mark_version_);
+        cwork_.push_back(h);
       }
     },
     [&](HeapObject* h, size_t size) { // onSlab
@@ -360,24 +342,23 @@ NEVER_INLINE void Collector::init() {
 //    expect to have found all pointers to them. Any other objects allocated
 //    this way are treated similarly.
 
-template <bool apcgc> void Collector::collect() {
+void Collector::collect() {
   init();
   if (type_scan::hasNonConservative() && RuntimeOption::EvalTwoPhaseGC) {
-    traceConservative<apcgc>();
-    traceExact<apcgc>();
+    traceConservative();
+    traceExact();
   } else {
-    traceAll<apcgc>();
+    traceAll();
   }
   sweep();
 }
 
 // Phase 1: Scan only conservative or mixed conservative/exact roots, plus any
 // malloc'd heap objects that are themselves fully conservatively scanned.
-template <bool apcgc>
 NEVER_INLINE void Collector::traceConservative() {
   auto finish = [&] {
     for (auto r : type_scanner_.m_conservative) {
-      conservativeScan<apcgc>(r.first, r.second);
+      conservativeScan(r.first, r.second);
     }
     type_scanner_.m_conservative.clear();
     // Accumulate m_addrs until traceExact()
@@ -406,13 +387,12 @@ NEVER_INLINE void Collector::traceConservative() {
 // of the heap, which is expected to be fully exactly-scannable. Assert if
 // any conservatively-scanned regions are found in this phase. Any unmarked
 // objects found in this phase may be safely copied.
-template <bool apcgc>
 NEVER_INLINE void Collector::traceExact() {
   auto finish = [&] {
-    assert(cwork_.empty() && type_scanner_.m_conservative.empty());
+    assertx(cwork_.empty() && type_scanner_.m_conservative.empty());
     for (auto addr : type_scanner_.m_addrs) {
       xscanned_ += sizeof(*addr);
-      exactEnqueue<apcgc>(*addr);
+      exactEnqueue(*addr);
     }
     type_scanner_.m_addrs.clear();
     // Accumulate m_weak until sweep()
@@ -437,16 +417,15 @@ NEVER_INLINE void Collector::traceExact() {
 }
 
 // Scan all roots & heap in one pass
-template <bool apcgc>
 NEVER_INLINE void Collector::traceAll() {
   auto finish = [&] {
     for (auto r : type_scanner_.m_conservative) {
-      conservativeScan<apcgc>(r.first, r.second);
+      conservativeScan(r.first, r.second);
     }
     type_scanner_.m_conservative.clear();
     for (auto addr : type_scanner_.m_addrs) {
       xscanned_ += sizeof(*addr);
-      checkedEnqueue<apcgc>(*addr);
+      checkedEnqueue(*addr);
     }
     type_scanner_.m_addrs.clear();
     // Accumulate m_weak until sweep()
@@ -483,24 +462,26 @@ NEVER_INLINE void Collector::sweep() {
     if (RuntimeOption::EvalQuarantine) mm.endQuarantine(std::move(quarantine));
     freed_bytes_ = usage0 - mm.currentUsage();
     sweep_ns_ = cpu_ns() - t0;
-    assert(freed_bytes_ >= 0);
+    assertx(freed_bytes_ >= 0);
   };
 
   // Clear weak references as needed.
   for (auto w : type_scanner_.m_weak) {
-    auto wref = static_cast<const WeakRefDataHandle*>(w);
-    assert(wref->acquire_count == 0);
-    assert(wref->wr_data);
-    auto type = wref->wr_data->pointee.m_type;
+    auto wr_data = static_cast<const WeakRefData*>(w);
+    auto type = wr_data->pointee.m_type;
     if (type == KindOfObject) {
-      auto h = find(wref->wr_data->pointee.m_data.pobj);
+      auto h = find(wr_data->pointee.m_data.pobj);
       if (!marked(h)) {
-        WeakRefData::invalidateWeakRef(uintptr_t(h));
+        // Its important we invalidate the pointer stored in the weakref, and
+        // not the start of the allocation.  In the case of objects with
+        // native datas, the start of allocation may not be the start of the
+        // ObjectData*.
+        WeakRefData::invalidateWeakRef(uintptr_t(wr_data->pointee.m_data.pobj));
         mm.reinitFree();
       }
       continue;
     }
-    assert(type == KindOfNull || type == KindOfUninit);
+    assertx(type == KindOfNull || type == KindOfUninit);
   }
   type_scanner_.m_weak.clear();
 
@@ -513,10 +494,6 @@ NEVER_INLINE void Collector::sweep() {
     return need_reinit_free = !h || !marked(h);
   });
 
-  mm.sweepApcArrays([&](APCLocalArray* a) {
-    return !marked(a);
-  });
-
   mm.sweepApcStrings([&](StringData* s) {
     return !marked(s);
   });
@@ -526,11 +503,11 @@ NEVER_INLINE void Collector::sweep() {
   heap_.iterate(
     [&](HeapObject* big, size_t big_size) { // onBig
       ++num_big_;
-      if (big->kind() == HeaderKind::BigObj) {
-        HeapObject* h2 = static_cast<MallocNode*>(big) + 1;
-        if (!marked(h2) && h2->kind() != HeaderKind::SmallMalloc) {
-          mm.freeBigSize(h2);
-        }
+      auto kind = big->kind();
+      if (kind != HeaderKind::BigMalloc && kind != HeaderKind::SmallMalloc &&
+          !marked(big)) {
+        // NB: kind == SmallMalloc occurs when tl_heap->m_bypassSlabAlloc==true
+        mm.freeBigSize(big);
       }
     },
     [&](HeapObject* big, size_t /*big_size*/) { // onSlab
@@ -545,40 +522,21 @@ NEVER_INLINE void Collector::sweep() {
         }
       });
     });
-  if (apcgc_) {
-    // This should be removed after global GC API is provided
-    // Currently we do this to sweeping only when script mode
-    apcgc_->sweep();
-  }
 }
-
-thread_local bool t_eager_gc{false};
-thread_local BloomFilter<256*1024> t_surprise_filter;
-
-// Structured Logging
-
-thread_local std::atomic<size_t> g_req_num;
-__thread size_t t_req_num; // snapshot thread-local copy of g_req_num;
-__thread size_t t_gc_num; // nth collection in this request.
-__thread bool t_enable_samples;
-__thread int64_t t_trigger;
-__thread int64_t t_trigger_allocated;
-__thread int64_t t_req_age;
-__thread MemoryUsageStats t_pre_stats;
 
 StructuredLogEntry logCommon() {
   StructuredLogEntry sample;
-  sample.setInt("req_num", t_req_num);
+  sample.setInt("req_num", rl_gcdata->t_req_num);
   // MemoryUsageStats
   sample.setInt("memory_limit", tl_heap->getMemoryLimit());
-  sample.setInt("usage", t_pre_stats.usage());
-  sample.setInt("mm_usage", t_pre_stats.mmUsage());
-  sample.setInt("mm_allocated", t_pre_stats.mmAllocated());
-  sample.setInt("aux_usage", t_pre_stats.auxUsage());
-  sample.setInt("mm_capacity", t_pre_stats.capacity());
-  sample.setInt("peak_usage", t_pre_stats.peakUsage);
-  sample.setInt("peak_capacity", t_pre_stats.peakCap);
-  sample.setInt("total_alloc", t_pre_stats.totalAlloc);
+  sample.setInt("usage", rl_gcdata->t_pre_stats.usage());
+  sample.setInt("mm_usage", rl_gcdata->t_pre_stats.mmUsage());
+  sample.setInt("mm_allocated", rl_gcdata->t_pre_stats.mmAllocated());
+  sample.setInt("aux_usage", rl_gcdata->t_pre_stats.auxUsage());
+  sample.setInt("mm_capacity", rl_gcdata->t_pre_stats.capacity());
+  sample.setInt("peak_usage", rl_gcdata->t_pre_stats.peakUsage);
+  sample.setInt("peak_capacity", rl_gcdata->t_pre_stats.peakCap);
+  sample.setInt("total_alloc", rl_gcdata->t_pre_stats.totalAlloc);
   return sample;
 }
 
@@ -595,9 +553,9 @@ void traceCollection(const Collector& collector) {
     "init {}ms mark {}ms sweep {}ms total {}ms "
     "marked {} pinned {} free {:.1f}M "
     "cscan-heap {:.1f}M xscan-heap {:.1f}M\n",
-    t_req_age,
-    t_pre_stats.mmUsage() / MB,
-    t_trigger / MB,
+    rl_gcdata->t_req_age,
+    rl_gcdata->t_pre_stats.mmUsage() / MB,
+    rl_gcdata->t_trigger / MB,
     collector.init_ns_ / 1000000,
     collector.mark_ns_ / 1000000,
     collector.sweep_ns_ / 1000000,
@@ -615,8 +573,8 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setStr("phase", phase);
   std::string scanner(type_scan::hasNonConservative() ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
-  sample.setInt("gc_num", t_gc_num);
-  sample.setInt("req_age_micros", t_req_age);
+  sample.setInt("gc_num", rl_gcdata->t_gc_num);
+  sample.setInt("req_age_micros", rl_gcdata->t_req_age);
   // timers of gc-sub phases
   sample.setInt("init_micros", collector.init_ns_/1000);
   sample.setInt("initfree_micros", collector.initfree_ns_/1000);
@@ -633,8 +591,8 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setInt("pinned_count", collector.pinned_);
   sample.setInt("unknown_count", collector.unknown_);
   sample.setInt("freed_bytes", collector.freed_bytes_);
-  sample.setInt("trigger_bytes", t_trigger);
-  sample.setInt("trigger_allocated", t_trigger_allocated);
+  sample.setInt("trigger_bytes", rl_gcdata->t_trigger);
+  sample.setInt("trigger_allocated", rl_gcdata->t_trigger_allocated);
   sample.setInt("cscanned_roots", collector.cscanned_roots_.bytes);
   sample.setInt("xscanned_roots", collector.xscanned_roots_.bytes);
   sample.setInt("cscanned_heap",
@@ -653,58 +611,44 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   VMRegAnchor _;
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
     t_eager_gc = false;
-    auto pc = vmpc();
-    if (t_surprise_filter.test(pc)) {
-      if (RuntimeOption::EvalGCForAPC) {
-        if (!APCGCManager::getInstance().excessedGCTriggerBar()) {
-          return;
-        }
-      } else {
-        return;
-      }
-    }
-    t_surprise_filter.insert(pc);
+    auto const pc = vmpc();
+    if (rl_gcdata->t_surprise_filter.test(pc)) return;
+    rl_gcdata->t_surprise_filter.insert(pc);
     TRACE(2, "eager gc %s at %p\n", phase, pc);
     phase = "eager";
   } else {
     TRACE(2, "normal gc %s at %p\n", phase, vmpc());
   }
-  if (t_gc_num == 0) {
-    t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+  if (rl_gcdata->t_gc_num == 0) {
+    rl_gcdata->t_enable_samples =
+      StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
   }
-  t_pre_stats = tl_heap->getStatsCopy(); // don't check or trigger OOM
+  rl_gcdata->t_pre_stats =
+    tl_heap->getStatsCopy(); // don't check or trigger OOM
   mark_version = (mark_version == MaxMark) ? MinMark :
                  GCBits(uint8_t(mark_version) + 1);
-  Collector collector(
-    heap,
-    RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr,
-    mark_version
-  );
-  if (RuntimeOption::EvalGCForAPC) {
-    collector.collect<true>();
-  } else {
-    collector.collect<false>();
-  }
+  Collector collector(heap, mark_version);
+  collector.collect();
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     traceCollection(collector);
   }
-  if (t_enable_samples) {
+  if (rl_gcdata->t_enable_samples) {
     logCollection(phase, collector);
   }
-  ++t_gc_num;
+  ++rl_gcdata->t_gc_num;
 }
 
 }
 
 void MemoryManager::resetGC() {
-  t_req_num = ++g_req_num;
-  t_gc_num = 0;
+  rl_gcdata->t_req_num = ++(rl_gcdata->g_req_num);
+  rl_gcdata->t_gc_num = 0;
   if (rds::header()) updateNextGc();
 }
 
 void MemoryManager::resetEagerGC() {
   if (RuntimeOption::EvalEagerGC && RuntimeOption::EvalFilterGCPoints) {
-    t_surprise_filter.clear();
+    rl_gcdata->t_surprise_filter.clear();
   }
 }
 
@@ -719,8 +663,8 @@ void MemoryManager::checkGC() {
   if (m_stats.mmUsage() > m_nextGC) {
     assertx(rds::header());
     setSurpriseFlag(PendingGCFlag);
-    if (t_trigger_allocated == -1) {
-      t_trigger_allocated = m_stats.mmAllocated();
+    if (rl_gcdata->t_trigger_allocated == -1) {
+      rl_gcdata->t_trigger_allocated = m_stats.mmAllocated();
     }
   }
 }
@@ -735,17 +679,20 @@ void MemoryManager::checkGC() {
  * checkGC()).
  */
 void MemoryManager::updateNextGc() {
-  t_trigger_allocated = -1;
+  rl_gcdata->t_trigger_allocated = -1;
   if (!isGCEnabled()) {
     m_nextGC = kNoNextGC;
     updateMMDebt();
     return;
   }
 
-  auto stats = getStatsCopy();
-  auto mm_limit = m_usageLimit - stats.auxUsage();
-  int64_t delta = (mm_limit - stats.mmUsage()) *
-                  RuntimeOption::EvalGCTriggerPct;
+  auto const stats = getStatsCopy();
+  auto const clearance =
+    static_cast<uint64_t>(m_usageLimit) -
+    stats.auxUsage() - stats.mmUsage();
+
+  int64_t delta = clearance > std::numeric_limits<int64_t>::max() ?
+    0 : clearance * RuntimeOption::EvalGCTriggerPct;
   delta = std::max(delta, RuntimeOption::EvalGCMinTrigger);
   m_nextGC = stats.mmUsage() + delta;
   updateMMDebt();
@@ -753,14 +700,14 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
-  t_req_age = cpu_ns()/1000 - m_req_start_micros;
-  t_trigger = m_nextGC;
+  rl_gcdata->t_req_age = cpu_ns()/1000 - m_req_start_micros;
+  rl_gcdata->t_trigger = m_nextGC;
   collectImpl(m_heap, phase, m_mark_version);
   updateNextGc();
 }
 
 void MemoryManager::setMemoryLimit(size_t limit) {
-  assert(limit <= (size_t)std::numeric_limits<int64_t>::max());
+  assertx(limit <= (size_t)std::numeric_limits<int64_t>::max());
   m_usageLimit = limit;
   updateNextGc();
 }

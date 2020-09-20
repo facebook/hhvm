@@ -46,7 +46,7 @@ void protect() {
       // the jit that could write to them (like allocating request memory).
       auto const base =
         static_cast<char*>(rds::tl_base) + sysconf(_SC_PAGESIZE);
-      auto const protlen = rds::persistentSection().begin() - base;
+      auto const protlen = rds::localSection().end() - base;
       if (protlen > 0) {
         auto const result = mprotect(base, protlen, PROT_READ);
         always_assert(result == 0);
@@ -61,7 +61,7 @@ void protect() {
 }
 
 void unprotect(void* base, VMRegState state) {
-  assert(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
+  assertx(rds::tl_base == s_fakeRdsBase.load(std::memory_order_relaxed));
   rds::tl_base = base;
   tl_regState = state;
   VMProtect::is_protected = false;

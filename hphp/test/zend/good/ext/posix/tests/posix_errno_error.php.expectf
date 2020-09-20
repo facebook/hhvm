@@ -1,4 +1,3 @@
 *** Test by calling method or function with more than expected arguments ***
 
-Warning: %s
-NULL
+Warning: posix_errno() expects exactly 0 parameters, 1 given in %s/posix_errno_error.php on line 6

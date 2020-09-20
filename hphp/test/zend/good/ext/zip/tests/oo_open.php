@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $dirname = dirname(__FILE__) . '/';
 $zip = new ZipArchive;
 $r = $zip->open($dirname . 'nofile');
@@ -29,4 +29,4 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 } else {
 	echo "failed\n";
 }
-?>
+}

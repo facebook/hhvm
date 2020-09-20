@@ -6,4 +6,8 @@ function main() {
   $s->addAll(Vector{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1});
   var_dump($s);
 }
+
+<<__EntryPoint>>
+function main_set_addall_shrink() {
 main();
+}

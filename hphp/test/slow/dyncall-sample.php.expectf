@@ -1,0 +1,75 @@
+Raw function call
+bar
+Function pointer call
+bar
+Function pointer call (laundered)
+bar
+String Call (laundered)
+
+Notice: 'foo' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 32
+
+Notice: 'bar' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 32
+bar
+String Call
+
+Notice: 'foo' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 38
+
+Notice: 'bar' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 38
+bar
+Raw class method call
+Class method pointer call
+Class method pointer call (laundered)
+Class/method string call (laundered)
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 57
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 58
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 59
+Class/method string call
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 65
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 66
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 67
+Class/method array call
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 72
+Class/method array call (laundered)
+
+Notice: 'Klass::funktion' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 77
+Raw method call
+Beta
+Method string call (laundered)
+
+Notice: 'Alpha::beta' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 86
+Beta
+
+Notice: 'Alpha' constructed dynamically in %s/dyncall-sample.php on line 87
+Beta
+
+Notice: 'Alpha' constructed dynamically in %s/dyncall-sample.php on line 88
+
+Notice: 'Alpha::beta' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 88
+Beta
+Method string call
+
+Notice: 'Alpha::beta' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 94
+Beta
+
+Notice: 'Alpha' constructed dynamically in %s/dyncall-sample.php on line 95
+Beta
+
+Notice: 'Alpha' constructed dynamically in %s/dyncall-sample.php on line 96
+
+Notice: 'Alpha::beta' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 96
+Beta
+Method array call
+
+Notice: 'Alpha::beta' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 101
+Beta
+Method array call (laundered)
+
+Notice: 'Alpha::beta' called dynamically but is not __DynamicallyCallable in %s/dyncall-sample.php on line 106
+Beta

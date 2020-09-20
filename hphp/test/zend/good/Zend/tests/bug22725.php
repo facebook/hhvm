@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
     private function aPrivateMethod() {
         echo "Foo::aPrivateMethod() called.\n";
@@ -16,7 +16,7 @@ class Bar extends Foo {
         $this->aProtectedMethod();
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $o = new Bar;
 $o->aPublicMethod();
-?>
+}

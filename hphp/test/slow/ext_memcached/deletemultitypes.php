@@ -1,14 +1,21 @@
-<?php
+<?hh
 
-$m = new Memcached();
-$m->addServer('localhost', '11211');
-
-function dump_types($v, $k) {
-    echo gettype($v) . "\n";
+function dump_types($v) {
+  echo gettype($v) . "\n";
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$keys = array(100, 'str');
-array_walk($keys, 'dump_types');
+  $m = new Memcached();
+  $m->addServer('localhost', '11211');
 
-$deleted = $m->deleteMulti($keys);
-array_walk($keys, 'dump_types');
+  $keys = varray[100, 'str'];
+  foreach ($keys as $key) {
+    dump_types($key);
+  }
+
+  $deleted = $m->deleteMulti($keys);
+  foreach ($keys as $key) {
+    dump_types($key);
+  }
+}

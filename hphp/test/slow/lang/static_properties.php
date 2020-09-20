@@ -1,9 +1,4 @@
-<?php
-
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
-print "Test begin\n";
+<?hh
 
 class A {
   const CD = "A::CD";
@@ -40,7 +35,7 @@ class A {
     print "  C::e: " . C::$e . "\n";
 #    print "  C::f: " . C::$f . "\n";
     print "  C::g: " . C::$g . "\n";
-    print "  C::h: " . C::$h . "\n";
+    print "  C::h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
   }
 }
 
@@ -75,7 +70,7 @@ class B extends A {
     print "  C::e: " . C::$e . "\n";
 #    print "  C::f: " . C::$f . "\n";
     print "  C::g: " . C::$g . "\n";
-    print "  C::h: " . C::$h . "\n";
+    print "  C::h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
   }
 }
 
@@ -108,7 +103,7 @@ class C extends B {
     print "  C::e: " . C::$e . "\n";
 #    print "  C::f: " . C::$f . "\n";
     print "  C::g: " . C::$g . "\n";
-    print "  C::h: " . C::$h . "\n";
+    print "  C::h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
   }
 }
 
@@ -126,10 +121,8 @@ function main() {
   $c->cFunc();
 
   print "isset(C::\$h): ".(isset(C::$h)?"true":"false")."\n";
-  print "empty(C::\$h): ".(empty(C::$h)?"true":"false")."\n";
 
   print "isset(C::\$i): ".(isset(C::$i)?"true":"false")."\n";
-  print "empty(C::\$i): ".(empty(C::$i)?"true":"false")."\n";
 
   print "C::\$h: ".C::$h."\n";
 
@@ -144,15 +137,7 @@ function main() {
   print "C::\$h: ".C::$h--."\n";
   print "C::\$h: ".--C::$h."\n";
 
-  $x = 1234;
-  C::$h =& $x;
-  print "C::\$h: ".C::$h."\n";
-  $x++;
-  print "C::\$h: ".C::$h."\n";
-  C::$h = 5678;
-  print "x: ".$x."\n";
-
-  C::$h = array(0, 1, 2);
+  C::$h = varray[0, 1, 2];
   $y = C::$h[1];
   print "\$y: $y\n";
   C::$h[2] = 42;
@@ -178,12 +163,10 @@ class D {
     $c->cFunc();
 
     print "isset(C::\$h): ".(isset(C::$h)?"true":"false")."\n";
-    print "empty(C::\$h): ".(empty(C::$h)?"true":"false")."\n";
 
     print "isset(C::\$i): ".(isset(C::$i)?"true":"false")."\n";
-    print "empty(C::\$i): ".(empty(C::$i)?"true":"false")."\n";
 
-    print "C::\$h: ".C::$h."\n";
+    print "C::\$h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
 
     C::$h = 42;
     print "C::\$h: ".C::$h."\n";
@@ -196,29 +179,25 @@ class D {
     print "C::\$h: ".C::$h--."\n";
     print "C::\$h: ".--C::$h."\n";
 
-    $x = 1234;
-    C::$h =& $x;
-    print "C::\$h: ".C::$h."\n";
-    $x++;
-    print "C::\$h: ".C::$h."\n";
-    C::$h = 5678;
-    print "x: ".$x."\n";
-
-    C::$h = array(0, 1, 2);
+    C::$h = varray[0, 1, 2];
     $y = C::$h[1];
     print "\$y: $y\n";
     C::$h[2] = 42;
     $y = C::$h[2];
     print "\$y: $y\n";
 
-    C::$h = 20;
-    $w =& C::$h;
-    $w = 5;
-    print "C::\$h: ".C::$h."\n";
-
     print "Test end\n";
   }
 }
 
+
+// disable array -> "Array" conversion notice
+<<__EntryPoint>>
+function main_static_properties() {
+error_reporting(error_reporting() & ~E_NOTICE);
+
+print "Test begin\n";
+
 main();
 D::main();
+}

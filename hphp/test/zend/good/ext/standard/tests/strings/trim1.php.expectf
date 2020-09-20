@@ -1,24 +1,16 @@
+
 string(0) ""
-string(0) ""
-string(1) "0"
-string(1) "0"
 string(13) "%r\x09%rtesting trim"
 string(17) "  %r\x09%rtesting trim  "
 string(15) "%r\x09%rtesting trim  "
 
 *** Testing error conditions ***
 
-Warning: %s
-NULL
+Warning: trim() expects at least 1 parameter, 0 given in %s/trim1.php on line 21
 
-Warning: %s
-NULL
+Warning: trim() expects at most 2 parameters, 3 given in %s/trim1.php on line 23
 
-Warning: %s
-NULL
-
-*** Testing with OBJECTS ***
-string(4) "bjec"
+Warning: trim() expects at most 2 parameters, 3 given in %s/trim1.php on line 24
 
 *** Testing with String with embedded NULL ***
 string(22) "234%r\x00%r05678%r\x00%r00efgh\xijkl"

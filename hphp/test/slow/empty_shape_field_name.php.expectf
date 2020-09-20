@@ -1,0 +1,2 @@
+
+Fatal error: Shape field name must be a nonempty single-quoted string or a class constant in %s/empty_shape_field_name.php on line 2

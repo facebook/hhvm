@@ -1,1 +1,1 @@
-<?php include('skipif.inc'); ?>
+<?hh include('skipif.inc');

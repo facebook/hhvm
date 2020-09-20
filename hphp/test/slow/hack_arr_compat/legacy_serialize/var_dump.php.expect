@@ -1,0 +1,90 @@
+
+
+----------------------------------------
+*** without legacy bit ***
+vec(0) {
+}
+*** with legacy bit ***
+varray(0) {
+}
+
+
+----------------------------------------
+*** without legacy bit ***
+dict(0) {
+}
+*** with legacy bit ***
+darray(0) {
+}
+
+
+----------------------------------------
+*** without legacy bit ***
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+*** with legacy bit ***
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+
+----------------------------------------
+*** without legacy bit ***
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+*** with legacy bit ***
+darray(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+
+----------------------------------------
+*** without legacy bit ***
+dict(2) {
+  ["hello"]=>
+  int(42)
+  ["baz"]=>
+  int(100)
+}
+*** with legacy bit ***
+darray(2) {
+  ["hello"]=>
+  int(42)
+  ["baz"]=>
+  int(100)
+}
+
+
+----------------------------------------
+*** without legacy bit ***
+dict(2) {
+  [1000]=>
+  string(2) "no"
+  ["potato"]=>
+  vec(0) {
+  }
+}
+*** with legacy bit ***
+darray(2) {
+  [1000]=>
+  string(2) "no"
+  ["potato"]=>
+  vec(0) {
+  }
+}

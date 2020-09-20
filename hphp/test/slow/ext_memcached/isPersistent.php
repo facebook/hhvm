@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $m1 = new Memcached('id1');
 $m1->setOption(Memcached::OPT_PREFIX_KEY, "foo_");
 var_dump($m1->isPersistent());
@@ -16,3 +16,4 @@ var_dump($m3->isPersistent());
 // objects have the same resource, but they are not the same object.
 var_dump($m1 === $m2);
 var_dump($m1->getOption(Memcached::OPT_PREFIX_KEY));
+}

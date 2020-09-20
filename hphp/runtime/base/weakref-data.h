@@ -13,10 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WEAKREF_DATA_H_
-#define incl_HPHP_WEAKREF_DATA_H_
+#pragma once
 
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-memory.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
@@ -29,7 +28,9 @@ struct Object;
 // object.
 struct WeakRefData {
   TypedValue pointee; // Object being weakly referenced.
-  TYPE_SCAN_IGNORE_FIELD(pointee);
+  TYPE_SCAN_CUSTOM() {
+    scanner.weak(this);
+  }
 
   // Invalidate WeakRefData associated with a refcounted object.
   static void invalidateWeakRef(uintptr_t ptr);
@@ -39,9 +40,10 @@ struct WeakRefData {
 
   ~WeakRefData();
   explicit WeakRefData(const TypedValue& tv): pointee(tv) {}
+
+  bool isValid() const;
 };
 
 void weakref_cleanup();
 
 } // namespace HPHP
-#endif // incl_HPHP_WEAKREF_DATA_H_

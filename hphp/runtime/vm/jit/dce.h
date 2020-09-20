@@ -13,14 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_DCE_H_
-#define incl_HPHP_DCE_H_
+#pragma once
 
 namespace HPHP { namespace jit {
 
 struct IRUnit;
-struct IRInstruction;
-struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,50 +37,7 @@ void mandatoryDCE(IRUnit&);
  */
 void fullDCE(IRUnit&);
 
-/*
- * Converts an instruction that operates on frame locals in an inlined function
- * to one that operates on the equivalent stack slots in the caller. Useful for
- * eliding DefInlineFP
- *
- * Precondition: inst is LdLoc, StLoc, LdLocAddr, CheckLoc, AssertLoc, or
- *                       HintLocInner
- * Precondition: inst->src(0)->inst() is DefInlineFP
- */
-void convertToStackInst(IRUnit& unit, IRInstruction& inst);
-
-/*
- * Converts certain instructions that operate using a frame pointer in an inline
- * function into an equivalent one using the parent's frame pointer. Useful for
- * eliding DefInlineFP.
- *
- * Precondition: inst is LdClsRef, StClsRef, or KillClsRef
- *
- * Precondition: inst->src(0)->inst() is DefInlineFP
- */
-void rewriteToParentFrame(IRUnit& unit, IRInstruction& inst);
-
-/*
- * Converts an InlineReturn instruction to a noop instruction that still models
- * the memory effects of InlineReturn to ensure that stores from the callee are
- * not pushed into the caller, and to hopefully prevent some stores from
- * occuring at all.
- *
- * Precondition: inst is InlineReturn
- * Postcondition: inst is InlineReturnNoFrame
- */
-void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst);
-
-/*
- * Given a SSATmp representing a FramePtr which comes from a DefLabel
- * instruction, chase the definitions to the first non-DefLabel instruction it
- * can find. This assumes that all inputs to the DefLabel are equivalent.
- *
- * Precondition: fp->inst()->is(DefLabel) && fp->is(TFramePtr)
- */
-IRInstruction* resolveFpDefLabel(const SSATmp* fp);
-
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

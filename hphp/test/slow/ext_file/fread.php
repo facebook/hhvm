@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_fread() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -12,3 +15,4 @@ echo fread($f, 100);
 echo "\n";
 
 unlink($tempfile);
+}

@@ -1,0 +1,32 @@
+Typing[4110] Invalid return type [1]
+-> Expected dict<int, int> [2]
+-> But got string [1]
+
+pos_across_multiple_lines.php:6:10
+    1 | <?hh
+    2 | 
+[2] 3 | function f(): dict<int,
+[2] 4 |   int>
+    5 | {
+[1] 6 |   return "hello";
+    7 | }
+    8 | 
+
+Typing[4105] Too many arguments (expected 0 but got 3) [1]
+-> Definition is here [2]
+
+pos_across_multiple_lines.php:15:3
+     7 | }
+     8 | 
+[2]  9 | function g(): void {
+    10 |   echo "hello";
+    11 | }
+    12 | 
+    13 | <<__EntryPoint>>
+    14 | function main(): void {
+[1] 15 |   g(1,
+[1] 16 |   2,
+[1] 17 |   3);
+    18 | }
+
+2 errors found.

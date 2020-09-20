@@ -1,2 +1,4 @@
-File "unpack_call10_unset.php", line 6, characters 3-17:
-Arg unpacking is disallowed for unset (Typing[4147])
+File "unpack_call10_unset.php", line 6, characters 12-12:
+An expression is expected here. (Parsing[1002])
+File "unpack_call10_unset.php", line 6, characters 9-11:
+Unbound name: `...` (a global constant) (Naming[2049])

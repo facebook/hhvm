@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL | E_STRICT);
+<?hh
 trait T {
   protected function f() {
     return 1;
@@ -18,6 +16,12 @@ trait T {
 class C {
   use T;
 }
+
+
+<<__EntryPoint>>
+function main_2058() {
+error_reporting(E_ALL | E_STRICT);
 $c = new C;
 echo $c->g();
 echo $c->h();
+}

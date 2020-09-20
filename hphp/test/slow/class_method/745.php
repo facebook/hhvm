@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class AB {
   static function foo() {
@@ -9,4 +9,8 @@ function f($x) {
   $a = $x.'B';
   $a::foo();
 }
+
+<<__EntryPoint>>
+function main_745() {
 f('A');
+}

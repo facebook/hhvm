@@ -3,4 +3,4 @@ test
 derived
 base
 
-Fatal error: %s
+Fatal error: Call to private method base::show() from context 'derived' in %s/private_redeclare.php on line 20

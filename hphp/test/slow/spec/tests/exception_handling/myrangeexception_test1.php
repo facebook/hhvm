@@ -1,0 +1,21 @@
+<?hh
+
+/*
+   +-------------------------------------------------------------+
+   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
+   +-------------------------------------------------------------+
+*/
+
+<<__EntryPoint>>
+function main() {
+   error_reporting(-1);
+
+   include_once 'MyRangeException.inc';
+
+   $re = new MyRangeException("xxx", 5, 20, 30);
+   var_dump($re);
+
+   echo "======\n";
+
+   echo "\$re = >$re<\n";
+}

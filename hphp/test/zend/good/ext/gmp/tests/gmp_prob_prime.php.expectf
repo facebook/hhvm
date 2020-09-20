@@ -37,9 +37,8 @@ int(0)
 int(0)
 int(0)
 
-Warning: %s
-NULL
+Warning: gmp_prob_prime() expects at least 1 parameter, 0 given in %s/gmp_prob_prime.php on line 26
 
-Warning: %s
+Warning: gmp_prob_prime(): Unable to convert variable to GMP - wrong type in %s/gmp_prob_prime.php on line 27
 bool(false)
 Done

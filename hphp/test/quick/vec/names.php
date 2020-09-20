@@ -20,7 +20,7 @@ function foo() { return 1; }
 
 namespace {
 function vecnest(vec<vec<int>> $foo) {}
-
+<<__EntryPoint>>
 function main() {
   var_dump(\vec\vec());
   var_dump(\vec\foo());
@@ -42,5 +42,4 @@ function main() {
 
   vecnest(vec[vec[12]]);
 }
-main();
 }

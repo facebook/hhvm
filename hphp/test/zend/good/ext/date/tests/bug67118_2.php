@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo extends DateTime {
     public function __construct($time = null) {
         $tz = new DateTimeZone('UTC');
@@ -12,7 +12,8 @@ class Foo extends DateTime {
         }
     }
 }
+<<__EntryPoint>> function main(): void {
 $date = '12 Sep 2007 15:49:12 UT';
 var_dump(new Foo($date));
-?>
-Done
+echo "Done";
+}

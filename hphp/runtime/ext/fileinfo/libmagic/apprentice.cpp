@@ -553,13 +553,14 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
     return apprentice_1(ms, fn, action);
   }
 
-  mfn = (char*) emalloc(strlen(fn) + 1);
+  size_t fn_len = strlen(fn);
+  mfn = (char*) emalloc(fn_len + 1);
   if (mfn == NULL) {
-    file_oomem(ms, strlen(fn));
+    file_oomem(ms, fn_len);
     return -1;
   }
-  strncpy(mfn, fn, strlen(fn));
-  mfn[strlen(fn)] = '\0';
+  strncpy(mfn, fn, fn_len);
+  mfn[fn_len] = '\0';
 
   for (i = 0; i < MAGIC_SETS; i++) {
     mlist_free(ms->mlist[i]);

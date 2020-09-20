@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string setlocale (int $category , string $locale [,string $..] )
               : string setlocale(int $category , array $locale);
  * Description: Sets locale information.Returns the new current locale , or FALSE
@@ -9,7 +9,7 @@
 /* Test the setlocale() when multiple locales are provided as argument */
 
 /* Prototype  : array list_system_locales( void )
-   Description: To get the currently installed locle in this platform 
+   Description: To get the currently installed locle in this platform
    Arguments  : Nil
    Returns    : set of locale as array
 */
@@ -18,7 +18,8 @@ function list_system_locales() {
   ob_start();
 
   // run the command 'locale -a' to fetch all locales available in the system
-  system('locale -a');
+  $return_var = -1;
+  system('locale -a', inout $return_var);
 
   // get the contents from the internal output buffer
   $all_locales = ob_get_contents();
@@ -32,13 +33,13 @@ function list_system_locales() {
   return $system_locales;
 }
 
-/* Collect existing system locales and get three locales that can be use to 
+/* Collect existing system locales and get three locales that can be use to
    pass as argument to setlocale() */
+<<__EntryPoint>> function main(): void {
 echo "*** Testing setlocale() by passing multiple locales as argument ***\n";
 
-
 //set of currency symbol according to above list of locales
-$currency_symbol = array(
+$currency_symbol = darray[
   "en_US.utf8" => "USD",
   "en_AU.utf8" => "AUD",
   "ko_KR.utf8" => "KRW",
@@ -49,7 +50,7 @@ $currency_symbol = array(
   "ja_JP.utf8" => "JPY",
   "el_GR.utf8" => "EUR",
   "nl_NL.utf8" =>"EUR"
-);
+];
 
 // gather all the locales installed in the system
 $all_system_locales = list_system_locales();
@@ -81,4 +82,4 @@ if( in_array("en_US.utf8",$all_system_locales) ||
 }
 
 echo "Done\n";
-?>
+}

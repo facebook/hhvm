@@ -1,5 +1,8 @@
-<?php
-file_put_contents('SplFileObject_setCsvControl_variation001.csv',
+<?hh
+<<__EntryPoint>>
+function main(): void {
+  chdir(__SystemLib\hphp_test_tmproot());
+  file_put_contents('SplFileObject_setCsvControl_variation001.csv',
 <<<CDATA
 "groene appelen",10
 "gele bananen",20
@@ -13,7 +16,5 @@ foreach ($s as $row) {
     list($fruit, $quantity) = $row;
     echo "$fruit : $quantity\n";
 }
-?>
-<?php
 unlink('SplFileObject_setCsvControl_variation001.csv');
-?>
+}

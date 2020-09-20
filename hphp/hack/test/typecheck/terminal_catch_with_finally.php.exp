@@ -1,0 +1,11 @@
+File "terminal_catch_with_finally.php", line 17, characters 5-15:
+  (int | bool | string)
+File "terminal_catch_with_finally.php", line 17, characters 5-15:[2]
+  (int | bool)
+File "terminal_catch_with_finally.php", line 17, characters 5-15:[3]
+  string
+File "terminal_catch_with_finally.php", line 17, characters 5-15:[4]
+  int
+File "terminal_catch_with_finally.php", line 20, characters 3-13:
+  int
+No errors

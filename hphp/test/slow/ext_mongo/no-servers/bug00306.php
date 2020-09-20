@@ -1,10 +1,10 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $n = new MongoId('4f06e55e44670ab92b000000');
 var_export($n);
 echo "\n";
 
-$a = MongoId::__set_state(array(
+$a = MongoId::__set_state(darray[
    '$id' => '4f06e55e44670ab92b000000',
-));
+]);
 var_dump($a);
-?>
+}

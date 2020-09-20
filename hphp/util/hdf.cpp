@@ -329,6 +329,13 @@ double Hdf::configGetDouble(double defValue /* = 0 */) const {
   return n;
 }
 
+void Hdf::configGet(std::vector<uint32_t> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values.push_back(hdf.configGetUInt32(0));
+  }
+}
+
 void Hdf::configGet(std::vector<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
@@ -347,6 +354,13 @@ void Hdf::configGet(boost::container::flat_set<std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
     values.insert(hdf.configGetString(""));
+  }
+}
+
+void Hdf::configGet(std::unordered_map<std::string, int> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values[hdf.getName()] = hdf.configGetInt32();
   }
 }
 

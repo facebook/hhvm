@@ -1,0 +1,1 @@
+ERROR: string(53) "Argument 1 to f() must be of type @Foo, HH\dict given"

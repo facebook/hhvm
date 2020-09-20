@@ -1,4 +1,5 @@
 <?hh
 
-function foo(double $a, inout int $b, int& $c) {
+function foo(float $a, inout int $b, int& $c) {
 }
+

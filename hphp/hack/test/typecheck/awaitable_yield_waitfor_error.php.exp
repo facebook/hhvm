@@ -1,6 +1,6 @@
 File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-Invalid return type (Typing[4110])
-File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
-This is void
+Invalid return type (Typing[4336])
 File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-It is incompatible with an object of type Awaitable because this async function implicitly returns Awaitable<void>
+Expected `Awaitable<void>` because this function does not always return a value
+File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
+But got `void`

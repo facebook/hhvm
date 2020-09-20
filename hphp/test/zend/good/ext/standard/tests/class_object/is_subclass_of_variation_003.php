@@ -1,18 +1,18 @@
-<?php
+<?hh
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+class caseSensitivityTest {}
+class caseSensitivityTestChild extends caseSensitivityTest {}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
 echo "*** Testing is_a() : usage variations ***\n";
 
-class caseSensitivityTest {}
-class caseSensitivityTestChild extends caseSensitivityTest {}
-
 var_dump(is_subclass_of('caseSensitivityTestCHILD', 'caseSensitivityTEST'));
 
-echo "Done"
-?>
+echo "Done";
+}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SORT_HELPERS_H_
-#define incl_HPHP_SORT_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -52,7 +51,7 @@ struct AssocKeyAccessorImpl {
     if (isInt(elm)) {
       return Self::getInt(elm);
     }
-    assert(isStr(elm));
+    assertx(isStr(elm));
     return Variant{Self::getStr(elm)};
   }
 };
@@ -149,7 +148,7 @@ struct IntElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0);
     }
-    assert(false);
+    assertx(false);
     return true;
   }
 };
@@ -198,7 +197,7 @@ struct StrElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0);
     }
-    assert(false);
+    assertx(false);
     return true;
   }
 };
@@ -313,7 +312,7 @@ struct ElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0);
     }
-    assert(false);
+    assertx(false);
     return true;
   }
 };
@@ -324,17 +323,20 @@ struct ElmUCompare {
   AccessorT acc;
   const CallCtx* ctx;
 
-  // only warn with HH syntax enabled
-  ElmUCompare() : warned(!RuntimeOption::EnableHipHopSyntax) {}
+  ElmUCompare() : warned(false) {}
 
   bool operator()(ElmT left, ElmT right) const {
     TypedValue args[2] = {
-      *acc.getValue(left).asCell(),
-      *acc.getValue(right).asCell()
+      *acc.getValue(left).asTypedValue(),
+      *acc.getValue(right).asTypedValue()
     };
     auto ret = Variant::attach(
       g_context->invokeFuncFew(*ctx, 2, args)
     );
+    if (ctx->func->takesInOutParams()) {
+      assertx(ret.isArray());
+      ret = ret.asCArrRef()[0];
+    }
     if (LIKELY(ret.isInteger())) {
       return ret.toInt64() > 0;
     }
@@ -372,4 +374,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SORT_HELPERS_H_

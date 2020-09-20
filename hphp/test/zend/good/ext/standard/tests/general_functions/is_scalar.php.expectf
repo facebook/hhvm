@@ -106,12 +106,9 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: %s
-NULL
+Warning: is_scalar() expects exactly 1 parameter, 0 given in %s/is_scalar.php on line 107
 
-Warning: %s
-NULL
+Warning: is_scalar() expects exactly 1 parameter, 2 given in %s/is_scalar.php on line 110
 
-Warning: %s
-NULL
+Warning: is_scalar() expects exactly 1 parameter, 2 given in %s/is_scalar.php on line 111
 Done

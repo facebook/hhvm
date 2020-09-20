@@ -1,0 +1,8 @@
+int(1)
+int(2)
+
+Warning: The switch statement failed to match any of the cases in %s on line 8
+int(2)
+
+Warning: The switch statement failed to match any of the cases in %s on line 8
+int(2)

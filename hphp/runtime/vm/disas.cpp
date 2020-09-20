@@ -18,6 +18,7 @@
 #include <sstream>
 #include <map>
 #include <queue>
+#include <functional>
 
 #include <boost/variant.hpp>
 
@@ -28,16 +29,19 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/match.h"
 
 namespace HPHP {
 
-TRACE_SET_MOD(tmp0);
+TRACE_SET_MOD(disas);
 
 namespace {
 
@@ -89,7 +93,6 @@ void indented(Output& out, Func f) {
 
 template<class T>
 std::string format_line_pair(T* ptr) {
-  if (!RuntimeOption::EvalDisassemblerSourceMapping) return {};
   return folly::sformat(" ({},{})", ptr->line1(), ptr->line2());
 }
 
@@ -120,8 +123,8 @@ std::string escaped_long(const ArrayData* ad) {
   return escaped_long(str.get());
 }
 
-std::string escaped_long(Cell cell) {
-  assert(cellIsPlausible(cell));
+std::string escaped_long(TypedValue cell) {
+  assertx(tvIsPlausible(cell));
   auto const str = internal_serialize(tvAsCVarRef(&cell));
   return escaped_long(str.get());
 }
@@ -133,14 +136,11 @@ std::string opt_escaped_long(const StringData* sd) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct EHFault { std::string label; };
 struct EHCatchLegacy { std::string label; };
 struct EHCatch { Offset end; };
-using EHInfo = boost::variant< EHFault
-                             , EHCatchLegacy
-                             , EHCatch
-                             >;
-
+using EHInfo = boost::variant<EHCatchLegacy, EHCatch>;
+using UBMap =
+  std::unordered_map<const StringData*, std::vector<TypeConstraint>>;
 struct FuncInfo {
   FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
 
@@ -154,8 +154,11 @@ struct FuncInfo {
   // names we chose for its handlers).
   std::unordered_map<const EHEnt*,EHInfo> ehInfo;
 
-  // Fault and catch protected region starts in order.
+  // Try/catch protected region starts in order.
   std::vector<std::pair<Offset,const EHEnt*>> ehStarts;
+
+  // Upper-bounds for params and return types
+  UBMap ubs;
 };
 
 FuncInfo find_func_info(const Func* func) {
@@ -175,23 +178,15 @@ FuncInfo find_func_info(const Func* func) {
   };
 
   auto find_jump_targets = [&] {
-    auto pc           = func->unit()->at(func->base());
-    auto const stop   = func->unit()->at(func->past());
-    auto const bcBase = func->unit()->at(0);
+    auto pc           = func->entry();
+    auto const stop   = func->at(func->past());
+    auto const bcBase = func->unit()->entry();
 
     for (; pc != stop; pc += instrLen(pc)) {
-      auto const op = peek_op(pc);
-      if (isSwitch(op)) {
-        foreachSwitchTarget(pc, [&] (Offset off) {
-          add_target("L", pc - bcBase + off);
-        });
-        continue;
-      }
-      auto const off = func->unit()->offsetOf(pc);
-      auto const target = instrJumpTarget(bcBase, off);
-      if (target != InvalidAbsoluteOffset) {
+      auto const off = func->offsetOf(pc);
+      auto const targets = instrJumpTargets(bcBase, off);
+      for (auto const& target : targets) {
         add_target("L", target);
-        continue;
       }
     }
   };
@@ -199,14 +194,8 @@ FuncInfo find_func_info(const Func* func) {
   auto find_eh_entries = [&] {
     for (auto& eh : func->ehtab()) {
       finfo.ehInfo[&eh] = [&]() -> EHInfo {
-        switch (eh.m_type) {
-        case EHEnt::Type::Catch:
-          if (eh.m_end != kInvalidOffset) return EHCatch { eh.m_end };
-          return EHCatchLegacy { add_target("C", eh.m_handler) };
-        case EHEnt::Type::Fault:
-          return EHFault { add_target("F", eh.m_handler) };
-        }
-        not_reached();
+        if (eh.m_end != kInvalidOffset) return EHCatch { eh.m_end };
+        return EHCatchLegacy { add_target("C", eh.m_handler) };
       }();
       finfo.ehStarts.emplace_back(eh.m_base, &eh);
     }
@@ -221,9 +210,27 @@ FuncInfo find_func_info(const Func* func) {
     }
   };
 
+  auto find_upper_bounds = [&] {
+    if (func->hasParamsWithMultiUBs()) {
+      auto const& params = func->params();
+      for (auto const& p : func->paramUBs()) {
+        auto const& typeName = params[p.first].typeConstraint.typeName();
+        auto& v = finfo.ubs[typeName];
+        if (v.empty()) v.assign(std::begin(p.second), std::end(p.second));
+      }
+    }
+    if (func->hasReturnWithMultiUBs()) {
+      auto& v = finfo.ubs[func->returnTypeConstraint().typeName()];
+      if (v.empty()) {
+        v.assign(std::begin(func->returnUBs()), std::end(func->returnUBs()));
+      }
+    }
+  };
+
   find_jump_targets();
   find_eh_entries();
   find_dv_entries();
+  find_upper_bounds();
   return finfo;
 }
 
@@ -253,12 +260,12 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   auto const startPc = pc;
 
   auto rel_label = [&] (Offset off) {
-    auto const tgt = startPc - finfo.unit->at(0) + off;
+    auto const tgt = finfo.func->offsetOf(startPc) + off;
     return jmp_label(finfo, tgt);
   };
 
   auto print_switch = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = int32_t{0}; i < vecLen; ++i) {
       auto const off = decode<Offset>(pc);
@@ -269,7 +276,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   };
 
   auto print_sswitch = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = int32_t{0}; i < vecLen; ++i) {
       auto const strId  = decode<Id>(pc);
@@ -283,38 +290,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
-  auto print_itertab = [&] {
-    auto const vecLen = decode<int32_t>(pc);
-    out.fmt(" <");
-    for (auto i = int32_t{0}; i < vecLen; ++i) {
-      auto const kind = static_cast<IterKind>(decode<int32_t>(pc));
-      auto const id   = decode<int32_t>(pc);
-      auto const kindStr = [&]() -> const char* {
-        switch (kind) {
-        case KindOfIter:   return "(Iter)";
-        case KindOfMIter:  return "(MIter)";
-        case KindOfCIter:  return "(CIter)";
-        }
-        not_reached();
-      }();
-      out.fmt("{}{} {}", i != 0 ? ", " : "", kindStr, id);
-    }
-    out.fmt(">");
-  };
-
-  auto print_argv = [&] {
-    auto const vecLen = decode<uint32_t>(pc);
-    if (!vecLen) return;
-    out.fmt(" <");
-    for (auto i = uint32_t{0}; i < vecLen; ++i) {
-      auto const num = decode<uint32_t>(pc);
-      out.fmt("{}{}", i != 0 ? ", " : "", num);
-    }
-    out.fmt(">");
-  };
-
   auto print_stringvec = [&] {
-    auto const vecLen = decode<int32_t>(pc);
+    auto const vecLen = decode_iva(pc);
     out.fmt(" <");
     for (auto i = uint32_t{0}; i < vecLen; ++i) {
       auto const str = finfo.unit->lookupLitstrId(decode<int32_t>(pc));
@@ -332,16 +309,26 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     return show(m);
   };
 
+  // The HHAS format for IterArgs doesn't include flags, so we drop them.
+  auto print_ita = [&](const IterArgs& ita) {
+    return show(ita, [&](int32_t id) { return loc_name(finfo, id); });
+  };
+
+  auto print_fca = [&] (FCallArgs fca) {
+    auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
+      ? rel_label(fca.asyncEagerOffset)
+      : "-";
+    return show(fca, fca.inoutArgs, aeLabel, fca.context);
+  };
+
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
-#define IMM_ILA    print_itertab();
-#define IMM_I32LA  print_argv();
 #define IMM_IVA    out.fmt(" {}", decode_iva(pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
 #define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
+#define IMM_NLA    out.fmt(" {}", loc_name(finfo, decode_named_local(pc).id));
+#define IMM_ILA    out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
 #define IMM_IA     out.fmt(" {}", decode_iva(pc));
-#define IMM_CAR    out.fmt(" {}", decode_iva(pc));
-#define IMM_CAW    out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
                            escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
@@ -353,41 +340,48 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
+#define IMM_ITA    out.fmt(" {}", print_ita(decodeIterArgs(pc)));
+#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc, \
+                                                            finfo.unit)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
-#define IMM_TWO(x,y)         IMM_ONE(x)       IMM_ONE(y)
-#define IMM_THREE(x,y,z)     IMM_TWO(x,y)     IMM_ONE(z)
-#define IMM_FOUR(x,y,z,l)    IMM_THREE(x,y,z) IMM_ONE(l)
+#define IMM_TWO(x,y)         IMM_ONE(x)          IMM_ONE(y)
+#define IMM_THREE(x,y,z)     IMM_TWO(x,y)        IMM_ONE(z)
+#define IMM_FOUR(x,y,z,l)    IMM_THREE(x,y,z)    IMM_ONE(l)
+#define IMM_FIVE(x,y,z,l,m)  IMM_FOUR(x,y,z,l)   IMM_ONE(m)
+#define IMM_SIX(x,y,z,l,m,n) IMM_FIVE(x,y,z,l,m) IMM_ONE(n)
 
   out.indent();
 #define O(opcode, imms, ...)                              \
-  case Op::opcode:                                        \
+  case Op::opcode: {                                      \
+    UNUSED auto const thisOpcode = Op::opcode;            \
     pc += encoded_op_size(Op::opcode);                    \
     out.fmt("{}", #opcode);                               \
     IMM_##imms                                            \
-    break;
+    break;                                                \
+  }
   switch (peek_op(pc)) { OPCODES }
 #undef O
 
-  assert(pc == startPc + instrLen(startPc));
+  assertx(pc == startPc + instrLen(startPc));
 
 #undef IMM_NA
 #undef IMM_ONE
 #undef IMM_TWO
 #undef IMM_THREE
 #undef IMM_FOUR
+#undef IMM_FIVE
+#undef IMM_SIX
 
 #undef IMM_BLA
 #undef IMM_SLA
-#undef IMM_ILA
-#undef IMM_I32LA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
+#undef IMM_NLA
+#undef IMM_ILA
 #undef IMM_IA
-#undef IMM_CAR
-#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -397,6 +391,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_ITA
+#undef IMM_FCA
 
   out.nl();
 }
@@ -411,11 +407,11 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   if (func->isMemoizeWrapper()) {
     out.fmtln(".ismemoizewrapper;");
   }
+  if (func->isMemoizeWrapperLSB()) {
+    out.fmtln(".ismemoizewrapperlsb;");
+  }
   if (auto const niters = func->numIterators()) {
     out.fmtln(".numiters {};", niters);
-  }
-  if (auto const nslots = func->numClsRefSlots()) {
-    out.fmtln(".numclsrefslots {};", nslots);
   }
   if (func->numNamedLocals() > func->numParams()) {
     std::vector<std::string> locals;
@@ -428,19 +424,16 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
-  for (auto& info : func->staticVars()) {
-    out.fmtln(".static ${};", info.name);
-  }
+}
+
+std::string get_srcloc_str(SourceLoc loc) {
+  if (!loc.valid()) return "-1:-1,-1:-1";
+  return folly::sformat("{}:{},{}:{}",
+                        loc.line0, loc.char0, loc.line1, loc.char1);
 }
 
 void print_srcloc(Output& out, SourceLoc loc) {
-  if (!RuntimeOption::EvalDisassemblerSourceMapping) return;
-  if (!loc.valid()) {
-    out.fmtln(".srcloc -1:-1,-1:-1;");
-  } else {
-    out.fmtln(".srcloc {}:{},{}:{};",
-            loc.line0, loc.char0, loc.line1, loc.char1);
-  }
+  out.fmtln(".srcloc {};", get_srcloc_str(loc));
 }
 
 void print_func_body(Output& out, const FuncInfo& finfo) {
@@ -450,8 +443,8 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   auto const lblStop = end(finfo.labels);
   auto       ehIter  = begin(finfo.ehStarts);
   auto const ehStop  = end(finfo.ehStarts);
-  auto       bcIter  = func->unit()->at(func->base());
-  auto const bcStop  = func->unit()->at(func->past());
+  auto       bcIter  = func->entry();
+  auto const bcStop  = func->at(func->past());
 
   SourceLoc srcLoc;
 
@@ -459,7 +452,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   min_priority_queue<Offset> ehHandlers;
 
   while (bcIter != bcStop) {
-    auto const off = func->unit()->offsetOf(bcIter);
+    auto const off = func->offsetOf(bcIter);
 
     // First, close any protected EH regions that are past-the-end at
     // this offset.
@@ -477,10 +470,6 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
 
       // You can't have multiple handlers at the same location.
       assertx(ehHandlers.empty() || ehHandlers.top() != off);
-
-      // Skip the implicitly defined Catch opcode by .catch {} directive.
-      assertx(peek_op(bcIter) == OpCatch);
-      bcIter += instrLen(bcIter);
       continue;
     }
 
@@ -498,10 +487,6 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
         },
         [&] (const EHCatchLegacy& ehCatch) {
           out.fmtln(".try_catch {} {{", ehCatch.label);
-          ehEnds.push(ehIter->second->m_past);
-        },
-        [&] (const EHFault& fault) {
-          out.fmtln(".try_fault {} {{", fault.label);
           ehEnds.push(ehIter->second->m_past);
         }
       );
@@ -549,16 +534,12 @@ std::string opt_type_info(const StringData *userType,
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
                       const UserAttributeMap* userAttrs = nullptr,
-                      bool isTop = true,
                       bool needPrefix = true) {
   auto str = folly::trimWhitespace(folly::sformat(
                "{} {}",
                attrs_to_string(ctx, attrs), user_attrs(userAttrs))).str();
   if (!str.empty()) {
-    str = folly::sformat("{}[{}{}]",
-      needPrefix ? " " : "", str, isTop ? "" : " nontop");
-  } else if (!isTop) {
-    str = " [nontop]";
+    str = folly::sformat("{}[{}]", needPrefix ? " " : "", str);
   }
   return str;
 }
@@ -572,17 +553,16 @@ std::string func_param_list(const FuncInfo& finfo) {
 
     ret += opt_attrs(AttrContext::Parameter,
         Attr(), &func->params()[i].userAttributes,
-        /*isTop*/true, /*needPrefix*/false);
+        /*needPrefix*/false);
 
-    if (func->params()[i].variadic) {
+    if (func->params()[i].isVariadic()) {
       ret += "...";
     }
-    if (func->params()[i].inout) {
+    if (func->isInOut(i)) {
       ret += "inout ";
     }
     ret += opt_type_info(func->params()[i].userType,
                          func->params()[i].typeConstraint);
-    if (func->byRef(i)) ret += "&";
     ret += folly::format("{}", loc_name(finfo, i)).str();
     if (func->params()[i].hasDefaultValue()) {
       auto const off = func->params()[i].funcletOff;
@@ -604,27 +584,50 @@ std::string func_flag_list(const FuncInfo& finfo) {
   if (func->isAsync()) flags.push_back("isAsync");
   if (func->isClosureBody()) flags.push_back("isClosureBody");
   if (func->isPairGenerator()) flags.push_back("isPairGenerator");
+  if (func->isRxDisabled()) flags.push_back("isRxDisabled");
 
   std::string strflags = folly::join(" ", flags);
   if (!strflags.empty()) return " " + strflags + " ";
   return " ";
 }
 
+// We do not need to emit shadowed type parameters in disassembly
+// because we do not emit any type parameters for classes.
+// We need to emit the empty list so that assembler can parse it.
+std::string opt_shadowed_tparams() {
+  return "{}";
+}
+
+std::string opt_ubs(const UBMap& ubs) {
+  std::string ret = {};
+  ret += "{";
+  for (auto const& p : ubs) {
+    ret += "(";
+    ret += p.first->data();
+    ret += " as ";
+    bool first = true;
+    for (auto const& ub : p.second) {
+      if (!first) ret += ", ";
+      ret += opt_type_info(nullptr, ub);
+      first = false;
+    }
+    ret += ")";
+  }
+  ret += "}";
+  return ret;
+}
+
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
-  if (func->isPseudoMain()) {
-    out.fmtln(".main{} {{", format_line_pair(func));
-  } else {
-    out.fmtln(".function{}{} {}{}({}){}{{",
-      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes(),
-                func->top()),
-      format_line_pair(func),
-      opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
-      func->name(),
-      func_param_list(finfo),
-      func_flag_list(finfo));
-  }
+  out.fmtln(".function{}{}{} {}{}({}){}{{",
+    opt_ubs(finfo.ubs),
+    opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
+    format_line_pair(func),
+    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
+    func->name(),
+    func_param_list(finfo),
+    func_flag_list(finfo));
   indented(out, [&] {
     print_func_directives(out, finfo);
     print_func_body(out, finfo);
@@ -633,13 +636,13 @@ void print_func(Output& out, const Func* func) {
   out.nl();
 }
 
-std::string member_tv_initializer(Cell cell) {
-  assert(cellIsPlausible(cell));
+std::string member_tv_initializer(TypedValue cell) {
+  assertx(tvIsPlausible(cell));
   if (cell.m_type == KindOfUninit) return "uninit";
   return escaped_long(cell);
 }
 
-void print_constant(Output& out, const PreClass::Const* cns) {
+void print_class_constant(Output& out, const PreClass::Const* cns) {
   if (cns->isAbstract()) {
     out.fmtln(".const {}{};", cns->name(),
               cns->isType() ? " isType" : "");
@@ -650,23 +653,34 @@ void print_constant(Output& out, const PreClass::Const* cns) {
     member_tv_initializer(cns->val()));
 }
 
-void print_property(Output& out, const PreClass::Prop* prop) {
+template<class T>
+void print_prop_or_field_impl(Output& out, const T& f) {
   out.fmtln(".property{}{} {}{} =",
-    opt_attrs(AttrContext::Prop, prop->attrs()),
+    opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
     RuntimeOption::EvalDisassemblerDocComments &&
     RuntimeOption::EvalDisassemblerPropDocComments
-      ? opt_escaped_long(prop->docComment())
+      ? opt_escaped_long(f.docComment())
       : std::string(""),
-    opt_type_info(prop->typeConstraint(), TypeConstraint{}),
-    prop->name()->data());
+    opt_type_info(f.userType(), f.typeConstraint()),
+    f.name()->data());
   indented(out, [&] {
-    out.fmtln("{};", member_tv_initializer(prop->val()));
+      out.fmtln("{};", member_tv_initializer(f.val()));
   });
+}
+
+void print_field(Output& out, const PreRecordDesc::Field& field) {
+  print_prop_or_field_impl(out, field);
+}
+
+void print_property(Output& out, const PreClass::Prop* prop) {
+  print_prop_or_field_impl(out, *prop);
 }
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{}{} {}{}({}){}{{",
+  out.fmtln(".method{}{}{}{} {}{}({}){}{{",
+    opt_shadowed_tparams(),
+    opt_ubs(finfo.ubs),
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
@@ -765,17 +779,58 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   print_cls_enum_ty(out, cls);
   print_cls_used_traits(out, cls);
   for (auto& r : cls->requirements())  print_requirement(out, r);
-  for (auto& c : cls->allConstants())  print_constant(out, &c);
+  for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property(out, &p);
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
+void print_rec_fields(Output& out, const PreRecordDesc* rec) {
+  for (auto& f : rec->allFields()) print_field(out, f);
+}
+
+void print_rec(Output& out, const PreRecordDesc* rec) {
+  out.indent();
+  out.fmt(".record {} {}{}",
+      opt_attrs(AttrContext::Class, rec->attrs()),
+      rec->name()->toCppString(),
+      format_line_pair(rec));
+  if (!rec->parentName()->empty()) {
+    out.fmt(" extends {}", rec->parentName());
+  }
+  out.fmt(" {{");
+  out.nl();
+  if (RuntimeOption::EvalDisassemblerDocComments) {
+    if (rec->docComment() && !rec->docComment()->empty()) {
+      out.fmtln(".doc {};", escaped_long(rec->docComment()));
+    }
+  }
+  indented(out, [&] { print_rec_fields(out, rec); });
+  out.fmt("}}");
+  out.nl();
+}
+
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
-  out.fmt(".class{} {}",
-    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
-              cls->hoistability() != PreClass::NotHoistable),
-    cls->name(),
+  auto name = cls->name()->toCppString();
+  if (PreClassEmitter::IsAnonymousClassName(name)) {
+    auto p = name.find(';');
+    if (p != std::string::npos) {
+      name = name.substr(0, p);
+    }
+  }
+  UBMap cls_ubs;
+  for (auto const& prop : cls->allProperties()) {
+    if (prop.upperBounds().empty()) continue;
+    auto& v = cls_ubs[prop.typeConstraint().typeName()];
+    if (v.empty()) {
+      v.assign(std::begin(prop.upperBounds()), std::end(prop.upperBounds()));
+    }
+  }
+
+  out.fmt(".class {} {} {}{}",
+    opt_ubs(cls_ubs),
+    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
+    name,
     format_line_pair(cls));
   print_cls_inheritance_list(out, cls);
   out.fmt(" {{");
@@ -785,35 +840,46 @@ void print_cls(Output& out, const PreClass* cls) {
   out.nl();
 }
 
-void print_alias(Output& out, const TypeAlias& alias) {
+void print_alias(Output& out, const PreTypeAlias& alias) {
   auto flags = TypeConstraint::NoFlags;
   if (alias.nullable) flags = flags | TypeConstraint::Nullable;
   TypeConstraint constraint(alias.value, flags);
 
-  out.fmtln(".alias{} {} = <{}> {};",
+  out.fmtln(".alias{} {} = <{}> ({}, {}) {};",
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
             type_constraint(constraint),
+            alias.line0,
+            alias.line1,
             escaped_long(alias.typeStructure.get()));
 }
 
-void print_unit_strict_types(Output& out, const Unit* unit) {
-  if (!RuntimeOption::PHP7_ScalarTypes) return;
-  if (unit->useStrictTypes()) out.fmtln(".strict 1;");
-  else out.fmtln(".strict 0;");
+void print_constant(Output& out, const Constant& cns) {
+  out.fmtln(".const{} {} = {};",
+            opt_attrs(AttrContext::Constant, cns.attrs),
+            cns.name,
+            member_tv_initializer(cns.val));
 }
 
-void print_hh_file(Output& out, const Unit* unit) {
-  out.nl();
-  if (unit->isHHFile()) out.fmtln(".hh_file 1;");
-  else out.fmtln(".hh_file 0;");
+void print_fatal(Output& out, const Unit* unit) {
+  if (auto const info = unit->getFatalInfo()) {
+    out.nl();
+    out.fmtln(".fatal {} {} {};",
+              get_srcloc_str(SourceLoc{info->m_fatalLoc}),
+              subopToName(info->m_fatalOp),
+              escaped(info->m_fatalMsg));
+  }
 }
 
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
 
   out.fmtln(".filepath {};", escaped(unit->filepath()));
-  print_hh_file(out, unit);
+  print_fatal(out, unit);
+  if (!unit->fileAttributes().empty()) {
+    out.nl();
+    out.fmtln(".file_attributes [{}] ;", user_attrs(&unit->fileAttributes()));
+  }
   auto const metaData = unit->metaData();
   for (auto kv : metaData) {
     if (isStringType(kv.second.m_type)) {
@@ -840,11 +906,12 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->filepath());
   out.nl();
-  print_unit_strict_types(out, unit);
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func(out, func);
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());
+  for (auto& rec : unit->prerecords())    print_rec(out, rec.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
+  for (auto& c : unit->constants())       print_constant(out, c);
   out.fmtln("# {} ends here", unit->filepath());
 }
 
@@ -857,8 +924,6 @@ void print_unit(Output& out, const Unit* unit) {
  * conjunction with as.cpp):
  *
  * - .line/.srcpos directives
- *
- * - Static locals.
  */
 
 std::string disassemble(const Unit* unit) {

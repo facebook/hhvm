@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   function x() { echo __METHOD__, "\n"; }
@@ -10,12 +10,16 @@ trait U {
 }
 class B { use T; }
 class X extends B {}
-(new X)->x();
 class Y extends B {
   function __construct() { echo __METHOD__, "\n"; }
 }
-(new Y)->y();
 class Z extends B {
     use U;
 }
+
+<<__EntryPoint>>
+function main_constructors() {
+(new X)->x();
+(new Y)->y();
 (new Z)->z();
+}

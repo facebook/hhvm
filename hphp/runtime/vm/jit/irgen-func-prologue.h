@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
-#define incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -32,17 +31,21 @@ struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitPrologueLocals(IRGS& env, uint32_t argc,
-                        const Func* func, SSATmp* closureOpt);
+void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
+                        SSATmp* callFlags, SSATmp* closureOpt);
 
-void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
+void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
+                      TransID transID);
 
-void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
+void emitGenericsMismatchCheck(IRGS& env, const Func* callee,
+                               SSATmp* callFlags);
 
-void emitDynamicCallCheck(IRGS& env);
+void emitCalleeDynamicCallCheck(IRGS& env, const Func* callee,
+                                SSATmp* callFlags);
+
+void emitImplicitContextCheck(IRGS& env, const Func* callee);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
 
-#endif // incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H

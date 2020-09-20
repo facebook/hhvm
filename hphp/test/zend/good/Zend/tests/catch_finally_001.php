@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo ($throw = FALSE) {
    try {
      echo "try\n";
@@ -6,15 +6,15 @@ function foo ($throw = FALSE) {
         throw new Exception("ex");
      }
    } catch (Exception $e) {
-     echo "catch\n"; 
+     echo "catch\n";
    } finally {
      echo "finally\n";
    }
 
    echo "end\n";
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
 echo "\n";
 foo(true);
-?>
+}

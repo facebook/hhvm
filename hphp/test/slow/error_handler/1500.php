@@ -1,6 +1,8 @@
-<?php
-function handler ($errno, $errstr, $errfile, $errline, array $errcontext) {
+<?hh
+function handler ($errno, $errstr, $errfile, $errline, darray $errcontext) {
   echo "handler_called\n";
 }
-set_error_handler('handler');
+<<__EntryPoint>> function main(): void {
+set_error_handler(fun('handler'));
 $undefined->foo();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   function gen($fn) {
@@ -16,6 +16,10 @@ function test() {
   }
 }
 
-test();
-
 function fiz($x) { return false; }
+
+
+<<__EntryPoint>>
+function main_closure_gen_with_this_loc() {
+test();
+}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * fopen() binds a named resource, specified by filename, to a stream.
@@ -37,7 +37,7 @@ function popen(string $command, string $mode): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fclose(resource $handle): bool;
 
 /**
@@ -69,7 +69,7 @@ function pclose(mixed $handle): mixed;
  *   seeking past EOF is not considered an error.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fseek(resource $handle, int $offset, int $whence = SEEK_SET): mixed;
 
 /**
@@ -84,7 +84,7 @@ function fseek(resource $handle, int $offset, int $whence = SEEK_SET): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function rewind(resource $handle): bool;
 
 /**
@@ -99,7 +99,7 @@ function rewind(resource $handle): bool;
  *   occurs, returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function ftell(resource $handle): mixed;
 
 /**
@@ -113,7 +113,7 @@ function ftell(resource $handle): mixed;
  *   occurs (including socket timeout); otherwise returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function feof(resource $handle): bool;
 
 /**
@@ -127,7 +127,7 @@ function feof(resource $handle): bool;
  *   format of the array is described in detail on the stat() manual page.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fstat(resource $handle): mixed;
 
 /**
@@ -143,7 +143,7 @@ function fstat(resource $handle): mixed;
  * @return mixed - Returns the read string or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fread(resource $handle, int $length): mixed;
 
 /**
@@ -161,7 +161,7 @@ function fread(resource $handle, int $length): mixed;
  *   this function.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fgetc(resource $handle): mixed;
 
 /**
@@ -183,7 +183,7 @@ function fgetc(resource $handle): mixed;
  *   file pointed to by handle.  If an error occurs, returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fgets(resource $handle, int $length = 0): mixed;
 
 /**
@@ -202,7 +202,7 @@ function fgets(resource $handle, int $length = 0): mixed;
  *   error occurs, returns FALSE.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fgetss(resource $handle,
                 int $length = 0,
                 string $allowable_tags = ""): mixed;
@@ -220,14 +220,11 @@ function fgetss(resource $handle,
  * @param string $format - The specified format as described in the sprintf()
  *   documentation.
  *
- * @return mixed - If only two parameters were passed to this function, the
- *   values parsed will be returned as an array. Otherwise, if optional
- *   parameters are passed, the function will return the number of assigned
- *   values. The optional parameters must be passed by reference.
+ * @return mixed - false on EOF, otherwise varray of parsed values
  *
  */
-<<__Native("ActRec", "VariadicByRef")>>
-function fscanf(resource $handle, string $format, ...): mixed;
+<<__Native>>
+function fscanf(resource $handle, string $format): mixed;
 
 /**
  * Reads to EOF on the given file pointer from the current position and writes
@@ -247,7 +244,7 @@ function fscanf(resource $handle, string $format, ...): mixed;
  *   through to the output.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fpassthru(resource $handle): mixed;
 
 /**
@@ -263,10 +260,10 @@ function fpassthru(resource $handle): mixed;
  *   error.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fwrite(resource $handle, string $data, int $length = 0): mixed;
 
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fputs(resource $handle, string $data, int $length = 0): mixed;
 
 /**
@@ -308,7 +305,7 @@ function vfprintf(mixed $handle, mixed $format, mixed $args): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function fflush(resource $handle): bool;
 
 /**
@@ -323,7 +320,7 @@ function fflush(resource $handle): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native, __ParamCoerceModeFalse>>
+<<__Native>>
 function ftruncate(resource $handle, int $size): bool;
 
 /**
@@ -353,7 +350,8 @@ function ftruncate(resource $handle, int $size): bool;
 <<__Native>>
 function flock(resource $handle,
                int $operation,
-               mixed &$wouldblock = null): bool;
+               <<__OutOnly("KindOfBoolean")>>
+               inout mixed $wouldblock): bool;
 
 /**
  * fputcsv() formats a line (passed as a fields array) as CSV and write it
@@ -375,7 +373,7 @@ function flock(resource $handle,
  */
 <<__Native>>
 function fputcsv(resource $handle,
-                 array $fields,
+                 varray $fields,
                  string $delimiter = ",",
                  string $enclosure = "\"",
                  string $escape_char = "\\"): mixed;
@@ -812,7 +810,7 @@ function symlink(string $target, string $link): bool;
  * @return string - Returns the base name of the given path.
  *
  */
-<<__Native, __IsFoldable>>
+<<__Native, __IsFoldable, __Pure>>
 function basename(string $path, string $suffix = ""): string;
 
 /**
@@ -1257,7 +1255,7 @@ function realpath(string $path): mixed;
  *   this function will return a string if not all elements are requested.
  *
  */
-<<__ParamCoerceModeNull, __Native>>
+<<__Native>>
 function pathinfo(string $path, int $opt = 15): mixed;
 
 /**
@@ -1344,7 +1342,7 @@ function rmdir(string $dirname, mixed $context = null): bool;
  *   removed.
  *
  */
-<<__Native, __IsFoldable>>
+<<__Native, __IsFoldable, __Pure>>
 function dirname(string $path): string;
 
 /**
@@ -1368,7 +1366,7 @@ function getcwd(): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function chdir(string $directory): bool;
 
 /**

@@ -2,19 +2,17 @@
 
 -- Testing is_subclass_of() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: is_subclass_of() expects at most 3 parameters, 4 given in %s/is_subclass_of_error_001.php on line 17
 
 -- Testing is_subclass_of() function with more than typo style invalid 3rd argument --
-bool(false)
+
+Warning: is_subclass_of() expects parameter 3 to be boolean, string given in %s/test/zend/good/ext/standard/tests/class_object/is_subclass_of_error_001.php on line 21
 
 -- Testing is_subclass_of() function with more than invalid 3rd argument --
 
-Warning: %s
-NULL
+Warning: is_subclass_of() expects parameter 3 to be boolean, object given in %s/is_subclass_of_error_001.php on line 26
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --
 
 Warning: %s
-NULL
 Done

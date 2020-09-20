@@ -1,2 +1,0 @@
-<?php require_once('skipif.inc'); ?>
-<?php if (!extension_loaded('simplexml')) die("skip simplexml extension not available"); ?>

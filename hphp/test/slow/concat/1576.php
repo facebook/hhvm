@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1576() {
 echo '\\';
 echo '\'';
 echo '\\';
@@ -33,3 +36,4 @@ echo "\0077\t7777";
 echo "\0077\v7777";
 echo "\0077\07777";
 echo "\0077\'7777";
+}

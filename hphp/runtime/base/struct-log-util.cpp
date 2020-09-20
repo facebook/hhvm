@@ -27,8 +27,8 @@ void logSerDes(const char* format, const char* op,
   sample.setStr("operation", op);
   DataType t = value.getType();
   sample.setStr("type", tname(t));
-  if (isArrayType(t)) {
-    sample.setInt("array_len", value.toCArrRef().length());
+  if (isArrayLikeType(t)) {
+    sample.setInt("array_len", value.asCArrRef().length());
   }
   if (auto sd = serialized.get()) {
     sample.setInt("length_ser", sd->size());

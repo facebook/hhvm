@@ -1,0 +1,4 @@
+File "trait.php", line 7, characters 7-7:
+You cannot implement sealed interface `A` (Typing[4238])
+File "trait.php", line 5, characters 11-11:
+Declaration is here

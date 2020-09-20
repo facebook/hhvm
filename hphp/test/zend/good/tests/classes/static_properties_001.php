@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 class test {
-	static public $ar = array();
+    static public $ar = varray[];
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(test::$ar);
 
 test::$ar[] = 1;
@@ -11,4 +11,4 @@ test::$ar[] = 1;
 var_dump(test::$ar);
 
 echo "Done\n";
-?>
+}

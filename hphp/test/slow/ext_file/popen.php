@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_popen() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -22,3 +25,4 @@ pclose($f);
 chdir($old_dir_path);
 
 unlink($tempfile);
+}

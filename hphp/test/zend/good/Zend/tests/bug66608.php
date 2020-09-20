@@ -1,5 +1,5 @@
-<?php
-function bar() {
+<?hh
+<<__EntryPoint>> function bar() {
 	try {
 		echo "1\n";
 		try {
@@ -53,4 +53,3 @@ function bar() {
 	}
 	echo "13\n";
 }
-bar();

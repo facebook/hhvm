@@ -16,6 +16,8 @@
 #ifndef _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 #define _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H
 
+#include <folly/functional/Invoke.h>
+
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-object.h"
@@ -36,6 +38,7 @@ struct NativeDataInfo {
 
   size_t sz;
   uint8_t rt_attrs;
+  bool ctor_throws;
   type_scan::Index tyindex;
   InitFunc init; // new Object
   CopyFunc copy; // clone $obj
@@ -92,7 +95,8 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
                             type_scan::Index tyindex,
-                            uint8_t rt_attrs = 0);
+                            uint8_t rt_attrs = 0,
+                            bool ctor_throws = false);
 
 template<class T>
 void nativeDataInfoInit(ObjectData* obj) {
@@ -134,7 +138,7 @@ getNativeDataInfoDestroy() {
 // unless its trivial, or the class defines a
 //
 //   static const bool sweep = false;
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasSweep, sweep);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_sweep, sweep);
 
 // class to test for presence of a sweep set to false
 template <typename T>
@@ -153,57 +157,38 @@ void callSweep(ObjectData* obj) {
 };
 
 template<class T>
-typename std::enable_if<hasSweep<T,void ()>::value,
-                        void(*)(ObjectData*)>::type
-getNativeDataInfoSweep() {
-  return &callSweep<T>;
-}
-
-template<class T>
-typename std::enable_if<(!hasSweep<T,void ()>::value &&
-                         !std::is_trivially_destructible<T>::value &&
-                         doSweep<T>::value),
-                        void(*)(ObjectData*)>::type
-getNativeDataInfoSweep() {
-  return &nativeDataInfoDestroy<T>;
-}
-
-template<class T>
-typename std::enable_if<(!hasSweep<T,void ()>::value &&
-                         (std::is_trivially_destructible<T>::value ||
-                          !doSweep<T>::value)),
-                        void(*)(ObjectData*)>::type
-getNativeDataInfoSweep() {
+auto getNativeDataInfoSweep() -> void(*)(ObjectData*) {
+  if constexpr (std::is_invocable_v<invoke_sweep, T>) {
+    return &callSweep<T>;
+  }
+  if constexpr (!std::is_trivially_destructible_v<T> && doSweep<T>::value) {
+    return &nativeDataInfoDestroy<T>;
+  }
   return nullptr;
 }
 
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasSleep, sleep);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_sleep, sleep);
+
+template<class T, class DeferVariant = Variant>
+DeferVariant nativeDataInfoSleep(const ObjectData* obj) {
+  if constexpr (std::is_invocable_v<invoke_sleep, T>) {
+    return data<T>(obj)->sleep();
+  } else {
+    always_assert(0);
+  }
+}
+
+FOLLY_CREATE_MEMBER_INVOKER(invoke_wakeup, wakeup);
 
 template<class T>
-typename std::enable_if<hasSleep<T, Variant() const>::value,
-Variant>::type nativeDataInfoSleep(const ObjectData* obj) {
-  return data<T>(obj)->sleep();
-}
-
-template <class T>
-typename std::enable_if<!hasSleep<T, Variant() const>::value, Variant>::type
-nativeDataInfoSleep(const ObjectData* /*obj*/) {
-  always_assert(0);
-}
-
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(hasWakeup, wakeup);
-
-template<class T>
-typename std::enable_if<hasWakeup<T, void(const Variant&, ObjectData*)>::value,
-void>::type nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
-  data<T>(obj)->wakeup(content, obj);
-}
-
-template <class T>
-typename std::enable_if<!hasWakeup<T, void(const Variant&, ObjectData*)>::value,
-                        void>::type
-nativeDataInfoWakeup(ObjectData* /*obj*/, const Variant& /*content*/) {
-  always_assert(0);
+void nativeDataInfoWakeup(ObjectData* obj, const Variant& content) {
+  constexpr bool has_wakeup =
+      std::is_invocable_v<invoke_wakeup, T, const Variant&, ObjectData*>;
+  if constexpr (has_wakeup) {
+    data<T>(obj)->wakeup(content, obj);
+  } else {
+    always_assert(0);
+  }
 }
 
 enum NDIFlags {
@@ -212,6 +197,10 @@ enum NDIFlags {
   // since memory props won't get setup/torn-down
   NO_COPY        = (1<<0),
   NO_SWEEP       = (1<<1),
+  // Forbid all forms of construction from hack code by throwing in the
+  // instanceCtor (i.e. only native funcs using other allocation code paths
+  // can create instances).
+  CTOR_THROWS    = (1<<2),
 };
 
 template<class T>
@@ -240,10 +229,11 @@ typename std::enable_if<
     (flags & NDIFlags::NO_COPY) ? nullptr : ndic,
     getNativeDataInfoDestroy<T>(),
     (flags & NDIFlags::NO_SWEEP) ? nullptr : ndisw,
-    hasSleep<T, Variant() const>::value ? ndisl : nullptr,
-    hasWakeup<T, void(const Variant&, ObjectData*)>::value ? ndiw : nullptr,
+    std::is_invocable_v<invoke_sleep, T const&> ? ndisl : nullptr,
+    std::is_invocable_v<invoke_wakeup, T&, const Variant&, ObjectData*> ? ndiw : nullptr,
     nativeTyindex<T>(),
-    rt_attrs);
+    rt_attrs,
+    (flags & NDIFlags::CTOR_THROWS));
 }
 
 // Return the ObjectData payload allocated after this NativeNode header
@@ -251,7 +241,7 @@ inline ObjectData* obj(NativeNode* node) {
   auto obj = reinterpret_cast<ObjectData*>(
     reinterpret_cast<char*>(node) + node->obj_offset
   );
-  assert(obj->hasNativeData());
+  assertx(obj->hasNativeData());
   return obj;
 }
 
@@ -260,10 +250,11 @@ inline const ObjectData* obj(const NativeNode* node) {
   auto obj = reinterpret_cast<const ObjectData*>(
     reinterpret_cast<const char*>(node) + node->obj_offset
   );
-  assert(obj->hasNativeData());
+  assertx(obj->hasNativeData());
   return obj;
 }
 
+template <bool Unlocked>
 ObjectData* nativeDataInstanceCtor(Class* cls);
 ObjectData* nativeDataInstanceCopyCtor(ObjectData *src, Class* cls,
                                        size_t nProps);
@@ -273,12 +264,6 @@ Variant nativeDataSleep(const ObjectData* obj);
 void nativeDataWakeup(ObjectData* obj, const Variant& data);
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi);
-
-// return the full native header size, which is also the distance from
-// the allocated pointer to the ObjectData*.
-inline size_t ndsize(size_t dataSize) {
-  return alignTypedValue(dataSize + sizeof(NativeNode));
- }
 
 inline NativeNode* getNativeNode(ObjectData* obj, const NativeDataInfo* ndi) {
   return reinterpret_cast<NativeNode*>(

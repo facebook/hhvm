@@ -1,3 +1,4 @@
-<?php
-        if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded('gd')) die("skip gd extension not available\n");
+}

@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_lookup_namespace_uri() {
 $xml =
  '<?xml version="1.0" encoding="UTF-8"?>
   <rootElement xmlns="http://www.website.org/somens">
@@ -14,4 +17,5 @@ $childElts = $dom->getElementsByTagName('childElement');
 echo 'Empty: '; var_dump($childElts->item(0)->lookupNamespaceURI(''));
 echo 'string: '; var_dump($childElts->item(0)->lookupNamespaceURI('string'));
 echo 'null: '; var_dump($childElts->item(0)->lookupNamespaceURI(null));
-echo 'array: '; var_dump($childElts->item(0)->lookupNamespaceURI(array()));
+echo 'array: '; var_dump($childElts->item(0)->lookupNamespaceURI(varray[]));
+}

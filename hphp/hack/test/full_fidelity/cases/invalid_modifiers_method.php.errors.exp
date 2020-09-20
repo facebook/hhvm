@@ -1,0 +1,5 @@
+(6,3)-(6,55) Cannot declare abstract method `C::f` `private`
+(6,12)-(6,17) Cannot declare abstract method `C::f` `final`
+(6,43)-(6,49) Methods cannot have multiple visibility modifiers
+(6,50)-(6,55) `async` cannot be used on an `abstract` method. Use an `Awaitable<...>` return type instead.
+(8,12)-(8,20) Methods cannot have duplicate modifiers

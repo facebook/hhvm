@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_datetime_clone() {
 $d1=new DateTimeImmutable('03/08/2015 1:59am GMT-05:00');
 echo $d1->format(DateTime::ISO8601)."\n";
 
@@ -13,3 +16,4 @@ echo $d1->format(DateTime::ISO8601)."\n";
 
 $d2 = clone $d1;
 echo $d2->format(DateTime::ISO8601)."\n";
+}

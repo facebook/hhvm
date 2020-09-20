@@ -1,2 +1,2 @@
 File "shapes_cc_12.php", line 8, characters 3-4:
-A shape field name cannot be an empty string (Typing[4136])
+Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])

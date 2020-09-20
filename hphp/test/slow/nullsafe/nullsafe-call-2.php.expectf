@@ -1,4 +1,4 @@
-object(D)#2 (0) {
+object(D) (0) {
 }
 
 Catchable fatal error: Value returned from function test() must be of type D, null given in %s on line 9

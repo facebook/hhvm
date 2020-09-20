@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Class C expects a reified generic at index 2' in %s:%d
+Stack trace:
+%A

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_save_xml() {
 $doc = new DOMDocument('1.0');
 
 $root = $doc->createElement('html');
@@ -19,3 +22,4 @@ $root->appendChild($body);
 
 var_dump($doc->saveXML());
 var_dump($doc->saveXML($head));
+}

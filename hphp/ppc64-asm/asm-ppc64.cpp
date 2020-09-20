@@ -580,8 +580,8 @@ void Assembler::li32 (const Reg64& rt, int32_t imm32) {
   }
 }
 
-void Assembler::li64TOC (const Reg64& rt, int64_t imm64,
-                         ImmType immt, bool immMayChange) {
+void Assembler::li64TOC(const Reg64& rt, int64_t imm64, ImmType /*immt*/,
+                        bool immMayChange) {
   int64_t TOCoffset;
   TOCoffset = VMTOC::getInstance().pushElem(imm64, immMayChange);
 

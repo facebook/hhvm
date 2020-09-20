@@ -1,7 +1,7 @@
 
-Warning: %s
+Warning: Protocol 'file' for external XML entity '%s/non-existent-file' is disabled for security reasons. This may be changed using the hhvm.libxml.ext_entity_whitelist ini setting. in %s/DOMDocument_schemaValidate_error5.php on line 7
 
-Warning: %s
+Warning: Failed to parse the XML resource '%s/non-existent-file'. in %s/DOMDocument_schemaValidate_error5.php on line 7
 
-Warning: %s
+Warning: Invalid Schema in %s/DOMDocument_schemaValidate_error5.php on line 7
 bool(false)

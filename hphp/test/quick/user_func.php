@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 function foo($a) {
   print "foo $a\n";
 }
 
-function bar(&$a) {
+function bar(inout $a) {
   $a = 2;
   return $a;
 }
@@ -12,13 +12,10 @@ function bar(&$a) {
 function baz($a) {
   return 2;
 }
+<<__EntryPoint>> function main(): void {
+$a = varray[1, 2];
+array_map(fun("foo"), $a);
 
-$a = array(1, 2);
-array_map("foo", $a);
-
-$b = array(1);
-array_walk($b, "bar");
-var_dump($b);
-
-$a = call_user_func("baz", $a);
+$a = call_user_func(fun("baz"), $a);
 var_dump($a);
+}

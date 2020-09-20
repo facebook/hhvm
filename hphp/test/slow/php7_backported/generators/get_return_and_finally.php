@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // TODO: HHVM doesn't support returning from a finally block, which `gen1` was
 // testing. It has been removed in the meantime, but should be added back in
@@ -13,6 +13,9 @@ function gen2() {
     yield;
 }
 
+
+<<__EntryPoint>>
+function main_get_return_and_finally() {
 $gen = gen2();
 try {
     // This will throw an exception (from the finally)
@@ -28,4 +31,5 @@ try {
     var_dump($gen->getReturn());
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
+}
 }

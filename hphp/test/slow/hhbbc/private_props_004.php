@@ -2,14 +2,13 @@
 
 class Other {}
 
-function reffy(&$x) {}
+
 
 class MVecFinalOps {
   private $s = "this is a string";
   private $o = null;
   private $igen = 42.0;
   private $icell = 2;
-  private $igen2 = array();
 
   public function __construct() {
     $this->o = new Other;
@@ -18,12 +17,10 @@ class MVecFinalOps {
 
   public function foo() {
     var_dump(isset($this->s));
-    var_dump(empty($this->s));
-    reffy($this->igen);
+    var_dump(!($this->s ?? false));
+
     $this->icell += 2;
     $this->icell++;
-    $x = array();
-    $this->igen2 =& $x;
   }
 
   public function printer() {
@@ -38,10 +35,9 @@ class MVecFinalOps {
   }
 }
 
-function main() {
+<<__EntryPoint>>
+function main_private_props_004() {
   $x = new MVecFinalOps();
   $x->foo();
   $x->printer();
 }
-
-main();

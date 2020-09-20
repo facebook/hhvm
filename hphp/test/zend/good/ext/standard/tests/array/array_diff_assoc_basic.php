@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
  * Description: Returns the entries of $arr1 that have values which are not 
  * present in any of the others arguments but do additional checks whether the keys are equal 
@@ -8,11 +8,11 @@
 /*
  * Test basic functionality of array_diff_assoc
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_assoc() : basic functionality ***\n";
-$array_default_key = array('one',       2,            'three', '4');
-$array_numeric_key = array(1 => 'one',  2=> 'two',    3 => 4);
-$array_string_key  = array('one' => 1, 'two' => '2', '3' => 'three');
+$array_default_key = varray['one',       2,            'three', '4'];
+$array_numeric_key = darray[1 => 'one',  2=> 'two',    3 => 4];
+$array_string_key  = darray['one' => 1, 'two' => '2', '3' => 'three'];
 
 
 
@@ -32,4 +32,4 @@ var_dump(array_diff_assoc($array_string_key, $array_numeric_key));
 
 
 echo "Done";
-?>
+}

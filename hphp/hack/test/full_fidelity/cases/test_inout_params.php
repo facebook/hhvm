@@ -49,13 +49,9 @@ function test(): void {
   add1(inout $i);
 
   swap(inout $i, inout $s);
-  swap(&$i, inout $s);
-  swap(inout $i, &$s);
-  swap(&$i, &$s);
 
   $v = vec[];
   extend(inout $v, vec[0, 1, 2]);
-  extend(&$v, dict['spam' => 3, 'eggs' => 4]);
   herp(fun('extend'), inout $v);
 
   $d = dict['derp' => dict[6 => vec['burp']]];

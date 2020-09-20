@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : array timezone_identifiers_list  ( void )
  * Description: Returns numerically index array with all timezone identifiers  
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing timezone_identifiers_list() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -19,5 +19,5 @@ var_dump(in_array("Europe/London", $zones));
 var_dump(in_array("America/New_York", $zones));
 var_dump(in_array("UTC", $zones));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

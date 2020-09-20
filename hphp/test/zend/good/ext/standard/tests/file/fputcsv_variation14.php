@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  Prototype: array fputcsv ( resource $handle , array $fields [, string $delimiter [, string $enclosure]]] );
  Description: Format line as CSV and write to the file pointer 
@@ -6,29 +6,28 @@
 
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter
    of two chars is provided and file is opened in read only mode */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = array (
-  array(',', '"', array('water,fruit') ),
-  array(',', '"', array('"water","fruit') ),
-  array(',', '"', array('"water","fruit"') ),
-  array(' ', '^', array('^water^ ^fruit^')),
-  array(':', '&', array('&water&:&fruit&')),
-  array('=', '=', array('=water===fruit=')),
-  array('-', '-', array('-water--fruit-air')),
-  array('-', '-', array('-water---fruit---air-')),
-  array(':', '&', array('&""""&:&"&:,:":&,&:,,,,'))
+$csv_lists = varray [
+  varray[',', '"', varray['water,fruit'] ],
+  varray[',', '"', varray['"water","fruit'] ],
+  varray[',', '"', varray['"water","fruit"'] ],
+  varray[' ', '^', varray['^water^ ^fruit^']],
+  varray[':', '&', varray['&water&:&fruit&']],
+  varray['=', '=', varray['=water===fruit=']],
+  varray['-', '-', varray['-water--fruit-air']],
+  varray['-', '-', varray['-water---fruit---air-']],
+  varray[':', '&', varray['&""""&:&"&:,:":&,&:,,,,']]
 
-);
-$file_path = dirname(__FILE__);
-$filename = "$file_path/fputcsv_variation14.tmp";
+];
+$filename = __SystemLib\hphp_test_tmppath('fputcsv_variation14.tmp');
 
-$file_modes = array ("r", "rb", "rt");
+$file_modes = varray ["r", "rb", "rt"];
 
 // create the file
 $file_handle = fopen($filename, "w" );
@@ -77,4 +76,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
-?>
+}

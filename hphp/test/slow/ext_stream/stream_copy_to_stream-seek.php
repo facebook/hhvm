@@ -1,6 +1,9 @@
-<?php
+<?hh
+
 
 // Create two temporary files.
+<<__EntryPoint>>
+function main_stream_copy_to_stream_seek() {
 $file1 = tmpfile();
 $file2 = tmpfile();
 fwrite($file1, 'input');
@@ -18,3 +21,4 @@ echo stream_get_contents($file2, -1, 0);
 // Cleanup.
 fclose($file1);
 fclose($file2);
+}

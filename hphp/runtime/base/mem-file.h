@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEM_FILE_H_
-#define incl_HPHP_MEM_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/type-array.h"
@@ -69,4 +68,3 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_MEM_FILE_H_

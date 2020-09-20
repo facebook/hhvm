@@ -3,13 +3,11 @@ NULL
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "A"
 bool(true)
-bool(true)
 
 bool(false)
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "A"
-bool(true)
 bool(true)
 
 bool(true)
@@ -17,11 +15,9 @@ bool(true)
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "B"
 bool(true)
-bool(true)
 
 int(3)
 string(1) "D"
-bool(true)
 bool(true)
 
 float(4)
@@ -29,13 +25,11 @@ float(4)
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "E"
 bool(true)
-bool(true)
 
 float(5.3)
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "F"
-bool(true)
 bool(true)
 
 float(6.7)
@@ -43,13 +37,11 @@ float(6.7)
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "G"
 bool(true)
-bool(true)
 
 int(-2)
 
 Notice: Uninitialized string offset: -2 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
-bool(false)
 bool(false)
 
 float(-2.5)
@@ -59,13 +51,11 @@ Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empt
 Notice: Uninitialized string offset: -2 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
-bool(false)
 
 int(21)
 
 Notice: Uninitialized string offset: 21 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
-bool(false)
 bool(false)
 
 float(22.5)
@@ -75,54 +65,44 @@ Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empt
 Notice: Uninitialized string offset: 22 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
-bool(false)
 
 int(9223372036854775807)
 
 Notice: Uninitialized string offset: 9223372036854775807 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
-bool(false)
 
 string(0) ""
 string(1) "A"
-bool(false)
 bool(false)
 
 string(1) "8"
 string(1) "I"
 bool(true)
-bool(true)
 
 string(2) "9a"
 string(1) "J"
-bool(false)
 bool(false)
 
 string(3) "foo"
 string(1) "A"
 bool(false)
-bool(false)
 
 string(2) "1 "
 string(1) "B"
-bool(false)
 bool(false)
 
 string(2) " 2"
 string(1) "C"
 bool(true)
-bool(true)
 
 string(3) " 	2"
 string(1) "C"
-bool(true)
 bool(true)
 
 string(3) " 
 2"
 string(1) "C"
-bool(true)
 bool(true)
 
 string(27) "999999999999999999999999999"
@@ -130,52 +110,43 @@ string(27) "999999999999999999999999999"
 Notice: Uninitialized string offset: 9223372036854775807 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
 bool(false)
-bool(false)
 
 string(4) "1.0 "
 string(1) "B"
-bool(false)
 bool(false)
 
 string(4) "2.0 "
 string(1) "C"
 bool(false)
-bool(false)
 
 string(3) "1e1"
 string(1) "B"
-bool(false)
 bool(false)
 
 string(4) "1e1 "
 string(1) "B"
 bool(false)
-bool(false)
 
 string(4) " 1e1"
 string(1) "B"
 bool(false)
-bool(false)
 
-array(0) {
+varray(0) {
 }
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "A"
 bool(false)
-bool(false)
 
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "B"
 bool(false)
-bool(false)
 
-object(stdClass)#1 (0) {
+object(stdClass) (0) {
 }
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
@@ -186,12 +157,8 @@ string(1) "B"
 Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 10
 bool(false)
 
-Notice: Object of class stdClass could not be converted to int in %s/test/slow/string/str_offset_isset_empty.php on line 11
-bool(false)
-
 int(4294967300)
 
 Notice: Uninitialized string offset: 4294967300 in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(0) ""
-bool(false)
 bool(false)

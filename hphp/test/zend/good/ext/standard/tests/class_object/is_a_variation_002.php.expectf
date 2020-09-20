@@ -1,78 +1,68 @@
 *** Testing is_a() : usage variations ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 64
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 67
 
 Arg value 0 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 1 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 12345 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value -2345 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 10.5 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value -10.5 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 101234567000 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 1.07654321E-9 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 0.5 
-bool(false)
 
-Arg value Array 
-
-Warning: %s
-NULL
-
-Arg value Array 
-
-Warning: %s
-NULL
-
-Arg value Array 
-
-Warning: %s
-NULL
-
-Arg value Array 
-
-Warning: %s
-NULL
-
-Arg value Array 
-
-Warning: %s
-NULL
+Warning: is_a() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 1 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value 1 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
 bool(false)
@@ -81,11 +71,14 @@ Arg value
 bool(false)
 
 Arg value C Instance 
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
 Arg value  
-bool(false)
+
+Warning: is_a() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 Done

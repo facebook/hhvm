@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method 'M1' declared in multiple traits (A, B) in %s/case-sensitive.php on line 13

@@ -5,5 +5,5 @@ File "shapes.php", line 19, characters 3-13:
 File "shapes.php", line 22, characters 3-13:
   shape(...)
 File "shapes.php", line 31, characters 3-13:
-  shape('x' => int, ...)(unset fields: b )
+  shape(?'b' => nothing, 'x' => int, ...)
 No errors

@@ -142,9 +142,7 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: %s
-bool(false)
+Warning: is_bool() expects exactly 1 parameter, 0 given in %s/is_bool.php on line 129
 
-Warning: %s
-bool(false)
+Warning: is_bool() expects exactly 1 parameter, 2 given in %s/is_bool.php on line 132
 Done

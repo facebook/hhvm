@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_AUTH_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_AUTH_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include <string>
@@ -27,9 +26,9 @@ struct CmdAuth : DebuggerCommand {
   CmdAuth() : DebuggerCommand(KindOfAuth) {}
 
   const std::string& getToken() const { return m_token; }
+  const std::string& getSession() const { return m_session; }
   const std::string& getSandboxPath() const { return m_sandboxPath; }
 
-  std::string getFullTokenScriptPath(const std::string& tokenScriptPath);
   void setSandboxPath(const std::string& sandboxPath) {
     m_sandboxPath = sandboxPath;
   };
@@ -43,10 +42,10 @@ protected:
 
 private:
   std::string m_token;
+  std::string m_session;
   std::string m_sandboxPath = "";
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_AUTH_H_

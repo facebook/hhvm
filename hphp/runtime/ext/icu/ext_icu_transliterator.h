@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_ICU_TRANSLITERATOR_H
-#define incl_HPHP_ICU_TRANSLITERATOR_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -31,8 +30,8 @@ struct Transliterator : IntlError {
 
   static Object newInstance(icu::Transliterator* trans) {
     if (!c_Transliterator) {
-      c_Transliterator = Unit::lookupClass(s_Transliterator.get());
-      assert(c_Transliterator);
+      c_Transliterator = Class::lookup(s_Transliterator.get());
+      assertx(c_Transliterator);
     }
     Object obj{c_Transliterator};
     auto data = Native::data<Transliterator>(obj);
@@ -57,4 +56,3 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_TRANSLITERATOR_H

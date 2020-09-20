@@ -1,13 +1,13 @@
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function id($x) { return $x; }
 
 class thinger {
   private
-    $things = array(),
-    $otherThings = array(),
-    $updatedIDs = array();
+    $things = varray[],
+    $otherThings = varray[],
+    $updatedIDs = varray[];
 
   function thinger() {
     $this->things[3] = 'three';
@@ -16,17 +16,17 @@ class thinger {
     $this->fn = 'id';
   }
 
-  private function process($history, &$updated) {
+  private function process($history, inout $updated) {
     $updated = rand(0, 1) == 2;
     $fn = $this->fn;
-    return $fn([$history]);
+    return $fn(varray[$history]);
   }
 
   public function done($init) {
     if ($this->things) {
       foreach ($this->things as $id => $history) {
         $updated = $init;
-        $this->otherThings[$id] = $this->process($history, $updated);
+        $this->otherThings[$id] = $this->process($history, inout $updated);
         if ($updated) {
           $this->updatedIDs[$id] = 1;
         }
@@ -42,4 +42,8 @@ function main() {
     $t->done(false);
   }
 }
+
+<<__EntryPoint>>
+function main_property_phi() {
 main();
+}

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_output_handler_constants() {
 var_dump(PHP_OUTPUT_HANDLER_CONT);
 var_dump(PHP_OUTPUT_HANDLER_WRITE);
 
@@ -14,3 +17,4 @@ var_dump(PHP_OUTPUT_HANDLER_CLEANABLE);
 var_dump(PHP_OUTPUT_HANDLER_FLUSHABLE);
 var_dump(PHP_OUTPUT_HANDLER_REMOVABLE);
 var_dump(PHP_OUTPUT_HANDLER_STDFLAGS);
+}

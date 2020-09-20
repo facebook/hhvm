@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 trait T {
   require extends X;
@@ -6,13 +6,13 @@ trait T {
 
 class X {
   public static function foo(): X {
-    //UNSAFE
+    return new X();
   }
 }
 
 class A extends X {
   public static function foo(): A {
-    //UNSAFE
+    return new A();
   }
 }
 

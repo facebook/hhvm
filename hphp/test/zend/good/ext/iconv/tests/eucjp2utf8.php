@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* include('test.inc'); */
 /* charset=EUC-JP */
 
@@ -45,4 +45,3 @@ $str = iconv("EUC-JP", "UTF-8", $str); /* libiconv(1.8) doesn't know "UTF8" but 
 $str = base64_encode($str);
 echo $str."\n";
 
-?>

@@ -4,7 +4,7 @@
 
 function show_iter($iter) {
   $vs = new Vector($iter);
-  sort($vs);
+  sort(inout $vs);
   echo "...\n";
   foreach ($vs as $v) var_dump($v);
   echo "...\n";
@@ -13,8 +13,8 @@ function show_iter($iter) {
 function main() {
   $fm = new ImmMap(Map {"a" => 10, "b" => 30, 10 => 42});
 
-  echo "\ntoArray...\n";
-  $res = $fm->toArray();
+  echo "\ntoDArray...\n";
+  $res = $fm->toDArray();
   var_dump(is_array($res));
   show_iter($res);
 
@@ -30,40 +30,44 @@ function main() {
 
   echo "\ntoVector...\n";
   $res = $fm->toVector();
-  var_dump($res instanceof Vector);
+  var_dump($res is Vector);
   show_iter($res);
 
   echo "\ntoImmVector...\n";
   $res = $fm->toImmVector();
-  var_dump($res instanceof ImmVector);
+  var_dump($res is ImmVector);
   show_iter($res);
 
   echo "\ntoMap...\n";
   $res = $fm->toMap();
-  var_dump($res instanceof Map);
+  var_dump($res is Map);
   show_iter($res);
 
   echo "\ntoImmMap...\n";
   $res = $fm->toImmMap();
-  var_dump($res instanceof ImmMap);
+  var_dump($res is ImmMap);
   show_iter($res);
 
   echo "\ntoSet...\n";
   $res = $fm->toSet();
-  var_dump($res instanceof Set);
+  var_dump($res is Set);
   show_iter($res);
 
   echo "\ntoImmSet...\n";
   $res = $fm->toImmSet();
-  var_dump($res instanceof ImmSet);
+  var_dump($res is ImmSet);
   show_iter($res);
 
   echo "\ntoMap...\n";
   $res = $fm->toMap();
-  var_dump($res instanceof Map &&
+  var_dump($res is Map &&
            $res == Map { "a" => 10, "b" => 30, 10 => 42 });
 
   // TODO: add toImmMap() once it exists.
 }
 
+
+<<__EntryPoint>>
+function main_materialization() {
 main();
+}

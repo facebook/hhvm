@@ -1,0 +1,6 @@
+File "xhp_attr_spread_generic.php", line 18, characters 15-17:
+Invalid xhp value for attribute `:my-vec` in `:my-bar` (Typing[4343])
+File "xhp_attr_spread_generic.php", line 8, characters 13-20:
+Expected `~?vec<int>` because it is an unenforceable type
+File "xhp_attr_spread_generic.php", line 4, characters 13-18:
+But got `vec<[unresolved]>`

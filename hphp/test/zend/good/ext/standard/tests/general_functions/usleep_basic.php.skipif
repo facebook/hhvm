@@ -1,3 +1,4 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-?>
+}

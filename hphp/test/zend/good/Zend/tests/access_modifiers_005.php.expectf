@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Methods cannot have duplicate modifiers in %s/access_modifiers_005.php on line 4

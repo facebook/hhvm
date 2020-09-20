@@ -1,9 +1,9 @@
-<?php
+<?hh
 class Foo {
     public function bar(Foo $foo, $bar = 'bar') {
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $class = new ReflectionClass('Foo');
 $method = $class->getMethod('bar');
 
@@ -12,4 +12,4 @@ foreach ($method->getParameters() as $parameter) {
         print $parameter->getDefaultValue()."\n";
     }
 }
-?>
+}

@@ -1,0 +1,21 @@
+(5,18)-(5,19) Encountered unexpected token `&`.
+(7,23)-(7,33) Parameter redundantly marked as variadic `...`.
+(9,21)-(9,21) A variable name is expected here.
+(9,23)-(9,23) An expression is expected here.
+(9,27)-(9,27) A semicolon `;` is expected here.
+(9,29)-(9,29) An expression is expected here.
+(9,31)-(9,31) An expression is expected here.
+(9,31)-(9,38) Cannot use collection initialization for non-collection class.
+(9,38)-(10,1) A semicolon `;` is expected here.
+(11,1)-(11,37) Declarations are not supported outside global scope
+(11,25)-(11,26) Encountered unexpected token `&`.
+(11,40)-(12,1) Inline function definitions are not supported in Hack
+(13,1)-(13,22) Declarations are not supported outside global scope
+(13,23)-(13,23) A variable name is expected here.
+(13,25)-(13,25) An expression is expected here.
+(13,29)-(13,29) An expression is expected here.
+(13,31)-(13,31) A semicolon `;` is expected here.
+(13,33)-(13,33) An expression is expected here.
+(13,35)-(13,35) An expression is expected here.
+(13,35)-(13,42) Cannot use collection initialization for non-collection class.
+(13,42)-(14,1) A semicolon `;` is expected here.

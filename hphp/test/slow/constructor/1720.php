@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   function a() {
@@ -14,4 +14,8 @@ class A {
  $obj = new A();
  $obj->a();
  }
- test();
+
+ <<__EntryPoint>>
+function main_1720() {
+test();
+}

@@ -1,0 +1,13 @@
+***** GETTING AND SETTING *****
+file SO_TYPE: Errno %d: %s
+tcp SO_TYPE: 1
+udp SO_TYPE: 2
+unix SO_TYPE: 1
+SO_REUSEADDR: 0
+SO_REUSEADDR: 1
+***** TESTING SO_REUSEADDR WORKS *****
+Binding duplicate address without SO_REUSEADDR failed (expected): Errno %d: %s
+Binding duplicate address with SO_REUSEADDR succeeded!
+***** SETTING A NON-INT OPTION TO AN INT ******
+getsockopt_int() with SO_LINGER succeeded with a truncated result.
+setsockopt_int() with SO_LINGER failed (expected): Errno %d: %s

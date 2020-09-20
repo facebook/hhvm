@@ -1,9 +1,9 @@
+Warning: Property 'Exception::previous' declared as type ?Exception, Error assigned in %s/test/slow/php7_backported/engine-exceptions/throwable_001.php on line 3
 
 Fatal error: Uncaught Error: Error message in %s:%d
 Stack trace:
-#0 {main}
+%a {main}
 
 Next exception 'Exception' with message 'Exception message' in %s:%d
 Stack trace:
-#0 {main}
-
+%a {main}

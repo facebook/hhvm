@@ -1,0 +1,25 @@
+darray(1) {
+  [0]=>
+  string(3) "bcd"
+}
+bool(true)
+darray(1) {
+  [0]=>
+  darray(2) {
+    [0]=>
+    string(3) "bcd"
+    [1]=>
+    string(3) "bzd"
+  }
+}
+bool(true)
+bool(true)
+darray(1) {
+  [0]=>
+  varray(2) {
+    string(3) "def"
+    int(3)
+  }
+}
+bool(true)
+bool(true)

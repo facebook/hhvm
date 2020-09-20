@@ -1,0 +1,42 @@
+File "mutable_in_collections1.php", line 8, characters 15-16:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 9, characters 16-17:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 10, characters 16-17:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 11, characters 20-21:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 12, characters 20-21:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 13, characters 23-24:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 15, characters 21-22:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 20, characters 15-16:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 21, characters 16-17:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 22, characters 16-17:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 23, characters 20-21:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 24, characters 20-21:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 25, characters 23-24:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 27, characters 21-22:
+This variable is maybe mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4258])
+File "mutable_in_collections1.php", line 32, characters 15-16:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 33, characters 16-17:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 34, characters 16-17:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 35, characters 20-21:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 36, characters 20-21:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 37, characters 23-24:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])
+File "mutable_in_collections1.php", line 39, characters 21-22:
+This variable is mutable. You cannot create a new reference to it by putting it into the collection. (Typing[4210])

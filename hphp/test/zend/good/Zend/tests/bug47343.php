@@ -1,39 +1,31 @@
-<?php
+<?hh
 class A
 {
-	public function __destruct()
-	{
-		gc_collect_cycles();
-	}
-	
-	public function getB()
-	{
-		$this->data['foo'] = new B($this);
-		$this->data['bar'] = new B($this);
-		// Return either of the above
-		return $this->data['foo'];
-	}
+    public function getB()
+    {
+        $this->data = darray[];
+        $this->data['foo'] = new B($this);
+        $this->data['bar'] = new B($this);
+        // Return either of the above
+        return $this->data['foo'];
+    }
 }
 
 class B
 {
-	public function B($A)
-	{
-		$this->A = $A;
-	}
-
-	public function __destruct()
-	{
-	}
+    public function B($A)
+    {
+        $this->A = $A;
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 for ($i = 0; $i < 2; $i++)
 {
-	$Aobj = new A;
-	$Bobj = $Aobj->getB();
-	unset($Bobj);
-	unset($Aobj);
+    $Aobj = new A;
+    $Bobj = $Aobj->getB();
+    unset($Bobj);
+    unset($Aobj);
 }
 
 echo "DONE\n";
-?>
+}

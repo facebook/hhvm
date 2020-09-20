@@ -1,0 +1,38 @@
+darray(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  darray(1) {
+    ["foo"]=>
+    darray(1) {
+      ["kind"]=>
+      int(4)
+    }
+  }
+}
+darray(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  darray(1) {
+    ["foo"]=>
+    darray(2) {
+      ["kind"]=>
+      int(4)
+      ["optional_shape_field"]=>
+      bool(true)
+    }
+  }
+}
+darray(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  darray(1) {
+    ["A"]=>
+    darray(1) {
+      ["kind"]=>
+      int(4)
+    }
+  }
+}

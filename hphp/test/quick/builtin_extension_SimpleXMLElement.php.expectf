@@ -1,113 +1,59 @@
 SimpleXMLElement
-object(SimpleXMLElement)#1 (0) {
+object(SimpleXMLElement) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(23) {
-  [0]=>
+varray(19) {
   string(11) "__construct"
-  [1]=>
   string(12) "offsetExists"
-  [2]=>
   string(9) "offsetGet"
-  [3]=>
   string(9) "offsetSet"
-  [4]=>
   string(11) "offsetUnset"
-  [5]=>
   string(11) "getIterator"
-  [6]=>
   string(5) "count"
-  [7]=>
   string(5) "xpath"
-  [8]=>
   string(22) "registerXPathNamespace"
-  [9]=>
   string(5) "asXML"
-  [10]=>
   string(7) "saveXML"
-  [11]=>
   string(13) "getNamespaces"
-  [12]=>
   string(16) "getDocNamespaces"
-  [13]=>
   string(8) "children"
-  [14]=>
   string(7) "getName"
-  [15]=>
   string(10) "attributes"
-  [16]=>
   string(8) "addChild"
-  [17]=>
   string(12) "addAttribute"
-  [18]=>
   string(10) "__toString"
-  [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
-  string(7) "__unset"
 }
 ================
 A_SimpleXMLElement
-object(A_SimpleXMLElement)#2 (0) {
+object(A_SimpleXMLElement) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(23) {
-  [0]=>
+varray(19) {
   string(11) "__construct"
-  [1]=>
   string(12) "offsetExists"
-  [2]=>
   string(9) "offsetGet"
-  [3]=>
   string(9) "offsetSet"
-  [4]=>
   string(11) "offsetUnset"
-  [5]=>
   string(11) "getIterator"
-  [6]=>
   string(5) "count"
-  [7]=>
   string(5) "xpath"
-  [8]=>
   string(22) "registerXPathNamespace"
-  [9]=>
   string(5) "asXML"
-  [10]=>
   string(7) "saveXML"
-  [11]=>
   string(13) "getNamespaces"
-  [12]=>
   string(16) "getDocNamespaces"
-  [13]=>
   string(8) "children"
-  [14]=>
   string(7) "getName"
-  [15]=>
   string(10) "attributes"
-  [16]=>
   string(8) "addChild"
-  [17]=>
   string(12) "addAttribute"
-  [18]=>
   string(10) "__toString"
-  [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
-  string(7) "__unset"
 }
 Of basic XML structure the 1th nodes contents is: 
 Of basic XML structure the 2th nodes contents is: b

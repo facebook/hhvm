@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($e, $m) {
   $_REQUEST['_foo'] = $e;
@@ -8,4 +8,8 @@ function foo($e, $m) {
 function test($x) {
   return foo('a', $x);
 }
+
+<<__EntryPoint>>
+function main_1830() {
 var_dump(test('b'));
+}

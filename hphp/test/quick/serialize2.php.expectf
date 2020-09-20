@@ -24,5 +24,5 @@ ABCDE ({"include_subclasses":true,"allowed_classes":["A","B","C","D","E","I"],"t
 ABCDE ({"include_subclasses":true,"allowed_classes":["A","I"],"throw":"UnexpectedSerializedClass"})
 _____ ({"include_subclasses":true,"allowed_classes":false,"throw":false})
 UnexpectedSerializedClass A {"include_subclasses":true,"allowed_classes":false,"throw":"UnexpectedSerializedClass"}
-[load Bar][load Baz][load MadeUp]
-Fatal error: Class undefined: MadeUp in %s/serialize2.php on line 59
+
+Fatal error: Class undefined: MadeUp in %s/serialize2.php on line 58

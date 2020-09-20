@@ -1,18 +1,20 @@
-<?php
-$a = array();
-$a[0] = $a;
-var_dump($a);
-$b = array(array());
-$b[0][0] = $b;
-var_dump($b);
+<?hh
 
 function f() {
-	$a = array();
+	$a = darray[];
 	$a[0] = $a;
 	var_dump($a);
-	$b = array(array());
+	$b = varray[darray[]];
 	$b[0][0] = $b;
 	var_dump($b);
 }
-f();
-?>
+<<__EntryPoint>>
+function main_entry(): void {
+  $a = darray[];
+  $a[0] = $a;
+  var_dump($a);
+  $b = varray[darray[]];
+  $b[0][0] = $b;
+  var_dump($b);
+  f();
+}

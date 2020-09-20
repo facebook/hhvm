@@ -1,3 +1,3 @@
-<?php
+<?hh
 function foo($arg1 string) {}
-?>
+

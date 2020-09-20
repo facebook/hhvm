@@ -1,17 +1,15 @@
 *** Testing error conditions of fileinode() ***
-Warning: %s
+Warning: fileinode(): No such file or directory in %s/fileinode_error.php on line 10
 bool(false)
 
-Warning: %s
+Warning: fileinode(): No such file or directory in %s/fileinode_error.php on line 13
 bool(false)
 
-Warning: %s
+Warning: fileinode(): No such file or directory in %s/fileinode_error.php on line 14
 bool(false)
 
-Warning: %s
-NULL
+Warning: fileinode() expects exactly 1 parameter, 0 given in %s/fileinode_error.php on line 17
 
-Warning: %s
-NULL
+Warning: fileinode() expects exactly 1 parameter, 2 given in %s/fileinode_error.php on line 20
 
 *** Done ***

@@ -1,11 +1,10 @@
-<?hh // decl /* -*- mode: php -*- */
+<?hh /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -20,5 +19,6 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
   public function key();
   public function current();
   protected function __clone();
+  public function call__($func, $params);
   public function getInnerIterator(): Iterator<Tv>;
 }

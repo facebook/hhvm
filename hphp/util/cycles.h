@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TSC_H_
-#define incl_HPHP_TSC_H_
+#pragma once
 
 #include <folly/portability/Asm.h>
 
@@ -67,4 +66,3 @@ inline void cycleDelay(uint32_t numCycles) {
 
 }
 
-#endif

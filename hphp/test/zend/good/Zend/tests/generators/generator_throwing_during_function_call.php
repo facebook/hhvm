@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function throwException() {
     throw new Exception('test');
@@ -9,9 +9,9 @@ function gen() {
     strlen("foo", "bar", throwException());
     yield 'bar';
 }
-
+<<__EntryPoint>> function main(): void {
 $gen = gen();
-
+$gen->next();
 var_dump($gen->current());
 
 try {
@@ -21,5 +21,4 @@ try {
 }
 
 var_dump($gen->current());
-
-?>
+}

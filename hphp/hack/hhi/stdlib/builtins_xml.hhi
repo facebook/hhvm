@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -40,50 +39,51 @@ const XML_OPTION_TARGET_ENCODING = 2;
 const XML_SAX_IMPL = "expat";
 
 <<__PHPStdLib>>
-function xml_parser_create($encoding = null) { }
+function xml_parser_create($encoding = null);
 <<__PHPStdLib>>
-function xml_parser_free($parser) { }
+function xml_parser_free(resource $parser);
 <<__PHPStdLib>>
-function xml_parse($parser, $data, $is_final = true) { }
+function xml_parse(resource $parser, string $data, bool $is_final = true);
 <<__PHPStdLib>>
-function xml_parse_into_struct($parser, $data, &$values, &$index = null) { }
+function xml_parse_into_struct(resource $parser, string $data,
+                               inout $values, inout $index);
 <<__PHPStdLib>>
-function xml_parser_create_ns($encoding = null, $separator = null) { }
+function xml_parser_create_ns($encoding = null, $separator = null);
 <<__PHPStdLib>>
-function xml_parser_get_option($parser, $option) { }
+function xml_parser_get_option(resource $parser, int $option);
 <<__PHPStdLib>>
-function xml_parser_set_option($parser, $option, $value) { }
+function xml_parser_set_option(resource $parser, int $option, $value);
 <<__PHPStdLib>>
-function xml_set_character_data_handler($parser, $handler) { }
+function xml_set_character_data_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_default_handler($parser, $handler) { }
+function xml_set_default_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_element_handler($parser, $start_element_handler, $end_element_handler) { }
+function xml_set_element_handler(resource $parser, $start_element_handler, $end_element_handler);
 <<__PHPStdLib>>
-function xml_set_processing_instruction_handler($parser, $handler) { }
+function xml_set_processing_instruction_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_start_namespace_decl_handler($parser, $handler) { }
+function xml_set_start_namespace_decl_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_end_namespace_decl_handler($parser, $handler) { }
+function xml_set_end_namespace_decl_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_unparsed_entity_decl_handler($parser, $handler) { }
+function xml_set_unparsed_entity_decl_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_external_entity_ref_handler($parser, $handler) { }
+function xml_set_external_entity_ref_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_notation_decl_handler($parser, $handler) { }
+function xml_set_notation_decl_handler(resource $parser, $handler);
 <<__PHPStdLib>>
-function xml_set_object($parser, &$object) { }
+function xml_set_object(resource $parser, $object);
 <<__PHPStdLib>>
-function xml_get_current_byte_index($parser) { }
+function xml_get_current_byte_index(resource $parser);
 <<__PHPStdLib>>
-function xml_get_current_column_number($parser) { }
+function xml_get_current_column_number(resource $parser);
 <<__PHPStdLib>>
-function xml_get_current_line_number($parser) { }
+function xml_get_current_line_number(resource $parser);
 <<__PHPStdLib>>
-function xml_get_error_code($parser) { }
+function xml_get_error_code(resource $parser);
 <<__PHPStdLib>>
-function xml_error_string($code) { }
-<<__PHPStdLib>>
-function utf8_decode($data) { }
-<<__PHPStdLib>>
-function utf8_encode($data) { }
+function xml_error_string(int $code);
+<<__PHPStdLib, __Pure>>
+function utf8_decode(string $data);
+<<__PHPStdLib, __Pure>>
+function utf8_encode(string $data);

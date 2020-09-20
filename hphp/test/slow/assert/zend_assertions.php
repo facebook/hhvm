@@ -1,7 +1,4 @@
-<?php
-
-assert_options(ASSERT_ACTIVE, 1);
-assert_options(ASSERT_WARNING, 1);
+<?hh
 
 class C {
   public function __construct() {
@@ -13,19 +10,26 @@ class C {
     return "toString";
   }
 }
+<<__EntryPoint>>
+function entrypoint_zend_assertions(): void {
 
-ini_set("zend.assertions", 1);
-$x = assert(false, new C);
-var_dump($x);
 
-echo "-\n";
+  assert_options(ASSERT_ACTIVE, 1);
+  assert_options(ASSERT_WARNING, 1);
 
-ini_set("zend.assertions", 0);
-$x = assert(false, new C);
-var_dump($x);
+  ini_set("zend.assertions", 1);
+  $x = assert(false, new C);
+  var_dump($x);
 
-ini_set("zend.assertions", -1);
-var_dump(ini_get("zend.assertions"));
+  echo "-\n";
 
-$f = 'assert';
-$f(false, new C);
+  ini_set("zend.assertions", 0);
+  $x = assert(false, new C);
+  var_dump($x);
+
+  ini_set("zend.assertions", -1);
+  var_dump(ini_get("zend.assertions"));
+
+  $f = 'assert';
+  $f(false, new C);
+}

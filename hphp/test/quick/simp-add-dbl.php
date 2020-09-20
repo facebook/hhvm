@@ -27,7 +27,7 @@ function foo6() {
 function foo7() {
   return 6 + INF;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1(true));
 var_dump(foo2());
 var_dump(foo3());
@@ -35,3 +35,4 @@ var_dump(foo4());
 var_dump(foo5());
 var_dump(foo6());
 var_dump(foo7());
+}

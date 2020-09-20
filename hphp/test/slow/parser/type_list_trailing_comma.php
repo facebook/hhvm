@@ -32,4 +32,8 @@ function f8(): Vector<(function(int): int)> {
   return Vector {(int $a) ==> $a};
 }
 
+
+<<__EntryPoint>>
+function main_type_list_trailing_comma() {
 echo 'Done';
+}

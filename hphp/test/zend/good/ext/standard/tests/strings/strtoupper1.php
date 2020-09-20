@@ -1,9 +1,9 @@
-<?php
-/* Prototype: 
+<?hh
+/* Prototype:
      string strtoupper ( string $string );
-   Description: 
-     Returns string with all alphabetic characters converted to uppercase
-*/ 
+   Description:
+     Returns string with all alphabetic characters converted to uppercase */
+<<__EntryPoint>> function main(): void {
 if( substr(PHP_OS, 0, 3) == 'WIN') {
   setlocale(LC_ALL, 'C');
 } else {
@@ -21,25 +21,25 @@ $str = "Mary Had A liTTle LAmb and ShE loveD IT So\n";
 var_dump(strtoupper($str));
 
 echo "\n*** Testing strtoupper() with various strings ***";
-/* strings to pass strtoupper() */ 
-$strings = array (
+/* strings to pass strtoupper() */
+$strings = varray [
   "",
   "string",
   "stRINg0234",
   "1.233.344StrinG12333",
   "$$$$$$!!!!@@@@@@@ ABCDEF !!!***",
-  "ABCD\0abcdABCD", 
+  "ABCD\0abcdABCD",
   NULL,
   TRUE,
   FALSE,
-  array()
-);
+  varray[]
+];
 
 $count = 0;
 /* loop through to check possible variations */
 foreach ($strings as $string) {
   echo "\n-- Iteration $count --\n";
-  var_dump( strtoupper($string) );
+  try { var_dump( strtoupper($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $count++;
 }
 
@@ -50,8 +50,8 @@ else
   echo "strings are not same\n";
 
 echo "\n*** Testing error conditions ***";
-var_dump( strtoupper() ); /* Zero arguments */
-var_dump( strtoupper("a", "b") ); /* Arguments > Expected */
+try { var_dump( strtoupper() ); /* Zero arguments */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( strtoupper("a", "b") ); /* Arguments > Expected */ } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "*** Done ***";
-?>
+}

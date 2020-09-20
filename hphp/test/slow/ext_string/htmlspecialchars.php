@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -35,15 +35,15 @@ function test_htmlspecialchars() {
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT), $zfoo);
 
   VS(fb_htmlspecialchars("abcdef'\"{}@gz", ENT_QUOTES,
-                           "", array("z")),
+                           "", varray["z"]),
      "abcdef&#039;&quot;&#123;&#125;&#064;g&#122;");
 
   VS(fb_htmlspecialchars("abcdef'\"".u('\u00a1\uabcd'), ENT_FB_UTF8,
-                           "", array("d")),
+                           "", varray["d"]),
      "abc&#100;ef&#039;&quot;&#xa1;&#xabcd;");
 
   VS(fb_htmlspecialchars("abcdef'\"".u('\u00a1\uabcd'), ENT_FB_UTF8_ONLY,
-                           "", array("d")),
+                           "", varray["d"]),
      "abcdef'\"&#xa1;&#xabcd;");
 
   // The rest here expects RuntimeOption::Utf8izeReplace = true;
@@ -58,13 +58,13 @@ function test_htmlspecialchars() {
     "\xe0\x80\xbc".
     "\xc2";
   $tmp = $input;
-  fb_utf8ize($tmp);
+  fb_utf8ize(inout $tmp);
   $sanitized = $tmp;
 
-  VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", array()),
+  VS(fb_htmlspecialchars($input, ENT_QUOTES, "UtF-8", varray[]),
      $sanitized);
 
-  VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", array()),
+  VS(fb_htmlspecialchars($input, ENT_FB_UTF8, "utf-8", varray[]),
      '&#xa1;&#xfffd;A'.
      '&#x561;&#xfffd;&#xfffd;'.
      '&#x3862;&#xfffd;&#xfffd;'.
@@ -74,11 +74,15 @@ function test_htmlspecialchars() {
      '&#xfffd;'.
      '&#xfffd;');
 
-  VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", array()),
+  VS(fb_htmlspecialchars($sanitized, ENT_QUOTES, "", varray[]),
      $sanitized);
 
   VS(fb_htmlspecialchars($zfoo, ENT_COMPAT, "UTF-8"), u('\ufffd')."foo");
 }
 
+
+<<__EntryPoint>>
+function main_htmlspecialchars() {
 test_htmlspecialchars_decode();
 test_htmlspecialchars();
+}

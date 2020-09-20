@@ -1,8 +1,9 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_DOMProcessingInstruction extends DOMProcessingInstruction {
   public $___x;
 }
-test("DOMProcessingInstruction", "Foo");
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("DOMProcessingInstruction", "Foo");
+}

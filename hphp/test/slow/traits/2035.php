@@ -1,17 +1,17 @@
-<?php
+<?hh
 
 trait TestTrait {
-	public static function test() {
-		return __TRAIT__;
-	}
+    public static function test() {
+        return __TRAIT__;
+    }
 }
 
 class Direct {
-	use TestTrait;
+    use TestTrait;
 }
 
 class IndirectInheritance extends Direct {
-  
+
 }
 
 trait TestTraitIndirect {
@@ -21,9 +21,8 @@ trait TestTraitIndirect {
 class Indirect {
   use TestTraitIndirect;
 }
-
+<<__EntryPoint>> function main(): void {
 echo Direct::test()."\n";
 echo IndirectInheritance::test()."\n";
 echo Indirect::test()."\n";
-
-?>
+}

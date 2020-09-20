@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FIXUP_H_
-#define incl_HPHP_FIXUP_H_
+#pragma once
 
 #include <vector>
 #include "hphp/runtime/vm/jit/types.h"
@@ -53,7 +52,12 @@ namespace HPHP { namespace jit {
  *     and an offset from the start of the func for pc.  In the case of
  *     resumable frames the sp offset is relative to Stack::resumableStackBase.
  *
- *   - IndirectFixup: this is used for some shared stubs in the TC.
+ *   - IndirectFixup:
+ *
+ *     This can be used for some shared stubs in the TC, to avoid
+ *     setting up a full frame, on architectures where the calee's
+ *     frame is stored immediately under the caller's sp (currently
+ *     true of x64 but not arm or ppc).
  *
  *     In this case, some JIT'd code associated with the ActRec* we found made
  *     a call to a shared stub, and then that stub called C++.  The
@@ -62,9 +66,10 @@ namespace HPHP { namespace jit {
  *     shared stub can be found.  I.e., we're trying to chase back two return
  *     ips into the TC.
  *
- *     Note that this means IndirectFixups will not work for C++ code paths
- *     that need to do a fixup without making at least one other C++ call, but
- *     for the current use case this is fine.
+ *     Note that this means IndirectFixups will not work for C++ code
+ *     paths that need to do a fixup without making at least one other
+ *     C++ call (because of -momit-leaf-frame-pointers), but for the
+ *     current use case this is fine.
  *
  *     Here's a picture of the native stack in the indirect fixup situation:
  *
@@ -115,7 +120,14 @@ struct Fixup {
 
   Fixup() {}
 
-  bool isValid() const { return pcOffset >= 0 && spOffset >= 0; }
+  bool isValid() const { return spOffset >= 0; }
+
+  bool operator==(const Fixup& o) const {
+    return pcOffset == o.pcOffset && spOffset == o.spOffset;
+  }
+  bool operator!=(const Fixup& o) const {
+    return pcOffset != o.pcOffset || spOffset != o.spOffset;
+  }
 
   int32_t pcOffset{-1};
   int32_t spOffset{-1};
@@ -146,10 +158,12 @@ const Fixup* findFixup(CTCA tca);
 size_t size();
 
 /*
- * Perform a fixup of the VM registers of ec for a stack whose first frame is
- * rbp.
+ * Perform a fixup of the VM registers for a stack whose first frame is `rbp`.
+ *
+ * Returns whether we successfully performed the fixup.  (We assert on failure
+ * if `soft` is not set).
  */
-void fixupWork(ExecutionContext* ec, ActRec* rbp);
+bool fixupWork(ActRec* rbp, bool soft = false);
 
 /*
  * Returns true if calls to func should use an EagerVMRegAnchor.
@@ -158,19 +172,18 @@ bool eagerRecord(const Func* func);
 }
 
 namespace detail {
-void syncVMRegsWork(); // internal sync work for a dirty vm state
+void syncVMRegsWork(bool soft); // internal sync work for a dirty vm state
 }
 
 /*
  * Sync VM registers for the first TC frame in the callstack.
  */
-inline void syncVMRegs() {
+inline void syncVMRegs(bool soft = false) {
   if (tl_regState == VMRegState::CLEAN) return;
-  detail::syncVMRegsWork();
+  detail::syncVMRegsWork(soft);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

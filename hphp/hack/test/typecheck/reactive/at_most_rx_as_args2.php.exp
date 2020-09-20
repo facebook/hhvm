@@ -1,0 +1,2 @@
+File "at_most_rx_as_args2.php", line 4, characters 9-24:
+Function or method annotated with `<<__AtMostRxAsArgs>>` attribute should have at least one parameter with `<<__AtMostRxAsFunc>>` or `<<__OnlyRxIfImpl>>` annotations. (NastCheck[3064])

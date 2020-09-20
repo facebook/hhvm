@@ -1,0 +1,8 @@
+File "t26793216.php", line 7, characters 3-3:
+Some type constraint(s) here are violated (Typing[4110])
+File "t26793216.php", line 4, characters 12-13:
+'T1' is a constrained type parameter
+File "t26793216.php", line 4, characters 18-20:
+This is an int
+File "t26793216.php", line 6, characters 27-28:
+It is incompatible with a value of generic type T2

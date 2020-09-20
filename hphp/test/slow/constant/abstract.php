@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface i1 {
   abstract const con;
 }
@@ -19,4 +19,8 @@ class b extends a {
     echo "Pass\n";
   }
 }
+
+<<__EntryPoint>>
+function main_abstract() {
 (new b)->main();
+}

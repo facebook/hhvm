@@ -33,11 +33,13 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/optimize.h"
+#include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/wide-func.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -50,7 +52,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_invoke("__invoke");
-const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -83,7 +84,7 @@ struct WorkResult {
     , cls(std::move(cls))
   {}
 
-  explicit WorkResult(FuncAnalysis func)
+  explicit WorkResult(FuncAnalysisResult func)
     : type(WorkType::Func)
     , func(std::move(func))
   {}
@@ -92,8 +93,12 @@ struct WorkResult {
     : type(wr.type)
   {
     switch (type) {
-    case WorkType::Class: new (&cls) ClassAnalysis(std::move(wr.cls));  break;
-    case WorkType::Func:  new (&func) FuncAnalysis(std::move(wr.func)); break;
+    case WorkType::Class:
+      new (&cls) ClassAnalysis(std::move(wr.cls));
+      break;
+    case WorkType::Func:
+      new (&func) FuncAnalysisResult(std::move(wr.func));
+      break;
     }
   }
 
@@ -112,7 +117,7 @@ struct WorkResult {
       cls.~ClassAnalysis();
       break;
     case WorkType::Func:
-      func.~FuncAnalysis();
+      func.~FuncAnalysisResult();
       break;
     }
   }
@@ -120,43 +125,31 @@ struct WorkResult {
   WorkType type;
   union {
     ClassAnalysis cls;
-    FuncAnalysis func;
+    FuncAnalysisResult func;
   };
 };
 
 //////////////////////////////////////////////////////////////////////
 
-// Return a Context for every function in the Program.
-std::vector<Context> all_function_contexts(const php::Program& program) {
-  std::vector<Context> ret;
-
-  for (auto& u : program.units) {
-    for (auto& c : u->classes) {
-      for (auto& m : c->methods) {
-        ret.push_back(Context { borrow(u), borrow(m), borrow(c)});
-      }
-    }
-    for (auto& f : u->funcs) {
-      ret.push_back(Context { borrow(u), borrow(f) });
-    }
-    if (options.AnalyzePseudomains) {
-      ret.push_back(Context { borrow(u), borrow(u->pseudomain) });
+template<typename F>
+void all_unit_contexts(const php::Unit* u, F&& fun) {
+  for (auto& c : u->classes) {
+    for (auto& m : c->methods) {
+      fun(Context { u, m.get(), c.get()});
     }
   }
-  return ret;
+  for (auto& f : u->funcs) {
+    fun(Context { u, f.get() });
+  }
 }
 
-std::vector<Context> const_pass_contexts(const php::Program& program,
-                                         php::Program::CInit ci) {
+std::vector<Context> const_pass_contexts(const php::Program& program) {
   std::vector<Context> ret;
   ret.reserve(program.constInits.size());
-  program.constInits.foreach([&](uintptr_t f) {
-      if (f & ci) {
-        auto const func = static_cast<php::Func*>(
-          reinterpret_cast<void*>(f & ~php::Program::ForAll));
-        ret.push_back(Context { func->unit, func, func->cls });
-      }
-    });
+  for (auto func : program.constInits) {
+    assertx(func);
+    ret.push_back(Context { func->unit, func, func->cls });
+  }
   return ret;
 }
 
@@ -167,18 +160,7 @@ std::vector<WorkItem> initial_work(const php::Program& program,
   std::vector<WorkItem> ret;
 
   if (mode == AnalyzeMode::ConstPass) {
-    auto const ctxs = const_pass_contexts(program, php::Program::ForAnalyze);
-    std::transform(begin(ctxs), end(ctxs), std::back_inserter(ret),
-      [&] (Context ctx) { return WorkItem { WorkType::Func, ctx }; }
-    );
-    return ret;
-  }
-  /*
-   * If we're not doing private property inference, schedule only
-   * function-at-a-time work items.
-   */
-  if (!options.HardPrivatePropInference) {
-    auto const ctxs = all_function_contexts(program);
+    auto const ctxs = const_pass_contexts(program);
     std::transform(begin(ctxs), end(ctxs), std::back_inserter(ret),
       [&] (Context ctx) { return WorkItem { WorkType::Func, ctx }; }
     );
@@ -186,6 +168,18 @@ std::vector<WorkItem> initial_work(const php::Program& program,
   }
 
   for (auto& u : program.units) {
+    /*
+     * If we're not doing private property inference, schedule only
+     * function-at-a-time work items.
+     */
+    if (!options.HardPrivatePropInference) {
+      all_unit_contexts(u.get(), [&] (Context&& c) {
+          ret.emplace_back(WorkType::Func, std::move(c));
+        }
+      );
+      continue;
+    }
+
     for (auto& c : u->classes) {
       if (c->closureContextCls) {
         // For class-at-a-time analysis, closures that are associated
@@ -195,45 +189,56 @@ std::vector<WorkItem> initial_work(const php::Program& program,
       if (is_used_trait(*c)) {
         for (auto& f : c->methods) {
           ret.emplace_back(WorkType::Func,
-                           Context { borrow(u), borrow(f), f->cls });
+                           Context { u.get(), f.get(), f->cls });
         }
       } else {
         ret.emplace_back(WorkType::Class,
-                         Context { borrow(u), nullptr, borrow(c) });
+                         Context { u.get(), nullptr, c.get() });
       }
     }
     for (auto& f : u->funcs) {
-      ret.emplace_back(WorkType::Func, Context { borrow(u), borrow(f) });
-    }
-    if (options.AnalyzePseudomains) {
-      ret.emplace_back(
-        WorkType::Func,
-        Context { borrow(u), borrow(u->pseudomain) }
-      );
+      ret.emplace_back(WorkType::Func, Context { u.get(), f.get() });
     }
   }
   return ret;
 }
 
-WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
-  if (auto const cls = d.right()) {
-    assertx(mode != AnalyzeMode::ConstPass &&
-            options.HardPrivatePropInference &&
-            !is_used_trait(*cls));
-    return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
+std::vector<Context> opt_prop_type_hints_contexts(const php::Program& program) {
+  std::vector<Context> ret;
+  for (auto& u : program.units) {
+    for (auto& c : u->classes) {
+      ret.emplace_back(Context { u.get(), nullptr, c.get() });
+    }
   }
+  return ret;
+}
 
-  auto const func = d.left();
-  assertx(func);
-  auto const cls = !func->cls ? nullptr :
-    func->cls->closureContextCls ?
-    func->cls->closureContextCls : func->cls;
-  assertx(!cls ||
-          mode == AnalyzeMode::ConstPass ||
-          !options.HardPrivatePropInference ||
-          is_used_trait(*cls));
-
-  return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
+WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
+  switch (d.tag()) {
+    case DependencyContextType::Class: {
+      auto const cls = (const php::Class*)d.ptr();
+      assertx(mode != AnalyzeMode::ConstPass &&
+              options.HardPrivatePropInference &&
+              !is_used_trait(*cls));
+      return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
+    }
+    case DependencyContextType::Func: {
+      auto const func = (const php::Func*)d.ptr();
+      auto const cls = !func->cls ? nullptr :
+        func->cls->closureContextCls ?
+        func->cls->closureContextCls : func->cls;
+      assertx(!cls ||
+              mode == AnalyzeMode::ConstPass ||
+              !options.HardPrivatePropInference ||
+              is_used_trait(*cls));
+      return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
+    }
+    case DependencyContextType::PropName:
+      // We only record dependencies on static property names. We don't schedule
+      // any work on their behalf.
+      break;
+  }
+  always_assert(false);
 }
 
 /*
@@ -278,7 +283,7 @@ void analyze_iteratively(Index& index, php::Program& program,
 
   auto work = initial_work(program, mode);
   while (!work.empty()) {
-    auto const results = [&] {
+    auto results = [&] {
       trace_time trace(
         "analyzing",
         folly::format("round {} -- {} work items", round, work.size()).str()
@@ -289,14 +294,12 @@ void analyze_iteratively(Index& index, php::Program& program,
         // DefaultConstructible.
         [&] (const WorkItem& wi) -> folly::Optional<WorkResult> {
           switch (wi.type) {
-          case WorkType::Func:
+          case WorkType::Func: {
             ++total_funcs;
-            return WorkResult {
-              analyze_func(index, wi.ctx,
-                           mode == AnalyzeMode::ConstPass ?
-                           CollectionOpts{} :
-                           CollectionOpts::TrackConstantArrays)
-            };
+            auto const wf = php::WideFunc::cns(wi.ctx.func);
+            auto const ctx = AnalysisContext { wi.ctx.unit, wf, wi.ctx.cls };
+            return WorkResult { analyze_func(index, ctx, CollectionOpts{}) };
+          }
           case WorkType::Class:
             ++total_classes;
             return WorkResult { analyze_class(index, wi.ctx) };
@@ -309,17 +312,28 @@ void analyze_iteratively(Index& index, php::Program& program,
     ++round;
     trace_time update_time("updating");
 
-    DependencyContextSet deps;
+    std::vector<DependencyContextSet> deps_vec{parallel::num_threads};
 
-    auto update_func = [&] (const FuncAnalysis& fa) {
-      index.refine_effect_free(fa.ctx.func, fa.effectFree);
-      index.refine_return_type(fa.ctx.func, fa.inferredReturn, deps);
+    auto update_func = [&] (FuncAnalysisResult& fa,
+                            DependencyContextSet& deps) {
+      SCOPE_ASSERT_DETAIL("update_func") {
+        return "Updating Func: " + show(fa.ctx);
+      };
+      // This const_cast is safe since no two threads update the same Func.
+      auto func = php::WideFunc::mut(const_cast<php::Func*>(fa.ctx.func));
+      index.refine_return_info(fa, deps);
       index.refine_constants(fa, deps);
-      index.refine_local_static_types(fa.ctx.func, fa.localStaticTypes);
+      update_bytecode(func, std::move(fa.blockUpdates));
+
+      if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
+        index.record_public_static_mutations(
+          *func,
+          std::move(fa.publicSPropMutations)
+        );
+      }
+
       if (fa.resolvedConstants.size()) {
-        index.refine_class_constants(fa.ctx,
-                                     fa.resolvedConstants,
-                                     deps);
+        index.refine_class_constants(fa.ctx, fa.resolvedConstants, deps);
       }
       for (auto& kv : fa.closureUseTypes) {
         assert(is_closure(*kv.first));
@@ -336,90 +350,75 @@ void analyze_iteratively(Index& index, php::Program& program,
       }
     };
 
-    auto update_class = [&] (const ClassAnalysis& ca) {
-      index.refine_private_props(ca.ctx.cls,
-                                 ca.privateProperties);
-      index.refine_private_statics(ca.ctx.cls,
-                                   ca.privateStatics);
-      for (auto& fa : ca.methods)  update_func(fa);
-      for (auto& fa : ca.closures) update_func(fa);
+    auto update_class = [&] (ClassAnalysis& ca,
+                             DependencyContextSet& deps) {
+      {
+        SCOPE_ASSERT_DETAIL("update_class") {
+          return "Updating Class: " + show(ca.ctx);
+        };
+        index.refine_private_props(ca.ctx.cls,
+                                   ca.privateProperties);
+        index.refine_private_statics(ca.ctx.cls,
+                                     ca.privateStatics);
+        index.refine_bad_initial_prop_values(ca.ctx.cls,
+                                             ca.badPropInitialValues,
+                                             deps);
+      }
+      for (auto& fa : ca.methods)  update_func(fa, deps);
+      for (auto& fa : ca.closures) update_func(fa, deps);
     };
 
-    for (auto& result : results) {
-      switch (result->type) {
-      case WorkType::Func:
-        update_func(result->func);
-        break;
-      case WorkType::Class:
-        update_class(result->cls);
-        break;
+    parallel::for_each(
+      results,
+      [&] (auto& result, size_t worker) {
+        assertx(worker < deps_vec.size());
+        switch (result->type) {
+          case WorkType::Func:
+            update_func(result->func, deps_vec[worker]);
+            break;
+          case WorkType::Class:
+            update_class(result->cls, deps_vec[worker]);
+            break;
+        }
+      }
+    );
+
+    {
+      trace_time _("merging deps");
+      for (auto& deps : deps_vec) {
+        if (&deps == &deps_vec[0]) continue;
+        for (auto& d : deps) deps_vec[0].insert(d);
+        deps.clear();
       }
     }
 
-    index.update_class_aliases();
+    auto& deps = deps_vec[0];
+
+    if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
+      index.refine_public_statics(deps);
+    }
+
     work.clear();
     work.reserve(deps.size());
     for (auto& d : deps) work.push_back(work_item_for(d, mode));
   }
 }
 
-void constant_pass(Index& index, php::Program& program) {
-  if (!options.HardConstProp) return;
-  index.use_class_dependencies(false);
-  analyze_iteratively(index, program, AnalyzeMode::ConstPass);
+void prop_type_hint_pass(Index& index, php::Program& program) {
+  trace_time tracer("optimize prop type-hints");
 
-  auto save = options.InsertAssertions;
-  options.InsertAssertions = false;
-  index.freeze();
-
-  trace_time optimize_constants("optimize constants");
+  auto const contexts = opt_prop_type_hints_contexts(program);
   parallel::for_each(
-    const_pass_contexts(program, php::Program::ForAll),
-    [&] (Context ctx) {
-      optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), false);
-    }
+    contexts,
+    [&] (Context ctx) { optimize_class_prop_type_hints(index, ctx); }
   );
 
-  index.thaw();
-  options.InsertAssertions = save;
-}
-
-void analyze_public_statics(Index& index, php::Program& program) {
-  PublicSPropIndexer publicStatics{&index};
-
-  {
-    trace_time timer("analyze public statics");
-    parallel::for_each(
-      all_function_contexts(program),
-      [&] (Context ctx) {
-        if (ctx.cls && ctx.cls->closureContextCls) {
-          ctx.cls = ctx.cls->closureContextCls;
-        }
-        auto info = CollectedInfo {
-          index, ctx, nullptr, &publicStatics,
-          CollectionOpts::TrackConstantArrays
-        };
-        analyze_func_collect(index, ctx, info);
-      }
-    );
-  }
-
-  trace_time update("update public statics");
-  index.refine_public_statics(publicStatics);
-}
-
-void mark_persistent_static_properties(const Index& index,
-                                       php::Program& program) {
-  trace_time update("mark persistent static properties");
-  for (auto& unit : program.units) {
-    for (auto& cls : unit->classes) {
-      for (auto& prop : cls->properties) {
-        if (index.lookup_public_static_immutable(borrow(cls), prop.name)) {
-          prop.attrs |= AttrPersistent;
-        }
-      }
+  parallel::for_each(
+    contexts,
+    [&] (Context ctx) {
+      index.mark_no_bad_redeclare_props(const_cast<php::Class&>(*ctx.cls));
     }
-  }
+  );
 }
 
 /*
@@ -436,46 +435,43 @@ void mark_persistent_static_properties(const Index& index,
  * bytecode/Blocks, because other threads may be doing unlocked
  * queries to php::Func and php::Class structures.
  */
-void final_pass(Index& index, php::Program& program) {
-  trace_time final_pass("final pass");
-  index.freeze();
-  parallel::for_each(
-    all_function_contexts(program),
-    [&] (Context ctx) {
-      optimize_func(index,
-                    analyze_func(index,
-                                 ctx,
-                                 CollectionOpts::TrackConstantArrays),
-                    true);
-    }
-  );
-}
-
-//////////////////////////////////////////////////////////////////////
-
-template<class Container>
-std::unique_ptr<php::Program> parse_program(Container units) {
-  trace_time tracer("parse");
-  auto ret = std::make_unique<php::Program>(units.size());
-  ret->units = parallel::map(
-    units,
-    [&] (std::unique_ptr<UnitEmitter>& ue) {
-      return parse_unit(*ret, std::move(ue));
-    }
-  );
-  return ret;
-}
-
 template<typename F>
-void make_unit_emitters(
-  const Index& index,
-  const php::Program& program,
-  F outFunc) {
-  trace_time trace("make_unit_emitters");
-  return parallel::for_each(
+void final_pass(Index& index,
+                php::Program& program,
+                const StatsHolder& stats,
+                F emitUnit) {
+  trace_time final_pass("final pass");
+  LitstrTable::fini();
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+  index.freeze();
+  auto const dump_dir = debug_dump_to();
+  parallel::for_each(
     program.units,
-    [&] (const std::unique_ptr<php::Unit>& unit) {
-      outFunc(emit_unit(index, *unit));
+    [&] (std::unique_ptr<php::Unit>& unit) {
+      // optimize_func can remove 86*init methods from classes, so we
+      // have to save the contexts for now.
+      std::vector<Context> contexts;
+      all_unit_contexts(unit.get(), [&] (Context&& ctx) {
+          contexts.push_back(std::move(ctx));
+        }
+      );
+      for (auto const& context : contexts) {
+        // This const_cast is safe since no two threads update the same Func.
+        auto func = php::WideFunc::mut(const_cast<php::Func*>(context.func));
+        auto const ctx = AnalysisContext { context.unit, func, context.cls };
+        optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
+      }
+      assert(check(*unit));
+      state_after("optimize", *unit);
+      if (!dump_dir.empty()) {
+        if (Trace::moduleEnabledRelease(Trace::hhbbc_dump, 2)) {
+          dump_representation(dump_dir, unit.get());
+        }
+        dump_index(dump_dir, index, unit.get());
+      }
+      collect_stats(stats, index, unit.get());
+      emitUnit(*unit);
     }
   );
 }
@@ -523,63 +519,101 @@ void UnitEmitterQueue::reset() {
 
 //////////////////////////////////////////////////////////////////////
 
-void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
+namespace php {
+
+void ProgramPtr::clear() { delete m_program; }
+
+}
+
+php::ProgramPtr make_program() {
+  return php::ProgramPtr{ new php::Program };
+}
+
+void add_unit_to_program(const UnitEmitter* ue, php::Program& program) {
+  parse_unit(program, ue);
+}
+
+void whole_program(php::ProgramPtr program,
                    UnitEmitterQueue& ueq,
                    std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
                    int num_threads) {
   trace_time tracer("whole program");
 
-  RuntimeOption::EvalLowStaticArrays = false;
+  if (options.TestCompression || RO::EvalHHBBCTestCompression) {
+    php::testCompression(*program);
+  }
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
   }
 
-  auto program = parse_program(std::move(ues));
-
   state_after("parse", *program);
 
-  folly::Optional<Index> index;
-  index.emplace(borrow(program));
-  if (!options.NoOptimizations) {
-    while (true) {
-      try {
-        assert(check(*program));
-        constant_pass(*index, *program);
-        index->use_class_dependencies(options.HardPrivatePropInference);
-        analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
-        if (options.AnalyzePublicStatics) {
-          analyze_public_statics(*index, *program);
-          analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
-        }
-        final_pass(*index, *program);
-        index->mark_persistent_classes_and_functions(*program);
-        state_after("optimize", *program);
-        break;
-      } catch (Index::rebuild& rebuild) {
-        FTRACE(1, "whole_program: rebuilding index\n");
-        index.emplace(borrow(program), &rebuild);
-        continue;
-      }
+  Index index(program.get());
+  auto stats = allocate_stats();
+  auto emitUnit = [&] (php::Unit& unit) {
+    auto ue = emit_unit(index, unit);
+    if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
+      fprintf(
+        stderr,
+        "The optimized unit for %s did not pass verification, "
+        "bailing because Eval.AbortBuildOnVerifyError is set\n",
+        ue->m_filepath->data()
+      );
+      _Exit(1);
     }
-  }
-
-  if (options.AnalyzePublicStatics) {
-    mark_persistent_static_properties(*index, *program);
-  }
-
-  debug_dump_program(*index, *program);
-  print_stats(*index, *program);
-
-  LitstrTable::fini();
-  LitstrTable::init();
-  LitstrTable::get().setWriting();
-  make_unit_emitters(*index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
     ueq.push(std::move(ue));
-  });
-  LitstrTable::get().setReading();
-  arrTable = std::move(index->array_table_builder());
+  };
+
+  std::thread cleanup_pre;
+  if (!options.NoOptimizations) {
+    assert(check(*program));
+    prop_type_hint_pass(index, *program);
+    index.rewrite_default_initial_values(*program);
+    index.use_class_dependencies(false);
+    analyze_iteratively(index, *program, AnalyzeMode::ConstPass);
+    // Defer initializing public static property types until after the
+    // constant pass, to try to get better initial values.
+    index.init_public_static_prop_types();
+    index.use_class_dependencies(options.HardPrivatePropInference);
+    analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
+    cleanup_pre = std::thread([&] { index.cleanup_for_final(); });
+    index.join_iface_vtable_thread();
+    if (parallel::num_threads > parallel::final_threads) {
+      parallel::num_threads = parallel::final_threads;
+    }
+    final_pass(index, *program, stats, emitUnit);
+  } else {
+    debug_dump_program(index, *program);
+    index.join_iface_vtable_thread();
+    parallel::for_each(
+      program->units,
+      [&] (const std::unique_ptr<php::Unit>& unit) {
+        collect_stats(stats, index, unit.get());
+        emitUnit(*unit);
+      }
+    );
+  }
+
+  auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+  // running cleanup_for_emit can take a while... start it as early as
+  // possible, and run in its own thread.
+  auto cleanup_post = std::thread([&] {
+      auto const enable =
+        logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
+      Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
+      index.cleanup_post_emit();
+    }
+  );
+
+  print_stats(stats);
+
+  arrTable = std::move(index.array_table_builder());
   ueq.push(nullptr);
+  cleanup_pre.join();
+  cleanup_post.join();
+
+  summarize_memory();
 }
 
 //////////////////////////////////////////////////////////////////////

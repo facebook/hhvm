@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 class C { function heh() { echo "heh\n"; } }
-function foo() { return array(); }
+function foo() { return darray[]; }
 function bar() {
   $x = foo();
   $x['a'] = new C;
@@ -11,4 +11,8 @@ function main() {
   $y = bar()['a'];
   $y->heh();
 }
+
+<<__EntryPoint>>
+function main_array_039() {
 main();
+}

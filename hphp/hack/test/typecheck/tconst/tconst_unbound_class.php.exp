@@ -1,0 +1,4 @@
+File "tconst_unbound_class.php--file1.php", line 5, characters 18-18:
+Unbound name: `D` (Naming[2049])
+File "tconst_unbound_class.php--file1.php", line 5, characters 18-18:
+Unbound name `D` in type constant access (Typing[4384])

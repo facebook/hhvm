@@ -1,0 +1,6 @@
+File "array_map2.php", line 8, characters 13-14:
+Invalid argument (Typing[4040])
+File "array_map2.php", line 4, characters 3-23:
+Too few arguments
+File "stdlib/builtins_array.hhi", line 118, characters 20-28:
+Because of this definition

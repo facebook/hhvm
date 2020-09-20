@@ -5,5 +5,7 @@ interface I {
 class C implements I {
   function foo() { echo "foo\n"; }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $obj->foo();
+}

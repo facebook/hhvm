@@ -1,6 +1,6 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $obj = new ReflectionExtension('reflection');
-$test = $obj instanceof ReflectionExtension;
+$test = $obj is ReflectionExtension;
 var_dump($test);
-?>
-==DONE==
+echo "==DONE==";
+}

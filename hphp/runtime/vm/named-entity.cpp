@@ -35,6 +35,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+rds::Handle NamedEntity::getFuncHandle(const StringData* name) const {
+  auto const mode =
+    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+  m_cachedFunc.bind(mode, rds::LinkName{"NEFunc", name});
+  return m_cachedFunc.handle();
+}
+
 void NamedEntity::setCachedFunc(Func* f) {
   *m_cachedFunc = f;
   if (m_cachedFunc.isNormal()) {
@@ -42,10 +49,18 @@ void NamedEntity::setCachedFunc(Func* f) {
   }
 }
 
-Func* NamedEntity::getCachedFunc() const {
-  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
-    ? *m_cachedFunc
-    : nullptr;
+rds::Handle NamedEntity::getClassHandle(const StringData* name) const {
+  auto const mode =
+    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+  m_cachedClass.bind(mode, rds::LinkName{"NEClass", name});
+  return m_cachedClass.handle();
+}
+
+rds::Handle NamedEntity::getRecordDescHandle(const StringData* name) const {
+  auto const mode =
+    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+  m_cachedRecordDesc.bind(mode, rds::LinkName{"NERecord", name});
+  return m_cachedRecordDesc.handle();
 }
 
 void NamedEntity::setCachedClass(Class* f) {
@@ -55,17 +70,18 @@ void NamedEntity::setCachedClass(Class* f) {
   }
 }
 
-Class* NamedEntity::getCachedClass() const {
-  return LIKELY(m_cachedClass.bound() && m_cachedClass.isInit())
-    ? *m_cachedClass
-    : nullptr;
+void NamedEntity::setCachedRecordDesc(RecordDesc* r) {
+  *m_cachedRecordDesc = r;
+  if (m_cachedRecordDesc.isNormal()) {
+    r ? m_cachedRecordDesc.markInit() : m_cachedRecordDesc.markUninit();
+  }
 }
 
 bool NamedEntity::isPersistentTypeAlias() const {
   return m_cachedTypeAlias.bound() && m_cachedTypeAlias.isPersistent();
 }
 
-void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
+void NamedEntity::setCachedTypeAlias(const TypeAlias& td) {
   if (!m_cachedTypeAlias.isInit()) {
     m_cachedTypeAlias.initWith(td);
   } else {
@@ -73,7 +89,7 @@ void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
   }
 }
 
-const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
+const TypeAlias* NamedEntity::getCachedTypeAlias() const {
   return m_cachedTypeAlias.bound() &&
          m_cachedTypeAlias.isInit() &&
          m_cachedTypeAlias->name
@@ -81,31 +97,68 @@ const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
     : nullptr;
 }
 
-void NamedEntity::pushClass(Class* cls) {
-  assert(!cls->m_nextClass);
-  cls->m_nextClass = m_clsList;
-  m_clsList = cls;
+void NamedEntity::setCachedReifiedGenerics(ArrayData* a) {
+  if (!m_cachedReifiedGenerics.isInit()) {
+    m_cachedReifiedGenerics.initWith(a);
+  } else {
+    *m_cachedReifiedGenerics = a;
+  }
 }
 
-void NamedEntity::removeClass(Class* goner) {
-  Class* head = m_clsList;
-  if (!head) return;
-
+namespace {
+template<typename T>
+typename std::enable_if<std::is_same<T, Class>::value, void>::type
+deregister(T* goner) {
   if (RuntimeOption::EvalEnableReverseDataMap) {
     // This deregisters Classes registered to data_map in Unit::defClass().
     data_map::deregister(goner);
   }
+}
+template<typename T>
+typename std::enable_if<!std::is_same<T, Class>::value, void>::type
+deregister(T* goner) {}
+
+template<class T>
+void pushImpl(T* type, NamedEntity::ListType<T>& list) {
+  assertx(type->m_next == nullptr);
+  type->m_next = list;
+  list = type;
+}
+
+template<class T>
+void removeImpl(T* goner, NamedEntity::ListType<T>& list) {
+  T* head = list;
+  if (!head) return;
+
+  deregister(goner);
 
   if (head == goner) {
-    m_clsList = head->m_nextClass;
+    list = head->m_next;
     return;
   }
-  LowPtr<Class>* cls = &head->m_nextClass;
-  while (cls->get() != goner) {
-    assert(*cls);
-    cls = &(*cls)->m_nextClass;
+  auto t = &(head->m_next);
+  while (t->get() != goner) {
+    assertx(*t);
+    t = &((*t)->m_next);
   }
-  *cls = goner->m_nextClass;
+  *t = goner->m_next;
+}
+}
+
+void NamedEntity::pushRecordDesc(RecordDesc* rec) {
+  pushImpl(rec, m_recordList);
+}
+
+void NamedEntity::removeRecordDesc(RecordDesc* goner) {
+  removeImpl(goner, m_recordList);
+}
+
+void NamedEntity::pushClass(Class* cls) {
+  pushImpl(cls, m_clsList);
+}
+
+void NamedEntity::removeClass(Class* goner) {
+  removeImpl(goner, m_clsList);
 }
 
 void NamedEntity::setUniqueFunc(Func* func) {
@@ -132,8 +185,8 @@ void initializeNamedDataMap() {
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
 
-  s_namedDataMap = new NamedEntity::Map(
-      RuntimeOption::EvalInitialNamedEntityTableSize, config);
+  s_namedDataMap = new (vm_malloc(sizeof(NamedEntity::Map)))
+    NamedEntity::Map(RuntimeOption::EvalInitialNamedEntityTableSize, config);
 }
 
 /*
@@ -161,27 +214,38 @@ NamedEntity* insertNamedEntity(const StringData* str) {
 NamedEntity* NamedEntity::get(const StringData* str,
                               bool allowCreate /* = true */,
                               String* normalizedStr /* = nullptr */) {
+  if (str->isSymbol()) {
+    if (auto const result = str->getNamedEntity()) return result;
+  }
+
   if (UNLIKELY(!s_namedDataMap)) {
     initializeNamedDataMap();
   }
 
-  auto it = s_namedDataMap->find(str);
-  if (LIKELY(it != s_namedDataMap->end())) {
-    return &it->second;
-  }
-
-  if (needsNSNormalization(str)) {
-    auto normStr = normalizeNS(StrNR(str).asString());
-    if (normalizedStr) {
-      *normalizedStr = normStr;
+  auto const result = [&]() -> NamedEntity* {
+    auto it = s_namedDataMap->find(str);
+    if (LIKELY(it != s_namedDataMap->end())) {
+      return &it->second;
     }
-    return get(normStr.get(), allowCreate, normalizedStr);
-  }
 
-  if (LIKELY(allowCreate)) {
-    return insertNamedEntity(str);
+    if (needsNSNormalization(str)) {
+      auto normStr = normalizeNS(StrNR(str).asString());
+      if (normalizedStr) {
+        *normalizedStr = normStr;
+      }
+      return get(normStr.get(), allowCreate, normalizedStr);
+    }
+
+    if (LIKELY(allowCreate)) {
+      return insertNamedEntity(str);
+    }
+    return nullptr;
+  }();
+
+  if (str->isSymbol() && result) {
+    const_cast<StringData*>(str)->setNamedEntity(result);
   }
-  return nullptr;
+  return result;
 }
 
 NamedEntity::Map* NamedEntity::table() {

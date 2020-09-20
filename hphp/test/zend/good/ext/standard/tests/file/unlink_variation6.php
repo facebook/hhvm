@@ -1,12 +1,20 @@
-<?php
+<?hh
 /* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file 
+ * Description: Delete a file
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+function f_exists($file) {
+   if (file_exists($file) == true) {
+      echo "$file exists\n";
+   }
+   else {
+      echo "$file doesn't exist\n";
+   }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing unlink() : variation: contexts and relative files ***\n";
-
+chdir(__SystemLib\hphp_test_tmproot());
 // test relative directories and stream contexts.
 $subdir = 'subdir';
 $testfile = $subdir.'/testfile.txt';
@@ -18,13 +26,5 @@ var_dump(unlink($testfile, $context));
 f_exists($testfile);
 rmdir($subdir);
 
-function f_exists($file) {
-   if (file_exists($file) == true) {
-      echo "$file exists\n";
-   }
-   else {
-      echo "$file doesn't exist\n";
-   }
-} 
-?>
-===DONE===
+echo "===DONE===\n";
+}

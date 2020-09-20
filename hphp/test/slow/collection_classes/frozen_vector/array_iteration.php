@@ -12,4 +12,8 @@ function main() {
 
 }
 
+
+<<__EntryPoint>>
+function main_array_iteration() {
 main();
+}

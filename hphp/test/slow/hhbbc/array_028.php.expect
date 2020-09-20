@@ -3,9 +3,9 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-array(1) {
+darray(1) {
   ["x"]=>
-  array(1) {
+  darray(1) {
     ["y"]=>
     int(3)
   }

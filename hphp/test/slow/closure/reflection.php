@@ -6,7 +6,11 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_reflection() {
 $func = Foo::getClosure();
 $reflection = new \ReflectionFunction($func);
-$result = $reflection->invokeArgs([]);
+$result = $reflection->invokeArgs(varray[]);
 var_dump($result);
+}

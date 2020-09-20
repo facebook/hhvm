@@ -1,13 +1,13 @@
-<?php 
-$vals = array(
-"	
+<?hh <<__EntryPoint>> function main(): void {
+$vals = varray[
+"
  ",
 " ",
 " 123",
 " 123.01 ",
-);
+];
 
 foreach ($vals as $var) {
-	var_dump(filter_var($var, FILTER_VALIDATE_FLOAT));
+    var_dump(filter_var($var, FILTER_VALIDATE_FLOAT));
 }
-?>
+}

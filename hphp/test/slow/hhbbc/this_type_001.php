@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   private $x = "string";
@@ -17,4 +17,8 @@ function main() {
   $foo = new Foo;
   return $foo->heh();
 }
+
+<<__EntryPoint>>
+function main_this_type_001() {
 echo main() . "\n";
+}

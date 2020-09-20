@@ -13,17 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CFG_H_
-#define incl_HHBBC_CFG_H_
+#pragma once
 
 #include <vector>
 
 #include <boost/variant/static_visitor.hpp>
 #include <boost/container/flat_set.hpp>
 
+#include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/bc.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -32,46 +31,14 @@ namespace HPHP { namespace HHBBC {
 namespace detail {
 
 template<class Fun>
-struct TargetVisitor : boost::static_visitor<void> {
-  explicit TargetVisitor(Fun f) : f(f) {}
-
-  template <class T>
-  typename std::enable_if<!has_target<T>::value, void>::type
-  operator()(T const& /*t*/) const {}
-
-  template<class T>
-  typename std::enable_if<has_target<T>::value,void>::type
-  operator()(T const& t) const { f(t.target); }
-
-  void operator()(const bc::Switch& b) const {
-    for (auto& t : b.targets) f(t);
-  }
-
-  void operator()(const bc::SSwitch& b) const {
-    for (auto& kv : b.targets) f(kv.second);
-  }
-
-private:
-  Fun f;
-};
-
-template<class Fun>
-void visitExnLeaves(const php::ExnNode& n, Fun f) {
-  for (auto& c : n.children) visitExnLeaves(*c, f);
+void visitExnLeaves(const php::Func& func, const php::ExnNode& n, Fun f) {
+  for (auto& c : n.children) visitExnLeaves(func, func.exnNodes[c], f);
   f(n);
 }
 
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Returns whether this block ends with an Unwind instruction.
- * I.e. it is terminal for a fault funclet.
- */
-inline bool ends_with_unwind(const php::Block& b) {
-  return b.hhbcs.back().op == Op::Unwind;
-}
 
 /*
  * Returns whether a block consists of a single Nop instruction.
@@ -84,24 +51,15 @@ inline bool is_single_nop(const php::Block& b) {
  * Walk through single_nop blocks to the next block that actually does
  * something.
  */
-BlockId next_real_block(const php::Func& func, BlockId id);
+BlockId next_real_block(const php::WideFunc& func, BlockId id);
 
 /*
- * Call a function for every jump target of a given bytecode.  If the
- * bytecode has no targets, the function is not called.
+ * Call a function for every jump target of a given bytecode, or Op.
+ * If the bytecode has no targets, the function is not called.
  */
-template<class Fun>
-void forEachTakenEdge(const Bytecode& b, Fun f) {
-  visit(b, detail::TargetVisitor<Fun>(f));
-}
-
-/*
- * Opcode version of the above, for use in other visitors.
- */
-template<class Fun, class T>
-void forEachTakenEdge(const T& op, Fun f) {
-  detail::TargetVisitor<Fun> v(f);
-  v(op);
+template<typename Bc, class Fun>
+void forEachTakenEdge(Bc& b, Fun f) {
+  b.forEachTarget(f);
 }
 
 /*
@@ -110,33 +68,43 @@ void forEachTakenEdge(const T& op, Fun f) {
  * Order unspecified, and the types of successor edges are not
  * distinguished.
  *
- * Factored exit edges are traversed only if the block consists of
- * more than a single Nop instruction.  The order_blocks routine in
- * emit.cpp relies on this for correctness: if the only block for a
- * protected fault region is empty, we need to not include the fault
- * funclet blocks as reachable, or we can end up with fault funclet
- * handlers without an EHEnt pointing at them.  In cases other than
- * emit.cpp, this is not required for correctness, but is slightly
- * better than always traversing the factored exit edges.
+ * Exit edges are traversed only if the block consists of
+ * more than a single Nop instruction.
  */
 template<class Fun>
 void forEachSuccessor(const php::Block& block, Fun f) {
   if (!is_single_nop(block)) {
     forEachTakenEdge(block.hhbcs.back(), f);
-    for (auto& ex : block.factoredExits) f(ex);
+    if (block.throwExit != NoBlockId) f(block.throwExit);
   }
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
 
 /*
  * Call a function for every successor of `block' that is reachable
- * through a non-factored edge.
+ * through a fallthrough or taken edge.
  */
-template<class Fun>
-void forEachNormalSuccessor(const php::Block& block, Fun f) {
+template<class Block, class Fun>
+void forEachNormalSuccessor(Block& block, Fun f) {
   forEachTakenEdge(block.hhbcs.back(), f);
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
+
+/*
+ * Call a function for every successor of `block' that is reachable
+ * through a non-throw edge.
+ */
+template<class Fun>
+void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
+  forEachTakenEdge(block.hhbcs.back(), f);
+  if (block.fallthrough != NoBlockId) f(block.fallthrough);
+}
+
+/*
+ * Obtain the blocks for a function in a reverse post order, starting
+ * with the specified block.  The exact order is not specified.
+ */
+std::vector<BlockId> rpoSortFromBlock(const php::WideFunc&, BlockId);
 
 /*
  * Obtain the blocks for a function in a reverse post order, starting
@@ -144,7 +112,7 @@ void forEachNormalSuccessor(const php::Block& block, Fun f) {
  *
  * DV initializer blocks will not appear in this list.
  */
-std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func&);
+std::vector<BlockId> rpoSortFromMain(const php::WideFunc&);
 
 /*
  * Obtain the blocks for a function in a reverse post order, taking
@@ -154,20 +122,20 @@ std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func&);
  * virtual empty "entry" block, with edges to each DV entry point and
  * an edge to the main entry point.
  */
-std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func&);
+std::vector<BlockId> rpoSortAddDVs(const php::WideFunc&);
 
 /*
  * Mappings from blocks to sets of blocks.
  *
- * The first level is indexed by block->id.  The second is a set of
+ * The first level is indexed by block id.  The second is a set of
  * block pointers.
  */
 using BlockToBlocks = std::vector<
-  boost::container::flat_set<borrowed_ptr<php::Block>>
+  boost::container::flat_set<BlockId>
 >;
 
 /*
- * Find the immediate non-exceptional predecessors for each block in
+ * Find the immediate non-throw predecessors for each block in
  * an RPO-sorted list of blocks.
  *
  * The BlockToBlocks map returned will have any entry for each block
@@ -175,10 +143,10 @@ using BlockToBlocks = std::vector<
  * in the list.
  */
 BlockToBlocks
-computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>&);
+computeNonThrowPreds(const php::WideFunc&, const std::vector<BlockId>&);
 
 /*
- * Find the immediate exceptional predecessors for each block in an
+ * Find the immediate throw predecessors for each block in an
  * RPO-sorted list of blocks.
  *
  * The BlockToBlocks map returned will have any entry for each block
@@ -186,7 +154,7 @@ computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>&);
  * in the list.
  */
 BlockToBlocks
-computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>&);
+computeThrowPreds(const php::WideFunc&, const std::vector<BlockId>&);
 
 /*
  * Visit each leaf in the ExnNode tree.
@@ -194,7 +162,7 @@ computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>&);
 template<class Fun>
 void visitExnLeaves(const php::Func& func, Fun f) {
   for (auto& n : func.exnNodes) {
-    detail::visitExnLeaves(*n, f);
+    detail::visitExnLeaves(func, n, f);
   }
 }
 
@@ -202,4 +170,3 @@ void visitExnLeaves(const php::Func& func, Fun f) {
 
 }}
 
-#endif

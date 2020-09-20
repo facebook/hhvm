@@ -1,0 +1,77 @@
+Calling thrower
+Constructing
+In catch
+object(Exception) (8) {
+  ["message":protected]=>
+  string(7) "finally"
+  ["string":"Exception":private]=>
+  string(0) ""
+  ["code":protected]=>
+  int(0)
+  ["file":protected]=>
+  string(%d) "%s/test/slow/exceptions/chain-fault.php"
+  ["line":protected]=>
+  int(15)
+  ["trace":"Exception":private]=>
+  varray(2) {
+    darray(4) {
+      ["file"]=>
+      string(%d) "%s/test/slow/exceptions/chain-fault.php"
+      ["line"]=>
+      int(22)
+      ["function"]=>
+      string(7) "thrower"
+      ["args"]=>
+      varray(0) {
+      }
+    }
+    darray(2) {
+      ["function"]=>
+      string(4) "main"
+      ["args"]=>
+      varray(0) {
+      }
+    }
+  }
+  ["previous":"Exception":private]=>
+  object(LogExn) (8) {
+    ["message":protected]=>
+    string(5) "inner"
+    ["string":"Exception":private]=>
+    string(0) ""
+    ["code":protected]=>
+    int(0)
+    ["file":protected]=>
+    string(%d) "%s/test/slow/exceptions/chain-fault.php"
+    ["line":protected]=>
+    int(13)
+    ["trace":"Exception":private]=>
+    varray(2) {
+      darray(4) {
+        ["file"]=>
+        string(%d) "%s/test/slow/exceptions/chain-fault.php"
+        ["line"]=>
+        int(22)
+        ["function"]=>
+        string(7) "thrower"
+        ["args"]=>
+        varray(0) {
+        }
+      }
+      darray(2) {
+        ["function"]=>
+        string(4) "main"
+        ["args"]=>
+        varray(0) {
+        }
+      }
+    }
+    ["previous":"Exception":private]=>
+    NULL
+    ["userMetadata":protected]=>
+    NULL
+  }
+  ["userMetadata":protected]=>
+  NULL
+}
+Leaving main

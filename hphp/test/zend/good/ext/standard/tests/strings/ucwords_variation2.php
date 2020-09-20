@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string ucwords ( string $str )
  * Description: Uppercase the first character of each word in a string
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 /*
  * test ucwords() with different string prepared using heredoc
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // Null here doc string
@@ -47,14 +47,14 @@ it's bright,but i cann't see it.
 this\line is /with\slashs
 EOT;
 
-$heredoc_strings = array(
+$heredoc_strings = varray[
   $null_string,
   $blank_line,
   $multiline_string,
   $diff_whitespaces,
   $numeric_string,
   $quote_char_string
-);
+];
 
 // loop through $heredoc_strings element and check the working on ucwords()
 $count = 1;
@@ -65,4 +65,4 @@ for($index =0; $index < count($heredoc_strings); $index ++) {
 }
 
 echo "Done\n";
-?>
+}

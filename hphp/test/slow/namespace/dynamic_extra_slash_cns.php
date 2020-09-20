@@ -1,13 +1,12 @@
-<?php
+<?hh
 
 namespace A {
   const B = 'B';
 }
 
 namespace C {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     $name = '\\\\A\B';
-    var_dump(constant($name));
+    \var_dump(\constant($name));
   }
-  main();
 }

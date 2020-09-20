@@ -1,14 +1,5 @@
-
-Warning: %s
-
-Warning: %s
-array(4) {
-  ["foo"]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [""]=>
-  int(3)
-}
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid darray key: expected a key of type int or string, double given' in %s/iterator_to_array_nonscalar_keys.php:13
+Stack trace:
+#0 %s/iterator_to_array_nonscalar_keys.php(13): iterator_to_array()
+#1 (): main()
+#2 {main}

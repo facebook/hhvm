@@ -35,6 +35,7 @@ PhysReg rsp() { return ARCH_SWITCH_CALL(rsp); }
 
 RegSet vm_regs_with_sp() { return ARCH_SWITCH_CALL(vm_regs_with_sp); }
 RegSet vm_regs_no_sp() { return ARCH_SWITCH_CALL(vm_regs_no_sp); }
+RegSet cross_jit_save() { return ARCH_SWITCH_CALL(cross_jit_save); }
 
 PhysReg rret_data() { return ARCH_SWITCH_CALL(rret_data); }
 PhysReg rret_type() { return ARCH_SWITCH_CALL(rret_type); }

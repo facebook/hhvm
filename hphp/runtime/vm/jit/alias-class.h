@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ALIAS_CLASS_H_
-#define incl_HPHP_ALIAS_CLASS_H_
+#pragma once
+
+#include "hphp/runtime/base/rds.h"
 
 #include "hphp/runtime/vm/minstr-state.h"
 
@@ -50,93 +51,140 @@ struct SSATmp;
  *                         Unknown
  *                            |
  *                            |
- *                    +-------+-------+----------+--------------+
- *                    |               |          |              |
- *                 UnknownTV      IterPosAny  IterBaseAny  ClsRefSlotAny
- *                    |               |          |              |
- *                    |              ...        ...            ...
+ *                    +-------+-------+
+ *                    |               |
+ *                 UnknownTV         Iter
  *                    |
- *      +---------+---+---------------+-------------------------+
- *      |         |                   |                         |
- *      |         |                   |                         |
- *      |         |                   |                         |
- *      |         |                   |                         |
- *      |         |                HeapAny*                     |
- *      |         |                   |                         |
- *      |         |            +------+------+---------+        |
- *      |         |            |             |         |        |
- *   FrameAny  StackAny     ElemAny       PropAny   RefAny  MIStateAny
- *      |         |          /    \          |         |        |
- *     ...       ...   ElemIAny  ElemSAny   ...       ...       |
- *                        |         |                           |
- *                       ...       ...          ----------------+-------------
- *                                              |         |        |         |
- *                                         MITempBase  MITvRef  MITvRef2  MIBase
+ *                    |
+ *                    |
+ *      +---------+---+---------------+-------------------+----------+
+ *      |         |                   |                   |          |
+ *      |         |                   |                   |          |
+ *      |         |                   |                   |       RdsAny
+ *      |         |                   |                   |          |
+ *      |         |                HeapAny*               |         ...
+ *      |         |                   |                   |
+ *      |         |            +------+------+            |
+ *      |         |            |             |            |
+ *   FrameAny  StackAny     ElemAny       PropAny     MIStateAny
+ *      |         |          /    \          |            |
+ *     ...       ...   ElemIAny  ElemSAny   ...           |
+ *                        |         |                     |
+ *                       ...       ...             +------+------+
+ *                                                 |             |
+ *                                             MITempBase     MIBase**
  *
  *
- *   (*) AHeapAny contains some things other than ElemAny, PropAny and RefAny
+ *   (*) AHeapAny contains some things other than ElemAny, and PropAny
  *       that don't have explicit nodes in the lattice yet.  (Like the
  *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
  *       now because we don't expose an intersection or difference operation.
+ *
+ *  (**) MIBase is a pointer, so it's not UnknownTV, but it's hard to find
+ *       the right spot for it in this diagram.
  */
 struct AliasClass;
 
 //////////////////////////////////////////////////////////////////////
 
+struct ALocal;
+struct AIter;
+
+namespace detail {
+FPRelOffset frame_base_offset(SSATmp* fp);
+
+static constexpr uint32_t kSlotsPerAIter = 4;
+static constexpr uint32_t kAIterBaseOffset = 0;
+static constexpr uint32_t kAIterTypeOffset = 1;
+static constexpr uint32_t kAIterPosOffset = 2;
+static constexpr uint32_t kAIterEndOffset = 3;
+
+}
+
+struct UFrameBase {
+  UFrameBase(SSATmp* fp) : base{detail::frame_base_offset(fp)} {}
+  UFrameBase(FPRelOffset off) : base{off} {}
+  FPRelOffset base;
+};
+
+#define FRAME_RELATIVE(Name)                                                  \
+  struct Name : UFrameBase {                                                  \
+    Name(SSATmp* fp, AliasIdSet ids, FPInvOffset off = FPInvOffset{0})        \
+      : UFrameBase{detail::frame_base_offset(fp) - off.offset}, ids{ids} {}   \
+    Name(FPRelOffset off, AliasIdSet ids) : UFrameBase{off}, ids{ids} {}      \
+    AliasIdSet ids;                                                           \
+  }
+
+#define FRAME_RELATIVE0(Name)                                                 \
+  struct Name : UFrameBase {                                                  \
+    using UFrameBase::UFrameBase;                                             \
+    Name() = default;                                                         \
+    /* implicit */ Name(const UFrameBase& base) : UFrameBase{base} {}         \
+    Name& operator=(const UFrameBase& b) { base = b.base; return *this; }     \
+  }
+
 /*
  * Special data for locations known to be a set of locals on the frame `fp'.
  */
-struct AFrame { SSATmp* fp; AliasIdSet ids; };
+FRAME_RELATIVE(ALocal);
 
 /*
- * Iterator state. Note that iterator slots can contain different kinds of data
- * (normal iterators, mutable iterators, or cuf "iterators"). However, in a well
- * formed program, each iterator slot will always contain a known type at any
- * given point without the possibility of aliasing. Therefore its safe to
- * consider the different types as totally distinct alias classes.
+ * Iterator state. We model the different fields of the iterator as 4
+ * adjacent slots (with each iterator starting at a multiple of 4).
  */
+FRAME_RELATIVE(AIter);
+
+inline AIter aiter_base(SSATmp* fp, uint32_t id,
+                        FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterBaseOffset, off };
+}
+inline AIter aiter_type(SSATmp* fp, uint32_t id,
+                        FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterTypeOffset, off };
+}
+inline AIter aiter_pos(SSATmp* fp, uint32_t id,
+                       FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterPosOffset, off };
+}
+inline AIter aiter_end(SSATmp* fp, uint32_t id,
+                       FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterEndOffset, off };
+}
+
+inline AIter aiter_all(SSATmp* fp, uint32_t id,
+                       FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter {
+    fp,
+    AliasIdSet::IdRange(id * kSlotsPerAIter, (id + 1) * kSlotsPerAIter),
+    off
+  };
+}
 
 /*
- * A specific php iterator's position value (m_pos).
+ * These singleton values are each associated with a given frame. AFContext
+ * is the m_thisUnsafe field of ActRec, AFFunc is m_func, AFMeta holds the
+ * flags, numArgs, hardware, and VM return fields (m_savedRip, m_numArgs, and
+ * m_callOffAndFlags),
  */
-struct AIterPos  { SSATmp* fp; uint32_t id; };
+FRAME_RELATIVE0(AFContext);
+FRAME_RELATIVE0(AFFunc);
+FRAME_RELATIVE0(AFMeta);
 
 /*
- * A specific php iterator's base and initialization state, for non-mutable
- * iterators.
- *
- * Instances of this AliasClass cover both the memory storing the pointer to
- * the object being iterated, and the initialization flags (itype and next
- * helper)---the reason for this is that nothing may load/store the
- * initialization state if it isn't also going to load/store the base pointer.
+ * AActRec is a union of AFContext, AFFunc, and AFMeta
  */
-struct AIterBase { SSATmp* fp; uint32_t id; };
+FRAME_RELATIVE0(AActRec);
 
 /*
- * A specific CufIter's func value (m_func).
+ * A location inside of an object property, with base `obj' at physical index
+ * `index' from the ObjectData*.
  */
-struct ACufIterFunc { SSATmp* fp; uint32_t id; };
-
-/*
- * A specific CufIter's ctx value (m_ctx).
- */
-struct ACufIterCtx { SSATmp* fp; uint32_t id; };
-
-/*
- * A specific CufIter's invoke name value (m_name).
- */
-struct ACufIterInvName { SSATmp* fp; uint32_t id; };
-
-/*
- * A specific CufIter's dynamic value (m_dynamic).
- */
-struct ACufIterDynamic { SSATmp* fp; uint32_t id; };
-
-/*
- * A location inside of an object property, with base `obj' and byte offset
- * `offset' from the ObjectData*.
- */
-struct AProp  { SSATmp* obj; uint32_t offset; };
+struct AProp  { SSATmp* obj; uint16_t offset; };
 
 /*
  * A integer index inside of an array, with base `arr'.  The `arr' tmp is any
@@ -153,17 +201,32 @@ struct AElemS { SSATmp* arr; const StringData* key; };
 /*
  * A range of the stack, starting at `offset' from the outermost frame pointer,
  * and extending `size' slots deeper into the stack (toward lower memory
- * addresses).  The frame pointer is the same for all stack ranges in the IR
- * unit, and thus is not stored here.  The reason ranges extend downward is
- * that it is common to need to refer to the class of all stack locations below
- * some depth (this can be done by putting INT32_MAX in the size).
+ * addresses).  As an example, `acls = AStack { fp, FPRelOffset{-1}, 3 }`
+ * represents the following:
+ *
+ *         ___________________
+ *        | (i am an actrec)  |
+ *  high  |___________________| ___...fp points here        __
+ *    ^   |   local 0         |                               \
+ *    |   |___________________| ___...start counting here: 1  |
+ *    |   |   local 1         |                               | acls
+ *    |   |___________________| ___...2                       |
+ *    |   |   local 2         |                               |
+ *   low  |___________________| ___...3; we're done         __/
+ *        |   local 3         |
+ *        |___________________|
+ *
+ * The frame pointer is the same for all stack ranges in the IR unit, and thus
+ * is not stored here.  The reason ranges extend downward is that it is common
+ * to need to refer to the class of all stack locations below some depth (this
+ * can be done by putting INT32_MAX in the size).
  *
  * Some notes on how the evaluation stack is treated for alias analysis:
  *
  *   o Since AStack locations are always canonicalized, different AStack
  *     locations must not alias if there is no overlap in the ranges.
  *
- *   o In situations with inlined calls, we may in fact have AFrame locations
+ *   o In situations with inlined calls, we may in fact have ALocal locations
  *     that refer to the same concrete memory locations (in the evaluation
  *     stack) as other AStack locations in the same HHIR program.  However, the
  *     portions of the HHIR program that may use that memory location in either
@@ -186,15 +249,27 @@ struct AStack {
 };
 
 /*
- * A RefData referenced by a BoxedCell.
+ * A TypedValue stored in rds.
+ *
+ * Assumes this handle uniquely identifies a TypedValue in rds - it's
+ * not required that the tv is at the start of the rds storage.
  */
-struct ARef { SSATmp* boxed; };
+struct ARds { rds::Handle handle; };
 
+#undef FRAME_RELATIVE
+#undef FRAME_RELATIVE0
 
-/*
- * A set of class-ref slots in the given frame.
- */
-struct AClsRefSlot { SSATmp* fp; AliasIdSet ids; };
+#define ALIAS_CLASS_SPEC          \
+  O(None,     BEmpty)             \
+  O(Local,    (BLocal | BActRec)) \
+  O(Iter,     (BIter | BActRec))  \
+  O(Prop,     BProp)              \
+  O(ElemI,    BElemI)             \
+  O(ElemS,    BElemS)             \
+  O(Stack,    BStack)             \
+  O(Rds,      BRds)               \
+  O(FrameAll, BActRec)            \
+/**/
 
 //////////////////////////////////////////////////////////////////////
 
@@ -203,36 +278,29 @@ struct AliasClass {
     BEmpty    = 0,
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
-    BFrame          = 1U << 0,
-    BIterPos        = 1U << 1,
-    BIterBase       = 1U << 2,
-    BProp           = 1U << 3,
-    BElemI          = 1U << 4,
-    BElemS          = 1U << 5,
-    BStack          = 1U << 6,
-    BRef            = 1U << 7,
-    BClsRefSlot     = 1U << 8,
-    BCufIterFunc    = 1U << 9,
-    BCufIterCtx     = 1U << 10,
-    BCufIterInvName = 1U << 11,
-    BCufIterDynamic = 1U << 12,
+    BLocal      = 1U << 0,
+    BIter       = 1U << 1,
+    BProp       = 1U << 2,
+    BElemI      = 1U << 3,
+    BElemS      = 1U << 4,
+    BStack      = 1U << 5,
+    BRds        = 1U << 6,
+    BFContext   = 1U << 7,
+    BFFunc      = 1U << 8,
+    BFMeta      = 1U << 9,
 
     // Have no specialization, put them last.
-    BMITempBase = 1U << 13,
-    BMITvRef    = 1U << 14,
-    BMITvRef2   = 1U << 15,
-    BMIBase     = 1U << 16,
+    BMITempBase = 1U << 10,
+    BMIBase     = 1U << 11,
+    BFBasePtr   = 1U << 12,
 
     BElem      = BElemI | BElemS,
-    BHeap      = BElem | BProp | BRef,
-    BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
-    BMIState   = BMIStateTV | BMIBase,
+    BHeap      = BElem | BProp,
+    BMIState   = BMITempBase | BMIBase,
 
-    BIter      = BIterPos | BIterBase,
-    BCufIter   = BCufIterFunc | BCufIterCtx | BCufIterInvName | BCufIterDynamic,
-    BIterSlot  = BIter | BCufIter,
+    BActRec = BFContext | BFFunc | BFMeta,
 
-    BUnknownTV = ~(BIterSlot | BMIBase),
+    BUnknownTV = ~(BIter | BMIBase | BActRec),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -252,19 +320,17 @@ struct AliasClass {
    * Create an alias class with more precise specialized information about
    * where it is.
    */
-  /* implicit */ AliasClass(AFrame);
-  /* implicit */ AliasClass(AIterPos);
-  /* implicit */ AliasClass(AIterBase);
-  /* implicit */ AliasClass(ACufIterFunc);
-  /* implicit */ AliasClass(ACufIterCtx);
-  /* implicit */ AliasClass(ACufIterInvName);
-  /* implicit */ AliasClass(ACufIterDynamic);
+  /* implicit */ AliasClass(ALocal);
+  /* implicit */ AliasClass(AIter);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
-  /* implicit */ AliasClass(ARef);
-  /* implicit */ AliasClass(AClsRefSlot);
+  /* implicit */ AliasClass(ARds);
+  /* implicit */ AliasClass(AFContext);
+  /* implicit */ AliasClass(AFFunc);
+  /* implicit */ AliasClass(AFMeta);
+  /* implicit */ AliasClass(AActRec);
 
   /*
    * Exact equality.
@@ -316,19 +382,17 @@ struct AliasClass {
    *
    * Returns folly::none if this alias class has no specialization in that way.
    */
-  folly::Optional<AFrame>          frame() const;
-  folly::Optional<AIterPos>        iterPos() const;
-  folly::Optional<AIterBase>       iterBase() const;
-  folly::Optional<ACufIterFunc>    cufIterFunc() const;
-  folly::Optional<ACufIterCtx>     cufIterCtx() const;
-  folly::Optional<ACufIterInvName> cufIterInvName() const;
-  folly::Optional<ACufIterDynamic> cufIterDynamic() const;
+  folly::Optional<ALocal>          local() const;
+  folly::Optional<AIter>           iter() const;
   folly::Optional<AProp>           prop() const;
   folly::Optional<AElemI>          elemI() const;
   folly::Optional<AElemS>          elemS() const;
   folly::Optional<AStack>          stack() const;
-  folly::Optional<ARef>            ref() const;
-  folly::Optional<AClsRefSlot>     clsRefSlot() const;
+  folly::Optional<ARds>            rds() const;
+  folly::Optional<AFContext>       fcontext() const;
+  folly::Optional<AFFunc>          ffunc() const;
+  folly::Optional<AFMeta>          fmeta() const;
+  folly::Optional<AActRec>         actrec() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -338,19 +402,17 @@ struct AliasClass {
    *
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
-  folly::Optional<AFrame>          is_frame() const;
-  folly::Optional<AIterPos>        is_iterPos() const;
-  folly::Optional<AIterBase>       is_iterBase() const;
-  folly::Optional<ACufIterFunc>    is_cufIterFunc() const;
-  folly::Optional<ACufIterCtx>     is_cufIterCtx() const;
-  folly::Optional<ACufIterInvName> is_cufIterInvName() const;
-  folly::Optional<ACufIterDynamic> is_cufIterDynamic() const;
+  folly::Optional<ALocal>          is_local() const;
+  folly::Optional<AIter>           is_iter() const;
   folly::Optional<AProp>           is_prop() const;
   folly::Optional<AElemI>          is_elemI() const;
   folly::Optional<AElemS>          is_elemS() const;
   folly::Optional<AStack>          is_stack() const;
-  folly::Optional<ARef>            is_ref() const;
-  folly::Optional<AClsRefSlot>     is_clsRefSlot() const;
+  folly::Optional<ARds>            is_rds() const;
+  folly::Optional<AFContext>       is_fcontext() const;
+  folly::Optional<AFFunc>          is_ffunc() const;
+  folly::Optional<AFMeta>          is_fmeta() const;
+  folly::Optional<AActRec>         is_actrec() const;
 
   /*
    * Like the other foo() and is_foo() methods, but since we don't have an
@@ -358,68 +420,48 @@ struct AliasClass {
    */
   folly::Optional<AliasClass> mis() const;
   folly::Optional<AliasClass> is_mis() const;
+  folly::Optional<AliasClass> frame_base() const;
+  folly::Optional<AliasClass> is_frame_base() const;
 
 private:
   enum class STag {
-    None,
-    Frame,
-    IterPos,
-    IterBase,
-    CufIterFunc,
-    CufIterCtx,
-    CufIterInvName,
-    CufIterDynamic,
-    Prop,
-    ElemI,
-    ElemS,
-    Stack,
-    Ref,
-    ClsRefSlot,
-
-    IterBoth,  // A union of base and pos for the same iter.
-    CufIterAll, // A union of all fields for the same CufIter.
+#define O(name, ...) name,
+    ALIAS_CLASS_SPEC
+#undef O
   };
-  struct UIterBoth   { SSATmp* fp; uint32_t id; };
-  struct UCufIterAll { SSATmp* fp; uint32_t id; };
 private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);
 
+  void framelike_union_set(ALocal);
+  void framelike_union_set(AIter);
+
+  template <typename T>
+  static AliasClass framelike_union(rep newBits, rep frm, T a, T b);
+
   bool checkInvariants() const;
   bool equivData(AliasClass) const;
   bool subclassData(AliasClass) const;
-  bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
   bool maybeData(AliasClass) const;
+  bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
   bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
-  folly::Optional<UIterBoth> asUIter() const;
-  folly::Optional<UCufIterAll> asUCufIter() const;
-  bool refersToSameIterHelper(AliasClass) const;
-  bool refersToSameCufIterHelper(AliasClass) const;
-  static folly::Optional<AliasClass>
-    precise_diffSTag_unionData(rep newBits, AliasClass, AliasClass);
+  folly::Optional<UFrameBase> asUFrameBase() const;
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
-  static rep stagBits(STag tag);
+  static STag stagFor(rep bits);
 
 private:
   rep m_bits;
-  STag m_stag{STag::None};
+  rep m_stagBits{BEmpty};
   union {
-    AFrame          m_frame;
-    AIterPos        m_iterPos;
-    AIterBase       m_iterBase;
-    ACufIterFunc    m_cufIterFunc;
-    ACufIterCtx     m_cufIterCtx;
-    ACufIterInvName m_cufIterInvName;
-    ACufIterDynamic m_cufIterDynamic;
+    ALocal          m_local;
+    AIter           m_iter;
     AProp           m_prop;
     AElemI          m_elemI;
     AElemS          m_elemS;
     AStack          m_stack;
-    ARef            m_ref;
-    AClsRefSlot     m_clsRefSlot;
+    ARds            m_rds;
 
-    UIterBoth       m_iterBoth;
-    UCufIterAll     m_cufIterAll;
+    UFrameBase      m_frameAll;
   };
 };
 
@@ -427,32 +469,29 @@ private:
 
 /* General alias classes. */
 auto const AEmpty             = AliasClass{AliasClass::BEmpty};
-auto const AFrameAny          = AliasClass{AliasClass::BFrame};
-auto const AIterPosAny        = AliasClass{AliasClass::BIterPos};
-auto const AIterBaseAny       = AliasClass{AliasClass::BIterBase};
-auto const ACufIterFuncAny    = AliasClass{AliasClass::BCufIterFunc};
-auto const ACufIterCtxAny     = AliasClass{AliasClass::BCufIterCtx};
-auto const ACufIterInvNameAny = AliasClass{AliasClass::BCufIterInvName};
-auto const ACufIterDynamicAny = AliasClass{AliasClass::BCufIterDynamic};
-auto const ACufIterAny        = AliasClass{AliasClass::BCufIter};
+auto const ALocalAny          = AliasClass{AliasClass::BLocal};
+auto const AIterAny           = AliasClass{AliasClass::BIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};
-auto const ARefAny            = AliasClass{AliasClass::BRef};
 auto const AStackAny          = AliasClass{AliasClass::BStack};
-auto const AClsRefSlotAny     = AliasClass{AliasClass::BClsRefSlot};
+auto const ARdsAny            = AliasClass{AliasClass::BRds};
 auto const AElemIAny          = AliasClass{AliasClass::BElemI};
 auto const AElemSAny          = AliasClass{AliasClass::BElemS};
 auto const AElemAny           = AliasClass{AliasClass::BElem};
-auto const AMIStateTV         = AliasClass{AliasClass::BMIStateTV};
 auto const AMIStateAny        = AliasClass{AliasClass::BMIState};
+auto const AFContextAny       = AliasClass{AliasClass::BFContext};
+auto const AFFuncAny          = AliasClass{AliasClass::BFFunc};
+auto const AFMetaAny          = AliasClass{AliasClass::BFMeta};
+auto const AActRecAny         = AliasClass{AliasClass::BActRec};
 auto const AUnknownTV         = AliasClass{AliasClass::BUnknownTV};
 auto const AUnknown           = AliasClass{AliasClass::BUnknown};
 
 /* Alias classes for specific MInstrState fields. */
 auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
-auto const AMIStateTvRef      = AliasClass{AliasClass::BMITvRef};
-auto const AMIStateTvRef2     = AliasClass{AliasClass::BMITvRef2};
 auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
+
+/* Alias class for the frame base register */
+auto const AFBasePtr          = AliasClass{AliasClass::BFBasePtr};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -476,4 +515,3 @@ std::string show(AliasClass);
 
 }}
 
-#endif

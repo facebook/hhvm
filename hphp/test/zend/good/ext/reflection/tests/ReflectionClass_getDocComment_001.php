@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
 
 
@@ -30,20 +30,19 @@ interface I {}
 class D implements I {}
 
 /**** Not a doc comment */
-class E extends C implements I {} {}
-
+class E extends C implements I {} 
 /**?** Not a doc comment */
-class F extends C implements I {} {}
-
+class F extends C implements I {} 
 /**	** Doc comment for G */
-final class G extends C implements I {} {}
+final class G extends C implements I {} 
 
-$classes = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'I');
-foreach ($classes as $class) {
-	echo "\n\n---> Doc comment for class $class:\n";
-	$rc = new ReflectionClass($class);	
-	var_dump($rc->getDocComment());	
+<<__EntryPoint>>
+function main_entry(): void {
+
+  $classes = varray['A', 'B', 'C', 'D', 'E', 'F', 'G', 'I'];
+  foreach ($classes as $class) {
+  	echo "\n\n---> Doc comment for class $class:\n";
+  	$rc = new ReflectionClass($class);	
+  	var_dump($rc->getDocComment());	
+  }
 }
-
-
-?>

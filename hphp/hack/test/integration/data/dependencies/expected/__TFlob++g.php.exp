@@ -1,0 +1,27 @@
+<?hh
+abstract class FlobBase {
+  public static function f2(): int {
+    throw new \Exception();
+  }
+  public function f1(): void {
+    throw new \Exception();
+  }
+}
+interface IFlob {
+  abstract const type T;
+  public function f1(): void;
+  public static function f2(): this::T;
+}
+final class Flob extends \FlobBase implements \IFlob, \IToto {
+  use \TFlob;
+}
+trait TFlob {
+  require implements \IFlob;
+  public function g(Flob $_): void {
+    $this->f1();
+    $_ = static::f2();
+  }
+}
+interface IToto {
+  const type T = int;
+}

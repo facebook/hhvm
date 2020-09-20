@@ -1,22 +1,22 @@
-object(HH\ImmVector)#2 (0) {
+object(HH\ImmVector) (0) {
 }
-object(HH\ImmVector)#2 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\ImmVector)#2 (0) {
+object(HH\ImmVector) (0) {
 }
-object(HH\ImmVector)#2 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\ImmVector)#3 (0) {
+object(HH\ImmVector) (0) {
 }
-object(HH\ImmVector)#3 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(1)
   [1]=>

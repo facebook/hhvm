@@ -1,14 +1,14 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function append_via_ref(&$ks, $val) {
+function append_via_ref(inout $ks, $val) {
   $ks[] = $val;
 }
 
 function do_append($ks, $val, $s, $via_ref) {
   try {
     if ($via_ref) {
-      append_via_ref($ks, $val);
+      append_via_ref(inout $ks, $val);
     } else {
       $ks[] = $val;
     }
@@ -35,7 +35,7 @@ function test_append($orig, $via_ref) {
     |> do_append($$, false, "bool", $via_ref)
     |> do_append($$, null, "null", $via_ref)
     |> do_append($$, new stdclass(), "class", $via_ref)
-    |> do_append($$, [300, 200, 100], "array", $via_ref)
+    |> do_append($$, varray[300, 200, 100], "array", $via_ref)
     |> do_append($$, vec[1, 2, 3], "vec", $via_ref)
     |> do_append($$, dict['a' => 1, 'b' => 2], "dict", $via_ref)
     |> do_append($$, keyset['a', 'b', 'c'], "keyset", $via_ref);
@@ -68,7 +68,7 @@ function test_set($orig) {
     |> do_set($$, null, "null key value")
     |> do_set($$, 1.23, "double key value")
     |> do_set($$, new stdclass(), "object key value")
-    |> do_set($$, [1, 2, 3], "array key value")
+    |> do_set($$, varray[1, 2, 3], "array key value")
     |> do_set($$, vec[1, 2, 3], "vec key value")
     |> do_set($$, dict['a' => 1, 'b' => 2, 'c' => 3], "dict key value")
     |> do_set($$, keyset['a', 'b', 'c'], "keyset key value");
@@ -101,7 +101,7 @@ function test_setop($orig) {
     |> do_setop($$, null, " + null key value")
     |> do_setop($$, 1.23, " + double key value")
     |> do_setop($$, new stdclass(), " + object key value")
-    |> do_setop($$, [1, 2, 3], " + array key value")
+    |> do_setop($$, varray[1, 2, 3], " + array key value")
     |> do_setop($$, vec[1, 2, 3], " + vec key value")
     |> do_setop($$, dict['a' => 1, 'b' => 2, 'c' => 3], " + dict key value")
     |> do_setop($$, keyset['a', 'b', 'c'], " + keyset key value");
@@ -134,7 +134,7 @@ function test_new_setop($orig) {
     |> do_new_setop($$, null, " + null value")
     |> do_new_setop($$, 1.23, " + double value")
     |> do_new_setop($$, new stdclass(), " + object value")
-    |> do_new_setop($$, [1, 2, 3], " + array value")
+    |> do_new_setop($$, varray[1, 2, 3], " + array value")
     |> do_new_setop($$, vec[1, 2, 3], " + vec value")
     |> do_new_setop($$, dict['a' => 1, 'b' => 2, 'c' => 3], " + dict value")
     |> do_new_setop($$, keyset['a', 'b', 'c'], " + keyset value");
@@ -180,7 +180,7 @@ function test_unset($orig) {
     |> do_unset($$, null, "null key value")
     |> do_unset($$, 1.23, "double key value")
     |> do_unset($$, new stdclass(), "object key value")
-    |> do_unset($$, [1, 2, 3], "array key value")
+    |> do_unset($$, varray[1, 2, 3], "array key value")
     |> do_unset($$, vec[1, 2, 3], "vec key value")
     |> do_unset($$, dict['a' => 1, 'b' => 2, 'c' => 3], "dict key value")
     |> do_unset($$, keyset['a', 'b', 'c'], "keyset key value");
@@ -198,7 +198,8 @@ function test($v) {
   test_new_setop($v);
   test_unset($v);
 }
-
+<<__EntryPoint>> function main(): void {
 test(keyset[]);
 test(keyset[1, 2, 3, 4]);
 test(keyset['b', '3', 3, 10, 'e', 'f', 'g']);
+}

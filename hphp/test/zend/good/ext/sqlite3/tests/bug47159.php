@@ -1,13 +1,15 @@
-<?php
+<?hh
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+<<__EntryPoint>>
+function main_entry(): void {
 
-$stmt = $db->prepare("SELECT 1");
+  require_once(dirname(__FILE__) . '/new_db.inc');
 
-var_dump($stmt->close());
+  $stmt = $db->prepare("SELECT 1");
 
-var_dump($db->close());
+  var_dump($stmt->close());
 
-print "done";
+  var_dump($db->close());
 
-?>
+  print "done";
+}

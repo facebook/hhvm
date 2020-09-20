@@ -2,12 +2,10 @@
 
 -- Testing ucwords() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: ucwords() expects at least 1 parameter, 0 given in %s/ucwords_error.php on line 11
 
 -- Testing ucwords() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: ucwords() expects at most 2 parameters, 3 given in %s/ucwords_error.php on line 18
 string(10) "string_val"
 Done

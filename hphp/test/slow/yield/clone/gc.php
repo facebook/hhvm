@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
   private int $x = 2;
@@ -13,6 +13,7 @@ function g() {
   } while ($x < 5);
 }
 
+<<__EntryPoint>>
 function test() {
   $g1 = g();
   foreach ($g1 as $x) {
@@ -28,5 +29,3 @@ function test() {
     var_dump($x);
   }
 }
-
-test();

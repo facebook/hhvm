@@ -1,2 +1,0 @@
-File "instanceof_parent_outside.php", line 4, characters 21-26:
-'parent' is undefined outside of a class (Typing[4075])

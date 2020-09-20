@@ -3,7 +3,7 @@
 
 class Box<T> {
   public function getContents(): T {
-    // UNSAFE
+    throw new Exception();
   }
 }
 

@@ -1,0 +1,21 @@
+----------
+--- Full path, nothing else
+--- Relative path, good cwd
+--- Using shell exec
+--- Expecting BAR
+BAR
+--- Not in PATH
+STDERR: /bin/sh: cat: No such file or directory
+--- Bad STDOUT
+STDERR: %s: Bad file descriptor
+--- Custom ARGV[0]
+STDERR: myshell
+--- Explicitly write to different handles
+STDERR: Bar
+STDOUT: Foo
+FD 42: Baz
+--- Good STDIO
+STDOUT: Hello, world
+STDERR: 
+--- Working directory does not exist
+  Exception: chdir() failed (%d - %s)

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_GEN_H_
-#define incl_HPHP_JIT_VASM_GEN_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -96,9 +95,17 @@ struct Vout {
   void setOrigin(const IRInstruction* i) { m_irctx.origin = i; }
 
   /*
+   * Add a scaling factor. The weight of the current block and all
+   * future blocks created from this Vout will be multiplied by the
+   * total scaling factor.
+   */
+  void addWeightScale(uint64_t);
+
+  /*
    * Vunit delegations.
    */
   Vreg makeReg();
+  Vaddr makeAddr();
   Vtuple makeTuple(const VregList& regs) const;
   Vtuple makeTuple(VregList&& regs) const;
   VcallArgsId makeVcallArgs(VcallArgs&& args) const;
@@ -106,9 +113,16 @@ struct Vout {
   template<class T, class... Args> T* allocData(Args&&... args);
 
 private:
+  Vout(Vunit& u, Vlabel b, Vinstr::ir_context irctx, uint64_t scale)
+    : m_unit{u}
+    , m_block{b}
+    , m_irctx{irctx}
+    , m_weight_scale{scale} {}
+
   Vunit& m_unit;
   Vlabel m_block;
   Vinstr::ir_context m_irctx;
+  uint64_t m_weight_scale = 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,8 +169,8 @@ struct Vauto {
                  bool relocate = false)
     : m_text{main, cold, data}
     , m_fixups(fixups)
-    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main, 1)}
-    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold, 1)}
+    , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
+    , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
     , m_kind{kind}
     , m_relocate{relocate}
   {
@@ -184,7 +198,7 @@ namespace detail {
   TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
                  CGMeta* meta, GenFunc gen,
                  CodeKind kind = CodeKind::CrossTrace,
-                 bool relocate = false);
+                 bool relocate = true);
 }
 
 /*
@@ -197,12 +211,12 @@ namespace detail {
  */
 template<class GenFunc>
 TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
-          CodeKind kind = CodeKind::CrossTrace, bool relocate = false) {
+          CodeKind kind = CodeKind::CrossTrace, bool relocate = true) {
   return detail::vwrap_impl(cb, cb, data, &meta,
                             [&] (Vout& v, Vout&) { gen(v); }, kind, relocate);
 }
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen, bool relocate = false) {
+TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen, bool relocate = true) {
   return detail::vwrap_impl(cb, cb, data, nullptr,
                             [&] (Vout& v, Vout&) { gen(v); },
                             CodeKind::CrossTrace, relocate);
@@ -217,9 +231,15 @@ TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen) {
   return detail::vwrap_impl(main, cold, data, nullptr, gen);
 }
 
+/*
+ * Multiplying factors used to compute the block weights for each code area.
+ * We multiply the corresponding IR block's profile counter by the following
+ * factors, depending on the code area the block is assigned to.
+ */
+uint64_t areaWeightFactor(AreaIndex area);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
 #include "hphp/runtime/vm/jit/vasm-gen-inl.h"
 
-#endif

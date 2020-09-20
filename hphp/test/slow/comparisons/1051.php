@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($p) {
   if ($p) {
@@ -17,4 +17,8 @@ function foo($p) {
     echo 'no';
   }
 }
+
+<<__EntryPoint>>
+function main_1051() {
 foo(false);
+}

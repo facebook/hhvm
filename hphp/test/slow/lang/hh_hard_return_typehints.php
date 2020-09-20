@@ -1,5 +1,4 @@
 <?hh
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     echo "Triggered E_RECOVERABLE_ERROR: $errmsg\n";
@@ -10,20 +9,19 @@ function handler($errno, $errmsg) {
   }
   return true;
 }
-set_error_handler('handler');
 class Foo {
   public function go() { echo "Foo::go()\n"; }
 }
 class Bar {
   public function go() { echo "Bar::go()\n"; }
 }
-function test1(): @Foo {
+function test1(): <<__Soft>> Foo {
   return new Foo();
 }
 function test2(): Foo {
   return new Foo();
 }
-function test3(): @Bar {
+function test3(): <<__Soft>> Bar {
   return new Foo();
 }
 function test4(): Bar {
@@ -35,4 +33,9 @@ function main(): void {
   test3()->go();
   test4()->go();
 }
-main();
+<<__EntryPoint>>
+function entrypoint_hh_hard_return_typehints(): void {
+  error_reporting(-1);
+  set_error_handler(fun('handler'));
+  main();
+}

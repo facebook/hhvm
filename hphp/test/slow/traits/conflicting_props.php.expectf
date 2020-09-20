@@ -1,0 +1,2 @@
+
+Fatal error: trait declaration of property 'prop' is incompatible with previous declaration in %s/test/slow/traits/conflicting_props.php on line 7

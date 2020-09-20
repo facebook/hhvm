@@ -1,8 +1,0 @@
-Doesn't trigger __get.
-
-Notice: %s
-Doesn't trigger __set.
-Doesn't trigger __unset.
-
-Notice: %s
-Shouldn't trigger __isset.

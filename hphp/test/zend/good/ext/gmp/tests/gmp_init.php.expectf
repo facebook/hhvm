@@ -1,29 +1,24 @@
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(8) "98765678"
 }
 string(8) "98765678"
 
-Warning: %s
+Warning: gmp_init() expects at least 1 parameter, 0 given in %s/gmp_init.php on line 5
 
-Warning: %s
+Warning: gmp_init() expects at least 1 parameter, 0 given in %s/gmp_init.php on line 6
+
+Warning: gmp_init() expects at most 2 parameters, 4 given in %s/gmp_init.php on line 7
+
+Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and 62) in %s/gmp_init.php on line 8
 bool(false)
 
-Warning: %s
-NULL
-
-Warning: %s
-NULL
-
-Warning: %s
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s/gmp_init.php on line 9
 bool(false)
 
-Warning: %s
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s/gmp_init.php on line 10
 bool(false)
 
-Warning: %s
-bool(false)
-
-Warning: %s
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s/gmp_init.php on line 11
 string(1) "0"
 Done

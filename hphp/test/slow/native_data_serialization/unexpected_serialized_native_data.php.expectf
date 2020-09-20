@@ -1,4 +1,4 @@
 
 Warning: Foo does not expect any serialized native data. in %s on line 5
-object(Foo)#1 (0) {
+object(Foo) (0) {
 }

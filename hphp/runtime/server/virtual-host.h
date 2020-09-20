@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VIRTUAL_HOST_H_
-#define incl_HPHP_VIRTUAL_HOST_H_
+#pragma once
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/server/ip-block-map.h"
@@ -139,4 +138,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_VIRTUAL_HOST_H_

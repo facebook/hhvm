@@ -63,8 +63,8 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
 Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
                           int64_t queue, int64_t priority);
 
-inline c_RescheduleWaitHandle* c_WaitHandle::asReschedule() {
-  assert(getKind() == Kind::Reschedule);
+inline c_RescheduleWaitHandle* c_Awaitable::asReschedule() {
+  assertx(getKind() == Kind::Reschedule);
   return static_cast<c_RescheduleWaitHandle*>(this);
 }
 

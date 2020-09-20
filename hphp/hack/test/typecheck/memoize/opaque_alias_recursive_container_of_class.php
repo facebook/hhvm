@@ -1,6 +1,5 @@
 //// file1.php
-
-<?hh
+<?hh // partial
 
 class BarImpl implements IMemoizeParam {
   public function getInstanceKey(): string {
@@ -11,9 +10,7 @@ class BarImpl implements IMemoizeParam {
 newtype Bar = array<array<BarImpl>>;
 
 //// file2.php
-
-<?hh
-
+<?hh // partial
 class Foo {
   <<__Memoize>>
   public function someMethod(Bar $i): void {}

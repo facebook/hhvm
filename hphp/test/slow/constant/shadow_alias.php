@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 const X = 1;
-
-@var_dump(X);
-@var_dump(x);
-
+const hello = 'hello';
 use const hello as x;
 
-@var_dump(x);
+<<__EntryPoint>> function main(): void {
+  @var_dump(X);
+  @var_dump(x);
+}

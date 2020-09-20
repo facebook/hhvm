@@ -1,0 +1,8 @@
+File "reg1.bad.php", line 18, characters 37-37:
+Unbound name: `E` (Naming[2049])
+File "reg1.bad.php", line 19, characters 25-26:
+Invalid argument (Typing[4110])
+File "reg1.bad.php", line 19, characters 12-23:
+Expected `this:@E`
+File "reg1.bad.php", line 18, characters 40-41:
+But got `TF`

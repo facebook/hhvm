@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_WRITER_H_
-#define incl_HPHP_WRITER_H_
+#pragma once
 
 #include <iostream>
 #include <stack>
@@ -348,4 +347,3 @@ private:
 };
 }
 
-#endif  // incl_HPHP_WRITER_H_

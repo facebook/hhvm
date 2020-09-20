@@ -2,29 +2,27 @@
 
 -- Testing trim() function with no arguments --
 
-Warning: %s
-NULL
+Warning: trim() expects at least 1 parameter, 0 given in %s/trim_error.php on line 12
 
 -- Testing trim() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: trim() expects at most 2 parameters, 3 given in %s/trim_error.php on line 16
 
 -- Test trim function with various invalid charlists --
 
-Warning: %s
+Warning: Invalid argument: charlist: Invalid '..'-range, missing left of '..' in %s/trim_error.php on line 21
 string(14) "  Hello World
 "
 
-Warning: %s
+Warning: Invalid argument: charlist: Invalid '..'-range, missing right of '..' in %s/trim_error.php on line 22
 string(14) "  Hello World
 "
 
-Warning: %s
+Warning: Invalid argument: charlist: '..'-range needs to be incrementing in %s/trim_error.php on line 23
 string(14) "  Hello World
 "
 
-Warning: %s
+Warning: Invalid argument: charlist: Invalid '..'-range in %s/trim_error.php on line 24
 string(14) "  Hello World
 "
 ===DONE===

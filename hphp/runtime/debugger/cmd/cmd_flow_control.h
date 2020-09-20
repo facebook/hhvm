@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
@@ -85,12 +84,12 @@ protected:
   void recvImpl(DebuggerThriftBuffer&) override;
 
   int decCount() {
-    assert(m_count > 0);
+    assertx(m_count > 0);
     return --m_count;
   }
 
   int getCount() const {
-    assert(m_count > 0);
+    assertx(m_count > 0);
     return m_count;
   }
 
@@ -99,7 +98,7 @@ protected:
   void setupStepOuts();
   void cleanupStepOuts();
   bool hasStepOuts();
-  bool atStepOutOffset(Unit* unit, Offset o);
+  bool atStepOutOffset(const Func* func, Offset o);
 
   bool m_complete{false};
   bool m_needsVMInterrupt{false};
@@ -113,20 +112,20 @@ protected:
   // unit and offset. Implictly maintains the breakpoint filter.
   struct StepDestination {
     StepDestination();
-    StepDestination(const HPHP::Unit* unit, Offset offset);
+    StepDestination(const HPHP::Func* func, Offset offset);
     StepDestination(const StepDestination& other) = delete;
     StepDestination& operator=(const StepDestination& other) = delete;
     StepDestination(StepDestination&& other);
     StepDestination& operator=(StepDestination&& other);
     ~StepDestination();
 
-    bool valid() const { return m_unit != nullptr; }
-    bool at(const Unit* unit, Offset o) const {
-      return (m_unit == unit) && (m_offset == o);
+    bool valid() const { return m_func != nullptr; }
+    bool at(const Func* func, Offset o) const {
+      return (m_func == func) && (m_offset == o);
     }
 
   private:
-    const Unit* m_unit;
+    const Func* m_func;
     Offset m_offset;
     bool m_ownsInternalBreakpoint;
   };
@@ -141,4 +140,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_FLOW_CONTROL_H_

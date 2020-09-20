@@ -1,0 +1,6 @@
+File "covariant2.php", line 17, characters 7-8:
+Invalid argument (Typing[4110])
+File "covariant2.php", line 5, characters 27-33:
+Expected `dynamic`
+File "covariant2.php", line 16, characters 25-29:
+But got `mixed`

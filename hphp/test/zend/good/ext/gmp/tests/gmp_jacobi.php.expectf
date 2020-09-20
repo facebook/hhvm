@@ -16,21 +16,18 @@ string(2) "-1"
 string(1) "0"
 string(2) "-1"
 
-Warning: %s
+Warning: gmp_jacobi(): Unable to convert variable to GMP - wrong type in %s/gmp_jacobi.php on line 18
 bool(false)
 
-Warning: %s
+Warning: gmp_jacobi(): Unable to convert variable to GMP - wrong type in %s/gmp_jacobi.php on line 19
 bool(false)
 
-Warning: %s
+Warning: gmp_jacobi(): Unable to convert variable to GMP - wrong type in %s/gmp_jacobi.php on line 20
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_jacobi() expects exactly 2 parameters, 3 given in %s/gmp_jacobi.php on line 22
 
-Warning: %s
-NULL
+Warning: gmp_jacobi() expects exactly 2 parameters, 1 given in %s/gmp_jacobi.php on line 23
 
-Warning: %s
-NULL
+Warning: gmp_jacobi() expects exactly 2 parameters, 0 given in %s/gmp_jacobi.php on line 24
 Done

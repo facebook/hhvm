@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method 'ReportCollision' declared in multiple traits (TC1, TC2) in %s/bug55554e.php on line 17

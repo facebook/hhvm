@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 class A {
-  private $a = array('apple');
+  private $a = varray['apple'];
   private $b = 'banana';
-  function foo() {
+  static function foo() {
     $b = new A();
     unset($b->b);
     var_dump($b);
@@ -12,4 +12,8 @@ class A {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_689() {
 A::foo();
+}

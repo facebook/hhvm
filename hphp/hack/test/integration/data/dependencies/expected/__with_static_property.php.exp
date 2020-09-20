@@ -1,0 +1,16 @@
+<?hh
+class A extends \A0 implements \I1 {}
+function with_static_property(): void {
+  $a = WithStaticProperty::$map;
+  $b = WithStaticProperty::$vector;
+}
+class WithStaticProperty {
+  public static \HH\Vector<\A> $vector = Vector {};
+  public static \HH\Map<\SomeEnum, string> $map = Map {};
+}
+enum SomeEnum: int {
+  FIRST = 0;
+  SECOND = 0;
+}
+interface I1 {}
+class A0 {}

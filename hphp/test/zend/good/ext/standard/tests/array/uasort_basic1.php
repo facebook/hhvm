@@ -1,10 +1,8 @@
-<?php
+<?hh
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
-
-echo "*** Testing uasort() : basic functionality ***\n";
 
 // comparison function
 /* Prototype : int cmp(mixed $value1, mixed $value2)
@@ -25,30 +23,32 @@ function cmp($value1, $value2)
   else
     return -1;
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing uasort() : basic functionality ***\n";
 
 // Int array with default keys
-$int_values = array(1, 8, 9, 3, 2, 6, 7);
+$int_values = varray[1, 8, 9, 3, 2, 6, 7];
 echo "-- Numeric array with default keys --\n";
-var_dump( uasort($int_values, 'cmp') );
+var_dump( uasort(inout $int_values, fun('cmp')) );
 var_dump($int_values);
 
 // String array with default keys
-$string_values = array("This", "is", 'a', "test");
+$string_values = varray["This", "is", 'a', "test"];
 echo "-- String array with default keys --\n";
-var_dump( uasort($string_values, 'cmp') );
+var_dump( uasort(inout $string_values, fun('cmp')) );
 var_dump($string_values);
 
 // Associative array with numeric keys
-$numeric_key_arg = array(1=> 1, 2 => 2, 3 => 7, 5 => 4, 4 => 9);
+$numeric_key_arg = darray[1=> 1, 2 => 2, 3 => 7, 5 => 4, 4 => 9];
 echo "-- Associative array with numeric keys --\n";
-var_dump( uasort($numeric_key_arg, 'cmp') );
+var_dump( uasort(inout $numeric_key_arg, fun('cmp')) );
 var_dump($numeric_key_arg);
 
 // Associative array with string keys
-$string_key_arg = array('one' => 4, 'two' => 2, 'three' => 1, 'four' => 10);
+$string_key_arg = darray['one' => 4, 'two' => 2, 'three' => 1, 'four' => 10];
 echo "-- Associative array with string keys --\n";
-var_dump( uasort($string_key_arg, 'cmp') );
+var_dump( uasort(inout $string_key_arg, fun('cmp')) );
 var_dump($string_key_arg);
 
-echo "Done"
-?>
+echo "Done";
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $uri = realpath(__DIR__.'/xinclude-1.xml');
@@ -10,4 +10,8 @@ function main() {
   var_dump($doc->saveXML());
 }
 
+
+<<__EntryPoint>>
+function main_xinclude() {
 main();
+}

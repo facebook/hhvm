@@ -46,4 +46,8 @@ function main() {
   print_r($a2->fv);
 }
 
+
+<<__EntryPoint>>
+function main_deep_copy() {
 main();
+}

@@ -1,6 +1,6 @@
 File "infinite_loop_terminal_bad.php", line 3, characters 10-10:
-Invalid return type (Typing[4110])
-File "infinite_loop_terminal_bad.php", line 3, characters 15-17:
-This is an int
+Invalid return type (Typing[4336])
 File "infinite_loop_terminal_bad.php", line 3, characters 10-10:
-It is incompatible with void because this function implicitly returns void
+Expected `void` because this function does not always return a value
+File "infinite_loop_terminal_bad.php", line 3, characters 15-17:
+But got `int`

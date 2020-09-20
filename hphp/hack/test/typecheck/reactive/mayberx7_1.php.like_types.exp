@@ -1,0 +1,10 @@
+File "mayberx7_1.php", line 5, characters 10-13:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "mayberx7_1.php", line 4, characters 38-54:
+This function is normal.
+File "mayberx7_1.php", line 11, characters 10-55:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "mayberx7_1.php", line 4, characters 10-16:
+This function is normal.
+File "mayberx7_1.php", line 11, characters 18-54:
+This argument caused function to be normal.

@@ -1,4 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (PHP_OS !== "Linux") {
   echo "Skip";
 } 
+}

@@ -1,4 +1,3 @@
 string(%d) "%s"
 
-Warning: %s
-NULL
+Warning: posix_getcwd() expects exactly 0 parameters, 1 given in %s/posix_getcwd.php on line 4

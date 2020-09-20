@@ -1,5 +1,5 @@
 Test
 
-Warning: %s
+Warning: File not supported in %s/bug62523_3.php on line 3
 int(1)
 Done

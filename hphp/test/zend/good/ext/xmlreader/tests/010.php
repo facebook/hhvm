@@ -1,4 +1,5 @@
-<?php 
+<?hh
+<<__EntryPoint>> function main(): void {
 /* $Id$ */
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <prefix:books xmlns:prefix="uri" isbn="" prefix:isbn="12isbn">book1</prefix:books>';
@@ -15,5 +16,5 @@ echo $reader->name;
 echo " ";
 echo $reader->getAttributeNs('isbn', 'uri');
 echo "\n";
-?>
-===DONE===
+echo "===DONE===\n";
+}

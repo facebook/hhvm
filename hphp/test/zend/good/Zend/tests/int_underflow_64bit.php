@@ -1,17 +1,10 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 
-$doubles = array(
-        -9223372036854775808,
-        -9223372036854775809,
-        -9223372036854775818,
-        -9223372036854775908,
-        -9223372036854776808,
-        );
-
-foreach ($doubles as $d) {
-        $l = (int)$d;
+foreach (range(0, 4) as $d) {
+        $l = (int)(PHP_INT_MIN - $d);
         var_dump($l);
 }
 
 echo "Done\n";
-?>
+}

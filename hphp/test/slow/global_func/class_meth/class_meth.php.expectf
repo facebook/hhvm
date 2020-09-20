@@ -1,0 +1,5 @@
+int(1)
+private: created in C
+string(10) "trait_meth"
+
+Fatal error: Failure to resolve method name 'C::private_meth' in %s/class_meth.php on line 34

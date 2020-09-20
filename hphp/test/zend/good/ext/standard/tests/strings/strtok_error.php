@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strtok ( string $str, string $token )
  * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
  * Source code: ext/standard/string.c
@@ -7,12 +7,12 @@
 /*
  * Testing strtok() for error conditions
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : error conditions ***\n";
 
 // Zero argument
 echo "\n-- Testing strtok() function with Zero arguments --\n";
-var_dump( strtok() );
+try { var_dump( strtok() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // More than expected number of arguments
 echo "\n-- Testing strtok() function with more than expected no. of arguments --\n";
@@ -20,7 +20,7 @@ $str = 'sample string';
 $token = ' ';
 $extra_arg = 10;
 
-var_dump( strtok($str, $token, $extra_arg) );
+try { var_dump( strtok($str, $token, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump( $str );
 
 // Less than expected number of arguments 
@@ -31,4 +31,4 @@ var_dump( strtok($str));
 var_dump( $str );
 
 echo "Done\n";
-?>
+}

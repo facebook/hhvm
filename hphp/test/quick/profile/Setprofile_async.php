@@ -7,7 +7,7 @@
 // have a balanced enter/exit for every call.
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
@@ -62,5 +62,6 @@ function main($a) {
   var_dump($result);
   fb_setprofile(null);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(42);
+}

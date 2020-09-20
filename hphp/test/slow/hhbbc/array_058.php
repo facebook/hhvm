@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyClass {
   private function getKeyPrefix() {
@@ -6,7 +6,7 @@ class MyClass {
   }
 
   public function makeArray() {
-    $data = array();
+    $data = darray[];
     $p = $this->getKeyPrefix();
 
     $data[$p.'a'] = 2;
@@ -18,4 +18,8 @@ class MyClass {
   }
 }
 
+
+<<__EntryPoint>>
+function main_array_058() {
 var_dump((new MyClass)->makeArray());
+}

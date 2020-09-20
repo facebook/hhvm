@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   function Bar() {
@@ -8,11 +8,10 @@ class Foo {
     $this = $__this;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $f = new Foo;
 
 $f->Bar();
 
 echo "OK\n";
-
-?>
+}

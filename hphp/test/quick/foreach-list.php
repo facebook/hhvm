@@ -1,23 +1,23 @@
 <?hh
 
 function test_simple() {
-  $arr = array(
-    array(1,2),
+  $arr = varray[
+    varray[1,2],
     null,
-    array(3,4)
-  );
+    varray[3,4]
+  ];
   foreach($arr as list($a, $b)) {
     var_dump($a, $b);
   }
 }
 
 function test_nested() {
-  $arr = array(
-    array(1, array(2,3), 4),
-    array(5, array(6,7), 8),
+  $arr = varray[
+    varray[1, varray[2,3], 4],
+    varray[5, varray[6,7], 8],
     null,
-    array(9, array(10, 11), 12)
-  );
+    varray[9, varray[10, 11], 12]
+  ];
 
   foreach ($arr as list($a, list($b, $c), $d)) {
     var_dump($d, $c, $b, $a);
@@ -25,17 +25,17 @@ function test_nested() {
 }
 
 function test_single() {
-  $arr = array(
-    array(1), array(2)
-  );
+  $arr = varray[
+    varray[1], varray[2]
+  ];
   foreach($arr as list($a)) {
     var_dump($a);
   }
 }
 
 function gen() {
-  yield array(1,2) => 3;
-  yield array(4,5) => 6;
+  yield varray[1,2] => 3;
+  yield varray[4,5] => 6;
 }
 function test_key() {
   foreach (gen() as list($a, $b) => $c) {
@@ -44,10 +44,10 @@ function test_key() {
 }
 
 function gen2() {
-  yield array(1,array(2,3),4) => array(array(1,2),array(3,4));
-  yield array(1,null,2) => array(null, array(1,2));
+  yield varray[1,varray[2,3],4] => varray[varray[1,2],varray[3,4]];
+  yield varray[1,null,2] => varray[null, varray[1,2]];
   yield null => null;
-  yield array(1,array(2,3,4),5) => array(array(1,2),array(3,4),array(5,6));
+  yield varray[1,varray[2,3,4],5] => varray[varray[1,2],varray[3,4],varray[5,6]];
 }
 function test_complex() {
   foreach (gen2() as
@@ -56,9 +56,10 @@ function test_complex() {
     var_dump($b, $a, $d, $c, $f, $e, $h, $g);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 test_simple();
 test_nested();
 test_single();
 test_key();
 test_complex();
+}

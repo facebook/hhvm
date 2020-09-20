@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public function foo() {
@@ -19,5 +19,9 @@ yield 1;
 class A {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2075() {
 $a = new A();
 $a->foo();
+}

@@ -3,7 +3,7 @@
 // Test showing breakpoints on async functions in the debugger.
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
@@ -47,5 +47,8 @@ function main($a) {
   var_dump($result);
 }
 
-main(42);
+<<__EntryPoint>>
+function entrypoint_break_async(): void {
 
+  main(42);
+}

@@ -14,16 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
 namespace HPHP {
+
+namespace {
+bool same_arrays(const Array& a1, const Array& a2) {
+  return a1->same(a2.get());
+}
+}
 
 TEST(ARRAY, Constructors) {
   const String s_name("name");
@@ -44,7 +51,13 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = Array::Create(0);
+  arr = Array::CreatePHPArray();
+  arr.append(1);
+  EXPECT_TRUE(!arr.empty());
+  EXPECT_TRUE(arr.size() == 1);
+  EXPECT_TRUE(arr.length() == 1);
+
+  arr = make_varray(0);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -53,7 +66,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = Array::Create("test");
+  arr = make_varray("test");
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -63,7 +76,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_FALSE(arr.isHackArray());
 
   Array arrCopy = arr;
-  arr = Array::Create(arr);
+  arr = make_varray(arrCopy);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -73,41 +86,12 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = Array::Create("name", 1);
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
-  EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr[s_name].toInt32() == 1);
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
-
-  arr = Array::Create(s_name, "test");
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
-  EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(equal(arr[s_name], String("test")));
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
-
-  arrCopy = arr;
-  arr = Array::Create(s_name, arr);
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
-  EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(equal(arr[s_name], arrCopy));
-  EXPECT_TRUE(arr[s_name].toArray().size() == 1);
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
-
   arr = Array::CreateVec();
   EXPECT_TRUE(arr.empty());
   EXPECT_TRUE(arr.size() == 0);
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr.isVecArray());
+  EXPECT_TRUE(arr.isVec());
   EXPECT_TRUE(arr.isHackArray());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
@@ -120,7 +104,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isDict());
   EXPECT_TRUE(arr.isHackArray());
-  EXPECT_FALSE(arr.isVecArray());
+  EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isKeyset());
   EXPECT_FALSE(arr.isPHPArray());
 
@@ -131,7 +115,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isKeyset());
   EXPECT_TRUE(arr.isHackArray());
-  EXPECT_FALSE(arr.isVecArray());
+  EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isPHPArray());
 }
@@ -154,10 +138,10 @@ TEST(ARRAY, Iteration) {
   i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), 0));
+      EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(0)));
       EXPECT_TRUE(equal(iter.second(), String("v1")));
     } else {
-      EXPECT_TRUE(equal(iter.first(), 1));
+      EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(1)));
       EXPECT_TRUE(equal(iter.second(), String("v2")));
     }
   }
@@ -205,14 +189,13 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(arr0.toDouble() == 0.0);
   EXPECT_TRUE(arr0.toString().empty());
 
-  Array arr1 = Array::Create("test");
+  Array arr1 = make_varray("test");
   EXPECT_TRUE(arr1.toBoolean() == true);
   EXPECT_TRUE(arr1.toByte() == 1);
   EXPECT_TRUE(arr1.toInt16() == 1);
   EXPECT_TRUE(arr1.toInt32() == 1);
   EXPECT_TRUE(arr1.toInt64() == 1);
   EXPECT_TRUE(arr1.toDouble() == 1.0);
-  EXPECT_TRUE(arr1.toString() == s_Array);
 
   Array vec0 = Array::CreateVec();
   EXPECT_TRUE(vec0.toBoolean() == false);
@@ -221,7 +204,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(vec0.toInt32() == 0);
   EXPECT_TRUE(vec0.toInt64() == 0);
   EXPECT_TRUE(vec0.toDouble() == 0.0);
-  EXPECT_TRUE(vec0.toString() == s_Vec);
 
   Array vec1 = Array::CreateVec();
   vec1.append("test");
@@ -231,7 +213,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(vec1.toInt32() == 1);
   EXPECT_TRUE(vec1.toInt64() == 1);
   EXPECT_TRUE(vec1.toDouble() == 1.0);
-  EXPECT_TRUE(vec1.toString() == s_Vec);
 
   Array dict0 = Array::CreateDict();
   EXPECT_TRUE(dict0.toBoolean() == false);
@@ -240,7 +221,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(dict0.toInt32() == 0);
   EXPECT_TRUE(dict0.toInt64() == 0);
   EXPECT_TRUE(dict0.toDouble() == 0.0);
-  EXPECT_TRUE(dict0.toString() == s_Dict);
 
   Array dict1 = Array::CreateDict();
   dict1.set(Variant{"key"}, Variant{"value"});
@@ -250,7 +230,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(dict1.toInt32() == 1);
   EXPECT_TRUE(dict1.toInt64() == 1);
   EXPECT_TRUE(dict1.toDouble() == 1.0);
-  EXPECT_TRUE(dict1.toString() == s_Dict);
 
   Array keyset0 = Array::CreateKeyset();
   EXPECT_TRUE(keyset0.toBoolean() == false);
@@ -259,7 +238,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(keyset0.toInt32() == 0);
   EXPECT_TRUE(keyset0.toInt64() == 0);
   EXPECT_TRUE(keyset0.toDouble() == 0.0);
-  EXPECT_TRUE(keyset0.toString() == s_Keyset);
 
   Array keyset1 = Array::CreateKeyset();
   keyset1.append("test");
@@ -269,7 +247,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(keyset1.toInt32() == 1);
   EXPECT_TRUE(keyset1.toInt64() == 1);
   EXPECT_TRUE(keyset1.toDouble() == 1.0);
-  EXPECT_TRUE(keyset1.toString() == s_Keyset);
 }
 
 TEST(Array, Offsets) {
@@ -281,87 +258,76 @@ TEST(Array, Offsets) {
     Array arr;
     arr.set(0, "v1");
     arr.set(1, "v2");
-    EXPECT_TRUE(equal(arr, make_packed_array("v1", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toPHPArray()));
   }
   {
     Array arr;
     arr.set(s_n1, "v1");
     arr.set(s_n2, "v2");
-    EXPECT_TRUE(equal(arr, make_map_array("n1", "v1", "n2", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n1", "v1", "n2", "v2")));
   }
   {
     Array arr;
     Variant v1 = String("v1");
     Variant v2 = String("v2");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(0));
-    tvSet(*v2.asTypedValue(), arr.lvalAt(1));
-    EXPECT_TRUE(equal(arr, make_packed_array("v1", "v2")));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(0));
+    tvSet(*v2.asTypedValue(), arr.lvalForce(1));
+    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toPHPArray()));
   }
   {
     Array arr;
     Variant v1 = String("v1");
     Variant v2 = String("v2");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(s_n1));
-    tvSet(*v2.asTypedValue(), arr.lvalAt(s_n2));
-    EXPECT_TRUE(equal(arr, make_map_array("n1", "v1", "n2", "v2")));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(s_n1));
+    tvSet(*v2.asTypedValue(), arr.lvalForce(s_n2));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n1", "v1", "n2", "v2")));
   }
   {
     Array arr;
     Variant name = "name";
     Variant value = String("value");
-    tvSet(*value.asTypedValue(), arr.lvalAt(name));
-    EXPECT_TRUE(equal(arr, make_map_array("name", "value")));
+    tvSet(*value.asTypedValue(), arr.lvalForce(name));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("name", "value")));
   }
   {
     Array arr = Array::CreateVec();
     arr.append("v1");
     arr.append("v2");
-    EXPECT_TRUE(equal(arr, make_vec_array("v1", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_vec_array("v1", "v2")));
   }
   {
     Array arr = Array::CreateDict();
     arr.set(Variant{"k1"}, Variant{"v1"});
     arr.set(Variant{"k2"}, Variant{"v2"});
-    EXPECT_TRUE(equal(arr, make_dict_array("k1", "v1", "k2", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_dict_array("k1", "v1", "k2", "v2")));
   }
   {
     Array arr = Array::CreateKeyset();
     arr.append("v1");
     arr.append("v2");
-    EXPECT_TRUE(equal(arr, make_keyset_array("v1", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_keyset_array("v1", "v2")));
   }
 
   {
     Array arr;
-    tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(1));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    tvSet(make_tv<KindOfInt64>(10), arr.lvalForce(1));
+    EXPECT_TRUE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr;
-    tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(Variant(1.5)));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    tvSet(make_tv<KindOfInt64>(10), arr.lvalForce(s_1));
+    EXPECT_FALSE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr;
-    tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(s_1));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
-  }
-  {
-    Array arr;
-    tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(Variant("1")));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    tvSet(make_tv<KindOfInt64>(10), arr.lvalForce(Variant("1")));
+    EXPECT_FALSE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr = Array::CreateVec();
@@ -407,121 +373,95 @@ TEST(ARRAY, Membership) {
     Array arr;
     Variant v1 = String("v1");
     Variant v2 = String("v2");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(0));
-    tvSet(*v2.asTypedValue(), arr.lvalAt(1));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(0));
+    tvSet(*v2.asTypedValue(), arr.lvalForce(1));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(0);
     EXPECT_TRUE(!arr.exists(0));
-    EXPECT_TRUE(equal(arr, Array::Create(1, "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array(1, "v2")));
     arr.append("v3");
-    EXPECT_TRUE(equal(arr, make_map_array(1, "v2", 2, "v3")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array(1, "v2", 2, "v3")));
   }
   {
     const String s_0("0");
     Array arr;
     Variant v1 = String("v1");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(0));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(0));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(String(s_0));
-    EXPECT_TRUE(!arr.exists(0));
+    EXPECT_TRUE(arr.exists(0));
   }
   {
     Array arr;
     Variant v1 = String("v1");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(0));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(0));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(Variant("0"));
-    EXPECT_TRUE(!arr.exists(0));
+    EXPECT_TRUE(arr.exists(0));
   }
   {
     Array arr;
     Variant v1 = String("v1");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(0));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(0));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(Variant(Variant("0")));
-    EXPECT_TRUE(!arr.exists(0));
-  }
-  {
-    Array arr;
-    Variant v1 = String("v1");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(0));
     EXPECT_TRUE(arr.exists(0));
-    arr.remove(Variant(Variant(0.5)));
-    EXPECT_TRUE(!arr.exists(0));
-  }
-  {
-    Array arr;
-    Variant v1 = 123;
-    tvSet(*v1.asTypedValue(), arr.lvalAt(Variant()));
-    EXPECT_TRUE(arr.exists(empty_string_ref));
-    arr.remove(Variant());
-    EXPECT_TRUE(!arr.exists(empty_string_ref));
   }
   {
     Array arr;
     Variant v1 = String("v1");
     Variant v2 = String("v2");
-    tvSet(*v1.asTypedValue(), arr.lvalAt(s_n1));
-    tvSet(*v2.asTypedValue(), arr.lvalAt(s_n2));
+    tvSet(*v1.asTypedValue(), arr.lvalForce(s_n1));
+    tvSet(*v2.asTypedValue(), arr.lvalForce(s_n2));
     EXPECT_TRUE(arr.exists(s_n1));
     arr.remove(s_n1);
     EXPECT_TRUE(!arr.exists(s_n1));
-    EXPECT_TRUE(equal(arr, Array::Create(s_n2, "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array(s_n2, "v2")));
     arr.append("v3");
-    EXPECT_TRUE(equal(arr, make_map_array("n2", "v2", 0, "v3")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n2", "v2", 0, "v3")));
   }
   {
     Array arr;
-    auto const lval = arr.lvalAt();
-    lval.type() = KindOfString;
-    lval.val().pstr = StringData::Make("test", CopyString);
-    EXPECT_TRUE(equal(arr, make_packed_array("test")));
+    arr.append(Variant("test"));
+    EXPECT_TRUE(same_arrays(arr, make_varray("test").toPHPArray()));
+  }
+  {
+    Array arr = Array::CreateVArray();
+    arr.append(Variant("test"));
+    EXPECT_TRUE(same_arrays(arr, make_varray("test")));
   }
   {
     Array arr;
     Variant value = String("value");
-    tvSet(*value.asTypedValue(), arr.lvalAt(s_name));
+    tvSet(*value.asTypedValue(), arr.lvalForce(s_name));
     EXPECT_TRUE(arr.exists(s_name));
   }
   {
     Array arr;
     Variant value = String("value");
-    tvSet(*value.asTypedValue(), arr.lvalAt(1));
+    tvSet(*value.asTypedValue(), arr.lvalForce(1));
     EXPECT_TRUE(arr.exists(1));
-    EXPECT_TRUE(arr.exists(s_1));
-    EXPECT_TRUE(arr.exists(Variant("1")));
+    EXPECT_TRUE(!arr.exists(s_1));
+    EXPECT_TRUE(!arr.exists(Variant("1")));
     EXPECT_TRUE(arr.exists(Variant(1)));
-    EXPECT_TRUE(arr.exists(Variant(1.5)));
   }
   {
     Array arr;
     Variant value = String("value");
-    tvSet(*value.asTypedValue(), arr.lvalAt(s_1));
-    EXPECT_TRUE(arr.exists(1));
+    tvSet(*value.asTypedValue(), arr.lvalForce(s_1));
+    EXPECT_TRUE(!arr.exists(1));
     EXPECT_TRUE(arr.exists(s_1));
     EXPECT_TRUE(arr.exists(Variant("1")));
-    EXPECT_TRUE(arr.exists(Variant(1)));
-    EXPECT_TRUE(arr.exists(Variant(1.5)));
+    EXPECT_TRUE(!arr.exists(Variant(1)));
   }
   {
     Array arr;
     Variant value = String("value");
-    tvSet(*value.asTypedValue(), arr.lvalAt(Variant(1.5)));
-    EXPECT_TRUE(arr.exists(1));
+    tvSet(*value.asTypedValue(), arr.lvalForce(Variant("1")));
+    EXPECT_TRUE(!arr.exists(1));
     EXPECT_TRUE(arr.exists(s_1));
     EXPECT_TRUE(arr.exists(Variant("1")));
-    EXPECT_TRUE(arr.exists(Variant(1)));
-    EXPECT_TRUE(arr.exists(Variant(1.5)));
-  }
-  {
-    Array arr;
-    Variant value = String("value");
-    tvSet(*value.asTypedValue(), arr.lvalAt(Variant("1")));
-    EXPECT_TRUE(arr.exists(1));
-    EXPECT_TRUE(arr.exists(s_1));
-    EXPECT_TRUE(arr.exists(Variant("1")));
-    EXPECT_TRUE(arr.exists(Variant(1)));
-    EXPECT_TRUE(arr.exists(Variant(1.5)));
+    EXPECT_TRUE(!arr.exists(Variant(1)));
   }
   {
     Array arr = Array::CreateVec();
@@ -561,29 +501,19 @@ TEST(ARRAY, Membership) {
 
 TEST(ARRAY, Merge) {
   {
-    Array arr = Array::Create(0) + Array::Create(1);
-    EXPECT_TRUE(equal(arr, Array::Create(0)));
-    arr += make_packed_array(0, 1);
-    EXPECT_TRUE(equal(arr, make_packed_array(0, 1)));
+    Array arr = make_varray(0).merge(make_varray(1));
+    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1).toDArray()));
+    arr = arr.merge(make_varray(0, 1));
+    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1, 0, 1).toDArray()));
 
-    arr = Array::Create(0).merge(Array::Create(1));
-    EXPECT_TRUE(equal(arr, make_packed_array(0, 1)));
-    arr = arr.merge(make_packed_array(0, 1));
-    EXPECT_TRUE(equal(arr, make_packed_array(0, 1, 0, 1)));
+    arr = make_varray("s0").merge(make_varray("s1"));
+    EXPECT_TRUE(same_arrays(arr, make_varray("s0", "s1").toDArray()));
 
-    arr = Array::Create("s0").merge(Array::Create("s1"));
-    EXPECT_TRUE(equal(arr, make_packed_array("s0", "s1")));
-
-    arr = Array::Create("n0", "s0") + Array::Create("n1", "s1");
-    EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
-    arr += make_map_array("n0", "s0", "n1", "s1");
-    EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
-
-    arr = Array::Create("n0", "s0").merge(Array::Create("n1", "s1"));
-    EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
+    arr = make_map_array("n0", "s0").merge(make_map_array("n1", "s1"));
+    EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s0", "n1", "s1")));
     Array arrX = make_map_array("n0", "s2", "n1", "s3");
     arr = arr.merge(arrX);
-    EXPECT_TRUE(equal(arr, make_map_array("n0", "s2", "n1", "s3")));
+    EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s2", "n1", "s3")));
   }
 
   {

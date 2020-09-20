@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /* Prototype  : string rtrim  ( string $str  [, string $charlist  ] )
  * Description: Strip whitespace (or other characters) from the end of a string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing rtrim() : basic functionality ***\n";
 
 $text  = "---These are a few words---  \t\r\n\0\x0B  ";
@@ -29,5 +29,5 @@ var_dump(rtrim($alpha, "A..Z"));
 echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(rtrim($binary, "\x00..\x1F"));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

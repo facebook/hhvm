@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MongoShellServer {
     protected $fp;
@@ -11,7 +11,7 @@ class MongoShellServer {
         $this->fp = $fp;
     }
 
-    public function makeShard($mongos = 4, $rsOptions = array(), $rsSettings = array()) {
+    public function makeShard($mongos = 4, $rsOptions = varray[], $rsSettings = varray[]) {
         $this->setDBDIR();
         $rsOptions = json_encode($rsOptions);
         $rsSettings = json_encode($rsSettings);
@@ -163,20 +163,20 @@ class MongoShellServer {
         $admin = $creds["admin"];
         $admin->db = "admin";
 
-        $newuser = (object)array(
+        $newuser = (object)darray[
             "db"       => $db,
             "username" => $username,
             "password" => $password,
-        );
+        ];
 
 
         $adminjs = json_encode($admin);
         $userjs  = json_encode($newuser);
 
-        return array(
+        return darray[
             "adminjs" => $adminjs,
             "userjs"  => $userjs,
-        );
+        ];
     }
 
     public function setDBDIR() {
@@ -195,10 +195,10 @@ class MongoShellServer {
 
     public function getCredentials() {
         include dirname(__FILE__) . "/cfg.inc";
-        return array(
+        return darray[
             "admin" => $SUPER_USER,
             "user"  => $NORMAL_USER,
-        );
+        ];
     }
 
     public function close() {
@@ -252,7 +252,7 @@ class MongoShellServer {
 
     protected static function prettifyRSInfo($config) {
         $rsname = $config["_id"];
-        $hosts  = array();
+        $hosts  = varray[];
         if (!isset($config["members"])) {
             var_dump($config);
         }
@@ -260,11 +260,11 @@ class MongoShellServer {
             $hosts[] = $v["host"];
         }
 
-        return array(
+        return darray[
             "dsn"    => join(",", $hosts),
             "rsname" => $rsname,
             "hosts"  => $hosts,
-        );
+        ];
     }
 }
 
@@ -280,7 +280,7 @@ class DebugException extends Exception {
 
 
 function getServerVersion($mc = null) {
-    $mc->selectDB(dbname())->command(array('buildinfo'=>true));
+    $mc->selectDB(dbname())->command(darray['buildinfo'=>true]);
 }
 
 
@@ -289,24 +289,24 @@ function getServerVersion($mc = null) {
 
 function mongo() {
     $config = MongoShellServer::getReplicaSetInfo();
-    return new Mongo($config["dsn"], array("replicaSet" => $config["rsname"]));
+    return new Mongo($config["dsn"], darray["replicaSet" => $config["rsname"]]);
 }
 function old_mongo() {
     return mongo();
 }
-function new_mongo($unused1 = null, $unused2 = null, $unused3 = null, $options = array()) {
+function new_mongo($unused1 = null, $unused2 = null, $unused3 = null, $options = darray[]) {
     $config = MongoShellServer::getReplicaSetInfo();
-    return new MongoClient($config["dsn"], array("replicaSet" => $config["rsname"])+$options);
+    return new MongoClient($config["dsn"], darray["replicaSet" => $config["rsname"]]+$options);
 }
 
 function old_mongo_standalone() {
     return mongo_standalone();
 }
-function mongo_standalone($unused1 = null, $unused2 = null, $unused3 = null, $options = array()) {
+function mongo_standalone($unused1 = null, $unused2 = null, $unused3 = null, $options = darray[]) {
     $dsn = MongoShellServer::getStandaloneInfo();
     return new Mongo($dsn, $options);
 }
-function new_mongo_standalone($unused1 = null, $unused2 = null, $unused3 = null, $options = array()) {
+function new_mongo_standalone($unused1 = null, $unused2 = null, $unused3 = null, $options = darray[]) {
     $dsn = MongoShellServer::getStandaloneInfo();
     return new MongoClient($dsn, $options);
 }
@@ -339,10 +339,10 @@ function rsname() {
 }
 function logCallback($module, $level, $message)
 {
-    global $_LOG_CALLBACK_REGEX;
 
-    if ($_LOG_CALLBACK_REGEX) {
-        if (preg_match($_LOG_CALLBACK_REGEX, $message)) {
+
+    if (ExtMongoUtilsServerInc::$_LOG_CALLBACK_REGEX) {
+        if (preg_match(ExtMongoUtilsServerInc::$_LOG_CALLBACK_REGEX, $message)) {
             echo $message, "\n";
         }
     } else {
@@ -352,13 +352,13 @@ function logCallback($module, $level, $message)
 
 function printLogs($module = MongoLog::ALL, $level = MongoLog::ALL, $containing = null)
 {
-    global $_LOG_CALLBACK_REGEX;
+
 
     MongoLog::setModule($module);
     MongoLog::setLevel($level);
 
     if ($containing) {
-        $_LOG_CALLBACK_REGEX = $containing;
+        ExtMongoUtilsServerInc::$_LOG_CALLBACK_REGEX = $containing;
     }
     MongoLog::setCallback("logCallback");
 }
@@ -369,3 +369,7 @@ list($REPLICASET_SECONDARY, $REPLICASET_SECONDARY_PORT) = explode(":", $config["
 list($REPLICASET_PRIMARY, $REPLICASET_PRIMARY_PORT) = explode(":", $config["hosts"][0]);
  */
 
+
+abstract final class ExtMongoUtilsServerInc {
+  public static $_LOG_CALLBACK_REGEX;
+}

@@ -14,19 +14,20 @@ async function re($e) {
     }
     echo "$e\t(2**$e)+$diff\t$priority\n";
   };
-  await AwaitAllWaitHandle::fromArray(
-    array($r(-1), $r(0), $r(1)),
-  );
+  await AwaitAllWaitHandle::fromVArray(varray[$r(-1), $r(0), $r(1)]);
 }
-\HH\Asio\join(AwaitAllWaitHandle::fromArray(array_map(
+
+<<__EntryPoint>>
+function main_reschedule() {
+\HH\Asio\join(AwaitAllWaitHandle::fromDArray(darray(array_map(
   async $e ==> await re($e),
-  [ 1, 10, 20 ],
-)));
+  varray[ 1, 10, 20 ],
+))));
 echo "\n\n";
-\HH\Asio\join(AwaitAllWaitHandle::fromArray(array_map(
+\HH\Asio\join(AwaitAllWaitHandle::fromDArray(darray(array_map(
   async $e ==> await re($e),
-  [ 1, 30, 31, 32, 33, 48, 62, 63 ],
-)));
+  varray[ 1, 30, 31, 32, 33, 48, 62, 63 ],
+))));
 
 \HH\Asio\join(RescheduleWaitHandle::create(
   RescheduleWaitHandle::QUEUE_DEFAULT,
@@ -42,3 +43,4 @@ try {
 }
 
 echo "fin.";
+}

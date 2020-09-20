@@ -19,4 +19,8 @@ function main() {
   $s3 = $s->map(function ($v) { return Pair {$v, $v}; });
 }
 
+
+<<__EntryPoint>>
+function main_set_map_ret_type() {
 main();
+}

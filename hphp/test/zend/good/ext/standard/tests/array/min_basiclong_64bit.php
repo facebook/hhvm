@@ -1,24 +1,24 @@
-<?php
- 
-define("MAX_64Bit", 9223372036854775807);
-define("MAX_32Bit", 2147483647);
-define("MIN_64Bit", -MAX_64Bit - 1);
-define("MIN_32Bit", -MAX_32Bit - 1);
+<?hh
 
-$arrayVals = array(
+const MAX_64Bit = 9223372036854775807;
+const MAX_32Bit = 2147483647;
+const MIN_64Bit = -MAX_64Bit - 1;
+const MIN_32Bit = -MAX_32Bit -1;
+<<__EntryPoint>> function main(): void {
+$arrayVals = varray[
     MAX_64Bit, MIN_64Bit, MAX_32Bit, MIN_32Bit, MAX_64Bit - MAX_32Bit, MIN_64Bit - MIN_32Bit,
     MAX_32Bit + 1, MIN_32Bit - 1, MAX_32Bit * 2, (MAX_32Bit * 2) + 1, (MAX_32Bit * 2) - 1,
     MAX_64Bit -1, MIN_64Bit + 1
-);
+];
 
-$longVals = array(
+$longVals = varray[
     MAX_64Bit, MIN_64Bit, MAX_32Bit, MIN_32Bit, MAX_64Bit - MAX_32Bit, MIN_64Bit - MIN_32Bit,
     MAX_32Bit + 1, MIN_32Bit - 1, MAX_32Bit * 2, (MAX_32Bit * 2) + 1, (MAX_32Bit * 2) - 1,
     MAX_64Bit -1, MAX_64Bit + 1, MIN_64Bit + 1, MIN_64Bit - 1
-);
+];
 
    var_dump(min($arrayVals));
-   var_dump(min($longVals));   
-   
-?>
-===DONE===
+   var_dump(min($longVals));
+
+echo "===DONE===\n";
+}

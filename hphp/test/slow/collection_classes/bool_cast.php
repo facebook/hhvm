@@ -48,4 +48,8 @@ function main() {
   if ($p)  {echo "if\n";} else {throw new Exception('pair');}
 }
 
+
+<<__EntryPoint>>
+function main_bool_cast() {
 main();
+}

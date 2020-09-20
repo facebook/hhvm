@@ -1,8 +1,0 @@
-#\!\/usr\/bin\/env php
-PHPUnit 3.7.22 by Sebastian Bergmann.
-
-.
-
-(Time: \d+ second.*, Memory: [^\r\n]+|Time: \d+:\d+, Memory: [^\r\n]+)
-
-OK \(1 test, 1 assertion\)

@@ -1,1 +1,0 @@
-((Fatal error\: Using \->\: syntax in write context is not supported in [^\r\n]+ on line 8)|(Fatal error\: \?\-> is not allowed in write context in [^\r\n]+\/xhp\/attr\-syntax\-3\.php on line 8))

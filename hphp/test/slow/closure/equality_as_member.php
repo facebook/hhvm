@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   public function __construct() {
@@ -6,4 +6,8 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_equality_as_member() {
 var_dump((new Foo()) == (new Foo()));
+}

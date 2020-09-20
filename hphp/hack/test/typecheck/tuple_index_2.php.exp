@@ -1,0 +1,6 @@
+File "tuple_index_2.php", line 5, characters 10-16:
+Invalid return type (Typing[4336])
+File "tuple_index_2.php", line 5, characters 10-16:
+Expected `void` because this function does not always return a value
+File "tuple_index_2.php", line 8, characters 4-11:
+But got `vec<Tv2>`

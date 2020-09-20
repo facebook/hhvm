@@ -1,5 +1,5 @@
-<?hh
-$data = [
+<?hh <<__EntryPoint>> function main(): void {
+$data = varray[
   'null',
   'false',
   'true',
@@ -15,4 +15,5 @@ foreach($data as $str) {
   echo "JSON: $str\n";
   var_dump(json_decode($str));
   echo "Error: ", json_last_error(), "\n";
+}
 }

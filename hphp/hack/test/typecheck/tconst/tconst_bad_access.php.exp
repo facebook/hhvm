@@ -1,0 +1,4 @@
+File "tconst_bad_access.php", line 5, characters 31-31:
+No type constant `T` in `C` (Typing[4090])
+File "tconst_bad_access.php", line 4, characters 7-7:
+Declaration of `C` is here

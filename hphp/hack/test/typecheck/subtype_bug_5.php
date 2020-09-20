@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 class B {}
 class C extends B {}
 

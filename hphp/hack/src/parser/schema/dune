@@ -1,0 +1,18 @@
+(library
+  (name parser_schema_def)
+  (wrapped false)
+  (modules
+    schema_definition
+    token_schema_definition
+    operator_schema_definition)
+  (libraries
+    collections))
+
+(library
+  (name parser_schema)
+  (wrapped false)
+  (modules
+    full_fidelity_schema)
+  (libraries
+    parser_schema_def)
+  (flags (:standard -w @a-29-50)))

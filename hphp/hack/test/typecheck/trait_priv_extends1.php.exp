@@ -1,11 +1,6 @@
-File "trait_priv_extends1.php", line 10, characters 7-7:
-Class C does not correctly implement all required methods  (Typing[4110])
-File "trait_priv_extends1.php", line 11, characters 7-7:
-Some methods are incompatible with those declared in type T
-Read the following to see why:
 File "trait_priv_extends1.php", line 17, characters 20-20:
-Member f has the wrong type
+The method `f` has the wrong type (Typing[4341])
 File "trait_priv_extends1.php", line 5, characters 25-27:
-This is an int
+Expected `int`
 File "trait_priv_extends1.php", line 17, characters 25-30:
-It is incompatible with a string
+But got `string`

@@ -13,21 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/tools/tc-print/offline-code.h"
 
-#include <stdio.h>
-#include <cxxabi.h>
 #include <vector>
-#include <assert.h>
 #include <iomanip>
-#include <sys/stat.h>
 
-#include "hphp/tools/tc-print/tc-print.h"
-#include "hphp/tools/tc-print/offline-trans-data.h"
 
-#include "hphp/util/disasm.h"
 
-using std::vector;
 
 namespace HPHP { namespace jit {
 

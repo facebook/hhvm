@@ -1,10 +1,8 @@
 *** Testing array_flip() : error conditions ***
 -- Testing array_flip() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_flip() expects exactly 1 parameter, 0 given in %s/array_flip_error.php on line 11
 -- Testing array_flip() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_flip() expects exactly 1 parameter, 2 given in %s/array_flip_error.php on line 17
 Done

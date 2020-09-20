@@ -3,7 +3,7 @@
 
 HHVM collects stats by time slots. Each time slot is configured as
 StatsSlotDuration seconds and server internally keeps StatsMaxSlot number
-of slots. Inside each slot, we keep a set of stats. These stats include 
+of slots. Inside each slot, we keep a set of stats. These stats include
 one built-in ("hit") and many key-value pairs defined by different parts
 of the system.
 
@@ -84,12 +84,7 @@ mcc.stats:          number of stats() calls
 
 apc.miss:   number of item misses
 apc.hit:    number of item hits
-apc.update: number of item updates
-apc.new:    number of new items
-apc.erased: number of successfully erased items
-apc.erase:  number of items that failed to erase (because they were absent)
-apc.inc:    number of inc() call
-apc.cas:    number of cas() call
+apc.write:  number of writes
 
 4. Memory Stats:
 

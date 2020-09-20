@@ -9,7 +9,7 @@ function handler($kind, $name) {
   if ($kind == 'exit' && $name == 'X::__construct') throw new Exception;
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   fb_setprofile('handler');
   try {
     new X;
@@ -17,5 +17,3 @@ function test() {
     echo "ok\n";
   }
 }
-
-test();

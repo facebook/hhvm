@@ -1,35 +1,35 @@
-<?php
+<?hh
 
-Class returnNull implements Countable {
-	function count() {
-	}
+class returnNull implements Countable {
+    function count() {
+    }
 }
 
-Class returnString implements Countable {
-	function count() {
-		return "hello";
-	}
+class returnString implements Countable {
+    function count() {
+        return "hello";
+    }
 }
 
-Class returnObject implements Countable {
-	function count() {
-		return new returnObject;
-	}
+class returnObject implements Countable {
+    function count() {
+        return new returnObject;
+    }
 }
 
-Class returnArray implements Countable {
-	function count() {
-		return array(1,2,3);
-	}
+class returnArray implements Countable {
+    function count() {
+        return varray[1,2,3];
+    }
 }
 
-Class throwException implements Countable {
-	function count() {
-		throw new Exception('Thrown from count');
-	}
+class throwException implements Countable {
+    function count() {
+        throw new Exception('Thrown from count');
+    }
 }
 
-
+<<__EntryPoint>> function main(): void {
 echo "Count returns null:\n";
 var_dump(count(new returnNull));
 
@@ -44,9 +44,8 @@ var_dump(count(new returnArray));
 
 echo "Count throws an exception:\n";
 try {
-	echo count(new throwException);
+    echo count(new throwException);
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
-
-?>
+}

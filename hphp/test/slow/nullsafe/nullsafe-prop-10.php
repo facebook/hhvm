@@ -1,15 +1,23 @@
 <?hh // strict
-
-$z = new stdClass;
-$z->m = 1;
-function something($x) { global $z; return $z; }
-
+function something($x) {
+return NullsafeNullsafeProp10Php::$z;
+}
 function test() {
-  global $z;
+
   $foo = null;
-  $x =& something($foo?->bar); // ok
+  $x = something($foo?->bar); // ok
   $x->n = 2;
-  var_dump($z);
+  var_dump(NullsafeNullsafeProp10Php::$z);
 }
 
-test();
+abstract final class NullsafeNullsafeProp10Php {
+  public static $z;
+}
+<<__EntryPoint>>
+function entrypoint_nullsafeprop10(): void {
+
+  NullsafeNullsafeProp10Php::$z = new stdClass;
+  NullsafeNullsafeProp10Php::$z->m = 1;
+
+  test();
+}

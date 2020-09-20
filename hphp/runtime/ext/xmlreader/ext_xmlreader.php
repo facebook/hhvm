@@ -1,87 +1,84 @@
-<?hh
+<?hh // partial
 
 <<__NativeData("XMLReader")>>
 class XMLReader {
 
-  function __construct(): void {}
+  public function __construct(): void {}
 
   <<__Native>>
-  function open(string $uri, ?string $encoding = null, int $options = 0): mixed;
+  public function open(string $uri, ?string $encoding = null, int $options = 0): mixed;
 
   <<__Native>>
-  function XML(string $source,
+  public function XML(string $source,
                ?string $encoding = null,
                int $options = 0): bool;
 
   <<__Native>>
-  function close(): bool;
+  public function close(): bool;
 
   <<__Native>>
-  function read(): bool;
+  public function read(): bool;
 
   <<__Native>>
-  function next(?string $localname = null): bool;
+  public function next(?string $localname = null): bool;
 
   <<__Native>>
-  function readString(): string;
+  public function readString(): string;
 
   <<__Native>>
-  function readInnerXML(): string;
+  public function readInnerXML(): string;
 
   <<__Native>>
-  function readOuterXML(): string;
+  public function readOuterXML(): string;
 
   <<__Native>>
-  function moveToNextAttribute(): bool;
+  public function moveToNextAttribute(): bool;
 
   <<__Native>>
-  function getAttribute(string $name): mixed;
+  public function getAttribute(string $name): mixed;
 
   <<__Native>>
-  function getAttributeNo(int $index): mixed;
+  public function getAttributeNo(int $index): mixed;
 
   <<__Native>>
-  function getAttributeNs(string $name, string $namespaceURI): mixed;
+  public function getAttributeNs(string $name, string $namespaceURI): mixed;
 
   <<__Native>>
-  function moveToAttribute(string $name): bool;
+  public function moveToAttribute(string $name): bool;
 
   <<__Native>>
-  function moveToAttributeNo(int $index): bool;
+  public function moveToAttributeNo(int $index): bool;
 
   <<__Native>>
-  function moveToAttributeNs(string $name, string $namespaceURI): bool;
+  public function moveToAttributeNs(string $name, string $namespaceURI): bool;
 
   <<__Native>>
-  function moveToElement(): bool;
+  public function moveToElement(): bool;
 
   <<__Native>>
-  function moveToFirstAttribute(): bool;
+  public function moveToFirstAttribute(): bool;
 
   <<__Native>>
-  function isValid(): bool;
+  public function isValid(): bool;
 
   <<__Native>>
-  function __get(mixed $name): mixed;
+  public function getParserProperty(int $property): bool;
 
   <<__Native>>
-  function getParserProperty(int $property): bool;
+  public function lookupNamespace(string $prefix): mixed;
 
   <<__Native>>
-  function lookupNamespace(string $prefix): mixed;
+  public function setSchema(string $source): bool;
 
   <<__Native>>
-  function setSchema(string $source): bool;
+  public function setParserProperty(int $property, bool $value): bool;
 
   <<__Native>>
-  function setParserProperty(int $property, bool $value): bool;
+  public function setRelaxNGSchema(string $filename): mixed;
 
   <<__Native>>
-  function setRelaxNGSchema(string $filename): mixed;
+  public function setRelaxNGSchemaSource(string $source): bool;
 
   <<__Native>>
-  function setRelaxNGSchemaSource(string $source): bool;
-
-  <<__Native>>
-  function expand(?DOMNode $basenode = null): mixed;
+  public function expand(?DOMNode $basenode = null): mixed;
 }

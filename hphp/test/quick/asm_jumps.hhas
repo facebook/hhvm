@@ -2,15 +2,7 @@
 # Test some jumps
 #
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Int 1
-  RetC
-}
-
-.function main {
+.function ["__EntryPoint"("""y:0:{}""")] main {
 
   Jmp real_function
 

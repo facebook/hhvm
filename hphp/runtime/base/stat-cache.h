@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STAT_CACHE_H_
-#define incl_HPHP_STAT_CACHE_H_
+#pragma once
 
 #ifdef __linux__
 #include <sys/inotify.h>
@@ -26,7 +25,7 @@
 
 #include <tbb/concurrent_hash_map.h>
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/lock.h"
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/atomic-countable.h"
@@ -41,11 +40,11 @@ struct StatCache {
   typedef AtomicSharedPtr<Node> NodePtr;
   typedef tbb::concurrent_hash_map<std::string, NodePtr,
                                    stringHashCompare> NameNodeMap;
-  typedef hphp_hash_map<int, NodePtr, int64_hash> WatchNodeMap;
+  using WatchNodeMap = hphp_hash_map<int, NodePtr, int64_hash>;
 
   struct Node : AtomicCountable {
-    typedef hphp_hash_map<std::string, NodePtr, string_hash> NameNodeMap;
-    typedef hphp_hash_map<std::string, void*, string_hash> NameMap;
+    using NameNodeMap = hphp_hash_map<std::string, NodePtr, string_hash>;
+    using NameMap = hphp_hash_map<std::string, void*, string_hash>;
 
     explicit Node(StatCache& statCache, int wd=-1);
     void atomicRelease();
@@ -78,6 +77,7 @@ struct StatCache {
     int m_wd;                // Watch descriptor; -1 if a file.
 
     bool m_valid;            // True if m_stat/m_lstat are currently valid.
+
     struct stat m_stat;      // Cached stat() result.
     struct stat m_lstat;     // Cached lstat() result.
     std::string m_link;      // Cached readlink() result.
@@ -100,6 +100,7 @@ struct StatCache {
   static int lstat(const std::string& path, struct stat* buf);
   static std::string readlink(const std::string& path);
   static std::string realpath(const char* path);
+  static void clearCache();
 
  private:
   bool init();
@@ -139,4 +140,3 @@ struct StatCache {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_STAT_CACHE_H_

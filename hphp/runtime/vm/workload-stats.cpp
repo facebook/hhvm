@@ -18,10 +18,12 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/timer.h"
 
+#include <mutex>
 #include <vector>
 
 namespace HPHP {
@@ -50,7 +52,7 @@ void start(DeltaCounter& dc) {
 void end(DeltaCounter& dc) {
   dc.acc += getCurrentCounter() - dc.start;
   assertx(dc.start != kInvalidCounter);
-  if (do_assert) dc.start = kInvalidCounter;
+  if (debug) dc.start = kInvalidCounter;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,13 +91,20 @@ private:
   static ServiceData::ExportedTimeSeries* s_interpVMRatio;
   static ServiceData::ExportedTimeSeries* s_trans;
   static ServiceData::ExportedTimeSeries* s_interps;
+
+public:
+  static int64_t s_relativeInterp;
+  static int64_t s_requests;
+  static std::mutex s_mutex;
 };
 ServiceData::ExportedTimeSeries* RequestWorkloadStats::s_interpNanos;
 ServiceData::ExportedTimeSeries* RequestWorkloadStats::s_requestNanos;
 ServiceData::ExportedTimeSeries* RequestWorkloadStats::s_interpVMRatio;
 ServiceData::ExportedTimeSeries* RequestWorkloadStats::s_trans;
 ServiceData::ExportedTimeSeries* RequestWorkloadStats::s_interps;
-
+int64_t RequestWorkloadStats::s_relativeInterp = 0;
+int64_t RequestWorkloadStats::s_requests = 0;
+std::mutex RequestWorkloadStats::s_mutex;
 
 // Setup RequestWorkloadStats to have init and request callbacks.
 THREAD_LOCAL_NO_CHECK(RequestWorkloadStats, s_request_workload_stats);
@@ -155,7 +164,14 @@ void RequestWorkloadStats::requestShutdown() {
   s_requestNanos->addValue(php);
 
   if (php > 0) {
-    s_interpVMRatio->addValue(interp * 10000 / php);
+    auto const value = interp * 10000 / php;
+    s_interpVMRatio->addValue(value);
+
+    {
+      std::unique_lock<std::mutex> guard(s_mutex);
+      s_relativeInterp += value;
+      s_requests++;
+    }
   }
 
   // Log state change counts.
@@ -230,6 +246,19 @@ WorkloadStats::WorkloadStats(State guardedState) {
 
 WorkloadStats::~WorkloadStats() {
   s_request_workload_stats->leave();
+}
+
+int64_t WorkloadStats::GetAndResetAvgRelativeInterp() {
+  int64_t relativeInterp;
+  int64_t requests;
+  {
+    std::unique_lock<std::mutex> guard(RequestWorkloadStats::s_mutex);
+    relativeInterp = RequestWorkloadStats::s_relativeInterp;
+    requests = RequestWorkloadStats::s_requests;
+    RequestWorkloadStats::s_relativeInterp = 0;
+    RequestWorkloadStats::s_requests = 0;
+  }
+  return requests ? (relativeInterp / requests) : relativeInterp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

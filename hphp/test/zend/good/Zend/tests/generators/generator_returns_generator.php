@@ -1,13 +1,12 @@
-<?php
+<?hh
 
 function gen() {
     // execution is suspended here, so the following never gets run:
     echo "Foo";
-	// trigger a generator
+    // trigger a generator
     yield;
 }
-
+<<__EntryPoint>> function main(): void {
 $generator = gen();
-var_dump($generator instanceof Generator);
-
-?>
+var_dump($generator is Generator);
+}

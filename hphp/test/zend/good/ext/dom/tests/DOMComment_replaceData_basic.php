@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $dom = new DomDocument();
 $comment = $dom->createComment('test-comment');
 $comment->replaceData(4,1,'replaced');
@@ -12,5 +12,4 @@ $comment = $dom->createComment('test-comment');
 $comment->replaceData(0,50,'replaced');
 $dom->appendChild($comment);
 echo $dom->saveXML();
-
-?>
+}

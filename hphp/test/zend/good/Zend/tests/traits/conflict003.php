@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait A {
    public function smallTalk() {
@@ -23,4 +22,7 @@ class Talker {
    use A, B;
 }
 
-?>
+<<__EntryPoint>>
+function entrypoint_conflict003(): void {
+  error_reporting(E_ALL);
+}

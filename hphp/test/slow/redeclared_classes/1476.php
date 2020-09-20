@@ -1,29 +1,31 @@
-<?php
+<?hh
 
 class PEAR {
   static function f() {
- PEAR::g();
- }
-  function g() {
- echo 'This is g()';
- }
-}
-if ($x) {
-  class PEAR {
-}
+    PEAR::g();
+  }
+  static function g() {
+    echo 'This is g()';
+  }
 }
 class D1 extends PEAR {
   public $foo;
   private $bar;
   function bar() {
- return $this->foo + $this->bar;
- }
+    return $this->foo + $this->bar;
+  }
 }
 class D2 extends D1 {
   public $foo;
   private $bar;
   function bar() {
- return $this->foo + $this->bar;
- }
+    return $this->foo + $this->bar;
+  }
 }
-PEAR::f();
+<<__EntryPoint>>
+function entrypoint_1476(): void {
+  if ($x) {
+    include '1476.inc';
+  }
+  PEAR::f();
+}

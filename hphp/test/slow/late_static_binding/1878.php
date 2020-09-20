@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   static function foo() {
@@ -11,6 +11,10 @@ class X {
  return time();
  }
   }
+
+<<__EntryPoint>>
+function main_1878() {
 var_dump(X::foo());
 var_dump(X::bar());
 var_dump(gettype(X::baz()));
+}

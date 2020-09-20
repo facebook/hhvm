@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1805() {
 try {
   $y = new RecursiveDirectoryIterator('/fake_path');
   $z = new RecursiveIteratorIterator($y);
@@ -8,3 +11,4 @@ try {
  catch (UnexpectedValueException $e) {
 }
 var_dump('ok');
+}

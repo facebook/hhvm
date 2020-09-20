@@ -1,3 +1,4 @@
-<?php 
-	if (!function_exists('imagepolygon')) die('skip imagepolygon() not available'); 
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!function_exists('imagepolygon')) die('skip imagepolygon() not available');
+}

@@ -8,8 +8,6 @@ class C extends B {
     var_dump(get_class_vars('C'));
   }
 }
-$o = new C;
-$o->dump_vars();
 
 class D {
   public $x = NonExistentClass::FOO;
@@ -21,12 +19,6 @@ function main() {
   $d = new E();
   echo "Done\n";
 }
-main();
-
-function __autoload($cls) {
-  echo "looking up $cls\n";
-  if ($cls == 'F') { class F { const FOO = 1; } }
-}
 
 class G {
   public static $x = NonExistentClass::FOO;
@@ -37,7 +29,22 @@ class H extends G {
 }
 
 function main2() {
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'f' => 'propeties4.inc',
+      ],
+    ],
+    __DIR__.'/',
+  );
+
   $d = new H();
   echo "Done\n";
 }
-main2();
+<<__EntryPoint>>
+function entrypoint_properties4(): void {
+  $o = new C;
+  $o->dump_vars();
+  main();
+  main2();
+}

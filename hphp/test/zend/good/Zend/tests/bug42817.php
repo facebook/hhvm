@@ -1,4 +1,3 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $a = clone(null);
-array_push($a->b, $c);
-?>
+}

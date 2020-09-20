@@ -1,15 +1,5 @@
 *** Testing vfprintf() : with unexpected values for format argument ***
 
-Notice: %s
-
-Notice: %s
-
-Notice: %s
-
-Notice: %s
-
-Notice: %s
-
 *** Testing vprintf() with with unexpected values for format argument ***
 
 -- Iteration 1 --

@@ -1,2 +1,2 @@
-File "variadic_args2.php", line 3, characters 30-29:
-A variadic parameter cannot have a default value. (Parsing[1002])
+File "variadic_args2.php", line 3, characters 12-30:
+A variadic parameter `...` must not have a default value. (Parsing[1002])

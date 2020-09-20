@@ -1,4 +1,5 @@
-array(5) {
+bool(true)
+darray(5) {
   ["ts"]=>
   int(1000000)
   ["time"]=>
@@ -10,7 +11,8 @@ array(5) {
   ["abbr"]=>
   string(3) "BST"
 }
-array(5) {
+bool(true)
+darray(5) {
   ["ts"]=>
   int(89172000)
   ["time"]=>
@@ -22,7 +24,7 @@ array(5) {
   ["abbr"]=>
   string(3) "GMT"
 }
-array(5) {
+darray(5) {
   ["ts"]=>
   int(985482000)
   ["time"]=>
@@ -34,9 +36,8 @@ array(5) {
   ["abbr"]=>
   string(3) "BST"
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(1383176624)
     ["time"]=>
@@ -49,50 +50,58 @@ array(1) {
     string(3) "IST"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-2147483648)
     ["time"]=>
     string(24) "1901-12-13T20:45:52+0000"
     ["offset"]=>
-    int(21200)
+    int(19270)
     ["isdst"]=>
     bool(false)
     ["abbr"]=>
-    string(3) "HMT"
+    string(3) "MMT"
   }
 }
-array(5) {
-  [0]=>
-  array(5) {
+varray(6) {
+  darray(5) {
     ["ts"]=>
     int(-2147483648)
     ["time"]=>
     string(24) "1901-12-13T20:45:52+0000"
     ["offset"]=>
-    int(21200)
+    int(19270)
     ["isdst"]=>
     bool(false)
     ["abbr"]=>
-    string(3) "HMT"
+    string(3) "MMT"
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     ["ts"]=>
-    int(-891582800)
+    int(-2019705670)
     ["time"]=>
-    string(24) "1941-09-30T18:06:40+0000"
+    string(24) "1905-12-31T18:38:50+0000"
+    ["offset"]=>
+    int(19800)
+    ["isdst"]=>
+    bool(false)
+    ["abbr"]=>
+    string(3) "IST"
+  }
+  darray(5) {
+    ["ts"]=>
+    int(-891581400)
+    ["time"]=>
+    string(24) "1941-09-30T18:30:00+0000"
     ["offset"]=>
     int(23400)
     ["isdst"]=>
-    bool(false)
+    bool(true)
     ["abbr"]=>
-    string(4) "BURT"
+    string(5) "+0630"
   }
-  [2]=>
-  array(5) {
+  darray(5) {
     ["ts"]=>
     int(-872058600)
     ["time"]=>
@@ -104,8 +113,7 @@ array(5) {
     ["abbr"]=>
     string(3) "IST"
   }
-  [3]=>
-  array(5) {
+  darray(5) {
     ["ts"]=>
     int(-862637400)
     ["time"]=>
@@ -115,10 +123,9 @@ array(5) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
-  [4]=>
-  array(5) {
+  darray(5) {
     ["ts"]=>
     int(-764145000)
     ["time"]=>
@@ -131,9 +138,8 @@ array(5) {
     string(3) "IST"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-872058600)
     ["time"]=>
@@ -146,9 +152,8 @@ array(1) {
     string(3) "IST"
   }
 }
-array(2) {
-  [0]=>
-  array(5) {
+varray(2) {
+  darray(5) {
     ["ts"]=>
     int(-872058600)
     ["time"]=>
@@ -160,8 +165,7 @@ array(2) {
     ["abbr"]=>
     string(3) "IST"
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     ["ts"]=>
     int(-862637400)
     ["time"]=>
@@ -171,12 +175,11 @@ array(2) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-872058599)
     ["time"]=>
@@ -189,9 +192,8 @@ array(1) {
     string(3) "IST"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-862637400)
     ["time"]=>
@@ -201,12 +203,11 @@ array(1) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-862637399)
     ["time"]=>
@@ -216,12 +217,11 @@ array(1) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-862637399)
     ["time"]=>
@@ -231,12 +231,11 @@ array(1) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(1000000)
     ["time"]=>
@@ -249,9 +248,8 @@ array(1) {
     string(3) "UTC"
   }
 }
-array(1) {
-  [0]=>
-  array(5) {
+varray(1) {
+  darray(5) {
     ["ts"]=>
     int(-9223372036854775808)
     ["time"]=>

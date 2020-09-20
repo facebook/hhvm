@@ -1,0 +1,12 @@
+File "solve_nothing.php", line 26, characters 21-22:
+Was expecting an array or collection but type is unknown (Typing[4297])
+File "solve_nothing.php", line 26, characters 5-6:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+File "solve_nothing.php", line 26, characters 27-28:
+Was expecting an array or collection but type is unknown (Typing[4297])
+File "solve_nothing.php", line 26, characters 5-6:
+It is unknown because a type could not be determined here
+File "solve_nothing.php", line 26, characters 33-34:
+Was expecting an array or collection but type is unknown (Typing[4297])
+File "solve_nothing.php", line 26, characters 5-6:
+It is unknown because a type could not be determined here

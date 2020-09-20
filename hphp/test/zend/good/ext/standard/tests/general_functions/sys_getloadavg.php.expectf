@@ -1,12 +1,7 @@
-
-Warning: %s
-NULL
-array(3) {
-  [0]=>
+Warning: sys_getloadavg() expects exactly 0 parameters, 1 given in %s/sys_getloadavg.php on line 3
+varray(3) {
   float(%f)
-  [1]=>
   float(%f)
-  [2]=>
   float(%f)
 }
 Done

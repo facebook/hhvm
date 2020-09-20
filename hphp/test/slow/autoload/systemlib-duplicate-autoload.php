@@ -10,20 +10,20 @@
  */
 function main() {
   HH\autoload_set_paths(
-    array(
-      'class' => array(
+    darray[
+      'class' => darray[
         'ziparchive' => 'systemlib-duplicate-autoload-1.inc',
         'herpderp' => 'systemlib-duplicate-autoload-2.inc',
-      ),
-      'function' => array(
+      ],
+      'function' => darray[
         'get_class' => 'systemlib-duplicate-autoload-1.inc',
         'herp_derp' => 'systemlib-duplicate-autoload-3.inc',
-      ),
-      'constant' => array(
+      ],
+      'constant' => darray[
         'HPHP_VERSION' => 'systemlib-duplicate-autoload-1.inc',
         'HERP_DERP' => 'systemlib-duplicate-autoload-4.inc',
-      ),
-    ),
+      ],
+    ],
     __DIR__.'/'
   );
   $obj = new ZipArchive();
@@ -42,6 +42,12 @@ function main() {
 
   var_dump(HPHP_VERSION);
   var_dump(HERP_DERP);
+  
+  var_dump(get_included_files());
 }
 
+
+<<__EntryPoint>>
+function main_systemlib_duplicate_autoload() {
 main();
+}

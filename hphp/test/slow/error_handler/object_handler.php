@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyClass {
   public function __construct() {
     // See GitHub #2113
@@ -6,7 +6,7 @@ class MyClass {
     $this->prop2 = 'somethingElse';
     $this->prop3 = 'somethingElseThen';
 
-    var_dump(set_error_handler(array($this, 'errorHandler')));
+    var_dump(set_error_handler(varray[$this, 'errorHandler']));
   }
 
   public function errorHandler($severity, $message, $file = NULL,
@@ -24,4 +24,8 @@ function main() {
   $x->fail();
 }
 
+
+<<__EntryPoint>>
+function main_object_handler() {
 main();
+}

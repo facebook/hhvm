@@ -1,12 +1,16 @@
-<?php
+<?hh
 
-$ar1 = array(
-  "color" => array("favoritte" => "red"),
-  5
-);
-$ar2 = array(
+
+<<__EntryPoint>>
+function main_array_replace_recursive() {
+$ar1 = darray[
+  "color" => darray["favoritte" => "red"],
+  0 => 5
+];
+$ar2 = varray[
   10,
-  array("color" => array("favorite" => "green", "blue"))
-);
-$r = array_replace_recursive($ar1, array($ar2));
+  darray["color" => darray["favorite" => "green", 0 => "blue"]]
+];
+$r = array_replace_recursive($ar1, varray[$ar2]);
 var_dump($r);
+}

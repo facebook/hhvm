@@ -1,0 +1,2 @@
+File "systemlib_bad1.php", line 12, characters 3-10:
+Unrecognized user attribute: `__Native` starts with __ but is not a standard attribute (Naming[2049])

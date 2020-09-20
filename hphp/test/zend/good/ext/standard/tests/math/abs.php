@@ -1,18 +1,16 @@
-<?php // $Id$
-
-define('LONG_MAX', is_int(5000000000)? (double)9223372036854775807 : (double)0x7FFFFFFF);
-define('LONG_MIN', -LONG_MAX - 1);
-printf("%d,%d,%d,%d\n",is_float(LONG_MIN  ),is_float(LONG_MAX  ),
-					   is_int(LONG_MIN-1),is_int(LONG_MAX+1));
-
-$tests = <<<TESTS
- 1   === abs(-1)
- 1.5 === abs(-1.5)
- 1   === abs("-1")
- 1.5 === abs("-1.5")
--LONG_MIN+1 === abs(LONG_MIN-1)
--LONG_MIN   === abs(LONG_MIN)
--(LONG_MIN+1) === abs(LONG_MIN+1)
-TESTS;
+<?hh
+<<__EntryPoint>> function main(): void {
+$long_max = is_int(5000000000)? (float)9223372036854775807 : (float)0x7FFFFFFF;
+$long_min = -$long_max - 1;
+printf("%d,%d,%d,%d\n",is_float($long_min  ),is_float($long_max  ),
+                       is_int($long_min-1),is_int($long_max+1));
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+quicktester(() ==> 1, () ==> abs(-1));
+quicktester(() ==> 1.5, () ==> abs(-1.5));
+quicktester(() ==> 1, () ==> abs("-1"));
+quicktester(() ==> 1.5, () ==> abs("-1.5"));
+quicktester(() ==> -($long_min+1), () ==> abs($long_min-1));
+quicktester(() ==> -($long_min), () ==> abs($long_min));
+quicktester(() ==> -($long_min+1), () ==> abs($long_min+1));
+}

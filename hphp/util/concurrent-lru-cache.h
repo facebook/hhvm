@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef incl_HPHP_UTIL_LRU_CACHE_H
-#define incl_HPHP_UTIL_LRU_CACHE_H
+#pragma once
 
 #include <atomic>
 #include <mutex>
@@ -391,4 +390,3 @@ evict() {
 
 } // namespace HPHP
 
-#endif

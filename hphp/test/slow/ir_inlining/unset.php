@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class NonExistProp {
   private $x;
@@ -20,7 +20,7 @@ function thrower() {
 }
 
 function test7() {
-  set_error_handler('thrower');
+  set_error_handler(fun('thrower'));
   try {
     $obj = new NonExistProp();
     $obj->unsetIt();
@@ -32,4 +32,8 @@ function test7() {
 }
 }
 
+
+<<__EntryPoint>>
+function main_unset() {
 test7();
+}

@@ -13,13 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_EXIT_H_
-#define incl_HPHP_JIT_IRGEN_EXIT_H_
+#pragma once
 
 #include <vector>
 #include <functional>
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/types.h"  // TransFlags
 
 #include "hphp/runtime/vm/jit/ir-builder.h"
@@ -59,12 +59,6 @@ Block* makeExit(IRGS&, TransFlags trflags);
 Block* makeGuardExit(IRGS&, TransFlags);
 
 /*
- * Has the effects of makeExit(env) if the current function is a psuedomain,
- * and otherwise returns nullptr.
- */
-Block* makePseudoMainExit(IRGS&);
-
-/*
  * Create a block that exits the current region by making a retranslate opt
  * service request.  Must not be used inside of an inlined function.
  */
@@ -78,9 +72,14 @@ Block* makeExitOpt(IRGS&);
  * The block is created with the current state.
  */
 Block* makeExitSlow(IRGS&);
+Block* makeExitSurprise(IRGS&, Offset);
+
+/*
+ * Create a block that should never be reached. Useful for debug assertions.
+ */
+Block* makeUnreachable(IRGS&, AssertReason);
 
 //////////////////////////////////////////////////////////////////////
 
 }}}
 
-#endif

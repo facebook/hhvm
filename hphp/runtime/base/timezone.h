@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TIMEZONE_H_
-#define incl_HPHP_TIMEZONE_H_
+#pragma once
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
@@ -73,13 +72,25 @@ public:
   /**
    * Whether this represents a valid timezone.
    */
-  bool isValid() const { return get();}
+  bool isValid() const {
+    switch (m_tztype) {
+      case 0:
+        return false;
+      case TIMELIB_ZONETYPE_ID:
+        return getTZInfo();
+      case TIMELIB_ZONETYPE_OFFSET:
+      case TIMELIB_ZONETYPE_ABBR:
+        return true;
+    }
+    always_assert(false && "invalid tztype");
+  }
 
   /**
    * Get timezone's name or abbreviation.
    */
   String name() const;
   String abbr(int type = 0) const;
+  int type() const;
 
   /**
    * Get offset from UTC at the specified timestamp under this timezone.
@@ -122,8 +133,11 @@ protected:
 
   /**
    * Returns raw pointer. For internal use only.
+   *
+   * If type() !== TIMELIB_ZONETYPE_ID, this will definitely return nullptr,
+   * even if isValid().
    */
-  timelib_tzinfo *get() const { return m_tzi; }
+  timelib_tzinfo *getTZInfo() const { return m_tzi; }
 
 private:
   static const timelib_tzdb *GetDatabase();
@@ -133,7 +147,11 @@ private:
    */
   static timelib_tzinfo* GetTimeZoneInfoRaw(char* name, const timelib_tzdb* db);
 
-  timelib_tzinfo* m_tzi;
+  unsigned int m_tztype = 0;
+  timelib_tzinfo* m_tzi = nullptr;
+  int m_offset;
+  int m_dst;
+  String m_abbr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,4 +163,3 @@ extern const timelib_tzdb* (*timezone_raw_get_tzdb)();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_TIMEZONE_H_

@@ -1,11 +1,5 @@
 <?hh // decl
 
-class Foo {
-  public function __destruct() {
-    echo "generator destructed\n";
-  }
-}
-
 async function foo() {
   yield 42;
   echo "waiting for clearing ref\n";
@@ -13,10 +7,10 @@ async function foo() {
   echo "finishing and destructing\n";
 }
 
+<<__EntryPoint>>
 async function main() {
   await RescheduleWaitHandle::create(0, 0);
   $gen = foo();
-  $gen->destructGuard = new Foo();
   $next = await $gen->next();
   var_dump($next[1]);
   echo "iterating\n";
@@ -27,5 +21,3 @@ async function main() {
   await RescheduleWaitHandle::create(0, 1);
   echo "survived\n";
 }
-
-\HH\Asio\join(main());

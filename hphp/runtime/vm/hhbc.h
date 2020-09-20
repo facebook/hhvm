@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_HHBC_H_
-#define incl_HPHP_VM_HHBC_H_
+#pragma once
 
 #include <type_traits>
 
@@ -26,9 +25,10 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/member-key.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 
@@ -37,16 +37,146 @@ namespace HPHP {
 struct Unit;
 struct UnitEmitter;
 struct Func;
+struct FuncEmitter;
 
-// A contiguous range of locals. The range always includes at least a single
-// local (first), plus some number of additional locals immediately after
-// (restCount).
+constexpr size_t kMaxHhbcImms = 6;
+
+// A contiguous range of locals. The count is the number of locals
+// including the first. If the range is empty, count will be zero and
+// first's value is arbitrary.
 struct LocalRange {
   uint32_t first;
-  uint32_t restCount;
+  uint32_t count;
 };
 
+/*
+ * Arguments to IterInit / IterNext opcodes.
+ * hhas format: <iterId> K:<keyId> V:<valId> (for key-value iters)
+ *              <iterId> NK V:<valId>        (for value-only iters)
+ * hhbc format: <uint8:flags> <iva:iterId> <iva:(keyId + 1)> <iva:valId>
+ *
+ * For value-only iters, keyId will be -1 (an invalid local ID); to take
+ * advantage of the one-byte encoding for IVA arguments, we add 1 to the key
+ * when encoding these args in the hhbc format.
+ *
+ * We don't accept flags from hhas because our flags require analyses that we
+ * currently only do in HHBBC.
+ */
+struct IterArgs {
+  enum Flags : uint8_t {
+    None      = 0,
+    // The base is stored in a local, and that local is unmodified in the loop.
+    BaseConst = (1 << 0),
+  };
+
+  static constexpr int32_t kNoKey = -1;
+
+  explicit IterArgs(Flags flags, int32_t iterId, int32_t keyId, int32_t valId)
+    : iterId(iterId), keyId(keyId), valId(valId), flags(flags) {}
+
+  bool hasKey() const {
+    assertx(keyId == kNoKey || keyId >= 0);
+    return keyId != kNoKey;
+  };
+
+  bool operator==(const IterArgs& other) const {
+    return iterId == other.iterId && keyId == other.keyId &&
+           valId == other.valId && flags == other.flags;
+  }
+
+  int32_t iterId;
+  int32_t keyId;
+  int32_t valId;
+  Flags flags;
+};
+
+// Arguments to FCall opcodes.
+// hhas format: <flags> <numArgs> <numRets> <inoutArgs> <asyncEagerOffset>
+// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
+//              ?<boolvec:inoutArgs> ?<ba:asyncEagerOffset>
+//   flags            = flags (hhas doesn't have HHBC-only flags)
+//   numArgs          = flags >> kFirstNumArgsBit
+//                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
+//   numRets          = flags & HasInOut ? decode_iva() : 1
+//   inoutArgs        = flags & EnforceInOut ? decode bool vec : nullptr
+//   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
+struct FCallArgsBase {
+  enum Flags : uint8_t {
+    None                     = 0,
+    // Unpack remaining arguments from a varray passed by ...$args.
+    HasUnpack                = (1 << 0),
+    // Pass generics to the callee.
+    HasGenerics              = (1 << 1),
+    // Lock newly constructed object if unwinding the constructor call.
+    LockWhileUnwinding       = (1 << 2),
+    // Arguments are known to be compatible with prologue of the callee and
+    // do not need to be repacked.
+    SkipRepack               = (1 << 3),
+    // HHBC-only: Op should be resolved using an explicit context class
+    ExplicitContext          = (1 << 4),
+    // HHBC-only: is the number of returns provided? false => 1
+    HasInOut                 = (1 << 5),
+    // HHBC-only: should this FCall enforce argument inout-ness?
+    EnforceInOut             = (1 << 6),
+    // HHBC-only: is the async eager offset provided? false => kInvalidOffset
+    HasAsyncEagerOffset      = (1 << 7),
+  };
+
+  // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
+  static constexpr uint8_t kInternalFlags =
+    HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack;
+
+  explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
+    : numArgs(numArgs)
+    , numRets(numRets)
+    , flags(flags)
+  {
+    assertx(!(flags & ~kInternalFlags));
+  }
+  bool hasUnpack() const { return flags & Flags::HasUnpack; }
+  bool hasGenerics() const { return flags & Flags::HasGenerics; }
+  bool lockWhileUnwinding() const { return flags & Flags::LockWhileUnwinding; }
+  bool skipRepack() const { return flags & Flags::SkipRepack; }
+  uint32_t numInputs() const {
+    return numArgs + (hasUnpack() ? 1 : 0) + (hasGenerics() ? 1 : 0);
+  }
+  uint32_t numArgs;
+  uint32_t numRets;
+  Flags flags;
+};
+
+struct FCallArgs : FCallArgsBase {
+  explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
+                     const uint8_t* inoutArgs, Offset asyncEagerOffset,
+                     const StringData* context)
+    : FCallArgsBase(flags, numArgs, numRets)
+    , asyncEagerOffset(asyncEagerOffset)
+    , inoutArgs(inoutArgs)
+    , context(context) {
+    assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));
+  }
+  bool enforceInOut() const { return inoutArgs != nullptr; }
+  bool isInOut(uint32_t i) const {
+    assertx(enforceInOut());
+    return inoutArgs[i / 8] & (1 << (i % 8));
+  }
+  FCallArgs withGenerics() const {
+    assertx(!hasGenerics());
+    return FCallArgs(
+      static_cast<Flags>(flags | Flags::HasGenerics),
+      numArgs, numRets, inoutArgs, asyncEagerOffset, context);
+  }
+  Offset asyncEagerOffset;
+  const uint8_t* inoutArgs;
+  const StringData* context;
+};
+
+using PrintLocal = std::function<std::string(int32_t local)>;
+std::string show(const IterArgs&, PrintLocal);
+
 std::string show(const LocalRange&);
+std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
+                 std::string asyncEagerLabel, const StringData* ctx);
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size
@@ -55,8 +185,18 @@ std::string show(const LocalRange&);
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA and SLA are meaningless since they are never
- * read out of ArgUnion (they use ImmVector and ImmVectorO).
+ * The types in this macro for BLA, SLA, and VSA are meaningless since they
+ * are never read out of ArgUnion (they use ImmVector).
+ *
+ * There are several different local immediate types:
+ *   - LA immediates are for bytecodes that only require the TypedValue* to
+ *     perform their operation.
+ *   - ILA immediates are used by bytecodes that need both the TypedValue* and
+ *     the slot index to implement their operation.  This could be used by
+ *     opcodes that print an error message including this slot info.
+ *   - NLA immediates are used by bytecodes that need both the TypedValue* and
+ *     the name of the local to be implemented.  This is commonly used for
+ *     ops that raise warnings for undefined local uses.
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
@@ -65,14 +205,12 @@ std::string show(const LocalRange&);
   ARGTYPE(NA,     void*)         /* unused */                                  \
   ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */        \
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
-  ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
-  ARGTYPEVEC(I32LA,uint32_t)     /* Vector of variable size: 8 or 32-bit uint*/\
-  ARGTYPE(IVA,    uint32_t)      /* Vector of 32-bit uint */                   \
+  ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
-  ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
+  ARGTYPE(LA,     int32_t)       /* Local: 8 or 32-bit int */                  \
+  ARGTYPE(NLA,    NamedLocal)    /* Local w/ name: 2x 8 or 32-bit int */       \
+  ARGTYPE(ILA,    int32_t)       /* Local w/ ID: 8 or 32-bit int */            \
   ARGTYPE(IA,     int32_t)       /* Iterator ID: 8 or 32-bit int */            \
-  ARGTYPE(CAR,    int32_t)       /* Class-ref slot (read): 8 or 32-bit int */  \
-  ARGTYPE(CAW,    int32_t)       /* Class-ref slot (write): 8 or 32-bit int */ \
   ARGTYPE(DA,     double)        /* Double */                                  \
   ARGTYPE(SA,     Id)            /* Static string ID */                        \
   ARGTYPE(AA,     Id)            /* Static array ID */                         \
@@ -81,6 +219,8 @@ std::string show(const LocalRange&);
   ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                     \
   ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */      \
   ARGTYPE(LAR,    LocalRange)    /* Contiguous range of locals */              \
+  ARGTYPE(ITA,    IterArgs)      /* Iterator arguments */                      \
+  ARGTYPE(FCA,    FCallArgs)     /* FCall arguments */                         \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
 enum ArgType {
@@ -93,7 +233,7 @@ enum ArgType {
 
 union ArgUnion {
   ArgUnion() : u_LA{0} {}
-  char bytes[0];
+  uint8_t bytes[0];
 #define ARGTYPE(name, type) type u_##name;
 #define ARGTYPEVEC(name, type) type u_##name;
   ARGTYPES
@@ -101,19 +241,11 @@ union ArgUnion {
 #undef ARGTYPEVEC
 };
 
-const Offset InvalidAbsoluteOffset = -1;
-
 enum FlavorDesc {
   NOV,  // None
-  CV,   // Cell
-  VV,   // Var
-  RV,   // Return value (cell or var)
-  FV,   // Function parameter (cell or var)
+  CV,   // TypedValue
   UV,   // Uninit
-  CVV,  // Cell or Var argument
-  CRV,  // Cell or Return value argument
-  CUV,  // Cell, or Uninit argument
-  CVUV, // Cell, Var, or Uninit argument
+  CUV,  // TypedValue, or Uninit argument
 };
 
 enum InstrFlags {
@@ -121,8 +253,8 @@ enum InstrFlags {
   NF = 0x0,
 
   /* Terminal: next instruction is not reachable via fall through or the callee
-   * returning control. This includes instructions like Throw and Unwind that
-   * always throw exceptions. */
+   * returning control. This includes instructions like Throw that always throw
+   * exceptions. */
   TF = 0x1,
 
   /* Control flow: If this instruction finishes executing (doesn't throw an
@@ -132,15 +264,8 @@ enum InstrFlags {
    * not affect what vmpc() is set to after the instruction completes. */
   CF = 0x2,
 
-  /* Instruction uses current FPI. */
-  FF = 0x4,
-
-  /* Instruction pushes an FPI */
-  PF = 0x8,
-
   /* Shorthand for common combinations. */
   CF_TF = (CF | TF),
-  CF_FF = (CF | FF)
 };
 
 #define INCDEC_OPS    \
@@ -179,13 +304,11 @@ inline bool isIncDecO(IncDecOp op) {
 }
 
 #define ISTYPE_OPS                             \
-  ISTYPE_OP(Uninit)                            \
   ISTYPE_OP(Null)                              \
   ISTYPE_OP(Bool)                              \
   ISTYPE_OP(Int)                               \
   ISTYPE_OP(Dbl)                               \
   ISTYPE_OP(Str)                               \
-  ISTYPE_OP(Arr)                               \
   ISTYPE_OP(Vec)                               \
   ISTYPE_OP(Dict)                              \
   ISTYPE_OP(Keyset)                            \
@@ -194,7 +317,11 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(ArrLike)                           \
   ISTYPE_OP(Res)                               \
   ISTYPE_OP(VArray)                            \
-  ISTYPE_OP(DArray)
+  ISTYPE_OP(DArray)                            \
+  ISTYPE_OP(ClsMeth)                           \
+  ISTYPE_OP(Func)                              \
+  ISTYPE_OP(PHPArr)                            \
+  ISTYPE_OP(Class)
 
 enum class IsTypeOp : uint8_t {
 #define ISTYPE_OP(op) op,
@@ -210,12 +337,6 @@ enum class InitPropOp : uint8_t {
 #define INITPROP_OP(op) op,
   INITPROP_OPS
 #undef INITPROP_OP
-};
-
-enum IterKind {
-  KindOfIter  = 0,
-  KindOfMIter = 1,
-  KindOfCIter = 2,
 };
 
 #define FATAL_OPS                               \
@@ -326,12 +447,31 @@ enum class MOpMode : uint8_t {
   OP(CGet)                                        \
   OP(CGetQuiet)                                   \
   OP(Isset)                                       \
-  OP(Empty)                                       \
   OP(InOut)
 
 enum class QueryMOp : uint8_t {
 #define OP(name) name,
   QUERY_M_OPS
+#undef OP
+};
+
+#define SET_RANGE_OPS \
+  OP(Forward)         \
+  OP(Reverse)
+
+enum class SetRangeOp : uint8_t {
+#define OP(name) name,
+  SET_RANGE_OPS
+#undef OP
+};
+
+#define TYPE_STRUCT_RESOLVE_OPS \
+  OP(Resolve)                  \
+  OP(DontResolve)
+
+enum class TypeStructResolveOp : uint8_t {
+#define OP(name) name,
+  TYPE_STRUCT_RESOLVE_OPS
 #undef OP
 };
 
@@ -355,17 +495,6 @@ enum class CudOp : uint8_t {
 #undef CUD_OP
 };
 
-#define FPASS_HINT_OPS \
-  OP(Any)              \
-  OP(Cell)             \
-  OP(Ref)
-
-enum class FPassHint : uint8_t {
-#define OP(name) name,
-  FPASS_HINT_OPS
-#undef OP
-};
-
 #define SPECIAL_CLS_REFS                        \
   REF(Self)                                     \
   REF(Static)                                   \
@@ -377,6 +506,16 @@ enum class SpecialClsRef : uint8_t {
 #undef REF
 };
 
+#define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
+  IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
+  IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
+
+enum class IsLogAsDynamicCallOp : uint8_t {
+#define IS_LOG_AS_DYNAMIC_CALL_OP(name) name,
+  IS_LOG_AS_DYNAMIC_CALL_OPS
+#undef IS_LOG_AS_DYNAMIC_CALL_OP
+};
+
 constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -384,26 +523,19 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Nop,             NA,               NOV,             NOV,        NF) \
   O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
-  O(DiscardClsRef,   ONE(CAR),         NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
-  O(PopV,            NA,               ONE(VV),         NOV,        NF) \
-  O(PopR,            NA,               ONE(RV),         NOV,        NF) \
   O(PopU,            NA,               ONE(UV),         NOV,        NF) \
+  O(PopU2,           NA,               TWO(CV,UV),      ONE(CV),    NF) \
+  O(PopFrame,        ONE(IVA),         CMANY_U3,        CMANY,      NF) \
   O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
-  O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
-  O(Unbox,           NA,               ONE(VV),         ONE(CV),    NF) \
-  O(BoxR,            NA,               ONE(RV),         ONE(VV),    NF) \
-  O(BoxRNop,         NA,               ONE(RV),         ONE(VV),    NF) \
-  O(UnboxR,          NA,               ONE(RV),         ONE(CV),    NF) \
-  O(UnboxRNop,       NA,               ONE(RV),         ONE(CV),    NF) \
-  O(RGetCNop,        NA,               ONE(CV),         ONE(RV),    NF) \
   O(CGetCUNop,       NA,               ONE(CUV),        ONE(CV),    NF) \
   O(UGetCUNop,       NA,               ONE(CUV),        ONE(UV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
   O(NullUninit,      NA,               NOV,             ONE(UV),    NF) \
   O(True,            NA,               NOV,             ONE(CV),    NF) \
   O(False,           NA,               NOV,             ONE(CV),    NF) \
+  O(FuncCred,        NA,               NOV,             ONE(CV),    NF) \
   O(Int,             ONE(I64A),        NOV,             ONE(CV),    NF) \
   O(Double,          ONE(DA),          NOV,             ONE(CV),    NF) \
   O(String,          ONE(SA),          NOV,             ONE(CV),    NF) \
@@ -411,33 +543,25 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Dict,            ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Keyset,          ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Vec,             ONE(AA),          NOV,             ONE(CV),    NF) \
-  O(NewArray,        ONE(IVA),         NOV,             ONE(CV),    NF) \
-  O(NewMixedArray,   ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewDictArray,    ONE(IVA),         NOV,             ONE(CV),    NF) \
-  O(NewLikeArrayL,   TWO(LA,IVA),      NOV,             ONE(CV),    NF) \
-  O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
-  O(NewStructArray,  ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewStructDArray, ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewStructDict,   ONE(VSA),         SMANY,           ONE(CV),    NF) \
-  O(NewVecArray,     ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(NewVec,          ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewKeysetArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewVArray,       ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewDArray,       ONE(IVA),         NOV,             ONE(CV),    NF) \
+  O(NewRecord,       TWO(SA,VSA),      SMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
-  O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(AddNewElemV,     NA,               TWO(VV,CV),      ONE(CV),    NF) \
   O(NewCol,          ONE(OA(CollectionType)),                           \
                                        NOV,             ONE(CV),    NF) \
   O(NewPair,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ColFromArray,    ONE(OA(CollectionType)),                           \
                                        ONE(CV),         ONE(CV),    NF) \
-  O(Cns,             ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
-  O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
-  O(ClsCns,          TWO(SA,CAR),      NOV,             ONE(CV),    NF) \
+  O(ClsCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
-  O(ClsRefName,      ONE(CAR),         NOV,             ONE(CV),    NF) \
+  O(ClassName,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Method,          NA,               NOV,             ONE(CV),    NF) \
@@ -473,15 +597,22 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CastInt,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastDouble,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastString,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CastArray,       NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CastObject,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastDict,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastKeyset,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastVec,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastVArray,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastDArray,      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(DblAsBits,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(IsLateBoundCls,  NA,               ONE(CV),         ONE(CV),    NF) \
+  O(IsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
+                                       TWO(CV,CV),      ONE(CV),    NF) \
+  O(ThrowAsTypeStructException,                                         \
+                     NA,               TWO(CV,CV),      NOV,        TF) \
+  O(CombineAndResolveTypeStruct,                                        \
+                     ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(Select,          NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Clone,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(Exit,            NA,               ONE(CV),         ONE(CV),    TF) \
@@ -494,191 +625,131 @@ constexpr uint32_t kMaxConcatN = 4;
                                        ONE(CV),         NOV,        CF_TF) \
   O(SSwitch,         ONE(SLA),         ONE(CV),         NOV,        CF_TF) \
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
-  O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
-  O(Unwind,          NA,               NOV,             NOV,        TF) \
-  O(Throw,           NA,               ONE(CV),         NOV,        TF) \
-  O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
+  O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
+  O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
+  O(CGetL,           ONE(NLA),         NOV,             ONE(CV),    NF) \
   O(CGetQuietL,      ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
-  O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
+  O(CGetL2,          ONE(NLA),         ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(CGetN,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetQuietN,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetQuietG,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetS,           ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
-  O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
-  O(VGetN,           NA,               ONE(CV),         ONE(VV),    NF) \
-  O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
-  O(VGetS,           ONE(CAR),         ONE(CV),         ONE(VV),    NF) \
-  O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \
-  O(ClsRefGetL,      TWO(LA,CAW),      NOV,             NOV,        NF) \
-  O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
+  O(CGetS,           NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(ClassGetC,       NA,               ONE(CV),         ONE(CV),    NF) \
+  O(ClassGetTS,      NA,               ONE(CV),         TWO(CV,CV), NF) \
+  O(GetMemoKeyL,     ONE(NLA),         NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IssetS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
-  O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
-  O(EmptyN,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(EmptyS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
+  O(IssetS,          NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(IsUnsetL,        ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
-  O(IsTypeL,         TWO(LA,                                            \
+  O(IsTypeL,         TWO(NLA,                                           \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
-  O(IsUninit,        NA,               ONE(CUV),        TWO(CUV,CV),NF) \
-  O(AssertRATL,      TWO(LA,RATA),     NOV,             NOV,        NF) \
+  O(AssertRATL,      TWO(ILA,RATA),    NOV,             NOV,        NF) \
   O(AssertRATStk,    TWO(IVA,RATA),    NOV,             NOV,        NF) \
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
-  O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetS,            ONE(CAR),         TWO(CV,CV),      ONE(CV),    NF) \
+  O(SetS,            NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
-  O(SetOpN,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetOpS,          TWO(OA(SetOpOp),CAR),                              \
-                                       TWO(CV,CV),      ONE(CV),    NF) \
-  O(IncDecL,         TWO(LA,                                            \
+  O(SetOpS,          ONE(OA(SetOpOp)), THREE(CV,CV,CV), ONE(CV),    NF) \
+  O(IncDecL,         TWO(NLA,                                           \
                        OA(IncDecOp)),  NOV,             ONE(CV),    NF) \
-  O(IncDecN,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
-  O(IncDecS,         TWO(OA(IncDecOp),CAR),                             \
-                                       ONE(CV),         ONE(CV),    NF) \
-  O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
-  O(BindN,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
-  O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
-  O(BindS,           ONE(CAR),         TWO(VV,CV),      ONE(VV),    NF) \
+  O(IncDecS,         ONE(OA(IncDecOp)),TWO(CV,CV),      ONE(CV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
-  O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
-  O(FPushFunc,       TWO(IVA,I32LA),   ONE(CV),         NOV,        PF) \
-  O(FPushFuncD,      TWO(IVA,SA),      NOV,             NOV,        PF) \
-  O(FPushFuncU,      THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(FPushObjMethod,  THREE(IVA,                                         \
-                       OA(ObjMethodOp),                                 \
-                       I32LA),          TWO(CV,CV),      NOV,       PF) \
-  O(FPushObjMethodD, THREE(IVA,SA,                                      \
-                       OA(ObjMethodOp)), ONE(CV),       NOV,        PF) \
-  O(FPushClsMethod,  THREE(IVA,CAR,I32LA),                              \
-                                       ONE(CV),         NOV,        PF) \
-  O(FPushClsMethodS, THREE(IVA,OA(SpecialClsRef),I32LA),                \
-                                       ONE(CV),         NOV,        PF) \
-  O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
-                                       NOV,             NOV,        PF) \
-  O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(FPushCtor,       TWO(IVA,CAR),     NOV,             ONE(CV),    PF) \
-  O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
-  O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
-  O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
-                                       NOV,             ONE(CV),    PF) \
-  O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
-  O(FPushCuf,        ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FPushCufF,       ONE(IVA),         ONE(CV),         NOV,        PF) \
-  O(FPushCufSafe,    ONE(IVA),         TWO(CV,CV),      TWO(CV,CV), PF) \
-  O(FPassC,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassCW,         TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassCE,         TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassV,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(VV),         ONE(FV),    FF) \
-  O(FPassVNop,       TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(VV),         ONE(FV),    FF) \
-  O(FPassR,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(RV),         ONE(FV),    FF) \
-  O(FPassL,          THREE(IVA,LA,OA(FPassHint)),                       \
-                                       NOV,             ONE(FV),    FF) \
-  O(FPassN,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassG,          TWO(IVA,OA(FPassHint)),                            \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(FPassS,          THREE(IVA,CAR,OA(FPassHint)),                      \
-                                       ONE(CV),         ONE(FV),    FF) \
-  O(RaiseFPassWarning, THREE(OA(FPassHint),SA,IVA),                     \
-                                       NOV,             NOV,        NF) \
-  O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
-  O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
-  O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
-  O(FCallUnpack,     ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
-  O(FCallArray,      NA,               ONE(FV),         ONE(RV),    CF_FF) \
-  O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
-  O(CufSafeArray,    NA,               THREE(RV,CV,CV), ONE(CV),    NF) \
-  O(CufSafeReturn,   NA,               THREE(RV,CV,CV), ONE(RV),    NF) \
-  O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
-  O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
-  O(WIterInit,       THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
-  O(IterInitK,       FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
-  O(MIterInitK,      FOUR(IA,BA,LA,LA),ONE(VV),         NOV,        CF) \
-  O(WIterInitK,      FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
-  O(IterNext,        THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(MIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(WIterNext,       THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(MIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(WIterNextK,      FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(DecodeCufIter,   TWO(IA,BA),       ONE(CV),         NOV,        CF) \
+  O(ResolveFunc,     ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(ResolveMethCaller,ONE(SA),         NOV,             ONE(CV),    NF) \
+  O(ResolveRFunc,    ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(ResolveObjMethod,NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(ResolveClsMethod,ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(ResolveClsMethodD,                                                  \
+                     TWO(SA,SA),       NOV,             ONE(CV),    NF) \
+  O(ResolveClsMethodS,                                                  \
+                     TWO(OA(SpecialClsRef),SA),                         \
+                                       NOV,             ONE(CV),    NF) \
+  O(ResolveRClsMethod,                                                  \
+                     ONE(SA),          TWO(CV,CV),      ONE(CV),    NF) \
+  O(ResolveRClsMethodD,                                                 \
+                     TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \
+  O(ResolveRClsMethodS,                                                 \
+                     TWO(OA(SpecialClsRef),SA),                         \
+                                       ONE(CV),         ONE(CV),    NF) \
+  O(ResolveClass,    ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(LazyClass,       ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
+  O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
+  O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(NewObjRD,        ONE(SA),          ONE(CV),         ONE(CV),    NF) \
+  O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
+                                       NOV,             ONE(CV),    NF) \
+  O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
+  O(FCallClsMethod,  THREE(FCA,SA,OA(IsLogAsDynamicCallOp)),            \
+                                       FCALL(2, 0),     FCALL,      CF) \
+  O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
+                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallClsMethodS, THREE(FCA,SA,OA(SpecialClsRef)),                   \
+                                       FCALL(1, 0),     FCALL,      CF) \
+  O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
+                                       FCALL(0, 0),     FCALL,      CF) \
+  O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
+  O(FCallFunc,       ONE(FCA),         FCALL(1, 0),     FCALL,      CF) \
+  O(FCallFuncD,      TWO(FCA,SA),      FCALL(0, 0),     FCALL,      CF) \
+  O(FCallObjMethod,  THREE(FCA,SA,OA(ObjMethodOp)),                     \
+                                       FCALL(1, 1),     FCALL,      CF) \
+  O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
+                                       FCALL(0, 1),     FCALL,      CF) \
+  O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
+  O(IterInit,        TWO(ITA,BA),      ONE(CV),         NOV,        CF) \
+  O(LIterInit,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
+  O(IterNext,        TWO(ITA,BA),      NOV,             NOV,        CF) \
+  O(LIterNext,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
-  O(MIterFree,       ONE(IA),          NOV,             NOV,        NF) \
-  O(CIterFree,       ONE(IA),          NOV,             NOV,        NF) \
-  O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \
+  O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \
   O(ReqOnce,         NA,               ONE(CV),         ONE(CV),    CF) \
   O(ReqDoc,          NA,               ONE(CV),         ONE(CV),    CF) \
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
-  O(DefFunc,         ONE(IVA),         NOV,             NOV,        NF) \
-  O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
-  O(DefClsNop,       ONE(IVA),         NOV,             NOV,        NF) \
-  O(AliasCls,        TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \
-  O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
-  O(DefTypeAlias,    ONE(IVA),         NOV,             NOV,        NF) \
   O(This,            NA,               NOV,             ONE(CV),    NF) \
   O(BareThis,        ONE(OA(BareThisOp)),                               \
                                        NOV,             ONE(CV),    NF) \
   O(CheckThis,       NA,               NOV,             NOV,        NF) \
   O(InitThisLoc,     ONE(LA),          NOV,             NOV,        NF) \
-  O(StaticLocCheck,  TWO(LA,SA),       NOV,             ONE(CV),    NF) \
-  O(StaticLocDef,    TWO(LA,SA),       ONE(CV),         NOV,        NF) \
-  O(StaticLocInit,   TWO(LA,SA),       ONE(CV),         NOV,        NF) \
-  O(Catch,           NA,               NOV,             ONE(CV),    NF) \
+  O(ChainFaults,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(OODeclExists,    ONE(OA(OODeclExistsOp)),                           \
                                        TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyOutType,   ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
-  O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
+  O(VerifyParamType, ONE(ILA),         NOV,             NOV,        NF) \
+  O(VerifyParamTypeTS, ONE(ILA),       ONE(CV),         NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
-  O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
+  O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
-  O(Self,            ONE(CAW),         NOV,             NOV,        NF) \
-  O(Parent,          ONE(CAW),         NOV,             NOV,        NF) \
-  O(LateBoundCls,    ONE(CAW),         NOV,             NOV,        NF) \
+  O(Self,            NA,               NOV,             ONE(CV),    NF) \
+  O(Parent,          NA,               NOV,             ONE(CV),    NF) \
+  O(LateBoundCls,    NA,               NOV,             ONE(CV),    NF) \
+  O(RecordReifiedGeneric, NA,          ONE(CV),         ONE(CV),    NF) \
+  O(CheckReifiedGenericMismatch, NA,   ONE(CV),         NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,IVA),     CUMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(Yield,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
-  O(ContAssignDelegate,                                                 \
-                     ONE(IA),          ONE(CV),         NOV,        NF) \
-  O(ContEnterDelegate,                                                  \
-                     NA,               ONE(CV),         NOV,        CF) \
-  O(YieldFromDelegate,                                                  \
-                     TWO(IA,BA),       NOV,             ONE(CV),    CF) \
-  O(ContUnsetDelegate, TWO(OA(CudOp),IA), NOV,          NOV,        NF) \
   O(ContCheck,       ONE(OA(ContCheckOp)), NOV,         NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
-  O(ContStarted,     NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \
   O(WHResult,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(Await,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(AwaitAll,        ONE(LAR),         NOV,             ONE(CV),    CF) \
-  O(IncStat,         TWO(IVA,IVA),     NOV,             NOV,        NF) \
   O(Idx,             NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(ArrayIdx,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(CheckProp,       ONE(SA),          NOV,             ONE(CV),    NF) \
@@ -686,52 +757,37 @@ constexpr uint32_t kMaxConcatN = 4;
                        OA(InitPropOp)),ONE(CV),         NOV,        NF) \
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
-  O(BaseNC,          TWO(IVA, OA(MOpMode)),                             \
-                                       NOV,             NOV,        NF) \
-  O(BaseNL,          TWO(LA, OA(MOpMode)),                              \
-                                       NOV,             NOV,        NF) \
+  O(ThrowNonExhaustiveSwitch, NA,      NOV,             NOV,        NF) \
+  O(RaiseClassStringConversionWarning,                                  \
+                              NA,      NOV,             NOV,        NF) \
   O(BaseGC,          TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseSC,          TWO(IVA, CAR),    NOV,             NOV,        NF) \
-  O(BaseSL,          TWO(LA, CAR),     NOV,             NOV,        NF) \
-  O(BaseL,           TWO(LA, OA(MOpMode)),                              \
+  O(BaseSC,          THREE(IVA, IVA, OA(MOpMode)),                      \
                                        NOV,             NOV,        NF) \
-  O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \
-  O(BaseR,           ONE(IVA),         NOV,             NOV,        NF) \
+  O(BaseL,           TWO(NLA, OA(MOpMode)),                             \
+                                       NOV,             NOV,        NF) \
+  O(BaseC,           TWO(IVA, OA(MOpMode)),                             \
+                                       NOV,             NOV,        NF) \
   O(BaseH,           NA,               NOV,             NOV,        NF) \
-  O(FPassBaseNC,     TWO(IVA, IVA),                                     \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseNL,     TWO(IVA, LA),                                      \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseGC,     TWO(IVA, IVA),                                     \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseGL,     TWO(IVA, LA),                                      \
-                                       NOV,             NOV,        FF) \
-  O(FPassBaseL,      TWO(IVA, LA),                                      \
-                                       NOV,             NOV,        FF) \
   O(Dim,             TWO(OA(MOpMode), KA),                              \
                                        NOV,             NOV,        NF) \
-  O(FPassDim,        TWO(IVA, KA),     NOV,             NOV,        FF) \
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
-  O(VGetM,           TWO(IVA, KA),     MFINAL,          ONE(VV),    NF) \
-  O(FPassM,          FOUR(IVA,IVA,KA,OA(FPassHint)),                    \
-                                       F_MFINAL,        ONE(FV),    FF) \
-  O(SetM,            TWO(IVA, KA),     C_MFINAL,        ONE(CV),    NF) \
+  O(SetM,            TWO(IVA, KA),     C_MFINAL(1),     ONE(CV),    NF) \
+  O(SetRangeM,       THREE(IVA, OA(SetRangeOp), IVA),                   \
+                                       C_MFINAL(3),     NOV,        NF) \
   O(IncDecM,         THREE(IVA, OA(IncDecOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
   O(SetOpM,          THREE(IVA, OA(SetOpOp), KA),                       \
-                                       C_MFINAL,        ONE(CV),    NF) \
-  O(BindM,           TWO(IVA, KA),     V_MFINAL,        ONE(VV),    NF) \
+                                       C_MFINAL(1),     ONE(CV),    NF) \
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
-  O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
-  O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
-  O(MemoGet,         TWO(IVA, LAR),    MFINAL,          ONE(CUV),   NF) \
-  O(MemoSet,         TWO(IVA, LAR),    C_MFINAL,        ONE(CV),    NF) \
-  O(MaybeMemoType,   NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IsMemoType,      NA,               ONE(CV),         ONE(CV),    NF)
+  O(MemoGet,         TWO(BA, LAR),     NOV,             ONE(CV),    CF) \
+  O(MemoGetEager,    THREE(BA, BA, LAR),                                \
+                                       NOV,             ONE(CV),    CF) \
+  O(MemoSet,         ONE(LAR),         ONE(CV),         ONE(CV),    NF) \
+  O(MemoSetEager,    ONE(LAR),         ONE(CV),         ONE(CV),    NF)
 
 enum class Op : uint16_t {
 #define O(name, ...) name,
@@ -740,7 +796,7 @@ enum class Op : uint16_t {
 };
 
 #define O(...) + 1
-constexpr size_t Op_count = 0 OPCODES;
+constexpr size_t Op_count = OPCODES;
 #undef O
 
 /*
@@ -771,27 +827,18 @@ inline MOpMode getQueryMOpMode(QueryMOp op) {
   switch (op) {
     case QueryMOp::CGet:  return MOpMode::Warn;
     case QueryMOp::CGetQuiet:
-    case QueryMOp::Isset:
-    case QueryMOp::Empty: return MOpMode::None;
+    case QueryMOp::Isset: return MOpMode::None;
     case QueryMOp::InOut: return MOpMode::InOut;
   }
   always_assert(false);
 }
-
-enum AcoldOp {
-  OpAcoldStart = Op_count-1,
-#define O(name, imm, pop, push, flags) OpAcold##name,
-  OPCODES
-#undef O
-  OpAcoldCount
-};
 
 #define HIGH_OPCODES \
   O(FuncPrologue) \
   O(TraceletGuard)
 
 enum HighOp {
-  OpHighStart = OpAcoldCount-1,
+  OpHighStart = Op_count-1,
 #define O(name) Op##name,
   HIGH_OPCODES
 #undef O
@@ -812,27 +859,6 @@ struct ImmVector {
     , m_numStack(numStack)
     , m_start(start)
   {}
-
-  /*
-   * Returns an ImmVector from a pointer to the immediate vector
-   * itself.  Use getImmVector() if you want to get it from an Opcode*
-   * that points to the opcode.
-   */
-  static ImmVector createFromStream(const uint8_t* opcode) {
-    int32_t size = reinterpret_cast<const int32_t*>(opcode)[0];
-    int32_t stackCount = reinterpret_cast<const int32_t*>(opcode)[1];
-    const uint8_t* start = opcode + sizeof(int32_t) + sizeof(int32_t);
-    return ImmVector(start, size, stackCount);
-  }
-
-  /*
-   * Returns an ImmVector of 32-bit ints from a pointer to the
-   * immediate vector itself.
-   */
-  static ImmVector createFromStream(const int32_t* stream) {
-    int32_t size = stream[0];
-    return ImmVector(reinterpret_cast<const uint8_t*>(stream + 1), size, 0);
-  }
 
   bool isValid() const { return m_start != 0; }
 
@@ -871,12 +897,11 @@ ImmVector getImmVector(PC opcode);
 // Some decoding helper functions.
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
-int immSize(PC opcode, int idx);
-bool immIsVector(Op opcode, int idx);
 bool hasImmVector(Op opcode);
 int instrLen(PC opcode);
 int numSuccs(PC opcode);
-bool pushesActRec(Op opcode);
+
+PC skipCall(PC pc);
 
 /*
  * The returned struct has normalized variable-sized immediates. u must be
@@ -891,7 +916,7 @@ ArgUnion* getImmPtr(PC opcode, int idx);
 
 void staticStreamer(const TypedValue* tv, std::string& out);
 
-std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u);
+std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f);
 void staticArrayStreamer(const ArrayData*, std::string&);
 
 /*
@@ -911,10 +936,12 @@ const char* subopToName(ObjMethodOp);
 const char* subopToName(SwitchKind);
 const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
+const char* subopToName(SetRangeOp);
+const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
-const char* subopToName(FPassHint);
 const char* subopToName(SpecialClsRef);
+const char* subopToName(IsLogAsDynamicCallOp);
 
 /*
  * Returns true iff the given SubOp is in the valid range for its type.
@@ -931,32 +958,22 @@ bool subopValid(Subop);
 template<class SubOpType>
 folly::Optional<SubOpType> nameToSubop(const char*);
 
-// returns a pointer to the location within the bytecode containing the jump
-//   Offset, or NULL if the instruction cannot jump. Note that this offset is
-//   relative to the current instruction.
-Offset* instrJumpOffset(PC instr);
+using OffsetList = std::vector<Offset>;
 
-// returns absolute address of target, or InvalidAbsoluteOffset if instruction
-//   cannot jump
-Offset instrJumpTarget(PC instrs, Offset pos);
+// Returns a jump offsets relative to the instruction, or nothing if
+// the instruction cannot jump.
+OffsetList instrJumpOffsets(PC instr);
+
+// returns absolute address of targets, or nothing if instruction
+// cannot jump
+OffsetList instrJumpTargets(PC instrs, Offset pos);
 
 /*
  * Returns the set of bytecode offsets for the instructions that may
  * be executed immediately after opc.
  */
 using OffsetSet = hphp_hash_set<Offset>;
-OffsetSet instrSuccOffsets(PC opc, const Unit* unit);
-
-struct StackTransInfo {
-  enum class Kind {
-    PushPop,
-    InsertMid
-  };
-  Kind kind;
-  int numPops;   // only for PushPop
-  int numPushes; // only for PushPop
-  int pos;       // only for InsertMid
-};
+OffsetSet instrSuccOffsets(PC opc, const Func* func);
 
 /*
  * Some CF instructions can be treated as non-CF instructions for most analysis
@@ -967,7 +984,7 @@ struct StackTransInfo {
  * creates the illusion that the instruction fell through normally to the
  * instruction after it, within the context of its execution frame.
  *
- * The canonical example of this behavior is the FCall instruction, so we use
+ * The canonical example of this behavior are the FCall* instructions, so we use
  * "non-call control flow" to describe the set of CF instruction that do not
  * exhibit this behavior. This function returns true if `opcode' is a non-call
  * control flow instruction.
@@ -975,7 +992,6 @@ struct StackTransInfo {
 bool instrIsNonCallControlFlow(Op opcode);
 
 bool instrAllowsFallThru(Op opcode);
-bool instrReadsCurrentFpi(Op opcode);
 
 constexpr InstrFlags instrFlagsData[] = {
 #define O(unusedName, unusedImm, unusedPop, unusedPush, flags) flags,
@@ -1000,80 +1016,71 @@ constexpr bool isConditionalJmp(Op opcode) {
 }
 
 constexpr bool isJmp(Op opcode) {
-  return opcode >= Op::Jmp && opcode <= Op::JmpNZ;
-}
-
-constexpr bool isFPush(Op opcode) {
-  return (instrFlags(opcode) & PF) != 0;
-}
-
-constexpr bool isFPushCuf(Op opcode) {
   return
-    opcode == OpFPushCufIter ||
-    opcode == OpFPushCuf     ||
-    opcode == OpFPushCufF    ||
-    opcode == OpFPushCufSafe;
+    opcode == Op::Jmp   ||
+    opcode == Op::JmpNS ||
+    opcode == Op::JmpZ  ||
+    opcode == Op::JmpNZ;
 }
 
-constexpr bool isFPushClsMethod(Op opcode) {
+constexpr bool isArrLikeConstructorOp(Op opcode) {
   return
-    opcode == OpFPushClsMethod  ||
-    opcode == OpFPushClsMethodS ||
-    opcode == OpFPushClsMethodSD ||
-    opcode == OpFPushClsMethodD;
+    opcode == Op::Array ||
+    opcode == Op::Dict ||
+    opcode == Op::Keyset ||
+    opcode == Op::Vec ||
+    opcode == Op::NewDictArray ||
+    opcode == Op::NewStructDArray ||
+    opcode == Op::NewStructDict ||
+    opcode == Op::NewVec ||
+    opcode == Op::NewKeysetArray ||
+    opcode == Op::NewVArray ||
+    opcode == Op::NewDArray;
 }
 
-constexpr bool isFPushObjMethod(Op opcode) {
+constexpr bool isComparisonOp(Op opcode) {
   return
-    opcode == OpFPushObjMethod ||
-    opcode == OpFPushObjMethodD;
+    opcode == Op::Cmp ||
+    opcode == Op::Eq ||
+    opcode == Op::Neq ||
+    opcode == Op::Gt ||
+    opcode == Op::Gte ||
+    opcode == Op::Lt ||
+    opcode == Op::Lte ||
+    opcode == Op::Same ||
+    opcode == Op::NSame;
 }
 
-constexpr bool isFPushCtor(Op opcode) {
+constexpr bool isFCallClsMethod(Op opcode) {
   return
-    opcode == OpFPushCtor  ||
-    opcode == OpFPushCtorD ||
-    opcode == OpFPushCtorI ||
-    opcode == OpFPushCtorS;
+    opcode == OpFCallClsMethod ||
+    opcode == OpFCallClsMethodD ||
+    opcode == OpFCallClsMethodS ||
+    opcode == OpFCallClsMethodSD;
 }
 
-constexpr bool isFPushFunc(Op opcode) {
-  return opcode >= OpFPushFunc && opcode <= OpFPushFuncU;
+constexpr bool isFCallFunc(Op opcode) {
+  return
+    opcode == OpFCallFunc ||
+    opcode == OpFCallFuncD;
 }
 
-inline bool isFCallStar(Op opcode) {
-  switch (opcode) {
-    case Op::FCall:
-    case Op::FCallD:
-    case Op::FCallAwait:
-    case Op::FCallArray:
-    case Op::FCallUnpack:
-      return true;
-    default:
-      return false;
-  }
+constexpr bool isFCallObjMethod(Op opcode) {
+  return
+    opcode == OpFCallObjMethod ||
+    opcode == OpFCallObjMethodD;
 }
 
-inline bool isFPassStar(Op opcode) {
-  switch (opcode) {
-    case OpFPassC:
-    case OpFPassCW:
-    case OpFPassCE:
-    case OpFPassV:
-    case OpFPassR:
-    case OpFPassL:
-    case OpFPassN:
-    case OpFPassG:
-    case OpFPassS:
-      return true;
-
-    default:
-      return false;
-  }
+constexpr bool isFCall(Op opcode) {
+  return
+    opcode == OpFCallCtor ||
+    isFCallClsMethod(opcode) ||
+    isFCallFunc(opcode) ||
+    isFCallObjMethod(opcode);
 }
 
 constexpr bool isRet(Op op) {
-  return op == OpRetC || op == OpRetV;
+  return op == OpRetC || op == OpRetCSuspended || op == OpRetM;
 }
 
 constexpr bool isReturnish(Op op) {
@@ -1090,20 +1097,11 @@ constexpr bool isTypeAssert(Op op) {
 
 inline bool isMemberBaseOp(Op op) {
   switch (op) {
-    case Op::BaseNC:
-    case Op::BaseNL:
     case Op::BaseGC:
     case Op::BaseGL:
-    case Op::FPassBaseNC:
-    case Op::FPassBaseNL:
-    case Op::FPassBaseGC:
-    case Op::FPassBaseGL:
     case Op::BaseSC:
-    case Op::BaseSL:
     case Op::BaseL:
-    case Op::FPassBaseL:
     case Op::BaseC:
-    case Op::BaseR:
     case Op::BaseH:
       return true;
 
@@ -1113,30 +1111,17 @@ inline bool isMemberBaseOp(Op op) {
 }
 
 inline bool isMemberDimOp(Op op) {
-  switch (op) {
-    case Op::Dim:
-    case Op::FPassDim:
-      return true;
-
-    default:
-      return false;
-  }
+  return op == Op::Dim;
 }
 
 inline bool isMemberFinalOp(Op op) {
   switch (op) {
     case Op::QueryM:
-    case Op::VGetM:
-    case Op::FPassM:
     case Op::SetM:
+    case Op::SetRangeM:
     case Op::IncDecM:
     case Op::SetOpM:
-    case Op::BindM:
     case Op::UnsetM:
-    case Op::SetWithRefLML:
-    case Op::SetWithRefRML:
-    case Op::MemoGet:
-    case Op::MemoSet:
       return true;
 
     default:
@@ -1150,42 +1135,33 @@ inline bool isMemberOp(Op op) {
 
 inline MOpMode finalMemberOpMode(Op op) {
   switch(op){
-    case Op::FPassM:
-    case Op::MemoGet:
-      return MOpMode::Warn;
     case Op::SetM:
-    case Op::VGetM:
+    case Op::SetRangeM:
     case Op::IncDecM:
     case Op::SetOpM:
-    case Op::BindM:
-    case Op::SetWithRefLML:
-    case Op::SetWithRefRML:
-    case Op::MemoSet:
       return MOpMode::Define;
     case Op::UnsetM:
       return MOpMode::Unset;
-    default:
+    case Op::QueryM:
       return MOpMode::None;
+    default:
+      always_assert_flog(
+        false, "Unknown final member op {}", opcodeToName(op)
+      );
   }
 }
 
 // true if the opcode body can set pc=0 to halt the interpreter.
 constexpr bool instrCanHalt(Op op) {
-  return op == OpRetC || op == OpRetV || op == OpNativeImpl ||
+  return op == OpRetC || op == OpNativeImpl ||
          op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
-         op == OpYield || op == OpYieldK ||
-         op == OpYieldFromDelegate;
+         op == OpYield || op == OpYieldK || op == OpRetM ||
+         op == OpRetCSuspended;
 }
 
 int instrNumPops(PC opcode);
 int instrNumPushes(PC opcode);
 FlavorDesc instrInputFlavor(PC op, uint32_t idx);
-StackTransInfo instrStackTransInfo(PC opcode);
-
-/*
- * Delta from FP to top pre-live ActRec.
- */
-int instrFpToArDelta(const Func* func, PC opcode);
 
 }
 
@@ -1202,4 +1178,3 @@ struct hash<HPHP::Op> {
 
 //////////////////////////////////////////////////////////////////////
 
-#endif

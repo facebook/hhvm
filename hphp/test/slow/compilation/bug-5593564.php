@@ -1,17 +1,23 @@
-<?php
+<?hh
 
 function main($arr) {
-  if ($arr[1 << 33]) {
-    var_dump($arr[1 << 33]);
-  } else {
-    echo "no\n";
-  }
+  try {
+    if ($arr[1 << 33]) {
+      var_dump($arr[1 << 33]);
+    } else {
+      echo "no\n";
+    }
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
-$packed = array(1,2,3);
-$mixed = array((1 << 33) => array("value"));
+
+<<__EntryPoint>>
+function main_bug_5593564() {
+$packed = varray[1,2,3];
+$mixed = darray[(1 << 33) => varray["value"]];
 
 main($packed);
 main($mixed);
 main($mixed);
 main($mixed);
+}

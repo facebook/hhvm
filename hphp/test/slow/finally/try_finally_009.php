@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
     for($i = 0; $i < 5; $i++) {
         do {
@@ -13,6 +13,6 @@ function foo () {
         } while (0);
     }
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
-?>
+}

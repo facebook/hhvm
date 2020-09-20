@@ -1,28 +1,22 @@
-<?php
+<?hh
 
 class early {
-	function early() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
-	function __destruct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
+    function __construct() {
+        echo __CLASS__ . "::" . __FUNCTION__ . "\n";
+    }
 }
 
 class late {
-	function __construct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
-	function __destruct() {
-		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
-	}
+    function __construct() {
+        echo __CLASS__ . "::" . __FUNCTION__ . "\n";
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $t = new early();
-$t->early();
+$t->__construct();
 unset($t);
 $t = new late();
 //unset($t); delay to end of script
 
 echo "Done\n";
-?>
+}

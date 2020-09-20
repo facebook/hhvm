@@ -1,16 +1,22 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-type t = NoCost | Base | SimpleMemberSelection
+type t =
+  | NoCost
+  | Base
+  | Moderate
+  | High
+[@@deriving eq]
 
-let get_cost t = match t with
+let get_cost t =
+  match t with
   | NoCost -> 0
   | Base -> 1
-  | SimpleMemberSelection -> 2
+  | Moderate -> 2
+  | High -> 3

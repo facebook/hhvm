@@ -1,71 +1,80 @@
 *** Testing stripos() function with unexpected values for haystack ***
 
 -- Iteration 1 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 2 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 3 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 4 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 5 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 6 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 7 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 8 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 9 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 15 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 16 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 17 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 18 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 19 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 20 --
 bool(false)
@@ -74,19 +83,22 @@ bool(false)
 bool(false)
 
 -- Iteration 22 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 23 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: stripos() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 25 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 26 --
-bool(false)
+
+Warning: stripos() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 *** Done ***

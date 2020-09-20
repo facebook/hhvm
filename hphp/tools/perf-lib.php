@@ -1,23 +1,27 @@
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function starts_with($str, $prefix) {
   return strncmp($str, $prefix, strlen($prefix)) === 0;
 }
 
+<<__Memoize>>
+function filter_func_raw(string $func): string {
+  return trim(shell_exec("echo '$func' | c++filt"));
+}
+
 # If $func looks like a mangled C++ symbol, attempt to demangle it, stripping
 # off any trailing junk first.
 function filter_func(string $func): string {
-  static $cache = Map {};
-
   if (strncmp($func, '_Z', 2) === 0) {
-    if (preg_match('/^(.+)\.isra\.\d+$/', $func, $matches) === 1) {
+    $matches = null;
+    if (
+      preg_match_with_matches('/^(.+)\.isra\.\d+$/', $func, inout $matches) ===
+        1
+    ) {
       $func = $matches[1];
     }
-    if (!isset($cache[$func])) {
-      $cache[$func] = trim(shell_exec("echo '$func' | c++filt"));
-    }
-    $func = $cache[$func];
+    return filter_func_raw($func);
   }
 
   return $func;
@@ -25,7 +29,7 @@ function filter_func(string $func): string {
 
 # Read perf samples from the given file stream into a Vector of stack traces.
 # The stream should contain the output of "perf script -f comm,ip,sym".
-function read_perf_samples($file, $desired_binary_prefix = 'hhvm.node') {
+function read_perf_samples($file, $desired_binary_prefix = 'hhvmworker') {
   $samples = Vector {};
   $skip_sample = false;
   $stack = null;
@@ -46,7 +50,10 @@ function read_perf_samples($file, $desired_binary_prefix = 'hhvm.node') {
       continue;
     }
 
-    if (preg_match('/^[a-f0-9]+ (.+)$/', $line, $matches) === 1) {
+    $matches = null;
+    if (
+      preg_match_with_matches('/^[a-f0-9]+ (.+)$/', $line, inout $matches) === 1
+    ) {
       if (!$stack) $stack = Vector {};
       $stack[] = filter_func($matches[1]);
     } else {

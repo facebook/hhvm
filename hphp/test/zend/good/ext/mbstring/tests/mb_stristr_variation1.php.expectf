@@ -1,65 +1,80 @@
 *** Testing mb_stristr() : usage variation ***
 
 --int 0--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --int 1--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --int 12345--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --int -12345--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --float 10.5--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --float -10.5--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --float 12.3456789000e10--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --float -12.3456789000e10--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --float .5--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --empty array--
-Error: 2 - mb_stristr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --int indexed array--
-Error: 2 - mb_stristr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --associative array--
-Error: 2 - mb_stristr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --nested arrays--
-Error: 2 - mb_stristr() expects parameter 1 to be string, array given, %s(%d)
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --uppercase NULL--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --lowercase null--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --lowercase true--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --lowercase false--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --uppercase TRUE--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --uppercase FALSE--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --empty string DQ--
 bool(false)
@@ -68,19 +83,22 @@ bool(false)
 bool(false)
 
 --instance of classWithToString--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --instance of classWithoutToString--
-Error: 2 - mb_stristr() expects parameter 1 to be string, object given, %s(%d)
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --undefined var--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --unset var--
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 
 --resource--
-Error: 2 - mb_stristr() expects parameter 1 to be string, resource given, %s(%d)
-bool(false)
+
+Warning: mb_stristr() expects parameter 1 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation1.php on line 108
 ===DONE===

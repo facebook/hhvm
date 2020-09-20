@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // HPHP has has many version of these functions over time
 // Faceobok has impelemtnation differences
@@ -85,8 +85,12 @@ function test_furchash() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_ext_hash() {
 brown_fox();
 test_hash_init();
 test_hash_file();
 test_furchash();
 test_hash_hmac();
+}

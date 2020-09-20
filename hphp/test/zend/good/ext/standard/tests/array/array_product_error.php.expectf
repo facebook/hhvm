@@ -2,16 +2,14 @@
 
 -- Testing array_product() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_product() expects exactly 1 parameter, 0 given in %s/array_product_error.php on line 12
 
 -- Testing array_product() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_product() expects exactly 1 parameter, 2 given in %s/array_product_error.php on line 18
 
 -- Testing array_product() function incorrect argument type --
 
-Warning: %s
+Warning: Invalid operand type was used: array_product expects an array or collection as argument 1 in %s/array_product_error.php on line 21
 NULL
 ===DONE===

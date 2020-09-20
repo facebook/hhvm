@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 class Foo {
   public $bar;
   public $bling;
 }
-
-$data = [
+<<__EntryPoint>> function main(): void {
+$data = varray[
   's:5:"Hello"',
   's:5:"Hello";',
   's:5:"Hello"Z',
@@ -20,4 +20,5 @@ $data = [
 
 foreach($data as $serialized) {
   var_dump(unserialize($serialized));
+}
 }

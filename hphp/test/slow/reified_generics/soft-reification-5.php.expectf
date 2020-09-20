@@ -1,0 +1,1 @@
+Fatal error: Tb is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed in %s on line 4

@@ -1,7 +1,5 @@
-
-Warning: %s
-NULL
-array(4) {
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation.php on line 6
+darray(4) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -11,18 +9,17 @@ array(4) {
   ["FOUR"]=>
   string(4) "four"
 }
-array(1) {
+darray(1) {
   ["one"]=>
   int(4)
 }
 
-Warning: %s
-NULL
-array(1) {
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation.php on line 12
+darray(1) {
   ["ONE"]=>
   int(3)
 }
-array(1) {
+darray(1) {
   ["ONE"]=>
   int(2)
 }

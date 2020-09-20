@@ -1,5 +1,9 @@
-<?php
+<?hh
 
+
+
+<<__EntryPoint>>
+function main_readdir() {
 $d = dir(__DIR__);
 while ($ent = readdir($d->handle)) {
   if ($ent == 'test_ext_file.txt') {
@@ -30,4 +34,4 @@ foreach (scandir(__DIR__) as $x) {
     var_dump($x);
   }
 }
-
+}

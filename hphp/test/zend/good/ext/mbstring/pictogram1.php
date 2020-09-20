@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 mb_substitute_character(0x3f);
 
 echo "SJIS-Mobile to Unicode\n";
@@ -92,5 +92,4 @@ echo "Unicode (Google) to UTF-8-Mobile\n";
 var_dump(bin2hex(mb_convert_encoding("\x00\x0f\xe8\x2d", "UTF-8-Mobile#DOCOMO", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x0f\xe8\x2d", "UTF-8-Mobile#KDDI", "UCS-4BE")));
 var_dump(bin2hex(mb_convert_encoding("\x00\x0f\xee\x70", "UTF-8-Mobile#SOFTBANK", "UCS-4BE")));//
-
-?>
+}

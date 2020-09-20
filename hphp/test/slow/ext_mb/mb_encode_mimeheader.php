@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_mb_encode_mimeheader() {
 mb_internal_encoding("ISO-8859-1");
 $expected_result = "Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=";
 var_dump($expected_result === mb_encode_mimeheader(
@@ -28,3 +31,4 @@ var_dump($expected_result === mb_encode_mimeheader(
   0
 ));
 mb_internal_encoding("UTF-8");
+}

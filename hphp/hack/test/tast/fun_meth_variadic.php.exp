@@ -1,80 +1,99 @@
-[(AnnotatedAST.Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-3:39], (Hprim Tvoid)));
-      f_name = ([3:10-3:22], "\\takes_string"); f_tparams = [];
-      f_where_constraints = []; f_variadic = AnnotatedAST.FVnonVariadic;
+[(Fun
+    { f_span = [3:1-42]; f_annotation = (); f_mode = Mpartial;
+      f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid))));
+      f_name = ([3:10-22], "\\takes_string"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ AnnotatedAST.param_hint = (Some ([3:23-3:29], (Hprim Tstring)));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:30-3:32]; param_name = "$s"; param_expr = None;
-         param_callconv = None; param_user_attributes = [] }
+      [{ param_annotation = ([3:30-32], string);
+         param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring))));
+         param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
         ];
-      f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop]; fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Fun
-     { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:30-5:34], (Hprim Tvoid)));
-       f_name = ([5:10-5:11], "\\f"); f_tparams = [];
-       f_where_constraints = [];
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false });
+  (Fun
+     { f_span = [5:1-9:2]; f_annotation = (); f_mode = Mpartial;
+       f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid))));
+       f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic =
-       (AnnotatedAST.FVvariadicArg
-          { AnnotatedAST.param_hint = (Some ([5:12-5:18], (Hprim Tstring)));
-            param_is_reference = false; param_is_variadic = true;
-            param_pos = [5:22-5:27]; param_name = "$args"; param_expr = None;
-            param_callconv = None; param_user_attributes = [] });
-       f_params = [];
+       (FVvariadicArg
+          { param_annotation = ([5:22-27], varray<string>);
+            param_type_hint =
+            ((varray<string>), (Some ([5:12-18], (Hprim Tstring))));
+            param_is_variadic = true; param_pos = [5:22-27];
+            param_name = "$args"; param_expr = None; param_callconv = None;
+            param_user_attributes = []; param_visibility = None });
+       f_params = []; f_cap = ((nothing), None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
-       (AnnotatedAST.NamedBody
-          { AnnotatedAST.fnb_nast =
-            [(AnnotatedAST.Foreach (
-                (([6:12-6:17], Some varray<string>),
-                 (AnnotatedAST.Lvar ([6:12-6:17], $args))),
-                (AnnotatedAST.As_v
-                   (([6:21-6:25], Some string),
-                    (AnnotatedAST.Lvar ([6:21-6:25], $arg)))),
-                [(AnnotatedAST.Expr
-                    (([7:5-7:23], Some void),
-                     (AnnotatedAST.Call (Cnormal,
-                        (([7:5-7:17], Some (function(string $s): void)),
-                         (AnnotatedAST.Id ([7:5-7:17], "\\takes_string"))),
-                        [],
-                        [(([7:18-7:22], Some string),
-                          (AnnotatedAST.Lvar ([7:18-7:22], $arg)))],
-                        []))))
-                  ]
-                ))
-              ];
-            fnb_unsafe = false });
-       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
-  (AnnotatedAST.Class
-     { AnnotatedAST.c_annotation = (); c_mode = <opaque>; c_final = false;
-       c_is_xhp = false; c_kind = Cnormal; c_name = ([11:7-11:9], "\\C1");
-       c_tparams = <opaque>; c_extends = []; c_uses = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = []; c_implements = []; c_consts = [];
-       c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = [];
+       { fb_ast =
+         [([6:3-8:4],
+           (Foreach (
+              (([6:12-17], varray<string>), (Lvar ([6:12-17], $args))),
+              (As_v (([6:21-25], string), (Lvar ([6:21-25], $arg)))),
+              [([7:5-24],
+                (Expr
+                   (([7:5-23], void),
+                    (Call (
+                       (([7:5-17], (function(string $s): void)),
+                        (Id ([7:5-17], "\\takes_string"))),
+                       [], [(([7:18-22], string), (Lvar ([7:18-22], $arg)))],
+                       None)))))
+                ]
+              )))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None; f_static = false });
+  (Class
+     { c_span = [11:1-13:2]; c_annotation = (); c_mode = Mpartial;
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([11:7-9], "\\C1"); c_tparams = [];
+       c_extends = []; c_uses = []; c_use_as_alias = [];
+       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+       c_reqs = []; c_implements = []; c_where_constraints = [];
+       c_consts = []; c_typeconsts = []; c_vars = [];
        c_methods =
-       [{ AnnotatedAST.m_annotation = (); m_final = false;
-          m_abstract = false; m_visibility = Public;
-          m_name = ([12:19-12:23], "meth"); m_tparams = [];
+       [{ m_span = [12:3-42]; m_annotation = (); m_final = false;
+          m_abstract = false; m_static = false; m_visibility = Public;
+          m_name = ([12:19-23], "meth"); m_tparams = [];
           m_where_constraints = [];
           m_variadic =
-          (AnnotatedAST.FVvariadicArg
-             { AnnotatedAST.param_hint = None; param_is_reference = false;
-               param_is_variadic = true; param_pos = [12:27-12:32];
+          (FVvariadicArg
+             { param_annotation = ([12:27-32], varray<_>);
+               param_type_hint = ((varray<_>), None);
+               param_is_variadic = true; param_pos = [12:27-32];
                param_name = "$args"; param_expr = None;
-               param_callconv = None; param_user_attributes = [] });
-          m_params = [];
-          m_body =
-          (AnnotatedAST.NamedBody
-             { AnnotatedAST.fnb_nast = [AnnotatedAST.Noop];
-               fnb_unsafe = false });
+               param_callconv = None; param_user_attributes = [];
+               param_visibility = None });
+          m_params = []; m_cap = ((mixed), None);
+          m_unsafe_cap = ((mixed), None);
+          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([12:35-12:39], (Hprim Tvoid))); m_ret_by_ref = false
-          }
+          m_ret = ((void), (Some ([12:35-39], (Hprim Tvoid))));
+          m_external = false; m_doc_comment = None }
          ];
-       c_user_attributes = []; c_enum = None })
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None; c_emit_id = None })
   ]

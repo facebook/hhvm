@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -8,7 +8,7 @@ array(4) {
   ["fragment"]=>
   string(12) "@google.com/"
 }
-array(4) {
+darray(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>

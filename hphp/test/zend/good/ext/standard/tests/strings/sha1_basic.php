@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 /* Prototype: string sha1  ( string $str  [, bool $raw_output  ] )
  * Description: Calculate the sha1 hash of a string
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sha1() : basic functionality ***\n";
 
 echo "\n-- Without raw argument --\n";
@@ -33,5 +33,5 @@ var_dump(bin2hex(sha1("abcdefghijklmnopqrstuvwxyz", true)));
 var_dump(bin2hex(sha1("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", true)));
 var_dump(bin2hex(sha1("12345678901234567890123456789012345678901234567890123456789012345678901234567890", true)));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

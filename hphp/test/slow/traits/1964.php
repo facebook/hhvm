@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public $y = 3;
@@ -14,6 +14,7 @@ class C {
 class D {
   public $y = 4;
 }
+<<__EntryPoint>> function main(): void {
 $o = new C;
 $o->printY();
-?>
+}

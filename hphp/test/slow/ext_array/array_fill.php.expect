@@ -1,4 +1,4 @@
-array(6) {
+darray(6) {
   [5]=>
   string(6) "banana"
   [6]=>
@@ -12,13 +12,13 @@ array(6) {
   [10]=>
   string(6) "banana"
 }
-array(2) {
+darray(2) {
   [-2]=>
   string(4) "pear"
   [0]=>
   string(4) "pear"
 }
-array(0) {
+varray(0) {
 }
-array(0) {
+darray(0) {
 }

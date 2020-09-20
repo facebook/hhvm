@@ -1,0 +1,13 @@
+
+.function ["__EntryPoint"("""y:0:{}""")] (7,7) <"" N  > main() {
+  String "FAIL: this file should not run\n"
+  Print
+  PopC
+  Null
+  RetC
+}
+
+.class C {
+  .property [public static is_const sys_initial_val late_init "__Const"("""y:0:{}""") "__LateInit"("""y:0:{}""")] <"HH\\int" "HH\\int" extended_hint > p =
+    uninit;
+}

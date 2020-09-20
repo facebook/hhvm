@@ -2,6 +2,5 @@
 
 -- Testing array_merge_recursive() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_merge_recursive() expects at least 1 parameter, 0 given in %s/array_merge_recursive_error.php on line 11
 Done

@@ -2,6 +2,5 @@
 
 -- Testing mb_substitute_character() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mb_substitute_character() expects at most 1 parameter, 2 given in %s/mb_substitute_character_error.php on line 15
 ===DONE===

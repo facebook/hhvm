@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /* Sends an email.
  * @param string $to
  * @param string $subject

@@ -1,66 +1,78 @@
 *** Testing strrchr() function: with unexpected inputs for haystack ***
 -- Iteration 1 --
-string(1) "0"
+
+Warning: strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 2 --
-string(1) "1"
+
+Warning: strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 3 --
-string(4) "2345"
+
+Warning: strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 4 --
-string(5) "-2345"
+
+Warning: strrchr() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 5 --
-string(4) "10.5"
+
+Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 6 --
-string(5) "-10.5"
+
+Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 7 --
-string(12) "105000000000"
+
+Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 8 --
-string(7) "1.06E-9"
+
+Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 9 --
-string(2) ".5"
+
+Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 15 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 16 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 17 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 18 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 19 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 20 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 21 --
-string(6) "object"
+
+Warning: strrchr() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: strrchr() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 25 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 -- Iteration 26 --
-bool(false)
+
+Warning: strrchr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strrchr_variation9.php on line 121
 *** Done ***

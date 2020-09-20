@@ -1,3 +1,1 @@
-string(5) "hello"
-
 Fatal error: Class already declared: X in %s on line 2

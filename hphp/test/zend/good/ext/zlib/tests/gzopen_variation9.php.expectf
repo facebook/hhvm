@@ -1,7 +1,7 @@
 *** Testing gzopen() : variation ***
 mode=r+
 
-Warning: %s
+Warning: cannot open a zlib stream for reading and writing at the same time! in %s/gzopen_variation9.php on line 16
 gzopen=bool(false)
 
 mode=rf
@@ -9,12 +9,12 @@ gzopen=resource(%d) of type (stream)
 
 mode=w+
 
-Warning: %s
+Warning: cannot open a zlib stream for reading and writing at the same time! in %s/gzopen_variation9.php on line 16
 gzopen=bool(false)
 
 mode=e
 
-Warning: %s
+Warning: Invalid argument in %s/gzopen_variation9.php on line 16
 gzopen=bool(false)
 
 ===DONE===

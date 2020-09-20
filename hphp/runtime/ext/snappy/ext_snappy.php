@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * This function compress the given string using the Snappy data format.

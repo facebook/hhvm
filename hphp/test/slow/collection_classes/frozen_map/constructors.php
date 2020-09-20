@@ -8,7 +8,7 @@ function show_keyed_iter($iter) {
     $vs[] = Pair {$k, $v};
   }
 
-  usort($vs, function($p1, $p2) {
+  usort(inout $vs, function($p1, $p2) {
     if ($p1[0] < $p2[0]) return -1;
     else if ($p1[0] == $p2[0]) return 0;
     else return 1;
@@ -29,9 +29,13 @@ function main() {
   echo "ImmMap\n";
   show_keyed_iter(new ImmMap(new ImmMap(Map {0 => 1, 10 => 2, 40 => 3})));
   echo "array\n";
-  show_keyed_iter(new ImmMap(array(1, 2, 3)));
+  show_keyed_iter(new ImmMap(varray[1, 2, 3]));
 
   // We can't construct a Map or ImmMap from a Set.
 }
 
+
+<<__EntryPoint>>
+function main_constructors() {
 main();
+}

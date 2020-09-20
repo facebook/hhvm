@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class SetM {
   private $x;
@@ -17,4 +17,8 @@ function main() {
   $x->clearX();
 }
 
+
+<<__EntryPoint>>
+function main_setm() {
 main();
+}

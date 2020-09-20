@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -29,38 +29,38 @@ function cmp_function($value1, $value2)
     return -1;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing uasort() : different numeric arrays as 'array_arg' ***\n";
 
 // Int array
-$int_values = array(0 => 3, 1 => 2, 3 => 100, 4 => 150, 5 => 25, 6 => 350, 7 => 0, 8 => -3, 9 => -1200);
+$int_values = darray[0 => 3, 1 => 2, 3 => 100, 4 => 150, 5 => 25, 6 => 350, 7 => 0, 8 => -3, 9 => -1200];
 echo "-- Sorting Integer array --\n";
-var_dump( uasort($int_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(inout $int_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($int_values);
 
 // Octal array
-$octal_values = array(0 => 056, 1 => 023, 2 => 090, 3 => 015, 4 => -045, 5 => 01, 6 => -078);
+$octal_values = darray[0 => 056, 1 => 023, 2 => 090, 3 => 015, 4 => -045, 5 => 01, 6 => -078];
 echo "-- Sorting Octal array --\n";
-var_dump( uasort($octal_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(inout $octal_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($octal_values);
 
 // Hexadecimal array
-$hex_values = array(0 => 0xAE, 1 => 0x2B, 2 => 0X10, 3 => -0xCF, 4 => 0X12, 5 => -0XF2);
+$hex_values = darray[0 => 0xAE, 1 => 0x2B, 2 => 0X10, 3 => -0xCF, 4 => 0X12, 5 => -0XF2];
 echo "-- Sorting Hex array --\n";
-var_dump( uasort($hex_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(inout $hex_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($hex_values);
 
 // Float array
-$float_values = array( 0 => 10.2, 1 => 2.4, 2 => -3.4, 3 => 0, 4 => 0.5, 5 => 7.3e3, 6 => -9.34E-2);
+$float_values = darray[ 0 => 10.2, 1 => 2.4, 2 => -3.4, 3 => 0, 4 => 0.5, 5 => 7.3e3, 6 => -9.34E-2];
 echo "-- Sorting Float array --\n";
-var_dump( uasort($float_values, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(inout $float_values, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($float_values);
 
 // empty array
-$empty_array = array();
+$empty_array = varray[];
 echo "-- Sorting empty array --\n";
-var_dump( uasort($empty_array, 'cmp_function') );  // expecting: bool(true)
+var_dump( uasort(inout $empty_array, fun('cmp_function')) );  // expecting: bool(true)
 var_dump($empty_array);
 
-echo "Done"
-?>
+echo "Done";
+}

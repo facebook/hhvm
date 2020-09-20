@@ -1,13 +1,13 @@
-object(g)#1 (1) {
+object(g) (1) {
   ["v"]=>
-  array(1) {
+  darray(1) {
     ["x"]=>
     int(1)
   }
 }
-object(g)#1 (1) {
+object(g) (1) {
   ["v"]=>
-  array(1) {
+  darray(1) {
     ["x"]=>
     int(1)
   }

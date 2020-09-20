@@ -1,0 +1,6 @@
+File "nullary_constructor_constraint.php", line 15, characters 3-20:
+Invalid assignment (Typing[4110])
+File "nullary_constructor_constraint.php", line 11, characters 10-11:
+Expected `~?[unresolved]` because it is an unenforceable type
+File "nullary_constructor_constraint.php", line 15, characters 18-18:
+But got `A`

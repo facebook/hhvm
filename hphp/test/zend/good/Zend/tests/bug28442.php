@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ClassA
 {
@@ -13,7 +13,7 @@ class ClassB extends ClassA
 class ClassC extends ClassB
 {
 }
-
+<<__EntryPoint>> function main(): void {
 echo "===INIT===\n";
 ClassA::$prop = 'A';
 ClassB::$prop = 'B';
@@ -40,5 +40,5 @@ var_dump(ClassA::$prop);
 var_dump(ClassB::$prop);
 var_dump(ClassC::$prop);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

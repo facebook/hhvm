@@ -1,4 +1,4 @@
-object(HH\ImmVector)#2 (3) {
+object(HH\ImmVector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -6,7 +6,7 @@ object(HH\ImmVector)#2 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmVector)#2 (4) {
+object(HH\ImmVector) (4) {
   [0]=>
   int(0)
   [1]=>

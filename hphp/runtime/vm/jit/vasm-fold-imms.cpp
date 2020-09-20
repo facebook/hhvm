@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -69,34 +69,38 @@ struct ImmFolder {
   }
 
   // helpers
-  bool match_byte(Vreg r, int& val) {
+  bool match_xbyte(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
-    if (!deltaFits(imm64, sz::byte)) return false;
-    val = imm64;
+    auto const imm64 = vals[r];
+    val = static_cast<int8_t>(imm64);
     return true;
   }
-  bool match_word(Vreg r, int& val) {
+  bool match_xword(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
-    if (!deltaFits(imm64, sz::word)) return false;
-    val = imm64;
+    auto const imm64 = vals[r];
+    val = static_cast<int16_t>(imm64);
     return true;
   }
   bool match_int(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
+    auto const imm64 = vals[r];
     if (!deltaFits(imm64, sz::dword)) return false;
     val = imm64;
     return true;
   }
   bool match_uint(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
+    auto const imm64 = vals[r];
     if (!magFits(imm64, sz::dword)) return false;
     val = imm64;
     return true;
   }
+  bool match_xint(Vreg r, int& val) {
+    if (!valid.test(r)) return false;
+    val = vals[r];
+    return true;
+  }
+
   // folders
   template <class Inst>
   void fold(Inst&, Vinstr& /*out*/) {}
@@ -148,21 +152,36 @@ struct ImmFolder {
     else if (match_uint(in.s0, val)) {out = testli{val, Reg32(in.s1), in.sf};}
     else if (match_uint(in.s1, val)) {out = testli{val, Reg32(in.s0), in.sf};}
   }
+  void fold(testl& in, Vinstr& out) {
+    int val;
+    if (match_xint(in.s0, val)) {out = testli{val, in.s1, in.sf};}
+    else if (match_xint(in.s1, val)) {out = testli{val, in.s0, in.sf};}
+  }
+  void fold(testw& in, Vinstr& out) {
+    int val;
+    if (match_xint(in.s0, val)) {out = testwi{int16_t(val), in.s1, in.sf};}
+    else if (match_xint(in.s1, val)) {out = testwi{int16_t(val), in.s0, in.sf};}
+  }
+  void fold(testb& in, Vinstr& out) {
+    int val;
+    if (match_xint(in.s0, val)) {out = testbi{int8_t(val), in.s1, in.sf};}
+    else if (match_xint(in.s1, val)) {out = testbi{int8_t(val), in.s0, in.sf};}
+  }
   void fold(cmpb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
+    if (match_xbyte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
   }
   void fold(cmpbm& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = cmpbim{val, in.s1, in.sf}; }
+    if (match_xbyte(in.s0, val)) { out = cmpbim{val, in.s1, in.sf}; }
   }
   void fold(cmpw& in, Vinstr& out) {
     int val;
-    if (match_word(in.s0, val)) { out = cmpwi{val, in.s1, in.sf}; }
+    if (match_xword(in.s0, val)) { out = cmpwi{val, in.s1, in.sf}; }
   }
   void fold(cmpwm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpwim{val, in.s1, in.sf}; }
+    if (match_xword(in.s0, val)) { out = cmpwim{val, in.s1, in.sf}; }
   }
   void fold(cmpq& in, Vinstr& out) {
     int val;
@@ -170,7 +189,7 @@ struct ImmFolder {
   }
   void fold(cmpl& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
+    if (match_xint(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
   }
   void fold(cmpqm& in, Vinstr& out) {
     int val;
@@ -178,7 +197,7 @@ struct ImmFolder {
   }
   void fold(cmplm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmplim{val, in.s1, in.sf}; }
+    if (match_xint(in.s0, val)) { out = cmplim{val, in.s1, in.sf}; }
   }
   void fold(orq& in, Vinstr& out) {
     int val;
@@ -191,19 +210,19 @@ struct ImmFolder {
       return;
     }
     int val;
-    if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
+    if (match_xbyte(in.s, val)) { out = storebi{val, in.m}; }
   }
   void fold(storebi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(storew& in, Vinstr& out) {
     foldVptr(in.m);
     int val;
-    if (match_word(in.s, val)) { out = storewi{val, in.m}; }
+    if (match_xword(in.s, val)) { out = storewi{val, in.m}; }
   }
   void fold(storewi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(storel& in, Vinstr& out) {
     foldVptr(in.m);
     int val;
-    if (match_int(in.s, val)) { out = storeli{val, in.m}; }
+    if (match_xint(in.s, val)) { out = storeli{val, in.m}; }
   }
   void fold(storeli& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(store& in, Vinstr& out) {
@@ -234,7 +253,7 @@ struct ImmFolder {
   // xor clears CF, OF.  ZF, SF, PF set accordingly
   void fold(xorb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) {
+    if (match_xbyte(in.s0, val)) {
       if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags.
         out = copy{in.s1, in.d};
       } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags.
@@ -242,7 +261,7 @@ struct ImmFolder {
       } else {
         out = xorbi{val, in.s1, in.d, in.sf};
       }
-    } else if (match_byte(in.s1, val)) {
+    } else if (match_xbyte(in.s1, val)) {
       if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags.
         out = copy{in.s0, in.d};
       } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags.

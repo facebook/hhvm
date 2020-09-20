@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  const X=1;
@@ -18,4 +18,8 @@ class A {
   $obj = new B;
  $obj->foo();
 }
- bar();
+
+ <<__EntryPoint>>
+function main_79() {
+bar();
+}

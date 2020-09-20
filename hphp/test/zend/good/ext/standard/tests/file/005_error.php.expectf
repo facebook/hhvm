@@ -1,66 +1,50 @@
 *** Testing error conditions ***
 
 -- Testing with  Non-existing files --
-Warning: %s
+Warning: fileatime(): No such file or directory in %s/005_error.php on line 24
 bool(false)
 
-Warning: %s
+Warning: filemtime(): No such file or directory in %s/005_error.php on line 25
 bool(false)
 
-Warning: %s
+Warning: filectime(): No such file or directory in %s/005_error.php on line 26
 bool(false)
 
-Warning: %s
+Warning: touch(): Unable to create file /no/such/file/or/dir because No such file or directory in %s/005_error.php on line 27
 bool(false)
 
-Warning: %s
-NULL
+Warning: fileatime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 30
 
-Warning: %s
-NULL
+Warning: filemtime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 31
 
-Warning: %s
-NULL
+Warning: filectime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 32
 
-Warning: %s
-NULL
+Warning: touch() expects at most 3 parameters, 4 given in %s/005_error.php on line 33
 
 -- Testing No.of arguments less than expected --
-Warning: %s
-NULL
+Warning: fileatime() expects exactly 1 parameter, 0 given in %s/005_error.php on line 36
 
-Warning: %s
-NULL
+Warning: filemtime() expects exactly 1 parameter, 0 given in %s/005_error.php on line 37
 
-Warning: %s
-NULL
+Warning: filectime() expects exactly 1 parameter, 0 given in %s/005_error.php on line 38
 
-Warning: %s
-NULL
+Warning: touch() expects at least 1 parameter, 0 given in %s/005_error.php on line 39
 
 -- Testing No.of arguments greater than expected --
-Warning: %s
-NULL
+Warning: fileatime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 43
 
-Warning: %s
-NULL
+Warning: filemtime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 44
 
-Warning: %s
-NULL
+Warning: filectime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 45
 
-Warning: %s
-NULL
+Warning: touch() expects at most 3 parameters, 4 given in %s/005_error.php on line 46
 
-Warning: %s
-NULL
+Warning: fileatime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 49
 
-Warning: %s
-NULL
+Warning: filemtime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 50
 
-Warning: %s
-NULL
+Warning: filectime() expects exactly 1 parameter, 2 given in %s/005_error.php on line 51
 
-Warning: %s
-NULL
+Warning: touch() expects at most 3 parameters, 4 given in %s/005_error.php on line 52
 
 Done

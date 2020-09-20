@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_register_postsend_function_nested() {
 var_dump('before reg');
 
 register_postsend_function(function() {
@@ -19,3 +22,4 @@ register_postsend_function(function() {
 });
 
 var_dump('after reg');
+}

@@ -1,0 +1,25 @@
+string(34) "`socketpair` only supports AF_UNIX"
+vec(2) {
+  object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (%d) {
+    ["sa_family"]=>
+    int(1)
+  }
+  object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (%d) {
+    ["sa_family"]=>
+    int(1)
+  }
+}
+vec(2) {
+  object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (%d) {
+    ["sa_family"]=>
+    int(1)
+  }
+  object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (%d) {
+    ["sa_family"]=>
+    int(1)
+  }
+}
+string(4) "Foo
+"
+string(4) "Bar
+"

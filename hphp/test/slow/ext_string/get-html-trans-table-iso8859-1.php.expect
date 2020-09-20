@@ -1,5 +1,5 @@
 bool(true)
-array(100) {
+darray(100) {
   ["""]=>
   string(6) "&quot;"
   ["&"]=>

@@ -1,2 +1,2 @@
-File "return_hint_parse_bad.php", line 13, characters 15-22:
-Expected variable. Perhaps you meant 'function (...): return-type'? (Parsing[1002])
+File "return_hint_parse_bad.php", line 13, characters 10-13:
+This token is not valid as part of a function declaration. (Parsing[1002])

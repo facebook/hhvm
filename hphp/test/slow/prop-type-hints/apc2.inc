@@ -1,0 +1,3 @@
+<?hh
+
+type MaybeBool = bool;

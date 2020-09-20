@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_ARRAY_LIKE_MAP_H_
-#define incl_HHBBC_ARRAY_LIKE_MAP_H_
+#pragma once
 
 #include "hphp/util/insertion-ordered-map.h"
 
@@ -26,19 +25,19 @@ namespace HPHP { namespace HHBBC {
 struct Type;
 
 struct ArrayLikeMapHash {
-  size_t operator()(const Cell& c) const { return c.m_data.num; }
+  size_t operator()(const TypedValue& c) const { return c.m_data.num; }
   size_t operator()(LSString s) const { return (size_t)s.get(); }
   size_t operator()(int64_t i) const { return i; }
 };
 
 struct ArrayLikeMapEqual {
-  bool operator()(const Cell& c1, const Cell& c2) const {
+  bool operator()(const TypedValue& c1, const TypedValue& c2) const {
     return c1.m_type == c2.m_type && c1.m_data.num == c2.m_data.num;
   }
-  bool operator()(SString s, const Cell& c) const {
+  bool operator()(SString s, const TypedValue& c) const {
     return isStringType(c.m_type) && c.m_data.pstr == s;
   }
-  bool operator()(int64_t i, const Cell& c) const {
+  bool operator()(int64_t i, const TypedValue& c) const {
     return c.m_type == KindOfInt64 && c.m_data.num == i;
   }
   bool operator()(LSString s1, LSString s2) const {
@@ -60,4 +59,3 @@ using ArrayLikeMap =
 
 } }
 
-#endif

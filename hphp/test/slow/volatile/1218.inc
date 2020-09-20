@@ -1,0 +1,4 @@
+<?hh
+
+    interface MyInterface{
+}

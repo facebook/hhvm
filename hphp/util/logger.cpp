@@ -69,16 +69,19 @@ bool Logger::Escape = true;
 pid_t Logger::s_pid;
 ServiceData::ExportedCounter* Logger::s_errorLines =
     ServiceData::createCounter("errorlog_lines");
-ServiceData::ExportedCounter* Logger::s_errorBytes =
+// ideally this should be "errorlog_serialized_bytes" but this was
+// added long ago and many tools rely on it.
+ServiceData::ExportedCounter* Logger::s_errorSerializedBytes =
     ServiceData::createCounter("errorlog_bytes");
-
+ServiceData::ExportedCounter* Logger::s_errorCompressedBytes =
+    ServiceData::createCounter("errorlog_bytes_compressed");
 THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 std::map<std::string, Logger*> Logger::s_loggers = {
   {Logger::DEFAULT, new Logger()},
 };
 
-void Logger::Log(LogLevelType level, const char *type, const Exception &e,
+void Logger::Log(LogLevelType level, const char* type, const Exception& e,
                  const char *file /* = NULL */, int line /* = 0 */) {
   if (!IsEnabled()) return;
   auto msg = type + e.getMessage();
@@ -114,8 +117,9 @@ void Logger::LogImpl(LogLevelType level, const std::string &msg,
     auto& logger = l.second;
     if (logger) {
       auto growth = logger->log(level, msg, stackTrace, escape, escapeMore);
-      s_errorLines->addValue(growth.first);
-      s_errorBytes->addValue(growth.second);
+      s_errorLines->addValue(growth.lines);
+      s_errorSerializedBytes->addValue(growth.serializedBytes);
+      s_errorCompressedBytes->addValue(growth.compressedBytes);
     }
   }
 }
@@ -133,8 +137,9 @@ void Logger::FlushAll() {
     auto& logger = l.second;
     if (logger) {
       auto growth = logger->flush();
-      s_errorLines->addValue(growth.first);
-      s_errorBytes->addValue(growth.second);
+      s_errorLines->addValue(growth.lines);
+      s_errorSerializedBytes->addValue(growth.serializedBytes);
+      s_errorCompressedBytes->addValue(growth.compressedBytes);
     }
   }
 }
@@ -163,10 +168,10 @@ int Logger::GetSyslogLevel(LogLevelType level) {
   }
 }
 
-std::pair<int, int> Logger::log(LogLevelType level, const std::string &msg,
-                                const StackTrace *stackTrace,
-                                bool escape /* = false */,
-                                bool escapeMore /* = false */) {
+LogGrowth Logger::log(LogLevelType level, const std::string &msg,
+                      const StackTrace *stackTrace,
+                      bool escape /* = false */,
+                      bool escapeMore /* = false */) {
   if (Logger::AlwaysEscapeLog && Logger::Escape) {
     escape = true;
   }
@@ -222,7 +227,7 @@ std::pair<int, int> Logger::log(LogLevelType level, const std::string &msg,
       m_flusher.recordWriteAndMaybeDropCaches(f, bytes);
     }
   }
-  return std::make_pair(1, bytes);
+  return LogGrowth(1, static_cast<uint64_t>(bytes), static_cast<uint64_t>(bytes));
 }
 
 void Logger::ResetPid() {

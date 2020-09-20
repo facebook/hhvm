@@ -1,12 +1,15 @@
-<?php
+<?hh
+
 class A {
-    const B = 'foo';
+  const B = 'foo';
 }
 
-$classname       =  'A';
-$wrongClassname  =  'B';
+<<__EntryPoint>>
+function main(): void {
+  $classname       =  'A';
+  $wrongClassname  =  'B';
 
-echo $classname::B."\n";
-echo $wrongClassname::B."\n";
-?>
-===DONE===
+  echo $classname::B."\n";
+  echo $wrongClassname::B."\n";
+  echo "===DONE===\n";
+}

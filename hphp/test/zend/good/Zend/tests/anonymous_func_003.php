@@ -1,10 +1,9 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 try {
-	$a = create_function('', 'return new Exception("test");');
+  $a = () ==> new Exception('test');
 	throw $a();
 } catch (Exception $e) {
 	var_dump($e->getMessage() == 'test');
 }
-
-?>
+}

@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : string imap_fetchheader(resource $stream_id, int $msg_no [, int $options])
- * Description: Get the full unfiltered header for a message 
+ * Description: Get the full unfiltered header for a message
  * Source code: ext/imap/php_imap.c
  */
 
@@ -8,6 +8,14 @@
  * Pass different data types as $stream_id argument to test behaviour of imap_fetchheader()
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imap_fetchheader() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -17,28 +25,20 @@ $msg_no = 1;
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // get different types of array
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $stream_id argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -71,14 +71,14 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // array data
-/*21*/ array(),
+/*21*/ varray[],
        $index_array,
        $assoc_array,
-       array('foo', $index_array, $assoc_array),
-       
-       
+       varray['foo', $index_array, $assoc_array],
+
+
        // object data
 /*25*/ new classA(),
 
@@ -87,14 +87,14 @@ $inputs = array(
 
        // unset data
 /*27*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of imap_fetchheader()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( imap_fetchheader($input, $msg_no) );
+  try { var_dump( imap_fetchheader($input, $msg_no) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
-?>
-===DONE===
+echo "===DONE===\n";
+}

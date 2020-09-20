@@ -29,9 +29,6 @@ function test_it():mixed {
   using ($z = new Handle()) {
     expect_mixed($z);
   }
-  using ($w = new Handle()) {
-    return $w;
-  }
   using ($q = new Handle()) {
     using ($q) { }
   }
@@ -41,5 +38,8 @@ function test_it():mixed {
   using ($s = new Handle()) {
     // OK, but look at body of function
     expect_handle($s);
+  }
+  using ($w = new Handle()) {
+    return $w;
   }
 }

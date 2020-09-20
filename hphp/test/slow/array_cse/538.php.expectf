@@ -1,19 +1,13 @@
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(1) {
+  varray(3) {
     int(0)
-    [1]=>
     int(1)
-    [2]=>
     int(2)
   }
 }
 string(3) "abc"
-
-Notice: Undefined index: 0 in %s/test/slow/array_cse/538.php on line 17
-array(1) {
-  [0]=>
+Out of bounds varray access: invalid index 0
+varray(1) {
   int(10)
 }
 int(10)
@@ -23,5 +17,3 @@ string(3) "A/B"
 string(3) "A/B"
 string(2) "e1"
 string(2) "e1"
-
-Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/538.php on line 38

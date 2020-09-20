@@ -1,2 +1,2 @@
 
-Catchable fatal error: %s
+Fatal error: Closure object cannot have properties in %s/closure_022.php on line 5

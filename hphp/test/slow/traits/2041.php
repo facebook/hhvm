@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL);
+<?hh
 
 trait HelloWorld {
    public function sayHello() {
@@ -23,8 +21,9 @@ class TheWorldIsNotEnough {
    }
 }
 
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
 $o = new TheWorldIsNotEnough();
 $o->sayHello();
  // echos Hello Universe!
-?>
-
+}

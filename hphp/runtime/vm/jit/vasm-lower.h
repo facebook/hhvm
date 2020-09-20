@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_LOWER_H_
-#define incl_HPHP_JIT_VASM_LOWER_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
@@ -67,4 +66,3 @@ void vlower(VLS& env, Vlabel b, size_t i);
 
 #include "hphp/runtime/vm/jit/vasm-lower-inl.h"
 
-#endif

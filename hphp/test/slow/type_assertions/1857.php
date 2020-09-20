@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x) {
   while (is_array($x) && isset($x[0])) $x = $x[0];
@@ -18,6 +18,10 @@ function h($x) {
  while (is_array($x) && isset($x[0]));
   var_dump($x);
 }
-f(array(array(array(array('hello')))));
-g(array(array(array(array('hello')))));
-h(array(array(array(array('hello')))));
+
+<<__EntryPoint>>
+function main_1857() {
+f(varray[varray[varray[varray['hello']]]]);
+g(varray[varray[varray[varray['hello']]]]);
+h(varray[varray[varray[varray['hello']]]]);
+}

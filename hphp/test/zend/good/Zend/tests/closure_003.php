@@ -1,24 +1,18 @@
-<?php
+<?hh
 
 function run () {
-	$x = 4;
+    $x = 4;
 
-	$lambda1 = function () use ($x) {
-		echo "$x\n";
-	};
+    $lambda1 = function () use ($x) {
+        echo "$x\n";
+    };
 
-	$lambda2 = function () use (&$x) {
-		echo "$x\n";
-	};
-
-	$lambda1();
-	$lambda2();
-	$x++;
-	$lambda1();
-	$lambda2();
+    $lambda1();
+    $x++;
+    $lambda1();
 }
-
+<<__EntryPoint>> function main(): void {
 run();
 
 echo "Done\n";
-?>
+}

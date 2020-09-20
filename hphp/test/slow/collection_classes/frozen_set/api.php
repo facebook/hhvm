@@ -10,8 +10,7 @@ function show_elems($fs) {
     var_dump($e);
   }
   echo "----\n";
-};
-
+}
 function api() {
   $fs = new ImmSet(Vector {1, 2, 3});
   $e = new ImmSet();
@@ -46,13 +45,34 @@ function api() {
   var_dump($fs->contains(1));
   var_dump($fs->contains(10));
   var_dump($e->contains(0));
+
+  echo "\nmap...\n";
+  $res = $fs->map(function ($v) { return 2 * $v; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
+  echo "\nmapWithKey...\n";
+  $res = $fs->mapWithKey(function ($k, $v) { return $k * $v; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
+  echo "\nfilter...\n";
+  $res = $fs->filter(function ($v) { return $v === 2; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
+  echo "\nfilterWithKey...\n";
+  $res = $fs->filterWithKey(function ($k, $v) { return $k === 3 && $v === 3; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
 }
 
 function materialization_methods() {
   $fs = new ImmSet(Vector {1, 2, 3});
 
-  echo "\ntoArray...\n";
-  var_dump($fs->toArray());
+  echo "\ntoDArray...\n";
+  var_dump($fs->toDArray());
 
   echo "\ntoKeysArray...\n";
   var_dump($fs->toKeysArray());
@@ -113,13 +133,14 @@ function static_methods() {
 
   echo "\nfromKeysOf...\n";
   show_elems(ImmSet::fromKeysOf(Vector {1, 2, 3}));
-  show_elems(ImmSet::fromKeysOf(['a', 'b', 'c']));
+  show_elems(ImmSet::fromKeysOf(varray['a', 'b', 'c']));
   show_elems(ImmSet::fromKeysOf(Map {'a' => 1, 'b' => 2}));
-  show_elems(ImmSet::fromKeysOf(['a' => 1, 'b' => 2]));
+  show_elems(ImmSet::fromKeysOf(darray['a' => 1, 'b' => 2]));
   show_elems(ImmSet::fromKeysOf(Set {4, 5, 6}));
 
   echo "\nfromArrays...\n";
-  show_elems(ImmSet::fromArrays(array(), array(1, 2, 3), array(4, 5, 6)));
+  show_elems(ImmSet::fromArrays(varray[], varray[1, 2, 3], varray[4, 5, 6]));
+  show_elems(ImmSet::fromArrays(vec[], vec[1, 2, 3], vec[4, 5, 6]));
 }
 
 function constructors() {
@@ -128,7 +149,7 @@ function constructors() {
   show_elems(new ImmSet(ImmVector {1, 2, 3}));
   show_elems(new ImmSet(Set {1, 2, 3}));
   show_elems(new ImmSet(Map {0 => 1, 10 => 2, 40 => 3}));
-  show_elems(new ImmSet(array(1, 2, 3)));
+  show_elems(new ImmSet(varray[1, 2, 3]));
 }
 
 function main() {
@@ -139,4 +160,9 @@ function main() {
   constructors();
 }
 
+<<__EntryPoint>>
+function main_api() {
+;
+
 main();
+}

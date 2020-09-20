@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: DOMDocumentFragment::appendXML() expects exactly 1 parameter, 0 given in %s/DOMDocumentFragment_appendXML_error_001.php on line 3

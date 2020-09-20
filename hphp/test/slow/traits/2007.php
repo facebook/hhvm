@@ -1,6 +1,4 @@
-<?php
-
-echo "*** Testing class_uses() : basic ***\n";
+<?hh
 
 
 trait foo {
@@ -29,17 +27,22 @@ class fooViaBarUser extends barUser {
 class fooExtended extends fooUser {
 }
 
-s_var_dump(class_uses(new foobarUser));
-s_var_dump(class_uses('foobarUser'));
-s_var_dump(class_uses(new fooViaBarUser));
-s_var_dump(class_uses('fooViaBarUser'));
-s_var_dump(class_uses(new fooExtended));
-s_var_dump(class_uses('fooExtended'));
-
 
 function s_var_dump($arr) {
-   krsort($arr);
+   krsort(inout $arr);
    var_dump($arr);
 }
-?>
-===DONE===
+<<__EntryPoint>>
+function main_entry(): void {
+
+  echo "*** Testing class_uses() : basic ***\n";
+
+  s_var_dump(class_uses(new foobarUser));
+  s_var_dump(class_uses('foobarUser'));
+  s_var_dump(class_uses(new fooViaBarUser));
+  s_var_dump(class_uses('fooViaBarUser'));
+  s_var_dump(class_uses(new fooExtended));
+  s_var_dump(class_uses('fooExtended'));
+
+  echo "===DONE===\n";
+}

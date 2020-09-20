@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_ICU_BREAK_ITERATOR_H
-#define incl_HPHP_EXT_ICU_BREAK_ITERATOR_H
+#pragma once
 
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/ext/icu/CodePointBreakIterator.h"
@@ -21,6 +20,11 @@ struct IntlBreakIterator : IntlError {
   }
   ~IntlBreakIterator() { setBreakIterator(nullptr); }
 
+  void sweep() {
+    setBreakIterator(nullptr);
+    std::destroy_at(&m_text);
+  }
+
   void setBreakIterator(icu::BreakIterator *bi) {
     if (m_breakIterator) {
       delete m_breakIterator;
@@ -38,8 +42,8 @@ struct IntlBreakIterator : IntlError {
 
   static Object newInstance(icu::BreakIterator* bi = nullptr) {
     if (!c_IntlBreakIterator) {
-      c_IntlBreakIterator = Unit::lookupClass(s_IntlBreakIterator.get());
-      assert(c_IntlBreakIterator);
+      c_IntlBreakIterator = Class::lookup(s_IntlBreakIterator.get());
+      assertx(c_IntlBreakIterator);
     }
     Object obj{c_IntlBreakIterator};
     if (bi) {
@@ -51,8 +55,8 @@ struct IntlBreakIterator : IntlError {
   static Object newCodePointInstance(CodePointBreakIterator* bi = nullptr) {
     if (!c_IntlCodePointBreakIterator) {
       c_IntlCodePointBreakIterator =
-        Unit::lookupClass(s_IntlCodePointBreakIterator.get());
-      assert(c_IntlCodePointBreakIterator);
+        Class::lookup(s_IntlCodePointBreakIterator.get());
+      assertx(c_IntlCodePointBreakIterator);
     }
     Object obj{c_IntlCodePointBreakIterator};
     if (bi) {
@@ -77,7 +81,7 @@ struct IntlBreakIterator : IntlError {
   }
 
   bool setText(const String& str) {
-    assert(isValid());
+    assertx(isValid());
     m_text = str.toCppString();
     UErrorCode error = U_ZERO_ERROR;
     m_uText = utext_openUTF8(m_uText, m_text.c_str(), m_text.size(), &error);
@@ -99,6 +103,7 @@ struct IntlBreakIterator : IntlError {
   // BreakIterator doesn't keep track of this for us, so we have to
   // A value of -1 means unknown and unknowable
   int32_t m_key{0};
+  String m_compiledRules;
  private:
   icu::BreakIterator *m_breakIterator{nullptr};
   std::string m_text;
@@ -112,4 +117,3 @@ struct IntlBreakIterator : IntlError {
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
-#endif // icl_HPHP_EXT_ICU_BREAK_ITERATOR_H

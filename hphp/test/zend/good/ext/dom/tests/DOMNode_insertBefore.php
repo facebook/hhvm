@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $dom = new DOMDocument();
 $dom->loadXML('<root/>');
 echo $dom->saveXML();
@@ -13,5 +13,4 @@ echo $dom->saveXML();
 echo "Add new node A before B\n";
 $e2->parentNode->insertBefore($e1, $e2);
 echo $dom->saveXML();
-
-?>
+}

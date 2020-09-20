@@ -1,6 +1,0 @@
-File "is_vec_bad.php", line 6, characters 12-13:
-Invalid return type (Typing[4110])
-File "is_vec_bad.php", line 4, characters 38-43:
-This is a string
-File "is_vec_bad.php", line 5, characters 7-12:
-It is incompatible with a value of generic type T#1 from the argument to this \is_vec test

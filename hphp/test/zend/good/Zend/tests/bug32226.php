@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 class A
 {
-        public function A()
+        public function __construct()
         {
-                set_exception_handler(array($this, 'EH'));
+                set_exception_handler(varray[$this, 'EH']);
 
                 throw new Exception();
         }
@@ -16,15 +16,15 @@ class A
                 throw new Exception();
         }
 }
-
+<<__EntryPoint>> function main(): void {
 try
 {
 $a = new A();
 }
 catch(Exception $e)
 {
-	echo "Caught\n";
+    echo "Caught\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

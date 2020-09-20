@@ -58,20 +58,17 @@ inline bool IRInstruction::consumesReferences() const {
 }
 
 inline bool IRInstruction::mayRaiseError() const {
-  if (opcodeHasFlags(op(), MayRaiseError)) {
-    // AKExistsArr, ArrayIdx, and ArrayIsset are only marked as Er because of
-    // EvalHackArrCompatNotices. So, if its not enabled, treat them as if they
-    // aren't.
-    if (is(AKExistsArr, ArrayIdx, ArrayIsset)) {
-      return RuntimeOption::EvalHackArrCompatNotices;
-    }
-    // Likewise for SameArr and NSameArr, but for EvalHackArrCompatDVCmpNotices.
-    if (is(SameArr, NSameArr)) {
-      return RuntimeOption::EvalHackArrCompatDVCmpNotices;
-    }
-    return true;
+  return opcodeMayRaise(op());
+}
+
+inline bool IRInstruction::mayRaiseErrorWithSources() const {
+  if (!mayRaiseError()) return false;
+  if (is(IterInit, IterInitK) && !src(0)->type().maybe(TObj)) return false;
+  if (is(SameArrLike, NSameArrLike, EqArrLike, NeqArrLike)) {
+    // Keyset comparisons never re-enter or throw
+    return !(src(0)->type() <= TKeyset && src(1)->type() <= TKeyset);
   }
-  return false;
+  return true;
 }
 
 inline bool IRInstruction::isTerminal() const {
@@ -86,14 +83,21 @@ inline bool IRInstruction::isPassthrough() const {
   return opcodeHasFlags(op(), Passthrough);
 }
 
+inline bool IRInstruction::isLayoutAgnostic() const {
+  return opcodeHasFlags(op(), LayoutAgnostic);
+}
+
+inline bool IRInstruction::isLayoutPreserving() const {
+  return opcodeHasFlags(op(), LayoutPreserving);
+}
+
 inline bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
 }
 
 inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
-  assertx(is(CheckType, CheckVArray, CheckDArray,
-             AssertType, AssertNonNull, Mov));
+  assertx(is(CheckType, AssertType, AssertNonNull, Mov, ConvPtrToLval));
   return src(0);
 }
 
@@ -174,7 +178,7 @@ inline uint32_t IRInstruction::numDsts() const {
 }
 
 inline SSATmp* IRInstruction::src(uint32_t i) const {
-  always_assert(i < numSrcs());
+  always_assert_flog(i < numSrcs(), "src {} out of range in {}", i, toString());
   return m_srcs[i];
 }
 
@@ -247,10 +251,16 @@ typename IRExtraDataType<opc>::type* IRInstruction::extra() {
   return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
 }
 
-template<class T>
+template<typename T>
 const T* IRInstruction::extra() const {
   if (debug) assert_opcode_extra<T>(op());
   return static_cast<const T*>(m_extra);
+}
+
+template<typename T>
+T* IRInstruction::extra() {
+  if (debug) assert_opcode_extra<T>(op());
+  return static_cast<T*>(m_extra);
 }
 
 inline const IRExtraData* IRInstruction::rawExtra() const {

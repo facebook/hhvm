@@ -30,9 +30,9 @@ struct KeccakContext {
 hash_keccak::hash_keccak(uint32_t capacity,
                          uint32_t digestlen)
   : HashEngine(digestlen, (1600 - capacity) >> 3, sizeof(KeccakContext)) {
-  assert(capacity > 0);
-  assert(capacity < 1600);
-  assert((capacity % 8) == 0);
+  assertx(capacity > 0);
+  assertx(capacity < 1600);
+  assertx((capacity % 8) == 0);
 }
 
 void hash_keccak::hash_init(void *context) {
@@ -166,7 +166,7 @@ void hash_keccak::hash_update(void *context, const unsigned char *buf,
     auto len = std::min(block_size - ctx->pos, count);
     count -= len;
     while (len-- > 0) {
-      assert(ctx->pos < block_size);
+      assertx(ctx->pos < block_size);
       ctx->state[ctx->pos++] ^= *(buf++);
     }
     if (ctx->pos >= block_size) {

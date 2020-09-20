@@ -2,11 +2,9 @@
 
 -- Testing gmstrftime() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: gmstrftime() expects at least 1 parameter, 0 given in %s/gmstrftime_error.php on line 12
 
 -- Testing gmstrftime() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: gmstrftime() expects at most 2 parameters, 3 given in %s/gmstrftime_error.php on line 19
 ===DONE===

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(): int {
   /* Test that multiline double-quoted strings with curly braces don't mess up

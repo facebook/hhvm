@@ -1,0 +1,8 @@
+dict(3) {
+  ["foo"]=>
+  bool(true)
+  ["bar"]=>
+  bool(true)
+  ["asdf"]=>
+  bool(true)
+}

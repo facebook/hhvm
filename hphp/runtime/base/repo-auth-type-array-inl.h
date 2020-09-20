@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_ARRAY_INL_H_
-#define incl_HPHP_REPO_AUTH_TYPE_ARRAY_INL_H_
+#pragma once
 
 #include <type_traits>
 #include <limits>
@@ -35,9 +34,9 @@ ArrayTypeTable::serde(SerDe& sd) {
   decltype(m_arrTypes)(size).swap(m_arrTypes);
   for (auto i = uint32_t{0}; i < size; ++i) {
     m_arrTypes[i] = RepoAuthType::Array::deserialize(sd, *this);
-    assert(m_arrTypes[i] != nullptr);
-    assert(m_arrTypes[i]->id() == i);
-    assert(check(m_arrTypes[i]));
+    assertx(m_arrTypes[i] != nullptr);
+    assertx(m_arrTypes[i]->id() == i);
+    assertx(check(m_arrTypes[i]));
     FTRACE(2, "  {} {}\n", i, show(*m_arrTypes[i]));
   }
 }
@@ -123,4 +122,3 @@ void RepoAuthType::Array::serialize(SerDe& sd) const {
 
 }
 
-#endif

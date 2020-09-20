@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["dirname"]=>
   string(1) "/"
   ["basename"]=>

@@ -18,11 +18,12 @@ function do_function($fn) {
   echo "$str\n";
   var_dump($param->getDefaultValue());
   $fn .= '_eval';
-  eval(sprintf('function %s($v = %s) { var_dump($v); } %s();',
-               $fn, $str, $fn));
+  eval(sprintf('function %s($v = %s) { var_dump($v); }',
+               $fn, $str));
+  $fn();
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   do_function('quote_default');
   do_function('clscns_default');
   do_function('zero_default');
@@ -32,4 +33,3 @@ function main() {
   do_function('float_default2');
   do_function('float_defaulte');
 }
-main();

@@ -1,20 +1,20 @@
-<?php
+<?hh
 class A {
-	use T2 { t2method as Bmethod; }
+    use T2 { t2method as Bmethod; }
 }
 
 class C extends A {
-	public function Bmethod() {
-		debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+    public function Bmethod() {
+        debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
     }
 }
 
 trait T2 {
-	public function t2method() {
-		debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-	}
+    public function t2method() {
+        debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $a->Bmethod();
 $a->t2method();
@@ -22,4 +22,4 @@ $a->t2method();
 $c = new C();
 $c->Bmethod();
 $c->t2method();
-?>
+}

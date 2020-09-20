@@ -1,0 +1,1 @@
+-vwatchman.enable=true -vEval.ForbidDynamicCallsToFunc=2 -vEval.ForbidDynamicCallsWithAttr=true

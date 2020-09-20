@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of first occurrence of a case-insensitive string
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 /* Test stripos() function by passing multi-line heredoc string for haystack and 
  *  with various needles & offsets
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing multi lines --\n";
 $multi_line_str = <<<EOD
@@ -22,4 +22,4 @@ var_dump( stripos($multi_line_str, "") );
 var_dump( stripos($multi_line_str, " ") );
 
 echo "*** Done ***";
-?>
+}

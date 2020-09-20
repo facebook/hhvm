@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g() {
   throw new Exception("Fooception");
@@ -10,8 +10,12 @@ function f($val = g()) {
   var_dump($val);
 }
 
+
+<<__EntryPoint>>
+function main_exception_default() {
 try {
   f();
 } catch (Exception $e) {
   echo "Caught exception: {$e->getMessage()}\n";
+}
 }

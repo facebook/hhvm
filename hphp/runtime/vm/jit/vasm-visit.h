@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_VISIT_H_
-#define incl_HPHP_JIT_VASM_VISIT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -80,6 +79,13 @@ void visit(const Vunit& unit, VcallArgsId a, F f) {
   for (auto r : args.args) detail::invoke(f, r, width(r));
   for (auto r : args.simdArgs) detail::invoke(f, r, width(r));
   for (auto r : args.stkArgs) detail::invoke(f, r, width(r));
+  for (auto r : args.indRetArgs) detail::invoke(f, r, width(r));
+  for (auto const& p : args.argSpills) {
+    detail::invoke(f, p.second, width(p.second));
+  }
+  for (auto const& p : args.stkSpills) {
+    detail::invoke(f, p.second, width(p.second));
+  }
 }
 
 template <class F>
@@ -88,6 +94,9 @@ void visit(const Vunit& /*unit*/, RegSet regs, F f) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+// NB: Unless otherwise stated, all these visitors will visit operands in the
+// order they're defined in the VASM_OPCODES macro.
 
 template<class Use>
 void visitUses(const Vunit& unit, const Vinstr& inst, Use use) {
@@ -131,6 +140,32 @@ void visitDefs(const Vunit& unit, const Vinstr& inst, Def def) {
 #undef Dn
 #undef DH
 #undef D
+#undef O
+  }
+}
+
+template<typename Across>
+void visitAcrosses(const Vunit& unit, const Vinstr& inst, Across across) {
+  switch (inst.op) {
+#define O(name, imms, uses, defs) \
+    case Vinstr::name: { \
+      auto& i = inst.name##_; (void)i; \
+      uses \
+      break; \
+    }
+#define U(s)
+#define UA(s)   visit(unit, i.s, across);
+#define UH(s,h)
+#define UM(s)
+#define UW(s)
+#define Un
+    VASM_OPCODES
+#undef Un
+#undef UW
+#undef UM
+#undef UH
+#undef UA
+#undef U
 #undef O
   }
 }
@@ -185,6 +220,155 @@ visitOperands(Tinstr& inst, Visitor& visitor) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/* Build VregSets from uses/acrosses/defs of a given Vinstr */
+
+inline VregSet usesSet(const Vunit& unit, const Vinstr& inst) {
+  VregSet uses;
+  visitUses(unit, inst, [&] (Vreg r) { uses.add(r); });
+  return uses;
+}
+
+inline VregSet acrossesSet(const Vunit& unit, const Vinstr& inst) {
+  VregSet acrosses;
+  visitAcrosses(unit, inst, [&] (Vreg r) { acrosses.add(r); });
+  return acrosses;
+}
+
+inline VregSet defsSet(const Vunit& unit, const Vinstr& inst) {
+  VregSet defs;
+  visitDefs(unit, inst, [&] (Vreg r) { defs.add(r); });
+  return defs;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+template <typename U, typename D,
+          typename RU, typename RD>
+struct MutableRegVisitor {
+  Vunit& unit;
+
+  U u;
+  D d;
+  RU ru;
+  RD rd;
+
+  template <typename T> void imm(const T&) const {}
+  template <typename T> void across(T& r) { use(r); }
+  template <typename T1, typename T2> void useHint(T1& r, const T2&) { use(r); }
+  template <typename T1, typename T2> void defHint(T1& r, const T2&) { def(r); }
+
+  void use(RegSet r) { r = ru(r); }
+  void use(Vtuple uses) { for (auto& r : unit.tuples[uses]) use(r); }
+  void use(Vptr& m) {
+    if (m.base.isValid())  use(m.base);
+    if (m.index.isValid()) use(m.index);
+  }
+  void use(VcallArgsId a) {
+    auto& args = unit.vcallArgs[a];
+    for (auto& r : args.args)       use(r);
+    for (auto& r : args.simdArgs)   use(r);
+    for (auto& r : args.stkArgs)    use(r);
+    for (auto& r : args.indRetArgs) use(r);
+    for (auto& p : args.argSpills)  use(p.second);
+    for (auto& p : args.stkSpills)  use(p.second);
+  }
+  template<typename W> void use(Vr<W>& m) { Vreg r = m; use(r); m = r; }
+  void use(Vreg& r) { r = u((Vreg)r); }
+
+  void def(RegSet r) const { r = rd(r); }
+  void def(Vtuple defs) { for (auto& r : unit.tuples[defs]) def(r); }
+  template<typename W> void def(Vr<W>& m) { Vreg r = m; def(r); m = r; }
+  void def(Vreg& r) { r = d((Vreg)r); }
+};
+
+}
+
+/*
+ * Visit all the register operands of a Vinstr, calling 'u' for uses, 'd' for
+ * defs, 'ru' for use RegSets, 'rd' for def RegSets. The callables return a new
+ * Vreg/RegSet, causing the Vinstr to be rewritten with that Vreg/RegSet.
+ */
+template <typename U, typename D,
+          typename RU, typename RD>
+void visitRegsMutable(Vunit& unit,
+                      Vinstr& instr,
+                      U&& u,
+                      D&& d,
+                      RU&& ru,
+                      RD&& rd) {
+  detail::MutableRegVisitor<U, D, RU, RD> visitor{
+    unit,
+    std::forward<U>(u),
+    std::forward<D>(d),
+    std::forward<RU>(ru),
+    std::forward<RD>(rd)
+  };
+  visitOperands(instr, visitor);
+}
+
+/*
+ * Overload for when you don't care about RegSets (they'll be left unchanged).
+ */
+template <typename U, typename D>
+void visitRegsMutable(Vunit& unit,
+                      Vinstr& instr,
+                      U&& u,
+                      D&& d) {
+  visitRegsMutable(
+    unit,
+    instr,
+    std::forward<U>(u),
+    std::forward<D>(d),
+    [](RegSet r) { return r; },
+    [](RegSet r) { return r; }
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+template <typename D> struct DefsWithHintsVisitor {
+  const Vunit& unit;
+  D d;
+
+  template <typename T> void imm(const T&) const {}
+  template <typename T> void use(const T&) {}
+  template <typename T> void across(const T&) {}
+  template <typename T1, typename T2> void useHint(const T1&, const T2&) {}
+
+  void defHint(Vreg r1, Vreg r2) { d(r1, r2); }
+  void defHint(Vtuple v1, Vtuple v2) {
+    auto const& t1 = unit.tuples[v1];
+    auto const& t2 = unit.tuples[v2];
+    assertx(t1.size() == t2.size());
+    for (size_t i = 0; i < t1.size(); ++i) d(t1[i], t2[i]);
+  }
+
+  void def(const RegSet& s) { s.forEach([&] (Vreg r) { d(r, Vreg{}); }); }
+  void def(Vtuple defs) {
+    for (auto const& r : unit.tuples[defs]) d(r, Vreg{});
+  }
+  void def(Vreg r) { d(r, Vreg{}); }
+};
+
+}
+
+/*
+ * Visit a Vinstr's defs, calling 'd' with the Vreg and its matching hint (if
+ * any). If there's no hint, an invalid Vreg will be passed as the second
+ * parameter.
+ */
+template <typename D>
+void visitDefsWithHints(const Vunit& unit, const Vinstr& instr, D&& d) {
+  detail::DefsWithHintsVisitor<D> visitor{unit, std::forward<D>(d)};
+  visitOperands(instr, visitor);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Visit reachable blocks, calling `pre' and `post' on each one.
  */
@@ -234,11 +418,10 @@ private:
   DfsWalker m_dfs;
 };
 
-using PredVector = jit::vector<jit::vector<Vlabel>>;
-PredVector computePreds(const Vunit& unit);
-
 ///////////////////////////////////////////////////////////////////////////////
+
+using PredVector = jit::vector<TinyVector<Vlabel, 3>>;
+PredVector computePreds(const Vunit& unit);
 
 }}
 
-#endif

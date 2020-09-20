@@ -1,0 +1,19 @@
+(library
+  (name server_monitor)
+  (wrapped false)
+  (libraries
+    collections
+    connection_tracker
+    core_kernel
+    libancillary
+    logging
+    marshal_tools
+    messages
+    relative_path
+    socket
+    sys_utils
+    utils_config_file
+    utils_scheduler
+    watchman)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208

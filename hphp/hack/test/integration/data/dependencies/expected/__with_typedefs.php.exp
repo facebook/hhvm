@@ -1,0 +1,11 @@
+<?hh
+type Complex = shape('first' => int, 'second' => \B);
+class A extends \A0 implements \I1 {}
+class C extends \A {}
+function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair): Point {
+  return shape('x' => $pair['x'], 'y' => $c['first']);
+}
+class B implements \I1 {}
+interface I1 {}
+class A0 {}
+newtype Point = shape('x' => int, 'y' => int);

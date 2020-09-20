@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 namespace __SystemLib {
 
@@ -30,10 +30,17 @@ class InvariantException extends \Exception {}
  *
  * @param $callback - The function that will be called if your invariant fails.
  */
-function invariant_callback_register(callable $callback) {
-  invariant(!\__SystemLib\InvariantCallback::$cb,
-            'Callback already registered: %s',
-            \__SystemLib\InvariantCallback::$cb);
+function invariant_callback_register($callback) {
+  invariant(
+    \is_callable($callback),
+    'Callback not callable: %s',
+    $callback,
+  );
+  invariant(
+    \__SystemLib\InvariantCallback::$cb is null,
+    'Callback already registered: %s',
+    \__SystemLib\InvariantCallback::$cb,
+  );
   \__SystemLib\InvariantCallback::$cb = $callback;
 }
 
@@ -61,12 +68,13 @@ function invariant_callback_register(callable $callback) {
  *   - [`invariant` guide](/hack/types/refining#invariant)
  *
  * @param $test - The condition you are declaring as an expression of fact.
- * @param $args - Arguments supplied if the condition is not met. This is
- *                usually a string, with possible placeholders.
+ * @param $format_str - The string that will be displayed when your
+ *                      invariant fails, with possible placeholders.
+ * @param $args - Actual values to placeholders in your format string.
  */
-function invariant(mixed $test, ...$args): void {
+function invariant(mixed $test, $format_str, ...$args): void {
   if (!$test) {
-    \HH\invariant_violation(...$args);
+    \HH\invariant_violation($format_str, ...$args);
   }
 }
 
@@ -80,11 +88,16 @@ function invariant(mixed $test, ...$args): void {
  * @param $args - Actual values to placeholders in your format string.
  */
 function invariant_violation(string $format_str, ...$args): void {
-  if ($cb = \__SystemLib\InvariantCallback::$cb) {
+  $cb = \__SystemLib\InvariantCallback::$cb;
+  if ($cb is nonnull) {
     $cb($format_str, ...$args);
   }
 
-  $args = \array_map('\__SystemLib\invariant_violation_helper', $args);
+  foreach ($args as $i => $arg) {
+    if (\is_object($arg)) {
+      $args[$i] = \__SystemLib\invariant_violation_helper($arg);
+    }
+  }
   $message = \vsprintf($format_str, $args);
 
   throw new InvariantException($message);

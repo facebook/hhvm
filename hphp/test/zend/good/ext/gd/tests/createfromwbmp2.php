@@ -1,12 +1,12 @@
-<?php
-$filename = dirname(__FILE__) . '/_tmp.wbmp';
+<?hh <<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('_tmp.wbmp');
 $fp = fopen($filename,"wb");
 if (!$fp) {
-	exit("Failed to create <$filename>");
+    exit("Failed to create <$filename>");
 }
 
 //write header
-$c = 0;
+$c = '0';
 fputs($fp, chr($c), 1);
 fputs($fp, $c, 1);
 
@@ -26,10 +26,10 @@ fputs($fp, chr($c), 1);
 
 /*write some data to cause overflow*/
 for ($i=0; $i<10000; $i++) {
-	fwrite($fp, chr($c), 1);
+    fwrite($fp, chr($c), 1);
 }
 
 fclose($fp);
 $im = imagecreatefromwbmp($filename);
 unlink($filename);
-?>
+}

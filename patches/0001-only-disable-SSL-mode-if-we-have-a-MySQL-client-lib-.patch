@@ -1,0 +1,45 @@
+From 5237d8ce57269a2f58d1b491f76684d632f96d85 Mon Sep 17 00:00:00 2001
+From: Fred Emmott <fe@fb.com>
+Date: Thu, 30 Aug 2018 10:58:40 -0700
+Subject: [PATCH] only disable SSL mode if we have a MySQL client lib that
+ supports it
+
+---
+ squangle/mysql_client/AsyncMysqlClient.cpp       | 2 ++
+ squangle/mysql_client/SSLOptionsProviderBase.cpp | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/third-party/squangle/squangle/mysql_client/AsyncMysqlClient.cpp b/third-party/squangle/squangle/mysql_client/AsyncMysqlClient.cpp
+index ee35853..fc39541 100644
+--- a/third-party/squangle/squangle/mysql_client/AsyncMysqlClient.cpp
++++ b/third-party/squangle/squangle/mysql_client/AsyncMysqlClient.cpp
+@@ -365,9 +365,11 @@ void Connection::initMysqlOnly() {
+   mysql_connection_ = std::make_unique<MysqlConnectionHolder>(
+       mysql_client_, mysql_init(nullptr), conn_key_);
+   mysql_connection_->mysql()->options.client_flag &= ~CLIENT_LOCAL_FILES;
++#ifdef MYSQL_OPT_SSL_MODE
+   // Turn off SSL by default for tests that rely on this.
+   enum mysql_ssl_mode ssl_mode = SSL_MODE_DISABLED;
+   mysql_options(mysql_connection_->mysql(), MYSQL_OPT_SSL_MODE, &ssl_mode);
++#endif
+ }
+ 
+ void Connection::initialize(bool initMysql) {
+diff --git a/third-party/squangle/squangle/mysql_client/SSLOptionsProviderBase.cpp b/third-party/squangle/squangle/mysql_client/SSLOptionsProviderBase.cpp
+index 8dcfe24..44a95d8 100644
+--- a/third-party/squangle/squangle/mysql_client/SSLOptionsProviderBase.cpp
++++ b/third-party/squangle/squangle/mysql_client/SSLOptionsProviderBase.cpp
+@@ -14,8 +14,10 @@ bool SSLOptionsProviderBase::setMysqlSSLOptions(MYSQL* mysql) {
+   }
+   // We need to set ssl_mode because we set it to disabled after we call
+   // mysql_init.
++#ifdef MYSQL_OPT_SSL_MODE
+   enum mysql_ssl_mode ssl_mode = SSL_MODE_PREFERRED;
+   mysql_options(mysql, MYSQL_OPT_SSL_MODE, &ssl_mode);
++#endif
+   mysql_options(mysql, MYSQL_OPT_SSL_CONTEXT, sslContext->getSSLCtx());
+   auto sslSession = getSSLSession();
+   if (sslSession) {
+-- 
+2.13.5
+

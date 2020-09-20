@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -8,12 +8,11 @@ $intlcal = IntlCalendar::createInstance('UTC');
 $intlcal->setTime($time * 1000);
 
 var_dump(
-	(float)$time*1000,
-	$intlcal->getTime());
-	
+    (float)$time*1000,
+    $intlcal->getTime());
+
 $intlcal = IntlCalendar::createInstance('UTC');
 intlcal_set_time($intlcal,$time * 1000);
 var_dump(intlcal_get_time($intlcal));
-
-?>
-==DONE==
+echo "==DONE==";
+}

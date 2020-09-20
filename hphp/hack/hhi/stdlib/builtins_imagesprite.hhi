@@ -3,11 +3,11 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 class ImageSprite {
   public function __construct() { }
   public function addFile($file, $options = null) { }
@@ -20,5 +20,4 @@ class ImageSprite {
   public function css($css_namespace, $sprite_file = null, $output_file = null, $verbose = false) { }
   public function getErrors() { }
   public function mapping() { }
-  public function __destruct() { }
 }

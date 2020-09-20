@@ -2,10 +2,10 @@ string(1) "1"
 string(1) "1"
 string(1) "1"
 
-Warning: %s
+Warning: gmp_fact(): Value operand not allowed in %s/gmp_fact.php on line 6
 string(1) "0"
 
-Warning: %s
+Warning: gmp_fact(): Value operand not allowed in %s/gmp_fact.php on line 7
 string(1) "0"
 string(1) "1"
 string(19) "2432902008176640000"
@@ -14,15 +14,13 @@ string(7) "3628800"
 string(1) "1"
 string(9) "479001600"
 
-Warning: %s
+Warning: gmp_fact(): Value operand not allowed in %s/gmp_fact.php on line 17
 string(1) "0"
 
-Warning: %s
-NULL
+Warning: gmp_fact() expects exactly 1 parameter, 0 given in %s/gmp_fact.php on line 19
 
-Warning: %s
-NULL
-object(GMP)#%d (1) {
+Warning: gmp_fact() expects exactly 1 parameter, 2 given in %s/gmp_fact.php on line 20
+object(GMP) (1) {
   ["num"]=>
   string(1) "1"
 }

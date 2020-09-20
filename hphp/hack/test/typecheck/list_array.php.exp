@@ -1,1 +1,6 @@
-No errors
+File "list_array.php", line 18, characters 3-19:
+Invalid assignment (Typing[4357])
+File "list_array.php", line 18, characters 3-14:
+This expression cannot be destructured with a `list(...)` expression
+File "list_array.php", line 17, characters 16-20:
+This is `varray_or_darray<arraykey, _>`

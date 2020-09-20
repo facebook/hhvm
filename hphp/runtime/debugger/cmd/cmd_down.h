@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_DOWN_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_DOWN_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -32,4 +31,3 @@ struct CmdDown : DebuggerCommand {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_DOWN_H_

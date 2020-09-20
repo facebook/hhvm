@@ -1,6 +1,0 @@
-<?php
-
-for ($i = 0; $i < 2; $i++) {
-  var_dump($i);
-  var_dump(xdebug_break());
-}

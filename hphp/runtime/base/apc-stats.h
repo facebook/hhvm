@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_STATS_H_
-#define incl_HPHP_APC_STATS_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/util/service-data.h"
@@ -25,6 +24,8 @@ namespace HPHP {
 struct APCHandle;
 struct APCArray;
 struct APCObject;
+struct APCRClsMeth;
+struct APCRFunc;
 struct APCString;
 struct StringData;
 struct ArrayData;
@@ -42,6 +43,8 @@ struct ArrayData;
 size_t getMemSize(const APCHandle*);
 size_t getMemSize(const APCArray*);
 size_t getMemSize(const APCObject*);
+size_t getMemSize(const APCRFunc*);
+size_t getMemSize(const APCRClsMeth*);
 /* Recurses on array/object values iff 'recurse'. Always includes strings. */
 size_t getMemSize(const ArrayData*, bool recurse = true);
 
@@ -131,6 +134,10 @@ private:
   ServiceData::ExportedCounter* m_serObject;
   // Number of APC objects
   ServiceData::ExportedCounter* m_apcObject;
+  // Number of RFuncs
+  ServiceData::ExportedCounter* m_apcRFunc;
+  // Number of RClsMeth
+  ServiceData::ExportedCounter* m_apcRClsMeth;
 
   /*
    * Operation counters.
@@ -173,21 +180,21 @@ struct APCStats {
 
   // A new key is added. Value is added through addAPCValue()
   void addKey(size_t len) {
-    assert(len > 0);
+    assertx(len > 0);
     m_entries->increment();
     m_keySize->addValue(len);
   }
 
   // A key is removed. Value is removed through removeAPCValue()
   void removeKey(size_t len) {
-    assert(len > 0);
+    assertx(len > 0);
     m_entries->decrement();
     m_keySize->addValue(-len);
   }
 
   // A primed key is added. Implies a key is added as well.
   void addPrimedKey(size_t len) {
-    assert(len > 0);
+    assertx(len > 0);
     m_primedEntries->increment();
     addKey(len);
   }
@@ -195,7 +202,7 @@ struct APCStats {
   // A value of a certain size was added to the primed set that is mapped
   // to file
   void addInFileValue(size_t size) {
-    assert(size > 0);
+    assertx(size > 0);
     m_inFileSize->addValue(size);
   }
 
@@ -204,7 +211,7 @@ struct APCStats {
     m_uncountedBlocks->increment();
   }
 
-  // Only call this method from ::destructUncounted() or ::releaseUncounted()
+  // Only call this method from ::ReleaseUncounted()
   void removeAPCUncountedBlock() {
     m_uncountedBlocks->decrement();
   }
@@ -213,7 +220,7 @@ struct APCStats {
   // an existing value. However the key may exists already a be a primed
   // mapped to file entry
   void addAPCValue(APCHandle* handle, size_t size, bool livePrimed) {
-    assert(handle && size > 0);
+    assertx(handle && size > 0);
     m_valueSize->addValue(size);
     if (handle->isUncounted()) {
       m_uncountedEntries->increment();
@@ -234,7 +241,7 @@ struct APCStats {
                       size_t oldSize,
                       bool livePrimed,
                       bool expired) {
-    assert(handle && size > 0 && oldHandle && oldSize > 0);
+    assertx(handle && size > 0 && oldHandle && oldSize > 0);
     auto diff = size - oldSize;
     if (diff != 0) {
       m_valueSize->addValue(diff);
@@ -252,7 +259,7 @@ struct APCStats {
                       APCHandle* handle,
                       bool livePrimed,
                       bool expired) {
-    assert(size > 0);
+    assertx(size > 0);
     m_valueSize->addValue(-size);
     if (handle->isUncounted()) {
       m_uncountedEntries->decrement();
@@ -317,4 +324,3 @@ private:
 
 }
 
-#endif

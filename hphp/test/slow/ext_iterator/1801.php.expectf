@@ -1,18 +1,13 @@
-array(5) {
-  [0]=>
+varray(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir/empty => 0
 "
-  [1]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty => 0
 "
-  [2]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file => 3
 "
-  [3]=>
-  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc => 459
+  string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc => 489
 "
-  [4]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink => 3
 "
 }
-Total: 5 files, 465 bytes
+Total: 5 files, 495 bytes

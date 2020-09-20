@@ -1,7 +1,0 @@
-*** Testing lstat() on a link after changing its access permission ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---

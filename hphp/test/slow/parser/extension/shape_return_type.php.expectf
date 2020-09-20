@@ -1,0 +1,18 @@
+dict(1) {
+  ["x"]=>
+  vec(1) {
+    string(8) "// hello"
+  }
+}
+dict(1) {
+  ["y"]=>
+  vec(1) {
+    string(6) "// bye"
+  }
+}
+dict(1) {
+  ["z"]=>
+  vec(1) {
+    string(6) "// cat"
+  }
+}

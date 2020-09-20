@@ -9,4 +9,8 @@ class :foo {
     } e;
 }
 
+
+<<__EntryPoint>>
+function main_enum_trailing_comma() {
 echo 'Done';
+}

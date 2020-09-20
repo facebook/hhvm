@@ -1,5 +1,4 @@
-#ifndef incl_ETCH_HELPERS_H
-#define incl_ETCH_HELPERS_H
+#pragma once
 
 #ifdef _MSC_VER
 #define CFI(x)            .cfi_##x
@@ -36,7 +35,7 @@
 #define ETCH_SECTION(x)   .text
 #define ETCH_SIZE(x)      /* not used on OSX */
 #define ETCH_NAME(x)      _##x
-#define ETCH_LABEL(x)     .L##_##x
+#define ETCH_LABEL(x)     L##_##x /* not .L */
 #define ETCH_TYPE(x, y)   /* not used on OSX */
 #define ETCH_NAME_REL(x)  _##x@GOTPCREL(%rip)
 #define ETCH_ARG1         %rdi
@@ -93,4 +92,3 @@
 #define ETCH_RET1         %rax
 #endif
 
-#endif // incl_ETCH_HELPERS_H

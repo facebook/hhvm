@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PDO_SQLITE_H_
-#define incl_HPHP_PDO_SQLITE_H_
+#pragma once
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 
@@ -107,4 +106,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PDO_SQLITE_H_

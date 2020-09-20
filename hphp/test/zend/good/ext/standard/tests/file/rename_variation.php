@@ -1,12 +1,12 @@
-<?php
-
+<?hh
 /* creating directory */
-$file_path = dirname(__FILE__);
+<<__EntryPoint>> function main(): void {
+$file_path = __SystemLib\hphp_test_tmproot();
 mkdir("$file_path/rename_variation");
 
 /* rename files across directories */
 echo "*** Testing rename() : rename files across directories ***\n";
-$src_filenames = array(
+$src_filenames = varray[
   "$file_path/rename_variation/rename_variation.phpt.tmp",
 
   /* Testing a file trailing slash */
@@ -15,7 +15,7 @@ $src_filenames = array(
   /* Testing file with double slashes */
   "$file_path/rename_variation//rename_variation.phpt.tmp",
   "$file_path//rename_variation//rename_variation.phpt.tmp",
-);
+];
 $counter = 1;
 /* loop through each $file and rename it to rename_variation.phpt2.tmp */
 foreach($src_filenames as $src_filename) {
@@ -24,17 +24,17 @@ foreach($src_filenames as $src_filename) {
   fclose($fp);
   $dest_filename = "$file_path/rename_variation.phpt2.tmp";
   var_dump( rename($src_filename, $dest_filename) );
-  // ensure that file got renamed to new name 
+  // ensure that file got renamed to new name
   var_dump( file_exists($src_filename) );  // expecting false
   var_dump( file_exists($dest_filename) );  // expecting true
   $counter++;
- 
-  // unlink the file  
+
+  // unlink the file
   unlink($dest_filename);
 }
 
 // clean the temp dir and file
-rmdir("$file_path/rename_variation"); 
+rmdir("$file_path/rename_variation");
 
 echo "Done\n";
-?>
+}

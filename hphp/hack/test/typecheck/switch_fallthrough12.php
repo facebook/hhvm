@@ -15,14 +15,14 @@ function test(): void {
       hh_show($x);
       // FALLTHROUGH
     case 3:
-      // $x should be string & int
+      // $x should be string | int
       hh_show($x);
       $x = true;
-      // $x should be string & int & bool
+      // $x should be string | int | bool
       hh_show($x);
       // FALLTHROUGH
     case 4:
-      // $x should be int & string
+      // $x should be int | bool
       hh_show($x);
       break;
     case 4:
@@ -33,6 +33,6 @@ function test(): void {
       hh_show($x);
       break;
   }
-  // $x should be int & string & float & bool
+  // $x should be int | float | bool
   hh_show($x);
 }

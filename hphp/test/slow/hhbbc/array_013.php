@@ -1,7 +1,7 @@
 <?hh
 
 function foo(bool $x) {
-  return array('flag' => array('flag2' => $x));
+  return darray['flag' => darray['flag2' => $x]];
 }
 function bar() {
   $x = foo(true);
@@ -10,4 +10,8 @@ function bar() {
   $l = $y['flag']['flag2'];
   var_dump($z, $l);
 }
+
+<<__EntryPoint>>
+function main_array_013() {
 bar();
+}

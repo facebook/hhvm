@@ -83,7 +83,7 @@ empty:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">
@@ -110,7 +110,7 @@ empty:
 foreach:
 foreach with key:
 3 objects:
-   $vec[0] => object(stdClass)#62 (0) {
+   $vec[0] => object(stdClass) (0) {
 }
    $vec[3] => <Exception: "Out of bounds vec access: invalid index 3">
    $vec[8] => <Exception: "Out of bounds vec access: invalid index 8">
@@ -129,7 +129,7 @@ foreach with key:
    $vec[dict] => <Exception: "Invalid vec key: expected a key of type int, dict given">
    $vec[keyset] => <Exception: "Invalid vec key: expected a key of type int, keyset given">
    $vec[resource] => <Exception: "Invalid vec key: expected a key of type int, gd given">
-   $vec[0] ?? "NOT FOUND" => object(stdClass)#62 (0) {
+   $vec[0] ?? "NOT FOUND" => object(stdClass) (0) {
 }
    $vec[3] ?? "NOT FOUND" => string(9) "NOT FOUND"
    $vec[8] ?? "NOT FOUND" => string(9) "NOT FOUND"
@@ -148,7 +148,7 @@ foreach with key:
    $vec[dict] ?? "NOT FOUND" => <Exception: "Invalid vec key: expected a key of type int, dict given">
    $vec[keyset] ?? "NOT FOUND" => <Exception: "Invalid vec key: expected a key of type int, keyset given">
    $vec[resource] ?? "NOT FOUND" => <Exception: "Invalid vec key: expected a key of type int, gd given">
-   idx($vec, 0, "NOT FOUND") => object(stdClass)#62 (0) {
+   idx($vec, 0, "NOT FOUND") => object(stdClass) (0) {
 }
    idx($vec, 3, "NOT FOUND") => string(9) "NOT FOUND"
    idx($vec, 8, "NOT FOUND") => string(9) "NOT FOUND"
@@ -197,7 +197,7 @@ foreach with key:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">
@@ -222,21 +222,21 @@ foreach with key:
    empty($vec[keyset]) => <Exception: "Invalid vec key: expected a key of type int, keyset given">
    empty($vec[resource]) => <Exception: "Invalid vec key: expected a key of type int, gd given">
 foreach:
-	Val: object(stdClass)#62 (0) {
+	Val: object(stdClass) (0) {
 }
-	Val: object(stdClass)#63 (0) {
+	Val: object(stdClass) (0) {
 }
-	Val: object(stdClass)#64 (0) {
+	Val: object(stdClass) (0) {
 }
 foreach with key:
 	Key: int(0)
-	Val: object(stdClass)#62 (0) {
+	Val: object(stdClass) (0) {
 }
 	Key: int(1)
-	Val: object(stdClass)#63 (0) {
+	Val: object(stdClass) (0) {
 }
 	Key: int(2)
-	Val: object(stdClass)#64 (0) {
+	Val: object(stdClass) (0) {
 }
 4 ints:
    $vec[0] => int(100)
@@ -323,7 +323,7 @@ foreach with key:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">
@@ -446,7 +446,7 @@ foreach with key:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">
@@ -569,7 +569,7 @@ foreach with key:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">
@@ -689,7 +689,7 @@ foreach with key:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">
@@ -827,7 +827,7 @@ foreach with key:
    array_key_exists($vec, 0.0) => <Exception: "Invalid vec key: expected a key of type int, double given">
    array_key_exists($vec, false) => <Exception: "Invalid vec key: expected a key of type int, bool given">
    array_key_exists($vec, object) => <Exception: "Invalid vec key: expected a key of type int, ToStringObj given">
-   array_key_exists($vec, null) => bool(false)
+   array_key_exists($vec, null) => <Exception: "Invalid vec key: expected a key of type int, null given">
    array_key_exists($vec, array) => <Exception: "Invalid vec key: expected a key of type int, array given">
    array_key_exists($vec, vec) => <Exception: "Invalid vec key: expected a key of type int, vec given">
    array_key_exists($vec, dict) => <Exception: "Invalid vec key: expected a key of type int, dict given">

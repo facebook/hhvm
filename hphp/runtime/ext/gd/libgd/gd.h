@@ -537,18 +537,18 @@ int gdImageColorResolveAlpha(gdImagePtr im, int r, int g, int b, int a);
 /* A simpler way to obtain an opaque truecolor value for drawing on a
   truecolor image. Not for use with palette images! */
 
-#define gdTrueColor(r, g, b) (((r) << 16) + \
-  ((g) << 8) + \
-  (b))
+#define gdTrueColor(r, g, b) ((((r) & 0xff) << 16) +    \
+                              (((g) & 0xff) << 8) +     \
+                              ((b) & 0xff))
 
 /* Returns a truecolor value with an alpha channel component.
   gdAlphaMax (127, **NOT 255**) is transparent, 0 is completely
   opaque. */
 
-#define gdTrueColorAlpha(r, g, b, a) (((a) << 24) + \
-  ((r) << 16) + \
-  ((g) << 8) + \
-  (b))
+#define gdTrueColorAlpha(r, g, b, a) ((((a) & 0xff) << 24) +    \
+                                      (((r) & 0xff) << 16) +    \
+                                      (((g) & 0xff) << 8) +     \
+                                      ((b) & 0xff))
 
 void gdImageColorDeallocate(gdImagePtr im, int color);
 

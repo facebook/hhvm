@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
 }
@@ -7,4 +7,8 @@ class A {
  return new self();
 }
  }
- var_dump(B::foo());
+
+ <<__EntryPoint>>
+function main_776() {
+var_dump(B::foo());
+}

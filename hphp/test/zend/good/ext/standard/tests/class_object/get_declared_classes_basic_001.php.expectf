@@ -1,7 +1,7 @@
 *** Testing get_declared_classes() : basic functionality ***
 
 -- Testing get_declared_classes() function with Zero arguments --
-array(%d) {
+varray(%d) {
 %a
 }
 

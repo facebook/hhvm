@@ -11,4 +11,6 @@ class Foo {
     return $x;
   }
 }
+<<__EntryPoint>> function main(): void {
 print_r(Foo::bar(<x:frag/>));
+}

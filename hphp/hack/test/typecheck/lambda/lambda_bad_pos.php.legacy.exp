@@ -1,0 +1,14 @@
+File "lambda_bad_pos.php", line 26, characters 8-13:
+Some type constraint(s) here are violated (Typing[4110])
+File "lambda_bad_pos.php", line 6, characters 21-22:
+'Tv' is a constrained type parameter
+File "lambda_bad_pos.php", line 6, characters 27-34:
+This is an array key (int | string)
+File "lambda_bad_pos.php", line 25, characters 22-22:
+It is incompatible with an object of type C
+File "hackarray.hhi", line 13, characters 61-61:
+  via this generic T
+File "interfaces.hhi", line 118, characters 84-85:
+  via this generic Tv
+File "rx/interfaces.hhi", line 35, characters 60-61:
+  via this generic Tv

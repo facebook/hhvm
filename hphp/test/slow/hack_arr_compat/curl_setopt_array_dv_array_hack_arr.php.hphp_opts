@@ -1,0 +1,1 @@
+-vRuntime.Eval.HackArrCompatNotices=true -vRuntime.Eval.HackArrDVArrs=true -d hhvm.php7.all=0

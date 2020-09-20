@@ -1,8 +1,8 @@
 File "with_tconst_bad2.php", line 13, characters 29-34:
-Wrong type hint (Typing[4110])
-File "with_tconst_bad2.php", line 13, characters 19-26:
-This is an object of type C
+Wrong type hint (Typing[4338])
 File "with_tconst_bad2.php", line 12, characters 19-19:
-  resulting from expanding the type constant CLoader::Ti
+Expected `C`
+File "with_tconst_bad2.php", line 13, characters 19-26:
+  resulting from expanding the type constant `this::Ti`
 File "with_tconst_bad2.php", line 13, characters 38-45:
-It is incompatible with an object of type stdClass
+But got `stdClass`

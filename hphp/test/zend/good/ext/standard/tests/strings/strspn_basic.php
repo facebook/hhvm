@@ -1,7 +1,7 @@
-<?php
+<?hh
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
-                If start or/and length is provided, it works like strspn(substr($s,$start,$len),$good_chars) 
+                If start or/and length is provided, it works like strspn(substr($s,$start,$len),$good_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -9,7 +9,7 @@
 /*
 * Testing strspn() : basic functionality
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strspn() : basic functionality ***\n";
 
 
@@ -28,5 +28,5 @@ var_dump( strspn($str, $mask, $start) );
 // Calling strspn() with default arguments
 var_dump( strspn($str, $mask) );
 
-echo "Done"
-?>
+echo "Done";
+}

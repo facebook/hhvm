@@ -33,4 +33,8 @@ function main($obj) {
   var_dump($t);
 }
 
+
+<<__EntryPoint>>
+function main_method_static() {
 main(new Foo);
+}

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Namespace declaration statement has to be the very first statement in the script in %s/ns_068.php on line 3

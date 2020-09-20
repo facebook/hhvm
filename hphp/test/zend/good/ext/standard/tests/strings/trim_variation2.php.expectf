@@ -1,54 +1,68 @@
 *** Testing trim() function: with unexpected inputs for 'charlist' argument ***
 -- Iteration 1 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 2 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 3 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 4 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 5 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 6 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, integer given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 7 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 8 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 9 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: trim() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: trim() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: trim() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 13 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 14 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 15 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 16 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 17 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 18 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 19 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, object given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: trim() expects parameter 2 to be string, resource given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 21 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 -- Iteration 22 --
-string(19) "!---Hello World---!"
+
+Warning: trim() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/strings/trim_variation2.php on line 73
 ===DONE===

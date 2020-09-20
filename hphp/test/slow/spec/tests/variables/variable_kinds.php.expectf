@@ -1,0 +1,10 @@
+---------------- Local variables -------------------
+---------------- Array elements -------------------
+---------------- recursive function example -------------------
+$result = 3628800
+---------------- Global Constants -------------------
+MAX_HEIGHT2 = 10.5
+Inside globalConst
+MAX_HEIGHT2 = 10.5
+COEFFICIENT_2 = 2.345
+---------------- instance/static properties & constants -------------------

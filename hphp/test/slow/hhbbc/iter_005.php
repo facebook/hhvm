@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-function asd() { return array(); }
+function asd() { return varray[]; }
 function foo() {
   $x = asd();
   foreach ($x as $v) {
@@ -8,4 +8,8 @@ function foo() {
   }
   return 1;
 }
+
+<<__EntryPoint>>
+function main_iter_005() {
 foo();
+}

@@ -1,13 +1,9 @@
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, integer given in %s/fstat_variation5.php on line 11
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, integer given in %s/fstat_variation5.php on line 11
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, integer given in %s/fstat_variation5.php on line 11
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, integer given in %s/fstat_variation5.php on line 11
 ===DONE===

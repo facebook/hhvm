@@ -1,49 +1,64 @@
 *** Testing mb_substr() : usage variations ***
 
 -- Iteration 1 --
-string(1) "0"
+
+Warning: mb_substr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 2 --
-string(1) "1"
+
+Warning: mb_substr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 3 --
-string(5) "12345"
+
+Warning: mb_substr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 4 --
-string(5) "-2345"
+
+Warning: mb_substr() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 5 --
-string(4) "10.5"
+
+Warning: mb_substr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 6 --
-string(5) "-10.5"
+
+Warning: mb_substr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 7 --
-string(5) "12345"
+
+Warning: mb_substr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 8 --
-string(5) "1.234"
+
+Warning: mb_substr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 9 --
-string(3) "0.5"
+
+Warning: mb_substr() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 10 --
-string(0) ""
+
+Warning: mb_substr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 11 --
-string(0) ""
+
+Warning: mb_substr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 12 --
-string(1) "1"
+
+Warning: mb_substr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 13 --
-string(0) ""
+
+Warning: mb_substr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 14 --
-string(1) "1"
+
+Warning: mb_substr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 15 --
-string(0) ""
+
+Warning: mb_substr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 16 --
 string(0) ""
@@ -61,16 +76,18 @@ string(5) "strin"
 string(5) "hello"
 
 -- Iteration 21 --
-string(5) "Class"
+
+Warning: mb_substr() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 22 --
-string(0) ""
+
+Warning: mb_substr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 23 --
-string(0) ""
+
+Warning: mb_substr() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: mb_substr() expects parameter 1 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_substr_variation1.php on line 89
 Done

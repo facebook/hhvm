@@ -27,4 +27,8 @@ function main() {
   dump_set((Set {11, 22})->lazy(), "Set lazy()");
   dump_set((Set {11, 22})->lazy()->map($v ==> $v), "Set lazy()->map()");
 }
+
+<<__EntryPoint>>
+function main_first_last() {
 main();
+}

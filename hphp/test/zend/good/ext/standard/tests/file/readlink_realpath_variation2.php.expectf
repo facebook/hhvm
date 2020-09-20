@@ -7,28 +7,28 @@ bool(true)
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
 
-Warning: %s
+Warning: symlink(): No such file or directory in %s/readlink_realpath_variation2.php on line 29
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory %s in %s/readlink_realpath_variation2.php on line 30
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: unlink(%s): No such file or directory in %s/readlink_realpath_variation2.php on line 35
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an array --
 bool(true)
 
-Warning: %s
+Warning: readlink(): No such file or directory %s in %s/readlink_realpath_variation2.php on line 40
 bool(false)
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp"
 
-Warning: %s
+Warning: link(): No such file or directory in %s/readlink_realpath_variation2.php on line 42
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory %s in %s/readlink_realpath_variation2.php on line 43
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: unlink(%s): No such file or directory in %s/readlink_realpath_variation2.php on line 48
 Done

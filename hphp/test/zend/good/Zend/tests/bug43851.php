@@ -1,8 +1,11 @@
-<?php
-foo();
+<?hh
+
+<<__EntryPoint>>
 function foo() {
-	global $LAST;
-	($LAST = $LAST + 0) * 1;
+	(ZendGoodZendTestsBug43851::$LAST = ZendGoodZendTestsBug43851::$LAST + 0) * 1;
 	echo "ok\n";
 }
-?>
+
+abstract final class ZendGoodZendTestsBug43851 {
+  public static $LAST;
+}

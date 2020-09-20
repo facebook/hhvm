@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
@@ -277,9 +278,10 @@ MagickBooleanType withMagickLocaleFix(
 
 std::vector<double> toDoubleArray(const Array& array) {
   std::vector<double> ret;
-  for (ArrayIter it(array); it; ++it) {
-    ret.push_back(tvCastToDouble(it.secondValPlus()));
-  }
+  ret.reserve(array.size());
+  IterateVNoInc(array.get(), [&](TypedValue v) {
+    ret.push_back(tvCastToDouble(v));
+  });
   return ret;
 }
 
@@ -288,12 +290,12 @@ std::vector<PointInfo> toPointInfoArray(const Array& coordinates) {
   int idx = 0;
 
   for (ArrayIter it(coordinates); it; ++it) {
-    auto const element = it.secondRvalPlus().unboxed();
-    if (!isArrayLikeType(element.type())) {
+    auto const element = it.secondValPlus();
+    if (!isArrayLikeType(type(element))) {
       return {};
     }
 
-    auto const coordinate = element.val().parr;
+    auto const coordinate = val(element).parr;
     if (coordinate->size() != 2) {
       return {};
     }
@@ -352,7 +354,7 @@ bool ImagickExtension::hasProgressMonitor() {
   return s_ini_setting->m_progress_monitor;
 }
 
-THREAD_LOCAL(ImagickExtension::ImagickIniSetting,
+RDS_LOCAL(ImagickExtension::ImagickIniSetting,
                        ImagickExtension::s_ini_setting);
 
 ImagickExtension s_imagick_extension;

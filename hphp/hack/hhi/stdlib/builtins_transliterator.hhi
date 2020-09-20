@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 // Based on runtime/ext/icu/ext_icu_transliterator.php
 
@@ -52,7 +52,7 @@ function transliterator_get_error_code(Transliterator $t): int;
 <<__PHPStdLib>>
 function transliterator_get_error_message(Transliterator $t): string;
 <<__PHPStdLib>>
-function transliterator_list_ids(): array;
+function transliterator_list_ids(): mixed;
 
 <<__PHPStdLib>>
 function transliterator_transliterate(

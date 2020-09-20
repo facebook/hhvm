@@ -40,30 +40,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# mysql checks - if we're using async mysql, we use webscalesqlclient from
-# third-party/ instead
-if (ENABLE_ASYNC_MYSQL)
-  include_directories(
-    ${RE2_INCLUDE_DIR}
-    ${TP_DIR}/squangle/src/
-    ${TP_DIR}/webscalesqlclient/src/include/
-  )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
-  set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
-  )
-else()
-  find_package(MySQL REQUIRED)
-  link_directories(${MYSQL_LIB_DIR})
-  include_directories(${MYSQL_INCLUDE_DIR})
-endif()
-MYSQL_SOCKET_SEARCH()
-if (MYSQL_UNIX_SOCK_ADDR)
-  add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
-else ()
-  message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-endif ()
-
 # pcre checks
 find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
@@ -81,10 +57,14 @@ endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # libXed
-find_package(LibXed)
-if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
-  include_directories(${LibXed_INCLUDE_DIR})
+if (ENABLE_XED)
+  find_package(LibXed)
+  if (LibXed_FOUND)
+    include_directories(${LibXed_INCLUDE_DIR})
+  endif()
   add_definitions("-DHAVE_LIBXED")
+else()
+  message(STATUS "XED is disabled")
 endif()
 
 # CURL checks
@@ -112,8 +92,8 @@ add_definitions(${LIBXML2_DEFINITIONS})
 
 # libsqlite3
 find_package(LibSQLite)
-if (LIBSQLITE_INCLUDE_DIR)
-  include_directories(${LIBSQLITE_INCLUDE_DIR})
+if (LIBSQLITE3_INCLUDE_DIR)
+  include_directories(${LIBSQLITE3_INCLUDE_DIR})
 endif ()
 
 # libdouble-conversion
@@ -122,33 +102,10 @@ if (DOUBLE_CONVERSION_INCLUDE_DIR)
   include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
 endif ()
 
-# liblz4
-find_package(LZ4)
-if (LZ4_FOUND)
-  include_directories(${LZ4_INCLUDE_DIR})
-endif()
-
 # fastlz
 find_package(FastLZ)
 if (FASTLZ_INCLUDE_DIR)
   include_directories(${FASTLZ_INCLUDE_DIR})
-endif()
-
-# libzip
-find_package(LibZip)
-if (LIBZIP_INCLUDE_DIR_ZIP AND LIBZIP_INCLUDE_DIR_ZIPCONF)
-  if (LIBZIP_VERSION VERSION_LESS "0.11")
-    unset(LIBZIP_FOUND CACHE)
-    unset(LIBZIP_LIBRARY CACHE)
-    unset(LIBZIP_INCLUDE_DIR_ZIP CACHE)
-    unset(LIBZIP_INCLUDE_DIR_ZIPCONF CACHE)
-    message(STATUS "libzip is too old, found ${LIBZIP_VERSION} and we need 0.11+, using third-party bundled libzip")
-  else ()
-    include_directories(${LIBZIP_INCLUDE_DIR_ZIP} ${LIBZIP_INCLUDE_DIR_ZIPCONF})
-    message(STATUS "Found libzip: ${LIBZIP_LIBRARY} ${LIBZIP_VERSION}")
-  endif ()
-else ()
-  message(STATUS "Using third-party bundled libzip")
 endif()
 
 # ICU
@@ -165,6 +122,10 @@ if (ICU_FOUND)
     add_definitions("-DU_EXPORT=")
     add_definitions("-DU_IMPORT=")
   endif()
+  # Everything is either in the `icu61` namespace or `icu` namespace, depending
+  # on another definition. There's an implicit `using namespace WHATEVER;` in
+  # ICU4c < 61.1, but now that's opt-in rather than opt-out.
+  add_definitions("-DU_USING_ICU_NAMESPACE=1")
 endif (ICU_FOUND)
 
 # jemalloc/tmalloc and profiler
@@ -195,34 +156,11 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
   endif()
 endif()
 
-if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
-  FIND_LIBRARY(JEMALLOC_LIB NAMES jemalloc)
-  FIND_PATH(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h)
-
-  if (JEMALLOC_INCLUDE_DIR AND JEMALLOC_LIB)
-    include_directories(${JEMALLOC_INCLUDE_DIR})
-
-    set (CMAKE_REQUIRED_INCLUDES ${JEMALLOC_INCLUDE_DIR})
-    INCLUDE(CheckCXXSourceCompiles)
-    CHECK_CXX_SOURCE_COMPILES("
-#include <jemalloc/jemalloc.h>
-
-#define JEMALLOC_VERSION_NUMERIC ((JEMALLOC_VERSION_MAJOR << 24) | (JEMALLOC_VERSION_MINOR << 16) | (JEMALLOC_VERSION_BUGFIX << 8) | JEMALLOC_VERSION_NDEV)
-
-#if JEMALLOC_VERSION_NUMERIC < 0x03050100
-# error jemalloc version >= 3.5.1 required
-#endif
-
-int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
-    set (CMAKE_REQUIRED_INCLUDES)
-
-    if (JEMALLOC_VERSION_MINIMUM)
-      message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
-      set(JEMALLOC_ENABLED 1)
-    else()
-      message(STATUS "Found jemalloc, but it was too old")
-    endif()
-  endif()
+if(USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
+  add_definitions(-DUSE_JEMALLOC=1)
+  set(JEMALLOC_ENABLED 1)
+else()
+  add_definitions(-DNO_JEMALLOC=1)
 endif()
 
 if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
@@ -235,11 +173,6 @@ if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
   endif()
 endif()
 
-if (JEMALLOC_ENABLED)
-  add_definitions(-DUSE_JEMALLOC=1)
-else()
-  add_definitions(-DNO_JEMALLOC=1)
-endif()
 if (GOOGLE_TCMALLOC_ENABLED)
   add_definitions(-DGOOGLE_TCMALLOC=1)
 else()
@@ -283,6 +216,10 @@ int main() {
 if (NOT OPENSSL_HAVE_RAND_EGD)
   add_definitions("-DOPENSSL_NO_RAND_EGD")
 endif()
+CHECK_CXX_SOURCE_COMPILES("#include <openssl/ssl.h>
+int main() {
+  return SSL_set_alpn_protos(nullptr, nullptr, 0);
+}" OPENSSL_HAVE_ALPN)
 SET(CMAKE_REQUIRED_INCLUDES)
 SET(CMAKE_REQUIRED_LIBRARIES)
 
@@ -291,13 +228,6 @@ SET(CMAKE_REQUIRED_LIBRARIES)
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
-# oniguruma
-find_package(ONIGURUMA REQUIRED)
-include_directories(${ONIGURUMA_INCLUDE_DIRS})
-if (ONIGURUMA_STATIC)
-  add_definitions("-DONIG_EXTERN=extern")
-endif()
-
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
@@ -305,17 +235,28 @@ if (LIBPTHREAD_STATIC)
   add_definitions("-DPTW32_STATIC_LIB")
 endif()
 
+OPTION(
+  NON_DISTRIBUTABLE_BUILD
+  "Use libraries which may result in a binary that can not be legally distributed"
+  OFF
+)
+
 # Either Readline or Editline (for hphpd)
-find_package(Readline)
-find_package(Editline)
-if (EDITLINE_INCLUDE_DIRS)
-  add_definitions("-DUSE_EDITLINE")
-  include_directories(${EDITLINE_INCLUDE_DIRS})
-elseif (READLINE_INCLUDE_DIR)
+if(NON_DISTRIBUTABLE_BUILD)
+  find_package(Readline)
+endif()
+if (NOT READLINE_INCLUDE_DIR)
+  find_package(Editline)
+endif()
+
+if (NON_DISTRIBUTABLE_BUILD AND READLINE_INCLUDE_DIR)
   if (READLINE_STATIC)
     add_definitions("-DREADLINE_STATIC")
   endif()
   include_directories(${READLINE_INCLUDE_DIR})
+elseif (EDITLINE_INCLUDE_DIRS)
+  add_definitions("-DUSE_EDITLINE")
+  include_directories(${EDITLINE_INCLUDE_DIRS})
 else()
   message(FATAL_ERROR "Could not find Readline or Editline")
 endif()
@@ -384,41 +325,31 @@ endif()
 include_directories(${HPHP_HOME}/hphp)
 
 macro(hphp_link target)
-  # oniguruma must remain first for OS X to work -- see below for a somewhat
-  # dogscience explanation. If you deeply understand this, feel free to fix
-  # properly; in particular, two-level namespaces on OS X should allow us to
-  # say *which* copy of the disputed functions we want, but I don' t know
-  # how to get that to work.
+  # oniguruma must be linked first for MacOS's linker to do the right thing -
+  # that's handled in HPHPSetup.cmake
   #
-  # oniguruma has some of its own implementations of POSIX regex functions,
-  # like regcomp() an regexec(). We use onig everywhere, for both its own
-  # sepcial functions and for the POSIX replacements. This means that the
-  # linker needs to pick the implementions of the POSIX regex functions from
-  # onig, not libc.
-  #
-  # On Linux, that works out fine, since the linker sees onig on the link
-  # line before (implicitly) libc. However, on OS X, despide the manpage for
-  # ld claiming otherwise about indirect dylib dependencies, as soon as we
-  # include one of the libs here that pull in libSystem.B, the linker will
-  # pick the implementations of those functions from libc, not from onig.
-  # And since we've included the onig headers, which have very slightly
-  # different definintions for some of the key data structures, things go
-  # quite awry -- this manifests as infinite loops or crashes when calling
-  # the PHP split() function.
-  #
-  # So make sure to link onig first, so its implementations are picked.
-  target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
+  # That only handles linking - we still need to make sure that:
+  # - oniguruma is built first, if needed (so we have the header files)
+  # - we build with the header files in the include path
+  if(APPLE)
+    add_dependencies(${target} onig)
+    target_include_directories(${target} PRIVATE $<TARGET_PROPERTY:onig,INTERFACE_INCLUDE_DIRECTORIES>)
+  else()
+    # Otherwise, the linker does the right thing, which sometimes means putting it after things that use it
+    target_link_libraries(${target} onig)
+  endif()
 
   if (LIBDL_LIBRARIES)
     target_link_libraries(${target} ${LIBDL_LIBRARIES})
   endif ()
 
+  if (JEMALLOC_ENABLED)
+    target_link_libraries(${target} jemalloc)
+    add_dependencies(${target} jemalloc)
+  endif ()
+
   if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
     target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
-  endif()
-
-  if (JEMALLOC_ENABLED)
-    target_link_libraries(${target} ${JEMALLOC_LIB})
   endif()
 
   if (GOOGLE_HEAP_PROFILER_ENABLED)
@@ -427,11 +358,11 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
+  add_dependencies(${target} boostMaybeBuild)
   target_link_libraries(${target} boost)
-  target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
-  if (ENABLE_ASYNC_MYSQL)
-    target_link_libraries(${target} squangle)
-  endif()
+  add_dependencies(${target} libsodiumMaybeBuild)
+  target_link_libraries(${target} libsodium)
+
   target_link_libraries(${target} ${PCRE_LIBRARY})
   target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${LIBEVENT_LIB})
@@ -439,10 +370,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${LIBGLOG_LIBRARY})
   if (LIBJSONC_LIBRARY)
     target_link_libraries(${target} ${LIBJSONC_LIBRARY})
-  endif()
-
-  if (LibXed_LIBRARY)
-    target_link_libraries(${target} ${LibXed_LIBRARY})
   endif()
 
   if (LIBINOTIFY_LIBRARY)
@@ -503,17 +430,8 @@ macro(hphp_link target)
     target_link_libraries(${target} double-conversion)
   endif()
 
-  if (LZ4_FOUND)
-    target_link_libraries(${target} ${LZ4_LIBRARY})
-  else()
-    target_link_libraries(${target} lz4)
-  endif()
-
-  if (LIBZIP_LIBRARY)
-    target_link_libraries(${target} ${LIBZIP_LIBRARY})
-  else()
-    target_link_libraries(${target} zip_static)
-  endif()
+  target_link_libraries(${target} lz4)
+  target_link_libraries(${target} libzip)
 
   if (PCRE_LIBRARY)
     target_link_libraries(${target} ${PCRE_LIBRARY})
@@ -530,8 +448,7 @@ macro(hphp_link target)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
   target_link_libraries(${target} wangle)
-  target_link_libraries(${target} brotli_enc)
-  target_link_libraries(${target} brotli_dec)
+  target_link_libraries(${target} brotli)
 
   if (ENABLE_MCROUTER)
     target_link_libraries(${target} mcrouter)
@@ -554,10 +471,46 @@ macro(hphp_link target)
   endif()
 
   if (LINUX)
-    target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
+    target_link_libraries(${target})
   endif()
 
   if (MSVC)
     target_link_libraries(${target} dbghelp.lib dnsapi.lib)
+  endif()
+
+# Check whether atomic operations require -latomic or not
+# See https://github.com/facebook/hhvm/issues/5217
+  include(CheckCXXSourceCompiles)
+  set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+  set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
+  CHECK_CXX_SOURCE_COMPILES("
+#include <atomic>
+#include <iostream>
+#include <stdint.h>
+int main() {
+    struct Test { int64_t val1; int64_t val2; };
+    std::atomic<Test> s;
+    // Do this to stop modern compilers from optimizing away the libatomic
+    // calls in release builds, making this test always pass in release builds,
+    // and incorrectly think that HHVM doesn't need linking against libatomic.
+    bool (std::atomic<Test>::* volatile x)(void) const =
+      &std::atomic<Test>::is_lock_free;
+    std::cout << (s.*x)() << std::endl;
+}
+  " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
+
+  if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
+      message(STATUS "-latomic is required to link hhvm")
+      find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
+      target_link_libraries(${target} ${ATOMIC_LIBRARY})
+  endif()
+  set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
+
+  if (ENABLE_XED)
+    if (LibXed_FOUND)
+        target_link_libraries(${target} ${LibXed_LIBRARY})
+    else()
+        target_link_libraries(${target} xed)
+    endif()
   endif()
 endmacro()

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot declare self-referencing constant 'A::FOO' in %s/constant_expressions_self_referencing_array.php on line 4

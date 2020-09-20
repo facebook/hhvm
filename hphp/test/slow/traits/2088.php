@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait Too {
   function gen() {
@@ -36,9 +36,13 @@ class Goo {
  return true;
  }
 }
+
+<<__EntryPoint>>
+function main_2088() {
 $of = new Foo;
 $f = $of->gen();
 var_dump($f(1000));
 $og = new Goo;
 $g = $og->gen();
 var_dump($g(2000));
+}

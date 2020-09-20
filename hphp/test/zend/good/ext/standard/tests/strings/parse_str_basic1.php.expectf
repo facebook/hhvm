@@ -1,13 +1,8 @@
 *** Testing parse_str() : basic functionality ***
-Basic test WITHOUT result arg
-NULL
-string(4) "val1"
-string(4) "val2"
-string(4) "val3"
 
 Basic test WITH undefined var for result arg
 NULL
-array(3) {
+darray(3) {
   ["first"]=>
   string(4) "val1"
   ["second"]=>
@@ -18,7 +13,7 @@ array(3) {
 
 Basic test WITH existing non-array var for result arg
 NULL
-array(3) {
+darray(3) {
   ["first"]=>
   string(4) "val1"
   ["second"]=>
@@ -29,7 +24,7 @@ array(3) {
 
 Basic test with an existing array as results array
 NULL
-array(3) {
+darray(3) {
   ["first"]=>
   string(4) "val1"
   ["second"]=>

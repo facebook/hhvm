@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Asd {
   static $x = 2;
@@ -16,6 +16,9 @@ class Asd {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_009() {
 $y = new Asd();
 var_dump($y->foo());
 var_dump($y->bar());
@@ -24,3 +27,4 @@ $y->heh();
 var_dump($y->foo());
 var_dump($y->bar());
 var_dump($y->baz());
+}

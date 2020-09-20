@@ -2,11 +2,9 @@
 
 -- Testing xml_parse_into_struct() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_parse_into_struct() expects exactly 4 parameters, 5 given in %s/xml_parse_into_struct_error.php on line 17
 
 -- Testing xml_parse_into_struct() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_parse_into_struct() expects exactly 4 parameters, 2 given in %s/xml_parse_into_struct_error.php on line 23
 Done

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   var_dump((clone (HH\Vector {1})->getIterator())->current());
   var_dump((clone (HH\ImmVector {2})->getIterator())->current());
@@ -8,4 +8,8 @@ function main() {
   var_dump((clone (HH\ImmSet {6})->getIterator())->current());
   var_dump((clone (HH\Pair {7,8})->getIterator())->current());
 }
+
+<<__EntryPoint>>
+function main_iterator_clone_bug() {
 main();
+}

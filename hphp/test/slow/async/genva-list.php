@@ -7,151 +7,103 @@ async function foo($x, $suspend = false, $throw = false) {
 }
 
 async function bar($x) {
-  return array($x + 1, array($x + 2, $x + 3));
+  return varray[$x + 1, varray[$x + 2, $x + 3]];
 }
 
 async function herp() {
-  list(
-    $a,
-    $b,
-    $c,
-    $d,
-    list($f1, list($f2, $f3)),
-    $e,
-    $f,
-  ) = await genva(
-    foo(1),
-    foo(2),
-    foo(3),
-    foo(4),
-    bar(42),
-    foo(5),
-    foo(6),
-  );
+  concurrent {
+    $a = await foo(1);
+    $b = await foo(2);
+    $c = await foo(3);
+    $d = await foo(4);
+    list($f1, list($f2, $f3)) = await bar(42);
+    $e = await foo(5);
+    $f = await foo(6);
+  }
   var_dump($a, $f);
   var_dump($f1, $f3);
 
   echo "================================\n";
 
-  list(
-    $a,
-    $b,
-    $c,
-    $d,
-    list($f1, list($f2, $f3)),
-    $e,
-    $f,
-  ) = await genva(
-    foo(1),
-    foo(2, true),
-    foo(3, true),
-    foo(4),
-    bar(42),
-    foo(5, true),
-    foo(6),
-  );
+  concurrent {
+    $a = await foo(1);
+    $b = await foo(2, true);
+    $c = await foo(3, true);
+    $d = await foo(4);
+    list($f1, list($f2, $f3)) = await bar(42);
+    $e = await foo(5, true);
+    $f = await foo(6);
+  }
   var_dump($a, $f);
   var_dump($f1, $f3);
 
   echo "================================\n";
 
-  list(
-    $a,
-    $b,
-    $c,
-    $d,
-    list($f1, list($f2, $f3)),
-    $e,
-    $f,
-  ) = await genva(
-    foo(1, true),
-    foo(2),
-    foo(3),
-    foo(4, true),
-    bar(42),
-    foo(5),
-    foo(6, true),
-  );
+  concurrent {
+    $a = await foo(1, true);
+    $b = await foo(2);
+    $c = await foo(3);
+    $d = await foo(4, true);
+    list($f1, list($f2, $f3)) = await bar(42);
+    $e = await foo(5);
+    $f = await foo(6, true);
+  }
   var_dump($a, $f);
   var_dump($f1, $f3);
 
   echo "================================\n";
 
   try {
-    await genva(
-      foo(1, true),
-      foo(2),
-      foo(3),
-      foo(4, false, true),
-      bar(42),
-      foo(5),
-      foo(6, true),
-    );
+    concurrent {
+      await foo(1, true);
+      await foo(2);
+      await foo(3);
+      await foo(4, false, true);
+      await bar(42);
+      await foo(5);
+      await foo(6, true);
+    }
   } catch (Exception $e) { echo "Caught!\n"; }
 
   echo "================================\n";
 
   try {
-    list(
-      $a,
-      $b,
-      $c,
-      ,
-      list($f1, list($f2, $f3)),
-      $e,
-      $f,
-    ) = await genva(
-      foo(1, true),
-      foo(2),
-      foo(3),
-      foo(4, true, true),
-      bar(42),
-      foo(5),
-      foo(6, true),
-    );
+    concurrent {
+      $a = await foo(1, true);
+      $b = await foo(2);
+      $c = await foo(3);
+      await foo(4, true, true);
+      list($f1, list($f2, $f3)) = await bar(42);
+      $e = await foo(5);
+      $f = await foo(6, true);
+    }
   } catch (Exception $e) { echo "Caught!\n"; }
 
   echo "================================\n";
 
   try {
-    list(
-      $a,
-      $b,
-      $c,
-      $d,
-      list($f1, list($f2, $f3)),
-      $e,
-      ,
-    ) = await genva(
-      foo(1, true),
-      foo(2),
-      foo(3),
-      foo(4, true),
-      bar(42),
-      foo(5),
-      foo(6, true, true),
-    );
+    concurrent {
+      $a = await foo(1, true);
+      $b = await foo(2);
+      $c = await foo(3);
+      $d = await foo(4, true);
+      list($f1, list($f2, $f3)) = await bar(42);
+      $e = await foo(5);
+      await foo(6, true, true);
+    }
   } catch (Exception $e) { echo "Caught!\n"; }
 
   echo "================================\n";
 
-  list(
-    $a,
-    $b,
-    $c,
-    $d,
-    list($f1, list($f2, $f3)),
-    $e,
-    $f,
-  ) = await genva(
-    foo(1),
-    foo(2),
-    foo(3),
-    foo(4),
-    bar(42),
-    foo(5),
-    foo(6),
-  );
+  concurrent {
+    $a = await foo(1);
+    $b = await foo(2);
+    $c = await foo(3);
+    $d = await foo(4);
+    list($f1, list($f2, $f3)) = await bar(42);
+    $e = await foo(5);
+    $f = await foo(6);
+  }
   var_dump($a, $f);
   var_dump($f1, $f3);
 }
@@ -160,4 +112,8 @@ function derp() {
   HH\Asio\join(herp());
 }
 
+
+<<__EntryPoint>>
+function main_genva_list() {
 derp();
+}

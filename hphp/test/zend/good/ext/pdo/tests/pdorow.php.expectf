@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class undefined: PDORow in %s/pdorow.php on line 3

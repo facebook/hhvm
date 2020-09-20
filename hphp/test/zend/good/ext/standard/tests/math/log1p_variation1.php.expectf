@@ -1,22 +1,28 @@
 *** Testing log1p() : usage variations ***
 
 -- Iteration 1 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 2 --
-float(0.69314718055995)
+
+Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 3 --
-float(9.4210874029538)
+
+Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 4 --
-float(NAN)
+
+Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 5 --
-float(21.487562597358)
+
+Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 6 --
-float(NAN)
+
+Warning: log1p() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 7 --
 float(2.4423470353692)
@@ -34,66 +40,66 @@ float(0.0012338064377078)
 float(0.40546510810816)
 
 -- Iteration 12 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 13 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 14 --
-float(0.69314718055995)
+
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 15 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 16 --
-float(0.69314718055995)
+
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 17 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 25 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 26 --
-float(0)
+
+Warning: log1p() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 27 --
 
-Warning: %s
-NULL
+Warning: log1p() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 ===Done===

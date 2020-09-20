@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
    */
 
-#ifndef incl_HPHP_PDO_PGSQL_H_
-#define incl_HPHP_PDO_PGSQL_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/array-data-defs.h"
@@ -37,4 +36,3 @@ enum {
   PDO_PGSQL_ATTR_DISABLE_PREPARES,
 };
 }
-#endif

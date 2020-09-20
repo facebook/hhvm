@@ -53,18 +53,18 @@ enum ComplexUnionEnum: int {
   stringValue = 2;
 }
 class ComplexUnion {
-  public static array $_TSPEC = array(
-    1 => array(
+  const arraylike SPEC = darray[
+    1 => darray[
       'var' => 'intValue',
       'union' => true,
       'type' => TType::I64,
-      ),
-    2 => array(
+      ],
+    2 => darray[
       'var' => 'stringValue',
       'union' => true,
       'type' => TType::STRING,
-      ),
-    );
+      ],
+    ];
   public static Map<string, int> $_TFIELDMAP = Map {
     'intValue' => 1,
     'stringValue' => 2,
@@ -131,7 +131,7 @@ class ComplexUnion {
       if (!$fid && $fname !== null) {
         $fid = (int) self::$_TFIELDMAP->get($fname);
         if ($fid !== 0) {
-          $ftype = self::$_TSPEC[$fid]['type'];
+          $ftype = self::SPEC[$fid]['type'];
         }
       }
       switch ($fid)
@@ -183,7 +183,7 @@ class ComplexUnion {
   }
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $p = new DummyProtocol();
   $v1 = new ComplexUnion();
   $v1->set_stringValue('What is the answer?');
@@ -210,4 +210,3 @@ function test() {
   $p->getTransport()->buff[1] = pack('C', 0x42);
   var_dump(thrift_protocol_read_compact($p, 'ComplexUnion'));
 }
-test();

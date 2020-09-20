@@ -17,9 +17,4 @@ int(1)
 TestB::doSomethingParentThis(1)
 TestA::doSomethingParentThis(2)
 int(1)
-
-===E===
-TestB::doSomethingStatic(1)
-TestA::doSomethingStatic(2)
-int(1)
 ===DONE===

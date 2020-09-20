@@ -1,0 +1,21 @@
+(executable
+  (name hh_fanout)
+  (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
+  (libraries
+    batch_init
+    client_ide_service
+    core
+    default_injector_config
+    hhi
+    lwt
+    provider_utils
+    relative_path
+    server
+    server_command_types
+    server_env
+    sys_utils
+    temp_file
+    utils_core)
+  (preprocess
+    (pps lwt_ppx ppx_let)))

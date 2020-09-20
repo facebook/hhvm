@@ -20,11 +20,6 @@ functions are defined in the C++ file.
 
 Currently only matches functions, so won't match classes/methods.
 */
-// expects argv[1] to be the C++ file, argv[2] to be the PHP file
-if (empty($_SERVER['argv'][2])) {
-  fwrite(STDERR, "Usage: {$_SERVER['argv'][0]} <extfile.cpp> <extfile.php>\n");
-  exit(1);
-}
 
 function parse_php_functions(string $file):
                            ConstMap<string, Pair<string, ConstVector<string>>> {
@@ -34,11 +29,11 @@ function parse_php_functions(string $file):
   }
 
   // Don't handle methods yet, so function can't be indented
-  static $function_regex =
+  $function_regex =
     "#<<[^>]*__Native([^>]*)>>\nfunction +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 
   $functions = Map {};
-  $matches = [];
+  $matches = vec[];
   if (preg_match_all($function_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {
       $nativeArgs = $match[1];
@@ -91,11 +86,11 @@ function parse_cpp_functions(string $file):
   }
 
   // Don't handle methods yet, so function can't be indented
-  static $function_regex =
+  $function_regex =
             "#^(?:static )?(\S+) +HHVM_FUNCTION\(([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $functions = Map {};
-  $matches = [];
+  $matches = vec[];
 
   if (preg_match_all($function_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {
@@ -124,18 +119,18 @@ function parse_php_methods(string $file):
     return ImmMap {};
   }
 
-  static $class_regex = "#class ([^\\s{/]+)[^{/\\)]*\\{(.*?)\n\\}#ms";
-  static $method_regex =
+  $class_regex = "#class ([^\\s{/]+)[^{/\\)]*\\{(.*?)\n\\}#ms";
+  $method_regex =
     "#<<[^>]*__Native([^>]*)>>\n\\s*.*?function +([^(]*)\(([^)]*)\) *: *(.+?);#m";
 
   $methods = Map {};
-  $classes = [];
+  $classes = vec[];
 
   if (preg_match_all($class_regex, $source, $classes, PREG_SET_ORDER)) {
     foreach ($classes as $class) {
       $cname = $class[1];
       $source = $class[2];
-      $matches = [];
+      $matches = vec[];
       if (preg_match_all($method_regex, $source, $matches, PREG_SET_ORDER)) {
         foreach($matches as $match) {
           $nativeArgs = $match[1];
@@ -191,7 +186,7 @@ function parse_cpp_methods(string $file):
   }
 
   // Don't handle methods yet, so function can't be indented
-  static $method_regex =
+  $method_regex =
     "#^(?:static )?(\S+) +HHVM_(?:STATIC_)?METHOD\(([^,)]+),\s+([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $methods = Map {};
@@ -312,14 +307,6 @@ function match_arg_type(string $php, string $cpp): bool {
         break;
     }
   }
-  // References must be a variant type
-  if ($php[strlen($php)-1] == '&') {
-    if ($expected != 'const Variant&') {
-      return false;
-    } else {
-      $expected = 'VRefParam';
-    }
-  }
   $cpp = trim($cpp);
   // Special case for ints
   if ($cpp == 'int') {
@@ -360,16 +347,26 @@ function check_types(ConstMap<string, Pair<string, ConstVector<string>>> $php,
   return $errored;
 }
 
-$phpFuncs = parse_php_functions($_SERVER['argv'][2]);
-$cppFuncs = parse_cpp_functions($_SERVER['argv'][1]);
+<<__EntryPoint>>
+function main() {
+  $argv = $_SERVER['argv'];
+  // expects argv[1] to be the C++ file, argv[2] to be the PHP file
+  if (empty($argv[2])) {
+    fwrite(STDERR, "Usage: {$argv[0]} <extfile.cpp> <extfile.php>\n");
+    exit(1);
+  }
 
-$cppMeths = parse_cpp_methods($_SERVER['argv'][1]);
-$phpMeths = parse_php_methods($_SERVER['argv'][2]);
+  $phpFuncs = parse_php_functions($argv[2]);
+  $cppFuncs = parse_cpp_functions($argv[1]);
 
-$funcs = check_types($phpFuncs, $cppFuncs);
-$meths = check_types($phpMeths, $cppMeths);
+  $cppMeths = parse_cpp_methods($argv[1]);
+  $phpMeths = parse_php_methods($argv[2]);
 
-if ($funcs || $meths) {
-  echo "See https://github.com/facebook/hhvm/wiki/Extension-API for what types",
-        " map to what\n";
+  $funcs = check_types($phpFuncs, $cppFuncs);
+  $meths = check_types($phpMeths, $cppMeths);
+
+  if ($funcs || $meths) {
+    echo "See https://github.com/facebook/hhvm/wiki/Extension-API for what types",
+          " map to what\n";
+  }
 }

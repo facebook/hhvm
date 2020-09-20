@@ -1,9 +1,16 @@
-<?php
+<?hh
 
-$a = ['img99.jpg', 'img1.jpg', 'img2.jpg', 'img12.jpg', 'img10.jpg'];
-array_multisort($a);
-var_dump($a);
-array_multisort($a, SORT_ASC, SORT_NATURAL);
-var_dump($a);
-array_multisort($a, SORT_DESC, SORT_NATURAL);
-var_dump($a);
+
+<<__EntryPoint>>
+function main_array_multisort() {
+  $asc = SORT_ASC;
+  $desc = SORT_DESC;
+  $natural = SORT_NATURAL;
+  $a = varray['img99.jpg', 'img1.jpg', 'img2.jpg', 'img12.jpg', 'img10.jpg'];
+  array_multisort1(inout $a);
+  var_dump($a);
+  array_multisort3(inout $a, inout $asc, inout $natural);
+  var_dump($a);
+  array_multisort3(inout $a, inout $desc, inout $natural);
+  var_dump($a);
+}

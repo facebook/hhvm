@@ -1,5 +1,5 @@
+<?hh //partial
 
-        <?hh
         function h(): string {
             return "a";
         }

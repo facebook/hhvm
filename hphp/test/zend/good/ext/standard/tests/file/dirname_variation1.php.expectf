@@ -1,65 +1,80 @@
 *** Testing dirname() : usage variation ***
 
 --int 0--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --int 1--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --int 12345--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --int -12345--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --float 10.5--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --float -10.5--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --float 12.3456789000e10--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --float -12.3456789000e10--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --float .5--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --empty array--
-Error: 2 - dirname() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: dirname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --int indexed array--
-Error: 2 - dirname() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: dirname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --associative array--
-Error: 2 - dirname() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: dirname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --nested arrays--
-Error: 2 - dirname() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: dirname() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --uppercase NULL--
-string(0) ""
+
+Warning: dirname() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --lowercase null--
-string(0) ""
+
+Warning: dirname() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --lowercase true--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --lowercase false--
-string(0) ""
+
+Warning: dirname() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --uppercase TRUE--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --uppercase FALSE--
-string(0) ""
+
+Warning: dirname() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --empty string DQ--
 string(0) ""
@@ -68,15 +83,18 @@ string(0) ""
 string(0) ""
 
 --instance of classWithToString--
-string(1) "."
+
+Warning: dirname() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --instance of classWithoutToString--
-Error: 2 - dirname() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: dirname() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --undefined var--
-string(0) ""
+
+Warning: dirname() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 
 --unset var--
-string(0) ""
+
+Warning: dirname() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/dirname_variation1.php on line 97
 ===DONE===

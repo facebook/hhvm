@@ -1,9 +1,17 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
+// declaring class
+class sample
+{
+  public function __toString() {
+    return "Object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing sprintf() : with different types of values passed for arg1 argument ***\n";
@@ -16,19 +24,11 @@ $arg2 = 'third argument';
 $unset_var = 10;
 unset ($unset_var);
 
-// declaring class
-class sample
-{
-  public function __toString() {
-    return "Object";
-  } 
-}
-
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
 
 //array of values to iterate over
-$values = array(
+$values = varray[
 
       // int data
       0,
@@ -44,11 +44,11 @@ $values = array(
       .5,
 
       // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
+      'Array',
+      'Array',
+      'Array',
+      'Array',
+      'Array',
 
       // null data
       NULL,
@@ -79,25 +79,25 @@ $values = array(
 
       // resource data
       $file_handle
-);
+];
 
 // loop through each element of the array for arg1
 
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with two arguments
   var_dump( sprintf($format, $value) );
 
   // with three arguments
   var_dump( sprintf($format, $value, $arg2) );
-  
-  $count++;   
+
+  $count++;
 };
 
 // closing the resource
 fclose($file_handle);
 
 echo "Done";
-?>
+}

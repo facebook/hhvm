@@ -1,16 +1,16 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_USER_NOTICE & ~E_NOTICE);
 
 $it = new APCIterator('user');
 for($i = 0; $i < 41; $i++) {
   apc_store("key$i", "value$i");
 }
+$vals = darray[];
 foreach($it as $key=>$value) {
   $vals[$key] = $value['key'];
 }
-ksort($vals);
+ksort(inout $vals);
 var_dump($vals);
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

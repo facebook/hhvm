@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
     do {
         try {
@@ -11,6 +11,6 @@ function foo () {
         }
     } while (0);
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
-?>
+}

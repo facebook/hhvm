@@ -7,4 +7,6 @@ class c {
 function main($a) {
   return $a[c::BAR];
 }
-var_dump(main(array('hello there' => 'success')));
+<<__EntryPoint>> function main_entry(): void {
+var_dump(main(darray['hello there' => 'success']));
+}

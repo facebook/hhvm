@@ -2,11 +2,9 @@
 
 -- Testing xml_set_object() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_set_object() expects exactly 2 parameters, 3 given in %s/xml_set_object_error.php on line 18
 
 -- Testing xml_set_object() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_set_object() expects exactly 2 parameters, 1 given in %s/xml_set_object_error.php on line 25
 Done

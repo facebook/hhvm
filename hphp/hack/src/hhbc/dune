@@ -1,0 +1,51 @@
+(library
+  (name hhbc)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (libraries
+    annotated_ast
+    ast
+    core_kernel
+    full_fidelity
+    lru
+    mutable_accumulator
+    options_ffi
+    utils_php_escape))
+
+(library
+  (name options_ffi)
+  (modules)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (wrapped false)
+  (self_build_stubs_archive (options_ffi))
+)
+(rule
+  (targets liboptions_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      options_ffi
+      options_ffi
+    )
+  )
+)
+
+(library
+  (name compile_ffi)
+  (modules)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (wrapped false)
+  (self_build_stubs_archive (compile_ffi))
+)
+(rule
+  (targets libcompile_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      compile_ffi
+      compile_ffi
+    )
+  )
+)

@@ -1,0 +1,104 @@
+[static] $cm ? VAR
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $oa        | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| $fa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| $ca        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $pa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| WRAPA($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($ca) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPO($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
++------------+------+------+------+------+------+------+------+
+
+[static] VAR ? $cm
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $oa        | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| $fa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| $ca        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $pa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| WRAPA($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($ca) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPO($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
++------------+------+------+------+------+------+------+------+
+
+[dynamic] $cm ? VAR
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $oa        | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| $fa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| $ca        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $pa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| WRAPA($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($ca) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPO($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
++------------+------+------+------+------+------+------+------+
+
+[dynamic] VAR ? $cm
++------------+------+------+------+------+------+------+------+
+| VAR        | <    | <=   | >    | >=   | ==   | ===  | <=>  |
++============+======+======+======+======+======+======+======+
+| $va        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $oa        | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| $fa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| $ca        | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| $pa        | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($va) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($oa) | F*   | T*   | F*   | T*   | T*   | F*   | 0  * |
+| WRAPA($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPA($ca) | F*   | T*   | F*   | T*   | T*   | T*   | 0  * |
+| WRAPA($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F*   | EXN  |
+| WRAPO($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPO($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPO($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($va) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($oa) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($fa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
+| WRAPD($ca) | F*   | T*   | F*   | T*   | T*   | F    | 0  * |
+| WRAPD($pa) | EXN  | EXN  | EXN  | EXN  | F*   | F    | EXN  |
++------------+------+------+------+------+------+------+------+
+

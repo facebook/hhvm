@@ -1,4 +1,9 @@
-array(3) {
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+darray(3) {
   [0]=>
   int(1)
   [1]=>

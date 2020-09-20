@@ -1,0 +1,8 @@
+File "t20893672.php", line 13, characters 29-41:
+Invalid argument (Typing[4110])
+File "t20893672.php", line 15, characters 40-45:
+This is a string
+File "t20893672.php", line 15, characters 40-45:
+Considering that this type argument is invariant with respect to Set
+File "t20893672.php", line 12, characters 27-28:
+It is incompatible with an int

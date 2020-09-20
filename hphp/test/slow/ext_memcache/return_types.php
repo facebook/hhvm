@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $key = 'TEST_KEY_RETURN_TYPES';
 
 $memcache = new Memcache;
@@ -11,7 +11,7 @@ $stdClass = new stdClass();
 $stdClass->prop1 = 1;
 $stdClass->prop2 = '2';
 
-$testValueList = array(
+$testValueList = varray[
   'Some string',
   '1234567',
   1234567,
@@ -24,7 +24,7 @@ $testValueList = array(
   $stdClass,
   'null',
   null
-);
+];
 
 foreach ($testValueList as $value) {
   $memcache->set($key, $value);
@@ -32,3 +32,4 @@ foreach ($testValueList as $value) {
 }
 
 $memcache->delete($key);
+}

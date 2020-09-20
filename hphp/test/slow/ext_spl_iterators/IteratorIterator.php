@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A implements IteratorAggregate {
   function getIterator() {
@@ -17,10 +17,14 @@ class C implements IteratorAggregate {
 }
 class D implements IteratorAggregate {
   function getIterator() {
-    return new ArrayObject(array(1,2,3));
+    return new ArrayIterator(varray[1,2,3]);
   }
 }
 
+
+<<__EntryPoint>>
+function main_iterator_iterator() {
 foreach (new IteratorIterator(new A) as $v) {
   var_dump($v);
+}
 }

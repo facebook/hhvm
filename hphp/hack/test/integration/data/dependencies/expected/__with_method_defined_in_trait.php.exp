@@ -1,0 +1,16 @@
+<?hh
+function with_method_defined_in_trait(IWibble $w, Wibble $_): void {
+  $w->f();
+}
+class Wibble implements \IWibble {
+  use \TWibble;
+}
+interface IWibble {
+  public function f(): void;
+}
+trait TWibble {
+  require implements \IWibble;
+  public function f(): void {
+    throw new \Exception();
+  }
+}

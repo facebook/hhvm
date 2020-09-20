@@ -16,21 +16,22 @@
 
 #include "hphp/compiler/option.h"
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/file_scope.h"
 
 #include "hphp/parser/scanner.h"
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/variable-unserializer.h"
 
+#include "hphp/util/file-cache.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -54,16 +55,8 @@ bool Option::CachePHPFile = false;
 
 std::vector<std::string> Option::ParseOnDemandDirs;
 
-std::map<std::string, std::string> Option::IncludeRoots;
-std::map<std::string, std::string> Option::AutoloadRoots;
 std::vector<std::string> Option::IncludeSearchPaths;
-hphp_string_imap<std::string> Option::ConstantFunctions;
 
-bool Option::GeneratePickledPHP = false;
-bool Option::GenerateInlinedPHP = false;
-bool Option::GenerateTrimmedPHP = false;
-std::string Option::ProgramPrologue;
-std::string Option::TrimmedPrologue;
 std::set<std::string> Option::VolatileClasses;
 std::map<std::string,std::string,stdltistr> Option::AutoloadClassMap;
 std::map<std::string,std::string,stdltistr> Option::AutoloadFuncMap;
@@ -72,13 +65,10 @@ std::string Option::AutoloadRoot;
 
 std::vector<std::string> Option::APCProfile;
 
-std::map<std::string, std::string> Option::FunctionSections;
-
 bool Option::GenerateTextHHBC = false;
 bool Option::GenerateHhasHHBC = false;
 bool Option::GenerateBinaryHHBC = false;
 std::string Option::RepoCentralPath;
-bool Option::RepoDebugInfo = false;
 
 std::string Option::IdPrefix = "$$";
 
@@ -91,28 +81,19 @@ bool Option::KeepStatementsWithNoEffect = false;
 
 std::string Option::ProgramName;
 
-bool Option::ParseTimeOpts = true;
-bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
-bool Option::EnableAspTags = false;
 int Option::ParserThreadCount = 0;
 
 int Option::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (EnableAspTags) type |= Scanner::AllowAspTags;
-  if (RuntimeOption::EnableXHP) type |= Scanner::AllowXHPSyntax;
-  if (RuntimeOption::EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 
-bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
 bool Option::RecordErrors = true;
 
 bool Option::AllVolatile = false;
-
-bool Option::GenerateDocComments = true;
 
 ///////////////////////////////////////////////////////////////////////////////
 // load from HDF file
@@ -130,8 +111,8 @@ void Option::LoadRootHdf(const IniSetting::Map& ini,
 }
 
 void Option::Load(const IniSetting::Map& ini, Hdf &config) {
-  LoadRootHdf(ini, config, "IncludeRoots", IncludeRoots);
-  LoadRootHdf(ini, config, "AutoloadRoots", AutoloadRoots);
+  LoadRootHdf(ini, config, "IncludeRoots", RuntimeOption::IncludeRoots);
+  LoadRootHdf(ini, config, "AutoloadRoots", RuntimeOption::AutoloadRoots);
 
   Config::Bind(PackageFiles, ini, config, "PackageFiles", PackageFiles);
   Config::Bind(IncludeSearchPaths, ini, config, "IncludeSearchPaths");
@@ -153,35 +134,30 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(LambdaPrefix, ini, config,
                "CodeGeneration.LambdaPrefix", LambdaPrefix);
 
-  Config::Bind(RuntimeOption::DynamicInvokeFunctions,
-               ini, config, "DynamicInvokeFunctions",
-               RuntimeOption::DynamicInvokeFunctions);
   Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
 
   Config::GetBool(ini, config, "FlattenTraits");
 
-  for (auto& str : Config::GetVector(ini, config, "ConstantFunctions")) {
+  for (auto& str : Config::GetStrVector(ini, config, "ConstantFunctions")) {
     std::string func;
     std::string value;
     if (folly::split('|', str, func, value)) {
-      ConstantFunctions[func] = value;
-    } else {
-      std::cerr << folly::format("Invalid ConstantFunction: '{}'\n", str);
+      VariableUnserializer uns{
+        value.data(), value.size(),
+        VariableUnserializer::Type::Internal,
+        false, empty_array()
+      };
+      try {
+        auto v = uns.unserialize();
+        v.setEvalScalar();
+        RuntimeOption::ConstantFunctions[func] = *v.asTypedValue();
+        continue;
+      } catch (const Exception& e) {
+        // fall through and log
+      }
     }
+    Logger::FError("Invalid ConstantFunction: '{}'\n", str);
   }
-
-  // build map from function names to sections
-  auto function_sections_callback = [&](const IniSetting::Map& ini_fs,
-                                        const Hdf& hdf_fs,
-                                        const std::string& ini_fs_key) {
-    auto function_callback = [&](const IniSetting::Map& ini_f, const Hdf& hdf_f,
-                                 const std::string& /*ini_f_key*/) {
-      FunctionSections[Config::GetString(ini_f, hdf_f, "", "", false)] =
-        hdf_fs.exists() && !hdf_fs.isEmpty() ? hdf_fs.getName() : ini_fs_key;
-    };
-    Config::Iterate(function_callback, ini_fs, hdf_fs, "", false);
-  };
-  Config::Iterate(function_sections_callback, ini, config, "FunctionSections");
 
   {
     // Repo
@@ -189,104 +165,96 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
       // Repo Central
       Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
     }
-    Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", false);
+    Config::Bind(RuntimeOption::RepoDebugInfo,
+                 ini, config, "Repo.DebugInfo",
+                 RuntimeOption::RepoDebugInfo);
   }
 
   {
     // AutoloadMap
-    Config::Bind(AutoloadClassMap, ini, config, "AutoloadMap.class");
-    Config::Bind(AutoloadFuncMap, ini, config, "AutoloadMap.function");
-    Config::Bind(AutoloadConstMap, ini, config, "AutoloadMap.constant");
-    Config::Bind(AutoloadRoot, ini, config, "AutoloadMap.root");
+    // not using Bind here because those maps are enormous and cause performance
+    // problems when showing up later
+    AutoloadClassMap = Config::GetMapC(ini, config, "AutoloadMap.class");
+    AutoloadFuncMap = Config::GetMapC(ini, config, "AutoloadMap.function");
+    AutoloadConstMap = Config::GetMap(ini, config, "AutoloadMap.constant");
+    AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
-  Config::Bind(RuntimeOption::EvalHardTypeHints, ini, config,
-               "HardTypeHints", RuntimeOption::EvalHardTypeHints);
-
-  static bool HardReturnTypeHints;
-  Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", true);
-
-  // This option takes precedence over RuntimeOption. We test to see if the
-  // option has been set (by the user) or not.
-  auto is_set = [&](const std::string& key) {
-    auto a = Config::GetBool(ini, config, key, true);
-    auto b = Config::GetBool(ini, config, key, false);
-    return a == b;
-  };
-
-  if (!is_set("CheckReturnTypeHints") || is_set("HardReturnTypeHints")) {
-    // Note that the actual value does not matter, since HHBBC only cares about
-    // whether the value is 3 or not.
-    RuntimeOption::EvalCheckReturnTypeHints = HardReturnTypeHints ? 3 : 2;
-  }
-
-  Config::Bind(HHBBC::options.HardConstProp, ini, config,
-               "HardConstProp", HHBBC::options.HardConstProp);
-  Config::Bind(HHBBC::options.ElideAutoloadInvokes, ini, config,
-               "ElideAutoloadInvokes", HHBBC::options.ElideAutoloadInvokes);
+ Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
+               "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
-
-  Config::Bind(RuntimeOption::EvalThisTypeHintLevel, ini, config,
-               "ThisTypeHintLevel", RuntimeOption::EvalThisTypeHintLevel);
 
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
                ini, config, "EnableHipHopSyntax",
                RuntimeOption::EnableHipHopSyntax);
-  Config::Bind(RuntimeOption::EvalPromoteEmptyObject,
-               ini, config, "PromoteEmptyObject",
-               RuntimeOption::EvalPromoteEmptyObject);
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);
-  Config::Bind(EnableHipHopExperimentalSyntax, ini,
-               config, "EnableHipHopExperimentalSyntax");
+  Config::Bind(RuntimeOption::EvalArrayProvenance,
+               ini, config, "ArrayProvenance",
+               RuntimeOption::EvalArrayProvenance);
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
-  Config::Bind(RuntimeOption::EvalHackArrCompatNotices,
-               ini, config, "HackArrCompatNotices",
-               RuntimeOption::EvalHackArrCompatNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatIsArrayNotices,
-               ini, config, "HackArrCompatIsArrayNotices",
-               RuntimeOption::EvalHackArrCompatIsArrayNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatPromoteNotices,
-               ini, config, "HackArrCompatPromoteNotices",
-               RuntimeOption::EvalHackArrCompatPromoteNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatTypeHintNotices,
-               ini, config, "HackArrCompatTypeHintNotices",
-               RuntimeOption::EvalHackArrCompatTypeHintNotices);
-  Config::Bind(RuntimeOption::EvalHackArrCompatDVCmpNotices,
-               ini, config, "HackArrCompatDVCmpNotices",
-               RuntimeOption::EvalHackArrCompatDVCmpNotices);
-  Config::Bind(RuntimeOption::EvalNoticeOnAllDynamicCalls,
-               ini, config, "NoticeOnAllDynamicCalls",
-               RuntimeOption::EvalNoticeOnAllDynamicCalls);
+
+#define BIND_HAC_OPTION(Name, Def)                      \
+  Config::Bind(RuntimeOption::EvalHackArrCompat##Name,  \
+               ini, config, "HackArrCompat" #Name,      \
+               RuntimeOption::EvalHackArrCompat##Def);
+
+#define BIND_HAC_OPTION_SELF(Name)  BIND_HAC_OPTION(Name, Name)
+
+  BIND_HAC_OPTION_SELF(Notices)
+  BIND_HAC_OPTION(CheckCompare, Notices)
+  BIND_HAC_OPTION_SELF(SerializeNotices)
+  BIND_HAC_OPTION_SELF(CompactSerializeNotices)
+
+#undef BIND_HAC_OPTION_SELF
+#undef BIND_HAC_OPTION
+
+  Config::Bind(RuntimeOption::EvalHackArrDVArrs,
+               ini, config, "HackArrDVArrs",
+               RuntimeOption::EvalHackArrDVArrs);
+
+  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToFunc,
+               ini, config, "ForbidDynamicCallsToFunc",
+               RuntimeOption::EvalForbidDynamicCallsToFunc);
+  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToClsMeth,
+               ini, config, "ForbidDynamicCallsToClsMeth",
+               RuntimeOption::EvalForbidDynamicCallsToClsMeth);
+  Config::Bind(RuntimeOption::EvalForbidDynamicCallsToInstMeth,
+               ini, config, "ForbidDynamicCallsToInstMeth",
+               RuntimeOption::EvalForbidDynamicCallsToInstMeth);
+  Config::Bind(RuntimeOption::EvalForbidDynamicConstructs,
+               ini, config, "ForbidDynamicConstructs",
+               RuntimeOption::EvalForbidDynamicConstructs);
+  Config::Bind(RuntimeOption::EvalForbidDynamicCallsWithAttr,
+               ini, config, "ForbidDynamicCallsWithAttr",
+               RuntimeOption::EvalForbidDynamicCallsWithAttr);
+  Config::Bind(RuntimeOption::EvalLogKnownMethodsAsDynamicCalls,
+               ini, config, "LogKnownMethodsAsDynamicCalls",
+               RuntimeOption::EvalLogKnownMethodsAsDynamicCalls);
   Config::Bind(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
                ini, config, "NoticeOnBuiltinDynamicCalls",
                RuntimeOption::EvalNoticeOnBuiltinDynamicCalls);
+  Config::Bind(RuntimeOption::EvalAbortBuildOnVerifyError,
+               ini, config, "AbortBuildOnVerifyError",
+               RuntimeOption::EvalAbortBuildOnVerifyError);
 
   {
     // Hack
-    Config::Bind(RuntimeOption::IntsOverflowToInts, ini, config,
-                 "Hack.Lang.IntsOverflowToInts",
-                 RuntimeOption::IntsOverflowToInts);
+    Config::Bind(RuntimeOption::CheckIntOverflow, ini, config,
+                 "Hack.Lang.CheckIntOverflow",
+                 RuntimeOption::CheckIntOverflow);
     Config::Bind(RuntimeOption::StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys",
                  RuntimeOption::StrictArrayFillKeys);
-    Config::Bind(RuntimeOption::DisallowDynamicVarEnvFuncs, ini, config,
-                 "Hack.Lang.DisallowDynamicVarEnvFuncs",
-                 RuntimeOption::DisallowDynamicVarEnvFuncs);
+    Config::Bind(RuntimeOption::EnableFirstClassFunctionPointers, ini, config,
+                 "Hack.Lang.EnableFirstClassFunctionPointers",
+                 RuntimeOption::EnableFirstClassFunctionPointers);
   }
-
-  Config::Bind(EnableAspTags, ini, config, "EnableAspTags");
 
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
                RuntimeOption::EnableXHP);
-
-  if (RuntimeOption::EnableHipHopSyntax) {
-    // If EnableHipHopSyntax is true, it forces EnableXHP to true
-    // regardless of how it was set in the config
-    RuntimeOption::EnableXHP = true;
-  }
 
   Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
@@ -299,8 +267,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(AllVolatile, ini, config, "AllVolatile");
 
-  Config::Bind(GenerateDocComments, ini, config, "GenerateDocComments", true);
-  Config::Bind(DumpAst, ini, config, "DumpAst", false);
+  Config::Bind(RuntimeOption::EvalGenerateDocComments, ini, config,
+               "GenerateDocComments", RuntimeOption::EvalGenerateDocComments);
   Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);
@@ -313,15 +281,6 @@ void Option::Load() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-std::string Option::GetAutoloadRoot(const std::string &name) {
-  for (auto const& pair : AutoloadRoots) {
-    if (name.substr(0, pair.first.length()) == pair.first) {
-      return pair.second;
-    }
-  }
-  return "";
-}
 
 std::string Option::MangleFilename(const std::string &name, bool id) {
   std::string ret = UserFilePrefix;

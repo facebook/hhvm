@@ -16,19 +16,23 @@
 
 #include "hphp/runtime/vm/async-flow-stepper.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
 
 TRACE_SET_MOD(debuggerflow);
 
+namespace {
 c_WaitableWaitHandle *objToWaitableWaitHandle(const Object& o) {
-  assert(o->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(o->instanceof(c_WaitableWaitHandle::classof()));
   return static_cast<c_WaitableWaitHandle*>(o.get());
+}
 }
 
 bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
@@ -44,12 +48,12 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
   ArrayIter iter(depStack);
   ++iter; // Skip the top frame.
   for (; iter; ++iter) {
-    auto const rval = iter.secondRval().unboxed();
-    if (isNullType(rval.type())) {
+    auto const tv = iter.secondVal();
+    if (isNullType(type(tv))) {
       return false;
     }
-    auto wh = objToWaitableWaitHandle(tvCastToObject(rval.tv()));
-    if (wh->getKind() == c_WaitHandle::Kind::AsyncFunction &&
+    auto const wh = objToWaitableWaitHandle(asCObjRef(&tv));
+    if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
       target == wh->asAsyncFunction()->actRec()) {
       return true;
     }
@@ -71,7 +75,7 @@ void AsyncFlowStepper::setup() {
 
   auto const pc = vmpc();
   SourceLoc source_loc;
-  if (!unit->getSourceLoc(unit->offsetOf(pc), source_loc)) {
+  if (!unit->getSourceLoc(func->offsetOf(pc), source_loc)) {
     TRACE(5, "Could not grab the current line number\n");
     return;
   }
@@ -113,7 +117,7 @@ AsyncStepHandleOpcodeResult AsyncFlowStepper::handleOpcode(PC pc) {
     {
       // Check if we are executing "await" instruction.
       if (m_awaitOpcodeBreakpointFilter.checkPC(pc)) {
-        auto wh = c_WaitHandle::fromCell(*vmsp());
+        auto wh = c_Awaitable::fromTV(*vmsp());
         // Is "await" blocked?
         if (wh && !wh->isFinished()) {
           handleBlockedAwaitOpcode(pc);
@@ -191,7 +195,7 @@ void AsyncFlowStepper::handleBlockedAwaitOpcode(PC pc) {
   TRACE(2, "AsyncFlowStepper: encountered blocking await\n");
   setResumeInternalBreakpoint(pc);
   auto fp = vmfp();
-  if (fp->resumed()) {
+  if (isResumed(fp)) {
     // Already in resumed execution mode.
     m_asyncResumableId = fp;
     m_stage = AsyncStepperStage::WaitResume;
@@ -208,7 +212,7 @@ void AsyncFlowStepper::handleBlockedAwaitOpcode(PC pc) {
 // This is required because async frame ActRec's address
 // is used for m_asyncResumableId.
 void AsyncFlowStepper::stepOverAwaitOpcode() {
-  assert(vmfp()->func()->isAsyncFunction());
+  assertx(vmfp()->func()->isAsyncFunction());
   m_stage = AsyncStepperStage::StepOverAwait;
 
   // Request interrupt opcode callback after "await" instruction
@@ -227,15 +231,14 @@ void AsyncFlowStepper::captureResumeIdAfterAwait() {
 // Set guard internal breakpoint at async operation
 // resume point to continue stepping.
 void AsyncFlowStepper::setResumeInternalBreakpoint(PC pc) {
-  assert(decode_op(pc) == Op::Await);
+  assertx(decode_op(pc) == Op::Await);
 
   auto resumeInstPc = pc + instrLen(pc);
-  assert(vmfp()->func()->unit()->offsetOf(resumeInstPc)
-    != InvalidAbsoluteOffset);
+  assertx(vmfp()->func()->offsetOf(resumeInstPc) != kInvalidOffset);
 
   TRACE(2, "Setup internal breakpoint after await at '%s' offset %d\n",
     vmfp()->func()->fullName()->data(),
-    vmfp()->func()->unit()->offsetOf(resumeInstPc));
+    vmfp()->func()->offsetOf(resumeInstPc));
   m_resumeBreakpointFilter.addPC(resumeInstPc);
 
   auto bpFilter = getBreakPointFilter();
@@ -252,8 +255,8 @@ bool AsyncFlowStepper::didResumeBreakpointTrigger(PC pc) {
 }
 
 const ActRec* AsyncFlowStepper::getAsyncResumableId(const ActRec* fp) {
-  assert(fp->resumed());
-  assert(fp->func()->isResumable());
+  assertx(isResumed(fp));
+  assertx(fp->func()->isResumable());
   return fp;
 }
 

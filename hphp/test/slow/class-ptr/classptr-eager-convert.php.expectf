@@ -1,0 +1,124 @@
+===keyset:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 44
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 45
+keyset(2) {
+  string(3) "Foo"
+  string(3) "Bar"
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 47
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 48
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 49
+string(3) "Foo"
+===dict:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 10
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 11
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 17
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 18
+bool(true)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 19
+int(42)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 20
+bool(true)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 21
+int(10)
+===Set===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 54
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 55
+object(HH\Set) (2) {
+  class(Foo)
+  string(3) "Bar"
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 57
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 58
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 59
+class(Foo)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 60
+class(Foo)
+===Map:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 26
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 27
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 28
+int(42)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 29
+bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 30
+int(42)
+===vec:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 65
+vec(3) {
+  class(Foo)
+  string(4) "Fizz"
+  class(Baz)
+}
+class(Foo)
+string(4) "Fizz"
+class(Baz)
+===Vector:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 36
+object(HH\Vector) (3) {
+  [0]=>
+  class(Baz)
+  [1]=>
+  string(4) "Fizz"
+  [2]=>
+  class(Foo)
+}
+===dvarray:===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 77
+varray(2) {
+  class(Baz)
+  string(4) "Fizz"
+}
+varray(2) {
+  int(0)
+  int(1)
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 80
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 81
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 81
+varray(2) {
+  string(3) "Foo"
+  string(3) "Baz"
+}
+===shape===
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 87
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 88
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 90
+darray(3) {
+  ["Foo"]=>
+  int(3)
+  ["Bar"]=>
+  int(2)
+  ["Fizz"]=>
+  int(4)
+}
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 92
+int(3)

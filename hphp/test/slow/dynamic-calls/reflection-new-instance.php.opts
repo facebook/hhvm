@@ -1,0 +1,3 @@
+-vEval.ForbidDynamicCallsToFunc=1
+-vEval.ForbidDynamicConstructs=1
+-vEval.ForbidDynamicCallsWithAttr=1

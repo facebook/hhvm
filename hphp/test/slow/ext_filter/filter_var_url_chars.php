@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_filter_var_url_chars() {
 $out = '';
 foreach (range(0, 255) as $n)
 {
@@ -7,3 +10,4 @@ foreach (range(0, 255) as $n)
     $out .= intval(false !== filter_var($url, FILTER_VALIDATE_URL));
 }
 echo wordwrap($out, 32, "\n", true), "\n";
+}

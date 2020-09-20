@@ -12,11 +12,11 @@ abstract class AC4 extends AC3 { }
 
 class C1 extends AC4 { }
 
-function array_some(array $array) {
+function array_some(darray $array) {
   foreach ($array as $value) {
     if ($value) {
       echo "Empty: ";
-      echo empty($value);
+      echo !($value ?? false);
       echo "\nBool: ";
       echo $value ? "true" : "false";
       echo "\n";
@@ -24,9 +24,9 @@ function array_some(array $array) {
   }
   return "Done";
 }
-
+<<__EntryPoint>> function main(): void {
 $a = new C1;
 
-var_dump( array_some(array_map(function($v) { return $v instanceof Interf2; },
-                     array($a))) );
-
+var_dump( array_some(array_map(function($v) { return $v is Interf2; },
+                     varray[$a])) );
+}

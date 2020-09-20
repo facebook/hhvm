@@ -1,17 +1,19 @@
-string(8) "foo<>bar"
-string(14) "foo&lt;&gt;bar"
-string(0) ""
-string(0) ""
+string(%d) "foo<>bar"
+string(%d) "foo&lt;&gt;bar"
+string(%d) ""
+string(%d) ""
 NULL
-string(0) ""
-array(1) {
+
+Warning: htmlspecialchars() expects parameter 1 to be string, null given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
+darray(1) {
   ["str"]=>
-  string(3) "aaa"
+  string(%d) "aaa"
 }
 
-Warning: htmlspecialchars() expects parameter 1 to be string, array given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 17
-NULL
+Warning: htmlspecialchars() expects parameter 1 to be string, %rd?%rarray given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 int(42)
-string(2) "42"
+
+Warning: htmlspecialchars() expects parameter 1 to be string, integer given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 float(1.234)
-string(5) "1.234"
+
+Warning: htmlspecialchars() expects parameter 1 to be string, double given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20

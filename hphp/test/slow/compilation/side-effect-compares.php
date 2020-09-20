@@ -60,8 +60,8 @@ function test_cls2() {
 }
 
 function test_arr() {
-  $x1 = [1, new Cls1(), 3];
-  $x2 = [1, "bye", 3];
+  $x1 = varray[1, new Cls1(), 3];
+  $x2 = varray[1, "bye", 3];
 
   // <= and >= can evaluate the operands an indeterminate number of times
   // depending on the mode.
@@ -83,6 +83,10 @@ function test_arr() {
   $x2 <=> $x1;
 }
 
+
+<<__EntryPoint>>
+function main_side_effect_compares() {
 test_cls1();
 test_cls2();
 test_arr();
+}

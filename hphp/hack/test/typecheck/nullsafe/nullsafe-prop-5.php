@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C {
   public int $x = 123;

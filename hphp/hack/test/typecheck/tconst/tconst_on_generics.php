@@ -8,7 +8,7 @@ abstract class Box {
 class IntBox extends Box {
   const type T = int;
   public function getK() : this::T {
-    // UNSAFE
+    return 4;
   }
   public function setK(this::T $x) : void {}
 
@@ -30,12 +30,12 @@ class Test {
     return $x->getK();
   }
 
-  public static function set<T1 as Box, T2>(T1 $x, T2 $y) : void  where T2 = T1::T {
+  public static function set<T1 as Box, T2>(T1 $x, T2 $y) : void where T2 = T1::T {
     $x->setK($y);
   }
 
   public static function swap<T1 as Box, T2 as Box>(T1 $x, T2 $y) : void where T1::T=T2::T {
-  $z = $y->getK();
+    $z = $y->getK();
   }
 }
 

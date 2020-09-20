@@ -1,1 +1,0 @@
-Fatal error: Method X::__call() cannot take a variadic argument in %s/slow/variadic_args/magic_call.php on line 4

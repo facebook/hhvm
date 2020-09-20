@@ -1,1 +1,3 @@
---no-fallback-in-namespaces
+--max-errors 1
+--allowed-fixme-codes-strict 4016,4045,4135
+--allowed-decl-fixme-codes 4045

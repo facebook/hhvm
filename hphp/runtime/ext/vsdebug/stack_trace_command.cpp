@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/tv-variant.h"
 
+#include <boost/filesystem.hpp>
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -39,6 +41,10 @@ bool StackTraceCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   const request_id_t requestId = m_debugger->getCurrentThreadId();
   const folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
@@ -58,12 +64,15 @@ bool StackTraceCommand::executeImpl(
 
   int startFrame = tryGetInt(args, "startFrame", 0);
   int levels = tryGetInt(args, "levels", INT_MAX);
+  if (levels == 0) {
+    // Per protocol: if levels is 0, all frames should be returned.
+    levels = INT_MAX;
+  }
   int levelsAdded = 0;
 
   // Respond with a stack trace!
   auto backtraceArgs = BacktraceArgs()
                         .withSelf()
-                        .withPseudoMain()
                         .setParserFrame(nullptr);
 
   const Array backtrace = createBacktrace(backtraceArgs);
@@ -79,10 +88,10 @@ bool StackTraceCommand::executeImpl(
       break;
     }
 
-    auto const parentFrame = backtrace.rvalAt(depth + 1).unboxed();
+    auto const parentFrame = backtrace.lookup(depth + 1);
     auto const funcName =
-      tvCastToString(parentFrame.val().parr->get(s_function).tv()).data();
-    auto const frame = backtrace.rvalAt(depth).unboxed();
+      tvCastToString(parentFrame.val().parr->get(s_function)).data();
+    auto const frame = backtrace.lookup(depth);
     const auto file = frame.val().parr->get(s_file);
     const auto line = frame.val().parr->get(s_line);
 
@@ -91,26 +100,21 @@ bool StackTraceCommand::executeImpl(
     stackFrame["id"] = session->generateFrameId(requestId, depth);
     stackFrame["name"] = funcName;
 
-    int64_t lineNumber = tvCastToInt64(line.tv());
+    int64_t lineNumber = tvCastToInt64(line);
     if (!prefs.linesStartAt1) {
       lineNumber--;
     }
 
     stackFrame["line"] = lineNumber;
-    stackFrame["column"] = 0;
-    stackFrame["source"] = folly::dynamic::object;
+    stackFrame["column"] = prefs.columnsStartAt1 ? 1 : 0;
 
-    folly::dynamic& source = stackFrame["source"];
-    std::string fileName = tvCastToString(file.tv()).toCppString();
-
-    if (fileName.empty()) {
-      // Some routines like builtins and native extensions do not have
-      // a PHP file path in their frame's file name field.
-      fileName = std::string("<unknown>");
+    std::string fileName = tvCastToString(file).toCppString();
+    if (!fileName.empty()) {
+      stackFrame["source"] = folly::dynamic::object;
+      folly::dynamic& source = stackFrame["source"];
+      source["name"] = boost::filesystem::basename(fileName);
+      source["path"] = fileName;
     }
-
-    source["name"] = fileName;
-    source["path"] = fileName;
 
     levelsAdded++;
   }

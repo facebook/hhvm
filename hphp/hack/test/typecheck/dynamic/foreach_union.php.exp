@@ -1,0 +1,12 @@
+File "foreach_union.php", line 12, characters 20-21:
+Invalid argument (Typing[4110])
+File "foreach_union.php", line 5, characters 25-32:
+Expected `vec<int>`
+File "foreach_union.php", line 7, characters 20-26:
+But got `dynamic`
+File "foreach_union.php", line 20, characters 12-13:
+Invalid `foreach` (Typing[4110])
+File "foreach_union.php", line 20, characters 12-13:
+Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
+File "foreach_union.php", line 16, characters 33-33:
+But got `C`

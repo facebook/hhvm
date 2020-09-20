@@ -1,4 +1,4 @@
-object(X)#2 (3) {
+object(X) (3) {
   ["str":"X":private]=>
   NULL
   ["arr":"X":private]=>

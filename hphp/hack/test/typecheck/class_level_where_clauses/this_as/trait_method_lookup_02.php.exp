@@ -1,0 +1,18 @@
+File "trait_method_lookup_02.php", line 29, characters 16-16:
+Class `D` does not correctly implement all required members  (Typing[4340])
+File "trait_method_lookup_02.php", line 29, characters 26-26:
+Some members are incompatible with those declared in type `C`
+File "trait_method_lookup_02.php", line 18, characters 26-28:
+The method `foo` has the wrong type
+File "trait_method_lookup_02.php", line 29, characters 16-16:
+Class `D` does not correctly implement all required members 
+File "trait_method_lookup_02.php", line 29, characters 26-26:
+Some members are incompatible with those declared in type `C`
+File "trait_method_lookup_02.php", line 18, characters 26-28:
+The method `foo` has the wrong type
+File "trait_method_lookup_02.php", line 14, characters 42-44:
+Expected `num`
+File "trait_method_lookup_02.php", line 18, characters 33-37:
+But got `mixed`
+File "trait_method_lookup_02.php", line 18, characters 26-28:
+This declaration was inherited from an object of type `T`. Redeclare this member in `D` with a compatible signature.

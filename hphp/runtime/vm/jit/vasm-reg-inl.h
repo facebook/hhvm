@@ -93,6 +93,13 @@ inline Vptr Vreg::operator+(intptr_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
 }
 
+inline Vptr Vreg::operator-(int32_t d) const {
+  return Vptr(*this, safe_cast<int32_t>(-static_cast<int64_t>(d)));
+}
+inline Vptr Vreg::operator-(intptr_t d) const {
+  return Vptr(*this, safe_cast<int32_t>(-d));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vr casting.
 
@@ -180,21 +187,28 @@ inline VscaledDisp operator+(Vscaled vs, int32_t disp) {
   return {vs, disp};
 }
 
+inline VscaledDisp operator+(VscaledDisp vsd, int32_t disp) {
+  return {vsd.vs, vsd.disp + disp};
+}
+
+inline VscaledDisp operator-(Vscaled vs, int32_t disp) {
+  return {vs, -disp};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vptr.
 
 inline MemoryRef Vptr::mr() const {
   if (index.isValid()) {
-    return base.isValid() ? r64(base)[r64(index) * scale + disp] :
-           *(IndexedDispReg{r64(index) * scale + disp});
+    return base.isValid() ? SegReg(seg)[r64(base) + r64(index) * scale + disp] :
+           SegReg(seg)[r64(index) * scale + disp];
   } else {
-    return base.isValid() ? r64(base)[disp] :
-           *(DispReg{disp});
+    return base.isValid() ? SegReg(seg)[r64(base) + disp] :
+           SegReg(seg)[disp];
   }
 }
 
 inline Vptr::operator MemoryRef() const {
-  assertx(seg == DS);
   return mr();
 }
 

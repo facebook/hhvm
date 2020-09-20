@@ -1,21 +1,21 @@
-<?php
+<?hh
 
 class X {
   public $bar = 5;
-  function &foo() {
- static $v;
- if (!$v) $v = $this;
- return $v;
- }
+
+  private static $fooV;
+  function foo() {
+    if (!self::$fooV) self::$fooV = $this;
+    return self::$fooV;
+  }
 }
-function &foo() {
-  static $v;
-  if (!$v) $v = new X;
-  return $v;
+
+abstract final class FooStatics {
+  public static $v;
 }
-function &bar() {
-  static $v;
-  return $v;
+function foo() {
+  if (!FooStatics::$v) FooStatics::$v = new X;
+  return FooStatics::$v;
 }
 function test() {
   $x = new X;
@@ -29,11 +29,9 @@ function test() {
   var_dump(foo()->bar);
   foo()->bar = 8;
   var_dump(foo()->bar);
-  bar()->bar = 6;
-  var_dump(bar()->bar);
-  bar()->bar = 7;
-  var_dump(bar()->bar);
-  bar()->bar = 8;
-  var_dump(bar()->bar);
 }
+
+<<__EntryPoint>>
+function main_719() {
 test();
+}

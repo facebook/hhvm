@@ -28,7 +28,10 @@ TRACE_SET_MOD(hhir);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IRUnit::IRUnit(TransContext context) : m_context(context)
+IRUnit::IRUnit(TransContext context,
+               std::unique_ptr<AnnotationData> annotationData)
+  : annotationData(std::move(annotationData))
+  , m_context(context)
 {
   // Setup m_entry after property initialization, since it depends on
   // the value of m_defHint.
@@ -45,7 +48,8 @@ void IRUnit::initLogEntry(const Func* func) {
   }
 }
 
-IRInstruction* IRUnit::defLabel(unsigned numDst, BCContext bcctx) {
+IRInstruction* IRUnit::defLabel(unsigned numDst, Block* b,
+                                const BCContext& bcctx) {
   IRInstruction inst(DefLabel, bcctx);
   auto const label = clone(&inst);
   if (numDst > 0) {
@@ -55,6 +59,7 @@ IRInstruction* IRUnit::defLabel(unsigned numDst, BCContext bcctx) {
     }
     label->setDsts(numDst, dstsPtr);
   }
+  b->prepend(label);
   return label;
 }
 
@@ -109,8 +114,8 @@ SSATmp* IRUnit::cns(Type type) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true iff `block' ends the IR unit after finishing execution
- * of the bytecode instruction at `sk'.
+ * Returns true iff `block' ends the IR unit after successfully finishing
+ * execution of the bytecode instruction at `sk', without throwing an exception.
  */
 static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
   if (!block->isExitNoThrow()) return false;
@@ -124,17 +129,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case InterpOneCF:
     case JmpSSwitchDest:
     case JmpSwitchDest:
-    case RaiseError:
-    case ThrowOutOfBounds:
-    case ThrowInvalidArrayKey:
-    case ThrowInvalidOperation:
-    case ThrowArithmeticError:
-    case ThrowDivisionByZeroError:
-    case VerifyParamFailHard:
-    case VerifyRetFailHard:
     case Unreachable:
     case EndBlock:
-    case FatalMissingThis:
       return instSk == sk;
 
     // The RetCtrl is generally ending a bytecode instruction, with the
@@ -142,11 +138,12 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // end of the bytecode instruction to be the non-suspending path.
     case RetCtrl: {
       auto const op = inst.marker().sk().op();
-      return op != Op::Await && op != Op::AwaitAll && op != Op::FCallAwait;
+      return op != Op::Await && op != Op::AwaitAll;
     }
 
     case AsyncFuncRet:
     case AsyncFuncRetSlow:
+    case EnterTCUnwind:
       return true;
 
     // A ReqBindJmp ends a unit and it jumps to the next instruction to
@@ -161,42 +158,29 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
   }
 }
 
-Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
-  bool unreachable = false;
-  Block* mainExit = nullptr;
+jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk) {
+  jit::vector<Block*> mainExits;
 
-  FTRACE(5, "findMainExitBlock: looking for exit at {} in unit:\n{}\n",
+  FTRACE(5, "findMainExitBlocks: looking for exit at {} in unit:\n{}\n",
          showShort(lastSk), show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
-    if (block->back().is(Unreachable)) unreachable = true;
-
-    if (endsUnitAtSrcKey(block, lastSk)) {
-      if (mainExit == nullptr) {
-        mainExit = block;
-        continue;
-      }
-
-      always_assert_flog(
-        mainExit->hint() == Block::Hint::Unlikely ||
-        block->hint() == Block::Hint::Unlikely,
-        "findMainExit: 2 likely exits found: B{} and B{}\nlastSk = {}",
-        mainExit->id(), block->id(), showShort(lastSk)
-      );
-
-      if (mainExit->hint() == Block::Hint::Unlikely) mainExit = block;
+    if (block->hint() != Block::Hint::Unused &&
+        endsUnitAtSrcKey(block, lastSk)) {
+      mainExits.push_back(block);
     }
   }
 
-  always_assert_flog(
-    mainExit || unreachable,
-    "findMainExit: no exit found for lastSk = {}",
-    showShort(lastSk)
-  );
+  FTRACE(5, "findMainExitBlocks: mainExits = {}\n",
+         [&]{
+           std::string ret;
+           for (auto& me : mainExits) {
+             folly::format(&ret, "B{}, ", me->id());
+           }
+           return ret;
+         }());
 
-  FTRACE(5, "findMainExitBlock: mainExit = B{}\n", mainExit->id());
-
-  return mainExit;
+  return mainExits;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

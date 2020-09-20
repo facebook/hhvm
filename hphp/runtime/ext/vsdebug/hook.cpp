@@ -16,6 +16,9 @@
 
 #include "hphp/runtime/ext/vsdebug/hook.h"
 
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+
 namespace HPHP {
 namespace VSDEBUG {
 
@@ -33,7 +36,7 @@ struct BreakContext {
   }
 
   Debugger* m_debugger;
-  RequestInfo* m_requestInfo;
+  DebuggerRequestInfo* m_requestInfo;
 
   // If true, tryEnterDebugger should try to break only when a step operation
   // is not in progress, otherwise it should always ask the debugger if we
@@ -45,19 +48,29 @@ void VSDebugHook::onRequestInit() {
   BreakContext breakContext(false);
 }
 
-void VSDebugHook::onRequestShutdown() {
-}
-
-void VSDebugHook::onOpcode(PC pc) {
+void VSDebugHook::onOpcode(PC /*pc*/) {
   RID().setDebuggerIntr(false);
   BreakContext breakContext(true);
 }
 
 void VSDebugHook::onFuncEntryBreak(const Func* func) {
-  // TODO: (Ericblue) NOT IMPLEMENTED
+  BreakContext breakContext(true);
+
+  if (breakContext.m_debugger != nullptr &&
+      breakContext.m_requestInfo != nullptr) {
+
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
+
+    breakContext.m_debugger->onFuncBreakpointHit(
+      breakContext.m_requestInfo,
+      func
+    );
+  }
 }
 
-void VSDebugHook::onFuncExitBreak(const Func* func) {
+void VSDebugHook::onFuncExitBreak(const Func* /*func*/) {
   // TODO: (Ericblue) NOT IMPLEMENTED
 }
 
@@ -66,6 +79,10 @@ void VSDebugHook::onLineBreak(const Unit* unit, int line) {
 
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
+
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
 
     breakContext.m_debugger->onLineBreakpointHit(
       breakContext.m_requestInfo,
@@ -84,6 +101,10 @@ void VSDebugHook::onExceptionThrown(ObjectData* exception) {
 
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
+
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
 
     breakContext.m_debugger->onExceptionBreakpointHit(
       breakContext.m_requestInfo,
@@ -105,6 +126,10 @@ void VSDebugHook::onError(
   if (breakContext.m_debugger != nullptr &&
       breakContext.m_requestInfo != nullptr) {
 
+    if (breakContext.m_requestInfo->m_flags.doNotBreak) {
+      return;
+    }
+
     breakContext.m_debugger->onError(
       breakContext.m_requestInfo,
       extendedException,
@@ -114,15 +139,15 @@ void VSDebugHook::onError(
   }
 }
 
-void VSDebugHook::onStepInBreak(const Unit* unit, int line) {
+void VSDebugHook::onStepInBreak(const Unit* /*unit*/, int /*line*/) {
   BreakContext breakContext(false);
 }
 
-void VSDebugHook::onStepOutBreak(const Unit* unit, int line) {
+void VSDebugHook::onStepOutBreak(const Unit* /*unit*/, int /*line*/) {
   BreakContext breakContext(false);
 }
 
-void VSDebugHook::onNextBreak(const Unit* unit, int line) {
+void VSDebugHook::onNextBreak(const Unit* /*unit*/, int /*line*/) {
   BreakContext breakContext(true);
 
   if (breakContext.m_debugger == nullptr ||
@@ -174,38 +199,127 @@ void VSDebugHook::onNextBreak(const Unit* unit, int line) {
 }
 
 void VSDebugHook::onFileLoad(Unit* efile) {
-  BreakContext breakContext(true);
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return;
+  }
+
+  DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    return;
+  }
 
   // Resolve any unresolved breakpoints that may be in this compilation unit.
-  if (breakContext.m_debugger != nullptr &&
-      breakContext.m_requestInfo != nullptr) {
+  debugger->onCompilationUnitLoaded(
+    requestInfo,
+    efile
+  );
 
-    breakContext.m_debugger->onCompilationUnitLoaded(
-      breakContext.m_requestInfo,
-      efile
-    );
-
-    tryEnterDebugger(
-      breakContext.m_debugger,
-      breakContext.m_requestInfo,
-      true
-    );
+  if (requestInfo->m_flags.unresolvedBps) {
+    debugger->tryInstallBreakpoints(requestInfo);
   }
 }
 
 void VSDebugHook::onDefClass(const Class* cls) {
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return;
+  }
+
+  DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    return;
+  }
+
+
+  // Resolve any breakpoints that are set on functions in this class.
+  // Acquire semantics around reading requestInfo->m_flags lock-free.
+  std::atomic_thread_fence(std::memory_order_acquire);
+
+  if (requestInfo->m_flags.unresolvedBps) {
+    size_t methodCount = cls->numMethods();
+    for (unsigned int i = 0; i < methodCount; i++) {
+      auto func = cls->getMethod(i);
+      const std::string functionName(func->fullName()->data());
+      debugger->onFunctionDefined(
+        requestInfo,
+        func,
+        functionName
+      );
+    }
+    debugger->tryInstallBreakpoints(requestInfo);
+  }
+}
+
+void VSDebugHook::onRegisterFuncIntercept(const String& name) {
+  BreakContext breakContext(true);
+
+  // This callback is invoked when a function is intercepted in HHVM.
+  // Intercepts are used by things like mocking and testing frameworks
+  // and some autoload infrastructure.  The debugger is interested in
+  // this so that we can warn the user if a breakpoint is in a function that's
+  // been detoured.
+
+  if (breakContext.m_debugger != nullptr) {
+    breakContext.m_debugger->onFuncIntercepted(
+      name.toCppString()
+    );
+  }
 }
 
 void VSDebugHook::onDefFunc(const Func* func) {
-  // TODO: (Ericblue) This routine is not needed unless we add support for
-  // function entry breakpoints.
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return;
+  }
+
+  DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    return;
+  }
+
+  // Resolve any breakpoints that are set on entry of this function.
+
+  // Acquire semantics around reading requestInfo->m_flags lock-free.
+  std::atomic_thread_fence(std::memory_order_acquire);
+
+  if (requestInfo->m_flags.unresolvedBps) {
+    std::string funcName(func->fullName()->data());
+    debugger->onFunctionDefined(
+      requestInfo,
+      func,
+      funcName
+    );
+  }
+  debugger->tryInstallBreakpoints(requestInfo);
 }
 
 void VSDebugHook::tryEnterDebugger(
   Debugger* debugger,
-  RequestInfo* requestInfo,
+  DebuggerRequestInfo* requestInfo,
   bool breakNoStepOnly
 ) {
+  // Acquire semantics around reading requestInfo->m_flags lock-free.
+  std::atomic_thread_fence(std::memory_order_acquire);
+
+  if (requestInfo->m_flags.terminateRequest) {
+    std::string message = "Request " +
+      std::to_string(debugger->getCurrentThreadId()) +
+      " terminating at debugger client's request.";
+    debugger->sendUserMessage(
+      message.c_str(),
+      DebugTransport::OutputLevelLog
+    );
+
+    raise_fatal_error(
+      "Request terminated by debugger client.",
+      null_array,
+      false,
+      true,
+      true
+    );
+  }
+
   if (requestInfo->m_flags.doNotBreak) {
     return;
   }
@@ -215,6 +329,11 @@ void VSDebugHook::tryEnterDebugger(
   if (!requestInfo->m_flags.memoryLimitRemoved) {
     IniSetting::SetUser(s_memoryLimit, std::numeric_limits<int64_t>::max());
     requestInfo->m_flags.memoryLimitRemoved = true;
+  }
+
+  if (!requestInfo->m_flags.requestUrlInitialized) {
+    requestInfo->m_requestUrl = g_context->getRequestUrl();
+    requestInfo->m_flags.requestUrlInitialized = true;
   }
 
   // Check if we need to update the hook stdout and stderr for the request
@@ -227,19 +346,23 @@ void VSDebugHook::tryEnterDebugger(
     // the wrapper has the actual stdout and stderr pipes to use directly,
     // except for the case where we attached to an already-running script,
     // which behaves like server mode.
-    bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0;
+    bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0 ||
+      (!RuntimeOption::ServerExecutionMode() &&
+       !RuntimeOption::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
-      if (!g_context.isNull()) {
-        g_context->setStdout(debugger->getStdoutHook());
-      }
+      if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {
+        if (!g_context.isNull()) {
+          g_context->addStdoutHook(debugger->getStdoutHook());
+        }
 
-      if (scriptAttachMode || debugger->isDummyRequest()) {
-        // Attach to stderr in server mode only for the dummy thread (to show
-        // any error spew from evals, etc) or in script attach mode.
-        // Attaching to all requests in server mode produces way too much error
-        // spew for the client. Users see stderr output for the webserver via
-        // web server logs.
-        Logger::SetThreadHook(debugger->getStderrHook());
+        if (scriptAttachMode || debugger->isDummyRequest()) {
+          // Attach to stderr in server mode only for the dummy thread (to show
+          // any error spew from evals, etc) or in script attach mode.
+          // Attaching to all requests in server mode produces way too much error
+          // spew for the client. Users see stderr output for the webserver via
+          // web server logs.
+          Logger::SetThreadHook(debugger->getStderrHook());
+        }
       }
     }
   }
@@ -249,7 +372,9 @@ void VSDebugHook::tryEnterDebugger(
   }
 
   // Install any breakpoints that have not yet been set on this request.
-  debugger->tryInstallBreakpoints(requestInfo);
+  if (requestInfo->m_flags.unresolvedBps) {
+    debugger->tryInstallBreakpoints(requestInfo);
+  }
 }
 
 const StaticString VSDebugHook::s_memoryLimit {"memory_limit"};

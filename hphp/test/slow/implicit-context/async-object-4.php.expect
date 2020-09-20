@@ -1,0 +1,5 @@
+in f should be C got C
+in g should be D got D
+before await in f should be C got C
+resumed g should be D got D
+done with f should be C got C

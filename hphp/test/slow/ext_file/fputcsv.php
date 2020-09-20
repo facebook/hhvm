@@ -1,8 +1,11 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_fputcsv() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
-$fields = array('apple', "\"banana\"");
+$fields = varray['apple', "\"banana\""];
 $f = fopen($tempfile, 'w');
 // #2511892: have to specify all fields due to a bug
 fputcsv($f, $fields, ',', '"');
@@ -17,3 +20,4 @@ $vals = fgetcsv($f, 0, ',', '"', '\\'); // #2511892
 var_dump($vals);
 
 unlink($tempfile);
+}

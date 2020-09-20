@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // All constructors should be registered as such
 
@@ -9,20 +9,11 @@ trait TConstructor {
 }
 
 class NewConstructor {
-	use TConstructor {
-	    constructor as __construct;
-	}
-}
-
-class LegacyConstructor {
     use TConstructor {
-        constructor as LegacyConstructor;
+        constructor as __construct;
     }
 }
-
+<<__EntryPoint>> function main(): void {
 echo "New constructor: ";
 $o = new NewConstructor;
-
-echo "Legacy constructor: ";
-$o = new LegacyConstructor;
-
+}

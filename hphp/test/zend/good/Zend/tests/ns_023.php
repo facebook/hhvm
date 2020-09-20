@@ -1,4 +1,5 @@
-<?php
+<?hh
 namespace test\foo;
-
-var_dump(__NAMESPACE__);
+<<__EntryPoint>> function main(): void {
+\var_dump(__NAMESPACE__);
+}

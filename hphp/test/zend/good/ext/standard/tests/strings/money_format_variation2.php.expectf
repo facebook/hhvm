@@ -1,16 +1,22 @@
 *** Testing money_format() function: with unexpected inputs for 'number' argument ***
 -- Iteration 1 --
-string
+
+Warning: money_format() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 2 --
-string
+
+Warning: money_format() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 3 --
-string
+
+Warning: money_format() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 4 --
-string
+
+Warning: money_format() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 5 --
-string
+
+Warning: money_format() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 6 --
-string
+
+Warning: money_format() expects parameter 2 to be double, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 7 --
 string
 -- Iteration 8 --
@@ -19,56 +25,56 @@ string
 string
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 13 --
-string
+
+Warning: money_format() expects parameter 2 to be double, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 14 --
-string
+
+Warning: money_format() expects parameter 2 to be double, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 15 --
-string
+
+Warning: money_format() expects parameter 2 to be double, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 16 --
-string
+
+Warning: money_format() expects parameter 2 to be double, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 17 --
-string
+
+Warning: money_format() expects parameter 2 to be double, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 18 --
-string
+
+Warning: money_format() expects parameter 2 to be double, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, string given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, string given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 21 --
-string
+
+Warning: money_format() expects parameter 2 to be double, string given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, string given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, object given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, object given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 25 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 2 to be double, resource given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 26 --
-string
+
+Warning: money_format() expects parameter 2 to be double, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 27 --
-string
+
+Warning: money_format() expects parameter 2 to be double, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 ===Done===

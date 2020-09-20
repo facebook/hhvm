@@ -2,12 +2,6 @@
 
 class c {
   public $prop = 'old value';
-  public function __get($n) {
-    return "You asked for property $n";
-  }
-  public function __set($n, $v) {
-    echo "Pretending to set $n to $v\n";
-  }
 }
 
 function propget($o, $p) {
@@ -18,7 +12,7 @@ function propset($o, $p, $v) {
   $o->$p = $v;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new c();
   var_dump(propget($c, 'prop'));
   propset($c, 'prop', 'new value');
@@ -27,4 +21,3 @@ function main() {
   var_dump(propget($c, 'fakeprop'));
   propset($c, 'fakeprop2', 'blah');
 }
-main();

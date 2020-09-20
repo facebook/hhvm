@@ -2,131 +2,131 @@
 
 --int 0--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --int 1--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --int 12345--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --int -12345--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --float 10.5--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --float -10.5--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --float 12.3456789000e10--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --float -12.3456789000e10--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --float .5--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --uppercase NULL--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --lowercase null--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --lowercase true--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --lowercase false--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --uppercase TRUE--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --uppercase FALSE--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --empty string DQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --empty string SQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --string DQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --string SQ--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --mixed case string--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --heredoc--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --undefined var--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --unset var--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 
 --resource var--
 
-Warning: %s
+Warning: array_intersect_key() expects parameter 3 to be an array or collection in %s/array_intersect_key_variation3.php on line 94
 NULL
 ===DONE===

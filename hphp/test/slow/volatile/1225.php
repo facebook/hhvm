@@ -1,16 +1,13 @@
-<?php
+<?hh
 
 function foo($a) {
   if ($a) {
-    interface A {
-}
+    include '1225-1.inc';
   }
 }
-foo(true);
 function bar() {
   if (interface_exists('A')) {
-    class C implements A {
- }
+    include '1225-2.inc';
     $obj = new C;
     var_dump($obj);
   }
@@ -18,4 +15,9 @@ function bar() {
     var_dump('no');
   }
 }
+
+<<__EntryPoint>>
+function main_1225() {
+foo(true);
 bar();
+}

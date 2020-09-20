@@ -6,19 +6,19 @@ int(6)
 
 mapWithKey...
 string(12) "HH\ImmVector"
-object(HH\Pair)#6 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(0)
   [1]=>
   int(1)
 }
-object(HH\Pair)#7 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\Pair)#8 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>
@@ -36,13 +36,13 @@ int(2)
 
 zip...
 string(12) "HH\ImmVector"
-object(HH\Pair)#12 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>
   int(4)
 }
-object(HH\Pair)#13 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(2)
   [1]=>

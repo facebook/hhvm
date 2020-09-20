@@ -1,0 +1,2 @@
+File "obj_get_dollar_dollar.php", line 7, characters 19-27:
+Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])

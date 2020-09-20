@@ -9,4 +9,8 @@ function main() {
   var_dump(isset($fv[3]));
 }
 
+
+<<__EntryPoint>>
+function main_isset() {
 main();
+}

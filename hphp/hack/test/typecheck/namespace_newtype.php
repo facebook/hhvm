@@ -1,12 +1,12 @@
 //// def.php
-<?hh
+<?hh // partial
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
@@ -23,14 +23,14 @@ namespace N {
 }
 
 //// use1.php
-<?hh
+<?hh // partial
 
 function f(int $x): \N\Foo {
   return \N\bless($x);
 }
 
 //// use2.php
-<?hh
+<?hh // partial
 
 namespace N {
   function f(int $x): Foo {

@@ -1,0 +1,6 @@
+(library
+  (name version)
+  (wrapped false)
+  (libraries
+    build_banner
+    utils_core))

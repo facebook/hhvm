@@ -27,7 +27,8 @@
 
 #include "hphp/util/dataflow-worklist.h"
 
-#include <unordered_map>
+#include <sstream>
+#include <folly/small_vector.h>
 
 namespace HPHP { namespace jit {
 
@@ -49,33 +50,8 @@ struct CongruenceHasher {
   using KeyType = std::pair<IRInstruction*, DstIndex>;
 
   explicit CongruenceHasher(const ValueNumberTable& globalTable)
-    : m_globalTable(globalTable)
+    : m_globalTable(&globalTable)
   {
-  }
-
-  size_t hashDefLabel(KeyType key) const {
-    auto inst = key.first;
-    auto idx = key.second;
-
-    // We use a set (instead of an unordered_set) because we want a fixed and
-    // well-defined iteration order while we're accumulating the hash below.
-    jit::set<SSATmp*> values;
-    for (auto& pred : inst->block()->preds()) {
-      auto fromBlock = pred.from();
-      auto& jmp = fromBlock->back();
-      auto src = canonical(jmp.src(idx));
-      assertx(m_globalTable[src].value);
-      values.emplace(m_globalTable[src].value);
-    }
-
-    auto result = static_cast<size_t>(inst->op());
-    for (auto value : values) {
-      result = folly::hash::hash_128_to_64(
-        result,
-        reinterpret_cast<size_t>(value)
-      );
-    }
-    return hashSharedImpl(inst, result);
   }
 
   size_t hashSharedImpl(IRInstruction* inst, size_t result) const {
@@ -94,13 +70,14 @@ struct CongruenceHasher {
   }
 
   size_t hashSrcs(KeyType key, size_t result) const {
+    auto& table = *m_globalTable;
     auto inst = key.first;
     for (uint32_t i = 0; i < inst->numSrcs(); ++i) {
       auto src = canonical(inst->src(i));
-      assertx(m_globalTable[src].value);
+      assertx(table[src].value);
       result = folly::hash::hash_128_to_64(
         result,
-        reinterpret_cast<size_t>(m_globalTable[src].value)
+        reinterpret_cast<size_t>(table[src].value)
       );
     }
     return result;
@@ -108,8 +85,6 @@ struct CongruenceHasher {
 
   size_t operator()(KeyType key) const {
     auto inst = key.first;
-
-    if (inst->is(DefLabel)) return hashDefLabel(key);
 
     // Note: this doesn't take commutativity or associativity into account, but
     // it might be nice to do so for the opcodes where it makes sense.
@@ -119,57 +94,28 @@ struct CongruenceHasher {
   }
 
 private:
-  const ValueNumberTable& m_globalTable;
+  const ValueNumberTable* m_globalTable;
 };
 
 struct CongruenceComparator {
   using KeyType = std::pair<IRInstruction*, DstIndex>;
 
   explicit CongruenceComparator(const ValueNumberTable& globalTable)
-    : m_globalTable(globalTable)
+    : m_globalTable(&globalTable)
   {
   }
 
-  bool compareDefLabelSrcs(KeyType keyA, KeyType keyB) const {
-    auto instA = keyA.first;
-    auto instB = keyB.first;
-    auto idxA = keyA.second;
-    auto idxB = keyB.second;
-
-    assert(instA->op() == instB->op());
-    assert(instA->is(DefLabel));
-
-    jit::hash_set<SSATmp*> valuesA;
-    jit::hash_set<SSATmp*> valuesB;
-
-    auto fillValueSet = [&](
-        IRInstruction* inst,
-        int32_t idx,
-        std::unordered_set<SSATmp*>& values
-    ) {
-      for (auto& pred : inst->block()->preds()) {
-        auto fromBlock = pred.from();
-        auto& jmp = fromBlock->back();
-        auto src = canonical(jmp.src(idx));
-        assertx(m_globalTable[src].value);
-        values.emplace(m_globalTable[src].value);
-      }
-    };
-    fillValueSet(instA, idxA, valuesA);
-    fillValueSet(instB, idxB, valuesB);
-    return valuesA == valuesB;
-  }
-
   bool compareSrcs(KeyType keyA, KeyType keyB) const {
+    auto& table = *m_globalTable;
     auto instA = keyA.first;
     auto instB = keyB.first;
 
     for (uint32_t i = 0; i < instA->numSrcs(); ++i) {
       auto srcA = canonical(instA->src(i));
       auto srcB = canonical(instB->src(i));
-      assertx(m_globalTable[srcA].value);
-      assertx(m_globalTable[srcB].value);
-      if (m_globalTable[srcA].value != m_globalTable[srcB].value) return false;
+      assertx(table[srcA].value);
+      assertx(table[srcB].value);
+      if (table[srcA].value != table[srcB].value) return false;
     }
 
     return true;
@@ -195,9 +141,7 @@ struct CongruenceComparator {
       }
     }
 
-    if (instA->is(DefLabel)) {
-      if (!compareDefLabelSrcs(keyA, keyB)) return false;
-    } else if (!compareSrcs(keyA, keyB)) {
+    if (!compareSrcs(keyA, keyB)) {
       return false;
     }
 
@@ -205,10 +149,10 @@ struct CongruenceComparator {
   }
 
 private:
-  const ValueNumberTable& m_globalTable;
+  const ValueNumberTable* m_globalTable;
 };
 
-using NameTable = std::unordered_map<
+using NameTable = jit::hash_map<
   std::pair<IRInstruction*, DstIndex>, SSATmp*,
   CongruenceHasher,
   CongruenceComparator
@@ -245,16 +189,13 @@ bool supportsGVN(const IRInstruction* inst) {
   case SubIntO:
   case MulIntO:
   case XorBool:
-  case ConvBoolToArr:
-  case ConvDblToArr:
-  case ConvIntToArr:
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvBoolToDbl:
   case ConvIntToDbl:
   case ConvBoolToInt:
   case ConvDblToInt:
-  case ConvClsToCctx:
+  case DblAsBits:
   case GtInt:
   case GteInt:
   case LtInt:
@@ -294,14 +235,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case SameVec:
-  case NSameVec:
-  case SameDict:
-  case NSameDict:
-  case EqKeyset:
-  case NeqKeyset:
-  case SameKeyset:
-  case NSameKeyset:
+  case SameArrLike:
+  case NSameArrLike:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -318,31 +253,26 @@ bool supportsGVN(const IRInstruction* inst) {
   case ExtendsClass:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
-  case InterfaceSupportsArr:
-  case InterfaceSupportsVec:
-  case InterfaceSupportsDict:
-  case InterfaceSupportsKeyset:
+  case InterfaceSupportsArrLike:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
   case HasToString:
   case IsType:
   case IsNType:
-  case IsScalarType:
   case IsWaitHandle:
   case IsCol:
-  case IsDVArray:
   case LdRDSAddr:
-  case LdCtx:
-  case LdCctx:
-  case LdClsCtx:
-  case LdClsCctx:
+  case LdFrameThis:
+  case LdFrameCls:
   case LdClsCtor:
   case DefConst:
-  case DefCls:
   case LdCls:
   case LdClsCached:
   case LdClsInitData:
+  case LdClsFromClsMeth:
+  case LdSmashableFunc:
+  case LdFuncFromClsMeth:
   case LdFuncVecLen:
   case LdClsMethod:
   case LdIfaceMethod:
@@ -351,26 +281,34 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsPropAddrOrRaise:
   case LdObjClass:
   case LdClsName:
-  case LdARNumParams:
+  case LdLazyClsName:
   case Mov:
   case LdContActRec:
   case LdAFWHActRec:
-  case LdPackedArrayDataElemAddr:
-  case LdStaticLoc:
+  case LdVecElemAddr:
   case OrdStr:
   case ChrInt:
   case CheckRange:
-  case CountArrayFast:
   case CountVec:
   case CountDict:
   case CountKeyset:
   case Select:
   case StrictlyIntegerConv:
+  case LookupSPropSlot:
+  case ConvPtrToLval:
+  case RaiseErrorOnInvalidIsAsExpressionType:
     return true;
 
-  case SameArr:
-  case NSameArr:
-    return !RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  case EqArrLike:
+  case NeqArrLike:
+    // Keyset equality comparisons never re-enter or throw
+    return inst->src(0)->type() <= TKeyset && inst->src(1)->type() <= TKeyset;
+
+
+  case IsTypeStruct:
+    // Resources can change type without generating a new SSATmp,
+    // so its not safe to GVN
+    return !opcodeMayRaise(IsTypeStruct) && !inst->src(1)->type().maybe(TRes);
 
   default:
     return false;
@@ -624,7 +562,6 @@ void insertIncRefs(PrcEnv& env) {
     id++;
   }
 
-  using Bits = PrcState::Bits;
   // compute anticipated
   do {
     auto const blk = env.rpoBlocks[antQ.pop()];
@@ -729,7 +666,7 @@ void insertIncRefs(PrcEnv& env) {
   }
 }
 
-using ActionMap = std::unordered_map<SSATmp*, std::vector<SSATmp*>>;
+using ActionMap = jit::fast_map<SSATmp*, std::vector<SSATmp*>>;
 
 void tryReplaceInstruction(
   IRUnit& unit,
@@ -794,7 +731,7 @@ void replaceRedundantComputations(
       tryReplaceInstruction(unit, idoms, &inst, table, actionMap);
     }
   }
-  if (!actionMap.size()) return;
+  if (actionMap.empty()) return;
   PrcEnv env(unit, blocks);
   for (auto& elm : actionMap) {
     if (env.insertMap.size() == kMaxTrackedPrcs) {

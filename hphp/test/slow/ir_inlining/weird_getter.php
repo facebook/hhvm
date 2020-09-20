@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class WeirdGetter {
   private $x;
@@ -18,4 +18,8 @@ function test8() {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_weird_getter() {
 test8();
+}

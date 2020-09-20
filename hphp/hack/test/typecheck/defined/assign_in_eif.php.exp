@@ -1,0 +1,4 @@
+File "assign_in_eif.php", line 4, characters 9-10:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_eif.php", line 4, characters 18-19:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

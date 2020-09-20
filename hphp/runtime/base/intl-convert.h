@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_INTL_CONVERT_H_
-#define incl_HPHP_INTL_CONVERT_H_
+#pragma once
 
 #include <unicode/ustring.h>
 
@@ -33,4 +32,3 @@ void intl_convert_utf16_to_utf8(char** target, int* target_len,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_INTL_CONVERT_H_

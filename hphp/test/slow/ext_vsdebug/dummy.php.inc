@@ -5,4 +5,7 @@ function dummyFoo() {
   return 1;
 }
 
-echo "I am the dummy!\n";
+<<__EntryPoint>>
+function main() {
+  echo "I am the dummy!\n";
+}

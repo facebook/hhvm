@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  function test(A $a) {
@@ -8,3 +8,4 @@ class A {
  print 'foo';
 }
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

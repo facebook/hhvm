@@ -2,6 +2,5 @@
 
 -- Testing posix_getpid() function with one argument --
 
-Warning: %s
-NULL
+Warning: posix_getpid() expects exactly 0 parameters, 1 given in %s/posix_getpid_error.php on line 13
 Done

@@ -31,7 +31,8 @@
 
 namespace HPHP { namespace hfsort {
 
-constexpr uint32_t BUFLEN = 1000;
+// some mangled names are very long up to 20k in size
+constexpr uint32_t BUFLEN = 24000;
 constexpr uint32_t kPageSize = 2 << 20;
 
 void error(const char* msg) {
@@ -47,16 +48,12 @@ void readSymbols(CallGraph& cg, FILE* file) {
   char     kind;
   while (fgets(line, BUFLEN, file)) {
     if (sscanf(line, "%lx %x %c %s", &addr, &size, &kind, name) == 4) {
-      int status;
-      char* demangledName = abi::__cxa_demangle(name, 0, 0, &status);
-      if (demangledName) {
-        free(demangledName);
-      } else {
-        if (!std::isalpha((uint8_t)*name) && *name != '_') continue;
-        for (const char* n = name; *++n; ) {
-          if (!std::isalnum((uint8_t)*n) && *n != '_' && *n != '.') {
-            continue;
-          }
+      if (!std::isalpha((uint8_t)*name) && *name != '_') {
+        continue;
+      }
+      for (const char* n = name; *++n; ) {
+        if (!std::isalnum((uint8_t)*n) && *n != '_' && *n != '.') {
+          continue;
         }
       }
       cg.addFunc(name, addr, size, 0);
@@ -114,16 +111,22 @@ void readSymbolCntData(CallGraph& cg, std::ifstream& file) {
   std::string line;
   while (std::getline(file, line)) {
     std::string caller, top;
-    int32_t count;
+    uint64_t count;
     folly::split(" ", line, caller, top, count);
     TargetId idTop = cg.funcToTargetId(top);
-    if (idTop == InvalidId) continue;
+    if (idTop == InvalidId) {
+      HFTRACE(2, "Target func not found: %s\n", top.c_str());
+      continue;
+    }
     cg.targets[idTop].samples += count;
     HFTRACE(2, "readSymbolCntData: idTop: %u %s\n", idTop,
             cg.funcs[idTop].mangledNames[0].c_str());
 
     TargetId idCaller = cg.funcToTargetId(caller);
-    if (idCaller == InvalidId) continue;
+    if (idCaller == InvalidId) {
+      HFTRACE(2, "Caller func not found: %s\n", caller.c_str());
+      continue;
+    }
     cg.incArcWeight(idCaller, idTop, count);
     HFTRACE(2, "readSymbolCntData: idCaller: %u %s\n", idCaller,
             cg.funcs[idCaller].mangledNames[0].c_str());

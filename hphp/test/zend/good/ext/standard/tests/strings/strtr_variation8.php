@@ -1,26 +1,26 @@
-<?php
+<?hh
 /* Prototype  : string strtr(string $str, string $from[, string $to]);
                 string strtr(string $str, array $replace_pairs);
  * Description: Translates characters in str using given translation tables
  * Source code: ext/standard/string.c
 */
 
-/* Test strtr() function: with unexpected inputs for 'replace_pairs' 
- *  and expected type for 'str' arguments 
+/* Test strtr() function: with unexpected inputs for 'replace_pairs'
+ *  and expected type for 'str' arguments
 */
-
-echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
-
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //defining a class
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
+
+//get an unset variable
+$unset_var = 'string_val';
+unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -29,7 +29,7 @@ $file_handle = fopen(__FILE__, "r");
 $str = "012atm";
 
 // array of inputs for 'replace_pairs' argument
-$replace_pairs_arr =  array (
+$replace_pairs_arr =  varray [
 
   // integer values
   0,
@@ -42,9 +42,9 @@ $replace_pairs_arr =  array (
   10.5e10,
 
   // array values
-  array(),
-  array(0),
-  array(1, 2),
+  varray[],
+  varray[0],
+  varray[1, 2],
 
   // boolean values
   true,
@@ -67,7 +67,7 @@ $replace_pairs_arr =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 // loop through with each element of the $replace_pairs array to test strtr() function
 $count = 1;
@@ -81,4 +81,4 @@ for($index = 0; $index < count($replace_pairs_arr); $index++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
-?>
+}

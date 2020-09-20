@@ -1,0 +1,8 @@
+File "is_as_generic_coercion.php", line 14, characters 14-15:
+Invalid argument (Typing[4110])
+File "is_as_generic_coercion.php", line 3, characters 33-33:
+Expected `T`
+File "is_as_generic_coercion.php", line 17, characters 21-21:
+  via this generic `T`
+File "is_as_generic_coercion.php", line 8, characters 27-31:
+But got `mixed`

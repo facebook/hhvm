@@ -5,10 +5,14 @@ function mymeth(string... $y):void {
 }
 
 class C {
-  public function foo((function(...):void) $func) {
+  public function foo((function(string...):void) $func) {
     $func("some", "string");
   }
 }
 
+
+<<__EntryPoint>>
+function main_function_hint_with_single_variadic_param() {
 $c = new C();
 $c->foo(HH\fun('mymeth'));
+}

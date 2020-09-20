@@ -1,0 +1,6 @@
+File "partially_abstract.php", line 8, characters 14-14:
+The assigned type of this type constant is inconsistent with its parent (Typing[4110])
+File "partially_abstract.php", line 8, characters 27-29:
+Expected `int`
+File "partially_abstract.php", line 4, characters 27-34:
+But got `arraykey`

@@ -1,0 +1,8 @@
+File "override_final7.php", line 26, characters 13-14:
+Class `C1` does not correctly implement all required members  (Typing[4340])
+File "override_final7.php", line 26, characters 24-25:
+Some members are incompatible with those declared in type `P2`
+File "override_final7.php", line 21, characters 25-37:
+You cannot override this method
+File "override_final7.php", line 13, characters 25-37:
+It was declared as final

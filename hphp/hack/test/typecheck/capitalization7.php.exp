@@ -1,0 +1,8 @@
+File "capitalization7.php", line 9, characters 7-15:
+No method `camelcase` in `C` (Typing[4053])
+File "capitalization7.php", line 4, characters 19-27:
+Did you mean `camel~~C~~ase` instead (which only differs by case)?
+File "capitalization7.php", line 8, characters 12-12:
+This is why I think it is an object of type C
+File "capitalization7.php", line 3, characters 7-7:
+Declaration of `C` is here

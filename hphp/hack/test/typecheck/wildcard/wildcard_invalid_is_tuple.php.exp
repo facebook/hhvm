@@ -1,0 +1,38 @@
+File "wildcard_invalid_is_tuple.php", line 4, characters 9-11:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 4, characters 10-10:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 5, characters 9-16:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 5, characters 10-10:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 6, characters 9-16:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 6, characters 15-15:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 7, characters 9-14:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 7, characters 10-10:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 7, characters 13-13:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 8, characters 9-20:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 8, characters 11-11:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 9, characters 9-23:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 9, characters 16-16:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 9, characters 21-21:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 10, characters 9-23:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 10, characters 16-16:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 11, characters 9-21:
+Invalid `is` expression hint (Typing[4195])
+File "wildcard_invalid_is_tuple.php", line 11, characters 19-19:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)
+File "wildcard_invalid_is_tuple.php", line 11, characters 10-10:
+The `is` operator cannot be used with _ in a tuple (use `mixed` instead)

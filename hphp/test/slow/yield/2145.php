@@ -1,10 +1,14 @@
-<?php
+<?hh
 
 function fruit() {
  echo "sadpanda, no fruit";
  yield break;
  }
- foreach (fruit() as $fruit) {
+
+
+ <<__EntryPoint>>
+function main_2145() {
+foreach (fruit() as $fruit) {
  var_dump($fruit);
 }
-
+}

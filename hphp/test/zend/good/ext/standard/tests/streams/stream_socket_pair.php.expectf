@@ -1,7 +1,5 @@
-array(2) {
-  [0]=>
+varray(2) {
   resource(%d) of type (stream)
-  [1]=>
   resource(%d) of type (stream)
 }
 string(3) "foo"

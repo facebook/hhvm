@@ -3,7 +3,7 @@
 int(%i)
 - Iteration 2 -
 
-Warning: %s
+Warning: fileinode(): Not a directory in %s/fileinode_variation3.php on line 38
 bool(false)
 - Iteration 3 -
 int(%i)
@@ -11,19 +11,19 @@ int(%i)
 int(%i)
 - Iteration 5 -
 
-Warning: %s
+Warning: fileinode(): No such file or directory in %s/fileinode_variation3.php on line 38
 bool(false)
 - Iteration 6 -
 
-Warning: %s
+Warning: fileinode(): No such file or directory in %s/fileinode_variation3.php on line 38
 bool(false)
 - Iteration 7 -
 
-Warning: %s
+Warning: fileinode() expects parameter 1 to be a valid path, string given in %s/fileinode_variation3.php on line 38
 NULL
 - Iteration 8 -
 
-Warning: %s
+Warning: fileinode() expects parameter 1 to be a valid path, string given in %s/fileinode_variation3.php on line 38
 NULL
 
 *** Done ***

@@ -1,12 +1,8 @@
 
-Warning: %s
-NULL
+Warning: ReflectionClass::isFinal() expects exactly 0 parameters, 1 given in %s/ReflectionClass_modifiers_002.php on line 7
 
-Warning: %s
-NULL
+Warning: ReflectionClass::isInterface() expects exactly 0 parameters, 1 given in %s/ReflectionClass_modifiers_002.php on line 8
 
-Warning: %s
-NULL
+Warning: ReflectionClass::isAbstract() expects exactly 0 parameters, 1 given in %s/ReflectionClass_modifiers_002.php on line 9
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getModifiers() expects exactly 0 parameters, 1 given in %s/ReflectionClass_modifiers_002.php on line 10

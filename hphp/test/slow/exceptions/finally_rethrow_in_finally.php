@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 try {
   throw new Exception("muahahhaha.");
 } finally {
@@ -10,4 +10,5 @@ try {
   } finally {
     throw $e;
   }
+}
 }

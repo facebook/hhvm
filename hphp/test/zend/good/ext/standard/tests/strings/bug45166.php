@@ -1,4 +1,5 @@
-<?php
-	echo substr('cd', -3) . "\n";  
-?>
-===DONE===
+<?hh
+<<__EntryPoint>> function main(): void {
+echo substr('cd', -3) . "\n";
+echo "===DONE===\n";
+}

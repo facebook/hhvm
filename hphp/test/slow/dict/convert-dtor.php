@@ -6,9 +6,6 @@ class Dtor {
   function __construct($id) {
     $this->id = $id;
   }
-  function __destruct() {
-    echo "Dtor::__destruct(" . $this->id . ")\n";
-  }
 }
 
 function main() {
@@ -35,9 +32,9 @@ function main() {
   echo "====================================================\n";
 
   $i += 3;
-  var_dump((array)dict[$i => new Dtor($i),
+  var_dump(darray(dict[$i => new Dtor($i),
                        $i+1 => new Dtor($i+1),
-                       $i+2 => new Dtor($i+2)]);
+                       $i+2 => new Dtor($i+2)]));
   echo "====================================================\n";
 
   $i += 3;
@@ -59,18 +56,6 @@ function main() {
   echo "====================================================\n";
 
   $i += 3;
-  var_dump((string)dict[$i => new Dtor($i),
-                        $i+1 => new Dtor($i+1),
-                        $i+2 => new Dtor($i+2)]);
-  echo "====================================================\n";
-
-  $i += 3;
-  var_dump((object)dict[$i => new Dtor($i),
-                        $i+1 => new Dtor($i+1),
-                        $i+2 => new Dtor($i+2)]);
-  echo "====================================================\n";
-
-  $i += 3;
   var_dump(new Vector(dict[$i => new Dtor($i),
                            $i+1 => new Dtor($i+1),
                            $i+2 => new Dtor($i+2)]));
@@ -83,4 +68,9 @@ function main() {
   echo "====================================================\n";
 }
 
-main();
+
+<<__EntryPoint>>
+function main_convert_dtor() {
+  main();
+  var_dump(hh\objprof_get_data());
+}

@@ -10,4 +10,8 @@ function main() {
   var_dump($fv);
 }
 
+
+<<__EntryPoint>>
+function main_cow_jit() {
 main();
+}

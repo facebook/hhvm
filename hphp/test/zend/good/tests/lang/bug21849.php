@@ -1,11 +1,14 @@
-<?php
+<?hh
+
 class foo {
-	const bar = "fubar\n";
-	
-	function foo($arg = self::bar) {
-		echo $arg;
-	}
+  const bar = "fubar\n";
+
+  function __construct($arg = self::bar) {
+    echo $arg;
+  }
 }
 
-new foo();
-?>
+<<__EntryPoint>>
+function main() {
+  new foo();
+}

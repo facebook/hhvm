@@ -1,0 +1,73 @@
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(5) "GMT+0"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "-01:00"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+01:00"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(9) "Etc/GMT+0"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(9) "Etc/GMT+1"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(9) "Etc/GMT-1"
+}
+---Repeating to check caching---
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(5) "GMT+0"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "-01:00"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+01:00"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(9) "Etc/GMT+0"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(9) "Etc/GMT+1"
+}
+object(DateTimeZone) (%d) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(9) "Etc/GMT-1"
+}

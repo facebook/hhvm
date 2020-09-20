@@ -1,23 +1,27 @@
-<?php
-function foo(stdClass $a, array $b, callable $c, stdClass $d = null,
+<?hh
+function foo(stdClass $a, arraylike $b, callable $c, stdClass $d = null,
              $e = null, string $f, bool $g, int $h, float $i,
              NotExisting $j) { }
-function nfoo(?stdClass $a, ?array $b, ?callable $c, ?stdClass $d = null,
+function nfoo(?stdClass $a, ?arraylike $b, ?callable $c, ?stdClass $d = null,
             $e = null, ?string $f, ?bool $g, ?int $h, ?float $i,
             ?NotExisting $j) { }
 function bar(): stdClass { return new stdClass; }
-class c extends stdClass {
+class b {}
+class c extends b {
   function bar(self $x): int { return 1; }
   function nbar(?self $x): ?int { return 1; }
   function pbar(parent $x): int { return 1; }
   function factory(): self { return new c; }
   function nfactory(): ?self { return new c; }
-  function pfactory(): parent { return new stdClass; }
+  function pfactory(): parent { return new b(); }
 }
+
+<<__EntryPoint>>
+function main_reflection_type_detailed_explicit_php7() {
 $closure = function (Test $a): Test { return $a; };
 $nclosure = function (?Test $a): ?Test { return $a; };
 echo "*** functions\n";
-foreach ([
+foreach (varray[
   new ReflectionFunction('foo'),
   new ReflectionFunction('nfoo'),
   new ReflectionFunction($closure),
@@ -35,7 +39,7 @@ foreach ([
   }
 }
 echo "\n*** methods\n";
-foreach ([
+foreach (varray[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionMethod('c', 'bar'),
   new ReflectionMethod('c', 'nbar'),
@@ -55,7 +59,7 @@ foreach ([
   }
 }
 echo "\n*** return types\n";
-foreach ([
+foreach (varray[
   new ReflectionMethod('SplObserver', 'update'),
   new ReflectionFunction('bar'),
   new ReflectionMethod('c', 'bar'),
@@ -76,4 +80,5 @@ foreach ([
     var_dump($ra->isBuiltin());
     var_dump((string)$ra);
   }
+}
 }

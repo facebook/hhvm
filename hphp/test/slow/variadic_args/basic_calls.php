@@ -1,8 +1,5 @@
 <?hh
 
-error_reporting(-1);
-require_once __DIR__.'/variadic_funcs.inc';
-
 function test_standard_calls() {
   echo '========= ', __FUNCTION__, ' ==========', "\n";
   variadic_only_no_vv('a', 'b', 'c');
@@ -28,20 +25,20 @@ function test_standard_insuffient_calls() {
   echo '========= ', __FUNCTION__, ' ==========', "\n";
   variadic_only_no_vv();
   variadic_only();
-  variadic_some();
+  try { variadic_some(); } catch (Exception $e) { var_dump($e->getMessage()); }
   variadic_hack_only();
-  variadic_hack_some();
+  try { variadic_hack_some(); } catch (Exception $e) { var_dump($e->getMessage()); }
   echo "\n", '========= static methods ==========', "\n";
   C::st_variadic_only();
-  C::st_variadic_some();
+  try { C::st_variadic_some(); } catch (Exception $e) { var_dump($e->getMessage()); }
   C::st_variadic_hack_only();
-  C::st_variadic_hack_some();
+  try { C::st_variadic_hack_some(); } catch (Exception $e) { var_dump($e->getMessage()); }
   echo "\n", '========= instance methods ==========', "\n";
   $inst = new C();
   $inst->variadic_only();
-  $inst->variadic_some();
+  try { $inst->variadic_some(); } catch (Exception $e) { var_dump($e->getMessage()); }
   $inst->variadic_hack_only();
-  $inst->variadic_hack_some();
+  try { $inst->variadic_hack_some(); } catch (Exception $e) { var_dump($e->getMessage()); }
   echo "\n\n";
 }
 
@@ -55,4 +52,11 @@ function main() {
   test_standard_insuffient_calls();
 }
 
+
+<<__EntryPoint>>
+function main_basic_calls() {
+error_reporting(-1);
+require_once __DIR__.'/variadic_funcs.inc';
+
 main();
+}

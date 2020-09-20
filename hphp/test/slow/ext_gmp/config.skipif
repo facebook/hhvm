@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!extension_loaded('gmp'))
 {
   print 'skip';

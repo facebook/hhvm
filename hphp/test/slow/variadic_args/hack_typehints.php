@@ -11,6 +11,9 @@ function variadic_hinted_scalars(int ...$objects) {
 function main() {
   variadic_hinted_scalars(1, 2, 3, 4, true);
 }
+
+<<__EntryPoint>>
+function main_hack_typehints() {
 main();
 
 $rf = new ReflectionFunction('variadic_hinted_scalars');
@@ -20,3 +23,4 @@ $rp = $rps[0];
 echo 'is_variadic = ' . $rp->isVariadic() . PHP_EOL;
 echo 'name = ' . $rp->getName() . PHP_EOL;
 echo 'type = ' . $rp->getTypeText() . PHP_EOL;
+}

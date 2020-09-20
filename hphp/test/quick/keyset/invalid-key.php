@@ -18,17 +18,12 @@ function add($d, $v) {
   return $d;
 }
 
-function main() {
-  $foo = 12;
-  $ref =& $foo;
-  $bar = array();
-  $badref =& $bar;
-
+function run(inout $ref, inout $badref) {
   $dyn = 42;
   add(keyset[$dyn], 1)
     |> add($$, "1")
     |> add($$, null)
-    |> add($$, array())
+    |> add($$, darray[])
     |> add($$, new stdclass)
     |> add($$, 1.2)
     |> add($$, $ref)
@@ -37,7 +32,7 @@ function main() {
     |> get($$, 1)
     |> get($$, "1")
     |> get($$, null)
-    |> get($$, array())
+    |> get($$, darray[])
     |> get($$, new stdclass)
     |> get($$, 1.2)
     |> get($$, $ref)
@@ -46,4 +41,9 @@ function main() {
     |> var_dump($$);
 }
 
-main();
+<<__EntryPoint>>
+function main() {
+  $foo = 12;
+  $bar = darray[];
+  run(inout $foo, inout $bar);
+}

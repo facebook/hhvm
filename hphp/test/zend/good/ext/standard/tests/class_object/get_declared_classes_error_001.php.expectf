@@ -2,6 +2,5 @@
 
 -- Testing get_declared_classes() function with one argument --
 
-Warning: %s
-NULL
+Warning: get_declared_classes() expects exactly 0 parameters, 1 given in %s/get_declared_classes_error_001.php on line 13
 Done

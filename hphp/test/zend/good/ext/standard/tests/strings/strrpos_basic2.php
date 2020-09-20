@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of last occurrence of 'needle' in 'haystack'
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrpos() function: basic functionality ***\n";
 $heredoc_str = <<<EOD
 Hello, World
@@ -28,4 +28,4 @@ var_dump( strrpos("Hello, World", "o", 3) );
 var_dump( strrpos("Hello, World", "o", 6) );
 var_dump( strrpos("Hello, World", "o", 10) );
 echo "*** Done ***";
-?>
+}

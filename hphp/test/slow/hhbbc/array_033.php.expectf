@@ -1,6 +1,6 @@
-Notice: Undefined index: z in %s/slow/hhbbc/array_033.php on line 8
+Out of bounds darray access: invalid index "z"
 bool(true)
 bool(false)
 bool(true)
-array(0) {
+darray(0) {
 }

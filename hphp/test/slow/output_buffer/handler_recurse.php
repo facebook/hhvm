@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ob_handler($str) {
   return $str.'???';
@@ -6,7 +6,7 @@ function ob_handler($str) {
 
 function main() {
   $handler = function($str) {
-    ob_start('ob_handler');
+    ob_start(fun('ob_handler'));
     echo $str.'!!!';
     $ret = ob_get_contents();
     ob_end_flush();
@@ -20,4 +20,8 @@ function main() {
   echo "DON'T PRINT ME";
 }
 
+
+<<__EntryPoint>>
+function main_handler_recurse() {
 main();
+}

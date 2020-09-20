@@ -1,0 +1,15 @@
+<?hh
+function with_defaults(
+  int $arg = \extract_standalone_make_default(),
+  float $argf = \extract_standalone_make_default(),
+): void {
+  throw new \Exception();
+}
+function call_defaulted(int $arg): void {
+  with_defaults($arg);
+  with_defaults();
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}

@@ -1,9 +1,8 @@
-<?php
+<?hh
 
 function err($x) { throw new Exception(); }
-set_error_handler('err');
 function foo() {
-  $x[0]['asd'] = true;
+  $x = varray[darray['asd' => true]];
   try {
     $x[0]['asd'][] = 2;
   } catch (Exception $e) {
@@ -11,4 +10,9 @@ function foo() {
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_minstr_throw_004() {
+set_error_handler(fun('err'));
 foo();
+}

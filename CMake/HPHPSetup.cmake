@@ -7,16 +7,35 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_ext
    )
 
-if (LINUX)
-  set(HHVM_WRAP_SYMS -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
-else ()
-  set(HHVM_WRAP_SYMS)
-endif ()
+set(HHVM_WRAP_SYMS)
 
+# Oniguruma ('onig') must be first:
+#
+# oniguruma has some of its own implementations of POSIX regex functions,
+# like regcomp() and regexec(). We use onig everywhere, for both its own
+# special functions and for the POSIX replacements. This means that the
+# linker needs to pick the implementions of the POSIX regex functions from
+# onig, not libc.
+#
+# On Linux, that works out fine, since the linker sees onig on the link
+# line before (implicitly) libc. However, on OS X, despite the manpage for
+# ld claiming otherwise about indirect dylib dependencies, as soon as we
+# include one of the libs here that pull in libSystem.B, the linker will
+# pick the implementations of those functions from libc, not from onig.
+# And since we've included the onig headers, which have very slightly
+# different definintions for some of the key data structures, things go
+# quite awry -- this manifests as infinite loops or crashes when calling
+# the PHP split() function.
+#
+# So make sure to link onig first, so its implementations are picked.
+#
+# Using the generator expression to explicitly pull the path in early, otherwise
+# it gets resolved later and put later in the build arguments, and makes
+# hphp/test/slow/ext_preg segfault.
 set(HHVM_LINK_LIBRARIES
+  $<TARGET_PROPERTY:onig,INTERFACE_LINK_LIBRARIES>
   ${HHVM_WRAP_SYMS}
   hphp_analysis
-  hphp_facts_parser
   hphp_system
   hphp_parser
   hphp_zend
@@ -69,12 +88,6 @@ include(HPHPCompiler)
 include(HPHPFunctions)
 include(HPHPFindLibs)
 
-# Ubuntu 15.10 and 14.04 have been failing to include a dependency on jemalloc
-# as a these linked flags force the dependency to be recorded
-if (JEMALLOC_ENABLED AND LINUX)
-  LIST(APPEND HHVM_LINK_LIBRARIES -Wl,--no-as-needed ${JEMALLOC_LIB} -Wl,--as-needed)
-endif()
-
 if (HHVM_VERSION_OVERRIDE)
   parse_version("HHVM_VERSION_" ${HHVM_VERSION_OVERRIDE})
   add_definitions("-DHHVM_VERSION_OVERRIDE")
@@ -99,23 +112,15 @@ if(CMAKE_CONFIGURATION_TYPES)
   if(NOT MSVC)
     message(FATAL_ERROR "Adding the appropriate defines for multi-config targets using anything other than MSVC is not yet supported!")
   endif()
-  if (MSVC_NO_ASSERT_IN_DEBUG)
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D RELEASE=1 /D NDEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D RELEASE=1 /D NDEBUG")
-  else()
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D DEBUG")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D DEBUG")
-  endif()
   foreach(flag_var
       CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
       CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-    set(${flag_var} "${${flag_var}} /D RELEASE=1 /D NDEBUG")
+    set(${flag_var} "${${flag_var}} /D NDEBUG")
   endforeach()
-elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-  add_definitions(-DDEBUG)
+elseif(${CMAKE_BUILD_TYPE} MATCHES "Debug" OR
+       ${CMAKE_BUILD_TYPE} MATCHES "DebugOpt")
   message("Generating DEBUG build")
 else()
-  add_definitions(-DRELEASE=1)
   add_definitions(-DNDEBUG)
   message("Generating Release build")
 endif()

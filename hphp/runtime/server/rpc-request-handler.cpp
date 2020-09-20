@@ -34,8 +34,8 @@
 #include "hphp/runtime/server/satellite-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
@@ -65,9 +65,9 @@ RPCRequestHandler::~RPCRequestHandler() {
 }
 
 void RPCRequestHandler::initState() {
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::RpcRequest);
   bool isServer =
-    RuntimeOption::ServerExecutionMode() && !is_cli_mode();
+    RuntimeOption::ServerExecutionMode() && !is_cli_server_mode();
   m_context = g_context.getNoCheck();
   if (isServer) {
     m_context->obStart(uninit_null(),
@@ -114,7 +114,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   }
   ++m_requestsSinceReset;
 
-  ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
+  ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
   GetAccessLog().onNewRequest();
@@ -188,7 +188,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
 
   // resolve virtual host
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
-  assert(vhost);
+  assertx(vhost);
   if (vhost->disabled()) {
     transport->sendString("Virtual host disabled.", 404);
     transport->onSendEnd();
@@ -196,7 +196,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     return;
   }
 
-  auto& reqData = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& reqData = RequestInfo::s_requestInfo->m_reqInjectionData;
   reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
   SCOPE_EXIT {
     reqData.setTimeout(0);  // can't throw when you pass zero
@@ -235,7 +235,7 @@ void RPCRequestHandler::abortRequest(Transport *transport) {
   g_context.getCheck();
   GetAccessLog().onNewRequest();
   const VirtualHost *vhost = HttpProtocol::GetVirtualHost(transport);
-  assert(vhost);
+  assertx(vhost);
   transport->sendString("Service Unavailable", 503);
   GetAccessLog().log(transport, vhost);
   if (!vmStack().isAllocated()) {
@@ -255,13 +255,13 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                                            ReturnEncodeType returnEncodeType) {
   std::string rpcFunc = transport->getCommand();
   {
+    ARRPROV_USE_RUNTIME_LOCATION();
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
     auto env = php_global(s__ENV);
-    env.toArrRef().set(s_HPHP_RPC, 1);
+    env.asArrRef().set(s_HPHP_RPC, 1);
     php_global_set(s__ENV, std::move(env));
-    InitFiniNode::GlobalsInit();
   }
 
   bool isFile = rpcFunc.rfind('.') != std::string::npos;
@@ -272,6 +272,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   Transport::Method requestMethod = m_serverInfo->getMethod();
   std::string sparams = transport->getParam("params", requestMethod);
   if (!sparams.empty()) {
+    ARRPROV_USE_RUNTIME_LOCATION();
     auto jparams = Variant::attach(
       HHVM_FN(json_decode)(String(sparams), true)
     );
@@ -281,6 +282,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       error = true;
     }
   } else {
+    ARRPROV_USE_RUNTIME_LOCATION();
     std::vector<std::string> sparams;
     transport->getArrayParam("p", sparams, requestMethod);
     if (!sparams.empty()) {
@@ -308,10 +310,6 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     m_reset = true;
   }
   int output = transport->getIntParam("output", requestMethod);
-
-  // We don't debug RPC requests, so we need to detach XDebugHook if xdebug was
-  // enabled.
-  DEBUGGER_ATTACHED_ONLY(DebuggerHook::detach());
 
   int code;
   if (!error) {
@@ -356,28 +354,32 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       if (!forbidden) {
         rpcFile = (std::string) canonicalize_path(rpcFile, "", 0);
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
-        ret = hphp_invoke(m_context, rpcFile, false, Array(), uninit_null(),
+        ret = hphp_invoke(m_context, rpcFile, false, Array(), nullptr,
                           reqInitFunc, reqInitDoc, error, errorMsg, runOnce,
                           false /* warmupOnly */,
-                          false /* richErrorMessage */);
+                          false /* richErrorMessage */,
+                          RuntimeOption::EvalPreludePath,
+                          true /* allowDynCallNoPointer */);
       }
       // no need to do the initialization for a second time
       reqInitFunc.clear();
       reqInitDoc.clear();
     }
     if (ret && !rpcFunc.empty()) {
-      ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
+      ret = hphp_invoke(m_context, rpcFunc, true, params, &funcRet,
                         reqInitFunc, reqInitDoc, error, errorMsg,
                         true /* once */,
                         false /* warmupOnly */,
-                        false /* richErrorMessage */);
+                        false /* richErrorMessage */,
+                        RuntimeOption::EvalPreludePath,
+                        true /* allowDynCallNoPointer */);
     }
     if (ret) {
       bool serializeFailed = false;
       String response;
       switch (output) {
         case 0: {
-          assert(returnEncodeType == ReturnEncodeType::Json ||
+          assertx(returnEncodeType == ReturnEncodeType::Json ||
                  returnEncodeType == ReturnEncodeType::Serialize);
           try {
             response = (returnEncodeType == ReturnEncodeType::Json)
@@ -391,7 +393,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         case 1: response = m_context->obDetachContents(); break;
         case 2:
           response = Variant::attach(HHVM_FN(json_encode)(
-            make_map_array(
+            make_dict_array(
               s_output,
               m_context->obDetachContents(),
               s_return,
@@ -407,7 +409,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
             "Serialization of the return value failed", 500);
         m_reset = true;
       } else {
-        transport->sendRaw((void*)response.data(), response.size());
+        transport->sendRaw(response.data(), response.size());
         code = transport->getResponseCode();
       }
     } else if (error) {

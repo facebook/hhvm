@@ -1,20 +1,5 @@
 # tests that verifier checks properties of the CreateCl bytecode
 
-.main {
-  FPushFuncD 0 "foo"
-  FCall 0
-  PopR
-  FPushFuncD 0 "bar"
-  FCall 0
-  PopR
-  FPushFuncD 0 "baz"
-  FCall 0
-  PopR
-
-  Int 1
-  RetC
-}
-
 .function foo() {
   Int 1
   Int 1
@@ -45,4 +30,25 @@
     Int 1
     RetC
   }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "bar"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "baz"
+  PopC
+
+  Int 1
+  RetC
 }

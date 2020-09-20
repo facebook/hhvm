@@ -27,6 +27,12 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const RegSet kGPRegs =
+  reg::rax | reg::rbx | reg::rcx | reg::rdx |
+  reg::rdi | reg::rsi | reg::rsp | reg::rbp |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11 |
+  reg::r12 | reg::r13 | reg::r14 | reg::r15;
+
 #ifdef _MSC_VER
 const RegSet kGPCallerSaved =
   reg::rax | reg::rcx | reg::rdx |
@@ -43,21 +49,20 @@ const RegSet kGPCalleeSaved =
   reg::rbx | reg::r12 | reg::r13 | reg::r14 | reg::r15;
 #endif
 
-const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
 const RegSet kGPReserved = x64::rsp() | x64::rvmfp() | x64::rvmtl();
-const RegSet kGPRegs = kGPUnreserved | kGPReserved;
+const RegSet kGPUnreserved = kGPRegs - kGPReserved;
 
-const RegSet kXMMCallerSaved =
+const RegSet kXMMRegs =
   reg::xmm0  | reg::xmm1  | reg::xmm2  | reg::xmm3 |
   reg::xmm4  | reg::xmm5  | reg::xmm6  | reg::xmm7 |
   reg::xmm8  | reg::xmm9  | reg::xmm10 | reg::xmm11 |
   reg::xmm12 | reg::xmm13 | reg::xmm14 | reg::xmm15;
 
+const RegSet kXMMCallerSaved = kXMMRegs;
 const RegSet kXMMCalleeSaved;
 
-const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 const RegSet kXMMReserved;
-const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
+const RegSet kXMMUnreserved = kXMMRegs - kXMMReserved;
 
 const RegSet kCallerSaved = kGPCallerSaved | kXMMCallerSaved;
 const RegSet kCalleeSaved = kGPCalleeSaved | kXMMCalleeSaved;
@@ -67,10 +72,14 @@ const RegSet kSF = RegSet(RegSF{0});
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Registers that can safely be used within a prologue.
+ */
+const RegSet kPrologueRegs = kXMMCallerSaved | kGPUnreserved;
+
+/*
  * Registers that can safely be used for scratch purposes in-between traces.
  */
-const RegSet kScratchCrossTraceRegs =
-  kXMMCallerSaved | (kGPUnreserved - x64::vm_regs_with_sp());
+const RegSet kScratchCrossTraceRegs = kPrologueRegs - reg::r15;
 
 /*
  * Helper code ABI registers.
@@ -88,6 +97,16 @@ const Abi trace_abi {
   kCalleeSaved,
   kSF,
   true,
+};
+
+const Abi prologue_abi {
+  trace_abi.gp() & kPrologueRegs,
+  trace_abi.gp() - kPrologueRegs,
+  trace_abi.simd() & kPrologueRegs,
+  trace_abi.simd() - kPrologueRegs,
+  trace_abi.calleeSaved & kPrologueRegs,
+  trace_abi.sf,
+  false
 };
 
 const Abi cross_trace_abi {
@@ -145,6 +164,8 @@ const Abi& abi(CodeKind kind) {
   switch (kind) {
     case CodeKind::Trace:
       return trace_abi;
+    case CodeKind::Prologue:
+      return prologue_abi;
     case CodeKind::CrossTrace:
       return cross_trace_abi;
     case CodeKind::Helper:

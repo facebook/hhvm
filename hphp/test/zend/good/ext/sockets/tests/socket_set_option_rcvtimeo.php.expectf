@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: no key "sec" passed in optval in %s/socket_set_option_rcvtimeo.php on line 9
 bool(true)
 bool(true)

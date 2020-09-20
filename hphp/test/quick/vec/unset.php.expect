@@ -34,10 +34,9 @@ vec(3) {
 vec(3) {
   int(1)
   string(3) "abc"
-  object(Dtor)#1 (0) {
+  object(Dtor) (0) {
   }
 }
-Dtor::__destruct
 vec(2) {
   int(1)
   string(3) "abc"

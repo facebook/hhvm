@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Only interfaces and classes may extend other interfaces and classes. in %s/bug55524.php on line 5

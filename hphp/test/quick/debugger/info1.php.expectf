@@ -14,7 +14,7 @@ info array_key_exists
 function array_key_exists($key, $search);
 
 info stdClass
-class stdClass {
+final class stdClass {
 }
 
 run

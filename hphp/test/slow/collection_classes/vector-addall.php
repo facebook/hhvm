@@ -6,4 +6,8 @@ function main($v) {
   return $v->addAll($v);
 }
 
+
+<<__EntryPoint>>
+function main_vector_addall() {
 var_dump(main(Vector { 1, 2, 3 }));
+}

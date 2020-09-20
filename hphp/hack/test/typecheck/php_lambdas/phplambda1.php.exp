@@ -1,0 +1,2 @@
+File "phplambda1.php", line 7, characters 10-57:
+PHP style anonymous functions are not allowed. (NastCheck[3084])

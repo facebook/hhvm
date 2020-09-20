@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   public static function bar($i) {
@@ -12,12 +12,15 @@ class Foo {
 
 function test_invoke($ref, $instance) {
   try {
-    $ref->invokeArgs($instance, ["SUCCESS"]);
+    $ref->invokeArgs($instance, varray["SUCCESS"]);
   } catch (Exception $e) {
     echo get_class($e) . ': ' . $e->getMessage() . "\n";
   }
 }
 
+
+<<__EntryPoint>>
+function main_reflection_class_invoke_args() {
 $class = new ReflectionClass('Foo');
 $static_method = $class->getMethod('bar');
 $instance_method = $class->getMethod('baz');
@@ -27,3 +30,4 @@ test_invoke($static_method, $class);
 
 test_invoke($instance_method, null);
 test_invoke($instance_method, $class);
+}

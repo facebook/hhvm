@@ -19,6 +19,7 @@ string(4) "CEST"
 string(16) "America/New_York"
 string(19) "America/Los_Angeles"
 string(15) "Pacific/Chatham"
+string(6) "+01:23"
 bool(true)
 
 Warning: timezone_open(): Unknown or bad timezone (sdf) in %s

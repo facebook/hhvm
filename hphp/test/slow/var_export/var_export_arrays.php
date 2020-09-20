@@ -1,17 +1,20 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_var_export_arrays() {
 echo("** array **\n");
-var_export(array());
+var_export(varray[]);
 echo("\n\n");
-var_export(array('foo'));
+var_export(varray['foo']);
 echo("\n\n");
-var_export(array('foo', 'bar'));
+var_export(varray['foo', 'bar']);
 echo("\n\n");
-var_export(array('foo' => 'fooval'));
+var_export(darray['foo' => 'fooval']);
 echo("\n\n");
-var_export(array('foo' => 'fooval', 'bar' => 'barval'));
+var_export(darray['foo' => 'fooval', 'bar' => 'barval']);
 echo("\n\n");
-var_export(array('4' => 'zuckval', '4bar' => 'barval'));
+var_export(darray['4' => 'zuckval', '4bar' => 'barval']);
 echo("\n\n");
 
 echo("** vec **\n");
@@ -39,3 +42,4 @@ var_export(keyset['foo']);
 echo("\n\n");
 var_export(keyset['foo', 'bar']);
 echo("\n\n");
+}

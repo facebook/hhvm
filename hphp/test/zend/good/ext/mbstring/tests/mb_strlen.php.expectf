@@ -14,8 +14,10 @@
 43
 101
 == WRONG PARAMETERS ==
-ERR: Warning
 
-ERR: Warning
+Warning: strlen() expects parameter 1 to be string, %rd?%rarray given in %s/mb_strlen.php on line 58
+
+
+Warning: strlen() expects parameter 1 to be string, object given in %s/mb_strlen.php on line 63
 
 ERR: Warning

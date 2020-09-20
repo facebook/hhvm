@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: Empty regular expression in %s/empty_pattern.php on line 4
 
-Warning: %s
+Warning: No regex given in %s/empty_pattern.php on line 5

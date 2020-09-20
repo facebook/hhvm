@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HEADER_KIND_H_
-#define incl_HPHP_HEADER_KIND_H_
+#pragma once
 
 #include "hphp/util/compilation-flags.h"
 
@@ -43,12 +42,23 @@ namespace HPHP {
  * HHVM_REPO_SCHEMA, because kind values are used in HHBC.
  */
 enum class HeaderKind : uint8_t {
-  // ArrayKind aliases
-  Packed, Mixed, Empty, Apc, Globals,
-  // Hack arrays
-  Dict, VecArray, Keyset,
+  // Array-like header kinds. We use the concrete values of these kinds for
+  // tests in array-data.h, so take care when changing them. Specifically,
+  // we currently require that:
+  //
+  //  1. Array-like HeaderKind values match up with ArrayData::ArrayKind.
+  //  2. All PHP kinds come before any Hack array kinds.
+  //  3. varray-ish and darray-ish kinds come first (used for dvarray tests)
+  //  4. "vanilla" kinds are even, and "bespoke" kinds are odd.
+  //  5. We support fast mask-compare tests for packed and mixed layouts.
+
+  // dvarrays, with bespoke counterparts
+  Mixed, BespokeDArray, Packed, BespokeVArray,
+  // Hack arrays, with bespoke counterparts
+  Dict, BespokeDict, Vec, BespokeVec, Keyset, BespokeKeyset,
+
   // Other ordinary refcounted heap objects
-  String, Resource, Ref,
+  String, Resource, ClsMeth, RClsMeth, Record, RFunc,
 
   // Valid kinds for an ObjectData; all but Object and NativeObject are
   // isCppBuiltin()
@@ -61,9 +71,10 @@ enum class HeaderKind : uint8_t {
   AsyncFuncFrame, // NativeNode followed by Frame, Resumable, AFWH
   NativeData, // a NativeData header preceding an HNI ObjectData
   ClosureHdr, // a ClosureHdr preceding a Closure ObjectData
+  MemoData, // Memoization data preceding an ObjectData
+  Cpp, // a managed object with associated C++ type
   SmallMalloc, // small req::malloc'd block
   BigMalloc, // big req::malloc'd block
-  BigObj, // big size-tracked object (valid header follows MallocNode)
   Free, // small block in a FreeList
   Hole, // wasted space not in any freelist
   Slab, // header for a contiguous "slab" of small objects
@@ -134,18 +145,28 @@ enum class GCBits : uint8_t {};
  * Refcounted types have a 32-bit RefCount normally, or 8-bit plus 24 bits of
  * padding with ONE_BIT_REFCOUNT.
  *
- * 0         32     40      48          56
- * [ count | kind | marks | DVArray   | sizeClass ] Packed, VecArray
- * [ count | kind | marks | DVArray   |           ] Mixed, Dict
- * [ count | kind | marks |                       ] Empty, Apc, Globals, Keyset
- * [ count | kind | marks | sizeClass:16          ] String
- * [ count | kind | marks | heapSize:16           ] Resource (ResourceHdr)
- * [ count | kind | marks |                       ] Ref (RefData)
- * [ count | kind | marks | Attribute |           ] Object..ImmSet (ObjectData)
+ * 0       32     40      48            56
+ * [ cnt | kind | marks | arrBits      | sizeClass ] Packed, Vec
+ * [ cnt | kind | marks | arrBits      | keyTypes  ] Mixed, Dict
+ * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
+ * [ cnt | kind | marks | sizeClass    | isSymbol  ] String
+ * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
+ * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
+ *
+ * Note: arrBits includes several flags, mostly from the Hack array migration:
+ *  - 1 bit for hasAPCTypedValue
+ *  - 1 bit for isLegacyArray
+ *  - 1 bit for hasProvenanceData
+ *  - 1 bit for hasStrKeyTable
+ *  - 4 bits unused
+ *
+ * When HAM is complete, we can eliminate DVArray and hasProvenanceData and move
+ * the MixedArray keyTypes bitset (which uses 4 bits) to byte 6.
  *
  * Note: when an ObjectData is preceded by a special header (AsyncFuncFrame,
- * NativeData, or ClosureHeader), only the special header is marked using
- * the m_marks field; the m_marks field on the interior ObjectData is unused.
+ * NativeData, ClosureHeader, or MemoData), only the special header is marked
+ * using the m_marks field; the m_marks field on the interior ObjectData is
+ * unused.
  *
  * Special headers have non-refcount uses for m_aux32:
  *
@@ -153,7 +174,9 @@ enum class GCBits : uint8_t {};
  * [ ar_off | kind | marks |              ] AsyncFuncFrame (NativeNode)
  * [ ar_off | kind | marks | tyindex:16   ] NativeData (NativeNode)
  * [ size   | kind | marks |              ] ClosureHeader (ClosureHdr)
- * [ index  | kind | marks | tyindex:16   ] Small/BigMalloc (MallocNode)
+ * [ objoff | kind | marks |              ] MemoData
+ * [        | kind | marks | tyindex:16   ] Cpp, SmallMalloc (MallocNode)
+ * [ index  | kind | marks | tyindex:16   ] BigMalloc (MallocNode)
  * [ index  | kind | marks | kIndexUnkown ] BigObj (MallocNode)
  * [ size   | kind | marks |              ] Free, Hole (FreeNode)
  * [        | kind |       |              ] Slab
@@ -251,15 +274,15 @@ static_assert(sizeof(HeapObject) == sizeof(uint64_t),
 constexpr auto HeaderKindOffset = HeapObject::kind_offset();
 constexpr auto HeaderAuxOffset = HeapObject::aux_offset();
 
-inline bool isObjectKind(HeaderKind k) {
+inline constexpr bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;
 }
 
-inline bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Packed && k <= HeaderKind::Keyset;
+inline constexpr bool isArrayKind(HeaderKind k) {
+  return k >= HeaderKind::Mixed && k <= HeaderKind::BespokeKeyset;
 }
 
-inline bool isFreeKind(HeaderKind k) {
+inline constexpr bool isFreeKind(HeaderKind k) {
   return k >= HeaderKind::Free;
 }
 
@@ -274,31 +297,20 @@ static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 10,
 
 // legacy CppBuiltins have custom C++ types (not plain ObjectData layouts)
 // are not considered HNI objects, and do not have NativeData headers.
-inline bool isCppBuiltin(HeaderKind k) {
+inline constexpr bool isCppBuiltin(HeaderKind k) {
   return k >= detail::FirstCppBuiltin && k <= detail::LastCppBuiltin;
 }
 
-inline bool hasInstanceDtor(HeaderKind k) {
+inline constexpr bool hasInstanceDtor(HeaderKind k) {
   static_assert(uint8_t(HeaderKind::NativeObject) + 1 ==
                 uint8_t(detail::FirstCppBuiltin), "");
   return k >= HeaderKind::NativeObject && k <= detail::LastCppBuiltin;
 }
 
-inline bool isHackArrayKind(HeaderKind k) {
-  return
-    k == HeaderKind::Dict     ||
-    k == HeaderKind::VecArray ||
-    k == HeaderKind::Keyset;
-}
-
-inline bool isWaithandleKind(HeaderKind k) {
+inline constexpr bool isWaithandleKind(HeaderKind k) {
   return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
   static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
                 "isWaithandleKind requires updating");
-}
-
-inline bool isBigKind(HeaderKind k) {
-  return k == HeaderKind::BigObj || k == HeaderKind::BigMalloc;
 }
 
 enum class CollectionType : uint8_t {
@@ -307,32 +319,31 @@ enum class CollectionType : uint8_t {
 #undef COL
 };
 
-inline bool isVectorCollection(CollectionType ctype) {
+inline constexpr bool isVectorCollection(CollectionType ctype) {
   return ctype == CollectionType::Vector || ctype == CollectionType::ImmVector;
 }
-inline bool isMapCollection(CollectionType ctype) {
+inline constexpr bool isMapCollection(CollectionType ctype) {
   return ctype == CollectionType::Map || ctype == CollectionType::ImmMap;
 }
-inline bool isSetCollection(CollectionType ctype) {
+inline constexpr bool isSetCollection(CollectionType ctype) {
   return ctype == CollectionType::Set || ctype == CollectionType::ImmSet;
 }
-inline bool isValidCollection(CollectionType ctype) {
+inline constexpr bool isValidCollection(CollectionType ctype) {
   return uint8_t(ctype) >= uint8_t(CollectionType::Vector) &&
          uint8_t(ctype) <= uint8_t(CollectionType::ImmSet);
 }
-inline bool isMutableCollection(CollectionType ctype) {
+inline constexpr bool isMutableCollection(CollectionType ctype) {
   return ctype == CollectionType::Vector ||
          ctype == CollectionType::Map ||
          ctype == CollectionType::Set;
 }
-inline bool isImmutableCollection(CollectionType ctype) {
+inline constexpr bool isImmutableCollection(CollectionType ctype) {
   return !isMutableCollection(ctype);
 }
 
-inline bool collectionAllowsIntStringKeys(CollectionType ctype) {
+inline constexpr bool collectionAllowsIntStringKeys(CollectionType ctype) {
   return isSetCollection(ctype) || isMapCollection(ctype);
 }
 
 }
 
-#endif

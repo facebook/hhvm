@@ -8,7 +8,7 @@ function cow(): (vec<int>, vec<int>, vec<int>) {
   $v1[] = 6;
   $v2[] = 7;
   $v2[] = 8;
-  return [$v1, $v2, $v3];
+  return varray[$v1, $v2, $v3];
 }
 
 function main() {
@@ -19,4 +19,8 @@ function main() {
   var_dump(cow());
 }
 
+
+<<__EntryPoint>>
+function main_cow() {
 main();
+}

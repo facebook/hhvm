@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time 
+ * Description: Format a GMT date/time
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -26,5 +26,5 @@ echo "\n-- Testing gmdate() function with greater than the range of timestamp --
 $timestamp = mktime(03, 14, 10, 1, 19, 2038);
 var_dump( gmdate(DATE_ISO8601, $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

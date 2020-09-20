@@ -10,6 +10,10 @@ class F {
   }
 }
 
+
+<<__EntryPoint>>
+function main_simple_meth() {
 $f = new F(42);
 var_dump(HH\Asio\join($f->retA()));
 var_dump(HH\Asio\join($f->awaitA()));
+}

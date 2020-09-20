@@ -1,3 +1,4 @@
+Warning: mysql_escape_string() expects exactly 1 parameter, 0 given in %s/mysql_escape_string.php on line 7
 %unicode|string%(31) "Am I a unicode string in PHP 6?"
 %unicode|string%(2) "\\"
 %unicode|string%(2) "\""

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_constants() {
 var_dump(APC_ITER_TYPE);
 var_dump(APC_ITER_KEY);
 var_dump(APC_ITER_FILENAME);
@@ -19,3 +22,4 @@ var_dump(APC_ITER_NONE);
 var_dump(APC_ITER_ALL);
 var_dump(APC_LIST_ACTIVE);
 var_dump(APC_LIST_DELETED);
+}

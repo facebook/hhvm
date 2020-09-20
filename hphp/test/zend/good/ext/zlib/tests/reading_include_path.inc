@@ -1,4 +1,4 @@
-<?php
+<?hh
 $thisTestDir = "zlibVariation.dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);
@@ -12,7 +12,7 @@ $secondFile = $baseDir."/dir2/".$filename;
 $firstFile = "../dir1/".$filename;
 $scriptFile = $scriptDir.'/'.$filename;
 
-$newdirs = array("dir1", "dir2", "dir3");
+$newdirs = varray["dir1", "dir2", "dir3"];
 $pathSep = ":";
 $newIncludePath = "";
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
@@ -24,4 +24,3 @@ foreach($newdirs as $newdir) {
 }
 mkdir($workingDir);
 chdir($workingDir);
-?>

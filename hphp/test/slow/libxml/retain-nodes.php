@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. http://3v4l.org/sbf0s
 
 function foo() {
@@ -13,9 +13,10 @@ function foo() {
 
   return $c;
 }
-
+<<__EntryPoint>> function main(): void {
 $x = foo();
 while ($x) {
   var_dump($x->tagName);
   $x = $x->parentNode;
+}
 }

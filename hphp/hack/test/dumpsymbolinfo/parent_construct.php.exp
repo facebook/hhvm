@@ -1,0 +1,27 @@
+{
+  "function_calls":[
+    {
+      "name":"B::__construct",
+      "type":"Constructor",
+      "pos":{"filename":"parent_construct.php","line":8,"char_start":13,"char_end":23},
+      "caller":"A::__construct"
+    }
+  ],
+  "symbol_types":[
+    {
+      "pos":{"filename":"parent_construct.php","line":4,"char_start":35,"char_end":36},
+      "type":"num",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"parent_construct.php","line":7,"char_start":35,"char_end":36},
+      "type":"int",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"parent_construct.php","line":8,"char_start":25,"char_end":26},
+      "type":"int",
+      "ident":0
+    }
+  ]
+}

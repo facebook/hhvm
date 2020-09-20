@@ -12,13 +12,7 @@ function serialize_test($a) {
 }
 
 function unserialize_test($s) {
-  $a = __hhvm_intrinsics\deserialize_keep_dvarrays(
-    __hhvm_intrinsics\launder_value($s)
-  );
-  var_dump($a);
-  var_dump(is_varray($a));
-  var_dump(is_darray($a));
-  echo "----------------------------------------------------\n";
+  echo "unserialize_test(\"".$s."\")\n";
   $a = unserialize(__hhvm_intrinsics\launder_value($s));
   var_dump($a);
   var_dump(is_varray($a));
@@ -26,7 +20,7 @@ function unserialize_test($s) {
   echo "----------------------------------------------------\n";
   $a = unserialize(
     __hhvm_intrinsics\launder_value($s),
-    ['force_darrays' => true]
+    darray['force_darrays' => true]
   );
   var_dump($a);
   var_dump(is_varray($a));
@@ -36,7 +30,7 @@ function unserialize_test($s) {
 
 function round_trip($a) {
   $a2 = __hhvm_intrinsics\launder_value($a);
-  $a3 = __hhvm_intrinsics\deserialize_keep_dvarrays(
+  $a3 = unserialize(
     __hhvm_intrinsics\serialize_keep_dvarrays($a2)
   );
   if ($a2 !== $a3) {
@@ -59,24 +53,27 @@ function round_trip($a) {
 }
 
 function serialize_tests() {
-  serialize_test([]);
-  serialize_test([100 => 200, 200 => 300, 300 => 400]);
-  serialize_test([0 => 'a', 1 => 'b', 2 => 'c']);
-  serialize_test(['abc' => 100, 'def' => 200, 'ghi' => 300]);
-  serialize_test([1 => [2 => 3], 4 => [5 => 6]]);
+  serialize_test(varray[]);
+  serialize_test(darray[100 => 200, 200 => 300, 300 => 400]);
+  serialize_test(darray[0 => 'a', 1 => 'b', 2 => 'c']);
+  serialize_test(darray['abc' => 100, 'def' => 200, 'ghi' => 300]);
+  serialize_test(darray[
+    1 => darray[2 => 3],
+    4 => darray[5 => 6],
+  ]);
 
   serialize_test(varray[]);
   serialize_test(varray[123, 456, 789]);
   serialize_test(varray['abc', 'def', 'ghi']);
   serialize_test(varray[varray[1, 2, 3], varray[4, 5, 6]]);
-  serialize_test([varray[1, 2, 3], varray[4, 5, 6]]);
+  serialize_test(varray[varray[1, 2, 3], varray[4, 5, 6]]);
 
   serialize_test(darray[]);
   serialize_test(darray[100 => 200, 200 => 300, 300 => 400]);
   serialize_test(darray[0 => 'a', 1 => 'b', 2 => 'c']);
   serialize_test(darray['abc' => 100, 'def' => 200, 'ghi' => 300]);
   serialize_test(darray[1 => darray[2 => 3], 4 => darray[5 => 6]]);
-  serialize_test([1 => darray[2 => 3], 4 => darray[5 => 6]]);
+  serialize_test(darray[1 => darray[2 => 3], 4 => darray[5 => 6]]);
 
   serialize_test(varray[darray[0 => 'a'], darray[1 => 'b'], darray[2 => 'c']]);
   serialize_test(darray[0 => varray[1, 2, 3], 1 => varray[4, 5, 6]]);
@@ -123,6 +120,10 @@ function round_trip_tests() {
   round_trip(darray[0 => varray[1, 2, 3], 1 => varray[4, 5, 6]]);
 }
 
+
+<<__EntryPoint>>
+function main_serialize() {
 serialize_tests();
 unserialize_tests();
 round_trip_tests();
+}

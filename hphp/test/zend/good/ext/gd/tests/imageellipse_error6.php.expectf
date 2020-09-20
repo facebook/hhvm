@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imageellipse() expects parameter 6 to be integer, string given in %s/imageellipse_error6.php on line 7

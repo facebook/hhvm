@@ -1,0 +1,21 @@
+-- at constructor entry --
+object(D) (1) {
+  ["ci"]=>
+  int(0)
+}
+-- at constructor entry --
+object(D) (1) {
+  ["ci"]=>
+  int(0)
+}
+-- after constructor completes --
+object(D) (1) {
+  ["ci"]=>
+  int(1)
+}
+Cannot modify const property ci of class D after construction
+-- at the end --
+object(D) (1) {
+  ["ci"]=>
+  int(1)
+}

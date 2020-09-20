@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $filename = __FILE__ . chr(0). ".ridiculous";
 
 if (file_exists($filename)) {
@@ -8,6 +8,5 @@ if (file_exists($filename)) {
 else {
     echo "PASS\n";
 }
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

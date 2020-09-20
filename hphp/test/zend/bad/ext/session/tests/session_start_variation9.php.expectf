@@ -1,9 +1,0 @@
-*** Testing session_start() : variation ***
-string(%d) "%s"
-
-Notice: %s
-bool(true)
-string(%d) "%s"
-bool(true)
-string(0) ""
-Done

@@ -1,4 +1,0 @@
-(5,7)-(5,11) Cannot define a class, interface, or trait inside a function. Currently class 'BadClass' is inside function 'later'.
-(7,7)-(7,15) Cannot define a class, interface, or trait inside a function. Currently interface 'BadInterface' is inside function 'later'.
-(9,7)-(9,11) Cannot define a class, interface, or trait inside a function. Currently trait 'BadTrait' is inside function 'later'.
-(23,5)-(23,9) Cannot define a class, interface, or trait inside a function. Currently class 'D' is inside function 'foo'.

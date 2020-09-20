@@ -1,10 +1,4 @@
-<?php
-
-set_error_handler(
-  function($errno, $str) {
-    var_dump($str);
-  }
-);
+<?hh
 
 class ReturnsString {
   public function __toString() {
@@ -12,15 +6,11 @@ class ReturnsString {
   }
 }
 
-var_dump((string) (new ReturnsString()));
-
 class ReturnsThis {
   public function __toString() {
     return $this;
   }
 }
-
-var_dump((string) (new ReturnsThis()));
 
 class ReturnsInt {
   public function __toString() {
@@ -28,15 +18,11 @@ class ReturnsInt {
   }
 }
 
-var_dump((string) (new ReturnsInt()));
-
 class ReturnsNull {
   public function __toString() {
     return null;
   }
 }
-
-var_dump((string) (new ReturnsInt()));
 
 class ReturnsStringable {
   public function __toString() {
@@ -44,4 +30,22 @@ class ReturnsStringable {
   }
 }
 
+
+<<__EntryPoint>>
+function main_tostring_invalid() {
+set_error_handler(
+  function($errno, $str) {
+    var_dump($str);
+  }
+);
+
+var_dump((string) (new ReturnsString()));
+
+var_dump((string) (new ReturnsThis()));
+
+var_dump((string) (new ReturnsInt()));
+
+var_dump((string) (new ReturnsInt()));
+
 var_dump((string) (new ReturnsStringable()));
+}

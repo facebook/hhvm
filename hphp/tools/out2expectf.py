@@ -1,66 +1,85 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+import argparse
+import inspect
+import pathlib as pl
 import re
 import sys
-import os
-import inspect
 
-self = os.path.abspath(inspect.getfile(inspect.currentframe()))
-root = os.path.dirname(os.path.dirname(os.path.dirname(self)))
-root_re = re.escape(root)
 
-for test in sys.argv[1:]:
-    if not test.endswith('.php'):
-        print("%s doesn\'t end in .php. Pass the .php file to this script." %
-               test)
-        sys.exit(1)
+def out2expectf_main():
+    this_file = pl.Path(inspect.getfile(inspect.currentframe())).resolve()
+    root = this_file.parent.parent.parent
+    root_re = re.escape(str(root))
 
-    try:
-        data = open(test + '.out').read()
-    except IOError:
-        print("%s.out doesn't exist, skipping" % test)
-        continue
+    parser = argparse.ArgumentParser(
+        description="Remove machine or test run specific data from test output."
+    )
+    parser.add_argument(
+        "test_directory",
+        help="Temporary test directory of recent hphp/test/run",
+        type=pl.Path,
+    )
+    parser.add_argument(
+        "test_files",
+        nargs="+",
+        help="List of test files to grab output of, relative to fbcode root",
+        type=pl.Path,
+    )
 
-    try:
-        # the first match has to be in a try incase there is bad unicode
-        re.sub('a', r'a', data)
-    except UnicodeDecodeError:
-        print("%s has invalid unicode, skipping" % test)
-        continue
+    args = parser.parse_args()
 
-    # try to do relative paths
-    data = re.sub('string\(\d+\) "(#\d+) ' + root_re + '(/hphp)?',
-                  r'string(%d) "\1 %s',
-                  data)
-    data = re.sub('string\(\d+\) "' + root_re + '(/hphp)?',
-                  r'string(%d) "%s', data)
-    data = re.sub(root_re + '(/hphp)?', '%s', data)
+    for test in args.test_files:
+        if (not str(test).endswith(".php")) and (not str(test).endswith(".hack")):
+            print("%s doesn't end in .php. Pass the .php file to this script." % test)
+            sys.exit(1)
 
-    # The debugger prints the path given on the command line, which is often
-    # relative. All such debugger tests live under something/debugger/foo.php.
-    data = re.sub('[^ ]*/debugger(/[^ ]*.php)', r'%s\1', data)
+        try:
+            test_file = args.test_directory / pl.Path(str(test) + '.out')
+            data = open(test_file).read()
+        except IOError:
+            print("%s doesn't exist, skipping" % test_file)
+            continue
 
-    # Generator method names are, well, generated!
-    # See ParserBase::getAnonFuncName.
-    data = re.sub(' [0-9]+_[0-9]+\(', ' %d_%d(', data)
+        try:
+            # the first match has to be in a try incase there is bad unicode
+            re.sub(r"a", r"a", data)
+        except UnicodeDecodeError:
+            print("%s has invalid unicode, skipping" % test)
+            continue
 
-    # Closure names change
-    data = re.sub('Closure\$\$[0-9a-f]+\$', 'Closure%s', data)
+        # try to do relative paths
+        data = re.sub(
+            r'string\(\d+\) "(#\d+) ' + root_re + r"(/hphp)?", r'string(%d) "\1 %s', data
+        )
+        data = re.sub(r'string\(\d+\) "' + root_re + r"(/hphp)?", r'string(%d) "%s', data)
+        data = re.sub(root_re + r"(/hphp)?", r"%s", data)
 
-    # Closure class name
-    data = re.sub('string\(7\) "Closure"', 'string(%d) "Closure%s"', data)
+        # The debugger prints the path given on the command line, which is often
+        # relative. All such debugger tests live under something/debugger/foo.php.
+        data = re.sub(r"[^ ]*/debugger(/[^ ]*.(php|hack))", r"%s\1", data)
 
-    # Left over Closure class names
-    data = re.sub('Closure(?!%s)', 'Closure%s', data)
+        # Generator method names are, well, generated!
+        # See ParserBase::getAnonFuncName.
+        data = re.sub(r" [0-9]+_[0-9]+\(", r" %d_%d(", data)
 
-    if '%' in data:
-        name = test + '.expectf'
-    else:
-        name = test + '.expect'
+        # Closure names change
+        data = re.sub(r"Closure\$\$[0-9a-f]+\$", r"Closure%s", data)
 
-    open(name, 'w').write(data)
-    print('Copied %s.out to %s' % (test, name))
+        # Closure class name
+        data = re.sub(r'string\(7\) "Closure"', r'string(%d) "Closure%s"', data)
+
+        # Left over Closure class names
+        data = re.sub(r"Closure(?!%s)", r"Closure%s", data)
+
+        if "%" in data:
+            name = str(test) + ".expectf"
+        else:
+            name = str(test) + ".expect"
+
+        open(name, "w").write(data)
+        print("Copied %s.out to %s" % (args.test_directory / test, name))
+
+
+if __name__ == "__main__":
+    out2expectf_main()

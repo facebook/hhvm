@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings 
+ * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -13,11 +13,11 @@ setlocale(LC_ALL, "en_US");
 date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
-$inputs = array(
-	  'Time in a.m/p.m notation' => "%r",
-	  'Time in 24 hour notation' => "%R",
-	  'Current time %H:%M:%S format' => "%T",
-);
+$inputs = darray[
+      'Time in a.m/p.m notation' => "%r",
+      'Time in 24 hour notation' => "%R",
+      'Current time %H:%M:%S format' => "%T",
+];
 
 // loop through each element of the array for timestamp
 
@@ -27,5 +27,5 @@ foreach($inputs as $key =>$value) {
       var_dump( gmstrftime($value, $timestamp) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

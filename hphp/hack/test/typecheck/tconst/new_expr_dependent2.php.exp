@@ -1,13 +1,13 @@
 File "new_expr_dependent2.php", line 21, characters 5-15:
-  C as C
+  exact C
 File "new_expr_dependent2.php", line 36, characters 5-15:
-  C as C
+  exact C
 File "new_expr_dependent2.php", line 59, characters 5-15:
-  ^(C as C | D as D)
+  (exact C | exact D)
 File "new_expr_dependent2.php", line 73, characters 5-15:
-  ^(?^_ | D as D | C as C)
+  ?(exact C | exact D)
 File "new_expr_dependent2.php", line 81, characters 5-20:
-  C as C
+  exact C
 File "new_expr_dependent2.php", line 88, characters 5-15:
-  D as D
+  exact D
 No errors

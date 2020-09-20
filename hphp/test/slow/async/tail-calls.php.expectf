@@ -1,0 +1,102 @@
+
+======================
+Iteration 0:
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s: test0()
+%A"
+int(1)
+int(2)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s/tail-calls.php(14): test1()
+#2 %s/tail-calls.php(18): test2()
+#3 (): test3()
+#4 (): HH\Asio\join()
+#5 (): __SystemLib\enter_async_entry_point()
+#6 {main}"
+int(4)
+int(5)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s/tail-calls.php(14): test1()
+#2 %s/tail-calls.php(18): test2()
+#3 %s/tail-calls.php(22): test3()
+#4 %s/tail-calls.php(26): test4()
+#5 %s/tail-calls.php(30): test5()
+#6 %s: test6()
+%A"
+int(7)
+int(8)
+string(6) "caught"
+
+======================
+Iteration 1:
+int(1)
+int(2)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s: test1()
+%A"
+int(4)
+int(5)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s/tail-calls.php(14): test1()
+#2 %s/tail-calls.php(18): test2()
+#3 %s/tail-calls.php(22): test3()
+#4 %s/tail-calls.php(26): test4()
+#5 %s: test5()
+%A"
+int(7)
+int(8)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s/tail-calls.php(14): test1()
+#2 %s/tail-calls.php(18): test2()
+#3 %s/tail-calls.php(22): test3()
+#4 %s/tail-calls.php(26): test4()
+#5 %s/tail-calls.php(30): test5()
+#6 %s/tail-calls.php(34): test6()
+#7 %s/tail-calls.php(38): test7()
+#8 %s: test8()
+%A"
+int(10)
+
+======================
+Iteration 2:
+int(2)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s: test0()
+%A"
+int(4)
+int(5)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s/tail-calls.php(14): test1()
+#2 %s/tail-calls.php(18): test2()
+#3 %s/tail-calls.php(22): test3()
+#4 %s: test4()
+%A"
+int(7)
+int(8)
+string(%d) "exception 'Exception' with message 'thrown' in %s/tail-calls.php:5
+Stack trace:
+#0 %s/tail-calls.php(10): test0()
+#1 %s/tail-calls.php(14): test1()
+#2 %s/tail-calls.php(18): test2()
+#3 %s/tail-calls.php(22): test3()
+#4 %s/tail-calls.php(26): test4()
+#5 %s/tail-calls.php(30): test5()
+#6 %s/tail-calls.php(34): test6()
+#7 %s: test7()
+%A"
+int(10)
+int(11)

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 //bogus
 var_dump(date_default_timezone_set('AAA'));
 var_dump(date_default_timezone_set('ZZZ'));
@@ -10,5 +10,4 @@ var_dump(date_default_timezone_set("Africa/Abidjan"));
 var_dump(date_default_timezone_set("Zulu"));
 
 echo "done\n";
-
-?>
+}

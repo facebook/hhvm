@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class CamelCase {
   final public function foo(int $x): void {}
@@ -13,8 +13,10 @@ function ret(): camelcase {
 }
 
 function foo(cAmelCase $arg): :xhp {
-  hh_show($arg);
+  expect_CamelCase($arg);
   $v = ret();
-  hh_show($v);
+  expect_CamelCase($v);
   return new :xhp();
 }
+
+function expect_CamelCase(CamelCase $x):void {}

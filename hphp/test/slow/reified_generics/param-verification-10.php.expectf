@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to C::f() must be an instance of A<int, int>, A<int,string> given in %s on line 11

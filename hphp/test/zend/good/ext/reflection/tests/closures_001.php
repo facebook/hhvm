@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $closure = function($a, $b = 0) { };
 
 $ro = new ReflectionObject($closure);
@@ -23,13 +23,13 @@ var_dump($rm->getNumberOfRequiredParameters());
 
 echo "---\n";
 
-$rp = new ReflectionParameter(array($closure, '__invoke'), 0);
+$rp = new ReflectionParameter(varray[$closure, '__invoke'], 0);
 var_dump($rp->isOptional());
-$rp = new ReflectionParameter(array($closure, '__invoke'), 1);
+$rp = new ReflectionParameter(varray[$closure, '__invoke'], 1);
 var_dump($rp->isOptional());
-$rp = new ReflectionParameter(array($closure, '__invoke'), 'a');
+$rp = new ReflectionParameter(varray[$closure, '__invoke'], 'a');
 var_dump($rp->isOptional());
-$rp = new ReflectionParameter(array($closure, '__invoke'), 'b');
+$rp = new ReflectionParameter(varray[$closure, '__invoke'], 'b');
 var_dump($rp->isOptional());
 
 echo "---\n";
@@ -43,5 +43,5 @@ var_dump($rp->isOptional());
 $rp = new ReflectionParameter($closure, 'b');
 var_dump($rp->isOptional());
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

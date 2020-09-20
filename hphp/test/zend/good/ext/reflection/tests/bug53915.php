@@ -1,18 +1,21 @@
-<?php
-Class Foo
+<?hh
+class Foo
 {
 	const A = 1;
 	const B = self::A;
 }
 
-$rc = new ReflectionClass('Foo');
-print_r($rc->getConstants());
-
-Class Foo2
+class Foo2
 {
         const A = 1;
         const B = self::A;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$rc = new ReflectionClass('Foo2');
-print_r($rc->getConstant('B'));
+  $rc = new ReflectionClass('Foo');
+  print_r($rc->getConstants());
+
+  $rc = new ReflectionClass('Foo2');
+  print_r($rc->getConstant('B'));
+}

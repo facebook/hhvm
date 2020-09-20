@@ -2,11 +2,9 @@
 
 -- Testing timezone_name_from_abbr() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects at least 1 parameter, 0 given in %s/timezone_name_from_abbr_error.php on line 16
 
 -- Testing timezone_name_from_abbr() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects at most 3 parameters, 4 given in %s/timezone_name_from_abbr_error.php on line 23
 ===DONE===

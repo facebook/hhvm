@@ -13,7 +13,7 @@ float(12.3)
 int(12)
 float(12)
 float(0)
-array(3) {
+darray(3) {
   [0]=>
   int(12)
   [1]=>
@@ -21,13 +21,13 @@ array(3) {
   [2]=>
   float(12.3)
 }
-object(stdClass)#%d (2) {
+object(stdClass) (2) {
   ["float"]=>
   float(12)
   ["integer"]=>
   int(12)
 }
-array(2) {
+darray(2) {
   ["float"]=>
   float(12)
   ["integer"]=>

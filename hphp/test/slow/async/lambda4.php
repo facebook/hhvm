@@ -13,4 +13,8 @@ async function foo($a) {
   return await $fn(47, 26);
 }
 
+
+<<__EntryPoint>>
+function main_lambda4() {
 var_dump(HH\Asio\join(foo(42)));
+}

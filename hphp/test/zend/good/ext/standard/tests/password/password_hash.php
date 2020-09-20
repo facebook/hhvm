@@ -1,15 +1,15 @@
-<?php
+<?hh
 //-=-=-=-
-
+<<__EntryPoint>> function main(): void {
 var_dump(strlen(password_hash("foo", PASSWORD_BCRYPT)));
 
 $hash = password_hash("foo", PASSWORD_BCRYPT);
 
 var_dump($hash === crypt("foo", $hash));
 
-var_dump(password_hash("rasmuslerdorf", PASSWORD_BCRYPT, array("cost" => 7, "salt" => "usesomesillystringforsalt")));
+var_dump(password_hash("rasmuslerdorf", PASSWORD_BCRYPT, darray["cost" => 7, "salt" => "usesomesillystringforsalt"]));
 
-var_dump(password_hash("test", PASSWORD_BCRYPT, array("salt" => "123456789012345678901" . chr(0))));
+var_dump(password_hash("test", PASSWORD_BCRYPT, darray["salt" => "123456789012345678901" . chr(0)]));
 
 echo "OK!";
-?>
+}

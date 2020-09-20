@@ -1,0 +1,1 @@
+Fatal error: Dynamic class names are not allowed in compile-time `::class` fetch in %s/test/slow/parser/colon_colon_class_var.php on line 6

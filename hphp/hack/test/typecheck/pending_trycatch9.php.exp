@@ -1,0 +1,2 @@
+File "pending_trycatch9.php", line 8, characters 10-11:
+Variable `$x` is undefined, or not always defined. (Naming[2050])

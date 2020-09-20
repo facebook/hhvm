@@ -4,10 +4,9 @@
 // disallowed in RepoAuthoritative mode. Thus, this test
 // is set to be norepo.
 function err($code, $msg) {
-  echo "Handled ${code}: $msg", "\n";
+  echo "Handled {$code}: $msg", "\n";
   return true;
 }
-set_error_handler('err');
 
 class CExplicit implements Stringish {
   public function __toString() {
@@ -33,18 +32,18 @@ class CThruTrait {
   use TStringish;
 }
 
-function f1(?Stringish $x): void {
+function f1(<<__Soft>> ?Stringish $x): void {
   $s = Stringish::class;
-  echo ($x instanceof Stringish) ? "true" : "false", ", ";
-  echo ($x instanceof $s) ? "true" : "false", ", ";
+  echo ($x is Stringish) ? "true" : "false", ", ";
+  echo (is_a($x, $s)) ? "true" : "false", ", ";
   var_dump($x);
   echo "\n";
 }
 
-function f2(Stringish $x): void {
+function f2(<<__Soft>> Stringish $x): void {
   $s = Stringish::class;
-  echo ($x instanceof Stringish) ? "true" : "false", ", ";
-  echo ($x instanceof $s) ? "true" : "false", ", ";
+  echo ($x is Stringish) ? "true" : "false", ", ";
+  echo (is_a($x, $s)) ? "true" : "false", ", ";
   var_dump($x);
   echo "\n";
 }
@@ -82,8 +81,8 @@ function test_functionality() {
   f2(null);
 
   echo '********** array **********', "\n";
-  f1(array(1, 2, 3));
-  f2(array(1, 2, 3));
+  f1(varray[1, 2, 3]);
+  f2(varray[1, 2, 3]);
 
   echo '********** number **********', "\n";
   f1(10);
@@ -131,5 +130,10 @@ function test_reflection() {
 
 }
 
+<<__EntryPoint>>
+function main_stringish() {
+set_error_handler(fun('err'));
+
 test_functionality();
 test_reflection();
+}

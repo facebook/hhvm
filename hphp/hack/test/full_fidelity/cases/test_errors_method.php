@@ -13,12 +13,8 @@ class E {
   public abstract function __construct () ;
   public abstract function __construct () {}
   public function f (public int $k) : void {}
-  public function __destruct (int $k) {}
-  static function __destruct () {}
   public function __construct () : int {}
-  public function __destruct () : E {}
   public function __construct () : void {}
-  public function __destruct () : void {}
   public function f (...) : void {} // no errors
   public function f (...,) : void {} // error; trailing comma illegal
   public function f (..., int $x) : void {} // error; ... must be at end

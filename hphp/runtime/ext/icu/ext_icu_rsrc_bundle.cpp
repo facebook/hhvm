@@ -50,7 +50,7 @@ static Variant extractValue(ResourceBundle* data,
       int32_t len;
       auto vec = bundle.getIntVector(len, error);
       EXTRACT_ERR(vector);
-      Array ret = Array::Create();
+      Array ret = Array::CreateVArray();
       for (int i = 0; i < len; ++i) {
         ret.append((int64_t)vec[i]);
       }
@@ -74,7 +74,7 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& localeName,
     raise_warning("Bundle name too long");
     bundle = String{};
   }
-  auto const locale = Locale::createFromName(
+  auto const locale = icu::Locale::createFromName(
     localeOrDefault(localeName.toString()).c_str()
   );
   auto data = Native::data<ResourceBundle>(this_);
@@ -187,7 +187,7 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   const char *entry;
   int32_t entry_len;
   while ((entry = uenum_next(le, &entry_len, &error))) {

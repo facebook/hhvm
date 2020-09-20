@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 $doc->load(dirname(__FILE__)."/nsdoc.xml");
 
@@ -13,4 +13,4 @@ echo $child->getAttribute("xmlns")."\n";
 echo $child->getAttribute("xmlns:ns2")."\n";
 
 echo "DONE\n";
-?>
+}

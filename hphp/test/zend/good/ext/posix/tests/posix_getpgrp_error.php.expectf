@@ -2,6 +2,5 @@
 
 -- Testing posix_getpgrp() function with one argument --
 
-Warning: %s
-NULL
+Warning: posix_getpgrp() expects exactly 0 parameters, 1 given in %s/posix_getpgrp_error.php on line 13
 Done

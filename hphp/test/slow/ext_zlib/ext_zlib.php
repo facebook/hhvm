@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -7,11 +7,14 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_zlib() {
 var_dump(readgzfile(__DIR__."/test_ext_zlib.gz"));
 
-VS(gzfile(__DIR__."/test_ext_zlib.gz"), array("Testing Ext Zlib\n"));
+VS(gzfile(__DIR__."/test_ext_zlib.gz"), varray["Testing Ext Zlib\n"]);
 
 VS(gzuncompress(gzcompress("testing gzcompress")), "testing gzcompress");
 
@@ -99,3 +102,4 @@ VERIFY($v == false);
 $c = lz4_compress($empty);
 $d = lz4_uncompress($c);
 VERIFY($d == $empty);
+}

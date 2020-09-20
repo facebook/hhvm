@@ -1,7 +1,6 @@
-<?php
-
-$aArray = array ( -1 => 'Hello');
+<?hh
+<<__EntryPoint>> function main(): void {
+$aArray = darray [ -1 => 'Hello'];
 
 var_export($aArray);
-
-?>
+}

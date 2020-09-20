@@ -1,0 +1,8 @@
+Parsing[1002] A right brace } is expected here. [1]
+
+error_pos_outside_range4.php:3:21
+    1 | <?hh
+    2 | 
+[1] 3 | function f(): void {_
+
+1 error found.

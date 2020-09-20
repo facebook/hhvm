@@ -1,16 +1,12 @@
-<?php
+<?hh
 
-$a = 100;
 function f() {
-  foreach ($GLOBALS as $k => &$v) {
-    if ($k == 'a') {
- $v = -1;
- }
-  }
-  global $a;
-  var_dump($a);
-  $b = $GLOBALS;
-  $b['a'] = 0;
-  var_dump($GLOBALS['a']);
+  var_dump(\HH\global_get('a'));
+  \HH\global_set('a', -1);
+  var_dump(\HH\global_get('a'));
 }
-f();
+<<__EntryPoint>>
+function entrypoint_1387(): void {
+  \HH\global_set('a', 100);
+  f();
+}

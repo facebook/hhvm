@@ -2,17 +2,13 @@
 
 -- Testing date_sunset() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects at least 1 parameter, 0 given in %s/date_sunset_error.php on line 20
 
 -- Testing date_sunset() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects at most 6 parameters, 7 given in %s/date_sunset_error.php on line 24
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects at most 6 parameters, 7 given in %s/date_sunset_error.php on line 25
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects at most 6 parameters, 7 given in %s/date_sunset_error.php on line 26
 ===DONE===

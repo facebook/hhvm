@@ -1,6 +1,6 @@
-<?php
-
-$filename = dirname(__FILE__)."/ftruncate.dat";
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('ftruncate.dat');
 
 file_put_contents($filename, "some test data inside");
 
@@ -35,4 +35,4 @@ var_dump(file_get_contents($filename));
 
 @unlink($filename);
 echo "Done\n";
-?>
+}

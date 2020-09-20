@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen-tls.h"
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
@@ -29,6 +30,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -133,61 +135,111 @@ Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
-  auto const type = src->type();
+namespace {
 
+void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
+  // We ignore the values of statically nullish types.
+  if (type <= TNull || type <= TNullptr) return;
+
+  // Store the value.
+  if (type.hasConstVal()) {
+    // Skip potential zero-extend if we know the value.
+    v << store{v.cns(type.rawVal()), valPtr};
+  } else {
+    assertx(srcLoc.hasReg(0));
+    auto const extended = zeroExtendIfBool(v, type, srcLoc.reg(0));
+    v << store{extended, valPtr};
+  }
+}
+
+}
+
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src, Type ty) {
+  if (ty == TBottom) ty = src->type();
+  storeTV(v, ty, srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data));
+}
+
+void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr valPtr) {
   if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << storeups{srcLoc.reg(), dst};
+    always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
+    v << storeups{srcLoc.reg(), valPtr};
     return;
   }
 
   if (type.needsReg()) {
     assertx(srcLoc.hasReg(1));
-    v << storeb{srcLoc.reg(1), dst + TVOFF(m_type)};
+    v << storeb{srcLoc.reg(1), typePtr};
   } else {
-    v << storeb{v.cns(type.toDataType()), dst + TVOFF(m_type)};
+    v << storeb{v.cns(type.toDataType()), typePtr};
   }
 
-  // We ignore the values of statically nullish types.
-  if (src->isA(TNull) || src->isA(TNullptr)) return;
+  storeTVVal(v, type, srcLoc, valPtr);
+}
 
-  // Store the value.
-  if (src->hasConstVal()) {
-    // Skip potential zero-extend if we know the value.
-    v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
+void storeTVWithAux(Vout& v,
+                    Vptr dst,
+                    Vloc srcLoc,
+                    const SSATmp* src,
+                    AuxUnion aux) {
+  static_assert(TVOFF(m_type) == 8, "");
+  static_assert(TVOFF(m_aux) == 12, "");
+  assertx(!srcLoc.isFullSIMD());
+
+  auto const type = src->type();
+  auto const auxMask = auxToMask(aux);
+
+  if (type.needsReg()) {
+    assertx(srcLoc.hasReg(1));
+
+    // DataType is signed. We're using movzbq here to clear out the upper 7
+    // bytes of the register, not to actually extend the type value.
+    auto const typeReg = srcLoc.reg(1);
+    auto const extended = v.makeReg();
+    auto const result = v.makeReg();
+    v << movzbq{typeReg, extended};
+    v << orq{extended, v.cns(auxMask), result, v.makeReg()};
+    v << store{result, dst + TVOFF(m_type)};
   } else {
-    assertx(srcLoc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, src->type(), srcLoc.reg(0));
-    v << store{extended, dst + TVOFF(m_data)};
+    auto const dt = static_cast<std::make_unsigned<data_type_t>::type>(
+      type.toDataType()
+    );
+    static_assert(std::numeric_limits<decltype(dt)>::digits <= 32, "");
+    v << store{v.cns(dt | auxMask), dst + TVOFF(m_type)};
   }
+
+  storeTVVal(v, type, srcLoc, dst + TVOFF(m_data));
 }
 
 void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
             bool aux /* = false */) {
-  auto const type = dst->type();
+  loadTV(v, dst->type(), dstLoc, src + TVOFF(m_type), src + TVOFF(m_data), aux);
+}
 
+void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
+            bool aux) {
   if (dstLoc.isFullSIMD()) {
     // The whole TV is loaded into a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << loadups{src, dstLoc.reg()};
+    always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
+    v << loadups{valPtr, dstLoc.reg()};
     return;
   }
 
-  if (type.needsReg()) {
+  if (type.needsReg() || aux) {
     assertx(dstLoc.hasReg(1));
     if (aux) {
-      v << load{src + TVOFF(m_type), dstLoc.reg(1)};
+      v << load{typePtr, dstLoc.reg(1)};
     } else {
-      v << loadb{src + TVOFF(m_type), dstLoc.reg(1)};
+      v << loadb{typePtr, dstLoc.reg(1)};
     }
   }
 
   if (type <= TBool) {
-    v << loadtqb{src + TVOFF(m_data), dstLoc.reg(0)};
+    v << loadtqb{valPtr, dstLoc.reg(0)};
   } else {
-    v << load{src + TVOFF(m_data), dstLoc.reg(0)};
+    v << load{valPtr, dstLoc.reg(0)};
   }
 }
 
@@ -221,7 +273,10 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
 
   if (dst_arity == 2) {
     always_assert(src_arity == 2);
-    v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
+    v << copyargs{
+      v.makeTuple({src.reg(0), src.reg(1)}),
+      v.makeTuple({dst.reg(0), dst.reg(1)})
+    };
     return;
   }
   always_assert(dst_arity == 1);
@@ -239,14 +294,26 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   }
 }
 
-void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
+void trashFullTV(Vout& v, Vptr ptr, char byte) {
   int32_t trash32;
   memset(&trash32, byte, sizeof(trash32));
-  static_assert(sizeof(TypedValue) == 16, "");
-  v << storeli{trash32, ptr[offset + 0x0]};
-  v << storeli{trash32, ptr[offset + 0x4]};
-  v << storeli{trash32, ptr[offset + 0x8]};
-  v << storeli{trash32, ptr[offset + 0xc]};
+  static_assert(sizeof(TypedValue) % sizeof(trash32) == 0, "");
+
+  for (int offset = 0; offset < sizeof(TypedValue);
+       offset += sizeof(trash32)) {
+    v << storeli{trash32, ptr + offset};
+  }
+}
+
+void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte) {
+  int32_t trash32;
+  memset(&trash32, byte, sizeof(trash32));
+  static_assert(sizeof(Value) == 8, "");
+  v << storeli{trash32, valPtr};
+  v << storeli{trash32, valPtr + 4};
+
+  static_assert(sizeof(DataType) == 1, "");
+  v << storebi{byte, typePtr};
 }
 
 void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
@@ -283,9 +350,9 @@ Vreg emitDecRef(Vout& v, Vreg base, Reason reason) {
 
 void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+  auto const cc = emitIsTVTypeRefCounted(v, sf, type);
   // ifRefCountedType
-  ifThen(v, CC_G, sf, [&] (Vout& v) {
+  ifThen(v, cc, sf, [&] (Vout& v) {
     // One-bit mode: do the IncRef if m_count == OneReference (0). Normal mode:
     // do the IncRef if m_count >= 0.
     auto const sf2 = emitCmpRefCount(v, 0, data);
@@ -294,14 +361,40 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   });
 }
 
+void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason) {
+  // If definitely not ref-counted, nothing to do
+  if (!type.maybe(TCounted)) return;
+
+  if (type <= TCounted) {
+    // Definitely ref-counted
+    emitIncRef(v, loc.reg(), reason);
+    return;
+  }
+
+  // It might be ref-counted, we need to check at runtime.
+
+  if (loc.hasReg(1)) {
+    // We don't know the type, so check it at runtime.
+    emitIncRefWork(v, loc.reg(0), loc.reg(1), reason);
+    return;
+  }
+
+  // We do know the type, but it might be persistent or counted. Check the
+  // ref-count.
+  auto const sf = emitCmpRefCount(v, 0, loc.reg());
+  auto const cc = one_bit_refcount ? CC_E : CC_GE;
+  ifThen(v, cc, sf, [&] (Vout& v) { emitIncRef(v, loc.reg(), reason); });
+}
+
 void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason) {
   auto const shouldRelease = emitCmpRefCount(v, OneReference, obj);
   ifThenElse(
     v, CC_E, shouldRelease,
     [&] (Vout& v) {
       // Put fn inside vcall{} triggers a compiler internal error (gcc 4.4.7)
-      auto const fn = CallSpec::method(&ObjectData::release);
-      v << vcall{fn, v.makeVcallArgs({{obj}}), v.makeTuple({})};
+      auto const cls = emitLdObjClass(v, obj, v.makeReg());
+      auto const fn = CallSpec::objDestruct(cls);
+      v << vcall{fn, v.makeVcallArgs({{obj, cls}}), v.makeTuple({})};
     },
     [&] (Vout& v) {
       emitDecRef(v, obj, reason);
@@ -323,25 +416,20 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       v << calls{static_cast<TCA>(target.address()), args};
       return;
 
-    case K::ArrayVirt: {
-      auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
-
-      auto const arrkind = v.makeReg();
-      v << loadzbl{rarg(0)[HeaderKindOffset], arrkind};
-
-      if (deltaFits(addr, sz::dword)) {
-        v << callm{baseless(arrkind * 8 + addr), args};
-      } else {
-        auto const base = v.makeReg();
-        v << ldimmq{addr, base};
-        v << callm{base[arrkind * 8], args};
-      }
-      static_assert(sizeof(HeaderKind) == 1, "");
-    } return;
-
     case K::Destructor: {
       auto dtor = lookupDestructor(v, target.reg());
       v << callm{dtor, args};
+    } return;
+
+    case K::ObjDestructor: {
+      auto const func = v.makeReg();
+      emitLdLowPtr(
+        v,
+        target.reg()[Class::releaseFuncOff()],
+        func,
+        sizeof(ObjReleaseFunc)
+      );
+      v << callr{func, args};
     } return;
 
     case K::Stub:
@@ -351,45 +439,37 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
   not_reached();
 }
 
-Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong) {
-  auto const table = reinterpret_cast<intptr_t>(g_destructors);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
+  auto const elem_sz = static_cast<int>(sizeof(g_destructors[0]) / 2);
+  auto const table = reinterpret_cast<intptr_t>(g_destructors) -
+    kMinRefCountedDataType * elem_sz;
 
-  auto const index = v.makeReg();
-  auto const indexl = v.makeReg();
-  auto const typel = [&] {
-    if (!typeIsLong) {
-      auto r = v.makeReg();
-      // the caller didn't zero extend the type, so we need to here
-      v << movzbl{type, r};
-      return r;
-    }
-    return type;
+  auto const index = [&] {
+    if (typeIsQuad) return type;
+    auto const r = v.makeReg();
+    v << movsbq{type, r};
+    return r;
   }();
-
-  v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
-  v << movzlq{indexl, index};
 
   // The baseless form is more compact, but isn't supported for 64-bit
   // displacements.
   if (table <= std::numeric_limits<int>::max()) {
-    return baseless(index * 8 + safe_cast<int>(table));
+    return baseless(index * elem_sz + safe_cast<int>(table));
   }
-  return v.cns(table)[index * 8];
+  return v.cns(table)[index * elem_sz];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+Vreg emitLdRecDesc(Vout& v, Vreg val, Vreg d) {
+  emitLdLowPtr(v, val[RecordData::getVMRecordOffset()], d,
+               sizeof(LowPtr<RecordDesc>));
+  return d;
+}
 
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
   emitLdLowPtr(v, obj[ObjectData::getVMClassOffset()], d,
                sizeof(LowPtr<Class>));
   return d;
-}
-
-Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
-  static_assert(ActRec::kHasClassBit == 1,
-                "Fix the decq if you change kHasClassBit");
-  v << decq{src, dst, v.makeReg()};
-  return dst;
 }
 
 void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
@@ -455,10 +535,16 @@ Vreg emitIsCollection(Vout& v, Vreg obj) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static std::atomic<int32_t> s_nextFakeAddress{-1};
+
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   v << store{vmfp, rds[rds::kVmfpOff]};
   v << store{vmsp, rds[rds::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
+
+  auto const addr = s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
+  v << storeqi{addr, rds[rds::kVmJitReturnAddrOff]};
+  v << recordstack{(TCA)static_cast<int64_t>(addr)};
 }
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
@@ -468,28 +554,105 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
-  if (!force && !Stats::enabled()) return;
-  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
-  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+void emitIncStat(Vout& v, Stats::StatCounter stat) {
+  if (!Stats::enabled()) return;
+  auto rdslocalBase = v.makeReg();
+  auto datum = tls_datum(rds::local::detail::rl_hotSection.rdslocal_base);
+  auto offset = Stats::rl_counters.getRawOffset() +
+                offsetof(Stats::StatCounters, counters) +
+                sizeof(decltype(stat))*stat;
+  v << load{emitTLSAddr(v, datum), rdslocalBase};
+  v << incqm{rdslocalBase[offset], v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
-  assertx(rds::isNormalHandle(ch));
+static Vptr getRDSHandleGenNumberAddr(rds::Handle handle) {
+  return rvmtl()[rds::genNumberHandleFrom(handle)];
+}
+
+static Vptr getRDSHandleGenNumberAddr(Vreg handle) {
+  return handle[DispReg(rvmtl(), -sizeof(rds::GenNumber))];
+}
+
+template<typename HandleT>
+Vreg doCheckRDSHandleInitialized(Vout& v, HandleT ch) {
   auto const gen = v.makeReg();
   auto const sf = v.makeReg();
-  v << loadb{rvmtl()[rds::genNumberHandleFrom(ch)], gen};
+  v << loadb{getRDSHandleGenNumberAddr(ch), gen};
   v << cmpbm{gen, rvmtl()[rds::currentGenNumberHandle()], sf};
   return sf;
 }
 
-void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
   assertx(rds::isNormalHandle(ch));
+  return doCheckRDSHandleInitialized(v, ch);
+}
+Vreg checkRDSHandleInitialized(Vout& v, Vreg ch) {
+  return doCheckRDSHandleInitialized(v, ch);
+}
+
+template<typename HandleT>
+void doMarkRDSHandleInitialized(Vout &v, HandleT ch) {
   auto const gen = v.makeReg();
   v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
-  v << storeb{gen, rvmtl()[rds::genNumberHandleFrom(ch)]};
+  v << storeb{gen, getRDSHandleGenNumberAddr(ch)};
+}
+
+void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  doMarkRDSHandleInitialized(v, ch);
+}
+
+void markRDSHandleInitialized(Vout& v, Vreg ch) {
+  doMarkRDSHandleInitialized(v, ch);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int offsetToLocalType(int id) {
+  return TVOFF(m_type) - cellsToBytes(id + 1);
+}
+int offsetToLocalData(int id) {
+  return TVOFF(m_data) - cellsToBytes(id + 1);
+}
+
+Vptr ptrToLocalType(Vreg fp, int id) {
+  return fp[offsetToLocalType(id)];
+}
+Vptr ptrToLocalData(Vreg fp, int id) {
+  return fp[offsetToLocalData(id)];
+}
+
+void nextLocal(Vout& v,
+               Vreg typeIn,
+               Vreg dataIn,
+               Vreg typeOut,
+               Vreg dataOut) {
+  v << subqi{(int32_t)sizeof(TypedValue), typeIn, typeOut, v.makeReg()};
+  v << subqi{(int32_t)sizeof(TypedValue), dataIn, dataOut, v.makeReg()};
+}
+
+void prevLocal(Vout& v,
+               Vreg typeIn,
+               Vreg dataIn,
+               Vreg typeOut,
+               Vreg dataOut) {
+  v << addqi{(int32_t)sizeof(TypedValue), typeIn, typeOut, v.makeReg()};
+  v << addqi{(int32_t)sizeof(TypedValue), dataIn, dataOut, v.makeReg()};
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+uint64_t auxToMask(AuxUnion aux) {
+  if (!aux.u_raw) return 0;
+  if (aux.u_raw == static_cast<uint32_t>(-1)) {
+    return static_cast<uint64_t>(-1) <<
+      std::numeric_limits<
+        std::make_unsigned<data_type_t>::type
+      >::digits;
+  }
+  return uint64_t{aux.u_raw} << 32;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

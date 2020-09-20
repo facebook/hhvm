@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function p($str)
 {
@@ -7,6 +7,9 @@ function p($str)
   echo bin2hex($str), "\n";
   echo bin2hex(strftime($str));
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-setlocale(LC_ALL, 'C');
-p('あ');
+  setlocale(LC_ALL, 'C');
+  p('あ');
+}

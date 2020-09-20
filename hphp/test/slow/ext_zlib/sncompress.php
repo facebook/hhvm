@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_sncompress() {
 $str = "Holy fuck. Are they actually going to get there?";
 
 $ret = snappy_compress($str);
@@ -13,3 +16,4 @@ $str = str_repeat("x", 1000);
 $ret = snappy_compress($str);
 $ret = snappy_uncompress($ret);
 var_dump($ret === $str);
+}

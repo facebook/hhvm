@@ -1,9 +1,0 @@
-*** Creating a hard link to a non-existent file ***
-
-Warning: %s
-bool(false)
-
-Warning: %s
-int(-1)
-bool(false)
-Done

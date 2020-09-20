@@ -2,11 +2,9 @@
 
 -- Testing array_rand() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_rand() expects at least 1 parameter, 0 given in %s/array_rand_error.php on line 11
 
 -- Testing array_rand() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_rand() expects at most 2 parameters, 3 given in %s/array_rand_error.php on line 18
 Done

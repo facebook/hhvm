@@ -1,34 +1,33 @@
-<?php
-echo "Test\n";
-
+<?hh
 class A {
-	public $e = array();
+    public $e = varray[];
 }
 
 class Token implements \Serializable {
-	public function serialize()
-	{
-		$c = new A;
+    public function serialize()
+    {
+        $c = new A;
 
-		for ($i = 0; $i < 4; $i++)
-		{
-			$e = new A;
-			$c->e[] = $e;
-			$e->e = $c->e;
-		}
+        for ($i = 0; $i < 4; $i++)
+        {
+            $e = new A;
+            $c->e[] = $e;
+            $e->e = $c->e;
+        }
 
-		return serialize(array(serialize($c)));
-	}
+        return serialize(varray[serialize($c)]);
+    }
 
-	public function unserialize($str)
-	{
-		$r = unserialize($str);
-		$r = unserialize($r[0]);
-	}
+    public function unserialize($str)
+    {
+        $r = unserialize($str);
+        $r = unserialize($r[0]);
+    }
 }
+<<__EntryPoint>> function main(): void {
+echo "Test\n";
 
 $token = new Token;
 $token = serialize($token);
-
-?>
-Done
+echo "Done";
+}

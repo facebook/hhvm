@@ -1,0 +1,1 @@
+Fatal error: The splat operator `...` for unpacking variadic arguments may only appear at the **end** of an argument list. in %s/test/slow/unpack_args/unpack_call_error.php on line 10

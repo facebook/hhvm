@@ -16,6 +16,7 @@
 #include "hphp/hhbbc/type-builtins.h"
 
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
@@ -38,8 +39,8 @@ const StaticString s_setall("setall");
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
-                                         borrowed_ptr<const php::Func> func) {
+bool is_collection_method_returning_this(const php::Class* cls,
+                                         const php::Func* func) {
   if (!cls) return false;
 
   if (cls->name->isame(s_Vector.get())) {
@@ -75,25 +76,22 @@ bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
   return false;
 }
 
-Type native_function_return_type(borrowed_ptr<const php::Func> f,
-                                 bool include_coercion_failures) {
+Type native_function_return_type(const php::Func* f) {
   assert(f->nativeInfo);
-
-  // If the function returns by ref, we can't say much about it. It can be a ref
-  // or null.
-  if (f->attrs & AttrReference) {
-    return union_of(TRef, TInitNull);
-  }
 
   // Infer the type from the HNI declaration
   auto t = [&]{
     auto const hni = f->nativeInfo->returnType;
     return hni ? from_DataType(*hni) : TInitCell;
   }();
-  if (t.subtypeOf(TArr)) {
-    if (f->retTypeConstraint.isVArray())      t = TVArr;
-    else if (f->retTypeConstraint.isDArray()) t = TDArr;
-    else if (f->retTypeConstraint.isArray())  t = TPArr;
+  if (t.subtypeOf(BArr)) {
+    if (f->retTypeConstraint.isVArray()) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      t = TVArr;
+    } else if (f->retTypeConstraint.isDArray()) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      t = TDArr;
+    }
   }
 
   // Non-simple types (ones that are represented by pointers) can always
@@ -106,18 +104,27 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
     assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
   }
 
-  if (include_coercion_failures) {
-    // If parameter coercion fails, we can also get null or false depending on
-    // the function.
-    if (f->attrs & AttrParamCoerceModeNull) {
-      t |= TInitNull;
-    }
-    if (f->attrs & AttrParamCoerceModeFalse) {
-      t |= TFalse;
+  return remove_uninit(t);
+}
+
+Type native_function_out_type(const php::Func* f, uint32_t index) {
+  assertx(f->nativeInfo);
+  assertx(f->hasInOutArgs);
+
+  for (auto& p : f->params) {
+    if (!p.inout) continue;
+
+    if (index-- == 0) {
+      auto dt = Native::builtinOutType(p.typeConstraint, p.userAttributes);
+      if (!dt) return TInitCell;
+      auto t = from_DataType(*dt);
+      return p.typeConstraint.isNullable()
+        ? union_of(std::move(t), TInitNull)
+        : t;
     }
   }
 
-  return remove_uninit(t);
+  return TBottom;
 }
 
 }}

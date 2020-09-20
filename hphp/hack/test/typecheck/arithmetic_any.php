@@ -1,5 +1,5 @@
 ////file1.php
-<?hh
+<?hh // partial
 
   function returnsAny() { return 5; }
 
@@ -73,11 +73,11 @@ function sorted<T>(
   Traversable<T> $collection,
   ?(function(T, T): int) $comparator = null,
 ): Vector<T> {
-  // UNSAFE
+  return Vector {};
 }
 
 function TestSort():void {
-  $v = sorted(array(),
+  $v = sorted(varray[],
               function ($x, $y) { hh_show($x); hh_show($y); return $x - $y; });
 }
 

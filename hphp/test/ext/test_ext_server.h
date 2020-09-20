@@ -21,7 +21,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TestExtServer : TestCppExt {
+struct TestExtServer final : TestCppExt {
   bool RunTests(const std::string& which) override;
 
   bool test_pagelet_server_task_start();

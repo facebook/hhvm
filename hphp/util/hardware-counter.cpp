@@ -20,6 +20,7 @@
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
@@ -50,6 +51,7 @@ THREAD_LOCAL_NO_CHECK(HardwareCounter, HardwareCounter::s_counter);
 static bool s_recordSubprocessTimes = false;
 static bool s_excludeKernel = false;
 static bool s_profileHWEnable;
+static bool s_fastReads = false;
 static int s_exportInterval = -1;
 static std::string s_profileHWEvents;
 
@@ -59,6 +61,73 @@ static inline bool useCounters() {
 #else
   return s_profileHWEnable;
 #endif
+}
+
+/*
+ * Turning this on helps with the resolution of multiplexed counters
+ * (provided cap_user_time is true in the
+ * perf_event_mmap_page). However, experiments show that periodically,
+ * time_offset and the result of rdtsc "jump" (this is probably when
+ * the thread migrates from one cpu to another); when they do, they
+ * jump by appropriate amounts so that enabled and runtime progress
+ * monotonically (and by sensible values) - but they don't seem to
+ * jump atomically, so there can be one sample where only one has
+ * jumped. This can cause a temporary blip in enabled and or runtime.
+ *
+ * I'm adding this so we can choose to *not* use rdtsc, and avoid the
+ * blips.
+ *
+ * It turns out that doing so does degrade the accuracy when there's a
+ * lot of multiplexing going on, and a bit more experimentation shows
+ * that the blip is only really a problem if we record it in the
+ * baseline during a reset (since that then affects every read until
+ * the next reset), so for now, turn it on but don't use it for
+ * reset_values.
+ */
+static constexpr auto use_cap_time = true;
+
+#if defined(__x86_64__)
+#define barrier()       __asm__ volatile("" ::: "memory")
+#elif defined(__aarch64__)
+#define barrier()       asm volatile("dmb ish" : : : "memory")
+#define isb()           asm volatile("isb" : : : "memory")
+#else
+#define barrier()
+#endif
+
+static uint64_t rdtsc() {
+#if defined(__x86_64__)
+  uint64_t msr;
+  asm volatile ( "rdtsc\n\t"    // Returns the time in EDX:EAX.
+                 "shl $32, %%rdx\n\t"  // Shift the upper bits left.
+                 "or %%rdx, %0"        // 'Or' in the lower bits.
+                 : "=a" (msr)
+                 :
+                 : "rdx");
+  return msr;
+#endif
+  always_assert(false);
+}
+
+static uint64_t rdpmc(uint32_t counter) {
+#if defined(__x86_64__)
+  uint32_t low, high;
+
+  __asm__ volatile("rdpmc" : "=a" (low), "=d" (high) : "c" (counter));
+  return low | ((uint64_t)high << 32);
+#elif defined(__aarch64__)
+  uint64_t ret;
+  if (counter == PERF_COUNT_HW_CPU_CYCLES)
+    asm volatile("mrs %0, pmccntr_el0" : "=r" (ret));
+  else {
+    asm volatile("msr pmselr_el0, %0" : : "r" ((uint64_t)(counter-1)));
+    asm volatile("mrs %0, pmxevcntr_el0" : "=r" (ret));
+  }
+
+  isb();
+  return ret;
+#endif
+  always_assert(false);
 }
 
 static ServiceData::ExportedTimeSeries*
@@ -88,12 +157,8 @@ createTimeSeries(const std::string& name) {
 struct HardwareCounterImpl {
   HardwareCounterImpl(int type, unsigned long config, const char* desc)
     : m_desc(desc ? desc : "")
-    , m_err(0)
     , m_timeSeries(createTimeSeries(m_desc))
-    , m_timeSeriesNonPsp(createTimeSeries(m_desc + "-nonpsp"))
-    , m_fd(-1)
-    , inited(false) {
-    memset (&pe, 0, sizeof (struct perf_event_attr));
+    , m_timeSeriesNonPsp(createTimeSeries(m_desc + "-nonpsp")) {
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
     pe.config = config;
@@ -104,7 +169,7 @@ struct HardwareCounterImpl {
     pe.exclude_hv = 1;
     pe.read_format =
       PERF_FORMAT_TOTAL_TIME_ENABLED|PERF_FORMAT_TOTAL_TIME_RUNNING;
-    }
+  }
 
   ~HardwareCounterImpl() {
     close();
@@ -129,8 +194,8 @@ struct HardwareCounterImpl {
     inited = true;
     m_fd = syscall(__NR_perf_event_open, &pe, 0, -1, -1, 0);
     if (m_fd < 0) {
-      Logger::Warning("perf_event_open failed with: %s",
-                      folly::errnoStr(errno).c_str());
+      Logger::FWarning("HardwareCounter: perf_event_open failed with: {}",
+                       folly::errnoStr(errno));
       m_err = -1;
       return;
     }
@@ -138,19 +203,52 @@ struct HardwareCounterImpl {
     fcntl(m_fd, F_SETFD, O_CLOEXEC);
 
     if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, 0) < 0) {
-      Logger::Warning("perf_event failed to enable: %s",
-                      folly::errnoStr(errno).c_str());
+      Logger::FWarning("perf_event failed to enable: {}",
+                       folly::errnoStr(errno));
       close();
       m_err = -1;
       return;
     }
+
+    if (!s_fastReads) return;
+
+    auto const base = mmap(nullptr, s_pageSize, PROT_READ | PROT_WRITE,
+                           MAP_SHARED, m_fd, 0);
+    if (base == MAP_FAILED) {
+      Logger::FWarning("HardwareCounter: failed to mmap perf_event: {}",
+                      folly::errnoStr(errno));
+    } else {
+      m_meta = static_cast<perf_event_mmap_page*>(base);
+      if (!m_meta->cap_user_rdpmc ||
+          (use_cap_time && !m_meta->cap_user_time)) {
+        munmap(m_meta, s_pageSize);
+        m_meta = nullptr;
+      }
+      ioctl(m_fd, PERF_EVENT_IOC_RESET, 0);
+    }
+
     reset();
   }
 
   int64_t read() {
     uint64_t values[3];
-    if (readRaw(values)) {
-      if (!values[2]) return 0;
+    if (auto const width = readRaw(values)) {
+      values[0] -= reset_values[0];
+      values[1] -= reset_values[1];
+      values[2] -= reset_values[2];
+      if (width < 64) {
+        auto const mask = (1uLL << width) - 1;
+        values[0] &= mask;
+        if (values[0] > (mask >> 1)) return extra;
+      } else if (values[0] > std::numeric_limits<int64_t>::max()) {
+        return extra;
+      }
+      if (values[1] == values[2]) {
+        return values[0] + extra;
+      }
+      if (!values[2]) {
+        return extra;
+      }
       int64_t value = (double)values[0] * values[1] / values[2];
       return value + extra;
     }
@@ -161,29 +259,87 @@ struct HardwareCounterImpl {
     extra += amount;
   }
 
-  bool readRaw(uint64_t* values) {
-    if (m_err || !useCounters()) return false;
+  /*
+   * read current value, enabled time, and running time for the
+   * counter.
+   *
+   * returns the width of the counter in bits, or zero on failure.
+   */
+  uint32_t readRaw(uint64_t* values, bool forReset = false) {
+    if (m_err || !useCounters()) return 0;
     init_if_not();
 
-    if (m_fd > 0) {
-      /*
-       * read the count + scaling values
-       *
-       * It is not necessary to stop an event to read its value
-       */
-      auto ret = ::read(m_fd, values, sizeof(*values) * 3);
-      if (ret == sizeof(*values) * 3) {
-        values[0] -= reset_values[0];
-        values[1] -= reset_values[1];
-        if (values[2] > reset_values[2]) {
-          values[2] -= reset_values[2];
-        } else {
-          values[2] = 0;
+    // try to read the values in user space
+    if (m_meta) {
+      uint32_t seq, time_mult, time_shift, idx, width;
+      uint64_t cyc, time_offset;
+      uint64_t count, enabled, running;
+
+      do {
+        seq = m_meta->lock;
+        barrier();
+        enabled = m_meta->time_enabled;
+        running = m_meta->time_running;
+
+        if (use_cap_time && !forReset) {
+          assertx(m_meta->cap_user_time);
+
+          cyc = rdtsc();
+          time_offset = m_meta->time_offset;
+          time_mult   = m_meta->time_mult;
+          time_shift  = m_meta->time_shift;
         }
-        return true;
-      }
+
+        idx = m_meta->index;
+        count = m_meta->offset;
+        width = m_meta->pmc_width;
+
+        assertx(m_meta->cap_user_rdpmc);
+        if (idx) {
+          count += rdpmc(idx - 1);
+        }
+
+        barrier();
+      } while (m_meta->lock != seq);
+
+      [&] {
+        if (!ever_active) {
+          if (!idx && !count) {
+            // enabled and running don't get meaningful values until
+            // the first time the counter is enabled. This only really
+            // matters if this call is being used to initialize the
+            // reset_values, because we'll get garbage values for the
+            // baseline.
+            enabled = running = 0;
+            return;
+          }
+          ever_active = true;
+        }
+        if (use_cap_time && !forReset) {
+          auto const quot = (cyc >> time_shift);
+          auto const rem = cyc & (((uint64_t)1 << time_shift) - 1);
+          auto const delta = time_offset + quot * time_mult +
+            ((rem * time_mult) >> time_shift);
+
+          enabled += delta;
+          if (idx) running += delta;
+        }
+      }();
+
+      values[0] = count;
+      values[1] = enabled;
+      values[2] = running;
+      return width;
     }
-    return false;
+
+    if (m_fd <= 0) return 0;
+    /*
+     * read the count + scaling values
+     *
+     * It is not necessary to stop an event to read its value
+     */
+    auto ret = ::read(m_fd, values, sizeof(*values) * 3);
+    return ret == sizeof(*values) * 3 ? 64 : 0;
   }
 
   void reset() {
@@ -191,16 +347,15 @@ struct HardwareCounterImpl {
     init_if_not();
     extra = 0;
     if (m_fd > 0) {
-      if (ioctl (m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
-        Logger::Warning("perf_event failed to reset with: %s",
-                        folly::errnoStr(errno).c_str());
+      if (!m_meta && ioctl(m_fd, PERF_EVENT_IOC_RESET, 0) < 0) {
+        Logger::FWarning("perf_event failed to reset with: {}",
+                         folly::errnoStr(errno));
         m_err = -1;
         return;
       }
-      auto ret = ::read(m_fd, reset_values, sizeof(reset_values));
-      if (ret != sizeof(reset_values)) {
-        Logger::Warning("perf_event failed to reset with: %s",
-                        folly::errnoStr(errno).c_str());
+      if (!readRaw(reset_values, true)) {
+        Logger::FWarning("perf_event failed to reset with: {}",
+                         folly::errnoStr(errno));
         m_err = -1;
         return;
       }
@@ -209,20 +364,26 @@ struct HardwareCounterImpl {
 
 public:
   std::string m_desc;
-  int m_err;
+  int m_err{0};
 private:
+  int m_fd{-1};
+  bool inited{false};
+  bool ever_active{false};
   ServiceData::ExportedTimeSeries* m_timeSeries;
   ServiceData::ExportedTimeSeries* m_timeSeriesNonPsp;
-  int m_fd;
-  struct perf_event_attr pe;
-  bool inited;
+  struct perf_event_attr pe{};
   uint64_t reset_values[3];
   uint64_t extra{0};
+  perf_event_mmap_page* m_meta{};
 
   void close() {
     if (m_fd > 0) {
       ::close(m_fd);
       m_fd = -1;
+      if (m_meta) {
+        munmap(m_meta, s_pageSize);
+        m_meta = nullptr;
+      }
     }
   }
 };
@@ -261,12 +422,15 @@ void HardwareCounter::ExcludeKernel() {
 }
 
 void HardwareCounter::Init(bool enable, const std::string& events,
-                           bool subProc, bool excludeKernel,
+                           bool subProc,
+                           bool excludeKernel,
+                           bool fastReads,
                            int exportInterval) {
   s_profileHWEnable = enable;
   s_profileHWEvents = events;
   s_recordSubprocessTimes = subProc;
   s_excludeKernel = excludeKernel;
+  s_fastReads = fastReads,
   s_exportInterval = exportInterval;
 }
 
@@ -298,7 +462,7 @@ int64_t HardwareCounter::GetLoadCount() {
 }
 
 int64_t HardwareCounter::getLoadCount() {
-  return m_loadCounter->read();
+  return m_loadCounter ? m_loadCounter->read() : 0;
 }
 
 int64_t HardwareCounter::GetStoreCount() {
@@ -306,7 +470,7 @@ int64_t HardwareCounter::GetStoreCount() {
 }
 
 int64_t HardwareCounter::getStoreCount() {
-  return m_storeCounter->read();
+  return m_storeCounter ? m_storeCounter->read() : 0;
 }
 
 void HardwareCounter::IncInstructionCount(int64_t amount) {
@@ -417,7 +581,7 @@ bool HardwareCounter::addPerfEvent(const char* event) {
       found = true;
       type = perfTable[i].type;
     } else if (type != perfTable[i].type) {
-      Logger::Warning("failed to find perf event: %s", event);
+      Logger::FWarning("failed to find perf event: {}", event);
       return false;
     }
     config |= perfTable[i].config;
@@ -436,12 +600,12 @@ bool HardwareCounter::addPerfEvent(const char* event) {
   }
 
   if (!found || *ev) {
-    Logger::Warning("failed to find perf event: %s", event);
+    Logger::FWarning("failed to find perf event: {}", event);
     return false;
   }
   auto hwc = std::make_unique<HardwareCounterImpl>(type, config, event);
   if (hwc->m_err) {
-    Logger::Warning("failed to set perf event: %s", event);
+    Logger::FWarning("failed to set perf event: {}", event);
     return false;
   }
   m_counters.emplace_back(std::move(hwc));

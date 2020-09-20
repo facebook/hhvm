@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $hosts = Vector { getenv('HPHP_TEST_MCROUTER') };
 $mcr = MCRouter::createSimple($hosts);
 try {
@@ -11,4 +11,5 @@ try {
   var_dump($e->getKey());
   var_dump(MCRouter::getOpName($e->getOp()));
   var_dump(MCRouter::getResultName($e->getCode()));
+}
 }

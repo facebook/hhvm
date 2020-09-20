@@ -1,0 +1,10 @@
+File "array_map10.php", line 4, characters 17-18:
+Invalid argument (Typing[4110])
+File "array_map10.php", line 3, characters 37-38:
+Expected `TA`
+File "array_map10.php", line 3, characters 54-55:
+But got `TC`
+File "hackarray.hhi", line 15, characters 61-61:
+  via this generic `T`
+File "interfaces.hhi", line 118, characters 99-100:
+  via this generic `Tv`

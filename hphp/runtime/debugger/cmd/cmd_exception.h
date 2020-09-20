@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_
+#pragma once
 
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 
@@ -35,4 +34,3 @@ struct CmdException : CmdBreak {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EXCEPTION_H_

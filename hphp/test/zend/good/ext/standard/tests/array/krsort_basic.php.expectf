@@ -2,7 +2,7 @@
 
 -- Testing krsort() by supplying string array, 'flag' value is defualt --
 bool(true)
-array(8) {
+darray(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -23,7 +23,7 @@ array(8) {
 
 -- Testing krsort() by supplying numeric array, 'flag' value is defualt --
 bool(true)
-array(4) {
+darray(4) {
   [555]=>
   int(2)
   [100]=>
@@ -36,7 +36,7 @@ array(4) {
 
 -- Testing krsort() by supplying string array, 'flag' = SORT_REGULAR --
 bool(true)
-array(8) {
+darray(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -57,7 +57,7 @@ array(8) {
 
 -- Testing krsort() by supplying numeric array, 'flag' = SORT_REGULAR --
 bool(true)
-array(4) {
+darray(4) {
   [555]=>
   int(2)
   [100]=>
@@ -70,7 +70,7 @@ array(4) {
 
 -- Testing krsort() by supplying string array, 'flag' = SORT_STRING --
 bool(true)
-array(8) {
+darray(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -91,7 +91,7 @@ array(8) {
 
 -- Testing krsort() by supplying string array (case insensitive), 'flag' = SORT_STRING|SORT_FLAG_CASE --
 bool(true)
-array(8) {
+darray(8) {
   ["O3"]=>
   string(7) "Orange3"
   ["o20"]=>
@@ -112,7 +112,7 @@ array(8) {
 
 -- Testing krsort() by supplying string array (natural), 'flag' = SORT_NATURAL --
 bool(true)
-array(8) {
+darray(8) {
   ["o20"]=>
   string(8) "orange20"
   ["o2"]=>
@@ -133,7 +133,7 @@ array(8) {
 
 -- Testing krsort() by supplying string array (natural, case insensitive), 'flag' = SORT_NATURAL|SORT_FLAG_CASE --
 bool(true)
-array(8) {
+darray(8) {
   ["o20"]=>
   string(8) "orange20"
   ["O3"]=>
@@ -154,7 +154,7 @@ array(8) {
 
 -- Testing krsort() by supplying numeric array, 'flag' = SORT_NUMERIC --
 bool(true)
-array(4) {
+darray(4) {
   [555]=>
   int(2)
   [100]=>

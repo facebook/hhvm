@@ -1,0 +1,18 @@
+object(HH\Lib\OS\FileDescriptor) (2) {
+  ["type"]=>
+  string(2) "fd"
+  ["fd"]=>
+  int(%d)
+}
+string(13) "Hello, world
+"
+object(HH\Lib\OS\FileDescriptor) (2) {
+  ["type"]=>
+  string(2) "fd"
+  ["fd"]=>
+  int(-1)
+}
+Expecting exception EBADF
+> Caught exception HH\Lib\_Private\_OS\ErrnoException with code (%d): %s
+Expecting exception EEXIST
+> Caught exception HH\Lib\_Private\_OS\ErrnoException with code (%d): %s

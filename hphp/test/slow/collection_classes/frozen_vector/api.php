@@ -8,16 +8,15 @@ function show_elems($fs) {
     var_dump($e);
   }
   echo "----\n";
-};
-
+}
 function materialization_methods() {
   $fv = ImmVector {1, 2, 3};
 
   echo "\nvalues...\n";
   var_dump($fv->values());
 
-  echo "\ntoArray...\n";
-  var_dump($fv->toArray());
+  echo "\ntoDArray...\n";
+  var_dump($fv->toDArray());
 
   echo "\ntoKeysArray...\n";
   var_dump($fv->toKeysArray());
@@ -49,9 +48,9 @@ function static_methods() {
 
   echo "\nfromKeysOf...\n";
   show_elems(ImmVector::fromKeysOf(Vector {1, 2, 3}));
-  show_elems(ImmVector::fromKeysOf(['a', 'b', 'c']));
+  show_elems(ImmVector::fromKeysOf(varray['a', 'b', 'c']));
   show_elems(ImmVector::fromKeysOf(Map {'a' => 1, 'b' => 2}));
-  show_elems(ImmVector::fromKeysOf(['a' => 1, 'b' => 2]));
+  show_elems(ImmVector::fromKeysOf(darray['a' => 1, 'b' => 2]));
   show_elems(ImmVector::fromKeysOf(Set {4, 5, 6}));
 }
 
@@ -61,4 +60,9 @@ function main() {
   static_methods();
 }
 
+<<__EntryPoint>>
+function main_api() {
+;
+
 main();
+}

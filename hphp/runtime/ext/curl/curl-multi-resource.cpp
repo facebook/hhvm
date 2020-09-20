@@ -83,7 +83,43 @@ Resource CurlMultiResource::find(CURL *cp) {
   return Resource();
 }
 
+void CurlMultiResource::setInExec(bool b) {
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    curl->m_in_exec = b;
+  }
+}
+
+bool CurlMultiResource::anyInExec() const {
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    if (curl->m_in_exec) return true;
+  }
+  return false;
+}
+
 void CurlMultiResource::check_exceptions() {
+  SCOPE_EXIT {
+    if (debug) {
+      for (ArrayIter iter(m_easyh); iter; ++iter) {
+        auto const curl = cast<CurlResource>(iter.second());
+        always_assert(!curl->m_exception);
+      }
+    }
+  };
+
+  // If we exit unexpectedly, ensure we've released any queued exceptions.
+  SCOPE_EXIT {
+    for (ArrayIter iter(m_easyh); iter; ++iter) {
+      auto const curl = cast<CurlResource>(iter.second());
+      if (auto const exn = curl->getAndClearException()) {
+        if (!CurlResource::isPhpException(exn)) {
+          delete CurlResource::getCppException(exn);
+        }
+      }
+    }
+  };
+
   Exception* cppException = nullptr;
   Object phpException;
   for (ArrayIter iter(m_easyh); iter; ++iter) {
@@ -98,16 +134,7 @@ void CurlMultiResource::check_exceptions() {
       auto const e = CurlResource::getCppException(nextException);
       if (auto const f = dynamic_cast<FatalErrorException*>(e)) {
         if (!f->isRecoverable()) {
-          // clean up cppException and remainder of m_easyh before throwing
           delete cppException;
-          for (++iter; iter; ++iter) {
-            auto const ignore_curl = cast<CurlResource>(iter.second());
-            if (auto const ignore_exn = curl->getAndClearException()) {
-              if (!CurlResource::isPhpException(ignore_exn)) {
-                delete CurlResource::getCppException(ignore_exn);
-              }
-            }
-          }
           f->throwException();
         }
       }

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $im = imagecreate(100,100);
 $white = imagecolorallocate($im, 255,255,255);
 $blue = imagecolorallocate($im, 0,0,255);
@@ -8,4 +8,4 @@ print_r(imagecolorat($im, 0,0));
 imagefill($im, 0,0,$white + 3);
 print_r(imagecolorat($im, 0,0));
 imagedestroy($im);
-?>
+}

@@ -1,40 +1,33 @@
 *** Testing lstat() for error conditions ***
 
-Warning: %s
-NULL
+Warning: lstat() expects exactly 1 parameter, 0 given in %s/lstat_stat_error.php on line 11
 
-Warning: %s
-NULL
+Warning: lstat() expects exactly 1 parameter, 2 given in %s/lstat_stat_error.php on line 12
 
-Warning: %s
+Warning: lstat(): No such file or directory in %s/lstat_stat_error.php on line 13
 bool(false)
 
-Warning: %s
+Warning: lstat(): No such file or directory in %s/lstat_stat_error.php on line 14
 bool(false)
 
-Warning: %s
-NULL
+Warning: lstat() expects parameter 1 to be string, %rv?%rarray given in %s/lstat_stat_error.php on line 16
 
 *** Testing stat() for error conditions ***
 
-Warning: %s
-NULL
+Warning: stat() expects exactly 1 parameter, 0 given in %s/lstat_stat_error.php on line 19
 
-Warning: %s
-NULL
+Warning: stat() expects exactly 1 parameter, 2 given in %s/lstat_stat_error.php on line 20
 
-Warning: %s
-NULL
+Warning: stat() expects exactly 1 parameter, 2 given in %s/lstat_stat_error.php on line 21
 
-Warning: %s
+Warning: stat(): stat failed for %s/temp.tmp in %s/lstat_stat_error.php on line 23
 bool(false)
 
-Warning: %s
+Warning: stat(): stat failed for %s/temp/ in %s/lstat_stat_error.php on line 24
 bool(false)
 
-Warning: %s
+Warning: stat(): stat failed for 22 in %s/lstat_stat_error.php on line 25
 bool(false)
 
-Warning: %s
-NULL
+Warning: stat() expects parameter 1 to be string, %rv?%rarray given in %s/lstat_stat_error.php on line 26
 Done

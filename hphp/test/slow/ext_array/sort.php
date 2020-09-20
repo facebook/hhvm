@@ -1,9 +1,13 @@
-<?php
+<?hh
 
-$fruits = array("lemon", "orange", "banana", "apple");
-sort($fruits);
+
+<<__EntryPoint>>
+function main_sort() {
+$fruits = varray["lemon", "orange", "banana", "apple"];
+sort(inout $fruits);
 var_dump($fruits);
 
-$fruits = array("lemon", "orange", "banana", "apple");
-rsort($fruits);
+$fruits = varray["lemon", "orange", "banana", "apple"];
+rsort(inout $fruits);
 var_dump($fruits);
+}

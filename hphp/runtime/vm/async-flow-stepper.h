@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ASYNC_FLOW_STEPPER_H_
-#define incl_HPHP_ASYNC_FLOW_STEPPER_H_
+#pragma once
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/pc-filter.h"
@@ -79,4 +78,3 @@ private:
 
 }
 
-#endif

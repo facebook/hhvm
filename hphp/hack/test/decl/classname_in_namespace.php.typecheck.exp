@@ -1,0 +1,12 @@
+File "classname_in_namespace.php", line 4, characters 22-22:
+Unbound name: `C` (Naming[2049])
+File "classname_in_namespace.php", line 5, characters 12-21:
+Unbound name: `classname` (Naming[2049])
+File "classname_in_namespace.php", line 5, characters 23-23:
+Unbound name: `C` (Naming[2049])
+File "classname_in_namespace.php", line 8, characters 24-24:
+Unbound name: `NS\C` (Naming[2049])
+File "classname_in_namespace.php", line 9, characters 14-23:
+Unbound name: `classname` (Naming[2049])
+File "classname_in_namespace.php", line 9, characters 25-25:
+Unbound name: `NS\C` (Naming[2049])

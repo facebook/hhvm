@@ -7,8 +7,12 @@ function main(bool $b1, bool $b2) {
   return 1 / ((float)$c);
 }
 
-foreach ([false, true, false, true] as $b1) {
-  foreach ([false, true, false, true] as $b2) {
+
+<<__EntryPoint>>
+function main_select_int_dbl() {
+foreach (varray[false, true, false, true] as $b1) {
+  foreach (varray[false, true, false, true] as $b2) {
     var_dump(main($b1, $b2));
   }
+}
 }

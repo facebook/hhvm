@@ -1,0 +1,10 @@
+File "override3.php", line 13, characters 7-7:
+Class `D` does not correctly implement all required members  (Typing[4340])
+File "override3.php", line 13, characters 17-17:
+Some members are incompatible with those declared in type `C`
+File "override3.php", line 10, characters 19-21:
+The method `foo` has the wrong type
+File "override3.php", line 5, characters 19-21:
+This method is `__DynamicallyCallable`.
+File "override3.php", line 10, characters 19-21:
+This method is **not**.

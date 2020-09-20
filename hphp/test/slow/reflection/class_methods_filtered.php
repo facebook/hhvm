@@ -1,4 +1,4 @@
-<?php
+<?hh
 abstract class A {
   private function f() {}
   abstract protected function g();
@@ -17,6 +17,10 @@ abstract class B extends A implements I {
   public function j() {}
 }
 
+
+<<__EntryPoint>>
+function main_class_methods_filtered() {
 $ref = new ReflectionClass("B");
 var_dump($ref->getMethods(ReflectionMethod::IS_ABSTRACT));
 var_dump($ref->getMethods(ReflectionMethod::IS_STATIC));
+}

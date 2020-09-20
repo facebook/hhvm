@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SERVER_H_
-#define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/server/fastcgi/fastcgi-session.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
@@ -99,8 +98,8 @@ struct FastCGIServer : public Server,
   void removeTakeoverListener(TakeoverListener* /*lisener*/) override {}
 
   // Increases the size of the thread-pool for dispatching requests
-  void addWorkers(int numWorkers) override {
-    m_dispatcher.addWorkers(numWorkers);
+  void saturateWorkers() override {
+    m_dispatcher.saturateWorkers();
   }
 
   // Configures m_socket and starts accepting connections in the event base
@@ -114,8 +113,14 @@ struct FastCGIServer : public Server,
 
   // Query information about the worker pool
   JobQueueDispatcher<FastCGIWorker>& getDispatcher() { return m_dispatcher; }
+  size_t getMaxThreadCount() override {
+    return m_dispatcher.getMaxThreadCount();
+  }
   int getActiveWorker() override { return m_dispatcher.getActiveWorker(); }
   int getQueuedJobs()   override { return m_dispatcher.getQueuedJobs();   }
+  void updateMaxActiveWorkers(int num) override {
+    return m_dispatcher.updateMaxActiveWorkers(num);
+  }
 
   // Query the event manager
   folly::EventBaseManager *getEventBaseManager() { return &m_eventBaseManager; }
@@ -169,4 +174,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_FASTCGI_FASTCGI_SERVER_H_

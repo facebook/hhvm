@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Sets of removed fields must be compatible
@@ -7,7 +7,7 @@
 interface I<-T> {}
 
 function f<Tv>(Tv $_): I<Tv> {
-  // UNSAFE
+  throw new Exception();
 }
 
 type s = shape(
@@ -15,10 +15,10 @@ type s = shape(
   'y' => string,
 );
 
-type t = shape('x' => int);
+type tt = shape('x' => int);
 
-function test(t $s): I<s> {
-  Shapes::removeKey(&$s, 'z');
+function test(tt $s): I<s> {
+  Shapes::removeKey(inout $s, 'z');
   $s = f($s);
   // This is legal. See shape28.php
   return $s;

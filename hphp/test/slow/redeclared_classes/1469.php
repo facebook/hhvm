@@ -1,20 +1,24 @@
-<?php
+<?hh
 
 class A {
+  <<__LSB>>
+  private static $fooZ = 0;
   static function foo() {
-    static $z = 0;
-    $z++;
-    var_dump($z);
+    static::$fooZ++;
+    var_dump(static::$fooZ);
   }
-}
-if (false) {
-  class A{
-}
 }
 class B extends A{
 }
 class C extends B {
 }
-A::foo();
-B::foo();
-C::foo();
+
+<<__EntryPoint>>
+function main_1469() {
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '1469-1.inc';
+  }
+  A::foo();
+  B::foo();
+  C::foo();
+}

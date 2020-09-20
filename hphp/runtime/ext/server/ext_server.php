@@ -1,4 +1,6 @@
-<?hh
+<?hh // partial
+
+namespace {
 
 /**
  * Return thread type. See enum class ThreadType.
@@ -32,9 +34,9 @@ function pagelet_server_is_enabled(): bool;
  */
 <<__HipHopSpecific, __Native>>
 function pagelet_server_task_start(string $url,
-                                   array $headers = [],
+                                   darray $headers = darray[],
                                    string $post_data = "",
-                                   array $files = [],
+                                   darray $files = darray[],
                                    int $timeout_seconds = 0): resource;
 
 /**
@@ -66,10 +68,14 @@ function pagelet_server_task_status(resource $task): int;
  *
  */
 <<__HipHopSpecific, __Native>>
-function pagelet_server_task_result(resource $task,
-                                    mixed &$headers,
-                                    mixed &$code,
-                                    int $timeout_ms = 0): string;
+function pagelet_server_task_result(
+  resource $task,
+  <<__OutOnly('varray')>>
+  inout mixed $headers,
+  <<__OutOnly('KindOfInt64')>>
+  inout mixed $code,
+  int $timeout_ms = 0,
+): string;
 
 /**
  * Return the number of pagelet tasks started during this request.
@@ -109,7 +115,8 @@ function pagelet_server_is_done(): bool;
  */
 <<__HipHopSpecific, __Native>>
 function xbox_send_message(string $msg,
-                           mixed &$ret,
+                           <<__OutOnly('darray')>>
+                           inout mixed $ret,
                            int $timeout_ms,
                            string $host = "localhost"): bool;
 
@@ -162,7 +169,11 @@ function xbox_task_status(resource $task): bool;
  *
  */
 <<__HipHopSpecific, __Native>>
-function xbox_task_result(resource $task, int $timeout_ms, mixed &$ret): int;
+function xbox_task_result(
+  resource $task,
+  int $timeout_ms,
+  <<__OutOnly>> inout mixed $ret,
+): int;
 
 /**
  * This function is invoked by the xbox facility to start an xbox call task.
@@ -215,6 +226,8 @@ function xbox_schedule_thread_reset(): void;
  */
 <<__HipHopSpecific, __Native>>
 function xbox_get_thread_time(): int;
+
+} // root namespace
 
 namespace HH {
 /**

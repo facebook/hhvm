@@ -1,3 +1,0 @@
-*** Testing curl_setopt($ch, CURLOPT_WRITEFUNCTION, <closure>); ***
-Data: Hello World!
-Hello World!===DONE===

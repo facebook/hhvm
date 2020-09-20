@@ -19,8 +19,12 @@ class thing {
   }
 }
 
+
+<<__EntryPoint>>
+function main_await_predict() {
 $t = new thing;
 for ($i = 0; $i < 500; ++$i) {
   $t->wat();
 }
 echo "Done\n";
+}

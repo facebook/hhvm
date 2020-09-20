@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $search =  "qxxx\0qqqqqqqq";
 $subject = "qxxx\0xxxxxxxx";
 $replace = "any text";
@@ -33,4 +33,4 @@ $result = str_ireplace ( $search, $replace, $subject );
 var_dump($result);
 
 echo "Done\n";
-?>
+}

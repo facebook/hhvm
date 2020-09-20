@@ -1,28 +1,28 @@
-<?php
+<?hh
 /* Prototype: bool fnmatch ( string $pattern, string $string [, int $flags] )
    Description: fnmatch() checks if the passed string would match 
      the given shell wildcard pattern. 
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions for fnmatch() ***";
 
 /* Invalid arguments */
-var_dump( fnmatch(array(), array()) );
+try { var_dump( fnmatch(varray[], varray[]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $file_handle = fopen(__FILE__, "r");
-var_dump( fnmatch($file_handle, $file_handle) );
+try { var_dump( fnmatch($file_handle, $file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 fclose( $file_handle );
 
 $std_obj = new stdClass();
-var_dump( fnmatch($std_obj, $std_obj) );
+try { var_dump( fnmatch($std_obj, $std_obj) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 /* No.of arguments less than expected */
-var_dump( fnmatch("match.txt") );
-var_dump( fnmatch("") );
+try { var_dump( fnmatch("match.txt") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fnmatch("") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of arguments greater than expected */
-var_dump( fnmatch("match.txt", "match.txt", TRUE, 100) );
+try { var_dump( fnmatch("match.txt", "match.txt", TRUE, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>
+}

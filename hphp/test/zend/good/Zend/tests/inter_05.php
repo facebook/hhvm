@@ -1,5 +1,4 @@
-<?php
+<?hh
 
 interface a extends Exception { }
 
-?>

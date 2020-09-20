@@ -1,0 +1,12 @@
+====================== 1 =======================
+
+Fatal error: Invalid expression in constant initializer in %s/func-ptr-in-const-disallowed1.php.inc on line 7
+====================== 2 =======================
+
+Fatal error: Invalid expression in constant initializer in %s/func-ptr-in-const-disallowed2.php.inc on line 7
+====================== 3 =======================
+
+Fatal error: Invalid expression in constant initializer in %s/func-ptr-in-const-disallowed3.php.inc on line 9
+====================== 4 =======================
+
+Fatal error: Invalid expression in constant initializer in %s/func-ptr-in-const-disallowed4.php.inc on line 9

@@ -1,7 +1,7 @@
-<?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section 
+<?hh
+/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section
  *           [, int $options])
- * Description: Get a specific body section 
+ * Description: Get a specific body section
  * Source code: ext/imap/php_imap.c
  */
 
@@ -9,6 +9,14 @@
  * Pass different data types as $stream_id argument to test behaviour of imap_fetchbody()
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -19,21 +27,13 @@ $section = '2';
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
 // unexpected values to be passed to $stream_id argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -57,17 +57,17 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -76,14 +76,14 @@ $inputs = array(
 
        // unset data
 /*24*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of imap_fetchbody()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( imap_fetchbody($input, $msg_no, $section) );
+  try { var_dump( imap_fetchbody($input, $msg_no, $section) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

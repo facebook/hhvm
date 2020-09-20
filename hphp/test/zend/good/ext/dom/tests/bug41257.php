@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 $doc->load(dirname(__FILE__)."/nsdoc.xml");
 
@@ -19,4 +19,4 @@ $disdef = $doc->isDefaultNamespace("http://ns")."\n";
 $eisdef = $root->isDefaultNamespace("http://ns")."\n";
 
 var_dump($dpref === $epref);
-?>
+}

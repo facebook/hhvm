@@ -1,8 +1,11 @@
-<?php
+<?hh
 
-define('AAA', true);
-define('BBB', false);
-define('CCC', null);
+
+const AAA = true;
+const BBB = false;
+const CCC = null;
+<<__EntryPoint>>
+function main_1595() {
 if (AAA){
   echo "AAA";
 }
@@ -25,3 +28,4 @@ $a = AAA ? "AAA" : "!AAA";
 $b = BBB ? "BBB" : "!BBB";
 $c = CCC ? "CCC" : "!CCC";
 echo "$a$b$c\n";
+}

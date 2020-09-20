@@ -1,0 +1,10 @@
+File "t13262460.php", line 18, characters 19-21:
+The method `foo` has the wrong type (Typing[4341])
+File "t13262460.php", line 18, characters 28-28:
+Some type constraint(s) are violated here
+File "t13262460.php", line 18, characters 23-23:
+`T` is a constrained type parameter
+File "t13262460.php", line 18, characters 28-28:
+Expected `C`
+File "t13262460.php", line 18, characters 23-23:
+But got `T`

@@ -1,6 +1,6 @@
-object(Foob)#1 (1) {
+object(Foob) (1) {
   ["x":"Foob":private]=>
-  object(A)#2 (0) {
+  object(A) (0) {
   }
 }
 heh

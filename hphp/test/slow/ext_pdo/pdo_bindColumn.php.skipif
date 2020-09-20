@@ -1,6 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 $drivers = PDO::getAvailableDrivers();
-
 if (!in_array('mysql', $drivers))
   die("Skip. Driver not found");
 
@@ -13,5 +13,6 @@ $db     = getenv("MYSQL_TEST_DB")     ? getenv("MYSQL_TEST_DB") : "test";
 try {
   $pdo = new PDO("mysql:dbname=$db;host=$host", $user, $passwd);
 } catch (PDOException $e) {
-  die($e->getMessage());
+  die("skip: ".$e->getMessage());
+}
 }

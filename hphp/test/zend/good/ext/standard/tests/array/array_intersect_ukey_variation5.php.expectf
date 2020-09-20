@@ -1,7 +1,7 @@
 *** Testing array_intersect_ukey() : usage variation ***
 
 -- Result of integers and floating point intersection --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
@@ -9,7 +9,7 @@ array(2) {
 }
 
 -- Result of integers and strings containing integers intersection --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
@@ -17,7 +17,7 @@ array(2) {
 }
 
 -- Result of integers and strings containing floating points intersection --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>

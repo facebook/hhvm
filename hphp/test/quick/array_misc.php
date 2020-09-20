@@ -1,32 +1,29 @@
-<?php
+<?hh
 
 class X {
-  function __destruct() { var_dump(__METHOD__); }
 }
 
 function test($a) {
-  apc_store('foo', array(1 => $a));
-  $a = apc_fetch('foo');
+  apc_store('foo', darray[1 => $a]);
+  $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   $a[1] = 'bar';
   var_dump($a);
 
-  $a = apc_fetch('foo');
+  $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   $a["1"] = 'bar';
   var_dump($a);
 
-  $u = new X;
-  $x =& $u;
-
-  $a = apc_fetch('foo');
+  $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   foreach ($a as $k => $x) {
-    var_dump($x, $u);
+    var_dump($x);
   }
 
-  $a = apc_fetch('foo');
+  $a = __hhvm_intrinsics\apc_fetch_no_check('foo');
   $a[1] = 'bar';
   foreach ($a as $k => $x) {
-    var_dump($x, $u);
+    var_dump($x);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 test(42);
+}

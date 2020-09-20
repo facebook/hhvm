@@ -1,0 +1,2 @@
+File "typeparam_type_const.php", line 9, characters 3-36:
+Type parameters are not allowed on class type constants (Parsing[1002])

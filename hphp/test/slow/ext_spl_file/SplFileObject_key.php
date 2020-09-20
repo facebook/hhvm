@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $s = new SplFileObject(__FILE__);
 echo $s->key(), "\n";
 $s->fgets();
@@ -15,4 +15,4 @@ $s->fgets();
 echo $s->key(), "\n";
 $s->fgets();
 echo $s->key(), "\n";
-?>
+}

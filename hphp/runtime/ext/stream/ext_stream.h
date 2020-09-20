@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STREAM_H_
-#define incl_HPHP_EXT_STREAM_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -158,17 +157,17 @@ bool HHVM_FUNCTION(stream_context_set_params,
 Variant HHVM_FUNCTION(stream_copy_to_stream,
                       const Resource& source,
                       const Resource& dest,
-                      int maxlength = -1,
-                      int offset = 0);
+                      int64_t maxlength = -1,
+                      int64_t offset = 0);
 
 Variant HHVM_FUNCTION(stream_get_contents,
                       const Resource& handle,
-                      int maxlen = -1,
-                      int offset = -1);
+                      int64_t maxlen = -1,
+                      int64_t offset = -1);
 
 Variant HHVM_FUNCTION(stream_get_line,
                       const Resource& handle,
-                      int length = 0,
+                      int64_t length = 0,
                       const Variant& ending = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_get_meta_data,
@@ -179,27 +178,15 @@ Array HHVM_FUNCTION(stream_get_transports);
 Array HHVM_FUNCTION(stream_get_wrappers);
 bool HHVM_FUNCTION(stream_is_local,
                    const Variant& stream_or_url);
-bool HHVM_FUNCTION(stream_register_wrapper,
-                   const String& protocol,
-                   const String& classname,
-                   int flags);
-bool HHVM_FUNCTION(stream_wrapper_register,
-                   const String& protocol,
-                   const String& classname,
-                   int flags);
-bool HHVM_FUNCTION(stream_wrapper_restore,
-                   const String& protocol);
-bool HHVM_FUNCTION(stream_wrapper_unregister,
-                   const String& protocol);
 
 Variant HHVM_FUNCTION(stream_resolve_include_path,
                       const String& filename,
                       const Variant& context = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_select,
-                      VRefParam read,
-                      VRefParam write,
-                      VRefParam except,
+                      Variant& read,
+                      Variant& write,
+                      Variant& except,
                       const Variant& vtv_sec,
                       int tv_usec = 0);
 
@@ -214,7 +201,7 @@ bool HHVM_FUNCTION(stream_set_blocking,
 
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,
-                      int buffer);
+                      int64_t buffer);
 
 Variant HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
@@ -227,31 +214,31 @@ bool HHVM_FUNCTION(stream_set_timeout,
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
                       const Resource& stream,
-                      int buffer);
+                      int64_t buffer);
 
 int64_t HHVM_FUNCTION(set_file_buffer,
                       const Resource& stream,
-                      int buffer);
+                      int64_t buffer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream sockets: ext_socket has better implementation of socket functions
 
 Variant HHVM_FUNCTION(stream_socket_accept,
                       const Resource& server_socket,
-                      double timeout = -1.0,
-                      VRefParam peername = uninit_null());
+                      double timeout,
+                      Variant& peername);
 
 Variant HHVM_FUNCTION(stream_socket_server,
                       const String& local_socket,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      Variant& errnum,
+                      Variant& errstr,
                       int flags = k_STREAM_SERVER_BIND|k_STREAM_SERVER_LISTEN,
                       const Variant& context = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_socket_client,
                       const String& remote_socket,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout = -1.0,
                       int flags = 0,
                       const Variant& context = uninit_variant);
@@ -273,9 +260,9 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
-                      int length,
-                      int flags = 0,
-                      VRefParam address = uninit_null());
+                      int64_t length,
+                      int flags,
+                      Variant& address);
 
 Variant HHVM_FUNCTION(stream_socket_sendto,
                       const Resource& socket,
@@ -290,4 +277,3 @@ bool HHVM_FUNCTION(stream_socket_shutdown,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_STREAM_H_

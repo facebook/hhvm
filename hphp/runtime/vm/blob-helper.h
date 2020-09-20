@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
-#define incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
+#pragma once
 
 #include <algorithm>
 #include <cstdlib>
@@ -27,13 +26,17 @@
 #include <folly/Optional.h>
 #include <folly/Varint.h>
 
+#include "hphp/compiler/option.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+
+#include "hphp/util/compact-vector.h"
 
 /*
  * This module contains helpers for serializing and deserializing
@@ -42,9 +45,11 @@
  * Types may provide their own serialization logic by implementing a
  * single-argument member function template called `serde' (as in
  * "serialization/deserialization"), and pushing data it wants to
- * serialize into the parameter.  Those members may in turn have
- * customized serialization behavior, or they may "bottom out" to
- * these helpers if they are basic-enough types.
+ * serialize into the parameter.  The function may take a set of
+ * optional arguments but if your function require those arguments
+ * they also have to be passed in when calling sd. Those members may
+ * in turn have customized serialization behavior, or they may "bottom
+ * out" to these helpers if they are basic-enough types.
  *
  * For example:
  *
@@ -82,11 +87,12 @@ namespace HPHP {
  * "SFINAE".
  */
 
-template<class T, class SerDe>
+template<class T, class SerDe, class... F>
 struct IsNontrivialSerializable {
 private:
-  template<class U, void (U::*)(SerDe&)> struct Checker;
-  template<class U> static char test(Checker<U,&U::template serde<SerDe> >*);
+  template<class U, void (U::*)(SerDe&, F...)> struct Checker;
+  template<class U> static char test(
+    Checker<U,&U::template serde<SerDe, F...> >*);
   template<class>   static long test(...);
 public:
   enum { value = sizeof(test<T>(0)) == 1 };
@@ -96,6 +102,13 @@ public:
 
 struct BlobEncoder {
   static const bool deserializing = false;
+  explicit BlobEncoder(bool l) : m_useGlobalIds{l} {}
+
+  void writeRaw(const char* ptr, size_t size) {
+    auto const start = m_blob.size();
+    m_blob.resize(start + size);
+    std::copy(ptr, ptr + size, &m_blob[start]);
+  }
 
   /*
    * Currently the most basic encoder/decode only works for integral
@@ -104,9 +117,17 @@ struct BlobEncoder {
    *
    * Floating point support could be added later if we need it ...
    */
+   template<class T>
+   typename std::enable_if<
+     std::is_integral<T>::value && std::is_signed<T>::value
+   >::type
+   encode(const T& t) {
+     encode(folly::encodeZigZag(static_cast<int64_t>(t)));
+   }
+
   template<class T>
   typename std::enable_if<
-    std::is_integral<T>::value ||
+    (std::is_integral<T>::value && !std::is_signed<T>::value) ||
     std::is_enum<T>::value
   >::type
   encode(const T& t) {
@@ -121,21 +142,43 @@ struct BlobEncoder {
     std::copy(buf, buf + buf_size, &m_blob[start]);
   }
 
-  template<class T>
+  template<class T, class... F>
   typename std::enable_if<
-    IsNontrivialSerializable<T,BlobEncoder>::value
-  >::type encode(const T& t) {
-    const_cast<T&>(t).serde(*this);
+    IsNontrivialSerializable<T,BlobEncoder, F...>::value
+  >::type encode(const T& t, F... lambdas) {
+    const_cast<T&>(t).serde(*this, lambdas...);
   }
 
   void encode(bool b) {
     encode(b ? 1 : 0);
   }
 
+  void encode(const SHA1& sha1) {
+    for (auto w : sha1.q) encode(w);
+  }
+
+  void encode(Location::Range loc) {
+    encode(loc.line0);
+    encode(loc.char0);
+    encode(loc.line1);
+    encode(loc.char1);
+  }
+
   void encode(DataType t) {
     // always encode DataType as int8 even if it's a bigger size.
-    assert(DataType(int8_t(t)) == t);
+    assertx(DataType(int8_t(t)) == t);
     encode(int8_t(t));
+  }
+
+  void encode(const LowStringPtr& s) {
+    const StringData* sd = s;
+    if (m_useGlobalIds) {
+      Id id = LitstrTable::get().mergeLitstr(sd);
+      encode(id);
+      return;
+    }
+
+    encode(sd);
   }
 
   void encode(const StringData* sd) {
@@ -147,6 +190,16 @@ struct BlobEncoder {
     const size_t start = m_blob.size();
     m_blob.resize(start + sz);
     std::copy(sd->data(), sd->data() + sz, &m_blob[start]);
+  }
+
+  void encode(const std::string& s) {
+    uint32_t sz = s.size();
+    encode(sz + 1);
+    if (!sz) { return; }
+
+    const size_t start = m_blob.size();
+    m_blob.resize(start + sz);
+    std::copy(s.data(), s.data() + sz, &m_blob[start]);
   }
 
   void encode(const TypedValue& tv) {
@@ -183,16 +236,38 @@ struct BlobEncoder {
     encode(kv.second);
   }
 
+  template<class T, typename FDeltaEncode>
+  void encode(const std::vector<T>& cont, FDeltaEncode deltaEncode) {
+    if (cont.size() >= 0xffffffffu) {
+      throw std::runtime_error("maximum vector size exceeded in BlobEncoder");
+    }
+
+    auto prev = T{};
+    encode(uint32_t(cont.size()));
+    for (auto it = cont.begin(); it != cont.end(); ++it) {
+      encode(deltaEncode(prev, *it));
+      prev = *it;
+    }
+  }
+
   template<class T>
   void encode(const std::vector<T>& vec) {
     encodeContainer(vec, "vector");
   }
 
   template<class T>
+  void encode(const CompactVector<T>& vec) {
+    encodeContainer(vec, "CompactVector");
+  }
+
+  template<class T>
   typename std::enable_if<
-    std::is_same<typename T::value_type,
-                 std::pair<typename T::key_type const,
-                           typename T::mapped_type>>::value &&
+    (std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type const,
+                            typename T::mapped_type>>::value ||
+     std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type,
+                            typename T::mapped_type>>::value) &&
     !IsNontrivialSerializable<T,BlobEncoder>::value
   >::type encode(const T& map) {
     encodeContainer(map, "map");
@@ -207,9 +282,9 @@ struct BlobEncoder {
     encodeContainer(set, "set");
   }
 
-  template<class T>
-  BlobEncoder& operator()(const T& t) {
-    encode(t);
+  template<class T, class... F>
+  BlobEncoder& operator()(const T& t, F... lambdas) {
+    encode(t, lambdas...);
     return *this;
   }
 
@@ -232,6 +307,7 @@ private:
 
 private:
   std::vector<char> m_blob;
+  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -239,20 +315,38 @@ private:
 struct BlobDecoder {
   static const bool deserializing = true;
 
-  explicit BlobDecoder(const void* vp, size_t sz)
+  BlobDecoder(const void* vp, size_t sz, bool l)
     : m_p(static_cast<const unsigned char*>(vp))
     , m_last(m_p + sz)
+    , m_useGlobalIds{l}
   {}
 
   void assertDone() {
-    assert(m_p >= m_last);
+    assertx(m_p >= m_last);
+  }
+
+  const unsigned char* data() const { return m_p; }
+  void advance(size_t s) { m_p += s; }
+
+  size_t remaining() const {
+    return m_p <= m_last ? (m_last - m_p) : 0;
   }
 
   // See encode() in BlobEncoder for why this only allows integral
   // types.
   template<class T>
   typename std::enable_if<
-    std::is_integral<T>::value ||
+    std::is_integral<T>::value && std::is_signed<T>::value
+  >::type
+  decode(T& t) {
+    uint64_t value;
+    decode(value);
+    t = static_cast<T>(folly::decodeZigZag(value));
+  }
+
+  template<class T>
+  typename std::enable_if<
+    (std::is_integral<T>::value && !std::is_signed<T>::value) ||
     std::is_enum<T>::value
   >::type
   decode(T& t) {
@@ -261,11 +355,24 @@ struct BlobDecoder {
     m_p = range.begin();
   }
 
-  template<class T>
+  template<class T, class... F>
   typename std::enable_if<
-    IsNontrivialSerializable<T,BlobDecoder>::value
-  >::type decode(T& t) {
-    t.serde(*this);
+    IsNontrivialSerializable<T,BlobDecoder, F...>::value
+  >::type decode(T& t, F... lambdas) {
+    t.serde(*this, lambdas...);
+  }
+
+  void decode(SHA1& sha1) {
+    for (auto& w : sha1.q) decode(w);
+  }
+
+  void decode(Location::Range& loc) {
+    int line0, char0, line1, char1;
+    decode(line0);
+    decode(char0);
+    decode(line1);
+    decode(char1);
+    loc = {line0, char0, line1, char1};
   }
 
   void decode(DataType& t) {
@@ -281,16 +388,27 @@ struct BlobDecoder {
   }
 
   void decode(LowStringPtr& s) {
-    const StringData* sd;
-    decode(sd);
-    s = sd;
+    if (m_useGlobalIds) {
+      Id id;
+      decode(id);
+      s = LitstrTable::get().lookupLitstrId(id);
+      return;
+    }
+
+    String st(decodeString());
+    s = st.get() ? makeStaticString(st) : 0;
+  }
+
+  void decode(std::string& s) {
+    String str(decodeString());
+    s = str.toCppString();
   }
 
   void decode(TypedValue& tv) {
     tvWriteUninit(tv);
 
     String s = decodeString();
-    assert(!!s);
+    assertx(!!s);
     if (s.empty()) return;
 
     tvAsVariant(&tv) =
@@ -331,21 +449,40 @@ struct BlobDecoder {
     decode(val.second);
   }
 
-  template<class T>
-  void decode(std::vector<T>& vec) {
+  template<typename Cont>
+  auto decode(Cont& vec) -> decltype(vec.emplace_back(), void()) {
     uint32_t size;
     decode(size);
+    if (size) vec.reserve(vec.size() + size);
     for (uint32_t i = 0; i < size; ++i) {
-      vec.push_back(T());
+      vec.emplace_back();
       decode(vec.back());
+    }
+  }
+
+  template<class T, typename FDeltaDecode>
+  void decode(std::vector<T>& vec, FDeltaDecode deltaDecode) {
+    uint32_t size;
+    decode(size);
+    vec.reserve(size);
+
+    auto prev = T{};
+    auto delta = T{};
+    for (uint32_t i = 0; i < size; ++i) {
+      decode(delta);
+      prev = deltaDecode(prev, delta);
+      vec.push_back(prev);
     }
   }
 
   template<class T>
   typename std::enable_if<
-    std::is_same<typename T::value_type,
-                 std::pair<typename T::key_type const,
-                           typename T::mapped_type>>::value &&
+    (std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type const,
+                            typename T::mapped_type>>::value ||
+     std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type,
+                            typename T::mapped_type>>::value) &&
     !IsNontrivialSerializable<T,BlobDecoder>::value
   >::type decode(T& map) {
     uint32_t size;
@@ -374,9 +511,9 @@ struct BlobDecoder {
     }
   }
 
-  template<class T>
-  BlobDecoder& operator()(T& t) {
-    decode(t);
+  template<class T, class... F>
+  BlobDecoder& operator()(T& t, F... lambdas) {
+    decode(t, lambdas...);
     return *this;
   }
 
@@ -390,7 +527,7 @@ private:
 
     String s = String(sz, ReserveString);
     char* pch = s.mutableData();
-    assert(m_last - m_p >= sz);
+    assertx(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;
     s.setSize(sz);
@@ -400,10 +537,10 @@ private:
 private:
   const unsigned char* m_p;
   const unsigned char* const m_last;
+  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-#endif

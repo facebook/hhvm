@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype         : resource curl_multi_init(void)
  * Description       : Returns a new cURL multi handle
  * Source code       : ext/curl/multi.c
@@ -6,13 +6,13 @@
  */
 
 // start testing
+<<__EntryPoint>> function main(): void {
 echo "*** Testing curl_multi_init(void); ***\n";
-
 //create the multiple cURL handle
 $mh = curl_multi_init();
 var_dump($mh);
 
 curl_multi_close($mh);
 var_dump($mh);
-?>
-===DONE===
+echo "===DONE===\n";
+}

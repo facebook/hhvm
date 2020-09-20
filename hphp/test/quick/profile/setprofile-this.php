@@ -1,12 +1,9 @@
-<?php
+<?hh
 // Test uses RenameFunction to ensure that all arguments are retained
 
 trait logger {
   public function __construct() {
     echo "\n".__CLASS__." constructing\n";
-  }
-  public function __destruct() {
-    echo "\n".__CLASS__." destructing\n";
   }
 }
 
@@ -21,25 +18,25 @@ class C {
   }
 }
 
+abstract final class ProfilerStatics {
+  public static $indent = 2;
+  public static $threw = false;
+}
+
 function profiler($event, $name, $info) {
-  static $indent = 2;
   if ($name == 'get_class') return;
 
-  if ($event == 'exit') --$indent;
-  printf("\n%s%s %s: %s\n", str_repeat('  ', $indent), $event,
+  if ($event == 'exit') --ProfilerStatics::$indent;
+  printf("\n%s%s %s: %s\n", str_repeat('  ', ProfilerStatics::$indent), $event,
          $name, serialize($info));
-  if ($event == 'enter') ++$indent;
-
-  static $threw = false;
+  if ($event == 'enter') ++ProfilerStatics::$indent;
   if ($event == 'exit' &&
-      ((!$threw && strncmp('C::', $name, 3) == 0) ||
+      ((!ProfilerStatics::$threw && strncmp('C::', $name, 3) == 0) ||
        $name === 'C::method')) {
-    $threw = true;
+    ProfilerStatics::$threw = true;
     throw new Exception($name);
   }
 }
-
-fb_setprofile('profiler');
 
 function main() {
   try {
@@ -54,4 +51,9 @@ function main() {
     echo "\nCaught ".$e->getMessage()."\n";
   }
 }
-main();
+<<__EntryPoint>>
+function entrypoint_setprofilethis(): void {
+
+  fb_setprofile('profiler');
+  main();
+}

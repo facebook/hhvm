@@ -48,7 +48,7 @@ icu::TimeZone* IntlTimeZone::ParseArg(const Variant& arg,
   } else if (arg.isObject()) {
     auto objarg = arg.toObject();
     auto cls = objarg->getVMClass();
-    auto IntlTimeZone_Class = Unit::lookupClass(s_IntlTimeZone.get());
+    auto IntlTimeZone_Class = Class::lookup(s_IntlTimeZone.get());
     if (IntlTimeZone_Class &&
         ((cls == IntlTimeZone_Class) || cls->classof(IntlTimeZone_Class))) {
       return IntlTimeZone::Get(objarg.get())->timezone()->clone();
@@ -150,7 +150,7 @@ static Object HHVM_STATIC_METHOD(IntlTimeZone, createTimeZone,
 
 static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
                                   const String& zoneId,
-                                  VRefParam isSystemID) {
+                                  bool& isSystemID) {
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString id;
   if (!ustring_from_char(id, zoneId, error)) {
@@ -169,7 +169,7 @@ static Variant HHVM_STATIC_METHOD(IntlTimeZone, getCanonicalID,
     return false;
   }
 
-  isSystemID.assignIfRef((bool)system);
+  isSystemID = (bool)system;
   error = U_ZERO_ERROR;
   String ret(u8(result, error));
   if (U_FAILURE(error)) {
@@ -259,7 +259,7 @@ static Variant HHVM_METHOD(IntlTimeZone, getID) {
 
 static bool HHVM_METHOD(IntlTimeZone, getOffset,
                         double date, bool local,
-                        VRefParam rawOffset, VRefParam dstOffset) {
+                        int64_t& rawOffset, int64_t& dstOffset) {
   TZ_GET(data, this_, false);
   UErrorCode error = U_ZERO_ERROR;
   int32_t rawOff, dstOff;
@@ -268,8 +268,8 @@ static bool HHVM_METHOD(IntlTimeZone, getOffset,
     data->setError(error, "intltz_get_offset: error obtaining offset");
     return false;
   }
-  rawOffset.assignIfRef(rawOff);
-  dstOffset.assignIfRef(dstOff);
+  rawOffset = rawOff;
+  dstOffset = dstOff;
   return true;
 }
 

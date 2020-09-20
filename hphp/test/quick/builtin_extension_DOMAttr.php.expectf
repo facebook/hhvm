@@ -1,7 +1,7 @@
 DOMAttr
 
 Warning: Not yet implemented in %s/test/quick/builtin_extensions.inc on line 6
-object(DOMAttr)#1 (21) {
+object(DOMAttr) (21) {
   ["nodeName"]=>
   string(5) "Hello"
   ["nodeValue"]=>
@@ -49,53 +49,33 @@ object(DOMAttr)#1 (21) {
 Warning: Attempted to serialize unserializable builtin class DOMAttr in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(20) {
-  [0]=>
+varray(20) {
   string(11) "__construct"
-  [1]=>
   string(11) "__debuginfo"
-  [2]=>
   string(4) "isId"
-  [3]=>
   string(11) "appendChild"
-  [4]=>
   string(9) "cloneNode"
-  [5]=>
   string(9) "getLineNo"
-  [6]=>
   string(13) "hasAttributes"
-  [7]=>
   string(13) "hasChildNodes"
-  [8]=>
   string(12) "insertBefore"
-  [9]=>
   string(18) "isDefaultNamespace"
-  [10]=>
   string(10) "isSameNode"
-  [11]=>
   string(11) "isSupported"
-  [12]=>
   string(18) "lookupNamespaceUri"
-  [13]=>
   string(12) "lookupPrefix"
-  [14]=>
   string(9) "normalize"
-  [15]=>
   string(11) "removeChild"
-  [16]=>
   string(12) "replaceChild"
-  [17]=>
   string(4) "c14n"
-  [18]=>
   string(8) "c14nfile"
-  [19]=>
   string(11) "getNodePath"
 }
 ================
 A_DOMAttr
 
 Warning: Not yet implemented in %s/test/quick/builtin_extensions.inc on line 24
-object(A_DOMAttr)#2 (22) {
+object(A_DOMAttr) (22) {
   ["___x"]=>
   NULL
   ["nodeName"]=>
@@ -145,45 +125,25 @@ object(A_DOMAttr)#2 (22) {
 Warning: Attempted to serialize unserializable builtin class A_DOMAttr in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(20) {
-  [0]=>
+varray(20) {
   string(11) "__construct"
-  [1]=>
   string(11) "__debuginfo"
-  [2]=>
   string(4) "isId"
-  [3]=>
   string(11) "appendChild"
-  [4]=>
   string(9) "cloneNode"
-  [5]=>
   string(9) "getLineNo"
-  [6]=>
   string(13) "hasAttributes"
-  [7]=>
   string(13) "hasChildNodes"
-  [8]=>
   string(12) "insertBefore"
-  [9]=>
   string(18) "isDefaultNamespace"
-  [10]=>
   string(10) "isSameNode"
-  [11]=>
   string(11) "isSupported"
-  [12]=>
   string(18) "lookupNamespaceUri"
-  [13]=>
   string(12) "lookupPrefix"
-  [14]=>
   string(9) "normalize"
-  [15]=>
   string(11) "removeChild"
-  [16]=>
   string(12) "replaceChild"
-  [17]=>
   string(4) "c14n"
-  [18]=>
   string(8) "c14nfile"
-  [19]=>
   string(11) "getNodePath"
 }

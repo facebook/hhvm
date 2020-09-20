@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : array gettimeofday([bool get_as_float])
  * Description: Returns the current time as array 
  * Source code: ext/standard/microtime.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gettimeofday() : basic functionality ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -24,5 +24,5 @@ $get_as_float = false;
 // Calling gettimeofday() with all possible arguments
 var_dump( gettimeofday($get_as_float) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

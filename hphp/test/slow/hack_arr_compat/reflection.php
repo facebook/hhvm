@@ -8,5 +8,9 @@ class Foo {
   private $prop4;
 }
 
+
+<<__EntryPoint>>
+function main_reflection() {
 $reflect = new ReflectionClass('Foo');
 var_dump($reflect->getProperties());
+}

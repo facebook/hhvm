@@ -1,95 +1,90 @@
 *** Testing strftime() : usage variation ***
 
 --float 10.5--
-string(20) "Jan 01 1970 05:30:10"
+
+Warning: strftime() expects parameter 2 to be integer, double given in %s/strftime_variation2.php on line 98
 
 --float -10.5--
-string(20) "Jan 01 1970 05:29:50"
+
+Warning: strftime() expects parameter 2 to be integer, double given in %s/strftime_variation2.php on line 98
 
 --float .5--
-string(20) "Jan 01 1970 05:30:00"
+
+Warning: strftime() expects parameter 2 to be integer, double given in %s/strftime_variation2.php on line 98
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --uppercase NULL--
-string(20) "Jan 01 1970 05:30:00"
+bool(true)
 
 --lowercase null--
-string(20) "Jan 01 1970 05:30:00"
+bool(true)
 
 --lowercase true--
-string(20) "Jan 01 1970 05:30:01"
+
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line 98
 
 --lowercase false--
-string(20) "Jan 01 1970 05:30:00"
+
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line 98
 
 --uppercase TRUE--
-string(20) "Jan 01 1970 05:30:01"
+
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line 98
 
 --uppercase FALSE--
-string(20) "Jan 01 1970 05:30:00"
+
+Warning: strftime() expects parameter 2 to be integer, boolean given in %s/strftime_variation2.php on line 98
 
 --empty string DQ--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 98
 
 --empty string SQ--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 98
 
 --string DQ--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 98
 
 --string SQ--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 98
 
 --mixed case string--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 98
 
 --heredoc--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 98
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, object given in %s/strftime_variation2.php on line 98
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: strftime() expects parameter 2 to be integer, object given in %s/strftime_variation2.php on line 98
 
 --undefined var--
-string(20) "Jan 01 1970 05:30:00"
+bool(true)
 
 --unset var--
-string(20) "Jan 01 1970 05:30:00"
+bool(true)
 ===DONE===

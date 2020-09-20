@@ -1,20 +1,25 @@
-<?php
-$data = "Testing openssl_private_encrypt()";
-$privkey = "file://" . dirname(__FILE__) . "/private.key";
-$pubkey = "file://" . dirname(__FILE__) . "/public.key";
-$wrong = "wrong";
+<?hh
 class test {
         function __toString() {
                 return "test";
         }
 }
-$obj = new test;
+<<__EntryPoint>>
+function entrypoint_014(): void {
+  $data = "Testing openssl_private_encrypt()";
+  $privkey = "file://" . dirname(__FILE__) . "/private.key";
+  $pubkey = "file://" . dirname(__FILE__) . "/public.key";
+  $wrong = "wrong";
+  $obj = new test;
 
-var_dump(openssl_private_encrypt($data, $encrypted, $privkey));
-var_dump(openssl_private_encrypt($data, $encrypted, $pubkey));
-var_dump(openssl_private_encrypt($data, $encrypted, $wrong));
-var_dump(openssl_private_encrypt($data, $encrypted, $obj));
-var_dump(openssl_private_encrypt($obj, $encrypted, $privkey));
-openssl_public_decrypt($encrypted, $output, $pubkey);
-var_dump($output);
-?>
+  $encrypted = null;
+  $encrypted_bad = null;
+  var_dump(openssl_private_encrypt($data, inout $encrypted, $privkey));
+  var_dump(openssl_private_encrypt($data, inout $encrypted_bad, $pubkey));
+  var_dump(openssl_private_encrypt($data, inout $encrypted_bad, $wrong));
+  var_dump(openssl_private_encrypt($data, inout $encrypted_bad, $obj));
+  try { var_dump(openssl_private_encrypt($obj, inout $encrypted_bad, $privkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  $output = null;
+  openssl_public_decrypt($encrypted, inout $output, $pubkey);
+  var_dump($output);
+}

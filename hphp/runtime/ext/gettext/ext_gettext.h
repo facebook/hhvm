@@ -14,8 +14,7 @@
 | license@php.net so we can mail you a copy immediately.               |
 +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_EXT_GETTEXT_H_
-#define incl_HPHP_EXT_GETTEXT_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -29,4 +28,3 @@ struct GettextExtension final : Extension {
 
 }
 
-#endif

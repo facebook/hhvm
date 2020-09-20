@@ -1,3 +1,4 @@
 <?hh
-echo "Script launched.\n";
-sleep(1);
+<<__EntryPoint>> function main() {
+echo 'hello world.';
+}

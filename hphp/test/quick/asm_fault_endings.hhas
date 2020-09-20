@@ -1,29 +1,18 @@
-.main {
-  .try {
-    FPushFuncD 0 "main"
-    FCall 0
-    UnboxR
-    RetC
-  } .catch {
-    PopC
-    String "Finished!\n"
-    Print
-    RetC
-  }
-}
-
-.function main {
+.function foo {
   .try {
     String "foo\n"
     Print
     PopC
 
     .try {
-      FPushCtorD 1 "Exception"
+      NewObjD "Exception"
+      Dup
+      NullUninit
+      NullUninit
       String "ex"
-      FPassC 0 Any
-      FCall 1
-      PopR
+      FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+      PopC
+      LockObj
       Throw
     } .catch {
       String "handler2\n"
@@ -36,5 +25,20 @@
     Print
     PopC
     Throw
+  }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  .try {
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallFuncD <> 0 1 "" - "" "foo"
+    RetC
+  } .catch {
+    PopC
+    String "Finished!\n"
+    Print
+    RetC
   }
 }

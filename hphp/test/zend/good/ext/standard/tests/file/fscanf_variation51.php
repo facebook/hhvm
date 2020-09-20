@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
   Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );
@@ -6,13 +6,12 @@
 */
 
 /* Test fscanf() to scan a file for read when file is opened inwrite only mode */
-
-$file_path = dirname(__FILE__);
+<<__EntryPoint>> function main(): void {
 
 echo "*** Test fscanf(): to read from a file opened in write only mode ***\n"; 
 
 // create a file
-$filename = "$file_path/fscanf_variation51.tmp";
+$filename = __SystemLib\hphp_test_tmppath('fscanf_variation51.tmp');
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
@@ -23,15 +22,15 @@ if($file_handle == false)
 fclose($file_handle);
 
 // various formats
-$formats = array( "%d", "%f", "%e", "%u", " %s", "%x", "%o");
+$formats = varray[ "%d", "%f", "%e", "%u", " %s", "%x", "%o"];
 
 $counter = 1;
 
 // various write only modes
-$modes = array("w", "wb", "wt",
+$modes = varray["w", "wb", "wt",
                "a", "ab", "at",
                "x", "xb", "xt"
-         );
+         ];
 
 $counter = 1;
 // reading the values from file using different integer formats
@@ -53,12 +52,4 @@ foreach($modes as $mode) {
 }
 
 echo "\n*** Done ***";
-?>
-<?php error_reporting(0); ?>
-<?php
-$file_path = dirname(__FILE__);
-$filename = "$file_path/fscanf_variation51.tmp";
-if(file_exists($filename)) {
-  unlink($filename);
 }
-?>

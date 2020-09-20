@@ -1,3 +1,3 @@
-<?hh
+<?hh // partial
 
 enum Foo: arraykey {}

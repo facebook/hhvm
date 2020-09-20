@@ -2,13 +2,17 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function do_add($a, $b) {
-  var_dump($a + $b);
+  try { var_dump($a + $b); } catch (Exception $e) { print($e->getMessage()."\n"); }
 }
 
 function main() {
-  do_add([], []);
-  do_add([1, 2, 3], []);
-  do_add([], [1, 2, 3]);
-  do_add([1, 2, 3], [4, 5, 6]);
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]));
+  do_add(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[4, 5, 6]));
 }
+
+<<__EntryPoint>>
+function main_add() {
 main();
+}

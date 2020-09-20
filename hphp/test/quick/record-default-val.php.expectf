@@ -1,0 +1,1 @@
+Catchable fatal error: Record field 'Foo::z' declared as type ?bool, int assigned in %s/record-default-val.php on line 3

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: test cannot inherit the constant FOO from test2, because it was previously inherited from test1 in %s/errmsg_025.php on line 11

@@ -16,8 +16,7 @@
 */
 /* utf8_decode.h */
 
-#ifndef incl_HPHP_ZEND_UTF8_DECODE_H_
-#define incl_HPHP_ZEND_UTF8_DECODE_H_
+#pragma once
 
 #include <folly/Likely.h>
 
@@ -72,4 +71,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_UTF8_DECODE_H_

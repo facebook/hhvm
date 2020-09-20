@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reflectMethod($class, $method) {
     $methodInfo = new ReflectionMethod($class, $method);
@@ -32,8 +32,6 @@ class TestClass
     }
 
     protected function prot() {}
-
-    public function __destruct() {}
 }
 
 class DerivedClass extends TestClass {}
@@ -41,7 +39,7 @@ class DerivedClass extends TestClass {}
 interface TestInterface {
     public function int();
 }
-
+<<__EntryPoint>> function main(): void {
 reflectMethod("DerivedClass", "foo");
 reflectMethod("TestClass", "stat");
 reflectMethod("TestClass", "priv");
@@ -49,6 +47,4 @@ reflectMethod("TestClass", "prot");
 reflectMethod("DerivedClass", "prot");
 reflectMethod("TestInterface", "int");
 reflectMethod("ReflectionProperty", "__construct");
-reflectMethod("TestClass", "__destruct");
-
-?>
+}

@@ -6,8 +6,8 @@ class D {
 }
 
 class A extends D {
-  private function func1() { return [1, 2, 3]; }
-  protected function func2() { return [4, 5, 6]; }
+  private function func1() { return varray[1, 2, 3]; }
+  protected function func2() { return varray[4, 5, 6]; }
 }
 
 class B {
@@ -26,6 +26,9 @@ function test4() { return (new B)->test2(new A); }
 function test5() { return (new C)->test1(new A); }
 function test6() { return (new D)->test1(new A); }
 
+
+<<__EntryPoint>>
+function main_inaccessible_folding() {
 $tests = vec[
   'test1',
   'test2',
@@ -35,7 +38,7 @@ $tests = vec[
   'test6',
 ];
 
-$count = apc_fetch('count');
+$count = __hhvm_intrinsics\apc_fetch_no_check('count');
 if ($count === false) $count = 0;
 if ($count < count($tests)) {
   $test = $tests[$count];
@@ -43,4 +46,5 @@ if ($count < count($tests)) {
   apc_store('count', $count);
   echo "====================== $test =======================\n";
   var_dump($test());
+}
 }

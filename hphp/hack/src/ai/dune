@@ -1,0 +1,54 @@
+(* -*- tuareg -*- *)
+
+let library_entry name suffix =
+  Printf.sprintf
+"(library
+  (name %s)
+  (wrapped false)
+  (modules)
+  (libraries %s_%s))" name name suffix
+
+let executable_entry is_fb name =
+  if is_fb then
+    Printf.sprintf
+      "(executable
+        (name %s)
+        (modules %s)
+        (ocamlc_flags (:standard -custom))
+        (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
+        (libraries
+         default_injector_config
+         %s_fb))" name name name
+  else
+    Printf.sprintf
+      "(executable
+        (name %s)
+        (modules %s)
+        (libraries))" name name
+
+let fb_entry name =
+  library_entry name "fb"
+
+let stubs_entry name =
+  library_entry name "stubs"
+
+let entry is_fb name =
+  if is_fb then
+    fb_entry name
+  else
+    stubs_entry name
+
+let () =
+  (* test presence of fb subfolder *)
+  let current_dir = Sys.getcwd () in
+  (* we are in src/ai, locate src/facebook *)
+  let src_dir = Filename.dirname current_dir in
+  let fb_dir = Filename.concat src_dir "facebook" in
+  (* locate src/facebook/dune *)
+  let fb_dune = Filename.concat fb_dir "dune" in
+  let is_fb = Sys.file_exists fb_dune in
+  let ai = entry is_fb "ai" in
+  let ai_options = entry is_fb "ai_options" in
+  let zoncolan = executable_entry is_fb "zoncolan" in
+  String.concat "\n" [ai_options; ai; zoncolan]
+  |> Jbuild_plugin.V1.send

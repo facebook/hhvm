@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_BLOCK_H_
-#define incl_HPHP_VM_BLOCK_H_
+#pragma once
 
 #include <algorithm>
+
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/edge.h"
@@ -74,9 +75,9 @@ struct Block {
   enum class Hint { Unused, Unlikely, Neither, Likely };
 
   explicit Block(unsigned id, uint64_t profCount)
-    : m_id(id)
+    : m_profCount(checkedProfCount(profCount))
+    , m_id(id)
     , m_hint(Hint::Neither)
-    , m_profCount(checkedProfCount(profCount))
   {}
 
   Block(const Block&) = delete;
@@ -107,7 +108,7 @@ struct Block {
   }
 
   // If its a catch block, the BeginCatch's marker
-  BCMarker catchMarker() const;
+  const BCMarker& catchMarker() const;
 
   // return the fallthrough block.  Should be nullptr if the last instruction
   // is a Terminal.
@@ -128,8 +129,8 @@ struct Block {
   // then return an iterator to the newly inserted instruction.
   iterator prepend(IRInstruction* inst);
 
-  // return iterator to first instruction after any DefFP, DefSP, DefLabel,
-  // and/or BeginCatch instructions.
+  // return iterator to first instruction after any DefFP, DefFrameRelSP,
+  // DefRegSP, DefLabel, and/or BeginCatch instructions.
   iterator skipHeader();
   const_iterator skipHeader() const;
 
@@ -208,12 +209,15 @@ struct Block {
   static uint64_t checkedProfCount(uint64_t profCount);
 
   InstructionList m_instrs; // instructions in this block
-  const unsigned m_id;      // unit-assigned unique id of this block
   EdgeList m_preds;         // Edges that point to this block
-  Hint m_hint;              // execution frequency hint
   uint64_t m_profCount;     // execution profile count of the region block
                             // containing this IR block.
+  const unsigned m_id;      // unit-assigned unique id of this block
+  Hint m_hint;              // execution frequency hint
 };
+
+// Try to keep this structure small; watch for alignment issues.
+static_assert(sizeof(Block) == 64, "");
 
 using BlockList = jit::vector<Block*>;
 using BlockSet = jit::flat_set<Block*>;
@@ -254,7 +258,10 @@ inline Block::iterator Block::prepend(IRInstruction* inst) {
 inline Block::iterator Block::skipHeader() {
   auto it = begin();
   auto e = end();
-  while (it != e && it->is(DefFP, DefSP, DefLabel, BeginCatch)) ++it;
+  while (it != e &&
+         it->is(DefFP, DefFrameRelSP, DefRegSP, DefLabel, BeginCatch)) {
+    ++it;
+  }
   return it;
 }
 
@@ -369,7 +376,7 @@ inline uint64_t Block::checkedProfCount(uint64_t profCount) {
   return profCount;
 }
 
-inline BCMarker Block::catchMarker() const {
+inline const BCMarker& Block::catchMarker() const {
   assertx(isCatch());
   auto it = skipHeader();
   assertx(it != begin());
@@ -395,6 +402,13 @@ inline const char* blockHintName(Block::Hint hint) {
   not_reached();
 }
 
+inline folly::Optional<Block::Hint> nameToHint(const std::string& hintStr) {
+  if (hintStr == "Unused")   return Block::Hint::Unused;
+  if (hintStr == "Unlikely") return Block::Hint::Unlikely;
+  if (hintStr == "Neither")  return Block::Hint::Neither;
+  if (hintStr == "Likely")   return Block::Hint::Likely;
+  return folly::none;
+}
+
 }}
 
-#endif

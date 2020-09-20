@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $it = new DirectoryIterator(__DIR__."/../../../../../sample_dir/");
 
 $count = 0;
@@ -14,5 +14,5 @@ foreach ($it as $e) {
 if ($count > 0) {
     echo "Found $count entries!\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

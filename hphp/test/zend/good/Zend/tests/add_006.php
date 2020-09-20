@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $i = 75636;
 $s1 = "this is a string";
 $s2 = "876222numeric";
@@ -31,4 +31,4 @@ $c = $s4 + $i;
 var_dump($c);
 
 echo "Done\n";
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A extends Exception {}
 class B extends Exception {}
@@ -54,6 +54,6 @@ function blah() {
   echo "jjj\n";
   return 666;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(blah());
-
+}

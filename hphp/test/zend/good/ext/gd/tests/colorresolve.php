@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorresolve($im, 255,0,255);
 printf("%X\n", $c);
@@ -56,6 +56,4 @@ for ($i=0; $i<256; $i++) {
 }
 $c = imagecolorresolvealpha($im, 255,10,10,0);
 print_r(imagecolorsforindex($im, $c));
-
-
-?>
+}

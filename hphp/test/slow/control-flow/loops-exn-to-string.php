@@ -32,4 +32,8 @@ function main(): void {
   $c->iter();
 }
 
+
+<<__EntryPoint>>
+function main_loops_exn_to_string() {
 main();
+}

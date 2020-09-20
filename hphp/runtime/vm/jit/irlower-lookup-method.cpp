@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -55,153 +56,100 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
+/*
+ * The `mcprep' instruction here creates a smashable move, which serves as
+ * the inline cache, or "prime cache" for the method lookup.
+ *
+ * On our first time through this codepath in the TC, we "prime" this cache
+ * (which holds across /all/ requests) by smashing the mov immediate to hold
+ * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
+ * not always possible (see MethodCache::handleStaticCall() for details), in
+ * which case we smash an immediate with some low bits set, so that we always
+ * miss on the inline cache when comparing against our live Class*.
+ *
+ * The inline cache is set up so that we always miss initially, and take the
+ * slow path to initialize it. After initialization, the slow path uses the
+ * out-of-line method cache (allocated above). The inline cache is set only
+ * during the first call(s) (usually once), but the one-way request-local
+ * method cache is updated on each miss.
+ */
+void cgLdSmashable(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << mcprep{dst};
+}
+
+void cgCheckSmashableClass(IRLS& env, const IRInstruction* inst) {
+  auto const smashable = srcLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  auto const tmp = v.makeReg();
+  auto const smashableCls = v.makeReg();
+  v << movtql{smashable, tmp};
+  v << movzlq{tmp, smashableCls};
+
+  auto const sf = v.makeReg();
+  v << cmpq{smashableCls, cls, sf};
+  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgLdSmashableFunc(IRLS& env, const IRInstruction* inst) {
+  auto const smashable = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  v << shrqi{32, smashable, dst, v.makeReg()};
+}
+
+void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
+
+  auto const target = CallSpec::direct(MethodCache::handleDynamicCall);
+  auto const args = argGroup(env, inst)
+    .ssa(0 /* cls */)
+    .ssa(1 /* methodName */)
+    .immPtr(inst->extra<OptClassData>()->cls);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdObjMethodS(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
   using namespace MethodCache;
 
-  auto const cls = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<LdObjMethodData>();
-  auto& v = vmain(env);
-  auto& vc = vcold(env);
-
   // Allocate the request-local one-way method cache for this lookup.
-  auto const handle = rds::alloc<Entry, sizeof(Entry)>().handle();
+  auto const handle =
+    rds::alloc<Entry, rds::Mode::Normal, sizeof(Entry)>().handle();
   if (RuntimeOption::EvalPerfDataMap) {
     rds::recordRds(handle, sizeof(TypedValue), "MethodCache",
-                   inst->marker().func()->fullName()->toCppString());
+                   inst->marker().func()->fullName()->slice());
   }
 
-  auto const mc_handler = extra->fatal ? tc::ustubs().handlePrimeCacheInitFatal
-                                       : tc::ustubs().handlePrimeCacheInit;
+  auto const target = CallSpec::direct(MethodCache::handleStaticCall);
+  auto const args = argGroup(env, inst)
+    .ssa(0 /* cls */)
+    .immPtr(inst->extra<FuncNameData>()->name)
+    .immPtr(inst->extra<FuncNameData>()->context)
+    .imm(safe_cast<int32_t>(handle))
+    .ssa(1 /* smashable */);
 
-  /*
-   * The `mcprep' instruction here creates a smashable move, which serves as
-   * the inline cache, or "prime cache" for the method lookup.
-   *
-   * On our first time through this codepath in the TC, we "prime" this cache
-   * (which holds across /all/ requests) by smashing the mov immediate to hold
-   * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
-   * not always possible (see handlePrimeCacheInit() for details), in which
-   * case we smash an immediate with some low bits set, so that we always miss
-   * on the inline cache when comparing against our live Class*.
-   *
-   * The inline cache is set up so that we always miss initially, and take the
-   * slow path to initialize it.  After initialization, we also smash the slow
-   * path call to point instead to a lookup routine for the out-of-line method
-   * cache (allocated above).  The inline cache is guaranteed to be set only
-   * once, but the one-way request-local method cache is updated on each miss.
-   */
-  auto func_class = v.makeReg();
-  v << mcprep{func_class};
-
-  // Get the Class* part of the cache line.
-  auto tmp = v.makeReg();
-  auto classptr = v.makeReg();
-  v << movtql{func_class, tmp};
-  v << movzlq{tmp, classptr};
-
-  // Check the inline cache.
-  auto const sf = v.makeReg();
-  v << cmpq{classptr, cls, sf};
-
-  unlikelyIfThenElse(
-    v, vc, CC_NE, sf,
-    [&] (Vout& v) { // then block (unlikely)
-      auto const args = argGroup(env, inst)
-        .imm(safe_cast<int32_t>(handle))
-        .addr(fp, cellsToBytes(extra->offset.offset))
-        .immPtr(extra->method)
-        .ssa(0 /* cls */)
-        .immPtr(inst->marker().func()->cls())
-        .reg(func_class);
-
-      cgCallHelper(v, env, CallSpec::smashable(mc_handler),
-                   kVoidDest, SyncOptions::Sync, args);
-    },
-    [&] (Vout& v) { // else block (likely)
-      auto const funcptr = v.makeReg();
-      v << shrqi{32, func_class, funcptr, v.makeReg()};
-      v << store{funcptr,
-                 fp[cellsToBytes(extra->offset.offset) + AROFF(m_func)]};
-    });
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(LdClsCtor)
-
-template<bool forward>
-void lookupClsMethodHelper(Class* cls, StringData* meth,
-                           ActRec* ar, ActRec* fp) {
-  try {
-    const Func* f;
-    auto const ctx = fp->m_func->cls();
-    auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
-    auto const res = lookupClsMethod(f, cls, meth, obj, ctx, true);
-
-    ar->m_func = f;
-
-    if (res == LookupResult::MethodFoundNoThis ||
-        res == LookupResult::MagicCallStaticFound) {
-      if (!f->isStaticInPrologue()) {
-        raise_missing_this(f);
-      }
-      if (forward && ctx) {
-        if (fp->hasThis()) {
-          cls = fp->getThis()->getVMClass();
-        } else {
-          cls = fp->getClass();
-        }
-      }
-      ar->setClass(cls);
-    } else {
-      assertx(obj);
-      assertx(res == LookupResult::MethodFoundWithThis ||
-              res == LookupResult::MagicCallFound);
-      obj->incRefCount();
-      ar->setThis(obj);
-    }
-
-    if (res == LookupResult::MagicCallFound ||
-        res == LookupResult::MagicCallStaticFound) {
-      ar->setMagicDispatch(meth);
-      meth->incRefCount();
-    }
-  } catch (...) {
-    *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
-    throw;
-  }
-}
-
-void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LookupClsMethod>();
-  auto const sp = srcLoc(env, inst, 2).reg();
-
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .ssa(1)
-    .addr(sp, cellsToBytes(extra->calleeAROffset.offset))
-    .ssa(3);
-
-  if (extra->forward) {
-    cgCallHelper(vmain(env), env,
-                 CallSpec::direct(lookupClsMethodHelper<true>),
-                 callDest(env, inst), SyncOptions::Sync, args);
-  } else {
-    cgCallHelper(vmain(env), env,
-                 CallSpec::direct(lookupClsMethodHelper<false>),
-                 callDest(env, inst), SyncOptions::Sync, args);
-  }
-}
+IMPL_OPCODE_CALL(LookupClsMethod)
 
 void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<ProfileMethodData>();
-  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<ProfileCallTargetData>();
 
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
-    .addr(sp, cellsToBytes(extra->bcSPOff.offset))
+    .ssa(0)
     .ssa(1);
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),
@@ -212,8 +160,7 @@ void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-const char* ctxName(const BCMarker& marker) {
-  auto const ctx = marker.func()->cls();
+const char* ctxName(const Class* ctx) {
   return ctx ? ctx->name()->data() : ":anonymous:";
 }
 
@@ -224,23 +171,21 @@ const char* ctxName(const BCMarker& marker) {
 void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ClsMethodData>();
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   auto const ch = StaticMethodCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
 
   if (false) { // typecheck
-    UNUSED TypedValue* fake_fp = nullptr;
     const UNUSED Func* f = StaticMethodCache::lookup(
       ch,
       extra->namedEntity,
       extra->clsName,
       extra->methodName,
-      fake_fp
+      extra->context
     );
   }
 
@@ -249,7 +194,7 @@ void cgLookupClsMethodCache(IRLS& env, const IRInstruction* inst) {
     .immPtr(extra->namedEntity)
     .immPtr(extra->clsName)
     .immPtr(extra->methodName)
-    .reg(fp);
+    .immPtr(extra->context);
 
   // May raise an error if the class is undefined.
   cgCallHelper(v, env, CallSpec::direct(StaticMethodCache::lookup),
@@ -264,7 +209,7 @@ void cgLdClsMethodCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const ch = StaticMethodCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
 
   auto const sf = checkRDSHandleInitialized(v, ch);
@@ -281,8 +226,9 @@ void cgLdClsMethodCacheCls(IRLS& env, const IRInstruction* inst) {
   auto const ch = StaticMethodCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
+  assertx(rds::isNormalHandle(ch));
 
   // The StaticMethodCache here is guaranteed to already be initialized in RDS
   // by the pre-conditions of this instruction.
@@ -294,25 +240,24 @@ void cgLookupClsMethodFCache(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ClsMethodData>();
   auto const dst = dstLoc(env, inst, 0).reg(0);
   auto const cls = inst->src(0)->clsVal();
-  auto const fp = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
   auto const ch = StaticMethodFCache::alloc(
     cls->name(),
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
   assertx(rds::isNormalHandle(ch));
 
   const Func* (*lookup)(rds::Handle, const Class*,
-                        const StringData*, TypedValue*) =
+                        const StringData*, const Class*) =
     StaticMethodFCache::lookup;
 
   auto const args = argGroup(env, inst)
    .imm(ch)
    .immPtr(cls)
    .immPtr(extra->methodName)
-   .reg(fp);
+   .immPtr(extra->context);
 
   cgCallHelper(v, env, CallSpec::direct(lookup),
                callDest(dst), SyncOptions::Sync, args);
@@ -326,52 +271,14 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
   auto const ch = StaticMethodFCache::alloc(
     extra->clsName,
     extra->methodName,
-    ctxName(inst->marker())
+    ctxName(extra->context)
   );
+  assertx(rds::isNormalHandle(ch));
 
   auto const sf = checkRDSHandleInitialized(v, ch);
   fwdJcc(v, env, CC_NE, sf, inst->taken());
   emitLdLowPtr(v, rvmtl()[ch + offsetof(StaticMethodFCache, m_func)],
                dst, sizeof(LowPtr<const Func>));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void cgCheckFuncStatic(IRLS& env, const IRInstruction* inst) {
-  auto const funcPtrReg = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << testlim{AttrStatic, funcPtrReg[Func::attrsOff()], sf};
-  v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
-  auto const dstCtx = dstLoc(env, inst, 0).reg();
-  auto const srcCtx = srcLoc(env, inst, 0).reg();
-  auto const ty = inst->src(0)->type();
-
-  auto& v = vmain(env);
-
-  auto ctx_from_this =  [] (Vout& v, Vreg rthis, Vreg dst) {
-    // Load (this->m_cls | 0x1) into `dst'.
-    auto const cls = emitLdObjClass(v, rthis, v.makeReg());
-    v << orqi{ActRec::kHasClassBit, cls, dst, v.makeReg()};
-    return dst;
-  };
-
-  if (ty <= TCctx) {
-    v << copy{srcCtx, dstCtx};
-  } else if (ty <= TObj) {
-    ctx_from_this(v, srcCtx, dstCtx);
-  } else {
-    // If we don't know whether we have a $this, we need to check dynamically.
-    auto const sf = v.makeReg();
-    v << testqi{ActRec::kHasClassBit, srcCtx, sf};
-    unlikelyCond(
-      v, vcold(env), CC_NZ, sf, dstCtx, [&](Vout& /*v*/) { return srcCtx; },
-      [&](Vout& v) { return ctx_from_this(v, srcCtx, v.makeReg()); });
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

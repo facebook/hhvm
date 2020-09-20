@@ -1,14 +1,6 @@
 # just testing istype opcodes
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Int 1
-  RetC
-}
-
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
   IsTypeC Int
   JmpNZ was_int

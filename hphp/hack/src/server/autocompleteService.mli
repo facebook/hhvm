@@ -1,29 +1,21 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+val add_position_to_results :
+  Provider_context.t -> SearchUtils.si_results -> SearchUtils.result
+
 val autocomplete_result_to_json :
-  AutocompleteTypes.complete_autocomplete_result ->
-  Hh_json.json
+  AutocompleteTypes.complete_autocomplete_result -> Hh_json.json
 
-val autocomplete_result_to_ide_response :
-  AutocompleteTypes.ide_result ->
-  Ide_message.response
-
-val get_results :
-  tcopt:TypecheckerOptions.t ->
-  delimit_on_namespaces:bool ->
-  content_funs:Reordered_argument_collections.SSet.t ->
-  content_classes:Reordered_argument_collections.SSet.t ->
-  autocomplete_context: AutocompleteTypes.legacy_autocomplete_context ->
+val go_ctx :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  autocomplete_context:AutocompleteTypes.legacy_autocomplete_context ->
+  sienv:SearchUtils.si_env ->
   AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t
-
-val attach_hooks : unit -> unit
-
-val detach_hooks : unit -> unit

@@ -1,0 +1,8 @@
+File "class_meth_reified_targs_mismatched_parameters.php", line 10, characters 6-12:
+Invalid argument (Typing[4110])
+File "class_meth_reified_targs_mismatched_parameters.php", line 8, characters 17-19:
+Expected `int`
+File "class_meth_reified_targs_mismatched_parameters.php", line 4, characters 39-39:
+  via this generic `T`
+File "class_meth_reified_targs_mismatched_parameters.php", line 10, characters 6-12:
+But got `string`

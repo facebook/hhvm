@@ -1,20 +1,20 @@
 <?hh
 
 function foo($v) {
-  return (double)$v;
+  return (float)$v;
 }
-
-var_dump(foo(null));
-var_dump(foo(true));
-var_dump(foo(1));
-var_dump(foo(9007199254740992));
-var_dump(foo(1.1));
-var_dump(foo("abc"));
-var_dump(foo(array(123)));
+function foo2(): void {
+  var_dump(foo(null));
+  var_dump(foo(true));
+  var_dump(foo(1));
+  var_dump(foo(9007199254740992));
+  var_dump(foo(1.1));
+  var_dump(foo("abc"));
+  var_dump(foo(varray[123]));
+  var_dump(foo(new C));
+}
 class C { public $foo = "bar"; }
-var_dump(foo(new C));
-
-function bar($i) {
+function real($i) {
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";
@@ -36,31 +36,33 @@ function bar($i) {
     $v7 = "1.1";
     $v8 = "abc";
     $v9 = new C;
-    $v10 = array();
-    $v11 = array(123);
+    $v10 = varray[];
+    $v11 = varray[123];
   }
-  var_dump((double)$v1);
-  var_dump((double)$v2);
-  var_dump((double)$v3);
-  var_dump((double)$v4);
-  var_dump((double)$v5);
-  var_dump((double)$v6);
-  var_dump((double)$v7);
-  var_dump((double)$v8);
-  var_dump((double)$v9);
-  var_dump((double)$v10);
-  var_dump((double)$v11);
+  var_dump((float)$v1);
+  var_dump((float)$v2);
+  var_dump((float)$v3);
+  var_dump((float)$v4);
+  var_dump((float)$v5);
+  var_dump((float)$v6);
+  var_dump((float)$v7);
+  var_dump((float)$v8);
+  var_dump((float)$v9);
+  var_dump((float)$v10);
+  var_dump((float)$v11);
 }
-
-bar(1);
 
 function baz($i) {
   if ($i >= 1) {
     $s1 = '5.3xxx';
     $s2 = '7yyy';
   }
-  var_dump((double)$s1);
-  var_dump((double)$s2);
+  var_dump((float)$s1);
+  var_dump((float)$s2);
 }
 
+<<__EntryPoint>> function main(): void {
+foo2();
+real(1);
 baz(1);
+}

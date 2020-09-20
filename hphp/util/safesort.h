@@ -109,8 +109,7 @@
  * PHP5 implementation.
  */
 
-#ifndef incl_HPHP_SAFESORT_H_
-#define incl_HPHP_SAFESORT_H_
+#pragma once
 
 #include <algorithm>
 
@@ -345,5 +344,4 @@ void sort(IterT first, IterT last, GtCompT gt) {
 }
 }
 
-#endif // incl_HPHP_SAFESORT_H_
 

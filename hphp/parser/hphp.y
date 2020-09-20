@@ -309,7 +309,7 @@ static void xhp_attribute_list(Parser *_p, Token &out, Token *list,
     }
   } else {
     Token name; _p->onScalar(name, T_CONSTANT_ENCAPSED_STRING, decl);
-    _p->onArrayPair(out, list, &name, decl, 0);
+    _p->onArrayPair(out, list, &name, &decl, 0);
     if (list) {
       out.setText(list->text());
     } else {
@@ -318,7 +318,21 @@ static void xhp_attribute_list(Parser *_p, Token &out, Token *list,
   }
 }
 
-static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
+static void xhp_attribute_property_stmt(Parser *_p, Token &out) {
+  // private static darray $__xhpAttributeDeclarationCache = null;
+  Token modifiers;
+  {
+    Token m;
+    Token m1; m1 = T_PRIVATE; _p->onMemberModifier(m, NULL, m1);
+    Token m2; m2 = T_STATIC;  _p->onMemberModifier(modifiers, &m, m2);
+  }
+  Token var;      var.set(T_VARIABLE, "__xhpAttributeDeclarationCache");
+  Token null;     scalar_null(_p, null);
+  Token cvout;    _p->onClassVariable(cvout, 0, var, &null);
+  _p->onClassVariableStart(out, &modifiers, cvout, NULL, NULL);
+}
+
+static void xhp_attribute_method_stmt(Parser *_p, Token &out, Token &attributes) {
   Token modifiers;
   Token fname; fname.setText("__xhpAttributeDeclaration");
   {
@@ -329,81 +343,136 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   _p->pushFuncLocation();
   _p->onMethodStart(fname, modifiers);
 
+  Token dummy;
+
   std::vector<std::string> classes;
   folly::split(':', attributes.text(), classes, true);
   Token arrAttributes; _p->onDArray(arrAttributes, attributes);
 
-  Token dummy;
+  auto _cache = [&]() {
+    // self::__xhpAttributeDeclarationCache
+    const char *cacheName = "__xhpAttributeDeclarationCache";
+    Token self;  self.set(T_STRING, "self");
+    Token cls;   _p->onName(cls, self, Parser::StringName);
+    Token var;   var.set(T_VARIABLE, cacheName);
+    Token sv;    _p->onSimpleVariable(sv, var);
+    Token out;
+    _p->onStaticMember(out, cls, sv);
+    return out;
+  };
 
-  Token stmts0;
+  auto _r = [&]() {
+    // $r
+    Token r; r.set(T_VARIABLE, "r");
+    Token out; _p->onSimpleVariable(out, r);
+    return out;
+  };
+
+  auto _assign_stmt = [&](Token &dest, Token &src) {
+    // [dest] = [src];
+    Token assign; _p->onAssign(assign, dest, src, 0);
+    Token stmt; _p->onExpStatement(stmt, assign);
+    return stmt;
+  };
+
+  auto _start_statements = [&]() {
+    Token stmts;
+    _p->onStatementListStart(stmts);
+    return stmts;
+  };
+
+  auto _add_statement = [&](Token &stmts, Token &new_stmt) {
+    Token stmts_in = stmts;
+    _p->addStatement(stmts, stmts_in, new_stmt);
+  };
+
+  auto _invoke = [&](std::string clsName) {
+    // Invokes clsName::__xhpAttributeDeclaration()
+    Token dummy;
+    Token name;    name.set(T_STRING, clsName);
+    Token cls;     _p->onName(cls, name, Parser::StringName);
+    Token fname;   fname.setText("__xhpAttributeDeclaration");
+    Token out;
+    _p->onCall(out, 0, fname, dummy, &cls);
+    return out;
+  };
+
+  auto _add_call_param_first = [&](Token &newParam) {
+    Token out;
+    _p->onCallParam(out, NULL, newParam, ParamMode::In, false);
+    return out;
+  };
+
+  auto _add_call_param = [&](Token &params, Token &newParam) {
+    Token params_in = params;
+    _p->onCallParam(params, &params_in, newParam, ParamMode::In, false);
+  };
+
+  Token body = _start_statements();
   {
-    _p->onStatementListStart(stmts0);
+    // $r = self::$__xhpAttributeDeclarationCache;
+    Token src = _cache();
+    Token dest = _r();
+    Token stmt = _assign_stmt(dest, src);
+    _add_statement(body, stmt);
   }
-  Token stmts1;
+
   {
-    // static $_ = null;
-    Token null;    scalar_null(_p, null);
-    Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &null);
-    Token sdecl;   _p->onStatic(sdecl, decl);
-    _p->addStatement(stmts1, stmts0, sdecl);
-  }
-  Token stmts2;
-  {
-    // if ($_ === null) {
-    //   $_ = __SystemLib\\merge_xhp_attr_declarations(
+    // if ($r === null) {
+    //   self::$__xhpAttributeDeclarationCache =
+    //     __SystemLib\\merge_xhp_attr_declarations(
     //          parent::__xhpAttributeDeclaration(),
+    //          firstInheritedClass::__xhpAttributeDeclaration(),
+    //          ...
+    //          lastInheritedClass::__xhpAttributeDeclaration(),
     //          attributes
     //        );
+    //   $r = self::$__xhpAttributeDeclarationCache;
     // }
-    Token parent;  parent.set(T_STRING, "parent");
-    Token cls;     _p->onName(cls, parent, Parser::StringName);
-    Token fname2;   fname2.setText("__xhpAttributeDeclaration");
-    Token param1;  _p->onCall(param1, 0, fname2, dummy, &cls);
-    Token params1; _p->onCallParam(params1, NULL, param1, ParamMode::In, false);
+    Token blockbody = _start_statements();
+    {
+      Token param1 = _invoke("parent");
+      Token params = _add_call_param_first(param1);
+      for (unsigned int i = 0; i < classes.size(); i++) {
+        Token param = _invoke(classes[i]);
+        _add_call_param(params, param);
+      }
+      _add_call_param(params, arrAttributes);
 
-    for (unsigned int i = 0; i < classes.size(); i++) {
-      Token parent2;  parent2.set(T_STRING, classes[i]);
-      Token cls2;     _p->onName(cls2, parent2, Parser::StringName);
-      Token fname3;   fname3.setText("__xhpAttributeDeclaration");
-      Token param;   _p->onCall(param, 0, fname3, dummy, &cls2);
-
-      Token params; _p->onCallParam(params, &params1, param, ParamMode::In,
-                                    false);
-      params1 = params;
-    }
-
-    Token params2; _p->onCallParam(params2, &params1, arrAttributes,
-                                   ParamMode::In, false);
-
-    Token name;    name.set(T_STRING, "__SystemLib\\merge_xhp_attr_declarations");
+      Token name;    name.set(T_STRING, "__SystemLib\\merge_xhp_attr_declarations");
                    name = name.num() | 2; // WTH???
-    Token call;    _p->onCall(call, 0, name, params2, NULL);
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token assign;  _p->onAssign(assign, var, call, 0);
-    Token exp;     _p->onExpStatement(exp, assign);
-    Token block;   _p->onBlock(block, exp);
+      Token call;    _p->onCall(call, 0, name, params, NULL);
+      Token dest = _cache();
+      Token stmt = _assign_stmt(dest, call);
+      _add_statement(blockbody, stmt);
+    }
+    {
+      Token dest = _r();
+      Token src = _cache();
+      Token stmt = _assign_stmt(dest, src);
+      _add_statement(blockbody, stmt);
+    }
+    Token block;   _p->onBlock(block, blockbody);
 
-    Token tvar2;   tvar2.set(T_VARIABLE, "_");
-    Token var2;    _p->onSimpleVariable(var2, tvar2);
-    Token null;    scalar_null(_p, null);
-    Token cond;    BEXP(cond, var2, null, T_IS_IDENTICAL);
-    Token dummy1, dummy2;
-    Token sif;     _p->onIf(sif, cond, block, dummy1, dummy2);
-    _p->addStatement(stmts2, stmts1, sif);
+    {
+      Token r = _r();
+      Token null;    scalar_null(_p, null);
+      Token cond;    BEXP(cond, r, null, T_IS_IDENTICAL);
+      Token dummy1, dummy2;
+      Token sif;     _p->onIf(sif, cond, block, dummy1, dummy2);
+      _add_statement(body, sif);
+    }
   }
-  Token stmts3;
+
   {
-    // return $_;
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token ret;     _p->onReturn(ret, &var);
-    _p->addStatement(stmts3, stmts2, ret);
+    // return $r;
+    Token r = _r();
+    Token ret; _p->onReturn(ret, &r);
+    _add_statement(body, ret);
   }
   Token stmt;
   {
-    _p->finishStatement(stmt, stmts3);
+    _p->finishStatement(stmt, body);
     stmt = 1;
   }
   {
@@ -412,12 +481,24 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
   }
 }
 
+static void xhp_attribute_stmts(Parser *_p, Token &out, Token &stmts, Token &attr) {
+    Token stmts1;
+    {
+      Token stmt;
+      xhp_attribute_property_stmt(_p, stmt);
+      _p->onClassStatement(stmts1, stmts, stmt);
+    }
+    {
+      Token stmt;
+      xhp_attribute_method_stmt(_p, stmt, attr);
+      _p->onClassStatement(out, stmts1, stmt);
+    }
+}
+
 static void xhp_collect_attributes(Parser *_p, Token &out, Token &stmts) {
   Token *attr = _p->xhpGetAttributes();
   if (attr) {
-    Token stmt;
-    xhp_attribute_stmt(_p, stmt, *attr);
-    _p->onClassStatement(out, stmts, stmt);
+    xhp_attribute_stmts(_p, out, stmts, *attr);
   } else {
     out = stmts;
   }
@@ -436,24 +517,14 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
   }
   Token stmts1;
   {
-    // static $_ = categories;
+    // return categories;
     Token arr;     _p->onDArray(arr, categories);
-    Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &arr);
-    Token sdecl;   _p->onStatic(sdecl, decl);
-    _p->addStatement(stmts1, stmts0, sdecl);
-  }
-  Token stmts2;
-  {
-    // return $_;
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token ret;     _p->onReturn(ret, &var);
-    _p->addStatement(stmts2, stmts1, ret);
+    Token ret;     _p->onReturn(ret, &arr);
+    _p->addStatement(stmts1, stmts0, ret);
   }
   Token stmt;
   {
-    _p->finishStatement(stmt, stmts2);
+    _p->finishStatement(stmt, stmts1);
     stmt = 1;
   }
   {
@@ -517,7 +588,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
   Token stmts1;
   {
-    // static $_ = children;
+    // return children;
     Token arr;
     if (children.num() == 2) {
       arr = children;
@@ -526,22 +597,12 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
     } else {
       HPHP_PARSER_ERROR("XHP: XHP unknown children declaration", _p);
     }
-    Token var;     var.set(T_VARIABLE, "_");
-    Token decl;    _p->onStaticVariable(decl, 0, var, &arr);
-    Token sdecl;   _p->onStatic(sdecl, decl);
-    _p->addStatement(stmts1, stmts0, sdecl);
-  }
-  Token stmts2;
-  {
-    // return $_;
-    Token tvar;    tvar.set(T_VARIABLE, "_");
-    Token var;     _p->onSimpleVariable(var, tvar);
-    Token ret;     _p->onReturn(ret, &var);
-    _p->addStatement(stmts2, stmts1, ret);
+    Token ret;     _p->onReturn(ret, &arr);
+    _p->addStatement(stmts1, stmts0, ret);
   }
   Token stmt;
   {
-    _p->finishStatement(stmt, stmts2);
+    _p->finishStatement(stmt, stmts1);
     stmt = 1;
   }
   {
@@ -553,8 +614,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
 static void only_in_hh_syntax(Parser *_p) {
   if (!_p->scanner().isHHSyntaxEnabled()) {
     HPHP_PARSER_ERROR(
-      "Syntax only allowed in Hack files (<?hh) or with -v "
-        "Eval.EnableHipHopSyntax=true",
+      "Syntax only allowed in Hack files (<?hh)",
       _p);
   }
 }
@@ -754,6 +814,7 @@ static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
 %token T_UNRESOLVED_OP
 %token T_WHERE
 
+%token T_FUNC_CRED_C
 %%
 
 start:
@@ -1372,12 +1433,6 @@ class_declaration_statement:
                                          _p->popTypeScope();}
 ;
 
-class_expression:
-    T_CLASS                            { _p->onClassExpressionStart(); }
-    ctor_arguments
-    extends_from implements_list '{'
-    class_statement_list '}'           { _p->onClassExpression($$, $3, $4, $5, $7); }
-
 trait_declaration_statement:
     T_TRAIT
     trait_decl_name                    { $2.setText(_p->nsClassDecl($2.text()));
@@ -1452,7 +1507,7 @@ foreach_optional_arg:
 foreach_variable:
     variable                           { $$ = $1; $$ = 0;}
   | '&' variable                       { $$ = $2; $$ = 1;}
-  | T_LIST '(' assignment_list ')'     { _p->onListAssignment($$, $3, NULL);}
+  | array_literal                      { _p->onListAssignment($$, $1, NULL);}
 ;
 
 for_statement:
@@ -1771,7 +1826,7 @@ enum_statement_list:
 ;
 enum_statement:
     enum_constant_declaration ';'      { _p->onClassVariableStart
-                                         ($$,NULL,$1,NULL);}
+                                         ($$,NULL,$1,NULL,NULL);}
 ;
 enum_constant_declaration:
     hh_constname_with_type '='
@@ -1787,16 +1842,25 @@ class_statement_list:
 class_statement:
     variable_modifiers
     class_variable_declaration ';'     { _p->onClassVariableStart
-                                         ($$,&$1,$2,NULL);}
+                                         ($$,&$1,$2,NULL,NULL);}
   | non_empty_member_modifiers
     hh_type
     class_variable_declaration ';'     { _p->onClassVariableStart
-                                         ($$,&$1,$3,&$2);}
+                                         ($$,&$1,$3,&$2,NULL);}
+  | non_empty_user_attributes
+    non_empty_member_modifiers
+    class_variable_declaration ';'     { _p->onClassVariableStart
+                                         ($$,&$2,$3,NULL,&$1);}
+  | non_empty_user_attributes
+    non_empty_member_modifiers
+    hh_type
+    class_variable_declaration ';'     { _p->onClassVariableStart
+                                         ($$,&$2,$4,&$3,&$1);}
   | class_constant_declaration ';'     { _p->onClassVariableStart
-                                         ($$,NULL,$1,NULL);}
+                                         ($$,NULL,$1,NULL,NULL);}
   | class_abstract_constant_declaration ';'
                                        { _p->onClassVariableStart
-                                         ($$,NULL,$1,NULL, true);}
+                                         ($$,NULL,$1,NULL,NULL,true);}
   | class_type_constant_declaration ';' { $$ = $1; }
   | method_modifiers function_loc
     is_reference hh_name_with_typevar '('
@@ -1932,10 +1996,10 @@ xhp_attribute_is_required:
 
 xhp_category_stmt:
     xhp_category_decl                  { Token t; scalar_num(_p, t, "1");
-                                         _p->onArrayPair($$,0,&$1,t,0);}
+                                         _p->onArrayPair($$,0,&$1,&t,0);}
   | xhp_category_stmt ','
     xhp_category_decl                  { Token t; scalar_num(_p, t, "1");
-                                         _p->onArrayPair($$,&$1,&$3,t,0);}
+                                         _p->onArrayPair($$,&$1,&$3,&t,0);}
 ;
 
 xhp_category_decl:
@@ -2031,6 +2095,11 @@ class_constant_declaration:
     hh_constname_with_type '=' static_expr   { _p->onClassConstant($$,&$1,$3,$5);}
   | T_CONST hh_constname_with_type '='
     static_expr                         { _p->onClassConstant($$,0,$2,$4);}
+  /* !PHP7_ONLY */
+  | parameter_modifier T_CONST hh_constname_with_type '='
+    static_expr                         { _p->onClassConstant($$,0,$3,$5);}
+  /* !END */
+;
 ;
 class_abstract_constant_declaration:
     class_abstract_constant_declaration ','
@@ -2059,7 +2128,6 @@ expr_with_parens:
     '(' expr_with_parens ')'           { $$ = $2;}
   | T_NEW class_name_reference
     ctor_arguments                     { _p->onNewObject($$, $2, $3);}
-  | T_NEW class_expression             { $$ = $2;}
   | T_CLONE expr                       { UEXP($$,$2,T_CLONE,1);}
   | xhp_tag                            { $$ = $1;}
   | collection_literal                 { $$ = $1;}
@@ -2086,8 +2154,8 @@ yield_assign_expr:
 ;
 
 yield_list_assign_expr:
-    T_LIST '(' assignment_list ')'
-    '=' yield_expr                     { _p->onListAssignment($$, $3, &$6, true);}
+    array_literal
+    '=' yield_expr                     { _p->onListAssignment($$, $1, &$3, true);}
 ;
 
 yield_from_expr:
@@ -2107,8 +2175,8 @@ await_assign_expr:
 ;
 
 await_list_assign_expr:
-    T_LIST '(' assignment_list ')'
-    '=' await_expr                     { _p->onListAssignment($$, $3, &$6, true);}
+    array_literal
+    '=' await_expr                     { _p->onListAssignment($$, $1, &$3, true);}
 ;
 
 parenthesis_expr:
@@ -2128,8 +2196,8 @@ parenthesis_expr_no_variable:
 ;
 
 expr_no_variable:
-    T_LIST '(' assignment_list ')'
-    '=' expr                           { _p->onListAssignment($$, $3, &$6);}
+    array_literal
+    '=' expr                           { _p->onListAssignment($$, $1, &$3);}
   | variable '=' expr                  { _p->onAssign($$, $1, $3, 0);}
   | variable '=' '&' variable          { _p->onAssign($$, $1, $4, 1);}
   | variable '=' '&' T_NEW
@@ -2365,20 +2433,20 @@ non_empty_shape_pair_list:
     non_empty_shape_pair_list ','
       shape_keyname
       T_DOUBLE_ARROW
-      expr                            { _p->onArrayPair($$,&$1,&$3,$5,0); }
+      expr                            { _p->onArrayPair($$,&$1,&$3,&$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      expr                            { _p->onArrayPair($$,  0,&$1,$3,0); }
+      expr                            { _p->onArrayPair($$,  0,&$1,&$3,0); }
 ;
 
 non_empty_static_shape_pair_list:
     non_empty_static_shape_pair_list ','
       shape_keyname
       T_DOUBLE_ARROW
-      static_expr                     { _p->onArrayPair($$,&$1,&$3,$5,0); }
+      static_expr                     { _p->onArrayPair($$,&$1,&$3,&$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      static_expr                     { _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_expr                     { _p->onArrayPair($$,  0,&$1,&$3,0); }
 ;
 
 shape_pair_list:
@@ -2394,12 +2462,13 @@ static_shape_pair_list:
 ;
 
 shape_literal:
-    T_SHAPE '(' shape_pair_list ')'   { _p->onArray($$, $3, T_DARRAY);}
+    T_SHAPE '(' shape_pair_list ')'   { _p->onDArray($$, $3);}
 ;
 
 array_literal:
     T_ARRAY '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
   | '[' array_pair_list ']'           { _p->onArray($$,$2,T_ARRAY);}
+  | T_LIST '(' array_pair_list ')'    { _p->onArray($$,$3,T_ARRAY);}
 ;
 
 dict_pair_list:
@@ -2410,8 +2479,8 @@ dict_pair_list:
 
 non_empty_dict_pair_list:
     non_empty_dict_pair_list
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,&$5,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,&$3,0);}
 ;
 
 static_dict_pair_list:
@@ -2423,9 +2492,9 @@ static_dict_pair_list:
 non_empty_static_dict_pair_list:
     non_empty_static_dict_pair_list
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,&$3,0);}
 ;
 
 static_dict_pair_list_ae:
@@ -2437,9 +2506,9 @@ static_dict_pair_list_ae:
 non_empty_static_dict_pair_list_ae:
     non_empty_static_dict_pair_list_ae
     ',' static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,$3,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,&$3,0);}
 ;
 
 dict_literal:
@@ -2622,7 +2691,7 @@ xhp_attributes:
     '{' T_ELLIPSIS expr '}'            { _p->onXhpAttributeSpread($$, &$1, $4);}
   | xhp_attributes
     xhp_attribute_name '='
-    xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,$4,0);}
+    xhp_attribute_value                { _p->onArrayPair($$,&$1,&$2,&$4,0);}
 ;
 xhp_children:
 xhp_children xhp_child                 { _p->onOptExprListElem($$, &$1, $2); }
@@ -2742,6 +2811,7 @@ xhp_bareword:
   | T_SHAPE                            { $$ = $1;}
   | T_USING                            { $$ = $1;}
   | T_INOUT                            { $$ = $1;}
+  | T_FUNC_CRED_C                      { $$ = $1;}
 ;
 
 simple_function_call:
@@ -2828,6 +2898,7 @@ common_scalar:
   | T_TRAIT_C                          { _p->onScalar($$, T_TRAIT_C,  $1);}
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
+  | T_FUNC_CRED_C                      { _p->onScalar($$, T_FUNC_CRED_C, 1);}
   | T_NS_C                             { _p->onScalar($$, T_NS_C,  $1);}
   | T_COMPILER_HALT_OFFSET             { _p->onScalar($$, T_COMPILER_HALT_OFFSET, $1);}
   | T_START_HEREDOC
@@ -2844,7 +2915,7 @@ static_expr:
     static_array_pair_list ')'         { _p->onArray($$,$3,T_ARRAY); }
   | '[' static_array_pair_list ']'     { _p->onArray($$,$2,T_ARRAY); }
   | T_SHAPE '('
-    static_shape_pair_list ')'         { _p->onArray($$,$3,T_DARRAY);}
+    static_shape_pair_list ')'         { _p->onDArray($$,$3);}
   | static_dict_literal                { $$ = $1;}
   | static_vec_literal                 { $$ = $1;}
   | static_keyset_literal              { $$ = $1;}
@@ -2953,12 +3024,12 @@ hh_possible_comma:
 non_empty_static_array_pair_list:
     non_empty_static_array_pair_list
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | non_empty_static_array_pair_list
-    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,&$3,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 common_scalar_ae:
@@ -3003,7 +3074,7 @@ static_scalar_ae:
     static_array_pair_list_ae ')'      { _p->onArray($$,$3,T_ARRAY);}
   | '[' static_array_pair_list_ae ']'  { _p->onArray($$,$2,T_ARRAY);}
   | T_SHAPE '('
-    static_shape_pair_list_ae ')'      { _p->onArray($$,$3,T_DARRAY);}
+    static_shape_pair_list_ae ')'      { _p->onDArray($$,$3);}
   | static_dict_literal_ae             { $$ = $1;}
   | static_vec_literal_ae              { $$ = $1;}
   | static_keyset_literal_ae           { $$ = $1;}
@@ -3026,17 +3097,17 @@ static_array_pair_list_ae:
 non_empty_static_array_pair_list_ae:
     non_empty_static_array_pair_list_ae
     ',' static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | non_empty_static_array_pair_list_ae
-    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,$3,0);}
+    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,&$3,0);}
   | static_scalar_ae T_DOUBLE_ARROW
-    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,$1,0);}
+    static_scalar_ae                   { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 non_empty_static_scalar_list_ae:
     non_empty_static_scalar_list_ae
-    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,$1,0);}
+    ',' static_scalar_ae               { _p->onArrayPair($$,&$1,  0,&$3,0);}
+  | static_scalar_ae                   { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 static_shape_pair_list_ae:
@@ -3047,10 +3118,10 @@ static_shape_pair_list_ae:
 non_empty_static_shape_pair_list_ae:
     non_empty_static_shape_pair_list_ae
       ',' shape_keyname
-      T_DOUBLE_ARROW static_scalar_ae  {  _p->onArrayPair($$,&$1,&$3,$5,0); }
+      T_DOUBLE_ARROW static_scalar_ae  {  _p->onArrayPair($$,&$1,&$3,&$5,0); }
   | shape_keyname
       T_DOUBLE_ARROW
-      static_scalar_ae                 { _p->onArrayPair($$,  0,&$1,$3,0); }
+      static_scalar_ae                 { _p->onArrayPair($$,  0,&$1,&$3,0); }
 ;
 
 static_scalar_list_ae:
@@ -3268,6 +3339,10 @@ callable_variable:
   | common_scalar                      { $$ = $1;}
   | '(' variable ')'                   { $$ = $2;}
   | '(' expr_no_variable ')'           { $$ = $2;}
+  /* PHP7 only, but harmless to enable in older versions (and FB) */
+  | parenthesis_expr_with_parens       { $$ = $1;}
+  | object_method_call                 { $$ = $1;}
+  /* end of not-really-php7-only */
   | lambda_or_closure_with_parens '('
     function_call_parameter_list ')'   { _p->onCall($$,1,$1,$3,NULL);}
   | callable_variable '('
@@ -3391,34 +3466,25 @@ dimmable_variable_no_calls:
   | '(' variable ')'                   { $$ = $2;}
 ;
 
-assignment_list:
-    assignment_list ','                { _p->onAListVar($$,&$1,NULL);}
-  | assignment_list ',' variable       { _p->onAListVar($$,&$1,&$3);}
-  | assignment_list ','
-    T_LIST '(' assignment_list ')'     { _p->onAListSub($$,&$1,$5);}
-  |                                    { _p->onAListVar($$,NULL,NULL);}
-  | variable                           { _p->onAListVar($$,NULL,&$1);}
-  | T_LIST '(' assignment_list ')'     { _p->onAListSub($$,NULL,$3);}
-;
-
 array_pair_list:
-    non_empty_array_pair_list
-    possible_comma                     { $$ = $1;}
-  |                                    { $$.reset();}
-;
-non_empty_array_pair_list:
-    non_empty_array_pair_list
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
-  | non_empty_array_pair_list ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
-  | non_empty_array_pair_list
-    ',' expr T_DOUBLE_ARROW
-    '&' variable                       { _p->onArrayPair($$,&$1,&$3,$6,1);}
-  | non_empty_array_pair_list ','
-    '&' variable                       { _p->onArrayPair($$,&$1,  0,$4,1);}
-  | expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,$4,1);}
-  | '&' variable                       { _p->onArrayPair($$,  0,  0,$2,1);}
+  /**** single elements ****/
+    expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,&$4,1);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | '&' variable                       { _p->onArrayPair($$,  0,  0,&$2,1);}
+  | expr                               { _p->onArrayPair($$,  0,  0,&$1,0);}
+  /**** list followed by single element ****/
+  | array_pair_list ','
+    expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,&$1,&$3,&$5,0);}
+  | array_pair_list ','
+    expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,&$1,&$3,&$6,1);}
+  | array_pair_list ',' '&' variable   { _p->onArrayPair($$,&$1,  0,&$4,1);}
+  | array_pair_list ',' expr           { _p->onArrayPair($$,&$1,  0,&$3,0);}
+  /**** special cases ****/
+  /* [,$b,,,] = [,'b',] is valid; multiple trailing on RHS aren't, but we
+   * need to catch that later as we don't know yet if we have an LHS or RHS */
+  | array_pair_list ','                { _p->onArrayPair($$,&$1,  0,  0,0);}
+  /* [,$b] = ['a', 'b'] is valid */
+  |                                    { _p->onArrayPair($$,  0,  0,  0,0);}
 ;
 
 collection_init:
@@ -3428,10 +3494,10 @@ collection_init:
 ;
 non_empty_collection_init:
     non_empty_collection_init
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
-  | non_empty_collection_init ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,&$5,0);}
+  | non_empty_collection_init ',' expr { _p->onArrayPair($$,&$1,  0,&$3,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | expr                               { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 static_collection_init:
@@ -3442,12 +3508,12 @@ static_collection_init:
 non_empty_static_collection_init:
     non_empty_static_collection_init
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,&$5,0);}
   | non_empty_static_collection_init
-    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,&$3,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,&$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,&$1,0);}
 ;
 
 encaps_list:

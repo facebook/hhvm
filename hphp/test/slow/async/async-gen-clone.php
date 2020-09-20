@@ -8,5 +8,9 @@ async function test() {
   $f2 = clone($f); // should fatal
 }
 
+
+<<__EntryPoint>>
+function main_async_gen_clone() {
 \HH\Asio\join(test());
 echo "survived\n";
+}

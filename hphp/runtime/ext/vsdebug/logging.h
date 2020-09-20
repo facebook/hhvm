@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_LOGGING_H_
-#define incl_HPHP_VSDEBUG_LOGGING_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/async-func.h"
@@ -32,7 +31,7 @@ static constexpr int kLogFlushIntervalSec = 10;
 struct VSDebugLogger final {
   static void Log(const char* level, const char* fmt, ...);
   static void LogFlush();
-  static void InitializeLogging(const std::string& logFilePath);
+  static int InitializeLogging(const std::string& logFilePath);
   static void FinalizeLogging();
   static void TryRotateLogs();
 
@@ -56,7 +55,7 @@ private:
   void loggerMaintenanceTask();
 
   static bool s_loggerDestroyed;
-  static void OpenLogFile();
+  static int OpenLogFile();
 
   std::string m_logFilePath {""};
   FILE* m_logFile {nullptr};
@@ -70,11 +69,10 @@ private:
   std::mutex m_condLock;
 
   // Log will be rotated approximately this often.
-  static constexpr int kLogRotateIntervalSec = 24 * 60;
-  static constexpr int kLogHistoryMaxDays = 5;
+  static constexpr int kLogFileMaxSizeBytes = 512 * 1024; // 0.5MB
+  static constexpr int kLogFilesToRetain = 5;
 };
 
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_LOGGING_H_

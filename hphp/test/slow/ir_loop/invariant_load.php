@@ -1,11 +1,14 @@
-<?php
+<?hh
+
+abstract final class AlternatorStatics {
+  public static $i = 0;
+}
 
 function alternator() {
-  static $i = 0;
   mt_rand();
   mt_rand();
   mt_rand();
-  return ($i++ % 2) == 0;
+  return (AlternatorStatics::$i++ % 2) == 0;
 }
 function foo($x, $k) {
   foreach ($x as $j) {
@@ -20,10 +23,14 @@ function foo($x, $k) {
   echo "done\n";
 }
 
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 123);
-foo(array(1,2,3), 'asd');
+
+<<__EntryPoint>>
+function main_invariant_load() {
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 123);
+foo(varray[1,2,3], 'asd');
+}

@@ -1,2 +1,0 @@
-
-((Fatal error\: syntax error, unexpected T_OBJECT_OPERATOR, expecting '\)' in [^\r\n]+\/bad\-call\-6\.php on line 3)|(Fatal error\: You cannot decorate this argument as inout in [^\r\n]+\/bad\-call\-6\.php on line 3))

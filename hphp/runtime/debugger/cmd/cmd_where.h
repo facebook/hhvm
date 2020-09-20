@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/base/req-root.h"
@@ -45,4 +44,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_WHERE_H_

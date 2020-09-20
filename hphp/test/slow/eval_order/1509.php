@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class c {
   function x($y) {
@@ -12,5 +12,9 @@ function p($x) {
 ";
   return $x;
 }
+
+<<__EntryPoint>>
+function main_1509() {
 $x = new c;
 $x->x(3, p(1), p(2))->x(6, p(4), p(5));
+}

@@ -1,20 +1,21 @@
 <?hh
 
-function f() {
-  global $baseurl;
-  global $has_local;
+abstract final class HoptLateJccToJmp {
+  public static $baseurl;
+  public static $has_local;
+}
 
-  if (0xface != $baseurl) {
-    $has_local = true;
+function f() {
+
+  if (0xface != HoptLateJccToJmp::$baseurl) {
+    HoptLateJccToJmp::$has_local = true;
   }
 
-  if (!$has_local) {
+  if (!HoptLateJccToJmp::$has_local) {
     echo "oops\n";
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   f();
 }
-main();
-

@@ -1,15 +1,15 @@
-<?hh     /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 <<__PHPStdLib>>
-function pdo_drivers() { }
+function pdo_drivers();
 class PDO {
   const PARAM_BOOL = 0;
   const PARAM_NULL = 0;
@@ -92,55 +92,58 @@ class PDO {
   const MYSQL_ATTR_DIRECT_QUERY = 0;
   const MYSQL_ATTR_FOUND_ROWS = 0;
   const MYSQL_ATTR_IGNORE_SPACE = 0;
+  const MYSQL_ATTR_SSL_CA = 0;
+  const MYSQL_ATTR_SSL_CAPATH = 0;
+  const MYSQL_ATTR_SSL_CERT = 0;
+  const MYSQL_ATTR_SSL_KEY = 0;
+  const MYSQL_ATTR_SSL_CIPHER = 0;
   const HH_MYSQL_ATTR_READ_TIMEOUT = 0;
   const HH_MYSQL_ATTR_WRITE_TIMEOUT = 0;
-  public function __construct($dsn, $username = null, $password = null, $options = null) { }
-  public function prepare($statement, $options = null) { }
-  public function beginTransaction() { }
-  public function inTransaction() { }
-  public function commit() { }
-  public function rollBack() { }
-  public function setAttribute($attribute, $value) { }
-  public function getAttribute($attribute) { }
-  public function exec($query) { }
-  public function lastInsertId($seqname = null) { }
-  public function errorCode() { }
-  public function errorInfo() { }
-  public function query($sql) { }
-  public function quote($str, $paramtype = null) { }
-  public function __wakeup() { }
-  public function __sleep() { }
-  static public function getAvailableDrivers() { }
+  public function __construct(string $dsn, string $username = "", string $password = "", $options = null);
+  public function prepare(string $statement, $options = null);
+  public function beginTransaction();
+  public function inTransaction();
+  public function commit();
+  public function rollBack();
+  public function setAttribute(int $attribute, $value);
+  public function getAttribute(int $attribute);
+  public function exec(string $query);
+  public function lastInsertId(string $seqname = "");
+  public function errorCode();
+  public function errorInfo();
+  public function query(string $sql);
+  public function quote(string $str, int $paramtype = PDO::PARAM_STR);
+  public function __wakeup();
+  public function __sleep();
+  static public function getAvailableDrivers();
 }
 class PDOStatement {
-  public function __construct() { }
-  public function execute($params = null) { }
-  public function fetch($how = 0, $orientation = null, $offset = 0) { }
-  public function fetchObject($class_name = null, $ctor_args = null) { }
-  public function fetchColumn($column_numner = 0) { }
-  public function fetchAll($how = 0, $class_name = null, $ctor_args = null) { }
-  public function bindValue($paramno, $param, $type = null) { }
-  public function bindParam($paramno, &$param, $type = null, $max_value_len = 0, $driver_params = null) { }
-  public function bindColumn($paramno, &$param, $type = null, $max_value_len = 0, $driver_params = null) { }
-  public function rowCount() { }
-  public function errorCode() { }
-  public function errorInfo() { }
-  public function setAttribute($attribute, $value) { }
-  public function getAttribute($attribute) { }
-  public function columnCount() { }
-  public function getColumnMeta($column) { }
-  public function setFetchMode($mode, ...) { }
-  public function nextRowset() { }
-  public function closeCursor() { }
-  public function debugDumpParams() { }
-  public function current() { }
-  public function key() { }
-  public function next() { }
-  public function rewind() { }
-  public function valid() { }
-  public function __wakeup() { }
-  public function __sleep() { }
+  public function __construct();
+  public function execute($params = null);
+  public function fetch(int $how = 0, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0);
+  public function fetchObject(string $class_name = "", $ctor_args = null);
+  public function fetchColumn(int $column_numner = 0);
+  public function fetchAll(int $how = 0, $class_name = null, $ctor_args = null);
+  public function bindValue($paramno, $param, int $type = PDO::PARAM_STR);
+  public function rowCount();
+  public function errorCode();
+  public function errorInfo();
+  public function setAttribute(int $attribute, $value);
+  public function getAttribute(int $attribute);
+  public function columnCount();
+  public function getColumnMeta(int $column);
+  public function setFetchMode(int $mode, ...$args);
+  public function nextRowset();
+  public function closeCursor();
+  public function debugDumpParams();
+  public function current();
+  public function key();
+  public function next();
+  public function rewind();
+  public function valid();
+  public function __wakeup();
+  public function __sleep();
 }
 class PDOException extends RuntimeException {
-  public ?array $errorInfo = null;
+  public ?varray $errorInfo = null;
 }

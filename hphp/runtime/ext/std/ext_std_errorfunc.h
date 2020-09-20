@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ERROR_H_
-#define incl_HPHP_EXT_ERROR_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -27,11 +26,13 @@ extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
 extern const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS;
 extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA;
 
+extern const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA;
+
 Array HHVM_FUNCTION(debug_backtrace,
                     int64_t options = k_DEBUG_BACKTRACE_PROVIDE_OBJECT,
                     int64_t limit = 0);
 Array HHVM_FUNCTION(hphp_debug_caller_info);
-int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash);
+int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash, int64_t options = 0);
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options = 0,
                                           int64_t limit = 0);
 Array HHVM_FUNCTION(error_get_last);
@@ -64,4 +65,3 @@ String debug_string_backtrace(bool skip, bool ignore_args = false,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ERROR_H_

@@ -1,6 +1,0 @@
-array(2) {
-  ["event"]=>
-  string(8) "SIGGRAPH"
-  ["state"]=>
-  string(2) "CA"
-}

@@ -1,6 +1,6 @@
-<?php
+<?hh
 require_once('connect.inc');
-
+<<__EntryPoint>> function main(): void {
 $conn = mysql_connect($host, $user, $passwd);
 var_dump(create_test_table('result'));
 var_dump(mysql_query(
@@ -8,3 +8,4 @@ var_dump(mysql_query(
 
 $res = mysql_query('select * from test_result');
 var_dump(mysql_result($res, 1, 1));
+}

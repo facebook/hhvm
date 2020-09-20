@@ -3,4 +3,4 @@ Test::__construct()
 TestPriv::__construct()
 DerivedPriv::__construct()
 
-Fatal error: %s
+Fatal error: Call to private method TestPriv::__construct() from context 'DerivedPriv' in %s/ctor_visibility.php on line 43

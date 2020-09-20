@@ -137,7 +137,7 @@ void reportHelperToVtune(const char *name,
   iJIT_Method_Load methodInfo;
   memset(&methodInfo, 0, sizeof(methodInfo));
 
-  assert(helperNumber < MIN_METHOD_ID);
+  assertx(helperNumber < MIN_METHOD_ID);
   methodInfo.method_id = helperNumber++;
 
   methodInfo.method_name = const_cast<char *>(name);

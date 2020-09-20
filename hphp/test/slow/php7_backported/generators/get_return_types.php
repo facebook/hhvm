@@ -1,41 +1,52 @@
-<?php
+<?hh
 
 function gen1() {
     return; // CONST
     yield;
 }
 
-$gen = gen1();
-var_dump($gen->getReturn());
-
 function gen2() {
     return "str"; // CONST
     yield;
 }
-
-$gen = gen2();
-var_dump($gen->getReturn());
 
 function gen3($var) {
     return $var; // CV
     yield;
 }
 
-$gen = gen3([1, 2, 3]);
-var_dump($gen->getReturn());
-
 function gen4($obj) {
     return $obj->prop; // VAR
     yield;
 }
-
-$gen = gen4((object) ['prop' => 321]);
-var_dump($gen->getReturn());
 
 function gen5($val) {
     return (int) $val; // TMP
     yield;
 }
 
-$gen = gen5("42");
-var_dump($gen->getReturn());
+
+<<__EntryPoint>>
+function main_get_return_types() {
+  $gen = gen1();
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen2();
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen3(varray[1, 2, 3]);
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $o = new stdClass();
+  $o->prop = 321;
+  $gen = gen4($o);
+  $gen->next();
+  var_dump($gen->getReturn());
+
+  $gen = gen5("42");
+  $gen->next();
+  var_dump($gen->getReturn());
+}

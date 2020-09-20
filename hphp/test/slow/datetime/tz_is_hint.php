@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_tz_is_hint() {
 date_default_timezone_set('Asia/Jerusalem');
 
 $format = "c\nO\nZ\nr";
@@ -16,3 +19,4 @@ var_dump((new DateTime('2014-01-01 00:00', $tz))->format($format));
 var_dump((new DateTime('@0', $tz))->format($format));
 // Pacific-ish
 var_dump((new DateTime('2014-01-01 00:00 -08:00', $tz))->format($format));
+}

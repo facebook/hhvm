@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_ereg_replace(string $pattern, string $replacement, 
  * string $string [, string o$ption])
  * Description: Replace regular expression for multibyte string 
@@ -8,7 +8,7 @@
 /*
  * Test Basic Functionality of mb_ereg_replace()
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_ereg_replace() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -36,4 +36,4 @@ $result_4 = mb_ereg_replace($regex2, b'_____', $string_mb);
 var_dump(bin2hex($result_4));
 
 echo "Done";
-?>
+}

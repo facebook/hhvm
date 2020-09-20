@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_spl_doubly_linked_list_foreach_with_delete() {
 $stack = new SplDoublyLinkedList();
 
 $stack->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO|SplDoublyLinkedList::IT_MODE_DELETE);
@@ -20,3 +23,4 @@ foreach($stack as $item)
 }
 
 var_dump(count($stack));
+}

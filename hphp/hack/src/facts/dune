@@ -1,0 +1,38 @@
+(* -*- tuareg -*- *)
+
+let dune_file s =
+  String.concat "\n"
+    [ ""
+    ; s
+    ; ""
+    ; "(include dune.inc)"
+    ]
+
+let rust =
+{|
+; FFI OCaml to Rust (../../target/*/librust_facts_ffi.a)
+; contains "external" function definition in .ml and
+; the symbol is provided by the ocaml-rs Rust package via caml! macro
+(library
+  (name rust_facts_ffi)
+  (modules)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (self_build_stubs_archive (rust_facts_ffi))
+)
+(rule
+  (targets librust_facts_ffi_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      rust_facts_ffi
+      rust_facts_ffi
+    )
+  )
+)
+|}
+
+
+let () =
+  Jbuild_plugin.V1.send @@ dune_file rust

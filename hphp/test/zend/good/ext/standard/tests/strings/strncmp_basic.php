@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : int strncmp ( string $str1, string $str2, int $len );
  * Description: Binary safe case-sensitive string comparison of the first n characters
  * Source code: Zend/zend_builtin_functions.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strncmp() function: basic functionality ***\n";
 
 echo "-- Testing strncmp() with single quoted string --\n";
@@ -25,4 +25,4 @@ var_dump( strncmp($str, "Hi", 5) );  //expected: value < 0
 var_dump( strncmp("Hi", $str, 5) );  //expected: value > 0
 
 echo "*** Done ***";
-?>
+}

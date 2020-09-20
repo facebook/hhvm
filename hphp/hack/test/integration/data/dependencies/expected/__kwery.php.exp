@@ -1,0 +1,8 @@
+<?hh
+function kwery(): Kwery<int, Result<int>> {
+  return new Kwery();
+}
+class Result<+T> implements \IResult<T> {}
+interface IResult<+T> {}
+interface IKwery<TResult as \Result<mixed>> {}
+class Kwery<TValue, TResult as \Result<TValue>> implements \IKwery<TResult> {}

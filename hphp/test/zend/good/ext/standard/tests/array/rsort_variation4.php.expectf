@@ -2,23 +2,17 @@
 
 -- 'flag' value is defualt --
 bool(true)
-array(3) {
-  [0]=>
-  &int(555)
-  [1]=>
-  &int(100)
-  [2]=>
-  &int(33)
+varray(3) {
+  int(555)
+  int(100)
+  int(33)
 }
 
 -- 'flag' = SORT_REGULAR --
 bool(true)
-array(3) {
-  [0]=>
-  &int(555)
-  [1]=>
-  &int(100)
-  [2]=>
-  &int(33)
+varray(3) {
+  int(555)
+  int(100)
+  int(33)
 }
 Done

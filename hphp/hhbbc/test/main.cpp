@@ -24,7 +24,8 @@ int main(int argc, char** argv) {
   if (::testing::FLAGS_gtest_list_tests) {
     return RUN_ALL_TESTS();
   }
-
+  HPHP::rds::local::init();
+  SCOPE_EXIT { HPHP::rds::local::fini(); };
   HPHP::init_for_unit_test();
   SCOPE_EXIT { HPHP::hphp_process_exit(); };
   return RUN_ALL_TESTS();

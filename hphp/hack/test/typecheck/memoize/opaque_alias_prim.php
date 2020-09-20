@@ -1,12 +1,10 @@
 //// file1.php
-
-<?hh
+<?hh // partial
 
 newtype fbid = int;
 
 //// file2.php
-
-<?hh
+<?hh // partial
 
 class Foo {
   <<__Memoize>>

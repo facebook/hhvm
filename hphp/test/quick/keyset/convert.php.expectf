@@ -1,42 +1,30 @@
 ====================================================
-array(0) {
+varray(0) {
 }
 ----------------------------------------------------
 keyset(0) {
 }
 ====================================================
 ====================================================
-array(8) {
-  [0]=>
+varray(8) {
   int(100)
-  [1]=>
   string(4) "val1"
-  [2]=>
   string(4) "val2"
-  [3]=>
   int(400)
-  [4]=>
   NULL
-  [5]=>
   bool(true)
-  [6]=>
   float(1.234)
-  [7]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
 Exception: "Invalid keyset key: expected a key of type int or string, null given"
 ====================================================
 ====================================================
-array(4) {
-  [0]=>
+varray(4) {
   int(100)
-  [1]=>
   int(200)
-  [2]=>
   string(1) "a"
-  [3]=>
   string(1) "b"
 }
 ----------------------------------------------------
@@ -48,10 +36,8 @@ keyset(4) {
 }
 ====================================================
 ====================================================
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "1"
-  [1]=>
   int(1)
 }
 ----------------------------------------------------
@@ -61,14 +47,10 @@ keyset(2) {
 }
 ====================================================
 ====================================================
-array(4) {
-  [0]=>
+varray(4) {
   string(3) "abc"
-  [1]=>
   int(123)
-  [2]=>
   string(3) "abc"
-  [3]=>
   int(123)
 }
 ----------------------------------------------------
@@ -78,7 +60,7 @@ keyset(2) {
 }
 ====================================================
 ====================================================
-array(8) {
+darray(8) {
   [1]=>
   int(10)
   ["key1"]=>
@@ -94,14 +76,14 @@ array(8) {
   ["key3"]=>
   float(1.234)
   ["key4"]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
 Exception: "Invalid keyset key: expected a key of type int or string, null given"
 ====================================================
 ====================================================
-array(4) {
+darray(4) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -120,7 +102,7 @@ keyset(4) {
 }
 ====================================================
 ====================================================
-array(2) {
+darray(2) {
   ["a"]=>
   string(1) "1"
   ["b"]=>
@@ -133,7 +115,7 @@ keyset(2) {
 }
 ====================================================
 ====================================================
-array(4) {
+darray(4) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -167,7 +149,7 @@ vec(10) {
   bool(false)
   NULL
   float(5.67)
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
@@ -238,7 +220,7 @@ dict(9) {
   ["1"]=>
   int(20)
   ["key4"]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
 ----------------------------------------------------
@@ -365,7 +347,7 @@ string(4) "abcd"
 Exception: "String to keyset conversion"
 ====================================================
 ====================================================
-object(IterableObj)#1 (1) {
+object(IterableObj) (1) {
   ["position":"IterableObj":private]=>
   int(0)
 }
@@ -377,7 +359,7 @@ keyset(3) {
 }
 ====================================================
 ====================================================
-object(ThrowIterableObj)#1 (1) {
+object(ThrowIterableObj) (1) {
   ["position":"ThrowIterableObj":private]=>
   int(0)
 }
@@ -385,18 +367,18 @@ object(ThrowIterableObj)#1 (1) {
 Exception: "ThrowIterableObj"
 ====================================================
 ====================================================
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
 ----------------------------------------------------
 Exception: "Non-iterable object to keyset conversion"
 ====================================================
 ====================================================
-resource(1) of type (stream)
+resource(4) of type (stream)
 ----------------------------------------------------
 Exception: "Resource to keyset conversion"
 ====================================================
 ====================================================
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -412,7 +394,7 @@ keyset(3) {
 }
 ====================================================
 ====================================================
-object(HH\Vector)#%d (3) {
+object(HH\Vector) (3) {
   [0]=>
   int(1)
   [1]=>
@@ -424,7 +406,7 @@ object(HH\Vector)#%d (3) {
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
 ====================================================
 ====================================================
-object(HH\Map)#%d (2) {
+object(HH\Map) (2) {
   ["a"]=>
   int(100)
   [200]=>
@@ -437,7 +419,7 @@ keyset(2) {
 }
 ====================================================
 ====================================================
-object(HH\Map)#%d (2) {
+object(HH\Map) (2) {
   ["a"]=>
   int(100)
   [200]=>
@@ -447,7 +429,7 @@ object(HH\Map)#%d (2) {
 Exception: "Invalid keyset key: expected a key of type int or string, double given"
 ====================================================
 ====================================================
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -460,7 +442,7 @@ keyset(2) {
 }
 ====================================================
 ====================================================
-object(HH\Pair)#%d (2) {
+object(HH\Pair) (2) {
   [0]=>
   NULL
   [1]=>
@@ -470,7 +452,7 @@ object(HH\Pair)#%d (2) {
 Exception: "Invalid keyset key: expected a key of type int or string, null given"
 ====================================================
 ====================================================
-object(HH\Set)#%d (5) {
+object(HH\Set) (5) {
   int(5)
   int(4)
   int(3)
@@ -487,7 +469,7 @@ keyset(5) {
 }
 ====================================================
 ====================================================
-object(AggregateObj)#%d (0) {
+object(AggregateObj) (0) {
 }
 ----------------------------------------------------
 keyset(3) {
@@ -500,7 +482,7 @@ keyset(3) {
 keyset(0) {
 }
 ----------------------------------------------------
-array(0) {
+darray(0) {
 }
 vec(0) {
 }
@@ -509,16 +491,12 @@ dict(0) {
 bool(false)
 int(0)
 float(0)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
-object(stdClass)#%d (0) {
+Exception: "Keyset to string conversion"
+object(HH\Vector) (0) {
 }
-object(HH\Vector)#%d (0) {
+object(HH\Map) (0) {
 }
-object(HH\Map)#%d (0) {
-}
-object(HH\Set)#%d (0) {
+object(HH\Set) (0) {
 }
 ====================================================
 ====================================================
@@ -529,7 +507,7 @@ keyset(4) {
   int(4)
 }
 ----------------------------------------------------
-array(4) {
+darray(4) {
   [1]=>
   int(1)
   [2]=>
@@ -558,20 +536,8 @@ dict(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
-object(stdClass)#%d (4) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
-object(HH\Vector)#%d (4) {
+Exception: "Keyset to string conversion"
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -581,7 +547,7 @@ object(HH\Vector)#%d (4) {
   [3]=>
   int(4)
 }
-object(HH\Map)#%d (4) {
+object(HH\Map) (4) {
   [1]=>
   int(1)
   [2]=>
@@ -591,7 +557,7 @@ object(HH\Map)#%d (4) {
   [4]=>
   int(4)
 }
-object(HH\Set)#%d (4) {
+object(HH\Set) (4) {
   int(1)
   int(2)
   int(3)
@@ -605,7 +571,7 @@ keyset(3) {
   string(1) "x"
 }
 ----------------------------------------------------
-array(3) {
+darray(3) {
   ["z"]=>
   string(1) "z"
   ["y"]=>
@@ -629,18 +595,8 @@ dict(3) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
-object(stdClass)#%d (3) {
-  ["z"]=>
-  string(1) "z"
-  ["y"]=>
-  string(1) "y"
-  ["x"]=>
-  string(1) "x"
-}
-object(HH\Vector)#%d (3) {
+Exception: "Keyset to string conversion"
+object(HH\Vector) (3) {
   [0]=>
   string(1) "z"
   [1]=>
@@ -648,7 +604,7 @@ object(HH\Vector)#%d (3) {
   [2]=>
   string(1) "x"
 }
-object(HH\Map)#%d (3) {
+object(HH\Map) (3) {
   ["z"]=>
   string(1) "z"
   ["y"]=>
@@ -656,7 +612,7 @@ object(HH\Map)#%d (3) {
   ["x"]=>
   string(1) "x"
 }
-object(HH\Set)#%d (3) {
+object(HH\Set) (3) {
   string(1) "z"
   string(1) "y"
   string(1) "x"
@@ -670,11 +626,15 @@ keyset(4) {
   string(1) "2"
 }
 ----------------------------------------------------
-array(2) {
+darray(4) {
   [1]=>
   int(1)
+  ["1"]=>
+  string(1) "1"
   [2]=>
   int(2)
+  ["2"]=>
+  string(1) "2"
 }
 vec(4) {
   int(1)
@@ -695,16 +655,8 @@ dict(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
-object(stdClass)#%d (2) {
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-}
-object(HH\Vector)#%d (4) {
+Exception: "Keyset to string conversion"
+object(HH\Vector) (4) {
   [0]=>
   int(1)
   [1]=>
@@ -714,7 +666,7 @@ object(HH\Vector)#%d (4) {
   [3]=>
   string(1) "2"
 }
-object(HH\Map)#%d (4) {
+object(HH\Map) (4) {
   [1]=>
   int(1)
   ["1"]=>
@@ -724,7 +676,7 @@ object(HH\Map)#%d (4) {
   ["2"]=>
   string(1) "2"
 }
-object(HH\Set)#%d (4) {
+object(HH\Set) (4) {
   int(1)
   string(1) "1"
   int(2)

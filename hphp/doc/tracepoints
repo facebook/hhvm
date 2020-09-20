@@ -1,0 +1,67 @@
+User-space defined tracepoints (USDTs) in HHVM.
+
+Tracepoints are implemented with FOLLY_SDT follow the naming
+convention hhvm_{event}_{cause}. {event} describes what happened,
+and {cause} describes what caused the event. Some tracepoints
+may occur more than once in the source (due to implementation details)
+or in the binary (due to inlining). Stack traces and arguments provide
+additional context.
+
+Example one-liners using some of the multi-purpose bcc tools:
+
+  # do you even have the tools?
+  $ ll $(which trace.py)
+
+  # stack traces of String concatinations triggering copy-on-write:
+  $ sudo trace.py -U\
+    'u:path/to/hhvm:hhvm_mut_concat "%d %d", arg1, arg2'
+
+  # histogram of RHS of in-place concatinations, on 5s intervals
+  $ sudo argdist.py -i 5 -H\
+    'u:path/to/hhvm:hhvm_mut_append():u32:arg2'
+
+  # counts of all probes on 5s intervals
+  $ sudo funccount.py -i 5 "u:path/to/hhvm:hhvm_*"
+
+hhvm_cow_concat lsize rsize
+hhvm_mut_concat lsize, rsize
+
+  Concatenating strings, causing copy-on-write (cow), or in-place appending
+  to a mutable string. Sometimes the mutable string isn't large enough to
+  append in place, but we still count it as a "mut" event. When concatinating
+  more than two strings in a single operation, lsize is the first string
+  length, and rsize is the sum of the remaining string lengths.
+
+  lsize: length in bytes of the left hand side string
+  rsize: length in bytes of the right-hand string(s).
+
+hhvm_cow_modifychar lsize index
+hhvm_mut_modifychar lsize index
+
+  A str[index]= assignment occurred on a string, causing a copy-on-write (cow),
+  or in-place mutation (mut).
+
+  lsize: size of the string being modified
+  index: index of the character being modified
+
+hhvm_cow_bitnot lsize
+hhvm_mut_bitnot lsize
+
+  A bitwise-not (~) on a string, resulting in copy-on-write (cow)
+  or in-place mutation (mut).
+
+  lsize: the size of the string copied + mutated.
+
+hhvm_cow_sodium lsize
+hhvm_mut_sodium lsize
+
+  ext_sodium operations.
+  lsize: the size of the string copied or mutated.
+
+hhvm_cow_setrange lsize rsize
+hhvm_mut_setrange lsize rsize
+
+  A SetRange operation copied or mutated a string.
+
+  lsize: size in bytes of the original string
+  rsize: number of bytes copied into the string (size * count)

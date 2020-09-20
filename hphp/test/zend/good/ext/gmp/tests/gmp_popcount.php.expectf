@@ -5,9 +5,8 @@ int(31)
 int(-1)
 int(20)
 
-Warning: %s
+Warning: gmp_popcount(): Unable to convert variable to GMP - wrong type in %s/gmp_popcount.php on line 10
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_popcount() expects exactly 1 parameter, 0 given in %s/gmp_popcount.php on line 11
 Done

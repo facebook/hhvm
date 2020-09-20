@@ -14,15 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_DEBUGGER_H_
-#define incl_HPHP_VSDEBUG_DEBUGGER_H_
+#pragma once
 
 #include <atomic>
 #include <unordered_map>
 #include <condition_variable>
 #include <mutex>
 
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
@@ -38,6 +37,10 @@
 
 namespace HPHP {
 namespace VSDEBUG {
+
+#define VSDEBUG_NAME "vsdebug"
+#define VSDEBUG_VERSION "1.2"
+
 
 struct DebugTransport;
 struct DebuggerSession;
@@ -65,28 +68,48 @@ struct RequestBreakpointInfo {
 };
 
 struct StepNextFilterInfo {
-  const Unit* stepStartUnit;
-  int skipLine0;
-  int skipLine1;
+  const Unit* stepStartUnit {nullptr};
+  int skipLine0 {0};
+  int skipLine1 {0};
 };
 
 // Structure to represent the state of a single request.
-struct RequestInfo {
-  struct {
-    bool hookAttached;
-    bool memoryLimitRemoved;
-    bool compilationUnitsMapped;
-    bool doNotBreak;
-    bool outputHooked;
-  } m_flags;
-  const char* m_stepReason;
+struct DebuggerRequestInfo {
+
+  // Request flags are read by the debugger hook prior to acquiring
+  // the debugger lock, so we can short-circuit and avoid calling
+  // into the debugger in certain cases.
+  union {
+    struct {
+      uint32_t memoryLimitRemoved : 1;
+      uint32_t compilationUnitsMapped : 1;
+      uint32_t doNotBreak : 1;
+      uint32_t outputHooked : 1;
+      uint32_t requestUrlInitialized : 1;
+      uint32_t terminateRequest : 1;
+      uint32_t unresolvedBps : 1;
+      uint32_t alive : 1;
+      uint32_t unused : 24;
+    } m_flags;
+    uint32_t m_allFlags;
+  };
+
+  const char* m_stepReason {nullptr};
   CommandQueue m_commandQueue;
-  RequestBreakpointInfo* m_breakpointInfo;
+  RequestBreakpointInfo* m_breakpointInfo {nullptr};
+
+  // Object IDs sent to the debugger client.
+  std::unordered_map<int, unsigned int> m_scopeIds;
+  std::unordered_map<void*, unsigned int> m_objectIds;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 
+  // Compilation units produced by debugger evaluations for this
+  // request - to be cleaned up when the request exits.
+  std::vector<std::unique_ptr<HPHP::Unit>> m_evaluationUnits;
+
   struct {
-    std::string path;
-    int line;
+    std::string path {""};
+    int line {0};
   } m_runToLocationInfo;
 
   // Info for allowing us to step over multi-line statements without hitting
@@ -94,14 +117,20 @@ struct RequestInfo {
   std::vector<StepNextFilterInfo> m_nextFilterInfo;
 
   // Number of evaluation frames on this request's stack right now.
-  int m_evaluateCommandDepth;
+  int m_evaluateCommandDepth {0};
 
   // Number of recursive calls into processCommandsQueue for this request
   // right now.
-  int m_pauseRecurseCount;
+  int m_pauseRecurseCount {0};
 
   // Number of times this request has entered the command queue since starting.
-  unsigned int m_totalPauseCount;
+  unsigned int m_totalPauseCount {0};
+
+  // Non-TLS copy of the request's URL to display in the client. Each request
+  // has this string in its ExecutionContext, but since that is thread-local,
+  // we cannot get at that copy when responding to a ThreadsRequest from the
+  // debugger client, so the debugger needs a copy.
+  std::string m_requestUrl {""};
 };
 
 // An exception to be thrown when a message from the client cannot be processed.
@@ -144,10 +173,48 @@ private:
   Debugger* m_debugger;
 };
 
+// Custom options that clients can pass in launch/attach messages
+// to control optional debugger behavior.
+struct DebuggerOptions {
+  // Show the dummy thread in the threads list when the debugger is
+  // responding to a stop command.
+  bool showDummyOnAsyncPause;
+
+  // Warn if the client sets a breakpoint in a function that is intercepted.
+  bool warnOnInterceptedFunctions;
+
+  // Tell the user if breakpoint calibration moves their bp.
+  bool notifyOnBpCalibration;
+
+  // Don't try to unique variable references by address.
+  bool disableUniqueVarRef;
+
+  // Don't try to run PSPs after each eval command on the dummy.
+  bool disableDummyPsPs;
+
+  // The maximum length of a string to return, for perf
+  int maxReturnedStringLength;
+
+  // Don't redirect stdout to the debugger console
+  bool disableStdoutRedirection;
+};
+
+struct ClientInfo {
+  std::string clientUser;
+  pid_t clientPid;
+  uid_t clientUid;
+};
+
 struct Debugger final {
   Debugger();
-  virtual ~Debugger() {
-    shutdown();
+  Debugger(const Debugger&) = delete;
+  Debugger& operator=(const Debugger&) = delete;
+  Debugger (Debugger && ) = delete;
+  ~Debugger() {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Debugger destructor called"
+    );
   }
 
   // Sets the transport mechanism to be used to communicate with a debug client.
@@ -160,7 +227,11 @@ struct Debugger final {
   // connected or not. Many debugger events will be skipped if no client is
   // connected to avoid impacting perf when there is no debugger client
   // attached.
-  void setClientConnected(bool connected);
+  void setClientConnected(
+    bool connected,
+    bool synchronous = false,
+    ClientInfo* clientInfo = nullptr
+  );
 
   // Shuts down the debugger session and cleans up any resources. This will also
   // unblock any requests that are broken in to the debugger.
@@ -189,31 +260,36 @@ struct Debugger final {
   void requestInit();
   void requestShutdown();
 
-  // Returns a pointer to the RequestInfo for the current thread.
-  RequestInfo* getRequestInfo(request_id_t threadId = (request_id_t)-1);
+  // Returns a pointer to the DebuggerRequestInfo for the current thread.
+  DebuggerRequestInfo* getRequestInfo(request_id_t threadId = (request_id_t)-1);
 
   // Allocates a new request info object.
-  static RequestInfo* createRequestInfo();
+  static DebuggerRequestInfo* createRequestInfo();
 
   // Cleans up and frees the specified request info object and shuts down its
   // command queue, unblocking the waiting request thread (if any).
-  static void cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri);
+  static void cleanupRequestInfo(RequestInfo* ti, DebuggerRequestInfo* ri);
 
   // Puts the current thread into the command queue for the specified request
   // info. This routine will block until the debugger is resumed by the client,
   // the client disconnects, or the extension is shut down.
   void processCommandQueue(
     request_id_t threadId,
-    RequestInfo* requestInfo,
-    const char* reason = "execution paused"
+    DebuggerRequestInfo* requestInfo,
+    const char* reason,
+    const char* displayReason,
+    bool focusedThread,
+    int bpId
   );
 
   // Called by the debugger transport when a new message is received from
   // a connected debugger client.
   void onClientMessage(folly::dynamic& message);
 
+  void logClientCommand(VSCommand* command);
+
   // Enters the debugger if the program is paused.
-  void enterDebuggerIfPaused(RequestInfo* requestInfo);
+  void enterDebuggerIfPaused(DebuggerRequestInfo* requestInfo);
 
   // Executes a command from the debugger client while holding the debugger
   // lock.
@@ -232,7 +308,13 @@ struct Debugger final {
   ClientPreferences getClientPreferences();
 
   // Starts the session's dummy request.
-  void startDummyRequest(const std::string& startupDoc);
+  void startDummyRequest(
+    const std::string& startupDoc,
+    const std::string& sandboxUser,
+    const std::string& sandboxName,
+    const std::string& debuggerSessionAuth,
+    bool displayStartupMsg
+  );
 
   // Sets the client initialized flag.
   void setClientInitialized();
@@ -240,10 +322,19 @@ struct Debugger final {
   // Returns the synthetic request ID for the current request thread.
   request_id_t getCurrentThreadId();
 
+  // Returns the client-provided authentication string to use for
+  // the dummy request, if any.  Returns empty string if called from
+  // any thread other than the dummy request thread or if there is no
+  // debugger client attached.
+  std::string getDebuggerSessionAuth();
+
   // Sends a stopped event to the client.
   void sendStoppedEvent(
     const char* reason,
-    request_id_t threadId
+    const char* displayReason,
+    request_id_t threadId,
+    bool focusedThread,
+    int breakpointId
   );
 
   // Sends a thread continued event to the client.
@@ -258,30 +349,46 @@ struct Debugger final {
   // Attempts to resolve and install breakpoints for the current request thread.
   // Will either install the breakpoint or add it to the request's unresolved
   // list.
-  void tryInstallBreakpoints(RequestInfo* ri);
+  void tryInstallBreakpoints(DebuggerRequestInfo* ri);
 
   // Called when a request loads a new compilation unit.
   void onCompilationUnitLoaded(
-    RequestInfo* ri,
+    DebuggerRequestInfo* ri,
     const HPHP::Unit* compilationUnit
   );
 
-  // Called when a request thinks it has hit a breakpoint.
+  // Called when a function is intercepted.
+  void onFuncIntercepted(std::string funcName);
+
+  // Called when the request defines a new function.
+  void onFunctionDefined(
+    DebuggerRequestInfo* ri,
+    const Func* func,
+    const std::string& funcName
+  );
+
+  // Called when a request thinks it has hit a source breakpoint.
   void onLineBreakpointHit(
-    RequestInfo* ri,
+    DebuggerRequestInfo* ri,
     const HPHP::Unit* compilationUnit,
     int line
   );
 
+  // Called when a request thinks it has hit a function breakpoint.
+  void onFuncBreakpointHit(
+    DebuggerRequestInfo* ri,
+    const HPHP::Func* func
+  );
+
   // Called when a request hits an exception.
   void onExceptionBreakpointHit(
-    RequestInfo* ri,
+    DebuggerRequestInfo* ri,
     const std::string& exceptionName,
     const std::string& exceptionMsg
   );
 
   void onError(
-    RequestInfo* requestInfo,
+    DebuggerRequestInfo* requestInfo,
     const ExtendedException& extendedException,
     int errnum,
     const std::string& message
@@ -297,7 +404,7 @@ struct Debugger final {
   bool onHardBreak();
 
   // Checks if we are stepping for a particular request.
-  static bool isStepInProgress(RequestInfo* requestInfo) {
+  static bool isStepInProgress(DebuggerRequestInfo* requestInfo) {
     return requestInfo->m_stepReason != nullptr ||
            (!requestInfo->m_runToLocationInfo.path.empty() &&
             requestInfo->m_runToLocationInfo.line > 0) ||
@@ -306,7 +413,7 @@ struct Debugger final {
 
   // Clears the state filters for a step operation on the specified request
   // thread, if any step is currently in progress.
-  static void clearStepOperation(RequestInfo* requestInfo) {
+  static void clearStepOperation(DebuggerRequestInfo* requestInfo) {
     if (isStepInProgress(requestInfo)) {
       phpDebuggerContinue();
       requestInfo->m_stepReason = nullptr;
@@ -353,7 +460,8 @@ struct Debugger final {
 
   static bool hasSameTty() {
     return !RuntimeOption::ServerExecutionMode() &&
-      RuntimeOption::VSDebuggerListenPort <= 0;
+      RuntimeOption::VSDebuggerListenPort <= 0 &&
+      RuntimeOption::VSDebuggerDomainSocketPath.empty();
   }
 
   // Returns the current stdout hook if one is installed, or nullptr otherwise.
@@ -381,14 +489,29 @@ struct Debugger final {
     return std::pair<const Unit*, HPHP::SourceLoc> (nullptr, loc);
   }
 
+  // Dispatches the specified command to a request.
+  void dispatchCommandToRequest(
+    request_id_t requestId,
+    VSCommand* command
+  );
+
+  bool getDebuggerOption(const HPHP::String& option);
+  void setDebuggerOption(const HPHP::String& option, bool value);
+  void setDebuggerOptions(DebuggerOptions options);
+
+  DebuggerOptions getDebuggerOptions() {
+    Lock lock(m_lock);
+    return m_debuggerOptions;
+  }
+
 private:
 
   // Cleans up server objects for a request.
-  void cleanupServerObjectsForRequest(RequestInfo* ri);
+  void cleanupServerObjectsForRequest(DebuggerRequestInfo* ri);
 
   // Attaches the debugger to the specified request thread and installs the
   // debugger hook.
-  RequestInfo* attachToRequest(ThreadInfo* ti);
+  DebuggerRequestInfo* attachToRequest(RequestInfo* ti);
 
   // Checks if the specified command requires the target to be broken in before
   // dispatching to a request queue and throws an exception if the condition is
@@ -401,6 +524,13 @@ private:
       );
     }
   }
+
+  void onBreakpointHit(
+    DebuggerRequestInfo* ri,
+    const HPHP::Unit* compilationUnit,
+    const HPHP::Func* func,
+    int line
+  );
 
   // Reports faiure to process a message from the debugger client to the
   // front-end.
@@ -421,12 +551,12 @@ private:
   void resumeTarget();
 
   // Halts execution of all request threads.
-  void pauseTarget(RequestInfo* ri, const char* stopReason);
+  void pauseTarget(DebuggerRequestInfo* ri, const char* stopReason);
 
   // Attempts to resolve and install a breakpoint for the current request.
   // Returns true if the bp was resolved, false if it is unresolved and pending.
   bool tryResolveBreakpoint(
-    RequestInfo* ri,
+    DebuggerRequestInfo* ri,
     const int bpId,
     const Breakpoint* bp
   );
@@ -434,12 +564,23 @@ private:
   // Attempts to resolve the breakpoint in the specified compilation unit.
   // Returns true on success, false otherwise.
   bool tryResolveBreakpointInUnit(
-    const RequestInfo* ri,
+    const DebuggerRequestInfo* ri,
     int bpId,
     const Breakpoint* bp,
     const std::string& unitFilePath,
     const HPHP::Unit* compilationUnit
   );
+
+  // Caches a flag on the request info indicating if there are any pending
+  // or unresolved breakpoints, so that the hook can skip calling into the
+  // debugger (and acquiring the debugger lock) every time a new func or
+  // compilation unit is defined if there are no unresolved breakpoints.
+  static inline void updateUnresolvedBpFlag(DebuggerRequestInfo* ri) {
+    ri->m_flags.unresolvedBps =
+      !ri->m_breakpointInfo->m_unresolvedBreakpoints.empty() ||
+      !ri->m_breakpointInfo->m_pendingBreakpoints.empty();
+    std::atomic_thread_fence(std::memory_order_release);
+  }
 
   // Notifies all threads that they need to switch to interpreted mode so we
   // can interrupt them.
@@ -449,12 +590,12 @@ private:
   // is currently attached to.
   void executeForEachAttachedRequest(
     std::function<void(
-      // Supplies the ThreadInfo for the request thread.
+      // Supplies the RequestInfo for the request thread.
       // NOTE: This parameter will be nullptr for the dummy request.
-      ThreadInfo* ti,
+      RequestInfo* ti,
       // Supplies the request info for the request thread. This will
       // never be nullptr.
-      RequestInfo* ri
+      DebuggerRequestInfo* ri
     )> callback,
     bool includeDummyRequest
   );
@@ -472,24 +613,27 @@ private:
     ReadyToPause,
     ErrorNoClient
   };
-  PrepareToPauseResult prepareToPauseTarget(RequestInfo* requestInfo);
+  PrepareToPauseResult prepareToPauseTarget(DebuggerRequestInfo* requestInfo);
 
   // Normalizes the file path for a compilation unit.
   static std::string getFilePathForUnit(const HPHP::Unit* compilationUnit);
 
   // Returns a stop reason string for a breakpoint.
   static std::string getStopReasonForBp(
-    const int id,
+    const Breakpoint* bp,
     const std::string& path,
     const int line
   );
 
   // Returns the request info for the dummy, if one exists or nullptr
   // if there is no client connected.
-  RequestInfo* getDummyRequestInfo();
+  DebuggerRequestInfo* getDummyRequestInfo();
 
   // Returns the next unused synthetic request thread ID.
   request_id_t nextThreadId();
+
+  // Worker routine to clean up old debugger sessions.
+  void runSessionCleanupThread();
 
   Mutex m_lock;
   DebugTransport* m_transport {nullptr};
@@ -514,13 +658,13 @@ private:
   ProgramState m_state {ProgramState::LoaderBreakpoint};
 
   // Information about all the requests that the debugger is aware of.
-  std::unordered_map<ThreadInfo*, RequestInfo*> m_requests;
+  std::unordered_map<RequestInfo*, DebuggerRequestInfo*> m_requests;
 
-  // Map of synthetic thread ID to ThreadInfo*;
-  std::unordered_map<request_id_t, ThreadInfo*> m_requestIdMap;
+  // Map of synthetic thread ID to RequestInfo*;
+  std::unordered_map<request_id_t, RequestInfo*> m_requestIdMap;
 
-  // Map of ThreadInfo* to synthetic thread ID
-  std::unordered_map<ThreadInfo*, request_id_t> m_requestInfoMap;
+  // Map of RequestInfo* to synthetic thread ID
+  std::unordered_map<RequestInfo*, request_id_t> m_requestInfoMap;
 
   // Next synthetic request ID to send to client as thread ID.
   request_id_t m_nextThreadId {1};
@@ -547,6 +691,19 @@ private:
   std::mutex m_resumeMutex;
   std::condition_variable m_resumeCondition;
 
+  // Client options.
+  DebuggerOptions m_debuggerOptions {0};
+
+  // Worker thread to clean up old session objects as debugger clients
+  // disconnect. Cleaning the session object requires joining with the
+  // dummy thread, which can block if it's in native code or a loop
+  // or something, so we need to do this in the background.
+  std::mutex m_sessionCleanupLock;
+  bool m_sessionCleanupTerminating {false};
+  std::condition_variable m_sessionCleanupCondition;
+  AsyncFunc<Debugger> m_sessionCleanupThread;
+  std::unordered_set<DebuggerSession*> m_cleanupSessions;
+
   // Pending event messages that are queued to be sent after the current
   // client command is processed and responded to.
   struct PendingEventMessage {
@@ -567,7 +724,7 @@ private:
 // A stdout hook that no-ops all writes to stdout.
 struct NoOpStdoutHook final : ExecutionContext::StdoutHook {
   explicit NoOpStdoutHook() {}
-  void operator()(const char* str, int len) override {}
+  void operator()(const char* /*str*/, int /*len*/) override {}
 };
 
 // When performing an evaluation on behalf of part of the debugger engine
@@ -578,25 +735,44 @@ struct NoOpStdoutHook final : ExecutionContext::StdoutHook {
 struct SilentEvaluationContext {
   SilentEvaluationContext(
     Debugger* debugger,
-    RequestInfo* ri,
+    DebuggerRequestInfo* ri,
     bool suppressOutput = true
   );
 
   ~SilentEvaluationContext();
 
 private:
-  RequestInfo* m_ri;
+  DebuggerRequestInfo* m_ri;
   bool m_suppressOutput;
   int m_errorLevel;
   StringBuffer* m_savedOutputBuffer;
   NoOpStdoutHook m_noOpHook;
   ExecutionContext::StdoutHook* m_oldHook;
+  StringBuffer m_sb;
 
   PCFilter m_savedFlowFilter;
   PCFilter m_savedBpFilter;
 };
 
+struct DebuggerNoBreakContext {
+  bool m_prevDoNotBreak;
+  bool m_prevDbgNoBreak;
+  DebuggerRequestInfo* m_requestInfo;
+
+  DebuggerNoBreakContext(Debugger* debugger) {
+    m_requestInfo = debugger->getRequestInfo();
+    m_prevDoNotBreak = m_requestInfo->m_flags.doNotBreak;
+    m_requestInfo->m_flags.doNotBreak = true;
+    m_prevDbgNoBreak = g_context->m_dbgNoBreak;
+    g_context->m_dbgNoBreak = true;
+  }
+
+  ~DebuggerNoBreakContext() {
+    m_requestInfo->m_flags.doNotBreak = m_prevDoNotBreak;
+    g_context->m_dbgNoBreak = m_prevDbgNoBreak;
+  }
+};
+
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_DEBUGGER_H_

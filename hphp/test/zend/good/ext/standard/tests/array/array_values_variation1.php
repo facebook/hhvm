@@ -1,18 +1,12 @@
-<?php
+<?hh
 /* Prototype  : array array_values(array $input)
- * Description: Return just the values from the input array 
+ * Description: Return just the values from the input array
  * Source code: ext/standard/array.c
  */
 
 /*
  * Pass different data types as $input argument to array_values() to test behaviour
  */
-
-echo "*** Testing array_values() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -21,6 +15,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_values() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $input argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -55,17 +55,17 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -77,7 +77,7 @@ $inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of array_values()
 $iterator = 1;
@@ -90,5 +90,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
-?>
-
+}

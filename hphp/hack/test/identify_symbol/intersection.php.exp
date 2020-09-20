@@ -1,19 +1,21 @@
-name: \C2::foo, kind: method, span: line 17, characters 7-9, definition: 
- foo
-   kind: method
-   id: method::C2::foo
-   position: line 8, characters 19-21
-   span: line 8, character 3 - line 8, character 26
-   modifiers: public 
-   params:
-
-
-name: \C1::foo, kind: method, span: line 17, characters 7-9, definition: 
+name: \C1::foo, kind: method, span: line 17, characters 7-9, is_declaration: false
+definition:
  foo
    kind: method
    id: method::C1::foo
    position: line 4, characters 19-21
    span: line 4, character 3 - line 4, character 26
+   modifiers: public 
+   params:
+
+
+name: \C2::foo, kind: method, span: line 17, characters 7-9, is_declaration: false
+definition:
+ foo
+   kind: method
+   id: method::C2::foo
+   position: line 8, characters 19-21
+   span: line 8, character 3 - line 8, character 26
    modifiers: public 
    params:
 

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $ts = new MongoTimestamp(0, 0);
 printf("Timestamp(%d, %d)\n", $ts->sec, $ts->inc);
 
@@ -13,4 +13,4 @@ printf("Timestamp(%d, %d)\n", $ts->sec, $ts->inc);
 
 $ts = new MongoTimestamp();
 printf("Timestamp(%d, %d)\n", $ts->sec, $ts->inc);
-?>
+}

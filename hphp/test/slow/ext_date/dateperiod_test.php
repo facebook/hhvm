@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_dateperiod_test() {
 $start = new DateTime('2012-07-01');
 $ival = new DateInterval('P7D');
 $end = new DateTime('2012-07-31');
@@ -16,4 +19,5 @@ $period = new DatePeriod($start, $ival, $end, DatePeriod::EXCLUDE_START_DATE);
 
 foreach ($period as $key => $date) {
   echo $key . " " . $date->format('Y-m-d') . "\n";
+}
 }

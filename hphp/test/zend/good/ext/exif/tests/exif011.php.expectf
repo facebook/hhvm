@@ -1,4 +1,4 @@
-array(28) {
+darray(28) {
   ["FileName"]=>
   string(12) "image011.jpg"
   ["FileDateTime"]=>
@@ -12,7 +12,7 @@ array(28) {
   ["SectionsFound"]=>
   string(19) "ANY_TAG, IFD0, EXIF"
   ["COMPUTED"]=>
-  array(9) {
+  darray(9) {
     ["html"]=>
     string(20) "width="1" height="1""
     ["Height"]=>

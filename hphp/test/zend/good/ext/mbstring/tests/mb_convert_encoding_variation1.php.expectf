@@ -2,70 +2,63 @@
 
 -- Iteration 1 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 2 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 3 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 4 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 5 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 6 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 7 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 8 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 9 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 10 --
-string(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_convert_encoding() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 11 --
-string(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_convert_encoding() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 12 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 13 --
-string(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_convert_encoding() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 14 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 15 --
-string(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_convert_encoding() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 16 --
 string(24) "68656c6c6f2c20776f726c64"
@@ -84,17 +77,17 @@ string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 21 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 22 --
-string(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_convert_encoding() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 23 --
-string(24) "68656c6c6f2c20776f726c64"
+
+Warning: mb_convert_encoding() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 
 -- Iteration 24 --
 
-Warning: %s
-string(0) ""
+Warning: mb_convert_encoding() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_convert_encoding_variation1.php on line 90
 Done

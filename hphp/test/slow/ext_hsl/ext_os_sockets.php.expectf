@@ -1,0 +1,98 @@
+***** Testing AF_INET server ***
+Initial server address:
+object(HH\Lib\_Private\_OS\sockaddr_in) (3) {
+  ["sin_port"]=>
+  int(0)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Server address from getsockname():
+object(HH\Lib\_Private\_OS\sockaddr_in) (3) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client address from accept():
+object(HH\Lib\_Private\_OS\sockaddr_in) (3) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client address from getpeername():
+object(HH\Lib\_Private\_OS\sockaddr_in) (3) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client address from getsockname():
+object(HH\Lib\_Private\_OS\sockaddr_in) (3) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Server address from getpeername():
+object(HH\Lib\_Private\_OS\sockaddr_in) (3) {
+  ["sin_port"]=>
+  int(%d)
+  ["sin_addr"]=>
+  int(2130706433)
+  ["sa_family"]=>
+  int(2)
+}
+Client received: 'Hello, '
+Server received: 'world!'
+
+
+***** Testing AF_UNIX server ***
+Initial server address:
+object(HH\Lib\_Private\_OS\sockaddr_un_pathname) (2) {
+  ["sun_path"]=>
+  string(%d) "%s/ext_os_sockets.php.tmpdir/sock"
+  ["sa_family"]=>
+  int(1)
+}
+Server address from getsockname():
+object(HH\Lib\_Private\_OS\sockaddr_un_pathname) (2) {
+  ["sun_path"]=>
+  string(%d) "%s/ext_os_sockets.php.tmpdir/sock"
+  ["sa_family"]=>
+  int(1)
+}
+Client address from accept():
+object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (1) {
+  ["sa_family"]=>
+  int(1)
+}
+Client address from getpeername():
+object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (1) {
+  ["sa_family"]=>
+  int(1)
+}
+Client address from getsockname():
+object(HH\Lib\_Private\_OS\sockaddr_un_unnamed) (1) {
+  ["sa_family"]=>
+  int(1)
+}
+Server address from getpeername():
+object(HH\Lib\_Private\_OS\sockaddr_un_pathname) (2) {
+  ["sun_path"]=>
+  string(%d) "%s/ext_os_sockets.php.tmpdir/sock"
+  ["sa_family"]=>
+  int(1)
+}
+Client received: 'Hello, '
+Server received: 'world!'

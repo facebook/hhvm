@@ -18,10 +18,8 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -29,10 +27,17 @@
 
 namespace HPHP {
 
+// We want to avoid potential include cycle with func.h/class.h, so putting
+// forward declarations here is more feasible and simpler.
+const StringData* classToStringHelper(const Class* cls);
+Array clsMethToVecHelper(const ClsMethDataRef clsMeth);
+void raiseClsMethConvertWarningHelper(const char* toType);
+[[noreturn]] void invalidFuncConversion(const char*);
+
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool cellToBool(Cell cell) {
-  assert(cellIsPlausible(cell));
+inline bool tvToBool(TypedValue cell) {
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -42,23 +47,31 @@ inline bool cellToBool(Cell cell) {
     case KindOfDouble:        return cell.m_data.dbl != 0;
     case KindOfPersistentString:
     case KindOfString:        return cell.m_data.pstr->toBoolean();
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return !cell.m_data.parr->empty();
+    case KindOfKeyset:        return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
-    case KindOfRef:           break;
+    case KindOfRecord:        raise_convert_record_to_type("bool"); break;
+    case KindOfRFunc:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfClsMeth:
+    case KindOfRClsMeth:
+    case KindOfLazyClass:     return true;
   }
   not_reached();
 }
 
-inline int64_t cellToInt(Cell cell) {
-  assert(cellIsPlausible(cell));
+inline int64_t tvToInt(TypedValue cell) {
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -68,87 +81,51 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfDouble:        return double_to_int64(cell.m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:        return cell.m_data.pstr->toInt64(10);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
+    case KindOfKeyset:        return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
-    case KindOfRef:           break;
+    case KindOfRecord:        raise_convert_record_to_type("int"); break;
+    case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
+    case KindOfFunc:
+      invalidFuncConversion("int");
+    case KindOfClass:
+      return classToStringHelper(cell.m_data.pclass)->toInt64();
+    case KindOfLazyClass:
+      return lazyClassToStringHelper(cell.m_data.plazyclass)->toInt64();
+    case KindOfClsMeth:
+      raiseClsMethConvertWarningHelper("int");
+      return 1;
+    case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
   }
   not_reached();
-}
-
-inline double cellToDouble(Cell cell) {
-  Cell tmp;
-  cellDup(cell, tmp);
-  tvCastToDoubleInPlace(&tmp);
-  return tmp.m_data.dbl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Cell cellToKey(Cell cell, const ArrayData* ad) {
-  assertx(cellIsPlausible(cell));
+template <IntishCast IC>
+inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
+  assertx(tvIsPlausible(cell));
 
   if (isStringType(cell.m_type)) {
     int64_t n;
-    if (ad->convertKey(cell.m_data.pstr, n)) {
+    if (IC == IntishCast::Cast && ad->intishCastKey(cell.m_data.pstr, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return cell;
   }
+
   if (LIKELY(isIntType(cell.m_type))) return cell;
 
-  if (!ad->useWeakKeys()) {
-    throwInvalidArrayKeyException(&cell, ad);
-  }
-  if (RuntimeOption::EvalHackArrCompatNotices) {
-    raiseHackArrCompatImplicitArrayKey(&cell);
-  }
-
-  switch (cell.m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return make_tv<KindOfPersistentString>(staticEmptyString());
-
-    case KindOfBoolean:
-      return make_tv<KindOfInt64>(cell.m_data.num);
-
-    case KindOfDouble:
-      return make_tv<KindOfInt64>(double_to_int64(cell.m_data.dbl));
-
-    case KindOfResource:
-      return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
-
-    case KindOfPersistentArray:
-    case KindOfArray:
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfObject:
-      raise_warning("Invalid operand type was used: Invalid type used as key");
-      return make_tv<KindOfNull>();
-
-    case KindOfInt64:
-    case KindOfString:
-    case KindOfPersistentString:
-    case KindOfRef:
-      break;
-  }
-  not_reached();
-}
-
-inline Cell tvToKey(TypedValue tv, const ArrayData* ad) {
-  assertx(tvIsPlausible(tv));
-  return cellToKey(tvToCell(tv), ad);
+  throwInvalidArrayKeyException(&cell, ad);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,6 +137,14 @@ inline TypedNum stringToNumeric(const StringData* sd) {
   return dt == KindOfInt64 ? make_tv<KindOfInt64>(ival) :
          dt == KindOfDouble ? make_tv<KindOfDouble>(dval) :
          make_tv<KindOfInt64>(0);
+}
+
+inline TypedValue tvClassToString(TypedValue key) {
+  if (isClassType(type(key))) {
+    auto const keyStr = classToStringHelper(val(key).pclass);
+    return make_tv<KindOfPersistentString>(keyStr);
+  }
+  return key;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,2 @@
+File "magic_trait_bad.php", line 14, characters 23-31:
+Using `__TRAIT__` outside a trait (Naming[2058])

@@ -1,0 +1,6 @@
+File "do_break.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "do_break.php", line 4, characters 23-28:
+Expected `string`
+File "do_break.php", line 9, characters 12-12:
+But got `int`

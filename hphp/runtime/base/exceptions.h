@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
-#define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
+#pragma once
 
 #include <string>
 #include <atomic>
@@ -25,17 +24,16 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
+#include "hphp/parser/location.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct String;
-struct IMarker;
-
-//////////////////////////////////////////////////////////////////////
+struct c_WaitableWaitHandle;
 
 /*
  * ExtendedException is the exception type for C++ exceptions that carry PHP
@@ -71,6 +69,7 @@ struct ExtendedException : Exception {
   // a silent exception does not have its exception message logged
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
+  void recomputeBacktraceFromWH(c_WaitableWaitHandle* wh);
 
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace);
@@ -103,6 +102,10 @@ void raise_fatal_error(const char* msg, const Array& bt = null_array,
                        bool recoverable = false, bool silent = false,
                        bool throws = true);
 
+[[noreturn]] void raise_parse_error(const StringData*,
+                                    const char*,
+                                    const Location::Range& loc);
+
 //////////////////////////////////////////////////////////////////////
 
 struct ResourceExceededException : FatalErrorException {
@@ -134,13 +137,25 @@ struct RequestMemoryExceededException : ResourceExceededException {
   EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
 };
 
+struct RequestOOMKilledException : ResourceExceededException {
+  explicit RequestOOMKilledException(size_t usedBytes)
+    : ResourceExceededException(
+        folly::sformat("request aborted due to memory pressure, "
+                       "used {} bytes", usedBytes),
+        empty_varray())
+    , m_usedBytes(usedBytes)
+  {}
+  const size_t m_usedBytes;
+  EXCEPTION_COMMON_IMPL(RequestOOMKilledException);
+};
+
 //////////////////////////////////////////////////////////////////////
 
-extern __thread int tl_exit_code;
+extern RDS_LOCAL(int, rl_exit_code);
 
 struct ExitException : ExtendedException {
   explicit ExitException(int exitCode) {
-    tl_exit_code = exitCode;
+    *rl_exit_code = exitCode;
   }
   EXCEPTION_COMMON_IMPL(ExitException);
 };
@@ -151,7 +166,7 @@ struct PhpFileDoesNotExistException : ExtendedException {
   explicit PhpFileDoesNotExistException(const char* msg,
                                         DEBUG_ONLY bool empty_file)
       : ExtendedException("%s", msg) {
-    assert(empty_file);
+    assertx(empty_file);
   }
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };
@@ -169,6 +184,7 @@ struct PhpFileDoesNotExistException : ExtendedException {
 [[noreturn]] void throw_not_implemented(const char* feature);
 [[noreturn]]
 void throw_not_supported(const char* feature, const char* reason);
+[[noreturn]] void throw_stack_overflow();
 
 /*
  * Initialize Throwable's file name and line number assuming the stack trace
@@ -181,8 +197,16 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable);
  */
 void throwable_init(ObjectData* throwable);
 
+/*
+ * Reinitialize Throwable's stack trace, file name and line number based on wait
+ * handle.
+ */
+void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
+                                           c_WaitableWaitHandle* wh);
+
+String throwable_to_string(ObjectData* throwable);
+
 //////////////////////////////////////////////////////////////////////
 
 }
 
-#endif

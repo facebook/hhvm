@@ -8,10 +8,12 @@ class Handle implements IDisposable {
 
 function testit(bool $b):void {
   // This is legal
-  using ($x = new Handle());
+  using $x = new Handle();
+  using $y = new Handle() {
+  }
 
   // This is not
   if ($b) {
-    using ($y = new Handle());
+    using $z = new Handle();
   }
 }

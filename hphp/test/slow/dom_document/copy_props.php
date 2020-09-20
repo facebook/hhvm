@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_copy_props() {
 $template = <<<XML
 <?xml version="1.0" encoding="utf-8"?>
 <resources></resources>
@@ -7,10 +10,10 @@ XML;
 
 $writer = new SimpleXMLElement( $template );
 
-$messages = array(
+$messages = darray[
   'key' => 'value',
   'anotherkey' => 'anothervalue',
-);
+];
 
 foreach ( $messages as $key => $value ) {
   $element = $writer->addChild( 'string', $value );
@@ -28,3 +31,4 @@ $dom->formatOutput = true;
 $dom->loadXML( $writer->asXML() );
 
 echo $dom->saveXML();
+}

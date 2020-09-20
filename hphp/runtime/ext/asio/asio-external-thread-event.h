@@ -59,7 +59,7 @@ struct c_ExternalThreadEventWaitHandle;
  *       markAsFinished();
  *     }
  *   protected:
- *     void unserialize(Cell& result) const {
+ *     void unserialize(TypedValue& result) const {
  *       if (UNLIKELY(m_failed)) {
  *         SystemLib::throwInvalidOperationExceptionObject(
  *           "An error has occurred while scheduling the operation"
@@ -72,7 +72,7 @@ struct c_ExternalThreadEventWaitHandle;
  *         );
  *       }
  *
- *       cellDup(make_tv<KindOfInt64>(m_value), result);
+ *       tvDup(make_tv<KindOfInt64>(m_value), result);
  *     }
  *   private:
  *     int m_value, m_maxValue;
@@ -101,7 +101,7 @@ struct c_ExternalThreadEventWaitHandle;
  *     event->setException(exception);
  *   } catch (...) {
  *     // unknown exception; should be never reached
- *     assert(false);
+ *     assertx(false);
  *     event->abandon();
  *     SystemLib::throwInvalidOperationExceptionObject(
  *       "Encountered unexpected exception"
@@ -192,7 +192,7 @@ struct AsioExternalThreadEvent {
      * If a result was already initialized, it must be uninitialized (decref
      * if needed) prior to throwing an exception.
      */
-    virtual void unserialize(Cell& result) = 0;
+    virtual void unserialize(TypedValue& result) = 0;
 
     /**
      * Get the time markAsFinished was called to retroactively reference
@@ -219,7 +219,7 @@ struct AsioExternalThreadEvent {
      * is eventually called.
      */
     virtual ~AsioExternalThreadEvent() {
-      assert(
+      assertx(
         m_state.load() == Finished ||
         m_state.load() == Canceled ||
         m_state.load() == Abandoned
@@ -247,7 +247,7 @@ struct AsioExternalThreadEvent {
      * called only from the unserialize() implementation.
      */
     ObjectData* getPrivData() const {
-      assert(m_state.load() == Finished);
+      assertx(m_state.load() == Finished);
       return m_waitHandle->getPrivData();
     }
 

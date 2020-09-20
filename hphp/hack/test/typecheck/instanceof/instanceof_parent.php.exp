@@ -1,0 +1,4 @@
+File "instanceof_parent.php", line 17, characters 7-17:
+  object
+File "instanceof_parent.php", line 16, characters 15-20:
+Unbound name: `parent` (Naming[2049])

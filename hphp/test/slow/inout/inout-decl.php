@@ -48,25 +48,25 @@ class PrivGParent extends PrivGGParent {
 }
 
 class PrivParent extends PrivGParent {
-  private function foo(&$x) {}
+  private function foo(inout $x) {}
   private function bar($y) {}
 }
 
 class PrivChild extends PrivParent {
   private function foo() {}
-  private function bar(&$y) {}
+  private function bar(inout $y) {}
 }
 
 function foo($x, $y, inout $z, $q) {}
 function bar(inout int $x) {}
-function f<T>(inout vec<T> $v, ...) {}
-function g($q, inout dict<string,vec<int>> $r, ...) {}
+function f<T>(inout vec<T> $v, ...$_) {}
+function g($q, inout dict<string,vec<int>> $r, ...$_) {}
 function h(inout $a, inout $b, $t, inout bool $c, $a = 12) {}
 
 function fptr<T as (function(inout int, inout bool, inout float): arraykey)>(
   inout $a,
   (function(inout int, inout Foo, inout float): Bar) $b
-): (function(inout double, inout int, float): int) {
+): (function(inout float, inout int, float): int) {
 }
 
 function main($a, $b, inout $c, $d, $e) {
@@ -84,9 +84,10 @@ function main($a, $b, inout $c, $d, $e) {
 
   return $x + $y + $z;
 }
-
+<<__EntryPoint>> function main_entry(): void {
 $a = 3;
 main(1, 2, inout $a, 4, 5, 6);
-var_dump(Cls::inout, Derp::foo);
+\var_dump(Cls::inout, Derp::foo);
 echo "Done.\n";
+}
 }

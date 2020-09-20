@@ -1,0 +1,4 @@
+File "tpu_access.bad.php", line 20, characters 43-44:
+A type specifier is expected here. (Parsing[1002])
+File "tpu_access.bad.php", line 20, characters 43-44:
+Encountered unexpected text `:@`, was expecting a type hint. (Parsing[1002])

@@ -34,28 +34,14 @@ class A {
   <<__Rx, __MutableReturn>>
   public function f4(): C {
     // OK - returns mutably owned local
-    $a = make();
+    $a = \HH\Rx\mutable(make());
     return $a;
-  }
-
-  <<__Rx, __MutableReturn>>
-  public function f5(): C {
-    // OK - returns conditional that returns mutably owned value
-    $a = make();
-    return true ? $a : make();
-  }
-
-  <<__Rx, __MutableReturn>>
-  public function f6(): C {
-    // OK - returns null coalescing operator that returns mutably owned value
-    $a = make();
-    return $a ?? make();
   }
 
   <<__Rx, __MutableReturn>>
   public function f7(): C {
     // OK - pipe where right hand side returns mutably owned value
-    return 1 |> make2($$);
+    return 1 |> \HH\Rx\mutable(make2($$));
   }
 
   <<__Rx, __MutableReturn>>

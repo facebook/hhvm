@@ -62,22 +62,22 @@ Testing:
 ,"rosebud"]
 
 DECODE: AS OBJECT
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(stdClass) (1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -88,7 +88,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#%d (36) {
+  object(stdClass) (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -140,21 +140,21 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
-    object(stdClass)#%d (0) {
+    object(stdClass) (0) {
     }
     ["123"]=>
-    object(stdClass)#%d (1) {
+    object(stdClass) (1) {
       ["456"]=>
-      object(stdClass)#%d (1) {
+      object(stdClass) (1) {
         ["abc"]=>
-        object(stdClass)#%d (3) {
+        object(stdClass) (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>
-          array(4) {
+          darray(4) {
             [0]=>
             int(1)
             [1]=>
@@ -165,7 +165,7 @@ array(14) {
             int(500)
           }
           ["ghi"]=>
-          array(5) {
+          darray(5) {
             [0]=>
             int(1)
             [1]=>
@@ -189,7 +189,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -206,7 +206,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -243,22 +243,22 @@ array(14) {
   string(7) "rosebud"
 }
 DECODE: AS ARRAY
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  array(1) {
+  darray(1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
   }
   [2]=>
-  array(0) {
+  darray(0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -269,7 +269,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  array(36) {
+  darray(36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -321,21 +321,21 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
-    array(0) {
+    darray(0) {
     }
     [123]=>
-    array(1) {
+    darray(1) {
       [456]=>
-      array(1) {
+      darray(1) {
         ["abc"]=>
-        array(3) {
+        darray(3) {
           [789]=>
           string(3) "def"
           ["012"]=>
-          array(4) {
+          darray(4) {
             [0]=>
             int(1)
             [1]=>
@@ -346,7 +346,7 @@ array(14) {
             int(500)
           }
           ["ghi"]=>
-          array(5) {
+          darray(5) {
             [0]=>
             int(1)
             [1]=>
@@ -370,7 +370,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -387,7 +387,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -428,22 +428,22 @@ ENCODE: FROM OBJECT
 ENCODE: FROM ARRAY
 ["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},[],[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"":0,"E no .":4000000000000,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","unicode":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8":"\u30d7\u30ec\u30b9\u30ad\u30c3\u30c8","empty_string":"","true":true,"false":false,"null":null,"array":[],"object":[],"123":{"456":{"abc":{"789":"def","012":[1,2,"5",500],"ghi":[1,2,"five",50,"sixty"]}}},"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
 DECODE AGAIN: AS OBJECT
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(stdClass) (1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -454,7 +454,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#%d (36) {
+  object(stdClass) (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -506,21 +506,21 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
-    object(stdClass)#%d (0) {
+    object(stdClass) (0) {
     }
     ["123"]=>
-    object(stdClass)#%d (1) {
+    object(stdClass) (1) {
       ["456"]=>
-      object(stdClass)#%d (1) {
+      object(stdClass) (1) {
         ["abc"]=>
-        object(stdClass)#%d (3) {
+        object(stdClass) (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>
-          array(4) {
+          darray(4) {
             [0]=>
             int(1)
             [1]=>
@@ -531,7 +531,7 @@ array(14) {
             int(500)
           }
           ["ghi"]=>
-          array(5) {
+          darray(5) {
             [0]=>
             int(1)
             [1]=>
@@ -555,7 +555,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -572,7 +572,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -609,22 +609,22 @@ array(14) {
   string(7) "rosebud"
 }
 DECODE AGAIN: AS ARRAY
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  array(1) {
+  darray(1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
   }
   [2]=>
-  array(0) {
+  darray(0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -635,7 +635,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  array(36) {
+  darray(36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -687,21 +687,21 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
-    array(0) {
+    darray(0) {
     }
     [123]=>
-    array(1) {
+    darray(1) {
       [456]=>
-      array(1) {
+      darray(1) {
         ["abc"]=>
-        array(3) {
+        darray(3) {
           [789]=>
           string(3) "def"
           ["012"]=>
-          array(4) {
+          darray(4) {
             [0]=>
             int(1)
             [1]=>
@@ -712,7 +712,7 @@ array(14) {
             int(500)
           }
           ["ghi"]=>
-          array(5) {
+          darray(5) {
             [0]=>
             int(1)
             [1]=>
@@ -736,7 +736,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -753,7 +753,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>

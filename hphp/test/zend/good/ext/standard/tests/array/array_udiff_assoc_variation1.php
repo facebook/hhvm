@@ -1,33 +1,33 @@
-<?php
+<?hh
 /* Prototype  : array array_udiff_assoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing array_udiff_assoc() : usage variation ***\n";
-
-// Initialise function arguments not being substituted (if any)
-$arr2 = array(1, 2);
-
-include('compare_function.inc');
-$key_comp_func = 'compare_function';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
 {
 }
+<<__EntryPoint>> function main(): void {
+include('compare_function.inc');
+echo "*** Testing array_udiff_assoc() : usage variation ***\n";
+
+// Initialise function arguments not being substituted (if any)
+$arr2 = varray[1, 2];
+
+$key_comp_func = 'compare_function';
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -35,11 +35,11 @@ hello world
 EOT;
 
 // add arrays
-$index_array = array (1, 2, 3);
-$assoc_array = array ('one' => 1, 'two' => 2);
+$index_array = varray [1, 2, 3];
+$assoc_array = darray ['one' => 1, 'two' => 2];
 
 //array of values to iterate over
-$inputs = array(
+$inputs = darray[
 
       // int data
       'int 0' => 0,
@@ -83,7 +83,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-);
+];
 
 // loop through each element of the array for arr1
 
@@ -92,5 +92,5 @@ foreach($inputs as $key =>$value) {
       var_dump( array_udiff_assoc($value, $arr2, $key_comp_func) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -27,6 +27,6 @@ type simple_shape = shape(
   ...
 );
 function show_shape_type_unset_fields(simple_shape $s): void {
-  Shapes::removeKey(&$s, 'b');
+  Shapes::removeKey(inout $s, 'b');
   hh_show($s);
 }

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_FUNC_EMITTER_H_
-#define incl_HPHP_VM_FUNC_EMITTER_H_
+#pragma once
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
@@ -27,6 +26,7 @@
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include <utility>
 #include <vector>
@@ -40,20 +40,9 @@ struct StringData;
 struct PreClassEmitter;
 struct UnitEmitter;
 
-///////////////////////////////////////////////////////////////////////////////
-
-struct EHEntEmitter {
-  EHEnt::Type m_type;
-  bool m_itRef;
-  Offset m_base;
-  Offset m_past;
-  int m_iterId;
-  int m_parentIndex;
-  Offset m_handler;
-  Offset m_end;
-
-  template<class SerDe> void serde(SerDe& sd);
-};
+namespace Native {
+struct NativeFunctionInfo;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -65,28 +54,24 @@ struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
+  using UpperBoundVec = CompactVector<TypeConstraint>;
+  using UpperBoundMap =
+    std::unordered_map<const StringData*, CompactVector<TypeConstraint>>;
   struct ParamInfo : public Func::ParamInfo {
-    ParamInfo()
-      : byRef(false)
-    {}
+    ParamInfo() {}
 
     template<class SerDe>
     void serde(SerDe& sd) {
       Func::ParamInfo* parent = this;
       parent->serde(sd);
-      sd(byRef);
+      sd(upperBounds);
     }
 
-    // Whether the parameter is passed by reference.  This field is absent from
-    // Func::ParamInfo because we store it in a bitfield on Func.
-    bool byRef;
+    UpperBoundVec upperBounds;
   };
 
   typedef std::vector<ParamInfo> ParamInfoVec;
-  typedef std::vector<Func::SVInfo> SVInfoVec;
-  typedef std::vector<EHEntEmitter> EHEntVec;
-  typedef std::vector<FPIEnt> FPIEntVec;
-
+  typedef std::vector<EHEnt> EHEntVec;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -99,9 +84,9 @@ struct FuncEmitter {
   /*
    * Just set some fields when we start and stop emitting.
    */
-  void init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
+  void init(int l1, int l2, Offset base_, Attr attrs_,
             const StringData* docComment_);
-  void finish(Offset past, bool load);
+  void finish(Offset past);
 
   /*
    * Commit this function to a repo.
@@ -136,7 +121,7 @@ struct FuncEmitter {
    */
   void setIds(int sn, Id id);
 
-
+  bool useGlobalIds() const;
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and parameters.
 
@@ -147,29 +132,24 @@ struct FuncEmitter {
   Id numNamedLocals() const;
   Id numIterators() const;
   Id numLiveIterators() const;
-  Id numClsRefSlots() const;
 
   /*
    * Set things.
    */
   void setNumIterators(Id numIterators);
   void setNumLiveIterators(Id id);
-  void setNumClsRefSlots(Id num);
 
   /*
    * Check existence of, look up, and allocate named locals.
    */
   bool hasVar(const StringData* name) const;
   Id lookupVarId(const StringData* name) const;
-  void allocVarId(const StringData* name);
+  void allocVarId(const StringData* name, bool slotless = false);
 
   /*
-   * Allocate and free unnamed locals. Unnamed locals must be freed in reverse
-   * allocation order (i.e., it is only ever legal to free the most recently
-   * allocated unnamed local that has not yet been freed).
+   * Allocate unnamed locals.
    */
   Id allocUnnamedLocal();
-  void freeUnnamedLocal(Id id);
 
   /*
    * Allocate and free iterators.
@@ -192,17 +172,15 @@ struct FuncEmitter {
   // Unit tables.
 
   /*
-   * Add entries to the EH and FPI tables, and return them by reference.
+   * Add entries to the EH table, and return them by reference.
    */
-  EHEntEmitter& addEHEnt();
-  FPIEnt& addFPIEnt();
+  EHEnt& addEHEnt();
 
 private:
   /*
    * Private table sort routines; called at finish()-time.
    */
   void sortEHTab();
-  void sortFPITab(bool load);
 
 public:
   /*
@@ -215,19 +193,19 @@ public:
   // Helper accessors.                                                  [const]
 
   /*
-   * Is the function a pseudomain, a method, variadic (i.e., takes a `...'
+   * Is the function a method, variadic (i.e., takes a `...'
    * parameter), or an HNI function with a native implementation?
    */
-  bool isPseudoMain() const;
   bool isMethod() const;
   bool isVariadic() const;
-  bool isVariadicByRef() const;
 
   /*
    * @returns: std::make_pair(line1, line2)
    */
   std::pair<int,int> getLocation() const;
 
+  Native::NativeFunctionInfo getNativeInfo() const;
+  String nativeFullname() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Complex setters.
@@ -247,10 +225,15 @@ public:
   int parseNativeAttributes(Attr& attrs_) const;
 
   /*
-   * Set some fields for builtin functions.
+   * Fix some attributes based on the current runtime options that may
+   * have been stored incorrectly in the repo.
    */
-  void setBuiltinFunc(Attr attrs_, Offset base_);
+  Attr fix_attrs(Attr a) const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Bytecode.
+
+  Offset offsetOf(const unsigned char* pc) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -274,36 +257,34 @@ public:
   int line1;
   int line2;
   LowStringPtr name;
-  bool top;
   Attr attrs;
 
   ParamInfoVec params;
-  SVInfoVec staticVars;
   int maxStackCells;
 
   MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
+  UpperBoundVec retUpperBounds;
 
   EHEntVec ehtab;
-  FPIEntVec fpitab;
 
   union {
-    uint8_t m_repoBoolBitset{0};
+    uint16_t m_repoBoolBitset{0};
     struct {
-      bool isMemoizeWrapper : 1;
-      bool isClosureBody    : 1;
-      bool isAsync          : 1;
-      bool containsCalls    : 1;
-      bool isNative         : 1;
-      bool isGenerator      : 1;
-      bool isPairGenerator  : 1;
+      bool isMemoizeWrapper    : 1;
+      bool isMemoizeWrapperLSB : 1;
+      bool isClosureBody       : 1;
+      bool isAsync             : 1;
+      bool containsCalls       : 1;
+      bool isNative            : 1;
+      bool isGenerator         : 1;
+      bool isPairGenerator     : 1;
+      bool isRxDisabled        : 1;
+      bool hasParamsWithMultiUBs : 1;
+      bool hasReturnWithMultiUBs : 1;
     };
   };
-
-  // These are not stored in the repo
-  bool isMemoizeImpl{false};
-  bool hasMemoizeSharedProp{false};
 
   LowStringPtr docComment;
   LowStringPtr originalFilename;
@@ -323,10 +304,8 @@ private:
   Func::NamedLocalsMap::Builder m_localNames;
   Id m_numLocals;
   int m_numUnnamedLocals;
-  int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
-  Id m_numClsRefSlots;
   bool m_ehTabSorted;
 };
 
@@ -347,7 +326,7 @@ struct FuncRepoProxy : public RepoProxy {
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
-                const StringData* name, bool top); // throws(RepoExc)
+                const StringData* name); // throws(RepoExc)
   };
 
   struct GetFuncsStmt : public RepoProxy::Stmt {
@@ -366,4 +345,3 @@ struct FuncRepoProxy : public RepoProxy {
 #include "hphp/runtime/vm/func-emitter-inl.h"
 #undef incl_HPHP_VM_FUNC_EMITTER_INL_H_
 
-#endif // incl_HPHP_VM_FUNC_EMITTER_H_

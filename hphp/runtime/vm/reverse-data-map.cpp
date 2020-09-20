@@ -124,7 +124,9 @@ bool contains(const NamedEntity* ne, const void* addr) {
 }
 
 bool contains(const StringData* sd, const void* addr) {
-  auto const start = reinterpret_cast<const char*>(sd);
+  auto const symbol = sd->isSymbol();
+  auto const start = reinterpret_cast<const char*>(sd)
+                   - (symbol ? sizeof(SymbolPrefix) : 0);
   return (start <= addr && addr < start + sd->heapSize());
 }
 

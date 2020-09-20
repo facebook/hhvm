@@ -1,19 +1,14 @@
 *** Testing for error conditions ***
 
-Warning: %s
-NULL
+Warning: substr() expects at least 2 parameters, 0 given in %s/substr.php on line 14
 
-Warning: %s
-NULL
+Warning: substr() expects at least 2 parameters, 1 given in %s/substr.php on line 17
 
-Warning: %s
-NULL
+Warning: substr() expects at least 2 parameters, 1 given in %s/substr.php on line 20
 
-Warning: %s
-NULL
+Warning: substr() expects at least 2 parameters, 1 given in %s/substr.php on line 23
 
-Warning: %s
-NULL
+Warning: substr() expects at most 3 parameters, 4 given in %s/substr.php on line 26
 
 --- Iteration 1 ---
 
@@ -36,24 +31,6 @@ bool(false)
 --- Iteration 2 ---
 
 -- Variations for two arguments --
-bool(false)
-bool(false)
-bool(false)
-
--- Variations for three arguments --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
---- Iteration 3 ---
-
--- Variations for two arguments --
 string(4) "2345"
 string(5) "12345"
 string(2) "45"
@@ -69,7 +46,7 @@ string(2) "45"
 string(0) ""
 string(0) ""
 
---- Iteration 4 ---
+--- Iteration 3 ---
 
 -- Variations for two arguments --
 string(5) "bcdef"
@@ -87,7 +64,7 @@ string(2) "ef"
 string(0) ""
 string(0) ""
 
---- Iteration 5 ---
+--- Iteration 4 ---
 
 -- Variations for two arguments --
 string(5) "23abc"
@@ -105,7 +82,7 @@ string(2) "bc"
 string(0) ""
 string(0) ""
 
---- Iteration 6 ---
+--- Iteration 5 ---
 
 -- Variations for two arguments --
 string(6) "123abc"

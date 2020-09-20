@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/litstr-table.h"
 
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -26,6 +27,10 @@ LitstrTable* LitstrTable::s_litstrTable = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Id LitstrTable::mergeLitstr(const StringData* litstr) {
+  if (!litstr) {
+    return 0;
+  }
+
   {
     LitstrMap::const_accessor acc;
     if (m_litstr2id.find(acc, litstr)) {
@@ -45,23 +50,36 @@ Id LitstrTable::mergeLitstr(const StringData* litstr) {
 void LitstrTable::setReading() {
   always_assert(!m_safeToRead);
   always_assert(!m_namedInfo.size());
-  if (m_litstr2id.size()) {
-    m_namedInfo.resize(m_litstr2id.size());
-    m_namedInfo.shrink_to_fit();
-    for (auto const& strId : m_litstr2id) {
-      m_namedInfo[strId.second] = strId.first;
-    }
+
+  m_namedInfo.resize(m_litstr2id.size() + 1);
+  m_namedInfo.shrink_to_fit();
+  for (auto const& strId : m_litstr2id) {
+    m_namedInfo[strId.second] = LowStringPtr{strId.first};
   }
+
   m_safeToRead = true;
 }
 
 void LitstrTable::forEachLitstr(
   std::function<void (int, const StringData*)> onItem) {
-  assert(m_safeToRead);
+  assertx(m_safeToRead);
   auto i = 0;
-  for (auto s : m_namedInfo) {
-    onItem(i++, s);
+  for (auto& s : m_namedInfo) {
+    if (i != 0) {
+      onItem(i, s.get());
+    }
+    i++;
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Lazy loading.
+
+StringData* loadLitstrById(Id id) {
+  if (RuntimeOption::RepoAuthoritative) {
+    return Repo::get().lsrp().loadOne(id);
+  }
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

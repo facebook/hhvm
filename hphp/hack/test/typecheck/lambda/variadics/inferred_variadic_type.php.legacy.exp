@@ -1,0 +1,34 @@
+File "inferred_variadic_type.php", line 37, characters 14-26:
+Typing error (Typing[4110])
+File "inferred_variadic_type.php", line 37, characters 14-18:
+This is a num (int | float) because this is used in an arithmetic operation
+File "inferred_variadic_type.php", line 15, characters 36-36:
+It is incompatible with an object of type D
+File "inferred_variadic_type.php", line 37, characters 14-26:
+Typing error (Typing[4110])
+File "inferred_variadic_type.php", line 37, characters 22-26:
+This is a num (int | float) because this is used in an arithmetic operation
+File "inferred_variadic_type.php", line 15, characters 36-36:
+It is incompatible with an object of type D
+File "inferred_variadic_type.php", line 37, characters 14-26:
+Invalid return type (Typing[4110])
+File "inferred_variadic_type.php", line 15, characters 48-50:
+This is an int
+File "inferred_variadic_type.php", line 37, characters 14-26:
+It is incompatible with a dynamic value because this is the sum of two arguments typed dynamic
+File "inferred_variadic_type.php", line 41, characters 38-40:
+You are trying to access the member foo but this is not an object, it is an int (Typing[4062])
+File "inferred_variadic_type.php", line 15, characters 42-44:
+Definition is here
+File "inferred_variadic_type.php", line 44, characters 19-25:
+Invalid argument (Typing[4062])
+File "inferred_variadic_type.php", line 43, characters 32-34:
+You are trying to access the member foo but this is not an object, it is an int
+File "inferred_variadic_type.php", line 15, characters 42-44:
+Definition is here
+File "inferred_variadic_type.php", line 47, characters 19-26:
+Invalid argument (Typing[4110])
+File "inferred_variadic_type.php", line 46, characters 20-21:
+This is an object of type C (variadic argument)
+File "inferred_variadic_type.php", line 15, characters 42-44:
+It is incompatible with an int

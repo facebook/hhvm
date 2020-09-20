@@ -45,7 +45,7 @@ void APCFileStorage::enable(const std::string& prefix, size_t chunkSize) {
   if (chunkSize <= PaddingSize) return;
   m_prefix = prefix;
   m_chunkSize = chunkSize;
-  assert(m_chunkSize < ~uint32_t(0));  // Must fit in low 32 bits of m_current.
+  assertx(m_chunkSize < ~uint32_t(0));  // Must fit in low 32 bits of m_current.
   if (m_state != StorageState::Invalid) {
     return;
   }
@@ -61,7 +61,7 @@ char* APCFileStorage::put(const char* data, uint32_t len) {
   auto maxOffset = m_chunkSize - totalLen;
   auto current = m_current.load(std::memory_order_relaxed);
   // m_current is intialized to -1 to postpone allocation to first 'put'.
-  assert(!m_chunks.empty() || current == ~0ull);
+  assertx(!m_chunks.empty() || current == ~0ull);
   do {
     if (UNLIKELY(static_cast<uint32_t>(current) > maxOffset)) {
       std::lock_guard<std::mutex> lock(m_lock);
@@ -94,7 +94,7 @@ char* APCFileStorage::put(const char* data, uint32_t len) {
   uint64_t h = hash_string_cs_unsafe(data, len);
   *(uint64_t*)base = h | (static_cast<uint64_t>(len) << 32);
   base += sizeof(uint64_t);
-  assert(base[len] == '\0');            // Should already be 0 after mmap.
+  assertx(base[len] == '\0');            // Should already be 0 after mmap.
   // Return the starting address of the string.
   return static_cast<char*>(memcpy(base, data, len));
 }
@@ -104,7 +104,7 @@ void APCFileStorage::seal() {
   if (m_state == StorageState::Sealed || m_chunks.empty()) {
     return;
   }
-  assert(m_state == StorageState::Open || m_state == StorageState::Full);
+  assertx(m_state == StorageState::Open || m_state == StorageState::Full);
   m_state = StorageState::Sealed;
 
   auto const current = m_current.load(std::memory_order_acquire);
@@ -132,7 +132,7 @@ void APCFileStorage::adviseOut() {
   }
   for (auto i = 0u; i < m_fds.size(); i++) {
     if (fadvise_dontneed(m_fds[i], m_chunkSize) < 0) {
-      Logger::Error("Failed to fadvise chunk file %d, fd = %d", i, m_fds[i]);
+      Logger::Error("Failed to fadvise chunk file %u, fd = %d", i, m_fds[i]);
     }
   }
 }
@@ -220,7 +220,7 @@ bool APCFileStorage::addFile() {
  #error "No implementation for posix_fallocate on your platform."
 #endif
   if (!couldAllocate) {
-    Logger::Error("Failed to posix_fallocate of size %" PRId64, m_chunkSize);
+    Logger::Error("Failed to posix_fallocate of size %zu", m_chunkSize);
     close(fd);
     return false;
   }
@@ -232,7 +232,7 @@ bool APCFileStorage::addFile() {
   char* addr = (char*)mmap(nullptr, m_chunkSize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, fd, 0);
   if (addr == (char*)-1) {
-    Logger::Error("Failed to mmap %s of size %" PRId64, name, m_chunkSize);
+    Logger::Error("Failed to mmap %s of size %zu", name, m_chunkSize);
     close(fd);
     return false;
   }
@@ -250,7 +250,7 @@ bool APCFileStorage::addFile() {
                                           std::memory_order_acquire,
                                           std::memory_order_relaxed)) {
         // Guaranteed by the memory_order_acquire
-        assert(current >> 32 == m_chunks.size() - 1);
+        assertx(current >> 32 == m_chunks.size() - 1);
         auto const p = m_chunks.back() + static_cast<uint32_t>(current);
         *reinterpret_cast<strhash_t*>(p) = TombHash;
         break;

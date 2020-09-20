@@ -1,16 +1,19 @@
-<?php
+<?hh
+
+abstract final class ZendGoodExtStandardTestsArrayBug25359 {
+  public static $data;
+}
 
 function does_not_work()
 {
-    global $data; // Remove this line to make array_multisort() work
+    ZendGoodExtStandardTestsArrayBug25359::$data = varray['first', 'fifth', 'second', 'forth', 'third'];
+    $sort = varray[1, 5, 2, 4, 3];
+    $data = ZendGoodExtStandardTestsArrayBug25359::$data;
+    array_multisort2(inout $sort, inout $data);
+    ZendGoodExtStandardTestsArrayBug25359::$data = $data;
 
-    $data = array('first', 'fifth', 'second', 'forth', 'third');
-    $sort = array(1, 5, 2, 4, 3);
-    array_multisort($sort, $data);
-
-    var_dump($data);
+    var_dump(ZendGoodExtStandardTestsArrayBug25359::$data);
 }
-
+<<__EntryPoint>> function main(): void {
 does_not_work();
-
-?>
+}

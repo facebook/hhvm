@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -8,7 +8,7 @@
 * Passing different arrays to $input argument and testing whether
 * array_unique() behaves in an expected way.
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_unique() : Passing different arrays to \$input argument ***\n";
 
 /* Different heredoc strings passed as argument to arrays */
@@ -42,30 +42,30 @@ $numeric_string = <<<EOT
 EOT;
 
 // arrays passed to $input argument
-$inputs = array (
-/*1*/  array(1, 2, 2, 1), // with default keys and numeric values
-       array(1.1, 2.2, 1.1), // with default keys & float values
-       array(false, true, false), // with default keys and boolean values
-       array(), // empty array
-/*5*/  array(NULL, null), // with NULL
-       array("a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"),  // with double quoted strings
-       array('a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'),  // with single quoted strings
-       array("h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, $blank_line),  // with heredocs
+$inputs = varray [
+/*1*/  varray[1, 2, 2, 1], // with default keys and numeric values
+       varray[1.1, 2.2, 1.1], // with default keys & float values
+       varray[false, true, false], // with default keys and boolean values
+       varray[], // empty array
+/*5*/  varray[NULL, null], // with NULL
+       varray["a\v\f", "aaaa\r", "b", "aaaa\r", "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"],  // with double quoted strings
+       varray['a\v\f', 'aaaa\r', 'b', 'aaaa\r', '\[\]\!\@\#\$\%\^\&\*\(\)\{\}'],  // with single quoted strings
+       darray["h1" => $blank_line, "h2" => $multiline_string, "h3" => $diff_whitespaces, 0 => $blank_line],  // with heredocs
 
        // associative arrays
-/*9*/  array(1 => "one", 2 => "two", 2 => "two"),  // explicit numeric keys, string values
-       array("one" => 1, "two" => 2, "1" => 1 ),  // string keys & numeric values
-       array( 1 => 10, 2 => 20, 4 => 40, 5 => 10),  // explicit numeric keys and numeric values
-       array( "one" => "ten", "two" => "twenty", "10" => "ten"),  // string key/value
-       array("one" => 1, 2 => "two", 4 => "four"),  //mixed
+/*9*/  darray[1 => "one", 2 => "two", 2 => "two"],  // explicit numeric keys, string values
+       darray["one" => 1, "two" => 2, "1" => 1 ],  // string keys & numeric values
+       darray[ 1 => 10, 2 => 20, 4 => 40, 5 => 10],  // explicit numeric keys and numeric values
+       darray[ "one" => "ten", "two" => "twenty", "10" => "ten"],  // string key/value
+       darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ array(NULL => "NULL", null => "null", "NULL" => NULL, "null" => null),
-       array(true => "true", false => "false", "false" => false, "true" => true),
-       array("" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''),
-       array(1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true),
-/*18*/ array('' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6),
-);
+/*14*/ darray['' => "NULL", '' => "null", "NULL" => NULL, "null" => null],
+       darray[1 => "true", 0 => "false", "false" => false, "true" => true],
+       darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
+       darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
+/*18*/ darray['' => 1, "" => 2, '' => 3, '' => 4, 0 => 5, 1 => 6],
+];
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
 $iterator = 1;
@@ -74,6 +74,6 @@ foreach($inputs as $input) {
   var_dump( array_unique($input, SORT_STRING) );
   $iterator++;
 }
-  
+
 echo "Done";
-?>
+}

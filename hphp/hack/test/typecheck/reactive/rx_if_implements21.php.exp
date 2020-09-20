@@ -1,0 +1,6 @@
+File "rx_if_implements21.php", line 13, characters 19-31:
+The method `condshallowrx` has the wrong type (Typing[4341])
+File "rx_if_implements21.php", line 7, characters 28-40:
+This function is conditionally shallow reactive (condition type: \Rx1).
+File "rx_if_implements21.php", line 13, characters 19-31:
+This function is local reactive.

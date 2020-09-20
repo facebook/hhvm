@@ -1,0 +1,2 @@
+--ffile=test/slow/eval_order/1532.inc
+--ffile=hphp/test/slow/eval_order/1532.inc

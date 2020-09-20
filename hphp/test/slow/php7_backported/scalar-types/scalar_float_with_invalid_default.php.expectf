@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Default value for parameter arg with type Boolean needs to have the same type as the type hint float in %s/test/slow/php7_backported/scalar-types/scalar_float_with_invalid_default.php on line 4

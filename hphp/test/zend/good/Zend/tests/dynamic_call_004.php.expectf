@@ -1,4 +1,6 @@
 
-Notice: %s
+Notice: Undefined variable: a in %s/dynamic_call_004.php on line 3
 
-Fatal error: %s
+Notice: Undefined variable: b in %s/dynamic_call_004.php on line 3
+
+Fatal error: Cls: Expected string or object in %s/dynamic_call_004.php on line 3

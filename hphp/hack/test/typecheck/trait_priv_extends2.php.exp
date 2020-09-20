@@ -1,11 +1,4 @@
-File "trait_priv_extends2.php", line 8, characters 7-7:
-Class C does not correctly implement all required methods  (Typing[4110])
-File "trait_priv_extends2.php", line 9, characters 7-7:
-Some methods are incompatible with those declared in type T
-Read the following to see why:
 File "trait_priv_extends2.php", line 15, characters 20-20:
-Member f has the wrong type
-File "trait_priv_extends2.php", line 5, characters 34-36:
-This is an int
-File "trait_priv_extends2.php", line 15, characters 25-30:
-It is incompatible with a string
+This member visibility is: `private` (Typing[4113])
+File "trait_priv_extends2.php", line 5, characters 28-28:
+`public` was expected

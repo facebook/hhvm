@@ -1,32 +1,35 @@
-<?php
+<?hh
+
 class Foo {
-    public function __construct(array $data) {
-		var_dump(array_map(array($this, 'callback'), $data));
+    public function __construct(varray $data) {
+        var_dump(array_map(varray[$this, 'callback'], $data));
     }
-    
-    private function callback($value) {
+
+    public function callback($value) {
         if (!is_array($value)) {
             return stripslashes($value);
         }
-	return array_map(array($this, 'callback'), $value);
+    return array_map(varray[$this, 'callback'], $value);
     }
 }
 
 class Bar extends Foo {
 }
 
-new Bar(array());
-
 class Foo2 {
-    public function __construct(array $data) {
-		var_dump(array_map(array($this, 'callBack'), $data));
+    public function __construct(varray $data) {
+        var_dump(array_map(varray[$this, 'callBack'], $data));
     }
-    
-    private function callBack($value) {
+
+    public function callBack($value) {
     }
 }
 
 class Bar2 extends Foo2 {
 }
 
-new Bar2(array());
+<<__EntryPoint>> function main(): void {
+new Bar(varray[]);
+
+new Bar2(varray[]);
+}

@@ -1,0 +1,44 @@
+File "index_array_bad.php", line 8, characters 3-18:
+Some type constraint(s) here are violated (Typing[4110])
+File "hackarray.hhi", line 11, characters 28-29:
+'Tk' is a constrained type parameter
+File "hackarray.hhi", line 11, characters 34-41:
+This is an array key (int | string)
+File "index_array_bad.php", line 8, characters 8-12:
+It is incompatible with a mixed value
+File "index_array_bad.php", line 12, characters 8-14:
+Invalid index type for this dict (Typing[4110])
+File "index_array_bad.php", line 6, characters 8-10:
+This is an int
+File "index_array_bad.php", line 12, characters 11-13:
+It is incompatible with a string
+File "index_array_bad.php", line 13, characters 8-15:
+Invalid index type for this array (Typing[4110])
+File "index_array_bad.php", line 7, characters 10-12:
+This is an int
+File "index_array_bad.php", line 13, characters 12-14:
+It is incompatible with a string
+File "index_array_bad.php", line 16, characters 9-16:
+Invalid index type for this KeyedContainer (Typing[4110])
+File "index_array_bad.php", line 9, characters 18-20:
+This is an int
+File "index_array_bad.php", line 16, characters 13-15:
+It is incompatible with a string
+File "index_array_bad.php", line 17, characters 9-16:
+Invalid index type for this ConstMap (Typing[4110])
+File "index_array_bad.php", line 10, characters 12-14:
+This is an int
+File "index_array_bad.php", line 17, characters 13-15:
+It is incompatible with a string
+File "index_array_bad.php", line 25, characters 24-31:
+Invalid index type for this KeyedContainer (Typing[4110])
+File "index_array_bad.php", line 9, characters 18-20:
+This is an int
+File "index_array_bad.php", line 25, characters 28-30:
+It is incompatible with a string
+File "index_array_bad.php", line 15, characters 9-18:
+This value is not a valid key type for this container (Typing[4298])
+File "index_array_bad.php", line 8, characters 3-18:
+This container is an object of type dict<mixed, bool>
+File "index_array_bad.php", line 15, characters 13-17:
+A bool cannot be used as a key for an object of type dict<mixed, bool>

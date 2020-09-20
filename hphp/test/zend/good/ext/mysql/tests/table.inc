@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 require_once 'connect.inc';
 
 // connect + select_db
@@ -21,4 +21,3 @@ if (!mysql_query('CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGI
 if (!mysql_query("INSERT INTO test(id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')", $link)) {
 	printf("[%d] %s\n",  mysql_errno($link), mysql_error($link));
 }
-?>

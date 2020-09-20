@@ -1,0 +1,6 @@
+File "do_continue.php", line 13, characters 20-21:
+Invalid argument (Typing[4110])
+File "do_continue.php", line 4, characters 23-28:
+Expected `string`
+File "do_continue.php", line 15, characters 12-14:
+But got `float`

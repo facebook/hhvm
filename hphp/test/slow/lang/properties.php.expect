@@ -3,7 +3,7 @@ Test begin
 C::C
 3
 0
-object(C)#1 (7) {
+object(C) (7) {
   ["np":"C":private]=>
   string(4) "C::C"
   ["nq":protected]=>
@@ -20,20 +20,16 @@ object(C)#1 (7) {
   int(0)
 }
 Properties:
-  "\0C\0np" => C::C
-  "\0*\0nq" => C::C
   "nr" => C::C
-  "\0C\0p" => 1
-  "\0*\0q" => 2
   "r" => 3
   "s" => 0
-object(C)#1 (7) {
+object(C) (7) {
   ["np":"C":private]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["nq":protected]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["nr"]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["p":"C":private]=>
   int(3)
   ["q":protected]=>
@@ -44,24 +40,20 @@ object(C)#1 (7) {
   int(2)
 }
 Properties:
-  "\0C\0np" => C::E
-  "\0*\0nq" => C::E
-  "nr" => C::E
-  "\0C\0p" => 3
-  "\0*\0q" => 4
+  "nr" => C::Ccc
   "r" => 5
   "s" => 2
 === D ===
 D::D
 33
 0
-object(D)#2 (9) {
+object(D) (9) {
   ["np":"D":private]=>
-  string(4) "D::F"
+  string(6) "D::Ddd"
   ["nq":protected]=>
-  string(4) "D::H"
+  string(8) "D::Dcdcd"
   ["nr"]=>
-  string(4) "D::H"
+  string(8) "D::Dcdcd"
   ["p":"D":private]=>
   int(13)
   ["q":protected]=>
@@ -69,33 +61,27 @@ object(D)#2 (9) {
   ["r"]=>
   int(37)
   ["np":"C":private]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
 }
 Properties:
-  "\0D\0np" => D::F
-  "\0*\0nq" => D::H
-  "nr" => D::H
-  "\0D\0p" => 13
-  "\0*\0q" => 26
+  "nr" => D::Dcdcd
   "r" => 37
-  "\0C\0np" => C::E
-  "\0C\0p" => 3
   "s" => 2
 === E ===
 E::E
 33
 0
-object(E)#3 (9) {
+object(E) (9) {
   ["np":protected]=>
-  string(4) "E::G"
+  string(6) "E::Eee"
   ["nq":protected]=>
-  string(4) "E::I"
+  string(8) "E::Ecece"
   ["nr"]=>
-  string(4) "E::I"
+  string(8) "E::Ecece"
   ["p":protected]=>
   int(13)
   ["q":protected]=>
@@ -103,21 +89,15 @@ object(E)#3 (9) {
   ["r"]=>
   int(37)
   ["np":"C":private]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
 }
 Properties:
-  "\0*\0np" => E::G
-  "\0*\0nq" => E::I
-  "nr" => E::I
-  "\0*\0p" => 13
-  "\0*\0q" => 26
+  "nr" => E::Ecece
   "r" => 37
-  "\0C\0np" => C::E
-  "\0C\0p" => 3
   "s" => 2
 === F ===
 F::F
@@ -127,13 +107,13 @@ F::F
 22
 33
 0
-object(F)#4 (9) {
+object(F) (9) {
   ["np"]=>
-  string(4) "F::H"
+  string(6) "F::Fff"
   ["nq"]=>
-  string(4) "F::J"
+  string(8) "F::Fcfcf"
   ["nr"]=>
-  string(4) "F::J"
+  string(8) "F::Fcfcf"
   ["p"]=>
   int(13)
   ["q"]=>
@@ -141,21 +121,19 @@ object(F)#4 (9) {
   ["r"]=>
   int(37)
   ["np":"C":private]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
 }
 Properties:
-  "np" => F::H
-  "nq" => F::J
-  "nr" => F::J
+  "np" => F::Fff
+  "nq" => F::Fcfcf
+  "nr" => F::Fcfcf
   "p" => 13
   "q" => 26
   "r" => 37
-  "\0C\0np" => C::E
-  "\0C\0p" => 3
   "s" => 2
 === G ===
 G::G
@@ -165,13 +143,13 @@ G::G
 22
 33
 0
-object(G)#5 (11) {
+object(G) (11) {
   ["np"]=>
-  string(4) "G::I"
+  string(6) "G::Ggg"
   ["nq"]=>
-  string(4) "G::M"
+  string(10) "G::Gcdgcdg"
   ["nr"]=>
-  string(4) "G::M"
+  string(10) "G::Gcdgcdg"
   ["p"]=>
   int(113)
   ["q"]=>
@@ -179,27 +157,23 @@ object(G)#5 (11) {
   ["r"]=>
   int(39)
   ["np":"D":private]=>
-  string(4) "D::F"
+  string(6) "D::Ddd"
   ["p":"D":private]=>
   int(13)
   ["np":"C":private]=>
-  string(4) "C::E"
+  string(6) "C::Ccc"
   ["p":"C":private]=>
   int(3)
   ["s"]=>
   int(2)
 }
 Properties:
-  "np" => G::I
-  "nq" => G::M
-  "nr" => G::M
+  "np" => G::Ggg
+  "nq" => G::Gcdgcdg
+  "nr" => G::Gcdgcdg
   "p" => 113
   "q" => 28
   "r" => 39
-  "\0D\0np" => D::F
-  "\0D\0p" => 13
-  "\0C\0np" => C::E
-  "\0C\0p" => 3
   "s" => 2
 === H ===
 H::H
@@ -208,13 +182,13 @@ H::H
 111
 222
 333
-object(D)#7 (9) {
+object(D) (9) {
   ["np":"D":private]=>
-  string(4) "D::E"
+  string(5) "D::Dd"
   ["nq":protected]=>
-  string(4) "D::F"
+  string(6) "D::Dcd"
   ["nr"]=>
-  string(4) "D::F"
+  string(6) "D::Dcd"
   ["p":"D":private]=>
   int(12)
   ["q":protected]=>
@@ -222,29 +196,23 @@ object(D)#7 (9) {
   ["r"]=>
   int(36)
   ["np":"C":private]=>
-  string(4) "C::D"
+  string(5) "C::Cc"
   ["p":"C":private]=>
   int(2)
   ["s"]=>
   int(1)
 }
 Properties:
-  "\0D\0np" => D::E
-  "\0*\0nq" => D::F
-  "nr" => D::F
-  "\0D\0p" => 12
-  "\0*\0q" => 24
+  "nr" => D::Dcd
   "r" => 36
-  "\0C\0np" => C::D
-  "\0C\0p" => 2
   "s" => 1
-object(H)#6 (6) {
+object(H) (6) {
   ["np"]=>
-  string(4) "H::I"
+  string(5) "H::Hh"
   ["nq"]=>
-  string(4) "H::I"
+  string(5) "H::Hh"
   ["nr"]=>
-  string(4) "H::I"
+  string(5) "H::Hh"
   ["p"]=>
   int(112)
   ["q"]=>
@@ -253,35 +221,33 @@ object(H)#6 (6) {
   int(334)
 }
 Properties:
-  "np" => H::I
-  "nq" => H::I
-  "nr" => H::I
+  "np" => H::Hh
+  "nq" => H::Hh
+  "nr" => H::Hh
   "p" => 112
   "q" => 223
   "r" => 334
 === J ===
-object(J)#7 (1) {
+object(J) (1) {
   ["p"]=>
   NULL
 }
 Properties:
   "p" => 
-=== Var properties ===
-it worked
 === Foreach ===
-  "np" => H::I
-  "nq" => H::I
-  "nr" => H::I
+  "np" => H::Hh
+  "nq" => H::Hh
+  "nr" => H::Hh
   "p" => 112
   "q" => 223
   "r" => 334
-object(H)#6 (6) {
+object(H) (6) {
   ["np"]=>
-  string(4) "H::I"
+  string(5) "H::Hh"
   ["nq"]=>
-  string(4) "H::I"
+  string(5) "H::Hh"
   ["nr"]=>
-  string(4) "H::O"
+  string(11) "H::Hhxxxxxx"
   ["p"]=>
   int(112)
   ["q"]=>
@@ -290,42 +256,10 @@ object(H)#6 (6) {
   int(340)
 }
 Properties:
-  "np" => H::I
-  "nq" => H::I
-  "nr" => H::O
+  "np" => H::Hh
+  "nq" => H::Hh
+  "nr" => H::Hhxxxxxx
   "p" => 112
   "q" => 223
   "r" => 340
-=== Foreach by reference ===
-  "np" => H::I
-  "nq" => H::I
-  "nr" => H::O
-  "p" => 112
-  "q" => q
-  "r" => 340
-object(H)#6 (6) {
-  ["np"]=>
-  string(4) "H::I"
-  ["nq"]=>
-  string(4) "H::I"
-  ["nr"]=>
-  string(2) "nr"
-  ["p"]=>
-  int(112)
-  ["q"]=>
-  string(1) "q"
-  ["r"]=>
-  &string(1) "r"
-}
-Properties:
-  "np" => H::I
-  "nq" => H::I
-  "nr" => nr
-  "p" => 112
-  "q" => q
-  "r" => r
-object(dumper)#9 (1) {
-  ["prop"]=>
-  int(10)
-}
 Test end

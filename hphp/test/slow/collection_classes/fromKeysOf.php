@@ -6,8 +6,7 @@ function show_elems($name, $fs) {
   foreach ($fs as $e) {
     var_dump($e);
   }
-};
-
+}
 function set_from_keys($containers) {
   echo "Set::fromKeysOf...\n";
   foreach ($containers as $name => $c) {
@@ -25,10 +24,10 @@ function vector_from_keys($containers) {
 }
 
 function main() {
-  $containers = array(
-    'empty array'  => [],
-    'packed array' => ['a', 'b', 'c'],
-    'mixed array'  => ['a' => 1, 'b' => 2],
+  $containers = darray[
+    'empty array'  => varray[],
+    'packed array' => varray['a', 'b', 'c'],
+    'mixed array'  => darray['a' => 1, 'b' => 2],
 
     'empty Vector'    => Vector {},
     'empty ImmVector' => ImmVector {},
@@ -43,8 +42,13 @@ function main() {
     'ImmMap'    => ImmMap {'a' => 1, 'b' => 2},
     'Set'       => Set {4, 5, 6},
     'ImmSet'    => ImmSet {4, 5, 6},
-  );
+  ];
   set_from_keys($containers);
   vector_from_keys($containers);
 }
+
+<<__EntryPoint>>
+function main_from_keys_of() {
+;
 main();
+}

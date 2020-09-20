@@ -1,0 +1,2 @@
+File "rx_if_implements11.php", line 7, characters 3-49:
+Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`, `__CippGlobal`. (Parsing[1002])

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // based on example at http://www.php.net/manual/en/normalizer.normalize.php
 
@@ -21,4 +21,8 @@ function main() {
   var_dump(intl_get_error_message());
 }
 
+
+<<__EntryPoint>>
+function main_normalizer_normalize() {
 main();
+}

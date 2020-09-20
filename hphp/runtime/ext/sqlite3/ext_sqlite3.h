@@ -15,16 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SQLITE3_H_
-#define incl_HPHP_EXT_SQLITE3_H_
-
-#include <memory>
-#include <vector>
-
-#include <sqlite3.h>
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-vector.h"
+#include <sqlite3.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,10 +119,6 @@ int64_t HHVM_METHOD(SQLite3Stmt, paramcount);
 bool HHVM_METHOD(SQLite3Stmt, close);
 bool HHVM_METHOD(SQLite3Stmt, reset);
 bool HHVM_METHOD(SQLite3Stmt, clear);
-bool HHVM_METHOD(SQLite3Stmt, bindparam,
-                 const Variant& name,
-                 VRefParam parameter,
-                 int64_t type /* = SQLITE3_TEXT */);
 bool HHVM_METHOD(SQLite3Stmt, bindvalue,
                  const Variant& name,
                  const Variant& parameter,
@@ -161,4 +152,3 @@ bool HHVM_METHOD(SQLite3Result, finalize);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SQLITE3_H_

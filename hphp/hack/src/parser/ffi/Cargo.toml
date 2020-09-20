@@ -1,0 +1,16 @@
+[package]
+name = "hack_parser_ffi"
+version = "3.49.0"
+edition = "2018"
+
+[dependencies]
+minimal_parser_ffi = { path = "../cargo/minimal_parser_ffi", package = "minimal_parser_ffi" }
+decl_mode_parser_ffi = { path = "../cargo/decl_mode_parser_ffi", package = "decl_mode_parser_ffi" }
+verify_parser_ffi = { path = "../cargo/verify_parser_ffi", package = "verify_parser_ffi" }
+positioned_parser_ffi = { path = "../cargo/positioned_parser_ffi", package = "positioned_parser_ffi" }
+aast_parser_ffi = { path = "../cargo/aast_parser_ffi", package = "aast_parser_ffi" }
+
+[lib]
+name = "rust_parser_ffi"
+path = "lib.rs"
+crate-type = ["lib", "staticlib"]

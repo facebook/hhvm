@@ -1,48 +1,46 @@
 *** Testing array_map() : different arrays for 'arr1' argument ***
 -- Iteration 1 --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 -- Iteration 2 --
-array(2) {
+darray(2) {
   [0]=>
   float(1.1)
   [1]=>
   float(2.2)
 }
 -- Iteration 3 --
-array(2) {
+darray(2) {
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(2)
   }
   [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
 }
 -- Iteration 4 --
-array(2) {
+darray(2) {
   [0]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- Iteration 5 --
-array(0) {
+darray(0) {
 }
 -- Iteration 6 --
-array(1) {
+darray(1) {
   [0]=>
   NULL
 }
 -- Iteration 7 --
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -57,7 +55,7 @@ array(6) {
   string(5) "ccccc"
 }
 -- Iteration 8 --
-array(3) {
+darray(3) {
   [1]=>
   string(3) "one"
   [2]=>
@@ -66,7 +64,7 @@ array(3) {
   string(5) "three"
 }
 -- Iteration 9 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -75,7 +73,7 @@ array(3) {
   int(3)
 }
 -- Iteration 10 --
-array(4) {
+darray(4) {
   [1]=>
   int(10)
   [2]=>
@@ -86,7 +84,7 @@ array(4) {
   int(30)
 }
 -- Iteration 11 --
-array(3) {
+darray(3) {
   ["one"]=>
   string(3) "ten"
   ["two"]=>
@@ -95,7 +93,7 @@ array(3) {
   string(6) "thirty"
 }
 -- Iteration 12 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   [2]=>
@@ -104,7 +102,7 @@ array(3) {
   string(4) "four"
 }
 -- Iteration 13 --
-array(3) {
+darray(3) {
   [""]=>
   string(4) "null"
   ["NULL"]=>
@@ -113,7 +111,7 @@ array(3) {
   NULL
 }
 -- Iteration 14 --
-array(4) {
+darray(4) {
   [1]=>
   string(4) "true"
   [0]=>
@@ -124,7 +122,7 @@ array(4) {
   bool(true)
 }
 -- Iteration 15 --
-array(3) {
+darray(3) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -133,7 +131,7 @@ array(3) {
   string(0) ""
 }
 -- Iteration 16 --
-array(6) {
+darray(6) {
   [1]=>
   string(0) ""
   [2]=>
@@ -148,7 +146,7 @@ array(6) {
   bool(true)
 }
 -- Iteration 17 --
-array(3) {
+darray(3) {
   [""]=>
   int(4)
   [0]=>
@@ -157,7 +155,7 @@ array(3) {
   int(6)
 }
 -- Iteration 18 --
-array(3) {
+darray(3) {
   ["One"]=>
   int(10)
   ["two"]=>

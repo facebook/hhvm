@@ -13,10 +13,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_INLINING_H_
-#define incl_HPHP_JIT_IRGEN_INLINING_H_
+#pragma once
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP { namespace jit {
+
+struct SSATmp;
+
+namespace irgen {
 
 struct IRGS;
 
@@ -34,8 +37,13 @@ void implInlineReturn(IRGS& env);
  */
 void retFromInlined(IRGS&);
 
+/*
+ * Exit the (now suspended) inline frame. The frame must no longer be live, and
+ * its contents must now reside in waithandle.
+ */
+void suspendFromInlined(IRGS&, SSATmp* waithandle);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}
 
-#endif

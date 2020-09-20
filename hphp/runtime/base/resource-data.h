@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RESOURCE_DATA_H_
-#define incl_HPHP_RESOURCE_DATA_H_
+#pragma once
 
 #include <iostream>
 #include "hphp/runtime/base/countable.h"
@@ -68,30 +67,30 @@ struct ResourceHdr final : Countable, // aux stores heap size
   static void resetMaxId();
 
   ALWAYS_INLINE void decRefAndRelease() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     if (decReleaseCheck()) release();
   }
   bool kindIsValid() const { return m_kind == HeaderKind::Resource; }
   void release() noexcept;
 
   void init(uint16_t size, type_scan::Index tyindex) {
-    assert(type_scan::isKnownType(tyindex));
+    assertx(type_scan::isKnownType(tyindex));
     initHeader_16(HeaderKind::Resource, OneReference, size);
     m_type_index = tyindex;
   }
 
   ResourceData* data() {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     return reinterpret_cast<ResourceData*>(this + 1);
   }
   const ResourceData* data() const {
-    assert(kindIsValid());
+    assertx(kindIsValid());
     return reinterpret_cast<const ResourceData*>(this + 1);
   }
 
   size_t heapSize() const {
-    assert(kindIsValid());
-    assert(m_aux16 != 0);
+    assertx(kindIsValid());
+    assertx(m_aux16 != 0);
     return m_aux16;
   }
 
@@ -120,12 +119,12 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
 
   const ResourceHdr* hdr() const {
     auto h = reinterpret_cast<const ResourceHdr*>(this) - 1;
-    assert(h->kindIsValid());
+    assertx(h->kindIsValid());
     return h;
   }
   ResourceHdr* hdr() {
     auto h = reinterpret_cast<ResourceHdr*>(this) - 1;
-    assert(h->kindIsValid());
+    assertx(h->kindIsValid());
     return h;
   }
 
@@ -147,7 +146,12 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
   virtual bool isInvalid() const { return false; }
 
   template <typename T>
-  bool instanceof() const { return dynamic_cast<const T*>(this) != nullptr; }
+  typename std::enable_if<!std::is_same<ResourceData,T>::value, bool>::type
+  instanceof() const { return dynamic_cast<const T*>(this) != nullptr; }
+
+  template <typename T>
+  typename std::enable_if<std::is_same<ResourceData,T>::value, bool>::type
+  instanceof() const { return true; }
 
   bool o_toBoolean() const { return true; }
   int64_t o_toInt64() const { return hdr()->getId(); }
@@ -162,7 +166,7 @@ struct ResourceData : type_scan::MarkCollectable<ResourceData> {
 };
 
 inline void ResourceHdr::release() noexcept {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   delete data();
   AARCH64_WALKABLE_FRAME();
 }
@@ -271,7 +275,7 @@ ALWAYS_INLINE void decRefRes(ResourceHdr* res) {
     static_assert(std::is_base_of<ResourceData,T>::value, "");  \
     constexpr auto size = sizeof(ResourceHdr) + sizeof(T);      \
     auto h = static_cast<ResourceData*>(p)->hdr();              \
-    assert(h->heapSize() == size);                              \
+    assertx(h->heapSize() == size);                              \
     tl_heap->objFree(h, size);                                  \
   }
 
@@ -302,7 +306,7 @@ typename std::enable_if<
   b->init(size, type_scan::getIndexForMalloc<T>());
   try {
     auto r = new (b->data()) T(std::forward<Args>(args)...);
-    assert(r->hasExactlyOneRef());
+    assertx(r->hasExactlyOneRef());
     return req::ptr<T>::attach(r);
   } catch (...) {
     tl_heap->objFree(b, size);
@@ -314,4 +318,3 @@ typename std::enable_if<
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RESOURCE_DATA_H_

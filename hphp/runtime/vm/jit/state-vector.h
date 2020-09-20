@@ -14,10 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STATE_VECTOR_H_
-#define incl_HPHP_JIT_STATE_VECTOR_H_
+#pragma once
 
 #include <type_traits>
+#include <utility>
+
+#include <folly/Optional.h>
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -50,8 +52,20 @@ struct StateVector {
   StateVector(const IRUnit& unit, Info init)
     : m_unit(&unit)
     , m_init(std::move(init))
-    , m_info(unit.numIds(nullKey), m_init)
+    , m_info(unit.numIds(nullKey), *m_init)
   {}
+
+  template<typename F>
+  StateVector(const IRUnit& unit, F init,
+              decltype(std::declval<F>()(0))* = nullptr)
+    : m_unit(&unit)
+  {
+    auto sz = unit.numIds(nullKey);
+    m_info.reserve(sz);
+    for (auto i = sz & 0; i < sz; ++i) {
+      m_info.emplace_back(init(i));
+    }
+  }
 
   StateVector(const StateVector&) = default;
   StateVector(StateVector&&) = default;
@@ -65,7 +79,9 @@ struct StateVector {
 
   const_reference operator[](uint32_t id) const {
     assertx(id < m_unit->numIds(nullKey));
-    return id < m_info.size() ? m_info[id] : m_init;
+    if (id < m_info.size()) return m_info[id];
+    assertx(m_init);
+    return *m_init;
   }
 
   reference operator[](const Key& k) { return (*this)[k.id()]; }
@@ -85,13 +101,14 @@ struct StateVector {
 
 private:
   void grow() {
-    m_info.resize(m_unit->numIds(nullKey), m_init);
+    assert(m_init);
+    m_info.resize(m_unit->numIds(nullKey), *m_init);
   }
 
 private:
   static constexpr Key* nullKey { nullptr };
   const IRUnit* m_unit;
-  Info m_init;
+  folly::Optional<Info> m_init;
   InfoVector m_info;
 };
 
@@ -99,4 +116,3 @@ private:
 
 }}
 
-#endif

@@ -1,46 +1,58 @@
 *** Testing money_format() function: with unexpected inputs for 'format' argument ***
 -- Iteration 1 --
-string
+
+Warning: money_format() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 2 --
-string
+
+Warning: money_format() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 3 --
-string
+
+Warning: money_format() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 4 --
-string
+
+Warning: money_format() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 5 --
-string
+
+Warning: money_format() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 6 --
-string
+
+Warning: money_format() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 7 --
-string
+
+Warning: money_format() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 8 --
-string
+
+Warning: money_format() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 9 --
-string
+
+Warning: money_format() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 13 --
-string
+
+Warning: money_format() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 14 --
-string
+
+Warning: money_format() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 15 --
-string
+
+Warning: money_format() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 16 --
-string
+
+Warning: money_format() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 17 --
-string
+
+Warning: money_format() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 18 --
-string
+
+Warning: money_format() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 19 --
 string
 -- Iteration 20 --
@@ -51,16 +63,17 @@ string
 string
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 24 --
-string
+
+Warning: money_format() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 25 --
 
-Warning: %s
-NULL
+Warning: money_format() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 26 --
-string
+
+Warning: money_format() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 -- Iteration 27 --
-string
+
+Warning: money_format() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/money_format_variation1.php on line 88
 ===Done===

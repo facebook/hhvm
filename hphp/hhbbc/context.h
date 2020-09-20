@@ -13,20 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CONTEXT_H_
-#define incl_HHBBC_CONTEXT_H_
+#pragma once
 
 #include <folly/Hash.h>
 #include <folly/Optional.h>
 
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/wide-func.h"
+
+#include "hphp/util/compact-vector.h"
 
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
+struct CollectedInfo;
 struct ContextHash;
+struct FuncAnalysis;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -36,12 +41,13 @@ struct ContextHash;
  * need a "context", to allow recording dependencies.
  */
 struct Context {
-  borrowed_ptr<const php::Unit> unit;
-  borrowed_ptr<php::Func> func;
-  borrowed_ptr<const php::Class> cls;
+  const php::Unit* unit;
+  const php::Func* func;
+  const php::Class* cls;
 
   using Hash = ContextHash;
 };
+
 struct ContextHash {
   size_t operator()(const Context& c) const {
     return pointer_hash<void>{}(c.func ? (void*)c.func :
@@ -59,23 +65,52 @@ inline bool operator<(Context a, Context b) {
 }
 
 /*
- * Context for a call to a function.  This means the types and number
- * of arguments, and where it is being called from.
+ * Context for a call to a function.  This is the function itself,
+ * plus the types and number of arguments, and the type of
+ * $this/get_called_context().
  */
 struct CallContext {
-  Context caller;
-  std::vector<Type> args;
+  const php::Func* callee;
+  CompactVector<Type> args;
   Type context;
 };
 
 inline bool operator==(const CallContext& a, const CallContext& b) {
-  return a.caller == b.caller &&
+  return a.callee == b.callee &&
          equivalently_refined(a.args, b.args) &&
          equivalently_refined(a.context, b.context);
 }
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Context used to analyze a function. Anyone constructing this context
+ * must ensure that the provided WideFunc lives longer than the context.
+ */
+struct AnalysisContext {
+  const php::Unit* unit;
+  const php::WideFunc& func;
+  const php::Class* cls;
+
+  operator Context() const { return { unit, func, cls }; }
+};
+
+/*
+ * Context used for per-block optimizations. As with AnalysisContext,
+ * callers must ensure that all the references here outlive this context.
+ * The WideFunc in this struct will always match the func in ainfo.ctx.
+ */
+struct VisitContext {
+  const Index& index;
+  const FuncAnalysis& ainfo;
+  CollectedInfo& collect;
+  php::WideFunc& func;
+
+  VisitContext(const Index& index, const FuncAnalysis& ainfo,
+               CollectedInfo& collect, php::WideFunc& func);
+};
+
+//////////////////////////////////////////////////////////////////////
+
 }}
 
-#endif

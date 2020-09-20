@@ -48,7 +48,7 @@ dict(8) {
   [4]=>
   NULL
   [5]=>
-  array(0) {
+  varray(0) {
   }
   [6]=>
   vec(3) {
@@ -69,7 +69,7 @@ dict(8) {
 }
 dict(1) {
   ["abc"]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
 }
 dict(2) {
@@ -112,10 +112,10 @@ dict(2) {
 }
 dict(2) {
   ["abc"]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   ["def"]=>
-  object(stdClass)#2 (0) {
+  object(stdClass) (0) {
   }
 }
 dict(2) {
@@ -138,15 +138,6 @@ dict(2) {
   ["def"]=>
   float(4.56)
 }
-1 Noisy::__destruct()
-dict(1) {
-  ["abc"]=>
-  object(Noisy)#2 (1) {
-    ["id"]=>
-    int(2)
-  }
-}
-2 Noisy::__destruct()
 Exception: Invalid dict key: expected a key of type int or string, null given
 Exception: Invalid dict key: expected a key of type int or string, bool given
 Exception: Invalid dict key: expected a key of type int or string, double given
@@ -159,8 +150,3 @@ Exception: Invalid dict key: expected a key of type int or string, ToString give
 Exception: Invalid dict key: expected a key of type int or string, HH\Vector given
 Exception: Invalid dict key: expected a key of type int or string, bool given
 Exception: Invalid dict key: expected a key of type int or string, vec given
-4 Noisy::__destruct()
-3 Noisy::__destruct()
-Exception: Invalid dict key: expected a key of type int or string, array given
-5 Noisy::__destruct()
-Exception: Invalid dict key: expected a key of type int or string, bool given

@@ -1,7 +1,8 @@
-<?php
+<?hh
 namespace foo {
     namespace oops {
     }
 }
-?>
-===DONE===
+<<__EntryPoint>> function main(): void {
+echo "===DONE===\n";
+}

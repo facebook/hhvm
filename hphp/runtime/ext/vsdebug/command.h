@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_COMMAND_H_
-#define incl_HPHP_VSDEBUG_COMMAND_H_
+#pragma once
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -97,7 +97,7 @@ struct VSCommand {
     bool defaultValue
   );
 
-  static const std::string& tryGetString(
+  static const std::string tryGetString(
     const folly::dynamic& message,
     const char* key,
     const std::string& defaultValue
@@ -107,6 +107,11 @@ struct VSCommand {
     const folly::dynamic& message,
     const char* key,
     const folly::dynamic& defaultValue
+  );
+
+  static const folly::dynamic& tryGetArray(
+    const folly::dynamic& message,
+    const char* key
   );
 
   static int64_t tryGetInt(
@@ -141,10 +146,9 @@ protected:
 
 // Common implementation for all the subcommands of VSCommand so we don't have
 // to repeat it in every subclass.
-#define VS_COMMAND_COMMON_IMPL(ClassName, Target, RequiresBreak)  \
+#define VS_COMMAND_COMMON_NOTARGET(ClassName, Target, RequiresBreak)  \
   virtual ~ClassName();                                           \
   const char* commandName() override { return #ClassName; }       \
-  CommandTarget commandTarget() override { return Target; }       \
   bool requiresBreak() override { return RequiresBreak; }         \
   ClassName(Debugger* debugger, folly::dynamic message);          \
 protected:                                                        \
@@ -153,6 +157,13 @@ protected:                                                        \
     folly::dynamic* responseMsg                                   \
   ) override;                                                     \
 
+#define VS_COMMAND_COMMON_TARGET(ClassName, Target, RequiresBreak)  \
+VS_COMMAND_COMMON_NOTARGET(ClassName, Target, RequiresBreak)      \
+public:                                                           \
+  CommandTarget commandTarget() override { return Target; }       \
+
+#define VS_COMMAND_COMMON_IMPL(ClassName, Target, RequiresBreak)  \
+  VS_COMMAND_COMMON_TARGET(ClassName, Target, RequiresBreak)
 
 ////// Represents an InitializeRequest command from the debugger client. //////
 struct InitializeCommand : public VSCommand {
@@ -174,9 +185,24 @@ public:
   static ContinueCommand* createInstance(Debugger* debugger);
 };
 
+//////  Runs a request thread's PSPs.                                //////
+struct RunPspCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(RunPspCommand, CommandTarget::WorkItem, false);
+
+public:
+  static RunPspCommand* createInstance(Debugger* debugger);
+};
+
 //////  Handles SetBreakpoints commands from the debugger client.     //////
 struct SetBreakpointsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(SetBreakpointsCommand, CommandTarget::None, false);
+private:
+
+  void setFnBreakpoints(
+    DebuggerSession* session,
+    const folly::dynamic& args,
+    folly::dynamic& responseBps
+  );
 };
 
 struct ResolveBreakpointsCommand : public VSCommand {
@@ -232,7 +258,8 @@ private:
   folly::dynamic getScopeDescription(
     DebuggerSession* session,
     const char* displayName,
-    ScopeType type
+    ScopeType type,
+    bool expensive
   );
 };
 
@@ -248,6 +275,7 @@ public:
   // specified scope.
   static int countScopeVariables(
     DebuggerSession* session,
+    Debugger* debugger,
     const ScopeObject* scope,
     request_id_t requestId
   );
@@ -264,6 +292,7 @@ public:
   // Serializes a variable to be sent over the VS Code debugger protocol.
   static folly::dynamic serializeVariable(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const std::string& name,
     const Variant& variable,
@@ -276,7 +305,7 @@ private:
   // Helper for sorting variable names - converts a variable name to uppercase
   // for case-insensitive sort, and caches the result on the folly::dynamic
   // object to avoid doing a UC conversion on each iteration of the sort loop.
-  static const std::string& getUcVariableName(
+  static const std::string getUcVariableName(
     folly::dynamic& var,
     const char* ucKey
   );
@@ -288,6 +317,7 @@ private:
   // returns a count of variables if vars == nullptr.
   static int addScopeVariables(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
@@ -306,6 +336,7 @@ private:
   // Adds local variables.
   static int addLocals(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
@@ -314,6 +345,7 @@ private:
   // Adds the specified type of constants.
   static int addConstants(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const StaticString& category,
     folly::dynamic* vars
@@ -322,13 +354,14 @@ private:
   // Adds super global variables.
   static int addSuperglobalVariables(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
   );
 
   // Adds children of a complex object.
-  static int addComplexChildren(
+  int addComplexChildren(
     DebuggerSession* session,
     request_id_t requestId,
     int start,
@@ -340,6 +373,7 @@ private:
   // Adds array indicies.
   static int addArrayChildren(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -353,7 +387,6 @@ private:
       const std::string& objectClassName,
       const std::string& propName,
       const std::string& propClassName,
-      const std::string& displayName,
       const char* visibilityDescription,
       folly::dynamic& presentationHint,
       const Variant& propertyVariant
@@ -363,6 +396,7 @@ private:
   // Adds object properties.
   static int addObjectChildren(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -373,6 +407,7 @@ private:
   // Adds constants defined on a class.
   static int addClassConstants(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -384,6 +419,7 @@ private:
   // Adds static properties defined on an object's class.
   static int addClassStaticProps(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -393,7 +429,7 @@ private:
   );
 
   // Adds private properties defined on one of an object's base classes.
-  static void addClassPrivateProps(
+  void addClassPrivateProps(
     DebuggerSession* session,
     request_id_t requestId,
     int start,
@@ -407,6 +443,7 @@ private:
   // chain (including itself) that has class constants or static props defined.
   static int addClassSubScopes(
     DebuggerSession* session,
+    Debugger* debugger,
     ClassPropsType propType,
     request_id_t requestId,
     const Variant& var,
@@ -427,7 +464,38 @@ private:
     folly::dynamic* vars
   );
 
-  static const std::string getVariableValue(const Variant& variable);
+  // Tries to get a cached JSON response for a variables request
+  // from the debugger session. This is used for responses that are
+  // the same for all frames and requests, and are valid for the duration
+  // of the current pause of the target.
+  static int getCachedValue(
+    DebuggerSession* session,
+    const int cacheKey,
+    folly::dynamic* vars
+  );
+
+  struct VariableValue {
+    explicit VariableValue(const std::string &value, bool hasSummaryOverride = false)
+      : m_value{value},
+        m_hasSummaryOverride(hasSummaryOverride)
+    {}
+    const std::string m_value;
+    bool m_hasSummaryOverride;
+  };
+
+  static const VariableValue getVariableValue(
+    DebuggerSession* session,
+    Debugger* debugger,
+    request_id_t requestId,
+    const Variant& variable
+  );
+
+  static const VariableValue getObjectSummary(
+    DebuggerSession* session,
+    Debugger* debugger,
+    request_id_t requestId,
+    const Object &obj
+  );
 
   static constexpr char* VisibilityPrivate = "private";
   static constexpr char* VisibilityProtected = "protected";
@@ -454,7 +522,7 @@ struct SetVariableCommand : public VSCommand {
 
 private:
 
-  static bool setLocalVariable(
+  bool setLocalVariable(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -462,7 +530,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setConstant(
+  bool setConstant(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -470,7 +538,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setArrayVariable(
+  bool setArrayVariable(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -478,7 +546,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setObjectVariable(
+  bool setObjectVariable(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -488,11 +556,11 @@ private:
 
   static bool getBooleanValue(const std::string& str);
 
-  static void setVariableValue(
+  void setVariableValue(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
-    TypedValue* typedVariable,
+    tv_lval typedVariable,
     request_id_t requestId,
     folly::dynamic* result
   );
@@ -506,14 +574,13 @@ struct EvaluateCommand : public VSCommand {
   request_id_t targetThreadId(DebuggerSession* session) override;
 
 public:
-  static void preparseEvalExpression(
-    std::string* expr
-  );
+  static std::string prepareEvalExpression(const std::string& expr);
 
 private:
 
   FrameObject* getFrameObject(DebuggerSession* session);
   unsigned int m_frameId;
+  bool m_returnHhvmSerialization;
   FrameObject* m_frameObj {nullptr};
 };
 
@@ -523,9 +590,34 @@ struct ThreadsCommand : public VSCommand {
   VS_COMMAND_COMMON_IMPL(ThreadsCommand, CommandTarget::None, false);
 };
 
+//////  Handles terminate thread requests from the client           //////
+struct TerminateThreadsCommand : public VSCommand {
+  VS_COMMAND_COMMON_NOTARGET(
+    TerminateThreadsCommand,
+    CommandTarget::None,
+    false
+  );
+  static TerminateThreadsCommand* createInstance(
+    Debugger* debugger,
+    folly::dynamic message,
+    request_id_t requestId
+  );
+
+  CommandTarget commandTarget() override;
+private:
+
+  TerminateThreadsCommand(
+    Debugger* debugger,
+    folly::dynamic message,
+    request_id_t requestId
+  );
+
+  request_id_t m_requestId;
+};
+
 //////  Handles completions requests from the client                //////
 struct CompletionsCommand : public VSCommand {
-  VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, true);
+  VS_COMMAND_COMMON_IMPL(CompletionsCommand, CommandTarget::Request, false);
   request_id_t targetThreadId(DebuggerSession* session) override;
 
 private:
@@ -629,9 +721,13 @@ private:
   FrameObject* m_frameObj {nullptr};
 };
 
+////// Represents an InitializeRequest command from the debugger client. //////
+struct InfoCommand : public VSCommand {
+  VS_COMMAND_COMMON_IMPL(InfoCommand, CommandTarget::Request, false);
+};
+
 #undef VS_COMMAND_COMMON_IMPL
 
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_COMMAND_H_

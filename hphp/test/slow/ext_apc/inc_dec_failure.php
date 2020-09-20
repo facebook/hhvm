@@ -1,14 +1,19 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_inc_dec_failure() {
+$res = null;
 apc_delete('test');
-var_dump(apc_inc('test'));
-var_dump(apc_dec('test'));
+var_dump(apc_inc('test', 1, inout $res));
+var_dump(apc_dec('test', 1, inout $res));
 
 apc_store('x', 'x');
 
-var_dump(apc_inc('x'));
-var_dump(apc_dec('x'));
+var_dump(apc_inc('x', 1, inout $res));
+var_dump(apc_dec('x', 1, inout $res));
 
 apc_store('numeric_str', '1');
 
-var_dump(apc_inc('numeric_str'));
-var_dump(apc_dec('numeric_str'));
+var_dump(apc_inc('numeric_str', 1, inout $res));
+var_dump(apc_dec('numeric_str', 1, inout $res));
+}

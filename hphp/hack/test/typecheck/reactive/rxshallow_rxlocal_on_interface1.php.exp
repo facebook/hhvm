@@ -1,0 +1,6 @@
+File "rxshallow_rxlocal_on_interface1.php", line 18, characters 19-20:
+The method `f1` has the wrong type (Typing[4341])
+File "rxshallow_rxlocal_on_interface1.php", line 10, characters 19-20:
+This function is conditionally reactive (condition type: \Rx).
+File "rxshallow_rxlocal_on_interface1.php", line 18, characters 19-20:
+This function is normal.

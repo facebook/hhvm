@@ -2,7 +2,7 @@
 
 class Foo {
   private $x;
-
+  public function __construct() { $this->x = new stdClass(); }
   public function get() { return $this->x; }
   public function set($y) { $this->x->x = $y; }
 }
@@ -15,4 +15,8 @@ function main() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_minstr_004() {
 main();
+}

@@ -104,8 +104,9 @@ Array
     [F] => FFF
     [blank] => 
     [3] => 3.7
-    [5] => Five
+    [5] => 7
     [6] => 8.6
+    [5] => Five
     [4name] => jonny
     [a] => 
 )
@@ -151,7 +152,7 @@ Array
 )
 
 Output after Pop is :
-array(0) {
+varray(0) {
 }
 
 -- Input Array for Iteration 11 is --

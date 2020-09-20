@@ -1,4 +1,4 @@
-<?php
+<?hh // partial
 
 class APCIterator implements Iterator{
 
@@ -84,7 +84,7 @@ class APCIterator implements Iterator{
     }
     ++$this->index;
     if ($this->search !== null) {
-      if (is_array($this->search)) {
+      if (HH\is_any_array($this->search)) {
         while ($this->valid() &&
                !$this->preg_match_recursive($this->search, $this->key())) {
           ++$this->index;
@@ -115,7 +115,7 @@ class APCIterator implements Iterator{
   public function current() {
     if (!$this->valid()) return false;
     $info = $this->getInfo()[$this->index];
-    $ret = array();
+    $ret = darray[];
     if ($this->format & APC_ITER_TYPE) {
       $ret['type'] = ($info['type'] == 0) ? 'user' : 'file';
     }
@@ -123,7 +123,8 @@ class APCIterator implements Iterator{
       $ret['key'] = $info['info'];
     }
     if ($this->format & APC_ITER_VALUE) {
-      $ret['value'] = apc_fetch($info['info']);
+      $ignored = false;
+      $ret['value'] = apc_fetch($info['info'], inout $ignored);
     }
     if ($this->format & APC_ITER_MEM_SIZE) {
       $ret['mem_size'] = $info['mem_size'];
@@ -173,7 +174,7 @@ class APCIterator implements Iterator{
     return $this->totals['size'];
   }
 
-  private function preg_match_recursive(array $patterns, $string) {
+  private function preg_match_recursive(Traversable<string> $patterns, $string) {
     foreach ($patterns as $pattern) {
       if (preg_match($pattern, $string)) {
         return true;
@@ -186,7 +187,7 @@ class APCIterator implements Iterator{
     $info = $this->getInfo();
     foreach ($info as $list) {
       if ($this->search !== null) {
-        if (is_array($this->search)) {
+        if (HH\is_any_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,
                                               $list['info'])) {
             continue;
@@ -204,9 +205,10 @@ class APCIterator implements Iterator{
   }
 
   private function init() {
-    $this->info = apc_cache_info()['cache_list'];
+    $info = apc_cache_info()['cache_list'];
     // Order defined by ksort
-    ksort($this->info);
+    ksort(inout $info);
+    $this->info = $info;
     $this->initialized = true;
     $this->index = -1;
     $this->next();
@@ -229,7 +231,7 @@ class APCIterator implements Iterator{
     }
     foreach ($this->info as $key) {
       if ($this->search !== null) {
-        if (is_array($this->search)) {
+        if (HH\is_any_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,
                                               $key['info'])) {
             continue;

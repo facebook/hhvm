@@ -1,5 +1,8 @@
-<?php
+<?hh
+
 // Test from https://bugs.php.net/bug.php?id=49490
+<<__EntryPoint>>
+function main_xpath_registerns() {
 $dom = new DOMDocument();
 $dom->loadXML(
   '<foobar><a:foo xmlns:a="urn:a">'.
@@ -31,3 +34,4 @@ var_dump(
     false
   )->item(0)->tagName
 );
+}

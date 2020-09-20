@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Establishes a connection to a LDAP server on a specified hostname and port.
@@ -79,7 +79,7 @@ function ldap_err2str(int $errnum): string;
  *
  */
 <<__Native>>
-function ldap_add(resource $link, string $dn, array $entry): bool;
+function ldap_add(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Adds one or more attributes to the specified dn. It performs the
@@ -95,7 +95,7 @@ function ldap_add(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_mod_add(resource $link, string $dn, array $entry): bool;
+function ldap_mod_add(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Removes one or more attributes from the specified dn. It performs the
@@ -111,7 +111,7 @@ function ldap_mod_add(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_mod_del(resource $link, string $dn, array $entry): bool;
+function ldap_mod_del(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Replaces one or more attributes from the specified dn. It performs the
@@ -127,7 +127,7 @@ function ldap_mod_del(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_mod_replace(resource $link, string $dn, array $entry): bool;
+function ldap_mod_replace(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Modify the existing entries in the LDAP directory. The structure of the
@@ -142,7 +142,7 @@ function ldap_mod_replace(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_modify(resource $link, string $dn, array $entry): bool;
+function ldap_modify(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Modify the existing entries in the LDAP directory. Allows detailed
@@ -156,7 +156,7 @@ function ldap_modify(resource $link, string $dn, array $entry): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
-function ldap_modify_batch(resource $link, string $dn, array $modifs): bool;
+function ldap_modify_batch(resource $link, string $dn, varray $modifs): bool;
 
 /**
  * Binds to the LDAP directory with specified RDN and password. If bind_rdn
@@ -213,7 +213,10 @@ function ldap_unbind(resource $link): bool;
  *
  */
 <<__Native>>
-function ldap_get_option(resource $link, int $option, mixed &$retval): bool;
+function ldap_get_option(resource $link,
+                         int $option,
+                         <<__OutOnly>>
+                         inout mixed $retval): bool;
 
 /**
  * Sets the value of the specified option to be newval.
@@ -275,7 +278,7 @@ function ldap_close(resource $link): bool;
 function ldap_list(mixed $link,
                    mixed $base_dn,
                    mixed $filter,
-                   ?array $attributes = null,
+                   ?varray $attributes = null,
                    int $attrsonly = 0,
                    int $sizelimit = -1,
                    int $timelimit = -1,
@@ -327,7 +330,7 @@ function ldap_list(mixed $link,
 function ldap_read(mixed $link,
                    mixed $base_dn,
                    mixed $filter,
-                   ?array $attributes = null,
+                   ?varray $attributes = null,
                    int $attrsonly = 0,
                    int $sizelimit = -1,
                    int $timelimit = -1,
@@ -387,7 +390,7 @@ function ldap_read(mixed $link,
 function ldap_search(mixed $link,
                      mixed $base_dn,
                      mixed $filter,
-                     ?array $attributes = null,
+                     ?varray $attributes = null,
                      int $attrsonly = 0,
                      int $sizelimit = -1,
                      int $timelimit = -1,
@@ -624,15 +627,20 @@ function ldap_next_reference(resource $link, resource $result_entry): mixed;
 <<__Native>>
 function ldap_parse_reference(resource $link,
                               resource $result_entry,
-                              mixed &$referrals): bool;
+                              <<__OutOnly("varray")>>
+                              inout mixed $referrals): bool;
 
 <<__Native>>
 function ldap_parse_result(resource $link,
                            resource $result,
-                           mixed &$errcode,
-                           mixed &$matcheddn = null,
-                           mixed &$errmsg = null,
-                           mixed &$referrals = null): bool;
+                           <<__OutOnly("KindOfInt64")>>
+                           inout mixed $errcode,
+                           <<__OutOnly("KindOfString")>>
+                           inout mixed $matcheddn,
+                           <<__OutOnly("KindOfString")>>
+                           inout mixed $errmsg,
+                           <<__OutOnly("varray")>>
+                           inout mixed $referrals): bool;
 
 /**
  * Frees up the memory allocated internally to store the result. All result
@@ -735,8 +743,10 @@ function ldap_control_paged_result(resource $link,
 <<__Native>>
 function ldap_control_paged_result_response(resource $link,
                                             resource $result,
-                                            mixed &$cookie = null,
-                                            mixed &$estimated = null): bool;
+                                            <<__OutOnly("KindOfString")>>
+                                            inout mixed $cookie,
+                                            <<__OutOnly("KindOfInt64")>>
+                                            inout mixed $estimated): bool;
 
 /**
  * Escape a string for use in an LDAP filter or DN.

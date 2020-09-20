@@ -22,8 +22,9 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
-
 #include "hphp/util/conv-10.h"
+
+#include <folly/tracing/StaticTracepoint.h>
 
 #include <algorithm>
 
@@ -80,45 +81,26 @@ static InitFiniNode prepopulate_integers([] {
 String::~String() {}
 
 StringData* buildStringData(int n) {
-  char tmpbuf[12];
-
-  tmpbuf[11] = '\0';
-  auto sl = conv_10(n, &tmpbuf[11]);
-  return StringData::Make(sl, CopyString);
+  return buildStringData(static_cast<int64_t>(n));
 }
-
-req::ptr<StringData> String::buildString(int n) {
-  const StringData* sd = GetIntegerStringData(n);
-  if (sd) {
-    assert(sd->isStatic());
-    return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
-  }
-  return req::ptr<StringData>::attach(buildStringData(n));
-}
-
-String::String(int n) : m_str(buildString(n)) { }
 
 StringData* buildStringData(int64_t n) {
-  char tmpbuf[21];
+  if (auto const sd = String::GetIntegerStringData(n)) {
+    assertx(sd->isStatic());
+    return const_cast<StringData*>(sd);
+  }
 
+  char tmpbuf[21];
   tmpbuf[20] = '\0';
   auto const sl = conv_10(n, &tmpbuf[20]);
   return StringData::Make(sl, CopyString);
 }
 
-req::ptr<StringData> String::buildString(int64_t n) {
-  const StringData* sd = GetIntegerStringData(n);
-  if (sd) {
-    assert(sd->isStatic());
-    return req::ptr<StringData>::attach(const_cast<StringData*>(sd));
-  }
-  return req::ptr<StringData>::attach(buildStringData(n));
-}
-
-String::String(int64_t n) : m_str(buildString(n)) { }
+String::String(int n) : String(static_cast<int64_t>(n)) {}
+String::String(int64_t n) : m_str(buildStringData(n), NoIncRef{}) {}
 
 void formatPhpDblStr(char **pbuf, double n) {
-  if (RuntimeOption::EnableHipHopSyntax && n == 0.0) {
+  if (n == 0.0) {
     n = 0.0; // so to avoid "-0" output
   }
   vspprintf(pbuf, 0, "%.*G", 14, n);
@@ -152,7 +134,7 @@ int String::find(char ch, int pos /* = 0 */,
 
 int String::find(const char *s, int pos /* = 0 */,
                  bool caseSensitive /* = true */) const {
-  assert(s);
+  assertx(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
     return find(*s, pos, caseSensitive);
@@ -180,7 +162,7 @@ int String::rfind(char ch, int pos /* = 0 */,
 
 int String::rfind(const char *s, int pos /* = 0 */,
                   bool caseSensitive /* = true */) const {
-  assert(s);
+  assertx(s);
   if (empty()) return -1;
   if (*s && *(s+1) == 0) {
     return rfind(*s, pos, caseSensitive);
@@ -203,7 +185,7 @@ int String::rfind(const String& s, int pos /* = 0 */,
 // offset functions: cannot inline these due to dependencies
 
 char String::charAt(int pos) const {
-  assert(pos >= 0 && pos <= size());
+  assertx(pos >= 0 && pos <= size());
   const char *s = data();
   return s[pos];
 }
@@ -227,60 +209,45 @@ String& String::operator=(const std::string& s) {
 // concatenation and increments
 
 String& String::operator+=(const char* s) {
-  if (s && *s) {
-    if (empty()) {
-      m_str = req::ptr<StringData>::attach(StringData::Make(s, CopyString));
-    } else if (!m_str->cowCheck()) {
-      auto const tmp = m_str->append(folly::StringPiece{s});
-      if (UNLIKELY(tmp != m_str)) {
-        m_str = req::ptr<StringData>::attach(tmp);
-      }
-    } else {
-      m_str =
-        req::ptr<StringData>::attach(StringData::Make(m_str.get(), s));
-    }
-  }
-  return *this;
-}
-
-String& String::operator+=(const String& str) {
-  if (!str.empty()) {
-    if (empty()) {
-      m_str = str.m_str;
-    } else if (!m_str->cowCheck()) {
-      auto tmp = m_str->append(str.slice());
-      if (UNLIKELY(tmp != m_str)) {
-        m_str = req::ptr<StringData>::attach(tmp);
-      }
-    } else {
-      m_str = req::ptr<StringData>::attach(
-        StringData::Make(m_str.get(), str.slice())
-      );
-    }
-  }
-  return *this;
+  if (!s) return *this;
+  return operator+=(folly::StringPiece{s, strlen(s)});
 }
 
 String& String::operator+=(const std::string& str) {
-  return (*this += folly::StringPiece{str});
+  return operator+=(folly::StringPiece{str});
+}
+
+String& String::operator+=(const String& str) {
+  if (str.empty()) return *this;
+  if (empty()) {
+    // lhs is empty, just return str. No attempt to append in place even
+    // if lhs is private & reserved.
+    m_str = str.m_str;
+    return *this;
+  }
+  return operator+=(str.slice());
 }
 
 String& String::operator+=(folly::StringPiece slice) {
-  if (slice.size() == 0) {
+  if (slice.empty()) {
     return *this;
   }
-  if (m_str && !m_str->cowCheck()) {
-    auto const tmp = m_str->append(slice);
-    if (UNLIKELY(tmp != m_str)) {
-      m_str = req::ptr<StringData>::attach(tmp);
-    }
-    return *this;
-  }
-  if (empty()) {
+  if (!m_str) {
     m_str = req::ptr<StringData>::attach(
       StringData::Make(slice.begin(), slice.size(), CopyString));
     return *this;
   }
+  if (!m_str->cowCheck()) {
+    UNUSED auto const lsize = m_str->size();
+    FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, slice.size());
+    auto const tmp = m_str->append(slice);
+    if (UNLIKELY(tmp != m_str)) {
+      // had to realloc even though count==1
+      m_str = req::ptr<StringData>::attach(tmp);
+    }
+    return *this;
+  }
+  FOLLY_SDT(hhvm, hhvm_cow_concat, m_str->size(), slice.size());
   m_str = req::ptr<StringData>::attach(
     StringData::Make(m_str.get(), slice)
   );
@@ -288,7 +255,7 @@ String& String::operator+=(folly::StringPiece slice) {
 }
 
 String& String::operator+=(folly::MutableStringPiece slice) {
-  return (*this += folly::StringPiece{slice.begin(), slice.size()});
+  return operator+=(folly::StringPiece{slice.begin(), slice.size()});
 }
 
 String&& operator+(String&& lhs, const char* rhs) {
@@ -308,10 +275,6 @@ String&& operator+(String&& lhs, String&& rhs) {
 
 String operator+(String&& lhs, const String & rhs) {
   return std::move(lhs += rhs);
-}
-
-String operator+(const String & lhs, String&& rhs) {
-  return String::attach(StringData::Make(lhs.slice(), rhs.slice()));
 }
 
 String operator+(const String & lhs, const String & rhs) {
@@ -404,22 +367,37 @@ void String::dump() const {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString
 
-StaticString::StaticString(const char* s)
-: String(makeStaticStringSafe(s), NoIncRef{}) { }
+bool StaticString::s_globalInit{false};
+std::vector<std::tuple<const char*, size_t, StaticString*>>*
+  StaticString::s_registered;
 
-StaticString::StaticString(const char* s, int length)
-: String(makeStaticStringSafe(s, length), NoIncRef{}) { }
+void StaticString::construct(const char* s, size_t len) {
+  if (s_globalInit) {
+    init(s, len);
+  } else {
+    if (!s_registered) {
+      s_registered =
+        new std::vector<std::tuple<const char*, size_t, StaticString*>>;
+    }
+    s_registered->emplace_back(s, len, this);
+  }
+}
 
-StaticString::StaticString(std::string s)
-: String(makeStaticStringSafe(s.c_str(), s.size()), NoIncRef{}) { }
+void StaticString::init(const char* s, size_t len) {
+  reset(makeStaticString(s, len));
+}
 
-StaticString& StaticString::operator=(const StaticString& /*str*/) {
-  // Assignment to a StaticString is ignored. Generated code
-  // should never use a StaticString on the left-hand side of
-  // assignment. A StaticString can only be initialized by a
-  // StaticString constructor or StaticString::init().
-  always_assert(false);
-  return *this;
+uint32_t StaticString::CreateAll() {
+  if (s_globalInit) return 0;
+  s_globalInit = true;
+  create_string_data_map();
+  for (auto& p : *s_registered) {
+    std::get<2>(p)->init(std::get<0>(p), std::get<1>(p));
+  }
+  auto const ret = s_registered->size();
+  s_registered->clear();
+  delete s_registered;
+  return ret;
 }
 
 const StaticString
@@ -428,15 +406,22 @@ const StaticString
   s_integer("integer"),
   s_double("double"),
   s_string("string"),
-  s_array("array"),
+  s_varray("varray"),
+  s_darray("darray"),
   s_vec("vec"),
   s_dict("dict"),
   s_keyset("keyset"),
   s_object("object"),
   s_resource("resource"),
-  s_ref("reference");
+  s_rfunc("reified function"),
+  s_func("function"),
+  s_class("class"),
+  s_clsmeth("clsmeth"),
+  s_rclsmeth("rclsmeth"),
+  s_record("record"),
+  s_lclass("lazy class");
 
-StaticString getDataTypeString(DataType t) {
+StaticString getDataTypeString(DataType t, bool isLegacy) {
   switch (t) {
     case KindOfUninit:
     case KindOfNull:       return s_null;
@@ -446,16 +431,24 @@ StaticString getDataTypeString(DataType t) {
     case KindOfPersistentString:
     case KindOfString:     return s_string;
     case KindOfPersistentVec:
-    case KindOfVec:        return s_vec;
+    case KindOfVec:        return isLegacy ? s_varray : s_vec;
     case KindOfPersistentDict:
-    case KindOfDict:       return s_dict;
+    case KindOfDict:       return isLegacy ? s_darray : s_dict;
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
-    case KindOfPersistentArray:
-    case KindOfArray:      return s_array;
+    case KindOfPersistentDArray:
+    case KindOfDArray:     return s_darray;
+    case KindOfPersistentVArray:
+    case KindOfVArray:     return s_varray;
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;
-    case KindOfRef:        return s_ref;
+    case KindOfRFunc:      return s_rfunc;
+    case KindOfFunc:       return s_func;
+    case KindOfClass:      return s_class;
+    case KindOfClsMeth:    return s_clsmeth;
+    case KindOfRClsMeth:   return s_rclsmeth;
+    case KindOfRecord:     return s_record;
+    case KindOfLazyClass:      return s_lclass;
   }
   not_reached();
 }

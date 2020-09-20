@@ -1,2 +1,2 @@
-File "decl_unclosed_xhp_nested.php", line 14, characters 13-14:
-Xhp tag not closed (Parsing[1002])
+File "decl_unclosed_xhp_nested.php", line 17, characters 1-1:
+A closing XHP tag is expected here. (Parsing[1002])

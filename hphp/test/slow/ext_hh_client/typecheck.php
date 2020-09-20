@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_typecheck() {
 $not_ready = \HH\Client\typecheck(__DIR__.'/hh_client_notready');
 apc_delete('__systemlib__hh_client_time');
 var_dump($not_ready);
@@ -27,3 +30,4 @@ $not_ready->triggerError();
 $clean->triggerError(E_WARNING);
 $error->triggerError(E_WARNING);
 $error->triggerError(E_RECOVERABLE_ERROR);
+}

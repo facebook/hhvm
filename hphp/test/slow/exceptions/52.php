@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Exception1 extends Exception {
   public function __Construct() {
@@ -15,17 +15,15 @@ class Exception2 extends Exception1 {
 function foo() {
   throw new Exception2();
 }
-
+<<__EntryPoint>>
 function bar() {
   try {
     foo();
   }
- catch (Exception $exn) {
+  catch (Exception $exn) {
     $a = $exn->getTrace();
- foreach ($a as &$b) $b['file'] = 'string';
+    foreach ($a as $k => $v) $a[$k]['file'] = 'string';
     var_dump($a);
     var_dump($exn->getLine());
   }
 }
-
-bar();

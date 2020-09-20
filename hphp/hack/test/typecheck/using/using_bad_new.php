@@ -10,9 +10,7 @@ class AsyncHandle implements IAsyncDisposable {
   public function bar():void { }
 }
 
-function expect_mixed(mixed $m):void { }
-
-function test_it():mixed {
+function test_it(): void {
   $x = new Handle();
 
   // This is legal

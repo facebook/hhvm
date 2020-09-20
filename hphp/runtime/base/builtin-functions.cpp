@@ -20,11 +20,9 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -36,10 +34,13 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -52,8 +53,6 @@
 
 #include <folly/Format.h>
 
-#include <boost/format.hpp>
-
 #include <algorithm>
 
 namespace HPHP {
@@ -64,9 +63,8 @@ using std::string;
 // static strings
 
 const StaticString
+  s_Array("Array"),
   s_offsetExists("offsetExists"),
-  s___call("__call"),
-  s___callStatic("__callStatic"),
   s___invoke("__invoke"),
   s_self("self"),
   s_parent("parent"),
@@ -75,6 +73,14 @@ const StaticString
 const StaticString s_cmpWithCollection(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a collection with an integer, double, string, array, or object"
+);
+const StaticString s_cmpWithVArray(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a varray with a non-varray"
+);
+const StaticString s_cmpWithDArray(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "darrays"
 );
 const StaticString s_cmpWithVec(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
@@ -88,20 +94,48 @@ const StaticString s_cmpWithKeyset(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "keysets"
 );
+const StaticString s_cmpWithRecord(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "records"
+);
+const StaticString s_cmpWithClsMeth(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a clsmeth with a non-clsmeth"
+);
+const StaticString s_cmpWithRClsMeth(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a reified class meth"
+);
+const StaticString s_cmpWithRFunc(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
+  "reified functions"
+);
+const StaticString s_cmpWithNonRecord(
+  "Cannot compare records with non-records"
+);
+const StaticString s_cmpWithNonArr(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a PHP array with a non-array"
+);
+const StaticString s_cmpWithFunc(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "funcs"
+);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool array_is_valid_callback(const Array& arr) {
-  if (!arr.isPHPArray() && !arr.isVecArray()) return false;
+  if (!arr.isPHPArray() && !arr.isVec() && !arr.isDict()) return false;
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
-  auto const elem0 = arr.rvalAt(0).unboxed();
-  if (!isStringType(elem0.type()) && !isObjectType(elem0.type())) {
+  auto const elem0 = arr.lookup(0);
+  if (!isStringType(elem0.type()) && !isObjectType(elem0.type()) &&
+      !isClassType(elem0.type())) {
     return false;
   }
-  auto const elem1 = arr.rvalAt(1).unboxed();
-  if (!isStringType(elem1.type())) {
+  auto const elem1 = arr.lookup(1);
+  if (!isStringType(elem1.type()) && !isFuncType(elem1.type())) {
     return false;
   }
   return true;
@@ -113,41 +147,49 @@ const StaticString
   s_colon2("::");
 
 bool is_callable(const Variant& v) {
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool dynamic;
-  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
-                                           invName, dynamic,
-                                           DecodeFlags::LookupOnly);
-  if (invName != nullptr) {
-    decRefStr(invName);
-  }
-  return f != nullptr && !f->isAbstract();
+  CallCtx ctx;
+  vm_decode_function(v, ctx, DecodeFlags::LookupOnly);
+  return ctx.func != nullptr && !ctx.func->isAbstract();
 }
 
-bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
+bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
   bool ret = true;
   if (LIKELY(!syntax_only)) {
     ret = is_callable(v);
     if (LIKELY(!name)) return ret;
   }
 
-  auto const tv_func = v.asCell();
+  auto const tv_func = v.asTypedValue();
+  if (isFuncType(tv_func->m_type)) {
+    auto func_name = tv_func->m_data.pfunc->fullName();
+    if (name) *name = Variant{func_name, Variant::PersistentStrInit{}};
+    return true;
+  }
+
+  if (isClsMethType(tv_func->m_type)) {
+    auto const clsmeth = tv_func->m_data.pclsmeth;
+    if (name) {
+      *name = concat3(
+        clsmeth->getCls()->nameStr(), "::", clsmeth->getFunc()->nameStr());
+    }
+    return true;
+  }
+
   if (isStringType(tv_func->m_type)) {
-    if (name) *name->var() = v;
+    if (name) *name = v;
     return ret;
   }
 
-  if (isArrayType(tv_func->m_type) || isVecType(tv_func->m_type)) {
+  if (isArrayType(tv_func->m_type) ||
+      isVecType(tv_func->m_type) ||
+      isDictType(tv_func->m_type)) {
     auto const arr = Array(tv_func->m_data.parr);
-    auto const clsname = arr.rvalAt(int64_t(0)).unboxed();
-    auto const mthname = arr.rvalAt(int64_t(1)).unboxed();
+    auto const clsname = arr.lookup(int64_t(0));
+    auto const mthname = arr.lookup(int64_t(1));
 
-    if (arr.size() != 2 ||
-        clsname.is_dummy() ||
-        !isStringType(mthname.type())) {
-      if (name) *name->var() = array_string;
+    if (arr.size() != 2 || !clsname.is_init() ||
+        (!isStringType(mthname.type()) && !isFuncType(mthname.type()))) {
+      if (name) *name = s_Array;
       return false;
     }
 
@@ -156,13 +198,23 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
       clsString = clsname.val().pobj->getClassName().get();
     } else if (isStringType(clsname.type())) {
       clsString = clsname.val().pstr;
+    } else if (isClassType(clsname.type())) {
+      clsString = const_cast<StringData*>(clsname.val().pclass->name());
     } else {
-      if (name) *name->var() = array_string;
+      if (name) *name = s_Array;
       return false;
     }
 
+    if (isFuncType(mthname.type())) {
+      if (name) {
+        *name = Variant{mthname.val().pfunc->fullName(),
+                               Variant::PersistentStrInit{}};
+      }
+      return true;
+    }
+
     if (name) {
-      *name->var() = concat3(String{clsString},
+      *name = concat3(String{clsString},
                              s_colon2,
                              String{mthname.val().pstr});
     }
@@ -175,9 +227,9 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     if (name) {
       if (d->instanceof(c_Closure::classof())) {
         // Hack to stop the mangled name from showing up
-        *name->var() = s_Closure__invoke;
+        *name = s_Closure__invoke;
       } else {
-        *name->var() = d->getClassName().asString() + "::__invoke";
+        *name = d->getClassName().asString() + "::__invoke";
       }
     }
     return invoke != nullptr;
@@ -186,17 +238,236 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
   return false;
 }
 
+namespace {
+Class* vm_decode_class_from_name(
+  const String& clsName,
+  const String& funcName,
+  bool nameContainsClass,
+  ActRec* ar,
+  bool& forwarding,
+  Class* ctx,
+  DecodeFlags flags) {
+  Class* cls = nullptr;
+  if (clsName.get()->isame(s_self.get())) {
+    if (ctx) {
+      cls = ctx;
+    }
+    if (!nameContainsClass) {
+      forwarding = true;
+    }
+  } else if (clsName.get()->isame(s_parent.get())) {
+    if (ctx && ctx->parent()) {
+      cls = ctx->parent();
+    }
+    if (!nameContainsClass) {
+      forwarding = true;
+    }
+  } else if (clsName.get()->isame(s_static.get())) {
+    if (ar && ar->func()->cls()) {
+      if (ar->hasThis()) {
+        cls = ar->getThis()->getVMClass();
+      } else {
+        cls = ar->getClass();
+      }
+      if (flags != DecodeFlags::NoWarn && cls) {
+        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          raise_warning(
+            "vm_decode_function() used to decode a LSB class "
+            "method on %s",
+            cls->name()->data()
+          );
+        }
+      }
+    }
+  } else {
+    if (flags == DecodeFlags::Warn && nameContainsClass) {
+      String nameClass = funcName.substr(0, funcName.find("::"));
+      if (nameClass.get()->isame(s_self.get())   ||
+          nameClass.get()->isame(s_static.get())) {
+        raise_warning("behavior of call_user_func(array('%s', '%s')) "
+                      "is undefined", clsName.data(), funcName.data());
+      }
+    }
+    cls = Class::load(clsName.get());
+  }
+  return cls;
+}
+
+const Func* vm_decode_func_from_name(
+  const String& funcName,
+  ActRec* ar,
+  bool forwarding,
+  ObjectData*& this_,
+  Class*& cls,
+  Class* ctx,
+  Class* cc,
+  DecodeFlags flags) {
+  CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
+  auto f = lookupMethodCtx(cc, funcName.get(), ctx, lookupType);
+  if (f && (f->attrs() & AttrStatic)) {
+    // If we found a method and its static, null out this_
+    this_ = nullptr;
+  } else {
+    if (!this_ && ar && ar->func()->cls() && ar->hasThis()) {
+      // If we did not find a static method AND this_ is null AND there is a
+      // frame ar, check if the current instance from ar is compatible
+      auto const obj = ar->getThis();
+      if (obj->instanceof(cls)) {
+        this_ = obj;
+        cls = obj->getVMClass();
+      }
+      if (flags != DecodeFlags::NoWarn && this_) {
+        if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+          raise_warning(
+            "vm_decode_function() used to decode a method on $this, an "
+            "instance of %s, from the caller, %s",
+            cls->name()->data(),
+            ar->func()->fullName()->data()
+          );
+        }
+      }
+    }
+    if (!f) {
+      if (lookupType == CallType::ClsMethod) {
+        this_ = nullptr;
+      }
+      // Bail out if we couldn't find the method
+      if (flags == DecodeFlags::Warn) {
+        raise_invalid_argument_warning("function: method '%s' not found",
+                               funcName.data());
+      }
+      return nullptr;
+    }
+  }
+
+  if (!this_ && !f->isStaticInPrologue()) {
+    if (flags != DecodeFlags::LookupOnly) throw_missing_this(f);
+  }
+
+  assertx(f && f->preClass());
+  // If this_ is non-NULL, then this_ is the current instance and cls is
+  // the class of the current instance.
+  assertx(!this_ || this_->getVMClass() == cls);
+  // If we are doing a forwarding call and this_ is null, set cls
+  // appropriately to propagate the current late bound class.
+  if (!this_ && forwarding && ar && ar->func()->cls()) {
+    auto const fwdCls = ar->hasThis() ?
+      ar->getThis()->getVMClass() : ar->getClass();
+
+    // Only forward the current late bound class if it is the same or
+    // a descendent of cls
+    if (fwdCls->classof(cls)) {
+      cls = fwdCls;
+    }
+
+    if (flags != DecodeFlags::NoWarn && fwdCls) {
+      if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+        raise_warning(
+          "vm_decode_function() forwarded the calling context, %s",
+          fwdCls->name()->data()
+        );
+      }
+    }
+  }
+
+  if (flags != DecodeFlags::NoWarn && !f->isPublic()) {
+    if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+      raise_warning(
+        "vm_decode_function() used to decode a %s method: %s",
+        f->attrs() & AttrPrivate ? "private" : "protected",
+        f->fullName()->data()
+      );
+    }
+  }
+  return f;
+}
+}
+
+bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
+  if (meth->isStaticInPrologue()) {
+    if (!error) return false;
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): method {} is static",
+      meth->fullName()->data()
+    ));
+  }
+
+  if (meth->isPublic() || ctx == meth->cls()) return true;
+  if (ctx && (meth->attrs() & AttrProtected) && ctx->classof(meth->cls())) {
+    return true;
+  }
+
+  // Executing this meth_caller() can still be an error but we won't know until
+  // we know precisely what instance it's being invoked on.
+  // XXX: Do we want this behavior?
+  if (meth->hasPrivateAncestor() && meth->cls()->classof(ctx)) {
+    auto const cmeth = ctx->lookupMethod(meth->name());
+    if (cmeth && cmeth->cls() == ctx && (cmeth->attrs() & AttrPrivate)) {
+      return true;
+    }
+  }
+
+  if (error) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): method {} cannot be called from this context",
+      meth->fullName()->data()
+    ));
+  }
+  return false;
+}
+
+void checkMethCaller(const Func* func, const Class* ctx) {
+  auto const cls = Class::load(func->methCallerClsName());
+  if (!cls) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): class {} not found", func->methCallerClsName()->data()
+    ));
+  }
+
+  if (isTrait(cls)) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): class {} is a trait", func->methCallerClsName()->data()
+    ));
+  }
+
+  auto const meth = cls->lookupMethod(func->methCallerMethName());
+  if (!meth) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): method {}::{} not found",
+      func->methCallerClsName()->data(),
+      func->methCallerMethName()->data()
+    ));
+  }
+
+  checkMethCallerTarget(meth, ctx, true);
+}
+
 const HPHP::Func*
-vm_decode_function(const Variant& function,
+vm_decode_function(const_variant_ref function,
                    ActRec* ar,
-                   bool forwarding,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
-                   StringData*& invName,
                    bool& dynamic,
-                   DecodeFlags flags /* = DecodeFlags::Warn */) {
-  invName = nullptr;
+                   DecodeFlags flags /* = DecodeFlags::Warn */,
+                   bool genericsAlreadyGiven /* = false */) {
+  bool forwarding = false;
   dynamic = true;
+
+  if (function.isFunc()) {
+    dynamic = false;
+    this_ = nullptr;
+    cls = nullptr;
+    return function.toFuncVal();
+  }
+
+  if (function.isClsMeth()) {
+    dynamic = false;
+    this_ = nullptr;
+    auto const clsmeth = function.toClsMethVal();
+    cls = clsmeth->getCls();
+    return clsmeth->getFunc();
+  }
+
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
     if (ar) ctx = arGetContextClass(ar);
@@ -219,63 +490,50 @@ vm_decode_function(const Variant& function,
       // assign the value at index 1 to name and we use the value at index
       // 0 to populate cls (if the value is a string) or this_ and cls (if
       // the value is an object).
-      assert(function.isArray());
+      assertx(function.isArray());
       Array arr = function.toArray();
       if (!array_is_valid_callback(arr)) {
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: not a valid callback array");
+          raise_invalid_argument_warning("function: not a valid callback array");
         }
         return nullptr;
       }
+
+      Variant elem0 = arr[0];
       Variant elem1 = arr[1];
+      if (elem1.isFunc()) {
+        if (elem0.isObject()) {
+          this_ = elem0.getObjectData();
+          cls = this_->getVMClass();
+        } else if (elem0.isClass()) {
+          cls = elem0.toClassVal();
+        } else {
+          raise_error("calling an ill-formed array without resolved "
+                      "object/class pointer");
+          return nullptr;
+        }
+        return elem1.toFuncVal();
+      }
+
+      assertx(elem1.isString());
       name = elem1.toString();
       pos = name.find("::");
       nameContainsClass =
         (pos != 0 && pos != String::npos && pos + 2 < name.size());
-      Variant elem0 = arr[0];
       if (elem0.isString()) {
-        String sclass = elem0.toString();
-        if (sclass.get()->isame(s_self.get())) {
-          if (ctx) {
-            cls = ctx;
-          }
-          if (!nameContainsClass) {
-            forwarding = true;
-          }
-        } else if (sclass.get()->isame(s_parent.get())) {
-          if (ctx && ctx->parent()) {
-            cls = ctx->parent();
-          }
-          if (!nameContainsClass) {
-            forwarding = true;
-          }
-        } else if (sclass.get()->isame(s_static.get())) {
-          if (ar && ar->func()->cls()) {
-            if (ar->hasThis()) {
-              cls = ar->getThis()->getVMClass();
-            } else {
-              cls = ar->getClass();
-            }
-          }
-        } else {
-          if (flags == DecodeFlags::Warn && nameContainsClass) {
-            String nameClass = name.substr(0, pos);
-            if (nameClass.get()->isame(s_self.get())   ||
-                nameClass.get()->isame(s_static.get())) {
-              raise_warning("behavior of call_user_func(array('%s', '%s')) "
-                            "is undefined", sclass.data(), name.data());
-            }
-          }
-          cls = Unit::loadClass(sclass.get());
-        }
+        cls = vm_decode_class_from_name(
+          elem0.toString(), name, nameContainsClass, ar, forwarding, ctx,
+          flags);
         if (!cls) {
           if (flags == DecodeFlags::Warn) {
-            throw_invalid_argument("function: class not found");
+            raise_invalid_argument_warning("function: class not found");
           }
           return nullptr;
         }
+      } else if (elem0.isClass()) {
+        cls = elem0.toClassVal();
       } else {
-        assert(elem0.isObject());
+        assertx(elem0.isObject());
         this_ = elem0.getObjectData();
         cls = this_->getVMClass();
       }
@@ -311,12 +569,21 @@ vm_decode_function(const Variant& function,
             cc = ar->getClass();
           }
         }
+        if (flags != DecodeFlags::NoWarn && cc) {
+          if (RuntimeOption::EvalWarnOnSkipFrameLookup) {
+            raise_warning(
+              "vm_decode_function() used to decode a LSB class "
+              "method on %s",
+              cc->name()->data()
+            );
+          }
+        }
       } else {
-        cc = Unit::loadClass(c.get());
+        cc = Class::load(c.get());
       }
       if (!cc) {
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: class not found");
+          raise_invalid_argument_warning("function: class not found");
         }
         return nullptr;
       }
@@ -338,86 +605,28 @@ vm_decode_function(const Variant& function,
     }
 
     if (!cls) {
-      HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
+      HPHP::Func* f = HPHP::Func::load(name.get());
       if (!f) {
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: method '%s' not found",
+          raise_invalid_argument_warning("function: method '%s' not found",
                                  name.data());
         }
         return nullptr;
       }
-      assert(f && f->preClass() == nullptr);
-      return f;
-    }
-    assert(cls);
-    CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
-    auto f = lookupMethodCtx(cc, name.get(), ctx, lookupType);
-    if (f && (f->attrs() & AttrStatic)) {
-      // If we found a method and its static, null out this_
-      this_ = nullptr;
-    } else {
-      if (!this_ && ar && ar->func()->cls() && ar->hasThis()) {
-        // If we did not find a static method AND this_ is null AND there is a
-        // frame ar, check if the current instance from ar is compatible
-        auto const obj = ar->getThis();
-        if (obj->instanceof(cls)) {
-          this_ = obj;
-          cls = obj->getVMClass();
-        }
-      }
-      if (!f) {
-        if (this_) {
-          // If this_ is non-null AND we could not find a method, try
-          // looking up __call in cls's method table
-          f = cls->lookupMethod(s___call.get());
-          assert(!f || !(f->attrs() & AttrStatic));
-        }
-        if (!f && lookupType == CallType::ClsMethod) {
-          f = cls->lookupMethod(s___callStatic.get());
-          assert(!f || (f->attrs() & AttrStatic));
-          this_ = nullptr;
-        }
-        if (f && (cc == cls || cc->lookupMethod(f->name()))) {
-          // We found __call or __callStatic!
-          // Stash the original name into invName.
-          invName = name.get();
-          invName->incRefCount();
-        } else {
-          // Bail out if we couldn't find the method or __call
-          if (flags == DecodeFlags::Warn) {
-            throw_invalid_argument("function: method '%s' not found",
-                                   name.data());
-          }
-          return nullptr;
-        }
-      }
-    }
-
-    if (!this_ && !f->isStaticInPrologue()) {
-      if (flags == DecodeFlags::Warn) raise_missing_this(f);
-      if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
+      assertx(f && f->preClass() == nullptr);
+      if (f->hasReifiedGenerics() && !genericsAlreadyGiven &&
+          !f->getReifiedGenericsInfo().allGenericsSoft()) {
+        raise_invalid_argument_warning(
+          "You may not call the reified function '%s' "
+          "without reified arguments",
+          f->fullName()->data());
         return nullptr;
       }
+      return f;
     }
-
-    assert(f && f->preClass());
-    // If this_ is non-NULL, then this_ is the current instance and cls is
-    // the class of the current instance.
-    assert(!this_ || this_->getVMClass() == cls);
-    // If we are doing a forwarding call and this_ is null, set cls
-    // appropriately to propagate the current late bound class.
-    if (!this_ && forwarding && ar && ar->func()->cls()) {
-      auto const fwdCls = ar->hasThis() ?
-        ar->getThis()->getVMClass() : ar->getClass();
-
-      // Only forward the current late bound class if it is the same or
-      // a descendent of cls
-      if (fwdCls->classof(cls)) {
-        cls = fwdCls;
-      }
-    }
-
-    return f;
+    assertx(cls);
+    return vm_decode_func_from_name(
+      name, ar, forwarding, this_, cls, ctx, cc, flags);
   }
   if (function.isObject()) {
     this_ = function.asCObjRef().get();
@@ -437,84 +646,54 @@ vm_decode_function(const Variant& function,
     return f;
   }
   if (flags == DecodeFlags::Warn) {
-    throw_invalid_argument("function: not string, closure, or array");
+    raise_invalid_argument_warning("function: not string, closure, or array");
   }
   return nullptr;
 }
 
-Variant vm_call_user_func(const Variant& function, const Variant& params,
-                          bool forwarding /* = false */,
-                          bool checkRef /* = false */) {
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  CallerFrame cf;
-  StringData* invName = nullptr;
-  bool dynamic;
-  const Func* f = vm_decode_function(function, cf(), forwarding,
-                                     obj, cls, invName, dynamic);
-  if (f == nullptr || (!isContainer(params) && !params.isNull())) {
+Variant vm_call_user_func(const_variant_ref function, const Variant& params,
+                          bool checkRef /* = false */,
+                          bool allowDynCallNoPointer /* = false */) {
+  CallCtx ctx;
+  vm_decode_function(function, ctx);
+  if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf,
-                          false, dynamic, checkRef)
+    g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
+                          ctx.dynamic, checkRef, allowDynCallNoPointer)
   );
-  if (UNLIKELY(ret.getRawType() == KindOfRef)) {
-    tvUnbox(*ret.asTypedValue());
-  }
   return ret;
 }
 
-static Variant invoke_failed(const char *func,
-                             bool fatal /* = true */) {
-  if (fatal) {
-    throw ExtendedException("(1) call the function without enough arguments OR "
-                            "(2) Unable to find function \"%s\" OR "
-                            "(3) function was not in invoke table OR "
-                            "(4) function was renamed to something else.",
-                            func);
-  }
-  raise_warning("call_user_func to non-existent function %s", func);
-  return false;
-}
-
-static Variant
-invoke(const String& function, const Variant& params, strhash_t /*hash*/,
-       bool /*tryInterp*/, bool fatal, bool useWeakTypes = false) {
-  Func* func = Unit::loadFunc(function.get());
+Variant
+invoke(const String& function, const Variant& params,
+       bool allowDynCallNoPointer /* = false */) {
+  Func* func = Func::load(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
-      g_context->invokeFunc(func, params, nullptr, nullptr,
-                            nullptr, nullptr, ExecutionContext::InvokeNormal,
-                            useWeakTypes)
+      g_context->invokeFunc(func, params, nullptr, nullptr, true, false,
+                            allowDynCallNoPointer)
+
     );
-    if (UNLIKELY(ret.getRawType() == KindOfRef)) {
-      tvUnbox(*ret.asTypedValue());
-    }
     return ret;
   }
-  return invoke_failed(function.c_str(), fatal);
-}
-
-// Declared in externals.h.  If you're considering calling this
-// function for some new code, please reconsider.
-Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */,
-               bool useWeakTypes /* = false */) {
-  String funcName(function, CopyString);
-  return invoke(funcName, params, hash, tryInterp, fatal, useWeakTypes);
+  throw ExtendedException("(1) call the function without enough arguments OR "
+                          "(2) Unable to find function \"%s\" OR "
+                          "(3) function was not in invoke table OR "
+                          "(4) function was renamed to something else.",
+                          function.c_str());
 }
 
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal /* = true */) {
-  HPHP::Class* class_ = Unit::lookupClass(s.get());
+  HPHP::Class* class_ = Class::lookup(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
   const HPHP::Func* f = class_->lookupMethod(method.get());
-  if (f == nullptr || !(f->attrs() & AttrStatic) ||
+  if (f == nullptr || !f->isStaticInPrologue() ||
     (!isContainer(params) && !params.isNull())) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
@@ -522,9 +701,6 @@ Variant invoke_static_method(const String& s, const String& method,
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, nullptr, class_)
   );
-  if (UNLIKELY(ret.getRawType() == KindOfRef)) {
-    tvUnbox(*ret.asTypedValue());
-  }
   return ret;
 }
 
@@ -542,54 +718,20 @@ Variant o_invoke_failed(const char *cls, const char *meth,
   }
 }
 
-template<class EF, class NF>
-void missing_this_check_helper(const Func* f, EF ef, NF nf) {
-  if (f->attrs() & AttrRequiresThis) {
-    ef();
-    return;
-  }
-
-  if (RuntimeOption::EvalRaiseMissingThis && !f->isStatic()) {
-    nf();
-    return;
-  }
-}
-
-void raise_missing_this(const Func* f) {
-  missing_this_check_helper(
-    f,
-    [&] {
-      raise_error("Non-static method %s() cannot be called statically",
-                  f->fullName()->data());
-    },
-    [&] {
-      auto constexpr msg =
-        "Non-static method %s() should not be called statically";
-
-      if (RuntimeOption::PHP7_DeprecationWarnings) {
-        raise_deprecated(msg, f->fullName()->data());
-      } else {
-        raise_strict_warning(msg, f->fullName()->data());
-      }
-    });
-}
-
-bool needs_missing_this_check(const Func* f) {
-  bool ret = false;
-  missing_this_check_helper(
-    f,
-    [&] { ret = true; },
-    [&] { ret = true; }
+void throw_has_this_need_static(const Func* f) {
+  auto const msg = folly::sformat(
+    "Static method {}() cannot be called on instance",
+    f->fullName()->data()
   );
-  return ret;
+  SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
-void NEVER_INLINE raise_null_object_prop() {
-  raise_notice("Trying to get property of non-object");
-}
-
-void NEVER_INLINE throw_null_get_object_prop() {
-  raise_error("Trying to get property of non-object");
+void throw_missing_this(const Func* f) {
+  auto const msg = folly::sformat(
+    "Non-static method {}() cannot be called statically",
+    f->fullName()->data()
+  );
+  SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
 void NEVER_INLINE throw_invalid_property_name(const String& name) {
@@ -600,9 +742,19 @@ void NEVER_INLINE throw_invalid_property_name(const String& name) {
 }
 
 void throw_instance_method_fatal(const char *name) {
-  if (!strstr(name, "::__destruct")) {
-    raise_error("Non-static method %s() cannot be called statically", name);
-  }
+  raise_error("Non-static method %s() cannot be called statically", name);
+}
+
+void throw_call_reified_func_without_generics(const Func* f) {
+  auto const msg = folly::sformat(
+    "Cannot call the reified function '{}' without the reified generics",
+    f->fullName()->data()
+  );
+  SystemLib::throwBadMethodCallExceptionObject(msg);
+}
+
+void throw_implicit_context_exception(std::string s) {
+  SystemLib::throwInvalidOperationExceptionObject(s);
 }
 
 void throw_iterator_not_valid() {
@@ -624,16 +776,20 @@ void throw_invalid_operation_exception(StringData* str) {
   SystemLib::throwInvalidOperationExceptionObject(Variant{str});
 }
 
-void throw_arithmetic_error(StringData* str) {
-  SystemLib::throwArithmeticErrorObject(Variant{str});
-}
-
-void throw_division_by_zero_error(StringData *str) {
-  SystemLib::throwDivisionByZeroErrorObject(Variant{str});
+void throw_division_by_zero_exception() {
+  SystemLib::throwDivisionByZeroExceptionObject();
 }
 
 void throw_collection_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithCollection);
+}
+
+void throw_varray_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithVArray);
+}
+
+void throw_darray_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDArray);
 }
 
 void throw_vec_compare_exception() {
@@ -644,8 +800,36 @@ void throw_dict_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDict);
 }
 
+void throw_record_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRecord);
+}
+
+void throw_rfunc_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRFunc);
+}
+
+void throw_rec_non_rec_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithNonRecord);
+}
+
 void throw_keyset_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithKeyset);
+}
+
+void throw_clsmeth_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithClsMeth);
+}
+
+void throw_rclsmeth_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRClsMeth);
+}
+
+void throw_arr_non_arr_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithNonArr);
+}
+
+void throw_func_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithFunc);
 }
 
 void throw_param_is_not_container() {
@@ -668,6 +852,14 @@ void throw_cannot_modify_immutable_object(const char* className) {
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
+void throw_cannot_modify_const_object(const char* className) {
+  auto msg = folly::sformat(
+    "Cannot modify const object of type {}",
+    className
+  );
+  SystemLib::throwInvalidOperationExceptionObject(msg);
+}
+
 void throw_object_forbids_dynamic_props(const char* className) {
   auto msg = folly::sformat(
     "Class {} does not allow use of dynamic (non-declared) properties",
@@ -676,34 +868,51 @@ void throw_object_forbids_dynamic_props(const char* className) {
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_cannot_modify_immutable_prop(const char* className,
-                                        const char* propName)
+void throw_cannot_modify_const_prop(const char* className,
+                                    const char* propName)
 {
   auto msg = folly::sformat(
-    "Cannot modify immutable property {} of class {} after construction",
+    "Cannot modify const property {} of class {} after construction",
     propName, className
   );
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_cannot_bind_immutable_prop(const char* className,
-                                      const char* propName)
+void throw_cannot_modify_static_const_prop(const char* className,
+                                           const char* propName)
 {
   auto msg = folly::sformat(
-    "Cannot bind immutable property {} of class {}",
-    propName, className
+   "Cannot modify static const property {} of class {}.",
+   propName, className
   );
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void check_collection_compare(const ObjectData* obj) {
-  if (obj && obj->isCollection()) throw_collection_compare_exception();
+NEVER_INLINE
+void throw_late_init_prop(const Class* cls,
+                          const StringData* propName,
+                          bool isSProp) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    folly::sformat(
+      "Accessing <<__LateInit>> {} '{}::{}' before initialization",
+      isSProp ? "static property" : "property",
+      cls->name(),
+      propName
+    )
+  );
 }
 
-void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2) {
-  if (obj1 && obj2 && (obj1->isCollection() || obj2->isCollection())) {
-    throw_collection_compare_exception();
+NEVER_INLINE
+void throw_parameter_wrong_type(TypedValue tv,
+                                const Func* callee,
+                                unsigned int arg_num,
+                                const StringData* expected_type) {
+  auto const msg = param_type_error_message(
+    callee->name()->data(), arg_num, expected_type->data(), tv);
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    SystemLib::throwTypeErrorObject(msg);
   }
+  SystemLib::throwRuntimeExceptionObject(msg);
 }
 
 void check_collection_cast_to_array() {
@@ -762,72 +971,17 @@ bool is_constructor_name(const char* fn) {
   return false;
 }
 
-void throw_wrong_argument_count_nr(const char *fn, int expected, int got,
-                                   const char *expectDesc,
-                                   int level /* = 0 */,
-                                   TypedValue *rv /* = nullptr */) {
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
-  std::string msg;
-  if (expected == 1) {
-    msg = (boost::format(Strings::MISSING_ARGUMENT) %
-           fn % expectDesc % got).str();
-  } else {
-    msg = (boost::format(Strings::MISSING_ARGUMENTS) %
-           fn % expectDesc % expected % got).str();
-  }
-
-  if (level == 2) {
-    raise_error(msg);
-  } else {
-    if (is_constructor_name(fn)) {
-      SystemLib::throwExceptionObject(msg);
-    }
-    raise_warning(msg);
-  }
+void throw_missing_arguments_nr(const char *fn, int expected, int got) {
+  SystemLib::throwRuntimeExceptionObject(folly::sformat(
+    "{}() expects exactly {} parameter{}, {} given",
+    fn,
+    expected,
+    expected == 1 ? "" : "s",
+    got
+  ));
 }
 
-void throw_missing_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */,
-                                TypedValue *rv /* = nullptr */) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
-}
-
-void throw_toomany_arguments_nr(const char *fn, int expected, int got,
-                                int level /* = 0 */,
-                                TypedValue *rv /* = nullptr */) {
-  throw_wrong_argument_count_nr(fn, expected, got, "exactly", level, rv);
-}
-
-void throw_wrong_arguments_nr(const char *fn, int count, int cmin, int cmax,
-                              int level /* = 0 */,
-                              TypedValue *rv /* = nullptr */) {
-  if (cmin >= 0 && count < cmin) {
-    if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmin, count, "at least", level, rv);
-    } else {
-      throw_wrong_argument_count_nr(fn, cmin, count, "exactly", level, rv);
-    }
-    return;
-  }
-  if (cmax >= 0 && count > cmax) {
-    if (cmin != cmax) {
-      throw_wrong_argument_count_nr(fn, cmax, count, "at most", level, rv);
-    } else {
-      throw_wrong_argument_count_nr(fn, cmax, count, "exactly", level, rv);
-    }
-    return;
-  }
-  if (rv != nullptr) {
-    rv->m_data.num = 0LL;
-    rv->m_type = KindOfNull;
-  }
-  assert(false);
-}
-
-void throw_bad_type_exception(const char *fmt, ...) {
+void raise_bad_type_warning(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string msg;
@@ -837,29 +991,29 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
-void throw_expected_array_exception(const char* fn /*=nullptr*/) {
+void raise_expected_array_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
     if (auto ar = g_context->getStackFrame()) {
-     fn = ar->m_func->name()->data();
+     fn = ar->func()->name()->data();
     } else {
      fn = "(unknown)";
     }
   }
-  throw_bad_type_exception("%s expects array(s)", fn);
+  raise_bad_type_warning("%s expects array(s)", fn);
 }
 
-void throw_expected_array_or_collection_exception(const char* fn /*=nullptr*/) {
+void raise_expected_array_or_collection_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
     if (auto ar = g_context->getStackFrame()) {
-      fn = ar->m_func->name()->data();
+      fn = ar->func()->name()->data();
     } else {
       fn = "(unknown)";
     }
   }
-  throw_bad_type_exception("%s expects array(s) or collection(s)", fn);
+  raise_bad_type_warning("%s expects array(s) or collection(s)", fn);
 }
 
-void throw_invalid_argument(const char *fmt, ...) {
+void raise_invalid_argument_warning(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
@@ -884,16 +1038,16 @@ Variant unserialize_ex(const char* str, int len,
   Variant v;
   try {
     v = vu.unserialize();
-  } catch (FatalErrorException &e) {
+  } catch (FatalErrorException& e) {
     throw;
-  } catch (InvalidAllowedClassesException &e) {
+  } catch (InvalidAllowedClassesException& e) {
     raise_warning(
       "unserialize(): allowed_classes option should be array or boolean"
     );
     return false;
-  } catch (Exception &e) {
-    raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
-                 e.getMessage().c_str());
+  } catch (Exception& e) {
+    raise_notice("Unable to unserialize: [%.*s]. %s.",
+                 std::min(len, 1000), str, e.getMessage().c_str());
     return false;
   }
   return v;
@@ -937,12 +1091,14 @@ String concat4(const String& s1, const String& s2, const String& s3,
 }
 
 static bool invoke_file_impl(Variant& res, const String& path, bool once,
-                             const char *currentDir) {
+                             const char *currentDir,
+                             bool callByHPHPInvoke) {
   bool initial;
-  auto const u = lookupUnit(path.get(), currentDir, &initial);
+  auto const u = lookupUnit(path.get(), currentDir, &initial,
+                            Native::s_noNativeFuncs, false);
   if (u == nullptr) return false;
   if (!once || initial) {
-    *res.asTypedValue() = g_context->invokeUnit(u);
+    *res.asTypedValue() = g_context->invokeUnit(u, callByHPHPInvoke);
   }
   return true;
 }
@@ -953,21 +1109,22 @@ static NEVER_INLINE Variant throw_missing_file(const char* file) {
 
 static Variant invoke_file(const String& s,
                            bool once,
-                           const char *currentDir) {
+                           const char *currentDir,
+                           bool callByHPHPInvoke) {
   Variant r;
-  if (invoke_file_impl(r, s, once, currentDir)) {
+  if (invoke_file_impl(r, s, once, currentDir, callByHPHPInvoke)) {
     return r;
   }
   return throw_missing_file(s.c_str());
 }
 
 Variant include_impl_invoke(const String& file, bool once,
-                            const char *currentDir) {
+                            const char *currentDir, bool callByHPHPInvoke) {
   if (FileUtil::isAbsolutePath(file.toCppString())) {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {
-        return invoke_file(file, once, currentDir);
-      } catch(PhpFileDoesNotExistException &e) {}
+        return invoke_file(file, once, currentDir, callByHPHPInvoke);
+      } catch(PhpFileDoesNotExistException& e) {}
     }
 
     try {
@@ -975,13 +1132,13 @@ Variant include_impl_invoke(const String& file, bool once,
                                            string(file.data())));
 
       // Don't try/catch - We want the exception to be passed along
-      return invoke_file(rel_path, once, currentDir);
-    } catch(PhpFileDoesNotExistException &e) {
+      return invoke_file(rel_path, once, currentDir, callByHPHPInvoke);
+    } catch(PhpFileDoesNotExistException& e) {
       throw PhpFileDoesNotExistException(file.c_str());
     }
   } else {
     // Don't try/catch - We want the exception to be passed along
-    return invoke_file(file, once, currentDir);
+    return invoke_file(file, once, currentDir, callByHPHPInvoke);
   }
 }
 
@@ -1020,6 +1177,11 @@ String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void*), void* ctx) {
   const char* c_file = file.data();
 
+  auto const getCwd = [] () -> String {
+    if (LIKELY(!g_context.isNull())) return g_context->getCwd();
+    return String(Process::CurrentWorkingDirectory, CopyString);
+  };
+
   if (!File::IsPlainFilePath(file)) {
     // URIs don't have an include path
     if (tryFile(file, ctx)) {
@@ -1036,7 +1198,7 @@ String resolve_include(const String& file, const char* currentDir,
   } else if ((c_file[0] == '.' && (c_file[1] == '/' || (
     c_file[1] == '.' && c_file[2] == '/')))) {
 
-    String path(String(g_context->getCwd() + "/" + file));
+    String path(String(getCwd() + "/" + file));
     String can_path = FileUtil::canonicalize(path);
 
     if (tryFile(can_path, ctx)) {
@@ -1044,34 +1206,36 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    auto const& includePaths = RID().getIncludePaths();
+    if (!RequestInfo::s_requestInfo.isNull()) {
+      auto const& includePaths = RID().getIncludePaths();
 
-    for (auto const& includePath : includePaths) {
-      String path("");
-      auto const is_stream_wrapper =
-        includePath.find("://") != std::string::npos;
+      for (auto const& includePath : includePaths) {
+        String path("");
+        auto const is_stream_wrapper =
+          includePath.find("://") != std::string::npos;
 
-      if (!is_stream_wrapper && !FileUtil::isAbsolutePath(includePath)) {
-        path += (g_context->getCwd() + "/");
-      }
+        if (!is_stream_wrapper && !FileUtil::isAbsolutePath(includePath)) {
+          path += (getCwd() + "/");
+        }
 
-      path += includePath;
+        path += includePath;
 
-      if (path[path.size() - 1] != '/') {
-        path += "/";
-      }
+        if (path[path.size() - 1] != '/') {
+          path += "/";
+        }
 
-      path += file;
+        path += file;
 
-      String can_path;
-      if (!is_stream_wrapper) {
-        can_path = FileUtil::canonicalize(path);
-      } else {
-        can_path = String(path.c_str());
-      }
+        String can_path;
+        if (!is_stream_wrapper) {
+          can_path = FileUtil::canonicalize(path);
+        } else {
+          can_path = String(path.c_str());
+        }
 
-      if (tryFile(can_path, ctx)) {
-        return can_path;
+        if (tryFile(can_path, ctx)) {
+          return can_path;
+        }
       }
     }
 
@@ -1085,7 +1249,7 @@ String resolve_include(const String& file, const char* currentDir,
         return can_path;
       }
     } else {
-      String path(g_context->getCwd() + "/" + currentDir + file);
+      String path(getCwd() + "/" + currentDir + file);
       String can_path = FileUtil::canonicalize(path);
 
       if (tryFile(can_path, ctx)) {
@@ -1128,9 +1292,9 @@ Variant require(const String& file,
 }
 
 bool function_exists(const String& function_name) {
-  auto f = Unit::lookupFunc(function_name.get());
+  auto f = Func::lookup(function_name.get());
   return (f != nullptr) &&
-         (f->builtinFuncPtr() != Native::unimplementedWrapper);
+         (f->arFuncPtr() != Native::unimplementedWrapper);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

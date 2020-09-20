@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function i1() {
         echo "i1\n";
@@ -29,15 +29,14 @@ function i6() {
         echo "i6\n";
         return 0;
 }
-
-$a = array(array(0));
-$b = array(array(1));
-$c = array(array(2));
+<<__EntryPoint>> function main(): void {
+$a = varray[varray[0]];
+$b = varray[varray[1]];
+$c = varray[varray[2]];
 
 $a[i1()][i2()] = $b[i3()][i4()] = $c[i5()][i6()];
 
 var_dump($a);
 var_dump($b);
 var_dump($c);
-
-?>
+}

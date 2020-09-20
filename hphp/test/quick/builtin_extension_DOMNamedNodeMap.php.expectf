@@ -1,25 +1,20 @@
 DOMNamedNodeMap
-object(DOMNamedNodeMap)#1 (0) {
+object(DOMNamedNodeMap) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class DOMNamedNodeMap in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(5) {
-  [0]=>
+varray(5) {
   string(11) "__construct"
-  [1]=>
   string(12) "getNamedItem"
-  [2]=>
   string(14) "getNamedItemNS"
-  [3]=>
   string(4) "item"
-  [4]=>
   string(11) "getIterator"
 }
 ================
 A_DOMNamedNodeMap
-object(A_DOMNamedNodeMap)#2 (1) {
+object(A_DOMNamedNodeMap) (1) {
   ["___x"]=>
   NULL
 }
@@ -27,15 +22,10 @@ object(A_DOMNamedNodeMap)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_DOMNamedNodeMap in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(5) {
-  [0]=>
+varray(5) {
   string(11) "__construct"
-  [1]=>
   string(12) "getNamedItem"
-  [2]=>
   string(14) "getNamedItemNS"
-  [3]=>
   string(4) "item"
-  [4]=>
   string(11) "getIterator"
 }

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/tv-type.h"
 
@@ -38,19 +38,29 @@ const EnumValues* EnumCache::getValues(const Class* klass,
     EnumCache::failLookup(msg);
   }
   if (LIKELY(!recurse)) {
-    if (auto values = klass->getEnumValues()) {
-      return values;
-    }
+    if (auto const values = klass->getEnumValues()) return values;
   }
   return s_cache.getEnumValues(klass, recurse);
 }
 
 const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
-  assert(isEnum(klass));
-  if (auto values = klass->getEnumValues()) {
-    return values;
-  }
+  assertx(isEnum(klass));
+  if (auto const values = klass->getEnumValues()) return values;
   return s_cache.getEnumValues(klass, false);
+}
+
+const EnumValues* EnumCache::getValuesStatic(const Class* klass) {
+  assertx(isEnum(klass));
+  auto const result = [&]() -> const EnumValues* {
+    if (auto const values = klass->getEnumValues()) return values;
+    return s_cache.getEnumValues(klass, false, true);
+  }();
+  if (!result) return nullptr;
+  assertx(result->names->isStatic());
+  assertx(result->values->isStatic());
+  // Sizes may mismatch if there are duplicate names or values.
+  if (result->names->size() != result->values->size()) return nullptr;
+  return result;
 }
 
 void EnumCache::deleteValues(const Class* klass) {
@@ -77,8 +87,8 @@ const EnumValues* EnumCache::cachePersistentEnumValues(
   bool recurse,
   Array&& names,
   Array&& values) {
-  assertx(names.isDArray());
-  assertx(values.isDArray());
+  assertx(names.isHAMSafeDArray());
+  assertx(values.isHAMSafeDArray());
 
   std::unique_ptr<EnumValues> enums(new EnumValues());
   enums->values = ArrayData::GetScalarArray(std::move(values));
@@ -102,10 +112,10 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
   Array&& names,
   Array&& values) {
 
-  assertx(names.isDArray());
-  assertx(values.isDArray());
+  assertx(names.isHAMSafeDArray());
+  assertx(values.isHAMSafeDArray());
 
-  m_nonScalarEnumValuesMap.bind();
+  m_nonScalarEnumValuesMap.bind(rds::Mode::Normal, rds::LinkID{"EnumCache"});
   if (!m_nonScalarEnumValuesMap.isInit()) {
     m_nonScalarEnumValuesMap.initWith(req::make_raw<ReqEnumValuesMap>());
   }
@@ -121,8 +131,8 @@ const EnumValues* EnumCache::cacheRequestEnumValues(
   return enums;
 }
 
-const EnumValues* EnumCache::loadEnumValues(const Class* klass,
-                                            bool recurse) {
+const EnumValues* EnumCache::loadEnumValues(
+    const Class* klass, bool recurse, bool require_static) {
   auto const numConstants = klass->numConstants();
   auto values = Array::CreateDArray();
   auto names = Array::CreateDArray();
@@ -135,34 +145,45 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
     if (consts[i].cls != klass && !recurse) {
       continue;
     }
-    Cell value = consts[i].val;
-    // Handle dynamically set constants
+    TypedValue value = consts[i].val;
+    // Handle dynamically set constants. We can't get a static value here.
     if (value.m_type == KindOfUninit) {
+      if (require_static) return nullptr;
       persist = false;
       value = klass->clsCnsGet(consts[i].name);
     }
-    assert(value.m_type != KindOfUninit);
+    assertx(value.m_type != KindOfUninit);
     if (UNLIKELY(!(isIntType(value.m_type) || tvIsString(&value)))) {
-      // only int and string values allowed for enums.
+      // Enum values must be ints or strings. We can't get a static value here.
+      if (require_static) return nullptr;
       std::string msg;
       msg += klass->name()->data();
       msg += " enum can only contain string and int values";
       EnumCache::failLookup(msg);
     }
-    values.set(StrNR(consts[i].name), cellAsCVarRef(value));
+    values.set(StrNR(consts[i].name), tvAsCVarRef(value));
 
     // Manually perform int-like key coercion even if names is a dict for
     // backwards compatibility.
     int64_t n;
-    if (tvIsString(&value) && value.m_data.pstr->isStrictlyInteger(n)) {
+    if (tvIsString(&value) &&
+        value.m_data.pstr->isStrictlyInteger(n)) {
       names.set(n, make_tv<KindOfPersistentString>(consts[i].name));
     } else {
       names.set(value, make_tv<KindOfPersistentString>(consts[i].name), true);
     }
   }
 
-  assertx(names.isDArray());
-  assertx(values.isDArray());
+  assertx(names.isHAMSafeDArray());
+  assertx(values.isHAMSafeDArray());
+
+  // Tag all enums with the large enum tag. Small enums will be tagged again
+  // based on the actual PC by the reflection methods that access this cache.
+  if (RO::EvalArrayProvenance) {
+    auto const tag = arrprov::Tag::LargeEnum(klass->name());
+    arrprov::setTag(names.get(), tag);
+    arrprov::setTag(values.get(), tag);
+  }
 
   // If we saw dynamic constants we cannot cache the enum values across requests
   // as they may not be the same in every request.
@@ -198,14 +219,11 @@ const EnumValues* EnumCache::getEnumValuesIfDefined(
   return nullptr;
 }
 
-const EnumValues* EnumCache::getEnumValues(const Class* klass,
-                                           bool recurse) {
-  const EnumValues* values =
-      getEnumValuesIfDefined(getKey(klass, recurse));
-  if (values == nullptr) {
-    values = loadEnumValues(klass, recurse);
-  }
-  return values;
+const EnumValues* EnumCache::getEnumValues(
+    const Class* klass, bool recurse, bool require_static) {
+  auto const values = getEnumValuesIfDefined(getKey(klass, recurse));
+  if (values && require_static && !values->names->isStatic()) return nullptr;
+  return values ? values : loadEnumValues(klass, recurse, require_static);
 }
 
 void EnumCache::deleteEnumValues(intptr_t key) {
@@ -214,6 +232,15 @@ void EnumCache::deleteEnumValues(intptr_t key) {
     delete acc->second;
     m_enumValuesMap.erase(acc);
   }
+}
+
+Array EnumCache::tagEnumWithProvenance(Array input) {
+  assertx(IMPLIES(arrprov::arrayWantsTag(input.get()),
+                  arrprov::getTag(input.get())));
+  if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
+  auto const ad = input->copy();
+  arrprov::setTag(ad, arrprov::tagFromPC());
+  return Array::attach(ad);
 }
 
 //////////////////////////////////////////////////////////////////////

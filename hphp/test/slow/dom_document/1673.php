@@ -1,5 +1,15 @@
-<?php
+<?hh
 
+function dump($elems) {
+ foreach ($elems as $elem) {
+  var_dump($elem->nodeName);
+  dump($elem->childNodes);
+}
+}
+
+
+<<__EntryPoint>>
+function main_1673() {
 $xml = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo xmlns="http://www.example.com/ns/foo"
@@ -11,13 +21,6 @@ $xml = <<<HERE
 </foo>
 HERE;
 
-function dump($elems) {
- foreach ($elems as $elem) {
-  var_dump($elem->nodeName);
-  dump($elem->childNodes);
-}
-}
-
 $dom = new DOMDocument();
 $dom->loadXML($xml);
 $doc = $dom->documentElement;
@@ -25,3 +28,4 @@ dump($dom->getElementsByTagName('bar'));
 dump($doc->getElementsByTagName('bar'));
 dump($dom->getElementsByTagNameNS('http://www.example.com/ns/fubar', 'bar'));
 dump($doc->getElementsByTagNameNS('http://www.example.com/ns/fubar', 'bar'));
+}

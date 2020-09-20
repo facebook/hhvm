@@ -3,7 +3,7 @@
 class C { public $heh; }
 
 function test_array() {
-  $arr = array('lol' => 'sup');
+  $arr = __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['lol' => 'sup']);
   $in = serialize($arr);
   return unserialize($in);
 }
@@ -26,4 +26,8 @@ function main() {
   test_prop_order();
 }
 
+
+<<__EntryPoint>>
+function main_serialize() {
 main();
+}

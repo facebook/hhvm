@@ -1,26 +1,16 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1465() {
 $i = 2;
 if ($i == 1) {
-  class foo {
-    function foo() {
-      echo "foo 1";
-    }
-    function bar() {
-      echo "bar 1";
-    }
-  }
+  include '1465-1.inc';
 }
  else {
-  class foo {
-    function foo() {
-      echo "foo 2";
-    }
-    function bar() {
-      echo "bar 2";
-    }
-  }
+  include '1465-2.inc';
 }
 $t = new foo();
-$t->foo();
+$t->__construct();
 $t->bar();
+}

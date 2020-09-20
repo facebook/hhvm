@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -31,11 +31,11 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
+#include <folly/tracing/StaticTracepoint.h>
+
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
-
-CompileStringFn g_hphp_compiler_parse;
 
 /**
  * print_string will decRef the string
@@ -66,15 +66,20 @@ void print_boolean(bool val) {
  */
 StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->cowCheck()) {
+    FOLLY_SDT(hhvm, hhvm_cow_concat, v1->size(), v2->size());
     StringData* ret = StringData::Make(v1, v2);
     // Because v1 was shared, we know this won't release the string.
     v1->decRefCount();
     return ret;
   }
 
-  auto const ret = v1->append(v2->slice());
+  auto const rhs = v2->slice();
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, rhs.size());
+  auto const ret = v1->append(rhs);
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -100,15 +105,19 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
   if (v1->cowCheck()) {
     auto const s1 = v1->slice();
+    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size());
     auto const ret = StringData::Make(s1, s2);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
 
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, s2.size());
   auto const ret = v1->append(s2);
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -116,17 +125,22 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 
 StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   if (v1->cowCheck()) {
-    StringData* ret = StringData::Make(
-      v1->slice(), v2->slice(), v3->slice());
+    auto s1 = v1->slice();
+    auto s2 = v2->slice();
+    auto s3 = v3->slice();
+    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size());
+    StringData* ret = StringData::Make(s1, s2, s3);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
 
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size());
   auto const ret = v1->append(v2->slice(), v3->slice());
-
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -135,89 +149,28 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
 StringData* concat_s4(StringData* v1, StringData* v2,
                       StringData* v3, StringData* v4) {
   if (v1->cowCheck()) {
-    StringData* ret = StringData::Make(
-        v1->slice(), v2->slice(), v3->slice(), v4->slice());
+    auto s1 = v1->slice();
+    auto s2 = v2->slice();
+    auto s3 = v3->slice();
+    auto s4 = v4->slice();
+    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(),
+              s2.size() + s3.size() + s4.size());
+    StringData* ret = StringData::Make(s1, s2, s3, s4);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
 
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize,
+            v2->size() + v3->size() + v4->size());
   auto const ret = v1->append(v2->slice(), v3->slice(), v4->slice());
-
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
-}
-
-Unit* compile_file(const char* s, size_t sz, const MD5& md5,
-                   const char* fname, Unit** releaseUnit) {
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
-}
-
-Unit* compile_string(const char* s,
-                     size_t sz,
-                     const char* fname,
-                     Unit** releaseUnit) {
-  auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
-  if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
-    return u;
-  }
-  // NB: fname needs to be long-lived if generating a bytecode repo because it
-  // can be cached via a Location ultimately contained by ErrorInfo for printing
-  // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
-}
-
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
-  if (RuntimeOption::RepoAuthoritative) {
-    String systemName = String("/:") + fname;
-    auto md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s,sz}))};
-    if (Repo::get().findFile(systemName.data(),
-                             SourceRootInfo::GetCurrentSourceRoot(),
-                             md5) == RepoStatus::success) {
-      if (auto u = Repo::get().loadUnit(fname, md5)) {
-        return u.release();
-      }
-    }
-  }
-  return compile_string(s, sz, fname);
-}
-
-int init_closure(ActRec* ar, TypedValue* sp) {
-  auto closure = c_Closure::fromObject(ar->getThis());
-
-  // Put in the correct context
-  ar->m_func = closure->getInvokeFunc();
-
-  if (ar->func()->cls()) {
-    // Swap in the $this or late bound class or null if it is ony from a plain
-    // function or pseudomain
-    ar->setThisOrClass(closure->getThisOrClass());
-
-    if (ar->hasThis()) {
-      ar->getThis()->incRefCount();
-    }
-  } else {
-    ar->trashThis();
-  }
-
-  // The closure is the first local.
-  // Similar to tvWriteObject() but we don't incref because it used to be $this
-  // and now it is a local, so they cancel out
-  TypedValue* firstLocal = --sp;
-  firstLocal->m_type = KindOfObject;
-  firstLocal->m_data.pobj = closure;
-
-  // Copy in all the use vars
-  TypedValue* prop = closure->getUseVars();
-  int n = closure->getNumUseVars();
-  for (int i=0; i < n; i++) {
-    tvDup(*prop++, *--sp);
-  }
-
-  return n + 1;
 }
 
 void raiseWarning(const StringData* sd) {
@@ -228,49 +181,85 @@ void raiseNotice(const StringData* sd) {
   raise_notice("%s", sd->data());
 }
 
-void raiseArrayIndexNotice(const int64_t index, bool isInOut) {
-  raise_notice("Undefined index%s: %" PRId64,
-               isInOut ? " on inout parameter" : "", index);
+void throwArrayIndexException(const ArrayData* ad, const int64_t index) {
+  throwOOBArrayKeyException(index, ad);
 }
 
-void raiseArrayKeyNotice(const StringData* key, bool isInOut) {
-  raise_notice("Undefined index%s: %s",
-               isInOut ? " on inout parameter" : "", key->data());
+void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
+  assertx(ad->isDArray() || ad->isDictType());
+  throwOOBArrayKeyException(key, ad);
 }
 
-std::string formatParamRefMismatch(const char* fname, uint32_t index,
+std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                    bool funcByRef) {
   if (funcByRef) {
     return folly::sformat(
-      "{}() expects parameter {} by reference, but the call was "
-      "not annotated with '&'", fname, index + 1
+      "{}() expects parameter {} to be inout, but the call was "
+      "not annotated with 'inout'", fname, index + 1
     );
   } else {
     return folly::sformat(
-      "{}() expects parameter {} by value, but the call was "
-      "annotated with '&'", fname, index + 1
+      "{}() does not expect parameter {} to be inout, but the call was "
+      "annotated with 'inout'", fname, index + 1
     );
   }
 }
 
-void raiseParamRefMismatch(uint32_t index, const Func* func) {
-  raise_warning(
-    formatParamRefMismatch(func->fullDisplayName()->data(),
-                           index, func->byRef(index))
+void throwParamInOutMismatch(const Func* func, uint32_t index) {
+  SystemLib::throwInvalidArgumentExceptionObject(formatParamInOutMismatch(
+    func->fullName()->data(), index, func->isInOut(index)));
+}
+
+void throwParamInOutMismatchRange(const Func* func, unsigned firstVal,
+                                  uint64_t mask, uint64_t vals) {
+  for (auto i = 0; i < 64; ++i) {
+    if (mask & (1UL << i)) {
+      bool isInOut = vals & (1UL << i);
+      if (func->isInOut(firstVal + i) != isInOut) {
+        throwParamInOutMismatch(func, firstVal + i);
+      }
+    }
+  }
+
+  // Caller guarantees at least one parameter with inout-ness mismatch.
+  not_reached();
+}
+
+void throwInvalidUnpackArgs() {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Only containers may be unpacked");
+}
+
+void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
+  assertx(RuntimeOption::EvalPureEnforceCalls > 0);
+  auto const callerIsPure = caller->func()->rxLevel() == RxLevel::Pure;
+  auto const errMsg = folly::sformat(
+    "Call to {} '{}' from {} '{}' violates {} constraints.",
+    rxLevelToString(callee->rxLevel()),
+    callee->fullName()->data(),
+    rxLevelToString(caller->rxMinLevel()),
+    caller->func()->fullName()->data(),
+    callerIsPure ? "purity" : "reactivity"
   );
+  if (RuntimeOption::EvalRxEnforceCalls >= 2 ||
+      (callerIsPure && RuntimeOption::EvalPureEnforceCalls >= 2)) {
+    SystemLib::throwBadMethodCallExceptionObject(errMsg);
+  } else {
+    raise_warning(errMsg);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {
-  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   auto level = id.getErrorReportingLevel();
   id.setErrorReportingLevel(0);
   return level;
 }
 
 void restore_error_level(int64_t oldLevel) {
-  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   if (id.getErrorReportingLevel() == 0) {
     id.setErrorReportingLevel(oldLevel);
   }

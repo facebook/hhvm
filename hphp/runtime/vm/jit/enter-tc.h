@@ -14,46 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ENTER_TC_H_
-#define incl_HPHP_JIT_ENTER_TC_H_
+#pragma once
 
-#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
 
 struct ActRec;
 
-namespace jit { namespace detail {
+namespace jit {
+
 /*
  * Main entry point for the translator from the bytecode interpreter.  It
  * operates on behalf of a given nested invocation of the intepreter (calling
  * back into it as necessary for blocks that need to be interpreted).
- *
- * If `start' is the address of a func prologue, `stashedAR' should be the
- * ActRec prepared for the call to that function.  Otherwise it should be
- * nullptr.
- *
- * But don't call it directly, use one of the helpers below.
  */
-void enterTC(TCA start, ActRec* stashedAR);
-}
-
-inline void enterTC() {
-  detail::enterTC(tc::ustubs().resumeHelper, nullptr);
-}
-
-inline void enterTCAtPrologue(ActRec* ar, TCA start) {
-  assertx(ar);
-  assertx(start);
-  detail::enterTC(start, ar);
-}
-
-inline void enterTCAfterPrologue(TCA start) {
-  assertx(start);
-  detail::enterTC(start, nullptr);
-}
+void enterTC(TCA start);
 
 }}
-
-#endif

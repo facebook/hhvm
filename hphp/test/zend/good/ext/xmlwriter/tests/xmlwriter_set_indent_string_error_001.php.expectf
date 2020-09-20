@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: xmlwriter_set_indent_string() expects exactly 2 parameters, 1 given in %s/xmlwriter_set_indent_string_error_001.php on line 7

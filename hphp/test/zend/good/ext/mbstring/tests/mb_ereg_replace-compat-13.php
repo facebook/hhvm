@@ -1,4 +1,5 @@
-<?php
+<?hh
 /* (counterpart: ext/standard/tests/reg/016.phpt) */
-  echo mb_ereg_replace('\?',"abc","?123?");
-?>
+<<__EntryPoint>> function main(): void {
+echo mb_ereg_replace('\?',"abc","?123?");
+}

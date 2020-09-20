@@ -1,13 +1,5 @@
 # Some tests for catch regions.
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Int 1
-  RetC
-}
-
 .function throw_stuff($msg) {
   .try {
     String "about to throw: "
@@ -18,10 +10,14 @@
     Print
     PopC
 
-    FPushCtorD 1 "Exception"
-    FPassL 0 $msg Any
-    FCall 1
-    PopR
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    CGetL $msg
+    FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+    PopC
+    LockObj
     Throw
   } .catch {
     String "throw_stuff's exception handler ...\n"
@@ -41,11 +37,12 @@
     Print
     PopC
 
-    FPushFuncD 1 "throw_stuff"
+    NullUninit
+    NullUninit
+    NullUninit
     String "the message"
-    FPassC 0 Any
-    FCall 1
-    PopR
+    FCallFuncD <> 1 1 "" - "" "throw_stuff"
+    PopC
 
     String "unreached\n"
     Print
@@ -77,19 +74,30 @@ repeat:
              CGetL $counter
              Switch Unbounded 0 <make_one make_two make_three>
 
-make_one:    FPushCtorD 0 "One"
-             FCall 0
-             PopR
+make_one:    NewObjD "One"
+             Dup
+             NullUninit
+             NullUninit
+             FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+             PopC
+             LockObj
              Throw
-make_two:    FPushCtorD 0 "Two"
-             FCall 0
-             PopR
+make_two:    NewObjD "Two"
+             Dup
+             NullUninit
+             NullUninit
+             FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+             PopC
+             LockObj
              Throw
-make_three:  FPushCtorD 1 "Three"
+make_three:  NewObjD "Three"
+             Dup
+             NullUninit
+             NullUninit
              String "third exception from throw_various"
-             FPassC 0 Any
-             FCall 1
-             PopR
+             FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+             PopC
+             LockObj
              Throw
            } .catch {
              Dup
@@ -125,25 +133,27 @@ on_three:    String "three\n"
            }
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
          False
          SetL $ever_caught
          PopC
+         NullUninit
+         NullUninit
+         NullUninit
          String "foo"
 
 resume:  .try {
-           FPushFunc 0
-           FCall 0
-           PopR
+           FCallFunc <> 0 1 "" - ""
+           PopC
            Jmp resume2
          } .catch {
            SetL $ex
            PopC
            String "top-level catch handler got: "
            PushL $ex
-           FPushObjMethodD 0 "getMessage" NullThrows
-           FCall 0
-           UnboxR
+           NullUninit
+           NullUninit
+           FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
            Concat
            String "\n"
            Concat
@@ -155,6 +165,9 @@ resume:  .try {
            SetL $ever_caught
            PopC
            JmpNZ resume2
+           NullUninit
+           NullUninit
+           NullUninit
            String "throw_various"
            Jmp resume
          }

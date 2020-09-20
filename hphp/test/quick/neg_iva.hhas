@@ -1,6 +1,6 @@
 #tests that files with negative IVA values fail assembly
 
-.main {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $foo $baz $t;
   Null
   SetL $foo
@@ -21,10 +21,12 @@
   Dim Define ET:"q"
   SetM -1 PC:1
   PopC
-  FPushFuncD 1 "var_dump"
-  FPassL 0 $foo Any
-  FCall 1
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $foo
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
   Int 1
   RetC
 }

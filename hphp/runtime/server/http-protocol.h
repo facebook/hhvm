@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_PROTOCOL_H_
-#define incl_HPHP_HTTP_PROTOCOL_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 
@@ -35,9 +34,9 @@ struct HttpProtocol {
                                      const RequestURI &r,
                                      const SourceRootInfo &sri);
   static void PrepareRequestVariables(Array& request,
-                                      Array& get,
-                                      Array& post,
-                                      Array& cookie,
+                                      const Array& get,
+                                      const Array& post,
+                                      const Array& cookie,
                                       const std::string& requestOrder);
   static void PrepareGetVariable(Array& get,
                                  const RequestURI &r);
@@ -82,4 +81,3 @@ struct HttpProtocol {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_PROTOCOL_H_

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8.0)
+project(squangle CXX C)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/squangle")
+HHVM_REMOVE_MATCHES_FROM_LISTS(files MATCHES "Benchmark.cpp$")
+add_library(squangle STATIC ${files})
+target_link_libraries(squangle fbmysqlclient folly re2)
+target_include_directories(squangle PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

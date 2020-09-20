@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -13,12 +13,12 @@ date_default_timezone_set("Asia/Calcutta");
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
-$inputs = array(
-	  'Year as decimal number without a century' => "%y",
-	  'Year as decimal number including the century' => "%Y",
-	  'Time zone offset' => "%Z",	 	
-	  'Time zone offset' => "%z",
-);
+$inputs = darray[
+      'Year as decimal number without a century' => "%y",
+      'Year as decimal number including the century' => "%Y",
+      'Time zone offset' => "%Z",
+      'Time zone offset' => "%z",
+];
 
 // loop through each element of the array for timestamp
 
@@ -28,5 +28,5 @@ foreach($inputs as $key =>$value) {
       var_dump( strftime($value, $timestamp) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

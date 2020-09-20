@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $v1 = headers_sent();
 $v2 = headers_list();
 var_dump(header("HTTP 1.0", true, 200));
@@ -17,4 +17,4 @@ var_dump(headers_sent());
 var_dump(headers_list());
 
 echo "Done\n";
-?>
+}

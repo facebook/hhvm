@@ -1,32 +1,32 @@
-object(HH\ImmVector)#2 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\ImmVector)#2 (2) {
+object(HH\ImmVector) (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\ImmMap)#3 (1) {
+object(HH\ImmMap) (1) {
   ["a"]=>
   int(2)
 }
-object(HH\ImmMap)#3 (1) {
+object(HH\ImmMap) (1) {
   ["a"]=>
   int(2)
 }
-object(HH\ImmSet)#4 (2) {
+object(HH\ImmSet) (2) {
   int(1)
   int(2)
 }
-object(HH\ImmSet)#4 (2) {
+object(HH\ImmSet) (2) {
   int(1)
   int(2)
 }
-object(HH\Pair)#4 (2) {
+object(HH\Pair) (2) {
   [0]=>
   int(1)
   [1]=>

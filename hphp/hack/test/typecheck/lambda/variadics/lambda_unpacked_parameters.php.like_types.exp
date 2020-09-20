@@ -1,0 +1,28 @@
+File "lambda_unpacked_parameters.php", line 11, characters 14-24:
+Invalid argument (Typing[4110])
+File "lambda_unpacked_parameters.php", line 11, characters 14-24:
+Expected `Traversable<[unresolved]>` (it is unpacked with `...`)
+File "lambda_unpacked_parameters.php", line 9, characters 17-17:
+But got `int`
+File "lambda_unpacked_parameters.php", line 15, characters 14-14:
+Invalid argument (Typing[4110])
+File "lambda_unpacked_parameters.php", line 14, characters 28-29:
+Expected `string` (variadic argument)
+File "lambda_unpacked_parameters.php", line 15, characters 14-14:
+But got `int`
+File "lambda_unpacked_parameters.php", line 47, characters 12-13:
+Was expecting an object but type is unknown (Typing[4297])
+File "lambda_unpacked_parameters.php", line 46, characters 18-19:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+File "lambda_unpacked_parameters.php", line 49, characters 14-17:
+Invalid argument (Typing[4359])
+File "lambda_unpacked_parameters.php", line 49, characters 14-17:
+An array cannot be unpacked into the required arguments of a function
+File "lambda_unpacked_parameters.php", line 46, characters 13-52:
+Definition is here
+File "lambda_unpacked_parameters.php", line 55, characters 14-17:
+Invalid argument (Typing[4359])
+File "lambda_unpacked_parameters.php", line 55, characters 14-17:
+An array cannot be unpacked into the required arguments of a function
+File "lambda_unpacked_parameters.php", line 52, characters 13-49:
+Definition is here

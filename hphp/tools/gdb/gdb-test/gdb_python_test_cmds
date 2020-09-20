@@ -1,0 +1,9 @@
+break HPHP::Unit::getCachedEntryPoint
+run
+unit this
+set logging on
+set pagination off
+hhx this->m_bc this->m_bc+this->m_bclen
+set logging off
+kill
+quit

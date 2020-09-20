@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $diriter = new RecursiveIteratorIterator( new RecursiveDirectoryIterator('.') );
 
 foreach ($diriter as $key => $file) {
@@ -8,5 +8,5 @@ foreach ($diriter as $key => $file) {
 	break;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

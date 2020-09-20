@@ -1,8 +1,13 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_date_sun_info() {
 date_default_timezone_set("America/Los_Angeles");
 
-var_dump(date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333));
+$sun_info = date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333);
+var_dump($sun_info);
+var_dump(is_darray($sun_info));
 
 /*
  * calculate the sunrise time for Lisbon, Portugal
@@ -13,7 +18,7 @@ var_dump(date_sun_info(strtotime("2006-12-12"), 31.7667, 35.2333));
  */
 var_dump(
   date_sunrise(strtotime("2004-12-20"), SUNFUNCS_RET_STRING,
-               38.4, -9, 90, 1)
+               38.4, -9.0, 90.0, 1.0)
 );
 
 /*
@@ -25,5 +30,6 @@ var_dump(
  */
 var_dump(
   date_sunset(strtotime("2004-12-20"), SUNFUNCS_RET_STRING,
-              38.4, -9, 90, 1)
+              38.4, -9.0, 90.0, 1.0)
 );
+}

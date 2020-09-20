@@ -1,8 +1,9 @@
-<?php
+<?hh
 
-var_dump(class_exists('C'));
-trait t {
- }
-class C {
- use t;
- }
+<<__EntryPoint>>
+function entrypoint_1868(): void {
+
+  var_dump(class_exists('C'));
+
+  require_once(__DIR__.'/1868.inc');
+}

@@ -1,9 +1,17 @@
-<?php
+<?hh
 /* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
  * Description: Return input as a new array with the order of the entries reversed
  * Source code: ext/standard/array.c
 */
 
+//get a class
+class classA
+{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_reverse() : usage variations - unexpected values for 'array' argument ***\n";
 
 //get an unset variable
@@ -13,21 +21,13 @@ unset ($unset_var);
 //get a resource variable
 $fp = fopen(__FILE__, "r");
 
-//get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
-
 //get a heredoc string
 $heredoc_string = <<<EOT
 Hello world\t\n
 EOT;
 
 //array of values to iterate over
-$arrays = array (
+$arrays = varray [
 
        // int data
 /*1*/  0,
@@ -55,12 +55,12 @@ $arrays = array (
        // empty data
 /*16*/ "",
        '',
-      
+
        // string data
        'Hello world',
        "Hello world",
        $heredoc_string,
-  
+
        // object data
 /*21*/ new classA(),
 
@@ -73,7 +73,7 @@ $arrays = array (
        // resource variable
 /*24*/ $fp
 
-);
+];
 
 // loop through each element of the array $arrays to check the behavior of array_reverse()
 $iterator = 1;
@@ -91,4 +91,4 @@ foreach($arrays as $array) {
 fclose($fp);
 
 echo "Done";
-?>
+}

@@ -8,8 +8,7 @@ function int_negone() {
   return -1;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   var_dump(int_min() % -1);
   var_dump(int_min() % int_negone());
 }
-main();

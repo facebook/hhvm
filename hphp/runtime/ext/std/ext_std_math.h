@@ -15,12 +15,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_MATH_H_
-#define incl_HPHP_EXT_MATH_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-math.h"
+#include "hphp/zend/zend-math.h"
 #include <cmath>
 
 namespace HPHP {
@@ -96,4 +95,3 @@ double HHVM_FUNCTION(lcg_value);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_MATH_H_

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TestA {
 protected static function doSomething() {
@@ -16,5 +16,9 @@ class Foo {
 public function bar() {
 }
 }
+
+<<__EntryPoint>>
+function main_1882() {
 $obj = new Foo();
 TestA::nativeTest($obj);
+}

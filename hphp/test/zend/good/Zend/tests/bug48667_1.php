@@ -1,5 +1,4 @@
-<?php
+<?hh
 
 abstract class A implements Iterator, IteratorAggregate { }
 
-?>

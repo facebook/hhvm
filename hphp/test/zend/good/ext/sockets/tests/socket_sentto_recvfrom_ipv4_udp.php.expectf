@@ -1,8 +1,4 @@
 
-Warning: %s
+Warning: socket_sendto() expects exactly 6 parameters, 5 given in %s/socket_sentto_recvfrom_ipv4_udp.php on line 11
 bool(false)
-
-Warning: %s
-
-Warning: %s
 Received Ping! from remote address 127.0.0.1 and remote port 1223

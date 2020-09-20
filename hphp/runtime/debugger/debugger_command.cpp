@@ -149,9 +149,9 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
       break;
 
     case KindOfExtended: {
-      assert(!clsname.empty());
+      assertx(!clsname.empty());
       cmd = CmdExtended::CreateExtendedCommand(clsname);
-      assert(cmd);
+      assertx(cmd);
       break;
     }
 
@@ -203,7 +203,7 @@ bool DebuggerCommand::displayedHelp(DebuggerClient& client) {
 // communicate with the client (for commands that do so).
 bool DebuggerCommand::onServer(DebuggerProxy& /*proxy*/) {
   TRACE(2, "DebuggerCommand::onServer\n");
-  assert(false);
+  assertx(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
   return false;
 }

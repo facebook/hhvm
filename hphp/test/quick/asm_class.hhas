@@ -2,18 +2,6 @@
 # Basic test of classes for hip hop assembler.
 #
 
-.main {
-  DefCls 0
-  DefCls 1
-  DefCls 2
-  DefCls 3
-  DefCls 4
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  True
-  RetC
-}
 
 .class Base {
   .method [public] __construct {
@@ -62,9 +50,10 @@
 .class Derived extends Base implements(IDunno IDunno2) {
   .method [public] some_junk {
     This
-    FPushObjMethodD 0 "prot_method" NullThrows
-    FCall 0
-    PopR
+    NullUninit
+    NullUninit
+    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "prot_method"
+    PopC
 
     Null
     RetC
@@ -92,7 +81,7 @@
     PopC
 
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PL:$name
     String "\n"
     Concat
@@ -106,7 +95,7 @@
 
   .method [public] print_defaulted {
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PT:"defaulted"
     String "\n"
     Concat
@@ -114,7 +103,7 @@
     PopC
 
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PT:"badstring"
     String "bad string\"\"\"has triple quotes"
     Eq
@@ -129,9 +118,13 @@
 }
 
 .function prop_test {
-  FPushCtorD 0 "WithProps"
-  FCall 0
-  PopR
+  NewObjD "WithProps"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
@@ -142,66 +135,81 @@
   PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "print_funk" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "print_funk"
+  PopC
 
   CGetL $obj
-  FPushObjMethodD 0 "print_defaulted" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "print_defaulted"
+  PopC
 
   True
   RetC
 }
 
-.function main {
-  .numclsrefslots 1;
-
-  FPushCtorD 0 "Base"
-  FCall 0
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  NewObjD "Base"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $base
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
+  String "printing this string"
   String "print_it"
   String "Base"
-  ClsRefGetC 0
-  FPushClsMethod 1 0
-  String "printing this string"
-  FPassC 0 Any
-  FCall 1
-  PopR
+  ClassGetC
+  FCallClsMethod <> 1 1 "" - "" "" LogAsDynamicCall
+  PopC
 
-  FPushCtorD 0 "Derived"
-  FCall 0
-  PopR
+  NewObjD "Derived"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $derived
   PopC
 
   CGetL $derived
-  FPushObjMethodD 0 "some_junk" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "some_junk"
+  PopC
 
   CGetL $base
-  FPushObjMethodD 0 "overriden" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "overriden"
+  PopC
 
   CGetL $derived
-  FPushObjMethodD 0 "overriden" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "overriden"
+  PopC
 
   CGetL $derived
-  FPushObjMethodD 0 "abs_method" NullThrows
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  FCallObjMethodD <> 0 1 "" - "" "" NullThrows "abs_method"
+  PopC
 
-  FPushFuncD 0 "prop_test"
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "prop_test"
+  PopC
 
   Int 1
   RetC

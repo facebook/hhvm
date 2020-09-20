@@ -1,0 +1,5 @@
+string(4) "val2"
+string(4) "val2"
+
+Catchable fatal error: Record field 'A::x' declared as type Alias, int assigned in %s/enum-alias-hint.php on line 19
+

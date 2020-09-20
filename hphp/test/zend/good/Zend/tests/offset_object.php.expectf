@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot use array access on an object in %s/offset_object.php on line 4

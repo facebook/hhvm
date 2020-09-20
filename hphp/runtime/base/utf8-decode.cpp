@@ -46,7 +46,7 @@ unsigned int UTF8To16Decoder::getNextChar() {
   int pos = m_cursor;
   unsigned int this_char = 0;
 
-  assert(pos <= m_strlen);
+  assertx(pos <= m_strlen);
 
   if (!CHECK_LEN(pos, 1))
     MB_FAILURE(pos, 1);

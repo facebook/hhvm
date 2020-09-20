@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Representation of date and time.
@@ -17,10 +17,10 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function add(DateInterval $interval): mixed;
+  public function add(DateInterval $interval): mixed;
 
   <<__Native>>
-  function __construct(string $time = "now",
+  public function __construct(string $time = "now",
                        ?DateTimeZone $timezone = null): void;
 
   /**
@@ -34,7 +34,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  static function createFromFormat(string $format,
+  public static function createFromFormat(string $format,
                                    string $time,
                                    ?DateTimeZone $timezone = null): mixed;
 
@@ -49,7 +49,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function diff(mixed $datetime2, mixed $absolute = false): mixed;
+  public function diff(mixed $datetime2, mixed $absolute = false): mixed;
 
   /**
    * Returns date formatted according to given format.
@@ -61,7 +61,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function format(mixed $format): string;
+  public function format(mixed $format): string;
 
   /**
    * Returns the last errors encountered by the datetime extension
@@ -70,7 +70,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  static function getLastErrors(): array;
+  public static function getLastErrors(): darray;
 
   /**
    * Returns the timezone offset.
@@ -80,7 +80,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function getOffset(): int;
+  public function getOffset(): int;
 
   /**
    * Returns the unix timestamp representing the date.
@@ -89,7 +89,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function getTimestamp(): int;
+  public function getTimestamp(): int;
 
   /**
    * Return time zone relative to given DateTime.
@@ -99,7 +99,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function getTimezone(): mixed;
+  public function getTimezone(): mixed;
 
   /**
    * Alter the timestamp of a DateTime object by incrementing or
@@ -113,7 +113,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function modify(string $modify): mixed;
+  public function modify(string $modify): mixed;
 
   /**
    * Resets the current date of the DateTime object to a different date.
@@ -128,7 +128,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function setDate(int $year, int $month, int $day): DateTime;
+  public function setDate(int $year, int $month, int $day): DateTime;
 
   /**
    * Set a date according to the ISO 8601  standard - using weeks and day
@@ -144,7 +144,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function setISODate(int $year, int $week, int $day = 1): DateTime;
+  public function setISODate(int $year, int $week, int $day = 1): DateTime;
 
   /**
    * Resets the current time of the DateTime object to a different time.
@@ -159,7 +159,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function setTime(int $hour, int $minute, int $second = 0): DateTime;
+  public function setTime(int $hour, int $minute, int $second = 0): DateTime;
 
   /**
    * Set the DateTime object according to the timestamp provided
@@ -171,7 +171,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function setTimestamp(int $unixtimestamp): DateTime;
+  public function setTimestamp(int $unixtimestamp): DateTime;
 
   /**
    * @param DateTimeZone $timezone - DateTime object returned by date_create().
@@ -182,7 +182,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function setTimezone(DateTimeZone $timezone): mixed;
+  public function setTimezone(DateTimeZone $timezone): mixed;
 
   /**
    * Subtract an interval from a datetime object
@@ -194,16 +194,16 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  function sub(DateInterval $interval): mixed;
+  public function sub(DateInterval $interval): mixed;
 
   <<__Native>>
-  function __sleep(): array;
+  public function __sleep(): varray;
 
   <<__Native>>
-  function __wakeup(): void;
+  public function __wakeup(): void;
 
   <<__Native>>
-  function __debugInfo(): array;
+  public function __debugInfo(): darray;
 
 }
 
@@ -219,7 +219,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function __construct(string $timezone): void;
+  public function __construct(string $timezone): void;
 
   /**
    * Returns location information for a timezone
@@ -228,7 +228,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getLocation(): array;
+  public function getLocation(): darray;
 
   /**
    * Returns the name of the timezone.
@@ -237,7 +237,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getName(): string;
+  public function getName(): string;
 
   /**
    * This function returns the offset to GMT for the date/time specified in the
@@ -252,7 +252,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getOffset(DateTimeInterface $datetime): mixed;
+  public function getOffset(DateTimeInterface $datetime): mixed;
 
   /**
    * @return array - Returns numerically indexed array containing associative
@@ -260,15 +260,15 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getTransitions(int $timestamp_begin = PHP_INT_MIN,
-                          int $timestamp_end = PHP_INT_MAX): array;
+  public function getTransitions(int $timestamp_begin = PHP_INT_MIN,
+                          int $timestamp_end = PHP_INT_MAX): mixed;
 
   /**
    * @return array - Returns array on success or FALSE on failure.
    *
    */
   <<__Native>>
-  static function listAbbreviations(): array;
+  public static function listAbbreviations(): darray;
 
   /**
    * @param int $what - One of DateTimeZone class constants.
@@ -279,8 +279,11 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  static function listIdentifiers(int $what = 2047,
+  public static function listIdentifiers(int $what = 2047,
                                   string $country = ""): mixed;
+
+  <<__Native>>
+  public function __debugInfo(): darray;
 }
 
 /**
@@ -297,35 +300,7 @@ class DateInterval {
    *
    */
   <<__Native>>
-  function __construct(string $interval_spec): void;
-
-  /**
-   * Retreives interval partials (y, m, d, etc...)
-   *
-   * @param mixed $member - One of 'y', 'm', 'd', 'h', 'i', 's', 'invert', or
-   *   'days'.  All other vales will return null and throw undefined property
-   *   notice.
-   *
-   * @return mixed - Number of years, months, days, hours, minutes, seconds,
-   *   or total days for DateInterval, or true/false for date inversion.
-   *
-   */
-  <<__Native>>
-  function __get(mixed $member): mixed;
-
-  /**
-   * Sets interval partials (y, m, d, etc...)
-   *
-   * @param mixed $member - One of 'y', 'm', 'd', 'h', 'i', 's', 'invert', or
-   *   'days'.  All other vales will throw undefined property notice and ignore
-   *   value.
-   * @param mixed $value - Either a boolean for 'invert', or a number.
-   *
-   * @return mixed - Always returns NULL.
-   *
-   */
-  <<__Native>>
-  function __set(mixed $member, mixed $value): mixed;
+  public function __construct(string $interval_spec): void;
 
   /**
    * Sets up a DateInterval from the relative parts of the string
@@ -338,7 +313,7 @@ class DateInterval {
    *
    */
   <<__Native>>
-  static function createFromDateString(string $time): DateInterval;
+  public static function createFromDateString(string $time): DateInterval;
 
   /**
    * Formats the interval
@@ -349,7 +324,7 @@ class DateInterval {
    *
    */
   <<__Native>>
-  function format(string $format): string;
+  public function format(string $format): string;
 }
 
 /**
@@ -365,7 +340,7 @@ class DateInterval {
  *   FALSE.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function checkdate(int $month, int $day, int $year): bool;
 
 function date_add(DateTime $datetime, DateInterval $interval): mixed {
@@ -378,7 +353,7 @@ function date_create_from_format(string $format,
   return DateTime::createFromFormat($format, $time, $timezone);
 }
 
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function date_parse_from_format(string $format, string $date): mixed;
 
 <<__Native>>
@@ -404,7 +379,7 @@ function date_date_set(DateTime $datetime,
  * @return string - Returns a string.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function date_default_timezone_get(): string;
 
 /**
@@ -427,22 +402,19 @@ function date_default_timezone_get(): string;
 <<__Native>>
 function date_default_timezone_set(string $name): bool;
 
-function date_get_last_errors(): array {
+function date_get_last_errors(): darray {
   return DateTime::getLastErrors();
 }
 
-<<__ParamCoerceModeFalse>>
 function date_interval_create_from_date_string(string $time): DateInterval {
   return DateInterval::createFromDateString($time);
 }
 
-<<__ParamCoerceModeFalse>>
 function date_interval_format(DateInterval $interval,
                               string $format_spec): string {
   return $interval->format($format_spec);
 }
 
-<<__ParamCoerceModeFalse>>
 function date_isodate_set(DateTime $datetime,
                           int $year,
                           int $week,
@@ -450,10 +422,9 @@ function date_isodate_set(DateTime $datetime,
   return $datetime->setISODate($year, $week, $day);
 }
 
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function date_format(DateTime $datetime, string $format): mixed;
 
-<<__ParamCoerceModeFalse>>
 function date_modify(DateTime $datetime, string $modify): void {
   $datetime->modify($modify);
 }
@@ -465,10 +436,9 @@ function date_modify(DateTime $datetime, string $modify): void {
  *   success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function date_parse(string $date): mixed;
 
-<<__ParamCoerceModeFalse>>
 function date_sub(DateTime $datetime, DateInterval $interval): mixed {
   return $datetime->sub($interval);
 }
@@ -481,8 +451,8 @@ function date_sub(DateTime $datetime, DateInterval $interval): mixed {
  * @return array - Returns array on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
-function date_sun_info(int $ts, float $latitude, float $longitude): array;
+<<__Native>>
+function date_sun_info(int $ts, float $latitude, float $longitude): darray;
 
 /**
  * date_sunrise() returns the sunrise time for a given day (specified as a
@@ -505,13 +475,13 @@ function date_sun_info(int $ts, float $latitude, float $longitude): array;
  *   or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
+<<__Native>>
 function date_sunrise(int $timestamp,
                       int $format = SUNFUNCS_RET_STRING,
-                      float $latitude = 0.0,
-                      float $longitude = 0.0,
-                      float $zenith = 0.0,
-                      float $gmt_offset = 0.0): mixed;
+                      ?float $latitude = null,
+                      ?float $longitude = null,
+                      ?float $zenith = null,
+                      ?float $gmt_offset = null): mixed;
 
 /**
  * date_sunset() returns the sunset time for a given day (specified as a
@@ -534,15 +504,14 @@ function date_sunrise(int $timestamp,
  *   FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
+<<__Native>>
 function date_sunset(int $timestamp,
                      int $format = SUNFUNCS_RET_STRING,
-                     float $latitude = 0.0,
-                     float $longitude = 0.0,
-                     float $zenith = 0.0,
-                     float $gmt_offset = 0.0): mixed;
+                     ?float $latitude = null,
+                     ?float $longitude = null,
+                     ?float $zenith = null,
+                     ?float $gmt_offset = null): mixed;
 
-<<__ParamCoerceModeFalse>>
 function date_time_set(DateTime $datetime,
                        int $hour,
                        int $minute,
@@ -550,12 +519,10 @@ function date_time_set(DateTime $datetime,
   $datetime->setTime($hour, $minute, $second);
 }
 
-<<__ParamCoerceModeFalse>>
 function date_timestamp_set(DateTime $datetime, int $timestamp): DateTime {
   return $datetime->setTimestamp($timestamp);
 }
 
-<<__ParamCoerceModeFalse>>
 function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): mixed {
   return $datetime->setTimezone($timezone);
 }
@@ -570,8 +537,8 @@ function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): mixed {
  *   emitted.
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
-function date(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function date(string $format, ?int $timestamp = null): mixed;
 
 /**
  * Returns an associative array containing the date information of the
@@ -584,8 +551,8 @@ function date(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("NumArgs")>>
-function getdate(int $timestamp = -1): array;
+<<__Native>>
+function getdate(?int $timestamp = null): darray;
 
 /**
  * This is an interface to gettimeofday(2). It returns an associative array
@@ -618,8 +585,8 @@ function gettimeofday(bool $return_float = false): mixed;
  *   emitted.
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
-function gmdate(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function gmdate(string $format, ?int $timestamp = null): mixed;
 
 /**
  * Identical to mktime() except the passed parameters represents a GMT date.
@@ -656,8 +623,8 @@ function gmmktime(int $hour = PHP_INT_MAX,
  *   respect the current locale set with setlocale().
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
-function gmstrftime(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function gmstrftime(string $format, ?int $timestamp = null): mixed;
 
 /**
  * Returns a number formatted according to the given format string using the
@@ -685,8 +652,8 @@ function gmstrftime(string $format, int $timestamp = -1): mixed;
  *   you would expect. See the example below.
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
-function idate(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function idate(string $format, ?int $timestamp = null): mixed;
 
 /**
  * The localtime() function returns an array identical to that of the
@@ -709,9 +676,9 @@ function idate(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("NumArgs")>>
-function localtime(int $timestamp = -1,
-                   bool $is_associative = false): array;
+<<__Native>>
+function localtime(?int $timestamp = null,
+                   bool $is_associative = false): varray_or_darray;
 
 /**
  * microtime() returns the current Unix timestamp with microseconds. This
@@ -781,8 +748,8 @@ function mktime(int $hour = PHP_INT_MAX,
  *   locale set with setlocale().
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
-function strftime(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function strftime(string $format, ?int $timestamp = null): mixed;
 
 /**
  * strptime() returns an array with the date parsed, or FALSE on error.  Month
@@ -817,8 +784,8 @@ function strptime(string $date, string $format): mixed;
  *   to PHP 5.1.0, this function would return -1 on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native("NumArgs")>>
-function strtotime(string $input, int $timestamp = -1): mixed;
+<<__Native>>
+function strtotime(string $input, ?int $timestamp = null): mixed;
 
 /**
  * Returns the current time measured in the number of seconds since the Unix
@@ -828,7 +795,7 @@ function strtotime(string $input, int $timestamp = -1): mixed;
 <<__Native>>
 function time(): int;
 
-function timezone_abbreviations_list(): array {
+function timezone_abbreviations_list(): darray {
   return DateTimeZone::listAbbreviations();
 }
 
@@ -845,7 +812,7 @@ function timezone_identifiers_list(int $what = 2047,
   return DateTimeZone::listIdentifiers($what, $country);
 }
 
-function timezone_location_get(DateTimeZone $timezone): array {
+function timezone_location_get(DateTimeZone $timezone): darray {
   return $timezone->getLocation();
 }
 
@@ -866,7 +833,7 @@ function timezone_location_get(DateTimeZone $timezone): array {
  * @return mixed - Returns time zone name on success or FALSE on failure.
  *
  */
-<<__ParamCoerceModeFalse, __Native>>
+<<__Native>>
 function timezone_name_from_abbr(string $abbr,
                                  int $gmtoffset = -1,
                                  int $isdst = 1): mixed;
@@ -875,7 +842,6 @@ function timezone_name_get(DateTimeZone $timezone): string {
   return $timezone->getName();
 }
 
-<<__ParamCoerceModeFalse>>
 function timezone_open(string $timezone): mixed {
   try {
     return new DateTimeZone($timezone);
@@ -890,7 +856,7 @@ function timezone_open(string $timezone): mixed {
 
 function timezone_transitions_get(DateTimeZone $timezone,
                                   int $timestamp_begin = PHP_INT_MIN,
-                                  int $timestamp_end = PHP_INT_MAX): array {
+                                  int $timestamp_end = PHP_INT_MAX): mixed {
   return $timezone->getTransitions($timestamp_begin, $timestamp_end);
 }
 

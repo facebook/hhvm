@@ -2,11 +2,9 @@
 
 -- Testing mb_strrichr() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_strrichr() expects at most 4 parameters, 5 given in %s/mb_strrichr_error1.php on line 18
 
 -- Testing mb_strrichr() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_strrichr() expects at least 2 parameters, 1 given in %s/mb_strrichr_error1.php on line 23
 ===DONE===

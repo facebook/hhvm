@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_ICU_RSRC_BUNDLE_H
-#define incl_HPHP_ICU_RSRC_BUNDLE_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -32,8 +31,8 @@ struct ResourceBundle : IntlError {
 
   static Object newInstance(icu::ResourceBundle* bundle) {
     if (!c_ResourceBundle) {
-      c_ResourceBundle = Unit::lookupClass(s_ResourceBundle.get());
-      assert(c_ResourceBundle);
+      c_ResourceBundle = Class::lookup(s_ResourceBundle.get());
+      assertx(c_ResourceBundle);
     }
     Object obj{c_ResourceBundle};
     auto data = Native::data<ResourceBundle>(obj);
@@ -61,7 +60,7 @@ struct ResourceBundle : IntlError {
     return true;
   }
   icu::ResourceBundle iterCurrent(UErrorCode& error) {
-    assert(iterValid());
+    assertx(iterValid());
     return m_rsrc->get(m_iterIndex, error);
   }
   Variant iterKey() {
@@ -86,4 +85,3 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_RSRC_BUNDLE_H

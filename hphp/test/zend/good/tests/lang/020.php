@@ -1,5 +1,5 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 $i="abc";
 
 for ($j=0; $j<10; $j++) {
@@ -39,4 +39,4 @@ switch (1) {
   	break;
  }
 }
-?>
+}

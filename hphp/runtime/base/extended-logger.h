@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_
-#define incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_
+#pragma once
 
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
@@ -50,7 +49,7 @@ private:
 
   static std::string StringOfFrame(const Array& frame, int i,
                                    bool escape = false);
-  std::pair<int, int> log(LogLevelType level, const std::string &msg,
+  LogGrowth log(LogLevelType level, const std::string &msg,
                           const StackTrace *stackTrace,
                           bool escape = true, bool escapeMore = false) override;
   static int PrintStackTrace(FILE *f, const Array& stackTrace,
@@ -60,4 +59,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RUNTIME_BASE_EXTENDED_LOGGER_H_

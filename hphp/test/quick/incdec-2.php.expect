@@ -1,20 +1,16 @@
 bool(false)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 bool(true)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 int(2)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 float(2)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }

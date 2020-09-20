@@ -2,108 +2,101 @@
 
 --float 10.5--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --float -10.5--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --float 12.3456789000e10--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --float -12.3456789000e10--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --float .5--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --uppercase NULL--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --lowercase null--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --lowercase true--
-string(5) "06:48"
+
+Warning: date_sunrise() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --lowercase false--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --uppercase TRUE--
-string(5) "06:48"
+
+Warning: date_sunrise() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --uppercase FALSE--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --empty string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --empty string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --mixed case string--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --heredoc--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --undefined var--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 
 --unset var--
-int(1218174483)
+
+Warning: date_sunrise() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/date_sunrise_variation2.php on line 94
 ===DONE===

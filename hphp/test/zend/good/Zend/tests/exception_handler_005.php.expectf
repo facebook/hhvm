@@ -1,1 +1,4 @@
+Fatal error: Uncaught exception 'Exception' with message '' in %s/exception_handler_005.php:15
+Stack trace:
+%a {main}
 string(25) "foo1(): Exception thrown!"

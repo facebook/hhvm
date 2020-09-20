@@ -1,0 +1,2 @@
+File "invalid_variable_name3_fail.php", line 14, characters 8-8:
+Variable Variables are not legal (Parsing[1002])

@@ -1,16 +1,20 @@
 *** Testing expm1() : usage variations ***
 
 -- Iteration 1 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 2 --
-float(1.718281828459)
+
+Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 3 --
-float(INF)
+
+Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 4 --
-float(-1)
+
+Warning: expm1() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 5 --
 float(36314.502674247)
@@ -28,76 +32,74 @@ float(0.0012353302826471)
 float(0.64872127070013)
 
 -- Iteration 10 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 11 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 12 --
-float(1.718281828459)
+
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 13 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 14 --
-float(1.718281828459)
+
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 15 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 16 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 25 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 26 --
-float(0)
+
+Warning: expm1() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 27 --
 
-Warning: %s
-NULL
+Warning: expm1() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 ===Done===

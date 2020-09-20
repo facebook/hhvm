@@ -1,0 +1,278 @@
+test_basic()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+test_falsey()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+test_array_get()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+test_array_get() $arr:
+n_dump from line %d:
+darray(8) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(43)
+  [2]=>
+  int(44)
+  [3]=>
+  int(45)
+  [4]=>
+  int(46)
+  [5]=>
+  int(47)
+  [6]=>
+  int(7)
+  [100]=>
+  int(48)
+}
+
+test_object_get()
+bool(true)
+bool(true)
+bool(true)
+test_object_get() CounterArray $obj:
+n_dump from line %d:
+object(CounterArray) (5) {
+  ["container":"CounterArray":private]=>
+  varray(0) {
+  }
+  ["counter"]=>
+  int(0)
+  ["addme"]=>
+  string(5) "added"
+  ["addmetoo"]=>
+  object(Closure$test_object_get;9) (0) {
+  }
+  ["42"]=>
+  string(10) "addmethree"
+}
+
+
+test_associativity()
+bool(true)
+bool(true)
+
+test_multi_dim_basic()
+bool(true)
+n_dump from line %d:
+darray(1) {
+  [4]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      ["I am a constant"]=>
+      int(42)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo) (1) {
+  ["foo2"]=>
+  object(Foo2) (1) {
+    ["vbar"]=>
+    string(8) "Who am I"
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo) (1) {
+  ["foo2"]=>
+  object(Foo2) (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["vbar2"]=>
+    int(43)
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo) (1) {
+  ["foo2"]=>
+  object(Foo2) (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["bar2"]=>
+    int(42)
+  }
+}
+
+test_null_base()
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+n_dump from line %d:
+bool(true)
+
+test_multi_dim_lvars()
+bool(true)
+n_dump from line %d:
+darray(1) {
+  [4]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      [0]=>
+      int(2)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+darray(2) {
+  [4]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      [1]=>
+      int(3)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+darray(2) {
+  [4]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  darray(1) {
+    [2]=>
+    darray(2) {
+      [1]=>
+      int(3)
+      [3]=>
+      int(5)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+darray(2) {
+  [4]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  darray(1) {
+    [2]=>
+    darray(3) {
+      [1]=>
+      int(3)
+      [3]=>
+      int(5)
+      ["I am a constant"]=>
+      string(4) "Yay!"
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+darray(2) {
+  [4]=>
+  darray(1) {
+    [2]=>
+    darray(1) {
+      [0]=>
+      int(2)
+    }
+  }
+  [2]=>
+  darray(1) {
+    [2]=>
+    darray(4) {
+      [1]=>
+      int(3)
+      [3]=>
+      int(5)
+      ["I am a constant"]=>
+      string(4) "Yay!"
+      ["I too am a constant"]=>
+      int(3)
+    }
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo) (1) {
+  ["foo2"]=>
+  object(Foo2) (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["vbar2"]=>
+    string(11) "Don't at me"
+  }
+}
+bool(true)
+n_dump from line %d:
+object(Foo) (1) {
+  ["foo2"]=>
+  object(Foo2) (2) {
+    ["vbar"]=>
+    string(8) "Who am I"
+    ["vbar2"]=>
+    string(11) "Don't at me"
+  }
+}
+
+test_multi_dim_side_effects()
+a
+c
+bool(true)
+n_dump from line %d:
+darray(1) {
+  ["a"]=>
+  object(Shoo) (1) {
+    ["b"]=>
+    darray(1) {
+      ["c"]=>
+      int(42)
+    }
+  }
+}

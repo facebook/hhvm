@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait T1 {
   public function getText() {
@@ -21,6 +20,8 @@ class TraitsTest {
     $this->text = $val;
   }
 }
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
 
 $o = new TraitsTest();
 var_dump($o->getText());
@@ -32,4 +33,4 @@ var_dump($o->getText());
 $o->setText('bar');
 
 var_dump($o->getText());
-?>
+}

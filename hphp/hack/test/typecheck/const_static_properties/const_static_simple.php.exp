@@ -1,0 +1,2 @@
+File "const_static_simple.php", line 4, characters 3-8:
+Constants cannot be declared `static` (Parsing[1002])

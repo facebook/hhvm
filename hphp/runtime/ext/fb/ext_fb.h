@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_FB_H_
-#define incl_HPHP_EXT_FB_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -24,57 +23,54 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS;
+extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS;
+extern const int64_t k_FB_SERIALIZE_VARRAY_DARRAY;
 
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options = 0);
 Variant HHVM_FUNCTION(fb_unserialize,
                       const Variant& thing,
-                      VRefParam success,
+                      bool& success,
                       int64_t options = 0);
 Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
 Variant HHVM_FUNCTION(fb_compact_unserialize,
-                      const Variant& thing, VRefParam success,
-                      VRefParam errcode = uninit_variant);
+                      const Variant& thing, bool& success,
+                      Variant& errcode);
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
-                    const Variant& data = uninit_variant);
+                   const Variant& data = uninit_variant);
+bool HHVM_FUNCTION(fb_intercept2, const String& name, const Variant& handler);
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                           const String& new_func_name);
-bool HHVM_FUNCTION(fb_utf8ize, VRefParam input);
+bool HHVM_FUNCTION(fb_utf8ize, Variant& input);
 int64_t HHVM_FUNCTION(fb_utf8_strlen_deprecated, const String& input);
 int64_t HHVM_FUNCTION(fb_utf8_strlen, const String& input);
 String HHVM_FUNCTION(fb_utf8_substr, const String& str,
                      int64_t start, int64_t length = INT_MAX);
 Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush);
 void HHVM_FUNCTION(fb_enable_code_coverage);
-Variant HHVM_FUNCTION(fb_disable_code_coverage);
+Array HHVM_FUNCTION(fb_disable_code_coverage);
+Array HHVM_FUNCTION(HH_disable_code_coverage_with_frequency);
 bool HHVM_FUNCTION(fb_output_compression, bool new_value);
 void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
-
-Array HHVM_FUNCTION(fb_call_user_func_safe,
-                    const Variant& function,
-                    const Array& argv);
-Variant HHVM_FUNCTION(fb_call_user_func_safe_return,
-                      const Variant& function,
-                      const Variant& def,
-                      const Array& argv);
-Array HHVM_FUNCTION(fb_call_user_func_array_safe,
-                    const Variant& function,
-                    const Array& params);
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str);
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_lower, StringArg str);
+int64_t HHVM_FUNCTION(HH_int_mul_overflow, int64_t a, int64_t b);
+int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
+                      int64_t a, int64_t b, int64_t bias);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant fb_unserialize(const char* str,
                        int len,
-                       VRefParam success,
+                       bool& success,
                        int64_t options);
 String fb_compact_serialize(const Variant& thing);
 Variant fb_compact_unserialize(const char* str, int len,
-                               VRefParam success,
-                               VRefParam errcode = uninit_variant);
+                               bool& success,
+                               Variant& errcode);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_FB_H_

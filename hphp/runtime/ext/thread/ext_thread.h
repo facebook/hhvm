@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_THREAD_H_
-#define incl_HPHP_EXT_THREAD_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -29,4 +28,3 @@ int64_t HHVM_FUNCTION(hphp_gettid);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_THREAD_H_

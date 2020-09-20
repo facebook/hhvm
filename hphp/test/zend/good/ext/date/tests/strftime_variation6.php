@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -14,13 +14,13 @@ $timestamp = mktime(18, 8, 8, 8, 8, 2008);
 
 
 //array of values to iterate over
-$inputs = array(
-	  'Hour as decimal by 24-hour format' => "%H",
-	  'Hour as decimal by 12-hour format' => "%I",
-	  'Minute as decimal number' => "%M",
-	  'AM/PM format for a time' => "%p",
-	  'Second as decimal number' => "%S",
-);
+$inputs = darray[
+      'Hour as decimal by 24-hour format' => "%H",
+      'Hour as decimal by 12-hour format' => "%I",
+      'Minute as decimal number' => "%M",
+      'AM/PM format for a time' => "%p",
+      'Second as decimal number' => "%S",
+];
 
 // loop through each element of the array for timestamp
 
@@ -30,5 +30,5 @@ foreach($inputs as $key =>$value) {
       var_dump( strftime($value, $timestamp) );
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

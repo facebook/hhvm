@@ -14,21 +14,22 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
-
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/util/struct-log.h"
 #include "hphp/util/thread-local.h"
+#include "hphp/util/rds-local.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/sync-signal.h"
 
 #include <signal.h>
 #include <time.h>
@@ -38,27 +39,6 @@
 namespace HPHP {
 
 TRACE_SET_MOD(xenon);
-
-void *s_waitThread(void *arg) {
-  TRACE(1, "s_waitThread Starting\n");
-  sem_t* sem = static_cast<sem_t*>(arg);
-  while (true) {
-    if (sem_wait(sem) == 0) {
-      TRACE(1, "s_waitThread Fired\n");
-      if (Xenon::getInstance().m_stopping) {
-        TRACE(1, "s_waitThread is exiting\n");
-        return nullptr;
-      }
-      Xenon::getInstance().surpriseAll();
-    } else if (errno != EINTR) {
-      break;
-    }
-  }
-  TRACE(1, "s_waitThread Ending\n");
-  return nullptr;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 // Data that is kept per request and is only valid per request.
 // This structure gathers a php and async stack trace when log is called.
@@ -71,21 +51,20 @@ void *s_waitThread(void *arg) {
 struct XenonRequestLocalData final {
   XenonRequestLocalData();
   ~XenonRequestLocalData();
-  void log(Xenon::SampleType t,
-           const char* info = nullptr,
-           c_WaitableWaitHandle* wh = nullptr);
+  void log(Xenon::SampleType t, c_WaitableWaitHandle* wh = nullptr);
   Array createResponse();
 
   void requestInit();
   void requestShutdown();
+  bool getIsProfiledRequest();
 
   // an array of php stacks
   Array m_stackSnapshots;
 
-  // Set to true while a request is active and it's safe to record samples.
-  bool m_inRequest{false};
+  // Set to true if this request is going to handle the log calls
+  bool m_isProfiledRequest{false};
 };
-static THREAD_LOCAL(XenonRequestLocalData, s_xenonData);
+static RDS_LOCAL(XenonRequestLocalData, s_xenonData);
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics used by the Xenon classes
@@ -99,24 +78,19 @@ const StaticString
   s_time("time"),
   s_isWait("ioWaitSample"),
   s_stack("stack"),
-  s_phpStack("phpStack"),
-  s_type("type"),
-  s_info("info");
+  s_phpStack("phpStack");
 
 namespace {
 
 Array parsePhpStack(const Array& bt) {
-  PackedArrayInit stack(bt->size());
+  VArrayInit stack(bt->size());
   for (ArrayIter it(bt); it; ++it) {
     const auto& frame = it.second().toArray();
     if (frame.exists(s_function)) {
       bool fileline = frame.exists(s_file) && frame.exists(s_line);
       bool metadata = frame.exists(s_metadata);
 
-      ArrayInit element(
-        1 + (fileline ? 2 : 0) + (metadata ? 1 : 0),
-        ArrayInit::Map{}
-      );
+      DArrayInit element(1 + (fileline ? 2 : 0) + (metadata ? 1 : 0));
 
       if (frame.exists(s_class)) {
         auto func = folly::to<std::string>(
@@ -151,7 +125,7 @@ Array parsePhpStack(const Array& bt) {
 // If in always on mode, the Xenon Surprise flags have to be on for each thread
 // and are never cleared.
 // For timer mode, when start is invoked, it adds a new timer to the existing
-// handler for SIGVTALRM.
+// handler for SIGPROF.
 
 Xenon& Xenon::getInstance() noexcept {
   static Xenon instance;
@@ -171,21 +145,21 @@ void Xenon::incrementMissedSampleCount(ssize_t val) {
 int64_t Xenon::getAndClearMissedSampleCount() {
     return std::atomic_exchange<int64_t>(&m_missedSampleCount, 0);
 }
+
+static void onXenonTimer(int signo) {
+  if (signo == SIGPROF) {
+    Xenon::getInstance().onTimer();
+  }
+}
+
 // XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
 // Xenon needs to be started once per process.
 // The number of milliseconds has to be greater than zero.
-// We need to create a semaphore and a thread.
 // If all of those happen, then we need a timer attached to a signal handler.
 void Xenon::start(uint64_t msec) {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
-  if (!RuntimeOption::XenonForceAlwaysOn
-      && m_timerid == 0
-      && msec > 0
-      && sem_init(&m_timerTriggered, 0, 0) == 0
-      && pthread_create(&m_triggerThread, nullptr, s_waitThread,
-          static_cast<void*>(&m_timerTriggered)) == 0) {
-
+  if (!RuntimeOption::XenonForceAlwaysOn && !m_timerid && msec > 0) {
     time_t sec = msec / 1000;
     long nsec = (msec % 1000) * 1000000;
     TRACE(1, "Xenon::start periodic %ld seconds, %ld nanoseconds\n", sec, nsec);
@@ -199,9 +173,11 @@ void Xenon::start(uint64_t msec) {
 
     sigevent sev={};
     sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGVTALRM;
-    sev.sigev_value.sival_ptr = nullptr; // null for Xenon signals
+    sev.sigev_signo = SIGPROF;
     timer_create(CLOCK_REALTIME, &sev, &m_timerid);
+
+    sync_signal(SIGPROF, onXenonTimer);
+    signal(SIGPROF, SIG_IGN);
 
     itimerspec ts={};
     ts.it_value.tv_sec = fSec;
@@ -218,11 +194,8 @@ void Xenon::stop() {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   if (m_timerid) {
     m_stopping = true;
-    sem_post(&m_timerTriggered);
-    pthread_join(m_triggerThread, nullptr);
     TRACE(1, "Xenon::stop has stopped the waiting thread\n");
     timer_delete(m_timerid);
-    sem_destroy(&m_timerTriggered);
   }
 #endif
 }
@@ -238,29 +211,29 @@ void Xenon::log(SampleType t, c_WaitableWaitHandle* wh) const {
     if (!RuntimeOption::XenonForceAlwaysOn) {
       clearSurpriseFlag(XenonSignalFlag);
     }
-    logNoSurprise(t, nullptr, wh);
+    TRACE(1, "Xenon::log %s\n", show(t));
+    s_xenonData->log(t, wh);
   }
-}
-
-void Xenon::logNoSurprise(SampleType t,
-                          const char* info,
-                          c_WaitableWaitHandle* wh) const {
-  TRACE(1, "Xenon::log %s %s\n", show(t), info ? info : "(null)");
-  s_xenonData->log(t, info, wh);
 }
 
 // Called from timer handler, Lets non-signal code know the timer was fired.
 void Xenon::onTimer() {
-  sem_post(&m_timerTriggered);
+  auto& instance = getInstance();
+  if (instance.m_stopping) return;
+  instance.surpriseAll();
 }
 
 // Turns on the Xenon Surprise flag for every thread via a lambda function
 // passed to ExecutePerThread.
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
-  ThreadInfo::ExecutePerThread(
-    [] (ThreadInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
+  RequestInfo::ExecutePerRequest(
+    [] (RequestInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
   );
+}
+
+bool Xenon::getIsProfiledRequest() {
+  return s_xenonData->getIsProfiledRequest();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -278,11 +251,10 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 // Creates an array to respond to the Xenon PHP extension;
 // builds the data into the format neeeded.
 Array XenonRequestLocalData::createResponse() {
-  assertx(m_inRequest);
-  PackedArrayInit stacks(m_stackSnapshots.size());
+  VArrayInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
-    stacks.append(make_map_array(
+    stacks.append(make_darray(
       s_time, frame[s_time],
       s_stack, frame[s_stack].toArray(),
       s_phpStack, parsePhpStack(frame[s_stack].toArray()),
@@ -293,9 +265,8 @@ Array XenonRequestLocalData::createResponse() {
 }
 
 void XenonRequestLocalData::log(Xenon::SampleType t,
-                                const char* info,
                                 c_WaitableWaitHandle* wh) {
-  if (!m_inRequest) return;
+  if (!m_isProfiledRequest) return;
 
   TRACE(1, "XenonRequestLocalData::log\n");
   time_t now = time(nullptr);
@@ -305,30 +276,17 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());
-  auto logDest = RuntimeOption::XenonStructLogDest;
-  if (!logDest.empty()) {
-    StructuredLogEntry cols;
-    cols.setStr("type", Xenon::show(t));
-    if (info) {
-      cols.setStr("info", info);
-    }
-    addBacktraceToStructLog(bt, cols);
-    StructuredLog::log(logDest, cols);
-  } else {
-    m_stackSnapshots.append(make_map_array(
-      s_time, now,
-      s_stack, bt,
-      s_isWait, !Xenon::isCPUTime(t),
-      s_type, Xenon::show(t),
-      s_info, info ? info : ""
-    ));
-  }
+  m_stackSnapshots.append(make_darray(
+    s_time, now,
+    s_stack, bt,
+    s_isWait, !Xenon::isCPUTime(t)
+  ));
 }
 
 void XenonRequestLocalData::requestInit() {
   TRACE(1, "XenonRequestLocalData::requestInit\n");
 
-  assertx(!m_inRequest);
+  assertx(!m_isProfiledRequest);
   assertx(m_stackSnapshots.get() == nullptr);
   if (RuntimeOption::XenonForceAlwaysOn) {
     setSurpriseFlag(XenonSignalFlag);
@@ -337,16 +295,22 @@ void XenonRequestLocalData::requestInit() {
     // not have a bias towards the first function.
     clearSurpriseFlag(XenonSignalFlag);
   }
-  m_inRequest = true;
+
+  uint32_t freq = RuntimeOption::XenonRequestFreq;
+  m_isProfiledRequest = (freq > 0 && folly::Random::rand32(freq) == 0);
 }
 
 void XenonRequestLocalData::requestShutdown() {
   TRACE(1, "XenonRequestLocalData::requestShutdown\n");
 
-  m_inRequest = false;
+  m_isProfiledRequest = false;
   clearSurpriseFlag(XenonSignalFlag);
   Xenon::getInstance().incrementMissedSampleCount(m_stackSnapshots.size());
   m_stackSnapshots.reset();
+}
+
+bool XenonRequestLocalData::getIsProfiledRequest() {
+  return m_isProfiledRequest;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -359,7 +323,7 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
     TRACE(1, "xenon_get_data\n");
     return s_xenonData->createResponse();
   }
-  return empty_array();
+  return Array::CreateVArray();
 }
 
 Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
@@ -370,7 +334,7 @@ Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
     s_xenonData->m_stackSnapshots.reset();
     return ret;
   }
-  return empty_array();
+  return Array::CreateVArray();
 }
 
 int64_t HHVM_FUNCTION(xenon_get_and_clear_missed_sample_count, void) {
@@ -378,14 +342,20 @@ int64_t HHVM_FUNCTION(xenon_get_and_clear_missed_sample_count, void) {
     return Xenon::getInstance().getAndClearMissedSampleCount();
 }
 
+bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
+  return Xenon::getInstance().getIsProfiledRequest();
+}
+
 struct xenonExtension final : Extension {
-  xenonExtension() : Extension("xenon", "1.0") { }
+  xenonExtension() : Extension("xenon", "2.0") { }
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\xenon_get_data, xenon_get_data);
     HHVM_FALIAS(HH\\xenon_get_and_clear_samples, xenon_get_and_clear_samples);
     HHVM_FALIAS(HH\\xenon_get_and_clear_missed_sample_count,
                 xenon_get_and_clear_missed_sample_count);
+    HHVM_FALIAS(HH\\xenon_get_is_profiled_request,
+                xenon_get_is_profiled_request);
     loadSystemlib();
   }
 

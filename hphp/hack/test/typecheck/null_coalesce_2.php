@@ -1,7 +1,7 @@
 <?hh // strict
 
 function f(): ?int {
-  // UNSAFE_BLOCK
+  return null;
 }
 
 function g(): int {

@@ -1,0 +1,32 @@
+array arr1 cmp array arr1:
+T       F       T       T       T       F       F       F       -1
+array arr1 cmp array arr2:
+T       F       T       T       T       F       F       F       -1
+array arr1 cmp array arr3:
+F       T       T       T       F       T       F       F       -1
+array arr1 cmp array arr4:
+F       T       T       T       F       T       F       F       -1
+array arr2 cmp array arr1:
+T       F       T       T       T       F       F       F       -1
+array arr2 cmp array arr2:
+T       F       T       T       T       F       F       F       -1
+array arr2 cmp array arr3:
+F       T       T       T       F       T       F       F       -1
+array arr2 cmp array arr4:
+F       T       T       T       F       T       F       F       -1
+array arr3 cmp array arr1:
+F       T       T       T       F       T       F       F       -1
+array arr3 cmp array arr2:
+F       T       T       T       F       T       F       F       -1
+array arr3 cmp array arr3:
+T       F       T       T       T       F       F       F       -1
+array arr3 cmp array arr4:
+F       T       T       T       F       T       F       F       -1
+array arr4 cmp array arr1:
+F       T       F       F       F       T       T       T       1
+array arr4 cmp array arr2:
+F       T       F       F       F       T       T       T       1
+array arr4 cmp array arr3:
+F       T       F       F       F       T       T       T       1
+array arr4 cmp array arr4:
+T       F       T       T       T       F       F       F       -1

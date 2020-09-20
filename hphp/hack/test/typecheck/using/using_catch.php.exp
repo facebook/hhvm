@@ -1,0 +1,4 @@
+File "using_catch.php", line 23, characters 5-6:
+Variable `$h` is undefined, or not always defined. (Naming[2050])
+File "using_catch.php", line 21, characters 22-23:
+Did you mean `$_` instead?

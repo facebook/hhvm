@@ -1,5 +1,4 @@
 <?hh
-//var_dump(token_get_all("<?hh const super = 0;"));
 
 class TypeConstraintWhereClausesTest<T> {
   // where should not be a keyword where it could be an identifier
@@ -35,3 +34,5 @@ class TypeConstraintWhereClausesTest<T> {
 function whereClauseOnFunction<T> (): T where T=int {
     return 5;
 }
+
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

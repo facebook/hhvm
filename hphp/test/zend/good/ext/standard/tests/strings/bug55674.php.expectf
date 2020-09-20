@@ -1,40 +1,24 @@
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "0"
-  [1]=>
   string(0) ""
-  [2]=>
   string(1) "2"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "0"
-  [1]=>
   string(1) " "
-  [2]=>
   string(1) "2"
 }
-array(5) {
-  [0]=>
+varray(5) {
   string(0) ""
-  [1]=>
   string(0) ""
-  [2]=>
   string(0) ""
-  [3]=>
   string(0) ""
-  [4]=>
   string(0) ""
 }
-array(5) {
-  [0]=>
+varray(5) {
   string(1) " "
-  [1]=>
   string(2) "  "
-  [2]=>
   string(0) ""
-  [3]=>
   string(0) ""
-  [4]=>
   string(1) " "
 }

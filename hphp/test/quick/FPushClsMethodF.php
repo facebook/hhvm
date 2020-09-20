@@ -26,5 +26,6 @@ class D extends C {
     echo "D\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 D::f();
-
+}

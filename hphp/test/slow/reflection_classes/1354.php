@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface i1 {
 }
@@ -12,8 +12,7 @@ class cls1 implements i1, i2 {
  print $param1;
 }
  }
- function &func1(cls1 $p1, &$p2, $p3='def') {
-   static $a=1;
+ function func1(cls1 $p1, inout $p2, $p3='def') {
  var_dump($p1);
 }
  function func2($a) {
@@ -26,10 +25,6 @@ function dump_func($func) {
    var_dump($func->isInternal());
    var_dump($func->isUserDefined());
    var_dump($func->isClosure());
-   $vars = $func->getStaticVariables();
-   var_dump(count($vars));
-  var_dump(array_key_exists('a', $vars));
-  var_dump($func->returnsReference());
    var_dump($func->getNumberOfParameters());
    var_dump($func->getNumberOfRequiredParameters());
    foreach ($func->getParameters() as $name => $param) {
@@ -46,7 +41,7 @@ function dump_func($func) {
   }
 }
 function verify_classes($classes) {
-  ksort($classes);
+  ksort(inout $classes);
   foreach ($classes as $cls) {
     verify_class($cls);
    }
@@ -118,12 +113,14 @@ function dump_param($param) {
      var_dump($func->isProtected());
      var_dump($func->isStatic());
      var_dump($func->isConstructor());
-     var_dump($func->isDestructor());
      var_dump($func->getModifiers() & 0xFFFF);
      verify_class($func->getDeclaringClass());
      if ($name == 'method1') $func->invoke($obj, 'invoked');
    }
 }
+
+<<__EntryPoint>>
+function main_1354() {
 $func = new ReflectionFunction('func1');
  dump_func($func);
  $func = new ReflectionFunction('func2');
@@ -134,3 +131,4 @@ $cls = new ReflectionClass('cls1');
 $cls = new ReflectionClass('cls2');
  $obj = $cls->newInstance();
  dump_class($cls, $obj);
+}

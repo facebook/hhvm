@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : DateTime date_timezone_set  ( DateTime $object  , DateTimeZone $timezone  )
  * Description: Sets the time zone for the DateTime object
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setTimezone
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_timezone_set() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -21,5 +21,5 @@ date_timezone_set($datetime, $la_time);
 $tz = date_timezone_get($datetime);
 echo "New timezone: " . timezone_name_get($tz) . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

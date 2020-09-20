@@ -1,17 +1,14 @@
 *** Testing array_fill() : error conditions ***
 -- Testing array_fill() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_fill() expects exactly 3 parameters, 0 given in %s/array_fill_error.php on line 12
 -- Testing array_fill() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_fill() expects exactly 3 parameters, 4 given in %s/array_fill_error.php on line 20
 -- Testing array_fill() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_fill() expects exactly 3 parameters, 2 given in %s/array_fill_error.php on line 26
 
-Warning: %s
+Warning: Invalid argument: Number of elements can't be negative in %s/array_fill_error.php on line 30
 bool(false)
 Done

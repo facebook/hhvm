@@ -1,0 +1,9 @@
+Warning: Generic at index 2 to Class C must be reified, erased given in %s on line 7
+
+Warning: Generic at index 2 to Class C must be reified, erased given in %s on line 12
+
+Warning: Generic at index 2 to Class C must be reified, erased given in %s on line 8
+
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Class C expects a reified generic at index 3' in %s:%d
+Stack trace:
+%A

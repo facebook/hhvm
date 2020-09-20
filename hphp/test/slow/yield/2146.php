@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fruit() {
   $a = 123;
@@ -7,7 +7,11 @@ function fruit() {
   yield ++$a;
 }
 
+
+
+<<__EntryPoint>>
+function main_2146() {
 foreach (fruit() as $fruit) {
   var_dump($fruit);
 }
-
+}

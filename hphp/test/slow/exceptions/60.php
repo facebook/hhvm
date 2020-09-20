@@ -1,8 +1,7 @@
-<?php
+<?hh
 
 class a extends Exception {
 }
-;
 class b extends a {
   function dump() {
     echo 'c:', $this->code, '
@@ -13,13 +12,15 @@ y:', $this->y, '
 ';
   }
 }
-if (0) {
- class a extends Exception {
-}
- }
-try {
-  throw(new b(1, 2));
-}
- catch (b $e) {
-  $e->dump();
+
+<<__EntryPoint>>
+function main_60() {
+  if (__hhvm_intrinsics\launder_value(0)) {
+    include '60.inc';
+  }
+  try {
+    throw(new b('1', 2));
+  } catch (b $e) {
+    $e->dump();
+  }
 }

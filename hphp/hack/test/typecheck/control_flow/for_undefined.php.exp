@@ -1,0 +1,2 @@
+File "for_undefined.php", line 6, characters 8-9:
+Variable `$x` is undefined, or not always defined. (Naming[2050])

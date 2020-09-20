@@ -1,10 +1,16 @@
-<?php
+<?hh // partial
 
-// default base
-class stdClass {
+// empty class that's always available
+final class stdClass {
 }
 
 // used in unserialize() for unknown classes
-class __PHP_Incomplete_Class {
+final class __PHP_Incomplete_Class {
   public $__PHP_Incomplete_Class_Name;
+
+  public function __construct() {
+    throw new Exception(
+      "Only the unserializer may construct instances of __PHP_Incomplete_Class"
+    );
+  }
 }

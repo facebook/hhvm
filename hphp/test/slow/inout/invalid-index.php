@@ -3,19 +3,16 @@
 function foo(inout $x) { var_dump($x); $x = 12; }
 
 function checkStatic() {
-  $a = ['apple' => ['orange' => 5]];
-  foo(inout $a[10]);
-  foo(inout $a['apple']['banana']);
-  foo(inout $a['apple']['orange']);
+  $a = darray['apple' => darray['orange' => 5]];
+  try { foo(inout $a[10]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { foo(inout $a['apple']['banana']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { foo(inout $a['apple']['orange']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
   try {
     foo(inout $a[50][100]);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
-  foo($a[1]);
-  foo(&$a[5][10]);
-  var_dump($a);
 }
 
 function getOne(inout $a, $k) {
@@ -39,16 +36,6 @@ function checkNonStatic($a) {
   getTwo(inout $a, 'apple', 'banana');
   getTwo(inout $a, 'apple', 'orange');
   getTwo(inout $a, 50, 100);
-  try {
-    foo($a[1]);
-  } catch (Exception $e) {
-    echo "Caught: ".$e->getMessage()."\n";
-  }
-  try {
-    foo(&$a[5][10]);
-  } catch (Exception $e) {
-    echo "Caught: ".$e->getMessage()."\n";
-  }
   var_dump($a);
 }
 
@@ -60,10 +47,11 @@ function checkNums($a) {
   getTwo(inout $a, 50, 100);
 }
 
+<<__EntryPoint>>
 function main() {
   checkStatic();
-  $a = ['apple' => ['orange' => 5]];
-  $b = dict['apple' => ['orange' => 5]];
+  $a = darray['apple' => darray['orange' => 5]];
+  $b = dict['apple' => darray['orange' => 5]];
   $c = keyset[0, 1, 2];
   $d = vec[vec[0, 1, 2], 3, 4];
   checkNonStatic($a);
@@ -71,5 +59,3 @@ function main() {
   checkNums($c);
   checkNums($d);
 }
-
-main();

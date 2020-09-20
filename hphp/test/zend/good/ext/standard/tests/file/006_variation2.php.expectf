@@ -58,38 +58,30 @@ bool(true)
 43567
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 51
 103567
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 56
 43567
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 51
 103567
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 56
 43567
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 51
 103567
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 56
 43567
 -- Iteration 15 --
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 51
 103567
 
-Warning: %s
-NULL
+Warning: chmod() expects parameter 2 to be integer, string given in %s/006_variation2.php on line 56
 43567
 *** Done ***

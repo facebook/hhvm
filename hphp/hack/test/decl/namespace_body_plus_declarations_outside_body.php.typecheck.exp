@@ -1,0 +1,2 @@
+File "namespace_body_plus_declarations_outside_body.php", line 3, characters 1-39:
+No code may exist outside of namespace {} (Parsing[1002])

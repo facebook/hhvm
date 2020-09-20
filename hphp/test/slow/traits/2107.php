@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public static function foo() {
@@ -12,5 +12,9 @@ class C {
     T::foo as public bar2;
   }
 }
+
+<<__EntryPoint>>
+function main_2107() {
 C::bar1();
 C::bar2();
+}

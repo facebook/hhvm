@@ -3,11 +3,11 @@
 **-- Offset is: -10 --**
 -- ASCII String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 32
 bool(false)
 --Multibyte String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 34
 bool(false)
 
 **-- Offset is: 0 --**
@@ -31,40 +31,40 @@ int(20)
 **-- Offset is: 30 --**
 -- ASCII String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 32
 bool(false)
 --Multibyte String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 34
 bool(false)
 
 **-- Offset is: 40 --**
 -- ASCII String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 32
 bool(false)
 --Multibyte String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 34
 bool(false)
 
 **-- Offset is: 50 --**
 -- ASCII String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 32
 bool(false)
 --Multibyte String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 34
 bool(false)
 
 **-- Offset is: 60 --**
 -- ASCII String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 32
 bool(false)
 --Multibyte String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/mb_stripos_variation5_Bug45923.php on line 34
 bool(false)
 Done

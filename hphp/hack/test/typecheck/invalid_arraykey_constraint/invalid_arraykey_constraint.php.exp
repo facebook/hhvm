@@ -1,0 +1,16 @@
+File "invalid_arraykey_constraint.php", line 34, characters 10-14:
+This type is a float, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 35, characters 10-13:
+This type is null, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 36, characters 10-20:
+This type is a float, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 37, characters 10-19:
+This type is null, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 20, characters 17-18:
+This type is a value of generic type Ta, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 21, characters 17-18:
+This type is a value of generic type Tb, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 22, characters 17-24:
+This type is the expression dependent type this::Tc, which cannot be used as an arraykey (string | int) (Typing[4319])
+File "invalid_arraykey_constraint.php", line 23, characters 17-24:
+This type is the expression dependent type this::Td, which cannot be used as an arraykey (string | int) (Typing[4319])

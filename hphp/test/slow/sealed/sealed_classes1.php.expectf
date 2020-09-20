@@ -1,0 +1,1 @@
+Fatal error: Classes cannot be both `final` and `sealed`. in %s/sealed_classes1.php on line 3

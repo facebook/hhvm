@@ -45,9 +45,9 @@ array(5) {
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: ldap_explode_dn() expects exactly 2 parameters, 1 given in %s/ldap_explode_dn.php on line 22
 
-Warning: %s
+Warning: ldap_explode_dn() expects exactly 2 parameters, 3 given in %s/ldap_explode_dn.php on line 25
 bool(false)
 bool(false)
 Done

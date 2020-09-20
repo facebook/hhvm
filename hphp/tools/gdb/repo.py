@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Wow okay, let's frob repos from inside gdb.
 """
@@ -11,8 +13,8 @@ from gdbutils import *
 
 #------------------------------------------------------------------------------
 
-_paths = [ None, None ]
-_conns = [ None, None ]
+_paths = [None, None]
+_conns = [None, None]
 
 
 def get(repo_id):
@@ -100,7 +102,7 @@ class RepoShowCommand(gdb.Command):
     def invoke(self, args, from_tty):
         global _paths
         print('Central repo: %s' % '<none>' if _paths[0] is None else _paths[0])
-        print('Local repo: %s'   % '<none>' if _paths[1] is None else _paths[1])
+        print('Local repo: %s' % '<none>' if _paths[1] is None else _paths[1])
 
 
 class RepoSetCentralCommand(gdb.Command):

@@ -2,23 +2,15 @@
 # Can only use AddNewElemC on PHP arrays
 #
 
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Int 1
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  NewDictArray 1
+  Int 100
+  AddNewElemC
+  SetL $v
+  PopC
+  String "Shouldn't get here...\n"
+  Print
+  PopC
+  True
   RetC
-}
-
-.function main {
-          NewDictArray 1
-          Int 100
-          AddNewElemC
-          SetL $v
-          PopC
-          String "Shouldn't get here...\n"
-          Print
-          PopC
-          True
-          RetC
 }

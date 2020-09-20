@@ -1,0 +1,1 @@
+Fatal error: Class AutoimportTest\TraversableExt may not inherit from interface (HH\Traversable) in %s/test/slow/namespace/autoimport2.php on line 7

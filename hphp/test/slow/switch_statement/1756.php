@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x) {
   switch ($x) {
@@ -25,6 +25,9 @@ function g($x) {
  break;
   }
 }
+
+<<__EntryPoint>>
+function main_1756() {
 f("foo");
 f("3");
 f("bar");
@@ -35,7 +38,8 @@ f(0.0);
 f(3.0);
 f(true);
 f(false);
-f(array());
+f(varray[]);
 f(new stdClass());
 g(0);
 g(0.0);
+}

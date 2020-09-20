@@ -2,11 +2,9 @@
 
 -- Testing var_export() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: var_export() expects at least 1 parameter, 0 given in %s/var_export_error1.php on line 12
 
 -- Testing var_export() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: var_export() expects at most 2 parameters, 3 given in %s/var_export_error1.php on line 19
 ===DONE===

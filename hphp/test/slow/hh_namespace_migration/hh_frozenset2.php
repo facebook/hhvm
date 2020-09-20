@@ -5,11 +5,9 @@
 
 namespace {
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $s = ImmSet {};
-  var_dump($s->isEmpty());
+  \var_dump($s->isEmpty());
 }
-
-main();
 
 }

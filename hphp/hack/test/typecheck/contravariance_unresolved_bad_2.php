@@ -39,5 +39,6 @@ class Foo {
   }
 }
 
-/* HH_FIXME[1002] */
-(new Foo())->BreakIt();
+function main(): void {
+  (new Foo())->BreakIt();
+}

@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : proto string base64_decode(string str[, bool strict])
- * Description: Decodes string using MIME base64 algorithm 
+ * Description: Decodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "Decode 'hello world!':\n";
 $noWhiteSpace = "aGVsbG8gd29ybGQh";
 var_dump(base64_decode($noWhiteSpace));
@@ -13,7 +13,7 @@ var_dump(base64_decode($noWhiteSpace, true));
 
 echo "\nWhitespace does not affect base64_decode, even with \$strict===true:\n";
 $withWhiteSpace = "a GVs   bG8gd2
-		 				9ybGQh";
+                         9ybGQh";
 var_dump(base64_decode($withWhiteSpace));
 var_dump(base64_decode($withWhiteSpace, false));
 var_dump(base64_decode($withWhiteSpace, true));
@@ -25,4 +25,4 @@ var_dump(base64_decode($badChars, false));
 var_dump(base64_decode($badChars, true));
 
 echo "Done";
-?>
+}

@@ -1,21 +1,24 @@
-<?php
+<?hh
 
-function f(&$a, &$b) {
- $a = 1;
- $b = 2;
- return 3;
- }
-class A {
- }
-function test() {
-  $a = array();
- f($a[0], $a[1]);
- var_dump($a);
-  $a = array();
- $a[0] = f($a[1], $a[2]);
- var_dump($a);
-  $a = new A();
- f($a->f, $a->g);
- var_dump($a);
+function f(inout $a, inout $b) {
+  $a[0] = 1;
+  $b[1] = 2;
+  return 3;
 }
-test();
+
+
+
+
+
+<<__EntryPoint>>
+function test() {
+  $a = darray[];
+  f(inout $a, inout $a);
+  var_dump($a);
+  $a = darray[];
+  $a[100] = f(inout $a, inout $a);
+  var_dump($a);
+
+
+
+}

@@ -1,0 +1,1 @@
+Fatal error: %r(The name Foo is already defined as a record|Cannot declare record with the same \(Foo\) as an existing type)%r in %s/record-type-same-name.php on line %r(3|6)%r

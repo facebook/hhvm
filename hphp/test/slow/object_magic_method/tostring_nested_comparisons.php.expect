@@ -1,0 +1,18 @@
+==== arrays ====
+__toString called
+bool(false)
+__toString called
+bool(true)
+__toString called
+bool(true)
+__toString called
+bool(false)
+==== objects ====
+__toString called
+bool(false)
+__toString called
+bool(true)
+__toString called
+bool(true)
+__toString called
+bool(false)

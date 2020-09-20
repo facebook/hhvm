@@ -1,26 +1,26 @@
-<?php
+<?hh
 /* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a 
- * 				user supplied callback function
+ * Description: Computes the difference of arrays with additional index check which is performed by a
+ *                 user supplied callback function
  * Source code: ext/standard/array.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$input_array = array(10 => 10, 12 => 12); 
+$input_array = darray[10 => 10, 12 => 12];
 
-$input_arrays = array(
-      'decimal indexed' => array(10 => 10, -17 => -17),
-      'octal indexed' => array( 012 => 10, -011 => -011,),
-      'hexa  indexed' => array(0xA => 10, -0x7 => -0x7 ),
-);
+$input_arrays = darray[
+      'decimal indexed' => darray[10 => 10, -17 => -17],
+      'octal indexed' => darray[ 012 => 10, -011 => -011,],
+      'hexa  indexed' => darray[0xA => 10, -0x7 => -0x7 ],
+];
 
 foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( array_diff_uassoc($input_array, $value, "strcasecmp") );
-      var_dump( array_diff_uassoc($value, $input_array, "strcasecmp") );
-} 
-     
-?>
-===DONE===
+      var_dump( array_diff_uassoc($input_array, $value, ($a, $b) ==> strcasecmp((string)$a, (string)$b)) );
+      var_dump( array_diff_uassoc($value, $input_array, ($a, $b) ==> strcasecmp((string)$a, (string)$b)) );
+}
+
+echo "===DONE===\n";
+}

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: trait declaration of property 'zoo' is incompatible with previous declaration in %s/overridding-conflicting-property-initializer.php on line 8

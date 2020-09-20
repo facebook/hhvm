@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: php_imagepolygon/%d: failed to allocate 18446744073709551608 bytes in %s/imagepolygon_negative.php on line 4

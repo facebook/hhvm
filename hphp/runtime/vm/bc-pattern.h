@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_BC_PATTERN_H_
-#define incl_HPHP_VM_BC_PATTERN_H_
+#pragma once
 
 #include "hphp/runtime/vm/hhbc.h"
 
@@ -84,6 +83,7 @@ struct BCPattern {
      */
     Atom& capture() {
       m_capture = true;
+      for (auto& a : m_alt) a = a.capture();
       return *this;
     }
 
@@ -93,7 +93,7 @@ struct BCPattern {
     }
 
     Atom& taken(std::initializer_list<Atom> pattern) {
-      assert(m_op == Op::JmpZ || m_op == Op::JmpNZ);
+      assertx(m_op == Op::JmpZ || m_op == Op::JmpNZ);
 
       m_taken = pattern;
       return *this;
@@ -188,4 +188,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_VM_BC_PATTERN_H_

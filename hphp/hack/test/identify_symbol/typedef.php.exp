@@ -1,4 +1,5 @@
-name: \Foo, kind: type_id, span: line 5, characters 10-12, definition: 
+name: \Foo, kind: type_id, span: line 5, characters 10-12, is_declaration: false
+definition:
  Foo
    kind: class
    id: type_id::Foo

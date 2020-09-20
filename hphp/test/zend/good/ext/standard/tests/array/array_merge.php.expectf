@@ -37,9 +37,10 @@ Array
 Array
 (
     [0] => 1
-    [1] => string
+    [1] => -2.344
+    [3] => string
     [2] => 
-    [3] => -2.344
+    [2] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 0 --
@@ -101,9 +102,10 @@ Array
 (
     [0] => string
     [1] => 1
-    [2] => string
-    [3] => 
-    [4] => -2.344
+    [2] => -2.344
+    [3] => string
+    [2] => 
+    [3] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 1 --
@@ -165,9 +167,10 @@ Array
 (
     [] => string
     [0] => 1
-    [1] => string
+    [1] => -2.344
+    [3] => string
     [2] => 
-    [3] => -2.344
+    [2] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 2 --
@@ -230,9 +233,10 @@ Array
 (
     [0] => 12
     [1] => 1
-    [2] => string
-    [3] => 
-    [4] => -2.344
+    [2] => -2.344
+    [3] => string
+    [2] => 
+    [3] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 3 --
@@ -309,9 +313,10 @@ Array
     [c] => 
     [d] => -2.344
     [0] => 1
-    [1] => string
+    [1] => -2.344
+    [3] => string
     [2] => 
-    [3] => -2.344
+    [2] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 4 --
@@ -395,9 +400,10 @@ Array
     [2] => 
     [3] => -2.344
     [4] => 1
-    [5] => string
-    [6] => 
-    [7] => -2.344
+    [5] => -2.344
+    [3] => string
+    [2] => 
+    [6] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 5 --
@@ -517,9 +523,10 @@ Array
         )
 
     [3] => 1
-    [4] => string
-    [5] => 
-    [6] => -2.344
+    [4] => -2.344
+    [3] => string
+    [2] => 
+    [5] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 6 --
@@ -547,14 +554,16 @@ Array
 )
 
 *** Testing array_merge() with three or more arrays ***
-array(12) {
+darray(13) {
   [0]=>
   int(1)
   [1]=>
+  float(-2.344)
+  ["3"]=>
   string(6) "string"
-  [2]=>
+  ["2"]=>
   NULL
-  [3]=>
+  [2]=>
   float(-2.344)
   ["a"]=>
   int(1)
@@ -564,42 +573,44 @@ array(12) {
   NULL
   ["d"]=>
   float(-2.344)
-  [4]=>
+  [3]=>
   NULL
-  [5]=>
+  [4]=>
   string(2) "Hi"
   ["string"]=>
   string(5) "hello"
-  [6]=>
-  array(3) {
+  [5]=>
+  darray(3) {
     [""]=>
     string(5) "World"
     ["-2.34"]=>
     string(1) "a"
-    [0]=>
+    ["0"]=>
     string(1) "b"
   }
 }
-array(6) {
+darray(7) {
   [0]=>
   int(1)
   [1]=>
-  string(6) "string"
-  [2]=>
-  NULL
-  [3]=>
   float(-2.344)
-  [4]=>
+  ["3"]=>
+  string(6) "string"
+  ["2"]=>
+  NULL
+  [2]=>
+  float(-2.344)
+  [3]=>
   string(12) "array on fly"
   ["nullarray"]=>
-  array(0) {
+  varray(0) {
   }
 }
 
 *** Testing single array argument ***
-array(0) {
+darray(0) {
 }
-array(4) {
+darray(4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -609,7 +620,7 @@ array(4) {
   ["d"]=>
   float(-2.344)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -619,7 +630,7 @@ array(4) {
   [3]=>
   float(-2.344)
 }
-array(4) {
+darray(4) {
   [0]=>
   NULL
   [1]=>
@@ -627,46 +638,27 @@ array(4) {
   ["string"]=>
   string(5) "hello"
   [2]=>
-  array(3) {
+  darray(3) {
     [""]=>
     string(5) "World"
     ["-2.34"]=>
     string(1) "a"
-    [0]=>
+    ["0"]=>
     string(1) "b"
   }
 }
 
-*** Testing array_merge() with typecasting non-array to array ***
-array(7) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  string(6) "string"
-  ["c"]=>
-  NULL
-  ["d"]=>
-  float(-2.344)
-  [0]=>
-  string(5) "type1"
-  [1]=>
-  int(10)
-  [2]=>
-  float(12.34)
-}
-
 *** Testing error conditions ***
-Warning: %s
+Warning: array_merge() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 75
+
+Warning: Invalid operand type was used: %s in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 76
 NULL
 
-Warning: %s
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 77
 NULL
 
-Warning: %s
-NULL
+Notice: Undefined variable: arr4 in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
 
-Notice: %s
-
-Warning: %s
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
 NULL
 Done

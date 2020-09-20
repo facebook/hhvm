@@ -1,11 +1,14 @@
-<?php
+<?hh
 
 // Stems from https://github.com/facebook/hhvm/issues/4892
 
-function elementOpen( $parser, $name, $attribs ) {
+function elementOpen( $parser, $name, darray $attribs ) {
     print "<$name>";
 }
 
+
+<<__EntryPoint>>
+function main_xml_callback_closure() {
 var_dump( is_callable( 'elementOpen' ) );
 $closure = function ( $parser, $name ) {
             print "</$name>";
@@ -27,3 +30,4 @@ if ( 0 === xml_parse( $parser, "<root><a><b></b></a></root>" ) ) {
 }
 
 xml_parser_free( $parser );
+}

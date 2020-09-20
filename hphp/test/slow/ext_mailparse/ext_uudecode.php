@@ -10,7 +10,7 @@
  * package... not what a human might actually expect.
  */
 
-function describe(array<string, mixed> $info): void {
+function describe(darray<string, mixed> $info): void {
   $ofname = "origfilename not set";
   if (array_key_exists('origfilename', $info)) {
     $ofname = $info['origfilename'];
@@ -55,6 +55,11 @@ function process(string $name, string $desc): void {
   }
 }
 
+// for x in scenarios process(k, v)
+
+
+<<__EntryPoint>>
+function main_ext_uudecode() {
 $scenarios = Map<string,string>{
   "simple" => "exactly one uuencoded file, no additional stuff",
   "mixed" => "literal data, and then one uuencoded file (common)",
@@ -72,5 +77,4 @@ $scenarios = Map<string,string>{
 foreach ($scenarios as $name => $desc) {
   process($name, $desc);
 }
-
-// for x in scenarios process(k, v)
+}

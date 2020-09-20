@@ -1,12 +1,11 @@
-<?php
+<?hh
 
 namespace foo;
-
-$x = function (\stdclass $x = NULL) { 
-	var_dump($x);	
+<<__EntryPoint>> function main(): void {
+$x = function (\stdclass $x = NULL) {
+    \var_dump($x);
 };
 
 $x(NULL);
 $x(new \stdclass);
-
-?>
+}

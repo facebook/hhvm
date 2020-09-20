@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class testobj {
   private $x;
@@ -9,7 +9,7 @@ class testobj {
 }
 
 function alloc_lots($x) {
-  $v = array();
+  $v = __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]);
   for ($i = 0; $i < $x * 10000; ++$i) {
     $m = new testobj($x * $i);
     $v[] = $m;
@@ -20,6 +20,9 @@ function alloc_lots($x) {
   return $v;
 }
 
+
+<<__EntryPoint>>
+function main_memory_interval() {
 memory_get_usage(); // force stats update
 
 // drive memory up to its highest peak in the script
@@ -49,3 +52,4 @@ var_dump($u1);
 var_dump($u2);
 var_dump($u3);
 var_dump($u4);
+}

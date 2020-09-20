@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private static $a = array('foo' => array('bar'), 2, 3);
+  private static $a = darray['foo' => varray['bar'], 0 => 2, 1 => 3];
 
   public static function main() {
     unset(self::$a['foo']['bar']);
@@ -15,4 +15,8 @@ function main() {
   Foo::main();
   var_dump(Foo::get());
 }
+
+<<__EntryPoint>>
+function main_static_props_015() {
 main();
+}

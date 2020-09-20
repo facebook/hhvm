@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class foo {
   function bar () {
@@ -8,6 +8,9 @@ class foo {
 }
 class foo2 extends foo {
 }
+
+<<__EntryPoint>>
+function main_1455() {
 $f1 = new foo;
 $f2 = new foo2;
 var_dump(get_class($f1));
@@ -16,3 +19,4 @@ $f2->bar();
 var_dump(get_class("qwerty"));
 var_dump(get_class($f1));
 var_dump(get_class($f2));
+}

@@ -19,6 +19,10 @@
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
@@ -26,13 +30,35 @@
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
-#include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
+c_ResumableWaitHandle* GetResumedWaitHandle() {
+  c_ResumableWaitHandle* ret = nullptr;
+  walkStack([&] (const ActRec* fp, Offset) {
+    if (isResumed(fp) && fp->func()->isAsync()) {
+      if (fp->func()->isGenerator()) {
+        // async generator
+        auto generator = frame_async_generator(fp);
+        if (!generator->isEagerlyExecuted()) {
+          ret = generator->getWaitHandle();
+          return true;
+        }
+      } else {
+        // async function
+        ret = frame_afwh(fp);
+        return true;
+      }
+    }
+    return false;
+  }, true);
+  return ret;
+}
 
 int64_t HHVM_FUNCTION(asio_get_current_context_idx) {
   return AsioSession::Get()->getCurrentContextIdx();
@@ -54,22 +80,22 @@ Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
     auto fp = session->getContext(ctx_idx + 1)->getSavedFP();
     return Object{c_ResumableWaitHandle::getRunning(fp)};
   } else {
-    return Object{c_ResumableWaitHandle::getRunning(GetCallerFrameForArgs())};
+    return Object{GetResumedWaitHandle()};
   }
 }
 
 }
 
 Object HHVM_FUNCTION(asio_get_running) {
-  return Object{c_ResumableWaitHandle::getRunning(GetCallerFrameForArgs())};
+  return Object{GetResumedWaitHandle()};
 }
 
 Variant HHVM_FUNCTION(join, const Object& obj) {
-  if (!obj->instanceof(c_WaitHandle::classof())) {
+  if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Joining unsupported for user-land Awaitable");
   }
-  auto handle = wait_handle<c_WaitHandle>(obj.get());
+  auto handle = wait_handle<c_Awaitable>(obj.get());
   if (!handle->isFinished()) {
     // run the full blown machinery
     assertx(handle->instanceof(c_WaitableWaitHandle::classof()));
@@ -78,28 +104,28 @@ Variant HHVM_FUNCTION(join, const Object& obj) {
   }
 
   if (LIKELY(handle->isSucceeded())) {
-    return cellAsCVarRef(handle->getResult());
+    return tvAsCVarRef(handle->getResult());
   } else {
     throw_object(Object{handle->getException()});
   }
 }
 
 bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
-  if (!obj->instanceof(c_WaitHandle::classof())) {
+  if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Cancellation unsupported for user-land Awaitable");
   }
-  auto handle = wait_handle<c_WaitHandle>(obj.get());
+  auto handle = wait_handle<c_Awaitable>(obj.get());
 
   switch(handle->getKind()) {
-    case c_WaitHandle::Kind::ExternalThreadEvent:
+    case c_Awaitable::Kind::ExternalThreadEvent:
       return handle->asExternalThreadEvent()->cancel(exception);
-    case c_WaitHandle::Kind::Sleep:
+    case c_Awaitable::Kind::Sleep:
       return handle->asSleep()->cancel(exception);
     default:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Cancellation unsupported for " +
-        HHVM_MN(WaitHandle, getName) (handle)
+        HHVM_MN(Awaitable, getName) (handle)
       );
   }
 }
@@ -112,14 +138,14 @@ Array HHVM_FUNCTION(backtrace,
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
 
-  if (!obj->instanceof(c_WaitHandle::classof())) {
+  if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Backtrace unsupported for user-land Awaitable");
   }
 
   // it's not possible to backtrace finished wait handle,
   // because it doesn't keep parent chain
-  if (wait_handle<c_WaitHandle>(obj.get())->isFinished()) {
+  if (wait_handle<c_Awaitable>(obj.get())->isFinished()) {
     return Array();
   }
 
@@ -136,6 +162,26 @@ Array HHVM_FUNCTION(backtrace,
 }
 
 static AsioExtension s_asio_extension;
+
+void AsioExtension::moduleInit() {
+  initFunctions();
+
+  initWaitHandle();
+  initResumableWaitHandle();
+  initAsyncGenerator();
+  initAwaitAllWaitHandle();
+  initConditionWaitHandle();
+  initSleepWaitHandle();
+  initRescheduleWaitHandle();
+  initExternalThreadEventWaitHandle();
+  initStaticWaitHandle();
+
+  loadSystemlib();
+
+  finishClasses();
+}
+
+void AsioExtension::requestInit() { requestInitSingletons(); }
 
 void AsioExtension::initFunctions() {
   HHVM_FALIAS(

@@ -1,8 +1,9 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_DOMNotation extends DOMNotation {
   public $___x;
 }
-test("DOMNotation");
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("DOMNotation");
+}

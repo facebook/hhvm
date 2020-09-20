@@ -1,0 +1,2 @@
+ERROR: string(59) "Argument 1 passed to f() must be an instance of @D, C given"
+ERROR: string(60) "Value returned from function f() must be of type @D, C given"

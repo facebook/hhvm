@@ -1,17 +1,8 @@
-Warning: Key size is 0 in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 4
+Warning: Key size is 0 in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 7
 
-Warning: Iv size incorrect; supplied length: 1, needed: 8 in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 4
+Warning: Iv size incorrect; supplied length: 1, needed: 8 in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 7
 
-Warning: Key length incorrect in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 4
-
-Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 6
-bool(false)
-
-Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 7
-bool(false)
-
-Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 8
-bool(false)
+Warning: Key length incorrect in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 7
 
 Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 9
 bool(false)
@@ -26,4 +17,13 @@ Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mc
 bool(false)
 
 Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 13
+bool(false)
+
+Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 14
+bool(false)
+
+Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 15
+bool(false)
+
+Warning: supplied argument is not a valid MCrypt resource in %s/test/slow/ext_mcrypt/ext_mcrypt_return_types.php on line 16
 bool(false)

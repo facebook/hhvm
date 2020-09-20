@@ -1,12 +1,11 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
- **)
+ * *)
 
 type raw_color =
   | Default
@@ -23,7 +22,10 @@ type style =
   | Normal of raw_color
   | Bold of raw_color
   | Dim of raw_color
+  | Italics of raw_color
   | Underline of raw_color
+  | BoldDim of raw_color
+  | BoldItalics of raw_color
   | BoldUnderline of raw_color
   | DimUnderline of raw_color
   | NormalWithBG of raw_color * raw_color
@@ -34,18 +36,36 @@ type color_mode =
   | Color_Never
   | Color_Auto
 
+val apply_color : ?color_mode:color_mode -> style -> string -> string
+
+val style_num_from_list :
+  raw_color -> [< `Bold | `Dim | `Italics | `Underline ] list -> string
+
+val apply_color_from_style :
+  ?color_mode:color_mode -> string -> string -> string
+
 (*
  * Print a sequence of colorized strings to stdout/stderr, using ANSI color
  * escapes codes.
  *)
-val cprint : ?color_mode:color_mode -> ?out_channel:out_channel -> (style * string) list -> unit
-val cprintf : ?color_mode:color_mode -> ?out_channel:out_channel -> style ->
-  ('a, unit, string, unit) format4 -> 'a
+val cprint :
+  ?color_mode:color_mode ->
+  ?out_channel:out_channel ->
+  (style * string) list ->
+  unit
+
+val cprintf :
+  ?color_mode:color_mode ->
+  ?out_channel:out_channel ->
+  style ->
+  ('a, unit, string, unit) format4 ->
+  'a
 
 (* These two functions provide a four-state TTY-friendly spinner that
  * a client can output between sleeps if it happens to be waiting on
  * a busy server (e.g. one that's initializing) *)
-val spinner : unit -> string
+val spinner : ?angery_reaccs_only:bool -> unit -> string
+
 val spinner_used : unit -> bool
 
 (* Output a "clear current line" escape sequence to out_channel if it's
@@ -65,5 +85,10 @@ val eprintf : ('a, out_channel, unit) format -> 'a
 (* Whether the terminal supports color *)
 val supports_color : unit -> bool
 
+val should_color : color_mode -> bool
+
 (* Whether the terminal supports emoji *)
 val supports_emoji : unit -> bool
+
+(* Gets the column width of the current terminal. *)
+val get_term_cols : unit -> int option

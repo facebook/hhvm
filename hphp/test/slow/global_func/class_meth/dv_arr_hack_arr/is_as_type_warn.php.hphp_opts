@@ -1,0 +1,5 @@
+-vRuntime.Eval.EmitClsMethPointers=1
+-vRuntime.Eval.IsCompatibleClsMethType=1
+
+-vHackArrDVArrs=1
+-vRuntime.Eval.IsVecNotices=1

@@ -1,5 +1,4 @@
 
-Warning: %s
-NULL
+Warning: ldap_rename() expects exactly 5 parameters, 1 given in %s/ldap_rename_error.php on line 5
 bool(false)
 ===DONE===

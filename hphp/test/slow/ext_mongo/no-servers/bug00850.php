@@ -1,4 +1,4 @@
-<?php
-$mc = new MongoClient("", array("connect" => false));
+<?hh <<__EntryPoint>> function main(): void {
+$mc = new MongoClient("", darray["connect" => false]);
 var_dump($mc->__toString());
-?>
+}

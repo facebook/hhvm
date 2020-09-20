@@ -16,6 +16,7 @@ class C extends A {
     $b->foo();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C;
 $c->foo();
+}

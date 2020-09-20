@@ -1,20 +1,11 @@
 <?hh
-function main() {
-  $a = array();
-  $x = array_shift($a);
+<<__EntryPoint>> function main(): void {
+  $a = darray[];
+  $x = array_shift(inout $a);
   var_dump($x);
   unset($a, $x);
-  $a = array();
-  $x = array_pop($a);
-  var_dump($x);
-  unset($a, $x);
-  $a = array();
-  $x = next($a);
-  var_dump($x);
-  unset($a, $x);
-  $a = array();
-  $x = prev($a);
+  $a = darray[];
+  $x = array_pop(inout $a);
   var_dump($x);
   unset($a, $x);
 }
-main();

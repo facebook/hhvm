@@ -21,19 +21,19 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/system-profiler.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
+#include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
+#include "hphp/zend/zend-math.h"
 
 #include <iostream>
 #include <fstream>
@@ -484,7 +484,7 @@ private:
     int64_t         m_vtsc_start;  // user/sys time start
   };
 
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
+  using StatsMap = hphp_hash_map<std::string, CountMap, string_hash>;
   StatsMap m_stats; // outcome
 
 public:
@@ -618,7 +618,7 @@ struct TraceWalker {
     // off. This ensures main() represents the entire run, even if we
     // run out of log space.
     if (!m_stack.empty()) {
-      assert(strcmp(m_stack.back().trace->symbol, "main()") == 0);
+      assertx(strcmp(m_stack.back().trace->symbol, "main()") == 0);
       incStats(m_stack.back().trace->symbol, final, m_stack.back(), stats);
     }
     if (m_badArcCount > 0) {
@@ -749,14 +749,14 @@ struct TraceProfiler final : Profiler {
     } else {
       m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
       Extension* ext = ExtensionRegistry::get(s_hotprofiler);
-      assert(ext);
+      assertx(ext);
       IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                        "profiler.max_trace_buffer",
                        &m_maxTraceBuffer);
     }
   }
 
-  ~TraceProfiler() {
+  ~TraceProfiler() override {
     if (m_successful) {
       free(m_traceBuffer);
       IniSetting::Unbind("profiler.max_trace_buffer");
@@ -959,7 +959,7 @@ struct TraceProfiler final : Profiler {
     int64_t count;
     CountedTraceData() : count(0)  { clear(); }
   };
-  typedef hphp_hash_map<std::string, CountedTraceData, string_hash> StatsMap;
+  using StatsMap = hphp_hash_map<std::string, CountedTraceData, string_hash>;
   StatsMap m_stats; // outcome
 
   static pthread_mutex_t s_inUse;
@@ -1102,7 +1102,7 @@ private:
 struct MemoProfiler final : Profiler {
   explicit MemoProfiler(int /*flags*/) : Profiler(true) {}
 
-  ~MemoProfiler() {
+  ~MemoProfiler() override {
   }
 
  private:
@@ -1113,12 +1113,12 @@ struct MemoProfiler final : Profiler {
     if (ar->func()->cls() && ar->hasThis()) {
       auto& memo = m_memos[symbol];
       if (!memo.m_ignore) {
-        auto args = hhvm_get_frame_args(ar, 0);
+        auto args = hhvm_get_frame_args(ar);
         args.append((int64_t)(ar->getThis())); // Use the pointer not the obj
         VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
         String sdata;
         try {
-          sdata = vs.serialize(args, true);
+          sdata = vs.serialize(VarNR{args}, true);
           f.m_args = sdata;
         } catch (...) {
           fprintf(stderr, "Args Serialization failure: %s\n", symbol);
@@ -1148,8 +1148,7 @@ struct MemoProfiler final : Profiler {
     ActRec *ar = vmfp();
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
-    if (!g_context->m_faults.empty()) return;
-    if (ar->m_func->isCPPBuiltin() || ar->resumed()) return;
+    if (ar->func()->isCPPBuiltin() || isResumed(ar)) return;
     auto ret = tvAsCVarRef(retval);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;
@@ -1300,28 +1299,25 @@ bool ProfilerFactory::start(ProfilerKind kind,
   case ProfilerKind::Memo:
     m_profiler = req::make_raw<MemoProfiler>(flags);
     break;
-  case ProfilerKind::XDebug:
-    m_profiler = req::make_raw<XDebugProfiler>();
-    break;
   case ProfilerKind::External:
     if (g_system_profiler) {
       m_profiler = g_system_profiler->getHotProfiler();
     } else if (m_external_profiler) {
       m_profiler = m_external_profiler;
     } else {
-      throw_invalid_argument(
+      raise_invalid_argument_warning(
         "ProfilerFactory::setExternalProfiler() not yet called");
       return false;
     }
     break;
   default:
-    throw_invalid_argument("level: %d", static_cast<int>(kind));
+    raise_invalid_argument_warning("level: %d", static_cast<int>(kind));
     return false;
   }
   if (m_profiler && m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
-    ThreadInfo::s_threadInfo->m_profiler = m_profiler;
+    RequestInfo::s_requestInfo->m_profiler = m_profiler;
     if (beginFrame) {
       m_profiler->beginFrame("main()");
     }
@@ -1340,7 +1336,7 @@ Variant ProfilerFactory::stop() {
     m_profiler->writeStats(ret);
     req::destroy_raw(m_profiler);
     m_profiler = nullptr;
-    ThreadInfo::s_threadInfo->m_profiler = nullptr;
+    RequestInfo::s_requestInfo->m_profiler = nullptr;
 
     return ret;
   }
@@ -1399,7 +1395,7 @@ void end_profiler_frame(Profiler *p,
 ///////////////////////////////////////////////////////////////////////////////
 
 static struct HotProfilerExtension : Extension {
-  HotProfilerExtension(): Extension("hotprofiler", get_PHP_VERSION().data()) {}
+  HotProfilerExtension(): Extension("hotprofiler") {}
 
   void moduleInit() override {
 #ifdef CLOCK_REALTIME

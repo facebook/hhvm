@@ -17,7 +17,7 @@ function test2(): myshape {
   return shape('field1' => 1, 'field2' => true);
 }
 
-
+<<__EntryPoint>>
 function main(): void {
   $y = test();
   var_dump($y[X::X1]);
@@ -25,5 +25,3 @@ function main(): void {
 
   var_dump(test2());
 }
-
-main();

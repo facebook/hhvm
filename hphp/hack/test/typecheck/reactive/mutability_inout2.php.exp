@@ -1,0 +1,2 @@
+File "mutability_inout2.php", line 6, characters 12-40:
+`__Mutable`, `__MaybeMutable` and `__OwnedMutable` annotations are not allowed on inout parameters. (Parsing[1002])

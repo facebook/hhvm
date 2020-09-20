@@ -1,0 +1,11 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+HHVM_VERSION_ID matches HHVM_VERSION_{MAJOR,MINOR,PATCH}
+HHVM_VERSION matches HHVM_VERSION_{MAJOR,MINOR,PATCH}

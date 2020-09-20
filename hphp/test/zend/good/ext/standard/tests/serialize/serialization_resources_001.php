@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 /* Prototype  : proto string serialize(mixed variable)
  * Description: Returns a string representation of variable (which can later be unserialized) 
  * Source code: ext/standard/var.c
@@ -9,7 +9,7 @@
  * Source code: ext/standard/var.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "\n--- Testing Resource ---\n";
 $file_handle = fopen( __FILE__, "r" );
 $serialized_data = serialize( $file_handle );
@@ -18,4 +18,4 @@ var_dump($serialized_data);
 var_dump(unserialize($serialized_data));
 
 echo "\nDone";
-?>
+}

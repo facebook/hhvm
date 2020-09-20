@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $key = <<<EOF
 -----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDXX/MsKEBLcLeKA1d/i7ufG1qs
@@ -12,5 +12,4 @@ EOF;
 print $key;
 $res = openssl_pkey_get_public($key);
 var_dump(openssl_pkey_get_details($res));
-?>
-
+}

@@ -1,0 +1,89 @@
+# pu_as_key.good.php starts here
+
+.filepath "pu_as_key.good.php";
+
+.adata A_0 = """D:0:{}""";
+.adata A_1 = """Y:1:{s:4:\"toto\";i:42;}""";
+
+.function {} ["__EntryPoint"("""y:0:{}""")] (8,19) <"HH\\void" N > main() {
+  .numiters 1;
+  .declvars $dict $key $value $shape;
+  .srcloc 9:11,9:16;
+  Dict @A_0
+  .srcloc 9:3,9:16;
+  SetL $dict
+  .srcloc 9:3,9:17;
+  PopC
+  .srcloc 10:25,10:40;
+  String "I am an atom !"
+  .srcloc 10:3,10:21;
+  BaseL $dict Define
+  .srcloc 10:3,10:21;
+  SetM 0 ET:"my_message"
+  .srcloc 10:3,10:41;
+  PopC
+  .srcloc 12:12,12:16;
+  CGetL $dict
+  .srcloc 12:12,12:16;
+  IterInit 0 K:$key V:$value L0
+  .try {
+  L1:
+    .srcloc 13:10,13:16;
+    String "key: "
+    .srcloc 13:18,13:21;
+    CGetL $key
+    Concat
+    .srcloc 13:23,13:26;
+    String "\n"
+    .srcloc 13:10,13:26;
+    Concat
+    .srcloc 13:5,13:27;
+    Print
+    .srcloc 13:5,13:27;
+    PopC
+    .srcloc 14:10,14:18;
+    String "value: "
+    .srcloc 14:20,14:25;
+    CGetL $value
+    Concat
+    .srcloc 14:27,14:30;
+    String "\n"
+    .srcloc 14:10,14:30;
+    Concat
+    .srcloc 14:5,14:31;
+    Print
+    .srcloc 14:5,14:31;
+    PopC
+    .srcloc 12:3,15:101;
+    IterNext 0 K:$key V:$value L1
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
+  }
+L0:
+  .srcloc 17:12,17:30;
+  Array @A_1
+  .srcloc 17:3,17:30;
+  SetL $shape
+  .srcloc 17:3,17:31;
+  PopC
+  .srcloc 18:8,18:21;
+  BaseL $shape Warn
+  QueryM 0 CGet ET:"toto"
+  .srcloc 18:23,18:26;
+  String "\n"
+  .srcloc 18:8,18:26;
+  Concat
+  .srcloc 18:3,18:27;
+  Print
+  .srcloc 18:3,18:27;
+  PopC
+  .srcloc 19:2,19:2;
+  Null
+  RetC
+}
+
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:16:\"pocket_universes\";}""")] ;
+
+# pu_as_key.good.php ends here

@@ -1,0 +1,2 @@
+File "vararg_mutable3.php", line 6, characters 12-37:
+Attributes on variadic parameters are not allowed (Parsing[1002])

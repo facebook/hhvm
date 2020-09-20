@@ -1,4 +1,0 @@
-File "yield_wait_forv_result_bad3.php", line 13, characters 16-30:
-gena expects an array (Typing[4044])
-File "yield_wait_forv_result_bad3.php", line 16, characters 27-35:
-It is incompatible with an object of type Awaitable

@@ -1,8 +1,6 @@
 *** Testing ob_get_contents() : error cases ***
 
-Warning: %s
-NULL
+Warning: ob_get_contents() expects exactly 0 parameters, 1 given in %s/ob_get_contents_error_001.php on line 11
 
-Warning: %s
-NULL
+Warning: ob_get_contents() expects exactly 0 parameters, 2 given in %s/ob_get_contents_error_001.php on line 15
 Done

@@ -1,3 +1,0 @@
-Method [ <user, overwrites Foo, prototype Foo> public method func ] {
-  @@ %s010.php 7 - 8
-}

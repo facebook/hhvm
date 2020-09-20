@@ -110,7 +110,7 @@ size_t relocateImpl(RelocationInfo& rel,
           }
         } else {
           if (fixups.addressImmediates.count((TCA)~uintptr_t(src))) {
-            // Handle weird, encoded offset, used by cgLdObjMethod
+            // Handle weird, encoded offset, used by LdSmashable
             always_assert(imm == ((uintptr_t(src) << 1) | 1));
             bool DEBUG_ONLY success =
               d2.setImmediate(((uintptr_t)dest << 1) | 1);
@@ -245,7 +245,7 @@ size_t relocateImpl(RelocationInfo& rel,
               keep_nops = rel.isSmashableRelocation(dest);
             }
             if (!d2.setFarBranchTarget(new_far_target, keep_nops)) {
-              assert(false && "Far branch target setting failed");
+              assertx(false && "Far branch target setting failed");
             }
             if (d2.couldBeNearBranch()) {
               // target is close enough, convert it to Near branch
@@ -354,25 +354,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
   }
 }
 
-void adjustMetaDataForRelocation(RelocationInfo& rel, AsmInfo* /*asmInfo*/,
-                                 CGMeta& meta) {
-  for (auto& li : meta.literals) {
-    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
-      li.second = (uint64_t*)adjusted;
-    }
-  }
-
-  decltype(meta.codePointers) updatedCP;
-  for (auto cp : meta.codePointers) {
-    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
-      updatedCP.emplace(adjusted);
-    } else {
-      updatedCP.emplace(cp);
-    }
-  }
-  updatedCP.swap(meta.codePointers);
-}
-
 /*
  * Adjust potentially live references that point into the relocated
  * area.
@@ -400,7 +381,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
 
 void findFixups(TCA start, TCA end, CGMeta& meta) {
   while (start != end) {
-    assert(start < end);
+    assertx(start < end);
     DecodedInstruction di(start);
     start += di.size();
 

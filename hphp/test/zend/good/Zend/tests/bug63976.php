@@ -1,15 +1,13 @@
-<?php
-if (1) {
-  class Foo {
-    const TABLE = "foo";
-    public $table = self::TABLE;
+<?hh
+
+<<__EntryPoint>>
+function test() {
+  if (__hhvm_intrinsics\launder_value(1)) {
+    include 'bug63976-1.inc';
   }
-}
-if (1) {
-  class Bar extends Foo {
-    const TABLE = "bar";
+  if (__hhvm_intrinsics\launder_value(1)) {
+    include 'bug63976-2.inc';
   }
+  $bar = new Bar();
+  var_dump($bar->table);
 }
-$bar = new Bar();
-var_dump($bar->table);
-?>

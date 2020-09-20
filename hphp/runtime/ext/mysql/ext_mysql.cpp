@@ -20,8 +20,8 @@
 #include <folly/String.h>
 #include <folly/portability/Sockets.h>
 
-#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/mysql/mysql_common.h"
@@ -46,7 +46,6 @@ HHVM_FUNCTION(mysql_connect, const String& server, const String& username,
       password,
       "",
       client_flags,
-      false,
       false,
       connect_timeout_ms,
       query_timeout_ms,
@@ -88,7 +87,6 @@ static Variant HHVM_FUNCTION(mysql_connect_with_db, const String& server,
       database,
       client_flags,
       false,
-      false,
       connect_timeout_ms,
       query_timeout_ms,
       &conn_attrs));
@@ -108,7 +106,7 @@ static Variant HHVM_FUNCTION(mysql_pconnect,
     password,
     "",
     client_flags,
-    true, false,
+    true,
     connect_timeout_ms,
     query_timeout_ms,
     &conn_attrs
@@ -130,7 +128,7 @@ static Variant HHVM_FUNCTION(mysql_pconnect_with_db,
     password,
     database,
     client_flags,
-    true, false,
+    true,
     connect_timeout_ms,
     query_timeout_ms,
     &conn_attrs
@@ -308,7 +306,7 @@ Variant HHVM_FUNCTION(mysql_affected_rows,
 
 static Variant HHVM_FUNCTION(mysql_query, const String& query,
                       const Variant& link_identifier /* = null */) {
-  return php_mysql_do_query_and_get_result(query, link_identifier, true, false);
+  return php_mysql_do_query_and_get_result(query, link_identifier, true);
 }
 
 static Variant HHVM_FUNCTION(mysql_multi_query, const String& query,
@@ -330,10 +328,8 @@ static Variant HHVM_FUNCTION(mysql_multi_query, const String& query,
 
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
-    if (RuntimeOption::EnableHipHopSyntax) {
-      raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
-                   query.data(), mysql_error(conn));
-    }
+    raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
+                 query.data(), mysql_error(conn));
 #endif
     // turning this off clears the errors
     if (!mysql_set_server_option(conn, MYSQL_OPTION_MULTI_STATEMENTS_OFF)) {
@@ -390,12 +386,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_result,
 
 static Variant HHVM_FUNCTION(mysql_unbuffered_query, const String& query,
                       const Variant& link_identifier /* = null */) {
-  return php_mysql_do_query_and_get_result(
-    query,
-    link_identifier,
-    false,
-    false
-  );
+  return php_mysql_do_query_and_get_result(query, link_identifier, false);
 }
 
 static Variant HHVM_FUNCTION(mysql_list_dbs,
@@ -436,269 +427,6 @@ static Variant HHVM_FUNCTION(mysql_list_processes,
   }
   return Variant(req::make<MySQLResult>(res));
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// async
-
-/* The mysql_*_nonblocking calls are Facebook extensions to
-   libmysqlclient; for now, protect with an ifdef.  Once open sourced,
-   the client will be detectable via its own ifdef. */
-#ifdef FACEBOOK
-
-static Variant HHVM_FUNCTION(mysql_async_connect_start,
-                      const String& server /* = null_string */,
-                      const String& username /* = null_string */,
-                      const String& password /* = null_string */,
-                      const String& database /* = null_string */) {
-  return php_mysql_do_connect(server, username, password, database,
-                              0, false, true, 0, 0, nullptr);
-}
-
-static bool HHVM_FUNCTION(mysql_async_connect_completed,
-                   const Variant& link_identifier) {
-  auto mySQL = MySQL::Get(link_identifier);
-  if (!mySQL) {
-    raise_warning("supplied argument is not a valid MySQL-Link resource");
-    return true;
-  }
-
-  MYSQL* conn = mySQL->get();
-  if (conn->async_op_status != ASYNC_OP_CONNECT) {
-    // Don't warn if we're in UNSET state (ie between queries, etc)
-    if (conn->async_op_status != ASYNC_OP_UNSET) {
-      raise_warning("runtime/ext_mysql: no pending async connect in progress");
-    }
-    return true;
-  }
-
-  int error = 0;
-  auto status = mysql_real_connect_nonblocking_run(conn, &error);
-  return status == NET_ASYNC_COMPLETE;
-}
-
-static bool HHVM_FUNCTION(mysql_async_query_start,
-                   const String& query, const Variant& link_identifier) {
-  MYSQL* conn = MySQL::GetConn(link_identifier);
-  if (!conn) {
-    return false;
-  }
-
-  if (conn->async_op_status != ASYNC_OP_UNSET) {
-    raise_warning("runtime/ext_mysql: attempt to run async query while async "
-                  "operation already pending");
-    return false;
-  }
-  Variant ret = php_mysql_do_query_and_get_result(query, link_identifier,
-                                                  true, true);
-  if (ret.getRawType() != KindOfBoolean) {
-    raise_warning("runtime/ext_mysql: unexpected return from "
-                  "php_mysql_do_query_and_get_result");
-    return false;
-  }
-  return ret.toBooleanVal();
-}
-
-static Variant HHVM_FUNCTION(mysql_async_query_result,
-                      const Variant& link_identifier) {
-  auto mySQL = MySQL::Get(link_identifier);
-  if (!mySQL) {
-    raise_warning("supplied argument is not a valid MySQL-Link resource");
-    return Variant(Variant::NullInit());
-  }
-  MYSQL* conn = mySQL->get();
-  if (!conn || (conn->async_op_status != ASYNC_OP_QUERY &&
-                conn->async_op_status != ASYNC_OP_UNSET)) {
-    raise_warning("runtime/ext_mysql: attempt to check query result when query "
-                  "not executing");
-    return Variant(Variant::NullInit());
-  }
-
-  int error = 0;
-  auto status = mysql_real_query_nonblocking(
-    conn, mySQL->m_async_query.c_str(), mySQL->m_async_query.size(), &error);
-
-  if (status != NET_ASYNC_COMPLETE) {
-    return Variant(Variant::NullInit());
-  }
-
-  if (error) {
-    return Variant(Variant::NullInit());
-  }
-
-  mySQL->m_async_query.clear();
-
-  MYSQL_RES* mysql_result = mysql_use_result(conn);
-  auto r = req::make<MySQLResult>(mysql_result);
-  r->setAsyncConnection(mySQL);
-  return Variant(std::move(r));
-}
-
-static bool HHVM_FUNCTION(mysql_async_query_completed, const Resource& result) {
-  auto const res = dyn_cast_or_null<MySQLResult>(result);
-  return !res || res->get() == nullptr;
-}
-
-static Variant HHVM_FUNCTION(mysql_async_fetch_array, const Resource& result,
-                                               int result_type /* = 1 */) {
-  if ((result_type & PHP_MYSQL_BOTH) == 0) {
-    throw_invalid_argument("result_type: %d", result_type);
-    return false;
-  }
-
-  auto res = php_mysql_extract_result(result);
-  if (!res) {
-    return false;
-  }
-
-  MYSQL_RES* mysql_result = res->get();
-  if (!mysql_result) {
-    raise_warning("invalid parameter to mysql_async_fetch_array");
-    return false;
-  }
-
-  MYSQL_ROW mysql_row = nullptr;
-  int status = mysql_fetch_row_nonblocking(mysql_result, &mysql_row);
-  // Last row, or no row yet available.
-  if (status != NET_ASYNC_COMPLETE) {
-    return false;
-  }
-  if (mysql_row == nullptr) {
-    res->close();
-    return false;
-  }
-
-  unsigned long *mysql_row_lengths = mysql_fetch_lengths(mysql_result);
-  if (!mysql_row_lengths) {
-    return false;
-  }
-
-  mysql_field_seek(mysql_result, 0);
-
-  Array ret;
-  MYSQL_FIELD *mysql_field;
-  int i;
-  for (mysql_field = mysql_fetch_field(mysql_result), i = 0; mysql_field;
-       mysql_field = mysql_fetch_field(mysql_result), i++) {
-    Variant data;
-    if (mysql_row[i]) {
-      data = mysql_makevalue(String(mysql_row[i], mysql_row_lengths[i],
-                                    CopyString), mysql_field);
-    }
-    if (result_type & PHP_MYSQL_NUM) {
-      ret.set(i, data);
-    }
-    if (result_type & PHP_MYSQL_ASSOC) {
-      ret.set(String(mysql_field->name, CopyString), data);
-    }
-  }
-
-  return ret;
-}
-
-// This function takes an array of arrays, each of which is of the
-// form array($dbh, ...).  The only thing that matters in the inner
-// arrays is the first element being a MySQL instance.  It then
-// procedes to block for up to 'timeout' seconds, waiting for the
-// first actionable descriptor(s), which it then returns in the form
-// of the original arrays passed in.  The intention is the caller
-// would include other information they care about in the tail of the
-// array so they can decide how to act on the
-// potentially-now-queryable descriptors.
-//
-// This function is a poor shadow of how the async library can be
-// used; for more complex cases, we'd use libevent and share our event
-// loop with other IO operations such as memcache ops, thrift calls,
-// etc.  That said, this function is reasonably efficient for most use
-// cases.
-static Variant HHVM_FUNCTION(mysql_async_wait_actionable, const Array& items,
-                                                   double timeout) {
-  size_t count = items.size();
-  if (count == 0 || timeout < 0) {
-    return empty_array();
-  }
-
-  struct pollfd* fds = (struct pollfd*)calloc(count, sizeof(struct pollfd));
-  SCOPE_EXIT { free(fds); };
-
-  // Walk our input, determine what kind of poll() operation is
-  // necessary for the descriptor in question, and put an entry into
-  // fds.
-  int nfds = 0;
-  for (ArrayIter iter(items); iter; ++iter) {
-    Array entry = iter.second().toArray();
-    if (entry.size() < 1) {
-      raise_warning("element %d did not have at least one entry",
-                   nfds);
-      return empty_array();
-    }
-
-    auto conn = cast<MySQLResource>(entry[0])->mysql()->get();
-
-    if (conn->async_op_status == ASYNC_OP_UNSET) {
-      raise_warning("runtime/ext_mysql: no pending async operation in "
-                    "progress");
-      return empty_array();
-    }
-
-    pollfd* fd = &fds[nfds++];
-    fd->fd = mysql_get_file_descriptor(conn);
-    if (conn->net.async_blocking_state == NET_NONBLOCKING_READ) {
-      fd->events = POLLIN;
-    } else {
-      fd->events = POLLOUT;
-    }
-    fd->revents = 0;
-  }
-
-  // The poll itself; either the timeout is hit or one or more of the
-  // input fd's is ready.
-  int timeout_millis = static_cast<long>(timeout * 1000);
-  int res = poll(fds, nfds, timeout_millis);
-  if (res == -1) {
-    raise_warning("unable to poll [%d]: %s", errno,
-                  folly::errnoStr(errno).c_str());
-    return empty_array();
-  }
-
-  // Now just find the ones that are ready, and copy the corresponding
-  // arrays from our input array into our return value.
-  Array ret = Array::Create();
-  nfds = 0;
-  for (ArrayIter iter(items); iter; ++iter) {
-    Array entry = iter.second().toArray();
-    if (entry.size() < 1) {
-      raise_warning("element %d did not have at least one entry",
-                   nfds);
-      return empty_array();
-    }
-
-    auto conn = cast<MySQLResource>(entry[0])->mysql()->get();
-
-    pollfd* fd = &fds[nfds++];
-    if (fd->fd != mysql_get_file_descriptor(conn)) {
-      raise_warning("poll returned events out of order wtf");
-      continue;
-    }
-    if (fd->revents != 0) {
-      ret.append(iter.second());
-    }
-  }
-
-  return ret;
-}
-
-static int64_t HHVM_FUNCTION(mysql_async_status,
-                             const Variant& link_identifier) {
-  auto mySQL = MySQL::Get(link_identifier);
-  if (!mySQL || !mySQL->get()) {
-    raise_warning("supplied argument is not a valid MySQL-Link resource");
-    return -1;
-  }
-
-  return mySQL->get()->async_op_status;
-}
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // row operations
@@ -912,7 +640,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  ArrayInit props(13, ArrayInit::Map{});
+  DArrayInit props(13);
   props.set("name",         info->name);
   props.set("table",        info->table);
   props.set("def",          info->def);
@@ -1016,25 +744,8 @@ void mysqlExtension::moduleInit() {
   HHVM_RC_INT(MYSQL_CLIENT_IGNORE_SPACE, 256);
   HHVM_RC_INT(MYSQL_CLIENT_INTERACTIVE, 1024);
   HHVM_RC_INT(MYSQL_CLIENT_SSL, 2048);
-  HHVM_RC_INT(ASYNC_OP_INVALID, k_ASYNC_OP_INVALID);
-  HHVM_RC_INT(ASYNC_OP_UNSET, k_ASYNC_OP_UNSET);
-  HHVM_RC_INT(ASYNC_OP_CONNECT, k_ASYNC_OP_CONNECT);
-  HHVM_RC_INT(ASYNC_OP_QUERY, k_ASYNC_OP_QUERY);
 
   loadSystemlib("mysql");
-
-#ifdef FACEBOOK
-  HHVM_FE(mysql_async_connect_start);
-  HHVM_FE(mysql_async_connect_completed);
-  HHVM_FE(mysql_async_query_start);
-  HHVM_FE(mysql_async_query_result);
-  HHVM_FE(mysql_async_query_completed);
-  HHVM_FE(mysql_async_fetch_array);
-  HHVM_FE(mysql_async_wait_actionable);
-  HHVM_FE(mysql_async_status);
-
-  loadSystemlib("mysql-async");
-#endif
 }
 
 mysqlExtension s_mysql_extension;

@@ -1,5 +1,0 @@
-<?php
-if (!extension_loaded('reflection') || !defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50399) {
-  print 'skip';
-}
-?>

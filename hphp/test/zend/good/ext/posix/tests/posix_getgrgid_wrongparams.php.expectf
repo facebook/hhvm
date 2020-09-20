@@ -1,6 +1,5 @@
 bool(false)
 bool(false)
 
-Warning: %s
-bool(false)
+Warning: posix_getgrgid() expects exactly 1 parameter, 0 given in %s/posix_getgrgid_wrongparams.php on line 5
 ===DONE===

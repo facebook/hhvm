@@ -1,11 +1,6 @@
-File "bad_inout_hint_parent3.php", line 7, characters 7-8:
-Class C2 does not correctly implement all required methods  (Typing[4110])
-File "bad_inout_hint_parent3.php", line 7, characters 18-19:
-Some methods are incompatible with those declared in type C1
-Read the following to see why:
 File "bad_inout_hint_parent3.php", line 8, characters 19-21:
-Member foo has the wrong type
-File "bad_inout_hint_parent3.php", line 4, characters 39-46:
-This is an array key (int/string)
+The method `foo` has the wrong type (Typing[4341])
 File "bad_inout_hint_parent3.php", line 8, characters 39-44:
-It is incompatible with a string
+Expected `string`
+File "bad_inout_hint_parent3.php", line 4, characters 39-46:
+But got `arraykey`

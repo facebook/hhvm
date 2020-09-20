@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXECUTION_CONTEXT_INL_H_
-#define incl_HPHP_EXECUTION_CONTEXT_INL_H_
+#pragma once
 
 #include "hphp/runtime/vm/act-rec.h"
 
@@ -42,8 +41,19 @@ inline Transport* ExecutionContext::getTransport() {
   return m_transport;
 }
 
+inline rqtrace::Trace* ExecutionContext::getRequestTrace() {
+  return m_requestTrace;
+}
+
 inline void ExecutionContext::setTransport(Transport* transport) {
   m_transport = transport;
+  if (transport && !m_requestTrace) {
+    if (auto trace = m_transport->getRequestTrace()) m_requestTrace = trace;
+  }
+}
+
+inline void ExecutionContext::setRequestTrace(rqtrace::Trace* trace) {
+  m_requestTrace = trace;
 }
 
 inline String ExecutionContext::getCwd() const {
@@ -187,6 +197,10 @@ inline bool ExecutionContext::hasRequestEventHandlers() const {
   return !m_requestEventHandlers.empty();
 }
 
+inline const RepoOptions* ExecutionContext::getRepoOptionsForRequest() const {
+  return m_requestOptions.get_pointer();
+}
+
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
   auto state = getPrevVMState(fp, nullptr, nullptr, nullptr);
   return state ? state->func() : nullptr;
@@ -194,39 +208,34 @@ inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
 
 inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
-  const Variant& args_,
-  VarEnv* varEnv
+  const Variant& args_
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv,
-                    ctx.invName, InvokeNormal, false, ctx.dynamic);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const Func* f,
-  void* thisOrCls,
-  StringData* invName
+  ExecutionContext::ThisOrClass thisOrCls
 ) {
-  return invokeFuncFew(f, thisOrCls, invName, 0, nullptr);
+  return invokeFuncFew(f, thisOrCls, 0, nullptr);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const CallCtx& ctx,
-  int argc,
+  uint32_t numArgs,
   const TypedValue* argv
 ) {
-  auto const thisOrCls = [&] () -> void* {
-    if (ctx.this_) return (void*)(ctx.this_);
-    if (ctx.cls) return (void*)((char*)(ctx.cls) + 1);
+  auto const thisOrCls = [&] () -> ExecutionContext::ThisOrClass {
+    if (ctx.this_) return ctx.this_;
+    if (ctx.cls) return ctx.cls;
     return nullptr;
   }();
 
   return invokeFuncFew(
     ctx.func,
     thisOrCls,
-    ctx.invName,
-    argc,
+    numArgs,
     argv,
-    false,
     ctx.dynamic
   );
 }
@@ -234,24 +243,27 @@ inline TypedValue ExecutionContext::invokeFuncFew(
 inline TypedValue ExecutionContext::invokeMethod(
   ObjectData* obj,
   const Func* meth,
-  InvokeArgs args
+  InvokeArgs args,
+  bool dynamic
 ) {
   return invokeFuncFew(
     meth,
-    ActRec::encodeThis(obj),
-    nullptr /* invName */,
+    obj,
     args.size(),
-    args.start()
+    args.start(),
+    dynamic,
+    false
   );
 }
 
 inline Variant ExecutionContext::invokeMethodV(
   ObjectData* obj,
   const Func* meth,
-  InvokeArgs args
+  InvokeArgs args,
+  bool dynamic
 ) {
   // Construct variant without triggering incref.
-  return Variant::attach(invokeMethod(obj, meth, args));
+  return Variant::attach(invokeMethod(obj, meth, args, dynamic));
 }
 
 inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
@@ -260,17 +272,9 @@ inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
   return LIKELY(!m_nestedVMs.empty()) ? m_nestedVMs.back().fp : nullptr;
 }
 
-inline Cell ExecutionContext::lookupClsCns(const StringData* cls,
+inline TypedValue ExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
   return lookupClsCns(NamedEntity::get(cls), cls, cns);
-}
-
-inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
-  auto const fp = getFrameAtDepth(frame);
-  if (fp && (fp->func()->attrs() & AttrMayUseVV)) {
-    if (fp->hasVarEnv()) return fp->getVarEnv();
-  }
-  return nullptr;
 }
 
 inline ActRec*
@@ -300,4 +304,3 @@ template<class Fn> void ExecutionContext::sweepDynPropTable(Fn fn) {
 
 }
 
-#endif

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $file = tempnam(sys_get_temp_dir(), "test_");
 var_dump($file);
 $fp = fopen($file, "wt");
@@ -8,4 +8,4 @@ fclose($fp);
 unlink($file);
 
 echo "Done\n";
-?>
+}

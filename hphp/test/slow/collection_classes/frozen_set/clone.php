@@ -8,4 +8,8 @@ function main() {
   var_dump($clone == $fs);
 }
 
+
+<<__EntryPoint>>
+function main_clone() {
 main();
+}

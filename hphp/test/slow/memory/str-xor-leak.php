@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($bits) {
 
@@ -19,4 +19,8 @@ function main($bits) {
   echo "Usage didn't flatten out after 5 tries\n";
 }
 
+
+<<__EntryPoint>>
+function main_str_xor_leak() {
 main('b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad');
+}

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
@@ -57,10 +58,20 @@ void cgInst(IRLS& env, const IRInstruction* inst){
   SCOPE_ASSERT_DETAIL("cgInst") { return inst->toString(); };
 
   switch (inst->op()) {
-#define O(name, dsts, srcs, flags)  \
-    case name:                      \
-      FTRACE(7, "cg" #name "\n");   \
-      cg##name(env, inst);          \
+#define O(name, dsts, srcs, flags)                                           \
+    case name:                                                               \
+      FTRACE(7, "cg" #name "\n");                                            \
+      try {                                                                  \
+        cg##name(env, inst);                                                 \
+      } catch (const Exception& e) {                                         \
+        always_assert_flog(0, "Exception escaped from cg" #name ": {}",      \
+                           e.getMessage());                                  \
+      } catch (const std::exception& e) {                                    \
+        always_assert_flog(0, "std::exception escaped from cg" #name ": {}", \
+                           e.what());                                        \
+      } catch (...) {                                                        \
+        always_assert_flog(0, "unknown exception escaped from cg" #name);    \
+      }                                                                      \
       break;
     IR_OPCODES
 #undef O
@@ -110,84 +121,25 @@ void optimize(Vunit& unit, CodeKind kind, bool regAlloc) {
   }
 }
 
-/*
- * Computes inline frames for each block in unit. Inline frames are dominated
- * by an inlinestart instruction and post-dominated by an inlineend instruction.
- * This function annotates Vblocks with their associated frame, and populates
- * the frame vector. Additionally, inlinestart and inlineend instructions are
- * replaced by jmp instructions.
- */
-void computeFrames(Vunit& unit) {
-  auto const topFunc = unit.context ? unit.context->func : nullptr;
-
-  auto const rpo = sortBlocks(unit);
-
-  unit.frames.emplace_back(topFunc, Vframe::Top, 0, unit.blocks[rpo[0]].weight);
-  unit.blocks[rpo[0]].frame = 0;
-  for (auto const b : rpo) {
-    auto& block = unit.blocks[b];
-    assert_flog(block.frame != -1, "Block frames cannot be uninitialized.");
-
-    if (block.code.empty()) continue;
-
-    auto const next_frame = [&] () -> int {
-      auto frame = block.frame;
-      for (auto& inst : block.code) {
-        switch (inst.op) {
-        case Vinstr::inlinestart:
-          // Each inlined frame will have a single start but may have multiple
-          // ends, and so we need to propagate this state here so that it only
-          // happens once per frame.
-          for (auto f = frame; f != Vframe::Top; f = unit.frames[f].parent) {
-            unit.frames[f].inclusive_cost += inst.inlinestart_.cost;
-            unit.frames[f].num_inner_frames++;
-          }
-
-          unit.frames.emplace_back(
-            inst.inlinestart_.func,
-            frame,
-            inst.inlinestart_.cost,
-            block.weight
-          );
-          frame = inst.inlinestart_.id = unit.frames.size() - 1;
-          break;
-        case Vinstr::inlineend:
-          frame = unit.frames[frame].parent;
-          break;
-        default: break;
-        }
-      }
-      return frame;
-    }();
-
-    for (auto const s : succs(block)) {
-      auto& sblock = unit.blocks[s];
-      assert_flog(
-        sblock.frame == -1 || sblock.frame == next_frame,
-        "Blocks must be dominated by a single inline frame {} cannot have "
-        "frames {} ({}) and {} ({}).",
-        s,
-        sblock.frame,
-        unit.frames[sblock.frame].func
-          ? unit.frames[sblock.frame].func->fullName()->data()
-          : "(null)",
-        next_frame,
-        unit.frames[next_frame].func
-          ? unit.frames[next_frame].func->fullName()->data()
-          : "(null)"
-      );
-      sblock.frame = next_frame;
-    }
-  }
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
+std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
+                                 CodeKind kind,
                                  bool regAlloc /* = true */) noexcept {
   Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
+
+  tracing::Block _{
+    "vasm-gen",
+    [&] {
+      return traceProps(unit)
+        .add("code_kind", codeKindAsString(kind))
+        .add("reg_alloc", regAlloc);
+    }
+  };
+
+  rqtrace::EventGuard trace{"VLOWER"};
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
   auto vunit = std::make_unique<Vunit>();
@@ -223,7 +175,13 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
     vunit->blocks[b].weight = block->profCount() * areaWeightFactor(v.area());
     v.use(b);
 
-    genBlock(env, v, vasm.cold(), *block);
+    auto& vcold =
+      block->hint() == Block::Hint::Unused ? vasm.frozen() : vasm.cold();
+
+    if (block == unit.entry() && kind == CodeKind::Trace) {
+      v << recordbasenativesp{};
+    }
+    genBlock(env, v, vcold, *block);
 
     assertx(v.closed());
     assertx(vasm.main().empty() || vasm.main().closed());
@@ -232,18 +190,22 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
   }
 
   fixBlockWeights(*vunit);
+
+  // This pass requires on some invariants about rvmfp() from HHIR, so we do it
+  // here rather than in optimize() as those optimizations may be called for non
+  // HHIR Vunits.
+  fixupVmfpUses(*vunit);
+
   printUnit(kInitialVasmLevel, "after initial vasm generation", *vunit);
   assertx(check(*vunit));
   timer.stop();
-
-  // Lower inlinestart and inlineend instructions to jmps, and annotate blocks
-  // with inlined function parents
-  computeFrames(*vunit);
+  trace.finish();
 
   try {
     optimize(*vunit, kind, regAlloc);
   } catch (const FailedTraceGen& e) {
     // vasm-xls can fail if it tries to allocate too many spill slots.
+    tracing::addPoint("vasm-optimize punt");
     logLowPriPerfWarning(
       "vasm-optimize punt",
       1000,
@@ -260,7 +222,10 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
 }
 
 Vcost computeIRUnitCost(const IRUnit& unit) {
-  auto const vunit = lowerUnit(unit, CodeKind::Trace, false /* regAlloc */);
+  auto vunit = lowerUnit(unit, CodeKind::Trace, false /* regAlloc */);
+  if (RuntimeOption::EvalHHIRInliningUseLayoutBlocks) {
+    layoutBlocks(*vunit);
+  }
   return computeVunitCost(*vunit);
 }
 

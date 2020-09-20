@@ -1,0 +1,1 @@
+ERROR: string(73) "Value returned from function f() must be of type @C<int>, C<string> given"

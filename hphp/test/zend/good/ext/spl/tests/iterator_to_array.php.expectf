@@ -1,6 +1,5 @@
+Warning: iterator_to_array() expects at least 1 parameter, 0 given in %s/iterator_to_array.php on line 6
 
-Warning: %s
+Warning: iterator_to_array() expects at most 2 parameters, 3 given in %s/iterator_to_array.php on line 9
 
-Warning: %s
-
-Catchable fatal error: %s
+Catchable fatal error: Argument 2 passed to iterator_to_array() must be an instance of bool, string given in %s/iterator_to_array.php on line 11

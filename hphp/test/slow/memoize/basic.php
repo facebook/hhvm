@@ -220,7 +220,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c2(456));
   var_dump($c2('abc'));
   var_dump($c2(456));
-  var_dump($c2());
+  try { var_dump($c2()); } catch (Exception $e) { var_dump($e->getMessage()); }
   var_dump($c2(null));
   var_dump($c2(456, 'abc'));
   var_dump($c2('abc', 456));
@@ -231,7 +231,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c3(789, 'def', true));
   var_dump($c3(false, 100, 1.23));
   var_dump($c3(789, 'def', false));
-  var_dump($c3(123, 'abc'));
+  try { var_dump($c3(123, 'abc')); } catch (Exception $e) { var_dump($e->getMessage()); }
   var_dump($c3(123, 'abc', null));
   var_dump($c3(456, 123, 'ghi', 789));
   var_dump($c3(456, 123, 'ghi', 987));
@@ -245,7 +245,7 @@ function runFuncs($c1, $c2, $c3, $c4, $c5) {
   var_dump($c5('abc'));
   var_dump($c5(123));
   var_dump($c5('abc'));
-  var_dump($c5());
+  try { var_dump($c5()); } catch (Exception $e) { var_dump($e->getMessage()); }
   var_dump($c5(null));
   var_dump($c5(123, 'abc'));
   var_dump($c5('abc', 123));
@@ -275,18 +275,18 @@ function runMethods() {
   echo "==========================================\n";
   echo "Testing methods....\n\n";
   $a = new Cls1();
-  runFuncs([$a, 'func1'],
-           [$a, 'func2'],
-           [$a, 'func3'],
-           [$a, 'func4'],
-           [$a, 'func5']);
+  runFuncs(varray[$a, 'func1'],
+           varray[$a, 'func2'],
+           varray[$a, 'func3'],
+           varray[$a, 'func4'],
+           varray[$a, 'func5']);
 
   $b = new Cls1();
-  runFuncs([$b, 'func1'],
-           [$b, 'func2'],
-           [$b, 'func3'],
-           [$b, 'func4'],
-           [$b, 'func5']);
+  runFuncs(varray[$b, 'func1'],
+           varray[$b, 'func2'],
+           varray[$b, 'func3'],
+           varray[$b, 'func4'],
+           varray[$b, 'func5']);
 }
 
 function runSingleMethods() {
@@ -297,11 +297,11 @@ function runSingleMethods() {
   $c = new Cls4();
   $d = new Cls5();
   $e = new Cls6();
-  runFuncs([$a, 'func'],
-           [$b, 'func'],
-           [$c, 'func'],
-           [$d, 'func'],
-           [$e, 'func']);
+  runFuncs(varray[$a, 'func'],
+           varray[$b, 'func'],
+           varray[$c, 'func'],
+           varray[$d, 'func'],
+           varray[$e, 'func']);
 }
 
 function runTraitStatics() {
@@ -323,19 +323,22 @@ function runTraitMethods() {
   echo "==========================================\n";
   echo "Testing trait methods....\n\n";
   $a = new Cls7();
-  runFuncs([$a, 'func1'],
-           [$a, 'func2'],
-           [$a, 'func3'],
-           [$a, 'func4'],
-           [$a, 'func5']);
+  runFuncs(varray[$a, 'func1'],
+           varray[$a, 'func2'],
+           varray[$a, 'func3'],
+           varray[$a, 'func4'],
+           varray[$a, 'func5']);
   $b = new Cls8();
-  runFuncs([$b, 'func1'],
-           [$b, 'func2'],
-           [$b, 'func3'],
-           [$b, 'func4'],
-           [$b, 'func5']);
+  runFuncs(varray[$b, 'func1'],
+           varray[$b, 'func2'],
+           varray[$b, 'func3'],
+           varray[$b, 'func4'],
+           varray[$b, 'func5']);
 }
 
+
+<<__EntryPoint>>
+function main_basic() {
 error_reporting(0);
 
 runFreeFuncs();
@@ -344,3 +347,4 @@ runMethods();
 runSingleMethods();
 runTraitStatics();
 runTraitMethods();
+}

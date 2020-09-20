@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function test() {
-  $a = array();
+  $a = varray[];
   for ($i = 0;
  $i < 17;
  $i++) {
@@ -9,7 +9,11 @@ function test() {
   }
   unset($a[16]);
   $b = $a;
-  array_unshift($a, 'foo');
+  array_unshift(inout $a, 'foo');
   var_dump(count($a), count($b));
 }
+
+<<__EntryPoint>>
+function main_417() {
 test();
+}

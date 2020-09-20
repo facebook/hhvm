@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of last occurrence of 'needle' in 'haystack'.
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 /* Test strrpos() function by passing heredoc string containing special chars for haystack
  *  and with various needles & offets 
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strrpos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing special chars --\n";
 $special_chars_str = <<<EOD
@@ -24,4 +24,4 @@ var_dump( strrpos($special_chars_str, "$*", 10) );
 var_dump( strrpos($special_chars_str, "(special)") );
 
 echo "*** Done ***";
-?>
+}

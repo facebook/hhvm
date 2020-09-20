@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_PRECLASS_H_
-#define incl_HPHP_VM_PRECLASS_H_
+#pragma once
 
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/attr.h"
@@ -24,6 +23,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/base/atomic-countable.h"
+#include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -98,6 +98,8 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  */
 struct PreClass : AtomicCountable {
   friend struct PreClassEmitter;
+  using UpperBoundVec = VMCompactVector<TypeConstraint>;
+  using UpperBoundMap = vm_flat_map<const StringData*, UpperBoundVec>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -116,29 +118,39 @@ struct PreClass : AtomicCountable {
     Prop(PreClass* preClass,
          const StringData* name,
          Attr attrs,
-         const StringData* typeConstraint,
+         const StringData* userType,
+         const TypeConstraint& typeConstraint,
+         const CompactVector<TypeConstraint>& ubs,
          const StringData* docComment,
          const TypedValue& val,
-         RepoAuthType repoAuthType);
+         RepoAuthType repoAuthType,
+         UserAttributeMap userAttributes);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()           const { return m_name; }
     const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
+    const StringData* userType()       const { return m_userType; }
+    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
+    const UpperBoundVec& upperBounds() const { return m_ubs; }
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
+    const UserAttributeMap&
+                      userAttributes() const { return m_userAttributes; }
 
   private:
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;
-    LowStringPtr m_typeConstraint;
+    LowStringPtr m_userType;
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
+    TypeConstraint m_typeConstraint;
+    UpperBoundVec m_ubs;
+    UserAttributeMap m_userAttributes;
   };
 
   /*
@@ -154,8 +166,8 @@ struct PreClass : AtomicCountable {
     const StringData* name()     const { return m_name; }
     const TypedValueAux& val()   const { return m_val; }
     const StringData* phpCode()  const { return m_phpCode; }
-    bool isAbstract()      const { return m_val.constModifiers().isAbstract; }
-    bool isType()          const { return m_val.constModifiers().isType; }
+    bool isAbstract()      const { return m_val.constModifiers().isAbstract(); }
+    bool isType()          const { return m_val.constModifiers().isType(); }
 
     template<class SerDe> void serde(SerDe& sd);
 
@@ -267,17 +279,17 @@ private:
   typedef IndexedStringMap<Const,true,Slot> ConstMap;
 
 public:
-  typedef FixedVector<LowStringPtr> InterfaceVec;
-  typedef FixedVector<LowStringPtr> UsedTraitVec;
-  typedef FixedVector<ClassRequirement> ClassRequirementsVec;
-  typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
-  typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
+  typedef VMFixedVector<LowStringPtr> InterfaceVec;
+  typedef VMFixedVector<LowStringPtr> UsedTraitVec;
+  typedef VMFixedVector<ClassRequirement> ClassRequirementsVec;
+  typedef VMFixedVector<TraitPrecRule> TraitPrecRuleVec;
+  typedef VMFixedVector<TraitAliasRule> TraitAliasRuleVec;
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
 
-  PreClass(Unit* unit, int line1, int line2, Offset o, const StringData* n,
+  PreClass(Unit* unit, int line1, int line2, const StringData* n,
            Attr attrs, const StringData* parent, const StringData* docComment,
            Id id, Hoistable hoistable);
   ~PreClass();
@@ -295,13 +307,16 @@ public:
   NamedEntity*      namedEntity()  const { return m_namedEntity; }
   int               line1()        const { return m_line1; }
   int               line2()        const { return m_line2; }
-  Offset            getOffset()    const { return m_offset; }
   Id                id()           const { return m_id; }
   Attr              attrs()        const { return m_attrs; }
   const StringData* name()         const { return m_name; }
   const StringData* parent()       const { return m_parent; }
   const StringData* docComment()   const { return m_docComment; }
   Hoistable         hoistability() const { return m_hoistable; }
+
+  int64_t dynConstructSampleRate() const {
+    return m_dynConstructSampleRate;
+  }
 
   /*
    * Number of methods declared on this class (as opposed to included via
@@ -332,6 +347,14 @@ public:
   const TraitPrecRuleVec& traitPrecRules()   const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes()   const { return m_userAttributes; }
+
+  /*
+   * If the parent is sealed, enforce that we are in the whitelist.
+   * Note that parent may be derived through a using, extending, or
+   * implementing relationship.
+   */
+  void
+  enforceInMaybeSealedParentWhitelist(const PreClass* parentPreClass) const;
 
   /*
    * Funcs, Consts, and Props all behave similarly.  Define raw accessors
@@ -397,7 +420,6 @@ public:
    */
   const Const* lookupConstant(const StringData* cnsName) const;
   Func* lookupMethod(const StringData* methName) const;
-  const Prop* lookupProp(const StringData* propName) const;
 
   /*
    * Static offset accessors, used by the JIT.
@@ -427,7 +449,6 @@ private:
   LowPtr<NamedEntity> m_namedEntity;
   int m_line1;
   int m_line2;
-  Offset m_offset;
   Id m_id;
   Attr m_attrs;
   Hoistable m_hoistable;
@@ -447,6 +468,7 @@ private:
   MethodMap m_methods;
   PropMap m_properties;
   ConstMap m_constants;
+  int64_t m_dynConstructSampleRate;
 };
 
 typedef AtomicSharedPtr<PreClass> PreClassPtr;
@@ -458,4 +480,3 @@ typedef AtomicSharedPtr<PreClass> PreClassPtr;
 #include "hphp/runtime/vm/preclass-inl.h"
 #undef incl_HPHP_VM_PRECLASS_INL_H_
 
-#endif // incl_HPHP_VM_PRECLASS_H_

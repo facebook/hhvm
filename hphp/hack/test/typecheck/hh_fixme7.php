@@ -6,5 +6,5 @@ newtype FBID = int;
 <?hh // strict
 
 class C {
-  /* HH_FIXME[4110] */ const FBID mark = 4;
+  /* HH_FIXME[4338] */ const FBID mark = 4;
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class JoinPoint
 {
 }
@@ -14,5 +14,6 @@ class Read extends Pointcut
     {
     }
 }
-?>
-DONE
+<<__EntryPoint>> function main(): void {
+echo "DONE";
+}

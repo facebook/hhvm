@@ -16,6 +16,9 @@
 */
 
 #include "hphp/runtime/ext/icu/ext_icu_uconverter.h"
+
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace Intl {
@@ -36,8 +39,8 @@ static Class* UConverterClass = nullptr;
 
 static Class* getClass() {
   if (!UConverterClass) {
-    UConverterClass = Unit::lookupClass(s_UConverter.get());
-    assert(UConverterClass);
+    UConverterClass = Class::lookup(s_UConverter.get());
+    assertx(UConverterClass);
   }
   return UConverterClass;
 }
@@ -104,16 +107,15 @@ static void ucnvToUCallback(ObjectData *objval,
   if (MemoryManager::sweeping()) return;
   auto data = Native::data<IntlUConverter>(objval);
   String source(args->source, args->sourceLimit - args->source, CopyString);
-  Variant errRef(RefData::Make(make_tv<KindOfInt64>(*pErrorCode)));
   Variant ret = objval->o_invoke_few_args(
     s_toUCallback, 4,
-    reason, source, String(codeUnits, length, CopyString), errRef);
-  if (errRef.is(KindOfInt64)) {
-    *pErrorCode = (UErrorCode)errRef.toInt64();
+    reason, source, String(codeUnits, length, CopyString), *pErrorCode);
+  if (ret.asCArrRef()[1].is(KindOfInt64)) {
+    *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();
   } else {
     data->failure(U_ILLEGAL_ARGUMENT_ERROR, "ucnvToUCallback()");
   }
-  appendToUTarget(data, ret, args);
+  appendToUTarget(data, ret.asCArrRef()[0], args);
 }
 
 void appendFromUTarget(IntlUConverter *data,
@@ -159,23 +161,22 @@ static void ucnvFromUCallback(ObjectData *objval,
                               UErrorCode *pErrorCode) {
   if (MemoryManager::sweeping()) return;
   auto data = Native::data<IntlUConverter>(objval);
-  Array source = Array::Create();
+  Array source = Array::CreateVArray();
   for(int i = 0; i < length; i++) {
     UChar32 c;
     U16_NEXT(codeUnits, i, length, c);
     source.append((int64_t)c);
   }
-  Variant errRef(RefData::Make(make_tv<KindOfInt64>(*pErrorCode)));
   Variant ret =
     objval->o_invoke_few_args(
       s_fromUCallback, 4,
-      reason, source, (int64_t)codePoint, errRef);
-  if (errRef.is(KindOfInt64)) {
-    *pErrorCode = (UErrorCode)errRef.toInt64();
+      reason, source, (int64_t)codePoint, *pErrorCode);
+  if (ret.asCArrRef()[1].is(KindOfInt64)) {
+    *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();
   } else {
     data->failure(U_ILLEGAL_ARGUMENT_ERROR, "ucnvFromUCallback()");
   }
-  appendFromUTarget(data, ret, args);
+  appendFromUTarget(data, ret.asCArrRef()[0], args);
 }
 
 static bool setCallback(const Object& this_, UConverter *cnv) {
@@ -270,8 +271,7 @@ static void HHVM_METHOD(UConverter, __construct, const String& toEncoding,
   }
 }
 
-// TODO(4017519)
-static void HHVM_METHOD(UConverter, __destruct) {
+static void HHVM_METHOD(UConverter, __dispose) {
   FETCH_CNV(data, this_,);
   if (data->src()) ucnv_close(data->src());
   if (data->dest()) ucnv_close(data->dest());
@@ -430,13 +430,13 @@ static Variant HHVM_STATIC_METHOD(UConverter, reasonText, int64_t reason) {
 
 static Array HHVM_STATIC_METHOD(UConverter, getAvailable) {
   int32_t i, count = ucnv_countAvailable();
-  Array ret = Array::Create();
+  VArrayInit ret(count);
 
   for(i = 0; i < count; ++i) {
     ret.append(ucnv_getAvailableName(i));
   }
 
-  return ret;
+  return ret.toArray();
 }
 
 static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
@@ -449,7 +449,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
     return init_null();
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for(i = 0; i < count; ++i) {
     error = U_ZERO_ERROR;
     const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
@@ -464,7 +464,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
 
 static Variant HHVM_STATIC_METHOD(UConverter, getStandards) {
   int16_t i, count = ucnv_countStandards();
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
 
   for(i = 0; i < count; ++i) {
     UErrorCode error = U_ZERO_ERROR;
@@ -496,8 +496,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getStandardName,
 
 void IntlExtension::initUConverter() {
   HHVM_ME(UConverter, __construct);
-  // TODO(4017519)
-  HHVM_ME(UConverter, __destruct);
+  HHVM_ME(UConverter, __dispose);
   HHVM_ME(UConverter, convert);
   HHVM_ME(UConverter, getDestinationEncoding);
   HHVM_ME(UConverter, getSourceEncoding);

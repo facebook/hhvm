@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : DateTime date_isodate_set  ( DateTime $object  , int $year  , int $week  [, int $day  ] )
  * Description: Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates. 
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setISODate
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_isodate_set() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -25,5 +25,5 @@ echo "Week 30 day 3 of 2009 is \"" . date_format($datetime, "D M j") . "\"\n";
 date_isodate_set($datetime, 2008, 30, 3);
 echo "..same day last year was \"" . date_format($datetime, "D M j") . "\"\n";
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

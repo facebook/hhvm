@@ -1,7 +1,7 @@
 <?hh
 
 class MyClass {
-  private $x = array(1,2,3);
+  private $x = varray[1,2,3];
 
   public function closure_fun() {
     $z = () ==> {
@@ -28,4 +28,8 @@ function main() {
   var_dump($my->getter());
 }
 
+
+<<__EntryPoint>>
+function main_closure_context_001() {
 main();
+}

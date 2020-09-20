@@ -12,7 +12,7 @@ function myflip<Tk, Tv as arraykey>(
   }
   return $result;
 }
-function mymap<Tk, Tv1, Tv2>(
+function mymap<Tk as arraykey, Tv1, Tv2>(
   KeyedTraversable<Tk, Tv1> $traversable,
   (function(Tv1): Tv2) $value_func,
 ): dict<Tk, Tv2> {

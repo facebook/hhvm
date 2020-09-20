@@ -1,14 +1,19 @@
-<?php
+<?hh
 
 class X {
+
+  private static $genX;
   public static function gen() {
-    static $x;
-    yield ++$x;
+    yield ++self::$genX;
     yield 2;
-    yield ++$x;
+    yield ++self::$genX;
   }
 }
 class Y extends X {
 }
+
+<<__EntryPoint>>
+function main_2178() {
 $g = X::gen();
 foreach ($g as $i) var_dump($i);
+}

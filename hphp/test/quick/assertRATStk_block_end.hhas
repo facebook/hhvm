@@ -1,17 +1,18 @@
 # tests that AssertRATStk cannot appear at the end of a block
 
-.main {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
-  RGetCNop
+  NullUninit
+  NullUninit
+  NullUninit
   Int 2
   JmpNZ target_label
-  AssertRATStk 0 Cell
-  target_label: FPushFuncD 1 "var_dump"
+  AssertRATStk 3 Cell
+target_label:
   Int 42
-  FPassCE 0 Any
-  FCall 1
-  PopR
-  PopR
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
+  PopC
   Int 1
-  RetC
+  RetC  
 }

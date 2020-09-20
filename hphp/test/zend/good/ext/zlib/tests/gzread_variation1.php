@@ -1,6 +1,6 @@
-<?php
-
-$filename = "gzread_variation1.txt.gz";
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath("gzread_variation1.txt.gz");
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 var_dump(gzread($h, 100));
@@ -15,5 +15,5 @@ gzpassthru($h);
 gzclose($h);
 echo "\n";
 unlink($filename);
-?>
-===DONE===
+echo "===DONE===\n";
+}

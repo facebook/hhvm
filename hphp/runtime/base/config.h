@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,     |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_01.txt                                  |
@@ -14,16 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONFIG_H_
-#define incl_HPHP_CONFIG_H_
+#pragma once
 
 #include "hphp/util/hdf.h"
+
+#include <folly/Format.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 struct Variant;
 struct IniSettingMap;
-typedef std::vector<std::string> ConfigVector;
 typedef std::map<std::string, std::string> ConfigMap;
 typedef std::set<std::string> ConfigSet;
 // with comparer
@@ -49,7 +49,7 @@ struct Config {
    * Normalizes hdf string names to their ini counterparts
    *
    * We have special handling for a few hdf strings such as those containing
-   * MySQL, Eval, IPv[4|6] and EnableHipHopSyntax
+   * MySQL, Eval and IPv[4|6].
    */
   static std::string IniName(const Hdf& config,
                              const bool prepend_hhvm = true);
@@ -131,10 +131,23 @@ struct Config {
   static void Bind(HackStrictOption& loc, const IniSettingMap &ini,
                    const Hdf& config, const std::string& name,
                    HackStrictOption def);
-  static void Bind(ConfigVector& loc, const IniSettingMap& ini,
-                   const Hdf& config, const std::string& name = "",
-                   const ConfigVector& defValue = ConfigVector(),
-                   const bool prepend_hhvm = true);
+  static void
+  Bind(std::vector<uint32_t>& loc, const IniSettingMap& ini,
+       const Hdf& config, const std::string& name = "",
+       const std::vector<uint32_t>& defValue = std::vector<uint32_t>(),
+       const bool prepend_hhvm = true);
+  static void
+  Bind(std::vector<std::string>& loc, const IniSettingMap& ini,
+       const Hdf& config, const std::string& name = "",
+       const std::vector<std::string>& defValue = std::vector<std::string>(),
+       const bool prepend_hhvm = true);
+  static void
+  Bind(std::unordered_map<std::string, int>& loc,
+       const IniSettingMap& ini, const Hdf& config,
+       const std::string& name = "",
+       const std::unordered_map<std::string, int>& defValue =
+         std::unordered_map<std::string, int>{},
+       const bool prepend_hhvm = true);
   static void Bind(ConfigMap& loc, const IniSettingMap& ini, const Hdf& config,
                    const std::string& name = "",
                    const ConfigMap& defValue = ConfigMap(),
@@ -212,10 +225,22 @@ struct Config {
                           const std::string& name = "",
                           const double defValue = 0,
                           const bool prepend_hhvm = true);
-  static ConfigVector GetVector(const IniSettingMap& ini, const Hdf& config,
-                                const std::string& name = "",
-                                const ConfigVector& defValue = ConfigVector(),
-                                const bool prepend_hhvm = true);
+  static std::vector<uint32_t>
+  GetUInt32Vector(const IniSettingMap& ini, const Hdf& config,
+                  const std::string& name = "",
+                  const std::vector<uint32_t>& def = std::vector<uint32_t>{},
+                  const bool prepend_hhvm = true);
+  static std::vector<std::string>
+  GetStrVector(const IniSettingMap& ini, const Hdf& config,
+               const std::string& name = "",
+               const std::vector<std::string>& def = std::vector<std::string>{},
+               const bool prepend_hhvm = true);
+  static std::unordered_map<std::string, int>
+  GetIntMap(const IniSettingMap& ini, const Hdf& config,
+            const std::string& name = "",
+            const std::unordered_map<std::string, int>& defValue =
+              std::unordered_map<std::string, int>{},
+            const bool prepend_hhvm = true);
   static ConfigMap GetMap(const IniSettingMap& ini, const Hdf& config,
                           const std::string& name = "",
                           const ConfigMap& defValue = ConfigMap(),
@@ -257,6 +282,11 @@ struct Config {
                                           const std::string&)> cb,
                       const IniSettingMap &ini, const Hdf& config,
                       const std::string &name, const bool prepend_hhvm = true);
+
+  static bool matchHdfPattern(const std::string &value,
+                              const IniSettingMap& ini, Hdf hdfPattern,
+                              const std::string& name,
+                              const std::string& suffix = "");
 
   private:
 
@@ -307,4 +337,24 @@ struct Config {
 
 }
 
-#endif /* incl_HPHP_CONFIG_H_ */
+namespace folly {
+
+template<> class FormatValue<HPHP::HackStrictOption> {
+ public:
+  explicit FormatValue(HPHP::HackStrictOption opt) : m_opt(opt) {}
+
+  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(
+      (m_opt == HPHP::HackStrictOption::WARN)
+        ? "warn"
+        : (m_opt == HPHP::HackStrictOption::ON) ? "on" : "off",
+      arg,
+      cb
+    );
+  }
+
+ private:
+  HPHP::HackStrictOption m_opt;
+};
+
+}

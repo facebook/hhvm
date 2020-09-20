@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-function test( array $array )
+function test( varray $array )
 {
     $closure = function() use ( $array ) {
         print_r( $array );
@@ -9,7 +9,7 @@ function test( array $array )
     return $closure();
 }
 
-function test2( array $array )
+function test2( varray $array )
 {
     $closure = function() use ( $array ) {
         print_r( $array );
@@ -17,17 +17,17 @@ function test2( array $array )
     };
     return $closure; // if you return the $closure and call it outside this function it works.
 }
-
-$generator = test(array( 1, 2, 3 ) );
+<<__EntryPoint>> function main(): void {
+$generator = test(varray[ 1, 2, 3 ] );
 foreach($generator as $something) {
 }
 
-$generator = test2(array( 1, 2, 3 ) );
+$generator = test2(varray[ 1, 2, 3 ] );
 foreach($generator() as $something) {
 }
 
 
-$generator = test2(array( 1, 2, 3 ) );
+$generator = test2(varray[ 1, 2, 3 ] );
 
 echo "okey\n";
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.inc');
 require_once(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
 
@@ -50,7 +50,7 @@ class MySQLPDOTest extends PDOTest {
 		if (!$new_options)
 			return PDO_MYSQL_TEST_DSN . $addition;
 
-		$old_options = array();
+		$old_options = darray[];
 		$dsn = substr(PDO_MYSQL_TEST_DSN,
 			strpos(PDO_MYSQL_TEST_DSN, ':') + 1,
 			strlen(PDO_MYSQL_TEST_DSN));
@@ -121,11 +121,11 @@ class MySQLPDOTest extends PDOTest {
 
 		if (!function_exists('sys_get_temp_dir')) {
 
-			if (!empty($_ENV['TMP']))
+			if ($_ENV['TMP'] ?? false)
 				return realpath( $_ENV['TMP'] );
-			if (!empty($_ENV['TMPDIR']))
+			if ($_ENV['TMPDIR'] ?? false)
 				return realpath( $_ENV['TMPDIR'] );
-			if (!empty($_ENV['TEMP']))
+			if ($_ENV['TEMP'] ?? false)
 				return realpath( $_ENV['TEMP'] );
 
 			$temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
@@ -143,7 +143,7 @@ class MySQLPDOTest extends PDOTest {
 
 	static function detect_transactional_mysql_engine($db) {
 		foreach ($db->query("show variables like 'have%'") as $row) {
-			if (!empty($row) && $row[1] == 'YES' && ($row[0] == 'have_innodb' || $row[0] == 'have_bdb')) {
+			if (($row ?? false) && $row[1] == 'YES' && ($row[0] == 'have_innodb' || $row[0] == 'have_bdb')) {
 				return str_replace("have_", "", $row[0]);
 			}
 		}
@@ -174,4 +174,3 @@ class MySQLPDOTest extends PDOTest {
 	}
 
 }
-?>

@@ -1,15 +1,15 @@
-<?php
+<?hh
 /* Prototype  : proto array getimagesize(string imagefile [, array info])
- * Description: Get the size of an image as 4-element array 
+ * Description: Get the size of an image as 4-element array
  * Source code: ext/standard/image.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
-set_error_handler('test_error_handler');
-
+<<__EntryPoint>> function main(): void {
+set_error_handler(fun('test_error_handler'));
 echo "*** Testing getimagesize() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -20,7 +20,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 //array of values to iterate over
-$values = array(
+$values = darray[
 
       // int data
       "0" => 0,
@@ -33,14 +33,14 @@ $values = array(
       "-10.5" => -10.5,
       "10.1234567e5" => 10.1234567e10,
       "10.7654321e-5" => 10.7654321E-5,
-      .5,
+      0 => .5,
 
       // array data
-      "array()" => array(),
-      "array(0)" => array(0),
-      "array(1)" => array(1),
-      "array(1, 2)" => array(1, 2),
-      "array('color' => 'red', 'item' => 'pen')" => array('color' => 'red', 'item' => 'pen'),
+      "array()" => varray[],
+      "array(0)" => varray[0],
+      "array(1)" => varray[1],
+      "array(1, 2)" => varray[1, 2],
+      "array('color' => 'red', 'item' => 'pen')" => darray['color' => 'red', 'item' => 'pen'],
 
       // null data
       "NULL" => NULL,
@@ -64,15 +64,15 @@ $values = array(
 
       // unset data
       "unset_var" => $unset_var,
-);
+];
 
 // loop through each element of the array for info
 
 foreach($values as $key => $value) {
       echo "\n-- Arg value $key --\n";
-      getimagesize($imagefile, $value);
+      getimagesize($imagefile, inout $value);
       var_dump(bin2hex($value["APP0"]));
 };
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

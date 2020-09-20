@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -25,5 +25,5 @@ var_dump($intlcal->getTimeZone()->getId());
 var_dump($intlcal->getLocale(1));
 
 var_dump($intlcal->getType());
-?>
-==DONE==
+echo "==DONE==";
+}

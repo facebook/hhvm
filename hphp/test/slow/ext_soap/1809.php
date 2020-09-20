@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MySoap extends SoapClient {
    public $pub = 1;
@@ -12,4 +12,8 @@ class MySoap extends SoapClient {
    return new MySoap(__DIR__.'/1809.wsdl', $options);
  }
 
- var_dump(test(array('foo' => 'bar'))->pub);
+
+ <<__EntryPoint>>
+function main_1809() {
+var_dump(test(darray['foo' => 'bar'])->pub);
+}

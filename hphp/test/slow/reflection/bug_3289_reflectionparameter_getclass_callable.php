@@ -1,7 +1,11 @@
-<?php
+<?hh
 
 class Foo {
   public function bar(callable $baz) {}
 }
 
-var_dump((new ReflectionParameter(['Foo', 'bar'], 'baz'))->getClass());
+
+<<__EntryPoint>>
+function main_bug_3289_reflectionparameter_getclass_callable() {
+var_dump((new ReflectionParameter(varray['Foo', 'bar'], 'baz'))->getClass());
+}

@@ -1,0 +1,7 @@
+
+Warning: Process tag(x0202=JPEGInterch): Cannot be empty in %s/ext_gd/exif-out-of-bounds.php on line 5
+
+Warning: File structure corrupted in %s/ext_gd/exif-out-of-bounds.php on line 5
+
+Warning: Invalid JPEG file in %s/ext_gd/exif-out-of-bounds.php on line 5
+bool(false)

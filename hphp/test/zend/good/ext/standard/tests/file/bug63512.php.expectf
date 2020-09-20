@@ -1,4 +1,4 @@
-array(7) {
+darray(7) {
   ["int"]=>
   string(3) "123"
   ["constant"]=>

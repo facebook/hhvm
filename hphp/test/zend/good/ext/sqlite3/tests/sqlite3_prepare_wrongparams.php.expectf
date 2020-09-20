@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: SQLite3::prepare() expects exactly 1 parameter, 0 given in %s/sqlite3_prepare_wrongparams.php on line 7

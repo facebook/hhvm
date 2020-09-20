@@ -1,0 +1,6 @@
+File "option_unify.php", line 4, characters 10-19:
+Invalid return type (Typing[4336])
+File "option_unify.php", line 4, characters 10-19:
+Expected `void` because this function does not always return a value
+File "option_unify.php", line 4, characters 45-53:
+But got `Vector<T>`

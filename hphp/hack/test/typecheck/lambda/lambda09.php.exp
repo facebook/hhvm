@@ -1,4 +1,4 @@
 File "lambda09.php", line 19, characters 12-13:
-The variable $y is defined (Naming[2007])
-File "lambda09.php", line 17, characters 7-8:
-But in a different scope
+Variable `$y` is undefined, or not always defined. (Naming[2050])
+File "lambda09.php", line 14, characters 3-11:
+Did you mean `$x` instead?

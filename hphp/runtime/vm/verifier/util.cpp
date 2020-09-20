@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/verifier/util.h"
 
-#include <stdlib.h>
 #include <string.h>
 
 namespace HPHP {  namespace Verifier {

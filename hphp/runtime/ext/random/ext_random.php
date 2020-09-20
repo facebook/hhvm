@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Generates cryptographically secure pseudo-random bytes that are suitable for
@@ -11,7 +11,7 @@
  * @throws Exception - If generating sufficiently random data fails.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function random_bytes(int $length): string;
 
 /**
@@ -27,5 +27,5 @@ function random_bytes(int $length): string;
  * @throws Error - If $min > $max.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Randomness')>>
 function random_int(int $min, int $max): int;

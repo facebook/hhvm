@@ -1,15 +1,23 @@
-array(1) {
-  [0]=>
-  &array(4) {
+varray(2) {
+  darray(4) {
     ["file"]=>
     string(6) "string"
     ["line"]=>
-    int(11)
+    int(12)
     ["function"]=>
     string(7) "thrower"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
+  }
+  darray(3) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
+    }
+    ["file"]=>
+    string(6) "string"
   }
 }
 int(8)

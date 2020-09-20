@@ -1,0 +1,6 @@
+File "newtype_subtype_mixed_bad.php--use.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 25-26:
+Expected `?T`
+File "newtype_subtype_mixed_bad.php--use.php", line 4, characters 18-18:
+But got `N`

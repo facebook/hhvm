@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
 
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -74,19 +73,16 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags /*trflags*/, bool& smashed) {
     not_reached();
   }();
 
+  // Return if already smashed.  Note that smashableXxTarget returns nullptr
+  // when the target was smashed if the XX was able to be optimized in place
+  // (so that it doesn't look like a smashable XX anymore).
   if (isJcc) {
     auto const target = smashableJccTarget(toSmash);
-    assertx(target);
-
-    // Return if already smashed.
-    if (target == tDest) return tDest;
+    if (target == nullptr || target == tDest) return tDest;
     sr->chainFrom(IncomingBranch::jccFrom(toSmash));
   } else {
     auto const target = smashableJmpTarget(toSmash);
-    assertx(target);
-
-    // Return if already smashed.
-    if (!target || target == tDest) return tDest;
+    if (target == nullptr || target == tDest) return tDest;
     sr->chainFrom(IncomingBranch::jmpFrom(toSmash));
   }
 
@@ -116,8 +112,14 @@ TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags /*trflags*/,
   return tDest;
 }
 
-void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
-  if (!start || smashableCallTarget(toSmash) == start) return;
+void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
+  // Return if already smashed.  Note that smashableCallTarget returns nullptr
+  // when the target was smashed if the call was able to be optimized in place
+  // (so that it doesn't look like a smashable call anymore).
+  if (start == nullptr || !smashableCallTarget(toSmash) ||
+      smashableCallTarget(toSmash) == start) {
+    return;
+  }
 
   // For functions to be PGO'ed, if their current prologues are still
   // profiling ones (living in code.prof()), then save toSmash as a
@@ -141,17 +143,15 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
     // It's possible that the callee prologue was reset before we acquired the
     // lock. Make sure we have the right one.
     start = mcgen::getFuncPrologue(callee, nArgs);
-    if (start && !immutable) start = funcGuardFromPrologue(start, callee);
 
     // Do these checks again with the lock.
-    if (!start || smashableCallTarget(toSmash) == start) return;
+    if (start == nullptr || !smashableCallTarget(toSmash) ||
+        smashableCallTarget(toSmash) == start) {
+      return;
+    }
 
     if (code().prof().contains(start)) {
-      if (immutable) {
-        rec->addMainCaller(toSmash);
-      } else {
-        rec->addGuardCaller(toSmash);
-      }
+      rec->addMainCaller(toSmash);
     } else {
       rec = nullptr;
       recLock.unlock();
@@ -167,10 +167,10 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
   // callers that will need to be re-smashed
   //
   // Additionally for profiled calls we need to remove them from the main
-  // and guard caller maps.
+  // caller map.
   if (RuntimeOption::EvalEnableReusableTC) {
-    if (debug || rec || !immutable) {
-      recordFuncCaller(callee, toSmash, immutable, rec);
+    if (debug || rec) {
+      recordFuncCaller(callee, toSmash, rec);
     }
   }
 }

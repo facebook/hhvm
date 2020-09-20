@@ -8,3 +8,4 @@ type MyType = MyClass; //ok
 
 // raise a fatal:
 type MyType = OtherClass;
+

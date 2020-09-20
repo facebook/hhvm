@@ -1,0 +1,10 @@
+File "asyncgen2.php", line 14, characters 5-15:
+  dynamic
+File "asyncgen2.php", line 15, characters 5-15:
+  dynamic
+File "asyncgen2.php", line 13, characters 12-14:
+Invalid `foreach` (Typing[4110])
+File "asyncgen2.php", line 13, characters 12-14:
+Expected `KeyedTraversable<[unresolved], [unresolved]>` because this is used in a `foreach` statement
+File "asyncgen2.php", line 7, characters 21-53:
+But got `AsyncGenerator<int, string, void>`

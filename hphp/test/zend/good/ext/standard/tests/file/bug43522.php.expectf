@@ -1,6 +1,6 @@
 Delimiter:  ZZZ
-	<?php // 1
-	234567890A
+	<?hh // 1
+	234567890
 Delimiter:  Z
-	<?php // 1
-	234567890A
+	<?hh // 1
+	234567890

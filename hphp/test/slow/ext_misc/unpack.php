@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -61,5 +61,9 @@ function test_unpack_empty() {
   var_dump(unpack("n*", ''));
 }
 
+
+<<__EntryPoint>>
+function main_unpack() {
 test_unpack();
 test_unpack_empty();
+}

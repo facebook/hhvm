@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 
@@ -13,5 +13,5 @@ var_dump(gztell($h));
 echo "first 20 characters=".gzread($h,20)."\n";
 
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";
+}

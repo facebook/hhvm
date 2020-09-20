@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_TRANSPORT_H_
-#define incl_HPHP_VSDEBUG_TRANSPORT_H_
+#pragma once
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -23,6 +22,7 @@
 #include <condition_variable>
 #include <mutex>
 
+#include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
@@ -41,6 +41,7 @@ struct DebugTransport {
   }
 
   virtual void shutdown();
+  virtual void cleanupFd(int fd);
 
   // Enqueues an outgoing message to be sent to the client. This routine will
   // put the message into the outgoing message queue and then return. A worker
@@ -55,6 +56,7 @@ struct DebugTransport {
   // put the message into the outgoing message queue and then return. A worker
   // thread will process outgoing messages in order and send them to the client.
   virtual void enqueueOutgoingUserMessage(
+    request_id_t threadId,
     const char* message,
     const char* level = OutputLevelLog
   );
@@ -75,6 +77,9 @@ struct DebugTransport {
   // VS Code protocol event types
   static constexpr char* EventTypeOutput = "output";
 
+  // Custom event types.
+  static constexpr char* EventTypeConnectionRefused = "hhvmConnectionRefused";
+
   // Message output levels to be displayed in the debugger console.
   // NOTE: the protocol explicitly defines:
   //    "console", "stdout", "stderr", "telemetry", with "console" being the
@@ -85,11 +90,17 @@ struct DebugTransport {
   //    they do not understand.
   static constexpr char* OutputLevelSuccess = "success";
   static constexpr char* OutputLevelInfo = "info";
-  static constexpr char* OutputLevelWarning = "warning";
+  static constexpr char* OutputLevelWarning = "console";
   static constexpr char* OutputLevelError = "error";
   static constexpr char* OutputLevelLog = "console";
   static constexpr char* OutputLevelStdout = "stdout";
   static constexpr char* OutputLevelStderr = "stderr";
+
+  #ifdef POLLRDHUP // Linux-only
+    static constexpr int g_platformPollFlags = POLLRDHUP;
+  #else
+    static constexpr int g_platformPollFlags = 0;
+  #endif
 
 protected:
 
@@ -154,4 +165,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_TRANSPORT_H_

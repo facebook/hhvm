@@ -14,7 +14,8 @@ function test($a, $b) {
   }
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 test(true, true);
 test(1, 3);
 test( 2.3, 4.6);
+}

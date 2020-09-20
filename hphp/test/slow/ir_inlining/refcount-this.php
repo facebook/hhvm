@@ -15,4 +15,8 @@ class BMTR {
   }
 }
 
+
+<<__EntryPoint>>
+function main_refcount_this() {
 (new BMTR)->init();
+}

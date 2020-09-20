@@ -1,4 +1,4 @@
-<?php
+<?hh
 # Enable to debug test-suite meltdown
 # Should not be enabled unless you know what you are doing
 if (!defined("DEBUG")) {

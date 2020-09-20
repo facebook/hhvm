@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class A {
   abstract public function __invoke($x);
@@ -30,9 +30,13 @@ function f3(IfaceInvoke $x, $y) {
  $x($y);
  $x->__invoke($y);
  }
+
+<<__EntryPoint>>
+function main_773() {
 $t1 = new Test1;
 $t2 = new Test2;
 f1($t1, 1);
 f1($t2, 2);
 f2($t1, 1);
 f3($t2, 2);
+}

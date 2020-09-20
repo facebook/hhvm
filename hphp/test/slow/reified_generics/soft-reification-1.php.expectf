@@ -1,0 +1,7 @@
+Warning: Generic at index 2 to Function f must be reified, erased given in %s on line 3
+
+Warning: Generic at index 2 to Function f must be reified, erased given in %s on line 3
+
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Function f expects a reified generic at index 3' in %s:3
+Stack trace:
+%A

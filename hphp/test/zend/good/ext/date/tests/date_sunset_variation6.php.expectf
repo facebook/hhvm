@@ -1,194 +1,182 @@
 *** Testing date_sunset() : usage variation ***
 
 --int 0--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 94
 
 --int 1--
-string(5) "13:40"
-float(13.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 94
 
 --int 12345--
-string(5) "21:40"
-float(21.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 94
 
 --int -12345--
-string(5) "19:40"
-float(19.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, integer given in %s/date_sunset_variation6.php on line 94
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 94
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 94
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 94
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunset_variation6.php on line 94
 
 --uppercase NULL--
-string(5) "12:40"
-float(12.681%d)
+string(5) "17:40"
+float(17.681%d)
 int(1218199253)
 
 --lowercase null--
-string(5) "12:40"
-float(12.681%d)
+string(5) "17:40"
+float(17.681%d)
 int(1218199253)
 
 --lowercase true--
-string(5) "13:40"
-float(13.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 94
 
 --lowercase false--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 94
 
 --uppercase TRUE--
-string(5) "13:40"
-float(13.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 94
 
 --uppercase FALSE--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 92
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 93
+
+Warning: date_sunset() expects parameter 6 to be double, boolean given in %s/date_sunset_variation6.php on line 94
 
 --empty string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 94
 
 --empty string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 94
 
 --string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 94
 
 --string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 94
 
 --mixed case string--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 94
 
 --heredoc--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, string given in %s/date_sunset_variation6.php on line 94
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunset() expects parameter 6 to be double, object given in %s/date_sunset_variation6.php on line 94
 
 --undefined var--
-string(5) "12:40"
-float(12.681%d)
+string(5) "17:40"
+float(17.681%d)
 int(1218199253)
 
 --unset var--
-string(5) "12:40"
-float(12.681%d)
+string(5) "17:40"
+float(17.681%d)
 int(1218199253)
 ===DONE===

@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function myfunc() must be of type Baz, Foo given in %s/record-alias-return-error.php on line 14

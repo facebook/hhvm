@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main(): void {
 var_dump(libxml_use_internal_errors(true));
 echo "suppressing\n";
 libxml_suppress_errors(true);
@@ -24,3 +24,4 @@ var_dump(libxml_get_errors());
 var_dump(libxml_use_internal_errors(false));
 
 echo "Done\n";
+}

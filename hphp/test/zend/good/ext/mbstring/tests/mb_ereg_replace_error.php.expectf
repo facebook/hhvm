@@ -2,11 +2,9 @@
 
 -- Testing mb_ereg_replace() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_replace() expects at most 4 parameters, 5 given in %s/mb_ereg_replace_error.php on line 17
 
 -- Testing mb_ereg_replace() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg_replace() expects at least 3 parameters, 2 given in %s/mb_ereg_replace_error.php on line 23
 Done

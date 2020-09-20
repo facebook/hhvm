@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_QSORT_H_
-#define incl_HPHP_ZEND_QSORT_H_
+#pragma once
 
 #include <stdlib.h>
 #include <limits.h>
@@ -33,4 +32,3 @@ void zend_qsort(void *base, size_t nmemb, size_t siz,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_QSORT_H_

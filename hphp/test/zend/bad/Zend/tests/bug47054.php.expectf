@@ -1,9 +1,0 @@
-Called class: D
-Called class: C
-Called class: C
-
-Warning: %s
-
-Strict Standards: Non-static method D::m() should not be called statically in %s on line %d
-
-Fatal error: %s

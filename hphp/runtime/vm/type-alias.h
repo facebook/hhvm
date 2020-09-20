@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_ALIAS_H_
-#define incl_HPHP_TYPE_ALIAS_H_
+#pragma once
 
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
@@ -31,6 +31,7 @@ namespace HPHP {
 
 struct ArrayData;
 struct Class;
+struct RecordDesc;
 struct StringData;
 struct Unit;
 
@@ -41,99 +42,76 @@ struct Unit;
  * allowed when HipHop extensions are enabled.
  *
  * The `type' field is Object whenever the type alias is basically just a
- * name.  At runtime we still might resolve this name to another type alias,
- * becoming a type alias for KindOfArray or something in that request.
+ * name. At runtime we still might resolve this name to another type alias,
+ * becoming a type alias for some other type or something in that request.
  *
- * For the per-request struct, see TypeAliasReq below.
+ * For the per-request struct, see TypeAlias below.
  */
-struct TypeAlias {
+struct PreTypeAlias {
+  Unit* unit;
   LowStringPtr name;
   LowStringPtr value;
   Attr attrs;
   AnnotType type;
+  int line0;
+  int line1;
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
-  Array typeStructure{Array::CreateDArray()};
+  Array typeStructure{ArrayData::CreateDArray(ARRPROV_HERE())};
 
-  template<class SerDe>
-  typename std::enable_if<!SerDe::deserializing>::type
-  serde(SerDe& sd) {
-    sd(name)
-      (value)
-      (type)
-      (nullable)
-      (userAttrs)
-      (attrs)
-      ;
-    TypedValue tv = make_tv<KindOfArray>(typeStructure.get());
-    sd(tv);
+  std::pair<int,int> getLocation() const {
+    return std::make_pair(line0, line1);
   }
-
-  template<class SerDe>
-  typename std::enable_if<SerDe::deserializing>::type
-  serde(SerDe& sd) {
-    sd(name)
-      (value)
-      (type)
-      (nullable)
-      (userAttrs)
-      (attrs)
-      ;
-
-    TypedValue tv;
-    sd(tv);
-    assert(isArrayType(tv.m_type));
-    typeStructure = tv.m_data.parr;
-  }
-
 };
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * In a given request, a defined type alias is turned into a TypeAliasReq
+ * In a given request, a defined type alias is turned into a TypeAlias
  * struct.  This contains the information needed to validate parameter type
  * hints for a type alias at runtime.
  */
-struct TypeAliasReq {
+struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
   // Static constructors.
 
-  static TypeAliasReq Invalid(Unit* unit);
-  static TypeAliasReq From(Unit* unit, const TypeAlias& alias);
-  static TypeAliasReq From(Unit* unit, TypeAliasReq req,
-                           const TypeAlias& alias);
+  static TypeAlias Invalid(const PreTypeAlias& alias);
+  static TypeAlias From(const PreTypeAlias& alias);
+  static TypeAlias From(TypeAlias req,
+                           const PreTypeAlias& alias);
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Comparison.
 
-  bool same(const TypeAliasReq& req) const;
-  bool compat(const TypeAlias& alias) const;
+  bool same(const TypeAlias& req) const;
+  bool compat(const PreTypeAlias& alias) const;
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
   // The aliased type.
-  AnnotType type{AnnotType::Uninit};
+  AnnotType type{AnnotType::NoReturn};
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
   // For option types, like ?Foo.
   bool nullable{false};
   // Aliased Class; nullptr if type != Object.
   LowPtr<Class> klass{nullptr};
+  // Aliased RecordDesc; nullptr if type != Record.
+  LowPtr<RecordDesc> rec{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
-  Array typeStructure{Array::CreateDArray()};
+  Array typeStructure{ArrayData::CreateDArray(ARRPROV_HERE())};
   UserAttributeMap userAttrs;
   Unit* unit{nullptr};
 };
 
-bool operator==(const TypeAliasReq& l, const TypeAliasReq& r);
-bool operator!=(const TypeAliasReq& l, const TypeAliasReq& r);
+bool operator==(const TypeAlias& l, const TypeAlias& r);
+bool operator!=(const TypeAlias& l, const TypeAlias& r);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -142,4 +120,3 @@ bool operator!=(const TypeAliasReq& l, const TypeAliasReq& r);
 #include "hphp/runtime/vm/type-alias-inl.h"
 #undef incl_HPHP_TYPE_ALIAS_INL_H_
 
-#endif

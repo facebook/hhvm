@@ -1,8 +1,9 @@
 <?hh
 
-invariant(true, "yup");
-
 class A {}
-invariant(new A instanceof A, "yup");
+<<__EntryPoint>> function main(): void {
+invariant(true, "yup");
+invariant(new A is A, "yup");
 
 invariant(false, "nope");
+}

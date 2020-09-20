@@ -1,33 +1,33 @@
-<?php
-
-$var_array = array(
-                   array(),
-                   array(1,2,3,4,5,6,7,8,9),
-                   array("One", "Two", "Three", "Four", "Five"),
-                   array(6, "six", 7, "seven", 8, "eight", 9, "nine"),
-                   array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"),
-                   array("1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"),
-                   array(1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"),
-                   array("f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
-                         "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five"),
-                   array(12, "name", 'age', '45'),
-                   array( array("oNe", "tWo", 4), array(10, 20, 30, 40, 50), array())
-                 );
+<?hh
+<<__EntryPoint>> function main(): void {
+$var_array = varray[
+                   varray[],
+                   varray[1,2,3,4,5,6,7,8,9],
+                   varray["One", "Two", "Three", "Four", "Five"],
+                   varray[6, "six", 7, "seven", 8, "eight", 9, "nine"],
+                   darray[ "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"],
+                   darray["1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"],
+                   darray[1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"],
+                   darray["f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+                         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five"],
+                   varray[12, "name", 'age', '45'],
+                   varray[ varray["oNe", "tWo", 4], varray[10, 20, 30, 40, 50], varray[]]
+                 ];
 
 $num = 4;
 $str = "john";
 
 /* Zero args */
 echo"\n*** Output for Zero Argument ***\n";
-array_slice();
+try { array_slice(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Single args */
 echo"\n*** Output for Single array Argument ***\n";
-array_slice($var_array);
+try { array_slice($var_array); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* More than valid no. of args (ie. >4 )  */
 echo"\n*** Output for invalid number of Arguments ***\n";
-array_slice($var_array, 2, 4, true, 3);
+try { array_slice($var_array, 2, 4, true, 3); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* Scalar arg */
 echo"\n*** Output for scalar Argument ***\n";
@@ -83,5 +83,4 @@ foreach ($var_array as $sub_array)
   var_dump (array_slice($var_array[2], 1, -3, false) );
   var_dump (array_slice($var_array[2], -3, -2, true) );
   var_dump (array_slice($var_array[2], -3, -2, false) );
-
-?>
+}

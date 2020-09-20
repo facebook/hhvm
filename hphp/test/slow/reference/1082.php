@@ -1,10 +1,16 @@
-<?php
+<?hh
 
-function f(&$a) {
+function f(inout $a) {
 }
  class T {
 }
- $a = new T();
+
+ <<__EntryPoint>>
+function main_1082() {
+$a = new T();
  $a->b = 10;
- f($a->b);
+ $__b = $a->b;
+ f(inout $__b);
+ $a->b = $__b;
  var_dump($a);
+}

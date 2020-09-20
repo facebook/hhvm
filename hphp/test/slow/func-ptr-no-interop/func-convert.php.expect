@@ -1,0 +1,300 @@
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+caught: Argument 1 passed to foo() must be an instance of string, func given
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+bool(false)
+string(57) "strlen() expects parameter 1 to be string, function given"
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+caught: Value returned from function baz() must be of type string, func given
+function(buz)
+bool(false)
+bool(false)
+caught: Expected string, got func
+caught: Property 'Props::a' declared as type string, func assigned
+caught: Static property 'Props::b' declared as type string, func assigned
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+caught: Argument 1 passed to io() must be an instance of string, func given
+string(3) "foo"
+function(foo)
+caught: Value returned from function io() must be of type string, func given
+function(foo)
+string(3) "foo"

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
 
   function Foo() {
@@ -8,10 +8,10 @@ class Foo {
     return $this->str;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $foo = new Foo();
-$server = new SoapServer(null,array('uri'=>"http://testuri.org"));
+$server = new SoapServer(null,darray['uri'=>"http://testuri.org"]);
 $server->setObject($foo);
 var_dump($server->getfunctions());
 echo "ok\n";
-?>
+}

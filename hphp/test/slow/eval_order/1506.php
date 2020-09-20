@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x($a, $b, $c, $d) {
 }
@@ -15,7 +15,7 @@ class c {
   static function g($a, $b, $c, $d) {
 }
 }
-function rt(&$a, $v) {
+function rt(inout $a, $v) {
   $a = $v;
 }
 function id($x) {
@@ -24,6 +24,9 @@ function id($x) {
 function dump($a, $b) {
   var_dump($a, $b);
 }
+
+<<__EntryPoint>>
+function main_1506() {
 echo "sfc
 ";
 x(p(1), p(2), p(3), 4);
@@ -46,7 +49,8 @@ echo "omc
 $q->f(p(1), p(2), p(3), 4);
 echo "rsfc
 ";
-rt($a, id(10));
+$a = null;
+rt(inout $a, id(10));
 var_dump($a);
 dump($v++, $v++);
 $v = 10;
@@ -56,6 +60,7 @@ echo "nest
 x(p(1), x(p(2), p(3), p(4), p(5)), p(6), x(p(7), p(8), p(9), p(10)));
 echo "arr
 ";
-$z = array(p(1), p(2), x(p(3), p(4), p(5), p(6)), p(7));
+$z = varray[p(1), p(2), x(p(3), p(4), p(5), p(6)), p(7)];
 $q = 1;
-$z = array(1, 2, $q);
+$z = varray[1, 2, $q];
+}

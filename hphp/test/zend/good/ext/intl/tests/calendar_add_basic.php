@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -13,8 +13,7 @@ $intlcal->add(IntlCalendar::FIELD_MINUTE, 6);
 intlcal_add($intlcal, IntlCalendar::FIELD_SECOND, 7);
 
 var_dump(
-	(float)$time2*1000,
-	$intlcal->getTime());
-
-?>
-==DONE==
+    (float)$time2*1000,
+    $intlcal->getTime());
+echo "==DONE==";
+}

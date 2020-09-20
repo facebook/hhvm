@@ -5,9 +5,7 @@ string(16) "this is a string"
 
 Arg value is: Array
 
-Warning: %s
-NULL
+Warning: preg_quote() expects parameter 1 to be string, %rv?%rarray given in %s/preg_quote_error1.php on line 14
 
-Warning: %s
-NULL
+Warning: preg_quote() expects parameter 1 to be string, object given in %s/preg_quote_error1.php on line 17
 Done

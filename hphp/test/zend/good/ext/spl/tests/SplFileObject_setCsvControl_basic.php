@@ -1,4 +1,7 @@
-<?php
+<?hh
+<<__EntryPoint>>
+function main(): void {
+chdir(__SystemLib\hphp_test_tmproot());
 file_put_contents('csv_control_data.csv',
 <<<CDATA
 'groene appelen'|10
@@ -13,8 +16,6 @@ foreach ($s as $row) {
     list($fruit, $quantity) = $row;
     echo "$fruit : $quantity\n";
 }
-?>
-<?php error_reporting(0); ?>
-<?php
+
 unlink('csv_control_data.csv');
-?>
+}

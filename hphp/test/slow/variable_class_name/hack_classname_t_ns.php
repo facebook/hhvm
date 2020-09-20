@@ -16,8 +16,12 @@ function baz<T as Herp>(typename<T> $type): string { return $type; }
 function bar(Vector<string> $foo): void {}
 
 function main(): void {
-  var_dump(foo(Derp::class));
-  var_dump(baz(Terp::class));
+  \var_dump(foo(Derp::class));
+  \var_dump(baz(Terp::class));
 }
 
+
+<<__EntryPoint>>
+function main_hack_classname_t_ns() {
 main();
+}

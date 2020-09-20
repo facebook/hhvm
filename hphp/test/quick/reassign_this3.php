@@ -4,3 +4,4 @@ class Foo {
   static function x($this){} // allow
   public function y($this){} // error
 }
+

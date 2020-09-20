@@ -1,11 +1,16 @@
-<?php
+<?hh
+
 trait T1 {
-	public function inc() {
-		static $x=1;
-		echo $x++ . "\n";
-	}
+  private static $incX =1;
+    public function inc() {
+        echo self::$incX++ . "\n";
+    }
 }
+
 class C { use T1; }
+
+<<__EntryPoint>> function main(): void {
 $c1 = new C;
 $c1->inc();
 $c1->inc();
+}

@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -40,13 +41,16 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -65,148 +69,89 @@ TRACE_SET_MOD(irlower);
 
 void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
+  auto const callee = srcLoc(env, inst, 2).reg();
+  auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<Call>();
-  auto const callee = extra->callee;
-  auto const argc = extra->numParams;
+  auto const numArgsInclUnpack = extra->numArgs + (extra->hasUnpack ? 1 : 0);
+  auto const func = inst->src(2)->hasConstVal(TFunc)
+    ? inst->src(2)->funcVal() : nullptr;
+  // Upgrade skipRepack if HHIR opts inferred the callee. We can't do this for
+  // unpack, as it is not guaranteed to be a varray.
+  auto const skipRepack = extra->skipRepack || (
+    func && !extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()
+  );
 
   auto& v = vmain(env);
-  auto& vc = vcold(env);
-  auto const catchBlock = label(env, inst->taken());
 
-  auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
-  auto const calleeAR = calleeSP + cellsToBytes(argc);
+  auto const callFlags = CallFlags(
+    extra->hasGenerics,
+    extra->dynamicCall,
+    extra->asyncEagerReturn,
+    extra->callOffset,
+    extra->genericsBitmap
+  );
 
-  v << store{fp, calleeAR + AROFF(m_sfp)};
-  v << storeli{safe_cast<int32_t>(extra->after), calleeAR + AROFF(m_soff)};
+  v << copy{v.cns(callFlags.value()), r_php_call_flags()};
+  v << copy{callee, r_php_call_func()};
+  v << copy{v.cns(numArgsInclUnpack), r_php_call_num_args()};
 
-  if (extra->fcallAwait) {
-    v << orlim{
-      static_cast<int32_t>(ActRec::Flags::IsFCallAwait),
-      calleeAR + AROFF(m_numArgsAndFlags),
-      v.makeReg()
-    };
+  auto withCtx = false;
+  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
+          inst->src(3)->isA(TNullptr));
+  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
+    withCtx = true;
+    v << copy{ctx, r_php_call_ctx()};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    withCtx = true;
+    v << copy{v.cns(ActRec::kTrashedThisSlot), r_php_call_ctx()};
   }
 
-  auto const isNativeImplCall = callee &&
-                                callee->builtinFuncPtr() &&
-                                !callee->nativeFuncPtr() &&
-                                argc == callee->numParams();
-  if (isNativeImplCall) {
-    // The assumption here is that for builtins, the generated func contains
-    // only a single opcode (NativeImpl), and there are no non-argument locals.
-    if (do_assert) {
-      assertx(argc == callee->numLocals());
-      assertx(callee->numIterators() == 0);
-      assertx(callee->numClsRefSlots() == 0);
-
-      auto addr = callee->getEntry();
-      while (peek_op(addr) == Op::AssertRATL) {
-        addr += instrLen(addr);
-      }
-      assertx(peek_op(addr) == Op::NativeImpl);
-      assertx(addr + instrLen(addr) ==
-              callee->unit()->entry() + callee->past());
-    }
-
-    v << store{v.cns(tc::ustubs().retHelper), calleeAR + AROFF(m_savedRip)};
-    if (callee->attrs() & AttrMayUseVV) {
-      v << storeqi{0, calleeAR + AROFF(m_invName)};
-    }
-    v << lea{calleeAR, rvmfp()};
-
-    emitCheckSurpriseFlagsEnter(v, vc, fp, Fixup(0, argc), catchBlock);
-
-    auto const builtinFuncPtr = callee->builtinFuncPtr();
-    TRACE(2, "Calling builtin preClass %p func %p\n",
-          callee->preClass(), builtinFuncPtr);
-
-    // We sometimes call this while curFunc() isn't really the builtin, so make
-    // sure to record the sync point as if we are inside the builtin.
-    if (FixupMap::eagerRecord(callee)) {
-      auto const syncSP = v.makeReg();
-      v << lea{calleeSP, syncSP};
-      emitEagerSyncPoint(v, callee->getEntry(), rvmtl(), rvmfp(), syncSP);
-    }
-
-    // Call the native implementation.  This will free the locals for us in the
-    // normal case.  In the case where an exception is thrown, the VM unwinder
-    // will handle it for us.
-    auto const done = v.makeBlock();
-    v << vinvoke{CallSpec::direct(builtinFuncPtr), v.makeVcallArgs({{rvmfp()}}),
-                 v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
-
-    v = done;
-    // The native implementation already put the return value on the stack for
-    // us, and handled cleaning up the arguments.  We have to update the frame
-    // pointer and the stack pointer, and load the return value into the return
-    // register so the trace we are returning to has it where it expects.
-    // TODO(#1273094): We should probably modify the actual builtins to return
-    // values via registers using the C ABI and do a reg-to-reg move.
-    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmfp()[kArRetOff], true);
-    v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
-    emitRB(v, Trace::RBTypeFuncExit, callee->fullName()->data());
-    return;
-  }
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    v << syncvmsp{v.cns(0x42)};
-
-    constexpr uint64_t kUninitializedRIP = 0xba5eba11acc01ade;
-    emitImmStoreq(v, kUninitializedRIP, calleeAR + AROFF(m_savedRip));
-  }
-
-  // A few vasm passes depend on the particular instruction sequence here:
-  //  - vasm-copy expects this lea{} to be immediately followed by the
-  //    callphp{} below.
-  //  - vasm-prof-branch requires that this lea{} fall through straight to the
-  //    callphp{}, with no intervening control flow (though it doesn't care if
-  //    they're contiguous).
-  v << lea{calleeAR, rvmfp()};
-
-  // Emit a smashable call that initially calls a recyclable service request
-  // stub.  The stub and the eventual targets take rvmfp() as an argument,
-  // pointing to the callee ActRec.
-  auto const target = callee
-    ? tc::ustubs().immutableBindCallStub
-    : tc::ustubs().bindCallStub;
+  // Make vmsp() point to the future vmfp().
+  auto const ssp = v.makeReg();
+  v << lea{sp[cellsToBytes(extra->spOffset.offset + extra->numInputs())], ssp};
+  v << syncvmsp{ssp};
 
   auto const done = v.makeBlock();
-  v << callphp{target, php_call_regs(), {{done, catchBlock}}};
-  v = done;
-
-  auto const dst = dstLoc(env, inst, 0);
-  auto const type = inst->dst()->type();
-  if (!type.admitsSingleVal()) {
-    v << defvmretdata{dst.reg(0)};
+  if (skipRepack && func) {
+    // Emit a smashable call that initially calls a recyclable service request
+    // stub.  The stub and the eventual targets take rvmfp() as an argument,
+    // pointing to the callee ActRec.
+    assertx(
+      (!extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()) ||
+      (extra->hasUnpack && extra->numArgs == func->numNonVariadicParams()));
+    v << callphps{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
+                  func, numArgsInclUnpack};
+  } else if (skipRepack) {
+    // If we've statically determined the provided number of arguments
+    // doesn't exceed what the target expects, we can skip the stub
+    // and call the prologue directly.
+    auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
+    auto const dest = v.makeReg();
+    emitLdLowPtr(v, r_php_call_func()[numArgsInclUnpack * ptrSize + pTabOff],
+                 dest, sizeof(LowPtr<uint8_t>));
+    v << callphpr{dest, php_call_regs(withCtx)};
+  } else {
+    // It was not statically determined that the arguments are passed in a way
+    // the callee expects. Use the redispatch stub to repack them as needed and
+    // transfer control to the appropriate prologue. This can happen due to:
+    // - the callee not being statically known
+    // - the callee inferred later in HHIR opts, but arguments mispacked
+    // - unpack used in a different position than callee's variadic param
+    auto const stub = !extra->hasUnpack
+      ? tc::ustubs().funcPrologueRedispatch
+      : tc::ustubs().funcPrologueRedispatchUnpack;
+    v << callphp{stub, php_call_regs(withCtx)};
   }
-  if (type.needsReg()) {
-    v << defvmrettype{dst.reg(1)};
-  }
-}
 
-void cgCallArray(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CallArray>();
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const syncSP = v.makeReg();
-  v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};
-  v << syncvmsp{syncSP};
-
-  auto const target = extra->numParams == 0
-    ? tc::ustubs().fcallArrayHelper
-    : tc::ustubs().fcallUnpackHelper;
-
-  auto const pc = v.cns(extra->pc);
-  auto const after = v.cns(extra->after);
-  auto const args = extra->numParams == 0
-    ? v.makeTuple({pc, after})
-    : v.makeTuple({pc, after, v.cns(extra->numParams)});
-
-  auto const done = v.makeBlock();
-  v << vcallarray{target, fcall_array_regs(), args,
-                  {done, label(env, inst->taken())}};
+  // The prologue is responsible for unwinding all inputs. We could have
+  // optimized away Uninit stores for ActRec and inouts, so skip them as well.
+  auto const marker = inst->marker();
+  auto const fixupBcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
+  auto const fixupSpOff =
+    marker.spOff() - extra->numInputs() - kNumActRecCells - extra->numOut;
+  v << syncpoint{Fixup{fixupBcOff, fixupSpOff.offset}};
+  v << unwind{done, label(env, inst->taken())};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
@@ -225,8 +170,14 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const funcReturnType = callee->hniReturnType();
   auto const returnByValue = callee->isReturnByValue();
 
+  auto& v = vmain(env);
+
+  // We don't write to the true dst registers until the very end of the
+  // instruction sequence, in case we have to perform option-dependent fixups.
   auto const dstData = dstLoc(env, inst, 0).reg(0);
   auto const dstType = dstLoc(env, inst, 0).reg(1);
+  auto const tmpData = v.makeReg();
+  auto const tmpType = v.makeReg();
 
   auto returnType = inst->dst()->type();
   // Subtract out the null possibility from the return type if it would be a
@@ -238,8 +189,6 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       returnType -= TNull;
     }
   }
-
-  auto& v = vmain(env);
 
   // Whether `t' is passed in/out of C++ as String&/Array&/Object&.
   auto const isReqPtrRef = [] (MaybeDataType t) {
@@ -291,34 +240,59 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     }
   }
 
-  // Add the func_num_args() value if needed.
-  if (callee->attrs() & AttrNumArgs) {
-    // If `numNonDefault' is negative, this is passed as an src.
-    if (extra->numNonDefault >= 0) {
-      args.imm((int64_t)extra->numNonDefault);
-    } else {
-      args.ssa(srcNum);
-      ++srcNum;
-    }
-  }
-
   // Add the positional arguments.
   for (uint32_t i = 0; i < callee->numParams(); ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
 
-    // Non-pointer and NativeArg args are passed by value.  String, Array,
-    // Object, and Variant are passed by const&, i.e. a pointer to stack memory
-    // holding the value, so we expect PtrToT types for these.  Pointers to
-    // req::ptr types (String, Array, Object) need adjusting to point to
-    // &ptr->m_data.
-    if (TVOFF(m_data) && !pi.nativeArg && isReqPtrRef(pi.builtinType)) {
-      assertx(inst->src(srcNum)->type() <= TPtrToGen);
-      args.addr(srcLoc(env, inst, srcNum).reg(), TVOFF(m_data));
-    } else if (pi.nativeArg && !pi.builtinType && !callee->byRef(i)) {
-      // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
-      args.typedValue(srcNum);
+    if (pi.isNativeArg() || pi.isTakenAsTypedValue()) {
+      // Native args are always passed by value. The input must be a
+      // Cell. If it expects a specific type, just pass the
+      // value. Otherwise pass it as a TypedValue.
+      assertx(inst->src(srcNum)->isA(TCell));
+      if (pi.builtinType && !pi.isTakenAsTypedValue()) {
+        args.ssa(srcNum);
+      } else {
+        args.typedValue(srcNum);
+      }
+    } else if (pi.builtinType && !pi.isTakenAsVariant()) {
+      // Otherwise the value is passed by value for some types, and by
+      // ref for others. The function expects a specific type, so we
+      // only need to pass the value. The input could be a Cell, a
+      // pointer, or a lval. It will be a Cell for value types, and a
+      // ptr/lval for ref types.
+      auto const src = inst->src(srcNum);
+      if (src->isA(TCell) || src->isA(TPtrToCell)) {
+        static_assert(TVOFF(m_data) == 0, "");
+        args.ssa(srcNum);
+      } else {
+        assertx(src->isA(TLvalToCell));
+        auto const loc = srcLoc(env, inst, srcNum);
+        args.reg(loc.reg(tv_lval::val_idx));
+      }
     } else {
-      args.ssa(srcNum, pi.builtinType == KindOfDouble);
+      // Function takes param by ref, and it doesn't expect a specific
+      // type. These will be const Variant&. The inputs will always be
+      // pointers or lvals. If we have a pointer to a Cell, we can
+      // just pass it directly. If we have a lval, we need to
+      // materialize the TypedValue onto the stack and then pass its
+      // address.
+      auto const src = inst->src(srcNum);
+      if (src->isA(TPtrToCell)) {
+        static_assert(TVOFF(m_data) == 0, "");
+        args.ssa(srcNum);
+      } else {
+        assertx(src->isA(TLvalToCell));
+        if (!wide_tv_val) {
+          args.ssa(srcNum);
+        } else {
+          auto const data = v.makeReg();
+          auto const type = v.makeReg();
+          auto const loc = srcLoc(env, inst, srcNum);
+          v << load{*loc.reg(tv_lval::val_idx), data};
+          v << loadb{*loc.reg(tv_lval::type_idx), type};
+          args.constPtrToTV(type, data);
+        }
+      }
     }
   }
 
@@ -329,17 +303,27 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
         ? callDest(dstData) // String, Array, or Object
         : callDest(dstData, dstType); // Variant
     }
-    return funcReturnType == KindOfDouble
-      ? callDestDbl(env, inst)
-      : callDest(env, inst);
+    return callDest(env, inst);
   }();
+  if (dest.reg0.isValid()) dest.reg0 = tmpData;
+  if (dest.reg1.isValid()) dest.reg1 = tmpType;
 
-  cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr()),
+  auto const isInlined = env.unit.context().initSrcKey.func() != callee;
+  if (isInlined) v << inlinestart{callee, 0};
+
+  // Call epilogue: handle builtin return types and inlining accounting.
+  auto const end = [&] (Vout& v) {
+    v << copy{tmpData, dstData};
+    if (dstType.isValid()) v << copy{tmpType, dstType};
+    if (isInlined) v << inlineend{};
+  };
+
+  cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
                dest, SyncOptions::Sync, args);
 
   // For primitive return types (int, bool, double) and returnByValue, the
   // return value is already in dstData/dstType.
-  if (returnType.isSimpleType() || returnByValue) return;
+  if (returnType.isSimpleType() || returnByValue) return end(v);
 
   // For return by reference (String, Object, Array, Variant), the builtin
   // writes the return value into MInstrState::tvBuiltinReturn, from where it
@@ -349,24 +333,25 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     // The return type is String, Array, or Object; fold nullptr to KindOfNull.
     assertx(isBuiltinByRef(funcReturnType) && isReqPtrRef(funcReturnType));
 
-    v << load{rvmtl()[returnOffset], dstData};
+    v << load{rvmtl()[returnOffset], tmpData};
 
     if (dstType.isValid()) {
       auto const sf = v.makeReg();
       auto const rtype = v.cns(returnType.toDataType());
       auto const nulltype = v.cns(KindOfNull);
-      v << testq{dstData, dstData, sf};
-      v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
+      v << testq{tmpData, tmpData, sf};
+      v << cmovb{CC_Z, sf, rtype, nulltype, tmpType};
     }
-    return;
+    return end(v);
   }
 
-  if (returnType <= TCell || returnType <= TBoxedCell) {
+  if (returnType <= TCell) {
     // The return type is Variant; fold KindOfUninit to KindOfNull.
     assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
-    static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
+    static_assert(KindOfUninit == static_cast<DataType>(0),
+                  "KindOfUninit must be 0 for test");
 
-    v << load{rvmtl()[returnOffset + TVOFF(m_data)], dstData};
+    v << load{rvmtl()[returnOffset + TVOFF(m_data)], tmpData};
 
     if (dstType.isValid()) {
       auto const rtype = v.makeReg();
@@ -374,10 +359,12 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
       auto const sf = v.makeReg();
       auto const nulltype = v.cns(KindOfNull);
+      static_assert(KindOfUninit == static_cast<DataType>(0),
+                    "Codegen assumes KindOfUninit == 0");
       v << testb{rtype, rtype, sf};
-      v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
+      v << cmovb{CC_Z, sf, rtype, nulltype, tmpType};
     }
-    return;
+    return end(v);
   }
 
   not_reached();
@@ -391,24 +378,25 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
   auto const func = inst->marker().func();
 
   if (FixupMap::eagerRecord(func)) {
-    emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
+    emitEagerSyncPoint(v, func->entry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
-    CallSpec::direct(func->builtinFuncPtr()),
+    CallSpec::direct(func->arFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
-    {label(env, inst->next()), label(env, inst->taken())},
+    {label(env, inst->next()),
+     label(env, inst->taken())},
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
 }
 
-static void traceCallback(ActRec* fp, Cell* sp, Offset bcOff) {
+static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {
   if (Trace::moduleEnabled(Trace::hhirTracelets)) {
     FTRACE(0, "{} {} {} {} {}\n",
-           fp->m_func->fullName()->data(), bcOff, fp, sp,
+           fp->func()->fullName()->data(), bcOff, fp, sp,
            __builtin_return_address(0));
   }
-  checkFrame(fp, sp, true /* fullCheck */, bcOff);
+  checkFrame(fp, sp, true /* fullCheck */);
 }
 
 void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
@@ -425,18 +413,30 @@ void cgDbgTraceCall(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgEnterFrame(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << phplogue{fp};
+void cgProfileCall(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileCallTargetData>();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .ssa(0);
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+               kVoidDest, SyncOptions::None, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
+void cgEnterPrologue(IRLS& env, const IRInstruction*) {
+  vmain(env) << stublogue{false};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgCheckInOuts(IRLS& env, const IRInstruction* inst)  {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const nparams = srcLoc(env, inst, 1).reg();
 
-  auto const extra = inst->extra<CheckRefs>();
+  auto const extra = inst->extra<CheckInOuts>();
   auto const mask64 = extra->mask;
   auto const vals64 = extra->vals;
   assertx(mask64);
@@ -452,10 +452,12 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
     auto cond = CC_NE;
 
     if (extra->firstBit == 0) {
-      bitsOff = Func::refBitValOff();
+      bitsOff = Func::inoutBitValOff();
       bitsPtr = func;
     } else {
-      v << load{func[Func::sharedOff()], bitsPtr};
+      auto const shared = v.makeReg();
+      v << load{func[Func::sharedOff()], shared};
+      v << load{shared[Func::sharedInOutBitPtrOff()], bitsPtr};
       bitsOff -= sizeof(uint64_t);
     }
 
@@ -502,23 +504,75 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
     auto const sf = v.makeReg();
     v << cmpqi{extra->firstBit, nparams, sf};
 
-    if (vals64 != 0 && vals64 != mask64) {
-      // If we're beyond nparams, then either all params are refs, or all
-      // params are non-refs, so if vals64 isn't 0 and isnt mask64, there's no
-      // possibility of a match.
+    if (vals64 != 0) {
+      // If we're beyond nparams, then all params are non-refs, so if vals64
+      // isn't 0, there's no possibility of a match.
       fwdJcc(v, env, CC_LE, sf, inst->taken());
       thenBody(v);
     } else {
-      ifThenElse(v, CC_NLE, sf, thenBody, [&] (Vout& v) {
-        // If not special builtin...
-        auto const sf = v.makeReg();
-        v << testlim{AttrVariadicByRef, func[Func::attrsOff()], sf};
-        fwdJcc(v, env, vals64 ? CC_Z : CC_NZ, sf, inst->taken());
-      });
+      ifThen(v, CC_NLE, sf, thenBody);
     }
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(NewRFunc)
+
+void cgHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const shared = v.makeReg();
+  auto const sf = v.makeReg();
+
+  v << load{func[Func::sharedOff()], shared};
+  v << testlim{(int32_t)Func::reifiedGenericsMask(),
+               shared[Func::sharedAllFlags()], sf};
+
+  v << setcc{CC_NZ, sf, dst};
+}
+
+void cgLdFuncFromRFunc(IRLS& env, const IRInstruction* inst) {
+  auto const rfuncRef = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{rfuncRef[RFuncData::funcOffset()], dst};
+}
+
+void cgLdGenericsFromRFunc(IRLS& env, const IRInstruction* inst) {
+  auto const rfuncRef = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{rfuncRef[RFuncData::genericsOffset()], dst};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(NewRClsMeth)
+
+namespace {
+
+void ldFromRClsMethCommon(IRLS& env, const IRInstruction* inst, ptrdiff_t offset) {
+  auto const rclsMethRef = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{rclsMethRef[offset], dst};
+}
+
+}// namespace
+
+void cgLdClsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
+  ldFromRClsMethCommon(env, inst, RClsMethData::clsOffset());
+}
+
+void cgLdFuncFromRClsMeth(IRLS& env, const IRInstruction* inst) {
+  ldFromRClsMethCommon(env, inst, RClsMethData::funcOffset());
+}
+
+void cgLdGenericsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
+  ldFromRClsMethCommon(env, inst, RClsMethData::genericsOffset());
+}
 
 }}}

@@ -13,5 +13,6 @@ function normalize_email($email, $strip_slashes = false): string {
 
   return $ret_email;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(normalize_email('xxxxxxxxxx@yyyyy.com'.str_repeat(' ',1518)));
+}

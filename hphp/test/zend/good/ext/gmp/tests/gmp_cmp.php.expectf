@@ -7,15 +7,12 @@ int(-1)
 bool(true)
 int(0)
 
-Warning: %s
-NULL
+Warning: gmp_cmp() expects exactly 2 parameters, 3 given in %s/gmp_cmp.php on line 15
 
-Warning: %s
+Warning: gmp_cmp(): Unable to convert variable to GMP - wrong type in %s/gmp_cmp.php on line 16
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_cmp() expects exactly 2 parameters, 1 given in %s/gmp_cmp.php on line 17
 
-Warning: %s
-NULL
+Warning: gmp_cmp() expects exactly 2 parameters, 0 given in %s/gmp_cmp.php on line 18
 Done

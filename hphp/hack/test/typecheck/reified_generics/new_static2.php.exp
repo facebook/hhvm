@@ -1,0 +1,2 @@
+File "new_static2.php", line 11, characters 7-16:
+This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics. (Typing[4312])

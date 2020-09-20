@@ -1,0 +1,20 @@
+vec(1) {
+  string(1) "A"
+}
+vec(0) {
+}
+vec(1) {
+  string(4) "main"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "C"
+}
+vec(0) {
+}
+vec(1) {
+  string(1) "T"
+}
+vec(0) {
+}

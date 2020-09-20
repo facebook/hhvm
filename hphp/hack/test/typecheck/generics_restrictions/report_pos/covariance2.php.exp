@@ -1,0 +1,16 @@
+File "covariance2.php", line 5, characters 24-24:
+Illegal usage of a covariant type parameter (Typing[4120]) [FROM REASON INFO]
+File "covariance2.php", line 3, characters 14-14:
+This is where the parameter was declared as covariant `+`
+File "covariance2.php", line 5, characters 24-24:
+Function parameters are contravariant
+File "covariance2.php", line 5, characters 24-24:
+You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information (Typing[4120]) [FROM REASON INFO]
+File "covariance2.php", line 7, characters 30-31:
+Illegal usage of a covariant type parameter (Typing[4120]) [FROM REASON INFO]
+File "covariance2.php", line 3, characters 14-14:
+This is where the parameter was declared as covariant `+`
+File "covariance2.php", line 7, characters 30-31:
+Function parameters are contravariant
+File "covariance2.php", line 7, characters 30-31:
+You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information (Typing[4120]) [FROM REASON INFO]

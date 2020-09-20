@@ -1,5 +1,0 @@
-__set(%r\x00%rmyprop, should work)
-__get(%r\x00%rmyprop)
-__isset(%r\x00%rmyprop)
-
-Fatal error: Cannot access property started with '\0' in %s/null_prop_magic_miss.php on line %d

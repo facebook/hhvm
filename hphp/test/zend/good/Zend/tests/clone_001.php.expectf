@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: clone called on non-object in %s/clone_001.php on line 3

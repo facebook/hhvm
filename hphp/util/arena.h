@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_ARENA_H_
-#define incl_HPHP_UTIL_ARENA_H_
+#pragma once
 
 #include <vector>
 #include <cstdlib>
@@ -27,20 +26,20 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /**
- * Arena/ArenaImpl is an allocator that frees all memory when the
- * arena instance is destroyed.  No destructors of allocated objects
- * will be called!  It is a bump-pointer allocator.
+ * Arena/ArenaImpl is an allocator that frees all its memory when the arena
+ * instance is destroyed.  It is a bump-pointer allocator.
  *
- * At various points in the lifetime of the arena, you can introduce a
- * new `frame' by calling beginFrame.  This is essentially a marker of
- * the current allocator state, which you can pop back to by calling
- * endFrame.
+ * There are two main methods to allocate memory from the arena:
+ *   1) alloc() allocates raw memory for which no destructor is invoked when the
+ *      arena is destroyed.
+ *   2) allocD<C>() allocates memory for an object of class C, whose destructor
+ *      (or a custom callback) is invoked when the arena is destroyed.
  *
  * Allocations smaller than kMinBytes bytes are rounded up to kMinBytes, and
  * all allocations are kMinBytes-aligned.
  *
  * Allocations larger than kChunkBytes are acquired directly from
- * malloc, and don't (currently) get freed with frames.
+ * malloc.
  *
  * The Arena typedef is for convenience when you want a default
  * configuration.  Use ArenaImpl if you want something specific.
@@ -56,7 +55,22 @@ struct ArenaImpl {
   ArenaImpl();
   ~ArenaImpl();
 
+  /*
+   * Allocate a raw chunk of memory with `nbytes' bytes.  No destructors will be
+   * called when the arena is destroyed.
+   */
   void* alloc(size_t nbytes);
+
+  /*
+   * Allocate a chunk of memory large enough to hold an object of class C, and
+   * register a destructor to be invoked when the arena is destroyed.  A custom
+   * `dtor' to be invoked can be provided, otherwise C's destructor is invoked.
+   */
+  template<class C>
+  C* allocD();
+
+  template<class C, class D>
+  C* allocD(D dtor);
 
   /*
    * Return the amount of memory this arena has handed out via alloc().
@@ -71,49 +85,31 @@ struct ArenaImpl {
    * Note that this is only an estimate, because we will include
    * fragmentation on the ends of slabs or due to alignment.
    */
-  size_t slackEstimate() const { return kChunkBytes - m_frame.offset; }
-
-  /*
-   * Framed arena allocation.
-   *
-   * Nesting allocations between beginFrame() and endFrame() will
-   * release memory in a stack-like fashion.  Calling endFrame() more
-   * times than beginFrame() will break things.
-   *
-   * Chunks allocated larger than kChunkBytes are not freed until the
-   * entire arena is destroyed.
-   *
-   * Memory is not released back to malloc until the entire arena is
-   * destroyed.
-   */
-  void beginFrame();
-  void endFrame();
+  size_t slackEstimate() const { return kChunkBytes - m_offset; }
 
  private:
+  struct Destroyer {
+    void* obj;
+    void (*dtor)(void*);
+    Destroyer* next;
+  };
+
   // copying Arenas will end badly.
   ArenaImpl(const ArenaImpl&);
   ArenaImpl& operator=(const ArenaImpl&);
 
- private:
-  struct Frame {
-    Frame*   prev;
-    uint32_t index;
-    uint32_t offset;
-  };
-
   static const size_t kMinBytes = 8;
 
- private:
   void* allocSlow(size_t nbytes);
   void createSlab();
 
- private:
   char* m_current;
-  Frame m_frame;
+  uint32_t m_offset;
   std::vector<char*> m_ptrs;
   PointerList<char> m_externalPtrs;
+  Destroyer* m_dtors;
   bool m_bypassSlabAlloc;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_externalAllocSize;
 #endif
 };
@@ -123,28 +119,31 @@ struct ArenaImpl {
 template<size_t kChunkBytes>
 inline void* ArenaImpl<kChunkBytes>::alloc(size_t nbytes) {
   nbytes = (nbytes + (kMinBytes - 1)) & ~(kMinBytes - 1); // round up
-  size_t newOff = m_frame.offset + nbytes;
+  size_t newOff = m_offset + nbytes;
   if (newOff <= kChunkBytes) {
-    char* ptr = m_current + m_frame.offset;
-    m_frame.offset = newOff;
+    char* ptr = m_current + m_offset;
+    m_offset = newOff;
     return ptr;
   }
   return allocSlow(nbytes);
 }
 
 template<size_t kChunkBytes>
-inline void ArenaImpl<kChunkBytes>::beginFrame() {
-  Frame curFrame = m_frame; // don't include the Frame allocation
-  Frame* oldFrame = static_cast<Frame*>(alloc(sizeof(Frame)));
-  *oldFrame = curFrame;
-  m_frame.prev = oldFrame;
+template<class C, class D>
+inline C* ArenaImpl<kChunkBytes>::allocD(D dtor) {
+  auto ptr = (C*)alloc(sizeof(C));
+  auto dtorPtr = (Destroyer*)alloc(sizeof(Destroyer));
+  dtorPtr->obj = ptr;
+  dtorPtr->dtor = dtor;
+  dtorPtr->next = m_dtors;
+  m_dtors = dtorPtr;
+  return ptr;
 }
 
 template<size_t kChunkBytes>
-inline void ArenaImpl<kChunkBytes>::endFrame() {
-  assert(m_frame.prev);
-  m_frame = *m_frame.prev;
-  m_current = m_ptrs[m_frame.index];
+template<class C>
+inline C* ArenaImpl<kChunkBytes>::allocD() {
+  return allocD([](void* p) { static_cast<C*>(p)->~C(); });
 }
 
 void SetArenaSlabAllocBypass(bool f);
@@ -170,4 +169,3 @@ inline void* operator new[](size_t nbytes,
 
 //////////////////////////////////////////////////////////////////////
 
-#endif

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SPL_H_
-#define incl_HPHP_EXT_SPL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -30,23 +29,13 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
                                         bool autoload = true);
 Variant HHVM_FUNCTION(class_parents, const Variant& obj, bool autoload = true);
 Variant HHVM_FUNCTION(class_uses, const Variant& obj, bool autoload = true);
-void HHVM_FUNCTION(spl_autoload_call, const String& class_name);
-String HHVM_FUNCTION(spl_autoload_extensions, const String& file_extensions =
-                                                null_string);
-Variant HHVM_FUNCTION(spl_autoload_functions);
+
 Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
                                       const Array& params = null_array);
 Variant HHVM_FUNCTION(iterator_count, const Variant& obj);
 Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
                                          bool use_keys = true);
-bool HHVM_FUNCTION(spl_autoload_register,
-                   const Variant& autoload_function = uninit_variant,
-                   bool throws = true,
-                   bool prepend = false
-                  );
-bool HHVM_FUNCTION(spl_autoload_unregister, const Variant& autoload_function);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SPL_H_

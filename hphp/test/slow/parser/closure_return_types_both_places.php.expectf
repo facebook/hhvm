@@ -1,0 +1,1 @@
+Fatal error: Bad signature: use(...) should occur after the type in %s/test/slow/parser/closure_return_types_both_places.php on line 6

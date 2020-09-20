@@ -1,4 +1,0 @@
-File "invalid_hint_classname_with_generic2.php", line 7, characters 5-15:
-  mixed
-File "invalid_hint_classname_with_generic2.php", line 6, characters 25-25:
-The `is` operator cannot be used with a value of generic type T (Typing[4195])

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1596() {
 echo strlen("he\0llo");
 echo php_uname();
 echo md5('1f3870be274f6c49b3e31a0c6728957f');
@@ -83,14 +86,15 @@ echo sinh(0.5);
 echo tan(0.5);
 echo tanh(0.5);
 echo exp(5.7);
-echo exp(12);
-echo log10(12);
-echo log(12);
-echo sqrt(2);
+echo exp(12.0);
+echo log10(12.0);
+echo log(12.0);
+echo sqrt(2.0);
 echo ceil(7.9);
 echo floor(7.9);
 echo fmod(5.7, 1.3);
 echo ip2long("127.0.0.1");
-echo long2ip(pow(2,32) + 1024);
-echo rad2deg(M_PI_4);
-echo deg2rad(45);
+echo long2ip((string)(pow(2.0,32.0) + 1024));
+echo rad2deg((float)M_PI_4);
+echo deg2rad((float)45);
+}

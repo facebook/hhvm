@@ -1,0 +1,6 @@
+File "array_map5.php", line 4, characters 17-18:
+Invalid argument (Typing[4110])
+File "stdlib/builtins_array.hhi", line 118, characters 31-35:
+Expected `Container<[unresolved]>`
+File "array_map5.php", line 3, characters 15-35:
+But got `(function(int): bool)`

@@ -1,0 +1,147 @@
+[(Fun
+    { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((), (Some ([3:18-22], (Hprim Tvoid))));
+      f_name = ([3:10-14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((), None); f_unsafe_cap = ((), None);
+      f_body =
+      { fb_ast =
+        [([4:3-33],
+          (Expr
+             ([4:3-32],
+              (ExpressionTree (([4:3-7], (Happly (([4:3-7], "\\Code"), []))),
+                 ([4:8-31],
+                  (Binop (Plus,
+                     ([4:8-14],
+                      (Binop (Plus, ([4:8-9], (Int "4")),
+                         ([4:12-14], (Int "10"))))),
+                     ([4:17-31],
+                      (ET_Splice ([4:28-30], (Lvar ([4:28-30], $x)))))
+                     ))),
+                 (Some ([Pos.none],
+                        (Lfun (
+                           { f_span = [4:8-31]; f_annotation = ();
+                             f_mode = Mstrict; f_ret = ((), None);
+                             f_name = ([Pos.none], ";anonymous");
+                             f_tparams = []; f_where_constraints = [];
+                             f_variadic = FVnonVariadic;
+                             f_params =
+                             [{ param_annotation = [Pos.none];
+                                param_type_hint =
+                                ((), (Some ([Pos.none], Hdynamic)));
+                                param_is_variadic = false;
+                                param_pos = [Pos.none]; param_name = "$v";
+                                param_expr = None; param_callconv = None;
+                                param_user_attributes = [];
+                                param_visibility = None }
+                               ];
+                             f_cap = ((), None); f_unsafe_cap = ((), None);
+                             f_body =
+                             { fb_ast =
+                               [([Pos.none],
+                                 (Return
+                                    (Some ([Pos.none],
+                                           (Call (
+                                              ([Pos.none],
+                                               (Obj_get (
+                                                  ([Pos.none],
+                                                   (Lvar ([Pos.none], $v))),
+                                                  ([Pos.none],
+                                                   (Id ([Pos.none], "plus"))),
+                                                  OG_nullthrows))),
+                                              [],
+                                              [([Pos.none],
+                                                (Call (
+                                                   ([Pos.none],
+                                                    (Obj_get (
+                                                       ([Pos.none],
+                                                        (Lvar
+                                                           ([Pos.none], $v))),
+                                                       ([Pos.none],
+                                                        (Id
+                                                           ([Pos.none],
+                                                            "plus"))),
+                                                       OG_nullthrows))),
+                                                   [],
+                                                   [([Pos.none],
+                                                     (Call (
+                                                        ([Pos.none],
+                                                         (Obj_get (
+                                                            ([Pos.none],
+                                                             (Lvar
+                                                                ([Pos.none],
+                                                                 $v))),
+                                                            ([Pos.none],
+                                                             (Id
+                                                                ([Pos.none],
+                                                                 "intLiteral"))),
+                                                            OG_nullthrows))),
+                                                        [],
+                                                        [([4:8-9], (Int "4"))
+                                                          ],
+                                                        None)));
+                                                     ([Pos.none],
+                                                      (Call (
+                                                         ([Pos.none],
+                                                          (Obj_get (
+                                                             ([Pos.none],
+                                                              (Lvar
+                                                                 ([Pos.none],
+                                                                  $v))),
+                                                             ([Pos.none],
+                                                              (Id
+                                                                 ([Pos.none],
+                                                                  "intLiteral"))),
+                                                             OG_nullthrows))),
+                                                         [],
+                                                         [([4:12-14],
+                                                           (Int "10"))],
+                                                         None)))
+                                                     ],
+                                                   None)));
+                                                ([Pos.none],
+                                                 (Call (
+                                                    ([Pos.none],
+                                                     (Obj_get (
+                                                        ([Pos.none],
+                                                         (Lvar
+                                                            ([Pos.none], $v))),
+                                                        ([Pos.none],
+                                                         (Id
+                                                            ([Pos.none],
+                                                             "unsupportedSyntax"))),
+                                                        OG_nullthrows))),
+                                                    [],
+                                                    [([Pos.none],
+                                                      (String
+                                                         "ETSplice(\n    Expr(\n        Pos(\n            Small {\n                file: RelativePath {\n                    prefix: Dummy,\n                    path: \"expression_tree_splice.php\",\n                },\n                start: FilePosSmall {\n                    bol: 30,\n                    line: 4,\n                    column: 27,\n                },\n                end: FilePosSmall {\n                    bol: 30,\n                    line: 4,\n                    column: 29,\n                },\n            },\n        ),\n        Lvar(\n            Lid(\n                Pos(\n                    Small {\n                        file: RelativePath {\n                            prefix: Dummy,\n                            path: \"expression_tree_splice.php\",\n                        },\n                        start: FilePosSmall {\n                            bol: 30,\n                            line: 4,\n                            column: 27,\n                        },\n                        end: FilePosSmall {\n                            bol: 30,\n                            line: 4,\n                            column: 29,\n                        },\n                    },\n                ),\n                (\n                    0,\n                    \"$x\",\n                ),\n            ),\n        ),\n    ),\n)"))
+                                                      ],
+                                                    None)))
+                                                ],
+                                              None))))))
+                                 ];
+                               fb_annotation = Named };
+                             f_fun_kind = FSync; f_user_attributes = [];
+                             f_file_attributes = []; f_external = false;
+                             f_namespace =
+                             { Namespace_env.ns_ns_uses = <opaque>;
+                               ns_class_uses = <opaque>;
+                               ns_record_def_uses = <opaque>;
+                               ns_fun_uses = <opaque>;
+                               ns_const_uses = <opaque>; ns_name = None;
+                               ns_auto_ns_map = []; ns_is_codegen = false;
+                               ns_disable_xhp_element_mangling = false };
+                             f_doc_comment = None; f_static = false },
+                           []))))
+                 )))))
+          ];
+        fb_annotation = Named };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false })
+  ]

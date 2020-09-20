@@ -1,0 +1,33 @@
+{
+  "function_calls":[
+    {
+      "name":"HH\\invariant_violation",
+      "type":"Function",
+      "pos":{"filename":"pseudofunctions.php","line":19,"char_start":3,"char_end":11},
+      "caller":"test"
+    },
+    {
+      "name":"HH\\invariant_violation",
+      "type":"Function",
+      "pos":{"filename":"pseudofunctions.php","line":20,"char_start":3,"char_end":21},
+      "caller":"test"
+    }
+  ],
+  "symbol_types":[
+    {
+      "pos":{"filename":"pseudofunctions.php","line":8,"char_start":17,"char_end":18},
+      "type":"C",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"pseudofunctions.php","line":15,"char_start":9,"char_end":10},
+      "type":"C",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"pseudofunctions.php","line":16,"char_start":9,"char_end":10},
+      "type":"C",
+      "ident":0
+    }
+  ]
+}

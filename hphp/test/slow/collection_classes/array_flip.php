@@ -9,8 +9,8 @@ function flip($input) {
 }
 
 function main() {
-  flip(['foo', 'bar', 'baz']);
-  flip(['a' => 10, 'b' => 20, 'c' => 30]);
+  flip(varray['foo', 'bar', 'baz']);
+  flip(darray['a' => 10, 'b' => 20, 'c' => 30]);
   flip(Vector {'foo', 'bar', 'baz'});
   flip(Set {'foo', 'bar', 'baz'});
   flip(Map { 'a' => 10, 'b' => 20, 'c' => 30});
@@ -22,4 +22,8 @@ function main() {
 
 }
 
+
+<<__EntryPoint>>
+function main_array_flip() {
 main();
+}

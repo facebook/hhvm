@@ -3,32 +3,32 @@
 *** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***
 -- Iteration1 --
 
-Warning: %s
+Warning: readlink(): No such file or directory   in %s/readlink_realpath_variation3.php on line 28
 bool(false)
-%s
+bool(false)
 -- Iteration2 --
 
-Warning: %s
+Warning: readlink(): No such file or directory   in %s/readlink_realpath_variation3.php on line 28
 bool(false)
-%s
+bool(false)
 -- Iteration3 --
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_realpath_variation3.php on line 28
 bool(false)
 string(%d) "%s"
 -- Iteration4 --
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_realpath_variation3.php on line 28
 bool(false)
 string(%d) "%s"
 -- Iteration5 --
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_realpath_variation3.php on line 28
 bool(false)
 string(%d) "%s"
 -- Iteration6 --
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_realpath_variation3.php on line 28
 bool(false)
 string(%d) "%s"
 Done

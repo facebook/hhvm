@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base{
   public    $aaa = 1;
@@ -14,6 +14,10 @@ class Child extends Base{
   protected $eee = 5;
   private   $fff = 6;
 }
+
+<<__EntryPoint>>
+function main_1535() {
 $base_obj = new Base();
 $child_obj = new Child();
 $base_obj->foo($child_obj);
+}

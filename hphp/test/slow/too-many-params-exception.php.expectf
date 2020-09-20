@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'RuntimeException' with message 'f() expects exactly 1 parameter, 2 given' in %s:4
+Stack trace:
+%A

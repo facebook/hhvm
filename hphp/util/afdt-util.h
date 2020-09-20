@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_AFDT_UTIL_H_
-#define incl_HPHP_AFDT_UTIL_H_
+#pragma once
 
 #ifdef _MSC_VER
 # error AFDT is not currently supported for MSVC!
@@ -240,4 +239,3 @@ int recv_fd(int afdt_fd);
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
-#endif

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $xml = "<?xml version=\"1.0\"?>
 <!DOCTYPE note [
 <!ELEMENT note (to,from,heading,body)>
@@ -16,4 +16,4 @@ $xml = "<?xml version=\"1.0\"?>
 $dom = new DOMDocument('1.0');
 $dom->loadXML($xml);
 var_dump($dom->validate());
-?>
+}

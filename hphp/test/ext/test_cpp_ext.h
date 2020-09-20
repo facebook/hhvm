@@ -33,7 +33,7 @@ struct TestCppExt : TestCppBase {
 };
 
 inline void evalCodeForCppExt(const String& code_str) {
-  String prefixedCode = concat("<?php ", code_str);
+  String prefixedCode = concat("<?hh ", code_str);
   Unit* unit = g_context->compileEvalString(prefixedCode.get());
   tvDecRefGen(g_context->invokeUnit(unit));
 }

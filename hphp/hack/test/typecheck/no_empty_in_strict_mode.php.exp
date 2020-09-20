@@ -1,2 +1,0 @@
-File "no_empty_in_strict_mode.php", line 9, characters 8-19:
-empty cannot be used in a completely type safe way and so is banned in strict mode (Typing[4016])

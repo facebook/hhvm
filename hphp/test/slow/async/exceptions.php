@@ -1,21 +1,18 @@
 <?hh
-assert_options(ASSERT_ACTIVE, 1);
-assert_options(ASSERT_WARNING, 1);
 
 function block() {
   return RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
-async function aThrow() { throw new Exception(__function__); }
+}
+async function aThrow() { throw new Exception(__FUNCTION__); }
 async function aaThrow() { await aThrow(); }
 
-async function bThrow() { await block(); throw new Exception(__function__); }
+async function bThrow() { await block(); throw new Exception(__FUNCTION__); }
 async function bbThrow() { await block(); await bThrow(); }
 
-function verify(&$a, &$e) {
+function verify($a, $e) {
   try { \HH\Asio\result($a); }
   catch (Exception $ae) {}
   assert($ae->getMessage() == $e->getMessage());
@@ -50,7 +47,14 @@ async function asyncCatch() {
   catch (Exception $e) { verify($a, $e); }
 }
 
+
+<<__EntryPoint>>
+function main_exceptions() {
+assert_options(ASSERT_ACTIVE, 1);
+assert_options(ASSERT_WARNING, 1);
+;
+
 normalCatch();
 echo "---\n";
 HH\Asio\join(asyncCatch());
-
+}

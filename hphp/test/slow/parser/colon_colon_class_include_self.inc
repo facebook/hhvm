@@ -1,2 +1,2 @@
-<?php
+<?hh
 echo self::class;

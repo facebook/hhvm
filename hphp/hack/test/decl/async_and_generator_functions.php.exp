@@ -1,0 +1,149 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\async_function" ->
+    { fe_pos = [5:16-30];
+      fe_type =
+      (Rwitness (root|async_and_generator_functions.php line 5, characters 16-29),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|async_and_generator_functions.php line 5, characters 16-29),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|async_and_generator_functions.php line 5, characters 34-50),
+               (Tapply (([5:34-43], "\\HH\\Awaitable"),
+                  [(Rhint (root|async_and_generator_functions.php line 5, characters 44-49),
+                    (Tprim Tstring))]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\async_generator" ->
+    { fe_pos = [18:16-31];
+      fe_type =
+      (Rwitness (root|async_and_generator_functions.php line 18, characters 16-30),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|async_and_generator_functions.php line 18, characters 16-30),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|async_and_generator_functions.php line 18, characters 35-67),
+               (Tapply (([18:35-49], "\\HH\\AsyncGenerator"),
+                  [(Rhint (root|async_and_generator_functions.php line 18, characters 50-52),
+                    (Tprim Tint));
+                    (Rhint (root|async_and_generator_functions.php line 18, characters 55-60),
+                     (Tprim Tstring));
+                    (Rhint (root|async_and_generator_functions.php line 18, characters 63-66),
+                     (Tprim Tvoid))
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\generator_function" ->
+    { fe_pos = [10:10-28];
+      fe_type =
+      (Rwitness (root|async_and_generator_functions.php line 10, characters 10-27),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|async_and_generator_functions.php line 10, characters 10-27),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|async_and_generator_functions.php line 10, characters 32-59),
+               (Tapply (([10:32-41], "\\Generator"),
+                  [(Rhint (root|async_and_generator_functions.php line 10, characters 42-47),
+                    (Tprim Tstring));
+                    (Rhint (root|async_and_generator_functions.php line 10, characters 50-52),
+                     (Tprim Tint));
+                    (Rhint (root|async_and_generator_functions.php line 10, characters 55-58),
+                     (Tprim Tvoid))
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\generator_function_implicit_key" ->
+    { fe_pos = [14:10-41];
+      fe_type =
+      (Rwitness (root|async_and_generator_functions.php line 14, characters 10-40),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|async_and_generator_functions.php line 14, characters 10-40),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|async_and_generator_functions.php line 14, characters 45-72),
+               (Tapply (([14:45-54], "\\Generator"),
+                  [(Rhint (root|async_and_generator_functions.php line 14, characters 55-57),
+                    (Tprim Tint));
+                    (Rhint (root|async_and_generator_functions.php line 14, characters 60-65),
+                     (Tprim Tstring));
+                    (Rhint (root|async_and_generator_functions.php line 14, characters 68-71),
+                     (Tprim Tvoid))
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\sync_function" ->
+    { fe_pos = [3:10-23];
+      fe_type =
+      (Rwitness (root|async_and_generator_functions.php line 3, characters 10-22),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|async_and_generator_functions.php line 3, characters 10-22),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|async_and_generator_functions.php line 3, characters 27-30),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

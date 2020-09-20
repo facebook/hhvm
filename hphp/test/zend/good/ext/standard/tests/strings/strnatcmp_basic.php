@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : int strnatcmp  ( string $str1  , string $str2  )
  * Description: String comparisons using a "natural order" algorithm
  * Source code: ext/standard/string.c
 */
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strnatcmp() : basic functionality ***\n";
-
 $a1 = "abc1";
 $b1 = "abc10";
 $c1 = "abc15";
@@ -31,7 +31,7 @@ var_dump(strnatcmp($d1, $c2));
 
 echo "Equal too tests\n";
 var_dump(strnatcmp($b1, $b1));
-var_dump(strnatcmp($b1, $b2));	
+var_dump(strnatcmp($b1, $b2));
 
 echo "Greater than tests\n";
 var_dump(strnatcmp($b1, $a1));
@@ -45,5 +45,5 @@ var_dump(strnatcmp($c1, $a2));
 var_dump(strnatcmp($d1, $a2));
 var_dump(strnatcmp($c1, $b2));
 var_dump(strnatcmp($c1, $d2));
-?>
-===DONE===
+echo "===DONE===\n";
+}

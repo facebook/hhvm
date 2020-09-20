@@ -1,5 +1,4 @@
-
-<?php 
+<?hh
 
 /* pretty nifty object oriented code! */
 
@@ -22,17 +21,17 @@ class user {
     $this->address = $address;
     $this->phone_num = $phone_num;
   }
-};
+}
 
-
-function test($u)
-{  /* one can pass classes as arguments */
+function test($u) {
+  /* one can pass classes as arguments */
   $u->display();
   $t = $u;
   $t->address = "New address...";
   return $t;  /* and also return them as return values */
 }
 
+<<__EntryPoint>> function main(): void {
 $user1 = new user;
 $user2 = new user;
 
@@ -43,5 +42,4 @@ $user2->display();
 
 $tmp = test($user2);
 $tmp->display();
-
-?>
+}

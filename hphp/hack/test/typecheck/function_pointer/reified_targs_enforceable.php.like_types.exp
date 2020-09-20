@@ -1,0 +1,6 @@
+File "reified_targs_enforceable.php", line 10, characters 12-17:
+Invalid type (Typing[4302])
+File "reified_targs_enforceable.php", line 5, characters 38-38:
+Type parameter `T` was declared `__Enforceable` here
+File "reified_targs_enforceable.php", line 10, characters 12-17:
+This type is not enforceable because it has a type with an erased generic type argument, except in a like cast when the corresponding type parameter is covariant

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $foo = function() {
 	try {
 		throw new Exception('test!');
@@ -13,5 +13,4 @@ try {
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
-
-?>
+}

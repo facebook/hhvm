@@ -27,13 +27,3 @@ function strict(int $x): int {
 function use_strict() {
   echo strict(1);
 }
-
-function has_unsafe(int $a) {
-  echo $a;
-  // UNSAFE
-  echo $a;
-}
-
-function has_unsafeexpr(string $a) {
-  echo /* UNSAFE_EXPR */ $a + 1;
-}

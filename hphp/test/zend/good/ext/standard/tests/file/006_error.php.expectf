@@ -1,39 +1,32 @@
 *** Testing error conditions for fileperms(), chmod() ***
 
-Warning: %s
+Warning: chmod(): Operation not permitted in %s/006_error.php on line 14
 bool(false)
 100%d44
 
-Warning: %s
+Warning: chmod(): Operation not permitted in %s/006_error.php on line 19
 bool(false)
 40755
 
-Warning: %s
+Warning: chmod(): No such file or directory in %s/006_error.php on line 25
 bool(false)
 
-Warning: %s
+Warning: fileperms(): No such file or directory in %s/006_error.php on line 26
 bool(false)
 
 
-Warning: %s
-NULL
+Warning: chmod() expects exactly 2 parameters, 1 given in %s/006_error.php on line 32
 
-Warning: %s
-NULL
+Warning: chmod() expects exactly 2 parameters, 1 given in %s/006_error.php on line 33
 
-Warning: %s
-NULL
+Warning: chmod() expects exactly 2 parameters, 0 given in %s/006_error.php on line 34
 
-Warning: %s
-NULL
+Warning: fileperms() expects exactly 1 parameter, 0 given in %s/006_error.php on line 35
 
-Warning: %s
-NULL
+Warning: chmod() expects exactly 2 parameters, 3 given in %s/006_error.php on line 38
 
-Warning: %s
-NULL
+Warning: fileperms() expects exactly 1 parameter, 2 given in %s/006_error.php on line 39
 
-Warning: %s
-NULL
+Warning: fileperms() expects exactly 1 parameter, 2 given in %s/006_error.php on line 40
 
 *** Done ***

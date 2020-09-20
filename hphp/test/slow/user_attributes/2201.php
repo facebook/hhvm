@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_rf_for_method($fn, $class) {
   $rc = new ReflectionClass($class);
@@ -17,23 +17,7 @@ function show($fn, $class=null) {
   foreach ($params as $param) {
     echo "{$param->getName()}:\n";
     $attrs = $param->getAttributes();
-    ksort($attrs);
-    var_dump($attrs);
-  }
-}
-
-function showr($fn, $class=null) {
-  $rf = null;
-  if ($class) {
-    $rf = get_rf_for_method($fn, $class);
-  } else {
-    $rf = new ReflectionFunction($fn);
-  }
-  $params = $rf->getParameters();
-  foreach ($params as $param) {
-    echo "{$param->getName()}:\n";
-    $attrs = $param->getAttributesRecursive();
-    ksort($attrs);
+    ksort(inout $attrs);
     var_dump($attrs);
   }
 }
@@ -43,9 +27,6 @@ function doboth($fn, $class=null) {
   if ($class) echo "$class::";
   echo "$fn =>\n---- non-recursive: ----\n";
   show($fn, $class);
-  echo "\n---- recursive: ----\n";
-  showr($fn, $class);
-  echo "\n";
 }
 
 //------------------------
@@ -64,7 +45,7 @@ class C {
 }
   public function o(<<Hi('bye')>> $param) {
 }
-  public function p(<<A('b', array('c', 'd')), E('fg')>> $param) {
+  public function p(<<A('b', varray['c', 'd']), E('fg')>> $param) {
 }
   public function q(<<RS>> $tuv) {
 }
@@ -92,8 +73,11 @@ class D extends C {
 }
 }
 
+
 //------------------------
 
+<<__EntryPoint>>
+function main_2201() {
 doboth('no_attrs');
 doboth('simple_attr');
 doboth('two_attrs');
@@ -109,3 +93,4 @@ doboth('o', 'D');
 doboth('p', 'D');
 doboth('q', 'D');
 doboth('wxy', 'D');
+}

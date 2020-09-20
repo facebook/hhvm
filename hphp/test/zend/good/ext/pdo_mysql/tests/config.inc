@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Overrule global settings, if need be */
 
 if (false !== getenv('PDO_MYSQL_TEST_DSN')) {
@@ -33,11 +33,11 @@ define('PDO_MYSQL_TEST_CHARSET', (false !== getenv('PDO_MYSQL_TEST_CHARSET')) ? 
 if (!function_exists('sys_get_temp_dir')) {
 	function sys_get_temp_dir() {
 
-		if (!empty($_ENV['TMP']))
+		if ($_ENV['TMP'] ?? false)
 			return realpath( $_ENV['TMP'] );
-		if (!empty($_ENV['TMPDIR']))
+		if ($_ENV['TMPDIR'] ?? false)
 			return realpath( $_ENV['TMPDIR'] );
-		if (!empty($_ENV['TEMP']))
+		if ($_ENV['TEMP'] ?? false)
 			return realpath( $_ENV['TEMP'] );
 
 		$temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
@@ -49,4 +49,3 @@ if (!function_exists('sys_get_temp_dir')) {
 		return FALSE;
 	}
 }
-?>

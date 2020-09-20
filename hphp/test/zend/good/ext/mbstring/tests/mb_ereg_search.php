@@ -1,25 +1,27 @@
-<?php
-    $str = "中国abc + abc ?!？！字符＃　china string";
+<?hh
+<<__EntryPoint>>
+function main_entry(): void {
+      $str = "中国abc + abc ?!？！字符＃　china string";
 
-    $reg = "\w+";
+      $reg = "\w+";
 
-    mb_regex_encoding("UTF-8");
+      mb_regex_encoding("UTF-8");
 
-    mb_ereg_search_init($str, $reg);
-    $r = mb_ereg_search();
+      mb_ereg_search_init($str, $reg);
+      $r = mb_ereg_search();
 
-    if(!$r)
-    {
-        echo "null\n";
-    }
-    else
-    {
-        $r = mb_ereg_search_getregs(); //get first result
-        do
-        {
-            var_dump($r[0]);
-            $r = mb_ereg_search_regs();//get next result
-        }
-        while($r);
-    }
-?>
+      if(!$r)
+      {
+          echo "null\n";
+      }
+      else
+      {
+          $r = mb_ereg_search_getregs(); //get first result
+          do
+          {
+              var_dump($r[0]);
+              $r = mb_ereg_search_regs();//get next result
+          }
+          while($r);
+      }
+}

@@ -2,16 +2,14 @@
 
 -- Testing imagecolorstotal() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: imagecolorstotal() expects exactly 1 parameter, 0 given in %s/imagecolorstotal_error.php on line 13
 
 -- Testing imagecolorstotal() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: imagecolorstotal() expects exactly 1 parameter, 2 given in %s/imagecolorstotal_error.php on line 17
 
 -- Testing imagecolorstotal() function with a invalid resource
 
-Warning: %s
+Warning: supplied resource is not a valid Image resource in %s/imagecolorstotal_error.php on line 20
 bool(false)
 ===DONE===

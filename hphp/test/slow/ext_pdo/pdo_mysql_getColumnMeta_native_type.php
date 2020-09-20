@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $host   = getenv("MYSQL_TEST_HOST");
 $port   = getenv("MYSQL_TEST_PORT");
 $user   = getenv("MYSQL_TEST_USER");
@@ -17,4 +17,5 @@ try {
 } catch (Exception $ex) {
 } finally {
   $pdo->query("DROP TABLE test_native_type");
+}
 }

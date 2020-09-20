@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x) {
   if (is_array($x) && isset($x[0])) {
@@ -11,6 +11,10 @@ function f($x) {
  var_dump($x);
  }
 }
-f(array(32));
+
+<<__EntryPoint>>
+function main_1854() {
+f(varray[32]);
 f('foobar');
 f(32);
+}

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_fgets() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -12,3 +15,4 @@ var_dump(fgets($f));
 var_dump(fgets($f));
 
 unlink($tempfile);
+}

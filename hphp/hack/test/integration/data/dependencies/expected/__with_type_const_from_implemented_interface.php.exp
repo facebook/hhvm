@@ -1,0 +1,15 @@
+<?hh
+function with_type_const_from_implemented_interface(
+  StringBarWrapper $w,
+): string {
+  return $w->getBar();
+}
+interface IHasBar {
+  const type TBar = string;
+}
+class StringBarWrapper extends \HasBar implements \IHasBar {
+  public function getBar(): this::TBar {
+    throw new \Exception();
+  }
+}
+abstract class HasBar {}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class LocalSoapClient extends SoapClient {
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
     return <<<EOF
@@ -28,7 +28,9 @@ class LocalSoapClient extends SoapClient {
 EOF;
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$client = new LocalSoapClient(NULL, array('location'=>'test://','uri'=>'test://'));
-print_r($client->getDIDAreaResponse());
-?>
+  $client = new LocalSoapClient(NULL, darray['location'=>'test://','uri'=>'test://']);
+  print_r($client->__soapcall('getDIDAreaResponse', varray[]));
+}

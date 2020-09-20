@@ -1,0 +1,177 @@
+[(Class
+    { c_span = [4:1-6:2]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([4:7-10], "\\Inv");
+      c_tparams =
+      { c_tparam_list =
+        [{ tp_variance = Invariant; tp_name = ([4:11-12], "T");
+           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
+           }
+          ];
+        c_tparam_constraints = <opaque> };
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_consts = []; c_typeconsts = [];
+      c_vars =
+      [{ cv_final = false; cv_is_xhp = false; cv_visibility = Public;
+         cv_type = (Some ([5:38-39], (Habstr "T")));
+         cv_id = ([5:40-45], "item"); cv_expr = None;
+         cv_user_attributes = []; cv_doc_comment = None;
+         cv_is_promoted_variadic = false; cv_is_static = false }
+        ];
+      c_methods =
+      [{ m_span = [5:3-50]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([5:19-30], "__construct"); m_tparams = [];
+         m_where_constraints = []; m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([5:40-45], T);
+            param_hint = (Some ([5:38-39], (Habstr "T")));
+            param_is_variadic = false;
+            param_pos = [5:40-45]; param_name = "$item"; param_expr = None;
+            param_callconv = None; param_user_attributes = [] }
+           ];
+         m_body =
+         { fb_ast =
+           [([5:40-45],
+             (Expr
+                (([5:40-45], T),
+                 (Binop ((Eq None),
+                    (([5:40-45], T),
+                     (Obj_get ((([5:40-45], this), This),
+                        (([5:40-45], T), (Id ([5:40-45], "item"))),
+                        OG_nullthrows))),
+                    (([5:40-45], T), (Lvar ([5:40-45], $item))))))));
+             ([Pos.none], Noop)];
+           fb_annotation = No unsafe blocks };
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([5:19-30], (Happly (([5:19-30], "void"), []))));
+         m_external = false; m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
+  (Fun
+     { f_span = [7:1-47]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([7:39-43], (Hprim Tvoid)));
+       f_name = ([7:10-24], "\\expectArraykey"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:34-37], arraykey);
+          param_hint = (Some ([7:25-33], (Hprim Tarraykey)));
+          param_is_variadic = false;
+          param_pos = [7:34-37]; param_name = "$ak"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
+  (Fun
+     { f_span = [8:1-15:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret =
+       (Some ([9:3-35],
+              (Happly (([9:3-6], "\\Inv"),
+                 [([9:7-34],
+                   (Hfun (FNonreactive, false,
+                      [([9:17-23], (Hprim Tstring))], [None], [None],
+                      Hnon_variadic, ([9:25-33], (Hprim Tarraykey)), false)))
+                   ]
+                 ))));
+       f_name = ([8:10-27], "\\test_shape_update"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([8:51-53], (function(string): int));
+          param_hint =
+          (Some ([8:28-50],
+                 (Hfun (FNonreactive, false, [([8:38-44], (Hprim Tstring))],
+                    [None], [None], Hnon_variadic, ([8:46-49], (Hprim Tint)),
+                    false))));
+          param_is_variadic = false;
+          param_pos = [8:51-53]; param_name = "$f"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+         { param_annotation = ([8:59-61], int);
+           param_hint = (Some ([8:55-58], (Hprim Tint)));
+           param_is_variadic = false;
+           param_pos = [8:59-61]; param_name = "$i"; param_expr = None;
+           param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast =
+         [([10:3-22],
+           (Expr
+              (([10:3-21], Inv<(function(string): arraykey)>),
+               (Binop ((Eq None),
+                  (([10:3-7], Inv<(function(string): arraykey)>),
+                   (Lvar ([10:3-7], $obj))),
+                  (([10:10-21], Inv<(function(string): arraykey)>),
+                   (New (
+                      (([10:14-17], Inv<[unresolved]>),
+                       (CI ([10:14-17], "\\Inv"))),
+                      [],
+                      [(([10:18-20], (function(string): int)),
+                        (Lvar ([10:18-20], $f)))],
+                      [],
+                      ([10:14-17], (function((function(string): arraykey) $item): _))
+                      )))
+                  )))));
+           ([11:3-19],
+            (Expr
+               (([11:3-18], (function(string): arraykey)),
+                (Binop ((Eq None),
+                   (([11:3-5], (function(string): arraykey)),
+                    (Lvar ([11:3-5], $r))),
+                   (([11:8-18], (function(string): arraykey)),
+                    (Obj_get (
+                       (([11:8-12], Inv<(function(string): arraykey)>),
+                        (Lvar ([11:8-12], $obj))),
+                       (([11:14-18], (function(string): arraykey)),
+                        (Id ([11:14-18], "item"))),
+                       OG_nullthrows)))
+                   )))));
+           ([12:3-29],
+            (Expr
+               (([12:3-28], void),
+                (Call (Cnormal,
+                   (([12:3-17], (function(arraykey $ak): void)),
+                    (Id ([12:3-17], "\\expectArraykey"))),
+                   [],
+                   [(([12:18-27], int),
+                     (Call (Cnormal,
+                        (([12:19-21], (function(string): int)),
+                         (Lvar ([12:19-21], $r))),
+                        [], [(([12:23-26], string), (String "a"))], [])))
+                     ],
+                   [])))));
+           ([13:3-19],
+            (Expr
+               (([13:3-18], (function(string): int)),
+                (Binop ((Eq None),
+                   (([13:3-13], (function(string): arraykey)),
+                    (Obj_get (
+                       (([13:3-7], Inv<(function(string): arraykey)>),
+                        (Lvar ([13:3-7], $obj))),
+                       (([13:9-13], (function(string): arraykey)),
+                        (Id ([13:9-13], "item"))),
+                       OG_nullthrows))),
+                   (([13:16-18], (function(string): int)),
+                    (Lvar ([13:16-18], $r)))
+                   )))));
+           ([14:3-15],
+            (Return
+               (Some (([14:10-14], Inv<(function(string): arraykey)>),
+                      (Lvar ([14:10-14], $obj))))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
+  ]
+The TAST for this definition contains nodes which are not yet implemented.
+Typing[4291] Unexpected type in TAST: expected (function(string): arraykey), got (function(string): int)
+   --> function_apply_hard.php
+ 12 |   expectArraykey(($r)("a"));
+    |                   ^^
+

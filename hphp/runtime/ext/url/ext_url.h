@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_URL_H_
-#define incl_HPHP_EXT_URL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -36,7 +35,7 @@ extern const int64_t k_PHP_QUERY_RFC3986;
 
 Variant HHVM_FUNCTION(base64_decode, const String& data,
                                      bool strict /* = false */);
-Variant HHVM_FUNCTION(base64_encode, const String& data);
+String HHVM_FUNCTION(base64_encode, const String& data);
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */);
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
@@ -57,4 +56,3 @@ String HHVM_FUNCTION(urlencode, const String& str);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_URL_H_

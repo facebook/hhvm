@@ -1,0 +1,12 @@
+int(9)
+varray(0) {
+}
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+int(5)
+int(1)
+Out of bounds darray access: invalid index "123"
+string(1) "6"

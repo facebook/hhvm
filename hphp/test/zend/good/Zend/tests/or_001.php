@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $s = "323423";
 $s1 = "2323.555";
 
@@ -17,4 +17,4 @@ $s |= "test";
 var_dump($s);
 
 echo "Done\n";
-?>
+}

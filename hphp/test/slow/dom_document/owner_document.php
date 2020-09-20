@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $doc = new DOMDocument();
@@ -8,4 +8,8 @@ function main() {
   var_dump($root->ownerDocument === $doc);
 }
 
+
+<<__EntryPoint>>
+function main_owner_document() {
 main();
+}

@@ -1,0 +1,8 @@
+File "shape.php", line 4, characters 41-47:
+Unbound name: nothing (an object type) (Naming[2049])
+File "shape.php", line 5, characters 10-11:
+Invalid return type (Typing[4166])
+File "shape.php", line 4, characters 55-71:
+The field 'y' is not defined in this shape type, and this shape type does not allow unknown fields.
+File "shape.php", line 4, characters 15-48:
+The field 'y' is set in the shape.

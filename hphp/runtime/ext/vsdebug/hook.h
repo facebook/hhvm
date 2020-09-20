@@ -14,20 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_HOOK_H_
-#define incl_HPHP_VSDEBUG_HOOK_H_
+#pragma once
 
 #include "hphp/runtime/vm/debugger-hook.h"
-#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 
 namespace HPHP {
 namespace VSDEBUG {
 
-struct RequestInfo;
+struct Debugger;
+struct DebuggerRequestInfo;
 
 struct VSDebugHook final : DebuggerHook {
   void onRequestInit() override;
-  void onRequestShutdown() override;
 
   void onOpcode(PC pc) override;
 
@@ -48,6 +46,7 @@ struct VSDebugHook final : DebuggerHook {
   void onFileLoad(Unit* efile) override;
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
+  void onRegisterFuncIntercept(const String& name) override;
 
   static DebuggerHook* GetInstance() {
     static VSDebugHook* hook = new VSDebugHook();
@@ -56,7 +55,7 @@ struct VSDebugHook final : DebuggerHook {
 
   static void tryEnterDebugger(
     Debugger* debugger,
-    RequestInfo* requestInfo,
+    DebuggerRequestInfo* requestInfo,
     bool breakNoStepOnly
   );
 
@@ -71,4 +70,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_HOOK_H_

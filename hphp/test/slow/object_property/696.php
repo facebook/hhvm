@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
 }
@@ -16,4 +16,8 @@ function foo($obj) {
   $a = $obj->data;
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_696() {
 foo(new B);
+}

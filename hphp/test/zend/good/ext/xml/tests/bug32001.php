@@ -1,4 +1,4 @@
-<?php
+<?hh
 class testcase {
 	private $encoding;
 	private $bom;
@@ -6,12 +6,12 @@ class testcase {
 	private $tags;
 	private $chunk_size;
 
-	function testcase($enc, $chunk_size = 0, $bom = 0, $omit_prologue = 0) {
+	function __construct($enc, $chunk_size = 0, $bom = 0, $omit_prologue = 0) {
 		$this->encoding = $enc;
 		$this->chunk_size = $chunk_size;
 		$this->bom = $bom;
 		$this->prologue = !$omit_prologue;
-		$this->tags = array();
+		$this->tags = varray[];
 	}
 
 	function start_element($parser, $name, $attrs) {
@@ -34,7 +34,7 @@ class testcase {
 <テスト:テスト1 xmlns:テスト="http://www.example.com/テスト/" テスト="テスト">
   <テスト:テスト2 テスト="テスト">
 	<テスト:テスト3>
-	  test! 
+	  test!
 	</テスト:テスト3>
   </テスト:テスト2>
 </テスト:テスト1>
@@ -89,7 +89,7 @@ HERE;
 
 		$parser = xml_parser_create(NULL);
 		xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-		xml_set_element_handler($parser, "start_element", "end_element");
+    xml_set_element_handler($parser, "start_element", "end_element");
 		xml_set_object($parser, $this);
 
 		if ($this->chunk_size == 0) {
@@ -112,45 +112,47 @@ HERE;
 		echo "Chunk size: ".($this->chunk_size ? "$this->chunk_size byte(s)\n": "all data at once\n");
 		echo "BOM: ".($this->bom ? 'prepended': 'not prepended'), "\n";
 
-		if ($success) { 
+		if ($success) {
 			var_dump($this->tags);
 		} else {
 			echo "[Error] ", xml_error_string(xml_get_error_code($parser)), "\n";
 		}
 	}
 }
-$suite = array(
-	new testcase("UTF-8",     0, 0, 0),
-	new testcase("UTF-8",     0, 0, 1),
-	new testcase("UTF-8",     0, 1, 0),
-	new testcase("UTF-8",     0, 1, 1),
-	new testcase("UTF-16BE",  0, 0, 0),
-	new testcase("UTF-16BE",  0, 1, 0),
-	new testcase("UTF-16BE",  0, 1, 1),
-	new testcase("UTF-16LE",  0, 0, 0),
-	new testcase("UTF-16LE",  0, 1, 0),
-	new testcase("UTF-16LE",  0, 1, 1),
-	new testcase("UTF-8",     1, 0, 0),
-	new testcase("UTF-8",     1, 0, 1),
-	new testcase("UTF-8",     1, 1, 0),
-	new testcase("UTF-8",     1, 1, 1),
-	new testcase("UTF-16BE",  1, 0, 0),
-	new testcase("UTF-16BE",  1, 1, 0),
-	new testcase("UTF-16BE",  1, 1, 1),
-	new testcase("UTF-16LE",  1, 0, 0),
-	new testcase("UTF-16LE",  1, 1, 0),
-	new testcase("UTF-16LE",  1, 1, 1),
-);
-
-if (XML_SAX_IMPL == 'libxml') {
-  echo "libxml2 Version => " . LIBXML_DOTTED_VERSION. "\n";
-} else {
-  echo "libxml2 Version => NONE\n";  
-}
-
-foreach ($suite as $testcase) {
-	$testcase->run();
-}
 
 // vim600: sts=4 sw=4 ts=4 encoding=UTF-8
-?>
+<<__EntryPoint>>
+function main_entry(): void {
+  $suite = varray[
+  	new testcase("UTF-8",     0, 0, 0),
+  	new testcase("UTF-8",     0, 0, 1),
+  	new testcase("UTF-8",     0, 1, 0),
+  	new testcase("UTF-8",     0, 1, 1),
+  	new testcase("UTF-16BE",  0, 0, 0),
+  	new testcase("UTF-16BE",  0, 1, 0),
+  	new testcase("UTF-16BE",  0, 1, 1),
+  	new testcase("UTF-16LE",  0, 0, 0),
+  	new testcase("UTF-16LE",  0, 1, 0),
+  	new testcase("UTF-16LE",  0, 1, 1),
+  	new testcase("UTF-8",     1, 0, 0),
+  	new testcase("UTF-8",     1, 0, 1),
+  	new testcase("UTF-8",     1, 1, 0),
+  	new testcase("UTF-8",     1, 1, 1),
+  	new testcase("UTF-16BE",  1, 0, 0),
+  	new testcase("UTF-16BE",  1, 1, 0),
+  	new testcase("UTF-16BE",  1, 1, 1),
+  	new testcase("UTF-16LE",  1, 0, 0),
+  	new testcase("UTF-16LE",  1, 1, 0),
+  	new testcase("UTF-16LE",  1, 1, 1),
+  ];
+
+  if (XML_SAX_IMPL == 'libxml') {
+    echo "libxml2 Version => " . LIBXML_DOTTED_VERSION. "\n";
+  } else {
+    echo "libxml2 Version => NONE\n";
+  }
+
+  foreach ($suite as $testcase) {
+  	$testcase->run();
+  }
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A
 {
@@ -24,7 +24,7 @@ class B extends A
     }
 }
 class C extends A {}
-
+<<__EntryPoint>> function main(): void {
 $B = new B("B");
 var_dump($B);
 $C = new C("C");
@@ -34,5 +34,5 @@ $B->copyValue($C);
 
 var_dump($B);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

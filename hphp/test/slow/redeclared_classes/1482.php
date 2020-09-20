@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
 }
@@ -13,16 +13,15 @@ class C extends B {
 ";
   }
 }
-if (false) {
-  class A {
-}
-  class B {
-}
-  class C {
-}
-}
 function test() {
   $x = new C;
   $x->meh()->work();
 }
-test();
+
+<<__EntryPoint>>
+function main_1482() {
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '1482.inc';
+  }
+  test();
+}

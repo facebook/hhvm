@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_STATIC_STRING_TABLE_H_
-#define incl_HPHP_STATIC_STRING_TABLE_H_
+#pragma once
 
 #include <string>
 
@@ -30,7 +29,6 @@ struct Array;
 struct StringData;
 struct String;
 struct TypedValue;
-using Cell = TypedValue;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -72,12 +70,13 @@ StringData* makeStaticString(const char* str, size_t len);
 StringData* makeStaticString(const char* str);
 
 /*
- * As their counterparts above, but check that the static string
- * table has been initialized. These should be used for anything
- * that might run before main().
+ * Insert an already initialized static StringData into the static string table.
+ * If the same string is already present, invoke the deleter to take appropriate
+ * action. By default, the deleter tries to free the memory; thus we need to
+ * pass a custom deleter if we manipulate pre-allocated memory.
  */
-StringData* makeStaticStringSafe(const char* str, size_t len);
-StringData* makeStaticStringSafe(const char* str);
+StringData* insertStaticString(StringData*,
+                               void (*deleter)(StringData*) = nullptr);
 
 /*
  * Lookup static strings for single character strings.  (We pre-create
@@ -92,6 +91,7 @@ StringData* makeStaticString(char c);
  * Returns: a string that isStatic(), or nullptr if there was none.
  */
 StringData* lookupStaticString(const StringData* str);
+StringData* lookupStaticString(folly::StringPiece);
 
 /*
  * Return the number of static strings in the process.
@@ -115,7 +115,7 @@ rds::Handle makeCnsHandle(const StringData* cnsName);
  *
  * Returns true iff the constant has a persistent handle.
  */
-bool bindPersistentCns(const StringData* cnsName, const Cell& value);
+bool bindPersistentCns(const StringData* cnsName, const TypedValue& value);
 
 /*
  * Return an array of all the static strings in the current
@@ -136,6 +136,11 @@ Array lookupDefinedConstants(bool categorize = false);
 size_t countStaticStringConstants();
 
 /*
+ * Initialize the static string table. This needs to happen before any static
+ * strings are materialized.
+ */
+void create_string_data_map();
+/*
  * The static string table is generally initially created before main
  * by global constructors (StaticString objects).  After we've parsed
  * options, we may find out a different size was requested for the
@@ -151,4 +156,3 @@ void refineStaticStringTableSize();
 
 }
 
-#endif

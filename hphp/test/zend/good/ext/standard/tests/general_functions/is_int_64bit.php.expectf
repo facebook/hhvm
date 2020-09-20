@@ -292,21 +292,15 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: %s
-bool(false)
+Warning: is_int() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line 130
 
-Warning: %s
-bool(false)
+Warning: is_integer() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line 131
 
-Warning: %s
-bool(false)
+Warning: is_long() expects exactly 1 parameter, 0 given in %s/is_int_64bit.php on line 132
 
-Warning: %s
-bool(false)
+Warning: is_int() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line 135
 
-Warning: %s
-bool(false)
+Warning: is_integer() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line 136
 
-Warning: %s
-bool(false)
+Warning: is_long() expects exactly 1 parameter, 2 given in %s/is_int_64bit.php on line 137
 Done

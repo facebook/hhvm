@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: readline_completion_function(): 1 is not callable in %s/readline_completion_function_001.php on line 13
 
-Warning: %s
+Warning: readline_completion_function(): 1.1231 is not callable in %s/readline_completion_function_001.php on line 13

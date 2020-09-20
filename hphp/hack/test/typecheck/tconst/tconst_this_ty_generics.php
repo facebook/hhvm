@@ -2,8 +2,9 @@
 
 abstract class Box<T> {
   abstract const type TValue;
+
   final public function getResult(): T {
-    // UNSAFE
+    throw new Exception();
   }
 
 }
@@ -16,7 +17,7 @@ abstract class TaoQuery<TGen, TGenw as Box<TGen>> {
   abstract const type TResult as Box2;
 
   final public function genw(): TGenw {
-    // UNSAFE
+    throw new Exception();
   }
 
 }

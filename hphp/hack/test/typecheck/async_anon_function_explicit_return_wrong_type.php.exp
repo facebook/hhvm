@@ -1,6 +1,6 @@
 File "async_anon_function_explicit_return_wrong_type.php", line 16, characters 10-13:
 Invalid return type (Typing[4110])
 File "async_anon_function_explicit_return_wrong_type.php", line 12, characters 17-19:
-This is an int
-File "async_anon_function_explicit_return_wrong_type.php", line 14, characters 5-13:
-It is incompatible with an object of type Awaitable
+Expected `int`
+File "async_anon_function_explicit_return_wrong_type.php", line 13, characters 8-43:
+But got `Awaitable<int>` (result of an `async` function)

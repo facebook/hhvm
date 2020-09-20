@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
   yield 1 => 2;
   yield 'a' => 'b';
@@ -13,5 +13,9 @@ function main() {
     echo "$k $v\n";
   }
 }
-main();
 
+
+<<__EntryPoint>>
+function main_yield_key_value_bug() {
+main();
+}

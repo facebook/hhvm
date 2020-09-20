@@ -1,9 +1,12 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+abstract final class FStatics {
+  public static $counter = 0;
+}
+
 function f() {
-  static $counter = 0;
-  return $counter++;
+  return FStatics::$counter++;
 }
 
 function big_keyset() {
@@ -673,7 +676,7 @@ function big_vec() {
 }
 
 function big_packed() {
-  return [
+  return varray[
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
@@ -1005,6 +1008,10 @@ function big_packed() {
   ];
 }
 
+
+<<__EntryPoint>>
+function main_giant_arrays() {
 var_dump(big_keyset());
 var_dump(big_vec());
 var_dump(big_packed());
+}

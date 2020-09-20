@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class g {
   public $v;
@@ -9,7 +9,7 @@ class g {
 }
 function foo() {
   $z = 1;
-  $qd = array('x' => $z);
+  $qd = darray['x' => $z];
   $a = G()->set($qd);
   var_dump($a);
   $qd['e'] = true;
@@ -19,4 +19,8 @@ function foo() {
 function G() {
   return new g;
 }
+
+<<__EntryPoint>>
+function main_655() {
 foo();
+}

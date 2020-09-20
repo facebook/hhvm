@@ -37,7 +37,7 @@ data exists in the other tables.
   BEGIN TRANSACTION;
   CREATE TABLE Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa(
     unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB,
-    mainReturn BLOB, mergeable INTEGER,lines BLOB, UNIQUE (md5));
+    mergeable INTEGER,lines BLOB, UNIQUE (md5));
   COMMIT;
 
 Rather than use the bulky md5 blob as a unique identifier throughout the repo,
@@ -83,12 +83,6 @@ can be used to control repo behavior:
   If false, do not attempt to open a local or central repo at paths other than
   those explicitly specified by the Repo.Local.Path, HHVM_REPO_LOCAL_PATH,
   Repo.Central.Path, or HHVM_REPO_CENTRAL_PATH options.
-* Repo.Eval.Mode: local, central, or readonly(*)
-  local: Write eval units to the local repo if it is writeable; otherwise write
-         to the central repo.
-  central: Write eval units to the central repo.
-  readonly: Do not write eval units to a repo, but still search for them in
-            repos.
 * Repo.Journal: delete(*) or memory
   delete: Delete the on-disk SQLite journal upon each successful transaction
           commit.
@@ -106,7 +100,5 @@ can be used to control repo behavior:
   not consult filesystem to check for existence of file or parse it.
   Otherwise, fall back to parsing file from filesystem if unit
   is not found in Repo.
-* Repo.Preload: true or false (*Repo.Authoritative)
-  If true, preload all units from the repo in parallel during startup.
 * The environment variable $HHVM_RUNTIME_REPO_SCHEMA will override the schema
   id.

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_IMAGICK_CONSTANTS_H_
-#define incl_HPHP_EXT_IMAGICK_CONSTANTS_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -122,4 +121,3 @@ void loadImagickConstants();
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#endif // incl_HPHP_EXT_IMAGICK_CONSTANTS_H_

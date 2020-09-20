@@ -22,5 +22,5 @@ list(2) + 3; // error 2040
 list(2) % 3; // error 2040
 
 function foo(): (int, int) {
-  return list(1, 2); // error2040
+  return list(1, 2); // error, list can only be used as an lvar
 }

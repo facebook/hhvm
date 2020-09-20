@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   final public function foo() {
@@ -11,5 +11,9 @@ class Bar {
     return 'Foo';
   }
 }
+
+<<__EntryPoint>>
+function main_2113() {
 $bar = new Bar();
 echo $bar->foo()."\n";
+}

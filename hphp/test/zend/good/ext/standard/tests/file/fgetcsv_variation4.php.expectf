@@ -2,840 +2,840 @@
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fgetcsv_variation4.php on line 73
 bool(false)
 int(0)
 bool(false)

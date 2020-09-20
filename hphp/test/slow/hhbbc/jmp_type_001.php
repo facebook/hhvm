@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {}
 class Bar {}
@@ -16,5 +16,9 @@ function main($x) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_jmp_type_001() {
 main(12);
-main(array(1,2,3));
+main(varray[1,2,3]);
+}

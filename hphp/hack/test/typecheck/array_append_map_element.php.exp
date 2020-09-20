@@ -1,0 +1,6 @@
+File "array_append_map_element.php", line 5, characters 3-21:
+Invalid assignment (Typing[4110])
+File "array_append_map_element.php", line 4, characters 31-33:
+Expected `int`
+File "array_append_map_element.php", line 5, characters 17-21:
+But got `string`

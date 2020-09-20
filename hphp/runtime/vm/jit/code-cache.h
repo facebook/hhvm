@@ -15,8 +15,7 @@
 */
 
 
-#ifndef incl_HPHP_UTIL_CODE_CACHE_H_
-#define incl_HPHP_UTIL_CODE_CACHE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -27,8 +26,8 @@ namespace HPHP { namespace jit {
 /*
  * CodeCache contains our Translation Cache, which is partitioned into 5
  * sections:
- *   - hot: Hot code from AttrHot Funcs.
- *   - main: Hot code from non-AttrHot Funcs.
+ *   - hot: Hot code from optimized translations.
+ *   - main: Cold code from optimized translations, hot cold from other.
  *   - cold: Cold code from all Funcs.
  *   - frozen: Code that is almost never used, and cold code from profiling
        translations.
@@ -50,23 +49,26 @@ struct CodeCache {
     std::numeric_limits<uint32_t>::max();
 
   /* Code block sizes read from configs. */
-  static uint64_t AHotSize;
-  static uint64_t ASize;
-  static uint64_t AProfSize;
-  static uint64_t AColdSize;
-  static uint64_t AFrozenSize;
+  static uint32_t AHotSize;
+  static uint32_t ASize;
+  static uint32_t AProfSize;
+  static uint32_t AColdSize;
+  static uint32_t AFrozenSize;
+  static uint32_t ABytecodeSize;
 
-  static uint64_t GlobalDataSize;
+  static uint32_t GlobalDataSize;
 
-  static uint64_t AMaxUsage;
-  static uint64_t AColdMaxUsage;
-  static uint64_t AFrozenMaxUsage;
+  static uint32_t AMaxUsage;
+  static uint32_t AProfMaxUsage;
+  static uint32_t AColdMaxUsage;
+  static uint32_t AFrozenMaxUsage;
 
   static bool MapTCHuge;
 
   static uint32_t AutoTCShift;
 
   static uint32_t TCNumHugeHotMB;
+  static uint32_t TCNumHugeMainMB;
   static uint32_t TCNumHugeColdMB;
 
   CodeCache();
@@ -78,6 +80,7 @@ struct CodeCache {
     body("prof", m_prof);
     body("cold", m_cold);
     body("frozen", m_frozen);
+    body("bytecode", m_bytecode);
   }
 
   /*
@@ -91,8 +94,14 @@ struct CodeCache {
     body("cold");
     body("frozen");
     body("data");
+    body("bytecode");
   }
 
+  static uint32_t maxUsage(uint32_t total) {
+    return total - total / 128;
+  }
+
+  size_t tcSize() const { return m_tcSize; }
   size_t codeSize() const { return m_codeSize; }
 
   /*
@@ -119,6 +128,15 @@ struct CodeCache {
   }
   bool isValidCodeAddress(ConstCodeAddress addr) const;
 
+  bool inHotOrMain(ConstCodeAddress addr) const {
+    return m_hot.contains(addr) || m_main.contains(addr);
+  }
+
+  bool inHotOrMainOrColdOrFrozen(ConstCodeAddress addr) const {
+    return m_hot.contains(addr)  || m_main.contains(addr) ||
+           m_cold.contains(addr) || m_frozen.contains(addr);
+  }
+
   /*
    * Prevent or allow writing to the code section of this CodeCache.
    */
@@ -130,6 +148,9 @@ struct CodeCache {
   const CodeBlock& cold()   const { return m_cold; }
   const CodeBlock& frozen() const { return m_frozen; }
   const CodeBlock& prof()   const { return m_prof; }
+
+  const CodeBlock& bytecode() const { return m_bytecode; }
+        CodeBlock& bytecode()       { return m_bytecode; }
 
   const DataBlock& data() const { return m_data; }
 
@@ -157,19 +178,24 @@ struct CodeCache {
 
   Address threadLocalStart() { return m_threadLocalStart; }
 
+  void freeProf();
+
 private:
   Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
-  size_t m_codeSize;
+  size_t m_tcSize; // jit output
+  size_t m_codeSize; // all code (jit+bytecode)
   size_t m_totalSize;
   size_t m_threadLocalSize;
   bool m_useHot;
+  bool m_profFreed{false};
 
   CodeBlock m_main;
   CodeBlock m_cold;
   CodeBlock m_hot;
   CodeBlock m_prof;
   CodeBlock m_frozen;
+  CodeBlock m_bytecode;
   DataBlock m_data;
 };
 
@@ -204,4 +230,3 @@ private:
 
 }}
 
-#endif

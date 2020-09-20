@@ -1,0 +1,6 @@
+File "array_filter1.php", line 4, characters 16-16:
+Invalid argument (Typing[4110])
+File "stdlib/builtins_array.hhi", line 85, characters 27-39:
+Expected `Container<[unresolved]>`
+File "array_filter1.php", line 4, characters 16-16:
+But got `int`

@@ -1,0 +1,4 @@
+Warning: Argument 1 passed to f() must be an instance of @C<int>, C<string> given in %s on line 5
+ok
+
+Warning: Value returned from function g() must be of type @C<int>, C<string> given in %s on line 6

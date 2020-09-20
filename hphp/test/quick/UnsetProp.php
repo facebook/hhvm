@@ -10,19 +10,6 @@ function t($o, $memb) {
   var_dump($o->$memb);
 }
 
-class C {
-  public $p = "C::p";
-  public $q;
-  function __unset($propName) {
-    print "In C::__unset(\"$propName\")\n";
-  }
-  function cF() {
-    unset($this->p);
-    unset($this->q);
-    unset($this->r);
-  }
-}
-
 function u() {
   echo "------------------------\n";
   $obj = new F;
@@ -50,11 +37,6 @@ function main() {
   t($f, 'bart');
   var_dump($f);
 
-  $c = new C();
-  var_dump($c);
-  $c->cF();
-  var_dump($c);
-
   $e = error_reporting(0);
   u();
 
@@ -62,7 +44,7 @@ function main() {
   print "Test end\n";
 }
 
-main();
+
 
 function getprop($o) {
   return $o->declprop;
@@ -83,5 +65,7 @@ function main2() {
   setprop($o, 'set2');
   var_dump(getprop($o));
 }
-
+<<__EntryPoint>> function main_entry(): void {
+main();
 main2();
+}

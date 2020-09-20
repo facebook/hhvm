@@ -1,15 +1,14 @@
 
-Warning: %s
-NULL
+Warning: gmp_testbit() expects exactly 2 parameters, 0 given in %s/gmp_testbit.php on line 3
 
-Warning: %s
+Warning: gmp_testbit(): Index must be greater than or equal to zero in %s/gmp_testbit.php on line 6
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 bool(true)
 
-Warning: %s
+Warning: gmp_testbit(): Index must be greater than or equal to zero in %s/gmp_testbit.php on line 13
 bool(false)
 bool(false)
 bool(true)

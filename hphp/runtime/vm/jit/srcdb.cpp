@@ -57,12 +57,10 @@ void IncomingBranch::patch(TCA dest) {
   switch (type()) {
     case Tag::JMP:
       smashJmp(toSmash(), dest);
-      Debug::DebugInfo::Get()->recordRelocMap(toSmash(), dest, "Arc-2");
       break;
 
     case Tag::JCC:
       smashJcc(toSmash(), dest);
-      Debug::DebugInfo::Get()->recordRelocMap(toSmash(), dest, "Arc-1");
       break;
 
     case Tag::ADDR: {
@@ -89,22 +87,36 @@ TCA IncomingBranch::target() const {
   always_assert(false);
 }
 
+TCA TransLoc::entry() const {
+  if (m_mainLen)        return mainStart();
+  if (coldCodeSize())   return coldCodeStart();
+  if (frozenCodeSize()) return frozenCodeStart();
+  always_assert(false);
+}
+
+TcaRange TransLoc::entryRange() const {
+  if (auto const size = m_mainLen)        return {mainStart(), size};
+  if (auto const size = coldCodeSize())   return {coldCodeStart(), size};
+  if (auto const size = frozenCodeSize()) return {frozenCodeStart(), size};
+  always_assert(false);
+}
+
 TCA TransLoc::mainStart()   const { return tc::offsetToAddr(m_mainOff); }
 TCA TransLoc::coldStart()   const { return tc::offsetToAddr(m_coldOff); }
 TCA TransLoc::frozenStart() const { return tc::offsetToAddr(m_frozenOff); }
 
 void TransLoc::setMainStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_mainOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setColdStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_coldOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setFrozenStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_frozenOff = tc::addrToOffset(newStart);
 }
 
@@ -152,12 +164,12 @@ void SrcRec::newTranslation(TransLoc loc,
           std::max(RuntimeOption::EvalJitMaxProfileTranslations,
                    RuntimeOption::EvalJitMaxTranslations));
 
-  TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, loc.mainStart());
+  TRACE(1, "SrcRec(%p)::newTranslation @%p, ", this, loc.entry());
 
   m_translations.push_back(loc);
   if (!m_topTranslation.get()) {
-    m_topTranslation = loc.mainStart();
-    patchIncomingBranches(loc.mainStart());
+    m_topTranslation = loc.entry();
+    patchIncomingBranches(loc.entry());
   }
 
   /*
@@ -175,7 +187,7 @@ void SrcRec::newTranslation(TransLoc loc,
    * translation possibly for this same situation.)
    */
   for (auto& br : m_tailFallbackJumps) {
-    br.patch(loc.mainStart());
+    br.patch(loc.entry());
   }
 
   // This is the new tail translation, so store the fallback jump list
@@ -263,6 +275,21 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
   m_incomingBranches.setEnd(end);
 }
 
+void SrcRec::removeIncomingBranchesInRange(TCA start, TCA frontier) {
+  auto srLock = writelock();
+
+  auto end = std::remove_if(
+    m_incomingBranches.begin(),
+    m_incomingBranches.end(),
+    [&] (const IncomingBranch& ib) {
+      auto addr = ib.toSmash();
+      return start <= addr && addr < frontier;
+    }
+  );
+
+  m_incomingBranches.setEnd(end);
+}
+
 void SrcRec::replaceOldTranslations() {
   auto srLock = writelock();
 
@@ -271,25 +298,6 @@ void SrcRec::replaceOldTranslations() {
   auto translations = std::move(m_translations);
   m_tailFallbackJumps.clear();
   m_topTranslation = nullptr;
-
-  /*
-   * It may seem a little weird that we're about to point every
-   * incoming branch at the anchor, since that's going to just
-   * unconditionally retranslate this SrcKey and never patch the
-   * incoming branch to do something else.
-   *
-   * The reason this is ok is this mechanism is only used in
-   * non-RepoAuthoritative mode, and the granularity of code
-   * invalidation there is such that we'll only have incoming branches
-   * like this basically within the same file since we don't have
-   * whole program analysis.
-   *
-   * This means all these incoming branches are about to go away
-   * anyway ...
-   *
-   * If we ever change that we'll have to change this to patch to
-   * some sort of rebind requests.
-   */
   assertx(!RuntimeOption::RepoAuthoritative || RuntimeOption::EvalJitPGO);
   patchIncomingBranches(m_anchorTranslation);
 

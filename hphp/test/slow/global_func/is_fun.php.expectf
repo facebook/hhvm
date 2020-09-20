@@ -1,0 +1,7 @@
+string(63) "==================== positive tests (true) ===================="
+bool(true)
+bool(true)
+string(64) "==================== negative tests (false) ===================="
+bool(false)
+bool(false)
+bool(false)

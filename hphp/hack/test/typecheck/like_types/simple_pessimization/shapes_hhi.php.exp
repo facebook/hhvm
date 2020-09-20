@@ -1,0 +1,17 @@
+File "shapes_hhi.php", line 5, characters 3-31:
+  ~?int
+File "shapes_hhi.php", line 6, characters 3-37:
+  ~bool
+File "shapes_hhi.php", line 8, characters 3-13:
+  ~shape('c' => string)
+File "shapes_hhi.php", line 9, characters 3-30:
+  ~darray<arraykey, mixed>
+File "shapes_hhi.php", line 10, characters 3-29:
+  ~dict<arraykey, mixed>
+File "shapes_hhi.php", line 11, characters 3-30:
+  ~int
+File "shapes_hhi.php", line 15, characters 3-30:
+  dynamic
+File "shapes_hhi.php", line 16, characters 3-29:
+  dynamic
+No errors

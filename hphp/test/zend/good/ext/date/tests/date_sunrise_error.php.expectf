@@ -2,11 +2,9 @@
 
 -- Testing date_sunrise() function with Zero arguments --
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects at least 1 parameter, 0 given in %s/date_sunrise_error.php on line 19
 
 -- Testing date_sunrise() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects at most 6 parameters, 7 given in %s/date_sunrise_error.php on line 23
 ===DONE===

@@ -1,11 +1,11 @@
-<?php
+<?hh
 /* Prototype  : proto string ob_get_contents(void)
  * Description: Return the contents of the output buffer 
  * Source code: main/output.c
  * Alias to functions: 
  */
 
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ob_get_contents() : basic functionality ***\n";
 
 // Zero arguments
@@ -43,4 +43,4 @@ var_dump(ob_get_contents());
 
 
 echo "Done\n";
-?>
+}

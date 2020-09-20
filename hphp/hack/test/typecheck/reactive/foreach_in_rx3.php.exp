@@ -1,0 +1,2 @@
+File "foreach_in_rx3.php", line 6, characters 12-13:
+Cannot traverse over non-reactive traversable in reactive code. (Typing[4267])

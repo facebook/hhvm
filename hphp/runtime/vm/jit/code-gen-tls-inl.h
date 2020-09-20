@@ -43,6 +43,19 @@ inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
   not_reached();
 }
 
+template<typename T>
+inline Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
+  switch (arch()) {
+    case Arch::X64:
+      return x64::detail::emitTLSLea(v, datum, offset);
+    case Arch::ARM:
+      return arm::detail::emitTLSLea(v, datum, offset);
+    case Arch::PPC64:
+      return ppc64::detail::emitTLSLea(v, datum, offset);
+  }
+  not_reached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_GCC_FAST_TLS

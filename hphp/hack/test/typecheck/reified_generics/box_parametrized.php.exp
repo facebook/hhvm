@@ -1,0 +1,24 @@
+File "box_parametrized.php", line 13, characters 14-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here
+File "box_parametrized.php", line 18, characters 15-20:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "box_parametrized.php", line 7, characters 7-12:
+Definition is here
+File "box_parametrized.php", line 20, characters 15-21:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here
+File "box_parametrized.php", line 26, characters 21-26:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "box_parametrized.php", line 7, characters 7-12:
+Definition is here
+File "box_parametrized.php", line 27, characters 28-34:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here
+File "box_parametrized.php", line 31, characters 29-35:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "box_parametrized.php", line 8, characters 7-13:
+Definition is here

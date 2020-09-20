@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_SSATMP_H_
-#define incl_HPHP_VM_SSATMP_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -54,12 +53,16 @@ struct SSATmp {
   double             dblVal() const       { return type().dblVal(); }
   const StringData*  strVal() const       { return type().strVal(); }
   const ArrayData*   arrVal() const       { return type().arrVal(); }
+  const ArrayData*   shapeVal() const     { return type().shapeVal(); }
   const ArrayData*   vecVal() const       { return type().vecVal(); }
   const ArrayData*   dictVal() const      { return type().dictVal(); }
   const ArrayData*   keysetVal() const    { return type().keysetVal(); }
+  const ArrayData*   arrLikeVal() const   { return type().arrLikeVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
-  ConstCctx          cctxVal() const      { return type().cctxVal(); }
+  LazyClassData      lclsVal() const      { return type().lclsVal(); }
+  const RecordDesc*  recVal() const       { return type().recVal(); }
+  const ClsMethDataRef clsmethVal() const { return type().clsmethVal(); }
   rds::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }
   TCA                tcaVal() const       { return type().tcaVal(); }
   Variant            variantVal() const;
@@ -97,4 +100,3 @@ private:
 
 }}
 
-#endif

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function aux($fun) {
   $func = new ReflectionFunction($fun);
@@ -11,5 +11,9 @@ function aux($fun) {
   }
 }
 
-function ufunc(&$arg1, $arg2) {}
+function ufunc(inout $arg1, $arg2) {}
+
+<<__EntryPoint>>
+function main_reflection_parameter_can_be_passed_by_value() {
 aux('ufunc');
+}

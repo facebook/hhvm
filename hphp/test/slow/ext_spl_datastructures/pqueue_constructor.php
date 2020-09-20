@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyPriorityQueue extends \SplPriorityQueue {
   public function __construct() {
@@ -6,7 +6,7 @@ class MyPriorityQueue extends \SplPriorityQueue {
   }
 
   public function sort() {
-    $sortedList = array();
+    $sortedList = varray[];
 
     while ($this->valid()) {
       $sortedList[] = $this->extract();
@@ -16,11 +16,14 @@ class MyPriorityQueue extends \SplPriorityQueue {
   }
 }
 
-$data  = array(
-  array('test1', 1),
-  array('test3', 3),
-  array('test2', 2),
-);
+
+<<__EntryPoint>>
+function main_pqueue_constructor() {
+$data  = varray[
+  varray['test1', 1],
+  varray['test3', 3],
+  varray['test2', 2],
+];
 $queue = new MyPriorityQueue();
 
 foreach ($data as $entry) {
@@ -28,3 +31,4 @@ foreach ($data as $entry) {
 }
 
 var_dump($queue->sort());
+}

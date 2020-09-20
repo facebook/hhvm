@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class derived may not inherit from final class (base) in %s/class_final.php on line 9

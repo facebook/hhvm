@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -13,12 +13,12 @@ function test_preg_rep($a,$b,$c) {
 }
 
 function test_preg_grep() {
-  $array = array("foo 123.1", "fg 24bar", "123.1", "24");
+  $array = varray["foo 123.1", "fg 24bar", "123.1", "24"];
   $fl_array = preg_grep("/^(\\d+)?\\.\\d+$/", $array);
-  VS(count(fl_array), 1);
+  VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", array("c", "b")), array());
+  VS(preg_grep("/a/", varray["c", "b"]), darray[]);
 }
 
 function test_preg_match() {
@@ -31,17 +31,20 @@ function test_preg_match() {
 
   // get host name from URL
   $matches = null;
-  preg_match("@^(?:http://)?([^/]+)@i",
-             "http://www.php.net/index.html", $matches);
+  preg_match_with_matches(
+    "@^(?:http://)?([^/]+)@i",
+    "http://www.php.net/index.html",
+    inout $matches,
+  );
   $host = $matches[1];
   VS($host, "www.php.net");
 
   // get last two segments of host name
-  preg_match("/[^.]+\\.[^.]+$/", $host, $matches);
+  preg_match_with_matches("/[^.]+\\.[^.]+$/", $host, inout $matches);
   VS($matches[0], "php.net");
 
   $str = "foobar: 2008";
-  preg_match("/(?<name>\\w+): (?<digit>\\d+)/", $str, $matches);
+  preg_match_with_matches("/(?<name>\\w+): (?<digit>\\d+)/", $str, inout $matches);
   VS(print_r($matches, true),
      "Array\n".
      "(\n".
@@ -55,8 +58,12 @@ function test_preg_match() {
 
 
 function test_preg_match_all() {
-  preg_match_all("/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
-                   "Call 555-1212 or 1-800-555-1212", $matches);
+  $matches = null;
+  preg_match_all_with_matches(
+    "/\\(?  (\\d{3})?  \\)?  (?(1)  [\\-\\s] ) \\d{3}-\\d{4}/x",
+    "Call 555-1212 or 1-800-555-1212",
+    inout $matches,
+  );
   VS(print_r($matches, true),
      "Array\n".
      "(\n".
@@ -79,8 +86,12 @@ function test_preg_match_all() {
   // itself, which would be the ([\w]+) in this case. The extra backslash is
   // required because the string is in double quotes.
   $html = "<b>bold text</b><a href=howdy.html>click me</a>";
-  preg_match_all("/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/", $html, $matches,
-                 PREG_SET_ORDER);
+  preg_match_all_with_matches(
+    "/(<([\\w]+)[^>]*>)(.*)(<\\/\\2>)/",
+    $html,
+    inout $matches,
+    PREG_SET_ORDER,
+  );
   VS(print_r($matches, true),
      "Array\n".
      "(\n".
@@ -105,7 +116,11 @@ function test_preg_match_all() {
      ")\n");
 
   $str = "a: 1\nb: 2\nc: 3\n";
-  preg_match_all("/(?<name>\\w+): (?<digit>\\d+)/", $str, $matches);
+  preg_match_all_with_matches(
+    "/(?<name>\\w+): (?<digit>\\d+)/",
+    $str,
+    inout $matches,
+  );
   VS(print_r($matches, true),
      "Array\n".
      "(\n".
@@ -154,8 +169,8 @@ function test_preg_replace() {
   VS(preg_replace($pattern, $replacement, $str), "April1,2003");
 
   $str = "The quick brown fox jumped over the lazy dog.";
-  $patterns = array();
-  $replacements = array();
+  $patterns = darray[];
+  $replacements = darray[];
   $patterns[0] = "/quick/";
   $patterns[1] = "/brown/";
   $patterns[2] = "/fox/";
@@ -165,25 +180,25 @@ function test_preg_replace() {
   VS(preg_replace($patterns, $replacements, $str),
      "The bear black slow jumped over the lazy dog.");
 
-  ksort($patterns);
-  ksort($replacements);
+  ksort(inout $patterns);
+  ksort(inout $replacements);
   VS(preg_replace($patterns, $replacements, $str),
      "The slow black bear jumped over the lazy dog.");
 
-  $foos = array();
+  $foos = darray[];
   $foos[0] = "foo";
   $foos[1] = "Foo";
   $foos[2] = "FOO";
-  $expFoo = array();
+  $expFoo = darray[];
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
-  VS(preg_replace("/some pattern/", "", array()), array());
+  VS(preg_replace("/some pattern/", "", varray[]), darray[]);
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
-  $patterns = array("/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
-                                  "/^\\s*{(\\w+)}\\s*=/");
-  $replace = array("\\3/\\4/\\1\\2", "$\\1 =");
+  $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
+                                  "/^\\s*{(\\w+)}\\s*=/"];
+  $replace = varray["\\3/\\4/\\1\\2", "$\\1 ="];
   VS(preg_replace($patterns, $replace, "{startDate} = 1999-5-27"),
      "\$startDate = 5/27/1999");
 
@@ -192,22 +207,22 @@ function test_preg_replace() {
   VS($str, "foo o");
 
   $count = 0;
-  preg_replace(array("/\\d/", "/\\s/"), "*", "xp 4 to", -1, $count);
+  preg_replace_with_count(varray["/\\d/", "/\\s/"], "*", "xp 4 to", -1, inout $count);
   VS($count, 3);
 
   VS(preg_replace("/xxx", "w", "xxxx"), NULL);
   VS(preg_replace("/xxx/", "w", "xxxx"), "wx");
   VS(preg_replace("/xxy/", "w", "xxxx"), "xxxx");
 
-  VS(preg_replace("/xxx", "w", array("xxxx")), array());
-  VS(preg_replace("/xxx/", "w", array("xxxx")), array("wx"));
-  VS(preg_replace("/xxx/", "w", array("xxxx", "yyyy")), array("wx", "yyyy"));
-  VS(preg_replace(array("/xxx/", "/xxx"), "w", array("xxxx")), array());
-  VS(preg_replace(array("/xxx/", "/xxx/"), "w", array("xxxx")), array("wx"));
+  VS(preg_replace("/xxx", "w", varray["xxxx"]), darray[]);
+  VS(preg_replace("/xxx/", "w", varray["xxxx"]), darray[0 => "wx"]);
+  VS(preg_replace("/xxx/", "w", varray["xxxx", "yyyy"]), darray[0 => "wx", 1 => "yyyy"]);
+  VS(preg_replace(varray["/xxx/", "/xxx"], "w", varray["xxxx"]), darray[]);
+  VS(preg_replace(varray["/xxx/", "/xxx/"], "w", varray["xxxx"]), darray[0 => "wx"]);
 
-  VS(preg_replace("/xxx", array("w"), array("xxxx")), false);
-  VS(preg_replace(array("/xxx"), array("w"), array("xxxx")), array());
-  VS(preg_replace(array("/xxx/"), array("w"), array("xxxx")), array("wx"));
+  VS(preg_replace("/xxx", varray["w"], varray["xxxx"]), false);
+  VS(preg_replace(varray["/xxx"], varray["w"], varray["xxxx"]), darray[]);
+  VS(preg_replace(varray["/xxx/"], varray["w"], varray["xxxx"]), darray[0 => "wx"]);
 }
 
 function next_year($m) {
@@ -217,8 +232,9 @@ function next_year($m) {
 function test_preg_replace_callback() {
   $text = "April fools day is 04/01/2002\n".
     "Last christmas was 12/24/2001\n";
-  $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", "next_year",
-                                $text);
+  $count = -1;
+  $text = preg_replace_callback("|(\\d{2}/\\d{2}/)(\\d{4})|", fun("next_year"),
+                                $text, -1, inout $count);
   VS($text, "April fools day is 04/01/2003\nLast christmas was 12/24/2002\n");
 }
 
@@ -304,7 +320,7 @@ function test_ereg_replace() {
   VS(ereg_replace("( )is", "\\1was", $str), "This was a test");
   VS(ereg_replace("(( )is)", "\\2was", $str), "This was a test");
 
-  $num = 4;
+  $num = '4';
   $str = "This string has four words.";
   $str = ereg_replace("four", $num, $str);
   VS($str, "This string has 4 words.");
@@ -321,20 +337,6 @@ function test_eregi_replace() {
   $body = ">whateversuffix";
   $body = eregi_replace($pattern, $replacement, $body);
   VS($body, ">whatever<span class=\"search\">suffix</span>");
-}
-
-function test_ereg() {
-  $date = "1973-04-30";
-  VERIFY(ereg("([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})", $date, $regs) !== false);
-  VS($regs[3], "30");
-  VS($regs[2], "04");
-  VS($regs[1], "1973");
-  VS($regs[0], "1973-04-30");
-}
-
-function test_eregi() {
-  $str = "XYZ";
-  VERIFY(eregi("z", $str) !== false);
 }
 
 function test_split() {
@@ -364,6 +366,9 @@ function test_sql_regcase() {
   VS(sql_regcase("Foo - bar."), "[Ff][Oo][Oo] - [Bb][Aa][Rr].");
 }
 
+
+<<__EntryPoint>>
+function main_ext_preg() {
 test_preg_grep();
 test_preg_match();
 test_preg_match_all();
@@ -373,8 +378,7 @@ test_preg_split();
 test_preg_quote();
 test_ereg_replace();
 test_eregi_replace();
-test_ereg();
-test_eregi();
 test_split();
 test_spliti();
 test_sql_regcase();
+}

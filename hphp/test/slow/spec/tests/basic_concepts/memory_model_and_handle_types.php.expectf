@@ -1,0 +1,33 @@
+----------------- simple assignment of handle types ----------------------
+After '$a = new Point(1, 3)', $a is (1,3)
+After '$b = $a', $b is (1,3)
+After '$d = clone $b', $d is (1,3)
+After '$b->move(4, 6)', $d is (1,3), $b is (4,6), and $a is (4,6)
+After '$a = new Point(2, 1)', $d is (1,3), $b is (4,6), and $a is (2,1)
+Done
+----------------- value argument passing of handle types ----------------------
+After '$a = new Point(1, 3)', $a is (1,3)
+	Inside function f1, $b is (1,3)
+After '$b->move(4, 6)', $b is (4,6)
+After 'new Point(5, 7)', $b is (5,7)
+After 'f1($a)', $a is (4,6)
+Done
+----------------- value returning of handle types ----------------------
+After 'new Point(5, 7)', $b is (5,7)
+After '$a = f2()', $a is (5,7)
+Done
+----------------- unsetting properties ----------------------
+at start, $c is object(C) (2) {
+  ["prop1"]=>
+  NULL
+  ["prop2"]=>
+  NULL
+}
+after unset($c->prop1), $c is object(C) (1) {
+  ["prop2"]=>
+  NULL
+}
+after unset($c->prop2), $c is object(C) (0) {
+}
+after unset($c), $c is undefined
+Done

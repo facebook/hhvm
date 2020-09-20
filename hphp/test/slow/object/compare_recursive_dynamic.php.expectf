@@ -1,0 +1,10 @@
+object(stdClass) (1) {
+  ["recur"]=>
+  *RECURSION*
+}
+object(stdClass) (1) {
+  ["recur"]=>
+  *RECURSION*
+}
+
+Fatal error: infinite recursion detected in %s/test/slow/object/compare_recursive_dynamic.php on line 10

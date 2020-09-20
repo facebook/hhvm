@@ -1,9 +1,6 @@
-<?php
+<?hh
 
 class C {
-  function __destruct() {
-    echo "in __destruct\n";
-  }
   function simpleRet() {
     return 1;
   }
@@ -15,7 +12,8 @@ function foo() {
   var_dump($x);
   var_dump($y);
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
 
 echo "End\n";
+}

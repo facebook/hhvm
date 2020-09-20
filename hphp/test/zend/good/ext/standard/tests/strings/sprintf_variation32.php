@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : octal formats with string values ***\n";
 
 // array of string values 
-$string_values = array(
+$string_values = varray[
   "",
   '',
   "0",
@@ -27,15 +27,15 @@ $string_values = array(
   'TRUE',
   "NULL",
   'null'
-);
+];
 
 // array of octal formats
-$octal_formats = array( 
+$octal_formats = varray[ 
   "%o", "%ho", "%lo", 
   "%Lo", " %o", "%o ",                        
   "\t%o", "\n%o", "%4o",
   "%30o", "%[0-7]", "%*o"
-);
+];
 
 $count = 1;
 foreach($string_values as $string_value) {
@@ -48,4 +48,4 @@ foreach($string_values as $string_value) {
 };
 
 echo "Done";
-?>
+}

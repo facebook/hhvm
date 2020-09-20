@@ -1,0 +1,8 @@
+File "concrete_redeclare_concrete_class_constant_bad.php--file2.hack", line 1, characters 7-7:
+Class `B` does not correctly implement all required members  (Typing[4340])
+File "concrete_redeclare_concrete_class_constant_bad.php--file2.hack", line 1, characters 17-17:
+Some members are incompatible with those declared in type `A`
+File "concrete_redeclare_concrete_class_constant_bad.php--file1.php", line 5, characters 9-11:
+Expected `int`
+File "concrete_redeclare_concrete_class_constant_bad.php--file2.hack", line 2, characters 9-16:
+But got `arraykey`

@@ -1,11 +1,10 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -60,9 +59,9 @@ const int DOM_VALIDATION_ERR = 16;
 
 class DOMXPath {
   public function __construct($doc);
-  public function evaluate($expr, $context = null);
-  public function query($expr, $context = null);
-  public function registerNamespace($prefix, $uri);
+  public function evaluate(string $expr, $context = null);
+  public function query(string $expr, $context = null);
+  public function registerNamespace(string $prefix, string $uri);
   public function registerPHPFunctions($funcs = null);
 }
 
@@ -111,7 +110,7 @@ class DOMNode {
   // methods
   public function __construct();
   public function appendChild<T as DOMNode>(T $newnode): T;
-  public function cloneNode($deep = false): this;
+  public function cloneNode(bool $deep = false): this;
   public function getLineNo(): int;
   public function hasAttributes(): bool;
   public function hasChildNodes(): bool;
@@ -121,7 +120,7 @@ class DOMNode {
   ): T;
   public function isDefaultNamespace(string $namespaceuri): bool;
   public function isSameNode(DOMNode $node): bool;
-  public function isSupported($feature, $version): bool;
+  public function isSupported(string $feature, string $version): bool;
   public function lookupNamespaceUri(?string $prefix): string;
   public function lookupPrefix(string $namespaceURI): string;
   public function normalize(): void;
@@ -129,13 +128,17 @@ class DOMNode {
   public function replaceChild<T as DOMNode>(DOMNode $newchildobj, T $oldchildobj): T;
   public function C14N(bool $exclusive = false,
                        bool $with_comments = false,
-                       ?array $xpath = null,
-                       ?array $ns_prefixes = null): string;
+                       /* HH_IGNORE_ERROR[2071] */
+                       ?darray $xpath = null,
+                       /* HH_IGNORE_ERROR[2071] */
+                       ?varray $ns_prefixes = null): string;
   public function C14NFile(string $uri,
                            bool $exclusive = false,
                            bool $with_comments = false,
-                           ?array $xpath = null,
-                           ?array $ns_prefixes = null): int;
+                           /* HH_IGNORE_ERROR[2071] */
+                           ?darray $xpath = null,
+                           /* HH_IGNORE_ERROR[2071] */
+                           ?varray $ns_prefixes = null): int;
   public function getNodePath();
 }
 
@@ -163,39 +166,39 @@ class DOMDocument extends DOMNode {
 
   // methods
   public function __construct($version = null, $encoding = null);
-  public function createAttribute($name);
-  public function createAttributens($namespaceuri, $qualifiedname);
-  public function createCDATASection($data);
-  public function createComment($data);
+  public function createAttribute(string $name);
+  public function createAttributeNS(string $namespaceuri, string $qualifiedname);
+  public function createCDATASection(string $data);
+  public function createComment(string $data);
   public function createDocumentFragment();
-  public function createElement($name, $value = null);
-  public function createElementNS($namespaceuri, $qualifiedname, $value = null);
-  public function createEntityReference($name);
-  public function createProcessingInstruction($target, $data = null);
-  public function createTextNode($data);
-  public function getElementById($elementid);
-  public function getElementsByTagName($name): DOMNodeList<DOMElement>;
+  public function createElement(string $name, $value = null);
+  public function createElementNS(string $namespaceuri, string $qualifiedname, $value = null);
+  public function createEntityReference(string $name);
+  public function createProcessingInstruction(string $target, $data = null);
+  public function createTextNode(string $data);
+  public function getElementById(string $elementid);
+  public function getElementsByTagName(string $name): DOMNodeList<DOMElement>;
   public function getElementsByTagNameNS(
-    $namespaceuri,
-    $localname,
+    string $namespaceuri,
+    string $localname,
   ): DOMNodeList<DOMElement>;
-  public function importNode($importednode, $deep = false);
+  public function importNode($importednode, bool $deep = false);
   public function load($filename, $options = 0);
   public function loadHTML($source, $options = 0);
   public function loadHTMLFile($filename, $options = 0);
   public function loadXML($source, $options = 0);
   public function normalizeDocument();
-  public function registerNodeClass($baseclass, $extendedclass);
-  public function relaxNGValidate($filename);
-  public function relaxNGValidateSource($source);
-  public function save($file, $options = 0);
+  public function registerNodeClass(string $baseclass, string $extendedclass);
+  public function relaxNGValidate(string $filename);
+  public function relaxNGValidateSource(string $source);
+  public function save(string $file, int $options = 0);
   public function saveHTML($node = null);
-  public function saveHTMLFile($file);
-  public function saveXML($node = null, $options = 0);
-  public function schemaValidate($filename);
-  public function schemaValidateSource($source);
+  public function saveHTMLFile(string $file);
+  public function saveXML($node = null, int $options = 0);
+  public function schemaValidate(string $filename);
+  public function schemaValidateSource(string $source);
   public function validate();
-  public function xinclude($options = 0);
+  public function xinclude(int $options = 0);
 }
 
 class DOMElement extends DOMNode {
@@ -204,28 +207,29 @@ class DOMElement extends DOMNode {
   /* readonly */ public bool $schemaTypeInfo;
 
   /* HH_FIXME[4110]: $attributes is nullable in the parent but not here */
+  /* HH_FIXME[4341]: $attributes is nullable in the parent but not here */
   /* readonly */ public DOMNamedNodeMap<DOMAttr> $attributes;
 
   // methods
-  public function __construct($name, $value = null, $namespaceuri = null);
-  public function getAttribute($name);
-  public function getAttributeNode($name);
-  public function getAttributeNodeNS($namespaceuri, $localname);
-  public function getAttributeNS($namespaceuri, $localname);
-  public function getElementsByTagName($name);
-  public function getElementsByTagNameNS($namespaceuri, $localname);
-  public function hasAttribute($name);
-  public function hasAttributeNS($namespaceuri, $localname);
-  public function removeAttribute($name);
+  public function __construct(string $name, $value = null, $namespaceuri = null);
+  public function getAttribute(string $name);
+  public function getAttributeNode(string $name);
+  public function getAttributeNodeNS(string $namespaceuri, string $localname);
+  public function getAttributeNS(string $namespaceuri, string $localname);
+  public function getElementsByTagName(string $name);
+  public function getElementsByTagNameNS(string $namespaceuri, string $localname);
+  public function hasAttribute(string $name);
+  public function hasAttributeNS(string $namespaceuri, string $localname);
+  public function removeAttribute(string $name);
   public function removeAttributeNode($oldattr);
-  public function removeAttributeNS($namespaceuri, $localname);
-  public function setAttribute($name, $value);
+  public function removeAttributeNS(string $namespaceuri, string $localname);
+  public function setAttribute(string $name, string $value);
   public function setAttributeNode($newattr);
   public function setAttributeNodeNS($newattr);
-  public function setAttributeNS($namespaceuri, $name, $value);
-  public function setIDAttribute($name, $isid);
-  public function setIDAttributeNode($idattr, $isid);
-  public function setIDAttributeNS($namespaceuri, $localname, $isid);
+  public function setAttributeNS(string $namespaceuri, string $name, string $value);
+  public function setIDAttribute(string $name, bool $isid);
+  public function setIDAttributeNode($idattr, bool $isid);
+  public function setIDAttributeNS(string $namespaceuri, string $localname, bool $isid);
 }
 
 class DOMAttr extends DOMNode {
@@ -277,7 +281,7 @@ class DOMDocumentType extends DOMNode {
   /* readonly */ public string $internalSubset;
 
   // Methods
-  public function __debuginfo(): array;
+  <<__PHPStdLib>> public function __debuginfo(): darray<arraykey, mixed>;
 
 }
 
@@ -307,10 +311,20 @@ class DOMDocumentFragment extends DOMNode {
 
 }
 
+class DOMComment extends DOMCharacterData {
+  // Methods
+  public function __construct(?string $value = null);
+}
+
+class DOMCdataSection extends DOMText {
+  // Methods
+  public function __construct(string $value = '');
+}
+
 <<__PHPStdLib>>
 function dom_import_simplexml(SimpleXMLElement $node): ?DOMElement;
 <<__PHPStdLib>>
 function simplexml_import_dom(
   DOMNode $node,
-  ?string $class_name = 'SimpleXMLElement',
+  string $class_name = 'SimpleXMLElement',
 );

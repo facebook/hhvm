@@ -1,29 +1,28 @@
-<?php
+<?hh
 
 class testClass {
-	function testClass($x) {
-		echo __METHOD__, " (". $x . ")\n";
-	}
+    function __construct($x) {
+        echo __METHOD__, " (". $x . ")\n";
+    }
 }
 
 class testClass2 extends testClass {
-	function __construct() {
-		static $x = 0;
-		
-		if ($x) {
-			print "Infinite loop...\n";
-		} else {
-			$x++;
-			
-			parent::__construct(1);
-			testclass::__construct(2);
-			call_user_func(array('parent', '__construct'), 3);
-			call_user_func(array('testclass', '__construct'), 4);
-			call_user_func(array('testclass', 'testclass'), 5);
-		}
-	}
+
+  private static $__constructX = 0;
+    function __construct() {
+
+        if (self::$__constructX) {
+            print "Infinite loop...\n";
+        } else {
+            self::$__constructX++;
+
+            parent::__construct(1);
+            testclass::__construct(2);
+            parent::__construct(3);
+            testclass::__construct(4);
+        }
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 new testClass2;
-
-?>
+}

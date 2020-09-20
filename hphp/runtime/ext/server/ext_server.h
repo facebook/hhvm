@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SERVER_H_
-#define incl_HPHP_EXT_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -43,15 +42,15 @@ int64_t HHVM_FUNCTION(pagelet_server_task_status,
                       const Resource& task);
 String HHVM_FUNCTION(pagelet_server_task_result,
                      const Resource& task,
-                     VRefParam headers,
-                     VRefParam code,
+                     Array& headers,
+                     int64_t& code,
                      int64_t timeout_ms);
 int64_t HHVM_FUNCTION(pagelet_server_tasks_started);
 void HHVM_FUNCTION(pagelet_server_flush);
 bool HHVM_FUNCTION(pagelet_server_is_done);
 bool HHVM_FUNCTION(xbox_send_message,
                    const String& msg,
-                   VRefParam ret,
+                   Array& ret,
                    int64_t timeout_ms,
                    const String& host = "localhost");
 bool HHVM_FUNCTION(xbox_post_message,
@@ -64,7 +63,7 @@ bool HHVM_FUNCTION(xbox_task_status,
 int64_t HHVM_FUNCTION(xbox_task_result,
                       const Resource& task,
                       int64_t timeout_ms,
-                      VRefParam ret);
+                      Variant& ret);
 Variant HHVM_FUNCTION(xbox_process_call_message,
                       const String& msg);
 int64_t HHVM_FUNCTION(xbox_get_thread_timeout);
@@ -81,4 +80,3 @@ int64_t HHVM_FUNCTION(server_process_start_time);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SERVER_H_

@@ -1,10 +1,13 @@
 <?hh
-function handler() { var_dump(func_get_args()); }
-set_error_handler('handler');
+function handler(...$args) { var_dump($args); }
 class X {
   public $p = Y::FOO;
 }
 function test() {
   new X;
 }
-test();
+<<__EntryPoint>>
+function entrypoint_fail_86pinit(): void {
+  set_error_handler(fun('handler'));
+  test();
+}

@@ -1,8 +1,10 @@
-<?php
+<?hh
+
 // TODO(#3312202) probably shouldn't need to do this
-if ($_ENV['HHVM_ARCH'] == 'arm') echo 'skip';
+<<__EntryPoint>> function main(): void { if ($_ENV['HHVM_ARCH'] == 'arm') echo 'skip';
 
 // Our memory accounting is broken when we compile without jemalloc.  There's no
 // easy way to check if an HHVM binary was compiled with jemalloc or not, so
 // just estimate it by seeing if the small-block allocator is disabled.
 if (ini_get('hhvm.disable_small_allocator')) echo 'skip';
+}

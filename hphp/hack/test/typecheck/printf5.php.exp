@@ -1,4 +1,4 @@
 File "printf5.php", line 22, characters 3-9:
-Too few arguments (Typing[4104])
+Too few arguments (required 2 but got 1) (Typing[4104])
 File "printf5.php", line 18, characters 10-10:
 Definition is here

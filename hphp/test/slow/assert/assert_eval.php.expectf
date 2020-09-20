@@ -1,7 +1,0 @@
-bool(true)
-bool(true)
-
-Warning: assert(): Assertion "is_array($value)" failed in %s on line 13
-NULL
-bool(true)
-bool(true)

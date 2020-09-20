@@ -1,13 +1,16 @@
 <?hh
 
-if (apc_add('i_was_already_run', 1)) {
-  class Foo { const ABC = 42; }
-} else {
-  class Foo { const ABC = 24; }
-}
-
 enum Bar: int {
   VALUE = Foo::ABC;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-var_dump(Bar::getValues());
+  if (apc_add('i_was_already_run', 1)) {
+    include 'enum-cache-1.inc';
+  } else {
+    include 'enum-cache-2.inc';
+  }
+
+  var_dump(Bar::getValues());
+}

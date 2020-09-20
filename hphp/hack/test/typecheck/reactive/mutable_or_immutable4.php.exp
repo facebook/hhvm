@@ -1,0 +1,2 @@
+File "mutable_or_immutable4.php", line 6, characters 21-53:
+Parameter cannot have both `__Mutable` and `__MaybeMutable` annotations. (Parsing[1002])

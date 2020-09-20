@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_METH_PROFILE_H_
-#define incl_HPHP_JIT_METH_PROFILE_H_
+#pragma once
+
+#include <folly/dynamic.h>
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/act-rec.h"
@@ -31,10 +32,13 @@ namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 struct MethProfile {
   using RawType = LowPtr<Class>::storage_type;
 
-  enum class Tag {
+  enum class Tag : uint8_t {
     UniqueClass = 0,
     UniqueMeth = 1,
     BaseMeth = 2,
@@ -52,6 +56,7 @@ struct MethProfile {
   {}
 
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
   /*
    * Obtain the profiled Class* or method Func*.
@@ -76,24 +81,19 @@ struct MethProfile {
    * If `cls' is not provided (when it's not known statically), we peek in `ar'
    * for the class context.
    */
-  void reportMeth(const ActRec* ar, const Class* cls) {
-    auto const meth = ar->func();
-    if (!cls && meth->isMethod()) {
-      cls = ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass();
-    }
-    reportMethHelper(cls, meth);
-  }
+  void reportMeth(const Class* cls, const Func* meth);
 
   /*
    * Aggregate two MethProfiles.
    */
   static void reduce(MethProfile& a, const MethProfile& b);
 
+  void serialize(ProfDataSerializer&) const;
+  void deserialize(ProfDataDeserializer&);
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  void reportMethHelper(const Class* cls, const Func* meth);
-
   /*
    * m_curMeth munging.
    */
@@ -128,4 +128,3 @@ private:
 
 }}
 
-#endif

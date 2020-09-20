@@ -1,6 +1,4 @@
-array(2) {
-  [0]=>
+varray(2) {
   int(3)
-  [1]=>
   string(4) "test"
 }

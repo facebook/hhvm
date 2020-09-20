@@ -8,4 +8,8 @@ class Herp {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bad_call_15() {
 (new Herp)->derp();
+}

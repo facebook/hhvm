@@ -3,11 +3,11 @@
 **-- Offset is: -10 --**
 -- ASCII String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/iconv_strpos_variation5.php on line 31
 bool(false)
 --Multibyte String --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/iconv_strpos_variation5.php on line 33
 bool(false)
 
 **-- Offset is: 0 --**

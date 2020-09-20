@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   ["ddd"]=>
   int(4)
   ["aaa"]=>
   int(1)
 }
-array(1) {
+darray(1) {
   ["aaa"]=>
   int(1)
 }

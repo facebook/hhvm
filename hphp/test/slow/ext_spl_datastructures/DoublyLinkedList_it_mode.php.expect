@@ -4,26 +4,10 @@ Foreach:
 1=>b
 2=>c
 
-ArrayAccess:
-string(1) "a"
-string(1) "b"
-string(1) "c"
-
-ArrayAccess Set:
-string(3) "two"
-OutOfRangeException caught
-
-ArrayAccess Exists:
-bool(true)
-bool(true)
-bool(false)
-
-ArrayAccess Unset:
-string(1) "b"
-
 Foreach:
-0=>b
-1=>two
+0=>a
+1=>b
+2=>c
 
 -------------------------
 LIFO:
@@ -32,24 +16,7 @@ Foreach:
 1=>b
 0=>a
 
-ArrayAccess:
-string(1) "c"
-string(1) "b"
-string(1) "a"
-
-ArrayAccess Set:
-string(3) "two"
-OutOfRangeException caught
-
-ArrayAccess Exists:
-bool(true)
-bool(true)
-bool(false)
-
-ArrayAccess Unset:
-string(1) "b"
-
 Foreach:
+2=>c
 1=>b
-0=>two
-
+0=>a

@@ -1,0 +1,6 @@
+File "typedef_unbound_class.php--file1.php", line 4, characters 10-14:
+Type aliases to type constants are not supported (Parsing[1002])
+File "typedef_unbound_class.php--file1.php", line 4, characters 10-10:
+Unbound name: `D` (Naming[2049])
+File "typedef_unbound_class.php--file1.php", line 4, characters 10-10:
+Unbound name `D` in type constant access (Typing[4384])

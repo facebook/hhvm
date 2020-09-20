@@ -1,5 +1,5 @@
 *** Testing chdir() : error conditions ***
 
-Warning: %s
+Warning: chdir(): No such file or directory (errno 2) in %s/chdir_error2.php on line 15
 bool(false)
 ===DONE===

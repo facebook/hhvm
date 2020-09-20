@@ -7,5 +7,6 @@ auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND HEADER_SOURCES ${files})
 
 add_library(ppc64-asm STATIC ${HEADERS_SOURCES} ${CXX_SOURCES})
+add_dependencies(ppc64-asm hphp_util)
 
 HHVM_PUBLIC_HEADERS(ppc64-asm ${HEADERS_SOURCES})

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: trait declaration of property 'same' is incompatible with previous declaration in %s/bug60369.php on line 7

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo1($a) {
   if ($a) return "ok";
@@ -19,4 +19,8 @@ function bar() {
   $v3 = foo3(0);
   var_dump($v3);
 }
+
+<<__EntryPoint>>
+function main_1418() {
 bar();
+}

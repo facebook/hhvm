@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   private $str;
@@ -6,7 +6,7 @@ class X {
   private $obj;
   function foo() {
     $this->str = 'hello';
-    $this->arr = array(1,2,3);
+    $this->arr = varray[1,2,3];
     $this->obj = $this;
   }
 }
@@ -16,4 +16,8 @@ function test() {
   $x = unserialize($s);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_1550() {
 test();
+}

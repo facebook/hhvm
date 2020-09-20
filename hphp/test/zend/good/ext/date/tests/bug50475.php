@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Asia/Calcutta');
 
 $date = new DateTime('18-01-2009 00:00:00');
@@ -9,4 +9,4 @@ var_dump($date->format('Y-m-d H:i:s'));
 
 $date->setTime(8, 0);
 var_dump($date->format('Y-m-d H:i:s'));
-?>
+}

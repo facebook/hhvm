@@ -1,21 +1,17 @@
 *** Testing strncasecmp() function: error conditions ***
 
 -- Testing strncasecmp() function with Zero arguments --
-Warning: %s
-NULL
+Warning: strncasecmp() expects exactly 3 parameters, 0 given in %s/strncasecmp_error.php on line 14
 
 -- Testing strncasecmp() function with less than expected number of arguments --
-Warning: %s
-NULL
+Warning: strncasecmp() expects exactly 3 parameters, 1 given in %s/strncasecmp_error.php on line 17
 
-Warning: %s
-NULL
+Warning: strncasecmp() expects exactly 3 parameters, 2 given in %s/strncasecmp_error.php on line 18
 
 -- Testing strncasecmp() function with more than expected number of arguments --
-Warning: %s
-NULL
+Warning: strncasecmp() expects exactly 3 parameters, 4 given in %s/strncasecmp_error.php on line 21
 
 -- Testing strncasecmp() function with invalid argument --
-Warning: %s
+Warning: Length must be greater than or equal to 0 in %s/strncasecmp_error.php on line 25
 bool(false)
 *** Done ***

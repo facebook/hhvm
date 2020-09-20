@@ -1,0 +1,18 @@
+==== stdClass ====
+bool(true)
+bool(false)
+==== native_data ====
+bool(true)
+bool(false)
+==== collection ====
+bool(true)
+bool(false)
+==== awaitable ====
+bool(true)
+bool(false)
+==== php_closure ====
+bool(true)
+bool(false)
+==== hack_closure ====
+bool(true)
+bool(false)

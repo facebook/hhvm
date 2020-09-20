@@ -1,7 +1,0 @@
-object(ReflectionProperty)#%d (2) {
-  ["name"]=>
-  string(2) "id"
-  ["class"]=>
-  string(9) "UserClass"
-}
-int(1000)

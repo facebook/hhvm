@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   public static function who() {
@@ -17,6 +17,6 @@ class B extends A {
     echo "B: " . __CLASS__;
   }
 }
+<<__EntryPoint>> function main(): void {
 B::test();
-?>
-
+}

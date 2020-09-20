@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : array strptime  ( string $date  , string $format  )
  * Description:  Parse a time/date generated with strftime()
  * Source code: ext/standard/datetime.c
 */
-
+<<__EntryPoint>> function main(): void {
 $orig = setlocale(LC_ALL, 'C');
 date_default_timezone_set("GMT"); 
 
@@ -22,5 +22,5 @@ $str = strftime("%A %B %e %R", $tstamp);
 var_dump(strptime($str, '%A %B %e %R'));
 
 setlocale(LC_ALL, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

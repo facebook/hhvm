@@ -1,0 +1,4 @@
+    $nonsensical_maplike_array = darray[
+      "A Very Long Key Value For This Map" =>
+        "Here's a value of an appropriate length",
+    ];

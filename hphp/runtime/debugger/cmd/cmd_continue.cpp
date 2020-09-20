@@ -37,7 +37,7 @@ void CmdContinue::help(DebuggerClient &client) {
 
 void CmdContinue::onSetup(DebuggerProxy& /*proxy*/,
                           CmdInterrupt& /*interrupt*/) {
-  assert(!m_complete); // Complete cmds should not be asked to do work.
+  assertx(!m_complete); // Complete cmds should not be asked to do work.
   // If there's a remaining count on this cmd then we want it left installed
   // in the proxy.
   m_complete = (decCount() == 0);
@@ -45,7 +45,7 @@ void CmdContinue::onSetup(DebuggerProxy& /*proxy*/,
 
 void CmdContinue::onBeginInterrupt(DebuggerProxy& /*proxy*/,
                                    CmdInterrupt& /*interrupt*/) {
-  assert(!m_complete); // Complete cmds should not be asked to do work.
+  assertx(!m_complete); // Complete cmds should not be asked to do work.
   m_complete = (decCount() == 0);
 }
 

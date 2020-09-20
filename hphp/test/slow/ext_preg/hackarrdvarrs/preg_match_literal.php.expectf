@@ -1,0 +1,77 @@
+int(1)
+int(1)
+int(1)
+int(0)
+int(1)
+int(0)
+int(1)
+int(1)
+string(3) "bcd"
+int(1)
+string(3) "bcd"
+int(1)
+int(1)
+int(1)
+int(1)
+int(1)
+string(3) "bcd"
+int(3)
+int(1)
+int(3)
+string(3) "bcd"
+string(3) "bcd"
+string(3) "bcd"
+int(0)
+int(1)
+int(0)
+int(1)
+int(0)
+int(1)
+int(0)
+int(1)
+int(0)
+int(1)
+int(0)
+int(0)
+int(0)
+int(0)
+int(1)
+int(0)
+int(1)
+int(0)
+int(1)
+
+Warning: No ending delimiter '/' found: [/abc\/] in %s/test/slow/ext_preg/hackarrdvarrs/preg_match_literal.php on line %d
+bool(false)
+int(1)
+int(1)
+int(1)
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "def"
+    int(3)
+  }
+}
+int(0)
+dict(0) {
+}
+int(1)
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(0) ""
+    int(3)
+  }
+}
+int(0)
+dict(0) {
+}
+int(1)
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "def"
+    int(3)
+  }
+}

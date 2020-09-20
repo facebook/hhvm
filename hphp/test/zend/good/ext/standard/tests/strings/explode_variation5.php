@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /* Prototype  : array explode  ( string $delimiter  , string $string  [, int $limit  ] )
  * Description: Split a string by string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing explode() function: positive and negative limits ***\n";
 $str = 'one||two||three||four';
 
@@ -16,5 +16,5 @@ var_dump(explode('||', $str, -1));
 
 echo "\n-- negative limit (since PHP 5.1) with null string -- \n";
 var_dump(explode('||', "", -1));
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Undefined interface: self in %s/errmsg_035.php on line 3

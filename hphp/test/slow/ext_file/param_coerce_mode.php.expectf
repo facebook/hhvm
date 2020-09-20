@@ -1,0 +1,49 @@
+Warning: fclose() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+string(6) "pclose"
+bool(false)
+
+Warning: fseek() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: rewind() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: ftell() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: feof() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fstat() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fread() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fgetc() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fgets() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fgetss() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fscanf() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fwrite() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fputs() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+string(7) "fprintf"
+bool(false)
+string(8) "vfprintf"
+bool(false)
+
+Warning: fflush() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: ftruncate() expects exactly 2 parameters, 1 given in %s/param_coerce_mode.php on line %d
+
+Warning: fputcsv() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: fgetcsv() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: flock() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: readdir() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: rewinddir() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d
+
+Warning: closedir() expects parameter 1 to be resource, boolean given in %s/param_coerce_mode.php on line %d

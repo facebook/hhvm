@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_exclude_comments() {
 $element = simplexml_load_string(<<<EOF
 <root>
   <!-- I am a comment -->
@@ -12,3 +15,4 @@ EOF
 );
 var_dump($element->count());
 var_dump($element->elem1->count());
+}

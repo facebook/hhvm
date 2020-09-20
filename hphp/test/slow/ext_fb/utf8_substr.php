@@ -1,6 +1,9 @@
-<?php
+<?hh
+
 
 // See utf8ize.php
+<<__EntryPoint>>
+function main_utf8_substr() {
 $INVALID_UTF_8_STRING = "\xe2\x82\x28";
 
 // Falsey inputs
@@ -34,3 +37,4 @@ echo json_encode(fb_utf8_substr("abcdef", -3, -1)), PHP_EOL;
 // Invalid sequence
 echo json_encode(fb_utf8_substr($INVALID_UTF_8_STRING, 0)), PHP_EOL;
 echo json_encode("\uFFFD\x28"), PHP_EOL;
+}

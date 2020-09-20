@@ -1,3 +1,3 @@
-<?hh
+<?hh // partial
 
-function f(...$args = array()): void {}
+function f(...$args = varray[]): void {}

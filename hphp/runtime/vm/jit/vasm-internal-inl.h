@@ -106,14 +106,40 @@ template <class Inst>
 bool emit(Venv& /*env*/, const Inst&) {
   return false;
 }
-bool emit(Venv& env, const callphp& i);
+bool emit(Venv& env, const callphps& i);
 bool emit(Venv& env, const bindjmp& i);
 bool emit(Venv& env, const bindjcc& i);
 bool emit(Venv& env, const bindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
-bool emit(Venv& env, const funcguard& i);
+bool emit(Venv& env, const movqs& i);
+bool emit(Venv& env, const debugguardjmp& i);
+bool emit(Venv& env, const jmps& i);
+
+inline bool emit(Venv& env, const pushframe&) {
+  if (env.frame == -1) return true; // unreachable block
+  assertx(env.pending_frames > 0);
+
+  --env.pending_frames;
+  return true;
+}
+
+inline bool emit(Venv& env, const popframe&) {
+  if (env.frame == -1) return true; // unreachable block
+
+  ++env.pending_frames;
+  return true;
+}
+
+inline bool emit(Venv& env, const recordbasenativesp& i) {
+  return true;
+}
+
+inline bool emit(Venv& env, const recordstack& i) {
+  env.record_inline_stack(i.fakeAddress);
+  return true;
+}
 
 inline void record_frame(Venv& env) {
   auto const& block = env.unit.blocks[env.current];
@@ -138,6 +164,7 @@ inline void record_frame(Venv& env) {
 inline bool emit(Venv& env, const inlinestart& i) {
   if (env.frame == -1) return true; // unreachable block
 
+  ++env.pending_frames;
   always_assert(0 <= i.id && i.id < env.unit.frames.size());
   record_frame(env);
   env.frame = i.id;
@@ -145,7 +172,9 @@ inline bool emit(Venv& env, const inlinestart& i) {
 }
 inline bool emit(Venv& env, const inlineend&) {
   if (env.frame == -1) return true; // unreachable block
+  assertx(env.pending_frames > 0);
 
+  --env.pending_frames;
   record_frame(env);
   env.frame = env.unit.frames[env.frame].parent;
   always_assert(0 <= env.frame && env.frame < env.unit.frames.size());
@@ -179,36 +208,46 @@ void check_nop_interval(Venv& env, const Vinstr& inst,
   }
 }
 
-/*
- * Perform miscellaneous postprocessing for architecture-independent emitters.
- */
-template<class Vemit>
-void postprocess(Venv& env, const Vinstr& inst) {
-  if (inst.op == Vinstr::callphp) {
-    auto const& i = inst.callphp_;
-    // The body of callphp{} is arch-independent, but the unwind information is
-    // not.  We could do this in the emitter for callphp{}, but then we'd have
-    // to thread Vemit through all the emitters and implement them all in the
-    // header... so instead we have this.
-    Vemit(env).emit(unwind{i.targets[0], i.targets[1]});
+void computeFrames(Vunit& unit);
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+inline Venv::Venv(Vunit& unit, Vtext& text, CGMeta& meta)
+  : unit(unit)
+  , text(text)
+  , meta(meta)
+{
+  vaddrs.resize(unit.next_vaddr);
+}
+
+inline void Venv::record_inline_stack(TCA addr) {
+  uint32_t callOff = 0;
+  auto const func = unit.frames[frame].func;
+  auto const in_builtin = func && func->isCPPBuiltin();
+  if (origin && !in_builtin) {
+    auto const marker = origin->marker();
+    callOff = marker.bcOff() - marker.func()->base();
   }
+  stacks.emplace_back(addr, IStack{frame - 1, pending_frames, callOff});
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 template<class Vemit>
 void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
                AsmInfo* asm_info) {
   using namespace vasm_detail;
 
+  // Lower inlinestart and inlineend instructions to jmps, and annotate blocks
+  // with inlined function parents
+  computeFrames(unit);
+
   Venv env { unit, text, fixups };
   env.addrs.resize(unit.blocks.size());
 
-  auto labels = layoutBlocks(unit, text);
+  auto labels = layoutBlocks(unit);
 
   IRMetadataUpdater irmu(env, asm_info);
 
@@ -233,6 +272,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
     env.addrs[b] = env.cb->frontier();
     env.framestart = env.cb->frontier();
     env.frame = block.frame;
+    env.pending_frames = std::max<int32_t>(block.pending_frames, 0);
 
     { // Compute the next block we will emit into the current area.
       auto const cur_start = area_start(labels[i]);
@@ -251,6 +291,7 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
     for (auto& inst : block.code) {
       irmu.register_inst(inst);
+      env.origin = inst.origin;
 
       check_nop_interval<Vemit>(env, inst, nop_counter, nop_interval);
 
@@ -263,21 +304,39 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
         VASM_OPCODES
 #undef O
       }
-      postprocess<Vemit>(env, inst);
     }
 
     if (block.frame != -1) record_frame(env);
     irmu.register_block_end();
   }
 
+  Vemit::emitVeneers(env);
+
+  Vemit::handleLiterals(env);
+
   // Emit service request stubs and register patch points.
   for (auto& p : env.stubs) emit_svcreq_stub(env, p);
+
+  // Bind any Vaddrs that correspond to Vlabels.
+  for (auto const& p : env.pending_vaddrs) {
+    assertx(env.addrs[p.target]);
+    env.vaddrs[p.vaddr] = env.addrs[p.target];
+  }
 
   // Patch up jump targets and friends.
   Vemit::patch(env);
 
   // Register catch blocks.
   for (auto& p : env.catches) register_catch_block(env, p);
+
+  // Register inline frames.
+  for (auto& f : unit.frames) {
+    if (f.parent == Vframe::Top) continue; // skip the top frame
+    fixups.inlineFrames.emplace_back(IFrame{f.func, f.callOff, f.parent - 1});
+  }
+
+  // Register inline stacks.
+  fixups.inlineStacks = std::move(env.stacks);
 
   if (unit.padding) Vemit::pad(text.main().code);
 

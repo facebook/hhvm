@@ -258,10 +258,6 @@ terminated:
   if (!im) {
     return 0;
   }
-  if (!im->colorsTotal) {
-    gdImageDestroy(im);
-    return 0;
-  }
   /* Check for open colors at the end, so
      we can reduce colorsTotal and ultimately
      BitsPerPixel */
@@ -271,6 +267,10 @@ terminated:
     } else {
       break;
     }
+  }
+  if (!im->colorsTotal) {
+    gdImageDestroy(im);
+    return 0;
   }
   return im;
 }
@@ -372,12 +372,12 @@ static int
 GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroDataBlockP)
 {
   int           i, j, ret;
-  unsigned char count;
+  int           count;
 
   if (flag) {
     scd->curbit = 0;
     scd->lastbit = 0;
-    scd->last_byte = 0;
+    scd->last_byte = 2;
     scd->done = FALSE;
     return 0;
   }
@@ -389,10 +389,14 @@ GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroD
       }
       return -1;
     }
-    scd->buf[0] = scd->buf[scd->last_byte-2];
-    scd->buf[1] = scd->buf[scd->last_byte-1];
+    if (!scd->last_byte) {
+      scd->buf[0] = scd->buf[1] = 0;
+    } else {
+      scd->buf[0] = scd->buf[scd->last_byte-2];
+      scd->buf[1] = scd->buf[scd->last_byte-1];
+    }
 
-               if ((count = GetDataBlock(fd, &scd->buf[2], ZeroDataBlockP)) <= 0)
+    if ((count = GetDataBlock(fd, &scd->buf[2], ZeroDataBlockP)) <= 0)
       scd->done = TRUE;
 
     scd->last_byte = 2 + count;
@@ -464,7 +468,7 @@ LWZReadByte_(gdIOCtx *fd, LZW_STATIC_DATA *sd, char flag, int input_code_size, i
   if (sd->sp > sd->stack)
     return *--sd->sp;
 
-    while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
+  while ((code = GetCode(fd, &sd->scd, sd->code_size, FALSE, ZeroDataBlockP)) >= 0) {
     if (code == sd->clear_code) {
       for (i = 0; i < sd->clear_code; ++i) {
         sd->table[0][i] = 0;

@@ -1,0 +1,20 @@
+<?hh
+final class Derived extends \ImplementingBase {
+  <<__Override>>
+  public function overridden(): int {
+    throw new \Exception();
+  }
+}
+class ImplementingBase extends \AbstractBase {
+  public function overridden(): int {
+    throw new \Exception();
+  }
+  public function inherited(): void {
+    throw new \Exception();
+  }
+}
+abstract class AbstractBase {}
+function with_overriding(Derived $arg): int {
+  $arg->inherited();
+  return $arg->overridden();
+}

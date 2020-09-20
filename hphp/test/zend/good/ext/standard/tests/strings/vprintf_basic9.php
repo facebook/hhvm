@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : string vprintf(string $format , array $args)
  * Description: Output a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vprintf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialising different format strings
@@ -16,9 +16,9 @@ $format11 = "%X";
 $format22 = "%X %X";
 $format33 = "%X %X %X";
 
-$arg1 = array(11);
-$arg2 = array(11,132);
-$arg3 = array(11,132,177);
+$arg1 = varray[11];
+$arg2 = varray[11,132];
+$arg3 = varray[11,132,177];
 
 $result = vprintf($format1,$arg1);
 echo "\n";
@@ -40,5 +40,5 @@ $result = vprintf($format33,$arg3);
 echo "\n";
 var_dump($result);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

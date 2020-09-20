@@ -1,4 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1669() {
 $obj = new DOMText();
- var_dump($obj instanceof DOMNode);
+ var_dump($obj is DOMNode);
+}

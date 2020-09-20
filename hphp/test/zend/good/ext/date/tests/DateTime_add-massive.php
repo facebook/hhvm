@@ -1,7 +1,9 @@
-<?php
+<?hh
 
-require 'examine_diff.inc';
-define('PHPT_DATETIME_SHOW', PHPT_DATETIME_SHOW_ADD);
-require 'DateTime_data-massive.inc';
+const PHPT_DATETIME_SHOW = PHPT_DATETIME_SHOW_ADD;
 
-?>
+<<__EntryPoint>> function main(): void {
+  require 'examine_diff.inc';
+  require 'DateTime_data-massive.inc';
+  test();
+}

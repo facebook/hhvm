@@ -9,12 +9,16 @@ function foo2(KeyedContainer<string> $foo, $f) {
 }
 
 function test($a) {
-  if ($a instanceof KeyedTraversable) {
+  if ($a is KeyedTraversable) {
     foo1($a, false);
   }
-  if ($a instanceof KeyedContainer) {
+  if ($a is KeyedContainer) {
     foo2($a, false);
   }
 }
 
-test(array(1));
+
+<<__EntryPoint>>
+function main_array_like() {
+test(varray[1]);
+}

@@ -5,7 +5,7 @@ class C {}
 function expects_C<T as C>(?T $x): void {}
 
 function not_null<T>(?T $x): T {
-  // UNSAFE
+  return $x as nonnull;
 }
 
 async function test(bool $cond): Awaitable<C> {

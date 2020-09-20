@@ -1,5 +1,6 @@
 <?hh
-  $info = "hello";
+<<__EntryPoint>> function main(): void {
+$info = "hello";
 echo <<<SCRIPT
 <?hh
 $info
@@ -10,3 +11,4 @@ Fix the above and then run `arc build`
 TXT
 );
 SCRIPT;
+}

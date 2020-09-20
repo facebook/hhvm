@@ -21,9 +21,9 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 
 #include <folly/Optional.h>
 
@@ -31,16 +31,20 @@ namespace HPHP { namespace jit {
 
 namespace {
 
+const StaticString s_GLOBALS("GLOBALS");
+
+uint32_t iterId(const IRInstruction& inst) {
+  return inst.extra<IterId>()->iterId;
+}
+
 AliasClass pointee(
   const SSATmp* ptr,
   jit::flat_set<const IRInstruction*>* visited_labels
 ) {
   auto const type = ptr->type();
-  always_assert(type <= TPtrToGen);
-  auto const maybeRef = type.maybe(TPtrToRefGen);
-  auto const typeNR = type - TPtrToRefGen;
+  always_assert(type <= TMemToCell);
   auto const canonPtr = canonical(ptr);
-  if (!canonPtr->isA(TPtrToGen)) {
+  if (!canonPtr->isA(TMemToCell)) {
     // This can happen when ptr is TBottom from a passthrough instruction with
     // a src that isn't TBottom. The most common cause of this is something
     // like "t5:Bottom = CheckType<Str> t2:Int". It means ptr isn't really a
@@ -52,8 +56,8 @@ AliasClass pointee(
 
   auto const sinst = canonPtr->inst();
 
-  if (sinst->is(UnboxPtr)) {
-    return ARefAny | pointee(sinst->src(0), visited_labels);
+  if (sinst->is(LdRDSAddr, LdInitRDSAddr)) {
+    return ARds { sinst->extra<RDSHandleData>()->handle };
   }
 
   // For phis, union all incoming values, taking care to not recurse infinitely
@@ -84,18 +88,18 @@ AliasClass pointee(
   }
 
   auto specific = [&] () -> folly::Optional<AliasClass> {
-    if (typeNR <= TBottom) return AEmpty;
+    if (type <= TBottom) return AEmpty;
 
-    if (typeNR <= TPtrToFrameGen) {
+    if (type <= TMemToFrameCell) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {
-          AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
+          ALocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
         };
       }
-      return AFrameAny;
+      return ALocalAny;
     }
 
-    if (typeNR <= TPtrToStkGen) {
+    if (type <= TMemToStkCell) {
       if (sinst->is(LdStkAddr)) {
         return AliasClass {
           AStack { sinst->src(0), sinst->extra<LdStkAddr>()->offset, 1 }
@@ -104,17 +108,19 @@ AliasClass pointee(
       return AStackAny;
     }
 
-    if (typeNR <= TPtrToPropGen) {
-      if (sinst->is(LdPropAddr)) {
+    if (type <= TMemToPropCell) {
+      if (sinst->is(LdPropAddr, LdInitPropAddr)) {
         return AliasClass {
-          AProp { sinst->src(0),
-                  safe_cast<uint32_t>(sinst->extra<LdPropAddr>()->offsetBytes) }
+          AProp {
+            sinst->src(0),
+            safe_cast<uint16_t>(sinst->extra<IndexData>()->index)
+          }
         };
       }
       return APropAny;
     }
 
-    if (typeNR <= TPtrToMISGen) {
+    if (type <= TMemToMISCell) {
       if (sinst->is(LdMIStateAddr)) {
         return mis_from_offset(sinst->src(0)->intVal());
       }
@@ -123,7 +129,7 @@ AliasClass pointee(
         // it.
         return AEmpty;
       }
-      return AMIStateTV;
+      return AMIStateTempBase;
     }
 
     auto elem = [&] () -> AliasClass {
@@ -138,31 +144,22 @@ AliasClass pointee(
       }
       if (key->hasConstVal(TStr)) {
         assertx(!base->isA(TVec));
-        int64_t n;
-        auto const arrTy = base->type();
-        if (!arrTy.subtypeOfAny(TDict, TKeyset) &&
-            key->strVal()->isStrictlyInteger(n)) {
-          if (arrTy.maybe(TDict) || arrTy.maybe(TKeyset)) return AElemAny;
-          return AElemI { base, n };
-        }
         return AElemS { base, key->strVal() };
       }
       return AElemAny;
     };
 
-    if (typeNR <= TPtrToElemGen) {
-      if (sinst->is(LdPackedArrayDataElemAddr)) return elem();
+    if (type <= TMemToElemCell) {
+      if (sinst->is(LdVecElemAddr)) return elem();
       return AElemAny;
     }
 
     // The result of ElemArray{,W,U} is either the address of an array element,
     // or &immutable_null_base.
-    if (typeNR <= TPtrToMembGen) {
-      if (sinst->is(ElemArrayX, ElemDictX, ElemKeysetX)) return elem();
-
-      // Takes a PtrToGen as its first operand, so we can't easily grab an array
-      // base.
-      if (sinst->is(ElemArrayU, ElemVecU, ElemDictU, ElemKeysetU)) {
+    if (type <= TMemToMembCell) {
+      // Takes a PtrToCell as its first operand, so we can't easily grab an
+      // array base.
+      if (sinst->is(ElemVecU, ElemDictU, ElemKeysetU)) {
         return AElemAny;
       }
 
@@ -170,16 +167,15 @@ AliasClass pointee(
       // src. Otherwise they can only return pointers to properties or
       // &immutable_null_base.
       if (sinst->is(PropX, PropDX, PropQ)) {
-        assertx(sinst->srcs().back()->isA(TPtrToMISGen));
-        return APropAny | pointee(sinst->srcs().back(), visited_labels);
+        assertx(sinst->srcs().back()->isA(TMemToMISCell));
+        auto const src = sinst->srcs().back();
+        return APropAny | pointee(src, visited_labels);
       }
 
-      // Like the Prop* instructions, but for array elements. These could also
-      // return pointers to collection elements but those don't exist in
-      // AliasClass yet.
-      if (sinst->is(ElemX, ElemDX, ElemUX)) {
-        assertx(sinst->srcs().back()->isA(TPtrToMISGen));
-        return AElemAny | pointee(sinst->srcs().back(), visited_labels);
+      // Like the Prop* instructions, but for array elements. These ops could
+      // pointers to collection elements, which we don't have AliasClasses for.
+      if (sinst->is(ElemDX, ElemUX)) {
+        return AElemAny;
       }
 
       return folly::none;
@@ -188,20 +184,21 @@ AliasClass pointee(
     return folly::none;
   }();
 
-  auto ret = maybeRef ? ARefAny : AEmpty;
-  if (specific) return *specific | ret;
+  if (specific) return *specific;
 
   /*
    * None of the above worked, so try to make the smallest union we can based
    * on the pointer type.
    */
-  if (typeNR.maybe(TPtrToStkGen))     ret = ret | AStackAny;
-  if (typeNR.maybe(TPtrToFrameGen))   ret = ret | AFrameAny;
-  if (typeNR.maybe(TPtrToPropGen))    ret = ret | APropAny;
-  if (typeNR.maybe(TPtrToElemGen))    ret = ret | AElemAny;
-  if (typeNR.maybe(TPtrToMISGen))     ret = ret | AMIStateTV;
-  if (typeNR.maybe(TPtrToClsInitGen)) ret = ret | AHeapAny;
-  if (typeNR.maybe(TPtrToClsCnsGen))  ret = ret | AHeapAny;
+  auto ret = AEmpty;
+  if (type.maybe(TMemToStkCell))     ret = ret | AStackAny;
+  if (type.maybe(TMemToFrameCell))   ret = ret | ALocalAny;
+  if (type.maybe(TMemToPropCell))    ret = ret | APropAny;
+  if (type.maybe(TMemToElemCell))    ret = ret | AElemAny;
+  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTempBase;
+  if (type.maybe(TMemToClsInitCell)) ret = ret | AHeapAny;
+  if (type.maybe(TMemToClsCnsCell))  ret = ret | AHeapAny;
+  if (type.maybe(TMemToSPropCell))   ret = ret | ARdsAny;
   return ret;
 }
 
@@ -210,14 +207,14 @@ AliasClass pointee(
 AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
   auto ret = AliasClass{AEmpty};
   for (auto const& src : srcs) {
-    if (src->isA(TPtrToGen)) {
+    if (src->isA(TMemToCell)) {
       ret = ret | pointee(src);
     }
   }
   return ret;
 }
 
-// Return an AliasClass containing all locations pointed to by any PtrToGen
+// Return an AliasClass containing all locations pointed to by any MemToCell
 // sources to an instruction.
 AliasClass all_pointees(const IRInstruction& inst) {
   return all_pointees(inst.srcs());
@@ -232,11 +229,6 @@ AliasClass stack_below(SSATmp* base, Off offset) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Helper functions for alias classes representing an ActRec on the stack
- * (whether pre-live or live).
- */
-
 // Return an AliasClass representing an entire ActRec at base + offset.
 AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
   return AStack {
@@ -248,16 +240,15 @@ AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
   };
 }
 
-// Return an AliasClass representing just the context field of an ActRec at base
-// + offset.
-AliasClass actrec_ctx(SSATmp* base, IRSPRelOffset offset) {
-  return AStack { base, offset + int32_t{kActRecCtxCellOff}, 1 };
+/*
+ * AliasClass that can be used to represent effects on liveFrame().
+ */
+AliasClass livefp(SSATmp* fp) {
+  return AFBasePtr | AActRec { fp };
 }
 
-// Return AliasClass representing just the func field of an ActRec at base +
-// offset.
-AliasClass actrec_func(SSATmp* base, IRSPRelOffset offset) {
-  return AStack { base, offset + int32_t{kActRecFuncCellOff}, 1 };
+AliasClass livefp(const IRInstruction& inst) {
+  return livefp(inst.marker().fp());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -265,41 +256,71 @@ AliasClass actrec_func(SSATmp* base, IRSPRelOffset offset) {
 // Determine an AliasClass representing any locals in the instruction's frame
 // which might be accessed via debug_backtrace().
 
-const StaticString s_86metadata("86metadata");
+const Func* func_from_fp(SSATmp* fp) {
+  if (!fp) return nullptr;
+  auto fpInst = fp->inst();
+  if (fpInst->is(DefFP)) return fpInst->marker().func();
+  if (fpInst->is(DefFuncEntryFP)) return fpInst->extra<DefFuncEntryFP>()->func;
+  if (fpInst->is(BeginInlining)) return fpInst->extra<BeginInlining>()->func;
+  always_assert(false);
+}
+
+bool any_frame_has_metadata(SSATmp* fp) {
+  while (fp) {
+    auto const func = func_from_fp(fp);
+    if (!func || func->lookupVarId(s_86metadata.get()) != kInvalidId) {
+      return true;
+    }
+    fp = fp->inst()->is(BeginInlining) ? fp->inst()->src(1) : nullptr;
+  }
+  return false;
+}
 
 AliasClass backtrace_locals(const IRInstruction& inst) {
-  auto const func = [&]() -> const Func* {
-    auto fp = inst.marker().fp();
-    if (!fp) return nullptr;
-    fp = canonical(fp);
-    auto fpInst = fp->inst();
-    if (UNLIKELY(fpInst->is(DefLabel))) {
-      fpInst = resolveFpDefLabel(fp);
-      assertx(fpInst);
+  auto eachFunc = [&] (auto fn) {
+    auto ac = AEmpty;
+    for (auto fp = inst.marker().fp(); fp; ) {
+      ac |= fn(func_from_fp(fp), fp);
+      fp = fp->inst()->is(BeginInlining) ? fp->inst()->src(1) : nullptr;
     }
-    if (fpInst->is(DefFP)) return fpInst->marker().func();
-    if (fpInst->is(DefInlineFP)) return fpInst->extra<DefInlineFP>()->target;
-    always_assert(false);
-  }();
+    return ac;
+  };
 
-  // Either there's no func or no frame-pointer. Either way, be conservative and
-  // assume anything can be read. This can happen in test code, for instance.
-  if (!func) return AFrameAny;
-
-  auto const add86meta = [&] (AliasClass ac) {
+  auto const add86meta = [&] (const Func* func, SSATmp* fp) -> AliasClass {
     // The 86metadata variable can also exist in a VarEnv, but accessing that is
     // considered a heap effect, so we can ignore it.
     auto const local = func->lookupVarId(s_86metadata.get());
-    if (local == kInvalidId) return ac;
-    return ac | AFrame { inst.marker().fp(), local };
+    if (local == kInvalidId) return AEmpty;
+    return ALocal { fp, (uint32_t)local };
   };
 
-  if (!RuntimeOption::EnableArgsInBacktraces || !func->numParams()) {
-    return add86meta(AEmpty);
-  }
+  // Either there's no func or no frame-pointer. Either way, be conservative and
+  // assume anything can be read. This can happen in test code, for instance.
+  if (!inst.marker().fp()) return ALocalAny;
 
-  AliasIdSet params{ AliasIdSet::IdRange{0, func->numParams()} };
-  return add86meta(AFrame { inst.marker().fp(), params });
+  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(add86meta);
+
+  return eachFunc([&] (const Func* func, SSATmp* fp) {
+    auto ac = AEmpty;
+    auto const numParams = func->numParams();
+
+    if (func->hasReifiedGenerics()) {
+      // First non param local contains reified generics
+      AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
+      ac |= ALocal { fp, reifiedgenerics };
+    }
+
+    if (func->cls() && func->cls()->hasReifiedGenerics()) {
+      // There is no way to access the SSATmp for ObjectData of `this` here,
+      // so be very pessimistic
+      ac |= APropAny;
+    }
+
+    if (!numParams) return add86meta(func, fp) | ac;
+
+    AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
+    return add86meta(func, fp) | ac | ALocal { fp, params };
+  });
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -316,29 +337,10 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
  *
  * For kills, locations on the eval stack below the re-entry depth should all
  * be added.
- *
- * Important note: because of the `kills' set modifications, an instruction may
- * not report that it can re-enter if it actually can't.  The reason this can
- * go wrong is that if the instruction was in an inlined function, if we've
- * removed the DefInlineFP its spOff will not be meaningful (unless it's a
- * DecRef instruction, which we explicitly adjust in dce.cpp).  In this case
- * the `kills' set will refer to the wrong stack locations.  In general this
- * means instructions that can re-enter must have catch traces---but a few
- * other instructions are exceptions, either since they are not allowed in
- * inlined functions or because they take the (possibly-inlined) FramePtr as a
- * source.
  */
 GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
-    (inst.taken() && inst.taken()->isCatch()) ||
-    inst.is(DecRef,
-            ReleaseVVAndSkip,
-            MIterFree,
-            MIterNext,
-            MIterNextK,
-            IterFree,
-            GenericRetDecRefs,
-            MemoSet);
+    inst.taken() && inst.taken()->isCatch();
   always_assert_flog(
     may_reenter_is_ok,
     "instruction {} claimed may_reenter, but it isn't allowed to say that",
@@ -369,44 +371,11 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   }();
 
   return GeneralEffects {
-    x.loads | AHeapAny | backtrace_locals(inst),
-    x.stores | AHeapAny,
+    x.loads | AHeapAny | ARdsAny | backtrace_locals(inst),
+    x.stores | AHeapAny | ARdsAny,
     x.moves,
     new_kills
   };
-}
-
-/*
- * Modify a GeneralEffects for instructions that could call the user
- * error handler for the current frame (ie something that can raise
- * a warning/notice/error, or a builtin call), because the error
- * handler gets a context array which contains all the locals.
- */
-GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
-  return may_reenter(
-    inst,
-    GeneralEffects {
-      x.loads |
-        (RuntimeOption::EnableContextInErrorHandler ? AFrameAny : AEmpty),
-      x.stores, x.moves, x.kills
-    }
-  );
-}
-
-// Equivalent to may_raise if EvalHackArrCompatNotices is enabled for certain
-// opcodes, no-op otherwise.
-GeneralEffects hack_arr_compat_may_raise(const IRInstruction& inst,
-                                         GeneralEffects x) {
-  assertx(inst.is(AKExistsArr, ArrayIdx, ArrayIsset));
-  if (!RuntimeOption::EvalHackArrCompatNotices) return x;
-  return may_raise(inst, x);
-}
-
-GeneralEffects hack_arr_compat_dv_cmp_may_raise(const IRInstruction& inst,
-                                                GeneralEffects x) {
-  assertx(inst.is(SameArr, NSameArr));
-  if (!RuntimeOption::EvalHackArrCompatDVCmpNotices) return x;
-  return may_raise(inst, x);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -432,26 +401,17 @@ GeneralEffects may_load_store_move(AliasClass loads,
 
 /*
  * Helper for iterator instructions.  They all affect some locals, but are
- * otherwise the same.
- *
- * N.B. Currently the memory for frame iterator slots is not part of the
- * AliasClass lattice, since we never really manipulate them from the TC yet,
- * so we don't report the effect these instructions have on it.
+ * otherwise the same. Value iters touch one local; key-value iters touch two.
  */
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
-  auto const iterID = inst.extra<IterData>()->iterId;
-  AliasClass const iterPos = AIterPos { fp, iterID };
-  AliasClass const iterBase = AIterBase { fp, iterID };
-  auto const iterMem = iterPos | iterBase;
-  return may_reenter(
-    inst,
-    may_load_store_kill(
-      locals | AHeapAny | iterMem,
-      locals | AHeapAny | iterMem,
-      AMIStateAny
-    )
+  auto const iters =
+    AliasClass { aiter_all(fp, inst.extra<IterData>()->args.iterId) };
+  return may_load_store_kill(
+    iters | locals | AHeapAny,
+    iters | locals | AHeapAny,
+    AMIStateAny
   );
 }
 
@@ -469,22 +429,13 @@ GeneralEffects iter_effects(const IRInstruction& inst,
  */
 GeneralEffects interp_one_effects(const IRInstruction& inst) {
   auto const extra  = inst.extra<InterpOne>();
-  auto loads  = AHeapAny | AStackAny | AFrameAny;
-  auto stores = AHeapAny | AStackAny;
+  auto loads  = AHeapAny | AStackAny | ALocalAny | ARdsAny | livefp(inst);
+  auto stores = AHeapAny | AStackAny | ARdsAny;
   if (extra->smashesAllLocals) {
-    stores = stores | AFrameAny;
+    stores = stores | ALocalAny;
   } else {
     for (auto i = uint32_t{0}; i < extra->nChangedLocals; ++i) {
-      stores = stores | AFrame { inst.src(1), extra->changedLocals[i].id };
-    }
-  }
-
-  for (auto i = uint32_t{0}; i < extra->nChangedClsRefSlots; ++i) {
-    auto const& slot = extra->changedClsRefSlots[i];
-    if (slot.write) {
-      stores = stores | AClsRefSlot { inst.src(1), slot.id };
-    } else {
-      loads = loads | AClsRefSlot { inst.src(1), slot.id };
+      stores = stores | ALocal { inst.src(1), extra->changedLocals[i].id };
     }
   }
 
@@ -499,7 +450,7 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
     kills = kills | AMIStateAny;
   }
 
-  return may_raise(inst, may_load_store_kill(loads, stores, kills));
+  return may_load_store_kill(loads, stores, kills);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -512,17 +463,14 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
  */
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
   auto const srcs = inst.srcs();
-  assertx(srcs.back()->isA(TPtrToMISGen));
-  return may_raise(
-    inst,
-    may_load_store(
-      AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 1)),
-      AHeapAny | all_pointees(inst)
-    )
-  );
+  assertx(srcs.back()->isA(TMemToMISCell));
+  auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 1));
+  auto const stores = AHeapAny | all_pointees(inst);
+  return may_load_store(loads, stores);
 }
 
 //////////////////////////////////////////////////////////////////////
+
 MemEffects memory_effects_impl(const IRInstruction& inst) {
   switch (inst.op()) {
 
@@ -573,11 +521,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * ReturnHook as src(1), and the ReturnHook may not access the stack).
    */
   case ReturnHook:
-    // Note, this instruction can re-enter, but doesn't need the may_reenter()
-    // treatmeant because of the special kill semantics for locals and stack.
     return may_load_store_kill(
-      AHeapAny, AHeapAny,
-      *AStackAny.precise_union(AFrameAny)->precise_union(AMIStateAny)
+      AHeapAny | AActRec {inst.src(0)}, AHeapAny,
+      *AStackAny.precise_union(ALocalAny)->precise_union(AMIStateAny)
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
@@ -587,9 +533,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
-    // TODO: may-load here probably doesn't need to include AFrameAny normally.
-    return may_reenter(inst,
-                       may_load_store_kill(AUnknown, AHeapAny, AMIStateAny));
+    // TODO: may-load here probably doesn't need to include ALocalAny normally.
+    return may_load_store_kill(AUnknown, AHeapAny, AMIStateAny);
 
   /*
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
@@ -602,12 +547,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AClsRefSlotAny | ACufIterAny | AMIStateAny
+      AStackAny | ALocalAny | AMIStateAny | AFBasePtr
     };
 
   case AsyncFuncRet:
   case AsyncFuncRetSlow:
-    return ReturnEffects { AStackAny | AMIStateAny };
+    return ReturnEffects { AStackAny | AMIStateAny | livefp(inst.src(1)) };
 
   case AsyncSwitchFast:
     // Suspending can go anywhere, and doesn't even kill locals.
@@ -623,8 +568,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
      * storing an Uninit over each of the locals, but the stores of uninits
      * would be dead so we're not actually doing that.
      */
-    return may_reenter(inst,
-                       may_load_store_kill(AUnknown, AUnknown, AMIStateAny));
+    return may_load_store_kill(AUnknown, AUnknown, AMIStateAny);
 
   case EndCatch: {
     auto const stack_kills = stack_below(
@@ -637,66 +581,30 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  /*
-   * DefInlineFP has some special treatment here.
-   *
-   * It's logically `publishing' a pointer to a pre-live ActRec, making it
-   * live.  It doesn't actually load from this ActRec, but after it's done this
-   * the set of things that can load from it is large enough that the easiest
-   * way to model this is to consider it as a load on behalf of `publishing'
-   * the ActRec.  Once it's published, it's a live activation record, and
-   * doesn't get written to as if it were a stack slot anymore (we've
-   * effectively converted AStack locations into a frame until the
-   * InlineReturn).
-   *
-   * Note: We may push the publishing of the inline frame below the start of
-   * the inline function so that we can avoid spilling the inline frame in the
-   * common case. Because of this we cannot add the stack positions within the
-   * inline function to the kill set here as they may be live having been stored
-   * on the main trace.
-   *
-   * TODO(#3634984): Additionally, DefInlineFP is marking may-load on all the
-   * locals of the outer frame.  This is probably not necessary anymore, but we
-   * added it originally because a store sinking prototype needed to know it
-   * can't push StLocs past a DefInlineFP, because of reserved registers.
-   * Right now it's just here because we need to think about and test it before
-   * removing that set.
-   */
-  case DefInlineFP:
-    return may_load_store(
-      /*
-       * We need to mark DefInlineFP as both loading and storing the entire
-       * stack below its frame because it may have been pushed. If DefInlineFP
-       * is not pushed these cells were marked as both stored and killed by
-       * BeginInlining so now actual stores should be aliased.
-       *
-       * Importantly, if we do sink DefInlineFP stack cells from above may
-       * alias locals within DefInlineFP, this confuses alias analysis, these
-       * stores must not be sunk past DefInlineFP where they could clobber a
-       * local.
-       */
-      AFrameAny | AClsRefSlotAny | ACufIterAny  |
-        stack_below(inst.dst(), FPRelOffset{0}) |
-        inline_fp_frame(&inst),
-      AFrameAny | AClsRefSlotAny | ACufIterAny |
-        stack_below(inst.dst(), FPRelOffset{0})
+  case EnterTCUnwind: {
+    auto const stack_kills = stack_below(
+      inst.marker().fp(),
+      -inst.marker().spOff() - 1
     );
+    return ExitEffects {
+      AUnknown,
+      stack_kills | AMIStateTempBase | AMIStateBase
+    };
+  }
 
   /*
-   * BeginInlining is similar to DefInlineFP, however, it must always be the
-   * first instruction in the inlined call and has no effect serving only as
-   * a marker to memory effects that the stack cells within the inlined call
-   * are now dead.
-   *
-   * Unlike DefInlineFP it does not load the SpillFrame, which we hope to push
-   * off the main trace or elide entirely.
+   * BeginInlining must always be the first instruction in the inlined call. It
+   * defines a new FP for the callee but does not perform any stores or
+   * otherwise initialize the FP.
    */
   case BeginInlining: {
     /*
-     * SP relative offset of the first non-frame cell within the inlined call.
+     * SP relative offset of the firstin the inlined call.
      */
-    auto inlineStackOff = inst.extra<BeginInlining>()->offset;
+    auto inlineStackOff =
+      inst.extra<BeginInlining>()->spOffset + kNumActRecCells - 1;
     return may_load_store_kill(
+      AEmpty,
       AEmpty,
       /*
        * This prevents stack slots from the caller from being sunk into the
@@ -704,36 +612,53 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * locals of the callee-- those slots are inacessible in the inlined
        * call as frame and stack locations may not alias.
        */
-      stack_below(inst.src(0), inlineStackOff),
-      /*
-       * While not required for correctness adding these slots to the kill set
-       * will hopefully avoid some extra stores.
-       */
       stack_below(inst.src(0), inlineStackOff)
     );
   }
 
-  case InlineReturn: {
-    auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
-                        AMIStateAny | AFrameAny | AClsRefSlotAny |
-                        ACufIterAny;
-    return may_load_store_kill(AEmpty, callee, callee);
+  case EndInlining: {
+    assertx(inst.src(0)->inst()->is(BeginInlining));
+    auto const fp = inst.src(0);
+    auto const callee = inst.src(0)->inst()->extra<BeginInlining>()->func;
+    const AliasClass ar = AActRec { inst.src(0) };
+    auto const locals = [&] () -> AliasClass {
+      if (!callee->numLocals()) return AEmpty;
+      return ALocal {fp, AliasIdSet::IdRange(0, callee->numLocals())};
+    }();
+
+    // NB: It's okay if the AliasIdSet for locals cannot be precise. We want to
+    //     kill *every* local in the frame so there's nothing else that can
+    //     accidentally be included in the set.
+    return may_load_store_kill(AEmpty, AEmpty, ar | locals | AMIStateAny);
   }
 
-  case InlineReturnNoFrame: {
-    auto const callee = AliasClass(AStack {
-      inst.extra<InlineReturnNoFrame>()->offset,
-      std::numeric_limits<int32_t>::max()
-    }) | AMIStateAny;
-    return may_load_store_kill(AEmpty, callee, callee);
-  }
+  case InlineCall:
+    return PureInlineCall {
+      AFBasePtr,
+      inst.src(0),
+
+      // Right now when we "publish" a frame by storing it in rvmfp() we
+      // implicitly depend on the AFFunc and AFMeta bits being stored. In the
+      // future we may want to track this explicitly.
+      //
+      // We also need to ensure that all of our parent frames have this stored
+      // this information. To achieve this we also register a load on AFBasePtr,
+      // forcing them to also be published. Notice that we doin't actually
+      // depend on this load to properly initialize m_sfp or rvmfp().
+      AliasClass(AFFunc { inst.src(0) }) | AFMeta { inst.src(0) } | AFBasePtr
+    };
+
+  case InlineReturn:
+    // Unlike InlineCall we don't need to explicitly require the frame be
+    // published. Unlike InlineCall, however, it is not safe to "move" an
+    // InlineReturn, it may only be killed once it has been made redundant by
+    // the removal of its associated InlineCall.
+    return PureInlineReturn { AFBasePtr, inst.src(0), inst.src(1) };
 
   case SyncReturnBC: {
     auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;
     auto const arStack = actrec(inst.src(0), spOffset);
-    // This instruction doesn't actually load but SpillFrame cannot be pushed
-    // past it
-    return may_load_store(arStack, arStack);
+    return may_load_store(AEmpty, arStack);
   }
 
   case InterpOne:
@@ -756,146 +681,173 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyParamCallable:
   case VerifyParamCls:
   case VerifyParamFailHard:
-    return may_raise(inst, may_load_store(AUnknown, AHeapAny));
+  case VerifyParamRecDesc:
+    return may_load_store(AUnknown, AHeapAny);
   // VerifyParamFail might coerce the parameter to the desired type rather than
   // throwing.
   case VerifyParamFail: {
-    auto const localId = inst.src(0)->intVal();
-    auto const stores = AHeapAny | AFrame{inst.marker().fp(), localId};
-    return may_raise(inst, may_load_store(AUnknown, stores));
+    auto const extra = inst.extra<ParamWithTCData>();
+    assertx(extra->paramId >= 0);
+    auto const stores =
+      AHeapAny |
+      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
+    return may_load_store(AUnknown, stores);
+  }
+  case VerifyReifiedLocalType: {
+    auto const extra = inst.extra<ParamData>();
+    assertx(extra->paramId >= 0);
+    auto const stores =
+      AHeapAny |
+      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
+    return may_load_store(AUnknown, stores);
   }
   // However the following ones can't read locals from our frame on the way
   // out, except as a side effect of raising a warning.
   case VerifyRetCallable:
   case VerifyRetCls:
-    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
-  // In PHP 7 VerifyRetFail can coerce the return type in weak files-- even in
-  // a strict file we may still coerce int to float. This is not true of HH
-  // files.
-  case VerifyRetFail: {
-    auto func = inst.marker().func();
-    auto mayCoerce =
-      RuntimeOption::PHP7_ScalarTypes &&
-      !RuntimeOption::EnableHipHopSyntax &&
-      !func->unit()->isHHFile();
-    auto stores = mayCoerce ? AHeapAny | AStackAny : AHeapAny;
-    return may_raise(inst, may_load_store(AHeapAny | AStackAny, stores));
-  }
-  case VerifyRetFailHard:
-    return may_raise(inst, may_load_store(AHeapAny | AStackAny, AHeapAny));
+  case VerifyReifiedReturnType:
+  case VerifyRetRecDesc:
+    return may_load_store(AHeapAny | livefp(inst), AHeapAny);
 
-  case CallArray:
-    {
-      auto const extra = inst.extra<CallArray>();
-      return CallEffects {
-        extra->writeLocals,
-        // Kills. Everything on the stack below the incoming parameters.
-        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The act-rec, incoming parameters, and everything below.
-        stack_below(
-          inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1
-        ),
-        // Locals.
-        (extra->writeLocals || extra->readLocals)
-          ? AFrameAny : backtrace_locals(inst),
-        // Callee.
-        actrec_func(inst.src(0), extra->spOffset + extra->numParams)
-      };
-    }
+  case VerifyRetFail:
+  case VerifyRetFailHard:
+    return may_load_store(AHeapAny | AStackAny | livefp(inst), AHeapAny);
+
+  case VerifyPropCls:
+  case VerifyPropFail:
+  case VerifyPropFailHard:
+  case VerifyProp:
+  case VerifyPropAll:
+  case VerifyPropCoerce:
+  case VerifyPropCoerceAll:
+  case VerifyPropRecDesc:
+    return may_load_store(AHeapAny | livefp(inst), AHeapAny);
 
   case ContEnter:
     {
       auto const extra = inst.extra<ContEnter>();
       return CallEffects {
-        false,
-        // Kills. Everything on the stack below the sent value.
-        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The value being sent, and everything below.
-        stack_below(inst.src(0), extra->spOffset),
+        // Kills. Everything on the stack.
+        stack_below(inst.src(0), extra->spOffset) | AMIStateAny,
+        // No inputs. The value being sent is passed explicitly.
+        AEmpty,
+        // ActRec. It is on the heap and we already implicitly assume that
+        // CallEffects can perform arbitrary heap operations.
+        AEmpty,
+        // No outputs.
+        AEmpty,
         // Locals.
-        backtrace_locals(inst),
-        // Callee. Stored inside the generator object, not used by ContEnter.
-        AEmpty
+        backtrace_locals(inst) | livefp(inst.src(1))
       };
     }
 
   case Call:
     {
+      // If any frames in the inlined stack have metadata we need to materialize
+      // all of the frames so that debug_backtrace() can find it.
+      AliasClass ar = any_frame_has_metadata(inst.src(1))
+        ? livefp(inst.src(1))
+        : AliasClass(AActRec {inst.src(1)});
       auto const extra = inst.extra<Call>();
       return CallEffects {
-        extra->writeLocals,
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The act-rec, incoming parameters, and everything below.
-        stack_below(
+        // Input arguments.
+        extra->numInputs() == 0 ? AEmpty : AStack {
           inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1
-        ),
-        // Locals.
-        (extra->writeLocals || extra->readLocals)
-          ? AFrameAny : backtrace_locals(inst),
-        // Callee.
-        actrec_func(inst.src(0), extra->spOffset + extra->numParams)
+          extra->spOffset + extra->numInputs() - 1,
+          static_cast<int32_t>(extra->numInputs())
+        },
+        // ActRec.
+        actrec(inst.src(0), extra->spOffset + extra->numInputs()),
+        // Inout outputs.
+        extra->numOut == 0 ? AEmpty : AStack {
+          inst.src(0),
+          extra->spOffset + extra->numInputs() + kNumActRecCells +
+            extra->numOut - 1,
+          static_cast<int32_t>(extra->numOut)
+        },
+        // Locals. We intentionally leave off a dependency on AFBasePtr to allow
+        // store-elim to elide the new frame.
+        backtrace_locals(inst) | ar
       };
     }
 
   case CallBuiltin:
     {
-      auto const extra = inst.extra<CallBuiltin>();
+      AliasClass out_stk = AEmpty;
+      auto const callee = inst.extra<CallBuiltin>()->callee;
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
-          if (inst.src(i)->type() <= TPtrToGen) {
+          if (inst.src(i)->type() <= TPtrToCell) {
             auto const cls = pointee(inst.src(i));
             if (cls.maybe(AStackAny)) {
               ret = ret | cls;
+              auto const paramOff = callee->isMethod() ? 3 : 2;
+              if (i >= paramOff && callee->isInOut(i - paramOff)) {
+                out_stk = out_stk | cls;
+              }
             }
           }
         }
         return ret;
       }();
-      auto const writeLocs = extra->writeLocals ? AFrameAny : AEmpty;
-      auto const readLocs =
-        (extra->readLocals || extra->writeLocals) ? AFrameAny : AEmpty;
-      return may_raise(
-        inst,
-        may_load_store_kill(stk | AHeapAny | readLocs, writeLocs, AMIStateAny)
-      );
+      if (callee->isFoldable()) {
+        return may_load_store_kill(
+          stk | AHeapAny, out_stk | AHeapAny, AMIStateAny
+        );
+      } else {
+        return may_load_store_kill(
+          stk | AHeapAny | ARdsAny,
+          out_stk | AHeapAny | ARdsAny,
+          AMIStateAny
+        );
+      }
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
   // heap.
   case CreateGen:
   case CreateAGen:
-  case CreateAFWH:
-  case CreateAFWHNoVV:
+  case CreateAFWH: {
+    auto const fp = canonical(inst.src(0));
+    auto fpInst = fp->inst();
+    auto const frame = [&] () -> AliasClass {
+      if (fpInst->is(DefFP, DefFuncEntryFP)) return ALocalAny;
+      assertx(fpInst->is(BeginInlining));
+      auto const nlocals = fpInst->extra<BeginInlining>()->func->numLocals();
+      return nlocals
+        ? ALocal { fp, AliasIdSet::IdRange(0, nlocals)}
+        : AEmpty;
+    }();
     return may_load_store_move(
-      AFrameAny | AClsRefSlotAny | ACufIterAny,
+      frame | AActRec { fp },
       AHeapAny,
-      AFrameAny | AClsRefSlotAny | ACufIterAny
+      frame
     );
+  }
 
   // AGWH construction updates the AsyncGenerator object.
   case CreateAGWH:
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny | AActRec { inst.src(0) }, AHeapAny);
 
   case CreateAAWH:
     {
       auto const extra = inst.extra<CreateAAWH>();
-      auto const frame = AFrame {
+      auto const frame = ALocal {
         inst.src(0),
         AliasIdSet {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
         }
       };
-      return may_reenter(inst, may_load_store(frame, AHeapAny));
+      return may_load_store(frame, AHeapAny);
     }
 
   case CountWHNotDone:
     {
       auto const extra = inst.extra<CountWHNotDone>();
-      auto const frame = AFrame {
+      auto const frame = ALocal {
         inst.src(0),
         AliasIdSet {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
@@ -906,61 +858,89 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // This re-enters to call extension-defined instance constructors.
   case ConstructInstance:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_load_store(AHeapAny, AHeapAny);
+
+  // Closures don't ever throw or reenter on construction
+  case ConstructClosure:
+    return IrrelevantEffects{};
 
   case CheckStackOverflow:
   case CheckSurpriseFlagsEnter:
   case CheckSurpriseAndStack:
-    return may_raise(inst, may_load_store(AEmpty, AEmpty));
-
-  case InitExtraArgs:
-    return UnknownEffects {};
+    return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // Iterator instructions
 
   case IterInit:
-  case MIterInit:
-  case WIterInit:
-    return iter_effects(
-      inst,
-      inst.src(1),
-      AFrame { inst.src(1), inst.extra<IterData>()->valId }
-    );
+  case LIterInit:
   case IterNext:
-  case MIterNext:
-  case WIterNext:
-    return iter_effects(
-      inst,
-      inst.src(0),
-      AFrame { inst.src(0), inst.extra<IterData>()->valId }
-    );
+  case LIterNext: {
+    auto const& args = inst.extra<IterData>()->args;
+    assertx(!args.hasKey());
+    auto const fp = inst.src(inst.op() == IterNext ? 0 : 1);
+    AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
+    return iter_effects(inst, fp, val);
+  }
 
   case IterInitK:
-  case MIterInitK:
-  case WIterInitK:
-    {
-      AliasClass key = AFrame { inst.src(1), inst.extra<IterData>()->keyId };
-      AliasClass val = AFrame { inst.src(1), inst.extra<IterData>()->valId };
-      return iter_effects(inst, inst.src(1), key | val);
-    }
-
+  case LIterInitK:
   case IterNextK:
-  case MIterNextK:
-  case WIterNextK:
-    {
-      AliasClass key = AFrame { inst.src(0), inst.extra<IterData>()->keyId };
-      AliasClass val = AFrame { inst.src(0), inst.extra<IterData>()->valId };
-      return iter_effects(inst, inst.src(0), key | val);
-    }
+  case LIterNextK: {
+    auto const& args = inst.extra<IterData>()->args;
+    assertx(args.hasKey());
+    auto const fp = inst.src(inst.op() == IterNextK ? 0 : 1);
+    AliasClass key = ALocal { fp, safe_cast<uint32_t>(args.keyId) };
+    AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
+    return iter_effects(inst, fp, key | val);
+  }
+
+  case IterFree: {
+    auto const base = aiter_base(inst.src(0), iterId(inst));
+    return may_load_store(AHeapAny | base, AHeapAny);
+  }
+
+  case CheckIter: {
+    auto const iter = inst.extra<CheckIter>()->iterId;
+    return may_load_store(aiter_type(inst.src(0), iter), AEmpty);
+  }
+
+  case LdIterBase:
+    return PureLoad { aiter_base(inst.src(0), iterId(inst)) };
+
+  case LdIterPos:
+    return PureLoad { aiter_pos(inst.src(0), iterId(inst)) };
+
+  case LdIterEnd:
+    return PureLoad { aiter_end(inst.src(0), iterId(inst)) };
+
+  case StIterBase:
+    return PureStore { aiter_base(inst.src(0), iterId(inst)), inst.src(1) };
+
+  case StIterType: {
+    auto const iter = inst.extra<StIterType>()->iterId;
+    return PureStore { aiter_type(inst.src(0), iter), nullptr };
+  }
+
+  case StIterPos:
+    return PureStore { aiter_pos(inst.src(0), iterId(inst)), inst.src(1) };
+
+  case StIterEnd:
+    return PureStore { aiter_end(inst.src(0), iterId(inst)), inst.src(1) };
+
+  case KillIter: {
+    auto const iters = aiter_all(inst.src(0), iterId(inst));
+    return may_load_store_kill(AEmpty, AEmpty, iters);
+  }
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate locals
 
   case StLoc:
     return PureStore {
-      AFrame { inst.src(0), inst.extra<StLoc>()->locId },
-      inst.src(1)
+      ALocal { inst.src(0), inst.extra<StLoc>()->locId },
+      inst.src(1),
+      nullptr
     };
 
   case StLocRange:
@@ -969,110 +949,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto acls = AEmpty;
 
       for (auto locId = extra->start; locId < extra->end; ++locId) {
-        acls = acls | AFrame { inst.src(0), locId };
+        acls = acls | ALocal { inst.src(0), locId };
       }
-      return PureStore { acls, inst.src(1) };
+      return PureStore { acls, inst.src(1), nullptr };
     }
 
   case LdLoc:
-    return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
+    return PureLoad { ALocal { inst.src(0), inst.extra<LocalId>()->locId } };
 
   case CheckLoc:
-  case LdLocPseudoMain:
-    // Note: LdLocPseudoMain is both a guard and a load, so it must not be a
-    // PureLoad.
     return may_load_store(
-      AFrame { inst.src(0), inst.extra<LocalId>()->locId },
+      ALocal { inst.src(0), inst.extra<LocalId>()->locId },
       AEmpty
     );
-
-  case StLocPseudoMain:
-    // This can store to globals or locals, but we don't have globals supported
-    // in AliasClass yet.
-    return PureStore { AUnknown, inst.src(1) };
-
-  case LdClosureStaticLoc:
-    return may_load_store(AFrameAny, AFrameAny);
-
-  //////////////////////////////////////////////////////////////////////
-  // Instructions that manipulate class-ref slots
-
-  case LdClsRef:
-    return PureLoad {
-      AClsRefSlot { inst.src(0), inst.extra<LdClsRef>()->slot }
-    };
-
-  case StClsRef:
-    return PureStore {
-      AClsRefSlot { inst.src(0), inst.extra<StClsRef>()->slot },
-      inst.src(1)
-    };
-
-  case KillClsRef:
-    return may_load_store_kill(
-      AEmpty, AEmpty,
-      AClsRefSlot { inst.src(0), inst.extra<KillClsRef>()->slot }
-    );
-
-  //////////////////////////////////////////////////////////////////////
-  // Instructions that manipulate cuf-iter slots
-
-  case DecodeCufIter: {
-    auto const iterId = inst.extra<DecodeCufIter>()->iterId;
-    auto const func = AliasClass { ACufIterFunc { inst.src(1), iterId } };
-    auto const ctx = AliasClass { ACufIterCtx { inst.src(1), iterId } };
-    auto const invName = AliasClass { ACufIterInvName { inst.src(1), iterId } };
-    return may_raise(
-      inst,
-      may_load_store(AHeapAny, AHeapAny | func | ctx | invName)
-    );
-  }
-
-  case StCufIterFunc:
-    return PureStore {
-      ACufIterFunc { inst.src(0), inst.extra<StCufIterFunc>()->iterId },
-      inst.src(1)
-    };
-  case StCufIterCtx:
-    return PureStore {
-      ACufIterCtx { inst.src(0), inst.extra<StCufIterCtx>()->iterId },
-      inst.src(1)
-    };
-  case StCufIterInvName:
-    return PureStore {
-      ACufIterInvName { inst.src(0), inst.extra<StCufIterInvName>()->iterId },
-      inst.src(1)
-    };
-  case StCufIterDynamic:
-    return PureStore {
-      ACufIterDynamic { inst.src(0), inst.extra<StCufIterDynamic>()->iterId },
-      inst.src(1)
-    };
-  case LdCufIterFunc:
-    return PureLoad {
-      ACufIterFunc { inst.src(0), inst.extra<LdCufIterFunc>()->iterId }
-    };
-  case LdCufIterCtx:
-    return PureLoad {
-      ACufIterCtx { inst.src(0), inst.extra<LdCufIterCtx>()->iterId }
-    };
-  case LdCufIterInvName:
-    return PureLoad {
-      ACufIterInvName { inst.src(0), inst.extra<LdCufIterInvName>()->iterId }
-    };
-  case LdCufIterDynamic:
-    return PureLoad {
-      ACufIterDynamic { inst.src(0), inst.extra<LdCufIterDynamic>()->iterId }
-    };
-
-  case KillCufIter: {
-    auto const iterId = inst.extra<KillCufIter>()->iterId;
-    auto const func = AliasClass { ACufIterFunc { inst.src(0), iterId } };
-    auto const ctx = AliasClass { ACufIterCtx { inst.src(0), iterId } };
-    auto const invName = AliasClass { ACufIterInvName { inst.src(0), iterId } };
-    auto const dynamic = AliasClass { ACufIterDynamic { inst.src(0), iterId } };
-    return may_load_store_kill(AEmpty, AEmpty, func | ctx | invName | dynamic);
-  }
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores
@@ -1080,41 +969,28 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdMem:
     return PureLoad { pointee(inst.src(0)) };
   case StMem:
-    return PureStore { pointee(inst.src(0)), inst.src(1) };
+    return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
 
-  // TODO(#5962341): These take non-constant offset arguments, and are
-  // currently only used for collections and class property inits, so we aren't
-  // hooked up yet.
-  case StElem:
-    return PureStore {
-      inst.src(0)->type() <= TPtrToRMembCell
-        ? AHeapAny
-        : AUnknown,
-      inst.src(2)
-    };
-  case LdElem:
-    return PureLoad {
-      inst.src(0)->type() <= TPtrToRMembCell
-        ? AHeapAny
-        : AUnknown
-    };
+  case StImplicitContext:
+    return may_load_store(AEmpty, AEmpty);
+
+  case LdClsInitElem:
+    return PureLoad { AHeapAny };
+
+  case StClsInitElem:
+    return PureStore { AHeapAny };
+
+  case LdPairElem:
+    return PureLoad { AHeapAny };
 
   case LdMBase:
     return PureLoad { AMIStateBase };
 
   case StMBase:
-    return PureStore { AMIStateBase, inst.src(0) };
+    return PureStore { AMIStateBase, inst.src(0), nullptr };
 
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
-
-  case BoxPtr:
-    {
-      auto const mem = pointee(inst.src(0));
-      return may_load_store(mem, mem);
-    }
-  case UnboxPtr:
-    return may_load_store(pointee(inst.src(0)), AEmpty);
 
   case IsNTypeMem:
   case IsTypeMem:
@@ -1122,18 +998,51 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckInitMem:
     return may_load_store(pointee(inst.src(0)), AEmpty);
 
+  case CheckRDSInitialized:
+    return may_load_store(
+      ARds { inst.extra<CheckRDSInitialized>()->handle },
+      AEmpty
+    );
+  case MarkRDSInitialized:
+    return may_load_store(
+      AEmpty,
+      ARds { inst.extra<MarkRDSInitialized>()->handle }
+    );
+
+  case InitProps:
+    return may_load_store(
+      AHeapAny,
+      AHeapAny | ARds { inst.extra<InitProps>()->cls->propHandle() }
+    );
+
+  case InitSProps:
+    return may_load_store(
+      AHeapAny,
+      AHeapAny | ARds { inst.extra<InitSProps>()->cls->sPropInitHandle() }
+    );
+
+  case LdClsFromClsMeth:
+  case LdFuncFromClsMeth:
+  case LdFuncFromRFunc:
+  case LdGenericsFromRFunc:
+  case LdClsFromRClsMeth:
+  case LdFuncFromRClsMeth:
+  case LdGenericsFromRClsMeth:
+    return may_load_store(AEmpty, AEmpty);
+
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
 
-  case CheckRefInner:
-    return may_load_store(ARef { inst.src(0) }, AEmpty);
-  case LdRef:
-    return PureLoad { ARef { inst.src(0) } };
-  case StRef:
-    return PureStore { ARef { inst.src(0) }, inst.src(1) };
-
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
+
+  case InitObjMemoSlots:
+    // Writes to memo slots, but these are not modeled.
+    return IrrelevantEffects {};
+
+  case LockObj:
+    // Writes object attributes, but these are not modeled.
+    return IrrelevantEffects {};
 
   // Loads $obj->trace, stores $obj->file and $obj->line.
   case InitThrowableFileAndLine:
@@ -1142,14 +1051,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Array loads and stores
 
-  case InitPackedLayoutArray:
-    return PureStore {
-      AElemI { inst.src(0), inst.extra<InitPackedLayoutArray>()->index },
-      inst.src(1)
-    };
+  case InitVecElem: {
+    auto const arr = inst.src(0);
+    auto const val = inst.src(1);
+    auto const idx = inst.extra<InitVecElem>()->index;
+    return PureStore { AElemI { arr, idx }, val, arr };
+  }
 
-  case LdVecElem:
-  case LdPackedElem: {
+  case InitDictElem: {
+    auto const arr = inst.src(0);
+    auto const val = inst.src(1);
+    auto const key = inst.extra<InitDictElem>()->key;
+    return PureStore { AElemS { arr, key }, val, arr };
+  }
+
+  case LdVecElem: {
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
     return PureLoad {
@@ -1157,9 +1073,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  case InitPackedLayoutArrayLoop:
+  case InitVecElemLoop:
     {
-      auto const extra = inst.extra<InitPackedLayoutArrayLoop>();
+      auto const extra = inst.extra<InitVecElemLoop>();
       auto const stack_in = AStack {
         inst.src(1),
         extra->offset + static_cast<int32_t>(extra->size) - 1,
@@ -1167,6 +1083,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
       return may_load_store_move(stack_in, AElemIAny, stack_in);
     }
+
+  case NewLoggingArray:
+  case LogArrayReach:
+    // May read any data referenced by the input array, but not locals/stack.
+    return may_load_store(AHeapAny, AHeapAny);
 
   case NewKeysetArray:
     {
@@ -1178,10 +1099,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         extra->offset + static_cast<int32_t>(extra->size) - 1,
         static_cast<int32_t>(extra->size)
       };
-      return may_raise(inst, may_load_store_move(stack_in, AEmpty, stack_in));
+      return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case NewStructArray:
   case NewStructDArray:
   case NewStructDict:
     {
@@ -1196,43 +1116,70 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case MemoGet: {
-    auto const extra = inst.extra<MemoGet>();
-    auto const frame = AFrame {
+  case NewRecord:
+    {
+      auto const extra = inst.extra<NewStructData>();
+      auto const stack_in = AStack {
+        inst.src(1),
+        extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
+        static_cast<int32_t>(extra->numKeys)
+      };
+      return may_load_store_move(stack_in, AEmpty, stack_in);
+    }
+  case MemoGetStaticValue:
+  case MemoGetLSBValue:
+  case MemoGetInstanceValue:
+    // Only reads the memo value (which isn't modeled here).
+    return may_load_store(AEmpty, AEmpty);
+
+  case MemoSetStaticValue:
+  case MemoSetLSBValue:
+  case MemoSetInstanceValue:
+    // Writes to the memo value (which isn't modeled)
+    return may_load_store(AEmpty, AEmpty);
+
+  case MemoGetStaticCache:
+  case MemoGetLSBCache:
+  case MemoSetStaticCache:
+  case MemoSetLSBCache: {
+    // Reads some (non-zero) set of locals for keys, and reads/writes from the
+    // memo cache (which isn't modeled).
+    auto const extra = inst.extra<MemoCacheStaticData>();
+    auto const frame = ALocal {
       inst.src(0),
       AliasIdSet{
         AliasIdSet::IdRange{
-          extra->locals.first,
-          extra->locals.first + extra->locals.restCount + 1
+          extra->keys.first,
+          extra->keys.first + extra->keys.count
         }
       }
     };
-    auto const base = pointee(inst.src(1));
-    return may_load_store(AElemAny | frame | base, AEmpty);
-  }
-  case MemoSet: {
-    auto const extra = inst.extra<MemoSet>();
-    auto const frame = AFrame {
-      inst.src(0),
-      AliasIdSet{
-        AliasIdSet::IdRange{
-          extra->locals.first,
-          extra->locals.first + extra->locals.restCount + 1
-        }
-      }
-    };
-    auto const base = pointee(inst.src(1));
-    // May re-enter when decrementing previously stored value
-    return may_reenter(
-      inst,
-      may_load_store(
-        AElemAny | frame | base,
-        AElemAny | base
-      )
-    );
+
+    return may_load_store(frame, AEmpty);
   }
 
-  case MixedArrayGetK:
+  case MemoGetInstanceCache:
+  case MemoSetInstanceCache: {
+    // Reads some set of locals for keys, and reads/writes from the memo cache
+    // (which isn't modeled).
+    auto const extra = inst.extra<MemoCacheInstanceData>();
+    auto const frame = [&]() -> AliasClass {
+      // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
+      if (extra->keys.count == 0) return AEmpty;
+
+      return ALocal {
+        inst.src(0),
+        AliasIdSet{
+          AliasIdSet::IdRange{
+            extra->keys.first,
+            extra->keys.first + extra->keys.count
+          }
+        }
+      };
+    }();
+    return may_load_store(frame, AEmpty);
+  }
+
   case DictGetK:
   case KeysetGetK: {
     auto const base = inst.src(0);
@@ -1251,61 +1198,79 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AElemAny };
   }
 
+  case LdPtrIterKey:
+    // Array element keys are not tracked by memory effects right now.
+    return may_load_store(AEmpty, AEmpty);
+
+  case LdPtrIterVal: {
+    // NOTE: The type param for this op restricts the key, not the value.
+    if (inst.typeParam() <= TInt) return PureLoad { AElemIAny };
+    if (inst.typeParam() <= TStr) return PureLoad { AElemSAny };
+    return PureLoad { AElemAny };
+  }
+
   case ElemMixedArrayK:
   case ElemDictK:
   case ElemKeysetK:
     return IrrelevantEffects {};
 
-  case ProfileMixedArrayOffset:
+  case VecFirst: {
+    auto const base = inst.src(0);
+    return may_load_store(AElemI { base, 0 }, AEmpty);
+  }
+  case VecLast: {
+    auto const base = inst.src(0);
+    if (base->hasConstVal(TArrLike)) {
+      auto const index = static_cast<int64_t>(base->arrLikeVal()->size() - 1);
+      return may_load_store(AElemI { base, index }, AEmpty);
+    }
+    return may_load_store(AElemIAny, AEmpty);
+  }
+  case DictFirst:
+  case DictLast:
+  case KeysetFirst:
+  case KeysetLast:
+    return may_load_store(AElemAny, AEmpty);
+
+  case DictFirstKey:
+  case DictLastKey:
+    return may_load_store(AEmpty, AEmpty);
+
+  case CheckDictKeys:
   case CheckMixedArrayOffset:
-  case CheckArrayCOW:
-  case ProfileDictOffset:
-  case ProfileKeysetOffset:
   case CheckDictOffset:
   case CheckKeysetOffset:
+  case CheckMissingKeyInArrLike:
+  case ProfileDictAccess:
+  case ProfileKeysetAccess:
+  case CheckArrayCOW:
     return may_load_store(AHeapAny, AEmpty);
-
-  case ArrayIsset:
-  case AKExistsArr:
-    return hack_arr_compat_may_raise(inst, may_load_store(AElemAny, AEmpty));
-
-  case ArrayIdx:
-    return hack_arr_compat_may_raise(
-      inst,
-      may_load_store(AElemAny | ARefAny, AEmpty)
-    );
-
-  case SameArr:
-  case NSameArr:
-    return hack_arr_compat_dv_cmp_may_raise(
-      inst,
-      may_load_store(AEmpty, AEmpty)
-    );
 
   case DictGetQuiet:
   case DictIsset:
-  case DictEmptyElem:
   case DictIdx:
   case KeysetGetQuiet:
   case KeysetIsset:
-  case KeysetEmptyElem:
   case KeysetIdx:
   case AKExistsDict:
   case AKExistsKeyset:
     return may_load_store(AElemAny, AEmpty);
 
-  case SameVec:
-  case NSameVec:
-  case SameDict:
-  case NSameDict:
-  case EqKeyset:
-  case NeqKeyset:
-  case SameKeyset:
-  case NSameKeyset:
+  case SameArrLike:
+  case NSameArrLike:
     return may_load_store(AElemAny, AEmpty);
 
+  case EqArrLike:
+  case NeqArrLike: {
+    if (inst.src(0)->type() <= TKeyset && inst.src(1)->type() <= TKeyset) {
+      return may_load_store(AElemAny, AEmpty);
+    } else {
+      return may_load_store(AHeapAny, AHeapAny);
+    }
+  }
+
   case AKExistsObj:
-    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_load_store(AHeapAny, AHeapAny);
 
   //////////////////////////////////////////////////////////////////////
   // Member instructions
@@ -1320,50 +1285,53 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * arbitrary heap locations.
    */
   case CGetElem:
-  case EmptyElem:
   case IssetElem:
   case CGetProp:
   case CGetPropQ:
-  case EmptyProp:
   case IssetProp:
-    return may_raise(inst, may_load_store(
+    return may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny
-    ));
+    );
 
-  case VGetElem:
+  /*
+   * SetRange behaves like a simpler version of SetElem.
+   */
+  case SetRange:
+  case SetRangeRev:
+    return may_load_store(
+      AHeapAny | all_pointees(inst),
+      AHeapAny | pointee(inst.src(0))
+    );
+
+  case IncDecElem:
+  case IncDecProp:
   case SetElem:
-  case SetNewElemArray:
-  case SetNewElemVec:
-  case SetNewElemKeyset:
   case SetNewElem:
   case SetOpElem:
-  case SetWithRefElem:
+  case SetOpProp:
+  case SetProp:
+  case SetNewElemDict:
+  case SetNewElemVec:
+  case SetNewElemKeyset:
   case UnsetElem:
-  case BindElem:
-  case BindNewElem:
-  case IncDecElem:
-  case ElemArrayD:
-  case ElemArrayU:
   case ElemVecD:
   case ElemVecU:
   case ElemDictD:
   case ElemDictU:
   case ElemKeysetU:
-  case VGetProp:
+  case ElemX:
+  case ElemDX:
+  case ElemUX:
   case UnsetProp:
-  case IncDecProp:
-  case SetProp:
-  case SetOpProp:
-  case BindProp:
-    // Right now we generally can't limit any of these better than general
-    // re-entry rules, since they can raise warnings and re-enter.
-    return may_raise(inst, may_load_store(
+    // These member ops will load and store from the base lval which they
+    // take as their first argument, which may point anywhere in the heap.
+    return may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
-    ));
+    );
 
-  case ReservePackedArrayDataNewElem:
+  case ReserveVecNewElem:
     return may_load_store(AHeapAny, AHeapAny);
 
   /*
@@ -1371,9 +1339,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * operations above, these may take a pointer to MInstrState::tvRef, which
    * they may store to (but not read from).
    */
-  case ElemX:
-  case ElemDX:
-  case ElemUX:
   case PropX:
   case PropDX:
   case PropQ:
@@ -1386,42 +1351,57 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    */
   case MapIsset:
   case PairIsset:
-  case VectorDoCow:
   case VectorIsset:
     return may_load_store(AHeapAny, AEmpty /* Note */);
   case MapGet:
   case MapSet:
-    return may_reenter(inst, may_load_store(AHeapAny, AEmpty /* Note */));
+  case VectorSet:
+    return may_load_store(AHeapAny, AEmpty /* Note */);
 
+  case LdInitPropAddr:
+    return may_load_store(
+      AProp {
+        inst.src(0),
+        safe_cast<uint16_t>(inst.extra<LdInitPropAddr>()->index)
+      },
+      AEmpty
+    );
+  case LdInitRDSAddr:
+    return may_load_store(
+      ARds { inst.extra<LdInitRDSAddr>()->handle },
+      AEmpty
+    );
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that allocate new objects, without reading any other memory
   // at all, so any effects they have on some types of memory locations we
   // track are isolated from anything else we care about.
 
-  case NewArray:
+  case NewClsMeth:
+  case NewRClsMeth:
   case NewCol:
   case NewColFromArray:
   case NewPair:
   case NewInstanceRaw:
-  case NewMixedArray:
   case NewDArray:
   case NewDictArray:
-  case AllocPackedArray:
+  case NewRFunc:
+  case FuncCred:
   case AllocVArray:
-  case AllocVecArray:
-  case ConvBoolToArr:
+  case AllocVec:
+  case AllocStructDArray:
+  case AllocStructDict:
   case ConvDblToStr:
-  case ConvDblToArr:
-  case ConvIntToArr:
   case ConvIntToStr:
-  case Box:  // conditional allocation
     return IrrelevantEffects {};
 
   case AllocObj:
     // AllocObj re-enters to call constructors, but if it weren't for that we
     // could ignore its loads and stores since it's a new object.
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+    return may_load_store(AEmpty, AEmpty);
+  case AllocObjReified:
+    // Similar to AllocObj but also stores the reification
+    return may_load_store(AEmpty, AHeapAny);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate the stack.
@@ -1434,19 +1414,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StStk:
     return PureStore {
       AStack { inst.src(0), inst.extra<StStk>()->offset, 1 },
-      inst.src(1)
+      inst.src(1),
+      nullptr
     };
 
-  case SpillFrame:
-    {
-      auto const spOffset = inst.extra<SpillFrame>()->spOffset;
-      return PureSpillFrame {
-        actrec(inst.src(0), spOffset),
-        actrec_ctx(inst.src(0), spOffset),
-        actrec_func(inst.src(0), spOffset),
-        inst.src(1)
-      };
-    }
+  case StOutValue:
+    // Technically these writes affect the caller's stack, but there is no way
+    // to actually observe them from within the callee. They can also only
+    // occur once on any exit path from a function.
+    return may_load_store(AEmpty, AEmpty);
+
+  case LdOutAddr:
+    return IrrelevantEffects{};
 
   case CheckStk:
     return may_load_store(
@@ -1454,50 +1433,31 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
-  // The following may re-enter, and also deal with a stack slot.
-  case CastStk:
-    {
-      auto const stk = AStack {
-        inst.src(0), inst.extra<CastStk>()->offset, 1
-      };
-      return may_raise(inst, may_load_store(stk, stk));
-    }
-  case CoerceStk:
-    {
-      auto const stk = AStack {
-        inst.src(0), inst.extra<CoerceStk>()->offset, 1
-      };
-      return may_raise(inst, may_load_store(stk, stk));
-    }
-
-  case CastMem:
-  case CoerceMem:
-    {
-      auto aInst = inst.src(0)->inst();
-      if (aInst->is(LdLocAddr)) {
-        return may_raise(inst, may_load_store(AFrameAny, AFrameAny));
-      }
-      return may_raise(inst, may_load_store(AUnknown, AUnknown));
-    }
-
-  case LdARCtx:
-    return PureLoad {
-      actrec_ctx(inst.src(0), inst.extra<LdARCtx>()->offset)
-    };
-  case LdARFuncPtr:
-    return PureLoad {
-      actrec_func(inst.src(0), inst.extra<LdARFuncPtr>()->offset)
-    };
-
-  case DbgAssertARFunc:
-    return may_load_store(
-      actrec_func(inst.src(0), inst.extra<DbgAssertARFunc>()->offset),
-      AEmpty
-    );
+  case DbgTraceCall:
+    return may_load_store(AStackAny | ALocalAny, AEmpty);
 
   case Unreachable:
     // Unreachable code kills every memory location.
     return may_load_store_kill(AEmpty, AEmpty, AUnknown);
+
+  case ResolveTypeStruct: {
+    auto const extra = inst.extra<ResolveTypeStructData>();
+    auto const stack_in = AStack {
+      inst.src(0),
+      extra->offset + static_cast<int32_t>(extra->size) - 1,
+      static_cast<int32_t>(extra->size)
+    };
+    return may_load_store(AliasClass(stack_in)|AHeapAny, AHeapAny);
+  }
+
+  case DefFP:
+    return may_load_store(AFBasePtr, AFBasePtr);
+
+  case DefFuncEntryFP:
+    return may_load_store(livefp(inst.src(0)), livefp(inst.dst()));
+
+  case LdARFlags:
+    return PureLoad { AFMeta { inst.src(0) }};
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
@@ -1507,35 +1467,42 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddDbl:
   case AddInt:
   case AddIntO:
+  case AdvanceDictPtrIter:
+  case AdvanceVecPtrIter:
   case AndInt:
   case AssertType:
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
-  case FuncGuard:
-  case DefFP:
-  case DefSP:
+  case DefFrameRelSP:
+  case DefRegSP:
+  case DefCallFlags:
+  case DefCallFunc:
+  case DefCallNumArgs:
+  case DefCallCtx:
   case EndGuards:
+  case EnterPrologue:
   case EqBool:
   case EqCls:
+  case EqRecDesc:
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
   case EqDbl:
   case EqInt:
+  case EqPtrIter:
+  case GetDictPtrIter:
+  case GetVecPtrIter:
   case GteBool:
   case GteInt:
   case GtBool:
   case GtInt:
-  case HintLocInner:
-  case HintStkInner:
-  case HintMBaseInner:
   case Jmp:
   case JmpNZero:
   case JmpZero:
   case LdPropAddr:
   case LdStkAddr:
-  case LdPackedArrayDataElemAddr:
+  case LdVecElemAddr:
   case LteBool:
   case LteDbl:
   case LteInt:
@@ -1568,6 +1535,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertNonNull:
   case CheckNonNull:
   case CheckNullptr:
+  case CheckImplicitContextNull:
+  case CheckSmashableClass:
   case Ceil:
   case Floor:
   case DefLabel:
@@ -1584,43 +1553,85 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Sqrt:
   case Shl:
   case Shr:
+  case Lshr:
   case IsNType:
   case IsType:
   case Mov:
-  case ConvClsToCctx:
   case ConvDblToBool:
   case ConvDblToInt:
-  case IsScalarType:
+  case DblAsBits:
   case LdMIStateAddr:
-  case LdPairBase:
-  case CheckStaticLoc:
-  case LdStaticLoc:
   case LdClsCns:
   case LdSubClsCns:
+  case LdSubClsCnsClsName:
+  case LdTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
   case ProfileSubClsCns:
-  case CheckCtxThis:
-  case CheckFuncStatic:
-  case LdARNumParams:
+  case FuncHasAttr:
+  case IsFunReifiedGenericsMatched:
+  case IsClsDynConstructible:
+  case JmpPlaceholder:
+  case LdFuncRxLevel:
+  case LdSmashable:
+  case LdSmashableFunc:
   case LdRDSAddr:
-  case ExitPlaceholder:
   case CheckRange:
   case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
-  case CheckARMagicFlag:
-  case LdARNumArgsAndFlags:
-  case StARNumArgsAndFlags:
+  case IsTypeStructCached:
   case LdTVAux:
-  case LdARInvName:
-  case StARInvName:
   case MethodExists:
   case GetTime:
   case GetTimeNs:
   case ProfileInstanceCheck:
   case Select:
+  case LookupSPropSlot:
+  case ConvPtrToLval:
+  case ProfileProp:
+  case ProfileIsTypeStruct:
+  case LdLazyClsName:
     return IrrelevantEffects {};
+
+  case StClosureArg:
+    return PureStore {
+      AProp {
+        inst.src(0),
+        safe_cast<uint16_t>(inst.extra<StClosureArg>()->index)
+      },
+      inst.src(1),
+      inst.src(0)
+    };
+
+  case StArResumeAddr:
+    return PureStore { AFMeta { inst.src(0) }, nullptr };
+
+  case StContArKey:
+  case StContArValue:
+  case StContArState:
+  case ContArIncIdx:
+  case ContArIncKey:
+  case ContArUpdateIdx:
+  case LdContArKey:
+  case LdContArValue:
+    return may_load_store(AFContext { inst.src(0) }, AEmpty);
+
+  case LdFrameThis:
+  case LdFrameCls:
+    return PureLoad { AFContext { inst.src(0) }};
+
+  case StFrameCtx:
+    return PureStore { AFContext { inst.src(0) }, inst.src(1) };
+
+  case StFrameFunc:
+    return PureStore { AFFunc { inst.src(0) }, nullptr };
+
+  case StFrameMeta:
+    return PureStore { AFMeta { inst.src(0) }, nullptr };
+
+  case EagerSyncVMRegs:
+    return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that technically do some things w/ memory, but not in any way
@@ -1630,68 +1641,50 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // can.  All GeneralEffects instructions are assumed to possibly do so.
 
   case DecRefNZ:
+  case ProfileDecRef:
   case AFWHBlockOn:
+  case AFWHPushTailFrame:
   case IncRef:
-  case LdClosureCtx:
-  case StClosureCtx:
-  case StClosureArg:
-  case StContArKey:
-  case StContArValue:
+  case LdClosureCls:
+  case LdClosureThis:
   case LdRetVal:
   case ConvStrToInt:
   case ConvResToInt:
   case OrdStr:
   case ChrInt:
   case CreateSSWH:
-  case NewLikeArray:
-  case CheckRefs:
-  case LdClsCctx:
+  case CheckInOuts:
   case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
-  case CheckVArray:
-  case CheckDArray:
-  case RegisterLiveObj:
-  case StArResumeAddr:
-  case StContArState:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case CheckCold:
-  case CheckInitProps:
-  case CheckInitSProps:
-  case ContArIncIdx:
-  case ContArIncKey:
-  case ContArUpdateIdx:
   case ContValid:
   case ContStarted:
   case IncProfCounter:
+  case IncCallCounter:
   case IncStat:
-  case IncStatGrouped:
   case ContPreNext:
   case ContStartedCheck:
-  case ConvArrToBool:
-  case ConvArrToDbl:
-  case CountArray:
-  case CountArrayFast:
   case CountVec:
   case CountDict:
   case CountKeyset:
+  case HasReifiedGenerics:
   case InstanceOf:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case InstanceOfIface:
-  case InterfaceSupportsArr:
-  case InterfaceSupportsVec:
-  case InterfaceSupportsDict:
-  case InterfaceSupportsKeyset:
+  case InstanceOfRecDesc:
+  case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:
   case IsWaitHandle:
   case IsCol:
-  case IsDVArray:
   case HasToString:
   case DbgAssertRefCount:
+  case DbgCheckLocalsDecRefd:
   case GtStr:
   case GteStr:
   case LtStr:
@@ -1719,25 +1712,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RBTraceMsg:
   case ConvIntToBool:
   case ConvIntToDbl:
-  case ConvStrToArr:   // decrefs src, but src is a string
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvResToDbl:
-  case EagerSyncVMRegs:
   case ExtendsClass:
   case LdUnwinderValue:
-  case LdCtx:
-  case LdCctx:
-  case LdClosure:
   case LdClsName:
   case LdAFWHActRec:
-  case LdClsCtx:
   case LdContActRec:
-  case LdContArKey:
-  case LdContArValue:
   case LdContField:
   case LdContResumeAddr:
   case LdClsCachedSafe:
+  case LdRecDescCachedSafe:
   case LdClsInitData:
   case UnwindCheckSideExit:
   case LdCns:
@@ -1746,43 +1732,43 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheCls:
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
-  case FwdCtxStaticCall:
-  case ProfileArrayKind:
+  case LdClsTypeCns:
+  case LdClsTypeCnsClsName:
   case ProfileSwitchDest:
-  case LdFuncCachedSafe:
+  case LdFuncCls:
   case LdFuncNumParams:
-  case LdGblAddr:
-  case LdGblAddrDef:
+  case LdFuncName:
+  case LdMethCallerName:
   case LdObjClass:
+  case LdRecDesc:
   case LdObjInvoke:
+  case LdObjMethodD:
+  case LdObjMethodS:
   case LdStrLen:
   case StringIsset:
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
-  case LdVectorBase:
   case LdWHResult:
   case LdWHState:
   case LdWHNotDone:
+  case LookupClsMethod:
   case LookupClsRDS:
-  case DbgTraceCall:
-  case InitCtx:
-  case PackMagicArgs:
   case StrictlyIntegerConv:
+  case DbgAssertFunc:
+  case ProfileCall:
+  case ProfileMethod:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
-  case InitStaticLoc:
   case ColIsEmpty:
   case ColIsNEmpty:
-  case ConvCellToBool:
+  case ConvTVToBool:
   case ConvObjToBool:
   case CountCollection:
   case LdVectorSize:
-  case VectorHasImmCopy:
-  case CheckPackedArrayDataBounds:
+  case CheckVecBounds:
   case LdColVec:
   case LdColDict:
-  case EnterFrame:
     return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
@@ -1791,92 +1777,56 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // alias-class.h above AStack for more).
 
   case DecRef:
-    {
-      auto const src = inst.src(0);
-      // It could decref the inner ref.
-      auto affected = src->isA(TBoxedCell) ? ARef { src } :
-                      src->type().maybe(TBoxedCell) ? ARefAny : AEmpty;
-      if (src->type().maybe(TKeyset | TBoxedKeyset)) {
-        // TKeyset can't re-enter, but it will decref any contained
-        // strings. Without this, an incref of a string contained in
-        // a Keyset could be sunk past the decref of the Keyset.
-        affected |= AHeapAny;
-      }
-      // Need to add affected to the `store' set. See comments about
-      // `GeneralEffects' in memory-effects.h.
-      auto const effect = may_load_store(affected, affected);
-      if (src->type().maybe(TArr | TVec | TDict | TObj | TRes |
-                            TBoxedArr | TBoxedVec | TBoxedDict |
-                            TBoxedObj | TBoxedRes)) {
-        // Could re-enter to run a destructor. Keysets are exempt because they
-        // can only contain strings or integers.
-        return may_reenter(inst, effect);
-      }
-      return effect;
-    }
+    return may_load_store(AHeapAny, AHeapAny);
 
-  case GetMemoKey: {
-    auto const src = inst.src(0);
-    if (src->type().maybe(TArr | TVec | TDict | TKeyset | TObj | TRes)) {
-      return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
-    }
+  case GetMemoKey:
+    return may_load_store(AHeapAny, AHeapAny);
+
+  case GetMemoKeyScalar:
     return IrrelevantEffects{};
+
+  // These opcodes raise notices if we access $GLOBALS['GLOBALS'],
+  // or, due to case insensitivity, $GLOBALS['gLoBAls'], etc.
+  case BaseG:
+  case LdGblAddr:
+  case LdGblAddrDef: {
+    auto const base = inst.op() == BaseG
+      ? may_load_store(AHeapAny, AHeapAny)
+      : may_load_store(AEmpty, AEmpty);
+    auto const& key = inst.src(0)->type();
+    auto const safe = key.hasConstVal() && !s_GLOBALS.equal(key.strVal());
+    return safe ? base : may_reenter(inst, base);
   }
 
-  case LdArrFPushCuf:
-  case LdArrFuncCtx:
-  case LdStrFPushCuf:
-  case LdFunc: // these all can autoload
-    {
-      AliasClass effects =
-        actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
-      return may_raise(inst, may_load_store(effects, effects));
-    }
+  case LdClsCtor:
+    return may_load_store(AEmpty, AEmpty);
 
-  case LdObjMethod:    // can't autoload, but can decref $this right now
-    {
-      AliasClass effects =
-        actrec(inst.src(1), inst.extra<LdObjMethod>()->offset);
-      return may_raise(inst, may_load_store(effects, effects));
-    }
-
-  case LookupClsMethod:   // autoload, and it writes part of the new actrec
-    {
-      AliasClass effects =
-        actrec(inst.src(2), inst.extra<LookupClsMethod>()->calleeAROffset);
-      return may_raise(inst, may_load_store(effects, effects));
-    }
-
-  case ProfileMethod:
-    {
-      AliasClass effects =
-        actrec(inst.src(0), inst.extra<ProfileMethod>()->bcSPOff);
-      return may_load_store(effects, AEmpty);
-    }
+  case RaiseRxCallViolation:
+    return may_load_store(AFFunc{inst.src(0)}, AEmpty);
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
-  case BaseG:
   case Clone:
-  case RaiseArrayIndexNotice:
-  case RaiseArrayKeyNotice:
+  case ThrowArrayIndexException:
+  case ThrowArrayKeyException:
+  case RaiseClsMethPropConvertNotice:
+  case RaiseArraySerializeNotice:
   case RaiseUninitLoc:
   case RaiseUndefProp:
-  case RaiseMissingArg:
+  case RaiseTooManyArg:
   case RaiseError:
   case RaiseNotice:
   case RaiseWarning:
-  case RaiseMissingThis:
-  case FatalMissingThis:
-  case RaiseVarEnvDynCall:
   case RaiseHackArrCompatNotice:
-  case RaiseHackArrParamNotice:
-  case RaiseParamRefMismatch:
-  case ConvCellToStr:
+  case RaiseForbiddenDynCall:
+  case RaiseForbiddenDynConstruct:
+  case RaiseStrToClassNotice:
+  case CheckClsMethFunc:
+  case CheckClsReifiedGenericMismatch:
+  case CheckFunReifiedGenericMismatch:
+  case ConvTVToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
-  case MIterFree:
-  case IterFree:
   case GtObj:
   case GteObj:
   case LtObj:
@@ -1884,64 +1834,32 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqObj:
   case NeqObj:
   case CmpObj:
-  case GtArr:
-  case GteArr:
-  case LtArr:
-  case LteArr:
-  case EqArr:
-  case NeqArr:
-  case CmpArr:
-  case GtVec:
-  case GteVec:
-  case LtVec:
-  case LteVec:
-  case EqVec:
-  case NeqVec:
-  case CmpVec:
-  case EqDict:
-  case NeqDict:
-  case ConvCellToArr:  // decrefs src, may read obj props
-  case ConvCellToObj:  // decrefs src
-  case ConvObjToArr:   // decrefs src
+  case GtArrLike:
+  case GteArrLike:
+  case LtArrLike:
+  case LteArrLike:
+  case CmpArrLike:
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
-  case InitProps:
-  case InitSProps:
   case OODeclExists:
-  case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
+  case LdFunc:         // autoload
   case LdFuncCached:   // autoload
-  case LdFuncCachedU:  // autoload
+  case LdRecDescCached:    // autoload
   case LdSwitchObjIndex:  // decrefs arg
   case InitClsCns:      // autoload
   case LookupClsMethodCache:  // autoload
   case LookupClsMethodFCache: // autoload
-  case LookupCns:
   case LookupCnsE:
-  case LookupCnsU:
+  case LookupFuncCached: // autoload
   case StringGet:      // raise_notice
   case OrdStrIdx:      // raise_notice
-  case ArrayAdd:       // decrefs source
-  case AddElemIntKey:
-  case AddElemStrKey:
-  case AddNewElem:         // can re-enter
   case AddNewElemKeyset:   // can re-enter
-  case DictAddElemIntKey:  // decrefs value
-  case DictAddElemStrKey:  // decrefs value
-  case ArrayGet:       // kVPackedKind warnings
-  case ArraySet:       // kVPackedKind warnings
-  case ArraySetRef:    // kVPackedKind warnings
   case DictGet:
   case KeysetGet:
   case VecSet:
-  case VecSetRef:
   case DictSet:
-  case DictSetRef:
-  case ElemArrayX:
-  case ElemDictX:
-  case ElemKeysetX:
-  case LdClsCtor:
   case ConcatStrStr:
   case PrintStr:
   case PrintBool:
@@ -1951,70 +1869,66 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdSSwitchDestSlow:
   case ConvObjToDbl:
   case ConvObjToInt:
-  case CoerceStrToInt:
-  case CoerceStrToDbl:
-  case CoerceCellToDbl:
-  case CoerceCellToInt:
-  case CoerceCellToBool:
-  case ConvCellToInt:
+  case ConvTVToInt:
   case ConvResToStr:
   case ConcatStr3:
   case ConcatStr4:
-  case ConvCellToDbl:
-  case ConvArrToVec:
-  case ConvArrToDict:
+  case ConvTVToDbl:
   case ConvObjToVec:
   case ConvObjToDict:
   case ConvObjToKeyset:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
-  case ThrowArithmeticError:
-  case ThrowDivisionByZeroError:
-  case SetOpCell:
-    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
+  case ThrowCallReifiedFunctionWithoutGenerics:
+  case ThrowDivisionByZeroException:
+  case ThrowHasThisNeedStatic:
+  case ThrowLateInitPropError:
+  case ThrowMissingArg:
+  case ThrowMissingThis:
+  case ThrowParameterWrongType:
+  case ThrowParamInOutMismatch:
+  case ThrowParamInOutMismatchRange:
+  case SetLegacyDict:
+  case SetLegacyVec:
+  case UnsetLegacyDict:
+  case UnsetLegacyVec:
+  case SetOpTV:
+  case OutlineSetOp:
+  case ThrowAsTypeStructException:
+  case PropTypeRedefineCheck: // Can raise and autoload
+  case HandleRequestSurprise:
+    return may_load_store(AHeapAny, AHeapAny);
 
   case AddNewElemVec:
+  case RaiseErrorOnInvalidIsAsExpressionType:
+  case IsTypeStruct:
+  case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);
 
-  case ConvArrToKeyset: // Decrefs input values
-  case ConvVecToKeyset:
-  case ConvDictToKeyset:
-    return may_raise(inst, may_load_store(AElemAny, AEmpty));
-
-  case ConvVecToArr:
-  case ConvDictToArr:
-  case ConvKeysetToArr:
-  case ConvArrToNonDVArr:
-  case ConvDictToVec:
-  case ConvKeysetToVec:
-  case ConvVecToDict:
-  case ConvKeysetToDict:
-  case ConvArrToVArr:
-  case ConvVecToVArr:
-  case ConvDictToVArr:
-  case ConvKeysetToVArr:
-  case ConvArrToDArr:
-  case ConvVecToDArr:
-  case ConvDictToDArr:
-  case ConvKeysetToDArr:
+  case ConvArrLikeToVec:
+  case ConvArrLikeToVArr:
+  case ConvArrLikeToDArr: // May raise Hack array compat notices
+  case ConvArrLikeToDict:
+  case ConvArrLikeToKeyset: // Decrefs input values
+  case ConvClsMethToDArr:
+  case ConvClsMethToDict:
+  case ConvClsMethToKeyset:
+  case ConvClsMethToVArr:
+  case ConvClsMethToVec:
     return may_load_store(AElemAny, AEmpty);
-
-  case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals
-    return may_reenter(inst,
-                       may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny));
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.
   case DebugBacktrace:
   case DebugBacktraceFast:
-    return may_load_store(AHeapAny|AFrameAny|AStackAny, AHeapAny);
+    return may_load_store(AHeapAny|ALocalAny|AStackAny, AHeapAny);
 
   // This instruction doesn't touch memory we track, except that it may
   // re-enter to construct php Exception objects.  During this re-entry anything
   // can happen (e.g. a surprise flag check could cause a php signal handler to
   // run arbitrary code).
   case AFWHPrepareChild:
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+    return may_load_store(AActRec { inst.src(0) }, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // The following instructions are used for debugging memory optimizations.
@@ -2054,10 +1968,10 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     return folly::sformat("  inst: {}\n  effects: {}\n", inst, show(me));
   };
 
-  auto check_fp = [&] (SSATmp* fp) {
+  auto check_fp = [&] (FPRelOffset base) {
     always_assert_flog(
-      fp->type() <= TFramePtr,
-      "Non frame pointer in memory effects"
+      base.offset <= 0,
+      "frame offset is above base frame"
     );
   };
 
@@ -2069,8 +1983,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   };
 
   auto check = [&] (AliasClass a) {
-    if (auto const fr = a.frame()) check_fp(fr->fp);
-    if (auto const sl = a.clsRefSlot()) check_fp(sl->fp);
+    if (auto const fr = a.local()) check_fp(fr->base);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 
@@ -2085,7 +1998,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       // Locations may-moved always should also count as may-loads.
       always_assert(x.moves <= x.loads);
 
-      if (inst.mayRaiseError()) {
+      if (inst.mayRaiseErrorWithSources()) {
         // Any instruction that can raise an error can run a user error handler
         // and have arbitrary effects on the heap.
         always_assert(AHeapAny <= x.loads);
@@ -2105,19 +2018,18 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       }
     },
     [&] (PureLoad x)         { check(x.src); },
-    [&] (PureStore x)        { check(x.dst);
-                               always_assert(x.value != nullptr); },
-    [&] (PureSpillFrame x)   { check(x.stk); check(x.ctx); check(x.callee);
-                               always_assert(x.ctx <= x.stk);
-                               always_assert(x.callee <= x.stk); },
+    [&] (PureStore x)        { check(x.dst); },
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
     [&] (CallEffects x)      { check(x.kills);
-                               check(x.stack);
-                               check(x.locals);
-                               check(x.callee);
-                               always_assert(x.callee <= x.stack); },
+                               check(x.inputs);
+                               check(x.actrec);
+                               check(x.outputs);
+                               check(x.locals); },
+    [&] (PureInlineCall x)   { check(x.base);
+                               check(x.actrec); },
+    [&] (PureInlineReturn x) { check(x.base); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -2129,7 +2041,37 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 }
 
 MemEffects memory_effects(const IRInstruction& inst) {
-  auto const ret = memory_effects_impl(inst);
+  auto const inner = memory_effects_impl(inst);
+  auto const ret = [&] () -> MemEffects {
+    if (!inst.mayRaiseErrorWithSources()) return inner;
+
+    auto fail = [&] {
+      always_assert_flog(
+        false,
+        "Instruction {} has effects {}, but has been marked as MayRaiseError "
+        "and must use a UnknownEffects, GeneralEffects, or CallEffects type.",
+        inst,
+        show(inner)
+      );
+      return may_load_store(AUnknown, AUnknown);
+    };
+
+    // Calls are implicitly MayRaise, all other instructions must use the
+    // GeneralEffects or UnknownEffects class of memory effects
+    return match<MemEffects>(
+      inner,
+      [&] (GeneralEffects x)   { return may_reenter(inst, x); },
+      [&] (CallEffects x)      { return x; },
+      [&] (UnknownEffects x)   { return x; },
+      [&] (PureLoad)           { return fail(); },
+      [&] (PureStore)          { return fail(); },
+      [&] (ExitEffects)        { return fail(); },
+      [&] (PureInlineCall)     { return fail(); },
+      [&] (PureInlineReturn)   { return fail(); },
+      [&] (IrrelevantEffects)  { return fail(); },
+      [&] (ReturnEffects)      { return fail(); }
+    );
+  }();
   assertx(check_effects(inst, ret));
   return ret;
 }
@@ -2156,25 +2098,32 @@ MemEffects canonicalize(MemEffects me) {
       return PureLoad { canonicalize(x.src) };
     },
     [&] (PureStore x) -> R {
-      return PureStore { canonicalize(x.dst), x.value };
-    },
-    [&] (PureSpillFrame x) -> R {
-      return PureSpillFrame {
-        canonicalize(x.stk),
-        canonicalize(x.ctx),
-        canonicalize(x.callee)
-      };
+      return PureStore { canonicalize(x.dst), x.value, x.dep };
     },
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
     },
+    [&] (PureInlineCall x) -> R {
+      return PureInlineCall {
+        canonicalize(x.base),
+        x.fp,
+        canonicalize(x.actrec)
+      };
+    },
+    [&] (PureInlineReturn x) -> R {
+      return PureInlineReturn {
+        canonicalize(x.base),
+        x.calleeFp,
+        x.callerFp
+      };
+    },
     [&] (CallEffects x) -> R {
       return CallEffects {
-        x.writes_locals,
         canonicalize(x.kills),
-        canonicalize(x.stack),
-        canonicalize(x.locals),
-        canonicalize(x.callee)
+        canonicalize(x.inputs),
+        canonicalize(x.actrec),
+        canonicalize(x.outputs),
+        canonicalize(x.locals)
       };
     },
     [&] (ReturnEffects x) -> R {
@@ -2202,19 +2151,22 @@ std::string show(MemEffects effects) {
     [&] (ExitEffects x) {
       return sformat("exit({} ; {})", show(x.live), show(x.kills));
     },
-    [&] (CallEffects x) {
-      return sformat("call({} ; {} ; {} ; {})",
-        show(x.kills),
-        show(x.stack),
-        show(x.locals),
-        show(x.callee)
+    [&] (PureInlineCall x) {
+      return sformat("inline_call({} ; {})",
+        show(x.base),
+        show(x.actrec)
       );
     },
-    [&] (PureSpillFrame x) {
-      return sformat("stFrame({} ; {} ; {})",
-        show(x.stk),
-        show(x.ctx),
-        show(x.callee)
+    [&] (PureInlineReturn x) {
+      return sformat("inline_return({})", show(x.base));
+    },
+    [&] (CallEffects x) {
+      return sformat("call({} ; {} ; {} ; {} ; {})",
+        show(x.kills),
+        show(x.inputs),
+        show(x.actrec),
+        show(x.outputs),
+        show(x.locals)
       );
     },
     [&] (PureLoad x)        { return sformat("ld({})", show(x.src)); },
@@ -2223,16 +2175,6 @@ std::string show(MemEffects effects) {
     [&] (IrrelevantEffects) { return "IrrelevantEffects"; },
     [&] (UnknownEffects)    { return "UnknownEffects"; }
   );
-}
-
-//////////////////////////////////////////////////////////////////////
-
-AliasClass inline_fp_frame(const IRInstruction* inst) {
-  return AStack {
-    inst->src(0),
-    inst->extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
-    int32_t{kNumActRecCells}
-  };
 }
 
 //////////////////////////////////////////////////////////////////////

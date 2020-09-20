@@ -1,66 +1,124 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
 type t = {
-  tco_assume_php : bool;
-  tco_safe_array : bool;
-  tco_safe_vector_array : bool;
-  tco_user_attrs : SSet.t option;
-  tco_experimental_features : SSet.t;
-  tco_migration_flags : SSet.t;
-  po_auto_namespace_map : (string * string) list;
-  po_enable_hh_syntax_for_hhvm : bool;
-  po_deregister_php_stdlib : bool;
-  tco_disallow_destruct : bool;
-  ignored_fixme_codes : ISet.t;
+  tco_experimental_features: SSet.t;
+  tco_migration_flags: SSet.t;
+  tco_dynamic_view: bool;
+  tco_num_local_workers: int option;
+  tco_parallel_type_checking_threshold: int;
+  tco_defer_class_declaration_threshold: int option;
+  tco_max_times_to_defer_type_checking: int option;
+  tco_prefetch_deferred_files: bool;
+  tco_remote_type_check_threshold: int option;
+  tco_remote_type_check: bool;
+  tco_remote_worker_key: string option;
+  tco_remote_check_id: string option;
+  tco_remote_max_batch_size: int;
+  tco_remote_min_batch_size: int;
+  tco_num_remote_workers: int;
+  so_remote_version_specifier: string option;
+  so_remote_worker_vfs_checkout_threshold: int;
+  so_naming_sqlite_path: string option;
+  po_auto_namespace_map: (string * string) list;
+  po_codegen: bool;
+  po_deregister_php_stdlib: bool;
+  po_disallow_toplevel_requires: bool;
+  po_disable_nontoplevel_declarations: bool;
+  po_disable_static_closures: bool;
+  po_allow_goto: bool;
+  po_allow_unstable_features: bool;
+  tco_log_inference_constraints: bool;
+  tco_disallow_array_typehint: bool;
+  tco_disallow_array_literal: bool;
+  tco_language_feature_logging: bool;
+  tco_unsafe_rx: bool;
+  tco_disallow_scrutinee_case_value_type_mismatch: bool;
+  tco_timeout: int;
+  tco_disallow_invalid_arraykey: bool;
+  tco_disallow_byref_dynamic_calls: bool;
+  tco_disallow_byref_calls: bool;
+  allowed_fixme_codes_strict: ISet.t;
+  allowed_fixme_codes_partial: ISet.t;
+  codes_not_raised_partial: ISet.t;
+  log_levels: int SMap.t;
+  po_disable_lval_as_an_expression: bool;
+  tco_shallow_class_decl: bool;
+  po_rust_parser_errors: bool;
+  profile_type_check_duration_threshold: float;
+  profile_type_check_twice: bool;
+  profile_owner: string option;
+  profile_desc: string;
+  tco_like_type_hints: bool;
+  tco_union_intersection_type_hints: bool;
+  tco_coeffects: bool;
+  tco_like_casts: bool;
+  tco_simple_pessimize: float;
+  tco_complex_coercion: bool;
+  tco_disable_partially_abstract_typeconsts: bool;
+  error_codes_treated_strictly: ISet.t;
+  tco_check_xhp_attribute: bool;
+  tco_check_redundant_generics: bool;
+  tco_disallow_unresolved_type_variables: bool;
+  tco_disallow_trait_reuse: bool;
+  tco_disallow_invalid_arraykey_constraint: bool;
+  po_enable_class_level_where_clauses: bool;
+  po_disable_legacy_soft_typehints: bool;
+  po_allowed_decl_fixme_codes: ISet.t;
+  po_allow_new_attribute_syntax: bool;
+  tco_global_inference: bool;
+  tco_gi_reinfer_types: string list;
+  tco_ordered_solving: bool;
+  tco_const_static_props: bool;
+  po_disable_legacy_attribute_syntax: bool;
+  tco_const_attribute: bool;
+  po_const_default_func_args: bool;
+  po_const_default_lambda_args: bool;
+  po_disallow_silence: bool;
+  po_abstract_static_props: bool;
+  po_disable_unset_class_const: bool;
+  po_parser_errors_only: bool;
+  tco_check_attribute_locations: bool;
+  glean_service: string;
+  glean_hostname: string;
+  glean_port: int;
+  glean_reponame: string;
+  symbol_write_root_path: string;
+  symbol_write_hhi_path: string;
+  symbol_write_ignore_paths: string list;
+  symbol_write_index_paths: string list;
+  symbol_write_include_hhi: bool;
+  po_disallow_func_ptrs_in_constants: bool;
+  tco_error_php_lambdas: bool;
+  tco_disallow_discarded_nullable_awaitables: bool;
+  po_enable_xhp_class_modifier: bool;
+  po_disable_xhp_element_mangling: bool;
+  po_disable_xhp_children_declarations: bool;
+  po_enable_first_class_function_pointers: bool;
+  po_disable_modes: bool;
+  po_disable_hh_ignore_error: bool;
+  po_disable_array: bool;
+  po_disable_array_typehint: bool;
+  tco_enable_systemlib_annotations: bool;
+  tco_higher_kinded_types: bool;
+  tco_method_call_inference: bool;
+  tco_report_pos_from_reason: bool;
+  tco_typecheck_sample_rate: float;
 }
-
-let tco_experimental_instanceof = "instanceof"
+[@@deriving eq, show]
 
 let tco_experimental_isarray = "is_array"
-
-(* Whether darray and varray are enabled. *)
-let tco_experimental_darray_and_varray = "darray_and_varray"
-
-let tco_experimental_goto = "goto"
-
-(* Whether allow accessing tconsts on generics *)
-let tco_experimental_tconst_on_generics = "tconst_on_generics"
-
-(**
- * Prevents arraus from being promoted to shape-like or tuple-like arrays.
- *)
-let tco_experimental_disable_shape_and_tuple_arrays =
-  "disable_shape_and_tuple_arrays"
-
-(* Whether Shapes::idx should return a non-nullable type when the input shape
-    is known to contain the field. *)
-let tco_experimental_stronger_shape_idx_ret =
-    "stronger_shape_idx_return"
-
-(* Whether subtype assertions of form TUnresolved[] <: t should be added to
- * todo list and checked later (usually generated from contravariant types) *)
-let tco_experimental_unresolved_fix =
-  "unresolved_fix"
-
-(**
- * Allows parsing type hints for function calls, such as foo<int>(args);.
- *)
-let tco_experimental_annotate_function_calls =
-  "annotate_function_calls"
 
 (**
  * Insist on instantiations for all generic types, even in non-strict files
  *)
-let tco_experimental_generics_arity =
-  "generics_arity"
+let tco_experimental_generics_arity = "generics_arity"
 
 (**
  * Forbid casting nullable values, since they have unexpected semantics. For
@@ -74,176 +132,596 @@ let tco_experimental_forbid_nullable_cast = "forbid_nullable_cast"
 *)
 
 let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
- (*
- * Allows parsing of coroutine functions/suspend operator
- *)
-let tco_experimental_coroutines =
-  "coroutines"
-
-(**
- * Support for in-out function parameters. This feature is incomplete and
- * under development, see T21979562 for details and progress.
- *)
-let tco_experimental_inout_params = "inout_params"
-
-(**
- * Disables optional and unknown shape fields syntax and typechecking.
- *
- * Please see the public documentation at
- * http://hhvm.com/blog/2017/09/26/hhvm-3-22.html#nullable-vs-optional-fields-in-shapes
- * to learn more about optional and unknown shape fields.
- *
- * When enabled, this flag results in the following behavior:
- *
- *   1. Shape fields with a nullable type are allowed to be omitted.
- *   2. All shapes are considered to support unknown fields, whether or not
- *      their last declared field is '...'.
- *
- * This temporary flag exists for backwards-compatiblity purposes, and will be
- * removed in a future release.
- *)
-let tco_experimental_disable_optional_and_unknown_shape_fields =
-  "disable_optional_and_unknown_shape_fields"
-
-(**
- * Enforce no duplication of traits in a class hierarchy. There is some clean-up
- * involved, so it's behind a flag.
- *)
-let tco_experimental_no_trait_reuse = "no_trait_reuse"
-
-(**
- * Typechecker support for `is` expressions. This feature is incomplete and
- * under development, see T22779957 for details and progress.
- *)
-let tco_experimental_is_expression = "is_expression"
-
-(**
- * If enabled:
- *
- * namespace Foo {
- *   // does not fall back to \bar() if `bar()` is not 'used' and
- *   // `Foo\bar()` does not exist
- *   bar();
- * }
- *)
-let tco_experimental_no_fallback_in_namespaces =
-  "no_fallback_in_namespaces"
-
-(**
- * Typechecker support for `nonnull` type. This feature is incomplete and is
- * under development, see T25474893 for details and progress.
- *)
-let tco_experimental_nonnull = "nonnull"
 
 (*
- * Check that the minimum number of arguments to a variadic
- * function are passed in, e.g. given the function:
- *
- * function max<T as num>(T $first, T $second, T ...$rest): T;
- *
- * The following calls will be errors if this option is enabled:
- *
- * $max = max(...$my_numbers);
- * $max = max($first, ...$my_numbers);
+ * Allows parsing of coroutine functions/suspend operator
  *)
-let tco_unpacking_check_arity =
-  "unpacking_check_arity"
+let tco_experimental_coroutines = "coroutines"
+
+(**
+ * Prevent type param names from shadowing class names
+ *)
+let tco_experimental_type_param_shadowing = "type_param_shadowing"
+
+(**
+ * Enable abstract const type with default syntax, i.e.
+ * abstract const type T as num = int;
+ *)
+let tco_experimental_abstract_type_const_with_default =
+  "abstract_type_const_with_default"
 
 let tco_experimental_all =
- SSet.empty |> List.fold_right SSet.add
-   [
-     tco_experimental_instanceof;
-     tco_experimental_isarray;
-     tco_experimental_darray_and_varray;
-     tco_experimental_goto;
-     tco_experimental_tconst_on_generics;
-     tco_experimental_disable_shape_and_tuple_arrays;
-     tco_experimental_stronger_shape_idx_ret;
-     tco_experimental_annotate_function_calls;
-     tco_experimental_unresolved_fix;
-     tco_experimental_generics_arity;
-     tco_experimental_forbid_nullable_cast;
-     tco_experimental_coroutines;
-     tco_experimental_disallow_static_memoized;
-     tco_experimental_inout_params;
-     tco_experimental_disable_optional_and_unknown_shape_fields;
-     tco_experimental_no_trait_reuse;
-     tco_experimental_is_expression;
-     tco_experimental_no_fallback_in_namespaces;
-     tco_experimental_nonnull;
-     tco_unpacking_check_arity;
-   ]
+  SSet.empty
+  |> List.fold_right
+       SSet.add
+       [
+         tco_experimental_isarray;
+         tco_experimental_generics_arity;
+         tco_experimental_forbid_nullable_cast;
+         tco_experimental_coroutines;
+         tco_experimental_disallow_static_memoized;
+         tco_experimental_abstract_type_const_with_default;
+       ]
 
 let tco_migration_flags_all =
-  SSet.empty |> List.fold_right SSet.add
-    [
-      "array_cast"
-    ]
+  SSet.empty |> List.fold_right SSet.add ["array_cast"]
 
-let default = {
- tco_assume_php = false;
- tco_safe_array = false;
- tco_safe_vector_array = false;
- tco_user_attrs = None;
- (** Default all features for testing. Actual options are set by reading
+let default =
+  {
+    (* Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
- tco_experimental_features = tco_experimental_all;
- tco_migration_flags = SSet.empty;
- po_auto_namespace_map = [];
- po_enable_hh_syntax_for_hhvm = false;
- po_deregister_php_stdlib = false;
- tco_disallow_destruct = false;
- ignored_fixme_codes = ISet.empty;
-}
-
-(* Use this instead of default when you don't have access to a project
-* .hhconfig and it's acceptable to omit some errors. IDE integration is one
-* example, assuming the IDE also talks to hh_client to get the full list with
-* higher latency.
-*
-* Use 'default' if it's fine to be potentially stricter than the rest of the
-* project requires, eg hh_single_typecheck *)
-let make_permissive tcopt =
-  { tcopt with
-    tco_assume_php = true;
-    tco_user_attrs = None;
+    tco_experimental_features = tco_experimental_all;
+    tco_migration_flags = SSet.empty;
+    tco_dynamic_view = false;
+    tco_num_local_workers = None;
+    tco_parallel_type_checking_threshold = 10;
+    tco_defer_class_declaration_threshold = None;
+    tco_max_times_to_defer_type_checking = None;
+    tco_prefetch_deferred_files = false;
+    tco_remote_type_check_threshold = None;
+    tco_remote_type_check = true;
+    tco_remote_worker_key = None;
+    tco_remote_check_id = None;
+    tco_remote_max_batch_size = 8_000;
+    tco_remote_min_batch_size = 5_000;
+    tco_num_remote_workers = 4;
+    so_remote_version_specifier = None;
+    so_remote_worker_vfs_checkout_threshold = 10000;
+    so_naming_sqlite_path = None;
+    po_auto_namespace_map = [];
+    po_codegen = false;
+    po_disallow_toplevel_requires = false;
+    po_deregister_php_stdlib = false;
+    po_disable_nontoplevel_declarations = false;
+    po_disable_static_closures = true;
+    po_allow_goto = false;
+    po_allow_unstable_features = false;
+    tco_log_inference_constraints = false;
+    tco_disallow_array_typehint = false;
+    tco_disallow_array_literal = false;
+    tco_language_feature_logging = false;
+    tco_unsafe_rx = true;
+    tco_disallow_scrutinee_case_value_type_mismatch = false;
+    tco_timeout = 0;
+    tco_disallow_invalid_arraykey = true;
+    tco_disallow_byref_dynamic_calls = false;
+    tco_disallow_byref_calls = true;
+    allowed_fixme_codes_strict = ISet.empty;
+    allowed_fixme_codes_partial = ISet.empty;
+    codes_not_raised_partial = ISet.empty;
+    log_levels = SMap.empty;
+    po_disable_lval_as_an_expression = true;
+    tco_shallow_class_decl = false;
+    po_rust_parser_errors = false;
+    profile_type_check_duration_threshold = 0.05;
+    profile_type_check_twice = false;
+    profile_owner = None;
+    profile_desc = "";
+    tco_like_type_hints = false;
+    tco_union_intersection_type_hints = false;
+    tco_coeffects = false;
+    tco_like_casts = false;
+    tco_simple_pessimize = 0.0;
+    tco_complex_coercion = false;
+    tco_disable_partially_abstract_typeconsts = false;
+    error_codes_treated_strictly = ISet.of_list [];
+    tco_check_xhp_attribute = false;
+    tco_check_redundant_generics = false;
+    tco_disallow_unresolved_type_variables = false;
+    tco_disallow_trait_reuse = false;
+    tco_disallow_invalid_arraykey_constraint = false;
+    po_enable_class_level_where_clauses = false;
+    po_disable_legacy_soft_typehints = true;
+    po_allowed_decl_fixme_codes = ISet.of_list [];
+    po_allow_new_attribute_syntax = false;
+    tco_global_inference = false;
+    tco_gi_reinfer_types = [];
+    tco_ordered_solving = false;
+    tco_const_static_props = false;
+    po_disable_legacy_attribute_syntax = false;
+    tco_const_attribute = false;
+    po_const_default_func_args = false;
+    po_const_default_lambda_args = false;
+    po_disallow_silence = false;
+    po_abstract_static_props = false;
+    po_disable_unset_class_const = false;
+    po_parser_errors_only = false;
+    tco_check_attribute_locations = true;
+    glean_service = "";
+    glean_hostname = "";
+    glean_port = 0;
+    glean_reponame = "www.autocomplete";
+    symbol_write_root_path = "www";
+    symbol_write_hhi_path = "hhi";
+    symbol_write_ignore_paths = [];
+    symbol_write_index_paths = [];
+    symbol_write_include_hhi = true;
+    po_disallow_func_ptrs_in_constants = false;
+    tco_error_php_lambdas = false;
+    tco_disallow_discarded_nullable_awaitables = false;
+    po_enable_xhp_class_modifier = true;
+    po_disable_xhp_element_mangling = true;
+    po_disable_xhp_children_declarations = true;
+    po_enable_first_class_function_pointers = false;
+    po_disable_modes = false;
+    po_disable_hh_ignore_error = false;
+    po_disable_array = true;
+    po_disable_array_typehint = true;
+    tco_enable_systemlib_annotations = false;
+    tco_higher_kinded_types = false;
+    tco_method_call_inference = false;
+    tco_report_pos_from_reason = false;
+    tco_typecheck_sample_rate = 1.0;
   }
 
-let make ~tco_assume_php
-         ~tco_safe_array
-         ~tco_safe_vector_array
-         ~po_deregister_php_stdlib
-         ~tco_user_attrs
-         ~tco_experimental_features
-         ~tco_migration_flags
-         ~po_auto_namespace_map
-         ~tco_disallow_destruct
-         ~ignored_fixme_codes = {
-                   tco_assume_php;
-                   tco_safe_array;
-                   tco_safe_vector_array;
-                   tco_user_attrs;
-                   tco_experimental_features;
-                   tco_migration_flags;
-                   po_auto_namespace_map;
-                   po_enable_hh_syntax_for_hhvm = false;
-                   ignored_fixme_codes;
-                   po_deregister_php_stdlib;
-                   tco_disallow_destruct;
-        }
-let tco_assume_php t = t.tco_assume_php
-let tco_safe_array t = t.tco_safe_array
-let tco_safe_vector_array t = t.tco_safe_vector_array
-let tco_user_attrs t = t.tco_user_attrs
-let tco_allowed_attribute t name = match t.tco_user_attrs with
- | None -> true
- | Some attr_names -> SSet.mem name attr_names
+let make
+    ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
+    ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
+    ?(po_disable_nontoplevel_declarations =
+      default.po_disable_nontoplevel_declarations)
+    ?(po_disable_static_closures = default.po_disable_static_closures)
+    ?(po_allow_goto = default.po_allow_goto)
+    ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
+    ?(tco_experimental_features = default.tco_experimental_features)
+    ?(tco_migration_flags = default.tco_migration_flags)
+    ?(tco_dynamic_view = default.tco_dynamic_view)
+    ?tco_num_local_workers
+    ?(tco_parallel_type_checking_threshold =
+      default.tco_parallel_type_checking_threshold)
+    ?tco_defer_class_declaration_threshold
+    ?tco_max_times_to_defer_type_checking
+    ?(tco_prefetch_deferred_files = default.tco_prefetch_deferred_files)
+    ?tco_remote_type_check_threshold
+    ?(tco_remote_type_check = default.tco_remote_type_check)
+    ?tco_remote_worker_key
+    ?tco_remote_check_id
+    ?(tco_remote_max_batch_size = default.tco_remote_max_batch_size)
+    ?(tco_remote_min_batch_size = default.tco_remote_min_batch_size)
+    ?(tco_num_remote_workers = default.tco_num_remote_workers)
+    ?so_remote_version_specifier
+    ?(so_remote_worker_vfs_checkout_threshold =
+      default.so_remote_worker_vfs_checkout_threshold)
+    ?so_naming_sqlite_path
+    ?(po_auto_namespace_map = default.po_auto_namespace_map)
+    ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
+    ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
+    ?(tco_language_feature_logging = default.tco_language_feature_logging)
+    ?(tco_unsafe_rx = default.tco_unsafe_rx)
+    ?(tco_disallow_scrutinee_case_value_type_mismatch =
+      default.tco_disallow_scrutinee_case_value_type_mismatch)
+    ?(tco_timeout = default.tco_timeout)
+    ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
+    ?(tco_disallow_byref_dynamic_calls =
+      default.tco_disallow_byref_dynamic_calls)
+    ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
+    ?(allowed_fixme_codes_strict = default.allowed_fixme_codes_strict)
+    ?(allowed_fixme_codes_partial = default.allowed_fixme_codes_partial)
+    ?(codes_not_raised_partial = default.codes_not_raised_partial)
+    ?(log_levels = default.log_levels)
+    ?(po_disable_lval_as_an_expression =
+      default.po_disable_lval_as_an_expression)
+    ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
+    ?(po_rust_parser_errors = default.po_rust_parser_errors)
+    ?(profile_type_check_duration_threshold =
+      default.profile_type_check_duration_threshold)
+    ?(profile_type_check_twice = default.profile_type_check_twice)
+    ?profile_owner
+    ?(profile_desc = default.profile_desc)
+    ?(tco_like_type_hints = default.tco_like_type_hints)
+    ?(tco_union_intersection_type_hints =
+      default.tco_union_intersection_type_hints)
+    ?(tco_coeffects = default.tco_coeffects)
+    ?(tco_like_casts = default.tco_like_casts)
+    ?(tco_simple_pessimize = default.tco_simple_pessimize)
+    ?(tco_complex_coercion = default.tco_complex_coercion)
+    ?(tco_disable_partially_abstract_typeconsts =
+      default.tco_disable_partially_abstract_typeconsts)
+    ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
+    ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
+    ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
+    ?(tco_disallow_unresolved_type_variables =
+      default.tco_disallow_unresolved_type_variables)
+    ?(tco_disallow_trait_reuse = default.tco_disallow_trait_reuse)
+    ?(tco_disallow_invalid_arraykey_constraint =
+      default.tco_disallow_invalid_arraykey_constraint)
+    ?(po_enable_class_level_where_clauses =
+      default.po_enable_class_level_where_clauses)
+    ?(po_disable_legacy_soft_typehints =
+      default.po_disable_legacy_soft_typehints)
+    ?(po_allowed_decl_fixme_codes = default.po_allowed_decl_fixme_codes)
+    ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
+    ?(tco_global_inference = default.tco_global_inference)
+    ?(tco_gi_reinfer_types = default.tco_gi_reinfer_types)
+    ?(tco_ordered_solving = default.tco_ordered_solving)
+    ?(tco_const_static_props = default.tco_const_static_props)
+    ?(po_disable_legacy_attribute_syntax =
+      default.po_disable_legacy_attribute_syntax)
+    ?(tco_const_attribute = default.tco_const_attribute)
+    ?(po_const_default_func_args = default.po_const_default_func_args)
+    ?(po_const_default_lambda_args = default.po_const_default_lambda_args)
+    ?(po_disallow_silence = default.po_disallow_silence)
+    ?(po_abstract_static_props = default.po_abstract_static_props)
+    ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
+    ?(po_parser_errors_only = default.po_parser_errors_only)
+    ?(tco_check_attribute_locations = default.tco_check_attribute_locations)
+    ?(glean_service = default.glean_service)
+    ?(glean_hostname = default.glean_hostname)
+    ?(glean_port = default.glean_port)
+    ?(glean_reponame = default.glean_reponame)
+    ?(symbol_write_root_path = default.symbol_write_root_path)
+    ?(symbol_write_hhi_path = default.symbol_write_hhi_path)
+    ?(symbol_write_ignore_paths = default.symbol_write_ignore_paths)
+    ?(symbol_write_index_paths = default.symbol_write_index_paths)
+    ?(symbol_write_include_hhi = default.symbol_write_include_hhi)
+    ?(po_disallow_func_ptrs_in_constants =
+      default.po_disallow_func_ptrs_in_constants)
+    ?(tco_error_php_lambdas = default.tco_error_php_lambdas)
+    ?(tco_disallow_discarded_nullable_awaitables =
+      default.tco_disallow_discarded_nullable_awaitables)
+    ?(po_enable_xhp_class_modifier = default.po_enable_xhp_class_modifier)
+    ?(po_disable_xhp_element_mangling = default.po_disable_xhp_element_mangling)
+    ?(po_disable_xhp_children_declarations =
+      default.po_disable_xhp_children_declarations)
+    ?(po_enable_first_class_function_pointers =
+      default.po_enable_first_class_function_pointers)
+    ?(po_disable_modes = default.po_disable_modes)
+    ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
+    ?(po_disable_array = default.po_disable_array)
+    ?(po_disable_array_typehint = default.po_disable_array_typehint)
+    ?(po_allow_unstable_features = default.po_allow_unstable_features)
+    ?(tco_enable_systemlib_annotations =
+      default.tco_enable_systemlib_annotations)
+    ?(tco_higher_kinded_types = default.tco_higher_kinded_types)
+    ?(tco_method_call_inference = default.tco_method_call_inference)
+    ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
+    ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
+    () =
+  {
+    tco_experimental_features;
+    tco_migration_flags;
+    tco_dynamic_view;
+    tco_num_local_workers;
+    tco_parallel_type_checking_threshold;
+    tco_defer_class_declaration_threshold;
+    tco_max_times_to_defer_type_checking;
+    tco_prefetch_deferred_files;
+    tco_remote_type_check_threshold;
+    tco_remote_type_check;
+    tco_remote_worker_key;
+    tco_remote_check_id;
+    tco_remote_max_batch_size;
+    tco_remote_min_batch_size;
+    tco_num_remote_workers;
+    so_remote_version_specifier;
+    so_remote_worker_vfs_checkout_threshold;
+    so_naming_sqlite_path;
+    po_auto_namespace_map;
+    po_codegen = false;
+    allowed_fixme_codes_strict;
+    allowed_fixme_codes_partial;
+    codes_not_raised_partial;
+    po_deregister_php_stdlib;
+    po_disallow_toplevel_requires;
+    po_disable_nontoplevel_declarations;
+    po_disable_static_closures;
+    po_allow_goto;
+    po_allow_unstable_features;
+    tco_log_inference_constraints;
+    tco_disallow_array_typehint;
+    tco_disallow_array_literal;
+    tco_language_feature_logging;
+    tco_unsafe_rx;
+    tco_disallow_scrutinee_case_value_type_mismatch;
+    tco_timeout;
+    tco_disallow_invalid_arraykey;
+    tco_disallow_byref_dynamic_calls;
+    tco_disallow_byref_calls;
+    log_levels;
+    po_disable_lval_as_an_expression;
+    tco_shallow_class_decl;
+    po_rust_parser_errors;
+    profile_type_check_duration_threshold;
+    profile_type_check_twice;
+    profile_owner;
+    profile_desc;
+    tco_like_type_hints;
+    tco_union_intersection_type_hints;
+    tco_coeffects;
+    tco_like_casts;
+    tco_simple_pessimize;
+    tco_complex_coercion;
+    tco_disable_partially_abstract_typeconsts;
+    error_codes_treated_strictly;
+    tco_check_xhp_attribute;
+    tco_check_redundant_generics;
+    tco_disallow_unresolved_type_variables;
+    tco_disallow_trait_reuse;
+    tco_disallow_invalid_arraykey_constraint;
+    po_enable_class_level_where_clauses;
+    po_disable_legacy_soft_typehints;
+    po_allowed_decl_fixme_codes;
+    po_allow_new_attribute_syntax;
+    tco_global_inference;
+    tco_gi_reinfer_types;
+    tco_ordered_solving;
+    tco_const_static_props;
+    po_disable_legacy_attribute_syntax;
+    tco_const_attribute;
+    po_const_default_func_args;
+    po_const_default_lambda_args;
+    po_disallow_silence;
+    po_abstract_static_props;
+    po_disable_unset_class_const;
+    po_parser_errors_only;
+    tco_check_attribute_locations;
+    glean_service;
+    glean_hostname;
+    glean_port;
+    glean_reponame;
+    symbol_write_root_path;
+    symbol_write_hhi_path;
+    symbol_write_ignore_paths;
+    symbol_write_index_paths;
+    symbol_write_include_hhi;
+    po_disallow_func_ptrs_in_constants;
+    tco_error_php_lambdas;
+    tco_disallow_discarded_nullable_awaitables;
+    po_enable_xhp_class_modifier;
+    po_disable_xhp_element_mangling;
+    po_disable_xhp_children_declarations;
+    po_enable_first_class_function_pointers;
+    po_disable_modes;
+    po_disable_hh_ignore_error;
+    po_disable_array;
+    po_disable_array_typehint;
+    tco_enable_systemlib_annotations;
+    tco_higher_kinded_types;
+    tco_method_call_inference;
+    tco_report_pos_from_reason;
+    tco_typecheck_sample_rate;
+  }
+
 let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features
-let tco_migration_flag_enabled t s =
-  SSet.mem s t.tco_migration_flags
+
+let tco_migration_flag_enabled t s = SSet.mem s t.tco_migration_flags
+
+let tco_dynamic_view t = t.tco_dynamic_view
+
+let tco_num_local_workers t = t.tco_num_local_workers
+
+let tco_parallel_type_checking_threshold t =
+  t.tco_parallel_type_checking_threshold
+
+let tco_defer_class_declaration_threshold t =
+  t.tco_defer_class_declaration_threshold
+
+let tco_max_times_to_defer_type_checking t =
+  t.tco_max_times_to_defer_type_checking
+
+let tco_prefetch_deferred_files t = t.tco_prefetch_deferred_files
+
+let tco_remote_type_check_threshold t = t.tco_remote_type_check_threshold
+
+let tco_remote_type_check t = t.tco_remote_type_check
+
+let tco_remote_worker_key t = t.tco_remote_worker_key
+
+let tco_remote_check_id t = t.tco_remote_check_id
+
+let tco_remote_max_batch_size t = t.tco_remote_max_batch_size
+
+let tco_remote_min_batch_size t = t.tco_remote_min_batch_size
+
+let tco_num_remote_workers t = t.tco_num_remote_workers
+
+let so_remote_version_specifier t = t.so_remote_version_specifier
+
+let so_remote_worker_vfs_checkout_threshold t =
+  t.so_remote_worker_vfs_checkout_threshold
+
+let so_naming_sqlite_path t = t.so_naming_sqlite_path
+
 let po_auto_namespace_map t = t.po_auto_namespace_map
+
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
-let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
-let tco_disallow_destruct t = t.tco_disallow_destruct
-let ignored_fixme_codes t = t.ignored_fixme_codes
+
+let po_disable_nontoplevel_declarations t =
+  t.po_disable_nontoplevel_declarations
+
+let po_disable_static_closures t = t.po_disable_static_closures
+
+let po_allow_goto t = t.po_allow_goto
+
+let tco_log_inference_constraints t = t.tco_log_inference_constraints
+
+let po_codegen t = t.po_codegen
+
+let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
+
+let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
+
+let tco_disallow_array_literal t = t.tco_disallow_array_literal
+
+let tco_language_feature_logging t = t.tco_language_feature_logging
+
+let tco_unsafe_rx t = t.tco_unsafe_rx
+
+let tco_disallow_scrutinee_case_value_type_mismatch t =
+  t.tco_disallow_scrutinee_case_value_type_mismatch
+
+let tco_timeout t = t.tco_timeout
+
+let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
+
+let tco_disallow_invalid_arraykey_constraint t =
+  t.tco_disallow_invalid_arraykey_constraint
+
+let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
+
+let tco_disallow_byref_calls t = t.tco_disallow_byref_calls
+
+let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
+
+let allowed_fixme_codes_partial t = t.allowed_fixme_codes_partial
+
+let codes_not_raised_partial t = t.codes_not_raised_partial
+
+let log_levels t = t.log_levels
+
+let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
+
+let tco_shallow_class_decl t = t.tco_shallow_class_decl
+
+let po_rust_parser_errors t = t.po_rust_parser_errors
+
+let profile_type_check_duration_threshold t =
+  t.profile_type_check_duration_threshold
+
+let profile_type_check_twice t = t.profile_type_check_twice
+
+let profile_owner t = t.profile_owner
+
+let profile_desc t = t.profile_desc
+
+let tco_like_type_hints t = t.tco_like_type_hints
+
+let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
+
+let coeffects t = t.tco_coeffects
+
+let set_coeffects t = { t with tco_coeffects = true }
+
+let tco_like_casts t = t.tco_like_casts
+
+let tco_simple_pessimize t = t.tco_simple_pessimize
+
+let tco_complex_coercion t = t.tco_complex_coercion
+
+let tco_disable_partially_abstract_typeconsts t =
+  t.tco_disable_partially_abstract_typeconsts
+
+let error_codes_treated_strictly t = t.error_codes_treated_strictly
+
+let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
+
+let tco_check_redundant_generics t = t.tco_check_redundant_generics
+
+let tco_disallow_unresolved_type_variables t =
+  t.tco_disallow_unresolved_type_variables
+
+let tco_disallow_trait_reuse t = t.tco_disallow_trait_reuse
+
+let po_enable_class_level_where_clauses t =
+  t.po_enable_class_level_where_clauses
+
+let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
+
+let po_allowed_decl_fixme_codes t = t.po_allowed_decl_fixme_codes
+
+let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
+
+let po_allow_unstable_features t = t.po_allow_unstable_features
+
+let tco_global_inference t = t.tco_global_inference
+
+let tco_gi_reinfer_types t = t.tco_gi_reinfer_types
+
+let tco_ordered_solving t = t.tco_ordered_solving
+
+let tco_const_static_props t = t.tco_const_static_props
+
+let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
+
+let tco_const_attribute t = t.tco_const_attribute
+
+let po_const_default_func_args t = t.po_const_default_func_args
+
+let po_const_default_lambda_args t = t.po_const_default_lambda_args
+
+let po_disallow_silence t = t.po_disallow_silence
+
+let po_abstract_static_props t = t.po_abstract_static_props
+
+let po_disable_unset_class_const t = t.po_disable_unset_class_const
+
+let tco_check_attribute_locations t = t.tco_check_attribute_locations
+
+let glean_service t = t.glean_service
+
+let glean_hostname t = t.glean_hostname
+
+let glean_port t = t.glean_port
+
+let glean_reponame t = t.glean_reponame
+
+let symbol_write_root_path t = t.symbol_write_root_path
+
+let symbol_write_hhi_path t = t.symbol_write_hhi_path
+
+let symbol_write_ignore_paths t = t.symbol_write_ignore_paths
+
+let symbol_write_index_paths t = t.symbol_write_index_paths
+
+let symbol_write_include_hhi t = t.symbol_write_include_hhi
+
+let set_global_inference t = { t with tco_global_inference = true }
+
+let set_ordered_solving t b = { t with tco_ordered_solving = b }
+
+let po_parser_errors_only t = t.po_parser_errors_only
+
+let po_disallow_func_ptrs_in_constants t = t.po_disallow_func_ptrs_in_constants
+
+let tco_error_php_lambdas t = t.tco_error_php_lambdas
+
+let tco_disallow_discarded_nullable_awaitables t =
+  t.tco_disallow_discarded_nullable_awaitables
+
+let po_enable_xhp_class_modifier t = t.po_enable_xhp_class_modifier
+
+let po_disable_xhp_element_mangling t = t.po_disable_xhp_element_mangling
+
+let po_disable_xhp_children_declarations t =
+  t.po_disable_xhp_children_declarations
+
+let po_enable_first_class_function_pointers t =
+  t.po_enable_first_class_function_pointers
+
+let po_disable_modes t = t.po_disable_modes
+
+let po_disable_hh_ignore_error t = t.po_disable_hh_ignore_error
+
+let po_disable_array t = t.po_disable_array
+
+let po_disable_array_typehint t = t.po_disable_array_typehint
+
+let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
+
+let tco_higher_kinded_types t = t.tco_higher_kinded_types
+
+let tco_method_call_inference t = t.tco_method_call_inference
+
+let tco_report_pos_from_reason t = t.tco_report_pos_from_reason
+
+let tco_typecheck_sample_rate t = t.tco_typecheck_sample_rate

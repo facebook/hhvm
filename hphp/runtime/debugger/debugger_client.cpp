@@ -19,6 +19,7 @@
 #include <fstream>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/preg.h"
@@ -30,8 +31,8 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
@@ -77,11 +78,7 @@ const StaticString
 static String wordwrap(const String& str, int width /* = 75 */,
                        const String& wordbreak /* = "\n" */,
                        bool cut /* = false */) {
-  Array args = Array::Create();
-  args.append(str);
-  args.append(width);
-  args.append(wordbreak);
-  args.append(cut);
+  Array args = make_varray(str, width, wordbreak, cut);
   return vm_call_user_func("wordwrap", args).toString();
 }
 
@@ -445,7 +442,7 @@ String DebuggerClient::FormatVariable(
   } catch (const StringBufferLimitException& e) {
     value = "Serialization limit reached";
   } catch (...) {
-    assert(false);
+    assertx(false);
     throw;
   }
   return value;
@@ -456,7 +453,7 @@ String DebuggerClient::FormatVariable(
  * truncated result, and the number of bytes truncated.
  */
 String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
-  assert(maxlen >= 0);
+  assertx(maxlen >= 0);
 
   VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
   auto const value = vs.serializeWithLimit(v, maxlen + 1);
@@ -553,7 +550,7 @@ bool DebuggerClient::isLocal() {
 
 bool DebuggerClient::connect(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connect\n");
-  assert((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
+  assertx((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   // First check for an existing connect, and reuse that.
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (HHVM_FN(gethostbyname)(m_machines[i]->m_name) ==
@@ -567,9 +564,9 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connectRPC\n");
-  assert(!m_machines.empty());
+  assertx(!m_machines.empty());
   auto local = m_machines[0];
-  assert(local->m_name == LocalPrompt);
+  assertx(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
   switchMachine(local);
@@ -580,9 +577,9 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 
 bool DebuggerClient::disconnect() {
   TRACE(2, "DebuggerClient::disconnect\n");
-  assert(!m_machines.empty());
+  assertx(!m_machines.empty());
   auto local = m_machines[0];
-  assert(local->m_name == LocalPrompt);
+  assertx(local->m_name == LocalPrompt);
   local->m_rpcHost.clear();
   local->m_rpcPort = 0;
   switchMachine(local);
@@ -624,7 +621,7 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
-  assert(m_machines.empty());
+  assertx(m_machines.empty());
   m_machines.push_back(machine);
   switchMachine(machine);
   return socket2;
@@ -646,7 +643,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
 
 bool DebuggerClient::reconnect() {
   TRACE(2, "DebuggerClient::reconnect\n");
-  assert(m_machine);
+  assertx(m_machine);
   auto& host = m_machine->m_name;
   int port = m_machine->m_port;
   if (port <= 0) {
@@ -800,7 +797,7 @@ void DebuggerClient::run() {
     m_macroPlaying->m_index = 0;
   }
 
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::DebuggerClient);
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {
@@ -811,13 +808,13 @@ void DebuggerClient::run() {
     bool reconnect = false;
     try {
       eventLoop(TopLevel, DebuggerCommand::KindOfNone, "Main client loop");
-    } catch (DebuggerClientExitException &e) { /* normal exit */
-    } catch (DebuggerServerLostException &e) {
+    } catch (DebuggerClientExitException& e) { /* normal exit */
+    } catch (DebuggerServerLostException& e) {
       // Loss of connection
       TRACE_RB(1, "DebuggerClient::run: server lost exception\n");
       usageLogEvent("DebuggerServerLostException", m_commandCanonical);
       reconnect = true;
-    } catch (DebuggerProtocolException &e) {
+    } catch (DebuggerProtocolException& e) {
       // Bad or unexpected data. Give reconnect a shot, it could help...
       TRACE_RB(1, "DebuggerClient::run: protocol exception\n");
       usageLogEvent("DebuggerProtocolException", m_commandCanonical);
@@ -1016,8 +1013,8 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
     if (m_inputState == TakingCommand) {
       switch (first_non_whitespace(rl_line_buffer)) {
         case '<':
-          if (strncasecmp(m_command.substr(0, 5).c_str(), "<?php", 5)) {
-            addCompletion("<?php");
+          if (strncasecmp(m_command.substr(0, 4).c_str(), "<?hh", 4)) {
+            addCompletion("<?hh");
             break;
           }
         case '@':
@@ -1031,7 +1028,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
             addCompletion(GetCommands());
             addCompletion("@");
             addCompletion("=");
-            addCompletion("<?php");
+            addCompletion("<?hh");
             addCompletion("?>");
           } else {
             auto cmd = createCommand();
@@ -1044,7 +1041,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
         }
       }
     } else {
-      assert(m_inputState == TakingCode);
+      assertx(m_inputState == TakingCode);
       if (!*rl_line_buffer) {
         addCompletion("?>"); // so we tab, we're done
       } else {
@@ -1061,7 +1058,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
     } else if ((int64_t)list >= 0 && (int64_t)list < AutoCompleteCount) {
       if (m_acLiveListsDirty) {
         updateLiveLists();
-        assert(!m_acLiveListsDirty);
+        assertx(!m_acLiveListsDirty);
       }
       char *p = getCompletion(m_acLiveLists->get(int64_t(list)), text);
       if (p) return p;
@@ -1138,6 +1135,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
                                              int expectedCmd,
                                              const char *caller) {
   TRACE(2, "DebuggerClient::eventLoop\n");
+  ARRPROV_USE_RUNTIME_LOCATION();
   if (loopKind == NestedWithExecution) {
     // Some callers have caused the server to start executing more PHP, so
     // update the machine/client state accordingly.
@@ -1273,7 +1271,7 @@ void DebuggerClient::console() {
             error("command \"" + m_command + "\" not found");
             m_command.clear();
           }
-        } catch (DebuggerConsoleExitException &e) {
+        } catch (DebuggerConsoleExitException& e) {
           return;
         }
       }
@@ -1290,7 +1288,7 @@ void DebuggerClient::console() {
             record(line);
             m_command = m_prevCmd;
             process(); // replay the same command
-          } catch (DebuggerConsoleExitException &e) {
+          } catch (DebuggerConsoleExitException& e) {
             return;
           }
           break;
@@ -1734,7 +1732,7 @@ bool DebuggerClient::process() {
       return true;
     }
     case '<': {
-      if (match("<?php")) {
+      if (match("<?hh")) {
         processTakeCode();
         return true;
       }
@@ -1873,7 +1871,7 @@ bool DebuggerClient::parse(const char *line) {
 
 bool DebuggerClient::match(const char *cmd) {
   TRACE(2, "DebuggerClient::match\n");
-  assert(cmd && *cmd);
+  assertx(cmd && *cmd);
   return !strncasecmp(m_command.c_str(), cmd, m_command.size());
 }
 
@@ -1884,8 +1882,8 @@ bool DebuggerClient::Match(const char *input, const char *cmd) {
 
 bool DebuggerClient::arg(int index, const char *s) const {
   TRACE(2, "DebuggerClient::arg\n");
-  assert(s && *s);
-  assert(index > 0);
+  assertx(s && *s);
+  assertx(index > 0);
   --index;
   return (int)m_args.size() > index &&
     !strncasecmp(m_args[index].c_str(), s, m_args[index].size());
@@ -1893,7 +1891,7 @@ bool DebuggerClient::arg(int index, const char *s) const {
 
 std::string DebuggerClient::argValue(int index) {
   TRACE(2, "DebuggerClient::argValue\n");
-  assert(index > 0);
+  assertx(index > 0);
   --index;
   if (index >= 0 && index < (int)m_args.size()) {
     return m_args[index];
@@ -1903,7 +1901,7 @@ std::string DebuggerClient::argValue(int index) {
 
 std::string DebuggerClient::lineRest(int index) {
   TRACE(2, "DebuggerClient::lineRest\n");
-  assert(index > 0);
+  assertx(index > 0);
   return m_line.substr(m_argIdx[index - 1] + 1);
 }
 
@@ -1950,12 +1948,12 @@ const StaticString s_UNDERSCORE("_");
 // and carries out the command.
 void DebuggerClient::processTakeCode() {
   TRACE(2, "DebuggerClient::processTakeCode\n");
-  assert(m_inputState == TakingCommand);
+  assertx(m_inputState == TakingCommand);
 
   char first = m_line[0];
   if (first == '@') {
     usageLogCommand("@", m_line);
-    m_code = std::string("<?php ") + (m_line.c_str() + 1) + ";";
+    m_code = std::string("<?hh ") + (m_line.c_str() + 1) + ";";
     processEval();
     return;
   } else if (first == '=') {
@@ -1964,20 +1962,20 @@ void DebuggerClient::processTakeCode() {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
     }
-    m_code = std::string("<?php $_=(") + m_line.substr(1) + "); ";
+    m_code = std::string("<?hh $_=(") + m_line.substr(1) + "); ";
     if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
     usageLogCommand("eval", m_line);
     // User entered something that did not start with @, =, or <
     // and also was not a debugger command. Interpret it as PHP.
-    m_code = "<?php ";
+    m_code = "<?hh ";
     m_code += m_line + ";";
     processEval();
     return;
   }
-  usageLogCommand("<?php", m_line);
-  m_code = "<?php ";
+  usageLogCommand("<?hh", m_line);
+  m_code = "<?hh ";
   m_code += m_line.substr(m_command.length()) + "\n";
   m_inputState = TakingCode;
 
@@ -1999,7 +1997,7 @@ bool DebuggerClient::processEval() {
 
 void DebuggerClient::swapHelp() {
   TRACE(2, "DebuggerClient::swapHelp\n");
-  assert(m_args.size() > 0);
+  assertx(m_args.size() > 0);
   m_command = m_args[0];
   m_args[0] = "help";
 }
@@ -2024,7 +2022,7 @@ DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
 // Update the current sandbox in the current machine. This should always be
 // called once we're attached to a machine.
 void DebuggerClient::setSandbox(DSandboxInfoPtr sandbox) {
-  assert(m_machine != nullptr);
+  assertx(m_machine != nullptr);
   m_machine->m_sandbox = sandbox;
 }
 
@@ -2069,7 +2067,7 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
 // The current location is initially determined by the
 // breakpoint where the debugger is currently stopped and can
 // thereafter be modified by list commands and by switching the
-// the stack frame. The lineFocus and and charFocus parameters
+// the stack frame. The lineFocus and charFocus parameters
 // are non zero only when the source location comes from a breakpoint.
 // They can be used to highlight the location of the current breakpoint
 // in the edit window of an attached IDE, for example.
@@ -2307,7 +2305,7 @@ bool DebuggerClient::deleteMacro(int index) {
 
 void DebuggerClient::record(const char *line) {
   TRACE(2, "DebuggerClient::record\n");
-  assert(line);
+  assertx(line);
   if (m_macroRecording && line[0] != '&') {
     m_macroRecording->m_cmds.push_back(line);
   }
@@ -2358,7 +2356,7 @@ void DebuggerClient::loadConfig() {
       config.open(Process::GetHomeDirectory() + LegacyConfigFileName);
       needToWriteFile = true;
     }
-  } catch (const HdfException &e) {
+  } catch (const HdfException& e) {
     // Good, they have migrated already
   }
 
@@ -2480,7 +2478,7 @@ void DebuggerClient::loadConfig() {
       for (auto& macro : m_macros) {
         ArrayInit ret_macro(2, ArrayInit::Map{});
         ret_macro.set(s_name, macro->m_name);
-        PackedArrayInit ret_cmds(macro->m_cmds.size());
+        VArrayInit ret_cmds(macro->m_cmds.size());
         for (auto& cmd : macro->m_cmds) {
           ret_cmds.append(cmd);
         }

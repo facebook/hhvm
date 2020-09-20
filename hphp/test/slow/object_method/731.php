@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface intf {
   function meth();
@@ -15,10 +15,14 @@ class m3 extends m2 {
     var_dump(parent::meth());
   }
 }
-$y = new m3;
-$y->f();
 function g() {
   $y = new m3;
   var_dump($y->meth());
 }
+
+<<__EntryPoint>>
+function main_731() {
+$y = new m3;
+$y->f();
 g();
+}

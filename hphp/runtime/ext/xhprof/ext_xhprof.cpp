@@ -1,22 +1,35 @@
 #include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(fb_setprofile,
   const Variant& callback,
-  int64_t flags = EventHook::ProfileDefault
+  int64_t flags,
+  ArrayArg functions
 ) {
-  if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
+  if (RequestInfo::s_requestInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
     return;
   }
   g_context->m_setprofileCallback = callback;
   g_context->m_setprofileFlags = flags;
+  g_context->m_setprofileFunctions.clear();
+  g_context->m_setprofileFunctions.reserve(functions->size());
+  IterateV(
+    functions.get(),
+    [&](TypedValue tv) -> bool {
+      if (isStringType(type(tv))) {
+        g_context->m_setprofileFunctions.emplace(String(val(tv).pstr));
+      }
+      return false;
+    }
+  );
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
   } else {
@@ -25,7 +38,7 @@ void HHVM_FUNCTION(fb_setprofile,
 }
 
 void HHVM_FUNCTION(xhprof_frame_begin, const String& name) {
-  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
+  Profiler *prof = RequestInfo::s_requestInfo->m_profiler;
   if (prof) {
     s_profiler_factory->cacheString(name);
     prof->beginFrame(name.data());
@@ -33,7 +46,7 @@ void HHVM_FUNCTION(xhprof_frame_begin, const String& name) {
 }
 
 void HHVM_FUNCTION(xhprof_frame_end) {
-  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
+  Profiler *prof = RequestInfo::s_requestInfo->m_profiler;
   if (prof) {
     prof->endFrame(nullptr, nullptr);
   }
@@ -113,6 +126,8 @@ struct XHProfExtension : Extension {
     HHVM_RC_INT(SETPROFILE_FLAGS_FRAME_PTRS, EventHook::ProfileFramePointers);
     HHVM_RC_INT(SETPROFILE_FLAGS_CTORS, EventHook::ProfileConstructors);
     HHVM_RC_INT(SETPROFILE_FLAGS_RESUME_AWARE, EventHook::ProfileResumeAware);
+    HHVM_RC_INT(SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK,
+                EventHook::ProfileThisObject);
 
     HHVM_FE(fb_setprofile);
     HHVM_FE(xhprof_frame_begin);

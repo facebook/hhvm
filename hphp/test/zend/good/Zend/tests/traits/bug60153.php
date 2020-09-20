@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface IFoo {
     public function oneArgument($a);

@@ -1,0 +1,5 @@
+<?hh
+function mainb() {
+echo "hello\n";
+echo "world\n";
+}

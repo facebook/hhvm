@@ -1,5 +1,0 @@
-__autoloading Y
-object(X)#1 (0) {
-}
-
-Fatal error: Class undefined: Y in %s/pinit-recurse.php on line 11

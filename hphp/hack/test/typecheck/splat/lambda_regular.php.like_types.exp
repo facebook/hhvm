@@ -1,0 +1,6 @@
+File "lambda_regular.php", line 5, characters 9-10:
+Invalid argument (Typing[4359])
+File "lambda_regular.php", line 5, characters 9-10:
+An array cannot be unpacked into the required arguments of a function
+File "lambda_regular.php", line 4, characters 8-46:
+Definition is here

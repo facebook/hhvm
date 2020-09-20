@@ -1,13 +1,4 @@
-
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-  Int 1
-  RetC
-}
-
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   String "asd"
   String "asd"
   AddNewElemC

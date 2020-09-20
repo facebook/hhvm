@@ -1,0 +1,6 @@
+File "mayberx16.php", line 18, characters 19-19:
+The method `f` has the wrong type (Typing[4341])
+File "mayberx16.php", line 5, characters 39-40:
+This parameter does not satisfy __AtMostRxAsFunc condition defined on matching parameter in function super type.
+File "mayberx16.php", line 18, characters 59-60:
+This is parameter declaration from the function super type.

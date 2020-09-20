@@ -1,0 +1,4 @@
+File "override_final3.php", line 17, characters 26-31:
+You cannot override this method (Typing[4070])
+File "override_final3.php", line 13, characters 32-37:
+It was declared as final

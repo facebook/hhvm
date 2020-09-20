@@ -1,0 +1,6 @@
+(3,13)-(3,13) A `case` statement may only appear directly inside a `switch`.
+(4,12)-(4,12) A `default` statement may only appear directly inside a `switch`.
+(14,3)-(14,9) A `try` statement requires a `catch` or a `finally` clause.
+(15,17)-(15,17) `switch` statements need to have at least one `case` or a `default` block
+(16,17)-(16,17) The first statement inside a `switch` statement must be a `case` or `default` label statement.
+(17,17)-(17,17) The first statement inside a `switch` statement must be a `case` or `default` label statement.

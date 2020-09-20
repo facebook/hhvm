@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
   private $sum = 0;
 
@@ -6,8 +6,8 @@ class foo {
     return $this->sum += $num;
   }
 }
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+<<__EntryPoint>> function main(): void {
+$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
 $server->setclass("foo");
 $server->setpersistence(SOAP_PERSISTENCE_REQUEST);
 
@@ -49,4 +49,4 @@ EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 ob_end_flush();
 echo "ok\n";
-?>
+}

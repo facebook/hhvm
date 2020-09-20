@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
  * Description: Returns a copy of input array padded with pad_value to size pad_size
  * Source code: ext/standard/array.c
@@ -9,15 +9,15 @@
 * array_pad() behaves in an expected way with the other arguments passed to the function.
 * The $pad_size and $pad_value arguments passed are fixed values.
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_pad() : Passing 2-D array to \$input argument ***\n";
 
 // initialize the 2-d array
-$input = array (
-  array(1, 2, 3),
-  array("hello", 'world'),
-  array("one" => 1, "two" => 2)
-);
+$input = varray [
+  varray[1, 2, 3],
+  varray["hello", 'world'],
+  darray["one" => 1, "two" => 2]
+];
 
 // initialize the $pad_size and $pad_value arguments
 $pad_size = 5;
@@ -34,4 +34,4 @@ var_dump( array_pad($input[1], $pad_size, $pad_value) );  // positive 'pad_size'
 var_dump( array_pad($input[1], -$pad_size, $pad_value) );  // negative 'pad_size'
 
 echo "Done";
-?>
+}

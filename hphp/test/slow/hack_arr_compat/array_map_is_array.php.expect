@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
@@ -6,7 +6,7 @@ array(3) {
   [2]=>
   int(3)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
@@ -15,7 +15,7 @@ array(3) {
   int(3)
 }
 int(6)
-array(3) {
+darray(3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -23,7 +23,7 @@ array(3) {
   ["c"]=>
   int(3)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(1)
   ["b"]=>

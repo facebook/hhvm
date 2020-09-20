@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_DATAFLOW_WORKLIST_H_
-#define incl_HPHP_DATAFLOW_WORKLIST_H_
+#pragma once
 
 #include <cstdint>
 #include <queue>
@@ -111,4 +110,3 @@ private:
 
 }
 
-#endif

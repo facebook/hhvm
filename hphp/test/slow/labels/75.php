@@ -1,8 +1,11 @@
-<?php
+<?hh
 
 class modalité {
  static function odalité() {
  var_dump(123);
 }
  }
- modalité::odalité();
+ <<__EntryPoint>>
+function main_75() {
+modalité::odalité();
+}

@@ -1,3 +1,0 @@
-<?php
-if (getenv("TRAVIS") === "true") die("skip inaccurate on TravisCI");
-?>

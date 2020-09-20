@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait U {
   public function test() {
@@ -13,7 +13,11 @@ class D {
     echo "U::foo\n";
   }
 }
+
+<<__EntryPoint>>
+function main_2076() {
 $obj = new D;
 $x = $obj->test();
 foreach ($x as $v) {
+}
 }

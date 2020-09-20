@@ -1,15 +1,15 @@
-<?php
+<?hh
 
 final class base {
-	function show() {
-		echo "base\n";
-	}
+    function show() {
+        echo "base\n";
+    }
 }
-
-$t = new base();
 
 class derived extends base {
 }
+<<__EntryPoint>> function main(): void {
+$t = new base();
 
 echo "Done\n"; // shouldn't be displayed
-?>
+}

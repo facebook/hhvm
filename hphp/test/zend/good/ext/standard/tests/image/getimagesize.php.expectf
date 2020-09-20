@@ -1,6 +1,6 @@
-array(13) {
+darray(13) {
   ["test-1pix.bmp"]=>
-  array(6) {
+  darray(6) {
     [0]=>
     int(1)
     [1]=>
@@ -15,7 +15,7 @@ array(13) {
     string(14) "image/x-ms-bmp"
   }
   ["test1bpix.bmp"]=>
-  array(6) {
+  darray(6) {
     [0]=>
     int(500)
     [1]=>
@@ -30,7 +30,7 @@ array(13) {
     string(14) "image/x-ms-bmp"
   }
   ["test1pix.bmp"]=>
-  array(6) {
+  darray(6) {
     [0]=>
     int(1)
     [1]=>
@@ -45,7 +45,7 @@ array(13) {
     string(14) "image/x-ms-bmp"
   }
   ["test1pix.jp2"]=>
-  array(7) {
+  darray(7) {
     [0]=>
     int(1)
     [1]=>
@@ -62,7 +62,7 @@ array(13) {
     string(9) "image/jp2"
   }
   ["test1pix.jpc"]=>
-  array(7) {
+  darray(7) {
     [0]=>
     int(1)
     [1]=>
@@ -79,7 +79,7 @@ array(13) {
     string(24) "application/octet-stream"
   }
   ["test1pix.jpg"]=>
-  array(7) {
+  darray(7) {
     [0]=>
     int(1)
     [1]=>
@@ -96,7 +96,7 @@ array(13) {
     string(10) "image/jpeg"
   }
   ["test2pix.gif"]=>
-  array(7) {
+  darray(7) {
     [0]=>
     int(2)
     [1]=>
@@ -113,7 +113,7 @@ array(13) {
     string(9) "image/gif"
   }
   ["test4pix.gif"]=>
-  array(7) {
+  darray(7) {
     [0]=>
     int(4)
     [1]=>
@@ -130,7 +130,7 @@ array(13) {
     string(9) "image/gif"
   }
   ["test4pix.iff"]=>
-  array(6) {
+  darray(6) {
     [0]=>
     int(4)
     [1]=>
@@ -145,7 +145,7 @@ array(13) {
     string(9) "image/iff"
   }
   ["test4pix.png"]=>
-  array(6) {
+  darray(6) {
     [0]=>
     int(4)
     [1]=>
@@ -160,7 +160,7 @@ array(13) {
     string(9) "image/png"
   }
   ["test4pix.psd"]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(4)
     [1]=>
@@ -173,7 +173,7 @@ array(13) {
     string(9) "image/psd"
   }
   ["test4pix.swf"]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(550)
     [1]=>
@@ -186,7 +186,7 @@ array(13) {
     string(29) "application/x-shockwave-flash"
   }
   ["test4pix.tif"]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(4)
     [1]=>

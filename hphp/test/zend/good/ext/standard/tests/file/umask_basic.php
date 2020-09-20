@@ -1,8 +1,8 @@
-<?php
+<?hh
 /* Prototype: int umask ( [int $mask] );
    Description: Changes the current umask
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing umask() : basic functionality ***\n";
 // checking umask() on all the modes
 for($mask = 0000; $mask <= 0777; $mask++) {
@@ -16,4 +16,4 @@ for($mask = 0000; $mask <= 0777; $mask++) {
 }
 
 echo "Done\n";
-?>
+}

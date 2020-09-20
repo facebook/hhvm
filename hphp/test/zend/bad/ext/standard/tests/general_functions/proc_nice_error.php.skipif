@@ -1,3 +1,0 @@
-<?php
-if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
-?>

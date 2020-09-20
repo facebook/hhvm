@@ -1,9 +1,10 @@
-name: \C::BAR, kind: typeconst, span: line 11, characters 26-28, definition: 
+name: \C::BAR, kind: typeconst, span: line 11, characters 26-28, is_declaration: false
+definition:
  BAR
    kind: typeconst
    id: class_const::C::BAR
    position: line 4, characters 14-16
-   span: line 4, character 3 - line 4, character 25
+   span: line 4, character 3 - line 4, character 26
    modifiers: 
 
 

@@ -8,9 +8,13 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_clone_method() {
 $x = new X;
 $x->val = 2;
 var_dump($x->mul());
 $y = clone $x;
 $y->val = 3;
 var_dump($y->mul());
+}

@@ -1,0 +1,6 @@
+File "do_break_fake.php", line 13, characters 14-22:
+Invalid argument (Typing[4110])
+File "do_break_fake.php", line 6, characters 21-23:
+Expected `int`
+File "do_break_fake.php", line 4, characters 17-20:
+But got `?int`

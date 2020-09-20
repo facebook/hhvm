@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_H_
-#define incl_HPHP_JIT_VASM_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 
@@ -40,13 +39,13 @@ struct Vtext;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DECLARE_VNUM(Vnum, check, prefix)                 \
+#define DECLARE_VNUM(Vnum, type, check, prefix)           \
 struct Vnum {                                             \
   Vnum() {}                                               \
-  explicit Vnum(size_t n) : n(safe_cast<uint32_t>(n)) {}  \
+  explicit Vnum(size_t n) : n(safe_cast<type>(n)) {}      \
                                                           \
   /* implicit */ operator size_t() const {                \
-    if (check) assertx(n != kInvalidId);                   \
+    if (check) assertx(n != kInvalidId);                  \
     return n;                                             \
   }                                                       \
                                                           \
@@ -60,26 +59,37 @@ struct Vnum {                                             \
   }                                                       \
                                                           \
 private:                                                  \
-  static constexpr uint32_t kInvalidId = 0xffffffff;      \
-  uint32_t n{kInvalidId};                                 \
+  static constexpr type kInvalidId =                      \
+    static_cast<type>(0xffffffff);                        \
+  type n{kInvalidId};                                     \
 }
 
 /*
  * Vlabel wraps a block number.
  */
-DECLARE_VNUM(Vlabel, true, "B");
+DECLARE_VNUM(Vlabel, uint32_t, true, "B");
+
+/*
+ * Vaddr is a reference to an address in the instruction stream.
+ */
+DECLARE_VNUM(Vaddr, uint32_t, false, "A");
 
 /*
  * Vtuple is an index to a tuple in Vunit::tuples.
  */
-DECLARE_VNUM(Vtuple, true, "T");
+DECLARE_VNUM(Vtuple, uint32_t, true, "T");
 
 /*
  * VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs.
  */
-DECLARE_VNUM(VcallArgsId, true, "V");
+DECLARE_VNUM(VcallArgsId, uint32_t, true, "V");
 
 #undef DECLARE_VNUM
+
+///////////////////////////////////////////////////////////////////////////////
+
+using VinstrId = unsigned int;
+using MaybeVinstrId = folly::Optional<VinstrId>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -105,18 +115,22 @@ bool checkBlockEnd(const Vunit& v, Vlabel b);
 /*
  * Passes.
  */
-void allocateRegisters(Vunit&, const Abi&);
+void allocateRegistersWithXLS(Vunit&, const Abi&);
+void allocateRegistersWithGraphColor(Vunit&, const Abi&);
 void annotateSFUses(Vunit&);
 void fuseBranches(Vunit&);
 void optimizeCopies(Vunit&, const Abi&);
-void optimizeExits(Vunit&);
-void optimizeJmps(Vunit&);
+void optimizeExits(Vunit&, MaybeVinstrId = {});
+void optimizeJmps(Vunit&, MaybeVinstrId = {});
 void optimizePhis(Vunit&);
-void removeDeadCode(Vunit&);
+void removeDeadCode(Vunit&, MaybeVinstrId = {});
 void removeTrivialNops(Vunit&);
 void reuseImmq(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
 void simplify(Vunit&);
+void postRASimplify(Vunit&);
+void sfPeepholes(Vunit&, const Abi&);
+void fixupVmfpUses(Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -144,12 +158,9 @@ void fixBlockWeights(Vunit& unit);
  * Order blocks for lowering to machine code.  May use different layout
  * algorithms depending on the TransKind of `unit'.
  *
- * The output is guaranteed to be partitioned by area relative to `text'.  This
- * is almost the same as partitioning by AreaIndex, except we may interleave,
- * e.g., Main and Cold blocks in the same partition if their actual code areas
- * in `text' are the same.
+ * The output is guaranteed to be partitioned by code area.
  */
-jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text);
+jit::vector<Vlabel> layoutBlocks(Vunit& unit);
 
 /*
  * Return a bitset, keyed by Vlabel, indicating which blocks are targets of
@@ -161,4 +172,11 @@ boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif
+namespace std {
+template<> struct hash<HPHP::jit::Vlabel> {
+  size_t operator()(HPHP::jit::Vlabel l) const { return (size_t)l; }
+};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+

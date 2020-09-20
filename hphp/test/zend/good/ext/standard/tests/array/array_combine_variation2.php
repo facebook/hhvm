@@ -1,7 +1,7 @@
-<?php
+<?hh
 /* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys 
- *              and the elements of the second as the corresponding values 
+ * Description: Creates an array by using the elements of the first parameter as keys
+ *              and the elements of the second as the corresponding values
  * Source code: ext/standard/array.c
 */
 
@@ -11,15 +11,6 @@
 * The $keys argument passed is a fixed array.
 */
 
-echo "*** Testing array_combine() : Passing non-array values to \$values argument ***\n";
-
-// Initialize $keys array
-$keys = array(1, 2);
-
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
-
 // get a class
 class classA
 {
@@ -27,6 +18,15 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_combine() : Passing non-array values to \$values argument ***\n";
+
+// Initialize $keys array
+$keys = varray[1, 2];
+
+//get an unset variable
+$unset_var = 10;
+unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -37,7 +37,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $values argument
-$values_passed = array(
+$values_passed = varray[
 
        // int data
 /*1*/  0,
@@ -82,7 +82,7 @@ $values_passed = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element within $values_passed to check the behavior of array_combine()
 $iterator = 1;
@@ -93,4 +93,4 @@ foreach($values_passed as $values) {
 };
 
 echo "Done";
-?>
+}

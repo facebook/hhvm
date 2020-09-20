@@ -1,0 +1,306 @@
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_static(): 0 -> Foo
+iter_static(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_arg(): 0 -> Foo
+iter_arg(): 1 -> bar
+Bar!
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:1:{s:1:"b";s:3:"xyz";}
+iter_recursive(): s:3:"xyz";
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): a:1:{s:1:"b";a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}}
+iter_recursive(): a:2:{i:0;s:3:"Foo";i:1;s:3:"bar";}
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_recursive(): s:3:"Foo";
+iter_recursive(): s:3:"bar";
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar
+iter_no_liter(): 0 -> Foo
+iter_no_liter(): 1 -> bar

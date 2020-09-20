@@ -1,0 +1,4 @@
+int(10)
+int(42)
+
+Fatal error: unknown record I in %s/record-child.inc on line 3

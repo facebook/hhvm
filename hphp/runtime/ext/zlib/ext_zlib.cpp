@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
@@ -25,14 +26,15 @@
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 #include <folly/String.h>
 #include <memory>
 #include <algorithm>
+#include <vector>
 
 #define PHP_ZLIB_MODIFIER 1000
 
@@ -112,12 +114,12 @@ Variant HHVM_FUNCTION(gzfile, const String& filename,
     return false;
   }
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   Variant line;
   while (!same(line = HHVM_FN(gzgets)(stream.toResource()), false)) {
     ret.append(line);
   }
-  return ret;
+  return ret.empty() ? init_null() : ret;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -212,7 +214,7 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
  */
 static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
-  assert(maxlen >= 0);
+  assertx(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
   String ret;
   size_t retused = 0;
@@ -222,7 +224,7 @@ static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
     if (UNLIKELY(retsize >= kMaxSmallSize) &&
         UNLIKELY(tl_heap->preAllocOOM(retsize + 1))) {
       VMRegAnchor _;
-      assert(checkSurpriseFlags());
+      assertx(checkSurpriseFlags());
       handle_request_surprise();
     }
 
@@ -437,18 +439,21 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 // Chunk-based API
 
 const StaticString s_SystemLib_ChunkedInflator("__SystemLib\\ChunkedInflator");
+const StaticString s_SystemLib_ChunkedGunzipper(
+  "__SystemLib\\ChunkedGunzipper");
 
-struct ChunkedInflator {
-  ChunkedInflator(): m_eof(false) {
+template<int W>
+struct ChunkedDecompressor {
+  ChunkedDecompressor(): m_eof(false) {
     m_zstream.zalloc = (alloc_func) Z_NULL;
     m_zstream.zfree = (free_func) Z_NULL;
-    int status = inflateInit2(&m_zstream, -MAX_WBITS);
+    int status = inflateInit2(&m_zstream, W);
     if (status != Z_OK) {
       raise_error("Failed to init zlib: %d", status);
     }
   }
 
-  ~ChunkedInflator() {
+  ~ChunkedDecompressor() {
     if (!eof()) {
       inflateEnd(&m_zstream);
     }
@@ -465,30 +470,74 @@ struct ChunkedInflator {
     }
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();
-    int factor = chunk.length() < 128 * 1024 * 1024 ? 4 : 2;
-    unsigned int maxfactor = 16;
-    do {
-      int buffer_length = chunk.length() * (1 << factor);
-      String buffer(buffer_length, ReserveString);
-      char* raw = buffer.mutableData();
+    unsigned int offset = 0;
+    String result(1024 * 1024, ReserveString);
+    int status;
+    bool completed = false;
+    for (int i = 0; i < 20; i++) {
+      char* raw = result.mutableData() + offset;
       m_zstream.next_out = (Bytef*) raw;
-      m_zstream.avail_out = buffer_length;
-
-      int status = inflate(&m_zstream, Z_SYNC_FLUSH);
-      if (status == Z_STREAM_END || status == Z_OK) {
+      m_zstream.avail_out = result.capacity() - offset;
+      status = inflate(&m_zstream, Z_SYNC_FLUSH);
+      if (status == Z_STREAM_END || status == Z_OK || status == Z_BUF_ERROR) {
         if (status == Z_STREAM_END) {
           m_eof = true;
         }
-        int64_t produced = buffer_length - m_zstream.avail_out;
-        if (produced) {
-          buffer.shrink(produced);
-          return buffer;
+        unsigned int produced = result.capacity() - offset - m_zstream.avail_out;
+        offset += produced;
+        result.setSize(offset);
+        // from zlib doc https://www.zlib.net/manual.html
+        // "if inflate returns Z_OK and with zero avail_out, it must be called
+        // again after making room in the output buffer because there might be
+        // more output pending"
+        // "... Note that Z_BUF_ERROR is not fatal, and inflate() can be
+        // called again with more input and more output space to continue
+        // decompressing"
+        if (m_zstream.avail_out > 0) {
+          completed = true;
+          break;
         }
+        result.reserve(result.capacity() + 1);  // bump to next allocation size
+      } else {
+        m_eof = true;
+        inflateEnd(&m_zstream);
+        throw_object(
+          "Exception",
+          make_vec_array(
+            folly::sformat("zlib error status={} msg=\"{}\"",
+              status,
+              m_zstream.msg
+            )
+          )
+        );
         return empty_string();
       }
-    } while (++factor < maxfactor);
-    raise_warning("Failed to extract chunk");
-    return empty_string();
+    }
+
+    if (Z_STREAM_END == status) {
+      m_eof = true;
+      inflateEnd(&m_zstream);
+    }
+    if (!completed) {
+      // output too large
+      throw_object(
+        "Exception",
+        make_vec_array("inflate failed: output too large")
+      );
+      return empty_string();
+    }
+    return result;
+  }
+
+  void close() {
+    if (!m_eof) {
+      m_eof = true;
+      inflateEnd(&m_zstream);
+    }
+  }
+
+  int getUndecompressedByteCount() {
+    return m_zstream.avail_in;
   }
 
  private:
@@ -499,12 +548,20 @@ struct ChunkedInflator {
   TYPE_SCAN_IGNORE_FIELD(m_zstream);
 };
 
+// As per zlib manual (https://www.zlib.net/manual.html)
+//  "... windowBits can also be -8..-15 for raw deflate ..."
+//  "... windowBits can also be greater than 15 for optional gzip encoding.
+//  Add 16 to windowBits to write a simple gzip header and trailer around
+//  the compressed data instead of a zlib wrapper ..."
+typedef ChunkedDecompressor<-MAX_WBITS> ChunkedInflator;
+typedef ChunkedDecompressor<16 + MAX_WBITS> ChunkedGunzipper;
+
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
   auto dest = Native::data<ChunkedInflator>(src);
 
 bool HHVM_METHOD(ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);
-  assert(data);
+  assertx(data);
   return data->eof();
 }
 
@@ -512,8 +569,49 @@ String HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
                    const String& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
-  assert(data);
+  assertx(data);
   return data->inflateChunk(chunk);
+}
+
+void HHVM_METHOD(ChunkedInflator, close) {
+  FETCH_CHUNKED_INFLATOR(data, this_);
+  assertx(data);
+  return data->close();
+}
+
+int HHVM_METHOD(ChunkedInflator, getUndecompressedByteCount) {
+  FETCH_CHUNKED_INFLATOR(data, this_);
+  assertx(data);
+  return data->getUndecompressedByteCount();
+}
+
+#define FETCH_CHUNKED_GUNZIPPER(dest, src) \
+  auto dest = Native::data<ChunkedGunzipper>(src);
+
+bool HHVM_METHOD(ChunkedGunzipper, eof) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->eof();
+}
+
+String HHVM_METHOD(ChunkedGunzipper,
+                   inflateChunk,
+                   const String& chunk) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->inflateChunk(chunk);
+}
+
+void HHVM_METHOD(ChunkedGunzipper, close) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->close();
+}
+
+int HHVM_METHOD(ChunkedGunzipper, getUndecompressedByteCount) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->getUndecompressedByteCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -556,10 +654,6 @@ struct ZlibExtension final : Extension {
     HHVM_FE(gzgetss);
     HHVM_FE(gzpassthru);
     HHVM_FE(gzwrite);
-#ifdef HAVE_QUICKLZ
-    HHVM_FE(qlzcompress);
-    HHVM_FE(qlzuncompress);
-#endif
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
 
@@ -567,14 +661,26 @@ struct ZlibExtension final : Extension {
                   HHVM_MN(ChunkedInflator, eof));
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, inflateChunk,
                   HHVM_MN(ChunkedInflator, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, close,
+                  HHVM_MN(ChunkedInflator, close));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, getUndecompressedByteCount,
+                  HHVM_MN(ChunkedInflator, getUndecompressedByteCount));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, eof,
+                  HHVM_MN(ChunkedGunzipper, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, inflateChunk,
+                  HHVM_MN(ChunkedGunzipper, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, close,
+                  HHVM_MN(ChunkedGunzipper, close));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, getUndecompressedByteCount,
+                  HHVM_MN(ChunkedGunzipper, getUndecompressedByteCount));
 
     Native::registerNativeDataInfo<ChunkedInflator>(
       s_SystemLib_ChunkedInflator.get());
 
+    Native::registerNativeDataInfo<ChunkedGunzipper>(
+      s_SystemLib_ChunkedGunzipper.get());
+
     loadSystemlib();
-#ifdef HAVE_QUICKLZ
-    loadSystemlib("zlib-qlz");
-#endif
   }
 } s_zlib_extension;
 ///////////////////////////////////////////////////////////////////////////////

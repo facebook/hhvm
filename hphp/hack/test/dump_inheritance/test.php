@@ -13,7 +13,7 @@ class Foo implements IFoo {
   public function override_me() {}
 }
 
-class Bar extends Foo, Bar implements IQux {
+class Bar extends Foo implements IQux {
   public function not_overridden() {}
 }
 

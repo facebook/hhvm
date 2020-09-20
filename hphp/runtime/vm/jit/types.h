@@ -14,16 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANSL_TYPES_H_
-#define incl_HPHP_TRANSL_TYPES_H_
+#pragma once
 
 #include <vector>
 
-#include "hphp/runtime/base/runtime-option.h"
+#include <folly/Optional.h>
+
 #include "hphp/runtime/base/types.h"
 
+#include "hphp/runtime/vm/jit/containers.h"
+
 #include "hphp/util/assertions.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP { namespace jit {
 
@@ -34,6 +36,8 @@ namespace HPHP { namespace jit {
  */
 typedef unsigned char* TCA; // "Translation cache address."
 typedef const unsigned char* CTCA;
+
+using TcaRange = folly::Range<TCA>;
 
 using LowTCA = LowPtr<uint8_t>;
 using AtomicLowTCA = AtomicLowPtr<uint8_t,
@@ -53,7 +57,7 @@ struct ctca_identity_hash {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TransIDSet = hphp_hash_set<TransID>;
+using TransIDSet = jit::flat_set<TransID>;
 using TransIDVec = std::vector<TransID>;
 
 using Annotation = std::pair<std::string, std::string>;
@@ -105,6 +109,13 @@ inline std::string show(TransKind k) {
   not_reached();
 }
 
+inline folly::Optional<TransKind> nameToTransKind(const std::string& str) {
+#define DO(name) if (str == "Trans" #name) return TransKind::name;
+  TRANS_KINDS
+#undef DO
+  return folly::none;
+}
+
 inline bool isProfiling(TransKind k) {
   switch (k) {
     case TransKind::Profile:
@@ -148,13 +159,10 @@ inline bool isPrologue(TransKind k) {
 struct TransFlags {
   /* implicit */ TransFlags(uint64_t flags = 0) : packed(flags) {}
 
-  union {
-    struct {
-      bool noinlineSingleton : 1;
-      bool noProfiledFPush : 1;
-    };
-    uint64_t packed;
-  };
+  bool operator==(TransFlags o) const { return packed == o.packed; }
+  bool operator!=(TransFlags o) const { return packed != o.packed; }
+
+  uint64_t packed;
 };
 
 static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");
@@ -174,6 +182,12 @@ enum class CodeKind : uint8_t {
   Trace,
 
   /*
+   * Code for function prologues. Similar to CrossTrace, but may allow more
+   * registers.
+   */
+  Prologue,
+
+  /*
    * Code at the TC boundaries, e.g., service requests, unique stubs.
    */
   CrossTrace,
@@ -186,6 +200,16 @@ enum class CodeKind : uint8_t {
    */
   Helper,
 };
+
+inline std::string codeKindAsString(CodeKind kind) {
+  switch (kind) {
+    case CodeKind::Trace:      return "trace";
+    case CodeKind::Prologue:   return "prologue";
+    case CodeKind::CrossTrace: return "cross-trace";
+    case CodeKind::Helper:     return "helper";
+  }
+  always_assert(false);
+}
 
 /*
  * Enumeration representing the various areas that we emit code.
@@ -207,18 +231,11 @@ inline std::string areaAsString(AreaIndex area) {
   always_assert(false);
 }
 
-/*
- * Multiplying factors used to compute the block weights for each code area.
- * We multiply the corresponding IR block's profile counter by the following
- * factors, depending on the code area the block is assigned to.
- */
-inline uint64_t areaWeightFactor(AreaIndex area) {
-  switch (area) {
-    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
-    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
-    case AreaIndex::Frozen: return 1;
-  };
-  always_assert(false);
+inline folly::Optional<AreaIndex> nameToAreaIndex(const std::string name) {
+  if (name == "Main") return AreaIndex::Main;
+  if (name == "Cold") return AreaIndex::Cold;
+  if (name == "Frozen") return AreaIndex::Frozen;
+  return folly::none;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,6 +270,13 @@ using Vflags = uint8_t;
 struct Reason {
   const char* file;
   unsigned line;
+
+  bool operator==(const Reason& o) const {
+    return line == o.line && std::string{file} == std::string{o.file};
+  }
+  bool operator!=(const Reason& o) const {
+    return line != o.line || std::string{file} != std::string{o.file};
+  }
 };
 
 inline std::string show(const Reason &r) {
@@ -261,4 +285,3 @@ inline std::string show(const Reason &r) {
 
 }}
 
-#endif

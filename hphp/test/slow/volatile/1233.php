@@ -1,28 +1,24 @@
-<?php
-
-var_dump(HH\autoload_set_paths(
-  array(
-    'function' => array(),
-    'constant' => array(),
-    'failure' => 'failure'
-  ),
-  ''
-));
+<?hh
+const foo = 0;
+const bar = 0;
 function failure($kind, $name) {
-  if ($kind == 'constant' && $name == 'bar') define('bar', 'baz');
   var_dump($kind, $name);
 }
-var_dump(function_exists('foo'));
-var_dump(function_exists('bar', false));
-var_dump(defined('foo'));
-var_dump(defined('bar', false));
-var_dump(constant('foo'));
-var_dump(constant('bar'));
-if (0) {
-  function foo() {
-}
-  function foo() {
-}
-  define('foo', 0);
-  define('bar', 0);
+<<__EntryPoint>>
+function main_entry(): void {
+
+  var_dump(HH\autoload_set_paths(
+    darray[
+      'function' => varray[],
+      'constant' => varray[],
+      'failure' => 'failure'
+    ],
+    ''
+  ));
+  var_dump(function_exists('foo'));
+  var_dump(function_exists('bar', false));
+  var_dump(defined('foo'));
+  var_dump(defined('bar', false));
+  var_dump(constant('foo'));
+  var_dump(constant('bar'));
 }

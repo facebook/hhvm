@@ -1,31 +1,4 @@
-<?php 
-
-$xml =<<<EOF
-<?xml version='1.0'?>
-<!DOCTYPE sxe SYSTEM "notfound.dtd">
-<sxe id="elem1">
- Plain text.
- <elem1 attr1='first'>
-  Bla bla 1.
-  <!-- comment -->
-  <elem2>
-   Here we have some text data.
-   <elem3>
-    And here some more.
-    <elem4>
-     Wow once again.
-    </elem4>
-   </elem3>
-  </elem2>
- </elem1>
- <elem11 attr2='second'>
-  Bla bla 2.
-  <elem111>
-   Foo Bar
-  </elem111>
- </elem11>
-</sxe>
-EOF;
+<?hh
 
 class SXETest extends SimpleXMLIterator
 {
@@ -65,14 +38,43 @@ class SXETest extends SimpleXMLIterator
 		return parent::getChildren();
 	}
 }
+<<__EntryPoint>>
+function entrypoint_sxe_004(): void {
 
-$sxe = new SXETest((binary)$xml);
-$rit = new RecursiveIteratorIterator($sxe, RecursiveIteratorIterator::SELF_FIRST);
+  $xml =<<<EOF
+<?xml version='1.0'?>
+<!DOCTYPE sxe SYSTEM "notfound.dtd">
+<sxe id="elem1">
+	Plain text.
+	<elem1 attr1='first'>
+	Bla bla 1.
+	<!-- comment -->
+	<elem2>
+		Here we have some text data.
+		<elem3>
+		And here some more.
+		<elem4>
+			Wow once again.
+		</elem4>
+		</elem3>
+	</elem2>
+	</elem1>
+	<elem11 attr2='second'>
+	Bla bla 2.
+	<elem111>
+		Foo Bar
+	</elem111>
+	</elem11>
+</sxe>
+EOF;
 
-foreach($rit as $data) {
-	var_dump(get_class($data));
-	var_dump(trim($data));
+  $sxe = new SXETest((string)$xml);
+  $rit = new RecursiveIteratorIterator($sxe, RecursiveIteratorIterator::SELF_FIRST);
+
+  foreach($rit as $data) {
+  	var_dump(get_class($data));
+  	var_dump(trim((string)$data));
+  }
+
+  echo "===DONE===\n";
 }
-
-?>
-===DONE===

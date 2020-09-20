@@ -20,11 +20,11 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 #include <c-client.h> /* includes mail.h and rfc822.h */
 #define namespace namespace_
@@ -47,7 +47,7 @@ struct ImapStream : SweepableResourceData {
   ImapStream(MAILSTREAM *stream, int64_t flag)
       : m_stream(stream), m_flag(flag) {
   }
-  ~ImapStream() {
+  ~ImapStream() override {
     close();
   }
 
@@ -228,7 +228,7 @@ static char *_php_rfc822_write_address(ADDRESS *addresslist) {
 #define ARR_SET_ENTRY(arr, obj, name, entry) \
   if (obj->entry) arr.set(name, String((const char*)obj->entry, CopyString));
 
-static void set_address(ArrayInit &ai, const char *prop, ADDRESS *addr) {
+static void set_address(DArrayInit &ai, const char *prop, ADDRESS *addr) {
   if (!addr) return;
 
   auto const fulladdress = _php_rfc822_write_address(addr);
@@ -236,9 +236,9 @@ static void set_address(ArrayInit &ai, const char *prop, ADDRESS *addr) {
     ai.set(String(prop) + "address", String(fulladdress, AttachString));
   }
 
-  auto paddress = Array::Create();
+  auto paddress = Array::CreateVArray();
   do {
-    ArrayInit props(4, ArrayInit::Map{});
+    DArrayInit props(4);
     ARR_SET_ENTRY(props, addr, "personal", personal);
     ARR_SET_ENTRY(props, addr, "adl",      adl);
     ARR_SET_ENTRY(props, addr, "mailbox",  mailbox);
@@ -249,7 +249,7 @@ static void set_address(ArrayInit &ai, const char *prop, ADDRESS *addr) {
 }
 
 static Array _php_make_header_props(ENVELOPE *en) {
-  ArrayInit ai(24, ArrayInit::Map{});
+  DArrayInit ai(24);
 
   ARR_SET_ENTRY(ai, en, "remail",      remail);
   ARR_SET_ENTRY(ai, en, "date",        date);
@@ -274,7 +274,7 @@ static Array _php_make_header_props(ENVELOPE *en) {
 }
 
 static Object _php_imap_body(BODY *body, bool do_multipart) {
-  ArrayInit props(17, ArrayInit::Map{});
+  DArrayInit props(17);
 
   if (body->type <= TYPEMAX) {
    props.set("type", body->type);
@@ -326,9 +326,9 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
   if (body->disposition.parameter) {
     props.set("ifdparameters", 1);
 
-    auto dparams = Array::Create();
+    auto dparams = Array::CreateVArray();
     for (auto dpar = body->disposition.parameter; dpar; dpar = dpar->next) {
-      ArrayInit dparam(2, ArrayInit::Map{});
+      DArrayInit dparam(2);
       dparam.set("attribute", String((const char*)dpar->attribute, CopyString));
       dparam.set("value", String((const char*)dpar->value, CopyString));
       dparams.append(ObjectData::FromArray(dparam.create()));
@@ -341,9 +341,9 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
   if (body->parameter) {
     props.set("ifparameters", 1);
 
-    auto params = Array::Create();
+    auto params = Array::CreateVArray();
     for (auto par = body->parameter; par; par = par->next) {
-      ArrayInit param(2, ArrayInit::Map{});
+      DArrayInit param(2);
       ARR_SET_ENTRY(param, par, "attribute", attribute);
       ARR_SET_ENTRY(param, par, "value", value);
       params.append(ObjectData::FromArray(param.create()));
@@ -356,7 +356,7 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
   if (do_multipart) {
     /* multipart message ? */
     if (body->type == TYPEMULTIPART) {
-      auto parts = Array::Create();
+      auto parts = Array::CreateVArray();
       for (auto part = body->nested.part; part; part = part->next) {
         parts.append(_php_imap_body(&part->body, do_multipart));
       }
@@ -365,7 +365,7 @@ static Object _php_imap_body(BODY *body, bool do_multipart) {
 
     /* encapsulated message ? */
     if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
-      auto parts = Array::Create();
+      auto parts = Array::CreateVArray();
       parts.append(_php_imap_body(body->nested.msg->body, do_multipart));
       props.set("parts", parts);
     }
@@ -702,7 +702,7 @@ static Variant HHVM_FUNCTION(imap_alerts) {
     return false;
   }
 
-  Array ret(Array::Create());
+  Array ret(Array::CreateVArray());
 
   for (STRINGLIST *cur = IMAPG(alertstack); cur != NIL;
        cur = cur->next) {
@@ -796,7 +796,7 @@ static Variant HHVM_FUNCTION(imap_check, const Resource& imap_stream) {
     return false;
   }
   if (obj->m_stream && obj->m_stream->mailbox) {
-    ArrayInit props(5, ArrayInit::Map{});
+    DArrayInit props(5);
     char date[100];
     rfc822_date(date);
     props.set("Date", String(date, CopyString));
@@ -867,7 +867,7 @@ static Variant HHVM_FUNCTION(imap_errors, ) {
     return false;
   }
 
-  Array ret(Array::Create());
+  Array ret(Array::CreateVArray());
 
   for (ERRORLIST *cur = IMAPG(errorstack); cur != NIL;
        cur = cur->next) {
@@ -893,7 +893,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
 
   auto obj = cast<ImapStream>(imap_stream);
 
-  Array ret(Array::Create());
+  Array ret(Array::CreateVArray());
 
   long status = (options & FT_UID)
     ? mail_uid_sequence(obj->m_stream, (unsigned char *)sequence.data())
@@ -906,7 +906,7 @@ static Variant HHVM_FUNCTION(imap_fetch_overview, const Resource& imap_stream,
       if (((elt = mail_elt(obj->m_stream, i))->sequence) &&
           (env = mail_fetch_structure(obj->m_stream, i, NIL, NIL))) {
 
-        ArrayInit props(16, ArrayInit::Map{});
+        DArrayInit props(16);
         ARR_SET_ENTRY(props, env, "subject", subject);
 
         if (env->from) {
@@ -1149,7 +1149,7 @@ static Variant HHVM_FUNCTION(imap_list, const Resource& imap_stream,
     return false;
   }
 
-  Array ret(Array::Create());
+  Array ret(Array::CreateVArray());
   for (STRINGLIST *cur = IMAPG(folders); cur != NIL; cur = cur->next) {
     ret.append(String((const char *)cur->text.data, CopyString));
   }
@@ -1262,7 +1262,7 @@ static Variant HHVM_FUNCTION(imap_mailboxmsginfo, const Resource& imap_stream) {
   char date[100];
   rfc822_date(date);
 
-  ArrayInit props(8, ArrayInit::Map{});
+  DArrayInit props(8);
   props.set("Unread", (int64_t)unreadmsg);
   props.set("Deleted", (int64_t)deletedmsg);
   props.set("Nmsgs", (int64_t)obj->m_stream->nmsgs);
@@ -1407,7 +1407,7 @@ static Variant HHVM_FUNCTION(imap_search, const Resource& imap_stream,
     return false;
   }
 
-  Array ret(Array::Create());
+  Array ret(Array::CreateVArray());
 
   MESSAGELIST *cur = IMAPG(messages);
   while (cur != NIL) {
@@ -1435,7 +1435,7 @@ static Variant HHVM_FUNCTION(imap_status, const Resource& imap_stream,
     return false;
   }
 
-  ArrayInit props(6, ArrayInit::Map{});
+  DArrayInit props(6);
   props.set("flags", (int64_t)IMAPG(status_flags));
   if (IMAPG(status_flags) & SA_MESSAGES) {
     props.set("messages", (int64_t)IMAPG(status_messages));
@@ -1594,7 +1594,7 @@ static struct imapExtension final : Extension {
 
     /* set default timeout values */
     void *timeout = reinterpret_cast<void *>(
-      ThreadInfo::s_threadInfo.getNoCheck()->
+      RequestInfo::s_requestInfo.getNoCheck()->
         m_reqInjectionData.getSocketDefaultTimeout());
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);

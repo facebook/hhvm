@@ -1,7 +1,4 @@
-<?php
-
-$m = new Memcached();
-$m->addServer('localhost', '11211');
+<?hh
 
 function has_all_keys($keys, $array, $check_true = false)
 {
@@ -14,52 +11,58 @@ function has_all_keys($keys, $array, $check_true = false)
     }
     return true;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$data = array(
-    'foo' => 'foo-data',
-    'bar' => 'bar-data',
-    'baz' => 'baz-data',
-    'lol' => 'lol-data',
-    'kek' => 'kek-data'
-);
+  $m = new Memcached();
+  $m->addServer('localhost', '11211');
 
-$keys = array_keys($data);
+  $data = darray[
+      'foo' => 'foo-data',
+      'bar' => 'bar-data',
+      'baz' => 'baz-data',
+      'lol' => 'lol-data',
+      'kek' => 'kek-data'
+  ];
 
-$null = null;
-$m->setMulti($data, 3600);
+  $keys = array_keys($data);
 
-/* Check that all keys were stored */
-var_dump(has_all_keys($keys, $m->getMulti($keys)));
+  $null = null;
+  $m->setMulti($data, 3600);
 
-/* Check that all keys get deleted */
-$deleted = $m->deleteMulti($keys);
+  /* Check that all keys were stored */
+  var_dump(has_all_keys($keys, $m->getMulti($keys)));
 
-var_dump(has_all_keys($keys, $deleted, true));
+  /* Check that all keys get deleted */
+  $deleted = $m->deleteMulti($keys);
 
-/* Try to get the deleted keys, should give empty array */
-var_dump($m->getMulti($keys));
+  var_dump(has_all_keys($keys, $deleted, true));
 
-/* ---- same tests for byKey variants ---- */
-$m->setMultiByKey("hi", $data, 3600);
+  /* Try to get the deleted keys, should give empty array */
+  var_dump($m->getMulti($keys));
 
-var_dump(has_all_keys($keys, $m->getMultiByKey('hi', $keys)));
+  /* ---- same tests for byKey variants ---- */
+  $m->setMultiByKey("hi", $data, 3600);
 
-/* Check that all keys get deleted */
-$deleted = $m->deleteMultiByKey('hi', $keys);
-var_dump(has_all_keys($keys, $deleted, true));
+  var_dump(has_all_keys($keys, $m->getMultiByKey('hi', $keys)));
 
-/* Try to get the deleted keys, should give empty array */
-var_dump($m->getMultiByKey('hi', $keys));
+  /* Check that all keys get deleted */
+  $deleted = $m->deleteMultiByKey('hi', $keys);
+  var_dump(has_all_keys($keys, $deleted, true));
 
-/* Test deleting non-existent keys */
-$keys = array();
-$keys[] = "nothere";
-$keys[] = "nothere2";
+  /* Try to get the deleted keys, should give empty array */
+  var_dump($m->getMultiByKey('hi', $keys));
 
-$retval = $m->deleteMulti($keys);
+  /* Test deleting non-existent keys */
+  $keys = varray[];
+  $keys[] = "nothere";
+  $keys[] = "nothere2";
 
-foreach ($retval as $key => $value) {
-    if ($value === Memcached::RES_NOTFOUND) {
-        echo "$key NOT FOUND\n";
-    }
+  $retval = $m->deleteMulti($keys);
+
+  foreach ($retval as $key => $value) {
+      if ($value === Memcached::RES_NOTFOUND) {
+          echo "$key NOT FOUND\n";
+      }
+  }
 }

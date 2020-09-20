@@ -1,0 +1,4 @@
+File "dup_class_bad_pos.php--file2.php", line 6, characters 16-16:
+Name already bound: `C` (Naming[2012])
+File "dup_class_bad_pos.php--file1.php", line 7, characters 16-16:
+Previous definition is here

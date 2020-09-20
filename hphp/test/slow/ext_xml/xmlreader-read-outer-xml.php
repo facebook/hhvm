@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_xmlreader_read_outer_xml() {
 $xml = <<<EOF
 <a>
 <b>0</b>
@@ -9,4 +12,5 @@ $reader = new XMLReader;
 $reader->XML($xml);
 while($reader->read()) {
   var_dump($reader->readOuterXML());
+}
 }

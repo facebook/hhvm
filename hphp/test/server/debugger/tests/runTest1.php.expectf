@@ -9,10 +9,10 @@ Requesting test1.php
 Web request /test1.php started.
 next
 Waiting for server response
-Break on line 2 of %s/test1.php
-   1 <?php
-   2*include 'break1.php';
-   3 
+Break at mainn() on line 13 of %s/test1.php
+  12 
+  13*<<__EntryPoint>> function mainn() { include 'break1.php'; test_break();
+  14 echo "request done\n"; }
 
 break break1.php:7
 Breakpoint 2 set on line 7 of break1.php

@@ -1,85 +1,118 @@
-<?php
+<?hh // partial
 
 namespace HH {
 
 /**
- * Returns the value at an index of an array. This function simplifies the
- * common pattern of checking for an index in an array and selecting a default
- * value if it does not exist. You should NOT use `idx` as a general replacement
- * for accessing array indices.
+ * Returns the value at a key of a KeyedContainer, if this key is present.
+ * This function simplifies the common pattern of checking for a key in
+ * a KeyedContainer and using a default value if the key is not present.
+ * You should NOT use `idx` as a replacement for accessing elements
+ * of KeyedContainers, since this makes the code harder to reason about.
  *
- * `idx` is used to look for an index in an array, and return either the value
- * at that index (if it exists) or some default (if it does not). Without
- * `idx`, you need to do this:
+ * `idx` is used to try and index into a KeyedContainer, and return either
+ * the value found at this key or some default. Writing this out the
+ * long way would look like this:
  *
  * ```
- * array_key_exists('index', $arr) ? $arr['index'] : $default
+ * C\contains_key($keyedcontainer, 'key') ? $keyedcontainer['key'] : $default;
  * ```
  *
  * This is verbose, and duplicates the variable name and index name, which can
  * lead to errors. With `idx`, you can simplify the expression:
  *
  * ```
- * idx($arr, 'index', $default);
+ * idx($keyedcontainer, 'key', $default);
  * ```
  *
  * The value `$default` is optional, and defaults to null if unspecified.
  *
- * The array `$arr` is permitted to be null; if it is null, `idx` guarantees
- * it will return `$default`.
+ * The first argument is permitted to be null; if it is null,
+ * `idx` will always return `$default`.
  *
- * You should NOT use `idx` as a general replacement for accessing array
- * indices. If you expect 'index' to always exist, DON'T use idx()!
+ * The second argument is permitted to be null; if it is null,
+ * `idx` will always return `$default`.
+ *
+ * Just as an aside, Hack has a null coalesce operator which interacts with
+ * with subscripting operations in an unusual way.
+ * The important difference between `$dict['key'] ?? $default` and
+ * `idx($dict, 'key', $default)` is that the `??` operator will also
+ * resolve the `$default` if the value held in `$dict['key']` is null.
+ * `idx`, in contrast, will return the null stored at 'key' instead, since 'key' is present.
+ *
+ * If you notice yourself accessing deeply nested KeyedContainers like this:
+ *
+ * ```
+ * // $dict['key1']['key2']['key3'], but it resolves to null when a key is missing.
+ * idx($dict, 'key1', dict[]) |> idx($$, 'key2', dict[]) |> idx($$, 'key3');
+ * ```
+ *
+ * it may be more natural to use `??` instead.
+ *
+ * ```
+ * $dict['key1']['key2']['key3'] ?? null;
+ * ```
+ *
+ * You should NOT use `idx` as a general replacement for accessing KeyedContainer
+ * indices. If you expect 'key' to always exist, do not use `idx`!
  *
  * ```
  * // COUNTEREXAMPLE
- * idx($arr, 'index'); // If you expect 'index' to exist, this is WRONG!
+ * $dict['key'] = some_function();
+ * // code...
+ * $y = idx($dict, 'key');
  * ```
  *
- * Instead, just access it normally like a sensible human being:
+ * This code is misleading, since the default value of `idx` (null) will never be used.
+ * This confuses the reader and leads to annoying nullchecks in the code using `$y`.
+ * Since we know that 'key' should / must be present, it is best to stick to
+ * indexing with the subscript operator like so.
  *
  * ```
- * $arr['index']
+ * $dict['key'];
  * ```
  *
- * This will give you a helpful warning if the index doesn't exist, allowing
- * you to identify a bug in your program and fix it. In contrast, idx() will
- * fail silently if the index doesn't exist, which won't help you out at all.
+ * This will throw an OutOfBoundsException if the 'key' is somehow not present.
+ * This is a good thing, since it will alert you that your mental model
+ * of the code is wrong, instead of continuing with `null` (or the default) silently.
  *
  * `idx` is for default selection, not a blanket replacement for array access.
  *
- * Finally, you should NOT fix errors about array indexes in parts of the code
- * you don't understand by just replacing an array access with a call to `idx`.
- * This is sweeping the problem under the rug. Instead, you need to actually
- * understand the problem and determine the most appropriate solution. It is
- * possible that this really is `idx`, but you can only make that determination
- * after understanding the context of the error.
+ * If you are tasked with fixing a bug that is caused by an OutOfBoundsException
+ * it is often tempting to use `idx` and set a default in place.
+ * This is hiding the underlying problem.
+ * Chances are that the programmer before you actually expected the key to always be present.
+ * Try to figure out why this might be the case.
+ * If this KeyedContainer is being used to access keys which are static in the source code,
+ * it might be helpful to change the code to use a shape() instead if possible.
+ * This will instruct the typechecker to validate that the keys are present.
  *
- * @param array $arr - Array to look for an index in.
- * @param scalar $idx - Index to check for. No longer accepts negative integers
- *                      for accessing elements from the end of the array.
- * @param mixed $default - Default value to return if index is not found. By
- *                         default, this is null.
- * @return mixed Value at array index if it exists, or the default value if not.
+ * The following behavior is deprecated and should not be relied upon.
+ * Because of backwards compatiblity, `idx` treats strings like arrays of characters.
+ * This is not allowed by the typechecker, since string is not a KeyedContainer.
+ * Indexing into a string can be done safely like so: `$string[4] ?? null`.
+ *
+ * @param ?KeyedContainer $arr - KeyedContainer to look for an index in.
+ * @param ?arraykey $idx      - Index to check for.
+ * @param mixed $default      - Default value to return if index is not found. By
+ *                              default, this is null.
+ * @return mixed                Value at array index if it exists, 
+ *                              or the default value if not.
  */
+<<__Pure>>
 function idx($arr, $idx, $default=null) {
-  if (\is_array($arr) || \is_vec($arr) || \is_dict($arr) || \is_keyset($arr)) {
+  if (\HH\is_any_array($arr)) {
     return \hphp_array_idx($arr, $idx, $default);
   }
 
   if ($idx !== null) {
     if (\is_object($arr)) {
-      if ($arr instanceof \ConstIndexAccess) {
+      if ($arr is \ConstIndexAccess) {
         if ($arr->containsKey($idx)) {
           return $arr[$idx];
         }
-      } else if ($arr instanceof \ConstSet) {
+      } else if ($arr is \ConstSet) {
         if ($arr->contains($idx)) {
           return $idx;
-        }
-      } else if ($arr instanceof \ArrayAccess) {
-        if ($arr->offsetExists($idx)) {
-          return $arr->offsetGet($idx);
         }
       }
     } else if (\is_string($arr)) {

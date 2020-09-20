@@ -13,6 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include <sstream>
+
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -45,19 +48,34 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Packed:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::Empty:
-    case HeaderKind::VecArray:
+    case HeaderKind::Vec:
     case HeaderKind::Keyset:
-    case HeaderKind::Apc:
-    case HeaderKind::Globals:
+    case HeaderKind::BespokeVArray:
+    case HeaderKind::BespokeDArray:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeKeyset:
       out << "[" << static_cast<const ArrayData*>(h)->size() << "]";
       break;
     case HeaderKind::String:
       out << "[" << static_cast<const StringData*>(h)->size() << "]";
       break;
-    case HeaderKind::Resource:
-    case HeaderKind::Ref:
+    case HeaderKind::RFunc: {
+      auto const rfunc = static_cast<const RFuncData*>(h);
+      out << ":" << rfunc->m_func->name()->data()
+          << "[" << rfunc->m_arr->size() << "]";
       break;
+    }
+    case HeaderKind::Resource:
+    case HeaderKind::ClsMeth:
+      break;
+    case HeaderKind::RClsMeth: {
+      auto const rclsmeth = static_cast<const RClsMethData*>(h);
+      out << ":" << rclsmeth->m_cls->name()->data()
+          << "::" << rclsmeth->m_func->name()->data()
+          << "[" << rclsmeth->m_arr->size() << "]";
+      break;
+    }
     case HeaderKind::Object:
     case HeaderKind::NativeObject:
     case HeaderKind::Closure:
@@ -66,6 +84,9 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::AwaitAllWH:
       out << ":" << static_cast<const ObjectData*>(h)->classname_cstr();
       break;
+    case HeaderKind::Record:
+      out << ":" <<
+        static_cast<const RecordData*>(h)->record()->name()->data();
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:
@@ -79,6 +100,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       out << "[" << getContainerSize(make_tv<KindOfObject>(obj)) << "]";
       break;
     }
+    case HeaderKind::Cpp:
     case HeaderKind::BigMalloc:
     case HeaderKind::SmallMalloc:
       out << "[" << static_cast<const MallocNode*>(h)->nbytes << "]";
@@ -86,11 +108,11 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
     case HeaderKind::ClosureHdr:
+    case HeaderKind::MemoData:
       break;
     case HeaderKind::Free:
       out << "[" << static_cast<const FreeNode*>(h)->size() << "]";
       break;
-    case HeaderKind::BigObj:
     case HeaderKind::Slab:
     case HeaderKind::Hole:
       not_reached();
@@ -224,7 +246,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
     auto& node = g.nodes[n];
     if (!haveCount(node.h->kind())) continue;
     auto count = static_cast<const MaybeCountable*>(node.h)->count();
-    assert(count >= 0); // static things shouldn't be in the heap.
+    assertx(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
       switch (ptr.ptr_kind) {
@@ -250,7 +272,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
       traceToRoot(g, n, "");
     }
   }
-  assert(!found_dangling && "found dangling pointers");
+  assertx(!found_dangling && "found dangling pointers");
   return true;
 }
 

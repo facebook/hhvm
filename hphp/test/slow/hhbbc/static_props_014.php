@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private static $cache = array();
+  private static $cache = darray[];
   const DELIM = ':';
 
   public function __construct(string $type, ?string $annot) {
@@ -34,4 +34,8 @@ function main() {
   $y = Foo::getCache();
   var_dump($y);
 }
+
+<<__EntryPoint>>
+function main_static_props_014() {
 main();
+}

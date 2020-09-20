@@ -1,54 +1,42 @@
-<?php
-$pwd = getcwd();
-$f = basename(current(get_included_files()), ".php");
-$dir1 = $pwd."/".$f.".dir1";
-$dir2 = $pwd."/".$f.".dir2";
-$dir3 = $pwd."/".$f.".dir3";
-//invalid directory
-$dir4 = $pwd."/".$f.".dir4";
-$newdirs = array($dir1, $dir2, $dir3);
-
-$reldirs = array("dir1", "dir2", "dir3");
+<?hh
 
 function generate_next_rel_path() {
-	global $reldirs;
 	//create the include directory structure
 	$pathSep = ":";
 	$newIncludePath = "";
 	if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	   $pathSep = ";";
 	}
-	foreach($reldirs as $newdir) {
+	foreach(ZendGoodExtStandardTestsFileFopenIncludePathInc::reldirs() as $newdir) {
 	   $newIncludePath .= $newdir.$pathSep;
 	}
 	return "dir4".$pathSep . $newIncludePath;
 }
 
 function generate_next_path() {
-	global $newdirs, $dir4;
+
 	//create the include directory structure
 	$pathSep = ":";
 	$newIncludePath = "";
 	if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	   $pathSep = ";";
 	}
-	foreach($newdirs as $newdir) {
+	foreach(ZendGoodExtStandardTestsFileFopenIncludePathInc::newdirs() as $newdir) {
 	   $newIncludePath .= $newdir.$pathSep;
 	}
-	return $dir4.$pathSep . $newIncludePath;
+	return ZendGoodExtStandardTestsFileFopenIncludePathInc::dir4().$pathSep . $newIncludePath;
 }
 
 
 function create_include_path() {
 
-	global $newdirs;
 	//create the include directory structure
 	$pathSep = ":";
 	$newIncludePath = "";
 	if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	   $pathSep = ";";
 	}
-	foreach($newdirs as $newdir) {
+	foreach(ZendGoodExtStandardTestsFileFopenIncludePathInc::newdirs() as $newdir) {
 	   mkdir($newdir);
 	   $newIncludePath .= $newdir.$pathSep;
 	}
@@ -57,14 +45,13 @@ function create_include_path() {
 
 function relative_include_path() {
 
-	global $reldirs;
 	//create the include directory structure
 	$pathSep = ":";
 	$newIncludePath = "";
 	if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	   $pathSep = ";";
 	}
-	foreach($reldirs as $newdir) {
+	foreach(ZendGoodExtStandardTestsFileFopenIncludePathInc::reldirs() as $newdir) {
 	   mkdir($newdir);
 	   $newIncludePath .= $newdir.$pathSep;
 	}
@@ -74,19 +61,47 @@ function relative_include_path() {
 
 function teardown_include_path() {
 
-	global $newdirs;
 	// remove the directory structure
-	foreach($newdirs as $newdir) {
+	foreach(ZendGoodExtStandardTestsFileFopenIncludePathInc::newdirs() as $newdir) {
 	   rmdir($newdir);
 	}
 }
 
 function teardown_relative_path() {
 
-	global $reldirs;
 	// remove the directory structure
-	foreach($reldirs as $newdir) {
+	foreach(ZendGoodExtStandardTestsFileFopenIncludePathInc::reldirs() as $newdir) {
 	   rmdir($newdir);
 	}
 }
-?>
+
+abstract final class ZendGoodExtStandardTestsFileFopenIncludePathInc {
+	public static function reldirs() {
+		return varray["dir1", "dir2", "dir3"];
+	}
+
+	public static function newdirs() {
+		return varray[
+			self::dir1(),
+			self::dir2(),
+			self::dir3(),
+		];
+	}
+
+	public static function dir1() {
+		return __SystemLib\hphp_test_tmppath('dir1');
+	}
+
+	public static function dir2() {
+		return __SystemLib\hphp_test_tmppath('dir2');
+	}
+
+	public static function dir3() {
+		return __SystemLib\hphp_test_tmppath('dir3');
+	}
+
+	//invalid directory
+    public static function dir4() {
+		return __SystemLib\hphp_test_tmppath('dir4');
+	}
+}

@@ -1,5 +1,5 @@
 ER_OPEN: ok
 create: ok
 
-Warning: %s
+Warning: ZipArchive::open(): Empty string as source in %s/oo_open.php on line 21
 OK

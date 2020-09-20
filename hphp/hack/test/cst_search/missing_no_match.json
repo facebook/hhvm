@@ -1,0 +1,12 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "node_pattern",
+    "kind": "if_statement",
+    "children": {
+      "if_else_clause": {
+        "pattern_type": "missing_node_pattern"
+      }
+    }
+  }
+}

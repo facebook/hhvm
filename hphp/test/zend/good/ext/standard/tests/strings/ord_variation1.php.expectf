@@ -1,54 +1,68 @@
 *** Testing ord() function: with unexpected inputs for 'string' argument ***
 -- Iteration 1 --
-int(48)
+
+Warning: ord() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 2 --
-int(49)
+
+Warning: ord() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 3 --
-int(50)
+
+Warning: ord() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 4 --
-int(50)
+
+Warning: ord() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 5 --
-int(50)
+
+Warning: ord() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 6 --
-int(45)
+
+Warning: ord() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 7 --
-int(49)
+
+Warning: ord() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 8 --
-int(45)
+
+Warning: ord() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 9 --
-int(49)
+
+Warning: ord() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: ord() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: ord() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: ord() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 13 --
-int(49)
+
+Warning: ord() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 14 --
-int(0)
+
+Warning: ord() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 15 --
-int(49)
+
+Warning: ord() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 16 --
-int(0)
+
+Warning: ord() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 17 --
-int(0)
+
+Warning: ord() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 18 --
-int(0)
+
+Warning: ord() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 19 --
-int(115)
+
+Warning: ord() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: ord() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 21 --
-int(0)
+
+Warning: ord() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 -- Iteration 22 --
-int(0)
+
+Warning: ord() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/ord_variation1.php on line 71
 ===DONE===

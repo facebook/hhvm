@@ -1,0 +1,6 @@
+File "enum_1.php", line 10, characters 16-18:
+Constant does not match the type of the enum it is in (Typing[4328])
+File "enum_1.php", line 9, characters 23-25:
+Expected `int`
+File "enum_1.php", line 10, characters 22-26:
+But got `string`

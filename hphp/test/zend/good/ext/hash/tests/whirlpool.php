@@ -1,5 +1,5 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 echo hash('whirlpool', ''), "\n";
 echo hash('whirlpool', $s='---qwertzuiopasdfghjklyxcvbnm------qwertzuiopasdfghjklyxcvbnm---'), "\n";
 echo hash('whirlpool', str_repeat($s.'0', 1000)), "\n";
-?>
+}

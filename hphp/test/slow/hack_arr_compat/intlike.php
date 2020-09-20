@@ -3,7 +3,7 @@
 
 function test($a, $k) {
   echo "=============== get ================================\n";
-  var_dump($a[$k]);
+  try { var_dump($a[$k]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
   var_dump(isset($a[$k]));
   echo "=============== akey-exists=========================\n";
@@ -19,7 +19,7 @@ function test($a, $k) {
 
 function test_const_key($a) {
   echo "=============== get ================================\n";
-  var_dump($a['2']);
+  try { var_dump($a['2']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
   var_dump(isset($a['2']));
   echo "=============== akey-exists=========================\n";
@@ -33,13 +33,29 @@ function test_const_key($a) {
   return $a;
 }
 
-function run_tests() {
-  test([], '10');
-  test([1, 2, 3, 4], '2');
-  test([10 => 'abc'], '10');
-
-  test_const_key([]);
-  test_const_key([1, 2, 3, 4]);
-  test_const_key([2 => 'abc']);
+function test_casting($a) {
+  echo "======================= darray cast ================\n";
+  var_dump(darray($a));
 }
+
+function run_tests() {
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), '10');
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]), '2');
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[10 => 'abc']), '10');
+
+  test_const_key(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  test_const_key(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]));
+  test_const_key(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[2 => 'abc']));
+
+  test_casting(dict['1' => true, '2' => false]);
+  test_casting(keyset['1', '2', '3']);
+
+  echo "======================= literals ===================\n";
+  var_dump(darray(dict['1' => true, '2' => false]));
+  var_dump(darray(keyset['1', '2', '3']));
+}
+
+<<__EntryPoint>>
+function main_intlike() {
 run_tests();
+}

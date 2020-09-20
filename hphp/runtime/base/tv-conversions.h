@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_CONVERSIONS_H_
-#define incl_HPHP_TV_CONVERSIONS_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-root.h"
@@ -41,61 +40,32 @@ struct StringData;
  */
 
 #define X(kind) \
-void tvCastTo##kind##InPlace(TypedValue* tv); \
-bool tvCoerceParamTo##kind##InPlace(TypedValue* tv, \
-                                    bool builtin);
+template<typename T> \
+enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv);
+#define Y(kind) \
+template<typename T, IntishCast IC = IntishCast::None> \
+enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv);
 X(Boolean)
 X(Int64)
 X(Double)
 X(String)
+Y(Array)
 X(Vec)
 X(Dict)
 X(Keyset)
-X(Array)
 X(Object)
 X(NullableObject)
 X(Resource)
+#undef Y
 #undef X
 
-void tvCastToVArrayInPlace(TypedValue* tv);
-void tvCastToDArrayInPlace(TypedValue* tv);
-
-ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
-#define X(kind) \
-  if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
-  X(Boolean)
-  X(Int64)
-  X(Double)
-  X(String)
-  X(Vec)
-  X(Dict)
-  X(Keyset)
-  X(Array)
-  X(Object)
-  X(Resource)
-#undef X
-  not_reached();
-}
-
-ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType,
-                                        bool builtin) {
-#define X(kind) \
-  if (DType == KindOf##kind) \
-    return tvCoerceParamTo##kind##InPlace(tv, \
-                                          builtin);
-  X(Boolean)
-  X(Int64)
-  X(Double)
-  X(String)
-  X(Vec)
-  X(Dict)
-  X(Keyset)
-  X(Array)
-  X(Object)
-  X(Resource)
-#undef X
-  not_reached();
-}
+template<typename T>
+enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv);
+template<typename T>
+enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv);
+template<typename T>
+enable_if_lval_t<T, void> tvCastToStringInPlace(T tv);
+void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 
 /*
  * Non-in-place casts.
@@ -104,25 +74,27 @@ bool tvCastToBoolean(TypedValue tv);
 int64_t tvCastToInt64(TypedValue tv);
 double tvCastToDouble(TypedValue tv);
 String tvCastToString(TypedValue tv);
+template <IntishCast IC = IntishCast::None>
 Array tvCastToArrayLike(TypedValue tv);
-Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
+StringData* tvCastToStringData(TypedValue c);
+template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
 
 /*
- * Convert a cell to various raw data types, without changing the Cell.
+ * Convert a cell to various raw data types, without changing the TypedValue.
  */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(Cell);
+bool tvToBool(TypedValue);
+int64_t tvToInt(TypedValue);
+double tvToDouble(TypedValue);
 
 /*
  * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
  */
-Cell cellToKey(Cell cell, const ArrayData* ad);
-Cell tvToKey(TypedValue tv, const ArrayData* ad);
+template <IntishCast IC = IntishCast::None>
+TypedValue tvToKey(TypedValue cell, const ArrayData* ad);
 
 /*
  * Convert a string to a TypedNum following PHP semantics, allowing strings
@@ -131,10 +103,11 @@ Cell tvToKey(TypedValue tv, const ArrayData* ad);
  */
 TypedNum stringToNumeric(const StringData*);
 
+TypedValue tvClassToString(TypedValue key);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
 
 #include "hphp/runtime/base/tv-conversions-inl.h"
 
-#endif

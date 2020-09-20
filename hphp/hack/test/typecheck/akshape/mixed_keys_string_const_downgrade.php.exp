@@ -1,3 +1,0 @@
-File "mixed_keys_string_const_downgrade.php", line 18, characters 3-13:
-  array<^(string), ^(int | string)>
-No errors

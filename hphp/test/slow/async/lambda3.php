@@ -16,9 +16,13 @@ async function foo() {
       async $id ==> {
         return await bar($id);
       },
-      array(1,2,3,4),
+      varray[1,2,3,4],
     )
   );
 }
 
+
+<<__EntryPoint>>
+function main_lambda3() {
 var_dump(HH\Asio\join(foo()));
+}

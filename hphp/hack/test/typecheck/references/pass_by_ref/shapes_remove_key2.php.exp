@@ -1,4 +1,0 @@
-File "shapes_remove_key2.php", line 5, characters 21-22:
-This argument should be annotated with & (Typing[4168])
-  File "hhi_lib__srcs/Shapes.hhi", line 49, characters 48-53:
-  Because this parameter is passed by reference

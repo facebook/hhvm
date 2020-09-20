@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -41,4 +40,3 @@ struct CmdComplete : DebuggerCommand {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_COMPLETE_H_

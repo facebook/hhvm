@@ -1,11 +1,8 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "foo"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "bar"
-  [1]=>
   string(3) "foo"
 }
 NULL

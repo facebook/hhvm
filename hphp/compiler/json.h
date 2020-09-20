@@ -14,8 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JSON_H_
-#define incl_HPHP_JSON_H_
+#pragma once
+
+#include "hphp/util/hash-map.h"
 
 #include <cassert>
 #include <map>
@@ -23,8 +24,6 @@
 #include <ostream>
 #include <set>
 #include <vector>
-
-#include "hphp/util/hash-map-typedefs.h"
 
 namespace HPHP { namespace JSON {
 ///////////////////////////////////////////////////////////////////////////////
@@ -262,4 +261,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_JSON_H_

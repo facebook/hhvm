@@ -1,10 +1,10 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -18,9 +18,7 @@ let test_write_and_read_directly_cwd () =
   let contents = Disk.cat "./a.txt" in
   contents = "hello"
 
-let tests = [
-  ("test_write_and_read_directly_cwd", test_write_and_read_directly_cwd);
-]
+let tests =
+  [("test_write_and_read_directly_cwd", test_write_and_read_directly_cwd)]
 
-let () =
-  Unit_test.run_all tests
+let () = Unit_test.run_all tests

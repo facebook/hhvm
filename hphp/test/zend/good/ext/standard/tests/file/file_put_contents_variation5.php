@@ -1,12 +1,31 @@
-<?php
+<?hh
 
+function runtest() {
 
-$thisTestDir = dirname(__FILE__) . '/' .basename(__FILE__, ".php") . ".directory";
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename, (string)"File written in working directory", FILE_USE_INCLUDE_PATH);
+   if(file_exists(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile)) {
+      echo "Fail - this is PHP52 behaviour\n";
+      unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile);
+   }else {
+      $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename);
+      echo "$line\n";
+      unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename);
+   }
+}
+
+abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation5 {
+  public static $scriptLocFile;
+  public static $filename;
+}
+
+<<__EntryPoint>> function main(): void {
+$thisTestDir = __SystemLib\hphp_test_tmppath('directory');
 mkdir($thisTestDir);
+$oldDirPath = getcwd();
 chdir($thisTestDir);
 
-$filename = basename(__FILE__, ".php") . ".tmp"; 
-$scriptLocFile = dirname(__FILE__)."/".$filename;
+ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename = basename(__FILE__, ".php") . ".tmp";
+ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile = dirname(__FILE__)."/".ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename;
 
 $newpath = "rubbish";
 set_include_path($newpath);
@@ -19,21 +38,8 @@ runtest();
 set_include_path(";;  ; ;c:\\rubbish");
 runtest();
 
-chdir(dirname(__FILE__));
+chdir($oldDirPath);
 rmdir($thisTestDir);
 
-
-function runtest() {
-   global $scriptLocFile, $filename;
-   file_put_contents($filename, (binary) "File written in working directory", FILE_USE_INCLUDE_PATH);
-   if(file_exists($scriptLocFile)) {
-      echo "Fail - this is PHP52 behaviour\n";
-      unlink($scriptLocFile);
-   }else {
-      $line = file_get_contents($filename); 
-      echo "$line\n";
-      unlink($filename);     
-   }
+echo "===DONE===\n";
 }
-?>
-===DONE===

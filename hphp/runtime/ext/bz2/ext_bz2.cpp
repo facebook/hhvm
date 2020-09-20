@@ -15,11 +15,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/bz2/bz2-file.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/ext/bz2/bz2-file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
 
@@ -43,7 +46,7 @@ struct BZ2StreamWrapper final : Stream::Wrapper {
     static const char cz[] = "compress.bzip2://";
 
     if (strncmp(filename.c_str(), cz, sizeof(cz) - 1)) {
-      assert(false);
+      assertx(false);
       return nullptr;
     }
 
@@ -175,27 +178,21 @@ Variant HHVM_FUNCTION(bzerrno, const Resource& bz) {
 
 Variant HHVM_FUNCTION(bzcompress, const String& source, int blocksize /* = 4 */,
                                   int workfactor /* = 0 */) {
-  char *dest = NULL;
-  int error;
   unsigned int source_len, dest_len;
 
   source_len = source.length();
-  dest_len = source.length() + (0.01*source.length()) + 600;
+  dest_len = source.length() + source.length() / 64 + 601;
 
-  if (!(dest = (char *)malloc(dest_len + 1))) {
-    return BZ_MEM_ERROR;
-  }
+  auto ret = String(dest_len, ReserveString);
 
-  error = BZ2_bzBuffToBuffCompress(dest, &dest_len, (char *) source.c_str(),
-                                   source_len, blocksize, 0, workfactor);
+  int error = BZ2_bzBuffToBuffCompress(ret.mutableData(), &dest_len,
+                                   (char*)source.c_str(), source_len,
+                                   blocksize, 0, workfactor);
   if (error != BZ_OK) {
-    free(dest);
     return error;
   } else {
-    // this is to shrink the allocation, since we probably over allocated
-    dest = (char *)realloc(dest, dest_len + 1);
-    dest[dest_len] = '\0';
-    String ret = String(dest, dest_len, AttachString);
+    ret.setSize(dest_len);
+    ret.shrink(dest_len);
     return ret;
   }
 }
@@ -241,6 +238,124 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
   }
 }
 
+const StaticString s_SystemLib_ChunkedBunzipper(
+  "__SystemLib\\ChunkedBunzipper");
+
+struct ChunkedBunzipper {
+  ChunkedBunzipper(): m_eof(false) {
+    m_bzstream.bzalloc = nullptr;
+    m_bzstream.bzfree = nullptr;
+    int status = BZ2_bzDecompressInit(&m_bzstream, 0, 0);
+    if (status != BZ_OK) {
+      raise_error("Failed BZ2_bzDecompressInit: %d", status);
+    }
+  }
+
+  ~ChunkedBunzipper() {
+    if (!eof()) {
+      BZ2_bzDecompressEnd(&m_bzstream);
+    }
+  }
+
+  bool eof() const {
+    return m_eof;
+  }
+
+  String inflateChunk(const String& chunk) {
+    if (m_eof) {
+      raise_warning("Tried to inflate after final chunk");
+      return empty_string();
+    }
+    m_bzstream.next_in = (char *) chunk.data();
+    m_bzstream.avail_in = chunk.length();
+    unsigned int offset = 0;
+    String result(1024 * 1024, ReserveString);
+    int status;
+    bool completed = false;
+    for (int i = 0; i < 20; i++) {
+      char* raw = result.mutableData() + offset;
+      unsigned int avail_len = result.capacity() - offset;
+      m_bzstream.next_out = raw;
+      m_bzstream.avail_out = avail_len;
+
+      status = BZ2_bzDecompress(&m_bzstream);
+      if (BZ_STREAM_END == status || BZ_OK == status) {
+        unsigned int produced = avail_len - m_bzstream.avail_out;
+        offset += produced;
+        result.setSize(offset);
+        // Unlike zlib, bz2 doesn't always try to fill the output buffer
+        // If the status is BZ_OK, we have to keep looping
+        if (!produced || BZ_STREAM_END == status) {
+          completed = true;
+          break;
+        }
+        // If less than half available space was used in this loop, don't resize
+        if (avail_len < produced * 2) {
+          result.reserve(result.capacity() + 1);  // bump to next allocation size
+        }
+      } else {
+        m_eof = true;
+        BZ2_bzDecompressEnd(&m_bzstream);
+        throw_object(
+          "Exception",
+          make_vec_array(folly::sformat("bz2 error status={}", status))
+        );
+        return empty_string();
+      }
+    }
+
+    if (BZ_STREAM_END == status) {
+      m_eof = true;
+      BZ2_bzDecompressEnd(&m_bzstream);
+    }
+    if (!completed) {
+      throw_object(
+        "Exception",
+        make_vec_array("inflate failed: output too large")
+      );
+      return empty_string();
+    }
+    return result;
+  }
+
+  void close() {
+    if (!m_eof) {
+      m_eof = true;
+      BZ2_bzDecompressEnd(&m_bzstream);
+    }
+  }
+
+ private:
+  ::bz_stream m_bzstream;
+  bool m_eof;
+
+  // z_stream contains void* that we don't care about.
+  TYPE_SCAN_IGNORE_FIELD(m_bzstream);
+};
+
+#define FETCH_CHUNKED_BUNZIPPER(dest, src) \
+  auto dest = Native::data<ChunkedBunzipper>(src);
+
+bool HHVM_METHOD(ChunkedBunzipper, eof) {
+  FETCH_CHUNKED_BUNZIPPER(data, this_);
+  assertx(data);
+  return data->eof();
+}
+
+String HHVM_METHOD(ChunkedBunzipper,
+                   inflateChunk,
+                   const String& chunk) {
+  FETCH_CHUNKED_BUNZIPPER(data, this_);
+  assertx(data);
+  return data->inflateChunk(chunk);
+}
+
+void HHVM_METHOD(ChunkedBunzipper, close) {
+  FETCH_CHUNKED_BUNZIPPER(data, this_);
+  assertx(data);
+  return data->close();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bz2Extension final : Extension {
@@ -261,6 +376,15 @@ struct bz2Extension final : Extension {
     HHVM_FE(bzerrno);
     HHVM_FE(bzcompress);
     HHVM_FE(bzdecompress);
+
+    HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, eof,
+                  HHVM_MN(ChunkedBunzipper, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, inflateChunk,
+                  HHVM_MN(ChunkedBunzipper, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, close,
+                  HHVM_MN(ChunkedBunzipper, close));
+    Native::registerNativeDataInfo<ChunkedBunzipper>(
+      s_SystemLib_ChunkedBunzipper.get());
 
     loadSystemlib("bz2");
   }

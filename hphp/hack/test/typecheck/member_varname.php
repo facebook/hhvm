@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class A {
   protected int $val = 43;

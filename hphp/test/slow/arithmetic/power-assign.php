@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $io = 1;
@@ -17,4 +17,8 @@ function main() {
   var_dump($dt **= $it);
 }
 
+
+<<__EntryPoint>>
+function main_power_assign() {
 main();
+}

@@ -1,6 +1,6 @@
-<?php
-
-$filename = dirname(__FILE__)."/gzeof_variation1.txt.gz";
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('gzeof_variation1.txt.gz');
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;
@@ -11,5 +11,5 @@ var_dump(gzeof($h));
 gzclose($h);
 var_dump(gzeof($h));
 unlink($filename);
-?>
-===DONE===
+echo "===DONE===\n";
+}

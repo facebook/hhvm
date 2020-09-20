@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen() {
   echo "before yield\n";
@@ -10,7 +10,9 @@ function gen() {
 
   yield 'result';
 }
-
+<<__EntryPoint>> function main(): void {
 $gen = gen();
+$gen->next();
 $gen->throw(new RuntimeException('Test'));
 var_dump($gen->current());
+}

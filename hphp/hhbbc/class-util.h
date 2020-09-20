@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CLASS_UTIL_H_
-#define incl_HHBBC_CLASS_UTIL_H_
+#pragma once
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
@@ -45,8 +44,7 @@ bool has_magic_bool_conversion(SString clsName);
 /*
  * Returns method named "name" if it exists.
  */
-borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class>,
-                                    SString name);
+php::Func* find_method(const php::Class*, SString name);
 
 /*
  * Returns true if `name' is the name of an internal VM special class
@@ -58,7 +56,14 @@ bool is_special_method_name(SString name);
  * Returns true if a class has the __MockClass user attribute.  This
  * attribute allows final methods and final classes to be overridden.
  */
-bool is_mock_class(borrowed_ptr<const php::Class>);
+bool is_mock_class(const php::Class*);
+
+/*
+ * Returns true if the given trait class has the __NoFlatten user attribute.
+ * This can be used to forcibly disable flattening for the given trait.
+ * Asserts that the class passed in is a trait.
+ */
+bool is_noflatten_trait(const php::Class*);
 
 /*
  * Returns true if cls is a trait which will not be imported into any
@@ -72,8 +77,14 @@ bool is_unused_trait(const php::Class& cls);
  */
 bool is_used_trait(const php::Class& cls);
 
+/*
+ * Normalizes a class' name to remove any non-deterministic elements. For
+ * closures and anonymous classes, it removes the unique integer identifier from
+ * it. Otherwise, it returns the unmodified class name.
+ */
+std::string normalized_class_name(const php::Class& cls);
+
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

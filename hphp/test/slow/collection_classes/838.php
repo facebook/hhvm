@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_838() {
 $s1 = Set {
 }
 ;
@@ -17,7 +20,7 @@ $s2->add('a');
 var_dump($s1 == $s2);
 $s1[] = 'c';
 var_dump($s1 == $s2);
-$s1->addAll(['d', 'e', 'f']);
+$s1->addAll(varray['d', 'e', 'f']);
 $s2->addAllKeysOf(Map {'c' => 0, 'd' => 1,'e' => 2,'f' => 3});
 var_dump($s1 == $s2);
 echo "============\n";
@@ -56,3 +59,4 @@ var_dump($m == false);
 var_dump($m == true);
 var_dump($m == 1);
 var_dump($m == "Set");
+}

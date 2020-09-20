@@ -7,5 +7,8 @@ enum NotAnObject : string as string {
 function test(NotAnObject $o) {
   var_dump($o);
 }
+<<__EntryPoint>>
+function entrypoint_enumparam(): void {
 
-test(NotAnObject::FOO);
+  test(NotAnObject::FOO);
+}

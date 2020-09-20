@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
     private $foo = 'foo';
     private $foo2 = 'foo2';
@@ -36,7 +36,7 @@ class baz2 extends bar2 {
     protected $foo = 'baz2';
     protected $foo2 = 'baz22';
 }
-
+<<__EntryPoint>> function main(): void {
 $bar = new bar;
 $bar->printFoo();
 echo "---baz--\n";
@@ -45,4 +45,4 @@ $baz->printFoo();
 echo "---baz2--\n";
 $baz = new baz2();
 $baz->printFoo();
-?>
+}

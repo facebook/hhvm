@@ -2,15 +2,14 @@ string(6) "value1"
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-array(2) {
+darray(2) {
   [0]=>
-  array(1) {
+  darray(1) {
     [12]=>
-    array(1) {
-      [0]=>
-      array(1) {
+    varray(1) {
+      darray(1) {
         ["bar"]=>
-        array(1) {
+        darray(1) {
           ["x"]=>
           string(6) "fuzzed"
         }
@@ -18,11 +17,10 @@ array(2) {
     }
   }
   [18]=>
-  array(1) {
-    [0]=>
-    array(1) {
+  varray(1) {
+    darray(1) {
       ["hello"]=>
-      array(1) {
+      darray(1) {
         ["y"]=>
         string(6) "value2"
       }
@@ -33,15 +31,14 @@ string(6) "value2"
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-array(2) {
+darray(2) {
   [0]=>
-  array(1) {
+  darray(1) {
     [12]=>
-    array(1) {
-      [0]=>
-      array(1) {
+    varray(1) {
+      darray(1) {
         ["bar"]=>
-        array(1) {
+        darray(1) {
           ["x"]=>
           string(6) "fuzzed"
         }
@@ -49,80 +46,17 @@ array(2) {
     }
   }
   [18]=>
-  array(1) {
-    [0]=>
-    array(1) {
+  varray(1) {
+    darray(1) {
       ["hello"]=>
-      array(1) {
+      darray(1) {
         ["y"]=>
         string(6) "fuzzed"
       }
     }
   }
 }
-string(6) "value1"
-string(6) "fuzzed"
-string(4) "fuzz"
-string(4) "main"
-array(2) {
-  [0]=>
-  array(1) {
-    [12]=>
-    array(1) {
-      [0]=>
-      array(1) {
-        ["bar"]=>
-        array(1) {
-          ["x"]=>
-          string(6) "fuzzed"
-        }
-      }
-    }
-  }
-  [18]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      ["hello"]=>
-      array(1) {
-        ["y"]=>
-        string(6) "value2"
-      }
-    }
-  }
-}
-string(6) "value2"
-string(6) "fuzzed"
-string(4) "fuzz"
-string(4) "main"
-array(2) {
-  [0]=>
-  array(1) {
-    [12]=>
-    array(1) {
-      [0]=>
-      array(1) {
-        ["bar"]=>
-        array(1) {
-          ["x"]=>
-          string(6) "fuzzed"
-        }
-      }
-    }
-  }
-  [18]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      ["hello"]=>
-      array(1) {
-        ["y"]=>
-        string(6) "fuzzed"
-      }
-    }
-  }
-}
-object(HH\Vector)#1 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
@@ -131,13 +65,11 @@ object(HH\Vector)#1 (2) {
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-array(1) {
-  [0]=>
+varray(1) {
   string(6) "fuzzed"
 }
-array(1) {
-  [0]=>
-  object(HH\Vector)#2 (2) {
+varray(1) {
+  object(HH\Vector) (2) {
     [0]=>
     int(1)
     [1]=>
@@ -148,7 +80,7 @@ string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
 string(6) "fuzzed"
-object(HH\Vector)#3 (2) {
+object(HH\Vector) (2) {
   [0]=>
   int(1)
   [1]=>
@@ -157,8 +89,7 @@ object(HH\Vector)#3 (2) {
 string(6) "fuzzed"
 string(4) "fuzz"
 string(4) "main"
-array(1) {
-  [0]=>
+varray(1) {
   vec(1) {
     string(6) "fuzzed"
   }

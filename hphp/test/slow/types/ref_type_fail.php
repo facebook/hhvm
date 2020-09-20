@@ -1,21 +1,25 @@
-<?php
+<?hh
 
 function handler() {
  var_dump(__METHOD__);
  return true;
  }
-set_error_handler('handler');
 
-function foo(array &$a) {
+function foo(<<__Soft>> inout varray $a) {
  var_dump($a);
  }
 
 function test($a) {
-  foo($a);
+  foo(inout $a);
 }
 
-test("hello");
-test(array(1,2,3));
-test(array());
-test("hello");
 
+<<__EntryPoint>>
+function main_ref_type_fail() {
+set_error_handler(fun('handler'));
+
+test("hello");
+test(varray[1,2,3]);
+test(varray[]);
+test("hello");
+}

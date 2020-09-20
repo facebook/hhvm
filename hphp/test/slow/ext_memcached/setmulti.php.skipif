@@ -1,9 +1,9 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $memc = new Memcached();
-$memc->addServer('localhost', '11211');
+$memc->addServer('localhost', 11211);
 $version = $memc->getVersion();
 if ($version["localhost:11211"] == "255.255.255") {
   echo "SKIP No Memcached running";
 }
-
+}

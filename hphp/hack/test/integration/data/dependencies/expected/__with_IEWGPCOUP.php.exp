@@ -1,0 +1,20 @@
+<?hh
+interface IEWGPCOUB extends \IEWGPMB, \IEPCOUB {}
+interface IEPMB extends \IEMBUIDMB {
+  abstract const type T as \IEP;
+}
+interface IEP extends \IEMBUID {}
+interface IEWGPMB extends \IEPMB {
+  abstract const type T as \IEWGP;
+}
+interface IEMBUID {}
+interface IEMBUIDCOUB extends \IEMBUIDMB {}
+interface IEPCOUB extends \IEMBUIDCOUB {}
+interface IEWGP extends \IEP {}
+interface IEMBUIDMB {
+  public function f(): this::T;
+  abstract const type T as \IEMBUID;
+}
+function with_IEWGPCOUP(IEWGPCOUB $x): IEWGP {
+  return $x->f();
+}

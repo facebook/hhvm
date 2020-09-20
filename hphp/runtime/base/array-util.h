@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_UTIL_H_
-#define incl_HPHP_ARRAY_UTIL_H_
+#pragma once
 
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/req-hash-set.h"
+#include "hphp/util/functional.h" // for pointer_hash
 
 #include "hphp/util/hdf.h"
 
@@ -109,11 +110,14 @@ struct ArrayUtil final {
   /////////////////////////////////////////////////////////////////////////////
   // Iterations.
 
+  using PointerSet = req::fast_set<const ArrayData*,
+                                   pointer_hash<const ArrayData>>;
+
   /**
    * Apply a user function to every member of an array.
    */
-  typedef void (*PFUNC_WALK)(Variant& value, const Variant& key,
-                             const Variant& userdata, const void *data);
+  using PFUNC_WALK = void (*)(Variant& value, const Variant& key,
+                              const Variant& userdata, const void *data);
   static void Walk(Variant &input, PFUNC_WALK walk_function, const void *data,
                    bool recursive = false, PointerSet *seen = nullptr,
                    const Variant& userdata = uninit_variant);
@@ -121,8 +125,9 @@ struct ArrayUtil final {
   /**
    * Iteratively reduce the array to a single value via the callback.
    */
-  typedef Variant (*PFUNC_REDUCE)(const Variant& result, const Variant& operand,
-                                  const void *data);
+  using PFUNC_REDUCE = Variant (*)(const Variant& result,
+                                   const Variant& operand,
+                                   const void *data);
   static Variant Reduce(const Array& input, PFUNC_REDUCE reduce_function,
                     const void *data, const Variant& initial = uninit_variant);
 };
@@ -130,4 +135,3 @@ struct ArrayUtil final {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ARRAY_UTIL_H_

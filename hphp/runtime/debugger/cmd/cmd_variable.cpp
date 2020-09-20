@@ -17,6 +17,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_variable.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -118,9 +119,9 @@ void CmdVariable::PrintVariable(DebuggerClient &client, const String& varName) {
   }
 
   auto const get_var = [varName] (const CmdVariable& cmd) {
-    assert(cmd.m_variables.size() == 1);
-    assert(cmd.m_variables.exists(varName, true /* isKey */));
-    assert(cmd.m_variables[varName].isString());
+    assertx(cmd.m_variables.size() == 1);
+    assertx(cmd.m_variables.exists(varName, true /* isKey */));
+    assertx(cmd.m_variables[varName].isString());
     return cmd.m_variables[varName].toString();
   };
 
@@ -175,7 +176,7 @@ void CmdVariable::PrintVariables(DebuggerClient &client, const Array& variables,
     cmd.m_version = 2;
     auto rcmd = client.xend<CmdVariable>(&cmd);
     if (!rcmd->m_variables.empty()) {
-      assert(rcmd->m_variables[name].isString());
+      assertx(rcmd->m_variables[name].isString());
       value = rcmd->m_variables[name].toString();
       found = true;
     } else if (text.empty()) {
@@ -244,32 +245,27 @@ const StaticString s_GLOBALS("GLOBALS");
 const StaticString s_this("this");
 
 Array CmdVariable::GetGlobalVariables() {
-  Array ret = g_context->m_globalVarEnv->getDefinedVariables();
+  Array ret = getDefinedVariables();
   ret.remove(s_GLOBALS);
   return ret;
 }
 
 bool CmdVariable::onServer(DebuggerProxy &proxy) {
-  if (m_frame < 0) {
-    m_variables = g_context->m_globalVarEnv->getDefinedVariables();
-    m_global = true;
-  } else {
-    m_variables = g_context->getLocalDefinedVariables(m_frame);
-    m_global = g_context->hasVarEnv(m_frame) == g_context->m_globalVarEnv;
+  if (m_frame >= 0) {
+    m_variables = g_context->getLocalDefinedVariablesDebugger(m_frame);
     auto oThis = g_context->getThis();
     if (nullptr != oThis) {
-      TypedValue tvThis;
-
-      tvThis.m_type = KindOfObject;
-      tvThis.m_data.pobj = oThis;
-
+      auto tvThis = make_tv<KindOfObject>(oThis);
       Variant thisName(s_this);
-      m_variables.add(thisName, tvAsVariant(&tvThis));
+      m_variables.set(thisName, tvAsVariant(&tvThis));
     }
   }
 
-  if (m_global) {
-    m_variables.remove(s_GLOBALS);
+  auto const& denv = g_context->getDebuggerEnv();
+  if (m_frame >= 0 && !denv.isNull()) {
+    IterateKVNoInc(denv.get(), [&] (TypedValue k, TypedValue v) {
+      if (!m_variables.exists(k)) m_variables.set(k, v, true);
+    });
   }
 
   // Deprecated IDE uses this, so keep it around for now.  It expects all
@@ -281,10 +277,10 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   // Version 1 of this command means we want the names of all variables, but we
   // don't care about their values just yet.
   if (m_version == 1) {
-    ArrayInit ret(m_variables->size(), ArrayInit::Map{});
+    DArrayInit ret(m_variables->size());
     Variant v;
     for (ArrayIter iter(m_variables); iter; ++iter) {
-      assert(iter.first().isString());
+      assertx(iter.first().isString());
       ret.add(iter.first().toString(), v);
     }
     m_variables = ret.toArray();
@@ -299,7 +295,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
 
   // Variable name might not exist.
   if (!m_variables.exists(m_varName, true /* isKey */)) {
-    m_variables = Array::Create();
+    m_variables = Array::CreateDArray();
     return proxy.sendToClient(this);
   }
 
@@ -307,13 +303,13 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   auto const result = m_formatMaxLen < 0
     ? DebuggerClient::FormatVariable(value)
     : DebuggerClient::FormatVariableWithLimit(value, m_formatMaxLen);
-  m_variables = Array::Create(m_varName, result);
+  m_variables = make_darray(m_varName, result);
 
   // Remove the entry if its name or context does not match the filter.
   if (!m_filter.empty() && m_varName.find(m_filter, 0, false) < 0) {
     auto const fullvalue = DebuggerClient::FormatVariable(value);
     if (fullvalue.find(m_filter, 0, false) < 0) {
-      m_variables = Array::Create();
+      m_variables = Array::CreateDArray();
     }
   }
 

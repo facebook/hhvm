@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
    try {
      throw new Exception("try");
@@ -6,7 +6,7 @@ function foo () {
      throw new Exception("finally");
    }
 }
-
+<<__EntryPoint>> function main(): void {
 try {
   foo();
 } catch (Exception $e) {
@@ -14,4 +14,4 @@ try {
     var_dump($e->getMessage());
   } while ($e = $e->getPrevious());
 }
-?>
+}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function foo() {
   $y = "asd";
@@ -6,7 +6,7 @@ function foo() {
     $k ==> {
       echo $k.$y."\n";
     },
-    array(1, 2, 3, 4),
+    varray[1, 2, 3, 4],
   );
 }
 foo();

@@ -22,10 +22,16 @@ namespace {
 
 struct A {
   A() { self = this; }
-  A(const A& o) { self = this; }
-  A(A&&o) noexcept { self = this; }
-  A& operator=(const A& o) { self = this; return *this; }
-  A& operator=(A&& o) { self = this; return *this; }
+  A(const A& /*o*/) { self = this; }
+  A(A&& /*o*/) noexcept { self = this; }
+  A& operator=(const A& /*o*/) {
+    self = this;
+    return *this;
+  }
+  A& operator=(A&& /*o*/) {
+    self = this;
+    return *this;
+  }
 
   bool valid() const { return self == this; }
 private:

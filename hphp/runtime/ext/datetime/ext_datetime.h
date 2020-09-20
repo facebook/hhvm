@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DATETIME_H_
-#define incl_HPHP_EXT_DATETIME_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -33,7 +32,7 @@ struct DateTimeData {
   DateTimeData() {}
   DateTimeData(const DateTimeData&) = delete;
   DateTimeData& operator=(const DateTimeData& other) {
-    m_dt = other.m_dt->cloneDateTime();
+    m_dt = other.m_dt ? other.m_dt->cloneDateTime() : req::ptr<DateTime>{};
     return *this;
   }
   Variant sleep() const {
@@ -41,10 +40,12 @@ struct DateTimeData {
   }
   void wakeup(const Variant& /*content*/, ObjectData* /*obj*/) {}
   int64_t getTimestamp() const {
+    assertx(m_dt);
     bool err = false;
     return m_dt->toTimeStamp(err);
   }
   String format(const String& format) const {
+    assertx(m_dt);
     return m_dt->toString(format, false);
   }
   Array getDebugInfo() const;
@@ -111,12 +112,16 @@ struct DateTimeZoneData {
   DateTimeZoneData() {}
   DateTimeZoneData(const DateTimeZoneData&) = delete;
   DateTimeZoneData& operator=(const DateTimeZoneData& other) {
-    m_tz = other.m_tz->cloneTimeZone();
+    m_tz = other.m_tz ? other.m_tz->cloneTimeZone() : req::ptr<TimeZone>{};
     return *this;
   }
+
   String getName() const {
+    assertx(m_tz);
     return m_tz->name();
   }
+
+  Array getDebugInfo() const;
 
   static Object wrap(req::ptr<TimeZone> tz);
   static req::ptr<TimeZone> unwrap(const Object& timezone);
@@ -146,11 +151,12 @@ void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
 Array HHVM_METHOD(DateTimeZone, getLocation);
 String HHVM_METHOD(DateTimeZone, getName);
+Array HHVM_METHOD(DateTimeZone, __debuginfo);
 Variant HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime);
-Array HHVM_METHOD(DateTimeZone, getTransitions,
-                  int64_t timestamp_begin = k_PHP_INT_MIN,
-                  int64_t timestamp_end = k_PHP_INT_MAX);
+TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
+                       int64_t timestamp_begin = k_PHP_INT_MIN,
+                       int64_t timestamp_end = k_PHP_INT_MAX);
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations);
 Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            int64_t what,
@@ -163,7 +169,8 @@ struct DateIntervalData {
   DateIntervalData() {}
   DateIntervalData(const DateIntervalData&) = delete;
   DateIntervalData& operator=(const DateIntervalData& other) {
-    m_di = other.m_di->cloneDateInterval();
+    m_di =
+      other.m_di ? other.m_di->cloneDateInterval() : req::ptr<DateInterval>{};
     return *this;
   }
 
@@ -178,11 +185,6 @@ struct DateIntervalData {
 
 void HHVM_METHOD(DateInterval, __construct,
                  const String& interval_spec);
-Variant HHVM_METHOD(DateInterval, __get,
-                    const Variant& member);
-Variant HHVM_METHOD(DateInterval, __set,
-                    const Variant& member,
-                    const Variant& value);
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time);
 String HHVM_METHOD(DateInterval, format,
@@ -253,4 +255,3 @@ Array HHVM_FUNCTION(date_sun_info,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_DATETIME_H_

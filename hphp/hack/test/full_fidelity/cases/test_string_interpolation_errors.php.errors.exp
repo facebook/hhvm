@@ -1,0 +1,25 @@
+(63,11)-(63,12) A simple offset expression is expected here
+(64,11)-(64,12) A simple offset expression is expected here
+(65,11)-(65,12) A simple offset expression is expected here
+(66,11)-(66,12) A simple offset expression is expected here
+(67,11)-(67,12) A simple offset expression is expected here
+(68,11)-(68,12) A simple offset expression is expected here
+(69,11)-(69,12) A simple offset expression is expected here
+(70,11)-(70,12) A simple offset expression is expected here
+(72,15)-(72,15) A right brace `}` is expected here.
+(73,13)-(73,14) A right brace `}` is expected here.
+(74,13)-(74,15) A right brace `}` is expected here.
+(76,12)-(76,12) A right brace `}` is expected here.
+(77,13)-(77,13) A right brace `}` is expected here.
+(78,9)-(78,17) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(79,9)-(79,15) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(80,9)-(80,16) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(81,9)-(81,16) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(82,9)-(82,18) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(83,9)-(83,17) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(84,9)-(84,21) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(85,9)-(85,20) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(86,9)-(86,15) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(87,9)-(87,14) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(88,9)-(88,20) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
+(92,9)-(92,16) The only legal expressions inside a `{$...}`-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions

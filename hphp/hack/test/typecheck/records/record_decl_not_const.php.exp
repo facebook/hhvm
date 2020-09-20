@@ -1,0 +1,2 @@
+File "record_decl_not_const.php", line 6, characters 11-15:
+Invalid expression in constant initializer (Parsing[1002])

@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 namespace HPHP { namespace jit {
 using namespace reg;
@@ -50,14 +50,14 @@ template<class T> uint64_t test_const(T val) {
     .sf = x64::abi().sf
   };
 
-  constexpr auto blockSize = 4096;
+  auto blockSize = 4096;
   auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
                                          PROT_READ | PROT_WRITE | PROT_EXEC,
                                          MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
   SCOPE_EXIT { munmap(code, blockSize); };
 
-  constexpr auto dataSize = 100;
-  constexpr auto codeSize = blockSize - dataSize;
+  auto const dataSize = 100;
+  auto const codeSize = blockSize - dataSize;
   // None of these tests should use much data.
   auto data_buffer = code + codeSize;
 
@@ -84,8 +84,8 @@ template<class T> uint64_t test_const(T val) {
     optimizeX64(vasm.unit(), test_abi_x64, true /* regalloc */);
     emitX64(unit, text, meta, nullptr);
   }
-  // The above code might use meta.literals but shouldn't use anything else.
-  meta.literals.clear();
+  // The above code might use meta.literalAddrs but shouldn't use anything else.
+  meta.literalAddrs.clear();
   EXPECT_TRUE(meta.empty());
 
   union { double d; uint64_t c; } u;
@@ -99,7 +99,7 @@ TEST(Vasm, XlsByteXmm) {
   // DataType is actually mapped to uint64_t constants, for some reason,
   // but if that changes we still want to test them as bytes here.
   EXPECT_EQ(test_const(KindOfUninit), 0);
-  EXPECT_EQ(test_const(KindOfArray), KindOfArray);
+  EXPECT_EQ(static_cast<DataType>(test_const(KindOfDict)), KindOfDict);
 }
 
 TEST(Vasm, XlsIntXmm) {

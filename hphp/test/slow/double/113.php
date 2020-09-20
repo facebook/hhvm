@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_113() {
 $foo = 1 + "10.5";
 print("$foo ");
 $foo = 1 + "-1.3e3";
@@ -16,3 +19,4 @@ $foo = "10.0 pigs " + 1;
 print("$foo ");
 $foo = "10.0 pigs " + 1.0;
 print("$foo ");
+}

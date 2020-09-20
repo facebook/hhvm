@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_classimpl_error() {
 class_implements("bbb", false);
 class_implements("bbb");
 
@@ -12,3 +15,4 @@ class_parents("bbb");
 class_implements(42);
 class_parents(42);
 class_uses(42);
+}

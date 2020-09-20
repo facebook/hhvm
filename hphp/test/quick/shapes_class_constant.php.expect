@@ -1,11 +1,11 @@
 int(1)
-array(2) {
+darray(2) {
   ["field1"]=>
   int(1)
   ["field2"]=>
   bool(true)
 }
-array(2) {
+darray(2) {
   ["field1"]=>
   int(1)
   ["field2"]=>

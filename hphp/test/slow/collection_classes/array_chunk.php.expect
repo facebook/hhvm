@@ -1,5 +1,5 @@
 ====================
-object(HH\Vector)#1 (5) {
+object(HH\Vector) (5) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -11,104 +11,92 @@ object(HH\Vector)#1 (5) {
   [4]=>
   string(1) "e"
 }
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [2]=>
     string(1) "c"
     [3]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [4]=>
     string(1) "e"
   }
 }
 bool(true)
 ====================
-object(HH\Set)#1 (5) {
+object(HH\Set) (5) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
   string(1) "d"
   string(1) "e"
 }
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     ["a"]=>
     string(1) "a"
     ["b"]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     ["c"]=>
     string(1) "c"
     ["d"]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["e"]=>
     string(1) "e"
   }
 }
 bool(true)
 ====================
-object(HH\Map)#1 (5) {
+object(HH\Map) (5) {
   [1]=>
   string(1) "a"
   [2]=>
@@ -120,52 +108,46 @@ object(HH\Map)#1 (5) {
   [5]=>
   string(1) "e"
 }
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [1]=>
     string(1) "a"
     [2]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [3]=>
     string(1) "c"
     [4]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [5]=>
     string(1) "e"
   }
 }
 bool(true)
 ====================
-object(HH\Map)#1 (5) {
+object(HH\Map) (5) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -177,45 +159,39 @@ object(HH\Map)#1 (5) {
   ["e"]=>
   string(1) "e"
 }
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     [0]=>
     string(1) "a"
     [1]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(1) "c"
     [1]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "e"
   }
 }
 bool(true)
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     ["a"]=>
     string(1) "a"
     ["b"]=>
     string(1) "b"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     ["c"]=>
     string(1) "c"
     ["d"]=>
     string(1) "d"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["e"]=>
     string(1) "e"
   }

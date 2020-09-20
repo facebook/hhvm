@@ -6,7 +6,7 @@
  */
 
 function test(int $key): void {
-  $a = array(4, 'aaa');
+  $a = varray[4, 'aaa'];
   $a[$key] = 4;
   hh_show($a);
   take_string($a[1]);

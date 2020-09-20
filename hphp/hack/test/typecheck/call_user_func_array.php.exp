@@ -1,1 +1,2 @@
-No errors
+File "call_user_func_array.php", line 13, characters 3-16:
+The builtin `call_user_func` is deprecated. (Typing[4128])

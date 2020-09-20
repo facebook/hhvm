@@ -2,11 +2,9 @@
 
 -- Testing mb_strripos() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_strripos() expects at most 4 parameters, 5 given in %s/mb_strripos_error1.php on line 22
 
 -- Testing mb_strripos() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: mb_strripos() expects at least 2 parameters, 1 given in %s/mb_strripos_error1.php on line 27
 Done

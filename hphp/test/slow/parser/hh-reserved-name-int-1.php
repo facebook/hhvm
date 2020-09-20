@@ -1,5 +1,6 @@
 <?hh
-if (false) {
-  class Int {}
-}
+
+class Int {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

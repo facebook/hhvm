@@ -1,4 +1,4 @@
-<?php
+<?hh
 class User
 {
     public $username;
@@ -9,10 +9,14 @@ class User
     }
 }
 
-$users = [
+
+<<__EntryPoint>>
+function main_array_column_on_objects() {
+$users = varray[
     new User('user 1'),
     new User('user 2'),
     new User('user 3'),
 ];
 
 print_r(array_column($users, 'username'));
+}

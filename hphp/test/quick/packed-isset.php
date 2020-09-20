@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  $arr = array();
+  $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = $i;
   }
@@ -13,10 +13,8 @@ function foo() {
   }
 }
 
-foo();
-
 function foo2() {
-  $arr = array();
+  $arr = darray[];
   for ($i = 0; $i < 4; $i++) {
     $arr[$i] = null;
   }
@@ -27,5 +25,10 @@ function foo2() {
     var_dump(isset($arr[$i]));
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-foo2();
+  foo();
+
+  foo2();
+}

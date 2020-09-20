@@ -1,0 +1,6 @@
+File "fst_then_invoke_bad.php", line 22, characters 7-9:
+No method `foo` in `D` (Typing[4053])
+File "fst_then_invoke_bad.php", line 18, characters 20-20:
+This is why I think it is an object of type D
+File "fst_then_invoke_bad.php", line 8, characters 7-7:
+Declaration of `D` is here

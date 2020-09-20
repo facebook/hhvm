@@ -1,0 +1,4 @@
+File "missing_init_tany.php", line 15, characters 7-7:
+Class `C` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "missing_init_tany.php", line 20, characters 15-17:
+`$this->li` is not initialized.

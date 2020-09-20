@@ -1,0 +1,18 @@
+(alias
+    (name highlighted_formatting_raw_color)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/error_formatting_highlighted_raw_color/*.php)
+          (glob_files %{project_root}/test/error_formatting_highlighted_raw_color/*.exp)
+          (glob_files %{project_root}/test/error_formatting_highlighted_raw_color/HH_FLAGS))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/error_formatting_highlighted_raw_color
+    --program %{exe:../../src/hh_single_type_check.exe}
+    --expect-extension .raw_color.exp
+    --out-extension .raw_color.out
+    --force-color)))
+
+(alias
+  (name runtest)
+  (deps
+    (alias highlighted_formatting_raw_color)))

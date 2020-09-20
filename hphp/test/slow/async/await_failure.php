@@ -7,8 +7,13 @@ async function foo() {
 }
 
 async function bar() {
-  $x = await foo();
-  var_dump($x);
+  try {
+    $x = await foo();
+    var_dump($x);
+  } catch (Exception $e) {
+    echo "rethrowing\n";
+    throw $e;
+  }
 }
 
 function main() {
@@ -29,5 +34,9 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_await_failure() {
 main();
 echo "done\n";
+}

@@ -13,7 +13,7 @@ function test(bool $x): void {
   $foo = make_counter('foo', 12);
   $bar = make_counter('bar', 42);
   $z = $x ? $foo : $bar;
-  return array($z['name'], $z['count']);
+  return varray[$z['name'], $z['count']];
 }
 
 function main() {
@@ -23,4 +23,8 @@ function main() {
   var_dump($name, $cnt);
 }
 
+
+<<__EntryPoint>>
+function main_array_005() {
 main();
+}

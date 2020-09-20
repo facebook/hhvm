@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: bcpowmod() expects at most 4 parameters, 5 given in %s/bcpowmod_error3.php on line 2

@@ -78,7 +78,7 @@ function test() {
    *              whitespace before the ':')
    *
    */
-  $a = false?:array();
+  $a = false?:varray[];
   $a = false?:floor(12.98);
   $a = b()?:NULL;
 
@@ -127,12 +127,6 @@ function test() {
   $x=$y?$y:foo();
   $x=$y?($y):foo();
   if(0){} :foo::bar();
-  function bar1(:foo $x): :foo {}
-  function bar2(:foo $x):?:foo {}
-  function bar3(:foo $x): ?:foo {}
-  function bar4(?:foo $x): :foo {}
-  function bar5(?:foo $x):?:foo {}
-  function bar6(?:foo $x): ?:foo {}
 
   /**
    * Examples which violate rule #1
@@ -178,4 +172,12 @@ function test() {
   // $x=true?$obj->{'foo'} :foo::BAR;
 
 }
+function bar1(:foo $x): :foo {}
+function bar2(:foo $x):?:foo {}
+function bar3(:foo $x): ?:foo {}
+function bar4(?:foo $x): :foo {}
+function bar5(?:foo $x):?:foo {}
+function bar6(?:foo $x): ?:foo {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

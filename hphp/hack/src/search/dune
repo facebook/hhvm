@@ -1,0 +1,23 @@
+(library
+  (name search)
+  (wrapped false)
+  (libraries
+    ast
+    ast_provider
+    decl_provider
+    facts
+    file_info
+    full_fidelity
+    future
+    glean_options
+    heap_shared_mem
+    index_builder
+    logging
+    naming
+    naming_global
+    procs_procs
+    pos
+    search_utils
+    sqlite3
+    state_loader
+    trie))

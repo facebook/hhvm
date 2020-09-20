@@ -1,194 +1,182 @@
 *** Testing date_sunrise() : usage variation ***
 
 --int 0--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --int 1--
-string(5) "05:08"
-float(5.133%d)
-int(1218172081)
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --int 12345--
-string(5) "21:45"
-float(21.759%d)
-int(1218145534)
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --int -12345--
-string(5) "12:41"
-float(12.698%d)
-int(1218199315)
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, integer given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --uppercase NULL--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 
 --lowercase null--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 
 --lowercase true--
-string(5) "05:08"
-float(5.133%d)
-int(1218172081)
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --lowercase false--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --uppercase TRUE--
-string(5) "05:08"
-float(5.133%d)
-int(1218172081)
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --uppercase FALSE--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
+
+Warning: date_sunrise() expects parameter 4 to be double, boolean given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --empty string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --empty string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --string DQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --string SQ--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --mixed case string--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --heredoc--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
 
-Warning: %s
-bool(false)
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --undefined var--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 
 --unset var--
-string(5) "05:12"
-float(5.200%d)
-int(1218172321)
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 ===DONE===

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMBER_REFLECTION_H_
-#define incl_HPHP_MEMBER_REFLECTION_H_
+#pragma once
 
 #include "hphp/runtime/base/mixed-array.h"
 
@@ -31,14 +30,10 @@ namespace HPHP {
   /* arrays */\
   X(ArrayData)\
   X(MixedArray)\
-  X(EmptyArray)\
-  X(APCLocalArray)\
-  X(GlobalsArray)\
   /* other php types */\
   X(StringData)\
   X(ObjectData)\
   X(ResourceData)\
-  X(RefData)\
   /* collections */\
   X(c_Pair)\
   X(BaseVector)\
@@ -61,7 +56,10 @@ namespace HPHP {
  *
  * Returns true on success, else false.
  */
-bool init_member_reflection();
+
+bool init_member_reflection(const std::string& extractPath,
+                            const std::string& fallbackPath,
+                            bool trust);
 
 /*
  * Given an object pointer `base' and an internal pointer `internal' for
@@ -75,9 +73,9 @@ bool init_member_reflection();
   HPHP_REFLECTABLES
 #undef X
 
-  template <typename T>
-  const char* nameof_member(const T* /*base*/, const void* /*internal*/) {
-    return nullptr;
+template <typename T>
+const char* nameof_member(const T* /*base*/, const void* /*internal*/) {
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,4 +91,3 @@ constexpr const char* const kMemberReflectionTableName =
 
 }
 
-#endif

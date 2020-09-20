@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TProtocolException extends Exception {
   const UNKNOWN = 0;
@@ -66,25 +66,25 @@ class DummyTransport {
 }
 
 class NodeObject {
-  static $_TSPEC = array(
-    1 => array(
+  const SPEC = darray[
+    1 => darray[
       'var' => 'fbid',
       'type' => TType::I64,
-    ),
-    2 => array(
+    ],
+    2 => darray[
       'var' => 'type',
       'type' => TType::I64,
-    ),
-    3 => array(
+    ],
+    3 => darray[
       'var' => 'owner',
       'type' => TType::I64,
-    ),
-  );
-  public static $_TFIELDMAP = array(
+    ],
+  ];
+  public static $_TFIELDMAP = darray[
     'fbid' => 1,
     'type' => 2,
     'owner' => 3,
-  );
+  ];
   const STRUCTURAL_ID = 5073716637340378305;
   public $fbid = null;
   public $type = null;
@@ -118,41 +118,41 @@ class NodeObject {
 }
 
 class EdgeObject {
-  static $_TSPEC = array(
-    1 => array(
+  const SPEC = darray[
+    1 => darray[
       'var' => 'source',
       'type' => TType::STRUCT,
       'class' => 'NodeObject',
-    ),
-    2 => array(
+    ],
+    2 => darray[
       'var' => 'target',
       'type' => TType::STRUCT,
       'class' => 'NodeObject',
-    ),
-    3 => array(
+    ],
+    3 => darray[
       'var' => 'type',
       'type' => TType::I64,
-    ),
-    4 => array(
+    ],
+    4 => darray[
       'var' => 'timeCreated',
       'type' => TType::I64,
-    ),
-    5 => array(
+    ],
+    5 => darray[
       'var' => 'creator',
       'type' => TType::STRUCT,
       'class' => 'NodeObject',
-    ),
-    6 => array(
+    ],
+    6 => darray[
       'var' => 'actionSource',
       'type' => TType::I32,
       'enum' => 'ActionSource',
-    ),
-    7 => array(
+    ],
+    7 => darray[
       'var' => 'appId',
       'type' => TType::I64,
-    ),
-  );
-  public static $_TFIELDMAP = array(
+    ],
+  ];
+  public static $_TFIELDMAP = darray[
     'source' => 1,
     'target' => 2,
     'type' => 3,
@@ -160,7 +160,7 @@ class EdgeObject {
     'creator' => 5,
     'actionSource' => 6,
     'appId' => 7,
-  );
+  ];
   const STRUCTURAL_ID = 8017252320845196830;
   public $source = null;
   public $target = null;
@@ -207,12 +207,32 @@ class EdgeObject {
   public static function __set_state($vals) {
     return new EdgeObject($vals);
   }
-
 }
 
-function testBadSpec($ok, $bad) {
-  EdgeObject::$_TSPEC = $ok;
+class EdgeObjectWithBadSpec1 extends EdgeObject {
+  const SPEC = darray[
+    7 => darray[
+      'var' => 'appId',
+      'type' => TType::STRING,
+    ],
+  ];
+}
 
+class EdgeObjectWithBadSpec2 extends EdgeObject {
+  const SPEC = varray[];
+}
+
+class EdgeObjectWithBadSpec3 extends EdgeObject {
+  const SPEC = 42;
+}
+
+class EdgeObjectWithBadSpec4 extends EdgeObject {
+  const SPEC = darray[
+    'foo' => 'bar',
+  ];
+}
+
+function testBadSpec($bad) {
   $p = new DummyProtocol();
   $v1 = new EdgeObject();
   $v1->appId = 1234;
@@ -226,17 +246,19 @@ function testBadSpec($ok, $bad) {
   $p->getTransport()->pos = 0;
   var_dump(thrift_protocol_read_compact($p, 'EdgeObject'));
 
-  EdgeObject::$_TSPEC = $bad;
-
   $p->getTransport()->pos = 0;
   try {
-    var_dump(thrift_protocol_read_compact($p, 'EdgeObject'));
+    var_dump(thrift_protocol_read_compact($p, $bad));
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }
 }
-$ok = EdgeObject::$_TSPEC;
-testBadSpec($ok, array(7 => array('var' => 'appId', 'type' => TType::STRING)));
-testBadSpec($ok, array());
-testBadSpec($ok, 42);
-testBadSpec($ok, array('foo' => 'bar'));
+
+<<__EntryPoint>>
+function main_bad_spec() {
+  testBadSpec('EdgeObjectWithBadSpec1');
+  testBadSpec('EdgeObjectWithBadSpec2');
+  testBadSpec('EdgeObjectWithBadSpec3');
+  testBadSpec('EdgeObjectWithBadSpec4');
+  testBadSpec('EdgeObjectWithBadSpec4');
+}

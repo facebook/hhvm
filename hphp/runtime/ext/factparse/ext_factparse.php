@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace HH {
 
@@ -8,7 +8,7 @@ enum FactTypeFlags : int {
   _FINAL = 2;
   // if this is set the flags are a union of features from all declarations
   MULTIPLE_DECLARATIONS = 4;
-};
+}
 
 /**
  * Read a set of HH/PHP files and quickly extract the main features aka. "Facts"
@@ -67,10 +67,10 @@ enum FactTypeFlags : int {
 <<__Native>>
 function facts_parse(
   ?string $root,
-  array<string> $pathList,
+  varray<string> $pathList,
   bool $allowHipHopSyntax,
   bool $useThreads,
-): array<string, ?array<string, mixed>>;
+): darray<string, ?darray<string, mixed>>;
 
 /**
  * This should be bumped with every non-backwards compatible API change

@@ -1,26 +1,35 @@
 <?hh // strict
 
-function f(): int {
+function f(bool $b): int {
   while (true) {
-    return 1;
+    if ($b) {
+      return 1;
+    }
   }
 }
 
-function g(): int {
+function g(bool $b): int {
   do {
+    if ($b) {
+      return 1;
+    }
   } while (true);
 }
 
-function h(): int {
+function h(bool $b): int {
   for (; ; ) {
-    return 1;
+    if ($b) {
+      return 1;
+    }
   }
 }
 
-function i(): int {
+function i(bool $b): int {
   for (; ; ) {
     for (; ; ) {
-      break;
+      if ($b) {
+        return 1;
+      }
     }
   }
 }

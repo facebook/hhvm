@@ -1,31 +1,40 @@
 *** Testing mb_encode_mimeheader() : usage variations ***
 
 -- Iteration 1 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, integer given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 2 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, integer given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 3 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, integer given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 4 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, integer given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 5 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, double given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 6 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, double given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 7 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, double given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 8 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, double given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 9 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, double given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 10 --
 string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
@@ -34,16 +43,20 @@ string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
 string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
 
 -- Iteration 12 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 13 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 14 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 15 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, boolean given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 16 --
 string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
@@ -61,7 +74,8 @@ string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
 string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
 
 -- Iteration 21 --
-string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
+
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, object given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 
 -- Iteration 22 --
 string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
@@ -71,6 +85,5 @@ string(52) "=?UTF-8?B?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?="
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: mb_encode_mimeheader() expects parameter 3 to be string, resource given in %s/zend/good/ext/mbstring/mb_encode_mimeheader_variation3.php on line 94
 Done

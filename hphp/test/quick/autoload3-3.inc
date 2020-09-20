@@ -1,0 +1,2 @@
+<?hh
+interface j {}

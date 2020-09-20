@@ -1,20 +1,19 @@
-<?php
+<?hh
 /* Prototype : bool unlink ( string $filename [, resource $context] );
    Description : Deletes filename
 */
 
 /* Delete link files - soft and hard links */
-
-$file_path = dirname(__FILE__);
+<<__EntryPoint>> function main(): void {
 // temp file used
-$filename = "$file_path/unlink_variation3.tmp";
+$filename = __SystemLib\hphp_test_tmppath('unlink_variation3.tmp');
 
 echo "*** Testing unlink() on soft and hard links ***\n";
 // create temp file
 $fp = fopen($filename, "w");
 fclose($fp);
 // link name used here
-$linkname = "$file_path/unlink_variation3_link.tmp";
+$linkname = __SystemLib\hphp_test_tmppath('unlink_variation3_link.tmp');
 
 echo "-- Testing unlink() on soft link --\n";
 // create soft link
@@ -35,4 +34,4 @@ var_dump( unlink($filename) );
 var_dump( file_exists($filename) );  // confirm file is deleted
 
 echo "Done\n";
-?>
+}

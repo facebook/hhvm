@@ -27,6 +27,7 @@
 #include "hphp/vixl/a64/disasm-a64.h"
 #include "hphp/util/text-color.h"
 
+#include <ostream>
 #include <folly/Format.h>
 
 namespace vixl {
@@ -58,6 +59,11 @@ Disassembler::~Disassembler() {
 
 char* Disassembler::GetOutput() {
   return buffer_;
+}
+
+
+void Disassembler::setShouldDereferencePCRelativeLiterals(bool enable) {
+  dereferenceLiterals_ = enable;
 }
 
 
@@ -1306,6 +1312,28 @@ void Disassembler::AppendCodeRelativeAddressToOutput(const Instruction *instr,
   }
 }
 
+void Disassembler::AppendCodeRelativeLiteralToOutput(uint32_t literal_width,
+                                                     const void *addr) {
+  if (!dereferenceLiterals_) return;
+  intptr_t real_address = CodeRelativeAddress(addr);
+  switch (literal_width) {
+    case LDR_w_lit:
+      AppendToOutput(
+        " [value word 0x%" PRIx32 "]",
+        *reinterpret_cast<uint32_t*>(real_address)
+      );
+      break;
+    case LDR_x_lit:
+      AppendToOutput(
+        " [value dword 0x%" PRIx64 "]",
+        *reinterpret_cast<uint64_t*>(real_address)
+      );
+      break;
+    default:
+      break;
+  }
+}
+
 void Disassembler::Format(Instruction* instr, const char* mnemonic,
                           const char* format) {
   assert(mnemonic != nullptr);
@@ -1563,11 +1591,16 @@ int Disassembler::SubstituteLiteralField(Instruction* instr,
   assert(strncmp(format, "LValue", 6) == 0);
   USE(format);
   const void* address = instr->LiteralAddress();
-  switch (instr->Mask(LoadLiteralMask)) {
+  uint32_t literal_width = instr->Mask(LoadLiteralMask);
+  switch (literal_width) {
     case LDR_w_lit:
     case LDR_x_lit:
     case LDR_s_lit:
-    case LDR_d_lit: AppendCodeRelativeAddressToOutput(instr, address); break;
+    case LDR_d_lit:
+      AppendCodeRelativeAddressToOutput(instr, address);
+      AppendCodeRelativeLiteralToOutput(literal_width, address);
+      break;
+
     default: not_reached();
   }
 

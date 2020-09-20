@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_H_
-#define incl_HPHP_JIT_TC_H_
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -60,14 +59,31 @@ struct TransRange {
   TransLoc loc() const;
 };
 
+using CodeViewPtr = std::unique_ptr<CodeCache::View>;
+
 struct TransMetaInfo {
   SrcKey sk;
   CodeCache::View emitView; // View code was emitted into (may be thread local)
-  TransKind viewKind; // TransKind used to select code view
-  TransKind transKind; // TransKind used for translation
-  TransRange range;
-  CGMeta meta;
-  TransRec transRec;
+  TransKind   viewKind; // TransKind used to select code view
+  TransKind   transKind; // TransKind used for translation
+  TransRange  range;
+  CodeViewPtr finalView; // View where code finally ended up (after relocation)
+  TransLoc    loc; // final location of translation (after relocation)
+  CGMeta      meta;
+  TransRec    transRec;
+  GrowableVector<IncomingBranch> tailBranches;
+};
+
+struct PrologueMetaInfo {
+  PrologueMetaInfo(ProfTransRec* rec)
+    : transRec(rec)
+  { }
+  ProfTransRec* transRec{nullptr};
+  TransID       transID{kInvalidTransID};
+  TCA           start{0};
+  TransLoc      loc;
+  CGMeta        meta;
+  CodeViewPtr   finalView;
 };
 
 struct LocalTCBuffer {
@@ -122,8 +138,8 @@ struct FuncMetaInfo {
   // vectors above, and it encodes the order in which they should be published.
   std::vector<Kind> order;
 
-  std::vector<ProfTransRec*> prologues;
-  std::vector<TransMetaInfo> translations;
+  std::vector<PrologueMetaInfo> prologues;
+  std::vector<TransMetaInfo>    translations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,13 +178,17 @@ folly::Optional<TransLoc> publishTranslation(
  * function. It is assumed that these translations have been emitted into per-
  * thread buffers and will need to be relocated.
  */
-void publishOptFunction(FuncMetaInfo info);
+void publishOptFunc(FuncMetaInfo info);
 
 /*
- * Acquires the code and metadata locks once and relocates all functions in
- * sorted list.
+ * Acquires the code and metadata locks once, and then processes all the
+ * functions in `infos' by:
+ *  1) relocating their translations into the TC in the order given by `infos';
+ *  2) smashing all the calls and jumps between these translations;
+ *  3) optimizing the calls and jumps smashed in step 2);
+ *  4) publishing these translations.
  */
-void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos);
+void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos);
 
 /*
  * Emit a new prologue for func-- returns nullptr if the global translation
@@ -182,14 +202,7 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind);
  * Smashes the callers of the prologue for rec and updates the cached func
  * prologue.
  */
-TCA emitFuncPrologueOpt(ProfTransRec* rec);
-
-/*
- * Emit the prologue dispatch for func which contains dvs DV initializers, and
- * return its start address.  The `kind' of translation argument is used to
- * decide what area of the code cache will be used (hot, main, or prof).
- */
-TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind);
+void emitFuncPrologueOpt(ProfTransRec* rec);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -199,15 +212,15 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind);
 bool canTranslate();
 
 /*
- * Whether we should emit a translation of kind for func, ignoring the cap on
+ * Whether we should emit a translation of kind for sk, ignoring the cap on
  * overall TC size.
  */
-bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind);
+bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind);
 
 /*
- * Whether we should emit a translation of kind for func.
+ * Whether we should emit a translation of kind for sk.
  */
-bool shouldTranslate(const Func* func, TransKind kind);
+bool shouldTranslate(SrcKey sk, TransKind kind);
 
 /*
  * Whether we are still profiling new functions.
@@ -223,6 +236,12 @@ bool profileFunc(const Func* func);
  * Attempt to discard profData via the treadmill if it is no longer needed.
  */
 void checkFreeProfData();
+
+/*
+ * Discard the memory used for the main portion of the profile translations via
+ * the treadmill.
+ */
+void freeProfCode();
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -343,7 +362,7 @@ void freeTCStub(TCA stub);
  * Emit checks for (and hooks into) an attached debugger in front of each
  * translation in `unit' or for `SrcKey{func, offset, resumed}'.
  */
-bool addDbgGuards(const Unit* unit);
+bool addDbgGuards(const Func* func);
 bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -371,6 +390,11 @@ std::string getTCSpace();
  * sections.
  */
 std::string getTCAddrs();
+
+/*
+ * Return whether or not TC dumping is enabled.
+ */
+bool dumpEnabled();
 
 /*
  * Dump the translation cache to files in RuntimeOption::EvalDumpTCPath
@@ -415,25 +439,12 @@ bool isValidCodeAddress(TCA addr);
  */
 bool isProfileCodeAddress(TCA addr);
 
-////////////////////////////////////////////////////////////////////////////////
-
 /*
-  relocate using data from perf.
-  If time is non-negative, its used as the time to run perf record.
-  If time is -1, we pick a random subset of translations, and relocate them
-  in a random order.
-  If time is -2, we relocate all of the translations.
+ * Check if `addr' is an address within the hot code block in the TC.
+ */
+bool isHotCodeAddress(TCA addr);
 
-  Currently we don't ever relocate anything from frozen (or prof). We also
-  don't relocate the cold portion of translations; but we still need to know
-  where those are in order to relocate back-references to the code that was
-  relocated.
-*/
-void liveRelocate(int time);
-
-inline void liveRelocate(bool random) {
-  return liveRelocate(random ? -1 : 20);
-}
+////////////////////////////////////////////////////////////////////////////////
 
 /*
  * Relocate a new translation to the current frontiers of main and cold. Code
@@ -448,16 +459,6 @@ void relocateTranslation(
   CodeBlock& frozen, CodeAddress frozen_start,
   AsmInfo* ai, CGMeta& meta
 );
-
-/*
- * Record data for live relocations.
- */
-void recordPerfRelocMap(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CGMeta& fixups);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -495,8 +496,7 @@ TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed);
  * Bind a call to start at toSmash, where start is the prologue for callee, when
  * invoked with nArgs.
  */
-void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable);
+void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs);
 
 }}}
 
-#endif

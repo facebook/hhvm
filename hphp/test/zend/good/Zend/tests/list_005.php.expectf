@@ -2,9 +2,5 @@ string(1) "f"
 string(1) "o"
 string(1) "o"
 ----
-NULL
-NULL
-NULL
-----
 
 Fatal error: %s

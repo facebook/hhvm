@@ -1,0 +1,3 @@
+Warning: Value returned from function f() must be of type B<C<@int, int>>, B<C<string,int>> given in %s on line 5
+
+Catchable fatal error: Value returned from function f() must be of type B<C<@int, int>>, B<C<string,string>> given in %s on line 8

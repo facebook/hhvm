@@ -2,28 +2,28 @@
 
 bool(true)
 bool(true)
-string(3) "int"
+string(7) "?HH\int"
 bool(true)
 
 --Function nfoo - Return--
 
 bool(true)
 bool(true)
-string(4) "bool"
+string(8) "?HH\bool"
 bool(true)
 
 --Function foo - Parameter--
 
 bool(true)
 bool(true)
-string(3) "int"
+string(6) "HH\int"
 bool(false)
 
 --Function foo - Return--
 
 bool(true)
 bool(true)
-string(4) "bool"
+string(7) "HH\bool"
 bool(false)
 
 
@@ -31,4 +31,4 @@ bool(false)
 
 bool(false)
 
-Fatal error: ReflectionType::__construct(): Internal error: Failed to retrieve the reflection object in %sReflectionType-basic-explicit-php7.php on line %d
+Fatal error: ReflectionType::__construct(): Internal error: Failed to retrieve the reflection object in %s/test/slow/reflection/ReflectionType-basic-explicit-php7.php on line 46

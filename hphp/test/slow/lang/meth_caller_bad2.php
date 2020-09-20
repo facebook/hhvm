@@ -6,4 +6,7 @@ class A {
     $cb(null);
   }
 }
+
+<<__EntryPoint>> function main(): void {
 (new A())->foo();
+}

@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/state-multi-map.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
@@ -158,18 +159,17 @@ using PostOrderId = uint32_t;
     - Phi..Phi+kMaxTrackedAlocs, in which case it holds a pointer to the
       Block where the phi would have to be inserted, or
     - Bad which means that although stores are available on all
-      paths to this point they're not compatible in some way
-      (usually SpillFrame vs StStk).
+      paths to this point they're not compatible in some way.
 
     - Pending and Processed are used while building phis to handle
       cycles of phis.
 
   For the Phi case, we just need to ensure that we can differentiate
   Phis in the same block for different ALocations; this is just used
-  for the hash() and same() methods for the spillFrameMap.
+  for the same() method for the combine_ts().
 */
 struct TrackedStore {
-  enum Kind {
+  enum Kind : int16_t {
     Unseen,
     Instruction,
     Phi,
@@ -238,9 +238,6 @@ struct TrackedStore {
                                     const TrackedStore& b) {
     return a.kind() >= b.kind();
   }
-  size_t hash() const {
-    return m_ptr.tag() + intptr_t(m_ptr.ptr());
-  }
   std::string toString() const {
     if (isUnseen()) return "Unseen";
     if (isBad()) return "Bad";
@@ -289,18 +286,6 @@ struct StoreKeyHashCmp {
 using MovableStoreMap = hphp_hash_map<StoreKey, TrackedStore,
                                       StoreKeyHashCmp, StoreKeyHashCmp>;
 
-struct TrackedStoreHashCmp {
-  size_t operator()(const TrackedStore& ts) const {
-    return ts.hash();
-  }
-  bool operator()(const TrackedStore& ts1, const TrackedStore& ts2) const {
-    return ts1.same(ts2);
-  }
-};
-
-using SpillFrameMap = hphp_hash_map<TrackedStore, ALocBits,
-                                    TrackedStoreHashCmp, TrackedStoreHashCmp>;
-
 struct BlockState {
   PostOrderId id;
   ALocBits antIn;
@@ -325,9 +310,15 @@ struct Global {
   BlockList poBlockList;
   AliasAnalysis ainfo;
 
-  // We keep an entry for each tracked SpillFrame in this map, so we
-  // can check its ALocBits
-  SpillFrameMap spillFrameMap;
+  /*
+   * Keep a mapping from DefLabel blocks, to the Alocs of stores that
+   * might depend on them.  Normally we don't need to worry about
+   * this, because ssa guarantees that a store is dominated by the def
+   * of its address. But in a loop, if the store's address depends on
+   * a phi, the store might be partially available at the DefLabel.
+   */
+  hphp_fast_map<Block*,ALocBits> blk2Aloc;
+
   MovableStoreMap trackedStoreMap;
   // Block states are indexed by block->id().  These are only meaningful after
   // we do dataflow.
@@ -337,6 +328,12 @@ struct Global {
   StateVector<Block,uint32_t> seenStores;
   uint32_t seenStoreId{0};
   bool needsReflow{false};
+  bool adjustedInlineCalls{false};
+
+  // We can't safely remove InlineReturn instructions, once we've moved or
+  // killed InlineCall instructions we handle InlineReturns in a final dataflow
+  // analysis that tracks inline frames.
+  IdSet<IRInstruction> deadInlineReturns;
 };
 
 // Block-local environment.
@@ -381,6 +378,7 @@ std::string show(TrackedStore ts) {
 }
 
 bool srcsCanSpanCall(const IRInstruction& inst) {
+  if (inst.is(StFrameCtx)) return true;
   for (auto i = inst.numSrcs(); i--; ) {
     auto const src = inst.src(i);
     if (!src->isA(TStkPtr) &&
@@ -390,28 +388,16 @@ bool srcsCanSpanCall(const IRInstruction& inst) {
   return true;
 }
 
-const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
-  auto it = genv.spillFrameMap.find(ts);
-  if (it == genv.spillFrameMap.end()) return nullptr;
-  return &it->second;
+folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
+  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
+    return meta->index;
+  }
+  return folly::none;
 }
 
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
   env.global.trackedStoreMap[
     StoreKey { inst.block(), StoreKey::Out, bit }].set(&inst);
-}
-
-void set_movable_spill_frame(Local& env, const ALocBits& bits,
-                             IRInstruction& inst) {
-  TrackedStore ts { &inst };
-  bitset_for_each_set(
-    bits,
-    [&](uint32_t i) {
-      env.global.trackedStoreMap[
-        StoreKey { inst.block(), StoreKey::Out, i }] = ts;
-    }
-  );
-  env.global.spillFrameMap[ts] = bits;
 }
 
 bool isDead(Local& env, int bit) {
@@ -439,14 +425,6 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
         inst.src(0)
       );
       break;
-    case SpillFrame:
-      dbgInst = env.global.unit.gen(
-        DbgTrashFrame,
-        inst.bcctx(),
-        IRSPRelOffsetData { inst.extra<SpillFrame>()->spOffset },
-        inst.src(0)
-      );
-      break;
     case StMem:
       dbgInst = env.global.unit.gen(DbgTrashMem, inst.bcctx(), inst.src(0));
       break;
@@ -455,6 +433,8 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
       break;
     }
   }
+
+  if (inst.is(InlineCall)) env.global.adjustedInlineCalls = true;
 
   auto block = inst.block();
   auto pos = block->erase(&inst);
@@ -516,6 +496,18 @@ void mayStore(Local& env, AliasClass acls) {
   env.reStores &= ~mayStore;
 }
 
+void store(Local& env, AliasClass acls) {
+  mayStore(env, acls);
+  if (auto bit = pure_store_bit(env, acls)) {
+    mustStore(env, *bit);
+  } else {
+    auto const it = env.global.ainfo.stack_ranges.find(canonicalize(acls));
+    if (it != end(env.global.ainfo.stack_ranges)) {
+      mustStoreSet(env, it->second);
+    }
+  }
+};
+
 void kill(Local& env, AliasClass acls) {
   auto const canon = canonicalize(acls);
   killSet(env, env.global.ainfo.expand(canon));
@@ -523,26 +515,75 @@ void kill(Local& env, AliasClass acls) {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
-  if (auto const meta = env.global.ainfo.find(canonicalize(acls))) {
-    return meta->index;
+void addPhiDeps(Local& env, uint32_t bit, SSATmp* dep) {
+  if (dep->inst()->is(DefLabel) || dep->inst()->producesReference()) {
+    FTRACE(2, "      B{} alters {} due to potential address change\n",
+           dep->inst()->block()->id(), bit);
+    env.global.blk2Aloc[dep->inst()->block()][bit] = 1;
+    return;
   }
-  return folly::none;
+
+  for (auto src : dep->inst()->srcs()) {
+    addPhiDeps(env, bit, src);
+  }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
   FTRACE(3, "    {}\n"
-            "      {}\n",
-            inst.toString(),
-            show(effects));
+         "      {}\n",
+         inst.toString(),
+         show(effects));
+
+  auto const doPureStore = [&] (PureStore l) {
+    if (auto bit = pure_store_bit(env, l.dst)) {
+      if (l.dep) addPhiDeps(env, *bit, l.dep);
+      if (isDead(env, *bit)) {
+        if (!removeDead(env, inst, true)) {
+          mayStore(env, l.dst);
+          mustStore(env, *bit);
+        }
+        return;
+      }
+      if (!env.antLoc[*bit] &&
+          !env.mayLoad[*bit] &&
+          !env.mayStore[*bit] &&
+          (!env.containsCall ||
+           srcsCanSpanCall(inst))) {
+        env.avlLoc[*bit] = 1;
+        set_movable_store(env, *bit, inst);
+      }
+      mayStore(env, l.dst);
+      mustStore(env, *bit);
+      if (!l.value || l.value->inst()->block() != inst.block()) return;
+      auto const le = memory_effects(*l.value->inst());
+      auto pl = boost::get<PureLoad>(&le);
+      if (!pl) return;
+      auto lbit = pure_store_bit(env, pl->src);
+      if (!lbit || *lbit != *bit) return;
+      /*
+       * The source of the store is a load from the same address, which is
+       * also in this block. If there's no interference, we can kill this
+       * store. We won't know until we see the load though.
+       */
+      if (env.global.reStores.size() <= *bit) {
+        env.global.reStores.resize(*bit + 1);
+      }
+      env.global.reStores[*bit] = &inst;
+      env.reStores[*bit] = 1;
+      return;
+    }
+    mayStore(env, l.dst);
+  };
 
   match<void>(
     effects,
     [&] (IrrelevantEffects) {
       switch (inst.op()) {
       case AssertLoc:
-        load(env, AFrame { inst.src(0), inst.extra<AssertLoc>()->locId });
+        load(env, ALocal { inst.src(0), inst.extra<AssertLoc>()->locId });
         return;
       case AssertStk:
         load(env, AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 });
@@ -557,7 +598,7 @@ void visit(Local& env, IRInstruction& inst) {
         if (env.reStores[*bit]) {
           auto const st = memory_effects(*env.global.reStores[*bit]);
           auto const pst = boost::get<PureStore>(&st);
-          if (pst && pst->value == inst.dst()) {
+          if (pst && pst->value && pst->value == inst.dst()) {
             FTRACE(4, "Killing self-store: {}\n",
                    env.global.reStores[*bit]->toString());
             removeDead(env, *env.global.reStores[*bit], false);
@@ -579,14 +620,28 @@ void visit(Local& env, IRInstruction& inst) {
       // function return---so mark everything read before we start killing
       // things.
       addAllLoad(env);
-      killSet(env, env.global.ainfo.all_frame);
-      killSet(env, env.global.ainfo.all_clsRefSlot);
+      killSet(env, env.global.ainfo.all_local);
       kill(env, l.kills);
     },
 
     [&] (ExitEffects l) {
       load(env, l.live);
       kill(env, l.kills);
+    },
+
+    [&] (PureInlineCall l) {
+      doPureStore(PureStore { l.base, l.fp });
+      load(env, l.actrec);
+    },
+
+    [&] (PureInlineReturn l) {
+      if (auto bit = pure_store_bit(env, l.base)) {
+        if (isDead(env, *bit)) env.global.deadInlineReturns.add(inst);
+        mayStore(env, l.base);
+        mustStore(env, *bit);
+        return;
+      }
+      mayStore(env, l.base);
     },
 
     /*
@@ -596,79 +651,15 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (CallEffects l) {
       env.containsCall = true;
 
+      store(env, l.outputs);
       load(env, AHeapAny);
-
       load(env, l.locals);
-      if (l.writes_locals) mayStore(env, AFrameAny);
-
-      load(env, l.stack);
+      load(env, l.inputs);
+      store(env, l.actrec);
       kill(env, l.kills);
     },
 
-    [&] (PureStore l) {
-      if (auto bit = pure_store_bit(env, l.dst)) {
-        if (isDead(env, *bit)) {
-          if (!removeDead(env, inst, true)) {
-            mayStore(env, l.dst);
-            mustStore(env, *bit);
-          }
-          return;
-        }
-        if (!env.antLoc[*bit] &&
-            !env.mayLoad[*bit] &&
-            !env.mayStore[*bit] &&
-            (!env.containsCall ||
-             srcsCanSpanCall(inst))) {
-          env.avlLoc[*bit] = 1;
-          set_movable_store(env, *bit, inst);
-        }
-        mayStore(env, l.dst);
-        mustStore(env, *bit);
-        if (l.value->inst()->block() != inst.block()) return;
-        auto const le = memory_effects(*l.value->inst());
-        auto pl = boost::get<PureLoad>(&le);
-        if (!pl) return;
-        auto lbit = pure_store_bit(env, pl->src);
-        if (!lbit || *lbit != *bit) return;
-        /*
-         * The source of the store is a load from the same address, which is
-         * also in this block. If there's no interference, we can kill this
-         * store. We won't know until we see the load though.
-         */
-        if (env.global.reStores.size() <= *bit) {
-          env.global.reStores.resize(*bit + 1);
-        }
-        env.global.reStores[*bit] = &inst;
-        env.reStores[*bit] = 1;
-        return;
-      }
-      mayStore(env, l.dst);
-    },
-
-    [&] (PureSpillFrame l) {
-      auto const it = env.global.ainfo.stack_ranges.find(canonicalize(l.stk));
-      if (it != end(env.global.ainfo.stack_ranges)) {
-        // If all the bits corresponding to the stack range are dead, we can
-        // eliminate this instruction.  We can also count all of them as
-        // redefined.
-        if (isDeadSet(env, it->second)) {
-          if (removeDead(env, inst, true)) return;
-        } else {
-          auto avlLoc = it->second & ~(env.antLoc | env.mayLoad |
-                                       env.mayStore);
-          if (avlLoc == it->second &&
-              (!env.containsCall ||
-               srcsCanSpanCall(inst))) {
-            set_movable_spill_frame(env, avlLoc, inst);
-            env.avlLoc |= avlLoc;
-          }
-        }
-        mayStore(env, l.stk);
-        mustStoreSet(env, it->second);
-        return;
-      }
-      mayStore(env, l.stk);
-    }
+    [&] (PureStore l) { doPureStore(l); }
   );
 }
 
@@ -721,7 +712,7 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
 
 void find_all_stores(Global& genv, Block* blk, uint32_t id,
                      jit::vector<IRInstruction*>& stores,
-                     jit::hash_set<Block*>& seen) {
+                     jit::hash_set<void*>& seen) {
   ITRACE(7, "find_all_stores: {} B{}\n", id, blk->id());
   Trace::Indent _i;
   blk->forEachPred(
@@ -738,7 +729,7 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
       IRInstruction* inst;
       if ((inst = pst.instruction()) != nullptr ||
           (inst = pst.processed()) != nullptr) {
-        if (inst->block() == pred || seen.insert(inst->block()).second) {
+        if (seen.insert(inst).second) {
           ITRACE(7, "find_all_stores: {} B{} pred B{}: adding {}\n",
                  id, blk->id(), pred->id(), inst->toString());
           stores.push_back(inst);
@@ -751,6 +742,12 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
       Block* b;
       if ((b = pst.block()) != nullptr ||
           (b = pst.pending()) != nullptr) {
+        if (b != pred && seen.count(b)) {
+          ITRACE(7,
+                 "find_all_stores: {} B{} pred B{} previously processed B{}\n",
+                 id, blk->id(), pred->id(), b->id());
+          return;
+        }
         ITRACE(7, "find_all_stores: {} B{} pred B{} recur to B{}\n",
                id, blk->id(), pred->id(), b->id());
         return find_all_stores(genv, b, id, stores, seen);
@@ -761,13 +758,12 @@ void find_all_stores(Global& genv, Block* blk, uint32_t id,
 }
 
 IRInstruction* resolve_ts(Global& genv, Block* blk,
-                          StoreKey::Where w, uint32_t id,
-                          const ALocBits** sfp = nullptr);
+                          StoreKey::Where w, uint32_t id);
 
-IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
+void resolve_cycle(Global& genv, TrackedStore& ts, Block* blk, uint32_t id) {
   genv.needsReflow = true;
   jit::vector<IRInstruction*> stores;
-  jit::hash_set<Block*> seen;
+  jit::hash_set<void*> seen;
   // find all the stores, so we can determine
   // whether a phi is actually required for each
   // src (also, we need a candidate store to clone)
@@ -786,7 +782,8 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
   }
   auto const cand = stores[0];
   if (stores.size() == 1) {
-    return cand;
+    ts.set(cand);
+    return;
   }
   jit::vector<uint32_t> srcsToPhi;
   for (uint32_t i = 0; i < cand->numSrcs(); i++) {
@@ -803,10 +800,21 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
   if (!srcsToPhi.size()) {
     // the various stores all had the same inputs
     // so nothing to do.
-    return cand;
+    ts.set(cand);
+    return;
   }
+  bool needsProcessed = false;
   auto const inst = genv.unit.clone(cand);
   for (auto i : srcsToPhi) {
+    auto t = TBottom;
+    for (auto const st : stores) {
+      t |= st->src(i)->type();
+    }
+    if (t.admitsSingleVal()) {
+      inst->setSrc(i, genv.unit.cns(t));
+      continue;
+    }
+    needsProcessed = true;
     // create a Mov; we'll use its dst as the src of the store, and
     // when we eventually create the phi, we'll set its dst as the src
     // of the Mov (this allows us to avoid creating a new phi if
@@ -817,9 +825,14 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
     blk->prepend(mv);
     inst->setSrc(i, mv->dst());
     mv->setSrc(0, mv->dst());
+    mv->dst()->setType(t);
     ITRACE(7, "  + created {} for {}\n", mv->toString(), inst->toString());
   }
-  return inst;
+  if (needsProcessed) {
+    ts.setProcessed(inst);
+  } else {
+    ts.set(inst);
+  }
 }
 
 IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
@@ -838,15 +851,24 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
 
   auto const cand = stores[0];
   if (stores.size() == 1) return cand;
+  assertx(blk->numPreds() == stores.size());
+  auto& preds = blk->preds();
   jit::vector<SSATmp*> newSrcs;
   jit::vector<uint32_t> srcsToPhi;
   for (uint32_t i = 0; i < cand->numSrcs(); i++) {
     bool same = true;
-    jit::vector<SSATmp*> phiInputs;
-    for (auto const st : stores) {
-      auto const si = st->src(i);
-      phiInputs.push_back(si);
-      if (si != phiInputs[0]) same = false;
+    SSATmp* temp = nullptr;
+    jit::hash_map<Block*, SSATmp*> phiInputs;
+    uint32_t j = 0;
+    for (auto const& edge : preds) {
+      auto const st = stores[j++];
+      auto si = st->src(i);
+      if (!si->inst()->is(DefConst) && si->type().admitsSingleVal()) {
+        si = genv.unit.cns(si->type());
+      }
+      phiInputs[edge.from()] = si;
+      if (temp == nullptr) temp = si;
+      if (si != temp) same = false;
     }
     if (!same) {
       srcsToPhi.push_back(i);
@@ -857,7 +879,7 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
       auto const mv = ts.processed()->src(i)->inst();
       if (mv->is(Mov) && mv->src(0) == mv->dst()) {
         srcsToPhi.push_back(i);
-        newSrcs.push_back(phiInputs[0]);
+        newSrcs.push_back(temp);
       }
     }
   }
@@ -892,15 +914,18 @@ IRInstruction* resolve_flat(Global& genv, Block* blk, uint32_t id,
 }
 
 IRInstruction* resolve_ts(Global& genv, Block* blk,
-                          StoreKey::Where w, uint32_t id,
-                          const ALocBits** sfp) {
+                          StoreKey::Where w, uint32_t id) {
   auto& ts = genv.trackedStoreMap[StoreKey { blk, w, id }];
-  auto sf = findSpillFrame(genv, ts);
-  if (sfp) *sfp = sf;
 
   ITRACE(7, "resolve_ts: B{}:{} store:{} ts:{}\n",
          blk->id(), show(w), id, show(ts));
   Trace::Indent _i;
+
+  if (ts.pending()) {
+    always_assert(ts.pending() == blk);
+    resolve_cycle(genv, ts, blk, id);
+    assertx(ts.instruction() || ts.processed());
+  }
 
   if (auto inst = ts.instruction()) {
     ITRACE(7, "-> inst: {}\n", inst->toString());
@@ -911,25 +936,16 @@ IRInstruction* resolve_ts(Global& genv, Block* blk,
     return inst;
   }
 
-  auto rep = [&]() {
-    if (ts.pending()) {
-      always_assert(ts.pending() == blk);
-      ts.setProcessed(resolve_cycle(genv, blk, id));
-      return ts.processed();
-    }
+  always_assert(ts.block());
+  if (w != StoreKey::In || blk != ts.block()) {
+    ITRACE(7, "direct recur: B{}:{} -> B{}:In\n",
+           blk->id(), show(w), ts.block()->id());
+    ts.set(resolve_ts(genv, ts.block(), StoreKey::In, id));
+  } else {
+    ts.set(resolve_flat(genv, blk, id, ts));
+  }
+  auto const rep = ts.instruction();
 
-    always_assert(ts.block());
-    if (w != StoreKey::In || blk != ts.block()) {
-      ITRACE(7, "direct recur: B{}:{} -> B{}:In\n",
-             blk->id(), show(w), ts.block()->id());
-      ts.set(resolve_ts(genv, ts.block(), StoreKey::In, id));
-    } else {
-      ts.set(resolve_flat(genv, blk, id, ts));
-    }
-    return ts.instruction();
-  }();
-
-  if (sf) genv.spillFrameMap[ts] = *sf;
   ITRACE(7, "-> {} (resolve_ts B{}, store {})\n",
          rep->toString(), blk->id(), id);
   return rep;
@@ -970,15 +986,11 @@ void optimize_block_pre(Global& genv, Block* block,
       insertBits,
       [&](size_t i){
         if (!store_insert.go()) return;
-        const ALocBits* sf = nullptr;
-        auto const cinst = resolve_ts(genv, block, StoreKey::In, i, &sf);
-        if (sf) {
-          always_assert((state.ppIn & *sf) == *sf);
-          insertBits &= ~*sf;
-        }
+        auto const cinst = resolve_ts(genv, block, StoreKey::In, i);
         FTRACE(1, " Inserting store {}: {}\n", i, cinst->toString());
         auto const inst = genv.unit.clone(cinst);
         block->prepend(inst);
+        if (inst->is(InlineCall)) genv.adjustedInlineCalls = true;
       }
     );
   }
@@ -1153,36 +1165,28 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
   auto compat = [](TrackedStore store1, TrackedStore store2) {
     auto i1 = store1.instruction();
     auto i2 = store2.instruction();
-    assert(i1 && i2);
+    assertx(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
+    for (auto i = i1->numSrcs(); i--; ) {
+      // Ptr and Lval types are imcompatible, as one requires two register,
+      // while the other requires only one.  This stops us from phiing the
+      // two types together to elimnate a store.
+      auto const& t1 = i1->src(i)->type();
+      auto const& t2 = i2->src(i)->type();
+      if ((t1.maybe(TPtrToCell) && t2.maybe(TLvalToCell)) ||
+          (t2.maybe(TPtrToCell) && t1.maybe(TLvalToCell))) {
+        return Compat::Bad;
+      }
+    }
     for (auto i = i1->numSrcs(); i--; ) {
       if (i1->src(i) != i2->src(i)) return Compat::Compat;
     }
     return Compat::Same;
   };
 
-  auto sf1 = findSpillFrame(genv, s1);
-  auto sf2 = findSpillFrame(genv, s2);
-
-  // t7621182 Don't merge different spillframes for now,
-  // because code-gen doesn't handle phi'ing an Obj and a
-  // Cls.
-  if (sf1 || sf2) {
-    // we already know they aren't the same
-    return TrackedStore::BadVal();
-  }
-
-  if (!sf1 != !sf2 || (sf1 && *sf1 != *sf2)) {
-    // They need to both be spill frames affecting
-    // the same addresses, or both not be spill frames.
-    return TrackedStore::BadVal();
-  }
-
   auto trackedBlock = [&]() {
-    auto ret = TrackedStore(succ, id);
-    if (sf1) genv.spillFrameMap[ret] = *sf1;
-    return ret;
+    return TrackedStore(succ, id);
   };
 
   if (s1.block() || s2.block()) {
@@ -1256,10 +1260,6 @@ void compute_available_stores(
 
           if (tsOut.isBad()) {
             state.ppOut[i] = false;
-          } else if (auto sf = findSpillFrame(genv, tsIn)) {
-            if ((propagate & *sf) != *sf) {
-              state.ppOut &= ~*sf;
-            }
           }
         }
       );
@@ -1305,26 +1305,13 @@ void compute_available_stores(
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
           auto& tsSucc =
             genv.trackedStoreMap[StoreKey { succ, StoreKey::In, i }];
-          auto sf = findSpillFrame(genv, ts);
-          if (sf) {
-            if ((succState.ppIn & *sf) != *sf) {
-              changed = true;
-              tsSucc.setBad();
-              succState.ppIn &= ~*sf;
-              return;
-            }
-          }
           auto tsNew = succ->numPreds() == 1 ? ts : recompute_ts(genv, i, succ);
           if (!tsNew.same(tsSucc)) {
             changed = true;
-            assert(tsNew >= tsSucc);
+            assertx(tsNew >= tsSucc);
             tsSucc = tsNew;
             if (tsSucc.isBad()) {
-              if (sf) {
-                succState.ppIn &= ~*sf;
-              } else {
-                succState.ppIn[i] = false;
-              }
+              succState.ppIn[i] = false;
             }
           }
         }
@@ -1382,22 +1369,7 @@ void compute_placement_possible(
           restrictBits &= succState.ppIn | succState.antIn;
         });
 
-      auto bitsToClear = state.ppOut & ~restrictBits;
-      // ensure that if we clear any spill frame bits, we clear
-      // them all.
-      if (bitsToClear.any()) {
-        bitset_for_each_set(
-          bitsToClear,
-          [&](uint32_t i) {
-            auto const ts =
-              genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-            if (auto sf = findSpillFrame(genv, ts)) {
-              restrictBits &= ~*sf;
-            }
-          }
-        );
-        state.ppOut &= restrictBits;
-      }
+      state.ppOut &= restrictBits;
       trace();
       return true;
     },
@@ -1426,6 +1398,279 @@ void compute_placement_possible(
       }
       return true;
     });
+}
+
+void fix_inlined_call(Global& genv, IRInstruction* call, SSATmp* fp) {
+  // Nothing to do if the frame hasn't changed.
+  if (fp == call->src(1)) return;
+
+  auto const origFp = call->src(1);
+  auto const extra = call->extra<Call>();
+  auto const callOffset = extra->callOffset;
+  assertx(origFp->inst()->is(BeginInlining));
+
+  // Adjust the fp and callOffset to reflect the caller frame for this call.
+  auto const sk = call->marker().fixupSk();
+  extra->callOffset = sk.offset() - sk.func()->base();
+  call->setSrc(1, fp);
+
+  // If we've already inserted a SyncReturnBC instruction there's no need
+  // to insert any more.
+  if (extra->hasInlFixup) return;
+  extra->hasInlFixup = true;
+
+  auto const catchBlock = call->taken();
+  auto it = catchBlock->skipHeader();
+
+  auto syncInst = genv.unit.gen(
+    SyncReturnBC,
+    it->bcctx(),
+    SyncReturnBCData{callOffset, extra->spOffset + extra->numInputs()},
+    call->src(0),
+    origFp
+  );
+  catchBlock->insert(it, syncInst);
+}
+
+struct FPState {
+  PC catchPC;      // PC at dominating BeginCatch or nullptr
+  int exitDepth;   // number of live frames at end of block
+  SSATmp* entry;   // live fp at start of block
+  SSATmp* exit;    // live fp at end of block
+  SSATmp* catchFP; // live fp at dominating BeginCatch or nullptr
+};
+
+void append_inline_returns(Global& genv, Block* b, SSATmp* start, SSATmp* end) {
+  auto const it = b->backIter();
+  for (; start != end; start = start->inst()->src(1)) {
+    assertx(start->inst()->is(BeginInlining));
+
+    auto const sInst = start->inst();
+    auto const next = start->inst()->src(1);
+    auto const nInst = next->inst();
+    auto const startOff = sInst->extra<BeginInlining>()->spOffset.offset;
+    auto const nextOff = [&] {
+      if (next->inst()->is(BeginInlining)) {
+        return nInst->extra<BeginInlining>()->spOffset;
+      }
+      auto const sp = sInst->src(0);
+      assertx(sp->inst()->is(DefRegSP, DefFrameRelSP));
+
+      // The IRSPRelOffset of `next` relative to `sp` is the same as the
+      // FPInvOffset of `sp` relative to `next`.
+      auto const off = sp->inst()->extra<FPInvOffsetData>()->offset;
+      return IRSPRelOffset{off.offset};
+    }().offset;
+
+    /*
+     * IRSPRel offsets get smaller the further down the stack they are, and
+     * start will by definition always be below next. The offset computed by
+     * nextOff - startOff will therefore be > 0. We want the FPRelOff, relative
+     * to start of next. FPRel offsets are positive above the fp they are
+     * are relative to ane negative below.
+     *
+     * +---------------------------+
+     * |            ...            |
+     * |                           |
+     * +---------------------------+
+     * |                           |
+     * +---------------------------+ <- sp ----+--+
+     * |                           |           |  |
+     * +---------------------------+  nextOff >|  |
+     * |                           |           |  |
+     * +---------------------------+ <- next --+--|-+
+     * |                           |              | |
+     * +---------------------------+    startOff >| |< nextOff - startOff
+     * |                           |              | |
+     * +---------------------------+ <- start ----+-+
+     * |                           |
+     * |            ...            |
+     * +---------------------------+
+     */
+    auto const callerFpOff = FPRelOffset{nextOff - startOff};
+
+    auto returnInst = genv.unit.gen(
+      InlineReturn,
+      it->bcctx(),
+      FPRelOffsetData { callerFpOff },
+      start,
+      next
+    );
+    b->insert(it, returnInst);
+  }
+}
+
+void adjust_inline_marker(IRInstruction& inst, SSATmp* fp) {
+  if (inst.marker().fp() == fp) return;
+  if (!inst.mayRaiseError() && !inst.is(BeginCatch)) return;
+  auto const curFp = inst.marker().fp();
+  assertx(curFp->inst()->is(BeginInlining));
+  auto const curOff = curFp->inst()->extra<BeginInlining>()->spOffset.offset;
+  auto const newOff = [&] {
+    if (fp->inst()->is(BeginInlining)) {
+      return fp->inst()->extra<BeginInlining>()->spOffset.offset;
+    }
+    assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
+    auto const defSP = curFp->inst()->src(0)->inst();
+    return defSP->extra<FPInvOffsetData>()->offset.offset;
+  }();
+
+  // Compute the difference in spoffset between the current and the previous
+  // marker fp.
+  auto const spAdj = newOff - curOff;
+
+  // Find the source key for the last inlined call from a published frame.
+  auto const callSK = [&] {
+    auto next = curFp;
+    for (;next->inst()->src(1) != fp; next = next->inst()->src(1)) {
+      assertx(next->inst()->is(BeginInlining));
+    }
+    return next->inst()->marker().sk();
+  }();
+
+  inst.marker() = inst.marker().adjustFP(fp)
+                               .adjustSP(inst.marker().spOff() + spAdj)
+                               .adjustFixupSK(callSK);
+}
+
+void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
+  auto const block = endCatch.block();
+  auto sync = genv.unit.gen(
+    EagerSyncVMRegs,
+    endCatch.bcctx(),
+    IRSPRelOffsetData { endCatch.extra<EndCatch>()->offset },
+    endCatch.src(0),
+    endCatch.src(1)
+  );
+  block->insert(--block->end(), sync);
+}
+
+void fix_inline_frames(Global& genv) {
+  using ECM = EndCatchData::CatchMode;
+  StateVector<Block,FPState> blockState{
+    genv.unit, FPState{nullptr, 0, nullptr, nullptr, nullptr}
+  };
+  const BlockList rpoBlocks{genv.poBlockList.rbegin(), genv.poBlockList.rend()};
+  auto const rpoIDs = numberBlocks(genv.unit, rpoBlocks);
+  dataflow_worklist<uint32_t> incompleteQ(rpoBlocks.size());
+  DEBUG_ONLY std::unordered_map<SSATmp*,SSATmp*> parentFPs;
+
+  for (auto rpoId = uint32_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
+    incompleteQ.push(rpoId);
+  }
+
+  while (!incompleteQ.empty()) {
+    auto const rpoId = incompleteQ.pop();
+    auto const blk = rpoBlocks[rpoId];
+    auto& state = blockState[blk];
+
+    state.entry = nullptr;
+    bool needFixup = false;
+    blk->forEachPred([&] (Block* pred) {
+      auto const& bs = blockState[pred];
+      needFixup |= bs.exit && state.entry && state.entry != bs.exit;
+      if (bs.catchPC) state.catchPC = bs.catchPC;
+      if (bs.catchFP) state.catchFP = bs.catchFP;
+
+      if (!bs.exit) return;
+      if (!state.entry || bs.exitDepth < state.exitDepth) {
+        state.entry = bs.exit;
+        state.exitDepth = bs.exitDepth;
+      }
+    });
+
+    // We split critical edges so it should be safe to insert InlineReturns into
+    // predecessors in this case.
+    if (needFixup) {
+      assertx(blk->numPreds() > 1);
+      blk->forEachPred([&] (Block* pred) {
+        assertx(pred->numSuccs() == 1);
+        auto& bs = blockState[pred];
+        if (bs.exitDepth > state.exitDepth) {
+          append_inline_returns(genv, pred, bs.exit, state.entry);
+          bs.exit = state.entry;
+        }
+      });
+    }
+
+    auto fp = state.entry;
+    folly::Optional<IRSPRelOffset> lastSync;
+    for (auto& inst : *blk) {
+      adjust_inline_marker(inst, fp);
+
+      if (inst.is(InlineReturn)) {
+        if (fp == inst.src(0)) {
+          // If we didn't elide the InlineCall paired with this return we can't
+          // have removed any of its parent calls as they should each depend on
+          // each other.
+          assertx(inst.src(1) == parentFPs[fp]);
+          state.exitDepth--;
+
+          fp = inst.src(1);
+          continue;
+        }
+
+        // The InlineCall was removed, we can remove the InlineReturn, determine
+        // if the InlineReturn needs to be converted to an InlineCall. This
+        // can happen when the InlineCall was killed or moved but the store for
+        // the InlineReturn is still live.
+        auto const parent = inst.src(1)->inst();
+        if (genv.deadInlineReturns[inst] || fp == parent->dst()) {
+          inst.convertToNop();
+          continue;
+        }
+        assertx(parent->is(BeginInlining));
+
+        InlineCallData data;
+        data.syncVmpc = state.catchPC;
+        data.spOffset = parent->extra<BeginInlining>()->spOffset;
+        genv.unit.replace(&inst, InlineCall, data, parent->dst(), fp);
+        // fallthrough to the InlineCall logic
+      }
+
+      if (inst.is(InlineCall)) {
+        fp = inst.src(0);
+        inst.extra<InlineCall>()->syncVmpc = state.catchPC;
+        state.exitDepth++;
+      }
+
+      if (debug && inst.is(BeginInlining)) parentFPs[inst.dst()] = inst.src(1);
+      if (inst.is(DefFP, DefFuncEntryFP)) fp = inst.dst();
+      if (inst.is(Call)) fix_inlined_call(genv, &inst, fp);
+      if (inst.is(CallBuiltin)) inst.setSrc(0, fp);
+
+      if (inst.is(EagerSyncVMRegs)) {
+        inst.setSrc(0, fp);
+        lastSync = inst.extra<EagerSyncVMRegs>()->offset;
+      }
+
+      if (inst.is(BeginCatch)) {
+        state.catchPC = inst.marker().sk().pc();
+        state.catchFP = fp;
+      }
+      if (inst.is(EndCatch)) {
+        if (state.catchFP != fp &&
+            inst.extra<EndCatch>()->mode != ECM::CallCatch &&
+            lastSync != inst.extra<EndCatch>()->offset) {
+          insert_eager_sync(genv, inst);
+        }
+      }
+
+      // This isn't a correctness problem but it may save us a register
+      if (inst.is(CheckSurpriseFlags) && inst.src(0)->isA(TFramePtr)) {
+        if (fp->inst()->marker().resumeMode() == ResumeMode::None) {
+          inst.setSrc(0, fp);
+        }
+      }
+    }
+
+    if (state.exit && state.exit != fp) {
+      blk->forEachSucc([&] (Block* succ) {
+        incompleteQ.push(rpoIDs[succ]);
+      });
+    }
+    state.exit = fp;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1466,9 +1711,17 @@ void optimizeStores(IRUnit& unit) {
   auto const blockAnalysis = [&] () -> jit::vector<BlockAnalysis> {
     auto ret = jit::vector<BlockAnalysis>{};
     ret.reserve(unit.numBlocks());
-    for (auto id = uint32_t{0}; id < poBlockList.size(); ++id) {
-      ret.push_back(analyze_block(genv, poBlockList[id]));
+    for (auto poId : poBlockList) {
+      ret.push_back(analyze_block(genv, poId));
     }
+    for (auto& elm : genv.blk2Aloc) {
+      auto poId = genv.blockStates[elm.first].id;
+      auto& ba = ret[poId];
+      ba.antLoc &= ~elm.second;
+      ba.alteredAnt |= elm.second;
+      ba.alteredAvl |= elm.second;
+    }
+    genv.blk2Aloc.clear();
     return ret;
   }();
 
@@ -1530,6 +1783,11 @@ void optimizeStores(IRUnit& unit) {
   for (auto& block : poBlockList) {
     optimize_block_pre(genv, block, blockAnalysis);
   }
+
+  if (genv.adjustedInlineCalls) {
+    fix_inline_frames(genv);
+  }
+
   if (genv.needsReflow) {
     reflowTypes(genv.unit);
   }

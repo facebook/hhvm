@@ -15,17 +15,18 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRACE_H_
-#define incl_HPHP_TRACE_H_
+#pragma once
 
 #include <string>
 #include <vector>
 #include <stdarg.h>
 
 #include <folly/Format.h>
+#include <folly/functional/Invoke.h>
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/text-color.h"
 
@@ -95,18 +96,23 @@ namespace Trace {
       TM(asmppc64)      \
       TM(atomicvector)  \
       TM(bcinterp)      \
+      TM(bespoke)       \
       TM(bisector)      \
       TM(class_load)    \
+      TM(cti)           \
       TM(datablock)     \
       TM(debugger)      \
       TM(debuggerflow)  \
       TM(debuginfo)     \
       TM(decreftype)    \
+      TM(disas)         \
       TM(dispatchBB)    \
       TM(ehframe)       \
       TM(emitter)       \
+      TM(extern_compiler) \
       TM(fixup)         \
       TM(fr)            \
+      TM(funcorder)     \
       TM(gc)            \
       TM(heapgraph)     \
       TM(heapreport)    \
@@ -116,9 +122,11 @@ namespace Trace {
       TM(hhbbc_cfg)     \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
+      TM(hhbbc_parse)   \
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
       TM(hhbbc_index)   \
+      TM(hhbbc_mem)     \
       TM(hhbbc_stats)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
@@ -148,6 +156,7 @@ namespace Trace {
       TM(jittime)       \
       TM(layout)        \
       TM(libxml)        \
+      TM(logging)       \
       TM(mcg)           \
       TM(mcgstats)      \
       TM(minstr)        \
@@ -155,13 +164,17 @@ namespace Trace {
       TM(objprof)       \
       TM(perf_mem_event) \
       TM(pgo)           \
+      TM(print_profiles)  \
       TM(printir)       \
+      TM(printir_json)  \
       TM(prof_branch)   \
       TM(prof_array)    \
+      TM(prof_prop)     \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \
       TM(region)        \
+      TM(repo_autoload) \
       TM(reusetc)       \
       TM(ringbuffer)    \
       TM(runtime)       \
@@ -170,6 +183,7 @@ namespace Trace {
       TM(stat)          \
       TM(statgroups)    \
       TM(stats)         \
+      TM(strobelight)   \
       TM(targetcache)   \
       TM(tcspace)       \
       TM(trans)         \
@@ -180,14 +194,19 @@ namespace Trace {
       TM(unwind)        \
       TM(ustubs)        \
       TM(vasm)          \
+      TM(vasm_block_count) \
       TM(vasm_copy)     \
+      TM(vasm_graph_color) \
       TM(vasm_phi)      \
+      TM(watchman_autoload) \
       TM(xenon)         \
       TM(xls)           \
       TM(xls_stats)     \
       TM(pdce_inline)   \
       TM(clisrv)        \
       TM(factparse)     \
+      TM(bccache)       \
+      TM(idx)           \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \
@@ -300,6 +319,10 @@ struct BumpRelease {
     if (m_live) tl_levels[m_mod] += m_adjust;
   }
 
+  BumpRelease negate() const {
+    return BumpRelease{ m_mod, -m_adjust, m_live };
+  }
+
   BumpRelease(const BumpRelease&) = delete;
   BumpRelease& operator=(const BumpRelease&) = delete;
 
@@ -309,9 +332,11 @@ private:
   int m_adjust;
 };
 
+CompactVector<BumpRelease> bumpSpec(folly::StringPiece traceSpec);
+
 //////////////////////////////////////////////////////////////////////
 
-#if (defined(DEBUG) || defined(USE_TRACE)) /* { */
+#if (!defined(NDEBUG) || defined(USE_TRACE)) /* { */
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
@@ -393,11 +418,11 @@ void dumpRingbuffer();
 void ensureInit(std::string outFile);
 // Set tracing levels for this thread using a module:level,... specification.
 // If traceSpec is empty, all levels for this thread are zeroed.
-void setTraceThread(const std::string& traceSpec);
+void setTraceThread(folly::StringPiece traceSpec);
 
 //////////////////////////////////////////////////////////////////////
 
-#else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
+#else /* } (!defined(NDEBUG) || defined(USE_TRACE)) { */
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -448,7 +473,7 @@ inline void setTraceThread(const std::string& /*traceSpec*/) {}
 
 //////////////////////////////////////////////////////////////////////
 
-#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
+#endif /* } (!defined(NDEBUG) || defined(USE_TRACE)) */
 
 } // Trace
 
@@ -475,21 +500,20 @@ inline std::string color(const char* fg, const char* bg) {
 
 //////////////////////////////////////////////////////////////////////
 
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_toString, toString);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_toString, toString);
 
 } // HPHP
 
 namespace folly {
 template<typename Val>
 class FormatValue<Val,
-                   typename std::enable_if<
-                     HPHP::has_toString<Val, std::string() const>::value &&
+                   std::enable_if_t<
+                     std::is_invocable_v<HPHP::invoke_toString, Val const> &&
                      // This is here because MSVC decides that StringPiece matches
                      // both this overload as well as the FormatValue overload for
                      // string-y types in folly itself.
-                     !std::is_same<Val, StringPiece>::value,
-                     void
-                   >::type> {
+                     !std::is_same<Val, StringPiece>::value
+                   >> {
  public:
   explicit FormatValue(const Val& val) : m_val(val) {}
 
@@ -502,4 +526,3 @@ class FormatValue<Val,
 };
 }
 
-#endif /* incl_HPHP_TRACE_H_ */

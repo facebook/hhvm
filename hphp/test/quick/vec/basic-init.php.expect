@@ -30,7 +30,7 @@ vec(8) {
   bool(false)
   bool(true)
   float(7.89)
-  array(0) {
+  varray(0) {
   }
   vec(0) {
   }
@@ -40,11 +40,11 @@ vec(8) {
   }
 }
 vec(4) {
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   int(1234)
   string(3) "abc"
-  object(HH\Vector)#2 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     int(1)
     [1]=>
@@ -90,9 +90,9 @@ vec(4) {
   bool(true)
 }
 vec(4) {
-  object(stdClass)#2 (0) {
+  object(stdClass) (0) {
   }
-  array(0) {
+  varray(0) {
   }
   vec(3) {
     int(1)
@@ -109,12 +109,9 @@ vec(4) {
     [1]=>
     string(1) "a"
   }
-  object(ToString)#2 (0) {
+  object(ToString) (0) {
   }
   string(3) "abc"
   int(10)
 }
-3 Noisy::__destruct()
-2 Noisy::__destruct()
-1 Noisy::__destruct()
 Exception: Thrower::__construct()

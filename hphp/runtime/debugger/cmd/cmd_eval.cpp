@@ -54,7 +54,7 @@ void CmdEval::onClient(DebuggerClient &client) {
   m_frame = client.getFrame();
   m_bypassAccessCheck = client.getDebuggerClientBypassCheck();
   auto res = client.xendWithNestedExecution<CmdEval>(this);
-  assert(res->is(DebuggerCommand::KindOfEval));
+  assertx(res->is(DebuggerCommand::KindOfEval));
   auto eval = std::static_pointer_cast<CmdEval>(res);
   eval->handleReply(client);
   m_failed = eval->m_failed;
@@ -73,7 +73,7 @@ void CmdEval::handleReply(DebuggerClient &client) {
 // can occur while we're doing the server-side work for an eval.
 bool CmdEval::onServer(DebuggerProxy &proxy) {
   PCFilter locSave;
-  RequestInjectionData &rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  RequestInjectionData &rid = RequestInfo::s_requestInfo->m_reqInjectionData;
   locSave.swap(rid.m_flowFilter);
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   auto const result = proxy.ExecutePHP(

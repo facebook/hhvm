@@ -1,2 +1,2 @@
-File "parse_error_visibility3.php", line 14, characters 3-8:
-Expected modifier (Parsing[1002])
+File "parse_error_visibility3.php", line 14, characters 10-10:
+A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. (Parsing[1002])

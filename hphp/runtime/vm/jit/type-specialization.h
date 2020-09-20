@@ -14,10 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_SPECIALIZATION_H_
-#define incl_HPHP_JIT_TYPE_SPECIALIZATION_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/bespoke-layout.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
 #include <folly/Optional.h>
@@ -28,6 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Class;
+struct RecordDesc;
 
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,28 +37,65 @@ namespace jit {
 /*
  * Array type specialization.
  *
- * May contain an ArrayKind and/or a pointer to a RAT.
+ * This type lattice is logically the following cross product:
+ *  (Maybe ArrayKind) x (Maybe RepoAuthoritativeType) x LayoutTag
+ *
+ * HHBBC doesn't know about vanilla or bespoke layouts, so when HHBBC provides
+ * us an ArrayKind or an RAT, we include those values in this specialization
+ * bit but we have an "unknown" layout tag. This tag makes the kind / type info
+ * unusable until we check that the array is vanilla.
+ *
+ * In the JIT, if we create an array with a known kind (e.g. with AllocVArray)
+ * or we test the kind (e.g. with CheckType), we'll also get the vanilla bit.
  */
 struct ArraySpec {
+  enum class LayoutTag { Unknown, Vanilla };
+
   /*
-   * Constructors.
+   * Constructors. If an ArrayKind is provided as one of the arguments, then
+   * we'll also set the vanilla bit, but otherwise, we'll leave it unset.
    */
-  constexpr ArraySpec();
-  explicit ArraySpec(ArrayData::ArrayKind kind);
+  constexpr explicit ArraySpec(LayoutTag = LayoutTag::Unknown);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
-  ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
+  explicit ArraySpec(BespokeLayout layout);
+
+  /*
+   * Set the vanilla bits on an ArraySpec.
+   */
+  ArraySpec narrowToVanilla() const;
+
+  /*
+   * Assign the bespoke layout of the ArraySpec, if it is possible
+   * to do so without a contradiction--otherwise return Top
+   */
+  ArraySpec narrowToBespokeLayout(BespokeLayout layout) const;
+
+  /*
+   * Only for post-deserialization fixup.
+   *
+   * As a precondition, the ArraySpec must already have a RAT type
+   */
+  void setType(const RepoAuthType::Array* adjusted);
+
+  /*
+   * Human-readable debug string.
+   */
+  std::string toString() const;
 
   /*
    * Accessors.
    *
-   * These return falsey values (folly::none or nullptr) if the respective bit
-   * in `m_sort' is not set.
-   *
-   * bits() returns the raw bits.
+   * bits() returns the raw bits for this ArraySpec.
+   * type() returns nullptr if no RAT is set.
    */
   uintptr_t bits() const;
-  folly::Optional<ArrayData::ArrayKind> kind() const;
   const RepoAuthType::Array* type() const;
+  bool vanilla() const;
+
+  /*
+   * Retrieve and lookup the bespoke layout for this ArraySpec, if presentj
+   */
+  std::optional<BespokeLayout> bespokeLayout() const;
 
   /*
    * Casts.
@@ -85,50 +124,64 @@ struct ArraySpec {
   /*
    * Top and bottom types.
    */
-  static const ArraySpec Top;
-  static const ArraySpec Bottom;
+  static constexpr ArraySpec Top();
+  static constexpr ArraySpec Bottom();
 
 private:
   /*
    * Bottom constructor.
    */
   enum class BottomTag {};
-  explicit ArraySpec(BottomTag);
+  explicit constexpr ArraySpec(BottomTag);
 
   /*
-   * Mask of specializations that a given ArraySpec represents.
+   * Checked by the ArraySpec constructors, to ensure that we don't create
+   * invalid array specializations like "Dict=DictKind".
    */
-  enum SortOf : uint8_t {
-    IsTop     = 0,
-    IsBottom  = 1 << 0,
-    HasKind   = 1 << 1,
-    HasType   = 1 << 2,
+  bool checkInvariants() const;
+
+  /*
+   * Allowed values of m_sort. Anything above Sort::Vanilla denotes a bespoke
+   * layout with index m_sort - Sort::Vanilla
+   */
+  enum class Sort : uint16_t {
+    /* possibly vanilla or bespoke */
+    Top = 0,
+    Bottom,
+    /* definitely vanilla */
+    Vanilla
+    /* larger values mean definitely a particular bespoke layout */
   };
-  friend SortOf operator|(SortOf, SortOf);
-  friend SortOf operator&(SortOf, SortOf);
+
+  /* convert an index to a Sort */
+  static Sort sortForBespokeIndex(uint16_t);
+  /* convert a sort to an index, or return 0 if the sort does not represent an
+   * index */
+  static std::optional<uint16_t> bespokeIndexForSort(Sort);
+  std::optional<uint16_t> bespokeIndex() const;
 
   /*
    * Data members.
    */
   union {
     struct {
-      uintptr_t m_sort : 8;
-      uintptr_t m_kind : 8;
+      Sort m_sort : 16;
+      /*
+       * holds the repo-auth type, or nullptr if there isn't one
+       */
       uintptr_t m_ptr : 48;
     };
     uintptr_t m_bits;
   };
 };
 
-ArraySpec::SortOf operator|(ArraySpec::SortOf l, ArraySpec::SortOf r);
-ArraySpec::SortOf operator&(ArraySpec::SortOf l, ArraySpec::SortOf r);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Class type specialization.
+ * Class and RecordDesc type specialization.
  */
-struct ClassSpec {
+template<typename T> // T is either Class or RecordDesc
+struct ClsRecSpec {
   /*
    * Constructor tags.
    */
@@ -138,17 +191,35 @@ struct ClassSpec {
   /*
    * Constructors.
    */
-  constexpr ClassSpec();
-  ClassSpec(const Class* cls, SubTag);
-  ClassSpec(const Class* cls, ExactTag);
+  constexpr ClsRecSpec();
+  ClsRecSpec(const T*, SubTag);
+  ClsRecSpec(const T*, ExactTag);
+
+  /*
+   * Human-readable debug string.
+   */
+  std::string toString() const;
 
   /*
    * Accessors.
    */
   uintptr_t bits() const;
   bool exact() const;
-  const Class* cls() const;
-  const Class* exactCls() const;
+
+  // Methods for accessing Class* and RecordDesc* of Class and RecordDesc
+  // specializations respectively.
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, Class>::value, D>>
+  const Class* cls() const { return typeCns(); }
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, Class>::value, D>>
+  const Class* exactCls() const { return exactTypeCns(); }
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, RecordDesc>::value, D>>
+  const RecordDesc* rec() const { return typeCns(); }
+  template<typename D = void,
+           typename = std::enable_if_t<std::is_same<T, RecordDesc>::value, D>>
+  const RecordDesc* exactRec() const { return exactTypeCns(); }
 
   /*
    * Casts.
@@ -160,32 +231,36 @@ struct ClassSpec {
   /*
    * Comparisons.
    */
-  bool operator==(const ClassSpec& rhs) const;
-  bool operator!=(const ClassSpec& rhs) const;
-  bool operator<=(const ClassSpec& rhs) const;
-  bool operator>=(const ClassSpec& rhs) const;
-  bool operator<(const ClassSpec& rhs) const;
-  bool operator>(const ClassSpec& rhs) const;
+  bool operator==(const ClsRecSpec<T>& rhs) const;
+  bool operator!=(const ClsRecSpec<T>& rhs) const;
+  bool operator<=(const ClsRecSpec<T>& rhs) const;
+  bool operator>=(const ClsRecSpec<T>& rhs) const;
+  bool operator<(const ClsRecSpec<T>& rhs) const;
+  bool operator>(const ClsRecSpec<T>& rhs) const;
 
   /*
    * Combinators.
    */
-  ClassSpec operator|(const ClassSpec& rhs) const;
-  ClassSpec operator&(const ClassSpec& rhs) const;
-  ClassSpec operator-(const ClassSpec& rhs) const;
+  ClsRecSpec<T> operator|(const ClsRecSpec<T>& rhs) const;
+  ClsRecSpec<T> operator&(const ClsRecSpec<T>& rhs) const;
+  ClsRecSpec<T> operator-(const ClsRecSpec<T>& rhs) const;
 
   /*
    * Top and bottom types.
    */
-  static const ClassSpec Top;
-  static const ClassSpec Bottom;
+  static constexpr ClsRecSpec<T> Top();
+  static constexpr ClsRecSpec<T> Bottom();
 
 private:
   /*
    * Bottom constructor.
    */
   enum class BottomTag {};
-  explicit ClassSpec(BottomTag);
+  explicit constexpr ClsRecSpec(BottomTag);
+
+  const T* typeCns() const;
+  const T* exactTypeCns() const;
+
 
   /*
    * Sort tag.
@@ -209,6 +284,14 @@ private:
   };
 };
 
+using ClassSpec = ClsRecSpec<Class>;
+using RecordSpec = ClsRecSpec<RecordDesc>;
+template<>
+ClassSpec ClassSpec::operator&(const ClassSpec&) const;
+
+template<>
+RecordSpec RecordSpec::operator&(const RecordSpec&) const;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -218,6 +301,7 @@ enum class SpecKind : uint8_t {
   None = 0,
   Array = 1 << 0,
   Class = 1 << 1,
+  Record = 1 << 2,
 };
 
 SpecKind operator|(SpecKind l, SpecKind r);
@@ -234,7 +318,7 @@ struct TypeSpec {
    * Constructors.
    */
   TypeSpec();
-  TypeSpec(ArraySpec, ClassSpec);
+  TypeSpec(ArraySpec, ClassSpec, RecordSpec);
 
   /*
    * Accessors.
@@ -242,6 +326,7 @@ struct TypeSpec {
   SpecKind kind() const;
   ArraySpec arrSpec() const;
   ClassSpec clsSpec() const;
+  RecordSpec recSpec() const;
 
   /*
    * Comparisons.
@@ -265,6 +350,7 @@ private:
   SpecKind m_kind;
   ArraySpec m_arrSpec;
   ClassSpec m_clsSpec;
+  RecordSpec m_recSpec;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -272,4 +358,3 @@ private:
 
 #include "hphp/runtime/vm/jit/type-specialization-inl.h"
 
-#endif

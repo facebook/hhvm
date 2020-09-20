@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   private function __construct() {
@@ -16,6 +16,9 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_private_new() {
 A::make();
 $r = new ReflectionClass('A');
 var_dump($r->isInstantiable());
@@ -26,4 +29,5 @@ try {
 } catch (Exception $e) {
   var_dump(get_class($e));
   var_dump($e->getMessage());
+}
 }

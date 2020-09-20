@@ -37,48 +37,27 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdClosure(IRLS& env, const IRInstruction* inst) {
-  assertx(!inst->func() || inst->func()->isClosureBody());
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_thisUnsafe)], dst};
-}
-
-void cgLdClosureCtx(IRLS& env, const IRInstruction* inst) {
+void cgLdClosureCls(IRLS& env, const IRInstruction* inst) {
   auto const ctx = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
   vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};
 }
 
-void cgLdClosureStaticLoc(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdClosureStaticLoc>();
-  auto const func = extra->func;
-  auto const cls = func->implCls();
-  auto const slot = lookupStaticSlotFromClosure(cls, extra->name);
-  auto const offset = cls->declPropOffset(slot);
-
-  auto const dst = dstLoc(env, inst, 0).reg();
+void cgLdClosureThis(IRLS& env, const IRInstruction* inst) {
+  auto const ctx = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << lea{obj[offset], dst};
-}
-
-void cgStClosureCtx(IRLS& env, const IRInstruction* inst) {
-  auto const obj = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  if (inst->src(1)->isA(TNullptr)) {
-    v << storeqi{0, obj[c_Closure::ctxOffset()]};
-  } else {
-    auto const ctx = srcLoc(env, inst, 1).reg();
-    v << store{ctx, obj[c_Closure::ctxOffset()]};
-  }
+  vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};
 }
 
 void cgStClosureArg(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
-  auto const off = inst->extra<StClosureArg>()->offsetBytes;
-  storeTV(vmain(env), obj[off], srcLoc(env, inst, 1), inst->src(1));
+  auto const offsets = ObjectProps::offsetOf(inst->extra<StClosureArg>()->index)
+    .shift(sizeof(ObjectData));
+  storeTV(vmain(env),
+          inst->src(1)->type(),
+          srcLoc(env, inst, 1),
+          obj[offsets.typeOffset()],
+          obj[offsets.dataOffset()]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

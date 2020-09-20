@@ -1,12 +1,7 @@
-
-Warning: %s
-NULL
-array(3) {
-  [0]=>
+Warning: array_splice() expects at most 4 parameters, 10 given in %s/array_splice_variation2.php on line 8
+varray(3) {
   int(0)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
 }
 Done

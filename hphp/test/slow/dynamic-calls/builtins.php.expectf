@@ -1,0 +1,56 @@
+Notice: 'count' called dynamically without using a function pointer in %s/builtins.php on line 14
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 17
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 18
+
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 19
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 20
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 21
+
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 23
+
+Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
+
+Notice: 'DateTime::createFromFormat' called dynamically without using a function pointer in %s/builtins.php on line 6
+
+Notice: 'DateTime::createFromFormat' called dynamically without using a function pointer in %s/builtins.php on line 7
+
+Notice: 'DateTime::createFromFormat' called dynamically without using a function pointer in %s/builtins.php on line 8
+
+Notice: 'DateTime::getTimezone' called dynamically without using a function pointer in %s/builtins.php on line 9
+
+Notice: 'array_map' called dynamically without using a function pointer in %s/builtins.php on line 28
+======================================================
+
+Notice: 'count' called dynamically without using a function pointer in %s/builtins.php on line 14
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 16
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 17
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 18
+
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 19
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 20
+
+Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 21
+
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 23
+
+Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
+
+Notice: 'DateTime::createFromFormat' called dynamically without using a function pointer in %s/builtins.php on line 6
+
+Notice: 'DateTime::createFromFormat' called dynamically without using a function pointer in %s/builtins.php on line 7
+
+Notice: 'DateTime::createFromFormat' called dynamically without using a function pointer in %s/builtins.php on line 8
+
+Notice: 'DateTime::getTimezone' called dynamically without using a function pointer in %s/builtins.php on line 9
+
+Notice: 'array_map' called dynamically without using a function pointer in %s/builtins.php on line 28

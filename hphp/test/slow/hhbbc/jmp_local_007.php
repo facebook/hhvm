@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-function foo($x) {
+function foo() {
   if ($x) {
     $y = "asd";
   } else {
@@ -10,4 +10,8 @@ function foo($x) {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_jmp_local_007() {
 foo();
+}

@@ -1,0 +1,8 @@
+File "xhp_attr_spread_localize.php", line 23, characters 12-13:
+Invalid xhp value for attribute `:my-foo` in `:baz` (Typing[4343])
+File "xhp_attr_spread_localize.php", line 15, characters 13-16:
+Expected `~?:baz` because it is an unenforceable type
+File "xhp_attr_spread_localize.php", line 19, characters 9-11:
+But got `:foo`
+File "xhp_attr_spread_localize.php", line 7, characters 13-16:
+  via this generic `this`

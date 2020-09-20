@@ -1,5 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (php_sapi_name() != "cli") {
-	die("skip this test is for CLI");
+  die("skip this test is for CLI");
 }
-?>
+}

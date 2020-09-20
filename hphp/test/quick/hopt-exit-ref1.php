@@ -1,9 +1,6 @@
-<?php
+<?hh
 
 class C {
-  function __destruct() {
-    echo "__destruct!\n";
-  }
 }
 
 function foo() {
@@ -17,4 +14,6 @@ function foo() {
   if ($x) return 1;
 }
 
+<<__EntryPoint>> function main(): void {
 foo();
+}

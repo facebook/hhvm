@@ -18,10 +18,9 @@ dict(4) {
   ["2"]=>
   string(3) "bar"
 }
-array(1) {
+darray(1) {
   ["TestAttr"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     dict(2) {
       [1]=>
       string(1) "a"

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 ob_start();
 
 for ($i = 0; $i < 10; $i++) {
@@ -8,3 +8,4 @@ for ($i = 0; $i < 10; $i++) {
 
 ob_end_clean();
 echo "Expected a fatal\n";
+}

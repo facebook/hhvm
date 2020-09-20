@@ -1,0 +1,4 @@
+File "pure_calls_rx.php", line 8, characters 3-6:
+Pure functions can only call other pure functions. (Typing[4387])
+File "pure_calls_rx.php", line 4, characters 10-11:
+This function is reactive.

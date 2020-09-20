@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_TEST_BASE_H_
 #define incl_HPHP_TEST_BASE_H_
 
-#include "hphp/compiler/hphp.h"
-
 #include "hphp/test/ext/test.h"
 #include "hphp/util/text-util.h"
 
@@ -58,7 +56,7 @@ struct TestBase {
     auto fail = [&] { printf("%s failed\n", name.c_str()); ret = false; };
 
     if (which.empty() || which == name) {
-      SCOPE_EXIT { fflush(nullptr); };
+      SCOPE_EXIT { fflush(stdout); fflush(stderr); };
       test_name = name;
       try {
         if (test()) {

@@ -3,7 +3,7 @@
 class A {
   public function foo() {
     $x = () ==> {
-      $GLOBALS['heh'] = $this;
+      \HH\global_set('heh', $this);
       yield 1;
       yield 2;
       yield 3;
@@ -17,4 +17,8 @@ function main() {
   $x = $x->foo();
   foreach ($x() as $k) var_dump($k);
 }
+
+<<__EntryPoint>>
+function main_closure_context_006() {
 main();
+}

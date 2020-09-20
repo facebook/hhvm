@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 //offset to large
 $dom = new DomDocument();
 $comment = $dom->createComment('test-comment');
@@ -10,5 +10,4 @@ try {
     echo "Throws DOMException for offest too large\n";
   }
 }
-
-?>
+}

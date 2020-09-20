@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_548() {
 foreach (range("0 xxx", "12 yyy") as $number) {
   echo $number . "
 ";
@@ -19,4 +22,5 @@ foreach (range('a xxx', 'i yyy') as $letter) {
 }
 foreach (range('c xxx', 'a yyy') as $letter) {
   echo $letter;
+}
 }

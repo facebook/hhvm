@@ -1,7 +1,7 @@
 ---- real collections: compact ----
-object(TestStruct)#7 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#8 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -10,22 +10,22 @@ object(TestStruct)#7 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#9 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#10 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- real collections: binary ----
-object(TestStruct)#12 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#13 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -34,22 +34,22 @@ object(TestStruct)#12 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#14 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#15 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- hack arrays: compact ----
-object(TestStruct)#18 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#19 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -58,22 +58,22 @@ object(TestStruct)#18 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#20 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#21 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- hack arrays: binary ----
-object(TestStruct)#23 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#24 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -82,22 +82,22 @@ object(TestStruct)#23 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#25 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#26 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- php arrays: compact ----
-object(TestStruct)#29 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#30 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -106,22 +106,22 @@ object(TestStruct)#29 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#31 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#32 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- php arrays: binary ----
-object(TestStruct)#34 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#35 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -130,22 +130,22 @@ object(TestStruct)#34 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#36 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#37 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- sadly, this is legal: compact ----
-object(TestStruct)#43 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#44 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -154,22 +154,22 @@ object(TestStruct)#43 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#45 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#46 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }
 }
 ---- sadly, this is legal: binary ----
-object(TestStruct)#48 (3) {
+object(TestStruct) (3) {
   ["aList"]=>
-  object(HH\Vector)#49 (3) {
+  object(HH\Vector) (3) {
     [0]=>
     float(13.3)
     [1]=>
@@ -178,14 +178,14 @@ object(TestStruct)#48 (3) {
     float(3576.2)
   }
   ["aMap"]=>
-  object(HH\Map)#50 (2) {
+  object(HH\Map) (2) {
     [10]=>
     float(1.2)
     [43]=>
     float(5.33)
   }
   ["aSet"]=>
-  object(HH\Set)#51 (2) {
+  object(HH\Set) (2) {
     int(10)
     int(11)
   }

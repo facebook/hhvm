@@ -1,11 +1,11 @@
-<?php
-
-$classes = array(
+<?hh
+<<__EntryPoint>> function main(): void {
+$classes = darray[
 	'DirectoryIterator' => 0,
 	'FilesystemIterator' => 1,
 	'RecursiveDirectoryIterator' => 1,
 	'GlobIterator' => 1,
-);
+];
 
 foreach ($classes as $class => $flags) {
 	echo "===$class===\n";
@@ -15,11 +15,11 @@ foreach ($classes as $class => $flags) {
 	if ($flags)
 	{
 		var_dump($obj->getFlags());
-		$flags = array(
+		$flags = darray[
 			FilesystemIterator::CURRENT_AS_FILEINFO => 0,
 			FilesystemIterator::CURRENT_AS_SELF     => 0,
 			FilesystemIterator::CURRENT_AS_PATHNAME => 1,
-		);
+		];
 		foreach($flags as $flag => $isstring) {
 			$obj->setFlags($flag);
 			$obj->rewind();
@@ -37,5 +37,5 @@ foreach ($classes as $class => $flags) {
 		}
 	}
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -1,7 +1,11 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_date_get_last_errors() {
 $dt = date_create("asdfasdf");
 $errs = date_get_last_errors();
+var_dump(is_darray($errs));
 var_dump(count($errs) === 4);
 
 var_dump($errs['warning_count'] === 1);
@@ -13,3 +17,4 @@ var_dump($errs['error_count'] === 1);
 $err_errors = $errs['errors'];
 var_dump(count($err_errors) === 1);
 var_dump($err_errors[0] === "The timezone could not be found in the database");
+}

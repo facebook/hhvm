@@ -1,0 +1,2 @@
+File "invalid_php7_anon_fn.php", line 4, characters 20-20:
+Bad signature: use(...) should occur after the type (Parsing[1002])

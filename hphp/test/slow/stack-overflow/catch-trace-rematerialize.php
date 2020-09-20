@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * This test is intended to ensure that we restore %rsp correctly as we unwind
  * through TC frames.
@@ -31,33 +31,33 @@ function chwrap($x) {
 }
 
 function choose($a) {
-  $arr = array('banana', $a, 'apple');
-  $dict = array(
+  $arr = varray['banana', $a, 'apple'];
+  $dict = darray[
     'banana' => 'banana',
     $a => $a,
     'apple' => 'apple',
-  );
+  ];
 
   $out = array_map(
     function ($val) { return strrev($val); },
     $arr
   );
 
-  foreach ($out as &$thing) {
-    $thing = $thing . 'boop';
+  foreach ($out as $idx => $thing) {
+    $out[$idx] = $thing . 'boop';
   }
 
   return $arr[0] === 'bananaboop';
 }
 
 function quux($b, $a) {
-  $arr = array($b, 'banana', $a, 'apple');
-  $dict = array(
+  $arr = varray[$b, 'banana', $a, 'apple'];
+  $dict = darray[
     $b => $b,
     'banana' => 'banana',
     $a => $a,
     'apple' => 'apple',
-  );
+  ];
 
   $out = array_map(
     function ($val) {
@@ -66,8 +66,8 @@ function quux($b, $a) {
     $arr
   );
 
-  foreach ($out as &$thing) {
-    $thing = chwrap($thing) ? foo($thing) : bar($thing);
+  foreach ($out as $idx => $thing) {
+    $out[$idx] = chwrap($thing) ? foo($thing) : bar($thing);
   }
   return $out;
 }
@@ -75,4 +75,8 @@ function quux($b, $a) {
 function main() {
   foo('tofu');
 }
+
+<<__EntryPoint>>
+function main_catch_trace_rematerialize() {
 main();
+}

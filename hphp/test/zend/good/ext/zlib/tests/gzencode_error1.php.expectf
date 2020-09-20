@@ -2,38 +2,31 @@
 
 -- Testing gzencode() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: gzencode() expects at least 1 parameter, 0 given in %s/gzencode_error1.php on line 24
 
 -- Testing gzencode() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: gzencode() expects at most 3 parameters, 4 given in %s/gzencode_error1.php on line 32
 
 -- Testing with incorrect compression level --
 
-Warning: %s
+Warning: compression level (99) must be within -1..9 in %s/gzencode_error1.php on line 36
 bool(false)
 
 -- Testing with incorrect encoding_mode --
 
-Warning: %s
+Warning: encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s/gzencode_error1.php on line 40
 bool(false)
 
 -- Testing with incorrect parameters --
 
-Warning: %s
-NULL
+Warning: gzencode() expects parameter 1 to be string, object given in %s/gzencode_error1.php on line 44
+
+Warning: gzencode() expects parameter 2 to be integer, object given in %s/gzencode_error1.php on line 45
 
 Warning: %s
-NULL
+
+Warning: gzencode() expects parameter 3 to be integer, object given in %s/gzencode_error1.php on line 47
 
 Warning: %s
-bool(false)
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
 ===Done===

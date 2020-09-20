@@ -1,0 +1,12 @@
+File "enum_constraint.php", line 5, characters 17-20:
+Unbound name: `IdOf` (Naming[2049])
+File "enum_constraint.php", line 5, characters 22-22:
+Unbound name: `X` (Naming[2049])
+File "enum_constraint.php", line 5, characters 6-6:
+Enums must be `int` or `string` or `arraykey`, not `IdOf<X>` (Typing[4024])
+File "enum_constraint.php", line 5, characters 6-6:
+Underlying type for enum is incompatible with constraint (Typing[4330])
+File "enum_constraint.php", line 5, characters 17-23:
+Expected `IdOf<X>`
+File "enum_constraint.php", line 5, characters 10-12:
+But got `int`

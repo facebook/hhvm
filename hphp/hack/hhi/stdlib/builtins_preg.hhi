@@ -1,15 +1,22 @@
-<?hh // decl    /* -*- php -*- */
+<?hh    /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 <<__PHPStdLib>>
-function preg_grep($pattern, $input, $flags = 0) { }
+function preg_grep(string $pattern, varray_or_darray $input, int $flags = 0);
+<<__PHPStdLib, __Pure>>
+function preg_grep_with_error(
+  string $pattern,
+  varray_or_darray $input,
+  inout ?int $error,
+  int $flags = 0,
+);
 /*
  * `preg_match` can actually return false if the regex fails to compile.
  * However, most code has no need to consider this possibility because their
@@ -20,44 +27,109 @@ function preg_grep($pattern, $input, $flags = 0) { }
  * This will eventually be fixed with more type inference magic.
  */
 <<__PHPStdLib>>
-function preg_match($pattern, $subject, &$matches = array(), $flags = 0,
-                    $offset = 0): int { }
+function preg_match(string $pattern, string $subject,
+                    int $flags = 0, int $offset = 0): int;
+<<__PHPStdLib, __Pure>>
+function preg_match_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): int;
 <<__PHPStdLib>>
-function preg_match_all($pattern, $subject, &$matches = array(), $flags = 0,
-                        $offset = 0) { }
+function preg_match_with_matches(string $pattern, string $subject, inout $matches,
+                                 int $flags = 0, int $offset = 0): int;
+<<__PHPStdLib, __Pure>>
+function preg_match_with_matches_and_error(
+  string $pattern,
+  string $subject,
+  inout $matches,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): int;
 <<__PHPStdLib>>
-function preg_replace($pattern, $replacement, $subject, $limit = -1,
-                      &$count = null) { }
+function preg_match_all(string $pattern, string $subject,
+                        int $flags = 0, int $offset = 0);
+<<__PHPStdLib, __Pure>>
+function preg_match_all_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+);
 <<__PHPStdLib>>
-function preg_replace_callback($pattern, $callback, $subject, $limit = -1,
-                               &$count = null) { }
+function preg_match_all_with_matches(string $pattern, string $subject, inout $matches,
+                                     int $flags = 0, int $offset = 0);
+<<__PHPStdLib, __Pure>>
+function preg_match_all_with_matches_and_error(
+  string $pattern,
+  string $subject,
+  inout $matches,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+);
+<<__PHPStdLib>>
+function preg_replace($pattern, $replacement, $subject, int $limit = -1);
+<<__PHPStdLib, __Pure>>
+function preg_replace_with_error(
+  $pattern,
+  $replacement,
+  $subject,
+  inout ?int $error,
+  int $limit = -1,
+);
+<<__PHPStdLib>>
+function preg_replace_with_count($pattern, $replacement, $subject, int $limit,
+                                 inout ?int $count);
+<<__PHPStdLib, __Pure>>
+function preg_replace_with_count_and_error(
+  $pattern,
+  $replacement,
+  $subject,
+  int $limit,
+  inout ?int $count,
+  inout ?int $error,
+);
+<<__PHPStdLib>>
+function preg_replace_callback($pattern, $callback, $subject, int $limit,
+                               inout ?int $count);
 <<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
-                                     $limit = -1, &$count = null) { }
+                                     int $limit, inout ?int $count);
+<<__PHPStdLib, __Pure>>
+function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0);
+<<__PHPStdLib, __Pure>>
+function preg_split_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  $limit = -1,
+  int $flags = 0,
+);
+<<__PHPStdLib, __Pure>>
+function preg_quote(string $str, $delimiter = null);
+<<__PHPStdLib, __NonRx('Reads from global')>>
+function preg_last_error();
 <<__PHPStdLib>>
-function preg_split($pattern, $subject, $limit = -1, $flags = 0) { }
+function ereg_replace(string $pattern, string $replacement, string $str);
 <<__PHPStdLib>>
-function preg_quote($str, $delimiter = null) { }
-<<__PHPStdLib>>
-function preg_last_error() { }
-<<__PHPStdLib>>
-function ereg_replace($pattern, $replacement, $str) { }
-<<__PHPStdLib>>
-function eregi_replace($pattern, $replacement, $str) { }
-<<__PHPStdLib>>
-function ereg($pattern, $str, &$regs = null) { }
-<<__PHPStdLib>>
-function eregi($pattern, $str, &$regs = null) { }
+function eregi_replace(string $pattern, string $replacement, string $str);
 <<__Deprecated('Use explode() or preg_split().'), __PHPStdLib>>
-function split($pattern, $str, $limit = -1) { }
+function split(string $pattern, string $str, int $limit = -1);
 <<__PHPStdLib>>
-function spliti($pattern, $str, $limit = -1) { }
+function spliti(string $pattern, string $str, int $limit = -1);
 <<__PHPStdLib>>
-function sql_regcase($str) { }
+function sql_regcase(string $str);
 
 const int PREG_PATTERN_ORDER = 0;
 const int PREG_SET_ORDER = 0;
 const int PREG_OFFSET_CAPTURE = 0;
+const int PREG_FB_HACK_ARRAYS = 0;
+const int PREG_HACK_ARR = 0; // legacy, equivalent to FB_HACK_ARRAYS
 const int PREG_SPLIT_NO_EMPTY = 0;
 const int PREG_SPLIT_DELIM_CAPTURE = 0;
 const int PREG_SPLIT_OFFSET_CAPTURE = 0;

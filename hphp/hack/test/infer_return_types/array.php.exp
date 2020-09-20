@@ -1,7 +1,0 @@
-\f : array<string, int> try array<string, int>
-\g : \Awaitable<array<string, int>> try \Awaitable<array<string, int>>
-\h : array<int> try array<int>
-\i : array<string, (int | bool)> try array<string, (int | bool)>
-\j : array<(int | bool)> try array<(int | bool)>
-\k : shape-like-array(a => int) try shape-like-array(a => int)
-No errors

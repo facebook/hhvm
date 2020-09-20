@@ -1,1 +1,1 @@
--vEnableHipHopSyntax=1 -vEnableHipHopExperimentalSyntax=1 -d hhvm.php7.all=0
+-d hhvm.php7.all=0

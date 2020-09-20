@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_INTERNAL_H_
-#define incl_HPHP_JIT_TC_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/tc.h"
 
@@ -169,18 +168,29 @@ private:
  */
 
 /*
- * Acquire a lock on this object's code cache.
+ * Acquire a lock on this object's code cache (the lock is deferred if
+ * lock is false).
  *
  * Must be held even if the current thread owns the global write lease.
  */
-std::unique_lock<SimpleMutex> lockCode();
+std::unique_lock<SimpleMutex> lockCode(bool lock = true);
 
 /*
- * Acquire a lock on this object's metadata tables.
+ * Acquire a lock on this object's metadata tables (the lock is
+ * deferred if lock is false).
  *
  * Must be held even if the current thread owns the global write lease.
  */
-std::unique_lock<SimpleMutex> lockMetadata();
+std::unique_lock<SimpleMutex> lockMetadata(bool lock = true);
+
+struct CodeMetaLock {
+  explicit CodeMetaLock(bool f);
+  void lock();
+  void unlock();
+private:
+  std::unique_lock<SimpleMutex> m_code;
+  std::unique_lock<SimpleMutex> m_meta;
+};
 
 /*
  * Atomically bumps the translation counter and returns true iff emitting a new
@@ -194,7 +204,7 @@ bool newTranslation();
  */
 ALWAYS_INLINE CodeCache& code() {
   extern CodeCache* g_code;
-  assert(g_code);
+  assertx(g_code);
   return *g_code;
 }
 
@@ -221,4 +231,3 @@ void recycleStop();
 
 }}}
 
-#endif

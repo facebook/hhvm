@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   public function doIt() {
@@ -15,7 +15,11 @@ function f($obj) {
   }
   yield $res;
 }
+
+<<__EntryPoint>>
+function main_2163() {
 $x = new X;
 foreach (f($x) as $i) {
  var_dump($i);
  }
+}

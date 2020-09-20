@@ -11,7 +11,6 @@ function broke() {
       var_dump($x);
     }
 }
-broke();
 
 class c {
   function genclo() {
@@ -28,4 +27,8 @@ function main() {
     var_dump($v);
   }
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+  broke();
+  main();
+}

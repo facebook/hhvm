@@ -1,8 +1,5 @@
-A[1]A[2]B[1]B[2]B[new item]array(3) {
-  [0]=>
+A[1]A[2]B[1]B[2]B[new item]varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   string(8) "new item"
 }

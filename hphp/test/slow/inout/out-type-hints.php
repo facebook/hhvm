@@ -1,16 +1,11 @@
 <?hh
 
-set_error_handler(($errno, $errstr, $errfile, $errline) ==> {
-  echo "[$errno] $errstr\n";
-  throw new Exception();
-});
-
 function foo($x, inout int $y): string {
   return ($y = $x);
 }
 
 function bar(inout int $x, inout int $y): int {
-  list($x, $y) = array($y, $x);
+  list($x, $y) = varray[$y, $x];
   return $x + $y;
 }
 
@@ -24,4 +19,13 @@ function main() {
   var_dump($r, $b, $c);
 }
 
+
+<<__EntryPoint>>
+function main_out_type_hints() {
+set_error_handler(($errno, $errstr, $errfile, $errline) ==> {
+  echo "[$errno] $errstr\n";
+  throw new Exception();
+});
+
 main();
+}

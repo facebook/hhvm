@@ -1,9 +1,6 @@
-array(3) {
-  [0]=>
+varray(3) {
   int(0)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
 }
 [0]
@@ -12,106 +9,90 @@ NULL
 NULL
 
 [1]
-array(3) {
-  [0]=>
-  array(1) {
+varray(3) {
+  darray(1) {
     [0]=>
     int(0)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(1)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(2)
   }
 }
-array(3) {
-  [0]=>
-  array(1) {
+varray(3) {
+  darray(1) {
     [0]=>
     int(0)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     int(1)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(2)
   }
 }
-array(3) {
-  [0]=>
-  array(1) {
+varray(3) {
+  darray(1) {
     [0]=>
     int(0)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(1)
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(2)
   }
 }
 
 [2]
-array(2) {
-  [0]=>
-  array(2) {
+varray(2) {
+  darray(2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(2)
   }
 }
-array(2) {
-  [0]=>
-  array(2) {
+varray(2) {
+  darray(2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(2)
   }
 }
-array(2) {
-  [0]=>
-  array(2) {
+varray(2) {
+  darray(2) {
     [0]=>
     int(0)
     [1]=>
     int(1)
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(2)
   }
 }
 
 [3]
-array(1) {
-  [0]=>
-  array(3) {
+varray(1) {
+  darray(3) {
     [0]=>
     int(0)
     [1]=>
@@ -120,9 +101,8 @@ array(1) {
     int(2)
   }
 }
-array(1) {
-  [0]=>
-  array(3) {
+varray(1) {
+  darray(3) {
     [0]=>
     int(0)
     [1]=>
@@ -131,9 +111,8 @@ array(1) {
     int(2)
   }
 }
-array(1) {
-  [0]=>
-  array(3) {
+varray(1) {
+  darray(3) {
     [0]=>
     int(0)
     [1]=>

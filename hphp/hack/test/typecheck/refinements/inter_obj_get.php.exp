@@ -1,0 +1,8 @@
+File "inter_obj_get.php", line 26, characters 17-18:
+Invalid argument (Typing[4110])
+File "inter_obj_get.php", line 26, characters 12-14:
+Expected `int`
+File "inter_obj_get.php", line 30, characters 20-20:
+  via this generic `T`
+File "inter_obj_get.php", line 6, characters 36-41:
+But got `string`

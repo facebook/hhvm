@@ -1,53 +1,79 @@
 *** Testing readfile() : usage variation ***
 
 --int 0--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --int 1--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --int 12345--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --int -12345--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --float 10.5--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --float -10.5--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --float 12.3456789000e10--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --float -12.3456789000e10--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --float .5--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --empty array--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --int indexed array--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --associative array--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --nested arrays--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --uppercase NULL--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --lowercase null--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --lowercase true--
 testing readfile
@@ -62,34 +88,52 @@ testing readfile
 testing readfile
 
 --empty string DQ--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --empty string SQ--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --string DQ--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --string SQ--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --mixed case string--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --heredoc--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, string given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --instance of classWithToString--
-Error: 2 - readfile() expects parameter 2 to be boolean, object given, %s(%d)
+
+Warning: readfile() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --instance of classWithoutToString--
-Error: 2 - readfile() expects parameter 2 to be boolean, object given, %s(%d)
+
+Warning: readfile() expects parameter 2 to be boolean, object given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --undefined var--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 
 --unset var--
-testing readfile
+
+Warning: readfile() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+File not read
 ===DONE===

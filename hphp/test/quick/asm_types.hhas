@@ -1,35 +1,27 @@
 # Test type annotations for hhas
 
-.adata A_0 = """a:0:{}""";
+.adata A_0 = """Y:0:{}""";
 
-.main {
-  DefCls 0
-  FPushFuncD 0 "test"
-  FCall 0
-  PopR
-  Int 1
-  RetC
-}
 
-.function use_class(<"@C" "C" hh_type extended_hint soft> $x) {
+.function use_class(<"@C" "C" extended_hint soft> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function use_int_soft(<"@HH\\int" "HH\\int" hh_type extended_hint soft> $x) {
+.function use_int_soft(<"@HH\\int" "HH\\int" extended_hint soft> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function use_int_nullable(<"?HH\\int" "HH\\int" nullable hh_type extended_hint> $x) {
+.function use_int_nullable(<"?HH\\int" "HH\\int" nullable extended_hint> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function use_int(<"HH\\int" "HH\\int" hh_type> $x) {
+.function use_int(<"HH\\int" "HH\\int"> $x) {
   VerifyParamType $x
   Null
   RetC
@@ -40,75 +32,89 @@
   RetC
 }
 
-.function test() {
-  FPushFuncD 1 "use_class"
-  FPushCtorD 0 "C"
-  FCall 0
-  PopR
-  FPassC 0 Any
-  FCall 1
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  NewObjD "C"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  FCallFuncD <> 1 1 "" - "" "use_class"
+  PopC
 
-  FPushFuncD 1 "use_class"
+  NullUninit
+  NullUninit
+  NullUninit
   Null
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_class"
+  PopC
 
-  FPushFuncD 1 "use_int_soft"
+  NullUninit
+  NullUninit
+  NullUninit
   Int 5
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int_soft"
+  PopC
 
-  FPushFuncD 1 "use_int_soft"
+  NullUninit
+  NullUninit
+  NullUninit
   Array @A_0
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int_soft"
+  PopC
 
-  FPushFuncD 1 "use_int_soft"
+  NullUninit
+  NullUninit
+  NullUninit
   Null
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int_soft"
+  PopC
 
-  FPushFuncD 1 "use_int_nullable"
+  NullUninit
+  NullUninit
+  NullUninit
   Int 6
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int_nullable"
+  PopC
 
-  FPushFuncD 1 "use_int_nullable"
+  NullUninit
+  NullUninit
+  NullUninit
   Null
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int_nullable"
+  PopC
 
-  FPushFuncD 1 "use_int"
+  NullUninit
+  NullUninit
+  NullUninit
   Int 5
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int"
+  PopC
 
-  FPushFuncD 1 "use_mixed"
+  NullUninit
+  NullUninit
+  NullUninit
   Array @A_0
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_mixed"
+  PopC
 
-  FPushFuncD 1 "use_int"
+  NullUninit
+  NullUninit
+  NullUninit
   Array @A_0
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallFuncD <> 1 1 "" - "" "use_int"
+  PopC
 
   Null
   RetC
 }
 
 .class C {
-  .method [public static] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
+  .method [public static] <"HH\\int" "HH\\int" extended_hint> test() {
     Int 42
     RetC
   }

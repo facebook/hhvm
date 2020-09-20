@@ -1,10 +1,13 @@
-<?hh // strict
+<?hh
 
 class C {
   function __construct() {
-    function foo() {}
-    yield foo();
+    yield 1;
   }
 }
 
+
+<<__EntryPoint>>
+function main_bad_yield() {
 echo "Done\n";
+}

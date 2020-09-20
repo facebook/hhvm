@@ -75,7 +75,7 @@ function compare($a, $b) {
   single_compare($b, $a);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   single_compare(keyset[], keyset[]);
   single_compare(keyset[1, 2, 3], keyset[1, 2, 3]);
   compare(keyset[4, 5], keyset[4, 6]);
@@ -94,8 +94,7 @@ function main() {
   compare(keyset[], 1.2345);
   compare(keyset[], 'abc');
   compare(keyset[], new stdclass);
-  compare(keyset[], []);
+  compare(keyset[], varray[]);
   compare(keyset[], vec[]);
   compare(keyset[], dict[]);
 }
-main();

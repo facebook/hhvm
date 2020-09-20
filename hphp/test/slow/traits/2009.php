@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL);
+<?hh
 
 trait Hello {
    public function saySomething() {
@@ -19,8 +17,11 @@ class MyHelloWorld {
      Hello::saySomething insteadof World;
    }
 }
- 
-$o = new MyHelloWorld();
-$o->saySomething();
-?>
+<<__EntryPoint>>
+function main_entry(): void {
 
+  error_reporting(E_ALL);
+
+  $o = new MyHelloWorld();
+  $o->saySomething();
+}

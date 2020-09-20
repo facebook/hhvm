@@ -2,16 +2,20 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls1 {
-  public function &get() {
-    static $_ = ['type' => 1];
-    return $_;
+
+  private static $get_res = darray['type' => 1];
+  <<__NEVER_INLINE>>
+  public function get() {
+    return self::$get_res;
   }
 }
 
 class Cls2 {
+
+  private static $get_res = darray['type' => 2];
+  <<__NEVER_INLINE>>
   public function get() {
-    static $_ = ['type' => 2];
-    return $_;
+    return self::$get_res;
   }
 }
 
@@ -24,11 +28,11 @@ function inline_run() {
   run(new Cls2());
 }
 
-__hhvm_intrinsics\disable_inlining('Cls1::get');
-__hhvm_intrinsics\disable_inlining('Cls2::get');
 
 // Profile a region within run() for both cases where $x->get() returns a ref
 // and not.
+<<__EntryPoint>>
+function main_ref_noref_methods() {
 $b = new Cls1();
 $d = new Cls2();
 for ($i = 0; $i < 100; $i++) {
@@ -44,3 +48,4 @@ for ($i = 0; $i < 200; $i++) {
 }
 
 echo "DONE\n";
+}

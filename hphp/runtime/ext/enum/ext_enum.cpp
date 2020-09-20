@@ -15,9 +15,12 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/enum-cache.h"
+#include "hphp/runtime/base/enum-util.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
@@ -25,40 +28,36 @@ namespace HPHP {
 // class BuiltinEnum
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
-  assertx(values->values.isDArray());
-  return values->values;
+  assertx(values->values.isHAMSafeDArray());
+  if (!RO::EvalArrayProvenance) return values->values;
+  return EnumCache::tagEnumWithProvenance(values->values);
 }
 
-const StaticString s_overlappingErrorMessage("Enum has overlapping values");
+const StaticString
+  s_invariant_violation("HH\\invariant_violation"),
+  s_overlappingErrorMessage("Enum has overlapping values");
 
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   if (values->names.size() != values->values.size()) {
-    invoke("\\HH\\invariant_violation",
-           make_packed_array(s_overlappingErrorMessage));
+    vm_call_user_func(
+      Func::lookup(s_invariant_violation.get()),
+      make_vec_array(s_overlappingErrorMessage)
+    );
   }
 
-  assertx(values->names.isDArray());
-  return values->names;
+  assertx(values->names.isHAMSafeDArray());
+  if (!RO::EvalArrayProvenance) return values->names;
+  return EnumCache::tagEnumWithProvenance(values->names);
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {
-  if (UNLIKELY(!value.isInteger() && !value.isString())) return false;
-
-  const EnumValues* values = EnumCache::getValuesBuiltin(self_);
-
-  // Manually perform int-like key conversion even if names is a dict, for
-  // backwards compatibility.
-  int64_t num;
-  if (value.isString() && value.getStringData()->isStrictlyInteger(num)) {
-    return values->names.exists(num);
-  }
-  return values->names.exists(value);
+  return enumHasValue(self_, value.asTypedValue());
 }
 
 static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   if (UNLIKELY(!value.isInteger() && !value.isString())) {
-    return Variant(Variant::NullInit{});
+    return init_null();
   }
 
   auto res = value;
@@ -67,13 +66,14 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   // succeeds below (since the values array does int-like string key conversion
   // when created, even if its a dict).
   int64_t num;
-  if (value.isString() && value.getStringData()->isStrictlyInteger(num)) {
+  if (value.isString() &&
+      value.getStringData()->isStrictlyInteger(num)) {
     res = Variant(num);
   }
 
   auto values = EnumCache::getValuesBuiltin(self_);
   if (!values->names.exists(res)) {
-    res = Variant(Variant::NullInit{});
+    res = init_null();
   } else if (auto base = self_->enumBaseTy()) {
     if (isStringType(*base) && res.isInteger()) {
       res = Variant(res.toString());
@@ -96,6 +96,7 @@ struct enumExtension final : Extension {
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, getNames, BuiltinEnum, getNames);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, isValid, BuiltinEnum, isValid);
     HHVM_STATIC_MALIAS(HH\\BuiltinEnum, coerce, BuiltinEnum, coerce);
+    HHVM_RC_STR(HH\\BUILTIN_ENUM, "HH\\BuiltinEnum");
     loadSystemlib();
   }
 } s_enum_extension;

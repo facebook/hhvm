@@ -1,5 +1,5 @@
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
+<?hh
+extension_loaded('imap') || die('skip imap extension not available in this build');
  
 // Change these to make tests run successfully
 $mailbox  = '{localhost/norsh}';
@@ -13,4 +13,3 @@ if (!$mbox) {
 	die("skip could not connect to mailbox $mailbox");
 }
 imap_close($mbox);
-?>

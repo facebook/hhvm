@@ -14,13 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_WARMUP_REQUEST_HANDLER_H_
-#define incl_HPHP_WARMUP_REQUEST_HANDLER_H_
+#pragma once
 
 #include <memory>
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/http-request-handler.h"
+#include "hphp/util/job-queue.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,11 +53,9 @@ struct WarmupRequestHandlerFactory
   : std::enable_shared_from_this<WarmupRequestHandlerFactory>
 {
   WarmupRequestHandlerFactory(Server *server,
-                              uint32_t additionalThreads,
                               uint32_t reqCount,
                               int timeout)
-    : m_additionalThreads(additionalThreads),
-      m_reqNumber(0),
+    : m_reqNumber(0),
       m_warmupReqThreshold(reqCount),
       m_timeout(timeout),
       m_server(server) {}
@@ -67,7 +65,6 @@ struct WarmupRequestHandlerFactory
   void bumpReqCount();
 
 private:
-  std::atomic<uint32_t> m_additionalThreads;
   std::atomic<uint32_t> m_reqNumber;
   uint32_t const m_warmupReqThreshold;
   int m_timeout;
@@ -75,7 +72,35 @@ private:
   Server *m_server;
 };
 
+struct WarmupJob {
+  const std::string hdfFile;
+  unsigned index;
+};
+
+struct InternalWarmupWorker : JobQueueWorker<WarmupJob> {
+  void doJob(WarmupJob job) override;
+};
+
+struct InternalWarmupRequestPlayer : JobQueueDispatcher<InternalWarmupWorker> {
+  // Don't inline into header file without testing performance on MacOS:
+  // https://github.com/facebook/hhvm/issues/8515
+  // Problem tested on 2019-06-11 on MacOS High Sierra and Mojave
+  // Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+  // Target: x86_64-apple-darwin18.5.0
+  explicit InternalWarmupRequestPlayer(int threadCount, bool dedup = false);
+  ~InternalWarmupRequestPlayer();
+
+  // Start running after an optional delay.
+  void runAfterDelay(const std::vector<std::string>& files,
+                     unsigned nTimes = 1,
+                     unsigned delaySeconds = 0);
+private:
+  // If set, duplicated files in the list will be ignored (but it is still
+  // possible to play each file multiple times by setting nTimes in
+  // runAfterDelay).
+  bool m_noDuplicate;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_WARMUP_REQUEST_HANDLER_H_

@@ -9,4 +9,8 @@ class X {
   function bar() { return __hhvm_intrinsics\launder_value(1); }
 }
 
+
+<<__EntryPoint>>
+function main_cls_ref_dce() {
 var_dump((new X)->foo());
+}

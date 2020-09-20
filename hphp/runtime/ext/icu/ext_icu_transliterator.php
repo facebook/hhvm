@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Transliterator provides transliteration of strings.
@@ -52,7 +52,7 @@ class Transliterator {
   public static function createFromRules(string $rules,
                                          int $direction = self::FORWARD):
                                                               ?Transliterator {
-    $obj = new Transliterator;
+    $obj = new Transliterator();
     if (!$obj->__init($rules, $direction, true)) {
       return null;
     }
@@ -194,7 +194,7 @@ function transliterator_get_error_message(Transliterator $t): string {
  * @return array - An array of registered transliterator IDs on success,
  *   .
  */
-function transliterator_list_ids(): array {
+function transliterator_list_ids(): varray {
   return Transliterator::listIDs();
 }
 
@@ -212,7 +212,7 @@ function transliterator_transliterate(mixed $tOrId,
                                       string $subject,
                                       int $start = 0,
                                       int $end = -1): mixed {
-  if (!($tOrId instanceof Transliterator)) {
+  if (!($tOrId is Transliterator)) {
     $tOrId = Transliterator::create((string)$tOrId,
                                     Transliterator::FORWARD);
     if (!$tOrId) {
@@ -221,4 +221,3 @@ function transliterator_transliterate(mixed $tOrId,
   }
   return $tOrId->transliterate($subject, $start, $end);
 }
-

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $regex = new MongoRegex('//');
 var_dump($regex->regex);
 var_dump($regex->flags);
@@ -10,4 +10,4 @@ var_dump($regex->flags);
 $regex = new MongoRegex('/foo[bar]{3}/i');
 var_dump($regex->regex);
 var_dump($regex->flags);
-?>
+}

@@ -1,91 +1,93 @@
-<?php
-/* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
- * Description: Set options in an XML parser 
- * Source code: ext/xml/xml.c
- * Alias to functions: 
- */
-
-echo "*** Testing xml_parser_set_option() : usage variations ***\n";
-error_reporting(E_ALL & ~E_NOTICE);
+<?hh
 
 class aClass {
    function __toString() {
        return "Some Ascii Data";
    }
 }
-// Initialise function arguments not being substituted (if any)
+<<__EntryPoint>>
+function main_entry(): void {
+  /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
+   * Description: Set options in an XML parser
+   * Source code: ext/xml/xml.c
+   * Alias to functions:
+   */
 
-$parser = xml_parser_create();
-$option = 1;
+  echo "*** Testing xml_parser_set_option() : usage variations ***\n";
+  error_reporting(E_ALL & ~E_NOTICE);
+  // Initialise function arguments not being substituted (if any)
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
+  $parser = xml_parser_create();
+  $option = 1;
 
-$fp = fopen(__FILE__, "r");
+  //get an unset variable
+  $unset_var = 10;
+  unset ($unset_var);
 
-//array of values to iterate over
-$values = array(
+  $fp = fopen(__FILE__, "r");
 
-      // int data
-      0,
-      1,
-      12345,
-      -2345,
+  //array of values to iterate over
+  $values = varray[
 
-      // float data
-      10.5,
-      -10.5,
-      10.1234567e10,
-      10.7654321E-10,
-      .5,
+        // int data
+        0,
+        1,
+        12345,
+        -2345,
 
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
+        // float data
+        10.5,
+        -10.5,
+        10.1234567e10,
+        10.7654321E-10,
+        .5,
 
-      // null data
-      NULL,
-      null,
 
-      // boolean data
-      true,
-      false,
-      TRUE,
-      FALSE,
 
-      // empty data
-      "",
-      '',
 
-      // string data
-      "string",
-      'string',
 
-      // object data
-      new aClass(),
 
-      // resource data
-      $fp, 
 
-      // undefined data
-      $undefined_var,
 
-      // unset data
-      $unset_var,
-);
+        // null data
+        NULL,
+        null,
 
-// loop through each element of the array for value
+        // boolean data
+        true,
+        false,
+        TRUE,
+        FALSE,
 
-foreach($values as $value) {
-      echo @"\nArg value $value \n";
-      var_dump( xml_parser_set_option($parser, $option, $value) );
-};
+        // empty data
+        "",
+        '',
 
-fclose($fp);
-xml_parser_free($parser);
-echo "Done";
-?>
+        // string data
+        "string",
+        'string',
+
+        // object data
+        new aClass(),
+
+        // resource data
+        $fp,
+
+        // undefined data
+        $undefined_var,
+
+        // unset data
+        $unset_var,
+  ];
+
+  // loop through each element of the array for value
+
+  foreach($values as $value) {
+        echo @"\nArg value $value \n";
+        var_dump( xml_parser_set_option($parser, $option, $value) );
+  };
+
+  fclose($fp);
+  xml_parser_free($parser);
+  echo "Done";
+}

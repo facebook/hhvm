@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -29,7 +28,7 @@ type subst
  *)
 (*****************************************************************************)
 
-val make_subst: decl tparam list -> decl ty list -> subst
+val make_subst : decl_tparam list -> decl_ty list -> subst
 
 (*****************************************************************************)
 (* Primitive instantiating a type.
@@ -37,7 +36,8 @@ val make_subst: decl tparam list -> decl ty list -> subst
  *)
 (*****************************************************************************)
 
-val instantiate     : subst -> decl ty -> decl ty
-val instantiate_ce  : subst -> class_elt -> class_elt
-val instantiate_typeconst :
-  subst -> typeconst_type -> typeconst_type
+val instantiate : subst -> decl_ty -> decl_ty
+
+val instantiate_ce : subst -> class_elt -> class_elt
+
+val instantiate_typeconst : subst -> typeconst_type -> typeconst_type

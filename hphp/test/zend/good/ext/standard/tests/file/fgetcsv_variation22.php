@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
@@ -8,27 +8,27 @@
    Testing fgetcsv() to read a file whose file pointer is pointing to end of file
    and fgetcsv() provided with default enclosure argument
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with default enclosure, file pointer pointing at end of file ***\n";
 
 /* the array is with two elements in it. Each element should be read as 
    1st element is delimiter & 2nd element is csv fields 
 */
-$csv_lists = array (
-  array(',', 'water,fruit'),
-  array(' ', 'water fruit'),
-  array(' ', '"water" "fruit"'),
-  array('\\', 'water\\"fruit"\\"air"'),
-  array('\\', '"water"\\"fruit"\\"""'),
-);
+$csv_lists = varray [
+  varray[',', 'water,fruit'],
+  varray[' ', 'water fruit'],
+  varray[' ', '"water" "fruit"'],
+  varray['\\', 'water\\"fruit"\\"air"'],
+  varray['\\', '"water"\\"fruit"\\"""'],
+];
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation22.tmp';
+$filename = __SystemLib\hphp_test_tmppath('/fgetcsv_variation22.tmp');
 @unlink($filename);
 
-$file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t"]; 
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -80,4 +80,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
-?>
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strtr(string $str, string $from[, string $to]);
                 string strtr(string $str, array $replace_pairs);
  * Description: Translates characters in str using given translation tables
@@ -9,7 +9,7 @@
  *   string containing various escape sequences for 'str' argument and
  *   corresponding translation pair of chars for 'from', 'to' & 'replace_pairs' arguments
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtr() : string containing escape sequences for 'str' arg ***\n";
 /* definitions of required input variables */
 $count = 1;
@@ -23,7 +23,7 @@ $heredoc_str = <<<EOD
 EOD;
 
 //array of string inputs for $str
-$str_arr = array(
+$str_arr = varray[
   //double quoted strings
   "\tes\t\\stt\r",
   "\\test\\\strtr",
@@ -40,11 +40,11 @@ $str_arr = array(
 
   //heredoc string
   $heredoc_str
-);
+];
 
 $from = "\n\r\t\\";
 $to = "TEST";
-$replace_pairs = array("\n" => "t", "\r\n" => "T", "\n\r\t\\" => "TEST");
+$replace_pairs = darray["\n" => "t", "\r\n" => "T", "\n\r\t\\" => "TEST"];
 
 /* loop through to test strtr() with each element of $str_arr */
 for($index = 0; $index < count($str_arr); $index++) {
@@ -61,4 +61,4 @@ for($index = 0; $index < count($str_arr); $index++) {
   $count++;
 }
 echo "*** Done ***";
-?>
+}

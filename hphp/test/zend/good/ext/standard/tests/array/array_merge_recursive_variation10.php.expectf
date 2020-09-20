@@ -1,20 +1,16 @@
 *** Testing array_merge_recursive() : two dimensional array for $arr1 argument ***
 -- Passing the entire 2-d array --
 -- With default argument --
-array(4) {
+darray(4) {
   [0]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
-    [3]=>
     int(1)
   }
   ["array"]=>
-  array(4) {
+  darray(4) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -25,7 +21,7 @@ array(4) {
     string(5) "world"
   }
   [1]=>
-  array(4) {
+  darray(4) {
     [1]=>
     string(3) "one"
     [2]=>
@@ -36,32 +32,24 @@ array(4) {
     string(3) "two"
   }
   [2]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
-    [3]=>
     int(1)
   }
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
-    [3]=>
     int(1)
   }
   ["array"]=>
-  array(6) {
+  darray(6) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -76,7 +64,7 @@ array(6) {
     string(5) "world"
   }
   [1]=>
-  array(4) {
+  darray(4) {
     [1]=>
     string(3) "one"
     [2]=>
@@ -87,14 +75,10 @@ array(6) {
     string(3) "two"
   }
   [2]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
-    [3]=>
     int(1)
   }
   [3]=>
@@ -104,7 +88,7 @@ array(6) {
 }
 -- Passing the sub-array --
 -- With default argument --
-array(4) {
+darray(4) {
   [0]=>
   string(5) "hello"
   [1]=>
@@ -115,7 +99,7 @@ array(4) {
   string(5) "world"
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
   string(5) "hello"
   [1]=>

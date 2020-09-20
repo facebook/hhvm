@@ -1,0 +1,16 @@
+File "tconst_on_generics5.php", line 39, characters 14-17:
+Some type constraint(s) here are violated (Typing[4110])
+File "tconst_on_generics5.php", line 25, characters 31-32:
+'T1' is a constrained type parameter
+File "tconst_on_generics5.php", line 25, characters 37-39:
+This is an object of type Box
+File "tconst_on_generics5.php", line 25, characters 47-47:
+It is incompatible with an object of type B
+File "tconst_on_generics5.php", line 22, characters 78-78:
+Could not find type constant T in type A (Typing[4090])
+File "tconst_on_generics5.php", line 3, characters 11-11:
+Declaration of A is here
+File "tconst_on_generics5.php", line 23, characters 16-19:
+You are trying to access the member getK but this is not an object, it is a value of generic type T1 (Typing[4062])
+File "tconst_on_generics5.php", line 22, characters 51-52:
+Definition is here

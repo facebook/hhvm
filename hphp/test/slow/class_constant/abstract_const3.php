@@ -10,5 +10,9 @@ class C implements I {
   const X = 'C::X';
 }
 
+
+<<__EntryPoint>>
+function main_abstract_const3() {
 var_dump(C::X);
 var_dump(C::Y);
+}

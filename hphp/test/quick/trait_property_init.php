@@ -7,6 +7,7 @@
 // Do this thing with a non-scalar initializer
 
 class C { const A = "ASD"; }
+const MUST_PREPARE = "temp";
 
 trait TNonScalar { private $nonScalarTraitProperty = C::A; }
 
@@ -37,7 +38,7 @@ class RobustRegularEnterpriseBusiness extends RobustEnterpriseBusiness {}
 //////////////////////////////////////////////////////////////////////
 // Same case with a scalar initializer
 
-trait TScalar { private $scalarTraitProperty = array(); }
+trait TScalar { private $scalarTraitProperty = varray[]; }
 
 abstract class RobustCreationInterface2 {}
 abstract class Robustish2 extends RobustCreationInterface2 { use TScalar; }
@@ -65,10 +66,10 @@ class RobustRegularEnterpriseBusiness2 extends RobustEnterpriseBusiness2 {}
 
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
 function main() {
   $k = new RobustRegularEnterpriseBusiness;
   echo "ok\n";
   $k = new RobustRegularEnterpriseBusiness2;
   echo "ok\n";
 }
-main();

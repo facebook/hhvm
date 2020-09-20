@@ -1,27 +1,21 @@
 SimpleXMLElementIterator
-object(SimpleXMLElementIterator)#1 (0) {
+object(SimpleXMLElementIterator) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SimpleXMLElementIterator in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(6) {
-  [0]=>
+varray(6) {
   string(11) "__construct"
-  [1]=>
   string(7) "current"
-  [2]=>
   string(3) "key"
-  [3]=>
   string(4) "next"
-  [4]=>
   string(6) "rewind"
-  [5]=>
   string(5) "valid"
 }
 ================
 A_SimpleXMLElementIterator
-object(A_SimpleXMLElementIterator)#2 (1) {
+object(A_SimpleXMLElementIterator) (1) {
   ["___x"]=>
   NULL
 }
@@ -29,17 +23,11 @@ object(A_SimpleXMLElementIterator)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElementIterator in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(6) {
-  [0]=>
+varray(6) {
   string(11) "__construct"
-  [1]=>
   string(7) "current"
-  [2]=>
   string(3) "key"
-  [3]=>
   string(4) "next"
-  [4]=>
   string(6) "rewind"
-  [5]=>
   string(5) "valid"
 }

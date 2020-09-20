@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   abstract public function foo($x);
@@ -14,5 +14,9 @@ class C extends B {
  echo "$x \n";
 }
 }
+
+<<__EntryPoint>>
+function main_2108() {
 $obj = new C;
 $obj->foo(1);
+}

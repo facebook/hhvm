@@ -1,4 +1,5 @@
 <?hh
+
 /* Tests the 8 function matrix of:
  *   vf(), vfk(), vm(), vmk(),
  *   mf(), mfk(), mm(), mmk(),
@@ -6,29 +7,30 @@
  * Using static wait handles which yield results in various types
  */
 
-$vals = array(
+<<__EntryPoint>>
+function main_hh_async_filter_map() {
+$vals = varray[
   NULL,
   true,
   false,
   1,
   2.0,
   "Hello World",
-  array(3.14),
-  (object)array(4, 8, 15, 16, 23, 42),
-);
+  varray[3.14],
+];
 
-$typeMap = array(
+$typeMap = darray[
   'v'  => ($a ==> Vector::fromArray($a)),
   'm'  => ($a ==> Map::fromArray($a)),
-);
-$keyMap = array(
+];
+$keyMap = darray[
   'f'  => (async function($v) {
     await HH\Asio\later();
     return is_scalar($v);
   }),
   'm'  => (async function($v) {
     await HH\Asio\later();
-    return array($v);
+    return varray[$v];
   }),
   'fk' => (async function($k, $v) {
     await HH\Asio\later();
@@ -36,9 +38,9 @@ $keyMap = array(
   }),
   'mk' => (async function($k, $v) {
     await HH\Asio\later();
-    return array($k => $v);
+    return darray[$k => $v];
   }),
-);
+];
 
 foreach ($typeMap as $type => $gen) {
   foreach ($keyMap as $ktype => $kgen) {
@@ -48,4 +50,5 @@ foreach ($typeMap as $type => $gen) {
     var_dump(\HH\Asio\join($wh));
   }
 
+}
 }

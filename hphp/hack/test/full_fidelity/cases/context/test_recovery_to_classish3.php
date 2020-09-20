@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // report the right braces as missing at the ends of lines 4, 6, 8, and 11
 trait T1 {

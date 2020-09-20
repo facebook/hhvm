@@ -1,0 +1,7 @@
+//// strict_toplevel.php
+<?hh
+function with_newtype_with_bound(dict<N, mixed> $_): void {}
+
+//// partial_toplevel.php
+<?hh // partial
+newtype N as arraykey = int;

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_XENON_H_
-#define incl_HPHP_EXT_XENON_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <semaphore.h>
@@ -29,12 +28,11 @@
   stack at that time (ie it flashes the code).
 
   How does it work?
-  There are two ways for Xenon to work: 1) always on, 2) via timer.
-  For the timer mode:  Xenon appends a timer to the already existing SIGVTALRM
-  handler.  When that timer fires it sets a semaphore so that others may
-  know.  We'd like to be able to record the status of every stack for every
-  thread at this point, but during a timer handler is not a reasonable place
-  to do this.
+  There are two ways for Xenon to work: 1) always on, 2) via timer. For the
+  timer mode: Xenon starts a timer that raises SIGPROF periodically. When that
+  timer fires it sets a semaphore so that others may know. We'd like to be able
+  to record the status of every stack for every thread at this point, but during
+  a timer handler is not a reasonable place to do this.
   Instead, Xenon has a pthread waiting for the semaphore.  When the semaphore
   is set in the handler, it wakes, sets the Xenon Surprise flag for every
   thread - this is the flash.
@@ -69,9 +67,6 @@ struct Xenon final {
     // Sample was taken during I/O wait and thus does not represent CPU time.
     IOWaitSample,
 
-    // Sample was taken to trace loading of new units.
-    UnitLoadEvent,
-
     // Sample was taken before an async function was resumed at await opcode.
     // The CPU time is attributed to the resumed async function, because the
     // CPU time was spent by the scheduler on the behalf of the resumed
@@ -95,7 +90,6 @@ struct Xenon final {
   static bool isCPUTime(SampleType t) {
     switch (t) {
       case IOWaitSample:
-      case UnitLoadEvent:
         return false;
       case ResumeAwaitSample:
       case EnterSample:
@@ -108,7 +102,6 @@ struct Xenon final {
   static const char* show(SampleType t) {
     switch (t) {
       case IOWaitSample: return "IOWait";
-      case UnitLoadEvent: return "UnitLoad";
       case ResumeAwaitSample: return "ResumeAwait";
       case EnterSample: return "Enter";
       case ExitSample: return "Exit";
@@ -130,23 +123,16 @@ struct Xenon final {
   // Log a sample if XenonSignalFlag is set. Also clear it, unless
   // in always-on mode.
   void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
-  // Like `log' but does not check or reset XenonSignalFlag. `info' may be
-  // brief description of why sample was logged, or nullptr.
-  void logNoSurprise(SampleType t,
-                     const char* info,
-                     c_WaitableWaitHandle* wh = nullptr) const;
   void surpriseAll();
   void onTimer();
+  bool getIsProfiledRequest();
 
   bool      m_stopping;
  private:
   std::atomic<int64_t> m_missedSampleCount;
-  sem_t     m_timerTriggered;
 #if !defined(__APPLE__) && !defined(_MSC_VER)
-  pthread_t m_triggerThread;
   timer_t   m_timerid;
 #endif
 };
 }
 
-#endif // incl_HPHP_EXT_XENON_H_

@@ -1,24 +1,24 @@
-<?php
+<?hh
 class DBStatement extends PDOStatement {
-	public $dbh;
-	protected function __construct($dbh) {
-		$this->dbh = $dbh;
-		throw new Exception("Blah");
-	}
+    public $dbh;
+    protected function __construct($dbh) {
+        $this->dbh = $dbh;
+        throw new Exception("Blah");
+    }
 }
-
-$pdo = new PDO('sqlite::memory:', null, null);
-$pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('DBStatement',
-	array($pdo)));
+<<__EntryPoint>> function main(): void {
+$pdo = new PDO('sqlite::memory:', '', '');
+$pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, varray['DBStatement',
+    varray[$pdo]]);
 $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
-	id INTEGER PRIMARY KEY,
-	title TEXT,
-	message TEXT,
-	time INTEGER)");
+    id INTEGER PRIMARY KEY,
+    title TEXT,
+    message TEXT,
+    time INTEGER)");
 
 try {
-	$pdoStatement = $pdo->query("select * from messages");
+    $pdoStatement = $pdo->query("select * from messages");
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
-?>
+}

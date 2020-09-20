@@ -1,0 +1,4 @@
+File "borrowed_as_immutable1.php", line 8, characters 10-10:
+Values returned from reactive function by default are treated as immutable. (Typing[4235])
+File "borrowed_as_immutable1.php", line 10, characters 10-11:
+This value is mutably borrowed and cannot be returned as immutable

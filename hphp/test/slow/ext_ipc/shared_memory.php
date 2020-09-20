@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_shared_memory() {
 $ret = shm_attach(0xDEADBEEF);
 if ($ret === false) { echo "failed\n"; exit(1); }
 shm_remove($ret); // just in case its left over from an earlier run
@@ -24,7 +27,8 @@ if ($pid == 0) {
   exit(0);
 }
 
-pcntl_waitpid($pid, $status);
+$status = null;
+pcntl_waitpid($pid, inout $status);
 var_dump($status);
 
 // Verify that shm_remove_var worked
@@ -32,3 +36,4 @@ $ret = shm_get_var($index, 1234);
 var_dump($ret === false);
 
 shm_remove($index);
+}

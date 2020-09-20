@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_fputs() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -10,3 +13,4 @@ $f = fopen($tempfile, "r");
 fpassthru($f);
 
 unlink($tempfile);
+}

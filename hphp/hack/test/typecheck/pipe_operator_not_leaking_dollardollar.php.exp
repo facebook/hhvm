@@ -1,2 +1,4 @@
 File "pipe_operator_not_leaking_dollardollar.php", line 13, characters 14-15:
-Undefined variable: $$ (Naming[2050])
+Variable `$$` is undefined, or not always defined. (Naming[2050])
+File "pipe_operator_not_leaking_dollardollar.php", line 12, characters 3-23:
+Did you mean `$i` instead?

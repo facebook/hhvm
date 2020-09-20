@@ -2,7 +2,7 @@
 
 -- Iteration 1 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 79
 NULL
 
 -- Iteration 2 --
@@ -10,116 +10,83 @@ int(%d)
 
 -- Iteration 3 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 79
 NULL
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 79
 NULL
 
 -- Iteration 5 --
-array(10) {
-  [0]=>
-  int(%d)
-  [1]=>
-  int(%d)
-  [2]=>
-  int(%d)
-  [3]=>
-  int(%d)
-  [4]=>
-  int(%d)
-  [5]=>
-  int(%d)
-  [6]=>
-  int(%d)
-  [7]=>
-  int(%d)
-  [8]=>
-  int(%d)
-  [9]=>
-  int(%d)
-}
+
+Warning: array_rand() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 6 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 7 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 12 --
-int(%d)
+
+Warning: array_rand() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 14 --
-int(%d)
+
+Warning: array_rand() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 15 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 16 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: array_rand() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_rand_variation2.php on line 81
 Done

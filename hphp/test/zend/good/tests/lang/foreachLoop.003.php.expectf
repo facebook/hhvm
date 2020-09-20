@@ -1,12 +1,13 @@
+
 Not an array.
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/foreachLoop.003.php on line 4
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/foreachLoop.003.php on line 9
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/foreachLoop.003.php on line 14
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/foreachLoop.003.php on line 19
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/foreachLoop.003.php on line 24
 done.

@@ -1,0 +1,1 @@
+Fatal error: Const class D cannot extend non-const parent C in %s/const_with_non_const_parent.php on line 4

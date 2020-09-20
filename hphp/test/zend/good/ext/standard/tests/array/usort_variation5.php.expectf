@@ -2,7 +2,7 @@
 
 -- Sorting Single Quoted String values --
 bool(true)
-array(10) {
+darray(10) {
   [0]=>
   string(0) ""
   [1]=>
@@ -27,7 +27,7 @@ array(10) {
 
 -- Sorting Double Quoted String values --
 bool(true)
-array(10) {
+darray(10) {
   [0]=>
   string(0) ""
   [1]=>
@@ -52,7 +52,7 @@ array(10) {
 
 -- Sorting Heredoc String values --
 bool(true)
-array(4) {
+darray(4) {
   [0]=>
   string(0) ""
   [1]=>
@@ -60,7 +60,7 @@ array(4) {
   [2]=>
   string(7) "Heredoc"
   [3]=>
-  string(%d) "heredoc string	with!@# and 123
+  string(43) "heredoc string	with!@# and 123
 Test this!!!"
 }
 ===DONE===

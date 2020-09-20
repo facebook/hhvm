@@ -1,0 +1,13 @@
+darray(2) {
+  ["kind"]=>
+  int(20)
+  ["generic_types"]=>
+  varray(1) {
+    darray(2) {
+      ["kind"]=>
+      int(1)
+      ["alias"]=>
+      string(10) "HelloAlias"
+    }
+  }
+}

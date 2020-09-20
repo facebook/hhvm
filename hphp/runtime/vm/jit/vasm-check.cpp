@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ checkSSA(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 
     auto const& block = unit.blocks[b];
     auto const lastOp = block.code.back().op;
-    if (lastOp == Vinstr::phijmp || lastOp == Vinstr::phijcc) {
+    if (lastOp == Vinstr::phijmp) {
       for (DEBUG_ONLY auto s : succs(block)) {
         assert_flog(
           !unit.blocks[s].code.empty() &&
@@ -124,8 +124,10 @@ checkCalls(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
         case Vinstr::callm:
         case Vinstr::callr:
         case Vinstr::calls:
+        case Vinstr::callphp:
+        case Vinstr::callphpr:
+        case Vinstr::callphps:
         case Vinstr::callstub:
-        case Vinstr::callarray:
         case Vinstr::contenter:
           sync_valid = unwind_valid = nothrow_valid = true;
           break;
@@ -150,6 +152,56 @@ checkCalls(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
   return true;
 }
 
+/* Check for any Vtuples are used by more than one Vinstr */
+
+struct VtupleVisitor {
+  explicit VtupleVisitor(const Vunit& unit)
+    : unit{unit} { uses.resize(unit.tuples.size()); }
+
+  const Vunit& unit;
+
+  struct Pos { Vlabel block; size_t instr; };
+  Pos pos;
+  jit::vector<Pos> uses;
+
+  template <typename T> void imm(const T&) const {}
+  template <typename T> void use(const T&) const {}
+  template <typename T> void def(const T&) const {}
+  template <typename T> void across(const T& t) { use(t); }
+  template <typename T, typename U>
+  void useHint(const T& t, const U&) { use(t); }
+  template <typename T, typename U>
+  void defHint(const T& t, const U&) { def(t); }
+  void use(Vtuple t) { check(t); }
+  void def(Vtuple t) { check(t); }
+  void check(Vtuple t) {
+    auto const usePos = uses[t];
+    always_assert_flog(
+      !usePos.block.isValid(),
+      "Instruction '{}' in {} uses a Vtuple already used by '{}' in {}\n{}\n",
+      show(unit, unit.blocks[pos.block].code[pos.instr]),
+      pos.block,
+      show(unit, unit.blocks[usePos.block].code[usePos.instr]),
+      usePos.block,
+      show(unit)
+    );
+    uses[t] = pos;
+  }
+};
+
+DEBUG_ONLY bool
+checkVtuples(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
+  VtupleVisitor visitor{unit};
+  for (auto const b : blocks) {
+    auto const& code = unit.blocks[b].code;
+    for (size_t i = 0; i < code.size(); ++i) {
+      visitor.pos = VtupleVisitor::Pos{b, i};
+      visitOperands(code[i], visitor);
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FlagUseChecker {
@@ -167,7 +219,7 @@ struct FlagUseChecker {
   }
   void use(VregSF r) {
     assertx(!cur_sf.isValid() || cur_sf == r);
-    assert(!r.isValid() || r.isSF() || r.isVirt());
+    assertx(!r.isValid() || r.isSF() || r.isVirt());
     cur_sf = r;
   }
   VregSF& cur_sf;
@@ -225,14 +277,13 @@ checkSF(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
     for (auto s : succs(block)) {
       if (!livein[s].isValid()) continue;
       assertx(!cur_sf.isValid() || cur_sf == livein[s]);
-      assert(livein[s].isSF() || livein[s].isVirt());
+      assertx(livein[s].isSF() || livein[s].isVirt());
       cur_sf = livein[s];
     }
     for (auto i = block.code.end(); i != block.code.begin();) {
       auto& inst = *--i;
       RegSet implicit_uses, implicit_across, implicit_defs;
-      if (inst.op == Vinstr::vcall || inst.op == Vinstr::vinvoke ||
-          inst.op == Vinstr::vcallarray) {
+      if (inst.op == Vinstr::vcall || inst.op == Vinstr::vinvoke) {
         // getEffects would assert since these haven't been lowered yet.
         implicit_defs |= RegSF{0};
       } else {
@@ -268,10 +319,16 @@ struct VisitOp {
   template<class T> void across(T) {}
   template<class T, class H> void useHint(T,H) {}
   template<class T, class H> void defHint(T,H) {}
-  void def(Vptr8 m) { memWidth = Width::Byte; }
+  void def(Vptr8 /*m*/) { memWidth = Width::Byte; }
   void def(Vptr m) { memWidth = m.width; }
-  template<Width w> void def(Vp<w> m) { memWidth = w; }
-  template<Width w> void use(Vp<w> m) { memWidth = w; }
+  template <Width w>
+  void def(Vp<w> /*m*/) {
+    memWidth = w;
+  }
+  template <Width w>
+  void use(Vp<w> /*m*/) {
+    memWidth = w;
+  }
   template<class T> void use(T) {}
   template<class T> void def(T) {}
   void use(Vreg r) { useWidth = width(r); }
@@ -308,15 +365,6 @@ checkWidths(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
 
         if (!i.s.isPhys() && !i.d.isPhys()) {
           widths[i.d] = widths[i.s];
-        }
-      } else if (inst.op == Vinstr::copy2) {
-        auto const& i = inst.copy2_;
-
-        if (!i.s0.isPhys() && !i.d0.isPhys()) {
-          widths[i.d0] = widths[i.s0];
-        }
-        if (!i.s1.isPhys() && !i.d1.isPhys()) {
-          widths[i.d1] = widths[i.s1];
         }
       } else if (inst.op == Vinstr::copyargs) {
         auto const& i = inst.copyargs_;
@@ -412,6 +460,7 @@ bool check(Vunit& unit) {
   assertx(checkSSA(unit, blocks));
   assertx(checkCalls(unit, blocks));
   assertx(checkSF(unit, blocks));
+  assertx(checkVtuples(unit, blocks));
   return true;
 }
 

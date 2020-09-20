@@ -45,7 +45,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-string(705) "<?xml version="1.0" encoding="UTF-8"?>
+string(704) "<?xml version="1.0" encoding="UTF-8"?>
 <node name="value" name2="">
   <subnode>some text</subnode>
 </node>
@@ -58,7 +58,7 @@ string(705) "<?xml version="1.0" encoding="UTF-8"?>
 <!--Comments-->
 <!--More comments-->
 <?lol?>
-<?php print 'Hello world!';?>
+<?hh print 'Hello world!';?>
 <node>Raw XML</node><!DOCTYPE name
 PUBLIC "publicID"
        "systemID" [subset]>

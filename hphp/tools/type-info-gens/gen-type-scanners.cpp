@@ -27,6 +27,8 @@
 #include <folly/Memory.h>
 #include <folly/Singleton.h>
 #include <folly/String.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 
 #include <boost/program_options.hpp>
 #include <boost/variant.hpp>
@@ -117,6 +119,21 @@
 
 namespace {
 
+// fast_map/set maps to F14{Value,Vector}Map/Set depending on K+V size.
+// Entries are moved (if possible) or copied (if necessary) on rehash & erase.
+template<class K, class V, class H=std::hash<K>, class C=std::equal_to<K>>
+using fast_map = folly::F14FastMap<K,V,H,C>;
+template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
+using fast_set = folly::F14FastSet<T,H,C>;
+
+// node_map/set allocate K+V separately like std::unordered_map; K+V don't
+// move during rehash. Saves memory compared to fast_map/set when when K+V
+// is large.
+template<class K, class V, class H=std::hash<K>, class C=std::equal_to<K>>
+using node_map = folly::F14NodeMap<K,V,H,C>;
+template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
+using node_set = folly::F14NodeSet<T,H,C>;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 using namespace debug_parser;
@@ -167,27 +184,27 @@ struct Generator {
     // If a custom scanner for the object type is specified, it will only be
     // invoked if any of the types in the custom guards list is interesting. If
     // the list is empty, the custom scanner is always invoked.
-    std::unordered_set<const Type*> custom_guards;
+    fast_set<const Type*> custom_guards;
 
     // List of fields in the object which should be ignored.
-    std::unordered_set<std::string> ignore_fields;
+    fast_set<std::string> ignore_fields;
 
     // List of fields in the object which should always be conservative scanned.
-    std::unordered_set<std::string> conservative_fields;
+    fast_set<std::string> conservative_fields;
 
     // Map of field names to symbols of custom scanners for that field.
-    std::unordered_map<std::string, std::string> custom_fields;
+    fast_map<std::string, std::string> custom_fields;
 
     // List of immediate base classes which should be ignored.
-    std::unordered_set<const Object*> ignored_bases;
+    fast_set<const Object*> ignored_bases;
 
     // List of immediate bases which the "forbidden template" check should not
     // be applied to. Mainly used internally.
-    std::unordered_set<const Object*> silenced_bases;
+    fast_set<const Object*> silenced_bases;
 
     // If a custom scanner function for bases is specified, the list of
     // immediate bases which the scanner applies to.
-    std::unordered_set<const Object*> custom_bases;
+    fast_set<const Object*> custom_bases;
 
     // For certain actions it can immediately be known that its associated
     // object will always be interesting. Therefore, any indexed type with such
@@ -338,20 +355,20 @@ struct Generator {
     ObjectNameEquals
   > m_objects_by_name;
 
-  mutable std::unordered_map<
+  mutable node_map<
     std::string,
     Object
   > m_external_objects;
 
-  mutable std::unordered_map<
+  mutable node_map<
     CompileUnitId,
-    std::unordered_map<
+    node_map<
       std::string,
       Object
     >
   > m_internal_objects;
 
-  mutable std::unordered_map<
+  mutable node_map<
     ObjectTypeId,
     Object
   > m_unique_objects;
@@ -359,7 +376,7 @@ struct Generator {
   // Mapping of object types to their computed actions. We could compute the
   // action everytime we needed it, but they're stored in this table for
   // memoization. This table is mutable as well since its a cache.
-  mutable std::unordered_map<const Object*, Action> m_actions;
+  mutable node_map<const Object*, Action> m_actions; // XXX must be node
 
   // List of all indexed types in the debug information.
   std::vector<IndexedType> m_indexed_types;
@@ -368,13 +385,17 @@ struct Generator {
   // collectable. The collectable set is set once, and should never change,
   // while the pointer followable set can grow as more pointer followable types
   // are discovered (it must grow monotonically, never removing anything).
-  std::unordered_set<const Object*> m_ptr_followable;
-  std::unordered_set<const Object*> m_collectable;
-  std::unordered_set<const Object*> m_scannable_collectable;
+  fast_set<const Object*> m_ptr_followable;
+  fast_set<const Object*> m_collectable;
+  fast_set<const Object*> m_scannable_collectable;
 
   // List of all layouts. Once computed, the indexed types will have an index
   // into this table for its associated layout.
   std::vector<Layout> m_layouts;
+
+  // Set of objects whose layout is currently being generated. Used to detect
+  // possible infinite recursion.
+  mutable fast_set<const Object*> m_layout_being_generated;
 
   // Static strings used to identify certain special types in the debug info,
   // which serve as markers for special actions. These strings should stay in
@@ -602,7 +623,7 @@ struct Generator::IndexedType {
   folly::Optional<LayoutError> errors;
 };
 
-constexpr size_t kNumThreads = 24;
+size_t NumThreads = 24;
 
 Generator::Generator(const std::string& filename, bool skip) {
   // Either this platform has no support for parsing debug information, or the
@@ -612,7 +633,7 @@ Generator::Generator(const std::string& filename, bool skip) {
   // runtime.
   if (skip) return;
 
-  m_parser = TypeParser::make(filename);
+  m_parser = TypeParser::make(filename, NumThreads);
 
   tbb::concurrent_vector<ObjectType> indexer_types;
   tbb::concurrent_vector<ObjectType> collectable_markers;
@@ -657,7 +678,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
     std::vector<std::thread> threads;
     // No point in creating more threads than there are blocks.
-    for (auto i = size_t{0}; i < std::min(block_count, kNumThreads); ++i) {
+    for (auto i = size_t{0}; i < std::min(block_count, NumThreads); ++i) {
       threads.emplace_back(std::thread(run));
     }
     for (auto& t : threads) t.join();
@@ -985,12 +1006,20 @@ T Generator::extractFromMarkers(const C& types, F&& f) const {
   std::sort(objects.begin(), objects.end());
 
   T out;
-  std::transform(
+  auto ins = std::inserter(out, out.end());
+  std::string msg;
+  std::for_each(
     objects.begin(),
     std::unique(objects.begin(), objects.end()),
-    std::inserter(out, out.end()),
-    [&](const Object* o) { return f(*o); }
+    [&](const Object* o) {
+      try {
+        ins = f(*o);
+      } catch (Exception& e) {
+        folly::format(&msg, " => {}\n", e.what());
+      }
+    }
   );
+  if (!msg.empty()) throw Exception(msg);
   return out;
 }
 
@@ -2198,13 +2227,19 @@ const Object& Generator::getObject(const ObjectType& type) const {
     // Otherwise if the type has external linkage, look for any type in any
     // compilation unit (with external linkage) with the same name and having a
     // complete definition.
-    if (type.name.linkage != ObjectTypeName::Linkage::internal) {
-      for (auto const& key : keys) {
-        if (key.object_id == type.key.object_id) continue;
-        auto other = m_parser->getObject(key);
-        if (other.incomplete) continue;
-        return insert(std::move(other));
-      }
+    if (type.name.linkage == ObjectTypeName::Linkage::internal) {
+      // Newer clang seems to split some types into different units,
+      // or at least we are not able to tell that they are the same.
+      std::cerr << "gen-type-scanners: warning: "
+        "No matching type found for internal linkage type " <<
+        type.name.name << " in same compile unit.  "
+        "Trying other compile units." << std::endl;
+    }
+    for (auto const& key : keys) {
+      if (key.object_id == type.key.object_id) continue;
+      auto other = m_parser->getObject(key);
+      if (other.incomplete) continue;
+      return insert(std::move(other));
     }
   }
 
@@ -2359,6 +2394,18 @@ void Generator::genLayout(const Object& object,
       !m_scannable_collectable.count(&object)) {
     return;
   }
+
+  if (!m_layout_being_generated.emplace(&object).second) {
+    throw LayoutError{
+      folly::sformat(
+        "'{}' is contained within a recursive definition. "
+        "This can only happen with invalid debug information "
+        "or a type-scanner generator bug.",
+        object.name.name
+      )
+    };
+  }
+  SCOPE_EXIT { m_layout_being_generated.erase(&object); };
 
   const auto& action = getAction(object, conservative_everything);
 
@@ -2817,7 +2864,10 @@ void Generator::assignUniqueLayouts() {
     // Finally, if there's a suffix layout, and the suffix begins at offset 0,
     // than the suffix layout can completely subsume the original layout.
     if (indexed.layout.suffix && indexed.layout.suffix_begin == 0) {
-     indexed.layout = std::move(*indexed.layout.suffix);
+      // avoid indeterminate evaluation order by moving indexed.layout.suffix
+      // to a temp before overwriting indexed.layout
+      auto suffix = std::move(*indexed.layout.suffix);
+      indexed.layout = std::move(suffix);
     }
   }
 
@@ -2867,7 +2917,9 @@ void Generator::checkForLayoutErrors() const {
       for (const auto& context : errors.context) {
         oss << "\t- " << context << "\n";
       }
-      oss << "\t- from type '" << *indexed.type << "'\n\n";
+      oss << "\t- from type '" << *indexed.type << "'\n"
+             "\t- if annotations are needed, see definitions in "
+             "hphp/util/type-scan.h.\n\n";
     }
     // Error if an indexed type had internal linkage.
     for (const auto& address : indexed.addresses) {
@@ -3314,7 +3366,10 @@ int main(int argc, char** argv) {
     ("output_file",
      po::value<std::string>()->required(),
      "filename of generated scanners")
-    ("skip", "do not scan dwarf, generate conservative scanners");
+    ("skip", "do not scan dwarf, generate conservative scanners")
+    ("num_threads", po::value<int>(), "number of parallel threads")
+    ("print", "dump the dwarf to stdout")
+    ;
 
   try {
     po::variables_map vm;
@@ -3326,14 +3381,18 @@ int main(int argc, char** argv) {
       return 1;
     }
 
-#ifdef __clang__
-  /* Doesn't work with Clang at the moment. t10336705 */
+#if defined(__clang__) && !defined(CLANG_STANDALONE_DEBUG)
+    // Doesn't work with older Clang that don't support attribute used
+    // in member functions of template classes.
+    // Fixed in https://reviews.llvm.org/D56928
+    // Doesn't work with Clang without -fstandalone-debug
   auto skip = true;
 #else
   auto skip = vm.count("skip") || getenv("HHVM_DISABLE_TYPE_SCANNERS");
 #endif
 
     po::notify(vm);
+    auto const print = vm.count("print") != 0;
 
     const auto output_filename =
       vm.count("install_dir") ?
@@ -3345,8 +3404,22 @@ int main(int argc, char** argv) {
       ) :
       vm["output_file"].as<std::string>();
 
+    if (vm.count("num_threads")) {
+      auto n = vm["num_threads"].as<int>();
+      if (n > 0) {
+        NumThreads = n;
+      } else {
+        std::cerr << "\nIllegal num_threads=" << n << "\n";
+        return 1;
+      }
+    }
+
     try {
       const auto source_executable = vm["source_file"].as<std::string>();
+      if (print) {
+        auto const printer = debug_parser::Printer::make(source_executable);
+        (*printer)(std::cout);
+      }
       Generator generator{source_executable, skip};
       std::ofstream output_file{output_filename};
       generator(output_file);

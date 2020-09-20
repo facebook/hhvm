@@ -1,5 +1,0 @@
-*** Test substituting argument 2 with object values ***
-bool(false)
-
-Warning: %s
-NULL

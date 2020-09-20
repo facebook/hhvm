@@ -1,0 +1,84 @@
+[(Fun
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:15-19], (Hprim Tvoid))); f_name = ([3:10-11], "\\f");
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params = [];
+      f_body =
+      (NamedBody
+         { Aast.AnnotatedAST.fnb_nast =
+           [(Expr
+               (([5:3-13], array<string>),
+                (Binop ((Eq None),
+                   (([5:3-5], array<string>), (Lvar ([5:3-5], $a))),
+                   (([5:8-13], array<string>),
+                    (Array [(AFvalue (([5:14-18], string), (String "hi")))]))
+                   ))));
+             (Expr
+                (([6:3-15], void),
+                 (Call (Cnormal,
+                    (([6:3-8], (function($x): void)),
+                     (Id ([6:3-8], "\\unset"))),
+                    [],
+                    [(([6:9-14], string),
+                      (Array_get (
+                         (([6:9-11], array<string>), (Lvar ([6:9-11], $a))),
+                         (Some (([6:12-13], int), (Int "0"))))))
+                      ],
+                    []))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+  (Fun
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([9:25-29], (Hprim Tvoid)));
+       f_name = ([9:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
+       f_variadic = FVnonVariadic;
+       f_params =
+       [{ Aast.AnnotatedAST.param_annotation = ([9:17-22], bool);
+          param_hint = (Some ([9:12-16], (Hprim Tbool)));
+          param_is_variadic = false;
+          param_pos = [9:17-22]; param_name = "$cond"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       (NamedBody
+          { Aast.AnnotatedAST.fnb_nast =
+            [(If ((([10:7-12], bool), (Lvar ([10:7-12], $cond))),
+                [(Expr
+                    (([11:5-17], array<string>),
+                     (Binop ((Eq None),
+                        (([11:5-9], array<string>), (Lvar ([11:5-9], $arr))),
+                        (([11:12-17], array<string>),
+                         (Array
+                            [(AFvalue (([11:18-23], string), (String "foo")))
+                              ]))
+                        ))))
+                  ],
+                [(Expr
+                    (([13:5-17], array<int>),
+                     (Binop ((Eq None),
+                        (([13:5-9], array<int>), (Lvar ([13:5-9], $arr))),
+                        (([13:12-17], array<int>),
+                         (Array [(AFvalue (([13:18-19], int), (Int "0")))]))
+                        ))))
+                  ]
+                ));
+              (Expr
+                 (([15:3-17], void),
+                  (Call (Cnormal,
+                     (([15:3-8], (function($x): void)),
+                      (Id ([15:3-8], "\\unset"))),
+                     [],
+                     [(([15:9-16], (int | string)),
+                       (Array_get (
+                          (([15:9-13], array<(int | string)>),
+                           (Lvar ([15:9-13], $arr))),
+                          (Some (([15:14-15], int), (Int "0"))))))
+                       ],
+                     []))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+  ]
+File "unset_array_idx_in_strict_mode.php", line 15, characters 9-12:
+Unexpected type in TAST: expected (array<string> | array<int>), got array<(int | string)> (TastTypecheck[11001])

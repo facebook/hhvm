@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class X {
   public static function getVal($val) {
@@ -16,11 +16,14 @@ final class X {
 
   private static function getArr($val) {
     self::check($val);
-    return array(
+    return varray[
       (int)$val
-    );
+    ];
   }
-};
+}
+<<__EntryPoint>>
+function main_unreachable_inlining() {
+;
 
 for ($i = 0; $i < 10; $i++) {
   try {
@@ -29,3 +32,4 @@ for ($i = 0; $i < 10; $i++) {
   }
 }
 var_dump('done');
+}

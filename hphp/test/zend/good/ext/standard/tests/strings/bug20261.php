@@ -1,15 +1,15 @@
-<?php
- $first = "boo";
- $second = $first;
- $rot = "";
+<?hh <<__EntryPoint>> function main(): void {
+$first = "boo";
+$second = $first;
+$rot = "";
 
- echo "1: ".$first."\n";
- echo "2: ".$second."\n";
- echo "3: ".$rot."\n";
+echo "1: ".$first."\n";
+echo "2: ".$second."\n";
+echo "3: ".$rot."\n";
 
- $rot = str_rot13($second);
+$rot = str_rot13($second);
 
- echo "1: ".$first."\n";
- echo "2: ".$second."\n";
- echo "3: ".$rot."\n";
-?>
+echo "1: ".$first."\n";
+echo "2: ".$second."\n";
+echo "3: ".$rot."\n";
+}

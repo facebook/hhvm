@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_PROCESS_H_
-#define incl_HPHP_EXT_PROCESS_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <sys/wait.h>
@@ -47,13 +46,13 @@ bool HHVM_FUNCTION(pcntl_signal,
 bool HHVM_FUNCTION(pcntl_sigprocmask,
                    int how,
                    const Array& set,
-                   VRefParam oldset = uninit_null());
+                   Array& oldset);
 int64_t HHVM_FUNCTION(pcntl_wait,
-                      VRefParam status,
+                      int64_t& status,
                       int options = 0);
 int64_t HHVM_FUNCTION(pcntl_waitpid,
                       int pid,
-                      VRefParam status,
+                      int64_t& status,
                       int options = 0);
 
 int64_t HHVM_FUNCTION(pcntl_wexitstatus,
@@ -79,4 +78,3 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_PROCESS_H_

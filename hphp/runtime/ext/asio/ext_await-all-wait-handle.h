@@ -57,8 +57,12 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     }
   }
 
-  static ObjectData* fromFrameNoCheck(uint32_t total, uint32_t cnt,
-                                      TypedValue* stk);
+  // [frame, last) are the set of locals, and cnt is number of
+  // non-finished wait handles in that range.
+  static ObjectData* fromFrameNoCheck(const ActRec* fp,
+                                      uint32_t first,
+                                      uint32_t last,
+                                      uint32_t cnt);
 
  public:
   struct Node final {
@@ -105,7 +109,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void scan(type_scan::Scanner&) const;
 
  private:
-  template<bool convert, typename Iter>
+  template<typename Iter>
   static Object Create(Iter iter);
   static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
   void initialize(context_idx_t ctx_idx);
@@ -113,8 +117,9 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
 
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
-                                   const Array& dependencies);
+  // Construct an AAWH from an array-like without making layout assumptions.
+  static Object fromArrLike(const ArrayData* ad);
+
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                                    const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
@@ -123,6 +128,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
                           const Variant& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
+  friend Object AwaitAllWaitHandleFromPHPArray(
+      const Class *self_,
+      const Array& dependencies
+  );
  private:
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
@@ -135,8 +144,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
 void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
                         const Variant& callback);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
-                          const Array& dependencies);
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                           const Array& dependencies);
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
@@ -146,8 +153,8 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
 
-inline c_AwaitAllWaitHandle* c_WaitHandle::asAwaitAll() {
-  assert(getKind() == Kind::AwaitAll);
+inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
+  assertx(getKind() == Kind::AwaitAll);
   return static_cast<c_AwaitAllWaitHandle*>(this);
 }
 

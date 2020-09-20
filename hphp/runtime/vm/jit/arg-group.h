@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_ARG_GROUP_H
-#define incl_HPHP_JIT_ARG_GROUP_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
@@ -46,8 +45,7 @@ namespace NativeCalls { struct CallInfo; }
 enum class DestType : uint8_t {
   None,      // return void (no valid registers)
   Indirect,  // return struct/object to the address in the first arg
-  SSA,       // return a single-register value
-  SSAPair,   // return a pair of registers
+  SSA,       // return an SSA value in 1 or 2 integer registers
   Byte,      // return a single-byte register value
   TV,        // return a TypedValue packed in two registers
   Dbl,       // return scalar double in a single FP register
@@ -56,8 +54,17 @@ enum class DestType : uint8_t {
 const char* destTypeName(DestType);
 
 struct CallDest {
-  DestType type;
+  CallDest(DestType t, Type vt, Vreg r0 = Vreg{}, Vreg r1 = Vreg{})
+    : valueType{vt}, reg0{r0}, reg1{r1}, type{t}
+  {}
+
+  CallDest(DestType t, Vreg r0 = Vreg{}, Vreg r1 = Vreg{})
+    : CallDest(t, TTop, r0, r1)
+  {}
+
+  Type valueType;
   Vreg reg0, reg1;
+  DestType type;
 };
 UNUSED const CallDest kVoidDest { DestType::None };
 UNUSED const CallDest kIndirectDest { DestType::Indirect };
@@ -70,12 +77,11 @@ struct ArgDesc {
     Addr,    // Address (register plus 32-bit displacement)
     DataPtr, // Pointer to data section
     IndRet,  // Indirect Return Address (register plus 32-bit displacement)
+    SpilledTV, // Address of TypedValue pushed onto the stack
   };
 
-  PhysReg dstReg() const { return m_dstReg; }
   Vreg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
-  void setDstReg(PhysReg reg) { m_dstReg = reg; }
   Immed64 imm() const {
     assertx(m_kind == Kind::Imm || m_kind == Kind::DataPtr);
     return m_imm64;
@@ -86,12 +92,16 @@ struct ArgDesc {
   }
   Immed disp() const {
     assertx(m_kind == Kind::Addr ||
-	    m_kind == Kind::IndRet);
+            m_kind == Kind::IndRet);
     return m_disp32;
   }
+  Vreg srcReg2() const {
+    assertx(m_kind == Kind::SpilledTV);
+    return m_srcReg2;
+  }
+
   bool isZeroExtend() const { return m_zeroExtend; }
-  bool done() const { return m_done; }
-  void markDone() { m_done = true; }
+  folly::Optional<AuxUnion> aux() const { return m_aux; }
 
 private: // These should be created using ArgGroup.
   friend struct ArgGroup;
@@ -111,19 +121,28 @@ private: // These should be created using ArgGroup.
     : m_kind(kind)
   {}
 
-  explicit ArgDesc(SSATmp* tmp, Vloc, bool val = true);
+  explicit ArgDesc(Kind kind, Vreg srcReg1, Vreg srcReg2)
+    : m_kind(kind)
+    , m_srcReg(srcReg1)
+    , m_srcReg2(srcReg2)
+  {}
+
+  explicit ArgDesc(SSATmp* tmp,
+                   Vloc,
+                   bool val = true,
+                   folly::Optional<AuxUnion> aux = folly::none);
 
 private:
   Kind m_kind;
   Vreg m_srcReg;
-  PhysReg m_dstReg;
   union {
     Immed64 m_imm64; // 64-bit plain immediate
     Immed m_disp32;  // 32-bit displacement
     DataType m_typeImm;
+    Vreg m_srcReg2;
   };
+  folly::Optional<AuxUnion> m_aux;
   bool m_zeroExtend{false};
-  bool m_done{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -153,6 +172,9 @@ struct ArgGroup {
   size_t numStackArgs() const { return m_stkArgs.size(); }
   size_t numIndRetArgs() const { return m_indRetArgs.size(); }
 
+  const std::vector<Type>& argTypes() const {
+    return m_argTypes;
+  }
   ArgDesc& gpArg(size_t i) {
     assertx(i < m_gpArgs.size());
     return m_gpArgs[i];
@@ -211,25 +233,12 @@ struct ArgGroup {
     return *this;
   }
 
-  ArgGroup& ssa(int i, bool isFP = false) {
-    auto s = m_inst->src(i);
-    ArgDesc arg(s, m_locs[s]);
-    if (isFP) {
-      push_SIMDarg(arg);
-      if (arch() == Arch::PPC64) {
-        // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
-        push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
-      }
-    } else {
-      push_arg(arg);
-    }
-    return *this;
-  }
+  ArgGroup& ssa(int i, bool allowFP = true);
 
   /*
    * Pass tmp as a TypedValue passed by value.
    */
-  ArgGroup& typedValue(int i);
+  ArgGroup& typedValue(int i, folly::Optional<AuxUnion> aux = folly::none);
 
   ArgGroup& memberKeyIS(int i) {
     return memberKeyImpl(i, true);
@@ -239,20 +248,30 @@ struct ArgGroup {
     return memberKeyImpl(i, false);
   }
 
+  /*
+   * Push a TypedValue onto the stack and pass its address. This is
+   * needed, for example, if you want to pass a tv_lval to a function
+   * expecting a const Variant&.
+   */
+  ArgGroup& constPtrToTV(Vreg type, Vreg data) {
+    push_arg(ArgDesc(ArgDesc::Kind::SpilledTV, type, data));
+    return *this;
+  }
+
   const IRInstruction* inst() const {
     return m_inst;
   }
 
 private:
-  void push_arg(const ArgDesc& arg);
-  void push_SIMDarg(const ArgDesc& arg);
+  void push_arg(const ArgDesc& arg, Type t = TBottom);
+  void push_SIMDarg(const ArgDesc& arg, Type t = TBottom);
 
   /*
    * For passing the m_type field of a TypedValue.
    */
-  ArgGroup& type(int i) {
+  ArgGroup& type(int i, folly::Optional<AuxUnion> aux) {
     auto s = m_inst->src(i);
-    push_arg(ArgDesc(s, m_locs[s], false));
+    push_arg(ArgDesc(s, m_locs[s], false, aux));
     return *this;
   }
 
@@ -272,6 +291,7 @@ private:
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
+  jit::vector<Type> m_argTypes;
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,
@@ -279,4 +299,3 @@ ArgGroup toArgGroup(const NativeCalls::CallInfo&,
                     const IRInstruction*);
 
 }}
-#endif

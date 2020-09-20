@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $h = new SplMaxHeap();
 
 // errors
@@ -32,6 +32,5 @@ $b = 5;
 $h2 = clone $h;
 echo $h->extract()."\n";
 echo $h2->extract()."\n";
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

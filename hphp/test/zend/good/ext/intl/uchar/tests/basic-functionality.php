@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 function unicode_info($cp) {
-  $proplist = array(
+  $proplist = varray[
     IntlChar::PROPERTY_ALPHABETIC,
-  );
-  $methodList = array(
+  ];
+  $methodList = varray[
     'isUAlphabetic',
     'isUUppercase', 'isupper',
     'isULowercase', 'islower',
@@ -14,7 +14,7 @@ function unicode_info($cp) {
     'isblank', 'isdefined', 'isspace', 'iscntrl',
     'isMirrored', 'isIDStart', 'isIDPart',
     'getBlockCode', 'charName',
-  );
+  ];
 
   $ncp = IntlChar::ord($cp);
   printf("Codepoint U+%04x\n", $ncp);
@@ -32,9 +32,9 @@ function unicode_info($cp) {
   echo "  charAge(): ", implode('.', IntlChar::charAge($cp)), "\n";
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 printf("Codepoint range: %04x-%04x\n", IntlChar::CODEPOINT_MIN, IntlChar::CODEPOINT_MAX);
-$codepoints = array('P', 0xDF, 0x2603);
+$codepoints = varray['P', 0xDF, 0x2603];
 foreach($codepoints as $cp) {
   unicode_info($cp);
 }
@@ -44,3 +44,4 @@ IntlChar::enumCharNames(0x2600, 0x2610, function($cp, $nc, $name) {
 });
 echo "RECYCLING SYMBOL FOR TYPE-1 PLASTICS => ";
 var_dump(IntlChar::charFromName("RECYCLING SYMBOL FOR TYPE-1 PLASTICS"));
+}

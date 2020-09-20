@@ -1,17 +1,15 @@
+
 *** Testing error conditions of array_splice() ***
 
-Warning: %s
+Warning: array_splice() expects at least 2 parameters, 0 given in %s/array_splice_errors.php on line 11
+
+Warning: array_splice() expects at least 2 parameters, 1 given in %s/array_splice_errors.php on line 12
+
+Warning: array_splice() expects at least 2 parameters, 1 given in %s/array_splice_errors.php on line 13
+
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_splice_errors.php on line 14
 NULL
 
-Warning: %s
-NULL
-
-Warning: %s
-NULL
-
-Warning: %s
-NULL
-
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_splice_errors.php on line 16
 NULL
 Done

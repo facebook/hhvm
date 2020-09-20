@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_bzcompress() {
 $str = "Holy fuck. Are they actually going to get there?";
 
 $ret = bzcompress($str);
@@ -13,3 +16,4 @@ $str = str_repeat("x", 1000);
 $ret = bzcompress($str);
 $ret = bzdecompress($ret);
 var_dump($ret === $str);
+}

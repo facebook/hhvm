@@ -1,8 +1,7 @@
+
 -- Testing vfprintf() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: vfprintf() expects exactly 3 parameters, 4 given in %s/vfprintf_error1.php on line 16
 
-Warning: %s
-NULL
+Warning: vfprintf() expects exactly 3 parameters, 4 given in %s/vfprintf_error1.php on line 17
 ===DONE===

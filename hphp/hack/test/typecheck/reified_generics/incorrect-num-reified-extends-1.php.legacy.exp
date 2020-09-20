@@ -1,0 +1,10 @@
+File "incorrect-num-reified-extends-1.php", line 4, characters 26-26:
+The class C expects 1 arguments (Typing[4010])
+File "incorrect-num-reified-extends-1.php", line 3, characters 7-7:
+Definition is here
+File "incorrect-num-reified-extends-1.php", line 4, characters 26-26:
+The class C expects 1 arguments (Typing[4010])
+File "incorrect-num-reified-extends-1.php", line 3, characters 7-7:
+Definition is here
+File "incorrect-num-reified-extends-1.php", line 4, characters 26-34:
+The type C expects 1 type parameter(s) (Typing[4101])

@@ -30,6 +30,7 @@
 #include <folly/MapUtil.h>
 
 #include <algorithm>
+#include <sstream>
 
 /*
  * This module implements two code layout strategies for sorting a Vunit's
@@ -61,7 +62,7 @@ TRACE_SET_MOD(layout);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> rpoLayout(Vunit& unit) {
   auto labels = sortBlocks(unit);
 
   auto const blk = [&] (Vlabel b) -> const Vblock& { return unit.blocks[b]; };
@@ -79,6 +80,18 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
              blk(b).code.back().op != Vinstr::fallthru;
     });
 
+  if (unit.context) {
+    auto const kind = unit.context->kind;
+    if ((isPrologue(kind)  && !RO::EvalJitLayoutPrologueSplitHotCold) ||
+        (isProfiling(kind) && !RO::EvalJitLayoutProfileSplitHotCold)) {
+      for (auto b : labels) {
+        if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+          unit.blocks[b].area_idx = AreaIndex::Main;
+        }
+      }
+    }
+  }
+
   // We put fallthru{} blocks at the end, but we also need to make sure it's
   // still partitioned with those blocks that share a code area.  This should
   // always be true, so just assert it.
@@ -86,8 +99,7 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
   assertx(n < 2 ||
     IMPLIES(
       blk(labels.back()).code.back().op == Vinstr::fallthru,
-      text.area(blk(labels.back()).area_idx) ==
-        text.area(blk(labels[n - 2]).area_idx)
+      blk(labels.back()).area_idx == blk(labels[n - 2]).area_idx
     )
   );
 
@@ -106,6 +118,14 @@ struct Scale {
       , m_preds(computePreds(unit)) {
     computeArcWeights();
   }
+
+  explicit Scale(const Vunit& unit, const jit::vector<Vlabel>& blockOrder)
+      : m_unit(unit)
+      , m_blocks(blockOrder)
+      , m_preds(computePreds(unit)) {
+    computeArcWeights();
+  }
+
   int64_t weight(Vlabel blk) const;
   int64_t weight(Vlabel src, Vlabel dst) const;
 
@@ -114,9 +134,9 @@ struct Scale {
  private:
   static const int64_t kUnknownWeight = std::numeric_limits<int64_t>::max();
 
-  void    computeArcWeights();
-  TransID findProfTransID(Vlabel blk) const;
-  int64_t findProfCount(Vlabel blk)   const;
+  void       computeArcWeights();
+  TransIDSet findProfTransIDs(Vlabel blk) const;
+  int64_t    findProfCount(Vlabel blk)   const;
 
   static uint64_t arcId(Vlabel src, Vlabel dst) { return (src << 32) + dst; }
 
@@ -134,14 +154,14 @@ int64_t Scale::weight(Vlabel src, Vlabel dst) const {
   return folly::get_default(m_arcWgts, arcId(src, dst), 0);
 }
 
-TransID Scale::findProfTransID(Vlabel blk) const {
+TransIDSet Scale::findProfTransIDs(Vlabel blk) const {
   for (auto& i : m_unit.blocks[blk].code) {
     if (!i.origin) continue;
-    auto profTransID = i.origin->marker().profTransID();
-    if (profTransID == kInvalidTransID) continue;
-    return profTransID;
+    auto profTransIDs = i.origin->marker().profTransIDs();
+    if (profTransIDs.empty()) continue;
+    return profTransIDs;
   }
-  return kInvalidTransID;
+  return TransIDSet{};
 }
 
 int64_t Scale::findProfCount(Vlabel blk) const {
@@ -247,19 +267,21 @@ void Scale::computeArcWeights() {
 
 std::string Scale::toString() const {
   std::ostringstream out;
-  out << "digraph {\n";
+  out << "digraph LayoutCFG {\n";
   int64_t maxWgt = 1;
   for (auto b : m_blocks) {
     maxWgt = std::max(maxWgt, weight(b));
   }
   for (auto b : m_blocks) {
+    auto const& block = m_unit.blocks[b];
     unsigned coldness = 255 - (255 * weight(b) / maxWgt);
     out << folly::format(
-      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\","
+      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\\ninsts: {}\","
       "shape=box,style=filled,fillcolor=\"#ff{:02x}{:02x}\"]\n",
-      b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area_idx),
-      findProfCount(b), coldness, coldness);
-    for (auto s : succs(m_unit.blocks[b])) {
+      b, b, weight(b), folly::join(',', findProfTransIDs(b)),
+      unsigned(block.area_idx),
+      findProfCount(b), block.code.size(), coldness, coldness);
+    for (auto s : succs(block)) {
       out << folly::format("{} -> {} [label={}];\n", b, s, weight(b, s));
     }
   }
@@ -277,7 +299,9 @@ struct Clusterizer {
     initClusters();
     clusterize();
     sortClusters();
-    splitHotColdClusters();
+    if (RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
+      splitHotColdClusters();
+    }
     FTRACE(1, "{}", toString());
   }
 
@@ -370,6 +394,13 @@ void Clusterizer::clusterize() {
     // dst must be the first in its cluster
     if (dstC.front() != dst) continue;
 
+    // Don't merge zero and non-zero weight blocks that go in different areas.
+    if (RO::EvalJitLayoutSeparateZeroWeightBlocks) {
+      auto const srcZero = m_unit.blocks[src].weight == 0;
+      auto const dstZero = m_unit.blocks[dst].weight == 0;
+      if (srcZero != dstZero) continue;
+    }
+
     // merge the clusters by append the blocks in dstC to srcC
     for (auto d : dstC) {
       srcC.push_back(d);
@@ -458,7 +489,6 @@ void Clusterizer::sortClusters() {
   m_clusterOrder = dfsSort.sort(m_blockCluster[m_unit.entry]);
 }
 
-
 void Clusterizer::splitHotColdClusters() {
   // compute the average weight of each cluster
   jit::vector<uint64_t> clusterAvgWgt(m_clusters.size());
@@ -473,21 +503,77 @@ void Clusterizer::splitHotColdClusters() {
     clusterAvgWgt[c] = totalSize == 0 ? 0 : totalWeight / totalSize;
   }
 
-  const auto entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
-  const uint64_t hotThreshold = entryAvgWgt *
-                                RuntimeOption::EvalJitLayoutHotThreshold;
-  FTRACE(3, "splitHotColdClusters: entryAvgWgt = {} ; hotThreshold = {}\n",
-         entryAvgWgt, hotThreshold);
+  // The "hot weight" is a measure of how hot this function's entry is that
+  // incorporates information from multiple translations. If we have (say)
+  // two translations and the first is much hotter than the second, we can
+  // use this hint to put the entire second translation into Cold or Frozen.
+  //
+  // If we always use this hint, we end up moving a lot of code across areas.
+  // To let us smoothly interpolate between using and not using this hint,
+  // we introduce a "multiplier" here: if it's set to 0, we'll always use this
+  // translation's entry weight, and if it's set to 1, we'll always the entry
+  // weight of the hottest translation for this function.
+  auto const entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
+  auto baseWgt = entryAvgWgt;
+  if (m_unit.context && m_unit.context->region) {
+    if (auto const hotWeight = m_unit.context->region->getHotWeight()) {
+      auto const multiplier =
+        RO::EvalJitPGOVasmBlockCountersHotWeightMultiplier;
+      baseWgt = std::max(entryAvgWgt, uint64_t(multiplier * (*hotWeight)));
+      FTRACE(3, "baseWgt:{} = max(entryAvgWgt:{}, multiplier:{} * hotWeight:{})\n",
+             baseWgt, entryAvgWgt, multiplier, *hotWeight);
+    }
+  }
+
+  // An alternative way to penalize cold translations is to have an absolute
+  // weight threshold in addition to a entry-relative one.
+  uint64_t hotThreshold  = baseWgt * RO::EvalJitLayoutHotThreshold;
+  uint64_t coldThreshold = baseWgt * RO::EvalJitLayoutColdThreshold;
+  if (RO::EvalJitLayoutMinHotThreshold) {
+    hotThreshold = std::max(hotThreshold, RO::EvalJitLayoutMinHotThreshold);
+  }
+  if (RO::EvalJitLayoutMinColdThreshold) {
+    coldThreshold = std::max(coldThreshold, RO::EvalJitLayoutMinColdThreshold);
+  }
+
+  // Finally, for correctness, we can't allow any cluster to be in a hotter
+  // region than the entry cluster. Adjust thresholds so that's the case.
+  assertx(!m_clusterOrder.empty());
+  auto maxAvgWgt = entryAvgWgt;
+  for (auto cid : m_clusterOrder) {
+    maxAvgWgt = std::max(maxAvgWgt, clusterAvgWgt[cid]);
+  }
+  if (maxAvgWgt >= hotThreshold && entryAvgWgt < hotThreshold) {
+    FTRACE(3, "(maxAvgWgt = {}) >= (hotThreshold = {}) > (entryAvgWgt = {}) "
+           "=> lower hotThreshold\n", maxAvgWgt, hotThreshold, entryAvgWgt);
+    hotThreshold = entryAvgWgt;
+  }
+  if (maxAvgWgt >= coldThreshold && entryAvgWgt < coldThreshold) {
+    FTRACE(3, "(maxAvgWgt = {}) >= (coldThreshold = {}) > (entryAvgWgt = {}) "
+           "=> lower coldThreshold\n", maxAvgWgt, coldThreshold, entryAvgWgt);
+    coldThreshold = entryAvgWgt;
+  }
+
+  // Also, for correctness, if we're padding the TC, put the entry in main.
+  if (RO::EvalReusableTCPadding && entryAvgWgt < hotThreshold) {
+    FTRACE(3, "TC includes {} padding bytes => put entry in main\n",
+           RO::EvalReusableTCPadding);
+    hotThreshold  = std::min(hotThreshold, entryAvgWgt);
+    coldThreshold = std::min(coldThreshold, entryAvgWgt);
+  }
+
+  FTRACE(3, "splitHotColdClusters: baseWgt = {} ; hotThreshold = {} "
+         "coldThreshold = {}\n", baseWgt, hotThreshold, coldThreshold);
 
   for (auto cid : m_clusterOrder) {
     if (m_clusters[cid].size() == 0) continue;
-    const AreaIndex area = clusterAvgWgt[cid] >= hotThreshold ? AreaIndex::Main
-                                                              : AreaIndex::Cold;
+    const AreaIndex area =
+      clusterAvgWgt[cid] >= hotThreshold  ? AreaIndex::Main :
+      clusterAvgWgt[cid] >= coldThreshold ? AreaIndex::Cold :
+                                            AreaIndex::Frozen;
     FTRACE(3, "  -> C{}: {} (avg wgt = {}): ",
            cid, area_names[unsigned(area)], clusterAvgWgt[cid]);
     for (auto b : m_clusters[cid]) {
-      // don't reassign blocks that are in frozen
-      if (m_unit.blocks[b].area_idx == AreaIndex::Frozen) continue;
       m_unit.blocks[b].area_idx = area;
       FTRACE(3, "{}, ", b);
     }
@@ -498,9 +584,16 @@ void Clusterizer::splitHotColdClusters() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
+bool usedVasmBlockCounters(const Vunit& unit) {
+  auto const opt = unit.context && unit.context->kind == TransKind::Optimize;
+  return opt && RO::EvalJitPGOVasmBlockCounters && isJitDeserializing();
+}
+
+jit::vector<Vlabel> pgoLayout(Vunit& unit) {
   // Make sure block weights are consistent.
-  fixBlockWeights(unit);
+  auto const skip = usedVasmBlockCounters(unit) &&
+                    RO::EvalJitPGOVasmBlockCountersSkipFixWeights;
+  if (!skip) fixBlockWeights(unit);
 
   // Compute arc weights.
   Scale scale(unit);
@@ -513,13 +606,36 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
   // Partition by actual code area without changing relative order.
   auto cold_iter = std::stable_partition(labels.begin(), labels.end(),
     [&] (Vlabel b) {
-      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Main);
+      return unit.blocks[b].area_idx == AreaIndex::Main;
     });
   if (cold_iter != labels.end()) {
     std::stable_partition(cold_iter, labels.end(),
       [&] (Vlabel b) {
-        return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
+        return unit.blocks[b].area_idx == AreaIndex::Cold;
       });
+  }
+
+  // Our relocation logic requires that no block be in a hotter area than the
+  // entry block's area (e.g. if the entry is Cold, no block is in Main).
+  // In particular, we use this invariant to identify the entry given the list
+  // of code ranges for a translation (see TransLoc::entry()).
+  //
+  // We could lift this requirement with work, but it's probably not useful to
+  // do so - if some blocks are in Main, we should put path from the entry to
+  // those blocks in Main too. Instead, we assert if we break the invariant.
+  //
+  // If we're padding TC entries, we require that entries are in Main.
+  assertx(!labels.empty());
+  assertx(labels[0] == unit.entry);
+  assertx(!RuntimeOption::EvalReusableTCPadding ||
+          unit.blocks[unit.entry].area_idx == AreaIndex::Main);
+
+  if (!RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
+    for (auto b : labels) {
+      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
+    }
   }
 
   if (Trace::moduleEnabled(Trace::layout, 1)) {
@@ -530,6 +646,10 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
     FTRACE(1, "\n");
   }
 
+  if (RuntimeOption::EvalDumpLayoutCFG) {
+    unit.annotations.emplace_back("LayoutCFG", Scale(unit, labels).toString());
+  }
+
   return labels;
 }
 
@@ -537,12 +657,12 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
   Timer timer(Timer::vasm_layout);
 
   return unit.context && unit.context->kind == TransKind::Optimize
-    ? pgoLayout(unit, text)
-    : rpoLayout(unit, text);
+    ? pgoLayout(unit)
+    : rpoLayout(unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -550,6 +670,11 @@ jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text) {
 void fixBlockWeights(Vunit& unit) {
   const auto preds(computePreds(unit));
   bool changed = false;
+
+  auto const hasSelfEdge = [] (Vlabel b, auto const& l) {
+    return std::find(l.begin(), l.end(), b) != l.end();
+  };
+
   do {
     changed = false;
     for (size_t b = 0; b < unit.blocks.size(); b++) {
@@ -557,7 +682,7 @@ void fixBlockWeights(Vunit& unit) {
 
       // Rule 1: a block's weight can't exceed the sum of its predecessors,
       // except for the entry block.
-      if (b != unit.entry) {
+      if (b != unit.entry && !hasSelfEdge(Vlabel{b}, preds[b])) {
         uint64_t predsTotal = 0;
         for (auto p : preds[b]) {
           predsTotal += unit.blocks[p].weight;
@@ -570,9 +695,10 @@ void fixBlockWeights(Vunit& unit) {
 
       // Rule 2: a block's weight can't exceed the sum of its successors, except
       // for exit blocks.
-      if (succs(block).size() > 0) {
+      auto const successors = succs(block);
+      if (successors.size() > 0 && !hasSelfEdge(Vlabel{b}, successors)) {
         uint64_t succsTotal = 0;
-        for (auto s : succs(block)) {
+        for (auto s : successors) {
           succsTotal += unit.blocks[s].weight;
         }
         if (block.weight > succsTotal) {

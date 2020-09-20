@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('UTC');
 $dto = new DateTime();
 $tzold = $dto->getTimezone();
@@ -9,4 +9,4 @@ var_dump($dto->getTimezone()->getName());
 unset($dto);
 var_dump($tzold->getName());
 echo "Done\n";
-?>
+}

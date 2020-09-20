@@ -1,12 +1,8 @@
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionClass_getDocComment_002.php on line 6
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionClass_getDocComment_002.php on line 7
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionClass_getDocComment_002.php on line 8
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionClass_getDocComment_002.php on line 9

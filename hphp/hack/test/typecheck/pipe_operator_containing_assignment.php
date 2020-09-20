@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function bar(int $a) {
   return $a + 1;

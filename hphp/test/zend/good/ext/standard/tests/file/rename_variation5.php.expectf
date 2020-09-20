@@ -1,3 +1,4 @@
+
 -- Renaming link to same link name --
 bool(true)
 
@@ -9,7 +10,7 @@ bool(true)
 
 -- Renaming existing link to existing directory name --
 
-Warning: %s
+Warning: rename(): Is a directory in %s/rename_variation5.php on line 27
 bool(false)
 
 -- Renaming existing link to existing file name --
@@ -17,7 +18,7 @@ bool(true)
 
 -- Renaming existing file to existing directory name --
 
-Warning: %s
+Warning: rename(): Is a directory in %s/rename_variation5.php on line 32
 bool(false)
 
 -- Renaming existing file to existing link name --
@@ -25,11 +26,11 @@ bool(true)
 
 -- Renaming existing directory to existing file name --
 
-Warning: %s
+Warning: rename(): Not a directory in %s/rename_variation5.php on line 39
 bool(false)
 
 -- Renaming existing directory to existing link name --
 
-Warning: %s
+Warning: rename(): Not a directory in %s/rename_variation5.php on line 41
 bool(false)
 Done

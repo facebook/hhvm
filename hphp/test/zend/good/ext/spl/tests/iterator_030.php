@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $it = new EmptyIterator;
 
 var_dump($it->valid());
@@ -28,6 +28,5 @@ catch(BadMethodCallException $e)
 
 var_dump($it->valid());
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

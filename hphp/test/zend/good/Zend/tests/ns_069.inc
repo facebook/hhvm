@@ -1,3 +1,5 @@
-<?php
+<?hh
 
-var_dump((binary)__NAMESPACE__);
+function foo() {
+var_dump((string)__NAMESPACE__);
+}

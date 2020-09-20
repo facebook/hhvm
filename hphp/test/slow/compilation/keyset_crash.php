@@ -7,4 +7,8 @@ function foo($f) {
   return $x;
 }
 
+
+<<__EntryPoint>>
+function main_keyset_crash() {
 var_dump(foo(false), foo(true));
+}

@@ -1,21 +1,12 @@
-<?php
+<?hh
 /* Prototype  : int mb_strlen(string $str [, string $encoding])
- * Description: Get character numbers of a string 
+ * Description: Get character numbers of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
 /*
  * Test mb_strlen by passing different data types as $str argument
  */
-
-echo "*** Testing mb_strlen() : usage variations ***\n";
-
-// Initialise function arguments not being substituted
-$encoding = 'utf-8';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +15,15 @@ class classA
     return b"Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing mb_strlen() : usage variations ***\n";
+
+// Initialise function arguments not being substituted
+$encoding = 'utf-8';
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = b<<<EOT
@@ -34,7 +34,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $str argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*18*/ b"string",
        b'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -79,17 +79,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_strlen()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strlen($input, $encoding));
+  try { var_dump( mb_strlen($input, $encoding)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
-?>
+}

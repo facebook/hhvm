@@ -1,1 +1,2 @@
-No errors
+File "namespace_collections3.php", line 14, characters 15-18:
+Unbound name: `Map` (Naming[2049])

@@ -3,7 +3,7 @@
 // Test showing async stacks in the debugger.
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
@@ -50,5 +50,8 @@ function main($a) {
   var_dump($result);
 }
 
-main(42);
+<<__EntryPoint>>
+function entrypoint_async_stack(): void {
 
+  main(42);
+}

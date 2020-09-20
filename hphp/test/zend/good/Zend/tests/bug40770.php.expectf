@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: request has exceeded memory limit in %s/bug40770.php on line %d

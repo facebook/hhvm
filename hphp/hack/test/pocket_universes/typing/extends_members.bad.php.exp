@@ -1,0 +1,6 @@
+File "extends_members.bad.php", line 32, characters 22-28:
+Invalid argument (Typing[4110])
+File "extends_members.bad.php", line 31, characters 12-12:
+Expected `D`
+File "extends_members.bad.php", line 32, characters 10-10:
+But got `C`

@@ -1,0 +1,108 @@
+Errors:
+  [13:3-16] Invalid assignment
+  [5:12-15] Expected `int`
+  [3:23-29] But got `string`
+[(Fun
+    { f_span = [3:1-15:2]; f_annotation = (); f_mode = Mstrict;
+      f_ret = ((int), (Some ([3:35-38], (Hprim Tint))));
+      f_name = ([3:10-14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params =
+      [{ param_annotation = ([3:19-21], int);
+         param_type_hint = ((int), (Some ([3:15-18], (Hprim Tint))));
+         param_is_variadic = false; param_pos = [3:19-21]; param_name = "$i";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None };
+        { param_annotation = ([3:30-32], string);
+          param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring))));
+          param_is_variadic = false; param_pos = [3:30-32];
+          param_name = "$s"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
+        ];
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_body =
+      { fb_ast =
+        [([4:3-26],
+          (Expr
+             (([4:3-25], Vector<int>),
+              (Binop ((Eq None),
+                 (([4:3-9], Vector<int>), (Lvar ([4:3-9], $items))),
+                 (([4:12-25], Vector<int>),
+                  (ValCollection (Vector, None,
+                     [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
+                 )))));
+          ([5:3-12:5],
+           (Expr
+              (([5:3-12:4], (function(): int)),
+               (Binop ((Eq None),
+                  (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
+                  (([5:8-12:4], (function(): int)),
+                   (Lfun (
+                      { f_span = [5:8-12:4]; f_annotation = ();
+                        f_mode = Mstrict;
+                        f_ret = ((int), (Some ([5:12-15], (Hprim Tint))));
+                        f_name = ([5:8-12:4], ";anonymous"); f_tparams = [];
+                        f_where_constraints = []; f_variadic = FVnonVariadic;
+                        f_params = []; f_cap = ((nothing), None);
+                        f_unsafe_cap = ((mixed), None);
+                        f_body =
+                        { fb_ast =
+                          [([10:5-23],
+                            (Expr
+                               (([10:5-22], int),
+                                (Binop ((Eq None),
+                                   (([10:5-10], int),
+                                    (Lvar ([10:5-10], $item))),
+                                   (([10:13-22], int),
+                                    (Array_get (
+                                       (([10:13-19], Vector<int>),
+                                        (Lvar ([10:13-19], $items))),
+                                       (Some (([10:20-21], int), (Int "1")))
+                                       )))
+                                   )))));
+                            ([11:5-18],
+                             (Return
+                                (Some (([11:12-17], int),
+                                       (Lvar ([11:12-17], $item))))))
+                            ];
+                          fb_annotation = () };
+                        f_fun_kind = FSync; f_user_attributes = [];
+                        f_file_attributes = []; f_external = false;
+                        f_namespace =
+                        { Namespace_env.ns_ns_uses = <opaque>;
+                          ns_class_uses = <opaque>;
+                          ns_record_def_uses = <opaque>;
+                          ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+                          ns_name = None; ns_auto_ns_map = [];
+                          ns_is_codegen = false;
+                          ns_disable_xhp_element_mangling = false };
+                        f_doc_comment = None; f_static = false },
+                      [([10:13-19], $items)])))
+                  )))));
+          ([13:3-17],
+           (Expr
+              (([13:3-16], string),
+               (Binop ((Eq None),
+                  (([13:3-11], string),
+                   (Array_get (
+                      (([13:3-9], Vector<int>), (Lvar ([13:3-9], $items))),
+                      None))),
+                  (([13:14-16], string), (Lvar ([13:14-16], $s))))))));
+          ([14:3-15],
+           (Return
+              (Some (([14:10-14], int),
+                     (Call (
+                        (([14:10-12], (function(): int)),
+                         (Lvar ([14:10-12], $f))),
+                        [], [], None))))))
+          ];
+        fb_annotation = () };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment = None; f_static = false })
+  ]

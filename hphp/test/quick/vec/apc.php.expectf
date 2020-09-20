@@ -9,9 +9,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
-Dtor... 1
-Dtor... 2
 Sleep...
 vec(0) {
 }
@@ -31,12 +28,12 @@ vec(2) {
   int(1)
 }
 vec(2) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   vec(3) {
     vec(0) {
@@ -50,7 +47,7 @@ object(SomeClass)#%d (1) {
     }
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   vec(1) {
     *RECURSION*
@@ -58,16 +55,14 @@ object(SomeClass)#%d (1) {
 }
 Wakeup...
 vec(1) {
-  object(Wakeup)#%d (1) {
+  object(Wakeup) (1) {
     ["val"]=>
     int(12345)
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 vec(1) {
-  object(Sleep)#%d (1) {
+  object(Sleep) (1) {
     ["val"]=>
     NULL
   }
@@ -91,12 +86,12 @@ vec(2) {
   int(1)
 }
 vec(2) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   vec(3) {
     vec(0) {
@@ -110,7 +105,7 @@ object(SomeClass)#%d (1) {
     }
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   vec(1) {
     *RECURSION*
@@ -118,22 +113,18 @@ object(SomeClass)#%d (1) {
 }
 Wakeup...
 vec(1) {
-  object(Wakeup)#%d (1) {
+  object(Wakeup) (1) {
     ["val"]=>
     int(12345)
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 vec(1) {
-  object(Sleep)#%d (1) {
+  object(Sleep) (1) {
     ["val"]=>
     NULL
   }
 }
-Dtor... 1
-Dtor... 2
 Sleep...
 vec(0) {
 }
@@ -153,12 +144,12 @@ vec(2) {
   int(2)
 }
 vec(2) {
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
-  object(stdClass)#%d (0) {
+  object(stdClass) (0) {
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   vec(3) {
     vec(0) {
@@ -172,7 +163,7 @@ object(SomeClass)#%d (1) {
     }
   }
 }
-object(SomeClass)#%d (1) {
+object(SomeClass) (1) {
   ["val"]=>
   vec(1) {
     *RECURSION*
@@ -180,16 +171,14 @@ object(SomeClass)#%d (1) {
 }
 Wakeup...
 vec(1) {
-  object(Wakeup)#%d (1) {
+  object(Wakeup) (1) {
     ["val"]=>
     int(12345)
   }
 }
 string(16) "Wakeup exception"
-Dtor... 1
-string(16) "Wakeup exception"
 vec(1) {
-  object(Sleep)#%d (1) {
+  object(Sleep) (1) {
     ["val"]=>
     NULL
   }

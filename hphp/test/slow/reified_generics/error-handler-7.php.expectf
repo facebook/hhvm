@@ -1,0 +1,5 @@
+ERROR: string(72) "Value returned from function f() must be of type C<int>, C<string> given"
+
+Fatal error: Uncaught exception 'Exception' with message '' in %s:17
+Stack trace:
+%A

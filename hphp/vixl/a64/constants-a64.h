@@ -1174,6 +1174,102 @@ enum FPFixedPointConvertOp {
   UCVTF_dx_fixed  = UCVTF_fixed | SixtyFourBits | FP64
 };
 
+// NEON instructions with three same-type operands.
+enum NEON3SameOp {
+  NEON3SameFixed = 0x0E200400,
+  NEON3SameFMask = 0x9F200400,
+  NEON3SameMask =  0xBF20FC00,
+  NEON3SameUBit =  0x20000000,
+  NEON_ADD    = NEON3SameFixed | 0x00008000,
+  NEON_ADDP   = NEON3SameFixed | 0x0000B800,
+  NEON_SHADD  = NEON3SameFixed | 0x00000000,
+  NEON_SHSUB  = NEON3SameFixed | 0x00002000,
+  NEON_SRHADD = NEON3SameFixed | 0x00001000,
+  NEON_CMEQ   = NEON3SameFixed | NEON3SameUBit | 0x00008800,
+  NEON_CMGE   = NEON3SameFixed | 0x00003800,
+  NEON_CMGT   = NEON3SameFixed | 0x00003000,
+  NEON_CMHI   = NEON3SameFixed | NEON3SameUBit | NEON_CMGT,
+  NEON_CMHS   = NEON3SameFixed | NEON3SameUBit | NEON_CMGE,
+  NEON_CMTST  = NEON3SameFixed | 0x00008800,
+  NEON_MLA    = NEON3SameFixed | 0x00009000,
+  NEON_MLS    = NEON3SameFixed | 0x20009000,
+  NEON_MUL    = NEON3SameFixed | 0x00009800,
+  NEON_PMUL   = NEON3SameFixed | 0x20009800,
+  NEON_SRSHL  = NEON3SameFixed | 0x00005000,
+  NEON_SQSHL  = NEON3SameFixed | 0x00004800,
+  NEON_SQRSHL = NEON3SameFixed | 0x00005800,
+  NEON_SSHL   = NEON3SameFixed | 0x00004000,
+  NEON_SMAX   = NEON3SameFixed | 0x00006000,
+  NEON_SMAXP  = NEON3SameFixed | 0x0000A000,
+  NEON_SMIN   = NEON3SameFixed | 0x00006800,
+  NEON_SMINP  = NEON3SameFixed | 0x0000A800,
+  NEON_SABD   = NEON3SameFixed | 0x00007000,
+  NEON_SABA   = NEON3SameFixed | 0x00007800,
+  NEON_UABD   = NEON3SameFixed | NEON3SameUBit | NEON_SABD,
+  NEON_UABA   = NEON3SameFixed | NEON3SameUBit | NEON_SABA,
+  NEON_SQADD  = NEON3SameFixed | 0x00000800,
+  NEON_SQSUB  = NEON3SameFixed | 0x00002800,
+  NEON_SUB    = NEON3SameFixed | NEON3SameUBit | 0x00008000,
+  NEON_UHADD  = NEON3SameFixed | NEON3SameUBit | NEON_SHADD,
+  NEON_UHSUB  = NEON3SameFixed | NEON3SameUBit | NEON_SHSUB,
+  NEON_URHADD = NEON3SameFixed | NEON3SameUBit | NEON_SRHADD,
+  NEON_UMAX   = NEON3SameFixed | NEON3SameUBit | NEON_SMAX,
+  NEON_UMAXP  = NEON3SameFixed | NEON3SameUBit | NEON_SMAXP,
+  NEON_UMIN   = NEON3SameFixed | NEON3SameUBit | NEON_SMIN,
+  NEON_UMINP  = NEON3SameFixed | NEON3SameUBit | NEON_SMINP,
+  NEON_URSHL  = NEON3SameFixed | NEON3SameUBit | NEON_SRSHL,
+  NEON_UQADD  = NEON3SameFixed | NEON3SameUBit | NEON_SQADD,
+  NEON_UQRSHL = NEON3SameFixed | NEON3SameUBit | NEON_SQRSHL,
+  NEON_UQSHL  = NEON3SameFixed | NEON3SameUBit | NEON_SQSHL,
+  NEON_UQSUB  = NEON3SameFixed | NEON3SameUBit | NEON_SQSUB,
+  NEON_USHL   = NEON3SameFixed | NEON3SameUBit | NEON_SSHL,
+  NEON_SQDMULH  = NEON3SameFixed | 0x0000B000,
+  NEON_SQRDMULH = NEON3SameFixed | 0x2000B000,
+
+  // NEON floating point instructions with three same-type operands.
+  NEON3SameFPFixed = NEON3SameFixed | 0x0000C000,
+  NEON3SameFPFMask = NEON3SameFMask | 0x0000C000,
+  NEON3SameFPMask = NEON3SameMask | 0x00800000,
+  NEON_FADD    = NEON3SameFixed | 0x0000D000,
+  NEON_FSUB    = NEON3SameFixed | 0x0080D000,
+  NEON_FMUL    = NEON3SameFixed | 0x2000D800,
+  NEON_FDIV    = NEON3SameFixed | 0x2000F800,
+  NEON_FMAX    = NEON3SameFixed | 0x0000F000,
+  NEON_FMAXNM  = NEON3SameFixed | 0x0000C000,
+  NEON_FMAXP   = NEON3SameFixed | 0x2000F000,
+  NEON_FMAXNMP = NEON3SameFixed | 0x2000C000,
+  NEON_FMIN    = NEON3SameFixed | 0x0080F000,
+  NEON_FMINNM  = NEON3SameFixed | 0x0080C000,
+  NEON_FMINP   = NEON3SameFixed | 0x2080F000,
+  NEON_FMINNMP = NEON3SameFixed | 0x2080C000,
+  NEON_FMLA    = NEON3SameFixed | 0x0000C800,
+  NEON_FMLS    = NEON3SameFixed | 0x0080C800,
+  NEON_FMULX   = NEON3SameFixed | 0x0000D800,
+  NEON_FRECPS  = NEON3SameFixed | 0x0000F800,
+  NEON_FRSQRTS = NEON3SameFixed | 0x0080F800,
+  NEON_FABD    = NEON3SameFixed | 0x2080D000,
+  NEON_FADDP   = NEON3SameFixed | 0x2000D000,
+  NEON_FCMEQ   = NEON3SameFixed | 0x0000E000,
+  NEON_FCMGE   = NEON3SameFixed | 0x2000E000,
+  NEON_FCMGT   = NEON3SameFixed | 0x2080E000,
+  NEON_FACGE   = NEON3SameFixed | 0x2000E800,
+  NEON_FACGT   = NEON3SameFixed | 0x2080E800,
+
+  // NEON logical instructions with three same-type operands.
+  NEON3SameLogicalFixed = NEON3SameFixed | 0x00001800,
+  NEON3SameLogicalFMask = NEON3SameFMask | 0x0000F800,
+  NEON3SameLogicalMask = 0xBFE0FC00,
+  NEON3SameLogicalFormatMask = NEON_Q,
+  NEON_AND = NEON3SameLogicalFixed | 0x00000000,
+  NEON_ORR = NEON3SameLogicalFixed | 0x00A00000,
+  NEON_ORN = NEON3SameLogicalFixed | 0x00C00000,
+  NEON_EOR = NEON3SameLogicalFixed | 0x20000000,
+  NEON_BIC = NEON3SameLogicalFixed | 0x00400000,
+  NEON_BIF = NEON3SameLogicalFixed | 0x20C00000,
+  NEON_BIT = NEON3SameLogicalFixed | 0x20800000,
+  NEON_BSL = NEON3SameLogicalFixed | 0x20400000
+};
+
 enum NEONLoadStoreMultiOp {
   NEONLoadStoreMultiL    = 0x00400000,
   NEONLoadStoreMulti1_1v = 0x00007000,
@@ -1412,7 +1508,7 @@ enum LSELd {
   LSELD_##A##_x   = LseLdOpFixed | LSESizeX | LSEAquireReleaseN  | LSE_LD##A, \
   LSELD_##A##_ax  = LseLdOpFixed | LSESizeX | LSEAquireReleaseA  | LSE_LD##A, \
   LSELD_##A##_lx  = LseLdOpFixed | LSESizeX | LSEAquireReleaseL  | LSE_LD##A, \
-  LSELD_##A##_alx = LseLdOpFixed | LSESizeX | LSEAquireReleaseAL | LSE_LD##A 
+  LSELD_##A##_alx = LseLdOpFixed | LSESizeX | LSEAquireReleaseAL | LSE_LD##A
   LSELD_OP_LIST(LSELD)
   #undef LSELD
 };

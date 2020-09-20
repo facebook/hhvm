@@ -51,6 +51,6 @@ function main($v1, $v2, $v3, $v4, $v5, $v6) {
   var_dump($w);
   var_dump($x);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(3, -3, 3.5, -3.5, 0, 0.0);
-
+}

@@ -6,18 +6,16 @@ int(43)
 int(0)
 int(26)
 
-Warning: %s
-NULL
+Warning: gmp_hamdist() expects exactly 2 parameters, 3 given in %s/gmp_hamdist.php on line 14
 
-Warning: %s
+Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s/gmp_hamdist.php on line 15
 bool(false)
 
-Warning: %s
+Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s/gmp_hamdist.php on line 16
 bool(false)
 
-Warning: %s
+Warning: gmp_hamdist(): Unable to convert variable to GMP - wrong type in %s/gmp_hamdist.php on line 17
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_hamdist() expects exactly 2 parameters, 0 given in %s/gmp_hamdist.php on line 18
 Done

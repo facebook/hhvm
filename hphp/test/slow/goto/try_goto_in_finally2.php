@@ -1,7 +1,7 @@
-<?php
-  try {
-    goto foo;
-  } finally {
-    foo:
-  }
-?>
+<?hh <<__EntryPoint>> function main(): void {
+try {
+  goto foo;
+} finally {
+  foo:
+}
+}

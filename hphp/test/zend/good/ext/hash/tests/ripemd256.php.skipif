@@ -1,1 +1,4 @@
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if(!extension_loaded("hash")) print "skip";
+}

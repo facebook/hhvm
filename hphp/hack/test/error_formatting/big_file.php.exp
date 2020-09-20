@@ -1,0 +1,13 @@
+Typing[4105] Too many arguments (expected 0 but got 1)
+   --> big_file.php
+   3 | function foo(): void {}
+     |          ^^^ Definition is here
+1009 |   foo(1);
+     |   ^^^^^^
+
+Typing[4030] Was expecting a return type hint
+   --> big_file.php
+1008 | function bar() {
+     |          ^^^
+
+2 errors found.

@@ -1,0 +1,10 @@
+AbortBuildOnVerifyError = false
+
+Overrides {
+  phase1 {
+    push_phase = /^phase1$/
+    overwrite {
+      AbortBuildOnVerifyError = true
+    }
+  }
+}

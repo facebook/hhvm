@@ -1,5 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!function_exists('crypt')) {
-	die("SKIP crypt() is not available");
+  die("SKIP crypt() is not available");
 }
-?>
+}

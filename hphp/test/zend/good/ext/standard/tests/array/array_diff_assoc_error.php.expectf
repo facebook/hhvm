@@ -2,11 +2,9 @@
 
 -- Testing array_diff_assoc() function with zero arguments --
 
-Warning: %s
-NULL
+Warning: array_diff_assoc() expects at least 2 parameters, 0 given in %s/array_diff_assoc_error.php on line 16
 
 -- Testing array_diff_assoc() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_diff_assoc() expects at least 2 parameters, 1 given in %s/array_diff_assoc_error.php on line 21
 Done

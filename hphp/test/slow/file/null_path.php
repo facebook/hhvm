@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_null_path() {
 error_reporting(-1);
 
 $path1 = '/etc/passwd' . chr(0) . '/foo/bar.jpg';
@@ -38,7 +41,7 @@ var_dump(realpath($path1));
 var_dump(disk_free_space($path1));
 var_dump(diskfreespace($path1));
 var_dump(disk_total_space($path1));
-var_dump(chmod($path1, '644'));
+var_dump(chmod($path1, 644));
 var_dump(chown($path1, 'nobody'));
 var_dump(lchown($path1, 'nobody'));
 var_dump(chgrp($path1, 'nogrp'));
@@ -55,3 +58,4 @@ var_dump(mkdir($path1));
 var_dump(chdir($path1));
 var_dump(chroot($path1));
 var_dump(scandir($path1));
+}

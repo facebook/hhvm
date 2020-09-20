@@ -2,6 +2,5 @@
 
 -- Testing posix_get_last_error() function with one argument --
 
-Warning: %s
-NULL
+Warning: posix_get_last_error() expects exactly 0 parameters, 1 given in %s/posix_get_last_error_error.php on line 13
 Done

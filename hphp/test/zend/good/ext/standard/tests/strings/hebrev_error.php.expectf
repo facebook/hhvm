@@ -2,12 +2,9 @@
 
 -- Testing hebrev() function with no arguments --
 
-Warning: %s
-NULL
+Warning: hebrev() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/strings/hebrev_error.php on line 11
 
 -- Testing hebrev() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
- 
+Warning: hebrev() expects at most 2 parameters, 3 given in %s/test/zend/good/ext/standard/tests/strings/hebrev_error.php on line 15
 ===DONE===

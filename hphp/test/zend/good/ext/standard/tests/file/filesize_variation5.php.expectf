@@ -1,11 +1,9 @@
 *** Testing filesize(): usage variations ***
 bool(false)
-bool(false)
+
+Warning: filesize(): No such file or directory in %s/filesize_variation5.php on line 12
 bool(false)
 
-Warning: %s
-bool(false)
-
-Warning: %s
+Warning: filesize(): No such file or directory in %s/filesize_variation5.php on line 13
 bool(false)
 *** Done ***

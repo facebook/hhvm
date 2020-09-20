@@ -1,13 +1,12 @@
-<?php
+<?hh
 
 function test() {
   (new X)->foo();
 }
 
-apc_add('foo', 0);
-
 function setup() {
-  $i = apc_inc('foo', 1);
+  $res = null;
+  $i = apc_inc('foo', 1, inout $res);
   var_dump($i);
 
   $text = "";
@@ -19,17 +18,18 @@ function setup() {
   }
   $text .= "class Y { const C = $i; }\n";
 
-  $file = __FILE__ . ".$i.inc";
-  file_put_contents($file, "<?php $text");
+  $file = __SystemLib\hphp_test_tmppath("$i.inc");
+  file_put_contents($file, "<?hh $text");
   include $file;
   unlink($file);
-  class X extends Y {
-    private $priv = 42;
-    function foo() {
-      var_dump($this->priv + self::C);
-    }
-  }
+  include 'func-guards.inc';
 }
+
+
+<<__EntryPoint>>
+function main_func_guards() {
+apc_add('foo', 0);
 
 setup();
 test();
+}

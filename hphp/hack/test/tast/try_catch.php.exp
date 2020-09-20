@@ -1,72 +1,125 @@
-[(AnnotatedAST.Fun
-    { AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([12:44-12:47], (Hprim Tint)));
-      f_name = ([12:10-12:40], "\\terminal_catch_can_do_whatever");
-      f_tparams = []; f_where_constraints = [];
-      f_variadic = AnnotatedAST.FVnonVariadic; f_params = [];
-      f_body =
-      (AnnotatedAST.NamedBody
-         { AnnotatedAST.fnb_nast =
-           [(AnnotatedAST.Expr
-               (([13:3-13:10], Some int),
-                (AnnotatedAST.Binop ((Eq None),
-                   (([13:3-13:5], Some int),
-                    (AnnotatedAST.Lvar ([13:3-13:5], $a))),
-                   (([13:8-13:10], Some int),
-                    (AnnotatedAST.Int ([13:8-13:10], "23")))
-                   ))));
-             (AnnotatedAST.Try (
-                [(AnnotatedAST.Expr
-                    (([15:5-15:13], Some int),
-                     (AnnotatedAST.Binop ((Eq None),
-                        (([15:5-15:7], Some int),
-                         (AnnotatedAST.Lvar ([15:5-15:7], $a))),
-                        (([15:10-15:13], Some int),
-                         (AnnotatedAST.Int ([15:10-15:13], "456")))
-                        ))))
-                  ],
-                [(([16:12-16:25], "\\YourException"), ([16:26-16:28], $e),
-                  [(AnnotatedAST.Return ([17:5-17:15],
-                      (Some (([17:12-17:14], Some int),
-                             (AnnotatedAST.Lvar ([17:12-17:14], $a))))
-                      ))
+[(Fun
+    { f_span = [11:1-32]; f_annotation = (); f_mode = Mpartial;
+      f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid))));
+      f_name = ([11:10-21], "\\might_throw"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false;
+      f_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      f_doc_comment =
+      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
+      f_static = false });
+  (Fun
+     { f_span = [13:1-31:2]; f_annotation = (); f_mode = Mpartial;
+       f_ret = ((int), (Some ([13:44-47], (Hprim Tint))));
+       f_name = ([13:10-40], "\\terminal_catch_can_do_whatever");
+       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params = []; f_cap = ((nothing), None);
+       f_unsafe_cap = ((mixed), None);
+       f_body =
+       { fb_ast =
+         [([14:3-11],
+           (Expr
+              (([14:3-10], int),
+               (Binop ((Eq None), (([14:3-5], int), (Lvar ([14:3-5], $a))),
+                  (([14:8-10], int), (Int "23")))))));
+           ([15:3-28:4],
+            (Try (
+               [([16:5-14],
+                 (Expr
+                    (([16:5-13], int),
+                     (Binop ((Eq None),
+                        (([16:5-7], int), (Lvar ([16:5-7], $a))),
+                        (([16:10-13], int), (Int "456")))))));
+                 ([17:5-19],
+                  (Expr
+                     (([17:5-18], void),
+                      (Call (
+                         (([17:5-16], (function(): void)),
+                          (Id ([17:5-16], "\\might_throw"))),
+                         [], [], None)))))
+                 ],
+               [(([18:12-25], "\\YourException"), ([18:26-28], $e),
+                 [([19:5-15],
+                   (Return
+                      (Some (([19:12-14], int), (Lvar ([19:12-14], $a))))))
+                   ]);
+                 (([20:12-23], "\\MyException"), ([20:24-26], $e),
+                  [([22:5-17],
+                    (Expr
+                       (([22:5-16], string),
+                        (Binop ((Eq None),
+                           (([22:5-7], string), (Lvar ([22:5-7], $a))),
+                           (([22:10-16], string), (String "duck")))))));
+                    ([23:5-18],
+                     (Return (Some (([23:12-17], int), (Int "23904")))))
                     ]);
-                  (([18:12-18:23], "\\MyException"), ([18:24-18:26], $e),
-                   [(AnnotatedAST.Expr
-                       (([20:5-20:16], Some string),
-                        (AnnotatedAST.Binop ((Eq None),
-                           (([20:5-20:7], Some string),
-                            (AnnotatedAST.Lvar ([20:5-20:7], $a))),
-                           (([20:10-20:16], Some string),
-                            (AnnotatedAST.String ([20:10-20:16], "duck")))
-                           ))));
-                     (AnnotatedAST.Return ([21:5-21:18],
-                        (Some (([21:12-21:17], Some int),
-                               (AnnotatedAST.Int ([21:12-21:17], "23904"))))
-                        ))
-                     ]);
-                  (([22:12-22:21], "\\Exception"), ([22:22-22:24], $e),
-                   [(AnnotatedAST.Return ([23:5-23:15],
-                       (Some (([23:12-23:14], Some int),
-                              (AnnotatedAST.Lvar ([23:12-23:14], $a))))
-                       ))
-                     ])
-                  ],
-                [(AnnotatedAST.Expr
-                    (([25:5-25:11], Some int),
-                     (AnnotatedAST.Binop ((Eq None),
-                        (([25:5-25:7], Some int),
-                         (AnnotatedAST.Lvar ([25:5-25:7], $a))),
-                        (([25:10-25:11], Some int),
-                         (AnnotatedAST.Int ([25:10-25:11], "4")))
-                        ))))
-                  ]
-                ));
-             (AnnotatedAST.Return ([28:3-28:13],
-                (Some (([28:10-28:12], Some int),
-                       (AnnotatedAST.Lvar ([28:10-28:12], $a))))
-                ))
-             ];
-           fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+                 (([24:12-21], "\\Exception"), ([24:22-24], $e),
+                  [([25:5-15],
+                    (Return
+                       (Some (([25:12-14], int), (Lvar ([25:12-14], $a))))))
+                    ])
+                 ],
+               [([27:5-12],
+                 (Expr
+                    (([27:5-11], int),
+                     (Binop ((Eq None),
+                        (([27:5-7], int), (Lvar ([27:5-7], $a))),
+                        (([27:10-11], int), (Int "4")))))))
+                 ]
+               )));
+           ([30:3-13],
+            (Return (Some (([30:10-12], int), (Lvar ([30:10-12], $a))))))
+           ];
+         fb_annotation = () };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false;
+       f_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       f_doc_comment = None; f_static = false });
+  (Class
+     { c_span = [33:1-41]; c_annotation = (); c_mode = Mpartial;
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([33:7-20], "\\YourException");
+       c_tparams = [];
+       c_extends = [([33:29-38], (Happly (([33:29-38], "\\Exception"), [])))];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
+  (Class
+     { c_span = [34:1-39]; c_annotation = (); c_mode = Mpartial;
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([34:7-18], "\\MyException");
+       c_tparams = [];
+       c_extends = [([34:27-36], (Happly (([34:27-36], "\\Exception"), [])))];
+       c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_implements = []; c_where_constraints = []; c_consts = [];
+       c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       c_pu_enums = []; c_doc_comment = None; c_emit_id = None })
   ]

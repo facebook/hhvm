@@ -1,7 +1,7 @@
 private a::blah
 public static a::stat
 protected aa::blah
-object(a)#1 (0) {
+object(a) (0) {
 }
 protected aa::blah
 bool(false)
@@ -11,13 +11,3 @@ protected aa::blah
 bool(false)
 protected aa::blah
 bool(true)
-protected aa::blah
-
-Notice: Undefined variable: this in %s on line 11
-bool(true)
-protected aa::blah
-
-Notice: Undefined variable: this in %s on line 11
-bool(true)
-magic call to aa->fakemethod with 3 arguments
-magic call to aa->fakemethod with 0 arguments

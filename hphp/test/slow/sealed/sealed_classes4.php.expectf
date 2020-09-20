@@ -1,0 +1,1 @@
+Fatal error: Class SomeOtherOtherInterface may not inherit from sealed interface (SomeSealedInterface) without being in the whitelist in %s/sealed_classes4.php on line 8

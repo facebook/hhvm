@@ -1,0 +1,5 @@
+(22,42)-(22,42) A scope resolution operator `::` is expected here.
+(23,3)-(23,33) Redeclared method `D::animal`
+(23,40)-(23,40) A name is expected here.
+(23,40)-(23,45) Encountered unexpected token `class`.
+(24,3)-(24,33) Redeclared method `D::animal`

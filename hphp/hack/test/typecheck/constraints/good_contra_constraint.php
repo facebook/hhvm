@@ -4,7 +4,8 @@
 function filterInstance<Tu, Tv super Tu>(
   Traversable<Tv> $vector,
   classname<Tu> $classname,
-): Vector<Tu> { // UNSAFE
+): Vector<Tu> {
+  return Vector {};
 }
 
 class Base {}

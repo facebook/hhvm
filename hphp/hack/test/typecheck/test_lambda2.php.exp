@@ -1,0 +1,4 @@
+File "test_lambda2.php", line 13, characters 3-6:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "test_lambda2.php", line 9, characters 8-50:
+This function is normal.

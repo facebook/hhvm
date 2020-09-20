@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TType {
   const STOP   = 0;
@@ -47,18 +47,14 @@ class DummyTransport {
 }
 
 class TestStruct {
-  static $_TSPEC;
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'aString',
+      'type' => TType::STRING,
+    ],
+  ];
   public $aString = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(
-        1 => array(
-          'var' => 'aString',
-          'type' => TType::STRING,
-        ),
-      );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 
 function test() {
@@ -72,5 +68,9 @@ function test() {
     $p->getTransport()->buff);
   thrift_protocol_read_binary($p, 'TestStruct', true);
 }
+
+<<__EntryPoint>>
+function main_thrift() {
 test();
 print "Done\n";
+}

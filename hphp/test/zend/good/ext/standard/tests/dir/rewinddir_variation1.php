@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start 
+ * Description: Rewind dir_handle back to the start
  * Source code: ext/standard/dir.c
  * Alias to functions: rewind
  */
@@ -9,12 +9,6 @@
  * Pass different data types as $dir_handle argument to rewinddir() to test behaviour
  */
 
-echo "*** Testing rewinddir() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -22,6 +16,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing rewinddir() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -29,7 +29,7 @@ hello world
 EOT;
 
 // unexpected values to be passed to $dir_handle argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -53,17 +53,17 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -72,14 +72,14 @@ $inputs = array(
 
        // unset data
 /*24*/ @$unset_var,
-);
+];
 
 // loop through each element of $inputs to check the behavior of rewinddir()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( rewinddir($input) );
+  try { var_dump( rewinddir($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
-?>
-===DONE===
+echo "===DONE===\n";
+}

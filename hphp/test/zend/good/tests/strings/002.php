@@ -1,7 +1,7 @@
-<?php 
+<?hh
+<<__EntryPoint>> function main(): void {
 error_reporting(0);
-
-$fp = fopen("php://stdout", "w") or die("Arrggsgg!!");
+($fp = fopen("php://stdout", "w")) || die("Arrggsgg!!");
 $x = fprintf($fp, "fprintf test 1:%.5s", "abcdefghij");
 echo "\n";
 var_dump($x);
@@ -38,7 +38,5 @@ printf("printf test 27:%3\$d %d %d\n", 1, 2, 3);
 printf("printf test 28:%2\$02d %1\$2d\n", 1, 2);
 printf("printf test 29:%2\$-2d %1\$2d\n", 1, 2);
 print("printf test 30:"); printf("%0\$s", 1); print("x\n");
-vprintf("vprintf test 1:%2\$-2d %1\$2d\n", array(1, 2));
-
-
-?>
+vprintf("vprintf test 1:%2\$-2d %1\$2d\n", varray[1, 2]);
+}

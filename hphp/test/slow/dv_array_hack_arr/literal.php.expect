@@ -1,0 +1,145 @@
+vec(0) {
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+vec(12) {
+  NULL
+  bool(true)
+  bool(false)
+  string(3) "abc"
+  int(100)
+  float(1.23)
+  object(stdClass) (0) {
+  }
+  resource(4) of type (xml)
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  vec(2) {
+    int(3)
+    int(4)
+  }
+  dict(1) {
+    [1]=>
+    int(2)
+  }
+  keyset(1) {
+    string(3) "abc"
+  }
+}
+vec(2) {
+  vec(0) {
+  }
+  vec(3) {
+    string(1) "a"
+    int(100)
+    bool(false)
+  }
+}
+vec(2) {
+  dict(0) {
+  }
+  dict(2) {
+    [100]=>
+    string(1) "a"
+    ["b"]=>
+    int(200)
+  }
+}
+dict(0) {
+}
+dict(4) {
+  [100]=>
+  int(1)
+  [200]=>
+  int(2)
+  [300]=>
+  int(3)
+  [400]=>
+  int(4)
+}
+dict(3) {
+  ["key1"]=>
+  string(1) "a"
+  ["key2"]=>
+  string(1) "b"
+  ["key3"]=>
+  string(1) "c"
+}
+dict(12) {
+  [10]=>
+  NULL
+  [20]=>
+  bool(true)
+  [30]=>
+  bool(false)
+  ["key1"]=>
+  string(3) "abc"
+  ["key2"]=>
+  int(100)
+  ["key3"]=>
+  float(1.23)
+  [40]=>
+  object(stdClass) (0) {
+  }
+  [50]=>
+  resource(5) of type (xml)
+  [60]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  ["key4"]=>
+  vec(2) {
+    int(3)
+    int(4)
+  }
+  ["key5"]=>
+  dict(1) {
+    [1]=>
+    int(2)
+  }
+  [70]=>
+  keyset(1) {
+    string(3) "abc"
+  }
+}
+dict(2) {
+  ["123"]=>
+  string(3) "abc"
+  [123]=>
+  string(3) "def"
+}
+dict(2) {
+  [123]=>
+  dict(0) {
+  }
+  [456]=>
+  dict(2) {
+    ["a"]=>
+    int(100)
+    [200]=>
+    string(1) "b"
+  }
+}
+dict(2) {
+  ["abc"]=>
+  vec(0) {
+  }
+  ["def"]=>
+  vec(3) {
+    string(1) "a"
+    int(100)
+    bool(false)
+  }
+}

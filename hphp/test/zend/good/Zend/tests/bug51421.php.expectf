@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Declaration of Test::__construct() must be compatible with that of TestInterface::__construct() in %s/bug51421.php on line 9

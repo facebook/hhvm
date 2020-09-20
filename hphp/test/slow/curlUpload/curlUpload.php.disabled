@@ -1,4 +1,4 @@
-<?php
+<?hh
 $fp = fopen(__DIR__.'/curlUpload.png', 'rb');
 
 $ch = curl_init('http://www.facebook.com/status.php');

@@ -1,3 +1,3 @@
 Call show()
 
-Fatal error: %s
+Fatal error: Call to private pass::show() from invalid context in %s/private_001.php on line 14

@@ -1,0 +1,4 @@
+File "assing_array_get_pair_component_bad.php", line 5, characters 3-19:
+You cannot mutate this (Typing[4011])
+File "assing_array_get_pair_component_bad.php", line 4, characters 15-42:
+This is an object of type Pair<int, dict<string, int>>

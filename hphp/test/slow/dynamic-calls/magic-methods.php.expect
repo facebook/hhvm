@@ -1,0 +1,35 @@
+=============== test_sleep =========================
+A::__construct
+A::__sleep
+A::__wakeup
+A::__sleep
+A::__wakeup
+=============== test_stringify =====================
+A::__construct
+A::__toString
+A::__toString
+=============== test_invoke ========================
+A::__construct
+A::__invoke
+A::__invoke
+A::__invoke
+A::__invoke
+A::__invoke
+A::__invoke
+=============== test_debug =========================
+A::__construct
+A::__set_state(darray[
+])
+A::__debugInfo
+object(A) (0) {
+}
+A::__set_state
+A::__debugInfo
+=============== test_clone =========================
+A::__construct
+A::__clone
+A::__clone
+=============== test_ctor =========================
+A::__construct
+A::__construct
+DONE

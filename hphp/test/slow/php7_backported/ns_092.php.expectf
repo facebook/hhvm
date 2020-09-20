@@ -13,4 +13,4 @@ Foo\Bar\fiz
 Foo\Bar\biz
 Foo\Bar\buz
 
-Fatal error: %s
+Fatal error: Call to undefined function Foo\Bar\A() in %s/ns_092.php on line 45

@@ -1,0 +1,25 @@
+dict(1) {
+  [0]=>
+  string(3) "bcd"
+}
+bool(true)
+dict(1) {
+  [0]=>
+  dict(2) {
+    [0]=>
+    string(3) "bcd"
+    [1]=>
+    string(3) "bzd"
+  }
+}
+bool(true)
+bool(true)
+dict(1) {
+  [0]=>
+  vec(2) {
+    string(3) "def"
+    int(3)
+  }
+}
+bool(true)
+bool(true)

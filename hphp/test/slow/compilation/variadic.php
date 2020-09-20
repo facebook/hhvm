@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 function f(...$args) {}
 function g($required, ...$args) {}
 function h($optional = null, ...$args) {}
 
-function test() {
+<<__EntryPoint>> function test() {
   f();
   g(1);
   h();
@@ -13,4 +13,3 @@ function test() {
   g(1,2,3,4);
   h(1,2,3,4);
 }
-test();

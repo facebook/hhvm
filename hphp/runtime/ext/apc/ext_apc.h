@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_APC_H_
-#define incl_HPHP_EXT_APC_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <set>
@@ -35,21 +34,14 @@ struct apcExtension final : Extension {
   static std::string PrimeLibrary;
   static int LoadThread;
   static std::set<std::string> CompletionKeys;
-  enum class TableTypes {
-    ConcurrentTable
-  };
-  static TableTypes TableType;
   static bool EnableApcSerialize;
-  static int64_t KeyMaturityThreshold;
-  static int64_t MaximumCapacity;
-  static int KeyFrequencyUpdatePeriod;
   static bool ExpireOnSets;
-  static int PurgeFrequency;
-  static int PurgeRate;
   static bool AllowObj;
+  static int PurgeInterval;
   static int TTLLimit;
   static int64_t TTLMaxFinite;
   static std::vector<std::string> HotPrefix;
+  static std::vector<std::string> SerializePrefix;
   static int HotSize;
   static double HotLoadFactor;
   static bool HotKeyAllocLow;
@@ -61,15 +53,23 @@ struct apcExtension final : Extension {
   static int FileStorageAdviseOutPeriod;
   static std::string FileStorageFlagKey;
   static bool FileStorageKeepFileLinked;
-  static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;
+  static bool ShareUncounted;
   static bool Stat;
   static bool EnableCLI;
+  static bool DeferredExpiration;
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
   void moduleInit() override;
   void moduleShutdown() override;
   bool moduleEnabled() const override { return Enable; }
+
+  void requestShutdown() override;
+
+  std::string serialize() override;
+  void deserialize(std::string data) override;
+
+  static void purgeDeferred(req::vector<StringData*>&&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,34 +85,35 @@ Variant HHVM_FUNCTION(apc_store,
 bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
                    const String& key,
                    const Variant& var);
-TypedValue HHVM_FUNCTION(apc_fetch,
-                         const Variant& key,
-                         VRefParam success = uninit_null());
+TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
 Variant HHVM_FUNCTION(apc_delete,
                       const Variant& key);
 bool HHVM_FUNCTION(apc_clear_cache,
                    const String& cache_type = "");
 Variant HHVM_FUNCTION(apc_inc,
                       const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
+                      int64_t step,
+                      bool& success);
 Variant HHVM_FUNCTION(apc_dec,
                       const String& key,
-                      int64_t step = 1,
-                      VRefParam success = uninit_null());
+                      int64_t step,
+                      bool& success);
 bool HHVM_FUNCTION(apc_cas,
                    const String& key,
                    int64_t old_cas,
                    int64_t new_cas);
 Variant HHVM_FUNCTION(apc_exists,
                       const Variant& key);
+bool HHVM_FUNCTION(apc_extend_ttl,
+                   const String& key,
+                   int64_t new_ttl);
+TypedValue HHVM_FUNCTION(apc_size, const String& key);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(apc_cache_info,
-                      const String& cache_type /* = "" */,
-                      bool limited /* = false */);
-Array HHVM_FUNCTION(apc_sma_info,
+Array HHVM_FUNCTION(apc_cache_info,
+                    const String& cache_type /* = "" */,
                     bool limited /* = false */);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -177,17 +178,29 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const Variant& value);
+enum APCSerializeMode {
+  Normal,
+  Prime
+};
+
+String apc_serialize(const_variant_ref value,
+                     APCSerializeMode mode = APCSerializeMode::Normal);
+inline String apc_serialize(const Variant& var,
+                            APCSerializeMode mode = APCSerializeMode::Normal) {
+  return apc_serialize(const_variant_ref{var}, mode);
+}
 Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 bool apc_dump(const char *filename, bool keyOnly, bool metaDump);
+bool apc_dump_prefix(const char *filename,
+                     const std::string &prefix,
+                     uint32_t count);
 size_t get_const_map_size();
 bool apc_get_random_entries(std::ostream &out, uint32_t count);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_APC_H_

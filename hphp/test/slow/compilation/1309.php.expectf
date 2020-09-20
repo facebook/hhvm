@@ -1,14 +1,6 @@
-
-Notice: Undefined index: 3 in %s/test/slow/compilation/1309.php on line 10
-
-Notice: Undefined variable: y in %s/test/slow/compilation/1309.php on line 10
-
-Warning: bar() expects exactly 3 parameters, 2 given in %s/test/slow/compilation/1309.php on line %d
-array(3) {
-  [0]=>
+Out of bounds varray access: invalid index 3
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }

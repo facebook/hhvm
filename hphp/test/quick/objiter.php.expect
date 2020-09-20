@@ -31,22 +31,3 @@ childPub => 40
 basePub => 10
 childDynamic => child dynamic
 
-Anonymous context, Child object, strong foreach
-object(Child)#3 (8) {
-  ["childPub"]=>
-  string(5) "BLARK"
-  ["childProt":protected]=>
-  int(50)
-  ["childPriv":"Child":private]=>
-  int(60)
-  ["basePriv":"Child":private]=>
-  string(16) "child's basePriv"
-  ["basePub"]=>
-  string(5) "BLARK"
-  ["baseProt":protected]=>
-  int(20)
-  ["basePriv":"Base":private]=>
-  int(30)
-  ["dynamic"]=>
-  &string(5) "BLARK"
-}

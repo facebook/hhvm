@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_IPC_H_
-#define incl_HPHP_EXT_IPC_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -41,18 +40,18 @@ bool HHVM_FUNCTION(msg_send,
                    const Resource& queue,
                    int64_t msgtype,
                    const Variant& message,
-                   bool serialize = true,
-                   bool blocking = true,
-                   VRefParam errorcode = uninit_null());
+                   bool serialize,
+                   bool blocking,
+                   Variant& errorcode);
 bool HHVM_FUNCTION(msg_receive,
                    const Resource& queue,
                    int64_t desiredmsgtype,
-                   VRefParam msgtype,
+                   int64_t& msgtype,
                    int64_t maxsize,
-                   VRefParam message,
-                   bool unserialize = true,
-                   int64_t flags = 0,
-                   VRefParam errorcode = uninit_null());
+                   Variant& message,
+                   bool unserialize,
+                   int64_t flags,
+                   Variant& errorcode);
 bool HHVM_FUNCTION(msg_remove_queue,
                    const Resource& queue);
 bool HHVM_FUNCTION(msg_set_queue,
@@ -105,4 +104,3 @@ bool HHVM_FUNCTION(shm_remove_var,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_IPC_H_

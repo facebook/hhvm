@@ -1,9 +1,7 @@
-array(3) {
+darray(3) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(5) "green"
-    [1]=>
     string(3) "red"
   }
   [1]=>
@@ -11,12 +9,10 @@ array(3) {
   [2]=>
   string(3) "php"
 }
-array(3) {
+darray(3) {
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(5) "green"
-    [1]=>
     string(3) "red"
   }
   [1]=>
@@ -24,7 +20,7 @@ array(3) {
   [0]=>
   string(3) "php"
 }
-array(3) {
+darray(3) {
   ["blab"]=>
   string(1) "b"
   [0]=>

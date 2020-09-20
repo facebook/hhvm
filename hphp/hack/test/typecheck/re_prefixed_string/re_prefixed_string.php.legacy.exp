@@ -1,0 +1,38 @@
+File "re_prefixed_string.php", line 18, characters 16-17:
+Invalid argument (Typing[4110])
+File "re_prefixed_string.php", line 21, characters 43-65:
+This is an object of type HH\Lib\Regex\Pattern<[unresolved]>
+File "re_prefixed_string.php", line 15, characters 8-20:
+It is incompatible with a string because this is the result of a concatenation
+File "re_prefixed_string.php", line 28, characters 13-35:
+Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
+File "re_prefixed_string.php", line 29, characters 13-29:
+Bad regex pattern; group name must start with a non-digit [5]. (Typing[4275])
+File "re_prefixed_string.php", line 30, characters 13-18:
+Bad regex pattern; \c at end of pattern [2]. (Typing[4275])
+File "re_prefixed_string.php", line 37, characters 16-35:
+Strings with embedded expressions are not allowed to be to be `re`-prefixed (Typing[4274])
+File "re_prefixed_string.php", line 43, characters 13-19:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 45, characters 13-20:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 47, characters 13-21:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 48, characters 13-20:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 51, characters 13-21:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 53, characters 14-24:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 54, characters 14-21:
+Bad regex pattern; Missing delimiter(s). (Typing[4275])
+File "re_prefixed_string.php", line 64, characters 13-23:
+Bad regex pattern; Invalid global option(s). (Typing[4275])
+File "re_prefixed_string.php", line 65, characters 13-30:
+Bad regex pattern; Invalid global option(s). (Typing[4275])
+File "re_prefixed_string.php", line 72, characters 13-62:
+Bad regex pattern; Invalid global option(s). (Typing[4275])
+File "re_prefixed_string.php", line 73, characters 13-68:
+Bad regex pattern; missing ) [52]. (Typing[4275])
+File "re_prefixed_string.php", line 77, characters 14-15:
+Bad regex pattern; This pattern is empty. (Typing[4275])

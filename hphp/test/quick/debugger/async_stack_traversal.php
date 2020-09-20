@@ -23,17 +23,20 @@ async function genBar($a) {
 async function genFoo($a) {
   $v1 = "v1-genFoo";
   $a++;
-  await AwaitAllWaitHandle::fromArray(
-    array(
+  await AwaitAllWaitHandle::fromVec(
+    vec[
       genBar($a),
       gen2($a + 2),
       gen2($a + 3)
-    )
+    ]
   );
 }
 
 function main($a) {
   HH\Asio\join(genFoo($a));
 }
+<<__EntryPoint>>
+function entrypoint_async_stack_traversal(): void {
 
-main(42);
+  main(42);
+}

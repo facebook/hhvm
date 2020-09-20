@@ -1,9 +1,9 @@
 int(1)
 
-Warning: %s
+Warning: supplied key param cannot be coerced into a public key in %s/019.php on line %d
 bool(false)
 
-Warning: %s
+Warning: supplied key param cannot be coerced into a public key in %s/019.php on line %d
 bool(false)
 int(0)
 int(0)

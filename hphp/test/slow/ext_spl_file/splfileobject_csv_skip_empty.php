@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_splfileobject_csv_skip_empty() {
 $fo = new SplFileObject(__DIR__.'/csv.csv');
 $fo->setFlags(SplFileObject::SKIP_EMPTY |
               SplFileObject::DROP_NEW_LINE |
@@ -9,4 +12,5 @@ $fo->setCsvControl(';');
 
 foreach ($fo as $key=>$val) {
   var_dump($val);
+}
 }

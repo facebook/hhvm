@@ -1,0 +1,9 @@
+int(16)
+string(%d) "%s/phpism/undefined_const5.php"
+string(%d) "%s/phpism"
+string(8) "Foo\main"
+string(3) "Foo"
+string(5) "hackc"
+string(5) "Foo\C"
+string(5) "Foo\T"
+string(8) "Foo\T::f"

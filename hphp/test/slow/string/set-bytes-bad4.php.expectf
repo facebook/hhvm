@@ -1,0 +1,2 @@
+
+Fatal error: Call to undefined function HH\set_bytes_string_vec() in %s/test/slow/string/set-bytes-bad4.php on line 7

@@ -1,4 +1,3 @@
-<?php
+<?hh
 namespace Foo;
-echo Foo::bar."\n";
-?>
+<<__EntryPoint>> function main(): void { echo Foo::bar."\n"; }

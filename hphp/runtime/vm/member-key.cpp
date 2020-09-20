@@ -40,7 +40,7 @@ const char* memberCodeString(MemberCode mcode) {
   static_assert(
       std::is_unsigned<typename std::underlying_type<MemberCode>::type>::value,
       "MemberCode is expected to be unsigned.");
-  assert(mcode < NumMemberCodes);
+  assertx(mcode < NumMemberCodes);
   return memberNames[mcode];
 }
 
@@ -57,8 +57,11 @@ std::string show(MemberKey mk) {
   std::string ret = memberCodeString(mk.mcode);
 
   switch (mk.mcode) {
-    case MEL: case MEC: case MPL: case MPC:
+    case MEC: case MPC:
       folly::toAppend(':', mk.iva, &ret);
+      break;
+    case MEL: case MPL:
+      folly::toAppend(':', mk.local.name, ':', mk.local.id, &ret);
       break;
     case MEI:
       folly::toAppend(':', mk.int64, &ret);

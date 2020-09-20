@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function test(): int {
   $w = 0;

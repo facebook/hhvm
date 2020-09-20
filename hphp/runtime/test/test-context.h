@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TEST_CONTEXT_H_
-#define incl_HPHP_TEST_CONTEXT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -24,11 +23,10 @@ namespace HPHP { namespace jit {
 
 // A TransContext for use in tests.
 const auto test_context =
-  TransContext { kInvalidTransID, TransKind::Live, TransFlags{},
-                 SrcKey{}, FPInvOffset{0} };
+  TransContext { TransIDSet{}, TransKind::Live, TransFlags{},
+                 SrcKey{}, FPInvOffset{0}, 0, nullptr };
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

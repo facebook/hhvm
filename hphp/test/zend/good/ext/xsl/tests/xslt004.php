@@ -1,6 +1,7 @@
-<?php
+<?hh
 echo "Test 4: Checking UTF8 Output";
 include("prepare.inc");
+$xsl = XSLTPrepare::getXSL();
 $xp = new domxpath($xsl);
 $res = $xp->query("/xsl:stylesheet/xsl:output/@encoding");
 if ($res->length != 1) {
@@ -8,9 +9,10 @@ if ($res->length != 1) {
     exit;
 }
 $res->item(0)->value = "utf-8";
+$proc = XSLTPrepare::getProc();
 $proc->importStylesheet($xsl);
 print "\n";
-print $proc->transformToXml($dom);
+print $proc->transformToXml(XSLTPrepare::getDOM());
 print "\n";
 
 

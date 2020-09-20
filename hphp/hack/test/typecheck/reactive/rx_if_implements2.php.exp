@@ -1,0 +1,2 @@
+File "rx_if_implements2.php", line 6, characters 16-29:
+The `__OnlyRxIfImpl` attribute cannot be used on a function. (Typing[4231])

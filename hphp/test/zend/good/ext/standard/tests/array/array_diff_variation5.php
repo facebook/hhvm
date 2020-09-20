@@ -1,20 +1,20 @@
-<?php
+<?hh
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not 
- * present in any of the others arguments. 
+ * Description: Returns the entries of $arr1 that have values which are not
+ * present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
 /*
  * Test how array_diff compares integers, floats and strings
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_diff() : usage variations ***\n";
 
-$arr_int = array(1, 2, 3);
-$arr_float = array(1.00, 2.00, 3.00);
-$arr_int_str = array('1', '2', '3');
-$arr_float_str = array('1.00', '2.00', '3.00');	
+$arr_int = varray[1, 2, 3];
+$arr_float = varray[1.00, 2.00, 3.00];
+$arr_int_str = varray['1', '2', '3'];
+$arr_float_str = varray['1.00', '2.00', '3.00'];
 
 print "-- Compare integers and floats: --\n";
 var_dump(array_diff($arr_int, $arr_float));
@@ -43,4 +43,4 @@ var_dump(array_diff($arr_int_str, $arr_float_str));
 var_dump(array_diff($arr_float_str, $arr_int_str));
 
 echo "Done";
-?>
+}

@@ -1,15 +1,5 @@
 <?hh
 
-$inputs = array(
-  array('1', '2', '10'),
-  array('y', 'k', 'i'),
-);
-
-$locales = array(
-  'en_US',
-  'lt_LT',
-);
-
 function sort_key_cmp(Collator $c, string $a, string $b) {
   $ka = $c->getSortKey($a);
   $kb = $c->getSortKey($b);
@@ -22,17 +12,31 @@ function sort_key_cmp(Collator $c, string $a, string $b) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_get_sort_key() {
+$inputs = varray[
+  varray['1', '2', '10'],
+  varray['y', 'k', 'i'],
+];
+
+$locales = varray[
+  'en_US',
+  'lt_LT',
+];
+
 foreach ($inputs as $input) {
   foreach ($locales as $locale) {
     $c = new Collator($locale);
-    usort($input, function($a, $b) use ($c) {
+    usort(inout $input, function($a, $b) use ($c) {
       return sort_key_cmp($c, $a, $b);
     });
-    var_dump(array($locale => $input));
+    var_dump(darray[$locale => $input]);
     $c->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
-    usort($input, function($a, $b) use ($c) {
+    usort(inout $input, function($a, $b) use ($c) {
       return sort_key_cmp($c, $a, $b);
     });
-    var_dump(array($locale.' numeric' => $input));
+    var_dump(darray[$locale.' numeric' => $input]);
   }
+}
 }

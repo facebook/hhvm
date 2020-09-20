@@ -1,0 +1,13 @@
+string(7) "B::test"
+string(7) "A::test"
+---
+string(7) "T::test"
+class_meth('T', 'test')
+---
+string(7) "D::test"
+class_meth('C', 'test')
+string(7) "C::test"
+class_meth('C', 'test')
+---
+---
+Done

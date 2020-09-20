@@ -1,0 +1,10 @@
+darray(1) {
+  ["kind"]=>
+  int(1)
+}
+darray(2) {
+  ["kind"]=>
+  int(15)
+  ["classname"]=>
+  string(1) "C"
+}

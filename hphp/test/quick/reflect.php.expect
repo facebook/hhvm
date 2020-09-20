@@ -10,13 +10,12 @@ bool(false)
 string(17) "HH\vec<HH\string>"
 bool(false)
 string(11) "HH\vec<Foo>"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(20)
   ["generic_types"]=>
-  array(1) {
-    [0]=>
-    array(1) {
+  varray(1) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }

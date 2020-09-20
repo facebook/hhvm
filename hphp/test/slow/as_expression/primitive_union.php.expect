@@ -1,0 +1,21 @@
+int(1)
+not num: boolean
+float(1.5)
+not num: string
+not num: resource
+not num: object
+not num: vec
+not num: dict
+not num: keyset
+not num: NULL
+
+int(1)
+not arraykey: boolean
+not arraykey: double
+string(3) "foo"
+not arraykey: resource
+not arraykey: object
+not arraykey: vec
+not arraykey: dict
+not arraykey: keyset
+not arraykey: NULL

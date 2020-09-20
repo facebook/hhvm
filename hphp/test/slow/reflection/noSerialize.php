@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 
 /** Yay */
 class A {
@@ -6,4 +6,8 @@ class A {
     throw new Exception();
   }
 }
+
+<<__EntryPoint>>
+function main_no_serialize() {
 var_dump((new ReflectionClass(new A))->getDocComment());
+}

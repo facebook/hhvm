@@ -1,27 +1,23 @@
 
-Warning: %s
+Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s/gmp_abs.php on line 3
 string(1) "0"
 string(1) "0"
 string(1) "0"
-
-Warning: %s
-string(1) "0"
+string(19) "1111111111111111111"
 string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(1) "0"
 
-Warning: %s
+Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s/gmp_abs.php on line 10
 string(1) "0"
 
-Warning: %s
+Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s/gmp_abs.php on line 11
 string(1) "0"
 
-Warning: %s
-NULL
+Warning: gmp_abs() expects exactly 1 parameter, 0 given in %s/gmp_abs.php on line 13
 
-Warning: %s
-NULL
+Warning: gmp_abs() expects exactly 1 parameter, 2 given in %s/gmp_abs.php on line 14
 
-Warning: %s
+Warning: gmp_abs(): Unable to convert variable to GMP - wrong type in %s/gmp_abs.php on line 15
 bool(false)
 Done

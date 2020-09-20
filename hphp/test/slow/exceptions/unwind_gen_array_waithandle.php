@@ -9,9 +9,8 @@ class E1 extends Exception {
       self::$e = $this;
     }
   }
-  function __destruct() { var_dump(__METHOD__); }
 
-  function rethrow() {
+  static function rethrow() {
     $e = self::$e;
     self::$e = null;
     throw $e;
@@ -29,7 +28,7 @@ async function fuz() {
 }
 
 function baz() {
-  return AwaitAllWaitHandle::fromArray(array(fuz(), fuz()));
+  return AwaitAllWaitHandle::fromVec(vec[fuz(), fuz()]);
 }
 
 async function bar() {
@@ -46,4 +45,8 @@ function test() {
   \HH\Asio\join(bar());
 }
 
+
+<<__EntryPoint>>
+function main_unwind_gen_array_waithandle() {
 test();
+}

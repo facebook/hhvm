@@ -12,6 +12,8 @@ set(HHVM_INCLUDE_DIRS "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 foreach(dir ${SOURCE_INCLUDE_DIRS})
   if(dir STREQUAL "${HPHP_HOME}/third-party/folly")
     # omit: PREFIX/third-party is a suitable path
+  elseif(dir STREQUAL "${HPHP_HOME}/third-party/boost")
+      # omit: PREFIX/third-party is a suitable path
   elseif(dir STREQUAL "${HPHP_HOME}/third-party/double-conversion/src")
     # omit: PREFIX/third-party is a suitable path
   elseif(dir STREQUAL "${HPHP_HOME}")

@@ -1,6 +1,6 @@
 <?hh
-
-define('SYMONE', 1);
+const SYMONE = 1;
+<<__EntryPoint>> function main(): void {
 $l0 = 1;
 $l1 = $l0 + 1;
 $l2 = $l1 + $l0 + 1;
@@ -23,4 +23,4 @@ $l16 = $l15 + $l14 + $l13 + $l12 + $l11 + $l10 + $l9 + $l8 + $l7 + $l6 + $l5 + $
 $l0 = $l16 + SYMONE;
 
 echo $l0;
-
+}

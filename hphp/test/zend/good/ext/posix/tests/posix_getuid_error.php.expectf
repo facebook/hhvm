@@ -2,6 +2,5 @@
 
 -- Testing posix_getuid() function with one argument --
 
-Warning: %s
-NULL
+Warning: posix_getuid() expects exactly 0 parameters, 1 given in %s/posix_getuid_error.php on line 13
 Done

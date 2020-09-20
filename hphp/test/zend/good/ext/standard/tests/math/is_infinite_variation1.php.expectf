@@ -1,19 +1,24 @@
 *** Testing is_infinite() : usage variations ***
 
 -- Iteration 1 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 2 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 3 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 4 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 5 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 6 --
 bool(false)
@@ -31,66 +36,66 @@ bool(false)
 bool(false)
 
 -- Iteration 11 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 12 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 13 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 14 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 15 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 16 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 24 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 25 --
-bool(false)
+
+Warning: is_infinite() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: is_infinite() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/is_infinite_variation1.php on line 79
 ===Done===

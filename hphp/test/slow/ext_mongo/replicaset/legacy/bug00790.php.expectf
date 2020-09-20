@@ -1,2 +1,0 @@
-string(%d) "%s:%d: timeout"
-int(4)

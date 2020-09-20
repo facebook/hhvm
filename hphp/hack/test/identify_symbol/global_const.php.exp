@@ -1,4 +1,5 @@
-name: \FOO, kind: global_const, span: line 6, characters 3-5, definition: 
+name: \FOO, kind: global_const, span: line 6, characters 3-5, is_declaration: false
+definition:
  FOO
    kind: const
    id: class_const::FOO

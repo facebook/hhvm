@@ -14,11 +14,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_CONSTRAINT_H_
-#define incl_HPHP_TYPE_CONSTRAINT_H_
+#pragma once
 
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/functional.h"
@@ -40,7 +40,7 @@ namespace HPHP {
  * function or method parameter typehint at runtime.
  */
 struct TypeConstraint {
-  enum Flags : uint8_t {
+  enum Flags : uint16_t {
     NoFlags = 0x0,
 
     /*
@@ -48,12 +48,6 @@ struct TypeConstraint {
      * or null.
      */
     Nullable = 0x1,
-
-    /*
-     * This flag indicates either EnableHipHopSyntax was true, or the
-     * type came from a <?hh file and EnableHipHopSyntax was false.
-     */
-    HHType = 0x2,
 
     /*
      * Extended hints are hints that do not apply to normal, vanilla
@@ -99,7 +93,19 @@ struct TypeConstraint {
      * Indicates that no mock object can satisfy this constraint.  This is
      * resolved by HHBBC.
      */
-    NoMockObjects = 0x80
+    NoMockObjects = 0x80,
+
+    /*
+     * Indicates that a type-constraint should be displayed as nullable (even if
+     * isNullable()) is false. This is used to maintain proper display of
+     * type-constraints even when resolved.
+     */
+    DisplayNullable = 0x100,
+
+    /*
+     * Indicates that a type-constraint came from an upper-bound constraint.
+     */
+    UpperBound = 0x200,
   };
 
   /*
@@ -126,7 +132,6 @@ struct TypeConstraint {
     , m_typeName(typeName)
     , m_namedEntity(nullptr)
   {
-    assert(!(flags & Flags::Resolved));
     init();
   }
 
@@ -147,8 +152,7 @@ struct TypeConstraint {
   TypeConstraint& operator=(const TypeConstraint&) = default;
 
   void resolveType(AnnotType t, bool nullable) {
-    assert(m_type == AnnotType::Object);
-    assert(t != AnnotType::Object);
+    assertx(m_type == AnnotType::Object);
     auto flags = m_flags | Flags::Resolved;
     if (nullable) flags |= Flags::Nullable;
     m_flags = static_cast<Flags>(flags);
@@ -158,6 +162,10 @@ struct TypeConstraint {
   void setNoMockObjects() {
     auto flags = m_flags | Flags::NoMockObjects;
     m_flags = static_cast<Flags>(flags);
+  }
+
+  void addFlags(Flags flags) {
+    m_flags = static_cast<Flags>(m_flags | flags);
   }
 
   /*
@@ -183,13 +191,7 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
-    if (isVArray() || isDArray() || isVArrayOrDArray()) {
-      return KindOfArray;
-    }
-    auto const dt = getAnnotDataType(m_type);
-    return (dt != KindOfUninit || isPrecise())
-      ? MaybeDataType(dt)
-      : folly::none;
+    return isPrecise() ? MaybeDataType(getAnnotDataType(m_type)) : folly::none;
   }
 
   /*
@@ -199,15 +201,43 @@ struct TypeConstraint {
   MaybeDataType underlyingDataTypeResolved() const;
 
   /*
+   * Check if this TypeConstraint *might* imply a runtime check. If it returns
+   * false, it definitely doesn't. If it returns true, it might still be a mixed
+   * type at runtime (because of a type-alias for example).
+   */
+  bool isCheckable() const {
+    return hasConstraint()
+        && !isMixed()
+        && !isTypeVar()
+        && !isTypeConstant()
+        && !(isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 0);
+  }
+
+  /*
+   * Check if this TypeConstraint definitely does not require a runtime check
+   * (equivalent to mixed). This may invoke the autoloader and will resolve
+   * type-aliases, so is exact.
+   */
+  bool isMixedResolved() const;
+
+  /*
+   * Check if this TypeConstraint may not require a runtime check (equivalent to
+   * mixed). If it returns false, it definitely is not. If it returns true, it
+   * still might not be (because of a type-alias for example). This will not
+   * invoke the autoloader.
+   */
+  bool maybeMixed() const;
+
+  /*
    * Predicates for various properties of the type constraint.
    */
   bool isNullable() const { return m_flags & Nullable; }
   bool isSoft()     const { return m_flags & Soft; }
-  bool isHHType()   const { return m_flags & HHType; }
   bool isExtended() const { return m_flags & ExtendedHint; }
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
   bool isResolved() const { return m_flags & Resolved; }
+  bool isUpperBound() const { return m_flags & UpperBound; }
   bool couldSeeMockObject() const { return !(m_flags & NoMockObjects); }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
@@ -217,23 +247,59 @@ struct TypeConstraint {
   bool isParent()   const { return m_type == Type::Parent; }
   bool isCallable() const { return m_type == Type::Callable; }
   bool isNumber()   const { return m_type == Type::Number; }
+  bool isNothing()  const { return m_type == Type::Nothing; }
+  bool isNoReturn() const { return m_type == Type::NoReturn; }
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
+  bool isArrayLike() const { return m_type == Type::ArrayLike; }
 
-  bool isArray()    const {
-    return m_type == Type::Array ||
-      isVArray() || isDArray() || isVArrayOrDArray();
+  bool isArray() const {
+    return isVArray() || isDArray() || isVArrayOrDArray();
   }
-  bool isDict()     const { return m_type == Type::Dict; }
-  bool isVec()      const { return m_type == Type::Vec; }
+  bool isDict() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));
+    return m_type == Type::Dict;
+  }
+  bool isVec() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArray));
+    return m_type == Type::Vec;
+  }
+  bool isVecOrDict() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
+    return m_type == Type::VecOrDict;
+  }
+
   bool isKeyset()   const { return m_type == Type::Keyset; }
-
   bool isObject()   const { return m_type == Type::Object; }
+  bool isInt()      const { return m_type == Type::Int; }
+  bool isString()   const { return m_type == Type::String; }
+  bool isRecord()   const { return m_type == Type::Record; }
 
-  bool isVArray()   const { return m_type == Type::VArray; }
-  bool isDArray()   const { return m_type == Type::DArray; }
-  bool isVArrayOrDArray() const { return m_type == Type::VArrOrDArr; }
+  bool isVArray() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArray));
+    return m_type == Type::VArray;
+  }
+  bool isDArray()   const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));
+    return m_type == Type::DArray;
+  }
+  bool isVArrayOrDArray() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
+    return m_type == Type::VArrOrDArr;
+  }
+
+  // Returns true if we should convert a ClsMeth to a varray for this typehint.
+  bool convertClsMethToArrLike() const;
 
   AnnotType type()  const { return m_type; }
+
+  bool validForProp() const {
+    return !isSelf() && !isParent() && !isCallable() && !isNothing() && !isNoReturn();
+  }
+
+  bool validForRecField() const {
+    return !isSelf() && !isParent() && !isCallable() && !isNothing() &&
+           !isNoReturn() && !isThis();
+  }
 
   /*
    * A string representation of this type constraint.
@@ -243,70 +309,158 @@ struct TypeConstraint {
     if (isSoft()) {
       name += '@';
     }
-    if (isNullable() && isExtended()) {
+    if ((m_flags & Flags::DisplayNullable) && isExtended()) {
       name += '?';
     }
     name += m_typeName->data();
-    if (isNullable() && !isExtended()) {
+    if ((m_flags & Flags::DisplayNullable) && !isExtended()) {
       name += " (defaulted to null)";
     }
     return name;
   }
 
-  std::string displayName(const Func* func = nullptr, bool extra = false) const;
+  /*
+   * Format this TypeConstraint for display to the user. Context is used to
+   * optionally resolve Self, Parent, and This to their class names. Extra will
+   * cause the resolved type (if any) to be appended to the name.
+   */
+  std::string displayName(const Class* context = nullptr,
+                          bool extra = false) const;
 
   /*
-   * Returns: whether two TypeConstraints are compatible, in the sense
-   * required for PHP inheritance where a method with parameter
-   * typehints is overridden.
+   * Obtain an initial value suitable for this type-constraint. Where possible,
+   * the initial value is chosen to satisfy the type-constraint, but this isn't
+   * always possible (for example, for objects).
    */
-  bool compat(const TypeConstraint& other) const;
-
-  // General check for any constraint.
-  bool check(TypedValue* tv, const Func* func) const;
-
-  bool checkTypeAliasObj(const Class* cls) const;
-  bool checkTypeAliasNonObj(const TypedValue* tv) const;
-
-  // NB: will throw if the check fails.
-  void verifyParam(TypedValue* tv, const Func* func, int paramNum,
-                   bool useStrictTypes = true) const {
-    if (UNLIKELY(!check(tv, func))) {
-      verifyParamFail(func, tv, paramNum, useStrictTypes);
-    }
-  }
-  void verifyReturn(TypedValue* tv, const Func* func,
-                    bool useStrictTypes = true) const {
-    if (UNLIKELY(!check(tv, func))) {
-      verifyReturnFail(func, tv, useStrictTypes);
-    }
-  }
-  void verifyReturnNonNull(TypedValue* tv, const Func* func,
-                           bool useStrictTypes = true) const;
-  void verifyOutParam(TypedValue* tv, const Func* func, int paramNum) const {
-    if (UNLIKELY(!check(tv, func))) {
-      verifyOutParamFail(func, tv, paramNum);
-    }
+  TypedValue defaultValue() const {
+    // Nullable type-constraints should always default to null, as Hack
+    // guarantees this.
+    if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
+    return annotDefaultValue(m_type);
   }
 
-  // Can not be private; used by the translator.
-  void selfToClass(const Func* func, const Class **cls) const;
-  void thisToClass(const Class **cls) const;
-  void parentToClass(const Func* func, const Class **cls) const;
-  void verifyFail(const Func* func, TypedValue* tv, int id,
-                  bool useStrictTypes) const;
-  void verifyParamFail(const Func* func, TypedValue* tv,
-                       int paramNum, bool useStrictTypes = true) const;
-  void verifyOutParamFail(const Func* func, TypedValue* tv, int paramNum) const;
-  void verifyReturnFail(const Func* func, TypedValue* tv,
-                        bool useStrictTypes = true) const {
-    verifyFail(func, tv, ReturnId, useStrictTypes);
+  /*
+   * Returns whether this and another type-constraint might not be equivalent at
+   * runtime. Two type-constraints are equivalent if they allow exactly the same
+   * values. This function is conservative and will return true if not
+   * sure. This function will not autoload or check loaded classes of
+   * type-aliases. Only meant for property type-hints.
+   */
+  bool maybeInequivalentForProp(const TypeConstraint& other) const;
+
+  /*
+   * Returns whether this and another type-constraint are definitely
+   * equivalent. Unlike maybeInequivalentForProp(), this function is exact and
+   * can autoload. Only meant for property type-hints.
+   */
+  bool equivalentForProp(const TypeConstraint& other) const;
+
+  /*
+   * Normal check if this type-constraint is compatible with the given value
+   * (using the given context). This can invoke the autoloader and is always
+   * exact. This should not be used for property type-hints (which behave
+   * slightly differently) and the context is required. The context determines
+   * the meaning of Self, Parent, and This type-constraints.
+   */
+  bool check(tv_rval val, const Class* context) const {
+    return checkImpl<CheckMode::Exact>(val, context);
   }
+
+  /*
+   * Assert that this type-constraint is compatible with the given value. This
+   * is meant for use in assertions and is conservative. It will not invoke the
+   * autoloader, but can consult already loaded classes or type-aliases. It will
+   * only return false if the value definitely does not satisfy the
+   * type-constraint, true otherwise.
+   */
+  bool assertCheck(tv_rval val) const {
+    return checkImpl<CheckMode::Assert>(val, nullptr);
+  }
+
+  /*
+   * Check if this type-constraint is compatible with the given value in *all
+   * contexts*. That is, regardless of which classes or type-aliases might be
+   * loaded. A type which passes this check will never need to be checked at
+   * run-time. This will utilize persistent classes but nothing else.
+   */
+  bool alwaysPasses(tv_rval val) const {
+    if (!isCheckable()) return true;
+    return checkImpl<CheckMode::AlwaysPasses>(val, nullptr);
+  }
+  // Same as the above, but uses a type instead of an actual value. The
+  // StringData* variant is for objects.
+  bool alwaysPasses(const StringData* clsName) const;
+  bool alwaysPasses(DataType dt) const;
+
+  bool checkTypeAliasObj(const Class* cls) const {
+    return checkTypeAliasImpl<Class, false>(cls);
+  }
+
+  bool checkTypeAliasRecord(const RecordDesc* rec) const {
+    return checkTypeAliasImpl<RecordDesc, false>(rec);
+  }
+
+  // NB: Can throw if the check fails.
+  void verifyParam(tv_lval val, const Func* func, int paramNum) const;
+  void verifyReturn(TypedValue* tv, const Func* func) const;
+  void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
+  void verifyOutParam(TypedValue* tv, const Func* func,
+                      int paramNum) const;
+  // TODO(T61738946): We can take a tv_rval here once we remove support for
+  // coercing class_meth types.
+  void verifyProperty(tv_lval val,
+                      const Class* thisCls,
+                      const Class* declCls,
+                      const StringData* propName) const;
+  void verifyStaticProperty(tv_lval val,
+                            const Class* thisCls,
+                            const Class* declCls,
+                            const StringData* propName) const;
+  void verifyRecField(tv_rval val,
+                   const StringData* recordName,
+                   const StringData* fieldName) const;
+
+  void verifyFail(const Func* func, tv_lval val, int id) const;
+  void verifyParamFail(const Func* func, tv_lval val, int paramNum) const;
+  void verifyOutParamFail(const Func* func, TypedValue* tv,
+                          int paramNum) const;
+  void verifyReturnFail(const Func* func, TypedValue* tv) const {
+    verifyFail(func, tv, ReturnId);
+  }
+  // TODO(T61738946): We can take a tv_rval here once we remove support for
+  // coercing class_meth types.
+  void verifyPropFail(const Class* thisCls, const Class* declCls,
+                      tv_lval val, const StringData* propName,
+                      bool isStatic) const;
+  void verifyRecFieldFail(tv_rval val,
+                       const StringData* recordName,
+                       const StringData* fieldName) const;
 
 private:
   void init();
-  void selfToTypeName(const Func* func, const StringData **typeName) const;
-  void parentToTypeName(const Func* func, const StringData **typeName) const;
+
+  enum class CheckMode {
+    Exact, // Do an exact check with autoloading
+    ExactProp, // Do an exact prop check with autoloading
+    ExactRecField, // Do an exact record field check with autoloading
+    AlwaysPasses, // Don't check environment at all. Return false if not sure.
+    Assert // Check loaded classes/type-aliases, but don't autoload. Return true
+           // if not sure.
+  };
+
+  template <CheckMode>
+  bool checkImpl(tv_rval val, const Class* context) const;
+
+  template <bool, bool>
+  bool checkNamedTypeNonObj(tv_rval val) const;
+
+  template <typename T, bool>
+  bool checkTypeAliasImpl(const T* type) const;
+
+  void verifyFail(const Func* func, TypedValue* tv, int id,
+                  bool useStrictTypes) const;
+
+  bool checkStringCompatible() const;
 
 private:
   // m_type represents the type to check on.  We don't know whether a
@@ -344,7 +498,6 @@ operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
  * enforced. If they are not, then none of this information can be used.
  */
 enum class MemoKeyConstraint {
-  Null,
   Int,
   IntOrNull,
   Bool,
@@ -352,12 +505,49 @@ enum class MemoKeyConstraint {
   Str,
   StrOrNull,
   IntOrStr,
+  Dbl,
+  DblOrNull,
+  Object,
+  ObjectOrNull,
   None
 };
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
-const char* describe_actual_type(const TypedValue* tv, bool isHHType);
+std::string describe_actual_type(tv_rval val);
 
+bool tcCouldBeReified(const Func*, uint32_t);
+
+/*
+ * Check if the result of a SetOp needs to be checked against the property's
+ * type-hint. If we do, we'll have to perform the SetOp on a temporary, do the
+ * check, then move it into the final location. Otherwise we can just do the
+ * SetOp in place.
+ *
+ * For now we only elide the type-check for concats when the lhs is already a
+ * string or the type-hint always allows strings (since a concat always produces
+ * a string). This is more than a minor optimization. If we do the concat on a
+ * temporary, it will increase the ref-count of the target, meaning the concat
+ * will trigger a COW. This can be a major performance hit if the target is
+ * large.
+ */
+inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
+                                SetOpOp op,
+                                tv_rval lhs) {
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0 || !tc.isCheckable()) {
+    return false;
+  }
+  if (RuntimeOption::EvalEnforceGenericsUB <= 0 && tc.isUpperBound()) {
+    return false;
+  }
+  if (op != SetOpOp::ConcatEqual) return true;
+  // If the target of the concat is already a string, or the type-hint always
+  // allows a string, we don't need a check because the concat will always
+  // produce a string, regardless of the rhs.
+  if (LIKELY(isStringType(type(lhs)))) return false;
+  return !tc.alwaysPasses(KindOfString);
 }
 
-#endif
+// Add all flags in tc (except TypeVar) to ub
+void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc);
+}
+

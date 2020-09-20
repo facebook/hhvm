@@ -63,4 +63,8 @@ function main() {
   var_dump(test5(null));
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_nullsafe_call_1() {
 main();
+}

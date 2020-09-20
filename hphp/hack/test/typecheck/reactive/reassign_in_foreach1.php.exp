@@ -1,0 +1,2 @@
+File "reassign_in_foreach1.php", line 12, characters 17-18:
+Cannot assign immutable value to mutably-owned local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

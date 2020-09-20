@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   function foo() {
@@ -26,10 +26,14 @@ class X {
     yield $arg;
   }
 }
+
+<<__EntryPoint>>
+function main_1757() {
 $x = new X;
 $x->foo();
 $x->bar(new stdClass);
 $x->bar($x);
 foreach ($x->baz($x) as $v) {
   var_dump($v);
+}
 }

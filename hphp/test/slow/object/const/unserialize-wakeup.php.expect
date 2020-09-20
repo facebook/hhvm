@@ -1,0 +1,33 @@
+object(D) (2) {
+  ["i"]=>
+  int(1)
+  ["c"]=>
+  object(C) (1) {
+    ["i"]=>
+    int(2)
+  }
+}
+-- in C::__wakeup --
+-- in D::__wakeup --
+Cannot modify const property i of class C after construction
+-- after unserialize --
+object(D) (2) {
+  ["i"]=>
+  int(2)
+  ["c"]=>
+  object(C) (1) {
+    ["i"]=>
+    int(3)
+  }
+}
+Cannot modify const property i of class D after construction
+Cannot modify const property i of class C after construction
+object(D) (2) {
+  ["i"]=>
+  int(2)
+  ["c"]=>
+  object(C) (1) {
+    ["i"]=>
+    int(3)
+  }
+}

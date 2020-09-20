@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_DCE_H_
-#define incl_HHBBC_DCE_H_
+#pragma once
 
 #include <vector>
 
@@ -24,27 +23,29 @@
 
 namespace HPHP { namespace HHBBC {
 
+//////////////////////////////////////////////////////////////////////
+
+namespace php { struct WideFunc; }
+
+struct FuncAnalysis;
 struct Index;
 struct State;
-struct Context;
-struct Bytecode;
-struct FuncAnalysis;
-struct CollectedInfo;
-namespace php { struct Block; }
+struct VisitContext;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * Perform DCE on a single basic block.
  */
-void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
-               borrowed_ptr<php::Block>, const State&);
+void local_dce(VisitContext& visit, BlockId bid, const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on
  * results from a previous analyze_func call.
+ *
+ * Returns true if we should re-run the optimizer.
  */
-void global_dce(const Index&, const FuncAnalysis&);
+bool global_dce(const Index&, const FuncAnalysis&, php::WideFunc&);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -55,4 +56,3 @@ const StaticString s_unreachable("static analysis error: supposedly "
 
 }}
 
-#endif

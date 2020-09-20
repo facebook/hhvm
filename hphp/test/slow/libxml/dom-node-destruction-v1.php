@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. http://3v4l.org/T1JaE
 
 class MyElement extends DOMElement {
@@ -10,10 +10,6 @@ class MyElement extends DOMElement {
     echo "Initializing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
 
     return $this;
-  }
-
-  function __destruct() {
-    echo "Destructing DOMElement #" . $this->id . ": "  . $this->tagName . "\n";
   }
 
   function info() {
@@ -31,7 +27,7 @@ function foo() {
   $dom->appendChild($dom->createElement('bar')->init());
 
   echo "Leave foo()\n";
-  return [$dom, $child];
+  return varray[$dom, $child];
 }
 
 function bar() {
@@ -43,8 +39,13 @@ function bar() {
     $foo->info();
   }
   echo "Leave bar()\n";
+  __hhvm_intrinsics\launder_value($c);
 }
 
+
+<<__EntryPoint>>
+function main_dom_node_destruction_v1() {
 echo "Enter main()\n";
 bar();
 echo "Leave main()\n";
+}

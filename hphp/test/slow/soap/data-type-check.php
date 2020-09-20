@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MySoapClient extends SoapClient {
   public function __doRequest(
@@ -23,20 +23,24 @@ class MySoapClient extends SoapClient {
   }
 }
 
+class BodyType {}
+
+
+<<__EntryPoint>>
+function main_data_type_check() {
 $client = new MySoapClient(
   __DIR__ . '/data-type-check.wdsl',
-  array(
-    'classmap' => array(
+  darray[
+    'classmap' => darray[
       'BodyType' => 'BodyType',
-    ),
+    ],
     'cache_wsdl' => WSDL_CACHE_NONE,
     'soap_version' => SOAP_1_1,
-  )
+  ]
 );
-
-class BodyType extends stdClass {}
 
 $recipientType = new BodyType();
 $recipientType->_ = '1234567890';
 $recipientType->uid = 4119859;
-$client->test($recipientType);
+$client->__soapcall('test', varray[$recipientType]);
+}

@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strftime() : basic functionality ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -18,5 +18,5 @@ var_dump( strftime($format, $timestamp) );
 // Calling strftime() with mandatory arguments
 var_dump( strftime($format) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

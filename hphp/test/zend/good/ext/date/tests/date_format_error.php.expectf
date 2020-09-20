@@ -2,27 +2,22 @@
 
 -- Testing date_create() function with zero arguments --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects exactly 2 parameters, 0 given in %s/date_format_error.php on line 14
 
 -- Testing date_create() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects exactly 2 parameters, 1 given in %s/date_format_error.php on line 19
 
 -- Testing date_create() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects exactly 2 parameters, 3 given in %s/date_format_error.php on line 24
 
 -- Testing date_create() function with an invalid values for $object argument --
 
-Warning: %s
+Warning: date_format() expects parameter 1 to be DateTimeInterface, stdClass given in %s/date_format_error.php on line 28
 bool(false)
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_error.php on line 30
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_error.php on line 32
 ===DONE===

@@ -72,10 +72,9 @@ vec(4) {
   string(6) "const3"
   string(6) "const4"
 }
-array(1) {
+darray(1) {
   ["TestAttr"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     vec(2) {
       string(9) "testattr1"
       string(9) "testattr2"

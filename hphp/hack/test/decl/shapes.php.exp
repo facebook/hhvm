@@ -1,0 +1,197 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\generic_shape" ->
+    { fe_pos = [15:10-23];
+      fe_type =
+      (Rwitness (root|shapes.php line 15, characters 10-22),
+       (Tfun
+          { ft_arity = (Fstandard ());
+            ft_tparams = [(Invariant, ([15:24-25], "T"), [], Erased)];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [15:34-39]; fp_name = (Some "$arg1");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|shapes.php line 15, characters 27-32),
+                  (Ttuple
+                     [(Rhint (root|shapes.php line 15, characters 28-28),
+                       (Tgeneric ("T", [])));
+                     (Rhint (root|shapes.php line 15, characters 31-31),
+                      (Tgeneric ("T", [])))
+                  ]))
+               };
+            fp_flags =
+            (make_fp_flags ~mutability:none ~accept_disposable:false
+              ~has_default:false ~mode:FPnormal);
+             }];
+       ft_implicit_params =
+       { capability =
+         (Rhint (root|shapes.php line 15, characters 10-22), (Tunion [])) };
+       ft_ret =
+       { et_enforced = false;
+         et_type =
+         (Rhint (root|shapes.php line 15, characters 42-47),
+          (Ttuple
+             [(Rhint (root|shapes.php line 15, characters 43-43),
+               (Tgeneric ("T", [])));
+             (Rhint (root|shapes.php line 15, characters 46-46),
+              (Tgeneric ("T", [])))
+          ]))
+       };
+      ft_flags =
+      (make_ft_flags sync none ~return_disposable:false
+        ~returns_mutable:false ~returns_void_to_rx:false);
+      ft_reactive = Nonreactive }));
+  fe_deprecated = None;  };
+"\\returns_shape" ->
+{ fe_pos = [9:10-23];
+  fe_type =
+  (Rwitness (root|shapes.php line 9, characters 10-22),
+   (Tfun
+      { ft_arity = (Fstandard ()); ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params =
+        [{ fp_pos = [10:14-19]; fp_name = (Some "$arg1");
+           fp_type =
+           { et_enforced = false;
+             et_type =
+             (Rhint (root|shapes.php line 10, characters 3-12),
+              (Tapply (([10:3-13], "\\Coordinate"), [])))
+             };
+           fp_flags =
+           (make_fp_flags ~mutability:none ~accept_disposable:false
+             ~has_default:false ~mode:FPnormal);
+            }
+          ];
+        ft_implicit_params =
+        { capability =
+          (Rhint (root|shapes.php line 9, characters 10-22), (Tunion [])) };
+        ft_ret =
+        { et_enforced = false;
+          et_type =
+          (Rhint (root|shapes.php line 11, characters 4-41),
+           (Tshape (Open_shape,
+              { (SFlit_str ([11:10-13], "x")) ->
+                { sft_optional = false;
+                  sft_ty =
+                  (Rhint (root|shapes.php line 11, characters 17-21),
+                   (Tprim Tfloat))
+                  };
+                (SFlit_str ([11:24-27], "y")) ->
+                { sft_optional = false;
+                  sft_ty =
+                  (Rhint (root|shapes.php line 11, characters 31-35),
+                   (Tprim Tfloat))
+                  } }
+              )))
+          };
+        ft_flags =
+        (make_ft_flags sync none ~return_disposable:false
+          ~returns_mutable:false ~returns_void_to_rx:false);
+        ft_reactive = Nonreactive }));
+  fe_deprecated = None;  };
+"\\takes_shape" ->
+{ fe_pos = [5:10-21];
+  fe_type =
+  (Rwitness (root|shapes.php line 5, characters 10-20),
+   (Tfun
+      { ft_arity = (Fstandard ()); ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params =
+        [{ fp_pos = [5:56-61]; fp_name = (Some "$arg1");
+           fp_type =
+           { et_enforced = false;
+             et_type =
+             (Rhint (root|shapes.php line 5, characters 22-54),
+              (Tshape (Closed_shape,
+                 { (SFlit_str ([5:28-31], "x")) ->
+                   { sft_optional = false;
+                     sft_ty =
+                     (Rhint (root|shapes.php line 5, characters 35-39),
+                      (Tprim Tfloat))
+                     };
+                   (SFlit_str ([5:42-45], "y")) ->
+                   { sft_optional = false;
+                     sft_ty =
+                     (Rhint (root|shapes.php line 5, characters 49-53),
+                      (Tprim Tfloat))
+                     } }
+                 )))
+             };
+           fp_flags =
+           (make_fp_flags ~mutability:none ~accept_disposable:false
+             ~has_default:false ~mode:FPnormal);
+            }
+          ];
+        ft_implicit_params =
+        { capability =
+          (Rhint (root|shapes.php line 5, characters 10-20), (Tunion [])) };
+        ft_ret =
+        { et_enforced = false;
+          et_type =
+          (Rhint (root|shapes.php line 5, characters 64-73),
+           (Tapply (([5:64-74], "\\Coordinate"), [])))
+          };
+        ft_flags =
+        (make_ft_flags sync none ~return_disposable:false
+          ~returns_mutable:false ~returns_void_to_rx:false);
+        ft_reactive = Nonreactive }));
+  fe_deprecated = None;  } };
+typedefs =
+{ "\\Coordinate" ->
+  { td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
+    td_constraint = None;
+    td_type =
+    (Rhint (root|shapes.php line 3, characters 19-56),
+     (Tshape (Open_shape,
+        { (SFlit_str ([3:25-28], "x")) ->
+          { sft_optional = false;
+            sft_ty =
+            (Rhint (root|shapes.php line 3, characters 32-36), (Tprim Tfloat))
+            };
+          (SFlit_str ([3:39-42], "y")) ->
+          { sft_optional = false;
+            sft_ty =
+            (Rhint (root|shapes.php line 3, characters 46-50), (Tprim Tfloat))
+            } }
+        )))
+    };
+  "\\TaggedCoordinate" ->
+  { td_pos = [19:6-22]; td_vis = Transparent; td_tparams = [];
+    td_constraint = None;
+    td_type =
+    (Rhint (root|shapes.php line 20, characters 3-71),
+     (Tshape (Closed_shape,
+        { (SFlit_str ([20:27-34], "coord")) ->
+          { sft_optional = false;
+            sft_ty =
+            (Rhint (root|shapes.php line 20, characters 38-70),
+             (Tshape (Closed_shape,
+                { (SFlit_str ([20:44-47], "x")) ->
+                  { sft_optional = false;
+                    sft_ty =
+                    (Rhint (root|shapes.php line 20, characters 51-55),
+                     (Tprim Tfloat))
+                    };
+                  (SFlit_str ([20:58-61], "y")) ->
+                  { sft_optional = false;
+                    sft_ty =
+                    (Rhint (root|shapes.php line 20, characters 65-69),
+                     (Tprim Tfloat))
+                    } }
+                )))
+            };
+          (SFlit_str ([20:10-15], "tag")) ->
+          { sft_optional = true;
+            sft_ty =
+            (Rhint (root|shapes.php line 20, characters 19-24),
+             (Tprim Tstring))
+            } }
+        )))
+    } }; consts = {}
+}
+
+They matched!

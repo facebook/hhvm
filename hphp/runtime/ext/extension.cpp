@@ -26,7 +26,8 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/native-func-table.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/system/systemlib.h"
 
@@ -34,11 +35,6 @@
 #include <vector>
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// Global systemlib extensions implemented entirely in PHP
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(redis, NO_EXTENSION_VERSION_YET);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Extension::Extension(const char* name, const char* version /* = "" */)
@@ -52,28 +48,26 @@ const static std::string
   s_systemlibHhasName("systemlib.hhas.");
 
 bool Extension::IsSystemlibPath(const std::string& name) {
-  return !name.compare(0, s_systemlibPhpName.length(), s_systemlibPhpName) ||
-         !name.compare(0, s_systemlibHhasName.length(), s_systemlibHhasName);
+  return !name.compare(0, 2, "/:");
 }
 
 void Extension::CompileSystemlib(const std::string &slib,
-                                 const std::string &name) {
+                                 const std::string &name,
+                                 const Native::FuncTable& nativeFuncs) {
   // TODO (t3443556) Bytecode repo compilation expects that any errors
   // encountered during systemlib compilation have valid filename pointers
   // which won't be the case for now unless these pointers are long-lived.
-  auto const moduleName = makeStaticString(name.c_str());
+  auto const moduleName = makeStaticString("/:" + name);
   auto const unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                             moduleName->data());
-  always_assert_flog(unit, "No unit created for systemlib `{}'", name);
+                                             moduleName->data(),
+                                             nativeFuncs);
+  always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
 
-  const StringData* msg;
-  int line;
-  if (unit->compileTimeFatal(msg, line) ||
-      unit->parseFatal(msg, line)) {
+  if (auto const info = unit->getFatalInfo()) {
     std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
                  name.c_str(),
-                 msg->data(),
-                 line);
+                 info->m_fatalMsg.c_str(),
+                 info->m_fatalLoc.line1);
     _Exit(0);
   }
 
@@ -88,24 +82,67 @@ void Extension::CompileSystemlib(const std::string &slib,
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  std::string n = name.empty() ?
-    std::string(m_name.data(), m_name.size()) : name;
+  assertx(!name.empty());
 #ifdef _MSC_VER
   std::string section("ext_");
 #else
   std::string section("ext.");
 #endif
-  section += HHVM_FN(md5)(n, false).substr(0, 12).data();
+  section += HHVM_FN(md5)(name, false).substr(0, 12).data();
   std::string hhas;
   std::string slib = get_systemlib(&hhas, section, m_dsoName);
   if (!slib.empty()) {
-    std::string phpname = s_systemlibPhpName + n;
-    CompileSystemlib(slib, phpname);
+    std::string phpname = s_systemlibPhpName + name;
+    CompileSystemlib(slib, phpname, m_nativeFuncs);
   }
   if (!hhas.empty()) {
-    std::string hhasname = s_systemlibHhasName + n;
-    CompileSystemlib(hhas, hhasname);
+    std::string hhasname = s_systemlibHhasName + name;
+    CompileSystemlib(hhas, hhasname, m_nativeFuncs);
   }
+}
+
+void Extension::moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/)
+{}
+
+void Extension::moduleInfo(Array &info) {
+  info.set(String(m_name), true);
+}
+
+void Extension::moduleInit()
+{}
+
+void Extension::moduleShutdown()
+{}
+
+void Extension::threadInit()
+{}
+
+void Extension::threadShutdown()
+{}
+
+void Extension::requestInit()
+{}
+
+void Extension::requestShutdown()
+{}
+
+// override this to control extension_loaded() return value
+bool Extension::moduleEnabled() const {
+  return true;
+}
+
+const Extension::DependencySet Extension::getDeps() const {
+  // No dependencies by default
+  return DependencySet();
+}
+
+void Extension::registerExtensionFunction(const String& name) {
+  assertx(name.get()->isStatic());
+  m_functions.push_back(name.get());
+}
+
+const std::vector<StringData*>& Extension::getExtensionFunctions() const {
+  return m_functions;
 }
 
 /////////////////////////////////////////////////////////////////////////////

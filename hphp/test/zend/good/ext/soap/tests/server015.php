@@ -1,9 +1,9 @@
-<?php
+<?hh
 function test() {
   return "Hello World";
 }
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+<<__EntryPoint>> function main(): void {
+$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
 $server->addfunction("test");
 
 $envelope = <<<EOF
@@ -21,4 +21,4 @@ $envelope = <<<EOF
 EOF;
 $server->handle($envelope);
 echo "ok\n";
-?>
+}

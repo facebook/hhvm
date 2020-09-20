@@ -1,9 +1,9 @@
-<?php 
+<?hh
 /* $Id$ */
-
+<<__EntryPoint>> function main(): void {
 $xmlstring = '<TEI.2>hello</TEI.2>';
-$relaxngfile = dirname(__FILE__) . '/relaxNG.rng'; 
-$file = dirname(__FILE__) . '/_007.xml';
+$relaxngfile = dirname(__FILE__) . '/relaxNG.rng';
+$file = __SystemLib\hphp_test_tmppath('_007.xml');
 file_put_contents($file, $xmlstring);
 
 $reader = new XMLReader();
@@ -39,8 +39,8 @@ $reader = new XMLReader();
 $reader->XML($xmlstring);
 
 if ($reader->setRelaxNGSchema('')) {
-	echo 'failed';
+    echo 'failed';
 }
 $reader->close();
-?>
-===DONE===
+echo "===DONE===\n";
+}

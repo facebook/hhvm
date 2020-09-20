@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_CREATE_H_
-#define incl_HPHP_JIT_IRGEN_CREATE_H_
+#pragma once
+
+#include <cstdint>
 
 namespace HPHP {
 
@@ -33,8 +34,10 @@ struct IRGS;
 void initSProps(IRGS&, const Class*);
 SSATmp* allocObjFast(IRGS&, const Class*);
 
+void emitNewVec(IRGS& env, uint32_t numArgs);
+void emitNewVArray(IRGS& env, uint32_t numArgs);
+
 //////////////////////////////////////////////////////////////////////
 
 }}}
 
-#endif

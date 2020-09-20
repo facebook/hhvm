@@ -1,13 +1,16 @@
-<?php
-
-error_reporting(-1);
+<?hh
 
 class Foo {
-  static $bar = array('baz' => 'myfunc');
+  static $bar = darray['baz' => 'myfunc'];
 }
 
 function myfunc() {
   return 'quux';
 }
+<<__EntryPoint>>
+function entrypoint_static_dim_call(): void {
 
-var_dump(Foo::$bar['baz']());
+  error_reporting(-1);
+
+  var_dump(Foo::$bar['baz']());
+}

@@ -7,4 +7,8 @@ function main() {
   $s = new ImmSet();
 }
 
+
+<<__EntryPoint>>
+function main_hh_frozenset3() {
 main();
+}

@@ -1,1 +1,1 @@
-#<?php echo 1 ?>#
+#<?hh echo 1 ?>#

@@ -1,0 +1,6 @@
+File "new_map_lambda.php", line 24, characters 60-65:
+Invalid argument (Typing[4110])
+File "new_map_lambda.php", line 18, characters 36-41:
+This is a value of MyEnum
+File "new_map_lambda.php", line 24, characters 26-31:
+It is incompatible with a string because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

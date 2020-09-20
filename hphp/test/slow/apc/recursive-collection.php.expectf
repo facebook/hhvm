@@ -1,0 +1,13 @@
+vec(1) {
+  object(HH\Map) (2) {
+    ["1"]=>
+    object(HH\Map) (2) {
+      ["1"]=>
+      *RECURSION*
+      [1]=>
+      int(123)
+    }
+    [1]=>
+    int(123)
+  }
+}

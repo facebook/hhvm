@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to foo() must be an instance of B, C given in %s/record-parent-typehint-error.php on line 20

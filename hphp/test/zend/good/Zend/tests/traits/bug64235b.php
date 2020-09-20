@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TestParentClass
 {
@@ -27,4 +27,3 @@ class TestChildClass extends TestParentClass
     }
 }
 
-?>

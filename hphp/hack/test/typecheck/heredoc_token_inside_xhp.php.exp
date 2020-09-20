@@ -1,2 +1,2 @@
-File "heredoc_token_inside_xhp.php", line 14, characters 13-16:
-Stray < in xhp (Parsing[1002])
+File "heredoc_token_inside_xhp.php", line 14, characters 18-18:
+A name is expected here. (Parsing[1002])

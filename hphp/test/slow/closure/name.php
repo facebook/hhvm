@@ -36,17 +36,18 @@ class Test {
     return () ==> debug_backtrace();
   }
 }
-
-$closures = array(
+<<__EntryPoint>> function main(): void {
+$closures = varray[
   testOne(),
   testTwo(),
   testNested(),
   testTwoNested(),
   Test::testStatic(),
   (new Test())->testMethod(),
-);
+];
 
 foreach ($closures as $t) {
   var_dump(array_map($x ==> $x['function'],
                      $t()));
+}
 }

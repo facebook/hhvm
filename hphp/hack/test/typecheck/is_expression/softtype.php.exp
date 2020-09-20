@@ -1,0 +1,2 @@
+File "softtype.php", line 6, characters 13-16:
+`__Soft` typehints cannot be used with `is` expressions (Parsing[1002])

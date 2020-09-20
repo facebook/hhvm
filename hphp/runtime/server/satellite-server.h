@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SATELLITE_SERVER_H_
-#define incl_HPHP_SATELLITE_SERVER_H_
+#pragma once
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -48,6 +47,7 @@ public:
 
   virtual void start() = 0;
   virtual void stop() = 0;
+  virtual size_t getMaxThreadCount() = 0;
   virtual int getActiveWorker() = 0;
   virtual int getQueuedJobs() = 0;
 
@@ -119,4 +119,3 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SATELLITE_SERVER_H_

@@ -1,17 +1,20 @@
-<?php
+<?hh
 
 function f($x) {
-  global $u;
-  if (isset($u)) return null;
+
+  if (isset(Reference1104::$u)) return null;
   return $x;
 }
 function test($a) {
   $a++;
   return $a;
 }
-function &foo() {
-  return $GLOBALS['x'];
+function foo() {
+  return \HH\global_get('x');
 }
+
+<<__EntryPoint>>
+function main_1104() {
 $x = 1;
 test(foo());
 var_dump($x);
@@ -23,3 +26,8 @@ $t = f('test');
 $x = 1;
 $t(foo());
 var_dump($x);
+}
+
+abstract final class Reference1104 {
+  public static $u;
+}

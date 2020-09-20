@@ -1,11 +1,10 @@
-<?hh // decl /* -*- mode: php -*- */
+<?hh /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -47,6 +46,6 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   public function getSubIterator($level = null);
   public function nextElement();
   public function setMaxDepth($max_depth = -1);
-  public function __call($func, $params);
+  public function call__($func, $params);
 
 }

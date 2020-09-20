@@ -1,0 +1,8 @@
+int(5)
+int(5)
+int(6)
+int(6)
+int(-1)
+
+Warning: The switch statement failed to match any of the cases in %s/slow/rx/body/switch.php on line 17
+int(-1)

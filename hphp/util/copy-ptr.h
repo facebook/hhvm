@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_COPY_PTR_H_
-#define incl_HPHP_COPY_PTR_H_
+#pragma once
 
 #include <atomic>
 #include <cstdlib>
@@ -39,6 +38,9 @@ struct copy_ptr {
     m_p = o.m_p;
     o.m_p = nullptr;
   }
+  template <typename... Args> explicit copy_ptr(Args&&... args) {
+    construct(nullptr, std::forward<Args>(args)...);
+  }
   ~copy_ptr() { dec_ref(m_p); }
   copy_ptr& operator=(const copy_ptr& o) {
     auto const save = m_p;
@@ -51,7 +53,8 @@ struct copy_ptr {
     return *this;
   }
 
-  explicit operator bool() const { return m_p != nullptr; }
+  explicit operator bool() const { return !isNull(); }
+  bool isNull() const { return m_p == nullptr; }
 
   const T& operator*() const { return *m_p; }
   const T* operator->() const { return m_p; }
@@ -70,6 +73,25 @@ struct copy_ptr {
 
   template <typename... Args> void emplace(Args&&... args) {
     auto const save = m_p;
+    construct(save, std::forward<Args>(args)...);
+    dec_ref(save);
+  }
+
+  friend bool
+  operator==(const copy_ptr& a, const copy_ptr& b) { return a.m_p == b.m_p; }
+  friend bool
+  operator==(const copy_ptr& a, const T* b)        { return a.m_p == b; }
+  friend bool
+  operator==(const T* a, const copy_ptr& b)        { return a == b.m_p; }
+  friend bool
+  operator!=(const copy_ptr& a, const copy_ptr& b) { return a.m_p != b.m_p; }
+  friend bool
+  operator!=(const copy_ptr& a, const T* b)        { return a.m_p != b; }
+  friend bool
+  operator!=(const T* a, const copy_ptr& b)        { return a != b.m_p; }
+
+private:
+  template <typename... Args> void construct(T* save, Args&&... args) {
     auto const mem = std::malloc(data_offset() + sizeof(T));
     if (!mem) throw std::bad_alloc();
     new (mem) refcount_type{1};
@@ -81,9 +103,8 @@ struct copy_ptr {
       m_p = save;
       throw;
     }
-    dec_ref(save);
   }
-private:
+
   using refcount_type = std::atomic<uint32_t>;
 
   T* m_p{};
@@ -121,4 +142,3 @@ private:
 
 }
 
-#endif

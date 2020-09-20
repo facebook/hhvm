@@ -18,7 +18,10 @@
 
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -26,6 +29,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -52,28 +56,47 @@ TRACE_SET_MOD(irlower);
 void cgNop(IRLS&, const IRInstruction*) {}
 void cgDefConst(IRLS&, const IRInstruction*) {}
 void cgEndGuards(IRLS&, const IRInstruction*) {}
-void cgExitPlaceholder(IRLS&, const IRInstruction*) {}
+void cgJmpPlaceholder(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgFuncGuard(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<FuncGuard>();
-  vmain(env) << funcguard{extra->func, extra->prologueAddrPtr};
+void cgDefFP(IRLS& env, const IRInstruction* inst) {
+  auto const fp = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << defvmfp{fp};
 }
 
-void cgDefFP(IRLS&, const IRInstruction*) {}
-
-void cgDefSP(IRLS& env, const IRInstruction* inst) {
+void cgDefFrameRelSP(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const sp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
+  v << lea{fp[-cellsToBytes(inst->extra<DefFrameRelSP>()->offset.offset)], sp};
+}
 
-  if (inst->marker().resumeMode() != ResumeMode::None) {
-    v << defvmsp{sp};
-    return;
-  }
+void cgDefRegSP(IRLS& env, const IRInstruction* inst) {
+  auto const sp = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << defvmsp{sp};
+}
 
-  auto const fp = srcLoc(env, inst, 0).reg();
-  v << lea{fp[-cellsToBytes(inst->extra<DefSP>()->offset.offset)], sp};
+void cgDefCallFlags(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_php_call_flags(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefCallFunc(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_php_call_func(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefCallNumArgs(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_php_call_num_args(), dstLoc(env, inst, 0).reg()};
+}
+
+void cgDefCallCtx(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  v << copy{r_php_call_ctx(), dstLoc(env, inst, 0).reg()};
 }
 
 void cgEagerSyncVMRegs(IRLS& env, const IRInstruction* inst) {
@@ -151,7 +174,699 @@ IMPL_OPCODE_CALL(PrintBool)
 IMPL_OPCODE_CALL(PrintInt)
 IMPL_OPCODE_CALL(PrintStr)
 
-IMPL_OPCODE_CALL(GetMemoKey)
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void getMemoKeyImpl(IRLS& env, const IRInstruction* inst, bool sync) {
+  auto const s = inst->src(0);
+
+  auto args = argGroup(env, inst);
+  if (s->isA(TKeyset) || s->isA(TArrLike) || s->isA(TObj) || s->isA(TStr) ||
+      s->isA(TDbl)) {
+    args.ssa(0, s->isA(TDbl));
+  } else {
+    args.typedValue(0);
+  }
+
+  auto const target = [&]{
+    if (s->isA(TKeyset))  return CallSpec::direct(serialize_memoize_param_set);
+    if (s->isA(TArrLike)) return CallSpec::direct(serialize_memoize_param_arr);
+    if (s->isA(TStr))     return CallSpec::direct(serialize_memoize_param_str);
+    if (s->isA(TDbl))     return CallSpec::direct(serialize_memoize_param_dbl);
+    if (s->isA(TObj)) {
+      auto const ty = s->type();
+      if (ty.clsSpec().cls() && ty.clsSpec().cls()->isCollectionClass()) {
+        return CallSpec::direct(serialize_memoize_param_col);
+      }
+      return CallSpec::direct(serialize_memoize_param_obj);
+    }
+    return CallSpec::direct(HHVM_FN(serialize_memoize_param));
+  }();
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    target,
+    callDestTV(env, inst),
+    sync ? SyncOptions::Sync :  SyncOptions::None,
+    args
+  );
+}
+
+}
+
+void cgGetMemoKey(IRLS& env, const IRInstruction* inst) {
+  getMemoKeyImpl(env, inst, true);
+}
+
+void cgGetMemoKeyScalar(IRLS& env, const IRInstruction* inst) {
+  getMemoKeyImpl(env, inst, false);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void memoSetDecRefImpl(TypedValue newVal, TypedValue* cache) {
+  assertx(tvIsPlausible(newVal));
+  assertx(tvIsPlausible(*cache));
+  tvSetWithAux(newVal, *cache);
+}
+
+namespace {
+
+/* Get the Handle for the LSB memo value/cache for cls & func */
+Vreg getLSBMemoHandle(
+  IRLS& env,
+  const IRInstruction* inst,
+  Vreg cls,
+  const Func* func,
+  bool forValue
+) {
+  auto& v = vmain(env);
+
+  // Grab cls->m_lsbMemoExtra
+  auto const extra = v.makeReg();
+  v << load{cls[Class::extraOffset()], extra};
+
+  /* Load m_handles */
+  auto const handles = v.makeReg();
+  v << load{extra[Class::lsbMemoExtraHandlesOffset()], handles};
+
+  /* Pre-compute the slot */
+  auto const slot = func->cls()->lsbMemoSlot(func, forValue);
+
+  // Grab the handle
+  auto const handle = v.makeReg();
+  v << loadzlq{handles[sizeof(rds::Handle) * slot], handle};
+
+  return handle;
+}
+
+Vptr getHandleAddr(rds::Handle handle) {
+  return rvmtl()[handle];
+}
+
+Vptr getHandleAddr(Vreg handle) {
+  return handle[rvmtl()];
+}
+
+/* HandleT may be either rds::Handle or VReg */
+template<typename HandleT>
+void doMemoGetValue(
+  IRLS& env,
+  const IRInstruction* inst,
+  HandleT handle,
+  bool loadAux
+) {
+  auto& v = vmain(env);
+  auto const sf = checkRDSHandleInitialized(v, handle);
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), getHandleAddr(handle), loadAux);
+}
+
+template<typename HandleT>
+void doMemoSetValue(
+  IRLS& env,
+  const IRInstruction* inst,
+  HandleT handle,
+  Type memoTy,
+  uint32_t valIndex,
+  folly::Optional<bool> asyncEager
+) {
+  auto& v = vmain(env);
+  auto const val = inst->src(valIndex);
+  auto const valLoc = srcLoc(env, inst, valIndex);
+
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (!asyncEager) return folly::none;
+    return *asyncEager
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
+  }();
+
+  auto const store = [&] {
+    if (!aux) return storeTV(v, getHandleAddr(handle), valLoc, val);
+    storeTVWithAux(v, getHandleAddr(handle), valLoc, val, *aux);
+  };
+
+  // Store the value (overwriting any previous value)
+  if (!memoTy.maybe(TCounted)) {
+    assertx(!val->type().maybe(TCounted));
+    store();
+    markRDSHandleInitialized(v, handle);
+    return;
+  }
+
+  auto const sf = checkRDSHandleInitialized(v, handle);
+  unlikelyIfThenElse(
+    v, vcold(env), CC_E, sf,
+    [&](Vout& v) {
+      auto const handleAddr = v.makeReg();
+      v << lea{getHandleAddr(handle), handleAddr};
+      cgCallHelper(
+        v,
+        env,
+        CallSpec::direct(memoSetDecRefImpl),
+        kVoidDest,
+        SyncOptions::Sync,
+        argGroup(env, inst)
+          .typedValue(0, aux)
+          .reg(handleAddr)
+      );
+    },
+    [&](Vout& v) {
+      emitIncRefWork(v, valLoc, val->type(), TRAP_REASON);
+      store();
+      markRDSHandleInitialized(v, handle);
+    }
+  );
+}
+
+template<typename HandleT>
+void doMemoGetCache(
+  IRLS& env,
+  const IRInstruction* inst,
+  const MemoCacheStaticData *extra,
+  Vreg fp,
+  HandleT handle
+) {
+  auto& v = vmain(env);
+
+  // We need some keys, or this would be GetStaticValue.
+  assertx(extra->keys.count > 0);
+  assertx(!extra->asyncEager);
+
+  // If the RDS entry isn't initialized, there can't be a value.
+  auto const sf = checkRDSHandleInitialized(v, handle);
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
+
+  auto const cachePtr = v.makeReg();
+  v << load{getHandleAddr(handle), cachePtr};
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1)
+    );
+  };
+
+  // Lookup the proper getter function and call it with the pointer to the
+  // cache. The pointer to the cache may be null, but the getter function can
+  // handle that.
+  auto const valPtr = v.makeReg();
+  if (auto const getter =
+      memoCacheGetForKeyTypes(extra->types, extra->keys.count)) {
+
+    auto args = argGroup(env, inst).reg(cachePtr);
+    addKeysAddr(args);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(getter),
+      callDest(valPtr),
+      SyncOptions::None,
+      args
+    );
+  } else {
+    auto args = argGroup(env, inst)
+      .reg(cachePtr)
+      .imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    addKeysAddr(args);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(memoCacheGetGeneric),
+      callDest(valPtr),
+      SyncOptions::None,
+      args
+    );
+  }
+
+  // If the returned pointer isn't null, load the value out of it.
+  auto const sf2 = v.makeReg();
+  v << testq{valPtr, valPtr, sf2};
+  fwdJcc(v, env, CC_Z, sf2, inst->taken());
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), *valPtr, extra->loadAux);
+}
+
+template<typename HandleT>
+void doMemoSetCache(
+  IRLS& env,
+  const IRInstruction* inst,
+  const MemoCacheStaticData *extra,
+  Vreg fp,
+  HandleT handle,
+  uint32_t valIndex
+) {
+  auto& v = vmain(env);
+  assertx(extra->keys.count > 0);
+  assertx(!extra->loadAux);
+
+  // If the RDS entry isn't initialized, mark it as initialized and store a null
+  // pointer in it. The setter will allocate the cache and update the pointer.
+  auto const sf = checkRDSHandleInitialized(v, handle);
+  ifThen(
+    v, CC_NE, sf,
+    [&](Vout& v) {
+      v << storeqi{0, getHandleAddr(handle)};
+      markRDSHandleInitialized(v, handle);
+    }
+  );
+
+  auto const handleAddr = v.makeReg();
+  v << lea{getHandleAddr(handle), handleAddr};
+
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (!extra->asyncEager) return folly::none;
+    return *extra->asyncEager
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
+  }();
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1)
+    );
+  };
+
+  // Lookup the setter and call it with the address of the cache pointer. The
+  // setter will create the cache as needed and update the pointer.
+  if (auto const setter =
+      memoCacheSetForKeyTypes(extra->types, extra->keys.count)) {
+    auto args = argGroup(env, inst).reg(handleAddr);
+    addKeysAddr(args);
+    args.typedValue(valIndex, aux);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(setter),
+      kVoidDest,
+      SyncOptions::Sync,
+      args
+    );
+  } else {
+    auto args = argGroup(env, inst)
+      .reg(handleAddr)
+      .imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    addKeysAddr(args);
+    args.typedValue(valIndex, aux);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(memoCacheSetGeneric),
+      kVoidDest,
+      SyncOptions::Sync,
+      args
+    );
+  }
+}
+
+} // end anonymous namespace
+
+void cgMemoGetStaticValue(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoGetStaticValue>();
+  auto const cache = rds::bindStaticMemoValue(extra->func);
+  assertx(!extra->asyncEager);
+  doMemoGetValue(env, inst, cache.handle(), extra->loadAux);
+}
+
+void cgMemoGetLSBValue(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoGetLSBValue>();
+  auto const lsbCls = srcLoc(env, inst, 0).reg();
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, extra->func, true);
+  assertx(!extra->asyncEager);
+  doMemoGetValue(env, inst, handle, extra->loadAux);
+}
+
+void cgMemoSetStaticValue(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoSetStaticValue>();
+  auto const f = extra->func;
+  auto const cache = rds::bindStaticMemoValue(f);
+  auto const memoTy = typeFromRAT(f->repoReturnType(), f->cls()) & TInitCell;
+  assertx(!extra->loadAux);
+  doMemoSetValue(env, inst, cache.handle(), memoTy, 0, extra->asyncEager);
+}
+
+void cgMemoSetLSBValue(IRLS& env, const IRInstruction* inst) {
+  auto const lsbCls = srcLoc(env, inst, 1).reg();
+  auto const extra = inst->extra<MemoSetLSBValue>();
+  auto const f = extra->func;
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, f, true);
+  auto const memoTy = typeFromRAT(f->repoReturnType(), f->cls()) & TInitCell;
+  assertx(!extra->loadAux);
+  doMemoSetValue(env, inst, handle, memoTy, 0, extra->asyncEager);
+}
+
+void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoGetStaticCache>();
+  auto const cache = rds::bindStaticMemoCache(extra->func);
+  assertx(!extra->asyncEager);
+  doMemoGetCache(env, inst, extra, fp, cache.handle());
+}
+
+void cgMemoGetLSBCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoGetLSBCache>();
+  auto const lsbCls = srcLoc(env, inst, 1).reg();
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
+  assertx(!extra->asyncEager);
+  doMemoGetCache(env, inst, extra, fp, handle);
+}
+
+void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoSetStaticCache>();
+  auto const cache = rds::bindStaticMemoCache(extra->func);
+  assertx(!extra->loadAux);
+  doMemoSetCache(env, inst, extra, fp, cache.handle(), 1);
+}
+
+void cgMemoSetLSBCache(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoSetLSBCache>();
+  auto const lsbCls = srcLoc(env, inst, 1).reg();
+  auto const handle =
+    getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
+  assertx(!extra->loadAux);
+  doMemoSetCache(env, inst, extra, fp, handle, 2);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+int32_t offsetToMemoSlot(Slot slot, const Class* cls) {
+  if (auto const ndi = cls->getNativeDataInfo()) {
+    return -safe_cast<int32_t>(
+      alignTypedValue(ndi->sz) + sizeof(MemoSlot) * (slot + 1)
+    );
+  }
+  return -safe_cast<int32_t>(sizeof(MemoSlot) * (slot + 1));
+}
+
+}
+
+void cgMemoGetInstanceValue(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<MemoGetInstanceValue>();
+  assertx(!extra->asyncEager);
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto const valPtr = obj[offsetToMemoSlot(extra->slot, extra->func->cls())];
+  auto const sf = v.makeReg();
+  // Uninit means the cache isn't initialized
+  emitCmpTVType(v, sf, KindOfUninit, valPtr + TVOFF(m_type));
+  fwdJcc(v, env, CC_E, sf, inst->taken());
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), valPtr, extra->loadAux);
+}
+
+void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<MemoSetInstanceValue>();
+  assertx(!extra->loadAux);
+  auto const val = inst->src(1);
+  auto const valLoc = srcLoc(env, inst, 1);
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto const oldValPtr = obj[offsetToMemoSlot(extra->slot, extra->func->cls())];
+
+  // Mark the object as having valid memo data so that it gets cleaned up upon
+  // destruction.
+  static_assert(ObjectData::sizeofAttrs() == 2, "");
+  v << orwim{
+    ObjectData::UsedMemoCache,
+    obj[ObjectData::offsetofAttrs()],
+    v.makeReg()
+  };
+
+  // Store it (overwriting any previous value).
+
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (!extra->asyncEager) return folly::none;
+    return *extra->asyncEager
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
+  }();
+
+  auto const store = [&]{
+    if (!aux) return storeTV(v, oldValPtr, valLoc, val);
+    storeTVWithAux(v, oldValPtr, valLoc, val, *aux);
+  };
+
+  auto const memoTy =
+    typeFromRAT(extra->func->repoReturnType(), extra->func->cls()) & TInitCell;
+  if (!memoTy.maybe(TCounted)) {
+    assertx(!val->type().maybe(TCounted));
+    store();
+    return;
+  }
+
+  auto const sf = v.makeReg();
+  emitCmpTVType(v, sf, KindOfUninit, oldValPtr + TVOFF(m_type));
+  unlikelyIfThenElse(
+    v, vcold(env), CC_NE, sf,
+    [&](Vout& v) {
+      auto const dest = v.makeReg();
+      v << lea{oldValPtr, dest};
+      cgCallHelper(
+        v,
+        env,
+        CallSpec::direct(memoSetDecRefImpl),
+        kVoidDest,
+        SyncOptions::Sync,
+        argGroup(env, inst).typedValue(1, aux).reg(dest)
+      );
+    },
+    [&](Vout& v) {
+      emitIncRefWork(v, valLoc, val->type(), TRAP_REASON);
+      store();
+    }
+  );
+}
+
+void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoGetInstanceCache>();
+  assertx(!extra->asyncEager);
+
+  // Unlike for the static case, we can have zero keys here (because of shared
+  // caches).
+  auto const obj = srcLoc(env, inst, 1).reg();
+  auto const cachePtr =
+    obj[offsetToMemoSlot(extra->slot, extra->func->cls()) + TVOFF(m_data)];
+
+  auto const cache = v.makeReg();
+  v << load{cachePtr, cache};
+
+  // Short-circuit if the pointer to the cache is null
+  auto const sf = v.makeReg();
+  v << testq{cache, cache, sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1)
+    );
+  };
+
+  // Lookup the right getter function and call it with the pointer to the cache.
+  auto const valPtr = v.makeReg();
+  if (extra->shared) {
+    if (extra->keys.count == 0) {
+      auto const args = argGroup(env, inst)
+        .reg(cache)
+        .imm(makeSharedOnlyKey(extra->func->getFuncId()));
+      cgCallHelper(
+        v,
+        env,
+        CallSpec::direct(memoCacheGetSharedOnly),
+        callDest(valPtr),
+        SyncOptions::None,
+        args
+      );
+    } else {
+      auto const getter =
+        sharedMemoCacheGetForKeyTypes(extra->types, extra->keys.count);
+      auto const funcId = extra->func->getFuncId();
+      auto args = argGroup(env, inst)
+        .reg(cache)
+        .imm(
+          getter
+            ? funcId
+            : GenericMemoId{funcId, extra->keys.count}.asParam()
+        );
+      addKeysAddr(args);
+
+      cgCallHelper(
+        v,
+        env,
+        getter
+          ? CallSpec::direct(getter)
+          : CallSpec::direct(memoCacheGetGeneric),
+        callDest(valPtr),
+        SyncOptions::None,
+        args
+      );
+    }
+  } else {
+    // A non-shared cache should always have non-zero keys (it would be a memo
+    // value otherwise).
+    assertx(extra->keys.count > 0);
+
+    auto const getter =
+      memoCacheGetForKeyTypes(extra->types, extra->keys.count);
+
+    auto args = argGroup(env, inst).reg(cache);
+    if (!getter) {
+      args.imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    }
+    addKeysAddr(args);
+
+    cgCallHelper(
+      v,
+      env,
+      getter
+        ? CallSpec::direct(getter)
+        : CallSpec::direct(memoCacheGetGeneric),
+      callDest(valPtr),
+      SyncOptions::None,
+      args
+    );
+  }
+
+  // Check the return pointer, and if it isn't null, load the value out of it.
+  auto const sf2 = v.makeReg();
+  v << testq{valPtr, valPtr, sf2};
+  fwdJcc(v, env, CC_Z, sf2, inst->taken());
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), *valPtr, extra->loadAux);
+}
+
+void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<MemoSetInstanceCache>();
+  assertx(!extra->loadAux);
+
+  // Unlike the static case, we can have zero keys here (because of shared
+  // caches).
+  auto const obj = srcLoc(env, inst, 1).reg();
+  auto const slotOff = offsetToMemoSlot(extra->slot, extra->func->cls());
+
+  // First mark the object as having valid memo data, so it gets cleaned up upon
+  // destruction.
+  static_assert(ObjectData::sizeofAttrs() == 2, "");
+  v << orwim{
+    ObjectData::UsedMemoCache,
+    obj[ObjectData::offsetofAttrs()],
+    v.makeReg()
+  };
+  // Also set the type field in the memo slot to indicate this is definitely a
+  // cache.
+  v << storebi{
+    static_cast<data_type_t>(kInvalidDataType),
+    obj[slotOff + TVOFF(m_type)]
+  };
+
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (!extra->asyncEager) return folly::none;
+    return *extra->asyncEager
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
+  }();
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1)
+    );
+  };
+
+  // Lookup the right setter and call it with the address of the pointer to the
+  // cache. If the pointer is null, the setter will allocate a new cache and
+  // update the pointer.
+  if (extra->shared) {
+    if (extra->keys.count == 0) {
+      auto const args = argGroup(env, inst)
+        .addr(obj, slotOff + TVOFF(m_data))
+        .imm(makeSharedOnlyKey(extra->func->getFuncId()))
+        .typedValue(2, aux);
+      cgCallHelper(
+        v,
+        env,
+        CallSpec::direct(memoCacheSetSharedOnly),
+        kVoidDest,
+        SyncOptions::Sync,
+        args
+      );
+    } else {
+      auto const setter =
+        sharedMemoCacheSetForKeyTypes(extra->types, extra->keys.count);
+      auto const funcId = extra->func->getFuncId();
+      auto args = argGroup(env, inst)
+        .addr(obj, slotOff + TVOFF(m_data))
+        .imm(
+          setter
+            ? funcId
+            : GenericMemoId{funcId, extra->keys.count}.asParam()
+        );
+      addKeysAddr(args);
+      args.typedValue(2, aux);
+
+      cgCallHelper(
+        v,
+        env,
+        setter
+          ? CallSpec::direct(setter)
+          : CallSpec::direct(memoCacheSetGeneric),
+        kVoidDest,
+        SyncOptions::Sync,
+        args
+      );
+    }
+  } else {
+    assertx(extra->keys.count > 0);
+
+    auto const setter =
+      memoCacheSetForKeyTypes(extra->types, extra->keys.count);
+
+    auto args = argGroup(env, inst).addr(obj, slotOff + TVOFF(m_data));
+    if (!setter) {
+      args.imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    }
+    addKeysAddr(args);
+    args.typedValue(2, aux);
+
+    cgCallHelper(
+      v,
+      env,
+      setter
+        ? CallSpec::direct(setter)
+        : CallSpec::direct(memoCacheSetGeneric),
+      kVoidDest,
+      SyncOptions::Sync,
+      args
+    );
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 void cgRBTraceEntry(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RBTraceEntry>();
@@ -179,14 +894,12 @@ void cgRBTraceMsg(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+IMPL_OPCODE_CALL(IncCallCounter);
+
 void cgIncStat(IRLS& env, const IRInstruction *inst) {
   auto const stat = Stats::StatCounter(inst->src(0)->intVal());
-  auto const n = inst->src(1)->intVal();
-  auto const force = inst->src(2)->boolVal();
-  emitIncStat(vmain(env), stat, n, force);
+  emitIncStat(vmain(env), stat);
 }
-
-IMPL_OPCODE_CALL(IncStatGrouped)
 
 void cgIncProfCounter(IRLS& env, const IRInstruction* inst) {
   auto const transID = inst->extra<TransIDData>()->transId;

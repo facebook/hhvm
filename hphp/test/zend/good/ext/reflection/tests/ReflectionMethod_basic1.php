@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reflectMethod($class, $method) {
     $methodInfo = new ReflectionMethod($class, $method);
@@ -18,8 +18,6 @@ function reflectMethod($class, $method) {
     var_dump($methodInfo->isStatic());
     echo "\nisConstructor():\n";
     var_dump($methodInfo->isConstructor());
-    echo "\nisDestructor():\n";
-    var_dump($methodInfo->isDestructor());
     echo "\n**********************************\n";
 }
 
@@ -28,18 +26,16 @@ class TestClass
     public function foo() {
         echo "Called foo()\n";
     }
-    
+
     static function stat() {
         echo "Called stat()\n";
     }
-    
+
     private function priv() {
         echo "Called priv()\n";
     }
-    
+
     protected function prot() {}
-    
-    public function __destruct() {}
 }
 
 class DerivedClass extends TestClass {}
@@ -47,7 +43,7 @@ class DerivedClass extends TestClass {}
 interface TestInterface {
     public function int();
 }
-
+<<__EntryPoint>> function main(): void {
 reflectMethod("DerivedClass", "foo");
 reflectMethod("TestClass", "stat");
 reflectMethod("TestClass", "priv");
@@ -55,6 +51,4 @@ reflectMethod("TestClass", "prot");
 reflectMethod("DerivedClass", "prot");
 reflectMethod("TestInterface", "int");
 reflectMethod("ReflectionProperty", "__construct");
-reflectMethod("TestClass", "__destruct");
-
-?>
+}

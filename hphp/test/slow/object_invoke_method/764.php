@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 // standard execution
 class C1 {
-  public function __invoke($a0, $a1) {
+  public static function __invoke($a0, $a1) {
     var_dump('C1');
     var_dump($a0, $a1);
   }
@@ -10,7 +10,7 @@ class C1 {
 class D1 extends C1 {
 }
 class E1 extends D1 {
-  public function __invoke($a0, $a1) {
+  public static function __invoke($a0, $a1) {
     var_dump('D2');
     var_dump($a0, $a1);
   }
@@ -28,6 +28,12 @@ class F1 {
     return $a0 > 10;
   }
 }
+function mk($n) {
+  return $n . '::__invoke';
+}
+
+<<__EntryPoint>>
+function main_764() {
 $c = new C1;
 $d = new D1;
 $e = new E1;
@@ -37,14 +43,12 @@ $e(0, 1);
 call_user_func($c, 0, 1);
 call_user_func($d, 0, 1);
 call_user_func($e, 0, 1);
-call_user_func_array($c, array(0, 1));
-call_user_func_array($d, array(0, 1));
-call_user_func_array($e, array(0, 1));
-$c->__invoke(0, 1);
-$d->__invoke(0, 1);
-$e->__invoke(0, 1);
-function mk($n) {
-  return $n . '::__invoke';
-}
+call_user_func_array($c, varray[0, 1]);
+call_user_func_array($d, varray[0, 1]);
+call_user_func_array($e, varray[0, 1]);
+$c::__invoke(0, 1);
+$d::__invoke(0, 1);
+$e::__invoke(0, 1);
 (new E1)->test();
-var_dump(array_filter(array(0, 1, 11, 13), new F1));
+var_dump(array_filter(varray[0, 1, 11, 13], new F1));
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Class with two singleton instances.
@@ -29,48 +29,60 @@ class C {
   }
 }
 
+abstract final class CheckNullSameStatics {
+  public static $instance = null;
+}
+
 /**
- * Toplevel functions with static local singletons.
+ * Toplevel functions with singleton statics.
  *
  * The *_loop functions are the same as the normal versions; they're duplicated
- * only to get fresh the static locals.
+ * only to get different statics.
  */
 function check_null_same() {
-  static $instance = null;
-  if ($instance === null) {
+  if (CheckNullSameStatics::$instance === null) {
     echo __FUNCTION__ . " made a ";
-    $instance = new C;
+    CheckNullSameStatics::$instance = new C;
   }
-  return $instance;
+  return CheckNullSameStatics::$instance;
+}
+
+abstract final class CheckNullSameLoopStatics {
+  public static $instance = null;
 }
 
 function check_null_same_loop() {
-  static $instance = null;
-  if ($instance === null) {
+  if (CheckNullSameLoopStatics::$instance === null) {
     echo __FUNCTION__ . " made a ";
-    $instance = new C;
+    CheckNullSameLoopStatics::$instance = new C;
   }
-  return $instance;
+  return CheckNullSameLoopStatics::$instance;
+}
+
+abstract final class CheckNullNsameStatics {
+  public static $instance = null;
 }
 
 function check_null_nsame() {
-  static $instance = null;
-  if ($instance !== null) {
-    return $instance;
+  if (CheckNullNsameStatics::$instance !== null) {
+    return CheckNullNsameStatics::$instance;
   }
   echo __FUNCTION__ . " made a ";
-  $instance = new C;
-  return $instance;
+  CheckNullNsameStatics::$instance = new C;
+  return CheckNullNsameStatics::$instance;
+}
+
+abstract final class CheckNullNsameLoopStatics {
+  public static $instance = null;
 }
 
 function check_null_nsame_loop() {
-  static $instance = null;
-  if ($instance !== null) {
-    return $instance;
+  if (CheckNullNsameLoopStatics::$instance !== null) {
+    return CheckNullNsameLoopStatics::$instance;
   }
   echo __FUNCTION__ . " made a ";
-  $instance = new C;
-  return $instance;
+  CheckNullNsameLoopStatics::$instance = new C;
+  return CheckNullNsameLoopStatics::$instance;
 }
 
 /**
@@ -108,9 +120,13 @@ function run_sprop_get_nsame() {
   var_dump(C::getNSame());
 }
 
+
+<<__EntryPoint>>
+function main_singleton() {
 run_null_same();
 run_null_same_loop();
 run_null_nsame();
 run_null_nsame_loop();
 run_sprop_get_same();
 run_sprop_get_nsame();
+}

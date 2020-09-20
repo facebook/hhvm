@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const WORKER_ARGV_VALUE = 'RUN_WORKER';
 
@@ -50,7 +50,7 @@ class ServerClientTestCase
     {
         $cmd = sprintf('%s "%s" %s', PHP_BINARY, __FILE__, WORKER_ARGV_VALUE);
 
-        $this->workerHandle = proc_open($cmd, [['pipe', 'r'], ['pipe', 'w'], STDERR], $pipes);
+        $this->workerHandle = proc_open($cmd, varray[varray['pipe', 'r'], varray['pipe', 'w'], STDERR], $pipes);
         $this->workerStdIn = $pipes[0];
         $this->workerStdOut = $pipes[1];
 
@@ -92,7 +92,7 @@ class ServerClientTestCase
         eval($this->stripPhpTagsFromCode($proc1Code));
         $this->cleanupWorkerProcess();
     }
-    
+
     public function wait()
     {
         fgets($this->isWorker ? STDIN : $this->workerStdOut);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base{
   public    $aaa = 1;
@@ -14,6 +14,10 @@ class Child extends Base{
     var_dump(get_object_vars($obj));
   }
 }
+
+<<__EntryPoint>>
+function main_1537() {
 $child_obj = new Child();
 $base_obj = new Base();
 $child_obj->foo($base_obj);
+}

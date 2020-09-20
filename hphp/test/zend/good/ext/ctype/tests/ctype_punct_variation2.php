@@ -1,7 +1,7 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 
@@ -9,17 +9,17 @@
  * Pass different integers to ctype_punct() to test which character codes are considered
  * valid punctuation characters
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 for ($c = 1; $c < 256; $c++) {
-	if (ctype_punct($c)) {
-		echo "character code $c is punctuation\n";
-	}
+    if (ctype_punct($c)) {
+        echo "character code $c is punctuation\n";
+    }
 }
 
-setlocale(LC_CTYPE, $orig); 
-?>
-===DONE===
+setlocale(LC_CTYPE, $orig);
+echo "===DONE===\n";
+}

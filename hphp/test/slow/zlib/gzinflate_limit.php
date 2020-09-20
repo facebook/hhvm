@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Check that gzinflate fails when output would be > limit.
 function inflateAboveLimit($original) {
   $packed=gzdeflate($original);
@@ -9,10 +9,14 @@ function inflateAboveLimit($original) {
     }
   }
 }
+
 // Test highly compressible strings.
+<<__EntryPoint>>
+function main_gzinflate_limit() {
 for ($reps = 2; $reps <= 32; $reps += 1) {
   inflateAboveLimit(str_repeat("a", $reps));
 }
 // Less compressible...
 inflateAboveLimit("incompressible?");
 inflateAboveLimit("incompressible (more or less)");
+}

@@ -1,6 +1,6 @@
 <?hh
 
-function foo($a, &$b, &$c, $d) {
+function foo($a, inout $b, inout $c, $d) {
   $a = 10;
   $b = 20;
   $c *= 10;
@@ -8,17 +8,17 @@ function foo($a, &$b, &$c, $d) {
   echo (__METHOD__."(): a: ".$a.", b: ".$b.", c: ".$c.", d: ".$d."\n");
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = 1;
   $b = 2;
   $c = 3;
   $d = 4;
   echo (__METHOD__."(): a: ".$a.", b: ".$b.", c: ".$c.", d: ".$d."\n");
-  foo($a, $b, $c, $d);
+  foo($a, inout $b, inout $c, $d);
   echo (__METHOD__."(): a: ".$a.", b: ".$b.", c: ".$c.", d: ".$d."\n");
 
-  sscanf("123", "%d", $number);  // should not warn that $number is undefined
-  var_dump($number);
+  $foo = null;
+  $bar = null;
+  foo(123, inout $foo, inout $bar, 456);  // should not warn that $foo/$bar are undefined
+  var_dump($foo, $bar);
 }
-
-main();

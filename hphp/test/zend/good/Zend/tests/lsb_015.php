@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
     B::throwException();
 }
@@ -8,7 +8,7 @@ class C {
     }
     public static function getException() {
         return new Exception();
-         
+
     }
 }
 class A {
@@ -58,10 +58,10 @@ class B extends A {
     }
 
 }
-
+<<__EntryPoint>> function main(): void {
 echo "via A:\n";
 A::myCatch();
 echo "via B:\n";
 B::myCatch();
-?>
-==DONE==
+echo "==DONE==";
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Stems from https://github.com/facebook/hhvm/issues/4892
 
@@ -12,13 +12,16 @@ class foo {
     }
 }
 
-var_dump( is_callable( array( 'foo', 'elementOpen' ) ) );
+
+<<__EntryPoint>>
+function main_xml_callback_static() {
+var_dump( is_callable( varray[ 'foo', 'elementOpen' ] ) );
 var_dump( is_callable( 'foo::elementClose' ) );
 
 $parser = xml_parser_create();
 xml_set_element_handler(
     $parser,
-    array( 'foo', 'elementOpen' ),
+    varray[ 'foo', 'elementOpen' ],
     'foo::elementClose'
 );
 
@@ -27,3 +30,4 @@ if ( 0 === xml_parse( $parser, "<root><a><b></b></a></root>" ) ) {
 }
 
 xml_parser_free( $parser );
+}

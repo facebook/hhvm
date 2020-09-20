@@ -1,0 +1,11 @@
+bool(true)
+object(DateTime) (3) {
+  ["date"]=>
+  string(%d) "%s"
+  ["timezone_type"]=>
+  int(%d)
+  ["timezone"]=>
+  string(%d) "%s"
+}
+bool(false)
+NULL

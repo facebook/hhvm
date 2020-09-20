@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $im = new Imagick();
 $im->newPseudoImage(100, 100, "XC:red");
 var_dump($im->getImageGeometry());
@@ -19,5 +19,4 @@ var_dump($im->getImageGeometry());
 } catch (Exception $e) {
   echo "fail\n";
 }
-
-?>
+}

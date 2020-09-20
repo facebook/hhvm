@@ -1,15 +1,5 @@
-object(X)#1 (0) {
-}
-array(1) {
-  [-1]=>
-  object(X)#1 (0) {
-  }
-}
-string(13) "X::__destruct"
-1
 
-Warning: Illegal string offset: -1 in %s/test/slow/array/promote_string2.php on line 9
-string(13) "X::__destruct"
+Warning: Illegal string offset: -1 in %s/test/slow/array/promote_string2.php on line 8
 NULL
 string(1) "x"
 2

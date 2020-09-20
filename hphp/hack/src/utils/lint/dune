@@ -1,0 +1,7 @@
+(library
+  (name utils_lint)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std))
+  (libraries
+    errors
+    pos))

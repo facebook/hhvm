@@ -1,0 +1,11 @@
+function(main)
+varray(2) {
+  object(C) (0) {
+  }
+  string(5) "inner"
+}
+varray(2) {
+  object(C3) (0) {
+  }
+  string(5) "inner"
+}

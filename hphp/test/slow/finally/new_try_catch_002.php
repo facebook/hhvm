@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 function blah() {
-  $xs = array(1, 2, 3);
-  $ys = array(1, 2, 3);
-  $zs = array(1, 2, 3);
+  $xs = varray[1, 2, 3];
+  $ys = varray[1, 2, 3];
+  $zs = varray[1, 2, 3];
   try {
     foreach ($xs as $x) {
       foreach ($ys as $y) {
@@ -33,5 +33,9 @@ function blah() {
   }
 }
 
-var_dump(blah());
 
+
+<<__EntryPoint>>
+function main_new_try_catch_002() {
+var_dump(blah());
+}

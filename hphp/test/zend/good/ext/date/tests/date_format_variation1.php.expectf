@@ -2,141 +2,115 @@
 
 -- int 0 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line 99
 
 -- int 1 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line 99
 
 -- int 12345 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line 99
 
 -- int -12345 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, integer given in %s/date_format_variation1.php on line 99
 
 -- float 10.5 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, double given in %s/date_format_variation1.php on line 99
 
 -- float -10.5 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, double given in %s/date_format_variation1.php on line 99
 
 -- float .5 --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, double given in %s/date_format_variation1.php on line 99
 
 -- empty array --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- int indexed array --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- associative array --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- nested arrays --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- uppercase NULL --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_variation1.php on line 99
 
 -- lowercase null --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_variation1.php on line 99
 
 -- lowercase true --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line 99
 
 -- lowercase false --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line 99
 
 -- uppercase TRUE --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line 99
 
 -- uppercase FALSE --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, boolean given in %s/date_format_variation1.php on line 99
 
 -- empty string DQ --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line 99
 
 -- empty string SQ --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line 99
 
 -- string DQ --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line 99
 
 -- string SQ --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line 99
 
 -- mixed case string --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line 99
 
 -- heredoc --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, string given in %s/date_format_variation1.php on line 99
 
 -- instance of classWithToString --
 
-Warning: %s
+Warning: date_format() expects parameter 1 to be DateTimeInterface, classWithToString given in %s/date_format_variation1.php on line 99
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: date_format() expects parameter 1 to be DateTimeInterface, classWithoutToString given in %s/date_format_variation1.php on line 99
 bool(false)
 
 -- undefined var --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_variation1.php on line 99
 
 -- unset var --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, null given in %s/date_format_variation1.php on line 99
 
 -- resource --
 
-Warning: %s
-bool(false)
+Warning: date_format() expects parameter 1 to be object, resource given in %s/date_format_variation1.php on line 99
 ===DONE===

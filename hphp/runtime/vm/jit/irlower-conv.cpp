@@ -18,13 +18,13 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -107,35 +108,6 @@ void cgConvStrToBool(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgConvArrToBool(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << cmplim{0, src[ArrayData::offsetofSize()], sf};
-
-  unlikelyCond(v, vcold(env), CC_S, sf, dst,
-    [&] (Vout& v) {
-      auto const vsize = v.makeReg();
-      cgCallHelper(v, env, CallSpec::method(&ArrayData::vsize),
-                   callDest(vsize), SyncOptions::None,
-                   argGroup(env, inst).ssa(0));
-
-      auto const sf = v.makeReg();
-      auto const d = v.makeReg();
-      v << testl{vsize, vsize, sf};
-      v << setcc{CC_NZ, sf, d};
-      return d;
-    },
-    [&] (Vout& v) {
-      auto const d = v.makeReg();
-      v << setcc{CC_NZ, sf, d};
-      return d;
-    }
-  );
-}
-
 void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const src = srcLoc(env, inst, 0).reg();
@@ -146,8 +118,21 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   emitLdObjClass(v, src, cls);
   v << testbim{Class::CallToImpl, cls[Class::RTAttrsOff()], sf};
 
+  auto const callToBoolean = [&] (Vout& v) {
+    auto const d = v.makeReg();
+    cgCallHelper(v, env,
+                 CallSpec::method(&ObjectData::toBoolean),
+                 CallDest{DestType::Byte, d},
+                 SyncOptions::Sync,
+                 argGroup(env, inst).ssa(0));
+    return d;
+  };
+
   unlikelyCond(v, vcold(env), CC_NZ, sf, dst,
     [&] (Vout& v) {
+      if (RuntimeOption::EvalNoticeOnCollectionToBool) {
+        return callToBoolean(v);
+      }
       auto const sf = emitIsCollection(v, src);
       return cond(v, CC_BE, sf, v.makeReg(),
         [&] (Vout& v) { // src points to native collection
@@ -158,20 +143,14 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
           return d;
         },
         [&] (Vout& v) { // src is not a native collection
-          auto const d = v.makeReg();
-          cgCallHelper(v, env,
-                       CallSpec::method(&ObjectData::toBoolean),
-                       CallDest{DestType::Byte, d},
-                       SyncOptions::Sync,
-                       argGroup(env, inst).ssa(0));
-          return d;
+          return callToBoolean(v);
         });
     },
     [&] (Vout& v) { return v.cns(true); }
   );
 }
 
-IMPL_OPCODE_CALL(ConvCellToBool);
+IMPL_OPCODE_CALL(ConvTVToBool);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToInt
@@ -209,9 +188,8 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
             [&] (Vout& v) {
               // PF = 1 -> unordered, i.e., we are doing an int cast of NaN.
               // PHP5 didn't formally define this, but observationally returns
-              // the truncated value (i.e., what d currently holds).  PHP7
-              // formally defines this case to return 0.
-              return RuntimeOption::PHP7_IntSemantics ? v.cns(0) : d;
+              // the truncated value (i.e., what d currently holds).
+              return d;
             },
             [&] (Vout& v) {
               constexpr uint64_t ulong_max =
@@ -256,7 +234,7 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(ConvStrToInt);
 IMPL_OPCODE_CALL(ConvObjToInt);
 IMPL_OPCODE_CALL(ConvResToInt);
-IMPL_OPCODE_CALL(ConvCellToInt);
+IMPL_OPCODE_CALL(ConvTVToInt);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToDbl
@@ -289,55 +267,27 @@ void cgConvIntToDbl(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(ConvStrToDbl);
-IMPL_OPCODE_CALL(ConvArrToDbl);
 IMPL_OPCODE_CALL(ConvObjToDbl);
 IMPL_OPCODE_CALL(ConvResToDbl);
-IMPL_OPCODE_CALL(ConvCellToDbl);
+IMPL_OPCODE_CALL(ConvTVToDbl);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToVArray
 
 static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
-  assertx(adIn->isPHPArray());
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toVArray(adIn->cowCheck());
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
-  assertx(adIn->isVecArray());
-  auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
-  assertx(a->isPacked());
-  assertx(a->isVArray());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
-  assertx(adIn->isDict());
-  auto a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  assertx(a->isPacked());
-  assertx(a->isVArray());
-  decRefArr(adIn);
-  return a;
-}
-
-static ArrayData* convKeysetToVArrImpl(ArrayData* adIn) {
-  assertx(adIn->isKeyset());
-  auto a = SetArray::ToVArray(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  assertx(a->isPacked());
-  assertx(a->isVArray());
-  decRefArr(adIn);
   return a;
 }
 
 static ArrayData* convObjToVArrImpl(ObjectData* obj) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToVArray(obj);
-  assertx(a->isPacked());
+  assertx(a->isPackedKind());
   assertx(a->isVArray());
   decRefObj(obj);
   return a;
@@ -360,22 +310,6 @@ void convToVArrHelper(IRLS& env, const IRInstruction* inst,
 
 }
 
-void cgConvArrToVArr(IRLS& env, const IRInstruction* inst) {
-  convToVArrHelper(env, inst, CallSpec::direct(convArrToVArrImpl), false);
-}
-
-void cgConvVecToVArr(IRLS& env, const IRInstruction* inst) {
-  convToVArrHelper(env, inst, CallSpec::direct(convVecToVArrImpl), false);
-}
-
-void cgConvDictToVArr(IRLS& env, const IRInstruction* inst) {
-  convToVArrHelper(env, inst, CallSpec::direct(convDictToVArrImpl), false);
-}
-
-void cgConvKeysetToVArr(IRLS& env, const IRInstruction* inst) {
-  convToVArrHelper(env, inst, CallSpec::direct(convKeysetToVArrImpl), false);
-}
-
 void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
   convToVArrHelper(env, inst, CallSpec::direct(convObjToVArrImpl), true);
 }
@@ -384,46 +318,51 @@ void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
 // ConvToDArray
 
 static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
-  assertx(adIn->isPHPArray());
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(adIn->isPHPArrayType());
   auto a = adIn->toDArray(adIn->cowCheck());
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
 
 static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
-  assertx(adIn->isVecArray());
-  auto a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(adIn->isVecKind());
+  auto a = PackedArray::ToDArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   decRefArr(adIn);
   return a;
 }
 
 static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
-  assertx(adIn->isDict());
-  auto a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
-  assertx(a->isMixed());
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(adIn->isDictKind());
+  auto a = MixedArray::ToDArray(adIn, adIn->cowCheck());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
 
 static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
-  assertx(adIn->isKeyset());
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  assertx(adIn->isKeysetKind());
   auto a = SetArray::ToDArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   decRefArr(adIn);
   return a;
 }
 
 static ArrayData* convObjToDArrImpl(ObjectData* obj) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToDArray(obj);
-  assertx(a->isMixed());
+  assertx(a->isMixedKind());
   assertx(a->isDArray());
   decRefObj(obj);
   return a;
@@ -446,22 +385,6 @@ void convToDArrHelper(IRLS& env, const IRInstruction* inst,
 
 }
 
-void cgConvArrToDArr(IRLS& env, const IRInstruction* inst) {
-  convToDArrHelper(env, inst, CallSpec::direct(convArrToDArrImpl), false);
-}
-
-void cgConvVecToDArr(IRLS& env, const IRInstruction* inst) {
-  convToDArrHelper(env, inst, CallSpec::direct(convVecToDArrImpl), false);
-}
-
-void cgConvDictToDArr(IRLS& env, const IRInstruction* inst) {
-  convToDArrHelper(env, inst, CallSpec::direct(convDictToDArrImpl), false);
-}
-
-void cgConvKeysetToDArr(IRLS& env, const IRInstruction* inst) {
-  convToDArrHelper(env, inst, CallSpec::direct(convKeysetToDArrImpl), false);
-}
-
 void cgConvObjToDArr(IRLS& env, const IRInstruction* inst) {
   convToDArrHelper(env, inst, CallSpec::direct(convObjToDArrImpl), true);
 }
@@ -473,37 +396,26 @@ IMPL_OPCODE_CALL(ConvIntToStr);
 IMPL_OPCODE_CALL(ConvDblToStr);
 IMPL_OPCODE_CALL(ConvObjToStr);
 IMPL_OPCODE_CALL(ConvResToStr);
-IMPL_OPCODE_CALL(ConvCellToStr);
+IMPL_OPCODE_CALL(ConvTVToStr);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(ConvBoolToArr);
-IMPL_OPCODE_CALL(ConvIntToArr);
-IMPL_OPCODE_CALL(ConvDblToArr);
-IMPL_OPCODE_CALL(ConvStrToArr);
-IMPL_OPCODE_CALL(ConvVecToArr);
-IMPL_OPCODE_CALL(ConvDictToArr);
-IMPL_OPCODE_CALL(ConvKeysetToArr);
-IMPL_OPCODE_CALL(ConvObjToArr);
-IMPL_OPCODE_CALL(ConvCellToArr);
-IMPL_OPCODE_CALL(ConvArrToNonDVArr);
+IMPL_OPCODE_CALL(ConvArrLikeToVArr);
+IMPL_OPCODE_CALL(ConvArrLikeToDArr);
+IMPL_OPCODE_CALL(ConvClsMethToVArr);
+IMPL_OPCODE_CALL(ConvClsMethToDArr);
 
-IMPL_OPCODE_CALL(ConvArrToVec);
-IMPL_OPCODE_CALL(ConvDictToVec);
-IMPL_OPCODE_CALL(ConvKeysetToVec);
+IMPL_OPCODE_CALL(ConvArrLikeToVec);
+IMPL_OPCODE_CALL(ConvClsMethToVec);
 IMPL_OPCODE_CALL(ConvObjToVec);
 
-IMPL_OPCODE_CALL(ConvArrToDict);
-IMPL_OPCODE_CALL(ConvVecToDict);
-IMPL_OPCODE_CALL(ConvKeysetToDict);
+IMPL_OPCODE_CALL(ConvArrLikeToDict);
+IMPL_OPCODE_CALL(ConvClsMethToDict);
 IMPL_OPCODE_CALL(ConvObjToDict);
 
-IMPL_OPCODE_CALL(ConvArrToKeyset);
-IMPL_OPCODE_CALL(ConvVecToKeyset);
-IMPL_OPCODE_CALL(ConvDictToKeyset);
+IMPL_OPCODE_CALL(ConvArrLikeToKeyset);
+IMPL_OPCODE_CALL(ConvClsMethToKeyset);
 IMPL_OPCODE_CALL(ConvObjToKeyset);
-
-IMPL_OPCODE_CALL(ConvCellToObj);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -526,6 +438,27 @@ void cgStrictlyIntegerConv(IRLS& env, const IRInstruction* inst) {
     SyncOptions::None,
     args
   );
+}
+
+void cgConvPtrToLval(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const srcLoc = irlower::srcLoc(env, inst, 0);
+  auto const dstLoc = irlower::dstLoc(env, inst, 0);
+
+  v << copy{srcLoc.reg(), dstLoc.reg(tv_lval::val_idx)};
+  if (wide_tv_val) {
+    static_assert(TVOFF(m_data) == 0, "");
+    v << lea{srcLoc.reg()[TVOFF(m_type)], dstLoc.reg(tv_lval::type_idx)};
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgDblAsBits(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{src, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,9 +1,11 @@
-<?hh
+<?hh // partial
 class C {
+
+  private static $barK = 0;
+
   private function bar() {
-    static $k = 0;
-    ++$k;
-    echo "$k\n";
+    ++self::$barK;
+    echo self::$barK . "\n";
     var_dump($this);
   }
   public function foo1() {
@@ -30,6 +32,6 @@ function main() {
     (function(int):bool) $f,
     Vector<Vector<int>> $v = Vector {Vector {1, 2}, Vector {3, 4}},
   ): Vector<Vector<int>> ==> $v;
-  var_dump($x instanceof Closure);
+  var_dump($x is Closure);
 }
 main();

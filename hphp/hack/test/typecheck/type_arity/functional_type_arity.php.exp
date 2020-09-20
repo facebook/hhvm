@@ -1,0 +1,4 @@
+File "functional_type_arity.php", line 14, characters 17-22:
+Wrong number of type arguments (expected 2, got 1) (Typing[4101])
+File "functional_type_arity.php", line 12, characters 7-7:
+Definition is here

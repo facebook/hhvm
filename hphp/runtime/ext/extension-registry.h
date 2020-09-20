@@ -1,20 +1,21 @@
-#ifndef incl_HPHP_EXTENSION_REGISTRY_H
-#define incl_HPHP_EXTENSION_REGISTRY_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/hdf.h"
 
-namespace HPHP { namespace ExtensionRegistry {
+namespace HPHP {
+
+namespace jit {
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+}
+
+namespace ExtensionRegistry {
 /////////////////////////////////////////////////////////////////////////////
 
 void registerExtension(Extension* ext);
-
-void unregisterExtension(const char* name);
-inline void unregisterExtension(const String& name) {
-  unregisterExtension(name.data());
-}
 
 bool isLoaded(const char* name, bool enabled_only = true);
 inline bool isLoaded(const String& name, bool enabled_only = true) {
@@ -41,9 +42,11 @@ void requestShutdown();
 
 bool modulesInitialised();
 
-void scanExtensions(IMarker&);
+void serialize(jit::ProfDataSerializer& ser);
+void deserialize(jit::ProfDataDeserializer& des);
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::ExtensionRegistry
+} // namespace HPHP::ExtensionRegistry
 
-#endif // incl_HPHP_EXTENSION_REGISTRY_H
+}
+

@@ -1,14 +1,14 @@
 *** Testing vfprintf() : with unexpected values for args argument ***
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vfprintf_variation21.php on line 90
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vfprintf_variation21.php on line 90
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vfprintf_variation21.php on line 90
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vfprintf_variation21.php on line 90
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vfprintf_variation21.php on line 90
 
 *** Testing vprintf() with unexpected values for args argument ***
 
@@ -57,5 +57,5 @@ string
 -- Iteration 22 --
 
 -- Iteration 23 --
-Resource id #%d
+Resource id #4
 ===DONE===

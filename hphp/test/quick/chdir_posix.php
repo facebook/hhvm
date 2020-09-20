@@ -1,14 +1,13 @@
 <?hh
 
-$origdir = getcwd();
+<<__EntryPoint>> function main(): void {
+  $origdir = getcwd();
+  $dirname = __SystemLib\hphp_test_tmppath('hhvm_chdir');
+  mkdir($dirname);
 
-// Ugh. This (racy crap) is the 'recommended' way to fake tmpdir()
-$dirname = tempnam(sys_get_temp_dir(), $prefix='hhvm_chdir');
-unlink($dirname);
-mkdir($dirname);
-
-var_dump(chdir($dirname));
-chdir($origdir);
-chmod($dirname, 0600);
-var_dump(chdir($dirname));
-rmdir($dirname);
+  var_dump(chdir($dirname));
+  chdir($origdir);
+  chmod($dirname, 0600);
+  var_dump(chdir($dirname));
+  rmdir($dirname);
+}

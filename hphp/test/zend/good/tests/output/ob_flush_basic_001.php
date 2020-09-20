@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : proto bool ob_flush(void)
  * Description: Flush (send) contents of the output buffer. The last buffer content is sent to next buffer 
  * Source code: main/output.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ob_flush() : basic functionality ***\n";
 
 // Zero arguments
@@ -20,5 +20,4 @@ $out = ob_flush();
 var_dump($out);
 
 echo "Done";
-
-?>
+}

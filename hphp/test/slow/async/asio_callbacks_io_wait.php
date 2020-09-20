@@ -1,13 +1,17 @@
 <?hh
 
-WaitableWaitHandle::setOnIOWaitEnterCallback(function() {
+
+<<__EntryPoint>>
+function main_asio_callbacks_io_wait() {
+Awaitable::setOnIOWaitEnterCallback(function() {
   echo "io wait enter\n";
 });
 
-WaitableWaitHandle::setOnIOWaitExitCallback(function() {
+Awaitable::setOnIOWaitExitCallback(function() {
   echo "io wait exit\n";
 });
 
 echo "going to sleep\n";
 HH\Asio\join(SleepWaitHandle::create(2000000));
 echo "sleep finished\n";
+}

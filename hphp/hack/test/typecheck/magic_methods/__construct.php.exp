@@ -1,0 +1,8 @@
+File "__construct.php", line 11, characters 10-20:
+`__construct` is a magic method and cannot be called directly (NastCheck[3011])
+File "__construct.php", line 11, characters 10-20:
+No method `__construct` in `Example` (Typing[4053])
+File "__construct.php", line 10, characters 15-21:
+This is why I think it is an object of type Example
+File "__construct.php", line 3, characters 7-13:
+Declaration of `Example` is here

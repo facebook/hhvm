@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strtok ( str $str, str $token )
  * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
  * Source code: ext/standard/string.c
@@ -7,20 +7,20 @@
 /*
  * Testing strtok() : with embedded nulls in the strings
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with embedded nulls in the strings ***\n";
 
 // defining varous strings with embedded nulls
-$strings_with_nulls = array(
- 		           "\0",
- 		           '\0',
+$strings_with_nulls = varray[
+                    "\0",
+                    '\0',
                            "hello\0world",
                            "\0hel\0lo",
                            "hello\0",
                            "\0\0hello\tworld\0\0",
                            "\\0he\0llo\\0",
                            'hello\0\0'
-                           );
+                           ];
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string values
@@ -37,4 +37,4 @@ foreach( $strings_with_nulls as $string )  {
 
 
 echo "Done\n";
-?>
+}

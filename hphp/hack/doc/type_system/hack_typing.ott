@@ -1,0 +1,2085 @@
+%% GOTCHAS with LateX output:
+%%   In free-standing {{ com }} blocks you must use math-mode around [[]]
+
+embed
+{{ coq
+Require Import String.
+}}
+
+embed
+{{ tex-preamble
+\usepackage{longtable}
+\renewcommand{\ottgrammartabular}[1]{\begin{longtable}{llclllllp{6.5cm} }#1\end{longtable} }
+\renewcommand{\ottmetavartabular}[1]{\begin{longtable}{ll}#1\end{longtable} }
+\renewcommand{\ottcom}[1]{\parbox[t]{6.5cm}{#1} }
+\renewcommand{\arraystretch}{1.2}
+\newcommand{\kwd}[1]{\mathtt{#1} }
+}}
+
+embed
+{{
+tex-wrap-pre
+\documentclass[11pt,a4paper]{memoir}
+\title{Hack type system}
+% standard packages, some relied upon by the generated Ott code
+\usepackage{amsmath,amssymb}
+\usepackage[left=1cm, right=1cm, top=2cm, bottom=1cm]{geometry}
+\usepackage{ifthen}
+\usepackage{alltt}
+\usepackage{color}
+\usepackage[bookmarks,bookmarksopen,bookmarksdepth=2]{hyperref}
+}}
+
+embed
+{{
+tex-wrap-post
+\begin{document}{
+% Workaround for Latex issue with newlines (note tildes)
+\ottmetavars~\\[0pt]
+\ottgrammar~\\[5.0mm]
+\ottdefnss
+}
+\end{document}
+}}
+
+metavar string_literal ::=
+  {{ coq string }} {{ com string literal }} {{ lex Alphanum }} {{ ocaml string }}
+metavar integer_literal ::=
+  {{ coq nat }} {{ com integer literal }} {{ lex numeral }} {{ ocaml int }}
+metavar sfn ::=
+  {{ coq string }} {{ com shape field name }} {{ lex Alphanum }} {{ ocaml string }}
+metavar f {{ ocaml field_id }} ::= {{ coq string }} {{ com field identifier }} {{ ocaml string }}
+metavar x {{ ocaml lvar_id }} ::= {{ coq string }} {{ com local variable identifier }} {{ ocaml string }}
+metavar typeid ::=
+  {{ lex Alphanum }}
+  {{ coq string }}
+  {{ com identifier }}
+  {{ ocaml string }}
+metavar userid ::=
+  {{ lex alphanum }}
+  {{ coq string }}
+  {{ com identifier }}
+  {{ ocaml string }}
+metavar T {{ ocaml typaram_id }} ::= {{ coq string }} {{ com type parameter, different from other identifiers for simplicity }}
+  {{ ocaml string }}
+indexvar i, j, m, n ::= {{ coq nat }} {{ com natural number indices }} {{ ocaml int}}
+
+grammar
+
+%% Symbolic names for types
+%% We need to know about three special interfaces for special subtyping
+%% rules for array types
+
+b :: 'bool_' ::= {{ com booleans }}
+  | True :: :: True
+  | False :: :: False
+
+N, C, I :: 'typename_' ::= {{ com named types }} {{ coq string }}
+  | ` typeid ` :: :: User
+    {{ com user type name }} {{ tex {\kwd{[[typeid]]} } }}
+    {{ coq "[[typeid]]"%string }}
+
+id :: 'id_' ::= {{ com identifiers }}
+% Just do this so we can get underscores displayed properly!
+  | is_bool :: :: is_bool {{ tex {\kwd{is\_bool} } }}
+  | is_int :: :: is_int {{ tex {\kwd{is\_int} } }}
+  | is_float :: :: is_float {{ tex {\kwd{is\_float} } }}
+  | is_string :: :: is_string {{ tex {\kwd{is\_string} } }}
+  | is_vec :: :: is_vec {{ tex {\kwd{is\_vec} } }}
+  | is_dict :: :: is_dict {{ tex {\kwd{is\_dict} } }}
+  | is_keyset :: :: is_keyset {{ tex {\kwd{is\_keyset} } }}
+  | is_array :: :: is_array {{ tex {\kwd{is\_array} } }}
+  | is_null :: :: is_null {{ tex {\kwd{is\_null} } }}
+  | ` userid `  :: :: user {{ com user identifier }} {{ tex {\kwd{[[userid]]} } }}
+
+%% Keys
+
+{{ com \subhead{Syntax of keys} }}
+
+sk {{ ocaml Shape_key }} :: 'SF' ::= {{ com shape keys }}
+  | sfn        :: :: requiredkey {{ com required key }}
+  | ? sfn      :: :: optionalkey {{ com optional key }}
+
+%% Types
+
+{{ com \subhead{Syntax of types} }}
+
+{{ com
+
+Implicit below is a well-formedness conditions for shapes stating that
+all shape field names must be disjoint.  In particular, the unset
+shape field names, which are listed on the right of $[[\]]$ in the
+open shape syntax, must not occur as shape field names of the shape
+field types on the left of $[[\]]$.
+
+}}
+
+t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of types }}
+  | nothing :: :: nothing                 {{ com bottom type }}
+  | mixed  ::   :: mixed                    {{ com top type }}
+  | nonnull ::  :: nonnull                  {{ com nonnull type }}
+  | null   ::   :: null                     {{ com null type }}
+  | int    ::   :: int                      {{ com integer }}
+  | float  ::   :: float                    {{ com floating point }}
+  | num    ::   :: num                      {{ com number }}
+  | string ::   :: string                   {{ com string }}
+  | arraykey :: :: arraykey                 {{ com array key }}
+  | bool   ::   :: bool                     {{ com boolean type }}
+  | void   ::   :: void                     {{ com void return type }}
+  | dynamic :: :: dynamic                   {{ com dynamic type }}
+  | T      ::   :: typeparam                {{ com generic type parameter }}
+  | N inst ::   :: classish                 {{ com possibly-instantiated named type }}
+  | # N inst :: :: exact                    {{ com exact named type }}
+  | this   ::   :: this                     {{ com this type }}
+  | ? t    ::   :: option                   {{ com nullable }}
+  | t1 '|' t2         :: :: union           {{ com union type }}
+  | t1 & t2 :: :: intersection              {{ com intersection type }}
+  | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
+  | ( t1 , .... , tn ) :: :: tuple          {{ com tuple }}
+  | shape ( sft1 , .. , sftn ) :: :: shape  {{ com closed shape (all field names are assumed to be disjoint) }}
+  | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are ssumed to be disjoint) }}
+  | function ( t1 , .. , tn ) : t           :: :: function {{ com function type }}
+  | function ( t1 , .. , tn , t0 vardots ) : t :: :: variadicfunction {{ com variadic function type }}
+  | array < > :: :: emptyarray              {{ com empty array }}
+  | array < t > :: :: vecarray              {{ com vec-like array }}
+  | array < t1 , t2 > :: :: maparray        {{ com map-like array }}
+  | vec < t > :: :: vec {{ com vector }}
+  | dict < t1 , t2 > :: :: dict {{ com dictionary }}
+  | keyset < t > :: :: keyset {{ com key set }}
+
+  | { t1 / T1 , .. , tn / Tn } t :: M :: Tsub
+    {{ com substitution (meta-operation) }}
+    {{ coq [[t]] }}  % TODO
+    {{ ocaml [[t]] }} % TODO
+  | { u / this } t :: M :: Tsub_this
+    {{ com substitution (meta-operation) for this }}
+    {{ coq [[t]] }}  % TODO
+    {{ ocaml [[t]] }} % TODO
+
+sft :: '' ::= {{ com shape field type }}
+  | sk => t ::  :: shape_field_type               {{ com shape field type }}
+
+inst :: '' ::= {{ com vector of type arguments }}
+  |       ::   :: emptyinst              {{ com no type arguments }}
+  | < t1 , .. , tn > ::  :: mkinst       {{ com some type arguments }}
+
+U {{ ocaml updatel }} {{ tex \Upsilon }} :: U_ ::= {{ com list of context updates }}
+  | x1 := t1 , .. , xn := tn ::   :: update_list
+  | U1 [ U2 ] ::  :: update_override
+    {{ com update list $[[U1]]$ overridden or extended with $[[U2]]$ }}
+
+Gitem :: 'lenv_' ::= {{ com entry in locals environment }}
+  | x : t                           ::   :: lvar {{ com local typing }}
+  | t <: t'                         ::   :: sub {{ com subtype assumption }}
+  | t ~> t'                         ::   :: coerce {{ com coercion assumption }}
+
+G {{ ocaml lenv }} {{ coq lenv }}
+   {{ tex \Gamma }} :: 'lenv_' ::=
+   {{ com subtype assumptions and typing of locals }}
+   | { Gitem1 , .. , Gitemn }        :: :: env
+   | G , Gitem                       :: :: add {{ com extend }}
+   | G [ U ]                         :: :: update
+     {{ com update environment $[[G]]$ with assignments $[[U]]$ }}
+
+Kitem :: 'kenv_' ::= {{ com entry in continuation environment }}
+  | contkind : G                          ::   :: make {{ com continuation typing }}
+
+%% WORKAROUND: can't inline this into definition of Cont_update
+%% as Coq output does not include correct specialized list
+Kupdate :: 'kenv_' ::= {{ com update to continuation environment }}
+  | contkind := G :: :: delta
+
+%% Model updates and extensions as bits of syntax rather than operations
+K {{ ocaml cont_env }} {{ tex \Delta }} :: Cont_ ::=
+  {{ com typing of continuations }}
+  | { Kitem1 , .. , Kitemn }        :: :: env
+    {{ com explicit continuation environment }}
+ | K , Kitem                            :: :: add
+ | K [ Kupdate1 , .. , Kupdaten ]    :: :: update
+
+
+%%% Type parameter declarations
+
+var {{ ocaml variance }} :: '' ::= {{ com variance annotation }}
+  | +   :: :: covariant {{ com covariant }}
+  | -   :: :: contravariant {{ com contravariant }}
+  |     :: :: invariant {{ com invariant }}
+
+typaram :: '' ::= {{ com generic type parameter declaration }}
+  | var T constraint :: :: typaram_make {{ com generic type parameter with variance }}
+
+typarams :: 'typarams_' ::= {{ com generic type parameters declaration }}
+  |                    :: :: empty  {{ com no type parameters }}
+  | < typaram1 , .. , typaramn > :: :: nonempty {{ com some type parameters }}
+
+constraint :: 'constraint_' ::= {{ com type parameter constraint }}
+  | as t :: :: as {{ com as constraint }}
+  | super t :: :: super {{ com super constraint }}
+  | :: :: none {{ com no constraint }}
+
+%%% Class extends and implements declarations
+
+cextends :: 'class_' ::= {{ com class extends declaration }}
+  | extends t ::   :: extends               {{ com extends a class }}
+  |           ::   :: noextends             {{ com does not extend a class }}
+
+cimpls :: 'class_' ::= {{ com class implements declaration }}
+  | implements t1 , ... , tn :: :: implements   {{ com implements some interfaces }}
+  |                          :: :: noimplements {{ com does not implement any interfaces }}
+
+%%% Interface extends declaration
+
+iextends :: 'interface_' ::= {{ com interface extends declaration }}
+  | extends t1 , ... , tn :: :: extends           {{ com extends some interfaces }}
+  |               :: :: noextends {{ com does not extend any interfaces }}
+
+%%% Enum or newtype as declaration
+asdecl :: 'type_' ::= {{ com as declaration }}
+  | as t :: :: as {{ com has supertype }}
+  | :: :: noas {{ com has no supertype }}
+
+%%% Kind of continuations, used in typing rules
+contkind :: 'Cont_' ::=
+  {{ com Continuation kinds }}
+  | break :: :: Break {{ com break from loop or switch }}
+  | continue :: :: Continue {{ com continue to head of loop }}
+  | catch :: :: Catch {{ com exception handler }}
+  | return :: :: Return {{ com return }}
+  | skip :: :: Skip {{ com next statement }}
+
+%%% Elements of class definitions
+member :: 'member_' ::= {{ com property or method definition }}
+  | t $ x ; :: :: instance_property {{ com instance property }} {{ tex [[t]]\;\$[[x]]; }}
+  | static t $ x ; :: :: static_property {{ com static property }} {{ tex [[static]]\;[[t]]\;\$[[x]]; }}
+  | function id F block :: :: instance_method {{ com instance method }}
+  | static function id F block :: :: static_method {{ com static method }}
+
+members :: 'members_' ::= {{ com non-constructor members of a class }}
+  | member1 .. membern :: :: list
+
+classbody :: 'class_' ::= {{ com class body }}
+  | { constructor members } :: :: body
+
+constructor :: 'constructor_' ::= {{ com constructor definition }}
+  | function __construct funparams block :: :: constructor {{ com constructor }}
+
+%%% Top level declaration
+decl :: 'decl_' ::= {{ com top level declarations }}
+  | class C typarams cextends cimpls classbody :: :: classdef {{ com class declaration }}
+  | interface I typarams iextends :: :: interfacedef {{ com interface declaration }}
+  | enum N : t asdecl :: :: enumdef
+  | type N < T1 , .. , Tn > = t :: :: alias {{ com type alias }}
+  | newtype N < T1 , .. , Tn > asdecl = t :: :: opaque {{ com opaque type definition }}
+  | function id F block :: :: function {{ com top-level function definition }}
+
+lvar :: '' ::= {{ com local variable }}
+  | $ x                        ::   :: lvar_id        {{ com local variable }}
+                                                      {{ tex { \$ [[x]] } }}
+e {{ ocaml expr }} :: 'e_' ::= {{ com expressions }}
+  | null                       ::   :: null           {{ com null value }}
+  | true                       ::   :: true           {{ com true value }}
+  | false                      ::   :: false          {{ com false value }}
+  | string_literal             ::   :: string         {{ com string literal }}
+  | integer_literal            ::   :: int            {{ com integer literal }}
+  | sfn                        ::   :: sfn            {{ com shape field name }}
+  | i                          ::   :: tuple_index    {{ com tuple index }}
+  | $this                      ::   :: this           {{ com this value }} {{ tex \mathtt{\$this} }}
+  | lvar                       ::   :: lvar           {{ com local variable }}
+  | id                         ::   :: id             {{ com top-level function }}
+  | e -> x                     ::   :: obj_get        {{ com property access }}
+  | e -> id ( args )           ::   :: method_call    {{ com method call }}
+  | e ?-> x                    ::   :: nullsafe_obj_get {{ com nullsafe property access }}
+  | e ?-> id ( args )          ::   :: nullsafe_method_call {{ com nullsafe method call }}
+  | N '::' x                   ::   :: class_get      {{ com static property access }}
+  | N '::' id ( args )         ::   :: static_method_call {{ com static method call }}
+  | e1 [ e2 ]                  ::   :: array_get      {{ com array indexing }}
+  | e []                       ::   :: array_append   {{ com array appending }}
+  | tuple ( e1 , ... , en )    ::   :: tuple          {{ com tuple }}
+  | list ( e1 , ... , en )     ::   :: list           {{ com list destructuring }}
+  | e ( args )                 ::   :: call           {{ com function or method call }}
+  | ( e )                      :: S :: parens {{ ocaml [[e]] }} {{ coq [[e]] }}
+  | e1 bop e2                   ::   :: binop          {{ com binary operation }}
+  | uop e                      ::   :: unop           {{ com unary operation }}
+  | e1 ? e2 : e3               ::   :: eif            {{ com conditional expression }}
+  | e1 ?? e2                   ::   :: nullCoalesce       {{ com null coalesce }}
+  | new C ( args )             ::   :: new            {{ com object creation }}
+  | lamparams lamreturn ==> lambody  ::   :: lambda   {{ com lambda }}
+  | await e                    ::   :: await          {{ com await expression }}
+
+args {{ ocaml args }} :: 'args_' ::= {{ com argument list }}
+  | e1 , .. , en              ::   :: args           {{ com arguments }}
+  | e1 , .. , en , vardots e  ::   :: args_splat     {{ com arguments with splat }}
+
+isvariadic :: 'is_variadic_' ::= {{ com optional variadic }}
+  |                              :: :: no            {{ com not variadic  parameter }}
+  | vardots                      :: :: yes           {{ com variadic parameter }}
+
+funparam :: 'function_' ::= {{ com function or method parameter }}
+  | t isvariadic lvar            :: :: param
+
+funparams :: 'function_' ::= {{ com function or method parameters }}
+    | ( funparam1 , .. , funparamn ) :: :: params       {{ com list }}
+
+F {{ ocaml funsig }} :: 'function_'     ::= {{ com function or method signature }}
+  | funparams : t :: :: sig
+
+lamparam :: 'lambda_param_' ::= {{ com lambda parameter }}
+  | isvariadic lvar              :: :: notype         {{ com without type }}
+  | t isvariadic lvar            :: :: type           {{ com with type }}
+
+lamreturn :: 'lambda_return_' ::= {{ com lambda return }}
+  |                              :: :: notype         {{ com without type }}
+  | : t                          :: :: type           {{ com with type }}
+
+lambody :: 'lambda_body_' ::= {{ com lambda body }}
+  | e                            :: :: expr           {{ com expression }}
+  | block                        :: :: block          {{ com block }}
+
+lamparams :: 'lambda_' ::= {{ com lambda parameters }}
+  | ( lamparam1 , .. , lamparamn ) :: :: params       {{ com list }}
+
+ae {{ ocaml as_expr }} :: 'ae_' ::= {{ com as expressions }}
+  | e                          ::   :: value          {{ com as value }}
+  | e1 => e2                   ::   :: key_value      {{ com as key-value pair }}
+
+s {{ ocaml st }} :: 's_' ::= {{ com statements }}
+  | break ;                    ::   :: break          {{ com break out of loop or switch }}
+  | continue ;                 ::   :: continue       {{ com continue in loop }}
+  | throw e ;                  ::   :: throw          {{ com throw exception }}
+  | return e ;                 ::   :: return         {{ com return from function }}
+  | return ;                   ::   :: return_void    {{ com return from void function }}
+  | ;                          ::   :: skip           {{ com empty statement }}
+  | if ( e ) s1 else s2        ::   :: if             {{ com conditional statement }}
+  | if ( e ) s                 ::   :: if_then        {{ com one-armed conditional }}
+  | do s while ( e )           ::   :: do             {{ com do loop }}
+  | while ( e ) s              ::   :: while          {{ com while loop }}
+  | for ( e1 ; e2 ; e3 ) s     ::   :: for            {{ com for loop }}
+  | foreach ( e as ae ) s      ::   :: foreach        {{ com foreach loop }}
+  | try s1 cc1 .. ccn finally s2 ::   :: try          {{ com try catch }}
+  | switch (e) cases           ::   :: switch         {{ com switch }}
+  | e ;                        ::   :: expr           {{ com expression as statement }}
+  | block                      ::   :: block          {{ com block as statement }}
+
+block {{ ocaml block }} :: 'block_' ::= {{ com block }}
+  | { s1 .. sn }               ::   :: statements     {{ com sequence of statements }}
+
+cc {{ ocaml catch }}:: 'cc_' ::= {{ com catch clause }}
+  | catch ( C lvar ) s           ::   :: catch          {{ com catch clause }}
+
+uop :: '' ::= {{ com unary operations }}
+  | '~' :: :: Utild {{ com tilde }} {{ tex \kwd{\sim} }}
+  | ! :: :: Unot {{ com not }} {{ tex \kwd{!} }}
+  | + :: :: Uplus  {{ com unary plus }} {{ tex \kwd{+} }}
+  | - :: :: Uminus {{ com unary negation }} {{ tex \kwd{-} }}
+  | (++) :: :: Uincr {{ com increment }} {{ tex \kwd{++} }}
+  | (--) :: :: Udecr {{ com decrement }} {{ tex \kwd{--} }}
+
+bop :: '' ::= {{ com binary operations }}
+  | + :: :: Plus {{ com addition }} {{ tex \kwd{+} }}
+  | - :: :: Minus {{ com subtraction }} {{ tex \kwd{-} }}
+  | * :: :: Star {{ com multiplication }} {{ tex \kwd{*} }}
+  | / :: :: Slash {{ com division }} {{ tex \kwd{/} }}
+  | == :: :: Eqeq {{ com equality }} {{ tex \kwd{==} }}
+  | === :: :: Eqeqeq {{ com equality }} {{ tex \kwd{===} }}
+  | ** :: :: Starstar {{ com exponentiation }} {{ tex \kwd{**} }}
+  | != :: :: Diff {{ com dis-equality }} {{ tex \kwd{!=} }}
+  | !== :: :: Diff2 {{ com dis-equality }} {{ tex \kwd{!==} }}
+  | && :: :: Ampamp {{ com logical and }} {{ tex \kwd{\&\&} }}
+  | '||' :: :: Barbar {{ com logical or }} {{ tex \kwd{||} }}
+  | xor :: :: LogXor {{ com logical xor }} {{ tex \kwd{xor} }}
+  | < :: :: Lt {{ com less than }} {{ tex \kwd{<} }}
+  | <= :: :: Lte {{ com less than or equal }} {{ tex \kwd{<=} }}
+  | > :: :: Gt {{ com greater than }} {{ tex \kwd{>} }}
+  | >= :: :: Gte {{ com greater than or equal }} {{ tex \kwd{>=} }}
+  | '.' :: :: Dot {{ com string concatenation }} {{ tex \kwd{.} }}
+  | & :: :: Amp {{ com bitwise and }} {{ tex \kwd{\&} }}
+  | '|' :: :: Bar {{ com bitwise or }} {{ tex \kwd{|} }}
+  | << :: :: Ltlt {{ com shift left }} {{ tex \kwd{<<} }}
+  | >> :: :: Gtgt {{ com shift right }} {{ tex \kwd{>>} }}
+  | % :: :: Percent {{ com remainder }} {{ tex \kwd{\%} }}
+  | ^ :: :: Xor {{ com bitwise xor }} %{{ tex \kwd{\^{} } }}
+  | <=> :: :: Cmp {{ com spaceship comparison operator }} {{ tex \kwd{<=>} }}
+  | = :: :: Eq {{ com assignment }}
+
+% Generic terminals with pretty TeX
+
+terminals :: terminals_ ::=
+  | -->                        ::   :: longrightarrow {{ tex \longrightarrow }}
+  | ->                         ::   :: rightarrow     {{ tex \rightarrow }}
+  | ?->                        ::   :: qrightarrow    {{ tex ?\rightarrow}}
+  | =>                         ::   :: Rightarrow     {{ tex \Rightarrow }}
+  | |->                        ::   :: mapsto         {{ tex \mapsto }}
+  | |-                         ::   :: vdash          {{ tex \vdash }}
+  | <::                        ::   :: derives        {{ tex <:: }}
+  | <                          ::   :: langle         {{ tex \langle }}
+  | >                          ::   :: rangle         {{ tex \rangle }}
+  | :>                         ::   :: supertype      {{ tex :> }}
+  | ==                         ::   :: eqtype         {{ tex \equiv }}
+  | ~>                         ::   :: leadsto        {{ tex \leadsto }}
+  | ~                          ::   :: tilde          {{ tex \sim }}
+  | truthy                     ::   :: truthy         {{ tex \Downarrow }}
+  | vardots                    ::   :: variadicrest   {{ tex \underline{\mathtt{...} } }}
+  | __construct                ::   :: construct      {{ tex \mathtt{\_\_construct}  }}
+  | \                          ::   :: setminus       {{ tex \setminus }}
+
+formula :: 'formula_' ::=
+  | judgement                       ::   :: judgement
+  | formula1 .. formulan            ::   :: dots
+  | not formula :: M :: not
+    {{ tex \neg [[formula]] }}
+    {{ ocaml not [[ formula ]] }}
+    {{ coq ~ [[ formula ]] }}
+  | ( formula ) :: M :: brackets
+    {{ tex ([[formula]]\!) }}
+    {{ ocaml [[ formula ]] }}
+    {{ coq [[formula]] }}
+  | formula \/ formula' :: M :: or
+    {{ tex [[formula]] \vee [[formula']] }}
+    {{ ocaml [[formula]] && [[formula']] }}
+    {{ coq [[formula]] /\ [[formula']] }}
+  | formula /\ formula' :: M :: and
+    {{ tex [[formula]] \wedge [[formula']] }}
+    {{ ocaml [[formula]] || [[formula']] }}
+    {{ coq [[formula]] \/ [[formula']] }}
+  | local N :: :: local {{ com definition of $[[N]]$ is in the current file }}
+                        {{ tex \textit{local}([[N]]) }}
+                        {{ ocaml true }} % TODO
+                        {{ coq True }} % TODO
+  | decl :: :: decl
+    {{ coq True }} % TODO
+  | T freshfor G :: M :: fresh {{ tex [[T]] \textrm{ fresh for } [[G]] }}
+    {{ ocaml true }} % TODO
+    {{ coq True }} % TODO
+
+defns
+TySys :: '' ::=
+
+defn
+  t1 <:: t2 :: :: derives ::'derives_'
+  {{ com $[[t1]]$ extends or implements $[[t2]]$ }}
+by
+
+{{ com \section*{Inheritance and implementation} }}
+{{ com \addcontentsline{toc}{section}{Inheritance and implementation} }}
+
+{{ com
+We define a separate relation (`derives from') for the transitive closure of extending a class or implementing an interface.
+Subtyping adds the substitution of the \texttt{this} type, which is not handled by the derives relation.
+\\\\
+}}
+
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > extends t cimpls classbody
+------------------------------------------------------ :: extends
+C < t1 , .. , tn > <:: { t1 / T1 , .. , tn / Tn } t
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > cextends implements u1 , .. , um classbody
+-------------------------------------------------------------------- :: implements
+C < t1 , .. , tn > <:: { t1 / T1 , .. , tn / Tn } ui
+
+t1 <:: t2
+t2 <:: t3
+------------------- :: trans
+t1 <:: t3
+
+{{ com \section*{Subtyping} }}
+{{ com \addcontentsline{toc}{section}{Subtyping} }}
+
+defn
+  G |- t1 <: t2 :: :: tysub ::'sub_'
+  {{ com $[[t1]]$ is a subtype of $[[t2]]$ under assumptions $[[G]]$ }}
+by
+
+{{ com \subsection*{General subtyping rules} }}
+
+{{ com Subtyping is reflexive and transitive. This is always true of subtyping;
+but it takes some care to ensure that the algorithm for checking subtypes
+actually ensures it. }}
+
+------------ :: refl
+G |- t <: t
+
+G |- t1 <: t2
+G |- t2 <: t3
+------------------- :: trans
+G |- t1 <: t3
+
+{{ com \subsection{Using subtype assumptions} }}
+
+-------------------------- :: assume
+G , t <: t' |- t <: t'
+
+{{ com \subsection{Union} }}
+
+{{ com
+Hack has union types, though at the moment there is no syntax for them.
+In general, they are n-ary, but it's easier to present in binary form.
+}}
+
+{{ com
+Any type can be widened to a larger union. (Unions are upper bounds.)
+}}
+
+------------------ :: union_upper1
+G |- t1 <: t1 | t2
+
+------------------ :: union_upper2
+G |- t2 <: t1 | t2
+
+{{ com
+The next rule states that union is the \emph{least} upper bound.
+}}
+
+G |- t1 <: t
+G |- t2 <: t
+------------------ :: union_least
+G |- t1 | t2 <: t
+
+{{ com
+Other properties are consequences of these rules. For example, commutativity
+follows by applying all three.
+}}
+
+{{ com \subsection{Intersection} }}
+
+{{ com
+Hack has intersection types, though at the moment there is no syntax for them.
+In general, they are n-ary, but it's easier to present in binary form.
+}}
+
+{{ com
+Any intersection type can be widened to one of its components. (Intersections are lower bounds.)
+}}
+
+------------------ :: intersect_lower1
+G |- t1 & t2 <: t1
+
+------------------ :: intersect_lower2
+G |- t1 & t2 <: t1
+
+{{ com
+The next rule states that intersection is the \emph{greatest} lower bound.
+}}
+
+G |- t <: t1
+G |- t <: t2
+------------------ :: intersect_greatest
+G |- t <: t1 & t2
+
+{{ com
+Other properties are consequences of these rules. For example, commutativity
+follows by applying all three.
+}}
+
+{{ com
+Intersection distributes over union. One direction of this is the rule below; the other direction is a consequence of other rules.
+Distributivity of union over intersection is also derivable.
+}}
+
+-------------------------------------------- :: intersect_distr_union
+G |- t1 & (t2 | t3) <: (t1 & t2) | (t1 & t3)
+
+{{ com
+Intersection interacts with function types according to the following rules.
+}}
+
+-------------------------------------------------------------------------------------------------------------- :: intersect_distr_function
+G |- (function(t1 , .. , tn) : t) & (function(u1 , .. , un) : u) <: function(t1|u1 , .. , tn | un) : (t & u)
+
+-------------------------------------------------------------------------------------------------------------- :: intersect_distr_variadic_function
+G |- (function(t1 , .. , tn, t vardots) : t) & (function(u1 , .. , un , u vardots) : u) <: function(t1|u1 , .. , tn | un , t0|u0 vardots) : (t & u)
+
+{{ com \subsection{Nullable types} }}
+
+{{ com
+
+Hack has nullable (or option) types.  For any type $[[t]]$, $[[? t]]$
+is syntactic sugar for $[[t | null]]$.  The following properties of
+nullable types are corollaries of this definition and the typing rules
+for unions.
+
+}}
+
+{{ com
+Any type can be \emph{widened} to include null.
+}}
+
+------------- :: nullable_widen
+G |- t <: ? t
+
+{{ com
+The nullable type behaves covariantly. }}
+
+G |- t1 <: t2
+----------------- :: nullable_sub
+G |- ? t1 <: ? t2
+
+{{ com
+In Caml and Haskell the \texttt{option} and \texttt{Maybe} type constructors
+can be nested. But in Hack, there is a single \texttt{null} value, and so applying
+the nullable type constructor $[[? t]]$ more than once makes no difference: it is
+idempotent. Note that the converse rule to the one below is a consequence of
+the two rules above.
+}}
+
+----------------- :: nullable_cancel
+G |- ? ? t <: ? t
+
+{{ com \subsection{Primitives} }}
+
+{{ com
+Hack has a top type.
+}}
+
+---------------- :: as_mixed
+G |- t <: mixed
+
+{{ com
+There is a special type $[[num]]$ that behaves exactly as if defined to
+be $[[int | float]]$.
+}}
+
+--------------- :: int_as_num
+G |- int <: num
+
+------------------ :: float_as_num
+G |- float <: num
+
+------------------------ :: num_as_int_or_float
+G |- num <: int | float
+
+{{ com
+There is a special type $[[arraykey]]$ which includes all key types,
+that is, $[[int]]$, $[[string]]$ and any enumeration type.
+}}
+
+--------------------- :: int_as_arraykey
+G |- int <: arraykey
+
+------------------------ :: string_as_arraykey
+G |- string <: arraykey
+
+enum N : t asdecl
+---------------------- :: enum_as_arraykey
+G |- N <: arraykey
+
+{{ com \subsection{Nothing} }}
+
+{{ com
+
+Hack has a bottom type.
+
+}}
+
+------------------ :: nothing_bottom
+G |- nothing <: t
+
+{{ com
+
+Note that this makes $[[nothing]]$ a neutral element with respect to union.
+
+}}
+
+{{ com \subsection{Nonnull} }}
+
+{{ com
+
+Primitive types except $[[mixed]]$ and $[[void]]$ are subtypes of $[[nonnull]]$:
+
+}}
+
+------------------- :: int_as_nonnull
+G |- int <: nonnull
+
+--------------------- :: float_as_nonnull
+G |- float <: nonnull
+
+---------------------- :: string_as_nonnull
+G |- string <: nonnull
+
+------------------------ :: arraykey_as_nonnull
+G |- arraykey <: nonnull
+
+-------------------- :: bool_as_nonnull
+G |- bool <: nonnull
+
+{{ com
+
+We don't need a separate rule for $[[num]]$ because $[[ G |- num <:
+nonnull ]]$ follows from \ottdrulename{sub\_int\_as\_nonnull},
+\ottdrulename{sub\_float\_as\_nonnull},
+\ottdrulename{sub\_num\_as\_int\_or\_float}, and
+\ottdrulename{sub\_union\_least}.
+
+}}
+
+{{ com
+
+User-defined types are subtypes of $[[nonnull]]$:
+
+}}
+
+class C<var1 T1 constraint1, .., varn Tn constraintn> cextends cimpls classbody
+------------------------------------------------------------------------------- :: class_as_nonnull
+G |- C<t1, .., tn> <: nonnull
+
+interface I<var1 T1 constraint1, .., varn Tn constraintn> iextends
+------------------------------------------------------------------ :: interface_as_nonnull
+G |- I<t1, .., tn> <: nonnull
+
+
+{{ com
+
+Rules \ottdrulename{sub\_arraykey\_as\_nonnull},
+\ottdrulename{sub\_enum\_as\_arraykey}, and \ottdrulename{sub\_trans}
+imply that any enum type $N$ is a subtype of $[[nonnull]]$.
+
+}}
+
+{{ com
+
+A type alias is a subtype of $[[nonnull]]$ if and only if the type it
+stands for is a subtype of $[[nonnull]]$.  This follows from
+\ottdrulename{sub\_alias\_as} (``if'') and
+\ottdrulename{sub\_alias\_super} (``only if''), and transitivity of
+subtyping.
+
+}}
+
+{{ com
+
+An opaque type is a subtype of $[[nonnull]]$ if it is constrained by a
+type that is a subtype of $[[nonnull]]$.  This follows from
+\ottdrulename{sub\_opaque\_as} and transitivity of subtyping.  In the
+file in which the type is defined it is a subtype of $[[nonnull]]$ if
+and only if the wrapped type is a subtype of $[[nonnull]]$.  This
+follows from \ottdrulename{sub\_opaque\_local\_as} (``if'') and
+\ottdrulename{sub\_opaque\_local\_super} (``only if''), and
+transitivity of subtyping.
+
+}}
+
+{{ com
+
+Because legacy arrays are $\kwd{KeyedContainer}$ it follows by transitivity
+of subtyping and \ottdrulename{sub\_class\_as\_nonnull} that arrays
+are subtypes of $[[nonnull]]$.  Do we need separate rules for Hack
+arrays, shapes, and tuples, or should we make them $\kwd{KeyedContainer}$
+too?
+
+}}
+
+{{ com
+
+Function types are subtypes of $[[nonnull]]$:
+
+}}
+
+---------------------------------------- :: function_as_nonnull
+G |- function(t1, .., tn) : t <: nonnull
+
+{{ com
+
+Finally, $[[mixed]]$ is a subtype of $[[nonnull | null]]$:
+
+}}
+
+---------------------------- :: mixed_as_nullable_nonnull
+G |- mixed <: nonnull | null
+
+{{ com
+
+Together with \ottdrulename{sub\_as\_mixed} this implies $[[G |- mixed
+== nonnull | null]]$.
+
+}}
+
+{{ com \subsection{Tuples} }}
+{{ com Tuples are covariant }}
+
+G |- t1 <: u1 .. G |- tn <: un
+---------------------------- :: tuple_co
+G |- ( t1,..,tn ) <: (u1,..,un)
+
+{{ com A tuple collapses if any of its types is the bottom type $[[nothing]]$ }}
+
+------------------------------------------------------ :: tuple_nothing
+G |- (t1 , .. , tm , nothing , t1', .. , tn') <: nothing
+
+{{ com \subsection{Hack arrays} }}
+
+{{ com Vecs, dicts, and keysets are covariant in all parameters }}
+
+G |- t <: u
+----------------- :: vec_co
+G |- vec<t> <: vec<u>
+
+G |- t1 <: u1
+G |- t2 <: u2
+--------------------------- :: dict_co
+G |- dict <t1,t2> <: dict<u1,u2>
+
+G |- t <: u
+---------------------- :: keyset_co
+G |- keyset<t> <: keyset<u>
+
+{{ com Vecs, dicts, and keysets are KeyedContainer }}
+
+--------------------------------- :: vec_as_KeyedContainer
+G |- vec<t> <: `KeyedContainer`<int, t>
+
+--------------------------------------- :: dict_as_KeyedContainer
+G |- dict<t1, t2> <: `KeyedContainer`<t1, t2>
+
+---------------------------------- :: keyset_as_KeyedContainer
+G |- keyset<t> <: `KeyedContainer`<t, t>
+
+{{ com \subsection{Legacy arrays} }}
+
+{{ com Legacy arrays are covariant in all parameters. }}
+
+G |- t <: u
+------------------------------ :: vecarray_co
+G |- array<t> <: array<u>
+
+G |- t1 <: u1
+G |- t2 <: u2
+------------------------------ :: maparray_co
+G |- array<t1,t2> <: array<u1,u2>
+
+{{ com Vec-like arrays can be treated as map-like arrays indexed by integers. }}
+
+------------------------ :: vecarray_as_maparray
+G |- array<t> <: array<int,t>
+
+{{ com Map-like arrays can be indexed. }}
+------------------------------- :: maparray_as_KeyedContainer
+G |- array<t1,t2> <: `KeyedContainer`<t1,t2>
+
+{{ com The empty array type is a bottom type in the array hierarchy. }}
+------------------------------- :: emptyarray_as_vecarray
+G |- array<> <: array<t>
+
+------------------------------- :: emptyarray_as_maparray
+G |- array<> <: array<t1,t2>
+
+{{ com Arrays over the bottom type $[[nothing]]$ are inhabited by the empty array only. }}
+
+------------------------------- :: vecarray_over_nothing_as_emptyarray
+G |- array<nothing> <: array<>
+
+---------------------------------- :: maparray_over_nothing_as_emptyarray
+G |- array<t, nothing> <: array<>
+
+{{ com \subsection{Functions} }}
+{{ com
+Function types are somewhat complicated: there are multiple parameters, zero
+or one results, and an additional type for \emph{variadic} parameters.
+}}
+
+
+{{ com Arguments behave contravariantly, results behave covariantly. }}
+
+G |- u1 <: t1 .. G |- un <: tn
+G |- t <: u
+---------------------------------------------------- :: function
+G |- function ( t1,..,tn ):t <: function ( u1, .., un ):u
+
+{{ com Variadic against non-variadic: a function that accepts \emph{at least} $n$ parameters
+also accepts $n+m$ parameters. }}
+
+G |- u1 <: t1 .. G |- un <: tn
+G |- u1' <: t' .. G |- um' <: t'
+G |- t <: u
+--------------------------------------------------------------------------------------------- :: function_variadic1
+G |- function (t1 , .. , tn , t' vardots ) : t <: function ( u1 , .. , un , u1', .. , um') : u
+
+{{ com Variadic against variadic: a function that accepts at
+least $n$ parameters also accepts at least $n+m$ parameters. }}
+
+G |- u1 <: t1 .. G |- un <: tn
+G |- u1' <: t' .. G |- um' <: t'  G |- u' <: t'
+G |- t <: u
+--------------------------------------------------------------------------------------------------------- :: function_variadic2
+G |- function (t1 , .. , tn , t' vardots ) : t <: function ( u1 , .. , un , u1', .. , um' , u' vardots ) : u
+
+{{ com \subsection{Shapes} }}
+
+{{ com Depth subtyping on closed shapes: types of fields behave covariantly }}
+
+G |- sft1 <: sft1' .. G |- sftn <: sftn'
+-------------------------------------------------- :: closed_shape_co
+G |- shape ( sft1 , .. , sftn ) <: shape ( sft1' , .. , sftn' )
+
+{{ com Width subtyping on closed shapes: optional fields can be introduced }}
+
+-------------------------------------------------- :: closed_shape_widen
+G |- shape ( sft1 , .. , sftm ) <: shape ( sft1 , .. , sftm , ?sfn1' => t1' , .. , ?sfnn' => tn' )
+
+{{ com Width subtyping on closed shapes: optional fields of type $[[nothing]]$ can be dropped }}
+
+-------------------------------------------------- :: closed_shape_narrow
+G |- shape ( sft1 , .. , sftm , ?sfn1' => nothing , .. , ?sfnn' => nothing ) <: shape ( sft1 , .. , sftm )
+
+{{ com A closed shape collapses if any of its required field types is $[[nothing]]$ }}
+
+-------------------------------------------------- :: closed_shape_empty
+G |- shape ( sft1 , .. , sftm , sfn => nothing , sft1' , .. , sftn') <: nothing
+
+{{ com Closed shapes can be opened }}
+
+-------------------------------------------------- :: shape_open
+G |- shape ( sft1 , .. , sftn ) <: shape ( sft1 , .. , sftn , vardots \ )
+
+{{ com Depth subtyping on open shapes: types of fields behave covariantly }}
+
+G |- sft1 <: sft1' .. G |- sftn <: sftn'
+-------------------------------------------------- :: open_shape_co
+G |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm ) <: shape ( sft1' , .. , sftn' , vardots \ sfn1 , .. , sfnm )
+
+{{ com Width subtyping on open shapes: fields can be forgotten }}
+
+-------------------------------------------------- :: open_shape_narrow
+G |- shape ( sft1 , .. , sfti , sft1' , .. , sftj', vardots \ sfn1 , .. , sfnm ) <: shape ( sft1 , .. , sfti , vardots \ sfn1 , .. , sfnm )
+
+{{ com Width subtyping on open shapes: optional fields of type $[[mixed]]$ can be introduced }}
+
+-------------------------------------------------- :: open_shape_widen
+G |- shape ( sft1 , .. , sfti , vardots \ sfn1 , .. , sfnm ) <: shape (sft1 , .. , sfti , ?sfn1' => mixed , .. , ?sfnj' => mixed , vardots \ sfn1 , .. , sfnm )
+
+{{ com Width subtyping on open shapes: unset fields can be set again }}
+
+-------------------------------------------------- :: open_shape_set_unset
+G |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn , sfn1' , .. , sfnj' ) <: shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn1' , .. , sfnj' )
+
+{{ com An open shape collapses if any of its required field types is $[[nothing]]$ }}
+
+-------------------------------------------------- :: open_shape_empty
+G |- shape ( sft1 , .. , sftm , sfn => nothing , sft1' , .. , sftn' , vardots \ ) <: nothing
+
+{{ com \subsection{Class and interface inheritance} }}
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > cextends cimpls classbody
+G |- t1 <: var1 :> u1 .. G |- tn <: varn :> un
+----------------------------------------------------- :: exact_variance
+G |- # C < t1 , .. , tn > <: # C < u1 , .. , un >
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > cextends cimpls classbody
+G |- t1 <: var1 :> u1 .. G |- tn <: varn :> un
+----------------------------------------------------- :: class_variance
+G |- C < t1 , .. , tn > <: C < u1 , .. , un >
+
+class C < var1 T1 constraint1, .. , varn Tn constraintn > extends t cimpls classbody
+------------------------------------------------- :: exact
+G |- # C < t1 , .. , tn > <: C < t1 , .. , tn >
+
+G |- t1 <: t2      t2 <:: t3
+---------------------------- :: derives
+G |- t1 <: { t1 / this } t3
+
+{{ com \subsection{Enumerations} }}
+
+enum N : t as u
+---------------- :: enum_as
+G |- N <: u
+
+{{ com \subsection{Type aliases} }}
+
+type N < T1, .. , Tn > = t
+------------------------------------------------- :: alias_as
+G |- N < t1 , .. , tn > <: { t1 / T1, .. , tn / Tn } t
+
+type N < T1, .. , Tn > = t
+------------------------------------------------- :: alias_super
+G |- { t1 / T1, .. , tn / Tn } t <: N < t1 , .. , tn >
+
+{{ com Opaque types }}
+
+newtype N < T1 , .. , Tn > as u = t
+-------------------------------------------------- :: opaque_as
+G |- N < t1 , .. , tn > <: { t1 / T1, .. , tn / Tn } u
+
+newtype N < T1 , .. , Tn > as u = t
+local N
+------------------------------------------------------------------------ :: opaque_local_as
+G |- N < t1 , .. , tn > <: { t1 / T1, .. , tn / Tn } t
+
+newtype N < T1 , .. , Tn > as u = t
+local N
+------------------------------------------------------------------------ :: opaque_local_super
+G |- { t1 / T1, .. , tn / Tn } t <: N < t1 , .. , tn >
+
+{{ com \section*{Subtyping on shape field types} }}
+{{ com \addcontentsline{toc}{section}{Subtyping on shape field types} }}
+
+defn
+  G |- sft1 <: sft2 :: ::fssub::'shape_field_'
+  {{ com shape field type $[[sft1]]$ is a subtype of shape field type $[[sft2]]$ under assumptions $[[G]]$ }}
+by
+
+{{ com \par Shapes behave covariantly in field types. }}
+
+G |- t1 <: t2
+-------------------- :: co
+G |- sk => t1 <: sk => t2
+
+{{ com Shapes can drop optional fields. }}
+
+G |- t1 <: t2
+-------------------- :: narrow
+G |- sfn => t1 <: ?sfn => t2
+
+{{ com \section*{Type equivalence} }}
+{{ com \addcontentsline{toc}{section}{Type equivalence} }}
+
+defn
+  G |- t1 == t2 :: ::tyeq::''
+  {{ com $[[t1]]$ is equivalent to $[[t2]]$ under assumptions $[[G]]$ }}
+by
+
+{{ com It's useful to define type equivalence as both-ways subtyping. }}
+
+G |- t1 <: t2
+G |- t2 <: t1
+------------- :: ty_equiv
+G |- t1 == t2
+
+
+{{ com \section*{Subtyping wrt variance} }}
+{{ com \addcontentsline{toc}{section}{Subtyping wrt variance} }}
+
+defn
+  G |- t1 <: var :> t2 :: ::argsub::''
+  {{ com $[[t1]]$ is related to $[[t2]]$ by variance $[[var]]$ under assumptions $[[G]]$ }}
+by
+
+G |- t1 <: t2
+------------- :: variance_co
+G |- t1 <: + :> t2
+
+G |- t2 <: t1
+------------- :: variance_contra
+G |- t1 <: - :> t2
+
+G |- t1 == t2
+------------------- :: variance_inv
+G |- t1 <: :> t2
+
+{{ com \\\section*{Lambda signature expansion} }}
+
+{{ com In order to type lambdas, we need to know the types of the parameters and the return type. Unlike functions and methods, these can be omitted even in strict mode.
+So we define a relation that fills in types when they are omitted. It's the type inference engine's job to determine types under which the program can be type checked.
+\\\\
+}}
+
+defn
+  lamparam ~> funparam :: :: lambda_param_expand :: 'lambda_param_expand_'
+  {{ com declaration $[[lamparam]]$ rewrites to typed parameter $[[funparam]]$ }}
+by
+
+  -------------------------------------- :: type
+  t isvariadic lvar ~> t isvariadic lvar
+
+  ------------------------------------ :: notype
+  isvariadic lvar ~> t isvariadic lvar
+
+{{ com \\\\ }}
+
+defn
+  lamparams lamreturn ~> funparams lamreturn' :: :: lambda_return_expand :: 'lambda_return_expand_'
+  {{ com declarations $[[lamparams]]$ $[[lamreturn]]$ rewrite to typed declarations $[[funparams]]$ $[[lamreturn']]$ }}
+by
+
+  lamparam1 ~> funparam1 ..  lamparamn ~> funparamn
+  ------------------------------------------------------------------------- :: type
+  ( lamparam1 , .. , lamparamn) : t ~> ( funparam1 , .. , funparamn ) : t
+
+  lamparam1 ~> funparam1  ..  lamparamn ~> funparamn
+  ------------------------------------------------------------------------- :: notype
+  ( lamparam1 , .. , lamparamn) ~> ( funparam1 , .. , funparamn ) : t
+
+{{ com \\\section*{Implicit coercion} }}
+
+defn
+  G |- t1 ~> t2 :: :: coerce :: 'coerce_'
+  {{ com Values of type $[[t1]]$ implicitly coerce to type $[[t2]]$ }}
+by
+
+  ------------------ :: dynamic
+  G |- t ~> dynamic
+
+  G |- t1 <: t2
+  -------------------------- :: subtype
+  G |- t1 ~> t2
+
+  G |- t ~> t2
+  ------------------ :: option
+  G |- t ~> ?t2
+
+defn
+  G ; K |- e ~ t :: :: exprimplicitty :: 'expr_'
+  {{ com Expression $[[e]]$ has implicit coercion to type $[[t]]$ under locals $[[G]]$ and continuations $[[K]]$ }}
+by
+
+    G ; K |- e : t1
+    G |- t1 ~> t2
+    -------------------------- :: coercion
+    G ; K |- e ~ t2
+
+{{ com \\\section*{Expression sequencing} }}
+
+{{ com It's useful to have an n-ary auxiliary form that captures the requirement
+for sequencing of updates to the locals. \\ }}
+
+defn
+  G ; K |- < e1 : t1 , ... , en : tn > :: :: exprsty :: 'exprs_'
+  {{ com Expressions
+  can be executed in sequence under locals $[[G]]$ and continuations $[[K]]$ }}
+by
+
+G ; K |- e : t
+----------------------- :: expr
+G ; K |- < e : t >
+
+G ; K [skip := G'] |- e : t
+G' ; K |- < e1 : t1 , .. , en : tn >
+--------------------------------------- :: seq
+G ; K |- < e : t , e1 : t1 , .. , en : tn >
+
+defn
+  G ; K |- < e1 ~ t1 , ... , en ~ tn > :: :: exprsimplicitty :: 'exprsimplicit_'
+  {{ com Expressions can be executed in sequence under locals $[[G]]$ and continuations $[[K]]$ }}
+by
+
+G ; K |- e ~ t
+----------------------- :: expr
+G ; K |- < e ~ t >
+
+G ; K [skip := G'] |- e ~ t
+G' ; K |- < e1 ~ t1 , .. , en ~ tn >
+--------------------------------------- :: seq
+G ; K |- < e ~ t , e1 ~ t1 , .. , en ~ tn >
+
+
+{{ com \section*{Expression typing} }}
+{{ com \addcontentsline{toc}{section}{Expression typing} }}
+
+defn
+  G ; K |- e : t :: :: exprty :: 'expr_'
+  {{ com Expression $[[e]]$ of type $[[t]]$ can be executed under locals $[[G]]$ and continuations $[[K]]$ }}
+by
+
+{{ com It should also be noted that throughout this section, left rules have
+complementary right rules that are omitted for brevity. }}
+
+{{ com \subsection{General rules} }}
+
+{{ com It should be the case that subtyping can be applied at any point.
+Doing this also saves us from introducing special ``merge'' logic
+in conditionals etc. It is commonly known as the rule of \emph{subsumption}. }}
+
+G ; K |- e : t
+G |- t <: t'
+------------------------------ :: sub
+G ; K |- e : t'
+
+{{ com \subsection{Literals} }}
+
+-------------------- :: null
+G ; K |- null : null
+
+--------------------- :: true
+G ; K |- true : bool
+
+---------------------- :: false
+G ; K |- false : bool
+
+--------------------------------- :: string
+G ; K |- string_literal : string
+
+------------------------------- :: int
+G ; K |- integer_literal : int
+
+{{ com \subsection{Tuples} }}
+
+G ; K |- < e1 : t1 , .. , en : tn >
+--------------------------------------------------------------------- :: tuple
+G ; K |- tuple (e1 , .. , en) : (t1 , .. , tn)
+
+{{ com \subsection{Locals} }}
+
+--------------------- :: lvar
+G , x:t ; K |- $x : t
+
+{{ com \subsection{Assignment} }}
+
+{{ com Assignment is surprisingly complex. Evaluation is left-to-right, within the lvalue
+$[[e_1]]$ and then within $[[e_2]]$. }}
+
+G ; K , skip : G' |- e1 := t , U
+G' ; K , skip : G'' |- e2 : t
+------------------------------------- :: assign
+G ; K , skip : G''[U] |- e1 = e2 : t
+
+{{ com \subsection{Addition} }}
+
+G ; K |- < e1 : float , e2 : num|dynamic >
+---------------------------------------------- :: add_float_left
+G ; K |- e1 + e2 : float
+
+G ; K |- < e1 : int , e2 : int >
+-------------------------------- :: add_int
+G ; K |- e1 + e2 : int
+
+G ; K |- < e1 : num , e2 : num|dynamic >
+----------------------------------------- :: add_num_left
+G ; K |- e1 + e2 : num
+
+{{ com The case below cannot gain the typing of num, as the runtime allows adding
+arrays to get arrays. Taking two arrays for dynamic parameters, adding them, and treating the
+resultant array as a num can cause crashing later. It could safely be $[[
+num|array<dynamic>|array<dynamic,dynamic>]]$ instead, but this typing is confusing to users. }}
+
+G ; K |- < e1 : dynamic , e2 : dynamic >
+------------------------------------ :: add_dynamic
+G ; K |- e1 + e2 : dynamic
+
+{{ com \subsection{Subtraction and Multiplication} }}
+
+{{ com These differ from addition only in how they handle the case of two dynamic
+types. Multiplication is omitted, but is similar to subtraction. }}
+
+G ; K |- < e1 : dynamic , e2 : dynamic >
+---------------------------------------------------- :: sub_dynamic
+G ; K |- e1 - e2 : num
+
+{{ com \subsection{Division and Exponentiation} }}
+
+{{ com Exponentiation is ommitted, but is similar to division. }}
+
+G ; K , skip:G', catch:G' |- < e1 : float , e2 : num|dynamic >
+--------------------------------------------------- :: div_float_left
+G ; K , skip:G', catch:G' |- e1 / e2 : float
+
+{{ com When int operations do not perfectly yield an int, the result is a float.
+ Thus num is the tightest typing. }}
+
+G ; K , skip:G', catch:G' |- < e1 : num|dynamic , e2 : num|dynamic >
+------------------------------------------------- :: div_num
+G ; K , skip:G', catch:G' |- e1 / e2 : num
+
+{{ com \subsection{Remainder and Shifts} }}
+
+{{ com Same rules for shift left and shift right }}
+
+G ; K |- < e1 : int|dynamic , e2 : int|dynamic >
+------------------------------------------------   :: mod
+G ; K |- e1 % e2 : int
+
+{{ com \subsection{Negation} }}
+
+{{ com Same rules for + }}
+
+G ; K |- e : int
+--------------------------------   :: neg_int
+G ; K |- - e : int
+
+G ; K |- e : float
+--------------------------------   :: neg_float
+G ; K |- - e : float
+
+G ; K |- e : num|dynamic
+--------------------------------   :: neg_num
+G ; K |- - e : num
+
+
+
+{{ com \subsection{Binary Bitwise} }}
+
+{{ com Same rules for bitwise xor and and }}
+
+G ; K |- < e1 : int , e2 : int|dynamic >
+--------------------------------   :: or_int_left
+G ; K |- e1 | e2 : int
+
+{{ com The case below cannot gain the typing of int, as the runtime allows bitwise
+operations on strings. Taking two strings for dynamic parameters, bitwise or-ing
+them, and treating the resultant string as an int can cause crashing later. It could safely be
+$[[int|string]]$ = $[[arraykey]]$ instead, but this typing is confusing to users. }}
+
+G ; K |- < e1 : dynamic , e2 : dynamic >
+--------------------------------------   :: or_dynamic
+G ; K |- e1 | e2 : dynamic
+
+{{ com \subsection{Bitwise Not} }}
+
+G ; K |- e : int
+--------------------------------   :: bitnot
+G ; K |- ~ e : int
+
+{{ com For the same reason as the binary case, unary bitwise operations on
+dynamic parameters yield dynamic. }}
+
+G ; K |- e : dynamic
+--------------------------------   :: bitnot_dynamic
+G ; K |- ~ e : dynamic
+
+
+{{ com \subsection{Concatenation} }}
+
+{{ com The type t here must be Stringish, containing any primitive type and
+objects that implement underscore underscore toString. }}
+
+G ; K |- < e1 : t|dynamic , e2 : t|dynamic >
+--------------------------------------------  :: concat
+G ; K |- e1 . e2 : string
+
+{{ com \subsection{Equality} }}
+
+{{ com Same rules for === and !==. }}
+
+G ; K |- < e1 : t1 , e2 : t2 >
+------------------------------ :: equals
+G ; K |- e1 == e2 : bool
+
+G ; K |- < e1 : t1 , e2 : t2 >
+------------------------------ :: disequals
+G ; K |- e1 != e2 : bool
+
+{{ com \subsection{Comparison operators} }}
+
+{{ com Similar for $\kwd{>}$, $\kwd{<=}$, and $\kwd{>=}$ }}
+
+G ; K |- < e1 : num , e2 : num >
+-------------------------------- :: lt_num
+G ; K |- e1 < e2 : bool
+
+G ; K |- < e1 : string , e2 : string >
+----------------------------------- :: lt_string
+G ; K |- e1 < e2 : bool
+
+G ; K |- < e1 : `DateTime` , e2 : `DateTime` >
+------------------------------------------ :: lt_datetime
+G ; K |- e1 < e2 : bool
+
+G ; K |- < e1 : dynamic , e2 : ((num|string)|`DateTime`)|dynamic >
+-------------------------------- :: lt_dynamic_left
+G ; K |- e1 < e2 : bool
+
+{{ com Also similar for $\kwd{<=>}$ except the type bool is replaced with int. }}
+
+{{ com \subsection{Conditionals and logical operators} }}
+
+{{ com The condition in a conditional expression can be used to
+refine the types of locals in both true and false branches.
+The current rule in Hack is unsound; the one below is sound.
+}}
+
+G ; K , skip : G1 |- e truthy
+G ; K , skip : G2 |- !e truthy
+G1 ; K |- e1 : t
+G2 ; K |- e2 : t
+---------------------------------------- :: if
+G ; K |- (e ? e1 : e2) : t
+
+G ; K , skip : G1 |- e1 truthy
+G ; K , skip : G2 |- !e1 truthy
+G1 ; K , skip : G2 |- e2 : t
+------------------------------- :: and
+G ; K , skip : G2 |- e1 && e2 : bool
+
+G ; K , skip : G1 |- !e1 truthy
+G ; K , skip : G2 |- e1 truthy
+G1 ; K , skip : G2 |- e2 : t
+----------------------------- :: or
+G ; K , skip : G2 |- e1 || e2 : bool
+
+G ; K |- e : t
+------------------ :: not
+G ; K |- !e : bool
+
+{{ com \subsection{Lambda} }}
+
+{{ com Lambda expressions inherit the locals environment from their enclosing scope, together with types for their parameters.
+But the continuation environment is initially empty, except for the return continuation (for statement bodies), which accepts anything.
+For void functions with statement bodies, we support implicit return by including a skip continuation. }}
+
+{{ com TBC variadics }}
+
+lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn) : t
+( t1 $x1 , .. , tn $xn) : t ; G [x1 := t1 , .. , xn := tn ] ; { return : G' } |- block
+------------------------------------------------------------------------ :: lambda_stmt
+G ; K |- lamparams lamreturn ==> block : function(t1,..,tn):t
+
+lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn) : void
+( t1 $x1 , .. , tn $xn) : void ; G [ x1 := t1 , .. , xn := tn ] ; { return : G', skip : G' } |- block
+------------------------------------------------------------------------ :: lambda_void
+G ; K |- lamparams lamreturn ==> block : function(t1,..,tn):void
+
+lamparams lamreturn ~> ( t1 $x1 , .. , tn $xn ) : t
+G [ x1 := t1 , .. , xn := tn ]; { } |- e : t
+---------------------------------------------------------- :: lambda_expr
+G ; K |- lamparams lamreturn ==> e : function(t1,..,tn):t
+
+{{ com \subsection{Object creation} }}
+
+{{ com To do: constraint satisfaction }}
+
+G ; K |- < e1 : { t1 / T1 , .. , tm / Tm } u1 , .. , en : { t1 / T1 , .. , tm / Tm } un >
+class C < var1 T1 constraint1, .. , varm Tm constraintm > cextends cimpls { function __construct (u1 lvar1 , .. , un lvarn) block members }
+--------------------------------------------------------------- :: new
+G ; K |- new C ( e1 , .. , en ) : # C < t1 , .. , tm >
+
+{{ com \subsection{Property access} }}
+
+G ; K |- e : u
+u -> x : t
+------------------- :: property_access
+G ; K |- e -> x : t
+
+G ; K |- e : ? u
+u -> x : t
+---------------------- :: nullsafe_property_access
+G ; K |- e ?-> x : ? t
+
+{{ com \subsection{Static property access} }}
+
+C declares static x : t
+----------------------- :: static_property_access
+G ; K |- C :: x : t
+
+{{ com \subsection{Array/shape/tuple indexing} }}
+
+G ; K |- e1 : t1
+G ; K |- t1 [ e2 ] : t
+---------------------- :: indexing
+G ; K |- e1 [ e2 ] : t
+
+{{ com \subsection{Function application} }}
+
+{{ com Function application is complicated by the possibility of
+(a) a variadic function type
+and (b) use of the splat operator at the call site.
+Fortunately variadics are already handled by subtyping rules. }}
+
+{{ com The basic rule simply says that an expression of function type can be applied to
+arguments with matching types. When combined with rule \ottdrulename{sub\_function\_variadic}
+it supports application of variadic functions to a known number of arguments.
+ }}
+
+G ; K[skip := G'] |- e : function(t1,..,tn):t
+G' ; K |- <e1 ~ t1 , .. , en ~ tn >
+----------------------------------- :: apply
+G ; K |- e ( e1 , .. , en ) : t
+
+{{ com
+If there is a splat argument with unbounded length, then we require that the
+function type is variadic. }}
+
+G ; K[skip := G'] |- e : function(t1,..,tn,t0 vardots ):t
+G' ; K |- <e1 ~ t1 , .. , en ~ tn , e' ~ `Traversable`<t0> >
+------------------------------------------------------------ :: apply_splat
+G ; K |- e ( e1 , .. , en , vardots e' ) : t
+
+{{ com
+Finally, splat can be used on an expression with known tuple type,
+as if the components of the tuple are additional arguments. Again, this can be combined
+with rule \ottdrulename{sub\_function\_variadic}. }}
+
+G ; K[skip := G'] |- e : function(t1,..,tn,t1',..,tm'):t
+G' ; K |- < e1 ~ t1 , .. , en ~ tn , e' ~ (t1', .. , tm') >
+----------------------------------------------------------- :: apply_splat_tuple
+G ; K |- e ( e1 , .. , en , vardots e' ) : t
+
+{{ com
+We are also allowed to use an expression of dynamic type as a function. We don't care about the types of the arguments,
+but do need to check that the splat argument is a traversable or a tuple.
+}}
+
+G ; K[skip := G'] |- e : dynamic
+G' ; K |- < e1 : t1 , .. , en : tn >
+------------------------------------ :: apply_dynamic
+G ; K |- e ( e1 , .. , en) : dynamic
+
+G ; K[skip := G'] |- e : dynamic
+G' ; K |- < e1 : t1 , .. , en : tn , e' : `Traversable`<t0> >
+------------------------------------------------------------- :: apply_dynamic_splat
+G ; K |- e ( e1 , .. , en , vardots e') : dynamic
+
+G ; K[skip := G'] |- e : dynamic
+G' ; K |- < e1 : t1 , .. , en : tn , e' : (t1', .. , tm') >
+----------------------------------------------------------- :: apply_dynamic_splat_tuple
+G ; K |- e ( e1 , .. , en , vardots e') : dynamic
+
+{{ com \subsection{Special function application} }}
+
+G ; K |- < e1 : ? `KeyedContainer` < t , u > , e2 : ? t >
+-------------------------------------------------- :: idx
+G ; K |- `idx` ( e1 , e2 ) : ? u
+
+G ; K |- < e1 : ? `KeyedContainer` < t , u > , e2 : ? t , e3 : u >
+-------------------------------------------------- :: idx_default
+G ; K |- `idx` ( e1 , e2 , e3 ) : u
+
+G ; K |- e : ? shape ( ?sfn => t , vardots \ sfn1 , .. , sfnm )
+-------------------------------------------------- :: shapes_idx_optional
+G ; K |- `Shapes` :: `idx` ( e , sfn ) : ? t
+
+G ; K |- < e1 : ? shape ( ?sfn => t , vardots \ sfn1 , .., sfnm ) , e2 : t >
+-------------------------------------------------- :: shapes_idx_default
+G ; K |- `Shapes` :: `idx` ( e1 , sfn , e2 ) : t
+
+G ; K |- e : shape ( sfn => t , vardots \ sfn1 , .. , sfnm )
+-------------------------------------------------- :: shapes_at_required
+G ; K |- `Shapes` :: `at` ( e , sfn ) : t
+
+G ; K |- e : shape ( ?sfn => t , vardots \ sfn1 , .. , sfnm )
+-------------------------------------------------- :: shapes_at_optional
+G ; K |- `Shapes` :: `at` ( e , sfn ) : t
+
+G ; K |- e : shape ( sft1 , .. , sfti , ?sfn => t , sft1' , .. , sftj' )
+-------------------------------------------------- :: shapes_remove_key_closed
+G ; K |- `Shapes` :: `removeKey` ( e , sfn ) : shape( sft1 , .. , sfti , sft1' , .. , sftj' )
+
+G ; K |- e : shape ( sft1 , .. , sfti , ? sfn => t , sft1' , .. , sftj' , vardots \ sfn1 , .. , sfnm )
+-------------------------------------------------- :: shapes_remove_key_open_set
+G ; K |- `Shapes` :: `removeKey` ( e , sfn ) : shape ( sft1 , .. , sfti , sft1' , .. , sftj' , vardots \ sfn1 , .. , sfnm , sfn )
+
+G ; K |- e : shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni, sfn , sfn1' , .. , sfnj' )
+-------------------------------------------------- :: shapes_remove_key_open_unset
+G ; K |- `Shapes` :: `removeKey` ( e , sfn ) : shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn , sfn1' , .. , sfnj' )
+
+
+{{ com \subsection{Await} }}
+
+G ; K |- e : t
+t awaits t'
+---------------------------------- :: await
+G ; K |- await e : t'
+
+{{ com \section*{Awaitable types} }}
+{{ com \addcontentsline{toc}{section}{Awaitable types} }}
+
+defn
+  t awaits t' :: :: awaits  :: 'awaits_'
+  {{ com awaiting on $[[t]]$ produces a $[[t']]$ }}
+by
+
+----------------------- :: awaitable
+`Awaitable`<t> awaits t
+
+t awaits t'
+------------------ :: nullable
+?t awaits ?t'
+
+t1 awaits t1'
+t2 awaits t2'
+------------------------------- :: union
+t1 | t2 awaits t1' | t2'
+
+{{ com \section*{Property declarations} }}
+{{ com \addcontentsline{toc}{section}{Property declarations} }}
+
+defn
+  u declares x : t :: :: declares :: 'declares_'
+  {{ com type $[[u]]$ declares a property $[[x]]$ of type $[[t]]$ }}
+by
+
+class C < var1 T1 constraint1 , .. , varm Tm constraintm > cextends cimpls { constructor t $ x ; member1 .. membern }
+----------------------------------------------------------- :: exact_class
+# C < t1 , .. , tm > declares x : { t1 / T1 , .. , tm / Tm } { # C < t1 , .. , tm > / this } t
+
+defn
+  u -> x : t :: :: property :: 'property_'
+  {{ com type $[[u]]$ has a property $[[x]]$ of type $[[t]]$ }}
+by
+
+u declares x : t
+---------------- :: declaration
+u -> x : t
+
+u1 -> x : t1
+u2 -> x : t2
+------------------------------- :: union
+( u1 | u2 ) -> x : t1 | t2
+
+{{ com TODO: use of $[[this]]$ type in the type of a property }}
+
+{{ com \section*{Static property declarations} }}
+{{ com \addcontentsline{toc}{section}{Static property declarations} }}
+
+defn
+  C declares static x : t :: :: declares_static :: 'declares_static_'
+  {{ com class $[[C]]$ declares a static property $[[x]]$ of type $[[t]]$ }}
+by
+
+C' inst' <:: C inst
+class C typarams cextends cimpls { constructor static t $ x ; member1 .. membern }
+---------------------------------------------------------------------------------- :: derived
+C' declares static x : t
+
+{{ com \section*{Types supporting indexing} }}
+{{ com \addcontentsline{toc}{section}{Types supporting indexing} }}
+
+defn
+  G ; K |- u [ e ] : t :: :: indexing :: 'indexing_'
+  {{ com type $[[u]]$ supports indexing at a value $[[e]]$ producing the result of type $[[t]]$
+  under environment $[[G]]$ and continuations $[[K]]$ }}
+by
+
+G ; K |- e : t1 | dynamic
+------------------------------------------ :: KeyedContainer
+G ; K |- `KeyedContainer` < t1 , t2 > [ e ] : t2
+
+------------------------------------------------- :: shape
+G ; K |- shape ( sfn => t , vardots \ sfn1 , .. , sfnm ) [ sfn ] : t
+
+------------------------------------------------------- :: tuple
+G ; K |- (t1 , .. , ti , t , t1' , .. , tj' ) [ i ] : t
+
+G ; K |- u1 [ e ] : t1
+G ; K |- u2 [ e ] : t2
+------------------------------------ :: union
+G ; K |- ( u1 | u2 ) [ e ] : t1 | t2
+
+{{ com \section*{Expression refinement} }}
+{{ com \addcontentsline{toc}{section}{Expression refinement} }}
+
+defn
+  G ; K |- e truthy :: :: truthy  :: 'cond_'
+  {{ com $[[e]]$ evaluating to truthy value is valid under environment $[[G]]$ and continuations $[[K]]$ }}
+by
+
+{{ com \subsection{Primitive type tests} }}
+
+{{ com Similar for boolean, string, float }}
+
+-------------------------------------------------------- :: is_int
+G , x : t ; K , skip : G , x: int |- is_int ( $x ) truthy
+
+{{ com \subsection{Collection type tests} }}
+
+{{ com For these tests, we generate fresh abstract types for the parameters.
+TBC: constraints on type parameter. }}
+
+T freshfor G
+--------------------------------------------------- :: is_vec
+G , x : t ; K, skip : G , x : vec<T> |- is_vec ( $x ) truthy
+
+T freshfor G
+------------------------------------------------------------- :: is_keyset
+G , x : t ; K , skip : G , T <: arraykey , x : keyset<T> |- is_keyset ( $x ) truthy
+
+T1 freshfor G
+T2 freshfor G
+------------------------------------------------- :: is_dict
+G , x : t ; K , skip : G , T1 <: arraykey , x : dict < T1, T2 > |- is_dict ( $x ) truthy
+
+{{ com \subsection{Null tests} }}
+
+{{ com Similar for $[[$x != null]]$ and $[[!($x === null)]]$
+and $[[!(is_null($x))]]$. }}
+
+------------------------------------------------------ :: neq_null
+G, x : ?t ; K , skip : G , x : t |- $x !== null truthy
+
+{{ com \subsection{Composition of refinements} }}
+
+G ; K , skip : G1 |- e1 truthy
+G ; K , skip : G2 |- ! e1 truthy
+G1 ; K , skip : G2 |- e2 truthy
+------------------------------------------------------- :: and
+G ; K , skip : G2 |- e1 && e2 truthy
+
+G ; K , skip : G1 |- !e1 truthy
+G ; K , skip : G2 |- e1 truthy
+G1 ; K , skip : G2 |- !e2 truthy
+-------------------------------------------- :: not_or
+G ; K , skip : G2 |- !(e1 || e2) truthy
+
+G ; K |- e truthy
+---------------------- :: not_not
+G ; K |- !(!e) truthy
+
+G ; K |- e : t
+---------------- :: id
+G ; K |- e truthy
+
+{{ com \section*{Assignment typing} }}
+{{ com \addcontentsline{toc}{section}{Assignment typing} }}
+
+defn
+  G ; K |- e := t , U :: :: assign :: 'assign_'
+  {{ com a value of type $[[t]]$ can be assigned to lvalue $[[e]]$ under locals $[[G]]$
+  and continuations $[[K]]$, yielding new type updates $[[U]]$}}
+by
+
+------------------------------------ :: local
+G ; K |- $x := t , x := t
+
+G ; K , skip : G' |- e1 := t1 , U1
+G' ; K , skip : G'' |- e2 := t2 , U2
+---------------------------------------------- :: pair
+G ; K , skip : G'' |- list ( e1 , e2 ) := `Pair` < t1 , t2> , U1[U2]
+
+G ; K |- e : t1
+G |- t1 [] := t2 => t1'
+G ; K |- e := t1' , U
+----------------------- :: array_append
+G ; K |- e [] := t2 , U
+
+G ; K |- e : u
+G |- u -> x := t
+---------------------- :: property
+G ; K |- e -> x := t ,
+
+C declares static x : t
+----------------------- :: static_property
+G ; K |- C :: x := t ,
+
+G ; K , skip : G' |- e1 : t1
+is_hack_collection t1 = False
+G' ; K , skip : G'' |- t1 [ e2 ] := t => t1'
+G'' ; K , skip : G''' |- e1 := t1' , U
+-------------------------------------------------- :: indexing_non_hack_collection
+G ; K , skip : G''' |- e1 [ e2 ] := t , U
+
+G ; K , skip : G' |- e1 : t1
+is_hack_collection t1 = True
+G' ; K , skip : G'' |- t1 [ e2 ] := t => t1'
+-------------------------------------------------- :: indexing_hack_collection
+G ; K , skip : G'' |- e1 [ e2 ] := t ,
+
+{{ com In the last rule, one could replace $[[t1']]$ with $[[t1]]$ because
+$$
+[[is_hack_collection t1 = True]]
+$$
+and
+$$
+[[G ; K |- t1 [ e2 ] := t => t1']]
+$$
+imply $[[G |- t1 == t1']]$ (the proof is by induction on the derivation of
+the former judgement). }}
+
+{{ com \subsection*{Array append} }}
+{{ com \addcontentsline{toc}{subsection}{Array append} }}
+
+defn
+  G |- t1 [] := t2 => t1' :: :: array_append :: 'array_append_'
+  {{ com under locals $[[G]]$, a value of type $[[t2]]$ can be appended to
+  an lvalue of type $[[t1]]$ and the result is of type $[[t1']]$ }}
+by
+
+G |- u1 <: t1
+G |- u2 <: t2
+G |- t1 [] := t2 => t1'
+-------------------------------------------------- :: sub
+G |- u1 [] := u2 => t1'
+
+G |- t' ~> t
+-------------------------------------------------- :: vec
+G |- vec < t > [] := t' => vec < t >
+
+G |- t' ~> t
+-------------------------------------------------- :: keyset
+G |- keyset < t > [] := t' => keyset < t >
+
+G |- t' ~> t
+-------------------------------------------------- :: vecarray
+G |- array < t > [] := t' => array < t >
+
+G |- t' ~> t
+-------------------------------------------------- :: vector
+G |- `Vector` < t > [] := t' => `Vector` < t >
+
+G |- t' ~> t
+-------------------------------------------------- :: set
+G |- `Set` < t > [] := t' => `Set` < t >
+
+G |- t1' ~> t1
+G |- t2' ~> t2
+-------------------------------------------------- :: map
+G |- `Map` < t1 , t2 > [] := `Pair` < t1' , t2' > => `Map` < t1 , t2 >
+
+G |- t1[] := t => t1'
+G |- t2[] := t => t2'
+-------------------------------------------------- :: union
+G |- (t1 | t2) [] := t => t1' | t2'
+
+{{ com \subsection*{Array/shape/tuple element} }}
+{{ com \addcontentsline{toc}{subsection}{Array/shape/tuple element} }}
+
+defn
+  G ; K |- t1 [ e2 ] := t => t1' :: :: array_get :: 'array_get_'
+  {{ com value $[[e2]]$ is a valid index into values of type $[[t1]]$ and assignment
+  of a value of type $[[t]]$ to the element at that index produces a value of type
+  $[[t1']]$ under environment $[[G]]$ and continuations $[[K]]$ }}
+by
+
+G |- u1 <: t1
+G |- u <: t
+G ; K |- t1 [ e2 ] := t => t1'
+-------------------------------------------------- :: sub
+G ; K |- u1 [ e2 ] := u => t1'
+
+G ; K |- e : int | dynamic
+-------------------------------------------------- :: vec
+G ; K |- vec < t > [ e ] := t => vec < t >
+
+G ; K |- e : t1 | dynamic
+-------------------------------------------------- :: dict
+G ; K |- dict < t1 , t2 > [ e ] := t2 => dict < t1 , t2 >
+
+G ; K |- e : int | dynamic
+-------------------------------------------------- :: vecarray
+G ; K |- array < t > [ e ] := t => array < t >
+
+G ; K |- e : t1 | dynamic
+-------------------------------------------------- :: maparray
+G ; K |- array < t1 , t2 > [ e ] := t2 => array < t1 , t2 >
+
+G ; K |- e : int | dynamic
+-------------------------------------------------- :: vector
+G ; K |- `Vector` < t > [ e ] := t => `Vector` < t >
+
+G ; K |- e : t1 | dynamic
+-------------------------------------------------- :: map
+G ; K |- `Map` < t1 , t2 > [ e1 ] := t2 => `Map` < t1 , t2 >
+
+-------------------------------------------------- :: closed_set
+G ; K |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' )
+
+-------------------------------------------------- :: open_set
+G ; K |- shape ( sft1 , .. , sfti , ?sfn => t , sft1' , .. , sftj' , vardots \ sfn1 , .. , sfnm ) [ sfn ] := t' => shape ( sft1 , .. , sfti , sfn => t' , sft1' , .. , sftj' , vardots \ sfn1 , .. , sfnm )
+
+-------------------------------------------------- :: open_set_unset
+G ; K |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn , sfn1' , .. , sfnj' ) [ sfn ] := t' => shape ( sft1 , .. , sftn , sfn => t' , vardots \ sfn1 , .. , sfni , sfn1' , .. , sfnj' )
+
+{{ com
+
+The above two rules imply that not only can we reassign an existing
+field, but also we can set a new field, because a shape that doesn't
+have a field $[[sfn]]$ is a subtype of a shape that does have it and
+in which $[[sfn]]$ is optional.  For open shapes the type of the field
+must be $[[mixed]]$, but for closed shapes it can be anything.  This
+follows from rules \ottdrulename{sub\_closed\_shape\_widen} and
+\ottdrulename{sub\_open\_shape\_widen}.
+
+}}
+
+-------------------------------------------------- :: tuple
+G ; K |- ( t1 , .. , ti , t , t1' , .. , tj' ) [ i ] := t' => ( t1 , .. , ti , t' , t1' , .. , tj' )
+
+G ; K |- t1 [ e ] := t => t1'
+G ; K |- t2 [ e ] := t => t2'
+-------------------------------------------------- :: union
+G ; K |- (t1 | t2) [ e ] := t => t1' | t2'
+
+{{ com \subsection*{Property} }}
+{{ com \addcontentsline{toc}{subsection}{Property} }}
+
+defn
+  G |- u -> x := t :: :: property_assignment :: 'property_assignment_'
+  {{ com under locals $[[G]]$, a value of type $[[t]]$ can be assigned to a property $[[x]]$ of a value of type $[[u]]$ }}
+by
+
+G |- u -> x := t
+G |- t' ~> t
+----------------- :: sub
+G |- u -> x := t'
+
+u declares x : t
+---------------- :: declaration
+G |- u -> x := t
+
+G |- u1 -> x := t
+G |- u2 -> x := t
+------------------- :: union
+G |- (u1 | u2) -> x := t
+
+{{ com \subsection*{Hack collections} }}
+{{ com \addcontentsline{toc}{subsection}{Hack collections} }}
+
+defn
+  is_hack_collection t = b :: :: is_hack_collection :: 'is_hack_collection_'
+  {{ com Is type $[[t]]$ a Hack collection? }}
+  {{ tex \kwd{is\_hack\_collection}\;[[t]] = [[b]] }}
+by
+
+-------------------------------------------------- :: vector
+is_hack_collection ( `Vector` < t > ) = True
+
+-------------------------------------------------- :: map
+is_hack_collection ( `Map` < t1 , t2 > ) = True
+
+-------------------------------------------------- :: set
+is_hack_collection ( `Set` < t > ) = True
+
+is_hack_collection t1 = True
+is_hack_collection t2 = True
+-------------------------------------------------- :: union_true
+is_hack_collection ( t1 | t2 ) = True
+
+-------------------------------------------------- :: vec
+is_hack_collection ( vec < t > ) = False
+
+-------------------------------------------------- :: dict
+is_hack_collection ( dict < t1 , t2 > ) = False
+
+-------------------------------------------------- :: keyset
+is_hack_collection ( keyset < t > ) = False
+
+-------------------------------------------------- :: vecarray
+is_hack_collection ( array < t > ) = False
+
+-------------------------------------------------- :: maparray
+is_hack_collection ( array < t1 , t2 > ) = False
+
+-------------------------------------------------- :: closed_shape
+is_hack_collection ( shape ( sft1 , .. , sftn ) ) = False
+
+-------------------------------------------------- :: open_shape
+is_hack_collection ( shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm ) ) = False
+
+-------------------------------------------------- :: tuple
+is_hack_collection ( t1 , .. , tn ) = False
+
+is_hack_collection t1 = False
+-------------------------------------------------- :: union_left_false
+is_hack_collection ( t1 | t2 ) = False
+
+is_hack_collection t2 = False
+-------------------------------------------------- :: union_right_false
+is_hack_collection ( t1 | t2 ) = False
+
+{{ com \section*{Statements} }}
+{{ com \addcontentsline{toc}{section}{Statements} }}
+
+defn
+  F ; G ; K |- s :: :: st :: 'st_'
+  {{ com statement $[[s]]$ can be executed under locals $[[G]]$ and continuations $[[K]]$
+     with enclosing function signature $[[F]]$ }}
+by
+
+G ; K[skip:=G1] |- e truthy
+G ; K[skip:=G2] |- !e truthy
+F ; G1; K |- s1
+F ; G2; K |- s2
+------------------------------------- :: if
+F ; G ; K |- if ( e ) s1 else s2
+
+
+F ; G ; K |- if ( e ) s else { }
+-------------------------------- :: if_then
+F ; G ; K |- if ( e ) s
+
+
+{{ com Break and continue just require that the continuation exists and accepts the current state. }}
+
+--------------------------- :: break
+F ; G ; K , break : G |- break ;
+
+-------------------------------- :: continue
+F ; G ; K, continue : G |- continue ;
+
+{{ com A return statement without expression is allowed only if the explicit return type of the enclosing
+function is void.
+}}
+
+--------------------------------------------------------------------- :: return_void
+funparams : void ; G ; K, return : G |- return ;
+
+{{ com If there is an expression, its type must coerce to the explicit return type of the enclosing function.
+}}
+
+G ; K |- e ~ t
+--------------------------------------------- :: return
+funparams : t ; G; K, return : G |- return e ;
+
+{{ com To simplify rules for while, we define a primitive rule for infinite loops. }}
+
+F ; G ; K [continue := G, break := G', skip := G] |- s
+--------------------------------------------------------- :: while_true
+F ; G ; K, skip : G' |- while ( true ) s
+
+{{ com All looping constructs are defined in terms of this infinite loop rule. }}
+
+F ; G ; K |- while ( true ) { if ( ! e ) break; s; }
+---------------------------------------------------------- :: while
+F ; G ; K |- while ( e ) s
+
+F ; G ; K |- while ( true ) { s ; if ( ! e ) break ; }
+---------------------------------------------------- :: do
+F ; G ; K |- do s while ( e )
+
+F ; G ; K |- { e1 ; while ( e2 ) { s ; e3 ; } }
+------------------------------------------------------------ :: for
+F ; G ; K |- for ( e1 ; e2 ; e3 ) s
+
+
+G ; K |- e : `Traversable` < t >
+F ; G ; K , skip : G[x := t] |- while ( true ) s
+-------------------------------------------------- :: foreach_value
+F ; G ; K |- foreach ( e as $x ) s
+
+G ; K |- e : `KeyedTraversable` < t1 , t2 >
+F ; G ; K , skip : G[x1 := t1, x2 := t2] |- while (true) s
+------------------------------------------------------ :: foreach_key_value
+F ; G ; K |- foreach ( e as $x1 => $x2 ) s
+
+{{ com Exception handling }}
+
+{{ com The control flow can arrive to the finally block from any break,
+continue or return statement in the try block, so we need to union them all. }}
+{{ com If the premise does not have the required continuations, we would use
+ST\textunderscore CONTINUATION\textunderscore EXTENSION to add the appropriate ones. }}
+
+F ; G ; { skip : G1, break : G1, continue : G1, return : G1 , catch : G2 } |- s
+F ; G2 , x : C1 ; K [ skip := G1, break := G1, continue := G1, return := G1 ] |- s1 .. F ; G2 , x : Cn ; K [ skip := G1, break := G1, continue := G1, return := G1 ] |- sn
+F ; G1 ; K' |- s'
+---------------------------------------------------- :: try_catch
+F ; G ; K' |- try s catch ( C1 $x1 ) s1 .. catch ( Cn $xn ) sn finally s'
+
+G ; K |- e : t
+---------------------------------- :: expr
+F ; G ; K |- e ;
+
+---------------------------- :: block_empty
+F ; G ; K , skip : G |- { }
+
+{{ com Sequencing just threads the environment.
+  This is just the Composition rule from program logic, written in a continuation-passing style }}
+
+F ; G ; K [ skip := G' ] |- s
+F ; G' ; K |- { s1 .. sn }
+------------------------------- :: seq
+F ; G ; K |- { s s1 .. sn }
+
+
+{{ com \section*{Top level declarations} }}
+{{ com \addcontentsline{toc}{section}{Top level declarations} }}
+
+defn
+  |- decl :: :: decl_ok :: 'decl_ok_' {{ com a declaration $[[decl]]$ is valid }}
+by
+
+{{ com \\\\
+Top-level functions are typed under an initial typing for locals that provides types for their parameters.
+The continuation environment is initially empty, except for the return continuation, which accepts anything.
+For void functions, we support implicit return by including a skip continuation. }}
+
+( t1 $x1 , .. , tn $xn ) : t ; { x1 : t1 , .. , xn : tn } ; { return : G } |- block
+------------------------------------------------------------------------------------------ :: function
+|- function id ( t1 $x1 , .. , tn $xn ) : t block
+
+( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G } |- block
+----------------------------------------------------------- :: function_variadic
+|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : t block
+
+( t1 $x1 , .. , tn $xn ) : void ; { x1 : t1 , .. , xn : tn } ; { return : G, skip : G } |- block
+--------------------------------------------------------------- :: function_void
+|- function id ( t1 $x1 , .. , tn $xn ) : void block
+
+( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void ; { x1 : t1 , .. , xn : tn , x0 : vec<t0> } ; { return : G, skip : G } |- block
+--------------------------------------------------------------- :: function_void_variadic
+|- function id ( t1 $x1 , .. , tn $xn , t0 vardots $x0 ) : void block

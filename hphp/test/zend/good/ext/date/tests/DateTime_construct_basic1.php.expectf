@@ -1,5 +1,5 @@
 *** Testing new DateTime() : basic functionality ***
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(%d) "%s"
   ["timezone_type"]=>
@@ -7,7 +7,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(%d) "%s"
   ["timezone_type"]=>
@@ -15,7 +15,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(3) "GMT"
 }
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
@@ -23,7 +23,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>

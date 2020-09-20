@@ -1,35 +1,35 @@
-<?php
+<?hh
 /* Prototype: float floatval( mixed $var );
  * Description: Returns the float value of var.
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing floatval() with valid float values ***\n";
-// different valid  float values 
-$valid_floats = array(
+// different valid  float values
+$valid_floats = varray[
                 0.0,
                 1.0,
                 -1.0,
                 1.234,
- 	        -1.234,
+             -1.234,
                 1.2e3,
-	        -1.2e3,
-		10.0000000000000000005,
-		10.5e+5,
+            -1.2e3,
+        10.0000000000000000005,
+        10.5e+5,
                 1e5,
-	        -1e5,
+            -1e5,
                 1e-5,
-		-1e-1,
-		1e+5,
-		-1e+5,
-		1E5,
-		-1E5,
-		1E+5,
-		-1E+5,
-		.5e+7,
-		-.5e+7
-);
+        -1e-1,
+        1e+5,
+        -1e+5,
+        1E5,
+        -1E5,
+        1E+5,
+        -1E+5,
+        .5e+7,
+        -.5e+7
+];
 
-/* loop to check that floatval() recognizes different 
+/* loop to check that floatval() recognizes different
    float values, expected output:float value for valid floating point number */
 
 foreach ($valid_floats as $value ) {
@@ -38,7 +38,7 @@ foreach ($valid_floats as $value ) {
 
 
 echo "\n*** Testing doubleval() with valid float values ***\n";
-/* loop to check that doubleval() also recognizes different 
+/* loop to check that doubleval() also recognizes different
    float values, expected output:float value for valid floating point number */
 
 foreach ($valid_floats as $value ) {
@@ -54,26 +54,26 @@ fclose($fp);
 $dfp = opendir ( dirname(__FILE__) );
 closedir($dfp);
 
-// other types in an array 
-$not_float_types = array (
+// other types in an array
+$not_float_types = varray [
                    -2147483648, // max negative integer value
                    2147483648,  // max positive integer value
                    $fp,  // resource
                    $dfp,
                    "0.0", // string
                    "1.0",
-	           "-1.3e3",
-		   "bob-1.3e3",
+               "-1.3e3",
+           "bob-1.3e3",
                    "10 Some dollars",
-	           "10.2 Some Dollars",
-	       	   "10.0 dollar" + 1,
-		   "10.0 dollar" + 1.0,
+               "10.2 Some Dollars",
+                  "10.0 dollar" + 1,
+           "10.0 dollar" + 1.0,
                    "",
                    true,
                    NULL,
                    null,
-                 );
-/* loop through the $not_float_types to see working of 
+                 ];
+/* loop through the $not_float_types to see working of
    floatval() on non float types, expected output: float value valid floating point numbers */
 foreach ($not_float_types as $type ) {
    var_dump( floatval($type) );
@@ -82,7 +82,7 @@ foreach ($not_float_types as $type ) {
 
 echo "\n*** Testing doubleval() on non floating types ***\n";
 
-/* loop through the $not_float_types to see working of 
+/* loop through the $not_float_types to see working of
    doubleval() on non float types, expected output: float value valid floating point numbers */
 foreach ($not_float_types as $type ) {
    var_dump( doubleval($type) );
@@ -93,14 +93,12 @@ foreach ($not_float_types as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( floatval() );
-var_dump( doubleval() );
+try { var_dump( floatval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( doubleval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-//arguments more than expected 
-var_dump( floatval(TRUE, FALSE) );
-var_dump( doubleval(TRUE, FALSE) );
- 
+//arguments more than expected
+try { var_dump( floatval(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( doubleval(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+
 echo "\nDone\n";
-
-
-?>
+}

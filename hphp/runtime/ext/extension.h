@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXTENSION_H_
-#define incl_HPHP_EXTENSION_H_
+#pragma once
 
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/version.h"
 #include "hphp/util/hdf.h"
 
@@ -58,37 +58,44 @@ struct Extension : IDebuggable {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
-  void loadSystemlib(const std::string& name = "");
+  void loadSystemlib() { loadSystemlib(m_name); }
+  void loadSystemlib(const std::string& name);
 
   // Compile and merge an systemlib fragment
   static void CompileSystemlib(const std::string &slib,
-                               const std::string &name);
+                               const std::string &name,
+                               const Native::FuncTable& nativeFuncs);
 public:
   explicit Extension(const char* name, const char* version = "");
   ~Extension() override {}
 
-  const char* getVersion() const { return m_version.c_str();}
+  const char* getVersion() const { return m_version.c_str(); }
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
-  virtual void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) {}
-  virtual void moduleInfo(Array &info) { info.set(String(m_name), true);}
-  virtual void moduleInit() {}
-  virtual void moduleShutdown() {}
-  virtual void threadInit() {}
-  virtual void threadShutdown() {}
-  virtual void requestInit() {}
-  virtual void requestShutdown() {}
+  virtual void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/);
+  virtual void moduleInfo(Array &info);
+  virtual void moduleInit();
+  virtual void moduleShutdown();
+  virtual void threadInit();
+  virtual void threadShutdown();
+  virtual void requestInit();
+  virtual void requestShutdown();
 
   // override this to control extension_loaded() return value
-  virtual bool moduleEnabled() const { return true; }
+  virtual bool moduleEnabled() const;
 
-  typedef std::set<std::string> DependencySet;
-  typedef std::map<Extension*, DependencySet> DependencySetMap;
-  virtual const DependencySet getDeps() const {
-    // No dependencies by default
-    return DependencySet();
-  }
+  // override these functions to perform extension-specific jumpstart,
+  // leveraging the JIT profile data serialization mechanisms.
+  virtual std::string serialize() { return {}; }
+  // throws std::runtime_error to abort the whole thing if needed. The extension
+  // can also choose to swallow the error.
+  virtual void deserialize(std::string) {}
+
+  using DependencySet = std::set<std::string>;
+  using DependencySetMap = std::map<Extension*, DependencySet>;
+
+  virtual const DependencySet getDeps() const;
 
   void setDSOName(const std::string &name) {
     m_dsoName = name;
@@ -98,13 +105,16 @@ public:
     return m_name;
   }
 
-  void registerExtensionFunction(const String& name) {
-    assert(name.get()->isStatic());
-    m_functions.push_back(name.get());
-  }
+  void registerNativeFunc(const StringData* name,
+                          const Native::NativeFunctionInfo&);
 
-  const std::vector<StringData*>& getExtensionFunctions() const {
-    return m_functions;
+  // access the list of functions (excluding methods);
+  // helper for get_extension_funcs()
+  const std::vector<StringData*>& getExtensionFunctions() const;
+  void registerExtensionFunction(const String& name);
+
+  Native::FuncTable& nativeFuncs() {
+    return m_nativeFuncs;
   }
 
 private:
@@ -112,6 +122,7 @@ private:
   std::string m_version;
   std::string m_dsoName;
   std::vector<StringData*> m_functions;
+  Native::FuncTable m_nativeFuncs;
 };
 
 struct ExtensionBuildInfo {
@@ -141,4 +152,3 @@ extern "C" Extension* getModule() { \
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-#endif // incl_HPHP_EXTENSION_H_

@@ -1,0 +1,8 @@
+File "t21684610.php", line 27, characters 9-10:
+Some type constraint(s) here are violated (Typing[4110])
+File "t21684610.php", line 9, characters 38-39:
+'Ti' is a constrained type parameter
+File "t21684610.php", line 9, characters 44-48:
+This is an object of type I1<float>
+File "t21684610.php", line 27, characters 16-16:
+It is incompatible with an int

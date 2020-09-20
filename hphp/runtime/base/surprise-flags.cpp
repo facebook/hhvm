@@ -19,28 +19,29 @@
 #include <type_traits>
 
 namespace HPHP {
-
 // NoHandleSurpriseScope is only implemented in DEBUG mode.
-#ifdef DEBUG
+#ifndef NDEBUG
+struct NoSurprise {
+  int64_t depth[sizeof(SurpriseFlag)] = {0,};
+};
 namespace {
-
-__thread int64_t tl_noSurpriseDepth[sizeof(SurpriseFlag)] = {0,};
+RDS_LOCAL(NoSurprise, rl_noSurprise);
 // Cache of flags with depth > 0.
-__thread SurpriseFlag tl_noSurpriseMask = static_cast<SurpriseFlag>(0);
+RDS_LOCAL(SurpriseFlag, rl_noSurpriseMask);
 
 void addNoSurpriseDepth(SurpriseFlag flags, int increment) {
   typename std::underlying_type<SurpriseFlag>::type mask = 0;
   for (size_t i = 0; i < sizeof(flags); ++i) {
-    if (flags & (1ull << i)) tl_noSurpriseDepth[i] += increment;
-    if (tl_noSurpriseDepth[i] > 0) mask |= (1ull << i);
+    if (flags & (1ull << i)) rl_noSurprise->depth[i] += increment;
+    if (rl_noSurprise->depth[i] > 0) mask |= (1ull << i);
   }
-  tl_noSurpriseMask = static_cast<SurpriseFlag>(mask);
+  *rl_noSurpriseMask = static_cast<SurpriseFlag>(mask);
 }
 
 }
 
 void NoHandleSurpriseScope::AssertNone(SurpriseFlag flags) {
-  assertx((flags & tl_noSurpriseMask) == 0);
+  assertx((flags & *rl_noSurpriseMask) == 0);
 }
 
 NoHandleSurpriseScope::NoHandleSurpriseScope(SurpriseFlag flags) {

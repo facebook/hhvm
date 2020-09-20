@@ -1,13 +1,11 @@
-array(2) {
-  [0]=>
-  array(2) {
+varray(2) {
+  darray(2) {
     ["test_field"]=>
     string(5) "text1"
     [0]=>
     string(5) "text1"
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     ["test_field"]=>
     string(5) "text2"
     [0]=>

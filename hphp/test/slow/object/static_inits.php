@@ -13,4 +13,8 @@ function x() {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_static_inits() {
 x();
+}

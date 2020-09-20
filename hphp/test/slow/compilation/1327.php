@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 class A {
   public $a;
   function foo() {
     $this->bar();
-    if ($this instanceof B) {
+    if ($this is B) {
       $this->b = 1;
     }
     $this->a = 1;
@@ -20,4 +20,8 @@ function main() {
   $b->foo();
   var_dump($b);
 }
+
+<<__EntryPoint>>
+function main_1327() {
 main();
+}

@@ -1,0 +1,4 @@
+string(0) ""
+
+Warning: cannot read from a php://output stream in %s on line %d
+string(0) ""

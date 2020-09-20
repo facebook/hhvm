@@ -1,21 +1,27 @@
-array(5) {
+darray(5) {
   ["hello"]=>
-  string(5) "world"
+  object(SimpleXMLElement) (1) {
+    [0]=>
+    string(5) "world"
+  }
   ["how"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["are"]=>
     string(3) "you"
   }
   ["hi"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["ho"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["test"]=>
-  string(4) "best"
+  object(SimpleXMLElement) (1) {
+    [0]=>
+    string(4) "best"
+  }
 }
-array(1) {
+darray(1) {
   ["world"]=>
   int(1)
 }

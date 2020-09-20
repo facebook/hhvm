@@ -184,12 +184,12 @@ Variant php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) {
     if (allow_hex && (*p == 'x' || *p == 'X')) {
       p++; len--;
       if (php_filter_parse_hex(p, len, &ctx_value) < 0) {
-        assert(ctx_value == 0);
+        assertx(ctx_value == 0);
         error = 1;
       }
     } else if (allow_octal) {
       if (php_filter_parse_octal(p, len, &ctx_value) < 0) {
-        assert(ctx_value == 0);
+        assertx(ctx_value == 0);
         error = 1;
       }
     } else if (len != 0) {
@@ -197,7 +197,7 @@ Variant php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) {
     }
   } else {
     if (php_filter_parse_int(p, len, &ctx_value) < 0) {
-      assert(ctx_value == 0);
+      assertx(ctx_value == 0);
       error = 1;
     }
   }
@@ -780,18 +780,6 @@ Variant php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) {
     }
   }
   return value;
-}
-
-Variant php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL) {
-  if (!is_callable(option_array)) {
-    raise_warning("First argument is expected to be a valid callback");
-    return init_null();
-  }
-  Variant reffable = value;
-  return vm_call_user_func(
-    option_array,
-    PackedArrayInit(1).appendRef(reffable).toArray()
-  );
 }
 
 }

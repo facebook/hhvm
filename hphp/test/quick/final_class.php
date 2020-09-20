@@ -1,8 +1,8 @@
 <?hh
 
-print "Test begin\n";
-
 final class C {}
 class D extends C {}
-
-print "Test end\n";
+<<__EntryPoint>>
+function entrypoint_final_class(): void {
+  print "Test\n";
+}

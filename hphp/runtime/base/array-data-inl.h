@@ -14,50 +14,66 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/runtime-option.h"
+
 #include "hphp/util/portability.h"
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * NOTE: MixedArray no longer calls this constructor.  If you change it, change
- * the MixedArray::Make functions as appropriate.
- */
-inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
-  : m_sizeAndPos(uint32_t(-1))
-{
-  initHeader(static_cast<HeaderKind>(kind), initial_count);
-  assert(m_size == -1);
-  assert(m_pos == 0);
-  assert(m_kind == static_cast<HeaderKind>(kind));
-  assert(dvArraySanityCheck());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-ALWAYS_INLINE ArrayData* staticEmptyArray() {
-  void* vp = &s_theEmptyArray;
-  return static_cast<ArrayData*>(vp);
-}
-
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
-  void* vp = &s_theEmptyVArray;
+  void* vp1 = &s_theEmptyVArray;
+  void* vp2 = &s_theEmptyVec;
+  void* vp3 = &s_theEmptyMarkedVec;
+  return static_cast<ArrayData*>(
+    RuntimeOption::EvalHackArrDVArrs ?
+    RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
+    : vp1
+  );
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyMarkedVArray() {
+  void* vp1 = &s_theEmptyMarkedVArray;
+  void* vp2 = &s_theEmptyMarkedVec;
+  return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyVec() {
+  void* vp = &s_theEmptyVec;
   return static_cast<ArrayData*>(vp);
 }
 
-ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
-  void* vp = &s_theEmptyVecArray;
+ALWAYS_INLINE ArrayData* staticEmptyMarkedVec() {
+  void* vp = &s_theEmptyMarkedVec;
   return static_cast<ArrayData*>(vp);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDArray() {
-  void* vp = &s_theEmptyDArray;
-  return static_cast<ArrayData*>(vp);
+  void* vp1 = &s_theEmptyDArray;
+  void* vp2 = &s_theEmptyDictArray;
+  void* vp3 = &s_theEmptyMarkedDictArray;
+  return static_cast<ArrayData*>(
+    RuntimeOption::EvalHackArrDVArrs ?
+    RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
+    : vp1
+  );
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyMarkedDArray() {
+  void* vp1 = &s_theEmptyMarkedDArray;
+  void* vp2 = &s_theEmptyMarkedDictArray;
+  return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
   void* vp = &s_theEmptyDictArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyMarkedDictArray() {
+  void* vp = &s_theEmptyMarkedDictArray;
   return static_cast<ArrayData*>(vp);
 }
 
@@ -70,22 +86,34 @@ ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
 // Creation and destruction.
 
 ALWAYS_INLINE ArrayData* ArrayData::Create() {
-  return staticEmptyArray();
+  return ArrayData::CreateDArray();
 }
 
-ALWAYS_INLINE ArrayData* ArrayData::CreateVArray() {
-  return staticEmptyVArray();
+ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag /* = {} */) {
+  auto const ad = RuntimeOption::EvalHackArrDVArrs ?
+    (RuntimeOption::EvalHackArrDVArrMark ?
+     staticEmptyMarkedVec() : staticEmptyVec()) :
+    staticEmptyVArray();
+  return RO::EvalArrayProvenance
+    ? arrprov::tagStaticArr(ad, tag)
+    : ad;
 }
 
-ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
-  return staticEmptyVecArray();
+ALWAYS_INLINE ArrayData* ArrayData::CreateDArray(arrprov::Tag tag /* = {} */) {
+  auto const ad = RuntimeOption::EvalHackArrDVArrs ?
+    (RuntimeOption::EvalHackArrDVArrMark ?
+     staticEmptyMarkedDictArray() : staticEmptyDictArray()) :
+    staticEmptyDArray();
+  return RO::EvalArrayProvenance
+    ? arrprov::tagStaticArr(ad, tag)
+    : ad;
 }
 
-ALWAYS_INLINE ArrayData* ArrayData::CreateDArray() {
-  return staticEmptyDArray();
+ALWAYS_INLINE ArrayData* ArrayData::CreateVec(arrprov::Tag tag /* = {} */) {
+  return staticEmptyVec();
 }
 
-ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
+ALWAYS_INLINE ArrayData* ArrayData::CreateDict(arrprov::Tag tag /* = {} */) {
   return staticEmptyDictArray();
 }
 
@@ -94,26 +122,23 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {
 }
 
 ALWAYS_INLINE void ArrayData::decRefAndRelease() {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   if (decReleaseCheck()) release();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
-inline size_t ArrayData::vsize() const {
-  return g_array_funcs.vsize[kind()](this);
+inline void ArrayData::release() noexcept {
+  assertx(!hasMultipleRefs());
+  g_array_funcs.release[kind()](this);
+  AARCH64_WALKABLE_FRAME();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Introspection.
 
 inline size_t ArrayData::size() const {
-  if (UNLIKELY((int)m_size) < 0) return vsize();
-  return m_size;
-}
-
-inline size_t ArrayData::getSize() const {
   return m_size;
 }
 
@@ -126,107 +151,156 @@ inline bool ArrayData::kindIsValid() const {
 }
 
 inline ArrayData::ArrayKind ArrayData::kind() const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   return static_cast<ArrayKind>(m_kind);
 }
 
-inline bool ArrayData::noCopyOnWrite() const {
-  // GlobalsArray doesn't support COW.
-  return kind() == kGlobalsKind;
-}
+inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
+inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
+inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
+inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
+inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 
-inline bool ArrayData::isPacked() const { return kind() == kPackedKind; }
-inline bool ArrayData::isMixed() const { return kind() == kMixedKind; }
-inline bool ArrayData::isApcArray() const { return kind() == kApcKind; }
-inline bool ArrayData::isGlobalsArray() const { return kind() == kGlobalsKind; }
-inline bool ArrayData::isEmptyArray() const { return kind() == kEmptyKind; }
-inline bool ArrayData::isDict() const { return kind() == kDictKind; }
-inline bool ArrayData::isVecArray() const { return kind() == kVecKind; }
-inline bool ArrayData::isKeyset() const { return kind() == kKeysetKind; }
-
-inline bool ArrayData::hasPackedLayout() const {
-  return isPacked() || isVecArray();
-}
-inline bool ArrayData::hasMixedLayout() const {
-  return isMixed() || isDict();
-}
-
-inline bool ArrayData::isPHPArray() const {
+inline bool ArrayData::isPHPArrayType() const {
   return kind() < kDictKind;
 }
-inline bool ArrayData::isHackArray() const {
+inline bool ArrayData::isHackArrayType() const {
   return kind() >= kDictKind;
 }
 
-inline ArrayData::DVArray ArrayData::dvArray() const {
-  // The darray/varray state is stored in the lower 2-bits of m_aux16. The
-  // array is free to store whatever it wants in the upper 14-bits.
-  return static_cast<DVArray>(m_aux16 & kDVArrayMask);
+inline bool ArrayData::isVecType() const {
+  return (kind() & ~kBespokeKindMask) == kVecKind;
+}
+inline bool ArrayData::isDictType() const {
+  return (kind() & ~kBespokeKindMask) == kDictKind;
+}
+inline bool ArrayData::isKeysetType() const {
+  return (kind() & ~kBespokeKindMask) == kKeysetKind;
 }
 
-inline void ArrayData::setDVArray(DVArray d) {
-  assertx(!(d & ~kDVArrayMask));
-  m_aux16 = (m_aux16 & ~kDVArrayMask) | d;
+inline bool ArrayData::hasVanillaPackedLayout() const {
+  return isPackedKind() || isVecKind();
+}
+inline bool ArrayData::hasVanillaMixedLayout() const {
+  return isMixedKind() || isDictKind();
 }
 
-inline bool ArrayData::isVArray() const { return dvArray() & kVArray; }
-inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
-inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
+inline bool ArrayData::isVanilla() const {
+  return !(kind() & kBespokeKindMask);
+}
 
-// gcc doesn't optimize (a & 3) == (b & 3) very well; help it a little.
+inline bool ArrayData::bothVanilla(const ArrayData* ad1, const ArrayData* ad2) {
+  return !((ad1->kind() | ad2->kind()) & kBespokeKindMask);
+}
+
+inline bool ArrayData::isVArray() const {
+  return (kind() & ~kBespokeKindMask) == kPackedKind;
+}
+
+inline bool ArrayData::isDArray() const {
+  static_assert(kMixedKind == 0);
+  static_assert(kBespokeDArrayKind == 1);
+  return kind() <= kBespokeDArrayKind;
+}
+
+inline bool ArrayData::isDVArray() const {
+  static_assert(kMixedKind == 0);
+  static_assert(kBespokeDArrayKind == 1);
+  static_assert(kPackedKind == 2);
+  static_assert(kBespokeVArrayKind == 3);
+  return kind() <= kBespokeVArrayKind;
+}
+
+inline bool ArrayData::isNotDVArray() const { return !isDVArray(); }
+
+inline bool ArrayData::isHAMSafeVArray() const {
+  return RuntimeOption::EvalHackArrDVArrs ? isVecType() : isVArray();
+}
+inline bool ArrayData::isHAMSafeDArray() const {
+  return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
+}
+inline bool ArrayData::isHAMSafeDVArray() const {
+  return RuntimeOption::EvalHackArrDVArrs ? isDictType() || isVecType()
+                                          : isDVArray();
+}
+
 inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
-  return ((a->m_aux16 ^ b->m_aux16) & kDVArrayMask) == 0;
+  static_assert(kMixedKind == 0);
+  static_assert(kBespokeDArrayKind == 1);
+  static_assert(kPackedKind == 2);
+  static_assert(kBespokeVArrayKind == 3);
+  return std::min(uint8_t(a->kind() & ~kBespokeKindMask), uint8_t{4}) ==
+         std::min(uint8_t(b->kind() & ~kBespokeKindMask), uint8_t{4});
 }
 
-inline bool ArrayData::dvArraySanityCheck() const {
-  auto const dv = dvArray();
-  if (isPacked()) return !(dv & kDArray);
-  if (isMixed())  return !(dv & kVArray);
-  return dv == kNotDVArray;
+inline bool ArrayData::hasApcTv() const { return m_aux16 & kHasApcTv; }
+
+inline bool ArrayData::isLegacyArray() const { return m_aux16 & kLegacyArray; }
+
+inline bool ArrayData::hasStrKeyTable() const {
+  return m_aux16 & kHasStrKeyTable;
 }
 
-inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
-
-inline DataType ArrayData::toDataType() const {
-  auto const k = kind();
-  if (k < kDictKind) return KindOfArray;
-  if (k == kVecKind) return KindOfVec;
-  if (k == kDictKind) return KindOfDict;
-  assert(k == kKeysetKind);
-  return KindOfKeyset;
-}
-
-inline DataType ArrayData::toPersistentDataType() const {
-  auto const k = kind();
-  if (k < kDictKind) return KindOfPersistentArray;
-  if (k == kVecKind) return KindOfPersistentVec;
-  if (k == kDictKind) return KindOfPersistentDict;
-  assert(k == kKeysetKind);
-  return KindOfPersistentKeyset;
+inline uint8_t ArrayData::auxBits() const {
+  return isLegacyArray() ? kLegacyArray : 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Iteration.
 
-inline int32_t ArrayData::getPosition() const {
-  return m_pos;
+ALWAYS_INLINE
+DataType ArrayData::toDataType() const {
+  switch (kind()) {
+    case kPackedKind:
+    case kBespokeVArrayKind:
+      return KindOfVArray;
+
+    case kMixedKind:
+    case kBespokeDArrayKind:
+      return KindOfDArray;
+
+    case kVecKind:
+    case kBespokeVecKind:
+      return KindOfVec;
+
+    case kDictKind:
+    case kBespokeDictKind:
+      return KindOfDict;
+
+    case kKeysetKind:
+    case kBespokeKeysetKind:
+      return KindOfKeyset;
+
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
 }
 
-inline void ArrayData::setPosition(int32_t p) {
-  assert(m_pos == p || !isStatic());
-  m_pos = p;
-}
+ALWAYS_INLINE
+DataType ArrayData::toPersistentDataType() const {
+  switch (kind()) {
+    case kPackedKind:
+    case kBespokeVArrayKind:
+      return KindOfPersistentVArray;
 
-inline bool ArrayData::isHead() const {
-  return m_pos == iter_begin();
-}
+    case kMixedKind:
+    case kBespokeDArrayKind:
+      return KindOfPersistentDArray;
 
-inline bool ArrayData::isTail() const {
-  return m_pos == iter_last();
-}
+    case kVecKind:
+    case kBespokeVecKind:
+      return KindOfPersistentVec;
 
-inline bool ArrayData::isInvalid() const {
-  return m_pos == iter_end();
+    case kDictKind:
+    case kBespokeDictKind:
+      return KindOfPersistentDict;
+
+    case kKeysetKind:
+    case kBespokeKeysetKind:
+      return KindOfPersistentKeyset;
+
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -239,6 +313,31 @@ inline bool ArrayData::IsValidKey(const StringData* k) {
 
 ALWAYS_INLINE void decRefArr(ArrayData* arr) {
   arr->decRefAndRelease();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE bool checkHACCompare() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckCompare;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace arrprov_detail {
+template<typename SrcArray>
+ArrayData* tagArrProvImpl(ArrayData*, const SrcArray*);
+}
+
+ALWAYS_INLINE ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
+  return RO::EvalArrayProvenance
+    ? arrprov_detail::tagArrProvImpl(ad, src)
+    : ad;
+}
+ALWAYS_INLINE ArrayData* tagArrProv(ArrayData* ad, const APCArray* src) {
+  return RO::EvalArrayProvenance
+    ? arrprov_detail::tagArrProvImpl(ad, src)
+    : ad;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

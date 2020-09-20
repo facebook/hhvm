@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 async function g(): Awaitable<int> {
   return 1;

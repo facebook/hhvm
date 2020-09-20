@@ -1,8 +1,7 @@
 *** Testing get_declared_traits() : basic functionality ***
 
 -- Testing get_declared_traits() function with Zero arguments --
-array(1) {
-  [0]=>
+varray(1) {
   string(7) "MyTrait"
 }
 

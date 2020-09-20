@@ -27,5 +27,9 @@ class D2 extends B {
   }
 }
 
+
+<<__EntryPoint>>
+function main_func_family_010() {
 D1::go();
 D2::go();
+}

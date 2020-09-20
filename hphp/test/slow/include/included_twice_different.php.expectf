@@ -1,0 +1,5 @@
+1
+2
+1
+
+Fatal error: Function already defined: f2 in %s/test/slow/include/included_twice_different.php on line 35

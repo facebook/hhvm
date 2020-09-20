@@ -14,17 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HPHP_ARRAY_H_
-#define incl_HPHP_HPHP_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/hash-table.h"
-#include "hphp/runtime/base/member-val.h"
+#include "hphp/runtime/base/mixed-array-keys.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
-
-#include "hphp/util/hash-map-typedefs.h"
 
 #include <folly/portability/Constexpr.h>
 
@@ -37,13 +36,10 @@ struct APCHandle;
 struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
+
 struct MixedArrayElm {
   using hash_t = strhash_t;
 
-  union {
-    int64_t ikey;
-    StringData* skey;
-  };
   // We store values here, but also some information local to this array:
   // data.m_aux.u_hash contains either a negative number (for an int key) or
   // a string hashcode (31-bit and thus non-negative); the high bit is the
@@ -53,8 +49,15 @@ struct MixedArrayElm {
   // write the m_aux field!
   TypedValueAux data;
 
+  // Putting the key second lets us cast MixedArrayElm* to TypedValue*, which
+  // we can use to simplify the Lval sublattice in the JIT type system.
+  union {
+    int64_t ikey;
+    StringData* skey;
+  };
+
   void setStaticKey(StringData* k, strhash_t h) {
-    assert(k->isStatic());
+    assertx(k->isStatic());
     setStrKeyNoIncRef(k, h);
   }
 
@@ -72,9 +75,18 @@ struct MixedArrayElm {
   void setIntKey(int64_t k, inthash_t h) {
     ikey = k;
     data.hash() = static_cast<int32_t>(h) | STRHASH_MSB;
-    assert(hasIntKey());
+    assertx(hasIntKey());
     static_assert(static_cast<int32_t>(STRHASH_MSB) < 0,
                   "high bit indicates int key");
+  }
+
+  void setTombstone() {
+    // We don't explicitly check for tombstones in MixedArray::release(),
+    // instead make the deleted element appear to contain uncounted values.
+    data.m_type = kInvalidDataType;
+    static_assert(!isRefcountedType(kInvalidDataType), "");
+    data.hash() = -1;
+    assertx(hasIntKey());
   }
 
   hash_t probe() const {
@@ -101,7 +113,7 @@ struct MixedArrayElm {
   }
 
   ALWAYS_INLINE StringData* strKey() const {
-    assert(hasStrKey());
+    assertx(hasStrKey());
     return skey;
   }
 
@@ -113,16 +125,12 @@ struct MixedArrayElm {
     return ikey;
   }
 
-  ALWAYS_INLINE Cell getKey() const {
+  ALWAYS_INLINE TypedValue getKey() const {
     if (hasIntKey()) {
       return make_tv<KindOfInt64>(ikey);
     }
-    auto str = skey;
-    if (str->isRefCounted()) {
-      str->rawIncRefCount();
-      return make_tv<KindOfString>(str);
-    }
-    return make_tv<KindOfPersistentString>(str);
+    return skey->isRefCounted() ? make_tv<KindOfString>(skey)
+                                : make_tv<KindOfPersistentString>(skey);
   }
 
   ALWAYS_INLINE hash_t hash() const {
@@ -135,16 +143,18 @@ struct MixedArrayElm {
 
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   ALWAYS_INLINE bool isTombstone() const {
-    assert(isRealType(data.m_type) || data.m_type == kInvalidDataType);
-    return data.m_type < KindOfUninit;
-    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
+    assertx(isRealType(data.m_type) || data.m_type == kInvalidDataType);
+    return data.m_type == kInvalidDataType;
   }
 
   static constexpr ptrdiff_t keyOff() {
     return offsetof(MixedArrayElm, ikey);
   }
   static constexpr ptrdiff_t dataOff() {
-    return offsetof(MixedArrayElm, data);
+    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_data);
+  }
+  static constexpr ptrdiff_t typeOff() {
+    return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_type);
   }
   static constexpr ptrdiff_t hashOff() {
     return offsetof(MixedArrayElm, data) + offsetof(TypedValue, m_aux);
@@ -154,17 +164,6 @@ struct MixedArrayElm {
 struct MixedArray final : ArrayData,
                           array::HashTable<MixedArray, MixedArrayElm>,
                           type_scan::MarkCollectable<MixedArray> {
-  /*
-   * Iterator helper for kPackedKind and kMixedKind.  You can use this
-   * to look at the values in the array, but not the keys unless you
-   * know it is kMixedKind.
-   *
-   * This can be used as an optimization vs. ArrayIter, which uses
-   * indirect calls in the loop.
-   */
-  struct ValIter;
-
-
   struct ElmKey {
     ElmKey() {}
     ElmKey(strhash_t hash, StringData* key)
@@ -199,44 +198,52 @@ struct MixedArray final : ArrayData,
   static constexpr auto MakeReserve = &MakeReserveMixed;
 
   /*
-   * Convert mixed-layout array to dict in-place. This function doesn't check
-   * whether the input array contains references or not, so only use this when
-   * you already know that they do not.
-   */
-  static MixedArray* ToDictInPlace(ArrayData*);
-
-  /*
-   * MakeReserveSame allocates a new, empty, request-local array with the same
-   * mode as `other' and with enough space reserved for `capacity' members, or
-   * if `capacity' is zero, with the same capacity as `other'.
-   *
-   * MakeReserveLike will return a PHP array with a memory representation
-   * similar to the one used by `other'.
-   *
-   * The returned array is already incref'd.
-   */
-  static ArrayData* MakeReserveSame(const ArrayData* other, uint32_t capacity);
-  static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
-
-  /*
    * Allocates a new request-local array with given key,value,key,value,... in
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.
    */
-  static MixedArray* MakeMixed(uint32_t size, const TypedValue* keysAndValues);
+  static MixedArray* MakeDArray(uint32_t size, const TypedValue* kvs);
+  static MixedArray* MakeDict(uint32_t size, const TypedValue* kvs);
+private:
+  template<HeaderKind hdr>
+  static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
+
+public:
+  static constexpr size_t kKeyTypesOffset = 7;
+
+  const MixedArrayKeys& keyTypes() const {
+    auto const pointer = uintptr_t(this) + kKeyTypesOffset;
+    return *reinterpret_cast<MixedArrayKeys*>(pointer);
+  }
+
+  MixedArrayKeys* mutableKeyTypes() {
+    auto const pointer = uintptr_t(this) + kKeyTypesOffset;
+    return reinterpret_cast<MixedArrayKeys*>(pointer);
+  }
+
+public:
+  /*
+   * Same semantics as PackedArray::MakeNatural().
+   */
+  static MixedArray* MakeDArrayNatural(uint32_t size, const TypedValue* vals);
 
   /*
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
-  static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
-                               const TypedValue* values);
   static MixedArray* MakeStructDict(uint32_t size,
                                     const StringData* const* keys,
                                     const TypedValue* values);
   static MixedArray* MakeStructDArray(uint32_t size,
                                       const StringData* const* keys,
                                       const TypedValue* values);
+
+  /*
+   * Allocate a struct-like array (with string literal keys), but only init
+   * the hash table and the header, leaving elms uninit. Requires size > 0.
+   */
+  static MixedArray* AllocStructDict(uint32_t size, const int32_t* hash);
+  static MixedArray* AllocStructDArray(uint32_t size, const int32_t* hash);
 
   /*
    * Allocate an uncounted MixedArray and copy the values from the
@@ -246,38 +253,28 @@ struct MixedArray final : ArrayData,
    * uncounted or static arrays).  The Packed version does the same
    * when the array has a kPackedKind.
    *
-   * 'extra' bytes may be allocated in front of the returned pointer,
-   * must be a multiple of 16, and later be passed to ReleaseUncounted.
-   * (This is used to co-allocate a TypedValue with its array data.)
+   * If withApcTypedValue is true, space for an APCTypedValue will be
+   * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(ArrayData* array,
-                                  size_t extra = 0,
-                                  PointerMap* seen = nullptr);
+  static ArrayData* MakeUncounted(
+      ArrayData* array, bool withApcTypedValue,
+      DataWalker::PointerMap* seen = nullptr
+  );
+  static ArrayData* MakeUncounted(
+      ArrayData* array, int, DataWalker::PointerMap* seen = nullptr
+  ) = delete;
+  static ArrayData* MakeUncounted(
+      ArrayData* array, size_t extra, DataWalker::PointerMap* seen = nullptr
+  ) = delete;
 
-  static ArrayData* MakeDictFromAPC(const APCArray* apc);
-  static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
+  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
+  static ArrayData* MakeDArrayFromAPC(const APCArray* apc,
+                                      bool isMarked = false);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);
   static bool DictSame(const ArrayData*, const ArrayData*);
   static bool DictNotSame(const ArrayData*, const ArrayData*);
-
-  /*
-   * Memoization interface.
-   *
-   * Both functions take a current base (which should either be a memoization
-   * cache, or a RefData pointing to one), a pointer to a contiguous range of
-   * keys to use for the lookup, and the length of the range. The length should
-   * always be at least one.
-   *
-   * MemoGet will return the stored value corresponding to the keys, or
-   * KindOfUninit if not found.
-   *
-   * MemoSet will store the given Cell at the location corresponding to the
-   * keys, updating the base if the underlying dicts are mutated.
-   */
-  static Cell MemoGet(const TypedValue*, const Cell*, uint32_t);
-  static void MemoSet(TypedValue*, const Cell*, uint32_t, Cell);
 
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
@@ -303,87 +300,46 @@ struct MixedArray final : ArrayData,
 private:
   using ArrayData::exists;
   using ArrayData::at;
-  using ArrayData::rval;
   using ArrayData::lval;
-  using ArrayData::lvalNew;
   using ArrayData::set;
-  using ArrayData::setRef;
-  using ArrayData::add;
   using ArrayData::remove;
   using ArrayData::release;
 
 public:
-  static size_t Vsize(const ArrayData*);
-  static member_rval::ptr_u GetValueRef(const ArrayData*, ssize_t pos);
+  static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool IsStrictVector(const ArrayData* ad) {
     return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
   }
-  static constexpr auto NvTryGetInt = &NvGetInt;
-  static constexpr auto NvTryGetStr = &NvGetStr;
-  static member_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isMixed());
-    return member_rval { ad, NvTryGetInt(ad, k) };
-  }
-  static member_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isMixed());
-    return member_rval { ad, NvTryGetStr(ad, k) };
-  }
-  static member_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    assertx(ad->isMixed());
-    return member_rval { ad, GetValueRef(ad, pos) };
-  }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static member_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static member_lval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
-  static member_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static member_lval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
-  static member_lval LvalNew(ArrayData*, bool copy);
-  static member_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
-                                  TypedValue v, bool copy);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
-                                  TypedValue v, bool copy);
-  static ArrayData* SetRefInt(ArrayData* ad, int64_t k,
-                              member_lval v, bool copy);
-  static ArrayData* SetRefStr(ArrayData* ad, StringData* k,
-                              member_lval v, bool copy);
-  static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
-  static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
-  static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
+  static arr_lval LvalInt(ArrayData* ad, int64_t k);
+  static arr_lval LvalStr(ArrayData* ad, StringData* k);
+  static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
+  static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
+  static ArrayData* RemoveInt(ArrayData*, int64_t k);
+  static ArrayData* RemoveStr(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, member_lval v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
-  static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
+  static ArrayData* Append(ArrayData*, TypedValue v);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
-  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* ToPHPArray(ArrayData*, bool);
+  static ArrayData* Prepend(ArrayData*, TypedValue v);
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);
 
-  static void Renumber(ArrayData*);
+  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
-  // Recursively register {allocation, rootAPCHandle} with APCGCManager
-  static void RegisterUncountedAllocations(ArrayData* ad,
-                                           APCHandle* rootAPCHandle);
-  static bool ReleaseUncounted(ArrayData*, size_t extra = 0);
-  static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
-  static bool AdvanceMArrayIter(ArrayData*, MArrayIter& fp);
-  static ArrayData* Escalate(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
+  static void ReleaseUncounted(ArrayData*);
 
   static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
@@ -393,108 +349,32 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static member_rval::ptr_u NvTryGetIntDict(const ArrayData*, int64_t);
-  static constexpr auto NvGetIntDict = &NvGetInt;
-  static member_rval::ptr_u NvTryGetStrDict(const ArrayData*,
-                                            const StringData*);
-  static constexpr auto NvGetStrDict = &NvGetStr;
-  static member_rval RvalIntDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDict());
-    return member_rval { ad, NvGetIntDict(ad, k) };
-  }
-  static member_rval RvalIntStrictDict(const ArrayData* ad, int64_t k) {
-    assertx(ad->isDict());
-    return member_rval { ad, NvTryGetIntDict(ad, k) };
-  }
-  static member_rval RvalStrDict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isDict());
-    return member_rval { ad, NvGetStrDict(ad, k) };
-  }
-  static member_rval RvalStrStrictDict(const ArrayData* ad,
-                                       const StringData* k) {
-    assertx(ad->isDict());
-    return member_rval { ad, NvTryGetStrDict(ad, k) };
-  }
-  static constexpr auto ReleaseDict = &Release;
-  static constexpr auto NvGetKeyDict = &NvGetKey;
-  static constexpr auto SetIntDict = &SetInt;
-  static constexpr auto SetStrDict = &SetStr;
-  static constexpr auto AddIntDict = &AddInt;
-  static constexpr auto AddStrDict = &AddStr;
-  static constexpr auto VsizeDict = &Vsize;
-  static constexpr auto GetValueRefDict = &GetValueRef;
-  static constexpr auto IsVectorDataDict = &IsVectorData;
-  static constexpr auto ExistsIntDict = &ExistsInt;
-  static constexpr auto ExistsStrDict = &ExistsStr;
-  static constexpr auto LvalIntDict = &LvalInt;
-  static constexpr auto LvalStrDict = &LvalStr;
-  static constexpr auto LvalNewDict = &LvalNew;
-  static constexpr auto RemoveIntDict = &RemoveInt;
-  static constexpr auto RemoveStrDict = &RemoveStr;
-  static constexpr auto IterBeginDict = &IterBegin;
-  static constexpr auto IterLastDict = &IterLast;
-  static constexpr auto IterEndDict = &IterEnd;
-  static constexpr auto IterAdvanceDict = &IterAdvance;
-  static constexpr auto IterRewindDict = &IterRewind;
-  static constexpr auto ValidMArrayIterDict = ValidMArrayIter;
-  static constexpr auto AdvanceMArrayIterDict = &AdvanceMArrayIter;
-  static constexpr auto EscalateForSortDict = &EscalateForSort;
-  static constexpr auto KsortDict = &Ksort;
-  static constexpr auto SortDict = &Sort;
-  static constexpr auto AsortDict = &Asort;
-  static constexpr auto UksortDict = &Uksort;
-  static constexpr auto UsortDict = &Usort;
-  static constexpr auto UasortDict = &Uasort;
-  static constexpr auto CopyDict = &Copy;
-  static constexpr auto CopyStaticDict = &CopyStatic;
-  static constexpr auto AppendDict = &Append;
-  static member_lval LvalIntRefDict(ArrayData*, int64_t, bool);
-  static member_lval LvalStrRefDict(ArrayData*, StringData*, bool);
-  static member_lval LvalNewRefDict(ArrayData*, bool);
-  static ArrayData* SetWithRefIntDict(ArrayData*, int64_t k,
-                                      TypedValue v, bool copy);
-  static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k,
-                                      TypedValue v, bool copy);
-  static ArrayData* SetRefIntDict(ArrayData*, int64_t, member_lval, bool);
-  static ArrayData* SetRefStrDict(ArrayData*, StringData*, member_lval, bool);
-  static ArrayData* AppendRefDict(ArrayData*, member_lval, bool);
-  static ArrayData* AppendWithRefDict(ArrayData*, TypedValue, bool);
-  static constexpr auto PlusEqDict = &PlusEq;
-  static constexpr auto MergeDict = &Merge;
-  static constexpr auto PopDict = &Pop;
-  static constexpr auto DequeueDict = &Dequeue;
-  static constexpr auto PrependDict = &Prepend;
-  static constexpr auto RenumberDict = &Renumber;
-  static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
-  static constexpr auto EscalateDict = &Escalate;
-  static ArrayData* ToPHPArrayDict(ArrayData*, bool);
-  static ArrayData* ToDictDict(ArrayData*, bool);
-  static constexpr auto ToVecDict = &ArrayCommon::ToVec;
-  static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
-  static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
-  static ArrayData* ToDArrayDict(ArrayData*, bool);
-
   //////////////////////////////////////////////////////////////////////
 
-  // Like Lval[Int,Str], but silently does nothing if the element does not
-  // exist. Not part of the ArrayData interface, but used for member operations.
-  static member_lval LvalSilentInt(ArrayData*, int64_t, bool);
-  static member_lval LvalSilentStr(ArrayData*, const StringData*, bool);
+  // Helpers used by ArrayInit to update MixedArrays without refcount ops.
+  // These helpers work for both mixed PHP arrays and dicts.
+  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
 
-  static constexpr auto LvalSilentIntDict = &LvalSilentInt;
-  static constexpr auto LvalSilentStrDict = &LvalSilentStr;
+  // Return an lval to the value at the given key. If `k` is not present,
+  // this method will insert a null value for it and return it.
+  //  @precondition: !isFull
+  //  @precondition: !cowCheck
+  static tv_lval LvalInPlace(ArrayData* ad, const Variant& k);
+
+  // If the key is not present in the array, return a null lval; else,
+  // COW the array if necessary and return an lval into the new array.
+  static arr_lval LvalSilentInt(ArrayData* ad, int64_t k);
+  static arr_lval LvalSilentStr(ArrayData* ad, StringData* k);
 
   //////////////////////////////////////////////////////////////////////
 
 private:
   MixedArray* copyMixed() const;
-  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk,
-                                    ArrayData::DVArray);
+  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
   static MixedArray* MakeStructImpl(uint32_t, const StringData* const*,
-                                    const TypedValue*, HeaderKind,
-                                    ArrayData::DVArray);
-
-  static ArrayData* FromDictImpl(ArrayData*, bool, bool);
+                                    const TypedValue*, HeaderKind);
+  static MixedArray* AllocStructImpl(uint32_t, const int32_t*, HeaderKind);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
@@ -503,13 +383,9 @@ public:
   uint32_t iterLimit() const { return m_used; }
 
   // Fetch a value and optional key (if keyPos != nullptr), given an
-  // iterator pos.  If withref is true, copy the value with "withRef"
-  // semantics, and decref the previous key before copying the key.
-  // Otherwise get the value cell (unboxing), and initialize keyOut.
+  // iterator pos.  Get the value cell, and initialize keyOut.
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   void getArrayElm(ssize_t pos, TypedValue* out) const;
-  void dupArrayElmWithRef(ssize_t pos, TypedValue* valOut,
-    TypedValue* keyOut) const;
 
   const TypedValue* getArrayElmPtr(ssize_t pos) const;
   TypedValue getArrayElmKey(ssize_t pos) const;
@@ -517,15 +393,12 @@ public:
   bool isTombstone(ssize_t pos) const;
   // Elm's data.m_type == kInvalidDataType for deleted slots.
   static bool isTombstone(DataType t) {
-    assert(isRealType(t) || t == kInvalidDataType);
-    return t < KindOfUninit;
-    static_assert(KindOfUninit == 0 && kInvalidDataType < 0, "");
+    return t == kInvalidDataType;
   }
 
 private:
   friend struct array::HashTable<MixedArray, MixedArrayElm>;
   friend struct MemoryProfile;
-  friend struct EmptyArray;
   friend struct PackedArray;
   friend struct HashCollection;
   friend struct BaseMap;
@@ -535,8 +408,6 @@ private:
   friend struct c_Set;
   friend struct c_ImmSet;
   friend struct c_AwaitAllWaitHandle;
-  enum class ClonePacked {};
-  enum class CloneMixed {};
 
   friend size_t getMemSize(const ArrayData*, bool);
   template <typename AccessorT, class ArrayT>
@@ -545,22 +416,22 @@ private:
 public:
   // Safe downcast helpers
   static MixedArray* asMixed(ArrayData* ad) {
-    assert(ad->hasMixedLayout());
+    assertx(ad->hasVanillaMixedLayout());
     auto a = static_cast<MixedArray*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
   static const MixedArray* asMixed(const ArrayData* ad) {
-    assert(ad->hasMixedLayout());
+    assertx(ad->hasVanillaMixedLayout());
     auto a = static_cast<const MixedArray*>(ad);
-    assert(a->checkInvariants());
+    assertx(a->checkInvariants());
     return a;
   }
 
   // Fast iteration
   template <class F, bool inc = true>
   static void IterateV(const MixedArray* arr, F fn) {
-    assert(arr->hasMixedLayout());
+    assertx(arr->hasVanillaMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
@@ -572,7 +443,7 @@ public:
   }
   template <class F, bool inc = true>
   static void IterateKV(const MixedArray* arr, F fn) {
-    assert(arr->hasMixedLayout());
+    assertx(arr->hasVanillaMixedLayout());
     auto elm = arr->data();
     if (inc) arr->incRefCount();
     SCOPE_EXIT { if (inc) decRefArr(const_cast<MixedArray*>(arr)); };
@@ -587,14 +458,22 @@ public:
   }
 
 private:
-  static Cell getElmKey(const Elm& e);
+  static TypedValue getElmKey(const Elm& e);
 
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode,
-                               HeaderKind, ArrayData::DVArray);
+  static MixedArray* CopyMixed(const MixedArray& other, AllocMode);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
+
+  // Slow paths used for MixedArrays with references or counted string keys.
+  // We fall back to SlowCopy and SlowGrow in the middle of iteration when we
+  // encounter a reference, so we take an (elm, end) pair as arguments.
+  static MixedArray* SlowCopy(MixedArray*, const ArrayData& old,
+                              MixedArrayElm* elm, MixedArrayElm* end);
+  static MixedArray* SlowGrow(MixedArray*, const ArrayData& old,
+                              MixedArrayElm* elm, MixedArrayElm* end);
+  static void SlowRelease(MixedArray*);
 
   MixedArray() = delete;
   MixedArray(const MixedArray&) = delete;
@@ -610,16 +489,20 @@ private:
   static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
                                  uint32_t nElems);
 
+  // TODO(kshaunak): Delete this method and use CopyMixed.
+  //
+  // There are subtleties which make it tricky, though; this method clears the
+  // m_nextKI and m_pos fields in the result array, which CopyMixed does not.
+  static ArrayData* ToDArrayImpl(const MixedArray* adIn);
+
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
 
-  static ArrayData* ArrayPlusEqGeneric(ArrayData*, MixedArray*,
-                                       const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
 
   // Assert a bunch of invariants about this array then return true.
-  // usage:  assert(checkInvariants());
+  // usage:  assertx(checkInvariants());
   bool checkInvariants() const;
 
 private:
@@ -634,27 +517,23 @@ private:
   InsertPos insert(StringData* k);
 
   using HashTable<MixedArray, MixedArrayElm>::findForRemove;
-  int32_t findForRemove(int64_t ki, inthash_t h, bool updateNext);
-  int32_t findForRemove(const StringData* s, strhash_t h);
 
-  bool nextInsert(Cell);
-  ArrayData* nextInsertRef(member_lval data);
-  ArrayData* nextInsertWithRef(TypedValue data);
-  ArrayData* nextInsertWithRef(const Variant& data);
-  ArrayData* addVal(int64_t ki, Cell data);
-  ArrayData* addVal(StringData* key, Cell data);
-  ArrayData* addValNoAsserts(StringData* key, Cell data);
+  static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
+  static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
+  static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
 
-  Elm& addKeyAndGetElem(StringData* key);
+  void nextInsert(TypedValue);
+  ArrayData* addVal(int64_t ki, TypedValue data);
+  ArrayData* addVal(StringData* key, TypedValue data);
+  ArrayData* addValNoAsserts(StringData* key, TypedValue data);
 
-  template <bool warn, class K> member_lval addLvalImpl(K k);
-  template <class K> ArrayData* update(K k, Cell data);
-  template <class K> ArrayData* updateWithRef(K k, TypedValue data);
-  template <class K> ArrayData* updateRef(K k, member_lval data);
+  template <class K> arr_lval addLvalImpl(K k);
+  // If "move" is false, this method will inc-ref data.
+  template <class K, bool move = false> ArrayData* update(K k, TypedValue data);
 
-  void adjustMArrayIter(ssize_t pos);
-  void eraseNoCompact(ssize_t pos);
-  void erase(ssize_t pos) {
+  void updateNextKI(int64_t removedKey, bool updateNext);
+  void eraseNoCompact(RemovePos pos);
+  void erase(RemovePos pos) {
     eraseNoCompact(pos);
     if (m_size <= m_used / 2) {
       // Compact in order to keep elms from being overly sparse.
@@ -664,9 +543,6 @@ private:
 
   MixedArray* copyImpl(MixedArray* target) const;
 
-  MixedArray* initRef(TypedValue& tv, member_lval v);
-  MixedArray* initWithRef(TypedValue& tv, TypedValue v);
-  MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 
   /*
@@ -704,22 +580,23 @@ public:
   void scan(type_scan::Scanner&) const; // in mixed-array-defs.h
 
 private:
-  struct Initializer;
-  static Initializer s_initializer;
+  struct DictInitializer;
+  static DictInitializer s_dict_initializer;
 
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
 
+  struct MarkedDictArrayInitializer;
+  static MarkedDictArrayInitializer s_marked_dict_initializer;
+
+  struct MarkedDArrayInitializer;
+  static MarkedDArrayInitializer s_marked_darr_initializer;
+
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
-
-ALWAYS_INLINE Array empty_dict_array() {
-  return Array::attach(staticEmptyDictArray());
-}
 
 HASH_TABLE_CHECK_OFFSETS(MixedArray, MixedArrayElm)
 //////////////////////////////////////////////////////////////////////
 
 }
 
-#endif // incl_HPHP_HPHP_ARRAY_H_

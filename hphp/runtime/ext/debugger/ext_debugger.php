@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace __SystemLib {
 
@@ -8,19 +8,28 @@ namespace __SystemLib {
    * and port will be null if the connection is local.
    */
   <<__Native>>
-  function debugger_get_info() : array;
+  function debugger_get_info() : darray;
 
 }
 
 namespace {
 
-  /* Request authentication token from the client. The token is empty in case of
+  /**
+   * Request authentication token from the client. The token is empty in case of
    * error.
    */
   <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphpd_auth_token(): string;
 
-  /* Sets a hard breakpoint. When a debugger is running, this line of code will
+  /**
+   * Request signed session from the client. The serialized session is empty in
+   * case of error;
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debug_session_auth(): string;
+
+  /**
+   * Sets a hard breakpoint. When a debugger is running, this line of code will
    * break into debugger, if condition is met. If there is no debugger that's
    * attached, it will not do anything.
    * @param bool $condition - If true, break, otherwise, continue.
@@ -29,14 +38,16 @@ namespace {
   function hphpd_break(bool $condition = true): void;
 
 
-  /* Quickly determine if a debugger is attached to this process and configured
+  /**
+   * Quickly determine if a debugger is attached to this process and configured
    * to debug this thread.
    * @return bool - TRUE if a debugger is attached, FALSE if not.
    */
   <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphp_debugger_attached(): bool;
 
-  /* Invokes a hard breakpoint. This routine will break into the debugger if
+  /**
+   * Invokes a hard breakpoint. This routine will break into the debugger if
    * and only if the debugger is enabled and a debugger client is currently
    * attached.
    * @param bool $condition - Optional condition. If specified, the debugger
@@ -46,4 +57,21 @@ namespace {
    */
   <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphp_debug_break(bool $condition = true): bool;
+
+  /**
+   * Customizes the behavior of the debugger by setting an option flag on or off
+   * @param string option - Name of the option to set, not case sensitive
+   * @param bool value - Value to set for the debugger option
+   * @return bool - New value of the debugger option
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debugger_set_option(string $option, bool $value): bool;
+
+  /**
+   * Queries the value of a debugger option
+   * @param string option - Name of the option to set, not case sensitive
+   * @return bool - Value of the debugger option
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debugger_get_option(string $option): bool;
 }

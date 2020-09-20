@@ -5,11 +5,9 @@
 
 namespace {
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $m = Map {};
-  var_dump($m->isEmpty());
+  \var_dump($m->isEmpty());
 }
-
-main();
 
 }

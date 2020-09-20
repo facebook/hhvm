@@ -10,7 +10,6 @@ class C {
     var_dump(static::$cls);
   }
   public static function bar() {
-    var_dump(isset($this));
     var_dump(static::$cls);
   }
   public function yar() {
@@ -31,19 +30,16 @@ class D extends C {
     C::yar();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C;
 $d = new D;
 echo "**************\n";
 $c->foo();
 $d->foo();
 echo "**************\n";
-$c->bar();
-$d->bar();
-echo "**************\n";
-C::foo();
+C::bar();
 D::bar();
 echo "**************\n";
+$c->yar();
 $d->yar();
-D::yar();
-
+}

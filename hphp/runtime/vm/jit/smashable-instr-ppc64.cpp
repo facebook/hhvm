@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/smashable-instr-ppc64.h"
 
 #include "hphp/runtime/vm/jit/abi-ppc64.h"
-#include "hphp/runtime/vm/jit/align-ppc64.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -49,22 +48,8 @@ using ppc64_asm::DecodedInstruction;
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
-  return EMIT_BODY(cb, fixups, limmediate, d, imm, ImmType::TocOnly, true);
-}
-
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp) {
-  auto const start = cb.frontier();
-  fixups.smashableLocations.insert(start);
-  Assembler a { cb };
-
-  // don't use cmpqim because of smashableCmpqImm implementation. A "load 32bits
-  // immediate" is mandatory
-  a.limmediate (rfuncln(), imm, ImmType::TocOnly, true);
-  a.lwz  (rAsm, r[disp]); // base + displacement
-  a.extsw(rAsm, rAsm);
-  a.cmpd (rfuncln(), rAsm);
-  return start;
+  return EMIT_BODY(cb, fixups, limmediate, d, imm, ImmType::TocOnly,
+                   true);
 }
 
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target,
@@ -178,6 +163,20 @@ ConditionCode smashableJccCond(TCA inst) {
   // skip to the branch instruction in order to get its condition
   ppc64_asm::BranchParams bp(reinterpret_cast<PPC64Instr*>(inst + jccLen));
   return bp;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool optimizeSmashedCall(TCA inst) {
+  return false;
+}
+
+bool optimizeSmashedJmp(TCA inst) {
+  return false;
+}
+
+bool optimizeSmashedJcc(TCA inst) {
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,4 @@
-<?php
-
-require_once('fix_exceptions.inc');
+<?hh
 
 function errHandler($errno, $errmsg, $file, $line) {
   $errmsg = str_replace('long', 'integer', $errmsg);
@@ -8,27 +6,34 @@ function errHandler($errno, $errmsg, $file, $line) {
   return true;
 }
 
-set_error_handler('errHandler', E_ALL);
-
 function check($kind, $builtin_fn, $user_fn) {
   echo "\n$kind\n";
-  foreach ([True, 1, 3.14, "abc", [1, 2, 3], null] as $k => $v) {
+  foreach (varray[True, 1, 3.14, "abc", varray[1, 2, 3], null] as $k => $v) {
     printf("Builtin:\n");
-    $builtin_fn($v);
+    try { $builtin_fn($v); } catch (Exception $e) { echo 'WARNING: '.$e->getMessage()."\n"; }
     printf("User:\n");
     $user_fn($v);
   }
 }
 
+
+<<__EntryPoint>>
+function main_type_coersion_5() {
+require_once('fix_exceptions.inc');
+
+set_error_handler(fun('errHandler'), E_ALL);
+
 check("Boolean", function ($v) { return sha1("abc", $v); },
-      function (boolean $v) { });
+      function (<<__Soft>> bool $v) { });
 check("Int64", function ($v) { return str_pad("abc", $v); },
-      function (integer $v) { });
+      function (<<__Soft>> int $v) { });
 check("Double", function ($v) { return number_format($v); },
-      function (float $v) { });
+      function (<<__Soft>> float $v) { });
 check("String", function ($v) { return rtrim($v); },
-      function (string $v) { });
-check("Array", function ($v) { return array_count_values($v); },
-      function (array $v) { });
+      function (<<__Soft>> string $v) { });
+check("varray",
+      function ($v) { return __hhvm_intrinsics\dummy_varray_builtin($v); },
+      function (<<__Soft>> varray $v) { });
 check("Object", function ($v) { return get_object_vars($v); },
-      function (object $v) { });
+      function (<<__Soft>> object $v) { });
+}

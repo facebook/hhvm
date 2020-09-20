@@ -1,0 +1,6 @@
+File "assign_in_conditional.php", line 4, characters 14-15:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_conditional.php", line 7, characters 14-15:
+Variable `$x` is undefined, or not always defined. (Naming[2050])
+File "assign_in_conditional.php", line 3, characters 17-18:
+Did you mean `$b` instead?

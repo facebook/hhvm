@@ -1,0 +1,6 @@
+File "pipe_ternary.php", line 11, characters 17-23:
+Invalid argument (Typing[4110])
+File "pipe_ternary.php", line 15, characters 24-29:
+Expected `string`
+File "pipe_ternary.php", line 9, characters 13-13:
+But got `int`

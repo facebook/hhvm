@@ -17,10 +17,10 @@ TEST 5
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s/openssl_encrypt_gcm.php on line %d
 bool(false)
 
-Warning: %s
+Warning: Retrieving authentication tag failed in %s/openssl_encrypt_gcm.php on line %d
 bool(false)
 TEST 0
 bool(true)
@@ -29,10 +29,10 @@ TEST 1
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s/openssl_encrypt_gcm.php on line %d
 bool(false)
 
-Warning: %s
+Warning: Retrieving authentication tag failed in %s/openssl_encrypt_gcm.php on line %d
 bool(false)
 TEST 0
 bool(true)
@@ -44,8 +44,8 @@ TEST 2
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s/openssl_encrypt_gcm.php on line %d
 bool(false)
 
-Warning: %s
+Warning: Retrieving authentication tag failed in %s/openssl_encrypt_gcm.php on line %d
 bool(false)

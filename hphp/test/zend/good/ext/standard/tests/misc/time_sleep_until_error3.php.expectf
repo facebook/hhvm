@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: time_sleep_until() expects exactly 1 parameter, 0 given in %s/time_sleep_until_error3.php on line 2

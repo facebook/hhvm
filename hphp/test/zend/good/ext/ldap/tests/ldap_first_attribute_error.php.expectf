@@ -1,7 +1,6 @@
 
-Warning: %s
-NULL
+Warning: ldap_first_attribute() expects exactly 2 parameters, 1 given in %s/ldap_first_attribute_error.php on line 5
 
-Warning: %s
+Warning: Not a valid ldap result entry resource in %s/ldap_first_attribute_error.php on line 6
 bool(false)
 ===DONE===

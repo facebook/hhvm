@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class a {
  public $var2 = 1;
@@ -12,4 +12,8 @@ function f() {
  var_dump($obj1);
  $obj1->var1 = 1;
  }
+
+<<__EntryPoint>>
+function main_639() {
 f();
+}

@@ -91,7 +91,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
       return sb.data();
     }
 
-    assert(false);
+    assertx(false);
   }
 
   String sret = DebuggerClient::FormatVariable(ret);
@@ -124,7 +124,7 @@ std::string CmdPrint::FormatResult(const char* format, const Variant& ret) {
     return String(ts).data();
   }
 
-  assert(false);
+  assertx(false);
   return "";
 }
 
@@ -157,8 +157,8 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
     thrift.read(sdata);
     auto const error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
     if (error == DebuggerWireHelpers::ErrorMsg) {
-      assert(m_ret.isString());
-      m_wireError = m_ret.toCStrRef().data();
+      assertx(m_ret.isString());
+      m_wireError = m_ret.asCStrRef().data();
     }
     if (error != DebuggerWireHelpers::NoError) {
       m_ret = uninit_null();
@@ -329,7 +329,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
   }
   m_bypassAccessCheck = client.getDebuggerClientBypassCheck();
   m_printLevel = client.getDebuggerClientPrintLevel();
-  assert(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
+  assertx(m_printLevel <= 0 || m_printLevel >= DebuggerClient::MinPrintLevel);
   m_frame = client.getFrame();
   auto res = client.xendWithNestedExecution<CmdPrint>(this);
   m_output = res->m_output;
@@ -344,7 +344,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
 // can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
   PCFilter locSave;
-  auto& rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& rid = RequestInfo::s_requestInfo->m_reqInjectionData;
   locSave.swap(rid.m_flowFilter);
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   {

@@ -1,0 +1,9 @@
+(library
+  (name search_utils)
+  (wrapped false)
+  (libraries
+    ast
+    file_info
+    pos
+    sqlite3)
+  (preprocess (pps ppx_deriving.std)))

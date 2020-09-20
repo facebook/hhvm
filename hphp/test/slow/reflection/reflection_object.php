@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $a = new stdClass();
@@ -16,4 +16,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_reflection_object() {
 main();
+}

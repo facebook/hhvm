@@ -19,6 +19,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 #include <folly/Optional.h>
 #include <folly/Traits.h>
@@ -33,7 +34,10 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
+#include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
 
@@ -41,16 +45,19 @@ namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
-#define X(y) const Type T##y = Type(B##y);
+#define X(y) const Type T##y{B##y};
 TYPES(X)
 #undef X
+
+ProvTag ProvTag::SomeTag = arrprov::Tag::RepoUnion();
+ProvTag ProvTag::Top = {};
+ProvTag ProvTag::NoTag = ProvTag::KnownEmpty{};
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_WaitHandle("HH\\WaitHandle");
-const StaticString s_empty("");
+const StaticString s_Awaitable("HH\\Awaitable");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -60,17 +67,34 @@ constexpr int kTypeWidenMaxDepth = 8;
 
 //////////////////////////////////////////////////////////////////////
 
+// HHBBC consumes a LOT of memory, and much of it is used by Types.
+// We keep the type representation compact; don't expand it accidentally.
+template <typename T, size_t Expected, size_t Actual = sizeof(T)>
+constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
+static_assert(CheckSize<Type, 32>(), "");
+static_assert(CheckSize<DCls, 16>(), "");
+static_assert(CheckSize<DObj, 24>(), "");
+static_assert(CheckSize<DRecord, 16>(), "");
+static_assert(CheckSize<copy_ptr<DArrLikeMapN>, 8>(), "");
+
+//////////////////////////////////////////////////////////////////////
+
 // Legal to call with !isPredefined(bits)
 bool mayHaveData(trep bits) {
+  bits &= ~BUninit;
   switch (bits) {
-  case BSStr:    case BObj:    case BInt:    case BDbl:
-  case BOptSStr: case BOptObj: case BOptInt: case BOptDbl:
+  case BSStr:    case BStr:
+  case BOptSStr: case BOptStr:
+  case BObj:     case BInt:    case BDbl:     case BRecord:
+  case BOptObj:  case BOptInt: case BOptDbl:  case BOptRecord:
   case BCls:
   case BArr:     case BSArr:     case BCArr:
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BRef:
+  case BFunc:
+  case BRFunc:   case BOptRFunc:
+  case BFuncLike: case BOptFuncLike:
   case BVec:      case BSVec:      case BCVec:
   case BVecN:     case BSVecN:     case BCVecN:
   case BOptVec:   case BOptSVec:   case BOptCVec:
@@ -85,10 +109,6 @@ bool mayHaveData(trep bits) {
   case BOptKeysetN: case BOptSKeysetN: case BOptCKeysetN:
     return true;
 
-  case BPArr:     case BSPArr:     case BCPArr:
-  case BPArrN:    case BSPArrN:    case BCPArrN:
-  case BOptPArr:  case BOptSPArr:  case BOptCPArr:
-  case BOptPArrN: case BOptSPArrN: case BOptCPArrN:
   case BVArr:     case BSVArr:     case BCVArr:
   case BVArrN:    case BSVArrN:    case BCVArrN:
   case BOptVArr:  case BOptSVArr:  case BOptCVArr:
@@ -99,37 +119,62 @@ bool mayHaveData(trep bits) {
   case BOptDArrN: case BOptSDArrN: case BOptCDArrN:
     return true;
 
+  case BSArrE: case BCArrE:
+  case BSVArrE:    case BCVArrE:    case BVArrE:
+  case BOptSVArrE: case BOptCVArrE: case BOptVArrE:
+  case BSDArrE:    case BCDArrE:    case BDArrE:
+  case BOptSDArrE: case BOptCDArrE: case BOptDArrE:
+  case BCVecE:     case BSVecE:     case BVecE:
+  case BOptCVecE:  case BOptSVecE:  case BOptVecE:
+  case BCDictE:    case BSDictE:    case BDictE:
+  case BOptCDictE: case BOptSDictE: case BOptDictE:
+    return true;
+
+  case BSArrLikeE:
+  case BCArrLikeE:
+  case BSArrLikeN:
+  case BCArrLikeN:
+  case BSArrLike:
+  case BCArrLike:
+  case BArrLikeE:
+  case BArrLikeN:
+  case BArrLike:
+  case BOptSArrLikeE:
+  case BOptCArrLikeE:
+  case BOptSArrLikeN:
+  case BOptCArrLikeN:
+  case BOptSArrLike:
+  case BOptCArrLike:
+  case BOptArrLikeE:
+  case BOptArrLikeN:
+  case BOptArrLike:
+  case BArrLikeCompat:
+  case BArrLikeCompatSA:
+  case BOptArrLikeCompat:
+  case BOptArrLikeCompatSA:
+    return true;
+
+  case BVArrCompat: case BVArrCompatSA:
+  case BOptVArrCompat: case BOptVArrCompatSA:
+  case BVecCompat: case BVecCompatSA:
+  case BOptVecCompat: case BOptVecCompatSA:
+  case BArrCompat: case BArrCompatSA:
+  case BOptArrCompat: case BOptArrCompatSA:
+    return true;
+
   case BBottom:
   case BUninit:
   case BInitNull:
   case BFalse:
   case BTrue:
   case BCStr:
-  case BSArrE:
-  case BCArrE:
-  case BSVecE:
-  case BCVecE:
-  case BSDictE:
-  case BCDictE:
   case BSKeysetE:
   case BCKeysetE:
-  case BSPArrE:
-  case BCPArrE:
-  case BPArrE:
-  case BSVArrE:
-  case BCVArrE:
-  case BVArrE:
-  case BSDArrE:
-  case BCDArrE:
-  case BDArrE:
   case BRes:
   case BNull:
   case BNum:
   case BBool:
-  case BStr:
   case BArrE:
-  case BVecE:
-  case BDictE:
   case BKeysetE:
   case BInitPrim:
   case BPrim:
@@ -137,85 +182,58 @@ bool mayHaveData(trep bits) {
   case BUnc:
   case BArrKey:
   case BUncArrKey:
+  case BStrLike:
+  case BUncStrLike:
+  case BArrKeyCompat:
+  case BUncArrKeyCompat:
   case BOptTrue:
   case BOptFalse:
   case BOptBool:
   case BOptNum:
   case BOptCStr:
-  case BOptStr:
   case BOptSArrE:
   case BOptCArrE:
   case BOptArrE:
-  case BOptSVecE:
-  case BOptCVecE:
-  case BOptVecE:
-  case BOptSDictE:
-  case BOptCDictE:
-  case BOptDictE:
   case BOptSKeysetE:
   case BOptCKeysetE:
   case BOptKeysetE:
-  case BOptSPArrE:
-  case BOptCPArrE:
-  case BOptPArrE:
-  case BOptSVArrE:
-  case BOptCVArrE:
-  case BOptVArrE:
-  case BOptSDArrE:
-  case BOptCDArrE:
-  case BOptDArrE:
   case BOptRes:
   case BOptArrKey:
   case BOptUncArrKey:
+  case BOptStrLike:
+  case BOptUncStrLike:
+  case BOptArrKeyCompat:
+  case BOptUncArrKeyCompat:
+  case BOptFunc:
+  case BOptCls:
+  case BClsMeth:
+  case BOptClsMeth:
+  case BRClsMeth:
+  case BOptRClsMeth:
+  case BLazyCls:  // Lazy classes will have data in future (T70712990)
+  case BOptLazyCls:
+  case BClsMethLike:
+  case BOptClsMethLike:
   case BInitCell:
   case BCell:
-  case BInitGen:
-  case BGen:
   case BTop:
     break;
   }
   return false;
 }
 
-/*
- * Note: currently we're limiting all represented types to predefined
- * bit patterns (instead of arbitrary unions), so this function is
- * around for assertions.
- *
- * This may be relaxed later if we think we can get more out of it,
- * but for now the thought is that the likelihood of getting
- * significantly better types from the inference algorithm might be
- * counter-balanced by the increased chance of hard-to-track
- * type-system bugs, so at least for now (at the time of this writing,
- * before shipping hhbbc) we're ruling out a bunch of edge cases.
- *
- * Aside from types like Obj<= or things like TSStr, a lot of cases
- * with arbitrary-unions may not lead to better code at JIT time
- * (unless the inference turns them back into a predefined type),
- * since we'll have to guard anyway to see which one it was.  We'll
- * try it later.
- */
-bool isPredefined(trep bits) {
-#define CASE(n) case B##n:
-  switch (bits) {
-    TYPES(CASE)
-    return true;
-    NON_TYPES(CASE)
-    break;
-  }
-#undef CASE
-  return false;
-}
-
 // Pre: isPredefined(bits)
 bool canBeOptional(trep bits) {
+  if (bits & BUninit) return false;
   switch (bits) {
   case BBottom:
     return false;
 
+  case BNull:
   case BUninit:
   case BInitNull:
     return false;
+
   case BFalse:
   case BTrue:
   case BInt:
@@ -231,14 +249,17 @@ bool canBeOptional(trep bits) {
   case BSKeysetN:
   case BObj:
   case BRes:
+  case BFunc:
+  case BCls:
+  case BClsMeth:
+  case BRClsMeth:
+  case BClsMethLike:
+  case BRecord:
+  case BRFunc:
+  case BLazyCls:
+  case BFuncLike:
     return true;
 
-  case BSPArrE:
-  case BSPArrN:
-  case BSPArr:
-  case BPArrE:
-  case BPArrN:
-  case BPArr:
   case BSVArrE:
   case BSVArrN:
   case BSVArr:
@@ -253,12 +274,21 @@ bool canBeOptional(trep bits) {
   case BDArr:
     return true;
 
-  case BNull:
   case BNum:
   case BBool:
   case BStr:
   case BUncArrKey:
   case BArrKey:
+  case BUncStrLike:
+  case BStrLike:
+  case BUncArrKeyCompat:
+  case BArrKeyCompat:
+  case BArrCompatSA:
+  case BArrCompat:
+  case BVArrCompatSA:
+  case BVArrCompat:
+  case BVecCompatSA:
+  case BVecCompat:
   case BSArr:
   case BArrE:
   case BArrN:
@@ -275,11 +305,15 @@ bool canBeOptional(trep bits) {
   case BKeysetE:
   case BKeysetN:
   case BKeyset:
+  case BArrLikeE:
+  case BArrLikeN:
+  case BArrLike:
+  case BArrLikeCompat:
+  case BSArrLikeE:
+  case BSArrLikeN:
+  case BSArrLike:
+  case BArrLikeCompatSA:
     return true;
-
-  case BCls:
-  case BRef:
-    return false;
 
   case BOptTrue:
   case BOptFalse:
@@ -313,12 +347,6 @@ bool canBeOptional(trep bits) {
   case BOptKeysetN:
   case BOptKeysetE:
   case BOptKeyset:
-  case BOptSPArrE:
-  case BOptSPArrN:
-  case BOptSPArr:
-  case BOptPArrE:
-  case BOptPArrN:
-  case BOptPArr:
   case BOptSVArrE:
   case BOptSVArrN:
   case BOptSVArr:
@@ -335,6 +363,33 @@ bool canBeOptional(trep bits) {
   case BOptRes:
   case BOptUncArrKey:
   case BOptArrKey:
+  case BOptUncStrLike:
+  case BOptStrLike:
+  case BOptUncArrKeyCompat:
+  case BOptArrKeyCompat:
+  case BOptArrCompatSA:
+  case BOptArrCompat:
+  case BOptVArrCompatSA:
+  case BOptVArrCompat:
+  case BOptVecCompatSA:
+  case BOptVecCompat:
+  case BOptFunc:
+  case BOptCls:
+  case BOptClsMeth:
+  case BOptRClsMeth:
+  case BOptClsMethLike:
+  case BOptRecord:
+  case BOptLazyCls:
+  case BOptArrLikeE:
+  case BOptArrLikeN:
+  case BOptArrLike:
+  case BOptSArrLikeE:
+  case BOptSArrLikeN:
+  case BOptSArrLike:
+  case BOptArrLikeCompat:
+  case BOptArrLikeCompatSA:
+  case BOptRFunc:
+  case BOptFuncLike:
     return false;
 
   case BInitPrim:
@@ -342,9 +397,7 @@ bool canBeOptional(trep bits) {
   case BInitUnc:
   case BUnc:
   case BInitCell:
-  case BInitGen:
   case BCell:
-  case BGen:
   case BTop:
     return false;
 
@@ -357,6 +410,54 @@ bool canBeOptional(trep bits) {
 }
 
 /*
+ * "vecish" refers to values that are either known to be a ?vec, or,
+ * after dvarray specialization, a ?varray. Most logic that applies
+ * to vecs actually applies to vec-ish types; of course, the goal of
+ * HAM is to turn this "most" into "all".
+ */
+bool isVecish(Type t) {
+  return t.subtypeOrNull(BVec) || t.subtypeOrNull(BVArr);
+}
+bool maybeVecish(Type t) {
+  return t.couldBe(BVec) || t.couldBe(BVArr);
+}
+
+/*
+ * Note: currently we're limiting all represented types to predefined
+ * bit patterns (instead of arbitrary unions), so this function is
+ * around for assertions.
+ *
+ * This may be relaxed later if we think we can get more out of it,
+ * but for now the thought is that the likelihood of getting
+ * significantly better types from the inference algorithm might be
+ * counter-balanced by the increased chance of hard-to-track
+ * type-system bugs, so at least for now (at the time of this writing,
+ * before shipping hhbbc) we're ruling out a bunch of edge cases.
+ *
+ * Aside from types like Obj<= or things like TSStr, a lot of cases
+ * with arbitrary-unions may not lead to better code at JIT time
+ * (unless the inference turns them back into a predefined type),
+ * since we'll have to guard anyway to see which one it was.  We'll
+ * try it later.
+ */
+bool isPredefined(trep bits) {
+  if (bits & BUninit &&
+      isPredefined(bits & ~BNull) &&
+      canBeOptional(bits & ~BNull)) {
+    return true;
+  }
+#define CASE(n) case B##n:
+  switch (bits) {
+    TYPES(CASE)
+    return true;
+    NON_TYPES(CASE)
+    break;
+  }
+#undef CASE
+  return false;
+}
+
+/*
  * Combine array bits.  Our type system currently avoids arbitrary unions (see
  * rationale above), so we don't have predefined types like CArr|SArrN, or
  * SArrN|CArrE.  This function checks a few cases to ensure combining array
@@ -364,12 +465,12 @@ bool canBeOptional(trep bits) {
  */
 template<trep B>
 trep combine_arrish_bits(trep a, trep b) {
-  DEBUG_ONLY constexpr trep OptB = static_cast<trep>(BInitNull | B);
-  auto const combined = static_cast<trep>(a | b);
-  assert((combined & OptB) == combined);
-  auto const arr_part = static_cast<trep>(combined & B);
-  if (!isPredefined(arr_part)) return static_cast<trep>(combined|B);
-  assert(isPredefined(combined));
+  DEBUG_ONLY constexpr trep NullishB = BNull | B;
+  auto const combined = a | (b & NullishB);
+  assertx((combined & NullishB) == combined);
+  auto const arr_part = combined & B;
+  if (!isPredefined(arr_part)) return combined | B;
+  assertx(isPredefined(combined));
   return combined;
 }
 
@@ -380,11 +481,11 @@ trep combine_arrish_bits(trep a, trep b) {
  * and emptiness bits.
  */
 trep combine_dv_arrish_bits(trep a, trep b) {
-  auto const combined = static_cast<trep>(a | b);
-  auto const nonopt = trep(combined & ~BInitNull);
-  auto const check = [&](trep x) { return (nonopt & x) == nonopt; };
-  auto const ret = [&](trep x) {
-    return (combined & BInitNull) ? trep(x | BInitNull) : x;
+  auto const combined = a | (b & (BArr | BNull));
+  auto const nonnull = combined & ~BNull;
+  auto const check = [&] (trep x) { return (nonnull & x) == nonnull; };
+  auto const ret = [&] (trep x) {
+    return x | (combined & BNull);
   };
   if (check(BSArrE)) return ret(BSArrE);
   if (check(BSArrN)) return ret(BSArrN);
@@ -397,10 +498,6 @@ trep combine_dv_arrish_bits(trep a, trep b) {
 
 trep combine_arr_bits(trep a, trep b) {
   return combine_arrish_bits<BArr>(a, b);
-}
-
-trep combine_parr_bits(trep a, trep b) {
-  return combine_arrish_bits<BPArr>(a, b);
 }
 
 trep combine_varr_bits(trep a, trep b) {
@@ -433,17 +530,16 @@ trep combine_keyset_bits(trep a, trep b) {
 // Note that this allows you to combine bits representing different d/varray
 // types. They'll promote to a TArr type.
 trep combine_arr_like_bits(trep a, trep b) {
-  auto check = [] (trep a, trep x) { return (a & x) == a; };
-  assert(a && isPredefined(a) && !check(a, BInitNull));
+  auto check = [] (trep a, trep x) { return (a & (x | BNull)) == a; };
+  assert(isPredefined(a) && !check(a, BNull));
   // If both bits have the same d/varray-ness, combine them as normal.
-  if (check(a, BOptPArr) && check(b, BOptPArr)) return combine_parr_bits(a, b);
-  if (check(a, BOptVArr) && check(b, BOptVArr)) return combine_varr_bits(a, b);
-  if (check(a, BOptDArr) && check(b, BOptDArr)) return combine_darr_bits(a, b);
+  if (check(a, BVArr) && check(b, BVArr)) return combine_varr_bits(a, b);
+  if (check(a, BDArr) && check(b, BDArr)) return combine_darr_bits(a, b);
   // If they're all arrays, combine them and promote it to the right TArr union.
-  if (check(a, BOptArr))    return combine_dv_arrish_bits(a, trep(b & BOptArr));
-  if (check(a, BOptVec))    return combine_vec_bits(a,    trep(b & BOptVec));
-  if (check(a, BOptDict))   return combine_dict_bits(a,   trep(b & BOptDict));
-  if (check(a, BOptKeyset)) return combine_keyset_bits(a, trep(b & BOptKeyset));
+  if (check(a, BArr))    return combine_dv_arrish_bits(a, b);
+  if (check(a, BVec))    return combine_vec_bits(a,       b);
+  if (check(a, BDict))   return combine_dict_bits(a,      b);
+  if (check(a, BKeyset)) return combine_keyset_bits(a,    b);
   not_reached();
 }
 
@@ -454,46 +550,88 @@ trep combine_arr_like_bits(trep a, trep b) {
  * TArrLikeN, but not promote a T[P,V,D]Arr to TArr.
  */
 trep combine_dv_arr_like_bits(trep a, trep b) {
-  auto check = [] (trep a, trep x) { return (a & x) == a; };
-  assert(a && isPredefined(a) && !check(a, BInitNull));
-  if (check(a, BOptPArr))   return combine_parr_bits(a,   trep(b & BOptPArr));
-  if (check(a, BOptVArr))   return combine_varr_bits(a,   trep(b & BOptVArr));
-  if (check(a, BOptDArr))   return combine_darr_bits(a,   trep(b & BOptDArr));
-  if (check(a, BOptArr))    return combine_arr_bits(a,    trep(b & BOptArr));
-  if (check(a, BOptVec))    return combine_vec_bits(a,    trep(b & BOptVec));
-  if (check(a, BOptDict))   return combine_dict_bits(a,   trep(b & BOptDict));
-  if (check(a, BOptKeyset)) return combine_keyset_bits(a, trep(b & BOptKeyset));
+  auto check = [] (trep a, trep x) { return (a & (x | BNull)) == a; };
+  assert(isPredefined(a) && !check(a, BNull));
+  if (check(a, BVArr))   return combine_varr_bits(a,   b);
+  if (check(a, BDArr))   return combine_darr_bits(a,   b);
+  if (check(a, BArr))    return combine_arr_bits(a,    b);
+  if (check(a, BVec))    return combine_vec_bits(a,    b);
+  if (check(a, BDict))   return combine_dict_bits(a,   b);
+  if (check(a, BKeyset)) return combine_keyset_bits(a, b);
   not_reached();
 }
 
-trep maybe_promote_varray(trep a) {
-  auto const check = [&](trep b, trep c){
-    if (a & b) a = static_cast<trep>(a | c);
-  };
-  assert(isPredefined(a));
-  check(BSVArrE, BSArrE);
-  check(BCVArrE, BCArrE);
-  check(BSVArrN, BSArrN);
-  check(BCVArrN, BCArrN);
-  assert(isPredefined(a));
-  return a;
+//////////////////////////////////////////////////////////////////////
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * For more info on what ProvTag is for and how it's represented, see
+ * the comment in type-system.h on the using ProvTag declaration
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*
+ * Determine if one provenance tag is a (non-strict) subtype of another
+ */
+bool subtypeProvTag(ProvTag p1, ProvTag p2) {
+  return p2 == ProvTag::Top ||
+    (p2 == ProvTag::SomeTag && p1 != ProvTag::NoTag) ||
+    p1 == p2;
 }
 
-trep promote_varray(trep a) {
-  auto const check = [&](trep b, trep c){
-    if (a & b) a = static_cast<trep>((a | c) & ~b);
-  };
-  assert(isPredefined(a));
-  // If the array is more than just a varray, we can't just switch the bits and
-  // keep the combination predefined. Just use the maybe path which will keep
-  // the bits predefined.
-  if ((a & BOptVArr) != a) return maybe_promote_varray(a);
-  check(BSVArrE, BSDArrE);
-  check(BCVArrE, BCDArrE);
-  check(BSVArrN, BSDArrN);
-  check(BCVArrN, BCDArrN);
-  assert(isPredefined(a));
-  return a;
+/*
+ * Compute the union of two provenance tags
+ */
+ProvTag unionProvTag(ProvTag p1, ProvTag p2) {
+  if (p1 == p2) {
+    return p1;
+  } else if (p1 == ProvTag::NoTag ||
+             p2 == ProvTag::NoTag ||
+             p1 == ProvTag::Top ||
+             p2 == ProvTag::Top) {
+    return ProvTag::Top;
+  } else {
+    return ProvTag::SomeTag;
+  }
+}
+
+/*
+ * Compute the intersection of two provenance tags
+ *
+ * XXX: If both p1 and p2 are specific tags and they differ, the result should
+ * be bottom, but we widen to 'top' since it prevents provenance data from
+ * producing bottoms and is still correct since intersections are allowed to be
+ * wider than either input type.
+ */
+ProvTag intersectProvTag(ProvTag p1, ProvTag p2) {
+  if (p1 == ProvTag::Top) {
+    return p2;
+  } else if (p2 == ProvTag::Top) {
+    return p1;
+  } else if (p1 == p2) {
+    return p1;
+  } else if (p1 == ProvTag::NoTag || p2 == ProvTag::NoTag) {
+    return ProvTag::Top;
+  } else if (p1 == ProvTag::SomeTag) {
+    return p2;
+  } else if (p2 == ProvTag::SomeTag) {
+    return p1;
+  } else {
+    return ProvTag::Top;
+  }
+}
+
+/*
+ * Determine if p1 and p2 could possibly be in a subtype relationship (i.e.
+ * their intersection is non-empty).
+ *
+ * For provenance tags, this only isn't the case if both tags are known and
+ * they do not match.
+ */
+bool couldBeProvTag(ProvTag p1, ProvTag p2) {
+  return p1 == ProvTag::Top ||
+    p2 == ProvTag::Top ||
+    (p1 == ProvTag::SomeTag && p2 != ProvTag::NoTag) ||
+    (p2 == ProvTag::SomeTag && p1 != ProvTag::NoTag) ||
+    p1 == p2;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -535,7 +673,10 @@ folly::Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
     );
   }
 
-  return DArrLikePacked { std::move(elems) };
+  return DArrLikePacked {
+    std::move(elems),
+    ProvTag::FromSArrOrTop(ar)
+  };
 }
 
 folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
@@ -555,7 +696,6 @@ folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
 
 folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
   assert(!ar->empty());
-
   auto map = MapElems{};
   auto idx = int64_t{0};
   auto packed = true;
@@ -569,7 +709,12 @@ folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
     map.emplace_back(key, from_cell(value));
   }
   if (packed) return folly::none;
-  return DArrLikeMap { std::move(map) };
+  return DArrLikeMap {
+    std::move(map),
+    TBottom,
+    TBottom,
+    ProvTag::FromSArrOrTop(ar)
+  };
 }
 
 folly::Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
@@ -600,6 +745,7 @@ bool subtypePacked(const DArrLikePacked& a, const DArrLikePacked& b) {
   auto const asz = a.elems.size();
   auto const bsz = b.elems.size();
   if (asz != bsz) return false;
+  if (!subtypeProvTag(a.provenance, b.provenance)) return false;
   for (auto i = size_t{0}; i < asz; ++i) {
     if (!a.elems[i].subtypeOfImpl<contextSensitive>(b.elems[i])) {
       return false;
@@ -610,20 +756,51 @@ bool subtypePacked(const DArrLikePacked& a, const DArrLikePacked& b) {
 
 template<bool contextSensitive>
 bool subtypeMap(const DArrLikeMap& a, const DArrLikeMap& b) {
-  if (a.map.size() != b.map.size()) return false;
+  // If both A and B both don't have optional elements, their values
+  // are completely disjoint if there's a different number of keys.
+  if (!a.hasOptElements() && !b.hasOptElements() &&
+      a.map.size() != b.map.size()) {
+    return false;
+  }
+  if (!subtypeProvTag(a.provenance, b.provenance)) return false;
+
+  // Check the common prefix of known keys. The keys must be the same
+  // and have compatible types.
   auto aIt = begin(a.map);
   auto bIt = begin(b.map);
-  for (; aIt != end(a.map); ++aIt, ++bIt) {
-    if (!cellSame(aIt->first, bIt->first)) return false;
+  while (aIt != end(a.map) && bIt != end(b.map)) {
+    if (!tvSame(aIt->first, bIt->first)) return false;
     if (!aIt->second.subtypeOfImpl<contextSensitive>(bIt->second)) return false;
+    ++aIt;
+    ++bIt;
   }
-  return true;
+  // If B has more known keys than A, A cannot be a subtype of B. It
+  // doesn't matter if A has optional elements since there's values in
+  // A which doesn't have them, while B always has the keys.
+  if (bIt != end(b.map)) return false;
+
+  // If A has any remaining known keys, check they're compatible with
+  // B's optional elements (if any).
+  while (aIt != end(a.map)) {
+    if (!from_cell(aIt->first).subtypeOfImpl<contextSensitive>(b.optKey)) {
+      return false;
+    }
+    if (!aIt->second.subtypeOfImpl<contextSensitive>(b.optVal)) return false;
+    ++aIt;
+  }
+
+  // Finally the optional values (if any) of A and B must be
+  // compatible.
+  return
+    a.optKey.subtypeOfImpl<contextSensitive>(b.optKey) &&
+    a.optVal.subtypeOfImpl<contextSensitive>(b.optVal);
 }
 
 bool couldBePacked(const DArrLikePacked& a, const DArrLikePacked& b) {
   auto const asz = a.elems.size();
   auto const bsz = b.elems.size();
   if (asz != bsz) return false;
+  if (!couldBeProvTag(a.provenance, b.provenance)) return false;
   for (auto i = size_t{0}; i < asz; ++i) {
     if (!a.elems[i].couldBe(b.elems[i])) {
       return false;
@@ -633,14 +810,99 @@ bool couldBePacked(const DArrLikePacked& a, const DArrLikePacked& b) {
 }
 
 bool couldBeMap(const DArrLikeMap& a, const DArrLikeMap& b) {
-  if (a.map.size() != b.map.size()) return false;
+  // If A and B don't have optional elements, their values are
+  // completely disjoint if the number of keys are different.
+  if (!a.hasOptElements() && !b.hasOptElements() &&
+      a.map.size() != b.map.size()) {
+    return false;
+  }
+  if (!couldBeProvTag(a.provenance, b.provenance)) return false;
+
+  // Check the common prefix of A and B. The keys must be the same and
+  // there must be an intersection among the values.
   auto aIt = begin(a.map);
   auto bIt = begin(b.map);
-  for (; aIt != end(a.map); ++aIt, ++bIt) {
-    if (!cellSame(aIt->first, bIt->first)) return false;
+  while (aIt != end(a.map) && bIt != end(b.map)) {
+    if (!tvSame(aIt->first, bIt->first)) return false;
     if (!aIt->second.couldBe(bIt->second)) return false;
+    ++aIt;
+    ++bIt;
   }
+
+  // Process the remaining known keys (only A or B will be
+  // processed). The known keys must have an intersection with the
+  // other map's optional values (if any).
+  while (aIt != end(a.map)) {
+    if (!from_cell(aIt->first).couldBe(b.optKey)) return false;
+    if (!aIt->second.couldBe(b.optVal)) return false;
+    ++aIt;
+  }
+
+  while (bIt != end(b.map)) {
+    if (!from_cell(bIt->first).couldBe(a.optKey)) return false;
+    if (!bIt->second.couldBe(a.optVal)) return false;
+    ++bIt;
+  }
+
   return true;
+}
+
+namespace {
+
+/*
+ * Walk a pair of arrays (already known to be tvSame) to compare the provenance
+ * tags in each of their subarrays. Calls the given function on each matched
+ * pair of provenance tags and returns false if any of these comparisions
+ * returns false.
+ */
+template <typename Visit>
+bool visitDifferingProvTagsInSimilarArrays(SArray arr1,
+                                           SArray arr2,
+                                           Visit&& visit) {
+  if (!RuntimeOption::EvalArrayProvenance) return true;
+  if (!visit(ProvTag::FromSArr(arr1), ProvTag::FromSArr(arr2))) return false;
+  bool ret = true;
+  IterateKV(
+    arr1,
+    [&](TypedValue k, TypedValue tv1) {
+      auto const bail = [&] {
+        ret = false;
+        return true;
+      };
+      assert(arr2->exists(k));
+      auto tv2 = arr2->get(k);
+      assert(type(tv1) == type(tv2));
+      if (isArrayLikeType(type(tv1))) {
+        if (!visitDifferingProvTagsInSimilarArrays(
+              tv1.m_data.parr,
+              tv2.m_data.parr,
+              std::forward<Visit>(visit)
+            )) {
+          return bail();
+        }
+      }
+      return false;
+    }
+  );
+  return ret;
+}
+
+}
+
+bool subtypeArrLike(SArray arr1, SArray arr2) {
+  if (arr1 == arr2) return true;
+  if (arr1->size() != arr2->size()) return false;
+  SuppressHACCompareNotices _;
+  if (!arr1->same(arr2)) return false;
+  return visitDifferingProvTagsInSimilarArrays(arr1, arr2, subtypeProvTag);
+}
+
+bool couldBeArrLike(SArray arr1, SArray arr2) {
+  if (arr1 == arr2) return true;
+  if (arr1->size() != arr2->size()) return false;
+  SuppressHACCompareNotices _;
+  if (!arr1->same(arr2)) return false;
+  return visitDifferingProvTagsInSimilarArrays(arr1, arr2, couldBeProvTag);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -649,13 +911,13 @@ std::pair<Type,Type> val_key_values(SArray a) {
   auto ret = std::make_pair(TBottom, TBottom);
   for (ArrayIter iter(a); iter; ++iter) {
     ret.first |= from_cell(*iter.first().asTypedValue());
-    ret.second |= from_cell(*iter.secondRef().asTypedValue());
+    ret.second |= from_cell(iter.secondVal());
   }
   return ret;
 }
 
 std::pair<Type,Type> map_key_values(const DArrLikeMap& a) {
-  auto ret = std::make_pair(TBottom, TBottom);
+  auto ret = std::make_pair(a.optKey, a.optVal);
   for (auto const& kv : a.map) {
     ret.first |= from_cell(kv.first);
     ret.second |= kv.second;
@@ -670,6 +932,16 @@ Type packed_values(const DArrLikePacked& a) {
 }
 
 //////////////////////////////////////////////////////////////////////
+template <typename T>
+struct DataTagTrait {};
+
+template<> struct DataTagTrait<SString>      { using tag = SString; };
+
+template<> struct DataTagTrait<DArrLikePacked>  { using tag = SArray; };
+template<> struct DataTagTrait<DArrLikePackedN> { using tag = SArray; };
+template<> struct DataTagTrait<DArrLikeMap>     { using tag = SArray; };
+template<> struct DataTagTrait<DArrLikeMapN>    { using tag = SArray; };
+template<> struct DataTagTrait<SArray>          { using tag = SArray; };
 
 /*
  * Helper for dealing with dualDispatchDataFn's---most of them are commutative.
@@ -686,26 +958,15 @@ struct Commute : InnerFn {
 
   using InnerFn::operator();
 
-  template<class B>
-  typename std::enable_if<!std::is_same<SArray, B>::value, result_type>::type
-  operator()(SArray a, const B& b) const {
+  template<class T1, class T2>
+  typename std::enable_if<!std::is_same<T1, T2>::value &&
+                          std::is_same<typename DataTagTrait<T1>::tag,
+                                       typename DataTagTrait<T2>::tag>::value,
+                          result_type>::type
+  operator()(const T1& a, const T2& b) const {
     return InnerFn::operator()(b, a);
   }
 
-  template<class B>
-  result_type operator()(const DArrLikeMap& a, const B& b) const {
-    return InnerFn::operator()(b, a);
-  }
-
-  template<class B>
-  result_type operator()(const DArrLikePackedN& a, const B& b) const {
-    return InnerFn::operator()(b, a);
-  }
-
-  template<class B>
-  result_type operator()(const DArrLikeMapN& a, const B& b) const {
-    return InnerFn::operator()(b, a);
-  }
 };
 
 template<bool contextSensitive>
@@ -717,6 +978,10 @@ struct DualDispatchEqImpl {
 
   bool operator()(const DArrLikePacked& a, SArray b) const {
     if (a.elems.size() != b->size()) return false;
+    if (RuntimeOption::EvalArrayProvenance) {
+      auto const tag = ProvTag::FromSArr(b);
+      if (a.provenance != tag) return false;
+    }
     auto const p = toDArrLikePacked(b);
     if (!p) return false;
     for (auto i = 0; i < a.elems.size(); i++) {
@@ -726,7 +991,14 @@ struct DualDispatchEqImpl {
   }
 
   bool operator()(const DArrLikeMap& a, SArray b) const {
+    // A map with optional elements contains multiple values, so it
+    // can never be equal to a static array (which is just one value).
+    if (a.hasOptElements()) return false;
     if (a.map.size() != b->size()) return false;
+    if (RuntimeOption::EvalArrayProvenance) {
+      auto const tag = ProvTag::FromSArr(b);
+      if (a.provenance != tag) return false;
+    }
     auto const m = toDArrLikeMap(b);
     if (!m) return false;
     auto it = m->map.begin();
@@ -754,6 +1026,7 @@ struct DualDispatchEqImpl {
   bool operator()(const DArrLikePacked&, const DArrLikeMapN&) const {
     return false;
   }
+
   bool
   operator()(const DArrLikePackedN& /*a*/, const DArrLikeMap& /*b*/) const {
     return false;
@@ -774,12 +1047,22 @@ struct DualDispatchCouldBeImpl {
 
   bool operator()(const DArrLikePacked& a, SArray b) const {
     if (a.elems.size() != b->size()) return false;
+    if (RuntimeOption::EvalArrayProvenance) {
+      auto const tag = ProvTag::FromSArr(b);
+      if (!couldBeProvTag(a.provenance, tag)) return false;
+    }
     auto const p = toDArrLikePacked(b);
     return p && couldBePacked(a, *p);
   }
 
   bool operator()(const DArrLikeMap& a, SArray b) const {
-    if (a.map.size() != b->size()) return false;
+    // If A doesn't have optional elements, there's no intersection if
+    // they have a different number of known keys.
+    if (!a.hasOptElements() && a.map.size() != b->size()) return false;
+    if (RuntimeOption::EvalArrayProvenance) {
+      auto const tag = ProvTag::FromSArr(b);
+      if (!couldBeProvTag(a.provenance, tag)) return false;
+    }
     auto const m = toDArrLikeMap(b);
     return m && couldBeMap(a, *m);
   }
@@ -794,7 +1077,7 @@ struct DualDispatchCouldBeImpl {
     bool bad = false;
     IterateKV(
       b,
-      [&] (Cell k, TypedValue v) {
+      [&] (TypedValue k, TypedValue v) {
         bad |= !(a.key.couldBe(from_cell(k)) && a.val.couldBe(from_cell(v)));
         return bad;
       }
@@ -818,6 +1101,9 @@ struct DualDispatchCouldBeImpl {
       if (!from_cell(kv.first).couldBe(b.key)) return false;
       if (!kv.second.couldBe(b.val)) return false;
     }
+    // We can ignore optional elements here. If the values
+    // corresponding to just the known keys already intersect with B,
+    // then we have an intersection so we're done.
     return true;
   }
 
@@ -849,43 +1135,28 @@ struct DualDispatchIntersectionImpl {
   Type operator()() const { not_reached(); }
 
   template <typename F>
-  Type intersect_packed(std::vector<Type> elems, F next) const {
+  Type intersect_packed(std::vector<Type> elems, F next, ProvTag tag) const {
     for (auto& e : elems) {
       e &= next();
       if (e == TBottom) return TBottom;
     }
-    return packed_impl(bits, std::move(elems));
-  }
-
-  template <typename F>
-  Type intersect_map(MapElems map, F next) const {
-    for (auto it = map.begin(); it != map.end(); it++) {
-      auto other = next();
-      if (it->first.m_type == KindOfInt64 ?
-          !other.first.couldBe(TInt) : !other.first.couldBe(TStr)) {
-        return TBottom;
-      }
-      auto val = intersection_of(it->second, other.second);
-      if (val == TBottom) return TBottom;
-      map.update(it, std::move(val));
-    }
-    return map_impl(bits, std::move(map));
+    return packed_impl(bits, std::move(elems), tag);
   }
 
   // The SArray is known to not be a subtype, so the intersection must be empty
-  Type operator()(const DArrLikePacked& a, const SArray b) const {
+  Type operator()(const DArrLikePacked& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const DArrLikePackedN& a, const SArray b) const {
+  Type operator()(const DArrLikePackedN& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const DArrLikeMapN& a, const SArray b) const {
+  Type operator()(const DArrLikeMapN& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const DArrLikeMap& a, const SArray b) const {
+  Type operator()(const DArrLikeMap& /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
-  Type operator()(const SArray a, const SArray b) const {
+  Type operator()(const SArray /*a*/, const SArray /*b*/) const {
     return TBottom;
   }
 
@@ -893,18 +1164,22 @@ struct DualDispatchIntersectionImpl {
     if (a.elems.size() != b.elems.size()) return TBottom;
 
     auto i = size_t{};
-    return intersect_packed(a.elems, [&] { return b.elems[i++]; });
+    return intersect_packed(
+      a.elems,
+      [&] { return b.elems[i++]; },
+      intersectProvTag(a.provenance, b.provenance)
+    );
   }
   Type operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
-    return intersect_packed(a.elems, [&] { return b.type; });
+    return intersect_packed(a.elems, [&] { return b.type; }, a.provenance);
   }
   Type operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
-    if (b.key.couldBe(TInt)) {
-      return intersect_packed(a.elems, [&] { return b.val; });
+    if (b.key.couldBe(BInt)) {
+      return intersect_packed(a.elems, [&] { return b.val; }, a.provenance);
     }
     return TBottom;
   }
-  Type operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
+  Type operator()(const DArrLikePacked& /*a*/, const DArrLikeMap& /*b*/) const {
     // We don't allow DArrLikeMaps which are packed
     return TBottom;
   }
@@ -915,13 +1190,14 @@ struct DualDispatchIntersectionImpl {
     return packedn_impl(bits, isect);
   }
   Type operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
-    if (b.key.couldBe(TInt)) {
+    if (b.key.couldBe(BInt)) {
       auto val = intersection_of(b.val, a.type);
       if (val != TBottom) return packedn_impl(bits, std::move(val));
     }
     return TBottom;
   }
-  Type operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
+  Type
+  operator()(const DArrLikePackedN& /*a*/, const DArrLikeMap& /*b*/) const {
     return TBottom;
   }
 
@@ -929,20 +1205,103 @@ struct DualDispatchIntersectionImpl {
     auto k = intersection_of(a.key, b.key);
     auto v = intersection_of(a.val, b.val);
     if (k == TBottom || v == TBottom) return TBottom;
-    return mapn_impl(bits, k, v);
+    return mapn_impl(bits, k, v, ProvTag::Top);
   }
   Type operator()(const DArrLikeMapN& a, const DArrLikeMap& b) const {
-    return intersect_map(b.map, [&] { return std::make_pair(a.key, a.val); });
+    auto map = MapElems{};
+
+    for (auto const& kv : b.map) {
+      if (!from_cell(kv.first).couldBe(a.key)) return TBottom;
+      auto val = intersection_of(kv.second, a.val);
+      if (val == TBottom) return TBottom;
+      map.emplace_back(kv.first, std::move(val));
+    }
+
+    auto optKey = TBottom;
+    auto optVal = TBottom;
+    if (b.hasOptElements()) {
+      optKey = intersection_of(b.optKey, a.key);
+      optVal = intersection_of(b.optVal, a.val);
+      if (optKey == TBottom || optVal == TBottom) {
+        optKey = TBottom;
+        optVal = TBottom;
+      }
+    }
+
+    return map_impl(
+      bits,
+      std::move(map),
+      std::move(optKey),
+      std::move(optVal),
+      b.provenance
+    );
   }
 
   Type operator()(const DArrLikeMap& a, const DArrLikeMap& b) const {
-    if (a.map.size() != b.map.size()) return TBottom;
-    auto it = b.map.begin();
-    return intersect_map(a.map, [&] {
-      auto ret = std::make_pair(from_cell(it->first), it->second);
-      ++it;
-      return ret;
-    });
+    // Two maps without optional elements have no values in common if
+    // they have different sets of keys.
+    if (!a.hasOptElements() && !b.hasOptElements() &&
+        a.map.size() != b.map.size()) {
+      return TBottom;
+    }
+
+    auto map = MapElems{};
+
+    auto aIt = begin(a.map);
+    auto bIt = begin(b.map);
+
+    // Intersect the common known keys
+    while (aIt != end(a.map) && bIt != end(b.map)) {
+      if (!tvSame(aIt->first, bIt->first)) return TBottom;
+      auto val = intersection_of(aIt->second, bIt->second);
+      if (val == TBottom) return TBottom;
+      map.emplace_back(aIt->first, std::move(val));
+      ++aIt;
+      ++bIt;
+    }
+
+    // Any remaining known keys are only in A, or in B. Intersect them
+    // with the optional elements in the other map. If the other map
+    // doesn't have optional elements, the intersection will be
+    // Bottom.
+    while (aIt != end(a.map)) {
+      if (!from_cell(aIt->first).couldBe(b.optKey)) return TBottom;
+      auto val = intersection_of(aIt->second, b.optVal);
+      if (val == TBottom) return TBottom;
+      map.emplace_back(aIt->first, std::move(val));
+      ++aIt;
+    }
+
+    while (bIt != end(b.map)) {
+      if (!from_cell(bIt->first).couldBe(a.optKey)) return TBottom;
+      auto val = intersection_of(bIt->second, a.optVal);
+      if (val == TBottom) return TBottom;
+      map.emplace_back(bIt->first, std::move(val));
+      ++bIt;
+    }
+
+    auto optKey = TBottom;
+    auto optVal = TBottom;
+    if (a.hasOptElements() && b.hasOptElements()) {
+      optKey = intersection_of(a.optKey, b.optKey);
+      optVal = intersection_of(a.optVal, b.optVal);
+      if (optKey == TBottom || optVal == TBottom) {
+        optKey = TBottom;
+        optVal = TBottom;
+      }
+    }
+
+    return map_impl(
+      bits,
+      std::move(map),
+      std::move(optKey),
+      std::move(optVal),
+      intersectProvTag(a.provenance, b.provenance)
+    );
+  }
+
+  Type operator()(const SString /*a*/, const SString /*b*/) const {
+    not_reached();
   }
 private:
   trep bits;
@@ -964,7 +1323,11 @@ struct DualDispatchUnionImpl {
     for (auto i = size_t{0}; i < a.elems.size(); ++i) {
       ret[i] |= b.elems[i];
     }
-    return packed_impl(bits, std::move(ret));
+    return packed_impl(
+      bits,
+      std::move(ret),
+      unionProvTag(a.provenance, b.provenance)
+    );
   }
 
   Type operator()(const DArrLikePackedN& a, const DArrLikePackedN& b) const {
@@ -976,37 +1339,77 @@ struct DualDispatchUnionImpl {
   }
 
   Type operator()(const DArrLikeMap& a, const DArrLikeMap& b) const {
-    auto to_map = [&] {
-      auto mkva = map_key_values(a);
-      auto mkvb = map_key_values(b);
+    auto map = MapElems{};
 
-      return mapn_impl(
-        bits,
-        union_of(std::move(mkva.first), std::move(mkvb.first)),
-        union_of(std::move(mkva.second), std::move(mkvb.second)));
-    };
-
-    /*
-     * With the current meaning of structs, if the keys are different, we can't
-     * do anything better than going to a map type.  The reason for this is
-     * that our struct types currently are implying the presence of all the
-     * keys in the struct (it might be worth adding some more types for struct
-     * subtyping to handle this better.)
-     */
-    if (a.map.size() != b.map.size()) return to_map();
-
-    auto retStruct = MapElems{};
+    // Keep the common prefix of known keys in both A and B.
     auto aIt = begin(a.map);
     auto bIt = begin(b.map);
-    for (; aIt != end(a.map); ++aIt, ++bIt) {
-      if (!cellSame(aIt->first, bIt->first)) return to_map();
-      retStruct.emplace_back(aIt->first, union_of(aIt->second, bIt->second));
+    while (aIt != end(a.map) && bIt != end(b.map)) {
+      if (!tvSame(aIt->first, bIt->first)) break;
+      map.emplace_back(aIt->first, union_of(aIt->second, bIt->second));
+      ++aIt;
+      ++bIt;
     }
-    return map_impl(bits, std::move(retStruct));
+
+    // If there's no common prefix, fall back to MapN.
+    if (map.empty()) {
+      auto mkva = map_key_values(a);
+      auto mkvb = map_key_values(b);
+      return mapn_impl_from_map(
+        bits,
+        union_of(std::move(mkva.first), std::move(mkvb.first)),
+        union_of(std::move(mkva.second), std::move(mkvb.second)),
+        unionProvTag(a.provenance, b.provenance)
+      );
+    }
+
+    // Any non-common known keys will be combined into the optional
+    // elements.
+    auto optKey = union_of(a.optKey, b.optKey);
+    auto optVal = union_of(a.optVal, b.optVal);
+
+    while (aIt != end(a.map)) {
+      optKey |= from_cell(aIt->first);
+      optVal |= aIt->second;
+      ++aIt;
+    }
+    while (bIt != end(b.map)) {
+      optKey |= from_cell(bIt->first);
+      optVal |= bIt->second;
+      ++bIt;
+    }
+
+    return map_impl(
+      bits,
+      std::move(map),
+      std::move(optKey),
+      std::move(optVal),
+      unionProvTag(a.provenance, b.provenance)
+    );
   }
 
   Type operator()(SArray a, SArray b) const {
     assert(a != b); // Should've been handled earlier in union_of.
+    if (a->empty() && b->empty()) {
+      auto const aTag = ProvTag::FromSArrOrTop(a);
+      auto const bTag = ProvTag::FromSArrOrTop(b);
+      assert(aTag != bTag || a->kind() != b->kind());
+
+      if (a->kind() != b->kind() || !arrprov::arrayWantsTag(a)) {
+        return Type { bits };
+      }
+
+      auto r = [&] {
+        auto const tag = unionProvTag(aTag, bTag);
+        if (a->isVecType()) return vec_empty();
+        if (a->isDictType()) return dict_empty();
+        if (a->isVArray()) return aempty_varray(tag);
+        if (a->isDArray()) return aempty_darray(tag);
+        always_assert(false);
+      }();
+      set_trep(r, bits);
+      return r;
+    }
 
     auto const p1 = toDArrLikePacked(a);
     auto const p2 = toDArrLikePacked(b);
@@ -1023,28 +1426,37 @@ struct DualDispatchUnionImpl {
   }
 
   Type operator()(const DArrLikeMapN& a, const DArrLikeMapN& b) const {
-    return mapn_impl(bits, union_of(a.key, b.key), union_of(a.val, b.val));
+    return mapn_impl(
+      bits,
+      union_of(a.key, b.key),
+      union_of(a.val, b.val),
+      ProvTag::Top
+    );
   }
 
   Type operator()(const DArrLikePacked& a, SArray b) const {
+    assert(!b->empty());
     auto const p = toDArrLikePacked(b);
     if (p) return (*this)(a, *p);
     return (*this)(a, *toDArrLikeMap(b));
   }
 
   Type operator()(const DArrLikePackedN& a, SArray b) const {
+    assert(!b->empty());
     auto const p = toDArrLikePackedN(b);
     if (p) return (*this)(a, *p);
     return (*this)(a, *toDArrLikeMap(b));
   }
 
   Type operator()(const DArrLikeMap& a, SArray b) const {
+    assert(!b->empty());
     auto const m = toDArrLikeMap(b);
     if (m) return (*this)(a, *m);
     return (*this)(*toDArrLikePacked(b), a);
   }
 
   Type operator()(const DArrLikeMapN& a, SArray b) const {
+    assert(!b->empty());
     auto const m1 = toDArrLikeMapN(b);
     if (m1) return (*this)(a, *m1);
     auto const m2 = toDArrLikeMap(b);
@@ -1054,30 +1466,53 @@ struct DualDispatchUnionImpl {
 
   Type operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
     auto mkv = map_key_values(b);
-    return mapn_impl(bits, union_of(TInt, std::move(mkv.first)),
-                     union_of(packed_values(a), std::move(mkv.second)));
+    return mapn_impl_from_map(
+      bits,
+      union_of(TInt, std::move(mkv.first)),
+      union_of(packed_values(a), std::move(mkv.second)),
+      unionProvTag(a.provenance, b.provenance)
+    );
   }
 
   Type operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
-    return mapn_impl(bits, union_of(b.key, TInt),
-                     union_of(packed_values(a), b.val));
+    return mapn_impl(
+      bits, union_of(b.key, TInt),
+      union_of(packed_values(a), b.val),
+      ProvTag::Top
+    );
   }
 
   Type operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
     auto mkv = map_key_values(b);
-    return mapn_impl(bits, union_of(TInt, std::move(mkv.first)),
-                     union_of(a.type, std::move(mkv.second)));
+    return mapn_impl_from_map(
+      bits,
+      union_of(TInt, std::move(mkv.first)),
+      union_of(a.type, std::move(mkv.second)),
+      ProvTag::Top
+    );
   }
 
   Type operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
-    return mapn_impl(bits, union_of(TInt, b.key), union_of(a.type, b.val));
+    return mapn_impl(
+      bits,
+      union_of(TInt, b.key),
+      union_of(a.type, b.val),
+      ProvTag::Top
+    );
   }
 
   Type operator()(const DArrLikeMap& a, const DArrLikeMapN& b) const {
     auto mkv = map_key_values(a);
-    return mapn_impl(bits,
-                     union_of(std::move(mkv.first), b.key),
-                     union_of(std::move(mkv.second), b.val));
+    return mapn_impl_from_map(
+      bits,
+      union_of(std::move(mkv.first), b.key),
+      union_of(std::move(mkv.second), b.val),
+      ProvTag::Top
+    );
+  }
+
+  Type operator()(const SString /*a*/, const SString /*b*/) const {
+    not_reached();
   }
 
 private:
@@ -1096,13 +1531,19 @@ struct DualDispatchSubtype {
   bool operator()() const { return false; }
 
   bool operator()(const DArrLikeMap& a, SArray b) const {
+    // A map with optional elements contains more than one value,
+    // while a static array is always one value.
+    if (a.hasOptElements()) return false;
     if (a.map.size() != b->size()) return false;
     auto const m = toDArrLikeMap(b);
     return m && subtypeMap<contextSensitive>(a, *m);
   }
 
   bool operator()(SArray a, const DArrLikeMap& b) const {
-    if (a->size() != b.map.size()) return false;
+    // If the map doesn't have optional elements, its values are
+    // disjoint from the static array if the keys are of different
+    // sizes.
+    if (!b.hasOptElements() && a->size() != b.map.size()) return false;
     auto const m = toDArrLikeMap(a);
     return m && subtypeMap<contextSensitive>(*m, b);
   }
@@ -1120,11 +1561,11 @@ struct DualDispatchSubtype {
   }
 
   bool operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
-    return b.key.couldBe(TInt) && a.type.subtypeOfImpl<contextSensitive>(b.val);
+    return b.key.couldBe(BInt) && a.type.subtypeOfImpl<contextSensitive>(b.val);
   }
 
   bool operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
-    if (!b.key.couldBe(TInt)) return false;
+    if (!b.key.couldBe(BInt)) return false;
     for (auto const& v : a.elems) {
       if (!v.subtypeOfImpl<contextSensitive>(b.val)) return false;
     }
@@ -1138,15 +1579,17 @@ struct DualDispatchSubtype {
       }
       if (!kv.second.subtypeOfImpl<contextSensitive>(b.val)) return false;
     }
-    return true;
+    return
+      a.optKey.subtypeOfImpl<contextSensitive>(b.key) &&
+      a.optVal.subtypeOfImpl<contextSensitive>(b.val);
   }
 
   bool operator()(SArray a, const DArrLikeMapN& b) const {
-    assert(!a->empty());
+    assert(!a->empty()); // if a is empty, we should have projected b to top
     bool bad = false;
     IterateKV(
       a,
-      [&] (Cell k, TypedValue v) {
+      [&] (TypedValue k, TypedValue v) {
         bad |= !(b.key.couldBe(from_cell(k)) && b.val.couldBe(from_cell(v)));
         return bad;
       }
@@ -1162,6 +1605,7 @@ struct DualDispatchSubtype {
   }
 
   bool operator()(SArray a, const DArrLikePackedN& b) const {
+    assert(!a->empty()); // if a is empty, we should have projected b to top
     auto p = toDArrLikePackedN(a);
     return p && p->type.subtypeOfImpl<contextSensitive>(b.type);
   }
@@ -1227,8 +1671,10 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 //////////////////////////////////////////////////////////////////////
 // Helpers for creating literal array-like types
 
-template<typename AInit>
-folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems) {
+template<typename AInit, bool force_static>
+folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
+                                  ProvTag tag) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   AInit ai(elems.size());
   for (auto const& t : elems) {
     auto const v = tv(t);
@@ -1236,11 +1682,15 @@ folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems) {
     ai.append(tvAsCVarRef(&*v));
   }
   auto var = ai.toVariant();
-  var.setEvalScalar();
-  return *var.asTypedValue();
+  if (tag.valid()) {
+    assertx(RuntimeOption::EvalArrayProvenance);
+    arrprov::setTag(var.asArrRef().get(), tag.get());
+  }
+  if (force_static) var.setEvalScalar();
+  return tvReturn(std::move(var));
 }
 
-bool checkTypeVec(const std::vector<Type> &elems) {
+bool checkTypeVec(const std::vector<Type> &elems, ProvTag /*tag*/) {
   for (auto const& t : elems) {
     if (!is_scalar(t)) return false;
   }
@@ -1250,7 +1700,7 @@ bool checkTypeVec(const std::vector<Type> &elems) {
 Variant keyHelper(SString key) {
   return Variant{ key, Variant::PersistentStrInit{} };
 }
-const Variant& keyHelper(const Cell& v) {
+const Variant& keyHelper(const TypedValue& v) {
   return tvAsCVarRef(&v);
 }
 template <typename AInit>
@@ -1258,13 +1708,15 @@ void add(AInit& ai, const Variant& key, const Variant& value) {
   ai.setValidKey(key, value);
 }
 void add(KeysetInit& ai, const Variant& key, const Variant& value) {
-  assert(cellSame(*key.asTypedValue(), *value.asTypedValue()));
+  assert(tvSame(*key.asTypedValue(), *value.asTypedValue()));
   ai.add(key);
 }
 
-template<typename AInit, typename Key>
-folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems) {
-  auto val = eval_cell_value([&] () -> Cell {
+template<typename AInit, bool force_static, typename Key>
+folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
+                                  ProvTag tag) {
+  ARRPROV_USE_RUNTIME_LOCATION();
+  auto val = eval_cell_value([&] () -> TypedValue {
     AInit ai(elems.size());
     for (auto const& elm : elems) {
       auto const v = tv(elm.second);
@@ -1272,15 +1724,20 @@ folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems) {
       add(ai, keyHelper(elm.first), tvAsCVarRef(&*v));
     }
     auto var = ai.toVariant();
-    var.setEvalScalar();
-    return *var.asTypedValue();
+    if (tag.valid()) {
+      assertx(RuntimeOption::EvalArrayProvenance);
+      assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));
+      arrprov::setTag(var.asArrRef().get(), tag.get());
+    }
+    if (force_static) var.setEvalScalar();
+    return tvReturn(std::move(var));
   });
   if (val && val->m_type == KindOfUninit) val.clear();
   return val;
 }
 
 template<typename Key>
-bool checkTypeMap(const ArrayLikeMap<Key> &elems) {
+bool checkTypeMap(const ArrayLikeMap<Key> &elems, ProvTag /*tag*/) {
   for (auto const& elm : elems) {
     if (!is_scalar(elm.second)) return false;
   }
@@ -1366,28 +1823,30 @@ Type Type::unctxHelper(Type t, bool& changed) {
            it != mutated->map.end();
            ++it) {
         bool c;
-        auto const ty = unctxHelper(it->second, c);
+        auto ty = unctxHelper(it->second, c);
         if (c) {
-          mutated->map.update(it, ty);
+          mutated->map.update(it, std::move(ty));
         }
       }
     }
+    bool changed2;
+    auto ty = unctxHelper(t.m_data.map->optVal, changed2);
+    if (changed2) t.m_data.map.mutate()->optVal = std::move(ty);
+    changed |= changed2;
     break;
   }
   case DataTag::ArrLikeMapN: {
     auto const mapn = t.m_data.mapn.get();
     auto ty = unctxHelper(mapn->val, changed);
-    if (changed) {
-      t.m_data.mapn.mutate()->val = ty;
-    }
+    if (changed) t.m_data.mapn.mutate()->val = std::move(ty);
     break;
   }
   case DataTag::None:
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Str:
-  case DataTag::RefInner:
   case DataTag::ArrLikeVal:
+  case DataTag::Record:
     break;
   }
   return t;
@@ -1416,8 +1875,7 @@ Type::Type(Type&& o) noexcept
   : m_bits(o.m_bits)
   , m_dataTag(o.m_dataTag)
 {
-  SCOPE_EXIT { assert(checkInvariants());
-               assert(o.checkInvariants()); };
+  SCOPE_EXIT { assert(o.checkInvariants()); };
   o.m_dataTag = DataTag::None;
   switch (m_dataTag) {
     case DataTag::None:   return;
@@ -1433,6 +1891,7 @@ Type::Type(Type&& o) noexcept
 
 Type& Type::operator=(const Type& o) noexcept {
   SCOPE_EXIT { assert(checkInvariants()); };
+  if (this == &o) return *this;
   destroy(*this);
   construct(*this, o);
   return *this;
@@ -1441,6 +1900,7 @@ Type& Type::operator=(const Type& o) noexcept {
 Type& Type::operator=(Type&& o) noexcept {
   SCOPE_EXIT { assert(checkInvariants());
                assert(o.checkInvariants()); };
+  if (this == &o) return *this;
   destroy(*this);
   construct(*this, std::move(o));
   return *this;
@@ -1485,17 +1945,26 @@ const Type& Type::operator &= (Type&& other) {
 
 template<class Ret, class T, class Function>
 struct Type::DDHelperFn {
-  template<class Y>
-  typename std::enable_if<!std::is_same<Y,T>::value ||
-                          !Function::disjoint, Ret>::type
+  template <class Y>
+  typename std::enable_if<(!std::is_same<Y,T>::value || !Function::disjoint) &&
+                          std::is_same<typename DataTagTrait<Y>::tag,
+                                       typename DataTagTrait<T>::tag>::value,
+                          Ret>::type
   operator()(const Y& y) const { return f(t, y); }
 
   template <class Y>
-  typename std::enable_if<std::is_same<Y, T>::value && Function::disjoint,
+  typename std::enable_if<(std::is_same<Y,T>::value && Function::disjoint) &&
+                          std::is_same<typename DataTagTrait<Y>::tag,
+                                       typename DataTagTrait<T>::tag>::value,
                           Ret>::type
-  operator()(const Y& /*y*/) const {
-    not_reached();
-  }
+  operator()(const Y& /*y*/) const { not_reached(); }
+
+  template <class Y>
+  typename std::enable_if<!std::is_same<typename DataTagTrait<Y>::tag,
+                                        typename DataTagTrait<T>::tag>::value,
+                          Ret>::type
+  operator()(const Y& /*y*/) const { return f(); }
+
   Ret operator()() const { return f(); }
   Function f;
   const T& t;
@@ -1512,12 +1981,12 @@ template<class Ret, class T, class Function>
 Ret Type::dd2nd(const Type& o, DDHelperFn<Ret,T,Function> f) const {
   switch (o.m_dataTag) {
   case DataTag::None:           not_reached();
-  case DataTag::Str:            return f();
   case DataTag::Obj:            return f();
   case DataTag::Int:            return f();
   case DataTag::Dbl:            return f();
   case DataTag::Cls:            return f();
-  case DataTag::RefInner:       return f();
+  case DataTag::Record:         return f();
+  case DataTag::Str:            return f(o.m_data.sval);
   case DataTag::ArrLikeVal:     return f(o.m_data.aval);
   case DataTag::ArrLikePacked:  return f(*o.m_data.packed);
   case DataTag::ArrLikePackedN: return f(*o.m_data.packedn);
@@ -1538,12 +2007,12 @@ Type::dualDispatchDataFn(const Type& o, Function f) const {
   using R = typename Function::result_type;
   switch (m_dataTag) {
   case DataTag::None:           not_reached();
-  case DataTag::Str:            return f();
   case DataTag::Obj:            return f();
   case DataTag::Int:            return f();
   case DataTag::Dbl:            return f();
   case DataTag::Cls:            return f();
-  case DataTag::RefInner:       return f();
+  case DataTag::Record:         return f();
+  case DataTag::Str:            return dd2nd(o, ddbind<R>(f, m_data.sval));
   case DataTag::ArrLikeVal:     return dd2nd(o, ddbind<R>(f, m_data.aval));
   case DataTag::ArrLikePacked:  return dd2nd(o, ddbind<R>(f, *m_data.packed));
   case DataTag::ArrLikePackedN: return dd2nd(o, ddbind<R>(f, *m_data.packedn));
@@ -1599,10 +2068,14 @@ bool Type::equivData(const Type& o) const {
     return m_data.dcls.type == o.m_data.dcls.type &&
            m_data.dcls.cls.same(o.m_data.dcls.cls) &&
            contextSensitiveCheck(m_data.dcls, o.m_data.dcls);
-  case DataTag::RefInner:
-    return m_data.inner->equivImpl<contextSensitive>(*o.m_data.inner);
+  case DataTag::Record:
+    return m_data.drec.type == o.m_data.drec.type &&
+           m_data.drec.rec.same(o.m_data.drec.rec);
   case DataTag::ArrLikePacked:
     if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
+      return false;
+    }
+    if (m_data.packed->provenance != o.m_data.packed->provenance) {
       return false;
     }
     for (auto i = 0; i <  m_data.packed->elems.size(); i++) {
@@ -1619,13 +2092,18 @@ bool Type::equivData(const Type& o) const {
     if (m_data.map->map.size() != o.m_data.map->map.size()) {
       return false;
     }
+    if (m_data.map->provenance != o.m_data.map->provenance) {
+      return false;
+    }
     auto it = o.m_data.map->map.begin();
     for (auto const& kv : m_data.map->map) {
       if (!ArrayLikeMapEqual{}(kv.first, it->first)) return false;
       if (!kv.second.equivImpl<contextSensitive>(it->second)) return false;
       ++it;
     }
-    return true;
+    return
+      m_data.map->optKey.equivImpl<contextSensitive>(o.m_data.map->optKey) &&
+      m_data.map->optVal.equivImpl<contextSensitive>(o.m_data.map->optVal);
   }
   case DataTag::ArrLikeMapN:
     return m_data.mapn->key.equivImpl<contextSensitive>(o.m_data.mapn->key) &&
@@ -1655,7 +2133,7 @@ bool Type::subtypeData(const Type& o) const {
         return true;
       }
       if (o.m_data.dobj.type == DObj::Sub) {
-        return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
+        return m_data.dobj.cls.mustBeSubtypeOf(o.m_data.dobj.cls);
       }
       return false;
     }();
@@ -1672,18 +2150,26 @@ bool Type::subtypeData(const Type& o) const {
       return true;
     }
     if (o.m_data.dcls.type == DCls::Sub) {
-      return m_data.dcls.cls.subtypeOf(o.m_data.dcls.cls);
+      return m_data.dcls.cls.mustBeSubtypeOf(o.m_data.dcls.cls);
     }
     return false;
-  case DataTag::Str:
+  case DataTag::Record:
+    if (m_data.drec.type == o.m_data.drec.type &&
+        m_data.drec.rec.same(o.m_data.drec.rec)) {
+      return true;
+    }
+    if (o.m_data.drec.type == DRecord::Sub) {
+      return m_data.drec.rec.mustBeSubtypeOf(o.m_data.drec.rec);
+    }
+    return false;
   case DataTag::ArrLikeVal:
+    return subtypeArrLike(m_data.aval, o.m_data.aval);
+  case DataTag::Str:
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::None:
     // Context sensitivity should not matter here.
     return equivData<contextSensitive>(o);
-  case DataTag::RefInner:
-    return m_data.inner->subtypeOfImpl<contextSensitive>(*o.m_data.inner);
   case DataTag::ArrLikePacked:
     return subtypePacked<contextSensitive>(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
@@ -1718,10 +2204,10 @@ bool Type::couldBeData(const Type& o) const {
         if (o.m_data.dobj.type == DObj::Sub) {
           return o.m_data.dobj.cls.couldBe(m_data.dobj.cls);
         }
-        return o.m_data.dobj.cls.subtypeOf(m_data.dobj.cls);
+        return o.m_data.dobj.cls.maybeSubtypeOf(m_data.dobj.cls);
       }
       if (o.m_data.dobj.type == DObj::Sub) {
-        return m_data.dobj.cls.subtypeOf(o.m_data.dobj.cls);
+        return m_data.dobj.cls.maybeSubtypeOf(o.m_data.dobj.cls);
       }
       return false;
     }();
@@ -1738,10 +2224,19 @@ bool Type::couldBeData(const Type& o) const {
       return m_data.dcls.cls.couldBe(o.m_data.dcls.cls);
     }
     return false;
-  case DataTag::RefInner:
-    return m_data.inner->couldBe(*o.m_data.inner);
-  case DataTag::Str:
+  case DataTag::Record:
+    if (m_data.drec.type == o.m_data.drec.type &&
+        m_data.drec.rec.same(o.m_data.drec.rec)) {
+      return true;
+    }
+    if (m_data.drec.type == DRecord::Sub ||
+        o.m_data.drec.type == DRecord::Sub) {
+      return m_data.drec.rec.couldBe(o.m_data.drec.rec);
+    }
+    return false;
   case DataTag::ArrLikeVal:
+    return couldBeArrLike(m_data.aval, o.m_data.aval);
+  case DataTag::Str:
   case DataTag::Int:
   case DataTag::Dbl:
     return equivData<false>(o);
@@ -1763,7 +2258,7 @@ bool Type::equivImpl(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
   // checkInvariants() and it all takes too long if the type is deeply nested.
 
-  if (m_bits != o.m_bits) return false;
+  if (bits() != o.bits()) return false;
   if (hasData() != o.hasData()) return false;
   if (!hasData()) return true;
 
@@ -1779,11 +2274,263 @@ bool Type::operator==(const Type& o) const {
 }
 
 size_t Type::hash() const {
-  using U1 = std::underlying_type<decltype(m_bits)>::type;
+  using U1 = std::underlying_type<trep>::type;
   using U2 = std::underlying_type<decltype(m_dataTag)>::type;
-  auto const rawBits = U1{m_bits};
+  auto const rawBits = U1{bits()};
   auto const rawTag  = static_cast<U2>(m_dataTag);
-  return folly::hash::hash_combine(rawBits, rawTag);
+
+  auto const data =
+    [&] () -> uintptr_t {
+      switch (m_dataTag) {
+        case DataTag::None:
+          return 0;
+        case DataTag::Obj:
+          return (uintptr_t)m_data.dobj.cls.name();
+        case DataTag::Cls:
+          return (uintptr_t)m_data.dcls.cls.name();
+        case DataTag::Record:
+          return (uintptr_t)m_data.drec.rec.name();
+        case DataTag::Str:
+          return (uintptr_t)m_data.sval;
+        case DataTag::Int:
+          return m_data.ival;
+        case DataTag::Dbl:
+          return std::hash<double>{}(m_data.dval);
+        case DataTag::ArrLikeVal:
+          return (uintptr_t)m_data.aval;
+        case DataTag::ArrLikePacked:
+          return m_data.packed->elems.size();
+        case DataTag::ArrLikePackedN:
+          return 0;
+        case DataTag::ArrLikeMap:
+          return m_data.map->map.size();
+        case DataTag::ArrLikeMapN:
+          return 0;
+      }
+      not_reached();
+    }();
+
+  return folly::hash::hash_combine(rawBits, rawTag, data);
+}
+
+bool must_be_counted(const Type& t) {
+  return must_be_counted(t, t.bits());
+}
+
+bool must_be_counted(const Type& t, trep bits) {
+  if ((bits & BUnc) == BBottom) return true;
+  if (bits & BInitNull) return false;
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+  case DataTag::Str:
+  case DataTag::ArrLikeVal:
+    return false;
+  case DataTag::Obj:
+    return true;
+  case DataTag::ArrLikePackedN:
+    if (bits & BSArrLikeE) return false;
+    return must_be_counted(t.m_data.packedn->type);
+  case DataTag::ArrLikePacked: {
+    if (bits & BSArrLikeE) return false;
+    auto const packed = t.m_data.packed.get();
+    for (size_t i = 0; i < packed->elems.size(); ++i) {
+      if (must_be_counted(packed->elems[i])) return true;
+    }
+    return false;
+  }
+  case DataTag::ArrLikeMapN:
+    if (bits & BSArrLikeE) return false;
+    return
+      must_be_counted(t.m_data.mapn->key) ||
+      must_be_counted(t.m_data.mapn->val);
+  case DataTag::ArrLikeMap:
+    if (bits & BSArrLikeE) return false;
+    for (auto const& p : t.m_data.map->map) {
+      if (must_be_counted(p.second)) return true;
+    }
+    return false;
+  default:
+    not_reached();
+  }
+}
+
+Type project_data(Type t, trep bits) {
+  auto const restrict_to = [&](trep allowed) {
+    assert(t.bits() & allowed);
+    return bits & allowed ? t : loosen_values(t);
+  };
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+    return t;
+  case DataTag::Int:         return restrict_to(BInt);
+  case DataTag::Dbl:         return restrict_to(BDbl);
+  case DataTag::Obj:         return restrict_to(BObj);
+  case DataTag::Record:      return restrict_to(BRecord);
+  case DataTag::Cls:         return restrict_to(BCls);
+  case DataTag::Str:         return restrict_to(BStr);
+  case DataTag::ArrLikeVal: {
+    auto const ad = t.m_data.aval;
+    if (ad->empty()) {
+      if (bits & (BArrN | BVecN | BDictN | BKeysetN)) {
+        return loosen_values(t);
+      }
+      return restrict_to(BArrE | BDictE | BVecE | BKeysetE);
+    }
+    return restrict_to(BArrN | BDictN | BVecN | BKeysetN);
+  }
+  case DataTag::ArrLikePacked:
+  case DataTag::ArrLikePackedN:
+    return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
+  case DataTag::ArrLikeMap:
+  case DataTag::ArrLikeMapN:
+    return restrict_to(BDictN | BKeysetN | BDArrN);
+  default:
+    not_reached();
+  }
+}
+
+Type remove_counted(Type t) {
+  auto const isStatic = [] (const Type& t) {
+    return (t.bits() & BUnc) == t.bits();
+  };
+  auto const isCounted = [] (const Type& t) {
+    return (t.bits() & BUnc) == BBottom;
+  };
+  auto const strip = [&] {
+    t.m_bits &= BUnc;
+    assertx(isPredefined(t.bits()));
+    return t;
+  };
+  auto const nothing = [&] {
+    auto ret = t.bits() & BSArrLikeE;
+    if (is_opt(t)) ret |= BInitNull;
+    return Type { ret };
+  };
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::Record:
+    case DataTag::Str:
+    case DataTag::ArrLikeVal:
+      return strip();
+    case DataTag::Obj:
+      return nothing();
+    case DataTag::ArrLikePackedN: {
+      if (isStatic(t.m_data.packedn->type)) return strip();
+      if (isCounted(t.m_data.packedn->type)) return nothing();
+      auto mutated = t.m_data.packedn.mutate();
+      auto ty = remove_counted(std::move(mutated->type));
+      if (ty == TBottom) return nothing();
+      mutated->type = std::move(ty);
+      return strip();
+    }
+    case DataTag::ArrLikeMapN: {
+      auto const keyStatic = isStatic(t.m_data.mapn->key);
+      auto const valStatic = isStatic(t.m_data.mapn->val);
+      if (keyStatic && valStatic) return strip();
+      if (isCounted(t.m_data.mapn->key)) return nothing();
+      if (isCounted(t.m_data.mapn->val)) return nothing();
+
+      DArrLikeMapN* mutated = nullptr;
+      if (!keyStatic) {
+        mutated = t.m_data.mapn.mutate();
+        auto ty = remove_counted(std::move(mutated->key));
+        if (ty == TBottom) return nothing();
+        mutated->key = std::move(ty);
+      }
+      if (!valStatic) {
+        if (!mutated) mutated = t.m_data.mapn.mutate();
+        auto ty = remove_counted(std::move(mutated->val));
+        if (ty == TBottom) return nothing();
+        mutated->val = std::move(ty);
+      }
+      return strip();
+    }
+    case DataTag::ArrLikePacked: {
+      auto packed = const_cast<DArrLikePacked*>(t.m_data.packed.get());
+      auto changed = false;
+      for (size_t i = 0; i < packed->elems.size(); ++i) {
+        if (isStatic(packed->elems[i])) continue;
+        if (isCounted(packed->elems[i])) return nothing();
+        if (!changed) {
+          packed = t.m_data.packed.mutate();
+          changed = true;
+        }
+        auto ty = remove_counted(std::move(packed->elems[i]));
+        if (ty == TBottom) return nothing();
+        packed->elems[i] = std::move(ty);
+      }
+      return strip();
+    }
+    case DataTag::ArrLikeMap: {
+      auto const map = t.m_data.map.get();
+      size_t count = 0;
+      for (auto it = map->map.begin(); it != map->map.end(); ++it, ++count) {
+        if (isStatic(it->second)) continue;
+        if (isCounted(it->second)) return nothing();
+        break;
+      }
+      auto const optKeyStatic = isStatic(t.m_data.map->optKey);
+      auto optValStatic = isStatic(t.m_data.map->optVal);
+      DArrLikeMap* mutated = nullptr;
+      if (count < map->map.size()) {
+        mutated = t.m_data.map.mutate();
+        auto it = mutated->map.begin();
+        for (std::advance(it, count); it != mutated->map.end(); ++it) {
+          if (isStatic(it->second)) continue;
+          if (isCounted(it->second)) return nothing();
+          auto ty = remove_counted(it->second);
+          if (ty == TBottom) return nothing();
+          mutated->map.update(it, std::move(ty));
+        }
+      }
+
+      if (!optKeyStatic) {
+        if (!mutated) mutated = t.m_data.map.mutate();
+        if (isCounted(mutated->optKey)) {
+          mutated->optKey = TBottom;
+          mutated->optVal = TBottom;
+          optValStatic = true;
+        } else {
+          auto ty = remove_counted(std::move(mutated->optKey));
+          if (ty == TBottom) {
+            mutated->optKey = TBottom;
+            mutated->optVal = TBottom;
+            optValStatic = true;
+          } else {
+            mutated->optKey = std::move(ty);
+          }
+        }
+      }
+
+      if (!optValStatic) {
+        if (!mutated) mutated = t.m_data.map.mutate();
+        if (isCounted(mutated->optVal)) {
+          mutated->optKey = TBottom;
+          mutated->optVal = TBottom;
+        } else {
+          auto ty = remove_counted(std::move(mutated->optVal));
+          if (ty == TBottom) {
+            mutated->optKey = TBottom;
+            mutated->optVal = TBottom;
+          } else {
+            mutated->optVal = std::move(ty);
+          }
+        }
+      }
+
+      return strip();
+    }
+  }
+  not_reached();
 }
 
 template<bool contextSensitive>
@@ -1791,15 +2538,17 @@ bool Type::subtypeOfImpl(const Type& o) const {
   // NB: We don't assert checkInvariants() here because this can be called from
   // checkInvariants() and it all takes too long if the type is deeply nested.
 
-  auto const isect = static_cast<trep>(m_bits & o.m_bits);
-  if (isect != m_bits) return false;
+  auto const isect = bits() & o.bits();
+  if (isect != bits()) return false;
 
   // No data is always more general.
-  if (!o.hasData()) return true;
-  if (!hasData()) return !mayHaveData(m_bits);
+  auto const this_projected = project_data(*this, isect);
+  auto const o_projected = project_data(o, isect);
+  if (!o_projected.hasData())      return true;
+  if (!this_projected.hasData()) return !mayHaveData(bits());
 
   // Both have data, so it depends on what the data says.
-  return subtypeData<contextSensitive>(o);
+  return this_projected.subtypeData<contextSensitive>(o_projected);
 }
 
 bool Type::moreRefined(const Type& o) const {
@@ -1825,33 +2574,67 @@ bool Type::couldBe(const Type& o) const {
   assert(checkInvariants());
   assert(o.checkInvariants());
 
-  auto const isect = static_cast<trep>(m_bits & o.m_bits);
+  auto const isect = bits() & o.bits();
   if (isect == 0) return false;
-  // just an optimization; if the intersection contains one of these,
-  // we're done because they don't support data.
-  if (isect & (BNull | BBool | BArrLikeE | BCStr)) return true;
-  // hasData is actually cheaper than mayHaveData, so do those checks first
-  if (!hasData() || !o.hasData()) return true;
+
+  // If the intersection contains any of these, it's a valid
+  // intersection regardless of any data since they do not use
+  // data. This is not just an optimization: if data exists and
+  // doesn't match, we don't want to (incorrectly) report no
+  // intersection.
+  if (isect & (BNull | BBool)) return true;
+
   // This looks like it could be problematic - eg BCell does not
   // support data, but lots of its subtypes do. It seems like what we
   // need here is !subtypeMayHaveData(isect) (a function we don't
-  // actually have). We know however that both inputs have data, so
-  // all we rely on here is that if A supports data, and B is a
-  // subtype of A that does not (eg TOptArr and TOptArrE), then no
-  // subtype of B can support data.
+  // actually have). We only care in the case that both inputs have
+  // data, however, so all we rely on here is that if A supports data,
+  // and B is a subtype of A that does not, then no subtype of B can
+  // support data.
   if (!mayHaveData(isect)) return true;
-  return couldBeData(o);
+
+  auto const this_projected = project_data(*this, isect);
+  auto const o_projected = project_data(o, isect);
+
+  // If the intersection is static and only one type has data, we need
+  // to check if that data does not only contains counted values. If
+  // so, there's no actual intersection (because you cannot get a
+  // counted value from a static type). This isn't an issue if both
+  // have data because couldBeData() will check.
+  if (!this_projected.hasData()) {
+    return
+      ((isect & BUnc) != isect) ||
+      !o_projected.hasData() ||
+      !must_be_counted(o_projected, isect);
+  }
+  if (!o_projected.hasData()) {
+    return
+      ((isect & BUnc) != isect) ||
+      !must_be_counted(this_projected, isect);
+  }
+
+  // BArrLikeE is similar to the null and bool case above, except we
+  // need to check for the special case where both types have data
+  // corresponding to an empty array. Only in that case does the data
+  // correspond to the BArrLikeE bits and we need to check it (for
+  // provenance mismatch purposes).
+  if (isect & BArrLikeE) {
+    if (m_dataTag != o.m_dataTag) return true;
+    if (m_dataTag != DataTag::ArrLikeVal) return true;
+    if (m_data.aval->size() != 0 || o.m_data.aval->size() != 0) return true;
+    return couldBeArrLike(m_data.aval, o.m_data.aval);
+  }
+  return this_projected.couldBeData(o_projected);
 }
 
 bool Type::checkInvariants() const {
-  assert(isPredefined(m_bits));
-  assert(!hasData() || mayHaveData(m_bits));
+  if (!debug) return true;
+  assert(isPredefined(bits()));
+  assert(!hasData() || mayHaveData(bits()));
 
 #define check(a) \
-  if (m_bits & BC##a) assertx(m_bits & BS##a)
+  if (bits() & BC##a) assertx(bits() & BS##a)
   check(Str);
-  check(PArrE);
-  check(PArrN);
   check(VArrE);
   check(VArrN);
   check(DArrE);
@@ -1869,18 +2652,17 @@ bool Type::checkInvariants() const {
   // NB: Avoid copying non-trivial types in here to avoid recursive calls to
   // checkInvariants() which can cause exponential time blow-ups.
 
-  DEBUG_ONLY auto const& keyType = (m_bits & BSArrLike) == m_bits
-    ? TUncArrKey : TArrKey;
-  DEBUG_ONLY auto const& valType = (m_bits & BOptArr) == m_bits
-    ? TInitGen
-    : ((m_bits & BOptKeyset) == m_bits) ? TArrKey : TInitCell;
-  DEBUG_ONLY auto const isVArray = (m_bits & BOptVArr) == m_bits;
-  DEBUG_ONLY auto const isDArray = (m_bits & BOptDArr) == m_bits;
-  DEBUG_ONLY auto const isNotDVArray = (m_bits & BOptPArr) == m_bits;
-  DEBUG_ONLY auto const isPHPArray = (m_bits & BOptArr) == m_bits;
-  DEBUG_ONLY auto const isVector = (m_bits & BOptVec) == m_bits;
-  DEBUG_ONLY auto const isKeyset = (m_bits & BOptKeyset) == m_bits;
-  DEBUG_ONLY auto const isDict = (m_bits & BOptDict) == m_bits;
+  DEBUG_ONLY auto const isVArray = subtypeOrNull(BVArr);
+  DEBUG_ONLY auto const isDArray = subtypeOrNull(BDArr);
+  DEBUG_ONLY auto const isPHPArray = subtypeOrNull(BArr);
+  DEBUG_ONLY auto const isVector = subtypeOrNull(BVec);
+  DEBUG_ONLY auto const isKeyset = subtypeOrNull(BKeyset);
+  DEBUG_ONLY auto const isDict = subtypeOrNull(BDict);
+
+  DEBUG_ONLY auto const keyBits =
+    subtypeOrNull(BSArrLike) ? BUncArrKeyCompat : BArrKeyCompat;
+  DEBUG_ONLY auto const valBits = isKeyset ? BArrKeyCompat : BInitCell;
+
   /*
    * TODO(#3696042): for static arrays, we could enforce that all
    * inner-types are also static (this may would require changes to
@@ -1893,29 +2675,42 @@ bool Type::checkInvariants() const {
   case DataTag::Str:    assert(m_data.sval->isStatic()); break;
   case DataTag::Dbl:    break;
   case DataTag::Int:    break;
-  case DataTag::RefInner:
-    assert(!m_data.inner->couldBe(TRef));
-    break;
   case DataTag::Cls:    break;
   case DataTag::Obj:    break;
+  case DataTag::Record: break;
   case DataTag::ArrLikeVal:
     assert(m_data.aval->isStatic());
-    assert(!m_data.aval->empty());
+    assert(!m_data.aval->empty() ||
+           isVector || isDict || isVArray || isDArray);
+    assert(bits() & (BArr | BVec | BDict | BKeyset));
+    if (m_data.aval->empty()) {
+      assert(!couldBe(BVecN));
+      assert(!couldBe(BDictN));
+    }
     // If we have a static array, we'd better be sure of the type.
-    assert(!isPHPArray || isVArray || isDArray || isNotDVArray);
-    assert(!isPHPArray || m_data.aval->isPHPArray());
+    assert(!isPHPArray || isVArray || isDArray);
+    assert(!isPHPArray || m_data.aval->isPHPArrayType());
     assert(!isVArray || m_data.aval->isVArray());
     assert(!isDArray || m_data.aval->isDArray());
-    assert(!isNotDVArray || m_data.aval->isNotDVArray());
-    assert(!isVector || m_data.aval->isVecArray());
-    assert(!isKeyset || m_data.aval->isKeyset());
-    assert(!isDict || m_data.aval->isDict());
+    assert(isPHPArray || m_data.aval->isNotDVArray());
+    assert(!isVector || m_data.aval->isVecType());
+    assert(!isKeyset || m_data.aval->isKeysetType());
+    assert(!isDict || m_data.aval->isDictType());
+    assertx(!RuntimeOption::EvalHackArrDVArrs || m_data.aval->isNotDVArray());
+    assertx(IMPLIES(RO::EvalArrayProvenance &&
+                    arrprov::getTag(m_data.aval).valid(),
+                    bits() & kProvBits));
     break;
   case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());
+    assertx(m_data.packed->provenance == ProvTag::Top ||
+            RO::EvalArrayProvenance);
+    assertx(m_data.packed->provenance == ProvTag::Top ||
+            bits() & kProvBits);
+    assert(bits() & (BVecN | BDictN | BKeysetN | BArrN));
     DEBUG_ONLY auto idx = size_t{0};
     for (DEBUG_ONLY auto const& v : m_data.packed->elems) {
-      assert(v.subtypeOf(valType) && v != TBottom);
+      assert(v.subtypeOf(valBits) && v != TBottom);
       assert(!isKeyset || v == ival(idx++));
     }
     break;
@@ -1923,15 +2718,28 @@ bool Type::checkInvariants() const {
   case DataTag::ArrLikeMap: {
     assert(!isVector);
     assert(!isVArray);
+    assert(bits() & (BDictN | BKeysetN | BArrN));
     assert(!m_data.map->map.empty());
+    assertx(m_data.map->provenance == ProvTag::Top ||
+            RO::EvalArrayProvenance);
+    assertx(m_data.map->provenance == ProvTag::Top ||
+            bits() & kProvBits);
     DEBUG_ONLY auto idx = size_t{0};
     DEBUG_ONLY auto packed = true;
     for (DEBUG_ONLY auto const& kv : m_data.map->map) {
-      assert(cellIsPlausible(kv.first));
+      assert(tvIsPlausible(kv.first));
       assert(isIntType(kv.first.m_type) ||
              kv.first.m_type == KindOfPersistentString);
-      assert(kv.second.subtypeOf(valType) && kv.second != TBottom);
-      assert(!isKeyset || from_cell(kv.first) == kv.second);
+      assert(kv.second.subtypeOf(valBits) && kv.second != TBottom);
+      if (isKeyset) {
+        if (isIntType(kv.first.m_type)) {
+          assert(kv.second.m_dataTag == DataTag::Int &&
+                 kv.first.m_data.num == kv.second.m_data.ival);
+        } else {
+          assert(kv.second.m_dataTag == DataTag::Str &&
+                 kv.first.m_data.pstr == kv.second.m_data.sval);
+        }
+      }
       if (packed) {
         packed = isIntType(kv.first.m_type) && kv.first.m_data.num == idx;
         ++idx;
@@ -1939,22 +2747,34 @@ bool Type::checkInvariants() const {
     }
     // Map shouldn't have packed-like keys. If it does, it should be Packed
     // instead.
-    assert(!packed);
+    assertx(!packed);
+    // Optional elements are either both Bottom or both not
+    assertx((m_data.map->optKey == TBottom) == (m_data.map->optVal == TBottom));
+    assertx(m_data.map->optKey.subtypeOf(keyBits));
+    assertx(m_data.map->optVal.subtypeOf(valBits));
+    assertx(!isKeyset || m_data.map->optKey == m_data.map->optVal);
+    // If the optional element has a const key, it cannot be the same
+    // key in the known keys.
+    if (auto const k = tv(m_data.map->optKey)) {
+      assertx(m_data.map->map.find(*k) == m_data.map->map.end());
+    }
     break;
   }
   case DataTag::ArrLikePackedN:
-    assert(m_data.packedn->type.subtypeOf(valType));
+    assert(m_data.packedn->type.subtypeOf(valBits));
     assert(m_data.packedn->type != TBottom);
+    assert(bits() & (BVecN | BDictN | BKeysetN | BArrN));
     assert(!isKeyset || m_data.packedn->type == TInt);
     break;
   case DataTag::ArrLikeMapN:
     assert(!isVector);
     assert(!isVArray);
-    assert(m_data.mapn->key.subtypeOf(keyType));
+    assert(bits() & (BDictN | BKeysetN | BArrN));
+    assert(m_data.mapn->key.subtypeOf(keyBits));
     // MapN shouldn't have a specialized key. If it does, then that implies it
     // only contains arrays of size 1, which means it should be Map instead.
     assert(m_data.mapn->key.m_dataTag == DataTag::None);
-    assert(m_data.mapn->val.subtypeOf(valType));
+    assert(m_data.mapn->val.subtypeOf(valBits));
     assert(m_data.mapn->key != TBottom);
     assert(m_data.mapn->val != TBottom);
     assert(!isKeyset || m_data.mapn->key == m_data.mapn->val);
@@ -1963,10 +2783,34 @@ bool Type::checkInvariants() const {
   return true;
 }
 
+/* Retrieve the provenance tag from a type, if it has one */
+ProvTag Type::getProvTag() const {
+  if (!RuntimeOption::EvalArrayProvenance) return ProvTag::Top;
+  switch (m_dataTag) {
+  case DataTag::None:
+  case DataTag::Str:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Obj:
+  case DataTag::Cls:
+  case DataTag::Record:
+  case DataTag::ArrLikePackedN:
+  case DataTag::ArrLikeMapN:
+    return ProvTag::Top;
+  case DataTag::ArrLikeVal:
+    return ProvTag::FromSArr(m_data.aval);
+  case DataTag::ArrLikePacked:
+    return m_data.packed->provenance;
+  case DataTag::ArrLikeMap:
+    return m_data.map->provenance;
+  }
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Type wait_handle(const Index& index, Type inner) {
-  auto const rwh = index.builtin_class(s_WaitHandle.get());
+  auto const rwh = index.builtin_class(s_Awaitable.get());
   auto t = subObj(rwh);
   t.m_data.dobj.whType.emplace(std::move(inner));
   return t;
@@ -1991,6 +2835,14 @@ Type sval(SString val) {
   return r;
 }
 
+Type sval_nonstatic(SString val) {
+  assert(val->isStatic());
+  auto r        = Type { BStr };
+  r.m_data.sval = val;
+  r.m_dataTag   = DataTag::Str;
+  return r;
+}
+
 Type ival(int64_t val) {
   auto r        = Type { BInt };
   r.m_data.ival = val;
@@ -2007,41 +2859,80 @@ Type dval(double val) {
 
 Type aval(SArray val) {
   assert(val->isStatic());
-  assert(val->isPHPArray());
-  if (val->empty()) {
-    if (val->isDArray()) return aempty_darray();
-    if (val->isVArray()) return aempty_varray();
-    return aempty();
-  }
+  assert(val->isPHPArrayType());
+  assertx(!RuntimeOption::EvalHackArrDVArrs || val->isNotDVArray());
+
   auto r = [&]{
+    if (val->empty()) {
+      if (val->isDArray()) return Type { BSDArrE };
+      if (val->isVArray()) return Type { BSVArrE };
+      always_assert(false);
+    }
     if (val->isDArray()) return Type { BSDArrN };
     if (val->isVArray()) return Type { BSVArrN };
-    return Type { BSPArrN };
+    always_assert(false);
   }();
+
   r.m_data.aval = val;
-  r.m_dataTag   = DataTag::ArrLikeVal;
+  r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
-Type aempty()         { return Type { BSPArrE }; }
-Type aempty_varray()  { return Type { BSVArrE }; }
-Type aempty_darray()  { return Type { BSDArrE }; }
-Type sempty()         { return sval(s_empty.get()); }
-Type some_aempty()    { return Type { BPArrE }; }
-Type some_aempty_darray() { return Type { BDArrE }; }
+Type aempty_varray(ProvTag tag)  {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  auto r = Type { BSVArrE };
+  r.m_data.aval = tag.valid()
+    ? arrprov::tagStaticArr(staticEmptyVArray(), tag.get())
+    : staticEmptyVArray();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
+}
+
+Type aempty_darray(ProvTag tag)  {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  auto r = Type { BSDArrE };
+  r.m_data.aval = tag.valid()
+    ? arrprov::tagStaticArr(staticEmptyDArray(), tag.get())
+    : staticEmptyDArray();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
+}
+
+Type sempty()         { return sval(staticEmptyString()); }
+
+Type some_aempty_darray(ProvTag tag) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  auto r = Type { BDArrE };
+  r.m_data.aval = tag.valid()
+    ? arrprov::tagStaticArr(staticEmptyDArray(), tag.get())
+    : staticEmptyDArray();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
+}
 
 Type vec_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isVecArray());
-  if (val->empty()) return vec_empty();
-  auto r        = Type { BSVecN };
+  assert(val->isVecType());
+  auto const bits = val->empty() ? BSVecE : BSVecN;
+  auto r = Type { bits };
   r.m_data.aval = val;
-  r.m_dataTag   = DataTag::ArrLikeVal;
+  r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
-Type vec_empty()         { return Type { BSVecE }; }
-Type some_vec_empty()    { return Type { BVecE }; }
+Type vec_empty() {
+  auto r = Type { BSVecE };
+  r.m_data.aval = staticEmptyVec();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
+}
+
+Type some_vec_empty() {
+  auto r = Type { BVecE };
+  r.m_data.aval = staticEmptyVec();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
+}
 
 Type packedn_impl(trep bits, Type t) {
   auto r = Type { bits };
@@ -2050,10 +2941,11 @@ Type packedn_impl(trep bits, Type t) {
   return r;
 }
 
-Type packed_impl(trep bits, std::vector<Type> elems) {
+Type packed_impl(trep bits, std::vector<Type> elems, ProvTag prov) {
   assert(!elems.empty());
   auto r = Type { bits };
-  construct_inner(r.m_data.packed, std::move(elems));
+  auto const tag = (bits & kProvBits) ? prov : ProvTag::Top;
+  construct_inner(r.m_data.packed, std::move(elems), tag);
   r.m_dataTag = DataTag::ArrLikePacked;
   return r;
 }
@@ -2067,41 +2959,84 @@ Type svec_n(Type ty) {
 }
 
 Type vec(std::vector<Type> elems) {
-  return packed_impl(BVecN, std::move(elems));
+  return packed_impl(BVecN, std::move(elems), ProvTag::Top);
 }
 
 Type svec(std::vector<Type> elems) {
-  return packed_impl(BSVecN, std::move(elems));
+  return packed_impl(BSVecN, std::move(elems), ProvTag::Top);
 }
 
 Type dict_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isDict());
-  if (val->empty()) return dict_empty();
-  auto r        = Type { BSDictN };
+  assert(val->isDictType());
+  auto const bits = val->empty() ? BSDictE : BSDictN;
+  auto r = Type { bits };
   r.m_data.aval = val;
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type dict_empty()         { return Type { BSDictE }; }
-Type some_dict_empty()    { return Type { BDictE }; }
+Type dict_empty() {
+  auto r = Type { BSDictE };
+  r.m_data.aval = staticEmptyDictArray();
+  r.m_dataTag   = DataTag::ArrLikeVal;
+  return r;
+}
 
-Type dict_map(MapElems m) {
-  return map_impl(BDictN, std::move(m));
+Type some_dict_empty() {
+  auto r = Type { BDictE };
+  r.m_data.aval = staticEmptyDictArray();
+  r.m_dataTag   = DataTag::ArrLikeVal;
+  return r;
+}
+
+Type dict_map(MapElems m, Type optKey, Type optVal) {
+  return map_impl(
+    BDictN,
+    std::move(m),
+    std::move(optKey),
+    std::move(optVal),
+    ProvTag::Top
+  );
+}
+
+Type sdict_map(MapElems m, Type optKey, Type optVal) {
+  return map_impl(
+    BSDictN,
+    std::move(m),
+    std::move(optKey),
+    std::move(optVal),
+    ProvTag::Top
+  );
 }
 
 Type dict_n(Type k, Type v) {
-  return mapn_impl(BDictN, std::move(k), std::move(v));
+  return mapn_impl(BDictN, std::move(k), std::move(v), ProvTag::Top);
 }
 
 Type sdict_n(Type k, Type v) {
-  return mapn_impl(BSDictN, std::move(k), std::move(v));
+  return mapn_impl(BSDictN, std::move(k), std::move(v), ProvTag::Top);
+}
+
+Type dict_packed(std::vector<Type> v) {
+  return packed_impl(BDictN, std::move(v), ProvTag::Top);
+}
+
+Type sdict_packed(std::vector<Type> v) {
+  return packed_impl(BSDictN, std::move(v), ProvTag::Top);
+}
+
+Type dict_packedn(Type t) {
+  return packedn_impl(BDictN, std::move(t));
+}
+
+Type sdict_packedn(Type t) {
+  return packedn_impl(BSDictN, std::move(t));
 }
 
 Type keyset_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isKeyset());
+  assert(val->isKeysetType());
   if (val->empty()) return keyset_empty();
   auto r        = Type { BSKeysetN };
   r.m_data.aval = val;
@@ -2113,15 +3048,31 @@ Type keyset_empty()         { return Type { BSKeysetE }; }
 Type some_keyset_empty()    { return Type { BKeysetE }; }
 
 Type keyset_n(Type kv) {
-  assert(kv.subtypeOf(TArrKey));
+  assert(kv.subtypeOf(BArrKey));
   auto v = kv;
-  return mapn_impl(BKeysetN, std::move(kv), std::move(v));
+  return mapn_impl(BKeysetN, std::move(kv), std::move(v), ProvTag::Top);
 }
 
 Type skeyset_n(Type kv) {
-  assert(kv.subtypeOf(TUncArrKey));
+  assert(kv.subtypeOf(BUncArrKey));
   auto v = kv;
-  return mapn_impl(BSKeysetN, std::move(kv), std::move(v));
+  return mapn_impl(BSKeysetN, std::move(kv), std::move(v), ProvTag::Top);
+}
+
+Type exactRecord(res::Record val) {
+  auto r = Type { BRecord };
+  construct(r.m_data.drec, DRecord::Exact, val);
+  r.m_dataTag = DataTag::Record;
+  return r;
+}
+
+Type subRecord(res::Record val) {
+  auto r = Type { BRecord };
+  construct(r.m_data.drec,
+            val.couldBeOverriden() ? DRecord::Sub : DRecord::Exact,
+            val);
+  r.m_dataTag = DataTag::Record;
+  return r;
 }
 
 Type subObj(res::Class val) {
@@ -2156,19 +3107,6 @@ Type clsExact(res::Class val) {
   return r;
 }
 
-
-Type ref_to(Type t) {
-  assert(t.subtypeOf(TInitCell));
-  auto r = Type{BRef};
-  construct_inner(r.m_data.inner, std::move(t));
-  r.m_dataTag = DataTag::RefInner;
-  return r;
-}
-
-bool is_ref_with_inner(const Type& t) {
-  return t.m_dataTag == DataTag::RefInner;
-}
-
 bool is_specialized_array_like(const Type& t) {
   switch (t.m_dataTag) {
   case DataTag::None:
@@ -2177,7 +3115,7 @@ bool is_specialized_array_like(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
+  case DataTag::Record:
     return false;
   case DataTag::ArrLikeVal:
   case DataTag::ArrLikePacked:
@@ -2190,19 +3128,19 @@ bool is_specialized_array_like(const Type& t) {
 }
 
 bool is_specialized_array(const Type& t) {
-  return t.subtypeOf(TOptArr) && is_specialized_array_like(t);
+  return t.subtypeOrNull(BArr) && is_specialized_array_like(t);
 }
 
 bool is_specialized_vec(const Type& t) {
-  return t.subtypeOf(TOptVec) && is_specialized_array_like(t);
+  return t.subtypeOrNull(BVec) && is_specialized_array_like(t);
 }
 
 bool is_specialized_dict(const Type& t) {
-  return t.subtypeOf(TOptDict) && is_specialized_array_like(t);
+  return t.subtypeOrNull(BDict) && is_specialized_array_like(t);
 }
 
 bool is_specialized_keyset(const Type& t) {
-  return t.subtypeOf(TOptKeyset) && is_specialized_array_like(t);
+  return t.subtypeOrNull(BKeyset) && is_specialized_array_like(t);
 }
 
 Type set_trep(Type& a, trep bits) {
@@ -2211,14 +3149,23 @@ Type set_trep(Type& a, trep bits) {
   // Packed or Map type. We cannot have a ArrLikeVal if the type isn't
   // specifically a subtype of TOptParr, TOptVArr, or TOptDArr.
   if (a.m_dataTag == DataTag::ArrLikeVal &&
-      ((a.subtypeOf(TOptPArr) && ((bits & BOptPArr) != bits)) ||
-       (a.subtypeOf(TOptVArr) && ((bits & BOptVArr) != bits)) ||
-       (a.subtypeOf(TOptDArr) && ((bits & BOptDArr) != bits)))) {
-    if (auto p = toDArrLikePacked(a.m_data.aval)) {
-      return packed_impl(bits, std::move(p->elems));
+      ((a.subtypeOrNull(BVArr) && ((bits & (BVArr | BNull)) != bits)) ||
+       (a.subtypeOrNull(BDArr) && ((bits & (BDArr | BNull)) != bits)))) {
+    if (a.m_data.aval->empty()) {
+      a = loosen_values(a);
+    } else {
+      if (auto p = toDArrLikePacked(a.m_data.aval)) {
+        return packed_impl(bits, std::move(p->elems), p->provenance);
+      }
+      auto d = toDArrLikeMap(a.m_data.aval);
+      return map_impl(
+        bits,
+        std::move(d->map),
+        std::move(d->optKey),
+        std::move(d->optVal),
+        d->provenance
+      );
     }
-    auto d = toDArrLikeMap(a.m_data.aval);
-    return map_impl(bits, std::move(d->map));
   }
   a.m_bits = bits;
   return std::move(a);
@@ -2234,50 +3181,38 @@ Type set_trep(Type& a, trep bits) {
  */
 Type spec_array_like_union(Type& spec_a,
                            Type& b,
-                           const Type& opt_e,
-                           const Type& opt) {
+                           trep opt_e,
+                           trep opt) {
   // If b isn't the same kind of array-like, we'll have to treat it as
   // a union of two separate types
-  if (!b.subtypeOf(opt)) return TBottom;
-  auto const bits = combine_arr_like_bits(spec_a.m_bits, b.m_bits);
+  if (!b.subtypeOf(opt | BNull)) return TBottom;
+
+  auto const bits = combine_arr_like_bits(spec_a.bits(), b.bits());
+  assertx((bits & BNull) == ((spec_a.bits() | b.bits()) & BNull));
   if (!is_specialized_array_like(b)) {
     // We can keep a's specialization if b is an empty array-like
     // or a nullable empty array-like.
-    if (b.subtypeOf(opt_e)) return set_trep(spec_a, bits);
+    if (b.subtypeOf(opt_e | BNull)) return set_trep(spec_a, bits);
     // otherwise drop the specialized bits
     return Type { bits };
   }
 
-  DEBUG_ONLY auto const shouldBeOpt = is_opt(spec_a) || is_opt(b);
   auto const t = Type::unionArrLike(std::move(spec_a), std::move(b));
-  assert(!shouldBeOpt || is_opt(t));
+  assertx((t.bits() & BNull) == (bits & BNull));
   return t;
 }
 
-Type arr_packed(std::vector<Type> elems) {
-  return packed_impl(BPArrN, std::move(elems));
+Type arr_packed_varray(std::vector<Type> elems, ProvTag tag) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  return packed_impl(BVArrN, std::move(elems), tag);
 }
 
-Type arr_packed_varray(std::vector<Type> elems) {
-  return packed_impl(BVArrN, std::move(elems));
-}
-
-Type sarr_packed(std::vector<Type> elems) {
-  return packed_impl(BSPArrN, std::move(elems));
-}
-
-Type arr_packedn(Type t) {
-  return packedn_impl(BPArrN, std::move(t));
-}
-
-Type sarr_packedn(Type t) {
-  return packedn_impl(BSPArrN, std::move(t));
-}
-
-Type map_impl(trep bits, MapElems m) {
+Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
   assert(!m.empty());
+  assertx((optKey == TBottom) == (optVal == TBottom));
 
-  // A Map cannot be packed, so if it is, return a Packed instead.
+  // A Map cannot be packed, so if it is, use a different
+  // representation.
   auto idx = int64_t{0};
   auto packed = true;
   for (auto const& p : m) {
@@ -2288,38 +3223,61 @@ Type map_impl(trep bits, MapElems m) {
     ++idx;
   }
   if (packed) {
-    std::vector<Type> elems;
-    for (auto& p : m) elems.emplace_back(std::move(p.second));
-    return packed_impl(bits, std::move(elems));
+    // The map is actually packed. If there's no optional elements, we
+    // can turn it into a Packed.
+    if (optKey == TBottom) {
+      std::vector<Type> elems;
+      for (auto& p : m) elems.emplace_back(p.second);
+      return packed_impl(bits, std::move(elems), prov);
+    }
+
+    // There are optional elements. We cannot represent optionals in
+    // packed representations, so we need to collapse the values into
+    // a single type.
+    auto vals = std::move(optVal);
+    for (auto const& p : m) vals |= p.second;
+
+    // Special case, if the optional elements represent a single key,
+    // and that key is next in packed order, we can use PackedN.
+    if (auto const k = tv(optKey)) {
+      if (isIntType(k->m_type) && k->m_data.num == idx) {
+        return packedn_impl(bits, std::move(vals));
+      }
+    }
+
+    // Not known to be packed including the optional elements, so use
+    // MapN, which is most general (it can contain packed and
+    // non-packed types).
+    return mapn_impl(bits, union_of(TInt, optKey), std::move(vals), prov);
   }
 
   auto r = Type { bits };
-  construct_inner(r.m_data.map, std::move(m));
+  auto const tag = (bits & kProvBits) ? prov : ProvTag::Top;
+  construct_inner(
+    r.m_data.map,
+    std::move(m),
+    std::move(optKey),
+    std::move(optVal),
+    tag
+  );
   r.m_dataTag = DataTag::ArrLikeMap;
   return r;
 }
 
-Type arr_map(MapElems m) {
-  return map_impl(BPArrN, std::move(m));
+Type arr_map_darray(MapElems m, ProvTag tag) {
+  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  return map_impl(BDArrN, std::move(m), TBottom, TBottom, tag);
 }
 
-Type arr_map_darray(MapElems m) {
-  return map_impl(BDArrN, std::move(m));
-}
-
-Type sarr_map(MapElems m) {
-  return map_impl(BSPArrN, std::move(m));
-}
-
-Type mapn_impl(trep bits, Type k, Type v) {
-  assert(k.subtypeOf(TArrKey));
+Type mapn_impl(trep bits, Type k, Type v, ProvTag tag) {
+  assert(k.subtypeOf(BArrKeyCompat));
 
   // A MapN cannot have a constant key (because that can actually make it be a
   // subtype of Map sometimes), so if it does, make it a Map instead.
   if (auto val = tv(k)) {
     MapElems m;
     m.emplace_back(*val, std::move(v));
-    return map_impl(bits, std::move(m));
+    return map_impl(bits, std::move(m), TBottom, TBottom, tag);
   }
 
   auto r = Type { bits };
@@ -2332,52 +3290,78 @@ Type mapn_impl(trep bits, Type k, Type v) {
   return r;
 }
 
-Type arr_mapn(Type k, Type v) {
-  return mapn_impl(BPArrN, std::move(k), std::move(v));
-}
-
-Type sarr_mapn(Type k, Type v) {
-  return mapn_impl(BSPArrN, std::move(k), std::move(v));
+Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag tag) {
+  if (bits & BKeyset && k != v) {
+    // When we convert could-be-keyset types from a Map representation to a
+    // MapN representation, we need to coerce the staticness of the key and
+    // value to match one another.  This necessity arises because DArrLikeMap
+    // can decay the value type to be of unknown-staticness, while the key
+    // (which is a TypedValue) maintains a persistent DataType.
+    //
+    // It's sufficient to loosen the key's staticness; it never happens the
+    // other way around.  Also note that we don't do any other coercions here;
+    // it's up to the caller to ensure `k == v` up-to-staticness.
+    k = loosen_staticness(k);
+  }
+  return mapn_impl(bits, std::move(k), std::move(v), tag);
 }
 
 Type opt(Type t) {
-  assert(canBeOptional(t.m_bits));
+  assert(canBeOptional(t.bits()));
   auto ret = t;
-  ret.m_bits = static_cast<trep>(ret.m_bits | BInitNull);
+  ret.m_bits |= BInitNull;
   return ret;
 }
 
 Type unopt(Type t) {
-  assert(is_opt(t));
-  t.m_bits = static_cast<trep>(t.m_bits & ~BInitNull);
-  assert(!is_opt(t));
+  assertx(is_opt(t));
+  t.m_bits &= ~BInitNull;
+  assertx(!is_opt(t));
   return t;
 }
 
 bool is_opt(const Type& t) {
-  if (t.m_bits == BInitNull) return false;
-  if (!t.couldBe(TInitNull)) return false;
-  auto const nonNullBits = static_cast<trep>(t.m_bits & ~BInitNull);
+  if (t.bits() == BInitNull) return false;
+  if (!t.couldBe(BInitNull)) return false;
+  auto const nonNullBits = t.bits() & ~BInitNull;
   return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
 }
 
+bool is_nullish(const Type& t) {
+  if (t.subtypeOf(TNull)) return false;
+  if (!t.couldBe(TNull)) return false;
+  auto const nonNullBits = t.bits() & ~BNull;
+  return isPredefined(nonNullBits) && canBeOptional(nonNullBits);
+}
+
+Type unnullish(Type t) {
+  assertx(is_nullish(t));
+  t.m_bits &= ~BNull;
+  assertx(!is_nullish(t));
+  return t;
+}
+
 Type return_with_context(Type t, Type context) {
-  assertx(t.subtypeOf(TGen));
-  // We don't assert the context is a TCls of TObj because sometimes we set it
+  assertx(t.subtypeOf(BInitCell));
+  // We don't assert the context is a TCls or TObj because sometimes we set it
   // to TTop when handling dynamic calls.
   if (((is_specialized_obj(t) && t.m_data.dobj.isCtx) ||
         (is_specialized_cls(t) && t.m_data.dcls.isCtx)) &&
       context.subtypeOfAny(TCls, TObj) && context != TBottom) {
-    context = toobj(context);
+    context = is_specialized_obj(t) ? toobj(context) : objcls(context);
     if (is_specialized_obj(context) && dobj_of(context).type == DObj::Exact &&
         dobj_of(context).cls.couldBeMocked()) {
       context = subObj(dobj_of(context).cls);
+    }
+    if (is_specialized_cls(context) && dcls_of(context).type == DCls::Exact &&
+        dcls_of(context).cls.couldBeMocked()) {
+      context = subCls(dcls_of(context).cls);
     }
     bool o = is_opt(t);
     t = intersection_of(unctx(std::move(t)), context);
     // We must preserve optional typing, as this is not included in the
     // context type.
-    return (o && canBeOptional(t.m_bits)) ? opt(t) : t;
+    return (o && canBeOptional(t.bits())) ? opt(t) : t;
   }
   return unctx(t);
 }
@@ -2405,16 +3389,24 @@ bool is_specialized_obj(const Type& t) {
   return t.m_dataTag == DataTag::Obj;
 }
 
+bool is_specialized_record(const Type& t) {
+  return t.m_dataTag == DataTag::Record;
+}
+
 bool is_specialized_cls(const Type& t) {
   return t.m_dataTag == DataTag::Cls;
 }
 
+bool is_specialized_string(const Type& t) {
+  return t.m_dataTag == DataTag::Str;
+}
+
 Type toobj(const Type& t) {
-  if (t.subtypeOf(TCls) && is_specialized_cls(t)) {
+  if (t.subtypeOf(BCls) && is_specialized_cls(t)) {
     auto const d = dcls_of(t);
     return setctx(d.type == DCls::Exact ? objExact(d.cls) : subObj(d.cls),
                   d.isCtx);
-  } else if (t.subtypeOf(TObj)) {
+  } else if (t.subtypeOf(BObj)) {
     return t;
   }
   always_assert(t == TCls);
@@ -2422,7 +3414,7 @@ Type toobj(const Type& t) {
 }
 
 Type objcls(const Type& t) {
-  if (t.subtypeOf(TObj)) {
+  if (t.subtypeOf(BObj)) {
     if (is_specialized_obj(t)) {
       auto const d = dobj_of(t);
       return setctx(d.type == DObj::Exact ? clsExact(d.cls) : subCls(d.cls),
@@ -2443,6 +3435,7 @@ folly::Optional<int64_t> arr_size(const Type& t) {
       return t.m_data.aval->size();
 
     case DataTag::ArrLikeMap:
+      if (t.m_data.map->hasOptElements()) return folly::none;
       return t.m_data.map->map.size();
 
     case DataTag::ArrLikePacked:
@@ -2452,11 +3445,11 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return folly::none;
   }
   not_reached();
@@ -2468,9 +3461,9 @@ Type::ArrayCat categorize_array(const Type& t) {
   auto isPacked = true;
   // Even if all the values are constants, we can't produce a constant array
   // unless the d/varray-ness is definitely known.
-  auto val = t.subtypeOfAny(TPArr, TVArr, TDArr);
+  auto val = t.subtypeOfAny(TVArr, TDArr, TVec, TDict, TKeyset);
   size_t idx = 0;
-  auto checkKey = [&] (const Cell& key) {
+  auto checkKey = [&] (const TypedValue& key) {
     if (isStringType(key.m_type)) {
       hasStrs = true;
       isPacked = false;
@@ -2485,12 +3478,13 @@ Type::ArrayCat categorize_array(const Type& t) {
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       IterateKV(t.m_data.aval,
-                [&] (Cell k, TypedValue) {
+                [&] (TypedValue k, TypedValue) {
                   return checkKey(k);
                 });
       break;
 
     case DataTag::ArrLikeMap:
+      if (t.m_data.map->hasOptElements()) return {};
       for (auto const& elem : t.m_data.map->map) {
         if (checkKey(elem.first) && !val) break;
         val = val && tv(elem.second);
@@ -2509,11 +3503,11 @@ Type::ArrayCat categorize_array(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return {};
   }
 
@@ -2530,13 +3524,14 @@ CompactVector<LSString> get_string_keys(const Type& t) {
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       IterateKV(t.m_data.aval,
-                [&] (Cell k, TypedValue) {
+                [&] (TypedValue k, TypedValue) {
                   assert(isStringType(k.m_type));
                   strs.push_back(k.m_data.pstr);
                 });
       break;
 
     case DataTag::ArrLikeMap:
+      assertx(!t.m_data.map->hasOptElements());
       for (auto const& elem : t.m_data.map->map) {
         assert(isStringType(elem.first.m_type));
         strs.push_back(elem.first.m_data.pstr);
@@ -2548,37 +3543,46 @@ CompactVector<LSString> get_string_keys(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       always_assert(false);
   }
 
   return strs;
 }
 
-template<typename R>
+template<typename R, bool force_static>
 struct tvHelper {
   template<DataType dt,typename... Args>
   static R make(Args&&... args) {
     return make_tv<dt>(std::forward<Args>(args)...);
   }
+  template<typename... Args>
+  static R makePersistentArray(Args&&... args) {
+    return make_persistent_array_like_tv(std::forward<Args>(args)...);
+  }
+
   template<typename Init, typename... Args>
   static R fromMap(Args&&... args) {
-    return fromTypeMap<Init>(std::forward<Args>(args)...);
+    return fromTypeMap<Init, force_static>(std::forward<Args>(args)...);
   }
   template<typename Init, typename... Args>
   static R fromVec(Args&&... args) {
-    return fromTypeVec<Init>(std::forward<Args>(args)...);
+    return fromTypeVec<Init, force_static>(std::forward<Args>(args)...);
   }
 };
 
-template<>
-struct tvHelper<bool> {
-  template<DataType dt,typename... Args>
-  static bool make(Args&&... args) {
+template<bool ignored>
+struct tvHelper<bool, ignored> {
+  template <DataType dt, typename... Args>
+  static bool make(Args&&... /*args*/) {
+    return true;
+  }
+  template <typename... Args>
+  static bool makePersistentArray(Args&&... /*args*/) {
     return true;
   }
   template<typename Init, typename... Args>
@@ -2591,42 +3595,53 @@ struct tvHelper<bool> {
   }
 };
 
-template<typename R>
+template<typename R, bool force_static>
 R tvImpl(const Type& t) {
   assert(t.checkInvariants());
-  using H = tvHelper<R>;
+  using H = tvHelper<R, force_static>;
 
-  switch (t.m_bits) {
+  switch (t.bits()) {
   case BUninit:      return H::template make<KindOfUninit>();
   case BInitNull:    return H::template make<KindOfNull>();
   case BTrue:        return H::template make<KindOfBoolean>(true);
   case BFalse:       return H::template make<KindOfBoolean>(false);
-  case BPArrE:
-  case BSPArrE:
-    return H::template make<KindOfPersistentArray>(staticEmptyArray());
   case BVArrE:
   case BSVArrE:
-    return H::template make<KindOfPersistentArray>(staticEmptyVArray());
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::makePersistentArray(const_cast<ArrayData*>(t.m_data.aval));
+    }
+    return H::makePersistentArray(staticEmptyVArray());
   case BDArrE:
   case BSDArrE:
-    return H::template make<KindOfPersistentArray>(staticEmptyDArray());
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::makePersistentArray(const_cast<ArrayData*>(t.m_data.aval));
+    }
+    return H::makePersistentArray(staticEmptyDArray());
   case BVecE:
   case BSVecE:
-    return H::template make<KindOfPersistentVec>(staticEmptyVecArray());
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::template make<KindOfPersistentVec>(t.m_data.aval);
+    }
+    return H::template make<KindOfPersistentVec>(staticEmptyVec());
   case BDictE:
   case BSDictE:
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::template make<KindOfPersistentDict>(t.m_data.aval);
+    }
     return H::template make<KindOfPersistentDict>(staticEmptyDictArray());
   case BKeysetE:
   case BSKeysetE:
     return H::template make<KindOfPersistentKeyset>(staticEmptyKeysetArray());
 
+  case BRecord:
+    break;
+
   case BCStr:
   case BCArrE:
   case BCArrN:
   case BCArr:
-  case BCPArrE:
-  case BCPArrN:
-  case BCPArr:
   case BCVArrE:
   case BCVArrN:
   case BCVArr:
@@ -2646,7 +3661,7 @@ R tvImpl(const Type& t) {
     always_assert(false);
 
   default:
-    if (is_opt(t)) {
+    if (t.couldBe(TNull)) {
       break;
     }
     switch (t.m_dataTag) {
@@ -2657,58 +3672,66 @@ R tvImpl(const Type& t) {
     case DataTag::Str:
       return H::template make<KindOfPersistentString>(t.m_data.sval);
     case DataTag::ArrLikeVal:
-      if ((t.m_bits & BArrN) == t.m_bits) {
-        return H::template make<KindOfPersistentArray>(
+      if (t.subtypeOf(BArrN)) {
+        return H::makePersistentArray(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
-      if ((t.m_bits & BVecN) == t.m_bits) {
+      if (t.subtypeOf(BVecN)) {
         return H::template make<KindOfPersistentVec>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
-      if ((t.m_bits & BDictN) == t.m_bits) {
+      if (t.subtypeOf(BDictN)) {
         return H::template make<KindOfPersistentDict>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
-      if ((t.m_bits & BKeysetN) == t.m_bits) {
+      if (t.subtypeOf(BKeysetN)) {
         return H::template make<KindOfPersistentKeyset>(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }
       break;
     case DataTag::ArrLikeMap:
-      if ((t.m_bits & BDictN) == t.m_bits) {
-        return H::template fromMap<DictInit>(t.m_data.map->map);
-      } else if ((t.m_bits & BKeysetN) == t.m_bits) {
-        return H::template fromMap<KeysetInit>(t.m_data.map->map);
-      } else if ((t.m_bits & BPArrN) == t.m_bits) {
-        return H::template fromMap<MixedArrayInit>(t.m_data.map->map);
-      } else if ((t.m_bits & BDArrN) == t.m_bits) {
-        return H::template fromMap<DArrayInit>(t.m_data.map->map);
+      if (t.m_data.map->hasOptElements()) break;
+      if (t.subtypeOf(BDictN)) {
+        return H::template fromMap<DictInit>(t.m_data.map->map,
+                                             t.m_data.map->provenance);
+      } else if (t.subtypeOf(BKeysetN)) {
+        return H::template fromMap<KeysetInit>(t.m_data.map->map,
+                                               ProvTag::Top);
+      } else if (t.subtypeOf(BDArrN)) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
+        return H::template fromMap<DArrayInit>(t.m_data.map->map,
+                                               t.m_data.map->provenance);
       }
       break;
     case DataTag::ArrLikePacked:
-      if ((t.m_bits & BVecN) == t.m_bits) {
-        return H::template fromVec<VecArrayInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BDictN) == t.m_bits) {
-        return H::template fromVec<DictInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BKeysetN) == t.m_bits) {
-        return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BPArrN) == t.m_bits) {
-        return H::template fromVec<PackedArrayInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BVArrN) == t.m_bits) {
-        return H::template fromVec<VArrayInit>(t.m_data.packed->elems);
-      } else if ((t.m_bits & BDArrN) == t.m_bits) {
-        return H::template fromVec<DArrayInit>(t.m_data.packed->elems);
+      if (t.subtypeOf(BVecN)) {
+        return H::template fromVec<VecInit>(t.m_data.packed->elems,
+                                            t.m_data.packed->provenance);
+      } else if (t.subtypeOf(BDictN)) {
+        return H::template fromVec<DictInit>(t.m_data.packed->elems,
+                                             t.m_data.packed->provenance);
+      } else if (t.subtypeOf(BKeysetN)) {
+        return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems,
+                                                     ProvTag::Top);
+      } else if (t.subtypeOf(BVArrN)) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
+        return H::template fromVec<VArrayInit>(t.m_data.packed->elems,
+                                               t.m_data.packed->provenance);
+      } else if (t.subtypeOf(BDArrN)) {
+        assertx(!RuntimeOption::EvalHackArrDVArrs);
+        return H::template fromVec<DArrayInit>(t.m_data.packed->elems,
+                                               t.m_data.packed->provenance);
       }
       break;
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::None:
       break;
     }
@@ -2717,12 +3740,16 @@ R tvImpl(const Type& t) {
   return R{};
 }
 
-folly::Optional<Cell> tv(const Type& t) {
-  return tvImpl<folly::Optional<Cell>>(t);
+folly::Optional<TypedValue> tv(const Type& t) {
+  return tvImpl<folly::Optional<TypedValue>, true>(t);
+}
+
+folly::Optional<TypedValue> tvNonStatic(const Type& t) {
+  return tvImpl<folly::Optional<TypedValue>, false>(t);
 }
 
 bool is_scalar(const Type& t) {
-  return tvImpl<bool>(t);
+  return tvImpl<bool, true>(t);
 }
 
 Type scalarize(Type t) {
@@ -2732,46 +3759,241 @@ Type scalarize(Type t) {
     case DataTag::None:
       assertx(t.subtypeOfAny(TNull, TTrue, TFalse,
                              TArrE, TVecE, TDictE, TKeysetE));
+      t.m_bits &= BNull | BBool | BSArrE | BSVecE | BSDictE | BSKeysetE;
     case DataTag::Int:
     case DataTag::Dbl:
-    case DataTag::Str:
       return t;
     case DataTag::ArrLikeVal:
-      t.m_bits = static_cast<trep>(t.m_bits &
-                                   (BSArrN | BSVecN | BSDictN | BSKeysetN));
+      t.m_bits &= BSArrN | BSVecN | BSDictN | BSKeysetN |
+                  BSArrE | BSVecE | BSDictE;
+      return t;
+    case DataTag::Str:
+      t.m_bits &= BSStr;
       return t;
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikePacked:
       return from_cell(*tv(t));
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       break;
   }
   not_reached();
 }
 
+folly::Optional<size_t> array_size(const Type& t) {
+  if (!t.subtypeOf(BArrLike)) return folly::none;
+  switch (t.m_dataTag) {
+    case DataTag::None:
+      if (t.subtypeOf(BArrLikeE)) return 0;
+      // fall through
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+    case DataTag::Record:
+      return folly::none;
+    case DataTag::ArrLikeVal:
+      return t.m_data.aval->size();
+    case DataTag::ArrLikeMap:
+      if (t.m_data.map->hasOptElements()) return folly::none;
+      return t.m_data.map->map.size();
+    case DataTag::ArrLikePacked:
+      return t.m_data.packed->elems.size();
+  }
+  not_reached();
+}
+
 Type type_of_istype(IsTypeOp op) {
+  using RO = RuntimeOption;
+  const auto php_arr = !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
+      ? TArrCompat : TArr;
   switch (op) {
-  case IsTypeOp::Uninit: return TUninit;
   case IsTypeOp::Null:   return TNull;
   case IsTypeOp::Bool:   return TBool;
   case IsTypeOp::Int:    return TInt;
   case IsTypeOp::Dbl:    return TDbl;
-  case IsTypeOp::Str:    return TStr;
+  case IsTypeOp::Str:    return TStrLike;
   case IsTypeOp::Res:    return TRes;
-  case IsTypeOp::Arr:    return TArr;
-  case IsTypeOp::Vec:    return TVec;
+  case IsTypeOp::PHPArr: return php_arr;
+  case IsTypeOp::Vec:
+    return RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
+      ? TVecCompat : TVec;
   case IsTypeOp::Dict:   return TDict;
   case IsTypeOp::Keyset: return TKeyset;
   case IsTypeOp::Obj:    return TObj;
-  case IsTypeOp::VArray: return TVArr;
-  case IsTypeOp::DArray: return TDArr;
+  case IsTypeOp::VArray:
+    assertx(!RO::EvalHackArrDVArrs);
+    return RO::EvalIsCompatibleClsMethType ? TVArrCompat : TVArr;
+  case IsTypeOp::DArray:
+    assertx(!RO::EvalHackArrDVArrs);
+    return TDArr;
+  case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::Class: return TCls;
+  case IsTypeOp::Func:
+    return TFunc;
   case IsTypeOp::ArrLike:
+    return RO::EvalIsCompatibleClsMethType ? TArrLikeCompat : TArrLike;
   case IsTypeOp::Scalar: always_assert(0);
   }
+  not_reached();
+}
+
+folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
+  if (t.subtypeOf(BNull))   return IsTypeOp::Null;
+  if (t.subtypeOf(BBool))   return IsTypeOp::Bool;
+  if (t.subtypeOf(BInt))    return IsTypeOp::Int;
+  if (t.subtypeOf(BDbl))    return IsTypeOp::Dbl;
+  if (t.subtypeOf(BStr))    return IsTypeOp::Str;
+  if (t.subtypeOf(BArr))    return IsTypeOp::PHPArr;
+  if (t.subtypeOf(BVec))    return IsTypeOp::Vec;
+  if (t.subtypeOf(BDict))   return IsTypeOp::Dict;
+  if (t.subtypeOf(BRes))    return IsTypeOp::Res;
+  if (t.subtypeOf(BKeyset)) return IsTypeOp::Keyset;
+  if (t.subtypeOf(BObj))    return IsTypeOp::Obj;
+  if (t.subtypeOf(BVArr)) {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return IsTypeOp::VArray;
+  }
+  if (t.subtypeOf(BDArr)) {
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    return IsTypeOp::DArray;
+  }
+  if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
+  if (t.subtypeOf(BCls)) return IsTypeOp::Class;
+  if (t.subtypeOf(BFunc)) return IsTypeOp::Func;
+  return folly::none;
+}
+
+folly::Optional<Type> type_of_type_structure(const Index& index,
+                                             Context ctx,
+                                             SArray ts) {
+  auto const is_nullable = is_ts_nullable(ts);
+  switch (get_ts_kind(ts)) {
+    case TypeStructure::Kind::T_int:
+      return is_nullable ? TOptInt : TInt;
+    case TypeStructure::Kind::T_bool:
+      return is_nullable ? TOptBool : TBool;
+    case TypeStructure::Kind::T_float:
+      return is_nullable ? TOptDbl : TDbl;
+    case TypeStructure::Kind::T_string:
+      return is_nullable ? TOptStrLike : TStrLike;
+    case TypeStructure::Kind::T_resource:
+      return is_nullable ? TOptRes : TRes;
+    case TypeStructure::Kind::T_num:
+      return is_nullable ? TOptNum : TNum;
+    case TypeStructure::Kind::T_arraykey:
+      return is_nullable ? TOptArrKey : TArrKey;
+    case TypeStructure::Kind::T_dict:
+      return is_nullable ? TOptDict : TDict;
+    case TypeStructure::Kind::T_vec:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return is_nullable ? TOptVecCompat : TVecCompat;
+      }
+      return is_nullable ? TOptVec : TVec;
+    case TypeStructure::Kind::T_keyset:
+      return is_nullable ? TOptKeyset : TKeyset;
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_null:
+      return TNull;
+    case TypeStructure::Kind::T_tuple: {
+      auto const tsElems = get_ts_elem_types(ts);
+      std::vector<Type> v;
+      for (auto i = 0; i < tsElems->size(); i++) {
+        auto t = type_of_type_structure(
+          index, ctx, tsElems->getValue(i).getArrayData());
+        if (!t) return folly::none;
+        v.emplace_back(std::move(t.value()));
+      }
+      if (v.empty()) return folly::none;
+      auto const arrT = arr_packed_varray(v, ProvTag::Top);
+      return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
+    }
+    case TypeStructure::Kind::T_shape: {
+      // Taking a very conservative approach to shapes where we dont do any
+      // conversions if the shape contains unknown or optional fields
+      if (does_ts_shape_allow_unknown_fields(ts)) return folly::none;
+      auto map = MapElems{};
+      auto const fields = get_ts_fields(ts);
+      for (auto i = 0; i < fields->size(); i++) {
+        auto key = fields->getKey(i).getStringData();
+        auto const wrapper = fields->getValue(i).getArrayData();
+
+        // Shapes can be defined using class constants, these keys must be
+        // resolved, and to side-step the issue of shapes potentially being
+        // packed arrays if the keys are consecutive integers beginning with 0,
+        // we allow only keys that resolve to strings here.
+        if (wrapper->exists(s_is_cls_cns)) {
+          std::string cls, cns;
+          auto const matched = folly::split("::", key->data(), cls, cns);
+          always_assert(matched);
+
+          auto const rcls = index.resolve_class(ctx, makeStaticString(cls));
+          if (!rcls || index.lookup_class_init_might_raise(ctx, *rcls)) {
+            return folly::none;
+          }
+          auto const tcns = index.lookup_class_constant(
+            ctx, *rcls, makeStaticString(cns), false);
+
+          auto const vcns = tv(tcns);
+          if (!vcns || !isStringType(type(*vcns))) return folly::none;
+          key = val(*vcns).pstr;
+        }
+
+        // Optional fields are hard to represent as a type
+        if (is_optional_ts_shape_field(wrapper)) return folly::none;
+        auto t = type_of_type_structure(index, ctx, get_ts_value(wrapper));
+        if (!t) return folly::none;
+        map.emplace_back(
+          make_tv<KindOfPersistentString>(key), std::move(t.value()));
+      }
+      if (map.empty()) return folly::none;
+      auto const arrT = arr_map_darray(map);
+      return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
+    }
+    case TypeStructure::Kind::T_vec_or_dict:
+      // Ideally, we would return this union; but thats not an allowed type, so
+      // we end up with TInitCell as the result, which makes hhbbc think that
+      // the condition is always true.
+      //
+      // return is_nullable ?
+      //   union_of(TOptVec, TOptDict) : union_of(TVec, TDict);
+      return folly::none;
+    case TypeStructure::Kind::T_arraylike:
+      // Similar to the above, we can't (yet) do this.
+      //
+      // return is_nullable
+      //  ? union_of(union_of(union_of(TOptArr, TOptVec), TOptDict), TOptKeyset)
+      //  : union_of(union_of(union_of(TArr, TVec), TDict), TKeyset);
+      return folly::none;
+
+    case TypeStructure::Kind::T_nothing:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_dynamic:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_reifiedtype:
+      return folly::none;
+  }
+
   not_reached();
 }
 
@@ -2781,14 +4003,26 @@ DObj dobj_of(const Type& t) {
   return t.m_data.dobj;
 }
 
+DRecord drec_of(const Type& t) {
+  assert(t.checkInvariants());
+  assert(is_specialized_record(t));
+  return t.m_data.drec;
+}
+
 DCls dcls_of(Type t) {
   assert(t.checkInvariants());
   assert(is_specialized_cls(t));
   return t.m_data.dcls;
 }
 
-Type from_cell(Cell cell) {
-  assert(cellIsPlausible(cell));
+SString sval_of(const Type& t) {
+  assert(t.checkInvariants());
+  assert(is_specialized_string(t));
+  return t.m_data.sval;
+}
+
+Type from_cell(TypedValue cell) {
+  assert(tvIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:   return TUninit;
@@ -2805,33 +4039,43 @@ Type from_cell(Cell cell) {
   case KindOfPersistentVec:
   case KindOfVec:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isVecArray());
+    always_assert(cell.m_data.parr->isVecType());
     return vec_val(cell.m_data.parr);
 
   case KindOfPersistentDict:
   case KindOfDict:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isDict());
+    always_assert(cell.m_data.parr->isDictType());
     return dict_val(cell.m_data.parr);
 
   case KindOfPersistentKeyset:
   case KindOfKeyset:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isKeyset());
+    always_assert(cell.m_data.parr->isKeysetType());
     return keyset_val(cell.m_data.parr);
 
-  case KindOfPersistentArray:
-  case KindOfArray:
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isPHPArray());
+    always_assert(cell.m_data.parr->isPHPArrayType());
     return aval(cell.m_data.parr);
 
-  case KindOfRef:
+  case KindOfLazyClass: return TLazyCls;
+
   case KindOfObject:
   case KindOfResource:
+  case KindOfRFunc:
+  case KindOfFunc:
+  case KindOfClass:
+  case KindOfClsMeth:
+  case KindOfRClsMeth:
+  case KindOfRecord:
     break;
   }
-  always_assert(0 && "reference counted/class type in from_cell");
+  always_assert(
+      0 && "reference counted/class/func/clsmeth/record type in from_cell");
 }
 
 Type from_DataType(DataType dt) {
@@ -2849,18 +4093,28 @@ Type from_DataType(DataType dt) {
   case KindOfDict:     return TDict;
   case KindOfPersistentKeyset:
   case KindOfKeyset:   return TKeyset;
-  case KindOfPersistentArray:
-  case KindOfArray:    return TArr;
-  case KindOfRef:      return TRef;
+  case KindOfRecord:   return TRecord;
+  case KindOfPersistentDArray:
+  case KindOfDArray:   return TDArr;
+  case KindOfPersistentVArray:
+  case KindOfVArray:   return TVArr;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-    break;
+  case KindOfRFunc:    return TRFunc;
+  case KindOfFunc:     return TFunc;
+  case KindOfClass:    return TCls;
+  case KindOfLazyClass: {
+    always_assert(false);
+    return TCls; // TODO (T68823001)
+  }
+  case KindOfClsMeth:  return TClsMeth;
+  case KindOfRClsMeth: return TRClsMeth;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }
 
 Type from_hni_constraint(SString s) {
-  if (!s) return TGen;
+  if (!s) return TCell;
 
   auto p   = s->data();
   auto ret = TBottom;
@@ -2870,32 +4124,47 @@ Type from_hni_constraint(SString s) {
     ++p;
   }
 
+  if (!strcasecmp(p, "HH\\null"))     return union_of(ret, TInitNull);
   if (!strcasecmp(p, "HH\\resource")) return union_of(ret, TRes);
   if (!strcasecmp(p, "HH\\bool"))     return union_of(ret, TBool);
   if (!strcasecmp(p, "HH\\int"))      return union_of(ret, TInt);
   if (!strcasecmp(p, "HH\\float"))    return union_of(ret, TDbl);
   if (!strcasecmp(p, "HH\\num"))      return union_of(ret, TNum);
   if (!strcasecmp(p, "HH\\string"))   return union_of(ret, TStr);
+  if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
   if (!strcasecmp(p, "HH\\dict"))     return union_of(ret, TDict);
   if (!strcasecmp(p, "HH\\vec"))      return union_of(ret, TVec);
   if (!strcasecmp(p, "HH\\keyset"))   return union_of(ret, TKeyset);
-  if (!strcasecmp(p, "HH\\varray"))   return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\darray"))   return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\varray_or_darray")) return union_of(ret, TArr);
-  if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
-  if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
+  if (!strcasecmp(p, "HH\\varray")) {
+    return union_of(ret, RuntimeOption::EvalHackArrDVArrs ? TVec : TArr);
+  }
+  if (!strcasecmp(p, "HH\\darray")) {
+    return union_of(ret, RuntimeOption::EvalHackArrDVArrs ? TDict : TArr);
+  }
+  if (!strcasecmp(p, "HH\\varray_or_darray")) {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      return union_of(ret, union_of(TVec, TDict));
+    }
+    return union_of(ret, TArr);
+  }
   if (!strcasecmp(p, "HH\\vec_or_dict")) {
     return union_of(ret, union_of(TVec, TDict));
   }
+  if (!strcasecmp(p, "HH\\arraylike")) {
+    return union_of(ret,
+                    union_of(TArr, union_of(TVec, union_of(TDict, TKeyset))));
+  }
+  if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\mixed"))    return TInitCell;
+  if (!strcasecmp(p, "HH\\nonnull"))  return TInitCell;
 
   // It might be an object, or we might want to support type aliases in HNI at
   // some point.  For now just be conservative.
-  return TGen;
+  return TCell;
 }
 
 Type intersection_of(Type a, Type b) {
-  auto const isect = static_cast<trep>(a.m_bits & b.m_bits);
+  auto isect = a.bits() & b.bits();
   if (!mayHaveData(isect)) return Type { isect };
 
   auto fix = [&] (Type& t) {
@@ -2903,10 +4172,48 @@ Type intersection_of(Type a, Type b) {
     return std::move(t);
   };
 
-  if (!b.hasData())           return fix(a);
-  if (!a.hasData())           return fix(b);
-  if (a.subtypeData<true>(b)) return fix(a);
-  if (b.subtypeData<true>(a)) return fix(b);
+  auto aProjected = project_data(a, isect);
+  auto bProjected = project_data(b, isect);
+
+  auto const isStatic = [] (trep b) {
+    return ((b & BUnc) == b);
+  };
+
+  // The intersection is non-empty. If either type has data (but not
+  // both), the intersection will contain that data. If the
+  // intersection is static, we need to remove any counted types from
+  // the data first (if there's no types left afterwards, the
+  // intersection doesn't actually exist).
+  if (!bProjected.hasData()) {
+    if (isStatic(isect) &&
+        !isStatic(aProjected.bits()) &&
+        aProjected.hasData()) {
+      aProjected = remove_counted(std::move(aProjected));
+      if (aProjected == TBottom) return TBottom;
+      isect &= aProjected.bits();
+    }
+    return fix(aProjected);
+  }
+  if (!aProjected.hasData()) {
+    if (isStatic(isect) &&
+        !isStatic(bProjected.bits()) &&
+        bProjected.hasData()) {
+      bProjected = remove_counted(std::move(bProjected));
+      if (bProjected == TBottom) return TBottom;
+      isect &= bProjected.bits();
+    }
+    return fix(bProjected);
+  }
+
+  // Otherwise we have data for both types, which we need to
+  // intersect.
+  if (aProjected.subtypeData<true>(bProjected)) return fix(aProjected);
+  if (bProjected.subtypeData<true>(aProjected)) return fix(bProjected);
+
+  /* from this point on, the projection doesn't matter since neither a or b
+   * isn't supported by a type bit in the intersection */
+  assert(aProjected.hasData() && aProjected == a);
+  assert(bProjected.hasData() && bProjected == b);
 
   auto t = [&] {
     if (a.m_dataTag == b.m_dataTag) {
@@ -2934,11 +4241,11 @@ Type intersection_of(Type a, Type b) {
             return fixWh(a);
           }
           if (b.m_data.dobj.type == DObj::Sub &&
-              a.m_data.dobj.cls.subtypeOf(b.m_data.dobj.cls)) {
+              a.m_data.dobj.cls.mustBeSubtypeOf(b.m_data.dobj.cls)) {
             return fixWh(a);
           }
           if (a.m_data.dobj.type == DObj::Sub &&
-              b.m_data.dobj.cls.subtypeOf(a.m_data.dobj.cls)) {
+              b.m_data.dobj.cls.mustBeSubtypeOf(a.m_data.dobj.cls)) {
             return fixWh(b);
           }
           if (a.m_data.dobj.type == DObj::Sub &&
@@ -2967,19 +4274,20 @@ Type intersection_of(Type a, Type b) {
             return fix(t);
           }
           return TBottom;
+        case DataTag::Record:
+          if (a.subtypeData<false>(b)) {
+            return fix(a);
+          }
+          if (b.subtypeData<false>(a)) {
+            return fix(b);
+          }
+          return TBottom;
         case DataTag::Str:
         case DataTag::ArrLikeVal:
         case DataTag::Int:
         case DataTag::Dbl:
           // Neither is a subtype of the other, so the intersection is empty
           return TBottom;
-        case DataTag::RefInner:
-        {
-          auto inner = intersection_of(*a.m_data.inner, *b.m_data.inner);
-          if (inner == TBottom) return TBottom;
-          *a.m_data.inner.mutate() = inner;
-          return fix(a);
-        }
         case DataTag::ArrLikePacked:
         case DataTag::ArrLikePackedN:
         case DataTag::ArrLikeMap:
@@ -2993,12 +4301,26 @@ Type intersection_of(Type a, Type b) {
 
   if (t != TBottom) return t;
   auto const bits =
-    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj|BRef);
-  return Type { static_cast<trep>(bits) };
+    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj|BRecord);
+  return Type { bits };
 }
 
 Type Type::unionArrLike(Type a, Type b) {
-  auto const newBits = combine_arr_like_bits(a.m_bits, b.m_bits);
+  auto const newBits = combine_arr_like_bits(a.bits(), b.bits());
+  /* the call to project_data here is because adding bits to the trep
+   * can cause us to lose data also, e.g. if a ArrN bit is added to
+   * what was previously known to be an empty array */
+  auto a_projected = project_data(a, newBits);
+  auto b_projected = project_data(b, newBits);
+  if (!b_projected.hasData()) {
+    return set_trep(a_projected, newBits);
+  }
+  if (!a_projected.hasData()) {
+    return set_trep(b_projected, newBits);
+  }
+  /* at this point we know the projection removed nothing */
+  assert(a.hasData() && a_projected.hasData());
+  assert(b.hasData() && b_projected.hasData());
   if (a.subtypeData<true>(b)) {
     return set_trep(b, newBits);
   }
@@ -3009,8 +4331,29 @@ Type Type::unionArrLike(Type a, Type b) {
 }
 
 Type union_of(Type a, Type b) {
-  if (a.subtypeOfImpl<true>(b)) return b;
-  if (b.subtypeOfImpl<true>(a)) return a;
+  auto const nullbits = (a.bits() | b.bits()) & BNull;
+
+  auto nullify = [&] (Type& dst) {
+    dst.m_bits |= nullbits;
+    assertx(isPredefined(dst.bits()));
+    return dst;
+  };
+
+  if (is_nullish(a)) {
+    if (unnullish(a).subtypeOfImpl<true>(b)) {
+      return nullify(b);
+    }
+  } else if (a.subtypeOfImpl<true>(b)) {
+    return b;
+  }
+
+  if (is_nullish(b)) {
+    if (unnullish(b).subtypeOfImpl<true>(a)) {
+      return nullify(a);
+    }
+  } else if (b.subtypeOfImpl<true>(a)) {
+    return a;
+  }
 
   /*
    * We need to check this before specialized objects, including the case where
@@ -3020,26 +4363,34 @@ Type union_of(Type a, Type b) {
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
       *a.m_data.dobj.whType.mutate() |= *b.m_data.dobj.whType;
-      return a;
+      return nullify(a);
     }
-    if (b == TInitNull) return opt(a);
+    if (b.subtypeOf(TNull)) {
+      return nullify(a);
+    }
   }
   if (is_specialized_wait_handle(b)) {
-    if (a == TInitNull) return opt(b);
+    if (a.subtypeOf(TNull)) {
+      return nullify(b);
+    }
   }
 
-  // When both types are strict subtypes of TObj or TOptObj or both
+  // When both types are strict subtypes of nullish TObj or both
   // are strict subtypes of TCls we look for a common ancestor if one
   // exists.
   if (is_specialized_obj(a) && is_specialized_obj(b)) {
-    auto keepOpt = is_opt(a) || is_opt(b);
-    auto t = a.m_data.dobj.cls.commonAncestor(dobj_of(b).cls);
+    auto const t = a.m_data.dobj.cls.commonAncestor(dobj_of(b).cls);
     // We need not to distinguish between Obj<=T and Obj=T, and always
     // return an Obj<=Ancestor, because that is the single type that
     // includes both children.
     auto const isCtx = a.m_data.dobj.isCtx && b.m_data.dobj.isCtx;
-    if (t) return setctx(keepOpt ? opt(subObj(*t)) : subObj(*t), isCtx);
-    return setctx(keepOpt ? TOptObj : TObj, isCtx);
+    auto ret = t ? subObj(*t) : TObj;
+    return setctx(nullify(ret), isCtx);
+  }
+  if (is_specialized_record(a) && is_specialized_record(b)) {
+    auto t = a.m_data.drec.rec.commonAncestor(drec_of(b).rec);
+    auto ret = t ? subRecord(*t) : TRecord;
+    return nullify(ret);
   }
   if (a.strictSubtypeOf(TCls) && b.strictSubtypeOf(TCls)) {
     auto t = a.m_data.dcls.cls.commonAncestor(dcls_of(b).cls);
@@ -3049,157 +4400,139 @@ Type union_of(Type a, Type b) {
   }
 
   if (is_specialized_array(a)) {
-    auto t = spec_array_like_union(a, b, TOptArrE, TOptArr);
+    auto t = spec_array_like_union(a, b, BArrE, BArr);
     if (t != TBottom) return t;
   } else if (is_specialized_array(b)) {
-    auto t = spec_array_like_union(b, a, TOptArrE, TOptArr);
+    auto t = spec_array_like_union(b, a, BArrE, BArr);
     if (t != TBottom) return t;
   }
 
   if (is_specialized_vec(a)) {
-    auto t = spec_array_like_union(a, b, TOptVecE, TOptVec);
+    auto t = spec_array_like_union(a, b, BVecE, BVec);
     if (t != TBottom) return t;
   } else if (is_specialized_vec(b)) {
-    auto t = spec_array_like_union(b, a, TOptVecE, TOptVec);
+    auto t = spec_array_like_union(b, a, BVecE, BVec);
     if (t != TBottom) return t;
   }
 
   if (is_specialized_dict(a)) {
-    auto t = spec_array_like_union(a, b, TOptDictE, TOptDict);
+    auto t = spec_array_like_union(a, b, BDictE, BDict);
     if (t != TBottom) return t;
   } else if (is_specialized_dict(b)) {
-    auto t = spec_array_like_union(b, a, TOptDictE, TOptDict);
+    auto t = spec_array_like_union(b, a, BDictE, BDict);
     if (t != TBottom) return t;
   }
 
   if (is_specialized_keyset(a)) {
-    auto t = spec_array_like_union(a, b, TOptKeysetE, TOptKeyset);
+    auto t = spec_array_like_union(a, b, BKeysetE, BKeyset);
     if (t != TBottom) return t;
   } else if (is_specialized_keyset(b)) {
-    auto t = spec_array_like_union(b, a, TOptKeysetE, TOptKeyset);
+    auto t = spec_array_like_union(b, a, BKeysetE, BKeyset);
     if (t != TBottom) return t;
   }
-
-  if (is_ref_with_inner(a) && is_ref_with_inner(b)) {
-    return ref_to(union_of(*a.m_data.inner, *b.m_data.inner));
-  }
-
-#define X(y) if (a.subtypeOf(y) && b.subtypeOf(y)) return y;
-  X(TInt)
-  X(TDbl)
-  X(TSStr)
-
-  X(TSPArr)
-  X(TPArrE)
-  X(TPArrN)
-  X(TPArr)
-
-  X(TSVArr)
-  X(TVArrE)
-  X(TVArrN)
-  X(TVArr)
-
-  X(TSDArr)
-  X(TDArrE)
-  X(TDArrN)
-  X(TDArr)
-
-  X(TSArrE)
-  X(TSArrN)
-  X(TSArr)
-  X(TArrE)
-  X(TArrN)
-  X(TArr)
-
-  X(TObj)
-  X(TCls)
-  X(TNull)
-  X(TBool)
-  X(TNum)
-  X(TStr)
-
-  X(TSVec)
-  X(TVecE)
-  X(TVecN)
-  X(TVec)
-  X(TSDict)
-  X(TDictE)
-  X(TDictN)
-  X(TDict)
-  X(TSKeyset)
-  X(TKeysetE)
-  X(TKeysetN)
-  X(TKeyset)
-
-  X(TUncArrKey)
-  X(TArrKey)
 
   /*
    * Merging option types tries to preserve subtype information where it's
    * possible.  E.g. if you union InitNull and Obj<=Foo, we want OptObj<=Foo to
    * be the result.
    */
-  if (a == TInitNull && canBeOptional(b.m_bits)) return opt(b);
-  if (b == TInitNull && canBeOptional(a.m_bits)) return opt(a);
+  if (isPredefined(a.bits() | b.bits())) {
+    if (a.subtypeOf(BNull)) {
+      b.m_bits |= a.bits();
+      return b;
+    }
+    if (b.subtypeOf(BNull)) {
+      a.m_bits |= b.bits();
+      return a;
+    }
+  }
 
-  // Optional types where the non-Null part is already a union or can
-  // have a value need to be manually tried (e.g. if we are merging
-  // TOptTrue and TOptFalse, we want TOptBool, or merging TOptInt=1
-  // and TOptInt=2 should give us TOptInt).
-  X(TOptBool)
-  X(TOptInt)
-  X(TOptDbl)
-  X(TOptNum)
-  X(TOptSStr)
-  X(TOptStr)
-  X(TOptObj)
+#define X(y) if (a.subtypeOf(B ## y) && b.subtypeOf(B ## y)) return T ## y;
+#define Y(y)                                                            \
+  X(y)                                                                  \
+  if (a.subtypeOf(B ## y | BInitNull) &&                                \
+      b.subtypeOf(B ## y | BInitNull)) return TOpt ## y;                \
+  if (a.subtypeOf(B ## y | BUninit) &&                                  \
+      b.subtypeOf(B ## y | BUninit)) return Type{B ## y | BUninit};     \
+  if (a.subtypeOf(B ## y | BNull) &&                                    \
+      b.subtypeOf(B ## y | BNull)) return Type{B ## y | BNull};
 
-  X(TOptSPArr)
-  X(TOptPArrE)
-  X(TOptPArrN)
-  X(TOptPArr)
+  // non-optional types
+  X(Null)
 
-  X(TOptSVArr)
-  X(TOptVArrE)
-  X(TOptVArrN)
-  X(TOptVArr)
+  // optional types
+  Y(Bool)
+  Y(Int)
+  Y(Dbl)
+  Y(Num)
+  Y(SStr)
+  Y(Str)
+  Y(Obj)
+  Y(Cls)
+  Y(Record)
 
-  X(TOptSDArr)
-  X(TOptDArrE)
-  X(TOptDArrN)
-  X(TOptDArr)
+  Y(SVArr)
+  Y(VArrE)
+  Y(VArrN)
+  Y(VArr)
 
-  X(TOptSArrE)
-  X(TOptSArrN)
-  X(TOptSArr)
-  X(TOptArrE)
-  X(TOptArrN)
-  X(TOptArr)
+  Y(SDArr)
+  Y(DArrE)
+  Y(DArrN)
+  Y(DArr)
 
-  X(TOptSVec)
-  X(TOptVecE)
-  X(TOptVecN)
-  X(TOptVec)
-  X(TOptSDict)
-  X(TOptDictE)
-  X(TOptDictN)
-  X(TOptDict)
-  X(TOptSKeyset)
-  X(TOptKeysetE)
-  X(TOptKeysetN)
-  X(TOptKeyset)
+  Y(SArrE)
+  Y(SArrN)
+  Y(SArr)
+  Y(ArrE)
+  Y(ArrN)
+  Y(Arr)
 
-  X(TOptUncArrKey)
-  X(TOptArrKey)
+  Y(SVec)
+  Y(VecE)
+  Y(VecN)
+  Y(Vec)
 
-  X(TInitPrim)
-  X(TPrim)
-  X(TInitUnc)
-  X(TUnc)
-  X(TInitCell)
-  X(TCell)
-  X(TInitGen)
-  X(TGen)
+  Y(SDict)
+  Y(DictE)
+  Y(DictN)
+  Y(Dict)
+
+  Y(SKeyset)
+  Y(KeysetE)
+  Y(KeysetN)
+  Y(Keyset)
+
+  Y(UncArrKey)
+  Y(ArrKey)
+
+  Y(FuncLike)
+
+  Y(UncStrLike)
+  Y(StrLike)
+
+  Y(UncArrKeyCompat)
+  Y(ArrKeyCompat)
+
+  Y(VArrCompatSA)
+  Y(VArrCompat)
+
+  Y(VecCompatSA)
+  Y(VecCompat)
+
+  Y(ArrCompatSA)
+  Y(ArrCompat)
+
+  // non-optional types that contain other types above (and hence
+  // must come after them).
+  X(InitPrim)
+  X(Prim)
+  X(InitUnc)
+  X(Unc)
+  X(InitCell)
+  X(Cell)
+
+#undef Y
 #undef X
 
   return TTop;
@@ -3210,16 +4543,14 @@ Type promote_emptyish(Type a, Type b) {
   if (a.subtypeOf(sempty())) {
     return b;
   }
-  auto t = trep(a.m_bits & ~(BNull | BFalse));
+  auto t = a.bits() & ~(BNull | BFalse);
   if (!isPredefined(t)) {
     if (trep(t & BInitPrim) == t) {
       t = BInitPrim;
     } else if (trep(t & BInitUnc) == t) {
       t = BInitUnc;
-    } else if (trep(t & BInitCell) == t) {
-      t = BInitCell;
     } else {
-      t = BInitGen;
+      t = BInitCell;
     }
     return union_of(Type { t }, b);
   }
@@ -3228,7 +4559,7 @@ Type promote_emptyish(Type a, Type b) {
 }
 
 bool could_have_magic_bool_conversion(const Type& t) {
-  if (!t.couldBe(TObj)) return false;
+  if (!t.couldBe(BObj)) return false;
 
   if (t.strictSubtypeOf(TObj) ||
       (is_opt(t) && unopt(t).strictSubtypeOf(TObj))) {
@@ -3239,15 +4570,22 @@ bool could_have_magic_bool_conversion(const Type& t) {
 
 Emptiness emptiness(const Type& t) {
   auto const empty_mask = BNull | BFalse | BArrE | BVecE | BDictE | BKeysetE;
-  if ((t.m_bits & empty_mask) == t.m_bits) return Emptiness::Empty;
+  if ((t.bits() & empty_mask) == t.bits()) return Emptiness::Empty;
   auto const non_empty_mask = BTrue | BArrN | BVecN | BDictN | BKeysetN;
-  if ((t.m_bits & non_empty_mask) == t.m_bits) return Emptiness::NonEmpty;
+  if ((t.bits() & non_empty_mask) == t.bits()) return Emptiness::NonEmpty;
   if (t.strictSubtypeOf(TObj)) {
     if (!could_have_magic_bool_conversion(t)) {
       return Emptiness::NonEmpty;
     }
+  }
+
+  if (is_opt(t)) {
+    // Something like ?Int=0 is always empty, but ?Int=1 may or may not be.
+    if (auto v = tv(unopt(t))) {
+      return tvToBool(*v) ? Emptiness::Maybe : Emptiness::Empty;
+    }
   } else if (auto v = tv(t)) {
-    return cellToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
+    return tvToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
   }
 
   return Emptiness::Maybe;
@@ -3256,9 +4594,9 @@ Emptiness emptiness(const Type& t) {
 void widen_type_impl(Type& t, uint32_t depth) {
   // Right now to guarantee termination we need to just limit the nesting depth
   // of the type to a fixed degree.
-  auto const checkDepth = [&]{
+  auto const checkDepth = [&] {
     if (depth >= kTypeWidenMaxDepth) {
-      t = Type { t.m_bits };
+      t = Type { t.bits() };
       return true;
     }
     return false;
@@ -3270,6 +4608,7 @@ void widen_type_impl(Type& t, uint32_t depth) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
+    case DataTag::Record:
     case DataTag::ArrLikeVal:
       return;
 
@@ -3278,9 +4617,6 @@ void widen_type_impl(Type& t, uint32_t depth) {
         widen_type_impl(*t.m_data.dobj.whType.mutate(), depth + 1);
       }
       return;
-
-    case DataTag::RefInner:
-      return widen_type_impl(*t.m_data.inner.mutate(), depth + 1);
 
     case DataTag::ArrLikePacked: {
       if (checkDepth()) return;
@@ -3305,6 +4641,10 @@ void widen_type_impl(Type& t, uint32_t depth) {
         auto temp = it->second;
         widen_type_impl(temp, depth + 1);
         map.map.update(it, std::move(temp));
+      }
+      if (map.hasOptElements()) {
+        // Key must be at least ArrKey, which doesn't need widening.
+        widen_type_impl(map.optVal, depth + 1);
       }
       return;
     }
@@ -3333,22 +4673,32 @@ Type widening_union(const Type& a, const Type& b) {
 }
 
 Type stack_flav(Type a) {
-  if (a.subtypeOf(TUninit))   return TUninit;
-  if (a.subtypeOf(TInitCell)) return TInitCell;
-  if (a.subtypeOf(TRef))      return TRef;
-  if (a.subtypeOf(TGen))      return TGen;
+  if (a.subtypeOf(BUninit))   return TUninit;
+  if (a.subtypeOf(BInitCell)) return TInitCell;
   always_assert(0 && "stack_flav passed invalid type");
 }
 
+Type loosen_interfaces(Type t) {
+  if (is_specialized_wait_handle(t)) {
+    auto const inner = wait_handle_inner(t);
+    if (is_specialized_obj(inner) && dobj_of(inner).cls.couldBeInterface()) {
+      *t.m_data.dobj.whType.mutate() = is_opt(inner) ? TOptObj : TObj;
+    }
+    return t;
+  } else if (is_specialized_obj(t) && dobj_of(t).cls.couldBeInterface()) {
+    return is_opt(t) ? TOptObj : TObj;
+  }
+  return t;
+}
+
 Type loosen_staticness(Type t) {
-  auto const check = [&](trep a){
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | a);
+  auto bits = t.bits();
+  if (TInitUnc.subtypeOf(bits)) return union_of(t, TInitCell);
+
+  auto const check = [&] (trep a) {
+    if (bits & a) bits |= a;
   };
-  // Need to remove any constant value from a string because a TStr cannot have
-  // one.
-  if (t.couldBe(TStr)) t |= TStr;
-  check(BPArrE);
-  check(BPArrN);
+  check(BStr);
   check(BVArrE);
   check(BVArrN);
   check(BDArrE);
@@ -3359,21 +4709,82 @@ Type loosen_staticness(Type t) {
   check(BDictN);
   check(BKeysetE);
   check(BKeysetN);
+
+  assertx(isPredefined(bits));
+  t.m_bits = bits;
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Str:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::Record:
+    case DataTag::ArrLikeVal:
+      break;
+
+    case DataTag::Obj:
+      if (t.m_data.dobj.whType) {
+        auto whType = t.m_data.dobj.whType.mutate();
+        *whType = loosen_staticness(std::move(*whType));
+      }
+      break;
+
+    case DataTag::ArrLikePacked: {
+      auto& packed = *t.m_data.packed.mutate();
+      for (auto& e : packed.elems) {
+        e = loosen_staticness(std::move(e));
+      }
+      break;
+    }
+
+    case DataTag::ArrLikePackedN: {
+      auto& packed = *t.m_data.packedn.mutate();
+      packed.type = loosen_staticness(std::move(packed.type));
+      break;
+    }
+
+    case DataTag::ArrLikeMap: {
+      auto& map = *t.m_data.map.mutate();
+      for (auto it = map.map.begin(); it != map.map.end(); it++) {
+        map.map.update(it, loosen_staticness(it->second));
+      }
+      map.optKey = loosen_staticness(std::move(map.optKey));
+      map.optVal = loosen_staticness(std::move(map.optVal));
+      break;
+    }
+
+    case DataTag::ArrLikeMapN: {
+      auto& map = *t.m_data.mapn.mutate();
+      map.key = loosen_staticness(std::move(map.key));
+      map.val = loosen_staticness(std::move(map.val));
+      break;
+    }
+  }
+
   return t;
 }
 
 Type loosen_dvarrayness(Type t) {
-  auto const check = [&](trep a) {
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | a);
+  auto const check = [&] (trep a) {
+    if (t.bits() & a) t.m_bits |= a;
   };
-  if (t.couldBe(TArr) && t.m_dataTag == DataTag::ArrLikeVal) {
+  if (t.couldBe(BArr) && t.m_dataTag == DataTag::ArrLikeVal) {
     // We need to drop any static array from the type because TArr unions cannot
     // have one. Turn it into the equivalent Packed or Map data.
-    if (auto p = toDArrLikePacked(t.m_data.aval)) {
-      t = packed_impl(t.m_bits, std::move(p->elems));
+    if (t.m_data.aval->empty()) {
+      t = loosen_values(t);
+    } else if (auto p = toDArrLikePacked(t.m_data.aval)) {
+      t = packed_impl(t.bits(), std::move(p->elems), p->provenance);
     } else {
       auto d = toDArrLikeMap(t.m_data.aval);
-      t = map_impl(t.m_bits, std::move(d->map));
+      t = map_impl(
+        t.bits(),
+        std::move(d->map),
+        std::move(d->optKey),
+        std::move(d->optVal),
+        d->provenance
+      );
     }
   }
   check(BSArrE);
@@ -3383,11 +4794,76 @@ Type loosen_dvarrayness(Type t) {
   return t;
 }
 
+Type loosen_provenance(Type t) {
+  if (!RuntimeOption::EvalArrayProvenance) return t;
+  if (t.couldBe(kProvBits)) {
+    switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Str:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::Record:
+      break;
+
+    case DataTag::ArrLikeVal:
+      if (arrprov::getTag(t.m_data.aval)) {
+        auto ad = t.m_data.aval->copy();
+        ArrayData::GetScalarArray(&ad);
+        t.m_data.aval = ad;
+      }
+      break;
+
+    case DataTag::Obj:
+      if (t.m_data.dobj.whType) {
+        auto whType = t.m_data.dobj.whType.mutate();
+        *whType = loosen_provenance(std::move(*whType));
+      }
+      break;
+
+    case DataTag::ArrLikePacked: {
+      auto& packed = *t.m_data.packed.mutate();
+      packed.provenance = ProvTag::Top;
+      for (auto& e : packed.elems) {
+        e = loosen_provenance(std::move(e));
+      }
+      break;
+    }
+
+    case DataTag::ArrLikePackedN: {
+      auto& packed = *t.m_data.packedn.mutate();
+      packed.type = loosen_provenance(std::move(packed.type));
+      break;
+    }
+
+    case DataTag::ArrLikeMap: {
+      auto& map = *t.m_data.map.mutate();
+      map.provenance = ProvTag::Top;
+      for (auto it = map.map.begin(); it != map.map.end(); it++) {
+        map.map.update(it, loosen_provenance(it->second));
+      }
+      map.optKey = loosen_provenance(std::move(map.optKey));
+      map.optVal = loosen_provenance(std::move(map.optVal));
+      break;
+    }
+
+    case DataTag::ArrLikeMapN: {
+      auto& map = *t.m_data.mapn.mutate();
+      map.key = loosen_provenance(std::move(map.key));
+      map.val = loosen_provenance(std::move(map.val));
+      break;
+    }
+    }
+  }
+  return t;
+}
+
 Type loosen_arrays(Type a) {
-  if (a.couldBe(TArr))    a |= TArr;
-  if (a.couldBe(TVec))    a |= TVec;
-  if (a.couldBe(TDict))   a |= TDict;
-  if (a.couldBe(TKeyset)) a |= TKeyset;
+  if (a.couldBe(BArr))     a |= TArr;
+  if (a.couldBe(BVec))     a |= TVec;
+  if (a.couldBe(BDict))    a |= TDict;
+  if (a.couldBe(BKeyset))  a |= TKeyset;
+  if (a.couldBe(BClsMeth)) a |= RO::EvalHackArrDVArrs ? TVecCompat : TArrCompat;
   return a;
 }
 
@@ -3397,30 +4873,28 @@ Type loosen_values(Type a) {
     case DataTag::Str:
     case DataTag::Int:
     case DataTag::Dbl:
-    case DataTag::RefInner:
     case DataTag::ArrLikeVal:
     case DataTag::ArrLikePacked:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
-      return Type { a.m_bits };
+      return Type { a.bits() };
     case DataTag::None:
     case DataTag::Obj:
     case DataTag::Cls:
+    case DataTag::Record:
       return a;
     }
     not_reached();
   }();
-  if (t.couldBe(TFalse) || t.couldBe(TTrue)) t |= TBool;
+  if (t.couldBe(BFalse) || t.couldBe(BTrue)) t |= TBool;
   return t;
 }
 
 Type loosen_emptiness(Type t) {
-  auto const check = [&](trep a, trep b){
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | b);
+  auto const check = [&] (trep a, trep b) {
+    if (t.bits() & a) t.m_bits |= b;
   };
-  check(BSPArr,   BSPArr);
-  check(BCPArr,   BPArr);
   check(BSVArr,   BSVArr);
   check(BCVArr,   BVArr);
   check(BSDArr,   BSDArr);
@@ -3431,25 +4905,90 @@ Type loosen_emptiness(Type t) {
   check(BCDict,   BDict);
   check(BSKeyset, BSKeyset);
   check(BCKeyset, BKeyset);
+  return project_data(t, t.bits());
+}
+
+Type loosen_likeness(Type t) {
+  if (RuntimeOption::EvalIsCompatibleClsMethType && t.couldBe(BClsMeth)) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      // Ideally we would loosen to TVArrLike, however, varray and darray need
+      // to behave the same in most instances.
+      t = union_of(std::move(t), TArrCompat);
+    } else {
+      t = union_of(std::move(t), TVecCompat);
+    }
+  }
+
+  if (t.couldBe(BCls)) t = union_of(std::move(t), TUncStrLike);
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+  case DataTag::Str:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+  case DataTag::Record:
+    break;
+
+  case DataTag::ArrLikeVal:
+    // Static arrays cannot currently contain function or class pointers.
+    break;
+
+  case DataTag::Obj:
+    if (t.m_data.dobj.whType) {
+      auto whType = t.m_data.dobj.whType.mutate();
+      *whType = loosen_likeness(std::move(*whType));
+    }
+    break;
+
+  case DataTag::ArrLikePacked: {
+    auto& packed = *t.m_data.packed.mutate();
+    for (auto& e : packed.elems) {
+      e = loosen_likeness(std::move(e));
+    }
+    break;
+  }
+
+  case DataTag::ArrLikePackedN: {
+    auto& packed = *t.m_data.packedn.mutate();
+    packed.type = loosen_likeness(std::move(packed.type));
+    break;
+  }
+
+  case DataTag::ArrLikeMap: {
+    auto& map = *t.m_data.map.mutate();
+    for (auto it = map.map.begin(); it != map.map.end(); it++) {
+      map.map.update(it, loosen_likeness(it->second));
+    }
+    map.optKey = loosen_likeness(std::move(map.optKey));
+    map.optVal = loosen_likeness(std::move(map.optVal));
+    break;
+  }
+
+  case DataTag::ArrLikeMapN: {
+    auto& map = *t.m_data.mapn.mutate();
+    map.key = loosen_likeness(std::move(map.key));
+    map.val = loosen_likeness(std::move(map.val));
+    break;
+  }
+  }
   return t;
 }
 
 Type loosen_all(Type t) {
-  return loosen_dvarrayness(
-    loosen_staticness(
-      loosen_emptiness(
-        loosen_values(std::move(t))
+  return loosen_staticness(
+    loosen_emptiness(
+      loosen_values(
+        loosen_likeness(std::move(t))
       )
     )
   );
 }
 
 Type add_nonemptiness(Type t) {
-  auto const check = [&](trep a, trep b){
-    if (t.m_bits & a) t.m_bits = static_cast<trep>(t.m_bits | b);
+  auto const check = [&] (trep a, trep b) {
+    if (t.bits() & a) t.m_bits |= b;
   };
-  check(BSPArrE,   BSPArrN);
-  check(BCPArrE,   BPArrN);
   check(BSVArrE,   BSVArrN);
   check(BCVArrE,   BVArrN);
   check(BSDArrE,   BSDArrN);
@@ -3460,33 +4999,43 @@ Type add_nonemptiness(Type t) {
   check(BCDictE,   BDictN);
   check(BSKeysetE, BSKeysetN);
   check(BCKeysetE, BKeysetN);
-  return t;
+  return project_data(t, t.bits());
 }
 
 Type remove_uninit(Type t) {
-  assert(t.subtypeOf(TCell));
-  if (!t.couldBe(TUninit))  return t;
-  if (t.subtypeOf(TUninit)) return TBottom;
-  if (t.subtypeOf(TNull))   return TInitNull;
-  if (t.subtypeOf(TPrim))   return TInitPrim;
-  if (t.subtypeOf(TUnc))    return TInitUnc;
+  assert(t.subtypeOf(BCell));
+  if (!t.couldBe(BUninit))  return t;
+  if (isPredefined(t.bits() & ~BUninit)) {
+    t.m_bits &= ~BUninit;
+    return t;
+  }
   return TInitCell;
+}
+
+Type to_cell(Type t) {
+  if (!t.subtypeOf(BCell)) return TInitCell;
+  if (!(t.bits() & BUninit)) return t;
+  auto const bits = (t.bits() & ~BUninit) | BInitNull;
+  assertx(isPredefined(bits));
+  t.m_bits = bits;
+  return t;
 }
 
 Type assert_emptiness(Type t) {
   if (t.subtypeOfAny(TTrue, TArrN, TVecN, TDictN, TKeysetN)) {
     return TBottom;
   }
-  if (!could_have_magic_bool_conversion(t) && t.subtypeOf(TOptObj)) {
-    return TInitNull;
+  if (!could_have_magic_bool_conversion(t) && t.subtypeOrNull(BObj)) {
+    return TNull;
   }
 
   auto remove = [&] (trep m, trep e) {
-    if ((t.m_bits & m) == t.m_bits) {
-      auto bits = static_cast<trep>(t.m_bits & e);
+    if ((t.bits() & (m | BNull)) == t.bits()) {
+      auto const bits = t.bits() & (e | BNull);
       if (t.hasData() && !mayHaveData(bits)) {
         t = Type { bits };
       } else {
+        t = project_data(t, bits);
         t.m_bits = bits;
       }
       return true;
@@ -3494,48 +5043,84 @@ Type assert_emptiness(Type t) {
     return false;
   };
 
-  if (remove(BOptArr, BOptArrE) || remove(BOptVec, BOptVecE) ||
-      remove(BOptDict, BOptDictE) || remove(BOptKeyset, BOptKeysetE)) {
+  if (remove(BArr, BArrE) || remove(BVec, BVecE) ||
+      remove(BDict, BDictE) || remove(BKeyset, BKeysetE)) {
     return t;
   }
 
-  if (t.subtypeOf(TInt))     return ival(0);
-  if (t.subtypeOf(TBool))    return TFalse;
-  if (t.subtypeOf(TDbl))     return dval(0);
-  if (t.subtypeOf(TSStr))    return sempty();
+  if (t.subtypeOf(BInt))     return ival(0);
+  if (t.subtypeOf(BBool))    return TFalse;
+  if (t.subtypeOf(BDbl))     return dval(0);
+  if (t.subtypeOf(BSStr))    return sempty();
 
-  if (t.subtypeOf(TOptInt))  return opt(ival(0));
-  if (t.subtypeOf(TOptBool)) return opt(TFalse);
-  if (t.subtypeOf(TOptDbl))  return opt(dval(0));
-  if (t.subtypeOf(TOptSStr)) return opt(sempty());
+  auto add_nullish = [&] (Type in) {
+    in.m_bits |= t.bits() & BNull;
+    return in;
+  };
+
+  if (t.subtypeOrNull(BInt))  return add_nullish(ival(0));
+  if (t.subtypeOrNull(BBool)) return add_nullish(TFalse);
+  if (t.subtypeOrNull(BDbl))  return add_nullish(dval(0));
+  if (t.subtypeOrNull(BSStr)) return add_nullish(sempty());
 
   return t;
 }
 
 Type assert_nonemptiness(Type t) {
+  t = remove_uninit(std::move(t));
   if (is_opt(t)) t = unopt(std::move(t));
-  if (t.subtypeOfAny(TNull, TFalse, TArrE, TVecE, TDictE, TKeysetE)) {
+  if (t.subtypeOf(BNull | BFalse | BArrE | BVecE | BDictE | BKeysetE)) {
     return TBottom;
   }
-  if (t.subtypeOf(TBool)) return TTrue;
+  if (auto const v = tv(t)) return tvToBool(*v) ? t : TBottom;
+  if (t.subtypeOf(BBool)) return TTrue;
 
   auto remove = [&] (trep m, trep e) {
-    if ((t.m_bits & m) == t.m_bits) {
-      t.m_bits = static_cast<trep>(t.m_bits & e);
+    if ((t.bits() & (m | BNull)) == t.bits()) {
+      t.m_bits &= (e | BNull);
       return true;
     }
     return false;
   };
 
-  if (remove(BOptArr, BOptArrN) || remove(BOptVec, BOptVecN) ||
-      remove(BOptDict, BOptDictN) || remove(BOptKeyset, BOptKeysetN)) {
+  if (remove(BArr, BArrN) || remove(BVec, BVecN) ||
+      remove(BDict, BDictN) || remove(BKeyset, BKeysetN)) {
     return t;
   }
 
-  return remove_uninit(std::move(t));
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////
+
+folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
+  if (keyTy.subtypeOf(TNull)) return {};
+
+  auto ret = ArrKey{};
+
+  if (keyTy.subtypeOf(BOptCls)) {
+    ret.mayThrow = true;
+    if (keyTy.subtypeOf(BCls)) {
+      if (keyTy.strictSubtypeOf(TCls)) {
+        auto cname = dcls_of(keyTy).cls.name();
+        ret.s = cname;
+        ret.type = sval(cname);
+      } else {
+        ret.type = TStr;
+      }
+      return ret;
+    }
+    ret.type = TUncArrKey;
+    return ret;
+  } else if (keyTy.couldBe(BOptCls)) {
+    ret.mayThrow = true;
+    if (strict) ret.type = keyTy.couldBe(BCStr) ? TArrKey : TUncArrKey;
+    else        ret.type = TInitCell;
+    return ret;
+  }
+
+  return {};
+}
 
 /*
  * For known strings that are strictly integers, we'll set both the known
@@ -3557,8 +5142,10 @@ Type assert_nonemptiness(Type t) {
 ArrKey disect_array_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (keyTy.subtypeOf(TOptInt)) {
-    if (keyTy.subtypeOf(TInt)) {
+  if (auto const r = maybe_class_func_key(keyTy, false)) return *r;
+
+  if (keyTy.subtypeOf(BOptInt)) {
+    if (keyTy.subtypeOf(BInt)) {
       if (keyTy.strictSubtypeOf(TInt)) {
         ret.i = keyTy.m_data.ival;
         ret.type = ival(*ret.i);
@@ -3574,49 +5161,25 @@ ArrKey disect_array_key(const Type& keyTy) {
     return ret;
   }
 
-  if (keyTy.subtypeOf(TOptStr)) {
-    if (keyTy.subtypeOf(TStr)) {
+  if (keyTy.subtypeOf(BOptStr)) {
+    if (keyTy.subtypeOf(BStr)) {
       if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
-        int64_t i;
-        if (keyTy.m_data.sval->isStrictlyInteger(i)) {
-          ret.i = i;
-          ret.type = ival(i);
-          ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
-        } else {
-          ret.s = keyTy.m_data.sval;
-          ret.type = keyTy;
-        }
-        return ret;
+        ret.s = keyTy.m_data.sval;
+      } else {
+        ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
       }
-      // Might stay a string or become an integer. The effective type is
-      // uncounted if the string is static.
-      ret.type = keyTy.subtypeOf(TSStr) ? TUncArrKey : TArrKey;
-      ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+      ret.type = keyTy;
       return ret;
     }
-    // If we have an OptStr with a value, we can at least exclude the
-    // possibility of integer-like strings by looking at that value.
-    // But we can't use the value itself, because if it is null the key
-    // will act like the empty string.  In that case, the code uses the
-    // static empty string, so if it was an OptCStr it needs to
-    // incorporate SStr, but an OptSStr can stay as SStr.
-    if (keyTy.strictSubtypeOf(TOptStr) && keyTy.m_dataTag == DataTag::Str) {
-      int64_t ignore;
-      if (!keyTy.m_data.sval->isStrictlyInteger(ignore)) {
-        ret.type = keyTy.strictSubtypeOf(TOptSStr) ? TSStr : TStr;
-        ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
-        return ret;
-      }
-    }
-    // An optional string is fine because a null will just become the empty
-    // string. So, if the string is static, the effective type is uncounted
-    // still. The effective type is ArrKey because it might become an integer.
-    ret.type = keyTy.subtypeOf(TOptSStr) ? TUncArrKey : TArrKey;
+
+    // Since the key is optional, we cannot include the value itself, as
+    // explained below.
+    ret.type = keyTy.subtypeOf(BOptSStr) ? TSStr : TStr;
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
 
-  if (keyTy.subtypeOf(TOptArrKey)) {
+  if (keyTy.subtypeOf(BOptArrKey)) {
     // The key is an integer, string, or null. The effective type is int or
     // string because null will become the empty string.
     ret.type = is_opt(keyTy) ? unopt(keyTy) : keyTy;
@@ -3629,40 +5192,40 @@ ArrKey disect_array_key(const Type& keyTy) {
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TNum)) {
+  if (keyTy.subtypeOf(BNum)) {
     ret.type = TInt;
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TNull)) {
-    ret.s = s_empty.get();
+  if (keyTy.subtypeOf(BNull)) {
+    ret.s = staticEmptyString();
     ret.type = sempty();
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TRes)) {
+  if (keyTy.subtypeOf(BRes)) {
     ret.type = TInt;
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TTrue)) {
+  if (keyTy.subtypeOf(BTrue)) {
     ret.i = 1;
     ret.type = ival(1);
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TFalse)) {
+  if (keyTy.subtypeOf(BFalse)) {
     ret.i = 0;
     ret.type = ival(0);
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TBool)) {
+  if (keyTy.subtypeOf(BBool)) {
     ret.type = TInt;
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }
-  if (keyTy.subtypeOf(TPrim)) {
+  if (keyTy.subtypeOf(BPrim)) {
     ret.type = TUncArrKey;
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
@@ -3672,7 +5235,7 @@ ArrKey disect_array_key(const Type& keyTy) {
   // raise warnings, so always assume it may throw. Keep the type as-is so that
   // we can detect this case at the point of the set.
 
-  if (!keyTy.subtypeOf(TInitCell)) {
+  if (!keyTy.subtypeOf(BInitCell)) {
     ret.type = TInitCell;
     ret.mayThrow = true;
     return ret;
@@ -3690,32 +5253,34 @@ ArrKey disect_array_key(const Type& keyTy) {
  * existed in the array.
  */
 std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
+  assert(aval.subtypeOrNull(BArrLike));
   assert(aval.m_dataTag == DataTag::ArrLikeVal);
+  auto const fix_staticness = [&](Type ty) {
+    if (aval.subtypeOrNull(BSArrLike)) return ty;
+    return loosen_staticness(ty);
+  };
   auto ad = aval.m_data.aval;
-  auto const isPhpArray = aval.subtypeOf(TOptArr);
   if (key.i) {
-    if (auto const r = ad->rval(*key.i)) {
-      return { from_cell(r.tv()), true };
-    }
-    return { isPhpArray ? TInitNull : TBottom, false };
+    auto const r = ad->get(*key.i);
+    if (r.is_init()) return { fix_staticness(from_cell(r)), true };
+    return { TBottom, false };
   } else if (key.s) {
-    if (auto const r = ad->rval(*key.s)) {
-      return { from_cell(r.tv()), true };
-    }
-    return { isPhpArray ? TInitNull : TBottom, false };
+    auto const r = ad->get(*key.s);
+    if (r.is_init()) return { fix_staticness(from_cell(r)), true };
+    return { TBottom, false };
   }
 
-  auto const couldBeInt = key.type.couldBe(TInt);
-  auto const couldBeStr = key.type.couldBe(TStr);
-  auto ty = isPhpArray ? TInitNull : TBottom;
-  IterateKV(ad, [&] (Cell k, TypedValue v) {
+  auto const couldBeInt = key.type.couldBe(BInt);
+  auto const couldBeStr = key.type.couldBe(BStr);
+  auto ty = TBottom;
+  IterateKV(ad, [&] (TypedValue k, TypedValue v) {
       if (isStringType(k.m_type) ? couldBeStr : couldBeInt) {
         ty |= from_cell(v);
         return TInitCell.subtypeOf(ty);
       }
       return false;
     });
-  return { ty, false };
+  return { fix_staticness(ty), false };
 }
 
 /*
@@ -3726,15 +5291,19 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
-  auto const isPhpArray = map.subtypeOf(TOptArr);
   if (auto const k = key.tv()) {
     auto r = map.m_data.map->map.find(*k);
     if (r != map.m_data.map->map.end()) return { r->second, true };
-    return { isPhpArray ? TInitNull : TBottom, false };
+    // If the key could match an optional element, use its associated
+    // type (but we cannot assert it definitely exists).
+    if (key.type.couldBe(map.m_data.map->optKey)) {
+      return { map.m_data.map->optVal, false };
+    }
+    return { TBottom, false };
   }
-  auto couldBeInt = key.type.couldBe(TInt);
-  auto couldBeStr = key.type.couldBe(TStr);
-  auto ty = isPhpArray ? TInitNull : TBottom;
+  auto couldBeInt = key.type.couldBe(BInt);
+  auto couldBeStr = key.type.couldBe(BStr);
+  auto ty = TBottom;
   for (auto const& kv : map.m_data.map->map) {
     if (isStringType(kv.first.m_type) ? couldBeStr : couldBeInt) {
       ty |= kv.second;
@@ -3742,6 +5311,8 @@ std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
     }
   }
 
+  // Include any optional elements if there's a possible match
+  if (key.type.couldBe(map.m_data.map->optKey)) ty |= map.m_data.map->optVal;
   return { ty, false };
 }
 
@@ -3753,20 +5324,15 @@ std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
   assert(pack.m_dataTag == DataTag::ArrLikePacked);
-  auto const isPhpArray = pack.subtypeOf(TOptArr);
   if (key.i) {
     if (*key.i >= 0 && *key.i < pack.m_data.packed->elems.size()) {
       return { pack.m_data.packed->elems[*key.i], true };
     }
-    return { isPhpArray ? TInitNull : TBottom, false };
-  } else if (!key.type.couldBe(TInt)) {
-    return { isPhpArray ? TInitNull : TBottom, false };
+    return { TBottom, false };
+  } else if (!key.type.couldBe(BInt)) {
+    return { TBottom, false };
   }
-  auto ret = packed_values(*pack.m_data.packed);
-  if (isPhpArray) {
-    ret |= TInitNull;
-  }
-  return { ret, false };
+  return { packed_values(*pack.m_data.packed), false };
 }
 
 /*
@@ -3774,16 +5340,10 @@ std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
  */
 std::pair<Type,bool> arr_packedn_elem(const Type& pack, const ArrKey& key) {
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
-  auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
-  if (key.s || !key.type.couldBe(TInt) || (key.i && *key.i < 0)) {
-    return {isPhpArray ? TInitNull : TBottom, false};
+  if (key.s || !key.type.couldBe(BInt) || (key.i && *key.i < 0)) {
+    return { TBottom, false };
   }
-
-  if (isPhpArray) {
-    return {union_of(pack.m_data.packedn->type, TInitNull), false};
-  }
-
-  return {pack.m_data.packedn->type, false};
+  return { pack.m_data.packedn->type, false };
 }
 
 /*
@@ -3797,34 +5357,58 @@ bool arr_packedn_set(Type& pack,
                      const Type& val,
                      bool maybeEmpty) {
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
-  assert(key.type.subtypeOf(TArrKey));
+  assert(key.type.subtypeOf(BArrKey));
 
-  auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
-  auto const isVecArray = (pack.m_bits & BOptVec) == pack.m_bits;
+  auto const canPromoteToMap = pack.subtypeOrNull(BArr);
+  auto const vecish = isVecish(pack);
+
   auto& ty = pack.m_data.packedn.mutate()->type;
   ty |= val;
 
   if (key.i) {
-    // If the key is known to be in range - its still a packedn
-    if (isPhpArray) {
+    // Setting element 0 of a non-empty PackedN is always safe.
+    if (!maybeEmpty && !*key.i) return true;
+    // Check for "implicit append" cases. In these cases, darrays will keep
+    // the PackedN specializtion, but "vecish" arrays will actually throw.
+    if (canPromoteToMap) {
       if (!*key.i) return true;
       if (!maybeEmpty && *key.i == 1) return true;
-    } else if (!maybeEmpty && !*key.i) {
-      return true;
     }
-    pack.m_bits = (*key.i < 0)
-      ? promote_varray(pack.m_bits)
-      : maybe_promote_varray(pack.m_bits);
-  } else {
-    pack.m_bits = key.type.subtypeOf(TStr)
-      ? promote_varray(pack.m_bits)
-      : maybe_promote_varray(pack.m_bits);
   }
 
-  if (!isVecArray) {
-    pack = mapn_impl(pack.m_bits, union_of(TInt, key.type), std::move(ty));
+  if (!vecish) {
+    pack = mapn_impl(
+      pack.bits(),
+      union_of(TInt, key.type),
+      std::move(ty),
+      ProvTag::Top
+    );
   }
   return false;
+}
+
+/*
+ * Return the appropriate provenance tag to apply given the current type of the
+ * array-like base and the source location.
+ */
+ProvTag arr_like_update_prov_tag(const Type& base, ProvTag loc) {
+  assert(base.subtypeOrNull(BArrLike));
+  if (!RuntimeOption::EvalArrayProvenance) return ProvTag::Top;
+  if (!base.couldBe(kProvBits)) return ProvTag::Top;
+  // If we don't know whether or not the array is empty, we also don't know if
+  // we'll preserve the provenance tag that may be associated with the
+  // ArrLikeN bit(s) of arr.
+  //
+  // OTOH, if we know the empty-ness of the array, it's safe to reason about
+  // the provenance of the resulting array.
+  if (base.couldBe(BArrLikeN) && base.couldBe(BArrLikeE)) return ProvTag::Top;
+
+  auto const tag = base.getProvTag();
+
+  if (tag == ProvTag::Top) return tag; // don't narrow Top
+  if (tag == ProvTag::NoTag) return loc; // override unknown prov
+  assertx(tag.valid());
+  return tag;
 }
 
 /*
@@ -3836,24 +5420,70 @@ bool arr_packedn_set(Type& pack,
  */
 bool arr_map_set(Type& map,
                  const ArrKey& key,
-                 const Type& val) {
+                 const Type& val,
+                 ProvTag src) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
-  assert(key.type.subtypeOf(TArrKey));
-  assert(!map.subtypeOf(TVArr));
+  assert(key.type.subtypeOf(BArrKey));
+  assert(!map.subtypeOf(BVArr));
+
+  auto const tag = arr_like_update_prov_tag(map, src);
+
+  auto mutated = map.m_data.map.mutate();
+  mutated->provenance = tag;
 
   if (auto const k = key.tv()) {
-    auto r = map.m_data.map.mutate()->map.emplace_back(*k, val);
-    // if the element existed, and was a ref, its still a ref after
-    // assigning to it
-    if (!r.second && r.first->second.subtypeOf(TInitCell)) {
-      map.m_data.map.mutate()->map.update(r.first, val);
+    // The new key is known
+    auto const it = mutated->map.find(*k);
+    // It matches an existing key. Set its associated type to be the
+    // new value type.
+    if (it != mutated->map.end()) {
+      mutated->map.update(it, val);
+      return true;
+    }
+
+    if (mutated->hasOptElements()) {
+      // The Map has optional elements. If the optional element
+      // represents a single key, and that key is the same as the new
+      // key, we can turn the optional element into a known key. An
+      // optional element representing a single key means "this array
+      // might end with this key, or might not". Since we're setting
+      // this key, the new array definitely ends with that key.
+      if (auto const optK = tv(mutated->optKey)) {
+        if (tvSame(*optK, *k)) {
+          mutated->map.emplace_back(*k, union_of(val, mutated->optVal));
+          mutated->optKey = TBottom;
+          mutated->optVal = TBottom;
+          return true;
+        }
+      }
+      // Otherwise just add the new key and value to the optional
+      // elements. We've lost the complete key structure of the array.
+      mutated->optKey |= key.type;
+      mutated->optVal |= val;
+    } else {
+      // There's no optional elements and we know this key doesn't
+      // exist in the Map. Add it as the next known key.
+      mutated->map.emplace_back(*k, val);
     }
     return true;
   }
-  auto mkv = map_key_values(*map.m_data.map);
-  map = mapn_impl(map.m_bits,
-                  union_of(std::move(mkv.first), key.type),
-                  union_of(std::move(mkv.second), val));
+
+  // The new key isn't known. The key either matches an existing key,
+  // or its a new one. For an existing key which can possibly match,
+  // union in the new value type. Then add the new key and value to
+  // the optional elements since it might not match. We don't have to
+  // do this for Keysets because the value is guaranteed to be the
+  // same as the key.
+  if (!map.subtypeOf(BKeyset)) {
+    for (auto it = mutated->map.begin(); it != mutated->map.end(); ++it) {
+      if (key.type.couldBe(from_cell(it->first))) {
+        mutated->map.update(it, union_of(it->second, val));
+      }
+    }
+  }
+  mutated->optKey |= key.type;
+  mutated->optVal |= val;
+
   return true;
 }
 
@@ -3865,38 +5495,34 @@ bool arr_map_set(Type& map,
  */
 bool arr_packed_set(Type& pack,
                     const ArrKey& key,
-                    const Type& val) {
+                    const Type& val,
+                    ProvTag src) {
   assert(pack.m_dataTag == DataTag::ArrLikePacked);
-  assert(key.type.subtypeOf(TArrKey));
+  assert(key.type.subtypeOf(BArrKey));
+  auto const tag = arr_like_update_prov_tag(pack, src);
+  auto const vecish = isVecish(pack);
 
-  auto const isVecArray = pack.subtypeOf(TOptVec);
   if (key.i) {
     if (*key.i >= 0) {
       if (*key.i < pack.m_data.packed->elems.size()) {
-        auto& current = pack.m_data.packed.mutate()->elems[*key.i];
-        // if the element was a ref, its still a ref after assigning to it
-        if (current.subtypeOf(TInitCell)) {
-          current = val;
-        }
+        pack.m_data.packed.mutate()->elems[*key.i] = val;
+        pack.m_data.packed.mutate()->provenance = tag;
         return true;
       }
-      if (!isVecArray && *key.i == pack.m_data.packed->elems.size()) {
+      // "implicit append" on "vecish" types will throw.
+      if (!vecish && *key.i == pack.m_data.packed->elems.size()) {
         pack.m_data.packed.mutate()->elems.push_back(val);
+        pack.m_data.packed.mutate()->provenance = tag;
         return true;
       }
     }
-    if (isVecArray) {
+    if (vecish) {
       pack = TBottom;
       return false;
     }
-    pack.m_bits = promote_varray(pack.m_bits);
-  } else {
-    pack.m_bits = key.type.subtypeOf(TStr)
-      ? promote_varray(pack.m_bits)
-      : maybe_promote_varray(pack.m_bits);
   }
 
-  if (!isVecArray) {
+  if (!vecish) {
     if (auto const v = key.tv()) {
       MapElems elems;
       auto idx = int64_t{0};
@@ -3904,17 +5530,17 @@ bool arr_packed_set(Type& pack,
         elems.emplace_back(make_tv<KindOfInt64>(idx++), t);
       }
       elems.emplace_back(*v, val);
-      pack = map_impl(pack.m_bits, std::move(elems));
+      pack = map_impl(pack.bits(), std::move(elems), TBottom, TBottom, tag);
       return true;
     }
 
     auto ty = union_of(packed_values(*pack.m_data.packed), val);
-    pack = mapn_impl(pack.m_bits, union_of(TInt, key.type), std::move(ty));
+    pack = mapn_impl(pack.bits(), union_of(TInt, key.type), std::move(ty), tag);
     return false;
   }
 
   auto ty = union_of(packed_values(*pack.m_data.packed), val);
-  pack = packedn_impl(pack.m_bits, std::move(ty));
+  pack = packedn_impl(pack.bits(), std::move(ty));
 
   return false;
 }
@@ -3923,8 +5549,8 @@ bool arr_mapn_set(Type& map,
                   const ArrKey& key,
                   const Type& val) {
   assert(map.m_dataTag == DataTag::ArrLikeMapN);
-  assert(key.type.subtypeOf(TArrKey));
-  assert(!map.subtypeOf(TVArr));
+  assert(key.type.subtypeOf(BArrKey));
+  assert(!map.subtypeOf(BVArr));
   auto& mapn = *map.m_data.mapn.mutate();
   mapn.val |= val;
   mapn.key |= key.type;
@@ -3932,8 +5558,19 @@ bool arr_mapn_set(Type& map,
   return true;
 }
 
-Type arr_map_newelem(Type& map, const Type& val) {
+Type arr_map_newelem(Type& map, const Type& val, ProvTag src) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
+  auto const tag = arr_like_update_prov_tag(map, src);
+
+  // If the Map has optional elements, we can't known what the new key
+  // is (but it won't modify known keys).
+  if (map.m_data.map->hasOptElements()) {
+    auto mutated = map.m_data.map.mutate();
+    mutated->optKey |= TInt;
+    mutated->optVal |= val;
+    return TInt;
+  }
+
   int64_t lastK = -1;
   for (auto const& kv : map.m_data.map->map) {
     if (kv.first.m_type == KindOfInt64 &&
@@ -3947,17 +5584,23 @@ Type arr_map_newelem(Type& map, const Type& val) {
   }
   map.m_data.map.mutate()->map.emplace_back(make_tv<KindOfInt64>(lastK + 1),
                                             val);
+  map.m_data.map.mutate()->provenance = tag;
   return ival(lastK + 1);
 }
 
-std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
-  const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool mustBeStatic = (arr.m_bits & BSArrLike) == arr.m_bits;
+std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
+                                           const ArrKey& key,
+                                           const Type& defaultTy) {
+  assert(arr.subtypeOrNull(BArrLike));
+  const bool maybeEmpty = arr.couldBe(BArrLikeE);
+  const bool mustBeStatic = arr.subtypeOrNull(BSArrLike);
 
-  auto const isPhpArray = arr.subtypeOf(TOptArr);
-  if (!(arr.m_bits & BArrLikeN)) {
+  if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
-    return { isPhpArray ? TInitNull : TBottom, ThrowMode::MissingElement };
+    return {
+      defaultTy,
+      key.mayThrow ? ThrowMode::MaybeBadKey : ThrowMode::MissingElement
+    };
   }
   auto pair = [&]() -> std::pair<Type, bool> {
     switch (arr.m_dataTag) {
@@ -3966,11 +5609,19 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
-    case DataTag::RefInner:
+    case DataTag::Record:
       not_reached();
 
-    case DataTag::None:
-      return { mustBeStatic ? TInitUnc : TInitCell, false };
+    case DataTag::None: {
+      auto const val = [&]{
+        if (arr.subtypeOrNull(BVArr) && !key.type.couldBe(BInt)) return TBottom;
+        if (arr.subtypeOrNull(BKeyset)) {
+          return mustBeStatic ? TUncArrKeyCompat : TArrKeyCompat;
+        }
+        return mustBeStatic ? TInitUnc : TInitCell;
+      }();
+      return { val, false };
+    }
 
     case DataTag::ArrLikeVal:
       return arr_val_elem(arr, key);
@@ -3985,27 +5636,27 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
       return arr_map_elem(arr, key);
 
     case DataTag::ArrLikeMapN:
-      if (isPhpArray) {
-        return { union_of(arr.m_data.mapn->val, TInitNull), false};
-      } else {
-        return { arr.m_data.mapn->val, false };
-      }
+      return { arr.m_data.mapn->val, false };
     }
     not_reached();
   }();
 
+  auto const isBottom = pair.first.subtypeOf(BBottom);
   std::pair<Type, ThrowMode> ret = {
     std::move(pair.first),
     key.mayThrow ? ThrowMode::MaybeBadKey :
-    pair.second ? ThrowMode::None : ThrowMode::MaybeMissingElement
+    pair.second ? ThrowMode::None :
+    isBottom ? ThrowMode::MissingElement :
+    ThrowMode::MaybeMissingElement
   };
+  if (!pair.second) ret.first |= defaultTy;
 
-  if (!ret.first.subtypeOf(TInitCell)) {
+  if (!ret.first.subtypeOf(BInitCell)) {
     ret.first = TInitCell;
   }
 
   if (maybeEmpty) {
-    if (isPhpArray) ret.first |= TInitNull;
+    ret.first |= defaultTy;
     if (ret.second == ThrowMode::None) {
       ret.second = ThrowMode::MaybeMissingElement;
     }
@@ -4015,10 +5666,10 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr, const ArrKey& key) {
 }
 
 std::pair<Type,ThrowMode>
-array_elem(const Type& arr, const Type& undisectedKey) {
-  assert(arr.subtypeOf(TArr));
+array_elem(const Type& arr, const Type& undisectedKey, const Type& defaultTy) {
+  assert(arr.subtypeOrNull(BArr));
   auto const key = disect_array_key(undisectedKey);
-  return array_like_elem(arr, key);
+  return array_like_elem(arr, key, defaultTy);
 }
 
 /*
@@ -4038,20 +5689,20 @@ array_elem(const Type& arr, const Type& undisectedKey) {
 
 std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          const ArrKey& key,
-                                         const Type& valIn) {
-  const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool isVector   = arr.m_bits & BOptVec;
-  const bool isPhpArray = arr.m_bits & BOptArr;
-  DEBUG_ONLY const bool isVArray   = (arr.m_bits & BOptVArr) == arr.m_bits;
-  const bool validKey   = key.type.subtypeOf(isVector ? TInt : TArrKey);
+                                         const Type& valIn,
+                                         ProvTag src) {
+  const bool maybeEmpty = arr.couldBe(BArrLikeE);
+  DEBUG_ONLY const bool isVector = arr.subtypeOrNull(BVec);
+  DEBUG_ONLY const bool isVArray = arr.subtypeOrNull(BVArr);
+  const bool validKey = key.type.subtypeOf(maybeVecish(arr) ? BInt : BArrKey);
+  const bool vecish = isVecish(arr);
 
-  trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
-  if (validKey) bits = static_cast<trep>(bits & ~BArrLikeE);
+  trep bits = combine_dv_arr_like_bits(arr.bits(), BArrLikeN);
+  if (validKey) bits &= ~BArrLikeE;
 
-  auto const fixRef  = !isPhpArray && valIn.couldBe(TRef);
-  auto const throwMode = !fixRef && validKey && !key.mayThrow ?
+  auto const throwMode = validKey && !key.mayThrow ?
     ThrowMode::None : ThrowMode::BadOperation;
-  auto const& val    = fixRef ? TInitCell : valIn;
+  auto const& val    = valIn;
   // We don't want to store types more general than TArrKey into specialized
   // array type keys. If the key was strange (array or object), it will be more
   // general than TArrKey (this is needed so we can set validKey above), so
@@ -4060,35 +5711,34 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     ? key
     : []{ ArrKey key; key.type = TArrKey; key.mayThrow = true; return key; }();
 
-  if (!(arr.m_bits & BArrLikeN)) {
+  if (!arr.couldBe(BArrLikeN)) {
+    auto const tag = arr_like_update_prov_tag(arr, src);
     assert(maybeEmpty);
-    if (isVector) return { TBottom, ThrowMode::BadOperation };
+    if (vecish) return { TBottom, ThrowMode::BadOperation };
     if (fixedKey.i) {
       if (!*fixedKey.i) {
-        return { packed_impl(bits, { val }), throwMode };
+        return { packed_impl(bits, { val }, tag), throwMode };
       }
-      bits = promote_varray(bits);
-    } else {
-      bits = fixedKey.type.subtypeOf(TStr)
-        ? promote_varray(bits)
-        : maybe_promote_varray(bits);
     }
     if (auto const k = fixedKey.tv()) {
       MapElems m;
       m.emplace_back(*k, val);
-      return { map_impl(bits, std::move(m)), throwMode };
+      return { map_impl(bits, std::move(m), TBottom, TBottom, tag), throwMode };
     }
-    return { mapn_impl(bits, fixedKey.type, val), throwMode };
+    return { mapn_impl_from_map(bits, fixedKey.type, val, tag), throwMode };
   }
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,ThrowMode> {
-    bits = fixedKey.type.subtypeOf(TStr)
-      ? promote_varray(bits)
-      : maybe_promote_varray(bits);
-    return { mapn_impl(bits,
-                       union_of(inKey, fixedKey.type),
-                       union_of(inVal, val)), throwMode };
+    return {
+      mapn_impl_from_map(
+        bits,
+        union_of(inKey, fixedKey.type),
+        union_of(inVal, val),
+        arr_like_update_prov_tag(arr, src)
+      ),
+      throwMode
+    };
   };
 
   arr.m_bits = bits;
@@ -4099,47 +5749,54 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
+  case DataTag::Record:
     not_reached();
 
   case DataTag::None:
-    arr.m_bits = fixedKey.type.subtypeOf(TStr)
-      ? promote_varray(arr.m_bits)
-      : maybe_promote_varray(arr.m_bits);
     return { std::move(arr), ThrowMode::BadOperation };
 
   case DataTag::ArrLikeVal:
-    if (maybeEmpty && !isVector) {
+    if (maybeEmpty && !vecish) {
       auto kv = val_key_values(arr.m_data.aval);
       return emptyHelper(kv.first, kv.second);
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
-        return array_like_set(packed_impl(bits, std::move(d->elems)),
-                              key, valIn);
+        return array_like_set(
+          packed_impl(bits, std::move(d->elems), d->provenance),
+          key, valIn, src
+        );
       }
       assert(!isVector);
       assert(!isVArray);
       // We know its not packed, so this should always succeed
       auto d = toDArrLikeMap(arr.m_data.aval);
-      return array_like_set(map_impl(bits, std::move(d->map)),
-                            key, valIn);
+      return array_like_set(
+        map_impl(
+          bits,
+          std::move(d->map),
+          std::move(d->optKey),
+          std::move(d->optVal),
+          d->provenance
+        ),
+        key, valIn, src
+      );
     }
 
   case DataTag::ArrLikePacked:
     // Setting element zero of a maybe empty, 1 element packed array
     // turns it into a 1 element packed array.
-    if (maybeEmpty && !isVector &&
+    if (maybeEmpty && !vecish &&
         (!fixedKey.i ||
          *fixedKey.i ||
          arr.m_data.packed->elems.size() != 1)) {
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
-      auto const inRange = arr_packed_set(arr, fixedKey, val);
+      auto const inRange = arr_packed_set(arr, fixedKey, val, src);
       return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
     }
 
   case DataTag::ArrLikePackedN:
-    if (maybeEmpty && !isVector) {
+    if (maybeEmpty && !vecish) {
       return emptyHelper(TInt, arr.m_data.packedn->type);
     } else {
       auto const inRange = arr_packedn_set(arr, fixedKey, val, false);
@@ -4153,7 +5810,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       auto mkv = map_key_values(*arr.m_data.map);
       return emptyHelper(std::move(mkv.first), std::move(mkv.second));
     } else {
-      auto const inRange = arr_map_set(arr, fixedKey, val);
+      auto const inRange = arr_map_set(arr, fixedKey, val, src);
       return { std::move(arr), inRange ? throwMode : ThrowMode::BadOperation };
     }
 
@@ -4173,50 +5830,57 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
 
 std::pair<Type, ThrowMode> array_set(Type arr,
                                      const Type& undisectedKey,
-                                     const Type& val) {
-  assert(arr.subtypeOf(TArr));
-
-  // Unless you know an array can't cow, you don't know if the TRef
-  // will stay a TRef or turn back into a TInitCell.  Generally you
-  // want a TInitGen.
-  always_assert((val == TBottom || !val.subtypeOf(TRef)) &&
-                "You probably don't want to put Ref types into arrays ...");
+                                     const Type& val,
+                                     ProvTag src) {
+  assert(arr.subtypeOf(BArr));
+  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_array_key(undisectedKey);
   assert(key.type != TBottom);
-  return array_like_set(std::move(arr), key, val);
+  return array_like_set(std::move(arr), key, val, src);
 }
 
-std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
+std::pair<Type,Type> array_like_newelem(Type arr,
+                                        const Type& val,
+                                        ProvTag src) {
 
-  if (arr.m_bits & BOptKeyset) {
+  if (arr.couldBe(BKeyset)) {
     auto const key = disect_strict_key(val);
     if (key.type == TBottom) return { TBottom, TInitCell };
-    return { array_like_set(std::move(arr), key, key.type).first, val };
+    return { array_like_set(std::move(arr), key, key.type, src).first, val };
   }
 
-  const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool isVector = arr.m_bits & BOptVec;
-  const bool isVArray = (arr.m_bits & BOptVArr) == arr.m_bits;
+  const bool maybeEmpty = arr.couldBe(BArrLikeE);
+  const bool isVector = arr.subtypeOrNull(BVec);
+  const bool isVArray = arr.subtypeOrNull(BVArr);
+  assertx(isVector == arr.couldBe(BVec));
 
-  trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
-  bits = static_cast<trep>(bits & ~BArrLikeE);
+  trep bits = combine_dv_arr_like_bits(arr.bits(), BArrLikeN);
+  bits &= ~BArrLikeE;
 
-  if (!(arr.m_bits & BArrLikeN)) {
+  if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
-    return { packed_impl(bits, { val }), ival(0) };
+    return { packed_impl(bits, { val }, arr_like_update_prov_tag(arr, src)),
+             ival(0) };
   }
+
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,Type> {
     if (isVector || isVArray) {
-      assert(inKey.subtypeOf(TInt));
+      assert(inKey.subtypeOf(BInt));
       return { packedn_impl(bits, union_of(inVal, val)), TInt };
     }
 
-    return { mapn_impl(bits,
-                       union_of(inKey, TInt),
-                       union_of(inVal, val)), TInt };
+    return {
+      mapn_impl_from_map(
+        bits,
+        union_of(inKey, TInt),
+        union_of(inVal, val),
+        arr_like_update_prov_tag(arr, src)
+      ),
+      TInt
+    };
   };
 
   switch (arr.m_dataTag) {
@@ -4225,7 +5889,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
+  case DataTag::Record:
     not_reached();
 
   case DataTag::None:
@@ -4239,12 +5903,22 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
         return array_like_newelem(
-          packed_impl(bits, std::move(d->elems)), val);
+          packed_impl(bits, std::move(d->elems), d->provenance), val, src);
       }
       assert(!isVector);
+      assert(!isVArray);
       // We know its not packed, so this should always succeed.
       auto d = toDArrLikeMap(arr.m_data.aval);
-      return array_like_newelem(map_impl(bits, std::move(d->map)), val);
+      return array_like_newelem(
+        map_impl(
+          bits,
+          std::move(d->map),
+          std::move(d->optKey),
+          std::move(d->optVal),
+          d->provenance
+        ),
+        val, src
+      );
     }
 
   case DataTag::ArrLikePacked:
@@ -4254,6 +5928,8 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
       arr.m_bits = bits;
       auto len = arr.m_data.packed->elems.size();
       arr.m_data.packed.mutate()->elems.push_back(val);
+      arr.m_data.packed.mutate()->provenance =
+        arr_like_update_prov_tag(arr, src);
       return { std::move(arr), ival(len) };
     }
 
@@ -4275,7 +5951,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
       return emptyHelper(mkv.first, mkv.second);
     } else {
       arr.m_bits = bits;
-      auto const idx = arr_map_newelem(arr, val);
+      auto const idx = arr_map_newelem(arr, val, src);
       return { std::move(arr), idx };
     }
 
@@ -4285,31 +5961,30 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
     if (maybeEmpty) {
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     }
-    return { mapn_impl(bits,
-                       union_of(arr.m_data.mapn->key, TInt),
-                       union_of(arr.m_data.mapn->val, val)),
-             TInt };
+    return {
+      mapn_impl_from_map(
+        bits,
+        union_of(arr.m_data.mapn->key, TInt),
+        union_of(arr.m_data.mapn->val, val),
+        arr_like_update_prov_tag(arr, src)
+      ),
+      TInt
+    };
   }
 
   not_reached();
 }
 
-std::pair<Type,Type> array_newelem(Type arr, const Type& val) {
-  assert(arr.subtypeOf(TArr));
+std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src) {
+  assert(arr.subtypeOf(BArr));
 
-  // Unless you know an array can't cow, you don't know if the TRef
-  // will stay a TRef or turn back into a TInitCell.  Generally you
-  // want a TInitGen.
-  always_assert((val == TBottom || !val.subtypeOf(TRef)) &&
-         "You probably don't want to put Ref types into arrays ...");
-
-  return array_like_newelem(std::move(arr), val);
+  return array_like_newelem(std::move(arr), val, src);
 }
 
 IterTypes iter_types(const Type& iterable) {
   // Only array types and objects can be iterated. Everything else raises a
   // warning and jumps out of the loop.
-  if (!iterable.couldBeAny(TArr, TVec, TDict, TKeyset, TObj)) {
+  if (!iterable.couldBeAny(TArr, TVec, TDict, TKeyset, TObj, TClsMeth)) {
     return { TBottom, TBottom, IterTypes::Count::Empty, true, true };
   }
 
@@ -4321,7 +5996,7 @@ IterTypes iter_types(const Type& iterable) {
       TInitCell,
       IterTypes::Count::Any,
       true,
-      iterable.couldBe(TObj)
+      iterable.couldBe(BObj)
     };
   }
 
@@ -4351,17 +6026,17 @@ IterTypes iter_types(const Type& iterable) {
 
   if (!is_specialized_array_like(iterable)) {
     auto kv = [&]() -> std::pair<Type, Type> {
-      if (iterable.subtypeOf(TOptSVec))    return { TInt, TInitUnc };
-      if (iterable.subtypeOf(TOptSDict))   return { TUncArrKey, TInitUnc };
-      if (iterable.subtypeOf(TOptSKeyset)) return { TUncArrKey, TUncArrKey };
-      if (iterable.subtypeOf(TOptSVArr))   return { TInt, TInitUnc };
-      if (iterable.subtypeOf(TOptSArr))    return { TUncArrKey, TInitUnc };
+      if (iterable.subtypeOrNull(BSVec))    return { TInt, TInitUnc };
+      if (iterable.subtypeOrNull(BSDict))   return { TUncArrKey, TInitUnc };
+      if (iterable.subtypeOrNull(BSKeyset)) return { TUncArrKey, TUncArrKey };
+      if (iterable.subtypeOrNull(BSVArr))   return { TInt, TInitUnc };
+      if (iterable.subtypeOrNull(BSArr))    return { TUncArrKey, TInitUnc };
 
-      if (iterable.subtypeOf(TOptVec))     return { TInt, TInitCell };
-      if (iterable.subtypeOf(TOptDict))    return { TArrKey, TInitCell };
-      if (iterable.subtypeOf(TOptKeyset))  return { TArrKey, TArrKey };
-      if (iterable.subtypeOf(TOptVArr))    return { TInt, TInitCell };
-      if (iterable.subtypeOf(TOptArr))     return { TArrKey, TInitCell };
+      if (iterable.subtypeOrNull(BVec))     return { TInt, TInitCell };
+      if (iterable.subtypeOrNull(BDict))    return { TArrKey, TInitCell };
+      if (iterable.subtypeOrNull(BKeyset))  return { TArrKey, TArrKey };
+      if (iterable.subtypeOrNull(BVArr))    return { TInt, TInitCell };
+      if (iterable.subtypeOrNull(BArr))     return { TArrKey, TInitCell };
 
       always_assert(false);
     }();
@@ -4382,7 +6057,7 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
+  case DataTag::Record:
     always_assert(0);
   case DataTag::ArrLikeVal: {
     auto kv = val_key_values(iterable.m_data.aval);
@@ -4415,7 +6090,9 @@ IterTypes iter_types(const Type& iterable) {
     return {
       std::move(kv.first),
       std::move(kv.second),
-      count(iterable.m_data.map->map.size()),
+      iterable.m_data.map->hasOptElements()
+        ? count(folly::none)
+        : count(iterable.m_data.map->map.size()),
       mayThrow,
       false
     };
@@ -4433,18 +6110,11 @@ IterTypes iter_types(const Type& iterable) {
   not_reached();
 }
 
-bool could_run_destructor(const Type& t) {
-  if (t.couldBe(TObj)) return true;
+bool could_contain_objects(const Type& t) {
+  if (t.couldBe(BObj)) return true;
 
   auto const couldBeArrWithDestructors =
-    t.m_bits & (BCArrN | BCVecN | BCDictN);
-
-  if (t.couldBe(TRef)) {
-    if (!couldBeArrWithDestructors && is_ref_with_inner(t)) {
-      return could_run_destructor(*t.m_data.inner);
-    }
-    return true;
-  }
+    t.bits() & (BCArrN | BCVecN | BCDictN);
 
   if (!couldBeArrWithDestructors) return false;
 
@@ -4455,30 +6125,225 @@ bool could_run_destructor(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
+  case DataTag::Record:
     return true;
   case DataTag::ArrLikeVal: return false;
   case DataTag::ArrLikePacked:
     for (auto const& e : t.m_data.packed->elems) {
-      if (could_run_destructor(e)) return true;
+      if (could_contain_objects(e)) return true;
     }
     return false;
   case DataTag::ArrLikePackedN:
-    return could_run_destructor(t.m_data.packedn->type);
+    return could_contain_objects(t.m_data.packedn->type);
   case DataTag::ArrLikeMap:
     for (auto const& kv : t.m_data.map->map) {
-      if (could_run_destructor(kv.second)) return true;
+      if (could_contain_objects(kv.second)) return true;
     }
+    if (could_contain_objects(t.m_data.map->optVal)) return true;
     return false;
   case DataTag::ArrLikeMapN:
-    return could_run_destructor(t.m_data.mapn->val);
+    return could_contain_objects(t.m_data.mapn->val);
   }
 
   not_reached();
 }
 
 bool could_copy_on_write(const Type& t) {
-  return t.m_bits & (BCStr | BCArrN | BCVecN | BCDictN | BCKeysetN);
+  return t.bits() & (BCStr | BCArrN | BCVecN | BCDictN | BCKeysetN);
+}
+
+bool is_type_might_raise(const Type& testTy, const Type& valTy) {
+  auto const hackarr = RO::EvalHackArrDVArrs;
+
+  // Explanation for the array-like type test behaviors:
+  //
+  //  1. If arrprov is on, we may log if an array-like with provenance fails or
+  //     passes a type test, because those arrays may have to be marked.
+  //
+  //  2. The ...IsArrayNotices flag is used to migrate is_array calls to
+  //     is_any_array calls, which differ for Hack arrays, so we must log.
+  //
+  //  3. The ...IsVecDictNotices flag tracks those type tests that would change
+  //     behavior with the Hack array migration - i.e. those tests which have
+  //     varrays in is_vec, darrays in is_dict, or vice versa.
+
+  auto const mayLogProv = RO::EvalArrayProvenance && valTy.couldBe(kProvBits);
+
+  if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
+  if (testTy == TStrLike) {
+    return valTy.couldBe(BCls);
+  } else if (testTy == TArr || testTy == TArrCompat) {
+    return mayLogProv ||
+           (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth));
+  } else if (testTy == TVArr || testTy == TVArrCompat) {
+    return mayLogProv ||
+           (RO::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
+  } else if (testTy == TDArr) {
+    return mayLogProv ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDict));
+  } else if (testTy == TVec || testTy == TVecCompat) {
+    return mayLogProv ||
+           (RO::EvalIsVecNotices && hackarr && valTy.couldBe(BClsMeth)) ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
+  } else if (testTy == TDict) {
+    return mayLogProv ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDArr));
+  } else if (testTy == TArrLikeCompat) {
+    return RO::EvalIsVecNotices && valTy.couldBe(BClsMeth);
+  }
+  return false;
+}
+
+bool is_type_might_raise(IsTypeOp testOp, const Type& valTy) {
+  switch (testOp) {
+    case IsTypeOp::Scalar:
+      return false;
+      /* fallthrough */
+    default:
+      return is_type_might_raise(type_of_istype(testOp), valTy);
+  }
+}
+
+bool inner_types_might_raise(const Type& t1, const Type& t2) {
+  assertx(t1.subtypeOf(BArrLike));
+  assertx(t2.subtypeOf(BArrLike));
+
+  // If either is an empty array, there are no inner elements to warn about.
+  if (!t1.couldBe(BArrLikeN) || !t2.couldBe(BArrLikeN)) return false;
+
+  auto const checkOne = [&] (const Type& t, folly::Optional<size_t>& sz) {
+    switch (t.m_dataTag) {
+      case DataTag::None:
+        return true;
+
+      case DataTag::Str:
+      case DataTag::Obj:
+      case DataTag::Int:
+      case DataTag::Dbl:
+      case DataTag::Cls:
+      case DataTag::Record:
+        not_reached();
+
+      case DataTag::ArrLikeVal:
+        sz = t.m_data.aval->size();
+        return true;
+      case DataTag::ArrLikePacked:
+        sz = t.m_data.packed->elems.size();
+        return true;
+      case DataTag::ArrLikePackedN:
+        return t.m_data.packedn->type.couldBe(BArrLike | BObj | BClsMeth);
+      case DataTag::ArrLikeMap:
+        if (!t.m_data.map->hasOptElements()) sz = t.m_data.map->map.size();
+        return true;
+      case DataTag::ArrLikeMapN:
+        return t.m_data.mapn->val.couldBe(BArrLike | BObj | BClsMeth);
+    }
+    not_reached();
+  };
+
+  folly::Optional<size_t> sz1;
+  if (!checkOne(t1, sz1)) return false;
+  folly::Optional<size_t> sz2;
+  if (!checkOne(t2, sz2)) return false;
+
+  // if the arrays have different sizes, we don't even check their contents
+  if (sz1 && sz2 && *sz1 != *sz2) return false;
+  size_t numToCheck = 1;
+  if (sz1 && *sz1 > numToCheck) numToCheck = *sz1;
+  if (sz2 && *sz2 > numToCheck) numToCheck = *sz2;
+
+  union ArrPos {
+    ArrPos() : pos{} {}
+    size_t pos;
+    MapElems::iterator it;
+  } p1, p2;
+
+  folly::Optional<Type> vals1;
+  folly::Optional<Type> vals2;
+
+  for (size_t i = 0; i < numToCheck; i++) {
+    auto const nextType = [&] (const Type& t,
+                               ArrPos& p,
+                               folly::Optional<Type>& vals) {
+      switch (t.m_dataTag) {
+        case DataTag::None:
+          return TInitCell;
+
+        case DataTag::Str:
+        case DataTag::Obj:
+        case DataTag::Int:
+        case DataTag::Dbl:
+        case DataTag::Cls:
+        case DataTag::Record:
+          not_reached();
+
+        case DataTag::ArrLikeVal:
+          if (!i) {
+            p.pos = t.m_data.aval->iter_begin();
+          } else {
+            p.pos = t.m_data.aval->iter_advance(p.pos);
+          }
+          return from_cell(t.m_data.aval->nvGetVal(p.pos));
+        case DataTag::ArrLikePacked:
+          return t.m_data.packed->elems[i];
+        case DataTag::ArrLikePackedN:
+          return t.m_data.packedn->type;
+        case DataTag::ArrLikeMap:
+          if (t.m_data.map->hasOptElements()) {
+            if (!vals) vals = map_key_values(*t.m_data.map).second;
+            return *vals;
+          }
+
+          if (!i) {
+            p.it = t.m_data.map->map.begin();
+          } else {
+           ++p.it;
+          }
+          return p.it->second;
+        case DataTag::ArrLikeMapN:
+          return t.m_data.mapn->val;
+      }
+      not_reached();
+    };
+    if (compare_might_raise(nextType(t1, p1, vals1), nextType(t2, p2, vals2))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool compare_might_raise(const Type& t1, const Type& t2) {
+  if (!RuntimeOption::EvalHackArrCompatNotices &&
+      !RuntimeOption::EvalEmitClsMethPointers) {
+    return false;
+  }
+
+  auto checkOne = [&] (const trep bits) -> folly::Optional<bool> {
+    if (t1.subtypeOf(bits) && t2.subtypeOf(bits)) {
+      return inner_types_might_raise(t1, t2);
+    }
+    if (t1.couldBe(bits) && t2.couldBe(BArrLike)) return true;
+    if (t2.couldBe(bits) && t1.couldBe(BArrLike)) return true;
+    return folly::none;
+  };
+
+  if (auto const f = checkOne(BArr)) return *f;
+  if (auto const f = checkOne(BDict)) return *f;
+  if (auto const f = checkOne(BVec)) return *f;
+  if (auto const f = checkOne(BKeyset)) return *f;
+
+  if (RuntimeOption::EvalEmitClsMethPointers) {
+    if (!RuntimeOption::EvalHackArrDVArrs) {
+      if (t1.couldBe(TClsMeth) && t2.couldBe(TArr))     return true;
+      if (t1.couldBe(TArr)     && t2.couldBe(TClsMeth)) return true;
+    } else if (RuntimeOption::EvalEmitClsMethPointers) {
+      if (t1.couldBe(TClsMeth) && t2.couldBe(TVec))     return true;
+      if (t1.couldBe(TVec)     && t2.couldBe(TClsMeth)) return true;
+    }
+  }
+
+  return t1.couldBe(BObj) && t2.couldBe(BObj);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4486,7 +6351,7 @@ bool could_copy_on_write(const Type& t) {
 ArrKey disect_vec_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (!keyTy.couldBe(TInt)) {
+  if (!keyTy.couldBe(BInt)) {
     ret.type = TBottom;
     ret.mayThrow = true;
     return ret;
@@ -4496,14 +6361,14 @@ ArrKey disect_vec_key(const Type& keyTy) {
   // type (and mark it as potentially throwing). We check for this explicitly
   // here rather than falling through so we can take advantage of something like
   // ?Int=123.
-  if (keyTy.subtypeOf(TOptInt)) {
+  if (keyTy.subtypeOf(BOptInt)) {
     if (keyTy.m_dataTag == DataTag::Int) {
       ret.i = keyTy.m_data.ival;
       ret.type = ival(*ret.i);
     } else {
       ret.type = TInt;
     }
-    ret.mayThrow = !keyTy.subtypeOf(TInt);
+    ret.mayThrow = !keyTy.subtypeOf(BInt);
     return ret;
   }
 
@@ -4515,25 +6380,27 @@ ArrKey disect_vec_key(const Type& keyTy) {
 }
 
 std::pair<Type, ThrowMode>
-vec_elem(const Type& vec, const Type& undisectedKey) {
+vec_elem(const Type& vec, const Type& undisectedKey, const Type& defaultTy) {
+  assert(vec.subtypeOrNull(BVec));
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(vec, key);
+  return array_like_elem(vec, key, defaultTy);
 }
 
 std::pair<Type, ThrowMode>
 vec_set(Type vec, const Type& undisectedKey, const Type& val) {
-  if (!val.couldBe(TInitCell)) return {TBottom, ThrowMode::BadOperation};
+  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
 
-  return array_like_set(std::move(vec), key, val);
+  return array_like_set(std::move(vec), key, val, ProvTag::Top);
 }
 
 std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
   return array_like_newelem(std::move(vec),
-                            val.subtypeOf(TInitCell) ? val : TInitCell);
+                            val.subtypeOf(BInitCell) ? val : TInitCell,
+                            ProvTag::Top);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4541,7 +6408,9 @@ std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
 ArrKey disect_strict_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (!keyTy.couldBe(TArrKey)) {
+  if (auto const r = maybe_class_func_key(keyTy, true)) return *r;
+
+  if (!keyTy.couldBe(BArrKey)) {
     ret.type = TBottom;
     ret.mayThrow = true;
     return ret;
@@ -4549,14 +6418,14 @@ ArrKey disect_strict_key(const Type& keyTy) {
 
   // If the key is null, we'll throw, so we can assume its not for the effective
   // type (but mark it as potentially throwing).
-  if (keyTy.subtypeOf(TOptArrKey)) {
+  if (keyTy.subtypeOf(BOptArrKey)) {
     if (keyTy.m_dataTag == DataTag::Int) {
       ret.i = keyTy.m_data.ival;
     } else if (keyTy.m_dataTag == DataTag::Str) {
       ret.s = keyTy.m_data.sval;
     }
     ret.type = is_opt(keyTy) ? unopt(keyTy) : keyTy;
-    ret.mayThrow = !keyTy.subtypeOf(TArrKey);
+    ret.mayThrow = !keyTy.subtypeOf(BArrKey);
     return ret;
   }
 
@@ -4568,34 +6437,39 @@ ArrKey disect_strict_key(const Type& keyTy) {
 }
 
 std::pair<Type, ThrowMode>
-dict_elem(const Type& dict, const Type& undisectedKey) {
+dict_elem(const Type& dict, const Type& undisectedKey, const Type& defaultTy) {
+  assert(dict.subtypeOrNull(BDict));
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(dict, key);
+  return array_like_elem(dict, key, defaultTy);
 }
 
 std::pair<Type, ThrowMode>
 dict_set(Type dict, const Type& undisectedKey, const Type& val) {
-  if (!val.couldBe(TInitCell)) return {TBottom, ThrowMode::BadOperation};
+  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
 
-  return array_like_set(std::move(dict), key, val);
+  return array_like_set(std::move(dict), key, val, ProvTag::Top);
 }
 
 std::pair<Type,Type> dict_newelem(Type dict, const Type& val) {
   return array_like_newelem(std::move(dict),
-                            val.subtypeOf(TInitCell) ? val : TInitCell);
+                            val.subtypeOf(BInitCell) ? val : TInitCell,
+                            ProvTag::Top);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 std::pair<Type, ThrowMode>
-keyset_elem(const Type& keyset, const Type& undisectedKey) {
+keyset_elem(const Type& keyset,
+            const Type& undisectedKey,
+            const Type& defaultTy) {
+  assert(keyset.subtypeOrNull(BKeyset));
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
-  return array_like_elem(keyset, key);
+  return array_like_elem(keyset, key, defaultTy);
 }
 
 std::pair<Type, ThrowMode>
@@ -4605,7 +6479,7 @@ keyset_set(Type /*keyset*/, const Type&, const Type&) {
 }
 
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val) {
-  return array_like_newelem(std::move(keyset), val);
+  return array_like_newelem(std::move(keyset), val, ProvTag::Top);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4625,7 +6499,7 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
-    case DataTag::RefInner:
+    case DataTag::Record:
     case DataTag::ArrLikeVal:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
@@ -4651,33 +6525,33 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
   }();
 
   auto const tag = [&]() -> RepoAuthType::Tag {
-    if (t.subtypeOf(TSVArr))    return RepoAuthType::Tag::SVArr;
-    if (t.subtypeOf(TVArr))     return RepoAuthType::Tag::VArr;
-    if (t.subtypeOf(TOptSVArr)) return RepoAuthType::Tag::OptSVArr;
-    if (t.subtypeOf(TOptVArr))  return RepoAuthType::Tag::OptVArr;
-    if (t.subtypeOf(TSDArr))    return RepoAuthType::Tag::SDArr;
-    if (t.subtypeOf(TDArr))     return RepoAuthType::Tag::DArr;
-    if (t.subtypeOf(TOptSDArr)) return RepoAuthType::Tag::OptSDArr;
-    if (t.subtypeOf(TOptDArr))  return RepoAuthType::Tag::OptDArr;
-    if (t.subtypeOf(TSArr))     return RepoAuthType::Tag::SArr;
-    if (t.subtypeOf(TArr))      return RepoAuthType::Tag::Arr;
-    if (t.subtypeOf(TOptSArr))  return RepoAuthType::Tag::OptSArr;
-    if (t.subtypeOf(TOptArr))   return RepoAuthType::Tag::OptArr;
+    if (t.subtypeOf(BSVArr))    return RepoAuthType::Tag::SVArr;
+    if (t.subtypeOf(BVArr))     return RepoAuthType::Tag::VArr;
+    if (t.subtypeOf(BOptSVArr)) return RepoAuthType::Tag::OptSVArr;
+    if (t.subtypeOf(BOptVArr))  return RepoAuthType::Tag::OptVArr;
+    if (t.subtypeOf(BSDArr))    return RepoAuthType::Tag::SDArr;
+    if (t.subtypeOf(BDArr))     return RepoAuthType::Tag::DArr;
+    if (t.subtypeOf(BOptSDArr)) return RepoAuthType::Tag::OptSDArr;
+    if (t.subtypeOf(BOptDArr))  return RepoAuthType::Tag::OptDArr;
+    if (t.subtypeOf(BSArr))     return RepoAuthType::Tag::SArr;
+    if (t.subtypeOf(BArr))      return RepoAuthType::Tag::Arr;
+    if (t.subtypeOf(BOptSArr))  return RepoAuthType::Tag::OptSArr;
+    if (t.subtypeOf(BOptArr))   return RepoAuthType::Tag::OptArr;
 
-    if (t.subtypeOf(TSVec))     return RepoAuthType::Tag::SVec;
-    if (t.subtypeOf(TVec))      return RepoAuthType::Tag::Vec;
-    if (t.subtypeOf(TOptSVec))  return RepoAuthType::Tag::OptSVec;
-    if (t.subtypeOf(TOptVec))   return RepoAuthType::Tag::OptVec;
+    if (t.subtypeOf(BSVec))     return RepoAuthType::Tag::SVec;
+    if (t.subtypeOf(BVec))      return RepoAuthType::Tag::Vec;
+    if (t.subtypeOf(BOptSVec))  return RepoAuthType::Tag::OptSVec;
+    if (t.subtypeOf(BOptVec))   return RepoAuthType::Tag::OptVec;
 
-    if (t.subtypeOf(TSDict))    return RepoAuthType::Tag::SDict;
-    if (t.subtypeOf(TDict))     return RepoAuthType::Tag::Dict;
-    if (t.subtypeOf(TOptSDict)) return RepoAuthType::Tag::OptSDict;
-    if (t.subtypeOf(TOptDict))  return RepoAuthType::Tag::OptDict;
+    if (t.subtypeOf(BSDict))    return RepoAuthType::Tag::SDict;
+    if (t.subtypeOf(BDict))     return RepoAuthType::Tag::Dict;
+    if (t.subtypeOf(BOptSDict)) return RepoAuthType::Tag::OptSDict;
+    if (t.subtypeOf(BOptDict))  return RepoAuthType::Tag::OptDict;
 
-    if (t.subtypeOf(TSKeyset))    return RepoAuthType::Tag::SKeyset;
-    if (t.subtypeOf(TKeyset))     return RepoAuthType::Tag::Keyset;
-    if (t.subtypeOf(TOptSKeyset)) return RepoAuthType::Tag::OptSKeyset;
-    if (t.subtypeOf(TOptKeyset))  return RepoAuthType::Tag::OptKeyset;
+    if (t.subtypeOf(BSKeyset))    return RepoAuthType::Tag::SKeyset;
+    if (t.subtypeOf(BKeyset))     return RepoAuthType::Tag::Keyset;
+    if (t.subtypeOf(BOptSKeyset)) return RepoAuthType::Tag::OptSKeyset;
+    if (t.subtypeOf(BOptKeyset))  return RepoAuthType::Tag::OptKeyset;
 
     not_reached();
   }();
@@ -4686,11 +6560,10 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
 }
 
 RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
-  assert(!t.couldBe(TCls));
-  assert(!t.subtypeOf(TBottom));
+  assert(!t.subtypeOf(BBottom));
   using T = RepoAuthType::Tag;
 
-  if (t.strictSubtypeOf(TObj) || (is_opt(t) && t.strictSubtypeOf(TOptObj))) {
+  if (is_specialized_obj(t) && t.subtypeOf(TOptObj)) {
     auto const dobj = dobj_of(t);
     auto const tag =
       is_opt(t)
@@ -4699,12 +6572,30 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
     return RepoAuthType { tag, dobj.cls.name() };
   }
 
-  if (t.strictSubtypeOf(TArr) || (is_opt(t) && t.strictSubtypeOf(TOptArr)) ||
-      t.strictSubtypeOf(TVec) || (is_opt(t) && t.strictSubtypeOf(TOptVec))) {
+  if (is_specialized_cls(t) && t.subtypeOf(TOptCls)) {
+    auto const dcls = dcls_of(t);
+    auto const tag =
+      is_opt(t)
+        ? (dcls.type == DCls::Exact ? T::OptExactCls : T::OptSubCls)
+        : (dcls.type == DCls::Exact ? T::ExactCls : T::SubCls);
+    return RepoAuthType { tag, dcls.cls.name() };
+  }
+
+  if (is_specialized_record(t) && t.subtypeOf(TOptRecord)) {
+    auto const drec = drec_of(t);
+    auto const tag =
+      is_opt(t)
+        ? (drec.type == DRecord::Exact ? T::OptExactRecord : T::OptSubRecord)
+        : (drec.type == DRecord::Exact ? T::ExactRecord : T::SubRecord);
+    return RepoAuthType { tag, drec.rec.name() };
+  }
+
+  if ((is_specialized_array(t) && t.subtypeOf(TOptArr)) ||
+      (is_specialized_vec(t) && t.subtypeOf(TOptVec))) {
     return make_repo_type_arr(arrTable, t);
   }
 
-#define X(x) if (t.subtypeOf(T##x)) return RepoAuthType{T::x};
+#define X(x) if (t.subtypeOf(B##x)) return RepoAuthType{T::x};
   X(Uninit)
   X(InitNull)
   X(Null)
@@ -4746,19 +6637,54 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptKeyset)
   X(Obj)
   X(OptObj)
+  X(Func)
+  X(OptFunc)
+  X(Cls)
+  X(OptCls)
+  X(ClsMeth)
+  X(OptClsMeth)
   X(UncArrKey)
   X(ArrKey)
   X(OptUncArrKey)
   X(OptArrKey)
+  X(UncStrLike)
+  X(StrLike)
+  X(OptUncStrLike)
+  X(OptStrLike)
+  X(UncArrKeyCompat)
+  X(ArrKeyCompat)
+  X(OptUncArrKeyCompat)
+  X(OptArrKeyCompat)
+  X(VArrCompat)
+  X(VecCompat)
+  X(OptVArrCompat)
+  X(OptVecCompat)
+  X(ArrCompat)
+  X(OptArrCompat)
   X(InitUnc)
   X(Unc)
   X(InitCell)
   X(Cell)
-  X(Ref)
-  X(InitGen)
-  X(Gen)
 #undef X
   not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type adjust_type_for_prop(const Index& index,
+                          const php::Class& propCls,
+                          const TypeConstraint* tc,
+                          const Type& ty) {
+  auto ret = loosen_likeness(ty);
+  // If the type-hint might not be enforced, we must be conservative.
+  if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ret;
+  auto const ctx = Context { nullptr, nullptr, &propCls };
+  // Otherwise lookup what we know about the constraint.
+  auto const tcBase = index.lookup_constraint(ctx, *tc, ret);
+  auto const tcType = unctx(loosen_interfaces(remove_uninit(tcBase)));
+  // The adjusted type is the intersection of the constraint and the type
+  // (which might not exist).
+  return intersection_of(tcType, std::move(ret));
 }
 
 //////////////////////////////////////////////////////////////////////

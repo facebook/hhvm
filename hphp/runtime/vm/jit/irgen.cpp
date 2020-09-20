@@ -15,32 +15,19 @@
 */
 #include "hphp/runtime/vm/jit/irgen.h"
 
-#include "hphp/runtime/vm/jit/irgen-exit.h"
-#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
-
+#include "hphp/runtime/vm/jit/irgen-control.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
-
-Block* create_catch_block(IRGS& env) {
-  auto const catchBlock = defBlock(env, Block::Hint::Unused);
-  BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
-
-  auto const& exnState = env.irb->exceptionStackState();
-  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
-
-  gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
-      fp(env), sp(env));
-  return catchBlock;
-}
 
 void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
   always_assert_flog(
@@ -56,11 +43,16 @@ void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
 }
 
 uint64_t curProfCount(const IRGS& env) {
-  auto const tid = env.profTransID;
-  assertx(tid == kInvalidTransID ||
-          (env.region != nullptr && profData() != nullptr));
-  return env.profFactor *
-    (tid != kInvalidTransID ? env.region->blockProfCount(tid) : 1);
+  auto const& tids = env.profTransIDs;
+  assertx(tids.empty() || (env.region != nullptr && profData() != nullptr));
+  if (tids.empty()) return env.profFactor;
+  uint64_t totalProfCount = 0;
+  for (auto tid : tids) {
+    if (env.region->hasBlock(tid)) {
+      totalProfCount += env.region->blockProfCount(tid);
+    }
+  }
+  return env.profFactor * totalProfCount;
 }
 
 uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion) {
@@ -81,6 +73,11 @@ uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion) {
  */
 namespace detail {
 SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
+  if (env.irb->inUnreachableState()) {
+    FTRACE(1, "Skipping unreachable instruction: {}\n", inst->toString());
+    return inst->hasDst() ? cns(env, TBottom) : nullptr;
+  }
+
   if (inst->mayRaiseError() && inst->taken()) {
     FTRACE(1, "{}: asserting about catch block\n", inst->toString());
     /*
@@ -102,7 +99,29 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      * information.
      */
     check_catch_stack_state(env, inst);
-    inst->setTaken(create_catch_block(env));
+    auto const offsetToAdjustSPForCall = [&]() -> int32_t {
+      if (inst->is(Call)) {
+        auto const extra = inst->extra<CallData>();
+        return extra->numInputs() + kNumActRecCells + extra->numOut;
+      }
+      return 0;
+    }();
+    auto const catchMode = [&]() {
+      if (inst->is(Call)) {
+        return EndCatchData::CatchMode::CallCatch;
+      }
+      if (inst->is(ReturnHook,
+                   SuspendHookAwaitEF,
+                   SuspendHookAwaitEG,
+                   SuspendHookCreateCont,
+                   CheckSurpriseAndStack,
+                   CheckSurpriseFlagsEnter)) {
+        return EndCatchData::CatchMode::LocalsDecRefd;
+      }
+      return EndCatchData::CatchMode::UnwindOnly;
+    }();
+    inst->setTaken(create_catch_block(env, []{}, catchMode,
+                                      offsetToAdjustSPForCall));
   }
 
   if (inst->mayRaiseError()) {
@@ -121,6 +140,18 @@ void incProfCounter(IRGS& env, TransID transId) {
 
 void checkCold(IRGS& env, TransID transId) {
   gen(env, CheckCold, makeExitOpt(env), TransIDData(transId));
+}
+
+void checkCoverage(IRGS& env) {
+  auto const handle = RDSHandleData { curUnit(env)->coverageDataHandle() };
+  ifElse(
+    env,
+    [&] (Block* next) { gen(env, CheckRDSInitialized, next, handle); },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, Jmp, makeExitSlow(env));
+    }
+  );
 }
 
 void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {
@@ -158,7 +189,7 @@ void endRegion(IRGS& env) {
   auto const curSk  = curSrcKey(env);
   if (!instrAllowsFallThru(curSk.op())) return; // nothing to do here
 
-  auto const nextSk = curSk.advanced(curUnit(env));
+  auto const nextSk = curSk.advanced(curFunc(env));
   endRegion(env, nextSk);
 }
 
@@ -199,8 +230,6 @@ Type predictedType(const IRGS& env, const Location& loc) {
       return fs.local(loc.localId()).predictedType;
     case LTag::MBase:
       return fs.mbase().predictedType;
-    case LTag::CSlot:
-      return fs.clsRefSlot(loc.clsRefSlot()).predictedType;
   }
   not_reached();
 }
@@ -215,8 +244,6 @@ Type provenType(const IRGS& env, const Location& loc) {
       return fs.local(loc.localId()).type;
     case LTag::MBase:
       return fs.mbase().type;
-    case LTag::CSlot:
-      return fs.clsRefSlot(loc.clsRefSlot()).type;
   }
   not_reached();
 }
@@ -224,47 +251,29 @@ Type provenType(const IRGS& env, const Location& loc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void endBlock(IRGS& env, Offset next) {
-  if (!fp(env)) {
-    // If there's no fp, we've already executed a RetCtrl or similar, so
-    // there's no reason to try to jump anywhere now.
-    return;
-  }
-  // Don't emit the jump if it would be unreachable.  This avoids
-  // unreachable blocks appearing to be reachable, which would cause
-  // translateRegion to process them.
-  if (auto const curBlock = env.irb->curBlock()) {
-    if (!curBlock->empty() && curBlock->back().isTerminal()) return;
-  }
+  // If there's no fp, we've already executed a RetCtrl or similar, so there's
+  // no reason to try to jump anywhere now. We can probably drop the fp check
+  // here and rely on the unreachable check alone.
+  if (!fp(env) || env.irb->inUnreachableState()) return;
   jmpImpl(env, next);
 }
 
-void prepareForNextHHBC(IRGS& env,
-                        const NormalizedInstruction* ni,
-                        SrcKey newSk,
-                        bool lastBcInst) {
+void prepareForNextHHBC(IRGS& env, SrcKey newSk) {
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
-  env.currentNormalizedInstruction = ni;
-
-  always_assert_flog(
-    IMPLIES(isInlining(env), !env.lastBcInst),
-    "Tried to end trace while inlining."
-  );
-
   always_assert_flog(
     IMPLIES(isInlining(env), !env.firstBcInst),
     "Inlining while still at the first region instruction."
   );
 
-  always_assert(env.bcStateStack.size() >= env.inlineLevel + 1);
-  auto pops = env.bcStateStack.size() - 1 - env.inlineLevel;
-  while (pops--) env.bcStateStack.pop_back();
-
-  always_assert_flog(env.bcStateStack.back().func() == newSk.func(),
+  always_assert(env.inlineState.bcStateStack.size() == inlineDepth(env));
+  always_assert_flog(curFunc(env) == newSk.func(),
                      "Tried to update current SrcKey with a different func");
 
-  env.bcStateStack.back().setOffset(newSk.offset());
+  FTRACE(1, "Next instruction: {}: {}\n", newSk.offset(),
+         NormalizedInstruction(newSk, curUnit(env)).toString());
+
+  env.bcState.setOffset(newSk.offset());
   updateMarker(env);
-  env.lastBcInst = lastBcInst;
   env.irb->exceptionStackBoundary();
   env.irb->resetCurIROff();
 }

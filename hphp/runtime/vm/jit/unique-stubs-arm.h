@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_UNIQUE_STUBS_ARM_H_
-#define incl_HPHP_JIT_UNIQUE_STUBS_ARM_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -46,4 +45,3 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us);
 
 }}}
 
-#endif

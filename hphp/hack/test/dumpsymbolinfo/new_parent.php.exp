@@ -1,0 +1,28 @@
+{
+  "function_calls":[
+    {
+      "name":"B::__construct",
+      "type":"Constructor",
+      "pos":{"filename":"new_parent.php","line":9,"char_start":10,"char_end":21},
+      "caller":"A::bar"
+    },
+    {
+      "name":"B::foo",
+      "type":"Method",
+      "pos":{"filename":"new_parent.php","line":10,"char_start":9,"char_end":11},
+      "caller":"A::bar"
+    }
+  ],
+  "symbol_types":[
+    {
+      "pos":{"filename":"new_parent.php","line":9,"char_start":5,"char_end":6},
+      "type":"B",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"new_parent.php","line":10,"char_start":5,"char_end":6},
+      "type":"B",
+      "ident":0
+    }
+  ]
+}

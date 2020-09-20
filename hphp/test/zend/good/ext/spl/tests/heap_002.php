@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $h = new SplMinHeap();
 
 // errors
@@ -30,6 +30,5 @@ $h->insert($b);
 $b = 5;
 
 echo $h->extract()."\n";
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

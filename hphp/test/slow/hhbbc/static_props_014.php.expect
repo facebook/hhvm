@@ -1,7 +1,7 @@
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["a"]=>
-  object(Foo)#1 (0) {
+  object(Foo) (0) {
   }
 }

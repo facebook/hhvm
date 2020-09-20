@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/dataflow-worklist.h"
-#include "hphp/util/either.h"
 #include "hphp/util/trace.h"
 
 #include <boost/dynamic_bitset.hpp>
@@ -325,41 +324,6 @@ PhysExpr expr_for(const Env& env, RegState& state, Vreg s) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Analyze instructions that are part of a callphp{} sequence.
- *
- * Returns true if no further analysis is needed for the def to `d'.
- */
-bool analyze_phys_callseq(const Env& /*env*/, Vreg d, const Vinstr& inst,
-                          const Vinstr* next) {
-  if (d != rvmfp()) return false;
-
-  /*
-   * A common pattern for us is to load an address into the frame pointer
-   * right before a PHP call.  In this case, if the frame pointer was not
-   * altered before this redefinition, it will effectively still be
-   * not-altered after the call, because callphp{} restores it to the
-   * previous value.
-   *
-   * We don't need to worry about not setting the redefined flag in between
-   * this instruction and the callphp{}, because callphp{}'s uses are only of
-   * a RegSet---we cannot mis-optimize any of its args based on the state
-   * we're tracking for the frame pointer.
-   *
-   * We also skip over callphp{}'s definition of rvmfp() for this reason.
-   * Really callphp{} only preserves rvmfp() if we properly set up the
-   * rvmfp() arg to it, but the program is ill-formed if it's not doing
-   * that so it's ok to just ignore that definition here.
-   */
-  if (next && next->op == Vinstr::callphp) {
-    FTRACE(3, "      post-dominated by callphp---preserving frame ptr\n");
-    return true;
-  }
-  if (inst.op == Vinstr::callphp) return true;
-
-  return false;
-}
-
-/*
  * Analyze a copy from `s' to `d'.
  *
  * Returns true if no further analysis is needed for the def to `d'.
@@ -473,7 +437,7 @@ void analyze_inst_virtual(Env& env, RegState& state, const Vinstr& inst) {
     case Vinstr::lea:
     {
       auto const& i = inst.lea_;
-      if (i.s.seg == Vptr::DS && i.s.index == InvalidReg) {
+      if (i.s.seg == Segment::DS && i.s.index == InvalidReg) {
         analyze_virt_disp(env, state, i.d, i.s.base, i.s.disp);
       }
       return;
@@ -501,20 +465,7 @@ void analyze_inst_virtual(Env& env, RegState& state, const Vinstr& inst) {
  */
 void analyze_inst_physical(Env& env, RegState& state,
                            const Vinstr& inst, const Vinstr* next) {
-  auto const is_call_seq = [&] {
-    auto result = false;
-    for_all_defs(env, inst, [&] (Vreg d) {
-      result |= analyze_phys_callseq(env, d, inst, next);
-    });
-    return result;
-  }();
-
   auto const done = [&] {
-    // If this instruction is part of a callphp{} sequence (i.e., fill rvmfp(),
-    // then callphp{}), we don't want to do instruction-specific analysis---but
-    // we stillneed to analyze any non-rvmfp() physical defs.
-    if (is_call_seq) return false;
-
     switch (inst.op) {
       case Vinstr::copy:
         return analyze_phys_copy(env, state, inst.copy_.d, inst.copy_.s);
@@ -522,7 +473,7 @@ void analyze_inst_physical(Env& env, RegState& state,
       case Vinstr::lea:
       {
         auto const& i = inst.lea_;
-        return i.s.seg == Vptr::DS &&
+        return i.s.seg == Segment::DS &&
                i.s.index == InvalidReg &&
                analyze_phys_disp(env, state, i.d, i.s.base, i.s.disp);
       }
@@ -547,8 +498,7 @@ void analyze_inst_physical(Env& env, RegState& state,
   if (done) return;
 
   for_all_defs(env, inst, [&] (Vreg d) {
-    return analyze_phys_callseq(env, d, inst, next) ||
-           analyze_phys_def(env, state, d);
+    return analyze_phys_def(env, state, d);
   });
 }
 
@@ -733,12 +683,12 @@ struct OptVisit {
   void use(Vptr& ptr) {
     // Rewrite memory operands that are based on registers we've copied or
     // lea'd off of other registers.
-    if (ptr.seg != Vptr::DS) return;
+    if (ptr.seg != Segment::DS) return;
     if_rewritable(env, state, ptr.base, [&] (const DefInfo& def) {
       if (arch() == Arch::ARM) {
         // After lowering, only [base, index lsl #scale] and [base, #imm]
         // are allowed where the range of #imm is [-256 .. 255]
-        assert(ptr.base.isValid());
+        assertx(ptr.base.isValid());
         auto disp = ptr.disp + def.disp;
         if (ptr.index.isValid()) {
           if (disp != 0) return;
@@ -789,6 +739,11 @@ void optimize_copy(const Env& env, const RegState& state, Vinstr& inst) {
  * Rewrite the srcs of `inst' as the expressions used to def them.
  */
 void optimize_inst(const Env& env, const RegState& state, Vinstr& inst) {
+  // For specialized iterators, we'd like to use a physical single register for
+  // the position. On exit traces, we intentionally recompute the old position
+  // in order to avoid extending Vreg lifetimes. Don't overoptimize this case.
+  if (inst.origin != nullptr && inst.origin->is(StIterPos)) return;
+
   auto visit = OptVisit { env, state };
   visitOperands(inst, visit);
 
@@ -839,8 +794,8 @@ void optimize(Env& env) {
  * when a register holds a value that is the same as another register plus some
  * offset.  It then folds offsets in memory operands to try to require fewer
  * registers.  The main motivation for this is to generally eliminate the need
- * for a separate stack pointer (the result of HHIR's DefSP instruction, which
- * will just be an lea off of the rvmfp() physical register).
+ * for a separate stack pointer (the result of HHIR's DefFrameRelSP instruction,
+ * which will just be an lea off of the rvmfp() physical register).
  */
 void optimizeCopies(Vunit& unit, const Abi& abi) {
   Timer timer(Timer::vasm_copy);

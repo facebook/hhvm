@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $path = __DIR__.'/bad_ini_quotes.ini';
@@ -7,4 +7,8 @@ function main() {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_bad_ini_quotes() {
 main();
+}

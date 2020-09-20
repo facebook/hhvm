@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($a,$b,$c,$d) {
  return implode($a,$b);
@@ -25,3 +25,4 @@ function bar($values, $parent_fields) {
   }
   $body .= '</table>';
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

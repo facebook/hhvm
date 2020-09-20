@@ -1,0 +1,2 @@
+File "class_reified_generic_static_method_class_get.php", line 9, characters 5-8:
+You may not use reified generics of the class in a static method (Parsing[1002])

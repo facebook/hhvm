@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SURPRISE_FLAGS_H_
-#define incl_HPHP_RUNTIME_SURPRISE_FLAGS_H_
+#pragma once
 
 #include "hphp/runtime/base/rds-header.h"
 
@@ -50,7 +49,8 @@ enum SurpriseFlag : size_t {
   /* Set by the debugger hook handler to force function entry/exit events. */
   DebuggerHookFlag     = 1ull << 57,
 
-  CPUTimedOutFlag      = 1ull << 58,
+  HeapSamplingFlag     = 1ull << 58,
+
   IntervalTimerFlag    = 1ull << 59,
 
   /* Set if a GC should be run at the next safe point. */
@@ -75,7 +75,6 @@ enum SurpriseFlag : size_t {
   ResourceFlags =
     MemExceededFlag |
     TimedOutFlag |
-    CPUTimedOutFlag |
     PendingGCFlag |
     PendingPerfEventFlag,
 
@@ -85,6 +84,7 @@ enum SurpriseFlag : size_t {
     EventHookFlag |
     InterceptFlag |
     XenonSignalFlag |
+    HeapSamplingFlag |
     IntervalTimerFlag |
     MemThresholdFlag |
     CLIClientTerminated |
@@ -108,7 +108,7 @@ enum SurpriseFlag : size_t {
  * regardess of whether they actually are set.
  */
 struct NoHandleSurpriseScope {
-#ifdef DEBUG
+#ifndef NDEBUG
   static void AssertNone(SurpriseFlag flags);
   explicit NoHandleSurpriseScope(SurpriseFlag flags);
   ~NoHandleSurpriseScope();
@@ -157,4 +157,3 @@ inline size_t fetchAndClearSurpriseFlags() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

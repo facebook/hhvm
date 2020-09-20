@@ -1,65 +1,80 @@
 *** Testing mb_decode_mimeheader() : usage variation ***
 
 --int 0--
-string(1) "0"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --int 1--
-string(1) "1"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --int 12345--
-string(5) "12345"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --int -12345--
-string(5) "-2345"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --float 10.5--
-string(4) "10.5"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --float -10.5--
-string(5) "-10.5"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --float 12.3456789000e10--
-string(12) "123456789000"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --float -12.3456789000e10--
-string(13) "-123456789000"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --float .5--
-string(3) "0.5"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --empty array--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --int indexed array--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --associative array--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --nested arrays--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, array given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --uppercase NULL--
-string(0) ""
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --lowercase null--
-string(0) ""
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --lowercase true--
-string(1) "1"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --lowercase false--
-string(0) ""
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --uppercase TRUE--
-string(1) "1"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --uppercase FALSE--
-string(0) ""
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --empty string DQ--
 string(0) ""
@@ -68,19 +83,22 @@ string(0) ""
 string(0) ""
 
 --instance of classWithToString--
-string(14) "Class A object"
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --instance of classWithoutToString--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, object given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --undefined var--
-string(0) ""
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --unset var--
-string(0) ""
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 
 --resource--
-Error: 2 - mb_decode_mimeheader() expects parameter 1 to be string, resource given, %s(%d)
-NULL
+
+Warning: mb_decode_mimeheader() expects parameter 1 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_decode_mimeheader_variation1.php on line 105
 ===DONE===

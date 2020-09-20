@@ -1,29 +1,29 @@
-<?php
+<?hh
 /* Prototype  : array file(string filename [, int flags[, resource context]])
- * Description: Read entire file into an array 
+ * Description: Read entire file into an array
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file() : variation ***\n";
-$testfile = dirname(__FILE__)."/fileVar9.txt";
+$testfile = __SystemLib\hphp_test_tmppath('fileVar9.txt');
 
-$contents = array(
+$contents = varray[
    "File ends on a single character\na",
    "File ends on a new line\n",
    "File ends on multiple newlines\n\n\n\n",
    "File has\n\nmultiple lines and newlines\n\n",
    "File has\r\nmultiple crlfs\n\r\n"
-   );
+   ];
 
-@unlink($testfile);   
+@unlink($testfile);
 foreach ($contents as $content) {
     $h = fopen($testfile, "w");
     fwrite($h, $content);
     fclose($h);
     var_dump(file($testfile));
-	unlink($testfile);
+    unlink($testfile);
 }
 
 echo "\n*** Done ***\n";
-?>
+}

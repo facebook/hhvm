@@ -1,0 +1,1 @@
+Fatal error: Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`, `__CippGlobal`. in %s/test/slow/rx/multiple_reactivity3.php on line 4

@@ -16,6 +16,7 @@ testing and some alternative PHP implementation.
 - hphp_get_thread_id
 
 - hphpd_auth_token
+- hphp_debug_session_auth
 - hphpd_install_user_command
 - hphpd_get_user_commands
 - hphpd_break
@@ -45,10 +46,6 @@ testing and some alternative PHP implementation.
 - xbox_task_status
 - xbox_task_result
 
-- fb_call_user_func_array_safe
-- fb_call_user_func_safe
-- fb_call_user_func_safe_return
-
 - fb_serialize
 - fb_unserialize
 - fb_intercept
@@ -57,6 +54,7 @@ testing and some alternative PHP implementation.
 - fb_utf8ize
 - fb_enable_code_coverage
 - fb_disable_code_coverage
+- HH\disable_code_coverage_with_frequency
 
 - xhprof_enable
 - xhprof_disable

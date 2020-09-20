@@ -1,0 +1,5 @@
+File "list_destructuring_intersection.php", line 11, characters 5-15:
+  (I1 & I3)
+File "list_destructuring_intersection.php", line 12, characters 5-15:
+  (I2 & I4)
+No errors

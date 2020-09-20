@@ -1,4 +1,4 @@
-object(test)#1 (2) {
+object(test) (2) {
   ["bar"]=>
   int(1)
   ["foo"]=>

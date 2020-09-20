@@ -1,10 +1,8 @@
 *** Testing nl2br() : error conditions ***
 
 -- Testing nl2br() function with Zero arguments --
-Warning: %s
-NULL
+Warning: nl2br() expects at least 1 parameter, 0 given in %s/nl2br_error.php on line 11
 
 -- Testing nl2br() function with more than expected no. of arguments --
-Warning: %s
-NULL
+Warning: nl2br() expects at most 2 parameters, 3 given in %s/nl2br_error.php on line 17
 Done

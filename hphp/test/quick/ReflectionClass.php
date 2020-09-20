@@ -7,10 +7,11 @@ class Thing {
   public static function testFour() { echo "four\n"; }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $class = new ReflectionClass('Thing');
 $methods = $class->getMethods();
 foreach ($methods as $method) {
   var_dump($method->getName());
   $method->invoke(null);
+}
 }

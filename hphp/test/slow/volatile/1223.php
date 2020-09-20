@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class B {
 }
@@ -8,9 +8,11 @@ class A extends B {
     $a = new self();
   }
 }
-if (false) {
- class A {
+
+<<__EntryPoint>>
+function main_1223() {
+  if (__hhvm_intrinsics\launder_value(false)) {
+    include '1223.inc';
+  }
+  A::make();
 }
-;
-}
-A::make();

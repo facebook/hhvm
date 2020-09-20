@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace foo {
   function bar() {
@@ -10,5 +10,7 @@ namespace {
   use function foo\bar;
   use function foo\bar as bar;
 
-  bar();
+  <<__EntryPoint>> function main(): void {
+    bar();
+  }
 }

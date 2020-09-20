@@ -3,28 +3,28 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 <<__PHPStdLib>>
-function bzclose($bz) { }
+function bzclose(resource $bz);
 <<__PHPStdLib>>
-function bzopen($filename, $mode) { }
+function bzopen($filename, string $mode);
 <<__PHPStdLib>>
-function bzread($bz, $length = 1024) { }
+function bzread(resource $bz, int $length = 1024);
 <<__PHPStdLib>>
-function bzwrite($bz, $data, $length = 0) { }
+function bzwrite(resource $bz, string $data, int $length = 0);
 <<__PHPStdLib>>
-function bzflush($bz) { }
+function bzflush(resource $bz);
 <<__PHPStdLib>>
-function bzerrstr($bz) { }
+function bzerrstr(resource $bz);
 <<__PHPStdLib>>
-function bzerror($bz) { }
+function bzerror(resource $bz);
 <<__PHPStdLib>>
-function bzerrno($bz) { }
-<<__PHPStdLib>>
-function bzcompress($source, $blocksize = 4, $workfactor = 0) { }
-<<__PHPStdLib>>
-function bzdecompress($source, $small = 0) { }
+function bzerrno(resource $bz);
+<<__PHPStdLib, __Pure>>
+function bzcompress(string $source, int $blocksize = 4, int $workfactor = 0);
+<<__PHPStdLib, __Pure>>
+function bzdecompress(string $source, int $small = 0);

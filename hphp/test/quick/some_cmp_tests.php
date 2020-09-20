@@ -5,29 +5,38 @@ function eq($x, $y) {
 }
 
 function lt($x, $y) {
-  var_dump($x < $y);
+  try {
+    var_dump($x < $y);
+  } catch (Exception $e) {
+    echo "Caught: ".$e->getMessage()."\n";
+  }
 }
 
 function gt($x, $y) {
-  var_dump($x > $y);
+  try {
+    var_dump($x > $y);
+  } catch (Exception $e) {
+    echo "Caught: ".$e->getMessage()."\n";
+  }
 }
 
+<<__EntryPoint>> function main(): void {
 echo "======\n";
 
-eq('Array', array(1,2));
-eq('Array', array());
-eq(array(), 'Array');
-eq(array('a', 'b'), 'Array');
+eq('Array', varray[1,2]);
+eq('Array', varray[]);
+eq(varray[], 'Array');
+eq(varray['a', 'b'], 'Array');
 echo "\n";
-lt('Array', array(1,2));
-lt('Array', array());
-lt(array(), 'Array');
-lt(array('a', 'b'), 'Array');
+lt('Array', varray[1,2]);
+lt('Array', varray[]);
+lt(varray[], 'Array');
+lt(varray['a', 'b'], 'Array');
 echo "\n";
-gt('Array', array(1,2));
-gt('Array', array());
-gt(array(), 'Array');
-gt(array('a', 'b'), 'Array');
+gt('Array', varray[1,2]);
+gt('Array', varray[]);
+gt(varray[], 'Array');
+gt(varray['a', 'b'], 'Array');
 
 echo "======\n";
 
@@ -56,3 +65,4 @@ lt(null, -1.0);
 echo "\n";
 gt(-1.0, null);
 gt(null, -1.0);
+}

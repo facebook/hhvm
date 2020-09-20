@@ -1,0 +1,139 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\generic_tuple" ->
+    { fe_pos = [13:10-23];
+      fe_type =
+      (Rwitness (root|tuples.php line 13, characters 10-22),
+       (Tfun
+          { ft_arity = (Fstandard ());
+            ft_tparams = [(Invariant, ([13:24-25], "T"), [], Erased)];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [13:34-39]; fp_name = (Some "$arg1");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|tuples.php line 13, characters 27-32),
+                  (Ttuple
+                     [(Rhint (root|tuples.php line 13, characters 28-28),
+                       (Tgeneric ("T", [])));
+                     (Rhint (root|tuples.php line 13, characters 31-31),
+                      (Tgeneric ("T", [])))
+                  ]))
+               };
+            fp_flags =
+            (make_fp_flags ~mutability:none ~accept_disposable:false
+              ~has_default:false ~mode:FPnormal);
+             }];
+       ft_implicit_params =
+       { capability =
+         (Rhint (root|tuples.php line 13, characters 10-22), (Tunion [])) };
+       ft_ret =
+       { et_enforced = false;
+         et_type =
+         (Rhint (root|tuples.php line 13, characters 42-47),
+          (Ttuple
+             [(Rhint (root|tuples.php line 13, characters 43-43),
+               (Tgeneric ("T", [])));
+             (Rhint (root|tuples.php line 13, characters 46-46),
+              (Tgeneric ("T", [])))
+          ]))
+       };
+      ft_flags =
+      (make_ft_flags sync none ~return_disposable:false
+        ~returns_mutable:false ~returns_void_to_rx:false);
+      ft_reactive = Nonreactive }));
+  fe_deprecated = None;  };
+"\\returns_tuple" ->
+{ fe_pos = [9:10-23];
+  fe_type =
+  (Rwitness (root|tuples.php line 9, characters 10-22),
+   (Tfun
+      { ft_arity = (Fstandard ()); ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params =
+        [{ fp_pos = [9:35-40]; fp_name = (Some "$arg1");
+           fp_type =
+           { et_enforced = false;
+             et_type =
+             (Rhint (root|tuples.php line 9, characters 24-33),
+              (Tapply (([9:24-34], "\\Coordinate"), [])))
+             };
+           fp_flags =
+           (make_fp_flags ~mutability:none ~accept_disposable:false
+             ~has_default:false ~mode:FPnormal);
+            }
+          ];
+        ft_implicit_params =
+        { capability =
+          (Rhint (root|tuples.php line 9, characters 10-22), (Tunion [])) };
+        ft_ret =
+        { et_enforced = false;
+          et_type =
+          (Rhint (root|tuples.php line 9, characters 43-56),
+           (Ttuple
+              [(Rhint (root|tuples.php line 9, characters 44-48),
+                (Tprim Tfloat));
+                (Rhint (root|tuples.php line 9, characters 51-55),
+                 (Tprim Tfloat))
+                ]))
+          };
+        ft_flags =
+        (make_ft_flags sync none ~return_disposable:false
+          ~returns_mutable:false ~returns_void_to_rx:false);
+        ft_reactive = Nonreactive }));
+  fe_deprecated = None;  };
+"\\takes_tuple" ->
+{ fe_pos = [5:10-21];
+  fe_type =
+  (Rwitness (root|tuples.php line 5, characters 10-20),
+   (Tfun
+      { ft_arity = (Fstandard ()); ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params =
+        [{ fp_pos = [5:37-42]; fp_name = (Some "$arg1");
+           fp_type =
+           { et_enforced = false;
+             et_type =
+             (Rhint (root|tuples.php line 5, characters 22-35),
+              (Ttuple
+                 [(Rhint (root|tuples.php line 5, characters 23-27),
+                   (Tprim Tfloat));
+                   (Rhint (root|tuples.php line 5, characters 30-34),
+                    (Tprim Tfloat))
+                   ]))
+             };
+           fp_flags =
+           (make_fp_flags ~mutability:none ~accept_disposable:false
+             ~has_default:false ~mode:FPnormal);
+            }
+          ];
+        ft_implicit_params =
+        { capability =
+          (Rhint (root|tuples.php line 5, characters 10-20), (Tunion [])) };
+        ft_ret =
+        { et_enforced = false;
+          et_type =
+          (Rhint (root|tuples.php line 5, characters 45-54),
+           (Tapply (([5:45-55], "\\Coordinate"), [])))
+          };
+        ft_flags =
+        (make_ft_flags sync none ~return_disposable:false
+          ~returns_mutable:false ~returns_void_to_rx:false);
+        ft_reactive = Nonreactive }));
+  fe_deprecated = None;  } };
+typedefs =
+{ "\\Coordinate" ->
+  { td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
+    td_constraint = None;
+    td_type =
+    (Rhint (root|tuples.php line 3, characters 19-32),
+     (Ttuple
+        [(Rhint (root|tuples.php line 3, characters 20-24), (Tprim Tfloat));
+          (Rhint (root|tuples.php line 3, characters 27-31), (Tprim Tfloat))]))
+    } }; consts = {}
+}
+
+They matched!

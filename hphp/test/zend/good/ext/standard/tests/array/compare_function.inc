@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function compare_function($var1, $var2) {
   if ($var1 == $var2) {
@@ -10,4 +10,3 @@ function compare_function($var1, $var2) {
   }
 }
 
-?>

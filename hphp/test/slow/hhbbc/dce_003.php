@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function heh($ar) {
   if (!$ar) throw new Exception('a');
@@ -13,6 +13,10 @@ function bar($ar) {
   }
   var_dump($tmp);
 }
-bar(array('a'));
-bar(array());
 
+
+<<__EntryPoint>>
+function main_dce_003() {
+bar(varray['a']);
+bar(varray[]);
+}

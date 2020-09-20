@@ -1,9 +1,4 @@
-<?php
-
-//Set the default time zone 
-date_default_timezone_set("Europe/London");
-
-echo "*** Testing basic DateTime inheritance() ***\n";
+<?hh
 
 
 class DateTimeExt extends DateTime
@@ -15,19 +10,26 @@ class DateTimeExt extends DateTime
 		return parent::format(self::$format);
 	}
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-echo "\n-- Create an instance of DateTimeExt --\n";
-$d = new DateTimeExt("1967-05-01 22:30:41");
+  //Set the default time zone 
+  date_default_timezone_set("Europe/London");
 
-echo "\n-- Invoke __toString --\n";
-echo $d . "\n";
+  echo "*** Testing basic DateTime inheritance() ***\n";
 
-echo "\n -- modify date and time --\n";
-$d->setDate(1963, 7, 2); 
-$d->setTime(10, 45, 30); 
+  echo "\n-- Create an instance of DateTimeExt --\n";
+  $d = new DateTimeExt("1967-05-01 22:30:41");
 
-echo "\n-- Invoke __toString again --\n";
-echo $d . "\n";
+  echo "\n-- Invoke __toString --\n";
+  echo $d . "\n";
 
-?>
-===DONE===
+  echo "\n -- modify date and time --\n";
+  $d->setDate(1963, 7, 2); 
+  $d->setTime(10, 45, 30); 
+
+  echo "\n-- Invoke __toString again --\n";
+  echo $d . "\n";
+
+  echo "===DONE===\n";
+}

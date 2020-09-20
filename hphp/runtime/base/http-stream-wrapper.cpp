@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
@@ -46,7 +46,7 @@ const StaticString
 req::ptr<File> HttpStreamWrapper::open(const String& filename,
                                        const String& mode, int /*options*/,
                                        const req::ptr<StreamContext>& context) {
-  if (RuntimeOption::ServerHttpSafeMode && !is_cli_mode()) {
+  if (RuntimeOption::ServerHttpSafeMode && !is_cli_server_mode()) {
     return nullptr;
   }
 
@@ -84,7 +84,7 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
           it.second().toString(), ":", 2).toArray();
-        headers.set(parts.rvalAt(0).unboxed().tv(), parts.rvalAt(1).tv());
+        headers.set(parts.lookup(0), parts.lookup(1));
       }
     }
     if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {
@@ -117,7 +117,7 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
   }
 
   if (!headers.exists(s_User_Agent)) {
-    auto default_user_agent = ThreadInfo::s_threadInfo.getNoCheck()
+    auto default_user_agent = RequestInfo::s_requestInfo.getNoCheck()
       ->m_reqInjectionData.getUserAgent();
     if (!default_user_agent.empty()) {
       headers.set(s_User_Agent, default_user_agent);

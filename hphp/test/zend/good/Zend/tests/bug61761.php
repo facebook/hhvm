@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A
 {
@@ -9,6 +9,6 @@ class B extends A
 {
         private static function test($a, $b) { }
 }
-
-?>
-==DONE==
+<<__EntryPoint>> function main(): void {
+echo "==DONE==";
+}

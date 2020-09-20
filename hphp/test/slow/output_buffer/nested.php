@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   echo "0";
@@ -12,4 +12,8 @@ function main() {
   echo "4";
 }
 
+
+<<__EntryPoint>>
+function main_nested() {
 main();
+}

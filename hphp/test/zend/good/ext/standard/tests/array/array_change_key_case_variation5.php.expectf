@@ -1,7 +1,7 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- Call array_change_key_case() --
-array(3) {
+darray(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>
@@ -9,9 +9,4 @@ array(3) {
   ["THREE"]=>
   string(5) "trois"
 }
--- Position of Internal Pointer in Result: --
-ONE => un
-
--- Position of Internal Pointer in Original Array: --
-one => un
 Done

@@ -13,8 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TREADMILL_INL_H_
-#define incl_HPHP_TREADMILL_INL_H_
+#pragma once
+
+#include "hphp/util/rds-local.h"
 
 #include <folly/Likely.h>
 
@@ -25,13 +26,14 @@
 namespace HPHP { namespace Treadmill {
 
 extern std::atomic<int64_t> g_nextThreadIdx;
-extern __thread int64_t tl_thisThreadIdx;
+extern RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx);
 
-inline int64_t threadIdx() {
-  if (UNLIKELY(tl_thisThreadIdx == kInvalidThreadIdx)) {
-    tl_thisThreadIdx = g_nextThreadIdx.fetch_add(1, std::memory_order_relaxed);
+inline int64_t requestIdx() {
+  if (UNLIKELY(*rl_thisRequestIdx == kInvalidRequestIdx)) {
+    *rl_thisRequestIdx =
+      g_nextThreadIdx.fetch_add(1, std::memory_order_relaxed);
   }
-  return tl_thisThreadIdx;
+  return *rl_thisRequestIdx;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -42,6 +44,8 @@ void enqueueInternal(std::unique_ptr<WorkItem>);
 //////////////////////////////////////////////////////////////////////
 
 using GenCount = int64_t;
+auto constexpr kIdleGenCount = GenCount{0}; // not processing any requests.
+auto constexpr kPurgedGenCount = GenCount{-1}; // used by apc
 
 struct WorkItem {
   WorkItem() = default;
@@ -82,4 +86,3 @@ void enqueue(F&& f) {
 
 }}
 
-#endif

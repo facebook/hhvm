@@ -6,21 +6,22 @@ class C {
 
 // freeze in multiple scopes
 <<__Rx>>
-function basic(): void {
-  $z = new C(7); // $z is mutable
-  if (true) {
-    freeze($z);
+function basic(bool $b): void {
+  $z = \HH\Rx\mutable(new C(7)); // $z is mutable
+  if ($b) {
+    $z1 = \HH\Rx\freeze($z);
   } else {
     $z->val = 5;
-    freeze($z);
+    $z1 = \HH\Rx\freeze($z);
   }
-  // valid, $z is now immutable
-  $y = new C(2);
-  if (true) {
-    freeze($y);
+  // valid, $z1 is now immutable
+  $y = \HH\Rx\mutable(new C(2));
+  if ($b) {
+    $y1 = \HH\Rx\freeze($y);
   } else {
 
   }
+  $y;
   // invalid, $y is frozen in one scope but not another
 
 }

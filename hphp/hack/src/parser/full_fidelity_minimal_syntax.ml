@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -16,48 +15,48 @@
   *)
 
 module Token = Full_fidelity_minimal_token
-
-module SyntaxWithMinimalToken =
-  Full_fidelity_syntax.WithToken(Token)
+module SyntaxWithMinimalToken = Full_fidelity_syntax.WithToken (Token)
 
 module MinimalSyntaxValue = struct
-  type t = { full_width: int }
+  type t = { full_width: int } [@@deriving show, eq]
+
   let make w = { full_width = w }
+
   let full_width n = n.full_width
+
   let to_json value =
-    let open Hh_json in
-    JSON_Object [ ("full_width", int_ value.full_width) ]
+    Hh_json.(JSON_Object [("full_width", int_ value.full_width)])
 end
 
 module MinimalSyntax =
-  SyntaxWithMinimalToken.WithSyntaxValue(MinimalSyntaxValue)
+  SyntaxWithMinimalToken.WithSyntaxValue (MinimalSyntaxValue)
 
 module MinimalValueBuilder = struct
   let value_from_children _text _offset _kind nodes =
     let folder sum node =
       let v = MinimalSyntax.value node in
       let w = MinimalSyntaxValue.full_width v in
-      sum + w in
+      sum + w
+    in
     let width = List.fold_left folder 0 nodes in
     MinimalSyntaxValue.make width
 
-  let value_from_token token =
-    MinimalSyntaxValue.make (Token.full_width token)
+  let value_from_token token = MinimalSyntaxValue.make (Token.full_width token)
 
   let value_from_syntax syntax =
     let folder sum child =
       let v = MinimalSyntax.value child in
       let w = MinimalSyntaxValue.full_width v in
-      sum + w in
-    let width = (MinimalSyntax.fold_over_children folder 0 syntax) in
+      sum + w
+    in
+    let width = MinimalSyntax.fold_over_children folder 0 syntax in
     MinimalSyntaxValue.make width
 end
 
 include MinimalSyntax
-include MinimalSyntax.WithValueBuilder(MinimalValueBuilder)
+include MinimalSyntax.WithValueBuilder (MinimalValueBuilder)
 
-let full_width node =
-  MinimalSyntaxValue.full_width (value node)
+let full_width node = MinimalSyntaxValue.full_width (value node)
 
 let leading_width node =
   match leading_token node with
@@ -69,8 +68,7 @@ let trailing_width node =
   | None -> 0
   | Some token -> Token.trailing_width token
 
-let width node =
-  (full_width node) - (leading_width node) - (trailing_width node)
+let width node = full_width node - leading_width node - trailing_width node
 
 (* TODO: This code is duplicated in the positioned syntax; consider pulling it
 out into its own module. *)
@@ -86,26 +84,43 @@ let parentage node position =
       if position < width then
         aux (children h) position (h :: acc)
       else
-        aux t (position - width) acc in
+        aux t (position - width) acc
+  in
   aux [node] position []
 
 let is_in_body node position =
   let rec aux parents =
     match parents with
     | [] -> false
-    | h1 :: t1 ->
-      if is_compound_statement h1 then
-        match t1 with
-        | [] -> false
-        | h2 :: _ ->
-          if ((is_methodish_declaration h2) || is_function_declaration h2) then
-            true
-          else
-            aux t1
-      else
-        aux t1 in
+    | h1 :: h2 :: _
+      when is_compound_statement h1
+           && (is_methodish_declaration h2 || is_function_declaration h2) ->
+      true
+    | _ :: rest -> aux rest
+  in
   let parents = parentage node position in
   aux parents
 
+let offset _ = None
+
 let position _file _node = None
+
 let extract_text _node = None
+
+type rust_parse_type =
+  Full_fidelity_source_text.t ->
+  Full_fidelity_parser_env.t ->
+  unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
+
+let rust_parse_ref : rust_parse_type ref =
+  ref (fun _ _ -> failwith "This should be lazily set in Rust_parser_ffi")
+
+let rust_parse text env = !rust_parse_ref text env
+
+let rust_parse_with_coroutine_sc _ _ = failwith "not implemented"
+
+let rust_parse_with_decl_mode_sc _ _ = failwith "not implemented"
+
+let rust_parse_with_verify_sc _ _ = failwith "not implemented"
+
+let rust_parser_errors _ _ _ = failwith "not implemented"

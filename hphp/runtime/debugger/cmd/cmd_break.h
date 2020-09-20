@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_BREAK_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_BREAK_H_
+#pragma once
 
 #include <vector>
 
@@ -97,4 +96,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_BREAK_H_

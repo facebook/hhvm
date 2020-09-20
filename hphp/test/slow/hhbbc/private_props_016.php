@@ -5,6 +5,7 @@ class Foo {
   private $bar = "foofoo";
 
   public function __construct(string $k) {
+    $this->foo = new stdClass();
     $this->{$k}->prop = 2;
   }
 
@@ -19,4 +20,8 @@ function main() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_private_props_016() {
 main();
+}

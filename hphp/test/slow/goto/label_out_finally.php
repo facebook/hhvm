@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a) {
   try {
     if ($a < 5) {
@@ -12,5 +12,9 @@ function foo($a) {
     goto test;
   }
 }
+
+<<__EntryPoint>>
+function main_label_out_finally() {
 foo(5);
 echo "Done\n";
+}

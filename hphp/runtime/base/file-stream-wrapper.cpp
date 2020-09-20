@@ -22,6 +22,7 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
 #include <boost/filesystem/operations.hpp>
@@ -70,7 +71,8 @@ FileStreamWrapper::open(const String& filename, const String& mode, int options,
 
   if (options & File::USE_INCLUDE_PATH) {
     struct stat s;
-    String resolved_fname = resolveVmInclude(fname.get(), "", &s);
+    String resolved_fname = resolveVmInclude(fname.get(), "", &s,
+                                             Native::s_noNativeFuncs);
     if (!resolved_fname.isNull()) {
       fname = resolved_fname;
     }

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_constant.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 
@@ -69,9 +70,9 @@ void CmdConstant::onClient(DebuggerClient &client) {
 
     {
       Variant forSort(cmd->m_constants);
-      HHVM_FN(ksort)(ref(forSort));
-      assert(forSort.isArray());
-      m_constants = forSort.asCell()->m_data.parr;
+      HHVM_FN(ksort)(forSort);
+      assertx(forSort.isArray());
+      m_constants = forSort.asTypedValue()->m_data.parr;
     }
 
     for (ArrayIter iter(m_constants); iter; ++iter) {

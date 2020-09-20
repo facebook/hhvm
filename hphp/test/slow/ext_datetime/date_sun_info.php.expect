@@ -1,4 +1,4 @@
-array(9) {
+darray(9) {
   ["sunrise"]=>
   int(1165897795)
   ["sunset"]=>
@@ -18,5 +18,6 @@ array(9) {
   ["astronomical_twilight_end"]=>
   int(1165939386)
 }
+bool(true)
 string(5) "08:52"
 string(5) "18:15"

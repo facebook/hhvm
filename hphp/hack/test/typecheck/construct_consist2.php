@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__ConsistentConstruct>>
 class C1 {}
@@ -11,3 +11,5 @@ class C2 extends C1 {
 class C3 extends C1 {
   // another default constructor is OK
 }
+
+class A {}

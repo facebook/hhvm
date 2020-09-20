@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   <<W(1),X(2)>>
@@ -22,6 +22,9 @@ class E extends D {
 class F extends E {
 }
 
+
+<<__EntryPoint>>
+function main_2200() {
 $rm = new ReflectionMethod('F', 'foo');
 
 var_dump($rm->getAttribute('W'));
@@ -30,14 +33,6 @@ var_dump($rm->getAttribute('Y'));
 var_dump($rm->getAttribute('Z'));
 
 $attrs = $rm->getAttributes();
-ksort($attrs);
+ksort(inout $attrs);
 var_dump($attrs);
-
-var_dump($rm->getAttributeRecursive('W'));
-var_dump($rm->getAttributeRecursive('X'));
-var_dump($rm->getAttributeRecursive('Y'));
-var_dump($rm->getAttributeRecursive('Z'));
-
-$attrs = $rm->getAttributesRecursive();
-ksort($attrs);
-var_dump($attrs);
+}

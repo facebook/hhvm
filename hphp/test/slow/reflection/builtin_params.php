@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   foreach ((new ReflectionFunction('date'))->getParameters() as $param) {
@@ -19,4 +19,8 @@ function main() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_builtin_params() {
 main();
+}

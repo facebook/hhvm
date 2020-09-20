@@ -1,8 +1,0 @@
-
-Notice: Hack Array Compat: Binding new-element ref in array in %s/cuf-safe-array.php on line 10
-array(2) {
-  [0]=>
-  bool(true)
-  [1]=>
-  &int(123)
-}

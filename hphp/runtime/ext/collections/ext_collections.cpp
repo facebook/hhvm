@@ -9,10 +9,6 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-void triggerCow(c_Vector* vec) {
-  vec->mutateImpl();
-}
-
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
   if (v.isArray()) {
     ArrayData* ad = v.getArrayData();

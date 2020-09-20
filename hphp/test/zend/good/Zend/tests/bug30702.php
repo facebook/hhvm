@@ -1,6 +1,6 @@
-<?php
+<?hh
 class foo {
-	const C1=1;
+    const C1=1;
 }
 
 class bar extends foo {
@@ -15,7 +15,7 @@ class bar extends foo {
   public $c5=foo::C1;
   public $c6=parent::C1;
 }
-
+<<__EntryPoint>> function main(): void {
 $x= new bar();
 var_dump($x);
-?>
+}

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Only double-quoted strings may be prefixed. in %s/heredoc_013.php on line 4

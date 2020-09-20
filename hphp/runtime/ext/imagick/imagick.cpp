@@ -17,8 +17,10 @@
 
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 using std::pair;
 using std::string;
@@ -105,7 +107,7 @@ struct ImageGeometry {
   }
 
   Array toArray() const {
-    return make_map_array(
+    return make_darray(
       s_width, m_width,
       s_height, m_height);
   }
@@ -224,7 +226,7 @@ Array magickQueryFormats(const char* pattern /* = "*" */) {
 String magickResolveFont(const String& fontName) {
   Array fonts = magickQueryFonts();
   for (ArrayIter it(fonts); it; ++it) {
-    if (strcasecmp(it.secondRvalPlus().val().pstr->data(),
+    if (strcasecmp(val(it.secondValPlus()).pstr->data(),
                    fontName.c_str()) == 0) {
       return fontName;
     }
@@ -557,7 +559,7 @@ static Array HHVM_METHOD(Imagick, compareImageChannels,
   if (magick == nullptr) {
     IMAGICK_THROW("Compare image channels failed");
   } else {
-    return make_packed_array(createImagick(magick), distortion);
+    return make_varray(createImagick(magick), distortion);
   }
 }
 
@@ -583,7 +585,7 @@ static Array HHVM_METHOD(Imagick, compareImages,
   if (magick == nullptr) {
     IMAGICK_THROW("Compare images failed");
   } else {
-    return make_packed_array(createImagick(magick), distortion);
+    return make_varray(createImagick(magick), distortion);
   }
 }
 
@@ -606,9 +608,9 @@ static void HHVM_METHOD(Imagick, __construct, const Variant& files) {
     setWandResource(s_Imagick, Object{this_}, magick);
   }
   auto wand = getMagickWandResource(Object{this_});
-  Array array = files.isString() ? make_packed_array(files)
+  Array array = files.isString() ? make_vec_array(files)
               : files.isArray() ? files.toArray()
-              : Array();
+              : empty_vec_array();
   for (ArrayIter it(array); it; ++it) {
     imagickReadOp(
       wand->getWand(),
@@ -1110,7 +1112,7 @@ static Array HHVM_METHOD(Imagick, getImageBluePrimary) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image blue primary");
   }
-  return make_map_array(s_x, x, s_y, y);
+  return make_darray(s_x, x, s_y, y);
 }
 
 static Object HHVM_METHOD(Imagick, getImageBorderColor) {
@@ -1169,7 +1171,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelExtrema, int64_t channel) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image channel extrema");
   }
-  return make_map_array(
+  return make_darray(
     s_minima, (int64_t)minima,
     s_maxima, (int64_t)maxima);
 }
@@ -1182,7 +1184,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelKurtosis, int64_t channel) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image channel kurtosis");
   }
-  return make_map_array(
+  return make_darray(
     s_kurtosis, kurtosis,
     s_skewness, skewness);
 }
@@ -1195,7 +1197,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelMean, int64_t channel) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image channel mean");
   }
-  return make_map_array(
+  return make_darray(
     s_mean, mean,
     s_standardDeviation, standardDeviation);
 }
@@ -1208,7 +1210,7 @@ static Array HHVM_METHOD(Imagick, getImageChannelRange, int64_t channel) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get channel range");
   }
-  return make_map_array(
+  return make_darray(
     s_minima, minima,
     s_maxima, maxima);
 }
@@ -1221,9 +1223,9 @@ static Array HHVM_METHOD(Imagick, getImageChannelStatistics) {
   auto wand = getMagickWandResource(Object{this_});
   auto stat = MagickGetImageChannelStatistics(wand->getWand());
 
-  ArrayInit ret(sizeof(channels) / sizeof(channels[0]), ArrayInit::Mixed{});
+  DArrayInit ret(sizeof(channels) / sizeof(channels[0]));
   for (auto channel : channels) {
-    ret.set(channel, make_map_array(
+    ret.set(channel, make_darray(
         s_mean, stat[channel].mean,
         s_minima, stat[channel].minima,
         s_maxima, stat[channel].maxima,
@@ -1314,7 +1316,7 @@ static Array HHVM_METHOD(Imagick, getImageExtrema) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image extrema");
   }
-  return make_map_array(
+  return make_darray(
     s_min, (int64_t)min,
     s_max, (int64_t)max);
 }
@@ -1352,7 +1354,7 @@ static Array HHVM_METHOD(Imagick, getImageGreenPrimary) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image green primary");
   }
-  return make_map_array(s_x, x, s_y, y);
+  return make_darray(s_x, x, s_y, y);
 }
 
 static int64_t HHVM_METHOD(Imagick, getImageHeight) {
@@ -1444,7 +1446,7 @@ static Array HHVM_METHOD(Imagick, getImagePage) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image page");
   }
-  return make_map_array(
+  return make_darray(
     s_width, (int64_t)width,
     s_height, (int64_t)height,
     s_x, (int64_t)x,
@@ -1479,7 +1481,7 @@ static String HHVM_METHOD(Imagick, getImageProfile, const String& name) {
   return magickGetImageProfile(wand->getWand(), name.c_str());
 }
 
-static Array HHVM_METHOD(Imagick, getImageProfiles,
+static Variant HHVM_METHOD(Imagick, getImageProfiles,
     const String& pattern, bool with_values) {
   auto wand = getMagickWandResource(Object{this_});
   size_t count;
@@ -1490,9 +1492,9 @@ static Array HHVM_METHOD(Imagick, getImageProfiles,
   }
 
   if (with_values) {
-    ArrayInit ret(count, ArrayInit::Map{});
+    DArrayInit ret(count);
     for (size_t i = 0; i < count; ++i) {
-      ret.setUnknownKey(
+      ret.set(
         String(profiles[i]),
         magickGetImageProfile(wand->getWand(), profiles[i]));
     }
@@ -1508,7 +1510,7 @@ static String magickGetImageProperty(MagickWand* wand, const char* name) {
   return convertMagickString(MagickGetImageProperty(wand, name));
 }
 
-static Array HHVM_METHOD(Imagick, getImageProperties,
+static Variant HHVM_METHOD(Imagick, getImageProperties,
     const String& pattern, bool with_values) {
   auto wand = getMagickWandResource(Object{this_});
   size_t count;
@@ -1519,9 +1521,9 @@ static Array HHVM_METHOD(Imagick, getImageProperties,
   }
 
   if (with_values) {
-    ArrayInit ret(count, ArrayInit::Map{});
+    DArrayInit ret(count);
     for (size_t i = 0; i < count; ++i) {
-      ret.setUnknownKey(
+      ret.set(
         String(properties[i]),
         magickGetImageProperty(wand->getWand(), properties[i]));
     }
@@ -1544,7 +1546,7 @@ static Array HHVM_METHOD(Imagick, getImageRedPrimary) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image red primary");
   }
-  return make_map_array(s_x, x, s_y, y);
+  return make_darray(s_x, x, s_y, y);
 }
 
 static Object HHVM_METHOD(Imagick, getImageRegion,
@@ -1569,7 +1571,7 @@ static Array HHVM_METHOD(Imagick, getImageResolution) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image resolution");
   }
-  return make_map_array(s_x, x, s_y, y);
+  return make_darray(s_x, x, s_y, y);
 }
 
 static String HHVM_METHOD(Imagick, getImagesBlob) {
@@ -1641,7 +1643,7 @@ static Array HHVM_METHOD(Imagick, getImageWhitePoint) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get image white point");
   }
-  return make_map_array(s_x, x, s_y, y);
+  return make_darray(s_x, x, s_y, y);
 }
 
 static int64_t HHVM_METHOD(Imagick, getImageWidth) {
@@ -1681,7 +1683,7 @@ static Array HHVM_METHOD(Imagick, getPage) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get page");
   }
-  return make_map_array(
+  return make_darray(
     s_width, (int64_t)width,
     s_height, (int64_t)height,
     s_x, (int64_t)x,
@@ -1705,7 +1707,7 @@ static double HHVM_METHOD(Imagick, getPointSize) {
 static Array HHVM_STATIC_METHOD(Imagick, getQuantumDepth) {
   size_t depth;
   const char* quantumDepth = MagickGetQuantumDepth(&depth);
-  return make_map_array(
+  return make_darray(
     s_quantumDepthLong, (int64_t)depth,
     s_quantumDepthString, quantumDepth);
 }
@@ -1713,7 +1715,7 @@ static Array HHVM_STATIC_METHOD(Imagick, getQuantumDepth) {
 static Array HHVM_STATIC_METHOD(Imagick, getQuantumRange) {
   size_t range;
   const char* quantumRange = MagickGetQuantumRange(&range);
-  return make_map_array(
+  return make_darray(
     s_quantumRangeLong, (int64_t)range,
     s_quantumRangeString, quantumRange);
 }
@@ -1746,7 +1748,7 @@ static Array HHVM_METHOD(Imagick, getSize) {
   if (status == MagickFalse) {
     IMAGICK_THROW("Unable to get size");
   }
-  return make_map_array(
+  return make_darray(
     s_columns, (int64_t)columns,
     s_rows, (int64_t)rows);
 }
@@ -1764,7 +1766,7 @@ static int64_t HHVM_METHOD(Imagick, getSizeOffset) {
 static Array HHVM_STATIC_METHOD(Imagick, getVersion) {
   size_t version;
   const char* versionStr = MagickGetVersion(&version);
-  return make_map_array(
+  return make_darray(
     s_versionNumber, (int64_t)version,
     s_versionString, versionStr);
 }
@@ -1827,7 +1829,7 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   auto wand = getMagickWandResource(Object{this_});
   String identify = convertMagickString(MagickIdentifyImage(wand->getWand()));
   auto parsedIdentify = parseIdentify(identify);
-  ArrayInit ret(parsedIdentify.size() + 6, ArrayInit::Map{});
+  DArrayInit ret(parsedIdentify.size() + 6);
 
   ret.set(s_imageName,
     convertMagickString(MagickGetImageFilename(wand->getWand())));
@@ -1836,14 +1838,14 @@ static Array HHVM_METHOD(Imagick, identifyImage, bool appendRawOutput) {
   ret.set(s_mimetype, mimetype.empty() ? String(s_unknown) : mimetype);
 
   for (const auto& i: parsedIdentify) {
-    ret.setUnknownKey(i.first, i.second);
+    ret.set(i.first, i.second);
   }
 
   ret.set(s_geometry, ImageGeometry(wand->getWand()).toArray());
 
   double x, y;
   if (MagickGetImageResolution(wand->getWand(), &x, &y) == MagickTrue) {
-    ret.set(s_resolution, make_map_array(s_x, x, s_y, y));
+    ret.set(s_resolution, make_darray(s_x, x, s_y, y));
   }
 
   ret.set(s_signature,
@@ -2408,10 +2410,10 @@ static Array HHVM_METHOD(Imagick, queryFontMetrics,
     static const size_t boundingBoxOffset = 7;
     static const size_t size = 13;
 
-    ArrayInit ret(size - 3, ArrayInit::Map{});
+    DArrayInit ret(size - 3);
     for (size_t i = 0; i < size; ++i) {
       if (keys[i] == s_boundingBox) {
-        ret.set(s_boundingBox, make_map_array(
+        ret.set(s_boundingBox, make_darray(
                 s_x1, metrics[boundingBoxOffset + 0],
                 s_y1, metrics[boundingBoxOffset + 1],
                 s_x2, metrics[boundingBoxOffset + 2],
@@ -3793,9 +3795,30 @@ static bool HHVM_METHOD(Imagick, valid) {
   return !getImagePending(Object{this_});
 }
 
+template<size_t (*get)(_MagickWand*)>
+static Variant get_size(const Object& this_) {
+  return get(getMagickWandResource(Object{this_})->getWand());
+}
+
+static Variant get_image_format(const Object& this_) {
+  return HHVM_MN(Imagick, getImageFormat)(this_.get());
+}
+
+static Native::PropAccessor imagick_properties[] = {
+  { "width", get_size<MagickGetImageWidth> },
+  { "height", get_size<MagickGetImageHeight> },
+  { "format", get_image_format },
+  { nullptr }
+};
+
+Native::PropAccessorMap imagick_properties_map{imagick_properties};
+struct ImagickPropHandler : Native::MapPropHandler<ImagickPropHandler> {
+  static constexpr Native::PropAccessorMap& map = imagick_properties_map;
+};
+
 #undef IMAGICK_THROW
 
-void loadImagickClass() {
+void ImagickExtension::loadImagickClass() {
   HHVM_ME(Imagick, adaptiveBlurImage);
   HHVM_ME(Imagick, adaptiveResizeImage);
   HHVM_ME(Imagick, adaptiveSharpenImage);
@@ -4126,6 +4149,8 @@ void loadImagickClass() {
   HHVM_ME(Imagick, next);
   HHVM_ME(Imagick, rewind);
   HHVM_ME(Imagick, valid);
+
+  Native::registerNativePropHandler<ImagickPropHandler>(s_Imagick);
 }
 
 //////////////////////////////////////////////////////////////////////////////

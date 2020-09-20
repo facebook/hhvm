@@ -2,11 +2,9 @@
 
 -- Testing sha1() function with no arguments --
 
-Warning: %s
-NULL
+Warning: sha1() expects at least 1 parameter, 0 given in %s/sha1_error.php on line 11
 
 -- Testing sha1() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: sha1() expects at most 2 parameters, 3 given in %s/sha1_error.php on line 15
 ===DONE===

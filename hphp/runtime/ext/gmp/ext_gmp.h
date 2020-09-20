@@ -108,7 +108,7 @@ private:
 struct GMP {
 private:
   static void initClass() {
-    cls = Unit::lookupClass(s_GMP_GMP.get());
+    cls = Class::lookup(s_GMP_GMP.get());
   }
 
 public:
@@ -122,7 +122,7 @@ public:
   static Object allocObject(const Variant& arg) {
     Object ret = allocObject();
     tvDecRefGen(
-      g_context->invokeFunc(cls->getCtor(), make_packed_array(arg), ret.get())
+      g_context->invokeFunc(cls->getCtor(), make_vec_array(arg), ret.get())
     );
     return ret;
   }

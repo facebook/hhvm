@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RESOURCE_H_
-#define incl_HPHP_RESOURCE_H_
+#pragma once
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -119,29 +118,6 @@ public:
   }
 
   /**
-   * getTyped() and is() are intended for use with C++ classes that derive
-   * from ResourceData.
-   *
-   * Prefer using the following functions instead of getTyped:
-   * r.getTyped<T>(false, false) -> cast<T>(r)
-   * r.getTyped<T>(true,  false) -> cast_or_null<T>(r)
-   * r.getTyped<T>(false, true) -> dyn_cast<T>(r)
-   * r.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(r)
-   */
-  template<typename T>
-  [[deprecated("Please use one of the cast family of functions instead.")]]
-  req::ptr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
-    static_assert(std::is_base_of<ResourceData, T>::value, "");
-    if (nullOkay) {
-      return badTypeOkay ? dyn_cast_or_null<T>(m_res) : cast_or_null<T>(m_res);
-    }
-    return badTypeOkay ? dyn_cast<T>(m_res) : cast<T>(m_res);
-  }
-
-  template<typename T>
-  bool is() const { return isa<T>(m_res->data()); }
-
-  /**
    * Type conversions
    */
   bool toBoolean() const {
@@ -164,14 +140,6 @@ public:
   }
   String toString() const;
   Array toArray() const;
-
-  /**
-   * Comparisons
-   */
-  bool same (const Resource& v2) const { return m_res == v2.m_res; }
-  bool equal(const Resource& v2) const { return m_res == v2.m_res; }
-  bool less(const Resource& v2) const { return toInt64() < v2.toInt64(); }
-  bool more(const Resource& v2) const { return toInt64() > v2.toInt64(); }
 
 private:
   //
@@ -204,4 +172,3 @@ extern const Resource null_resource;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RESOURCE_DATA_H_

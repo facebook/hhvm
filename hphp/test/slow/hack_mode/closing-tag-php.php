@@ -1,4 +1,0 @@
-<?hh
-
-?>
-Hello World

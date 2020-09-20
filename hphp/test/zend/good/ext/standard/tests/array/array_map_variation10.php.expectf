@@ -1,66 +1,23 @@
 *** Testing array_map() : anonymous callback function ***
 -- anonymous function with all parameters and body --
-array(3) {
-  [0]=>
-  array(2) {
-    [0]=>
+varray(3) {
+  varray(2) {
     int(1)
-    [1]=>
     int(3)
   }
-  [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(2)
-    [1]=>
     int(4)
   }
-  [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(3)
-    [1]=>
     int(5)
   }
 }
 -- anonymous function with two parameters and passing one array --
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-
-Warning: %s
-
-Notice: %s
-array(3) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    NULL
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    int(2)
-    [1]=>
-    NULL
-  }
-  [2]=>
-  array(2) {
-    [0]=>
-    int(3)
-    [1]=>
-    NULL
-  }
-}
+string(48) "__invoke() expects exactly 2 parameters, 1 given"
 -- anonymous function with NULL parameter --
-array(3) {
+darray(3) {
   [0]=>
   NULL
   [1]=>
@@ -69,7 +26,7 @@ array(3) {
   NULL
 }
 -- anonymous function with NULL body --
-array(3) {
+darray(3) {
   [0]=>
   NULL
   [1]=>
@@ -79,6 +36,6 @@ array(3) {
 }
 -- passing NULL as 'arr1' --
 
-Warning: %s
+Warning: array_map(): Argument #2 should be an array or collection in %s/array_map_variation10.php on line 29
 NULL
 Done

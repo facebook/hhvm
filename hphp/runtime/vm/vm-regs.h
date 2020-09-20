@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_VM_REGS_H_
-#define incl_HPHP_RUNTIME_VM_VM_REGS_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/call-flags.h"
 
 /*
  * This file contains accessors for the three primary VM registers:
  *
  * vmpc(): PC pointing to the currently executing bytecode instruction
  * vmfp(): ActRec* pointing to the current frame
- * vmsp(): Cell* pointing to the top of the eval stack
+ * vmsp(): TypedValue* pointing to the top of the eval stack
  *
  * The registers are physically located in the RDS header struct (defined in
  * runtime/base/rds-header.h), allowing efficient access from translated code
@@ -70,11 +70,11 @@ enum VMRegState : uintptr_t {
 extern __thread VMRegState tl_regState;
 
 inline void checkVMRegState() {
-  assert(tl_regState == VMRegState::CLEAN);
+  assertx(tl_regState == VMRegState::CLEAN);
 }
 
 inline void checkVMRegStateGuarded() {
-  assert(tl_regState != VMRegState::DIRTY);
+  assertx(tl_regState != VMRegState::DIRTY);
 }
 
 inline VMRegs& vmRegsUnsafe() {
@@ -94,7 +94,7 @@ inline bool isValidVMStackAddress(const void* addr) {
   return vmRegsUnsafe().stack.isValidAddress(uintptr_t(addr));
 }
 
-inline Cell*& vmsp() {
+inline TypedValue*& vmsp() {
   return vmRegs().stack.top();
 }
 
@@ -107,7 +107,7 @@ inline const unsigned char*& vmpc() {
 }
 
 inline Offset pcOff() {
-  return vmfp()->m_func->unit()->offsetOf(vmpc());
+  return vmfp()->func()->offsetOf(vmpc());
 }
 
 inline ActRec*& vmFirstAR() {
@@ -124,18 +124,23 @@ inline ActRec*& vmJitCalledFrame() {
   return vmRegsUnsafe().jitCalledFrame;
 }
 
+inline jit::TCA& vmJitReturnAddr() {
+  return vmRegsUnsafe().jitReturnAddr;
+}
+
 inline void assert_native_stack_aligned() {
 #ifndef _MSC_VER
-  assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 #endif
 }
 
-inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
-  assert(tl_regState == VMRegState::DIRTY);
+inline void interp_set_regs(ActRec* ar, TypedValue* sp, Offset pcOff) {
+  assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   vmfp() = ar;
   vmsp() = sp;
-  vmpc() = ar->unit()->at(pcOff);
+  vmpc() = ar->func()->at(pcOff);
+  vmJitReturnAddr() = nullptr; // We never elide frames around an interpOne
 }
 
 /*
@@ -161,15 +166,15 @@ ActRec* callerFrameHelper();
  * assert or crash if it attempts to parse a part of the stack with no frame
  * pointers. VMRegAnchor forces the stack traversal to be done when it is
  * constructed.
+ *
+ * A VMRegAnchor in "soft" mode will look for stashed VM metadata and only sync
+ * VM state if it finds it.  (The default behavior is "hard" mode, where we
+ * assert if we don't find the fixup state).
  */
 struct VMRegAnchor {
-  VMRegAnchor();
-  /*
-   * Some C++ entry points have an ActRec prepared from after a call
-   * instruction.  Instantiating a VMRegAnchor with an ActRec argument syncs us
-   * to right after the call instruction.
-   */
-  explicit VMRegAnchor(ActRec* ar);
+  enum Mode { Hard, Soft };
+
+  explicit VMRegAnchor(Mode mode = Hard);
 
   ~VMRegAnchor() {
     if (m_old < VMRegState::GUARDED_THRESHOLD) {
@@ -197,11 +202,11 @@ struct EagerVMRegAnchor {
       DEBUG_ONLY auto const sp = regs.stack.top();
       DEBUG_ONLY auto const pc = regs.pc;
       VMRegAnchor _;
-      assert(regs.fp == fp);
-      assert(regs.stack.top() == sp);
-      assert(regs.pc == pc);
+      assertx(regs.fp == fp);
+      assertx(regs.stack.top() == sp);
+      assertx(regs.pc == pc);
     }
-    assert(tl_regState < VMRegState::GUARDED_THRESHOLD);
+    assertx(tl_regState < VMRegState::GUARDED_THRESHOLD);
     m_old = tl_regState;
     tl_regState = VMRegState::CLEAN;
   }
@@ -264,66 +269,6 @@ struct VMRegGuard {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace detail {
-
-inline ActRec* regAnchorFP(ActRec* cur, Offset* pc = nullptr) {
-  // In builtins, m_fp points to the caller's frame if called through
-  // FCallBuiltin, else it points to the builtin's frame, in which case,
-  // getPrevVMState() gets the caller's frame.  In addition, we need to skip
-  // over php-defined builtin functions in order to find the true context.
-  auto const context = g_context.getNoCheck();
-  if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
-  if (cur && cur->skipFrame()) cur = context->getPrevVMStateSkipFrame(cur, pc);
-  return cur;
-}
-
-inline ActRec* regAnchorFPForArgs(ActRec* cur) {
-  // Like regAnchorFP, but only account for FCallBuiltin
-  if (cur && cur->m_func->isCPPBuiltin()) {
-    auto const context = g_context.getNoCheck();
-    cur = context->getPrevVMState(cur);
-  }
-  return cur;
-}
-
-}
-
-/*
- * VM helper to retrieve the current vm frame pointer without ensuring
- * the vm state is clean.
- *
- * This is a common need for extensions.
- */
-inline ActRec* GetCallerFrame() {
-  auto fp = tl_regState == VMRegState::CLEAN ? vmfp() : callerFrameHelper();
-  return detail::regAnchorFP(fp);
-}
-
-inline ActRec* GetCallerFrameForArgs() {
-  auto fp = tl_regState == VMRegState::CLEAN ? vmfp() : callerFrameHelper();
-  return detail::regAnchorFPForArgs(fp);
-}
-
-/*
- * VM helper to clean the vm state, and retrieve the current vm frame
- * pointer.
- *
- * This is a common need for extensions.
- */
-struct CallerFrame : public VMRegAnchor {
-  ActRec* operator()(Offset* pc = nullptr) {
-    return detail::regAnchorFP(vmfp(), pc);
-  }
-  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(vmfp()); }
-};
-
-struct EagerCallerFrame : public EagerVMRegAnchor {
-  ActRec* operator()() {
-    return detail::regAnchorFP(vmfp());
-  }
-  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(vmfp()); }
-};
-
 #define SYNC_VM_REGS_SCOPED() \
   HPHP::VMRegAnchor _anchorUnused
 
@@ -331,4 +276,3 @@ struct EagerCallerFrame : public EagerVMRegAnchor {
 
 }
 
-#endif

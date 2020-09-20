@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 trait T {
-  function foo() {
+  static function foo() {
     var_dump(__METHOD__);
   }
 }
@@ -10,4 +10,8 @@ function test($f) {
   call_user_func($f);
 }
 
-test(array('T', 'T::foo'));
+
+<<__EntryPoint>>
+function main_classof() {
+test(varray['T', 'T::foo']);
+}

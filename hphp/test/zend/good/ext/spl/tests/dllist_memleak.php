@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $dll = new SplDoublyLinkedList();
 $dll->push(1);
 $dll->push(2);
@@ -12,6 +12,5 @@ $dll->next();
 $dll->next();
 echo $dll->current()."\n";
 
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

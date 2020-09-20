@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: A semicolon `;` is expected here. in %s/syntax-error.php on line 3

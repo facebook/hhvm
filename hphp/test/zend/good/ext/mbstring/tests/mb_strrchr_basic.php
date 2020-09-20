@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
  * Description: Finds the last occurrence of a character in a string within another 
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strrchr() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -33,5 +33,5 @@ echo "\n-- Multibyte string: needle doesn't exist --\n";
 $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strrchr($string_mb, $needle2));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

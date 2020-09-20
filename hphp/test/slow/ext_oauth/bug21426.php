@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo extends OAuth
 {
@@ -9,8 +9,7 @@ class Foo extends OAuth
         return $this->foo;
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $foo = new Foo('key', 'secret');
 var_dump($foo->getFoo());
-
-?>
+}

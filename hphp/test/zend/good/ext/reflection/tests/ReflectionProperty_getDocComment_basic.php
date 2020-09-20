@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
     /**
@@ -9,7 +9,7 @@ class A {
     /**
      * My Doc Comment for $d
      */
-    var $d;
+    public $d;
     /**Not a doc comment */
     private $e;
     /**
@@ -21,12 +21,12 @@ class A {
 class B extends A {
     public $a = 2;
     /** A doc comment for $b */
-    var $b, $c = 1;
+    public $b, $c = 1;
     /** A doc comment for $e */
-    var $e;
+    public $e;
 }
-
-foreach(array('A', 'B') as $class) {
+<<__EntryPoint>> function main(): void {
+foreach(varray['A', 'B'] as $class) {
     $rc = new ReflectionClass($class);
     $rps = $rc->getProperties();
     foreach($rps as $rp) {
@@ -34,5 +34,4 @@ foreach(array('A', 'B') as $class) {
         var_dump($rp->getDocComment());
     }
 }
-
-?>
+}

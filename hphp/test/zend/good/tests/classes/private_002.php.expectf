@@ -1,4 +1,4 @@
 Call pass::show()
 Call fail::show()
 
-Fatal error: %s
+Fatal error: Call to private method pass::show() from context 'fail' in %s/private_002.php on line 16

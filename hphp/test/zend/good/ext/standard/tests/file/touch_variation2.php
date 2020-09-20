@@ -1,7 +1,7 @@
-<?php
+<?hh
 
-
-$filename = dirname(__FILE__)."/touch_variation2.dat";
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('touch_variation2.dat');
 $fp=fopen($filename,"w");
 fwrite ($fp,"mydata");
 fclose($fp);
@@ -11,5 +11,4 @@ var_dump(file_get_contents($filename));
 
 @unlink($filename);
 echo "Done\n";
-
-?>
+}

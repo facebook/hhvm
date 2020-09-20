@@ -1,109 +1,124 @@
-array(2) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(4) "Base"
+  ["exact"]=>
+  bool(true)
 }
-array(2) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(5) "Child"
+  ["exact"]=>
+  bool(true)
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(2) {
+  darray(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
     string(4) "Base"
+    ["exact"]=>
+    bool(true)
   }
   ["param_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(4) "Base"
+      ["exact"]=>
+      bool(true)
     }
   }
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(2) {
+  darray(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
     string(5) "Child"
+    ["exact"]=>
+    bool(true)
   }
   ["param_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(5) "Child"
+      ["exact"]=>
+      bool(true)
     }
   }
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(2) {
+  darray(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
     string(4) "Base"
+    ["exact"]=>
+    bool(true)
   }
   ["param_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(4) "Base"
+      ["exact"]=>
+      bool(true)
     }
   }
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(2) {
+  darray(2) {
     ["foo"]=>
-    array(2) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(5) "Child"
+      ["exact"]=>
+      bool(true)
     }
     ["bar"]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(6) "HH\Map"
       ["generic_types"]=>
-      array(2) {
-        [0]=>
-        array(1) {
+      varray(2) {
+        darray(1) {
           ["kind"]=>
           int(4)
         }
-        [1]=>
-        array(2) {
+        darray(3) {
           ["kind"]=>
           int(15)
           ["classname"]=>
           string(5) "Child"
+          ["exact"]=>
+          bool(true)
         }
       }
     }

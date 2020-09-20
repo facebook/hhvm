@@ -1,16 +1,16 @@
 string(5) "Y-m-d"
 string(19) "2001-11-29 13:20:01"
 bool(false)
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  array(1) {
+  darray(1) {
     [10]=>
     string(13) "Trailing data"
   }
@@ -19,7 +19,7 @@ array(4) {
 
 string(6) "Y-m-d+"
 string(19) "2001-11-29 13:20:01"
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -27,25 +27,25 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(%d) "%s"
 }
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  array(1) {
+  darray(1) {
     [10]=>
     string(13) "Trailing data"
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
 }
 
 
 string(7) "Y-m-d +"
 string(19) "2001-11-29 13:20:01"
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -53,25 +53,25 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(%d) "%s"
 }
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  array(1) {
+  darray(1) {
     [11]=>
     string(13) "Trailing data"
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
 }
 
 
 string(6) "Y-m-d+"
 string(10) "2001-11-29"
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -79,16 +79,16 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(%d) "%s"
 }
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
 }
 
@@ -96,16 +96,16 @@ array(4) {
 string(7) "Y-m-d +"
 string(10) "2001-11-29"
 bool(false)
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(1)
   ["errors"]=>
-  array(1) {
+  darray(1) {
     [10]=>
     string(12) "Data missing"
   }
@@ -114,7 +114,7 @@ array(4) {
 
 string(7) "Y-m-d +"
 string(11) "2001-11-29 "
-object(DateTime)#%d (3) {
+object(DateTime) (3) {
   ["date"]=>
   string(26) "2001-11-29 %d:%d:%d.%d"
   ["timezone_type"]=>
@@ -122,15 +122,15 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(%d) "%s"
 }
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
 }

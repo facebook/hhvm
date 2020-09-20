@@ -1,10 +1,9 @@
-<?php
+<?hh
 
-class abc { 
+class abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
-?>

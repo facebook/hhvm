@@ -1,0 +1,7 @@
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'foobar' in %s/test/slow/object_magic_method/uncaught_exn_to_string.php:4
+Stack trace:
+#0 %s/test/slow/object_magic_method/uncaught_exn_to_string.php(4): HH\invariant_violation()
+#1 %s/test/slow/object_magic_method/uncaught_exn_to_string.php(8): zardoz()
+#2 %s/test/slow/object_magic_method/uncaught_exn_to_string.php(13): foobar()
+#3 (): main()
+#4 {main}

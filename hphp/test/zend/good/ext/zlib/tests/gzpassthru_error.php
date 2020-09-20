@@ -1,12 +1,12 @@
-<?php
+<?hh
 
-
+<<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 $extra_arg = 'nothing';
-var_dump(gzpassthru( $h, $extra_arg ) );
-var_dump(gzpassthru() );
+try { var_dump(gzpassthru( $h, $extra_arg ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gzpassthru() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 gzclose($h);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

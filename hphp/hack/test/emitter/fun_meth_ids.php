@@ -17,11 +17,11 @@ function incr(int $x): int {
 }
 
 function test(): void {
-  var_dump(array_map(fun('incr'), array(1, 2, 3)));
+  var_dump(array_map(fun('incr'), varray[1, 2, 3]));
 
   $x = new Foo();
-  var_dump(array_map(inst_meth($x, 'f'), array(1, 2, 3)));
-  var_dump(array_map(meth_caller('Foo', 'h'), array($x, $x, $x)));
+  var_dump(array_map(inst_meth($x, 'f'), varray[1, 2, 3]));
+  var_dump(array_map(meth_caller('Foo', 'h'), varray[$x, $x, $x]));
 
-  var_dump(array_map(class_meth('Foo', 'g'), array(1, 2, 3)));
+  var_dump(array_map(class_meth('Foo', 'g'), varray[1, 2, 3]));
 }

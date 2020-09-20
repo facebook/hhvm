@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_wrapper() {
 $loremIpsum = <<<LOREM_IPSUM
 Lorem ipsum dolor sit amet,
 consectetur adipiscing elit,
@@ -41,3 +44,4 @@ echo "----- Contents -----\n";
 readfile("compress.bzip2://$fn");
 
 unlink($fn);
+}

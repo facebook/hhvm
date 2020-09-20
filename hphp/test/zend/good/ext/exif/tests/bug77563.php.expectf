@@ -1,0 +1,9 @@
+
+Warning: IFD data too short: 0x0009 offset 0x0008 in %s/bug77563.php on line 6
+
+Warning: Illegal IFD offset in %s/bug77563.php on line 6
+
+Warning: File structure corrupted in %s/bug77563.php on line 6
+
+Warning: Invalid JPEG file in %s/bug77563.php on line 6
+bool(false)

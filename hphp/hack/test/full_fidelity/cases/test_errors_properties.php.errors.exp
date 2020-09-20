@@ -1,0 +1,2 @@
+(4,10)-(4,17) Properties cannot have multiple visibility modifiers
+(5,17)-(5,23) Properties cannot have duplicate modifiers

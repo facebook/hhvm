@@ -1,19 +1,19 @@
-<?hh // uses RenameFunction to ensure that all arguments are retained
-
+<?hh
+/* uses RenameFunction to ensure that all arguments are retained */
 class A {
   static function foo() {
     var_dump(debug_backtrace());
   }
 
   function bar($a, $b, $c = null) {
-    $this->foo();
+    self::foo();
   }
 }
 
 function bar() {
   $a = new A();
-  $a->bar(1, "str", array(1, 2, 3));
-  hphp_invoke_method($a, "A", "bar", array(1, 2));
+  $a->bar(1, "str", varray[1, 2, 3]);
+  hphp_invoke_method($a, "A", "bar", varray[1, 2]);
   hphp_invoke_method($a, "A", "bar", Map {'a' => 1, 'b' => 2});
 }
 function foo() {
@@ -28,7 +28,9 @@ function error_handler($errno, $errstr, $errfile, $errline, $errcontext) {
 function main() {
   foo();
 
-  set_error_handler('error_handler');
-  return FakeConstant;
+  set_error_handler(fun('error_handler'));
 }
-main();
+<<__EntryPoint>>
+function entrypoint_debug_backtrace(): void {
+  main();
+}

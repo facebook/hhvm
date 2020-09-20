@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
   protected function foo() {
@@ -18,6 +18,10 @@ class E extends C {
     $obj->foo();
   }
 }
+
+<<__EntryPoint>>
+function main_2111() {
 $d = new D;
 E::test($d);
 echo "Done\n";
+}

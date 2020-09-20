@@ -2,19 +2,6 @@
 # Some tests of property/constant initializers.
 #
 
-.main {
-  FPushFuncD 0 "init_test"
-  FCall 0
-  PopR
-
-  FPushFuncD 0 "uninit_test"
-  FCall 0
-  PopR
-
-  Int 1
-  RetC
-}
-
 .class Init {
   .default_ctor;
   .const BAR = """s:4:"1242";""";
@@ -28,7 +15,7 @@
   .property [static public] foo = uninit;
   .property [public] nonstat = uninit;
 
-  .method [public] 86cinit($which) {
+  .method [static public] 86cinit($which) {
     CGetL $which
     String "BAR"
     Same
@@ -42,7 +29,7 @@
     Fatal Runtime
   }
 
-  .method [public] 86sinit() {
+  .method [static public] 86sinit() {
     String "default ::foo value"
     InitProp "foo" Static
 
@@ -50,7 +37,7 @@
     RetC
   }
 
-  .method [public] 86pinit() {
+  .method [static public] 86pinit() {
     CheckProp "nonstat"
     JmpNZ isset
     String "code-created prop value"
@@ -63,27 +50,32 @@
 }
 
 .function do_test($who) {
-  .numclsrefslots 1;
-
-  ClsRefGetL $who 0
-  ClsCns "BAR" 0
+  CGetL $who
+  ClassGetC
+  ClsCns "BAR"
   String "\n"
   Concat
   Print
   PopC
 
   String "foo"
-  ClsRefGetL $who 0
-  CGetS 0
+  CGetL $who
+  ClassGetC
+  CGetS
   String "\n"
   Concat
   Print
   PopC
 
-  ClsRefGetL $who 0
-  FPushCtor 0 0
-  FCall 0
-  PopR
+  CGetL $who
+  ClassGetC
+  NewObj
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
 
@@ -100,19 +92,36 @@
 }
 
 .function init_test {
-  FPushFuncD 1 "do_test"
+  NullUninit
+  NullUninit
+  NullUninit
     String "Init"
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "do_test"
   RetC
 }
 
 .function uninit_test {
-  FPushFuncD 1 "do_test"
+  NullUninit
+  NullUninit
+  NullUninit
     String "Uninit"
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "do_test"
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "init_test"
+  PopC
+
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "uninit_test"
+  PopC
+
+  Int 1
   RetC
 }

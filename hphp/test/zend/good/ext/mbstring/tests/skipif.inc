@@ -1,4 +1,4 @@
-<?php
+<?hh
 // This script prints "skip" if condition does not meet.
 
 /*
@@ -11,4 +11,3 @@ if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
 if (!extension_loaded("mbstring")) {
     die("skip\n");
 }
-?>

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
-#define incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
+#pragma once
 
 #include <list>
 #include <memory>
@@ -24,6 +23,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -100,7 +100,7 @@ struct InterruptSite {
 
   const SourceLoc* getSourceLoc() const { return &m_sourceLoc; }
   const Offset getCurOffset() const { return m_offset; }
-  const Unit* getUnit() const { return m_unit; }
+  const Func* getFunc() const { return m_func; }
 
   bool valid() const { return m_valid; }
   bool funcEntry() const { return m_funcEntry; }
@@ -129,7 +129,7 @@ private:
 
   SourceLoc m_sourceLoc;
   Offset m_offset;
-  Unit* m_unit;
+  const Func* m_func;
   bool m_valid;
   bool m_funcEntry;
   bool m_builtin;
@@ -280,4 +280,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_

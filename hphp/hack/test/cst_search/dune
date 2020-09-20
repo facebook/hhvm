@@ -1,0 +1,16 @@
+(alias
+    (name cst_search)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/cst_search/*.php)
+          (glob_files %{project_root}/test/cst_search/*.json)
+          (glob_files %{project_root}/test/cst_search/*.json.exp)
+          (glob_files %{project_root}/test/cst_search/*.flags))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/cst_search
+    --program %{exe:../../src/hh_single_type_check.exe}
+    --in-extension .json --stdin)))
+
+(alias
+    (name runtest)
+    (deps (alias cst_search)))

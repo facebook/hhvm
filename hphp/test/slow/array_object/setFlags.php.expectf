@@ -1,4 +1,0 @@
-
-Notice: Undefined property: ArrayObject::$lemons in %s/test/slow/array_object/setFlags.php on line 14
-NULL
-int(1)

@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -37,12 +37,10 @@ $entry2 = $entry;
 $entry2["weirdAttribute"] = "weirdVal";
 
 var_dump(ldap_mod_add($link, "dc=my-domain,$base", $entry2));
-?>
-===DONE===
-<?php
+echo "===DONE===\n";
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
-?>

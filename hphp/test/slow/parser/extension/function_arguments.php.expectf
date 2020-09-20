@@ -1,0 +1,14 @@
+dict(3) {
+  ["a"]=>
+  vec(1) {
+    string(20) "// Description of a."
+  }
+  ["b"]=>
+  vec(2) {
+    string(21) "// Description of the"
+    string(15) "// parameter b."
+  }
+  ["c"]=>
+  vec(0) {
+  }
+}

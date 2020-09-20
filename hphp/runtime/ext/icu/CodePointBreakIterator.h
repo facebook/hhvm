@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_ICU_CODEPOINTBREAKITERATOR_H
-#define incl_HPHP_EXT_ICU_CODEPOINTBREAKITERATOR_H
+#pragma once
 
 #include <unicode/brkiter.h>
 #include <unicode/uchriter.h>
@@ -51,11 +50,11 @@ struct CodePointBreakIterator : icu::BreakIterator {
     return new CodePointBreakIterator(*this);
   }
 
-  CharacterIterator& getText(void) const override {
+  icu::CharacterIterator& getText(void) const override {
     if (!m_charIter) {
       // this method is deprecated anyway; setup bogus iterator
       static const UChar c = 0;
-      m_charIter = new UCharCharacterIterator(&c, 0);
+      m_charIter = new icu::UCharCharacterIterator(&c, 0);
     }
     return *m_charIter;
   }
@@ -64,7 +63,7 @@ struct CodePointBreakIterator : icu::BreakIterator {
     return utext_clone(fillIn, m_text, false, true, &status);
   }
 
-  void setText(const UnicodeString &text) override {
+  void setText(const icu::UnicodeString &text) override {
     UErrorCode error = U_ZERO_ERROR;
     m_text = utext_openConstUnicodeString(m_text, &text, &error);
     clearCurrentCharIter();
@@ -78,7 +77,7 @@ struct CodePointBreakIterator : icu::BreakIterator {
     clearCurrentCharIter();
   }
 
-  void adoptText(CharacterIterator* it) override {
+  void adoptText(icu::CharacterIterator* it) override {
     clearCurrentCharIter();
     UErrorCode error = U_ZERO_ERROR;
     m_charIter = it;
@@ -157,7 +156,7 @@ struct CodePointBreakIterator : icu::BreakIterator {
  private:
   UText  *m_text{nullptr};
   UChar32 m_lastCodePoint{U_SENTINEL};
-  mutable CharacterIterator *m_charIter{nullptr};
+  mutable icu::CharacterIterator *m_charIter{nullptr};
 
   inline void clearCurrentCharIter() {
     if (m_charIter) {
@@ -170,4 +169,3 @@ struct CodePointBreakIterator : icu::BreakIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
-#endif // incl_HPHP_EXT_ICU_CODEPOINTBREAKITERATOR_H

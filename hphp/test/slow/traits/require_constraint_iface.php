@@ -61,5 +61,9 @@ function reflection() {
   reflect_requirements(C3::class);
   reflect_requirements(C4::class);
 }
+
+<<__EntryPoint>>
+function main_require_constraint_iface() {
 main();
 reflection();
+}

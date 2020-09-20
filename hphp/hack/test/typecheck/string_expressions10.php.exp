@@ -1,6 +1,10 @@
+File "string_expressions10.php", line 26, characters 20-27:
+Typing error (Typing[4053])
 File "string_expressions10.php", line 26, characters 30-31:
-Could not find member wt in an object of type Blah (Typing[4053])
+No property `wt` in `Blah`
+File "string_expressions10.php", line 13, characters 10-12:
+Did you mean `wut` instead?
 File "string_expressions10.php", line 18, characters 11-14:
 This is why I think it is an object of type Blah
 File "string_expressions10.php", line 12, characters 7-10:
-Declaration of Blah is here
+Declaration of `Blah` is here

@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
  * Description: Sets the current substitute_character or returns the current substitute_character 
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substitute_character() : basic functionality ***\n";
 
 
@@ -18,5 +18,5 @@ var_dump( mb_substitute_character("none") );
 var_dump( mb_substitute_character() );
 var_dump( mb_substitute_character("b") );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

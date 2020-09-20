@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_112() {
 $a = 1.234;
 echo $a;
 $b = 1.2e3;
@@ -14,3 +17,4 @@ echo (64.0-floor(64.0));
 echo round(64.1-floor(64.1));
 echo round(3.1415927,2);
 echo round(1092,-2);
+}

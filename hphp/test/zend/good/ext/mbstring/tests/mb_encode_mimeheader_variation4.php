@@ -1,7 +1,7 @@
-<?php
+<?hh
 /* Prototype  : string mb_encode_mimeheader
  * (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
- * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= 
+ * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?=
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -9,6 +9,14 @@
  * Pass different data types to $linefeed argument to see how mb_encode_mimeheader() behaves
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_encode_mimeheader() : usage variations ***\n";
 mb_internal_encoding('utf-8');
 
@@ -24,14 +32,6 @@ $indent = 2;
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -41,7 +41,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $linefeed argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -65,7 +65,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -74,7 +74,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -86,17 +86,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_encode_mimeheader()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_encode_mimeheader($str, $charset, $transfer_encoding, $input, $indent));
+  try { var_dump( mb_encode_mimeheader($str, $charset, $transfer_encoding, $input, $indent)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
-?>
+}

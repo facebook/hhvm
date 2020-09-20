@@ -1,0 +1,12 @@
+File "scope_bug.php", line 11, characters 19-20:
+Invalid argument (Typing[4110])
+File "scope_bug.php", line 4, characters 25-30:
+Expected `string`
+File "scope_bug.php", line 9, characters 12-12:
+But got `int`
+File "scope_bug.php", line 21, characters 19-20:
+Invalid argument (Typing[4110])
+File "scope_bug.php", line 4, characters 25-30:
+Expected `string`
+File "scope_bug.php", line 19, characters 12-12:
+But got `int`

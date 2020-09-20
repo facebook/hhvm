@@ -1,0 +1,11 @@
+set pagination off
+break HPHP::f_var_dump
+ignore 1 2
+run
+unwinder init
+set logging on
+print *expression.m_data.pobj
+bt 5
+set logging off
+kill
+quit

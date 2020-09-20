@@ -1,0 +1,16 @@
+object(FunctionCredential) (3) {
+  ["class_name"]=>
+  NULL
+  ["function_name"]=>
+  string(4) "main"
+  ["file_name"]=>
+  string(%d) "%s/hphp/test/slow/ext_functioncredential/var_dump.php"
+}
+object(FunctionCredential) (3) {
+  ["class_name"]=>
+  string(9) "TestClass"
+  ["function_name"]=>
+  string(13) "static_method"
+  ["file_name"]=>
+  string(%d) "%s/hphp/test/slow/ext_functioncredential/var_dump.php"
+}

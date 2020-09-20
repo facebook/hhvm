@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/util/portability.h"
+
 namespace HPHP {
 
 namespace array {
@@ -44,10 +46,10 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
   uint64_t offset = scale * 16;
   __asm__ __volatile__(
     "pcmpeqd    %%xmm0, %%xmm0\n"          // xmm0 <- 11111....
-    ".l%=:\n"
+    ASM_LOCAL_LABEL("HTCIH%=") ":\n"
     "sub        $0x10, %0\n"
     "movdqu     %%xmm0, (%1, %0)\n"
-    "ja         .l%=\n"
+    "ja         " ASM_LOCAL_LABEL("HTCIH%=") "\n"
     : "+r"(offset) : "r"(hash) : "xmm0"
   );
 #elif defined(__aarch64__)
@@ -58,11 +60,11 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
   uint64_t ones = -1;
   auto hash2 = hash;
   __asm__ __volatile__(
-    ".l%=:\n"
+    ASM_LOCAL_LABEL("HTCIH%=") ":\n"
     "stp        %x2, %x2, [%x1], #16\n"
     "subs       %x0, %x0, #16\n"
-    "bhi        .l%=\n"
-    : "+r"(offset), "+r"(hash2) : "r"(ones)
+    "bhi        " ASM_LOCAL_LABEL("HTCIH%=") "\n"
+    : "+r"(offset), "+r"(hash2) : "r"(ones) : "cc"
   );
 #elif defined(__powerpc__)
   static_assert(Empty == -1, "The following fills with all 1's.");
@@ -71,10 +73,10 @@ void HashTableCommon::InitHash(int32_t* hash, uint32_t scale) {
   uint64_t offset = scale * 16;
   __asm__ __volatile__(
     "vspltisw   0, -1       \n"
-    ".l%=:                  \n"
+    ASM_LOCAL_LABEL("HTCIH%=") ":\n"
     "subic.     %0, %0, 0x10\n"
     "stxvd2x    32, %1, %0   \n"
-    "bgt        .l%=        \n"
+    "bgt        " ASM_LOCAL_LABEL("HTCIH%=") "\n"
     : "+b"(offset) : "b"(hash) : "v0");
 #else
   static_assert(Empty == -1, "Cannot use wordfillones().");
@@ -92,7 +94,7 @@ void HashTableCommon::CopyHash(int32_t* to,
 }
 
 ALWAYS_INLINE bool HashTableCommon::isFull() const {
-  assert(m_used <= capacity());
+  assertx(m_used <= capacity());
   return m_used == capacity();
 }
 
@@ -100,7 +102,7 @@ template<typename ArrayType, typename ElmType>
 ALWAYS_INLINE
 ssize_t HashTable<ArrayType, ElmType>::getIterBeginNotEmpty() const {
   // Expedite no tombstone case.
-  assert(!array()->empty());
+  assertx(!array()->empty());
   if (LIKELY(!data()[0].isTombstone())) {
       return 0;
   }
@@ -132,11 +134,11 @@ ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::getIterEnd() const {
 template<typename ArrayType, typename ElmType>
 ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::nextElm(Elm* elms,
                                                              ssize_t ei) const {
-  assert(-1 <= ei && ei < m_used);
+  assertx(-1 <= ei && ei < m_used);
   while (++ei < m_used) {
     if (LIKELY(!elms[ei].isTombstone())) return ei;
   }
-  assert(ei == m_used);
+  assertx(ei == m_used);
   return m_used;
 }
 
@@ -148,7 +150,7 @@ ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::nextElm(ssize_t ei) const {
 template<typename ArrayType, typename ElmType>
 ALWAYS_INLINE ssize_t HashTable<ArrayType, ElmType>::prevElm(Elm* elms,
                                                              ssize_t ei) const {
-  assert(ei < ssize_t(m_used));
+  assertx(ei < ssize_t(m_used));
   while (--ei >= 0) {
     if (!elms[ei].isTombstone()) {
       return ei;
@@ -185,7 +187,7 @@ HashTable<ArrayType, ElmType>::iter_advance_helper(ssize_t next_pos) const {
       return next_pos;
     }
   }
-  assert(next_pos == m_used);
+  assertx(next_pos == m_used);
   return next_pos;
 }
 
@@ -228,10 +230,17 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
   //Use a2 since writeback == true for stp instruction
   auto a2 = a;
   __asm__ __volatile__(
+ #ifdef __clang__
+  "stp        %[data], %[data], %[addr]\n"
+  :[addr] "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
+  :[data] "r"(emptyVal));
+#else
     "stp        %x1, %x1, %x0\n"
     : "+o"(*((uint8_t*)a2 + (sizeof(ArrayType) + SmallSize * sizeof(Elm))))
     : "r"(emptyVal)
   );
+#endif
+
 #elif defined(__powerpc__)
   static_assert(Empty == -1, "");
   static_assert(SmallSize == 3, "");
@@ -250,23 +259,22 @@ ALWAYS_INLINE void HashTable<ArrayType, ElmType>::InitSmallHash(ArrayType* a) {
 }
 
 template<typename ArrayType, typename ElmType>
-member_rval::ptr_u
-HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad, int64_t k) {
+TypedValue HashTable<ArrayType, ElmType>::NvGetInt(const ArrayData* ad,
+                                                   int64_t k) {
   auto a = asArrayType(ad);
   auto i = a->find(k, hash_int64(k));
-  return LIKELY(validPos(i)) ? a->data()[i].datatv() : nullptr;
+  return LIKELY(validPos(i)) ? *a->data()[i].datatv() : make_tv<KindOfUninit>();
 }
 
 #if !defined(__SSE4_2__) || defined(NO_HWCRC) || !defined(NO_M_DATA) || \
   defined(_MSC_VER)
 // This function is implemented directly in ASM in hash-table-x64.S otherwise.
 template<typename ArrayType, typename ElmType>
-member_rval::ptr_u
-HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
-                                        const StringData* k) {
+TypedValue HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
+                                                   const StringData* k) {
   auto a = asArrayType(ad);
   auto i = a->find(k, k->hash());
-  return LIKELY(validPos(i)) ? a->data()[i].datatv() : nullptr;
+  return LIKELY(validPos(i)) ? *a->data()[i].datatv() : make_tv<KindOfUninit>();
 }
 #else
   // hash-table-x64.S depends on StringData and ArrayType layout.
@@ -277,10 +285,26 @@ HashTable<ArrayType, ElmType>::NvGetStr(const ArrayData* ad,
 #endif
 
 template<typename ArrayType, typename ElmType>
-Cell HashTable<ArrayType, ElmType>::NvGetKey(const ArrayData* ad, ssize_t pos) {
+ssize_t HashTable<ArrayType, ElmType>::NvGetIntPos(const ArrayData* ad,
+                                                   int64_t k) {
   auto a = asArrayType(ad);
-  assert(pos != a->m_used);
-  assert(!a->data()[pos].isTombstone());
+  auto i = a->find(k, hash_int64(k));
+  return LIKELY(validPos(i)) ? i : a->m_used;
+}
+
+template<typename ArrayType, typename ElmType>
+ssize_t HashTable<ArrayType, ElmType>::NvGetStrPos(const ArrayData* ad,
+                                                   const StringData* k) {
+  auto a = asArrayType(ad);
+  auto i = a->find(k, k->hash());
+  return LIKELY(validPos(i)) ? i : a->m_used;
+}
+
+template<typename ArrayType, typename ElmType>
+TypedValue HashTable<ArrayType, ElmType>::GetPosKey(const ArrayData* ad, ssize_t pos) {
+  auto a = asArrayType(ad);
+  assertx(pos != a->m_used);
+  assertx(!a->data()[pos].isTombstone());
   return a->data()[pos].getKey();
 }
 
@@ -337,22 +361,21 @@ HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
 // table elements exactly once.
 
 template <typename ArrayType, typename ElmType>
-template <typename HashTableCommon::FindType type,
-         typename Hit,
-         typename RLambda>
+template <typename HashTableCommon::FindType type, typename Hit>
 ALWAYS_INLINE
 typename std::conditional<
-  type == HashTableCommon::FindType::Lookup ||
-  type == HashTableCommon::FindType::Remove,
+  type == HashTableCommon::FindType::Lookup,
   int32_t,
   typename std::conditional<
-    type == HashTableCommon::FindType::Exists,
-    bool,
-    typename HashTableCommon::Inserter
+    type == HashTableCommon::FindType::Remove,
+    typename HashTableCommon::RemovePos,
+    typename std::conditional<
+      type == HashTableCommon::FindType::Exists,
+      bool,
+      typename HashTableCommon::Inserter
+    >::type
   >::type
->::type HashTable<ArrayType, ElmType>::findImpl(hash_t h0,
-                                                Hit hit,
-                                                RLambda remove) const {
+>::type HashTable<ArrayType, ElmType>::findImpl(hash_t h0, Hit hit) const {
   static_assert(
     static_cast<int>(FindType::Lookup) == 0 &&
     static_cast<int>(FindType::Exists) == 1 &&
@@ -370,23 +393,20 @@ typename std::conditional<
     int32_t pos = *ei;
 
     if (validPos(pos)) {
-      assert(0 <= pos);
-      assert(pos < capacity());
+      assertx(0 <= pos);
+      assertx(pos < capacity());
       if (hit(elms[pos])) {
-        if (type == FindType::Remove) {
-          remove(elms[pos]);
-          *ei = Tombstone;
-        }
         return std::get<static_cast<int>(type)>(
           std::make_tuple(int32_t(pos), true, Inserter(nullptr),
-                          Inserter(ei), int32_t(pos))
+                          Inserter(ei),
+                          RemovePos{uint32_t(probe), int32_t(pos)})
         );
       }
     } else if (pos & 1) {
-      assert(pos == Empty);
+      assertx(pos == Empty);
       return std::get<static_cast<int>(type)>(
-        std::make_tuple(int32_t(pos), false, Inserter(ei),
-                        Inserter(ei), int32_t(pos))
+        std::make_tuple(int32_t(Empty), false, Inserter(ei),
+                        Inserter(ei), RemovePos{})
       );
     }
 

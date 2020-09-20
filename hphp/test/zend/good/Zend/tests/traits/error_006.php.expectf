@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: A cannot use abc - it is not a trait in %s/error_006.php on line 6

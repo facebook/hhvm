@@ -1,0 +1,16 @@
+<?hh
+class SimpleClass {
+  public function __construct(string $s, int $i) {
+    throw new \Exception();
+  }
+  public function simple_method(): void {
+    throw new \Exception();
+  }
+}
+class SimpleDerived extends \SimpleClass {
+  private static int $calls = 0;
+  public function call_parent_method(): void {
+    parent::simple_method();
+    ++SimpleDerived::$calls;
+  }
+}

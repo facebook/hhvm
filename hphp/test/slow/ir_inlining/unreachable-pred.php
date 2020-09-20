@@ -54,5 +54,9 @@ function test() {
   loop('Foobaz2', 35);
   loop('Foobaz3', 35);
 }
+
+<<__EntryPoint>>
+function main_unreachable_pred() {
 test();
 echo "DONE\n";
+}

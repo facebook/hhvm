@@ -1,2 +1,0 @@
-File "instanceof_self_outside.php", line 4, characters 21-24:
-'self' is undefined outside of a class (Typing[4059])

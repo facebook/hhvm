@@ -2,11 +2,9 @@
 
 -- Testing mail() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mail() expects at most 5 parameters, 6 given in %s/mail_error.php on line 19
 
 -- Testing mail() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mail() expects at least 3 parameters, 2 given in %s/mail_error.php on line 25
 ===DONE===

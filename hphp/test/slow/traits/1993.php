@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 function get_declared_user_traits() {
-  $ret = array();
+  $ret = varray[];
   foreach (get_declared_traits() as $v) {
     // exclude system traits
     $rc = new ReflectionClass($v);
@@ -22,5 +22,6 @@ abstract class this_is_an_abstract_class {
  }
 final class this_is_a_final_class {
  }
+<<__EntryPoint>> function main(): void {
 var_dump(get_declared_user_traits());
-?>
+}

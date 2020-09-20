@@ -17,6 +17,7 @@
 #include <queue>
 #include "pq.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/zend-string.h"
 
@@ -38,12 +39,12 @@
   name##_decrefs.reserve(params.size());              \
                                                       \
   for (ArrayIter iter(params); iter; ++iter) {        \
-    auto const param = iter.secondRval().unboxed();   \
-    if (isNullType(param.type())) {                   \
+    auto const param = iter.secondVal();              \
+    if (isNullType(type(param))) {                    \
       name.push_back(nullptr);                        \
     } else {                                          \
       name##_decrefs.push_back(                       \
-        tvCastToString(param.tv())                    \
+        tvCastToString(param)                         \
       );                                              \
       name.push_back(name##_decrefs.back().c_str());  \
     }                                                 \
@@ -363,7 +364,7 @@ bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
   Variant actual_field;
   int actual_row;
 
-  assert(out_row && out_field && "Output parameters cannot be null");
+  assertx(out_row && out_field && "Output parameters cannot be null");
 
   if (!fn_name) {
     fn_name = "__internal_pgsql_func";
@@ -692,30 +693,33 @@ const StaticString
 
 static Variant HHVM_FUNCTION(pg_connection_pool_stat) {
   auto pools = s_connectionPoolContainer.GetPools();
+  if (pools.size() == 0) {
+    return init_null();
+  }
 
-  Array arr;
+  VArrayInit arr(pools.size());
 
-  int i = 0;
 
   for (auto pool : pools) {
     Array poolArr;
 
     String poolName(pool->GetCleanedConnectionString().c_str(), CopyString);
 
-    poolArr.set(s_connection_string, poolName);
-    poolArr.set(s_sweeped_connections, pool->SweepedConnections());
-    poolArr.set(s_opened_connections, pool->OpenedConnections());
-    poolArr.set(s_requested_connections, pool->RequestedConnections());
-    poolArr.set(s_released_connections, pool->ReleasedConnections());
-    poolArr.set(s_errors, pool->Errors());
-    poolArr.set(s_total_connections, pool->TotalConnectionsCount());
-    poolArr.set(s_free_connections, pool->FreeConnectionsCount());
+    poolArr = make_darray(
+      s_connection_string, poolName,
+      s_sweeped_connections, pool->SweepedConnections(),
+      s_opened_connections, pool->OpenedConnections(),
+      s_requested_connections, pool->RequestedConnections(),
+      s_released_connections, pool->ReleasedConnections(),
+      s_errors, pool->Errors(),
+      s_total_connections, pool->TotalConnectionsCount(),
+      s_free_connections, pool->FreeConnectionsCount()
+    );
 
-    arr.set(i, poolArr);
-    i++;
+    arr.append(poolArr);
   }
 
-  return arr;
+  return arr.toArray();
 }
 
 static void HHVM_FUNCTION(pg_connection_pool_sweep_free) {
@@ -884,7 +888,7 @@ static Variant HHVM_FUNCTION(pg_version, const Resource& connection) {
     FAIL_RETURN;
   }
 
-  Array ret;
+  Array ret = Array::CreateDArray();
 
   int proto_ver = pgsql->get().protocolVersion();
   if (proto_ver) {
@@ -911,6 +915,10 @@ static Variant HHVM_FUNCTION(pg_version, const Resource& connection) {
     ret.set(
       client_key, String(major) + "." + String(minor) + "." + String(revision)
     );
+  }
+
+  if (ret.empty()) {
+    return init_null();
   }
 
   return ret;

@@ -1,8 +1,8 @@
-<?hh
+<?hh // partial
 
 class Super {
   public function foo(): int {
-    if ($this instanceof IMarked) {
+    if ($this is IMarked) {
       return $this->methodOfMarked();
     }
     return 0;

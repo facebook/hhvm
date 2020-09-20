@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DEFAULT_PTR_H_
-#define incl_HPHP_DEFAULT_PTR_H_
+#pragma once
 
 #include <cstddef>
 #include <utility>
@@ -114,4 +113,3 @@ const T default_ptr<T>::s_default;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DEFAULT_PTR_H_

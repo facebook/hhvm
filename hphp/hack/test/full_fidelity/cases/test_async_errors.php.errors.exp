@@ -1,0 +1,3 @@
+(5,10)-(5,15) `async` cannot be used on a method in an interface. Use an `Awaitable<...>` return type instead.
+(11,19)-(11,24) `async` cannot be used on an `abstract` method. Use an `Awaitable<...>` return type instead.
+(17,19)-(17,24) `async` cannot be used on an `abstract` method. Use an `Awaitable<...>` return type instead.

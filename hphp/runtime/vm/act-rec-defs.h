@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ACT_REC_DEFS_H_
-#define incl_HPHP_ACT_REC_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/vm/act-rec.h"
 
@@ -37,10 +36,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::setReturnVMExit() {
-  assert(isReturnHelper(jit::tc::ustubs().callToExit));
+  assertx(isReturnHelper(jit::tc::ustubs().callToExit));
   m_sfp = nullptr;
   m_savedRip = reinterpret_cast<uintptr_t>(jit::tc::ustubs().callToExit);
-  m_soff = 0;
+  m_callOffAndFlags = 0;
 #ifdef __powerpc64__
   // Save the TOC value, as it will need to be restored when unwinding.
   asm ("mr %0, 2" : "=r" (m_savedToc));
@@ -51,4 +50,3 @@ inline void ActRec::setReturnVMExit() {
 
 }
 
-#endif

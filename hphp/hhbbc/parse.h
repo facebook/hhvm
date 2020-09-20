@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_PARSE_H_
-#define incl_HHBBC_PARSE_H_
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -24,13 +23,11 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace php { struct Unit; struct Program; }
+namespace php { struct Program; }
 
-std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
-                                      std::unique_ptr<UnitEmitter> ue);
+void parse_unit(php::Program& prog, const UnitEmitter* ue);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

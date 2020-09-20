@@ -8,7 +8,7 @@ class ToStringObj {
 function test($k, $description) {
   $test_resource = imagecreate(1, 1);
 
-  $tests = ["0" => 0,
+  $tests = darray["0" => 0,
             "3" => 3,
             "8" => 8,
             "999999999" => 999999999,
@@ -21,7 +21,7 @@ function test($k, $description) {
             "false" => false,
             "object" => new ToStringObj(),
             "null" => null,
-            "array" => [1, 2, 3],
+            "array" => varray[1, 2, 3],
             "vec" => vec[1, 2, 3],
             "dict" => dict['1' => 1, '2' => 2, '3' => 3],
             "keyset" => keyset[1, 2, 3],
@@ -83,7 +83,7 @@ function test($k, $description) {
   foreach ($tests as $str => $key) {
     try {
       echo "   empty(\$keyset[$str]) => ";
-      $res = empty($k[$key]);
+      $res = !($k[$key] ?? false);
       var_dump($res);
     } catch (Exception $e) {
       echo "<Exception: \"", $e->getMessage(), "\">\n";
@@ -107,11 +107,9 @@ function test($k, $description) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   test(keyset[], "empty");
   test(keyset[0, 100, 3, 400], "4 ints");
   test(keyset["foobar", "A", "3", "", "B"], "5 strings");
   test(keyset[0, "A", 1, "B"], "2 ints, 2 strings");
 }
-
-main();

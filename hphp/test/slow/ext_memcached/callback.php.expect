@@ -1,6 +1,0 @@
-object(Memcached)#2 (0) {
-}
-string(13) "callback_test"
-NULL
-int(99)
-int(99)

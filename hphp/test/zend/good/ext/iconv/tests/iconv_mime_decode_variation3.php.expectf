@@ -2,47 +2,47 @@
 
 -- Iteration 1 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 2 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 3 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 4 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, integer given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 5 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 6 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 7 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 8 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 9 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, double given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 10 --
@@ -53,19 +53,23 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 12 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 13 --
-string(44) "5375626a6563743a20412053616d706c652054657374"
+
+Warning: iconv_mime_decode() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
+bool(false)
 
 -- Iteration 14 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 15 --
-string(44) "5375626a6563743a20412053616d706c652054657374"
+
+Warning: iconv_mime_decode() expects parameter 3 to be string, boolean given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
+bool(false)
 
 -- Iteration 16 --
 string(44) "5375626a6563743a20412053616d706c652054657374"
@@ -75,22 +79,22 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 18 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `string' is not allowed in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 19 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `string' is not allowed in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 20 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `hello world' is not allowed in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 21 --
 
-Notice: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, object given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 22 --
@@ -101,6 +105,6 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, resource given in %s/zend/good/ext/iconv/tests/iconv_mime_decode_variation3.php on line 95
 bool(false)
 Done

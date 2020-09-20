@@ -1,6 +1,6 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $fp = fopen (__FILE__, 'r');
 var_dump(fstat( $fp ) );
 fclose($fp);
-?>
-===DONE===
+echo "===DONE===\n";
+}

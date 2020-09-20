@@ -1,3 +1,3 @@
-<?php
-var_dump(array_product(array()));
-?>
+<?hh <<__EntryPoint>> function main(): void {
+var_dump(array_product(varray[]));
+}

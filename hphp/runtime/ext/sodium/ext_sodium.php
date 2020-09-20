@@ -12,13 +12,13 @@ function sodium_bin2hex(string $binary): string;
 function sodium_hex2bin(string $hex, ?string $ignore = null): string;
 
 <<__Native>>
-function sodium_memzero(mixed &$buffer): void;
+function sodium_memzero(inout mixed $buffer): void;
 
 <<__Native>>
-function sodium_increment(mixed &$buffer): void;
+function sodium_increment(inout mixed $buffer): void;
 
 <<__Native>>
-function sodium_add(mixed &$value, string $add): void;
+function sodium_add(inout mixed $value, string $add): void;
 
 <<__Native>>
 function sodium_memcmp(string $a, string $b): int;
@@ -52,13 +52,13 @@ function sodium_crypto_generichash_init(
 
 <<__Native>>
 function sodium_crypto_generichash_update(
-  mixed &$state,
+  inout mixed $state,
   string $msg,
 ): bool;
 
 <<__Native>>
 function sodium_crypto_generichash_final(
-  mixed &$state,
+  inout mixed $state,
   ?int $length = null,
 ): string;
 
@@ -246,13 +246,13 @@ function sodium_crypto_kx_publickey(string $keypair): string {
 function sodium_crypto_kx_client_session_keys(
   string $client_keypair,
   string $server_pubkey,
-): array<string>;
+): varray<string>;
 
 <<__Native>>
 function sodium_crypto_kx_server_session_keys(
   string $server_keypair,
   string $client_pubkey,
-): array<string>;
+): varray<string>;
 
 ///// Unauthenticated asymetric (PSK) encryption (you probably don't want this)
 

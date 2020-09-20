@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ancester
 {
 public $ancester = 0;
@@ -16,10 +16,12 @@ public $bar = "1";
 	}
 }
 
-$r = new ReflectionClass('foo');
-foreach ($r->GetProperties() as $p)
-{
-	echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
-}
+<<__EntryPoint>>
+function main_entry(): void {
 
-?>
+  $r = new ReflectionClass('foo');
+  foreach ($r->GetProperties() as $p)
+  {
+  	echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
+  }
+}

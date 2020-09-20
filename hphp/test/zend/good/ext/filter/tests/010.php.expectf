@@ -1,4 +1,4 @@
-array(7) {
+darray(7) {
   [0]=>
   int(1)
   [1]=>
@@ -12,10 +12,10 @@ array(7) {
   [5]=>
   bool(false)
   [6]=>
-  array(0) {
+  darray(0) {
   }
 }
-array(7) {
+darray(7) {
   [0]=>
   float(1.2)
   [1]=>
@@ -29,12 +29,11 @@ array(7) {
   [5]=>
   bool(false)
   [6]=>
-  array(0) {
+  darray(0) {
   }
 }
 
-Warning: %s
-NULL
+Warning: filter_var() expects parameter 2 to be integer, varray given in %s/010.php on line 5
 string(1) "1"
 string(1) "1"
 string(1) "1"

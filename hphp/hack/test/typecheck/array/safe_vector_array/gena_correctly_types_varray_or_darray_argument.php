@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 async function gen_nullable_int(): Awaitable<?int> {
   return null;

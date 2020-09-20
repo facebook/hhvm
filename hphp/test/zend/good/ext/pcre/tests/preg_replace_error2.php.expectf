@@ -5,7 +5,7 @@ string(64) "this is a stringthis is a stringthis is a stringthis is a string"
 
 Arg value is: Array
 
-Warning: %s
+Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/preg_replace_error2.php on line 16
 bool(false)
 
-Catchable fatal error: %s
+Catchable fatal error: Object of class stdClass could not be converted to string in %s/preg_replace_error2.php on line 19

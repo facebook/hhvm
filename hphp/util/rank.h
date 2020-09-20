@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RANK_H_
-#define incl_HPHP_RANK_H_
+#pragma once
 
 #include <limits.h>
 
@@ -65,7 +64,7 @@ enum Rank {
   RankLeaf
 };
 
-#ifdef DEBUG
+#ifndef NDEBUG
 extern Rank currentRank();
 extern void checkRank(Rank r);
 extern void pushRank(Rank r);
@@ -81,4 +80,3 @@ extern void insertRank(Rank r);
 
 }
 
-#endif

@@ -1,6 +1,10 @@
-<?php
+<?hh
 
 class A {
  const Foo = __METHOD__;
 }
- var_dump(A::Foo);
+
+ <<__EntryPoint>>
+function main_71() {
+var_dump(A::Foo);
+}

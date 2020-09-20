@@ -1,5 +1,4 @@
-#ifndef incl_HHVM_VERSION_H
-#define incl_HHVM_VERSION_H
+#pragma once
 
 // This file needs to be valid C, not just C++
 
@@ -10,8 +9,8 @@
  * See: CMake/HHVMVersion.cmake
  */
 #ifndef HHVM_VERSION_OVERRIDE
-# define HHVM_VERSION_MAJOR 3
-# define HHVM_VERSION_MINOR 25
+# define HHVM_VERSION_MAJOR 4
+# define HHVM_VERSION_MINOR 76
 # define HHVM_VERSION_PATCH 0
 # define HHVM_VERSION_SUFFIX "-dev"
 #endif
@@ -35,4 +34,3 @@
   HHVM_VERSION_STRINGIFY(HHVM_VERSION_PATCH) HHVM_VERSION_SUFFIX
 #define HHVM_VERSION (HHVM_VERSION_C_STRING_LITERALS)
 
-#endif // incl_HHVM_VERSION_H

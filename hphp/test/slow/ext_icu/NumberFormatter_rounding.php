@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_number_formatter_rounding() {
 include (__DIR__ . '/NumberFormatter_rounding.inc');
 
 echo "Testing en_US, default rounding mode, 3 digits\n";
@@ -24,3 +27,4 @@ test_rounding("en_US", 2, NumberFormatter::ROUND_HALFUP); // aka ROUND
 
 echo "Testing en_US, rounding mode half-even, 2 digits\n";
 test_rounding("en_US", 2, NumberFormatter::ROUND_HALFEVEN);
+}

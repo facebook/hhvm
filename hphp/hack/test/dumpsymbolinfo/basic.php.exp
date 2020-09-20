@@ -1,22 +1,16 @@
 {
   "function_calls":[
     {
-      "name":"none_member_function",
-      "type":"Function",
-      "pos":{"filename":"basic.php","line":26,"char_start":5,"char_end":24},
-      "caller":"AnotherTestClass::createInstance"
-    },
-    {
-      "name":"AnotherTestClass::staticMethod",
+      "name":"AnotherTestClass::createInstance",
       "type":"Method",
-      "pos":{"filename":"basic.php","line":24,"char_start":23,"char_end":34},
-      "caller":"AnotherTestClass::createInstance"
+      "pos":{"filename":"basic.php","line":4,"char_start":28,"char_end":41},
+      "caller":"none_member_function"
     },
     {
       "name":"AnotherTestClass::publicMethod",
       "type":"Method",
-      "pos":{"filename":"basic.php","line":22,"char_start":11,"char_end":22},
-      "caller":"AnotherTestClass::createInstance"
+      "pos":{"filename":"basic.php","line":5,"char_start":9,"char_end":20},
+      "caller":"none_member_function"
     },
     {
       "name":"AnotherTestClass::__construct",
@@ -27,14 +21,20 @@
     {
       "name":"AnotherTestClass::publicMethod",
       "type":"Method",
-      "pos":{"filename":"basic.php","line":5,"char_start":9,"char_end":20},
-      "caller":"none_member_function"
+      "pos":{"filename":"basic.php","line":22,"char_start":11,"char_end":22},
+      "caller":"AnotherTestClass::createInstance"
     },
     {
-      "name":"AnotherTestClass::createInstance",
+      "name":"AnotherTestClass::staticMethod",
       "type":"Method",
-      "pos":{"filename":"basic.php","line":4,"char_start":28,"char_end":41},
-      "caller":"none_member_function"
+      "pos":{"filename":"basic.php","line":24,"char_start":23,"char_end":34},
+      "caller":"AnotherTestClass::createInstance"
+    },
+    {
+      "name":"none_member_function",
+      "type":"Function",
+      "pos":{"filename":"basic.php","line":26,"char_start":5,"char_end":24},
+      "caller":"AnotherTestClass::createInstance"
     }
   ],
   "symbol_types":[
@@ -46,12 +46,12 @@
     {
       "pos":{"filename":"basic.php","line":4,"char_start":3,"char_end":6},
       "type":"AnotherTestClass",
-      "ident":1
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":5,"char_start":3,"char_end":6},
       "type":"AnotherTestClass",
-      "ident":1
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":6,"char_start":10,"char_end":13},
@@ -61,32 +61,32 @@
     {
       "pos":{"filename":"basic.php","line":12,"char_start":38,"char_end":43},
       "type":"string",
-      "ident":2
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":13,"char_start":20,"char_end":25},
       "type":"string",
-      "ident":2
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":16,"char_start":32,"char_end":35},
       "type":"_",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":21,"char_start":5,"char_end":8},
       "type":"AnotherTestClass",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":22,"char_start":5,"char_end":8},
       "type":"AnotherTestClass",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":27,"char_start":12,"char_end":15},
       "type":"AnotherTestClass",
-      "ident":4
+      "ident":0
     }
   ]
 }

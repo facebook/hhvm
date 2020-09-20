@@ -29,30 +29,101 @@ LaunchAttachCommand::LaunchAttachCommand(
 LaunchAttachCommand::~LaunchAttachCommand() {
 }
 
-bool LaunchAttachCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
-) {
+bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
+                                      folly::dynamic* responseMsg) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
-  const std::string noDocument = std::string("");
+  const std::string emptyString = std::string("");
+
+  const auto& sandboxUser =
+    tryGetString(args, "sandboxUser", emptyString);
+
+  const auto& sandboxName =
+    tryGetString(args, "sandboxName", "default");
 
   const auto& startupDoc =
-    tryGetString(args, "startupDocumentPath", noDocument);
+    tryGetString(args, "startupDocumentPath", emptyString);
 
-  if (!startupDoc.empty()) {
-    m_debugger->startDummyRequest(startupDoc);
-  } else {
-    m_debugger->startDummyRequest(noDocument);
-  }
+  bool displayStartupMsg =
+    tryGetBool(args, "displayConsoleStartupMsg", true);
+
+  bool showDummyOnAsyncPause =
+     tryGetBool(args, "showDummyOnAsyncPause", false);
+
+  bool warnOnInterceptedFunctions =
+    tryGetBool(args, "warnOnInterceptedFunctions", false);
+
+  bool notifyOnBpCalibration =
+    tryGetBool(args, "notifyOnBpCalibration", false);
+
+  bool disableUniqueVarRef =
+    tryGetBool(args, "disableUniqueVarRef", false);
+
+  bool disableDummyPsPs =
+    tryGetBool(args, "disableDummyPsPs", false);
+
+  bool disableStdoutRedirection =
+    tryGetBool(args, "disableStdoutRedirection", false);
 
   const auto& logFilePath =
-    tryGetString(args, "logFilePath", noDocument);
+    tryGetString(args, "logFilePath", emptyString);
+
+  const auto debuggerSessionAuthToken =
+    tryGetString(args, "debuggerSessionAuthToken", emptyString);
+
+  auto maxReturnedStringLength =
+    tryGetInt(args, "maxReturnedStringLength", 32 * 1024);
 
   if (!logFilePath.empty()) {
     // Re-open logging using the file path specified by the client.
-    VSDebugLogger::InitializeLogging(logFilePath);
+    int result = VSDebugLogger::InitializeLogging(logFilePath);
+    if (result != 0) {
+      std::string msg = "Opening log file ";
+      msg += logFilePath.c_str();
+      msg += " failed: ";
+      msg += strerror(result);
+      m_debugger->sendUserMessage(
+        msg.c_str(),
+        DebugTransport::OutputLevelWarning
+      );
+    }
   }
+
+  // Obviously don't log the auth token itself, but log whether or not we've
+  // got one.
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Client provided an auth token? %s",
+    debuggerSessionAuthToken.empty() ? "NO" : "YES"
+  );
+
+  if (!startupDoc.empty()) {
+    m_debugger->startDummyRequest(
+      startupDoc,
+      sandboxUser,
+      sandboxName,
+      debuggerSessionAuthToken,
+      displayStartupMsg
+    );
+  } else {
+    m_debugger->startDummyRequest(
+      emptyString,
+      sandboxUser,
+      sandboxName,
+      debuggerSessionAuthToken,
+      displayStartupMsg
+    );
+  }
+
+  DebuggerOptions options = {0};
+  options.showDummyOnAsyncPause = showDummyOnAsyncPause;
+  options.warnOnInterceptedFunctions = warnOnInterceptedFunctions;
+  options.notifyOnBpCalibration = notifyOnBpCalibration;
+  options.disableUniqueVarRef = disableUniqueVarRef;
+  options.disableDummyPsPs = disableDummyPsPs;
+  options.maxReturnedStringLength = maxReturnedStringLength;
+  options.disableStdoutRedirection = disableStdoutRedirection;
+  m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up
   // and ready for breakpoint requests.

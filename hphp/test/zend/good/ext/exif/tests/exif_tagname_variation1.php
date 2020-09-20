@@ -1,10 +1,17 @@
-<?php
+<?hh
 
 /* Prototype  : string exif_tagname ( string $index  )
  * Description: Get the header name for an index
  * Source code: ext/exif/exif.c
 */
 
+// declaring a class
+class sample  {
+  public function __toString() {
+  return "obj'ct";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing exif_tagname() : different types for index argument ***\n";
 // initialize all required variables
 
@@ -12,18 +19,11 @@ echo "*** Testing exif_tagname() : different types for index argument ***\n";
 $unset_var = 'string_val';
 unset($unset_var);
 
-// declaring a class
-class sample  {
-  public function __toString() {
-  return "obj'ct";
-  } 
-}
-
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
-$values =  array (
+$values =  varray [
 
   // integer values
   0,
@@ -39,11 +39,11 @@ $values =  array (
   .5,
 
   // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -60,16 +60,16 @@ $values =  array (
 
   // unset variable
   $unset_var,
-  
+
   // objects
   new sample(),
 
   // resource
   $file_handle,
- 
+
   NULL,
   null
-);
+];
 
 
 // loop through each element of the array and check the working of exif_tagname()
@@ -79,7 +79,7 @@ echo "\n--- Testing exif_tagname() by supplying different values for 'index' arg
 $counter = 1;
 foreach($values as $index) {
   echo "-- Iteration $counter --\n";
-  var_dump( exif_tagname($index) );
+  try { var_dump( exif_tagname($index) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $counter ++;
 }
 
@@ -87,7 +87,5 @@ foreach($values as $index) {
 fclose($file_handle);
 
 echo "Done\n";
-?>
-
-?>
-===Done===
+echo "===Done===";
+}

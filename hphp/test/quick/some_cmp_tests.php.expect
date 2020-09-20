@@ -4,15 +4,15 @@ bool(false)
 bool(false)
 bool(false)
 
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
 ======
 bool(true)
 bool(true)

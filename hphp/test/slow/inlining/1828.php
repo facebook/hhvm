@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function id($x) {
  return $x;
@@ -11,4 +11,8 @@ class X {
 function test($a, $b) {
   return $a ? $b : id(new X)->f();
 }
-var_dump(test());
+
+<<__EntryPoint>>
+function main_1828() {
+var_dump(test(false, false));
+}

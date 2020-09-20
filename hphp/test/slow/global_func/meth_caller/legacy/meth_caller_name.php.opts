@@ -1,0 +1,3 @@
+-vEval.EmitMethCallerFuncPointers=0
+
+-vEval.NoticeOnMethCallerHelperUse=1

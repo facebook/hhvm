@@ -14,62 +14,151 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_INTERP_HELPERS_H_
-#define incl_HPHP_VM_INTERP_HELPERS_H_
+#pragma once
 
-#include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/rx.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
+
+#include <folly/Random.h>
 
 namespace HPHP {
 
-// In PHP7 the caller specifies if parameter type-checking is strict in the
-// callee. NB: HH files ignore this preference and always use strict checking,
-// except in systemlib. Calls originating in systemlib are never strict.
-inline bool callUsesStrictTypes(ActRec* caller) {
-  if (!caller) {
-    // eg when being called from hhbbc
-    return true;
+/*
+ * RAII wrapper for popping/pushing generics from/to the VM stack.
+ */
+struct GenericsSaver {
+  GenericsSaver(bool hasGenerics) : m_generics(pop(hasGenerics)) {}
+  ~GenericsSaver() { push(std::move(m_generics)); }
+
+  static Array pop(bool hasGenerics) {
+    if (LIKELY(!hasGenerics)) return Array();
+    assertx(tvIsHAMSafeVArray(vmStack().topC()));
+    auto const generics = vmStack().topC()->m_data.parr;
+    vmStack().discard();
+    return Array::attach(generics);
   }
-  auto func = caller->func();
-  if (func->isBuiltin()) {
-    return false;
+  static void push(Array&& generics) {
+    if (LIKELY(generics.isNull())) return;
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      vmStack().pushVecNoRc(generics.detach());
+    } else {
+      vmStack().pushArrayNoRc(generics.detach());
+    }
   }
-  if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
-    return true;
+
+private:
+  Array m_generics;
+};
+
+inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {
+  for (auto i = 0; i < fca.numArgs; ++i) {
+    auto const inout = func->isInOut(i);
+    if (inout != fca.isInOut(i)) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        formatParamInOutMismatch(func->fullName()->data(), i, inout));
+    }
   }
-  return func->unit()->useStrictTypes();
 }
 
-inline bool builtinCallUsesStrictTypes(const Unit* caller) {
-  if (!RuntimeOption::PHP7_ScalarTypes || RuntimeOption::EnableHipHopSyntax) {
-    return false;
+inline void callerDynamicCallChecks(const Func* func,
+                                    bool allowDynCallNoPointer = false) {
+  auto dynCallable = func->isDynamicallyCallable();
+  if (dynCallable) {
+    if (allowDynCallNoPointer) return;
+    if (!RO::EvalForbidDynamicCallsWithAttr) return;
   }
-  return caller->useStrictTypesForBuiltins();
+  auto level = func->isMethod()
+    ? (func->isStatic()
+        ? RO::EvalForbidDynamicCallsToClsMeth
+        : RO::EvalForbidDynamicCallsToInstMeth)
+    : RO::EvalForbidDynamicCallsToFunc;
+  if (level <= 0) return;
+
+  if (auto const rate = func->dynCallSampleRate()) {
+    if (folly::Random::rand32(*rate) != 0) return;
+    level = 1;
+  }
+
+  auto error_msg = dynCallable ?
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
+  if (level >= 3 || (level >= 2 && !dynCallable)) {
+    std::string msg;
+    string_printf(msg, error_msg, func->fullName()->data());
+    throw_invalid_operation_exception(makeStaticString(msg));
+  }
+  raise_notice(error_msg, func->fullName()->data());
 }
 
-inline void setTypesFlag(ActRec* fp, ActRec* ar) {
-  if (!callUsesStrictTypes(fp)) ar->setUseWeakTypes();
-}
+inline void callerDynamicConstructChecks(const Class* cls) {
+  auto level = RO::EvalForbidDynamicConstructs;
+  if (level <= 0 || cls->isDynamicallyConstructible()) return;
 
-inline void checkForDynamicCall(const ActRec* ar) {
-  if (!ar->isDynamicCall()) return;
-  auto const func = ar->func();
+  if (auto const rate = cls->dynConstructSampleRate()) {
+    if (folly::Random::rand32(*rate) != 0) return;
+    level = 1;
+  }
 
-  if (func->accessesCallerFrame()) raise_disallowed_dynamic_call(func);
-
-  if (RuntimeOption::EvalNoticeOnAllDynamicCalls ||
-      (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
-       func->isBuiltin())) {
+  if (level >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::CLASS_CONSTRUCTED_DYNAMICALLY,
+      cls->name()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
     raise_notice(
-      Strings::FUNCTION_CALLED_DYNAMICALLY,
-      func->fullDisplayName()->data()
+      Strings::CLASS_CONSTRUCTED_DYNAMICALLY,
+      cls->name()->data()
     );
   }
+}
+
+inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
+                                    bool allowDynCallNoPointer = false) {
+  if (!dynamicCall) return;
+  if (func->isDynamicallyCallable() && allowDynCallNoPointer) return;
+
+  auto error_msg = func->isDynamicallyCallable() ?
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
+    Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
+
+  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
+    raise_notice(
+      error_msg,
+      func->fullName()->data()
+    );
+  }
+}
+
+/*
+ * Check if a call from `caller` to `callee` satisfies reactivity constraints.
+ * Returns true if yes, otherwise raise a warning and return false or raise
+ * an exception.
+ */
+inline bool callerRxChecks(const ActRec* caller, const Func* callee) {
+  if (RuntimeOption::EvalPureEnforceCalls <= 0) return true;
+  // Conditional reactivity is not tracked yet, so assume the caller has minimum
+  // and the callee has maximum possible level of reactivity.
+  auto const callerLevel = caller->rxMinLevel();
+  if (!rxEnforceCallsInLevel(callerLevel)) return true;
+
+  auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
+  if (LIKELY(callee->rxLevel() >= minReqCalleeLevel)) return true;
+  raiseRxCallViolation(caller, callee);
+  return false;
 }
 
 /*
@@ -80,7 +169,7 @@ inline void checkNativeStack() {
   // Check whether we're going out of bounds of our native stack.
   if (LIKELY(stack_in_bounds())) return;
   TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  raise_error("Stack overflow");
+  throw_stack_overflow();
 }
 
 /*
@@ -105,8 +194,7 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
   auto limit = f->maxStackCells() + kStackCheckPadding + extraCells;
   if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;
   TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  raise_error("Stack overflow");
+  throw_stack_overflow();
 }
 
 }
-#endif

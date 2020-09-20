@@ -1,0 +1,6 @@
+int(42)
+int(5)
+
+Warning: Argument 1 to wat() must be of type @FBID, string given in %s
+string(4) "fail"
+Done

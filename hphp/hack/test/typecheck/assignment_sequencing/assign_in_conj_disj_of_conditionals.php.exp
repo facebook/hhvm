@@ -1,0 +1,52 @@
+File "assign_in_conj_disj_of_conditionals.php", line 4, characters 14-15:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_conj_disj_of_conditionals.php", line 15, characters 14-15:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_conj_disj_of_conditionals.php", line 7, characters 16-17:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
+Expected `int`
+File "assign_in_conj_disj_of_conditionals.php", line 3, characters 21-26:
+But got `string`
+File "assign_in_conj_disj_of_conditionals.php", line 8, characters 19-20:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
+Expected `string`
+File "assign_in_conj_disj_of_conditionals.php", line 4, characters 19-19:
+But got `int`
+File "assign_in_conj_disj_of_conditionals.php", line 10, characters 14-15:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
+Expected `int`
+File "assign_in_conj_disj_of_conditionals.php", line 3, characters 21-26:
+But got `string`
+File "assign_in_conj_disj_of_conditionals.php", line 11, characters 17-18:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
+Expected `string`
+File "assign_in_conj_disj_of_conditionals.php", line 4, characters 19-19:
+But got `int`
+File "assign_in_conj_disj_of_conditionals.php", line 16, characters 16-17:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
+Expected `int`
+File "assign_in_conj_disj_of_conditionals.php", line 14, characters 21-26:
+But got `string`
+File "assign_in_conj_disj_of_conditionals.php", line 17, characters 19-20:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
+Expected `string`
+File "assign_in_conj_disj_of_conditionals.php", line 15, characters 19-19:
+But got `int`
+File "assign_in_conj_disj_of_conditionals.php", line 21, characters 14-15:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 25, characters 21-23:
+Expected `int`
+File "assign_in_conj_disj_of_conditionals.php", line 14, characters 21-26:
+But got `string`
+File "assign_in_conj_disj_of_conditionals.php", line 22, characters 17-18:
+Invalid argument (Typing[4110])
+File "assign_in_conj_disj_of_conditionals.php", line 26, characters 24-29:
+Expected `string`
+File "assign_in_conj_disj_of_conditionals.php", line 15, characters 19-19:
+But got `int`

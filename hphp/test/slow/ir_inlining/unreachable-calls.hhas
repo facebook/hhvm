@@ -1,13 +1,3 @@
-.main {
-  FPushFuncD 0 "main"
-  FCall 0
-  PopR
-
-  String "DONE\n"
-  Print
-  RetC
-}
-
 .class [unique final persistent] Cls1 {
   .default_ctor;
   .method [public unique] foobaz($a, $b, $c, $d, $e) {
@@ -30,27 +20,27 @@
 
   CGetL $obj
   AssertRATStk 0 Obj=Cls1
-  FPushObjMethodD 5 "foobaz" NullThrows
-  FPassL 0 $x Any
-  FPassL 1 $x Any
-  FPassL 2 $x Any
-  FPassL 3 $x Any
-  FPassL 4 $x Any
-  FCallD 5 "Cls1" "foobaz"
-  UnboxRNop
+  NullUninit
+  NullUninit
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  FCallObjMethodD <> 5 1 "" - "" "Cls1" NullThrows "foobaz"
   Jmp end
 
 cls2:
   CGetL $obj
   AssertRATStk 0 Obj=Cls2
-  FPushObjMethodD 5 "foobaz" NullThrows
-  FPassL 0 $x Any
-  FPassL 1 $x Any
-  FPassL 2 $x Any
-  FPassL 3 $x Any
-  FPassL 4 $x Any
-  FCallD 5 "Cls2" "foobaz"
-  UnboxRNop
+  NullUninit
+  NullUninit
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  FCallObjMethodD <> 5 1 "" - "" "Cls2" NullThrows "foobaz"
   Jmp end
 
 end:
@@ -61,31 +51,41 @@ end:
   CGetL $type
   JmpZ cls2
 
-  FPushCtorD 0 "Cls1"
-  FCall 0
-  PopR
+  NewObjD "Cls1"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
-  FPushFuncD 3 "test"
-  FPassL 0 $obj Any
-  FPassL 1 $type Any
-  FPassL 2 $x Any
-  FCall 3
-  UnboxRNop
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $obj
+  CGetL $type
+  CGetL $x
+  FCallFuncD <> 3 1 "" - "" "test"
   RetC
 
 cls2:
-  FPushCtorD 0 "Cls2"
-  FCall 0
-  PopR
+  NewObjD "Cls2"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $obj
   PopC
-  FPushFuncD 3 "test"
-  FPassL 0 $obj Any
-  FPassL 1 $type Any
-  FPassL 2 $x Any
-  FCall 3
-  UnboxRNop
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $obj
+  CGetL $type
+  CGetL $x
+  FCallFuncD <> 3 1 "" - "" "test"
   RetC
 }
 
@@ -100,12 +100,13 @@ header:
   Lt
   JmpZ end
 
-  FPushFuncD 2 "test_outer"
-  FPassL 0 $type Any
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $type
   Int 1
-  FPassC 1 Any
-  FCall 2
-  PopR
+  FCallFuncD <> 2 1 "" - "" "test_outer"
+  PopC
 
   IncDecL $count PreInc
   PopC
@@ -116,21 +117,24 @@ end:
   RetC
 }
 
-.function main() {
-  FPushFuncD 2 "loop"
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
   False
-  FPassC 0 Any
   Int 40
-  FPassC 1 Any
-  FCall 2
-  PopR
+  FCallFuncD <> 2 1 "" - "" "loop"
+  PopC
 
-  FPushFuncD 2 "loop"
+  NullUninit
+  NullUninit
+  NullUninit
   True
-  FPassC 0 Any
   Int 100
-  FPassC 1 Any
-  FCall 2
-  UnboxRNop
+  FCallFuncD <> 2 1 "" - "" "loop"
+  PopC
+
+  String "DONE\n"
+  Print
   RetC
 }

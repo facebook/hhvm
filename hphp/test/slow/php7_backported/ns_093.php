@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // should not throw syntax errors
 
@@ -15,7 +15,8 @@ use Foo\Bar\
 {
     D
 };
+<<__EntryPoint>>
+function entrypoint_ns_093(): void {
 
-echo "\nDone\n";
-
-
+  echo "\nDone\n";
+}

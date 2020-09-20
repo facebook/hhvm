@@ -32,7 +32,6 @@ const char* destTypeName(DestType dt) {
     case DestType::None:     return "None";
     case DestType::Indirect: return "Indirect";
     case DestType::SSA:      return "SSA";
-    case DestType::SSAPair:  return "SSAPair";
     case DestType::Byte:     return "Byte";
     case DestType::TV:       return "TV";
     case DestType::Dbl:      return "Dbl";
@@ -41,16 +40,35 @@ const char* destTypeName(DestType dt) {
   not_reached();
 }
 
-ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
+ArgDesc::ArgDesc(SSATmp* tmp,
+                 Vloc loc,
+                 bool val,
+                 folly::Optional<AuxUnion> aux) {
+  assertx(IMPLIES(aux, !val));
+
+  auto const setTypeImm = [&] {
+    static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+
+    if (aux) {
+      auto const dt = static_cast<std::make_unsigned<data_type_t>::type>(
+        tmp->type().toDataType()
+      );
+      static_assert(std::numeric_limits<decltype(dt)>::digits <= 32, "");
+      m_imm64 = dt | auxToMask(*aux);
+      m_kind = Kind::Imm;
+    } else {
+      m_typeImm = tmp->type().toDataType();
+      m_kind = Kind::TypeImm;
+    }
+  };
+
   if (tmp->hasConstVal()) {
     // tmp is a constant
     if (val) {
       m_imm64 = tmp->rawVal();
       m_kind = Kind::Imm;
     } else {
-      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-      m_typeImm = tmp->type().toDataType();
-      m_kind = Kind::TypeImm;
+      setTypeImm();
     }
     return;
   }
@@ -70,32 +88,59 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     // val is false so we're passing tmp's type.
     m_srcReg = loc.reg(1);
     m_kind = Kind::Reg;
+    m_aux = aux;
     return;
   }
 
-  // arg is the (constant) type of a known-typed value.
-  static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-  m_typeImm = tmp->type().toDataType();
-  m_kind = Kind::TypeImm;
+  setTypeImm();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArgGroup& ArgGroup::typedValue(int i) {
-  // If there's exactly one register argument slot left, the whole TypedValue
-  // goes on the stack instead of being split between a register and the
-  // stack.
-  if (m_gpArgs.size() == num_arg_regs() - 1) {
-    m_override = &m_stkArgs;
+ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
+  auto s = m_inst->src(i);
+  ArgDesc arg(s, m_locs[s]);
+  if (s->isA(TDbl) && allowFP) {
+    push_SIMDarg(arg, s->type());
+    if (arch() == Arch::PPC64) {
+      // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
+      push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
+    }
+  } else {
+    if (wide_tv_val && (s->isA(TLvalToCell) && !s->isA(TBottom))) {
+      // If there's exactly one register argument slot left, the whole tv_lval
+      // goes on the stack instead of being split between a register and the
+      // stack.
+      if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+      SCOPE_EXIT { m_override = nullptr; };
+
+      push_arg(arg, s->type());
+      push_arg(ArgDesc{ArgDesc::Kind::Reg, m_locs[s].reg(1), -1});
+    } else {
+      push_arg(arg, s->type());
+    }
   }
-  static_assert(offsetof(TypedValue, m_data) == 0, "");
-  static_assert(offsetof(TypedValue, m_type) == 8, "");
-  ssa(i).type(i);
-  m_override = nullptr;
   return *this;
 }
 
-void ArgGroup::push_arg(const ArgDesc& arg) {
+ArgGroup& ArgGroup::typedValue(int i, folly::Optional<AuxUnion> aux) {
+  // If there's exactly one register argument slot left, the whole TypedValue
+  // goes on the stack instead of being split between a register and the stack.
+  if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+
+  // On x86, if we have one free GP register left, we'll use it for the next
+  // int argument, but on ARM, we'll just spill all later int arguments.
+  #ifndef __aarch64__
+    SCOPE_EXIT { m_override = nullptr; };
+  #endif
+
+  static_assert(offsetof(TypedValue, m_data) == 0, "");
+  static_assert(offsetof(TypedValue, m_type) == 8, "");
+  ssa(i, false).type(i, aux);
+  return *this;
+}
+
+void ArgGroup::push_arg(const ArgDesc& arg, Type t) {
   // If m_override is set, use it unconditionally. Otherwise, select
   // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
   ArgVec* args = m_override;
@@ -107,9 +152,10 @@ void ArgGroup::push_arg(const ArgDesc& arg) {
     }
   }
   args->push_back(arg);
+  m_argTypes.emplace_back(t);
 }
 
-void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
+void ArgGroup::push_SIMDarg(const ArgDesc& arg, Type t) {
   // See push_arg above
   ArgVec* args = m_override;
   if (!args) {
@@ -117,6 +163,7 @@ void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
          ? &m_simdArgs : &m_stkArgs;
   }
   args->push_back(arg);
+  m_argTypes.emplace_back(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

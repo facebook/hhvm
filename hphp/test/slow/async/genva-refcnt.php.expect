@@ -1,13 +1,11 @@
+darray(0) {
+}
 genva 1
 unset a
-destructing
 unset b
-destructing
 genva 2
-destructing
-destructing
 genva 3
-destructing
-destructing
 done
+darray(0) {
+}
 exit

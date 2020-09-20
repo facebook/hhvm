@@ -1,7 +1,7 @@
 <?hh
 
 function main() {
-  $arr = array('a', 'b', 'c');
+  $arr = varray['a', 'b', 'c'];
 
   $v = Vector {'a', 'b', 'c'};
   $m = Map {0 => 'a', 1 => 'b', 2 => 'c'};
@@ -25,4 +25,8 @@ function main() {
   var_dump(strlen($set_implode) === strlen($arr_implode));
   var_dump(new Set(explode(', ', $set_implode)) == $s);
 }
+
+<<__EntryPoint>>
+function main_implode() {
 main();
+}

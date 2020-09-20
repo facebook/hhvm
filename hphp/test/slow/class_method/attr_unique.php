@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base  {
   public function overriddenMethod() {
@@ -18,7 +18,11 @@ class DerivedOne extends Base {
 class DerivedTwo extends Base {
 }
 
-class_alias( 'Base', 'AliasForBase' );
+
+<<__EntryPoint>>
+function main_attr_unique() {
+
 
 $inst = new DerivedOne();
 printf($inst->wrapper());
+}

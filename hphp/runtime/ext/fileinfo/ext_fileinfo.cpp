@@ -32,7 +32,7 @@ struct FileinfoResource : SweepableResourceData {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   explicit FileinfoResource(struct magic_set* magic) : m_magic(magic) {}
-  virtual ~FileinfoResource() { close(); }
+  ~FileinfoResource() override { close(); }
   void close() {
     magic_close(m_magic);
     m_magic = nullptr;

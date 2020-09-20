@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: Using an empty Initialization Vector (iv) is potentially insecure and not recommended in %s/openssl_encrypt_crash.php on line 2
 string(4) "done"

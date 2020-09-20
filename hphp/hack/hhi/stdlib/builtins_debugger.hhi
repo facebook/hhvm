@@ -1,17 +1,19 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 <<__PHPStdLib>>
 function hphpd_install_user_command($cmd, $clsname);
 <<__PHPStdLib>>
 function hphpd_auth_token(): string;
+<<__PHPStdLib>>
+function hphp_debug_session_auth(): string;
 <<__PHPStdLib>>
 function hphpd_get_user_commands();
 <<__PHPStdLib>>
@@ -42,15 +44,15 @@ class DebuggerClientCmdUser {
   const AUTO_COMPLETE_CODE = 0;
   public function __construct();
   public function quit();
-  public function help($format, ...);
-  public function info($format, ...);
-  public function output($format, ...);
-  public function error($format, ...);
+  public function help($format, ...$args);
+  public function info($format, ...$args);
+  public function output($format, ...$args);
+  public function error($format, ...$args);
   public function code($source, $highlight_line = 0, $start_line_no = 0, $end_line_no = 0);
-  public function ask($format, ...);
+  public function ask($format, ...$args);
   public function wrap($str);
   public function helpTitle($str);
-  public function helpCmds($cmd, $desc, ...);
+  public function helpCmds($cmd, $desc, ...$args);
   public function helpBody($str);
   public function helpSection($str);
   public function tutorial($str);

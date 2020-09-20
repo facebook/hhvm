@@ -14,25 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
-#define incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
+#pragma once
 
+#include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <vector>
 #include <boost/container/flat_set.hpp>
 
-#include "hphp/runtime/base/config.h"
-#include "hphp/util/async-func.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/health-monitor-types.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 
 // This class must be used as a singleton.
 struct HostHealthMonitor {
   void subscribe(IHostHealthObserver* observer) {
-    assert(observer != nullptr);
+    assertx(observer);
     std::lock_guard<std::mutex> g(m_lock);
     m_observers.insert(observer);
   }
@@ -48,6 +50,11 @@ struct HostHealthMonitor {
 
  private:
   HealthLevel evaluate();
+  // true if the monitoring thread should wake up immediately, used with the
+  // condition variable.
+  bool shouldWakeup() const {
+    return m_stopped.load(std::memory_order_acquire);
+  }
   void notifyObservers(HealthLevel newStatus);
   void monitor();
 
@@ -55,12 +62,13 @@ struct HostHealthMonitor {
   boost::container::flat_set<IHostHealthObserver*> m_observers;
   std::mutex m_lock;                    // protects metrics/observers
   HealthLevel m_status{HealthLevel::Bold};
-  std::mutex m_stopped_lock;
+  std::chrono::steady_clock::time_point m_statusTime;
+  ServiceData::ExportedTimeSeries* m_healthLevelCounter{nullptr};
+  std::mutex m_condvar_lock;
   std::condition_variable m_condition;
-  bool m_stopped{true};
-  std::unique_ptr<AsyncFunc<HostHealthMonitor>> m_monitor_func;
+  std::atomic_bool m_stopped{true};
+  std::unique_ptr<std::thread> m_monitor_thread;
 };
 
 }
 
-#endif

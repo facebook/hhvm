@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $xml = '<?xml version="1.0" encoding="utf-8" ?>
 <test>
 
@@ -12,4 +12,4 @@ var_dump($clone);
 var_dump($clone->asXML());
 
 echo "Done\n";
-?>
+}

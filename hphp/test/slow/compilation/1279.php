@@ -1,6 +1,10 @@
-<?php
+<?hh
 
 function test() {
 }
- var_dump(test());
+
+ <<__EntryPoint>>
+function main_1279() {
+var_dump(test());
  $a = test();
+}

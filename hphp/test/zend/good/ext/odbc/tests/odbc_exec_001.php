@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 include 'config.inc';
-
+<<__EntryPoint>> function main(): void {
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'foo', 'bar');
@@ -15,5 +15,4 @@ odbc_exec($conn, 1);
 
 odbc_exec($conn, NULL, NULL);
 odbc_exec($conn, NULL);
-
-?>
+}

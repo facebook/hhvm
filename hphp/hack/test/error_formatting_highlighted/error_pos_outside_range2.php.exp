@@ -1,0 +1,12 @@
+Parsing[1002] A .php file must begin with <?hh. [1]
+
+error_pos_outside_range2.php:1:1
+[1] 1 | function }
+
+Parsing[1002] Encountered unexpected text ``, was expecting a function parameter. [1]
+
+error_pos_outside_range2.php:2:1
+    1 | function }
+[1] 2 | _
+
+2 errors found.

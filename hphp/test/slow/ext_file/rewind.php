@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_rewind() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -15,3 +18,4 @@ var_dump(fread($f, 7));
 var_dump(fread($f, 100));
 
 unlink($tempfile);
+}

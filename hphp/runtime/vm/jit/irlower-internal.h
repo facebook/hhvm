@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRLOWER_INTERNAL_H_
-#define incl_HPHP_JIT_IRLOWER_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -52,8 +51,10 @@ Vout& vcold(IRLS& env);
 Vlabel label(IRLS& env, Block* b);
 
 /*
- * Get the SSATmp location descriptor for the i-th src or dst of `inst'.
+ * Get the SSATmp location descriptor for an SSATmp*, or the i-th src or dst of
+ * `inst'.
  */
+Vloc tmpLoc(IRLS& env, const SSATmp* tmp);
 Vloc srcLoc(IRLS& env, const IRInstruction* inst, unsigned i);
 Vloc dstLoc(IRLS& env, const IRInstruction* inst, unsigned i);
 
@@ -69,7 +70,6 @@ CallDest callDest(Vreg reg0);
 CallDest callDest(Vreg reg0, Vreg reg1);
 CallDest callDest(IRLS& env, const IRInstruction*);
 CallDest callDestTV(IRLS& env, const IRInstruction*);
-CallDest callDestDbl(IRLS& env, const IRInstruction*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -136,6 +136,11 @@ void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise);
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
                                  Fixup fixup, Vlabel catchBlock);
 
+/*
+ * Emits vasm instructions to get crc32 hash of the given arr
+ */
+Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define O(name, ...)  \
@@ -149,4 +154,3 @@ IR_OPCODES
 
 #include "irlower-internal-inl.h"
 
-#endif

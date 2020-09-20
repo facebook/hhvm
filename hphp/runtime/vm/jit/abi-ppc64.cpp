@@ -29,6 +29,16 @@ namespace {
 
 namespace reg = ppc64_asm::reg;
 
+const RegSet kGPRegs =
+  reg::r0  | reg::r1  | reg::r2  | reg::r3 |
+  reg::r4  | reg::r5  | reg::r6  | reg::r7  |
+  reg::r8  | reg::r9  | reg::r10 | reg::r11 |
+  reg::r12 | reg::r13 | reg::r14 | reg::r15 |
+  reg::r16 | reg::r17 | reg::r18 | reg::r19 |
+  reg::r20 | reg::r21 | reg::r22 | reg::r23 |
+  reg::r24 | reg::r25 | reg::r26 | reg::r27 |
+  reg::r28 | reg::r29 | reg::r30 | reg::r31;
+
 const RegSet kGPCallerSaved =
   reg::r3 | reg::r4 | reg::r5 | reg::r6 |
   reg::r7 | reg::r8 | reg::r9 | reg::r10;
@@ -47,13 +57,18 @@ const RegSet kGPCalleeSaved =
   // r31 is used as rvmfp
   // r28 is used as rone
 
-const RegSet kGPUnreserved = kGPCallerSaved | kGPCalleeSaved;
-
 const RegSet kGPReserved =
   rtoc() | rsp() | rvmfp() | rvmtl() | rvmsp() | rAsm | rsfp() | rfuncln() |
   rfuncentry() | rthreadptr() | rone() | r_svcreq_stub() | reg::r30;
+const RegSet kGPUnreserved = kGPRegs - kGPReserved;
 
-const RegSet kGPRegs = kGPUnreserved | kGPReserved;
+const RegSet kXMMRegs =
+  reg::f0  | reg::f1  | reg::f2  | reg::f3  | reg::f4  | reg::f5  |
+  reg::f6  | reg::f7  | reg::f8  | reg::f9  | reg::f10 | reg::f11 |
+  reg::f12 | reg::f13 | reg::v16 | reg::v17 | reg::v18 | reg::v19 |
+  reg::f14 | reg::f15 | reg::v20 | reg::v21 | reg::v22 |
+  reg::v23 | reg::v24 | reg::v25 | reg::v26 | reg::v27 |
+  reg::v28 | reg::v30 | reg::v31 | reg::v29;
 
 const RegSet kXMMCallerSaved =
   reg::f0  | reg::f1  | reg::f2  | reg::f3  | reg::f4  | reg::f5  |
@@ -66,10 +81,8 @@ const RegSet kXMMCalleeSaved =
   reg::v28 | reg::v30 | reg::v31;
   // v29 reserved for Vxls::m_tmp
 
-const RegSet kXMMUnreserved = kXMMCallerSaved | kXMMCalleeSaved;
 const RegSet kXMMReserved = RegSet(reg::v29);
-
-const RegSet kXMMRegs = kXMMUnreserved | kXMMReserved;
+const RegSet kXMMUnreserved = kXMMRegs - kXMMReserved;
 
 const RegSet kCallerSaved = kGPCallerSaved | kXMMCallerSaved;
 const RegSet kCalleeSaved = kGPCalleeSaved | kXMMCalleeSaved;
@@ -81,8 +94,7 @@ const RegSet kSF = RegSet(RegSF{0});
 /*
  * Registers that can safely be used for scratch purposes in-between traces.
  */
-const RegSet kScratchCrossTraceRegs =
-  kXMMCallerSaved | (kGPUnreserved - vm_regs_with_sp());
+const RegSet kScratchCrossTraceRegs = kXMMCallerSaved | kGPUnreserved;
 
 /*
  * Helper code ABI registers.
@@ -147,6 +159,7 @@ const Abi& abi(CodeKind kind) {
     case CodeKind::Trace:
       return trace_abi;
     case CodeKind::CrossTrace:
+    case CodeKind::Prologue:
       return cross_trace_abi;
     case CodeKind::Helper:
       return helper_abi;

@@ -1,6 +1,6 @@
-<?php
-	var_dump(bind_textdomain_codeset(false,false));
-	var_dump(bind_textdomain_codeset('messages', "UTF-8"));
+<?hh <<__EntryPoint>> function main(): void {
+var_dump(bind_textdomain_codeset('',''));
+var_dump(bind_textdomain_codeset('messages', "UTF-8"));
 
-	echo "Done\n";
-?>
+echo "Done\n";
+}

@@ -17,6 +17,7 @@ newtype StringAlias = string;
 function dostring(StringAlias $s) {
   var_dump($f);
 }
-
+<<__EntryPoint>> function main(): void {
 dofoo(new Foo());
 dostring(new Foo());
+}

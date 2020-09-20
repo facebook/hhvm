@@ -1,26 +1,38 @@
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() with invalid filenames ***
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+
+Warning: is_writable() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
+
+Warning: is_writable() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
+
+Warning: is_writable() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
+
+Warning: is_writable() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
+
+Warning: is_writable() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
+
+Warning: is_writable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
 bool(false)
 bool(false)
 
-Warning: %s
-NULL
+Warning: is_writable() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
 
-Warning: %s
-NULL
-bool(false)
-bool(false)
+Warning: is_writeable() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
+
+Warning: is_writable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 27
+
+Warning: is_writeable() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/file/is_writable_variation3.php on line 28
 Done

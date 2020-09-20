@@ -39,52 +39,52 @@ namespace HPHP {
 const StaticString s_result("<result>");
 const StaticString s_exception("<exception>");
 
-void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitEnterCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitEnterCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnIOWaitEnter(callback);
 }
 
-void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnIoWaitExitCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnIOWaitExit(callback);
 }
 
-void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
+void HHVM_STATIC_METHOD(Awaitable, setOnJoinCallback,
                         const Variant& callback) {
   AsioSession::Get()->setOnJoin(callback);
 }
 
-bool HHVM_METHOD(WaitHandle, isFinished) {
-  return wait_handle<c_WaitHandle>(this_)->isFinished();
+bool HHVM_METHOD(Awaitable, isFinished) {
+  return wait_handle<c_Awaitable>(this_)->isFinished();
 }
 
-bool HHVM_METHOD(WaitHandle, isSucceeded) {
-  return wait_handle<c_WaitHandle>(this_)->isSucceeded();
+bool HHVM_METHOD(Awaitable, isSucceeded) {
+  return wait_handle<c_Awaitable>(this_)->isSucceeded();
 }
 
-bool HHVM_METHOD(WaitHandle, isFailed) {
-  return wait_handle<c_WaitHandle>(this_)->isFailed();
+bool HHVM_METHOD(Awaitable, isFailed) {
+  return wait_handle<c_Awaitable>(this_)->isFailed();
 }
 
-String HHVM_METHOD(WaitHandle, getName) {
-  auto obj = wait_handle<c_WaitHandle>(this_);
+String HHVM_METHOD(Awaitable, getName) {
+  auto obj = wait_handle<c_Awaitable>(this_);
   if (obj->isSucceeded()) {
     return s_result;
   } else if (obj->isFailed()) {
     return s_exception;
   }
 
-  assert(obj->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(obj->instanceof(c_WaitableWaitHandle::classof()));
   return static_cast<c_WaitableWaitHandle*>(obj)->getName();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 size_t asio_object_size(const ObjectData* od) {
-  auto obj = wait_handle<c_WaitHandle>(od);
+  auto obj = wait_handle<c_Awaitable>(od);
   switch (obj->getKind()) {
 #define X(knd) \
-    case c_WaitHandle::Kind::knd: \
+    case c_Awaitable::Kind::knd: \
       return sizeof(c_ ## knd ## WaitHandle);
     X(Static)
     X(Condition)
@@ -93,9 +93,9 @@ size_t asio_object_size(const ObjectData* od) {
     X(ExternalThreadEvent)
     X(AsyncGenerator)
 #undef X
-    case c_WaitHandle::Kind::AwaitAll:
+    case c_Awaitable::Kind::AwaitAll:
       return obj->asAwaitAll()->heapSize();
-    case c_WaitHandle::Kind::AsyncFunction:
+    case c_Awaitable::Kind::AsyncFunction:
       return obj->asAsyncFunction()->resumable()->size();
   }
   always_assert(false);
@@ -105,14 +105,14 @@ void AsioExtension::initWaitHandle() {
   // ensure AsioBlockable* fields are pointer-followable
   (void)type_scan::getIndexForMalloc<AsioBlockable>();
 #define WH_SME(meth) \
-  HHVM_STATIC_MALIAS(HH\\WaitHandle, meth, WaitHandle, meth)
+  HHVM_STATIC_MALIAS(HH\\Awaitable, meth, Awaitable, meth)
   WH_SME(setOnIoWaitEnterCallback);
   WH_SME(setOnIoWaitExitCallback);
   WH_SME(setOnJoinCallback);
 #undef WH_SME
 
 #define WH_ME(meth) \
-  HHVM_MALIAS(HH\\WaitHandle, meth, WaitHandle, meth)
+  HHVM_MALIAS(HH\\Awaitable, meth, Awaitable, meth)
   WH_ME(isFinished);
   WH_ME(isSucceeded);
   WH_ME(isFailed);
@@ -121,7 +121,7 @@ void AsioExtension::initWaitHandle() {
 }
 
 const StaticString
-  s_DoNotNewInstance("WaitHandles may not be directly instantiated");
+  s_DoNotNewInstance("Awaitables may not be directly instantiated");
 
 static ObjectData* asioInstanceCtor(Class*) {
   SystemLib::throwExceptionObject(s_DoNotNewInstance);
@@ -134,29 +134,33 @@ static ObjectData* asioInstanceCtor(Class*) {
 // and declared property slots, and that instance methods can only be called
 // on the official, systemlib base classes.
 template<class T> typename
-  std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
+  std::enable_if<std::is_base_of<c_Awaitable, T>::value, void>::type
 finish_class() {
-  DEBUG_ONLY auto const wh = c_WaitHandle::classof();
+  DEBUG_ONLY auto const wh = c_Awaitable::classof();
   auto cls = const_cast<Class*>(T::classof());
-  assert(wh && cls);
-  assert((cls == wh) || (cls->classof(wh)));
-  assert(cls->numDeclProperties() == 0);
-  assert(cls->numStaticProperties() == 0);
+  assertx(wh && cls);
+  assertx((cls == wh) || (cls->classof(wh)));
+  assertx(cls->numDeclProperties() == 0);
+  assertx(cls->numStaticProperties() == 0);
+  assertx(!cls->hasMemoSlots());
   DEBUG_ONLY auto const ctor = cls->getCtor();
-  assert(ctor == wh->getCtor());
-  assert(ctor->attrs() & AttrPrivate);
-  assert(ctor->attrs() & AttrFinal);
+  assertx(ctor == wh->getCtor());
+  assertx(ctor->attrs() & AttrPrivate);
+  assertx(ctor->attrs() & AttrFinal);
 
   cls->allocExtraData();
-  assert(!cls->m_extra->m_nativeDataInfo);
-  assert(!cls->m_extra->m_instanceCtor);
-  assert(!cls->m_extra->m_instanceDtor);
+  assertx(!cls->m_extra->m_nativeDataInfo);
+  assertx(!cls->m_extra->m_instanceCtor);
+  assertx(!cls->m_extra->m_instanceCtorUnlocked);
+  assertx(!cls->m_extra->m_instanceDtor);
   cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
+  cls->m_extra.raw()->m_instanceCtorUnlocked = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+  cls->m_releaseFunc = T::instanceDtor;
 }
 
 void AsioExtension::finishClasses() {
-  finish_class<c_WaitHandle>();
+  finish_class<c_Awaitable>();
   finish_class<c_WaitableWaitHandle>();
   finish_class<c_AwaitAllWaitHandle>();
   finish_class<c_ResumableWaitHandle>();

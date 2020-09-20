@@ -1,10 +1,16 @@
-<?php
+<?hh
 /* Prototype  : proto int fpassthru(resource fp)
- * Description: Output all remaining data from a file pointer 
+ * Description: Output all remaining data from a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzpassthru
  */
 
+class testClass {
+   public function __toString() {
+      return "testClass";
+   }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fpassthru() : usage variations ***\n";
 error_reporting(E_ALL & ~E_NOTICE);
 
@@ -12,14 +18,8 @@ error_reporting(E_ALL & ~E_NOTICE);
 $unset_var = 10;
 unset ($unset_var);
 
-class testClass {
-   public function __toString() {
-      return "testClass";
-   }
-}
-
 //array of values to iterate over
-$values = array(
+$values = varray[
 
       // int data
       0,
@@ -34,12 +34,12 @@ $values = array(
       10.7654321E-10,
       .5,
 
-      // array data
-      array(),
-      array(0),
-      array(1),
-      array(1, 2),
-      array('color' => 'red', 'item' => 'pen'),
+
+
+
+
+
+
 
       // null data
       NULL,
@@ -67,14 +67,14 @@ $values = array(
 
       // unset data
       $unset_var,
-);
+];
 
 // loop through each element of the array for fp
 
 foreach($values as $value) {
       echo @"\nArg value $value \n";
-      var_dump( fpassthru($value) );
+      try { var_dump( fpassthru($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";
-?>
+}

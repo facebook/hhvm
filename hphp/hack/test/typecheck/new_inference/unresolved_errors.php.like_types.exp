@@ -1,0 +1,8 @@
+File "unresolved_errors.php", line 16, characters 3-7:
+Was expecting an object but type is unknown (Typing[4297])
+File "unresolved_errors.php", line 15, characters 8-13:
+It is unknown because type parameter `Tv` of `HH\Map` could not be determined. Please add explicit type parameters to the invocation of `HH\Map`
+File "unresolved_errors.php", line 19, characters 3-7:
+Was expecting an object but type is unknown (Typing[4297])
+File "unresolved_errors.php", line 18, characters 8-16:
+It is unknown because type parameter `T` of `HH\Vector` could not be determined. Please add explicit type parameters to the invocation of `HH\Vector`

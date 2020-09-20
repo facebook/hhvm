@@ -1,19 +1,15 @@
-<?php
-
-$a = 'test';
-if ($a) {
-  function bar() {
-}
-}
- else {
-  function bar() {
-}
-}
+<?hh
 function foo() {
 }
-function goo(&$p) {
+function goo(inout $p) {
 }
+function bar() {
+}
+
+<<__EntryPoint>>
+function main_1187() {
 $goo = 'goo';
-goo(foo());
-$goo(foo());
+$foo = foo(); goo(inout $foo);
+$foo = foo(); $goo(inout $foo);
 bar(foo());
+}

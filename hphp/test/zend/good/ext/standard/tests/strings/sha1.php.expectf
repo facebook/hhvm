@@ -13,8 +13,8 @@ bool(true)
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 bool(true)
-string(20) "%a"
-string(20) "%a"
+string(20) "Ú9£î^kK2U¿ï•`¯Ø	"
+string(20) "Ú9£î^kK2U¿ï•`¯Ø	"
 
-Warning: %s
+Warning: No such file or directory in %s/sha1.php on line 24
 Done

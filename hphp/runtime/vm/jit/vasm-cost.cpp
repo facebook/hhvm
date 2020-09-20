@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 
+#include "hphp/runtime/base/runtime-option.h"
+
 namespace HPHP { namespace jit {
 namespace {
 
@@ -32,8 +34,6 @@ Vcost instrSize(const Vunit& u, AreaIndex area, Vinstr inst) {
     return {tuple_size(inst.get<phidef>().defs), false};
   case Vinstr::phijmp:
     return {tuple_size(inst.get<phijmp>().uses) + 1, false};
-  case Vinstr::phijcc:
-    return {tuple_size(inst.get<phijcc>().uses) + 1, false};
   case Vinstr::copyargs:
     return {tuple_size(inst.get<copyargs>().s), false};
   case Vinstr::copy2:
@@ -53,13 +53,29 @@ Vcost instrSize(const Vunit& u, AreaIndex area, Vinstr inst) {
 Vcost computeVunitCost(const Vunit& unit) {
   int cost = 0;
   bool incomplete = false;
-  for (auto const& block : unit.blocks) {
+
+  for (auto const b : sortBlocks(unit)) {
+    auto const& block = unit.blocks[b];
+
+    auto const factor = [&] {
+      switch (block.area_idx) {
+        case AreaIndex::Main:
+          return RuntimeOption::EvalHHIRInliningCostFactorMain;
+        case AreaIndex::Cold:
+          return RuntimeOption::EvalHHIRInliningCostFactorCold;
+        case AreaIndex::Frozen:
+          return RuntimeOption::EvalHHIRInliningCostFactorFrozen;
+      }
+      not_reached();
+    }();
+
     for (auto const& instr : block.code) {
       auto info = instrSize(unit, block.area_idx, instr);
-      cost += info.cost;
+      cost += info.cost * factor;
       incomplete |= info.incomplete;
     }
   }
+
   return {cost, incomplete};
 }
 

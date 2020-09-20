@@ -16,14 +16,17 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include <fstream>
+#include <sstream>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
-#include <fstream>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -67,9 +70,6 @@ std::string Config::IniName(const std::string& config,
     idx++;
   }
 
-  // The HHIRLICM runtime option is all capitals, so separation
-  // cannot be determined. Special case it.
-  boost::replace_first(out, "hhirlicm", "hhir_licm");
   // The HHVM ini option becomes the standard PHP option.
   boost::replace_first(out,
                        "hhvm.server.upload.max_file_uploads",
@@ -83,10 +83,6 @@ std::string Config::IniName(const std::string& config,
   // No use of Eval in our ini strings
   boost::replace_first(out, ".eval.", ".");
   boost::replace_first(out, ".my_sql.", ".mysql.");
-  boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
-
-  // Fix "XDebug" turning into "x_debug".
-  boost::replace_first(out, "hhvm.debugger.x_debug_", "xdebug.");
 
   return out;
 }
@@ -186,13 +182,13 @@ void Config::SetParsedIni(IniSettingMap &ini, const std::string confStr,
                           bool is_system) {
   // if we are setting constants, we must be setting system settings
   if (constants_only) {
-    assert(is_system);
+    assertx(is_system);
   }
   auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
   for (ArrayIter iter(parsed_ini.toArray()); iter; ++iter) {
     // most likely a string, but just make sure that we are dealing
     // with something that can be converted to a string
-    assert(iter.first().isScalar());
+    assertx(iter.first().isScalar());
     ini.set(iter.first().toString(), iter.second());
     if (constants_only) {
       IniSetting::FillInConstant(iter.first().toString().toCppString(),
@@ -324,7 +320,10 @@ void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
                    IniName(name, prepend_hhvm), &loc); \
 }
 
-CONTAINER_CONFIG_BODY(ConfigVector, Vector)
+CONTAINER_CONFIG_BODY(std::vector<uint32_t>, UInt32Vector)
+CONTAINER_CONFIG_BODY(std::vector<std::string>, StrVector)
+namespace { using simap = std::unordered_map<std::string, int>; }
+CONTAINER_CONFIG_BODY(simap, IntMap)
 CONTAINER_CONFIG_BODY(ConfigMap, Map)
 CONTAINER_CONFIG_BODY(ConfigMapC, MapC)
 CONTAINER_CONFIG_BODY(ConfigSet, Set)
@@ -381,6 +380,24 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
       }
     }
   }
+}
+
+bool Config::matchHdfPattern(const std::string &value,
+                             const IniSettingMap& ini, Hdf hdfPattern,
+                             const std::string& name,
+                             const std::string& suffix) {
+  std::string pattern = Config::GetString(ini, hdfPattern, name, "", false);
+  if (!pattern.empty()) {
+    if (!suffix.empty()) pattern += suffix;
+    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+                                    CopyString),
+                             String(value.c_str(), value.size(),
+                                    CopyString));
+    if (ret.toInt64() <= 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }

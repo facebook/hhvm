@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_XHPROF_H
-#define incl_HPHP_XHPROF_H
+#pragma once
 
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/base/type-array.h"
@@ -19,8 +18,8 @@ Variant HHVM_FUNCTION(xhprof_run_trace, const String& packedTrace,
                                         int64_t flags);
 void HHVM_FUNCTION(xhprof_sample_enable);
 Variant HHVM_FUNCTION(xhprof_sample_disable);
-void HHVM_FUNCTION(fb_setprofile, const Variant& callback, int64_t flags);
+void HHVM_FUNCTION(fb_setprofile, const Variant& callback,
+                                  int64_t flags, ArrayArg functions);
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-#endif // incl_HPHP_XHPROF_H

@@ -1,7 +1,0 @@
-*** Testing compact() : error conditions ***
-
--- Testing compact() function with Zero arguments --
-
-Warning: %s
-NULL
-Done

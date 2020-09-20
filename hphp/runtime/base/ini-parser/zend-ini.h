@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_BASE_ZENDINI_H_
-#define incl_HPHP_RUNTIME_BASE_ZENDINI_H_
+#pragma once
 
 #include "hphp/runtime/base/ini-setting.h"
 
@@ -53,4 +52,3 @@ bool zend_parse_ini_string(const std::string &str,
                            HPHP::IniSetting::ParserCallback &callback,
                            void *arg);
 
-#endif // incl_HPHP_RUNTIME_BASE_ZENDINI_H_

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string vsprintf(string format, array args)
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
@@ -8,7 +8,7 @@
  * Test vsprintf() when different string formats and string values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vsprintf() : string formats with strings ***\n";
 
 
@@ -29,7 +29,7 @@ $heredoc_empty_string = <<<EOT
 EOT;
 
 // defining array of string formats
-$formats = array(
+$formats = varray[
   "%s",
   "%+s %-s %S",
   "%ls %Ls, %4s %-4s",
@@ -37,20 +37,20 @@ $formats = array(
   "%'#2s %'2s %'$2s %'_2s",
   "%% %%s %10 s%",
   '%3$s %4$s %1$s %2$s'
-);
+];
 
 // Arrays of string values for the format defined in $format.
 // Each sub array contains string values which correspond to each format string in $format
-$args_array = array(
-  array(" "),
-  array("hello\0world", "hello\0", "\0hello"),
-  array("@#$%&*", "@#$%&*", "\x55F", "\001"),
-  array("sunday", 'monday', "tuesday", 'wednesday'),
-  array($heredoc_string, "abcdef", $heredoc_numeric_string, $heredoc_empty_string),
-  array("one", "two", 'three', 'four'),
-  array("three", 'four', 'one', "two")
+$args_array = varray[
+  varray[" "],
+  varray["hello\0world", "hello\0", "\0hello"],
+  varray["@#$%&*", "@#$%&*", "\x55F", "\001"],
+  varray["sunday", 'monday', "tuesday", 'wednesday'],
+  varray[$heredoc_string, "abcdef", $heredoc_numeric_string, $heredoc_empty_string],
+  varray["one", "two", 'three', 'four'],
+  varray["three", 'four', 'one', "two"]
 
-);
+];
 
 // looping to test vsprintf() with different string formats from the above $format array
 // and with string from the above $args_array array
@@ -62,5 +62,4 @@ foreach($formats as $format) {
 }
 
 echo "Done";
-?>
-
+}

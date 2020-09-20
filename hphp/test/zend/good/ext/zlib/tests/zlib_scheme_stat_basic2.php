@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $inputFileName = dirname(__FILE__)."/004.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 echo "file_exists=";
@@ -17,5 +17,5 @@ var_dump(filetype($srcFile));
 echo "fileatime=";
 var_dump(fileatime($srcFile));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

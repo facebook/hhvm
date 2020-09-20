@@ -11,7 +11,7 @@ class C extends B {
     echo "C::foo\n";
   }
   public static function test() {
-    $arr = array('foo');
+    $arr = varray['foo'];
     self::foo();
     parent::foo();
     self::$arr[0]();
@@ -20,4 +20,6 @@ class C extends B {
     echo parent::MYCONST . "\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 C::test();
+}

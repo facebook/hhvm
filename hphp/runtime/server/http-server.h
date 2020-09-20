@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_H_
-#define incl_HPHP_HTTP_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
@@ -24,6 +23,7 @@
 #include "hphp/util/async-func.h"
 #include "hphp/util/service-data.h"
 
+#include <atomic>
 #include <folly/MicroSpinLock.h>
 
 namespace HPHP {
@@ -31,17 +31,20 @@ namespace HPHP {
 
 struct HttpServer : Synchronizable, TakeoverListener,
                     Server::ServerEventListener {
+ public:
   static std::shared_ptr<HttpServer> Server;
   static time_t StartTime;
   static std::atomic<double> LoadFactor;
+  static std::atomic_int QueueDiscount;
+  static std::atomic_int SignalReceived;
 
-private:
+ private:
   static std::atomic_int_fast64_t PrepareToStopTime;
   static time_t OldServerStopTime;
   static std::vector<ShutdownStat> ShutdownStats;
   static folly::MicroSpinLock StatsLock; // for ShutdownStats
 
-public:
+ public:
   explicit HttpServer();
   ~HttpServer() override;
 
@@ -62,7 +65,6 @@ public:
   bool isStopped() const { return m_stopped;}
 
   void flushLog();
-  void watchDog();
 
   void takeoverShutdown() override;
 
@@ -75,6 +77,7 @@ public:
 
   static void MarkShutdownStat(ShutdownEvent event);
   static void LogShutdownStats();
+  static void ProfileFlush();
 
   static int64_t GetPrepareToStopTime() {
     // Make sure changes are seen right away after PrepareToStop().
@@ -127,27 +130,21 @@ private:
   void removePid();
   void killPid();
 
-  // memory monitoring functions
-  void dropCache();
-  void checkMemory();
-
   // Allow cleanups (e.g., flush cached values into a database) using
   // PHP code when server stops.
   void playShutdownRequest(const std::string& fileName);
 
 private:
-  bool m_stopped;
-  bool m_killed;
-  const char* m_stopReason;
+  std::atomic<bool> m_stopping{false};
+  bool m_stopped{false};
+  const char* m_stopReason{nullptr};
 
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;
   std::vector<std::unique_ptr<SatelliteServer>> m_satellites;
-  AsyncFunc<HttpServer> m_watchDog;
   ServiceData::CounterCallback m_counterCallback;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_H_

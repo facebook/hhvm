@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -28,6 +29,7 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-internal.h"
 #include "hphp/runtime/vm/jit/vasm-lower.h"
@@ -56,6 +58,7 @@ namespace {
 static_assert(folly::kIsLittleEndian,
   "Code contains little-endian specific optimizations.");
 
+template<class X64Asm>
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)
@@ -67,6 +70,8 @@ struct Vgen {
     , catches(env.catches)
   {}
 
+  static void emitVeneers(Venv& env) {}
+  static void handleLiterals(Venv& env) {}
   static void patch(Venv& env);
   static void pad(CodeBlock& cb);
 
@@ -81,17 +86,18 @@ struct Vgen {
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a.int3(); }
-  void emit(const fallthru& /*i*/) {}
+  void emit(const fallthru&);
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
+  void emit(const ldundefq& /*i*/) {}
   void emit(const load& i);
   void emit(const store& i);
   void emit(const mcprep& i);
 
   // native function abi
   void emit(const call& i);
-  void emit(const callm& i) { a.call(i.target); }
+  void emit(const callm& i) { a.prefix(i.target.mr()).call(i.target); }
   void emit(const callr& i) { a.call(i.target); }
   void emit(const calls& i);
   void emit(const ret& /*i*/) { a.ret(); }
@@ -101,16 +107,22 @@ struct Vgen {
   void emit(const callstub& i);
   void emit(const callfaststub& i);
   void emit(const tailcallstub& i);
+  void emit(const tailcallstubr& i);
 
   // php function abi
+  void emit(const callphp& i) {
+    emit(call{i.target, i.args});
+    setCallFuncId(env, a.frontier());
+  }
+  void emit(const callphpr& i) {
+    emit(callr{i.target, i.args});
+    setCallFuncId(env, a.frontier());
+  }
   void emit(const phpret& i);
-  void emit(const tailcallphp& i);
-  void emit(const callarray& i);
   void emit(const contenter& i);
 
   // vm entry abi
   void emit(const inittc& /*i*/) {}
-  void emit(const calltc&);
   void emit(const leavetc&) { a.ret(); }
 
   // exceptions
@@ -123,18 +135,22 @@ struct Vgen {
   void emit(absdbl i) { unary(i); a.psllq(1, i.d); a.psrlq(1, i.d); }
   void emit(andb i) { commuteSF(i); a.andb(i.s0, i.d); }
   void emit(andbi i) { binary(i); a.andb(i.s0, i.d); }
-  void emit(const andbim& i) { a.andb(i.s, i.m); }
+  void emit(const andbim& i) { a.prefix(i.m.mr()).andb(i.s, i.m); }
+  void emit(andw i) { commuteSF(i); a.andw(i.s0, i.d); }
+  void emit(andwi i) { binary(i); a.andw(i.s0, i.d); }
   void emit(andl i) { commuteSF(i); a.andl(i.s0, i.d); }
   void emit(andli i) { binary(i); a.andl(i.s0, i.d); }
   void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
   void emit(andqi i);
+  void emit(const addwm& i) { a.prefix(i.m.mr()).addw(i.s0, i.m); }
+  void emit(addl i) { commuteSF(i); a.addl(i.s0, i.d); }
   void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
-  void emit(const addlm& i) { a.addl(i.s0, i.m); }
+  void emit(const addlm& i) { a.prefix(i.m.mr()).addl(i.s0, i.m); }
   void emit(const addlim& i);
   void emit(addq i) { commuteSF(i); a.addq(i.s0, i.d); }
   void emit(addqi i) { binary(i); a.addq(i.s0, i.d); }
-  void emit(const addqmr& i) { binary(i); a.addq(i.m, i.d); }
-  void emit(const addqrm& i) { a.addq(i.s1, i.m); }
+  void emit(const addqmr& i);
+  void emit(const addqrm& i);
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
   void emit(const cloadq& i);
@@ -145,59 +161,61 @@ struct Vgen {
   void emit(const cmovq& i) { emit_cmov(i); }
   void emit(const cmpb& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
-  void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
-  void emit(const cmpbm& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpbim& i) { a.prefix(i.s1.mr()).cmpb(i.s0, i.s1); }
+  void emit(const cmpbm& i) { a.prefix(i.s1.mr()).cmpb(i.s0, i.s1); }
   void emit(const cmpw& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwi& i) { a.cmpw(i.s0, i.s1); }
-  void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
-  void emit(const cmpwm& i) { a.cmpw(i.s0, i.s1); }
+  void emit(const cmpwim& i) { a.prefix(i.s1.mr()).cmpw(i.s0, i.s1); }
+  void emit(const cmpwm& i) { a.prefix(i.s1.mr()).cmpw(i.s0, i.s1); }
   void emit(const cmpl& i) { a.cmpl(i.s0, i.s1); }
   void emit(const cmpli& i) { a.cmpl(i.s0, i.s1); }
-  void emit(const cmplim& i) { a.cmpl(i.s0, i.s1); }
-  void emit(const cmplm& i) { a.cmpl(i.s0, i.s1); }
+  void emit(const cmplim& i) { a.prefix(i.s1.mr()).cmpl(i.s0, i.s1); }
+  void emit(const cmplm& i) { a.prefix(i.s1.mr()).cmpl(i.s0, i.s1); }
   void emit(const cmpq& i) { a.cmpq(i.s0, i.s1); }
   void emit(const cmpqi& i) { a.cmpq(i.s0, i.s1); }
-  void emit(const cmpqim& i) { a.cmpq(i.s0, i.s1); }
-  void emit(const cmpqm& i) { a.cmpq(i.s0, i.s1); }
+  void emit(const cmpqim& i) { a.prefix(i.s1.mr()).cmpq(i.s0, i.s1); }
+  void emit(const cmpqm& i) { a.prefix(i.s1.mr()).cmpq(i.s0, i.s1); }
   void emit(cmpsd i) { noncommute(i); a.cmpsd(i.s0, i.d, i.pred); }
   void emit(const cqo& /*i*/) { a.cqo(); }
   void emit(const cvttsd2siq& i) { a.cvttsd2siq(i.s, i.d); }
   void emit(const cvtsi2sd& i);
   void emit(const cvtsi2sdm& i);
   void emit(decl i) { unary(i); a.decl(i.d); }
-  void emit(const declm& i) { a.decl(i.m); }
+  void emit(const declm& i) { a.prefix(i.m.mr()).decl(i.m); }
   void emit(decq i) { unary(i); a.decq(i.d); }
-  void emit(const decqm& i) { a.decq(i.m); }
-  void emit(const decqmlock& i) { a.lock(); a.decq(i.m); }
+  void emit(const decqm& i) { a.prefix(i.m.mr()).decq(i.m); }
+  void emit(const decqmlock& i) { a.prefix(i.m.mr()).decqlock(i.m); }
   void emit(divsd i) { noncommute(i); a.divsd(i.s0, i.d); }
   void emit(imul i) { commuteSF(i); a.imul(i.s0, i.d); }
   void emit(const idiv& i) { a.idiv(i.s); }
   void emit(incl i) { unary(i); a.incl(i.d); }
-  void emit(const inclm& i) { a.incl(i.m); }
+  void emit(const inclm& i) { a.prefix(i.m.mr()).incl(i.m); }
   void emit(incq i) { unary(i); a.incq(i.d); }
-  void emit(const incqm& i) { a.incq(i.m); }
-  void emit(const incwm& i) { a.incw(i.m); }
+  void emit(const incqm& i) { a.prefix(i.m.mr()).incq(i.m); }
+  void emit(const incwm& i) { a.prefix(i.m.mr()).incw(i.m); }
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
   void emit(const jmpr& i) { a.jmp(i.target); }
-  void emit(const jmpm& i) { a.jmp(i.target); }
+  void emit(const jmpm& i) { a.prefix(i.target.mr()).jmp(i.target); }
   void emit(const jmpi& i);
   void emit(const lea& i);
   void emit(const leap& i) { a.lea(i.s, i.d); }
+  void emit(const leav& i);
   void emit(const lead& i) { a.lea(rip[(intptr_t)i.s.get()], i.d); }
-  void emit(const loadups& i) { a.movups(i.s, i.d); }
-  void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
-  void emit(const loadb& i) { a.loadb(i.s, i.d); }
-  void emit(const loadw& i) { a.loadw(i.s, i.d); }
-  void emit(const loadtql& i) { a.loadl(i.s, i.d); }
-  void emit(const loadl& i) { a.loadl(i.s, i.d); }
+  void emit(const loadups& i) { a.prefix(i.s.mr()).movups(i.s, i.d); }
+  void emit(const loadtqb& i) { a.prefix(i.s.mr()).loadb(i.s, i.d); }
+  void emit(const loadb& i) { a.prefix(i.s.mr()).loadb(i.s, i.d); }
+  void emit(const loadw& i) { a.prefix(i.s.mr()).loadw(i.s, i.d); }
+  void emit(const loadtql& i) { a.prefix(i.s.mr()).loadl(i.s, i.d); }
+  void emit(const loadl& i) { a.prefix(i.s.mr()).loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
   void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }
-  void emit(const loadsd& i) { a.movsd(i.s, i.d); }
-  void emit(const loadzbl& i) { a.loadzbl(i.s, i.d); }
-  void emit(const loadzbq& i) { a.loadzbl(i.s, Reg32(i.d)); }
-  void emit(const loadzlq& i) { a.loadl(i.s, Reg32(i.d)); }
+  void emit(const loadsd& i) { a.prefix(i.s.mr()).movsd(i.s, i.d); }
+  void emit(const loadzbl& i) { a.prefix(i.s.mr()).loadzbl(i.s, i.d); }
+  void emit(const loadzbq& i) { a.prefix(i.s.mr()).loadzbl(i.s, Reg32(i.d)); }
+  void emit(const loadsbq& i) { a.prefix(i.s.mr()).loadsbq(i.s, i.d); }
+  void emit(const loadzlq& i) { a.prefix(i.s.mr()).loadl(i.s, Reg32(i.d)); }
   void emit(const movb& i) { a.movb(i.s, i.d); }
   void emit(const movl& i) { a.movl(i.s, i.d); }
   void emit(const movzbw& i) { a.movzbl(i.s, Reg32(i.d)); }
@@ -206,22 +224,26 @@ struct Vgen {
   void emit(const movzwl& i) { a.movzwl(i.s, i.d); }
   void emit(const movzwq& i) { a.movzwl(i.s, Reg32(i.d)); }
   void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
+  void emit(const movsbq& i) { a.movsbq(i.s, i.d); }
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
   void emit(const nop& /*i*/) { a.nop(); }
   void emit(not i) { unary(i); a.not(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
-  void emit(const orbim& i) { a.orb(i.s0, i.m); }
-  void emit(const orwim& i) { a.orw(i.s0, i.m); }
-  void emit(const orlim& i) { a.orl(i.s0, i.m); }
+  void emit(orbi i) { binary(i); a.orb(i.s0, i.d); }
+  void emit(const orbim& i) { a.prefix(i.m.mr()).orb(i.s0, i.m); }
+  void emit(const orwim& i) { a.prefix(i.m.mr()).orw(i.s0, i.m); }
+  void emit(const orlim& i) { a.prefix(i.m.mr()).orl(i.s0, i.m); }
   void emit(orq i) { commuteSF(i); a.orq(i.s0, i.d); }
+  void emit(orwi i) { binary(i); a.orw(i.s0, i.d); }
+  void emit(orli i) { binary(i); a.orl(i.s0, i.d); }
   void emit(orqi i) { binary(i); a.orq(i.s0, i.d); }
-  void emit(const orqim& i) { a.orq(i.s0, i.m); }
+  void emit(const orqim& i) { a.prefix(i.m.mr()).orq(i.s0, i.m); }
   void emit(const pop& i) { a.pop(i.d); }
-  void emit(const popm& i) { a.pop(i.d); }
+  void emit(const popm& i) { a.prefix(i.d.mr()).pop(i.d); }
   void emit(const popf& i) { assertx(i.d == RegSF{0}); a.popf(); }
   void emit(const push& i) { a.push(i.s); }
-  void emit(const pushm& i) { a.push(i.s); }
+  void emit(const pushm& i) { a.prefix(i.s.mr()).push(i.s); }
   void emit(const pushf& i) { assertx(i.s == RegSF{0}); a.pushf(); }
   void emit(const roundsd& i) { a.roundsd(i.dir, i.s, i.d); }
   void emit(const sarq& i) { unary(i); a.sarq(i.d); }
@@ -229,19 +251,20 @@ struct Vgen {
   void emit(const setcc& i) { a.setcc(i.cc, i.d); }
   void emit(shlli i) { binary(i); a.shll(i.s0, i.d); }
   void emit(shlq i) { unary(i); a.shlq(i.d); }
+  void emit(shrq i) { unary(i); a.shrq(i.d); }
   void emit(shlqi i) { binary(i); a.shlq(i.s0, i.d); }
   void emit(shrli i) { binary(i); a.shrl(i.s0, i.d); }
   void emit(shrqi i) { binary(i); a.shrq(i.s0, i.d); }
   void emit(const sqrtsd& i) { a.sqrtsd(i.s, i.d); }
-  void emit(const storeups& i) { a.movups(i.s, i.m); }
-  void emit(const storeb& i) { a.storeb(i.s, i.m); }
+  void emit(const storeups& i) { a.prefix(i.m.mr()).movups(i.s, i.m); }
+  void emit(const storeb& i) { a.prefix(i.m.mr()).storeb(i.s, i.m); }
   void emit(const storebi& i);
-  void emit(const storel& i) { a.storel(i.s, i.m); }
-  void emit(const storeli& i) { a.storel(i.s, i.m); }
+  void emit(const storel& i) { a.prefix(i.m.mr()).storel(i.s, i.m); }
+  void emit(const storeli& i) { a.prefix(i.m.mr()).storel(i.s, i.m); }
   void emit(const storeqi& i);
-  void emit(const storesd& i) { a.movsd(i.s, i.m); }
-  void emit(const storew& i) { a.storew(i.s, i.m); }
-  void emit(const storewi& i) { a.storew(i.s, i.m); }
+  void emit(const storesd& i) { a.prefix(i.m.mr()).movsd(i.s, i.m); }
+  void emit(const storew& i) { a.prefix(i.m.mr()).storew(i.s, i.m); }
+  void emit(const storewi& i) { a.prefix(i.m.mr()).storew(i.s, i.m); }
   void emit(subl i) { noncommute(i); a.subl(i.s0, i.d); }
   void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
   void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }
@@ -249,16 +272,19 @@ struct Vgen {
   void emit(subsd i) { noncommute(i); a.subsd(i.s0, i.d); }
   void emit(const testb& i) { a.testb(i.s0, i.s1); }
   void emit(const testbi& i) { a.testb(i.s0, i.s1); }
-  void emit(const testbim& i) { a.testb(i.s0, i.s1); }
+  void emit(const testbm& i) { a.prefix(i.s1.mr()).testb(i.s0, i.s1); }
+  void emit(const testbim& i) { a.prefix(i.s1.mr()).testb(i.s0, i.s1); }
   void emit(const testw& i) { a.testw(i.s0, i.s1); }
   void emit(const testwi& i);
+  void emit(const testwm& i) { a.prefix(i.s1.mr()).testw(i.s0, i.s1); }
   void emit(const testwim& i);
   void emit(const testl& i) { a.testl(i.s0, i.s1); }
   void emit(const testli& i);
+  void emit(const testlm& i) { a.prefix(i.s1.mr()).testl(i.s0, i.s1); }
   void emit(const testlim& i);
   void emit(const testq& i) { a.testq(i.s0, i.s1); }
   void emit(const testqi& i);
-  void emit(const testqm& i) { a.testq(i.s0, i.s1); }
+  void emit(const testqm& i) { a.prefix(i.s1.mr()).testq(i.s0, i.s1); }
   void emit(const testqim& i);
   void emit(const trap& i);
   void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
@@ -270,6 +296,7 @@ struct Vgen {
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
   void emit(const conjure& /*i*/) { always_assert(false); }
   void emit(const conjureuse& /*i*/) { always_assert(false); }
+  void emit(const crc32q& i);
 
   void emit_nop() {
     emit(lea{rax[8], rax});
@@ -287,6 +314,7 @@ private:
 
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
+
   template<class Inst> void commuteSF(Inst&);
   template<class Inst> void commute(Inst&);
   template<class Inst> void noncommute(Inst&);
@@ -295,7 +323,7 @@ private:
 
 private:
   Venv& env;
-  X64Assembler a;
+  X64Asm a;
 
   const Vlabel current;
   const Vlabel next;
@@ -305,13 +333,13 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Prepare a binary op that is not commutative.
  *
  * s0 must be a different register than s1 so we don't clobber it.
  */
-template<class Inst> void Vgen::noncommute(Inst& i) {
+template<class X64Asm>
+template<class Inst> void Vgen<X64Asm>::noncommute(Inst& i) {
   assertx(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
   binary(i);
 }
@@ -321,7 +349,8 @@ template<class Inst> void Vgen::noncommute(Inst& i) {
  *
  * Swap operands if the dest is s0.
  */
-template<class Inst> void Vgen::commuteSF(Inst& i) {
+template<class X64Asm>
+template<class Inst> void Vgen<X64Asm>::commuteSF(Inst& i) {
   if (i.s1 != i.d && i.s0 == i.d) {
     i = Inst{i.s1, i.s0, i.d, i.sf};
   } else {
@@ -329,24 +358,13 @@ template<class Inst> void Vgen::commuteSF(Inst& i) {
   }
 }
 
-template<class Inst> void Vgen::commute(Inst& i) {
+template<class X64Asm>
+template<class Inst> void Vgen<X64Asm>::commute(Inst& i) {
   if (i.s1 != i.d && i.s0 == i.d) {
     i = Inst{i.s1, i.s0, i.d};
   } else {
     binary(i);
   }
-}
-
-/*
- * Helper for emitting instructions whose Vptr operand specifies a segment.
- */
-X64Assembler& prefix(X64Assembler& a, const Vptr& ptr) {
-  if (ptr.seg == Vptr::Segment::FS) {
-    a.fs();
-  } else if (ptr.seg == Vptr::Segment::GS) {
-    a.gs();
-  }
-  return a;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -450,19 +468,27 @@ void retargetJumps(Venv& env,
     }
     env.meta.inProgressTailJumps.swap(newTailJumps);
   }
+  // If the retarged jumps were smashable, now they aren't anymore, so remove
+  // them from smashableJumpData.
+  for (auto jmp : retargeted) {
+    if (env.meta.smashableJumpData.erase(jmp) > 0) {
+      FTRACE(3, "retargetJumps: removed {} from smashableJumpData\n", jmp);
+    }
+  }
 }
 
-void Vgen::patch(Venv& env) {
-  for (auto& p : env.jmps) {
+template<class X64Asm>
+void Vgen<X64Asm>::patch(Venv& env) {
+  for (auto const& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    X64Asm::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
   }
 
   auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
-  for (auto& p : env.jccs) {
+  for (auto const& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    X64Asm::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
     if (optLevel >= 2 ||
         (optLevel == 1 && p.target >= env.unit.blocks.size())) {
       jccs[env.addrs[p.target]].emplace_back(p.instr);
@@ -470,18 +496,25 @@ void Vgen::patch(Venv& env) {
   }
 
   if (!jccs.empty()) retargetJumps(env, jccs);
+
+  for (auto const& p : env.leas) {
+    assertx(env.vaddrs[p.target]);
+    DecodedInstruction di(toReal(env, p.instr), p.instr);
+    assertx(di.hasPicOffset());
+    di.setPicAddress(env.vaddrs[p.target]);
+  }
 }
 
-void Vgen::pad(CodeBlock& cb) {
-  X64Assembler a { cb };
-  while (a.available() >= 2) a.ud2();
-  if (a.available() > 0) a.int3();
-  assertx(a.available() == 0);
+template<class X64Asm>
+void Vgen<X64Asm>::pad(CodeBlock& cb) {
+  X64Asm a { cb };
+  a.pad();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const copy& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const copy& i) {
   if (i.s == i.d) return;
   if (i.s.isGP()) {
     if (i.d.isGP()) {                 // GP => GP
@@ -504,7 +537,8 @@ void Vgen::emit(const copy& i) {
   }
 }
 
-void Vgen::emit(const copy2& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const copy2& i) {
   assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
   auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
   assertx(d0 != d1);
@@ -523,7 +557,8 @@ void Vgen::emit(const copy2& i) {
   }
 }
 
-void Vgen::emit_simd_imm(int64_t val, Vreg d) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit_simd_imm(int64_t val, Vreg d) {
   if (val == 0) {
     a.pxor(d, d); // does not modify flags
   } else {
@@ -532,7 +567,8 @@ void Vgen::emit_simd_imm(int64_t val, Vreg d) {
   }
 }
 
-void Vgen::emit(const ldimmb& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldimmb& i) {
   // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
   auto val = i.s.ub();
   if (i.d.isGP()) {
@@ -543,7 +579,8 @@ void Vgen::emit(const ldimmb& i) {
   }
 }
 
-void Vgen::emit(const ldimml& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldimml& i) {
   // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
   auto val = i.s.l();
   if (i.d.isGP()) {
@@ -554,7 +591,8 @@ void Vgen::emit(const ldimml& i) {
   }
 }
 
-void Vgen::emit(const ldimmq& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldimmq& i) {
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
@@ -568,9 +606,10 @@ void Vgen::emit(const ldimmq& i) {
   }
 }
 
-void Vgen::emit(const load& i) {
-  prefix(a, i.s);
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const load& i) {
   auto mref = i.s.mr();
+  a.prefix(mref);
   if (i.d.isGP()) {
     a.loadq(mref, i.d);
   } else {
@@ -579,7 +618,10 @@ void Vgen::emit(const load& i) {
   }
 }
 
-void Vgen::emit(const store& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const store& i) {
+  auto const mref = i.d.mr();
+  a.prefix(mref);
   if (i.s.isGP()) {
     a.storeq(i.s, i.d);
   } else {
@@ -590,14 +632,15 @@ void Vgen::emit(const store& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const mcprep& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const mcprep& i) {
   /*
    * Initially, we set the cache to hold (addr << 1) | 1 (where `addr' is the
    * address of the movq) so that we can find the movq from the handler.
    *
    * We set the low bit for two reasons: the Class* will never be a valid
    * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePrimeCacheInit can tell it's not been smashed yet
+   * MethodCache::handleStaticCall can tell it's not been smashed yet
    */
   auto const mov_addr = emitSmashableMovq(a.code(), env.meta, 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
@@ -608,7 +651,8 @@ void Vgen::emit(const mcprep& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const call& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const call& i) {
   if (a.jmpDeltaFits(i.target)) {
     a.call(i.target);
   } else {
@@ -626,13 +670,15 @@ void Vgen::emit(const call& i) {
   }
 }
 
-void Vgen::emit(const calls& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const calls& i) {
   emitSmashableCall(a.code(), env.meta, i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const stubret& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const stubret& i) {
   if (i.saveframe) {
     a.pop(rvmfp());
   } else {
@@ -641,40 +687,42 @@ void Vgen::emit(const stubret& i) {
   a.ret();
 }
 
-void Vgen::emit(const callstub& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const callstub& i) {
   emit(call{i.target, i.args});
 }
 
-void Vgen::emit(const callfaststub& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const callfaststub& i) {
   emit(call{i.target, i.args});
   emit(syncpoint{i.fix});
 }
 
-void Vgen::emit(const tailcallstub& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const tailcallstub& i) {
   a.addq(8, reg::rsp);
   emit(jmpi{i.target, i.args});
 }
 
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const tailcallstubr& i) {
+  a.addq(8, reg::rsp);
+  emit(jmpr{i.target, i.args});
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const phpret& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const phpret& i) {
   a.push(i.fp[AROFF(m_savedRip)]);
   if (!i.noframe) {
-    a.loadq(i.fp[AROFF(m_sfp)], i.d);
+    a.loadq(i.fp[AROFF(m_sfp)], rvmfp());
   }
   a.ret();
 }
 
-void Vgen::emit(const tailcallphp& i) {
-  emit(pushm{i.fp[AROFF(m_savedRip)]});
-  emit(jmpr{i.target, i.args});
-}
-
-void Vgen::emit(const callarray& i) {
-  emit(call{i.target, i.args});
-}
-
-void Vgen::emit(const contenter& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const contenter& i) {
   Label Stub, End;
   Reg64 fp = i.fp, target = i.target;
   a.jmp8(End);
@@ -691,39 +739,38 @@ void Vgen::emit(const contenter& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const calltc& i) {
-  a.push(i.exittc);
-  a.push(i.fp[AROFF(m_savedRip)]);
-
-  Label stub;
-  a.call(stub);
-
-  asm_label(a, stub);
-  assertx(!i.args.contains(reg::rax));
-  a.pop(reg::rax);  // unused
-  a.jmp(i.target);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const nothrow& /*i*/) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a.frontier(), nullptr);
+  env.record_inline_stack(a.frontier());
 }
 
-void Vgen::emit(const syncpoint& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a.frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   env.meta.fixups.emplace_back(a.frontier(), i.fix);
+  env.record_inline_stack(a.frontier());
 }
 
-void Vgen::emit(const unwind& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const unwind& i) {
   catches.push_back({a.frontier(), i.targets[1]});
+  env.record_inline_stack(a.frontier());
   emit(jmp{i.targets[0]});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(andqi i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const fallthru&) {
+  a.nop();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(andqi i) {
   if (magFits(i.s0.q(), sz::dword)) {
     emit(andli{int32_t(i.s0.q()), Reg32(i.s1), Reg32(i.d), i.sf});
     return;
@@ -733,15 +780,33 @@ void Vgen::emit(andqi i) {
   a.andq(i.s0, i.d);
 }
 
-void Vgen::emit(const addlim& i) {
-  prefix(a, i.m).addl(i.s0, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const addlim& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).addl(i.s0, mref);
 }
 
-void Vgen::emit(const addqim& i) {
-  prefix(a, i.m).addq(i.s0, i.m.mr());
+template<typename X64Asm>
+void Vgen<X64Asm>::emit(const addqmr& i) {
+  binary(i);
+  auto const mref = i.m.mr();
+  a.prefix(mref).addq(mref, i.d);
 }
 
-void Vgen::emit(const cloadq& i) {
+template<typename X64Asm>
+void Vgen<X64Asm>::emit(const addqrm& i) {
+  auto const mref = i.m.mr();
+  a.prefix(mref).addq(i.s1, mref);
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const addqim& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).addq(i.s0, mref);
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const cloadq& i) {
   auto m = i.t;
   always_assert(!m.index.isValid()); // not supported, but could be later.
   if (i.f != i.d) {
@@ -749,19 +814,20 @@ void Vgen::emit(const cloadq& i) {
       // We can't move f over d or we'll clobber the Vptr we need to load from.
       // Since cload does the load unconditionally anyway, we can just load and
       // cmov.
-      a.loadq(i.t, i.d);
+      a.prefix(m.mr()).loadq(i.t, i.d);
       a.cmov_reg64_reg64(ccNegate(i.cc), i.f, i.d);
       return;
     }
     a.movq(i.f, i.d);
   }
-  a.cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
+  a.prefix(m.mr()).cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
 }
 
 // add s0 s1 d => mov s1->d; d += s0
 // cmov cc s d => if cc { mov s->d }
+template<class X64Asm>
 template<class cmov>
-void Vgen::emit_cmov(const cmov& i) {
+void Vgen<X64Asm>::emit_cmov(const cmov& i) {
   if (i.f != i.d && i.t == i.d) {
     // negate the condition and swap t/f operands so we dont clobber i.t
     return emit(cmov{ccNegate(i.cc), i.sf, i.t, i.f, i.d});
@@ -771,17 +837,20 @@ void Vgen::emit_cmov(const cmov& i) {
   a.cmov_reg64_reg64(i.cc, r64(i.t), r64(i.d));
 }
 
-void Vgen::emit(const cvtsi2sd& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const cvtsi2sd& i) {
   a.pxor(i.d, i.d);
   a.cvtsi2sd(i.s, i.d);
 }
 
-void Vgen::emit(const cvtsi2sdm& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const cvtsi2sdm& i) {
   a.pxor(i.d, i.d);
   a.cvtsi2sd(i.s, i.d);
 }
 
-void Vgen::emit(const jcc& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
       return emit(jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}});
@@ -793,18 +862,21 @@ void Vgen::emit(const jcc& i) {
   emit(jmp{i.targets[0]});
 }
 
-void Vgen::emit(const jcci& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jcci& i) {
   a.jcc(i.cc, i.taken);
   emit(jmp{i.target});
 }
 
-void Vgen::emit(const jmp& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jmp& i) {
   if (next == i.target) return;
   jmps.push_back({a.frontier(), i.target});
   a.jmp(a.frontier());
 }
 
-void Vgen::emit(const jmpi& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jmpi& i) {
   if (a.jmpDeltaFits(i.target)) {
     a.jmp(i.target);
   } else {
@@ -814,7 +886,9 @@ void Vgen::emit(const jmpi& i) {
   }
 }
 
-void Vgen::emit(const lea& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const lea& i) {
+  assertx(i.s.seg == Segment::DS);
   // could do this in a simplify pass
   if (i.s.disp == 0 && i.s.base.isValid() && !i.s.index.isValid()) {
     emit(copy{i.s.base, i.d});
@@ -823,16 +897,27 @@ void Vgen::emit(const lea& i) {
   }
 }
 
-void Vgen::emit(const storebi& i) {
-  prefix(a, i.m).storeb(i.s, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const leav& i) {
+  auto const addr = a.frontier();
+  emit(leap{reg::rip[0xdeadbeef], i.d});
+  env.leas.push_back({addr, i.s});
 }
 
-void Vgen::emit(const storeqi& i) {
-  prefix(a, i.m).storeq(i.s, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const storebi& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).storeb(i.s, mref);
 }
 
-template<typename Inst>
-bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const storeqi& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).storeq(i.s, mref);
+}
+
+template<class VgenImpl, typename Inst>
+bool testimHelper(VgenImpl& env, const Inst& i, uint64_t mask) {
   // If there's only 1 byte of meaningful bits in the mask, we can adjust the
   // pointer offset and use testbim instead.
   int off = 0;
@@ -847,31 +932,36 @@ bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
   return true;
 }
 
-void Vgen::emit(const testwi& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const testwi& i) {
   if (i.s0.w() == -1) {
     return emit(testw{i.s1, i.s1, i.sf});
   }
   a.testw(i.s0, i.s1);
 }
 
-void Vgen::emit(const testwim& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::Vgen::emit(const testwim& i) {
   if (testimHelper(*this, i, i.s0.w())) return;
-  a.testw(i.s0, i.s1);
+  a.prefix(i.s1.mr()).testw(i.s0, i.s1);
 }
 
-void Vgen::emit(const testlim& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::Vgen::emit(const testlim& i) {
   if (testimHelper(*this, i, i.s0.l())) return;
-  a.testl(i.s0, i.s1);
+  a.prefix(i.s1.mr()).testl(i.s0, i.s1);
 }
 
-void Vgen::emit(const testli& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::Vgen::emit(const testli& i) {
   if (i.s0.l() == -1) {
     return emit(testl{i.s1, i.s1, i.sf});
   }
   a.testl(i.s0, i.s1);
 }
 
-void Vgen::emit(const testqi& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const testqi& i) {
   auto const imm = i.s0.q();
   if (magFits(imm, sz::byte)) {
     a.testb(int8_t(imm), rbyte(i.s1));
@@ -884,29 +974,38 @@ void Vgen::emit(const testqi& i) {
   }
 }
 
-void Vgen::emit(const testqim& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const testqim& i) {
   if (testimHelper(*this, i, i.s0.q())) return;
   if (magFits(i.s0.q(), sz::dword)) {
     // For an unsigned 32 bit immediate, we can get the same results
     // by emitting a testlim.
     emit(testlim{int32_t(i.s0.q()), i.s1, i.sf});
   } else {
-    a.testq(i.s0, i.s1);
+    a.prefix(i.s1.mr()).testq(i.s0, i.s1);
   }
 }
 
-void Vgen::emit(const trap& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const trap& i) {
   env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
   a.ud2();
 }
 
-void Vgen::emit(xorq i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(xorq i) {
   if (i.s0 == i.s1) {
     // 32-bit xor{s, s, d} zeroes the upper bits of `d'.
     return emit(xorl{r32(i.s0), r32(i.s1), r32(i.d), i.sf});
   }
   commuteSF(i);
   a.xorq(i.s0, i.d);
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const crc32q& i) {
+  noncommute(i);
+  a.crc32q(i.s0, i.d);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -959,8 +1058,15 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   }
 }
 
-void lower(Vunit& unit, stubunwind& /*inst*/, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
+void lower(Vunit& unit, unstublogue& /*inst*/, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = lea{reg::rsp[8], reg::rsp};
+}
+
+void lower(Vunit& unit, stubunwind& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << lea{reg::rsp[8], reg::rsp};
+    v << pop{inst.d};
+  });
 }
 
 void lower(Vunit& unit, stubtophp& /*inst*/, Vlabel b, size_t i) {
@@ -995,6 +1101,13 @@ void lower(Vunit& unit, shl& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
     v << copy{inst.s0, rcx};
     v << shlq{inst.s1, inst.d, inst.sf};
+  });
+}
+
+void lower(Vunit& unit, shr& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << copy{inst.s0, rcx};
+    v << shrq{inst.s1, inst.d, inst.sf};
   });
 }
 
@@ -1054,16 +1167,58 @@ void lowerForX64(Vunit& unit) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void stressTestLiveness(Vunit& unit) {
+  auto const blocks = sortBlocks(unit);
+  auto const livein = computeLiveness(unit, abi(), blocks);
+  auto const gp_regs = abi().gpUnreserved;
+
+  for (auto b : blocks) {
+    auto& block = unit.blocks[b];
+    auto const& live_set = livein[b];
+    jit::vector<Vinstr> new_insts;
+    const uint64_t trash = 0xbad;
+    gp_regs.forEach([&](PhysReg r) {
+                      if (!live_set[Vreg(r)]) {
+                        new_insts.insert(new_insts.end(), ldimmq{trash, r});
+                      }
+                    });
+
+    // set irctx for the newly added instructions
+    auto const irctx = block.code.front().irctx();
+    for (auto& ni : new_insts) {
+      ni.set_irctx(irctx);
+    }
+
+    // insert new instructions in the beginning of the block, but after any
+    // existing phidef
+    auto insertPt = block.code.begin();
+    while (insertPt->op == Vinstr::phidef) insertPt++;
+    block.code.insert(insertPt, new_insts.begin(), new_insts.end());
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   Timer timer(Timer::vasm_optimize, unit.log_entry);
 
-  removeTrivialNops(unit);
-  optimizePhis(unit);
-  fuseBranches(unit);
-  optimizeJmps(unit);
-  optimizeExits(unit);
+  tracing::Block _{
+    "vasm-optimize",
+    [&] { return traceProps(unit).add("reg_alloc", regalloc); }
+  };
+
+  auto const doPass = [&] (const char* name, auto fun) {
+    rqtrace::EventGuard trace{name};
+    fun(unit);
+  };
+
+  doPass("VOPT_NOP",    removeTrivialNops);
+  doPass("VOPT_PHI",    optimizePhis);
+  doPass("VOPT_BRANCH", fuseBranches);
+  doPass("VOPT_JMP",    [] (Vunit& u) { optimizeJmps(u); });
+  doPass("VOPT_EXIT",   [] (Vunit& u) { optimizeExits(u); });
 
   assertx(checkWidths(unit));
 
@@ -1073,31 +1228,63 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
     // non-profiling translations of PHP functions.  We also require that we
     // can spill, so that we can generate arbitrary profiling code, and also to
     // ensure we don't profile unique stubs and such.
-    profile_branches(unit);
+    doPass("VOPT_PROF_BRANCH", profile_branches);
   }
 
-  lowerForX64(unit);
-  simplify(unit);
-  lowerForX64(unit);
+  doPass("VOPT_X64",      lowerForX64);
+  doPass("VOPT_SIMPLIFY", simplify);
+  doPass("VOPT_X64",      lowerForX64);
 
   if (!unit.constToReg.empty()) {
-    foldImms<x64::ImmFolder>(unit);
+    doPass("VOPT_FOLD_IMM", foldImms<x64::ImmFolder>);
   }
 
-  optimizeCopies(unit, abi);
+  doPass("VOPT_COPY", [&] (Vunit& u) { optimizeCopies(u, abi); });
 
   if (unit.needsRegAlloc()) {
-    removeDeadCode(unit);
-    if (regalloc) allocateRegisters(unit, abi);
+    doPass("VOPT_DCE", [] (Vunit& u) { removeDeadCode(u); });
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });
+    doPass("VOPT_DCE", [] (Vunit& u) { removeDeadCode(u); });
+    if (regalloc) {
+      if (RuntimeOption::EvalUseGraphColor &&
+          unit.context &&
+          (unit.context->kind == TransKind::Optimize ||
+           unit.context->kind == TransKind::OptPrologue)) {
+        rqtrace::EventGuard trace{"VOPT_GRAPH_COLOR"};
+        allocateRegistersWithGraphColor(unit, abi);
+      } else {
+        rqtrace::EventGuard trace{"VOPT_XLS"};
+        allocateRegistersWithXLS(unit, abi);
+      }
+      doPass("VOPT_SF_PEEPHOLES", [&] (Vunit& u) { sfPeepholes(u, abi); });
+      doPass("VOPT_POST_RA_SIMPLIFY", postRASimplify);
+    }
+  }
+  if (unit.needsRegAlloc() && regalloc) {
+    if (RuntimeOption::EvalJitStressTestLiveness && unit.context &&
+        (unit.context->kind == TransKind::Live ||
+         unit.context->kind == TransKind::Profile ||
+         unit.context->kind == TransKind::Optimize)) {
+      doPass("STRESS_TEST_LIVENESS", stressTestLiveness);
+    }
+    doPass("VOPT_BLOCK_WEIGHTS",
+           [] (Vunit& u) { VasmBlockCounters::profileGuidedUpdate(u); });
   }
   if (unit.blocks.size() > 1) {
-    optimizeJmps(unit);
+    doPass("VOPT_JMP", [] (Vunit& u) { optimizeJmps(u); });
   }
 }
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
-  vasm_emit<Vgen>(unit, text, fixups, asmInfo);
+  tracing::Block _{"emit-X64", [&] { return traceProps(unit); }};
+
+#ifdef HAVE_LIBXED
+  if (RuntimeOption::EvalUseXedAssembler) {
+    return vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);
+  }
+#endif
+  vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -62,4 +62,8 @@ function main() {
   echo "----\n";
   test(ImmSet {5, 'a', 0, ''});
 }
+
+<<__EntryPoint>>
+function main_set_invalid_operations() {
 main();
+}

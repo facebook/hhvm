@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ABI_ARM_H
-#define incl_HPHP_JIT_ABI_ARM_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -23,8 +22,6 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
-
-#include <unordered_map>
 
 namespace HPHP { namespace jit {
 
@@ -47,6 +44,13 @@ inline PhysReg rsp()   { return vixl::sp; }
 
 inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
 inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
+inline RegSet cross_jit_save() {
+  return
+    vixl::x19 | vixl::x20 | vixl::x21 | vixl::x22 | vixl::x23 |
+    vixl::x24 | vixl::x25 | vixl::x26 | vixl::x27 | vixl::x28 |
+    vixl::d8 | vixl::d9 | vixl::d10 | vixl::d11 | vixl::d12 |
+    vixl::d13 | vixl::d14 | vixl::d15;
+}
 
 inline PhysReg rret_data() { return vixl::x0; }
 inline PhysReg rret_type() { return vixl::x1; }
@@ -88,7 +92,8 @@ inline vixl::FPRegister x2f(PhysReg x64reg) {
 
 inline vixl::VRegister x2v(PhysReg x64reg) {
   always_assert(x64reg.isSIMD());
-  return vixl::VRegister(vixl::CPURegister(x64reg));
+  auto const r = vixl::CPURegister(x64reg);
+  return vixl::VRegister(r.code(), 128);
 }
 
 /*
@@ -242,4 +247,3 @@ const vixl::Register rAsm_w(vixl::w18);
 
 }}}
 
-#endif

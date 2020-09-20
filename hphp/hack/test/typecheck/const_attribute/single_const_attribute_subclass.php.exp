@@ -1,2 +1,2 @@
 File "single_const_attribute_subclass.php", line 19, characters 12-13:
-Cannot assign to a __Const property (Typing[4196])
+Cannot mutate a `__Const` property (Typing[4196])

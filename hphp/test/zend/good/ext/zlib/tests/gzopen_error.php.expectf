@@ -2,11 +2,9 @@
 
 -- Testing gzopen() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: gzopen() expects at most 3 parameters, 4 given in %s/gzopen_error.php on line 17
 
 -- Testing gzopen() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: gzopen() expects at least 2 parameters, 1 given in %s/gzopen_error.php on line 22
 ===DONE===

@@ -1,7 +1,7 @@
-<?php
+<?hh
 // this is an Apache Licensed font, see separate LICENSE file
+<<__EntryPoint>> function main(): void {
 $font = __DIR__.'/Rochester-Regular.otf';
-
 // thank you Helgi
 $sample_string = "\xC3\x9E\xC3\xB6";
 
@@ -52,4 +52,4 @@ if ($black_pixels >= 10) {
   printf("FAIL %d black pixels\n", $black_pixels);
 }
 imagedestroy($im);
-?>
+}

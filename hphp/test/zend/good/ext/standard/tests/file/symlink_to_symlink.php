@@ -1,5 +1,6 @@
-<?php
-$prefix = __FILE__;
+<?hh
+<<__EntryPoint>> function main(): void {
+$prefix = __SystemLib\hphp_test_tmppath('symlink_to_symlink.php');
 
 touch($prefix . "_file");
 
@@ -31,5 +32,4 @@ unlink($prefix . "_link3");
 unlink($prefix . "_link2");
 unlink($prefix . "_link1");
 unlink($prefix . "_file");
-
-?>
+}

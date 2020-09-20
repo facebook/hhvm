@@ -1,0 +1,2 @@
+File "magic_get.php", line 4, characters 3-30:
+Magic `__get` methods are no longer supported (Parsing[1002])

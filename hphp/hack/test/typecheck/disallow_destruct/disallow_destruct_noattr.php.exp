@@ -1,2 +1,0 @@
-File "disallow_destruct_noattr.php", line 5, characters 19-28:
-Cannot have a destructor unless it is marked with <<__OptionalDestruct>> (NastCheck[3056])

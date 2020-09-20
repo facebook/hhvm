@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BITOPS_H_
-#define incl_HPHP_BITOPS_H_
+#pragma once
 
 #if !defined(__x86_64__) && !defined(__aarch64__)
 #include <folly/Bits.h>
@@ -45,7 +44,7 @@ inline bool ffs64(I64 input, J64 &out) {
     "rbit  %2, %2\n\t"  // reverse bits
     "clz   %1, %2\n\t"  // count leading zeros
     "cmp   %1, #64\n\t"
-    "cset  %0, NE":     // return (result != 64)
+    "cset  %w0, NE":    // return (result != 64)
     "=r"(retval), "=r"(out), "+r"(input):
     :
     "cc"
@@ -89,7 +88,7 @@ inline bool fls64(I64 input, J64 &out) {
     "neg   %1, %1\n\t"
     "adds  %1, %1, #63\n\t" // result = 63 - (# of leading zeros)
                             // "s" suffix sets condition flags
-    "cset  %0, PL":         // return (result >= 0)
+    "cset  %w0, PL":        // return (result >= 0)
                             //   because result < 0 iff input == 0
     "=r"(retval), "=r"(out):
     "r"(input):
@@ -182,6 +181,14 @@ inline void bitvec_set(uint64_t* bits, size_t index) {
 #endif
 }
 
+inline void bitvec_clear(uint64_t* bits, size_t index) {
+#if defined(__x86_64__)
+  asm ("btr %1,%0" : "+m"(*bits) : "r"(index));
+#else
+  bits[index / 64] &= ~(1ull << (index % 64));
+#endif
+}
+
 inline bool bitvec_test(const uint64_t* bits, size_t index) {
 #if defined(__x86_64__)
   bool b;
@@ -195,4 +202,3 @@ inline bool bitvec_test(const uint64_t* bits, size_t index) {
 
 } // HPHP
 
-#endif

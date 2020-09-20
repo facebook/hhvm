@@ -1,0 +1,52 @@
+================= play around a bit =================
+object(C) (1) {
+  ["m":"C":private]=>
+  int(10)
+}
+Inside C::__clone
+object(C) (1) {
+  ["m":"C":private]=>
+  int(10)
+}
+================= Use cloning in Point class =================
+object(Point2) (2) {
+  ["x"]=>
+  int(0)
+  ["y"]=>
+  int(0)
+}
+object(Point2) (2) {
+  ["x"]=>
+  int(0)
+  ["y"]=>
+  int(0)
+}
+object(Point2) (2) {
+  ["x"]=>
+  int(0)
+  ["y"]=>
+  int(0)
+}
+object(Point2) (2) {
+  ["x"]=>
+  int(0)
+  ["y"]=>
+  int(0)
+}
+================= use chained cloning in a class hierarchy =================
+object(Manager) (2) {
+  ["level":"Manager":private]=>
+  int(23)
+  ["name":"Employee":private]=>
+  string(5) "Smith"
+}
+Inside Manager::__clone
+Inside Employee::__clone
+
+====>>>>int(999)
+object(Manager) (2) {
+  ["level":"Manager":private]=>
+  int(23)
+  ["name":"Employee":private]=>
+  string(5) "Smith"
+}

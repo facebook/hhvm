@@ -14,8 +14,8 @@ function f(
 }
 
 function test($caption, $parameters, $i, $attribute) {
-    $p = $parameters[$i]->getAttribute($attribute);
-    print $caption . ":" . (isset($p) ? "SET" : "NOTSET") . "\n";
+    $p = $parameters[$i]->hasAttribute($attribute);
+    print $caption . ":" . ($p ? "SET" : "NOTSET") . "\n";
 }
 
 function run() {
@@ -30,5 +30,8 @@ function run() {
     test('5. existing attribute', $func->getParameters(), 1, "A2");
     test('6. missing attribute', $func->getParameters(), 1, "A2-missing");
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-run();
+  run();
+}

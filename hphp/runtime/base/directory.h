@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DIRECTORY_H_
-#define incl_HPHP_DIRECTORY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -46,7 +45,7 @@ struct Directory : SweepableResourceData {
   const String& o_getClassNameHook() const override { return classnameof(); }
 
   String getLastError() {
-    return String(folly::errnoStr(errno).toStdString());
+    return String(folly::errnoStr(errno));
   }
 };
 
@@ -109,4 +108,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DIRECTORY_H_

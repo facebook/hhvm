@@ -1,12 +1,9 @@
 string(1) "A"
-array(1) {
-  [0]=>
+varray(1) {
   int(123)
 }
 string(1) "B"
-array(2) {
-  [0]=>
+varray(2) {
   int(123)
-  [1]=>
   int(456)
 }

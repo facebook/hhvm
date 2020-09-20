@@ -1,21 +1,18 @@
-<?php
+<?hh
 
 class MyArrayIterator extends ArrayIterator {
-	public function rewind() {
-		throw new Exception('Make the iterator break');
-	}
+    public function rewind() {
+        throw new Exception('Make the iterator break');
+    }
 }
 
 function test() {}
-
-$it = new MyArrayIterator(array(1, 21, 22));
+<<__EntryPoint>> function main(): void {
+$it = new MyArrayIterator(varray[1, 21, 22]);
 
 try {
-	$res = iterator_apply($it, 'test');
+    $res = iterator_apply($it, fun('test'));
 } catch (Exception $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
-
-?>
-
-<?php exit(0); ?>
+}

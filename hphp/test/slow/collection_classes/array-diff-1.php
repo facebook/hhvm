@@ -1,13 +1,13 @@
 <?hh
 function main() {
-  $a1 = array("1", 1, "2", 3, 4, "a", "7");
+  $a1 = varray["1", 1, "2", 3, 4, "a", "7"];
   $v1 = Vector {"1", 1, "2", 3, 4, "a", "7"};
   $m1 = Map {0 => "1", 1 => 1, 2 => "2", 3 => 3, 4 => 4, 5 => "a",
                    6 => "7"};
-  $a2 = array(1, "3", 5, "a");
+  $a2 = varray[1, "3", 5, "a"];
   $v2 = Vector {1, "3", 5, "a"};
   $m2 = Map {0 => 1, 1 => "3", 2 => 5, 3 => "a"};
-  $a3 = array("0", 7);
+  $a3 = varray["0", 7];
   $v3 = Vector {"0", 7};
   $m3 = Map {0 => "0", 1 => 7};
   var_dump(array_diff($a1, $a2));
@@ -48,5 +48,9 @@ function main() {
   var_dump(array_diff($v1, $m2, $m3));
   var_dump(array_diff($m1, $m2, $m3));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_diff_1() {
+main();
+}

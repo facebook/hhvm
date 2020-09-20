@@ -1,0 +1,35 @@
+function(MethCaller$A$f)
+bool(true)
+string(1) "A"
+string(1) "f"
+function(MethCaller$B$f)
+bool(true)
+string(1) "B"
+string(1) "f"
+function(MethCaller$C$f)
+bool(true)
+string(1) "C"
+string(1) "f"
+function(MethCaller$D$f)
+bool(true)
+string(1) "D"
+string(1) "f"
+function(MethCaller$Ans\A$f)
+bool(true)
+string(5) "Ans\A"
+string(1) "f"
+function(MethCaller$Ans\B$f)
+bool(true)
+string(5) "Ans\B"
+string(1) "f"
+function(MethCaller$Ans\C$f)
+bool(true)
+string(5) "Ans\C"
+string(1) "f"
+function(MethCaller$Ans\D$f)
+bool(true)
+string(5) "Ans\D"
+string(1) "f"
+bool(false)
+
+Fatal error: Argument 1 passed to meth_caller_get_class() must be a MethCaller in %s/meth_caller_name.php on line 128

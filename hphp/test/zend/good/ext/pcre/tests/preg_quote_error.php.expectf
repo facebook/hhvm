@@ -2,11 +2,9 @@
 
 -- Testing preg_quote() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: preg_quote() expects at least 1 parameter, 0 given in %s/preg_quote_error.php on line 9
 
 -- Testing preg_quote() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: preg_quote() expects at most 2 parameters, 3 given in %s/preg_quote_error.php on line 15
 Done

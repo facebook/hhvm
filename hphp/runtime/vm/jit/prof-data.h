@@ -14,12 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROF_TRANS_DATA_H_
-#define incl_HPHP_PROF_TRANS_DATA_H_
+#pragma once
 
 #include "hphp/util/atomic-vector.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/rds-local.h"
 
+#include "hphp/runtime/base/prof-counters.h"
 #include "hphp/runtime/base/rds.h"
 
 #include "hphp/runtime/vm/func.h"
@@ -35,13 +35,12 @@
 
 #include <vector>
 #include <memory>
-#include <unordered_map>
 
 namespace HPHP { namespace jit {
 
 struct ProfData;
 
-extern __thread ProfData* tl_profData;
+extern RDS_LOCAL_NO_CHECK(ProfData*, rl_profData);
 
 /*
  * Perform any process-global initialization required for ProfData.
@@ -63,7 +62,7 @@ void requestExitProfData();
  * survive at least as long as the current request.
  */
 inline ProfData* profData() {
-  return tl_profData;
+  return *rl_profData;
 }
 
 const ProfData* globalProfData();
@@ -80,61 +79,6 @@ void discardProfData();
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * A simple class of a growable number of profiling counters with fixed
- * addresses, suitable for being incremented from the TC.
- */
-template<typename T>
-struct ProfCounters {
-  explicit ProfCounters(T initVal)
-    : m_initVal(initVal)
-  {}
-
-  ProfCounters(ProfCounters&&) = default;
-  ProfCounters& operator=(ProfCounters&&) = default;
-
-  ProfCounters(const ProfCounters&) = delete;
-  ProfCounters& operator=(const ProfCounters&) = delete;
-
-  T get(uint32_t id) const {
-    assertx(kCountersPerChunk % 11);
-    return id / kCountersPerChunk >= m_chunks.size()
-      ? m_initVal
-      : m_chunks[id / kCountersPerChunk][(id * 11) % kCountersPerChunk];
-  }
-
-  T* getAddr(uint32_t id) {
-    // allocate a new chunk of counters if necessary
-    while (id >= m_chunks.size() * kCountersPerChunk) {
-      uint32_t size = sizeof(T) * kCountersPerChunk;
-      auto const chunk = new T[size];
-      std::fill_n(chunk, kCountersPerChunk, m_initVal);
-      m_chunks.emplace_back(chunk);
-    }
-    assertx(id / kCountersPerChunk < m_chunks.size());
-    assertx(kCountersPerChunk % 11);
-    return &(m_chunks[id / kCountersPerChunk][(id * 11) % kCountersPerChunk]);
-  }
-
-  T getDefault() const { return m_initVal; }
-
-  void resetAllCounters(T value) {
-    // We need to set m_initVal so that method transCounter() works, and also so
-    // that newly created counters start with `value'.
-    m_initVal = value;
-    // Reset all counters already created.
-    for (auto& chunk : m_chunks) {
-      std::fill_n(chunk.get(), kCountersPerChunk, value);
-    }
-  }
-
-private:
-  static const uint32_t kCountersPerChunk = 2 * 1024 * 1024 / sizeof(T);
-
-  T m_initVal;
-  std::vector<std::unique_ptr<T[]>> m_chunks;
-};
-
-/**
  * A profiling record kept for each translation in JitPGO mode.
  */
 struct ProfTransRec {
@@ -142,25 +86,30 @@ struct ProfTransRec {
    * Construct a ProfTransRec attached to a RegionDescPtr (region must be
    * non-null), for a profiling translation.
    */
-  ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region);
+  ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region,
+               uint32_t asmSize);
 
   /*
    * Construct a ProfTransRec for a ProfPrologue.
    */
-  ProfTransRec(SrcKey sk, int nArgs);
+  ProfTransRec(SrcKey sk, int nArgs, uint32_t asmSize);
   ~ProfTransRec();
 
-  TransKind kind() const { return m_kind; }
-  SrcKey srcKey() const { return m_sk; }
-  FuncId funcId() const { return m_sk.funcID(); }
-  Func* func() const { return const_cast<Func*>(m_sk.func()); }
-  bool isProfile() const { return m_kind == TransKind::Profile; }
-  bool isProflogue() const { return m_kind == TransKind::ProfPrologue; }
+  TransKind kind()        const { return m_kind; }
+  SrcKey    srcKey()      const { return m_sk; }
+  FuncId    funcId()      const { return m_sk.funcID(); }
+  Func*     func()        const { return const_cast<Func*>(m_sk.func()); }
+  bool      isProfile()   const { return m_kind == TransKind::Profile; }
+  bool      isProflogue() const { return m_kind == TransKind::ProfPrologue; }
+  uint32_t  asmSize()     const { return m_asmSize; }
 
   /*
    * First BC offset in this translation.
    */
-  Offset startBcOff() const { return m_region->start().offset(); }
+  Offset startBcOff() const {
+    assertx(m_kind == TransKind::Profile);
+    return m_region->start().offset();
+  }
 
   /*
    * Last BC offset in this translation.
@@ -203,36 +152,35 @@ struct ProfTransRec {
   }
 
   /*
-   * All calls in the TC which target this proflogue (directly|via the guard).
+   * All calls in the TC which target this proflogue directly.
    *
    * The vector can only be used while the caller list is locked.
    *
    * Precondition: kind() == TransKind::ProfPrologue
    */
-  std::vector<TCA>& mainCallers() {
+  auto& mainCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    return m_callers.main;
+    m_callers->lock.assertOwnedBySelf();
+    return m_callers->main;
   }
-  const std::vector<TCA>& mainCallers() const {
+  auto const& mainCallers() const {
     return const_cast<ProfTransRec*>(this)->mainCallers();
   }
-  std::vector<TCA>& guardCallers() {
+  auto& profCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    return m_callers.guard;
+    m_callers->lock.assertOwnedBySelf();
+    return m_callers->profCallers;
   }
-  const std::vector<TCA>& guardCallers() const {
-    return const_cast<ProfTransRec*>(this)->guardCallers();
+  auto const& profCallers() const {
+    return const_cast<ProfTransRec*>(this)->profCallers();
   }
   std::unique_lock<Mutex> lockCallerList() const {
     assertx(m_kind == TransKind::ProfPrologue);
-    return std::unique_lock<Mutex>{m_callers.lock};
+    return std::unique_lock<Mutex>{m_callers->lock};
   }
 
   /*
-   * (Record|Erase) a call at address caller (directly|via the guard) to this
-   * proflogue.
+   * (Record|Erase) a call at address caller directly to this proflogue.
    *
    * These functions may only be called when the caller list is locked.
    *
@@ -240,16 +188,10 @@ struct ProfTransRec {
    */
   void addMainCaller(TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    m_callers.main.emplace_back(caller);
+    m_callers->lock.assertOwnedBySelf();
+    m_callers->main.emplace_back(caller);
   }
-  void addGuardCaller(TCA caller) {
-    assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    m_callers.guard.emplace_back(caller);
-  }
-  void removeMainCaller(TCA caller) { removeCaller(m_callers.main, caller); }
-  void removeGuardCaller(TCA caller) { removeCaller(m_callers.guard, caller); }
+  void removeMainCaller(TCA caller) { removeCaller(m_callers->main, caller); }
 
   /*
    * Erase the record of all calls to this proflogue.
@@ -260,21 +202,28 @@ struct ProfTransRec {
    */
   void clearAllCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    m_callers.main.clear();
-    m_callers.guard.clear();
+    m_callers->lock.assertOwnedBySelf();
+    m_callers->main.clear();
   }
+
+  void setAsmSize(uint32_t asmSize) { m_asmSize = asmSize; }
+
 private:
   struct CallerRec {
-    std::vector<TCA> main;
-    std::vector<TCA> guard;
+    // main is populated by profiling, and is used both to smash callers when
+    // we optimize, and to build the call-graph. profCallers is only populated
+    // via deserialization (where main is not used), and is only used to build
+    // the call-graph.
+    CompactVector<TCA> main;
+    CompactVector<TransID> profCallers;
     mutable Mutex lock;
   };
+  using CallerRecPtr = std::unique_ptr<CallerRec>;
 
-  void removeCaller(std::vector<TCA>& v, TCA caller) {
+  void removeCaller(CompactVector<TCA>& v, TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
-    auto pos = std::find(v.begin(), v.end(), caller);
+    m_callers->lock.assertOwnedBySelf();
+    auto const pos = std::find(v.begin(), v.end(), caller);
     if (pos != v.end()) v.erase(pos);
   }
 
@@ -286,15 +235,17 @@ private:
   };
   SrcKey m_sk;
   union {
-    RegionDescPtr m_region; // for TransProfile translations
-    CallerRec m_callers; // for TransProfPrologue translations
+    RegionDescPtr   m_region; // for TransProfile translations
+    CallerRecPtr    m_callers; // for TransProfPrologue translations
   };
+  uint32_t m_asmSize;  // size of the machine code
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * ProfData encapsulates the profiling data kept by the JIT.
+ * ProfData encapsulates the profiling data kept by the JIT.  It also includes
+ * data derived from profiling counters.
  *
  * Thread safety: All of ProfData's member functions may be called with no
  * external synchronization, with the caveat that care must be taken to not
@@ -307,7 +258,8 @@ struct ProfData {
   ProfData& operator=(const ProfData&) = delete;
 
   struct Session final {
-    Session() { requestInitProfData(); }
+    Session() : m_ts(Treadmill::SessionKind::ProfData)
+               { requestInitProfData(); }
     ~Session() { requestExitProfData(); }
     Session(Session&&) = delete;
     Session& operator=(Session&&) = delete;
@@ -315,6 +267,34 @@ struct ProfData {
   private:
     Treadmill::Session m_ts;
   };
+
+  static bool triedDeserialization() {
+    return s_triedDeserialization.load(std::memory_order_relaxed);
+  }
+  static void setTriedDeserialization() {
+    s_triedDeserialization.store(true, std::memory_order_relaxed);
+  }
+
+  static bool wasDeserialized() {
+    return s_wasDeserialized.load(std::memory_order_relaxed);
+  }
+  static int64_t buildTime() {
+    return s_buildTime.load(std::memory_order_relaxed);
+  }
+  static const StringData* buildHost() {
+    return s_buildHost.load(std::memory_order_relaxed);
+  }
+  static const StringData* tag() {
+    return s_tag.load(std::memory_order_relaxed);
+  }
+  static void setDeserialized(const std::string& buildHost,
+                              const std::string& tag,
+                              int64_t buildTime) {
+    s_buildHost.store(makeStaticString(buildHost), std::memory_order_relaxed);
+    s_tag.store(makeStaticString(tag), std::memory_order_relaxed);
+    s_buildTime.store(buildTime, std::memory_order_relaxed);
+    s_wasDeserialized.store(true, std::memory_order_relaxed);
+  }
 
   /*
    * Allocate a new id for a translation. Depending on the kind of the
@@ -366,8 +346,14 @@ struct ProfData {
     return initVal - counter;
   }
 
-  ProfCounters<int64_t> takeCounters() {
-    return std::move(m_counters);
+  /*
+   * Used for save/restore during serialization.
+   */
+  int64_t counterDefault() const {
+    return m_counters.getDefault();
+  }
+  void resetCounters(int64_t val) {
+    m_counters.resetAllCounters(val);
   }
 
   /*
@@ -376,6 +362,13 @@ struct ProfData {
   int64_t* transCounterAddr(TransID id) {
     // getAddr() can grow the slab list, so grab a write lock.
     folly::SharedMutex::WriteHolder lock{m_transLock};
+    return m_counters.getAddr(id);
+  }
+
+  /*
+   * As above, if we already hold the lock.
+   */
+  int64_t* transCounterAddrNoLock(TransID id) {
     return m_counters.getAddr(id);
   }
 
@@ -404,8 +397,15 @@ struct ProfData {
    * Record a profiling translation: creates a ProfTransRec and returns the
    * associated TransID.
    */
-  void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&);
-  void addTransProfPrologue(TransID, SrcKey, int);
+  void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&,
+                       uint32_t);
+  void addTransProfPrologue(TransID, SrcKey, int, uint32_t);
+
+  /*
+   * Add a ProfTransRec. Only used when deserializing the profile data, and
+   * must be called in single threaded context.
+   */
+  void addProfTrans(TransID transID, std::unique_ptr<ProfTransRec> tr);
 
   /*
    * Check if a (function|SrcKey) has been marked as optimized.
@@ -571,7 +571,17 @@ struct ProfData {
   void addTargetProfile(const TargetProfileInfo& info);
   std::vector<TargetProfileInfo> getTargetProfiles(TransID transID) const;
 
-private:
+  /*
+   * Access base profile count.
+   */
+  uint64_t baseProfCount() const {
+    return m_baseProfCount;
+  }
+  void setBaseProfCount(uint64_t c) {
+    m_baseProfCount = c;
+  }
+
+ private:
   struct PrologueID {
     FuncId func;
     int nArgs;
@@ -632,7 +642,7 @@ private:
    * Lists of profiling translations for each Func, and a lock to protect it.
    */
   mutable folly::SharedMutex m_funcProfTransLock;
-  std::unordered_map<FuncId, TransIDVec> m_funcProfTrans;
+  jit::fast_map<FuncId, TransIDVec> m_funcProfTrans;
 
   /*
    * Map from jump addresses to the ID of the translation containing them.
@@ -643,23 +653,29 @@ private:
    * Cache for Func -> block end offsets. Values in this map cannot be modified
    * after insertion so no locking is necessary for lookups.
    */
-  folly::AtomicHashMap<FuncId, const std::unordered_set<Offset>>
+  folly::AtomicHashMap<FuncId, const jit::fast_set<Offset>>
     m_blockEndOffsets;
 
   mutable folly::SharedMutex m_targetProfilesLock;
-  std::unordered_map<TransID, std::vector<TargetProfileInfo>> m_targetProfiles;
+  jit::fast_map<TransID, jit::vector<TargetProfileInfo>> m_targetProfiles;
+
+  /*
+   * Base profile count for inlining.
+   */
+  uint64_t m_baseProfCount;
+
+  /*
+   * The following static variables need to be alive for the lifetime of the
+   * process, even after profile data are freed.
+   */
+  static std::atomic_bool s_triedDeserialization;
+  static std::atomic_bool s_wasDeserialized;
+  static std::atomic<StringData*> s_buildHost;
+  static std::atomic<StringData*> s_tag;
+  static std::atomic<int64_t> s_buildTime;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Returns whether or not we've collected enough profile data to trigger
- * retranslateAll.
- */
-bool hasEnoughProfDataToRetranslateAll();
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

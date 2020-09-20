@@ -1,0 +1,30 @@
+(alias
+    (name pocket_universes_naming_good)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/pocket_universes/naming/*.good.php)
+          (glob_files %{project_root}/test/pocket_universes/naming/*.good.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/naming
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .good.php
+    )))
+
+(alias
+    (name pocket_universes_naming_bad)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/pocket_universes/naming/HH_FLAGS)
+          (glob_files %{project_root}/test/pocket_universes/naming/*.bad.php)
+          (glob_files %{project_root}/test/pocket_universes/naming/*.bad.php.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/naming
+    --program %{exe:../../../src/hh_single_type_check.exe}
+    --in-extension .bad.php --flags
+    --error-format raw)))
+
+(alias
+    (name runtest)
+    (deps
+      (alias pocket_universes_naming_good)
+      (alias pocket_universes_naming_bad)))

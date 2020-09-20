@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
 #include <algorithm>
@@ -27,6 +28,10 @@ Vlabel Vunit::makeBlock(AreaIndex area, uint64_t weight) {
   auto i = blocks.size();
   blocks.emplace_back(area, weight);
   return Vlabel{i};
+}
+
+Vlabel Vunit::makeBlock(AreaIndex area) {
+  return makeBlock(area, areaWeightFactor(area));
 }
 
 Vlabel Vunit::makeScratchBlock() {

@@ -1,4 +1,0 @@
-File "invalid_hint_classname_with_generic.php", line 9, characters 5-15:
-  classname<C<int>>
-File "invalid_hint_classname_with_generic.php", line 6, characters 23-23:
-The `is` operator should not be used with a type with generics, because generics are erased at runtime (Typing[4199])

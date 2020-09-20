@@ -1,0 +1,160 @@
+[(Class
+    { c_span = [4:1-6:2]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([4:7-10], "\\Inv");
+      c_tparams =
+      { c_tparam_list =
+        [{ tp_variance = Invariant; tp_name = ([4:11-12], "T");
+           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
+           }
+          ];
+        c_tparam_constraints = <opaque> };
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_consts = []; c_typeconsts = [];
+      c_vars =
+      [{ cv_final = false; cv_is_xhp = false; cv_visibility = Public;
+         cv_type = (Some ([5:38-39], (Habstr "T")));
+         cv_id = ([5:40-45], "item"); cv_expr = None;
+         cv_user_attributes = []; cv_doc_comment = None;
+         cv_is_promoted_variadic = false; cv_is_static = false }
+        ];
+      c_methods =
+      [{ m_span = [5:3-50]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([5:19-30], "__construct"); m_tparams = [];
+         m_where_constraints = []; m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([5:40-45], T);
+            param_hint = (Some ([5:38-39], (Habstr "T")));
+            param_is_variadic = false;
+            param_pos = [5:40-45]; param_name = "$item"; param_expr = None;
+            param_callconv = None; param_user_attributes = [] }
+           ];
+         m_body =
+         { fb_ast =
+           [([5:40-45],
+             (Expr
+                (([5:40-45], T),
+                 (Binop ((Eq None),
+                    (([5:40-45], T),
+                     (Obj_get ((([5:40-45], this), This),
+                        (([5:40-45], T), (Id ([5:40-45], "item"))),
+                        OG_nullthrows))),
+                    (([5:40-45], T), (Lvar ([5:40-45], $item))))))));
+             ([Pos.none], Noop)];
+           fb_annotation = No unsafe blocks };
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([5:19-30], (Happly (([5:19-30], "void"), []))));
+         m_external = false; m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
+  (Fun
+     { f_span = [7:1-15:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret =
+       (Some ([7:51-70],
+              (Happly (([7:51-54], "\\Inv"),
+                 [([7:55-69],
+                   (Hoption
+                      ([7:56-69],
+                       (Happly (([7:56-59], "\\vec"),
+                          [([7:60-68], (Hprim Tarraykey))])))))
+                   ]
+                 ))));
+       f_name = ([7:10-25], "\\test_vec_append"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([7:39-41], ?vec<string>);
+          param_hint =
+          (Some ([7:26-38],
+                 (Hoption
+                    ([7:27-38],
+                     (Happly (([7:27-30], "\\vec"),
+                        [([7:31-37], (Hprim Tstring))]))))));
+          param_is_variadic = false;
+          param_pos = [7:39-41]; param_name = "$v"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+         { param_annotation = ([7:47-49], int);
+           param_hint = (Some ([7:43-46], (Hprim Tint)));
+           param_is_variadic = false;
+           param_pos = [7:47-49]; param_name = "$i"; param_expr = None;
+           param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast =
+         [([8:3-22],
+           (Expr
+              (([8:3-21], Inv<?vec<arraykey>>),
+               (Binop ((Eq None),
+                  (([8:3-7], Inv<?vec<arraykey>>), (Lvar ([8:3-7], $obj))),
+                  (([8:10-21], Inv<?vec<arraykey>>),
+                   (New (
+                      (([8:14-17], Inv<[unresolved]>),
+                       (CI ([8:14-17], "\\Inv"))),
+                      [],
+                      [(([8:18-20], ?vec<string>), (Lvar ([8:18-20], $v)))],
+                      [], ([8:14-17], (function(?vec<arraykey> $item): _)))))
+                  )))));
+           ([9:3-19],
+            (Expr
+               (([9:3-18], ?vec<arraykey>),
+                (Binop ((Eq None),
+                   (([9:3-5], ?vec<arraykey>), (Lvar ([9:3-5], $r))),
+                   (([9:8-18], ?vec<arraykey>),
+                    (Obj_get (
+                       (([9:8-12], Inv<?vec<arraykey>>),
+                        (Lvar ([9:8-12], $obj))),
+                       (([9:14-18], ?vec<arraykey>), (Id ([9:14-18], "item"))),
+                       OG_nullthrows)))
+                   )))));
+           ([10:3-13:4],
+            (If (
+               (([10:7-18], bool),
+                (Binop (Diff2,
+                   (([10:7-9], ?vec<string>), (Lvar ([10:7-9], $r))),
+                   (([10:14-18], ?vec<string>), Null)))),
+               [([11:5-15],
+                 (Expr
+                    (([11:5-14], int),
+                     (Binop ((Eq None),
+                        (([11:5-9], int),
+                         (Array_get (
+                            (([11:5-7], vec<(int | string)>),
+                             (Lvar ([11:5-7], $r))),
+                            None))),
+                        (([11:12-14], int), (Lvar ([11:12-14], $i))))))));
+                 ([12:5-21],
+                  (Expr
+                     (([12:5-20], vec<(int | string)>),
+                      (Binop ((Eq None),
+                         (([12:5-15], ?vec<arraykey>),
+                          (Obj_get (
+                             (([12:5-9], Inv<?vec<arraykey>>),
+                              (Lvar ([12:5-9], $obj))),
+                             (([12:11-15], ?vec<arraykey>),
+                              (Id ([12:11-15], "item"))),
+                             OG_nullthrows))),
+                         (([12:18-20], vec<(int | string)>),
+                          (Lvar ([12:18-20], $r)))
+                         )))))
+                 ],
+               [([Pos.none], Noop)])));
+           ([14:3-15],
+            (Return
+               (Some (([14:10-14], Inv<?vec<arraykey>>),
+                      (Lvar ([14:10-14], $obj))))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
+  ]
+The TAST for this definition contains nodes which are not yet implemented.
+Typing[4291] Unexpected type in TAST: expected ?vec<arraykey>, got ?vec<string>
+   --> nullable_array_append_hard.php
+ 10 |   if ($r !== null) {
+    |       ^^
+

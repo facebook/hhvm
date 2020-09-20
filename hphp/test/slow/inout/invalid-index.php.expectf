@@ -1,77 +1,26 @@
-
-Notice: Undefined index on inout parameter: 10 in %sinout/invalid-index.php on line 7
-NULL
-
-Notice: Undefined index on inout parameter: banana in %sinout/invalid-index.php on line 8
-NULL
+Out of bounds darray access: invalid index 10
+Out of bounds darray access: invalid index "banana"
 int(5)
-
-Notice: Undefined index on inout parameter: 50 in %sinout/invalid-index.php on line 12
-string(85) "Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays"
-NULL
-NULL
-array(4) {
-  ["apple"]=>
-  array(2) {
-    ["orange"]=>
-    int(12)
-    ["banana"]=>
-    int(12)
-  }
-  [10]=>
-  int(12)
-  [1]=>
-  int(12)
-  [5]=>
-  array(1) {
-    [10]=>
-    int(12)
-  }
-}
-
-Notice: Undefined index on inout parameter: 10 in %sinout/invalid-index.php on line 23
-NULL
-
-Notice: Undefined index on inout parameter: banana in %sinout/invalid-index.php on line 31
-NULL
+string(45) "Out of bounds darray access: invalid index 50"
+Caught: Out of bounds darray access: invalid index 10
+Caught: Out of bounds darray access: invalid index "banana"
 int(5)
-
-Notice: Undefined index on inout parameter: 50 in %sinout/invalid-index.php on line 31
-Caught: Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays
-NULL
-NULL
-array(4) {
+Caught: Out of bounds darray access: invalid index 50
+darray(1) {
   ["apple"]=>
-  array(2) {
+  darray(1) {
     ["orange"]=>
-    int(12)
-    ["banana"]=>
-    int(12)
-  }
-  [10]=>
-  int(12)
-  [1]=>
-  int(12)
-  [5]=>
-  array(1) {
-    [10]=>
     int(12)
   }
 }
 Caught: Out of bounds dict access: invalid index 10
-
-Notice: Undefined index on inout parameter: banana in %sinout/invalid-index.php on line 31
-NULL
+Caught: Out of bounds darray access: invalid index "banana"
 int(5)
 Caught: Out of bounds dict access: invalid index 50
-Caught: Dicts cannot contain references
-Caught: Out of bounds dict access: invalid index 5
 dict(1) {
   ["apple"]=>
-  array(2) {
+  darray(1) {
     ["orange"]=>
-    int(12)
-    ["banana"]=>
     int(12)
   }
 }

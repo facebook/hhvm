@@ -8,24 +8,18 @@ string(2) "20"
 string(2) "20"
 string(2) "20"
 string(2) "20"
-string(2) "20"
-string(2) "20"
-string(2) "20"
 string(2) "11"
 string(2) "01"
 string(8) "testxfoo"
 
-Warning: Cannot use a scalar value as an array in %s/test/slow/eval_order/1523.php on line 60
-NULL
-
-Notice: Cannot access property on non-object in %s/test/slow/eval_order/1523.php on line 64
+Notice: Cannot access property on non-object in %s/test/slow/eval_order/1523.php on line 68
 NULL
 string(3) "foo"
-object(stdClass)#2 (1) {
+object(stdClass) (1) {
   ["0"]=>
   int(5)
 }
-object(stdClass)#2 (1) {
+object(stdClass) (1) {
   ["0"]=>
   int(5)
 }

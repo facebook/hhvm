@@ -12,11 +12,10 @@ NULL
 
 Passing undefined by reference
 
+Notice: Undefined variable: undef2 in %s/passByReference_003.php on line %d
+
 Inside passbyRef call:
 NULL
 
 After call
-array(1) {
-  [0]=>
-  NULL
-}
+NULL

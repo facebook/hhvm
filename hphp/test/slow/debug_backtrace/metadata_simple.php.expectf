@@ -1,62 +1,46 @@
-array(2) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(9)
     ["function"]=>
     string(3) "bar"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      int(0)
-    }
   }
-  [1]=>
-  array(4) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(12)
+    int(14)
     ["function"]=>
     string(3) "foo"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      int(0)
-    }
+  }
+  darray(1) {
+    ["function"]=>
+    string(4) "main"
   }
 }
-array(2) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
     int(9)
     ["function"]=>
     string(3) "bar"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      int(65536)
-    }
   }
-  [1]=>
-  array(5) {
+  darray(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(13)
+    int(15)
     ["function"]=>
     string(3) "foo"
-    ["args"]=>
-    array(1) {
-      [0]=>
-      int(65536)
-    }
     ["metadata"]=>
     string(8) "I am foo"
+  }
+  darray(1) {
+    ["function"]=>
+    string(4) "main"
   }
 }

@@ -5,301 +5,275 @@
 -- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --
 -- Iteration 1 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 2 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 3 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 4 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 5 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 6 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 7 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 8 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 9 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 10 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 11 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 12 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 13 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 14 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 15 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 16 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 17 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 18 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 19 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 20 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 -- Iteration 21 --
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 76
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 77
 bool(false)
 
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 78
 bool(false)
 
-Warning: %s
-bool(false)
--- Iteration 22 --
-
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
--- Iteration 23 --
-
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
-
-Warning: %s
-bool(false)
-
-Warning: %s
+Warning: Invalid operand type was used: arsort expects array(s) or collection(s) in %s/arsort_variation1.php on line 79
 bool(false)
 Done

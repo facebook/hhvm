@@ -49,4 +49,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_pair_magic_methods() {
 main();
+}

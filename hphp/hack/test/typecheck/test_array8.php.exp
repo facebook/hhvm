@@ -1,1 +1,6 @@
-No errors
+File "test_array8.php", line 14, characters 10-11:
+Invalid return type (Typing[4110])
+File "test_array8.php", line 12, characters 20-32:
+Expected `darray<int, A>`
+File "test_array8.php", line 13, characters 9-13:
+But got `varray_or_darray<arraykey, _>`

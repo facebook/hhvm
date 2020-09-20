@@ -1,5 +1,4 @@
 <?hh
-error_reporting(0);
 
 class A {
   public $a = 5;
@@ -102,7 +101,10 @@ function test_pair($k1, $v1, $k2, $v2) {
   echo "\n";
 }
 
-function test() {
+<<__EntryPoint>>
+function main(): void {
+  error_reporting(0);
+
   $a1 = new A;
   $a2 = new A;
   $a3 = new A(new A);
@@ -136,10 +138,6 @@ function test() {
   $t4 = new DateTime1(-1);
   $t5 = new DateTime2;
 
-  $ao1 = new ArrayObject(array());
-  $ao2 = new ArrayObject(array(99));
-  $ao3 = new ArrayObject(array(99));
-
   $xml = simplexml_load_string("<root />")->unknown;
 
   $v1 = Vector{0, 1, 2, 3, 4};
@@ -153,32 +151,28 @@ function test() {
   $clo1 = function () { return 0; };
   $clo2 = function () { return 0; };
 
-  $arr1 = array();
-  $arr2 = array(99);
-  $arr3 = array('foo');
-  $arr4 = array('foo', 'bar');
-  $arr5 = array('foo', 'bar');
-  $arr6 = array('foo', 'baz');
-  $arr7 = array(new A, new A);
-  $arr8 = array(new A, new A);
-  $arr9 = array(new A, new C);
-  $arr10 = array(new ToString('foo'), new ToString('bar'));
-  $arr11 = array(new ToString('foo'), new ToStringThrower);
-  $arr12 = array(array(1, 2), array(1, 2, 3));
-  $arr13 = array(array(1, 2), array(1, 2, 3));
-  $arr14 = array(array(1, 2), array(99));
-  $arr15 = array(Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8});
-  $arr16 = array(Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8});
-  $arr17 = array(1, NAN);
-  $arr18 = array(1, NAN);
-  $arr19 = array(NAN, 1);
-  $arr20 = array(1, NAN, 2);
-  $arr21 = array('key1' => 1, 'key2' => 2, 'key3' => 3);
-  $arr22 = array('key1' => 1, 'key2' => 2, 'key3' => 3);
-  $arr23 = array('key1' => 1, 'key2-other' => 2, 'key3' => 3);
-  $arr24 = array('key2' => 2, 'key3' => 3, 'key1' => 1);
-  $arr25 = array('baz', 'foo');
-  $arr26 = array('baz', new ToStringThrower);
+  $arr1 = varray[];
+  $arr2 = varray[99];
+  $arr3 = varray['foo'];
+  $arr4 = varray['foo', 'bar'];
+  $arr5 = varray['foo', 'bar'];
+  $arr6 = varray['foo', 'baz'];
+  $arr7 = varray[new A, new A];
+  $arr8 = varray[new A, new A];
+  $arr9 = varray[new A, new C];
+  $arr10 = varray[new ToString('foo'), new ToString('bar')];
+  $arr11 = varray[new ToString('foo'), new ToStringThrower];
+  $arr12 = varray[varray[1, 2], varray[1, 2, 3]];
+  $arr13 = varray[varray[1, 2], varray[1, 2, 3]];
+  $arr14 = varray[varray[1, 2], varray[99]];
+  $arr15 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
+  $arr16 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
+  $arr17 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr18 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr19 = darray['key1' => 1, 'key2-other' => 2, 'key3' => 3];
+  $arr20 = darray['key2' => 2, 'key3' => 3, 'key1' => 1];
+  $arr21 = varray['baz', 'foo'];
+  $arr22 = varray['baz', new ToStringThrower];
 
   $vec1 = vec[];
   $vec2 = vec[1, 2];
@@ -222,13 +216,13 @@ function test() {
   $f2 = imagecreate(10, 10);
   $f3 = imagecreate(1, 1);
 
-  $arr = array('null' => null,
+  $arr = darray['null' => null,
 
                'false' => false, 'true' => true,
 
                'int 0' => 0, 'int 99' => 99, 'int -1' => -1,
 
-               'float 0' => 0.0,'double 99' => (double)99,
+               'float 0' => 0.0,'double 99' => (float)99,
                'float 99' => 99.0, 'float -1' => -1.0,
                'INF' => INF, '-INF' => -INF, 'NAN' => NAN,
 
@@ -248,8 +242,6 @@ function test() {
                'array arr17' => $arr17, 'array arr18' => $arr18,
                'array arr19' => $arr19, 'array arr20' => $arr20,
                'array arr21' => $arr21, 'array arr22' => $arr22,
-               'array arr23' => $arr23, 'array arr24' => $arr24,
-               'array arr25' => $arr25, 'array arr26' => $arr26,
 
                'vec vec1' => $vec1, 'vec vec2' => $vec2, 'vec vec3' => $vec3,
                'vec vec4' => $vec4, 'vec vec5' => $vec5, 'vec vec6' => $vec6,
@@ -276,8 +268,7 @@ function test() {
                'object b1' => $b1, 'object c1' => $c1, 'object s1' => $s1,
                'object s2' => $s2, 'object s3' => $s3, 'object s4' => $s4,
                'object t1' => $t1, 'object t2' => $t2, 'object t3' => $t3,
-               'object t4' => $t4, 'object t5' => $t5, 'object ao1' => $ao1,
-               'object ao2' => $ao2, 'object ao3' => $ao3, 'object xml' => $xml,
+               'object t4' => $t4, 'object t5' => $t5, 'object xml' => $xml,
 
                'vector v1' => $v1, 'vector v2' => $v2, 'vector v3' => $v3,
                'pair p1' => $p1, 'pair p2' => $p2, 'pair p3' => $p3,
@@ -285,7 +276,7 @@ function test() {
                'closure clo1' => $clo1, 'closure clo2' => $clo2,
 
                'resource f1' => $f1, 'resource f2' => $f2, 'resource f3' => $f3,
-              );
+              ];
 
   echo "same    nsame   lt      lte     eq      neq     gte     gt      cmp\n\n";
   foreach ($arr as $k1 => $v1) {
@@ -297,6 +288,58 @@ function test() {
   imagedestroy($f1);
   imagedestroy($f2);
   imagedestroy($f3);
-}
 
-test();
+  // also test some pairs that are not interesting to compare in an O(n^2) way
+  // to everything above, but we want to see how they compare to each other
+  $aiter1 = new ArrayIterator(darray['a' => 'b']);
+  $aiter2 = new ArrayIterator(darray['a' => 'b']); $aiter2->c = 'd';
+  $xml1 = simplexml_load_string("<apple />");
+  $xml2 = simplexml_load_string("<pie><apple /></pie>");
+  $aa1 = new A(new ToStringThrower());
+  $aa2 = new A(); $aa2->a = 6;
+  $dynamicA = new stdClass(); $dynamicA->a = 'a';
+  $dynamicB = new stdClass(); $dynamicB->b = 'a';
+  $dynamicANAN = new stdClass(); $dynamicANAN->a = NAN;
+  $dynamicAB = new stdClass(); $dynamicAB->a = 'a'; $dynamicAB->b = 'b';
+  $dynamicBCThrows = new stdClass();
+  $dynamicBCThrows->b = new ToStringThrower();
+  $dynamicBCThrows->c = 'c';
+
+  $pairs = varray[
+    varray[
+      darray['k' => 'ArrayIterator 1', 'v' => $aiter1],
+      darray['k' => 'ArrayIterator 2', 'v' => $aiter2],
+    ],
+    varray[
+      darray['k' => 'SimpleXMLElement 1', 'v' => $xml1],
+      darray['k' => 'SimpleXMLElement 2', 'v' => $xml2],
+    ],
+    varray[
+      // the first property is different, so we should always short-circuit
+      // and never throw
+      darray['k' => 'object aa1', 'v' => $aa1],
+      darray['k' => 'object aa2', 'v' => $aa2],
+    ],
+    varray[
+      // same number of dynamic properties with the same value, but diff name
+      darray['k' => 'Dynamic property a', 'v' => $dynamicA],
+      darray['k' => 'Dynamic property b', 'v' => $dynamicB],
+    ],
+    varray[
+      darray['k' => 'Dynamic property a', 'v' => $dynamicA],
+      darray['k' => 'Dynamic property NAN', 'v' => $dynamicANAN],
+    ],
+    varray[
+      // depending on which operand in the comparison we traverse, we'll either
+      // short-circuit or throw
+      darray['k' => 'Dynamic props (a, b)', 'v' => $dynamicAB],
+      darray['k' => 'Dynamic props (b, c)', 'v' => $dynamicBCThrows],
+    ],
+  ];
+
+  echo "\nsame    nsame   lt      lte     eq      neq     gte     gt      cmp\n\n";
+  foreach ($pairs as $p) {
+    test_pair($p[0]['k'], $p[0]['v'], $p[1]['k'], $p[1]['v']);
+    test_pair($p[1]['k'], $p[1]['v'], $p[0]['k'], $p[0]['v']);
+  }
+}

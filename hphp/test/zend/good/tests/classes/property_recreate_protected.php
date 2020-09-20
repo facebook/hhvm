@@ -1,20 +1,20 @@
-<?php
+<?hh
 class C {
-	protected $p = 'test';
-	function unsetProtected() {
-		unset($this->p);		
-	}
-	function setProtected() {
-		$this->p = 'changed';		
-	}
+    protected $p = 'test';
+    function unsetProtected() {
+        unset($this->p);
+    }
+    function setProtected() {
+        $this->p = 'changed';
+    }
 }
 
 class D extends C {
-	function setP() {
-		$this->p = 'changed in D';
-	}
+    function setP() {
+        $this->p = 'changed in D';
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $d = new D;
 echo "Unset and recreate a protected property from property's declaring class scope:\n";
 $d->unsetProtected();
@@ -31,4 +31,4 @@ echo "\nUnset a protected property, and attempt to recreate it outside of scope 
 $d->unsetProtected();
 $d->p = 'this will fail';
 var_dump($d);
-?>
+}

@@ -1,6 +1,6 @@
 .adata A_0 = """v:1:{i:1;}""";
 
-.main {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   Vec @A_0
   ColFromArray Map
   RetC

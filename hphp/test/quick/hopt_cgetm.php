@@ -23,7 +23,7 @@ function foo($o){
   echo $o->getX();
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C(2); // change to 4.0
 foo($c);
-
+}

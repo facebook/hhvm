@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const ONE = 1;
 const TWO = ONE + 1;
@@ -44,4 +44,8 @@ function main() {
   var_dump(D::PROTECT);
 }
 
+
+<<__EntryPoint>>
+function main_const_expr() {
 main();
+}

@@ -8,7 +8,7 @@ function test($name, $c) {
 }
 
 function main() {
-  $containers = array(
+  $containers = darray[
     'Vector'          => Vector {1},
     'empty Vector'    => Vector {},
     'ImmVector'       => ImmVector {2},
@@ -23,10 +23,14 @@ function main() {
     'empty Set'       => Set {},
     'ImmSet'          => ImmSet {8},
     'empty ImmSet'    => ImmSet {},
-  );
+  ];
   foreach ($containers as $name => $c) {
     test($name, $c);
   }
 }
 
+
+<<__EntryPoint>>
+function main_keys() {
 main();
+}

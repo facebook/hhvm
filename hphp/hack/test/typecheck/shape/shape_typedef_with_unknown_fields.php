@@ -1,3 +1,3 @@
-<?hh
+<?hh // partial
 
 type ShapeWithUnknownFields = shape(...);

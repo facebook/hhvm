@@ -1,13 +1,13 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 <<__PHPStdLib>>
 function spl_classes();
 <<__PHPStdLib>>
@@ -17,29 +17,17 @@ function hphp_object_pointer($obj);
 <<__PHPStdLib>>
 function hphp_get_this();
 <<__PHPStdLib>>
-function class_implements($obj, $autoload = true);
+function class_implements($obj, bool $autoload = true);
 <<__PHPStdLib>>
-function class_parents($obj, $autoload = true);
+function class_parents($obj, bool $autoload = true);
 <<__PHPStdLib>>
-function class_uses($obj, $autoload = true);
+function class_uses($obj, bool $autoload = true);
 <<__PHPStdLib>>
 function iterator_apply($obj, $func, $params = null);
 <<__PHPStdLib>>
 function iterator_count($obj);
 <<__PHPStdLib>>
-function iterator_to_array($obj, $use_keys = true);
-<<__PHPStdLib>>
-function spl_autoload_call($class_name);
-<<__PHPStdLib>>
-function spl_autoload_extensions($file_extensions = null);
-<<__PHPStdLib>>
-function spl_autoload_functions();
-<<__PHPStdLib>>
-function spl_autoload_register($autoload_function = null, $throws = true, $prepend = false);
-<<__PHPStdLib>>
-function spl_autoload_unregister($autoload_function);
-<<__PHPStdLib>>
-function spl_autoload($class_name, $file_extensions = null);
+function iterator_to_array($obj, bool $use_keys = true);
 
 class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
   public function bottom(): T;
@@ -128,7 +116,7 @@ class SplFileObject extends SplFileInfo
     bool $use_include_path = false,
     ?resource $context = null,
   );
-  /* returns string|array ... violates Iterator interface */
+  /** @return string|array violates Iterator interface */
   public function current();
   public function eof(): bool;
   public function fflush(): bool;
@@ -137,24 +125,28 @@ class SplFileObject extends SplFileInfo
     string $delimiter = ",",
     string $enclosure = "\"",
     string $escape = "\\",
-  ): array;
+    /* HH_IGNORE_ERROR[2071] */
+  ): varray;
   public function fgets();
   public function fgetss(?string $allowable_tags = null): string;
-  public function flock(int $operation, mixed &$wouldblock = false): bool;
+  public function flock(int $operation, inout mixed $wouldblock): bool;
   public function fpassthru(): int;
   public function fputcsv(
-    array $fields,
+    /* HH_IGNORE_ERROR[2071] */
+    varray $fields,
     string $delimiter = ",",
     string $enclosure = '"',
   ): int;
   public function fread(int $length): string;
-  public function fscanf(string $format, ... ): mixed;
+  public function fscanf(string $format): varray;
   public function fseek(int $offset, int $whence = SEEK_SET): int;
-  public function fstat(): array;
+  /* HH_IGNORE_ERROR[2071] */
+  public function fstat(): darray;
   public function ftell(): int;
   public function ftruncate(int $size): bool;
   public function fwrite(string $str, int $length): int;
-  public function getCsvControl(): array;
+  /* HH_IGNORE_ERROR[2071] */
+  public function getCsvControl(): varray;
   public function getFlags(): int;
   public function getMaxLineLen(): int;
   public function setCsvControl(
@@ -196,69 +188,10 @@ class DirectoryIterator extends SplFileInfo
   public function valid(): bool;
 }
 
-class CallbackFilterIterator<T> extends FilterIterator<T> {
-  public function accept() {}
-}
-
-class RecursiveCallbackFilterIterator<T> extends CallbackFilterIterator<T> implements RecursiveIterator<T> {
-  public function getChildren() {}
-  public function hasChildren() {}
-}
-
-class ParentIterator<T> extends RecursiveFilterIterator<T> {
-  public function accept() {}
-}
-
-class CachingIterator<Tk, Tv> extends IteratorIterator<Tv> implements ArrayAccess<Tk, Tv>, Countable {
-  const int CALL_TOSTRING = 1;
-  const int CATCH_GET_CHILD = 16;
-  const int TOSTRING_USE_KEY = 2;
-  const int TOSTRING_USE_CURRENT = 4;
-  const int TOSTRING_USE_INNER = 8;
-  const int FULL_CACHE = 256;
-  public function __toString() {}
-  public function count() {}
-  public function getCache() {}
-  public function getFlags() {}
-  public function hasNext() {}
-  public function offsetExists($index) {}
-  public function offsetGet($index) {}
-  public function offsetSet($index, $newval) {}
-  public function offsetUnset($index) {}
-  public function setFlags($flags) {}
-}
-
-class RecursiveCachingIterator<Tk, Tv> extends CachingIterator<Tk, Tv> implements RecursiveIterator<Tv> {
-  public function getChildren() {}
-  public function hasChildren() {}
-}
-
 class NoRewindIterator<T> extends IteratorIterator<T> {
 }
 
 class InfiniteIterator<T> extends IteratorIterator<T> {
-}
-
-class RecursiveTreeIterator<Tv> extends RecursiveIteratorIterator<Tv> {
-  const int BYPASS_CURRENT = 4;
-  const int BYPASS_KEY = 8;
-  const int PREFIX_LEFT = 0;
-  const int PREFIX_MID_HAS_NEXT = 1;
-  const int PREFIX_MID_LAST = 2;
-  const int PREFIX_END_HAS_NEXT = 3;
-  const int PREFIX_END_LAST = 4;
-  const int PREFIX_RIGHT = 5;
-  public function getEntry() {}
-  public function getPostfix() {}
-  public function getPrefix() {}
-  public function setPostfix() {}
-  public function setPrefixPart($part, $value) {}
-}
-
-class RecursiveArrayIterator<T> extends ArrayIterator<T> implements RecursiveIterator<T> {
-  const int CHILD_ARRAYS_ONLY = 4;
-  public function getChildren() {}
-  public function hasChildren() {}
 }
 
 class GlobIterator extends FilesystemIterator implements Countable {
@@ -287,25 +220,6 @@ class SplPriorityQueue<T> implements Iterator<T>, Countable {
   public function valid() {}
 }
 
-class SplFixedArray<Tk, Tv> implements Iterator<Tv>, ArrayAccess<Tk, Tv>, Countable {
-  public function __construct($size = null) {}
-  public function __wakeup() {}
-  public function count() {}
-  public function current() {}
-  public static function fromArray($data, $save_indexes = null) {}
-  public function getSize() {}
-  public function key() {}
-  public function next() {}
-  public function offsetExists($index) {}
-  public function offsetGet($index) {}
-  public function offsetSet($index, $newval) {}
-  public function offsetUnset($index) {}
-  public function rewind() {}
-  public function setSize($value) {}
-  public function toArray() {}
-  public function valid() {}
-}
-
 interface SplObserver {
   public function update(SplSubject $SplSubject) {}
 }
@@ -314,25 +228,6 @@ interface SplSubject {
   public function attach(SplObserver $SplObserver) {}
   public function detach(SplObserver $SplObserver) {}
   public function notify() {}
-}
-
-class MultipleIterator<T> implements Iterator<T> {
-  const int MIT_NEED_ANY = 0;
-  const int MIT_NEED_ALL = 1;
-  const int MIT_KEYS_NUMERIC = 0;
-  const int MIT_KEYS_ASSOC = 2;
-  public function __construct($flags) {}
-  public function attachIterator(Iterator<T> $iterator, $infos = null) {}
-  public function containsIterator(Iterator<T> $iterator) {}
-  public function countIterators() {}
-  public function current() {}
-  public function detachIterator(Iterator<T> $iterator) {}
-  public function getFlags() {}
-  public function key() {}
-  public function next() {}
-  public function rewind() {}
-  public function setFlags($flags) {}
-  public function valid() {}
 }
 
 class SplType {

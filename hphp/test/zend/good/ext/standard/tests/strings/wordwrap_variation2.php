@@ -1,19 +1,19 @@
-<?php
+<?hh
 /* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
  * Description: Wraps buffer to selected number of characters using string break char
  * Source code: ext/standard/string.c
 */
 
 /*
- * test wordwrap by passing different values for width argument 
-*/
+ * test wordwrap by passing different values for width argument */
+<<__EntryPoint>> function main(): void {
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $str = 'testing wordwrap function';
 $break = '<br />\n';
 $cut = true;
 
-// resource var 
+// resource var
 $fp = fopen(__FILE__, "r");
 
 // get an unset variable
@@ -22,7 +22,7 @@ unset($unset_var);
 
 
 // array with different values as width
-$values =  array (
+$values =  varray [
   // zerovalue for width
   0,
 
@@ -31,11 +31,11 @@ $values =  array (
   -10,
 
   // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red', 'item' => 'pen'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red', 'item' => 'pen'],
 
   // boolean values
   true,
@@ -50,7 +50,7 @@ $values =  array (
   // objects
   new stdclass(),
 
-  // Null value 
+  // Null value
   NULL,
   null,
 
@@ -66,7 +66,7 @@ $values =  array (
 
   // unset variable
   @$unset_var
-);
+];
 
 
 // loop though each element of the array and check the working of wordwrap()
@@ -77,16 +77,16 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $width = $values [$index];
 
-  var_dump( wordwrap($str, $width) );
-  var_dump( wordwrap($str, $width, $break) );
+  try { var_dump( wordwrap($str, $width) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump( wordwrap($str, $width, $break) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-  // cut as false 
+  // cut as false
   $cut = false;
-  var_dump( wordwrap($str, $width, $break, $cut) );
+  try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   // cut as true
   $cut = true;
-  var_dump( wordwrap($str, $width, $break, $cut) );
+  try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }
@@ -95,4 +95,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($fp);
 
 echo "Done\n";
-?>
+}

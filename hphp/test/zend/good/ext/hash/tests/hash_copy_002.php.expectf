@@ -1,8 +1,6 @@
 
-Warning: %s
-NULL
+Warning: hash_copy() expects exactly 1 parameter, 0 given in %s/hash_copy_002.php on line 4
 resource(%d) of type (Hash Context)
 
-Warning: %s
-NULL
+Warning: hash_copy() expects exactly 1 parameter, 2 given in %s/hash_copy_002.php on line 6
 Done

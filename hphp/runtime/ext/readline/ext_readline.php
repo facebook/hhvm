@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Adds a line to the history

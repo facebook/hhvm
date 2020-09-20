@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($a) {
   var_dump($a);
@@ -17,6 +17,9 @@ class ClassA {
  var_dump($this->val);
   }
 }
+
+<<__EntryPoint>>
+function main_1704() {
 $obj = new ClassA();
 var_dump($obj);
 $obj->foo();
@@ -25,3 +28,4 @@ $obj->bar();
 $obj->foo2();
 var_dump($obj);
 $obj->bar();
+}

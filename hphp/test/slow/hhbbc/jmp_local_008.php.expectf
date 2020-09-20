@@ -1,5 +1,6 @@
 
-Warning: foo() expects exactly 1 parameter, 0 given in %s/test/slow/hhbbc/jmp_local_008.php on line 4
-
 Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_008.php on line 4
+NULL
+
+Notice: Undefined variable: x in %s/test/slow/hhbbc/jmp_local_008.php on line 5
 string(4) "asd2"

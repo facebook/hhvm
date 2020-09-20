@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : int mb_strpos(string $haystack, string $needle [, int $offset [, string $encoding]])
- * Description: Find position of first occurrence of a string within another 
+ * Description: Find position of first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -8,6 +8,14 @@
  * Pass mb_strpos different data types as $needle arg to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return b"Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -19,14 +27,6 @@ $encoding = 'utf-8';
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return b"Class A object";
-  }
-}
-
 // heredoc string
 $heredoc = b<<<EOT
 hello world
@@ -36,7 +36,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $needle argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -60,7 +60,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -69,7 +69,7 @@ $inputs = array(
 /*18*/ b"string",
        b'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -81,17 +81,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_strpos()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strpos($haystack, $input, $offset, $encoding));
+  try { var_dump( mb_strpos($haystack, $input, $offset, $encoding)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
-?>
+}

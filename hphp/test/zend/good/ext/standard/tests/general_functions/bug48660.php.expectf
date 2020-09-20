@@ -1,6 +1,6 @@
-array(1) {
+darray(1) {
   ["cases"]=>
-  array(5) {
+  darray(5) {
     ["Case.a"]=>
     string(6) "avalue"
     ["Case.b"]=>
@@ -13,9 +13,9 @@ array(1) {
     string(2) "10"
   }
 }
-array(1) {
+darray(1) {
   ["cases"]=>
-  array(5) {
+  darray(5) {
     ["Case.a"]=>
     string(6) "avalue"
     ["Case.b"]=>

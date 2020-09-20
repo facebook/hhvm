@@ -15,7 +15,7 @@ class C {
 
 function is_deprecated(ReflectionFunctionAbstract $f) {
   $name =
-    ($f instanceof ReflectionMethod
+    ($f is ReflectionMethod
      ? ($f->getDeclaringClass()->getName().'::')
      : '') . $f->getName();
   echo $name, ": ", $f->isDeprecated() ? 'deprecated' : 'not deprecated', "\n";
@@ -31,4 +31,8 @@ function test() {
   echo 'Done', "\n";
 }
 
+
+<<__EntryPoint>>
+function main_deprecation() {
 test();
+}

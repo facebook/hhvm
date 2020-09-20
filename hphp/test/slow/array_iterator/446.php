@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ex($m) {
   var_dump('Throwing: '.$m);
@@ -8,18 +8,12 @@ class A {
   public function __construct() {
     var_dump(__METHOD__);
   }
-  public function __destruct() {
-    var_dump(__METHOD__);
-  }
 }
 class B {
   public $a;
   public function gen() {
     ex('die!');
     yield(2);
-  }
-  function __destruct() {
-    var_dump(__METHOD__);
   }
 }
 class II {
@@ -28,9 +22,6 @@ class II {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
   public function gen() {
  return new I($this->tn, $this->tv);
  }
@@ -41,9 +32,6 @@ class JJ {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
   public function gen() {
  return new J($this->tn, $this->tv);
  }
@@ -54,9 +42,6 @@ class KK {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
   public function gen() {
  return new K($this->tn, $this->tv);
  }
@@ -67,9 +52,6 @@ class LL {
  $this->tn = $tn;
  $this->tv = $tv;
  }
-  function __destruct() {
-    var_dump(__METHOD__);
-  }
   public function gen() {
  return new L($this->tn, $this->tv);
  }
@@ -82,9 +64,6 @@ class I implements Iterator{
   public function __construct($tn, $tv) {
     $this->tn = $tn;
     $this->tv = $tv;
-  }
-  public function __destruct() {
-    var_dump(__METHOD__);
   }
   public function rewind() {
     var_dump(__METHOD__);
@@ -115,9 +94,6 @@ class J implements IteratorAggregate {
   public function __construct($tn, $tv) {
     $this->i = new I($tn, $tv);
   }
-  public function __destruct() {
-    var_dump(__METHOD__);
-  }
   public function getIterator() {
  return $this->i;
  }
@@ -130,9 +106,6 @@ class K implements IteratorAggregate {
   public function __construct($tn, $tv) {
     $this->tn = $tn;
     $this->tv = $tv;
-  }
-  public function __destruct() {
-    var_dump(__METHOD__);
   }
   public function getIterator() {
  return new I($this->tn, $this->tv);
@@ -186,4 +159,8 @@ function main() {
   triple('LL');
   test('B', 0, 0);
 }
+
+<<__EntryPoint>>
+function main_446() {
 main();
+}

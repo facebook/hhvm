@@ -1,5 +1,5 @@
 DOMElement
-object(DOMElement)#1 (18) {
+object(DOMElement) (18) {
   ["nodeName"]=>
   string(3) "Foo"
   ["nodeValue"]=>
@@ -38,87 +38,50 @@ object(DOMElement)#1 (18) {
   NULL
 }
 string(22) "O:10:"DOMElement":0:{}"
-object(DOMElement)#2 (0) {
+object(DOMElement) (0) {
 }
-array(37) {
-  [0]=>
+varray(37) {
   string(11) "__construct"
-  [1]=>
   string(11) "__debuginfo"
-  [2]=>
   string(12) "getAttribute"
-  [3]=>
   string(16) "getAttributeNode"
-  [4]=>
   string(18) "getAttributeNodeNS"
-  [5]=>
   string(14) "getAttributeNS"
-  [6]=>
   string(20) "getElementsByTagName"
-  [7]=>
   string(22) "getElementsByTagNameNS"
-  [8]=>
   string(12) "hasAttribute"
-  [9]=>
   string(14) "hasAttributeNS"
-  [10]=>
   string(15) "removeAttribute"
-  [11]=>
   string(19) "removeAttributeNode"
-  [12]=>
   string(17) "removeAttributeNS"
-  [13]=>
   string(12) "setAttribute"
-  [14]=>
   string(16) "setAttributeNode"
-  [15]=>
   string(18) "setAttributeNodeNS"
-  [16]=>
   string(14) "setAttributeNS"
-  [17]=>
   string(14) "setIDAttribute"
-  [18]=>
   string(18) "setIDAttributeNode"
-  [19]=>
   string(16) "setIDAttributeNS"
-  [20]=>
   string(11) "appendChild"
-  [21]=>
   string(9) "cloneNode"
-  [22]=>
   string(9) "getLineNo"
-  [23]=>
   string(13) "hasAttributes"
-  [24]=>
   string(13) "hasChildNodes"
-  [25]=>
   string(12) "insertBefore"
-  [26]=>
   string(18) "isDefaultNamespace"
-  [27]=>
   string(10) "isSameNode"
-  [28]=>
   string(11) "isSupported"
-  [29]=>
   string(18) "lookupNamespaceUri"
-  [30]=>
   string(12) "lookupPrefix"
-  [31]=>
   string(9) "normalize"
-  [32]=>
   string(11) "removeChild"
-  [33]=>
   string(12) "replaceChild"
-  [34]=>
   string(4) "c14n"
-  [35]=>
   string(8) "c14nfile"
-  [36]=>
   string(11) "getNodePath"
 }
 ================
 A_DOMElement
-object(A_DOMElement)#3 (19) {
+object(A_DOMElement) (19) {
   ["___x"]=>
   NULL
   ["nodeName"]=>
@@ -159,83 +122,46 @@ object(A_DOMElement)#3 (19) {
   NULL
 }
 string(37) "O:12:"A_DOMElement":1:{s:4:"___x";N;}"
-object(A_DOMElement)#4 (1) {
+object(A_DOMElement) (1) {
   ["___x"]=>
   NULL
 }
-array(37) {
-  [0]=>
+varray(37) {
   string(11) "__construct"
-  [1]=>
   string(11) "__debuginfo"
-  [2]=>
   string(12) "getAttribute"
-  [3]=>
   string(16) "getAttributeNode"
-  [4]=>
   string(18) "getAttributeNodeNS"
-  [5]=>
   string(14) "getAttributeNS"
-  [6]=>
   string(20) "getElementsByTagName"
-  [7]=>
   string(22) "getElementsByTagNameNS"
-  [8]=>
   string(12) "hasAttribute"
-  [9]=>
   string(14) "hasAttributeNS"
-  [10]=>
   string(15) "removeAttribute"
-  [11]=>
   string(19) "removeAttributeNode"
-  [12]=>
   string(17) "removeAttributeNS"
-  [13]=>
   string(12) "setAttribute"
-  [14]=>
   string(16) "setAttributeNode"
-  [15]=>
   string(18) "setAttributeNodeNS"
-  [16]=>
   string(14) "setAttributeNS"
-  [17]=>
   string(14) "setIDAttribute"
-  [18]=>
   string(18) "setIDAttributeNode"
-  [19]=>
   string(16) "setIDAttributeNS"
-  [20]=>
   string(11) "appendChild"
-  [21]=>
   string(9) "cloneNode"
-  [22]=>
   string(9) "getLineNo"
-  [23]=>
   string(13) "hasAttributes"
-  [24]=>
   string(13) "hasChildNodes"
-  [25]=>
   string(12) "insertBefore"
-  [26]=>
   string(18) "isDefaultNamespace"
-  [27]=>
   string(10) "isSameNode"
-  [28]=>
   string(11) "isSupported"
-  [29]=>
   string(18) "lookupNamespaceUri"
-  [30]=>
   string(12) "lookupPrefix"
-  [31]=>
   string(9) "normalize"
-  [32]=>
   string(11) "removeChild"
-  [33]=>
   string(12) "replaceChild"
-  [34]=>
   string(4) "c14n"
-  [35]=>
   string(8) "c14nfile"
-  [36]=>
   string(11) "getNodePath"
 }

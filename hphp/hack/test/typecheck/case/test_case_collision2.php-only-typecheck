@@ -1,0 +1,9 @@
+<?hh // strict
+
+function foo(int $x, int $y): int {
+  return $x + $y;
+}
+
+function FOO(int $x, int $y): int {
+  return $x - $y;
+}

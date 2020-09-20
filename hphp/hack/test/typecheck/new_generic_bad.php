@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class T<T> {
   public static function f() {

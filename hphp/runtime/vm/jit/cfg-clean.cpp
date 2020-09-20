@@ -44,11 +44,7 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
                CheckMBase,
                CheckInit,
                CheckInitMem,
-               CheckInitProps,
-               CheckInitSProps,
-               CheckRefInner,
-               CheckCtxThis,
-               CheckFuncStatic)) {
+               CheckRDSInitialized)) {
     return false;
   }
 
@@ -79,7 +75,7 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
   }
 
   if (isUnconditional) {
-    assert(takenBlk);
+    assertx(takenBlk);
     auto const bcctx = term.bcctx();
     term.convertToNop();                // Removes edges to original dests.
     block->push_back(unit.gen(Jmp, bcctx, takenBlk));

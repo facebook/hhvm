@@ -1,4 +1,4 @@
-<?php
+<?hh
 # Enable to debug test-suite meltdown
 # Should not be enabled unless you know what you are doing
 if (!defined("DEBUG")) {
@@ -14,8 +14,8 @@ $DBDIR = "/tmp/db/";
 
 
 /* You probably don't want to change this */
-$SUPER_USER  = (object)array("username" => "root", "password" => "complicated password");
-$NORMAL_USER = (object)array("username" => "user", "password" => "this isn't it, is it?");
+$SUPER_USER  = (object)darray["username" => "root", "password" => "complicated password"];
+$NORMAL_USER = (object)darray["username" => "user", "password" => "this isn't it, is it?"];
 
 $JSFILE       = dirname(__FILE__) . "/myconfig.js";
 $SHELL_PARAMS = "--nodb --norc --shell $JSFILE";

@@ -1,24 +1,15 @@
-<?php
-function f($arg1, &$arg2)
+<?hh
+function f($arg1, inout $arg2)
 {
-	var_dump($arg1++);
-	var_dump($arg2++);
+    var_dump($arg1++);
+    var_dump($arg2++);
 }
-
-function g (&$arg1, &$arg2)
-{
-	var_dump($arg1);
-	var_dump($arg2);
-}
+<<__EntryPoint>> function main(): void {
 $a = 7;
 $b = 15;
 
-f($a, $b);
+f($a, inout $b);
 
 var_dump($a);
 var_dump($b);
-
-$c=array(1);
-g($c,$c[0]);
-
-?>
+}

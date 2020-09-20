@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 /**
  * Generates localized date and/or time format pattern strings suitable for use
  * in IntlDateFormatter.

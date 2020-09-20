@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQUEST_URI_H_
-#define incl_HPHP_REQUEST_URI_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 
@@ -43,6 +42,7 @@ struct RequestURI {
 
   bool rewritten() const { return m_rewritten; }
   bool defaultDoc() const { return m_defaultDoc; }
+  bool globalDoc() const { return m_globalDoc; }
   bool done() const { return m_done; }
   bool forbidden() const { return m_forbidden; }
 
@@ -64,6 +64,7 @@ private:
 
   bool m_rewritten;  // whether rewrite rules have applied
   bool m_defaultDoc; // whether DefaultDocument was appended
+  bool m_globalDoc; // whether GlobalDocument was used
   bool m_done;
   bool m_forbidden;
   const char *m_ext;   // file extension
@@ -74,6 +75,15 @@ private:
   bool rewriteURL(const VirtualHost *vhost, Transport *transport,
                   const std::string &pathTranslation,
                   const std::string &sourceRoot);
+  bool rewriteURLNoDirCheck(const VirtualHost *vhost, Transport *transport,
+                            const std::string &pathTranslation,
+                            const std::string &sourceRoot);
+  bool rewriteURLForDir(const VirtualHost *vhost, Transport *transport,
+                             const std::string &pathTranslation,
+                             const std::string &sourceRoot);
+  bool resolveGlobalURL(const VirtualHost *vhost,
+                        const std::string &pathTranslation,
+                        const std::string &sourceRoot);
   bool resolveURL(const VirtualHost *vhost,
                   const std::string &pathTranslation,
                   const std::string &sourceRoot);
@@ -98,4 +108,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_REQUEST_URI_H_

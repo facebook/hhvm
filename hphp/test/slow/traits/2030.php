@@ -1,17 +1,17 @@
-<?php
+<?hh
 
 trait ATrait {
   public static function get_class_name() {
     return __CLASS__;
   }
-  
+
   public function get_class_name_obj() {
     return __CLASS__;
   }
 }
 
 trait Indirect {
-	use ATrait;
+    use ATrait;
 }
 
 class SomeClass {
@@ -19,9 +19,9 @@ class SomeClass {
 }
 
 class UsingIndirect {
-	use Indirect;
+    use Indirect;
 }
-
+<<__EntryPoint>> function main(): void {
 $r = SomeClass::get_class_name();
 var_dump($r);
 
@@ -35,6 +35,4 @@ var_dump($r);
 $o = new UsingIndirect();
 $r = $o->get_class_name_obj();
 var_dump($r);
-
-
-?>
+}

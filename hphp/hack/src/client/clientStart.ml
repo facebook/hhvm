@@ -1,125 +1,220 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+open Hh_prelude
 module SMUtils = ServerMonitorUtils
 
 let get_hhserver () =
   let exe_name =
-    if Sys.win32 then "hh_server.exe" else "hh_server" in
+    if Sys.win32 then
+      "hh_server.exe"
+    else
+      "hh_server"
+  in
   let server_next_to_client =
-    Path.(to_string @@ concat (dirname executable_name) exe_name) in
-  if Sys.file_exists server_next_to_client
-  then server_next_to_client
-  else exe_name
+    Path.(to_string @@ concat (dirname executable_name) exe_name)
+  in
+  if Sys.file_exists server_next_to_client then
+    server_next_to_client
+  else
+    exe_name
 
 type env = {
   root: Path.t;
-  no_load : bool;
-  profile_log : bool;
-  silent : bool;
-  exit_on_failure : bool;
-  ai_mode : string option;
+  from: string;
+  no_load: bool;
+  watchman_debug_logging: bool;
+  log_inference_constraints: bool;
+  profile_log: bool;
+  silent: bool;
+  exit_on_failure: bool;
+  ai_mode: string option;
   debug_port: Unix.file_descr option;
-  ignore_hh_version : bool;
+  ignore_hh_version: bool;
+  saved_state_ignore_hhconfig: bool;
+  dynamic_view: bool;
+  prechecked: bool option;
+  config: (string * string) list;
+  custom_telemetry_data: (string * string) list;
+  allow_non_opt_build: bool;
 }
 
-let start_server env =
+let start_server (env : env) =
+  let {
+    root;
+    from;
+    no_load;
+    watchman_debug_logging;
+    log_inference_constraints;
+    profile_log;
+    silent;
+    exit_on_failure;
+    ai_mode;
+    debug_port;
+    ignore_hh_version;
+    saved_state_ignore_hhconfig;
+    dynamic_view;
+    prechecked;
+    config;
+    custom_telemetry_data;
+    allow_non_opt_build;
+  } =
+    env
+  in
   (* Create a pipe for synchronization with the server: we will wait
      until the server finishes its initialisation phase. *)
-  let in_fd, out_fd = Unix.pipe () in
+  let (in_fd, out_fd) = Unix.pipe () in
   Unix.set_close_on_exec in_fd;
   let ic = Unix.in_channel_of_descr in_fd in
-
+  let serialize_key_value_options
+      (option : string) (keyvalues : (string * string) list) =
+    keyvalues
+    |> List.map ~f:(fun (key, value) ->
+           [| option; Printf.sprintf "%s=%s" key value |])
+    |> Array.concat
+  in
   let ai_options =
-    match env.ai_mode with
+    match ai_mode with
     | Some ai -> [| "--ai"; ai |]
-    | None -> [||] in
+    | None -> [||]
+  in
   let hh_server = get_hhserver () in
   let hh_server_args =
-    Array.concat [
-      [|hh_server; "-d"; Path.to_string env.root|];
-      if env.no_load then [| "--no-load" |] else [||];
-      if env.profile_log then [| "--profile-log" |] else [||];
-      ai_options;
-      (** If the client starts up a server monitor process, the output of that
-       * bootup is passed to this FD - so this FD needs to be threaded
-       * through the server monitor process then to the typechecker process.
-       *
-       * Note: Yes, the FD is available in the monitor process as well, but
-       * it doesn't, and shouldn't, use it. *)
-      [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
-      if env.ignore_hh_version then [| "--ignore-hh-version" |] else [||];
-      match env.debug_port with
-        | None -> [| |]
+    Array.concat
+      [
+        [| hh_server; "-d"; Path.to_string root |];
+        ( if String.equal from "" then
+          [||]
+        else
+          [| "--from"; from |] );
+        ( if no_load then
+          [| "--no-load" |]
+        else
+          [||] );
+        ( if watchman_debug_logging then
+          [| "--watchman-debug-logging" |]
+        else
+          [||] );
+        ( if log_inference_constraints then
+          [| "--log-inference-constraints" |]
+        else
+          [||] );
+        ( if profile_log then
+          [| "--profile-log" |]
+        else
+          [||] );
+        ai_options;
+        (* If the client starts up a server monitor process, the output of that
+         * bootup is passed to this FD - so this FD needs to be threaded
+         * through the server monitor process then to the typechecker process.
+         *
+         * Note: Yes, the FD is available in the monitor process as well, but
+         * it doesn't, and shouldn't, use it. *)
+        [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
+        ( if ignore_hh_version then
+          [| "--ignore-hh-version" |]
+        else
+          [||] );
+        ( if saved_state_ignore_hhconfig then
+          [| "--saved-state-ignore-hhconfig" |]
+        else
+          [||] );
+        ( if dynamic_view then
+          [| "--dynamic-view" |]
+        else
+          [||] );
+        (match prechecked with
+        | Some true -> [| "--prechecked" |]
+        | _ -> [||]);
+        (match prechecked with
+        | Some false -> [| "--no-prechecked" |]
+        | _ -> [||]);
+        serialize_key_value_options "--config" config;
+        serialize_key_value_options
+          "--custom-telemetry-data"
+          custom_telemetry_data;
+        ( if allow_non_opt_build then
+          [| "--allow-non-opt-build" |]
+        else
+          [||] );
+        (match debug_port with
+        | None -> [||]
         | Some fd ->
-          [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]
-    ] in
-  if not env.silent then
-    Printf.eprintf "Server launched with the following command:\n\t%s\n%!"
-      (String.concat " "
-         (Array.to_list (Array.map Filename.quote hh_server_args)));
-
-  let stdin, stdout, stderr = if env.silent then
-    let nfd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in nfd, nfd, nfd
-  else
-    Unix.(stdin, stdout, stderr) in
-
+          [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]);
+      ]
+  in
+  let (stdin, stdout, stderr) =
+    if silent then
+      let nfd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in
+      (nfd, nfd, nfd)
+    else
+      Unix.(stdin, stdout, stderr)
+  in
   try
     let server_pid =
-      Unix.create_process hh_server hh_server_args stdin stdout stderr in
+      Unix.create_process hh_server hh_server_args stdin stdout stderr
+    in
     Unix.close out_fd;
 
-    match Unix.waitpid [] server_pid with
-    | _, Unix.WEXITED 0 ->
-      assert (input_line ic = ServerMonitorUtils.ready);
-      close_in ic
-    | _, Unix.WEXITED i ->
-      if not env.silent then Printf.eprintf
-          "Starting hh_server failed. Exited with status code: %d!\n" i;
-      if env.exit_on_failure then exit 77
+    match Sys_utils.waitpid_non_intr [] server_pid with
+    | (_, Unix.WEXITED 0) ->
+      assert (String.equal (Stdlib.input_line ic) ServerMonitorUtils.ready);
+      Stdlib.close_in ic
+    | (_, Unix.WEXITED i) ->
+      if not silent then
+        Printf.eprintf
+          "Starting hh_server failed. Exited with status code: %d!\n"
+          i;
+      if exit_on_failure then exit 77
     | _ ->
-      if not env.silent then Printf.eprintf "Could not start hh_server!\n";
-      if env.exit_on_failure then exit 77
+      if not silent then Printf.eprintf "Could not start hh_server!\n";
+      if exit_on_failure then exit 77
   with _ ->
-    if not env.silent then Printf.eprintf "Could not start hh_server!\n";
-    if env.exit_on_failure then exit 77
-
+    if not silent then Printf.eprintf "Could not start hh_server!\n";
+    if exit_on_failure then exit 77
 
 let should_start env =
   let root_s = Path.to_string env.root in
-  let handoff_options = {
-    MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
-    force_dormant_start = false;
-  } in
-  match ServerUtils.connect_to_monitor
-    ~timeout:3
-    env.root handoff_options with
+  let handoff_options =
+    MonitorRpc.
+      {
+        force_dormant_start = false;
+        pipe_name = HhServerMonitorConfig.(pipe_type_to_string Default);
+      }
+  in
+  let tracker = Connection_tracker.create () in
+  Hh_logger.log
+    "[%s] ClientStart.should_start"
+    (Connection_tracker.log_id tracker);
+  match
+    ServerUtils.connect_to_monitor ~tracker ~timeout:3 env.root handoff_options
+  with
   | Ok _conn -> false
   | Error
-      ( SMUtils.Server_missing
-      | SMUtils.Build_id_mismatched _
-      | SMUtils.Server_died
-      ) -> true
-  | Error SMUtils.Server_dormant ->
-    Printf.eprintf
-      "Server already exists but is dormant";
+      ( SMUtils.Server_missing_exn _ | SMUtils.Server_missing_timeout _
+      | SMUtils.Build_id_mismatched _ | SMUtils.Server_died ) ->
+    true
+  | Error SMUtils.Server_dormant
+  | Error SMUtils.Server_dormant_out_of_retries ->
+    Printf.eprintf "Server already exists but is dormant";
     false
-  | Error SMUtils.Monitor_socket_not_ready
+  | Error (SMUtils.Monitor_socket_not_ready _)
   | Error SMUtils.Monitor_establish_connection_timeout
-  | Error SMUtils.Monitor_connection_failure ->
+  | Error (SMUtils.Monitor_connection_failure _) ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
-    ClientStop.kill_server env.root;
+    ClientStop.kill_server env.root env.from;
     true
 
-let main env =
+let main (env : env) : Exit_status.t Lwt.t =
+  HackEventLogger.set_from env.from;
   HackEventLogger.client_start ();
+
   (* TODO(ljw): There are some race conditions here. First scenario: two      *)
   (* processes simultaneously do 'hh start' while the server isn't running.   *)
   (* Both their calls to should_start will see the lockfile absent and        *)
@@ -163,14 +258,13 @@ let main env =
   (* immediately get ECONNREFUSED during the delay window, so it will retry   *)
   (* connection attempt immediately, and it might burn through all of its     *)
   (* available retries instantly. That's because ECONNREFUSED is immediate.   *)
-  if should_start env
-  then begin
+  if should_start env then (
     start_server env;
-    Exit_status.No_error
-  end else begin
-    if not env.silent then Printf.eprintf
-      "Error: Server already exists for %s\n\
-      Use hh_client restart if you want to kill it and start a new one\n%!"
-      (Path.to_string env.root);
-    Exit_status.Server_already_exists
-  end
+    Lwt.return Exit_status.No_error
+  ) else (
+    if not env.silent then
+      Printf.eprintf
+        "Error: Server already exists for %s\nUse hh_client restart if you want to kill it and start a new one\n%!"
+        (Path.to_string env.root);
+    Lwt.return Exit_status.Server_already_exists
+  )

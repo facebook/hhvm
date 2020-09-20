@@ -21,6 +21,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/portability/Sockets.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -30,6 +31,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/network.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,18 +39,20 @@ namespace HPHP {
 
 static Mutex NetworkMutex;
 
-Variant HHVM_FUNCTION(gethostname) {
-  char h_name[HOST_NAME_MAX + 1];
-
-  if (gethostname(h_name, sizeof(h_name)) != 0) {
-    raise_warning(
-        "gethostname() failed with errorno=%d: %s", errno, strerror(errno));
-    return false;
+TypedValue HHVM_FUNCTION(gethostname) {
+  static StringData* hostname = nullptr;
+  if (!hostname) {
+    char h_name[HOST_NAME_MAX + 1];
+    if (gethostname(h_name, sizeof(h_name)) != 0) {
+      raise_warning("gethostname() failed with errorno=%d", errno);
+      return make_tv<KindOfBoolean>(false);
+    }
+    // gethostname may not null-terminate
+    h_name[sizeof(h_name) - 1] = '\0';
+    Lock lock(NetworkMutex);
+    if (!hostname) hostname = makeStaticString(h_name);
   }
-  // gethostname may not null-terminate
-  h_name[sizeof(h_name) - 1] = '\0';
-
-  return String(h_name, CopyString);
+  return make_tv<KindOfPersistentString>(hostname);
 }
 
 Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
@@ -76,8 +80,6 @@ Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address) {
   return ip_address;
 }
 
-const StaticString s_empty("");
-
 String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   IOStatusHelper io("gethostbyname", hostname.data());
 
@@ -90,7 +92,7 @@ String HHVM_FUNCTION(gethostbyname, const String& hostname) {
   memcpy(&in.s_addr, *(result.hostbuf.h_addr_list), sizeof(in.s_addr));
   try {
     return String(folly::IPAddressV4(in).str());
-  } catch (folly::IPAddressFormatException &e) {
+  } catch (folly::IPAddressFormatException& e) {
     return hostname;
   }
 }
@@ -102,12 +104,12 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
     return false;
   }
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
     try {
       ret.append(String(folly::IPAddressV4(in).str()));
-    } catch (folly::IPAddressFormatException &e) {
+    } catch (folly::IPAddressFormatException& e) {
         // ok to skip
     }
   }
@@ -164,29 +166,58 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
     return false;
   }
 
-  char buffer[40];
-  if (!inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
+  char buffer[INET6_ADDRSTRLEN];
+  if (!::inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
     raise_warning("An unknown error occurred");
     return false;
   }
   return String(buffer, CopyString);
 }
 
+TypedValue HHVM_FUNCTION(inet_ntop_folly, const String& in_addr) {
+  try {
+    auto const ip = folly::IPAddress::fromBinary(in_addr.slice());
+    return tvReturn(String{std::move(ip.str())});
+  } catch (folly::IPAddressFormatException&) {
+    return make_tv<KindOfNull>();
+  }
+}
+
+TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr) {
+  int af = AF_INET6;
+  size_t buflen = INET6_ADDRSTRLEN;
+  switch (in_addr.size()) {
+    case 16: break;
+    case 4:
+      af = AF_INET;
+      buflen = INET_ADDRSTRLEN;
+      break;
+    default:
+      return make_tv<KindOfNull>();
+  }
+  String ret(buflen, ReserveString);
+  auto buffer = ret.mutableData();
+  if (!::inet_ntop(af, in_addr.data(), buffer, buflen)) {
+    return make_tv<KindOfNull>();
+  }
+  ret.setSize(std::min(strlen(buffer), buflen));
+  return tvReturn(std::move(ret));
+}
+
 Variant HHVM_FUNCTION(inet_pton, const String& address) {
   int af = AF_INET;
-  const char *saddress = address.data();
-  if (strchr(saddress, ':')) {
+  if (address.find(':') != String::npos) {
     af = AF_INET6;
-  } else if (!strchr(saddress, '.')) {
-    raise_warning("Unrecognized address %s", saddress);
+  } else if (address.find('.') == String::npos) {
+    raise_warning("Unrecognized address %s", address.c_str());
     return false;
   }
 
   char buffer[17];
   memset(buffer, 0, sizeof(buffer));
-  int ret = inet_pton(af, saddress, buffer);
+  int ret = ::inet_pton(af, address.c_str(), buffer);
   if (ret <= 0) {
-    raise_warning("Unrecognized address %s", saddress);
+    raise_warning("Unrecognized address %s", address.c_str());
     return false;
   }
 
@@ -207,8 +238,8 @@ String HHVM_FUNCTION(long2ip, const String& proper_address) {
   unsigned long ul = strtoul(proper_address.c_str(), nullptr, 0);
   try {
     return folly::IPAddress::fromLongHBO(ul).str();
-  } catch (folly::IPAddressFormatException &e) {
-    return s_empty;
+  } catch (folly::IPAddressFormatException& e) {
+    return empty_string();
   }
 }
 
@@ -282,7 +313,7 @@ void HHVM_FUNCTION(header, const String& str, bool replace /* = true */,
   }
 }
 
-static THREAD_LOCAL(int, s_response_code);
+static RDS_LOCAL(int, s_response_code);
 
 Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
   Transport *transport = g_context->getTransport();
@@ -306,33 +337,35 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
 }
 
 Array HHVM_FUNCTION(headers_list) {
-  Transport *transport = g_context->getTransport();
-  Array ret = Array::Create();
+  auto const transport = g_context->getTransport();
+  auto ret = Array::CreateVArray();
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end(); ++iter) {
-      const std::vector<std::string> &values = iter->second;
-      for (unsigned int i = 0; i < values.size(); i++) {
-        ret.append(String(iter->first + ": " + values[i]));
+    for (const auto& iter : headers) {
+      for (const auto& values : iter.second) {
+        ret.append(String(iter.first + ": " + values));
       }
     }
   }
   return ret;
 }
 
-bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
-                                 VRefParam line /* = null */) {
+bool HHVM_FUNCTION(headers_sent_with_file_line,
+                   Variant& file,
+                   Variant& line) {
   Transport *transport = g_context->getTransport();
   if (transport) {
-    file.assignIfRef(String(transport->getFirstHeaderFile()));
-    line.assignIfRef(transport->getFirstHeaderLine());
+    file = String(transport->getFirstHeaderFile());
+    line = transport->getFirstHeaderLine();
     return transport->headersSent();
-  } else {
-    return g_context->getStdoutBytesWritten() > 0;
   }
-  return false;
+  return g_context->getStdoutBytesWritten() > 0;
+}
+
+bool HHVM_FUNCTION(headers_sent) {
+  Variant file, line;
+  return HHVM_FN(headers_sent_with_file_line)(file, line);
 }
 
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
@@ -433,7 +466,7 @@ bool validate_dns_arguments(const String& host, const String& type,
     stype = type.data();
   }
   if (host.empty()) {
-    throw_invalid_argument("host: [empty]");
+    raise_invalid_argument_warning("host: [empty]");
   }
 
   if (!strcasecmp("A", stype)) ntype = DNS_T_A;
@@ -449,7 +482,7 @@ bool validate_dns_arguments(const String& host, const String& type,
   else if (!strcasecmp("NAPTR", stype)) ntype = DNS_T_NAPTR;
   else if (!strcasecmp("A6",    stype)) ntype = DNS_T_A6;
   else {
-    throw_invalid_argument("type: %s", stype);
+    raise_invalid_argument_warning("type: %s", stype);
     return false;
   }
 
@@ -466,6 +499,8 @@ void StandardExtension::initNetwork() {
   HHVM_FE(getservbyname);
   HHVM_FE(getservbyport);
   HHVM_FE(inet_ntop);
+  HHVM_FE(inet_ntop_nullable);
+  HHVM_FE(inet_ntop_folly);
   HHVM_FE(inet_pton);
   HHVM_FE(ip2long);
   HHVM_FE(long2ip);
@@ -476,6 +511,7 @@ void StandardExtension::initNetwork() {
   HHVM_FE(http_response_code);
   HHVM_FE(headers_list);
   HHVM_FE(headers_sent);
+  HHVM_FE(headers_sent_with_file_line);
   HHVM_FE(header_register_callback);
   HHVM_FE(header_remove);
   HHVM_FE(get_http_request_size);

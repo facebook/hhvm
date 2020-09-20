@@ -2,10 +2,10 @@
 
 /**
  * Test confilicting AKempty promotions - in one branch it's promoted to
- * AKvec, in another to AKmap. Should be unresolved of those two afterwards.
+ * AKvarray, in another to AKdarray. Should be unresolved of those two afterwards.
  */
 function test(bool $b): void {
-  $a = array();
+  $a = varray[];
   if ($b) {
     $a[] = 'aaa';
   } else {

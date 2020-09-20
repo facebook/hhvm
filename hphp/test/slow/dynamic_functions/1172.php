@@ -1,7 +1,11 @@
-<?php
+<?hh
 
 function test($a) {
  print $a;
 }
- $a = 'Test';
+
+ <<__EntryPoint>>
+function main_1172() {
+$a = 'Test';
  $a('ok');
+}

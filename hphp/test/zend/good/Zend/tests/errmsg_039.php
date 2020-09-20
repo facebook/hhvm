@@ -1,9 +1,11 @@
-<?php
+<?hh
 
 class test {
-	var $var;
-	var $var;
+  public $var;
+  public $var;
 }
 
-echo "Done\n";
-?>
+<<__EntryPoint>>
+function main(): void {
+  echo "Done\n";
+}

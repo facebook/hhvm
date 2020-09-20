@@ -1,55 +1,55 @@
-object(SimpleXMLElement)#%d (2) {
+object(SimpleXMLElement) (2) {
   ["b"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["c"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["x"]=>
-    object(SimpleXMLElement)#%d (0) {
+    object(SimpleXMLElement) (0) {
     }
   }
 }
 
-object(SimpleXMLElement)#%d (3) {
+object(SimpleXMLElement) (3) {
   ["b"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["d"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["c"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["x"]=>
-    object(SimpleXMLElement)#%d (0) {
+    object(SimpleXMLElement) (0) {
     }
   }
 }
 
-object(SimpleXMLElement)#%d (2) {
+object(SimpleXMLElement) (2) {
   ["b"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["c"]=>
-  object(SimpleXMLElement)#%d (2) {
+  object(SimpleXMLElement) (2) {
     ["d"]=>
-    object(SimpleXMLElement)#%d (0) {
+    object(SimpleXMLElement) (0) {
     }
     ["x"]=>
-    object(SimpleXMLElement)#%d (0) {
+    object(SimpleXMLElement) (0) {
     }
   }
 }
 
-object(SimpleXMLElement)#%d (2) {
+object(SimpleXMLElement) (2) {
   ["b"]=>
-  object(SimpleXMLElement)#%d (0) {
+  object(SimpleXMLElement) (0) {
   }
   ["c"]=>
-  object(SimpleXMLElement)#%d (1) {
+  object(SimpleXMLElement) (1) {
     ["d"]=>
-    object(SimpleXMLElement)#%d (1) {
+    object(SimpleXMLElement) (1) {
       ["x"]=>
-      object(SimpleXMLElement)#%d (0) {
+      object(SimpleXMLElement) (0) {
       }
     }
   }

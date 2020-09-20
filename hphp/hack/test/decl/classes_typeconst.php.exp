@@ -1,0 +1,154 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\C" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+      sc_name = ([4:7-8], "\\C"); sc_tparams = []; sc_where_constraints = [];
+      sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts = [];
+      sc_typeconsts =
+      [{ Shallow_decl_defs.stc_abstract = TCConcrete; stc_constraint = None;
+         stc_name = ([5:14-15], "T");
+         stc_type =
+         (Some (Rhint (root|classes_typeconst.php line 5, characters 18-20),
+                (Tprim Tint)));
+         stc_enforceable = ([Pos.none], false); stc_reifiable = None };
+        { Shallow_decl_defs.stc_abstract = TCConcrete; stc_constraint = None;
+          stc_name = ([15:14-16], "T2");
+          stc_type =
+          (Some (Rhint (root|classes_typeconst.php line 15, characters 19-24),
+                 (Tprim Tstring)));
+          stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+        ];
+      sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
+      sc_static_methods = [];
+      sc_methods =
+      [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+         sm_memoizelsb = false; sm_name = ([7:19-20], "f");
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
+         sm_type =
+         (Rwitness (root|classes_typeconst.php line 7, characters 19-19),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_typeconst.php line 7, characters 19-19),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|classes_typeconst.php line 7, characters 24-30),
+                  (Taccess
+                     ((Rhint (root|classes_typeconst.php line 7, characters 24-27),
+                       Tthis),
+                      [([7:30-31], "T")])))
+                 };
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
+         sm_visibility = Public; sm_deprecated = None };
+        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+          sm_memoizelsb = false; sm_name = ([11:19-20], "g");
+          sm_override = false; sm_dynamicallycallable = false;
+          sm_reactivity = None;
+          sm_type =
+          (Rwitness (root|classes_typeconst.php line 11, characters 19-19),
+           (Tfun
+              { ft_arity = (Fstandard ()); ft_tparams = [];
+                ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes_typeconst.php line 11, characters 19-19),
+                   (Tunion []))
+                  };
+                ft_ret =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|classes_typeconst.php line 11, characters 24-31),
+                   (Taccess
+                      ((Rhint (root|classes_typeconst.php line 11, characters 24-27),
+                        Tthis),
+                       [([11:30-32], "T2")])))
+                  };
+                ft_flags =
+                (make_ft_flags sync none ~return_disposable:false
+                  ~returns_mutable:false ~returns_void_to_rx:false);
+                ft_reactive = Nonreactive }));
+          sm_visibility = Public; sm_deprecated = None }
+        ];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      };
+    "\\C2" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
+      sc_name = ([18:16-18], "\\C2"); sc_tparams = [];
+      sc_where_constraints = []; sc_extends = []; sc_uses = [];
+      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+      sc_implements = []; sc_consts = [];
+      sc_typeconsts =
+      [{ Shallow_decl_defs.stc_abstract = TCAbstract {};
+         stc_constraint =
+         (Some (Rhint (root|classes_typeconst.php line 19, characters 37-37),
+                (Tapply (([19:37-38], "\\C"), []))));
+         stc_name = ([19:23-33], "TConstType"); stc_type = None;
+         stc_enforceable = ([Pos.none], false); stc_reifiable = None }
+        ];
+      sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
+      sc_static_methods = [];
+      sc_methods =
+      [{ Shallow_decl_defs.sm_abstract = true; sm_final = false;
+         sm_memoizelsb = false; sm_name = ([20:28-39], "instantiate");
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
+         sm_type =
+         (Rwitness (root|classes_typeconst.php line 20, characters 28-38),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = [];
+               ft_params =
+               [{ fp_pos = [20:60-68]; fp_name = (Some "$request");
+                  fp_type =
+                  { et_enforced = false;
+                    et_type =
+                    (Rhint (root|classes_typeconst.php line 20, characters 40-58),
+                     (Taccess
+                        ((Rhint (root|classes_typeconst.php line 20, characters 40-43),
+                          Tthis),
+                         [([20:46-56], "TConstType"); ([20:58-59], "T")])))
+                    };
+                  fp_flags =
+                  (make_fp_flags ~mutability:none ~accept_disposable:false
+                    ~has_default:false ~mode:FPnormal);
+                   }
+                 ];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_typeconst.php line 20, characters 28-38),
+                  (Tunion []))
+                 };
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|classes_typeconst.php line 20, characters 71-86),
+                  (Taccess
+                     ((Rhint (root|classes_typeconst.php line 20, characters 71-74),
+                       Tthis),
+                      [([20:77-87], "TConstType")])))
+                 };
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
+         sm_visibility = Public; sm_deprecated = None }
+        ];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      } };
+  funs = {}; typedefs = {}; consts = {} }
+
+They matched!

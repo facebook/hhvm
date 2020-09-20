@@ -13,24 +13,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WORD_MEM_H_
-#define incl_HPHP_WORD_MEM_H_
+#pragma once
 
 #include <limits>
 #include <folly/Portability.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
 
 extern "C" void* _memcpy8(void* dst, const void* src, size_t len);
 extern "C" void* _memcpy16(void* dst, const void* src, size_t len);
 extern "C" void _bcopy32(void* dst, const void* src, size_t len);
 extern "C" void _bcopy_in_64(void* dst, const void* src, size_t lenIn64);
-
-#ifdef __APPLE__
-#define ASM_LOCAL_LABEL(x) "L" x
-#else
-#define ASM_LOCAL_LABEL(x) ".L" x
-#endif
 
 namespace HPHP {
 
@@ -130,6 +124,7 @@ inline void bcopy32_inline(void* dst, const void* src, size_t len) {
                        "bgt    " ASM_LOCAL_LABEL("BCP32%=") "\n"
                        : "+r"(len), "+r"(src), "+r"(dst),
                          "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6), "=r"(t7)
+                       :: "cc"
                       );
 #else
   bcopy32(dst, src, len);
@@ -179,6 +174,7 @@ inline void memcpy16_inline(void* dst, const void* src, size_t len) {
                        : "+r"(len), "+r"(src), "+r"(dst),
                          "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6),
                          "=r"(s1), "=r"(d1), "=r"(d2)
+                       :: "cc"
                       );
 #else
   memcpy16(dst, src, len);
@@ -193,11 +189,11 @@ inline void memcpy16_inline(void* dst, const void* src, size_t len) {
  * the two strings have the same length. It will not check for the null
  * terminator.
  *
- * Assumes that the the buffer addresses are word aligned, and that it can
- * read lenBytes rounded up to a whole word. This is possible in HPHP because
- * we always allocate whole numbers of words.
- * The final word compare is adjusted to handle the slack in lenBytes so only
- * the bytes we care about are compared.
+ * Assumes that the buffer addresses are word aligned, and that it can read
+ * lenBytes rounded up to a whole word. This is possible in HPHP because we
+ * always allocate whole numbers of words.  The final word compare is adjusted
+ * to handle the slack in lenBytes so only the bytes we care about are
+ * compared.
  */
 ALWAYS_INLINE
 bool wordsame(const void* mem1, const void* mem2, uint32_t lenBytes) {
@@ -288,4 +284,3 @@ T* wordfillones(T* ptr, size_t numT) {
 
 }
 
-#endif

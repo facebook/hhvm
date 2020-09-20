@@ -2,6 +2,5 @@
 
 -- Testing array_merge() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_merge() expects at least 1 parameter, 0 given in %s/array_merge_error.php on line 16
 Done

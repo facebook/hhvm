@@ -20,47 +20,27 @@ string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
-
-Notice: %s
-string(0) ""
--- Iteration 11 --
-
-Notice: %s
-string(1) "0"
--- Iteration 12 --
-
-Notice: %s
-string(1) "1"
--- Iteration 13 --
-
-Notice: %s
-string(7) "1Array2"
--- Iteration 14 --
-
-Notice: %s
-string(11) "redArraypen"
--- Iteration 15 --
 string(17) "element11element2"
+-- Iteration 11 --
+string(16) "element1element2"
+-- Iteration 12 --
+string(17) "element11element2"
+-- Iteration 13 --
+string(16) "element1element2"
+-- Iteration 14 --
+string(26) "element1testObjectelement2"
+-- Iteration 15 --
+string(16) "element1element2"
 -- Iteration 16 --
 string(16) "element1element2"
 -- Iteration 17 --
-string(17) "element11element2"
+string(16) "element1element2"
 -- Iteration 18 --
 string(16) "element1element2"
 -- Iteration 19 --
-string(26) "element1testObjectelement2"
+string(%d) "element1Resource id #%delement2"
 -- Iteration 20 --
 string(16) "element1element2"
 -- Iteration 21 --
-string(16) "element1element2"
--- Iteration 22 --
-string(16) "element1element2"
--- Iteration 23 --
-string(16) "element1element2"
--- Iteration 24 --
-string(%d) "element1Resource id #%delement2"
--- Iteration 25 --
-string(16) "element1element2"
--- Iteration 26 --
 string(16) "element1element2"
 Done

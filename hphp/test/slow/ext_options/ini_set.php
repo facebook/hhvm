@@ -1,6 +1,9 @@
-<?php
+<?hh
+
 
 // PHP_INI_ALL
+<<__EntryPoint>>
+function main_ini_set() {
 var_dump(ini_set('arg_separator.output', 'foo'));
 var_dump(ini_get('arg_separator.output'));
 
@@ -23,3 +26,4 @@ var_dump(ini_get('always_populate_raw_post_data'));
 // ini_set with values expecting numbers but given an empty string
 var_dump(ini_set('error_reporting', ''));
 var_dump(ini_get('error_reporting'));
+}

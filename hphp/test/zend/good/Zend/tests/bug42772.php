@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
     static public $foo;
     function __toString() {
@@ -6,7 +6,7 @@ class Foo {
         return 'foo';
     }
 }
-
+<<__EntryPoint>> function main(): void {
 $foo = (string)new Foo();
 var_dump(Foo::$foo);
-?>
+}

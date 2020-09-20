@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -49,9 +50,9 @@ bool doPass(IRUnit& unit, PassFN fn, DCE dce) {
   return result;
 }
 
-void removeExitPlaceholders(IRUnit& unit) {
+void removeJmpPlaceholders(IRUnit& unit) {
   for (auto& block : rpoSortCfg(unit)) {
-    if (block->back().is(ExitPlaceholder)) {
+    if (block->back().is(JmpPlaceholder)) {
       unit.replace(&block->back(), Jmp, block->next());
     }
   }
@@ -152,6 +153,14 @@ void fixBlockHints(IRUnit& unit) {
   } while (changed);
 }
 
+uint64_t count_inline_returns(const IRUnit& unit) {
+  uint64_t ret = 0;
+  forEachInst(poSortCfg(unit), [&] (const IRInstruction* inst) {
+    if (inst->is(InlineReturn)) ++ret;
+  });
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -159,60 +168,68 @@ void fixBlockHints(IRUnit& unit) {
 void optimize(IRUnit& unit, TransKind kind) {
   Timer timer(Timer::optimize, unit.logEntry().get_pointer());
 
+  tracing::Block _{
+    "hhir-optimize",
+    [&] { return traceProps(unit).add("trans_kind", show(kind)); }
+  };
+
   assertx(checkEverything(unit));
 
-  fullDCE(unit);
+  // We use JmpPlaceholders to hide specialized iterators until we use them.
+  // Any placeholders that survive irgen are just another kind of dead code.
+  doPass(unit, removeJmpPlaceholders, DCE::Full);
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
+    rqtrace::EventGuard trace{"OPT_PRED"};
     doPass(unit, optimizePredictions, DCE::None);
   }
 
   if (RuntimeOption::EvalHHIRSimplification) {
+    rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
     doPass(unit, cleanCfg, DCE::None);
   }
 
   if (RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
 
+  auto inline_returns = count_inline_returns(unit);
   while (true) {
     if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+      rqtrace::EventGuard trace{"OPT_LOAD"};
       doPass(unit, optimizeLoads, DCE::Full);
       printUnit(6, unit, " after optimizeLoads ");
     }
 
     if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+      rqtrace::EventGuard trace{"OPT_STORE"};
       doPass(unit, optimizeStores, DCE::Full);
       printUnit(6, unit, " after optimizeStores ");
     }
 
-    if (RuntimeOption::EvalHHIRPartialInlineFrameOpts) {
-      doPass(unit, optimizeInlineReturns, DCE::Full);
-      printUnit(6, unit, " after optimizeInlineReturns ");
-    }
+    auto const prev_inline_returns = inline_returns;
+    if (inline_returns) inline_returns = count_inline_returns(unit);
 
-    if (!doPass(unit, optimizePhis, DCE::Full)) break;
+    rqtrace::EventGuard trace{"OPT_PHI"};
+    if (!doPass(unit, optimizePhis, DCE::Full)) {
+      if (prev_inline_returns != inline_returns) continue;
+      break;
+    }
     doPass(unit, cleanCfg, DCE::None);
     printUnit(6, unit, " after optimizePhis ");
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
+    rqtrace::EventGuard trace{"OPT_REFS"};
     doPass(unit, optimizeRefcounts, DCE::Full);
     printUnit(6, unit, " after optimizeRefCounts ");
   }
 
-  if (RuntimeOption::EvalHHIRLICM && cfgHasLoop(unit) &&
-      kind != TransKind::Profile) {
-    doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
-    printUnit(6, unit, " after optimizeLoopInvariantCode ");
-  }
-
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);
-
-  doPass(unit, removeExitPlaceholders, DCE::Full);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     doPass(unit, insertAsserts, DCE::None);
@@ -224,14 +241,19 @@ void optimize(IRUnit& unit, TransKind kind) {
 
   if (kind != TransKind::Profile &&
       RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    rqtrace::EventGuard trace{"OPT_GVN"};
     doPass(unit, gvn, DCE::Full);
   }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
+    rqtrace::EventGuard trace{"OPT_SIMPLIFY"};
     doPass(unit, simplifyPass, DCE::Full);
   }
   doPass(unit, fixBlockHints, DCE::None);
 
+  if (kind == TransKind::Optimize) {
+    doPass(unit, selectiveWeakenDecRefs, DCE::None);
+  }
   printUnit(6, unit, " after optimize ");
 }
 

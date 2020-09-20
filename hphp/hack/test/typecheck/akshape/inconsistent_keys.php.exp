@@ -1,5 +1,0 @@
-File "inconsistent_keys.php", line 17, characters 3-13:
-  array<^(string), ^(int | string)>
-File "inconsistent_keys.php", line 20, characters 3-13:
-  array<^(string), ^(int | string)>
-No errors

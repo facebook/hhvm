@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MCGEN_H_
-#define incl_HPHP_JIT_MCGEN_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -33,7 +32,12 @@ namespace jit {
 struct IRUnit;
 struct Vunit;
 
-namespace tc { struct LocalTCBuffer; }
+namespace tc {
+
+struct LocalTCBuffer;
+struct FuncMetaInfo;
+
+}
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -47,9 +51,19 @@ struct TransArgs {
   Annotations annotations;
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
+  // A sequential per function index to identify optimized
+  // translations in TRACE and StructuredLog output (in particular to
+  // make it possible to cross reference between the two).
+  int optIndex{0};
   TransKind kind{TransKind::Invalid};
   RegionDescPtr region{nullptr};
 };
+
+inline tracing::Props traceProps(const TransArgs& a) {
+  return traceProps(a.sk.func())
+    .add("sk", show(a.sk))
+    .add("trans_kind", show(a.kind));
+}
 
 /*
  * The state of a partially-complete translation.
@@ -110,10 +124,20 @@ TCA retranslate(TransArgs args, const RegionContext& ctx);
 bool retranslateOpt(FuncId funcId);
 
 /*
- * In JitPGO mode, check whether enough profile data has been collected and,
- * if we haven't retranslated
+ * In JitPGO mode, run retranslateAll if its enabled, we haven't already run it,
+ * and either force is true, or we've collected "enough" profile data.
+ *
+ * In CLI mode, or when force is true, wait for retranslateAll to
+ * finish; otherwise let it run in parallel.
  */
-void checkRetranslateAll();
+void checkRetranslateAll(bool force = false);
+
+/*
+ * If JIT optimized code profile-data serialization is enabled and scheduled to
+ * trigger in the future, check if we hit one of the triggering conditions and,
+ * of so, append the data to the file containing the serialized profile.
+ */
+void checkSerializeOptProf();
 
 /*
  * Called once when the JIT is activated to initialize internal mcgen structures
@@ -127,6 +151,12 @@ void processInit();
 void joinWorkerThreads();
 
 /*
+ * Wait until the specified function has been optimized by the
+ * retranslateAll workers.
+ */
+void waitForTranslate(const tc::FuncMetaInfo&);
+
+/*
  * True iff mcgen::processInit() has been called
  */
 bool initialized();
@@ -137,15 +167,9 @@ bool initialized();
 int64_t jitInitTime();
 
 /*
- * Whether we should dump TC annotations for translations of `func' of
- * `transKind'.
+ * Whether we should dump TC annotations for translations of `transKind'.
  */
-bool dumpTCAnnotation(const Func& func, TransKind transKind);
-
-/*
- * Is still a pending call to retranslateAll()
- */
-bool retranslateAllPending();
+bool dumpTCAnnotation(TransKind transKind);
 
 /*
  * How many JIT worker threads are active.
@@ -154,4 +178,3 @@ int getActiveWorker();
 
 }}}
 
-#endif

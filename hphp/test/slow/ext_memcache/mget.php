@@ -1,9 +1,9 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $memcache = new Memcache();
 $memcache->addServer('localhost', 11211);
 
-$keys = [
+$keys = varray[
   'abcdef1',
   'abcdef11',
   'abcdef12',
@@ -15,3 +15,4 @@ foreach($keys as $k) {
 }
 $r = $memcache->get($keys);
 var_dump($r);
+}

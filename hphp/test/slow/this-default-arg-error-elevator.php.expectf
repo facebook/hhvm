@@ -1,0 +1,6 @@
+
+Warning: Failed to eval default value of flerbo()'s $x argument for reflection, assigning NULL instead in %s/this-default-arg-error-elevator.php on line 26
+NULL
+
+Warning: Failed to eval default value of A::blarf()'s $x argument for reflection, assigning NULL instead in %s/this-default-arg-error-elevator.php on line 29
+NULL

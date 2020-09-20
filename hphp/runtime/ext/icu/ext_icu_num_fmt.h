@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_NUMFMT_H
-#define incl_HPHP_ICU_NUMFMT_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -51,8 +50,8 @@ struct NumberFormatter : IntlError {
 
   static Object newInstance() {
     if (!c_NumberFormatter) {
-      c_NumberFormatter = Unit::lookupClass(s_NumberFormatter.get());
-      assert(c_NumberFormatter);
+      c_NumberFormatter = Class::lookup(s_NumberFormatter.get());
+      assertx(c_NumberFormatter);
     }
     return Object{c_NumberFormatter};
   }
@@ -70,4 +69,3 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_NUMFMT_H

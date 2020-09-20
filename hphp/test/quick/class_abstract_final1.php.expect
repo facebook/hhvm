@@ -2,10 +2,6 @@ Utils::staticMethod
 Utils::protStaticMethod
 Utils::privStaticMethod Utils::prop
 Tr::staticTraitMethod
-C::nonStaticInheritedMethod of Utils
-this: undefined
-Tr::nonStaticTraitMethod of Utils
-this: undefined
 ReflectionClass::isAbstract => bool(true)
 ReflectionClass::isFinal => bool(true)
 ReflectionClass::isInstantiable => bool(false)

@@ -59,6 +59,9 @@ function main() {
   var_dump($x);
 }
 
-main();
 
+<<__EntryPoint>>
+function entrypoint_flow_excep(): void {
 
+  main();
+}

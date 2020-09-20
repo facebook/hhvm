@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_highlight_init_test() {
 var_dump(ini_get('highlight.comment'));
 var_dump(ini_get('highlight.default'));
 var_dump(ini_get('highlight.keyword'));
@@ -16,3 +19,4 @@ var_dump(ini_get('highlight.default'));
 var_dump(ini_get('highlight.keyword'));
 var_dump(ini_get('highlight.string'));
 var_dump(ini_get('highlight.html'));
+}

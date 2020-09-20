@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 $doc->loadXML('<root/>');
 
@@ -19,7 +19,7 @@ try {
 }
 
 try {
-  $root->setAttributeNS(NULL, '@ghi', '789');
+  $root->setAttributeNS('', '@ghi', '789');
 } catch (DOMException $e) {
   echo $e->getMessage()."\n";
 }
@@ -31,4 +31,4 @@ try {
 }
 
 echo $doc->saveXML($root);
-?>
+}

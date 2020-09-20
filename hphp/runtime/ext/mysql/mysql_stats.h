@@ -15,14 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MYSQLSTATS_H_
-#define incl_HPHP_MYSQLSTATS_H_
+#pragma once
 
-#include <string>
-#include <memory>
-
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/lock.h"
+#include <memory>
+#include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +69,7 @@ private:
   struct Stats {
     int actions[VERB_COUNT];
   };
-  typedef hphp_string_map<std::shared_ptr<Stats>> StatsMap;
+  using StatsMap = hphp_string_map<std::shared_ptr<Stats>>;
 
   static bool s_inited;
   static hphp_string_map<Verb> s_verbs;
@@ -88,4 +86,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_MYSQLSTATS_H_

@@ -1,2 +1,32 @@
-1,1,0,0
+OK
+OK
+OK
+OK
+OK
+OK
+
+Assert failed:
+Left:  int(9223372036854775807)
+Right: float(-9.2233720368548E+18)
+OK
+OK
+OK
+
+Assert failed:
+Left:  int(9223372036854775807)
+Right: float(-9.2233720368548E+18)
+OK
+OK
+
+Assert failed:
+Left:  int(-9223372036854775808)
+Right: float(9.2233720368548E+18)
+OK
+OK
+OK
+
+Assert failed:
+Left:  int(-9223372036854775808)
+Right: float(9.2233720368548E+18)
+OK
 OK

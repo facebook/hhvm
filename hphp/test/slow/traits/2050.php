@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   static function foo() {
@@ -16,11 +16,10 @@ trait T2 {
 trait T3 {
  use T2;
  }
-$x = new D();
-$x->foo();
+<<__EntryPoint>> function main(): void {
 C::foo();
 D::foo();
 T::foo();
 T2::foo();
 T3::foo();
-?>
+}

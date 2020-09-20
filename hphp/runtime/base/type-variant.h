@@ -14,20 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VARIANT_H_
-#define incl_HPHP_VARIANT_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-resource.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/rclass-meth-data.h"
+#include "hphp/runtime/vm/rfunc-data.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -37,11 +39,198 @@ namespace HPHP {
 
 // Forward declare these to avoid including tv-conversions.h which has a
 // circular dependency with this file.
-void tvCastToVecInPlace(TypedValue*);
-void tvCastToDictInPlace(TypedValue*);
-void tvCastToKeysetInPlace(TypedValue*);
-void tvCastToVArrayInPlace(TypedValue*);
-void tvCastToDArrayInPlace(TypedValue*);
+
+struct OptionalVariant;
+
+/*
+ * These structs are substitutes for Variant& or const Variant&, when there's
+ * no actual Variant in memory to take a reference to (when working with a
+ * tv_lval from an Array, for example). They should be treated with the same
+ * care as normal references: when copying or storing a variant_ref or
+ * const_variant_ref, think carefully about the lifetime of the underlying
+ * data.
+ */
+namespace variant_ref_detail {
+template<bool is_const>
+struct base {
+private:
+  using tv_val_t = typename std::conditional<is_const, tv_rval, tv_lval>::type;
+
+public:
+  explicit base(tv_val_t val) : m_val{val} {}
+
+  DataType getType() const {
+    return type(m_val);
+  }
+  bool isNull()      const { return isNullType(getType()); }
+  bool isBoolean()   const { return isBooleanType(getType()); }
+  bool isInteger()   const { return isIntType(getType()); }
+  bool isDouble()    const { return isDoubleType(getType()); }
+  bool isString()    const { return isStringType(getType()); }
+  bool isArray()     const { return isArrayLikeType(getType()); }
+  bool isPHPArray()  const { return isArrayType(getType()); }
+  bool isVec()       const { return isVecType(getType()); }
+  bool isDict()      const { return isDictType(getType()); }
+  bool isKeyset()    const { return isKeysetType(getType()); }
+  bool isHackArray() const { return isHackArrayType(getType()); }
+  bool isObject()    const { return isObjectType(getType()); }
+  bool isResource()  const { return isResourceType(getType()); }
+  bool isFunc()      const { return isFuncType(getType()); }
+  bool isClass()     const { return isClassType(getType()); }
+  bool isLazyClass() const { return isLazyClassType(getType()); }
+  bool isClsMeth()   const { return isClsMethType(getType()); }
+
+  bool isPrimitive() const { return !isRefcountedType(type(m_val)); }
+
+  auto toBoolean() const { return tvCastToBoolean(*m_val); }
+  auto toInt64()   const { return tvCastToInt64(*m_val); }
+  auto toDouble()  const { return tvCastToDouble(*m_val); }
+  auto toString()  const { return HPHP::toString(m_val); }
+  auto toArray()   const { return HPHP::toArray(m_val); }
+  auto toObject()  const { return HPHP::toObject(m_val); }
+
+  auto& asCStrRef() const { return HPHP::asCStrRef(m_val); }
+  auto& asCArrRef() const { return HPHP::asCArrRef(m_val); }
+  auto& asCObjRef() const { return HPHP::asCObjRef(m_val); }
+
+  tv_rval asTypedValue() const { return m_val; }
+
+  ArrayData *getArrayData() const {
+    assertx(isArray());
+    return val(m_val).parr;
+  }
+
+  auto toFuncVal() const {
+    assertx(isFunc());
+    return val(m_val).pfunc;
+  }
+
+  auto toClassVal() const {
+    assertx(isClass());
+    return val(m_val).pclass;
+  }
+
+  auto toLazyClassVal() const {
+    assertx(isLazyClass());
+    return val(m_val).plazyclass;
+  }
+
+  ClsMethDataRef toClsMethVal() const {
+    assertx(isClsMeth());
+    return val(m_val).pclsmeth;
+  }
+
+  int getRefCount() const noexcept {
+    return isRefcountedType(type(m_val)) ? tvGetCount(*m_val) : 1;
+  }
+
+protected:
+  const tv_val_t m_val;
+};
+}
+
+struct const_variant_ref;
+
+struct variant_ref : variant_ref_detail::base<false> {
+  using variant_ref_detail::base<false>::base;
+
+  /* implicit */ variant_ref(Variant& v);
+
+  /* implicit */ operator const_variant_ref() const;
+
+  tv_lval lval() const { return m_val; }
+
+  void unset() const {
+    tvMove(make_tv<KindOfUninit>(), m_val);
+  }
+
+  void setNull() noexcept {
+    tvSetNull(m_val);
+  }
+
+  variant_ref& operator=(const Variant& v) noexcept;
+
+  variant_ref& assign(const Variant& v) noexcept;
+
+  variant_ref& operator=(Variant &&rhs) noexcept;
+
+  // Generic assignment operator. Forward argument (preserving rvalue-ness and
+  // lvalue-ness) to the appropriate set function, as long as its not a Variant.
+  template <typename T>
+  typename std::enable_if<
+    !std::is_same<
+      Variant,
+      typename std::remove_reference<typename std::remove_cv<T>::type>::type
+    >::value
+    &&
+    !std::is_same<
+      VarNR,
+      typename std::remove_reference<typename std::remove_cv<T>::type>::type
+    >::value,
+    variant_ref&
+  >::type operator=(T&& v) {
+    set(std::forward<T>(v));
+    return *this;
+  }
+
+  void set(bool    v) noexcept;
+  void set(int     v) noexcept;
+  void set(int64_t   v) noexcept;
+  void set(double  v) noexcept;
+  void set(const char* v) = delete;
+  void set(const std::string & v) {
+    return set(String(v));
+  }
+  void set(StringData  *v) noexcept;
+  void set(ArrayData   *v) noexcept;
+  void set(ObjectData  *v) noexcept;
+  void set(ResourceHdr *v) noexcept;
+  void set(ResourceData *v) noexcept { set(v->hdr()); }
+  void set(const StringData *v) = delete;
+  void set(const ArrayData *v) = delete;
+  void set(const ObjectData *v) = delete;
+  void set(const ResourceData *v) = delete;
+  void set(const ResourceHdr *v) = delete;
+
+  void set(const String& v) noexcept { set(v.get()); }
+  void set(const StaticString & v) noexcept;
+  void set(const Array& v) noexcept { set(v.get()); }
+  void set(const Object& v) noexcept { set(v.get()); }
+  void set(const Resource& v) noexcept { set(v.hdr()); }
+
+  void set(String&& v) noexcept { steal(v.detach()); }
+  void set(Array&& v) noexcept { steal(v.detach()); }
+  void set(Object&& v) noexcept { steal(v.detach()); }
+  void set(Resource&& v) noexcept { steal(v.detachHdr()); }
+
+  template<typename T>
+  void set(const req::ptr<T> &v) noexcept {
+    return set(v.get());
+  }
+
+  template <typename T>
+  void set(req::ptr<T>&& v) noexcept {
+    return steal(v.detach());
+  }
+
+  void steal(StringData* v) noexcept;
+  void steal(ArrayData* v) noexcept;
+  void steal(ObjectData* v) noexcept;
+  void steal(ResourceHdr* v) noexcept;
+  void steal(ResourceData* v) noexcept { steal(v->hdr()); }
+};
+
+struct const_variant_ref : variant_ref_detail::base<true> {
+  using variant_ref_detail::base<true>::base;
+
+  /* implicit */ const_variant_ref(const Variant& v);
+
+  tv_rval rval() const { return m_val; }
+};
+
+inline variant_ref::operator const_variant_ref() const {
+  return const_variant_ref{m_val};
+}
 
 /*
  * This class predates HHVM.
@@ -55,33 +244,35 @@ void tvCastToDArrayInPlace(TypedValue*);
  * a replacement yet, sorry).
  *
  * In C++ extensions, this class can be used as a generic handle to
- * one of our other data types (e.g. StringData, ArrayData), and it
- * may also be a handle to a RefData.
+ * one of our other data types (e.g. StringData, ArrayData)
  *
  * Beware:
  *
  *    For historical reasons, this class does a lot of things you
  *    don't really expect in a well-behaved C++ class.
  *
- *    For example, the copy constructor is not a copy constructor (it
- *    unboxes refs and converts KindOfUninit to KindOfNull).  A
- *    similar story applies to the move constructor.  (And this means
- *    we may actually rely on whether copy elision (NRVO etc) is
- *    happening in some places for correctness.)
+ *    For example, the copy constructor is not a copy constructor (it converts
+ *    KindOfUninit to KindOfNull).  A similar story applies to the move
+ *    constructor.  (And this means we may actually rely on whether copy
+ *    elision (NRVO etc) is happening in some places for correctness.)
  *
  *    Use carefully.
  *
  */
 
 struct Variant : private TypedValue {
+  friend variant_ref;
+
+  // Used by VariantTraits to create a folly::Optional-like
+  // optional Variant which fits in 16 bytes.
+  using Optional = OptionalVariant;
+
   enum class NullInit {};
   enum class NoInit {};
-  enum class CellCopy {};
-  enum class CellDup {};
+  enum class TVCopy {};
+  enum class TVDup {};
   enum class ArrayInitCtor {};
-  enum class StrongBind {};
   enum class Attach {};
-  enum class WithRefBind {};
   enum class Wrap {};
 
   Variant() noexcept { m_type = KindOfUninit; }
@@ -102,6 +293,9 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(long long v) noexcept {
     m_type = KindOfInt64; m_data.num = v;
   }
+  /* implicit */ Variant(unsigned v) noexcept {
+    m_type = KindOfInt64; m_data.num = v;
+  }
   /* implicit */ Variant(unsigned long v) noexcept {
     m_type = KindOfInt64; m_data.num = v;
   }
@@ -119,18 +313,13 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const std::string &v) {
     m_type = KindOfString;
     StringData *s = StringData::Make(v.c_str(), v.size(), CopyString);
-    assert(s);
+    assertx(s);
     m_data.pstr = s;
   }
   /* implicit */ Variant(const StaticString &v) noexcept {
-    assert(v.get() && !v.get()->isRefCounted());
+    assertx(v.get() && !v.get()->isRefCounted());
     m_type = KindOfPersistentString;
     m_data.pstr = v.get();
-  }
-
-  Variant(const Variant& other, WithRefBind) {
-    tvDupWithRef(*other.asTypedValue(), *asTypedValue());
-    if (m_type == KindOfUninit) m_type = KindOfNull;
   }
 
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
@@ -138,6 +327,22 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Resource& v) noexcept
   : Variant(v.hdr()) {}
+
+  /* implicit */ Variant(Class* v) {
+    m_type = KindOfClass;
+    m_data.pclass = v;
+  }
+
+  /* implicit */ Variant(LazyClassData v) {
+    m_type = KindOfLazyClass;
+    m_data.plazyclass = v;
+  }
+
+  /* implicit */ Variant(const ClsMethDataRef v) {
+    m_type = KindOfClsMeth;
+    m_data.pclsmeth = v;
+    incRefClsMeth(v);
+  }
 
   /*
    * Explicit conversion constructors. These all manipulate ref-counts of bare
@@ -166,11 +371,30 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
     }
   }
-  explicit Variant(RefData* r) noexcept {
-    if (r) {
-      m_type = KindOfRef;
-      m_data.pref = r;
-      r->incRefCount();
+
+  explicit Variant(const Func* f) noexcept {
+    assertx(f);
+    m_type = KindOfFunc;
+    m_data.pfunc = f;
+  }
+
+  explicit Variant(RFuncData* v) noexcept {
+    if (v) {
+      assertx(v);
+      m_type = KindOfRFunc;
+      m_data.prfunc = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
+  explicit Variant(RClsMethData* v) noexcept {
+    if (v) {
+      assertx(v);
+      m_type = KindOfRClsMeth;
+      m_data.prclsmeth = v;
+      v->incRefCount();
     } else {
       m_type = KindOfNull;
     }
@@ -187,22 +411,23 @@ struct Variant : private TypedValue {
    * inc-ref.
    */
   explicit Variant(ArrayData* ad, DataType dt, ArrayInitCtor) noexcept {
-    assert(ad->toDataType() == dt);
+    assertx(ad->toDataType() == dt);
     m_type = dt;
     m_data.parr = ad;
   }
 
   enum class PersistentArrInit {};
   Variant(const ArrayData* ad, DataType dt, PersistentArrInit) noexcept {
-    assert(ad->toPersistentDataType() == dt);
-    assert(!ad->isRefCounted());
+    // TODO(T58820726): Switch back to trusting caller and strict equality.
+    assertx(equivDataTypes(ad->toPersistentDataType(), dt));
+    assertx(!ad->isRefCounted());
     m_data.parr = const_cast<ArrayData*>(ad);
     m_type = dt;
   }
 
   enum class PersistentStrInit {};
   explicit Variant(const StringData *s, PersistentStrInit) noexcept {
-    assert(!s->isRefCounted());
+    assertx(!s->isRefCounted());
     m_data.pstr = const_cast<StringData*>(s);
     m_type = KindOfPersistentString;
   }
@@ -222,26 +447,21 @@ struct Variant : private TypedValue {
 
   /*
    * Copy constructor and copy assignment do not semantically make
-   * copies: they unbox refs and turn uninits to null.
+   * copies: they turn uninits to null.
    */
 
   Variant(const Variant& v) noexcept;
+  explicit Variant(const_variant_ref v) noexcept;
 
-  Variant(const Variant& v, CellCopy) noexcept {
+  Variant(const Variant& v, TVCopy) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
   }
 
-  Variant(const Variant& v, CellDup) noexcept {
+  Variant(const Variant& v, TVDup) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
     tvIncRefGen(*asTypedValue());
-  }
-
-  Variant(StrongBind, Variant& v) {
-    assert(tvIsPlausible(v));
-    tvBoxIfNeeded(*v.asTypedValue());
-    refDup(*v.asTypedValue(), *asTypedValue());
   }
 
   Variant& operator=(const Variant& v) noexcept {
@@ -252,18 +472,11 @@ struct Variant : private TypedValue {
    * Move ctors
    *
    * Note: not semantically moves.  Like our "copy constructor", these
-   * unbox refs and turn uninits to null.
+   * turn uninits to null.
    */
 
   Variant(Variant&& v) noexcept {
-    if (UNLIKELY(v.m_type == KindOfRef)) {
-      // We can't avoid the refcounting when it's a ref.  Do basically
-      // what a copy would have done.
-      moveRefHelper(std::move(v));
-      return;
-    }
-
-    assert(this != &v);
+    assertx(this != &v);
     if (v.m_type != KindOfUninit) {
       m_type = v.m_type;
       m_data = v.m_data;
@@ -324,14 +537,12 @@ struct Variant : private TypedValue {
   /*
    * Move assign
    *
-   * Note: not semantically moves.  Like our "copies", these unbox
-   * refs and turn uninits to null.
+   * Note: not semantically moves.  Like our "copies", these turn uninits
+   * to null.
    */
   Variant& operator=(Variant &&rhs) noexcept {
-    assert(this != &rhs); // we end up as null on a self move-assign.
-    if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
-
-    Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
+    assertx(this != &rhs); // we end up as null on a self move-assign.
+    Variant& lhs = *this;
 
     Variant goner((NoInit()));
     goner.m_data = lhs.m_data;
@@ -385,19 +596,6 @@ struct Variant : private TypedValue {
     tvSetNull(*asTypedValue());
   }
 
-  /**
-   * Clear the original data, and set it to be the same as in v, and if
-   * v is referenced, keep the reference.
-   */
-  Variant& setWithRef(TypedValue v) noexcept {
-    tvSetWithRef(v, *asTypedValue());
-    if (m_type == KindOfUninit) m_type = KindOfNull;
-    return *this;
-  }
-  Variant& setWithRef(const Variant& v) noexcept {
-    return setWithRef(*v.asTypedValue());
-  }
-
   static Variant attach(TypedValue tv) noexcept {
     return Variant{tv, Attach{}};
   }
@@ -416,9 +614,6 @@ struct Variant : private TypedValue {
   static Variant attach(ResourceHdr* var) noexcept {
     return Variant{var, Attach{}};
   }
-  static Variant attach(RefData* var) noexcept {
-    return Variant{var, Attach{}};
-  }
 
   static Variant wrap(TypedValue tv) noexcept {
     return Variant{tv, Wrap{}};
@@ -428,160 +623,104 @@ struct Variant : private TypedValue {
 // int64
 
   ALWAYS_INLINE int64_t asInt64Val() const {
-    assert(m_type == KindOfInt64);
+    assertx(m_type == KindOfInt64);
     return m_data.num;
   }
 
   ALWAYS_INLINE int64_t toInt64Val() const {
-    assert(is(KindOfInt64));
-    return
-        LIKELY(m_type == KindOfInt64) ?
-        m_data.num : m_data.pref->var()->m_data.num;
+    assertx(is(KindOfInt64));
+    return m_data.num;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // double
 
   ALWAYS_INLINE double asDoubleVal() const {
-    assert(m_type == KindOfDouble);
+    assertx(m_type == KindOfDouble);
     return m_data.dbl;
   }
 
   ALWAYS_INLINE double toDoubleVal() const {
-    assert(is(KindOfDouble));
-    return
-        LIKELY(m_type == KindOfDouble) ?
-        m_data.dbl : m_data.pref->var()->m_data.dbl;
+    assertx(is(KindOfDouble));
+    return m_data.dbl;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // boolean
 
   ALWAYS_INLINE bool asBooleanVal() const {
-    assert(m_type == KindOfBoolean);
+    assertx(m_type == KindOfBoolean);
     return m_data.num;
   }
 
   ALWAYS_INLINE bool toBooleanVal() const {
-    assert(is(KindOfBoolean));
-    return
-        LIKELY(m_type == KindOfBoolean) ?
-        m_data.num : m_data.pref->var()->m_data.num;
+    assertx(is(KindOfBoolean));
+    return m_data.num;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // string
 
   ALWAYS_INLINE const String& asCStrRef() const {
-    assert(isStringType(m_type) && m_data.pstr);
+    assertx(isStringType(m_type) && m_data.pstr);
     return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
-  ALWAYS_INLINE const String& toCStrRef() const {
-    assert(isString());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    return *reinterpret_cast<const String*>(LIKELY(isStringType(m_type)) ?
-        &m_data.pstr : &m_data.pref->tv()->m_data.pstr);
-  }
-
   ALWAYS_INLINE String& asStrRef() {
-    assert(isStringType(m_type) && m_data.pstr);
+    assertx(isStringType(m_type) && m_data.pstr);
     // The caller is likely going to modify the string, so we have to eagerly
     // promote KindOfPersistentString -> KindOfString.
     m_type = KindOfString;
     return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
-  ALWAYS_INLINE String& toStrRef() {
-    assert(isString());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr);
-    // The caller is likely going to modify the string, so we have to eagerly
-    // promote KindOfPersistentString -> KindOfString.
-    auto tv = LIKELY(isStringType(m_type)) ? this : m_data.pref->tv();
-    tv->m_type = KindOfString;
-    return *reinterpret_cast<String*>(&tv->m_data.pstr);
-  }
-
 ///////////////////////////////////////////////////////////////////////////////
 // array
 
   ALWAYS_INLINE const Array& asCArrRef() const {
-    assert(isArrayLikeType(m_type) && m_data.parr);
+    assertx(isArrayLikeType(m_type) && m_data.parr);
     return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
-  ALWAYS_INLINE const Array& toCArrRef() const {
-    assert(isArray());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    return *reinterpret_cast<const Array*>(LIKELY(isArrayLikeType(m_type)) ?
-        &m_data.parr : &m_data.pref->tv()->m_data.parr);
-  }
-
   ALWAYS_INLINE Array& asArrRef() {
-    assert(isArrayLikeType(m_type) && m_data.parr);
+    assertx(isArrayLikeType(m_type) && m_data.parr);
     m_type = m_data.parr->toDataType();
     return *reinterpret_cast<Array*>(&m_data.parr);
-  }
-
-  ALWAYS_INLINE Array& toArrRef() {
-    assert(isArray());
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr);
-    auto tv = LIKELY(isArrayLikeType(m_type)) ? this : m_data.pref->tv();
-    tv->m_type = tv->m_data.parr->toDataType();
-    return *reinterpret_cast<Array*>(&tv->m_data.parr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
 // object
 
   ALWAYS_INLINE const Object& asCObjRef() const {
-    assert(m_type == KindOfObject && m_data.pobj);
+    assertx(m_type == KindOfObject && m_data.pobj);
     return *reinterpret_cast<const Object*>(&m_data.pobj);
   }
 
-  ALWAYS_INLINE const Object& toCObjRef() const {
-    assert(is(KindOfObject));
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
-    return *reinterpret_cast<const Object*>(LIKELY(m_type == KindOfObject) ?
-        &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
-  }
-
   ALWAYS_INLINE Object & asObjRef() {
-    assert(m_type == KindOfObject && m_data.pobj);
+    assertx(m_type == KindOfObject && m_data.pobj);
     return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
   ALWAYS_INLINE const Resource& asCResRef() const {
-    assert(m_type == KindOfResource && m_data.pres);
+    assertx(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<const Resource*>(&m_data.pres);
   }
 
   ALWAYS_INLINE const Resource& toCResRef() const {
-    assert(is(KindOfResource));
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pres : m_data.pres);
-    return *reinterpret_cast<const Resource*>(LIKELY(m_type == KindOfResource) ?
-        &m_data.pres : &m_data.pref->tv()->m_data.pres);
+    assertx(is(KindOfResource));
+    assertx(m_data.pres);
+    return *reinterpret_cast<const Resource*>(&m_data.pres);
   }
 
   ALWAYS_INLINE Resource & asResRef() {
-    assert(m_type == KindOfResource && m_data.pres);
+    assertx(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<Resource*>(&m_data.pres);
-  }
-
-  ALWAYS_INLINE Object& toObjRef() {
-    assert(is(KindOfObject));
-    assert(m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj);
-    return *reinterpret_cast<Object*>(LIKELY(m_type == KindOfObject) ?
-        &m_data.pobj : &m_data.pref->tv()->m_data.pobj);
   }
 
   /**
    * Type testing functions
    */
   DataType getType() const {
-    return m_type == KindOfRef ? m_data.pref->var()->m_type : m_type;
-  }
-  DataType getRawType() const {
     return m_type;
   }
   bool is(DataType type) const {
@@ -611,7 +750,13 @@ struct Variant : private TypedValue {
   bool isPHPArray() const {
     return isArrayType(getType());
   }
-  bool isVecArray() const {
+  bool isDArray() const {
+    return isArrayLikeType(getType()) && m_data.parr->isDArray();
+  }
+  bool isVArray() const {
+    return isArrayLikeType(getType()) && m_data.parr->isVArray();
+  }
+  bool isVec() const {
     return isVecType(getType());
   }
   bool isDict() const {
@@ -628,6 +773,18 @@ struct Variant : private TypedValue {
   }
   bool isResource() const {
     return getType() == KindOfResource;
+  }
+  bool isFunc() const {
+    return isFuncType(getType());
+  }
+  bool isClass() const {
+    return isClassType(getType());
+  }
+  bool isLazyClass() const {
+    return isLazyClassType(getType());
+  }
+  bool isClsMeth() const {
+    return isClsMethType(getType());
   }
 
   bool isNumeric(bool checkString = false) const noexcept;
@@ -652,57 +809,57 @@ struct Variant : private TypedValue {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-      case KindOfPersistentArray:
-      case KindOfArray:
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+      case KindOfRFunc:
+      case KindOfFunc:
+      case KindOfClass:
+      case KindOfLazyClass:
+      case KindOfClsMeth:
+      case KindOfRClsMeth:
+      case KindOfRecord:
         return false;
-      case KindOfRef:
-        return m_data.pref->var()->isIntVal();
     }
     not_reached();
   }
 
   // Is "define('CONSTANT', <this value>)" legal?
-  bool isAllowedAsConstantValue() const;
-
-  /**
-   * Whether or not there are at least two variables that are strongly bound.
-   */
-  bool isReferenced() const {
-    return m_type == KindOfRef && m_data.pref->isReferenced();
-  }
+  enum class AllowedAsConstantValue {
+      Allowed
+    , NotAllowed
+    , ContainsObject // Allowed if constant of an "enum class".
+  };
+  AllowedAsConstantValue isAllowedAsConstantValue() const;
 
   /**
    * Get reference count of weak or strong binding. For debugging purpose.
    */
-  int getRefCount() const noexcept;
+  int getRefCount() const noexcept {
+    return const_variant_ref{*this}.getRefCount();
+  }
 
   bool getBoolean() const {
-    assert(getType() == KindOfBoolean);
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
+    assertx(getType() == KindOfBoolean);
+    return m_data.num;
   }
   int64_t getInt64() const {
-    assert(getType() == KindOfInt64);
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.num : m_data.num;
+    assertx(getType() == KindOfInt64);
+    return m_data.num;
   }
   double getDouble() const {
-    assert(getType() == KindOfDouble);
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.dbl : m_data.dbl;
+    assertx(getType() == KindOfDouble);
+    return m_data.dbl;
   }
 
   /**
    * Operators
    */
   Variant& assign(const Variant& v) noexcept {
-    tvSet(tvToInitCell(*v.asTypedValue()), *asTypedValue());
+    tvSet(tvToInit(*v.asTypedValue()), *asTypedValue());
     return *this;
   }
-  Variant& assignRef(Variant& v) noexcept {
-    assert(&v != &uninit_variant);
-    tvBoxIfNeeded(*v.asTypedValue());
-    tvBind(*v.asTypedValue(), *asTypedValue());
-    return *this;
-  }
-  Variant& assignRef(VRefParam v) = delete;
 
   // Generic assignment operator. Forward argument (preserving rvalue-ness and
   // lvalue-ness) to the appropriate set function, as long as its not a Variant.
@@ -768,31 +925,12 @@ struct Variant : private TypedValue {
   Variant &operator -- () = delete;
   Variant  operator -- (int) = delete;
 
-  /*
-   * Variant used to implicitly convert to all these types.  (It still
-   * implicitly converts *from* most of them.)
-   *
-   * We're leaving these functions deleted for now because we fear the
-   * possibility of changes to overload resolution by not declaring
-   * them.  Eventually when fewer of these types have implicit
-   * conversions we'll remove them.
-   */
-  /* implicit */ operator bool   () const = delete;
-  /* implicit */ operator char   () const = delete;
-  /* implicit */ operator short  () const = delete;
-  /* implicit */ operator int    () const = delete;
-  /* implicit */ operator int64_t  () const = delete;
-  /* implicit */ operator double () const = delete;
-  /* implicit */ operator String () const = delete;
-  /* implicit */ operator Array  () const = delete;
-  /* implicit */ operator Object () const = delete;
-
   /**
    * Explicit type conversions
    */
   bool toBoolean() const {
     if (isNullType(m_type)) return false;
-    if (m_type <= KindOfInt64) return m_data.num;
+    if (hasNumData(m_type)) return m_data.num;
     return toBooleanHelper();
   }
   char toByte() const { return (char)toInt64();}
@@ -800,22 +938,21 @@ struct Variant : private TypedValue {
   int toInt32(int base = 10) const { return (int)toInt64(base);}
   int64_t toInt64() const {
     if (isNullType(m_type)) return 0;
-    if (m_type <= KindOfInt64) return m_data.num;
+    if (hasNumData(m_type)) return m_data.num;
     return toInt64Helper(10);
   }
   int64_t toInt64(int base) const {
     if (isNullType(m_type)) return 0;
-    if (m_type <= KindOfInt64) return m_data.num;
+    if (hasNumData(m_type)) return m_data.num;
     return toInt64Helper(base);
   }
   double toDouble() const {
     if (m_type == KindOfDouble) return m_data.dbl;
-    return toDoubleHelper();
+    return tvCastToDouble(*asTypedValue());
   }
 
   String toString() const& {
-    if (isStringType(m_type)) return String{m_data.pstr};
-    return toStringHelper();
+    return HPHP::toString(asTypedValue());
   }
 
   String toString() && {
@@ -823,34 +960,33 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
       return String::attach(m_data.pstr);
     }
-    return toStringHelper();
+    return toString();
   }
 
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
   // arrays unchanged. Use toPHPArray() if you want the result to always be a
   // PHP array.
+  template <IntishCast IC = IntishCast::None>
   Array toArray() const {
-    if (isArrayLikeType(m_type)) return Array(m_data.parr);
-    return toArrayHelper();
+    return HPHP::toArray<IC>(asTypedValue());
   }
   Array toPHPArray() const {
     if (isArrayType(m_type)) return Array(m_data.parr);
     return toPHPArrayHelper();
   }
   Object toObject() const {
-    if (m_type == KindOfObject) return Object{m_data.pobj};
-    return toObjectHelper();
+    return HPHP::toObject(asTypedValue());
   }
   Resource toResource() const {
     if (m_type == KindOfResource) return Resource{m_data.pres};
     return toResourceHelper();
   }
 
-  Array toVecArray() const {
+  Array toVec() const {
     if (isVecType(m_type)) return Array{m_data.parr};
     auto copy = *this;
     tvCastToVecInPlace(copy.asTypedValue());
-    assertx(copy.isVecArray());
+    assertx(copy.isVec());
     return Array::attach(copy.detach().m_data.parr);
   }
 
@@ -871,7 +1007,12 @@ struct Variant : private TypedValue {
   }
 
   Array toVArray() const {
-    if (isArrayType(m_type)) return asCArrRef().toVArray();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      auto a = toVec();
+      a.setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+      return a;
+    }
+    if (isArrayLikeType(m_type)) return asCArrRef().toVArray();
     auto copy = *this;
     tvCastToVArrayInPlace(copy.asTypedValue());
     assertx(copy.isPHPArray() && copy.asCArrRef().isVArray());
@@ -879,7 +1020,12 @@ struct Variant : private TypedValue {
   }
 
   Array toDArray() const {
-    if (isArrayType(m_type)) return asCArrRef().toDArray();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      auto a = toDict();
+      a.setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+      return a;
+    }
+    if (isArrayLikeType(m_type)) return asCArrRef().toDArray();
     auto copy = *this;
     tvCastToDArrayInPlace(copy.asTypedValue());
     assertx(copy.isPHPArray() && copy.asCArrRef().isDArray());
@@ -892,9 +1038,6 @@ struct Variant : private TypedValue {
     if (m_type == KindOfResource) {
       return m_data.pres->data()->instanceof<T>();
     }
-    if (m_type == KindOfRef && m_data.pref->var()->m_type == KindOfResource) {
-      return m_data.pref->var()->m_data.pres->data()->instanceof<T>();
-    }
     return false;
   }
 
@@ -904,24 +1047,14 @@ struct Variant : private TypedValue {
     if (m_type == KindOfObject) {
       return m_data.pobj->instanceof<T>();
     }
-    if (m_type == KindOfRef &&
-               m_data.pref->var()->m_type == KindOfObject) {
-      return m_data.pref->var()->m_data.pobj->instanceof<T>();
-    }
     return false;
-  }
-
-  /**
-   * Whether or not calling toKey() will throw a bad type exception
-   */
-  bool canBeValidKey() const {
-    return !isArrayType(getType()) && getType() != KindOfObject;
   }
 
   /*
    * Convert to a valid key or throw an exception. If convertStrKeys is true
    * int-like string keys will be converted to int keys.
    */
+  template <IntishCast IC = IntishCast::None>
   VarNR toKey(const ArrayData*) const;
 
   /* Creating a temporary Array, String, or Object with no ref-counting and
@@ -939,61 +1072,59 @@ struct Variant : private TypedValue {
     return ObjNR(getObjectData());
   }
 
+  auto toFuncVal() const {
+    return const_variant_ref{*this}.toFuncVal();
+  }
+  auto toClassVal() const {
+    return const_variant_ref{*this}.toClassVal();
+  }
+  auto toLazyClassVal() const {
+    return const_variant_ref{*this}.toLazyClassVal();
+  }
+  ClsMethDataRef toClsMethVal() const {
+    return const_variant_ref{*this}.toClsMethVal();
+  }
+
   /*
    * Low level access that should be restricted to internal use.
    */
   int64_t *getInt64Data() const {
-    assert(getType() == KindOfInt64);
-    return m_type == KindOfRef ? &m_data.pref->var()->m_data.num :
-                     const_cast<int64_t*>(&m_data.num);
+    assertx(getType() == KindOfInt64);
+    return const_cast<int64_t*>(&m_data.num);
   }
   double *getDoubleData() const {
-    assert(getType() == KindOfDouble);
-    return m_type == KindOfRef ? &m_data.pref->var()->m_data.dbl :
-                     const_cast<double*>(&m_data.dbl);
+    assertx(getType() == KindOfDouble);
+    return const_cast<double*>(&m_data.dbl);
   }
   StringData *getStringData() const {
-    assert(isStringType(getType()));
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.pstr : m_data.pstr;
+    assertx(isStringType(getType()));
+    return m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
     // This is a necessary evil because getStringData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || isString());
-    return m_type == KindOfRef ?
-      (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
-        m_data.pref->var()->m_data.pstr) :
-      (m_type <= KindOfNull ? nullptr : m_data.pstr);
+    assertx(isNull() || isString());
+    return isNullType(m_type) ? nullptr : m_data.pstr;
   }
   ArrayData *getArrayData() const {
-    assert(isArray());
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.parr : m_data.parr;
+    assertx(isArray());
+    return m_data.parr;
   }
   ArrayData *getArrayDataOrNull() const {
     // This is a necessary evil because getArrayData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || isArray());
-    return m_type == KindOfRef ?
-      (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
-        m_data.pref->var()->m_data.parr) :
-      (m_type <= KindOfNull ? nullptr : m_data.parr);
+    assertx(isNull() || isArray());
+    return isNullType(m_type) ? nullptr : m_data.parr;
   }
   ObjectData* getObjectData() const {
-    assert(is(KindOfObject));
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.pobj : m_data.pobj;
+    assertx(is(KindOfObject));
+    return m_data.pobj;
   }
   ObjectData *getObjectDataOrNull() const {
     // This is a necessary evil because getObjectData() returns
     // an undefined result if this is a null variant
-    assert(isNull() || is(KindOfObject));
-    return m_type == KindOfRef ?
-      (m_data.pref->var()->m_type <= KindOfNull ? nullptr :
-        m_data.pref->var()->m_data.pobj) :
-      (m_type <= KindOfNull ? nullptr : m_data.pobj);
-  }
-  Variant *getRefData() const {
-    assert(m_type == KindOfRef);
-    return m_data.pref->var();
+    assertx(isNull() || is(KindOfObject));
+    return isNullType(m_type) ? nullptr : m_data.pobj;
   }
 
   int64_t getNumData() const { return m_data.num; }
@@ -1007,36 +1138,19 @@ struct Variant : private TypedValue {
   void setEvalScalar();
 
   /*
-   * Access this Variant as a TypedValue. Does not unbox refs, etc.
+   * Access this Variant as a TypedValue.
    */
   const TypedValue* asTypedValue() const { return this; }
         TypedValue* asTypedValue()       { return this; }
 
   /*
-   * Access this Variant as a Cell.  I.e. unboxes it if it was a
-   * KindOfRef.
-   */
-  const Cell* asCell() const { return tvToCell(asTypedValue()); }
-        Cell* asCell()       { return tvToCell(asTypedValue()); }
-
-  /*
    * Read this Variant as an InitCell, without incrementing the
-   * reference count.  I.e. unbox if it is boxed, and turn
-   * KindOfUninit into KindOfNull.
+   * reference count.  I.e. turn KindOfUninit into KindOfNull.
    */
-  Cell asInitCellTmp() const {
-    if (UNLIKELY(m_type == KindOfRef)) {
-      return *m_data.pref->tv();
-    }
+  TypedValue asInitTVTmp() const {
     if (m_type == KindOfUninit) return make_tv<KindOfNull>();
     return *this;
   }
-
-  /*
-   * Access this Variant as a Ref, converting it to a Ref it isn't
-   * one.
-   */
-  Ref* asRef() { tvBoxIfNeeded(*asTypedValue()); return this; }
 
   TypedValue detach() noexcept {
     auto tv = *asTypedValue();
@@ -1046,30 +1160,22 @@ struct Variant : private TypedValue {
 
  private:
   ResourceData* getResourceData() const {
-    assert(is(KindOfResource));
-    return m_type == KindOfRef ? m_data.pref->var()->m_data.pres->data() :
-                                 m_data.pres->data();
+    assertx(is(KindOfResource));
+    return m_data.pres->data();
   }
 
   ResourceData* detachResourceData() {
-    assert(is(KindOfResource));
-    if (LIKELY(m_type == KindOfResource)) {
-      m_type = KindOfNull;
-      return m_data.pres->data();
-    }
+    assertx(is(KindOfResource));
+    assertx(m_type == KindOfResource);
     m_type = KindOfNull;
-    return m_data.pref->tv()->m_data.pres->data();
+    return m_data.pres->data();
   }
 
   ObjectData* detachObjectData() {
-    assert(is(KindOfObject));
-    if (LIKELY(m_type == KindOfObject)) {
-      m_type = KindOfNull;
-      return m_data.pobj;
-    } else {
-      m_type = KindOfNull;
-      return m_data.pref->tv()->m_data.pobj;
-    }
+    assertx(is(KindOfObject));
+    assertx(m_type == KindOfObject);
+    m_type = KindOfNull;
+    return m_data.pobj;
   }
 
   template <typename T>
@@ -1161,14 +1267,6 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
     }
   }
-  Variant(RefData* var, Attach) noexcept {
-    if (var) {
-      m_type = KindOfRef;
-      m_data.pref = var;
-    } else {
-      m_type = KindOfNull;
-    }
-  }
   Variant(TypedValue tv, Attach) noexcept : TypedValue(tv) {}
   Variant(TypedValue tv, Wrap) noexcept : TypedValue(tv) {
     tvIncRefGen(*asTypedValue());
@@ -1176,8 +1274,7 @@ struct Variant : private TypedValue {
 
   bool isPrimitive() const { return !isRefcountedType(m_type); }
   bool isObjectConvertable() {
-    assert(m_type != KindOfRef);
-    return m_type <= KindOfNull ||
+    return isNullType(m_type) ||
       (m_type == KindOfBoolean && !m_data.num) ||
       (isStringType(m_type) && m_data.pstr->empty());
   }
@@ -1229,24 +1326,9 @@ struct Variant : private TypedValue {
   void steal(ResourceData* v) noexcept { steal(v->hdr()); }
 
 private:
-  void moveRefHelper(Variant&& v) {
-    assert(tvIsPlausible(v));
-
-    assert(v.m_type == KindOfRef);
-    m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
-    m_data = v.m_data.pref->tv()->m_data;
-    tvIncRefGen(*asTypedValue());
-    decRefRef(v.m_data.pref);
-    v.m_type = KindOfNull;
-  }
-
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
-  double toDoubleHelper() const;
-  String toStringHelper() const;
-  Array  toArrayHelper() const;
   Array  toPHPArrayHelper() const;
-  Object toObjectHelper() const;
   Resource toResourceHelper() const;
 
   DataType convertToNumeric(int64_t *lval, double *dval) const;
@@ -1254,117 +1336,80 @@ private:
 
 Variant operator+(const Variant & lhs, const Variant & rhs) = delete;
 
-struct RefResultValue {
-  const Variant& get() const { return m_var; }
-private:
-  Variant m_var;
-};
+///////////////////////////////////////////////////////////////////////////////
 
-struct VRefParamValue {
-  template <class T> /* implicit */ VRefParamValue(const T &v) : m_var(v) {}
+/*
+ * Definitions for some members of variant_ref et al. that use Variant.
+ */
 
-  /* implicit */ VRefParamValue() : m_var(Variant::NullInit()) {}
-  /* implicit */ VRefParamValue(RefResult v)
-    : m_var(Variant::StrongBind{},
-            const_cast<Variant&>(reinterpret_cast<const Variant&>(v))) {} // XXX
-  template <typename T>
-  Variant &operator=(const T &v) const = delete;
-  operator const Variant&() const { return m_var; }
-  const Variant *operator&() const { return &m_var; } // FIXME
-  const Variant *operator->() const { return &m_var; }
+inline variant_ref::variant_ref(Variant& v)
+  : variant_ref_detail::base<false>{v.asTypedValue()}
+{}
 
-  const Variant& wrapped() const { return m_var; }
+inline const_variant_ref::const_variant_ref(const Variant& v)
+  : variant_ref_detail::base<true>{v.asTypedValue()}
+{}
 
-  explicit operator bool   () const { return m_var.toBoolean();}
-  operator int    () const { return m_var.toInt32();}
-  operator int64_t() const { return m_var.toInt64();}
-  operator double () const { return m_var.toDouble();}
-  operator String () const { return m_var.toString();}
-  operator Array  () const { return m_var.toArray();}
-  operator Object () const { return m_var.toObject();}
-  explicit operator Resource () const { return m_var.toResource();}
+inline variant_ref& variant_ref::operator=(const Variant& v) noexcept {
+  return assign(v);
+}
 
-  bool is(DataType type) const { return m_var.is(type); }
-  bool isString() const { return m_var.isString(); }
-  bool isObject() const { return m_var.isObject(); }
-  bool isReferenced() const { return m_var.isReferenced(); }
-  bool isNull() const { return m_var.isNull(); }
-  bool isRefData() const { return m_var.asTypedValue()->m_type == KindOfRef; }
+inline variant_ref& variant_ref::assign(const Variant& v) noexcept {
+  tvSet(tvToInit(*v.asTypedValue()), m_val);
+  return *this;
+}
 
-  bool toBoolean() const { return m_var.toBoolean(); }
-  int64_t toInt64() const { return m_var.toInt64(); }
-  double toDouble() const { return m_var.toDouble(); }
-  String toString() const { return m_var.toString(); }
-  StringData *getStringData() const { return m_var.getStringData(); }
-  Array toArray() const { return m_var.toArray(); }
-  Object toObject() const { return m_var.toObject(); }
-  Resource toResource() const { return m_var.toResource(); }
-  ObjectData *getObjectData() const { return m_var.getObjectData(); }
+inline variant_ref& variant_ref::operator=(Variant &&rhs) noexcept {
+  variant_ref lhs = *this;
 
-  bool isArray() const { return m_var.isArray(); }
-  bool isHackArray() const { return m_var.isHackArray(); }
-  bool isPHPArray() const { return m_var.isPHPArray(); }
-  ArrNR toArrNR() const { return m_var.toArrNR(); }
+  Variant goner((Variant::NoInit()));
+  goner.m_data = val(lhs.m_val);
+  goner.m_type = type(lhs.m_val);
 
-  RefData* getRefData() const {
-    assert(isRefData());
-    return m_var.asTypedValue()->m_data.pref;
+  if (rhs.m_type == KindOfUninit) {
+    type(lhs.m_val) = KindOfNull;
+  } else {
+    type(lhs.m_val) = rhs.m_type;
+    val(lhs.m_val) = rhs.m_data;
+    rhs.m_type = KindOfNull;
   }
-  RefData* getRefDataOrNull() const {
-    return isRefData() ? m_var.asTypedValue()->m_data.pref : nullptr;
-  }
-  Variant* getVariantOrNull() const {
-    return isRefData() ? m_var.asTypedValue()->m_data.pref->var() : nullptr;
-  }
-  void assignIfRef(const Variant& other) const {
-    if (auto ref = getVariantOrNull()) *ref = other;
-  }
-  void assignIfRef(Variant&& other) const {
-    if (auto ref = getVariantOrNull()) *ref = std::move(other);
-  }
-private:
-  Variant m_var;
-};
+
+  return *this;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR
 
-struct VarNR : private TypedValueAux {
+struct VarNR : private TypedValue {
   static VarNR MakeKey(const String& s) {
     if (s.empty()) return VarNR(staticEmptyString());
-    int64_t n;
-    if (UNLIKELY(s.get()->isStrictlyInteger(n))) {
-      if (RuntimeOption::EvalHackArrCompatNotices) {
-        raise_intish_index_cast();
-      }
-      return VarNR(n);
-    }
     return VarNR(s);
   }
 
   // Use to hold variant that do not need ref-counting
-  explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
-  explicit VarNR(int     v) { init(KindOfInt64  ); m_data.num = v;}
+  explicit VarNR(bool      v) { m_type = KindOfBoolean; m_data.num = (v?1:0);}
+  explicit VarNR(int       v) { m_type = KindOfInt64;   m_data.num = v;}
   // The following two overloads will accept int64_t whether it's
   // implemented as long or long long.
-  explicit VarNR(long    v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(long long v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(uint64_t  v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
+  explicit VarNR(long      v) { m_type = KindOfInt64;   m_data.num = v;}
+  explicit VarNR(long long v) { m_type = KindOfInt64;   m_data.num = v;}
+  explicit VarNR(uint64_t  v) { m_type = KindOfInt64;   m_data.num = v;}
+  explicit VarNR(double    v) { m_type = KindOfDouble;  m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
-    assert(v.get() && !v.get()->isRefCounted());
-    init(KindOfPersistentString);
+    assertx(v.get() && !v.get()->isRefCounted());
+    m_type = KindOfPersistentString;
     m_data.pstr = v.get();
   }
 
-  explicit VarNR(const String& v);
-  explicit VarNR(const Array& v);
-  explicit VarNR(const Object& v);
+  explicit VarNR(const String& v) : VarNR(v.get()) {}
+  explicit VarNR(const Array& v) : VarNR(v.get()) {}
+  explicit VarNR(const Object& v) : VarNR(v.get()) {}
+
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
-    assert(v && !v->isRefCounted());
-    init(KindOfPersistentString);
+    assertx(v && !v->isRefCounted());
+    m_type = KindOfPersistentString;
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);
@@ -1372,9 +1417,11 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(ObjectData *v);
   explicit VarNR(const ObjectData*) = delete;
 
-  explicit VarNR(TypedValue tv) { init(tv.m_type); m_data = tv.m_data; }
+  explicit VarNR(TypedValue tv) { m_type = tv.m_type; m_data = tv.m_data; }
+  explicit VarNR(const Variant& v) : VarNR{*v.asTypedValue()} {}
 
-  VarNR(const VarNR &v) : TypedValueAux(v) {}
+  VarNR(const VarNR&) = delete;
+  VarNR& operator=(const VarNR&) = delete;
 
   explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 
@@ -1396,10 +1443,6 @@ private:
   /* implicit */ VarNR(const char* v) = delete;
   /* implicit */ VarNR(const std::string & v) = delete;
 
-  void init(DataType dt) {
-    m_type = dt;
-    if (debug) varNrFlag() = NR_FLAG;
-  }
   const Variant *asVariant() const {
     return &tvAsCVarRef(static_cast<const TypedValue*>(this));
   }
@@ -1407,28 +1450,37 @@ private:
     return &tvAsVariant(static_cast<TypedValue*>(this));
   }
   void checkRefCount() {
-    assert(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
+    assertx(isRealType(m_type));
 
     switch (m_type) {
       DT_UNCOUNTED_CASE:
         return;
       case KindOfString:
-        assert(m_data.pstr->checkCount());
+        assertx(m_data.pstr->checkCount());
         return;
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfArray:
-        assert(m_data.parr->checkCount());
+      case KindOfDArray:
+      case KindOfVArray:
+        assertx(m_data.parr->checkCount());
         return;
+      case KindOfClsMeth:
+        assertx(checkCountClsMeth(m_data.pclsmeth));
+        return;
+      case KindOfRClsMeth:
+        assertx(m_data.prclsmeth->checkCount());
       case KindOfObject:
-        assert(m_data.pobj->checkCount());
+        assertx(m_data.pobj->checkCount());
         return;
       case KindOfResource:
-        assert(m_data.pres->checkCount());
+        assertx(m_data.pres->checkCount());
         return;
-      case KindOfRef:
-        assert(m_data.pref->checkCount());
+      case KindOfRecord:
+        assertx(m_data.prec->checkCount());
+        return;
+      case KindOfRFunc:
+        assertx(m_data.prfunc->checkCount());
         return;
     }
     not_reached();
@@ -1453,27 +1505,24 @@ void clearBlackHole();
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
 
-inline Variant Array::operator[](Cell key) const {
-  return Variant::wrap(rvalAt(key).tv());
+inline Variant Array::operator[](TypedValue key) const {
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](int key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](int64_t key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](const String& key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](const Variant& key) const {
-  return Variant::wrap(rvalAt(key).tv());
+  return Variant::wrap(lookup(key));
 }
 
 inline void Array::append(const Variant& v) {
   append(*v.asTypedValue());
-}
-inline void Array::appendWithRef(const Variant& v) {
-  appendWithRef(*v.asTypedValue());
 }
 inline void Array::prepend(const Variant& v) {
   prepend(*v.asTypedValue());
@@ -1487,49 +1536,51 @@ ALWAYS_INLINE Variant init_null() {
   return Variant(Variant::NullInit());
 }
 
-inline Variant &concat_assign(Variant &v1, const char* s2) = delete;
+inline void concat_assign(Variant &v1, const char* s2) = delete;
 
-inline Variant &concat_assign(Variant &v1, const String& s2) {
-  if (v1.getType() == KindOfString) {
-    auto& str = v1.asStrRef();
-    if (!str.get()->cowCheck()) {
-      str += s2.slice();
-      return v1;
-    }
-  }
-
-  auto s1 = v1.toString();
-  s1 += s2;
-  v1 = s1;
-  return v1;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// Defined here for include order reasons.
-inline RefData::~RefData() {
-  assert(m_kind == HeaderKind::Ref);
-  tvAsVariant(&m_tv).~Variant();
+inline void concat_assign(tv_lval lhs, const String& s2) {
+  if (!isStringType(type(lhs))) tvCastToStringInPlace(lhs);
+  asStrRef(lhs) += s2;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 inline Array& forceToArray(Variant& var) {
   if (!var.isArray()) var = Variant(Array::Create());
-  return var.toArrRef();
+  return var.asArrRef();
 }
 
-inline Array& forceToArray(member_lval lval) {
-  auto const inner = lval.unboxed();
-  if (!isArrayLikeType(inner.type())) {
-    tvSet(make_tv<KindOfArray>(ArrayData::Create()), inner);
+inline Array& forceToArray(tv_lval lval) {
+  if (!isArrayLikeType(lval.type())) {
+    tvMove(make_array_like_tv(ArrayData::Create()), lval);
   }
-  return asArrRef(inner);
+  return asArrRef(lval);
 }
 
 inline Array& forceToDict(Variant& var) {
   if (!var.isDict()) var = Variant(Array::CreateDict());
-  return var.toArrRef();
+  return var.asArrRef();
+}
+
+inline Array& forceToDict(tv_lval lval) {
+  if (!isDictType(lval.type())) {
+    tvSet(make_tv<KindOfDict>(ArrayData::CreateDict()), lval);
+  }
+  return asArrRef(lval);
+}
+
+inline Array& forceToDArray(Variant& var) {
+  if (!tvIsHAMSafeDArray(var.asTypedValue())) {
+    var = Variant(Array::CreateDArray());
+  }
+  return var.asArrRef();
+}
+
+inline Array& forceToDArray(tv_lval lval) {
+  if (!tvIsHAMSafeDArray(lval)) {
+    tvMove(make_array_like_tv(ArrayData::CreateDArray()), lval);
+  }
+  return asArrRef(lval);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1549,7 +1600,7 @@ inline Variant toVariant(req::ptr<T>&& p) {
 }
 
 template <>
-inline bool is_null(const Variant& v) {
+inline bool ptr_is_null(const Variant& v) {
   return v.isNull();
 }
 
@@ -1560,19 +1611,128 @@ inline bool isa_non_null(const Variant& v) {
 
 // Defined here to avoid introducing a dependency cycle between type-variant
 // and type-array
-ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
-  return cellToKey(k, m_arr ? m_arr.get() : staticEmptyArray());
+template <IntishCast IC>
+ALWAYS_INLINE TypedValue Array::convertKey(TypedValue k) const {
+  return tvToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::Create());
 }
-ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
-  return convertKey(*k.asCell());
+template <IntishCast IC>
+ALWAYS_INLINE TypedValue Array::convertKey(const Variant& k) const {
+  return convertKey<IC>(*k.asTypedValue());
 }
 
+template <IntishCast IC>
 inline VarNR Variant::toKey(const ArrayData* ad) const {
-  return VarNR(tvToKey(*this, ad));
+  return VarNR(tvToKey<IC>(*this, ad));
 }
+
+struct alignas(16) OptionalVariant {
+  OptionalVariant() {
+    m_tv.m_type = kInvalidDataType;
+  }
+  ~OptionalVariant() {
+    clear();
+  }
+  OptionalVariant(const OptionalVariant& other) {
+    if (other.hasValue()) {
+      construct(other.value());
+      return;
+    }
+    m_tv.m_type = kInvalidDataType;
+  }
+  OptionalVariant(OptionalVariant&& other) noexcept {
+    if (other.hasValue()) {
+      construct(std::move(other.value()));
+      other.m_tv.m_type = kInvalidDataType;
+      return;
+    }
+    m_tv.m_type = kInvalidDataType;
+  }
+
+  template<typename Arg>
+  OptionalVariant& operator=(Arg&& arg) {
+    assign(std::forward<Arg>(arg));
+    return *this;
+  }
+  OptionalVariant& operator=(const OptionalVariant& arg) {
+    assign(arg);
+    return *this;
+  }
+  OptionalVariant& operator=(OptionalVariant&& arg) {
+    assign(std::move(arg));
+    return *this;
+  }
+
+  bool hasValue() const {
+    return m_tv.m_type != kInvalidDataType;
+  }
+  bool has_value() const {
+    return hasValue();
+  }
+  Variant& value() {
+    assertx(hasValue());
+    return tvAsVariant(&m_tv);
+  }
+  const Variant& value() const {
+    assertx(hasValue());
+    return tvAsCVarRef(&m_tv);
+  }
+  void clear() {
+    if (hasValue()) {
+      auto const old = m_tv;
+      m_tv.m_type = kInvalidDataType;
+      tvDecRefGen(old);
+    }
+  }
+  template <class... Args>
+  Variant& emplace(Args&&... args) {
+    clear();
+    construct(std::forward<Args>(args)...);
+    return value();
+  }
+  void assign(const Variant& other) {
+    if (hasValue()) {
+      value() = other;
+      return;
+    }
+    construct(other);
+  }
+  void assign(Variant&& other) {
+    if (hasValue()) {
+      value() = std::move(other);
+      return;
+    }
+    construct(std::move(other));
+  }
+  void assign(const OptionalVariant& other) {
+    if (other.hasValue()) return assign(other.value());
+    clear();
+  }
+  void assign(OptionalVariant&& other) {
+    if (other.hasValue()) {
+      assign(std::move(other.value()));
+      other.m_tv.m_type = kInvalidDataType;
+      return;
+    }
+    clear();
+  }
+
+  operator bool() const { return hasValue(); }
+
+  const Variant* operator->() const { return &value(); }
+  Variant* operator->() { return &value(); }
+
+  const Variant& operator*() const & { return value(); }
+  Variant& operator*() & { return value(); }
+  Variant&& operator*() && { return std::move(value()); }
+private:
+  template<typename... Args>
+  void construct(Args&&... args) {
+    new (&m_tv) Variant(std::forward<Args>(args)...);
+  }
+  TypedValue m_tv;
+};
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-#endif // incl_HPHP_VARIANT_H_

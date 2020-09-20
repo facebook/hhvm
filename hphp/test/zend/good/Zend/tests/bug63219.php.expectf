@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Unknown trait 'Typo' in %s/bug63219.php on line 6

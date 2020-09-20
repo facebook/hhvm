@@ -1,7 +1,11 @@
-<?php
+<?hh
 
-$one = array('cluster'=> 1, 'version'=>2);
+
+<<__EntryPoint>>
+function main_683() {
+$one = darray['cluster'=> 1, 'version'=>2];
 var_dump(isset($one->cluster));
-var_dump(empty($one->cluster));
+var_dump(!($one->cluster ?? false));
 $two = 'hello';
 var_dump(isset($two->scalar));
+}

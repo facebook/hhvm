@@ -1,12 +1,12 @@
-<?php
+<?hh
 
 class X {
-  static function foo() {
- global$g;
- return $g;
+ public static $g;
+ public static function foo() {
+ return self::$g;
  }
 }
-function bar() {
+function bar($_1, $_2, inout $_3, $_4, inout $_5) {
   var_dump('Intercepted');
 }
 function test() {
@@ -14,4 +14,8 @@ function test() {
   fb_intercept('X::foo', 'bar', 'bar');
   X::foo();
 }
+
+<<__EntryPoint>>
+function main_1200() {
 test();
+}

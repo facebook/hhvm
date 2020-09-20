@@ -14,100 +14,127 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRINGS_H_
-#define incl_HPHP_STRINGS_H_
+#pragma once
 
 namespace HPHP {
 namespace Strings {
 
-const char* const FATAL_NULL_THIS = "$this is null";
-const char* const WARN_NULL_THIS = "Undefined variable: this";
-const char* const ASSIGN_THIS_ERROR = "Cannot re-assign $this";
-const char* const FUNCTION_ALREADY_DEFINED = "Function already defined: %s";
-const char* const CONSTANT_ALREADY_DEFINED = "Constant %s already defined";
-const char* const CONSTANTS_MUST_BE_SCALAR =
-  "Constants may only evaluate to scalar values or arrays";
-const char* const CONSTANTS_CASE_SENSITIVE =
-  "Case insensitive constant names are not supported in HipHop";
-const char* const MODULO_BY_ZERO = "Modulo by zero";
-const char* const DIVISION_BY_ZERO =
+constexpr char FATAL_NULL_THIS[] = "$this is null";
+constexpr char WARN_NULL_THIS[] = "Undefined variable: this";
+constexpr char FUNCTION_ALREADY_DEFINED[] = "Function already defined: %s";
+constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
+constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
-const char* const NEGATIVE_SHIFT = "Bit shift by negative number";
-const char* const UNDEFINED_CONSTANT =
-  "Use of undefined constant %s - assumed '%s'";
-const char* const UNDEFINED_VARIABLE = "Undefined variable: %s";
-const char* const UNKNOWN_CLASS = "Class undefined: %s";
-const char* const CANT_ACCESS_SELF =
+constexpr char INTEGER_OVERFLOW[] = "Integer overflow";
+constexpr char UNDEFINED_VARIABLE[] = "Undefined variable: %s";
+constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";
+constexpr char UNKNOWN_RECORD[] = "Record undefined: %s";
+constexpr char CANT_ACCESS_SELF[] =
   "Cannot access self:: when no class scope is active";
-const char* const CANT_ACCESS_PARENT_WHEN_NO_CLASS =
+constexpr char CANT_ACCESS_PARENT_WHEN_NO_CLASS[] =
   "Cannot access parent:: when no class scope is active";
-const char* const CANT_ACCESS_PARENT_WHEN_NO_PARENT =
+constexpr char CANT_ACCESS_PARENT_WHEN_NO_PARENT[] =
   "Cannot access parent:: when current class scope has no parent";
-const char* const CANT_ACCESS_STATIC =
+constexpr char CANT_ACCESS_STATIC[] =
   "Cannot access static:: when no class scope is active";
-const char* const UNDEFINED_INDEX =
-  "Undefined index: %s";
-const char* const CANNOT_USE_SCALAR_AS_ARRAY =
+constexpr char THIS_OUTSIDE_CLASS[] =
+  "Cannot use 'this' outside of a class";
+constexpr char CANNOT_USE_SCALAR_AS_ARRAY[] =
   "Cannot use a scalar value as an array";
-const char* const CREATING_DEFAULT_OBJECT =
+constexpr char CREATING_DEFAULT_OBJECT[] =
   "Creating default object from empty value";
-const char* const SET_PROP_NON_OBJECT =
+constexpr char SET_PROP_NON_OBJECT[] =
   "Setting a property on a non-object";
-const char* const NULLSAFE_PROP_WRITE_ERROR =
+constexpr char NULLSAFE_PROP_WRITE_ERROR[] =
   "?-> is not allowed in write context";
-const char* const NULLSAFE_THIS_BASE_ERROR = "?-> is not allowed with $this";
-const char* const FUNCTION_NAME_MUST_BE_STRING =
+constexpr char FUNCTION_NAME_MUST_BE_STRING[] =
   "Function name must be a string";
-const char* const METHOD_NAME_MUST_BE_STRING =
+constexpr char METHOD_NAME_MUST_BE_STRING[] =
   "Method name must be a string";
-const char* const MISSING_ARGUMENT_EXCEPTION =
-  "Too few arguments to function %s(), %d passed and %s %d expected";
-const char* const MISSING_ARGUMENT =
-  "%s() expects %s 1 parameter, %d given";
-const char* const MISSING_ARGUMENTS =
-  "%s() expects %s %d parameters, %d given";
-const char* const CANT_UNSET_STRING =
+constexpr char CANT_UNSET_STRING[] =
   "Cannot unset string offsets";
-const char* const OP_NOT_SUPPORTED_STRING =
+constexpr char OP_NOT_SUPPORTED_STRING[] =
   "Operator not supported for strings";
-const char* const ASYNC_WITHOUT_BODY =
-  "Cannot declare %s method %s::%s() async; async is only meaningful"
-  " when it modifies a method body";
-const char* const PICK_ACCESS_MODIFIER =
-  "Multiple access type modifiers are not allowed";
-const char* const TRAITS_UNKNOWN_TRAIT =
+constexpr char OP_NOT_SUPPORTED_FUNC[] =
+  "Operator not supported for funcs";
+constexpr char OP_NOT_SUPPORTED_RECORD[] =
+  "Operator not supported for records";
+constexpr char OP_NOT_SUPPORTED_CLASS[] =
+  "Operator not supported for classes";
+constexpr char TRAITS_UNKNOWN_TRAIT[] =
   "Unknown trait '%s'";
-const char* const TRAITS_UNKNOWN_TRAIT_METHOD =
+constexpr char TRAITS_UNKNOWN_TRAIT_METHOD[] =
   "Unknown trait method '%s'";
-const char* const METHOD_IN_MULTIPLE_TRAITS =
-  "Method '%s' declared in multiple traits";
-const char* const TRAIT_REQ_EXTENDS =
+constexpr char METHOD_IN_MULTIPLE_TRAITS[] =
+  "Method '%s' declared in multiple traits (%s)";
+constexpr char TRAIT_REQ_EXTENDS[] =
   "Class '%s' required to extend class '%s'"
   " by trait '%s'";
-const char* const TRAIT_REQ_IMPLEMENTS =
+constexpr char TRAIT_REQ_IMPLEMENTS[] =
   "Class '%s' required to implement interface '%s'"
   " by trait '%s'";
-const char* const TRAIT_BAD_REQ_EXTENDS =
+constexpr char TRAIT_BAD_REQ_EXTENDS[] =
   "Trait '%s' requires extension of '%s', but %s "
   "is not an extendable class";
-const char* const TRAIT_BAD_REQ_IMPLEMENTS =
+constexpr char TRAIT_BAD_REQ_IMPLEMENTS[] =
   "Trait '%s' requires implementations of '%s', but %s "
   "is not an interface";
-const char* const INCONSISTENT_INSTEADOF =
+constexpr char INCONSISTENT_INSTEADOF[] =
   "Inconsistent insteadof definition. The method %s is to be used from %s, "
   "but %s is also on the exclude list";
-const char* const MULTIPLY_EXCLUDED =
+constexpr char MULTIPLY_EXCLUDED[] =
   "Failed to evaluate a trait precedence (%s). Method of trait %s was defined "
   "to be excluded multiple times";
-const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
-const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
-const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
-  "Comparing array with non-array";
-const char* const HACKARR_COMPAT_VARR_IS_ARR = "is_array() called on varray";
-const char* const HACKARR_COMPAT_DARR_IS_ARR = "is_array() called on darray";
-const char* const FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
+constexpr char REDECLARE_BUILTIN[] = "Cannot redeclare %s()";
+constexpr char HACKARR_COMPAT_ARR_HACK_ARR_CMP[] =
+  "Comparing PHP array with Hack array";
+constexpr char HACKARR_COMPAT_VEC_IS_ARR[] = "is_array() called on vec";
+constexpr char HACKARR_COMPAT_DICT_IS_ARR[] = "is_array() called on dict";
+constexpr char HACKARR_COMPAT_KEYSET_IS_ARR[] = "is_array() called on keyset";
+constexpr char HACKARR_COMPAT_VARR_IS_VEC[] = "is_vec() called on varray";
+constexpr char HACKARR_COMPAT_DARR_IS_DICT[] = "is_dict() called on darray";
+constexpr char DATATYPE_SPECIALIZED_DVARR[] =
+  "Dataype-specialized array currently unsupported";
+constexpr char FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE[] =
+  "'%s' called dynamically but is not __DynamicallyCallable";
+constexpr char FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE[] =
+  "'%s' called dynamically without using a function pointer";
+constexpr char CLASS_CONSTRUCTED_DYNAMICALLY[] = "'%s' constructed dynamically";
+constexpr char NEW_STATIC_ON_REIFIED_CLASS[] =
+  "Cannot call new static since class %s has reified generics";
+constexpr char RECORD_NOT_SUPPORTED[] =
+  "Records are not supported here";
+constexpr char CALL_ILLFORMED_FUNC[] =
+  "calling an ill-formed function pointer without resolved "
+  "class/object pointer";
+constexpr char RFUNC_NOT_SUPPORTED[] =
+  "Reified functions not supported";
+constexpr char RCLS_METH_NOT_SUPPORTED[] =
+  "Reified class method pointers no supported";
+
+constexpr char CLSMETH_COMPAT_IS_ARR[] = "is_array() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_VEC[] = "is_vec() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_VARR[] = "is_varray() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_VEC_OR_VARR[] =
+  "is_vec_or_varray() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_ANY_ARR[] = "is_any_array() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_SHAPE[] = "is_shape() called on clsmeth";
+constexpr char CLSMETH_COMPAT_IS_TUPLE[] = "is_tuple() called on clsmeth";
+constexpr char CLSMETH_COMPAT_VEC_CMP[] = "Comparing clsmeth with vec";
+constexpr char CLSMETH_COMPAT_NON_CLSMETH_REL_CMP[] =
+  "Comparing clsmeth with non-clsmeth relationally";
+
+constexpr char FUNC_TO_STRING_IMPLICIT[] =
+  "Implicit Func to string conversion for type-hint";
+constexpr char FUNC_TO_STRING[] = "Func to string conversion";
+constexpr char CLASS_TO_STRING_IMPLICIT[] =
+  "Implicit Class to string conversion for type-hint";
+constexpr char CLASS_TO_STRING[] = "Class to string conversion";
+constexpr char ARRAY_MARK_LEGACY_VEC[] = "array_mark_legacy() called on vec";
+constexpr char ARRAY_MARK_LEGACY_DICT[] = "array_mark_legacy() called on dict";
+constexpr char NONEXHAUSTIVE_SWITCH[] =
+  "The switch statement failed to match any of the cases";
 
 } // namespace Strings
 } // namespace HPHP
 
-#endif // incl_HPHP_STRINGS_H_

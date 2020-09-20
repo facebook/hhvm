@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function f(int $foo, ...$args): void {}
 
@@ -22,19 +22,19 @@ class C2 extends C1 {
 }
 
 function make_int_args(): Container<int> {
-  // UNSAFE
+  return vec[];
 }
 
 function make_mixed_args(): array<mixed> {
-  // UNSAFE
+  return varray[];
 }
 
 function make_str_args(): Vector<string> {
-  // UNSAFE
+  return Vector {};
 }
 
 function test_basic(): void {
-  $args = array(1, 2, 3);
+  $args = varray[1, 2, 3];
   f(...$args);
   $inst = new C1(...$args);
   $inst->f(...$args);
@@ -65,7 +65,7 @@ function test_basic(): void {
 
 function test_limitations() {
   // fails at runtime, but we don't track array arity!
-  $args = array();
+  $args = darray[];
   f(...$args);
 
   // fails at runtime, but we don't ensure that container doesn't have
@@ -77,12 +77,16 @@ function test_limitations() {
   $args = Map { 'a' => 1, 'b' => 2, };
   f(1, ...$args);
 
-  $args = array( 'a' => 1, 'b' => 2 );
+  $args = darray[ 'a' => 1, 'b' => 2 ];
   f(1, ...$args);
 
   // fails at runtime, but we don't unpack the container's content type
   // because issuing errors for mixed pretty much destroys the feature
-  f(...make_string_args());
-  $make = fun('make_string_args');
+  f(...make_mixed());
+  $make = fun('make_mixed');
   f(...$make());
+}
+
+function make_mixed(): mixed {
+  throw new Exception('');
 }

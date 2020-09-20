@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  function test() {
@@ -11,7 +11,11 @@ class A {
  function test() {
 }
 }
- $a = 'test';
+
+ <<__EntryPoint>>
+function main_1273() {
+$a = 'test';
  $a = new B();
  $a->b = new A();
  $a->b->test();
+}

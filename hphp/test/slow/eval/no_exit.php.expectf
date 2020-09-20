@@ -1,4 +1,4 @@
 Before error, there should be an 'After error'
 
-Fatal error: syntax error, unexpected $end in %s(%d)(%s) : eval()'d code on line %d
+Fatal error: A semicolon `;` is expected here. in %s/test/slow/eval/no_exit.php(7)(8502ee21e3b82bd59a5f2f94a566e519) : eval()'d code on line 1
 After error

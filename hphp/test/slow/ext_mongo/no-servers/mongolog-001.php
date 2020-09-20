@@ -1,4 +1,5 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 // Common constants
 var_dump(0 === MongoLog::NONE);
 var_dump(31 === MongoLog::ALL);
@@ -14,4 +15,4 @@ var_dump(1 === MongoLog::POOL); // This constant is mapped to ::RS for BC
 var_dump(4 === MongoLog::IO);
 var_dump(8 === MongoLog::SERVER);
 var_dump(16 === MongoLog::PARSE);
-?>
+}

@@ -11,5 +11,9 @@ function decompose($s) {
 
 function foo($x) { return IntlChar::chr($x); }
 
+
+<<__EntryPoint>>
+function main_fcallbuiltin_name_alias() {
 var_dump(decompose(foo(169)));
 var_dump(decompose(foo(169)));
+}

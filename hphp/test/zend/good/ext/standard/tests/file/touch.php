@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 // This doesn't work for windows, time, atime usage results in very different
 // output to linux. This could be a php.net bug on windows or a windows querk.
-$filename = dirname(__FILE__)."/touch.dat";
-
-var_dump(touch());
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('touch.dat');
+try { var_dump(touch()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(touch($filename));
 var_dump(filemtime($filename));
 @unlink($filename);
@@ -28,4 +28,4 @@ var_dump(touch("/no/such/file/or/directory"));
 @unlink($filename);
 
 echo "Done\n";
-?>
+}

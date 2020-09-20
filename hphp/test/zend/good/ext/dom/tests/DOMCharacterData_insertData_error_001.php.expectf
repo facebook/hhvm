@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: DOMCharacterData::insertData() expects exactly 2 parameters, 0 given in %s/DOMCharacterData_insertData_error_001.php on line 8

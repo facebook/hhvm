@@ -1,0 +1,8 @@
+File "constraint_bad_usepos.php", line 12, characters 11-15:
+Some type constraint(s) here are violated (Typing[4323])
+File "constraint_bad_usepos.php", line 6, characters 9-10:
+`TC` is a constrained type parameter
+File "constraint_bad_usepos.php", line 6, characters 15-15:
+Expected `I`
+File "constraint_bad_usepos.php", line 12, characters 13-14:
+But got `TD`

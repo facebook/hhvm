@@ -9,7 +9,7 @@ abstract class InstantiateTypeConstantFromClassname {
   abstract const type TConstType as AbstractBaseClass;
   public function instantiate(this::TConstType::T $request): this::TConstType {
     $ts = type_structure(static::class, 'TConstType');
-    // Class is now a Tvar of Tunresolved.
+    // Class is now a Tvar of Tunion.
     $class = getClassname("dummy", $ts['classname']);
     // This should not be a dynamic class.
     $instance = new $class($request);
@@ -17,7 +17,6 @@ abstract class InstantiateTypeConstantFromClassname {
   }
 }
 
-//
 function getClassname<T>(mixed $x, classname<T> $y): classname<T> {
-  // UNSAFE
+  return $y;
 }

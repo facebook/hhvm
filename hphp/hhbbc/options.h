@@ -13,29 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HHBBC_OPTIONS_H_
-#define incl_HPHP_HHBBC_OPTIONS_H_
+#pragma once
 
 #include <string>
 #include <utility>
-#include <map>
-#include <set>
 
-#include "hphp/util/functional.h"
+#include "hphp/hhbbc/hhbbc.h"
 
 namespace HPHP {
 
-enum class Op : uint16_t;
-
 namespace HHBBC {
-
-using MethodMap = std::map<
-  std::string,
-  std::set<std::string,stdltistr>,
-  stdltistr
->;
-
-using OpcodeSet = std::set<Op>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -54,6 +41,12 @@ struct Options {
    * that use particular bytecodes.
    */
   OpcodeSet TraceBytecodes;
+
+  /*
+   * If non-empty, dump jemalloc memory profiles at key points during
+   * the build, using this as a prefix.
+   */
+  std::string profileMemory;
 
   //////////////////////////////////////////////////////////////////////
 
@@ -84,6 +77,11 @@ struct Options {
    *   InitCell, CArrN(x:InitCell), CArrN(x:CArrN(x:InitCell)), ...
    */
   uint32_t returnTypeRefineLimit = 15;
+
+  /*
+   * Limit public static property refinement for the same reason.
+   */
+  uint32_t publicSPropRefineLimit = 15;
 
   /*
    * Whether to produce extended stats information.  (Takes extra
@@ -134,16 +132,16 @@ struct Options {
   bool GlobalDCE = true;
 
   /*
-   * Whether to remove completely unused local variables.  This requires
+   * Whether to remove completely unused local names.  This requires
    * GlobalDCE.
    */
-  bool RemoveUnusedLocals = true;
+  bool RemoveUnusedLocalNames = true;
 
   /*
-   * Whether to remove completely unused class-ref slots.  This requires
-   * GlobalDCE.
+   * Whether to compact local slot usage by having non conflicting locals share
+   * a local slot.  This requires GlobalDCE.
    */
-  bool RemoveUnusedClsRefSlots = true;
+  bool CompactLocalSlots = true;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can assume them
@@ -162,15 +160,9 @@ struct Options {
 
   /*
    * Whether to replace bytecode with less expensive bytecodes when we can.
-   * E.g. InstanceOf -> InstanceOfD or FPushFunc -> FPushFuncD.
+   * E.g. InstanceOf -> InstanceOfD or FCallFunc -> FCallFuncD.
    */
   bool StrengthReduce = true;
-
-  /*
-   * Whether to turn on peephole optimizations (e.g., Concat, ..., Concat ->
-   * ..., ConcatN).
-   */
-  bool Peephole = true;
 
   /*
    * Whether to enable 'FuncFamily' method resolution.
@@ -179,12 +171,6 @@ struct Options {
    * set of candidates when we aren't sure which one it would be.
    */
   bool FuncFamilies = true;
-
-  /*
-   * Whether or not hhbbc should attempt to do anything intelligent to
-   * pseudomains.
-   */
-  bool AnalyzePseudomains = true;
 
   /*
    * Should we do an extra whole-program pass to try to determine the types of
@@ -200,14 +186,6 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
-   * If true, we'll propagate global defined constants, class constants, and
-   * constant static class properties "unsoundly".  I.e., it is visible to the
-   * user that we may not invoke autoload at places where we would have without
-   * this optimization.
-   */
-  bool HardConstProp = true;
-
-  /*
    * If true, we'll try to infer the types of declared private class
    * properties.
    *
@@ -221,13 +199,6 @@ struct Options {
   bool HardPrivatePropInference = true;
 
   /*
-   * If true, we'll perform optimizations which can remove invocations of the
-   * autoloader, if it can be proven the invocation would not find a viable
-   * function.
-   */
-  bool ElideAutoloadInvokes = true;
-
-  /*
    * Whether to flatten trait methods and properties into the classes
    * that use them.
    */
@@ -238,9 +209,13 @@ struct Options {
    * save the stats file to a temporary file.
    */
   std::string stats_file;
+
+  /*
+   * Run a test of HHBBC memory compression (e.g. bytecode compression).
+   */
+  bool TestCompression;
 };
 extern Options options;
 
 }}
 
-#endif

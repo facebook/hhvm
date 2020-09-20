@@ -1,7 +1,7 @@
-<?hh
+<?hh // partial
 
 function my_compact<T>(Vector<?T> $vector): Vector<T> {
-  //UNSAFE
+  return Vector {};
 }
 
 function test(bool $b): ?string {

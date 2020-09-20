@@ -1,0 +1,24 @@
+-- at constructor entry --
+object(C) (4) {
+  ["ci"]=>
+  int(0)
+  ["i"]=>
+  int(1)
+  ["ci2"]=>
+  int(2)
+  ["i2"]=>
+  int(3)
+}
+-- after constructor completes --
+object(C) (2) {
+  ["ci2"]=>
+  int(2)
+  ["i2"]=>
+  int(3)
+}
+Cannot modify const property ci2 of class C after construction
+-- at the end --
+object(C) (1) {
+  ["ci2"]=>
+  int(2)
+}

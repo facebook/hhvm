@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_1647() {
 $file = <<<EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <wurfl-config>
@@ -23,4 +26,5 @@ foreach ($xml->children() as $parent_name => $xml_ele) {
   foreach ($xml_ele->children() as $key => $value) {
     var_dump((string)$key, (string)$value);
   }
+}
 }

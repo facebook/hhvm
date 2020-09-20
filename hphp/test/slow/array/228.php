@@ -1,11 +1,14 @@
-<?php
+<?hh
 
-$foo = array(1,2,3,4);
+
+<<__EntryPoint>>
+function main_228() {
+$foo = varray[1,2,3,4];
 foreach ($foo as $key => $val) {
   if($val == 2) {
     $foo[$key] = 0;
   }
- else if($val == 3) {
+ else if($val == 4) {
     unset($foo[$key]);
   }
  else {
@@ -13,3 +16,4 @@ foreach ($foo as $key => $val) {
   }
 }
 var_dump($foo);
+}

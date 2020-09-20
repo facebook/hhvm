@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Lal {
 }
@@ -20,4 +20,8 @@ function main() {
   $x->sup();
 }
 
+
+<<__EntryPoint>>
+function main_not_supported_exception() {
 main();
+}

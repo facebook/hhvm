@@ -1,7 +1,7 @@
 
-Warning: %s
+Warning: Invalid argument: seconds: cannot be negative in %s/bug60222.php on line 3
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: nanoseconds: has to be 0 to 999999999 in %s/bug60222.php on line 4
 bool(false)
 ===DONE===

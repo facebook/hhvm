@@ -1,0 +1,14 @@
+.class Clojure extends CLOSURE {
+  .method [public static] (3,3) <"" N  > __invoke() isClosureBody {
+    Null
+    RetC
+  }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  String "FAIL: should not run this\n"
+  Print
+  PopC
+  Int 1
+  RetC  
+}

@@ -16,5 +16,6 @@ class C extends B {
 
   public function test() { echo self::FOO . "\n"; }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(C::FOO);
+}

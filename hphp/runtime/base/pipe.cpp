@@ -37,8 +37,8 @@ Pipe::~Pipe() {
 }
 
 bool Pipe::open(const String& filename, const String& mode) {
-  assert(m_stream == nullptr);
-  assert(getFd() == -1);
+  assertx(m_stream == nullptr);
+  assertx(getFd() == -1);
 
 #ifdef _MSC_VER
   auto old_cwd = Process::GetCurrentDirectory();
@@ -58,22 +58,21 @@ bool Pipe::open(const String& filename, const String& mode) {
 }
 
 bool Pipe::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 
 bool Pipe::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
-    assert(m_stream);
+    assertx(m_stream);
 #ifdef _MSC_VER
     int pcloseRet = _pclose(m_stream);
 #else
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
 #endif
-    s_pcloseRet = pcloseRet;
+    *s_pcloseRet = pcloseRet;
     ret = (pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;

@@ -1,0 +1,6 @@
+File "this_type_attr.php", line 8, characters 22-23:
+Invalid xhp value for attribute `:me` in `:my-xhp` (Typing[4343])
+File "this_type_attr.php", line 4, characters 13-16:
+Expected `~?:my-xhp` because it is an unenforceable type
+File "this_type_attr.php", line 7, characters 15-21:
+But got `:my-xhp`

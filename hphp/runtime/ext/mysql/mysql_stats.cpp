@@ -30,7 +30,7 @@ Mutex MySqlStats::s_mutex;
 MySqlStats::StatsMap MySqlStats::s_stats;
 
 void MySqlStats::Init() {
-  assert(!s_inited);
+  assertx(!s_inited);
 
   s_verbs["t_begin"   ] = T_BEGIN;
   s_verbs["t_commit"  ] = T_COMMIT;
@@ -146,7 +146,7 @@ std::string MySqlStats::ReportStats() {
     Stats &stats = *iter->second;
     for (int i = 0; i < VERB_COUNT; i++) {
       const char *name = Translate((Verb)i);
-      assert(name);
+      assertx(name);
       out << "  <" << name << ">";
       out << stats.actions[i];
       out << "</" << name << ">\n";

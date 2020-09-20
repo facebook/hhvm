@@ -1,5 +1,5 @@
-%string|unicode%(6) "foobar"
+string(6) "foobar"
 
-Warning: %s
+Warning: Invalid argument: function: method 'priv' not found in %s/call_user_func_001.php on line 22
 
-Warning: %s
+Warning: Invalid argument: function: method 'prot' not found in %s/call_user_func_001.php on line 23

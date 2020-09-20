@@ -1,6 +1,6 @@
-<?php
-    
-$tests = array('"A JSON payload should be an object or array, not a string."',
+<?hh
+<<__EntryPoint>> function main(): void {
+$tests = varray['"A JSON payload should be an object or array, not a string."',
                '["Unclosed array"',
                '{unquoted_key: "keys must be quoted}',
                '["extra comma",]',
@@ -23,7 +23,7 @@ $tests = array('"A JSON payload should be an object or array, not a string."',
                '{"Comma instead of colon", null}',
                '["Colon instead of comma": false]',
                '["Bad value", truth]',
-               "['single quote']");
+               "['single quote']"];
 
 foreach ($tests as $test)
 {
@@ -33,5 +33,4 @@ foreach ($tests as $test)
     echo "AS ARRAY\n";
     var_dump(json_decode($test, true));
 }
-
-?>
+}

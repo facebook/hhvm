@@ -1,15 +1,8 @@
-File "simplify_error.php", line 7, characters 16-16:
-Class C does not correctly implement all required methods  (Typing[4110])
-File "simplify_error.php", line 7, characters 26-26:
-Some methods are incompatible with those declared in type P
-Read the following to see why:
 File "simplify_error.php", line 13, characters 31-33:
-Member foo has the wrong type
+The method `foo` has the wrong type (Typing[4341])
 File "simplify_error.php", line 7, characters 28-34:
-This is the expression dependent type \C::T
+Expected `this::T`
 File "simplify_error.php", line 4, characters 38-38:
-  via this generic T
-File "simplify_error.php", line 8, characters 23-23:
-  resulting from expanding the type constant C::T
+  via this generic `T`
 File "simplify_error.php", line 13, characters 38-38:
-It is incompatible with an object of type T
+But got `T`

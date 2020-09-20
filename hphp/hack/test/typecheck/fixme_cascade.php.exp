@@ -1,0 +1,6 @@
+File "fixme_cascade.php--b.php", line 4, characters 7-9:
+Invalid argument (Typing[4110])
+File "fixme_cascade.php--a.php", line 5, characters 3-5:
+Expected `int`
+File "fixme_cascade.php--b.php", line 4, characters 7-9:
+But got `string`

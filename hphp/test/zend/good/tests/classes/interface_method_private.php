@@ -1,7 +1,5 @@
-<?php
+<?hh
 
 interface if_a {
-	abstract private function err();
+    private function err();
 }
-
-?>

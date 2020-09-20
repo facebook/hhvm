@@ -11,7 +11,7 @@ class Ex3 extends Exception {
 
 function bar($a) {
   print "bar $a\n";
-  $b = array(1, 2);
+  $b = varray[1, 2];
   foreach($b as $c) {
     if ($a == 0) {
       throw new Ex1();
@@ -25,7 +25,7 @@ function bar($a) {
 
 function foo2($a) {
   try {
-    call_user_func("bar", $a);
+    call_user_func(fun("bar"), $a);
   } catch (Ex1 $e) {
     print "caught 1\n";
   }
@@ -40,19 +40,19 @@ function foo($a) {
 }
 
 function main1() {
-  $a = array(0, 1, 2);
-  $b = array(0);
+  $a = varray[0, 1, 2];
+  $b = varray[0];
 
   foreach ($b as $c) {
     try {
-      array_map("foo", $a);
+      array_map(fun("foo"), $a);
     } catch (Ex2 $e) {
       print "caught 2\n";
     }
   }
 
   try {
-    foreach (array(1,2,3) as $_) {
+    foreach (varray[1,2,3] as $_) {
       echo "before\n";
       throw new Exception();
       echo "after\n";
@@ -61,7 +61,6 @@ function main1() {
     echo "caught\n";
   }
 }
-main1();
 
 class A {
   function __construct() {
@@ -71,12 +70,11 @@ class A {
 
 function main2() {
   try {
-    call_user_func("hphp_create_object", "A", NULL);
+    call_user_func(fun("hphp_create_object"), "A", NULL);
   } catch (Exception $e) {
     print "caught exception\n";
   }
 }
-main2();
 
 class Ex4 extends Ex3 {
   function __construct($s) {
@@ -84,6 +82,8 @@ class Ex4 extends Ex3 {
     var_dump($this->getTraceAsString());
   }
 }
+
+
 function a() {
   return b();
 }
@@ -100,13 +100,17 @@ function main3() {
   printf("Exception from %s:%d\n", $e->getFile(), $e->getLine());
   var_dump($e->getTraceAsString());
 
-  $b = array(3);
+  $b = varray[3];
   try {
-    array_map("foo", $b);
+    array_map(fun("foo"), $b);
   } catch (Ex3 $e) {
     print "caught 3\n";
     throw $e;
   }
 }
-main3();
 
+<<__EntryPoint>> function main(): void {
+  main1();
+  main2();
+  main3();
+}

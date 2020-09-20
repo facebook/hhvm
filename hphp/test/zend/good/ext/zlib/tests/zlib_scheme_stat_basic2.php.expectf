@@ -4,12 +4,12 @@ is_dir=bool(false)
 is_readable=bool(false)
 
 filesize=
-Warning: %s
+Warning: filesize(): No such file or directory in %s/zlib_scheme_stat_basic2.php on line 14
 bool(false)
 filetype=
-Warning: %s
+Warning: filetype(): No such file or directory in %s/zlib_scheme_stat_basic2.php on line 16
 bool(false)
 fileatime=
-Warning: %s
+Warning: fileatime(): No such file or directory in %s/zlib_scheme_stat_basic2.php on line 18
 bool(false)
 ===DONE===

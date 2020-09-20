@@ -1,0 +1,17 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "node_pattern",
+    "kind": "methodish_declaration",
+    "children": {
+      "methodish_semicolon": {
+        "pattern_type": "descendant_pattern",
+        "pattern": {
+          "pattern_type": "node_pattern",
+          "kind": "methodish_declaration",
+          "children": {}
+        }
+      }
+    }
+  }
+}

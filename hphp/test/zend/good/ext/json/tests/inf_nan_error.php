@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $inf = INF;
 
 var_dump($inf);
@@ -21,4 +21,4 @@ var_dump(json_last_error(), json_last_error_msg());
 
 var_dump(json_encode($nan, JSON_PARTIAL_OUTPUT_ON_ERROR));
 var_dump(json_last_error(), json_last_error_msg());
-?>
+}

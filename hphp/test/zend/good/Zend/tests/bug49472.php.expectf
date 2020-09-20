@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot override previously defined constant ia::c in FooBar in %s/bug49472.php on line 11

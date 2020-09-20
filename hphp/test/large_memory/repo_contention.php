@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foobar($i) {
   usleep(500*1000);
@@ -11,7 +11,7 @@ function main($num) {
 
   echo "Starting $num procs\n";
   for ($i = 0; $i < $num; $i++) {
-    $handles[] = proc_open($cmd." $i", array(), $pipes);
+    $handles[] = proc_open($cmd." $i", darray[], $pipes);
   }
   while ($handles) {
     foreach ($handles as $i => $handle) {

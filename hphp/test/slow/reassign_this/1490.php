@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   function Bar() {
@@ -8,3 +8,4 @@ class Foo {
     $this = $__this;
   }
  }
+

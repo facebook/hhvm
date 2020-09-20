@@ -33,7 +33,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 struct PDOSqliteStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement);
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);
-  virtual ~PDOSqliteStatement();
+  ~PDOSqliteStatement() override;
 
   bool support(SupportedMethod method) override;
   bool executer() override;
@@ -86,7 +86,7 @@ PDOSqliteConnection::PDOSqliteConnection() : m_db(NULL) {
 
 PDOSqliteConnection::~PDOSqliteConnection() {
   if (m_db) {
-    sqlite3_close(m_db);
+    sqlite3_close_v2(m_db);
   }
   if (m_einfo.errmsg) {
     free(m_einfo.errmsg);
@@ -97,7 +97,7 @@ bool PDOSqliteConnection::create(const Array& options) {
   String filename = data_source.substr(0,1) == ":" ? String(data_source) :
                     File::TranslatePath(data_source);
   if (filename.empty()) {
-    throw_pdo_exception(0, Array(),
+    throw_pdo_exception(Array(),
                         "safe_mode/open_basedir prohibits opening %s",
                         data_source.c_str());
     return false;
@@ -158,7 +158,7 @@ int PDOSqliteConnection::handleError(const char *file, int line,
 
 bool PDOSqliteConnection::closer() {
   if (m_db) {
-    sqlite3_close(m_db);
+    sqlite3_close_v2(m_db);
     m_db = NULL;
   }
   if (m_einfo.errmsg) {
@@ -179,7 +179,7 @@ bool PDOSqliteConnection::preparer(const String& sql, sp_PDOStatement *stmt,
 
   const char *tail;
   sqlite3_stmt *rawstmt = NULL;
-  if (sqlite3_prepare(m_db, sql.data(), sql.size(), &rawstmt, &tail)
+  if (sqlite3_prepare_v2(m_db, sql.data(), sql.size(), &rawstmt, &tail)
       == SQLITE_OK) {
 
     *stmt = req::make<PDOSqliteStatement>(m_db, rawstmt);
@@ -359,9 +359,9 @@ bool PDOSqliteStatement::support(SupportedMethod method) {
 
 int PDOSqliteStatement::handleError(const char *file, int line) {
   auto rsrc = unsafe_cast<PDOSqliteResource>(dbh);
-  assert(rsrc);
+  assertx(rsrc);
   auto conn = rsrc->conn();
-  assert(conn);
+  assertx(conn);
   return conn->handleError(file, line, this);
 }
 
@@ -496,7 +496,6 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam* param,
       m_done = 1;
     }
 
-    if (param->is_param) {
       if (param->paramno == -1) {
         param->paramno = sqlite3_bind_parameter_index(m_stmt,
                                                       param->name.c_str()) - 1;
@@ -575,7 +574,6 @@ bool PDOSqliteStatement::paramHook(PDOBoundParam* param,
         handleError(__FILE__, __LINE__);
         return false;
       }
-    }
     break;
 
   default:;
@@ -604,8 +602,8 @@ bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
     return false;
   }
 
-  ret = Array::Create();
-  Array flags = Array::Create();
+  ret = Array::CreateDArray();
+  Array flags = Array::CreateVArray();
   switch (sqlite3_column_type(m_stmt, colno)) {
   case SQLITE_NULL:    ret.set(s_native_type, s_null);    break;
   case SQLITE_FLOAT:   ret.set(s_native_type, s_double);  break;

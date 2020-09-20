@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_graph(mixed $c)
  * Description: Checks for any printable character(s) except space 
  * Source code: ext/ctype/ctype.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ctype_graph() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -15,5 +15,5 @@ var_dump(ctype_graph($c1));
 var_dump(ctype_graph($c2));
 
 setlocale(LC_CTYPE, $orig);
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STATIC_CONTENT_CACHE_H_
-#define incl_HPHP_STATIC_CONTENT_CACHE_H_
+#pragma once
 
 #include <memory>
 
@@ -45,4 +44,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_STATIC_CONTENT_CACHE_H_

@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $msg = random_bytes(1000);
 $key = sodium_crypto_auth_keygen();
 $mac = sodium_crypto_auth($msg, $key);
@@ -8,8 +8,8 @@ var_dump(sodium_crypto_auth_verify($mac, $msg, $key));
 
 $bad_key = random_bytes(SODIUM_CRYPTO_AUTH_KEYBYTES - 1);
 try {
-	$mac = sodium_crypto_auth($msg, $bad_key);
-	echo 'Fail!', PHP_EOL;
+    $mac = sodium_crypto_auth($msg, $bad_key);
+    echo 'Fail!', PHP_EOL;
 } catch (SodiumException $ex) {
   echo $ex->getMessage(), PHP_EOL;
 }
@@ -22,9 +22,9 @@ var_dump(sodium_crypto_auth_verify($mac, $badmsg, $key));
 // Let's flip a bit pseudo-randomly
 $badmsg = $msg;
 $badmsg[$i=mt_rand(0, 999)] = \chr(
-	\ord($msg[$i]) ^ (
-		1 << mt_rand(0, 7)
-	)
+    \ord($msg[$i]) ^ (
+        1 << mt_rand(0, 7)
+    )
 );
 
 var_dump(sodium_crypto_auth_verify($mac, $badmsg, $key));
@@ -33,4 +33,4 @@ var_dump(sodium_crypto_auth_verify($mac, $badmsg, $key));
 $badmac = $mac;
 $badmac[0] = \chr(\ord($badmac[0]) ^ 0x80);
 var_dump(sodium_crypto_auth_verify($badmac, $msg, $key));
-?>
+}

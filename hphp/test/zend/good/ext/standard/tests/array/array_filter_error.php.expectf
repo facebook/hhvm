@@ -1,11 +1,5 @@
 *** Testing array_filter() : error conditions ***
--- Testing array_filter() function with Zero arguments --
-Warning: %s
-NULL
--- Testing array_filter() function with more than expected no. of arguments --
-Warning: %s
-NULL
 -- Testing array_filter() function with incorrect callback --
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter_error.php on line 24
 NULL
 Done

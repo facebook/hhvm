@@ -1,0 +1,7 @@
+(library
+    (name call_order)
+    (wrapped false)
+    (modules callOrder)
+    (libraries
+      default_injector_config
+      full_fidelity))

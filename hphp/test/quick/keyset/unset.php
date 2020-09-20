@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $e = keyset[];
   $one = keyset[1];
   $two = keyset[1, "1"];
@@ -15,5 +15,3 @@ function main() {
   unset($three['a']);
   var_dump($e, $one, $two, $three);
 }
-
-main();

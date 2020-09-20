@@ -1,4 +1,10 @@
-array(2) {
+darray(2) {
+  [0]=>
+  string(4) "test"
+  ["test"]=>
+  string(4) "test"
+}
+darray(2) {
   [0]=>
   string(4) "test"
   ["test"]=>

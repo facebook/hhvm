@@ -1,11 +1,15 @@
-<?php
+<?hh
 
 class Foo {
-  static $heh = array();
+  static $heh = varray[];
   function go() {
-    self::$heh = array(self::$heh);
+    self::$heh = varray[self::$heh];
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_005() {
 (new Foo)->go();
 var_dump(Foo::$heh);
+}

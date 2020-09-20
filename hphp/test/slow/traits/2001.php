@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
 }
@@ -22,6 +22,7 @@ class C5 extends C4 {
 }
 interface I1 {
 }
+<<__EntryPoint>> function main(): void {
 echo "T1:\n";
 var_dump(class_uses('T1'));
 $rt1 = new ReflectionClass('T1');
@@ -54,4 +55,4 @@ echo "\nI1:\n";
 var_dump(class_uses('I1'));
 $ri1 = new ReflectionClass('I1');
 var_dump($ri1->getTraitNames());
-?>
+}

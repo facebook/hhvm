@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 <<__NativeData("IntlTimeZone")>>
 class IntlTimeZone {
@@ -82,7 +82,9 @@ class IntlTimeZone {
    */
   <<__Native>>
   public static
-  function getCanonicalID(string $zoneId, mixed &$isSystemID = null): mixed;
+  function getCanonicalID(string $zoneId,
+                          <<__OutOnly("KindOfBoolean")>>
+                          inout mixed $isSystemID): mixed;
 
 
   <<__Native>>
@@ -169,10 +171,12 @@ class IntlTimeZone {
    * @return integer -
    */
   <<__Native>>
-  public function getOffset(float $date,
-                            bool $local,
-                            int &$rawOffset,
-                            int &$dstOffset): bool;
+  public function getOffset(
+    float $date,
+    bool $local,
+    <<__OutOnly('KindOfInt64')>> inout int $rawOffset,
+    <<__OutOnly('KindOfInt64')>> inout int $dstOffset,
+  ): bool;
 
   /**
    * Get the raw GMT offset (before taking daylight savings time into
@@ -297,8 +301,8 @@ function intltz_from_date_time_zone(DateTimeZone $zoneId): IntlTimeZone {
  * @return string -
  */
 function intltz_get_canonical_id(string $zoneId,
-                                 mixed &$isSystemID = null): mixed {
-  return IntlTimeZone::getCanonicalID($zoneId, $isSystemID);
+                                 inout mixed $isSystemID): mixed {
+  return IntlTimeZone::getCanonicalID($zoneId, inout $isSystemID);
 }
 
 function intltz_get_region(string $str): mixed {
@@ -397,9 +401,9 @@ function intltz_get_id(IntlTimeZone $obj): string {
 function intltz_get_offset(IntlTimeZone $obj,
                            float $date,
                            bool $local,
-                           int &$rawOffset,
-                           int &$dstOffset): bool {
-  return $obj->getOffset($date, $local, $rawOffset, $dstOffset);
+                           inout int $rawOffset,
+                           inout int $dstOffset): bool {
+  return $obj->getOffset($date, $local, inout $rawOffset, inout $dstOffset);
 }
 
 /**

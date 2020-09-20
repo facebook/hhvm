@@ -1,4 +1,7 @@
 string(12) "test1:Caught"
 string(12) "test2:Caught"
+string(12) "test3:Caught"
 
-Fatal error: Cls: Expected string or object in %s/test/slow/exceptions/65.php on line 23
+Notice: Undefined variable: a in %s/test/slow/exceptions/65.php on line 20
+
+Fatal error: Cls: Expected string or object in %s/test/slow/exceptions/65.php on line 20

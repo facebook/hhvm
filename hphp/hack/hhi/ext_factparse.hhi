@@ -1,13 +1,13 @@
-<?hh //decl
+<?hh
 
 namespace HH {
 
 function facts_parse(
   ?string $root,
-  array<string> $pathList,
+  varray<string> $pathList,
   bool $allowHipHopSyntax,
   bool $useThreads,
-): array<string, ?array<string, mixed>>;
+): darray<string, ?darray<string, mixed>>;
 
 function ext_factparse_version(): int;
 

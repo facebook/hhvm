@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/call-flags.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 
 namespace HPHP {
@@ -25,27 +27,11 @@ namespace HPHP {
 // Register dirtiness: thread-private.
 __thread VMRegState tl_regState = VMRegState::CLEAN;
 
-VMRegAnchor::VMRegAnchor()
+VMRegAnchor::VMRegAnchor(Mode mode)
   : m_old(tl_regState)
 {
   assert_native_stack_aligned();
-  jit::syncVMRegs();
-}
-
-VMRegAnchor::VMRegAnchor(ActRec* ar)
-  : m_old(tl_regState)
-{
-  assert(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-
-  auto prevAr = g_context->getOuterVMFrame(ar);
-  const Func* prevF = prevAr->m_func;
-  assert(!ar->resumed());
-  auto& regs = vmRegs();
-  regs.stack.top() = (TypedValue*)ar - ar->numArgs();
-  assert(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->unit()->at(prevF->base() + ar->m_soff);
-  regs.fp = prevAr;
+  jit::syncVMRegs(mode == Soft);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

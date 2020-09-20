@@ -14,11 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MCGEN_TRANSLATE_H_
-#define incl_HPHP_JIT_MCGEN_TRANSLATE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
+
+#include "hphp/util/trace.h"
 
 #include <folly/Optional.h>
 
@@ -27,6 +28,9 @@ namespace HPHP { namespace jit {
 struct FPInvOffset;
 struct ProfTransRec;
 struct TransArgs;
+
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
 
 namespace tc { struct TransMetaInfo; };
 
@@ -53,7 +57,31 @@ folly::Optional<tc::TransMetaInfo> translate(
  * execution mode.
  */
 bool retranslateAllEnabled();
+/*
+ * Is still a pending call to retranslateAll()
+ */
+bool retranslateAllPending();
+/*
+ * Whether retranslateAll has been scheduled (and possibly already completed).
+ */
+bool retranslateAllScheduled();
+
+/*
+ * Whether retranslateAll has been scheduled but has not complete.
+ */
+bool pendingRetranslateAllScheduled();
+
+/*
+ * Is retranslateAll() finished.
+ */
+bool retranslateAllComplete();
+
+/*
+ * Undo the effects of bumpTraceFunctions() (so that we don't trace
+ * all the inlined functions we're because we're tracing the function
+ * they're inlined into).
+ */
+CompactVector<Trace::BumpRelease> unbumpFunctions();
 
 }}}
 
-#endif

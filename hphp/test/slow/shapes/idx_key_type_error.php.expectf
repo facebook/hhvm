@@ -1,0 +1,1 @@
+Fatal error: Argument 2 passed to HH\Shapes::idx() must be an instance of arraykey, null given in %s/test/slow/shapes/idx_key_type_error.php on line 5

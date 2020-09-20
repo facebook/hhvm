@@ -2,201 +2,155 @@
 
 --int 0--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --int 1--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --int 12345--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --int -12345--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, integer given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --float 10.5--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --float -10.5--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --float 12.3456789000e10--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --float -12.3456789000e10--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --float .5--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --empty array--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --int indexed array--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --associative array--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --nested arrays--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --uppercase NULL--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --lowercase null--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --lowercase true--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --lowercase false--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --uppercase TRUE--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --uppercase FALSE--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, boolean given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --empty string DQ--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 bool(false)
 
 --empty string SQ--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 bool(false)
 
 --instance of classWithToString--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --instance of classWithoutToString--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, object given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --undefined var--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --unset var--
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: %s
-bool(false)
+Warning: idate() expects parameter 1 to be string, null given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 ===DONE===

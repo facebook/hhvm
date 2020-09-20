@@ -1,170 +1,170 @@
 *** Testing array_intersect() : Passing non-array values to $arr2 argument ***
 
 -- Iterator 1 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 2 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 3 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 4 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 5 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 6 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 7 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 8 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 9 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 10 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 11 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 12 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 13 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 14 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 15 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 16 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 17 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 18 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 19 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 20 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 21 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 22 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 23 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 
 -- Iterator 24 --
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 95
 NULL
 
-Warning: %s
+Warning: array_intersect() expects parameter 2 to be an array or collection in %s/array_intersect_variation2.php on line 98
 NULL
 Done

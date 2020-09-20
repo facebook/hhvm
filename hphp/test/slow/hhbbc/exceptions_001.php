@@ -1,15 +1,16 @@
-<?php
+<?hh
 
-error_reporting(-1);
+abstract final class HehStatics {
+  public static $x = 0;
+}
 
 function heh() {
-  static $x = 0;
+  $x = HehStatics::$x;
   echo "ok $x\n";
-  if ($x++ == 0) {
+  if (HehStatics::$x++ == 0) {
     throw new Exception('a');
   }
 }
-set_error_handler('heh');
 
 function foo() {
   try {
@@ -21,4 +22,11 @@ function foo() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_exceptions_001() {
+error_reporting(-1);
+set_error_handler(fun('heh'));
+
 foo();
+}

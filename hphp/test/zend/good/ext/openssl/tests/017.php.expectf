@@ -1,15 +1,15 @@
 bool(true)
 string(32) "Testing openssl_public_decrypt()"
 
-Warning: %s
+Warning: key parameter is not a valid private key in %s/017.php on line %d
 bool(false)
 NULL
 bool(false)
 NULL
 
-Warning: %s
+Warning: key array must be of the form array(0 => key, 1 => phrase) in %s/017.php on line %d
 
-Warning: %s
+Warning: key parameter is not a valid private key in %s/017.php on line %d
 bool(false)
 NULL
 bool(true)

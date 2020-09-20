@@ -1,0 +1,19 @@
+(2,12)-(2,13) A name is expected here.
+(2,13)-(2,14) A name is expected here.
+(3,12)-(3,13) A name is expected here.
+(4,12)-(4,13) A name is expected here.
+(5,12)-(5,13) A name is expected here.
+(6,12)-(6,13) A name is expected here.
+(6,13)-(6,14) A name is expected here.
+(7,12)-(7,13) A name is expected here.
+(8,8)-(13,30) XHP: mismatched tag: `` not the same as `a`
+(8,12)-(8,13) A name is expected here.
+(8,27)-(8,27) A closing angle bracket `>` is expected here.
+(9,8)-(13,30) XHP: mismatched tag: `` not the same as `a`
+(9,26)-(9,26) A closing angle bracket `>` is expected here.
+(10,12)-(10,13) A name is expected here.
+(11,12)-(11,13) A name is expected here.
+(12,12)-(12,13) A name is expected here.
+(12,13)-(12,14) A name is expected here.
+(13,12)-(13,13) A name is expected here.
+(14,1)-(14,1) A closing XHP tag is expected here.

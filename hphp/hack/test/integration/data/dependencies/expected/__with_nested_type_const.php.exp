@@ -1,0 +1,18 @@
+<?hh
+interface IHasQuux {
+  abstract const type TQuux;
+}
+function with_nested_type_const(IntBazWrapper $x): void {
+  $x->takeQuux(42);
+}
+interface IntBazWrapper extends \IHasBaz {
+  const type TBaz = \IntQuuxWrapper;
+}
+class IntQuuxWrapper implements \IHasQuux {
+  const type TQuux = int;
+}
+interface IHasBaz {
+  public function takeQuux(this::TQuux $_): void;
+  abstract const type TBaz as \IHasQuux;
+  const type TQuux = this::TBaz::TQuux;
+}

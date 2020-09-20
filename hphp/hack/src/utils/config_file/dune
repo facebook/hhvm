@@ -1,0 +1,45 @@
+(library
+  (name utils_config_file_common)
+  (wrapped false)
+  (modules
+    config_file_common
+    config_file_version)
+  (libraries
+    core_kernel
+    sys_utils
+    utils_core
+    utils_hash)
+  (preprocess (pps lwt_ppx)) ; See T41851208
+)
+
+(library
+  (name utils_config_file)
+  (wrapped false)
+  (modules
+    config_file)
+  (libraries
+    core_kernel
+    sys_utils
+    utils_config_file_common
+    utils_core
+    utils_exit
+    utils_hash)
+  (preprocess (pps lwt_ppx)) ; See T41851208
+)
+
+(library
+  (name utils_config_file_lwt)
+  (wrapped false)
+  (modules
+    config_file_lwt)
+  (libraries
+    core_kernel
+    lwt
+    lwt.unix
+    lwt_utils
+    sys_utils
+    utils_config_file_common
+    utils_core
+    utils_hash)
+  (preprocess (pps lwt_ppx))
+)

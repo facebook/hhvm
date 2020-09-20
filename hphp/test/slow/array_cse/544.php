@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function blocker() {
  print 'block';
@@ -11,3 +11,4 @@ function f($x, $y) {
   blocker();
   var_dump($y);
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

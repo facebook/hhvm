@@ -1,801 +1,675 @@
-array(3) {
-  [%s]=>
-  array(6) {
-    ["md5sum0"]=>
-    int(%i)
-    ["md5sum1"]=>
-    int(%i)
-    ["types"]=>
-    array(13) {
-      [0]=>
-      array(4) {
-        ["name"]=>
-        string(3) "CL0"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [1]=>
-      array(4) {
-        ["name"]=>
-        string(3) "CL1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(0)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [2]=>
-      array(4) {
-        ["name"]=>
-        string(3) "CL2"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(5) {
-          [0]=>
-          string(3) "CL0"
-          [1]=>
-          string(2) "I0"
-          [2]=>
-          string(2) "I1"
-          [3]=>
-          string(3) "TR0"
-          [4]=>
-          string(3) "TR1"
-        }
-      }
-      [3]=>
-      array(4) {
-        ["name"]=>
-        string(3) "CL3"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(4)
-        ["baseTypes"]=>
-        array(3) {
-          [0]=>
-          string(3) "CL0"
-          [1]=>
-          string(2) "I0"
-          [2]=>
-          string(3) "TR0"
-        }
-      }
-      [4]=>
-      array(4) {
-        ["name"]=>
-        string(2) "E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
-        ["baseTypes"]=>
-        array(1) {
-          [0]=>
-          string(14) "HH\BuiltinEnum"
-        }
-      }
-      [5]=>
-      array(5) {
-        ["name"]=>
-        string(2) "I0"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
-        }
-      }
-      [6]=>
-      array(5) {
-        ["name"]=>
-        string(2) "I1"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
-        }
-      }
-      [7]=>
-      array(5) {
-        ["name"]=>
-        string(2) "I2"
-        ["kindOf"]=>
-        string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(2) {
-          [0]=>
-          string(2) "I0"
-          [1]=>
-          string(2) "I1"
-        }
-        ["requireExtends"]=>
-        array(1) {
-          [0]=>
-          string(3) "CL1"
-        }
-      }
-      [8]=>
-      array(4) {
-        ["name"]=>
-        string(2) "M0"
-        ["kindOf"]=>
-        string(5) "mixed"
-        ["flags"]=>
-        int(5)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [9]=>
-      array(4) {
-        ["name"]=>
-        string(2) "M1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(7)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [10]=>
-      array(6) {
-        ["name"]=>
-        string(3) "TR0"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
-        ["requireImplements"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
-        }
-      }
-      [11]=>
-      array(6) {
-        ["name"]=>
-        string(3) "TR1"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
-        ["requireImplements"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
-        }
-      }
-      [12]=>
-      array(6) {
-        ["name"]=>
-        string(3) "TR2"
-        ["kindOf"]=>
-        string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(4) {
-          [0]=>
-          string(2) "I0"
-          [1]=>
-          string(2) "I1"
-          [2]=>
-          string(3) "TR0"
-          [3]=>
-          string(3) "TR1"
-        }
-        ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(2) "I2"
-        }
-        ["requireExtends"]=>
-        array(1) {
-          [0]=>
-          string(3) "CL1"
-        }
-      }
-    }
-    ["functions"]=>
-    array(5) {
-      [0]=>
-      string(2) "f1"
-      [1]=>
-      string(2) "f2"
-      [2]=>
-      string(2) "f7"
-      [3]=>
-      string(2) "f8"
-      [4]=>
-      string(2) "f6"
-    }
+darray(3) {
+  ["%s/ext_factparse.php"]=>
+  darray(7) {
     ["constants"]=>
-    array(6) {
-      [0]=>
+    varray(6) {
       string(3) "CO0"
-      [1]=>
       string(3) "CO1"
-      [2]=>
       string(3) "CO2"
-      [3]=>
       string(3) "CO3"
-      [4]=>
       string(3) "CO4"
-      [5]=>
       string(3) "CO5"
     }
+    ["functions"]=>
+    varray(4) {
+      string(2) "f1"
+      string(2) "f2"
+      string(2) "f6"
+      string(24) "entrypoint_ext_factparse"
+    }
+    ["md5sum0"]=>
+    int(-3473718262674997378)
+    ["md5sum1"]=>
+    int(-2184420665833432478)
+    ["sha1sum"]=>
+    string(40) "23c93fe1632ce968f8c2c843e3c03baf0183f8fa"
     ["typeAliases"]=>
-    array(3) {
-      [0]=>
+    varray(3) {
       string(3) "TA0"
-      [1]=>
       string(3) "TA1"
-      [2]=>
       string(3) "TA2"
     }
-  }
-  [%s]=>
-  array(6) {
-    ["md5sum0"]=>
-    int(%i)
-    ["md5sum1"]=>
-    int(%i)
     ["types"]=>
-    array(13) {
-      [0]=>
-      array(4) {
-        ["name"]=>
-        string(6) "NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
+    varray(13) {
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
         ["flags"]=>
         int(0)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [1]=>
-      array(4) {
-        ["name"]=>
-        string(6) "NS\CL1"
         ["kindOf"]=>
         string(5) "class"
+        ["name"]=>
+        string(3) "CL0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
         ["flags"]=>
         int(0)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [2]=>
-      array(4) {
-        ["name"]=>
-        string(6) "NS\CL2"
         ["kindOf"]=>
         string(5) "class"
+        ["name"]=>
+        string(3) "CL1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(5) {
+          string(3) "CL0"
+          string(2) "I0"
+          string(2) "I1"
+          string(3) "TR0"
+          string(3) "TR1"
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
-        array(5) {
-          [0]=>
-          string(6) "NS\CL0"
-          [1]=>
-          string(5) "NS\I0"
-          [2]=>
-          string(5) "NS\I1"
-          [3]=>
-          string(6) "NS\TR0"
-          [4]=>
-          string(6) "NS\TR1"
-        }
-      }
-      [3]=>
-      array(4) {
-        ["name"]=>
-        string(6) "NS\CL3"
         ["kindOf"]=>
         string(5) "class"
-        ["flags"]=>
-        int(4)
-        ["baseTypes"]=>
-        array(3) {
-          [0]=>
-          string(6) "NS\CL0"
-          [1]=>
-          string(5) "NS\I0"
-          [2]=>
-          string(6) "NS\TR0"
-        }
-      }
-      [4]=>
-      array(4) {
         ["name"]=>
-        string(5) "NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
+        string(3) "CL2"
+      }
+      darray(4) {
         ["baseTypes"]=>
-        array(1) {
-          [0]=>
+        varray(1) {
           string(14) "HH\BuiltinEnum"
         }
-      }
-      [5]=>
-      array(5) {
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
         ["name"]=>
-        string(5) "NS\I0"
+        string(2) "E0"
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
+        ["name"]=>
+        string(2) "I0"
         ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [6]=>
-      array(5) {
-        ["name"]=>
-        string(5) "NS\I1"
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
+        ["name"]=>
+        string(2) "I1"
         ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [7]=>
-      array(5) {
-        ["name"]=>
-        string(5) "NS\I2"
+      darray(5) {
+        ["baseTypes"]=>
+        varray(2) {
+          string(2) "I0"
+          string(2) "I1"
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(9) "interface"
+        ["name"]=>
+        string(2) "I2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(3) "CL1"
+        }
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(3) "TA2"
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
-        array(2) {
-          [0]=>
-          string(5) "NS\I0"
-          [1]=>
-          string(5) "NS\I1"
-        }
-        ["requireExtends"]=>
-        array(1) {
-          [0]=>
-          string(6) "NS\CL1"
-        }
-      }
-      [8]=>
-      array(4) {
-        ["name"]=>
-        string(5) "NS\M0"
-        ["kindOf"]=>
-        string(5) "mixed"
-        ["flags"]=>
-        int(5)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [9]=>
-      array(4) {
-        ["name"]=>
-        string(5) "NS\M1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(7)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [10]=>
-      array(6) {
-        ["name"]=>
-        string(6) "NS\TR0"
         ["kindOf"]=>
         string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
+        ["name"]=>
+        string(3) "TR0"
+        ["requireExtends"]=>
+        varray(0) {
         }
         ["requireImplements"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [11]=>
-      array(6) {
-        ["name"]=>
-        string(6) "NS\TR1"
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
+        ["name"]=>
+        string(3) "TR1"
+        ["requireExtends"]=>
+        varray(0) {
         }
         ["requireImplements"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [12]=>
-      array(6) {
-        ["name"]=>
-        string(6) "NS\TR2"
+      darray(6) {
+        ["baseTypes"]=>
+        varray(4) {
+          string(2) "I0"
+          string(2) "I1"
+          string(3) "TR0"
+          string(3) "TR1"
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(4) {
-          [0]=>
-          string(5) "NS\I0"
-          [1]=>
-          string(5) "NS\I1"
-          [2]=>
-          string(6) "NS\TR0"
-          [3]=>
-          string(6) "NS\TR1"
+        ["name"]=>
+        string(3) "TR2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(3) "CL1"
         }
         ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(5) "NS\I2"
-        }
-        ["requireExtends"]=>
-        array(1) {
-          [0]=>
-          string(6) "NS\CL1"
+        varray(1) {
+          string(2) "I2"
         }
       }
+    }
+  }
+  ["%s"]=>
+  darray(7) {
+    ["constants"]=>
+    varray(6) {
+      string(6) "NS\CO0"
+      string(6) "NS\CO1"
+      string(6) "NS\CO2"
+      string(6) "NS\CO3"
+      string(6) "NS\CO4"
+      string(6) "NS\CO5"
     }
     ["functions"]=>
-    array(5) {
-      [0]=>
+    varray(4) {
       string(5) "NS\f1"
-      [1]=>
       string(5) "NS\f2"
-      [2]=>
-      string(5) "NS\f7"
-      [3]=>
-      string(5) "NS\f8"
-      [4]=>
       string(5) "NS\f6"
+      string(27) "NS\entrypoint_ext_factparse"
     }
-    ["constants"]=>
-    array(2) {
-      [0]=>
-      string(6) "NS\CO0"
-      [1]=>
-      string(6) "NS\CO1"
-    }
+    ["md5sum0"]=>
+    int(6232939544107321464)
+    ["md5sum1"]=>
+    int(-3625618707922112292)
+    ["sha1sum"]=>
+    string(40) "d01f6b1d0ba0dbe0c8c6f3a50f49f9c07c079277"
     ["typeAliases"]=>
-    array(3) {
-      [0]=>
+    varray(3) {
       string(6) "NS\TA0"
-      [1]=>
       string(6) "NS\TA1"
-      [2]=>
       string(6) "NS\TA2"
     }
-  }
-  [%s]=>
-  array(6) {
-    ["md5sum0"]=>
-    int(%i)
-    ["md5sum1"]=>
-    int(%i)
     ["types"]=>
-    array(13) {
-      [0]=>
-      array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL0"
-        ["kindOf"]=>
-        string(5) "class"
+    varray(13) {
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
         ["flags"]=>
         int(0)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [1]=>
-      array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL1"
         ["kindOf"]=>
         string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
         ["flags"]=>
         int(0)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [2]=>
-      array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL2"
         ["kindOf"]=>
         string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(5) {
+          string(6) "NS\CL0"
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+          string(6) "NS\TR0"
+          string(6) "NS\TR1"
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
-        array(5) {
-          [0]=>
-          string(9) "NS\NS\CL0"
-          [1]=>
-          string(8) "NS\NS\I0"
-          [2]=>
-          string(8) "NS\NS\I1"
-          [3]=>
-          string(9) "NS\NS\TR0"
-          [4]=>
-          string(9) "NS\NS\TR1"
-        }
-      }
-      [3]=>
-      array(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL3"
         ["kindOf"]=>
         string(5) "class"
-        ["flags"]=>
-        int(4)
-        ["baseTypes"]=>
-        array(3) {
-          [0]=>
-          string(9) "NS\NS\CL0"
-          [1]=>
-          string(8) "NS\NS\I0"
-          [2]=>
-          string(9) "NS\NS\TR0"
-        }
-      }
-      [4]=>
-      array(4) {
         ["name"]=>
-        string(8) "NS\NS\E0"
-        ["kindOf"]=>
-        string(4) "enum"
-        ["flags"]=>
-        int(2)
+        string(6) "NS\CL2"
+      }
+      darray(4) {
         ["baseTypes"]=>
-        array(1) {
-          [0]=>
+        varray(1) {
           string(14) "HH\BuiltinEnum"
         }
-      }
-      [5]=>
-      array(5) {
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
         ["name"]=>
-        string(8) "NS\NS\I0"
+        string(5) "NS\E0"
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
+        ["name"]=>
+        string(5) "NS\I0"
         ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [6]=>
-      array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I1"
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(9) "interface"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
-        }
+        ["name"]=>
+        string(5) "NS\I1"
         ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [7]=>
-      array(5) {
-        ["name"]=>
-        string(8) "NS\NS\I2"
+      darray(5) {
+        ["baseTypes"]=>
+        varray(2) {
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(9) "interface"
+        ["name"]=>
+        string(5) "NS\I2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(6) "NS\CL1"
+        }
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(6) "NS\TA2"
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
         ["flags"]=>
         int(1)
-        ["baseTypes"]=>
-        array(2) {
-          [0]=>
-          string(8) "NS\NS\I0"
-          [1]=>
-          string(8) "NS\NS\I1"
-        }
-        ["requireExtends"]=>
-        array(1) {
-          [0]=>
-          string(9) "NS\NS\CL1"
-        }
-      }
-      [8]=>
-      array(4) {
-        ["name"]=>
-        string(8) "NS\NS\M0"
-        ["kindOf"]=>
-        string(5) "mixed"
-        ["flags"]=>
-        int(5)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [9]=>
-      array(4) {
-        ["name"]=>
-        string(8) "NS\NS\M1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(7)
-        ["baseTypes"]=>
-        array(0) {
-        }
-      }
-      [10]=>
-      array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR0"
         ["kindOf"]=>
         string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
+        ["name"]=>
+        string(6) "NS\TR0"
+        ["requireExtends"]=>
+        varray(0) {
         }
         ["requireImplements"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [11]=>
-      array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR1"
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(0) {
+        ["name"]=>
+        string(6) "NS\TR1"
+        ["requireExtends"]=>
+        varray(0) {
         }
         ["requireImplements"]=>
-        array(0) {
-        }
-        ["requireExtends"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [12]=>
-      array(6) {
-        ["name"]=>
-        string(9) "NS\NS\TR2"
+      darray(6) {
+        ["baseTypes"]=>
+        varray(4) {
+          string(5) "NS\I0"
+          string(5) "NS\I1"
+          string(6) "NS\TR0"
+          string(6) "NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
         ["kindOf"]=>
         string(5) "trait"
-        ["flags"]=>
-        int(1)
-        ["baseTypes"]=>
-        array(4) {
-          [0]=>
-          string(8) "NS\NS\I0"
-          [1]=>
-          string(8) "NS\NS\I1"
-          [2]=>
-          string(9) "NS\NS\TR0"
-          [3]=>
-          string(9) "NS\NS\TR1"
+        ["name"]=>
+        string(6) "NS\TR2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(6) "NS\CL1"
         }
         ["requireImplements"]=>
-        array(1) {
-          [0]=>
-          string(8) "NS\NS\I2"
-        }
-        ["requireExtends"]=>
-        array(1) {
-          [0]=>
-          string(9) "NS\NS\CL1"
+        varray(1) {
+          string(5) "NS\I2"
         }
       }
+    }
+  }
+  ["%s"]=>
+  darray(7) {
+    ["constants"]=>
+    varray(6) {
+      string(9) "NS\NS\CO0"
+      string(9) "NS\NS\CO1"
+      string(9) "NS\NS\CO2"
+      string(9) "NS\NS\CO3"
+      string(9) "NS\NS\CO4"
+      string(9) "NS\NS\CO5"
     }
     ["functions"]=>
-    array(5) {
-      [0]=>
+    varray(4) {
       string(8) "NS\NS\f1"
-      [1]=>
       string(8) "NS\NS\f2"
-      [2]=>
-      string(8) "NS\NS\f7"
-      [3]=>
-      string(8) "NS\NS\f8"
-      [4]=>
       string(8) "NS\NS\f6"
+      string(30) "NS\NS\entrypoint_ext_factparse"
     }
-    ["constants"]=>
-    array(2) {
-      [0]=>
-      string(9) "NS\NS\CO0"
-      [1]=>
-      string(9) "NS\NS\CO1"
-    }
+    ["md5sum0"]=>
+    int(-6807311658022174106)
+    ["md5sum1"]=>
+    int(-1698087833325446643)
+    ["sha1sum"]=>
+    string(40) "2419b66e8f152f77b6b8aba30b9be5b836d363aa"
     ["typeAliases"]=>
-    array(3) {
-      [0]=>
+    varray(3) {
       string(9) "NS\NS\TA0"
-      [1]=>
       string(9) "NS\NS\TA1"
-      [2]=>
       string(9) "NS\NS\TA2"
+    }
+    ["types"]=>
+    varray(13) {
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(5) {
+          string(9) "NS\NS\CL0"
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+          string(9) "NS\NS\TR0"
+          string(9) "NS\NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL2"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(1) {
+          string(14) "HH\BuiltinEnum"
+        }
+        ["flags"]=>
+        int(2)
+        ["kindOf"]=>
+        string(4) "enum"
+        ["name"]=>
+        string(8) "NS\NS\E0"
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+      }
+      darray(5) {
+        ["baseTypes"]=>
+        varray(2) {
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(9) "interface"
+        ["name"]=>
+        string(8) "NS\NS\I2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(9) "NS\NS\CL1"
+        }
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA0"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA1"
+      }
+      darray(4) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(0)
+        ["kindOf"]=>
+        string(9) "typeAlias"
+        ["name"]=>
+        string(9) "NS\NS\TA2"
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR0"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(0) {
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR1"
+        ["requireExtends"]=>
+        varray(0) {
+        }
+        ["requireImplements"]=>
+        varray(0) {
+        }
+      }
+      darray(6) {
+        ["baseTypes"]=>
+        varray(4) {
+          string(8) "NS\NS\I0"
+          string(8) "NS\NS\I1"
+          string(9) "NS\NS\TR0"
+          string(9) "NS\NS\TR1"
+        }
+        ["flags"]=>
+        int(1)
+        ["kindOf"]=>
+        string(5) "trait"
+        ["name"]=>
+        string(9) "NS\NS\TR2"
+        ["requireExtends"]=>
+        varray(1) {
+          string(9) "NS\NS\CL1"
+        }
+        ["requireImplements"]=>
+        varray(1) {
+          string(8) "NS\NS\I2"
+        }
+      }
     }
   }
 }
 PASSED md5sum
-array(3) {
-  [%s]=>
+darray(3) {
+  ["%s"]=>
   NULL
   ["garbage_filename"]=>
   NULL
-  ["/tmp"]=>
+  ["%s"]=>
   NULL
 }
 PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
-
-Warning: HH\facts_parse() expects parameter 2 to be array, null given in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
+string(%d) "HH\facts_parse() expects parameter 2 to be %rv?%rarray, null given"
+string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"
+string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"

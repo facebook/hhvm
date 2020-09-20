@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Structural subtyping of declared shapes in presence of optional fields

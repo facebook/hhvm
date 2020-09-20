@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $a = "aaa";
-$x = array(&$a[1]);
-?>
+$x = foo(inout $a[1]);
+}

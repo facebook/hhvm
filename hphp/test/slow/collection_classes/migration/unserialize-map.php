@@ -36,4 +36,8 @@ function main() {
   var_dump(unserialize($s4) == $m);
 }
 
+
+<<__EntryPoint>>
+function main_unserialize_map() {
 main();
+}

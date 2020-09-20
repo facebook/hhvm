@@ -4,11 +4,13 @@
 #include "hphp/runtime/ext/curl/ext_curl.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -126,6 +128,13 @@ void CurlResource::sweep() {
 }
 
 void CurlResource::close() {
+  // If we try to close while we're in a callback, warn.
+  if (m_in_callback) {
+    raise_warning(
+      "curl_close(): Attempt to close cURL in callback, ignored."
+    );
+    return;
+  }
   closeForSweep();
   m_opts.clear();
   m_to_free.reset();
@@ -136,7 +145,7 @@ void CurlResource::closeForSweep() {
   if (m_cp) {
     if (m_connPool) {
       // reuse this curl handle if we're pooling
-      assert(m_pooledHandle);
+      assertx(m_pooledHandle);
       m_connPool->store(m_pooledHandle);
       m_pooledHandle = nullptr;
     } else {
@@ -210,7 +219,19 @@ Variant CurlResource::execute() {
   {
     IOStatusHelper io("curl_easy_perform", m_url.data());
     SYNC_VM_REGS_SCOPED();
-    m_error_no = curl_easy_perform(m_cp);
+    if (m_in_exec) {
+      log_native_stack("unexpected re-entry into curl_exec");
+    }
+    m_in_exec = true;
+    // T29358191: curl_easy_perform should not throw... trust but verify
+    try {
+      m_error_no = curl_easy_perform(m_cp);
+    } catch (...) {
+      m_in_exec = false;
+      log_native_stack("unexpected exception from curl_easy_perform");
+      throw;
+    }
+    m_in_exec = false;
     check_exception();
   }
   set_curl_statuses(m_cp, m_url.data());
@@ -288,7 +309,7 @@ bool CurlResource::setOption(long option, const Variant& value) {
     ret = true;
   } else {
     m_error_no = CURLE_FAILED_INIT;
-    throw_invalid_argument("option: %ld", option);
+    raise_invalid_argument_warning("option: %ld", option);
     ret = false;
   }
 
@@ -506,11 +527,35 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073300 /* Available since 7.51.0 */
     case CURLOPT_KEEP_SENDING_ON_ERROR:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
+    case CURLOPT_PROXY_SSLVERSION:
+    case CURLOPT_PROXY_SSL_OPTIONS:
+    case CURLOPT_PROXY_SSL_VERIFYHOST:
+    case CURLOPT_PROXY_SSL_VERIFYPEER:
+#endif
 #if LIBCURL_VERSION_NUM >= 0x073600 /* Available since 7.54.0 */
     case CURLOPT_SUPPRESS_CONNECT_HEADERS:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
     case CURLOPT_SOCKS5_AUTH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
+    case CURLOPT_SSH_COMPRESSION:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+    case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
+    case CURLOPT_TIMEVALUE_LARGE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
+    case CURLOPT_DNS_SHUFFLE_ADDRESSES:
+    case CURLOPT_HAPROXYPROTOCOL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+    case CURLOPT_DISALLOW_USERNAME_IN_URL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
+    case CURLOPT_UPKEEP_INTERVAL_MS:
+    case CURLOPT_UPLOAD_BUFFERSIZE:
 #endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
@@ -559,6 +604,10 @@ bool CurlResource::isStringFilePathOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071306 /* Available since 7.19.6 */
     case CURLOPT_SSH_KNOWNHOSTS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
+    case CURLOPT_PROXY_CRLFILE:
+    case CURLOPT_PROXY_SSLCERT:
 #endif
       return true;
     default:
@@ -643,6 +692,26 @@ bool CurlResource::isStringOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x072d00 /* Available since 7.45.0 */
     case CURLOPT_DEFAULT_PROTOCOL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
+    case CURLOPT_PROXY_CAINFO:
+    case CURLOPT_PROXY_CAPATH:
+    case CURLOPT_PROXY_KEYPASSWD:
+    case CURLOPT_PROXY_PINNEDPUBLICKEY:
+    case CURLOPT_PROXY_SSLCERTTYPE:
+    case CURLOPT_PROXY_SSLKEY:
+    case CURLOPT_PROXY_SSLKEYTYPE:
+    case CURLOPT_PROXY_SSL_CIPHER_LIST:
+    case CURLOPT_PROXY_TLSAUTH_PASSWORD:
+    case CURLOPT_PROXY_TLSAUTH_TYPE:
+    case CURLOPT_PROXY_TLSAUTH_USERNAME:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+    case CURLOPT_PROXY_TLS13_CIPHERS:
+    case CURLOPT_TLS13_CIPHERS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
+    case CURLOPT_DOH_URL:
 #endif
       return true;
     default:
@@ -1038,7 +1107,7 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
 }
 
 inline int64_t minTimeoutImpl(int64_t timeout, int64_t multiple) {
-  auto info = ThreadInfo::s_threadInfo.getNoCheck();
+  auto info = RequestInfo::s_requestInfo.getNoCheck();
   auto& data = info->m_reqInjectionData;
   if (!data.getTimeout()) {
     return timeout;
@@ -1077,6 +1146,10 @@ void CurlResource::handle_exception() {
 size_t CurlResource::curl_read(char *data,
                                size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_read");
+  }
   ReadHandler *t  = &ch->m_read;
 
   int length = -1;
@@ -1094,9 +1167,13 @@ size_t CurlResource::curl_read(char *data,
         break;
       case PHP_CURL_USER: {
         int data_size = size * nmemb;
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_packed_array(Resource(ch), Resource(t->fp), data_size));
+          make_vec_array(Resource(ch), Resource(t->fp), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -1115,6 +1192,10 @@ size_t CurlResource::curl_read(char *data,
 size_t CurlResource::curl_write(char *data,
                                 size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_write");
+  }
   WriteHandler *t  = &ch->m_write;
   size_t length = size * nmemb;
 
@@ -1131,9 +1212,13 @@ size_t CurlResource::curl_write(char *data,
         }
         break;
       case PHP_CURL_USER: {
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_packed_array(Resource(ch), String(data, length, CopyString)));
+          make_vec_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1148,6 +1233,10 @@ size_t CurlResource::curl_write(char *data,
 size_t CurlResource::curl_write_header(char *data,
                                        size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_write_header");
+  }
   WriteHandler *t  = &ch->m_write_header;
   size_t length = size * nmemb;
 
@@ -1164,9 +1253,13 @@ size_t CurlResource::curl_write_header(char *data,
       case PHP_CURL_FILE:
         return t->fp->write(String(data, length, CopyString), length);
       case PHP_CURL_USER: {
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_packed_array(Resource(ch), String(data, length, CopyString)));
+          make_vec_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1196,8 +1289,12 @@ int CurlResource::curl_progress(void* p,
                                 double ultotal, double ulnow) {
   assertx(p);
   CurlResource* curl = static_cast<CurlResource*>(p);
+  if (!curl->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_progress");
+  }
 
-  PackedArrayInit pai(5);
+  VArrayInit pai(5);
   pai.append(Resource(curl));
   pai.append(dltotal);
   pai.append(dlnow);

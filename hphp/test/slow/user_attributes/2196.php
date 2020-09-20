@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class B {
   final public function foo() { echo __METHOD__, "\n"; }
@@ -27,4 +27,8 @@ function test() {
 
   MockAbsFinalClass::f();
 }
+
+<<__EntryPoint>>
+function main_2196() {
 test();
+}

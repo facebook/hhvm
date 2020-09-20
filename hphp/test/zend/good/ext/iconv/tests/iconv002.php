@@ -1,4 +1,5 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 /* include('test.inc'); */
 /*
 Expected output:
@@ -12,4 +13,4 @@ abcd
    $s = pack("NNNN", 97, 98, 99, 100);
    $q = iconv("UCS-4BE", "ascii", $s);
    print $q; print "\n";
-?>
+}

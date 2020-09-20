@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait Company {
   public function getName() {
@@ -14,7 +14,7 @@ class English {
     echo $this->getHi() . $this->getName();
   }
 }
+<<__EntryPoint>> function main(): void {
 $e = new English();
 $e->sayHello();
-?>
-
+}

@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/utf8-decode.h"
@@ -31,30 +32,42 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 // json_encode() options
-const int64_t k_JSON_HEX_TAG                 = 1<<0;
-const int64_t k_JSON_HEX_AMP                 = 1<<1;
-const int64_t k_JSON_HEX_APOS                = 1<<2;
-const int64_t k_JSON_HEX_QUOT                = 1<<3;
-const int64_t k_JSON_FORCE_OBJECT            = 1<<4;
-const int64_t k_JSON_NUMERIC_CHECK           = 1<<5;
-const int64_t k_JSON_UNESCAPED_SLASHES       = 1<<6;
-const int64_t k_JSON_PRETTY_PRINT            = 1<<7;
-const int64_t k_JSON_UNESCAPED_UNICODE       = 1<<8;
-const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
-const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
+const int64_t k_JSON_HEX_TAG                 = 1ll << 0;
+const int64_t k_JSON_HEX_AMP                 = 1ll << 1;
+const int64_t k_JSON_HEX_APOS                = 1ll << 2;
+const int64_t k_JSON_HEX_QUOT                = 1ll << 3;
+const int64_t k_JSON_FORCE_OBJECT            = 1ll << 4;
+const int64_t k_JSON_NUMERIC_CHECK           = 1ll << 5;
+const int64_t k_JSON_UNESCAPED_SLASHES       = 1ll << 6;
+const int64_t k_JSON_PRETTY_PRINT            = 1ll << 7;
+const int64_t k_JSON_UNESCAPED_UNICODE       = 1ll << 8;
+const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1ll << 9;
+const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1ll << 10;
 
 // json_decode() options
-const int64_t k_JSON_OBJECT_AS_ARRAY   = 1<<0;
-const int64_t k_JSON_BIGINT_AS_STRING  = 1<<1;
+const int64_t k_JSON_OBJECT_AS_ARRAY   = 1ll << 0;
+const int64_t k_JSON_BIGINT_AS_STRING  = 1ll << 1;
 
 // FB json_decode() options
 // intentionally higher so when PHP adds more options we're fine
-const int64_t k_JSON_FB_LOOSE          = 1<<20;
-const int64_t k_JSON_FB_UNLIMITED      = 1<<21;
-const int64_t k_JSON_FB_EXTRA_ESCAPES  = 1<<22;
-const int64_t k_JSON_FB_COLLECTIONS    = 1<<23;
-const int64_t k_JSON_FB_STABLE_MAPS    = 1<<24;
-const int64_t k_JSON_FB_HACK_ARRAYS    = 1<<25;
+const int64_t k_JSON_FB_DARRAYS        = 1ll << 19;
+const int64_t k_JSON_FB_LOOSE          = 1ll << 20;
+const int64_t k_JSON_FB_UNLIMITED      = 1ll << 21;
+const int64_t k_JSON_FB_EXTRA_ESCAPES  = 1ll << 22;
+const int64_t k_JSON_FB_COLLECTIONS    = 1ll << 23;
+const int64_t k_JSON_FB_STABLE_MAPS    = 1ll << 24;
+const int64_t k_JSON_FB_HACK_ARRAYS    = 1ll << 25;
+const int64_t k_JSON_FB_FORCE_PHP_ARRAYS = 1ll << 26;
+const int64_t k_JSON_FB_WARN_DICTS       = 1ll << 27;
+const int64_t k_JSON_FB_WARN_PHP_ARRAYS  = 1ll << 28;
+const int64_t k_JSON_FB_DARRAYS_AND_VARRAYS = 1ll << 29;
+const int64_t k_JSON_FB_WARN_EMPTY_DARRAYS = 1ll << 30;
+const int64_t k_JSON_FB_WARN_VEC_LIKE_DARRAYS = 1ll << 31;
+const int64_t k_JSON_FB_WARN_DICT_LIKE_DARRAYS = 1ll << 32;
+const int64_t k_JSON_FB_IGNORE_LATEINIT = 1ll << 33;
+const int64_t k_JSON_FB_THRIFT_SIMPLE_JSON = 1ll << 34;
+const int64_t k_JSON_FB_WARN_KEYSETS       = 1ll << 36;
+const int64_t k_JSON_FB_FORCE_HACK_ARRAYS  = 1ll << 37;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;
@@ -92,8 +105,7 @@ Variant json_guard_error_result(const String& partial_error_output,
 
    // Issue a warning on unsupported type in case of HH syntax.
   if (json_get_last_error_code() ==
-      json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE &&
-      RuntimeOption::EnableHipHopSyntax) {
+      json_error_codes::JSON_ERROR_UNSUPPORTED_TYPE) {
     // Unhandled case is always returned as `false`; for partial output
     // we render "null" value.
     raise_warning("json_encode(): type is unsupported, encoded as %s",
@@ -118,6 +130,15 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
   VariableSerializer vs(VariableSerializer::Type::JSON, options);
   vs.setDepthLimit(depth);
+  if (options & k_JSON_FB_FORCE_PHP_ARRAYS) vs.setForcePHPArrays();
+  if (options & k_JSON_FB_FORCE_HACK_ARRAYS) vs.setForceHackArrays();
+  if (options & k_JSON_FB_WARN_DICTS) vs.setDictWarn();
+  if (options & k_JSON_FB_WARN_KEYSETS) vs.setKeysetWarn();
+  if (options & k_JSON_FB_WARN_PHP_ARRAYS) vs.setPHPWarn();
+  if (options & k_JSON_FB_WARN_EMPTY_DARRAYS) vs.setEmptyDArrayWarn();
+  if (options & k_JSON_FB_WARN_VEC_LIKE_DARRAYS) vs.setVecLikeDArrayWarn();
+  if (options & k_JSON_FB_WARN_DICT_LIKE_DARRAYS) vs.setDictLikeDArrayWarn();
+  if (options & k_JSON_FB_IGNORE_LATEINIT) vs.setIgnoreLateInit();
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
   assertx(json.get() != nullptr);
@@ -132,10 +153,27 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
   return tvReturn(std::move(json));
 }
 
+TypedValue HHVM_FUNCTION(json_encode_with_error, const Variant& value,
+                         Variant& error, int64_t options, int64_t depth) {
+  // fn is pure, so prior state must be preserved and restored
+  auto prior_error_code = json_get_last_error_code();
+
+  auto result = HHVM_FN(json_encode)(value, options, depth);
+
+  auto error_code = json_get_last_error_code();
+  if (error_code == k_JSON_ERROR_NONE) {
+    error.setNull();
+  } else {
+    error = make_varray(error_code, json_get_last_error_msg());
+  }
+
+  json_set_last_error_code(prior_error_code);
+
+  return result;
+}
+
 TypedValue HHVM_FUNCTION(json_decode, const String& json,
                          bool assoc, int64_t depth, int64_t options) {
-  SuppressHackArrCompatNotices suppress;
-
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
   if (json.empty()) {
@@ -151,7 +189,10 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     k_JSON_FB_COLLECTIONS |
     k_JSON_FB_STABLE_MAPS |
     k_JSON_BIGINT_AS_STRING |
-    k_JSON_FB_HACK_ARRAYS;
+    k_JSON_FB_HACK_ARRAYS |
+    k_JSON_FB_DARRAYS |
+    k_JSON_FB_DARRAYS_AND_VARRAYS |
+    k_JSON_FB_THRIFT_SIMPLE_JSON;
   int64_t parser_options = options & supported_options;
   Variant z;
   const auto ok =
@@ -232,8 +273,28 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     return tvReturn(json.substr(1, json.size() - 2));
   }
 
-  assert(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
+  assertx(json_get_last_error_code() != json_error_codes::JSON_ERROR_NONE);
   return make_tv<KindOfNull>();
+}
+
+TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
+                         Variant& error, bool assoc, int64_t depth,
+                         int64_t options) {
+  // fn is pure, so prior state must be preserved and restored
+  auto prior_error_code = json_get_last_error_code();
+
+  auto result = HHVM_FN(json_decode)(json, assoc, depth, options);
+
+  auto error_code = json_get_last_error_code();
+  if (error_code == k_JSON_ERROR_NONE) {
+    error.setNull();
+  } else {
+    error = make_varray(error_code, json_get_last_error_msg());
+  }
+
+  json_set_last_error_code(prior_error_code);
+
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,12 +315,26 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_PRESERVE_ZERO_FRACTION, k_JSON_PRESERVE_ZERO_FRACTION);
     HHVM_RC_INT(JSON_OBJECT_AS_ARRAY, k_JSON_OBJECT_AS_ARRAY);
     HHVM_RC_INT(JSON_BIGINT_AS_STRING, k_JSON_BIGINT_AS_STRING);
+    HHVM_RC_INT(JSON_FB_DARRAYS, k_JSON_FB_DARRAYS);
     HHVM_RC_INT(JSON_FB_LOOSE, k_JSON_FB_LOOSE);
     HHVM_RC_INT(JSON_FB_UNLIMITED, k_JSON_FB_UNLIMITED);
     HHVM_RC_INT(JSON_FB_EXTRA_ESCAPES, k_JSON_FB_EXTRA_ESCAPES);
     HHVM_RC_INT(JSON_FB_COLLECTIONS, k_JSON_FB_COLLECTIONS);
     HHVM_RC_INT(JSON_FB_HACK_ARRAYS, k_JSON_FB_HACK_ARRAYS);
     HHVM_RC_INT(JSON_FB_STABLE_MAPS, k_JSON_FB_STABLE_MAPS);
+    HHVM_RC_INT(JSON_FB_FORCE_PHP_ARRAYS, k_JSON_FB_FORCE_PHP_ARRAYS);
+    HHVM_RC_INT(JSON_FB_WARN_DICTS, k_JSON_FB_WARN_DICTS);
+    HHVM_RC_INT(JSON_FB_WARN_PHP_ARRAYS, k_JSON_FB_WARN_PHP_ARRAYS);
+    HHVM_RC_INT(JSON_FB_WARN_EMPTY_DARRAYS, k_JSON_FB_WARN_EMPTY_DARRAYS);
+    HHVM_RC_INT(JSON_FB_WARN_VEC_LIKE_DARRAYS,
+                k_JSON_FB_WARN_VEC_LIKE_DARRAYS);
+    HHVM_RC_INT(JSON_FB_WARN_DICT_LIKE_DARRAYS,
+                k_JSON_FB_WARN_DICT_LIKE_DARRAYS);
+    HHVM_RC_INT(JSON_FB_IGNORE_LATEINIT, k_JSON_FB_IGNORE_LATEINIT);
+    HHVM_RC_INT(JSON_FB_THRIFT_SIMPLE_JSON, k_JSON_FB_THRIFT_SIMPLE_JSON);
+    HHVM_RC_INT(JSON_FB_WARN_KEYSETS, k_JSON_FB_WARN_KEYSETS);
+    HHVM_RC_INT(JSON_FB_FORCE_HACK_ARRAYS, k_JSON_FB_FORCE_HACK_ARRAYS);
+
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);
     HHVM_RC_INT(JSON_ERROR_DEPTH, k_JSON_ERROR_DEPTH);
     HHVM_RC_INT(JSON_ERROR_STATE_MISMATCH, k_JSON_ERROR_STATE_MISMATCH);
@@ -273,7 +348,9 @@ struct JsonExtension final : Extension {
     HHVM_FE(json_last_error);
     HHVM_FE(json_last_error_msg);
     HHVM_FE(json_encode);
+    HHVM_FE(json_encode_with_error);
     HHVM_FE(json_decode);
+    HHVM_FE(json_decode_with_error);
 
     loadSystemlib();
   }

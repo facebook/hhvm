@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2014 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,10 +14,6 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/boot-stats.h"
-
-#include <cassert>
-
-#include <folly/portability/Unistd.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -36,7 +32,7 @@ ResourceUsage ResourceUsage::sinceEpoch() {
     std::chrono::duration_cast<TimeUnit>(
       std::chrono::microseconds(
         HPHP::Timer::GetRusageMicros(Timer::TotalCPU, Timer::Self))),
-    Process::GetProcessRSS());
+    Process::GetMemUsageMb());
 }
 
 std::string ResourceUsage::toString() const {
@@ -68,8 +64,7 @@ ResourceUsage ResourceUsage::operator+(const ResourceUsage& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct BootStats::Impl {
-  Impl() : m_last(ResourceUsage::sinceEpoch()) {
-  }
+  Impl() : m_last(ResourceUsage::sinceEpoch()) {}
 
   void add(const std::string& info, ResourceUsage value);
   void dumpMarks();
@@ -83,6 +78,8 @@ private:
   ResourceUsage m_last;
   std::mutex m_marks_guard_;
   std::map<std::string, ResourceUsage> m_marks;
+  std::map<std::string, std::string> m_strs;
+  std::map<std::string, int64_t> m_ints;
 };
 
 void BootStats::Impl::add(const std::string& info, ResourceUsage value) {
@@ -92,8 +89,7 @@ void BootStats::Impl::add(const std::string& info, ResourceUsage value) {
 
 void BootStats::Impl::dumpMarks() {
   for (const auto& it : m_marks) {
-    Logger::Info(
-      folly::sformat("BootStats: {} = {}", it.first, it.second.toString()));
+    Logger::FInfo("BootStats: {} = {}", it.first, it.second.toString());
   }
 }
 
@@ -107,16 +103,18 @@ ResourceUsage BootStats::Impl::computeDeltaFromLast() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BootStats::Block::Block(const std::string& name)
-    : m_name(name), m_start(ResourceUsage::sinceEpoch()) {
-  Logger::Info(folly::sformat("BootStats: {}...", name));
+BootStats::Block::Block(const std::string& name, bool enabled) {
+  if (!enabled) return;
+  m_name = name;
+  m_enabled = true;
+  m_start = ResourceUsage::sinceEpoch();
+  Logger::FInfo("BootStats: {}...", name);
 }
 
 BootStats::Block::~Block() {
+  if (!m_enabled) return;
   auto total = ResourceUsage::sinceEpoch() - m_start;
-  Logger::Info(
-    folly::sformat(
-      "BootStats: {} block done, took {}", m_name, total.toString()));
+  Logger::FInfo("BootStats: {} block done, took {}", m_name, total.toString());
   BootStats::add(m_name, total);
 }
 
@@ -137,8 +135,7 @@ void BootStats::done() {
   s_started = false;
 
   auto total = ResourceUsage::sinceEpoch() - s_start;
-  Logger::Info(
-    folly::sformat("BootStats: all done, took {} total", total.toString()));
+  Logger::FInfo("BootStats: all done, took {} total", total.toString());
 
   BootStats::s_instance->add("TOTAL", total);
   BootStats::s_instance->dumpMarks();
@@ -146,14 +143,20 @@ void BootStats::done() {
   if (StructuredLog::enabled()) {
     std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
     StructuredLogEntry cols;
-    for (auto sample : s_instance->m_marks) {
+    for (auto const& sample : s_instance->m_marks) {
       cols.setInt(sample.first, sample.second.wall().count());
       cols.setInt(sample.first + " CPU", sample.second.cpu().count());
+    }
+    for (auto const& strCol : s_instance->m_strs) {
+      cols.setStr(strCol.first, strCol.second);
+    }
+    for (auto const intCol : s_instance->m_strs) {
+      cols.setStr(intCol.first, intCol.second);
     }
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();
     for (auto sample : s_instance->m_marks) {
-      cols.setInt(sample.first, sample.second.rssMb() << 20); // To bytes.
+      cols.setInt(sample.first, sample.second.rssMb() * (1 << 20)); // To bytes.
     }
     StructuredLog::log("hhvm_boot_memory", cols);
   }
@@ -162,14 +165,23 @@ void BootStats::done() {
 void BootStats::mark(const std::string& info) {
   if (!s_started) return;
   auto elapsed = BootStats::s_instance->computeDeltaFromLast();
-  Logger::Info(
-    folly::sformat("BootStats: {} done, took {}", info, elapsed.toString()));
+  Logger::FInfo("BootStats: {} done, took {}", info, elapsed.toString());
   BootStats::s_instance->add(info, elapsed);
 }
 
 void BootStats::add(const std::string& info, const ResourceUsage value) {
   if (!s_started) return;
   BootStats::s_instance->add(info, value);
+}
+
+void BootStats::set(const std::string& name, const std::string& value) {
+  if (!s_started) return;
+  BootStats::s_instance->m_strs[name] = value;
+}
+
+void BootStats::set(const std::string& name, int64_t value) {
+  if (!s_started) return;
+  BootStats::s_instance->m_ints[name] = value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

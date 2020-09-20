@@ -1,19 +1,19 @@
-<?php
+<?hh
 
 /* Prototype  : string ltrim  ( string $str  [, string $charlist  ] )
  * Description: Strip whitespace (or other characters) from the beginning of a string.
  * Source code: ext/standard/string.c
 */
 
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ltrim() : error conditions ***\n";
 
 echo "\n-- Testing ltrim() function with no arguments --\n";
-var_dump( ltrim() );
+try { var_dump( ltrim() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n-- Testing ltrim() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump( ltrim("Hello World",  "Heo", $extra_arg) );
+try { var_dump( ltrim("Hello World",  "Heo", $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 
 $hello = "  Hello World\n";
@@ -23,5 +23,5 @@ var_dump(ltrim($hello, "a.."));
 var_dump(ltrim($hello, "z..a"));
 var_dump(ltrim($hello, "a..b..c"));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

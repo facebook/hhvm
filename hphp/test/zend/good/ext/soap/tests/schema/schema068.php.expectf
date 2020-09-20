@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Uncaught SoapFault exception: [Client] SOAP_ERROR: Encoding: Attribute 'int' has fixed value '5' (value '4' is not allowed)

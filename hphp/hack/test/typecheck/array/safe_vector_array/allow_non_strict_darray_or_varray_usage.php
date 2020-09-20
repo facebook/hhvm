@@ -1,6 +1,6 @@
-<?hh
+<?hh // partial
 
-abstract class Class {
+abstract class C {
 
   public abstract function providesDarrayOfString(): darray<arraykey, string>;
   public abstract function providesVarrayOfString(): varray<string>;

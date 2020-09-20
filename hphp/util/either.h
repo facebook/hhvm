@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_EITHER_H_
-#define incl_HPHP_EITHER_H_
+#pragma once
 
 #include <cassert>
 #include <cstdint>
@@ -207,4 +206,3 @@ private:
 
 }
 
-#endif

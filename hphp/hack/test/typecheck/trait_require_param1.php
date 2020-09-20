@@ -1,8 +1,8 @@
-<?hh
+<?hh // partial
 
 abstract class Foo<T> {
   protected function bar(): T {
-    // UNSAFE
+    throw new Exception();
   }
 }
 

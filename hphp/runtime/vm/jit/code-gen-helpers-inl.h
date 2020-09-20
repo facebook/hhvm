@@ -16,8 +16,11 @@
 
 #include "hphp/runtime/base/header-kind.h"
 
+#include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
+
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
@@ -27,6 +30,20 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Vptr memTVTypePtr(SSATmp* ptr, Vloc loc) {
+  assertx(ptr->isA(TPtrToCell) || ptr->isA(TLvalToCell));
+  if (wide_tv_val && ptr->isA(TLvalToCell)) return *loc.reg(tv_lval::type_idx);
+
+  return loc.reg()[TVOFF(m_type)];
+}
+
+inline Vptr memTVValPtr(SSATmp* ptr, Vloc loc) {
+  assertx(ptr->isA(TPtrToCell) || ptr->isA(TLvalToCell));
+  if (wide_tv_val && ptr->isA(TLvalToCell)) return *loc.reg(tv_lval::val_idx);
+
+  return loc.reg()[TVOFF(m_data)];
+}
+
 inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << testbi{s0, s1, sf};
 }
@@ -35,24 +52,51 @@ inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
   v << testbim{s0, s1, sf};
 }
 
-inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
-  v << cmpbim{s0, s1, sf};
+inline void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vptr s1) {
+  v << cmpbim{static_cast<data_type_t>(s0), s1, sf};
 }
 
-inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
-  v << cmpbi{s0, s1, sf};
+inline void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1) {
+  v << cmpbi{static_cast<data_type_t>(s0), s1, sf};
 }
 
-inline Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1) {
+inline Vreg emitGetTVType(Vout& v, Vreg s) {
+  return s;
+}
+
+inline Vreg emitGetTVType(Vout& v, Vptr s) {
+  auto const d = v.makeReg();
+  v << loadb{s, d};
+  return d;
+}
+
+inline Vreg emitGetTVTypeQuad(Vout& v, Vreg s) {
+  auto const d = v.makeReg();
+  v << movsbq{s, d};
+  return d;
+}
+
+inline Vreg emitGetTVTypeQuad(Vout& v, Vptr s) {
+  auto const d = v.makeReg();
+  v << loadsbq{s, d};
+  return d;
+}
+
+template<typename TLoc>
+inline Vreg emitMaskTVType(Vout& v, Immed s0, TLoc s1) {
+  auto const rtype = emitGetTVType(v, s1);
   auto const dst = v.makeReg();
-  v << andbi{s0, s1, dst, v.makeReg()};
+  v << andbi{s0, rtype, dst, v.makeReg()};
   return dst;
 }
 
-inline Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1) {
-  auto const reg = v.makeReg();
-  v << loadb{s1, reg};
-  return emitMaskTVType(v, s0, reg);
+template<typename TLoc>
+inline ConditionCode emitIsTVTypeRefCounted(Vout& v, Vreg sf, TLoc s1) {
+  if (RuntimeOption::EvalJitProfileGuardTypes) {
+    emitProfileGuardType(v, TUncounted);
+  }
+  emitTestTVType(v, sf, kRefCountedBit, s1);
+  return CC_NZ;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,6 +108,18 @@ inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1) {
     v << cmpbim{s0, s1[FAST_REFCOUNT_OFFSET], sf};
   } else {
     v << cmplim{s0, s1[FAST_REFCOUNT_OFFSET], sf};
+  }
+
+  return sf;
+}
+
+inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vptr m) {
+  auto const sf = v.makeReg();
+
+  if (one_bit_refcount) {
+    v << cmpbim{s0, m + FAST_REFCOUNT_OFFSET, sf};
+  } else {
+    v << cmplim{s0, m + FAST_REFCOUNT_OFFSET, sf};
   }
 
   return sf;

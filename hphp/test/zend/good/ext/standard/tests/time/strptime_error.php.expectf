@@ -2,16 +2,13 @@
 
 -- Testing strptime() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: strptime() expects exactly 2 parameters, 0 given in %s/strptime_error.php on line 14
 
 -- Testing strptime() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strptime() expects exactly 2 parameters, 1 given in %s/strptime_error.php on line 20
 
 -- Testing strptime() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: strptime() expects exactly 2 parameters, 3 given in %s/strptime_error.php on line 24
 ===DONE===

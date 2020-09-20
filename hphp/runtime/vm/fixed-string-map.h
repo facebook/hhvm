@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FIXED_STRING_MAP_H_
-#define incl_HPHP_FIXED_STRING_MAP_H_
+#pragma once
 
 #include <cstdint>
 #include <limits>
@@ -24,7 +23,7 @@
 #include "hphp/runtime/base/string-data.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 
@@ -132,4 +131,3 @@ private:
 
 #include "hphp/runtime/vm/fixed-string-map-inl.h"
 
-#endif

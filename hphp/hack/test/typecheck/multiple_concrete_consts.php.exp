@@ -1,0 +1,12 @@
+File "multiple_concrete_consts.php", line 8, characters 11-11:
+Class `I` does not correctly implement all required members  (Typing[4340])
+File "multiple_concrete_consts.php", line 8, characters 25-26:
+Some members are incompatible with those declared in type `I2`
+File "multiple_concrete_consts.php", line 3, characters 13-13:
+`I1` and `I2` both declare ambiguous implementations of `X`.
+File "multiple_concrete_consts.php", line 3, characters 13-13:
+`I1`'s definition is here.
+File "multiple_concrete_consts.php", line 6, characters 13-13:
+`I2`'s definition is here.
+File "multiple_concrete_consts.php", line 3, characters 13-13:
+Redeclare `X` in `I` with a compatible signature.

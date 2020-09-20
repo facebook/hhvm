@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Evil {
   private $x;
@@ -81,6 +81,9 @@ function f_3($x) {
   case "baz": print "baz";
   }
 }
+
+<<__EntryPoint>>
+function main_1755() {
 f_1("");
 f_1(null);
 f_1(false);
@@ -101,8 +104,7 @@ f_2(2.0);
 f_2(true);
 f_2(false);
 f_2(null);
-f_2((object) null);
-f_2(array());
+f_2(varray[]);
 f_2(3.21200);
 g_2(0);
 g_2(null);
@@ -117,3 +119,4 @@ f_3("foo");
 f_3("bar");
 f_3("baz");
 f_3("def");
+}

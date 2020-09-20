@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Shape with unknown fields cannot be a subtype of a shape with known fields
@@ -7,7 +7,7 @@
 interface I<-T> {}
 
 function f<Tv>(Tv $_): I<Tv> {
-  // UNSAFE
+  throw new Exception();
 }
 
 type s = shape(

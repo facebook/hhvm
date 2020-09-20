@@ -1,13 +1,16 @@
-<?php
+<?hh
+
 class A {
-    public    static $b = 'foo';
+  public static $b = 'foo';
 }
 
-$classname       =  'A';
-$wrongClassname  =  'B';
+<<__EntryPoint>>
+function main(): void {
+  $classname       =  'A';
+  $wrongClassname  =  'B';
 
-echo $classname::$b."\n";
-echo $wrongClassname::$b."\n";
+  echo $classname::$b."\n";
+  echo $wrongClassname::$b."\n";
 
-?>
-===DONE===
+  echo "===DONE===\n";
+}

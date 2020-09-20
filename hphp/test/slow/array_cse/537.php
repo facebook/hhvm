@@ -1,63 +1,51 @@
-<?php
-
-error_reporting(0);
-
-class ArrayWrap implements arrayaccess {
-  private $x;
-  public function __construct($x) {
-    $this->x = $x;
-  }
-  public function offsetSet($offset, $value) {
-    $this->x[$offset] = $value;
-  }
-  public function offsetExists($offset) {
-    return isset($this->x[$offset]);
-  }
-  public function offsetUnset($offset) {
-    unset($this->x[$offset]);
-  }
-  public function offsetGet($offset) {
-    return $this->x[$offset];
-  }
-}
-$o = new ArrayWrap(array(0, 1, 2));
+<?hh
 
 function f1($x) {
   return isset($x[0]) && $x[0];
 }
-var_dump(f1(null));
-var_dump(f1(array()));
-var_dump(f1(array(0)));
-var_dump(f1(''));
-var_dump(f1('a'));
-var_dump(f1($o));
 
 function f2($x) {
-  if (!is_null($x[0])) var_dump($x[0]);
-  var_dump($x[0]);
+  try {
+    if (!is_null($x[0])) var_dump($x[0]);
+    var_dump($x[0]);
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
-f2(array(0 => array()));
-f2(array());
-f2('');
-f2($o);
-f2(null);
 
 function f3($x) {
   foreach ($x['foo'] as $k => $v) {
-    if ($v) unset($x['foo'][$k]);
+    try {
+      if ($v) unset($x['foo'][$k]);
+    } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
   var_dump($x);
 }
-f3(array('foo' => array(0,1,2,3)));
 
 function f4($x) {
-  var_dump($x[0][1]);
-  unset($x[0][1]);
-  var_dump($x[0][1]);
+  try {
+    var_dump($x[0][1]);
+    unset($x[0][1]);
+    var_dump($x[0][1]);
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
-f4(array(array(1 => new stdClass())));
 
 function f5($x) {
   var_dump(md5($x[0]), $x[0]);
 }
+
+
+<<__EntryPoint>>
+function main_537() {
+error_reporting(0);
+var_dump(f1(null));
+var_dump(f1(varray[]));
+var_dump(f1(varray[0]));
+var_dump(f1(''));
+var_dump(f1('a'));
+f2(darray[0 => varray[]]);
+f2(varray[]);
+f2('');
+f2(null);
+f3(darray['foo' => varray[0,1,2,3]]);
+f4(varray[darray[1 => new stdClass()]]);
 f5('foobar');
+}

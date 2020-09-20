@@ -1,17 +1,20 @@
-<?php
-
-ini_set('memory_limit', '18M');
-$rep = 'x';
-
-register_shutdown_function(function () {
-    global $rep;
-    print "IN SHUTDOWN".PHP_EOL;
-    $y = str_repeat($rep, 1024 * 1024 * 15);
-});
+<?hh
 
 function foo() {
-  global $rep;
-  $x = str_repeat($rep, 1024 * 1024 * 20);
+  $x = str_repeat(MemoryShutdownHandlerCanStillOom::$rep, 1024 * 1024 * 20);
 }
 
+abstract final class MemoryShutdownHandlerCanStillOom {
+  public static $rep;
+}
+<<__EntryPoint>> function main(): void {
+ini_set('memory_limit', '16M');
+MemoryShutdownHandlerCanStillOom::$rep = 'x';
+
+register_shutdown_function(function () {
+    print "IN SHUTDOWN".PHP_EOL;
+    $y = str_repeat(MemoryShutdownHandlerCanStillOom::$rep, 1024 * 1024 * 20);
+});
+
 foo();
+}

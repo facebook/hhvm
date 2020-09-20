@@ -1,0 +1,1 @@
+Fatal error: Property B::$x must be <<__LateInit>> (as in class A) in %s/redeclare1.php on line 8

@@ -82,6 +82,10 @@ $this = cls Object
 (
 )
 
+$break3 = cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 break break3->pubObj()
@@ -98,6 +102,10 @@ Breakpoint 1 reached at cls::pubCls() on line 15 of %s/break1.php
 
 variable
 $x = "test_break4"
+$break3 = cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 break cls::break4->pubCls()

@@ -39,7 +39,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/conv-10.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
 #include "hphp/util/thread-local.h"
@@ -430,6 +430,7 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
   printPair(fd, "ThreadID", (int64_t)Process::GetThreadId());
   printPair(fd, "ThreadPID", Process::GetThreadPid());
   printPair(fd, "Name", Process::GetAppName().c_str());
+  printPair(fd, "CmdLine", Process::GetCommandLine(getpid()).c_str());
   printPair(fd, "Type", errorType ? errorType : "(unknown error)");
   printPair(fd, "Runtime", "hhvm");
   printPair(fd, "Version", buildId);

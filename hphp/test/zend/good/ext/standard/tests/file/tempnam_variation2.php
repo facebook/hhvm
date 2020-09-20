@@ -1,20 +1,19 @@
-<?php
+<?hh
 /* Prototype:  string tempnam ( string $dir, string $prefix );
    Description: Create file with unique file name.
 */
 
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing tempnam() with absolute and relative paths ***\n";
-$dir_name = dirname(__FILE__)."/tempnam_variation2";
+$dir_name = __SystemLib\hphp_test_tmppath('tempnam_variation2');
 mkdir($dir_name);
 $dir_path = $dir_name."/tempnam_variation2_sub";
 mkdir($dir_path);
 
-$old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+chdir(__SystemLib\hphp_test_tmproot());
 
-$dir_paths = array(
+$dir_paths = varray[
   // absolute paths
   "$dir_path",
   "$dir_path/",
@@ -33,7 +32,7 @@ $dir_paths = array(
   "tempnam_variation2//tempnam_variation2_sub",  
   "./tempnam_variation2/../tempnam_variation2/tempnam_variation2_sub",
   "BADDIR",  
-);
+];
 
 for($i = 0; $i<count($dir_paths); $i++) {
   $j = $i+1;
@@ -73,9 +72,8 @@ for($i = 0; $i<count($dir_paths); $i++) {
   unlink($file_name);
 }
 
-chdir($old_dir_path);
 rmdir($dir_path);
 rmdir($dir_name);
 
 echo "\n*** Done ***\n";
-?>
+}

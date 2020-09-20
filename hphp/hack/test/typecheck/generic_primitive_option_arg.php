@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 function g(?int $x): void {}
 

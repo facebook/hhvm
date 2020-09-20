@@ -1,13 +1,9 @@
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
 
-Warning: %s
-bool(false)
+Warning: fstat() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fstat_variation1.php on line 14
 ===DONE===

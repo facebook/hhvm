@@ -1,11 +1,10 @@
-<?php
+<?hh
 
 function test1($args) {}
 function test2(...$args) {}
 function test3($arg, ...$args) {}
-
+<<__EntryPoint>> function main(): void {
 var_dump((new ReflectionFunction('test1'))->isVariadic());
 var_dump((new ReflectionFunction('test2'))->isVariadic());
 var_dump((new ReflectionFunction('test3'))->isVariadic());
-
-?>
+}

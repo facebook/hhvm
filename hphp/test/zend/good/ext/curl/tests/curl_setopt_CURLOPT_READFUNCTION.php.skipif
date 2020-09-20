@@ -1,3 +1,4 @@
-<?php 
-if (!extension_loaded("curl")) print "skip cURL extension not loaded"; 
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded("curl")) print "skip cURL extension not loaded";
+}

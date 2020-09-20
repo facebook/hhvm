@@ -1,10 +1,13 @@
-<?php
+<?hh
+
 # Check for at least one HNI based function in get_defined_functions()
 # and at least one IDL based function.
 #
 # Note to future self: One day (soon) this test will fail
 # and Simon shall weep, for there are no more IDLs to convert.
 
+<<__EntryPoint>>
+function main_get_defined_functions_id_lvs_hni() {
 $foundidl = false;
 $foundhni = false;
 
@@ -29,3 +32,4 @@ foreach(get_defined_functions()['internal'] as $f) {
 }
 var_dump($foundhni);
 var_dump($foundidl);
+}

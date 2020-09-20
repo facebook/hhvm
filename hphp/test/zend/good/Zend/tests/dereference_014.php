@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL);
+<?hh
 
 class foo {
 	public $x;
@@ -15,11 +13,15 @@ class foo {
 	}
 }
 
-$foo = new foo;
-$h = $foo->a()[0]->a;
-var_dump($h);
+<<__EntryPoint>>
+function main_entry(): void {
 
-$h = foo::b()[1]->b;
-var_dump($h);
+  error_reporting(E_ALL);
 
-?>
+  $foo = new foo;
+  $h = $foo->a()[0]->a;
+  var_dump($h);
+
+  $h = foo::b()[1]->b;
+  var_dump($h);
+}

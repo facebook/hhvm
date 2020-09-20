@@ -1,32 +1,37 @@
-<?php
+<?hh
+
 
 // Various functions that accept resource arguments have different coerce modes
 
 // False
-var_dump('fclose', @fclose(false));
+<<__EntryPoint>>
+function main_param_coerce_mode() {
+try { fclose(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump('pclose', @pclose(false));
-var_dump('fseek', @fseek(false, 0));
-var_dump('rewind', @rewind(false));
-var_dump('ftell', @ftell(false));
-var_dump('feof', @feof(false));
-var_dump('fstat', @fstat(false));
-var_dump('fread', @fread(false, 0));
-var_dump('fgetc', @fgetc(false));
-var_dump('fgets', @fgets(false));
-var_dump('fgetss', @fgetss(false));
-var_dump('fscanf', @fscanf(false));
-var_dump('fpassthru', @fpassthru(false));
-var_dump('fwrite', @fwrite(false, ''));
-var_dump('fputs', @fputs(false, ''));
+try { fseek(false, 0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { rewind(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { ftell(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { feof(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fstat(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fread(false, 0); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fgetc(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fgets(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fgetss(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fscanf(false, ''); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fpassthru(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fwrite(false, ''); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fputs(false, ''); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump('fprintf', @fprintf(false, ''));
-var_dump('vfprintf', @vfprintf(false, '', array()));
-var_dump('fflush', @fflush(false));
-var_dump('ftruncate', @ftruncate(false));
+var_dump('vfprintf', @vfprintf(false, '', varray[]));
+try { fflush(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { ftruncate(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // NULL
-var_dump('fputcsv', @fputcsv(false, array()));
-var_dump('fgetcsv', @fgetcsv(false));
-var_dump('flock', @flock(false, 0));
-var_dump('readdir', @readdir(false));
-var_dump('rewinddir', @rewinddir(false));
-var_dump('closedir', @closedir(false));
+try { fputcsv(false, varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { fgetcsv(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$wouldblock = false;
+try { flock(false, 0, inout $wouldblock); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { readdir(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { rewinddir(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { closedir(false); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

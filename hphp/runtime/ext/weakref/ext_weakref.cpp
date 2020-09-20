@@ -36,10 +36,10 @@ WeakRefDataHandle& WeakRefDataHandle::operator=(
   wr_data = other.wr_data;
   acquire_count = other.acquire_count;
 
-  if (acquire_count > 0 && wr_data->pointee.m_type != KindOfUninit) {
+  if (acquire_count > 0 && wr_data->isValid()) {
     tvIncRefCountable(wr_data->pointee);
   }
-  if (old_acquire_count > 0 && old_wr_data->pointee.m_type != KindOfUninit) {
+  if (old_acquire_count > 0 && old_wr_data->isValid()) {
     tvDecRefCountable(&(old_wr_data->pointee));
   }
   return *this;
@@ -47,7 +47,7 @@ WeakRefDataHandle& WeakRefDataHandle::operator=(
 
 
 WeakRefDataHandle::~WeakRefDataHandle() {
-  if (acquire_count > 0 && wr_data->pointee.m_type != KindOfUninit) {
+  if (acquire_count > 0 && wr_data->isValid()) {
     tvDecRefCountable(&(wr_data->pointee));
   }
 }
@@ -69,12 +69,12 @@ void HHVM_METHOD(WeakRef, __construct, const Variant& pointee) {
 
 bool HHVM_METHOD(WeakRef, acquire) {
   auto wr_data_handle = Native::data<WeakRefDataHandle>(this_);
-  if (LIKELY(wr_data_handle->wr_data->pointee.m_type != KindOfUninit)) {
+  if (LIKELY(wr_data_handle->wr_data->isValid())) {
     wr_data_handle->acquire_count++;
     if (wr_data_handle->acquire_count == 1) {
       tvIncRefCountable(wr_data_handle->wr_data->pointee);
     }
-    assert(wr_data_handle->acquire_count > 0);
+    assertx(wr_data_handle->acquire_count > 0);
     return true;
   }
   return false;
@@ -82,7 +82,7 @@ bool HHVM_METHOD(WeakRef, acquire) {
 
 TypedValue HHVM_METHOD(WeakRef, get) {
   auto wr_data_handle = Native::data<WeakRefDataHandle>(this_);
-  if (wr_data_handle->wr_data->pointee.m_type != KindOfUninit) {
+  if (wr_data_handle->wr_data->isValid()) {
     tvIncRefCountable(wr_data_handle->wr_data->pointee);
     return (wr_data_handle->wr_data->pointee);
   } else {
@@ -92,7 +92,7 @@ TypedValue HHVM_METHOD(WeakRef, get) {
 
 bool HHVM_METHOD(WeakRef, release) {
   auto wr_data_handle = Native::data<WeakRefDataHandle>(this_);
-  if (LIKELY(wr_data_handle->wr_data->pointee.m_type != KindOfUninit
+  if (LIKELY(wr_data_handle->wr_data->isValid()
         && wr_data_handle->acquire_count > 0)) {
     wr_data_handle->acquire_count--;
     if (wr_data_handle->acquire_count == 0) {
@@ -105,7 +105,7 @@ bool HHVM_METHOD(WeakRef, release) {
 
 bool HHVM_METHOD(WeakRef, valid) {
   auto wr_data_handle = Native::data<WeakRefDataHandle>(this_);
-  return wr_data_handle->wr_data->pointee.m_type != KindOfUninit;
+  return wr_data_handle->wr_data->isValid();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A {
    protected static function foo() { echo "abc\n"; }
@@ -12,9 +12,7 @@ class B {
       A::bar as public baz;
    }
 }
-
+<<__EntryPoint>> function main(): void {
 B::foo();
 B::baz();
-
-
-?>
+}

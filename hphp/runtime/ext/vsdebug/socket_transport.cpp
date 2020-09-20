@@ -14,26 +14,43 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/vsdebug/socket_transport.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
+#include "hphp/runtime/ext/vsdebug/socket_transport.h"
+#include "hphp/util/user-info.h"
+
+#include <pwd.h>
+#include <grp.h>
 
 namespace HPHP {
 namespace VSDEBUG {
 
-SocketTransport::SocketTransport(Debugger* debugger, int listenPort) :
+SocketTransport::SocketTransport(
+  Debugger* debugger,
+  const SocketTransportOptions& options
+) :
   DebugTransport(debugger),
   m_terminating(false),
   m_clientConnected(false),
-  m_listenPort(listenPort),
+  m_listenPort(options.tcpListenPort),
+  m_domainSocketPath(options.domainSocketPath),
   m_connectThread(this, &SocketTransport::listenForClientConnection) {
 
   Lock lock(m_lock);
 
-  assert(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "SocketTransport created with options: domain socket path=%s, tcp port=%d",
+    options.domainSocketPath.empty() ? "" : options.domainSocketPath.c_str(),
+    options.tcpListenPort
+  );
+
+  assertx(m_abortPipeFd[0] == -1 && m_abortPipeFd[1] == -1);
 
   // Create a set of pipe file descriptors to use to inform the thread
   // polling for socket connections that it's time to exit.
   createAbortPipe();
+  m_connectThread.setNoInitFini();
   m_connectThread.start();
 }
 
@@ -44,6 +61,10 @@ SocketTransport::~SocketTransport() {
   }
 
   stopConnectionThread();
+
+  if (useDomainSocket() && !m_domainSocketPath.empty()) {
+    unlink(m_domainSocketPath.c_str());
+  }
 }
 
 void SocketTransport::stopConnectionThread() {
@@ -51,7 +72,6 @@ void SocketTransport::stopConnectionThread() {
   write(m_abortPipeFd[1], &value, 1);
   close(m_abortPipeFd[1]);
   m_abortPipeFd[1] = -1;
-
   m_connectThread.waitForEnd();
 }
 
@@ -73,7 +93,7 @@ void SocketTransport::createAbortPipe() {
 
     // This is unexpected and treated as fatal because we won't be able
     // to stop the polling thread in an orderly fashion at this point.
-    assert(false);
+    assertx(false);
   }
 }
 
@@ -92,6 +112,8 @@ void SocketTransport::onClientDisconnected() {
     if (!m_terminating && m_clientConnected) {
       stopConnectionThread();
       m_clientConnected = false;
+      m_clientInfo.clientUser = "";
+      m_clientInfo.clientPid = 0;
       createAbortPipe();
       m_connectThread.start();
     }
@@ -101,6 +123,10 @@ void SocketTransport::onClientDisconnected() {
 bool SocketTransport::clientConnected() const {
   Lock lock(m_lock);
   return m_clientConnected;
+}
+
+bool SocketTransport::useDomainSocket() const {
+  return !m_domainSocketPath.empty();
 }
 
 void SocketTransport::listenForClientConnection() {
@@ -120,17 +146,11 @@ void SocketTransport::listenForClientConnection() {
   {
     Lock lock(m_lock);
     abortFd = m_abortPipeFd[0];
-    assert(abortFd >= 0);
+    assertx(abortFd >= 0);
   }
 
-  struct addrinfo hint;
-  struct addrinfo* ai = nullptr;
   std::vector<int> socketFds;
-
-  memset(&hint, 0, sizeof(hint));
-  hint.ai_family = AF_UNSPEC;
-  hint.ai_socktype = SOCK_STREAM;
-  hint.ai_flags = AI_PASSIVE;
+  struct addrinfo* ai = nullptr;
 
   SCOPE_EXIT {
     if (ai != nullptr) {
@@ -151,29 +171,49 @@ void SocketTransport::listenForClientConnection() {
   };
 
   // Share existing DebuggerDisableIPv6 configuration with hphpd.
-  if (RuntimeOption::DebuggerDisableIPv6) {
-    hint.ai_family = AF_INET;
-  }
-
-  const auto name = RuntimeOption::DebuggerServerIP.empty()
-    ? "localhost"
-    : RuntimeOption::DebuggerServerIP.c_str();
-  if (getaddrinfo(name, std::to_string(m_listenPort).c_str(), &hint, &ai)) {
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelError,
-      "Failed to call getaddrinfo: %d.",
-      errno
-    );
-
-    return;
-  }
-
-  // Attempt to listen on the specified port on each of this host's available
-  // addresses.
-  struct addrinfo* address;
   bool anyInterfaceBound = false;
-  for (address = ai; address != nullptr; address = address->ai_next) {
-    if (bindAndListen(address, socketFds)) {
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Socket transport using domain socket? %s",
+    useDomainSocket() ? "YES" : "NO"
+  );
+
+  if (!useDomainSocket()) {
+    struct addrinfo hint;
+    memset(&hint, 0, sizeof(hint));
+
+    hint.ai_family = AF_UNSPEC;
+    hint.ai_socktype = SOCK_STREAM;
+    hint.ai_flags = AI_PASSIVE;
+
+    if (RuntimeOption::DebuggerDisableIPv6) {
+      hint.ai_family = AF_INET;
+    }
+
+    const auto name = RuntimeOption::DebuggerServerIP.empty()
+      ? "localhost"
+      : RuntimeOption::DebuggerServerIP.c_str();
+    if (getaddrinfo(name, std::to_string(m_listenPort).c_str(), &hint, &ai)) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to call getaddrinfo: %d.",
+        errno
+      );
+
+      return;
+    }
+
+    // Attempt to listen on the specified port on each of this host's available
+    // addresses.
+    struct addrinfo* address;
+    for (address = ai; address != nullptr; address = address->ai_next) {
+      if (bindAndListenTCP(address, socketFds)) {
+        anyInterfaceBound = true;
+      }
+    }
+  } else {
+    // Use a UNIX domain socket.
+    if (bindAndListenDomain(socketFds)) {
       anyInterfaceBound = true;
     }
   }
@@ -194,7 +234,126 @@ void SocketTransport::listenForClientConnection() {
   waitForConnection(socketFds, abortFd);
 }
 
-bool SocketTransport::bindAndListen(
+bool SocketTransport::setSocketPermissions(const char* path) {
+  int mask = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+  const std::string& configGroup = VSDebugExtension::getDomainSocketGroup();
+
+  if (!configGroup.empty()) {
+    const char* groupName = configGroup.c_str();
+    auto buf = GroupBuffer{};
+    struct group* grp;
+    if (getgrnam_r(groupName, &buf.ent, buf.data.get(), buf.size, &grp)) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to call getgrnam_r for group %s: %s",
+        groupName,
+        folly::errnoStr(errno).c_str()
+      );
+      return false;
+    }
+    if (grp == nullptr) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Group %s does not exist",
+        groupName
+      );
+      return false;
+    }
+
+    auto gid = grp->gr_gid;
+    if (chown(path, static_cast<uid_t>(-1), gid) < 0) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to call chown for socket %s to group id %d",
+        path,
+        gid
+      );
+      return false;
+    }
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Successfully called chown for socket %s to group id %d",
+      path,
+      gid
+    );
+  } else {
+    // If no security group is configured, fall back to the previous
+    // behavior of allowing any local user to talk to the debugger.
+    mask |= S_IROTH | S_IXOTH | S_IWOTH;
+  }
+
+  // Set socket permissions
+  if (chmod(path, mask) < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to call chmod for domain socket: %d.",
+      errno
+    );
+    return false;
+  }
+
+  return true;
+}
+
+bool SocketTransport::bindAndListenDomain(std::vector<int>& socketFds) {
+  struct sockaddr_un addr;
+  std::string socketPath = m_domainSocketPath;
+
+  int sockFd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (sockFd < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to call socket for type AF_UNIX: %d.",
+      errno
+    );
+
+    return false;
+  }
+
+  memset(&addr, 0, sizeof(addr));
+  addr.sun_family = AF_UNIX;
+  strncpy(addr.sun_path,
+          socketPath.c_str(),
+          sizeof(addr.sun_path) - 1);
+
+  // If the previous socket was left hanging around, clean it up.
+  struct stat tstat;
+  if (lstat(addr.sun_path, &tstat) == 0) {
+    if (S_ISSOCK(tstat.st_mode)) {
+      unlink(addr.sun_path);
+    }
+  }
+
+  if (bind(sockFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to call bind for type AF_UNIX: %d.",
+      errno
+    );
+
+    return false;
+  }
+
+  if (!setSocketPermissions(addr.sun_path)) {
+    return false;
+  }
+
+  if (listen(sockFd, 0) < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to call listen for type AF_UNIX: %d.",
+      errno
+    );
+
+    return false;
+  }
+
+  socketFds.push_back(sockFd);
+  return true;
+}
+
+bool SocketTransport::bindAndListenTCP(
   struct addrinfo* address,
   std::vector<int>& socketFds
 ) {
@@ -202,16 +361,14 @@ bool SocketTransport::bindAndListen(
                   address->ai_socktype,
                   address->ai_protocol);
 
-  if (fd < 0 && errno == EAFNOSUPPORT) {
+  if (fd < 0) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelWarning,
       "SocketTransport: socket() call failed: %d",
       errno
     );
 
-    // Don't bind to this address, but still try to process other
-    // addresses if there are any.
-    return true;
+    return false;
   }
 
   constexpr int yes = 1;
@@ -219,8 +376,6 @@ bool SocketTransport::bindAndListen(
   if (address->ai_family == AF_INET6) {
     setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(yes));
   }
-
-  socketFds.push_back(fd);
 
   if (bind(fd, address->ai_addr, address->ai_addrlen) < 0) {
     VSDebugLogger::Log(
@@ -245,20 +400,46 @@ bool SocketTransport::bindAndListen(
     return false;
   }
 
+  socketFds.push_back(fd);
   return true;
 }
 
-void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
-  VSDebugLogger::Log(
-    VSDebugLogger::LogLevelInfo,
-    "SocketTransport: new client connection rejected because another "
-      "client is already connected."
-  );
+void SocketTransport::rejectClientWithMsg(
+  int newFd,
+  int abortFd,
+  RejectReason reason,
+  ClientInfo& existingClientInfo
+) {
+  std::string msg = "An internal error occurred while connecting to HHVM.";
+  const bool validClient = !existingClientInfo.clientUser.empty() &&
+      existingClientInfo.clientPid > 0;
+
+  if (reason == RejectReason::ClientAlreadyAttached) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "SocketTransport: new client connection rejected because another "
+        "client is already connected."
+    );
+
+    msg = "Failed to attach to HHVM: another client is already attached";
+    if (validClient) {
+      msg += ": process ";
+      msg += std::to_string(existingClientInfo.clientPid);
+      msg += " owned by user ";
+      msg += existingClientInfo.clientUser;
+    }
+  } else if (reason == RejectReason::AuthenticationFailed) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "SocketTransport: new client connection rejected because domain "
+        "socket peer could not be authenticated."
+    );
+    msg = "Failed to attach to HHVM: Access was denied.";
+  }
 
   folly::dynamic rejectMsg = folly::dynamic::object;
   rejectMsg["category"] = OutputLevelError;
-  rejectMsg["output"] = "Could not attach to HHVM: another debugger "
-    "client is already attached!";
+  rejectMsg["output"] = msg;
 
   folly::dynamic response = folly::dynamic::object;
   response["event"] = EventTypeOutput;
@@ -270,11 +451,51 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
   const char* output = serialized.c_str();
   write(newFd, output, strlen(output) + 1);
 
+  // Send a custom refused event that clients can detect.
+  folly::dynamic rejectDetails = folly::dynamic::object;
+  if (validClient) {
+    rejectDetails["pid"] = existingClientInfo.clientPid;
+    rejectDetails["user"] = existingClientInfo.clientUser;
+  }
+
+  folly::dynamic refusedEvent = folly::dynamic::object;
+  refusedEvent["event"] = EventTypeConnectionRefused;
+  refusedEvent["body"] = rejectDetails;
+  refusedEvent["type"] = MessageTypeEvent;
+  const char* refusedEventOutput = folly::toJson(refusedEvent).c_str();
+  write(newFd, refusedEventOutput, strlen(refusedEventOutput) + 1);
+  shutdownSocket(newFd, abortFd);
+}
+
+void SocketTransport::cleanupFd(int fd) {
+  shutdownSocket(fd, m_abortPipeFd[0]);
+}
+
+void SocketTransport::shutdownSocket(int sockFd, int abortFd) {
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Shutting down sockFd(%d) abortFd(%d)",
+    sockFd,
+    abortFd
+  );
+
+  // The process might be exiting, and this logging is important
+  // for debugging shutdown issues, so explicitly flush here.
+  VSDebugLogger::LogFlush();
+
   // Perform an orderly shutdown of the socket so that the message is actually
   // sent and received. This requires us to shutdown the write end of the socket
   // and then drain the receive buffer before closing the socket. If abortFd
   // is signalled before this is complete, we just close the socket and bail.
-  ::shutdown(newFd, SHUT_WR);
+  if (::shutdown(sockFd, SHUT_WR) < 0) {
+    // This is normal if there is no client connection.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelWarning,
+      "Socket ::shutdown returned: %d",
+      errno
+    );
+    return;
+  }
 
   int result;
   size_t size = sizeof(struct pollfd) * 2;
@@ -285,7 +506,7 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
       free(fds);
     }
 
-    close(newFd);
+    close(sockFd);
 
     if (buffer != nullptr) {
       free(buffer);
@@ -296,14 +517,14 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
     return;
   }
 
-  int eventMask = POLLIN | POLLERR | POLLHUP;
+  int eventMask = POLLIN | POLLERR | POLLHUP | g_platformPollFlags;
   constexpr int abortIdx = 0;
   constexpr int readIdx = 1;
 
   memset(fds, 0, size);
   fds[abortIdx].fd = abortFd;
   fds[abortIdx].events = eventMask;
-  fds[readIdx].fd = newFd;
+  fds[readIdx].fd = sockFd;
   fds[readIdx].events = eventMask;
 
   while (true) {
@@ -313,12 +534,12 @@ void SocketTransport::rejectClientWithMsg(int newFd, int abortFd) {
     } else if (result < 0 ||
                fds[abortIdx].revents != 0 ||
                fds[readIdx].revents & POLLERR ||
-               fds[readIdx].revents & POLLHUP
-               ) {
+               fds[readIdx].revents & POLLHUP ||
+               fds[readIdx].revents & g_platformPollFlags) {
 
       break;
     } else if (fds[readIdx].revents & POLLIN) {
-      result = read(newFd, buffer, 1024);
+      result = read(sockFd, buffer, 1024);
       if (result <= 0) {
         break;
       }
@@ -350,18 +571,22 @@ void SocketTransport::waitForConnection(
     if (fds != nullptr) {
       free(fds);
     }
+
+    for (const int fd : socketFds) {
+      close(fd);
+    }
   };
 
   // fds[0] will contain the read end of our "abort" pipe. Another thread will
   // write data to tihs pipe to signal it's time for this worker to stop
   // blocking in poll() and terminate.
-  int eventMask = POLLIN | POLLERR | POLLHUP;
+  int eventMask = POLLIN | POLLERR | POLLHUP | g_platformPollFlags;
   fds[0].fd = abortFd;
   fds[0].events = eventMask;
 
-  for (unsigned int i = 0; i < count; i++) {
-    fds[i + 1].fd = socketFds[i];
-    fds[i + 1].events = eventMask;
+  for (unsigned int i = 1; i < count; i++) {
+    fds[i].fd = socketFds[i - 1];
+    fds[i].events = eventMask;
   }
 
   // Poll socket fds until a connection is established or we're terminated.
@@ -407,13 +632,35 @@ void SocketTransport::waitForConnection(
             strerror(errno)
           );
         } else {
-          Lock lock(m_lock);
+          m_lock.lock();
+          bool locked = true;
+          SCOPE_EXIT {
+            if (locked) {
+              m_lock.unlock();
+            }
+          };
 
+          const bool domainSocket = useDomainSocket();
+          RejectReason rejectReason = RejectReason::None;
           if (m_clientConnected) {
-            // A client is already connected!
+            rejectReason = RejectReason::ClientAlreadyAttached;
+          } else if (domainSocket &&
+                     !validatePeerCreds(newFd, m_clientInfo)) {
+            rejectReason = RejectReason::AuthenticationFailed;
+          }
+
+          if (rejectReason != RejectReason::None) {
+            locked = false;
             m_lock.unlock();
-            rejectClientWithMsg(newFd, abortFd);
-            m_lock.lock();
+            rejectClientWithMsg(
+              newFd,
+              abortFd,
+              rejectReason,
+              m_clientInfo
+            );
+            // NB this code used to have a manual m_lock.lock() here; however,
+            // this causes  a deadlock if the  connection  thread  is  exiting
+            // (see D15701465 for details).
           } else {
             VSDebugLogger::Log(
               VSDebugLogger::LogLevelInfo,
@@ -423,7 +670,11 @@ void SocketTransport::waitForConnection(
             // We have established a connection with a client.
             m_clientConnected = true;
             setTransportFd(newFd);
-            m_debugger->setClientConnected(true);
+            m_debugger->setClientConnected(
+              true,
+              false,
+              domainSocket ? &m_clientInfo : nullptr
+            );
           }
         }
       }
@@ -432,6 +683,66 @@ void SocketTransport::waitForConnection(
       fds[i].revents = 0;
     }
   }
+}
+
+bool SocketTransport::validatePeerCreds(int newFd, ClientInfo& info) {
+#ifdef SO_PEERCRED
+  struct ucred ucred = {0};
+  socklen_t len = sizeof(ucred);
+
+  if (getsockopt(newFd,
+                 SOL_SOCKET,
+                 SO_PEERCRED,
+                 &ucred,
+                 &len) < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Failed to get creds from peer socket: %d",
+      errno
+    );
+    return false;
+  }
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Obtained credentials from peer socket: pid=%ld, uid=%ld",
+    (long)ucred.pid,
+    (long)ucred.uid
+  );
+
+  auto buf = PasswdBuffer{};
+  passwd* pw;
+  if (getpwuid_r(ucred.uid, &buf.ent, buf.data.get(), buf.size, &pw)) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Failed to call getpwuid_r: %d",
+      errno
+    );
+    return false;
+  }
+
+  if (pw == nullptr) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "No such uid: %d",
+      ucred.uid
+    );
+    return false;
+  }
+
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Client username is: %s",
+    pw->pw_name
+  );
+
+  info.clientUser = std::string(pw->pw_name);
+  info.clientPid = ucred.pid;
+  info.clientUid = ucred.uid;
+  return pw->pw_name != nullptr && strlen(pw->pw_name) > 0;
+#else
+  return true;
+#endif
 }
 
 }

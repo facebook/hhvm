@@ -15,5 +15,7 @@ class Bar extends Foo {
     return $this->f();
   }
 }
+<<__EntryPoint>> function main(): void {
 $b = new Bar();
 echo $b->inv()."\n";
+}

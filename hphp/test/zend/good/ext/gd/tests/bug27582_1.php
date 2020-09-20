@@ -1,6 +1,7 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 /* $id$ */
-$dest = dirname(realpath(__FILE__)) . '/bug27582.png';
+$dest = __SystemLib\hphp_test_tmppath('bug27582.png');
 @unlink($dest);
 $im = ImageCreateTrueColor(10, 10);
 imagealphablending($im, true);
@@ -15,4 +16,4 @@ $col = imagecolorat($im2, 5, 5);
 $color = imagecolorsforindex($im2, $col);
 echo $color['alpha'];
 @unlink($dest);
-?>
+}

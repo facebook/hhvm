@@ -1,0 +1,14 @@
+
+ReflectionMethod:
+string(10) "HH\nothing"
+bool(false)
+string(10) "HH\nothing"
+bool(false)
+string(6) "HH\int"
+bool(false)
+string(6) "Foo::T"
+
+ReflectionFunction:
+string(10) "HH\nothing"
+bool(false)
+string(18) "HH\vec<HH\nothing>"

@@ -4,5 +4,4 @@ let write_file ~dir ~file ~contents =
 
 let setup_dir dir files =
   Disk.mkdir_p (Path.to_string dir);
-  List.iter (fun (file, contents) ->
-    write_file ~dir ~file ~contents) files
+  List.iter (fun (file, contents) -> write_file ~dir ~file ~contents) files

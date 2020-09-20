@@ -3,14 +3,16 @@
 
 class CatWrapper {
   private resource $proc;
-  private array $pipes;
+  private darray $pipes;
 
   public function __construct() {
-    $descriptorspec = array(
-      0 => array("pipe", "r"),
-      1 => array("pipe", "w"),
-    );
-    $this->proc = proc_open("cat", $descriptorspec, $this->pipes);
+    $descriptorspec = darray[
+      0 => varray["pipe", "r"],
+      1 => varray["pipe", "w"],
+    ];
+    $__pipes = $this->pipes;
+    $this->proc = proc_open("cat", $descriptorspec, inout $__pipes);
+    $this->pipes = $__pipes;
     if (!is_resource($this->proc) ||
         !is_resource($this->pipes[0]) ||
         !is_resource($this->pipes[0])) {
@@ -43,7 +45,7 @@ async function correctFrame(Awaitable<int> $awaitable): Awaitable<void> {
   await $awaitable;
 }
 
-function backtrace_contains(array $bt, string $fn_name): bool {
+function backtrace_contains(varray $bt, string $fn_name): bool {
   foreach ($bt as $frame) {
     if (idx($frame, 'function') === $fn_name) {
       return true;
@@ -83,7 +85,7 @@ async function testBacktrace(): Awaitable<void> {
 
   // try backtracing wait handle, before anything awaits on it
   $bt = HH\Asio\backtrace($wh);
-  var_dump(empty($bt));
+  var_dump(!($bt ?? false));
 
   $wrapper_frame = async {
     await correctFrame($wh);
@@ -91,7 +93,7 @@ async function testBacktrace(): Awaitable<void> {
 
   // now something awaits on $wh, but it's not in asio context yet
   $bt = HH\Asio\backtrace($wh);
-  var_dump(empty($bt));
+  var_dump(!($bt ?? false));
 
   $resv = await HH\Asio\vw(ImmVector {
       $wrapper_frame,
@@ -100,11 +102,11 @@ async function testBacktrace(): Awaitable<void> {
 
   // try backtracing wait handle, after it has already finished
   $bt = HH\Asio\backtrace($wh);
-  var_dump(empty($bt));
+  var_dump(!($bt ?? false));
 
   // try backtracing static wait handle
   $bt = HH\Asio\backtrace(HH\Asio\null());
-  var_dump(empty($bt));
+  var_dump(!($bt ?? false));
 
   // try backtracing something, that is not a wait handle
   try {
@@ -115,4 +117,8 @@ async function testBacktrace(): Awaitable<void> {
   }
 }
 
+
+<<__EntryPoint>>
+function main_backtrace() {
 HH\Asio\join(testBacktrace());
+}

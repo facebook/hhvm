@@ -1,5 +1,4 @@
-
-<?php
+<?hh
 
 /*
  * Test for the datefmt_get_pattern & datefmt_set_pattern function
@@ -8,12 +7,12 @@
 
 function ut_main()
 {
-        $pattern_arr = array (
+        $pattern_arr = varray [
                 'DD-MM-YYYY hh:mm:ss',
-		'yyyy-DDD.hh:mm:ss z',
+        'yyyy-DDD.hh:mm:ss z',
                 "yyyy/MM/dd",
                 "yyyyMMdd"
-        );
+        ];
 
         $res_str = '';
 
@@ -23,8 +22,8 @@ function ut_main()
         $fmt = ut_datefmt_create( "en-US",  IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'America/New_York', IntlDateFormatter::GREGORIAN , $start_pattern );
         $pattern = ut_datefmt_get_pattern( $fmt);
         $res_str .= "\nAfter call to get_pattern :  pattern= $pattern";
-	$formatted = ut_datefmt_format($fmt,0);
-	$res_str .= "\nResult of formatting timestamp=0 is :  \n$formatted";
+    $formatted = ut_datefmt_format($fmt,0);
+    $res_str .= "\nResult of formatting timestamp=0 is :  \n$formatted";
 
 
         foreach( $pattern_arr as $pattern_entry )
@@ -34,7 +33,7 @@ function ut_main()
                 ut_datefmt_set_pattern( $fmt , $pattern_entry );
                 $pattern = ut_datefmt_get_pattern( $fmt);
                 $res_str .= "\nAfter call to get_pattern :  pattern= $pattern";
-		$formatted = ut_datefmt_format($fmt,0);
+        $formatted = ut_datefmt_format($fmt,0);
                 $res_str .= "\nResult of formatting timestamp=0 with the new pattern is :  \n$formatted";
                 $res_str .= "\n";
 
@@ -44,8 +43,8 @@ function ut_main()
 
 }
 
-include_once( 'ut_common.inc' );
-
-// Run the test
-ut_run();
-?>
+<<__EntryPoint>> function main_entry(): void {
+        include_once( 'ut_common.inc' );
+        // Run the test
+        ut_run();
+}

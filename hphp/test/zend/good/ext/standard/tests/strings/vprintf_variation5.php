@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string vprintf(string format, array args)
  * Description: Output a formatted string 
  * Source code: ext/standard/formatted_print.c
@@ -8,12 +8,12 @@
  * Test vprintf() when different float formats and float values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing vprintf() : int formats with float values ***\n";
 
 
 // defining array of float formats
-$formats = array(
+$formats = varray[
   "%f",
   "%+f %-f %F",
   "%lf %Lf, %4f %-4f",
@@ -22,21 +22,21 @@ $formats = array(
   "%f %f %f %f",
   "% %%f f%",
   '%3$f %4$f %1$f %2$f'
-);
+];
 
 // Arrays of float values for the format defined in $format.
 // Each sub array contains float values which correspond to each format string in $format
-$args_array = array(
-  array(0.0),
-  array(-0.1, +0.1, +10.0000006),
-  array(2147483649, -2147483647, +2147483640, -2147483640),
-  array(2e5, 2e-5, -2e5, -2e-5),
-  array(0.2E5, -0.2e40, 0.2E-20, 0.2E+20),
-  array(0x123b, 0xfAb, 0123, 01293),
-  array(1234.1234, -5678.5678, 2345.2345),
-  array(3.33, 4.44, 1.11, 2.22)
+$args_array = varray[
+  varray[0.0],
+  varray[-0.1, +0.1, +10.0000006],
+  varray[2147483649, -2147483647, +2147483640, -2147483640],
+  varray[2e5, 2e-5, -2e5, -2e-5],
+  varray[0.2E5, -0.2e40, 0.2E-20, 0.2E+20],
+  varray[0x123b, 0xfAb, 0123, 01293],
+  varray[1234.1234, -5678.5678, 2345.2345],
+  varray[3.33, 4.44, 1.11, 2.22]
 
-);
+];
 
 // looping to test vprintf() with different float formats from the above $format array
 // and with float values from the above $args_array array
@@ -49,5 +49,5 @@ foreach($formats as $format) {
   $counter++;
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

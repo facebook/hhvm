@@ -1,7 +1,8 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $memc = new Memcached();
 $refl = new ReflectionClass($memc);
 if ($refl->getConstant('DISTRIBUTION_CONSISTENT_WEIGHTED') === false) {
   echo "SKIP Memcached::DISTRIBUTION_CONSISTENT_WEIGHTED not defined";
+}
 }

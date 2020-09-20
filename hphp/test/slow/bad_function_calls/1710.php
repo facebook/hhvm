@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(E_ALL & ~E_NOTICE);
+<?hh
 function foo($a) {
  print $a;
 }
@@ -8,4 +6,10 @@ function foo($a) {
  function __construct() {
 }
 }
+
+
+<<__EntryPoint>>
+function main_1710() {
+error_reporting(E_ALL & ~E_NOTICE);
  $obj = new A(foo(10));
+}

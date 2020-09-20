@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $getClosure = function ($v) {
 	return function () use ($v) {
 		echo "Hello World: $v!\n";
@@ -10,4 +10,4 @@ $closure = $getClosure (2);
 $closure ();
 
 echo "Done\n";
-?>
+}

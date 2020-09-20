@@ -1,5 +1,5 @@
 //// partial.php
-<?hh
+<?hh // partial
 
 function any() {
 }

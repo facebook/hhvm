@@ -1,0 +1,72 @@
+File "variableprop.php", line 5, characters 3-13:
+  dynamic
+File "variableprop.php", line 7, characters 3-13:
+  dynamic
+[(Fun
+    { f_span = [3:1-8:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([3:50-54], (Hprim Tvoid)));
+      f_name = ([3:10-25], "\\testDynamicProp"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params =
+      [{ param_annotation = ([3:34-36], dynamic);
+         param_hint = (Some ([3:26-33], Hdynamic));
+         param_is_variadic = false;
+         param_pos = [3:34-36]; param_name = "$x"; param_expr = None;
+         param_callconv = None; param_user_attributes = [] };
+        { param_annotation = ([3:45-47], string);
+          param_hint = (Some ([3:38-44], (Hprim Tstring)));
+          param_is_variadic = false;
+          param_pos = [3:45-47]; param_name = "$y"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+        ];
+      f_body =
+      { fb_ast =
+        [([4:3-17],
+          (Expr
+             (([4:3-16], dynamic),
+              (Binop ((Eq None), (([4:3-5], dynamic), (Lvar ([4:3-5], $z))),
+                 (([4:8-16], dynamic),
+                  (Call (Cnormal,
+                     (([4:8-14], dynamic),
+                      (Obj_get ((([4:8-10], dynamic), (Lvar ([4:8-10], $x))),
+                         (([4:12-14], dynamic), (Lvar ([4:12-14], $y))),
+                         OG_nullthrows))),
+                     [], [], [])))
+                 )))));
+          ([5:3-15],
+           (Expr
+              (([5:3-14], _),
+               (Call (Cnormal, (([5:3-10], _), (Id ([5:3-10], "\\hh_show"))),
+                  [], [(([5:11-13], dynamic), (Lvar ([5:11-13], $z)))], 
+                  [])))));
+          ([6:3-15],
+           (Expr
+              (([6:3-14], dynamic),
+               (Binop ((Eq None), (([6:3-5], dynamic), (Lvar ([6:3-5], $z))),
+                  (([6:8-14], dynamic),
+                   (Obj_get ((([6:8-10], dynamic), (Lvar ([6:8-10], $x))),
+                      (([6:12-14], dynamic), (Lvar ([6:12-14], $y))),
+                      OG_nullthrows)))
+                  )))));
+          ([7:3-15],
+           (Expr
+              (([7:3-14], _),
+               (Call (Cnormal, (([7:3-10], _), (Id ([7:3-10], "\\hh_show"))),
+                  [], [(([7:11-13], dynamic), (Lvar ([7:11-13], $z)))], 
+                  [])))))
+          ];
+        fb_annotation = No unsafe blocks };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false })
+  ]
+Typing[4291] Unexpected type in TAST: expected string, got dynamic
+   --> variableprop.php
+  4 |   $z = $x->$y();
+    |            ^^
+
+Typing[4291] Unexpected type in TAST: expected string, got dynamic
+   --> variableprop.php
+  6 |   $z = $x->$y;
+    |            ^^
+

@@ -36,5 +36,9 @@ FailedTraceGen::FailedTraceGen(const char* file, int line, const char* why)
                                      file, line, why).str())
 {}
 
+RetryIRGen::RetryIRGen(const char* why)
+  : std::runtime_error(why)
+{}
+
 //////////////////////////////////////////////////////////////////////
 }}

@@ -1,8 +1,10 @@
-<?php
+<?hh
 
-//NOTE: RepoAuth mode doesn't properly handle the first constant test,
-//      a seperate .expectf-repo is included till that is resovled.
+// NOTE: RepoAuth mode doesn't properly handle the first constant test,
+//       a separate .expectf-repo is included until that is resolved.
+// echo great[1];
+// echo "\n";
+const great = "my";
+<<__EntryPoint>> function main(): void {
 echo great[1];
-echo "\n";
-define("great","my");
-echo great[1];
+}

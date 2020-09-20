@@ -1,0 +1,8 @@
+File "where_on_function_callsite.php", line 11, characters 8-10:
+A 'where' type constraint is violated here (Typing[4110])
+  File "where_on_function_callsite.php", line 4, characters 10-12:
+  This is the method with 'where' type constraints
+  File "where_on_function_callsite.php", line 4, characters 40-42:
+  This is an int
+  File "where_on_function_callsite.php", line 10, characters 8-14:
+  It is incompatible with a string

@@ -1,8 +1,0 @@
-C::__destruct
-object(D)#2 (0) {
-}
-==========
-C::__destruct done
-D::__destruct
-****
-int(1)

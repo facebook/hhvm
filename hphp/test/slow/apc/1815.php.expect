@@ -1,4 +1,4 @@
-object(B)#1 (2) {
+object(B) (2) {
   ["b":"B":private]=>
   int(100)
   ["b":"A":private]=>

@@ -1,8 +1,17 @@
-<?php
+<?hh
 
-spl_autoload_register(function ($class) {
-  echo "Called autoload for $class\n";
-  include __DIR__.'/autoload-class.inc';
-});
 
-var_dump(get_parent_class('C'));
+<<__EntryPoint>>
+function main_get_parent_class() {
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'c' => 'autoload-class.inc',
+        'b' => 'autoload-class.inc',
+      ],
+    ],
+    __DIR__.'/',
+  );
+
+  var_dump(get_parent_class('C'));
+}

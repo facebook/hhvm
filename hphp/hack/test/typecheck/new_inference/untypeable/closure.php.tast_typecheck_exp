@@ -1,0 +1,261 @@
+[(Class
+    { c_span = [4:1-12:2]; c_annotation = (); c_mode = <opaque>;
+      c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([4:7-10], "\\Ref");
+      c_tparams =
+      { c_tparam_list =
+        [{ tp_variance = Invariant; tp_name = ([4:11-12], "T");
+           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
+           }
+          ];
+        c_tparam_constraints = <opaque> };
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_consts = []; c_typeconsts = [];
+      c_vars =
+      [{ cv_final = false; cv_is_xhp = false; cv_visibility = Private;
+         cv_type = (Some ([5:11-13], (Hoption ([5:12-13], (Habstr "T")))));
+         cv_id = ([5:14-20], "value");
+         cv_expr = (Some (([5:23-27], null), Null)); cv_user_attributes = [];
+         cv_doc_comment = None; cv_is_promoted_variadic = false;
+         cv_is_static = false }
+        ];
+      c_methods =
+      [{ m_span = [6:3-8:4]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([6:19-22], "get"); m_tparams = [];
+         m_where_constraints = []; m_variadic = FVnonVariadic;
+         m_params =
+         [{ param_annotation = ([6:25-33], T);
+            param_hint = (Some ([6:23-24], (Habstr "T")));
+            param_is_variadic = false;
+            param_pos = [6:25-33]; param_name = "$default";
+            param_expr = None; param_callconv = None;
+            param_user_attributes = [] }
+           ];
+         m_body =
+         { fb_ast =
+           [([7:5-37],
+             (Return
+                (Some (([7:12-36], T),
+                       (Binop (QuestionQuestion,
+                          (([7:12-24], ?T),
+                           (Obj_get ((([7:12-17], this), This),
+                              (([7:19-24], ?T), (Id ([7:19-24], "value"))),
+                              OG_nullthrows))),
+                          (([7:28-36], T), (Lvar ([7:28-36], $default)))))))))
+             ];
+           fb_annotation = No unsafe blocks };
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([6:36-37], (Habstr "T"))); m_external = false;
+         m_doc_comment = None };
+        { m_span = [9:3-11:4]; m_annotation = (); m_final = false;
+          m_abstract = false; m_static = false; m_visibility = Public;
+          m_name = ([9:19-22], "set"); m_tparams = [];
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params =
+          [{ param_annotation = ([9:25-31], T);
+             param_hint = (Some ([9:23-24], (Habstr "T")));
+             param_is_variadic = false;
+             param_pos = [9:25-31]; param_name = "$value"; param_expr = None;
+             param_callconv = None; param_user_attributes = [] }
+            ];
+          m_body =
+          { fb_ast =
+            [([10:5-27],
+              (Expr
+                 (([10:5-26], T),
+                  (Binop ((Eq None),
+                     (([10:5-17], ?T),
+                      (Obj_get ((([10:5-10], this), This),
+                         (([10:12-17], ?T), (Id ([10:12-17], "value"))),
+                         OG_nullthrows))),
+                     (([10:20-26], T), (Lvar ([10:20-26], $value))))))))
+              ];
+            fb_annotation = No unsafe blocks };
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some ([9:34-38], (Hprim Tvoid))); m_external = false;
+          m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
+  (Fun
+     { f_span = [14:1-16:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret =
+       (Some ([14:32-48],
+              (Hfun (FNonreactive, false, [([14:42-43], (Habstr "T"))],
+                 [None], [None], Hnon_variadic, ([14:46-47], (Habstr "T")),
+                 false))));
+       f_name = ([14:10-16], "\\getter");
+       f_tparams =
+       [{ tp_variance = Invariant; tp_name = ([14:17-18], "T");
+          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([14:27-29], Ref<T>);
+          param_hint =
+          (Some ([14:20-26],
+                 (Happly (([14:20-23], "\\Ref"), [([14:24-25], (Habstr "T"))]
+                    ))));
+          param_is_variadic = false;
+          param_pos = [14:27-29]; param_name = "$r"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast =
+         [([15:3-29],
+           (Return
+              (Some (([15:10-28], (function(T $x): T)),
+                     (Lfun (
+                        { f_span = [15:10-28]; f_annotation = ();
+                          f_mode = <opaque>; f_ret = None;
+                          f_name = ([15:10-28], ";anonymous");
+                          f_tparams = []; f_where_constraints = [];
+                          f_variadic = FVnonVariadic;
+                          f_params =
+                          [{ param_annotation = ([15:10-12], T);
+                             param_hint = None;
+                             param_is_variadic = false;
+                             param_pos = [15:10-12]; param_name = "$x";
+                             param_expr = None; param_callconv = None;
+                             param_user_attributes = [] }
+                            ];
+                          f_body =
+                          { fb_ast =
+                            [([15:17-28],
+                              (Return
+                                 (Some (([15:17-28], T),
+                                        (Call (Cnormal,
+                                           (([15:17-24], (function(T $default): T)),
+                                            (Obj_get (
+                                               (([15:17-19], Ref<T>),
+                                                (Lvar ([15:17-19], $r))),
+                                               (([15:21-24], (function(T $default): T)),
+                                                (Id ([15:21-24], "get"))),
+                                               OG_nullthrows))),
+                                           [],
+                                           [(([15:25-27], T),
+                                             (Lvar ([15:25-27], $x)))],
+                                           []))))))
+                              ];
+                            fb_annotation = No unsafe blocks };
+                          f_fun_kind = FSync; f_user_attributes = [];
+                          f_file_attributes = []; f_external = false;
+                          f_namespace = <opaque>; f_doc_comment = None;
+                          f_static = false },
+                        [([15:17-19], $r)]))))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
+  (Fun
+     { f_span = [18:1-43]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([18:36-40], (Hprim Tvoid)));
+       f_name = ([18:10-23], "\\expect_string"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([18:31-33], string);
+          param_hint = (Some ([18:24-30], (Hprim Tstring)));
+          param_is_variadic = false;
+          param_pos = [18:31-33]; param_name = "$_"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false });
+  (Fun
+     { f_span = [20:1-26:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([20:35-39], (Hprim Tvoid)));
+       f_name = ([20:10-14], "\\test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ param_annotation = ([20:19-21], int);
+          param_hint = (Some ([20:15-18], (Hprim Tint)));
+          param_is_variadic = false;
+          param_pos = [20:19-21]; param_name = "$a"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+         { param_annotation = ([20:30-32], string);
+           param_hint = (Some ([20:23-29], (Hprim Tstring)));
+           param_is_variadic = false;
+           param_pos = [20:30-32]; param_name = "$b"; param_expr = None;
+           param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       { fb_ast =
+         [([21:3-18],
+           (Expr
+              (([21:3-17], Ref<(int | string)>),
+               (Binop ((Eq None),
+                  (([21:3-5], Ref<(int | string)>), (Lvar ([21:3-5], $r))),
+                  (([21:8-17], Ref<(int | string)>),
+                   (New (
+                      (([21:12-15], Ref<[unresolved]>),
+                       (CI ([21:12-15], "\\Ref"))),
+                      [], [], [], ([21:12-15], _))))
+                  )))));
+           ([22:3-19],
+            (Expr
+               (([22:3-18], (function((int | string)): (int | string))),
+                (Binop ((Eq None),
+                   (([22:3-5], (function((int | string)): (int | string))),
+                    (Lvar ([22:3-5], $f))),
+                   (([22:8-18], (function((int | string)): (int | string))),
+                    (Call (Cnormal,
+                       (([22:8-14], (function<T>(Ref<(int | string)> $r): (function((int | string)): (int | string)))),
+                        (Id ([22:8-14], "\\getter"))),
+                       [],
+                       [(([22:15-17], Ref<(int | string)>),
+                         (Lvar ([22:15-17], $r)))],
+                       [])))
+                   )))));
+           ([23:3-15],
+            (Expr
+               (([23:3-14], (int | string)),
+                (Binop ((Eq None),
+                   (([23:3-5], (int | string)), (Lvar ([23:3-5], $c))),
+                   (([23:8-14], (int | string)),
+                    (Call (Cnormal,
+                       (([23:8-10], (function((int | string)): (int | string))),
+                        (Lvar ([23:8-10], $f))),
+                       [], [(([23:11-13], string), (Lvar ([23:11-13], $b)))],
+                       [])))
+                   )))));
+           ([24:3-15],
+            (Expr
+               (([24:3-14], void),
+                (Call (Cnormal,
+                   (([24:3-10], (function((int | string) $value): void)),
+                    (Obj_get (
+                       (([24:3-5], Ref<(int | string)>),
+                        (Lvar ([24:3-5], $r))),
+                       (([24:7-10], (function((int | string) $value): void)),
+                        (Id ([24:7-10], "set"))),
+                       OG_nullthrows))),
+                   [], [(([24:11-13], int), (Lvar ([24:11-13], $a)))], 
+                   [])))));
+           ([25:3-21],
+            (Expr
+               (([25:3-20], void),
+                (Call (Cnormal,
+                   (([25:3-16], (function(string $_): void)),
+                    (Id ([25:3-16], "\\expect_string"))),
+                   [], [(([25:17-19], string), (Lvar ([25:17-19], $c)))], 
+                   [])))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
+  ]
+The TAST for this definition contains nodes which are not yet implemented.
+Typing[4291] Unexpected type in TAST: expected (int | string), got string
+   --> closure.php
+ 25 |   expect_string($c);
+    |                 ^^
+

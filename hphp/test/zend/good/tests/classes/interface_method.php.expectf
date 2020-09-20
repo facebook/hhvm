@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. in %s/interface_method.php on line 5

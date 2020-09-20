@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_EXT_INTERVALTIMER_H_
-#define incl_HPHP_EXT_INTERVALTIMER_H_
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
@@ -78,4 +77,3 @@ void HHVM_METHOD(IntervalTimer, stop);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif

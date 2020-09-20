@@ -1,6 +1,6 @@
 *** Testing get_parent_class() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(68)
-Error: 8 - Undefined variable: unset_var, %s(71)
+Error: 8 - Undefined variable: undefined_var, %s(64)
+Error: 8 - Undefined variable: unset_var, %s(67)
 
 Arg value 0 
 bool(false)
@@ -28,23 +28,18 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
 
 Arg value Array 
 bool(false)
@@ -74,13 +69,11 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
 Arg value  
 bool(false)

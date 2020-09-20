@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   ob_start(function($str) {
@@ -13,4 +13,8 @@ function main() {
   echo "DON'T PRINT ME!";
 }
 
+
+<<__EntryPoint>>
+function main_handler_fatal() {
 main();
+}

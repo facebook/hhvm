@@ -37,8 +37,3 @@ function test4(C $c): void {
     $c->prop->nar()?->baz();
   }
 }
-function test5(?C $c): int {
-  $x = null;
-  $c?->yar($x = 123);
-  return $x;
-}

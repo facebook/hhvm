@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function thrower() {
   for ($i = 0; $i < 10; ++$i) mt_rand();  // make it not-inlinable
@@ -36,4 +36,8 @@ function main() {
   var_dump($z);
 }
 
+
+<<__EntryPoint>>
+function main_try_catch_call_001() {
 main();
+}

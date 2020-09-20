@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
-#include <unordered_map>
-
 namespace HPHP { namespace jit {
 
 TransRec::TransRec(SrcKey                      _src,
@@ -40,7 +38,7 @@ TransRec::TransRec(SrcKey                      _src,
   , annotations(std::move(_annotations))
   , funcName(_src.func()->fullName()->data())
   , src(_src)
-  , md5(_src.func()->unit()->md5())
+  , sha1(_src.func()->unit()->sha1())
   , aStart(_aStart)
   , acoldStart(_acoldStart)
   , afrozenStart(_afrozenStart)
@@ -59,7 +57,7 @@ TransRec::TransRec(SrcKey                      _src,
   assertx(!region->empty());
   for (auto& block : region->blocks()) {
     auto sk = block->start();
-    blocks.emplace_back(Block{sk.unit()->md5(), sk.offset(),
+    blocks.emplace_back(Block{sk.unit()->sha1(), sk.offset(),
                               block->last().advanced().offset()});
   }
 
@@ -96,7 +94,7 @@ void TransRec::optimizeForMemory() {
 
 TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
-  static std::unordered_map<std::string, bool> fileWritten;
+  static jit::fast_map<std::string, size_t> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
                    RuntimeOption::EvalDumpTCPath,
@@ -106,15 +104,15 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   };
   auto const fileName = saved.fileName.c_str();
 
-  auto result = fileWritten.find(saved.fileName);
-  if (result == fileWritten.end()) {
+  if (fileWritten.emplace(saved.fileName, 0).second) {
     unlink(fileName);
-    fileWritten[saved.fileName] = true;
   }
+
+  auto& fileOffset = fileWritten.at(saved.fileName);
 
   FILE* file = fopen(fileName, "a");
   if (!file) return saved;
-  saved.offset = lseek(fileno(file), 0, SEEK_END);
+  saved.offset = fileOffset;
   if (saved.offset == (off_t)-1) {
     fclose(file);
     return saved;
@@ -135,6 +133,7 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
     }
     fclose(file);
   }
+  fileOffset += saved.length;
 
   return saved;
 }
@@ -156,6 +155,14 @@ bool TransRec::isConsistent() const {
   return true;
 }
 
+bool TransRec::contains(TCA tca) const {
+  if (!isValid()) return false;
+  if (aStart <= tca && tca - aStart < aLen) return true;
+  if (acoldStart <= tca && tca - acoldStart < acoldLen) return true;
+  if (afrozenStart <= tca && tca - afrozenStart < afrozenLen) return true;
+  return false;
+}
+
 std::string TransRec::print() const {
   if (!isValid()) return "Translation -1 {\n}\n\n";
 
@@ -166,17 +173,15 @@ std::string TransRec::print() const {
   folly::format(
     &ret,
     "Translation {} {{\n"
-    "  src.md5 = {}\n"
+    "  src.sha1 = {}\n"
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
     "  src.resumeMode = {}\n"
-    "  src.hasThis = {}\n"
     "  src.bcStart = {}\n"
     "  src.blocks = {}\n",
-    id, md5, src.funcID(),
+    id, sha1, src.funcID(),
     funcName.empty() ? "Pseudo-main" : funcName,
     (int32_t)src.resumeMode(),
-    (int32_t)src.hasThis(),
     src.offset(),
     blocks.size());
 
@@ -184,7 +189,7 @@ std::string TransRec::print() const {
     folly::format(
       &ret,
       "    {} {} {}\n",
-      block.md5, block.bcStart, block.bcPast);
+      block.sha1, block.bcStart, block.bcPast);
   }
 
   folly::format( &ret, "  src.guards = {}\n", guards.size());
@@ -232,7 +237,7 @@ std::string TransRec::print() const {
     folly::format(
       &ret,
       "    {} {} {} {} {}\n",
-      info.md5, info.bcStart,
+      info.sha1, info.bcStart,
       info.aStart, info.acoldStart, info.afrozenStart);
   }
 

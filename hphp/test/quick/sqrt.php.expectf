@@ -4,19 +4,11 @@ float(2.2360679774998)
 float(1.5811388300842)
 float(NAN)
 float(1.4973266176756)
-float(1)
-float(0)
-float(0)
-float(3.8729833462074)
-
-Warning: sqrt() expects parameter 1 to be double, string given in %s/test/quick/sqrt.php on line 22
-NULL
-
-Warning: sqrt() expects parameter 1 to be double, object given in %s/test/quick/sqrt.php on line 23
-NULL
-
-Warning: sqrt() expects parameter 1 to be double, array given in %s/test/quick/sqrt.php on line 24
-NULL
-
-Warning: sqrt() expects parameter 1 to be double, array given in %s/test/quick/sqrt.php on line 25
-NULL
+string(%d) "sqrt() expects parameter 1 to be double, boolean given"
+string(%d) "sqrt() expects parameter 1 to be double, boolean given"
+string(%d) "sqrt() expects parameter 1 to be double, null given"
+string(%d) "sqrt() expects parameter 1 to be double, string given"
+string(%d) "sqrt() expects parameter 1 to be double, string given"
+string(%d) "sqrt() expects parameter 1 to be double, object given"
+string(%d) "sqrt() expects parameter 1 to be double, %rv?%rarray given"
+string(%d) "sqrt() expects parameter 1 to be double, %rv?%rarray given"

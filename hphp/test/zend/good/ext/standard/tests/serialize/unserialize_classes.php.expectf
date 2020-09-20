@@ -1,6 +1,6 @@
-array(3) {
+darray(3) {
   [0]=>
-  object(foo)#%d (1) {
+  object(foo) (1) {
     ["x"]=>
     string(3) "bar"
   }
@@ -9,9 +9,9 @@ array(3) {
   [2]=>
   string(1) "3"
 }
-array(3) {
+darray(3) {
   [0]=>
-  object(__PHP_Incomplete_Class)#%d (2) {
+  object(__PHP_Incomplete_Class) (2) {
     ["__PHP_Incomplete_Class_Name"]=>
     string(3) "foo"
     ["x"]=>
@@ -22,9 +22,9 @@ array(3) {
   [2]=>
   string(1) "3"
 }
-array(3) {
+darray(3) {
   [0]=>
-  object(foo)#%d (1) {
+  object(foo) (1) {
     ["x"]=>
     string(3) "bar"
   }
@@ -33,9 +33,9 @@ array(3) {
   [2]=>
   string(1) "3"
 }
-array(3) {
+darray(3) {
   [0]=>
-  object(__PHP_Incomplete_Class)#%d (2) {
+  object(__PHP_Incomplete_Class) (2) {
     ["__PHP_Incomplete_Class_Name"]=>
     string(3) "foo"
     ["x"]=>
@@ -46,9 +46,9 @@ array(3) {
   [2]=>
   string(1) "3"
 }
-array(3) {
+darray(3) {
   [0]=>
-  object(foo)#%d (1) {
+  object(foo) (1) {
     ["x"]=>
     string(3) "bar"
   }
@@ -57,9 +57,9 @@ array(3) {
   [2]=>
   string(1) "3"
 }
-array(3) {
+darray(3) {
   [0]=>
-  object(foo)#%d (1) {
+  object(foo) (1) {
     ["x"]=>
     string(3) "bar"
   }

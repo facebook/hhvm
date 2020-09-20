@@ -1,10 +1,8 @@
-<?php
-
-ini_set('memory_limit','18M');
+<?hh
 function test() {
   for ($i = 0; $i < 4000; $i++) {
     try {
-      call_user_func('bar');
+      call_user_func(fun('bar'));
     }
     catch (Exception $e) {
     }
@@ -14,4 +12,10 @@ function test() {
 function bar() {
   throw new Exception;
 }
+
+
+<<__EntryPoint>>
+function main_63() {
+ini_set('memory_limit','18M');
 test();
+}

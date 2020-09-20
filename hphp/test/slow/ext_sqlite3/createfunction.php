@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_createfunction() {
 $db = new PDO('sqlite::memory:');
 $db->sqliteCreateFunction('length', 'strlen', 1);
 
@@ -12,3 +15,4 @@ $sth = $db->prepare($q);
 $r = $sth->execute();
 $rows = $sth->fetchall();
 var_dump($rows);
+}

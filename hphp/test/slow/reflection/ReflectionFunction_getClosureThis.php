@@ -1,8 +1,15 @@
-<?php
+<?hh
 
-class Foo {}
-$unbound = function () {};
-$bound = $unbound->bindTo(new Foo);
+class Foo {
+  public function createcl() {
+    return function () {};
+  }
+}
 
-var_dump((new ReflectionFunction($unbound))->getClosureThis());
-var_dump((new ReflectionFunction($bound))->getClosureThis());
+<<__EntryPoint>>
+function main_reflection_function_get_closure_this() {
+  $closure = function () {};
+  $closure_with_this = (new Foo())->createcl();
+  var_dump((new ReflectionFunction($closure))->getClosureThis());
+  var_dump((new ReflectionFunction($closure_with_this))->getClosureThis());
+}

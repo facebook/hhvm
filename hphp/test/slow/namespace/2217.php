@@ -1,16 +1,18 @@
-<?php
+<?hh
 
 namespace foo\baz {
   function foo() {
- var_dump(__NAMESPACE__);
-}
+    \var_dump(__NAMESPACE__);
+  }
 }
 namespace bar\baz {
   function foo() {
- var_dump(__NAMESPACE__);
-}
+    \var_dump(__NAMESPACE__);
+  }
 }
 namespace {
   use foo\baz as baz;
-  baz\foo();
+  <<__EntryPoint>> function main(): void {
+    baz\foo();
+  }
 }

@@ -2,30 +2,6 @@
 # Basic test of continuations in HH assembler.
 #
 
-.main {
-  .numiters 1;
-  FPushFuncD 0 "R"
-  FCall 0
-  UnboxR
-  IterInit 0 L0 $i
-  .try {
-  L1:
-    String "\n"
-    CGetL2 $i
-    Concat
-    Print
-    PopC
-    IterNext 0 L1 $i
-    Jmp L0
-  } .catch {
-    IterFree 0
-    Throw
-  }
-L0:
-  Int 1
-  RetC
-}
-
 .function R() isGenerator {
   CreateCont
   PopC
@@ -39,6 +15,31 @@ L0:
   Yield
   PopC
   Null
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  .numiters 1;
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "R"
+  IterInit 0 NK V:$i L0
+  .try {
+  L1:
+    String "\n"
+    CGetL2 $i
+    Concat
+    Print
+    PopC
+    IterNext 0 NK V:$i L1
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
+  }
+L0:
+  Int 1
   RetC
 }
 

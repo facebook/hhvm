@@ -1,10 +1,13 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
+$a = varray[1,2,3];
+$b = varray[];
 
-$a = array(1,2,3);
-$b = array();
-
-$c = $a % $b;
-var_dump($c);
+try {
+  $c = $a % $b;
+} catch (DivisionByZeroException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
-?>
+}

@@ -30,7 +30,7 @@ namespace HPHP {
 struct c_AsyncGeneratorWaitHandle;
 struct c_StaticWaitHandle;
 struct c_WaitableWaitHandle;
-struct c_WaitHandle;
+struct c_Awaitable;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
@@ -40,9 +40,9 @@ struct AsyncGenerator final : BaseGenerator {
   ~AsyncGenerator();
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
-                            jit::TCA resumeAddr, Offset resumeOffset);
+                            jit::TCA resumeAddr, Offset suspendOffset);
   static Class* getClass() {
-    assert(s_class);
+    assertx(s_class);
     return s_class;
   }
   static constexpr ptrdiff_t objectOff() {
@@ -52,8 +52,8 @@ struct AsyncGenerator final : BaseGenerator {
     return Native::data<AsyncGenerator>(obj);
   }
 
-  c_StaticWaitHandle* yield(Offset resumeOffset,
-                            const Cell* key, Cell value);
+  c_StaticWaitHandle* yield(Offset suspendOffset,
+                            const TypedValue* key, TypedValue value);
   c_StaticWaitHandle* ret();
   c_StaticWaitHandle* fail(ObjectData* exception);
   void failCpp();

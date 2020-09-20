@@ -1,9 +1,9 @@
-<?hh
+<?hh // partial
 
 namespace HH\Lib\DictLib;
 
 function foo(): dict<int, int> {
-  $d = dict(array(1 => 1));
+  $d = dict(darray[1 => 1]);
   hh_show($d);
   return $d;
 }

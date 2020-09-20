@@ -1,32 +1,28 @@
 int(0)
-array(0) {
+varray(0) {
 }
 bool(false)
 int(0)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 bool(false)
 int(0)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 bool(true)
 int(0)
-array(0) {
+varray(0) {
 }
 bool(false)
 int(0)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 bool(false)
 int(0)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 bool(true)

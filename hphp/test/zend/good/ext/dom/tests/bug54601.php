@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $xml = <<< XML
 <?xml version='1.0' encoding='utf-8' ?>
 <!DOCTYPE set PUBLIC "-//OASIS//DTD DocBook XML V5.0//EN" "http://www.docbook.org/xml/5.0/dtd/docbook.dtd" [
@@ -14,6 +14,5 @@ $n = $doc->doctype;
 $doc->removeChild($n);
 echo get_class($n), "\n";
 print $doc->saveXML();
-?>
-===DONE===
-<?php exit(0); ?>
+echo "===DONE===\n";
+}

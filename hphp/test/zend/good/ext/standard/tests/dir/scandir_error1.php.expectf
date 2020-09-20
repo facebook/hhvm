@@ -2,11 +2,9 @@
 
 -- Testing scandir() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: scandir() expects at least 1 parameter, 0 given in %s/scandir_error1.php on line 15
 
 -- Testing scandir() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: scandir() expects at most 3 parameters, 4 given in %s/scandir_error1.php on line 24
 ===DONE===

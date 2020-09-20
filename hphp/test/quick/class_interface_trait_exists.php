@@ -1,16 +1,20 @@
 <?hh
 
-function __autoload($n) {
-  var_dump($n);
-  class fooo {}
-}
-
 trait tttt {}
 class cccc {}
 interface iiii {}
-if (0) { class zzzz {} interface zzzz {} }
+
+<<__EntryPoint>>
 function main() {
-  var_dump(class_exists('fooo', false));
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'fooo' => 'class_interface_trait_exists1.inc',
+      ],
+    ],
+    __DIR__.'/',
+  );
+
   var_dump(class_exists('fooo'));
   var_dump(class_exists('tttt'));
   var_dump(class_exists('cccc'));
@@ -27,10 +31,9 @@ function main() {
   var_dump(trait_exists('iiii'));
   var_dump(trait_exists('zzzz'));
 
-  foreach (array('tttt', 'cccc', 'iiii', 'zzzz') as $n) {
+  foreach (varray['tttt', 'cccc', 'iiii', 'zzzz'] as $n) {
     var_dump(class_exists($n));
     var_dump(interface_exists($n));
     var_dump(trait_exists($n));
   }
 }
-main();

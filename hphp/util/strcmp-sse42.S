@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,7 +98,7 @@ ETCH_LABEL(slow):
  * next page boundary.  Read till end of the page and go back to the fast path
  * if no difference is found.
  */
-#ifdef DEBUG
+#ifndef NDEBUG
 /*
  * Make sure adding 16 would overread a page, i.e., in the form of 0x.*00[0-F]
  */
@@ -133,7 +133,7 @@ ETCH_LABEL(goback):
         add       %rdi, %rsi
         jmp       ETCH_LABEL(getsafebytes)
 
-#ifdef DEBUG
+#ifndef NDEBUG
 ETCH_LABEL(bad):
         ud2
 #endif

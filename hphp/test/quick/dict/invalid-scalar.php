@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main(): void {
 try {
   $d = dict[1.1 => 1];
 } catch (Exception $e) {
@@ -20,7 +20,7 @@ try {
   var_dump("Got ".$e->getMessage());
 }
 try {
-  $h = dict[array() => 1];
+  $h = dict[darray[] => 1];
 } catch (Exception $e) {
   var_dump("Got ".$e->getMessage());
 }
@@ -54,4 +54,5 @@ try {
   $o = dict[Vector{1, 2, 3} => 1];
 } catch (Exception $e) {
   var_dump("Got ".$e->getMessage());
+}
 }

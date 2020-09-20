@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
   public function t1method() {}
@@ -52,7 +52,10 @@ class B4 extends A2 {
   public function zmethod() {}
 }
 
-foreach (array('B1', 'B2', 'B3', 'B4') as $name) {
+
+<<__EntryPoint>>
+function main_trait_method_ordering() {
+foreach (varray['B1', 'B2', 'B3', 'B4'] as $name) {
   $obj = new ReflectionClass($name);
   var_dump(array_map(
     function($meth) {
@@ -60,4 +63,5 @@ foreach (array('B1', 'B2', 'B3', 'B4') as $name) {
     },
     $obj->getMethods()
   ));
+}
 }

@@ -2,15 +2,9 @@
 1
 2
 3
-Caught the rain
-0
-1
-2
-3
 
-Fatal error: Uncaught exception 'Exception' with message '' in %s/raise_array_index_notice.php:5
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Out of bounds darray access: invalid index 4' in %s:9
 Stack trace:
-#0 %s/raise_array_index_notice.php(16): errorHandler()
-#1 %s/raise_array_index_notice.php(26): rain()
-#2 %s/raise_array_index_notice.php(30): main()
-#3 {main}
+#0 %s(14): rain()
+#1 %S(%S): main()
+#2 {main}

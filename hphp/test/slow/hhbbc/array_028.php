@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 function junk() { return 2; }
 function bar() {
-  $x = array('x' => array('y' => junk()));
+  $x = darray['x' => darray['y' => junk()]];
   $x['x']['y']++;
   $val = $x['x'];
   $val2 = $x['x']['y'];
@@ -13,4 +13,8 @@ function bar() {
   var_dump(is_array($x));
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_array_028() {
 bar();
+}

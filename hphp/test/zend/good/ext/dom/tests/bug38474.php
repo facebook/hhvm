@@ -1,5 +1,5 @@
-<?php
-$xml = '<node xmlns:pre="http://foo.com/tr/pre" 
+<?hh <<__EntryPoint>> function main(): void {
+$xml = '<node xmlns:pre="http://foo.com/tr/pre"
               xmlns:post="http://foo.com/tr/post"
               pre:type="bar" type="foo" ><sub /></node>';
 $dom = new DomDocument();
@@ -23,4 +23,4 @@ echo $dom->firstChild->getAttribute('type')."\n";
 echo $dom->firstChild->getAttribute('pre:type')."\n";
 echo $dom->firstChild->getAttribute('post:type')."\n";
 echo $dom->firstChild->getAttribute('new:type');
-?>
+}

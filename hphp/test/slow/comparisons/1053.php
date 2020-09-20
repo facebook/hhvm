@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
  }
@@ -7,8 +7,12 @@ function foo($p) {
     $obj = new C;
   }
  else {
-    $a = array(1);
+    $a = varray[1];
   }
   var_dump($obj == $a);
 }
+
+<<__EntryPoint>>
+function main_1053() {
 foo(false);
+}

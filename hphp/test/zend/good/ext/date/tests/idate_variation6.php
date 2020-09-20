@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : int idate(string format [, int timestamp])
  * Description: Format a local time/date as integer 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing idate() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -18,5 +18,5 @@ var_dump( idate($format, $timestamp) );
 echo "\n-- Testing idate() function for 2 digit year having zero as starting number --\n";
 $timestamp = mktime(8, 8, 8, 8, 8, 2001);
 var_dump( idate($format, $timestamp) );
-?>
-===DONE===
+echo "===DONE===\n";
+}

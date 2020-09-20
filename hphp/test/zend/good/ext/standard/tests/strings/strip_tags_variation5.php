@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
  * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
@@ -8,7 +8,7 @@
 /*
  * testing functionality of strip_tags() by giving heredoc strings as values for $str argument
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // null here doc string
@@ -24,7 +24,7 @@ EOT;
 $multiline_string = <<<EOT
 <html>hello world</html>
 <p>13 &lt; 25</p>
-<?php 1111 &amp; 0000 = 0000 ?>
+<?hh 1111 &amp; 0000 = 0000 ?>
 <b>This is a double quoted string</b>
 EOT;
 
@@ -49,7 +49,7 @@ $quote_char_string = <<<EOT
 <html>this\line is single quoted /with\slashes </html>
 EOT;
 
-$res_heredoc_strings = array(
+$res_heredoc_strings = varray[
   //heredoc strings
   $null_string,
   $blank_line,
@@ -57,10 +57,10 @@ $res_heredoc_strings = array(
   $diff_whitespaces,
   $numeric_string,
   $quote_char_string
-);
+];
 
 // initialize the second argument
-$quotes = "<html><a><?php";
+$quotes = "<html><a><?hh";
 
 // loop through $res_heredoc_strings element and check the working on strip_tags()
 $count = 1;
@@ -71,4 +71,4 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 }
 
 echo "Done\n";
-?>
+}

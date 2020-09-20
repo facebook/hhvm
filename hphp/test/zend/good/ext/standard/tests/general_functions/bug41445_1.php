@@ -1,6 +1,6 @@
-<?php
-
-$file = dirname(__FILE__)."/bug41445_1.ini";
+<?hh
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('bug41445_1.ini');
 
 $data = <<<DATA
 [2454.33]
@@ -21,4 +21,4 @@ var_dump(parse_ini_file($file));
 @unlink($file);
 
 echo "Done\n";
-?>
+}

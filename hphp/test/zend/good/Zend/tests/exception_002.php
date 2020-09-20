@@ -1,5 +1,5 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 goto foo;
 
 try {
@@ -10,5 +10,4 @@ try {
 } catch (Exception $e) {
 	
 }
-
-?>
+}

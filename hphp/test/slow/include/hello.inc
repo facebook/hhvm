@@ -1,3 +1,5 @@
-<?php
+<?hh
 
-print "Hello World";
+function hello() {
+  print "Hello World";
+}

@@ -1,0 +1,12 @@
+File "dup_instances.bad.php--file1.php", line 8, characters 9-11:
+value `key` is already assigned in `A:@F:@A` (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 16, characters 9-11:
+value `key` is already assigned in `A:@F:@A` (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 24, characters 28-28:
+type `T` is already assigned in `D:@F:@I` (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 25, characters 33-35:
+value `key` is already assigned in `D:@F:@J` (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 26, characters 28-28:
+type `T` is already assigned in `D:@F:@K` (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 26, characters 51-53:
+value `key` is already assigned in `D:@F:@K` (Naming[2101])

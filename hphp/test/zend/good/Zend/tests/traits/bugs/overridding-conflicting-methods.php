@@ -1,5 +1,4 @@
-<?php
-error_reporting(E_ALL);
+<?hh
 
 trait THello1 {
   public function hello() {
@@ -21,6 +20,8 @@ class TraitsTest {
   }
 }
 
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL);
 $test = new TraitsTest();
 $test->hello();
-?>
+}

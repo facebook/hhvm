@@ -56,9 +56,11 @@ void multibitset<N>::resize(size_t nelms) {
            (m_nwords - prev_nwords) * sizeof(*m_bits));
   } else if (m_size < prev_size) {
     // f{f,l}s() rely on the out-of-range bits being zeroed.
-    auto const tail_nbits = N * m_size - m_nwords * 64;
-    auto const tail_mask = (1ull << tail_nbits) - 1;
-    m_bits[m_nwords - 1] &= tail_mask;
+    if (whole_words != m_nwords) {
+      auto const tail_nbits = N * m_size - whole_words * 64;
+      auto const tail_mask = (1ull << tail_nbits) - 1;
+      m_bits[m_nwords - 1] &= tail_mask;
+    }
   }
 }
 

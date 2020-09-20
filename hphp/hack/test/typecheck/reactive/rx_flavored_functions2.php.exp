@@ -1,0 +1,6 @@
+File "rx_flavored_functions2.php", line 11, characters 13-34:
+Invalid argument (Typing[4203])
+File "rx_flavored_functions2.php", line 4, characters 13-40:
+This function is shallow reactive.
+File "rx_flavored_functions2.php", line 11, characters 13-34:
+This function is local reactive.

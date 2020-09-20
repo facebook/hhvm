@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_DEBUGGABLE_H_
-#define incl_HPHP_DEBUGGABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 
@@ -83,4 +82,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DEBUGGABLE_H_

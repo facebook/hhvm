@@ -1,4 +1,4 @@
 <?hh // strict
 
 <<__Const>>
-trait Trait {}
+trait T {}

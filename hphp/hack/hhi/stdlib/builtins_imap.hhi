@@ -3,144 +3,98 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 <<__PHPStdLib>>
-function imap_8bit($str) { }
+function imap_8bit(string $str);
 <<__PHPStdLib>>
-function imap_alerts() { }
+function imap_alerts();
 <<__PHPStdLib>>
-function imap_append($imap_stream, $mailbox, $message, $options = "") { }
+function imap_base64(string $text);
 <<__PHPStdLib>>
-function imap_base64($text) { }
+function imap_binary(string $str);
 <<__PHPStdLib>>
-function imap_binary($str) { }
+function imap_body(resource $imap_stream, int $msg_number, int $options = 0);
 <<__PHPStdLib>>
-function imap_body($imap_stream, $msg_number, $options = 0) { }
+function imap_bodystruct(resource $imap_stream, int $msg_number, string $section);
 <<__PHPStdLib>>
-function imap_bodystruct($imap_stream, $msg_number, $section) { }
+function imap_check(resource $imap_stream);
 <<__PHPStdLib>>
-function imap_check($imap_stream) { }
+function imap_clearflag_full(resource $imap_stream, string $sequence, string $flag, int $options = 0);
 <<__PHPStdLib>>
-function imap_clearflag_full($imap_stream, $sequence, $flag, $options = 0) { }
+function imap_close(resource $imap_stream, int $flag = 0);
 <<__PHPStdLib>>
-function imap_close($imap_stream, $flag = 0) { }
+function imap_createmailbox(resource $imap_stream, string $mailbox);
 <<__PHPStdLib>>
-function imap_createmailbox($imap_stream, $mailbox) { }
+function imap_delete(resource $imap_stream, string $msg_number, int $options = 0);
 <<__PHPStdLib>>
-function imap_delete($imap_stream, $msg_number, $options = 0) { }
+function imap_deletemailbox(resource $imap_stream, string $mailbox);
 <<__PHPStdLib>>
-function imap_deletemailbox($imap_stream, $mailbox) { }
+function imap_errors();
 <<__PHPStdLib>>
-function imap_errors() { }
+function imap_expunge(resource $imap_stream);
 <<__PHPStdLib>>
-function imap_expunge($imap_stream) { }
+function imap_fetch_overview(resource $imap_stream, string $sequence, int $options = 0);
 <<__PHPStdLib>>
-function imap_fetch_overview($imap_stream, $sequence, $options = 0) { }
+function imap_fetchbody(resource $imap_stream, int $msg_number, string $section, int $options = 0);
 <<__PHPStdLib>>
-function imap_fetchbody($imap_stream, $msg_number, $section, $options = 0) { }
+function imap_fetchheader(resource $imap_stream, int $msg_number, int $options = 0);
 <<__PHPStdLib>>
-function imap_fetchheader($imap_stream, $msg_number, $options = 0) { }
+function imap_fetchstructure(resource $imap_stream, int $msg_number, int $options = 0);
 <<__PHPStdLib>>
-function imap_fetchstructure($imap_stream, $msg_number, $options = 0) { }
+function imap_gc(resource $imap_stream, int $caches);
 <<__PHPStdLib>>
-function imap_gc($imap_stream, $caches) { }
+function imap_header(resource $imap_stream, int $msg_number, int $fromlength = 0, int $subjectlength = 0, string $defaulthost = "");
 <<__PHPStdLib>>
-function imap_get_quota($imap_stream, $quota_root) { }
+function imap_headerinfo(resource $imap_stream, int $msg_number, int $fromlength = 0, int $subjectlength = 0, string $defaulthost = "");
 <<__PHPStdLib>>
-function imap_get_quotaroot($imap_stream, $quota_root) { }
+function imap_last_error();
 <<__PHPStdLib>>
-function imap_getacl($imap_stream, $mailbox) { }
+function imap_list(resource $imap_stream, string $ref, string $pattern);
 <<__PHPStdLib>>
-function imap_getmailboxes($imap_stream, $ref, $pattern) { }
+function imap_listmailbox(resource $imap_stream, string $ref, string $pattern);
 <<__PHPStdLib>>
-function imap_getsubscribed($imap_stream, $ref, $pattern) { }
+function imap_mail_copy(resource $imap_stream, string $msglist, string $mailbox, int $options = 0);
 <<__PHPStdLib>>
-function imap_header($imap_stream, $msg_number, $fromlength = 0, $subjectlength = 0, $defaulthost = "") { }
+function imap_mail_move(resource $imap_stream, string $msglist, string $mailbox, int $options = 0);
 <<__PHPStdLib>>
-function imap_headerinfo($imap_stream, $msg_number, $fromlength = 0, $subjectlength = 0, $defaulthost = "") { }
+function imap_mail(string $to, string $subject, string $message, string $additional_headers = "", string $cc = "", string $bcc = "", string $rpath = "");
 <<__PHPStdLib>>
-function imap_headers($imap_stream) { }
+function imap_mailboxmsginfo(resource $imap_stream);
 <<__PHPStdLib>>
-function imap_last_error() { }
+function imap_msgno(resource $imap_stream, int $uid);
 <<__PHPStdLib>>
-function imap_list($imap_stream, $ref, $pattern) { }
+function imap_num_msg(resource $imap_stream);
 <<__PHPStdLib>>
-function imap_listmailbox($imap_stream, $ref, $pattern) { }
+function imap_num_recent(resource $imap_stream);
 <<__PHPStdLib>>
-function imap_listscan($imap_stream, $ref, $pattern, $content) { }
+function imap_open(string $mailbox, string $username, string $password, int $options = 0, int $retries = 0);
 <<__PHPStdLib>>
-function imap_listsubscribed($imap_stream, $ref, $pattern) { }
+function imap_ping(resource $imap_stream);
 <<__PHPStdLib>>
-function imap_lsub($imap_stream, $ref, $pattern) { }
+function imap_qprint(string $str);
 <<__PHPStdLib>>
-function imap_mail_compose($envelope, $body) { }
+function imap_renamemailbox(resource $imap_stream, string $old_mbox, string $new_mbox);
 <<__PHPStdLib>>
-function imap_mail_copy($imap_stream, $msglist, $mailbox, $options = 0) { }
+function imap_reopen(resource $imap_stream, string $mailbox, int $options = 0, int $retries = 0);
 <<__PHPStdLib>>
-function imap_mail_move($imap_stream, $msglist, $mailbox, $options = 0) { }
+function imap_search(resource $imap_stream, string $criteria, int $options = 0, string $charset = "");
 <<__PHPStdLib>>
-function imap_mail($to, $subject, $message, $additional_headers = "", $cc = "", $bcc = "", $rpath = "") { }
+function imap_setflag_full(resource $imap_stream, string $sequence, string $flag, int $options = 0);
 <<__PHPStdLib>>
-function imap_mailboxmsginfo($imap_stream) { }
+function imap_status(resource $imap_stream, string $mailbox, int $options = 0);
 <<__PHPStdLib>>
-function imap_mime_header_decode($text) { }
+function imap_subscribe(resource $imap_stream, string $mailbox);
 <<__PHPStdLib>>
-function imap_msgno($imap_stream, $uid) { }
+function imap_timeout(int $timeout_type, int $timeout = -1);
 <<__PHPStdLib>>
-function imap_num_msg($imap_stream) { }
+function imap_uid(resource $imap_stream, int $msg_number);
 <<__PHPStdLib>>
-function imap_num_recent($imap_stream) { }
+function imap_undelete(resource $imap_stream, string $msg_number, int $flags = 0);
 <<__PHPStdLib>>
-function imap_open($mailbox, $username, $password, $options = 0, $retries = 0) { }
+function imap_unsubscribe(resource $imap_stream, string $mailbox);
 <<__PHPStdLib>>
-function imap_ping($imap_stream) { }
-<<__PHPStdLib>>
-function imap_qprint($str) { }
-<<__PHPStdLib>>
-function imap_renamemailbox($imap_stream, $old_mbox, $new_mbox) { }
-<<__PHPStdLib>>
-function imap_reopen($imap_stream, $mailbox, $options = 0, $retries = 0) { }
-<<__PHPStdLib>>
-function imap_rfc822_parse_adrlist($address, $default_host) { }
-<<__PHPStdLib>>
-function imap_rfc822_parse_headers($headers, $defaulthost = "") { }
-<<__PHPStdLib>>
-function imap_rfc822_write_address($mailbox, $host, $personal) { }
-<<__PHPStdLib>>
-function imap_savebody($imap_stream, $file, $msg_number, $part_number = "", $options = 0) { }
-<<__PHPStdLib>>
-function imap_scanmailbox($imap_stream, $ref, $pattern, $content) { }
-<<__PHPStdLib>>
-function imap_search($imap_stream, $criteria, $options = 0, $charset = "") { }
-<<__PHPStdLib>>
-function imap_set_quota($imap_stream, $quota_root, $quota_limit) { }
-<<__PHPStdLib>>
-function imap_setacl($imap_stream, $mailbox, $id, $rights) { }
-<<__PHPStdLib>>
-function imap_setflag_full($imap_stream, $sequence, $flag, $options = 0) { }
-<<__PHPStdLib>>
-function imap_sort($imap_stream, $criteria, $reverse, $options = 0, $search_criteria = "", $charset = "") { }
-<<__PHPStdLib>>
-function imap_status($imap_stream, $mailbox, $options = 0) { }
-<<__PHPStdLib>>
-function imap_subscribe($imap_stream, $mailbox) { }
-<<__PHPStdLib>>
-function imap_thread($imap_stream, $options = 0) { }
-<<__PHPStdLib>>
-function imap_timeout($timeout_type, $timeout = -1) { }
-<<__PHPStdLib>>
-function imap_uid($imap_stream, $msg_number) { }
-<<__PHPStdLib>>
-function imap_undelete($imap_stream, $msg_number, $flags = 0) { }
-<<__PHPStdLib>>
-function imap_unsubscribe($imap_stream, $mailbox) { }
-<<__PHPStdLib>>
-function imap_utf7_decode($text) { }
-<<__PHPStdLib>>
-function imap_utf7_encode($data) { }
-<<__PHPStdLib>>
-function imap_utf8($mime_encoded_text) { }
+function imap_utf8(string $mime_encoded_text);

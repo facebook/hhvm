@@ -1,2 +1,0 @@
-File "instanceof_generic_bad3.php", line 4, characters 24-24:
-Generics can only be used in type hints since they are erased at runtime. (Typing[4124])

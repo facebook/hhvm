@@ -12,6 +12,6 @@ class Test {
   // not ok
   <<__Rx, __MutableReturn, __Memoize>>
   public function foo2(int $x, int $y): Foo {
-    // UNSAFE
+    return new Foo(42);
   }
 }

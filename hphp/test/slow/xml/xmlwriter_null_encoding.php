@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $x = new XMLWriter();
@@ -9,4 +9,8 @@ function main() {
   var_dump($x->outputMemory(true));
 }
 
+
+<<__EntryPoint>>
+function main_xmlwriter_null_encoding() {
 main();
+}

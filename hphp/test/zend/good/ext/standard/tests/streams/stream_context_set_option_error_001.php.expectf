@@ -1,6 +1,6 @@
 
-Warning: %s
+Warning: called with wrong number or type of parameters; please RTM in %s/stream_context_set_option_error_001.php on line 5
 bool(false)
 
-Warning: %s
+Warning: called with wrong number or type of parameters; please RTM in %s/stream_context_set_option_error_001.php on line 8
 bool(false)

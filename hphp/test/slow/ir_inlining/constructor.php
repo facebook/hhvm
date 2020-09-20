@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class foo {
   private $prop;
@@ -10,5 +10,9 @@ class foo {
 function main() {
   new foo('hi');
 }
+
+<<__EntryPoint>>
+function main_constructor() {
 main();
 echo "done\n";
+}

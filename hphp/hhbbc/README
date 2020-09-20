@@ -152,9 +152,8 @@ problem.  Because of the presence of dynamic calls, we assume that
 anything could call the function, so the input states are initialized
 quite conservatively.
 
-The algorithm is fairly standard after that, except for handling of
-factored exit edges.  Here is an overview (the code is in
-analyze_func):
+The algorithm is fairly standard after that, except for handling of exceptional
+edges.  Here is an overview (the code is in analyze_func):
 
   - A work list of blocks is initialized with the entry blocks.
     (Functions may have multiple entries because of DV initializers.)
@@ -164,7 +163,7 @@ analyze_func):
 
      - If the abstract interpreter encounters an instruction that
        could potentially throw an exception, it propagates the current
-       state from before the instruction across all the factored exit
+       state from before the instruction across all the throw
        edges for the block.
 
      - If it encounters an instruction that could take a branch, it

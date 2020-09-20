@@ -1,32 +1,32 @@
-<?php
+<?hh
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
+class MyClass
+{
+    // no toString() method defined
+}
 
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strval() : error conditions ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);
-
-class MyClass
-{
-	// no toString() method defined 
-}
 
 $string  = "Hello";
 $extra_arg = 10;
 
 //Test strval with one more than the expected number of arguments
 echo "\n-- Testing strval() function with more than expected no. of arguments --\n";
-var_dump( strval($string, $extra_arg) );
+try { var_dump( strval($string, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing strval with one less than the expected number of arguments
 echo "\n-- Testing strval() function with less than expected no. of arguments --\n";
-var_dump( strval() );
+try { var_dump( strval() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // Testing strval with a object which has no toString() method
 echo "\n-- Testing strval() function with object which has not toString() method  --\n";
 var_dump( strval(new MyClass()) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

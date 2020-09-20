@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $data = file(__FILE__);
 try {
   foreach ($data as $line) {
@@ -7,4 +7,4 @@ try {
 } catch (Exception $e) {
   echo "ok\n";
 }
-?>
+}

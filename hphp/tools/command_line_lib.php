@@ -3,8 +3,6 @@
  * Contains some reusable utilities for command line php scripts.
  */
 
-require_once(__DIR__.'/command_line_lib_UNSAFE.php');
-
 function error(string $message): void {
   error_unsafe($message);
 }
@@ -52,19 +50,19 @@ type OptionInfoMap = Map<string,OptionInfo>;
 type OptionMap     = Map<string,mixed>;
 
 function parse_options(OptionInfoMap $optmap): OptionMap {
-  return parse_options_UNSAFE($optmap);
+  $argv = new Vector($GLOBALS['argv']);
+  $result = parse_options_impl($optmap, $argv);
+  $GLOBALS['argv'] = varray($argv);
+  return $result;
 }
 
-function remove_argument(array<string> &$argv, $index) {
-  if ($index < 0 || $index >= count($argv)) {
-    return;
+function remove_argument(Vector<string> $argv, $index) {
+  if (0 <= $index && $index < $argv->count()) {
+    $argv->removeKey($index);
   }
-
-  unset($argv[$index]);
-  $argv = array_values($argv);
 }
 
-function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): OptionMap {
+function parse_options_impl(OptionInfoMap $optmap, Vector<string> $argv): OptionMap {
   $short_to_long     = Map {};
   $long_to_default   = Map {};
   $long_supports_arg = Map {};
@@ -74,14 +72,14 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
   foreach ($optmap as $k => $v) {
     $m = null;
-    if (preg_match('/^([^:]*)(\[\])/', $k, $m)) {
+    if (preg_match_with_matches('/^([^:]*)(\[\])/', $k, inout $m)) {
       invariant($m !== null, "Regex must return match!");
       $k = $m[1];
       $all_longs[$k] = true;
       $long_supports_arg[$k] = true;
       $long_requires_arg[$k] = true;
       $long_set_arg[$k] = true;
-    } else if (preg_match('/^([^:]*)(:(:(.*))?)?/', $k, $m)) {
+    } else if (preg_match_with_matches('/^([^:]*)(:(:(.*))?)?/', $k, inout $m)) {
       invariant($m !== null, "Regex must return match!");
       $k = $m[1];
       $all_longs[$k] = true;
@@ -104,7 +102,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
   $ret = Map {};
 
-  array_shift($argv);
+  $argv->removeKey(0);
   $pos_args_count = 0;
   while (count($argv) - $pos_args_count > 0) {
     $arg = $argv[$pos_args_count];
@@ -115,12 +113,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
     }
 
     // Helper to try to read an argument for an option.
-    $read_argument = function($long) use (&$argv,
-                                           $pos_args_count,
-                                           $long_supports_arg,
-                                           $long_requires_arg,
-                                           $long_to_default,
-                                           $long_set_arg) {
+    $read_argument = $long ==> {
       if (!$long_supports_arg[$long]) error("precondition");
       if ($long_requires_arg[$long] || $long_set_arg[$long]) {
         remove_argument($argv, $pos_args_count);
@@ -139,16 +132,16 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
     };
 
     // Returns whether a given option is recognized at all.
-    $opt_exists = function($opt) use ($all_longs) {
+    $opt_exists = $opt ==> {
       return $all_longs->containsKey($opt);
     };
 
     // Long-style arguments.
     $m = null;
-    if (preg_match('/^--([^=]*)(=(.*))?/', $arg, $m)) {
-      assert($m);
+    if (preg_match_with_matches('/^--([^=]*)(=(.*))?/', $arg, inout $m)) {
+      invariant($m, 'assert');
       $long = $m[1];
-      $has_val = !empty($m[3]);
+      $has_val = (bool)($m[3] ?? false);
       $val = $has_val ? $m[3] : false;
 
       if (isset($m[2]) && !$has_val) {
@@ -178,10 +171,10 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
     // Short-style arguments
     $m = null;
-    if (preg_match('/^-([^-=]*)(=(.*))?/', $arg, $m)) {
-      assert($m);
+    if (preg_match_with_matches('/^-([^-=]*)(=(.*))?/', $arg, inout $m)) {
+      invariant($m, 'assert');
       $shorts = $m[1];
-      $has_val = !empty($m[3]);
+      $has_val = (bool)($m[3] ?? false);
       $val = $has_val ? $m[3] : false;
 
       if (isset($m[2]) && !$has_val) {
@@ -261,7 +254,7 @@ function display_help(string $message, OptionInfoMap $optmap): void {
     }
   }
 
-  $longest_col = max($first_cols->values()->map(fun('strlen'))->toArray());
+  $longest_col = max($first_cols->values()->map(fun('strlen')));
 
   foreach ($first_cols as $long => $col) {
     $pad = str_repeat(' ', $longest_col - strlen($col) + 5);

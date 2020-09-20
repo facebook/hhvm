@@ -1,15 +1,15 @@
-array(2) {
+darray(2) {
   ["empty"]=>
-  array(0) {
+  varray(0) {
   }
   ["three"]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(1)
     ["b"]=>
     string(1) "c"
     [3]=>
-    array(0) {
+    varray(0) {
     }
   }
 }

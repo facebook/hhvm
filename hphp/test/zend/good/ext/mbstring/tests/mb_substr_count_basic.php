@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int mb_substr_count(string $haystack, string $needle [, string $encoding])
  * Description: Count the number of substring occurrences 
  * Source code: ext/mbstring/mbstring.c
@@ -7,7 +7,7 @@
 /*
  * Test Basic functionality of mb_substr_count
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_substr_count() : basic functionality ***\n";
 
 $string_ascii = 'This is an English string. 0123456789.';
@@ -25,4 +25,4 @@ var_dump(mb_substr_count($string_mb, $needle_mb1));
 var_dump(mb_substr_count($string_mb, $needle_mb2));
 
 echo "Done";
-?>
+}

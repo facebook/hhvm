@@ -14,8 +14,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ZEND_MULTIPLY_H_
-#define incl_HPHP_ZEND_MULTIPLY_H_
+#pragma once
 
 #if (defined(__x86_64__) || defined(__i386__)) && defined(__GNUC__)
 
@@ -44,4 +43,3 @@
 
 #endif
 
-#endif // incl_HPHP_ZEND_MULTIPLY_H_

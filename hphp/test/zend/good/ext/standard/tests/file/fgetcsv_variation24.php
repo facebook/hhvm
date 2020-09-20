@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
@@ -8,29 +8,29 @@
    Testing fgetcsv() to read from a file opened in various write modes and 
    enclosure argument with two characters
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
    1st element is delimiter, 2nd element is enclosure 
    and 3rd element is csv fields
 */
-$csv_lists = array (
-  array(',', '"', '"water",fruit'),
-  array(',', '"', '"water","fruit"'),
-  array(' ', '^', '^water^ ^fruit^'),
-  array(':', '&', '&water&:&fruit&'),
-  array('=', '=', '=water===fruit='),
-  array('-', '-', '-water--fruit-air'),
-  array('-', '-', '-water---fruit---air-'),
-  array(':', '&', '&""""&:&"&:,:":&,&:,,,,')
-);
+$csv_lists = varray [
+  varray[',', '"', '"water",fruit'],
+  varray[',', '"', '"water","fruit"'],
+  varray[' ', '^', '^water^ ^fruit^'],
+  varray[':', '&', '&water&:&fruit&'],
+  varray['=', '=', '=water===fruit='],
+  varray['-', '-', '-water--fruit-air'],
+  varray['-', '-', '-water---fruit---air-'],
+  varray[':', '&', '&""""&:&"&:,:":&,&:,,,,']
+];
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation24.tmp';
+$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation24.tmp');
 @unlink($filename);
 
-$file_modes = array ("w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t");
+$file_modes = varray ["w+", "w+b", "w+t",
+                     "x+", "x+b", "x+t"];
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
@@ -86,4 +86,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
-?>
+}

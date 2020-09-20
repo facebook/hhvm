@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
@@ -26,6 +27,9 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/arch.h"
+#include "hphp/util/dataflow-worklist.h"
+
+#include <boost/range/adaptor/reversed.hpp>
 
 TRACE_SET_MOD(vasm);
 
@@ -186,6 +190,144 @@ void annotateSFUses(Vunit& unit) {
   }
 
   printUnit(kVasmAnnotateSFLevel, "after map SF", unit);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Perform a few peephole optimizations that are only safe if the flags register
+// is dead.
+void sfPeepholes(Vunit& unit, const Abi& abi) {
+  // Currently, all our optimizations are only relevant on x64.
+  assertx(arch() == Arch::X64);
+
+  Timer timer(Timer::vasm_sf_peepholes, unit.log_entry);
+
+  auto const rpo = sortBlocks(unit);
+  jit::vector<size_t> rpoOrder(unit.blocks.size());
+  for (size_t i = 0; i < rpo.size(); ++i) rpoOrder[rpo[i]] = i;
+
+  auto const preds = computePreds(unit);
+
+  // Calculate per-block flag liveness using dataflow
+  boost::dynamic_bitset<> livenessIn;
+  livenessIn.resize(unit.blocks.size());
+
+  dataflow_worklist<size_t, std::less<size_t>> worklist(rpo.size());
+  for (size_t i = 0; i < rpo.size(); ++i) worklist.push(i);
+
+  while (!worklist.empty()) {
+    auto const b = rpo[worklist.pop()];
+    auto const& block = unit.blocks[b];
+
+    auto const liveIn = [&]{
+      for (auto const& inst : block.code) {
+        auto uses = false;
+        visitUses(
+          unit, inst,
+          [&] (Vreg r) { if (r.isSF()) uses = true; }
+        );
+        if (uses) return true;
+
+        auto kills = false;
+        visitDefs(
+          unit, inst,
+          [&] (Vreg r) { if (r.isSF()) kills = true; }
+        );
+        if (kills) return false;
+      }
+
+      auto liveOut = false;
+      for (auto const s : succs(block)) liveOut |= livenessIn[s];
+      return liveOut;
+    }();
+
+    if (liveIn != livenessIn[b]) {
+      assertx(liveIn);
+      assertx(!livenessIn[b]);
+      for (auto const pred : preds[b]) {
+        worklist.push(rpoOrder[pred]);
+      }
+      livenessIn[b] = liveIn;
+    }
+  }
+
+  // Now perform the peepholes
+  for (auto const b : rpo) {
+    auto& block = unit.blocks[b];
+
+    auto live = false;
+    for (auto const s : succs(block)) live |= livenessIn[s];
+
+    // We need to update the flag register's liveness as we go, walk backwards.
+    for (auto& inst : boost::adaptors::reverse(block.code)) {
+      visitDefs(
+        unit, inst,
+        [&] (Vreg r) { if (r.isSF()) live = false; }
+      );
+
+      visitUses(
+        unit, inst,
+        [&] (Vreg r) { if (r.isSF()) live = true; }
+      );
+
+      // The peepholes are only sound if the flag register is dead. If its not
+      // then keep going until it is.
+      if (live) continue;
+
+      auto const sf = abi.sf.choose();
+
+      // An lea manipulating the stack pointer can be changed to a simple add if
+      // we don't mind clobbering the flags. An immediate load of zero can be
+      // simplified into an equivalent xor if we don't mind clobbering the
+      // flags.
+      switch (inst.op) {
+        case Vinstr::lea: {
+          auto const& lea = inst.lea_;
+          if (lea.d == rsp()) {
+            assertx(lea.s.base == lea.d);
+            assertx(!lea.s.index.isValid());
+            inst.addqi_ = addqi{lea.s.disp, lea.d, lea.d, sf};
+            inst.op = Vinstr::addqi;
+          }
+          break;
+        }
+        case Vinstr::ldimmb: {
+          auto const& ldimm = inst.ldimmb_;
+          if (ldimm.s.q() == 0 && ldimm.d.isGP()) {
+            inst.xorb_ = xorb{ldimm.d, ldimm.d, ldimm.d, sf};
+            inst.op = Vinstr::xorb;
+          }
+          break;
+        }
+        case Vinstr::ldimml: {
+          auto const& ldimm = inst.ldimml_;
+          if (ldimm.s.q() == 0 && ldimm.d.isGP()) {
+            inst.xorl_ = xorl{ldimm.d, ldimm.d, ldimm.d, sf};
+            inst.op = Vinstr::xorl;
+          }
+          break;
+        }
+        case Vinstr::ldimmq: {
+          auto const& ldimm = inst.ldimmq_;
+          if (ldimm.s.q() == 0 && ldimm.d.isGP()) {
+            inst.xorq_ = xorq{ldimm.d, ldimm.d, ldimm.d, sf};
+            inst.op = Vinstr::xorq;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+
+    // Our tracking of the flag register liveness should match what the dataflow
+    // calculated.
+    assertx(live == livenessIn[b]);
+  }
+
+  assertx(check(unit));
+
+  printUnit(kVasmAnnotateSFLevel, "after sf-peepholes", unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,9 +1,7 @@
 <?hh
-error_reporting(-1);
 function doThrow() {
   throw new Exception("f you!");
 }
-set_error_handler('doThrow');
 function f($a1, $a2) {
   if (false) {
     var_dump($b1);
@@ -25,13 +23,15 @@ function main() {
   }
   echo "Done\n";
 }
-main();
-
-spl_autoload_register('doThrow');
 function main2() {
   try {
     new NonExist();
   } catch (Exception $e) {
   }
 }
-main2();
+<<__EntryPoint>>
+function main_entry(): void {
+  error_reporting(-1);
+  set_error_handler(fun('doThrow'));
+  main();
+}

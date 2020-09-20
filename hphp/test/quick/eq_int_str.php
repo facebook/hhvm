@@ -71,8 +71,8 @@ function is($x, $y) {
   var_dump($x == $y);
 }
 
-function cmpr() {
-  $s = array(
+<<__EntryPoint>> function cmpr(): void {
+  $s = varray[
     "",
     "123",
     "123q",
@@ -82,10 +82,10 @@ function cmpr() {
     "7.80",
     "9000000000",
     "9e10",
-  );
-  $i = array(
+  ];
+  $i = varray[
     0, 123, -456, 7.8, 90000000000,
-  );
+  ];
 
   for ($ji = 0; $ji < 5; ++$ji) {
     cs($i[$ji]);
@@ -111,6 +111,3 @@ function cmpr() {
   print "----------\n0 == '-456'\n"; 
   var_dump(0 == "-456");
 }
-
-cmpr();
-

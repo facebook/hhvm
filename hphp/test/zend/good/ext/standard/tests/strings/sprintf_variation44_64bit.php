@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : unsigned formats with string values ***\n";
 
 // array of string values 
-$string_values = array(
+$string_values = varray[
   "",
   '',
   "0",
@@ -28,15 +28,15 @@ $string_values = array(
   'TRUE',
   "NULL",
   'null'
-);
+];
 
 // array of unsigned formats
-$unsigned_formats = array( 
+$unsigned_formats = varray[ 
   "%u", "%hu", "%lu",
   "%Lu", " %u", "%u ",   
   "\t%u", "\n%u", "%4u", 
    "%30u", "%[0-9]", "%*u"
-);
+];
 
 
 $count = 1;
@@ -50,4 +50,4 @@ foreach($string_values as $string_value) {
 };
 
 echo "Done";
-?>
+}

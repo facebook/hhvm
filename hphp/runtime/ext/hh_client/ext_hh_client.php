@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 namespace __SystemLib\HH\Client {
 
@@ -34,7 +34,7 @@ function locate_hh(string $client_name): ?string {
   $cmd = \sprintf('which %s > /dev/null 2>&1', \escapeshellarg($client_name));
   $ret = null;
   $output_arr = null;
-  \exec($cmd, $output_arr, $ret);
+  \exec($cmd, inout $output_arr, inout $ret);
 
   if ($ret === 0) {
     return $client_name;
@@ -70,7 +70,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
 
   $ret = null;
   $output_arr = null;
-  $output = \exec($cmd, $output_arr, $ret);
+  $output = \exec($cmd, inout $output_arr, inout $ret);
 
   // 7 -> timeout, or ran out of retries
   if ($ret == 7) {
@@ -90,7 +90,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
     // same exit code as "type error". See above about fixing this.
     return new TypecheckResult(
       TypecheckStatus::OTHER_ERROR,
-      implode(' ', $output_arr)
+      \implode(' ', $output_arr)
     );
   }
 
@@ -101,7 +101,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
   } else {
     $errors = \hphp_array_idx($json, 'errors', null);
     if ($errors) {
-      $first_msg = \reset(\reset($errors)['message']);
+      $first_msg = $errors[0]['message'][0];
       $error_text = \sprintf(
         'Hack type error: %s at %s line %d',
         $first_msg['descr'],
@@ -135,7 +135,7 @@ final class TypecheckResult implements \JsonSerializable {
   public function __construct(
     private TypecheckStatus $status,
     private ?string $error,
-    private ?array $rawResult = null
+    private ?varray_or_darray $rawResult = null
   ) {}
 
   public function getStatus(): TypecheckStatus {
@@ -209,16 +209,25 @@ function typecheck(string $client_name = 'hh_client'): TypecheckResult {
   // Fetch times from cache and from the stamp file. Both will return "false" on
   // error (no cached time or the stamp doesn't exist). The latter will also
   // emit a warning, which we don't care about, so suppress it.
-  $cached_time = \apc_fetch(CacheKeys::TIME_CACHE_KEY);
-  $time = (int)@\filemtime('/tmp/hh_server/stamp');
-
+  $success = false;
+  $cached_time = \apc_fetch(CacheKeys::TIME_CACHE_KEY, inout $success);
+  $old = \error_reporting();
+  try {
+    \error_reporting(0);
+    $file_time = \filemtime('/tmp/hh_server/stamp');
+  } finally {
+    if (\error_reporting() === 0) {
+      \error_reporting($old);
+    }
+  }
+  $time = (int)$file_time;
   // If we actually have something in cache, and the times match, use it. Note
   // that we still don't care if the stamp file actually exists -- we just treat
   // that as "time 0" (cast bool to int); it will stay zero as long as the file
   // doesn't exist and become nonzero when hh_server starts up and creates it,
   // which is what we want.
   if ($cached_time !== false && (int)$cached_time === $time) {
-    $result = \apc_fetch(CacheKeys::RESULT_CACHE_KEY);
+    $result = \apc_fetch(CacheKeys::RESULT_CACHE_KEY, inout $success);
   } else {
     $result = \__SystemLib\HH\Client\typecheck_impl($client_name);
 

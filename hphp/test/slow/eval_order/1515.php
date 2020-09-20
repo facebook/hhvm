@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($a) {
  echo "test$a\n";
@@ -7,4 +7,8 @@ function f($a) {
 function bug2($a, $b) {
   return isset($b[f($a++)], $b[f($a++)], $b[f($a++)]);
 }
-bug2(0, array());
+
+<<__EntryPoint>>
+function main_1515() {
+bug2(0, varray[]);
+}

@@ -1,7 +1,5 @@
 <?hh
 
-require 'logger.inc';
-
 function thrower() {
   throw new Exception('hi');
 }
@@ -109,6 +107,11 @@ async function mainAsync() {
   echo "Leaving mainAsync\n\n";
 }
 
+
+<<__EntryPoint>>
+function main_basic() {
+require 'logger.inc';
+
 main();
 HH\Asio\join(mainAsync());
 
@@ -117,3 +120,4 @@ using (new Logger()) {
   echo "Inside using\n";
 }
 echo "Outside using\n";
+}

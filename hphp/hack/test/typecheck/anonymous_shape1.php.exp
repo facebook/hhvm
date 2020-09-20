@@ -1,6 +1,6 @@
-File "anonymous_shape1.php", line 9, characters 10-14:
+File "anonymous_shape1.php", line 9, characters 10-42:
 Invalid return type (Typing[4110])
 File "anonymous_shape1.php", line 6, characters 36-38:
-This is an int
+Expected `int`
 File "anonymous_shape1.php", line 9, characters 36-40:
-It is incompatible with a string
+But got `string`

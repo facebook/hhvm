@@ -1,2 +1,0 @@
-((Fatal error\: HH mode\: \?> not allowed \(Line\: \d+, Char\: \d+\)
-syntax error, unexpected T_HH_ERROR, expecting \$end in [^\r\n]+\/test\/slow\/hack_mode\/2204\.php on line 2)|(Fatal error\: A hack source file cannot contain '\?>'\. in [^\r\n]+\/hack_mode\/2204\.php on line 3))

@@ -12,9 +12,9 @@ function foo(<<__Mutable>>Foo $x): void {
 
 <<__Rx>>
 function test(): void {
-  $x = new Foo(7);
+  $x = \HH\Rx\mutable(new Foo(7));
   foo($x); // no errors
-  foo(new Foo(8)); // no problemo
-  freeze($x);
-  foo($x); // error
+  foo(\HH\Rx\mutable(new Foo(8))); // no problemo
+  $y = \HH\Rx\freeze($x);
+  foo($y); // error
 }

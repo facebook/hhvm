@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THREAD_LOCAL_EMULATE_H_
-#define incl_HPHP_THREAD_LOCAL_EMULATE_H_
+#pragma once
 
 namespace HPHP {
 
@@ -142,57 +141,11 @@ private:
 template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
 template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
-///////////////////////////////////////////////////////////////////////////////
-// some classes don't need new/delete at all
-
-template<typename T, bool throwOnNull = true>
-struct ThreadLocalProxy {
-  /**
-   * Constructor that has to be called from a thread-neutral place.
-   */
-  ThreadLocalProxy() : m_key(0) {
-    ThreadLocalCreateKey(&m_key, nullptr);
-  }
-
-  T *get() const {
-    T *obj = (T*)pthread_getspecific(m_key);
-    if (obj == nullptr && throwOnNull) {
-      throw Exception("ThreadLocalProxy::get() called before set()");
-    }
-    return obj;
-  }
-
-  void set(T* obj) {
-    ThreadLocalSetValue(m_key, obj);
-  }
-
-  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
-
-  void destroy() {
-    ThreadLocalSetValue(m_key, nullptr);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-public:
-  pthread_key_t m_key;
-};
-
 /**
  * The emulation version of the thread-local macros
  */
 #define THREAD_LOCAL(T, f) HPHP::ThreadLocal<T> f
 #define THREAD_LOCAL_NO_CHECK(T, f) HPHP::ThreadLocalNoCheck<T> f
-#define THREAD_LOCAL_PROXY(T, N, f) HPHP::ThreadLocalProxy<T, N> f
+
 }
 
-#endif

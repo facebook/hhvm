@@ -1,20 +1,9 @@
 # Tests that generator opcodes are verified to be in generator functions
 
-.main {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   CreateCont
   Yield
   Int 1
   YieldK
-  RetC
-}
-
-.function foo() isGenerator isAsync {
-  .numiters 1;
-  YieldFromDelegate 0 L1
-  ContEnterDelegate
-  Int 1
-  L1: ContAssignDelegate 0
-  ContUnsetDelegate IgnoreIter 0
-  Int 1
   RetC
 }

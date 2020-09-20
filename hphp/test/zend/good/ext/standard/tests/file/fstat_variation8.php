@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $stat_result = stat(__FILE__);
 clearstatcache();
 $fp = fopen (__FILE__, 'r');
@@ -12,10 +12,10 @@ foreach($stat_result as $key =>$value) {
       // windows, dev and rdev will not match this is expected
    }
    else {
-	   if ($fstat_result[$key] != $value) {
-	      echo "FAIL: stat differs at '$key'. $fstat_result[$key] -- $value\n";
-	      $failed = true;
-	   }
+       if ($fstat_result[$key] != $value) {
+          echo "FAIL: stat differs at '$key'. $fstat_result[$key] -- $value\n";
+          $failed = true;
+       }
    }
 }
 if ($failed !== true) {
@@ -23,5 +23,5 @@ if ($failed !== true) {
 }
 
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

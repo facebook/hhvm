@@ -1,4 +1,4 @@
-File "const_vector2.php", line 13, characters 3-7:
+File "const_vector2.php", line 13, characters 3-15:
 You cannot mutate this (Typing[4011])
-File "const_vector2.php", line 12, characters 14-24:
-This is an object of type ConstVector
+File "const_vector2.php", line 12, characters 14-32:
+This is an object of type ConstVector<string>

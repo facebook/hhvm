@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_XBOX_SERVER_H_
-#define incl_HPHP_XBOX_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
@@ -126,7 +125,10 @@ struct XboxTransport final : Transport, Synchronizable {
    * Manage headers.
    */
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap& /*headers*/) override {}
+  const HeaderMap& getHeaders() override {
+    static const HeaderMap emptyMap{};
+    return emptyMap;
+  }
   void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {}
   void removeHeaderImpl(const char* /*name*/) override {}
 
@@ -157,7 +159,7 @@ struct XboxTransport final : Transport, Synchronizable {
     ++m_refCount;
   }
   void decRefCount() {
-    assert(m_refCount.load());
+    assertx(m_refCount.load());
     if (--m_refCount == 0) {
       delete this;
     }
@@ -181,4 +183,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_XBOX_SERVER_H_

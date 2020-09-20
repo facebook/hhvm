@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_LOG_FILE_FLUSHER_H_
-#define incl_HPHP_LOG_FILE_FLUSHER_H_
+#pragma once
 
 #include <cstdio>
 #include <atomic>
@@ -53,4 +52,3 @@ private:
 
 }
 
-#endif

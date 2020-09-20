@@ -1,8 +1,11 @@
-<?php
+<?hh
 
-$separators = [
-  'multichar' => ['herp', 'derp'],
-  'multibyte' => ['¡', '×']
+
+<<__EntryPoint>>
+function main_number_format_multibyte() {
+$separators = darray[
+  'multichar' => varray['herp', 'derp'],
+  'multibyte' => varray['¡', '×']
 ];
 
 var_dump(
@@ -14,3 +17,4 @@ var_dump(
     $separators
   )
 );
+}

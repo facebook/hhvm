@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 // Due to inheriting from an interface, this code fatals in HHVM.
 
@@ -11,5 +11,5 @@ class C1 implements I1 {
 }
 
 class C2 extends C1 {
-  public function meth($x = null, ...): void {}
+  public function meth($x = null, ...$args): void {}
 }

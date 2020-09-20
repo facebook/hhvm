@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HEAP_ALGORITHMS_H_
-#define incl_HPHP_HEAP_ALGORITHMS_H_
+#pragma once
 
 #include "hphp/runtime/base/heap-graph.h"
 #include <folly/Range.h>
@@ -208,4 +207,3 @@ void walkParents(const HeapGraph& g, const std::vector<int>& parents,
 }
 
 }
-#endif

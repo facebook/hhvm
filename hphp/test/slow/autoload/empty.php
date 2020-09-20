@@ -1,7 +1,7 @@
-<?php
+<?hh
 
-spl_autoload_register(function($class) {
-  var_dump($class);
-});
 
+<<__EntryPoint>>
+function main_empty() {
 var_dump(method_exists('', 'foo'));
+}

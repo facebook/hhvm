@@ -2,11 +2,9 @@
 
 -- Testing iconv_strrpos() function with more than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: iconv_strrpos() expects at most 3 parameters, 4 given in %s/iconv_strrpos_error1.php on line 20
 
 -- Testing iconv_strrpos() function with less than expected no. of arguments --
 
-Warning: %s
-bool(false)
+Warning: iconv_strrpos() expects at least 2 parameters, 1 given in %s/iconv_strrpos_error1.php on line 25
 Done

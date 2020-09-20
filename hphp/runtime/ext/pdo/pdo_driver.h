@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PDO_DRIVER_H_
-#define incl_HPHP_PDO_DRIVER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -89,19 +88,20 @@ enum PDOFetchType {
   PDO_FETCH_NAMED,  /* like PDO_FETCH_ASSOC, but can handle duplicate names */
   PDO_FETCH_KEY_PAIR,  /* fetch into an array where the 1st column is a key
                           and all subsequent columns are values */
-  PDO_FETCH__MAX    /* must be last */
+  PDO_FETCH__MAX,    /* must be after all modes, and before flags */
+
+  PDO_FETCH_FLAGS      = 0xFFFF0000, /* fetchAll() modes or'd to
+                                            PDO_FETCH_XYZ */
+  PDO_FETCH_GROUP      = 0x00010000, /* fetch into groups */
+  PDO_FETCH_UNIQUE     = 0x00030000, /* fetch into groups assuming
+                                            first col is unique */
+  PDO_FETCH_CLASSTYPE  = 0x00040000, /* fetch class gets its class
+                                            name from 1st column */
+  PDO_FETCH_SERIALIZE  = 0x00080000, /* fetch class instances by
+                                            calling serialize */
+  PDO_FETCH_PROPS_LATE = 0x00100000, /* fetch props after calling ctor */
 };
 
-#define PDO_FETCH_FLAGS      0xFFFF0000  /* fetchAll() modes or'd to
-                                            PDO_FETCH_XYZ */
-#define PDO_FETCH_GROUP      0x00010000  /* fetch into groups */
-#define PDO_FETCH_UNIQUE     0x00030000  /* fetch into groups assuming
-                                            first col is unique */
-#define PDO_FETCH_CLASSTYPE  0x00040000  /* fetch class gets its class
-                                            name from 1st column */
-#define PDO_FETCH_SERIALIZE  0x00080000  /* fetch class instances by
-                                            calling serialize */
-#define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
 
 /* fetch orientation for scrollable cursors */
 enum PDOFetchOrientation {
@@ -444,7 +444,7 @@ protected:
  */
 struct PDOResource : SweepableResourceData {
   explicit PDOResource(sp_PDOConnection conn) : m_conn(conn) {
-    assert(m_conn);
+    assertx(m_conn);
   }
   virtual ~PDOResource() {}
 
@@ -496,7 +496,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 /* describes a bound parameter */
-struct PDOBoundParam : SweepableResourceData {
+struct PDOBoundParam final : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PDOBoundParam);
   PDOBoundParam();
   ~PDOBoundParam();
@@ -510,15 +510,10 @@ public:
                               know the index *yet* */
   String name;
 
-  int64_t max_value_len;     /* as a hint for pre-allocation */
-
   Variant parameter;       /* the variable itself */
   PDOParamType param_type; /* desired or suggested type */
 
-  Variant driver_params;   /* optional parameter(s) for the driver */
-
   PDOStatement *stmt;      /* for convenience in dtor */
-  bool is_param;           /* parameter or column ? */
 
   void *driver_ext_data;   /* must not be request-heap ptr */
   TYPE_SCAN_IGNORE_FIELD(driver_ext_data);
@@ -705,10 +700,9 @@ void pdo_raise_impl_error(sp_PDOResource rsrc, sp_PDOStatement stmt,
                           const char *sqlstate, const char *supp);
 void pdo_raise_impl_error(sp_PDOResource rsrc, PDOStatement* stmt,
                           const char *sqlstate, const char *supp);
-void throw_pdo_exception(const Variant& code, const Variant& info,
-  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
+void throw_pdo_exception(const Variant& info,
+  ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PDO_DRIVER_H_

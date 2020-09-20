@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $nano = time_nanosleep(2, 100000);
 
 if ($nano === true) {
@@ -11,4 +11,4 @@ if ($nano === true) {
     echo "Interrupted by a signal.\n";
     echo "Time remaining: $seconds seconds, $nanoseconds nanoseconds.";
 }
-?>
+}

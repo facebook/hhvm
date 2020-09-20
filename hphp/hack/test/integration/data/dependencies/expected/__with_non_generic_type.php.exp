@@ -1,0 +1,6 @@
+<?hh
+class Second {}
+class GenericBase<Tfirst, Tsecond> {}
+class First {}
+class NonGenericDerived extends \GenericBase<\First, \Second> {}
+function with_non_generic_type(NonGenericDerived $_): void {}

@@ -1,0 +1,2 @@
+-vRuntime.Eval.HackRecords=true
+-vRuntime.Eval.CheckPropTypeHints=2

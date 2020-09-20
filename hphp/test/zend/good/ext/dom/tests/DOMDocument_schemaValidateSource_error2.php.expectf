@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: Element 'books': No matching global declaration available for the validation root. in %s/DOMDocument_schemaValidateSource_error2.php on line 9
 bool(false)

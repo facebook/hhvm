@@ -1,0 +1,10 @@
+(library
+  (name nast_check)
+  (wrapped false)
+  (libraries
+    ast
+    core_kernel
+    nast
+    nast_eval
+    utils_core
+    tast))

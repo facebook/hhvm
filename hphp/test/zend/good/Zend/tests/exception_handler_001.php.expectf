@@ -1,1 +1,4 @@
+Fatal error: Uncaught exception 'test' with message '' in %s/exception_handler_001.php:12
+Stack trace:
+%a {main}
 string(12) "test thrown!"

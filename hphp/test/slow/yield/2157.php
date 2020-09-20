@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   public function foo() {
@@ -16,5 +16,9 @@ yield 1;
     }
   }
 }
+
+<<__EntryPoint>>
+function main_2157() {
 $a = new A();
 $a->foo();
+}

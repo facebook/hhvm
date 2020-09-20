@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SERVICE_REQUEST_HANDLERS_H_
-#define incl_HPHP_JIT_SERVICE_REQUEST_HANDLERS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -42,23 +41,13 @@ TCA handleServiceRequest(ReqInfo& info) noexcept;
 
 /*
  * Handle a bindcall request---i.e., look up (or create) the appropriate func
- * prologue for `calleeFrame', then smash the call instruction at `toSmash'.
+ * prologue for `func' and `numArgs', then smash the call instruction
+ * at `toSmash'.
  *
  * If we can't find or make a translation, may return fcallHelperThunk instead,
  * which uses C++ helpers to act like a prologue.
  */
-TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable);
-
-/*
- * If we suspend an FCallAwait frame we need to suspend the caller. Returning
- * to the jitted code will automatically take care of that, but if we're
- * returning in the interpreter, we have to handle it separately. If the frame
- * we're returning from was the vmJitCalledFrame(), we have to exit from
- * handleResume (see comments for jitReturnPre and jitReturnPost). After
- * exiting from there, there is no correct bytecode to resume at, so we use
- * this helper to cleanup and continue.
- */
-TCA handleFCallAwaitSuspend();
+TCA handleBindCall(TCA toSmash, Func* func, int32_t numArgs);
 
 /*
  * Look up (or create) and return the address of a translation for the current
@@ -81,4 +70,3 @@ TCA funcBodyHelper(ActRec* fp);
 
 }}}
 
-#endif

@@ -1,0 +1,6 @@
+string(8) "especial"
+int(7)
+string(7) "default"
+int(23)
+
+Catchable fatal error: Argument 1 passed to Cat::__construct() must be an instance of string, int given in %s

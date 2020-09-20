@@ -1,0 +1,6 @@
+<?hh
+<<__EntryPoint>> function main(): void { $stats = heapgraph_stats(heapgraph_create());
+if (isset($stats['exact']) && !$stats['exact']) {
+  echo 'skip';
+}
+}

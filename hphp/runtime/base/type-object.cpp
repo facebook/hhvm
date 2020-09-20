@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
@@ -46,16 +45,6 @@ Array Object::toArray() const {
 
 String Object::toString() const {
   return m_obj ? m_obj->invokeToString() : String();
-}
-
-int64_t Object::toInt64ForCompare() const {
-  check_collection_compare(get());
-  return toInt64();
-}
-
-double Object::toDoubleForCompare() const {
-  check_collection_compare(get());
-  return toDouble();
 }
 
 const char* Object::classname_cstr() const {

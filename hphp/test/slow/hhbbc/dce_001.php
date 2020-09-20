@@ -2,7 +2,7 @@
 
 function asd() { return 12; }
 function bsd() { return mt_rand() ? 12.0 : 42.0; }
-function lol(double $x) { echo "heh\n"; }
+function lol(float $x) { echo "heh\n"; }
 
 /*
  * This is a case where global dce can change the type of locals
@@ -18,4 +18,8 @@ function foo() {
   lol($x);
 }
 
+
+<<__EntryPoint>>
+function main_dce_001() {
 foo();
+}

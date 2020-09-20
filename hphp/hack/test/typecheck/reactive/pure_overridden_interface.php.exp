@@ -1,0 +1,6 @@
+File "pure_overridden_interface.php", line 8, characters 19-22:
+The method `pure` has the wrong type (Typing[4341])
+File "pure_overridden_interface.php", line 5, characters 19-22:
+This function is pure.
+File "pure_overridden_interface.php", line 8, characters 19-22:
+This function is normal.

@@ -6,9 +6,7 @@ class B {
 
 class C extends B {}
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $o = new C;
   var_dump($o->p);
 }
-
-main();

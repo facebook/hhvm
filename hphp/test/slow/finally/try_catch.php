@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function thr($doit) {
   try {
@@ -12,5 +12,9 @@ function thr($doit) {
     var_dump("finally");
   }
 }
+
+<<__EntryPoint>>
+function main_try_catch() {
 thr(true);
 thr(false);
+}

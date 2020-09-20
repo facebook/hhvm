@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -22,52 +21,86 @@
  * abstraction when we need some of them.
  *)
 
-module OffsetMap = Line_break_map
+[@@@warning "-32"] (* unused variables *)
+
+module OffsetMap = struct
+  (* placeholder definitions to placate open source build.
+   * These definitions will be mercilessly shadowed if deriving show fires
+   * like it's supposed to *)
+  let pp _ _ = ()
+
+  let show _ = ""
+
+  include Line_break_map
+end
+
+[@@@warning "+32"]
 
 type t = {
-  file_path : Relative_path.t;
-  length : int;
-  text : string;
-  offset_map : OffsetMap.t
+  file_path: Relative_path.t;
+  length: int;
+  text: string; [@opaque]
+  offset_map: OffsetMap.t;
 }
+[@@deriving show, eq]
+
+type pos = t * int
 
 let make file_path content =
-  { file_path; text = content; offset_map = OffsetMap.make content;
-    length = String.length content; }
+  {
+    file_path;
+    text = content;
+    offset_map = OffsetMap.make content;
+    length = String.length content;
+  }
 
-let empty =
-  make Relative_path.default ""
+let empty = make Relative_path.default ""
 
 let from_file file =
-  let content =
-    try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
+  let content = Sys_utils.cat (Relative_path.to_absolute file) in
   make file content
 
-let append_padding x pad = { x with text = x.text ^ pad }
+let file_path source_text = source_text.file_path
 
-let text source_text =
-  source_text.text
+let length source_text = source_text.length
 
-let file_path source_text =
-  source_text.file_path
-
-let length source_text =
-  source_text.length
-
-let get_text t =
-  t.text
+let text t = t.text
 
 let get source_text index =
-  String.get source_text.text index
+  if index < source_text.length then
+    String.unsafe_get source_text.text index
+  else
+    '\x00'
 
 let sub source_text start length =
-  let len = String.length source_text.text in
+  let len = source_text.length in
   if start >= len then
     ""
   else if start + length > len then
     String.sub source_text.text start (len - start)
   else
     String.sub source_text.text start length
+
+(* Fetch the contents of just one line of text *)
+let line_text (source_text : t) (line_number : int) : string =
+  try
+    let offset_start =
+      OffsetMap.position_to_offset source_text.offset_map (line_number, 1)
+    in
+    let offset_end =
+      OffsetMap.position_to_offset source_text.offset_map (line_number + 1, 1)
+    in
+    (* Strip off the newline if one exists. If we're getting the very last line of the file, and
+     * the very last line doesn't end in a newline, this unsafe_get won't return a \n char. *)
+    let offset_end =
+      if String.unsafe_get source_text.text (offset_end - 1) = '\n' then
+        offset_end - 1
+      else
+        offset_end
+    in
+    sub source_text offset_start (offset_end - offset_start)
+    (* If the line was outside the boundaries of the file, just return a blank string *)
+  with _ -> ""
 
 (* Take a zero-based offset, produce a one-based (line, char) pair. *)
 let offset_to_position source_text offset =
@@ -79,14 +112,9 @@ let position_to_offset source_text position =
 
 (* Create a Pos.t from two offsets in a source_text (given a path) *)
 let relative_pos pos_file source_text start_offset end_offset =
-  let offset_to_file_pos offset =
-    try
-      let pos_lnum, pos_bol, pos_cnum =
-        OffsetMap.offset_to_file_pos_triple source_text.offset_map offset
-      in
-      File_pos.of_lnum_bol_cnum ~pos_lnum ~pos_bol ~pos_cnum
-    with Invalid_argument _ -> File_pos.dummy
+  let offset_to_lnum_bol_cnum offset =
+    OffsetMap.offset_to_file_pos_triple source_text.offset_map offset
   in
-  let pos_start = offset_to_file_pos start_offset in
-  let pos_end   = offset_to_file_pos end_offset in
-  Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+  let pos_start = offset_to_lnum_bol_cnum start_offset in
+  let pos_end = offset_to_lnum_bol_cnum end_offset in
+  Pos.make_from_lnum_bol_cnum ~pos_file ~pos_start ~pos_end

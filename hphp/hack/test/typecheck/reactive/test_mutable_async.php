@@ -6,5 +6,5 @@ class Test {
 
 class Another {
   <<__Rx, __Mutable>>
-  public async function foo(int $x, int $y): void {}
+  public async function foo(int $x, int $y): Awaitable<void> {}
 }

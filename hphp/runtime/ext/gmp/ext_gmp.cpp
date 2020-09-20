@@ -157,10 +157,18 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
-  case KindOfPersistentArray:
-  case KindOfArray:
-  case KindOfRef:
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:
   case KindOfResource:
+  case KindOfRFunc:
+  case KindOfFunc:
+  case KindOfClass:
+  case KindOfLazyClass:
+  case KindOfClsMeth:
+  case KindOfRClsMeth:
+  case KindOfRecord:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;
   }
@@ -243,7 +251,7 @@ static Variant HHVM_FUNCTION(gmp_and,
 
 
 static void HHVM_FUNCTION(gmp_clrbit,
-                          VRefParam& data,
+                          Variant& data,
                           int64_t index) {
 
   if (index < 0) {
@@ -412,9 +420,9 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
     return false;
   }
 
-  PackedArrayInit returnArray(2);
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturnQ));
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturnR));
+  VArrayInit returnArray(2);
+  returnArray.append(mpzToGMPObject(gmpReturnQ));
+  returnArray.append(mpzToGMPObject(gmpReturnR));
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -1058,9 +1066,9 @@ static Variant HHVM_FUNCTION(gmp_rootrem,
 
   mpz_rootrem(gmpReturn0, gmpReturn1, gmpData, (uint32_t)root);
 
-  PackedArrayInit returnArray(2);
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturn0));
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturn1));
+  VArrayInit returnArray(2);
+  returnArray.append(mpzToGMPObject(gmpReturn0));
+  returnArray.append(mpzToGMPObject(gmpReturn1));
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn0);
@@ -1113,7 +1121,7 @@ static Variant HHVM_FUNCTION(gmp_scan1,
 
 
 static void HHVM_FUNCTION(gmp_setbit,
-                          VRefParam& data,
+                          Variant& data,
                           int64_t index,
                           bool bitOn /* = true*/) {
   if (index < 0) {
@@ -1200,9 +1208,9 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
 
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
 
-  PackedArrayInit returnArray(2);
-  returnArray.appendWithRef(mpzToGMPObject(gmpSquareRoot));
-  returnArray.appendWithRef(mpzToGMPObject(gmpRemainder));
+  VArrayInit returnArray(2);
+  returnArray.append(mpzToGMPObject(gmpSquareRoot));
+  returnArray.append(mpzToGMPObject(gmpRemainder));
 
   mpz_clear(gmpData);
   mpz_clear(gmpSquareRoot);
@@ -1352,7 +1360,7 @@ static void HHVM_METHOD(GMP, unserialize,
 
   auto gmpObjectData = Native::data<GMPData>(this_);
   gmpObjectData->setGMPMpz(gmpData);
-  this_->setDynPropArray(props.toArray());
+  this_->setDynProps(props.toArray());
 
   mpz_clear(gmpData);
 }

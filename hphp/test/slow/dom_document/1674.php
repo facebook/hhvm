@@ -1,5 +1,13 @@
-<?php
+<?hh
 
+function adjustDoctype($xml) {
+    return str_replace(varray[">
+<","DOCTYPE HTML",'<p>','</p>'],varray["><","DOCTYPE html",'',''],$xml);
+}
+
+
+<<__EntryPoint>>
+function main_1674() {
 $dom = new domdocument;
 $html = <<<EOM
 <html><head>
@@ -20,8 +28,4 @@ print  "--- save as HTML
 ";
 
 print adjustDoctype($dom->saveHTML());
-
-function adjustDoctype($xml) {
-    return str_replace(array(">
-<","DOCTYPE HTML",'<p>','</p>'),array("><","DOCTYPE html",'',''),$xml);
 }

@@ -25,4 +25,8 @@ async function main() {
   var_dump($f);
 }
 
+
+<<__EntryPoint>>
+function main_trait_generator_closure_002() {
 main();
+}

@@ -1,6 +1,0 @@
-File "covariance2.php", line 4, characters 24-24:
-Illegal usage of a covariant type parameter (Typing[4120])
-File "covariance2.php", line 3, characters 14-14:
-This is where the parameter was declared as covariant (+)
-File "covariance2.php", line 4, characters 24-24:
-Function parameters are contravariant

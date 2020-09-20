@@ -1,0 +1,2 @@
+File "mutable_on_static.php", line 4, characters 3-75:
+`__Mutable` and `__MaybeMutable` annotations are not allowed on static methods. (Parsing[1002])

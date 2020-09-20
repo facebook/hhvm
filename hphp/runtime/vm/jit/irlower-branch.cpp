@@ -21,8 +21,6 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 
-#include "hphp/runtime/vm/resumable.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
@@ -35,10 +33,12 @@
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-data.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/resumable.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
@@ -53,7 +53,7 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp, IRSPRelOffset off) {
+void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
   if (marker.resumeMode() == ResumeMode::None) {
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       v << syncvmsp{v.cns(0x42)};
@@ -65,7 +65,7 @@ void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp, IRSPRelOffset off) {
   v << syncvmsp{sync_sp};
 }
 
-RegSet cross_trace_args(BCMarker marker) {
+RegSet cross_trace_args(const BCMarker& marker) {
   return marker.resumeMode() != ResumeMode::None
     ? cross_trace_regs_resumed() : cross_trace_regs();
 }
@@ -119,7 +119,7 @@ void cgJmp(IRLS& env, const IRInstruction* inst) {
 
     // Handle phi for the value.
     auto val = sloc.reg(0);
-    if (src->isA(TBool) && !def.dst(i)->isA(TBool)) {
+    if (src->type().nonTrivialSubtypeOf(TBool) && !def.dst(i)->isA(TBool)) {
       val = v.makeReg();
       v << movzbq{sloc.reg(0), val};
     }
@@ -153,7 +153,7 @@ void cgSelect(IRLS& env, const IRInstruction* inst) {
   }
 
   // First copy the type if the destination needs one. This should only apply to
-  // types <= TGen.
+  // types <= TCell.
   if (dloc.hasReg(1)) {
     assertx(trueTy.isKnownDataType() || tloc.hasReg(1));
     assertx(falseTy.isKnownDataType() || floc.hasReg(1));
@@ -170,14 +170,12 @@ void cgSelect(IRLS& env, const IRInstruction* inst) {
 
   // If the value is statically known (IE, its one of the types with a singleton
   // value), don't bother copying it (this also applies to Bottom).
-  if (!inst->dst(0)->type().subtypeOfAny(TNull, TNullptr)) {
-    if (trueTy <= TBool && falseTy <= TBool) {
-      v << cmovb{CC_NZ, sf, floc.reg(0), tloc.reg(0), dloc.reg(0)};
-    } else {
-      auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
-      auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
-      v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
-    }
+  if (trueTy <= TBool && falseTy <= TBool) {
+    v << cmovb{CC_NZ, sf, floc.reg(0), tloc.reg(0), dloc.reg(0)};
+  } else {
+    auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
+    auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
+    v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
   }
 }
 
@@ -228,6 +226,11 @@ void cgCheckNonNull(IRLS& env, const IRInstruction* inst) {
   v << testq{src, src, sf};
   fwdJcc(v, env, CC_Z, sf, inst->taken());
   v << copy{src, dst};
+  auto const regs = inst->dst()->numWords();
+  assertx(regs == 1 || (inst->dst()->isA(TLvalToCell) && regs == 2));
+  if (regs == 2) {
+    v << copy{srcLoc(env, inst, 0).reg(1), dstLoc(env, inst, 0).reg(1)};
+  }
 }
 
 void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {
@@ -253,7 +256,8 @@ void cgCheckInit(IRLS& env, const IRInstruction* inst) {
   assertx(type != InvalidReg);
   auto& v = vmain(env);
 
-  static_assert(KindOfUninit == 0, "cgCheckInit assumes KindOfUninit == 0");
+  static_assert(KindOfUninit == static_cast<DataType>(0),
+                "cgCheckInit assumes KindOfUninit == 0");
 
   auto const sf = v.makeReg();
   v << testb{type, type, sf};
@@ -266,11 +270,12 @@ void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->type().deref().maybe(TUninit)) return;
 
-  auto const ptr = srcLoc(env, inst, 0).reg();
+  auto const ptrLoc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, ptr[TVOFF(m_type)]);
+  emitCmpTVType(v, sf, KindOfUninit, memTVTypePtr(src, ptrLoc));
+
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
@@ -278,6 +283,7 @@ void cgCheckInitMem(IRLS& env, const IRInstruction* inst) {
 
 void cgProfileSwitchDest(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ProfileSwitchDest>();
+  assertx(!rds::isPersistentHandle(extra->handle));
   auto const idx = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
@@ -332,9 +338,8 @@ TCA sswitchHelperFast(const StringData* val,
 
 TCA sswitchHelperSlow(TypedValue tv, const StringData** strs,
                       int numCases, TCA* jmptab) {
-  auto const cell = tvToCell(&tv);
   for (int i = 0; i < numCases; ++i) {
-    if (cellEqual(*cell, strs[i])) return jmptab[i];
+    if (tvEqual(tv, strs[i])) return jmptab[i];
   }
   return jmptab[numCases]; // default case
 }

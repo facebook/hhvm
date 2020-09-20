@@ -1,12 +1,11 @@
-
-Notice: Undefined index: z in %s/slow/hhbbc/array_034.php on line 10
+Out of bounds darray access: invalid index "z"
 bool(false)
 bool(true)
 bool(true)
 bool(false)
 bool(true)
-array(1) {
+darray(1) {
   ["z"]=>
-  array(0) {
+  darray(0) {
   }
 }

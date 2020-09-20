@@ -1,59 +1,29 @@
-(**
+(*
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Hh_core
-open Sys_utils
+open Core_kernel
+include Config_file_version
 
 type t = string SMap.t
 
-(*
- * Config file format:
- * # Some comment. Indicate by a pound sign at the start of a new line
- * key = a possibly space-separated value
- *)
-let parse_contents contents =
-  let lines = Str.split (Str.regexp "\n") contents in
-  List.fold_left lines ~f:begin fun acc line ->
-    if String.trim line = "" || (String.length line > 0 && line.[0] = '#')
-    then acc
-    else
-      let parts = Str.bounded_split (Str.regexp "=") line 2 in
-      match parts with
-      | [k; v] -> SMap.add (String.trim k) (String.trim v) acc
-      | _ -> failwith "failed to parse config";
-  end ~init:SMap.empty
+let file_path_relative_to_repo_root =
+  Config_file_common.file_path_relative_to_repo_root
 
-let parse fn =
-  let contents = try cat fn
-    with e ->
-      Hh_logger.exc ~prefix:".hhconfig deleted: " e;
-      Exit_status.(exit Hhconfig_deleted) in
-  let parsed = parse_contents contents in
-  let hash = Sha1.digest contents in
-  hash, parsed
+let apply_overrides = Config_file_common.apply_overrides
 
-module Getters = struct
+let parse_hhconfig ~silent (fn : string) : string * string SMap.t =
+  try Config_file_common.parse ~silent fn
+  with e ->
+    let stack = Printexc.get_backtrace () in
+    Hh_logger.exc ~prefix:".hhconfig deleted: " ~stack e;
+    Exit.exit Exit_status.Hhconfig_deleted
 
-  let string_opt key config =
-    SMap.get key config
+let parse_local_config = Config_file_common.parse_local_config
 
-  let string_ key ~default config =
-    Option.value (SMap.get key config) ~default
-
-  let int_ key ~default config =
-    Option.value_map (SMap.get key config) ~default ~f:int_of_string
-
-  let bool_ key ~default config =
-    Option.value_map (SMap.get key config) ~default ~f:bool_of_string
-
-  let string_list ~delim key ~default config =
-    Option.value_map (SMap.get key config) ~default ~f:(Str.split delim)
-
-end
+module Getters = Config_file_common.Getters

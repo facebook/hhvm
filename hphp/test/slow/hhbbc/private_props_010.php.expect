@@ -1,11 +1,8 @@
-object(A)#1 (2) {
+object(A) (2) {
   ["x":"A":private]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(0)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
   ["y":"A":private]=>

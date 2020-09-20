@@ -1,0 +1,13 @@
+<?hh
+function with_indirect_require_extends(Jay $x): void {
+  $x->f();
+}
+abstract class Bee {
+  public function f(): void {
+    throw new \Exception();
+  }
+}
+interface Eye {
+  require extends \Bee;
+}
+interface Jay extends \Eye {}

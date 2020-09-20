@@ -44,5 +44,8 @@ function main() {
   echo("\nADictType type_structure:\n");
   var_dump(type_structure(ADictType::class));
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-main();
+  main();
+}

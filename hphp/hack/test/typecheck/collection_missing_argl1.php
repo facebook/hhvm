@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /* HH_FIXME[4101] */
 function f(Vector $x): void {

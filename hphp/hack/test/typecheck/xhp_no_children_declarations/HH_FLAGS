@@ -1,0 +1,2 @@
+--max-errors 1
+--disable-xhp-children-declarations

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ut_main()
 {
@@ -9,9 +9,8 @@ function ut_main()
     return $str_res;
 }
 
-include_once( 'ut_common.inc' );
-
-// Run the test
-ut_run();
-
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    // Run the test
+    ut_run();
+}

@@ -1,8 +1,12 @@
-<?php
+<?hh
 
-$array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
-$array2 = array("a" => "GREEN", "B" => "brown", "yellow", "red");
-$array3 = array("a" => "grEEN", "white");
+
+<<__EntryPoint>>
+function main_array_uintersect_vararg() {
+  $array1 = darray["a" => "green", "b" => "brown", "c" => "blue", 0 => "red"];
+  $array2 = darray["a" => "GREEN", "B" => "brown", 0 => "yellow", 1 => "red"];
+  $array3 = darray["a" => "grEEN", 0 => "white"];
 
 print_r(array_uintersect($array1, $array2, "strcasecmp"));
 print_r(array_uintersect($array1, $array2, $array3, "strcasecmp"));
+}

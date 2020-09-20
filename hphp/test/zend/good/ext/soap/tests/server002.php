@@ -1,9 +1,9 @@
-<?php
+<?hh
 function Add($x,$y) {
   return $x+$y;
 }
-
-$server = new soapserver(null,array('uri'=>"http://testuri.org"));
+<<__EntryPoint>> function main(): void {
+$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
 $server->addfunction("Add");
 
 $HTTP_RAW_POST_DATA = <<<EOF
@@ -25,4 +25,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
-?>
+}

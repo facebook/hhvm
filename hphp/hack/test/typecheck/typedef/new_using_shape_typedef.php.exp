@@ -1,0 +1,4 @@
+File "new_using_shape_typedef.php", line 8, characters 12-12:
+Expected a `class` but got a type alias. (Naming[2052])
+File "new_using_shape_typedef.php", line 3, characters 6-6:
+Alias definition is here.

@@ -1,10 +1,13 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_813() {
 $v = new Vector;
 $v[] = 'c';
 $v[] = 'a';
 $v[] = 'b';
-sort($v);
+sort(inout $v);
 foreach ($v as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
@@ -16,12 +19,13 @@ $m['v'] = 4;
 $m['y'] = 3;
 $m['x'] = 5;
 $m['z'] = 1;
-ksort($m);
+ksort(inout $m);
 foreach ($m as $key => $val) {
   echo $key . ' ' . $val . "\n";
 }
 echo "------------------------\n";
-asort($m);
+asort(inout $m);
 foreach ($m as $key => $val) {
   echo $key . ' ' . $val . "\n";
+}
 }

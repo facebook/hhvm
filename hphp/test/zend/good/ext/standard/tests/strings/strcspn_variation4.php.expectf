@@ -1,96 +1,98 @@
 *** Testing strcspn() : with unexpected values of len argument ***
 
 -- Iteration with len value as "10.5" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "-10.5" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "101234567000" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "1.07654321E-9" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "0.5" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "1" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "1" --
-int(0)
 
--- Iteration with len value as "" --
-int(0)
-
--- Iteration with len value as "" --
-
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+
+-- Iteration with len value as "" --
+
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+
+-- Iteration with len value as "" --
+
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "string" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "string" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "object" --
 
-Warning: %s
-NULL
+Warning: strcspn() expects parameter 4 to be integer, object given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
-int(0)
+
+Warning: strcspn() expects parameter 4 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
-int(0)
 
--- Iteration with len value as "Resource id #%d" --
+Warning: strcspn() expects parameter 4 to be integer, null given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
-Warning: %s
-NULL
+-- Iteration with len value as "Resource id #4" --
+
+Warning: strcspn() expects parameter 4 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 Done

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Provides string comparison capability with support for appropriate
@@ -26,7 +26,7 @@ class Collator {
    * @return bool -
    */
   <<__Native>>
-  public function asort(mixed &$arr,
+  public function asort(inout mixed $arr,
                         int $sort_flag = Collator::SORT_REGULAR): bool;
 
   /**
@@ -153,7 +153,7 @@ class Collator {
    * @return bool -
    */
   <<__Native>>
-  public function sortWithSortKeys(mixed &$arr): bool;
+  public function sortWithSortKeys(inout mixed $arr): bool;
 
   /**
    * Sort array using specified collator
@@ -169,7 +169,7 @@ class Collator {
    * @return bool -
    */
   <<__Native>>
-  public function sort(mixed &$arr,
+  public function sort(inout mixed $arr,
                        int $sort_flag = Collator::SORT_REGULAR): bool;
 }
 
@@ -188,9 +188,9 @@ class Collator {
  * @return bool -
  */
 function collator_asort(collator $coll,
-                        mixed &$arr,
+                        inout mixed $arr,
                         int $sort_flag = Collator::SORT_REGULAR): bool {
-  return $coll->asort($arr, $sort_flag);
+  return $coll->asort(inout $arr, $sort_flag);
 }
 
 /**
@@ -344,8 +344,8 @@ function collator_set_strength(collator $coll,
  * @return bool -
  */
 function collator_sort_with_sort_keys(collator $coll,
-                                      mixed &$arr): bool {
-  return $coll->sortWithSortKeys($arr);
+                                      inout mixed $arr): bool {
+  return $coll->sortWithSortKeys(inout $arr);
 }
 
 /**
@@ -363,7 +363,7 @@ function collator_sort_with_sort_keys(collator $coll,
  * @return bool -
  */
 function collator_sort(collator $coll,
-                       mixed &$arr,
+                       inout mixed $arr,
                        int $sort_flag = Collator::SORT_REGULAR): bool {
-  return $coll->sort($arr, $sort_flag);
+  return $coll->sort(inout $arr, $sort_flag);
 }

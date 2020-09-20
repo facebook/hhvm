@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public static function F() {
@@ -8,5 +8,6 @@ trait T {
 class C {
   use T;
 }
+<<__EntryPoint>> function main(): void {
 C::F();
-?>
+}

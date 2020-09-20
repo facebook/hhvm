@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Helper for the DateTime diff/days/math tests
@@ -9,10 +9,10 @@
 /**#@+
  * Which test segments should be displayed?
  */
-define('PHPT_DATETIME_SHOW_DIFF', 1);
-define('PHPT_DATETIME_SHOW_DAYS', 2);
-define('PHPT_DATETIME_SHOW_ADD', 3);
-define('PHPT_DATETIME_SHOW_SUB', 4);
+ const PHPT_DATETIME_SHOW_DIFF = 1;
+ const PHPT_DATETIME_SHOW_DAYS = 2;
+ const PHPT_DATETIME_SHOW_ADD = 3;
+ const PHPT_DATETIME_SHOW_SUB = 4;
 /**#@-*/
 
 /**

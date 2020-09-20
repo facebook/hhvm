@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,14 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_PROFILE_H_
-#define incl_HPHP_JIT_TYPE_PROFILE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 #include <sstream>
 #include <string>
 
+#include <folly/dynamic.h>
 #include <folly/Format.h>
 
 namespace HPHP { namespace jit {
@@ -32,19 +32,45 @@ struct SwitchProfile {
   SwitchProfile(const SwitchProfile&) = delete;
   SwitchProfile& operator=(const SwitchProfile&) = delete;
 
-  std::string toString(int nCases) const {
-    std::ostringstream out;
-    for (int i = 0; i < nCases; ++i) out << folly::format("{},", cases[i]);
-    return out.str();
+  std::string toString() const {
+    return "";
   }
 
-  static void reduce(SwitchProfile& a, const SwitchProfile& b, int nCases) {
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object();
+  }
+
+  std::string toString(uint32_t size) const {
+    auto const nCases = size / sizeof(uint32_t);
+    std::string out;
+    for (int i = 0; i < nCases; ++i) folly::format(&out, "{},", cases()[i]);
+    return out;
+  }
+
+  folly::dynamic toDynamic(uint32_t size) const;
+
+  static void reduce(SwitchProfile& a, const SwitchProfile& b, uint32_t size) {
+    auto const nCases = size / sizeof(uint32_t);
     for (uint32_t i = 0; i < nCases; ++i) {
-      a.cases[i] += b.cases[i];
+      a.cases()[i] += b.cases()[i];
     }
   }
 
-  uint32_t cases[0]; // dynamically sized
+  static size_t extraSize(int n) {
+    return n * sizeof(uint32_t) - sizeof(SwitchProfile);
+  }
+
+  uint32_t* cases() {
+    auto ptr = static_cast<void*>(this);
+    ptr = static_cast<char*>(ptr) + offsetof(SwitchProfile, first_case);
+    return static_cast<uint32_t*>(ptr);
+  }
+
+  const uint32_t* cases() const {
+    return const_cast<SwitchProfile*>(this)->cases();
+  }
+
+  uint32_t first_case;
 
   // In RDS but can't contain pointers to request-allocated data
   TYPE_SCAN_IGNORE_ALL;
@@ -70,4 +96,3 @@ std::vector<SwitchCaseCount> sortedSwitchProfile(
 
 }}
 
-#endif

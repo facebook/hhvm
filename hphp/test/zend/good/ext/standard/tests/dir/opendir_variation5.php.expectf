@@ -2,11 +2,11 @@
 
 -- After restricting 1st level parent directory --
 
-Warning: %s
+Warning: Permission denied in %s/opendir_variation5.php on line 38
 bool(false)
 
 -- After restricting parent directory --
 
-Warning: %s
+Warning: Permission denied in %s/opendir_variation5.php on line 46
 bool(false)
 ===DONE===

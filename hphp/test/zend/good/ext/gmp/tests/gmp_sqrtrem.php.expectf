@@ -1,10 +1,10 @@
 
-Warning: %s
+Warning: gmp_sqrtrem(): Number has to be greater than or equal to 0 in %s/gmp_sqrtrem.php on line 3
 
-Warning: %s
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/gmp_sqrtrem.php on line 4
 bool(false)
 
-Warning: %s
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/gmp_sqrtrem.php on line 5
 bool(false)
 string(1) "0"
 string(1) "0"
@@ -23,19 +23,18 @@ string(1) "0"
 string(4) "1000"
 string(1) "1"
 
-Warning: %s
+Warning: gmp_sqrtrem(): Number has to be greater than or equal to 0 in %s/gmp_sqrtrem.php on line 41
 
-Warning: %s
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/gmp_sqrtrem.php on line 42
 bool(false)
 
-Warning: %s
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s/gmp_sqrtrem.php on line 43
 bool(false)
 string(4) "1000"
 string(1) "1"
 
-Warning: %s
+Warning: gmp_sqrtrem(): Unable to convert variable to GMP - wrong type in %s/gmp_sqrtrem.php on line 50
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_sqrtrem() expects exactly 1 parameter, 0 given in %s/gmp_sqrtrem.php on line 51
 Done

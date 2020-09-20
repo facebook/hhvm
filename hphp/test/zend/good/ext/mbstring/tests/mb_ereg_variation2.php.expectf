@@ -1,63 +1,78 @@
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 2 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 3 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 4 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 5 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 6 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 7 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 8 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 9 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 10 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 11 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 12 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 13 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 14 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 15 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 16 --
@@ -70,15 +85,13 @@ NULL
 
 -- Iteration 18 --
 int(3)
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "str"
 }
 
 -- Iteration 19 --
 int(3)
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "str"
 }
 
@@ -87,20 +100,22 @@ bool(false)
 NULL
 
 -- Iteration 21 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 22 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 23 --
-bool(false)
+
+Warning: mb_ereg() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: mb_ereg() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_ereg_variation2.php on line %d
 NULL
 Done

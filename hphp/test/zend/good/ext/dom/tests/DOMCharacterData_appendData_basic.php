@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);
@@ -18,5 +18,4 @@ echo "CDATA Length (two appends): " . $cdatanode->length . "\n";
 echo "CDATA Content: " . $cdatanode->data . "\n";
 
 echo "\n" . $document->saveXML();
-
-?>
+}

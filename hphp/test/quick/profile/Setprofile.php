@@ -16,11 +16,11 @@ function test_exception() {
   throw new Exception('test');
 }
 
-function profiler(string $op, string $fn) {
+function profiler(...$args) {
   // Calling functions from within the profiler function should note
   // use the profile (it would cause an infinite loop)
   pure_function_no_profile();
-  var_dump(func_get_args());
+  var_dump($args);
 }
 
 function gen() {
@@ -42,4 +42,7 @@ function main() {
   fb_setprofile(null);
   pure_function_2(5, 6);
 }
-main();
+<<__EntryPoint>>
+function entrypoint_Setprofile(): void {
+  main();
+}

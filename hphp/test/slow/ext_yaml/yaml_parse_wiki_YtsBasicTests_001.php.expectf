@@ -1,8 +1,0 @@
-array(3) {
-  [0]=>
-  string(5) "apple"
-  [1]=>
-  string(6) "banana"
-  [2]=>
-  string(6) "carrot"
-}

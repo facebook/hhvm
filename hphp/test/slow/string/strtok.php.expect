@@ -1,28 +1,20 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(6) "barbaz"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "foo"
-  [1]=>
   string(1) "z"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "foo"
-  [1]=>
   string(1) "r"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "z"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "foo"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "r"
 }

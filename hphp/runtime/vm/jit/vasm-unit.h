@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_UNIT_H_
-#define incl_HPHP_JIT_VASM_UNIT_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 
@@ -28,6 +27,8 @@
 
 #include "hphp/util/data-block.h"
 #include "hphp/util/immed.h"
+
+#include <folly/sorted_vector_types.h>
 
 #include <functional>
 #include <type_traits>
@@ -48,6 +49,7 @@ struct Vblock {
 
   AreaIndex area_idx;
   int frame{-1};
+  int pending_frames{-1};
   uint64_t weight;
   jit::vector<Vinstr> code;
 };
@@ -61,6 +63,23 @@ struct VcallArgs {
   VregList simdArgs;
   VregList stkArgs;
   VregList indRetArgs;
+
+  // If the index of the associated VregList has an entry in the
+  // Spills map, it means that Vreg in the VregList is the type field
+  // of a TypedValue to be spilled. The Vreg in the map is the
+  // matching data field. Since spilled TypedValues are rare, this
+  // lets us avoid making the VregLists bigger.
+  using Spills = folly::sorted_vector_map<size_t, Vreg>;
+  Spills argSpills; // For "args"
+  Spills stkSpills; // For "stkArgs"
+
+  bool operator==(const VcallArgs& o) const {
+    return
+      std::tie(args, simdArgs, stkArgs, indRetArgs, argSpills, stkSpills) ==
+      std::tie(o.args, o.simdArgs, o.stkArgs, o.indRetArgs,
+               o.argSpills, o.stkSpills);
+  }
+  bool operator!=(const VcallArgs& o) const { return !(*this == o); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,8 +127,7 @@ struct Vconst {
   explicit Vconst(R (*fn)(Args...)) : Vconst(uintptr_t(fn)) {}
 
   bool operator==(Vconst other) const {
-    return kind == other.kind &&
-      ((isUndef && other.isUndef) || val == other.val);
+    return kind == other.kind && isUndef == other.isUndef && val == other.val;
   }
 
   struct Hash {
@@ -131,8 +149,14 @@ struct Vconst {
 };
 
 struct Vframe {
-  Vframe(const Func* func, int parent, int cost, uint64_t entry_weight)
-    : func(func)
+  Vframe(
+    const Func* func,
+    int32_t callOff,
+    int parent,
+    int cost,
+    uint64_t entry_weight
+  ) : func(func)
+    , callOff(callOff)
     , parent(parent)
     , entry_weight(entry_weight)
     , inclusive_cost(cost)
@@ -147,6 +171,7 @@ struct Vframe {
   static constexpr int Top = -1;
 
   LowPtr<const Func> func;
+  int32_t callOff{-1};
   int parent;
 
   uint64_t entry_weight;
@@ -168,6 +193,7 @@ struct Vunit {
   /*
    * Create a new block in the given area and weight, returning its id.
    */
+  Vlabel makeBlock(AreaIndex area);
   Vlabel makeBlock(AreaIndex area, uint64_t weight);
 
   /*
@@ -191,6 +217,7 @@ struct Vunit {
    * Make various Vunit-managed vasm structures.
    */
   Vreg makeReg() { return Vreg{next_vr++}; }
+  Vaddr makeAddr() { return Vaddr{next_vaddr++}; }
   Vtuple makeTuple(VregList&& regs);
   Vtuple makeTuple(const VregList& regs);
   VcallArgsId makeVcallArgs(VcallArgs&& args);
@@ -241,14 +268,20 @@ struct Vunit {
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;
+  unsigned next_vaddr{0};
   uint16_t cur_voff{0};  // current instruction index managed by Vout
   bool padding{false};
   bool profiling{false};
   folly::Optional<TransContext> context;
   StructuredLogEntry* log_entry{nullptr};
+  Annotations annotations;
 };
+
+inline tracing::Props traceProps(const Vunit& v) {
+  if (v.context) return traceProps(*v.context);
+  return tracing::Props{}.add("func_name", "(stub)");
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

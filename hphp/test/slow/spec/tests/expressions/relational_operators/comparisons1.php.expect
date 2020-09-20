@@ -1,0 +1,226 @@
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+
+      NULL >        0  result: bool(false)
+      NULL >  (bool)0  result: bool(false)
+      0 <=       NULL  result: bool(true)
+(bool)0 <=       NULL  result: bool(true)
+---
+      NULL >=       0  result: bool(true)
+      NULL >= (bool)0  result: bool(true)
+      0 <        NULL  result: bool(false)
+(bool)0 <        NULL  result: bool(false)
+---
+      NULL <        0  result: bool(false)
+      NULL <  (bool)0  result: bool(false)
+      0 >=       NULL  result: bool(true)
+(bool)0 >=       NULL  result: bool(true)
+---
+      NULL <=       0  result: bool(true)
+      NULL <= (bool)0  result: bool(true)
+      0 >        NULL  result: bool(false)
+(bool)0 >        NULL  result: bool(false)
+=======
+      NULL >        100  result: bool(false)
+      NULL >  (bool)100  result: bool(false)
+      100 <=       NULL  result: bool(false)
+(bool)100 <=       NULL  result: bool(false)
+---
+      NULL >=       100  result: bool(false)
+      NULL >= (bool)100  result: bool(false)
+      100 <        NULL  result: bool(false)
+(bool)100 <        NULL  result: bool(false)
+---
+      NULL <        100  result: bool(true)
+      NULL <  (bool)100  result: bool(true)
+      100 >=       NULL  result: bool(true)
+(bool)100 >=       NULL  result: bool(true)
+---
+      NULL <=       100  result: bool(true)
+      NULL <= (bool)100  result: bool(true)
+      100 >        NULL  result: bool(true)
+(bool)100 >        NULL  result: bool(true)
+=======
+      NULL >        -3.4  result: bool(false)
+      NULL >  (bool)-3.4  result: bool(false)
+      -3.4 <=       NULL  result: bool(false)
+(bool)-3.4 <=       NULL  result: bool(false)
+---
+      NULL >=       -3.4  result: bool(false)
+      NULL >= (bool)-3.4  result: bool(false)
+      -3.4 <        NULL  result: bool(false)
+(bool)-3.4 <        NULL  result: bool(false)
+---
+      NULL <        -3.4  result: bool(true)
+      NULL <  (bool)-3.4  result: bool(true)
+      -3.4 >=       NULL  result: bool(true)
+(bool)-3.4 >=       NULL  result: bool(true)
+---
+      NULL <=       -3.4  result: bool(true)
+      NULL <= (bool)-3.4  result: bool(true)
+      -3.4 >        NULL  result: bool(true)
+(bool)-3.4 >        NULL  result: bool(true)
+=======
+      NULL >        true  result: bool(false)
+      NULL >  (bool)true  result: bool(false)
+      true <=       NULL  result: bool(false)
+(bool)true <=       NULL  result: bool(false)
+---
+      NULL >=       true  result: bool(false)
+      NULL >= (bool)true  result: bool(false)
+      true <        NULL  result: bool(false)
+(bool)true <        NULL  result: bool(false)
+---
+      NULL <        true  result: bool(true)
+      NULL <  (bool)true  result: bool(true)
+      true >=       NULL  result: bool(true)
+(bool)true >=       NULL  result: bool(true)
+---
+      NULL <=       true  result: bool(true)
+      NULL <= (bool)true  result: bool(true)
+      true >        NULL  result: bool(true)
+(bool)true >        NULL  result: bool(true)
+=======
+      NULL >        false  result: bool(false)
+      NULL >  (bool)false  result: bool(false)
+      false <=       NULL  result: bool(true)
+(bool)false <=       NULL  result: bool(true)
+---
+      NULL >=       false  result: bool(true)
+      NULL >= (bool)false  result: bool(true)
+      false <        NULL  result: bool(false)
+(bool)false <        NULL  result: bool(false)
+---
+      NULL <        false  result: bool(false)
+      NULL <  (bool)false  result: bool(false)
+      false >=       NULL  result: bool(true)
+(bool)false >=       NULL  result: bool(true)
+---
+      NULL <=       false  result: bool(true)
+      NULL <= (bool)false  result: bool(true)
+      false >        NULL  result: bool(false)
+(bool)false >        NULL  result: bool(false)
+=======
+      NULL >        NULL  result: bool(false)
+      NULL >  (bool)NULL  result: bool(false)
+      NULL <=       NULL  result: bool(true)
+(bool)NULL <=       NULL  result: bool(true)
+---
+      NULL >=       NULL  result: bool(true)
+      NULL >= (bool)NULL  result: bool(true)
+      NULL <        NULL  result: bool(false)
+(bool)NULL <        NULL  result: bool(false)
+---
+      NULL <        NULL  result: bool(false)
+      NULL <  (bool)NULL  result: bool(false)
+      NULL >=       NULL  result: bool(true)
+(bool)NULL >=       NULL  result: bool(true)
+---
+      NULL <=       NULL  result: bool(true)
+      NULL <= (bool)NULL  result: bool(true)
+      NULL >        NULL  result: bool(false)
+(bool)NULL >        NULL  result: bool(false)
+=======
+      NULL >        ''  result: bool(false)
+      NULL >  (bool)''  result: bool(false)
+      '' <=       NULL  result: bool(true)
+(bool)'' <=       NULL  result: bool(true)
+---
+      NULL >=       ''  result: bool(true)
+      NULL >= (bool)''  result: bool(true)
+      '' <        NULL  result: bool(false)
+(bool)'' <        NULL  result: bool(false)
+---
+      NULL <        ''  result: bool(false)
+      NULL <  (bool)''  result: bool(false)
+      '' >=       NULL  result: bool(true)
+(bool)'' >=       NULL  result: bool(true)
+---
+      NULL <=       ''  result: bool(true)
+      NULL <= (bool)''  result: bool(true)
+      '' >        NULL  result: bool(false)
+(bool)'' >        NULL  result: bool(false)
+=======
+      NULL >        '123'  result: bool(false)
+      NULL >  (bool)'123'  result: bool(false)
+      '123' <=       NULL  result: bool(false)
+(bool)'123' <=       NULL  result: bool(false)
+---
+      NULL >=       '123'  result: bool(false)
+      NULL >= (bool)'123'  result: bool(false)
+      '123' <        NULL  result: bool(false)
+(bool)'123' <        NULL  result: bool(false)
+---
+      NULL <        '123'  result: bool(true)
+      NULL <  (bool)'123'  result: bool(true)
+      '123' >=       NULL  result: bool(true)
+(bool)'123' >=       NULL  result: bool(true)
+---
+      NULL <=       '123'  result: bool(true)
+      NULL <= (bool)'123'  result: bool(true)
+      '123' >        NULL  result: bool(true)
+(bool)'123' >        NULL  result: bool(true)
+=======
+      NULL >        'abc'  result: bool(false)
+      NULL >  (bool)'abc'  result: bool(false)
+      'abc' <=       NULL  result: bool(false)
+(bool)'abc' <=       NULL  result: bool(false)
+---
+      NULL >=       'abc'  result: bool(false)
+      NULL >= (bool)'abc'  result: bool(false)
+      'abc' <        NULL  result: bool(false)
+(bool)'abc' <        NULL  result: bool(false)
+---
+      NULL <        'abc'  result: bool(true)
+      NULL <  (bool)'abc'  result: bool(true)
+      'abc' >=       NULL  result: bool(true)
+(bool)'abc' >=       NULL  result: bool(true)
+---
+      NULL <=       'abc'  result: bool(true)
+      NULL <= (bool)'abc'  result: bool(true)
+      'abc' >        NULL  result: bool(true)
+(bool)'abc' >        NULL  result: bool(true)
+=======
+      NULL >        array()  result: cannot be compared
+      NULL >  (bool)array()  result: bool(false)
+      array() <=       NULL  result: cannot be compared
+(bool)array() <=       NULL  result: bool(true)
+---
+      NULL >=       array()  result: cannot be compared
+      NULL >= (bool)array()  result: bool(true)
+      array() <        NULL  result: cannot be compared
+(bool)array() <        NULL  result: bool(false)
+---
+      NULL <        array()  result: cannot be compared
+      NULL <  (bool)array()  result: bool(false)
+      array() >=       NULL  result: cannot be compared
+(bool)array() >=       NULL  result: bool(true)
+---
+      NULL <=       array()  result: cannot be compared
+      NULL <= (bool)array()  result: bool(true)
+      array() >        NULL  result: cannot be compared
+(bool)array() >        NULL  result: bool(false)
+=======
+      NULL >        array(0=>10,1=>2.3)  result: cannot be compared
+      NULL >  (bool)array(0=>10,1=>2.3)  result: bool(false)
+      array(0=>10,1=>2.3) <=       NULL  result: cannot be compared
+(bool)array(0=>10,1=>2.3) <=       NULL  result: bool(false)
+---
+      NULL >=       array(0=>10,1=>2.3)  result: cannot be compared
+      NULL >= (bool)array(0=>10,1=>2.3)  result: bool(false)
+      array(0=>10,1=>2.3) <        NULL  result: cannot be compared
+(bool)array(0=>10,1=>2.3) <        NULL  result: bool(false)
+---
+      NULL <        array(0=>10,1=>2.3)  result: cannot be compared
+      NULL <  (bool)array(0=>10,1=>2.3)  result: bool(true)
+      array(0=>10,1=>2.3) >=       NULL  result: cannot be compared
+(bool)array(0=>10,1=>2.3) >=       NULL  result: bool(true)
+---
+      NULL <=       array(0=>10,1=>2.3)  result: cannot be compared
+      NULL <= (bool)array(0=>10,1=>2.3)  result: bool(true)
+      array(0=>10,1=>2.3) >        NULL  result: cannot be compared
+(bool)array(0=>10,1=>2.3) >        NULL  result: bool(true)
+=======
+-------------------------------------

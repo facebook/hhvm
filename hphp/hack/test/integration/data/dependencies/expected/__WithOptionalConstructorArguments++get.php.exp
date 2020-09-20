@@ -1,0 +1,22 @@
+<?hh
+<<__ConsistentConstruct>>
+interface IWithNullaryConstructor {
+  public function __construct();
+}
+trait TDummy implements \IWithNullaryConstructor {}
+class WithOptionalConstructorArguments implements \IWithNullaryConstructor {
+  use \TDummy;
+  public function __construct(
+    ?int $x = \extract_standalone_make_default(),
+    ?string $y = \extract_standalone_make_default(),
+  ) {
+    throw new \Exception();
+  }
+  public static function get(): this {
+    return new static();
+  }
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}

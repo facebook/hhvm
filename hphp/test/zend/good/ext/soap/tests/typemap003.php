@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TestSoapClient extends SoapClient{
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
 		return <<<EOF
@@ -10,13 +10,13 @@ class TestSoapClient extends SoapClient{
 </res>
 </ns1:dotest2Response></SOAP-ENV:Body></SOAP-ENV:Envelope>
 EOF;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 
 function book_from_xml($xml) {
@@ -26,16 +26,18 @@ function book_from_xml($xml) {
 	$obj->b = (string)$sxe->b;
 	return $obj;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$options=Array(
-		'actor' =>'http://schemas.nothing.com',
-		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
-		                         "type_name" => "book",
-		                         "from_xml"  => "book_from_xml"))
-		);
+  $options=darray[
+  		'actor' =>'http://schemas.nothing.com',
+  		'typemap' => varray[darray["type_ns"   => "http://schemas.nothing.com",
+  		                         "type_name" => "book",
+  		                         "from_xml"  => "book_from_xml"]]
+  		];
 
-$client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
-$ret = $client->dotest2("???");
-var_dump($ret);
-echo "ok\n";
-?>
+  $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
+  $ret = $client->__soapcall('dotest2', varray["???"]);
+  var_dump($ret);
+  echo "ok\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C
 {
@@ -67,7 +67,7 @@ function f($str)
 
 function p5($a1, $a2, $a3, $a4, $a5, $a6, $a7, $a8, $a9, $a10, $a11, $a12)
 {
-  $ret = array_filter(array(0), 'f');
+  $ret = array_filter(varray[0], fun('f'));
 }
 
 function p4()
@@ -89,7 +89,7 @@ function p1()
 {
   p2();
 }
-
+<<__EntryPoint>> function main(): void {
 p1();
 echo "ok\n";
-?>
+}

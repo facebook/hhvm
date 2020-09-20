@@ -1,0 +1,20 @@
+File "instance_method.php", line 15, characters 5-10:
+Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `A::foo` instead (Naming[2112])
+File "instance_method.php", line 15, characters 13-15:
+No static method `foo` in `A` (Typing[4090])
+File "instance_method.php", line 7, characters 19-21:
+Did you mean instance method `foo` instead?
+File "instance_method.php", line 6, characters 7-7:
+Declaration of `A` is here
+File "instance_method.php", line 16, characters 11-13:
+No static method `foo` in `B` (Typing[4090])
+File "instance_method.php", line 14, characters 19-21:
+Did you mean instance method `foo` instead?
+File "instance_method.php", line 12, characters 13-13:
+Declaration of `B` is here
+File "instance_method.php", line 17, characters 13-15:
+No static method `foo` in `B` (Typing[4090])
+File "instance_method.php", line 14, characters 19-21:
+Did you mean instance method `foo` instead?
+File "instance_method.php", line 12, characters 13-13:
+Declaration of `B` is here

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyReflectionMethod extends ReflectionMethod
 {
@@ -8,5 +8,9 @@ class MyReflectionMethod extends ReflectionMethod
     }
 }
 
+
+<<__EntryPoint>>
+function main_reflection_method_override_tostring() {
 $method = new MyReflectionMethod('MyReflectionMethod', 'toString');
 echo $method->toString();
+}

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FILEINFO_COMPAT_H_
-#define incl_HPHP_FILEINFO_COMPAT_H_
+#pragma once
 
 #include "hphp/runtime/base/directory.h"
 #include "hphp/runtime/base/file.h"
@@ -66,4 +65,3 @@ size_t php_strlcpy(char *dst, const char *src, size_t siz);
 #define strlcpy php_strlcpy
 #endif
 
-#endif // incl_HPHP_FILEINFO_COMPAT_H_

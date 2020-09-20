@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Get locale.
@@ -6,16 +6,16 @@
 
 function ut_main()
 {
-    $locales = array(
+    $locales = varray[
         'en_UK',
         'en_US@California',
         'fr_CA',
-    );
+    ];
 
-    $loc_types = array(
+    $loc_types = darray[
         Locale::ACTUAL_LOCALE    => 'actual',
         Locale::VALID_LOCALE     => 'valid',
-    );
+    ];
 
     $res_str = '';
 
@@ -33,8 +33,8 @@ function ut_main()
     return $res_str;
 }
 
-include_once( 'ut_common.inc' );
-
-// Run the test
-ut_run();
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    // Run the test
+    ut_run();
+}

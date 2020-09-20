@@ -1,0 +1,1 @@
+Fatal error: Generics type parameters are disallowed on dynamic method calls in %s on line 15

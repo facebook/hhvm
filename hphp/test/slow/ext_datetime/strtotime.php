@@ -1,5 +1,9 @@
-<?php
+<?hh
 
+
+
+<<__EntryPoint>>
+function main_strtotime() {
 date_default_timezone_set("America/Los_Angeles");
 
 var_dump(strtotime("now") > 0);
@@ -14,4 +18,4 @@ $str = "Not Good";
 $timestamp = strtotime($str);
 var_dump($timestamp);
 var_dump(strtotime(""));
-
+}

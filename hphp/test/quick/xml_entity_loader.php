@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument();
 $doc->loadXML(
 '<?xml version="1.0" encoding="UTF-8" ?>
@@ -11,3 +11,4 @@ LIBXML_DTDLOAD | LIBXML_NOENT
 );
 
 var_dump($doc->textContent);
+}

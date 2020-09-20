@@ -1,10 +1,6 @@
 File "unpack_call6.php", line 12, characters 13-17:
 Invalid argument (Typing[4110])
-  File "unpack_call6.php", line 12, characters 13-17:
-  This is an object of type Traversable (it is unpacked with '...')
-  File "unpack_call6.php", line 11, characters 11-18:
-  It is incompatible with a string
-File "unpack_call6.php", line 12, characters 3-18:
-Too few arguments (Typing[4104])
-  File "unpack_call6.php", line 4, characters 19-29:
-  Definition is here
+File "unpack_call6.php", line 12, characters 13-17:
+Expected `Traversable<[unresolved]>` (it is unpacked with `...`)
+File "unpack_call6.php", line 11, characters 11-18:
+But got `string`

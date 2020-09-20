@@ -3,14 +3,14 @@
 class IterableClass implements \HH\Iterable {
   use StrictIterable;
   public function getIterator() {
-    return new ArrayIterator(array(11, 22, 33));
+    return new ArrayIterator(varray[11, 22, 33]);
   }
 }
 
 class KeyedIterableClass implements \HH\KeyedIterable {
   use StrictKeyedIterable;
   public function getIterator() {
-    return new ArrayIterator(array(44, 55, 66));
+    return new ArrayIterator(varray[44, 55, 66]);
   }
 }
 
@@ -20,7 +20,7 @@ function test($name, $a, $b) {
   echo get_class($got) . "\n";
   foreach ($got as $k => $p) {
     echo "$k => ";
-    if ($p instanceof Pair) {
+    if ($p is Pair) {
       echo "Pair {{$p[0]} => {$p[1]}}\n";
     } else {
       echo "ERROR\n";
@@ -30,7 +30,7 @@ function test($name, $a, $b) {
 }
 
 function main() {
-  $zippable = array(
+  $zippable = darray[
     'empty Vector'    => Vector    {},
     'short Vector'    => Vector    {1, 2},
     'long  Vector'    => Vector    {3, 4, 5, 6},
@@ -44,11 +44,11 @@ function main() {
     'empty ImmMap' => ImmMap {},
     'short ImmMap' => ImmMap {'u' => 'U', 'v' => 'V'},
     'long  ImmMap' => ImmMap {'w' => 'W', 'x' => 'X', 'y' => 'Y', 'z' => 'Z'},
-  );
-  $additional_iterable = array(
+  ];
+  $additional_iterable = darray[
     'IterableClass'      => new IterableClass,
     'KeyedIterableClass' => new KeyedIterableClass,
-  );
+  ];
   foreach ($zippable as $name => $container) {
     foreach ($zippable as $name2 => $container2) {
       test("$name zip with $name2", $container, $container2);
@@ -59,4 +59,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_zip() {
 main();
+}

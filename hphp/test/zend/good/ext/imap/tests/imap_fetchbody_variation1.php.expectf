@@ -2,121 +2,97 @@
 
 -- Iteration 1 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 2 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 3 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 4 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 5 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 6 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 7 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 8 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, double given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, null given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, null given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, boolean given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, boolean given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, boolean given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 15 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, boolean given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 16 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, %rv?%rarray given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, object given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, null given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: imap_fetchbody() expects parameter 1 to be resource, null given in %s/imap_fetchbody_variation1.php on line 85
 ===DONE===

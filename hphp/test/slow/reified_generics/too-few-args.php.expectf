@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'RuntimeException' with message 'test() expects exactly 1 parameter, 0 given' in %s:8
+Stack trace:
+#0 %s: test<int>()
+#1 (): main()
+#2 {main}

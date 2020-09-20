@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);
@@ -8,4 +8,4 @@ $fragment->appendXML('<foo id="baz">bar</foo>');
 $root->appendChild($fragment);
 
 print $document->saveXML();
-?>
+}

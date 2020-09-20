@@ -1,27 +1,29 @@
-<?php
+<?hh
 class obj {
-	function method() {}
+    function method() {}
 }
+<<__EntryPoint>>
+function main() {
+  $o = new stdClass();
+  $o->root=new obj();
 
-$o->root=new obj();
+  ob_start();
+  var_dump($o);
+  $x=ob_get_contents();
+  ob_end_clean();
 
-ob_start();
-var_dump($o);
-$x=ob_get_contents();
-ob_end_clean();
+  $o->root->method();
 
-$o->root->method();
-
-ob_start();
-var_dump($o);
-$y=ob_get_contents();
-ob_end_clean();
-if ($x == $y) {
+  ob_start();
+  var_dump($o);
+  $y=ob_get_contents();
+  ob_end_clean();
+  if ($x == $y) {
     print "success";
-} else {
+  } else {
     print "failure
-x=$x
-y=$y
-";
+      x=$x
+      y=$y
+    ";
+  }
 }
-?>

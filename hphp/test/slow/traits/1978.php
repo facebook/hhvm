@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
   static function hello() {
@@ -18,5 +18,6 @@ class C {
     self::world();
   }
 }
+<<__EntryPoint>> function main(): void {
 C::p();
-?>
+}

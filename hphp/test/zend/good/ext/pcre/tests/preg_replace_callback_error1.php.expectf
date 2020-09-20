@@ -2,22 +2,22 @@
 
 Arg value is abcdef
 
-Warning: %s
+Warning: Delimiter must not be alphanumeric or backslash in %s/preg_replace_callback_error1.php on line 36
 NULL
 
 Arg value is /[a-zA-Z]
 
-Warning: %s
+Warning: No ending delimiter '/' found: [/[a-zA-Z]] in %s/preg_replace_callback_error1.php on line 36
 NULL
 
 Arg value is [a-zA-Z]/
 
-Warning: %s
+Warning: Unknown modifier '/': [[a-zA-Z]/] in %s/preg_replace_callback_error1.php on line 36
 NULL
 
 Arg value is /[a-zA-Z]/F
 
-Warning: %s
+Warning: Unknown modifier 'F': [/[a-zA-Z]/F] in %s/preg_replace_callback_error1.php on line 36
 NULL
 
 Arg value is Array

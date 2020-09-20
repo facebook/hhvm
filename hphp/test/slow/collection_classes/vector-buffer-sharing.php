@@ -16,19 +16,19 @@ function main() {
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0][] = 73;
+  $x[0] = varray[]; $x[0][] = 73;
   var_dump($y);
   unset($y);
   unset($x);
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0][42] = 73;
+  $x[0] = darray[]; $x[0][42] = 73;
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {null};
+  $x = Vector {new stdClass()};
   $y = $x->toImmVector();
   $x[0]->prop = 73;
   var_dump($y);
@@ -43,21 +43,21 @@ function main() {
   unset($y);
   unset($x);
 
-  $x = Vector {array(1)};
+  $x = Vector {varray[1]};
   $y = $x->toImmVector();
   unset($x[0][0]);
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {array(1)};
+  $x = Vector {varray[1]};
   $y = $x->toImmVector();
   $x[0][] = 2;
   var_dump($y);
   unset($y);
   unset($x);
 
-  $x = Vector {array(1)};
+  $x = Vector {darray[0 => 1]};
   $y = $x->toImmVector();
   $x[0][1] = 2;
   var_dump($y);
@@ -96,5 +96,9 @@ function main() {
   $x->pop();
   unset($x);
 }
-main();
 
+
+<<__EntryPoint>>
+function main_vector_buffer_sharing() {
+main();
+}

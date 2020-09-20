@@ -23,9 +23,6 @@ bool(false)
 isConstructor():
 bool(false)
 
-isDestructor():
-bool(false)
-
 **********************************
 **********************************
 Reflecting on method TestClass::stat()
@@ -50,9 +47,6 @@ isStatic():
 bool(true)
 
 isConstructor():
-bool(false)
-
-isDestructor():
 bool(false)
 
 **********************************
@@ -81,9 +75,6 @@ bool(false)
 isConstructor():
 bool(false)
 
-isDestructor():
-bool(false)
-
 **********************************
 **********************************
 Reflecting on method TestClass::prot()
@@ -108,9 +99,6 @@ isStatic():
 bool(false)
 
 isConstructor():
-bool(false)
-
-isDestructor():
 bool(false)
 
 **********************************
@@ -139,9 +127,6 @@ bool(false)
 isConstructor():
 bool(false)
 
-isDestructor():
-bool(false)
-
 **********************************
 **********************************
 Reflecting on method TestInterface::int()
@@ -168,9 +153,6 @@ bool(false)
 isConstructor():
 bool(false)
 
-isDestructor():
-bool(false)
-
 **********************************
 **********************************
 Reflecting on method ReflectionProperty::__construct()
@@ -195,38 +177,6 @@ isStatic():
 bool(false)
 
 isConstructor():
-bool(true)
-
-isDestructor():
-bool(false)
-
-**********************************
-**********************************
-Reflecting on method TestClass::__destruct()
-
-
-isFinal():
-bool(false)
-
-isAbstract():
-bool(false)
-
-isPublic():
-bool(true)
-
-isPrivate():
-bool(false)
-
-isProtected():
-bool(false)
-
-isStatic():
-bool(false)
-
-isConstructor():
-bool(false)
-
-isDestructor():
 bool(true)
 
 **********************************

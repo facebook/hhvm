@@ -1,11 +1,11 @@
-<?php 
+<?hh
 
 interface iTest { }
- 
+
 class baz implements iTest {}
- 
+
 class bar { }
- 
+
 class foo extends bar {
     public function testFoo(self $obj) {
         var_dump($obj);
@@ -17,11 +17,10 @@ class foo extends bar {
         var_dump($obj);
     }
 }
- 
+<<__EntryPoint>> function main(): void {
 $foo = new foo;
 $foo->testFoo(new foo);
 $foo->testBar(new bar);
 $foo->testBaz(new baz);
 $foo->testFoo(new stdClass); // Catchable fatal error
-
-?>
+}

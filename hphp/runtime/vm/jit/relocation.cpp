@@ -174,14 +174,30 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
      * But the target is an instruction, so skip over any nops
      * that might have been inserted (eg for alignment).
      */
-    if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
-      ct.second = adjusted;
-    }
+     if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
+       ct.second = adjusted;
+     }
   }
+
+  for (auto& is : meta.inlineStacks) {
+    /*
+     * As with fixups and catches these are return addresses.
+     */
+     if (auto const adjusted = rel.adjustedAddressBefore(is.first)) {
+       is.first = adjusted;
+     }
+   }
+
 
   for (auto& jt : meta.jmpTransIDs) {
     if (auto const adjusted = rel.adjustedAddressAfter(jt.first)) {
       jt.first = adjusted;
+    }
+  }
+
+  for (auto& it : meta.callFuncIds) {
+    if (auto const adjusted = rel.adjustedAddressAfter(it.first)) {
+      it.first = adjusted;
     }
   }
 
@@ -219,13 +235,19 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
       updatedAI.insert(adjusted);
     } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
-      // just for cgLdObjMethod
+      // just for LdSmashable
       updatedAI.insert((TCA)~uintptr_t(odd));
     } else {
       updatedAI.insert(addrImm);
     }
   }
   updatedAI.swap(meta.addressImmediates);
+
+  if (meta.fallthru) {
+    if (TCA adjusted = rel.adjustedAddressAfter(*meta.fallthru)) {
+      meta.fallthru = adjusted;
+    }
+  }
 
   decltype(meta.alignments) updatedAF;
   for (auto af : meta.alignments) {
@@ -243,15 +265,82 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
-  // Perform platform-specific metadata adjustments.
-  ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, meta);
+  decltype(meta.smashableCallData) updatedCD;
+  for (auto& cd : meta.smashableCallData) {
+    if (auto adjusted = rel.adjustedAddressAfter(cd.first)) {
+      updatedCD[adjusted] = cd.second;
+      FTRACE_MOD(Trace::mcg, 3,
+                 "adjustMetaDataForRelocation(smashableCallData): {} => {}\n",
+                 cd.first, adjusted);
+    } else {
+      updatedCD[cd.first] = cd.second;
+    }
+  }
+  updatedCD.swap(meta.smashableCallData);
+
+  decltype(meta.smashableJumpData) updatedJD;
+  for (auto& jd : meta.smashableJumpData) {
+    if (auto adjusted = rel.adjustedAddressAfter(jd.first)) {
+      updatedJD[adjusted] = jd.second;
+      FTRACE_MOD(Trace::mcg, 3,
+                 "adjustMetaDataForRelocation(smashableJumpData): {} => {}\n",
+                 jd.first, adjusted);
+    } else {
+      updatedJD[jd.first] = jd.second;
+    }
+  }
+  updatedJD.swap(meta.smashableJumpData);
+
+  for (auto& li : meta.literalAddrs) {
+    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
+      li.second = (uint64_t*)adjusted;
+    }
+  }
+
+  for (auto& v : meta.veneers) {
+    bool updated = false;
+    DEBUG_ONLY auto const before = v;
+    if (auto adjustedSource = rel.adjustedAddressAfter(v.source)) {
+      v.source = adjustedSource;
+      updated = true;
+    }
+    if (auto adjustedTarget = rel.adjustedAddressAfter(v.target)) {
+      v.target = adjustedTarget;
+      updated = true;
+    }
+    if (updated) {
+      FTRACE_MOD(Trace::mcg, 3,
+                 "adjustMetaDataForRelocation(veneers): ({}, {}) => ({}, {})\n",
+                 before.source, before.target, v.source, v.target);
+    }
+  }
+
+  decltype(meta.smashableLocations) updatedSL;
+  for (auto sl : meta.smashableLocations) {
+    if (auto adjusted = rel.adjustedAddressAfter(sl)) {
+      updatedSL.insert(adjusted);
+    } else {
+      updatedSL.insert(sl);
+    }
+  }
+  updatedSL.swap(meta.smashableLocations);
+
+  decltype(meta.codePointers) updatedCP;
+  for (auto cp : meta.codePointers) {
+    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
+      updatedCP.emplace(adjusted);
+    } else {
+      updatedCP.emplace(cp);
+    }
+  }
+  updatedCP.swap(meta.codePointers);
 
   if (asmInfo) {
-    assert(asmInfo->validate());
+    assertx(asmInfo->validate());
     rel.fixupRanges(asmInfo, AreaIndex::Main);
     rel.fixupRanges(asmInfo, AreaIndex::Cold);
     rel.fixupRanges(asmInfo, AreaIndex::Frozen);
-    assert(asmInfo->validate());
+    assertx(asmInfo->validate());
   }
 }
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
   private function myPrivateMethod() {
     return 42;
@@ -14,6 +14,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_reflection_method_set_accessible() {
 $method = new ReflectionMethod('Foo', 'myPrivateMethod');
 $method->setAccessible(true);
 var_dump($method->invoke(new Foo()));
@@ -33,3 +36,4 @@ var_dump($method->invoke(new Foo()));
 $method = new ReflectionMethod('Foo', 'myProtectedStaticMethod');
 $method->setAccessible(true);
 var_dump($method->invoke(new Foo()));
+}

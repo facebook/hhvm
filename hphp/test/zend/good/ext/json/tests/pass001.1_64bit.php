@@ -1,12 +1,12 @@
-<?php
+<?hh
 /* Modified to test unescaped UNICODE as keys and values.
  * Modified to test numbers with exponents without a decimal point.
  * Modified to test empty string values.
  * Modified to test a mix of integers and strings as keys.
  */
+<<__EntryPoint>> function main(): void {
 // Expect warnings about INF.
 ini_set("error_reporting", E_ALL & ~E_WARNING);
-
 $test = "
 [
     \"JSON Test Pattern pass1\",
@@ -92,5 +92,4 @@ var_dump($obj);
 echo "DECODE AGAIN: AS ARRAY\n";
 $arr = json_decode($arr_enc, true);
 var_dump($arr);
-
-?>
+}

@@ -1,7 +1,7 @@
 <?hh
 
 function fsort($a) {
-  sort($a);
+  sort(inout $a);
   return $a;
 }
 
@@ -20,9 +20,9 @@ class A {
   }
 }
 
-class B extends A {};
+class B extends A {}
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $objA = new A;
   $objB = new B;
 
@@ -38,5 +38,3 @@ function main() {
   echo "\nclass B::dump()\n";
   print_r($objB->dump());
 }
-
-main();

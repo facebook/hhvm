@@ -1,0 +1,12 @@
+File "type_constants_self_referential.php", line 16, characters 10-17:
+Invalid `as` expression hint (Typing[4195])
+File "type_constants_self_referential.php", line 5, characters 23-24:
+The `as` operator cannot be used with the abstract type constant Ta because it is not marked `<<__Enforceable>>`
+File "type_constants_self_referential.php", line 18, characters 10-17:
+Invalid `as` expression hint (Typing[4195])
+File "type_constants_self_referential.php", line 11, characters 14-15:
+The `as` operator cannot be used with the abstract type constant Te because it is not marked `<<__Enforceable>>`
+File "type_constants_self_referential.php", line 19, characters 10-20:
+Invalid `as` expression hint (Typing[4195])
+File "type_constants_self_referential.php", line 24, characters 23-24:
+The `as` operator cannot be used with the abstract type constant Tc because it is not marked `<<__Enforceable>>`

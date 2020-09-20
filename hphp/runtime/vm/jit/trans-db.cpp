@@ -22,42 +22,48 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-#include "hphp/util/compilation-flags.h"
 #include "hphp/util/timer.h"
 
+#include <folly/SharedMutex.h>
+
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace HPHP { namespace jit { namespace transdb { namespace {
 std::map<TCA, TransID> s_transDB;
-std::vector<TransRec> s_translations;
+std::vector<std::unique_ptr<TransRec>> s_translations;
+folly::SharedMutex s_lock;
 }
 
 bool enabled() {
-  return debug ||
-         RuntimeOption::EvalDumpTC ||
-         RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpRegion;
+  return debug || tc::dumpEnabled();
 }
 
 const TransRec* getTransRec(TCA tca) {
   if (!enabled()) return nullptr;
-
-  auto const it = s_transDB.find(tca);
-  if (it == s_transDB.end()) {
-    return nullptr;
+  TransRec* ret = nullptr;
+  {
+    folly::SharedMutex::ReadHolder guard(s_lock);
+    auto it = s_transDB.upper_bound(tca);
+    if (it == s_transDB.begin()) {
+      return nullptr;
+    }
+    --it;                               // works for s_transDB::end()
+    if (it->second >= s_translations.size()) {
+      return nullptr;
+    }
+    ret = s_translations[it->second].get();
   }
-  if (it->second >= s_translations.size()) {
-    return nullptr;
-  }
-  return &s_translations[it->second];
+  if (ret->contains(tca)) return ret;
+  return nullptr;
 }
 
 const TransRec* getTransRec(TransID transId) {
   if (!enabled()) return nullptr;
 
   always_assert(transId < s_translations.size());
-  return &s_translations[transId];
+  return s_translations[transId].get();
 }
 
 size_t getNumTranslations() {
@@ -81,24 +87,30 @@ void addTranslation(const TransRec& transRec) {
 
   if (!enabled()) return;
   tc::assertOwnsCodeLock();
-  TransID id = transRec.id == kInvalidTransID ? s_translations.size()
-                                              : transRec.id;
-  assert_flog(transRec.isConsistent(), "{}", transRec.print());
+
+  auto transRecPtr = std::make_unique<TransRec>(transRec);
+  folly::SharedMutex::WriteHolder guard(s_lock);
+  if (transRecPtr->id == kInvalidTransID) {
+    transRecPtr->id = s_translations.size();
+  }
+  TransID id = transRecPtr->id;
+  assert_flog(transRecPtr->isConsistent(), "{}", transRecPtr->print());
+
+  if (transRecPtr->aLen > 0) {
+    s_transDB[transRecPtr->aStart] = id;
+  }
+  if (transRecPtr->acoldLen > 0) {
+    s_transDB[transRecPtr->acoldStart] = id;
+  }
+  if (transRecPtr->afrozenLen > 0) {
+    s_transDB[transRecPtr->afrozenStart] = id;
+  }
   if (id >= s_translations.size()) {
     s_translations.resize(id + 1);
   }
-  s_translations[id] = transRec;
-  s_translations[id].id = id;
-
-  if (transRec.aLen > 0) {
-    s_transDB[transRec.aStart] = id;
-  }
-  if (transRec.acoldLen > 0) {
-    s_transDB[transRec.acoldStart] = id;
-  }
-
   // Optimize storage of the created TransRec.
-  s_translations[id].optimizeForMemory();
+  transRecPtr->optimizeForMemory();
+  s_translations[id] = std::move(transRecPtr);
 }
 
 }}}

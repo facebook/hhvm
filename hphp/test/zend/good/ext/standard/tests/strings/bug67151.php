@@ -1,3 +1,3 @@
-<?php
-var_dump(strtr("foo", []));
-?>
+<?hh <<__EntryPoint>> function main(): void {
+var_dump(strtr("foo", varray[]));
+}

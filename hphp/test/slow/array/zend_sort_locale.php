@@ -1,6 +1,9 @@
-<?php
+<?hh
+
+<<__EntryPoint>>
+function main_zend_sort_locale() {
 setlocale(LC_ALL, 'fr_FR.ISO8859-1', 'fr_FR');
-$table = array("AB" => "Alberta",
+$table = darray["AB" => "Alberta",
 "BC" => "Colombie-Britannique",
 "MB" => "Manitoba",
 "NB" => "Nouveau-Brunswick",
@@ -12,12 +15,13 @@ $table = array("AB" => "Alberta",
 "SK" => "Saskatchewan",
 "NT" => "Territoires du Nord-Ouest",
 "NU" => "Nunavut",
-"YT" => "Territoire du Yukon");
-asort($table, SORT_LOCALE_STRING);
+"YT" => "Territoire du Yukon"];
+asort(inout $table, SORT_LOCALE_STRING);
 
 #ASCII-ize
-foreach($table as &$val) {
-  $val = urlencode($val);
+foreach($table as $key => $val) {
+  $table[$key] = urlencode($val);
 }
 unset($val);
 var_dump($table);
+}

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_REQUEST_HANDLER_H_
-#define incl_HPHP_HTTP_REQUEST_HANDLER_H_
+#pragma once
 
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -63,6 +62,8 @@ private:
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
   folly::Optional<SourceRootInfo> m_sourceRootInfo;
 
+  bool handleFileRequest(Transport *transport, const String& translated,
+                         const std::string& path, const char* ext);
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,
                          time_t mtime, bool compressed,
@@ -82,4 +83,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_REQUEST_HANDLER_H_

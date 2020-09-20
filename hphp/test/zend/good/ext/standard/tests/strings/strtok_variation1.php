@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strtok ( string $str, string $token )
  * Description: splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token
  * Source code: ext/standard/string.c
@@ -8,6 +8,13 @@
  * Testing strtok() : with first argument as non-string
 */
 
+// declaring a class
+class sample  {
+  public function __toString() {
+  return "obj-ect";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strtok() : with first argument as non-string ***\n";
 // initialize all required variables
 $token = '-';
@@ -16,18 +23,11 @@ $token = '-';
 $unset_var = 'string_val';
 unset($unset_var);
 
-// declaring a class
-class sample  {
-  public function __toString() {
-  return "obj-ect";
-  }
-}
-
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
-$values =  array (
+$values =  varray [
 
   // integer values
   0,
@@ -43,11 +43,11 @@ $values =  array (
   .5,
 
   // array values
-  array(),
-  array(0),
-  array(1),
-  array(1, 2),
-  array('color' => 'red-color', 'item' => 'pen-color'),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[1, 2],
+  darray['color' => 'red-color', 'item' => 'pen-color'],
 
   // boolean values
   true,
@@ -74,7 +74,7 @@ $values =  array (
 
   // resource
   $file_handle
-);
+];
 
 
 // loop through each element of the array and check the working of strtok()
@@ -86,13 +86,13 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $str = $values [$index];
 
-  var_dump( strtok($str, $token) );
+  try { var_dump( strtok($str, $token) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter ++;
 }
 
-//closing the resource 
+//closing the resource
 fclose($file_handle);
 
 echo "Done\n";
-?>
+}

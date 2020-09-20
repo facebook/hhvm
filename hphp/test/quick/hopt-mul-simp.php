@@ -48,7 +48,7 @@ function foo11($x) {
 function foo12($x) {
   return $x * (-8);
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2(6));
 var_dump(foo3(6,2));
@@ -61,3 +61,4 @@ var_dump(foo9(2,5));
 var_dump(foo10(2));
 var_dump(foo11(7));
 var_dump(foo12(3));
+}

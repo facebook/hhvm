@@ -2,11 +2,9 @@
 
 -- Testing mcrypt_ecb() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mcrypt_ecb() expects at most 5 parameters, 6 given in %s/mcrypt_ecb_error.php on line 21
 
 -- Testing mcrypt_ecb() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mcrypt_ecb() expects at least 4 parameters, 3 given in %s/mcrypt_ecb_error.php on line 28
 ===DONE===

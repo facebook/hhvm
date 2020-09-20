@@ -1,64 +1,65 @@
 *** Testing str_pad() function: with unexpected inputs for 'pad_string' argument ***
 -- Iteration 1 --
-string(20) "Test string000000000"
+
+Warning: str_pad() expects parameter 3 to be string, integer given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 2 --
-string(20) "Test string111111111"
+
+Warning: str_pad() expects parameter 3 to be string, integer given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 3 --
-string(20) "Test string-2-2-2-2-"
+
+Warning: str_pad() expects parameter 3 to be string, integer given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 4 --
-string(20) "Test string214748364"
+
+Warning: str_pad() expects parameter 3 to be string, integer given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 5 --
-string(20) "Test string-21474836"
+
+Warning: str_pad() expects parameter 3 to be string, integer given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 6 --
-string(20) "Test string10.510.51"
+
+Warning: str_pad() expects parameter 3 to be string, double given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 7 --
-string(20) "Test string-20.5-20."
+
+Warning: str_pad() expects parameter 3 to be string, double given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 8 --
-string(20) "Test string101234567"
+
+Warning: str_pad() expects parameter 3 to be string, double given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 12 --
-string(20) "Test string111111111"
+
+Warning: str_pad() expects parameter 3 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 14 --
-string(20) "Test string111111111"
+
+Warning: str_pad() expects parameter 3 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 15 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 16 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, null given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, null given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 18 --
-string(20) "Test stringsample ob"
+
+Warning: str_pad() expects parameter 3 to be string, object given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, resource given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, null given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: str_pad() expects parameter 3 to be string, null given in %s/zend/good/ext/standard/tests/strings/str_pad_variation3.php on line 78
 ===DONE===

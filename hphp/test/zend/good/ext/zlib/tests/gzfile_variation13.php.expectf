@@ -1,5 +1,5 @@
-Error: 2 - gzfile() expects parameter 2 to be integer, object given, %s(%d)
-NULL
-Error: 2 - gzfile() expects parameter 2 to be integer, object given, %s(%d)
-NULL
+
+Warning: gzfile() expects parameter 2 to be integer, object given in %s/gzfile_variation13.php on line %d
+
+Warning: gzfile() expects parameter 2 to be integer, object given in %s/gzfile_variation13.php on line %d
 ===DONE===

@@ -4,17 +4,17 @@ string(1) "x"
 string(1) "x"
 string(0) ""
 
-Warning: Accessing DOMNode derived property 'nodename' with the incorrect casing in %s on line 13
+Warning: Accessing DOMNode derived property 'nodename' with the incorrect casing in %s on line 16
 string(3) "x:x"
 
-Warning: Accessing DOMNode derived property 'namespaceuri' with the incorrect casing in %s on line 14
+Warning: Accessing DOMNode derived property 'namespaceuri' with the incorrect casing in %s on line 17
 string(5) "urn:x"
 
-Warning: Accessing DOMNode derived property 'PREFIX' with the incorrect casing in %s on line 15
+Warning: Accessing DOMNode derived property 'PREFIX' with the incorrect casing in %s on line 18
 string(1) "x"
 
-Warning: Accessing DOMNode derived property 'localname' with the incorrect casing in %s on line 16
+Warning: Accessing DOMNode derived property 'localname' with the incorrect casing in %s on line 19
 string(1) "x"
 
-Warning: Accessing DOMNode derived property 'textcontent' with the incorrect casing in %s on line 17
+Warning: Accessing DOMNode derived property 'textcontent' with the incorrect casing in %s on line 20
 string(0) ""

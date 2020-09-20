@@ -1,11 +1,6 @@
-File "subsume_tconst3.php", line 7, characters 7-7:
-Class C does not correctly implement all required methods  (Typing[4110])
-File "subsume_tconst3.php", line 7, characters 17-17:
-Some methods are incompatible with those declared in type P
-Read the following to see why:
 File "subsume_tconst3.php", line 8, characters 14-14:
-The assigned type of this type constant is inconsistent with its parent
+The assigned type of this type constant is inconsistent with its parent (Typing[4110])
 File "subsume_tconst3.php", line 4, characters 30-35:
-This is a string
+Expected `string`
 File "subsume_tconst3.php", line 8, characters 18-20:
-It is incompatible with an int
+But got `int`

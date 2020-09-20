@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
+#include "hphp/runtime/base/apc-rclass-meth.h"
+#include "hphp/runtime/base/apc-rfunc.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include "hphp/util/trace.h"
@@ -52,7 +54,7 @@ size_t getMemSize(const TypedValue* tv, bool recurse = true) {
   if (!isRefcountedType(type)) {
     return sizeof(Variant);
   }
-  assert(!"Unsupported Variant type for getMemSize()");
+  assertx(!"Unsupported Variant type for getMemSize()");
   return 0;
 }
 
@@ -65,6 +67,8 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentFunc:
+    case APCKind::FuncEntity:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:
@@ -100,10 +104,14 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
     case APCKind::SharedKeyset:
     case APCKind::SharedVArray:
+    case APCKind::SharedMarkedVArray:
     case APCKind::SharedDArray:
+    case APCKind::SharedMarkedDArray:
       return getMemSize(APCArray::fromHandle(handle));
 
     case APCKind::SerializedObject:
@@ -112,8 +120,13 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
       return getMemSize(APCObject::fromHandle(handle));
+
+    case APCKind::RFunc:
+      return getMemSize(APCRFunc::fromHandle(handle));
+    case APCKind::RClsMeth:
+      return getMemSize(APCRClsMeth::fromHandle(handle));
   }
-  assert(!"Unsupported APCHandle Type in getMemSize");
+  assertx(!"Unsupported APCHandle Type in getMemSize");
   return 0;
 }
 
@@ -161,17 +174,24 @@ size_t getMemSize(const APCObject* obj) {
   return size;
 }
 
+size_t getMemSize(const APCRFunc* rfunc) {
+  return sizeof(APCRFunc) + getMemSize(rfunc->m_generics);
+}
+
+size_t getMemSize(const APCRClsMeth* rclsmeth) {
+  return sizeof(APCRClsMeth) + getMemSize(rclsmeth->m_generics);
+}
+
 size_t getMemSize(const ArrayData* arr, bool recurse) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind:
   case ArrayData::ArrayKind::kVecKind: {
-    // we want to measure just the overhead of the array
+    // This array space overhead computation assumes a TypedValue* layout.
+    static_assert(PackedArray::stores_typed_values);
     auto size = PackedArray::heapSize(arr) - (sizeof(TypedValue) * arr->m_size);
-    auto const values = packedData(arr);
-    auto const last = values + arr->m_size;
-    for (auto ptr = values; ptr != last; ++ptr) {
-      size += getMemSize(ptr, recurse);
-    }
+    PackedArray::IterateVNoInc(arr, [&](TypedValue tv) {
+      size += getMemSize(&tv, recurse);
+    });
     return size;
   }
   case ArrayData::ArrayKind::kDictKind:
@@ -207,10 +227,8 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     }
     return size;
   }
-  case ArrayData::ArrayKind::kEmptyKind:
-    return sizeof(ArrayData);
   default:
-    assert(!"Unsupported Array type in getMemSize");
+    assertx(!"Unsupported Array type in getMemSize");
   }
   return 0;
 }
@@ -351,6 +369,8 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
                                      , m_uncKeyset(nullptr)
                                      , m_serObject(nullptr)
                                      , m_apcObject(nullptr)
+                                     , m_apcRFunc(nullptr)
+                                     , m_apcRClsMeth(nullptr)
                                      , m_setValues(nullptr)
                                      , m_delValues(nullptr)
                                      , m_replValues(nullptr)
@@ -372,6 +392,8 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
   m_uncKeyset = ServiceData::createCounter("apc.type_unc_keyset");
   m_serObject = ServiceData::createCounter("apc.type_ser_object");
   m_apcObject = ServiceData::createCounter("apc.type_apc_object");
+  m_apcRFunc = ServiceData::createCounter("apc.type_apc_rfunc");
+  m_apcRClsMeth = ServiceData::createCounter("apc.type_apc_rclsmeth");
 
   m_setValues = ServiceData::createCounter("apc.set_values");
   m_delValues = ServiceData::createCounter("apc.deleted_values");
@@ -396,6 +418,8 @@ const StaticString s_typUncountedDict("type_unc_dict");
 const StaticString s_typUncountedKeyset("type_unc_keyset");
 const StaticString s_typeSerObject("type_ser_object");
 const StaticString s_typeAPCObject("type_apc_object");
+const StaticString s_typeAPCRFunc("type_apc_rfunc");
+const StaticString s_typeAPCRClsMeth("type_apc_rclsmeth");
 const StaticString s_setValueCount("set_values_count");
 const StaticString s_deleteValuesCount("deleted_values_count");
 const StaticString s_replacedValueCount("replaced_values_count");
@@ -436,6 +460,10 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_serObject->getValue()) +
          "\nAPC object count: " +
          std::to_string(m_apcObject->getValue()) +
+         "\nAPC rfunc count: " +
+         std::to_string(m_apcRFunc->getValue()) +
+         "\nAPC rclsmeth count: " +
+         std::to_string(m_apcRClsMeth->getValue()) +
          "\add count: " +
          std::to_string(m_setValues->getValue()) +
          "\ndelete count: " +
@@ -501,6 +529,12 @@ void APCDetailedStats::collectStats(
         std::pair<const StringData*, int64_t>(s_typeAPCObject.get(),
                                               m_apcObject->getValue()));
   stats.insert(
+        std::pair<const StringData*, int64_t>(s_typeAPCRFunc.get(),
+                                              m_apcRFunc->getValue()));
+  stats.insert(
+        std::pair<const StringData*, int64_t>(s_typeAPCRClsMeth.get(),
+                                              m_apcRClsMeth->getValue()));
+  stats.insert(
         std::pair<const StringData*, int64_t>(s_setValueCount.get(),
                                               m_setValues->getValue()));
   stats.insert(
@@ -548,6 +582,8 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::Bool:
     case APCKind::Int:
     case APCKind::Double:
+    case APCKind::PersistentFunc:
+    case APCKind::FuncEntity:
     case APCKind::StaticString:
     case APCKind::StaticArray:
     case APCKind::StaticVec:
@@ -588,13 +624,17 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVArray:
+    case APCKind::SharedMarkedVArray:
     case APCKind::SharedDArray:
+    case APCKind::SharedMarkedDArray:
       return m_apcArray;
 
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
       return m_apcVec;
 
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
       return m_apcDict;
 
     case APCKind::SharedKeyset:
@@ -606,6 +646,12 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
       return m_apcObject;
+
+    case APCKind::RFunc:
+      return m_apcRFunc;
+
+    case APCKind::RClsMeth:
+      return m_apcRClsMeth;
   }
   not_reached();
 }

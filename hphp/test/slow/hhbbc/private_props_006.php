@@ -1,18 +1,4 @@
-<?php
-
-/*
- * Testing 86pinit's effects on private property type inference.
- */
-
-if (mt_rand()) {
-  class Bar {
-    const A = "asd";
-  }
-} else {
-  class Bar {
-    const B = 42;
-  }
-}
+<?hh
 
 class Testing86Pinit {
   private $x = Bar::A;
@@ -31,4 +17,18 @@ function main() {
   $x->asd();
 }
 
+
+/*
+ * Testing 86pinit's effects on private property type inference.
+ */
+
+<<__EntryPoint>>
+function main_private_props_006() {
+if (mt_rand()) {
+  include 'private_props_006-1.inc';
+} else {
+  include 'private_props_006-2.inc';
+}
+
 main();
+}

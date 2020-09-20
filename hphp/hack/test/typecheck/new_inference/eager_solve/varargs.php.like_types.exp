@@ -1,0 +1,6 @@
+File "varargs.php", line 13, characters 20-22:
+Invalid argument (Typing[4359])
+File "varargs.php", line 13, characters 20-22:
+An array cannot be unpacked into the required arguments of a function
+File "varargs.php", line 3, characters 10-15:
+Definition is here

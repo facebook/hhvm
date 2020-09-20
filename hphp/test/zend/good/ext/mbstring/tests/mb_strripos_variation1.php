@@ -1,14 +1,22 @@
-<?php
+<?hh
 /* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive 
+ * Description: Finds position of last occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
  * Pass mb_strripos different data types as $haystack arg to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return b"Class A object";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -20,14 +28,6 @@ $encoding = 'utf-8';
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return b"Class A object";
-  }
-}
-
 // heredoc string
 $heredoc = b<<<EOT
 hello world
@@ -37,7 +37,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $haystack argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,7 +70,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -82,17 +82,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_strripos()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strripos($input, $needle, $offset, $encoding));
+  try { var_dump( mb_strripos($input, $needle, $offset, $encoding)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
-?>
+}

@@ -1,11 +1,1 @@
-File "typing_fail_contravariant.php", line 20, characters 7-7:
-Class D does not correctly implement all required methods  (Typing[4110])
-File "typing_fail_contravariant.php", line 20, characters 17-17:
-Some methods are incompatible with those declared in type C
-Read the following to see why:
-File "typing_fail_contravariant.php", line 21, characters 19-21:
-Member foo has the wrong type
-File "typing_fail_contravariant.php", line 21, characters 23-23:
-This is an object of type A
-File "typing_fail_contravariant.php", line 17, characters 23-23:
-It is incompatible with an object of type B
+No errors

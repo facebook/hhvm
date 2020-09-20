@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped 
+ * Description: Return array with key <-> value flipped
  * Source code: ext/standard/array.c
 */
 
@@ -8,7 +8,7 @@
 * In 'input' array argument, values are expected to be valid keys i.e. string/integer
 * here testing for all different valid string and integer values
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing array_flip() : different valid values in 'input' array argument ***\n";
 
 $empty_heredoc = <<<EOT1
@@ -23,7 +23,7 @@ multiline heredoc with 123 and
 speci@! ch@r$..checking\nwith\talso
 EOT7;
 
-$input = array(
+$input = darray[
   // numeric values
   'int_value' => 1,
   'negative_value' => -2,
@@ -41,7 +41,7 @@ $input = array(
   'whitespace1_value1' => '\t',
   'whitespace2_value1' => '\n',
   'null_char_value1' => '\0',
-  
+
   // double quoted string value
   'empty_value2' => "",
   'space_value2' => " ",
@@ -58,9 +58,9 @@ $input = array(
   'empty_heredoc' => $empty_heredoc,
   'simple_heredoc' => $simple_heredoc,
   'multiline_heredoc' => $multiline_heredoc,
-);
-  
+];
+
 var_dump( array_flip($input) );
 
-echo "Done"
-?>
+echo "Done";
+}

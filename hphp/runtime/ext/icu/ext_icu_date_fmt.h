@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_DATE_FMT_H
-#define incl_HPHP_ICU_DATE_FMT_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -53,8 +52,8 @@ struct IntlDateFormatter : IntlError {
 
   static Object newInstance() {
     if (!c_IntlDateFormatter) {
-      c_IntlDateFormatter = Unit::lookupClass(s_IntlDateFormatter.get());
-      assert(c_IntlDateFormatter);
+      c_IntlDateFormatter = Class::lookup(s_IntlDateFormatter.get());
+      assertx(c_IntlDateFormatter);
     }
     return Object{c_IntlDateFormatter};
   }
@@ -85,4 +84,3 @@ struct IntlDateFormatter : IntlError {
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
-#endif // incl_HPHP_ICU_DATE_FMT_H

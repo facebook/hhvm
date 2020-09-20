@@ -2,7 +2,7 @@
 
 class C {
   public function nonStaticInheritedMethod() {
-    echo __METHOD__, ' of ', get_called_class(), "\n";
+    echo __METHOD__, ' of ', static::class, "\n";
     echo 'this: ', isset($this) ? 'defined' : 'undefined', "\n";
   }
 }
@@ -11,7 +11,7 @@ trait Tr {
   require extends C;
 
   public function nonStaticTraitMethod() {
-    echo __METHOD__, ' of ', get_called_class(), "\n";
+    echo __METHOD__, ' of ', static::class, "\n";
     echo 'this: ', isset($this) ? 'defined' : 'undefined', "\n";
   }
   public static function staticTraitMethod() {
@@ -28,6 +28,7 @@ abstract final class Utils extends C {
     echo __METHOD__, "\n";
   }
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 echo 'Done', "\n";
+}

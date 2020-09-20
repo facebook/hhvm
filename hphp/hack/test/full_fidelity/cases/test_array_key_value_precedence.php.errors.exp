@@ -1,0 +1,1 @@
+(3,27)-(3,28) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.

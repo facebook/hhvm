@@ -1,0 +1,26 @@
+string(2) "::"
+string(2) "::"
+string(2) "::"
+string(3) "::1"
+string(3) "::1"
+string(3) "::1"
+string(9) "127.0.0.1"
+string(9) "127.0.0.1"
+string(9) "127.0.0.1"
+string(9) "127.0.0.1"
+string(9) "127.0.0.1"
+string(9) "127.0.0.1"
+string(3) "::1"
+string(3) "::1"
+string(3) "::1"
+string(3) "::1"
+string(3) "::1"
+string(3) "::1"
+string(4) "1::1"
+string(4) "1::1"
+string(4) "1::1"
+
+Warning: Invalid in_addr value in %s/inet_ntop.php on line 46
+bool(true)
+bool(true)
+bool(true)

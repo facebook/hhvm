@@ -1,0 +1,6 @@
+==== explicit call ====
+__toString called
+string(6) "string"
+==== explicit cast ====
+
+Fatal error: Cannot convert object to string (got instance of C) in %s on line 19

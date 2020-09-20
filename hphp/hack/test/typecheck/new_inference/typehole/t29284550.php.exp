@@ -1,0 +1,6 @@
+File "t29284550.php", line 15, characters 24-52:
+Invalid return type (Typing[4110])
+File "t29284550.php", line 14, characters 21-24:
+Expected `int`
+File "t29284550.php", line 15, characters 41-52:
+But got `string`

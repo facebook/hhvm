@@ -4,3 +4,4 @@
 class A {
   const FOO = $GLOBALS;
 }
+

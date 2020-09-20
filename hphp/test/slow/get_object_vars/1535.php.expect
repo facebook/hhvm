@@ -1,5 +1,5 @@
 string(5) "Child"
-array(5) {
+darray(5) {
   ["ddd"]=>
   int(4)
   ["eee"]=>

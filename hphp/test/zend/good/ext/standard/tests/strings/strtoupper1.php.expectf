@@ -152,26 +152,26 @@ string(31) "$$$$$$!!!!@@@@@@@ ABCDEF !!!***"
 string(13) "ABCD%r\x00%rABCDABCD"
 
 -- Iteration 6 --
-string(0) ""
+
+Warning: strtoupper() expects parameter 1 to be string, null given in %s/test/zend/good/ext/standard/tests/strings/strtoupper1.php on line 42
 
 -- Iteration 7 --
-string(1) "1"
+
+Warning: strtoupper() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strtoupper1.php on line 42
 
 -- Iteration 8 --
-string(0) ""
+
+Warning: strtoupper() expects parameter 1 to be string, boolean given in %s/test/zend/good/ext/standard/tests/strings/strtoupper1.php on line 42
 
 -- Iteration 9 --
 
-Warning: %s
-NULL
+Warning: strtoupper() expects parameter 1 to be string, %rv?%rarray given in %s/test/zend/good/ext/standard/tests/strings/strtoupper1.php on line 42
 
 *** Testing strtoupper() with two different case strings ***
 strings are same, with Case Insensitive
 
 *** Testing error conditions ***
-Warning: %s
-NULL
+Warning: strtoupper() expects exactly 1 parameter, 0 given in %s/strtoupper1.php on line 53
 
 Warning: %s
-NULL
 *** Done ***

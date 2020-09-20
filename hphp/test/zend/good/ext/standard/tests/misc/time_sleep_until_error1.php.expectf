@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: Invalid argument: timestamp: Sleep until to time is less than current time in %s/time_sleep_until_error1.php on line 2
 bool(false)

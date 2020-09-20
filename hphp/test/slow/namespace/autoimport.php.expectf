@@ -1,0 +1,1 @@
+Fatal error: Class AutoimportTest\ContainerExt may not inherit from interface (HH\Container) in %s/test/slow/namespace/autoimport.php on line 7

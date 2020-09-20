@@ -1,2 +1,10 @@
-
-Fatal error: Yield expression inside a finally block is not supported in %s/test/slow/finally/finally_yield_001.php on line 12
+begin
+try
+received: 1
+try
+received: 2
+finally
+received: 3
+finally
+end
+received: 4

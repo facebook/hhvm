@@ -1,0 +1,6 @@
+File "skip_one.php", line 11, characters 14-14:
+The assigned type of this type constant is inconsistent with its parent (Typing[4110])
+File "skip_one.php", line 5, characters 39-41:
+Expected `int`
+File "skip_one.php", line 11, characters 18-23:
+But got `string`

@@ -1,6 +1,3 @@
 
-Notice: %s
-ok
-
-Warning: %s
+Notice: Cannot access property on non-object in %s/026.php on line 10
 ok

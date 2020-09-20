@@ -1,5 +1,5 @@
-<?php 
-
+<?hh 
+<<__EntryPoint>> function main(): void {
 $xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd" [
@@ -23,5 +23,5 @@ EOF;
 
 var_dump(simplexml_load_string($xml));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

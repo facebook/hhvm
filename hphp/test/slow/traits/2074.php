@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   function f() {
@@ -13,8 +13,12 @@ trait T {
 class A {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2074() {
 $a = new A;
 $f = $a->f();
 foreach ($f() as $v) {
  var_dump($v);
  }
+}

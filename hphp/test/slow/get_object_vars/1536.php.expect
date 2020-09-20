@@ -1,5 +1,5 @@
 string(4) "Base"
-array(3) {
+darray(3) {
   ["aaa"]=>
   int(1)
   ["bbb"]=>

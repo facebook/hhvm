@@ -75,11 +75,11 @@ struct XSLTProcessorData {
   m_secprefs(k_XSL_SECPREF_DEFAULT),
   m_registerPhpFunctions(0) {
     if (m_params.empty()) {
-      m_params = Array::Create();
+      m_params = Array::CreateDArray();
     }
 
     if (m_registered_phpfunctions.empty()) {
-      m_registered_phpfunctions = Array::Create();
+      m_registered_phpfunctions = Array::CreateDArray();
     }
   };
 
@@ -195,8 +195,8 @@ xmlDocPtr XSLTProcessorData::apply_stylesheet() {
   );
 
   for (ArrayIter iter(m_params); iter; ++iter) {
-    assert(iter.first().isString());
-    assert(iter.second().isString());
+    assertx(iter.first().isString());
+    assertx(iter.second().isString());
 
     xmlChar *value = xslt_string_to_xpathexpr(iter.second().toString().c_str());
     if (value) {
@@ -214,7 +214,7 @@ xmlDocPtr XSLTProcessorData::apply_stylesheet() {
     profile = fopen(m_profile.data(), "w");
   }
 
-  assert(m_usedElements.empty());
+  assertx(m_usedElements.empty());
   xmlDocPtr res = xsltApplyStylesheetUser(m_stylesheet,
                                           doc(),
                                           nullptr,
@@ -263,7 +263,7 @@ static xmlChar *xslt_string_to_xpathexpr(const char *str) {
 }
 
 static Object newNode(const String name, xmlNodePtr obj) {
-  auto const cls = Unit::lookupClass(name.get());
+  auto const cls = Class::lookup(name.get());
   Object ret{cls};
   auto retData = Native::data<DOMNode>(ret);
   retData->setNode(obj);
@@ -333,7 +333,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
         arg = String(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
-        arg = Array::Create();
+        arg = Array::CreateVArray();
         if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
           for (int j = 0; j < obj->nodesetval->nodeNr; j++) {
             // TODO: not sure this is the right thing to do.
@@ -342,23 +342,23 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
             if (node->type == XML_ELEMENT_NODE) {
               Object element = newNode(s_DOMElement,
                                        xmlCopyNode(node, /*extended*/ 1));
-              arg.toArrRef().append(element);
+              arg.asArrRef().append(element);
             } else if (node->type == XML_ATTRIBUTE_NODE) {
               Object attribute =
                 newNode(s_DOMAttr,
                         (xmlNodePtr)xmlCopyProp(nullptr, (xmlAttrPtr)node));
-              arg.toArrRef().append(attribute);
+              arg.asArrRef().append(attribute);
             } else if (node->type == XML_TEXT_NODE) {
               Object text =
                 newNode(s_DOMText,
                         (xmlNodePtr)xmlNewText(xmlNodeGetContent(node)));
-              arg.toArrRef().append(text);
+              arg.asArrRef().append(text);
             } else {
               raise_warning("Unhandled node type '%d'", node->type);
               // Use a generic DOMNode as fallback for now.
               Object nodeobj = newNode(s_DOMNode,
                                        xmlCopyNode(node, /*extended*/ 1));
-              arg.toArrRef().append(nodeobj);
+              arg.asArrRef().append(nodeobj);
             }
           }
         }
@@ -449,7 +449,7 @@ HHVM_METHOD(XSLTProcessor, getParameter, const Variant& /*namespaceURI*/,
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (data->m_params.exists(localName)) {
-    assert(data->m_params[localName].isString());
+    assertx(data->m_params[localName].isString());
     return data->m_params[localName].toString();
   }
 
@@ -505,7 +505,7 @@ HHVM_METHOD(XSLTProcessor, removeParameter, const Variant& /*namespaceURI*/,
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (data->m_params.exists(localName)) {
-    assert(data->m_params[localName].isString());
+    assertx(data->m_params[localName].isString());
     data->m_params.remove(localName);
 
     return true;
@@ -549,22 +549,13 @@ HHVM_METHOD(XSLTProcessor, setParameter, const Variant& /*namespaceURI*/,
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (localName.isString() && value.isString()) {
-    if (data->m_params.exists(localName)) {
-      data->m_params.set(localName, value);
-    } else {
-      data->m_params.add(localName, value);
-    }
-
+    data->m_params.set(localName, value);
     return true;
   } else if (localName.isArray() && value.isNull()) {
     int ret = true;
     for (ArrayIter iter(localName); iter; ++iter) {
       if (iter.first().isString() && iter.second().isString()) {
-        if (data->m_params.exists(iter.first().toString())) {
-          data->m_params.set(iter.first().toString(), iter.second().toString());
-        } else {
-          data->m_params.add(iter.first().toString(), iter.second().toString());
-        }
+        data->m_params.set(iter.first().toString(), iter.second().toString());
       } else {
         ret = false;
       }

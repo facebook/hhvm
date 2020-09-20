@@ -1,12 +1,12 @@
-<?php
+<?hh
 if (!function_exists('sys_get_temp_dir')) {
   function sys_get_temp_dir() {
 
-    if (!empty($_ENV['TMP']))
+    if ($_ENV['TMP'] ?? false)
       return realpath( $_ENV['TMP'] );
-    if (!empty($_ENV['TMPDIR']))
+    if ($_ENV['TMPDIR'] ?? false)
       return realpath( $_ENV['TMPDIR'] );
-    if (!empty($_ENV['TEMP']))
+    if ($_ENV['TEMP'] ?? false)
       return realpath( $_ENV['TEMP'] );
 
     $temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
@@ -22,9 +22,9 @@ if (!function_exists('sys_get_temp_dir')) {
 if (!function_exists('my_mysql_connect')) {
   /* wrapper to simplify test porting */
   function my_mysql_connect($host, $user, $passwd, $db, $port, $socket, $flags = NULL, $persistent = false) {
-    global $connect_flags;
 
-    $flags = ($flags === NULL) ? $connect_flags : $flags;
+
+    $flags = ($flags === NULL) ? $GLOBALS['connect_flags'] : $flags;
 
     if ($socket)
       $host = sprintf("%s:%s", $host, $socket);
@@ -94,4 +94,3 @@ $TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) 
   false;
 
 $IS_MYSQLND = stristr(mysql_get_client_info(), "mysqlnd");
-?>

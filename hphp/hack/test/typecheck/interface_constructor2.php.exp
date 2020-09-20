@@ -1,11 +1,6 @@
-File "interface_constructor2.php", line 16, characters 7-7:
-Class A does not correctly implement all required methods  (Typing[4110])
-File "interface_constructor2.php", line 16, characters 20-22:
-Some methods are incompatible with those declared in type Foo
-Read the following to see why:
 File "interface_constructor2.php", line 17, characters 19-29:
-Member __construct has the wrong type
+The method `__construct` has the wrong type (Typing[4341])
 File "interface_constructor2.php", line 17, characters 31-34:
-This is a bool
+Expected `bool`
 File "interface_constructor2.php", line 13, characters 31-33:
-It is incompatible with an int
+But got `int`

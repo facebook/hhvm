@@ -30,4 +30,8 @@ function main() {
   var_dump(unserialize($s4) == $p);
 }
 
+
+<<__EntryPoint>>
+function main_unserialize_pair() {
 main();
+}

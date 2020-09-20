@@ -31,24 +31,24 @@ inline std::chrono::seconds nowAsSeconds() {
 } // namespace detail
 
 inline void ExportedTimeSeries::addValue(int64_t value) {
-  m_timeseries->addValue(detail::nowAsSeconds(), value);
+  m_timeseries.wlock()->addValue(detail::nowAsSeconds(), value);
 }
 
 inline void ExportedTimeSeries::addValue(int64_t value, int64_t times) {
-  m_timeseries->addValue(detail::nowAsSeconds(), value, times);
+  m_timeseries.wlock()->addValue(detail::nowAsSeconds(), value, times);
 }
 
 inline void ExportedTimeSeries::addValueAggregated(int64_t sum,
                                                    int64_t nsamples) {
-  m_timeseries->addValueAggregated(detail::nowAsSeconds(), sum, nsamples);
+  m_timeseries.wlock()->addValueAggregated(detail::nowAsSeconds(), sum, nsamples);
 }
 
 inline void ExportedHistogram::addValue(int64_t value) {
-  m_histogram->addValue(value);
+  m_histogram.wlock()->addValue(value);
 }
 
 inline void ExportedHistogram::removeValue(int64_t value) {
-  m_histogram->removeValue(value);
+  m_histogram.wlock()->removeValue(value);
 }
 
 }  // namespace ServiceData

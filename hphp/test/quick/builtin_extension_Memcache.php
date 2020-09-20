@@ -1,8 +1,9 @@
-<?php
-
-include __DIR__."/builtin_extensions.inc";
+<?hh
 
 class A_Memcache extends Memcache {
   public $___x;
 }
-test("Memcache");
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("Memcache");
+}

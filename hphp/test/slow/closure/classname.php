@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function t($c) {
   var_dump($c);
@@ -24,4 +24,8 @@ function main() {
   t($closure6);
 }
 
+
+<<__EntryPoint>>
+function main_classname() {
 main();
+}

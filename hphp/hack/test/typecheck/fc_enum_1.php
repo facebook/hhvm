@@ -6,6 +6,7 @@ enum Foo: int as int {
   BAZ = 3;
 }
 
+/*
 enum Bar: int {
   FOO = 1;
   BAR = 2;
@@ -38,3 +39,4 @@ function do_case(Bar $x): int {
   }
   return -1;
 }
+*/

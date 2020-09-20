@@ -1,19 +1,13 @@
-<?php
+<?hh
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Passing non array values to 'input' argument of array_unique() and see 
+ * Passing non array values to 'input' argument of array_unique() and see
  * that the function outputs proper warning messages wherever expected.
 */
-
-echo "*** Testing array_unique() : Passing non array values to \$input argument ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 // get a class
 class classA
@@ -22,6 +16,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_unique() : Passing non array values to \$input argument ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -32,7 +32,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $input argument
-$inputs = array (
+$inputs = varray [
 
        // int data
 /*1*/  0,
@@ -77,7 +77,7 @@ $inputs = array (
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs and check the behavior of array_unique()
 $iterator = 1;
@@ -90,4 +90,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
-?>
+}

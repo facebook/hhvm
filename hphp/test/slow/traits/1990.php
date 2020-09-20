@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Direct {
   use TestTrait;
@@ -30,8 +30,12 @@ trait TestTrait {
            "> __METHOD__: <" . __METHOD__ . ">";
   }
 }
+
+<<__EntryPoint>>
+function main_1990() {
 echo Direct::test()."\n";
 echo IndirectInheritance::test()."\n";
 echo Indirect::test()."\n";
 echo NoTraitUsed::test()."\n";
 echo test()."\n";
+}

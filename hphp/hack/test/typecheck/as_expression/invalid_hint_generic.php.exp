@@ -1,0 +1,6 @@
+File "invalid_hint_generic.php", line 5, characters 3-13:
+  T
+File "invalid_hint_generic.php", line 4, characters 9-9:
+Invalid `as` expression hint (Typing[4195])
+File "invalid_hint_generic.php", line 4, characters 9-9:
+The `as` operator cannot be used with an erased generic type parameter

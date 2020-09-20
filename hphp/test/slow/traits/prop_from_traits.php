@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   private $a = 1;
@@ -22,5 +22,14 @@ class A {
 }
 
 
-$a = new A();
-$a->t();
+
+<<__EntryPoint>>
+function main_prop_from_traits() {
+  $a = new A();
+  $a->t();
+
+  $cls = new ReflectionClass($a);
+  foreach ($cls->getProperties() as $prop) {
+    $prop->getAttributes();
+  }
+}

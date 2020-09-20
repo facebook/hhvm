@@ -1,6 +1,6 @@
 Test 11: php:function Support
 
-Warning: %s
+Warning: A PHP Object cannot be converted to an XPath-string in %s/xslt011.php on line 16
 <?xml version="1.0"?>
 foobar - secondArg
 foobar - 

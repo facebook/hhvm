@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_CURL_H_
-#define incl_HPHP_EXT_CURL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -55,16 +54,16 @@ Resource HHVM_FUNCTION(curl_multi_init);
 Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code);
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch);
 Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch);
-Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running);
+Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, int64_t& still_running);
 Variant HHVM_FUNCTION(curl_multi_select, const Resource& mh, double timeout = 1.0);
 Variant HHVM_FUNCTION(curl_multi_getcontent, const Resource& ch);
 Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
-                              VRefParam read_fd_set,
-                              VRefParam write_fd_set,
-                              VRefParam exc_fd_set,
-                              VRefParam max_fd = null_object);
+                              Array& read_fd_set,
+                              Array& write_fd_set,
+                              Array& exc_fd_set,
+                              int64_t& max_fd);
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
-                               VRefParam msgs_in_queue = null_object);
+                               int64_t& msgs_in_queue);
 Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
 bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
                               int option,
@@ -78,4 +77,3 @@ bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_CURL_H_

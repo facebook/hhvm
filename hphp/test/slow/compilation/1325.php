@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   function foo($x,$y) {
@@ -10,5 +10,9 @@ class X {
     return $a;
   }
 }
+
+<<__EntryPoint>>
+function main_1325() {
 $x = new X;
 var_dump($x->foo(false, true));
+}

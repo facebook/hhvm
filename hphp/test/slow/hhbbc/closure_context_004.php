@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $foo = array(1,2,3);
+  private $foo = varray[1,2,3];
 
   public function f() {
     return function () {
@@ -26,4 +26,8 @@ function main() {
   var_dump($foo->getter());
 }
 
+
+<<__EntryPoint>>
+function main_closure_context_004() {
 main();
+}

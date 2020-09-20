@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 (* Tracks the different types of mutability of a given local variable
@@ -21,7 +20,13 @@
   vars. They cannot have their object properties be written toward, and cannot be
   reassigned. They are essentially read only.
 *)
-type mut_type = Mutable | Borrowed | Const
+type mut_type =
+  | Mutable
+  | Borrowed
+  | MaybeMutable
+  | Immutable
+[@@deriving eq]
+
 type mutability = Pos.t * mut_type
 
 (* Mapping from local variables to their mutability
@@ -33,5 +38,7 @@ type mutability = Pos.t * mut_type
 type mutability_env = mutability Local_id.Map.t
 
 (* Given two mutability maps, intersect them. *)
-val intersect_mutability : mutability_env -> mutability_env -> mutability_env -> mutability_env
+val intersect_mutability :
+  mutability_env -> mutability_env -> mutability_env -> mutability_env
+
 val to_string : mutability -> string

@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/ref-data.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -25,9 +24,9 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -68,7 +67,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
     if (srcType != InvalidReg) {
       v << copy{srcType, dstType};
     } else {
-      v << ldimmq{src->type().toDataType(), dstType};
+      v << ldimmb{static_cast<data_type_t>(src->type().toDataType()), dstType};
     }
   };
 
@@ -86,15 +85,11 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
   }
 
   if (srcType != InvalidReg) {
-    emitTypeTest(v, env, typeParam, srcType, srcData, v.makeReg(), doJcc);
-    doMov();
-    return;
-  }
-
-  if (src->type() <= TBoxedCell && typeParam <= TBoxedCell) {
-    // We should never have specific known Boxed types; those should only be
-    // used for hints and predictions.
-    always_assert(!(typeParam < TBoxedInitCell));
+    // CheckType<UncountedInit> requires two tests: Uncounted, and not Uninit.
+    // If we already know the value is an InitCell, skip the second.
+    auto const relax = typeParam == TUncountedInit && src->isA(TInitCell);
+    auto const typeToCheck = relax ? TUncounted : typeParam;
+    emitTypeTest(v, env, typeToCheck, srcType, srcData, v.makeReg(), doJcc);
     doMov();
     return;
   }
@@ -113,6 +108,20 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
       typeParam.unspecialize() >= src->type()) {
     detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
                                     v.makeReg(), doJcc);
+    doMov();
+    return;
+  }
+
+  // We know that it is a string and we are checking for static str
+  if (!typeParam.isSpecialized() && typeParam <= TStaticStr) {
+    if (!src->isA(TStr)) {
+      // This could be a false negative but that's okay based on CheckType's
+      // contract
+      v << jmp{label(env, inst->taken())};
+      return;
+    }
+    detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
+                                v.makeReg(), doJcc);
     doMov();
     return;
   }
@@ -147,9 +156,11 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckTypeMem(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
+  auto const src = inst->src(0);
+  auto const srcLoc = tmpLoc(env, src);
   emitTypeCheck(vmain(env), env, inst->typeParam(),
-                src[TVOFF(m_type)], src[TVOFF(m_data)], inst->taken());
+                memTVTypePtr(src, srcLoc), memTVValPtr(src, srcLoc),
+                inst->taken());
 }
 
 void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
@@ -163,14 +174,6 @@ void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
 void cgCheckStk(IRLS& env, const IRInstruction* inst) {
   auto const baseOff = cellsToBytes(inst->extra<CheckStk>()->offset.offset);
   auto const base = srcLoc(env, inst, 0).reg()[baseOff];
-
-  emitTypeCheck(vmain(env), env, inst->typeParam(),
-                base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
-}
-
-void cgCheckRefInner(IRLS& env, const IRInstruction* inst) {
-  if (inst->typeParam() >= TInitCell) return;
-  auto const base = srcLoc(env, inst, 0).reg()[RefData::tvOffset()];
 
   emitTypeCheck(vmain(env), env, inst->typeParam(),
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
@@ -194,13 +197,12 @@ void implIsType(IRLS& env, const IRInstruction* inst, bool negate) {
     v << setcc{negate ? ccNegate(cc) : cc, sf, dst};
   };
 
-  if (src->isA(TPtrToGen)) {
-    auto const base = loc.reg();
-    emitTypeTest(v, env, inst->typeParam(), base[TVOFF(m_type)],
-                 base[TVOFF(m_data)], v.makeReg(), doJcc);
+  if (src->isA(TPtrToCell) || src->isA(TLvalToCell)) {
+    emitTypeTest(v, env, inst->typeParam(), memTVTypePtr(src, loc),
+                 memTVValPtr(src, loc), v.makeReg(), doJcc);
     return;
   }
-  assertx(src->isA(TGen));
+  assertx(src->isA(TCell));
 
   auto const data = loc.reg(0);
   auto const type = loc.reg(1) != InvalidReg
@@ -227,103 +229,6 @@ void cgIsNTypeMem(IRLS& env, const IRInstruction* inst) {
   implIsType(env, inst, true);
 }
 
-void cgIsScalarType(IRLS& env, const IRInstruction* inst) {
-  auto rtype = srcLoc(env, inst, 0).reg(1);
-  auto dst = dstLoc(env, inst, 0).reg(0);
-
-  static_assert(KindOfInt64 < KindOfPersistentString,
-                "fix checks for IsScalar");
-  static_assert(KindOfBoolean < KindOfPersistentString,
-                "fix checks for IsScalar");
-
-  static_assert(KindOfDouble > KindOfPersistentString,
-                "fix checks for IsScalar");
-  static_assert(KindOfString > KindOfPersistentString,
-                "fix checks for IsScalar");
-
-  static_assert(sizeof(DataType) == 1, "");
-
-  auto& v = vmain(env);
-
-  if (rtype == InvalidReg) {
-    auto const type = inst->src(0)->type();
-    auto const imm = type <= (TBool | TInt | TDbl | TStr);
-    v << copy{v.cns(imm), dst};
-    return;
-  }
-
-  auto const sf = v.makeReg();
-  v << cmpbi{KindOfPersistentString, rtype, sf};
-  cond(
-    v, CC_L, sf, dst,
-    [&](Vout& v) {
-      auto const sf = v.makeReg();
-      auto const dst = v.makeReg();
-      v << cmpbi{KindOfInt64, rtype, sf};
-      cond(
-        v, CC_E, sf, dst,
-        [&](Vout& v) { return v.cns(true); },
-        [&](Vout& v) {
-          auto const sf = v.makeReg();
-          auto const dst = v.makeReg();
-          v << cmpbi{KindOfBoolean, rtype, sf};
-          v << setcc{CC_E, sf, dst};
-          return dst;
-        }
-      );
-      return dst;
-    },
-    [&](Vout& v) {
-      auto const sf = v.makeReg();
-      auto const dst = v.makeReg();
-      emitTestTVType(v, sf, KindOfStringBit, rtype);
-      cond(
-        v, CC_NZ, sf, dst,
-        [&](Vout& v) { return v.cns(true); },
-        [&](Vout& v) {
-          auto const sf = v.makeReg();
-          auto const dst = v.makeReg();
-          v << cmpbi{KindOfDouble, rtype, sf};
-          v << setcc{CC_E, sf, dst};
-          return dst;
-        }
-      );
-      return dst;
-    }
-  );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void cgCheckVArray(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  auto const sf = v.makeReg();
-  v << cmpbim{ArrayData::kVArray, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_NZ, sf, inst->taken());
-  v << copy{src, dst};
-}
-
-void cgCheckDArray(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  auto const sf = v.makeReg();
-  v << cmpbim{ArrayData::kDArray, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_NZ, sf, inst->taken());
-  v << copy{src, dst};
-}
-
-void cgIsDVArray(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  auto const sf = v.makeReg();
-  v << cmpbim{ArrayData::kNotDVArray, src + ArrayData::offsetofDVArray(), sf};
-  v << setcc{CC_NZ, sf, dst};
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgAssertType(IRLS& env, const IRInstruction* inst) {
@@ -343,9 +248,6 @@ void cgAssertType(IRLS& env, const IRInstruction* inst) {
 void cgAssertLoc(IRLS&, const IRInstruction*) {}
 void cgAssertStk(IRLS&, const IRInstruction*) {}
 void cgAssertMBase(IRLS&, const IRInstruction*) {}
-void cgHintLocInner(IRLS&, const IRInstruction*) {}
-void cgHintStkInner(IRLS&, const IRInstruction*) {}
-void cgHintMBaseInner(IRLS&, const IRInstruction*) {}
 
 void cgProfileType(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RDSHandleData>();
@@ -356,6 +258,27 @@ void cgProfileType(IRLS& env, const IRInstruction* inst) {
 
   cgCallHelper(vmain(env), env, CallSpec::method(&TypeProfile::report),
                kVoidDest, SyncOptions::None, args);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(RecordReifiedGenericsAndGetTSList)
+
+void cgResolveTypeStruct(IRLS& env, const IRInstruction* inst) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<ResolveTypeStructData>();
+  auto& v = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .imm(extra->size)      // num
+    .addr(sp, cellsToBytes(extra->offset.offset)) // values
+    .imm(extra->cls)       // declaring cls
+    .ssa(1)                // called cls
+    .imm(extra->suppress)  // suppress
+    .imm(extra->isOrAsOp); // isOrAsOp
+
+  cgCallHelper(v, env, CallSpec::direct(resolveTypeStructHelper),
+               callDest(env, inst), SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

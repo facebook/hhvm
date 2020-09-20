@@ -7,5 +7,7 @@ function test(): void {
   $int_array = varray[];
   hh_show($int_array);
   $int_array[] = 42;
-  hh_show($int_array);
+  expect_vector_of_int($int_array);
 }
+
+function expect_vector_of_int(varray<int> $varr): void {}

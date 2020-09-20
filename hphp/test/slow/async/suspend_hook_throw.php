@@ -1,17 +1,13 @@
 <?hh
-
-$counter = 0;
 function throw_one_time($why, $what) {
-  global $counter;
+
   if ($what === 'a' && $why == 'exit') {
-    if ($counter++ == 1) {
+    if (AsyncSuspendHookThrow::$counter++ == 1) {
       echo "throwing\n";
       throw new exception('x');
     }
   }
 }
-
-fb_setprofile('throw_one_time');
 
 async function a() {
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
@@ -20,22 +16,34 @@ async function a() {
   echo "a woke up2\n";
 }
 
-global $z;
-$z = a();
-
 async function d() {
-  global $z;
-  try { await $z; } catch (Exception $x) { echo "d_catch\n"; }
+
+  try { await AsyncSuspendHookThrow::$z; } catch (Exception $x) { echo "d_catch\n"; }
   echo "heyo d\n";
 }
-$l = d();
 
 async function c() {
-  global $z;
-  try { await $z; } catch (Exception $x) { echo "c_catch\n"; }
+
+  try { await AsyncSuspendHookThrow::$z; } catch (Exception $x) { echo "c_catch\n"; }
   echo "c woke up\n";
 }
+
+
+<<__EntryPoint>>
+function main_suspend_hook_throw() {
+$counter = 0;
+
+fb_setprofile('throw_one_time');
+
+AsyncSuspendHookThrow::$z = a();
+$l = d();
 
 $k = c();
 HH\Asio\join($l);
 HH\Asio\join($k);
+}
+
+abstract final class AsyncSuspendHookThrow {
+  public static $counter;
+  public static $z;
+}

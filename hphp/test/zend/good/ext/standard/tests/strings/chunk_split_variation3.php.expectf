@@ -1,66 +1,80 @@
 *** Testing chunk_split() : unexpected values for 'ending' ***
 -- Iteration 1 --
-string(28) "This0 is 0simp0le s0trin0g.0"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 2 --
-string(28) "This1 is 1simp1le s1trin1g.1"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 3 --
-string(52) "This12345 is 12345simp12345le s12345trin12345g.12345"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 4 --
-string(52) "This-2345 is -2345simp-2345le s-2345trin-2345g.-2345"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 5 --
-string(46) "This10.5 is 10.5simp10.5le s10.5trin10.5g.10.5"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 6 --
-string(52) "This-10.5 is -10.5simp-10.5le s-10.5trin-10.5g.-10.5"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 7 --
-string(94) "This101234560000 is 101234560000simp101234560000le s101234560000trin101234560000g.101234560000"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 8 --
-string(100) "This1.07654321E-9 is 1.07654321E-9simp1.07654321E-9le s1.07654321E-9trin1.07654321E-9g.1.07654321E-9"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 9 --
-string(40) "This0.5 is 0.5simp0.5le s0.5trin0.5g.0.5"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 15 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 16 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 17 --
-string(28) "This1 is 1simp1le s1trin1g.1"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 18 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 19 --
-string(28) "This1 is 1simp1le s1trin1g.1"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 20 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 21 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 22 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 23 --
-string(58) "Thisobject is objectsimpobjectle sobjecttrinobjectg.object"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 24 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 25 --
-string(22) "This is simple string."
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation3.php on line 83
 Done

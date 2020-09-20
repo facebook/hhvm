@@ -1,4 +1,4 @@
-<?php
-if (HHVM_NO_DESTRUCTORS) {
+<?hh
+if (HHVM_ONE_BIT_REFCOUNT) {
   echo 'skip';
 }

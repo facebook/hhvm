@@ -1,0 +1,3 @@
+private: created in C
+
+Fatal error: Failure to resolve method name 'private_meth' in %s/inst_meth_accessibility.php on line 19

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   // php://input is backed by a MemFile
@@ -6,4 +6,8 @@ function main() {
   var_dump(fstat($f));
 }
 
+
+<<__EntryPoint>>
+function main_fstat_memfile() {
 main();
+}

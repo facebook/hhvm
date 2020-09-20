@@ -1,0 +1,44 @@
+int(2)
+int(3)
+int(2)
+int(1)
+float(2.5)
+float(3.5)
+float(2.5)
+float(1.5)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(false)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(false)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(false)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(false)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(true)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(true)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(true)
+
+Warning: Unsupported operand type (bool) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+bool(true)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+int(1)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDec.php on line %d
+NULL

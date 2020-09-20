@@ -1,19 +1,24 @@
 *** Testing exp() : usage variations ***
 
 -- Iteration 1 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 2 --
-float(2.718281828459)
+
+Warning: exp() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 3 --
-float(INF)
+
+Warning: exp() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 4 --
-float(0)
+
+Warning: exp() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 5 --
-float(INF)
+
+Warning: exp() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 6 --
 float(36315.502674247)
@@ -31,66 +36,66 @@ float(1.0000000012346)
 float(1.6487212707001)
 
 -- Iteration 11 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 12 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 13 --
-float(2.718281828459)
+
+Warning: exp() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 14 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 15 --
-float(2.718281828459)
+
+Warning: exp() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 16 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, boolean given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, string given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, object given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 24 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 25 --
-float(1)
+
+Warning: exp() expects parameter 1 to be double, null given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: exp() expects parameter 1 to be double, resource given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 ===Done===

@@ -1,15 +1,13 @@
 <?hh
 
-  function run() {
-    $a = 5;
-    $b =& $a;
-    $c =& $b;
+function run(inout $a, inout $b, inout $c) {
+  $a = "hello";
+  $b = 2;
+  $c = varray[];
 
-    $a = "hello";
-    $b = 2;
-    $c = array();
-
-    return $a;
-  }
-
-var_dump(run());
+  return $a;
+}
+<<__EntryPoint>> function main(): void {
+$a = 5;
+var_dump(run(inout $a, inout $a, inout $a));
+}

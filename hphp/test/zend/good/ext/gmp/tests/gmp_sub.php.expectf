@@ -1,34 +1,31 @@
 
-Warning: %s
-NULL
+Warning: gmp_sub() expects exactly 2 parameters, 0 given in %s/gmp_sub.php on line 3
 
-Warning: %s
-NULL
+Warning: gmp_sub() expects exactly 2 parameters, 1 given in %s/gmp_sub.php on line 4
 
-Warning: %s
+Warning: gmp_sub(): Unable to convert variable to GMP - string is not an integer in %s/gmp_sub.php on line 5
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_sub() expects exactly 2 parameters, 3 given in %s/gmp_sub.php on line 6
 
-Warning: %s
+Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s/gmp_sub.php on line 7
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(2) "-1"
 }
 string(2) "-1"
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(5) "10001"
 }
 string(5) "10001"
 
-Warning: %s
+Warning: gmp_sub(): supplied object is not a valid GMP object in %s/gmp_sub.php on line 13
 bool(false)
 string(1) "0"
 
-Warning: %s
+Warning: gmp_sub(): supplied object is not a valid GMP object in %s/gmp_sub.php on line 15
 bool(false)
 string(1) "0"
 Done

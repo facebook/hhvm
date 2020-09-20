@@ -1,5 +1,5 @@
 Basic test of POSIX posix_getrlimit function
-array(%d) {
+darray(20) {
 %a
 }
 ===DONE====

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SOCKET_H_
-#define incl_HPHP_EXT_SOCKET_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/network.h"
@@ -25,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
+bool socket_create_pair_impl(int domain, int type, int protocol, Variant& fd,
                              bool asStream);
 
 Variant HHVM_FUNCTION(socket_create,
@@ -39,19 +38,19 @@ bool HHVM_FUNCTION(socket_create_pair,
                    int domain,
                    int type,
                    int protocol,
-                   VRefParam fd);
+                   Variant& fd);
 Variant HHVM_FUNCTION(socket_get_option,
                       const Resource& socket,
                       int level,
                       int optname);
 bool HHVM_FUNCTION(socket_getpeername,
                    const Resource& socket,
-                   VRefParam address,
-                   VRefParam port = uninit_null());
+                   Variant& address,
+                   Variant& port);
 bool HHVM_FUNCTION(socket_getsockname,
                    const Resource& socket,
-                   VRefParam address,
-                   VRefParam port = uninit_null());
+                   Variant& address,
+                   Variant& port);
 bool HHVM_FUNCTION(socket_set_block,
                    const Resource& socket);
 bool HHVM_FUNCTION(socket_set_nonblock,
@@ -73,50 +72,50 @@ bool HHVM_FUNCTION(socket_listen,
                    const Resource& socket,
                    int backlog = 0);
 Variant HHVM_FUNCTION(socket_select,
-                      VRefParam read,
-                      VRefParam write,
-                      VRefParam except,
+                      Variant& read,
+                      Variant& write,
+                      Variant& except,
                       const Variant& vtv_sec,
                       int tv_usec = 0);
 Variant HHVM_FUNCTION(socket_server,
                       const String& hostname,
-                      int port = -1,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null());
+                      int port,
+                      Variant& errnum,
+                      Variant& errstr);
 Variant HHVM_FUNCTION(socket_accept,
                       const Resource& socket);
 Variant HHVM_FUNCTION(socket_read,
                       const Resource& socket,
-                      int length,
+                      int64_t length,
                       int type = 0);
 Variant HHVM_FUNCTION(socket_write,
                       const Resource& socket,
                       const String& buffer,
-                      int length = 0);
+                      int64_t length = 0);
 Variant HHVM_FUNCTION(socket_send,
                       const Resource& socket,
                       const String& buf,
-                      int len,
+                      int64_t len,
                       int flags);
 Variant HHVM_FUNCTION(socket_sendto,
                       const Resource& socket,
                       const String& buf,
-                      int len,
+                      int64_t  len,
                       int flags,
                       const String& addr,
                       int port = -1);
 Variant HHVM_FUNCTION(socket_recv,
                       const Resource& socket,
-                      VRefParam buf,
-                      int len,
+                      Variant& buf,
+                      int64_t len,
                       int flags);
 Variant HHVM_FUNCTION(socket_recvfrom,
                       const Resource& socket,
-                      VRefParam buf,
-                      int len,
+                      Variant& buf,
+                      int64_t len,
                       int flags,
-                      VRefParam name,
-                      VRefParam port = -1);
+                      Variant& name,
+                      Variant& port);
 bool HHVM_FUNCTION(socket_shutdown,
                    const Resource& socket,
                    int how = 0);
@@ -142,30 +141,28 @@ Variant HHVM_FUNCTION(getaddrinfo,
 
 Variant HHVM_FUNCTION(fsockopen,
                       const String& hostname,
-                      int port = -1,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      int port,
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout = -1.0);
 Variant HHVM_FUNCTION(pfsockopen,
                       const String& hostname,
-                      int port = -1,
-                      VRefParam errnum = uninit_null(),
-                      VRefParam errstr = uninit_null(),
+                      int port,
+                      Variant& errnum,
+                      Variant& errstr,
                       double timeout = -1.0);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant socket_server_impl(const HostURL &hosturl,
-                           int flags = k_STREAM_SERVER_BIND |
-                             k_STREAM_SERVER_LISTEN,
-                           VRefParam errnum = uninit_null(),
-                           VRefParam errstr = uninit_null(),
+                           int flags,
+                           Variant& errnum,
+                           Variant& errstr,
                            const Variant& context = uninit_variant);
-Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
-                      VRefParam errstr, double timeout, bool persistent,
+Variant sockopen_impl(const HostURL &hosturl, Variant& errnum,
+                      Variant& errstr, double timeout, bool persistent,
                       const Variant& context);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SOCKET_H_

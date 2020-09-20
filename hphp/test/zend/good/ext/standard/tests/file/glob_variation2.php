@@ -1,9 +1,10 @@
-<?php
+<?hh
 /* Prototype: array glob ( string $pattern [, int $flags] );
    Description: Find pathnames matching a pattern
 */
-
-$file_path = dirname(__FILE__);
+<<__EntryPoint>> function main(): void {
+$file_path = __SystemLib\hphp_test_tmppath('glob_variation2');
+mkdir($file_path);
 
 // temp dirname used here
 $dir_name = 'glob_test';
@@ -26,10 +27,8 @@ var_dump( glob("$dir_name/*"));
 var_dump( glob("$dir_name"));
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-$file_path = dirname(__FILE__);
+
 unlink("$file_path/glob_test/file.text");
 rmdir("$file_path/glob_test/");
-?>
+rmdir($file_path);
+}

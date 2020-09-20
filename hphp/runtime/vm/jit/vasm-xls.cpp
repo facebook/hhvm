@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,10 +107,10 @@ struct Use {
   unsigned pos{kMaxPos};
   /*
    * If valid, try to assign the same physical register here as `hint' was
-   * assigned at `pos'.  The `alt_hint' is for phijcc.
+   * assigned at `pos'.
    */
   Vreg hint;
-  Vreg alt_hint;
+
   /*
    * Index of phi group metadata.
    */
@@ -293,14 +293,12 @@ public:
   unsigned def_pos{kMaxPos};
   Vlabel def_block;
 
+  // List of recordbasenativesps this vreg is live across.
+  jit::vector<unsigned> recordbasenativesps{};
+
   // Copy of the Vreg's def instruction.
   Vinstr def_inst;
 };
-
-/*
- * Bitset of Vreg numbers.
- */
-using LiveSet = boost::dynamic_bitset<>;
 
 template<class Fn> void forEach(const LiveSet& bits, Fn fn) {
   for (auto i = bits.find_first(); i != bits.npos; i = bits.find_next(i)) {
@@ -321,7 +319,7 @@ struct VxlsContext {
         tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
         break;
       case Arch::ARM:
-        tmp = vixl::x17; // also used as tmp1 by MacroAssembler
+        tmp = vixl::d31;
         break;
       case Arch::PPC64:
         tmp = ppc64_asm::reg::v29;
@@ -346,8 +344,9 @@ public:
   jit::vector<Vlabel> blocks;
   // [start,end) position of each block.
   jit::vector<LiveRange> block_ranges;
-  // Per-block sp[offset] to spill-slots.
-  jit::vector<int> spill_offsets;
+  // Per-block sp[offset] to spill-slots.  folly::none in cases where we
+  // have still not reached the recordbasenativesp instruction.
+  jit::vector<folly::Optional<int>> spill_offsets;
   // Per-block live-in sets.
   jit::vector<LiveSet> livein;
 };
@@ -599,7 +598,7 @@ void insertCodeAt(jit::vector<Vinstr>& dst, unsigned& j,
   for (auto const& inst : src) {
     dst[j] = inst;
     dst[j].set_irctx(irctx);
-    dst[j++].pos = pos;
+    dst[j++].id = pos;
   }
 }
 
@@ -629,7 +628,7 @@ jit::vector<LiveRange> computePositions(Vunit& unit,
     auto const start = pos;
 
     for (auto& inst : unit.blocks[b].code) {
-      inst.pos = pos;
+      inst.id = pos;
       pos += 2;
     }
     block_ranges[b] = { start, pos };
@@ -679,23 +678,34 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp,
 /*
  * Compute the offset from `sp' to the spill area at each block start.
  */
-jit::vector<int> analyzeSP(const Vunit& unit,
-                           const jit::vector<Vlabel>& blocks,
-                           PhysReg sp) {
+jit::vector<folly::Optional<int>> analyzeSP(const Vunit& unit,
+                                            const jit::vector<Vlabel>& blocks,
+                                            PhysReg sp) {
   auto visited = boost::dynamic_bitset<>(unit.blocks.size());
-  auto spill_offsets = jit::vector<int>(unit.blocks.size());
+  auto spill_offsets = jit::vector<folly::Optional<int>>(unit.blocks.size());
 
   for (auto const b : blocks) {
-    auto offset = visited.test(b) ? spill_offsets[b] : 0;
+    auto offset = visited.test(b) ? spill_offsets[b] : folly::none;
 
-    for (auto const& inst : unit.blocks[b].code) {
-      offset -= spEffect(unit, inst, sp);
+    for (unsigned j = 0; j < unit.blocks[b].code.size(); j++) {
+      auto const& inst = unit.blocks[b].code[j];
+      if (inst.op == Vinstr::recordbasenativesp) {
+        assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
+                    "already initialized.", size_t(b), j);
+        offset = 0;
+      } else if (offset) {
+        *offset -= spEffect(unit, inst, sp);
+      }
     }
     for (auto const s : succs(unit.blocks[b])) {
       if (visited.test(s)) {
         assert_flog(offset == spill_offsets[s],
                     "sp mismatch on edge B{}->B{}, expected {} got {}",
-                    size_t(b), size_t(s), spill_offsets[s], offset);
+                    size_t(b), size_t(s),
+                    spill_offsets[s] ? std::to_string(*spill_offsets[s])
+                                     : "none",
+                    offset           ? std::to_string(*offset)
+                                     : "none");
       } else {
         spill_offsets[s] = offset;
         visited.set(s);
@@ -703,84 +713,6 @@ jit::vector<int> analyzeSP(const Vunit& unit,
     }
   }
   return spill_offsets;
-}
-
-/*
- * Compute livein set for each block.
- *
- * An iterative data-flow analysis to compute the livein sets for each block is
- * necessary for two reasons:
- *
- * 1. buildIntervals() uses the sets in a single backwards pass to build
- *    precise Intervals with live range holes, and
- *
- * 2. resolveEdges() uses the sets to discover which intervals require copies
- *    on control flow edges due to having been split.
- */
-jit::vector<LiveSet> computeLiveness(const Vunit& unit,
-                                     const Abi& abi,
-                                     const jit::vector<Vlabel>& blocks) {
-  auto livein = jit::vector<LiveSet>{unit.blocks.size()};
-  auto const preds = computePreds(unit);
-
-  auto blockPO = jit::vector<uint32_t>(unit.blocks.size());
-  auto revBlocks = blocks;
-  std::reverse(begin(revBlocks), end(revBlocks));
-
-  FTRACE(6, "computeLiveness: starting with {} blocks (unit blocks: {})\n",
-         revBlocks.size(), unit.blocks.size());
-
-  auto wl = dataflow_worklist<uint32_t>(revBlocks.size());
-
-  for (unsigned po = 0; po < revBlocks.size(); po++) {
-    wl.push(po);
-    blockPO[revBlocks[po]] = po;
-    FTRACE(6, "  - inserting block {} (po = {})\n", revBlocks[po], po);
-  }
-
-  while (!wl.empty()) {
-    auto b = revBlocks[wl.pop()];
-    auto& block = unit.blocks[b];
-
-    FTRACE(6, "  - popped block {} (po = {})\n", b, blockPO[b]);
-
-    // start with the union of the successor blocks
-    LiveSet live(unit.next_vr);
-    for (auto s : succs(block)) {
-      if (!livein[s].empty()) live |= livein[s];
-    }
-
-    // and now go through the instructions in the block in reverse order
-    for (auto const& inst : boost::adaptors::reverse(block.code)) {
-      RegSet implicit_uses, implicit_across, implicit_defs;
-      getEffects(abi, inst, implicit_uses, implicit_across, implicit_defs);
-
-      auto const vsf = Vreg{RegSF{0}};
-
-      auto const dvisit = [&] (Vreg r, Width w) {
-        live.reset(w == Width::Flags ? vsf : r);
-      };
-      auto const uvisit = [&] (Vreg r, Width w) {
-        live.set(w == Width::Flags ? vsf : r);
-      };
-
-      visitDefs(unit, inst, dvisit);
-      visit(unit, implicit_defs, dvisit);
-
-      visitUses(unit, inst, uvisit);
-      visit(unit, implicit_uses, uvisit);
-    }
-
-    if (live != livein[b]) {
-      livein[b] = live;
-      for (auto p : preds[b]) {
-        wl.push(blockPO[p]);
-        FTRACE(6, "  - reinserting block {} (po = {})\n", p, blockPO[p]);
-      }
-    }
-  }
-
-  return livein;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -933,6 +865,7 @@ struct UseVisitor {
    * register, but is still correct.
    */
   template<class R> void across(R r) { use(r, constraint(r), m_range.end + 1); }
+  void across(Vtuple uses) { for (auto r : m_unit.tuples[uses]) across(r); }
   void across(RegSet regs) { regs.forEach([&](Vreg r) { across(r); }); }
   void across(Vptr m) {
     if (m.base.isValid()) across(m.base);
@@ -952,7 +885,6 @@ private:
       if (m_inst.op == Vinstr::copyargs ||
           m_inst.op == Vinstr::copy2 ||
           m_inst.op == Vinstr::copy ||
-          (m_inst.op == Vinstr::phijcc && kind != Constraint::Sf) ||
           m_inst.op == Vinstr::phijmp) {
         // all these instructions lower to parallel copyplans, which know
         // how to load directly from constants or spilled locations
@@ -976,7 +908,7 @@ private:
  */
 jit::vector<Variable*> buildIntervals(const Vunit& unit,
                                       const VxlsContext& ctx) {
-  ONTRACE(kRegAllocLevel, printCfg(unit, ctx.blocks));
+  ONTRACE(kVasmRegAllocDetailLevel, printCfg(unit, ctx.blocks));
 
   auto variables = jit::vector<Variable*>{unit.next_vr};
 
@@ -1012,6 +944,17 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
       visitOperands(inst, uv);
       uv.use(implicit_uses);
       uv.across(implicit_across);
+      if (inst.op == Vinstr::recordbasenativesp) {
+        forEach(live, [&](Vreg r) {
+          if (!unit.regToConst.count(r)) {
+            // We mark the recordbasenativesp as a use so no spills get
+            // inserted prior to the recordbasenativesp unless they have to be.
+            uv.use(r);
+            if (!variables[r]) variables[r] = Variable::create(r);
+            variables[r]->recordbasenativesps.push_back(pos);
+          }
+        });
+      }
     }
 
     // sanity check liveness computation
@@ -1036,7 +979,7 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
     std::reverse(ivl->uses.begin(), ivl->uses.end());
     std::reverse(ivl->ranges.begin(), ivl->ranges.end());
   }
-  ONTRACE(kRegAllocLevel,
+  ONTRACE(kVasmRegAllocDetailLevel,
     printVariables("after building intervals", unit, ctx, variables);
   );
 
@@ -1128,7 +1071,7 @@ struct HintInfo {
 void addPhiGroupMember(const jit::vector<Variable*>& variables,
                        jit::vector<jit::vector<PhiVar>>& phi_groups,
                        Vreg r, unsigned pos, int pgid,
-                       Vreg hint = Vreg{}, Vreg other = Vreg{}) {
+                       Vreg hint = Vreg{}) {
   assertx(phi_groups.size() > pgid);
   assertx(!phi_groups[pgid].empty());
 
@@ -1142,7 +1085,6 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
   assertx(u.pos == pos);
 
   if (hint.isValid()) u.hint = hint;
-  if (other.isValid()) u.alt_hint = other;
 
   u.phi_group = pgid;
   phi_groups[pgid].push_back({r, u.pos});
@@ -1158,8 +1100,8 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
  * rise to n equivalence classes, each of which consists in the i-th use or def
  * variable from each phi instruction in the transitive closure of the predicate
  *
- *    P(f) := { every phijmp or phijcc which targets f, and every other phidef
- *              targeted by those phijmp's and phijcc's }
+ *    P(f) := { every phijmp which targets f, and every other phidef
+ *              targeted by those phijmp's }
  *
  * applied to F.
  *
@@ -1169,11 +1111,11 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
  *    |                                           +---------+   |
  *    |                                           |         |   |
  *    |                                           v         |   |
- *    | phijmp(x1, y1)    phijcc(x2, y2)    phijmp(x3, y3)  .   |
+ *    | phijmp(x1, y1)    phijmp(x2, y2)    phijmp(x3, y3)  .   |
  *    |       |                 |                 |         .   |
- *    |       |   +-------------+   +-------------+         .   |
- *    |       |   |             |   |                       |   |
- *    |       v   v             v   v                       |   |
+ *    |       +-----------------+   +-------------+         .   |
+ *    |       |                     |                       |   |
+ *    |       v                     v                       |   |
  *    | phidef(x4, y4)    phidef(x5, y5) -------------------+   |
  *    |       |                                                 |
  *    |______ . ________________________________________________|
@@ -1184,19 +1126,19 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
  *    | phijmp(x6, y6)--->phidef(x7, y7)  |
  *    |___________________________________|
  *
- * The equivalence classes in this example are {x1, ..., x5}, {y1, ..., y5},
- * {x6, x7}, and {y6, y7}.
+ * The equivalence classes in this example are {x1, x2, x4}, {y1, y2, y4},
+ * {x3, x5}, {y3, y5}, {x6, x7}, and {y6, y7}.
  *
  * We use these equivalence classes during register allocation to try to assign
  * the same register to all the variables in a phi group (at least at those
  * positions where the phi instructions occur).
  *
  * Note that this equivalence relation does /not/ capture the idea that we
- * probably want the same register for x4 as we do for x6 and x7.  To track
- * that information, we set the `hint' on phi uses to the corresponding phidef
- * variable (or one of the two, in the case of phijcc), then let the hint back
- * propagation pass handle it.  (Note that we do /not/ set the `hint' field at
- * phi defs, nor do we try to use it at any point.)
+ * probably want the same register for x4 as we do for x6 and x7.  To track that
+ * information, we set the `hint' on phi uses to the corresponding phidef
+ * variable, then let the hint back propagation pass handle it.  (Note that we
+ * do /not/ set the `hint' field at phi defs, nor do we try to use it at any
+ * point.)
  */
 jit::vector<jit::vector<PhiVar>>
 analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
@@ -1257,60 +1199,7 @@ analyzePhiHints(const Vunit& unit, const VxlsContext& ctx,
 
         auto const pgid = def_phi_group(defs[i], true);
         addPhiGroupMember(variables, phi_groups,
-                          uses[i], last.pos, pgid, defs[i]);
-      }
-    } else if (last.op == Vinstr::phijcc) {
-      auto const next  = last.phijcc_.targets[0];
-      auto const taken = last.phijcc_.targets[1];
-      auto const& next_inst  = unit.blocks[next].code.front();
-      auto const& taken_inst = unit.blocks[taken].code.front();
-      assertx(next_inst.op == Vinstr::phidef);
-      assertx(taken_inst.op == Vinstr::phidef);
-
-      auto const& uses  = unit.tuples[last.phijcc_.uses];
-      auto const& next_defs  = unit.tuples[next_inst.phidef_.defs];
-      auto const& taken_defs = unit.tuples[taken_inst.phidef_.defs];
-      assertx(uses.size() == next_defs.size());
-      assertx(uses.size() == taken_defs.size());
-
-      for (size_t i = 0, n = uses.size(); i < n; ++i) {
-        if (is_fixed(next_defs[i]) || is_fixed(taken_defs[i])) continue;
-
-        auto const next_pgid  = def_phi_group(next_defs[i], false);
-        auto const taken_pgid = def_phi_group(taken_defs[i], false);
-        auto pgid = next_pgid;
-
-        if (next_pgid == kInvalidPhiGroup) {
-          pgid = taken_pgid == kInvalidPhiGroup
-            ? def_phi_group(taken_defs[i], true)
-            : taken_pgid;
-          addPhiGroupMember(variables, phi_groups,
-                            next_defs[i], next_inst.pos, pgid);
-        } else if (taken_pgid == kInvalidPhiGroup) {
-          pgid = next_pgid; // we know this is valid
-          addPhiGroupMember(variables, phi_groups,
-                            taken_defs[i], taken_inst.pos, pgid);
-        } else if (next_pgid != taken_pgid) {
-          // We managed to hit phijmps to both of our target phidefs before
-          // hitting this phijcc.  This should be pretty rare, but let's go
-          // ahead and merge the two equivalence classes into one.
-          phi_groups[pgid].reserve(phi_groups[next_pgid].size() +
-                                   phi_groups[taken_pgid].size());
-          for (auto const& phiv : phi_groups[taken_pgid]) {
-            addPhiGroupMember(variables, phi_groups,
-                              phiv.r, phiv.pos, pgid);
-          }
-          phi_groups[taken_pgid].clear();
-        }
-
-        // Pick the hotter phidef as the hint, else prefer `next'.
-        auto const next_hotter =
-          static_cast<unsigned>(unit.blocks[next].area_idx) <=
-          static_cast<unsigned>(unit.blocks[taken].area_idx);
-        auto const hint  = next_hotter ? next_defs[i] : taken_defs[i];
-        auto const other = next_hotter ? taken_defs[i] : next_defs[i];
-        addPhiGroupMember(variables, phi_groups,
-                          uses[i], last.pos, pgid, hint, other);
+                          uses[i], last.id, pgid, defs[i]);
       }
     }
   }
@@ -1351,9 +1240,9 @@ PhysReg tryCoalesce(const jit::vector<Variable*>& variables,
  * first one we find.
  *
  * For a given phi node F, the first of the two hints we return is derived from
- * only those phijmps and phijccs targeting F (if F is a phidef), or from the
- * phidefs F targets (if F is a phijmp or phijcc).  The second hint accounts
- * for F's entire equivalence class---see analyzePhiHints() for more details.
+ * only those phijmps targeting F (if F is a phidef), or from the phidefs F
+ * targets (if F is a phijmp).  The second hint accounts for F's entire
+ * equivalence class---see analyzePhiHints() for more details.
  */
 folly::Optional<std::pair<PhysReg,PhysReg>>
 tryPhiHint(const jit::vector<Variable*>& variables,
@@ -1382,8 +1271,7 @@ tryPhiHint(const jit::vector<Variable*>& variables,
       assertx(phu.pos == phiv.pos);
 
       // Prefer to use a hint from a corresponding phi node.
-      if (u.hint == phiv.r || u.alt_hint == phiv.r ||
-          phu.hint == ivl->var->vreg || phu.alt_hint == ivl->var->vreg) {
+      if (u.hint == phiv.r || phu.hint == ivl->var->vreg) {
         preferred = choose(preferred, phivl->reg);
       }
       // In the end, though, we're okay with any hint from the group.
@@ -1611,7 +1499,8 @@ void Vxls::assignSpill(Interval* ivl) {
   }
 
   // Ran out of spill slots.
-  ONTRACE(kRegAllocLevel, dumpVariables(variables, spill_info.num_spills));
+  ONTRACE(kVasmRegAllocDetailLevel,
+          dumpVariables(variables, spill_info.num_spills));
   TRACE(1, "vxls-punt TooManySpills\n");
   TRACE_PUNT("LinearScan_TooManySpills");
 }
@@ -2121,9 +2010,18 @@ void insertSpill(const VxlsContext& ctx,
     assertx(pos - 1 >= range.start && pos + 1 < range.end);
     return true;
   };
-  auto pos = ivl->var->def_pos + 1;
-  assertx(checkPos(pos));
-  resolution.spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
+  auto const spill = [&] (unsigned pos) {
+    assertx(checkPos(pos));
+    resolution.spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
+  };
+  if (ivl->var->recordbasenativesps.empty()) {
+    spill(ivl->var->def_pos + 1);
+  } else {
+    for (auto const pos : ivl->var->recordbasenativesps) {
+      always_assert_flog(ivl->covers(pos), "Spilling required before native sp set");
+      spill(pos + 1);
+    }
+  }
 }
 
 /*
@@ -2258,13 +2156,6 @@ void resolveEdges(Vunit& unit, const VxlsContext& ctx,
       auto const& uses = unit.tuples[phijmp.uses];
       addPhiEdgeCopies(b1, target, 0, uses);
       inst1 = jmp{target};
-    } else if (inst1.op == Vinstr::phijcc) {
-      auto const& phijcc = inst1.phijcc_;
-      auto const& targets = phijcc.targets;
-      auto const& uses = unit.tuples[phijcc.uses];
-      addPhiEdgeCopies(b1, targets[0], 0, uses);
-      addPhiEdgeCopies(b1, targets[1], 1, uses);
-      inst1 = jcc{phijcc.cc, phijcc.sf, {targets[0], targets[1]}};
     }
 
     auto const succlist = succs(block1);
@@ -2354,7 +2245,7 @@ private:
   void rename(Vreg128& r) { r = lookup(r, Constraint::Simd); }
   void rename(VregSF& r) { r = RegSF{0}; }
   void rename(Vreg& r) { r = lookup(r, Constraint::Any); }
-  void rename(Vtuple /*t*/) { /* phijmp/phijcc+phidef handled by resolveEdges */
+  void rename(Vtuple /*t*/) { /* phijmp+phidef handled by resolveEdges */
   }
 
   PhysReg lookup(Vreg vreg, Constraint kind) {
@@ -2387,94 +2278,9 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
     }
   }
   ONTRACE(
-    kRegAllocLevel,
+    kVasmRegAllocDetailLevel,
     printVariables("after renaming operands", unit, ctx, variables);
   );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Flags liveness optimization.
-
-template <typename Inst, typename F>
-void optimize(Vunit& /*unit*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/,
-              F /*sf_live*/) {}
-
-template<typename xor_op, typename ldimm_op, typename F>
-void optimize_ldimm(Vunit& unit, ldimm_op& ldimm,
-                    Vlabel b, size_t i, F sf_live) {
-  if (!sf_live() && ldimm.s.q() == 0 && ldimm.d.isGP()) {
-    decltype(xor_op::d) d = ldimm.d;
-    unit.blocks[b].code[i] = xor_op{d, d, d, RegSF{0}};
-  }
-}
-
-template<typename F>
-void optimize(Vunit& unit, ldimmb& inst, Vlabel b, size_t i, F sf_live) {
-  optimize_ldimm<xorb>(unit, inst, b, i, sf_live);
-}
-template<typename F>
-void optimize(Vunit& unit, ldimml& inst, Vlabel b, size_t i, F sf_live) {
-  optimize_ldimm<xorl>(unit, inst, b, i, sf_live);
-}
-template<typename F>
-void optimize(Vunit& unit, ldimmq& inst, Vlabel b, size_t i, F sf_live) {
-  optimize_ldimm<xorq>(unit, inst, b, i, sf_live);
-}
-
-template<typename F>
-void optimize(Vunit& unit, lea& inst, Vlabel b, size_t i, F sf_live) {
-  if (!sf_live() && inst.d == rsp()) {
-    assertx(inst.s.base == inst.d && !inst.s.index.isValid());
-    unit.blocks[b].code[i] = addqi{inst.s.disp, inst.d, inst.d, RegSF{0}};
-  }
-}
-
-/*
- * Perform optimizations on instructions in `unit' at which no flags registers
- * are live.
- */
-void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
-                        const jit::vector<Variable*>& variables) {
-  // Currently, all our optimizations are only relevant on x64.
-  if (arch() != Arch::X64) return;
-
-  // sf_var is the physical SF register, computed from the union of VregSF
-  // registers by computeLiveness() and buildIntervals().
-  auto const sf_var = variables[VregSF(RegSF{0})];
-  auto const sf_ivl = sf_var ? sf_var->ivl() : nullptr;
-
-  for (auto const b : ctx.blocks) {
-    auto& code = unit.blocks[b].code;
-
-    for (size_t i = 0; i < code.size(); ++i) {
-      auto& inst = code[i];
-
-      /*
-       * An instruction that defines sf, where sf is not subsequently
-       * read, will have a live range going from inst.pos to inst.pos
-       * + 1. Its ok to replace such an instruction with one that
-       * doesn't modify the flags (or that modifies them in different
-       * ways), so check for a range that covers pos-1 or pos+1 to
-       * determine true liveness.
-       */
-      auto const sf_live = [&] {
-        return sf_ivl &&
-          !sf_ivl->ranges.empty() &&
-          ((inst.pos && sf_ivl->covers(inst.pos - 1)) ||
-           sf_ivl->covers(inst.pos + 1));
-      };
-
-      switch (inst.op) {
-#define O(name, ...)        \
-        case Vinstr::name:  \
-          optimize(unit, inst.name##_, b, i, sf_live); \
-          break;
-
-        VASM_OPCODES
-#undef O
-      }
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2487,7 +2293,7 @@ void optimizeSFLiveness(Vunit& unit, const VxlsContext& ctx,
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
-                    const CopyPlan& spills, MemoryRef slots,
+                    const CopyPlan& spills, folly::Optional<MemoryRef> slots,
                     unsigned pos) {
   jit::vector<Vinstr> stores;
 
@@ -2495,9 +2301,11 @@ void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     auto ivl = spills[src];
     if (!ivl) continue;
 
+    always_assert_flog(slots, "Spilling before native sp is set (pos {})",
+                       pos);
     auto slot = ivl->var->slot;
     assertx(slot >= 0 && src == ivl->reg);
-    MemoryRef ptr{slots.r + slotOffset(slot)};
+    MemoryRef ptr{slots->r + slotOffset(slot)};
 
     if (!ivl->var->wide) {
       always_assert_flog(!src.isSF(), "Tried to spill %flags");
@@ -2545,7 +2353,8 @@ void insertCopiesAt(const VxlsContext& ctx,
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
-                   const CopyPlan& plan, MemoryRef slots, unsigned pos) {
+                   const CopyPlan& plan, folly::Optional<MemoryRef> slots,
+                   unsigned pos) {
   jit::vector<Vinstr> loads;
 
   for_each_load(plan, [&] (PhysReg dst, const Interval* ivl) {
@@ -2564,7 +2373,9 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
         not_reached();
       }());
     } else if (ivl->spilled()) {
-      MemoryRef ptr{slots.r + slotOffset(ivl->var->slot)};
+      always_assert_flog(slots, "Reloading before native sp is set (pos {})",
+                         pos);
+      MemoryRef ptr{slots->r + slotOffset(ivl->var->slot)};
       if (!ivl->var->wide) {
         loads.emplace_back(load{ptr, dst});
       } else {
@@ -2585,6 +2396,12 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
 void insertCopies(Vunit& unit, const VxlsContext& ctx,
                   const jit::vector<Variable*>& /*variables*/,
                   const ResolutionPlan& resolution) {
+  auto const getSlots = [&] (folly::Optional<int> offset) {
+      folly::Optional<MemoryRef> slots;
+      if (offset) slots = ctx.sp[*offset];
+      return slots;
+  };
+
   // Insert copies inside blocks.
   for (auto const b : ctx.blocks) {
     auto& block = unit.blocks[b];
@@ -2593,7 +2410,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
     auto offset = ctx.spill_offsets[b];
 
     for (unsigned j = 0; j < code.size(); j++, pos += 2) {
-      MemoryRef slots = ctx.sp[offset];
+      auto const slots = getSlots(offset);
 
       // Spills, reg-reg moves, and loads of constant values or spill space all
       // occur between instruction.  Insert them in order.
@@ -2614,8 +2431,13 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         insertLoadsAt(code, j, c->second, slots, pos);
       }
       assertx(resolution.spills.count(pos) == 0);
-
-      offset -= spEffect(unit, code[j], ctx.sp);
+      if (code[j].op == Vinstr::recordbasenativesp) {
+        assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
+                    "already initialized.", size_t(b), j);
+        offset = 0;
+      } else if (offset) {
+        *offset -= spEffect(unit, code[j], ctx.sp);
+      }
     }
   }
 
@@ -2631,7 +2453,8 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         auto& code = block.code;
         unsigned j = code.size() - 1;
         auto const pos = ctx.block_ranges[b].end - 1;
-        auto const slots = ctx.sp[ctx.spill_offsets[succlist[0]]];
+        auto const offset = ctx.spill_offsets[succlist[0]];
+        auto const slots = getSlots(offset);
 
         // We interleave copies and loads in `edge_copies', so here and below
         // we process them separately (and pass `true' to avoid asserting).
@@ -2647,7 +2470,8 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
           auto const pos = ctx.block_ranges[s].start;
-          auto const slots = ctx.sp[ctx.spill_offsets[s]];
+          auto const offset = ctx.spill_offsets[s];
+          auto const slots = getSlots(offset);
 
           insertCopiesAt(ctx, code, j, c->second, pos);
           insertLoadsAt(code, j, c->second, slots, pos);
@@ -2710,6 +2534,10 @@ enum SpillState : uint8_t {
   // State is uninitialized. All block in-states start here.
   Uninit,
 
+  // Spill space is not currently possible; we must allocate spill space after
+  // this point.
+  NoSpillPossible,
+
   // Spill space is not currently needed; it's safe to allocate spill space
   // after this point.
   NoSpill,
@@ -2752,6 +2580,10 @@ SpillState instrInState(const Vunit& unit, const Vinstr& inst,
                         SpillState prevState, PhysReg sp) {
   switch (prevState) {
     case Uninit: break;
+
+    case NoSpillPossible:
+      if (inst.op == Vinstr::recordbasenativesp) return NoSpill;
+      return NoSpillPossible;
 
     case NoSpill:
       if (instrNeedsSpill(unit, inst, sp)) return NeedSpill;
@@ -2925,7 +2757,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     spi.used_spill_slots += extra;
   }
   if (spi.used_spill_slots == 0) return;
-  Timer t(Timer::vasm_xls_spill, unit.log_entry);
+  Timer t(Timer::vasm_reg_alloc_spill, unit.log_entry);
   always_assert(ctx.abi.canSpill);
 
   // Make sure we always allocate spill space in multiples of 16 bytes, to keep
@@ -2943,7 +2775,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
   for (uint32_t i = 0; i < ctx.blocks.size(); ++i) rpoIds[ctx.blocks[i]] = i;
 
   jit::vector<SpillStates> states(unit.blocks.size(), {Uninit, Uninit});
-  states[unit.entry].in = NoSpill;
+  states[unit.entry].in = NoSpillPossible;
   dataflow_worklist<uint32_t> worklist(unit.blocks.size());
   worklist.push(0);
 
@@ -2975,14 +2807,14 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     auto state = states[label];
     auto& block = unit.blocks[label];
 
-    // Any block with a NoSpill in-state and == NeedSpill out-state might have
-    // an instruction in it that needs spill space, which we allocate right
-    // before the instruction in question.
-    if (state.in == NoSpill && state.out == NeedSpill) {
-      auto state = NoSpill;
+    // Any block with a non NeedSpill in-state and == NeedSpill out-state might
+    // have an instruction in it that needs spill space, which we allocate
+    // right before the instruction in question.
+    if (state.in != NeedSpill && state.out == NeedSpill) {
+      auto blockState = state.in;
       for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-        state = instrInState(unit, *it, state, ctx.sp);
-        if (state == NeedSpill) {
+        blockState = instrInState(unit, *it, blockState, ctx.sp);
+        if (blockState == NeedSpill) {
           FTRACE(3, "alloc spill before {}: {}\n", label, show(unit, *it));
           alloc.set_irctx(it->irctx());
           block.code.insert(it, alloc);
@@ -2994,9 +2826,10 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     // Allocate spill space on edges from a NoSpill out-state to a NeedSpill
     // in-state.
     auto const successors = succs(block);
-    if (state.out == NoSpill) {
+    if (state.out == NoSpill || state.out == NoSpillPossible) {
       for (auto s : successors) {
         if (states[s].in == NeedSpill) {
+          assertx(state.out != NoSpillPossible);
           FTRACE(3, "alloc spill on edge from {} -> {}\n", label, s);
           auto it = std::prev(block.code.end());
           alloc.set_irctx(it->irctx());
@@ -3016,9 +2849,9 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
       block.code.insert(it, free);
     }
 
-    // Any block that ends with anything other than NoSpill needs to be walked
-    // to look for places to free spill space.
-    if (state.out != NoSpill) {
+    // Any block that ends with NeedSpill needs to be walked to look for places
+    // to free spill space.
+    if (state.out == NeedSpill) {
       processSpillExits(unit, label, state.in, free, ctx.sp);
     }
   }
@@ -3124,29 +2957,29 @@ DEBUG_ONLY void printInstr(std::ostringstream& str,
       }
       if (collapse_fixed) {
         fixed = var; // can be any.
-        fixed_covers[0] |= var->ivl()->covers(inst.pos);
-        fixed_covers[1] |= var->ivl()->covers(inst.pos + 1);
+        fixed_covers[0] |= var->ivl()->covers(inst.id);
+        fixed_covers[1] |= var->ivl()->covers(inst.id + 1);
         continue;
       }
     }
     str << " ";
-    str << draw(var, inst.pos, Light, [&](Interval* child, unsigned p) {
+    str << draw(var, inst.id, Light, [&](Interval* child, unsigned p) {
       return child->covers(p);
     });
-    str << draw(var, inst.pos, Heavy, [&](Interval* child, unsigned p) {
+    str << draw(var, inst.id, Heavy, [&](Interval* child, unsigned p) {
       return child->usedAt(p);
     });
   }
-  str << " " << draw(fixed, inst.pos, Heavy, [&](Interval*, unsigned p) {
-    assertx(p - inst.pos < 2);
-    return fixed_covers[p - inst.pos];
+  str << " " << draw(fixed, inst.id, Heavy, [&](Interval*, unsigned p) {
+    assertx(p - inst.id < 2);
+    return fixed_covers[p - inst.id];
   });
-  if (inst.pos == ctx.block_ranges[b].start) {
+  if (inst.id == ctx.block_ranges[b].start) {
     str << folly::format(" B{: <3}", size_t(b));
   } else {
     str << "     ";
   }
-  str << folly::format(" {: <3} ", inst.pos) << show(unit, inst) << "\n";
+  str << folly::format(" {: <3} ", inst.id) << show(unit, inst) << "\n";
 }
 
 DEBUG_ONLY void printVariables(const char* caption,
@@ -3237,8 +3070,8 @@ void dumpStats(const Vunit& unit, const ResolutionPlan& resolution) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void allocateRegisters(Vunit& unit, const Abi& abi) {
-  Timer timer(Timer::vasm_xls, unit.log_entry);
+void allocateRegistersWithXLS(Vunit& unit, const Abi& abi) {
+  Timer timer(Timer::vasm_reg_alloc, unit.log_entry);
   auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
 
   splitCriticalEdges(unit);
@@ -3259,7 +3092,8 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   // Perform register allocation.
   auto spill_info = assignRegisters(ctx, variables, hint_info);
 
-  ONTRACE(kRegAllocLevel, dumpVariables(variables, spill_info.num_spills));
+  ONTRACE(kVasmRegAllocDetailLevel,
+          dumpVariables(variables, spill_info.num_spills));
 
   // Insert lifetime-resolving copies, spills, and rematerializations, and
   // replace the Vreg operands in the Vinstr stream with the assigned PhysRegs.
@@ -3267,13 +3101,11 @@ void allocateRegisters(Vunit& unit, const Abi& abi) {
   renameOperands(unit, ctx, variables);
   insertCopies(unit, ctx, variables, resolution);
 
-  ONTRACE(kRegAllocLevel,
+  ONTRACE(kVasmRegAllocDetailLevel,
     dumpVariables(variables, spill_info.num_spills);
     printVariables("after inserting copies", unit, ctx, variables);
   );
 
-  // Perform optimizations based on flags liveness, then do some cleanup.
-  optimizeSFLiveness(unit, ctx, variables);
   peephole(unit, ctx);
 
   // Insert instructions for creating spill space.

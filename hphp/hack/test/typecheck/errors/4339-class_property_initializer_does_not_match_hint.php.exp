@@ -1,0 +1,6 @@
+File "4339-class_property_initializer_does_not_match_hint.php", line 5, characters 14-24:
+Wrong type hint (Typing[4339])
+File "4339-class_property_initializer_does_not_match_hint.php", line 5, characters 10-12:
+Expected `int`
+File "4339-class_property_initializer_does_not_match_hint.php", line 5, characters 19-24:
+But got `string`

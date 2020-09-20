@@ -1,0 +1,2 @@
+-vEval.ForbidDynamicCallsToClsMeth=1
+-vEval.EmitClsMethPointers=1

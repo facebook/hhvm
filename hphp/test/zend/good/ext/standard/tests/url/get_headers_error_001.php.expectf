@@ -2,11 +2,9 @@
 
 -- Testing get_headers() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: get_headers() expects at least 1 parameter, 0 given in %s/get_headers_error_001.php on line 12
 
 -- Testing get_headers() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: get_headers() expects at most 2 parameters, 3 given in %s/get_headers_error_001.php on line 19
 Done

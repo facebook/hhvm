@@ -1,13 +1,11 @@
-<?php
+<?hh
 
 namespace ABC\QRS\XYZ {
   function foo() { echo "foo\n"; }
 }
 
 namespace {
-  function main() {
+  <<__EntryPoint>> function main(): void {
     ALIAS\foo();
   }
-
-  main();
 }

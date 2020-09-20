@@ -1,0 +1,18 @@
+NULL
+NULL
+varray(1) {
+  int(5)
+}
+varray(1) {
+  int(6)
+}
+darray(2) {
+  ["Y"]=>
+  varray(1) {
+    int(5)
+  }
+  ["Z"]=>
+  varray(1) {
+    int(6)
+  }
+}

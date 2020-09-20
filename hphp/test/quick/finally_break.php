@@ -55,7 +55,7 @@ function break_finally_2(int $b): int {
   return 1;
 }
 
-function test(): void {
+<<__EntryPoint>> function test(): void {
   var_dump(break_finally_0(0));
   var_dump(break_finally_0(1));
 
@@ -68,5 +68,3 @@ function test(): void {
   var_dump(break_finally_2(340));
   var_dump(break_finally_2(10));
 }
-
-test();

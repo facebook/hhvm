@@ -1,1 +1,0 @@
-((Fatal error\: Cannot re\-assign \$this in [^\r\n]+ on line 4)|(Fatal error\: Can't use return value in write context in [^\r\n]+\/list_assignment\/assignment\-to\-this\.php on line 4))

@@ -20,9 +20,8 @@
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/source-root-info.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/file-util.h"
 
@@ -78,7 +77,7 @@ const StaticString s__SERVER("_SERVER");
 
 void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   while (!m_stopped) {
     try {
       CLISession hphpSession;
@@ -95,8 +94,8 @@ void DummySandbox::run() {
             "PHP files may not be loaded properly.\n";
         } else {
           auto server = php_global_exchange(s__SERVER, init_null());
-          forceToArray(server);
-          Array arr = server.toArrRef();
+          forceToDArray(server);
+          Array arr = server.asArrRef();
           server.unset();
           php_global_set(s__SERVER, sri.setServerVariables(std::move(arr)));
         }
@@ -111,8 +110,8 @@ void DummySandbox::run() {
                        doc.c_str(), cwd);
           bool error; std::string errorMsg;
           bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
-                                 uninit_null(), "", "", error, errorMsg, true,
-                                 false, true);
+                                 nullptr, "", "", error, errorMsg, true,
+                                 false, true, RuntimeOption::EvalPreludePath);
           if (!ret || error) {
             msg += "Unable to pre-load " + doc;
             if (!errorMsg.empty()) {
@@ -153,10 +152,10 @@ void DummySandbox::run() {
         }
         m_signum = CmdSignal::SignalNone;
       }
-    } catch (const DebuggerClientExitException &e) {
+    } catch (const DebuggerClientExitException& e) {
       // stopped by the dummy sandbox thread itself
       break;
-    } catch (const DebuggerException &e) {
+    } catch (const DebuggerException& e) {
     }
   }
 }

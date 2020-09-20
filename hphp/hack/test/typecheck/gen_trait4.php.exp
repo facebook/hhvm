@@ -1,10 +1,12 @@
 File "gen_trait4.php", line 27, characters 18-19:
 Invalid argument (Typing[4110])
-File "gen_trait4.php", line 25, characters 18-24:
-This is an object of type B
-File "gen_trait4.php", line 26, characters 5-17:
-It was implicitly typed as an object of type B during this operation
 File "gen_trait4.php", line 18, characters 30-30:
-It is incompatible with an object of type A
+Expected `A`
 File "gen_trait4.php", line 18, characters 30-30:
-Considering that this type argument is invariant with respect to Vector
+Considering that this type argument is invariant with respect to `Vector`
+File "gen_trait4.php", line 21, characters 15-15:
+But got `B`
+File "gen_trait4.php", line 13, characters 20-20:
+  via this generic `T`
+File "gen_trait4.php", line 13, characters 20-20:
+Considering that this type argument is invariant with respect to `Vector`

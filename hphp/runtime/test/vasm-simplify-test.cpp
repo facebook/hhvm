@@ -67,7 +67,7 @@ void testSetccXor() {
 
     // Test that setcc/xor pair is collapsed.
     EXPECT_EQ(
-      "B0 main\n"
+      "B0 main (1)\n"
       "movl %131(42l) => %128\n"
       "setcc NE, %128 => %130\n",
       stripWhitespace(show(unit))
@@ -92,7 +92,7 @@ void testSetccXor() {
     // Test that setcc/xor pair is not collapsed when setcc result
     // has more than one use.
     EXPECT_EQ(
-      "B0 main\n"
+      "B0 main (1)\n"
       "movl %131(42l) => %128\n"
       "setcc E, %128 => %129\n"
       "xorbi 1, %129 => %130, %132\n"
@@ -117,7 +117,7 @@ void testSetccXor() {
 
     // Check that setcc/xor pair is collapsed with different condition.
     EXPECT_EQ(
-      "B0 main\n"
+      "B0 main (1)\n"
       "movl %131(42l) => %128\n"
       "setcc E, %128 => %130\n",
       stripWhitespace(show(unit))
@@ -138,7 +138,7 @@ void testSetccXor() {
 
     // Make sure that setcc with no xor doesn't cause a buffer overrun.
     EXPECT_EQ(
-      "B0 main\n"
+      "B0 main (1)\n"
       "movl %130(42l) => %128\n"
       "setcc NE, %128 => %129\n",
       stripWhitespace(show(unit))
@@ -161,7 +161,7 @@ void testSetccXor() {
 
     // Make sure that setcc/xor with an non-1 xor constant is skipped.
     EXPECT_EQ(
-      "B0 main\n"
+      "B0 main (1)\n"
       "movl %131(42l) => %128\n"
       "setcc NE, %128 => %129\n"
       "xorbi 2, %129 => %130, %132\n",
@@ -187,7 +187,7 @@ void testSetccXor() {
 
     // Make sure that setcc/xor with xor status flags being used is skipped.
     EXPECT_EQ(
-      "B0 main\n"
+      "B0 main (1)\n"
       "movl %132(42l) => %128\n"
       "setcc NE, %128 => %129\n"
       "xorbi 1, %129 => %130, %131\n"

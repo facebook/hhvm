@@ -2,6 +2,5 @@
 
 -- Testing posix_times() function with one argument --
 
-Warning: %s
-NULL
+Warning: posix_times() expects exactly 0 parameters, 1 given in %s/posix_times_error.php on line 13
 Done

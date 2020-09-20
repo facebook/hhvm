@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class B {
   public static $a = 100;
@@ -9,4 +9,8 @@ class B {
 class C extends B {
   public static $a = 1000;
 }
-call_user_func(array('C', 'f'));
+
+<<__EntryPoint>>
+function main_1874() {
+call_user_func(varray['C', 'f']);
+}

@@ -1,0 +1,4 @@
+File "trait_conflict.bad.php", line 30, characters 7-14:
+type `T` is already assigned in `myTrait0:@E:@S` (Naming[2101])
+File "trait_conflict.bad.php", line 30, characters 7-14:
+value `val` is already assigned in `myTrait0:@E:@S` (Naming[2101])

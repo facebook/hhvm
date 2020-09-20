@@ -1,0 +1,2 @@
+File "yield_bad2.php", line 5, characters 8-9:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

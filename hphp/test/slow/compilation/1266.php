@@ -1,9 +1,13 @@
-<?php
+<?hh
 
 class A {
  public $prop = 1;
 }
- $a = 1;
+
+ <<__EntryPoint>>
+function main_1266() {
+$a = 1;
  $a = new A();
  $a->prop++;
  var_dump($a->prop);
+}

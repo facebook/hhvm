@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function wat(string $x) {
   return 12;
@@ -13,4 +13,8 @@ function main() {
  }
 }
 
+
+<<__EntryPoint>>
+function main_failing_param() {
 main();
+}

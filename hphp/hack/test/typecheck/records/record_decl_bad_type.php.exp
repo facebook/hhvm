@@ -1,0 +1,4 @@
+File "record_decl_bad_type.php", line 4, characters 3-6:
+Unbound name: `self` (Naming[2049])
+File "record_decl_bad_type.php", line 8, characters 3-6:
+Cannot use `this` outside of a class (Naming[2045])

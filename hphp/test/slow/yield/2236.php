@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   $a = new stdClass;
@@ -12,4 +12,8 @@ function main() {
     var_dump($k, $v);
   }
 }
+
+<<__EntryPoint>>
+function main_2236() {
 main();
+}

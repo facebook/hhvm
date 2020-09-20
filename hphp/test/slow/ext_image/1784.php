@@ -1,6 +1,9 @@
-<?php
+<?hh
+
 
 // Create a new image instance
+<<__EntryPoint>>
+function main_1784() {
 $im = imagecreatetruecolor(100, 100);
 // Make the background white
 imagefilledrectangle($im, 0, 0, 99, 99, 0xFFFFFF);
@@ -10,3 +13,4 @@ imagestring($im, 3, 40, 20, 'GD Library', 0xFFBA00);
 header('Content-type: image/gif');
 imagegif($im);
 imagedestroy($im);
+}

@@ -1,0 +1,47 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {}; funs = {};
+  typedefs =
+  { "\\A" ->
+    { td_pos = [4:8-9]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|classname_in_namespace.php line 4, characters 12-23),
+       (Tapply (([4:12-21], "\\HH\\classname"),
+          [(Rhint (root|classname_in_namespace.php line 4, characters 22-22),
+            (Tapply (([4:22-23], "\\C"), [])))]
+          )))
+      };
+    "\\B" ->
+    { td_pos = [5:8-9]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|classname_in_namespace.php line 5, characters 12-24),
+       (Tapply (([5:12-22], "\\classname"),
+          [(Rhint (root|classname_in_namespace.php line 5, characters 23-23),
+            (Tapply (([5:23-24], "\\C"), [])))]
+          )))
+      };
+    "\\NS\\A" ->
+    { td_pos = [8:10-11]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|classname_in_namespace.php line 8, characters 14-25),
+       (Tapply (([8:14-23], "\\HH\\classname"),
+          [(Rhint (root|classname_in_namespace.php line 8, characters 24-24),
+            (Tapply (([8:24-25], "\\NS\\C"), [])))]
+          )))
+      };
+    "\\NS\\B" ->
+    { td_pos = [9:10-11]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|classname_in_namespace.php line 9, characters 14-26),
+       (Tapply (([9:14-24], "\\classname"),
+          [(Rhint (root|classname_in_namespace.php line 9, characters 25-25),
+            (Tapply (([9:25-26], "\\NS\\C"), [])))]
+          )))
+      } };
+  consts = {} }
+
+They matched!

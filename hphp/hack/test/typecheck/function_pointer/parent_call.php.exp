@@ -1,0 +1,2 @@
+File "parent_call.php", line 14, characters 5-10:
+Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `BaseClass::foo` instead (Naming[2112])

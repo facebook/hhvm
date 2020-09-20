@@ -1,0 +1,8 @@
+File "type_arity_checked.php", line 6, characters 15-15:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "type_arity_checked.php", line 3, characters 7-7:
+Definition is here
+File "type_arity_checked.php", line 10, characters 24-24:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "type_arity_checked.php", line 3, characters 7-7:
+Definition is here

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C {
   public static function aStaticMeth(): string {
@@ -6,19 +6,19 @@ class C {
   }
 
   public function test() {
-    $f = class_meth(__CLASS__, 'aStaticMeth');
-    hh_show($f);
-    echo $f(), ' ';
-    $g = class_meth(self::class, 'aStaticMeth');
-    hh_show($g);
-    echo $g(), ' ';
     $h = class_meth(static::class, 'aStaticMeth');
     hh_show($h);
     echo $h(), ' ';
   }
 }
 
-class D extends C {
+final class D extends C {
+  public function test2() {
+    $g = class_meth(self::class, 'aStaticMeth');
+    hh_show($g);
+    echo $g(), ' ';
+  }
+
   public static function aStaticMeth(): string {
     return 'D';
   }
@@ -30,14 +30,6 @@ trait MyTr {
   }
 
   public function test() {
-    // __CLASS__ is the 'use'r class at runtime
-    $f = class_meth(__CLASS__, 'aStaticMeth');
-    hh_show($f);
-    echo $f(), ' ';
-    // self::class is the 'use'r class at runtime
-    $g = class_meth(self::class, 'aStaticMeth');
-    hh_show($g);
-    echo $g(), ' ';
     // static::class is the 'use'r class at runtime
     $h = class_meth(static::class, 'aStaticMeth');
     hh_show($h);

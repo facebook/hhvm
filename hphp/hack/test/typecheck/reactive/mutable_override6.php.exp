@@ -1,0 +1,8 @@
+File "mutable_override6.php", line 10, characters 19-19:
+The method `f` has the wrong type (Typing[4341])
+File "mutable_override6.php", line 4, characters 19-19:
+Incompatible mutabilities:
+File "mutable_override6.php", line 4, characters 19-19:
+Receiver of this function is maybe-mutable
+File "mutable_override6.php", line 10, characters 19-19:
+Receiver of this function is immutable

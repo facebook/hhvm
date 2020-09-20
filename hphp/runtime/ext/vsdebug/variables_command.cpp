@@ -14,27 +14,81 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/ext/vsdebug/command.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/php_executor.h"
+
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-variant.h"
-#include "hphp/runtime/ext/vsdebug/command.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include <folly/Format.h>
+
+using folly::format;
+
 namespace HPHP {
 namespace VSDEBUG {
+
+namespace {
+struct DebugSummaryPHPExecutor: public PHPExecutor
+{
+public:
+  DebugSummaryPHPExecutor(
+    Debugger *debugger,
+    DebuggerSession *session,
+    request_id_t m_threadId,
+    const Object &obj
+  );
+
+Variant m_debugDisplay;
+
+protected:
+  const Object &m_obj;
+
+  void callPHPCode() override;
+};
+
+DebugSummaryPHPExecutor::DebugSummaryPHPExecutor(
+  Debugger *debugger,
+  DebuggerSession *session,
+  request_id_t threadId,
+  const Object &obj
+) : PHPExecutor(debugger, session, "Debug summary returned", threadId, true)
+  , m_obj{obj}
+{
+}
+
+void DebugSummaryPHPExecutor::callPHPCode()
+{
+  try {
+    DebuggerRequestInfo* info = m_debugger->getRequestInfo();
+    bool prev = info->m_flags.doNotBreak;
+    info->m_flags.doNotBreak = true;
+    SCOPE_EXIT {
+      info->m_flags.doNotBreak = prev;
+    };
+
+    m_debugDisplay = m_obj->invokeToDebugDisplay();
+  } catch (...) {
+    // NB if we get here it's because __toDebugDisplay threw, so we'll
+    // fall back to the default action.
+  }
+}
+}
 
 const StaticString s_user("user");
 const StaticString s_core("Core");
 
 static bool isArrayObjectType(const std::string className) {
-  // HH\Vector is special in that its an object but its children should
-  // look like array indicies.
-  return className == "HH\\Vector";
+  // HH\Vector and HH\Map are special in that they are objects but their
+  // children look like array indicies.
+  return className == "HH\\Vector" || className == "HH\\Map";
 };
 
 VariablesCommand::VariablesCommand(
@@ -75,7 +129,7 @@ request_id_t VariablesCommand::targetThreadId(DebuggerSession* session) {
   throw DebuggerCommandException("Unexpected server object type");
 }
 
-const std::string& VariablesCommand::getUcVariableName(
+const std::string VariablesCommand::getUcVariableName(
   folly::dynamic& var,
   const char* ucKey
 ) {
@@ -83,7 +137,7 @@ const std::string& VariablesCommand::getUcVariableName(
   // cache the result on the object so we don't do this every
   // iteration of the sort operation.
   const std::string& str = var["name"].getString();
-  const std::string& ucStr = tryGetString(var, ucKey, "");
+  const std::string ucStr = tryGetString(var, ucKey, "");
 
   if (!ucStr.empty() || str.empty()) {
     return ucStr;
@@ -100,7 +154,7 @@ const std::string& VariablesCommand::getUcVariableName(
 
 void VariablesCommand::sortVariablesInPlace(folly::dynamic& vars) {
   constexpr char* ucKey = "uc_name";
-  assert(vars.isArray());
+  assertx(vars.isArray());
 
   std::sort(
     vars.begin(),
@@ -116,7 +170,7 @@ void VariablesCommand::sortVariablesInPlace(folly::dynamic& vars) {
   for (auto it = vars.begin(); it != vars.end(); it++) {
     try {
       it->erase(ucKey);
-    } catch (std::out_of_range e) {
+    } catch (std::out_of_range &e) {
     }
   }
 }
@@ -125,6 +179,10 @@ bool VariablesCommand::executeImpl(
   DebuggerSession* session,
   folly::dynamic* responseMsg
 ) {
+  // The request thread should not re-enter the debugger while
+  // processing this command.
+  DebuggerNoBreakContext noBreak(m_debugger);
+
   folly::dynamic body = folly::dynamic::object;
   folly::dynamic variables = folly::dynamic::array;
   auto& args = tryGetObject(getMessage(), "arguments", s_emptyArgs);
@@ -137,7 +195,7 @@ bool VariablesCommand::executeImpl(
 
     if (obj->objectType() == ServerObjectType::Scope) {
       ScopeObject* scope = static_cast<ScopeObject*>(obj);
-      addScopeVariables(session, targetThreadId(session), scope, &variables);
+      addScopeVariables(session, m_debugger, targetThreadId(session), scope, &variables);
       sortVariablesInPlace(variables);
 
       // Client can ask for a subsequence of the variables.
@@ -184,27 +242,29 @@ bool VariablesCommand::executeImpl(
 
 int VariablesCommand::countScopeVariables(
   DebuggerSession* session,
+  Debugger* debugger,
   const ScopeObject* scope,
   request_id_t requestId
 ) {
-  return addScopeVariables(session, requestId, scope, nullptr);
+  return addScopeVariables(session, debugger, requestId, scope, nullptr);
 }
 
 int VariablesCommand::addScopeVariables(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
-  assert(vars == nullptr || vars->isArray());
+  assertx(vars == nullptr || vars->isArray());
 
   switch (scope->m_scopeType) {
     case ScopeType::Locals:
-      return addLocals(session, requestId, scope, vars);
+      return addLocals(session, debugger, requestId, scope, vars);
 
     case ScopeType::ServerConstants: {
       Variant v;
-      int count = addConstants(session, requestId, s_user, nullptr);
+      int count = addConstants(session, debugger, requestId, s_user, nullptr);
       addScopeSubSection(
         session,
         "User Defined Constants",
@@ -218,7 +278,7 @@ int VariablesCommand::addScopeVariables(
         vars
       );
 
-      count = addConstants(session, requestId, s_core, nullptr);
+      count = addConstants(session, debugger, requestId, s_core, nullptr);
       addScopeSubSection(
         session,
         "System Defined Constants",
@@ -235,10 +295,10 @@ int VariablesCommand::addScopeVariables(
       return 2;
     }
     case ScopeType::Superglobals:
-      return addSuperglobalVariables(session, requestId, scope, vars);
+      return addSuperglobalVariables(session, debugger, requestId, scope, vars);
 
     default:
-      assert(false);
+      assertx(false);
   }
 
   return 0;
@@ -253,11 +313,11 @@ void VariablesCommand::addSubScopes(
   folly::dynamic* variables
 ) {
   if (subScope->m_subScopeType == ClassPropsType::UserDefinedConstants) {
-    addConstants(session, requestId, s_user, variables);
+    addConstants(session, m_debugger, requestId, s_user, variables);
     sortVariablesInPlace(*variables);
   } else if (subScope->m_subScopeType ==
               ClassPropsType::SystemDefinedConstants) {
-    addConstants(session, requestId, s_core, variables);
+    addConstants(session, m_debugger, requestId, s_core, variables);
     sortVariablesInPlace(*variables);
   } else {
     const auto obj = subScope->m_variable.toObject().get();
@@ -275,6 +335,7 @@ void VariablesCommand::addSubScopes(
         // Add all the constants for the specified class to the result array
         addClassConstants(
           session,
+          m_debugger,
           requestId,
           start,
           count,
@@ -290,6 +351,7 @@ void VariablesCommand::addSubScopes(
         // result array.
         addClassStaticProps(
           session,
+          m_debugger,
           requestId,
           start,
           count,
@@ -321,20 +383,22 @@ void VariablesCommand::addSubScopes(
 
 int VariablesCommand::addLocals(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
-  assert(scope->m_scopeType == ScopeType::Locals);
+  assertx(scope->m_scopeType == ScopeType::Locals);
 
   VMRegAnchor regAnchor;
   int count = 0;
 
   const int frameDepth = scope->m_frameDepth;
-  auto const fp = g_context->getFrameAtDepth(frameDepth);
+  auto const fp = g_context->getFrameAtDepthForDebuggerUnsafe(frameDepth);
 
   // If the frame at the specified depth has a $this, include it.
   if (fp != nullptr &&
+      !fp->isInlined() &&
       fp->func() != nullptr &&
       fp->func()->cls() != nullptr &&
       fp->hasThis()) {
@@ -342,7 +406,7 @@ int VariablesCommand::addLocals(
     count++;
     if (vars != nullptr) {
       Variant this_(fp->getThis());
-      vars->push_back(serializeVariable(session, requestId, "this", this_));
+      vars->push_back(serializeVariable(session, debugger, requestId, "this", this_));
     }
   }
 
@@ -350,73 +414,184 @@ int VariablesCommand::addLocals(
   auto const locals = getDefinedVariables(fp);
   for (ArrayIter iter(locals); iter; ++iter) {
     const std::string name = iter.first().toString().toCppString();
-    if (isSuperGlobal(name)) {
+    if (isSuperGlobal(name) || name == "this") {
       continue;
     }
 
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second())
+        serializeVariable(session, debugger, requestId, name, iter.second())
       );
     }
 
     count++;
   }
 
+  // Append the debugger specific environment.
+  if (!g_context->getDebuggerEnv().isNull()) {
+    IterateKVNoInc(
+      g_context->getDebuggerEnv().get(),
+      [&] (TypedValue k, TypedValue v) {
+        if (locals.exists(k, true) || !isStringType(type(k))) return;
+        if (vars != nullptr) {
+          vars->push_back(
+            serializeVariable(session, debugger, requestId,
+                              val(k).pstr->toCppString(), tvAsVariant(v)));
+        }
+        count++;
+      }
+    );
+  }
+
   return count;
+}
+
+int VariablesCommand::getCachedValue(
+  DebuggerSession* session,
+  const int cacheKey,
+  folly::dynamic* vars
+) {
+  int count;
+
+  folly::dynamic* cachedResult = session->getCachedVariableObject(cacheKey);
+  if (cachedResult != nullptr) {
+    // Found a cached copy of this response as a folly::dynamic. Use that.
+    count = cachedResult->size();
+    if (vars != nullptr) {
+      *vars = *cachedResult;
+    }
+    return count;
+  }
+
+  return -1;
 }
 
 int VariablesCommand::addConstants(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const StaticString& category,
   folly::dynamic* vars
 ) {
   int count = 0;
 
+  int cacheKey = -1;
+  if (category == s_core) {
+    cacheKey = DebuggerSession::kCachedVariableKeyServerConsts;
+  } else if (category == s_user) {
+    cacheKey = DebuggerSession::kCachedVariableKeyUserConsts;
+  }
+
+  if (cacheKey != -1) {
+    int cacheCount = getCachedValue(session, cacheKey, vars);
+    if (cacheCount >= 0) {
+      return cacheCount;
+    }
+  }
+
   const auto& constants = lookupDefinedConstants(true)[category].toArray();
   for (ArrayIter iter(constants); iter; ++iter) {
     const std::string name = iter.first().toString().toCppString();
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second(), true)
+        serializeVariable(session, debugger, requestId, name, iter.second(), true)
       );
     }
 
     count++;
   }
 
+  if (vars != nullptr && cacheKey != -1) {
+    // Cache the result since the same JSON array is to be requested by the
+    // client for every stack frame for every request for this pause of the
+    // target.
+    session->setCachedVariableObject(cacheKey, *vars);
+  }
+
   return count;
 }
 
+namespace {
+const auto s_GLOBALS = StaticString{"GLOBALS"};
+const auto globalKeys = {
+  StaticString{"_SERVER"},
+  StaticString{"_GET"},
+  StaticString{"_POST"},
+  StaticString{"_COOKIE"},
+  StaticString{"_FILES"},
+  StaticString{"_ENV"},
+  StaticString{"_REQUEST"},
+  StaticString{"GLOBALS"}
+};
+
+// Don't read the GLOBALS array directly through php_global; doing so warns.
+//
+// When we eliminate this array, we may add a shim to getDefinedVariables that
+// materializes it specifically for debugging. This shim doesn't need to have
+// the reffy behavior that PHP's globals array has. It can be a simple array.
+Variant globals_array() {
+  Array ret = getDefinedVariables();
+  return Variant::wrap(ret.lookup(s_GLOBALS));
+}
+}
+
 bool VariablesCommand::isSuperGlobal(const std::string& name) {
-  return name == "GLOBALS" || BuiltinSymbols::IsSuperGlobal(name);
+  static const hphp_string_set superGlobals = []() {
+    hphp_string_set superGlobals;
+    for (auto const& k : globalKeys) {
+      superGlobals.insert(k.toCppString());
+    }
+    return superGlobals;
+  }();
+  return superGlobals.count(name);
 }
 
 int VariablesCommand::addSuperglobalVariables(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
 ) {
-  assert(scope->m_scopeType == ScopeType::Superglobals);
+  assertx(scope->m_scopeType == ScopeType::Superglobals);
+
+  int cacheCount = getCachedValue(
+    session,
+    DebuggerSession::kCachedVariableKeyServerGlobals,
+    vars
+  );
+
+  if (cacheCount >= 0) {
+    return cacheCount;
+  }
 
   int count = 0;
 
-  const Array globals = php_globals_as_array();
-  for (ArrayIter iter(globals); iter; ++iter) {
-    const std::string name = iter.first().toString().toCppString();
-    if (!isSuperGlobal(name)) {
+  for (auto const& k : globalKeys) {
+    auto const& name = k.toCppString();
+    assertx(isSuperGlobal(name));
+    auto const v = k.get() == s_GLOBALS.get() ? globals_array() : php_global(k);
+    if (!v.isInitialized()) {
       continue;
     }
 
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second())
+        serializeVariable(session, debugger, requestId, name, v)
       );
     }
 
     count++;
+  }
+
+  if (vars != nullptr) {
+    // Cache the result since the same JSON array is to be requested by the
+    // client for every stack frame for every request for this pause of the
+    // target.
+    session->setCachedVariableObject(
+      DebuggerSession::kCachedVariableKeyServerGlobals,
+      *vars
+    );
   }
 
   return count;
@@ -431,6 +606,7 @@ const std::string VariablesCommand::getPHPVarName(const std::string& name) {
 
 folly::dynamic VariablesCommand::serializeVariable(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const std::string& name,
   const Variant& variable,
@@ -440,28 +616,42 @@ folly::dynamic VariablesCommand::serializeVariable(
   folly::dynamic var = folly::dynamic::object;
   const std::string variableName = doNotModifyName ? name : getPHPVarName(name);
 
+  auto value = getVariableValue(session, debugger, requestId, variable);
+
   var["name"] = variableName;
-  var["value"] = getVariableValue(variable);
+  var["value"] = value.m_value;
   var["type"] = getTypeName(variable);
 
-  // If the variable is an array or object, register it as a server object and
-  // indicate how many children it has.
-  if (variable.isArray() || variable.isObject()) {
+  // If there is a summary value returned from the object, then we don't want
+  // to show children. Otherwise, if the variable is an array or object,
+  // register it as a server object and indicate how many children it has.
+  if (!value.m_hasSummaryOverride && (variable.isArray() || variable.isObject())) {
+    bool hasChildren = false;
     unsigned int id = session->generateVariableId(
       requestId,
       const_cast<Variant&>(variable)
     );
 
     if (variable.isObject()) {
-      var["namedVariables"] =
-        addObjectChildren(session, requestId, -1, -1, variable, nullptr);
+      auto obj = variable.getObjectDataOrNull();
+      if (obj != nullptr && !UNLIKELY(obj->instanceof(c_Closure::classof()))) {
+        hasChildren = true;
+        var["namedVariables"] =
+          addObjectChildren(session, debugger, requestId, -1, -1, variable, nullptr);
+      }
     } else if (variable.isDict() || variable.isKeyset()) {
+      hasChildren = true;
       var["namedVariables"] = variable.toArray().size();
     } else {
+      hasChildren = true;
       var["indexedVariables"] = variable.toArray().size();
     }
 
-    var["variablesReference"] = id;
+    if (hasChildren) {
+      var["variablesReference"] = id;
+    } else {
+      var["variablesReference"] = 0;
+    }
   }
 
   if (presentationHint != nullptr) {
@@ -473,54 +663,33 @@ folly::dynamic VariablesCommand::serializeVariable(
 
 const char* VariablesCommand::getTypeName(const Variant& variable) {
   switch (variable.getType()) {
+    // Could we use getDataTypeString for these, too?
+    case KindOfBoolean: return "bool";
+    case KindOfInt64:   return "int";
+
+    // Same for these - let's distinguish array types.
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      return "array";
+
     case KindOfUninit:
     case KindOfNull:
-      return "null";
-
-    case KindOfBoolean:
-      return "bool";
-
-    case KindOfInt64:
-      return "int";
-
     case KindOfDouble:
-      return "double";
-
     case KindOfPersistentString:
     case KindOfString:
-      return "string";
-
     case KindOfResource:
-      return "resource";
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray: {
-      if (variable.isVecArray()) {
-        return "vec";
-      }
-
-      if (variable.isDict()) {
-        return "dict";
-      }
-
-      if (variable.isKeyset()) {
-        return "keyset";
-      }
-
-      return "array";
-    }
+      return getDataTypeString(variable.getType()).data();
 
     case KindOfObject:
-      return variable.toCObjRef()->getClassName().c_str();
-
-    case KindOfRef:
-      return "reference";
+      return variable.asCObjRef()->getClassName().c_str();
 
     default:
       VSDebugLogger::Log(
@@ -532,23 +701,25 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
   }
 }
 
-const std::string VariablesCommand::getVariableValue(const Variant& variable) {
+const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
+  DebuggerSession* session,
+  Debugger* debugger,
+  request_id_t requestId,
+  const Variant& variable) {
   const DataType type = variable.getType();
 
   switch (type) {
     // For primitive / scalar values, just return a string representation of
     // the variable's value.
     case KindOfUninit:
-      return "undefined";
-
     case KindOfNull:
-      return "null";
+      return VariableValue{"null"};
 
     case KindOfBoolean:
-      return variable.toBooleanVal() ? "true" : "false";
+      return VariableValue{variable.toBooleanVal() ? "true" : "false"};
 
     case KindOfInt64:
-      return std::to_string(variable.toInt64Val());
+      return VariableValue{std::to_string(variable.toInt64Val())};
 
     case KindOfDouble: {
       // Convert double to string, but remove any trailing 0s after the
@@ -558,12 +729,19 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
       if (dblString[dblString.size() - 1] == '.') {
         dblString += "0";
       }
-      return dblString;
+      return VariableValue{dblString};
     }
 
     case KindOfPersistentString:
-    case KindOfString:
-      return variable.toCStrRef().toCppString();
+    case KindOfString: {
+      std::string value {variable.asCStrRef().toCppString()};
+      int maxDisplayLength =
+        debugger->getDebuggerOptions().maxReturnedStringLength;
+      if (value.length() > maxDisplayLength) {
+        value = value.substr(0, maxDisplayLength) + std::string{"..."};
+      }
+      return VariableValue{value};
+    }
 
     case KindOfResource: {
       auto res = variable.toResource();
@@ -572,45 +750,55 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
       resourceDesc += "' type='";
       resourceDesc += res->o_getResourceName().data();
       resourceDesc += "'";
-      return resourceDesc;
+      return VariableValue{resourceDesc};
     }
 
     case KindOfPersistentVec:
     case KindOfVec:
-    case KindOfPersistentArray:
-    case KindOfArray: {
-      std::string arrayDesc = "array[";
-      arrayDesc += std::to_string(variable.toArray().size());
-      arrayDesc += "]";
-      return arrayDesc;
-    }
-
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
     case KindOfPersistentDict:
-    case KindOfDict: {
-      std::string dictDisc = "dict[";
-      dictDisc += std::to_string(variable.toArray().size());
-      dictDisc += "]";
-      return dictDisc;
-    }
-
+    case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      std::string keysetDisc = "keyset[";
-      keysetDisc += std::to_string(variable.toArray().size());
-      keysetDisc += "]";
-      return keysetDisc;
+      auto const type = getDataTypeString(variable.getType());
+      auto const size = variable.toArray().size();
+      return VariableValue{format("{}[{}]", type.data(), size).str()};
     }
 
-    case KindOfRef:
-      // Note: PHP references are not supported in Hack.
-      return "reference";
-
     case KindOfObject:
-      return variable.toCObjRef()->getClassName().c_str();
+      return getObjectSummary(session, debugger, requestId, variable.asCObjRef());
 
     default:
-      return "Unexpected variable type";
+      return VariableValue{"Unexpected variable type"};
   }
+}
+
+const VariablesCommand::VariableValue VariablesCommand::getObjectSummary(
+  DebuggerSession* session,
+  Debugger* debugger,
+  request_id_t threadId,
+  const Object &obj
+) {
+  auto executor = DebugSummaryPHPExecutor{
+    debugger,
+    session,
+    threadId,
+    obj
+  };
+
+  executor.execute();
+
+  if (executor.m_debugDisplay.isString()) {
+    return VariableValue{
+      executor.m_debugDisplay.asCStrRef().toCppString(),
+      true
+    };
+  }
+
+  return VariableValue{obj->getClassName().c_str()};
 }
 
 int VariablesCommand::addComplexChildren(
@@ -624,17 +812,21 @@ int VariablesCommand::addComplexChildren(
   Variant& var = variable->m_variable;
 
   if (var.isObject()) {
-    int result = addObjectChildren(
-      session,
-      requestId,
-      start,
-      count,
-      variable->m_variable,
-      vars
-    );
+    int result = 0;
+    const auto obj = var.toObject().get();
+    if (obj != nullptr && !UNLIKELY(obj->instanceof(c_Closure::classof()))) {
+      result += addObjectChildren(
+        session,
+        m_debugger,
+        requestId,
+        start,
+        count,
+        variable->m_variable,
+        vars
+      );
+    }
 
     bool isArrayLikeObject = false;
-    const auto obj = var.toObject().get();
     if (obj != nullptr) {
       auto currentClass = obj->getVMClass();
       if (currentClass != nullptr) {
@@ -654,6 +846,7 @@ int VariablesCommand::addComplexChildren(
     // from classes up the parent chain.
     result += addClassSubScopes(
       session,
+      m_debugger,
       ClassPropsType::Constants,
       requestId,
       var,
@@ -664,6 +857,7 @@ int VariablesCommand::addComplexChildren(
     // inherited from classes up the parent chain.
     result += addClassSubScopes(
       session,
+      m_debugger,
       ClassPropsType::StaticProps,
       requestId,
       var,
@@ -672,7 +866,7 @@ int VariablesCommand::addComplexChildren(
 
     return result;
   } else if (var.isArray()) {
-    return addArrayChildren(session, requestId, start, count, variable, vars);
+    return addArrayChildren(session, m_debugger, requestId, start, count, variable, vars);
   }
 
   return 0;
@@ -680,6 +874,7 @@ int VariablesCommand::addComplexChildren(
 
 int VariablesCommand::addArrayChildren(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   int start,
   int count,
@@ -688,7 +883,7 @@ int VariablesCommand::addArrayChildren(
 ) {
   Variant& var = variable->m_variable;
 
-  assert(var.isArray());
+  assertx(var.isArray());
 
   int idx = -1;
   int added = 0;
@@ -707,7 +902,7 @@ int VariablesCommand::addArrayChildren(
 
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second(), true)
+        serializeVariable(session, debugger, requestId, name, iter.second(), true)
       );
       added++;
     }
@@ -722,11 +917,10 @@ int VariablesCommand::addArrayChildren(
 
 int VariablesCommand::addClassConstants(
   DebuggerSession* session,
-  request_id_t requestId,
-  int start,
-  int count,
-  Class* cls,
-  const Variant& var,
+  Debugger* debugger,
+  request_id_t requestId, int start,
+  int count, Class* cls,
+  const Variant& /*var*/,
   folly::dynamic* vars
 ) {
   Class* currentClass = cls;
@@ -752,6 +946,7 @@ int VariablesCommand::addClassConstants(
           vars->push_back(
             serializeVariable(
               session,
+              debugger,
               requestId,
               name,
               tvAsVariant(const_cast<TypedValueAux*>(&constant.val)),
@@ -786,11 +981,10 @@ int VariablesCommand::addClassConstants(
 
 int VariablesCommand::addClassStaticProps(
   DebuggerSession* session,
-  request_id_t requestId,
-  int start,
-  int count,
-  Class* cls,
-  const Variant& var,
+  Debugger* debugger,
+  request_id_t requestId, int start,
+  int count, Class* cls,
+  const Variant& /*var*/,
   folly::dynamic* vars
 ) {
   const std::string className = cls->name()->toCppString();
@@ -834,6 +1028,7 @@ int VariablesCommand::addClassStaticProps(
         vars->push_back(
           serializeVariable(
             session,
+            debugger,
             requestId,
             propName,
             variant,
@@ -905,6 +1100,7 @@ int VariablesCommand::addScopeSubSection(
 
 int VariablesCommand::addClassSubScopes(
   DebuggerSession* session,
+  Debugger* debugger,
   ClassPropsType propType,
   request_id_t requestId,
   const Variant& var,
@@ -929,6 +1125,7 @@ int VariablesCommand::addClassSubScopes(
     case ClassPropsType::Constants: {
         count = addClassConstants(
           session,
+          debugger,
           requestId,
           0,
           0,
@@ -958,6 +1155,7 @@ int VariablesCommand::addClassSubScopes(
         className = currentClass->name()->toCppString();
         count = addClassStaticProps(
           session,
+          debugger,
           requestId,
           0,
           0,
@@ -984,7 +1182,7 @@ int VariablesCommand::addClassSubScopes(
       }
       break;
     default:
-      assert(false);
+      assertx(false);
   }
 
   return subScopeCount;
@@ -996,7 +1194,6 @@ void VariablesCommand::forEachInstanceProp(
     const std::string& objectClassName,
     const std::string& propName,
     const std::string& propClassName,
-    const std::string& displayName,
     const char* visibilityDescription,
     folly::dynamic& presentationHint,
     const Variant& propertyVariant
@@ -1013,7 +1210,7 @@ void VariablesCommand::forEachInstanceProp(
   }
 
   // Instance properties on this object.
-  const Array instProps = obj->toArray();
+  const Array instProps = obj->toArray(false, true);
   const std::string className = cls->name()->toCppString();
 
   for (ArrayIter iter(instProps); iter; ++iter) {
@@ -1041,10 +1238,6 @@ void VariablesCommand::forEachInstanceProp(
       propName = propName.substr(classNameEnd + 1);
     }
 
-    const std::string displayName = isArrayObjectType(className)
-      ? propName
-      : "$" + propName;
-
     folly::dynamic presentationHint = folly::dynamic::object;
     presentationHint["visibility"] = visibilityDescription;
 
@@ -1056,7 +1249,6 @@ void VariablesCommand::forEachInstanceProp(
                              className,
                              propName,
                              propClassName,
-                             displayName,
                              visibilityDescription,
                              presentationHint,
                              propertyVariant
@@ -1085,7 +1277,6 @@ void VariablesCommand::addClassPrivateProps(
       const std::string& objectClassName,
       const std::string& propName,
       const std::string& propClassName,
-      const std::string& displayName,
       const char* visibilityDescription,
       folly::dynamic& presentationHint,
       const Variant& propertyVariant
@@ -1109,8 +1300,9 @@ void VariablesCommand::addClassPrivateProps(
       vars->push_back(
         serializeVariable(
           session,
+          m_debugger,
           requestId,
-          displayName,
+          propName,
           propertyVariant,
           true,
           &presentationHint
@@ -1127,13 +1319,14 @@ void VariablesCommand::addClassPrivateProps(
 
 int VariablesCommand::addObjectChildren(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   int start,
   int count,
   const Variant& var,
   folly::dynamic* vars
 ) {
-  assert(var.isObject());
+  assertx(var.isObject());
 
   int propCount = 0;
 
@@ -1151,7 +1344,6 @@ int VariablesCommand::addObjectChildren(
       const std::string& objectClassName,
       const std::string& propName,
       const std::string& propClassName,
-      const std::string& displayName,
       const char* visibilityDescription,
       folly::dynamic& presentationHint,
       const Variant& propertyVariant
@@ -1184,14 +1376,14 @@ int VariablesCommand::addObjectChildren(
         return true;
       }
 
-      if (properties.find(displayName) != properties.end()) {
+      if (properties.find(propName) != properties.end()) {
         // A property with this name has already been added by a derived class,
         // since we're walking the class inheritance hierarchy from the object
         // upwards, the derived property shadows this property.
         return true;
       }
 
-      properties.insert(displayName);
+      properties.insert(propName);
       propCount++;
 
       if (start >= 0 && propCount < start) {
@@ -1201,8 +1393,9 @@ int VariablesCommand::addObjectChildren(
       vars->push_back(
         serializeVariable(
           session,
+          debugger,
           requestId,
-          displayName,
+          propName,
           propertyVariant,
           true,
           &presentationHint

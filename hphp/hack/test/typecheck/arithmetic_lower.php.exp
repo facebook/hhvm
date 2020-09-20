@@ -1,0 +1,6 @@
+File "arithmetic_lower.php", line 92, characters 15-23:
+Invalid argument (Typing[4110])
+File "arithmetic_lower.php", line 4, characters 22-26:
+Expected `float`
+File "arithmetic_lower.php", line 92, characters 15-23:
+But got `int` because this is the result of an integer arithmetic operation

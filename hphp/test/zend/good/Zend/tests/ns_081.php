@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace foo {
 use \foo;
 class bar {
@@ -14,5 +14,4 @@ use foo\bar as foo1;
 new foo1;
 new foo;
 }
-?>
-===DONE===
+echo "===DONE===\n";

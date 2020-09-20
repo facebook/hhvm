@@ -1,5 +1,9 @@
 <?hh
 
+class Ref {
+  function __construct(public $value) {}
+}
+
 async function noblock() {
   echo "not blocking\n";
 }
@@ -10,18 +14,18 @@ async function block() {
   echo "block exit\n";
 }
 
-async function block_then_succeed(&$condition) {
+async function block_then_succeed(Ref $condition) {
   echo "block enter\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
-  $condition->succeed(42);
+  $condition->value->succeed(42);
 }
 
-async function block_then_fail(&$condition) {
+async function block_then_fail(Ref $condition) {
   echo "block enter\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
   echo "block exit\n";
-  $condition->fail(new Exception('horrible failure'));
+  $condition->value->fail(new Exception('horrible failure'));
 }
 
 async function condition_noblock() {
@@ -51,17 +55,19 @@ async function condition_block_ugly_fail() {
 }
 
 async function condition_block_nice_succeed() {
-  $condition = null;
-  $condition = ConditionWaitHandle::create(block_then_succeed($condition));
+  $condition = new Ref(null);
+  $condition->value = ConditionWaitHandle::create(
+    block_then_succeed($condition)
+  );
   echo "constructed ConditionWaitHandle\n";
-  return await $condition;
+  return await $condition->value;
 }
 
 async function condition_block_nice_fail() {
-  $condition = null;
-  $condition = ConditionWaitHandle::create(block_then_fail($condition));
+  $condition = new Ref(null);
+  $condition->value = ConditionWaitHandle::create(block_then_fail($condition));
   echo "constructed ConditionWaitHandle\n";
-  return await $condition;
+  return await $condition->value;
 }
 
 async function run_one(string $name) {
@@ -85,4 +91,8 @@ async function run() {
   await run_one('condition_block_nice_fail');
 }
 
+
+<<__EntryPoint>>
+function main_condition() {
 HH\Asio\join(run());
+}

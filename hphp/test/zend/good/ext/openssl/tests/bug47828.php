@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $csr = "-----BEGIN CERTIFICATE-----
 MIIEKzCCAxOgAwIBAgICAtUwDQYJKoZIhvcNAQEFBQAwgewxFjAUBgNVBC0DDQBT
 UFI5NjEyMTdOSzkxETAPBgNVBAcTCENveW9hY+FuMQswCQYDVQQIEwJERjELMAkG
@@ -29,4 +29,4 @@ $cert = str_replace("\\n", "\n", $csr);
 $arr = openssl_x509_parse($cert);
 var_dump($arr['hash']);
 echo "Done";
-?>
+}

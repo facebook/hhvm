@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_STRING_H_
-#define incl_HPHP_APC_STRING_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-typed-value.h"
@@ -56,13 +55,14 @@ struct APCString {
   }
 
   static void Delete(APCString* s) {
+    auto const allocSize = sizeof(APCString) + s->m_str.m_len + 1;
     s->~APCString();
-    std::free(s);
+    uncounted_sized_free(s, allocSize);
   }
 
   static APCString* fromHandle(APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedString ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedString ||
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
@@ -76,8 +76,8 @@ struct APCString {
   }
 
   static const APCString* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedString ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedString ||
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
@@ -121,4 +121,3 @@ private:
 
 }
 
-#endif

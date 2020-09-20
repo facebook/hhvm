@@ -1,0 +1,2 @@
+
+Catchable fatal error: Argument 1 passed to __hhvm_intrinsics\id_string() must be an instance of string, C given in %s/builtin_param_coercion.php on line 7

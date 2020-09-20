@@ -1,21 +1,21 @@
-<?php
+<?hh
 /* 
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
 
 /* Testing fgetcsv() by reading a file containing a blank line */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fgetcsv() : reading the blank line ***\n";
 
 
-$filename = dirname(__FILE__) . '/fgetcsv_variation14.tmp';
+$filename = __SystemLib\hphp_test_tmppath('fgetcsv_variation14.tmp');
 @unlink($filename);
 
-$file_modes = array ("r","rb", "rt", "r+", "r+b", "r+t",
+$file_modes = varray ["r","rb", "rt", "r+", "r+b", "r+t",
                      "a+", "a+b", "a+t",
                      "w+", "w+b", "w+t",
-                     "x+", "x+b", "x+t"); 
+                     "x+", "x+b", "x+t"]; 
 
 $loop_counter = 1;
   for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
@@ -65,4 +65,4 @@ $loop_counter = 1;
   } //end of mode loop 
 
 echo "Done\n";
-?>
+}

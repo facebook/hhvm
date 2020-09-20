@@ -30,4 +30,8 @@ function main() {
   echo $val;
   echo "\n";
 }
+
+<<__EntryPoint>>
+function main_headers() {
 main();
+}

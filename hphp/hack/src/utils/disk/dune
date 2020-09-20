@@ -1,0 +1,7 @@
+(library
+  (name disk)
+  (wrapped false)
+  (libraries
+    injector_config
+    counters
+    unix))

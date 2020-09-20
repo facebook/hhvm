@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string chop ( string $str [, string $charlist] )
  * Description: Strip whitespace (or other characters) from the end of a string
  * Source code: ext/standard/string.c
@@ -7,7 +7,7 @@
 /*
  * Testing chop(): basic functionality
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chop() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -24,4 +24,4 @@ var_dump( chop($str, $charlist) );
 var_dump( chop($str, '!') );
 
 echo "Done\n";
-?>
+}

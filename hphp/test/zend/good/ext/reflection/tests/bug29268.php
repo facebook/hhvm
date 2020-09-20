@@ -1,20 +1,18 @@
-<?php
-function __autoload($classname) {
-	echo "__autoload($classname)\n";
-	eval("class $classname {}");
-}
+<?hh
+
+class A {}
 
 class B{
-	public function doit(A $a){
-	}
+    public function doit(A $a){
+    }
 }
-
+<<__EntryPoint>> function main(): void {
 $ref = new reflectionMethod('B','doit');
-$parameters = $ref->getParameters();	
+$parameters = $ref->getParameters();
 foreach($parameters as $parameter)
 {
-	$class = $parameter->getClass();
-	echo $class->name."\n";
+    $class = $parameter->getClass();
+    echo $class->name."\n";
 }
 echo "ok\n";
-?>
+}

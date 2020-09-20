@@ -1,42 +1,42 @@
 Testing: [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
 DECODE: AS OBJECT
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
-    array(1) {
+    darray(1) {
       [0]=>
-      array(1) {
+      darray(1) {
         [0]=>
-        array(1) {
+        darray(1) {
           [0]=>
-          array(1) {
+          darray(1) {
             [0]=>
-            array(1) {
+            darray(1) {
               [0]=>
-              array(1) {
+              darray(1) {
                 [0]=>
-                array(1) {
+                darray(1) {
                   [0]=>
-                  array(1) {
+                  darray(1) {
                     [0]=>
-                    array(1) {
+                    darray(1) {
                       [0]=>
-                      array(1) {
+                      darray(1) {
                         [0]=>
-                        array(1) {
+                        darray(1) {
                           [0]=>
-                          array(1) {
+                          darray(1) {
                             [0]=>
-                            array(1) {
+                            darray(1) {
                               [0]=>
-                              array(1) {
+                              darray(1) {
                                 [0]=>
-                                array(1) {
+                                darray(1) {
                                   [0]=>
-                                  array(1) {
+                                  darray(1) {
                                     [0]=>
-                                    array(1) {
+                                    darray(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }
@@ -59,43 +59,43 @@ array(1) {
   }
 }
 DECODE: AS ARRAY
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
-    array(1) {
+    darray(1) {
       [0]=>
-      array(1) {
+      darray(1) {
         [0]=>
-        array(1) {
+        darray(1) {
           [0]=>
-          array(1) {
+          darray(1) {
             [0]=>
-            array(1) {
+            darray(1) {
               [0]=>
-              array(1) {
+              darray(1) {
                 [0]=>
-                array(1) {
+                darray(1) {
                   [0]=>
-                  array(1) {
+                  darray(1) {
                     [0]=>
-                    array(1) {
+                    darray(1) {
                       [0]=>
-                      array(1) {
+                      darray(1) {
                         [0]=>
-                        array(1) {
+                        darray(1) {
                           [0]=>
-                          array(1) {
+                          darray(1) {
                             [0]=>
-                            array(1) {
+                            darray(1) {
                               [0]=>
-                              array(1) {
+                              darray(1) {
                                 [0]=>
-                                array(1) {
+                                darray(1) {
                                   [0]=>
-                                  array(1) {
+                                  darray(1) {
                                     [0]=>
-                                    array(1) {
+                                    darray(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }
@@ -122,43 +122,43 @@ ENCODE: FROM OBJECT
 ENCODE: FROM ARRAY
 [[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]
 DECODE AGAIN: AS OBJECT
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
-    array(1) {
+    darray(1) {
       [0]=>
-      array(1) {
+      darray(1) {
         [0]=>
-        array(1) {
+        darray(1) {
           [0]=>
-          array(1) {
+          darray(1) {
             [0]=>
-            array(1) {
+            darray(1) {
               [0]=>
-              array(1) {
+              darray(1) {
                 [0]=>
-                array(1) {
+                darray(1) {
                   [0]=>
-                  array(1) {
+                  darray(1) {
                     [0]=>
-                    array(1) {
+                    darray(1) {
                       [0]=>
-                      array(1) {
+                      darray(1) {
                         [0]=>
-                        array(1) {
+                        darray(1) {
                           [0]=>
-                          array(1) {
+                          darray(1) {
                             [0]=>
-                            array(1) {
+                            darray(1) {
                               [0]=>
-                              array(1) {
+                              darray(1) {
                                 [0]=>
-                                array(1) {
+                                darray(1) {
                                   [0]=>
-                                  array(1) {
+                                  darray(1) {
                                     [0]=>
-                                    array(1) {
+                                    darray(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }
@@ -181,43 +181,43 @@ array(1) {
   }
 }
 DECODE AGAIN: AS ARRAY
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
-    array(1) {
+    darray(1) {
       [0]=>
-      array(1) {
+      darray(1) {
         [0]=>
-        array(1) {
+        darray(1) {
           [0]=>
-          array(1) {
+          darray(1) {
             [0]=>
-            array(1) {
+            darray(1) {
               [0]=>
-              array(1) {
+              darray(1) {
                 [0]=>
-                array(1) {
+                darray(1) {
                   [0]=>
-                  array(1) {
+                  darray(1) {
                     [0]=>
-                    array(1) {
+                    darray(1) {
                       [0]=>
-                      array(1) {
+                      darray(1) {
                         [0]=>
-                        array(1) {
+                        darray(1) {
                           [0]=>
-                          array(1) {
+                          darray(1) {
                             [0]=>
-                            array(1) {
+                            darray(1) {
                               [0]=>
-                              array(1) {
+                              darray(1) {
                                 [0]=>
-                                array(1) {
+                                darray(1) {
                                   [0]=>
-                                  array(1) {
+                                  darray(1) {
                                     [0]=>
-                                    array(1) {
+                                    darray(1) {
                                       [0]=>
                                       string(12) "Not too deep"
                                     }

@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * Caches a variable in the data store, only if it's not already stored.
@@ -23,7 +23,7 @@
  *   with error keys if passed an array.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_add(mixed $key_or_array,
                  mixed $var = null,
                  int $ttl = 0): mixed;
@@ -49,7 +49,7 @@ function apc_add(mixed $key_or_array,
  *   error keys if passed an array.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_store(mixed $key_or_array,
                    mixed $var = null,
                    int $ttl = 0): mixed;
@@ -66,7 +66,7 @@ function apc_store(mixed $key_or_array,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_store_as_primed_do_not_use(string $key,
                                         mixed $var): bool;
 
@@ -81,9 +81,9 @@ function apc_store_as_primed_do_not_use(string $key,
  *   on failure
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_fetch(mixed $key,
-                   mixed &$success = null): mixed;
+                   <<__OutOnly("KindOfBoolean")>> inout mixed $success): mixed;
 
 /**
  * Removes a stored variable from the cache.
@@ -93,7 +93,7 @@ function apc_fetch(mixed $key,
  * @return mixed - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_delete(mixed $key): mixed;
 
 /**
@@ -114,8 +114,8 @@ function apc_delete(mixed $key): mixed;
  *   data. This typically occurs when APC is not enabled.
  *
  */
-<<__Native>>
-function apc_cache_info(string $cache_type = "", bool $limited = false): mixed;
+<<__Native, __NonRx('APC')>>
+function apc_cache_info(string $cache_type = "", bool $limited = false): darray;
 
 /**
  * Clears the user/system cache.
@@ -123,7 +123,7 @@ function apc_cache_info(string $cache_type = "", bool $limited = false): mixed;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_clear_cache(string $cache_type = ""): bool;
 
 /**
@@ -135,8 +135,8 @@ function apc_clear_cache(string $cache_type = ""): bool;
  * @return array - Array of Shared Memory Allocation data; FALSE on failure.
  *
  */
-<<__Native>>
-function apc_sma_info(bool $limited = false): array;
+<<__NonRx('APC')>>
+function apc_sma_info(bool $limited = false): darray { return darray[]; }
 
 /**
  * Increases a stored number.
@@ -150,10 +150,11 @@ function apc_sma_info(bool $limited = false): array;
  *   FALSE on failure
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_inc(string $key,
-                 int $step = 1,
-                 mixed &$success = null): mixed;
+                 int $step,
+                 <<__OutOnly("KindOfBoolean")>>
+                 inout mixed $success): mixed;
 
 /**
  * Decreases a stored integer value.
@@ -167,10 +168,11 @@ function apc_inc(string $key,
  *   FALSE on failure
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_dec(string $key,
-                 int $step = 1,
-                 mixed &$success = null): mixed;
+                 int $step,
+                 <<__OutOnly("KindOfBoolean")>>
+                 inout mixed $success): mixed;
 
 /**
  * Update an existing old value to a new value.
@@ -182,7 +184,7 @@ function apc_dec(string $key,
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_cas(string $key,
                  int $old_cas,
                  int $new_cas): bool;
@@ -198,5 +200,31 @@ function apc_cas(string $key,
  *   array if none exist.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('APC')>>
 function apc_exists(mixed $key): mixed;
+
+/**
+ * Extend the TTL of a key in APC to now + a new ttl (or infinite). If the
+ * effective expiration of the key is longer than this, returns FALSE and
+ * does nothing.
+ *
+ * @param string $key - The key to bump. If the key is not stored in APC, then
+ *   FALSE is returned.
+ *
+ * @param int $new_ttl - The new TTL for the key. 0 means infinite TTL.
+ *
+ * @return bool - TRUE if the TTL was actually extended, FALSE otherwise.
+ */
+ <<__Native, __NonRx('APC')>>
+ function apc_extend_ttl(string $key, int $new_ttl): bool;
+
+/**
+ * Find the in-memory size of a key in APC, for debugging purposes.
+ *
+ * @param string $key - The key to find the size of.
+ *
+ * @return mixed - Returns the current size of a key or null on failure.
+ *
+ */
+<<__Native, __NonRx('APC')>>
+function apc_size(string $key): ?int;

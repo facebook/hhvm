@@ -1,15 +1,9 @@
 
-Warning: %s
+Warning: min() expects at least 1 parameter, 0 given in %s/min.php on line 3
+int(1)
 NULL
-
-Warning: %s
-NULL
-
-Warning: %s
-bool(false)
-
-Warning: %s
-NULL
+object(stdClass) (0) {
+}
 int(1)
 float(2.09)
 string(0) ""

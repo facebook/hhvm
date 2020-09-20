@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface I1 {
   const int C1 = 10;

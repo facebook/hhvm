@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_NETWORK_INTERNAL_H_
-#define incl_HPHP_EXT_NETWORK_INTERNAL_H_
+#pragma once
 
 // HOST_NAME_MAX is recommended by POSIX, but not required.
 // FreeBSD and OSX (as of 10.9) are known to not define it.
@@ -60,4 +59,3 @@
                         PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT| \
                         PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 
-#endif // incl_HPHP_EXT_NETWORK_INTERNAL_H_

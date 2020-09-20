@@ -1,9 +1,0 @@
-From foo::__callStatic:
-string(3) "abc"
-
-Notice: %s
-NULL
-From foo::__call:
-string(3) "abc"
-object(foo)#%d (0) {
-}

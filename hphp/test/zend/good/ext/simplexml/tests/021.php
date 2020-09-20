@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $ok = 1;
 $doc = simplexml_load_string('<root><exists>foo</exists></root>');
 if(!isset($doc->exists)) {
@@ -13,5 +13,5 @@ if ($ok) {
 } else {
          print "Error\n";
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

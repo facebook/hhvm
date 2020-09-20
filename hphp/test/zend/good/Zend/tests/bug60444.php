@@ -1,13 +1,15 @@
-<?php
+<?hh
 class Foo {
-	public function __construct() {
-		eval("class Bar extends Foo {}");
-		Some::foo($this);
-	}
+    public function __construct() {
+        eval("class Bar extends Foo {}");
+        Some::foo($this);
+    }
 }
 class Some {
-	public static function foo(Foo $foo) {
-	}
+    public static function foo(Foo $foo) {
+    }
 }
+<<__EntryPoint>> function main(): void {
 new Foo;
 echo "done\n";
+}

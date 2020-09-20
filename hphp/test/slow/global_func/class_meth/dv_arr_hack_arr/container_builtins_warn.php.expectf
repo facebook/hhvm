@@ -1,0 +1,93 @@
+
+Notice: Implicit clsmeth to vec conversion for shuffle() in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: array_diff() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_udiff() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_diff_assoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_diff_uassoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_udiff_assoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_udiff_uassoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_diff_key() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_diff_ukey() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_intersect() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_uintersect() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_intersect_assoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_intersect_uassoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_uintersect_assoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_uintersect_uassoc() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_intersect_key() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: array_intersect_ukey() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+NULL
+
+Warning: sort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: rsort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: asort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: arsort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: ksort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: krsort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: natsort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: natcasesort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: usort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: uasort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: uksort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Warning: array_multisort() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
+bool(false)
+
+Notice: Implicit clsmeth to vec conversion in %s/container_builtins_warn.php on line %d
+int(2)
+
+Notice: Implicit clsmeth to vec conversion in %s/container_builtins_warn.php on line %d
+bool(true)

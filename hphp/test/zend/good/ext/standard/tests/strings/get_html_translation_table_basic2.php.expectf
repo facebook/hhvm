@@ -1,6 +1,6 @@
 *** Testing get_html_translation_table() : basic functionality ***
 -- with table = HTML_ENTITIES & quote_style = ENT_COMPAT --
-array(252) {
+darray(252) {
   ["Æ"]=>
   string(7) "&AElig;"
   ["Á"]=>
@@ -507,7 +507,7 @@ array(252) {
   string(6) "&zwnj;"
 }
 -- with table = HTML_ENTITIES & quote_style = ENT_QUOTES --
-array(253) {
+darray(253) {
   ["'"]=>
   string(6) "&#039;"
   ["Æ"]=>
@@ -1016,7 +1016,7 @@ array(253) {
   string(6) "&zwnj;"
 }
 -- with table = HTML_ENTITIES & quote_style = ENT_NOQUOTES --
-array(251) {
+darray(251) {
   ["Æ"]=>
   string(7) "&AElig;"
   ["Á"]=>

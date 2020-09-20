@@ -1,0 +1,14 @@
+object(Listish) (1) {
+  ["extraData"]=>
+  object(HH\Set) (1) {
+    string(1) "1"
+  }
+}
+string(32) "19286a1fb9d389bdc6771662c169dcd1"
+object(Listish) (1) {
+  ["extraData"]=>
+  object(HH\Vector) (1) {
+    [0]=>
+    string(1) "1"
+  }
+}

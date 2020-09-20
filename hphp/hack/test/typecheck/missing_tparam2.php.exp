@@ -1,2 +1,4 @@
 File "missing_tparam2.php", line 18, characters 14-14:
-The type A expects 1 type parameter(s) (Typing[4101])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "missing_tparam2.php", line 12, characters 7-7:
+Definition is here

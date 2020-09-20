@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STRING_TAG_H_
-#define incl_HPHP_JIT_STRING_TAG_H_
+#pragma once
 
 #include <cstdint>
 
@@ -43,4 +42,3 @@ const char* string_from_tag(StringTag);
 
 }}
 
-#endif

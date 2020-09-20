@@ -1,0 +1,6 @@
+File "rx_if_implements35.php", line 17, characters 26-26:
+The method `f` has the wrong type (Typing[4341])
+File "rx_if_implements35.php", line 10, characters 26-26:
+This function is conditionally reactive (condition type: \Rx).
+File "rx_if_implements35.php", line 17, characters 26-26:
+This function is normal.

@@ -1,12 +1,16 @@
-<?php
+<?hh
 
 function less($a, $b) {
  return $a < $b;
  }
 
 function main($a) {
-  usort($a, 'less');
+  usort(inout $a, fun('less'));
   var_dump($a);
 }
 
-main(array(1,2));
+
+<<__EntryPoint>>
+function main_usort() {
+main(varray[1,2]);
+}

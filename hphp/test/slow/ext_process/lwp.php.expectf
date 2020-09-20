@@ -38,18 +38,18 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: NULL byte detected. Possible attack in %s/lwp.php on line 110
+Warning: NULL byte detected. Possible attack in %s/lwp.php on line %d
 bool(true)
 
-Warning: NULL byte detected. Possible attack in %s/lwp.php on line 111
+Warning: NULL byte detected. Possible attack in %s/lwp.php on line %d
 bool(true)
 
-Warning: NULL byte detected. Possible attack in %s/lwp.php on line 112
+Warning: NULL byte detected. Possible attack in %s/lwp.php on line %d
 bool(true)
 bool(true)
 
-Warning: NULL byte detected. Possible attack in %s/lwp.php on line 114
+Warning: NULL byte detected. Possible attack in %s/lwp.php on line %d
 bool(true)
 
-Warning: NULL byte detected. Possible attack in %s/lwp.php on line 115
+Warning: NULL byte detected. Possible attack in %s/lwp.php on line %d
 bool(true)

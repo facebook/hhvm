@@ -1,11 +1,14 @@
-<?php
+<?hh
 
 function foo(int $a): bool {}
 function nfoo(?int $a): ?bool {}
 
+
+<<__EntryPoint>>
+function main_reflection_type_basic_explicit_php7() {
 $rp = null;
 
-foreach(['nfoo','foo'] as $fName) {
+foreach(varray['nfoo','foo'] as $fName) {
   $rf = new ReflectionFunction($fName);
 
   echo "--Function $fName - Parameter--\n\n";
@@ -41,3 +44,4 @@ var_dump($rt2->isBuiltin());
 // This will trigger an error since it is not ReflectionParameter or
 // ReflectionFunctionAbstract
 $rt3 = new ReflectionType(new ReflectionClass('Exception'));
+}

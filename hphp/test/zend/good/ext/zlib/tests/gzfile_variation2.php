@@ -1,19 +1,16 @@
-<?php
+<?hh
 
-
-$use_include_path = 
-
-
-$variation = array(
+<<__EntryPoint>> function main(): void {
+$variation = darray[
   'lowercase true' => true,
   'lowercase false' =>false,
   'uppercase TRUE' =>TRUE,
   'uppercase FALSE' =>FALSE,
-  );
+  ];
 
 
 foreach ( $variation as $var ) {
-  var_dump(gzfile( $var ,  $use_include_path ) );
+  try { var_dump(gzfile( '' ,  $var ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
-?>
-===DONE===
+echo "===DONE===\n";
+}

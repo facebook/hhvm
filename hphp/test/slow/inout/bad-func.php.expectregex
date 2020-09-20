@@ -1,2 +1,0 @@
-
-((Fatal error\: syntax error, unexpected T_INOUT in [^\r\n]+\/bad\-func\.php on line 3)|(Fatal error\: A name, __construct, or __destruct keyword is expected here\. in [^\r\n]+\/bad\-func\.php on line 3))

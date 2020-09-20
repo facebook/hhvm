@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STRING_H_
-#define incl_HPHP_EXT_STRING_H_
+#pragma once
 
 #include "hphp/zend/zend-html.h"
-#include"hphp/runtime/ext/std/ext_std_misc.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/bstring.h"
@@ -129,13 +129,11 @@ TypedValue HHVM_FUNCTION(strtok,
 TypedValue HHVM_FUNCTION(str_replace,
                          const Variant& search,
                          const Variant& replace,
-                         const Variant& subject,
-                         VRefParam count = uninit_null());
+                         const Variant& subject);
 TypedValue HHVM_FUNCTION(str_ireplace,
                          const Variant& search,
                          const Variant& replace,
-                         const Variant& subject,
-                         VRefParam count = uninit_null());
+                         const Variant& subject);
 TypedValue HHVM_FUNCTION(substr_replace,
                          const Variant& str,
                          const Variant& replacement,
@@ -172,9 +170,9 @@ String HHVM_FUNCTION(htmlspecialchars,
                      bool double_encode = true);
 String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
-                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
-                     const String& charset = "ISO-8859-1",
-                     const Variant& extra = empty_array_ref);
+                     int quote_style,
+                     const String& charset,
+                     const Variant& extra);
 String HHVM_FUNCTION(quoted_printable_encode,
                      const String& str);
 String HHVM_FUNCTION(quoted_printable_decode,
@@ -234,10 +232,9 @@ Variant f_vsprintf(const String& format,
                    const Array& args);
 
 
-Variant sscanfImpl(const String& str,
-                   const String& format,
-                   const req::vector<Variant*>& args);
-TypedValue* HHVM_FN(sscanf)(ActRec* ar);
+Variant HHVM_FUNCTION(sscanf,
+                      const String& str,
+                      const String& format);
 String HHVM_FUNCTION(chr, const Variant& ascii);
 int64_t HHVM_FUNCTION(ord,
                       const String& str);
@@ -332,8 +329,6 @@ TypedValue HHVM_FUNCTION(strcspn,
                          const String& str2,
                          int start = 0,
                          int length = 0x7FFFFFFF);
-TypedValue HHVM_FUNCTION(strlen,
-                         const Variant& vstr);
 Array HHVM_FUNCTION(str_getcsv,
                     const String& str,
                     const String& delimiter = ",",
@@ -355,7 +350,7 @@ int64_t HHVM_FUNCTION(levenshtein,
 int64_t HHVM_FUNCTION(similar_text,
                       const String& first,
                       const String& second,
-                      VRefParam percent = uninit_null());
+                      double& percent);
 Variant HHVM_FUNCTION(soundex,
                       const String& str);
 Variant HHVM_FUNCTION(metaphone,
@@ -366,4 +361,3 @@ Variant HHVM_FUNCTION(metaphone,
 
 }
 
-#endif

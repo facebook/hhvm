@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SSL_SOCKET_H_
-#define incl_HPHP_SSL_SOCKET_H_
+#pragma once
 
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/socket.h"
@@ -134,7 +133,7 @@ private:
 
 struct Certificate : SweepableResourceData {
   X509 *m_cert;
-  explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
+  explicit Certificate(X509 *cert) : m_cert(cert) { assertx(m_cert);}
   ~Certificate() {
     if (m_cert) X509_free(m_cert);
   }
@@ -164,4 +163,3 @@ struct Certificate : SweepableResourceData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SSL_SOCKET_H_

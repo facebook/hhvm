@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/smashable-instr-x64.h"
 
-#include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
@@ -48,14 +47,15 @@ namespace HPHP { namespace jit { namespace x64 {
           Alignment::Smash##Inst,       \
           AlignContext::Live);          \
     auto const theStart = cb.frontier();\
-    X64Assembler a { cb };              \
+    NEW_X64_ASM(a, cb);                 \
     a.inst(__VA_ARGS__);                \
     return theStart;                    \
   }())
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
-  auto const start = EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
+  auto const start =
+    EMIT_BODY(cb, movq, Movq, 0xdeadbeeffeedface, d);
 
   auto frontier = cb.toDestAddress(cb.frontier());
   auto immp = reinterpret_cast<uint64_t*>(
@@ -64,11 +64,6 @@ TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
   *immp = imm;
 
   return start;
-}
-
-TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& fixups, int32_t imm,
-                      PhysReg r, int8_t disp) {
-  return EMIT_BODY(cb, cmpq, Cmpq, imm, r[disp]);
 }
 
 TCA emitSmashableCall(CodeBlock& cb, CGMeta& fixups, TCA target) {
@@ -101,7 +96,7 @@ void smashCmpq(TCA inst, uint32_t imm) {
 
 void smashCall(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashCall));
-  X64Assembler::patchCall(inst, inst, target);
+  X64AssemblerBase::patchCall(inst, inst, target);
 }
 
 void smashJmp(TCA inst, TCA target) {
@@ -132,7 +127,7 @@ void smashJmp(TCA inst, TCA target) {
     // we always leave the instruction in a consistent state.
     auto const imm = safe_cast<int32_t>(target - (inst + 5));
     if (inst[0] != 0xe9) {
-      assert(inst[0] == 0x0f && inst[1] == 0x1f && inst[2] == 0x44);
+      assertx(inst[0] == 0x0f && inst[1] == 0x1f && inst[2] == 0x44);
 
       auto const last = 0xff & (imm >> 24);
       auto const first = 0xe9 | ((size_t(imm) & 0xffffffULL) << 8);
@@ -151,7 +146,7 @@ void smashJmp(TCA inst, TCA target) {
 
 void smashJcc(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJcc));
-  X64Assembler::patchJcc(inst, inst, target);
+  X64AssemblerBase::patchJcc(inst, inst, target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,6 +184,20 @@ TCA smashableJccTarget(TCA inst) {
 
 ConditionCode smashableJccCond(TCA inst) {
   return DecodedInstruction(inst).jccCondCode();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool optimizeSmashedCall(TCA inst) {
+  return false;
+}
+
+bool optimizeSmashedJmp(TCA inst) {
+  return false;
+}
+
+bool optimizeSmashedJcc(TCA inst) {
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

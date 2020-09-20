@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ATOMIC_COUNTABLE_H_
-#define incl_HPHP_ATOMIC_COUNTABLE_H_
+#pragma once
 
 #include <atomic>
 #include <cstdint>
@@ -38,4 +37,3 @@ struct AtomicCountable {
 };
 
 }
-#endif

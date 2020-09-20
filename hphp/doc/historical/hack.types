@@ -7,9 +7,6 @@ Introduction
 
 With the introduction of Hack, our runtime types have gradually become richer.
 
-These new type annotations can be enabled with EnableHipHopSyntax=1 or by
-using <?hh instead of <?php as the code prologue.
-
 Some type annotation are currently enforced, others trigger warnings and some
 are just ignored. Over time we will probably implement more consistent checks.
 

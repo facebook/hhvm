@@ -1,8 +1,0 @@
-object(SplFixedArray)#%d (3) {
-  [0]=>
-  int(1)
-  [1]=>
-  %string|unicode%(1) "2"
-  [2]=>
-  bool(false)
-}

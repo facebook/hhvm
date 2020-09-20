@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_INFO_H_
-#define incl_HPHP_JIT_VASM_INFO_H_
+#pragma once
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -50,8 +49,20 @@ bool touchesMemory(Vinstr::Opcode op);
  * Returns true if the instruction writes memory.
  */
 bool writesMemory(Vinstr::Opcode op);
+
+/*
+ * Returns true if the instruction has some side-effect beyond writing to its
+ * declared outputs (It may still read from memory, for example).
+ */
+bool effectful(const Vinstr& inst);
+
+/*
+ * Returns true if the instruction's behavior depends solely on its declared
+ * inputs and has no side-effects besides writing to its declared outputs.
+ */
+bool isPure(const Vinstr& inst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

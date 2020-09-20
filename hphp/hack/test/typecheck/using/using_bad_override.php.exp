@@ -1,44 +1,24 @@
-File "using_bad_override.php", line 13, characters 7-17:
-Class BadDerived1 does not correctly implement all required methods  (Typing[4189])
-  File "using_bad_override.php", line 13, characters 27-30:
-  Some methods are incompatible with those declared in type Base
-Read the following to see why:
-  File "using_bad_override.php", line 14, characters 19-21:
-  Member foo has the wrong type
-  File "using_bad_override.php", line 10, characters 51-52:
-  This parameter is marked <<__AcceptDisposable>>
-  File "using_bad_override.php", line 14, characters 29-30:
-  This parameter is not marked <<__AcceptDisposable>>
-File "using_bad_override.php", line 17, characters 7-17:
-Class BadDerived2 does not correctly implement all required methods  (Typing[4189])
-  File "using_bad_override.php", line 17, characters 27-30:
-  Some methods are incompatible with those declared in type Base
-Read the following to see why:
-  File "using_bad_override.php", line 19, characters 19-21:
-  Member bar has the wrong type
-  File "using_bad_override.php", line 19, characters 51-52:
-  This parameter is marked <<__AcceptDisposable>>
-  File "using_bad_override.php", line 11, characters 29-30:
-  This parameter is not marked <<__AcceptDisposable>>
-File "using_bad_override.php", line 30, characters 7-18:
-Class RBadDerived1 does not correctly implement all required methods  (Typing[4207])
-  File "using_bad_override.php", line 30, characters 28-32:
-  Some methods are incompatible with those declared in type RBase
-Read the following to see why:
-  File "using_bad_override.php", line 31, characters 19-21:
-  Member foo has the wrong type
-  File "using_bad_override.php", line 27, characters 19-21:
-  This is marked <<__ReturnDisposable>>.
-  File "using_bad_override.php", line 31, characters 19-21:
-  This is not marked <<__ReturnDisposable>>.
-File "using_bad_override.php", line 34, characters 7-18:
-Class RBadDerived2 does not correctly implement all required methods  (Typing[4207])
-  File "using_bad_override.php", line 34, characters 28-32:
-  Some methods are incompatible with those declared in type RBase
-Read the following to see why:
-  File "using_bad_override.php", line 38, characters 19-21:
-  Member bar has the wrong type
-  File "using_bad_override.php", line 28, characters 19-21:
-  This is not marked <<__ReturnDisposable>>.
-  File "using_bad_override.php", line 38, characters 19-21:
-  This is marked <<__ReturnDisposable>>.
+File "using_bad_override.php", line 14, characters 19-21:
+The method `foo` has the wrong type (Typing[4341])
+File "using_bad_override.php", line 10, characters 51-52:
+This parameter is marked `<<__AcceptDisposable>>`
+File "using_bad_override.php", line 14, characters 29-30:
+This parameter is not marked `<<__AcceptDisposable>>`
+File "using_bad_override.php", line 19, characters 19-21:
+The method `bar` has the wrong type (Typing[4341])
+File "using_bad_override.php", line 19, characters 51-52:
+This parameter is marked `<<__AcceptDisposable>>`
+File "using_bad_override.php", line 11, characters 29-30:
+This parameter is not marked `<<__AcceptDisposable>>`
+File "using_bad_override.php", line 31, characters 19-21:
+The method `foo` has the wrong type (Typing[4341])
+File "using_bad_override.php", line 27, characters 19-21:
+This is marked `<<__ReturnDisposable>>`.
+File "using_bad_override.php", line 31, characters 19-21:
+This is not marked `<<__ReturnDisposable>>`.
+File "using_bad_override.php", line 38, characters 19-21:
+The method `bar` has the wrong type (Typing[4341])
+File "using_bad_override.php", line 28, characters 19-21:
+This is not marked `<<__ReturnDisposable>>`.
+File "using_bad_override.php", line 38, characters 19-21:
+This is marked `<<__ReturnDisposable>>`.

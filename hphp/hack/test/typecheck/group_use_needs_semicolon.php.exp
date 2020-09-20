@@ -1,2 +1,2 @@
-File "group_use_needs_semicolon.php", line 20, characters 3-10:
-Expected ; (Parsing[1002])
+File "group_use_needs_semicolon.php", line 18, characters 51-51:
+A semicolon `;` is expected here. (Parsing[1002])

@@ -1,5 +1,5 @@
-<?hh
+<?hh // partial
 
 function test(): varray<string> {
-  return array("tingley");
+  return varray["tingley"];
 }

@@ -1,10 +1,4 @@
-<?php
-echo "<pre>";
-test("one\n\nthree\nfour");
-test("one\n\nthree\nfour\n");
-test("\ntwo\nthree\nfour");
-test("\ntwo\nthree\nfour\n");
-test("one\ntwo\n\n\n");
+<?hh
 
 function test($string) {
     $stream = fopen('php://memory', 'r+');
@@ -17,4 +11,14 @@ function test($string) {
         var_dump($line);
     }
     echo "\n";
+}
+
+<<__EntryPoint>>
+function main_stream_get_line_returnvalue() {
+echo "<pre>";
+test("one\n\nthree\nfour");
+test("one\n\nthree\nfour\n");
+test("\ntwo\nthree\nfour");
+test("\ntwo\nthree\nfour\n");
+test("one\ntwo\n\n\n");
 }

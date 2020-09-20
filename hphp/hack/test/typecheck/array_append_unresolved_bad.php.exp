@@ -1,0 +1,6 @@
+File "array_append_unresolved_bad.php", line 12, characters 3-11:
+Invalid assignment (Typing[4110])
+File "array_append_unresolved_bad.php", line 4, characters 31-33:
+Expected `num`
+File "array_append_unresolved_bad.php", line 4, characters 61-66:
+But got `string`

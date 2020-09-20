@@ -1,0 +1,5 @@
+Success: f no context!
+Success: f no context!
+Success: g no context!
+Function g has implicit context but is marked with __NoContext
+Success: g no context!

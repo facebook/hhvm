@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $w = 1;
 $h = 50;
 $im = imagecreatetruecolor($w, $h);
@@ -12,4 +12,4 @@ for ($iy = 0; $iy < $h; $iy++) {
 }
 
 echo "OK\n";
-?>
+}

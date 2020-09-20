@@ -1,25 +1,14 @@
 <?hh // decl
 
-class Logger {
-  public static function attach($obj) {
-    $obj->logger = new Logger(get_class($obj));
-    return $obj;
-  }
-
-  private $what;
-  private function __construct($what) {
-    $this->what = $what;
-    echo "constructing {$this->what}\n";
-  }
-
-  private function __destruct() {
-    echo "destructing {$this->what}\n";
-  }
+function log_construction<T>(T $obj): T {
+  $class = get_class($obj);
+  echo "constructing $class\n";
+  return $obj;
 }
 
 class Base {
   public static function create($key) {
-    return Logger::attach(new static($key));
+    return log_construction(new static($key));
   }
 
   public function __toString() {
@@ -79,22 +68,22 @@ async function gen($exit_type) {
       echo "got bar $x\n";
       return;
     }
-    case 2: throw Logger::attach(new Exception("hello world"));
+    case 2: throw log_construction(new Exception("hello world"));
     case 3: {
       $x = await bar();
       echo "got bar $x\n";
-      throw Logger::attach(new Exception("hello world"));
+      throw log_construction(new Exception("hello world"));
     }
   }
 }
 
 async function main($exit_type) {
   echo "creating\n";
-  $gen = Logger::attach(gen($exit_type));
+  $gen = log_construction(gen($exit_type));
   $step = 0;
   do {
     echo "calling next\n";
-    $awaitable = Logger::attach(
+    $awaitable = log_construction(
       $step ? $gen->send(SentValue::create($step)) : $gen->next()
     );
     ++$step;
@@ -110,6 +99,9 @@ async function main($exit_type) {
   } while ($res);
 }
 
+
+<<__EntryPoint>>
+function main_async_generators() {
 Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 echo "start\n";
 for ($exit_type = 0; $exit_type < 4; ++$exit_type) {
@@ -122,3 +114,4 @@ for ($exit_type = 0; $exit_type < 4; ++$exit_type) {
   }
 }
 echo "end\n";
+}

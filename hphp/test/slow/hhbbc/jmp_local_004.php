@@ -7,4 +7,8 @@ function main(bool $x, bool $y) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_jmp_local_004() {
 main(true, true);
+}

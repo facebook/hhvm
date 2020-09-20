@@ -1,3 +1,1 @@
-Fun \NS\bar -> GConst \NS\C
-Fun \NS\bar -> GConstName \C
-Fun \NS\bar -> GConstName \NS\C
+GConst NS\C -> Fun NS\bar

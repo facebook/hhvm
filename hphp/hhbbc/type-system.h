@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_TYPE_SYSTEM_H_
-#define incl_HHBBC_TYPE_SYSTEM_H_
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -23,9 +22,11 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/copy-ptr.h"
+#include "hphp/util/low-ptr.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/array-provenance.h"
 
 #include "hphp/hhbbc/array-like-map.h"
 #include "hphp/hhbbc/index.h"
@@ -44,19 +45,19 @@ struct Type;
  *
  *                      Top
  *                       |
- *                 +-----+              InitGen :=  Gen - Uninit
+ *                 +-----+
  *                 |     |             InitCell := Cell - Uninit
- *                Cls   Gen---+              ?X := X + InitNull
- *                 |     |    |
- *              Cls<=c  Cell  Ref
+ *                Cls    |                   ?X := X + InitNull
  *                 |     |
- *              Cls=c    +-------------+--------+-------+-------+
- *                       |             |        |       |       |
- *                      Unc            |        |      Obj     Res
- *                       | \           |        |      /  \
- *                       |  \          |        |  Obj<=c Obj<=WaitHandle
- *                     Prim  \         |        |    |       |
- *                     / |   InitUnc   |        |  Obj=c   WaitH<T>
+ *              Cls<=c  Cell
+ *                 |     |
+ *              Cls=c    +-------------+--------+-------+-------+------------+
+ *                       |             |        |       |       |            |
+ *                      Unc            |        |      Obj     Res         Record
+ *                       | \           |        |      /  \                  |
+ *                       |  \          |        |  Obj<=c Obj<=WaitHandle Record<=c
+ *                     Prim  \         |        |    |       |               |
+ *                     / |   InitUnc   |        |  Obj=c   WaitH<T>       Record=c
  *                    /  |   /  |  |   |        |
  *                   /   |  /   |  |   |        |
  *                  /    | /    |  |   |        |
@@ -191,6 +192,8 @@ struct Type;
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr size_t kTRepBitsStored = 48;
+
 enum trep : uint64_t {
   BBottom   = 0,
 
@@ -202,45 +205,46 @@ enum trep : uint64_t {
   BDbl      = 1ULL << 5,
   BSStr     = 1ULL << 6,  // static string
   BCStr     = 1ULL << 7,  // counted string
+  BFunc     = 1ULL << 8,
 
-  BSPArrE   = 1ULL << 8, // static empty "plain" array
-  BCPArrE   = 1ULL << 9, // counted empty "plain" array
-  BSPArrN   = 1ULL << 10, // static non-empty "plain" array
-  BCPArrN   = 1ULL << 11ULL, // counted non-empty "plain array"
+  BSVArrE   = 1ULL << 9,  // static empty varray
+  BCVArrE   = 1ULL << 10, // counted empty varray
+  BSVArrN   = 1ULL << 11, // static non-empty varray
+  BCVArrN   = 1ULL << 12, // counted non-empty varray
 
-  BSVArrE   = 1ULL << 12, // static empty varray
-  BCVArrE   = 1ULL << 13, // counted empty varray
-  BSVArrN   = 1ULL << 14, // static non-empty varray
-  BCVArrN   = 1ULL << 15, // counted non-empty varray
+  BSDArrE   = 1ULL << 13, // static empty darray
+  BCDArrE   = 1ULL << 14, // counted empty darray
+  BSDArrN   = 1ULL << 15, // static non-empty darray
+  BCDArrN   = 1ULL << 16, // counted non-empty darray
 
-  BSDArrE   = 1ULL << 16, // static empty darray
-  BCDArrE   = 1ULL << 17, // counted empty darray
-  BSDArrN   = 1ULL << 18, // static non-empty darray
-  BCDArrN   = 1ULL << 19, // counted non-empty darray
+  BClsMeth  = 1ULL << 17,
 
-  BObj      = 1ULL << 20,
-  BRes      = 1ULL << 21,
-  BCls      = 1ULL << 22,
-  BRef      = 1ULL << 23,
+  BObj      = 1ULL << 18,
+  BRes      = 1ULL << 19,
+  BCls      = 1ULL << 20,
 
-  BSVecE    = 1ULL << 24, // static empty vec
-  BCVecE    = 1ULL << 25, // counted empty vec
-  BSVecN    = 1ULL << 26, // static non-empty vec
-  BCVecN    = 1ULL << 27, // counted non-empty vec
-  BSDictE   = 1ULL << 28, // static empty dict
-  BCDictE   = 1ULL << 29, // counted empty dict
-  BSDictN   = 1ULL << 30, // static non-empty dict
-  BCDictN   = 1ULL << 31, // counted non-empty dict
-  BSKeysetE = 1ULL << 32, // static empty keyset
-  BCKeysetE = 1ULL << 33, // counted empty keyset
-  BSKeysetN = 1ULL << 34, // static non-empty keyset
-  BCKeysetN = 1ULL << 35, // counted non-empty keyset
+  BSVecE    = 1ULL << 21, // static empty vec
+  BCVecE    = 1ULL << 22, // counted empty vec
+  BSVecN    = 1ULL << 23, // static non-empty vec
+  BCVecN    = 1ULL << 24, // counted non-empty vec
+  BSDictE   = 1ULL << 25, // static empty dict
+  BCDictE   = 1ULL << 26, // counted empty dict
+  BSDictN   = 1ULL << 27, // static non-empty dict
+  BCDictN   = 1ULL << 28, // counted non-empty dict
+  BSKeysetE = 1ULL << 29, // static empty keyset
+  BCKeysetE = 1ULL << 30, // counted empty keyset
+  BSKeysetN = 1ULL << 31, // static non-empty keyset
+  BCKeysetN = 1ULL << 32, // counted non-empty keyset
 
-  BSPArr    = BSPArrE | BSPArrN,
-  BCPArr    = BCPArrE | BCPArrN,
-  BPArrE    = BSPArrE | BCPArrE,
-  BPArrN    = BSPArrN | BCPArrN,
-  BPArr     = BPArrE  | BPArrN,
+  BRecord   = 1ULL << 33,
+  BRFunc    = 1ULL << 34, // Reified function
+  BRClsMeth = 1ULL << 35, // Reified class method
+
+  BLazyCls  = 1ULL << 36,
+
+  // NOTE: We only have kTRepBitsStored = 48 bits available.
+  // We can bump that to 56 bits, at the cost of a taking a few
+  // more instructions to load or store the Type::m_bits field.
 
   BSVArr    = BSVArrE | BSVArrN,
   BCVArr    = BCVArrE | BCVArrN,
@@ -254,10 +258,10 @@ enum trep : uint64_t {
   BDArrN    = BSDArrN | BCDArrN,
   BDArr     = BDArrE  | BDArrN,
 
-  BSArrE    = BSPArrE | BSVArrE | BSDArrE,
-  BCArrE    = BCPArrE | BCVArrE | BCDArrE,
-  BSArrN    = BSPArrN | BSVArrN | BSDArrN,
-  BCArrN    = BCPArrN | BCVArrN | BCDArrN,
+  BSArrE    = BSVArrE | BSDArrE,
+  BCArrE    = BCVArrE | BCDArrE,
+  BSArrN    = BSVArrN | BSDArrN,
+  BCArrN    = BCVArrN | BCDArrN,
 
   BNull     = BUninit | BInitNull,
   BBool     = BFalse | BTrue,
@@ -305,6 +309,9 @@ enum trep : uint64_t {
   BOptArr      = BInitNull | BArr,       // may have value / data
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
+  BOptFunc     = BInitNull | BFunc,
+  BOptCls      = BInitNull | BCls,
+  BOptClsMeth  = BInitNull | BClsMeth,
   BOptSVecE    = BInitNull | BSVecE,
   BOptCVecE    = BInitNull | BCVecE,
   BOptSVecN    = BInitNull | BSVecN,
@@ -332,16 +339,10 @@ enum trep : uint64_t {
   BOptKeysetE  = BInitNull | BKeysetE,
   BOptKeysetN  = BInitNull | BKeysetN,
   BOptKeyset   = BInitNull | BKeyset,
-
-  BOptSPArrE   = BInitNull | BSPArrE,
-  BOptCPArrE   = BInitNull | BCPArrE,
-  BOptSPArrN   = BInitNull | BSPArrN,
-  BOptCPArrN   = BInitNull | BCPArrN,
-  BOptSPArr    = BInitNull | BSPArr,
-  BOptCPArr    = BInitNull | BCPArr,
-  BOptPArrE    = BInitNull | BPArrE,
-  BOptPArrN    = BInitNull | BPArrN,
-  BOptPArr     = BInitNull | BPArr,
+  BOptRecord   = BInitNull | BRecord,
+  BOptRFunc    = BInitNull | BRFunc,
+  BOptRClsMeth = BInitNull | BRClsMeth,
+  BOptLazyCls     = BInitNull | BLazyCls,
 
   BOptSVArrE   = BInitNull | BSVArrE,
   BOptCVArrE   = BInitNull | BCVArrE,
@@ -368,24 +369,102 @@ enum trep : uint64_t {
   BOptUncArrKey = BInitNull | BUncArrKey,
   BOptArrKey    = BInitNull | BArrKey,
 
+  BFuncLike     = BFunc | BRFunc,
+  BOptFuncLike  = BInitNull | BFuncLike,
+
+  BClsMethLike    = BClsMeth | BRClsMeth,
+  BOptClsMethLike = BInitNull | BClsMethLike,
+
+  BStrLike    = BCls | BStr,
+  BUncStrLike = BCls | BSStr,
+
+  BOptStrLike    = BInitNull | BStrLike,
+  BOptUncStrLike = BInitNull | BUncStrLike,
+
+  BUncArrKeyCompat = BUncArrKey | BCls | BLazyCls,
+  BArrKeyCompat    = BArrKey | BCls | BLazyCls,
+  BOptUncArrKeyCompat = BInitNull | BUncArrKeyCompat,
+  BOptArrKeyCompat = BInitNull | BArrKeyCompat,
+
+  BVArrCompat   = BClsMeth | BVArr,
+  BVArrCompatSA = BClsMeth | BSVArr,
+
+  BOptVArrCompat = BInitNull | BVArrCompat,
+  BOptVArrCompatSA = BInitNull | BVArrCompatSA,
+
+  BVecCompat   = BClsMeth | BVec,
+  BVecCompatSA = BClsMeth | BSVec,
+
+  BOptVecCompat    = BInitNull | BVecCompat,
+  BOptVecCompatSA  = BInitNull | BVecCompatSA,
+
+  BArrCompat   = BClsMeth | BArr,
+  BArrCompatSA = BClsMeth | BSArr,
+
+  BOptArrCompat   = BInitNull | BArrCompat,
+  BOptArrCompatSA = BInitNull | BArrCompatSA,
+
   BInitPrim = BInitNull | BBool | BNum,
+
+  BSArrLikeE = BSArrE | BSVecE | BSDictE | BSKeysetE,
+  BCArrLikeE = BCArrE | BCVecE | BCDictE | BCKeysetE,
+  BSArrLikeN = BSArrN | BSVecN | BSDictN | BSKeysetN,
+  BCArrLikeN = BCArrN | BCVecN | BCDictN | BCKeysetN,
+  BSArrLike  = BSArrLikeE | BSArrLikeN,
+  BCArrLike  = BCArrLikeE | BCArrLikeN,
+  BArrLikeE  = BSArrLikeE | BCArrLikeE,
+  BArrLikeN  = BSArrLikeN | BCArrLikeN,
+  BArrLike   = BArrLikeE | BArrLikeN,
+
+  BOptSArrLikeE = BInitNull | BSArrLikeE,
+  BOptCArrLikeE = BInitNull | BCArrLikeE,
+  BOptSArrLikeN = BInitNull | BSArrLikeN,
+  BOptCArrLikeN = BInitNull | BCArrLikeN,
+  BOptSArrLike  = BInitNull | BSArrLike,
+  BOptCArrLike  = BInitNull | BCArrLike,
+  BOptArrLikeE  = BInitNull | BArrLikeE,
+  BOptArrLikeN  = BInitNull | BArrLikeN,
+  BOptArrLike   = BInitNull | BArrLike,
+
+  BArrLikeCompat    = BClsMeth | BArrLike,
+  BArrLikeCompatSA  = BClsMeth | BSArrLike,
+
+  BOptArrLikeCompat   = BInitNull | BArrLikeCompat,
+  BOptArrLikeCompatSA = BInitNull | BArrLikeCompatSA,
+
   BPrim     = BInitPrim | BUninit,
-  BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
+  BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset |
+              BCls | BLazyCls | BFunc | (use_lowptr ? BClsMeth : 0),
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset,
+              BVec | BDict | BKeyset | BFunc | BCls | BLazyCls | BClsMeth |
+              BRecord | BRFunc | BRClsMeth,
   BCell     = BUninit | BInitCell,
-  BInitGen  = BInitCell | BRef,
-  BGen      = BUninit | BInitGen,
 
-  BTop      = static_cast<uint64_t>(-1),
+  BTop      = (uint64_t{1} << kTRepBitsStored) - 1,
 };
 
-// Useful constants. Don't put them in the enum itself, because they
-// can't actually occur, but are convenient masks.
-constexpr auto BArrLikeE = static_cast<trep>(BArrE | BVecE | BDictE | BKeysetE);
-constexpr auto BArrLikeN = static_cast<trep>(BArrN | BVecN | BDictN | BKeysetN);
-constexpr auto BSArrLike = static_cast<trep>(BSArr | BSVec | BSDict | BSKeyset);
+constexpr trep operator~(trep a) {
+  return static_cast<trep>(~static_cast<int64_t>(a));
+}
+
+constexpr trep operator&(trep a, trep b) {
+  return static_cast<trep>(static_cast<int64_t>(a) & b);
+}
+
+constexpr trep operator|(trep a, trep b) {
+  return static_cast<trep>(static_cast<int64_t>(a) | b);
+}
+
+constexpr const trep& operator&=(trep&a, trep b) {
+  a = a & b;
+  return a;
+}
+
+constexpr const trep& operator|=(trep&a, trep b) {
+  a = a | b;
+  return a;
+}
 
 #define DATATAGS                                                \
   DT(Str, SString, sval)                                        \
@@ -394,7 +473,7 @@ constexpr auto BSArrLike = static_cast<trep>(BSArr | BSVec | BSDict | BSKeyset);
   DT(ArrLikeVal, SArray, aval)                                  \
   DT(Obj, DObj, dobj)                                           \
   DT(Cls, DCls, dcls)                                           \
-  DT(RefInner, copy_ptr<Type>, inner)                           \
+  DT(Record, DRecord, drec)                                     \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
   DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
@@ -448,13 +527,117 @@ struct DObj {
   copy_ptr<Type> whType;
 };
 
+/*
+ * Information about a specific record type.  The record type is either
+ * exact or a subtype of the supplied record.
+ */
+struct DRecord {
+  enum Tag : uint16_t { Exact, Sub };
+
+  DRecord(Tag type, res::Record rec)
+    : type(type)
+    , rec(rec)
+  {}
+
+  Tag type;
+  res::Record rec;
+};
+
 struct DArrLikePacked;
 struct DArrLikePackedN;
 struct DArrLikeMap;
 struct DArrLikeMapN;
-using MapElems = ArrayLikeMap<Cell>;
+using MapElems = ArrayLikeMap<TypedValue>;
 struct ArrKey;
 struct IterTypes;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * A provenance tag as tracked on a DArrLike{Packed,Map} (and, at runtime, on
+ * various kinds of arrays).  The provenance tag on an array contains a file
+ * and line nubmer where that array is "from" (ideally, where the array was
+ * allocated---for static arrays the srcloc where the array is first
+ * referenced).
+ *
+ * This is tracked here in hhbbc because we both manipulate and create new
+ * static arrays.
+ *
+ * If the runtime option EvalArrayProvenance is not set, all ProvTags should be
+ * equal to ProvTag::Top.
+ *
+ * ProvTag::Top means the array type could have a provenance tag from anywhere,
+ * or no tag at all. (i.e. its provenance is unknown completely, a.k.a. NoTag).
+ *
+ * ProvTag::Some means the array type has one of several known tags and will
+ * be written out with a RepoUnion tag
+ *
+ * This information forms a sublattice like:
+ *
+ *                                     top
+ *           __________________________/ \_________________
+ *          /                                              \
+ *       some tag                                           |
+ *    ____/|\___________                                    |
+ *   /     |            \                                   |
+ *  t_1   t_2     ...   t_n (specific arrprov::Tag's)     no tag
+ *   \____ | ___________/___________________________________/
+ *        \|/
+ *       bottom (unrepresentable)
+ *
+ * If we would produce a Bottom provenance tag, (i.e. in intersectProvTag) we
+ * widen the result to ProvTag::Top.
+ */
+struct ProvTag {
+  ProvTag() {}
+  /* implicit */ ProvTag(const arrprov::Tag& t)
+    : m_tag(t) {}
+
+  enum class KnownEmpty {};
+  /* implicit */ ProvTag(KnownEmpty)
+    : m_knownEmpty(true)
+    , m_tag() {}
+
+  static ProvTag Top;
+  static ProvTag NoTag;
+  static ProvTag SomeTag;
+
+  static ProvTag FromSArr(SArray a) {
+    assertx(RO::EvalArrayProvenance);
+    // It would be nice to assert a->isStatic() here, but, of course, SArrays
+    // (like the ones representing bytecode immediates) are not always static
+    // because we muck with them during various optimization passes.
+    return arrprov::getTag(a);
+  }
+
+  static ProvTag FromSArrOrTop(SArray a) {
+    return RO::EvalArrayProvenance ? FromSArr(a) : ProvTag::Top;
+  }
+
+  /*
+   * Do we have a known provenance tag.
+   */
+  bool valid() const {
+    return !m_knownEmpty && m_tag.valid();
+  }
+
+  arrprov::Tag get() const { return m_tag; }
+
+  bool operator==(const ProvTag& o) const {
+    return m_knownEmpty == o.m_knownEmpty && m_tag == o.m_tag;
+  }
+  bool operator!=(const ProvTag& o) const {
+    return m_knownEmpty != o.m_knownEmpty || m_tag != o.m_tag;
+  }
+
+private:
+  bool m_knownEmpty{false};
+  arrprov::Tag m_tag{};
+};
+
+constexpr auto kProvBits = BVArr | BDArr;
+
+//////////////////////////////////////////////////////////////////////
 
 enum class Emptiness {
   Empty,
@@ -517,6 +700,13 @@ struct Type {
   bool strictSubtypeOf(const Type& o) const;
 
   /*
+   * Similar, but only check the trep (same as subtypeOf(Type{bits}),
+   * but cheaper).
+   */
+  bool subtypeOf(trep bits) const { return (m_bits & bits) == m_bits; }
+  bool subtypeOrNull(trep bits) const { return subtypeOf(bits | BNull); }
+
+  /*
    * Subtype of any of the list of types.
    */
   template<class... Types>
@@ -524,6 +714,15 @@ struct Type {
     return subtypeOf(t) || subtypeOfAny(ts...);
   }
   bool subtypeOfAny() const { return false; }
+
+  /*
+   * Strict subtype of any of the list of types.
+   */
+  template<class... Types>
+  bool strictSubtypeOfAny(const Type& t, Types... ts) const {
+    return strictSubtypeOf(t) || strictSubtypeOfAny(ts...);
+  }
+  bool strictSubtypeOfAny() const { return false; }
 
   template<bool contextSensitive>
   bool equivImpl(const Type& o) const;
@@ -541,6 +740,7 @@ struct Type {
    * precise when returning false.
    */
   bool couldBe(const Type& o) const;
+  bool couldBe(trep bits) const { return m_bits & bits; }
 
   /*
    * Could-be any of the list of types.
@@ -564,10 +764,13 @@ private:
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type& t);
   friend bool is_specialized_obj(const Type&);
+  friend bool is_specialized_record(const Type&);
   friend bool is_specialized_cls(const Type&);
-  friend bool is_ref_with_inner(const Type&);
+  friend bool is_specialized_record(const Type&);
+  friend bool is_specialized_string(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
+  friend Type sval_nonstatic(SString);
   friend Type ival(int64_t);
   friend Type dval(double);
   friend Type aval(SArray);
@@ -575,13 +778,18 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend Type ref_to(Type);
-  friend Type packed_impl(trep, std::vector<Type>);
+  friend Type exactRecord(res::Record);
+  friend Type subRecord(res::Record);
+  friend Type rname(SString);
+  friend Type packed_impl(trep, std::vector<Type>, ProvTag);
   friend Type packedn_impl(trep, Type);
-  friend Type map_impl(trep, MapElems);
-  friend Type mapn_impl(trep bits, Type k, Type v);
+  friend Type map_impl(trep, MapElems, Type, Type, ProvTag);
+  friend Type mapn_impl(trep bits, Type k, Type v, ProvTag);
+  friend Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag);
   friend DObj dobj_of(const Type&);
+  friend DRecord drec_of(const Type&);
   friend DCls dcls_of(Type);
+  friend SString sval_of(const Type&);
   friend Type union_of(Type, Type);
   friend Type intersection_of(Type, Type);
   friend void widen_type_impl(Type&, uint32_t);
@@ -591,15 +799,24 @@ private:
   friend Emptiness emptiness(const Type&);
   friend Type opt(Type);
   friend Type unopt(Type);
+  friend Type unnullish(Type);
   friend bool is_opt(const Type&);
-  template<typename R>
+  friend bool is_nullish(const Type&);
+  friend Type project_data(Type t, trep bits);
+  friend bool must_be_counted(const Type&);
+  friend bool must_be_counted(const Type&, trep bits);
+  friend Type remove_counted(Type t);
+  template<typename R, bool>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
+  friend folly::Optional<size_t> array_size(const Type& t);
+
   friend Type return_with_context(Type, Type);
   friend Type setctx(Type, bool);
   friend Type unctx(Type);
   friend std::string show(const Type&);
   friend ArrKey disect_array_key(const Type&);
+  friend ProvTag arr_like_update_prov_tag(const Type&, ProvTag);
   friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
   friend std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key);
   friend std::pair<Type,bool> arr_packed_elem(const Type& pack,
@@ -607,17 +824,23 @@ private:
   friend std::pair<Type,bool> arr_packedn_elem(const Type& pack,
                                                const ArrKey& key);
   friend std::pair<Type,ThrowMode> array_like_elem(const Type& arr,
-                                                    const ArrKey& key);
+                                                   const ArrKey& key,
+                                                   const Type& defaultTy);
   friend std::pair<Type,ThrowMode> array_like_set(Type arr,
                                                   const ArrKey& key,
-                                                  const Type& val);
-  friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val);
-  friend bool arr_map_set(Type& map, const ArrKey& key, const Type& val);
-  friend bool arr_packed_set(Type& pack, const ArrKey& key, const Type& val);
+                                                  const Type& val,
+                                                  ProvTag src);
+  friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val,
+                                                 ProvTag src);
+  friend bool arr_map_set(Type& map, const ArrKey& key,
+                          const Type& val, ProvTag src);
+  friend bool arr_packed_set(Type& pack, const ArrKey& key,
+                             const Type& val,
+                             ProvTag src);
   friend bool arr_packedn_set(Type& pack, const ArrKey& key,
                               const Type& val, bool maybeEmpty);
   friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
-  friend Type arr_map_newelem(Type& map, const Type& val);
+  friend Type arr_map_newelem(Type& map, const Type& val, ProvTag src);
   friend IterTypes iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
@@ -625,22 +848,33 @@ private:
   friend struct ArrKey disect_vec_key(const Type&);
   friend struct ArrKey disect_strict_key(const Type&);
 
-  friend Type spec_array_like_union(Type&, Type&, const Type&, const Type&);
+  friend Type spec_array_like_union(Type&, Type&, trep, trep);
+  friend Type aempty_varray(ProvTag);
+  friend Type aempty_darray(ProvTag);
   friend Type vec_val(SArray);
+  friend Type vec_empty();
   friend Type dict_val(SArray);
+  friend Type dict_empty();
+  friend Type some_aempty_darray(ProvTag);
+  friend Type some_vec_empty();
+  friend Type some_dict_empty();
   friend Type keyset_val(SArray);
-  friend bool could_run_destructor(const Type&);
+  friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
+  friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
-  friend Type loosen_unstaticness(Type);
   friend Type loosen_dvarrayness(Type);
+  friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);
+  friend Type loosen_likeness(Type);
   friend Type add_nonemptiness(Type);
   friend Type assert_emptiness(Type);
   friend Type assert_nonemptiness(Type);
   friend Type set_trep(Type&, trep);
-
+  friend Type remove_uninit(Type t);
+  friend Type to_cell(Type t);
+  friend bool inner_types_might_raise(const Type& t1, const Type& t2);
 private:
   union Data {
     Data() {}
@@ -655,6 +889,7 @@ private:
   struct DDHelperFn;
 
 private:
+  trep bits() const { return trep(m_bits); }
   static Type unctxHelper(Type, bool&);
   static Type unionArrLike(Type a, Type b);
   template<class Ret, class T, class Function>
@@ -670,9 +905,10 @@ private:
   bool subtypeData(const Type&) const;
   bool couldBeData(const Type&) const;
   bool checkInvariants() const;
+  ProvTag getProvTag() const;
 
 private:
-  trep m_bits;
+  uint64_t m_bits : kTRepBitsStored;
   DataTag m_dataTag = DataTag::None;
   Data m_data;
 };
@@ -685,7 +921,7 @@ struct ArrKey {
   Type type;
   bool mayThrow = false;
 
-  folly::Optional<Cell> tv() const {
+  folly::Optional<TypedValue> tv() const {
     assert(!i || !s);
     if (i) {
       return make_tv<KindOfInt64>(*i);
@@ -698,11 +934,13 @@ struct ArrKey {
 };
 
 struct DArrLikePacked {
-  explicit DArrLikePacked(std::vector<Type> elems)
+  explicit DArrLikePacked(std::vector<Type> elems, ProvTag tag)
     : elems(std::move(elems))
+    , provenance(tag)
   {}
 
   std::vector<Type> elems;
+  ProvTag provenance;
 };
 
 struct DArrLikePackedN {
@@ -712,8 +950,20 @@ struct DArrLikePackedN {
 
 struct DArrLikeMap {
   DArrLikeMap() {}
-  explicit DArrLikeMap(MapElems map) : map(std::move(map)) {}
+  explicit DArrLikeMap(MapElems map, Type optKey, Type optVal, ProvTag tag)
+    : map(std::move(map))
+    , optKey(std::move(optKey))
+    , optVal(std::move(optVal))
+    , provenance(tag)
+  {}
+  bool hasOptElements() const { return !optKey.subtypeOf(BBottom); }
+  // The array always starts with these known keys
   MapElems map;
+  // Key/value types for optional elements after known keys. Bottom if
+  // none.
+  Type optKey;
+  Type optVal;
+  ProvTag provenance;
 };
 
 struct DArrLikeMapN {
@@ -741,7 +991,12 @@ X(SArrN)                                        \
 X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
-X(Ref)                                          \
+X(Func)                                        \
+X(RFunc)                                        \
+X(ClsMeth)                                      \
+X(RClsMeth)                                     \
+X(Record)                                       \
+X(LazyCls)                                      \
 X(SVecE)                                        \
 X(SVecN)                                        \
 X(SDictE)                                       \
@@ -768,12 +1023,6 @@ X(SKeyset)                                      \
 X(KeysetE)                                      \
 X(KeysetN)                                      \
 X(Keyset)                                       \
-X(SPArrE)                                       \
-X(SPArrN)                                       \
-X(SPArr)                                        \
-X(PArrE)                                        \
-X(PArrN)                                        \
-X(PArr)                                         \
 X(SVArrE)                                       \
 X(SVArrN)                                       \
 X(SVArr)                                        \
@@ -788,6 +1037,18 @@ X(DArrN)                                        \
 X(DArr)                                         \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
+X(FuncLike)                                     \
+X(ClsMethLike)                                  \
+X(UncStrLike)                                   \
+X(StrLike)                                      \
+X(UncArrKeyCompat)                              \
+X(ArrKeyCompat)                                 \
+X(ArrCompatSA)                                  \
+X(ArrCompat)                                    \
+X(VArrCompatSA)                                 \
+X(VArrCompat)                                   \
+X(VecCompatSA)                                  \
+X(VecCompat)                                    \
 X(InitPrim)                                     \
 X(Prim)                                         \
 X(InitUnc)                                      \
@@ -808,6 +1069,12 @@ X(OptArrN)                                      \
 X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
+X(OptFunc)                                     \
+X(OptCls)                                       \
+X(OptClsMeth)                                   \
+X(OptRClsMeth)                                  \
+X(OptRecord)                                    \
+X(OptLazyCls)                                   \
 X(OptSVecE)                                     \
 X(OptSVecN)                                     \
 X(OptSVec)                                      \
@@ -826,12 +1093,6 @@ X(OptSKeyset)                                   \
 X(OptKeysetE)                                   \
 X(OptKeysetN)                                   \
 X(OptKeyset)                                    \
-X(OptSPArrE)                                    \
-X(OptSPArrN)                                    \
-X(OptSPArr)                                     \
-X(OptPArrE)                                     \
-X(OptPArrN)                                     \
-X(OptPArr)                                      \
 X(OptSVArrE)                                    \
 X(OptSVArrN)                                    \
 X(OptSVArr)                                     \
@@ -846,10 +1107,37 @@ X(OptDArrN)                                     \
 X(OptDArr)                                      \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
+X(OptFuncLike)                                  \
+X(OptClsMethLike)                               \
+X(OptUncStrLike)                                \
+X(OptStrLike)                                   \
+X(OptUncArrKeyCompat)                           \
+X(OptArrKeyCompat)                              \
+X(OptArrCompatSA)                               \
+X(OptArrCompat)                                 \
+X(OptVArrCompatSA)                              \
+X(OptVArrCompat)                                \
+X(OptVecCompatSA)                               \
+X(OptVecCompat)                                 \
+X(SArrLikeE)                                    \
+X(SArrLikeN)                                    \
+X(SArrLike)                                     \
+X(ArrLikeE)                                     \
+X(ArrLikeN)                                     \
+X(ArrLike)                                      \
+X(OptSArrLikeE)                                 \
+X(OptSArrLikeN)                                 \
+X(OptSArrLike)                                  \
+X(OptArrLikeE)                                  \
+X(OptArrLikeN)                                  \
+X(OptArrLike)                                   \
+X(ArrLikeCompat)                                \
+X(ArrLikeCompatSA)                              \
+X(OptArrLikeCompat)                             \
+X(OptArrLikeCompatSA)                           \
+X(OptRFunc)                                     \
 X(InitCell)                                     \
 X(Cell)                                         \
-X(InitGen)                                      \
-X(Gen)                                          \
 X(Top)
 
 #define X(y) extern const Type T##y;
@@ -861,8 +1149,6 @@ TYPES(X)
 // S types.
 #define NON_TYPES(X)                            \
   X(CStr)                                       \
-  X(CPArrE)                                     \
-  X(CPArrN)                                     \
   X(CVArrE)                                     \
   X(CVArrN)                                     \
   X(CDArrE)                                     \
@@ -875,7 +1161,6 @@ TYPES(X)
   X(CDictN)                                     \
   X(CKeysetE)                                   \
   X(CKeysetN)                                   \
-  X(CPArr)                                      \
   X(CVArr)                                      \
   X(CDArr)                                      \
   X(CArr)                                       \
@@ -883,9 +1168,6 @@ TYPES(X)
   X(CDict)                                      \
   X(CKeyset)                                    \
   X(OptCStr)                                    \
-  X(OptCPArrE)                                  \
-  X(OptCPArrN)                                  \
-  X(OptCPArr)                                   \
   X(OptCVArrE)                                  \
   X(OptCVArrN)                                  \
   X(OptCVArr)                                   \
@@ -903,7 +1185,14 @@ TYPES(X)
   X(OptCDict)                                   \
   X(OptCKeysetE)                                \
   X(OptCKeysetN)                                \
-  X(OptCKeyset)
+  X(OptCKeyset)                                 \
+  X(CArrLikeE)                                  \
+  X(CArrLikeN)                                  \
+  X(CArrLike)                                   \
+  X(OptCArrLikeE)                               \
+  X(OptCArrLikeN)                               \
+  X(OptCArrLike)
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -929,14 +1218,14 @@ Type aval(SArray);
 Type vec_val(SArray);
 Type dict_val(SArray);
 Type keyset_val(SArray);
+Type sval_nonstatic(SString);
 
 /*
  * Create static empty array or string types.
  */
 Type sempty();
-Type aempty();
-Type aempty_varray();
-Type aempty_darray();
+Type aempty_varray(ProvTag = ProvTag::Top);
+Type aempty_darray(ProvTag = ProvTag::Top);
 Type vec_empty();
 Type dict_empty();
 Type keyset_empty();
@@ -944,8 +1233,7 @@ Type keyset_empty();
 /*
  * Create an any-countedness empty array/vec/dict type.
  */
-Type some_aempty();
-Type some_aempty_darray();
+Type some_aempty_darray(ProvTag = ProvTag::Top);
 Type some_vec_empty();
 Type some_dict_empty();
 Type some_keyset_empty();
@@ -960,36 +1248,25 @@ Type subCls(res::Class);
 Type clsExact(res::Class);
 
 /*
- * Packed array types with known size.
+ * Create types for records with some known constraint on an associated
+ * res::Record.
+ */
+Type exactRecord(res::Record);
+Type subRecord(res::Record);
+
+/*
+ * Packed varray types with known size.
  *
  * Pre: !v.empty()
  */
-Type arr_packed(std::vector<Type> v);
-Type arr_packed_varray(std::vector<Type> v);
-Type sarr_packed(std::vector<Type> v);
+Type arr_packed_varray(std::vector<Type> v, ProvTag = ProvTag::Top);
 
 /*
- * Packed array types of unknown size.
- *
- * Note that these types imply the arrays are non-empty.
- */
-Type arr_packedn(Type);
-Type sarr_packedn(Type);
-
-/*
- * Struct-like arrays.
+ * Struct-like darrays.
  *
  * Pre: !m.empty()
  */
-Type arr_map(MapElems m);
-Type arr_map_darray(MapElems m);
-Type sarr_map(MapElems m);
-
-/*
- * Map-like arrays.
- */
-Type arr_mapn(Type k, Type v);
-Type sarr_mapn(Type k, Type v);
+Type arr_map_darray(MapElems m, ProvTag = ProvTag::Top);
 
 /*
  * vec types with known size.
@@ -1010,13 +1287,22 @@ Type svec_n(Type);
  *
  * Pre: !m.empty()
  */
-Type dict_map(MapElems m);
+Type dict_map(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
+Type sdict_map(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
 
 /*
  * Dict with key/value types.
  */
 Type dict_n(Type, Type);
 Type sdict_n(Type, Type);
+
+/*
+ * Dicts with vector-like data.
+ */
+Type dict_packed(std::vector<Type> v);
+Type sdict_packed(std::vector<Type> v);
+Type dict_packedn(Type);
+Type sdict_packedn(Type);
 
 /*
  * Keyset with key (same as value) type.
@@ -1027,7 +1313,9 @@ Type ckeyset_n(Type);
 /*
  * Keyset from MapElems
  */
-inline Type keyset_map(MapElems m) { return map_impl(BKeysetN, std::move(m)); }
+inline Type keyset_map(MapElems m) {
+  return map_impl(BKeysetN, std::move(m), TBottom, TBottom, ProvTag::Top);
+}
 
 /*
  * Create the optional version of the Type t.
@@ -1051,6 +1339,19 @@ Type unopt(Type t);
 bool is_opt(const Type& t);
 
 /*
+ * Return t with BNull removed from its trep.
+ *
+ * Pre: is_nullish(t)
+ */
+Type unnullish(Type t);
+
+/*
+ * Returns whether a given type couldBe TNull, and would still be
+ * predefined if BNull was removed from its trep.
+ */
+bool is_nullish(const Type& t);
+
+/*
  * Improves the type `t` given the current context.  This returns the
  * intersection of the type `t` with the `context` if the `context` is a valid
  * class or object, and `t` is tagged as being the context.  If `context` is
@@ -1071,6 +1372,24 @@ Type setctx(Type t, bool to = true);
  * types.
  */
 Type unctx(Type t);
+
+/*
+ * Discards any data associated with `t` that isn't valid for the given trep
+ *
+ * At the moment this will do nothing beyond removing empty ArrLikeDatas from
+ * types that used to only have ArrE bits set but now have a ArrN bit set
+ */
+Type project_data(Type t, trep bits);
+
+/*
+ * Returns true if the type can only be counted. We don't allow the
+ * the usage of the counted side of the type lattice, so this checks
+ * if the type is a definitely counted type (IE, object or resource),
+ * or if it has an array specialization which contains such a type
+ * recursively (an array which contains a definitely counted type must
+ * itself by counted).
+ */
+bool must_be_counted(const Type&);
 
 /*
  * Refinedness equivalence checks.
@@ -1136,12 +1455,22 @@ Type toobj(const Type& t);
 Type objcls(const Type& t);
 
 /*
- * If the type t has a known constant value, return it as a Cell.
+ * If the type t has a known constant value, return it as a TypedValue.
  * Otherwise return folly::none.
  *
- * The returned Cell can only contain non-reference-counted types.
+ * The returned TypedValue can only contain non-reference-counted types.
  */
-folly::Optional<Cell> tv(const Type& t);
+folly::Optional<TypedValue> tv(const Type& t);
+
+/*
+ * If the type t has a known constant value, return it as a TypedValue.
+ * Otherwise return folly::none.
+ *
+ * The returned TypedValue may contain reference-counted types.
+ *
+ * You are responsible for any required ref-counting.
+ */
+folly::Optional<TypedValue> tvNonStatic(const Type& t);
 
 /*
  * If the type t has a known constant value, return true.
@@ -1163,12 +1492,32 @@ bool is_scalar(const Type& t);
 Type scalarize(Type t);
 
 /*
+ * If t represents an array, and we know its size, return it.
+ */
+folly::Optional<size_t> array_size(const Type& t);
+
+/*
  * Get the type in our typesystem that corresponds to an hhbc
  * IsTypeOp.
  *
  * Pre: op != IsTypeOp::Scalar
  */
 Type type_of_istype(IsTypeOp op);
+
+/*
+ * Get the hhbc IsTypeOp that corresponds to the type in our typesystem.
+ * Returns folly::none if no matching IsTypeOp is found.
+ */
+folly::Optional<IsTypeOp> type_to_istypeop(const Type& t);
+
+/*
+ * Get the type in our typesystem that corresponds to type given by the
+ * potentially unresolved type structure.
+ * Returns folly::none if the type structure is unresolved or
+ * no matching Type is found.
+ *
+ */
+folly::Optional<Type> type_of_type_structure(const Index&, Context, SArray ts);
 
 /*
  * Return the DObj structure for a strict subtype of TObj or TOptObj.
@@ -1185,12 +1534,19 @@ DObj dobj_of(const Type& t);
 DCls dcls_of(Type t);
 
 /*
- * Create a Type from a Cell.
+ * Return the SString for a strict subtype of TStr.
+ *
+ * Pre: is_specialized_string(t)
+ */
+SString sval_of(const Type& t);
+
+/*
+ * Create a Type from a TypedValue.
  *
  * Pre: the cell must contain a non-reference-counted type.
  * Post: returned type is a subtype of TUnc
  */
-Type from_cell(Cell tv);
+Type from_cell(TypedValue tv);
 
 /*
  * Create a Type from a DataType. KindOfString and KindOfPersistentString
@@ -1278,31 +1634,45 @@ bool could_have_magic_bool_conversion(const Type&);
 
 /*
  * Returns the smallest type that `a' is a subtype of, from the
- * following set: TGen, TInitCell, TRef, TUninit, TCls.
+ * following set: TInitCell, TUninit.
  *
- * Pre: `a' is a subtype of TGen, or TCls.
+ * Pre: `a' is a subtype of TCell.
  */
 Type stack_flav(Type a);
 
 /*
- * Discard any countedness information about the type. Force any type which
- * contains only static or counted variants to contain both. Doesn't change the
- * type otherwise.
+ * The HHBBC type system is not monotonic. However, we want types stored in
+ * the index to become monotonically more refined. We call this helper before
+ * updating function return types to help maintain that invariant. A function
+ * return type should never be an object with some known interface.
+ *
+ * The monotonicity requirement on our types is that given a, b, A, and B
+ * such that A <= a and B <= b, we must have union_of(A, B) <= union_of(a, b)
+ * and intersection_of(A, B) <= intersection_of(a, b).
+ *
+ * The union_of case can fail if a and b are some interface and A and B are
+ * concrete, unrelated classes that implement that interface.
+ */
+Type loosen_interfaces(Type);
+
+/*
+ * Discard any countedness information about the type. Force any type
+ * (recursively) which contains only static or counted variants to contain
+ * both. Doesn't change the type otherwise.
  */
 Type loosen_staticness(Type);
 
 /*
- * Make sure the corresponding static type is present for any
- * non-static type that is present.
- */
-Type loosen_unstaticness(Type);
-
-/*
  * Discard any specific knowledge about whether the type is a d/varray. Force
- * any type which might contain any sub-types of PArr, VArr, or DArr to contain
- * Arr, while keeping the same staticness and emptiness information.
+ * any type which might contain any sub-types of VArr or DArr to contain Arr,
+ * while keeping the same staticness and emptiness information.
  */
 Type loosen_dvarrayness(Type);
+
+/*
+ * Discard any specific provenance tag on this type and any sub-arrays
+ */
+Type loosen_provenance(Type);
 
 /*
  * Force any type which might contain any sub-types of Arr, Vec, Dict, and
@@ -1326,6 +1696,12 @@ Type loosen_values(Type t);
 Type loosen_emptiness(Type t);
 
 /*
+ * Force all TFunc and TCls types to TUncStrLike, and all TClsMeth to either
+ * TVArrLike or TVecLike.
+ */
+Type loosen_likeness(Type t);
+
+/*
  * Loosens staticness, emptiness, and values from the type. This forces a type
  * to its most basic form (except for object class information).
  */
@@ -1335,16 +1711,27 @@ Type loosen_all(Type t);
  * If t contains TUninit, returns the best type we can that contains
  * at least everything t contains, but doesn't contain TUninit.  Note
  * that this function will return TBottom for TUninit.
- *
- * Pre: t.subtypeOf(TCell)
  */
 Type remove_uninit(Type t);
+
+/*
+ * If t is not a TCell, returns TInitCell. Otherwise, if t contains
+ * TUninit, return union_of(remove_uninit(t), TInitCell).
+ */
+Type to_cell(Type t);
 
 /*
  * Add non-empty variants of the type to the type if not already
  * present. Doesn't change the type otherwise.
  */
 Type add_nonemptiness(Type t);
+
+/*
+ * Force `t` to only contain static types, including any specialized
+ * data recursively. If `t` is definitely counted, TBottom will be
+ * returned.
+ */
+Type remove_counted(Type t);
 
 /*
  * Produced the most refined type possible, given that
@@ -1364,10 +1751,14 @@ Type assert_nonemptiness(Type);
  *
  * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key);
-std::pair<Type, ThrowMode> vec_elem(const Type& vec, const Type& key);
-std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key);
-std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key);
+std::pair<Type,ThrowMode> array_elem(const Type& arr, const Type& key,
+                                     const Type& defaultTy = TInitNull);
+std::pair<Type, ThrowMode> vec_elem(const Type& vec, const Type& key,
+                                    const Type& defaultTy = TBottom);
+std::pair<Type, ThrowMode> dict_elem(const Type& dict, const Type& key,
+                                     const Type& defaultTy = TBottom);
+std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key,
+                                       const Type& defaultTy = TBottom);
 
 /*
  * (array|vec|dict|keyset)_set
@@ -1381,12 +1772,10 @@ std::pair<Type, ThrowMode> keyset_elem(const Type& keyset, const Type& key);
  * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
 std::pair<Type, ThrowMode> array_set(Type arr, const Type& key,
-                                     const Type& val);
+                                     const Type& val, ProvTag src);
 std::pair<Type, ThrowMode> vec_set(Type vec, const Type& key, const Type& val);
-std::pair<Type, ThrowMode> dict_set(Type dict, const Type& key,
-                                    const Type& val);
-std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key,
-                                      const Type& val);
+std::pair<Type, ThrowMode> dict_set(Type dict, const Type& key, const Type& val);
+std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key, const Type& val);
 
 /*
  * (array|vec|dict|keyset)_newelem
@@ -1398,7 +1787,7 @@ std::pair<Type, ThrowMode> keyset_set(Type keyset, const Type& key,
  *
  * Pre: first arg is a subtype of TArr, TVec, TDict, TKeyset respectively.
  */
-std::pair<Type,Type> array_newelem(Type arr, const Type& val);
+std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src);
 std::pair<Type,Type> vec_newelem(Type vec, const Type& val);
 std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
 std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);
@@ -1435,13 +1824,34 @@ IterTypes iter_types(const Type&);
  * SStrings for class names.  The emit code needs to handle making
  * sure these things are merged into the appropriate unit or repo.
  *
- * Pre: !t.couldBe(TCls)
- *      !t.subtypeOf(TBottom)
+ * Pre: !t.couldBe(BCls)
+ *      !t.subtypeOf(BBottom)
  */
 RepoAuthType make_repo_type(ArrayTypeTable::Builder&, const Type& t);
+
+/*
+ * Returns true iff an IsType testing for testTy/testOp on valTy might raise.
+ */
+bool is_type_might_raise(const Type& testTy, const Type& valTy);
+bool is_type_might_raise(IsTypeOp testOp, const Type& valTy);
+
+/*
+ * Returns true iff a compare of two types might raise a HAC notice
+ */
+bool compare_might_raise(const Type& t1, const Type& t2);
+
+/*
+ * Given a type, adjust the type for the given type-constraint. If there's no
+ * type-constraint, or if property type-hints aren't being enforced, then return
+ * the type as is. This might return TBottom if the type is not compatible with
+ * the type-hint.
+ */
+Type adjust_type_for_prop(const Index& index,
+                          const php::Class& propCls,
+                          const TypeConstraint* tc,
+                          const Type& ty);
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

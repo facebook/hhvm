@@ -46,7 +46,7 @@ Only integer values and string values may be used with Sets
 bool(true)
 bool(true)
 ----
-object(HH\Set)#1 (2) {
+object(HH\Set) (2) {
   int(0)
   string(0) ""
 }

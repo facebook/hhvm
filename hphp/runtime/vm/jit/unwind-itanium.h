@@ -14,16 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_UNWIND_ITANIUM_H_
-#define incl_HPHP_JIT_UNWIND_ITANIUM_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/either.h"
 
 #include <cstddef>
 
@@ -47,44 +48,46 @@ namespace jit {
  * Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
-  /* When a cleanup (non-side-exiting) catch trace is executing, this will
-   * point to the currently propagating exception, to be passed to
-   * _Unwind_Resume at the end of cleanup. */
-  _Unwind_Exception* exn;
+  /* PHP/C++ exception or Failed Static WaitHandle, nullptr if SetM exception */
+  union {
+    Either<ObjectData*, Exception*> exn;
+    c_StaticWaitHandle* fswh;
+  };
+  TYPE_SCAN_CONSERVATIVE_FIELD(exn);
 
   /* Some helpers need to signal an error along with a TypedValue to be pushed
    * on the eval stack. When present, that value lives here. */
   TypedValue tv;
 
-  union {
-    /* When returning from a frame that had its m_savedRip smashed by
-     * the debugger, the return stub stashes values here to be used
-     * after running the appropriate catch trace. In addition, a
-     * non-nullptr debuggerReturnSP is used as the flag to
-     * endCatchHelper that it should perform a REQ_POST_DEBUGGER_RET
-     * rather than resuming the unwind process. */
-    TypedValue* debuggerReturnSP;
-    void* originalRip;
-  };
-  TYPE_SCAN_IGNORE_FIELD(originalRip);
-  Offset debuggerReturnOff;
-
   /* This will be true iff the currently executing catch trace should side exit
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
+
+  /* Indicates that we entered tc_unwind_resume directly rather than through
+   * itanium ABI
+   */
+  bool sideEnter;
+
+  /* Indicates whether this is the first frame the unwinder will unwind
+   */
+  bool isFirstFrame;
+
+  /* The instruction pointer that async functions will use to return to
+   */
+  TCA savedRip;
 };
-extern rds::Link<UnwindRDS, true /* normal_only */> g_unwind_rds;
+extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
 
 #define IMPLEMENT_OFF(Name, member)                             \
   inline ptrdiff_t unwinder##Name##Off() {                      \
     return g_unwind_rds.handle() + offsetof(UnwindRDS, member); \
   }
 IMPLEMENT_OFF(Exn, exn)
+IMPLEMENT_OFF(FSWH, fswh)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
-IMPLEMENT_OFF(DebuggerReturnOff, debuggerReturnOff)
-IMPLEMENT_OFF(DebuggerReturnSP, debuggerReturnSP)
-IMPLEMENT_OFF(OriginalRip, originalRip)
+IMPLEMENT_OFF(SideEnter, sideEnter)
+IMPLEMENT_OFF(SavedRip, savedRip)
 #undef IMPLEMENT_OFF
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,6 +102,10 @@ tc_unwind_personality(int version,
                       _Unwind_Exception* exceptionObj,
                       _Unwind_Context* context);
 
+using PersonalityFunc = _Unwind_Reason_Code(*)(int, _Unwind_Action, uint64_t,
+                                               _Unwind_Exception*,
+                                               _Unwind_Context*);
+
 /*
  * Resume unwinding of jitted PHP frames.
  *
@@ -111,21 +118,16 @@ struct TCUnwindInfo {
   TCA catchTrace;
   ActRec* fp;
 };
-TCUnwindInfo tc_unwind_resume(ActRec* fp);
+TCUnwindInfo tc_unwind_resume(ActRec* fp, bool teardown);
+TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip);
 
 /*
  * Called to initialize the unwinder and register an .eh_frame that covers the
  * TC.
  */
-void initUnwinder(TCA base, size_t size);
-
-/*
- * Handle unknown exceptions for tc_unwind_personality
- */
-[[noreturn]] void unknownExceptionHandler();
+void initUnwinder(TCA base, size_t size, PersonalityFunc fn);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

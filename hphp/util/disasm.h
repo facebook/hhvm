@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_DISASM_H_
-#define incl_HPHP_UTIL_DISASM_H_
+#pragma once
 
 #ifdef HAVE_LIBXED
 extern "C" {
@@ -97,4 +96,3 @@ struct Disasm {
 
 } // namespace HPHP
 
-#endif

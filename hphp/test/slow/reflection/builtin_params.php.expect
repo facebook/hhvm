@@ -3,7 +3,7 @@ bool(false)
 Parameter is not optional
 bool(true)
 bool(true)
-int(-1)
+NULL
 bool(false)
 bool(false)
 bool(true)

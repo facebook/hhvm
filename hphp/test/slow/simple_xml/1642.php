@@ -1,12 +1,12 @@
-<?php
+<?hh
 
 function convert_simplexml_to_array($sxml) {
-  $arr = array();
+  $arr = darray[];
   if ($sxml) {
     foreach ($sxml as $k => $v) {
-      if ($sxml['list']) {
-        if (isset($v['key'])) {
-          $arr[(string)$v['key']] = convert_simplexml_to_array($v);
+      if ($sxml->offsetGet('list')) {
+        if ($v->offsetExists('key') && $v->offsetGet('key') is nonnull) {
+          $arr[(string)$v->offsetGet('key')] = convert_simplexml_to_array($v);
         }
  else {
           $arr[] = convert_simplexml_to_array($v);
@@ -25,6 +25,9 @@ function convert_simplexml_to_array($sxml) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1642() {
 $xml = <<<EOM
 <root list="true">
   <node key="key1" list="true">
@@ -42,3 +45,4 @@ EOM;
 
 $sxml = simplexml_load_string($xml);
 var_dump(convert_simplexml_to_array($sxml));
+}

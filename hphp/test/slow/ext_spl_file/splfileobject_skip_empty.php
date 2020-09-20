@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_splfileobject_skip_empty() {
 $fo = new SplFileObject(__DIR__ . "/text.txt");
 $fo->setFlags(SplFileObject::SKIP_EMPTY |
               SplFileObject::DROP_NEW_LINE |
@@ -7,4 +10,5 @@ $fo->setFlags(SplFileObject::SKIP_EMPTY |
 
 foreach ($fo as $key=>$val) {
   var_dump($val);
+}
 }

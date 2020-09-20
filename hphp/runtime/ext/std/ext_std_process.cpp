@@ -36,14 +36,15 @@
 #include "hphp/util/process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std.h"
@@ -52,10 +53,6 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/repo.h"
-
-#if !defined(_NSIG) && defined(NSIG)
-# define _NSIG NSIG
-#endif
 
 #ifndef _WIN32
 # define MAYBE_WIFEXITED(var) if (WIFEXITED(var)) { var = WEXITSTATUS(var); }
@@ -213,7 +210,7 @@ struct ShellExecContext final {
   }
 
   FILE *exec(const String& cmd_string) {
-    assert(m_proc == nullptr);
+    assertx(m_proc == nullptr);
     const auto cmd = cmd_string.c_str();
     if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
       return nullptr;
@@ -260,18 +257,13 @@ Variant HHVM_FUNCTION(shell_exec,
   if (!fp) return init_null();
   StringBuffer sbuf;
   sbuf.read(fp);
-  auto ret = sbuf.detach();
-  if (ret.empty() && !RuntimeOption::EnableHipHopSyntax) {
-    // Match php5
-    return init_null();
-  }
-  return ret;
+  return sbuf.detach();
 }
 
 String HHVM_FUNCTION(exec,
                      const String& command,
-                     VRefParam output /* = null */,
-                     VRefParam return_var /* = null */) {
+                     Array& output,
+                     int64_t& return_var) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -281,17 +273,17 @@ String HHVM_FUNCTION(exec,
   Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
-  return_var.assignIfRef(ret);
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line
   }
 
-  PackedArrayInit pai(count);
+  VArrayInit pai(count);
   for (int i = 0; i < count; i++) {
     pai.append(HHVM_FN(rtrim)(lines[i].toString(), "\f\n\r\t\x0b\x00 "));
   }
-  output.assignIfRef(pai.toArray());
+  output = pai.toArray();
 
   if (!count || lines.empty()) {
     return String();
@@ -302,7 +294,7 @@ String HHVM_FUNCTION(exec,
 
 void HHVM_FUNCTION(passthru,
                    const String& command,
-                   VRefParam return_var /* = null */) {
+                   int64_t& return_var) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return;
@@ -317,12 +309,12 @@ void HHVM_FUNCTION(passthru,
   }
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
-  return_var.assignIfRef(ret);
+  return_var = ret;
 }
 
 String HHVM_FUNCTION(system,
                      const String& command,
-                     VRefParam return_var /* = null */) {
+                     int64_t& return_var) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
   if (!fp) return empty_string();
@@ -334,7 +326,7 @@ String HHVM_FUNCTION(system,
   Array lines = StringUtil::Explode(sbuf.detach(), "\n").toArray();
   int ret = ctx.exit();
   MAYBE_WIFEXITED(ret);
-  return_var.assignIfRef(ret);
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line
@@ -663,7 +655,7 @@ static bool pre_proc_open(const Array& descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(const String& cmd, Variant& pipes,
+static Variant post_proc_open(const String& cmd, Array& pipes,
                               const Variant& env,
                               std::vector<DescriptorItem> &items,
                               pid_t child
@@ -691,13 +683,13 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
 
   // need to set pipes to a new empty array, ignoring whatever it was
   // previously set to
-  pipes = Variant(Array::Create());
+  pipes = Array::CreateDArray();
 
   for (auto& item : items) {
     Resource f = item.dupParent();
     if (!f.isNull()) {
       proc->pipes.append(f);
-      pipes.toArrRef().set(item.index, f);
+      pipes.set(item.index, f);
     }
   }
   return Variant(std::move(proc));
@@ -705,7 +697,7 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
 
 Variant
 HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
-              VRefParam pipesParam, const Variant& cwd /* = uninit_variant */,
+              Array& pipes, const Variant& cwd /* = uninit_variant */,
               const Variant& env /* = uninit_variant */,
               const Variant& /*other_options*/ /* = uninit_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
@@ -715,7 +707,6 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
     raise_warning("NULL byte detected. Possible attack");
     return false;
   }
-  Variant pipes(pipesParam, Variant::WithRefBind{});
 
   std::vector<DescriptorItem> items;
 
@@ -729,7 +720,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
   Array enva;
 
   if (env.isNull()) {
-    if (is_cli_mode()) {
+    if (is_cli_server_mode()) {
       enva = cli_env();
     } else {
       // Build out an environment that conceptually matches what we'd
@@ -934,7 +925,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     scwd.c_str(), envs);
-    assert(child);
+    assertx(child);
     return post_proc_open(cmd, pipes, enva, items, child);
   }
 
@@ -954,7 +945,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
     }
   }
 
-  assert(child == 0);
+  assertx(child == 0);
   /* this is the child process */
 
   /* close those descriptors that we just opened for the parent stuff,
@@ -1035,7 +1026,7 @@ Array HHVM_FUNCTION(proc_get_status,
   }
 #endif
 
-  return make_map_array(
+  return make_darray(
     s_command,  proc->command,
     s_pid, (int)proc->child,
     s_running,  running,
@@ -1069,10 +1060,9 @@ String HHVM_FUNCTION(escapeshellarg,
                      const String& arg) {
   if (!arg.empty()) {
     return string_escape_shell_arg(arg.c_str());
-  } else if (RuntimeOption::EvalQuoteEmptyShellArg) {
+  } else {
     return String(s_twosinglequotes);
   }
-  return arg;
 }
 
 String HHVM_FUNCTION(escapeshellcmd,

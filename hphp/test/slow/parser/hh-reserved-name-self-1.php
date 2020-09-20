@@ -1,5 +1,6 @@
 <?hh
-if (false) {
-  class Self {}
-}
+
+class Self {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

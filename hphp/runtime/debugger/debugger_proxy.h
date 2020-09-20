@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_PROXY_H_
-#define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
+#pragma once
 
 #include <string>
 #include <map>
@@ -106,7 +105,7 @@ struct DebuggerProxy : Synchronizable,
   void stop();
   bool cleanup(int timeout);
 
-  bool getClientConnectionInfo(VRefParam address, VRefParam port);
+  bool getClientConnectionInfo(Variant& address, Variant& port);
 
   enum ExecutePHPFlags {
     ExecutePHPFlagsNone = 0x0, // No logging, not at an interrupt
@@ -118,6 +117,7 @@ struct DebuggerProxy : Synchronizable,
   ExecutePHP(const std::string &php, String &output, int frame, int flags);
 
   std::string requestAuthToken();
+  std::string requestSessionAuth();
 
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);
@@ -164,9 +164,11 @@ private:
   // m_signum, m_okayToPoll.
   Mutex m_signalMutex;
   int m_signum;
+
+  // Last output hook for nested PHP evaluations.
+  ExecutionContext::StdoutHook* m_evalOutputHook{};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_PROXY_H_

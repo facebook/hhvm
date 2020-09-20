@@ -1,6 +1,6 @@
 *** Testing array_merge_recursive() : array with binary data for $arr1 argument ***
 -- With default argument --
-array(5) {
+darray(5) {
   [0]=>
   string(1) "1"
   ["hello"]=>
@@ -13,11 +13,11 @@ array(5) {
   string(5) "world"
 }
 -- With more arguments --
-array(5) {
+darray(5) {
   [0]=>
   string(1) "1"
   ["hello"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -26,14 +26,14 @@ array(5) {
   [1]=>
   string(5) "world"
   ["str1"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(5) "hello"
     [1]=>
     string(6) "binary"
   }
   ["str2"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(5) "world"
     [1]=>

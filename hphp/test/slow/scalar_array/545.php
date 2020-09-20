@@ -1,22 +1,48 @@
-<?php
+<?hh
 
-$a1 = array();
-$a2 = array(null);
-$a3 = array(true);
-$a4 = array(false);
-$a5 = array(0);
-$a6 = array(1);
-$a7 = array(1.0);
-$a8 = array('1.0');
-$a9 = array(1.23456789e+34);
-$a13 = array(1.7976931348623157e+308);
-$a10 = array(1E666);
-$a11 = array(1E666/1E666);
-$a12 = array("a bc");
-$a13 = array("\xc1 bc");
-$a14 = array(null, true, false, 0, 1, 1.0,             '1.0', 1.23456789e+34,             1.7976931348623157e+308, 1E666,             1E666/1E666, "a bc",             "\xc1 bc");
-$a15 = array(null => true, false => 0, 1 => 1.0,             '1.0' => 1.23456789e+34,             1.7976931348623157e+308 => 1E666,             1E666/1E666 => "a bc",             "\xc1 bc");
-$a16 = array(null => true, false => 0, 1 => 1.0,             '1.0' => 1.23456789e+34,             1.7976931348623157e+308 => 1E666,             1E666/1E666 => "a bc",             "\xc1 bc",             array(null => true, array(),                   false => 0, 1 => 1.0,                   '1.0' => 1.23456789e+34,                   1.7976931348623157e+308 => 1E666,                   1E666/1E666 => "a bc",                   "\xc1 bc"));
+
+<<__EntryPoint>>
+function main_545() {
+$a1 = varray[];
+$a2 = varray[null];
+$a3 = varray[true];
+$a4 = varray[false];
+$a5 = varray[0];
+$a6 = varray[1];
+$a7 = varray[1.0];
+$a8 = varray['1.0'];
+$a9 = varray[1.23456789e+34];
+$a13 = varray[1.7976931348623157e+308];
+$a10 = varray[1E666];
+$a11 = varray[1E666/1E666];
+$a12 = varray["a bc"];
+$a13 = varray["\xc1 bc"];
+$a14 = varray[null, true, false, 0, 1, 1.0,             '1.0', 1.23456789e+34,             1.7976931348623157e+308, 1E666,             1E666/1E666, "a bc",             "\xc1 bc"];
+$a15 = darray[
+  "" => true,
+  1 => 1.0,
+  '1.0' => 1.23456789e+34,
+  (int)1.7976931348623157e+308 => 1E666,
+  (int)(1E666/1E666) => "a bc",
+  2 => "\xc1 bc"
+];
+$a16 = darray[
+  "" => true,
+  1 => 1.0,
+  '1.0' => 1.23456789e+34,
+  (int)1.7976931348623157e+308 => 1E666,
+  (int)(1E666/1E666) => "a bc",
+  2 => "\xc1 bc",
+  3 => darray[
+    "" => true,
+    0 => varray[],
+    1 => 1.0,
+    '1.0' => 1.23456789e+34,
+    (int)1.7976931348623157e+308 => 1E666,
+    (int)(1E666/1E666) => "a bc",
+    2 => "\xc1 bc"
+  ]
+];
 var_dump($a1);
 var_dump($a2);
 var_dump($a3);
@@ -33,3 +59,4 @@ var_dump($a13);
 var_dump($a14);
 var_dump($a15);
 var_dump($a16);
+}

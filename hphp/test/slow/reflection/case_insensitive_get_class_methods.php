@@ -1,6 +1,4 @@
-<?php
-
-function main() {
+<?hh
 
 class A {
   public function b() {}
@@ -26,9 +24,9 @@ class J {
 }
 class K extends J implements H {}
 
-var_dump(get_class_methods('C'));
-var_dump(get_class_methods('G'));
-var_dump(get_class_methods('K'));
-
+<<__EntryPoint>>
+function main_case_insensitive_get_class_methods() {
+  var_dump(get_class_methods('C'));
+  var_dump(get_class_methods('G'));
+  var_dump(get_class_methods('K'));
 }
-main();

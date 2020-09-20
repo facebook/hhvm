@@ -10,100 +10,98 @@ string(3) "UTC"
 string(3) "UTC"
 
 -- float 10.5 --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- float -10.5 --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- float .5 --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- empty array --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- int indexed array --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- associative array --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- nested arrays --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- uppercase NULL --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- lowercase null --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- lowercase true --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- lowercase false --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- uppercase TRUE --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- uppercase FALSE --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- empty string DQ --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- empty string SQ --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- string DQ --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- string SQ --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- mixed case string --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- heredoc --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- instance of classWithToString --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- instance of classWithoutToString --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- undefined var --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- unset var --
-string(3) "UTC"
+
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- resource --
 
-Warning: %s
-bool(false)
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, resource given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 ===DONE===

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   function foo() {
@@ -10,3 +10,4 @@ class X {
   function bar() {
 }
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

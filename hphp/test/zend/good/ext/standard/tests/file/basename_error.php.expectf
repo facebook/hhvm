@@ -2,11 +2,9 @@
 
 -- Testing basename() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: basename() expects at least 1 parameter, 0 given in %s/basename_error.php on line 12
 
 -- Testing basename() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: basename() expects at most 2 parameters, 3 given in %s/basename_error.php on line 19
 ===DONE===

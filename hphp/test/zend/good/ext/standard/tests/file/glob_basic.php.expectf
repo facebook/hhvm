@@ -1,32 +1,23 @@
 *** Testing glob() : basic functions ***
-array(3) {
-  [0]=>
+varray(3) {
   string(%d) "%s/glob_basic/file.text"
-  [1]=>
   string(%d) "%s/glob_basic/wonder.txt"
-  [2]=>
   string(%d) "%s/glob_basic/wonder12345"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(%d) "%s/glob_basic/wonder.txt"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(%d) "%s/glob_basic/wonder.txt"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(%d) "%s/glob_basic/file.text"
-  [1]=>
   string(%d) "%s/glob_basic/wonder.txt"
 }
-array(0) {
+varray(0) {
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(%d) "%s/glob_basic/file.text"
-  [1]=>
   string(%d) "%s/glob_basic/wonder.txt"
 }
 Done

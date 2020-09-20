@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class logger {
   static $x = 0;
@@ -7,9 +7,6 @@ class logger {
     $this->idx = self::$x++;
     printf("logger %d constructing\n", $this->idx);
   }
-  function __destruct() {
-    printf("logger %d destructing\n", $this->idx);
-  }
 }
 
 function create() {
@@ -17,20 +14,20 @@ function create() {
   yield $x;
   $s = 'foo';
   yield $s;
-  $$s = 1234;
-  $z = $$s;
+  $foo = 1234;
+  $z = $foo;
   yield $z;
-  yield $$s;
+  yield $foo;
 }
 
 function unusedarg($x, $y) {
   $z = 5;
-  yield compact('x', 'z');
+  yield darray['x' => $x, 'z' => $z];
   $s = 'foo';
   yield 'almost there';
-  $$s = 'inside foo';
-  yield compact('foo', 's');
-  yield compact('x', 'y', 'foo', 'z');
+  $foo = 'inside foo';
+  yield darray['foo' => $foo, 's' => $s];
+  yield darray['x' => $x, 'y' => $y, 'foo' => $foo, 'z' => $z];
 }
 
 function dumpgen($g) {
@@ -39,10 +36,10 @@ function dumpgen($g) {
   }
 }
 
-function getargs($foo) {
+function getargs(...$args) {
   yield 0xdeadbeef;
-  yield func_get_args();
-  yield func_get_arg(3);
+  yield $args;
+  yield $args[3];
 }
 
 function genthrow() {
@@ -63,14 +60,14 @@ function manylocals() {
   $j = 10;
   $k = 11;
   $l = 12;
-  $a = yield get_defined_vars();
+  $a = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $b = 0xdeadbeef;
-  $c = yield get_defined_vars();
+  $c = yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
   $d = $e = 0xba53b411;
-  yield get_defined_vars();
+  yield darray['a' => $a, 'b' => $b, 'c' => $c, 'd' => $d, 'e' => $e, 'f' => $f, 'g' => $g, 'h' => $h, 'i' => $i, 'j' => $j, 'k' => $k, 'l' => $l];
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   dumpgen(create());
   dumpgen(unusedarg(new logger(), 5));
   dumpgen(getargs(1, 2, 3, 4, 5));
@@ -85,6 +82,7 @@ function main() {
   }
 
   $g = manylocals();
+  $g->next();
   var_dump($g->current());
   $g->send(new stdclass);
   var_dump($g->current());
@@ -94,4 +92,3 @@ function main() {
   var_dump($g->current());
   var_dump($g->valid());
 }
-main();

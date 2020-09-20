@@ -8,7 +8,7 @@ string(35) "/**
 int(13)
 
 --- getEndLine("f") ---
-int(20)
+int(18)
 
 --- getFileName("f") ---
 string(%d) "%s/test/slow/lang/reflection.php"
@@ -23,11 +23,10 @@ int(4)
 int(2)
 
 --- getParameters("f") ---
-array(4) {
-  [0]=>
-  object(ReflectionParameter)#2 (3) {
+varray(4) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
-    array(10) {
+    darray(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -45,7 +44,7 @@ array(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -53,7 +52,7 @@ array(4) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -62,10 +61,9 @@ array(4) {
       bool(false)
     }
   }
-  [1]=>
-  object(ReflectionParameter)#3 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
-    array(11) {
+    darray(11) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -82,10 +80,10 @@ array(4) {
       bool(true)
       ["type_hint_nullable"]=>
       bool(true)
-      ["ref"]=>
+      ["inout"]=>
       bool(true)
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -93,7 +91,7 @@ array(4) {
     ["name"]=>
     string(1) "b"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -102,10 +100,9 @@ array(4) {
       bool(false)
     }
   }
-  [2]=>
-  object(ReflectionParameter)#4 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    darray(12) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -127,7 +124,7 @@ array(4) {
       ["defaultText"]=>
       string(4) "NULL"
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -135,7 +132,7 @@ array(4) {
     ["name"]=>
     string(1) "c"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -144,10 +141,9 @@ array(4) {
       bool(false)
     }
   }
-  [3]=>
-  object(ReflectionParameter)#5 (3) {
+  object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    darray(12) {
       ["index"]=>
       int(3)
       ["name"]=>
@@ -165,18 +161,15 @@ array(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      array(3) {
-        [0]=>
+      varray(3) {
         int(1)
-        [1]=>
         int(2)
-        [2]=>
         string(11) "some string"
       }
       ["defaultText"]=>
-      string(26) "array(1, 2, SOME_CONSTANT)"
+      string(27) "varray[1, 2, SOME_CONSTANT]"
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -184,7 +177,7 @@ array(4) {
     ["name"]=>
     string(1) "d"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -195,33 +188,22 @@ array(4) {
   }
 }
 
---- getStaticVariables("f") ---
-array(2) {
-  ["staticX"]=>
-  NULL
-  ["staticY"]=>
-  NULL
-}
-
 --- isInternal("f") ---
 bool(false)
 
 --- isUserDefined("f") ---
 bool(true)
 
---- returnsReference("f") ---
-bool(true)
-
 --- export("f") ---
 string(%d) "/**
  * This is f's doc comment.
  */
-Function [ <user> function &f ] {
-  @@ %s/test/slow/lang/reflection.php 13 - 20
+Function [ <user> function f ] {
+  @@ %s/test/slow/lang/reflection.php 13 - 18
 
   - Parameters [4] {
     Parameter #0 [ <required> $a ]
-    Parameter #1 [ <required> &$b ]
+    Parameter #1 [ <required> inout $b ]
     Parameter #2 [ <optional> $c = NULL ]
     Parameter #3 [ <optional> $d = array (
     0 => 1,
@@ -231,20 +213,6 @@ Function [ <user> function &f ] {
   }
 }
 "
-
---- invokeArgs("f") ---
-In f()
-int(5)
-In f()
-int(6)
-
---- getStaticVariables("f") ---
-array(2) {
-  ["staticX"]=>
-  int(6)
-  ["staticY"]=>
-  NULL
-}
 
 --- invoke("g") ---
 In g(a, b, some string)
@@ -257,7 +225,7 @@ string(%d) "/**
  * This is g's doc comment.
  */
 Function [ <user> function g ] {
-  @@ %s/test/slow/lang/reflection.php 92 - 94
+  @@ %s/test/slow/lang/reflection.php 36 - 38
 
   - Parameters [3] {
     Parameter #0 [ <optional> $a = NULL ]
@@ -276,7 +244,7 @@ string(%d) "/**
  * This is B's doc comment.
  */
 Class [ <user> class B extends A implements I, K, H, J ] {
-  @@ %s/test/slow/lang/reflection.php 131-147
+  @@ %s/test/slow/lang/reflection.php 64-80
 
   - Constants [2] {
     Constant [ string C0 {B::C0} ]
@@ -291,10 +259,10 @@ Class [ <user> class B extends A implements I, K, H, J ] {
 
   - Static methods [2] {
     Method [ <user> static public method smethB0 ] {
-      @@ %s/test/slow/lang/reflection.php 141 - 141
+      @@ %s/test/slow/lang/reflection.php 74 - 74
     }
     Method [ <user> static private method smethB1 ] {
-      @@ %s/test/slow/lang/reflection.php 142 - 142
+      @@ %s/test/slow/lang/reflection.php 75 - 75
     }
   }
 
@@ -307,22 +275,22 @@ Class [ <user> class B extends A implements I, K, H, J ] {
 
   - Methods [6] {
     Method [ <user, implements I> public method methI ] {
-      @@ %s/test/slow/lang/reflection.php 143 - 143
+      @@ %s/test/slow/lang/reflection.php 76 - 76
     }
     Method [ <user, implements J> public method methJ ] {
-      @@ %s/test/slow/lang/reflection.php 144 - 144
+      @@ %s/test/slow/lang/reflection.php 77 - 77
     }
     Method [ <user, implements K> public method methK ] {
-      @@ %s/test/slow/lang/reflection.php 145 - 145
+      @@ %s/test/slow/lang/reflection.php 78 - 78
     }
     Method [ <user> private method methB ] {
-      @@ %s/test/slow/lang/reflection.php 146 - 146
+      @@ %s/test/slow/lang/reflection.php 79 - 79
     }
     Method [ <user, inherits A> public method methH ] {
-      @@ %s/test/slow/lang/reflection.php 125 - 125
+      @@ %s/test/slow/lang/reflection.php 58 - 58
     }
     Method [ <user, inherits A> protected method methA ] {
-      @@ %s/test/slow/lang/reflection.php 126 - 126
+      @@ %s/test/slow/lang/reflection.php 59 - 59
     }
   }
 }
@@ -333,7 +301,7 @@ string(5) "B::C0"
 string(5) "B::C1"
 
 --- getConstants() ---
-array(2) {
+darray(2) {
   ["C0"]=>
   string(5) "B::C0"
   ["C1"]=>
@@ -349,23 +317,19 @@ string(35) "/**
  */"
 
 --- getStartLine() ---
-int(131)
+int(64)
 
 --- getEndLine() ---
-int(147)
+int(80)
 
 --- getFileName() ---
 string(%d) "%s/test/slow/lang/reflection.php"
 
 --- getInterfaceNames() ---
-array(4) {
-  [0]=>
+varray(4) {
   string(1) "I"
-  [1]=>
   string(1) "K"
-  [2]=>
   string(1) "H"
-  [3]=>
   string(1) "J"
 }
 
@@ -382,7 +346,7 @@ int(0)
 string(1) "B"
 
 --- getParentClass() ---
-object(ReflectionClass)#43 (2) {
+object(ReflectionClass) (2) {
   ["name"]=>
   string(1) "A"
   ["obj":"ReflectionClass":private]=>
@@ -449,7 +413,7 @@ bool(false)
 bool(true)
 
 --- newInstance() ---
-object(B)#55 (4) {
+object(B) (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -461,7 +425,7 @@ object(B)#55 (4) {
 }
 
 --- newInstanceArgs() ---
-object(B)#55 (4) {
+object(B) (4) {
   ["p0":"B":private]=>
   int(1)
   ["p1":protected]=>
@@ -473,10 +437,9 @@ object(B)#55 (4) {
 }
 
 --- get_defined_functions() ---
-array(2) {
-  [0]=>
+varray(3) {
+  string(21) "entrypoint_reflection"
   string(1) "f"
-  [1]=>
   string(1) "g"
 }
 --- get_defined_constants() ---

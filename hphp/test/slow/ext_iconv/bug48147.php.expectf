@@ -3,8 +3,8 @@ bool(false)
 string(10) "aa%C3%B8aa"
 
 Notice: iconv(): Detected an incomplete multibyte character in input string in %s on line %d
-string(0) ""
+bool(false)
 string(8) "%C3%B8aa"
 
 Notice: iconv(): Detected an incomplete multibyte character in input string in %s on line %d
-string(0) ""
+bool(false)

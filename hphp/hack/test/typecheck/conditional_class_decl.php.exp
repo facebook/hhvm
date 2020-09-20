@@ -1,0 +1,2 @@
+File "conditional_class_decl.php", line 12, characters 12-12:
+Declarations are not supported outside global scope (Parsing[1002])

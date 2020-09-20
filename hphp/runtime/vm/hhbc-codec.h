@@ -14,9 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_HHBC_CODEC_H_
-#define incl_HPHP_VM_HHBC_CODEC_H_
+#pragma once
 
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/either.h"
 
@@ -70,7 +70,7 @@ void encode_op(Op op, F write_byte) {
     write_byte(static_cast<uint8_t>(0xff));
     rawVal -= 0xff;
   }
-  assert(rawVal < 0xff);
+  assertx(rawVal < 0xff);
 
   write_byte(rawVal);
 }
@@ -119,6 +119,10 @@ template<class T> T decode_oa(PC& pc) {
   return decode_raw<T>(pc);
 }
 
+ALWAYS_INLINE Offset decode_ba(PC& pc) {
+  return decode_raw<Offset>(pc);
+}
+
 ALWAYS_INLINE uint32_t decode_iva(PC& pc) {
   auto const small = *pc;
   if (UNLIKELY(int8_t(small) < 0)) {
@@ -129,10 +133,17 @@ ALWAYS_INLINE uint32_t decode_iva(PC& pc) {
   return small;
 }
 
+using StringDecoder = Either<const Unit*, const UnitEmitter*>;
+
+/*
+ * decode a namedlocal, advancing pc past it.
+ */
+NamedLocal decode_named_local(PC& pc);
+
 /*
  * Decode a MemberKey, advancing pc past it.
  */
-MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u);
+MemberKey decode_member_key(PC& pc, StringDecoder u);
 
 void encode_member_key(MemberKey mk, UnitEmitter& ue);
 
@@ -141,12 +152,12 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue);
 template<typename L>
 void foreachSwitchTarget(PC pc, L func) {
   auto const op = decode_op(pc);
-  assert(isSwitch(op));
+  assertx(isSwitch(op));
   if (op == Op::Switch) {
     (void)decode_oa<SwitchKind>(pc); // skip bounded kind
     (void)decode_raw<int64_t>(pc); // skip base
   }
-  int32_t size = decode_raw<int32_t>(pc);
+  int32_t size = decode_iva(pc);
   for (int i = 0; i < size; ++i) {
     if (op == Op::SSwitch) decode_raw<Id>(pc);
     func(decode_raw<Offset>(pc));
@@ -156,8 +167,8 @@ void foreachSwitchTarget(PC pc, L func) {
 template<typename L>
 void foreachSSwitchString(PC pc, L func) {
   auto const UNUSED op = decode_op(pc);
-  assert(op == Op::SSwitch);
-  int32_t size = decode_raw<int32_t>(pc) - 1; // the last item is the default
+  assertx(op == Op::SSwitch);
+  int32_t size = decode_iva(pc) - 1; // the last item is the default
   for (int i = 0; i < size; ++i) {
     func(decode_raw<Id>(pc));
     decode_raw<Offset>(pc);
@@ -171,6 +182,30 @@ LocalRange decodeLocalRange(const unsigned char*&);
 
 //////////////////////////////////////////////////////////////////////
 
+void encodeIterArgs(UnitEmitter&, const IterArgs&);
+IterArgs decodeIterArgs(const unsigned char*&);
+
+//////////////////////////////////////////////////////////////////////
+
+void encodeFCallArgsBase(UnitEmitter&, const FCallArgsBase&,
+                         bool hasInoutArgs, bool hasAsyncEagerOffset,
+                         bool hasContext);
+void encodeFCallArgsIO(UnitEmitter&, int numBytes, const uint8_t* inoutArgs);
+
+FCallArgs decodeFCallArgs(Op, PC&, StringDecoder);
+
+template<typename T, typename IO, typename CTX>
+void encodeFCallArgs(UnitEmitter& ue, const FCallArgsBase& fca,
+                     bool hasInoutArgs, IO emitInoutArgs,
+                     bool hasAsyncEagerOffset, T emitAsyncEagerOffset,
+                     bool hasContext, CTX emitContext) {
+  encodeFCallArgsBase(ue, fca, hasInoutArgs, hasAsyncEagerOffset, hasContext);
+  if (hasInoutArgs) emitInoutArgs();
+  if (hasAsyncEagerOffset) emitAsyncEagerOffset();
+  if (hasContext) emitContext();
 }
 
-#endif
+//////////////////////////////////////////////////////////////////////
+
+}
+

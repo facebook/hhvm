@@ -6,9 +6,7 @@ string(58) "2101-6391-1.3444111PHP1111 16999.999999991string%r\x00%rwith%r\x00%r
 -- Iteration 3 --
 string(47) "20-639-1.34441PHP 6999.99999999string%r\x00%rwith%r\x00%r...%r\x00%r"
 -- Iteration 4 --
-
-Notice: %s
-string(13) "key1Arraykey2"
+string(102) "2Array0Array-639Array-1.3444Array1ArrayPHPArrayArrayArrayArray Array6999.99999999Arraystring%r\x00%rwith%r\x00%r...%r\x00%r"
 -- Iteration 5 --
 string(47) "20-639-1.34441PHP 6999.99999999string%r\x00%rwith%r\x00%r...%r\x00%r"
 -- Iteration 6 --

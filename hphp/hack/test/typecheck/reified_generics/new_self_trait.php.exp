@@ -1,0 +1,4 @@
+File "new_self_trait.php", line 10, characters 9-12:
+`MyTrait` is uninstantiable (Typing[4002])
+File "new_self_trait.php", line 6, characters 7-13:
+Declaration is here

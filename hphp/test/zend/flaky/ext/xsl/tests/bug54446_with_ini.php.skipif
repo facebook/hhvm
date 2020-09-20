@@ -1,3 +1,0 @@
-<?php
-if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
-?>

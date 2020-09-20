@@ -1,8 +1,7 @@
-object(Z)#1 (2) {
+Notice: Undefined property: Z::$priv in %s/test/slow/object_property_expression/801.php on line 8
+object(Z) (1) {
   ["priv":"Y":private]=>
   NULL
-  ["priv"]=>
-  int(1)
 }
 
 Fatal error: Cannot access private property Y::$priv in %s/test/slow/object_property_expression/801.php on line 8

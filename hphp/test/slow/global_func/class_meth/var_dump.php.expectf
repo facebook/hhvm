@@ -1,0 +1,14 @@
+array (
+  0 => 'A',
+  1 => 'f1',
+)
+varray(2) {
+  string(1) "A"
+  string(2) "f1"
+}
+
+class_meth('A', 'f1')
+classMeth{
+    class(A)
+    function(f1)
+}

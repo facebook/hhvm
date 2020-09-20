@@ -1,0 +1,115 @@
+[(Fun
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([8:51-55], (Hprim Tvoid)));
+      f_name = ([8:10-14], "\\test"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params =
+      [{ Aast.AnnotatedAST.param_annotation = ([8:20-22], bool);
+         param_hint = (Some ([8:15-19], (Hprim Tbool)));
+         param_is_variadic = false;
+         param_pos = [8:20-22]; param_name = "$b"; param_expr = None;
+         param_callconv = None; param_user_attributes = [] };
+        { Aast.AnnotatedAST.param_annotation = ([8:28-30], int);
+          param_hint = (Some ([8:24-27], (Hprim Tint)));
+          param_is_variadic = false;
+          param_pos = [8:28-30]; param_name = "$x"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+        { Aast.AnnotatedAST.param_annotation = ([8:38-40], float);
+          param_hint = (Some ([8:32-37], (Hprim Tfloat)));
+          param_is_variadic = false;
+          param_pos = [8:38-40]; param_name = "$y"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] };
+        { Aast.AnnotatedAST.param_annotation = ([8:46-48], num);
+          param_hint = (Some ([8:42-45], (Hprim Tnum)));
+          param_is_variadic = false;
+          param_pos = [8:46-48]; param_name = "$z"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+        ];
+      f_body =
+      (NamedBody
+         { Aast.AnnotatedAST.fnb_nast =
+           [(If ((([9:7-9], bool), (Lvar ([9:7-9], $b))),
+               [(Expr
+                   (([10:5-15], int),
+                    (Binop ((Eq None),
+                       (([10:5-10], int), (Lvar ([10:5-10], $xory))),
+                       (([10:13-15], int), (Lvar ([10:13-15], $x)))))))
+                 ],
+               [(Expr
+                   (([12:5-15], float),
+                    (Binop ((Eq None),
+                       (([12:5-10], float), (Lvar ([12:5-10], $xory))),
+                       (([12:13-15], float), (Lvar ([12:13-15], $y)))))))
+                 ]
+               ));
+             (Expr
+                (([14:3-20], C),
+                 (Binop ((Eq None), (([14:3-5], C), (Lvar ([14:3-5], $c))),
+                    (([14:8-20], C),
+                     (New (
+                        (([14:12-13], C<[unresolved]>),
+                         (CI (([14:12-13], "\\C"), []))),
+                        [(([14:14-19], (float | num | int)),
+                          (Lvar ([14:14-19], $xory)))],
+                        [])))
+                    ))));
+             (Expr
+                (([15:3-17], num),
+                 (Binop ((Eq None),
+                    (([15:3-12], (float | num | int)),
+                     (Obj_get ((([15:3-5], C), (Lvar ([15:3-5], $c))),
+                        (([15:7-12], (float | num | int)),
+                         (Id ([15:7-12], "value"))),
+                        OG_nullthrows))),
+                    (([15:15-17], num), (Lvar ([15:15-17], $z)))))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false });
+  (Class
+     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = false; c_kind = Cnormal;
+       c_name = ([4:7-8], "\\C"); c_tparams = <opaque>; c_extends = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = [];
+       c_vars =
+       [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
+          cv_visibility = Public; cv_type = (Some ([5:38-39], (Habstr "T")));
+          cv_id = ([5:40-46], "value"); cv_expr = None;
+          cv_user_attributes = [] }
+         ];
+       c_constructor =
+       (Some { Aast.AnnotatedAST.m_annotation = (); m_final = false;
+               m_abstract = false; m_visibility = Public;
+               m_name = ([5:19-30], "__construct"); m_tparams = [];
+               m_where_constraints = []; m_variadic = FVnonVariadic;
+               m_params =
+               [{ Aast.AnnotatedAST.param_annotation = ([5:40-46], T);
+                  param_hint = (Some ([5:38-39], (Habstr "T")));
+                  param_is_variadic = false;
+                  param_pos = [5:40-46]; param_name = "$value";
+                  param_expr = None; param_callconv = None;
+                  param_user_attributes = [] }
+                 ];
+               m_body =
+               (NamedBody
+                  { Aast.AnnotatedAST.fnb_nast =
+                    [(Expr
+                        (([5:40-46], T),
+                         (Binop ((Eq None),
+                            (([5:40-46], T),
+                             (Obj_get ((([5:40-46], <static>), This),
+                                (([5:40-46], T), (Id ([5:40-46], "value"))),
+                                OG_nullthrows))),
+                            (([5:40-46], T), (Lvar ([5:40-46], $value)))))));
+                      Noop];
+                    fnb_unsafe = false });
+               m_fun_kind = FSync; m_user_attributes = [];
+               m_ret = (Some ([5:19-30], (Happly (([5:19-30], "void"), []))));
+               m_ret_by_ref = false });
+       c_static_methods = []; c_methods = []; c_user_attributes = [];
+       c_enum = None })
+  ]
+The TAST for this definition contains nodes which are not yet implemented.
+File "assign_unresolved_obj_get.php", line 14, characters 14-18:
+Unexpected type in TAST: expected (int | float), got (float | num | int) (TastTypecheck[11001])

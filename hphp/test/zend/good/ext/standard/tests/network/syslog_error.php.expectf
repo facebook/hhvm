@@ -2,11 +2,9 @@
 
 -- Testing syslog() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: syslog() expects exactly 2 parameters, 3 given in %s/syslog_error.php on line 16
 
 -- Testing syslog() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: syslog() expects exactly 2 parameters, 1 given in %s/syslog_error.php on line 21
 ===DONE===

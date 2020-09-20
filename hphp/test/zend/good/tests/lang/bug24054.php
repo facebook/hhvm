@@ -1,18 +1,15 @@
-<?php // $Id$
+<?hh
+<<__EntryPoint>> function main(): void {
+    $long_max = is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF;
+    $long_min = -$long_max - 1;
+    printf("%d,%d,%d,%d\n",is_int($long_min  ),is_int($long_max  ),
+                        is_int($long_min-1),is_int($long_max+1));
 
-define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
-define('LONG_MIN', -LONG_MAX - 1);
-printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
-					   is_int(LONG_MIN-1),is_int(LONG_MAX+1));
+    $i = $long_max;
 
-	$i = LONG_MAX;
+    $j = $i * 1001;
+    $i *= 1001;
 
-	$j = $i * 1001;
-	$i *= 1001;
-
-$tests = <<<TESTS
-$i === $j
-TESTS;
-
-include(dirname(__FILE__) . '/../quicktester.inc');
-
+    include(dirname(__FILE__) . '/../quicktester.inc');
+    quicktester(() ==> $i, () ==> $j);
+}

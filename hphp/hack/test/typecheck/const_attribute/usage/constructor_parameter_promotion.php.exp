@@ -1,2 +1,2 @@
 File "constructor_parameter_promotion.php", line 8, characters 12-12:
-Cannot assign to a __Const property (Typing[4196])
+Cannot mutate a `__Const` property (Typing[4196])

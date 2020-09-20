@@ -33,39 +33,39 @@ function test_get_meta_tags() {
 }
 
 function test_http_build_query() {
-  $data = array("foo" => "bar", "baz" => "boom", "cow" => "milk",
-                           "php" => "hypertext processor");
+  $data = darray["foo" => "bar", "baz" => "boom", "cow" => "milk",
+                           "php" => "hypertext processor"];
   VS(http_build_query($data),
      "foo=bar&baz=boom&cow=milk&php=hypertext+processor");
   VS(http_build_query($data, "", "&amp;"),
      "foo=bar&amp;baz=boom&amp;cow=milk&amp;php=hypertext+processor");
 
-  $data = array(
-    'foo',
-    'bar',
-    'baz',
-    'boom',
+  $data = darray[
+    0 => 'foo',
+    1 => 'bar',
+    2 => 'baz',
+    3 => 'boom',
     'cow' => 'milk',
     'php' => 'hypertext processor'
-  );
+  ];
   VS(http_build_query($data),
      "0=foo&1=bar&2=baz&3=boom&cow=milk&php=hypertext+processor");
   VS(http_build_query($data, "myvar_"),
      "myvar_0=foo&myvar_1=bar&myvar_2=baz&myvar_3=boom&cow=milk&".
      "php=hypertext+processor");
 
-  $data = array(
-    'user' => array('name' => 'Bob Smith',
+  $data = darray[
+    'user' => darray['name' => 'Bob Smith',
                     'age' => 47,
                     'sex' => 'M',
-                    'dob' => '5/12/1956'),
-    'pastimes' => array('golf', 'opera', 'poker', 'rap'),
-    'children' => array('bobby' => array('age' => 12,
-                                         'sex' => 'M'),
-                        'sally' => array('age' => 8,
-                                         'sex' => 'F')),
-    'CEO'
-  );
+                    'dob' => '5/12/1956'],
+    'pastimes' => varray['golf', 'opera', 'poker', 'rap'],
+    'children' => darray['bobby' => darray['age' => 12,
+                                         'sex' => 'M'],
+                        'sally' => darray['age' => 8,
+                                         'sex' => 'F']],
+    0 => 'CEO'
+  ];
   VS(http_build_query($data, "flags_"),
      "user%5Bname%5D=Bob+Smith&user%5Bage%5D=47&user%5Bsex%5D=M&".
      "user%5Bdob%5D=5%2F12%2F1956&pastimes%5B0%5D=golf&".
@@ -114,6 +114,9 @@ function test_urlencode() {
   VS(urlencode("foo bar@baz"), "foo+bar%40baz");
 }
 
+
+<<__EntryPoint>>
+function main_ext_url() {
 test_base64_decode();
 test_base64_encode();
 test_get_meta_tags();
@@ -123,3 +126,4 @@ test_rawurldecode();
 test_rawurlencode();
 test_urldecode();
 test_urlencode();
+}

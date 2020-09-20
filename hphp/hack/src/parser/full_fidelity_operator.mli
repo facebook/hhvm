@@ -1,10 +1,9 @@
-(**
+(*
  * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -12,93 +11,18 @@ module TokenKind : sig
   type t = Full_fidelity_token_kind.t
 end
 
-type t =
-| DollarOperator
-(* TODO: Is there a better name? Operators should be named as what they do,
-not how they look on the page. *)
-| IndexingOperator
-| FunctionCallOperator
-| AwaitOperator
-| SuspendOperator
-| PipeOperator
-| ConditionalQuestionOperator
-| ConditionalColonOperator
-| DegenerateConditionalOperator
-| CoalesceOperator
-| PHPOrOperator
-| PHPExclusiveOrOperator
-| PHPAndOperator
-| PrintOperator
-| LogicalOrOperator
-| ExclusiveOrOperator
-| LogicalAndOperator
-| OrOperator
-| AndOperator
-| EqualOperator
-| StrictEqualOperator
-| NotEqualOperator
-| PhpNotEqualOperator
-| StrictNotEqualOperator
-| SpaceshipOperator
-| LessThanOperator
-| LessThanOrEqualOperator
-| GreaterThanOperator
-| GreaterThanOrEqualOperator
-| LeftShiftOperator
-| RightShiftOperator
-| AdditionOperator
-| SubtractionOperator
-| ConcatenationOperator
-| MultiplicationOperator
-| DivisionOperator
-| RemainderOperator
-| LogicalNotOperator
-| InstanceofOperator
-| IsOperator
-| NotOperator
-| PrefixIncrementOperator
-| PrefixDecrementOperator
-| PostfixIncrementOperator
-| PostfixDecrementOperator
-| CastOperator
-| ExponentOperator
-| ReferenceOperator
-| ErrorControlOperator
-| NewOperator
-| CloneOperator
-| AssignmentOperator
-| AdditionAssignmentOperator
-| SubtractionAssignmentOperator
-| MultiplicationAssignmentOperator
-| DivisionAssignmentOperator
-| ExponentiationAssignmentOperator
-| ConcatenationAssignmentOperator
-| RemainderAssignmentOperator
-| AndAssignmentOperator
-| OrAssignmentOperator
-| ExclusiveOrAssignmentOperator
-| LeftShiftAssignmentOperator
-| RightShiftAssignmentOperator
-| MemberSelectionOperator
-| NullSafeMemberSelectionOperator
-| ScopeResolutionOperator
-| UnaryPlusOperator
-| UnaryMinusOperator
-| IncludeOperator
-| IncludeOnceOperator
-| RequireOperator
-| RequireOnceOperator
+include Full_fidelity_operator_generated.Sig
 
 type assoc =
-| LeftAssociative
-| RightAssociative
-| NotAssociative
+  | LeftAssociative
+  | RightAssociative
+  | NotAssociative
 
-val precedence : t -> int
+val precedence : Full_fidelity_parser_env.t -> t -> int
 
 val precedence_for_assignment_in_expressions : int
 
-val associativity : t -> assoc
+val associativity : Full_fidelity_parser_env.t -> t -> assoc
 
 val prefix_unary_from_token : TokenKind.t -> t
 

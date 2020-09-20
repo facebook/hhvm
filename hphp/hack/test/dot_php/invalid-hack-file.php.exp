@@ -1,0 +1,2 @@
+File "invalid-hack-file.php", line 3, characters 1-74:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])

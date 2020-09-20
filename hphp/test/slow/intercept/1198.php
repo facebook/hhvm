@@ -1,17 +1,21 @@
-<?php
+<?hh
 
-function foo(&$a) {
+function foo(inout $a) {
   var_dump('foo');
-  $a = 1;
+  $a[0] = 1;
 }
-function bar(&$a) {
+function bar(inout $a) {
   var_dump('bar');
-  $a = 2;
+  $a[0] = 2;
 }
-function goo($name, $obj, $params, $data, &$done) {
-  return call_user_func_array($data, $params);
+function goo($name, $obj, inout $params, $data, inout $done) {
+  return $data(inout $params);
 }
+
+<<__EntryPoint>>
+function main_1198() {
 fb_intercept('foo', 'goo', 'bar');
 $a = 0;
-foo($a);
+foo(inout $a);
 var_dump($a);
+}

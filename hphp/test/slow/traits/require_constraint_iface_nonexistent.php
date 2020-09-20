@@ -6,3 +6,8 @@ interface I1 {
 
 class X implements I1 {
 }
+
+<<__EntryPoint>>
+function main(): void {
+  $x = new X();
+}

@@ -1,0 +1,15 @@
+array(4) {
+  ["total"]=>
+  int(%d)
+  ["same"]=>
+  int(%d)
+  ["similar"]=>
+  int(%d)
+  ["diff"]=>
+  int(%d)
+}
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   try {
@@ -12,4 +12,8 @@ function foo() {
   }
   var_dump("after");
 }
+
+<<__EntryPoint>>
+function main_kill_from_throw() {
 var_dump(foo());
+}

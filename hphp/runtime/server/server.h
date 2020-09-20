@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_SERVER_H_
-#define incl_HPHP_HTTP_SERVER_SERVER_H_
+#pragma once
 
 #include <algorithm>
 #include <chrono>
@@ -212,7 +211,7 @@ public:
   /**
    * Add additional worker threads
    */
-  virtual void addWorkers(int numWorkers) = 0;
+  virtual void saturateWorkers() = 0;
 
   /**
    * Informational.
@@ -220,8 +219,13 @@ public:
   std::string getAddress() const { return m_address;}
   int getPort() const { return m_port;}
 
-  RunStatus getStatus() const { return m_status;}
-  void setStatus(RunStatus status) { m_status = status;}
+  RunStatus getStatus() const {
+    return m_status.load(std::memory_order_acquire);
+  }
+  void setStatus(RunStatus status) {
+    m_status.store(status, std::memory_order_release);
+  }
+
   /**
    * IHostHealthObserver interface.  Note that m_status doesn't
    * contain server health information.
@@ -257,9 +261,20 @@ public:
   virtual void stop() = 0;
 
   /**
+   * How many threads can be available for handling requests.
+   */
+  virtual size_t getMaxThreadCount() = 0;
+
+  /**
    * How many threads are actively working on handling requests.
    */
   virtual int getActiveWorker() = 0;
+
+  /**
+   * Update the maximum number of threads allowed to handle requests at a
+   * time.
+   */
+  virtual void updateMaxActiveWorkers(int) = 0;
 
   /**
    * How many jobs are queued waiting to be handled.
@@ -304,7 +319,7 @@ protected:
   std::list<ServerEventListener*> m_listeners;
 
 private:
-  RunStatus m_status{RunStatus::NOT_YET_STARTED};
+  std::atomic<RunStatus> m_status{RunStatus::NOT_YET_STARTED};
   HealthLevel m_healthLevel{HealthLevel::Bold};
 };
 
@@ -312,18 +327,16 @@ struct ServerOptions {
   ServerOptions(const std::string &address,
                 uint16_t port,
                 int maxThreads,
-                int initThreads = -1)
+                int initThreads = -1,
+                int maxQueue = -1,
+                bool legacyBehavior = true)
     : m_address(address),
       m_port(port),
       m_maxThreads(maxThreads),
       m_initThreads(initThreads),
-      m_serverFD(-1),
-      m_sslFD(-1),
-      m_takeoverFilename(),
-      m_useFileSocket(false),
-      m_queueToWorkerRatio(1),
-      m_hugeThreads(0) {
-    assert(m_maxThreads >= 0);
+      m_maxQueue(maxQueue == -1 ? maxThreads : maxQueue),
+      m_legacyBehavior(legacyBehavior) {
+    assertx(m_maxThreads >= 0);
     if (m_initThreads < 0 || m_initThreads > m_maxThreads) {
       m_initThreads = m_maxThreads;
     }
@@ -333,12 +346,16 @@ struct ServerOptions {
   uint16_t m_port;
   int m_maxThreads;
   int m_initThreads;
-  int m_serverFD;
-  int m_sslFD;
+  int m_maxQueue;
+  bool m_legacyBehavior;
+  int m_serverFD{-1};
+  int m_sslFD{-1};
   std::string m_takeoverFilename;
-  bool m_useFileSocket;
-  int m_queueToWorkerRatio;
-  int m_hugeThreads;
+  bool m_useFileSocket{false};
+  int m_hugeThreads{0};
+  unsigned m_hugeStackKb{0};
+  unsigned m_extraKb{0};
+  uint32_t m_loop_sample_rate{0};
 };
 
 /**
@@ -427,4 +444,3 @@ struct InvalidHeaderException : ServerException {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_SERVER_H_

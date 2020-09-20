@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base {
   private function foo() {
@@ -26,4 +26,8 @@ function main() {
   var_dump($y->heh($y));
 }
 
+
+<<__EntryPoint>>
+function main_method_resolution_002() {
 main();
+}

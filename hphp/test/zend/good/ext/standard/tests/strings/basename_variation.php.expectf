@@ -7,7 +7,7 @@ string(3) "bar"
 string(3) "bar"
 
 --Iteration 3--
-string(3) "bar"
+string(55) "basename() expects parameter 2 to be string, null given"
 
 --Iteration 4--
 string(3) "bar"
@@ -25,7 +25,7 @@ string(7) "bar.tar"
 string(7) "bar.tar"
 
 --Iteration 9--
-string(7) "bar.tar"
+string(55) "basename() expects parameter 2 to be string, null given"
 
 --Iteration 10--
 string(7) "bar.tar"
@@ -70,7 +70,7 @@ string(7) "My Pics"
 string(10) "My Pics.gz"
 
 --Iteration 24--
-string(10) "My Pics.gz"
+string(55) "basename() expects parameter 2 to be string, null given"
 
 --Iteration 25--
 string(10) "My Pics.gz"
@@ -127,7 +127,7 @@ string(1) " "
 string(1) " "
 
 --Iteration 43--
-string(0) ""
+string(55) "basename() expects parameter 1 to be string, null given"
 
 --Iteration 44--
 string(1) " "
@@ -142,5 +142,5 @@ string(0) ""
 string(0) ""
 
 --Iteration 48--
-string(0) ""
+string(55) "basename() expects parameter 1 to be string, null given"
 Done

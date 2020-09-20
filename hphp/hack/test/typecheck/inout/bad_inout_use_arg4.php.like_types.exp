@@ -1,0 +1,8 @@
+File "bad_inout_use_arg4.php", line 9, characters 7-23:
+You cannot decorate this argument as `inout` (Parsing[1002])
+File "bad_inout_use_arg4.php", line 9, characters 13-23:
+Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+File "bad_inout_use_arg4.php", line 9, characters 13-23:
+Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
+File "bad_inout_use_arg4.php", line 9, characters 13-20:
+This is a dynamic value or an object of type vec<int> because a type could not be determined here

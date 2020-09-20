@@ -1,14 +1,12 @@
-<?php
+<?hh
 
 class A {
- function foo() {
- $args = func_get_args();
+ function foo(...$args) {
  var_dump(__CLASS__, $args);
 }
 }
  class B extends A {
- function foo() {
- $args = func_get_args();
+ function foo(...$args) {
  var_dump(__CLASS__, $args);
 }
 }
@@ -18,4 +16,8 @@ class A {
   $obj = new B;
  $obj->foo(123, 456);
 }
- bar();
+
+ <<__EntryPoint>>
+function main_78() {
+bar();
+}

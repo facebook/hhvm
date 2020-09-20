@@ -1,6 +1,9 @@
-<?php
+<?hh
+
 
 // PHP's string -> double conversion doesn't care about locale.
+<<__EntryPoint>>
+function main_decimal_point() {
 setlocale(LC_ALL, 'fr_FR');
 
 $a1 = '1.5';
@@ -11,3 +14,4 @@ var_dump($a2 * $b);
 
 var_dump('1.5' * 1);
 var_dump('1,5' * 1);
+}

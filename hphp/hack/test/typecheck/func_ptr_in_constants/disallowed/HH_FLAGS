@@ -1,0 +1,2 @@
+--disallow-func-ptrs-in-constants
+--enable-first-class-function-pointers

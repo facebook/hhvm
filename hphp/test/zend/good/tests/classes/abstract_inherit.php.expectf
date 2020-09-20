@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot instantiate abstract class fail in %s/abstract_inherit.php on line 10

@@ -1,0 +1,47 @@
+.function <"" N  > test(<"\?HH\\string" "HH\\string" nullable extended_hint > $a, <"\?HH\\string" "HH\\string" nullable extended_hint > $b, <"HH\\string" "HH\\string" > $c) {
+  VerifyParamType $a
+  VerifyParamType $b
+  VerifyParamType $c
+  IsTypeL $a Null
+  JmpZ L1
+  Null
+  Jmp L5
+L1:
+  CGetL $b
+L3:
+  Dup
+  JmpNZ L6
+  Nop
+L5:
+  PopC
+  CGetL $c
+  Jmp L4
+L6:
+  Nop
+L4:
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  String "a"
+  String "b"
+  String "c"
+  FCallFuncD <> 3 1 "" - "" "test"
+  NullUninit
+  NullUninit
+  NullUninit
+  Null
+  String "b"
+  String "c"
+  FCallFuncD <> 3 1 "" - "" "test"
+  FCallFuncD <> 2 1 "" - "" "var_dump"
+  PopC
+  Int 1
+  RetC 
+}

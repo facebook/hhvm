@@ -1,0 +1,2 @@
+File "ellipsis_without_hint.php", line 3, characters 20-22:
+Cannot use ... without a typehint (Parsing[1002])

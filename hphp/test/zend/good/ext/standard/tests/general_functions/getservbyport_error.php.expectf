@@ -1,6 +1,4 @@
 
-Warning: %s
-NULL
+Warning: getservbyport() expects exactly 2 parameters, 3 given in %s/getservbyport_error.php on line 5
 
-Warning: %s
-NULL
+Warning: getservbyport() expects exactly 2 parameters, 1 given in %s/getservbyport_error.php on line 6

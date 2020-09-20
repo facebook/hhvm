@@ -5,15 +5,15 @@ File "switch_fallthrough12.php", line 12, characters 7-17:
 File "switch_fallthrough12.php", line 15, characters 7-17:
   string
 File "switch_fallthrough12.php", line 19, characters 7-17:
-  ^(int | string)
+  (int | string)
 File "switch_fallthrough12.php", line 22, characters 7-17:
   bool
 File "switch_fallthrough12.php", line 26, characters 7-17:
-  ^(string | bool | int)
+  (int | bool)
 File "switch_fallthrough12.php", line 30, characters 7-17:
   int
 File "switch_fallthrough12.php", line 33, characters 7-17:
   float
 File "switch_fallthrough12.php", line 37, characters 3-13:
-  ^(int | string | float | bool)
+  (bool | num)
 No errors

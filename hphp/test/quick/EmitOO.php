@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 interface I {
   public function f($a);
 }
@@ -18,7 +16,7 @@ class C extends B implements I {
   public $p1 = null;
   public $p = 13;
   protected $q = "q...";
-  private $r = array(1, 2, 3);
+  private $r = varray[1, 2, 3];
 
   function __construct() {
     print "In C::__construct()\n";
@@ -35,10 +33,6 @@ class C extends B implements I {
     $x = $this;
     $this;
     return $this;
-    # Ignored.
-    function f2() {
-      return $this;
-    }
   }
 
   function g($x) {
@@ -74,4 +68,9 @@ function main() {
 
   print "Test end\n";
 }
-main();
+<<__EntryPoint>>
+function main_entry(): void {
+
+  print "Test begin\n";
+  main();
+}

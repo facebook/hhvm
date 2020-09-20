@@ -1,0 +1,6 @@
+Linearization for class \C:
+[\C]
+Linearization for class \D:
+[\D, \C<int,T3>]
+Linearization for class \E:
+[\E, \D<string>, \C<int,string>]

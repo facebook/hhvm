@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string gmdate(string format [, long timestamp])
  * Description: Format a GMT date/time 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -23,5 +23,5 @@ echo "\n-- Testing gmdate() function with English ordinal suffix --\n";
 var_dump( gmdate('S') );
 var_dump( gmdate('S', $timestamp) );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

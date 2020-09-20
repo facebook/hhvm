@@ -1,0 +1,2 @@
+File "rx_indexing3.php", line 6, characters 3-14:
+Cannot assign to element of Hack Collection object via `[]` in a reactive context. Instead, use the `set` method. (Typing[4201])

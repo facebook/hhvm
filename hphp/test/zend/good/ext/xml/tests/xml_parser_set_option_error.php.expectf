@@ -2,11 +2,9 @@
 
 -- Testing xml_parser_set_option() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_parser_set_option() expects exactly 3 parameters, 4 given in %s/xml_parser_set_option_error.php on line 17
 
 -- Testing xml_parser_set_option() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: xml_parser_set_option() expects exactly 3 parameters, 2 given in %s/xml_parser_set_option_error.php on line 23
 Done

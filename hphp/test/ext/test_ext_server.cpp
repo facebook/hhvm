@@ -76,12 +76,13 @@ bool TestExtServer::test_pagelet_server_task_result() {
   String basepost("postparam=");
 
   std::vector<Resource> tasks;
+  tasks.reserve(TEST_SIZE);
   for (int i = 0; i < TEST_SIZE; ++i) {
     String url = baseurl + String(i);
     String header = baseheader + String(i);
     String post = basepost + String(i);
     Resource task = HHVM_FN(pagelet_server_task_start)(url,
-      make_packed_array(header), post);
+      make_varray(header), post);
     tasks.push_back(task);
   }
 
@@ -91,9 +92,9 @@ bool TestExtServer::test_pagelet_server_task_result() {
 
   // Calls that time out (try 1 ms) should return a status code of -1
   for (int i = 0; i < TEST_SIZE; ++i) {
-    Variant code, headers;
-    VS("", HHVM_FN(pagelet_server_task_result)(tasks[i], ref(headers),
-                                               ref(code), 1));
+    Array headers;
+    int64_t code;
+    VS("", HHVM_FN(pagelet_server_task_result)(tasks[i], headers, code, 1));
     VS(code, -1);
   }
 
@@ -106,24 +107,24 @@ bool TestExtServer::test_pagelet_server_task_result() {
     expected += String(i);
 
     // A timeout of 0 indicates an infinite timeout that blocks.
-    Variant code, headers;
-    VS(expected, HHVM_FN(pagelet_server_task_result)(tasks[i], ref(headers),
-                                                     ref(code), 0));
+    Array headers;
+    int64_t code;
+    VS(expected, HHVM_FN(pagelet_server_task_result)(tasks[i], headers,
+                                                     code, 0));
     VS(code, 200);
 
-    Array headerArray = headers.toArray();
     bool hasResponseHeader = false;
-    String expectedHeader = String("ResponseHeader: okay");
+    auto const expectedHeader = String("ResponseHeader: okay");
 
-    for (int headerIdx = 0; headerIdx < headerArray.size(); headerIdx++) {
-      if (headerArray[headerIdx].toString() == expectedHeader) {
+    for (int headerIdx = 0; headerIdx < headers.size(); headerIdx++) {
+      if (headers[headerIdx].toString() == expectedHeader) {
         hasResponseHeader = true;
         break;
       }
     }
     VERIFY(hasResponseHeader);
-    VS(expected, HHVM_FN(pagelet_server_task_result)(tasks[i], ref(headers),
-                                                     ref(code), 1));
+    VS(expected, HHVM_FN(pagelet_server_task_result)(tasks[i], headers,
+                                                     code, 1));
     VS(code, 200);
   }
 
@@ -136,10 +137,10 @@ bool TestExtServer::test_xbox_send_message() {
   static const StaticString
     s_code("code"),
     s_response("response");
-  Variant ret;
-  VERIFY(HHVM_FN(xbox_send_message)("hello", ref(ret), 5000));
-  VS(ret.toArray()[s_code], 200);
-  VS(ret.toArray()[s_response], "olleh");
+  Array ret;
+  VERIFY(HHVM_FN(xbox_send_message)("hello", ret, 5000));
+  VS(ret[s_code], 200);
+  VS(ret[s_response], "olleh");
   return Count(true);
 }
 
@@ -162,7 +163,7 @@ bool TestExtServer::test_xbox_task_result() {
   Resource task = HHVM_FN(xbox_task_start)("hello");
   HHVM_FN(xbox_task_status)(task);
   Variant ret;
-  VS(HHVM_FN(xbox_task_result)(task, 0, ref(ret)), 200);
+  VS(HHVM_FN(xbox_task_result)(task, 0, ret), 200);
   VS(ret, "olleh");
   return Count(true);
 }

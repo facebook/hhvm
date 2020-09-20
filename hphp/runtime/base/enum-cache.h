@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ENUM_CACHE_H_
-#define incl_HPHP_ENUM_CACHE_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/class.h"
@@ -42,14 +41,14 @@ struct EnumCache {
   // TBB hash and compare struct
   struct clsCompare {
     bool equal(intptr_t key1, intptr_t key2) const {
-      assert(key1 && key2);
+      assertx(key1 && key2);
       bool equal = (key1 == key2);
-      assert(!equal || getClass(key1)->name()->equal(getClass(key2)->name()));
+      assertx(!equal || getClass(key1)->name()->equal(getClass(key2)->name()));
       return equal;
     }
 
     size_t hash(intptr_t key) const {
-      assert(key);
+      assertx(key);
       return static_cast<size_t>(hash_int64(key));
     }
   };
@@ -62,12 +61,19 @@ struct EnumCache {
   static const EnumValues* getValues(const Class* klass, bool recurse);
   // Like above, but for first-class enums
   static const EnumValues* getValuesBuiltin(const Class* klass);
+  // Like above, but for first-class enums where the values can be computed
+  // entirely statically. Returns nullptr if that's not the case.
+  static const EnumValues* getValuesStatic(const Class* klass);
   // delete the EnumValues element in the cache for the given class.
   // If there is no entry this function is a no-op.
   static void deleteValues(const Class* klass);
 
   // Helper that raises a PHP exception
   [[noreturn]] static void failLookup(const Variant& msg);
+
+  // Large enums get the dummy LargeEnum tag (so that we can cache a single
+  // static value for these enums). Small enums get a tag based on the caller.
+  static Array tagEnumWithProvenance(Array input);
 
 private:
   // Class* to intptr_ti key helpers
@@ -95,8 +101,10 @@ private:
 
   const EnumValues* getEnumValuesIfDefined(intptr_t key,
     bool checkLocal = true) const;
-  const EnumValues* getEnumValues(const Class* klass, bool recurse);
-  const EnumValues* loadEnumValues(const Class* klass, bool recurse);
+  const EnumValues* getEnumValues(const Class* klass, bool recurse,
+                                  bool require_static = false);
+  const EnumValues* loadEnumValues(const Class* klass, bool recurse,
+                                   bool require_static = false);
   void deleteEnumValues(intptr_t key);
 
   // Map that contains associations between Enum classes and their array
@@ -106,19 +114,17 @@ private:
     const EnumValues*,
     clsCompare>;
 
-  using ReqEnumValuesMap = req::hash_map<
+  using ReqEnumValuesMap = req::fast_map<
     intptr_t,
     const EnumValues*>;
 
   // Persistent values, recursive case. Non-recursive are cached in Class.
   EnumValuesMap m_enumValuesMap;
 
-  rds::Link<ReqEnumValuesMap*,true /* normal_only */>
-    m_nonScalarEnumValuesMap{rds::kUninitHandle};
+  rds::Link<ReqEnumValuesMap*, rds::Mode::Normal> m_nonScalarEnumValuesMap;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-#endif

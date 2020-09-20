@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require_once(dirname(__FILE__) . '/new_db.inc');
 
@@ -17,11 +17,10 @@ echo "SELECTING results\n";
 $stmt = $db->prepare($query);
 
 echo "paramCount with wrong number of arguments\n";
-var_dump($stmt->paramCount('foobar'));
+try { var_dump($stmt->paramCount('foobar')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $result = $stmt->execute();
 echo "Closing database\n";
 $stmt = null;
 $result = null;
 var_dump($db->close());
 echo "Done\n";
-?>

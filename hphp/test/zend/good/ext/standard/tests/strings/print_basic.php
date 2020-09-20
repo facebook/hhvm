@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 /* Prototype  : int print  ( string $arg  )
  * Description: Output a string
  * Source code: n/a, print is a language construct not an extension function
  * Test based on php.net manual example.
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing print() : basic functionality ***\n";
 
 echo "\n-- Iteration 1 --\n";
@@ -33,7 +33,7 @@ echo "\n-- Iteration 6 --\n";
 print "foo is $foo"; // foo is foobar
 
 // You can also use arrays
-$bar = array("value" => "foo");
+$bar = darray["value" => "foo"];
 
 echo "\n-- Iteration 7 --\n";
 print "this is {$bar['value']} !"; // this is foo !
@@ -54,5 +54,5 @@ multiple lines with $variable interpolation. Note
 that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!\n
 END;
-?>
-===DONE===
+echo "===DONE===\n";
+}

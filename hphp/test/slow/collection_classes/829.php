@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_829() {
 $mapFn = function ($v) {
  return $v+1;
  }
@@ -27,4 +30,5 @@ $pair = Pair {
 ;
 foreach ($pair->map($mapFn)->filter($filtFn) as $k => $v) {
   var_dump($k, $v);
+}
 }

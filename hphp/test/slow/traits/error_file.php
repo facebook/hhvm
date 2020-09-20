@@ -1,10 +1,15 @@
 <?hh
 
-require "error_file.inc";
-
-class X {
-  use T;
+function foo() {
+  var_dump(hphp_debug_caller_info());
 }
 
-(new X)->f();
-(new X)->g();
+<<__EntryPoint>> function main(): void {
+  require "error_file.inc2";
+  require "error_file.inc";
+  require "error_file-class.inc";
+
+  (new X)->f();
+  (new X)->g();
+  (new X)->h();
+}

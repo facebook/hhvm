@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * The function converts the pathname of an existing accessible file and a
@@ -56,8 +56,7 @@ function msg_queue_exists(int $key): bool;
  *   sent. serialize defaults to TRUE which means that the message is serialized
  *   using the same mechanism as the session module before being sent to the
  *   queue. This allows complex arrays and objects to be sent to other PHP
- *   scripts, or if you are using the WDDX serializer, to any WDDX compatible
- *   client.
+ *   scripts.
  * @param bool $blocking - If the message is too large to fit in the queue,
  *   your script will wait until another process reads messages from the queue
  *   and frees enough space for your message to be sent. This is called
@@ -78,9 +77,10 @@ function msg_queue_exists(int $key): bool;
 function msg_send(resource $queue,
                   int $msgtype,
                   mixed $message,
-                  bool $serialize = true,
-                  bool $blocking = true,
-                  mixed &$errorcode = null): bool;
+                  bool $serialize,
+                  bool $blocking,
+                  <<__OutOnly>>
+                  inout mixed $errorcode): bool;
 
 /**
  * msg_receive() will receive the first message from the specified queue of
@@ -106,8 +106,7 @@ function msg_send(resource $queue,
  *   it was serialized using the same mechanism as the session module. The
  *   message will be unserialized and then returned to your script. This allows
  *   you to easily receive arrays or complex object structures from other PHP
- *   scripts, or if you are using the WDDX serializer, from any WDDX compatible
- *   source.  If unserialize is FALSE, the message will be returned as a
+ *   scripts.  If unserialize is FALSE, the message will be returned as a
  *   binary-safe string.
  * @param int $flags - The optional flags allows you to pass flags to the
  *   low-level msgrcv system call. It defaults to 0, but you may specify one or
@@ -132,12 +131,15 @@ function msg_send(resource $queue,
 <<__Native>>
 function msg_receive(resource $queue,
                      int $desiredmsgtype,
-                     mixed &$msgtype,
+                     <<__OutOnly("KindOfInt64")>>
+                     inout mixed $msgtype,
                      int $maxsize,
-                     mixed &$message,
-                     bool $unserialize = true,
-                     int $flags = 0,
-                     mixed &$errorcode = null): bool;
+                     <<__OutOnly>>
+                     inout mixed $message,
+                     bool $unserialize,
+                     int $flags,
+                     <<__OutOnly>>
+                     inout mixed $errorcode): bool;
 
 /**
  * msg_remove_queue() destroys the message queue specified by the queue. Only
@@ -169,7 +171,7 @@ function msg_remove_queue(resource $queue): bool;
  *
  */
 <<__Native>>
-function msg_set_queue(resource $queue, array $data): bool;
+function msg_set_queue(resource $queue, darray $data): bool;
 
 /**
  * msg_stat_queue() returns the message queue meta data for the message queue
@@ -193,4 +195,4 @@ function msg_set_queue(resource $queue, array $data): bool;
  *
  */
 <<__Native>>
-function msg_stat_queue(resource $queue): array;
+function msg_stat_queue(resource $queue): darray;

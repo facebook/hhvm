@@ -4,18 +4,12 @@
 bool\(true\)
 
 The output array is:
-array\(6\) {
-  \[0\]=>
+varray\(6\) {
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[1\]=>
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[2\]=>
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[3\]=>
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[4\]=>
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
-  \[5\]=>
   string\([0-9]*\) "[0-9 a-z \n \0 \t]*"
 }
 
@@ -23,7 +17,7 @@ array\(6\) {
 bool\(true\)
 
 The output array is:
-array\(6\) {
+darray\(6\) {
   \[0\]=>
   string\(8\) "[heredoc 1-5]*"
   \[1\]=>

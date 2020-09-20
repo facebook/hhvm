@@ -15,10 +15,9 @@
 */
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 
@@ -33,8 +32,8 @@ bool branchesToItself(SrcKey sk) {
   auto const op = peek_op(pc);
   if (!instrIsControlFlow(op)) return false;
   if (isSwitch(op)) return false;
-  auto const branchOffsetPtr = instrJumpOffset(pc);
-  return branchOffsetPtr != nullptr && *branchOffsetPtr == 0;
+  auto const offsets = instrJumpOffsets(pc);
+  return std::find(offsets.begin(), offsets.end(), 0) != offsets.end();
 }
 
 /*
@@ -113,18 +112,20 @@ Block* makeGuardExit(IRGS& env, TransFlags flags) {
 Block* makeExitSlow(IRGS& env) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
-  interpOne(env, *env.currentNormalizedInstruction);
+  interpOne(env);
   // If it changes the PC, InterpOneCF will get us to the new location.
-  if (!opcodeChangesPC(env.currentNormalizedInstruction->op())) {
+  if (!opcodeChangesPC(curSrcKey(env).op())) {
     gen(env, Jmp, makeExit(env, nextBcOff(env)));
   }
   return exit;
 }
 
-Block* makePseudoMainExit(IRGS& env) {
-  return curFunc(env)->isPseudoMain()
-    ? makeExit(env)
-    : nullptr;
+Block* makeExitSurprise(IRGS& env, Offset targetBcOff) {
+  auto const exit = defBlock(env, Block::Hint::Unlikely);
+  BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
+  gen(env, HandleRequestSurprise);
+  exitRequest(env, TransFlags{}, SrcKey{curSrcKey(env), targetBcOff});
+  return exit;
 }
 
 Block* makeExitOpt(IRGS& env) {
@@ -136,6 +137,12 @@ Block* makeExitOpt(IRGS& env) {
   return exit;
 }
 
+Block* makeUnreachable(IRGS& env, AssertReason reason) {
+  auto const unreachable = defBlock(env, Block::Hint::Unlikely);
+  BlockPusher blockPusher(*env.irb, makeMarker(env, bcOff(env)), unreachable);
+  gen(env, Unreachable, reason);
+  return unreachable;
+}
 
 //////////////////////////////////////////////////////////////////////
 

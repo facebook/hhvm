@@ -1,0 +1,107 @@
+darray(1) {
+  ["ONE"]=>
+  NULL
+}
+darray(1) {
+  ["TWO"]=>
+  string(3) "TWO"
+}
+darray(1) {
+  ["TFoo"]=>
+  string(4) "TFoo"
+}
+varray(1) {
+  object(ReflectionTypeConstant) (0) {
+  }
+}
+darray(2) {
+  ["prop"]=>
+  NULL
+  ["static_prop"]=>
+  NULL
+}
+varray(1) {
+  string(3) "Foo"
+}
+darray(1) {
+  ["Foo"]=>
+  object(ReflectionClass) (2) {
+    ["name"]=>
+    string(3) "Foo"
+    ["obj":"ReflectionClass":private]=>
+    NULL
+  }
+}
+darray(1) {
+  ["__Attr1"]=>
+  varray(2) {
+    int(3)
+    int(4)
+  }
+}
+varray(2) {
+  object(ReflectionMethod) (2) {
+    ["name"]=>
+    string(3) "baz"
+    ["class"]=>
+    string(1) "A"
+  }
+  object(ReflectionMethod) (2) {
+    ["name"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(3) "Foo"
+  }
+}
+varray(2) {
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(4) "prop"
+    ["class"]=>
+    string(1) "A"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  object(ReflectionProperty) (3) {
+    ["name"]=>
+    string(11) "static_prop"
+    ["class"]=>
+    string(1) "A"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}
+darray(1) {
+  ["static_prop"]=>
+  NULL
+}
+object(B) (1) {
+  ["prop":protected]=>
+  NULL
+}
+darray(0) {
+}
+varray(1) {
+  string(5) "TBing"
+}
+darray(1) {
+  ["TBing"]=>
+  object(ReflectionClass) (2) {
+    ["name"]=>
+    string(5) "TBing"
+    ["obj":"ReflectionClass":private]=>
+    NULL
+  }
+}
+varray(1) {
+  string(1) "A"
+}
+darray(1) {
+  ["A"]=>
+  object(ReflectionClass) (2) {
+    ["name"]=>
+    string(1) "A"
+    ["obj":"ReflectionClass":private]=>
+    NULL
+  }
+}

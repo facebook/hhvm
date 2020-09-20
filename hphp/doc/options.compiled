@@ -97,9 +97,6 @@ flood error logs.
     CoreFileSize = 0           # in bytes
     MaxSocket = 0
     SocketDefaultTimeout = 60  # in seconds
-    MaxRSS = 0
-    MaxRSSPollingCycle = 0     # in seconds, how often to check max memory
-    DropCacheCycle = 0         # in seconds, how often to drop disk cache
     MaxSQLRowCount = 0
     SerializationSizeLimit = 0
   }
@@ -186,12 +183,6 @@ server port it's trying to grab.
 
     # HTTP settings
     GzipCompressionLevel = 3
-    ForceCompression {
-      # force response to be compressed, even if there isn't accept-encoding
-      URL =         # if URL perfectly matches this
-      Cookie =      # if this cookie is present: "name" or "name=value"
-      Param =       # if this parameter in query string is present
-    }
     EnableKeepAlive = true
     EnableOutputBuffering = false
     OutputHandler =
@@ -267,13 +258,6 @@ through PrimeLibrary option. The loading can be done in parallel with
 LoadThread count of threads. Once loading is done, it can write to APC with
 some specified keys in CompletionKeys to tell web application about priming.
 
-      TableType = concurrent (default)
-
-- TableType
-
-Recommend to use "concurrent", the fastest with least locking, and since its
-the only implemented table type.  (The option remains for future use if we
-add other apc implementations).
 
       ExpireOnSets = false
       PurgeFrequency = 4096
@@ -283,21 +267,6 @@ add other apc implementations).
 ExpireOnSets turns on item purging on expiration, and it's only done once per
 PurgeFrequency of sets.
 
-      KeyMaturityThreshold = 20
-      MaximumCapacity = 0
-      KeyFrequencyUpdatePeriod = 1000  # in number of accesses
-
-- KeyMaturityThreshold, MaximumCapacity, KeyFrequencyUpdatePeriod
-
-These are experimental LFU settings.
-
-    }
-
-    # DNS cache
-    DnsCache {
-      Enable = false
-      TTL = 600   # in seconds
-    }
 
     # Light process has very little forking cost, because they are pre-forked
     # Recommend to turn it on for faster shell command execution.
@@ -663,11 +632,7 @@ users can use the same machine serving their own source files.
   Eval {
     CheckSymLink = true
 
-    EnableHipHopSyntax = false
-    EnableHipHopExperimentalSyntax = false
-
     EnableShortTags = true   # is <? allowed
-    EnableAspTags = false    # is <% %> allowed
     EnableXHP = true         # XHP extension
     NativeXHP = true         # Use HPHP to directly handle XHP
 

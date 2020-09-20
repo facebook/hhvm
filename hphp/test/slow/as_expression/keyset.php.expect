@@ -1,0 +1,11 @@
+not keyset: integer
+not keyset: boolean
+not keyset: double
+not keyset: string
+not keyset: resource
+not keyset: object
+not keyset: vec
+not keyset: dict
+keyset(0) {
+}
+not keyset: NULL

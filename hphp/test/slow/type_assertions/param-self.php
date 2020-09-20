@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface X {
   public function foo(self $x);
@@ -15,3 +15,5 @@ class Z extends Y {
 class R implements X {
   public function foo(self $x) { var_dump($x); }
 }
+
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

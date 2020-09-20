@@ -1,2 +1,0 @@
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");

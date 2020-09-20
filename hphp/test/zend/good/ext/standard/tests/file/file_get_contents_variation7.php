@@ -1,22 +1,22 @@
-<?php
+<?hh
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
  * Description: Read the entire file into a string 
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
+chdir(__SystemLib\hphp_test_tmproot());
 $mainDir = "fileGetContentsVar7.dir";
 $subDir = "fileGetContentsVar7Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
-$old_dir_path = getcwd();
-chdir(dirname(__FILE__));
 
-$allDirs = array(
+
+$allDirs = varray[
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -32,7 +32,7 @@ $allDirs = array(
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",  
   
-);
+];
 
 $filename = 'FileGetContentsVar7.tmp';
 $absFile = $absSubDir.'/'.$filename;
@@ -47,10 +47,9 @@ for($i = 0; $i<count($allDirs); $i++) {
   var_dump(file_get_contents($dir."/".$filename));
 }
 
-chdir($old_dir_path);
 unlink($absFile);
 rmdir($absSubDir);
 rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
-?>
+}

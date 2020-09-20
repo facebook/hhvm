@@ -106,32 +106,8 @@ TOKEN_MAX=$(grep "^\s\+YYTOKEN(" "${OUTHEADER}" | tail -n 1 | \
 
 echo -e "${TOKEN_MIN}\n\n${TOKEN_MAX}" >> "${OUTHEADER}"
 
-# Renaming some stuff in the cpp file.
-sed -i \
-    -e "s/first_line/line0/g"   \
-    -e "s/last_line/line1/g"     \
-    -e "s/first_column/char0/g"  \
-    -e "s/last_column/char1/g"   \
-    -e "s/union/struct/g"        \
-    -e "s/YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));/YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));\n      memset(yyptr, 0, YYSTACK_BYTES (yystacksize));/" \
-    -e "s/YYSTACK_RELOCATE (yyvs_alloc, yyvs)/YYSTACK_RELOCATE_RESET (yyvs_alloc, yyvs)/" \
-    -e "s/YYSTACK_FREE (yyss)/YYSTACK_FREE (yyss);\n  YYSTACK_CLEANUP/" \
-    -e "s/\".*hphp\\.\\(.\\)\\.tab\\.cpp\"/\"hphp.\\1.tab.cpp\"/" \
-    "${OUTFILE5}" "${OUTFILE7}"
-
-# Renaming some stuff in the cpp file.
-GUARD_NAME=$(echo "${INFILE}" | awk '{print toupper($0)}' | sed 's|[./-]|_|g')
-sed -i \
-    -e "s|YY_.*_INCLUDED|YY_YY_${GUARD_NAME}_INCLUDED|g" \
-    "${OUTFILE5}" \
-    "${OUTFILE7}"
-
 # We still want the files in our tree since they are checked in.
 if [ "${INSTALL_DIR}" != "${DIR}" ]; then
-  sed -i -e "1i// @""generated" "${OUTFILE5}"
-  sed -i -e "1i// @""generated" "${OUTFILE7}"
   sed -i -e "1i// @""generated" "${OUTHEADER}"
-  cp "${OUTFILE5}" "${DIR}/hphp.5.tab.cpp"
-  cp "${OUTFILE7}" "${DIR}/hphp.7.tab.cpp"
   cp "${OUTHEADER}" "${DIR}/hphp.tab.hpp"
 fi

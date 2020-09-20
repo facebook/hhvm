@@ -1,4 +1,10 @@
-array(4) {
+varray(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+}
+darray(4) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -8,17 +14,7 @@ array(4) {
   [3]=>
   string(1) "d"
 }
-array(4) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-}
-array(4) {
+darray(4) {
   [2]=>
   string(1) "a"
   [4]=>
@@ -28,7 +24,7 @@ array(4) {
   [7]=>
   string(1) "d"
 }
-array(4) {
+darray(4) {
   [-2]=>
   string(1) "a"
   [-4]=>
@@ -38,7 +34,7 @@ array(4) {
   [0]=>
   string(1) "d"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(1) "a"
   [1]=>

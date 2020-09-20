@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 /*
  * Sort arrays using various locales.
  */
 
 
-$test_num = 1;
+ZendGoodExtIntlTestsCollatorSort::$test_num = 1;
 
 /*
  * Sort arrays in the given list using specified locale.
@@ -29,12 +29,11 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 		// Preppend test signature to output string
         $md5 = md5( $res_dump );
 
-        global $test_num;
         
         $res_str .= "\n\n".
-                    "Test $test_num.$md5:" .
+                    "Test ".ZendGoodExtIntlTestsCollatorSort::$test_num.".$md5:" .
                     $res_dump;
-        ++$test_num;
+        ++ZendGoodExtIntlTestsCollatorSort::$test_num;
     }
 
     return $res_str;
@@ -42,50 +41,50 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 
 function ut_main()
 {
-    global $test_num;
-    $test_num = 1;
+
+    ZendGoodExtIntlTestsCollatorSort::$test_num = 1;
     $res_str = '';
 
     // Sort an array in SORT_REGULAR mode using en_US locale.
-    $test_params = array(
-        array( 'abc', 'abd', 'aaa' ),
-        array( 'm'  , '1'  , '_'   ),
-        array( 'a'  , 'aaa', 'aa'  ),
-        array( 'ba' , 'b'  , 'ab'  ),
-        array( 'e'  , 'c'  , 'a'   ),
-        array( '100', '25' , '36'  ),
-        array( 5    , '30' , 2     ),
-        array( 'd'  , ''   , ' a'  ),
-        array( 'd ' , 'f ' , ' a'  ),
-        array( 'a'  , null , '3'   ),
-        array( 'y'  , 'k'  , 'i' )
-    );
+    $test_params = varray[
+        varray[ 'abc', 'abd', 'aaa' ],
+        varray[ 'm'  , '1'  , '_'   ],
+        varray[ 'a'  , 'aaa', 'aa'  ],
+        varray[ 'ba' , 'b'  , 'ab'  ],
+        varray[ 'e'  , 'c'  , 'a'   ],
+        varray[ '100', '25' , '36'  ],
+        varray[ 5    , '30' , 2     ],
+        varray[ 'd'  , ''   , ' a'  ],
+        varray[ 'd ' , 'f ' , ' a'  ],
+        varray[ 'a'  , null , '3'   ],
+        varray[ 'y'  , 'k'  , 'i' ]
+    ];
 
     $res_str .= sort_arrays( 'en_US', $test_params );
 
-    $test_params = array(
-        array( '100', '25' , '36'  ),
-        array( 5    , '30' , 2     ),
-        array( 'd'  , ''   , ' a'  ),
-        array( 'y'  , 'k'  , 'i' )
-    );
+    $test_params = varray[
+        varray[ '100', '25' , '36'  ],
+        varray[ 5    , '30' , 2     ],
+        varray[ 'd'  , ''   , ' a'  ],
+        varray[ 'y'  , 'k'  , 'i' ]
+    ];
 
     // Sort in en_US locale with SORT_STRING flag
     $res_str .= sort_arrays( 'en_US', $test_params, Collator::SORT_STRING );
 
 
     // Sort a non-ASCII array using ru_RU locale.
-    $test_params = array(
-        array( 'абг', 'абв', 'ааа', 'abc' ),
-        array( 'аа', 'ааа' , 'а' )
-    );
+    $test_params = varray[
+        varray[ 'абг', 'абв', 'ааа', 'abc' ],
+        varray[ 'аа', 'ааа' , 'а' ]
+    ];
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );
 
     // Sort an array using Lithuanian locale.
-    $test_params = array(
-        array( 'y'  , 'k'  , 'i' )
-    );
+    $test_params = varray[
+        varray[ 'y'  , 'k'  , 'i' ]
+    ];
 
     $res_str .= sort_arrays( 'lt_LT', $test_params );
 
@@ -94,4 +93,7 @@ function ut_main()
 
 include_once( 'ut_common.inc' );
 ut_run();
-?>
+
+abstract final class ZendGoodExtIntlTestsCollatorSort {
+  public static $test_num;
+}

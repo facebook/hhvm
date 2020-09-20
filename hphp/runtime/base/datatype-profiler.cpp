@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/datatype-profiler.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -27,8 +28,10 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_double(name + "=KindOfDouble")
   , m_persistent_string(name + "=KindOfPersistentString")
   , m_string(name + "=KindOfString")
-  , m_persistent_array(name + "=KindOfPersistentArray")
-  , m_array(name + "=KindOfArray")
+  , m_persistent_darray(name + "=KindOfPersistentDArray")
+  , m_darray(name + "=KindOfDArray")
+  , m_persistent_varray(name + "=KindOfPersistentVArray")
+  , m_varray(name + "=KindOfVArray")
   , m_persistent_vec(name + "=KindOfPersistentVec")
   , m_vec(name + "=KindOfVec")
   , m_persistent_dict(name + "=KindOfPersistentDict")
@@ -37,7 +40,13 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_keyset(name + "=KindOfKeyset")
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
-  , m_ref(name + "=KindOfRef")
+  , m_func(name + "=KindOfFunc")
+  , m_rfunc(name + "=KindOfRFunc")
+  , m_class(name + "=KindOfClass")
+  , m_clsmeth(name + "=KindOfClsMeth")
+  , m_rclsmeth(name + "=KindOfRClsMeth")
+  , m_record(name + "=KindOfRecord")
+  , m_lclass(name + "=KindOfLazyClass")
 {}
 
 DataType DataTypeProfiler::operator()(DataType type) {
@@ -55,11 +64,19 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDict:          m_dict.count(); break;
     case KindOfPersistentKeyset: m_persistent_keyset.count(); break;
     case KindOfKeyset:        m_keyset.count(); break;
-    case KindOfPersistentArray:  m_persistent_array.count(); break;
-    case KindOfArray:         m_array.count(); break;
+    case KindOfPersistentDArray: m_persistent_darray.count(); break;
+    case KindOfDArray:        m_darray.count(); break;
+    case KindOfPersistentVArray: m_persistent_varray.count(); break;
+    case KindOfVArray:        m_varray.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
-    case KindOfRef:           m_ref.count(); break;
+    case KindOfRFunc:         m_rfunc.count(); break;
+    case KindOfFunc:          m_func.count(); break;
+    case KindOfClass:         m_class.count(); break;
+    case KindOfLazyClass:     m_lclass.count(); break;
+    case KindOfClsMeth:       m_clsmeth.count(); break;
+    case KindOfRClsMeth:      m_rclsmeth.count(); break;
+    case KindOfRecord:        m_record.count(); break;
   }
   return type;
 }
@@ -79,11 +96,19 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_dict.hits() +
                m_persistent_keyset.hits() +
                m_keyset.hits() +
-               m_persistent_array.hits() +
-               m_array.hits() +
+               m_persistent_darray.hits() +
+               m_darray.hits() +
+               m_persistent_varray.hits() +
+               m_varray.hits() +
                m_object.hits() +
                m_resource.hits() +
-               m_ref.hits();
+               m_func.hits() +
+               m_rfunc.hits() +
+               m_class.hits() +
+               m_clsmeth.hits() +
+               m_rclsmeth.hits() +
+               m_record.hits() +
+               m_lclass.hits();
   if (!total) return;
   fprintf(stderr, "%s: total=%zu KindOfUninit=%.1f%% "
                   "KindOfNull=%.1f%% "
@@ -92,8 +117,10 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfDouble=%.1f%% "
                   "KindOfPersistentString=%.1f%% "
                   "KindOfString=%.1f%% "
-                  "KindOfPersistentArray=%.1f%% "
-                  "KindOfArray=%.1f%% "
+                  "KindOfPersistentDArray=%.1f%% "
+                  "KindOfDArray=%.1f%% "
+                  "KindOfPersistentVArray=%.1f%% "
+                  "KindOfVArray=%.1f%% "
                   "KindOfPersistentVec=%.1f%% "
                   "KindOfVec=%.1f%% "
                   "KindOfPersistentDict=%.1f%% "
@@ -102,7 +129,13 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfKeyset=%.1f%% "
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
-                  "KindOfRef=%.1f%%\n",
+                  "KindOfFunc=%.1f%% "
+                  "KindOfRFunc=%.1f%%"
+                  "KindOfClass=%.1f%% "
+                  "KindOfClsMeth=%.1f%% "
+                  "KindOfRClsMeth=%.1f%% "
+                  "KindOfRecord=%.1f%% "
+                  "KindOfLazyClass=%.1f%% ",
           m_name.c_str(), total,
           100.0 * m_uninit.hits() / total,
           100.0 * m_null.hits() / total,
@@ -111,8 +144,10 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_double.hits() / total,
           100.0 * m_persistent_string.hits() / total,
           100.0 * m_string.hits() / total,
-          100.0 * m_persistent_array.hits() / total,
-          100.0 * m_array.hits() / total,
+          100.0 * m_persistent_darray.hits() / total,
+          100.0 * m_darray.hits() / total,
+          100.0 * m_persistent_varray.hits() / total,
+          100.0 * m_varray.hits() / total,
           100.0 * m_persistent_vec.hits() / total,
           100.0 * m_vec.hits() / total,
           100.0 * m_persistent_dict.hits() / total,
@@ -121,7 +156,13 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_keyset.hits() / total,
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,
-          100.0 * m_ref.hits() / total);
+          100.0 * m_func.hits() / total,
+          100.0 * m_rfunc.hits() / total,
+          100.0 * m_class.hits() / total,
+          100.0 * m_clsmeth.hits() / total,
+          100.0 * m_rclsmeth.hits() / total,
+          100.0 * m_record.hits() / total,
+          100.0 * m_lclass.hits() / total);
 }
 
 }

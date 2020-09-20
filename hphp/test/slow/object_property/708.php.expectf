@@ -1,4 +1,2 @@
 
-Warning: Creating default object from empty value in %s/test/slow/object_property/708.php on line 4
-
 Fatal error: Cannot access property started with '\0' in %s/test/slow/object_property/708.php on line 4

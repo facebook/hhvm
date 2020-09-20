@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );
  * Description: Find position of first occurrence of a case-insensitive string
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing stripos() function: basic functionality ***\n";
 $heredoc_str = <<<Identifier
 Hello, World
@@ -29,4 +29,4 @@ var_dump( stripos("Hello, World", "O", 5) );
 var_dump( stripos("Hello, World", "o", 6) );
 var_dump( stripos("Hello, World", "o", 10) );
 echo "*** Done ***";
-?>
+}

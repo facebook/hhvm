@@ -1,9 +1,9 @@
-<?php
+<?hh
 /* Prototype  : array getdate([int timestamp])
  * Description: Get date/time information 
  * Source code: ext/date/php_date.c
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing getdate() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -18,5 +18,5 @@ var_dump( getdate($timestamp) );
 // Calling getdate() with mandatory arguments
 var_dump( getdate() );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

@@ -5,10 +5,10 @@ int(5)
 
 *** Testing objects with array_search() ***
 
-Warning: %s
+Warning: array_search() expects parameter 2 to be an array or collection in %s/array_search_variation3.php on line 33
 NULL
 
-Warning: %s
+Warning: array_search() expects parameter 2 to be an array or collection in %s/array_search_variation3.php on line 35
 NULL
 int(1)
 Done

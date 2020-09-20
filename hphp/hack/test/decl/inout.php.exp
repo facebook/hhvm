@@ -1,0 +1,72 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\f" ->
+    { fe_pos = [3:10-11];
+      fe_type =
+      (Rwitness (root|inout.php line 3, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [3:40-42]; fp_name = (Some "$f");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|inout.php line 3, characters 12-38),
+                  (Tfun
+                     { ft_arity = (Fstandard ()); ft_tparams = [];
+                       ft_where_constraints = [];
+                       ft_params =
+                       [{ fp_pos = [3:28-31]; fp_name = None;
+                          fp_type =
+                          { et_enforced = false;
+                            et_type =
+                            (Rhint (root|inout.php line 3, characters 28-30),
+                             (Tprim Tint))
+                            };
+                          fp_flags =
+                          (make_fp_flags ~mutability:none
+                            ~accept_disposable:false ~has_default:false
+                            ~mode:FPinout);
+                           }
+                         ];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|inout.php line 3, characters 12-38),
+                          (Tunion []))
+                         };
+                       ft_ret =
+                       { et_enforced = false;
+                         et_type =
+                         (Rhint (root|inout.php line 3, characters 34-37),
+                          (Tprim Tvoid))
+                         };
+                       ft_flags =
+                       (make_ft_flags sync none ~return_disposable:false
+                         ~returns_mutable:false ~returns_void_to_rx:false);
+                       ft_reactive = Nonreactive }))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }
+              ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|inout.php line 3, characters 10-10), (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|inout.php line 3, characters 45-48), (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

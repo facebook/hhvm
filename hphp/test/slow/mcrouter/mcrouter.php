@@ -1,6 +1,6 @@
 <?hh
 
-define('PREFIX', 'HPHP_TEST_MCROUTER|');
+const PREFIX = 'HPHP_TEST_MCROUTER|';
 
 async function set_get_del(MCRouter $mcr): Awaitable<string> {
   $key = PREFIX . 'set-get-del';
@@ -36,7 +36,7 @@ async function set_inc_dec(MCRouter $mcr): Awaitable<string> {
 
   return "Success";
 }
-
+<<__EntryPoint>> function main(): void {
 $servers = Vector { getenv('HPHP_TEST_MCROUTER') };
 $mcr = MCRouter::createSimple($servers);
 $wh = Vector {
@@ -46,4 +46,5 @@ $wh = Vector {
 $results = HH\Asio\join(HH\Asio\v($wh));
 foreach ($results as $result) {
   var_dump($result);
+}
 }

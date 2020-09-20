@@ -1,16 +1,16 @@
-<?php
+<?hh
 
 function t() {
   if (mt_rand()) {
-    class Foo {
-      const VALUE = __CLASS__ . '::VALUE';
-    }
+    include 'refcount-1.inc';
   } else {
-    class Foo {
-      const VALUE = __CLASS__ . '::VALUE';
-    }
+    include 'refcount-2.inc';
   }
 }
 
+
+<<__EntryPoint>>
+function main_refcount() {
 t();
 var_dump(Foo::VALUE);
+}

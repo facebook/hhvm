@@ -1,6 +1,9 @@
-<?php
+<?hh
 
-$types = array(
+
+<<__EntryPoint>>
+function main_get_resource_type() {
+$types = varray[
   'php://stdin',
   'php://stdout',
   'php://stderr',
@@ -9,7 +12,7 @@ $types = array(
   'php://memory',
   'php://input',
   'php://output',
-);
+];
 
 foreach ($types as $type) {
   var_dump(get_resource_type(fopen($type, 'r')));
@@ -20,3 +23,4 @@ var_dump(get_resource_type(bzopen($tmp, 'w')));
 var_dump(get_resource_type(gzopen($tmp, 'w')));
 var_dump(get_resource_type(imagecreate(110, 20)));
 var_dump(get_resource_type(curl_init()));
+}

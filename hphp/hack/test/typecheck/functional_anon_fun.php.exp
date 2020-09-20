@@ -1,6 +1,4 @@
-File "functional_anon_fun.php", line 24, characters 10-36:
-Invalid return type (Typing[4110])
-File "functional_anon_fun.php", line 19, characters 21-23:
-This is an int
-File "functional_anon_fun.php", line 14, characters 30-33:
-It is incompatible with void
+File "functional_anon_fun.php", line 21, characters 12-13:
+Was expecting an object but type is unknown (Typing[4297])
+File "functional_anon_fun.php", line 20, characters 17-18:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

@@ -1,18 +1,14 @@
-<?php
+<?hh
 
 // lambdas in class bodies
 
 class bar {
   private $x = "asd";
 
-  public function __destruct() {
-    echo "~bar()\n";
-  }
-
   public function foo() {
     return array_map(
       $y ==> $this->x,
-      array(1,2,3,4)
+      varray[1,2,3,4]
     );
   }
 
@@ -26,7 +22,7 @@ class bar {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   var_dump((new bar)->foo());
   $k = (new bar)->getClos();
   // dtor prints here
@@ -38,5 +34,3 @@ function main() {
   unset($k);
   echo "Done\n";
 }
-
-main();

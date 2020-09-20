@@ -23,10 +23,11 @@
 
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/wide-func.h"
 
 namespace HPHP { namespace HHBBC { namespace php {
 
@@ -37,8 +38,8 @@ const StaticString s_invoke("__invoke");
 
 //////////////////////////////////////////////////////////////////////
 
-bool DEBUG_ONLY checkBlock(const php::Block& b) {
-  if (b.id == NoBlockId) {
+bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
+  if (b.dead) {
     // the block was deleted
     return true;
   }
@@ -54,11 +55,11 @@ bool DEBUG_ONLY checkBlock(const php::Block& b) {
     });
   }
 
-  // The factored exit list contains unique elements.
-  std::set<BlockId> exitSet;
-  std::copy(begin(b.factoredExits), end(b.factoredExits),
-            std::inserter(exitSet, begin(exitSet)));
-  assert(exitSet.size() == b.factoredExits.size());
+  // A block should either have a matching exnNodeId and throwExit, or neither
+  // should be set.
+  assert(b.throwExit == (b.exnNodeId != NoExnNodeId
+    ? f.exnNodes[b.exnNodeId].region.catchEntry
+    : NoBlockId));
 
   return true;
 }
@@ -85,95 +86,42 @@ bool has_edge_linear(const Container& c,
   return std::find(begin(c), end(c), target) != end(c);
 }
 
-void checkExnTreeBasic(boost::dynamic_bitset<>& seenIds,
-                       borrowed_ptr<const ExnNode> node,
-                       borrowed_ptr<const ExnNode> expectedParent) {
+void checkExnTreeBasic(const php::Func& f,
+                       boost::dynamic_bitset<>& seenIds,
+                       const ExnNode* node,
+                       ExnNodeId expectedParent) {
   // All exnNode ids must be unique.
-  if (seenIds.size() < node->id + 1) {
-    seenIds.resize(node->id + 1);
+  if (seenIds.size() < node->idx + 1) {
+    seenIds.resize(node->idx + 1);
   }
-  assert(!seenIds[node->id]);
-  seenIds[node->id] = true;
+  assert(!seenIds[node->idx]);
+  seenIds[node->idx] = true;
 
   // Parent pointers should point to the node that has a given node as
   // a child.
   assert(node->parent == expectedParent);
 
   for (auto& c : node->children) {
-    checkExnTreeBasic(seenIds, borrow(c), node);
+    checkExnTreeBasic(f, seenIds, &f.exnNodes[c], node->idx);
   }
-}
-
-void checkFaultEntryRec(const php::Func& func,
-                        boost::dynamic_bitset<>& seenBlocks,
-                        BlockId faultEntryId,
-                        const php::ExnNode& exnNode) {
-
-  auto const& faultEntry = *func.blocks[faultEntryId];
-  assert(faultEntry.id == faultEntryId);
-  // Loops in fault funclets could cause us to revisit the same block,
-  // so we track the ones we've seen.
-  if (seenBlocks.size() < faultEntryId + 1) {
-    seenBlocks.resize(faultEntryId + 1);
-  }
-  if (seenBlocks[faultEntryId]) return;
-  seenBlocks[faultEntryId] = true;
-
-  /*
-   * All funclets aren't in the main section.
-   */
-  assert(faultEntry.section != php::Block::Section::Main);
-
-  /*
-   * The fault blocks should all have factored exits to the parent
-   * catch/fault, if there is any.
-   *
-   * Note: for now this is an invariant, but if we start pruning
-   * factoredExits this might need to change.
-   */
-  if (auto parent = exnNode.parent) {
-    match<void>(
-      parent->info,
-      [&] (const CatchRegion& cr) {
-        assert(has_edge_linear(faultEntry.factoredExits, cr.catchEntry));
-      },
-      [&] (const FaultRegion& fr) {
-        assert(has_edge_linear(faultEntry.factoredExits, fr.faultEntry));
-      }
-    );
-  }
-
-  // Note: right now we're only asserting about normal successors, but
-  // there can be exception-only successors for catch blocks inside of
-  // fault funclets for finally handlers.  (Just going un-asserted for
-  // now.)
-  forEachNormalSuccessor(faultEntry, [&] (BlockId succ) {
-    checkFaultEntryRec(func, seenBlocks, succ, exnNode);
-  });
-}
-
-void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
-  // Fault entries have a few things to assert.
-  match<void>(node->info,
-              [&](const FaultRegion& fr) {
-                boost::dynamic_bitset<> seenBlocks;
-                checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
-              },
-              [&](const CatchRegion& /*cr*/) {});
-
-  for (auto& c : node->children) checkExnTreeMore(func, borrow(c));
 }
 
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
   boost::dynamic_bitset<> seenIds;
-  for (auto& n : f.exnNodes) checkExnTreeBasic(seenIds, borrow(n), nullptr);
+  ExnNodeId idx{0};
+  for (auto& n : f.exnNodes) {
+    if (n.parent == NoExnNodeId && n.idx != NoExnNodeId) {
+      assertx(n.idx == idx);
+      checkExnTreeBasic(f, seenIds, &n, NoExnNodeId);
+    }
+    idx++;
+  }
 
   // ExnNode ids are contiguous.
-  for (size_t i = 0; i < seenIds.size(); ++i) assert(seenIds[i] == true);
+  for (size_t i = 0; i < seenIds.size(); ++i) {
+    assert(seenIds[i] == true || f.exnNodes[i].idx == NoExnNodeId);
+  }
 
-  // The following assertions come after the above, because if the
-  // tree is totally clobbered it's easy for the wrong ones to fire.
-  for (auto& n : f.exnNodes) checkExnTreeMore(f, borrow(n));
   return true;
 }
 
@@ -188,39 +136,25 @@ bool DEBUG_ONLY checkName(SString name) {
 bool check(const php::Func& f) {
   assert(checkParams(f));
   assert(checkName(f.name));
-  for (DEBUG_ONLY auto& block : f.blocks) assert(checkBlock(*block));
+
+  if constexpr (!debug) return true;
+  auto const func = php::WideFunc::cns(&f);
+  for (DEBUG_ONLY auto& block : func.blocks()) assert(checkBlock(f, *block));
 
   /*
    * Some of these relationships may change as async/await
    * implementation progresses.  Asserting them now so they are
    * revisited here if they aren't true anymore.
    */
-  if (f.isClosureBody)          assert(!f.top);
-  if (f.isPairGenerator)        assert(f.isGenerator);
+  if (f.isPairGenerator) assert(f.isGenerator);
 
   if (f.isClosureBody) {
-    assert(f.cls &&
-           f.cls->parentName &&
-           f.cls->parentName->isame(s_Closure.get()));
-  }
-
-  DEBUG_ONLY Attr pcm = AttrParamCoerceModeNull | AttrParamCoerceModeFalse;
-  assert((f.attrs & pcm) != pcm); // not both
-
-  boost::dynamic_bitset<> seenId(f.blocks.size());
-  for (auto& block : f.blocks) {
-    if (block->id == NoBlockId) continue;
-    assert(checkBlock(*block));
-
-    // All blocks have unique ids in a given function; not necessarily
-    // consecutive.
-    assert(block->id < f.blocks.size());
-    assert(!seenId.test(block->id));
-    seenId.set(block->id);
+    assertx(f.cls);
+    assertx(f.cls->parentName);
+    assertx(f.cls->parentName->isame(s_Closure.get()));
   }
 
   assert(checkExnTree(f));
-
   return true;
 }
 
@@ -238,7 +172,7 @@ bool check(const php::Class& c) {
     assert(c.methods.size() == 1 || c.methods.size() == 2);
     assert(c.methods[0]->name->isame(s_invoke.get()));
     assert(c.methods[0]->isClosureBody);
-    assert(c.methods.size() == 1 || (c.methods[1]->attrs & AttrIsInOutWrapper));
+    assert(c.methods.size() == 1);
   } else {
     assert(!c.closureContextCls);
   }
@@ -247,9 +181,8 @@ bool check(const php::Class& c) {
 }
 
 bool check(const php::Unit& u) {
-  assert(check(*u.pseudomain));
-  for (DEBUG_ONLY auto& c : u.classes)   assert(check(*c));
-  for (DEBUG_ONLY auto& f : u.funcs)     assert(check(*f));
+  for (DEBUG_ONLY auto& c : u.classes) assert(check(*c));
+  for (DEBUG_ONLY auto& f : u.funcs)   assert(check(*f));
   return true;
 }
 

@@ -1,0 +1,4 @@
+string(54) "Non-static method Foo::a() cannot be called statically"
+string(54) "Non-static method Foo::a() cannot be called statically"
+string(51) "Static method Foo::b() cannot be called on instance"
+string(51) "Static method Foo::b() cannot be called on instance"

@@ -14,7 +14,7 @@ function main() {
       break;
   }
 
-  $a = array(2);
+  $a = varray[2];
   switch ($a[0]) {
     case ++$a[0]:
       echo "nope: pre-inc\n";
@@ -27,7 +27,7 @@ function main() {
       break;
   }
 
-  $a = array(10);
+  $a = varray[10];
   $ten = 10;
   switch ($a[0]) {
     case $ten:
@@ -38,8 +38,6 @@ function main() {
       break;
   }
 }
-main();
-main();
 
 function strswitch() {
   $a = 'luke';
@@ -77,5 +75,10 @@ function strswitch() {
 
   return true;
 }
-var_dump(strswitch());
-var_dump(strswitch());
+<<__EntryPoint>>
+function main_entry(): void {
+  main();
+  main();
+  var_dump(strswitch());
+  var_dump(strswitch());
+}

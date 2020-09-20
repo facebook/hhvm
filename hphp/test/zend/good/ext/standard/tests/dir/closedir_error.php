@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : void closedir([resource $dir_handle])
  * Description: Close directory connection identified by the dir_handle 
  * Source code: ext/standard/dir.c
@@ -8,27 +8,23 @@
 /*
  * Pass incorrect number of arguments to closedir() to test behaviour
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing closedir() : error conditions ***\n";
 
 
 //Test closedir with one more than the expected number of arguments
 echo "\n-- Testing closedir() function with more than expected no. of arguments --\n";
 
-$dir_path = dirname(__FILE__) . '\closedir_error';
+$dir_path = __SystemLib\hphp_test_tmppath('closedir_error');
 mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 
 $extra_arg = 10;
-var_dump( closedir($dir_handle, $extra_arg) );
+try { var_dump( closedir($dir_handle, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //successfully close the directory handle so can delete in CLEAN section
 closedir($dir_handle);
-?>
-===DONE===
-<?php error_reporting(0); ?>
-<?php
-$base_dir = dirname(__FILE__);
-$dir_path = $base_dir . '\closedir_error';
+echo "===DONE===\n";
+
 rmdir($dir_path);
-?>
+}

@@ -24,6 +24,7 @@
 namespace HPHP {
 
 struct ActRec;
+struct ImplicitContext;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class ResumableWaitHandle
@@ -53,10 +54,17 @@ struct c_ResumableWaitHandle : c_WaitableWaitHandle {
   static const int8_t STATE_BLOCKED   = 2; // waiting on dependencies.
   static const int8_t STATE_READY     = 3; // ready to run
   static const int8_t STATE_RUNNING   = 4; // currently running
+
+  ImplicitContext* m_implicitContext;
+
+  static constexpr ptrdiff_t implicitContextOff() {
+    return offsetof(c_ResumableWaitHandle, m_implicitContext);
+  }
 };
 
-inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {
-  assert(getKind() == Kind::AsyncFunction || getKind() == Kind::AsyncGenerator);
+inline c_ResumableWaitHandle* c_Awaitable::asResumable() {
+  assertx(getKind() == Kind::AsyncFunction ||
+          getKind() == Kind::AsyncGenerator);
   return static_cast<c_ResumableWaitHandle*>(this);
 }
 

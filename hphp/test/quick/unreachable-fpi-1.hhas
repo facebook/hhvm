@@ -1,13 +1,18 @@
-.main {
-  FPushCtorD 1 "Exception"
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NewObjD "Exception"
+  Dup
+  NullUninit
+  NullUninit
   String "foo"
-  FPassCE 0 Any
-  FCall 1
-  PopR
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
   Throw
-  FPushFuncD 0 "bar"
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "bar"
+  PopC
   Int 1
-  RetC
+  RetC 
 }

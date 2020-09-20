@@ -1,6 +1,6 @@
-object(HH\Map)#1 (1) {
+object(HH\Map) (1) {
   ["a"]=>
   string(1) "b"
 }
-object(Asd)#2 (0) {
+object(Asd) (0) {
 }

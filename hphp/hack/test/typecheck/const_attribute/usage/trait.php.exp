@@ -1,2 +1,2 @@
-File "trait.php", line 4, characters 7-11:
-Cannot apply __Const attribute to a trait (NastCheck[3048])
+File "trait.php", line 3, characters 1-22:
+Interfaces, traits and enums may not be declared `__Const` (Parsing[1002])

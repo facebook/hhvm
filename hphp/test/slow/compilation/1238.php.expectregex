@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected T_STRING in [^\r\n]+\/test\/slow\/compilation\/1238\.php on line 3)|(Fatal error\: A semicolon is expected here\. in [^\r\n]+\/compilation\/1238\.php on line 3))

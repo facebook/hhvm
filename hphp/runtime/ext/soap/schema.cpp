@@ -480,7 +480,7 @@ static bool schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType,
     string type, ns;
     xmlNsPtr nsptr;
 
-    str = strdup((char*)memberTypes->children->content);
+    str = req::strdup((char*)memberTypes->children->content);
     whiteSpace_collapse(BAD_CAST(str));
     start = str;
     while (start && *start != '\0') {
@@ -504,7 +504,7 @@ static bool schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType,
       }
       start = next;
     }
-    free(str);
+    req::free(str);
   }
 
   xmlNodePtr trav = unionType->children;

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_apc_fetch_object_fast_init() {
 require_once('apc_fetch_object_fast_init.inc');
 
 if (!apc_exists('my_key')) {
@@ -7,4 +10,5 @@ if (!apc_exists('my_key')) {
   $c->lol = 'wat';
   var_dump(apc_store('my_key', $c));
 }
-var_dump(apc_fetch('my_key'));
+var_dump(__hhvm_intrinsics\apc_fetch_no_check('my_key'));
+}

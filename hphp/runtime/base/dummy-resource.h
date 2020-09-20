@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DUMMY_RESOURCE_H_
-#define incl_HPHP_DUMMY_RESOURCE_H_
+#pragma once
 
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-string.h"
@@ -44,4 +43,3 @@ struct DummyResource : ResourceData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

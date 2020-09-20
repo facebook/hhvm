@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function printElement($el, $indent='') {
   if (strlen($indent) > 10) {
@@ -13,5 +13,9 @@ function printElement($el, $indent='') {
     printElement($child, $indent.'  ');
   }
 }
+
+<<__EntryPoint>>
+function main_1655() {
 $a = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><xx><yy><node a="b">hi</node></yy><yy><node a="b">hi</node></yy></xx>');
 printElement($a);
+}

@@ -1,4 +1,3 @@
 bool(true)
 
-Warning: %s
-NULL
+Warning: readline_clear_history() expects exactly 0 parameters, 1 given in %s/readline_clear_history_001.php on line 4

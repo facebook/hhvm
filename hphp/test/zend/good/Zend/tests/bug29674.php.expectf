@@ -1,9 +1,9 @@
 ===BASE===
 string(4) "Base"
 
-Notice: %s
+Notice: Undefined property: BaseClass::$private_child in %s/bug29674.php on line 10
 NULL
 ===CHILD===
 string(4) "Base"
 
-Fatal error: %s
+Fatal error: Cannot access private property ChildClass::$private_child in %s/bug29674.php on line 10

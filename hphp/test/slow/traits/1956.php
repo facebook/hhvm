@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait English {
   public function say() {
@@ -18,8 +18,9 @@ trait Italiano {
 class Talker {
   use Italiano;
 }
+<<__EntryPoint>> function main(): void {
 $talker = new Talker();
 $talker->say();
 $talker->fala();
 $talker->parla();
-?>
+}

@@ -74,6 +74,7 @@ bool dumpTCData() {
   auto const dataPath = RuntimeOption::EvalDumpTCPath + "/tc_data.txt.gz";
   gzFile tcDataFile = gzopen(dataPath.c_str(), "w");
   if (!tcDataFile) return false;
+  SCOPE_EXIT { gzclose(tcDataFile); };
 
   if (!gzprintf(tcDataFile,
                 "repo_schema      = %s\n"
@@ -109,20 +110,31 @@ bool dumpTCData() {
     // No need for matching exit call; data is immortal with trans DB enabled.
     requestInitProfData();
   }
+  const TransRec invalid;
+  assertx(!invalid.isValid());
   for (TransID t = 0; t < transdb::getNumTranslations(); t++) {
-    auto const ret = gzputs(
-      tcDataFile, transdb::getTransRec(t)->print().c_str()
-    );
+    auto transRec = transdb::getTransRec(t);
+    if (!transRec) transRec = &invalid;
+    auto const ret = gzputs(tcDataFile, transRec->print().c_str());
     if (ret == -1) {
       return false;
     }
   }
 
-  gzclose(tcDataFile);
   return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+}
+
+bool dumpEnabled() {
+  return RuntimeOption::EvalDumpTC ||
+         RuntimeOption::EvalDumpIR ||
+         RuntimeOption::EvalDumpRegion ||
+         RuntimeOption::EvalDumpInlDecision ||
+         RuntimeOption::EvalDumpCallTargets ||
+         RuntimeOption::EvalDumpLayoutCFG ||
+         RuntimeOption::EvalDumpVBC;
 }
 
 bool dump(bool ignoreLease /* = false */) {

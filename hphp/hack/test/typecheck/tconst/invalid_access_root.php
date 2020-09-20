@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class C<T> {
   /* HH_FIXME[4124] */

@@ -24,11 +24,15 @@
  *  A Vreg64 is a X-register with a u64 value.
  *
  * This allows to omit truncation instructions for sub-32-bit
- * operations. E.g. a cmpb{Vreg8 s0, Vreg8 s1} has to truncate
- * s0 and s1 before emitting a cmp instruction. When using the
- * early-truncation policy, the cmpb{} emitter can rely on the
+ * operations. E.g. a testb{Vreg8 s0, Vreg8 s1} has to truncate
+ * s0 and s1 before emitting a tst instruction. When using the
+ * early-truncation policy, the testb{} emitter can rely on the
  * fact, that s0 and s1 are already truncated and can emit a
  * cmp instruction without preceding uxtb's.
+ *
+ * Conversely any arithmetic instruction has to sign extend any
+ * Vreg8 before operating on it. Vasm is light on these instructions,
+ * with only the following, currently: csinc[bw]{} and cmp[bw][i]{}.
  *
  * Early-truncation has also consequences to extension/truncation
  * vasm instructions. The following list shows how to use them:
@@ -45,7 +49,7 @@
  * Early-truncation also implies, that instructions have to truncate
  * after performing the actual operation if it cannot guarantee that
  * the resulting VregN type matches. E.g. emitting code for the vasm
- * instruction subbi{Immed imm, Vreg8 s, Vreg8 d} has to truncate the
+ * instruction andbi{Immed imm, Vreg8 s, Vreg8 d} has to truncate the
  * result to guarantee that register d indeed holds a u8 value.
  *
  * Note, that the early-truncation policy allows aarch64 specific
@@ -97,14 +101,6 @@ namespace {
 
 static_assert(folly::kIsLittleEndian,
   "Code contains little-endian specific optimizations.");
-
-uint8_t bAsUb(Immed imm) {
-  return static_cast<uint8_t>(imm.b());
-}
-
-uint16_t wAsUw(Immed imm) {
-  return static_cast<uint16_t>(imm.w());
-}
 
 vixl::Register X(Vreg64 r) {
   PhysReg pr(r.asReg());
@@ -222,6 +218,8 @@ struct Vgen {
     env.cb->sync(base);
   }
 
+  static void emitVeneers(Venv& env);
+  static void handleLiterals(Venv& env);
   static void patch(Venv& env);
 
   static void pad(CodeBlock& cb) {
@@ -243,11 +241,12 @@ struct Vgen {
   void emit(const copy& i);
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a->Brk(0); }
-  void emit(const fallthru& /*i*/) {}
+  void emit(const fallthru& /*i*/);
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
   void emit(const ldimmw& i);
+  void emit(const ldundefq& /*i*/) {}
   void emit(const load& i);
   void emit(const store& i);
   void emit(const mcprep& i);
@@ -263,12 +262,18 @@ struct Vgen {
   void emit(const callfaststub& i);
 
   // php function abi
-  void emit(const callarray& i);
+  void emit(const callphp& i) {
+    emit(call{i.target, i.args});
+    setCallFuncId(env, a->frontier());
+  }
+  void emit(const callphpr& i) {
+    emit(callr{i.target, i.args});
+    setCallFuncId(env, a->frontier());
+  }
   void emit(const contenter& i);
   void emit(const phpret& i);
 
   // vm entry abi
-  void emit(const calltc& i);
   void emit(const inittc& /*i*/) {}
   void emit(const leavetc& i);
 
@@ -286,7 +291,9 @@ struct Vgen {
   void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), bAsUb(i.s0), UF(i.fl)); }
+  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.ub(), UF(i.fl)); }
+  void emit(const andw& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
+  void emit(const andwi& i) { a->And(W(i.d), W(i.s1), i.s0.uw(), UF(i.fl)); }
   void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andli& i) { a->And(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
@@ -296,15 +303,19 @@ struct Vgen {
   void emit(const cmovw& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovl& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
+  // note: cmp{bw}[i] are emitted only for narrow comparisons and _do not_ sign
+  // extend their arguments--these instructions are lowered to cmp{lq}[i] if
+  // the comparison is not narrow or not equality/inequality
   void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpbi& i) { a->Cmp(W(i.s1), bAsUb(i.s0)); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), static_cast<uint8_t>(i.s0.b())); }
   void emit(const cmpw& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpwi& i) { a->Cmp(W(i.s1), wAsUw(i.s0)); }
+  void emit(const cmpwi& i) { a->Cmp(W(i.s1), static_cast<uint16_t>(i.s0.w())); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
   void emit(const cmpsd& i);
+  // TODO(CDE): csinc[bw]{} Should a) sign extend and b) set SF for overflow
   void emit(const csincb& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const csincw& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const csincl& i) { a->Csinc(W(i.d), W(i.t), W(i.f), C(i.cc)); }
@@ -326,7 +337,8 @@ struct Vgen {
   void emit(const jmpr& i) { a->Br(X(i.target)); }
   void emit(const lea& i);
   void emit(const leap& i);
-  void emit(const lead& i) { a->Mov(X(i.d), i.s.get()); }
+  void emit(const leav& i);
+  void emit(const lead& i);
   void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadsd& i) { a->Ldr(D(i.d), M(i.s)); }
@@ -336,10 +348,15 @@ struct Vgen {
   void emit(const loadw& i) { a->Ldrh(W(i.d), M(i.s)); }
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
+  void emit(const loadsbq& i) { a->Ldrsb(X(i.d), M(i.s)); }
+  void emit(const loadsbl& i) { a->Ldrsb(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movsbl& i) { a->Sxtb(W(i.d), W(i.s)); }
+  void emit(const movsbq& i) { a->Sxtb(X(i.d), W(i.s).X()); }
+  void emit(const movswl& i) { a->Sxth(W(i.d), W(i.s)); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtqw& i) { a->Uxth(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
@@ -351,7 +368,10 @@ struct Vgen {
   void emit(const nop& /*i*/) { a->Nop(); }
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
   void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
+  void emit(const orbi& i);
   void emit(const orq& i);
+  void emit(const orwi& i);
+  void emit(const orli& i);
   void emit(const orqi& i);
   void emit(const pop& i);
   void emit(const popp& i);
@@ -379,9 +399,9 @@ struct Vgen {
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const testb& i){ a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testbi& i){ a->Tst(W(i.s1), bAsUb(i.s0)); }
+  void emit(const testbi& i){ a->Tst(W(i.s1), i.s0.ub()); }
   void emit(const testw& i){ a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testwi& i){ a->Tst(W(i.s1), wAsUw(i.s0)); }
+  void emit(const testwi& i){ a->Tst(W(i.s1), i.s0.uw()); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
@@ -405,6 +425,12 @@ struct Vgen {
 
 private:
   CodeBlock& frozen() { return env.text.frozen().code; }
+  static void recordAddressImmediate(Venv& env, TCA addr) {
+    env.meta.addressImmediates.insert(addr);
+  }
+  void recordAddressImmediate() {
+    env.meta.addressImmediates.insert(env.cb->frontier());
+  }
 
 private:
   Venv& env;
@@ -422,14 +448,10 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 static CodeBlock* getBlock(Venv& env, CodeAddress a) {
-  if (env.text.main().code.contains(a)) {
-    return &env.text.main().code;
-  }
-  if (env.text.cold().code.contains(a)) {
-    return &env.text.cold().code;
-  }
-  if (env.text.frozen().code.contains(a)) {
-    return &env.text.frozen().code;
+  for (auto const& area : env.text.areas()) {
+    if (area.code.contains(a)) {
+      return &area.code;
+    }
   }
   return nullptr;
 }
@@ -439,20 +461,205 @@ static CodeAddress toReal(Venv& env, CodeAddress a) {
   return (b == nullptr) ? a : b->toDestAddress(a);
 }
 
-void Vgen::patch(Venv& env) {
-  for (auto& p : env.jmps) {
-    auto addr = toReal(env, p.instr);
-    auto target = env.addrs[p.target];
-    assertx(target);
-    // Patch the 32 bit target following the LDR and BR
-    patchTarget32(addr + 2 * 4, target);
+void Vgen::emitVeneers(Venv& env) {
+  auto& meta = env.meta;
+  decltype(env.meta.veneers) notEmitted;
+
+  for (auto const& veneer : meta.veneers) {
+    auto cb = getBlock(env, veneer.source);
+    if (!cb) {
+      // If we can't find the code block, it must have been emitted by a Vunit
+      // wrapping this one (retransopt emits a Vunit within a Vunit).
+      notEmitted.push_back(veneer);
+      continue;
+    }
+    auto const vaddr = cb->frontier();
+
+    FTRACE(1, "emitVeneers: source = {}, target = {}, veneer at {}\n",
+           veneer.source, veneer.target, vaddr);
+
+    // Emit the veneer code: LDR + BR.
+    meta.veneerAddrs.insert(vaddr);
+    MacroAssembler av{*cb};
+    vixl::Label target_data;
+    meta.addressImmediates.insert(vaddr);
+    poolLiteral(*cb, meta, (uint64_t)makeTarget32(veneer.target), 32, true);
+    av.bind(&target_data);
+    av.Ldr(rAsm_w, &target_data);
+    av.Br(rAsm);
+
+    // Update the veneer source instruction to jump/call the veneer.
+    auto const realSource = toReal(env, veneer.source);
+    CodeBlock tmpBlock;
+    tmpBlock.init(realSource, kInstructionSize, "emitVeneers");
+    MacroAssembler at{tmpBlock};
+    int64_t offset = vaddr - veneer.source;
+    auto sourceInst = Instruction::Cast(realSource);
+
+    if (sourceInst->Mask(UnconditionalBranchMask) == B) {
+      always_assert(is_int28(offset));
+      at.b(offset >> kInstructionSizeLog2);
+
+    } else if (sourceInst->Mask(UnconditionalBranchMask) == BL) {
+      always_assert(is_int28(offset));
+      at.bl(offset >> kInstructionSizeLog2);
+
+    } else if (sourceInst->IsCondBranchImm()) {
+      auto const cond = static_cast<Condition>(sourceInst->ConditionBranch());
+      if (is_int21(offset)) {
+        at.b(offset >> kInstructionSizeLog2, cond);
+      } else {
+        // The offset doesn't fit in a conditional jump. Hopefully it still fits
+        // in an unconditional jump, in which case we add an appendix to the
+        // veneer.
+        offset += 2 * kInstructionSize;
+        always_assert(is_int28(offset));
+        // Add an appendix to the veneer, and jump to it instead.  The full
+        // veneer in this case looks like:
+        //   VENEER:
+        //      LDR RX, LITERAL_ADDR
+        //      BR  RX
+        //   APPENDIX:
+        //      B.CC VENEER
+        //      B NEXT
+        // And the conditional jump into the veneer is turned into a jump to the
+        // appendix:
+        //      B APPENDIX
+        //   NEXT:
+
+        // Turn the original conditional branch into an unconditional one.
+        at.b(offset >> kInstructionSizeLog2);
+
+        // Emit appendix.
+        auto const appendix = cb->frontier();
+        av.b(-2 /* veneer starts 2 instructions before the appendix */, cond);
+        const int64_t nextOffset = (veneer.source + kInstructionSize) - // NEXT
+          (vaddr + 3 * kInstructionSize); // addr of "B NEXT"
+        always_assert(is_int28(nextOffset));
+        av.b(nextOffset >> kInstructionSizeLog2);
+
+        // Replace veneer.source with appendix in the relevant metadata.
+        meta.smashableLocations.erase(veneer.source);
+        meta.smashableLocations.insert(appendix);
+        for (auto& tj : meta.inProgressTailJumps) {
+          if (tj.toSmash() == veneer.source) tj.adjust(appendix);
+        }
+        for (auto& stub : env.stubs) {
+          if (stub.jcc == veneer.source) stub.jcc = appendix;
+        }
+      }
+    } else {
+      always_assert_flog(0, "emitVeneers: invalid source instruction at source"
+                         " {} (realSource = {})",
+                         veneer.source, realSource);
+    }
   }
-  for (auto& p : env.jccs) {
+
+  env.meta.veneers.swap(notEmitted);
+}
+
+void Vgen::handleLiterals(Venv& env) {
+  decltype(env.meta.literalsToPool) notEmitted;
+  for (auto const& pl : env.meta.literalsToPool) {
+    auto const cb = getBlock(env, pl.patchAddress);
+    if (!cb) {
+      // If we can't find the code block it must have been emitted by a Vunit
+      // wrapping this one.  (retransopt emits a Vunit within a Vunit)
+      notEmitted.push_back(pl);
+      continue;
+    }
+
+    // Emit the literal.
+    auto literalAddress = cb->frontier();
+    if (pl.width == 32) {
+      cb->dword(static_cast<uint32_t>(pl.value));
+    } else if (pl.width == 64) {
+      if (pl.smashable) {
+        // Although the region is actually dead, we mark it as live, so that
+        // the relocator can remove the padding.
+        align(*cb, &env.meta, Alignment::QuadWordSmashable, AlignContext::Live);
+        literalAddress = cb->frontier();
+      }
+      cb->qword(pl.value);
+    } else {
+      not_reached();
+    }
+
+    // Patch the LDR.
+    auto const patchAddressActual =
+      Instruction::Cast(toReal(env, pl.patchAddress));
+    assertx(patchAddressActual->IsLoadLiteral());
+    patchAddressActual->SetImmPCOffsetTarget(
+      Instruction::Cast(literalAddress),
+      Instruction::Cast(pl.patchAddress));
+  }
+
+  if (env.meta.fallthru) {
+    auto const fallthru = *env.meta.fallthru;
+    auto const cb = getBlock(env, fallthru);
+    if (!cb) {
+      always_assert_flog(false,
+                         "Fallthrus shouldn't be used in nested Vunits.");
+    }
+    auto const blockEndAddr = cb->frontier();
+    auto const startAddr = cb->toDestAddress(fallthru);
+    CodeBlock tmp;
+    tmp.init(startAddr, kInstructionSize, "Tmp");
+    // Write the jmp.
+    Assembler a { tmp };
+    recordAddressImmediate(env, fallthru);
+    a.b((blockEndAddr - fallthru) >> kInstructionSizeLog2);
+  }
+
+  env.meta.literalsToPool.swap(notEmitted);
+}
+
+void Vgen::patch(Venv& env) {
+  // Patch the 32 bit target of the LDR
+  auto patch = [&env](TCA instr, TCA target) {
+    // The LDR loading the address to branch to.
+    auto ldr = Instruction::Cast(instr);
+    auto const DEBUG_ONLY br = ldr->NextInstruction();
+    assertx(ldr->Mask(LoadLiteralMask) == LDR_w_lit &&
+            br->Mask(UnconditionalBranchToRegisterMask) == BR &&
+            ldr->Rd() == br->Rn());
+    // The address the LDR loads.
+    auto targetAddr = ldr->LiteralAddress();
+    // Patch the 32 bit target following the LDR and BR
+    patchTarget32(targetAddr, target);
+  };
+
+  for (auto const& p : env.jmps) {
     auto addr = toReal(env, p.instr);
-    auto target = env.addrs[p.target];
-    assertx(p.target);
-    // Patch the 32 bit target following the B.<CC>, LDR, and BR
-    patchTarget32(addr + 3 * 4, target);
+    auto const target = env.addrs[p.target];
+    assertx(target);
+    if (env.meta.smashableLocations.count(p.instr)) {
+      assertx(possiblySmashableJmp(addr));
+      // Update `addr' to point to the veneer.
+      addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
+    }
+    // Patch the address we are jumping to.
+    patch(addr, target);
+  }
+  for (auto const& p : env.jccs) {
+    auto addr = toReal(env, p.instr);
+    auto const target = env.addrs[p.target];
+    assertx(target);
+    if (env.meta.smashableLocations.count(p.instr)) {
+      assertx(possiblySmashableJcc(addr));
+      // Update `addr' to point to the veneer.
+      addr = TCA(vixl::Instruction::Cast(addr)->ImmPCOffsetTarget());
+    } else {
+      assertx(Instruction::Cast(addr)->IsCondBranchImm());
+      // If the jcc starts with a conditional jump, patch the next instruction
+      // (which should start with a LDR).
+      addr += kInstructionSize;
+    }
+    patch(addr, target);
+  }
+  for (auto const& p : env.leas) {
+    (void)p;
+    not_implemented();
   }
 }
 
@@ -468,7 +675,7 @@ void Vgen::emit(const copy& i) {
     a->Fmov(D(i.d), X(i.s));
   } else {
     assertx(i.s.isSIMD() && i.d.isSIMD());
-    a->Fmov(D(i.d), D(i.s));
+    a->mov(V(i.d), V(i.s));
   }
 }
 
@@ -493,11 +700,11 @@ void Vgen::emit(const copy2& i) {
   }
 }
 
-void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
+void emitSimdImmInt(vixl::MacroAssembler* a, uint64_t val, Vreg d) {
   // Assembler::fmov emits a ldr from a literal pool if IsImmFP64 is false.
   // In that case, emit the raw bits into a GPR first and then move them
   // unmodified into destination SIMD
-  union { double dval; int64_t ival; };
+  union { double dval; uint64_t ival; };
   ival = val;
   if (vixl::Assembler::IsImmFP64(dval)) {
     a->Fmov(D(d), dval);
@@ -508,19 +715,24 @@ void emitSimdImmInt(vixl::MacroAssembler* a, int64_t val, Vreg d) {
     a->Fmov(D(d), rAsm);
   }
 }
+void Vgen::emit(const fallthru& /*i*/) {
+  always_assert(!env.meta.fallthru);
+  env.meta.fallthru = a->frontier();
+  a->nop();
+}
 
 #define Y(vasm_opc, simd_w, vr_w, gpr_w, imm) \
 void Vgen::emit(const vasm_opc& i) {          \
   if (i.d.isSIMD()) {                         \
-    emitSimdImmInt(a, i.s.simd_w(), i.d);     \
+    emitSimdImmInt(a, static_cast<uint##vr_w##_t>(i.s.simd_w()), i.d);     \
   } else {                                    \
     Vreg##vr_w d = i.d;                       \
     a->Mov(gpr_w(d), imm);                    \
   }                                           \
 }
 
-Y(ldimmb, b, 8, W, bAsUb(i.s))
-Y(ldimmw, w, 16, W, wAsUw(i.s))
+Y(ldimmb, ub, 8, W, i.s.ub())
+Y(ldimmw, uw, 16, W, i.s.uw())
 Y(ldimml, l, 32, W, i.s.l())
 Y(ldimmq, q, 64, X, i.s.q())
 
@@ -556,11 +768,12 @@ void Vgen::emit(const mcprep& i) {
    *
    * We set the low bit for two reasons: the Class* will never be a valid
    * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePrimeCacheInit can tell it's not been smashed yet
+   * MethodCache::handleStaticCall can tell it's not been smashed yet
    */
-  auto const mov_addr = emitSmashableMovq(a->code(), env.meta, 0, r64(i.d));
-  auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smashMovq(a->code().toDestAddress(mov_addr), (imm << 1) | 1);
+
+  align(*env.cb, &env.meta, Alignment::SmashMovq, AlignContext::Live);
+  auto const imm = reinterpret_cast<uint64_t>(a->frontier());
+  emitSmashableMovq(*env.cb, env.meta, (imm << 1) | 1, r64(i.d));
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
@@ -568,7 +781,8 @@ void Vgen::emit(const mcprep& i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const call& i) {
-  a->Mov(rAsm, reinterpret_cast<uint64_t>(i.target));
+  recordAddressImmediate();
+  a->Mov(rAsm, i.target);
   a->Blr(rAsm);
   if (i.watch) {
     *i.watch = a->frontier();
@@ -577,7 +791,7 @@ void Vgen::emit(const call& i) {
 }
 
 void Vgen::emit(const calls& i) {
-  emitSmashableCall(a->code(), env.meta, i.target);
+  emitSmashableCall(*env.cb, env.meta, i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -596,21 +810,18 @@ void Vgen::emit(const callfaststub& i) {
 void Vgen::emit(const phpret& i) {
   // prefer load-pair instruction
   if (!i.noframe) {
-    a->ldp(X(i.d), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
+    a->ldp(X(rvmfp()), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
   } else {
     a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
   }
   emit(ret{});
 }
 
-void Vgen::emit(const callarray& i) {
-  emit(call{i.target, i.args});
-}
-
 void Vgen::emit(const contenter& i) {
   vixl::Label stub, end;
 
   // Jump past the stub below.
+  recordAddressImmediate();
   a->B(&end);
 
   // We call into this stub from the end below. Take that LR and store it in
@@ -621,30 +832,15 @@ void Vgen::emit(const contenter& i) {
 
   // Call to stub above and then unwind.
   a->bind(&end);
+  recordAddressImmediate();
   a->Bl(&stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const calltc& i) {
-  vixl::Label stub;
-
-  // Preserve the LR (exittc) on the stack, pushing twice for SP alignment.
-  a->Mov(rAsm, i.exittc);
-  a->Stp(rAsm, rAsm, MemOperand(sp, -16, PreIndex));
-
-  // Branch and link to nowhere to balance the LR stack.
-  a->bl(&stub);
-  a->bind(&stub);
-
-  // Load the saved RIP into LR and branch without link.
-  a->Ldr(X(rlr()), M(i.fp[AROFF(m_savedRip)]));
-  a->Br(X(i.target));
-}
-
 void Vgen::emit(const leavetc& /*i*/) {
-  // The LR was preserved on the stack by calltc above. Pop it while preserving
+  // The LR was preserved on the stack by resumetc. Pop it while preserving
   // SP alignment and return.
   a->Ldp(rAsm, X(rlr()), MemOperand(sp, 16, PostIndex));
   a->Ret();
@@ -654,16 +850,19 @@ void Vgen::emit(const leavetc& /*i*/) {
 
 void Vgen::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a->frontier(), nullptr);
+  env.record_inline_stack(a->frontier());
 }
 
 void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   env.meta.fixups.emplace_back(a->frontier(), i.fix);
+  env.record_inline_stack(a->frontier());
 }
 
 void Vgen::emit(const unwind& i) {
   catches.push_back({a->frontier(), i.targets[1]});
+  env.record_inline_stack(a->frontier());
   emit(jmp{i.targets[0]});
 }
 
@@ -703,8 +902,10 @@ void Vgen::emit(const imul& i) {
 
       // If hi is all 0's or 1's, then check the sign, else overflow
       // (fallthrough).
+      recordAddressImmediate();
       a->Cbz(rAsm, &checkSign);
       a->Cmp(rAsm, -1);
+      recordAddressImmediate();
       a->B(&checkSign, vixl::eq);
 
       // Overflow, so conditionally set N and Z bits and then or in V bit.
@@ -713,11 +914,13 @@ void Vgen::emit(const imul& i) {
       a->Mrs(rAsm, NZCV);
       a->Orr(rAsm, rAsm, 1<<28);
       a->Msr(NZCV, rAsm);
+      recordAddressImmediate();
       a->B(&after);
 
       // Check the signs of hi and lo.
       a->Bind(&checkSign);
       a->Eor(rAsm, rAsm, X(i.d));
+      recordAddressImmediate();
       a->Tbnz(rAsm, 63, &Overflow);
     }
 
@@ -742,6 +945,7 @@ void Vgen::emit(const decqmlock& i) {
     a->ldxr(rAsm, adr);
     a->Sub(rAsm, rAsm, 1, SetFlags);
     a->stxr(rVixlScratch0, rAsm, adr);
+    recordAddressImmediate();
     a->Cbnz(rVixlScratch0, &again);
   }
   /* Restore VIXL's scratch regs. */
@@ -757,13 +961,16 @@ void Vgen::emit(const jcc& i) {
     jccs.push_back({a->frontier(), taken});
     vixl::Label skip, data;
 
-    // Emit a sequence similar to a smashable for easy patching later.
-    // Static relocation might be able to simplify the branch.
+    // Emit a "far JCC" sequence for easy patching later.  Static relocation
+    // might be able to simplify this later (see optimizeFarJcc()).
+    recordAddressImmediate();
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
+    recordAddressImmediate();
+    poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
+                32, false);
+    a->bind(&data);  // This will be remmaped during the handleLiterals phase.
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
-    a->bind(&data);
-    a->dc32(makeTarget32(a->frontier()));
     a->bind(&skip);
   }
   emit(jmp{i.targets[0]});
@@ -772,6 +979,7 @@ void Vgen::emit(const jcc& i) {
 void Vgen::emit(const jcci& i) {
   vixl::Label skip;
 
+  recordAddressImmediate();
   a->B(&skip, vixl::InvertCondition(C(i.cc)));
   emit(jmpi{i.taken});
   a->bind(&skip);
@@ -783,12 +991,13 @@ void Vgen::emit(const jmp& i) {
   jmps.push_back({a->frontier(), i.target});
   vixl::Label data;
 
-  // Emit a sequence similar to a smashable for easy patching later.
-  // Static relocation might be able to simplify the branch.
+  // Emit a "far JMP" sequence for easy patching later.  Static relocation
+  // might be able to simplify this (see optimizeFarJmp()).
+  recordAddressImmediate();
+  poolLiteral(*env.cb, env.meta, (uint64_t)a->frontier(), 32, false);
+  a->bind(&data); // This will be remapped during the handleLiterals phase.
   a->Ldr(rAsm_w, &data);
   a->Br(rAsm);
-  a->bind(&data);
-  a->dc32(makeTarget32(a->frontier()));
 }
 
 void Vgen::emit(const jmpi& i) {
@@ -798,14 +1007,16 @@ void Vgen::emit(const jmpi& i) {
   // PC relative jump. Else, emit target address into code and load from there.
   auto diff = (i.target - a->frontier()) >> vixl::kInstructionSizeLog2;
   if (vixl::is_int26(diff)) {
+    recordAddressImmediate();
     a->b(diff);
   } else {
     // Cannot use simple a->Mov() since such a sequence cannot be
     // adjusted while live following a relocation.
+    recordAddressImmediate();
+    poolLiteral(*env.cb, env.meta, (uint64_t)i.target, 32, false);
+    a->bind(&data); // This will be remapped during the handleLiterals phase.
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
-    a->bind(&data);
-    a->dc32(makeTarget32(i.target));
   }
 }
 
@@ -820,17 +1031,28 @@ void Vgen::emit(const lea& i) {
   }
 }
 
+void Vgen::emit(const leav& i) {
+  auto const addr = a->frontier();
+  emit(leap{reg::rip[0xdeadbeef], i.d});
+  env.leas.push_back({addr, i.s});
+}
+
 void Vgen::emit(const leap& i) {
   vixl::Label imm_data;
   vixl::Label after_data;
 
   // Cannot use simple a->Mov() since such a sequence cannot be
   // adjusted while live following a relocation.
+  recordAddressImmediate();
+  poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(i.s.r.disp),
+              32, false);
+  a->bind(&imm_data);  // This will be remapped during the handleLiterals phase.
   a->Ldr(W(i.d), &imm_data);
-  a->B(&after_data);
-  a->bind(&imm_data);
-  a->dc32(makeTarget32(i.s.r.disp));
-  a->bind(&after_data);
+}
+
+void Vgen::emit(const lead& i) {
+  recordAddressImmediate();
+  a->Mov(X(i.d), i.s.get());
 }
 
 #define Y(vasm_opc, arm_opc, src_dst, m)                             \
@@ -869,10 +1091,13 @@ void Vgen::emit(const vasm_opc& i) {                  \
   }                                                   \
 }
 
+Y(orbi, Orr, W, i.s0.ub(), wzr);
+Y(orwi, Orr, W, i.s0.uw(), xzr);
+Y(orli, Orr, W, i.s0.l(), xzr);
 Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
 Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, bAsUb(i.s0), wzr);
+Y(xorbi, Eor, W, i.s0.ub(), wzr);
 Y(xorl, Eor, W, W(i.s0), wzr);
 Y(xorq, Eor, X, X(i.s0), xzr);
 Y(xorqi, Eor, X, i.s0.q(), xzr);
@@ -1287,25 +1512,59 @@ Y(storew, m)
 
 #undef Y
 
-#define Y(vasm_opc, lower_opc, load_opc, store_opc, s0, m)  \
+#define Y(vasm_opc, lower_opc, load_opc, store_opc, arg, m) \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
     lowerVptr(i.m, v);                                      \
     auto r0 = v.makeReg(), r1 = v.makeReg();                \
     v << load_opc{i.m, r0};                                 \
-    v << lower_opc{i.s0, r0, r1, i.sf};                     \
+    v << lower_opc{arg, r0, r1, i.sf, i.fl};                \
     v << store_opc{r1, i.m};                                \
   });                                                       \
 }
 
-Y(addlim, addli, loadl, storel, s0, m)
-Y(addlm, addl, loadl, storel, s0, m)
-Y(addqim, addqi, load, store, s0, m)
-Y(andbim, andbi, loadb, storeb, s, m)
-Y(orbim, orqi, loadb, storeb, s0, m)
-Y(orqim, orqi, load, store, s0, m)
-Y(orwim, orqi, loadw, storew, s0, m)
-Y(orlim, orqi, loadl, storel, s0, m)
+Y(addlim, addli, loadl, storel, i.s0, m)
+Y(addlm, addl, loadl, storel, i.s0, m)
+Y(addwm, addl, loadw, storew, Reg32(i.s0), m)
+Y(addqim, addqi, load, store, i.s0, m)
+Y(andbim, andbi, loadb, storeb, i.s, m)
+Y(orbim, orqi, loadb, storeb, i.s0, m)
+Y(orqim, orqi, load, store, i.s0, m)
+Y(orwim, orqi, loadw, storew, i.s0, m)
+Y(orlim, orqi, loadl, storel, i.s0, m)
+
+#undef Y
+
+#define Y(vasm_opc, lower_opc, movs_opc)                                \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {             \
+  if (!i.fl || (i.fl & static_cast<Vflags>(StatusFlags::NV))) {         \
+    lower_impl(e.unit, b, z, [&] (Vout& v) {                            \
+      auto r0 = v.makeReg(), r1 = v.makeReg();                          \
+      v << movs_opc{i.s0, r0};                                          \
+      v << movs_opc{i.s1, r1};                                          \
+      v << lower_opc{r0, r1, i.sf, i.fl};                               \
+    });                                                                 \
+  }                                                                     \
+}
+
+Y(cmpb, cmpl, movsbl)
+Y(cmpw, cmpl, movswl)
+
+#undef Y
+
+#define Y(vasm_opc, lower_opc, movs_opc)                                \
+void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {             \
+  if (!i.fl || (i.fl & static_cast<Vflags>(StatusFlags::NV))) {         \
+    lower_impl(e.unit, b, z, [&] (Vout& v) {                            \
+      auto r = v.makeReg();                                             \
+      v << movs_opc{i.s1, r};                                           \
+      v << lower_opc{i.s0, r, i.sf, i.fl};                              \
+    });                                                                 \
+  }                                                                     \
+}
+
+Y(cmpbi, cmpli, movsbl)
+Y(cmpwi, cmpli, movswl)
 
 #undef Y
 
@@ -1315,19 +1574,24 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {      \
     lowerVptr(i.s1, v);                                          \
     auto r = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
     v << load_opc{i.s1, r};                                      \
-    v << lower_opc{i.s0, r, i.sf};                               \
+    v << lower_opc{i.s0, r, i.sf, i.fl};                         \
   });                                                            \
 }
 
-Y(cmpbim, cmpli, loadb)
+Y(cmpbim, cmpbi, loadb)
 Y(cmplim, cmpli, loadl)
+Y(cmpbm, cmpb, loadb)
+Y(cmpwm, cmpw, loadb)
 Y(cmplm, cmpl, loadl)
 Y(cmpqim, cmpqi, load)
 Y(cmpqm, cmpq, load)
-Y(cmpwim, cmpli, loadw)
+Y(cmpwim, cmpwi, loadw)
 Y(testbim, testli, loadb)
 Y(testlim, testli, loadl)
 Y(testqim, testqi, load)
+Y(testbm, testb, loadb)
+Y(testwm, testw, loadw)
+Y(testlm, testl, loadl)
 Y(testqm, testq, load)
 Y(testwim, testli, loadw)
 
@@ -1349,7 +1613,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {       \
     auto r0 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
     auto r1 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
     v << load_opc{i.m, r0};                                       \
-    v << lower_opc{r0, r1, i.sf};                                 \
+    v << lower_opc{r0, r1, i.sf, i.fl};                           \
     v << store_opc{r1, i.m};                                      \
   });                                                             \
 }
@@ -1422,6 +1686,13 @@ void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   });
 }
 
+void lower(const VLS& e, unstublogue& /*i*/, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Pop LR and remove FP from the stack.
+    v << popp{PhysReg(rAsm), rlr()};
+  });
+}
+
 void lower(const VLS& e, stubret& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop LR and (optionally) FP.
@@ -1445,10 +1716,19 @@ void lower(const VLS& e, tailcallstub& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(const VLS& e, stubunwind& /*i*/, Vlabel b, size_t z) {
+void lower(const VLS& e, tailcallstubr& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Restore LR from native stack and adjust SP.
+    v << popp{PhysReg(rAsm), rlr()};
+
+    v << jmpr{i.target, i.args};
+  });
+}
+
+void lower(const VLS& e, stubunwind& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame.
-    v << lea{rsp()[16], rsp()};
+    v << popp{PhysReg(rAsm), i.d};
   });
 }
 
@@ -1471,15 +1751,6 @@ void lower(const VLS& e, loadstubret& i, Vlabel b, size_t z) {
 void lower(const VLS& e, phplogue& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << store{rlr(), i.fp[AROFF(m_savedRip)]};
-  });
-}
-
-void lower(const VLS& e, tailcallphp& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    // Undoes the prologue by restoring LR from saved RIP.
-    v << load{i.fp[AROFF(m_savedRip)], rlr()};
-
-    v << jmpr{i.target, i.args};
   });
 }
 
@@ -1572,25 +1843,6 @@ void lower(const VLS& e, movtdq& i, Vlabel b, size_t z) {
   });
 }
 
-template<typename load_op, typename cmp_op, typename cmpm>
-void lower_cmpm(const VLS& e, cmpm& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    lowerVptr(i.s1, v);
-    Vreg tmp0 = i.s0;
-    auto tmp1 = v.makeReg();
-    v << load_op{i.s1, tmp1};
-    v << cmp_op{tmp0, tmp1, i.sf};
-  });
-}
-
-void lower(const VLS& e, cmpbm& i, Vlabel b, size_t z) {
-  lower_cmpm<loadzbl, cmpl>(e, i, b, z);
-}
-
-void lower(const VLS& e, cmpwm& i, Vlabel b, size_t z) {
-  lower_cmpm<loadw, cmpl>(e, i, b, z);
-}
-
 #define Y(vasm_opc, lower_opc, load_opc, imm, zr, sz)   \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                   \
@@ -1674,6 +1926,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
 
   simplify(unit);
 
+  annotateSFUses(unit);
   lowerForARM(unit);
 
   simplify(unit);
@@ -1688,7 +1941,16 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   annotateSFUses(unit);
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
-    if (regalloc) allocateRegisters(unit, abi);
+    if (regalloc) {
+      if (RuntimeOption::EvalUseGraphColor &&
+          unit.context &&
+          (unit.context->kind == TransKind::Optimize ||
+           unit.context->kind == TransKind::OptPrologue)) {
+        allocateRegistersWithGraphColor(unit, abi);
+      } else {
+        allocateRegistersWithXLS(unit, abi);
+      }
+    }
   }
   if (unit.blocks.size() > 1) {
     optimizeJmps(unit);

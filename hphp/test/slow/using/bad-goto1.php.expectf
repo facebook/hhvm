@@ -1,2 +1,5 @@
+Notice: Undefined variable: x in %s/bad-goto1.php on line 4
 
-Fatal error: 'goto' into or across using statement is disallowed%s %s/test/slow/using/bad-goto1.php on line 1
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function __dispose() on a non-object (null)' in %s/bad-goto1.php:4
+Stack trace:
+%a {main}

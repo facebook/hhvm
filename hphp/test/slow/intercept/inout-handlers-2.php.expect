@@ -1,0 +1,6 @@
+foo: handler1
+bar: handler2
+fiz: handler3
+buz: handler4
+biz: handler5
+far: handler6

@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 function bar() {
   echo 'bar called';
 }
 class foo {
-  public $functions = array();
-  function foo() {
+  public $functions = darray[];
+  function __construct() {
     $function = 'bar';
     print($function);
     print($function());
@@ -13,4 +13,8 @@ class foo {
     print($this->functions['test']());
   }
 }
+
+<<__EntryPoint>>
+function main_1211() {
 $a = new foo ();
+}

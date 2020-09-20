@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
   yield 1;
   yield -100 => 2;
@@ -10,4 +10,8 @@ function main() {
     var_dump($k, $v);
   }
 }
+
+<<__EntryPoint>>
+function main_2231() {
 main();
+}

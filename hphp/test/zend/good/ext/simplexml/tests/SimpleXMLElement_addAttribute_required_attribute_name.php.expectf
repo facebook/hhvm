@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: Attribute name is required in %s/SimpleXMLElement_addAttribute_required_attribute_name.php on line 3
 <?xml version="1.0"?>
 <php>testfest</php>

@@ -1,10 +1,10 @@
-object(SubclassA)#%d (2) {
+object(SubclassA) (2) {
   ["hello":"SubclassA":private]=>
   int(0)
   ["hello":"BaseWithPropA":private]=>
   int(0)
 }
-object(SubclassB)#%d (2) {
+object(SubclassB) (2) {
   ["hello":"SubclassB":private]=>
   int(0)
   ["hello":"BaseWithTPropB":private]=>

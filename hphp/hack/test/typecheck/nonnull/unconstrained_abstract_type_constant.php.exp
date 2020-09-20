@@ -1,14 +1,6 @@
 File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
-File "unconstrained_abstract_type_constant.php", line 7, characters 12-13:
-Some type constraint(s) here are violated
-File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-'<static>::T' is a constrained type parameter
-File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-'this::T' is a constrained type parameter
 File "unconstrained_abstract_type_constant.php", line 6, characters 34-40:
-This is a nonnull value
+Expected `nonnull`
 File "unconstrained_abstract_type_constant.php", line 6, characters 21-27:
-It is incompatible with the expression dependent type \C::T
-File "unconstrained_abstract_type_constant.php", line 4, characters 23-23:
-  resulting from expanding the type constant C::T
+But got `this::T`

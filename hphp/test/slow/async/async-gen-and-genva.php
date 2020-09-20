@@ -14,9 +14,9 @@ async function baz(int $num) {
 
 async function bar() {
   $exp = 0;
-  foreach (array(0, 1) as $block_dep1) {
-    foreach (array(0, 1) as $block_dep2) {
-      foreach (array(0, 1) as $block_outer) {
+  foreach (varray[0, 1] as $block_dep1) {
+    foreach (varray[0, 1] as $block_dep2) {
+      foreach (varray[0, 1] as $block_outer) {
         if ($block_outer) {
           await block();
         }
@@ -33,10 +33,10 @@ async function bar() {
 
 async function foo() {
   foreach (bar() await as list($x, $y)) {
-    list($a, $b) = await genva(
-      baz($x),
-      baz($y),
-    );
+    concurrent {
+      $a = await baz($x);
+      $b = await baz($y);
+    }
     yield 100 * $a + $b;
   }
 }
@@ -47,4 +47,8 @@ async function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_async_gen_and_genva() {
 \HH\Asio\join(main());
+}

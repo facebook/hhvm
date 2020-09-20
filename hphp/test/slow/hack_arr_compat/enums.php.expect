@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   [1]=>
   string(3) "ONE"
   [2]=>
@@ -6,7 +6,7 @@ array(3) {
   [3]=>
   string(5) "THREE"
 }
-array(3) {
+darray(3) {
   ["ONE"]=>
   string(1) "1"
   ["TWO"]=>
@@ -20,16 +20,14 @@ string(1) "1"
 string(1) "1"
 string(1) "1"
 string(1) "1"
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "1"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "1"
 }
 ==============================================
-array(3) {
+darray(3) {
   [1]=>
   string(3) "ONE"
   [2]=>
@@ -37,7 +35,7 @@ array(3) {
   [3]=>
   string(5) "THREE"
 }
-array(3) {
+darray(3) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -51,16 +49,14 @@ int(1)
 int(1)
 int(1)
 int(1)
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 ==============================================
-array(3) {
+darray(3) {
   [1]=>
   string(3) "ONE"
   [2]=>
@@ -68,7 +64,7 @@ array(3) {
   [3]=>
   string(5) "THREE"
 }
-array(3) {
+darray(3) {
   ["ONE"]=>
   string(1) "1"
   ["TWO"]=>
@@ -82,11 +78,9 @@ string(1) "1"
 int(1)
 string(1) "1"
 int(1)
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "1"
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }

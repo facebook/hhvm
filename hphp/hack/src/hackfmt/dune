@@ -1,0 +1,50 @@
+(library
+  (name hackfmt_doc)
+  (wrapped false)
+  (modules
+    cost
+    doc
+    rule)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (libraries
+    core_kernel
+    utils_core))
+
+(library
+  (name hackfmt_env)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (modules
+    format_env))
+
+(library
+  (name hackfmt)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std)) ; See T41851208
+  (modules
+    boundaries
+    chunk
+    chunk_builder
+    chunk_group
+    hack_format
+    interval
+    libhackfmt
+    line_splitter
+    nesting
+    nesting_allocator
+    noformat
+    rule_allocator
+    solve_state
+    span
+    span_allocator
+    state_queue
+    subchunk)
+  (libraries
+    common
+    diff
+    full_fidelity
+    hackfmt_doc
+    hackfmt_env
+    hackfmt_error
+    logging
+    utils_www_root))

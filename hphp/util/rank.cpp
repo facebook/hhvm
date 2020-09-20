@@ -24,7 +24,7 @@
 #include "hphp/util/process.h"
 
 namespace HPHP {
-#ifdef DEBUG
+#ifndef NDEBUG
 static const int kMaxLockDepth=256;
 static __thread Rank tl_rankStack[kMaxLockDepth];
 static __thread int tl_curRankDepth;

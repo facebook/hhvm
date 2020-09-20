@@ -2,11 +2,9 @@
 
 -- Testing array_key_exists() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_key_exists() expects exactly 2 parameters, 3 given in %s/array_key_exists_error.php on line 19
 
 -- Testing array_key_exists() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_key_exists() expects exactly 2 parameters, 1 given in %s/array_key_exists_error.php on line 24
 Done

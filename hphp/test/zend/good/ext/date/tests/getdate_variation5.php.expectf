@@ -1,7 +1,7 @@
 *** Testing getdate() : usage variation ***
 
 --Pacific/Samoa--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -27,7 +27,7 @@ array(11) {
 }
 
 --US/Alaska--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -53,7 +53,7 @@ array(11) {
 }
 
 --Africa/Casablanca--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -79,7 +79,7 @@ array(11) {
 }
 
 --Europe/Moscow--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -105,7 +105,7 @@ array(11) {
 }
 
 --Asia/Hong_Kong--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -131,7 +131,7 @@ array(11) {
 }
 
 --Australia/Brisbane--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>
@@ -157,7 +157,7 @@ array(11) {
 }
 
 --Pacific/Wallis--
-array(11) {
+darray(11) {
   ["seconds"]=>
   int(0)
   ["minutes"]=>

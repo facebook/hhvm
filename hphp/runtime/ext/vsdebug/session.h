@@ -14,17 +14,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_SESSION_H_
-#define incl_HPHP_VSDEBUG_SESSION_H_
+#pragma once
 
 #include "hphp/runtime/ext/vsdebug/logging.h"
-#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 #include "hphp/runtime/ext/vsdebug/command_queue.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/breakpoint.h"
 #include "hphp/runtime/ext/vsdebug/client_preferences.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
+#include "hphp/runtime/server/source-root-info.h"
 #include "hphp/util/async-func.h"
 
 namespace HPHP {
@@ -32,7 +31,7 @@ namespace VSDEBUG {
 
 struct Debugger;
 struct BreakpointManager;
-struct RequestInfo;
+struct DebuggerRequestInfo;
 
 // This object represents a connected session with a single debugger client.
 // It contains any data specific to the connected client's state.
@@ -40,7 +39,13 @@ struct DebuggerSession final {
   DebuggerSession(Debugger* debugger);
   virtual ~DebuggerSession();
 
-  void startDummyRequest(const std::string& startupDoc);
+  void startDummyRequest(
+    const std::string& startupDoc,
+    const std::string& sandboxUser,
+    const std::string& sandboxName,
+    const std::string& debuggerSessionAuth,
+    bool displayStartupMsg
+  );
 
   void enqueueDummyCommand(VSCommand* command);
   void setClientPreferences(ClientPreferences& preferences);
@@ -73,10 +78,28 @@ struct DebuggerSession final {
   // Called by the debugger when a server object is removed from a request.
   void onServerObjectDestroyed(unsigned int objectId);
 
-  // RequestInfo for the dummy request thread.
-  RequestInfo* const m_dummyRequestInfo;
+  // DebuggerRequestInfo for the dummy request thread.
+  DebuggerRequestInfo* const m_dummyRequestInfo;
+
+  // Indicates if the client wants output about the startup request state.
+  bool m_displayStartupMsg;
+
+  folly::dynamic* getCachedVariableObject(const int key);
+  void setCachedVariableObject(const int key, const folly::dynamic& value);
+  void clearCachedVariable(const int key);
+
+  std::string getDebuggerSessionAuth();
+
+  static constexpr int kCachedVariableKeyAll = -1;
+  static constexpr int kCachedVariableKeyServerConsts = 1;
+  static constexpr int kCachedVariableKeyUserConsts = 2;
+  static constexpr int kCachedVariableKeyServerGlobals = 3;
 
 private:
+
+  unsigned int generateOrReuseVariableId(
+    const Variant& variable
+  );
 
   void registerRequestObject(
     unsigned int objectId,
@@ -101,15 +124,25 @@ private:
   AsyncFunc<DebuggerSession> m_dummyThread;
   std::string m_dummyStartupDoc;
 
+  // Auth token provided by the attached debugger client.
+  // Note: it is only safe to read this from the dummy request thread.
+  std::string m_debuggerSessionAuth;
+
   // When a request is paused, the backend must maintain state about scopes,
   // frames and variable IDs sent to the front end. The IDs are globally
-  // unique, and the objects to which they refer are valid per-request and
-  // only until that request resumes.
+  // unique, and the objects to which they refer are valid per-request..
   static unsigned int s_nextObjectId;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
+
+  // A cache for things like server constants that are expensive to compute,
+  // are requested for each thread and frame, and unlikely to change while
+  // the target is paused. Items in this cache are global, not per-request.
+  std::unordered_map<int, folly::dynamic> m_globalVariableCache;
+
+  std::string m_sandboxUser;
+  std::string m_sandboxName;
 };
 
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_SESSION_H_

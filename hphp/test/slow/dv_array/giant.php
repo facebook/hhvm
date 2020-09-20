@@ -1,9 +1,12 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+abstract final class FStatics {
+  public static $x = 0;
+}
+
 function f() {
-  static $x = 0;
-  return $x++;
+  return FStatics::$x++;
 }
 
 function test() {
@@ -82,4 +85,8 @@ function test() {
   var_dump(is_darray($x3));
 }
 
+
+<<__EntryPoint>>
+function main_giant() {
 test();
+}

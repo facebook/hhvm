@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $iToday = new DateTimeImmutable('today');
 $iTomorrow = new DateTimeImmutable('tomorrow');
 
@@ -15,4 +15,4 @@ var_dump($iToday === $mToday);
 var_dump($iToday < $mTomorrow);
 var_dump($iToday == $mTomorrow);
 var_dump($iToday > $mTomorrow);
-?>
+}

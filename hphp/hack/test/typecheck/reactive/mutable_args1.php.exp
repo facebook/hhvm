@@ -1,0 +1,4 @@
+File "mutable_args1.php", line 14, characters 9-10:
+A mutable expression may not be passed as multiple arguments where at least one matching parameter is mutable. Matching parameter here is mutable (Typing[4269])
+File "mutable_args1.php", line 14, characters 5-6:
+This is where it was used before, being passed as mutable

@@ -5,6 +5,7 @@ enum Foo : int as int {
   BAR = 2;
   BAZ = 2;
 }
-
+<<__EntryPoint>> function main(): void {
 // Should fail
 var_dump(Foo::getNames());
+}

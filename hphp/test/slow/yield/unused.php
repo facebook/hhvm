@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   $f = function() use($a) {
@@ -11,4 +11,8 @@ function test($a) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_unused() {
 test("unused");
+}

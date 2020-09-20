@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_internal_encoding([string $encoding])
  * Description: Sets the current internal encoding or 
  * Returns the current internal encoding as a string 
@@ -8,10 +8,10 @@
 /*
  * Pass mb_internal_encoding an unknown encoding
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_internal_encoding() : error conditions ***\n";
 
 var_dump(mb_internal_encoding('unknown-encoding'));
 
 echo "Done";
-?>
+}

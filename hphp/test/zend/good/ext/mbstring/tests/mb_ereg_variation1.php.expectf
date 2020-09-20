@@ -46,15 +46,13 @@ NULL
 
 -- Iteration 12 --
 int(6)
-array(1) {
-  [0]=>
+varray(1) {
   string(6) "string"
 }
 
 -- Iteration 13 --
 int(6)
-array(1) {
-  [0]=>
+varray(1) {
   string(6) "string"
 }
 

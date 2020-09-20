@@ -1,6 +1,6 @@
-<?php
-
-$lefts = array(
+<?hh
+<<__EntryPoint>> function main(): void {
+$lefts = varray[
   0,
   123,
   true,
@@ -8,7 +8,7 @@ $lefts = array(
   "non-numeric",
   "789",
   null,
-);
+];
 $rights = $lefts;
 
 foreach ($lefts as $left) {
@@ -37,13 +37,21 @@ foreach ($lefts as $left) {
 
     echo "  / ";
     $a = $left;
-    var_dump($a /= $right);
-    var_dump($a);
+    try {
+      var_dump($a /= $right);
+      var_dump($a);
+    } catch (DivisionByZeroException $e) {
+      echo "\n", $e->getMessage(), "\n";
+    }
 
     echo "  % ";
     $a = $left;
-    var_dump($a %= $right);
-    var_dump($a);
+    try {
+      var_dump($a %= $right);
+      var_dump($a);
+    } catch (DivisionByZeroException $e) {
+      echo "\n", $e->getMessage(), "\n";
+    }
 
     echo "  & ";
     $a = $left;
@@ -70,4 +78,5 @@ foreach ($lefts as $left) {
     var_dump($a >>= $right);
     var_dump($a);
   }
+}
 }

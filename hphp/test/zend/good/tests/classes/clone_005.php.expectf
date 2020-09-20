@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot override final method base::__clone() in %s/clone_005.php on line 9

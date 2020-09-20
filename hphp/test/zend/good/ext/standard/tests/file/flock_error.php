@@ -1,32 +1,33 @@
-<?php
-/* 
-Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files 
-  in an advisory way
-*/
-
+<?hh
+/*
+ * Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
+ * Description: PHP supports a portable way of locking complete files
+ * in an advisory way
+ */
+<<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
-$file = dirname(__FILE__)."/flock.tmp";
+$file = __SystemLib\hphp_test_tmppath('flock.tmp');
 $fp = fopen($file, "w");
 
 /* array of operatons */
-$operations = array(
+$operations = varray[
   0,
   LOCK_NB,
   FALSE,
   NULL,
-  array(1,2,3),
-  array(),
+  varray[1,2,3],
+  varray[],
   "string",
   "",
-  "\0" 
-);
+  "\0"
+];
 
 $i = 0;
 foreach($operations as $operation) {
   echo "\n--- Iteration $i ---";
-  var_dump(flock($fp, $operation));
+  $wouldblock = false;
+  try { var_dump(flock($fp, $operation, inout $wouldblock)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $i++;
 }
 
@@ -34,21 +35,21 @@ foreach($operations as $operation) {
 /* Invalid arguments */
 $fp = fopen($file, "w");
 fclose($fp);
-var_dump(flock($fp, LOCK_SH|LOCK_NB));
+$wouldblock = false;
+var_dump(flock($fp, LOCK_SH|LOCK_NB, inout $wouldblock));
 
-var_dump(flock("", "", $var));
+$var = false;
+try { var_dump(flock("", "", inout $var)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args leass than expected */
-var_dump(flock());
-var_dump(flock($fp));
+try { var_dump(flock()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(flock($fp)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* No.of args greater than expected */
-var_dump(flock($fp, "", $var, ""));
+try { var_dump(flock($fp, "", inout $var, "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-?>
-<?php error_reporting(0); ?>
-<?php
+error_reporting(0);
 $file = dirname(__FILE__)."/flock.tmp";
 unlink($file);
-?>
+}

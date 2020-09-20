@@ -1,6 +1,0 @@
-object(foo\foo)#1 (0) {
-}
-object(foo\bar\foo)#2 (0) {
-}
-
-Fatal error: %s

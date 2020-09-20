@@ -1,0 +1,2 @@
+File "override_attr_06.php", line 18, characters 19-21:
+`B` has no parent class with a method `foo` to override (Typing[4087])

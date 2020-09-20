@@ -23,21 +23,39 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+
+const StaticString
+  s_file("file"),
+  s_line("line"),
+  s_function("function"),
+  s_class("class"),
+  s_type("type"),
+  s_args("args"),
+  s_message("message"),
+  s_call_user_func("call_user_func"),
+  s_call_user_func_array("call_user_func_array");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
 const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
+
+const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA = (1 << 0);
 
 
 Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
@@ -72,11 +90,44 @@ ResourceHdr* debug_backtrace_fast() {
  * class name (if in class context) where the "caller" called the "callee".
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
-  return g_context->getCallerInfo();
+  Array ret = empty_darray();
+  bool skipped = false;
+  walkStack([&] (const ActRec* fp, Offset pc) {
+    if (!skipped && fp->func()->isSkipFrame()) return false;
+    if (!skipped) {
+      skipped = true;
+      return false;
+    }
+    if (fp->func()->name()->isame(s_call_user_func.get())) return false;
+    if (fp->func()->name()->isame(s_call_user_func_array.get())) return false;
+    auto const line = fp->func()->unit()->getLineNumber(pc);
+    if (line == -1) return false;
+    auto const cls = fp->func()->cls();
+    auto const path = fp->func()->originalFilename() ?
+      fp->func()->originalFilename() : fp->func()->unit()->filepath();
+    if (cls && !fp->func()->isClosureBody()) {
+      ret = make_darray(
+        s_class, const_cast<StringData*>(cls->name()),
+        s_file, const_cast<StringData*>(path),
+        s_function, const_cast<StringData*>(fp->func()->name()),
+        s_line, line
+      );
+    } else {
+      ret = make_darray(
+        s_file, const_cast<StringData*>(path),
+        s_function, const_cast<StringData*>(fp->func()->name()),
+        s_line, line
+      );
+    }
+    return true;
+  });
+  return ret;
 }
 
-int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash) {
-  return createBacktraceHash();
+int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash, int64_t options /* = 0 */) {
+  return createBacktraceHash(
+    options & k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA
+  );
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
@@ -84,15 +135,6 @@ void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
   g_context->write(debug_string_backtrace(false, ignore_args, limit));
 }
-
-const StaticString
-  s_class("class"),
-  s_type("type"),
-  s_function("function"),
-  s_file("file"),
-  s_line("line"),
-  s_message("message"),
-  s_args("args");
 
 String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
                               int64_t limit /* = 0 */) {
@@ -110,14 +152,14 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     if (i < 10) buf.append(' ');
     buf.append(' ');
     if (frame.exists(s_class)) {
-      buf.append(tvCastToString(frame->get(s_class).tv()));
-      buf.append(tvCastToString(frame->get(s_type).tv()));
+      buf.append(tvCastToString(frame->get(s_class)));
+      buf.append(tvCastToString(frame->get(s_type)));
     }
-    buf.append(tvCastToString(frame->get(s_function).tv()));
+    buf.append(tvCastToString(frame->get(s_function)));
     buf.append("(");
     if (!ignore_args) {
       bool first = true;
-      for (ArrayIter argsIt(tvCastToArrayLike(frame->get(s_args).tv()));
+      for (ArrayIter argsIt(tvCastToArrayLike(frame->get(s_args)));
           !argsIt.end();
           argsIt.next()) {
         if (!first) {
@@ -135,9 +177,9 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     buf.append(")");
     if (frame.exists(s_file)) {
       buf.append(" called at [");
-      buf.append(tvCastToString(frame->get(s_file).tv()));
+      buf.append(tvCastToString(frame->get(s_file)));
       buf.append(':');
-      buf.append(tvCastToString(frame->get(s_line).tv()));
+      buf.append(tvCastToString(frame->get(s_line)));
       buf.append(']');
     }
     buf.append('\n');
@@ -148,12 +190,14 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
 Array HHVM_FUNCTION(error_get_last) {
   String lastError = g_context->getLastError();
   if (lastError.isNull()) {
-    return Array();
+    return null_array;
   }
-  return make_map_array(s_type, g_context->getLastErrorNumber(),
-                        s_message, g_context->getLastError(),
-                        s_file, g_context->getLastErrorPath(),
-                        s_line, g_context->getLastErrorLine());
+  return make_darray(
+    s_type, g_context->getLastErrorNumber(),
+    s_message, g_context->getLastError(),
+    s_file, g_context->getLastErrorPath(),
+    s_line, g_context->getLastErrorLine()
+  );
 }
 
 bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
@@ -191,7 +235,7 @@ bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
 }
 
 int64_t HHVM_FUNCTION(error_reporting, const Variant& level /* = null */) {
-  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
     id.setErrorReportingLevel(level.toInt32());
@@ -211,7 +255,7 @@ bool HHVM_FUNCTION(restore_exception_handler) {
 
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
                       int error_types /* = ErrorMode::PHP_ALL | STRICT */) {
-  if (!is_null(error_handler)) {
+  if (!is_null(error_handler.asTypedValue())) {
     return g_context->pushUserErrorHandler(error_handler, error_types);
   } else {
     g_context->clearUserErrorHandlers();
@@ -275,12 +319,11 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
     return true;
   }
 
-  ActRec* fp = g_context->getStackFrame();
+  auto const f = fromCaller(
+    [] (const ActRec* fp, Offset) { return fp->func(); }
+  );
 
-  if (fp->m_func->nativeFuncPtr() == (BuiltinFunction)HHVM_FN(trigger_error)) {
-    fp = g_context->getOuterVMFrame(fp);
-  }
-  if (fp && fp->m_func->isBuiltin()) {
+  if (f && f->isBuiltin()) {
     if (error_type == (int)ErrorMode::ERROR) {
       raise_error_without_first_frame(msg);
       return true;
@@ -329,8 +372,10 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
 Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
   auto bt = dyn_cast<CompactTrace>(handle);
   if (!bt) {
-    throw_invalid_argument("__SystemLib\\extract_trace() expects parameter 1 "
-                           "to be a CompactTrace resource.");
+    raise_invalid_argument_warning(
+        "__SystemLib\\extract_trace() expects parameter 1 "
+        "to be a CompactTrace resource.");
+    return Array::CreateVArray();
   }
 
   return bt->extract();
@@ -362,6 +407,8 @@ void StandardExtension::initErrorFunc() {
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,
               k_DEBUG_BACKTRACE_PROVIDE_METADATA);
+  HHVM_RC_INT(DEBUG_BACKTRACE_HASH_CONSIDER_METADATA,
+              k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA);
   HHVM_RC_INT(E_ERROR, (int)ErrorMode::ERROR);
   HHVM_RC_INT(E_WARNING, (int)ErrorMode::WARNING);
   HHVM_RC_INT(E_PARSE, (int)ErrorMode::PARSE);

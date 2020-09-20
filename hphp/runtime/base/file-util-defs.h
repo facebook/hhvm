@@ -16,10 +16,13 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef incl_HPHP_FILE_UTIL_DEFS_H_
-#define incl_HPHP_FILE_UTIL_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/util/logger.h"
 
 #include <string>
@@ -30,8 +33,8 @@ namespace HPHP { namespace FileUtil {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename F>
-void find(const std::string &root, const std::string& path, bool php,
-          const F& callback) {
+void find(const std::string &root, const std::string& path,
+          bool php, const F& callback) {
   auto spath = path.empty() || !isDirSeparator(path[0]) ?
     path : path.substr(1);
 
@@ -87,20 +90,8 @@ void find(const std::string &root, const std::string& path, bool php,
     bool isPHP = false;
     const char *p = strrchr(ename, '.');
     if (p) {
-      isPHP = (strncmp(p + 1, "php", 3) == 0);
-    } else {
-      try {
-        std::string line;
-        std::ifstream fin(fe.c_str());
-        if (std::getline(fin, line)) {
-          if (line[0] == '#' && line[1] == '!' &&
-              line.find("php") != std::string::npos) {
-            isPHP = true;
-          }
-        }
-      } catch (...) {
-        Logger::Error("FileUtil::find(): unable to read %s", fe.c_str());
-      }
+      isPHP = (strcmp(p + 1, "php") == 0) ||
+        (strcmp(p + 1, "hack") == 0) || ((strcmp(p + 1, "hackpartial") == 0) || strcmp(p + 1, "hh") == 0);
     }
 
     if (isPHP == php) {
@@ -111,8 +102,34 @@ void find(const std::string &root, const std::string& path, bool php,
   closedir(dir);
 }
 
+const StaticString s_slash("/");
+
+template <class Action>
+bool runRelative(std::string suffix, String cmd,
+                 const char* currentDir, Action action) {
+  suffix = "/" + suffix;
+  auto cwd = resolve_include(
+    cmd,
+    currentDir,
+    [] (const String& f, void*) {
+      if (!is_cli_server_mode()) return access(f.data(), R_OK) == 0;
+      auto const w = Stream::getWrapperFromURI(f, nullptr, false);
+      return w->access(f, R_OK) == 0;
+    },
+    nullptr
+  );
+  if (cwd.isNull()) return false;
+  do {
+    cwd = f_dirname(cwd);
+    auto const f = String::attach(
+      StringData::Make(cwd.data(), suffix.data())
+    );
+    if (action(f)) return true;
+  } while (!cwd.empty() && !cwd.equal(s_slash));
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif

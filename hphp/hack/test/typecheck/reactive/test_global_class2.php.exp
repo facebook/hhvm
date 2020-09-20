@@ -1,2 +1,0 @@
-File "test_global_class2.php", line 5, characters 10-11:
-This is global; you cannot access or write to globals in a reactive context (NastCheck[3049])

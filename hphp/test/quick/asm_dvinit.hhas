@@ -2,17 +2,6 @@
 # Try out dv initializers in the assembler
 #
 
-.main {
-  String "beginning...\n"
-  Print
-  PopC
-
-  FPushFuncD 0 "main"
-  FCall 0
-  UnboxR
-  RetC
-}
-
 .function foo($x, $y = y_init) {
   entry:
           CGetL $x
@@ -63,36 +52,44 @@
           Jmp entry
 }
 
-.function main() {
-  FPushFuncD 1 "foo"
-  String "sup: "
-  FPassC 0 Any
-  FCall 1
-  PopR
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  String "beginning...\n"
+  Print
+  PopC
 
-  FPushFuncD 2 "foo"
+  NullUninit
+  NullUninit
+  NullUninit
   String "sup: "
-  FPassC 0 Any
+  FCallFuncD <> 1 1 "" - "" "foo"
+  PopC
+
+  NullUninit
+  NullUninit
+  NullUninit
+  String "sup: "
   String " non-default y value\n"
-  FPassC 1 Any
-  FCall 2
-  PopR
+  FCallFuncD <> 2 1 "" - "" "foo"
+  PopC
 
-  FPushFuncD 0 "multiple"
-  FCall 0
-  PopR
-  FPushFuncD 1 "multiple"
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "multiple"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
   String "nondef\n"
-  FPassC 0 Any
-  FCall 1
-  PopR
-  FPushFuncD 2 "multiple"
+  FCallFuncD <> 1 1 "" - "" "multiple"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
   String "nondef1\n"
-  FPassC 0 Any
   String "nondef2\n"
-  FPassC 1 Any
-  FCall 2
-  PopR
+  FCallFuncD <> 2 1 "" - "" "multiple"
+  PopC
 
   String "done\n"
   Print

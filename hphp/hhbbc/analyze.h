@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_ANALYZE_H_
-#define incl_HHBBC_ANALYZE_H_
+#pragma once
 
 #include <vector>
 #include <utility>
@@ -32,23 +31,19 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The result of a function-at-a-time type analysis.
- *
- * For each block, contains an input state describing the types of
- * locals, stack elements, etc.
+ * The result of a function-at-a-time type analysis, as needed for
+ * updating the index. Does not include per-block state.
  */
-struct FuncAnalysis {
-  using BlockData = struct { uint32_t rpoId; State stateIn; };
-
+struct FuncAnalysisResult {
   /*
    * Initializes this structure so rpoBlocks contains the func's
    * blocks according to rpoSortAddDVs(), each bdata entry has an
    * rpoId index, and all block states are uninitialized.
    */
-  explicit FuncAnalysis(Context);
+  explicit FuncAnalysisResult(AnalysisContext);
 
-  FuncAnalysis(FuncAnalysis&&) = default;
-  FuncAnalysis& operator=(FuncAnalysis&&) = default;
+  FuncAnalysisResult(FuncAnalysisResult&&) = default;
+  FuncAnalysisResult& operator=(FuncAnalysisResult&&) = default;
 
   /*
    * FuncAnalysis carries the Context it was created for because
@@ -62,18 +57,6 @@ struct FuncAnalysis {
    */
   Context ctx;
 
-  // Blocks in a reverse post order, with DV initializers.
-  std::vector<borrowed_ptr<php::Block>> rpoBlocks;
-
-  // Block data is indexed by Block::id.
-  std::vector<BlockData> bdata;
-
-  /*
-   * The inferred function return type.  May be TBottom if the
-   * function never returns.
-   */
-  Type inferredReturn;
-
   /*
    * If this function allocates closures, this maps each of those
    * closure classes to the types of its used variables, in their
@@ -82,22 +65,17 @@ struct FuncAnalysis {
   ClosureUseVarMap closureUseTypes;
 
   /*
-   * With HardConstProp enabled, the set of constants that this
-   * function could define.
+   * The inferred function return type.  May be TBottom if the
+   * function never returns.
    */
-  ConstantMap cnsMap;
+  Type inferredReturn;
 
   /*
-   * Reads a constant thats not in the index (yet - this can only
-   * happen on the first iteration). We'll need to revisit it.
+   * If the function returns one of its parameters, the index of that
+   * parameter. MaxLocalId and above indicate that it doesn't return a
+   * parameter.
    */
-  bool readsUntrackedConstants{false};
-
-  /*
-   * Flag to indicate that the function does something that requires a
-   * variable environment.
-   */
-  bool mayUseVV;
+  LocalId retParam{MaxLocalId};
 
   /*
    * Flag to indicate that the function is effectFree, in the sense
@@ -109,26 +87,61 @@ struct FuncAnalysis {
   bool effectFree{false};
 
   /*
-   * A set of functions that are called with constant args, but which
-   * are not foldable.
+   * Flag to indicate that an iterator's base was unchanged on at least one path
+   * to that iterator's release. If this is false, we can skip doing the more
+   * expensive LIter optimization pass (because it will never succeed).
    */
-  std::unordered_set<borrowed_ptr<const php::Func>> unfoldableFuncs;
+  bool hasInvariantIterBase{false};
 
   /*
-   * Known types of local statics.
+   * A set of pair of functions and their push blocks that we failed to fold.
    */
-  CompactVector<Type> localStaticTypes;
+  hphp_fast_set<std::pair<const php::Func*, BlockId>> unfoldableFuncs;
 
-  // For an 86cinit, any constants that we resolved.
-  // The size_t is the index into ctx.cls->constants
+  /*
+   * Bitset representing which parameters may affect the result of the
+   * function, assuming it produces one. Note that VerifyParamType
+   * does not count as a use in this context.
+   */
+  std::bitset<64> usedParams;
+
+  /*
+   * For an 86cinit, any constants that we resolved.
+   * The size_t is the index into ctx.cls->constants
+   */
   CompactVector<std::pair<size_t,TypedValue>> resolvedConstants;
+
+  /*
+   * Public static property mutations in this function.
+   */
+  PublicSPropMutations publicSPropMutations;
+
+  /*
+   * Vector of block updates
+   */
+  CompactVector<std::pair<BlockId, BlockUpdateInfo>> blockUpdates;
+};
+
+struct FuncAnalysis : FuncAnalysisResult {
+  using BlockData = struct { uint32_t rpoId; State stateIn; };
+
+  explicit FuncAnalysis(AnalysisContext);
+
+  FuncAnalysis(FuncAnalysis&&) = default;
+  FuncAnalysis& operator=(FuncAnalysis&&) = default;
+
+  // Block ids in a reverse post order, with DV initializers.
+  std::vector<BlockId> rpoBlocks;
+
+  // Block data is indexed by Block::id.
+  std::vector<BlockData> bdata;
 };
 
 /*
  * The result of a class-at-a-time analysis.
  */
 struct ClassAnalysis {
-  ClassAnalysis(Context ctx, bool anyInterceptable) :
+  ClassAnalysis(const Context& ctx, bool anyInterceptable) :
       ctx(ctx), anyInterceptable(anyInterceptable) {}
 
   ClassAnalysis(ClassAnalysis&&) = default;
@@ -139,13 +152,16 @@ struct ClassAnalysis {
 
   // FuncAnalysis results for each of the methods on the class, and
   // for each closure allocated in the class's context.
-  CompactVector<FuncAnalysis> methods;
-  CompactVector<FuncAnalysis> closures;
+  CompactVector<FuncAnalysisResult> methods;
+  CompactVector<FuncAnalysisResult> closures;
 
   // Inferred types for private instance and static properties.
   PropState privateProperties;
   PropState privateStatics;
   bool anyInterceptable;
+
+  // Whether this class might have a bad initial value for a property.
+  bool badPropInitialValues{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -157,15 +173,8 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, Context, CollectionOpts opts);
-
-/*
- * Analyze a function like analyze_func, but exposing gathered CollectedInfo
- * results.  The CollectedInfo structure can be initialized by the caller to
- * enable collecting some pass-specific types of information (e.g. public
- * static property types).
- */
-FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
+FuncAnalysis analyze_func(const Index&, const AnalysisContext&,
+                          CollectionOpts opts);
 
 /*
  * Perform a flow-sensitive type analysis on a function, using the
@@ -178,10 +187,10 @@ FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
  * Currently this is not supported for closure bodies.
  */
 FuncAnalysis analyze_func_inline(const Index&,
-                                 Context,
-                                 std::vector<Type> args,
-                                 CollectionOpts opts =
-                                 CollectionOpts::TrackConstantArrays);
+                                 const AnalysisContext&,
+                                 const Type& thisType,
+                                 const CompactVector<Type>& args,
+                                 CollectionOpts opts = {});
 
 /*
  * Perform an analysis for a whole php::Class at a time.
@@ -189,7 +198,7 @@ FuncAnalysis analyze_func_inline(const Index&,
  * This involves doing a analyze_func call on each of its functions,
  * and inferring some whole-class information at the same time.
  */
-ClassAnalysis analyze_class(const Index&, Context);
+ClassAnalysis analyze_class(const Index&, const Context&);
 
 /*
  * Propagate a block input State to each instruction in the block.
@@ -205,13 +214,23 @@ ClassAnalysis analyze_class(const Index&, Context);
  */
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
-                          const FuncAnalysis&,
+                          const AnalysisContext&,
                           CollectedInfo& collect,
-                          borrowed_ptr<const php::Block>,
+                          BlockId bid,
                           State stateIn);
 
+/*
+ * Propagate a block input State to find the output state for a particular
+ * target of the block.  This is used to update the in state for a block added
+ * to the CFG in betwee analysis rounds.
+ */
+State locally_propagated_bid_state(const Index& index,
+                                   const AnalysisContext& ctx,
+                                   CollectedInfo& collect,
+                                   BlockId bid,
+                                   State state,
+                                   BlockId targetBid);
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

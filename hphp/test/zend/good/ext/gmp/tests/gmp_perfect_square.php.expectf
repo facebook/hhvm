@@ -10,9 +10,8 @@ bool(false)
 bool(true)
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_perfect_square() expects exactly 1 parameter, 0 given in %s/gmp_perfect_square.php on line 19
 
-Warning: %s
+Warning: gmp_perfect_square(): Unable to convert variable to GMP - wrong type in %s/gmp_perfect_square.php on line 20
 bool(false)
 Done

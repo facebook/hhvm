@@ -4,4 +4,4 @@ Method - Foo\Foo::__construct
 Method - Foo\Foo::Bar
 Func   - Foo\Bar
 
-Fatal error: %s
+Fatal error: Call to undefined function Foo\Foo\Bar() in %s/ns_026.php on line 22

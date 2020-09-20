@@ -1,5 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!function_exists("utf8_encode") || !function_exists("utf8_decode")) {
-	die("SKIP Neither utf8_encode() nor utf8_decode() are available");
+  die("SKIP Neither utf8_encode() nor utf8_decode() are available");
 }
-?>
+}

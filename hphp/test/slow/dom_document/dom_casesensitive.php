@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_dom_casesensitive() {
 $doc = new DOMDocument();
 $doc->loadXML('<x:x xmlns:x="urn:x"/>');
 $node = $doc->documentElement;
@@ -15,3 +18,4 @@ var_dump($node->namespaceuri);
 var_dump($node->PREFIX);
 var_dump($node->localname);
 var_dump($node->textcontent);
+}

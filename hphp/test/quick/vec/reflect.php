@@ -19,12 +19,10 @@ function dump($x) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   dump(new ReflectionMethod('Foo::bar'));
   dump(new ReflectionFunction('foobar'));
 
   var_dump(type_structure(Foo::class, 'Tvec'));
   var_dump(gettype(vec[]));
 }
-
-main();

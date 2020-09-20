@@ -1,25 +1,25 @@
-<?php
+<?hh
 
 class TestClass
 {
-	/** const comment */
-	const C = 0;
+    /** const comment */
+    const C = 0;
 
-	function x() {}
+    function x() {}
 }
-
-$rm = new ReflectionMethod('TestClass', 'x');
-var_dump($rm->getDocComment());
 
 class TestClass2
 {
-	/** const comment */
-	const C = 0;
+    /** const comment */
+    const C = 0;
 
-	public $x;
+    public $x;
 }
+
+<<__EntryPoint>> function main(): void {
+$rm = new ReflectionMethod('TestClass', 'x');
+var_dump($rm->getDocComment());
 
 $rp = new ReflectionProperty('TestClass2', 'x');
 var_dump($rp->getDocComment());
-
-?>
+}

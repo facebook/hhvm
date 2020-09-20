@@ -1,0 +1,158 @@
+>>> no_attrs =>
+---- non-recursive: ----
+p1:
+darray(0) {
+}
+p2:
+darray(0) {
+}
+>>> simple_attr =>
+---- non-recursive: ----
+param:
+darray(1) {
+  ["Attribute"]=>
+  varray(0) {
+  }
+}
+>>> two_attrs =>
+---- non-recursive: ----
+p1:
+darray(1) {
+  ["Attr1"]=>
+  varray(0) {
+  }
+}
+p2:
+darray(1) {
+  ["Attr2"]=>
+  varray(0) {
+  }
+}
+>>> C::m =>
+---- non-recursive: ----
+param:
+darray(1) {
+  ["Attr"]=>
+  varray(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+>>> C::n =>
+---- non-recursive: ----
+param:
+darray(2) {
+  ["Bar"]=>
+  varray(0) {
+  }
+  ["Foo"]=>
+  varray(0) {
+  }
+}
+>>> C::o =>
+---- non-recursive: ----
+param:
+darray(1) {
+  ["Hi"]=>
+  varray(1) {
+    string(3) "bye"
+  }
+}
+>>> C::p =>
+---- non-recursive: ----
+param:
+darray(2) {
+  ["A"]=>
+  varray(2) {
+    string(1) "b"
+    varray(2) {
+      string(1) "c"
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  varray(1) {
+    string(2) "fg"
+  }
+}
+>>> C::q =>
+---- non-recursive: ----
+tuv:
+darray(1) {
+  ["RS"]=>
+  varray(0) {
+  }
+}
+>>> C::wxy =>
+---- non-recursive: ----
+z:
+darray(1) {
+  ["And_"]=>
+  varray(0) {
+  }
+}
+wont_you_sing_with_me:
+darray(1) {
+  ["NextTime"]=>
+  varray(0) {
+  }
+}
+>>> D::m =>
+---- non-recursive: ----
+param:
+darray(0) {
+}
+>>> D::n =>
+---- non-recursive: ----
+param:
+darray(2) {
+  ["Bar"]=>
+  varray(0) {
+  }
+  ["Foo"]=>
+  varray(0) {
+  }
+}
+>>> D::o =>
+---- non-recursive: ----
+param:
+darray(1) {
+  ["Hi"]=>
+  varray(1) {
+    string(5) "hello"
+  }
+}
+>>> D::p =>
+---- non-recursive: ----
+param:
+darray(2) {
+  ["A"]=>
+  varray(2) {
+    string(1) "b"
+    varray(2) {
+      string(1) "c"
+      string(1) "d"
+    }
+  }
+  ["E"]=>
+  varray(1) {
+    string(2) "fg"
+  }
+}
+>>> D::q =>
+---- non-recursive: ----
+rstuv:
+darray(0) {
+}
+>>> D::wxy =>
+---- non-recursive: ----
+z:
+darray(1) {
+  ["EnglishPeopleCallThisZed"]=>
+  varray(0) {
+  }
+}
+wont_you_sing_with_me:
+darray(0) {
+}

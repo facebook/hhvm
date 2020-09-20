@@ -17,6 +17,8 @@
 
 #include "hphp/runtime/ext/imagick/ext_imagick.h"
 
+#include <sstream>
+
 namespace HPHP {
 
 #define IMAGICKDRAW_THROW imagickThrow<ImagickDrawException>
@@ -28,12 +30,12 @@ using CUCString = const unsigned char*;
 ALWAYS_INLINE
 static void getAffineMatrixElement(
     const Array& array, const String& key, double& ret) {
-  auto const value = array.rvalAt(key).unboxed();
+  auto const value = array.lookup(key);
   if (isNullType(value.type())) {
     IMAGICKDRAW_THROW(
       "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");
   } else {
-    ret = cellToDouble(value.tv());
+    ret = tvCastToDouble(value);
   }
 }
 
@@ -885,7 +887,7 @@ static bool HHVM_METHOD(ImagickDraw, translate,
 
 #undef IMAGICKDRAW_THROW
 
-void loadImagickDrawClass() {
+void ImagickExtension::loadImagickDrawClass() {
   HHVM_ME(ImagickDraw, affine);
   HHVM_ME(ImagickDraw, annotation);
   HHVM_ME(ImagickDraw, arc);

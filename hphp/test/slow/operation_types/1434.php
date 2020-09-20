@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   return '1';
@@ -11,4 +11,8 @@ function bar() {
   $b -= foo();
   var_dump($b);
 }
+
+<<__EntryPoint>>
+function main_1434() {
 bar();
+}

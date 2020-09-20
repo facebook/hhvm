@@ -1,4 +1,4 @@
-File "immmap_mutate.php", line 13, characters 3-7:
+File "immmap_mutate.php", line 13, characters 3-11:
 You cannot mutate this (Typing[4011])
-File "immmap_mutate.php", line 12, characters 17-22:
-This is an object of type ImmMap
+File "immmap_mutate.php", line 12, characters 17-32:
+This is an object of type ImmMap<int, int>

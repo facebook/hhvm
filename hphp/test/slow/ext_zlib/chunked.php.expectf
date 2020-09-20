@@ -1,0 +1,83 @@
+-----
+Testing inflator with random string
+Chunk 0: produced %d; eof: false
+Chunk 1: produced %d; eof: false
+Chunk 2: produced %d; eof: false
+Chunk 3: produced %d; eof: false
+Chunk 4: produced %d; eof: false
+Chunk 5: produced %d; eof: false
+Chunk 6: produced %d; eof: false
+Chunk 7: produced %d; eof: false
+Chunk 8: produced %d; eof: false
+Chunk 9: produced %d; eof: true
+-----
+Input size: 9977
+Output size: 9977
+In MD5: 73f8802b7f98c4c0410287916f847fc7
+Out MD5: 73f8802b7f98c4c0410287916f847fc7
+-----
+Testing gunzipper with random string
+Chunk 0: produced %d; eof: false
+Chunk 1: produced %d; eof: false
+Chunk 2: produced %d; eof: false
+Chunk 3: produced %d; eof: false
+Chunk 4: produced %d; eof: false
+Chunk 5: produced %d; eof: false
+Chunk 6: produced %d; eof: false
+Chunk 7: produced %d; eof: false
+Chunk 8: produced %d; eof: false
+Chunk 9: produced %d; eof: true
+-----
+Input size: 9977
+Output size: 9977
+In MD5: 73f8802b7f98c4c0410287916f847fc7
+Out MD5: 73f8802b7f98c4c0410287916f847fc7
+-----
+Testing bunzipper with random string
+Chunk 0: produced 0; eof: false
+Chunk 1: produced 0; eof: false
+Chunk 2: produced 0; eof: false
+Chunk 3: produced 0; eof: false
+Chunk 4: produced 0; eof: false
+Chunk 5: produced 0; eof: false
+Chunk 6: produced 0; eof: false
+Chunk 7: produced 0; eof: false
+Chunk 8: produced 9977; eof: true
+-----
+Input size: 9977
+Output size: 9977
+In MD5: 73f8802b7f98c4c0410287916f847fc7
+Out MD5: 73f8802b7f98c4c0410287916f847fc7
+-----
+Testing inflator with highly compressed string
+-----
+Input size: 33554432
+Output size: 33554432
+In MD5: bc3d7c2ff64219e33239f2e13c2d21db
+Out MD5: bc3d7c2ff64219e33239f2e13c2d21db
+-----
+Testing gunzipper with highly compressed string
+-----
+Input size: 33554432
+Output size: 33554432
+In MD5: bc3d7c2ff64219e33239f2e13c2d21db
+Out MD5: bc3d7c2ff64219e33239f2e13c2d21db
+-----
+Testing bunzipper with highly compressed string
+-----
+Input size: 33554432
+Output size: 33554432
+In MD5: bc3d7c2ff64219e33239f2e13c2d21db
+Out MD5: bc3d7c2ff64219e33239f2e13c2d21db
+-----
+Testing inflator exception
+inflateChunk() threw an exception: Exception("zlib error status=-3 msg="invalid stored block lengths"")
+-----
+Testing gunzipper exception
+inflateChunk() threw an exception: Exception("zlib error status=-3 msg="incorrect header check"")
+-----
+Testing bunzipper exception
+inflateChunk() threw an exception: Exception("bz2 error status=-5")
+-----
+Testing multiple gz streams
+Uncompressed length: 2949120, totaling 256 streams

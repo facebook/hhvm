@@ -1,5 +1,9 @@
-<?php
+<?hh
 
-$a = array('a' => 10);
+
+<<__EntryPoint>>
+function main_330() {
+$a = darray['a' => 10];
  $a[1] = 'test';
         var_dump($a);
+}

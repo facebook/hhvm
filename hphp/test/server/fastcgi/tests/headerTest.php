@@ -1,11 +1,12 @@
-<?php
-
-require_once('test_base.inc');
+<?hh
 
 function headerTestController($serverPort) {
-  $args = array('Authorization' => 'foo');
-  var_dump(request(php_uname('n'), $serverPort, "test_headers.php",
-                  [], ['PROXY' => 'foobar'], $args));
+  $args = darray['Authorization' => 'foo'];
+  var_dump(fastcgi_request('localhost', $serverPort, "test_headers.php",
+                  darray[], darray['PROXY' => 'foobar'], $args));
 }
-
-runTest("headerTestController");
+<<__EntryPoint>> function main(): void {
+  require_once('test_base.inc');
+  init();
+  runTest("headerTestController");
+}

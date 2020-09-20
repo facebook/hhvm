@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_OUT_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_OUT_H_
+#pragma once
 
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 
@@ -31,10 +30,9 @@ struct CmdOut : CmdFlowControl {
   void onBeginInterrupt(DebuggerProxy&, CmdInterrupt&) override;
 
 private:
-  bool m_skippingOverPopR{false};
+  bool m_skippingOverPopC{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_OUT_H_

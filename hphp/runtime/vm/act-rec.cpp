@@ -43,22 +43,18 @@ bool isReturnHelper(void* address) {
          tca == u.callToExit;
 }
 
-bool isDebuggerReturnHelper(void* address) {
-  auto tca = reinterpret_cast<jit::TCA>(address);
-  auto& u = jit::tc::ustubs();
-  return tca == u.debuggerRetHelper ||
-         tca == u.debuggerGenRetHelper ||
-         tca == u.debuggerAsyncGenRetHelper;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
-void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
-  assert(fp->func()->contains(pc));
-  assert(isReturnHelper(retAddr));
+void ActRec::setReturn(ActRec* fp, PC callPC, void* retAddr,
+                       bool asyncEagerReturn) {
+  assertx(fp->func()->contains(callPC));
+  assertx(isReturnHelper(retAddr));
   m_sfp = fp;
   m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
-  m_soff = Offset(pc - fp->func()->getEntry());
+  m_callOffAndFlags = encodeCallOffsetAndFlags(
+    Offset(callPC - fp->func()->entry()),
+    asyncEagerReturn ? (1 << AsyncEagerRet) : 0
+  );
 }
 
 void ActRec::setJitReturn(void* retAddr) {
@@ -71,13 +67,9 @@ bool ActRec::skipFrame() const {
   return func() && func()->isSkipFrame();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-TypedValue* ActRec::getExtraArg(unsigned ind) const {
-  assert(hasExtraArgs() || hasVarEnv());
-  return hasExtraArgs() ? getExtraArgs()->getExtraArg(ind) :
-         hasVarEnv()    ? getVarEnv()->getExtraArg(ind) :
-         static_cast<TypedValue*>(nullptr);
+bool ActRec::isInlined() const {
+  return reinterpret_cast<jit::TCA>(m_savedRip) ==
+    jit::tc::ustubs().retInlHelper;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

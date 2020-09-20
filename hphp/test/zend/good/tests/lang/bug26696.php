@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $str = 'asdd/?';
 $len = strlen($str);
 for ($i = 0; $i < $len; $i++) {
@@ -7,16 +7,16 @@ for ($i = 0; $i < $len; $i++) {
 		case '?':
 			echo "OK\n";
 			break;
+		default: break;
 	}
 }
 
 $str = '*';
-switch ($str[0]) { 
+switch ($str[0]) {
 	case '*';
 		echo "OK\n";
 		break;
 	default:
 		echo 'Default RAN!';
 }
-
-?>
+}

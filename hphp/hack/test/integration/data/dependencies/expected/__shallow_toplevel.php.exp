@@ -1,0 +1,11 @@
+<?hh
+function shallow_toplevel(C $c): void {
+  g();
+}
+class A extends \A0 implements \I1 {}
+class C extends \A {}
+function g(): void {
+  throw new \Exception();
+}
+interface I1 {}
+class A0 {}

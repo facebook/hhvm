@@ -1,4 +1,4 @@
-HH\Asio\vf() => object(HH\Vector)#%d (5) {
+HH\Asio\vf() => object(HH\Vector) (5) {
   [0]=>
   bool(true)
   [1]=>
@@ -10,146 +10,86 @@ HH\Asio\vf() => object(HH\Vector)#%d (5) {
   [4]=>
   string(11) "Hello World"
 }
-HH\Asio\vm() => object(HH\Vector)#%d (8) {
+HH\Asio\vm() => object(HH\Vector) (7) {
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     NULL
   }
   [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     bool(true)
   }
   [2]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     bool(false)
   }
   [3]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
   [4]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     float(2)
   }
   [5]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(11) "Hello World"
   }
   [6]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
+  varray(1) {
+    varray(1) {
       float(3.14)
     }
   }
-  [7]=>
-  array(1) {
-    [0]=>
-    object(stdClass)#%d (6) {
-      [0]=>
-      int(4)
-      [1]=>
-      int(8)
-      [2]=>
-      int(15)
-      [3]=>
-      int(16)
-      [4]=>
-      int(23)
-      [5]=>
-      int(42)
-    }
-  }
 }
-HH\Asio\vfk() => object(HH\Vector)#%d (4) {
+HH\Asio\vfk() => object(HH\Vector) (3) {
   [0]=>
   bool(true)
   [1]=>
   int(1)
   [2]=>
   string(11) "Hello World"
-  [3]=>
-  object(stdClass)#%d (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\vmk() => object(HH\Vector)#%d (8) {
+HH\Asio\vmk() => object(HH\Vector) (7) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
     NULL
   }
   [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     bool(true)
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
     bool(false)
   }
   [3]=>
-  array(1) {
+  darray(1) {
     [3]=>
     int(1)
   }
   [4]=>
-  array(1) {
+  darray(1) {
     [4]=>
     float(2)
   }
   [5]=>
-  array(1) {
+  darray(1) {
     [5]=>
     string(11) "Hello World"
   }
   [6]=>
-  array(1) {
+  darray(1) {
     [6]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       float(3.14)
     }
   }
-  [7]=>
-  array(1) {
-    [7]=>
-    object(stdClass)#%d (6) {
-      [0]=>
-      int(4)
-      [1]=>
-      int(8)
-      [2]=>
-      int(15)
-      [3]=>
-      int(16)
-      [4]=>
-      int(23)
-      [5]=>
-      int(42)
-    }
-  }
 }
-HH\Asio\mf() => object(HH\Map)#%d (5) {
+HH\Asio\mf() => object(HH\Map) (5) {
   [1]=>
   bool(true)
   [2]=>
@@ -161,142 +101,82 @@ HH\Asio\mf() => object(HH\Map)#%d (5) {
   [5]=>
   string(11) "Hello World"
 }
-HH\Asio\mm() => object(HH\Map)#%d (8) {
+HH\Asio\mm() => object(HH\Map) (7) {
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     NULL
   }
   [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     bool(true)
   }
   [2]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     bool(false)
   }
   [3]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
   [4]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     float(2)
   }
   [5]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(11) "Hello World"
   }
   [6]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
+  varray(1) {
+    varray(1) {
       float(3.14)
     }
   }
-  [7]=>
-  array(1) {
-    [0]=>
-    object(stdClass)#%d (6) {
-      [0]=>
-      int(4)
-      [1]=>
-      int(8)
-      [2]=>
-      int(15)
-      [3]=>
-      int(16)
-      [4]=>
-      int(23)
-      [5]=>
-      int(42)
-    }
-  }
 }
-HH\Asio\mfk() => object(HH\Map)#%d (4) {
+HH\Asio\mfk() => object(HH\Map) (3) {
   [1]=>
   bool(true)
   [3]=>
   int(1)
   [5]=>
   string(11) "Hello World"
-  [7]=>
-  object(stdClass)#%d (6) {
-    [0]=>
-    int(4)
-    [1]=>
-    int(8)
-    [2]=>
-    int(15)
-    [3]=>
-    int(16)
-    [4]=>
-    int(23)
-    [5]=>
-    int(42)
-  }
 }
-HH\Asio\mmk() => object(HH\Map)#%d (8) {
+HH\Asio\mmk() => object(HH\Map) (7) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
     NULL
   }
   [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     bool(true)
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
     bool(false)
   }
   [3]=>
-  array(1) {
+  darray(1) {
     [3]=>
     int(1)
   }
   [4]=>
-  array(1) {
+  darray(1) {
     [4]=>
     float(2)
   }
   [5]=>
-  array(1) {
+  darray(1) {
     [5]=>
     string(11) "Hello World"
   }
   [6]=>
-  array(1) {
+  darray(1) {
     [6]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       float(3.14)
-    }
-  }
-  [7]=>
-  array(1) {
-    [7]=>
-    object(stdClass)#%d (6) {
-      [0]=>
-      int(4)
-      [1]=>
-      int(8)
-      [2]=>
-      int(15)
-      [3]=>
-      int(16)
-      [4]=>
-      int(23)
-      [5]=>
-      int(42)
     }
   }
 }

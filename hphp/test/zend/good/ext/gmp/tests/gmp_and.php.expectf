@@ -4,23 +4,21 @@ string(3) "515"
 string(4) "3333"
 string(4) "4544"
 
-Warning: %s
+Warning: gmp_and(): Unable to convert variable to GMP - string is not an integer in %s/gmp_and.php on line 8
 string(1) "0"
 string(4) "1536"
 string(15) "424703623692768"
 
-Warning: %s
-NULL
+Warning: gmp_and() expects exactly 2 parameters, 3 given in %s/gmp_and.php on line 15
 
-Warning: %s
-NULL
+Warning: gmp_and() expects exactly 2 parameters, 1 given in %s/gmp_and.php on line 16
 
-Warning: %s
+Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s/gmp_and.php on line 17
 bool(false)
 
-Warning: %s
+Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s/gmp_and.php on line 18
 bool(false)
 
-Warning: %s
+Warning: gmp_and(): Unable to convert variable to GMP - wrong type in %s/gmp_and.php on line 19
 bool(false)
 Done

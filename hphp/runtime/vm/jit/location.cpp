@@ -33,8 +33,6 @@ std::string show(Location loc) {
       return folly::sformat("Stack{{{}}}", loc.stackIdx().offset);
     case LTag::MBase:
       return "MBase{}";
-    case LTag::CSlot:
-      return folly::sformat("CSlot{{{}}}", loc.clsRefSlot());
   }
   not_reached();
 }

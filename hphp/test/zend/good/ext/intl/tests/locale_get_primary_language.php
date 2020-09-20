@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the prmary language for different locales
@@ -9,16 +9,16 @@ function ut_main()
 {
     $res_str = '';
 
-    $locales = array(
+    $locales = varray[
         'uk-ua_CALIFORNIA@currency=;currency=GRN',
-	'root',
+    'root',
         'uk@currency=EURO',
         'Hindi',
 //Simple language subtag
         'de',
         'fr',
         'ja',
-      	'i-enochian', //(example of a grandfathered tag)
+        'i-enochian', //(example of a grandfathered tag)
 //Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
@@ -58,7 +58,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc'
-    );
+    ];
 
 
     $res_str = '';
@@ -74,7 +74,7 @@ function ut_main()
 
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-
-?>
+<<__EntryPoint>> function main_entry(): void {
+    include_once( 'ut_common.inc' );
+    ut_run();
+}

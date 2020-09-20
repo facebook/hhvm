@@ -1,5 +1,4 @@
-<?php
-ini_set("soap.wsdl_cache_enabled", 0);
+<?hh
 
 class foo {
 	public    $a="a";
@@ -27,14 +26,17 @@ class LocalSoapClient extends SoapClient {
     return $response;
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  ini_set("soap.wsdl_cache_enabled", 0);
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
-                         array());
-var_dump($x->test(new foo()));
+  $x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
+                           darray[]);
+  var_dump($x->__soapcall('test', varray[new foo()]));
 
-$x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl", 
-                         array("classmap" => array('testType'=>'foo')));
-var_dump($x->test(new foo()));
+  $x = new LocalSoapClient(dirname(__FILE__)."/bug30928.wsdl",
+                           darray["classmap" => darray['testType'=>'foo']]);
+  var_dump($x->__soapcall('test', varray[new foo()]));
 
-echo "ok\n";
-?>
+  echo "ok\n";
+}

@@ -1,0 +1,6 @@
+File "valid_targ_funcall.php", line 7, characters 5-5:
+Invalid reified hint (Typing[4305])
+File "valid_targ_funcall.php", line 7, characters 5-5:
+This is not reified, it cannot be used as a reified type argument
+File "valid_targ_funcall.php", line 4, characters 18-22:
+`Tpain` is reified

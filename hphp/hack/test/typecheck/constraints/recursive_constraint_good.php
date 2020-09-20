@@ -37,9 +37,6 @@ class MyInt implements GIComparable<MyInt> {
   public function Compare(MyInt $mi): int {
     return $this->item - $mi->item;
   }
-  public function __toString(): string {
-    return (string)$this->item;
-  }
 }
 
 // Lexicographic ordering
@@ -51,9 +48,6 @@ class MyPair<Tx as GIComparable<Tx>, Ty as GIComparable<Ty>>
     if ($c !== 0)
       return $c;
     return $this->snd->Compare($that->snd);
-  }
-  public function __toString(): string {
-    return (string)$this->fst.",".(string)$this->snd;
   }
 }
 

@@ -1,6 +1,6 @@
-<?php
-
-$list = array(
+<?hh
+<<__EntryPoint>> function main(): void {
+$list = darray[
   'boolean_true' => true,
   'boolean_false' => false,
   'string' => "just a string",
@@ -13,9 +13,9 @@ $list = array(
   'float_negative' => -42.123312,
   'float_zero' => 0.0,
   'null' => null,
-  'array_empty' => array(),
-  'array' => array(1, 2, 3, "foo"),
-);
+  'array_empty' => varray[],
+  'array' => varray[1, 2, 3, "foo"],
+];
 
 $memc = new Memcached();
 $memc->addServer('localhost', '11211');
@@ -37,4 +37,5 @@ var_dump(count($res));
 
 foreach($res as $key => $value) {
   var_dump($value == $list[$key]);
+}
 }

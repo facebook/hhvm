@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /* openssl_csr_export_to_file() takes the Certificate Signing Request
  * represented by csr and saves it as ascii-armoured text into the file named
@@ -27,7 +27,8 @@ function openssl_csr_export_to_file(mixed $csr,
  */
 <<__Native>>
 function openssl_csr_export(mixed $csr,
-                            mixed &$out,
+                            <<__OutOnly>>
+                            inout mixed $out,
                             bool $notext = true): bool;
 
 /* @param mixed $csr
@@ -80,8 +81,8 @@ function openssl_csr_get_subject(mixed $csr,
  * @return mixed - Returns the CSR.
  */
 <<__Native>>
-function openssl_csr_new(?array $dn,
-                         mixed &$privkey,
+function openssl_csr_new(?darray $dn,
+                         inout mixed $privkey,
                          mixed $configargs = null,
                          mixed $extraattribs = null): mixed;
 
@@ -140,7 +141,8 @@ function openssl_error_string(): mixed;
  */
 <<__Native>>
 function openssl_open(string $sealed_data,
-                      mixed &$open_data,
+                      <<__OutOnly>>
+                      inout mixed $open_data,
                       string $env_key,
                       mixed $priv_key_id,
                       string $method = "",
@@ -175,7 +177,8 @@ function openssl_pkcs12_export_to_file(mixed $x509,
  */
 <<__Native>>
 function openssl_pkcs12_export(mixed $x509,
-                               mixed &$out,
+                               <<__OutOnly>>
+                               inout mixed $out,
                                mixed $priv_key,
                                string $pass,
                                mixed $args = null): bool;
@@ -190,7 +193,8 @@ function openssl_pkcs12_export(mixed $x509,
  */
 <<__Native>>
 function openssl_pkcs12_read(string $pkcs12,
-                             mixed &$certs,
+                             <<__OutOnly>>
+                             inout mixed $certs,
                              string $pass): bool;
 
 /* Decrypts the S/MIME encrypted message contained in the file specified by
@@ -229,7 +233,7 @@ function openssl_pkcs7_decrypt(string $infilename,
 function openssl_pkcs7_encrypt(string $infilename,
                                string $outfilename,
                                mixed $recipcerts,
-                               array $headers,
+                               darray $headers,
                                int $flags = 0,
                                int $cipherid = OPENSSL_CIPHER_RC2_40): bool;
 
@@ -286,7 +290,7 @@ function openssl_pkcs7_sign(string $infilename,
 function openssl_pkcs7_verify(string $filename,
                               int $flags,
                               ?string $outfilename = null,
-                              ?array $cainfo = null,
+                              ?varray<string> $cainfo = null,
                               ?string $extracerts = null,
                               ?string $content = null): mixed;
 
@@ -325,7 +329,8 @@ function openssl_pkey_export_to_file(mixed $key,
  */
 <<__Native>>
 function openssl_pkey_export(mixed $key,
-                             mixed &$out,
+                             <<__OutOnly>>
+                             inout mixed $out,
                              string $passphrase = "",
                              mixed $configargs = null): bool;
 
@@ -353,7 +358,7 @@ function openssl_free_key(resource $key): void {
  * OPENSSL_KEYTYPE_EC or -1 meaning unknown).
  */
 <<__Native>>
-function openssl_pkey_get_details(resource $key): array<string, mixed>;
+function openssl_pkey_get_details(resource $key): darray<string, mixed>;
 
 /* openssl_get_privatekey() parses key and prepares it for use by other
  * functions.
@@ -424,7 +429,8 @@ function openssl_pkey_new(mixed $configargs = null): mixed;
  */
 <<__Native>>
 function openssl_private_decrypt(string $data,
-                                 mixed &$decrypted,
+                                 <<__OutOnly>>
+                                 inout mixed $decrypted,
                                  mixed $key,
                                  int $padding = OPENSSL_PKCS1_PADDING): bool;
 
@@ -441,7 +447,8 @@ function openssl_private_decrypt(string $data,
  */
 <<__Native>>
 function openssl_private_encrypt(string $data,
-                                 mixed &$crypted,
+                                 <<__OutOnly>>
+                                 inout mixed $crypted,
                                  mixed $key,
                                  int $padding = OPENSSL_PKCS1_PADDING): bool;
 
@@ -459,7 +466,8 @@ function openssl_private_encrypt(string $data,
  */
 <<__Native>>
 function openssl_public_decrypt(string $data,
-                                mixed &$decrypted,
+                                <<__OutOnly>>
+                                inout mixed $decrypted,
                                 mixed $key,
                                 int $padding = OPENSSL_PKCS1_PADDING): bool;
 
@@ -477,7 +485,8 @@ function openssl_public_decrypt(string $data,
  */
 <<__Native>>
 function openssl_public_encrypt(string $data,
-                                mixed &$crypted,
+                                <<__OutOnly>>
+                                inout mixed $crypted,
                                 mixed $key,
                                 int $padding = OPENSSL_PKCS1_PADDING): bool;
 
@@ -501,11 +510,14 @@ function openssl_public_encrypt(string $data,
  */
 <<__Native>>
 function openssl_seal(string $data,
-                      mixed &$sealed_data,
-                      mixed &$env_keys,
-                      array $pub_key_ids,
-                      string $method = "",
-                      mixed &$iv = null): mixed;
+                      <<__OutOnly>>
+                      inout mixed $sealed_data,
+                      <<__OutOnly>>
+                      inout mixed $env_keys,
+                      varray $pub_key_ids,
+                      string $method,
+                      <<__OutOnly>>
+                      inout mixed $iv): mixed;
 
 /* openssl_sign() computes a signature for the specified data by using SHA1
  * for hashing followed by encryption using the private key associated with
@@ -520,7 +532,8 @@ function openssl_seal(string $data,
  */
 <<__Native>>
 function openssl_sign(string $data,
-                      mixed &$signature,
+                      <<__OutOnly>>
+                      inout mixed $signature,
                       mixed $priv_key_id,
                       mixed $signature_alg = OPENSSL_ALGO_SHA1): bool;
 
@@ -576,7 +589,7 @@ function openssl_x509_check_private_key(mixed $cert,
 <<__Native>>
 function openssl_x509_checkpurpose(mixed $x509cert,
                                    int $purpose,
-                                   array $cainfo = [],
+                                   varray $cainfo = varray[],
                                    string $untrustedfile = ""): mixed;
 
 /* openssl_x509_export_to_file() stores x509 into a file named by outfilename
@@ -606,7 +619,8 @@ function openssl_x509_export_to_file(mixed $x509,
  */
 <<__Native>>
 function openssl_x509_export(mixed $x509,
-                             mixed &$output,
+                             <<__OutOnly>>
+                             inout mixed $output,
                              bool $notext = true): bool;
 
 /* openssl_x509_free() frees the certificate associated with the specified
@@ -658,7 +672,8 @@ function openssl_x509_read(mixed $x509certdata): mixed;
  */
 <<__Native>>
 function openssl_random_pseudo_bytes(int $length,
-                                     mixed &$crypto_strong = false): mixed;
+                                     <<__OutOnly("KindOfBoolean")>>
+                                     inout mixed $crypto_strong): mixed;
 
 /* Returns the required initialisation vector length for the cipher determined
  * by the mode parameter.
@@ -696,9 +711,19 @@ function openssl_encrypt(string $data,
                          string $password,
                          int $options = 0,
                          string $iv = "",
-                         mixed &$tag_out = null,
                          string $aad = "",
                          int $tag_length = 16): mixed;
+
+<<__Native>>
+function openssl_encrypt_with_tag(string $data,
+                                  string $method,
+                                  string $password,
+                                  int $options,
+                                  string $iv,
+                                  <<__OutOnly>>
+                                  inout mixed $tag_out,
+                                  string $aad = "",
+                                  int $tag_length = 16): mixed;
 
 /* Takes a raw or base64 encoded string and decrypts it using a given method
  * and key.
@@ -743,13 +768,13 @@ function openssl_digest(string $data,
  * within the returned array.
  * @return array - An array of available cipher methods.
  */
-<<__Native>>
-function openssl_get_cipher_methods(bool $aliases = false): array<string>;
+<<__Native, __IsFoldable>>
+function openssl_get_cipher_methods(bool $aliases = false): varray<string>;
 
 /**
  * Return array of available elliptic curves or FALSE on failure.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function openssl_get_curve_names(): mixed;
 
 /* Gets a list of available digest methods.
@@ -757,5 +782,5 @@ function openssl_get_curve_names(): mixed;
  * within the returned array.
  * @return array - An array of available digest methods.
  */
-<<__Native>>
-function openssl_get_md_methods(bool $aliases = false): array<string>;
+<<__Native, __IsFoldable>>
+function openssl_get_md_methods(bool $aliases = false): varray<string>;

@@ -1,0 +1,2 @@
+File "magic_class_bad.php", line 13, characters 21-29:
+Using `__CLASS__` outside a class or trait (Naming[2021])

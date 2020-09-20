@@ -1,8 +1,5 @@
 <?hh
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 interface I {
   function foo($x, $y=0);
 }
@@ -10,21 +7,26 @@ interface J {
   function foo($x, $y);
 }
 interface K {
-  function foo($x, $y=0, array $z);
+  function foo($x, $y=0, varray $z);
 }
 interface L {
-  function foo($x, $y, array $z=null);
+  function foo($x, $y, varray $z=null);
 }
 interface M {
-  function foo($x, $y=0, array $z=array());
+  function foo($x, $y=0, varray $z=varray[]);
 }
 class C implements I, J, K, L, M {
-  public function foo($x, $y=0, array $z=null, array $a=null) {
+  public function foo($x, $y=0, varray $z=null, arraylike $a=null) {
+    $x = HH\is_any_array($x) ? 'Array' : $x;
+    $y = HH\is_any_array($y) ? 'Array' : $y;
+    $z = HH\is_any_array($z) ? 'Array' : $z;
     echo "$x $y $z\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $obj->foo(1);
 $obj->foo(1, 2);
 $obj->foo(1, 2, null);
-$obj->foo(1, 2, array());
+$obj->foo(1, 2, varray[]);
+}

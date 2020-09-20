@@ -2,19 +2,15 @@
 
 -- Testing array_pad() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: array_pad() expects exactly 3 parameters, 0 given in %s/array_pad_error.php on line 11
 
 -- Testing array_pad() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_pad() expects exactly 3 parameters, 4 given in %s/array_pad_error.php on line 19
 
 -- Testing array_pad() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_pad() expects exactly 3 parameters, 2 given in %s/array_pad_error.php on line 25
 
-Warning: %s
-NULL
+Warning: array_pad() expects exactly 3 parameters, 1 given in %s/array_pad_error.php on line 26
 Done

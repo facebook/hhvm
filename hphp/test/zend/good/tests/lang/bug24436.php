@@ -1,10 +1,10 @@
-<?php
+<?hh
 class test {
-	function __construct() {
-		if (empty($this->test[0][0])) { print "test1";}
-		if (!isset($this->test[0][0])) { print "test2";}
-	}
+    function __construct() {
+        if (!isset($this->test[0][0])) { print "test2";}
+    }
 }
 
-$test1 = new test();
-?>
+<<__EntryPoint>> function main(): void {
+  $test1 = new test();
+}

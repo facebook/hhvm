@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CRONOLOG_H_
-#define incl_HPHP_CRONOLOG_H_
+#pragma once
 
 #include <atomic>
 #include <string>
@@ -63,4 +62,3 @@ struct Cronolog {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_CRONOLOG_H_

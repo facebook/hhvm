@@ -2,11 +2,9 @@
 
 -- Testing json_decode() function with no arguments --
 
-Warning: %s
-NULL
+Warning: json_decode() expects at least 1 parameter, 0 given in %s/json_decode_error.php on line 10
 
 -- Testing json_decode() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: json_decode() expects at most 4 parameters, 5 given in %s/json_decode_error.php on line 14
 ===Done===

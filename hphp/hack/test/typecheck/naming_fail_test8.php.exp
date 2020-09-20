@@ -1,4 +1,4 @@
 File "naming_fail_test8.php", line 24, characters 3-4:
-The variable $k is defined (Naming[2007])
-File "naming_fail_test8.php", line 20, characters 17-18:
-But in a different scope
+Variable `$k` is undefined, or not always defined. (Naming[2050])
+File "naming_fail_test8.php", line 14, characters 27-28:
+Did you mean `$x` instead?

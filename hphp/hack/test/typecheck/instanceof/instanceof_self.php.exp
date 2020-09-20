@@ -1,0 +1,4 @@
+File "instanceof_self.php", line 17, characters 7-17:
+  object
+File "instanceof_self.php", line 16, characters 15-18:
+Unbound name: `self` (Naming[2049])

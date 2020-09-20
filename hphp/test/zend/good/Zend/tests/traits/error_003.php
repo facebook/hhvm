@@ -1,10 +1,9 @@
-<?php
+<?hh
 
-interface abc { 
+interface abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
-?>

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $lambda1 = function () {
 	echo "Hello World!\n";
 };
@@ -16,4 +16,4 @@ call_user_func($lambda1);
 call_user_func($lambda2, "Universe");
 
 echo "Done\n";
-?>
+}

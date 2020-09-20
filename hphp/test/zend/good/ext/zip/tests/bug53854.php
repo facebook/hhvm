@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(ZipArchive::CM_DEFAULT);
 var_dump(ZipArchive::CM_STORE);
 var_dump(ZipArchive::CM_SHRINK);
@@ -17,3 +17,4 @@ var_dump(ZipArchive::CM_TERSE);
 var_dump(ZipArchive::CM_LZ77);
 var_dump(ZipArchive::CM_WAVPACK);
 var_dump(ZipArchive::CM_PPMD);
+}

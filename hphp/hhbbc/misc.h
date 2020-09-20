@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_MISC_H_
-#define incl_HHBBC_MISC_H_
+#pragma once
 
 #include <chrono>
 #include <cassert>
@@ -22,9 +21,10 @@
 #include <boost/variant.hpp>
 #include <memory>
 
-#include "hphp/util/trace.h"
-#include "hphp/util/match.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/match.h"
+#include "hphp/util/trace.h"
 
 namespace HPHP {
 struct StringData;
@@ -36,36 +36,25 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Self-documenting type alias for pointers that aren't owned.
- *
- * This type is intended to imply that someone else has an owning
- * pointer on this value which is guaranteed to live longer than this
- * pointer.
- */
-template<class T> using borrowed_ptr = T*;
-
-template<class T>
-borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
-  return p.get();
-}
-
-/*
- * String that must be a static string, and and Array that must be a
+ * String that must be a static string, and Array that must be a
  * static array.
  */
 using SString  = const StringData*;
 using LSString = LowPtr<const StringData>;
 using SArray   = const ArrayData*;
 
+struct Bytecode;
+using BytecodeVec = CompactVector<Bytecode>;
+
 /*
  * HHBC evaluation stack flavors.
  */
-enum class Flavor { C, V, R, F, U, CR, CVU, CUV };
+enum class Flavor { C, U, CU };
 
 /*
  * Types of parameter preparation (or unknown).
  */
-enum class PrepKind { Ref, Val, Unknown };
+enum class PrepKind { InOut, Val, Unknown };
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;
@@ -74,13 +63,14 @@ constexpr const LocalId NoLocalId = -1;
  * this element is a dup of the one below.
  */
 constexpr const LocalId StackDupId = -2;
-constexpr const LocalId MaxLocalId = StackDupId - 1;
+constexpr const LocalId StackThisId = -3;
+constexpr const LocalId MaxLocalId = StackThisId - 1;
 
 using IterId = uint32_t;
-using ClsRefSlotId = uint32_t;
-constexpr const ClsRefSlotId NoClsRefSlotId = -1;
 using BlockId = uint32_t;
 constexpr const BlockId NoBlockId = -1;
+using ExnNodeId = uint32_t;
+constexpr const ExnNodeId NoExnNodeId = -1;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -106,36 +96,47 @@ constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
+void profile_memory(const char* what, const char* when, const std::string&);
+void summarize_memory();
+
 struct trace_time {
-  using clock      = std::chrono::high_resolution_clock;
+  using clock      = std::chrono::system_clock;
   using time_point = clock::time_point;
 
   explicit trace_time(const char* what,
                       const std::string& extra = std::string{})
     : what(what)
     , start(clock::now())
+    , extra(extra)
   {
+    profile_memory(what, "start", extra);
     if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
       Trace::traceRelease(
         "%s",
-        folly::format("{}: start{}\n",
+        folly::sformat(
+          "{}: {}: start{}\n",
+          ts(start),
           what,
           !extra.empty() ? folly::format(" ({})", extra).str() : extra
-        ).str().c_str()
+        ).c_str()
       );
     }
   }
 
   ~trace_time() {
     namespace C = std::chrono;
-    DEBUG_ONLY auto const elapsed = C::duration_cast<C::milliseconds>(
-      clock::now() - start
+    auto const end = clock::now();
+    auto const elapsed = C::duration_cast<C::milliseconds>(
+      end - start
     );
+    profile_memory(what, "end", extra);
     if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
       Trace::traceRelease(
         "%s",
-        folly::format("{}: {}ms elapsed\n", what, elapsed.count())
-          .str().c_str()
+        folly::sformat(
+          "{}: {}: {}ms elapsed\n",
+          ts(end), what, elapsed.count())
+          .c_str()
       );
     }
   }
@@ -144,12 +145,20 @@ struct trace_time {
   trace_time& operator=(const trace_time&) = delete;
 
 private:
+  std::string ts(time_point t) {
+    char snow[64];
+    auto tm = std::chrono::system_clock::to_time_t(t);
+    ctime_r(&tm, snow);
+    // Eliminate trailing newline from ctime_r.
+    snow[24] = '\0';
+    return snow;
+  }
   const char* what;
   time_point start;
+  std::string extra;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif

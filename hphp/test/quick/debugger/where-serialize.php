@@ -21,5 +21,8 @@ class Thing implements Serializable {
 function bar($b) {
   var_dump($b);
 }
+<<__EntryPoint>>
+function entrypoint_whereserialize(): void {
 
-bar(new Thing(1));
+  bar(new Thing(1));
+}

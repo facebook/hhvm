@@ -1,7 +1,12 @@
 <?hh
 
+abstract final class FooStatics {
+  public static $x = false;
+}
+
 async function foo() {
-  static $x = false; $x = !$x; return $x;
+  FooStatics::$x = !FooStatics::$x;
+  return FooStatics::$x;
 }
 
 class X {
@@ -25,4 +30,8 @@ function test() {
   var_dump(HH\Asio\join($x->f()));
 }
 
+
+<<__EntryPoint>>
+function main_bad_type_conversion() {
 test();
+}

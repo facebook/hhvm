@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main_entry() {
 $overflown = str_repeat('C', 8476509);
 $msgid     = "msgid";
 $domain    = "domain";
@@ -26,5 +26,5 @@ var_dump(dgettext($overflown, $msgid));
 var_dump(dgettext($domain, $overflown));
 
 var_dump(textdomain($overflown));
-?>
-==DONE==
+echo "==DONE==";
+}

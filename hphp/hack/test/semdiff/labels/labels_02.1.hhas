@@ -1,6 +1,0 @@
-.main {
-  Jmp L0
-L0:
-  Int 1
-  RetC
-}

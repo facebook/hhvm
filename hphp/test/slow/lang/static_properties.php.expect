@@ -116,9 +116,7 @@ In C::cFunc():
   C::g: B::g
   C::h: C::h
 isset(C::$h): true
-empty(C::$h): false
 isset(C::$i): false
-empty(C::$i): true
 C::$h: C::h
 C::$h: 42
 C::$h: 84
@@ -126,9 +124,6 @@ C::$h: 85
 C::$h: 85
 C::$h: 86
 C::$h: 84
-C::$h: 1234
-C::$h: 1235
-x: 5678
 $y: 1
 $y: 42
 Test end
@@ -249,9 +244,7 @@ In C::cFunc():
   C::g: B::g
   C::h: Array
 isset(C::$h): true
-empty(C::$h): false
 isset(C::$i): false
-empty(C::$i): true
 C::$h: Array
 C::$h: 42
 C::$h: 84
@@ -259,10 +252,6 @@ C::$h: 85
 C::$h: 85
 C::$h: 86
 C::$h: 84
-C::$h: 1234
-C::$h: 1235
-x: 5678
 $y: 1
 $y: 42
-C::$h: 5
 Test end

@@ -48,43 +48,56 @@
 import argparse
 import fileinput
 import json
+
 from lspcommand import LspCommandProcessor
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--request_timeout',
-                        type=int,
-                        action='store',
-                        default=30,
-                        help='duration to wait for request responses, in seconds.')
-    parser.add_argument('--notify_timeout',
-                        type=int,
-                        action='store',
-                        default=1,
-                        help='duration to wait for notify responses, in seconds.')
-    parser.add_argument('--verbose',
-                        action='store_true',
-                        default=False,
-                        help='display diagnostic information while reading/writing.')
-    parser.add_argument('--silent',
-                        action='store_true',
-                        default=False,
-                        help='suppresses printing of transcript, but not diagnostics.')
-    parser.add_argument('files',
-                        metavar='FILE',
-                        nargs='*',
-                        default=['-'],
-                        help='list of files to read, if empty, stdin is used.')
+    parser.add_argument(
+        "--request_timeout",
+        type=int,
+        action="store",
+        default=30,
+        help="duration to wait for request responses, in seconds.",
+    )
+    parser.add_argument(
+        "--notify_timeout",
+        type=int,
+        action="store",
+        default=1,
+        help="duration to wait for notify responses, in seconds.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="display diagnostic information while reading/writing.",
+    )
+    parser.add_argument(
+        "--silent",
+        action="store_true",
+        default=False,
+        help="suppresses printing of transcript, but not diagnostics.",
+    )
+    parser.add_argument(
+        "files",
+        metavar="FILE",
+        nargs="*",
+        default=["-"],
+        help="list of files to read, if empty, stdin is used.",
+    )
     args = parser.parse_args()
 
     commands = LspCommandProcessor.parse_commands(read_commands(args.files))
 
     with LspCommandProcessor.create() as lsp_proc:
-        transcript = lsp_proc.communicate(commands,
-                                          request_timeout=args.request_timeout,
-                                          notify_timeout=args.notify_timeout,
-                                          verbose=args.verbose)
+        transcript = lsp_proc.communicate(
+            commands,
+            request_timeout=args.request_timeout,
+            notify_timeout=args.notify_timeout,
+            verbose=args.verbose,
+        )
         if not args.silent:
             print_transcript(lsp_proc, transcript)
 
@@ -99,7 +112,7 @@ def print_transcript(lsp_proc, transcript):
             print(f"\nReceived [{id}]:\n")
             print(json.dumps(package["received"], indent=2))
 
-        print('-' * 80)
+        print("-" * 80)
 
 
 # this will read command data from stdin or
@@ -108,7 +121,8 @@ def read_commands(files):
     command_lines = []
     for line in fileinput.input(files=files):
         command_lines.append(line)
-    return ''.join(command_lines)
+    return "".join(command_lines)
+
 
 if __name__ == "__main__":
     main()

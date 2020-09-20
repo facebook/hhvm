@@ -1,11 +1,10 @@
-<?hh // decl /* -*- mode: php -*- */
+<?hh /* -*- mode: php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -15,29 +14,100 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class Exception {
-  // $code should be untyped, or mixed because some subclasses set it
-  // to a string, the main example being PDOException
-  protected $code;
+namespace {
+
+<<__Sealed(Error::class, Exception::class)>>
+interface Throwable {
+  public function getMessage(): string;
+  // Documented as 'int' in PHP docs, but not actually guaranteed;
+  // subclasses (e.g. PDO) can do what they want.
+  <<__Pure, __MaybeMutable>>
+  public function getCode(): mixed;
+  <<__Pure, __MaybeMutable>>
+  public function getFile(): string;
+  <<__Pure, __MaybeMutable>>
+  public function getLine(): int;
+  <<__Pure, __MaybeMutable>>
+  public function getTrace(): Container<mixed>;
+  <<__Pure, __MaybeMutable>>
+  public function getTraceAsString(): string;
+  <<__Pure, __MaybeMutable>>
+  public function getPrevious(): ?Throwable;
+  public function __toString(): string;
+  public function toString(): string;
+}
+
+class Error implements Throwable {
+  protected string $message;
+  protected mixed $code;
   protected string $file;
   protected int $line;
-  protected array $trace;
 
+  /* Methods */
+  <<__Pure>>
+  public function __construct (
+    string $message = "",
+    int $code = 0,
+    ?Throwable $previous = null,
+  );
+  <<__Pure, __MaybeMutable>>
+  final public function getMessage(): string;
+  <<__Pure, __MaybeMutable>>
+  final public function getPrevious(): ?Throwable;
+  <<__Pure, __MaybeMutable>>
+  final public function getCode(): mixed;
+  <<__Pure, __MaybeMutable>>
+  final public function getFile(): string;
+  <<__Pure, __MaybeMutable>>
+  final public function getLine(): int;
+  <<__Pure, __MaybeMutable>>
+  final public function getTrace(): varray<mixed>;
+  <<__Pure, __MaybeMutable>>
+  final public function getTraceAsString(): string;
+  public function __toString(): string;
+  public function toString(): string;
+  final private function __clone(): void;
+}
+
+class ArithmeticError extends Error {}
+class ArgumentCountError extends Error {}
+class AssertionError extends Error {}
+class DivisionByZeroError extends Error {}
+class ParseError extends Error {}
+class TypeError extends Error {}
+
+class Exception implements Throwable {
+  protected int $code;
+  protected string $file;
+  protected int $line;
+  private varray<mixed> $trace;
+  protected mixed $userMetadata;
+
+  <<__Pure>>
   public function __construct (
     protected string $message = '',
     int $code = 0,
     protected ?Exception $previous = null,
   );
+  <<__Pure, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
   public function getMessage(): string;
+  <<__Pure, __MaybeMutable>>
   final public function getPrevious(): ?Exception;
+  <<__Pure, __Mutable>>
   public final function setPrevious(Exception $previous): void;
+  <<__Pure, __MaybeMutable>>
   public function getCode(): int;
+  <<__Pure, __MaybeMutable>>
   final public function getFile(): string;
+  <<__Pure, __MaybeMutable>>
   final public function getLine(): int;
-  final public function getTrace(): array;
-  final protected function __prependTrace(array $trace): void;
+  <<__Pure, __MaybeMutable>>
+  final public function getTrace(): varray<mixed>;
+  final protected function __prependTrace(Container<mixed> $trace): void;
+  <<__Pure, __MaybeMutable>>
   final public function getTraceAsString(): string;
   public function __toString(): string;
+  public function toString(): string;
   final private function __clone(): void;
 
   final public static function getTraceOptions();
@@ -45,6 +115,7 @@ class Exception {
 }
 
 class ErrorException extends Exception {
+  <<__Pure>>
   public function __construct(
     $message = "",
     int $code = 0,
@@ -53,6 +124,7 @@ class ErrorException extends Exception {
     int $lineno = 0 /* __LINE__ */,
     ?Exception $previous = null
   );
+  <<__Pure, __MaybeMutable>>
   public final function getSeverity(): int;
 }
 
@@ -72,3 +144,13 @@ class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
 
 class InvariantException extends Exception {}
+final class TypeAssertionException extends Exception {}
+class DivisionByZeroException extends Exception {}
+
+} // namespace
+
+namespace HH {
+
+class InvariantException extends \Exception {}
+
+} // namespace HH

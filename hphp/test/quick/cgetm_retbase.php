@@ -1,15 +1,13 @@
 <?hh
-function f() { $a = array(); $a[] = 1; return $a; }
+function f() { $a = varray[]; $a[] = 1; return $a; }
 function nonHphpArray( ) {
-  apc_add('foo', array(1, 2, 3));
-  return apc_fetch('foo');
+  apc_add('foo', varray[1, 2, 3]);
+  return __hhvm_intrinsics\apc_fetch_no_check('foo');
 }
 function test1() {
   return f()[0];
 }
-function main() {
+<<__EntryPoint>> function main(): void {
   var_dump(test1());
   var_dump(nonHphpArray()[0]);
 }
-
-main();

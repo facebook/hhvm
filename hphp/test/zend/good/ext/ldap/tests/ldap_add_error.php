@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -77,12 +77,10 @@ var_dump(
 	ldap_errno($link)
 	*/
 );
-?>
-===DONE===
-<?php
+echo "===DONE===\n";
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 ldap_delete($link, "dc=my-domain,$base");
-?>

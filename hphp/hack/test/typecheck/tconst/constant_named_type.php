@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 interface I {
   abstract const type;

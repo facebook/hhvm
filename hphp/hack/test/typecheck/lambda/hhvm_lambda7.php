@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 class box {
   public function __construct(private $x) {}
@@ -11,12 +11,12 @@ function mappers() {
   };
 
   // Doesn't capture $x; the parameter wins:
-  $x = array("one", "two", "three");
+  $x = varray["one", "two", "three"];
   $dump($x, $x ==> "(".$x.")");
 
-  $dump(array(1,2,3,4), $x ==> $x*$x);
+  $dump(varray[1,2,3,4], $x ==> $x*$x);
   $dump(
-    array(new box(123), new box(456)),
+    varray[new box(123), new box(456)],
     $x ==> $x->get()
   );
 }
@@ -29,9 +29,9 @@ function filters() {
     var_dump(array_filter($ar, $fn));
   };
 
-  $dump(array(1,2,3,4,5,6),         $x ==> $x % 2 == 0);
-  $dump(array("a", "b", "ac", "k"), $x ==> $x[0] == "a");
-  $dump(array("asd", new box(123)), $x ==> is_string($x));
+  $dump(varray[1,2,3,4,5,6],         $x ==> $x % 2 == 0);
+  $dump(varray["a", "b", "ac", "k"], $x ==> $x[0] == "a");
+  $dump(varray["asd", new box(123)], $x ==> $x is string);
 }
 filters();
 
@@ -48,7 +48,7 @@ function collection() {
 
   var_dump(
     $blah->map($x ==> $x->get())
-         ->filter($x ==> !is_string($x))
+         ->filter($x ==> !($x is string))
          ->filter($x ==> $x % 2 == 0)
   );
 }

@@ -14,11 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VARIABLE_UNSERIALIZER_H_
-#define incl_HPHP_VARIABLE_UNSERIALIZER_H_
+#pragma once
 
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 namespace HPHP {
@@ -29,10 +28,7 @@ struct StringBuffer;
 enum class UnserializeMode {
   Value = 0,
   Key = 1,
-  ColValue = 2,
-  ColKey = 3,
-  VecValue = 4,
-  DictValue = 5,
+  ColKey = 2,
 };
 
 struct InvalidAllowedClassesException : Exception {
@@ -47,7 +43,8 @@ struct VariableUnserializer {
     Serialize,
     Internal,
     APCSerialize,
-    DebuggerSerialize
+    DebuggerSerialize,
+    Last
   };
 
   /*
@@ -82,7 +79,23 @@ struct VariableUnserializer {
    */
   void set(const char* buf, const char* end);
 
+  void setDVOverrides(VariableSerializer::DVOverrides* overrides) {
+    m_dvOverrides = overrides;
+  }
+
+  void setUnitFilename(const StringData* name) {
+    assertx(name->isStatic());
+    assertx(m_type == Type::Internal);
+    m_unitFilename = name;
+  }
+
  private:
+  /*
+   * Used to object property values that are overwritten by later entries.
+   * For array element values, later values for the key override earlier ones.
+   */
+  Array m_overwrittenList;
+
   bool readOnly() const { return m_readOnly; }
 
   /*
@@ -125,7 +138,7 @@ struct VariableUnserializer {
   /*
    * Push v onto the vector of refs for future reference.
    */
-  void add(Variant* v, UnserializeMode mode);
+  void add(tv_lval v, UnserializeMode mode);
 
   /*
    * Preallocate memory for an expected number of values to be added
@@ -134,20 +147,9 @@ struct VariableUnserializer {
   void reserveForAdd(size_t count);
 
   /*
-   * Used by the 'r' encoding to get a reference.
+   * Used by the 'r' encoding to re-use previously deserialized values.
    */
-  Variant* getByVal(int id);
-
-  /*
-   * Used by the 'R' encoding to get a reference.
-   */
-  Variant* getByRef(int id);
-
-  /*
-   * Store properties/array elements that get overwritten incase they are
-   * referenced later during unserialization
-   */
-  void putInOverwrittenList(const Variant& v);
+  TypedValue getByVal(int id);
 
   /*
    * Register an object that needs its __wakeup() method called after
@@ -156,51 +158,30 @@ struct VariableUnserializer {
   void addSleepingObject(const Object&);
 
 private:
-  /*
-   * Hold references to previously-unserialized data, along with bits telling
-   * whether it is legal to reference them later.
-   */
-  struct RefInfo {
-    explicit RefInfo(Variant* v);
-    static RefInfo makeColValue(Variant* v);
-    static RefInfo makeVecValue(Variant* v);
-    static RefInfo makeDictValue(Variant* v);
-
-    Variant* var() const;
-
-    bool canBeReferenced() const;
-    bool isColValue() const;
-    bool isVecValue() const;
-    bool isDictValue() const;
-  private:
-    enum class Type {
-      Value,
-      ColValue,
-      VecValue,
-      DictValue
-    };
-    RefInfo(Variant*, Type);
-    CompactTaggedPtr<Variant, Type> m_data;
-  };
-
-  Array m_overwrittenList;
-
   void check() const;
+  void checkElemTermination() const;
 
   Type m_type;
   bool m_readOnly;
   const char* m_buf;
   const char* m_end;
-  req::vector<RefInfo> m_refs;
+  req::vector<tv_rval> m_refs;
   bool m_unknownSerializable;
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
   bool m_forceDArrays;
+  bool m_markLegacyArrays;
+  /* unitFilename should be set when we are deserializing
+   * an adata from the repo--it is needed to *re*construct the
+   * correct provenance tag */
+  const StringData* m_unitFilename{nullptr};
+  VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
-  void unserializeVariant(Variant& self,
+  void unserializeVariant(tv_lval self,
                           UnserializeMode mode = UnserializeMode::Value);
   Array unserializeArray();
+  arrprov::Tag unserializeProvenanceTag();
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();
@@ -215,7 +196,7 @@ private:
   void unserializeMap(ObjectData*, int64_t sz, char type);
   void unserializeSet(ObjectData*, int64_t sz, char type);
   void unserializePair(ObjectData*, int64_t sz, char type);
-  void unserializePropertyValue(Variant& v, int remainingProps);
+  void unserializePropertyValue(tv_lval v, int remainingProps);
   bool tryUnserializeStrIntMap(struct BaseMap* map, int64_t sz);
   void unserializeProp(ObjectData* obj, const String& key, Class* ctx,
                        const String& realKey, int nProp);
@@ -226,4 +207,3 @@ private:
 
 }
 
-#endif // incl_HPHP_VARIABLE_UNSERIALIZER_H_

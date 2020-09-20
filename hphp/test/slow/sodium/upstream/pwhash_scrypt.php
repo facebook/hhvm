@@ -1,11 +1,11 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $passwd = 'test';
 
 $hash = sodium_crypto_pwhash_scryptsalsa208sha256_str
   ($passwd, SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE,
-			SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE);
+            SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE);
 var_dump(substr($hash, 0, 3) ===
-		 SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX);
+         SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_STRPREFIX);
 
 $c = sodium_crypto_pwhash_scryptsalsa208sha256_str_verify($hash, $passwd);
 var_dump($c);
@@ -20,4 +20,4 @@ $key = sodium_crypto_pwhash_scryptsalsa208sha256
    SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE,
    SODIUM_CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE);
 var_dump(strlen($key) === $out_len);
-?>
+}

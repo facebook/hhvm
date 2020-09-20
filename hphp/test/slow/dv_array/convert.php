@@ -70,19 +70,6 @@ function test_darray($v) {
   }
 }
 
-function test_array($v) {
-  echo "============== test_array =========================\n";
-  try {
-    $v2 = (array)$v;
-    var_dump($v2);
-    var_dump(is_array($v2));
-    var_dump(is_varray($v2));
-    var_dump(is_darray($v2));
-  } catch (Exception $e) {
-    echo "Exception: " . $e->getMessage() . "\n";
-  }
-}
-
 function test_indirect($c, $v) {
   echo "============== test_indirect ($c) ==================\n";
   try {
@@ -95,6 +82,9 @@ function test_indirect($c, $v) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_convert() {
 $values = vec[
   null,
   false,
@@ -103,16 +93,16 @@ $values = vec[
   123,
   '123',
   3.14,
-  [],
-  [1, 2, 3, 4],
-  ['a' => 100, 'b' => 200, 'c' => 300],
+  __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]),
+  varray[1, 2, 3, 4],
+  darray['a' => 100, 'b' => 200, 'c' => 300],
   vec[],
   vec[1, 2, 3, 4],
   dict[],
   dict[1 => 'a', 2 => 'b'],
   keyset[],
   keyset[100, 'abc', 200],
-  STDIN,
+  fopen(__FILE__, 'r'),
   new stdclass,
   new IterableObj,
   new ThrowIterableObj,
@@ -146,15 +136,4 @@ foreach ($values as $v) {
 foreach ($values as $v) {
   test_indirect($c2, $v);
 }
-
-$dvvalues = vec[
-  varray[],
-  varray['a', 'b', 'c'],
-  darray[],
-  darray[0 => 'x', 1 => 'y', 2 => 'z'],
-  darray['key1' => 111, 'key2' => 222]
-];
-$dvvalues = __hhvm_intrinsics\launder_value($dvvalues);
-foreach ($dvvalues as $v) {
-  test_array($v);
 }

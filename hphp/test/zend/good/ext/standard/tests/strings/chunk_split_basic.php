@@ -1,15 +1,15 @@
-<?php
+<?hh
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
- * Description: Returns split line 
+ * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*
-* Testing chunk_split() for basic functionality by passing all possible 
-* arguments as well as with default arguments chunklen and ending  
+* Testing chunk_split() for basic functionality by passing all possible
+* arguments as well as with default arguments chunklen and ending
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing chunk_split() : basic functionality ***\n";
 
 
@@ -19,7 +19,7 @@ $chunklen = 2;
 $ending = '##';
 
 // Calling chunk_split() with all possible arguments
-echo "-- Testing chunk_split() with all possible arguments --\n"; 
+echo "-- Testing chunk_split() with all possible arguments --\n";
 var_dump( chunk_split($str, $chunklen, $ending) );
 
 
@@ -31,6 +31,6 @@ var_dump( chunk_split($str, $chunklen) );
 //Calling chunk_split() with default chunklen and ending string
 echo "-- Testing chunk_split() with default chunklen and ending string --\n";
 var_dump( chunk_split($str) );
-	
-echo "Done"   
-?>
+
+echo "Done";
+}

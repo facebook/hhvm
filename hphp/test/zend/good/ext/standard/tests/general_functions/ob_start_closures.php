@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 echo "*** Testing ob_start() : closures as output handlers ***\n";
 
 ob_start(function ($output) {
@@ -21,5 +21,5 @@ ob_end_flush();
 
 echo $str1, $str2;
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

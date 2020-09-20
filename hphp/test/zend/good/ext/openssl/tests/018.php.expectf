@@ -1,7 +1,6 @@
 bool(true)
 
-Warning: %s
+Warning: supplied key param cannot be coerced into a private key in %s/018.php on line %d
 bool(false)
 
-Warning: %s
-NULL
+Warning: openssl_sign() expects parameter 1 to be string, %rv?%rarray given in %s/018.php on line %d

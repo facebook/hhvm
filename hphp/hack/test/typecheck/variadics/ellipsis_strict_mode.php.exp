@@ -1,0 +1,2 @@
+File "ellipsis_strict_mode.php", line 31, characters 19-20:
+Was expecting a type hint on this variadic parameter (Typing[4033])

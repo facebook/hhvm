@@ -1,9 +1,7 @@
 
-Warning: %s
-NULL
+Warning: touch() expects at least 1 parameter, 0 given in %s/touch_error.php on line 3
 
-Warning: %s
-NULL
+Warning: touch() expects at most 3 parameters, 4 given in %s/touch_error.php on line 4
 
-Warning: %s
+Warning: touch(): Unable to create file /no/such/file/or/directory because No such file or directory in %s/touch_error.php on line 5
 bool(false)

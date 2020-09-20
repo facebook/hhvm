@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string iconv(string in_charset, string out_charset, string str)
  * Description: Returns converted string in desired encoding 
  * Source code: ext/iconv/iconv.c
@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv()
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing iconv() : basic functionality ***\n";
 
 //All strings are the same when displayed in their respective encodings
@@ -37,4 +37,4 @@ var_dump(bin2hex(iconv('SJIS', 'UTF-8', $sjis_string)));
 var_dump(bin2hex(iconv('EUC-JP', 'UTF-8', $euc_jp_string)));
 
 echo "Done";
-?>
+}

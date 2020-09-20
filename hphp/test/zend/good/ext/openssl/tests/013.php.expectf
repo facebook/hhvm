@@ -1,6 +1,6 @@
 string(19) "openssl_open() test"
 
-Warning: %s
+Warning: unable to coerce parameter 4 into a private key in %s/013.php on line %d
 NULL
 string(19) "openssl_open() test"
 NULL

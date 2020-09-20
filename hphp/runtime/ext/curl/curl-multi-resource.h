@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_CURL_MULTI_RESOURCE_H
-#define incl_HPHP_CURL_MULTI_RESOURCE_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -33,6 +32,9 @@ struct CurlMultiResource : SweepableResourceData {
   CURLM* get();
   void check_exceptions();
 
+  void setInExec(bool b);
+  bool anyInExec() const;
+
  private:
   CURLM *m_multi;
   // CURLM is a typedef to void
@@ -42,4 +44,3 @@ struct CurlMultiResource : SweepableResourceData {
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

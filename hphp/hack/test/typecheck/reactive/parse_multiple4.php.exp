@@ -1,0 +1,6 @@
+File "parse_multiple4.php", line 4, characters 3-16:
+Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`, `__CippGlobal`. (Parsing[1002])
+File "parse_multiple4.php", line 4, characters 11-14:
+You cannot reuse the attribute `__Rx` (Naming[2062])
+File "parse_multiple4.php", line 4, characters 5-8:
+`__Rx` was already used here

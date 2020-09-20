@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace N1 {
   const C = 42;
@@ -10,6 +10,8 @@ namespace N2\N3 {
 
 namespace N2 {
   use const \N1\C as CC;
-  var_dump(CC);
-  var_dump(N3\C);
+  <<__EntryPoint>> function main(): void {
+  \var_dump(CC);
+  \var_dump(N3\C);
+  }
 }

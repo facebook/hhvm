@@ -1,0 +1,8 @@
+File "class_meth_abstract.php", line 8, characters 3-31:
+Cannot create a class_meth of Foo::bar; it is abstract. (Typing[4382])
+File "class_meth_abstract.php", line 4, characters 35-37:
+Declaration is here
+File "class_meth_abstract.php", line 10, characters 3-26:
+Cannot create a class_meth of Foo::bar; it is abstract. (Typing[4382])
+File "class_meth_abstract.php", line 4, characters 35-37:
+Declaration is here

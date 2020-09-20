@@ -1,0 +1,17 @@
+Typing[4105] Too many arguments (expected 0 but got 3) [1]
+-> Definition is here [2]
+
+pos_across_multiple_lines2.php:8:3
+     1 | <?hh
+[2]  2 | function g(): void {
+     3 |   echo "hello";
+     4 | }
+     5 | 
+     6 | <<__EntryPoint>>
+     7 | function main(): void {
+[1]  8 |   g(1,
+[1]  9 |   2,
+[1] 10 |   3);
+    11 | }
+
+1 error found.

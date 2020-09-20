@@ -1,0 +1,6 @@
+File "instantiate_unresolved5.php", line 16, characters 10-19:
+Some elements in this collection are incompatible (Typing[4110])
+File "instantiate_unresolved5.php", line 15, characters 37-44:
+Expected `varray<T>`
+File "instantiate_unresolved5.php", line 15, characters 17-24:
+But got `dynamic` because it is an unenforceable type

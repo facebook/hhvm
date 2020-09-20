@@ -1,7 +1,7 @@
 <?hh //strict
 
 /**
- * Create nested Tunresolved that can occur as a result of anonymous
+ * Create nested Tunion that can occur as a result of anonymous
  * function call, and check that subsequent unification of those types works
  * correctly.
  */

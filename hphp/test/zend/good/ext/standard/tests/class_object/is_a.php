@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface if_a {
 	function f_a();
@@ -50,34 +50,26 @@ class derived_c extends derived_a implements if_b {
 
 class derived_d extends derived_c {
 }
-
-$t = new base();
-$t->test();
-
-$t = new derived_a();
-$t->test();
-
-eval('
-  function __autoload($name)
-  {
-      echo ">>>> In __autoload: ";
-      var_dump($name);
-  }
-');
-
-echo "NOW WITH AUTOLOAD\n\n";
-
-$t = new base();
-$t->test();
-
-$t = new derived_a();
-$t->test();
-
-$t = new derived_b();
-$t->test();
  
 
 
 
 
-?>
+<<__EntryPoint>>
+function main_entry(): void {
+
+  $t = new base();
+  $t->test();
+
+  $t = new derived_a();
+  $t->test();
+
+  $t = new base();
+  $t->test();
+
+  $t = new derived_a();
+  $t->test();
+
+  $t = new derived_b();
+  $t->test();
+}

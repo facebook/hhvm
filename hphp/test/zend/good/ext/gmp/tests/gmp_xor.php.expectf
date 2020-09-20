@@ -4,23 +4,21 @@ string(10) "2342340648"
 string(5) "-3334"
 string(5) "-4563"
 
-Warning: %s
+Warning: gmp_xor(): Unable to convert variable to GMP - string is not an integer in %s/gmp_xor.php on line 8
 string(1) "0"
 string(15) "987657876574716"
 string(21) "987658017016065701376"
 
-Warning: %s
-NULL
+Warning: gmp_xor() expects exactly 2 parameters, 3 given in %s/gmp_xor.php on line 15
 
-Warning: %s
-NULL
+Warning: gmp_xor() expects exactly 2 parameters, 1 given in %s/gmp_xor.php on line 16
 
-Warning: %s
+Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s/gmp_xor.php on line 17
 bool(false)
 
-Warning: %s
+Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s/gmp_xor.php on line 18
 bool(false)
 
-Warning: %s
+Warning: gmp_xor(): Unable to convert variable to GMP - wrong type in %s/gmp_xor.php on line 19
 bool(false)
 Done

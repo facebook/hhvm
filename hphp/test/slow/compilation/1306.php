@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($a) {
 }
@@ -9,3 +9,4 @@ function foo($x) {
   $a = bar(1);
   bar($a++);
 }
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

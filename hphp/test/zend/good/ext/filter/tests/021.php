@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(filter_var("qwertyu123456dfghj", FILTER_SANITIZE_NUMBER_INT));
 var_dump(filter_var("asd123123.asd123.23", FILTER_SANITIZE_NUMBER_INT));
 var_dump(filter_var("123,23", FILTER_SANITIZE_NUMBER_INT));
@@ -19,4 +19,4 @@ var_dump(filter_var("234.56fsfd", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLO
 var_dump(filter_var("", FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION));
 
 echo "Done\n";
-?>
+}

@@ -2,11 +2,9 @@
 
 -- Testing trait_exists() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: trait_exists() expects at least 1 parameter, 0 given in %s/trait_exists_error_001.php on line 16
 
 -- Testing trait_exists() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: trait_exists() expects at most 2 parameters, 3 given in %s/trait_exists_error_001.php on line 23
 Done

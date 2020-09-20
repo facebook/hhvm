@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -92,7 +92,7 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
   // If a non-zero timeout is requested, use it and cap it at the remaining
   // request time.
   int remaining_time =
-    ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
+    RequestInfo::s_requestInfo->m_reqInjectionData.getRemainingTime();
   int timeout = desired_timeout > 0 && desired_timeout <= remaining_time
     ? desired_timeout
     : remaining_time;
@@ -117,15 +117,13 @@ int64_t HHVM_FUNCTION(pagelet_server_task_status,
 
 String HHVM_FUNCTION(pagelet_server_task_result,
                      const Resource& task,
-                     VRefParam headers,
-                     VRefParam code,
+                     Array& headers,
+                     int64_t& code,
                      int64_t timeout_ms /* = 0 */) {
-  Array rheaders;
   int rcode;
-  String response = PageletServer::TaskResult(task, rheaders, rcode,
+  String response = PageletServer::TaskResult(task, headers, rcode,
                                               timeout_ms);
-  headers.assignIfRef(rheaders);
-  code.assignIfRef(rcode);
+  code = rcode;
   return response;
 }
 
@@ -163,12 +161,10 @@ bool HHVM_FUNCTION(pagelet_server_is_done) {
 
 bool HHVM_FUNCTION(xbox_send_message,
                    const String& msg,
-                   VRefParam retRef,
+                   Array& ret,
                    int64_t timeout_ms,
                    const String& host /* = "localhost" */) {
-  Array ret;
   auto b = XboxServer::SendMessage(msg, ret, timeout_ms, host);
-  retRef.assignIfRef(ret);
   return b;
 }
 
@@ -191,8 +187,9 @@ bool HHVM_FUNCTION(xbox_task_status,
 int64_t HHVM_FUNCTION(xbox_task_result,
                       const Resource& task,
                       int64_t timeout_ms,
-                      VRefParam ret) {
-  return XboxServer::TaskResult(task, timeout_ms, ret.getVariantOrNull());
+                      Variant& ret) {
+  auto result = XboxServer::TaskResult(task, timeout_ms, &ret);
+  return result;
 }
 
 Variant HHVM_FUNCTION(xbox_process_call_message,
@@ -219,7 +216,7 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
   if (!args.isArray()) {
     raise_error("Error decoding xbox call message");
   }
-  return vm_call_user_func(fn, args.toArray());
+  return vm_call_user_func(fn, args.toArray(), false, true);
 }
 
 int64_t HHVM_FUNCTION(xbox_get_thread_timeout) {
@@ -281,12 +278,12 @@ bool HHVM_FUNCTION(server_is_prepared_to_stop) {
 int64_t HHVM_FUNCTION(server_health_level) {
   if (HttpServer::Server) {
     if (auto const server = HttpServer::Server->getPageServer()) {
-      return healthLeveltToInt(server->getHealthLevel());
+      return healthLevelToInt(server->getHealthLevel());
     }
   }
   // If server is not yet started, e.g., when not running in server
   // mode, or before server starts, we assume everything is OK.
-  return healthLeveltToInt(HealthLevel::Bold);
+  return healthLevelToInt(HealthLevel::Bold);
 }
 
 int64_t HHVM_FUNCTION(server_uptime) {

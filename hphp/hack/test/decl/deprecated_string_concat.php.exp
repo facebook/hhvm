@@ -1,0 +1,152 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\doubledouble" ->
+    { fe_pos = [7:10-22];
+      fe_type =
+      (Rwitness (root|deprecated_string_concat.php line 7, characters 10-21),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|deprecated_string_concat.php line 7, characters 10-21),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|deprecated_string_concat.php line 7, characters 26-29),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated =
+      (Some "The function doubledouble is deprecated: doubledouble");  };
+    "\\heredoc" ->
+    { fe_pos = [19:10-17];
+      fe_type =
+      (Rwitness (root|deprecated_string_concat.php line 19, characters 10-16),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|deprecated_string_concat.php line 19, characters 10-16),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|deprecated_string_concat.php line 19, characters 21-24),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated =
+      (Some "The function heredoc is deprecated: single  heredoc");  };
+    "\\nowdoc" ->
+    { fe_pos = [25:10-16];
+      fe_type =
+      (Rwitness (root|deprecated_string_concat.php line 25, characters 10-15),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|deprecated_string_concat.php line 25, characters 10-15),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|deprecated_string_concat.php line 25, characters 20-23),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated =
+      (Some "The function nowdoc is deprecated: single  nowdoc");  };
+    "\\singledouble" ->
+    { fe_pos = [10:10-22];
+      fe_type =
+      (Rwitness (root|deprecated_string_concat.php line 10, characters 10-21),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|deprecated_string_concat.php line 10, characters 10-21),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|deprecated_string_concat.php line 10, characters 26-29),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated =
+      (Some "The function singledouble is deprecated: singledouble");  };
+    "\\singledoublesingle" ->
+    { fe_pos = [13:10-28];
+      fe_type =
+      (Rwitness (root|deprecated_string_concat.php line 13, characters 10-27),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|deprecated_string_concat.php line 13, characters 10-27),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|deprecated_string_concat.php line 13, characters 32-35),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated =
+      (Some "The function singledoublesingle is deprecated: singledoublesingle");
+       };
+    "\\singlesingle" ->
+    { fe_pos = [4:10-22];
+      fe_type =
+      (Rwitness (root|deprecated_string_concat.php line 4, characters 10-21),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|deprecated_string_concat.php line 4, characters 10-21),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|deprecated_string_concat.php line 4, characters 26-29),
+               (Tprim Tvoid))
+              };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated =
+      (Some "The function singlesingle is deprecated: singlesingle");  } };
+  typedefs = {}; consts = {} }
+
+They matched!

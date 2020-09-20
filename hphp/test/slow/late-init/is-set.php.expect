@@ -1,0 +1,18 @@
+bool(false)
+Unknown or inaccessible property 'p2' on object of class A
+Unknown or inaccessible property 'p3' on object of class A
+bool(false)
+Unknown or inaccessible static property 's2' on class A
+Unknown or inaccessible static property 's3' on class A
+Unknown class Foo
+bool(false)
+bool(false)
+bool(true)
+Unknown or inaccessible property 'p2' on object of class A
+Unknown or inaccessible property 'p3' on object of class A
+bool(true)
+Unknown or inaccessible static property 's2' on class A
+Unknown or inaccessible static property 's3' on class A
+Unknown class Foo
+bool(true)
+bool(true)

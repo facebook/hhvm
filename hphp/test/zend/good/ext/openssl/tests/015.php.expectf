@@ -1,12 +1,13 @@
 bool(true)
 
-Warning: %s
+Warning: key parameter is not a valid public key in %s/zend/good/ext/openssl/tests/015.php on line %d
 bool(false)
 
-Warning: %s
+Warning: key parameter is not a valid public key in %s/zend/good/ext/openssl/tests/015.php on line %d
 bool(false)
 
-Warning: %s
+Warning: key parameter is not a valid public key in %s/zend/good/ext/openssl/tests/015.php on line %d
 bool(false)
-bool(true)
-string(4) "test"
+
+Warning: openssl_public_encrypt() expects parameter 1 to be string, object given in %s/zend/good/ext/openssl/tests/015.php on line %d
+string(32) "Testing openssl_public_encrypt()"

@@ -1,0 +1,2 @@
+File "untyped_lambda_strict_mode.php", line 5, characters 16-31:
+Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters. (Typing[4224])

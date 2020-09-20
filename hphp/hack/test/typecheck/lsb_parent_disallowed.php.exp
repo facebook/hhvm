@@ -1,0 +1,4 @@
+File "lsb_parent_disallowed.php", line 9, characters 20-21:
+__LSB properties cannot be accessed with parent:: (Typing[4112])
+File "lsb_parent_disallowed.php", line 4, characters 27-29:
+This member is public

@@ -50,8 +50,8 @@ function convert_from($d) {
   echo "====================================================\n";
   var_dump($d);
   echo "----------------------------------------------------\n";
-  var_dump((array)$d);
-  var_dump(vec($d));
+  var_dump(darray($d));
+  var_dump(vec(HH\array_unmark_legacy($d)));
 
   try {
     var_dump(keyset($d));
@@ -62,8 +62,11 @@ function convert_from($d) {
   var_dump((bool)$d);
   var_dump((int)$d);
   var_dump((float)$d);
-  var_dump((string)$d);
-  var_dump((object)$d);
+  try {
+    var_dump((string)$d);
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
   var_dump(new Vector($d));
   var_dump(new Map($d));
 
@@ -81,17 +84,17 @@ function convert_to($from) {
   var_dump($from);
   echo "----------------------------------------------------\n";
   try {
-    var_dump(dict($from));
+    var_dump(dict(HH\array_unmark_legacy($from)));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
   echo "====================================================\n";
 }
 
-function main() {
-  convert_to([]);
-  convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
-  convert_to([1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
+<<__EntryPoint>> function main(): void {
+  convert_to(varray[]);
+  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
+  convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
               'key4' => new stdclass]);
 
@@ -123,12 +126,10 @@ function main() {
   convert_to(new AggregateObj);
 
   convert_from(dict[]);
-  convert_from(dict[1 => 1, 2 => true, 3 => null, 4 => []]);
+  convert_from(dict[1 => 1, 2 => true, 3 => null, 4 => varray[]]);
   convert_from(dict['key1' => 'val1', 'key2' => 'val2', 'key3' => 'val3']);
   convert_from(dict['key1' => 100, 'key2' => 'val1',
                     200 => 300, 400 => 'val2']);
   convert_from(dict['12345' => 100, 12345 => 200]);
   convert_from(dict[1 => dict[5 => 10], 'a' => dict['b' => 'c']]);
 }
-
-main();

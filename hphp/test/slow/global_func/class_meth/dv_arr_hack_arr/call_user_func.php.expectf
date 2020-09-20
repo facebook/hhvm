@@ -1,0 +1,10 @@
+resource(4) of type (XboxTask)
+resource(4) of type (XboxTask)
+resource(4) of type (XboxTask)
+
+Notice: Implicit clsmeth to vec conversion in %s/call_user_func.php on line 5
+resource(4) of type (XboxTask)
+bool(true)
+int(4)
+string(8) "shutdown"
+string(8) "postSend"

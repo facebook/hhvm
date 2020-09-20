@@ -1,8 +1,8 @@
-<?php
-function foo(array $a) {
-	echo count($a)."\n";
+<?hh
+function foo(varray $a) {
+    echo count($a)."\n";
 }
-
-foo(array(1,2,3));
+<<__EntryPoint>> function main(): void {
+foo(varray[1,2,3]);
 foo(123);
-?>
+}

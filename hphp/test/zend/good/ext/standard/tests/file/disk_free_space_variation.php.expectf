@@ -40,34 +40,34 @@ float(%d)
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 48
 NULL
 
-Warning: %s
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 49
 NULL
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 48
 NULL
 
-Warning: %s
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 49
 NULL
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 48
 NULL
 
-Warning: %s
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 49
 NULL
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 48
 NULL
 
-Warning: %s
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s/disk_free_space_variation.php on line 49
 NULL
 
 --- Done ---

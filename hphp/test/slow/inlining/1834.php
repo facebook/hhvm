@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($name) {
   $name = trim($name);
@@ -13,4 +13,8 @@ function foo() {
   bar($name);
   bar($name);
 }
+
+<<__EntryPoint>>
+function main_1834() {
 foo();
+}

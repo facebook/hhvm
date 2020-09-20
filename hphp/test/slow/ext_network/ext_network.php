@@ -1,10 +1,12 @@
-<?php
+<?hh
 
 //////////////////////////////////////////////////////////////////////
 
 function tryopen($u, $p = -1) {
   for ($i = 0; $i < 100; $i++) {
-    @$r = $p >= 0 ? fsockopen($u, $p) : fsockopen($u);
+    $errno = null;
+    $errstr = null;
+    @$r = fsockopen($u, $p, inout $errno, inout $errstr);
     if ($r) return $r;
     usleep(1000);
   }
@@ -12,8 +14,10 @@ function tryopen($u, $p = -1) {
 }
 
 function get_addresses($host) {
-  $r = array();
-  if (($records = dns_get_record($host))) {
+  $r = varray[];
+  $authns = null;
+  $addtl = null;
+  if (($records = dns_get_record($host, DNS_ANY, inout $authns, inout $addtl))) {
     foreach ($records as $record) {
       if (isset($record['ipv6'])) {
         $r []= '['.$record['ipv6'].']';
@@ -24,7 +28,7 @@ function get_addresses($host) {
   }
   return $r;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(gethostname() != false);
 
 var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));
@@ -63,3 +67,4 @@ closelog();
 openlog("TestExtNetwork", LOG_ODELAY, LOG_USER);
 syslog(LOG_INFO, "testing");
 closelog();
+}

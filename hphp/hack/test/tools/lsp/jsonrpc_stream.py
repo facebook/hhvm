@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import json
+from queue import Empty, Queue
 from threading import Thread
-from queue import Queue, Empty
 
 
 class JsonRpcStreamReader:
@@ -26,8 +26,7 @@ class JsonRpcStreamReader:
 
     def _read(self, timeout_seconds):
         try:
-            return self.queue.get(block=True,
-                                  timeout=timeout_seconds)
+            return self.queue.get(block=True, timeout=timeout_seconds)
         except Empty:
             return None
 

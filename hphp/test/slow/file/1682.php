@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $name = tempnam(sys_get_temp_dir(), '1682');
@@ -17,4 +17,8 @@ function main() {
 
   file_put_contents('php://stdout', "file_put_contents\n");
 }
+
+<<__EntryPoint>>
+function main_1682() {
 main();
+}

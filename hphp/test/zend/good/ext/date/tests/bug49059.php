@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 date_default_timezone_set('Asia/Calcutta');
 
 $date1 = date_create("2009-03-27");
@@ -18,4 +18,4 @@ $diff = $date2->diff($date1);
 print "\$date1 after third diff (called at \$date2): " .
 $date1->format("Y-m-d") . "\n";
 print "\$diff->days after third diff: " . $diff->days . "\n";
-?>
+}

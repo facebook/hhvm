@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_
-#define incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_
+#pragma once
 
 #include <event.h>
 
@@ -115,4 +114,3 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_TAKEOVER_AGENT_H_

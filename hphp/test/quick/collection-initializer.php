@@ -1,10 +1,41 @@
 <?hh
-function main() {
-  function f($x = Vector {}) {
+
+abstract final class GStatics {
+  public static Vector $x = Vector {};
+}
+class C {
+  public $y = Vector {};
+  static public $z = Vector {};
+}
+class V {
+  public $x = darray['a' => 1];
+  public $y = Map {'a' => 1};
+}
+class W extends V {
+  public $x = Map {'a' => 1};
+  public $y = darray['a' => 1];
+}
+class X {
+  public $prop = varray[Map {'a' => 1}];
+}
+class Y {
+  public $prop = Vector {varray[Map {'a' => 1}]};
+}
+class Z {
+  const FOO = 456;
+  const BAR = "yo";
+  public $prop = Map {Z::FOO => Z::BAR};
+}
+class T {
+  public $prop = varray[Set {'a'}];
+}
+
+<<__EntryPoint>> function main(): void {
+  $f = function ($x = Vector {}) {
     return $x;
-  }
-  $v1 = f();
-  $v2 = f();
+  };
+  $v1 = $f();
+  $v2 = $f();
   $v1[] = 11;
   $v2[] = 22;
   $v2[] = 33;
@@ -12,12 +43,11 @@ function main() {
 
   echo "=========\n";
 
-  function g() {
-    static $x = Vector {};
-    return $x;
-  }
-  $v1 = g();
-  $v2 = g();
+  $g = function () {
+    return GStatics::$x;
+  };
+  $v1 = $g();
+  $v2 = $g();
   $v1[] = 11;
   $v2[] = 22;
   $v2[] = 33;
@@ -25,10 +55,6 @@ function main() {
 
   echo "=========\n";
 
-  class C {
-    public $y = Vector {};
-    static public $z = Vector {};
-  }
   $obj1 = new C;
   $obj2 = new C;
   $v1 = $obj1->y;
@@ -41,14 +67,6 @@ function main() {
 
   echo "=========\n";
 
-  class V {
-    public $x = array('a' => 1);
-    public $y = Map {'a' => 1};
-  }
-  class W extends V {
-    public $x = Map {'a' => 1};
-    public $y = array('a' => 1);
-  }
   $obj1 = new W;
   $obj2 = new W;
   var_dump($obj1->x === $obj2->x);
@@ -67,17 +85,11 @@ function main() {
 
   echo "=========\n";
 
-  class X {
-    public $prop = array(Map {'a' => 1});
-  }
   $obj1 = new X;
   $obj2 = new X;
   $obj1->prop[0]['a']++;
   var_dump($obj1->prop[0]['a']);
   var_dump($obj2->prop[0]['a']);
-  class Y {
-    public $prop = Vector {array(Map {'a' => 1})};
-  }
   $obj1 = new Y;
   $obj2 = new Y;
   $obj1->prop[0][0]['a']++;
@@ -86,29 +98,17 @@ function main() {
 
   echo "=========\n";
 
-  define('FOO', 123);
-  define('BAR', "blah");
-  class Z {
-    const FOO = 456;
-    const BAR = "yo";
-    public $prop = Map {FOO => BAR, Z::FOO => Z::BAR};
-  }
   $obj1 = new Z;
-  var_dump($obj1->prop[FOO], $obj1->prop[Z::FOO], count($obj1->prop));
+  var_dump($obj1->prop[Z::FOO], count($obj1->prop));
   $obj2 = new Z;
-  $obj1->prop[FOO] = 42;
   $obj1->prop[Z::FOO] = 73;
-  var_dump($obj2->prop[FOO], $obj2->prop[Z::FOO]);
+  var_dump($obj2->prop[Z::FOO]);
 
   echo "=========\n";
 
-  class T {
-    public $prop = array(Set {'a'});
-  }
   $obj1 = new T;
   $obj2 = new T;
   $obj1->prop[0][] = 'b';
   var_dump($obj1->prop[0]->contains('b'));
   var_dump($obj2->prop[0]->contains('b'));
 }
-main();

@@ -1,22 +1,15 @@
-.main {
-  FPushFuncD 1 "HH\\Asio\\join"
-  FPushFuncD 0 "main"
-  FCall 0
-  FPassR 0 Any
-  FCall 1
-  PopR
-  Null
-  RetC
-}
-
 .class heh {
   .default_ctor;
 }
 
-.function main() isAsync {
-  FPushCtorD 0 "heh"
-  FCall 0
-  PopR
+.function foo() isAsync {
+  NewObjD "heh"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
   SetL $x
   PopC
 
@@ -25,5 +18,19 @@
   PopC
 
   Int 1
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" - "" "HH\\Asio\\join"
+  PopC
+  Null
   RetC
 }

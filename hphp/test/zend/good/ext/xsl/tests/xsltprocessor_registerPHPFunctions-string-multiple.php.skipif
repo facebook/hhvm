@@ -1,5 +1,6 @@
-<?php 
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded('xsl')) {
+        die("skip\n");
+}
+}

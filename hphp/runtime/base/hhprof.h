@@ -14,12 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHPROF_H_
-#define incl_HPHP_HHPROF_H_
+#pragma once
 
 #include "hphp/util/alloc.h"
 
 #include "hphp/runtime/server/transport.h"
+
+#include "hphp/util/rds-local.h"
 
 #include <mutex>
 
@@ -28,7 +29,7 @@ namespace HPHP {
 
 struct HHProf {
   struct Request {
-    static THREAD_LOCAL(Request, s_request);
+    static RDS_LOCAL(Request, s_request);
 
     static inline void Setup(Transport* transport) {
       if (!RuntimeOption::HHProfEnabled) return;
@@ -137,4 +138,3 @@ struct HHProf {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_HHPROF_H_

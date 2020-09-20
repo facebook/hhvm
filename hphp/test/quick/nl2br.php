@@ -3,10 +3,10 @@
 
 //This makes reading the output easier for debugging
 function escapeNewLine($string) {
-  return str_replace(array("\n", "\r"), array('\n', '\r'), $string);
+  return str_replace(varray["\n", "\r"], varray['\n', '\r'], $string);
 }
-
-$stringList = array(
+<<__EntryPoint>> function main(): void {
+$stringList = varray[
   "Test\nString",
   "Test\rString",
   "Test\n\rString",
@@ -15,8 +15,9 @@ $stringList = array(
   "Test\r\rString",
   "Test String\n",
   "Hello<br />\nmy<br />\r\nfriend<br />\n\r" //case from issue
-);
+];
 foreach ($stringList as $string) {
   var_dump(escapeNewLine(nl2br($string, true)));
   var_dump(escapeNewLine(nl2br($string, false)));
+}
 }

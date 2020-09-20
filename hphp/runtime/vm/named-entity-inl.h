@@ -24,23 +24,45 @@ namespace HPHP {
 inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
   : m_cachedClass(ne.m_cachedClass)
   , m_cachedFunc(ne.m_cachedFunc)
+  // Since cached type alias and cached reified generics are a union
+  // the following line will set them both
   , m_cachedTypeAlias(ne.m_cachedTypeAlias)
 {
   m_clsList = ne.m_clsList;
+  m_recordList = ne.m_recordList;
 }
 
-inline rds::Handle NamedEntity::getFuncHandle() const {
-  m_cachedFunc.bind();
-  return m_cachedFunc.handle();
+inline Func* NamedEntity::getCachedFunc() const {
+  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
+    ? *m_cachedFunc
+    : nullptr;
 }
 
-inline rds::Handle NamedEntity::getClassHandle() const {
-  m_cachedClass.bind();
-  return m_cachedClass.handle();
+inline Class* NamedEntity::getCachedClass() const {
+  return LIKELY(m_cachedClass.bound() && m_cachedClass.isInit())
+    ? *m_cachedClass
+    : nullptr;
+}
+
+inline ArrayData* NamedEntity::getCachedReifiedGenerics() const {
+  return LIKELY(m_cachedReifiedGenerics.bound() &&
+                m_cachedReifiedGenerics.isInit())
+    ? *m_cachedReifiedGenerics
+    : nullptr;
+}
+
+inline RecordDesc* NamedEntity::getCachedRecordDesc() const {
+  return LIKELY(m_cachedRecordDesc.bound() && m_cachedRecordDesc.isInit())
+    ? *m_cachedRecordDesc
+    : nullptr;
 }
 
 inline Class* NamedEntity::clsList() const {
   return m_clsList;
+}
+
+inline RecordDesc* NamedEntity::recordList() const {
+  return m_recordList;
 }
 
 inline Func* NamedEntity::uniqueFunc() const {

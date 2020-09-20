@@ -1,12 +1,12 @@
-<?php
+<?hh
 /* Prototype  : proto bool feof(resource fp)
  * Description: Test for end-of-file on a file pointer 
  * Source code: ext/standard/file.c
  * Alias to functions: gzeof
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing feof() : basic functionality ***\n";
-$tmpFile1 = __FILE__.".tmp1";
+$tmpFile1 = __SystemLib\hphp_test_tmppath('tmp1');
 $h = fopen($tmpFile1, 'wb');
 $count = 10;
 for ($i = 1; $i <= $count; $i++) {
@@ -29,7 +29,7 @@ echo $previousLine;
 var_dump($lastline); // this should be false 
 fclose($h);
 
-$tmpFile2 = __FILE__.".tmp2";
+$tmpFile2 = __SystemLib\hphp_test_tmppath('tmp2');
 $h = fopen($tmpFile2, 'wb+');
 $count = 10;
 echo "*** writing $count lines, testing feof ***\n";
@@ -64,4 +64,4 @@ unlink($tmpFile1);
 unlink($tmpFile2);
 
 echo "Done";
-?>
+}

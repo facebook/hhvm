@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
@@ -24,17 +23,23 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/iter.h"
 
-#include "hphp/runtime/vm/jit/types.h"
+#include <folly/container/Array.h>
+
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -51,21 +56,40 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
+
+void profileIterInit(IRLS& env, const IRInstruction* inst, bool isInitK) {
+  if (!inst->src(0)->isA(TArrLike)) return;
+  auto const profile = TargetProfile<ArrayIterProfile>(
+    env.unit.context(),
+    inst->marker(),
+    s_ArrayIterProfile.get()
+  );
+  if (!profile.profiling()) return;
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
+    .ssa(0)
+    .imm(isInitK);
+  cgCallHelper(vmain(env), env, CallSpec::method(&ArrayIterProfile::update),
+               kVoidDest, SyncOptions::Sync, args);
+}
+
 int iterOffset(const BCMarker& marker, uint32_t id) {
   auto const func = marker.func();
   return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  bool isInitK = inst->is(IterInitK, WIterInitK);
-  bool isWInit = inst->is(WIterInit, WIterInitK);
-
-  auto const extra = inst->extra<IterData>();
+  auto const isInitK = inst->is(IterInitK, LIterInitK);
+  auto const isLInit = inst->is(LIterInit, LIterInitK);
+  auto const extra = &inst->extra<IterData>()->args;
 
   auto const src = inst->src(0);
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const iterOff = iterOffset(inst->marker(), extra->iterId);
   auto const valOff = localOffset(extra->valId);
+  profileIterInit(env, inst, isInitK);
 
   auto& v = vmain(env);
 
@@ -77,28 +101,22 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     args.addr(fp, valOff);
     if (isInitK) {
       args.addr(fp, localOffset(extra->keyId));
-    } else if (isWInit) {
-      args.imm(0);
     }
 
-    auto const helper = [&] {
-      // MSVC gets confused if we try to directly assign the template overload,
-      // so use a temporary and let the optimizer sort it out.
-      if (isWInit) {
-        return (TCA)new_iter_array_key<true>;
-      } else if (isInitK) {
-        return (TCA)new_iter_array_key<false>;
-      } else {
-        return (TCA)new_iter_array;
-      }
+    auto const op = [&]{
+      if (!isLInit) return IterTypeOp::NonLocal;
+      auto const flag = extra->flags & IterArgs::Flags::BaseConst;
+      return flag ? IterTypeOp::LocalBaseConst : IterTypeOp::LocalBaseMutable;
     }();
-
-    cgCallHelper(v, env, CallSpec::direct(reinterpret_cast<void (*)()>(helper)),
-                 callDest(env, inst), SyncOptions::Sync, args);
+    auto const target = isInitK
+      ? CallSpec::direct(new_iter_array_key_helper(op))
+      : CallSpec::direct(new_iter_array_helper(op));
+    cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
     return;
   }
 
   always_assert(src->type() <= TObj);
+  always_assert(!isLInit);
 
   args.immPtr(inst->marker().func()->cls())
       .addr(fp, valOff);
@@ -108,68 +126,13 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     args.imm(0);
   }
 
-  // new_iter_object decrefs its src object if it propagates an exception
-  // out, so we use SyncAdjustOne, which adjusts the stack pointer by 1 stack
-  // element on an unwind, skipping over the src object.
-  cgCallHelper(v, env, CallSpec::direct(new_iter_object),
-               callDest(env, inst), SyncOptions::SyncAdjustOne, args);
-}
-
-void implMIterInit(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<IterData>();
-
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  auto const valOff = localOffset(extra->valId);
-
-  auto& v = vmain(env);
-
-  auto args = argGroup(env, inst)
-    .addr(fp, iterOff)
-    .ssa(0 /* src */);
-
-  auto const innerType = inst->typeParam();
-  assertx(innerType.isKnownDataType());
-
-  if (innerType <= TArrLike) {
-    args.addr(fp, valOff);
-    if (inst->is(MIterInitK)) {
-      args.addr(fp, localOffset(extra->keyId));
-    } else {
-      args.imm(0);
-    }
-    cgCallHelper(v, env, CallSpec::direct(new_miter_array_key),
-                 callDest(env, inst), SyncOptions::Sync, args);
-    return;
-  }
-
-  always_assert(innerType <= TObj);
-
-  args.immPtr(inst->marker().func()->cls())
-      .addr(fp, valOff);
-  if (inst->is(MIterInitK)) {
-    args.addr(fp, localOffset(extra->keyId));
-  } else {
-    args.imm(0);
-  }
-
-  // new_miter_object decrefs its src object if it propagates an exception out,
-  // so we use SyncAdjustOne, which adjusts the stack pointer by 1 stack
-  // element on an unwind, skipping over the src object.
-  cgCallHelper(v, env, CallSpec::direct(new_miter_object),
-               callDest(env, inst), SyncOptions::SyncAdjustOne, args);
+  auto const target = CallSpec::direct(new_iter_object);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void implIterNext(IRLS& env, const IRInstruction* inst) {
-  // Nothing uses WIterNext so we intentionally don't support it here to avoid
-  // a null check in the witer_next_key helper.  This will need to change if we
-  // ever start using it in an hhas file.
-  always_assert(!inst->is(WIterNext));
-
-  bool isNextK = inst->is(IterNextK, WIterNextK);
-  bool isWNext = inst->is(WIterNext, WIterNextK);
-
-  auto const extra = inst->extra<IterData>();
+  auto const isNextK = inst->is(IterNextK);
+  auto const extra = &inst->extra<IterData>()->args;
 
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 0).reg();
@@ -182,32 +145,32 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
     return ret;
   }();
 
-  auto const helper = isWNext ? (TCA)witer_next_key :
-                      isNextK ? (TCA)iter_next_key_ind :
-                                (TCA)iter_next_ind;
+  auto const target = isNextK ? CallSpec::direct(iter_next_key_ind) :
+                                CallSpec::direct(iter_next_ind);
   auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(reinterpret_cast<void (*)()>(helper)),
-               callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void implMIterNext(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<IterData>();
+void implLIterNext(IRLS& env, const IRInstruction* inst) {
+  always_assert(inst->is(LIterNext, LIterNextK));
+  auto const isKey = inst->is(LIterNextK);
+  auto const extra = &inst->extra<IterData>()->args;
 
   auto const args = [&] {
-    auto const fp = srcLoc(env, inst, 0).reg();
-
+    auto const fp = srcLoc(env, inst, 1).reg();
     auto ret = argGroup(env, inst)
       .addr(fp, iterOffset(inst->marker(), extra->iterId))
       .addr(fp, localOffset(extra->valId));
-    if (inst->is(MIterNextK)) {
-      ret.addr(fp, localOffset(extra->keyId));
-    } else {
-      ret.imm(0);
-    }
+    if (isKey) ret.addr(fp, localOffset(extra->keyId));
+    ret.ssa(0);
     return ret;
   }();
-  cgCallHelper(vmain(env), env, CallSpec::direct(miter_next_key),
-               callDest(env, inst), SyncOptions::Sync, args);
+
+  auto const target = isKey
+    ? CallSpec::direct(liter_next_key_ind)
+    : CallSpec::direct(liter_next_ind);
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
@@ -225,6 +188,115 @@ void implIterFree(IRLS& env, const IRInstruction* inst, CallSpec meth) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+template<typename T>
+Vptr iteratorPtr(IRLS& env, const IRInstruction* inst, const T* extra) {
+  assertx(inst->src(0)->isA(TFramePtr));
+  auto const fp = srcLoc(env, inst, 0).reg();
+  return fp[iterOffset(inst->marker(), extra->iterId)];
+}
+
+int32_t iteratorType(IterSpecialization specialization) {
+  auto const nextHelperIndex = [&]{
+    using S = IterSpecialization;
+    switch (specialization.base_type) {
+      case S::Packed:
+      case S::Vec: {
+        return specialization.base_const && !specialization.output_key
+          ? IterNextIndex::ArrayPackedPointer
+          : IterNextIndex::ArrayPacked;
+      }
+      case S::Mixed:
+      case S::Dict: {
+        return specialization.base_const
+          ? IterNextIndex::ArrayMixedPointer
+          : IterNextIndex::ArrayMixed;
+      }
+    }
+    always_assert(false);
+  }();
+
+  auto const type = IterImpl::packTypeFields(
+    IterImpl::TypeArray, nextHelperIndex, specialization);
+  return safe_cast<int32_t>(type);
+}
+
+}
+
+void cgCheckIter(IRLS& env, const IRInstruction* inst) {
+  static_assert(sizeof(IterSpecialization) == 1, "");
+  auto const iter = iteratorPtr(env, inst, inst->extra<CheckIter>());
+  auto const type = inst->extra<CheckIter>()->type;
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpbim{type.as_byte, iter + IterImpl::specializationOffset(), sf};
+  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgLdIterBase(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::baseSize() == 8, "");
+  always_assert(!inst->typeParam().needsReg());
+  auto const dst  = dstLoc(env, inst, 0).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterBase>());
+  vmain(env) << load{iter + IterImpl::baseOffset(), dst};
+}
+
+void cgLdIterPos(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::posSize() == 8, "");
+  auto const dst  = dstLoc(env, inst, 0).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterPos>());
+  vmain(env) << load{iter + IterImpl::posOffset(), dst};
+}
+
+void cgLdIterEnd(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::endSize() == 8, "");
+  auto const dst  = dstLoc(env, inst, 0).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<LdIterEnd>());
+  vmain(env) << load{iter + IterImpl::endOffset(), dst};
+}
+
+void cgStIterBase(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::baseSize() == 8, "");
+  auto const src  = srcLoc(env, inst, 1).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterBase>());
+  vmain(env) << store{src, iter + IterImpl::baseOffset()};
+}
+
+void cgStIterType(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::typeSize() == 4, "");
+  auto const type = inst->extra<StIterType>()->type;
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterType>());
+  vmain(env) << storeli{iteratorType(type), iter + IterImpl::typeOffset()};
+}
+
+void cgStIterPos(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::posSize() == 8, "");
+  auto const src  = srcLoc(env, inst, 1).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterPos>());
+  vmain(env) << store{src, iter + IterImpl::posOffset()};
+}
+
+void cgStIterEnd(IRLS& env, const IRInstruction* inst) {
+  static_assert(IterImpl::endSize() == 8, "");
+  auto const src  = srcLoc(env, inst, 1).reg();
+  auto const iter = iteratorPtr(env, inst, inst->extra<StIterEnd>());
+  vmain(env) << store{src, iter + IterImpl::endOffset()};
+}
+
+void cgKillIter(IRLS& env, const IRInstruction* inst) {
+  if (!debug) return;
+  int32_t trash;
+  memset(&trash, kIterTrashFill, sizeof(trash));
+  auto const iter = iteratorPtr(env, inst, inst->extra<KillIter>());
+  auto& v = vmain(env);
+  for (auto i = 0; i < sizeof(IterImpl); i += sizeof(trash)) {
+    v << storeli{trash, iter + i};
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgIterInit(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
@@ -233,20 +305,12 @@ void cgIterInitK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgWIterInit(IRLS& env, const IRInstruction* inst) {
+void cgLIterInit(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
 }
 
-void cgWIterInitK(IRLS& env, const IRInstruction* inst) {
+void cgLIterInitK(IRLS& env, const IRInstruction* inst) {
   implIterInit(env, inst);
-}
-
-void cgMIterInit(IRLS& env, const IRInstruction* inst) {
-  implMIterInit(env, inst);
-}
-
-void cgMIterInitK(IRLS& env, const IRInstruction* inst) {
-  implMIterInit(env, inst);
 }
 
 void cgIterNext(IRLS& env, const IRInstruction* inst) {
@@ -257,153 +321,16 @@ void cgIterNextK(IRLS& env, const IRInstruction* inst) {
   implIterNext(env, inst);
 }
 
-void cgWIterNext(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst);
+void cgLIterNext(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst);
 }
 
-void cgWIterNextK(IRLS& env, const IRInstruction* inst) {
-  implIterNext(env, inst);
-}
-
-void cgMIterNext(IRLS& env, const IRInstruction* inst) {
-  implMIterNext(env, inst);
-}
-
-void cgMIterNextK(IRLS& env, const IRInstruction* inst) {
-  implMIterNext(env, inst);
+void cgLIterNextK(IRLS& env, const IRInstruction* inst) {
+  implLIterNext(env, inst);
 }
 
 void cgIterFree(IRLS& env, const IRInstruction* inst) {
   implIterFree(env, inst, CallSpec::method(&Iter::free));
-}
-
-void cgMIterFree(IRLS& env, const IRInstruction* inst) {
-  implIterFree(env, inst, CallSpec::method(&Iter::mfree));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-int64_t decodeCufIterHelper(Iter* it, TypedValue func, ActRec* ar) {
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  StringData* invName = nullptr;
-  bool dynamic = false;
-
-  if (LIKELY(ar->func()->isBuiltin())) {
-    ar = g_context->getOuterVMFrame(ar);
-  }
-  auto const f = vm_decode_function(tvAsVariant(&func), ar, false,
-                                    obj, cls, invName, dynamic,
-                                    DecodeFlags::NoWarn);
-  if (UNLIKELY(!f)) return false;
-
-  auto& cit = it->cuf();
-  assertx(dynamic == cit.dynamic());
-  cit.setFunc(f);
-  if (obj) {
-    cit.setCtx(obj);
-    obj->incRefCount();
-  } else {
-    cit.setCtx(cls);
-  }
-  cit.setName(invName);
-  return true;
-}
-
-void cgDecodeCufIter(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<DecodeCufIter>();
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-
-  auto const args = argGroup(env, inst)
-    .addr(fp, iterOff)
-    .typedValue(0)
-    .reg(fp);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(decodeCufIterHelper),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void cgStCufIterFunc(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<StCufIterFunc>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const func    = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << store{func, fp[iterOff + CufIter::funcOff()]};
-}
-
-void cgStCufIterCtx(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<StCufIterCtx>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const ctx     = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << store{ctx, fp[iterOff + CufIter::ctxOff()]};
-}
-
-void cgStCufIterInvName(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<StCufIterInvName>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const name    = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << store{name, fp[iterOff + CufIter::nameOff()]};
-}
-
-void cgStCufIterDynamic(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<StCufIterDynamic>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const dynamic = srcLoc(env, inst, 1).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << storeb{dynamic, fp[iterOff + CufIter::dynamicOff()]};
-}
-
-void cgLdCufIterFunc(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<LdCufIterFunc>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const dst     = dstLoc(env, inst, 0).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << load{fp[iterOff + CufIter::funcOff()], dst};
-}
-
-void cgLdCufIterCtx(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<LdCufIterCtx>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const dst     = dstLoc(env, inst, 0).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << load{fp[iterOff + CufIter::ctxOff()], dst};
-}
-
-void cgLdCufIterInvName(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<LdCufIterInvName>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const dst     = dstLoc(env, inst, 0).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << load{fp[iterOff + CufIter::nameOff()], dst};
-}
-
-void cgLdCufIterDynamic(IRLS& env, const IRInstruction* inst) {
-  auto const extra   = inst->extra<LdCufIterDynamic>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const dst     = dstLoc(env, inst, 0).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-  vmain(env) << loadtqb{fp[iterOff + CufIter::dynamicOff()], dst};
-}
-
-void cgKillCufIter(IRLS& env, const IRInstruction* inst) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
-
-  auto& v            = vmain(env);
-  auto const extra   = inst->extra<KillCufIter>();
-  auto const fp      = srcLoc(env, inst, 0).reg();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-
-  uint64_t trash;
-  memset(&trash, kTrashCufIter, sizeof(trash));
-  auto const trashCns = v.cns(trash);
-
-  v << store{trashCns, fp[iterOff + CufIter::funcOff()]};
-  v << store{trashCns, fp[iterOff + CufIter::ctxOff()]};
-  v << store{trashCns, fp[iterOff + CufIter::nameOff()]};
-  v << storeb{trashCns, fp[iterOff + CufIter::dynamicOff()]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -24,9 +24,6 @@
 #include <folly/ScopeGuard.h>
 
 #include <stdio.h>
-#include <assert.h>
-#include <zlib.h>
-#include <ctype.h>
 
 using HPHP::hfsort::error;
 

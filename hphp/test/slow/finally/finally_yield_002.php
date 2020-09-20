@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bleh() {
   echo "begin\n";
@@ -22,5 +22,9 @@ function main() {
   }
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_finally_yield_002() {
+main();
+}

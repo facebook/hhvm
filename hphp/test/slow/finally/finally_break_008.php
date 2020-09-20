@@ -1,9 +1,9 @@
-<?php
+<?hh
 
 function blah() {
-  $xs = array(11, 22, 33, 44, 55);
-  $ys = array('a', 'b', 'c', 'd', 'e', 'f');
-  $zs = array('x', 'y', 'z');
+  $xs = varray[11, 22, 33, 44, 55];
+  $ys = varray['a', 'b', 'c', 'd', 'e', 'f'];
+  $zs = varray['x', 'y', 'z'];
 
   try {
     echo "begin try\n";
@@ -30,12 +30,14 @@ function blah() {
           }
           echo "middle outer loop\n";
           try {
+            $continue_outer_loop = false;
             foreach ($xs as $x) {
               try  {
                 echo "begin inner loop $x\n";
                 if ($x == 22 || $y == 'b') {
                   echo "continue 2\n";
-                  continue 2;
+                  $continue_outer_loop = true;
+                  break;
                 }
                 if ($x == 33) {
                   echo "break\n";
@@ -50,6 +52,7 @@ function blah() {
               }
               echo "end inner loop $x\n";
             }
+            if ($continue_outer_loop) continue;
           } finally {
             echo "inner finally 2\n";
           }
@@ -65,5 +68,9 @@ function blah() {
   }
 }
 
-blah();
 
+
+<<__EntryPoint>>
+function main_finally_break_008() {
+blah();
+}

@@ -85,9 +85,22 @@ struct RefineTmpsRec {
       FTRACE(3, "  {}\n", inst);
       for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
         auto const src = inst.src(srcID);
-        if (auto const replace = find_replacement(src, blk)) {
-          FTRACE(1, "    rewrite {} -> {} in {}\n", *src, *replace, inst);
-          inst.setSrc(srcID, replace);
+        // We'll often see multiple refinements of a given tmp in a row; for
+        // example, in a retranslation chain, we may see a negative type assert
+        // for the previous check followed by a new CheckType. Keep following
+        // this chain of replacements as long as they're usable.
+        //
+        // We shouldn't hit a cycle here because we always transition to a tmp
+        // defined earlier in the same block or to one defined in a dominator.
+        auto prev = src;
+        auto next = src;
+        while (next != nullptr) {
+          prev = next;
+          next = find_replacement(next, blk);
+        }
+        if (prev != src) {
+          FTRACE(1, "    rewrite {} -> {} in {}\n", *src, *prev, inst);
+          inst.setSrc(srcID, prev);
           if (inst.hasDst()) needsReflow = true;
         }
       }
@@ -98,7 +111,11 @@ struct RefineTmpsRec {
         continue;
       }
 
-      if (inst.is(CheckType, AssertType, CheckVArray, CheckDArray)) {
+      if (inst.is(CheckType, AssertType)) {
+        // Type information for one use of a pointer can't be transferred to
+        // other uses, because we may overwrite the pointer's target in between
+        // the uses (e.g. due to minstr escalation).
+        if (inst.hasTypeParam() && inst.typeParam() <= TMemToCell) continue;
         if (!saved_state) saved_state = state;
         auto const dst = inst.dst();
         auto const src = inst.src(0);
@@ -290,20 +307,20 @@ void refineTmps(IRUnit& unit,
 }
 
 SSATmp* insertPhi(IRUnit& unit, Block* blk,
-                  const jit::vector<SSATmp*>& inputs) {
-  assert(blk->numPreds() > 1);
+                  const jit::hash_map<Block*, SSATmp*>& inputs) {
+  assertx(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
-    label = unit.defLabel(1, label->bcctx());
-    blk->insert(blk->begin(), label);
+    label = unit.defLabel(1, blk, label->bcctx());
   } else {
     for (auto d = label->numDsts(); d--; ) {
       auto result = label->dst(d);
-      uint32_t i = 0;
       blk->forEachPred([&](Block* pred) {
           if (result) {
             auto& jmp = pred->back();
-            if (jmp.src(d) != inputs[i++]) {
+            auto it = inputs.find(pred);
+            assertx(it != inputs.end());
+            if (jmp.src(d) != it->second) {
               result = nullptr;
             }
           }
@@ -313,9 +330,10 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
     unit.expandLabel(label, 1);
   }
 
-  uint32_t i = 0;
   blk->forEachPred([&](Block* pred) {
-      unit.expandJmp(&pred->back(), inputs[i++]);
+      auto it = inputs.find(pred);
+      assertx(it != inputs.end());
+      unit.expandJmp(&pred->back(), it->second);
     });
   retypeDests(label, &unit);
   return label->dst(label->numDsts() - 1);

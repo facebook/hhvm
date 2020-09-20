@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_globiterator() {
 $iter = new GlobIterator(__DIR__ . "/../../sample_dir/*");
 
 var_dump($iter->count());
@@ -9,4 +12,5 @@ var_dump($iter->getFilename());
 
 foreach ($iter as $file) {
   echo "$file\n";
+}
 }

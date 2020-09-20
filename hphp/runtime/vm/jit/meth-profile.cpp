@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include "hphp/util/assertions.h"
 
@@ -29,7 +30,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void MethProfile::reportMethHelper(const Class* cls, const Func* meth) {
+void MethProfile::reportMeth(const Class* cls, const Func* meth) {
   auto val = methValue();
   if (!val) {
     assertx(cls);
@@ -92,7 +93,7 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
       continue;
     }
     assertx(cls);
-    a.reportMethHelper(cls, fromValue(bMethVal));
+    a.reportMeth(cls, fromValue(bMethVal));
     return;
   }
 
@@ -113,7 +114,7 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
     return;
   }
 
-  a.reportMethHelper(nullptr, meth);
+  a.reportMeth(nullptr, meth);
   if (a.curTag() == Tag::UniqueMeth && toTag(bMethVal) == Tag::BaseMeth) {
     a.setMeth(meth, Tag::BaseMeth);
   }
@@ -130,6 +131,43 @@ std::string MethProfile::toString() const {
     return folly::sformat("interfaceMeth {}", meth->fullName()->data());
   }
   return std::string("none");
+}
+
+folly::dynamic MethProfile::toDynamic() const {
+  using folly::dynamic;
+
+  dynamic baseObj = dynamic::object("profileType", "MethProfile");
+  if (auto cls = uniqueClass()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "uniqueClass")
+                                         ("name", cls->name()->slice()));
+  } else if (auto meth = uniqueMeth()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "uniqueMeth")
+                                         ("name", meth->fullName()->slice()));
+  } else if (auto meth = baseMeth()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "baseMeth")
+                                         ("name", meth->fullName()->slice()));
+  } else if (auto meth = interfaceMeth()) {
+    return dynamic::merge(baseObj,
+                          dynamic::object("type", "interfaceMeth")
+                                         ("name", meth->fullName()->slice()));
+  }
+  return dynamic();
+}
+
+void MethProfile::serialize(ProfDataSerializer& ser) const {
+  write_raw(ser, curTag());
+  write_func(ser, rawMeth());
+  write_class(ser, rawClass());
+}
+
+void MethProfile::deserialize(ProfDataDeserializer& ser) {
+  auto const tag = read_raw<Tag>(ser);
+  auto const func = read_func(ser);
+  setMeth(func, tag);
+  m_curClass = read_class(ser);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

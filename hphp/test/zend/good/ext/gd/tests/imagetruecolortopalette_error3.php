@@ -1,10 +1,9 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $image = imagecreatetruecolor(50, 50);
 $resource = tmpfile();
 
-imagetruecolortopalette($image, true, 'string');
-imagetruecolortopalette($image, true, $resource);
-imagetruecolortopalette($image, true, array());
-imagetruecolortopalette($image, true, null);
-
-?>
+try { imagetruecolortopalette($image, true, 'string'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { imagetruecolortopalette($image, true, $resource); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { imagetruecolortopalette($image, true, varray[]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { imagetruecolortopalette($image, true, null); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

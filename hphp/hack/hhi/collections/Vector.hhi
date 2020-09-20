@@ -1,11 +1,10 @@
-<?hh // decl
+<?hh
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -14,6 +13,8 @@
  *
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
+
+namespace HH {
 
 /**
  * `Vector` is a stack-like collection. HHVM provides a native implementation
@@ -37,16 +38,11 @@
  * elements are being removed. When a new element is added or removed, all
  * iterators that point to the `Vector` shall be considered invalid.
  *
- * `Vector`s do not support taking elements by reference. If binding assignment
- * (`=&`) is used with an element of a `Vector`, or if an element of a `Vector`
- * is passed by reference, or if a `Vector` is used with `foreach` by
- * reference, an exception will be thrown.
- *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 
-final class Vector<Tv> implements MutableVector<Tv> {
+final class Vector<Tv> implements \MutableVector<Tv> {
   /**
    * Creates a `Vector` from the given `Traversable`, or an empty `Vector`
    * if `null` is passed.
@@ -55,16 +51,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *              the `Vector` (e.g., `array`). If `null`, then an empty
    *              `Vector` is created.
    */
-  public function __construct(?Traversable<Tv> $it);
-
-  /**
-   * Returns an `array` containing the values from the current `Vector`.
-   *
-   * This method is interchangeable with `toValuesArray()`.
-   *
-   * @return - An `array` containing the values from the current `Vector`.
-   */
-  public function toArray(): array<Tv>;
+  <<__Pure, __AtMostRxAsArgs>>
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Returns an `array` containing the values from the current `Vector`.
@@ -73,20 +61,23 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - An `array` containing the values from the current `Vector`.
    */
-  public function toValuesArray(): array<Tv>;
+  <<__Pure, __MaybeMutable>>
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an `array` whose values are the keys from the current `Vector`.
    *
    * @return - An `array` with the integer keys from the current `Vector`.
    */
-  public function toKeysArray(): array<int>;
+  <<__Pure, __MaybeMutable>>
+  public function toKeysArray(): varray<int>;
 
   /**
    * Returns a copy of the current `Vector`.
    *
    * @return - A `Vector` that is a copy of the current `Vector`.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toVector(): Vector<Tv>;
 
   /**
@@ -94,6 +85,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Vector` that is an immutable copy of the current `Vector`.
    */
+  <<__Pure, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
 
   /**
@@ -102,6 +94,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Map` that has the integer keys and associated values of the
    *           current `Vector`.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toMap(): Map<int, Tv>;
 
   /**
@@ -111,6 +104,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - An `ImmMap` that has the integer keys and associated values
    *           of the current `Vector`.
    */
+  <<__Pure, __MaybeMutable>>
   public function toImmMap(): ImmMap<int, Tv>;
 
   /**
@@ -118,7 +112,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Set` containing the unique values of the current `Vector`.
    */
-  public function toSet(): Set<Tv>;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable set (`ImmSet`) based on the values of the current
@@ -126,7 +121,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - An `ImmSet` containing the unique values of the current `Vector`.
    */
-  public function toImmSet(): ImmSet<Tv>;
+  <<__Pure, __MaybeMutable>>
+  public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
   /**
    * Returns an immutable copy (`ImmVector`) of the current `Vector`.
@@ -135,6 +131,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - An `ImmVector` copy of the current `Vector`.
    */
+  <<__Pure, __MaybeMutable>>
   public function immutable(): ImmVector<Tv>;
 
   /**
@@ -150,7 +147,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function lazy(): KeyedIterable<int, Tv>;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function lazy(): \HH\Rx\KeyedIterable<int, Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector`.
@@ -160,6 +158,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Vector` containing the values of the current `Vector`.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function values(): Vector<Tv>;
 
   /**
@@ -167,6 +166,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Vector` containing the integer keys of the current `Vector`.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function keys(): Vector<int>;
 
   /**
@@ -185,7 +185,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Vector<Tu>;
 
   /**
    * Returns a `Vector` containing the results of applying an operation to each
@@ -202,7 +203,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` containing the results of applying a user-specified
    *           operation to each key/value pair of the current `Vector` in turn.
    */
-  public function mapWithKey<Tu>((function(int, Tv): Tu) $callback): Vector<Tu>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $callback): Vector<Tu>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector` that meet
@@ -220,7 +222,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  public function filter((function(Tv): bool) $callback): Vector<Tv>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Vector<Tv>;
 
   /**
    * Returns a `Vector` containing the values of the current `Vector` that meet
@@ -241,7 +244,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *           to the corresponding key/value pairs.
    *
    */
-  public function filterWithKey((function(int, Tv): bool) $callback):
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $callback):
     Vector<Tv>;
 
   /**
@@ -259,7 +263,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` that combines the values of the current `Vector`
    *           with the provided `Traversable`.
    */
-  public function zip<Tu>(Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
 
   /**
    * Returns a `Vector` containing the first `$n` values of the current
@@ -278,6 +283,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` that is a subset of the current `Vector` up to `$n`
    *           elements.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function take(int $n): Vector<Tv>;
 
   /**
@@ -294,7 +300,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` that is a subset of the current `Vector` up until the
    *           callback returns `false`.
    */
-  public function takeWhile((function(Tv): bool) $fn): Vector<Tv>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Vector<Tv>;
 
   /**
    * Returns a `Vector` containing the values after the `$n`-th element of the
@@ -314,6 +321,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` that is a subset of the current `Vector` containing
    *           values after the specified `$n`-th element.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function skip(int $n): Vector<Tv>;
 
   /**
@@ -331,7 +339,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` that is a subset of the current `Vector` starting
    *           with the value for which the callback first returns `false`.
    */
-  public function skipWhile((function(Tv): bool) $fn): Vector<Tv>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Vector<Tv>;
 
   /**
    * Returns a subset of the current `Vector` starting from a given key up to,
@@ -356,6 +365,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` that is a subset of the current `Vector` starting
    *           at `$start` up to but not including the element `$start + $len`.
    */
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len): Vector<Tv>;
 
   /**
@@ -378,7 +388,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function concat<Tu super Tv>(Traversable<Tu> $traversable): Vector<Tu>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
    * Returns the first value in the current `Vector`.
@@ -386,6 +397,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The first value in the current `Vector`, or `null` if the
    *           `Vector` is empty.
    */
+  <<__Pure, __MaybeMutable>>
   public function firstValue(): ?Tv;
 
   /**
@@ -394,6 +406,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The first key (an integer) in the current `Vector`, or `null` if
    *           the `Vector` is empty.
    */
+  <<__Pure, __MaybeMutable>>
   public function firstKey(): ?int;
 
   /**
@@ -402,6 +415,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The last value in the current `Vector`, or `null` if the current
    *           `Vector` is empty.
    */
+  <<__Pure, __MaybeMutable>>
   public function lastValue(): ?Tv;
 
   /**
@@ -410,6 +424,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The last key (an integer) in the current `Vector`, or `null` if
    *           the `Vector` is empty.
    */
+  <<__Pure, __MaybeMutable>>
   public function lastKey(): ?int;
 
   /**
@@ -417,6 +432,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - `true` if the current `Vector` is empty; `false` otherwise.
    */
+  <<__Pure, __MaybeMutable>>
   public function isEmpty(): bool;
 
   /**
@@ -424,6 +440,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - The number of elements in the current `Vector`.
    */
+  <<__Pure, __MaybeMutable>>
   public function count(): int;
 
   /**
@@ -439,6 +456,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The value at the specified key; or an exception if the key does
    *           not exist.
    */
+  <<__Pure, __MaybeMutable>>
   public function at(int $k): Tv;
 
   /**
@@ -452,6 +470,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - The value at the specified key; or `null` if the key does not
    *           exist.
    */
+  <<__Pure, __MaybeMutable>>
   public function get(int $k): ?Tv;
 
   /**
@@ -472,6 +491,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function set(int $k, Tv $v): Vector<Tv>;
 
   /**
@@ -491,7 +511,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
-  public function setAll(?KeyedTraversable<int, Tv> $it): Vector<Tv>;
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<int, Tv> $it): Vector<Tv>;
 
   /**
    * Removes all the elements from the current `Vector`.
@@ -501,6 +522,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function clear(): Vector<Tv>;
 
   /**
@@ -511,7 +533,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function containsKey<Tu super int>(Tu $k): bool;
+  <<__Pure, __MaybeMutable>>
+  public function containsKey(mixed $k): bool;
 
   /**
    * Appends a value to the end of the current `Vector`, assigning it the next
@@ -532,6 +555,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function add(Tv $value): Vector<Tv>;
 
   /**
@@ -548,7 +572,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
-  public function addAll(?Traversable<Tv> $it): Vector<Tv>;
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Vector<Tv>;
 
   /**
    * Adds the keys of the specified container to the current `Vector`.
@@ -563,9 +588,10 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
-  public function addAllKeysOf<Tv2>(
-    ?KeyedContainer<Tv,Tv2> $container,
-  ): Vector<Tv>;
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
+  public function addAllKeysOf(
+    ?KeyedContainer<Tv,mixed> $container,
+  ): Vector<Tv> where Tv as arraykey;
 
   /**
    * Removes the key/value pair with the specified key from the current
@@ -586,6 +612,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - Returns itself.
    */
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function removeKey(int $k): Vector<Tv>;
 
   /**
@@ -599,6 +626,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - The value of the last element.
    */
+  <<__Pure, __Mutable>>
   public function pop(): Tv;
 
   /**
@@ -618,6 +646,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $value - The value to use as the filler if we are increasing the
    *                 size of the current `Vector`.
    */
+  <<__Pure, __Mutable>>
   public function resize(int $sz, Tv $value): void;
 
   /**
@@ -631,6 +660,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $sz - The pre-determined size you want for the current `Vector`.
    */
+  <<__Pure, __Mutable>>
   public function reserve(int $sz): void;
 
   /**
@@ -639,11 +669,13 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `Vector`.
    */
-  public function getIterator(): KeyedIterator<int, Tv>;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function getIterator(): \HH\Rx\KeyedIterator<int, Tv>;
 
   /**
    * Reverse the elements of the current `Vector` in place.
    */
+  <<__Pure, __Mutable>>
   public function reverse(): void;
 
   /**
@@ -667,6 +699,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @link http://php.net/manual/en/function.array-splice.php
    */
+  <<__Pure, __Mutable>>
   public function splice(int $offset, ?int $len = null): void;
 
   /**
@@ -681,11 +714,13 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  public function linearSearch<Tu super Tv>(Tu $search_value): int;
+  <<__Pure, __MaybeMutable>>
+  public function linearSearch(mixed $search_value): int;
 
   /**
    * Shuffles the values of the current `Vector` randomly in place.
    */
+  <<__Pure, __Mutable>>
   public function shuffle(): void;
 
   /**
@@ -698,7 +733,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` with the values from the provided `array`.
    */
   <<__Deprecated('Use `new Vector($arr)` instead.')>>
-  public static function fromArray<T>(array<T, Tv> $arr): Vector<Tv>;
+  public static function fromArray(darray<arraykey, Tv> $arr): Vector<Tv>;
 
   /**
    * Creates a `Vector` from the given `Traversable`, or an empty `Vector` if
@@ -714,7 +749,8 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` with the values from the `Traversable`; or an empty
    *           `Vector` if the `Traversable` is `null`.
    */
-  public static function fromItems(?Traversable<Tv> $items): Vector<Tv>;
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Vector<Tv>;
 
   /**
    * Creates a `Vector` from the keys of the specified container.
@@ -727,8 +763,9 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Vector` built from the keys of the specified container.
    */
-  public static function fromKeysOf<Tk,Tv2>(
-    ?KeyedContainer<Tk,Tv2> $container
+  <<__Pure, __MutableReturn>>
+  public static function fromKeysOf<Tk as arraykey>(
+    ?KeyedContainer<Tk,mixed> $container
   ): Vector<Tk>;
 
   /**
@@ -736,6 +773,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - The string `"Vector"`.
    */
+  <<__Pure, __MaybeMutable>>
   public function __toString(): string;
 
   /**
@@ -746,19 +784,37 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - The `Iterable` view of the current `Vector`.
    */
-  public function items(): Iterable<Tv>;
+  <<__Pure, __MutableReturn, __MaybeMutable>>
+  public function items(): \HH\Rx\Iterable<Tv>;
+
+  <<__Pure, __MaybeMutable>> /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  <<__Pure, __MaybeMutable>> /* HH_FIXME[0001] */
+  public function toDArray(): darray<int, Tv>;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * @internal
  *
  * Methods and functions should take and return the KeyedIterator interface.
  */
-class VectorIterator<+Tv> implements KeyedIterator<int, Tv> {
+class VectorIterator<+Tv> implements HH\Rx\KeyedIterator<int, Tv> {
+  <<__Pure>>
   public function __construct();
-  public function rewind(): void;
+  <<__Pure, __MaybeMutable>>
   public function current(): Tv;
+  <<__Pure, __MaybeMutable>>
   public function key(): int;
-  public function next(): void;
+  <<__Pure, __MaybeMutable>>
   public function valid(): bool;
+  <<__Pure, __Mutable>>
+  public function next(): void;
+  <<__Pure, __Mutable>>
+  public function rewind(): void;
 }
+
+} // namespace

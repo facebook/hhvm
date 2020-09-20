@@ -1,1 +1,2 @@
-No errors
+File "imports_toplevel_strict.php", line 2, characters 1-45:
+Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])

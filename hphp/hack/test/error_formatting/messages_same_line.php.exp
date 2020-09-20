@@ -1,0 +1,12 @@
+Typing[4105] Too many arguments (expected 0 but got 1)
+   --> messages_same_line.php
+  3 | function foo(): void {} function bar() { foo(1); }
+    |                                          ^^^^^^
+    |          ^^^ Definition is here
+
+Typing[4030] Was expecting a return type hint
+   --> messages_same_line.php
+  3 | function foo(): void {} function bar() { foo(1); }
+    |                                  ^^^
+
+2 errors found.

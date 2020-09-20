@@ -1,12 +1,8 @@
 
-Warning: %s
-bool(false)
+Warning: posix_seteuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_seteuid_variation1.php on line 15
 
-Warning: %s
-bool(false)
+Warning: posix_seteuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_seteuid_variation1.php on line 15
 
-Warning: %s
-bool(false)
+Warning: posix_seteuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_seteuid_variation1.php on line 15
 
-Warning: %s
-bool(false)
+Warning: posix_seteuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_seteuid_variation1.php on line 15

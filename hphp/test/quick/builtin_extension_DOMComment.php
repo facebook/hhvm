@@ -1,8 +1,9 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_DOMComment extends DOMComment {
   public $___x;
 }
-test("DOMComment");
+<<__EntryPoint>> function main(): void {
+  include __DIR__."/builtin_extensions.inc";
+  test("DOMComment");
+}

@@ -1,1 +1,0 @@
-((Fatal error\: Only the last parameter in a function call is allowed to use \.\.\. in [^\r\n]+\/unpack_call_error\.php on line 10)|(Fatal error\: The splat operator \('\.\.\.'\) for unpacking variadic arguments may only appear at the end of an argument list\. in [^\r\n]+\/unpack_args\/unpack_call_error\.php on line 10))

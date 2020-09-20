@@ -1,4 +1,4 @@
-array(7) {
+darray(7) {
   [0]=>
   int(120)
   [1]=>
@@ -14,7 +14,7 @@ array(7) {
   ["mime"]=>
   string(9) "image/gif"
 }
-array(7) {
+darray(7) {
   [0]=>
   int(120)
   [1]=>

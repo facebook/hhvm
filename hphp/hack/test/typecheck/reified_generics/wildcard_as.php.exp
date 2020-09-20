@@ -1,0 +1,2 @@
+File "wildcard_as.php", line 7, characters 8-8:
+Wildcard typehints are not allowed in this position (Naming[2084])

@@ -1,22 +1,22 @@
-<?php
-
-error_reporting (E_ALL);
+<?hh
 
 class foo {
 
-    public $functions = array();
-    
-    function foo()
+    public $functions = darray[];
+
+    function __construct()
     {
-        $function = create_function('', 'return "FOO\n";');
+        $function = () ==> "FOO\n";
         print($function());
-        
+
         $this->functions['test'] = $function;
         print($this->functions['test']());    // werkt al niet meer
-    
+
     }
 }
 
-$a = new foo ();
+<<__EntryPoint>> function main(): void {
+error_reporting (E_ALL);
 
-?>
+$a = new foo ();
+}

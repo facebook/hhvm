@@ -32,6 +32,7 @@
 # include <execinfo.h>
 #endif
 
+#include <folly/Demangle.h>
 #include <folly/Format.h>
 
 #include "hphp/util/functional.h"
@@ -94,7 +95,7 @@ std::string getNativeFunctionName(void* codeAddr) {
   folly::symbolizer::Symbolizer symbolizer;
   folly::symbolizer::SymbolizedFrame frame;
   if (symbolizer.symbolize(uintptr_t(codeAddr), frame)) {
-    functionName = frame.demangledName().toStdString();
+    functionName = folly::demangle(frame.name).toStdString();
   }
 
 #else

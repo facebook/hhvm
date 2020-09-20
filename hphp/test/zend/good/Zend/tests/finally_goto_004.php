@@ -1,9 +1,8 @@
-<?php
-function foo() {
-	try {
+<?hh
+<<__EntryPoint>> function foo(): void {
+    try {
     } finally {
 test:
     }
-	goto test;
+    goto test;
 }
-?>

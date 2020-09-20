@@ -1,0 +1,2 @@
+File "obj_get_chained.php", line 13, characters 8-37:
+Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. (Parsing[1002])

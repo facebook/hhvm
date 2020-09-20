@@ -22,4 +22,8 @@ function main() {
   f(new C());
 }
 
+
+<<__EntryPoint>>
+function main_traits_and_interfaces1() {
 main();
+}

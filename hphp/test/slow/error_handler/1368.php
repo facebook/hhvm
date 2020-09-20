@@ -1,13 +1,13 @@
-<?php
-
+<?hh
 function handler($e) {
-   var_dump(strpos((string)$e, 'bomb') !== false);
- return true;
+  var_dump(strpos((string)$e, 'bomb') !== false);
+  return true;
 }
- set_exception_handler('handler');
 function a() {
 }
- set_exception_handler('a');
-restore_exception_handler();
-throw new Exception('bomb');
-
+<<__EntryPoint>> function main(): void {
+  set_exception_handler(fun('handler'));
+  set_exception_handler(fun('a'));
+  restore_exception_handler();
+  throw new Exception('bomb');
+}

@@ -1,0 +1,5 @@
+%d seconds into the request on callback1 (i=%d)
+%d seconds into the request on callback2 (i=%d)
+
+Fatal error: Maximum execution time of %d seconds exceeded in %s on line %d
+It is over.

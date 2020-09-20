@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function iterate_queue_with_mode($mode) {
   $x = new SplQueue();
@@ -11,7 +11,7 @@ function iterate_queue_with_mode($mode) {
   }
   var_dump(count($x));
 }
-
+<<__EntryPoint>>
 function main() {
   iterate_queue_with_mode(SplQueue::IT_MODE_FIFO);
   iterate_queue_with_mode(SplQueue::IT_MODE_FIFO | SplQueue::IT_MODE_DELETE);
@@ -20,5 +20,3 @@ function main() {
   // Should fail
   iterate_queue_with_mode(SplQueue::IT_MODE_LIFO);
 }
-
-main();

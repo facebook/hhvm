@@ -18,18 +18,18 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/req-containers.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/util/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TimerPool final : RequestEventHandler {
-  using TimerSet = req::hash_set<IntervalTimer*>;
+  using TimerSet = req::fast_set<IntervalTimer*>;
   TimerSet& timers() { return *m_timers; }
 
   void requestInit() override {
@@ -44,7 +44,7 @@ struct TimerPool final : RequestEventHandler {
         timer->~IntervalTimer();
       }
     } while (!m_timers->empty());
-    m_timers.clear();
+    m_timers.reset();
   }
 
  private:
@@ -97,13 +97,11 @@ void IntervalTimer::RunCallbacks(
       }
     }
     try {
-      Array args = make_packed_array(sample_type_string(type),
-                                     count,
-                                     Object{wh});
+      auto args = make_vec_array(sample_type_string(type), count, Object{wh});
       vm_call_user_func(timer->m_callback, args);
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping IntervalTimer: %s",
-                  ex.toString().data());
+                  throwable_to_string(ex.get()).data());
     }
   }
 }
@@ -174,7 +172,7 @@ void HHVM_METHOD(IntervalTimer, __construct,
                  const Variant& callback) {
   auto data = Native::data<IntervalTimer>(this_);
   data->init(interval, initial, callback,
-             &ThreadInfo::s_threadInfo->m_reqInjectionData);
+             &RequestInfo::s_requestInfo->m_reqInjectionData);
 }
 
 void HHVM_METHOD(IntervalTimer, start) {

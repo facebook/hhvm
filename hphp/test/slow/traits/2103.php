@@ -1,20 +1,17 @@
-<?php
+<?hh
 
 trait TraitFoo {
   public function testDoSomethingInTrait() {
-    return call_user_func(array($this, 'doSomethingInTrait'));
+    return $this->doSomethingInTrait();
   }
   public function testDoSomethingPublicInTrait() {
-    return call_user_func(array($this, 'doSomethingPublicInTrait'));
+    return $this->doSomethingPublicInTrait();
   }
 }
 class A {
   use TraitFoo;
   public function testDoSomething() {
-    return call_user_func(array($this, 'doSomething'));
-  }
-  public function __call($name, $args) {
-    echo "**calling __call $name**";
+    return $this->doSomething();
   }
   protected function doSomething() {
     return 'doSomething';
@@ -26,6 +23,9 @@ class A {
     return 'doSomethingPublicInTrait';
   }
 }
+
+<<__EntryPoint>>
+function main_2103() {
 $a = new A();
 echo $a->testDoSomething()."
 ";
@@ -33,3 +33,4 @@ echo $a->testDoSomethingInTrait()."
 ";
 echo $a->testDoSomethingPublicInTrait()."
 ";
+}

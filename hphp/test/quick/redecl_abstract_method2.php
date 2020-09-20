@@ -7,3 +7,4 @@ class B {
 abstract class C extends B {
   abstract function foo();
 }
+

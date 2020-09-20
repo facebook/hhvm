@@ -1,3 +1,2 @@
-<?php
-var_dump('hello');
+<?hh
 class X { const V = 2; }

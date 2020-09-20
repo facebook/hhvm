@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(gmp_strval(gmp_sqrt(-2)));
 var_dump(gmp_strval(gmp_sqrt("-2")));
 var_dump(gmp_strval(gmp_sqrt("0")));
@@ -13,9 +13,9 @@ var_dump(gmp_strval(gmp_sqrt($n)));
 $n = gmp_init(777);
 var_dump(gmp_strval(gmp_sqrt($n)));
 
-var_dump(gmp_sqrt($n, 1));
-var_dump(gmp_sqrt());
-var_dump(gmp_sqrt(array()));
+try { var_dump(gmp_sqrt($n, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_sqrt()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_sqrt(varray[]));
 
 echo "Done\n";
-?>
+}

@@ -9,7 +9,7 @@ class one {
 class two {
   public static function foo() {
     echo "two\n";
-    if (get_called_class() === "three") {
+    if (static::class === "three") {
       static::heh();
     }
   }
@@ -20,23 +20,24 @@ class three extends two {
 }
 
 class doer {
-  public function junk($x) {
+  public function ijunk($x) {
     $x->foo();
+  }
+  public function sjunk($x) {
+    $x::foo();
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $b = new one;
   $d = new two;
   $x = new doer;
-  $x->junk($b);
-  $x->junk($d);
-  $x->junk($b);
-  $x->junk($d);
-  $x->junk(new three);
-  $x->junk($b);
-  $x->junk(new three);
-  $x->junk($d);
+  $x->ijunk($b);
+  $x->sjunk($d);
+  $x->ijunk($b);
+  $x->sjunk($d);
+  $x->sjunk(new three);
+  $x->ijunk($b);
+  $x->sjunk(new three);
+  $x->sjunk($d);
 }
-
-main();

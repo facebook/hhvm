@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_VERIFIER_UTIL_H_
-#define incl_HPHP_VM_VERIFIER_UTIL_H_
+#pragma once
 
 #include <cstddef> // for size_t
 #include <stdint.h>
@@ -59,4 +58,3 @@ inline bool contains(const C &c, T e) {
 
 }} // namespace HPHP::Verifier
 
-#endif // incl_HPHP_VM_VERIFIER_UTIL_H

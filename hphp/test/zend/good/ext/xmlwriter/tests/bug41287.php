@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $xw = xmlwriter_open_memory();
 xmlwriter_set_indent($xw, true);
 xmlwriter_start_document($xw);
@@ -23,4 +23,4 @@ $xw->writeElementNS(null, 'bar', '', '');
 $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);
-?>
+}

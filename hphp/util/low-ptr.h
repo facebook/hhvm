@@ -14,13 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LOW_PTR_H_
-#define incl_HPHP_LOW_PTR_H_
+#pragma once
 
+#include "hphp/util/low-ptr-def.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
 
-#include <folly/CPortability.h> // FOLLY_SANITIZE
 #include <folly/Format.h>
 
 #include <algorithm>
@@ -43,6 +42,7 @@ namespace detail {
 template <class T, class S>
 struct LowPtrImpl {
   using storage_type = typename S::storage_type;
+  enum class Unchecked {};
 
   /*
    * Constructors.
@@ -50,6 +50,7 @@ struct LowPtrImpl {
   LowPtrImpl() {}
 
   /* implicit */ LowPtrImpl(T* px) : m_s{to_low(px)} {}
+  /* implicit */ LowPtrImpl(Unchecked, T* px) : m_s{to_low_unchecked(px)} {}
 
   /* implicit */ LowPtrImpl(std::nullptr_t /*px*/) : m_s{ 0 } {}
 
@@ -159,8 +160,13 @@ private:
     return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
   }
 
+  static typename S::raw_type to_low_unchecked(T* px) {
+    assertx(is_low(px));
+    return (typename S::raw_type)(reinterpret_cast<uintptr_t>(px));
+  }
+
 protected:
-  typename S::storage_type m_s;
+  typename S::storage_type m_s{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -197,10 +203,6 @@ struct AtomicStorage {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#if FOLLY_SANITIZE
-#undef USE_LOWPTR
-#endif
-
 #ifdef USE_LOWPTR
 constexpr bool use_lowptr = true;
 
@@ -215,6 +217,13 @@ using low_storage_t = uintptr_t;
 }
 #endif
 
+inline bool is_low_mem(void* m) {
+  assertx(use_lowptr);
+  const uint32_t mask = ~0;
+  auto const i = reinterpret_cast<intptr_t>(m);
+  return (mask & i) == i;
+}
+
 template<class T>
 using LowPtr =
   detail::LowPtrImpl<T, detail::RawStorage<detail::low_storage_t>>;
@@ -226,6 +235,18 @@ using AtomicLowPtr =
   detail::LowPtrImpl<T, detail::AtomicStorage<detail::low_storage_t,
                                               read_order,
                                               write_order>>;
+
+template<class T> struct lowptr_traits : std::false_type {};
+template<class T> struct lowptr_traits<LowPtr<T>> : std::true_type {
+  using element_type = T;
+  using pointer = T*;
+};
+template<class T, std::memory_order R, std::memory_order W>
+struct lowptr_traits<AtomicLowPtr<T, R, W>> : std::true_type {
+  using element_type = T;
+  using pointer = T*;
+};
+template<class T> constexpr bool is_lowptr_v = lowptr_traits<T>::value;
 
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -245,4 +266,3 @@ template<class T> class FormatValue<HPHP::LowPtr<T>> {
 };
 }
 
-#endif // incl_HPHP_LOW_PTR_H_

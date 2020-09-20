@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_LOCK_FREE_PTR_WRAPPER_H_
-#define incl_LOCK_FREE_PTR_WRAPPER_H_
+#pragma once
 
 #include <atomic>
-
-#include <folly/Portability.h>
+#include <type_traits>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/smalllocks.h"
 
 namespace HPHP {
@@ -49,64 +48,195 @@ namespace HPHP {
  */
 template<class T>
 struct LockFreePtrWrapper {
-  static_assert(sizeof(T) == sizeof(uintptr_t),
+  static_assert((sizeof(T) == sizeof(uintptr_t)) ||
+                (sizeof(T) == sizeof(uint32_t)),
                 "LockFreePtrWrapper operates on pointers, or "
                 "classes that wrap pointers (with no other data)");
+  using raw_type =
+    typename std::conditional<sizeof(T) == 4, uint32_t, uintptr_t>::type;
 
-  LockFreePtrWrapper(const LockFreePtrWrapper<T>&) = delete;
-  LockFreePtrWrapper<T>& operator=(const LockFreePtrWrapper<T>&) = delete;
-  LockFreePtrWrapper() : val{} { assertx(!(raw() & ~kPtrMask)); };
+  LockFreePtrWrapper() : val{} { assertx(notLocked()); }
+  LockFreePtrWrapper(const T& v) : val{v} { assertx(notLocked()); }
   ~LockFreePtrWrapper() {
-    assertx(!(raw() & ~kPtrMask));
+    assertx(notLocked());
     val.~T();
   }
 
+  LockFreePtrWrapper(const LockFreePtrWrapper<T>&) = delete;
+  LockFreePtrWrapper<T>& operator=(const LockFreePtrWrapper<T>&) = delete;
+
+  /*
+   * We can't return a T* to callers because a valid T doesn't always exist in
+   * LockFreePtrWrapper. Holder is a convenience wrapper around a bitwise copy
+   * of T that avoids calling T's constructor or destructor, giving nearly the
+   * same effect as returning a T*.
+   */
   struct Holder {
-    T* operator->() { return &val; }
+    friend struct LockFreePtrWrapper;
+    auto get() { return getter(val, false); }
+    auto operator->() { return get(); }
     Holder(const Holder& h) : bits{h.bits} { assertx(!(bits & ~kPtrMask)); }
-    Holder(uintptr_t bits) : bits{bits} { assertx(!(bits & ~kPtrMask)); }
+    Holder(raw_type bits) : bits{bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(T&& val) : val{std::move(val)} { assertx(!(bits & ~kPtrMask)); }
     ~Holder() {}
+  private:
     union {
-      uintptr_t bits;
-      T         val;
+      raw_type bits;
+      T val;
     };
+    template<typename U>
+    static const U* getter(const U& p, int f) { return &p; }
+    template<typename U>
+    static auto getter(const U& p, bool f) -> decltype(p.operator->(), p) {
+      return p;
+    }
   };
 
   // Get a bitwise copy of the current value
-  Holder get() const {
-    return Holder { unlocked() };
+  auto get() const {
+    return getImpl<T>();
+  }
+
+  auto operator->() const {
+    return get();
   }
 
   T copy() const {
+    return copyImpl<T>();
+  }
+
+  /*
+   * Get an exclusive lock on the wrapped value. Other threads can
+   * still read its current value via get() or copy(). After calling
+   * this, you must unlock it either with update_and_unlock (if you
+   * want to change the value), or unlock (if you don't).
+   */
+  void lock_for_update();
+
+  /*
+   * Like lock_for_update(), but returns false if it fails to acquire
+   * the lock rather than blocking. Returns true on success.
+   */
+  bool try_lock_for_update();
+
+  /*
+   * Unlock it.
+   */
+  void unlock();
+  /*
+   * Update the wrapped value, and return the old value. The old value
+   * will typically need to be destroyed via a treadmill-like
+   * mechanism, because other threads may have read the old value just
+   * prior to the update (and still be using it).
+   */
+  T update_and_unlock(T&& v);
+
+ protected:
+  // Constructor that accepts raw bits, for use in the unsafe version.
+  LockFreePtrWrapper(raw_type rawBits) : bits(rawBits) {
+    assertx(notLocked());
+  }
+  raw_type raw() const { return bits.load(std::memory_order_relaxed); }
+  const bool notLocked() {
+    return !(low_bits.load(std::memory_order_relaxed) & ~kPtrMask);
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          std::is_pointer<U>::value,U>::type
+  getImpl() const {
+    return reinterpret_cast<T>(unlocked());
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value && is_lowptr_v<U>,
+                          typename lowptr_traits<U>::pointer>::type
+  getImpl() const {
+    auto p = unlocked();
+    return reinterpret_cast<T*>(&p)->get();
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          !std::is_pointer<U>::value &&
+                          !is_lowptr_v<U>, Holder>::type
+  getImpl() const {
+    return Holder { unlocked() };
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          (std::is_pointer<U>::value || is_lowptr_v<U>),
+                          T>::type
+  copyImpl() const {
+    return get();
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          !std::is_pointer<U>::value &&
+                          !is_lowptr_v<U>, T>::type
+  copyImpl() const {
     // We need to force a copy, rather than a move from get().val. If you
     // change this, make sure you know what you're doing.
     auto const& x = get();
     return x.val;
   }
 
-  void lock_for_update();
-  void unlock();
-  T update_and_unlock(T&& v);
-private:
-  uintptr_t unlock_helper(uintptr_t rep);
-  uintptr_t raw() const { return bits.load(std::memory_order_relaxed); }
-  uintptr_t unlocked() const {
+  raw_type unlock_helper(raw_type rep) {
+    auto const c = bits.exchange(rep, std::memory_order_release);
+    if (c & kLockWithWaitersBit) {
+      futex_wake(&low_bits, 1);
+    } else {
+      assertx(c & kLockNoWaitersBit);
+    }
+    return c & kPtrMask;
+  }
+  raw_type unlocked() const {
     return bits.load(std::memory_order_acquire) & kPtrMask;
   }
   union {
-    std::atomic<uintptr_t> bits;
-    std::atomic<uint32_t>  low_bits;
-    T                      val;
+    std::atomic<raw_type> bits;
+    std::atomic<uint32_t> low_bits;
+    T                     val;
   };
   static_assert(
     folly::kIsLittleEndian,
     "The low bits of low_bits must correspond to the low bits of bits"
   );
-  static constexpr uintptr_t kPtrMask = static_cast<uintptr_t>(-4);
-  static constexpr uintptr_t kLockNoWaitersBit = 1;
-  static constexpr uintptr_t kLockWithWaitersBit = 2;
+  static constexpr raw_type kPtrMask = static_cast<raw_type>(-4);
+  static constexpr raw_type kLockNoWaitersBit = 1;
+  static constexpr raw_type kLockWithWaitersBit = 2;
 };
+
+/*
+ * The unsafe-version of LockFreePtrWrapper, provides copy constructor and
+ * copy assignment operator, to be used when other mechanisms provide guarantee
+ * that no concurrent access happens during the unsafe copying.
+ *
+ * Warning: a thorough idea on when and in which threads all accesses happen is
+ * needed to safely use this.
+ */
+template<class T>
+struct UnsafeLockFreePtrWrapper : LockFreePtrWrapper<T> {
+  using LockFreePtrWrapper<T>::notLocked;
+
+  UnsafeLockFreePtrWrapper() : LockFreePtrWrapper<T>() {}
+  UnsafeLockFreePtrWrapper(const T& v) : LockFreePtrWrapper<T>(v) {}
+
+  UnsafeLockFreePtrWrapper(const UnsafeLockFreePtrWrapper& o)
+    : LockFreePtrWrapper<T>(o.raw()) {}
+  auto const& operator=(const UnsafeLockFreePtrWrapper& o) {
+    assertx(notLocked());
+    LockFreePtrWrapper<T>::bits.store(o.raw(), std::memory_order_relaxed);
+    assertx(notLocked());
+    return *this;
+  }
+};
+
+static_assert(!std::is_copy_constructible<LockFreePtrWrapper<int*>>::value, "");
+static_assert(std::is_copy_constructible<UnsafeLockFreePtrWrapper<int*>>::
+              value, "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -143,15 +273,14 @@ void LockFreePtrWrapper<T>::lock_for_update() {
   }
 }
 
-template<class T>
-uintptr_t LockFreePtrWrapper<T>::unlock_helper(uintptr_t rep) {
-  auto const c = bits.exchange(rep, std::memory_order_release);
-  if (c & kLockWithWaitersBit) {
-    futex_wake(&low_bits, 1);
-  } else {
-    assertx(c & kLockNoWaitersBit);
-  }
-  return c & kPtrMask;
+template<typename T>
+bool LockFreePtrWrapper<T>::try_lock_for_update() {
+  auto c = raw() & kPtrMask;
+  return bits.compare_exchange_weak(
+    c,
+    c + kLockNoWaitersBit,
+    std::memory_order_relaxed
+  );
 }
 
 template<class T>
@@ -170,4 +299,3 @@ T LockFreePtrWrapper<T>::update_and_unlock(T&& v) {
 //////////////////////////////////////////////////////////////////////
 }
 
-#endif

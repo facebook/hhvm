@@ -1,0 +1,8 @@
+File "prop_access_lambda3.php", line 8, characters 6-7:
+Invalid argument (Typing[4053])
+File "prop_access_lambda3.php", line 7, characters 19-19:
+No property `x` in `A`
+File "prop_access_lambda3.php", line 6, characters 14-14:
+This is why I think it is an object of type A
+File "prop_access_lambda3.php", line 4, characters 7-7:
+Declaration of `A` is here

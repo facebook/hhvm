@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Base {
   abstract public function foo();
@@ -16,8 +16,12 @@ function main(Base $b) {
   var_dump($x);
 }
 
+
+
+<<__EntryPoint>>
+function main_func_family_004() {
 try {
   main(new D2);
   main(new D1);
 } catch (exception $x) {}
-
+}

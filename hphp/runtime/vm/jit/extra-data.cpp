@@ -16,11 +16,20 @@
 
 #include "hphp/runtime/vm/jit/extra-data.h"
 
+#include <sstream>
+
+#include <folly/functional/Invoke.h>
+
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP { namespace jit {
+
+std::string KeyedIndexData::show() const {
+  auto const escaped = escapeStringForCPP(key->data(), key->size());
+  return folly::format("{},\"{}\"", index, key->data()).str();
+}
 
 std::string NewStructData::show() const {
   std::ostringstream os;
@@ -39,10 +48,9 @@ std::string NewStructData::show() const {
 
 namespace {
 
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_hash,   hash);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_equals, equals);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_clone,  clone);
-FOLLY_CREATE_HAS_MEMBER_FN_TRAITS(has_show,   show);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_hash,   hash);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_equals, equals);
+FOLLY_CREATE_MEMBER_INVOKER(invoke_clone,  clone);
 
 /*
  * dispatchExtra translates from runtime values for the Opcode enum
@@ -95,10 +103,10 @@ RetType dispatchExtra(Opcode opc, IRExtraData* data, Args&&... args) {
 }
 
 template<class T>
-typename std::enable_if<
-  has_hash<T,size_t () const>::value,
+std::enable_if_t<
+  std::is_invocable_v<invoke_hash, T const&>,
   size_t
->::type hashExtraImpl(T* t) { return t->hash(); }
+> hashExtraImpl(T* t) { return t->hash(); }
 size_t hashExtraImpl(IRExtraData*) {
   // This probably means we tried to hash an IRInstruction with extra data that
   // had no hash function.
@@ -107,11 +115,10 @@ size_t hashExtraImpl(IRExtraData*) {
 }
 
 template<class T>
-typename std::enable_if<
-  has_equals<T,bool (T const&) const>::value ||
-  has_equals<T,bool (T)        const>::value,
+std::enable_if_t<
+  std::is_invocable_v<invoke_equals, T const&, T const&>,
   bool
->::type equalsExtraImpl(T* t, IRExtraData* o) {
+> equalsExtraImpl(T* t, IRExtraData* o) {
   return t->equals(*static_cast<T*>(o));
 }
 bool equalsExtraImpl(IRExtraData*, IRExtraData*) {
@@ -123,20 +130,12 @@ bool equalsExtraImpl(IRExtraData*, IRExtraData*) {
 
 // Clone using a data-specific clone function.
 template<class T>
-typename std::enable_if<
-  has_clone<T,T* (Arena&) const>::value,
-  T*
->::type cloneExtraImpl(T* t, Arena& arena) {
-  return t->clone(arena);
-}
-
-// Use the copy constructor if no clone() function was supplied.
-template<class T>
-typename std::enable_if<
-  !has_clone<T,T* (Arena&) const>::value,
-  T*
->::type cloneExtraImpl(T* t, Arena& arena) {
-  return new (arena) T(*t);
+T* cloneExtraImpl(T* t, Arena& arena) {
+  if constexpr (std::is_invocable_v<invoke_clone, T const&, Arena&>) {
+    return t->clone(arena);
+  } else {
+    return new (arena) T(*t);
+  }
 }
 
 template<class T>

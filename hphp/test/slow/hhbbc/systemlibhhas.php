@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace WhateverNamespace;
 
@@ -8,11 +8,15 @@ class WhateverTest {
       return "whatever";
     };
 
-    return array_map( $mapFunction, $array );
+    return \array_map( $mapFunction, $array );
   }
 }
 
-$t = new WhateverTest();
-$ret = $t->filter( array(  "lol", "wow", "doge" ) );
 
-var_dump( $ret );
+<<__EntryPoint>>
+function main_systemlibhhas() {
+$t = new WhateverTest();
+$ret = $t->filter( varray[  "lol", "wow", "doge" ] );
+
+\var_dump( $ret );
+}

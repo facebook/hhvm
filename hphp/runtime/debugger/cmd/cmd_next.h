@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_NEXT_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_NEXT_H_
+#pragma once
 
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -32,9 +31,9 @@ struct CmdNext : CmdFlowControl {
 
 private:
   void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
-  void stepAfterAwait();
+  void stepIntoSuspendedFrame();
   bool hasStepResumable();
-  bool atStepResumableOffset(Unit* unit, Offset o);
+  bool atStepResumableOffset(const Func* func, Offset o);
   void setupStepSuspend(ActRec* fp, PC pc);
   void cleanupStepResumable();
   void* getResumableId(ActRec* fp);
@@ -44,10 +43,11 @@ private:
   // Unique id for the resumable we're stepping.
   ActRec* m_stepResumableId{nullptr};
 
-  bool m_skippingAwait{false};
+  // We're trying to step over an await, but that await will cause the eagerly
+  // executed frame we're in to be suspended.
+  bool m_steppingWhileSuspendingFrame{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_NEXT_H_

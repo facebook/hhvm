@@ -10,18 +10,12 @@ function err_handler($errno, $errstr, $file, $line) {
   }
   throw new Exception($errstr);
 }
-error_reporting(-1);
-set_error_handler('err_handler');
 
 trait Tr {
   <<__Deprecated('message')>>
   public function meth() { echo __METHOD__, "\n"; }
   <<__Deprecated('message')>>
   public static function stMeth() { echo __METHOD__, "\n"; }
-  <<__Deprecated('message')>>
-  public static function __callStatic($name, $args) { echo __METHOD__, "\n"; }
-  <<__Deprecated('message')>>
-  public function __call($name, $args) { echo __METHOD__, "\n"; }
 }
 
 class C {
@@ -29,10 +23,6 @@ class C {
   public function meth() { echo __METHOD__, "\n"; }
   <<__Deprecated('message')>>
   public static function stMeth() { echo __METHOD__, "\n"; }
-  <<__Deprecated('message')>>
-  public static function __callStatic($name, $args) { echo __METHOD__, "\n"; }
-  <<__Deprecated('message')>>
-  public function __call($name, $args) { echo __METHOD__, "\n"; }
 }
 
 class C_T {
@@ -52,10 +42,8 @@ function basic() {
   echo '= ', __FUNCTION__, " =", "\n";
   f();
   C::stMeth();
-  C::viaCallStatic();
   $inst = new C();
   $inst->meth();
-  $inst->viaCall();
   f_gen();
   echo "\n";
 }
@@ -67,20 +55,12 @@ function memoized() {
   echo "\n";
 }
 
-function builtin() {
-  echo '= ', __FUNCTION__, " =", "\n";
-  ereg('foobar', 'foo');
-  echo "\n";
-}
-
 function via_trait() {
   echo '= ', __FUNCTION__, " =", "\n";
   // f();
   C_T::stMeth();
-  C_T::viaCallStatic();
   $inst = new C_T();
   $inst->meth();
-  $inst->viaCall();
   echo "\n";
 }
 
@@ -88,8 +68,12 @@ function main() {
   basic();
   via_trait();
   memoized();
-  builtin();
   echo 'Done', "\n";
 }
+<<__EntryPoint>>
+function entrypoint_deprecated(): void {
+  error_reporting(-1);
+  set_error_handler(fun('err_handler'));
 
-main();
+  main();
+}

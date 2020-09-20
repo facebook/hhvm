@@ -1,0 +1,8 @@
+Linearization for class \A:
+[\A(PAT)]
+Linearization for class \B:
+[\B, \A]
+Linearization for class \C:
+[\C(PAT), \B, \A]
+Linearization for class \D:
+[\D, \C, \B, \A]

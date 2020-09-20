@@ -1,0 +1,4 @@
+File "newable_tparams.php", line 16, characters 23-24:
+The type parameter `Tc` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. The constraints C, E are valid newable classes (Typing[4308])
+File "newable_tparams.php", line 19, characters 25-26:
+The type parameter `Tm` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes (Typing[4308])

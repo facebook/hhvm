@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Properties cannot have multiple visibility modifiers in %s/errmsg_009.php on line 4

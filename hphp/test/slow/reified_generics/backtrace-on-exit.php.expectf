@@ -1,0 +1,120 @@
+varray(3) {
+  darray(2) {
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(4) {
+    ["file"]=>
+    %s
+    ["line"]=>
+    int(13)
+    ["function"]=>
+    string(13) "fb_setprofile"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+}
+varray(3) {
+  darray(4) {
+    ["file"]=>
+    %s
+    ["line"]=>
+    int(8)
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(7) {
+    ["file"]=>
+    %s
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(6) "f<int>"
+    ["class"]=>
+    string(1) "C"
+    ["object"]=>
+    object(C) (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+}
+varray(3) {
+  darray(4) {
+    ["file"]=>
+    %s
+    ["line"]=>
+    int(8)
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(6) {
+    ["file"]=>
+    %s
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(1) "f"
+    ["class"]=>
+    string(1) "C"
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+}
+varray(2) {
+  darray(4) {
+    ["file"]=>
+    %s
+    ["line"]=>
+    int(16)
+    ["function"]=>
+    string(8) "profiler"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+  darray(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    varray(0) {
+    }
+  }
+}

@@ -1,0 +1,6 @@
+File "cyclic_type_const_2.php--file1.php", line 4, characters 14-14:
+Cyclic type constant:
+  `C1::T` -> `C2::T` -> `C1::T` (Typing[4131])
+File "cyclic_type_const_2.php--file1.php", line 8, characters 14-14:
+Cyclic type constant:
+  `C2::T` -> `C1::T` -> `C2::T` (Typing[4131])

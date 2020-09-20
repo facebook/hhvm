@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_strftime() {
 date_default_timezone_set("America/Los_Angeles");
 
 $ts = mktime(0, 0, 0, 8, 5, 1998);
@@ -44,3 +47,4 @@ var_dump(strftime("%V,%G,%Y", strtotime("12/23/2004")));
 var_dump(strftime("%V,%G,%Y", strtotime("12/31/2004")));
 var_dump(strftime("%V,%G,%Y", strtotime("1/2/2005")));
 var_dump(strftime("%V,%G,%Y", strtotime("1/3/2005")));
+}

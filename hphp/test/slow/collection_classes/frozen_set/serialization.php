@@ -22,4 +22,8 @@ function main() {
 }
 
 
+
+<<__EntryPoint>>
+function main_serialization() {
 main();
+}

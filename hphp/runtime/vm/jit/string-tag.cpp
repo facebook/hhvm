@@ -20,9 +20,9 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/safe-cast.h"
+#include "hphp/runtime/vm/jit/containers.h"
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace HPHP { namespace jit {
@@ -35,7 +35,7 @@ namespace {
 
 SharedMutex s_mutex;
 
-std::unordered_map<std::string,StringTag> s_string_to_tag;
+jit::fast_map<std::string,StringTag> s_string_to_tag;
 std::vector<const char*> s_tag_to_string;
 
 }

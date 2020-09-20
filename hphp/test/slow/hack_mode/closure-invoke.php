@@ -7,4 +7,8 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_closure_invoke() {
 (new Foo())->bar();
+}

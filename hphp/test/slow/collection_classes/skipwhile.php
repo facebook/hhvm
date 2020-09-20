@@ -12,7 +12,7 @@ function main() {
   foreach ($containers as $c) {
     $name = get_class($c);
     echo "$name\n";
-    foreach (array(~PHP_INT_MAX, -1, 0, 1, 2, 6, PHP_INT_MAX) as $n) {
+    foreach (varray[~PHP_INT_MAX, -1, 0, 1, 2, 6, PHP_INT_MAX] as $n) {
       if ($name === Set::class || $name === ImmSet::class) {
         echo "--------\n";
         echo "n = $n\n";
@@ -31,4 +31,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_skipwhile() {
 main();
+}

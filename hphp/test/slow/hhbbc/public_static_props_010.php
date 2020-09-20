@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   static $x;
@@ -16,4 +16,8 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_010() {
 (new Foo)->go();
+}

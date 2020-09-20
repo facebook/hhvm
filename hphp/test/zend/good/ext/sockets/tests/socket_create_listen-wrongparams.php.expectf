@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: socket_create_listen() expects parameter 1 to be integer, %rv?%rarray given in %s/socket_create_listen-wrongparams.php on line 2
 
-Warning: %s
+Warning: socket_create_listen() expects parameter 2 to be integer, %rv?%rarray given in %s/socket_create_listen-wrongparams.php on line 3

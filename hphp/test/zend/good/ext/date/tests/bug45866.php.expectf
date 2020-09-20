@@ -1,5 +1,5 @@
 Thu, 14 Aug 168488594 16:44:23 +0000
 Thu, 14 Aug 168488594 16:44:23 +0000
 
-Warning: %s
+Warning: DateTime::modify(): Failed to parse time string (Â£61538461538 day) at position 0 (Â): Unexpected character in %s/bug45866.php on line 13
 Wed, 29 Jul 2009 16:44:23 +0100

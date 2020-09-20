@@ -1,4 +1,0 @@
-<?php
-$ssl = 1;
-require 'skipif.inc';
-?>

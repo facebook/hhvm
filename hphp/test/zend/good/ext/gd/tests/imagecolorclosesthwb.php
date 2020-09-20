@@ -1,11 +1,11 @@
-<?php
-	$im = imagecreatefrompng(dirname(__FILE__).'/test.png');
+<?hh <<__EntryPoint>> function main(): void {
+$im = imagecreatefrompng(dirname(__FILE__).'/test.png');
 
-	var_dump(imagecolorclosesthwb($im, 255, 50, 0));
+var_dump(imagecolorclosesthwb($im, 255, 50, 0));
 
-	var_dump(imagecolorclosesthwb(NULL));
-	var_dump(imagecolorclosesthwb(NULL, NULL, NULL, NULL));
-	var_dump(imagecolorclosesthwb($im, "hello", "from", "gd"));
+try { var_dump(imagecolorclosesthwb(NULL)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(imagecolorclosesthwb(NULL, NULL, NULL, NULL)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(imagecolorclosesthwb($im, "hello", "from", "gd")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-	imagedestroy($im);
-?>
+imagedestroy($im);
+}

@@ -41,12 +41,12 @@ string(13) "Hello World
 string(13) "Hello World
 "
 -- Iteration 14 --
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 -- Iteration 15 --
-array(5) {
+darray(5) {
   [0]=>
   int(1)
   [1]=>
@@ -58,7 +58,7 @@ array(5) {
   [4]=>
   int(5)
 }
-array(5) {
+darray(5) {
   [0]=>
   int(1)
   [1]=>
@@ -71,7 +71,7 @@ array(5) {
   int(5)
 }
 -- Iteration 16 --
-object(stdClass)#%d (5) {
+object(stdClass) (5) {
   ["myInt"]=>
   int(99)
   ["myFloat"]=>
@@ -83,7 +83,7 @@ object(stdClass)#%d (5) {
   ["myString"]=>
   string(11) "Hello World"
 }
-array(5) {
+darray(5) {
   ["myInt"]=>
   int(99)
   ["myFloat"]=>
@@ -96,7 +96,7 @@ array(5) {
   string(11) "Hello World"
 }
 -- Iteration 17 --
-object(stdClass)#%d (6) {
+object(stdClass) (6) {
   ["Jan"]=>
   int(31)
   ["Feb"]=>
@@ -110,7 +110,7 @@ object(stdClass)#%d (6) {
   ["June"]=>
   int(30)
 }
-array(6) {
+darray(6) {
   ["Jan"]=>
   int(31)
   ["Feb"]=>
@@ -128,8 +128,8 @@ array(6) {
 string(0) ""
 string(0) ""
 -- Iteration 19 --
-object(stdClass)#%d (0) {
+object(stdClass) (0) {
 }
-array(0) {
+darray(0) {
 }
 ===Done===

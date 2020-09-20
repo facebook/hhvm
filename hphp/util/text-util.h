@@ -16,8 +16,7 @@
 
 // Utilities for manipulating text in strings.
 
-#ifndef incl_HPHP_TEXT_UTIL_H_
-#define incl_HPHP_TEXT_UTIL_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -89,4 +88,3 @@ std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
 }  // namespace HPHP
 
-#endif  // incl_HPHP_TEXT_UTIL_H_

@@ -1,14 +1,12 @@
-<?php
-/* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+<?hh
+/* Prototype  : bool usort(&array $array_arg, string $cmp_function)
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
 /*
  * Test basic functionality of usort() with indexed and associative arrays
  */
-
-echo "*** Testing usort() : basic functionality ***\n";
 
 function cmp($value1, $value2)
 {
@@ -21,33 +19,35 @@ function cmp($value1, $value2)
   else
     return -1;
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing usort() : basic functionality ***\n";
 
 // Int array with default keys
-$int_values = array(1, 8, 9, 3, 2, 6, 7);
+$int_values = varray[1, 8, 9, 3, 2, 6, 7];
 
 echo "\n-- Numeric array with default keys --\n";
-var_dump( usort($int_values, 'cmp') );
+var_dump( usort(inout $int_values, fun('cmp')) );
 var_dump($int_values);
 
 // String array with default keys
-$string_values = array("This", "is", 'a', "test");
+$string_values = varray["This", "is", 'a', "test"];
 
 echo "\n-- String array with default keys --\n";
-var_dump( usort($string_values, 'cmp') );
+var_dump( usort(inout $string_values, fun('cmp')) );
 var_dump($string_values);
 
 // Associative array with numeric keys
-$numeric_key_arg = array(1=> 1, 2 => 2, 3 => 7, 5 => 4, 4 => 9);
+$numeric_key_arg = darray[1=> 1, 2 => 2, 3 => 7, 5 => 4, 4 => 9];
 
 echo "\n-- Associative array with numeric keys --\n";
-var_dump( usort($numeric_key_arg, 'cmp') );
+var_dump( usort(inout $numeric_key_arg, fun('cmp')) );
 var_dump($numeric_key_arg);
 
 // Associative array with string keys
-$string_key_arg = array('one' => 4, 'two' => 2, 'three' => 1, 'four' => 10);
+$string_key_arg = darray['one' => 4, 'two' => 2, 'three' => 1, 'four' => 10];
 
 echo "\n-- Associative array with string keys --\n";
-var_dump( usort($string_key_arg, 'cmp') );
+var_dump( usort(inout $string_key_arg, fun('cmp')) );
 var_dump($string_key_arg);
-?>
-===DONE===
+echo "===DONE===\n";
+}

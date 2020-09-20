@@ -128,6 +128,24 @@ $this = cls Object
 )
 
 step
+Break at cls::pri() on line 19 of %s/flow_small.php
+  18     $y = $x + 3; $z = $x * 5;
+  19*    foo($y, $z);
+  20     if ($x == 3) {
+
+step
+Break at cls::pri() on line 19 of %s/flow_small.php
+  18     $y = $x + 3; $z = $x * 5;
+  19*    foo($y, $z);
+  20     if ($x == 3) {
+
+step
+Break at cls::pri() on line 19 of %s/flow_small.php
+  18     $y = $x + 3; $z = $x * 5;
+  19*    foo($y, $z);
+  20     if ($x == 3) {
+
+step
 Break at foo() on line 6 of %s/flow_small.php
    5 function foo($a, $b) {
    6*  $c = $b - $a;

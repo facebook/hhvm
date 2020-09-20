@@ -1,0 +1,72 @@
+
+
+----------------------------------------
+vec(0) {
+}
+*** without legacy bit ***
+[]
+*** with legacy bit ***
+[]
+
+
+----------------------------------------
+dict(0) {
+}
+*** without legacy bit ***
+{}
+*** with legacy bit ***
+[]
+
+
+----------------------------------------
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+*** without legacy bit ***
+[1,2,3]
+*** with legacy bit ***
+[1,2,3]
+
+
+----------------------------------------
+dict(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+*** without legacy bit ***
+{"0":1,"1":2,"2":3}
+*** with legacy bit ***
+[1,2,3]
+
+
+----------------------------------------
+dict(2) {
+  ["hello"]=>
+  int(42)
+  ["baz"]=>
+  int(100)
+}
+*** without legacy bit ***
+{"hello":42,"baz":100}
+*** with legacy bit ***
+{"hello":42,"baz":100}
+
+
+----------------------------------------
+dict(2) {
+  [1000]=>
+  string(2) "no"
+  ["potato"]=>
+  vec(0) {
+  }
+}
+*** without legacy bit ***
+{"1000":"no","potato":[]}
+*** with legacy bit ***
+{"1000":"no","potato":[]}

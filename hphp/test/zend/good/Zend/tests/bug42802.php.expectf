@@ -3,4 +3,4 @@ ok
 ok
 ok
 
-Catchable fatal error: %s
+Catchable fatal error: Argument 1 passed to foo\test5() must be an instance of bar, foo\bar given in %s/bug42802.php on line 30

@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);
@@ -19,5 +19,5 @@ echo "Text Content: " . $textnode->data . "\n";
 
 echo "\n" . $document->saveXML();
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

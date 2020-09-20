@@ -1,0 +1,16 @@
+(library
+  (name errors)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std))
+  (libraries
+    core_kernel
+    hh_autoimport
+    logging
+    pos
+    ast
+    server_load_flag
+    utils_exit
+    utils_multifile
+    (select error_message_sentinel.ml from
+      (facebook -> facebook/error_message_sentinel.ml)
+      (-> ../stubs/error_message_sentinel.ml))))

@@ -1,54 +1,64 @@
 *** Testing chunk_split() : with unexpected values for 'str' argument ***
 -- Iteration 1 --
-string(2) "0 "
+
+Warning: chunk_split() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 2 --
-string(2) "1 "
+
+Warning: chunk_split() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 3 --
-string(8) "12 34 5 "
+
+Warning: chunk_split() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 4 --
-string(8) "-2 34 5 "
+
+Warning: chunk_split() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 5 --
-string(6) "10 .5 "
+
+Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 6 --
-string(8) "-1 0. 5 "
+
+Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 7 --
-string(18) "10 12 34 56 70 00 "
+
+Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 8 --
-string(20) "1. 07 65 43 21 E- 9 "
+
+Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 9 --
-string(5) "0. 5 "
+
+Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 10 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 11 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 12 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 13 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 14 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 15 --
-string(1) " "
+
+Warning: chunk_split() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 16 --
-string(1) " "
+
+Warning: chunk_split() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 17 --
-string(2) "1 "
+
+Warning: chunk_split() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 18 --
-string(1) " "
+
+Warning: chunk_split() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 19 --
-string(2) "1 "
+
+Warning: chunk_split() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 20 --
-string(1) " "
+
+Warning: chunk_split() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 21 --
 string(1) " "
 -- Iteration 22 --
@@ -58,13 +68,15 @@ string(9) "st ri ng "
 -- Iteration 24 --
 string(9) "st ri ng "
 -- Iteration 25 --
-string(9) "ob je ct "
+
+Warning: chunk_split() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 26 --
-string(1) " "
+
+Warning: chunk_split() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 27 --
-string(1) " "
+
+Warning: chunk_split() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 28 --
 
-Warning: %s
-NULL
+Warning: chunk_split() expects parameter 1 to be string, resource given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 Done

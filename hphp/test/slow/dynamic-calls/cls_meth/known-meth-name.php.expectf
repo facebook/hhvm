@@ -1,0 +1,9 @@
+============== Don't log: new ================
+============== Don't log =================
+============== Log ======================
+
+Notice: 'A::pub_stat' called dynamically but is not __DynamicallyCallable in %s/known-meth-name.php on line 33
+
+Notice: 'A::pub_stat' called dynamically but is not __DynamicallyCallable in %s/known-meth-name.php on line 34
+
+Notice: 'A::pub_stat' called dynamically but is not __DynamicallyCallable in %s/known-meth-name.php on line 35

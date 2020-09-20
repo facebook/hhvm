@@ -14,20 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMORY_MANAGER_H_
-#define incl_HPHP_MEMORY_MANAGER_H_
+#pragma once
 
 #include <array>
-#include <vector>
+#include <string>
 #include <utility>
-#include <set>
-#include <unordered_map>
-#include <bitset>
+#include <vector>
 
 #include <folly/Memory.h>
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
+#include "hphp/util/bloom-filter.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/radix-map.h"
+#include "hphp/util/rds-local.h"
+#include "hphp/util/slab-manager.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/type-scan.h"
@@ -37,14 +39,10 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/slab-manager.h"
 
 namespace HPHP {
-
-struct APCLocalArray;
 
 namespace req {
 struct root_handle;
@@ -388,8 +386,8 @@ static_assert(kMaxSmallSize < kMaxSizeClass,
  */
 constexpr char kSmallFreeFill   = 0x6a;
 constexpr char kRDSTrashFill    = 0x6b; // used by RDS for "normal" section
-constexpr char kTrashClsRef     = 0x6c; // used for class-ref slots
-constexpr char kTrashCufIter    = 0x6d; // used for cuf-iters
+constexpr char kIterTrashFill   = 0x6c; // used by ArrayIters at their end
+constexpr char kMixedElmFill    = 0x6d; // used for uninit MixedArrayElms
 constexpr char kTVTrashFill     = 0x7a; // used by interpreter
 constexpr char kTVTrashFill2    = 0x7b; // used by req::ptr dtors
 constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
@@ -398,6 +396,11 @@ constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
 constexpr char kTVTrashJITRetVal = 0x7f; // used by the JIT for ActRec::m_r
 constexpr uintptr_t kSmallFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
+
+// In debug builds, we check if refcounts are higher than RefCountMaxRealistic.
+// This check is only useful if a trashed refcount is above the bound. We check
+// kMallocFreeWord here because it's the smallest of the trash fill bytes.
+static_assert(RefCountMaxRealistic < (kMallocFreeWord >> 4), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -412,13 +415,16 @@ static_assert(std::numeric_limits<type_scan::Index>::max() <=
               "type_scan::Index must be no greater than 16-bits "
               "to fit into HeapObject");
 
-// This is the header MemoryManager uses to remember large allocations
-// so they can be auto-freed in MemoryManager::reset(), as well as large/small
-// req::malloc()'d blocks, which must track their size internally.
-// The size recorded here must be the requested size for type_scan correctness.
+/*
+ * MallocNode is the header used for req::malloced blocks.
+ * m_kind: SmallMalloc or BigMalloc indicating which allocator
+ * owns the object.
+ * nbytes: the requested size + sizeof(MallocNode), not rounded
+ * to size class, for correct type_scan.
+ * m_aux16: type_scan::Index of the allocated data.
+ */
 struct MallocNode : HeapObject {
   size_t nbytes; // requested bytes + sizeof(MallocNode)
-  uint32_t& index() { return m_aux32; }
   uint16_t& typeIndex() { return m_aux16; }
   uint16_t typeIndex() const { return m_aux16; }
 };
@@ -450,6 +456,19 @@ struct NativeNode : HeapObject,
   uint32_t arOff() const { return m_aux32; } // from this to ActRec, or 0
 };
 
+// Header for objects with memoization data.
+struct MemoNode : HeapObject,
+                  type_scan::MarkCollectable<MemoNode> {
+  explicit MemoNode(uint32_t objoff) {
+    initHeader_32(HeaderKind::MemoData, objoff);
+  }
+  uint32_t objOff() const { return m_aux32; }
+  // Make sure this header is the same size as a TypedValue to simplify
+  // alignment.
+  uint64_t padding;
+};
+static_assert(sizeof(MemoNode) == alignTypedValue(sizeof(MemoNode)), "");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -466,23 +485,18 @@ struct SparseHeap {
 
   /*
    * Whether `ptr' refers to slab-allocated memory.
-   *
-   * Note that memory in big blocks is explicitly excluded.
    */
-  bool contains(void* ptr) const;
+  bool contains(const void* ptr) const;
 
   /*
-   * Allocate a MemBlock of kSlabSize bytes, track in m_slabs.
+   * Allocate a Slab of kSlabSize bytes, track in m_pooled_slabs.
    */
   HeapObject* allocSlab(MemoryUsageStats& stats);
 
   /*
    * Allocation API for big blocks.
    */
-  void* allocBig(size_t size, HeaderKind kind,
-                 type_scan::Index tyindex, MemoryUsageStats& stats);
-  void* callocBig(size_t size, HeaderKind kind,
-                  type_scan::Index tyindex, MemoryUsageStats& stats);
+  void* allocBig(size_t size, bool zero, MemoryUsageStats& stats);
   void* resizeBig(void* p, size_t size, MemoryUsageStats& stats);
   void freeBig(void*, MemoryUsageStats& stats);
 
@@ -510,45 +524,32 @@ struct SparseHeap {
   template<class Fn> void iterate(Fn);
 
   /*
-   * call OnBig() on each BigObj & BigMalloc header, and OnSlab() on
-   * each slab, without iterating the blocks within each slab.
+   * call OnBig() on each big HeapObject, and OnSlab() on each slab, without
+   * iterating the blocks within each slab.
    */
   template<class OnBig, class OnSlab> void iterate(OnBig, OnSlab);
 
   /*
-   * Find the HeapObject* which contains `p', else nullptr if `p' is
-   * not contained in any heap allocation.
+   * Find the HeapObject* in the heap which contains `p', else nullptr if `p'
+   * is not contained in any heap allocation.
    */
   HeapObject* find(const void* p);
 
   /*
-   * Sorts both slabs and big blocks.
-   */
-  void sort();
-
-  /*
    * Return the (likely sparse) address range that contains every slab.
-   * Requires that sort() has been called, so m_slabs is in address order.
    */
-  MemBlock slab_range() const;
-
- protected:
-  void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
+  MemBlock slab_range() const { return m_slab_range; }
 
  protected:
   struct SlabInfo {
-    SlabInfo(void* p, size_t s) : ptr(p), size(s) {}
-    SlabInfo(void* p, size_t s, uint16_t v)
-      : ptr(p), size(s), pooled(true), version(v) {}
-
+    SlabInfo(void* p, uint16_t v) : ptr(p), version(v) {}
     void* ptr;
-    uint32_t size;
-    bool pooled{false};                 // from SlabManager
     uint16_t version{0};                // tag used with SlabManager
   };
-  std::vector<SlabInfo> m_slabs;
-  std::vector<MallocNode*> m_bigs;
-  int64_t m_pooledBytes{0};             // compare with RequestHugeMaxBytes
+  std::vector<SlabInfo> m_pooled_slabs;
+  RadixMap<HeapObject*,kLgSmallSizeQuantum,8> m_bigs;
+  MemBlock m_slab_range;
+  int64_t m_hugeBytes{0};               // compare with RequestHugeMaxBytes
   SlabManager* m_slabManager{nullptr};
 };
 
@@ -612,6 +613,7 @@ struct MemoryManager {
    * Pre: size > 0 && size <= kMaxSmallSize
    */
   void* mallocSmallSize(size_t size);
+  void* mallocSmallIndexSize(size_t index, size_t bytes);
   void freeSmallSize(void* p, size_t size);
 
   /*
@@ -623,12 +625,9 @@ struct MemoryManager {
    *
    * Pre: size > kMaxSmallSize
    */
-  enum MBS { Unzeroed, Zeroed };
-  template<MBS Mode>
-  void* mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
-                      type_scan::Index tyindex = type_scan::kIndexUnknown);
+  void* mallocBigSize(size_t size, bool zero = false);
   void freeBigSize(void* vp);
-  void* resizeBig(MallocNode* n, size_t nbytes);
+  MallocNode* reallocBig(MallocNode* n, size_t nbytes);
 
   /*
    * Allocate/deallocate objects when the size is not known to be
@@ -712,23 +711,18 @@ struct MemoryManager {
 
   /*
    * Whether `p' points into memory owned by `m_heap'.
-   *
-   * Note that this explicitly excludes allocations that are made through the
-   * big alloc API.
    */
-  bool contains(void* p) const;
+  bool contains(const void* p) const;
 
   /*
    * Heap iterator methods.  `fn' takes a HeapObject* argument.
    *
-   * initFree(): prepare to iterate by initializing free block headers,
-   *             initializing dead space past m_front, and sorting slabs.
+   * initFree(): prepare to iterate by initializing free block headers
+   *             and initializing dead space past m_front
    * reinitFree(): like initFree() but only update the freelists.
    * iterate(): Raw iterator loop over every HeapObject in the heap.
-   *            Skips BigObj because it's just a detail of which sub-heap we
-   *            used to allocate something based on its size, and it can prefix
-   *            almost any other header kind, and also skips Hole. Clients can
-   *            call this directly to avoid unnecessary initFree()s.
+   *            Skips Holes and Slab headers. Clients can call this directly
+   *            to avoid unnecessary initFree()s.
    * forEachHeapObject(): Like iterate(), but with an eager initFree().
    * forEachObject(): Iterate just the ObjectDatas, including the kinds with
    *                  prefixes (NativeData, AsyncFuncFrame, and ClosureHdr).
@@ -746,13 +740,24 @@ struct MemoryManager {
   template<class Fn> void iterateRoots(Fn) const;
 
   /*
-   * Find the HeapObject* which contains `p', else nullptr if `p' is
-   * not contained in any heap allocation.
+   * Find the HeapObject* in the heap which contains `p', else nullptr if `p'
+   * is not contained in any heap allocation.
    */
   HeapObject* find(const void* p);
 
   /////////////////////////////////////////////////////////////////////////////
   // Stats.
+
+  /*
+   * Get the total amount of memory used across all memory managers.  This
+   * number of bytes is tracked at the slab size granularity.
+   *
+   * This number make occasionally be negative since the atomic operations used
+   * to track it are performed with relaxed ordering constraints.
+   */
+  static ssize_t getAllMMUsage() {
+    return s_req_heap_usage.load(std::memory_order_relaxed);
+  }
 
   /*
    * Update the request-memory limit.
@@ -773,6 +778,11 @@ struct MemoryManager {
    * allocation counters passively.
    */
   MemoryUsageStats getStatsCopy();
+
+  /*
+   * Record a small set of important stats to the given StructuredLogEntry.
+   */
+  void recordStats(StructuredLogEntry&);
 
   /*
    * Get a reference to the current stats data. This does not require any
@@ -859,14 +869,11 @@ struct MemoryManager {
 
   /*
    * Methods for maintaining dedicated sweep lists of sweepable NativeData
-   * objects, APCLocalArray instances, and Sweepables.
+   * objects, and Sweepable instances.
    */
   void addNativeObject(NativeNode*);
   void removeNativeObject(NativeNode*);
-  void addApcArray(APCLocalArray*);
-  void removeApcArray(APCLocalArray*);
   void addSweepable(Sweepable*);
-  template<class Fn> void sweepApcArrays(Fn fn);
   template<class Fn> void sweepApcStrings(Fn fn);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -942,7 +949,7 @@ struct MemoryManager {
     void push(void*);
     FreeNode* head{nullptr};
   };
-  using FreelistArray = std::array<FreeList,kNumSmallSizes>;
+  using FreelistArray = std::array<FreeList, kNumSmallSizes + 1>;
 
   /*
    * beginQuarantine() swaps out the normal freelists. endQuarantine()
@@ -978,21 +985,14 @@ private:
     std::string filename{};
   };
 
-  /*
-   * Pushes some allocation stats to scuba.
-   */
-  void publishStats(const char* name, const std::vector<int64_t> &stats,
-      uint32_t sampleRate);
-
   /////////////////////////////////////////////////////////////////////////////
 
 private:
   void* slabAlloc(size_t bytes, size_t index);
   void* newSlab(size_t nbytes);
-  void* mallocSmallIndexTail(size_t bytes, size_t index);
-  void* mallocSmallIndexSlow(size_t bytes, size_t index);
   void* mallocSmallSizeSlow(size_t bytes, size_t index);
   void  updateBigStats();
+  void  freeSmallIndexSlow(void* ptr, size_t index, size_t bytes);
 
   static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&);
@@ -1009,20 +1009,26 @@ private:
   void resetEagerGC();
   void checkGC();
 
+  // Allocation sampling
+  void checkSampling(size_t bytes);
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
   TRACE_SET_MOD(mm);
 
   static auto constexpr kNoNextGC = std::numeric_limits<int64_t>::max();
+  static auto constexpr kNoNextSample = std::numeric_limits<int64_t>::max();
 
   void* m_front{nullptr};
   void* m_limit{nullptr};
   FreelistArray m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
-  std::vector<APCLocalArray*> m_apc_arrays;
   int64_t m_nextGC{kNoNextGC}; // request gc when heap usage reaches this size
+  int64_t m_nextSample{kNoNextSample};
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit
+  ssize_t m_lastUsage{0};
+  static std::atomic<ssize_t> s_req_heap_usage;
   MemoryUsageStats m_stats;
   HeapImpl m_heap;
   std::vector<NativeNode*> m_natives;
@@ -1058,15 +1064,29 @@ private:
   int64_t m_req_start_micros;
 
   TYPE_SCAN_IGNORE_ALL; // heap-scan handles MemoryManager fields itself.
-
-  // This are memory intensive, a counter per slab. As such, they're only
-  // allocated when we skip the small allocator.
-  std::vector<int64_t> totalSmallAllocs;
-  std::vector<int64_t> currentSmallAllocs;
 };
 
 extern THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 extern __thread size_t tl_heap_id; // current heap instance id
+
+struct RequestLocalGCData {
+  BloomFilter<256*1024> t_surprise_filter;
+  // Structured logging
+  std::atomic<size_t> g_req_num{};
+  size_t t_req_num; // snapshot thread-local copy of g_req_num;
+  size_t t_gc_num; // nth collection in this request.
+  bool t_enable_samples;
+  int64_t t_trigger;
+  int64_t t_trigger_allocated;
+  int64_t t_req_age;
+  MemoryUsageStats t_pre_stats;
+};
+
+extern RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
+extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+
+void gather_alloc_stack(bool skipTop = false);
+void reset_alloc_sampling();
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1074,4 +1094,3 @@ extern __thread size_t tl_heap_id; // current heap instance id
 
 #include "hphp/runtime/base/memory-manager-inl.h"
 
-#endif

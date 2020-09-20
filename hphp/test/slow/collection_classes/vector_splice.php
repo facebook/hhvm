@@ -14,4 +14,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_vector_splice() {
 main();
+}

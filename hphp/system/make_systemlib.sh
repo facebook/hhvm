@@ -13,7 +13,7 @@ SYSTEMLIB=$INSTALL_DIR/systemlib.php
 # keeping.
 AT="@"
 
-echo "<?hh" > ${SYSTEMLIB}
+echo "<?hh // partial" > ${SYSTEMLIB}
 echo "// {$AT}generated" >> ${SYSTEMLIB}
 
 for i in $@; do

@@ -1,6 +1,6 @@
-array(2) {
+darray(2) {
   ["staticBitmask"]=>
-  array(0) {
+  darray(0) {
   }
   ["spaceId"]=>
   int(3)

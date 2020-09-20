@@ -1,4 +1,4 @@
-<?hh
+<?hh // partial
 
 /**
  * MessageFormatter is a concrete class that enables users to produce
@@ -76,7 +76,7 @@ class MessageFormatter {
    */
   public static function formatMessage(string $locale,
                                        string $pattern,
-                                       array $args): mixed {
+                                       darray $args): mixed {
     $fmt = new MessageFormatter($locale, $pattern);
     return $fmt->format($args);
   }
@@ -89,7 +89,7 @@ class MessageFormatter {
    * @return string - The formatted string, or FALSE if an error occurred
    */
   <<__Native>>
-  public function format(array $args): mixed;
+  public function format(darray $args): mixed;
 
   /**
    * Get the error code from last operation
@@ -203,7 +203,7 @@ function msgfmt_create(string $locale,
  */
 function msgfmt_format_message(string $locale,
                                string $pattern,
-                               array $args): string {
+                               darray $args): string {
   return MessageFormatter::formatMessage($locale, $pattern, $args);
 }
 
@@ -216,7 +216,7 @@ function msgfmt_format_message(string $locale,
  * @return string - The formatted string, or FALSE if an error occurred
  */
 function msgfmt_format(MessageFormatter $fmt,
-                       array $args): mixed {
+                       darray $args): mixed {
   return $fmt->format($args);
 }
 

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_FUNC_PROLOGUE_H
-#define incl_HPHP_JIT_FUNC_PROLOGUE_H
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -36,6 +35,12 @@ namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct TransLoc;
+
+namespace tc { struct CodeMetaLock; }
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Emit a func prologue, preceded by its func guard, to the TC, and return the
  * prologue's start address.
@@ -49,20 +54,12 @@ namespace jit {
  * A func prologue does a large portion of the work of an interpreted FCall;
  * the rest of it is handled by the Call instruction.
  */
-TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
-                    CodeCache::View code, CGMeta& fixups);
-
-/*
- * Emit a func body dispatch entry point to the TC.
- *
- * This entry point calls DV init funclets for any un-passed parameters, and
- * then performs a bindjmp to the function's actual entry point translation.
- */
-TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                        CodeCache::View code);
+std::tuple<TransLoc, TCA, CodeCache::View>
+genFuncPrologue(TransID transID, TransKind kind,
+                Func* func, int argc, CodeCache& code, CGMeta& fixups,
+                tc::CodeMetaLock* locker);
 
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
 
-#endif // incl_HPHP_JIT_FUNC_PROLOGUE_H

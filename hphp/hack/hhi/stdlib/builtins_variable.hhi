@@ -1,59 +1,82 @@
-<?hh // decl /* -*- php -*- */
+<?hh /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
- <<__Rx>>
+
+namespace {
+<<__PHPStdLib, __Pure>>
 function is_bool($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Pure>>
 function is_int($var): bool;
-<<__Deprecated('Use is_int().')>>
+<<__Deprecated('Use is_int().'), __Pure>>
 function is_integer($var): bool;
-<<__Deprecated('Use is_int().')>>
+<<__Deprecated('Use is_int().'), __Pure>>
 function is_long($var): bool;
-<<__Deprecated('Use is_float().')>>
+<<__Deprecated('Use is_float().'), __Pure>>
 function is_double($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Pure>>
 function is_float($var): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure>>
 function is_numeric($var): bool;
-<<__Deprecated('Use is_float().')>>
+<<__Deprecated('Use is_float().'), __Pure>>
 function is_real($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Pure>>
 function is_string($var): bool;
-<<__Rx>>
+<<__Pure>>
 function is_scalar($var): bool;
-<<__Rx>>
+<<__Pure>>
 function is_object($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Pure>>
 function is_resource($var): bool;
-<<__Rx>>
+<<__Pure>>
 function is_null($var): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure>>
 function gettype($v);
+<<__PHPStdLib, __Pure>>
+function get_resource_type(resource $handle);
 <<__PHPStdLib>>
-function get_resource_type($handle);
+function print_r($expression, bool $ret = false);
 <<__PHPStdLib>>
-function settype(&$var, $type);
+function var_export($expression, bool $ret = false);
 <<__PHPStdLib>>
-function print_r($expression, $ret = false);
-<<__PHPStdLib>>
-function var_export($expression, $ret = false);
-<<__PHPStdLib>>
-function var_dump(<<__AcceptDisposable>> $expression, <<__AcceptDisposable>> ...$rest);
+function var_dump(<<__AcceptDisposable>> mixed $expression, mixed ...$rest);
 <<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure>>
 function serialize($value);
+<<__PHPStdLib, __Pure>>
+function unserialize(string $str, darray $options = darray[]);
 <<__PHPStdLib>>
-function unserialize($str, $class_whitelist = array());
-<<__Rx>>
-function get_defined_vars();
-<<__PHPStdLib>>
-function import_request_variables($types, $prefix = "");
-function extract(&$var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");
+function import_request_variables(string $types, string $prefix = "");
+}
+
+namespace HH\Lib\_Private\Native {
+  <<__Pure, __AtMostRxAsArgs>>
+  function first<Tv>(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    Container<Tv> $container,
+  ): ?Tv;
+
+  <<__Pure, __AtMostRxAsArgs>>
+  function first_key<Tk as arraykey>(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    KeyedContainer<Tk, mixed> $container,
+  ): ?Tk;
+
+  <<__Pure, __AtMostRxAsArgs>>
+  function last<Tv>(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    Container<Tv> $container,
+  ): ?Tv;
+
+  <<__Pure, __AtMostRxAsArgs>>
+  function last_key<Tk as arraykey>(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    KeyedContainer<Tk, mixed> $container,
+  ): ?Tk;
+}

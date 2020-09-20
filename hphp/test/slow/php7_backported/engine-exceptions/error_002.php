@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function alpha() {
   throw new Error('Foo');
@@ -20,4 +20,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_error_002() {
 main();
+}

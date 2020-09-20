@@ -1,0 +1,2 @@
+
+Fatal error: Invalid expression in constant initializer in %s/static_prop_with_non_const_expr.php on line 8

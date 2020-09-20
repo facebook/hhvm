@@ -1,0 +1,2 @@
+File "await_in_rx1.php", line 11, characters 8-10:
+This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed. (Typing[4248])

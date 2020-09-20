@@ -7,23 +7,23 @@ int(2)
 string(1) "b"
 string(1) "z"
 int(9)
-object(HH\Vector)#10 (3) {
+object(HH\Vector) (3) {
   [0]=>
-  object(HH\Pair)#14 (2) {
+  object(HH\Pair) (2) {
     [0]=>
     string(1) "a"
     [1]=>
     int(1)
   }
   [1]=>
-  object(HH\Pair)#15 (2) {
+  object(HH\Pair) (2) {
     [0]=>
     int(2)
     [1]=>
     string(1) "b"
   }
   [2]=>
-  object(HH\Pair)#16 (2) {
+  object(HH\Pair) (2) {
     [0]=>
     string(1) "z"
     [1]=>
@@ -31,30 +31,30 @@ object(HH\Vector)#10 (3) {
   }
 }
 ------------------------
-object(HH\Vector)#17 (3) {
+object(HH\Vector) (3) {
   [0]=>
-  object(HH\Pair)#20 (2) {
+  object(HH\Pair) (2) {
     [0]=>
     string(1) "a"
     [1]=>
     int(1)
   }
   [1]=>
-  object(HH\Pair)#21 (2) {
+  object(HH\Pair) (2) {
     [0]=>
     int(2)
     [1]=>
     string(1) "b"
   }
   [2]=>
-  object(HH\Pair)#22 (2) {
+  object(HH\Pair) (2) {
     [0]=>
     string(1) "z"
     [1]=>
     int(9)
   }
 }
-object(HH\Map)#26 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   [2]=>
@@ -63,7 +63,7 @@ object(HH\Map)#26 (3) {
   int(9)
 }
 ------------------------
-object(HH\Map)#31 (3) {
+object(HH\Map) (3) {
   ["a"]=>
   int(1)
   [2]=>

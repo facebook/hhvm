@@ -1,0 +1,1 @@
+Fatal error: Interfaces may not implement other interfaces or classes in %s/interface_implements_interface.php on line 4

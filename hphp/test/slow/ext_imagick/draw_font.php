@@ -1,5 +1,9 @@
-<?php
+<?hh
 
+
+
+<<__EntryPoint>>
+function main_draw_font() {
 $draw = new ImagickDraw;
 
 $font_path = __DIR__.'/php_imagick_tests/anonymous_pro_minus.ttf';
@@ -12,7 +16,7 @@ try {
   var_dump("setFont");
 }
 
-$draw->setFontSize(12);
+$draw->setFontSize(12.0);
 var_dump($draw->getFontSize());
 
 $draw->setFontStretch(Imagick::STRETCH_SEMIEXPANDED);
@@ -29,4 +33,4 @@ try {
 } catch (ImagickDrawException $ex) {
   var_dump($ex->getMessage());
 }
-
+}

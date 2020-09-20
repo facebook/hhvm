@@ -1,0 +1,30 @@
+=============== positive tests =====================
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 133
+
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 135
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 152
+
+Notice: 'A::async_func' called dynamically but is not __DynamicallyCallable in %s on line 154
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 163
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 174
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 184
+
+Notice: 'A::func' called dynamically but is not __DynamicallyCallable in %s on line 192
+
+Notice: 'A::cmp' called dynamically but is not __DynamicallyCallable in %s on line 202
+=============== negative tests =====================
+=============== positive tests (exceptions) ========
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::async_func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func' called dynamically but is not __DynamicallyCallable
+Exception: 'A::cmp' called dynamically but is not __DynamicallyCallable

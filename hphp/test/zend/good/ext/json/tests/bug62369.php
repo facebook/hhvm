@@ -1,8 +1,8 @@
-<?php
-
-$array = array();
+<?hh
+<<__EntryPoint>> function main(): void {
+$array = varray[];
 for ($i=0; $i<550; $i++) {
-    $array = array($array);
+    $array = varray[$array];
 }
 
 json_encode($array, 0, 551);
@@ -23,4 +23,5 @@ switch (json_last_error()) {
     case JSON_ERROR_DEPTH:
         echo 'ERROR'.PHP_EOL;
     break;
+}
 }

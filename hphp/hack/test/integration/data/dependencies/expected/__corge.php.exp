@@ -1,0 +1,15 @@
+<?hh
+interface ICorge {
+  abstract const type Tthis as this;
+  public function get(): this::Tthis;
+}
+final class Corge implements \ICorge {
+  const type Tthis = \Corge;
+  public function get(): this::Tthis {
+    throw new \Exception();
+  }
+}
+function corge(Corge $x, ICorge $y): void {
+  $_ = $x->get();
+  $_ = $y->get();
+}

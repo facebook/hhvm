@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HHIR_OPT_H_
-#define incl_HPHP_HHIR_OPT_H_
+#pragma once
 
+#include "hphp/runtime/vm/jit/id-set.h"
+#include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
@@ -23,15 +24,14 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct IRUnit;
-struct IRInstruction;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * The main optimization passes.
  */
-void optimizeInlineReturns(IRUnit&);
 void optimizeRefcounts(IRUnit&);
+void selectiveWeakenDecRefs(IRUnit&);
 void optimizePredictions(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
@@ -55,4 +55,3 @@ void optimize(IRUnit& unit, TransKind kind);
 
 }}
 
-#endif

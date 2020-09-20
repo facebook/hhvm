@@ -1,10 +1,10 @@
-<?php
-
-var_dump(gmp_strval());
+<?hh
+<<__EntryPoint>> function main(): void {
+try { var_dump(gmp_strval()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_strval(""));
-var_dump(gmp_strval("", ""));
+try { var_dump(gmp_strval("", "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gmp_strval("", -1));
-var_dump(gmp_strval(-1, ""));
+try { var_dump(gmp_strval(-1, "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 $fp = fopen(__FILE__, "r");
 var_dump(gmp_strval($fp));
@@ -21,10 +21,10 @@ var_dump(gmp_strval($g, -1));
 var_dump(gmp_strval($g, 100000));
 var_dump(gmp_strval($g, 10));
 
-var_dump(gmp_strval(array(1,2), array(1,2)));
-var_dump(gmp_strval(new stdclass, new stdclass));
-var_dump(gmp_strval(array(1,2)));
+try { var_dump(gmp_strval(varray[1,2], varray[1,2])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_strval(new stdclass, new stdclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+var_dump(gmp_strval(varray[1,2]));
 var_dump(gmp_strval(new stdclass));
 
 echo "Done\n";
-?>
+}

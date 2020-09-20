@@ -1,0 +1,6 @@
+File "namespaced_attributes.php", line 23, characters 7-7:
+Invalid argument (Typing[4110])
+File "namespaced_attributes.php", line 9, characters 40-45:
+Expected `string`
+File "namespaced_attributes.php", line 23, characters 7-7:
+But got `int`

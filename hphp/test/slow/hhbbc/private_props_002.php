@@ -7,7 +7,7 @@
  * as a SStr or SArr.
  */
 class SerDe {
-  private $arr = array(1,2,3);
+  private $arr = varray[1,2,3];
   private $str = "one two three";
 
   public function foo() {
@@ -21,4 +21,8 @@ function main() {
   $x->foo();
 }
 
+
+<<__EntryPoint>>
+function main_private_props_002() {
 main();
+}

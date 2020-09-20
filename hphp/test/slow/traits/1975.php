@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 trait T {
   function foo() {
     echo "Foo";
     parent::bar();
-    echo "__class__: " . __class__ . "\n";
+    echo "__class__: " . __CLASS__ . "\n";
   }
 }
 class C {
@@ -15,6 +15,7 @@ class C {
 class D extends C {
   use T;
 }
+<<__EntryPoint>> function main(): void {
 $x = new D();
 $x->foo();
-?>
+}

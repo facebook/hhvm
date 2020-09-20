@@ -1,0 +1,6 @@
+File "generics.php", line 8, characters 29-32:
+Cannot use experimental feature: like-types (Other[0000])
+File "generics.php", line 8, characters 12-20:
+Cannot use experimental feature: like-types (Other[0000])
+File "generics.php", line 19, characters 16-19:
+Cannot use experimental feature: like-types (Other[0000])

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TC_RELOCATE_H_
-#define incl_HPHP_TC_RELOCATE_H_
+#pragma once
 
 #include <set>
 #include <cstdio>
@@ -37,13 +36,6 @@ struct IRUnit;
 
 namespace tc {
 
-std::string perfRelocMapInfo(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CGMeta& fixups);
-
 bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
                             CGMeta& fixups,
                             TCA* adjust = nullptr);
@@ -64,4 +56,3 @@ void tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
 
 }}}
 
-#endif

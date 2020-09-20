@@ -1,12 +1,14 @@
-array(3) {
+darray(4) {
   [0]=>
   string(28) "Closure$testCycleBackTrace#3"
   [1]=>
   string(12) "HH\Asio\join"
   [2]=>
   string(18) "testCycleBackTrace"
+  [3]=>
+  string(32) "entrypoint_cycle_debug_backtrace"
 }
-array(4) {
+darray(5) {
   [0]=>
   string(28) "Closure$testCycleBackTrace#5"
   [1]=>
@@ -15,6 +17,8 @@ array(4) {
   string(12) "HH\Asio\join"
   [3]=>
   string(18) "testCycleBackTrace"
+  [4]=>
+  string(32) "entrypoint_cycle_debug_backtrace"
 }
 string(%d) "Encountered dependency cycle.
 Existing stack:
@@ -23,7 +27,7 @@ Existing stack:
 Trying to introduce dependency on:
   {closure} (%x) (dupe)
 "
-string(%d) "Encountered dependency cycle.
+string(178) "Encountered dependency cycle.
 Existing stack:
   {closure} (%x) (dupe)
   <await-all> (%x)

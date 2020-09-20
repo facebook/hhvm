@@ -1,5 +1,4 @@
-#!/bin/env php
-<?php
+<?hh
 
 /*
  * Small utilities for wrapping tests to put output into fbmake.
@@ -12,37 +11,35 @@ function say($val) {
   fwrite(STDERR, json_encode($val, JSON_UNESCAPED_SLASHES) . "\n");
 }
 
-// Currently running test, and the results of each test.
-$results = array();
-$current = '';
-
 function finish($status) {
-  global $results;
-  global $current;
 
-  say(array('op' => 'test_done',
-            'test' => $current,
+
+
+  say(darray['op' => 'test_done',
+            'test' => ToolsFbmakeTestBinaryWrapperPhp::$current,
             'details' => '',
-            'status' => $status));
-  array_push($results, array('name'   => $current,
-                             'status' => $status));
-  $current = '';
+            'status' => $status]);
+  ToolsFbmakeTestBinaryWrapperPhp::$results[] = darray[
+    'name'   => ToolsFbmakeTestBinaryWrapperPhp::$current,
+    'status' => $status,
+  ];
+  ToolsFbmakeTestBinaryWrapperPhp::$current = '';
 }
 
 function start($test) {
-  global $current;
 
-  $current = $test;
-  say(array('op'    => 'start',
-            'test'  => $current));
+
+  ToolsFbmakeTestBinaryWrapperPhp::$current = $test;
+  say(darray['op'    => 'start',
+            'test'  => ToolsFbmakeTestBinaryWrapperPhp::$current]);
 }
 
 function test_is_running() {
-  return $GLOBALS['current'] != '';
+  return \HH\global_get('current') != '';
 }
 
 function loop_tests($cmd, $line_func) {
-  global $results;
+
 
   $ftest = popen($cmd, 'r');
   if (!$ftest) {
@@ -51,11 +48,13 @@ function loop_tests($cmd, $line_func) {
   }
   while (!feof($ftest)) {
     $line = fgets($ftest);
-    $line_func($line);
+    if ($line !== false) {
+      $line_func($line);
+    }
   }
   if (!fclose($ftest)) {
-    global $current;
-    if ($current !== '') {
+
+    if (ToolsFbmakeTestBinaryWrapperPhp::$current !== '') {
       finish('failed');
     }
     start('test-binary');
@@ -63,22 +62,42 @@ function loop_tests($cmd, $line_func) {
     return;
   }
 
-  say(array('op'      => 'all_done',
-            'results' => $results));
+  say(darray['op'      => 'all_done',
+            'results' => ToolsFbmakeTestBinaryWrapperPhp::$results]);
 }
 
 
-chdir(__DIR__.'/../../../');
-$cmd = "./hphp/tools/run_test_binary.sh " .
-       "'$argv[1]' '$argv[2]' '$argv[3]' '$argv[4]' ".
-       "2>/dev/null";
+abstract final class ToolsFbmakeTestBinaryWrapperPhp {
+  public static $results;
+  public static $current;
+}
 
-loop_tests($cmd, function ($line) {
-  if (preg_match('/^(Test[a-zA-Z]*)\.\.\.\.\.\.$/', $line, $m)) {
-    start($m[1]);
-  } else if (preg_match('/^Test[a-zA-Z]* (OK|\#\#\#\#\#\>\>\> FAILED)/',
-                        $line,
-                        $m)) {
-    finish($m[1] == 'OK' ? 'passed' : 'failed');
-  }
-});
+<<__EntryPoint>>
+async function main(): Awaitable<void> {
+  chdir(__DIR__.'/../../../');
+  $argv = \HH\global_get('argv');
+  $cmd = sprintf(
+    "./hphp/tools/run_test_binary.sh ".
+    "'%s' '%s' '%s' '%s' ".
+    "2>/dev/null",
+    $argv[1],
+    $argv[2],
+    $argv[3],
+    $argv[4],
+  );
+
+  // Currently running test, and the results of each test.
+  ToolsFbmakeTestBinaryWrapperPhp::$results = varray[];
+  ToolsFbmakeTestBinaryWrapperPhp::$current = '';
+
+  loop_tests($cmd, function ($line) {
+    $m = null;
+    if (preg_match_with_matches('/^(Test[a-zA-Z]*)\.\.\.\.\.\.$/', $line, inout $m)) {
+      start($m[1]);
+    } else if (preg_match_with_matches('/^Test[a-zA-Z]* (OK|\#\#\#\#\#\>\>\> FAILED)/',
+                 $line,
+                 inout $m)) {
+      finish($m[1] == 'OK' ? 'passed' : 'failed');
+    }
+  });
+}

@@ -23,4 +23,8 @@ function main() {
   $test("remove", function ($s) { $s->remove(1); });
 }
 
+
+<<__EntryPoint>>
+function main_cow() {
 main();
+}

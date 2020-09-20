@@ -1,7 +1,11 @@
-<?php
+<?hh
 
-var_dump((integer)'10');
-var_dump((integer)'0x10');
-var_dump((integer)'010');
+
+<<__EntryPoint>>
+function main_105() {
+var_dump((int)'10');
+var_dump((int)'0x10');
+var_dump((int)'010');
 var_dump(10 + 0x10);
 var_dump(10 + 010);
+}

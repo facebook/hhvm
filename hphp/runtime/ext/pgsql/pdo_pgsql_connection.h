@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
    */
 
-#ifndef incl_HPHP_PDO_PGSQL_CONNECTION_H_
-#define incl_HPHP_PDO_PGSQL_CONNECTION_H_
+#pragma once
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 #include "pq.h"
@@ -76,4 +75,3 @@ private:
 };
 }
 
-#endif

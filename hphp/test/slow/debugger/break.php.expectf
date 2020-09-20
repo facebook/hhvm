@@ -1,9 +1,15 @@
 Program %s/break.php loaded. Type '[r]un' or '[c]ontinue' to go.
 continue
-Break on line 3 of %s/break.php
-   2 
-   3*hphpd_break();
-   4 (END)
+Break at entrypoint_break() on line 5 of %s/break.php
+   4 
+   5*  hphpd_break();
+   6 }
+
+n
+Break at entrypoint_break() on line 6 of %s/break.php
+   5   hphpd_break();
+   6*}
+   7 (END)
 
 n
 Program %s/break.php exited normally.

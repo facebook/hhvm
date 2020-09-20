@@ -1,68 +1,54 @@
 *** Testing array_merge_recursive() : array with default keys ***
 -- With default argument --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
 }
 -- With more arguments --
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
   [2]=>
   int(3)
   [3]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(5) "hello"
-    [1]=>
     string(5) "world"
   }
 }
-array(6) {
+darray(6) {
   [0]=>
   int(1)
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
   [2]=>
   int(3)
   [3]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(5) "hello"
-    [1]=>
     string(5) "world"
   }
   [4]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(6)
-    [1]=>
     int(7)
   }
   [5]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(4) "str1"
-    [1]=>
     string(4) "str2"
   }
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
  public $xT1 = 'xT1';
@@ -18,6 +18,9 @@ class A extends B {
   public $xA = 'xA';
   use T3;
 }
+
+<<__EntryPoint>>
+function main_2062() {
 $x = new A();
 $s = serialize($x);
 echo $s . "\n";
@@ -27,3 +30,4 @@ var_dump($y->xT2);
 var_dump($y->xT3);
 var_dump($y->xA);
 var_dump($y->xB);
+}

@@ -1,16 +1,20 @@
-<?php
-$buffer = '';
-function my_output($output, $flag) {
-  global $buffer;
-  $buffer = var_export(['output' => $output, 'flags' => $flag], true);
-  return $output;
+<?hh
+
+abstract final class ExtOutputObCleanHandler {
+  public static $buffer = '';
 }
 
-ob_start('my_output');
+function my_output($output, $flag) {
+  ExtOutputObCleanHandler::$buffer = var_export(darray['output' => $output, 'flags' => $flag], true);
+  return $output;
+}
+<<__EntryPoint>> function main(): void {
+ob_start(fun('my_output'));
 echo "herp";
 ob_clean();
-var_dump($buffer);
-ob_start('my_output');
+var_dump(ExtOutputObCleanHandler::$buffer);
+ob_start(fun('my_output'));
 echo "derp";
 ob_end_clean();
-var_dump($buffer);
+var_dump(ExtOutputObCleanHandler::$buffer);
+}

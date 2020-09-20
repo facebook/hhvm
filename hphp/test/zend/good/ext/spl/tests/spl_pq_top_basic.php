@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $priorityQueue = new SplPriorityQueue();
 
 $priorityQueue->insert("a", 1);
@@ -20,4 +20,4 @@ print_r($priorityQueue->top());
 echo "EXTR_DATA",PHP_EOL;
 $priorityQueue->setExtractFlags(SplPriorityQueue::EXTR_DATA);
 echo "value: ",$priorityQueue->top(),PHP_EOL;
-?>
+}

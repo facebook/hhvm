@@ -14,23 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PACKAGE_H_
-#define incl_HPHP_PACKAGE_H_
+#pragma once
 
-#include "hphp/compiler/hphp.h"
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include "hphp/util/string-bag.h"
+
+#include <folly/Optional.h>
+
 #include "hphp/util/file-cache.h"
 #include "hphp/util/mutex.h"
+#include "hphp/hhbbc/hhbbc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(ServerData);
-DECLARE_BOOST_TYPES(AnalysisResult);
+struct AnalysisResult;
+using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
 
 /**
  * A package contains a list of directories and files that will be parsed
@@ -40,9 +41,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  * Therefore, a package is really toppest entry point for parsing.
  */
 struct Package {
-  explicit Package(const char *root,
-                   bool bShortTags = true,
-                   bool bAspTags = false);
+  explicit Package(const char *root, bool bShortTags = true);
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 
@@ -51,9 +50,9 @@ struct Package {
   void addStaticFile(const std::string& fileName);
   void addDirectory(const std::string &path, bool force);
   void addStaticDirectory(const std::string& path);
-  void addPHPDirectory(const std::string& path, bool force);
+  void addSourceDirectory(const std::string& path, bool force);
 
-  bool parse(bool check);
+  bool parse(bool check, std::thread& unit_emitter_thread);
   bool parseImpl(const std::string* fileName);
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
@@ -67,7 +66,13 @@ struct Package {
   const std::string& getRoot() const { return m_root;}
   std::shared_ptr<FileCache> getFileCache();
 
+  void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
 private:
+
+  std::unique_ptr<UnitEmitter> createSymlinkWrapper(
+    const std::string& full_path, const std::string& file_name,
+    std::unique_ptr<UnitEmitter> org_ue);
+
   std::string m_root;
   std::set<std::string> m_filesToParse;
 
@@ -83,8 +88,9 @@ private:
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
   std::map<std::string,std::string> m_discoveredStaticFiles;
+  folly::Optional<HHBBC::UnitEmitterQueue> m_ueq;
+  hphp_fast_set<std::string> m_locally_cached_bytecode;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_PACKAGE_H_

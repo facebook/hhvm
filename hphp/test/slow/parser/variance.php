@@ -6,3 +6,4 @@ type Y<T1, -T2, +T3> = int;
 
 // Questionable, dissallowed in the type-checker
 function foo<+T>() {}
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

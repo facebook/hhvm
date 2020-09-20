@@ -18,10 +18,15 @@
 
 #include "hphp/util/embedded-data.h"
 
+#include <folly/Conv.h>
 #include <folly/Range.h>
+
 #include <atomic>
+#include <cstdlib>
 #include <mutex>
 #include <string>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +37,8 @@ std::atomic<bool> inited;
 std::mutex mtx;
 std::string repoSchema;
 std::string compiler;
+std::string buildid;
+std::string hhjsbabeltransform;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,8 +74,19 @@ void readBuildInfo() {
   }
 
   compiler = get("compiler_id");
+  buildid = get("build_id");
+  hhjsbabeltransform = get("hhjs_babel_transform");
 
   inited.store(true, std::memory_order_release);
+}
+
+template<typename ValueFn>
+void replacePlaceholder(std::string& target,
+                        const char* placeholder,
+                        ValueFn&& value) {
+  auto const pos = target.find(placeholder);
+  if (pos == std::string::npos) return;
+  target.replace(pos, strlen(placeholder), value());
 }
 
 }
@@ -83,6 +101,28 @@ folly::StringPiece repoSchemaId() {
 folly::StringPiece compilerId() {
   readBuildInfo();
   return compiler;
+}
+
+folly::StringPiece buildId() {
+  readBuildInfo();
+  return buildid;
+}
+
+folly::StringPiece hhjsBabelTransform() {
+  readBuildInfo();
+  return hhjsbabeltransform;
+}
+
+void replacePlaceholders(std::string& s) {
+  replacePlaceholder(s, "%{schema}", [] { return repoSchemaId().begin(); });
+  replacePlaceholder(s, "%{euid}", [] {
+    return folly::to<std::string>(geteuid());
+  });
+  replacePlaceholder(s, "%{user}", [] {
+    auto user = getenv("SUDO_USER");
+    if (user == nullptr) user = getenv("USER");
+    return user != nullptr ? user : "%{user}";
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////

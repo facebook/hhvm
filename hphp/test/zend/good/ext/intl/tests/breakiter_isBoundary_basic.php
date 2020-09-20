@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 
@@ -10,5 +10,5 @@ var_dump($bi->isBoundary(7));
 var_dump($bi->isBoundary(-1));
 var_dump($bi->isBoundary(1));
 var_dump($bi->isBoundary(50));
-?>
-==DONE==
+echo "==DONE==";
+}

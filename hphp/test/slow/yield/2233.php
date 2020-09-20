@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 function foo() {
   yield 1.0 => "hello";
-  yield array(1,2,3) => "world";
+  yield varray[1,2,3] => "world";
   yield new stdClass => "foobar";
 }
 
@@ -11,4 +11,8 @@ function main() {
     var_dump($k, $v);
   }
 }
+
+<<__EntryPoint>>
+function main_2233() {
 main();
+}

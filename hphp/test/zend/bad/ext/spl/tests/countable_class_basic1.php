@@ -1,3 +1,0 @@
-<?php
-ReflectionClass::export('Countable');
-?>

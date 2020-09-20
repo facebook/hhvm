@@ -1,1 +1,2 @@
 -vLog.AlwaysLogUnhandledExceptions=true -vErrorHandling.CallUserHandlerOnFatals=true
+-vEval.EnableArgsInBacktraces=1

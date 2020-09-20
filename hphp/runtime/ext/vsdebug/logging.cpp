@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/ext/vsdebug/logging.h"
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -28,11 +29,11 @@ namespace VSDEBUG {
 static VSDebugLogger s_logger;
 bool VSDebugLogger::s_loggerDestroyed {false};
 
-void VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
+int VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
   std::unique_lock<std::recursive_mutex> lock(s_logger.m_lock);
 
   if (logFilePath.empty()) {
-    return;
+    return 0;
   }
 
   if (!s_logger.m_logFilePath.empty()) {
@@ -45,20 +46,26 @@ void VSDebugLogger::InitializeLogging(const std::string& logFilePath) {
 
   s_logger.m_logFilePath = logFilePath;
 
-  OpenLogFile();
+  return OpenLogFile();
 }
 
-void VSDebugLogger::OpenLogFile() {
+int VSDebugLogger::OpenLogFile() {
   const char* path = s_logger.m_logFilePath.c_str();
   s_logger.m_logFile = fopen(path, "a");
   if (s_logger.m_logFile == nullptr) {
-    return;
+    return errno;
   }
 
   // Start with a visual delimiter so it's easy to see where
   // the session started.
   Log(VSDebugLogger::LogLevelInfo, "-------------------------------");
   Log(VSDebugLogger::LogLevelInfo, "Created new log file.");
+  Log(VSDebugLogger::LogLevelInfo,
+      "Debugger version: %s",
+      VSDEBUG_VERSION
+  );
+
+  return 0;
 }
 
 void VSDebugLogger::SetLogRotationEnabled(bool enabled) {
@@ -147,10 +154,8 @@ void VSDebugLogger::TryRotateLogs() {
     return;
   }
 
-  struct tm* timeInfo = gmtime(&statBuffer.st_ctime);
-  auto now = std::time(nullptr);
-  double diff = difftime(mktime(timeInfo), mktime(gmtime(&now)));
-  if (diff < kLogRotateIntervalSec) {
+  auto fileSizeBytes = statBuffer.st_size;
+  if (fileSizeBytes < kLogFileMaxSizeBytes) {
     return;
   }
 
@@ -160,7 +165,7 @@ void VSDebugLogger::TryRotateLogs() {
   s_logger.m_logFile = nullptr;
 
   // Rotate the files.
-  for (int i = kLogHistoryMaxDays - 1; i >= 0; i--) {
+  for (int i = kLogFilesToRetain - 1; i >= 0; i--) {
     // Try to rename the file if it exists, ignore return code.
     const std::string fromFile = i > 0
       ? s_logger.m_logFilePath + std::to_string(i)
@@ -186,7 +191,8 @@ void VSDebugLogger::Log(const char* level, const char* fmt, ...) {
   struct tm tm = *localtime(&t);
 
   fprintf(s_logger.m_logFile,
-    "[%d-%d-%d %d:%d:%d]",
+    "[%" PRId64 "][%d-%d-%d %d:%d:%d]",
+    (int64_t)getpid(),
     tm.tm_year + 1900,
     tm.tm_mon + 1,
     tm.tm_mday,

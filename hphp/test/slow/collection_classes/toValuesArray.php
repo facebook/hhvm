@@ -1,4 +1,7 @@
 <?hh
+
+<<__EntryPoint>>
+function main_to_values_array() {
 $x = Vector {'a'};
 var_dump($x->toValuesArray());
 var_dump($x->lazy()->toValuesArray());
@@ -15,3 +18,4 @@ $x = Pair {'a', 'b'};
 var_dump($x->toValuesArray());
 var_dump($x->lazy()->toValuesArray());
 var_dump($x->lazy()->map(function($x){return $x;})->toValuesArray());
+}

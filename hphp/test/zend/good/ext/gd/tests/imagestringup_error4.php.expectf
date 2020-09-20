@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagestringup() expects parameter 3 to be integer, string given in %s/imagestringup_error4.php on line 3

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function echoLong($num) {
   return $num;
@@ -22,17 +22,24 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$soap = new LocalSoapClient(dirname(__FILE__)."/bug36999.wsdl");
-
 function test($num) {
-  global $soap;
+
   try {
 	  printf("%s %0.0f\n", gettype($num), $num);
-	  $ret = $soap->echoLong($num);
+    $ret = ZendGoodExtSoapTestsBugsBug36999::$soap
+      ->__soapcall('echoLong', varray[$num]);
 	  printf("%s %0.0f\n", gettype($ret), $ret);
 	} catch (SoapFault $ex) {
 	  var_dump($ex);
 	}
 }
-test(3706790240);
-?>
+
+abstract final class ZendGoodExtSoapTestsBugsBug36999 {
+  public static $soap;
+}
+<<__EntryPoint>>
+function entrypoint_bug36999(): void {
+
+  ZendGoodExtSoapTestsBugsBug36999::$soap = new LocalSoapClient(dirname(__FILE__)."/bug36999.wsdl");
+  test(3706790240);
+}

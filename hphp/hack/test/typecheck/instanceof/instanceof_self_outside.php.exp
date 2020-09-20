@@ -1,0 +1,2 @@
+File "instanceof_self_outside.php", line 4, characters 13-16:
+Unbound name: `self` (Naming[2049])

@@ -4,7 +4,7 @@ function f($x) {
   foreach ($x as $k => $_) {
     var_dump($k);
   }
-  usort($x, function($x,$y) {
+  usort(inout $x, function($x,$y) {
     if (is_int($x) != is_int($y)) {
       if (is_int($x)) return -1;
       return 1;
@@ -29,33 +29,10 @@ function main() {
   f($set->toKeysArray());
   f(array_keys($pair));
   f($pair->toKeysArray());
-  echo "========\n\n";
-  f(array_keys($vector, 22));
-  f(array_keys($vector, '22'));
-  f(array_keys($map, 22));
-  f(array_keys($map, '22'));
-  f(array_keys($set, 22));
-  f(array_keys($set, '22'));
-  f(array_keys($pair, 22));
-  f(array_keys($pair, '22'));
-  echo "========\n\n";
-  f(array_keys($vector, 22, false));
-  f(array_keys($vector, '22', false));
-  f(array_keys($map, 22, false));
-  f(array_keys($map, '22', false));
-  f(array_keys($set, 22, false));
-  f(array_keys($set, '22', false));
-  f(array_keys($pair, 22, false));
-  f(array_keys($pair, '22', false));
-  echo "========\n\n";
-  f(array_keys($vector, 22, true));
-  f(array_keys($vector, '22', true));
-  f(array_keys($map, 22, true));
-  f(array_keys($map, '22', true));
-  f(array_keys($set, 22, true));
-  f(array_keys($set, '22', true));
-  f(array_keys($pair, 22, true));
-  f(array_keys($pair, '22', true));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_keys() {
+main();
+}

@@ -13,8 +13,12 @@ class D {
   const type V = bool;
 }
 
+
+<<__EntryPoint>>
+function main_type_annotation_typeaccess1() {
 var_dump(type_structure(C::class, 'V'));
 var_dump(type_structure(D::class, 'U'));
 
 $x = new ReflectionTypeConstant(D::class, 'U');
 var_dump($x->getAssignedTypeText());
+}

@@ -8,7 +8,7 @@ class ConfigChooser<-TContextProvider, +TResult> {
   ) {}
 
   public function getValue(TContextProvider $context_provider): TResult {
-    //UNSAFE
+    throw new Exception();
   }
 }
 

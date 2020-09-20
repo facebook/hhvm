@@ -1,0 +1,6 @@
+(library
+  (name hackfmt_debug)
+  (wrapped false)
+  (libraries
+    hackfmt
+    full_fidelity))

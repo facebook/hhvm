@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  private $prop = array(1,2,3);
+  private $prop = varray[1,2,3];
 
   public async function genFoo() {
     return async function() {
@@ -26,5 +26,9 @@ function main() {
   var_dump($x->getter());
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_closure_context_003() {
+main();
+}

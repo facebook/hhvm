@@ -1,4 +1,4 @@
-object(HH\Vector)#1 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(11)
   [1]=>
@@ -8,7 +8,7 @@ object(HH\Vector)#1 (4) {
   [3]=>
   int(44)
 }
-object(HH\Vector)#1 (4) {
+object(HH\Vector) (4) {
   [0]=>
   int(11)
   [1]=>
@@ -18,7 +18,7 @@ object(HH\Vector)#1 (4) {
   [3]=>
   int(44)
 }
-object(HH\Map)#1 (4) {
+object(HH\Map) (4) {
   ["a"]=>
   int(11)
   ["b"]=>
@@ -28,7 +28,7 @@ object(HH\Map)#1 (4) {
   ["f"]=>
   int(44)
 }
-object(HH\Map)#4 (4) {
+object(HH\Map) (4) {
   ["a"]=>
   int(11)
   ["b"]=>

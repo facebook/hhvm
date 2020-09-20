@@ -1,9 +1,10 @@
-name: \Foo, kind: type_id, span: line 8, characters 12-14, definition: 
+name: \Foo, kind: type_id, span: line 10, characters 12-14, is_declaration: false
+definition:
  Foo
    kind: class
    id: type_id::Foo
-   position: line 3, characters 7-9
-   span: line 3, character 1 - line 3, character 30
+   position: line 5, characters 7-9
+   span: line 5, character 1 - line 5, character 30
    modifiers: 
 
 

@@ -2,11 +2,9 @@
 
 -- Testing count_chars() function with no arguments --
 
-Warning: %s
-NULL
+Warning: count_chars() expects at least 1 parameter, 0 given in %s/count_chars_error.php on line 11
 
 -- Testing count_chars() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: count_chars() expects at most 2 parameters, 3 given in %s/count_chars_error.php on line 17
 ===DONE===

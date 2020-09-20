@@ -6,7 +6,7 @@ class A extends RecursiveDirectoryIterator {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
 
   $it = new RecursiveIteratorIterator(
     new A(__DIR__), RecursiveIteratorIterator::SELF_FIRST
@@ -16,4 +16,3 @@ function main() {
     var_dump($a);
   }
 }
-main();

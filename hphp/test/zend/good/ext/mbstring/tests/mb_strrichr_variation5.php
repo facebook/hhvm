@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : string mb_strrichr(string haystack, string needle[, bool part[, string encoding]])
  * Description: Finds the last occurrence of a character in a string within another, case insensitive 
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_strrichr() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -38,5 +38,5 @@ var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_lower, true)));
 var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, false)));
 var_dump(bin2hex(mb_strrichr($string_mb, $needle_mb_mixed, true)));
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

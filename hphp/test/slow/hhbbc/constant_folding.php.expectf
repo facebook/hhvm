@@ -1,0 +1,18 @@
+%A
+%w%d: CnsE "FOO"
+%w%d: FCallFuncD <> 1 1 "0" - "" "var_dump"
+%A
+%w%d: CnsE "BAR"
+%w%d: FCallFuncD <> 1 1 "0" - "" "var_dump"
+%A
+%w%d: CnsE "BAZ"
+%w%d: FCallFuncD <> 1 1 "0" - "" "var_dump"
+%A
+%w%d: CnsE "QUX"
+%w%d: FCallFuncD <> 1 1 "0" - "" "var_dump"
+%A
+int(1)
+int(2)
+%A
+int(3)
+int(3)

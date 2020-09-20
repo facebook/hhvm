@@ -1,7 +1,11 @@
-<?php
+<?hh
 
 function Test() {
- var_dump(__FUNCTION__);
+  var_dump(__FUNCTION__);
 }
- var_dump(__FUNCTION__);
- test();
+
+<<__EntryPoint>>
+function main(): void {
+  test();
+  var_dump(__FUNCTION__);
+}

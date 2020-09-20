@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class TB {
   const PARAM_A = 'aaa';
@@ -10,7 +10,11 @@ abstract class ATB extends TB {
 }
 class ABCD extends ATB {
   static public function foo() {
-    return array(      'a_ids'   => array(        ATB::PARAM_A => true,        ATB::PARAM_C   => array(          array('tcks', 'none'),          array('tcks', 'ids'),          ),        ATB::PARAM_B     =>          'aaaa',      ),      'user_id'   => array(        ATB::PARAM_A => true,        ATB::PARAM_C   => array(          array('tcks', 'none'),          array('tcks', 'id'),          ),        ATB::PARAM_B     =>          'bbbb',      ),    );
+    return darray[      'a_ids'   => darray[        ATB::PARAM_A => true,        ATB::PARAM_C   => varray[          varray['tcks', 'none'],          varray['tcks', 'ids'],          ],        ATB::PARAM_B     =>          'aaaa',      ],      'user_id'   => darray[        ATB::PARAM_A => true,        ATB::PARAM_C   => varray[          varray['tcks', 'none'],          varray['tcks', 'id'],          ],        ATB::PARAM_B     =>          'bbbb',      ],    ];
   }
 }
+
+<<__EntryPoint>>
+function main_1611() {
 var_dump(ABCD::foo());
+}

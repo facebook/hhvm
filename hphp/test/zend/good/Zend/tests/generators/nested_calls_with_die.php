@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen() {
     die('Test');
@@ -18,8 +18,7 @@ function outerGen() {
     function_with_4_args(0, 1, 2, 3);
     yield; // force generator
 }
-
+<<__EntryPoint>> function main(): void {
 $outerGen = outerGen();
 $outerGen->rewind();
-
-?>
+}

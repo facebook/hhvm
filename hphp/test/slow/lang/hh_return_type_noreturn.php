@@ -1,6 +1,4 @@
 <?hh
-
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     throw new Exception($errmsg);
@@ -12,7 +10,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 
 function return_implicit(): noreturn {}
 
@@ -32,4 +29,11 @@ function main() {
   echo 'Done', "\n";
 }
 
+
+<<__EntryPoint>>
+function main_hh_return_type_noreturn() {
+error_reporting(-1);
+set_error_handler(fun('handler'));
+
 main();
+}

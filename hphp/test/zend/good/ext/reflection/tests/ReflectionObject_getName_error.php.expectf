@@ -1,9 +1,6 @@
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getName() expects exactly 0 parameters, 1 given in %s/ReflectionObject_getName_error.php on line 10
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getName() expects exactly 0 parameters, 2 given in %s/ReflectionObject_getName_error.php on line 11
 
-Warning: %s
-NULL
+Warning: ReflectionClass::getName() expects exactly 0 parameters, 1 given in %s/ReflectionObject_getName_error.php on line 12

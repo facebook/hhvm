@@ -1,6 +1,5 @@
 
-Warning: %s
-bool(false)
+Warning: strftime() expects at least 1 parameter, 0 given in %s/009.php on line 6
 bool(false)
 %unicode|string%(%d) "Tue Tuesday Jun June Tue Jun 27 00:00:00 2006 %s
 %s %"
@@ -8,8 +7,7 @@ bool(false)
 %unicode|string%(%d) "%s"
 %unicode|string%(4) "blah"
 
-Warning: %s
-bool(false)
+Warning: gmstrftime() expects at least 1 parameter, 0 given in %s/009.php on line 14
 bool(false)
 %unicode|string%(%d) "Mon Monday Jun June Mon Jun 26 21:00:00 2006 %s
 %s %"

@@ -1,17 +1,11 @@
-array(3) {
-  [0]=>
+varray(3) {
   int(0)
-  [1]=>
   int(3)
-  [2]=>
   int(2)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(0)
-  [1]=>
   int(1)
-  [2]=>
   int(3)
 }
 
@@ -19,4 +13,5 @@ Fatal error: Uncaught exception 'UnexpectedValueException' with message '300 is 
 Stack trace:
 #0 (): HH\BuiltinEnum::assert()
 #1 %s(12): HH\BuiltinEnum::assertAll()
-#2 {main}
+#2 (): main()
+#3 {main}

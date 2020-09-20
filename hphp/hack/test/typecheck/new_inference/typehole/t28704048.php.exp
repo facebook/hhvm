@@ -1,0 +1,6 @@
+File "t28704048.php", line 14, characters 8-13:
+This value is not a valid key type for this container (Typing[4298])
+File "t28704048.php", line 8, characters 8-21:
+This container is an object of type dict<string, int>
+File "t28704048.php", line 12, characters 14-14:
+An object of exactly the class B cannot be used as a key for an object of type dict<string, int>

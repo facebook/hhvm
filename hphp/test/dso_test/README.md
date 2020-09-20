@@ -1,6 +1,6 @@
 ## Purpose of dso_test
 This is a simple zend extension solely for testing, taken from
-    http://devzone.zend.com/303
+    https://devzone.zend.com/303
 and renamed "dso_test".
 
 This extension is intended to be compiled as a DSO, not statically linked
@@ -43,4 +43,3 @@ rapidly doing its relatively trivial work.
 ### Examine products:
 
     nm -u dso_test.so | c++filt
-

@@ -1,0 +1,8 @@
+File "async_lambda.php", line 6, characters 7-9:
+Some type constraint(s) here are violated (Typing[4110])
+File "collections/Set.hhi", line 221, characters 23-24:
+'Tu' is a constrained type parameter
+File "collections/Set.hhi", line 221, characters 29-36:
+This is an array key (int | string)
+File "async_lambda.php", line 6, characters 11-25:
+It is incompatible with an object of type Awaitable<int> (result of 'async function')

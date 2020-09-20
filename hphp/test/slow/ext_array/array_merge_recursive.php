@@ -1,18 +1,22 @@
-<?php
+<?hh
 
-$a1 = array();
-$a2 = array("key1" => &$a2);
+
+<<__EntryPoint>>
+function main_array_merge_recursive() {
+$a1 = varray[];
+$a2 = darray["key1" => null];
 $a1 = array_merge_recursive($a1, $a2);
 unset($a1);unset($a2);
 
-$ar1 = array(
-  "color" => array("favorite" => "red"),
+$ar1 = darray[
+  "color" => darray["favorite" => "red"],
   1 => 5
-);
-$ar2 = array(
-  "color" => array("favorite" => "green"),
-  "blue"
-);
+];
+$ar2 = darray[
+  "color" => darray["favorite" => "green"],
+  0 => "blue"
+];
 
-$result = array_merge_recursive($ar1, array($ar2));
+$result = array_merge_recursive($ar1, varray[$ar2]);
 var_dump($result);
+}

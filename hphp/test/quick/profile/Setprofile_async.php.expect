@@ -34,8 +34,8 @@ In gen2
 ** exit HH\RescheduleWaitHandle::create
 ** suspend gen2
 ** enter genList
-** enter HH\AwaitAllWaitHandle::fromArray
-** exit HH\AwaitAllWaitHandle::fromArray
+** enter HH\AwaitAllWaitHandle::fromVec
+** exit HH\AwaitAllWaitHandle::fromVec
 ** suspend genList
 ** suspend genFoo
 ** enter HH\Asio\join
@@ -70,6 +70,8 @@ Finished in gen2
 ** exit gen2
 ** resume genList
 ** enter array_map
+** enter is_callable
+** exit is_callable
 ** enter __invoke
 ** enter HH\Asio\result
 ** exit HH\Asio\result

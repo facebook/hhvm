@@ -1,3 +1,2 @@
 
-Warning: %s
-NULL
+Warning: mt_getrandmax() expects exactly 0 parameters, 1 given in %s/mt_getrandmax_error.php on line 2

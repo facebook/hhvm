@@ -1,2 +1,6 @@
+File "bad_inout_use_lvalue4.php", line 10, characters 5-35:
+You cannot decorate this argument as `inout` (Parsing[1002])
 File "bad_inout_use_lvalue4.php", line 10, characters 11-35:
-Array-like class consts are not valid lvalues (Parsing[1002])
+Arguments for `inout` parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])
+File "bad_inout_use_lvalue4.php", line 4, characters 9-25:
+Please add a type hint (Naming[2035])

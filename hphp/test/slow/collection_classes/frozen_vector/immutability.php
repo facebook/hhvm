@@ -33,4 +33,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_immutability() {
 main();
+}

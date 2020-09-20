@@ -12,11 +12,11 @@ int(4)
 Warning: ReflectionProperty::setValue() expects parameter 1 to be object, integer given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 27
 int(4)
 
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 0 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 29
+Warning: ReflectionProperty::getValue() expects parameter 1 to be object, NULL given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 29
 NULL
 
 Warning: ReflectionProperty::getValue() expects parameter 1 to be object, string given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 30
 NULL
 
-Warning: ReflectionProperty::getValue() expects exactly 1 parameter, 2 given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 31
+Warning: ReflectionProperty::getValue() expects parameter 1 to be object, integer given in %s/test/slow/reflection/ReflectionProperty_setValue.php on line 31
 NULL

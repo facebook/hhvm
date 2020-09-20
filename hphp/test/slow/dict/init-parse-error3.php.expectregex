@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected '&', expecting ']' in [^\r\n]+ on line \d+)|(Fatal error\: Key of collection element cannot be marked as reference in [^\r\n]+\/dict\/init\-parse\-error3\.php on line 4))

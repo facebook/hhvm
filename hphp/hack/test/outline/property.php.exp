@@ -24,14 +24,14 @@ C
     id: property::C:::xhp_property
     position: line 9, characters 12-23
     span: line 9, character 12 - line 9, character 23
-    modifiers: 
+    modifiers: public 
 
   :xhp_enum_property
     kind: property
     id: property::C:::xhp_enum_property
     position: line 10, characters 25-41
     span: line 10, character 25 - line 10, character 48
-    modifiers: 
+    modifiers: public 
 
   __construct
     kind: method

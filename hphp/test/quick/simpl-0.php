@@ -7,7 +7,7 @@ function plus0($x) {
 function minus0($x) {
   return $x - 0;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(plus0(false));
 var_dump(plus0(null));
 var_dump(plus0(1));
@@ -21,3 +21,4 @@ var_dump(minus0(1));
 var_dump(minus0(1.5));
 var_dump(minus0(""));
 var_dump(minus0("1"));
+}

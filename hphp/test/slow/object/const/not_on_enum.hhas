@@ -1,0 +1,11 @@
+.function ["__EntryPoint"("""y:0:{}""")] (5,5) <"" N  > main() {
+  String "FAIL: this file should not run\n"
+  Print
+  PopC
+  Null
+  RetC
+}
+
+.class [enum final is_const no_dynamic_props "__Const"("""y:0:{}""")] E extends HH\BuiltinEnum {
+  .enum_ty <"HH\\int" extended_hint >;
+}

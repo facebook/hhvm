@@ -1,0 +1,40 @@
+File "at_most_rx_as_func2.php", line 11, characters 10-13:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "at_most_rx_as_func2.php", line 8, characters 23-39:
+This function is normal.
+File "at_most_rx_as_func2.php", line 18, characters 5-28:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "at_most_rx_as_func2.php", line 15, characters 15-15:
+Argument type must be a subtype of `\Rx`, now `~T`.
+File "at_most_rx_as_func2.php", line 7, characters 10-10:
+This is the function declaration
+File "at_most_rx_as_func2.php", line 20, characters 5-35:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "at_most_rx_as_func2.php", line 15, characters 15-15:
+Argument type must be a subtype of `\Rx`, now `~T`.
+File "at_most_rx_as_func2.php", line 7, characters 10-10:
+This is the function declaration
+File "at_most_rx_as_func2.php", line 27, characters 5-28:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "at_most_rx_as_func2.php", line 24, characters 15-15:
+Argument type must be a subtype of `\Rx`, now `~T`.
+File "at_most_rx_as_func2.php", line 7, characters 10-10:
+This is the function declaration
+File "at_most_rx_as_func2.php", line 29, characters 5-35:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "at_most_rx_as_func2.php", line 24, characters 15-15:
+Argument type must be a subtype of `\Rx`, now `~T`.
+File "at_most_rx_as_func2.php", line 7, characters 10-10:
+This is the function declaration
+File "at_most_rx_as_func2.php", line 31, characters 5-35:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "at_most_rx_as_func2.php", line 24, characters 15-15:
+Argument type must be a subtype of `\Rx`, now `~T`.
+File "at_most_rx_as_func2.php", line 7, characters 10-10:
+This is the function declaration
+File "at_most_rx_as_func2.php", line 33, characters 5-33:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "at_most_rx_as_func2.php", line 24, characters 15-15:
+Argument type must be a subtype of `\Rx`, now `~T`.
+File "at_most_rx_as_func2.php", line 7, characters 10-10:
+This is the function declaration

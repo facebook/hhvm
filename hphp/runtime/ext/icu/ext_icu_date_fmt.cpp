@@ -247,12 +247,13 @@ static String HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
 }
 
 static String HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
-  ULocDataLocaleType whichloc = ULOC_ACTUAL_LOCALE;
-  if (!which.isNull()) whichloc = (ULocDataLocaleType)which.toInt64();
+  std::underlying_type<ULocDataLocaleType>::type whichloc = ULOC_ACTUAL_LOCALE;
+  if (!which.isNull()) whichloc = which.toInt64();
 
   DATFMT_GET(data, this_, String());
   UErrorCode error = U_ZERO_ERROR;
-  const char *loc = udat_getLocaleByType(data->datefmt(), whichloc, &error);
+  const char *loc = udat_getLocaleByType(data->datefmt(),
+                                         (ULocDataLocaleType)whichloc, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
     return String();
@@ -288,7 +289,7 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getTimeType) {
 
 static String HHVM_METHOD(IntlDateFormatter, getTimeZoneId) {
   DATFMT_GET(data, this_, 0);
-  UnicodeString id;
+  icu::UnicodeString id;
   data->datefmtObject()->getTimeZone().getID(id);
   UErrorCode error = U_ZERO_ERROR;
   String ret(u8(id, error));
@@ -333,7 +334,7 @@ static void add_to_localtime_arr(Array &ret, const UCalendar *cal,
 }
 
 static Variant HHVM_METHOD(IntlDateFormatter, localtime,
-                           const String& value, VRefParam position) {
+                           const String& value, Variant& position) {
   DATFMT_GET(data, this_, uninit_null());
   int32_t parse_pos = -1;
   if (!position.isNull()) {
@@ -356,7 +357,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
                      uValue.getBuffer(), uValue.length(),
                      &parse_pos, &error);
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   error = U_ZERO_ERROR;
   add_to_localtime_arr(ret, cal, UCAL_SECOND, s_tm_sec, error);
   add_to_localtime_arr(ret, cal, UCAL_MINUTE, s_tm_min, error);
@@ -381,12 +382,12 @@ static Variant HHVM_METHOD(IntlDateFormatter, localtime,
   }
   ret.set(s_tm_isdst, isDST ? 1 : 0);
 
-  position.assignIfRef((int64_t)parse_pos);
+  position = (int64_t)parse_pos;
   return ret;
 }
 
-static Variant HHVM_METHOD(IntlDateFormatter, parse,
-                           const String& value, VRefParam position) {
+static Variant HHVM_METHOD(IntlDateFormatter, parseWithPosition,
+                           const String& value, Variant& position) {
   DATFMT_GET(data, this_, 0);
   data->clearError();
   int32_t pos = position.toInt64();
@@ -404,7 +405,7 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
   UDate timestamp = udat_parse(data->datefmt(),
                                str.getBuffer(), str.length(),
                                &pos, &error);
-  position.assignIfRef((int64_t)pos);
+  position = (int64_t)pos;
   if (U_FAILURE(error)) {
     data->setError(error, "Date parsing failed");
     return false;
@@ -482,7 +483,7 @@ void IntlExtension::initDateFormatter() {
   HHVM_ME(IntlDateFormatter, getTimeZone);
   HHVM_ME(IntlDateFormatter, isLenient);
   HHVM_ME(IntlDateFormatter, localtime);
-  HHVM_ME(IntlDateFormatter, parse);
+  HHVM_ME(IntlDateFormatter, parseWithPosition);
   HHVM_ME(IntlDateFormatter, setCalendar);
   HHVM_ME(IntlDateFormatter, setLenient);
   HHVM_ME(IntlDateFormatter, setPattern);

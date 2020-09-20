@@ -1,17 +1,16 @@
-<?php
-ini_set("soap.wsdl_cache_enabled", 0);
+<?hh
 
 function getContinentList() {
-	return array("getContinentListResult"=>array(
+	return darray["getContinentListResult"=>darray[
 	  "schema"=>"<xsd:schema><element name=\"test\" type=\"xsd:string\"/></xsd:schema>",
-	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"));
+	  "any"=>"<test>Hello World!</test><test>Bye World!</test>"]];
 }
 
 class LocalSoapClient extends SoapClient {
-  function __construct($wsdl, $options=array()) {
+  function __construct($wsdl, $options=darray[]) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
-		$this->server->addFunction("getContinentList"); 
+		$this->server->addFunction("getContinentList");
   }
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
@@ -24,10 +23,16 @@ class LocalSoapClient extends SoapClient {
     return $response;
   }
 }
+<<__EntryPoint>>
+function main_entry(): void {
+  ini_set("soap.wsdl_cache_enabled", 0);
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
-var_dump($client->__getFunctions());
-var_dump($client->__getTypes());
-$x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));
-var_dump($x);
-?>
+  $client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
+  var_dump($client->__getFunctions());
+  var_dump($client->__getTypes());
+  $x = $client->__soapcall(
+    'getContinentList',
+    varray[darray["AFFILIATE_ID"=>1,"PASSWORD"=>"x"]],
+  );
+  var_dump($x);
+}

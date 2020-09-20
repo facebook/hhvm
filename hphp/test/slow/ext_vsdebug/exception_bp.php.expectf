@@ -1,6 +1,1 @@
-hello world.
-About to throw again.
-
-Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Exn thrown!' in %s/exception_bp.php.test:13
-Stack trace:
-#0 {main}
+OK!

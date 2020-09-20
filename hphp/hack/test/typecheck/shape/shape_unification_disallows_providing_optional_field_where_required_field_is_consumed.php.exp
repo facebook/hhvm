@@ -1,8 +1,0 @@
-File "shape_unification_disallows_providing_optional_field_where_required_field_is_consumed.php", line 8, characters 14-15:
-Invalid argument (Typing[4163])
-File "shape_unification_disallows_providing_optional_field_where_required_field_is_consumed.php", line 7, characters 25-29:
-The field 'x' is optional
-File "shape_unification_disallows_providing_optional_field_where_required_field_is_consumed.php", line 5, characters 31-35:
-The field 'x' is defined as required
-File "shape_unification_disallows_providing_optional_field_where_required_field_is_consumed.php", line 5, characters 31-35:
-Considering that this type argument is invariant with respect to MyWrapper

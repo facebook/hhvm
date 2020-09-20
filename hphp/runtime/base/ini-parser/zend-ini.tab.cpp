@@ -94,7 +94,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
 using namespace HPHP;
 

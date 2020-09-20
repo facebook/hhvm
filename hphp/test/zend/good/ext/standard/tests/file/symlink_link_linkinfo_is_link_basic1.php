@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool symlink ( string $target, string $link );
    Description: creates a symbolic link to the existing target with the specified name link
 
@@ -11,8 +11,8 @@
    Prototype: int linkinfo ( string $path );
    Description: Gets information about a link
 */
-
-$file_path = dirname(__FILE__);
+<<__EntryPoint>> function main(): void {
+$file_path = __SystemLib\hphp_test_tmproot();
 
 // temp dir created in present working directory
 $dirname = "symlink_link_linkinfo_is_link_basic1";
@@ -35,10 +35,10 @@ $sym_linkname = "$file_path/$dirname/symlink_link_linkinfo_is_link_softlink_basi
 $linkname = "$file_path/$dirname/symlink_link_linkinfo_is_link_hardlink_basic1.tmp";
 
 // filename stored in array with single and double slash notation in its path
-$files = array (
+$files = varray [
   "$file_path/$dirname/symlink_link_linkinfo_is_link_basic1.tmp",
   "$file_path//$dirname//symlink_link_linkinfo_is_link_basic1.tmp"
-);
+];
 
 $counter = 1;
 /* create soft/hard link to  the file 
@@ -73,10 +73,8 @@ foreach($files as $file) {
 }
 
 echo "Done\n";
-?>
-<?php error_reporting(0); ?>
-<?php
-$dirname = dirname(__FILE__)."/symlink_link_linkinfo_is_link_basic1";
+
+$dirname = $file_path."/symlink_link_linkinfo_is_link_basic1";
 unlink("$dirname/symlink_link_linkinfo_is_link_basic1.tmp");
 rmdir($dirname);
-?>
+}

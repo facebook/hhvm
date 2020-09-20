@@ -18,10 +18,21 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/replay-transport.h"
 
+#include "hphp/util/boot-stats.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
+
+#include <boost/filesystem.hpp>
+#include <folly/Range.h>
+#include <folly/Format.h>
 #include <folly/Memory.h>
-
-using std::make_unique;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,16 +74,94 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
     return;
   }
 
-  auto const num = m_additionalThreads.load();
-  if (!num) {
-    return;
+  Logger::Info("Finished warmup; saturating worker threads");
+  m_server->saturateWorkers();
+}
+
+void InternalWarmupWorker::doJob(WarmupJob job) {
+  if (f_server_is_stopping()) return;
+  if (f_server_uptime() > 0 &&
+      jit::mcgen::retranslateAllScheduled()) return;
+  HttpServer::CheckMemAndWait();
+  folly::StringPiece f(job.hdfFile);
+  auto const pos = f.rfind('/');
+  auto const str = (pos == f.npos) ? f : f.subpiece(pos + 1);
+  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, job.index),
+                         RuntimeOption::ServerExecutionMode());
+  try {
+    HttpRequestHandler handler(0);
+    ReplayTransport rt;
+    Logger::FInfo("Replaying warmup request {}:{}", job.hdfFile, job.index);
+    timespec start;
+    Timer::GetMonotonicTime(start);
+    rt.onRequestStart(start);
+    rt.replayInput(Hdf(job.hdfFile));
+    handler.run(&rt);
+  } catch (std::exception& e) {
+    Logger::FWarning("Got exception during warmup request {}:{}, {}",
+                     job.hdfFile, job.index, e.what());
   }
+}
 
-  Logger::Info("Finished warmup; adding %d new worker threads", num);
-  m_server->addWorkers(num);
+InternalWarmupRequestPlayer::InternalWarmupRequestPlayer(int threadCount,
+                                                         bool dedup)
+  : JobQueueDispatcher<InternalWarmupWorker>(threadCount, threadCount,
+                                             0, false, nullptr)
+  , m_noDuplicate(dedup) {
+}
 
-  // Set to zero so we can't do it if the req counter wraps.
-  m_additionalThreads.store(0);
+InternalWarmupRequestPlayer::~InternalWarmupRequestPlayer() {
+  waitEmpty();
+}
+
+void InternalWarmupRequestPlayer::
+runAfterDelay(const std::vector<std::string>& files,
+              unsigned nTimes, unsigned delaySeconds) {
+  if (nTimes == 0) return;
+  if (delaySeconds) {
+    /* sleep override */
+    sleep(delaySeconds);
+  }
+  start();
+  hphp_fast_string_map<unsigned> seen;
+  hphp_fast_string_set deduped;
+  do {
+    deduped.clear();
+    for (auto const& file : files) {
+      if (m_noDuplicate && !deduped.insert(file).second) continue;
+      try {
+        boost::filesystem::path p(file);
+        if (boost::filesystem::is_regular_file(p)) {
+          enqueue(WarmupJob{file, ++seen[file]});
+        } else if (boost::filesystem::is_directory(p)) {
+          for (auto const& f : boost::filesystem::directory_iterator(p)) {
+            if (boost::filesystem::is_regular_file(f.path())) {
+              std::string subFile = f.path().native();
+              // Only do it for .hdf files.
+              if (subFile.size() < 5 ||
+                  subFile.substr(subFile.size() - 4) != ".hdf") {
+                Logger::FWarning("Skipping {} for warmup because it doesn't "
+                                 "look like a .hdf file", subFile);
+                continue;
+              }
+              enqueue(WarmupJob{subFile, ++seen[subFile]});
+            }
+          }
+        }
+      } catch (std::exception& e) {
+        Logger::FError("Exception preparing warmup requests: {}", e.what());
+      }
+    }
+  } while (--nTimes);
+  // Log what was replayed.
+  if (StructuredLog::enabled()) {
+    for (const auto& row : seen) {
+      StructuredLogEntry cols;
+      cols.setStr("file", row.first);
+      cols.setInt("times", row.second);
+      StructuredLog::log("hhvm_replay", cols);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,15 @@
+Warning: Property 'A::p' declared as type this, B assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, C assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, D assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, A assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, C assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, D assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, A assigned in %s/prop-type-hints/this.php on line 6
+
+Warning: Property 'A::p' declared as type this, B assigned in %s/prop-type-hints/this.php on line 6

@@ -1,0 +1,5 @@
+string(70) "Argument 1 passed to foo1() must be upper-bounded by num, string given"
+string(78) "Value returned from function foo2() must be upper-bounded by int, string given"
+string(75) "Argument 1 passed to Bar::foo3() must be upper-bounded by num, string given"
+string(81) "Value returned from method Bar::foo4() must be upper-bounded by string, int given"
+string(70) "Argument 1 passed to foo5() must be upper-bounded by int, string given"

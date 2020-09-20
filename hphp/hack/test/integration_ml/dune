@@ -1,0 +1,355 @@
+; As an exception, we directly use test_injector_config here to be sure
+; all the tests that depend on this lib are using the test stubs
+(library
+  (name integration_test_base)
+  (wrapped false)
+  (modules
+    integration_test_base
+    integration_test_base_types)
+  (libraries
+    asserter
+    client
+    hh_server_monitor
+    server
+    server_client_provider
+    server_command_types
+    server_env
+    test_injector_config))
+
+(library
+  (name runner_base)
+  (wrapped false)
+  (modules runner_base)
+  (libraries
+    integration_test_base
+    errors
+    server_env
+    unit_test
+    test_coverage_levels
+    test_all_ide))
+
+(executable
+  (name runner)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
+  (modules
+    runner
+    test_added_parent
+    test_capitalization
+    test_coverage_counts
+    test_decl_decl
+    test_delete_file
+    test_duplicate_parent
+    test_duplicated_file
+    test_failed_decl
+    test_failed_naming
+    test_function_arg_rx_if_implements1
+    test_function_arg_rx_if_implements2
+    test_gconst_file
+    test_get_dependent_classes
+    test_getfundeps
+    test_ignore_fixme_hhi
+    test_infer_type
+    test_interrupt
+    test_interrupt2
+    test_isfunlocallable
+    test_lazy_decl_idempotence
+    test_mixed_hack_hackpartial
+    test_modify_file
+    test_new_file
+    test_property_initializer
+    test_property_initializer2
+    test_rx_if_implements
+    test_server_hover
+    test_serverConfig_overrides
+    test_unbound_name
+    test_unbound_name_2)
+  (libraries runner_base))
+
+(rule
+  (targets test_all.exe)
+  (action (copy runner.exe test_all.exe)))
+
+(rule
+  (targets test_all.bc)
+  (action (copy runner.bc test_all.bc)))
+
+(alias
+  (name server_config_overrides)
+  (deps test_all.exe)
+  (action (run ./test_all.exe server_config_overrides)))
+
+(alias
+  (name ignore_fixme_hhi)
+  (deps test_all.exe)
+  (action (run ./test_all.exe ignore_fixme_hhi)))
+
+(alias
+  (name coverage_counts)
+  (deps test_all.exe)
+  (action (run ./test_all.exe coverage_counts)))
+
+(alias
+  (name new_file)
+  (deps test_all.exe)
+  (action (run ./test_all.exe new_file)))
+
+(alias
+  (name property_initializer)
+  (deps test_all.exe)
+  (action (run ./test_all.exe property_initializer)))
+
+(alias
+  (name property_initializer2)
+  (deps test_all.exe)
+  (action (run ./test_all.exe property_initializer2)))
+
+(alias
+  (name capitalization)
+  (deps test_all.exe)
+  (action (run ./test_all.exe capitalization)))
+
+(alias
+  (name mixed_hack_hackpartial)
+  (deps test_all.exe)
+  (action (run ./test_all.exe mixed_hack_hackpartial)))
+
+(alias
+  (name modify_file)
+  (deps test_all.exe)
+  (action (run ./test_all.exe modify_file)))
+
+(alias
+  (name delete_file)
+  (deps test_all.exe)
+  (action (run ./test_all.exe delete_file)))
+
+(alias
+  (name duplicated_file)
+  (deps test_all.exe)
+  (action (run ./test_all.exe duplicated_file)))
+
+(alias
+  (name failed_decl)
+  (deps test_all.exe)
+  (action (run ./test_all.exe failed_decl)))
+
+(alias
+  (name duplicate_parent)
+  (deps test_all.exe)
+  (action (run ./test_all.exe duplicate_parent)))
+
+(alias
+  (name added_parent)
+  (deps test_all.exe)
+  (action (run ./test_all.exe added_parent)))
+
+(alias
+  (name get_dependent_classes)
+  (deps test_all.exe)
+  (action (run ./test_all.exe get_dependent_classes)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/deps:deps",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/naming:naming",
+;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils:relative_path",
+;         "//hphp/hack/src/utils/collections:collections",
+;
+
+(alias
+  (name infer_type)
+  (deps test_all.exe)
+  (action (run ./test_all.exe infer_type)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/hhi:hhi",
+;         "//hphp/hack/src/options:global_options",
+;         "//hphp/hack/src/options:tc_options",
+;         "//hphp/hack/src/server:server",
+;         "//hphp/hack/src/server:server_command_types",
+;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_services",
+;         "//hphp/hack/src/typing:typing",
+;         "//hphp/hack/src/typing:typing_ast",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils/collections:collections",
+
+(alias
+  (name getfundeps)
+  (deps test_all.exe)
+  (action (run ./test_all.exe getfundeps)))
+
+(alias
+  (name isfunlocallable)
+  (deps test_all.exe)
+  (action (run ./test_all.exe isfunlocallable)))
+
+(alias
+  (name server_hover)
+  (deps test_all.exe)
+  (action (run ./test_all.exe server_hover)))
+
+(alias
+  (name failed_naming)
+  (deps test_all.exe)
+  (action (run ./test_all.exe failed_naming)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/server:server_env",
+
+(alias
+  (name gconst_file)
+  (deps test_all.exe)
+  (action (run ./test_all.exe gconst_file)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/deps:deps",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/heap:heap",
+;         "//hphp/hack/src/options:tc_options",
+;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_services",
+;         "//hphp/hack/src/typing:typing",
+;         "//hphp/hack/src/typing:typing_ast",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils/collections:collections",
+
+(alias
+  (name unbound_name)
+  (deps test_all.exe)
+  (action (run ./test_all.exe unbound_name)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/server:server_env",
+
+(alias
+  (name decl_decl)
+  (deps test_all.exe)
+  (action (run ./test_all.exe decl_decl)))
+
+(alias
+  (name rx_if_implements)
+  (deps test_all.exe)
+  (action (run ./test_all.exe rx_if_implements)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils/collections:collections",
+
+(alias
+  (name function_arg_rx_if_implements1)
+  (deps test_all.exe)
+  (action (run ./test_all.exe function_arg_rx_if_implements1)))
+
+(alias
+  (name function_arg_rx_if_implements2)
+  (deps test_all.exe)
+  (action (run ./test_all.exe function_arg_rx_if_implements2)))
+
+(alias
+  (name lazy_decl_idempotence)
+  (deps test_all.exe)
+  (action (run ./test_all.exe lazy_decl_idempotence)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/deps:deps",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/heap:heap",
+;         "//hphp/hack/src/options:global_options",
+;         "//hphp/hack/src/options:parser_options",
+;         "//hphp/hack/src/options:tc_options",
+;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_services",
+;         "//hphp/hack/src/typing:typing_check_service",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils:relative_path",
+;         "//hphp/hack/src/utils/collections:collections",
+
+(alias
+  (name interrupt)
+  (deps test_all.exe)
+  (action (run ./test_all.exe interrupt)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/deps:deps",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/heap:heap",
+;         "//hphp/hack/src/naming:naming",
+;         "//hphp/hack/src/options:global_options",
+;         "//hphp/hack/src/options:parser_options",
+;         "//hphp/hack/src/options:tc_options",
+;         "//hphp/hack/src/procs:procs",
+;         "//hphp/hack/src/server:server",
+;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_services",
+;         "//hphp/hack/src/typing:typing_check_service",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils:relative_path",
+;         "//hphp/hack/src/utils/collections:collections",
+
+(alias
+  (name interrupt2)
+  (deps test_all.exe)
+  (action (run ./test_all.exe interrupt2)))
+
+;         ":integration_test_base",
+;         "//hphp/hack/src/decl:decl",
+;         "//hphp/hack/src/deps:deps",
+;         "//hphp/hack/src/errors:errors",
+;         "//hphp/hack/src/heap:heap",
+;         "//hphp/hack/src/options:global_options",
+;         "//hphp/hack/src/options:parser_options",
+;         "//hphp/hack/src/options:tc_options",
+;         "//hphp/hack/src/procs:procs",
+;         "//hphp/hack/src/server:server",
+;         "//hphp/hack/src/server:server_extras",
+;         "//hphp/hack/src/server:server_services",
+;         "//hphp/hack/src/typing:typing_check_service",
+;         "//hphp/hack/src/utils/core:core",
+;         "//hphp/hack/src/utils:relative_path",
+;         "//hphp/hack/src/utils/collections:collections",
+
+(alias
+  (name runtest)
+  (deps
+    (alias coverage_counts)
+    (alias new_file)
+    (alias capitalization)
+    (alias mixed_hack_hackpartial)
+    (alias modify_file)
+    (alias delete_file)
+    (alias duplicated_file)
+    (alias failed_decl)
+    (alias duplicate_parent)
+    (alias added_parent)
+    (alias get_dependent_classes)
+    (alias infer_type)
+    (alias getfundeps)
+    (alias isfunlocallable)
+    (alias server_hover)
+    (alias failed_naming)
+    (alias gconst_file)
+    (alias unbound_name)
+    (alias decl_decl)
+    (alias property_initializer)
+    (alias property_initializer2)
+    (alias rx_if_implements)
+    (alias function_arg_rx_if_implements1)
+    (alias function_arg_rx_if_implements2)
+    (alias lazy_decl_idempotence)
+    (alias ignore_fixme_hhi)
+    (alias interrupt)
+    (alias interrupt2)))

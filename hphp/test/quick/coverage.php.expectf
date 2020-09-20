@@ -2,9 +2,9 @@ About to enable
 Going to enable
 Enabled
 Done enabling
-array(1) {
+darray(1) {
   ["%s"]=>
-  array(%d) {
+  darray(%d) {
     [4]=>
     int(4)
     [5]=>
@@ -31,8 +31,6 @@ array(1) {
     int(4)
     [24]=>
     int(4)
-    [25]=>
-    int(5)
     [26]=>
     int(1)
     [30]=>

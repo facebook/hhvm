@@ -1,8 +1,9 @@
+
 *** Testing unlink() on file inside a directory ***
 -- Unlink file having default permission and its dir having read only permission --
 bool(true)
 
-Warning: %s
+Warning: unlink(%s): Permission denied in %s/unlink_variation1.php on line 29
 bool(false)
 bool(false)
 bool(true)

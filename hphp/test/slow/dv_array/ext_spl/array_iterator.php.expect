@@ -1,0 +1,27 @@
+darray(0) {
+}
+int(0)
+int(1)
+int(1)
+int(2)
+int(2)
+int(3)
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(3) "foo"
+int(1)
+string(3) "bar"
+int(3)
+string(3) "baz"
+int(5)
+darray(3) {
+  ["foo"]=>
+  int(1)
+  ["bar"]=>
+  int(3)
+  ["baz"]=>
+  int(5)
+}

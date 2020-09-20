@@ -1,9 +1,7 @@
 
-Notice: Undefined variable: abc in %s/test/slow/closure/1921.php on line 8
+Notice: Undefined variable: abc in %s/test/slow/closure/1921.php on line 7
 NULL
 int(123)
-int(456)
 NULL
 int(789)
 int(123)
-int(333)

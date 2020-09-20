@@ -1,6 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(posix_getcwd());
-var_dump(posix_getcwd(1));
-
-?>
+try { var_dump(posix_getcwd(1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

@@ -1,18 +1,26 @@
-<?php
+<?hh
 
-$stack = array();
+abstract final class PushStackStatics {
+  public static $index = 0;
+  public static $stack = varray[];
+}
+
 function push_stack(){
-  global $stack;
-  static $index = 0;
-  $val = $index++;
-  array_push($stack, $val);
+
+  $val = PushStackStatics::$index++;
+  $stack = PushStackStatics::$stack;
+  array_push(inout $stack, $val);
+  PushStackStatics::$stack = $stack;
 }
 function pop_stack(){
-  global $stack;
-  if ($stack) {
-    array_pop($stack);
+
+  if (PushStackStatics::$stack) {
+    $stack = PushStackStatics::$stack;
+    array_pop(inout $stack);
+    PushStackStatics::$stack = $stack;
   }
 }
+<<__EntryPoint>> function main(): void {
 push_stack();
 pop_stack();
 pop_stack();
@@ -20,5 +28,6 @@ pop_stack();
 push_stack();
 pop_stack();
 push_stack();
-$info = array(count($stack), $stack[count($stack)-1], $stack);
+$info = varray[count(PushStackStatics::$stack), PushStackStatics::$stack[count(PushStackStatics::$stack)-1], PushStackStatics::$stack];
 var_dump($info);
+}

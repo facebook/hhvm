@@ -1,17 +1,3 @@
-# /data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php starts here
-
-
-.filepath "/data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php";
-
-.main {
-  FPushFuncD 0 "foo"
-  FCall 0
-  PopR
-  Int 1
-  RetC
-}
-
-
 .function <"" N  > foo($b = DV1("""22"""), $c = DV2("""33""")) {
 L0:
   String "/"
@@ -38,5 +24,12 @@ DV2:
   JmpNS L0
 }
 
-
-# /data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php ends here
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  PopC
+  Int 1
+  RetC
+}

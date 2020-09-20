@@ -1,0 +1,22 @@
+darray(2) {
+  [17]=>
+  object(HH\Vector) (2) {
+    [0]=>
+    string(3) "foo"
+    [1]=>
+    string(3) "bar"
+  }
+  [34]=>
+  int(51)
+}
+darray(2) {
+  [0]=>
+  object(HH\Vector) (2) {
+    [0]=>
+    int(17)
+    [1]=>
+    int(34)
+  }
+  [1]=>
+  int(68)
+}

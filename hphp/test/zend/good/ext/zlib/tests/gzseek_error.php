@@ -1,13 +1,13 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 $offset = 1;
 $whence = SEEK_SET;
-$extra_arg = 'nothing'; 
+$extra_arg = 'nothing';
 
-var_dump(gzseek( $h, $offset, $whence, $extra_arg ) );
-var_dump(gzseek($h));
-var_dump(gzseek());
+try { var_dump(gzseek( $h, $offset, $whence, $extra_arg ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gzseek($h)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gzseek()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

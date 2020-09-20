@@ -1,7 +1,0 @@
-*** Testing stat() on a file after using is_file() on it ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---

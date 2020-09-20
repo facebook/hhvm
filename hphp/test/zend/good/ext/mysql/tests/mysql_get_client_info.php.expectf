@@ -1,1 +1,2 @@
+Warning: mysql_get_client_info() expects exactly 0 parameters, 1 given in %s/mysql_get_client_info.php on line 11
 done!

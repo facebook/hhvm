@@ -1,6 +1,6 @@
-<?php
+<?hh
 /* Prototype  : string http_build_query ( mixed $query_data [, string $numeric_prefix [, string $arg_separator [, int $enc_type = PHP_QUERY_RFC1738 ]]] )
- * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
+ * Description: Generates a URL-encoded query string from the associative (or indexed) array provided.
  * Source code: ext/standard/http.c
 */
 
@@ -11,7 +11,7 @@ class UrlBuilder
   protected $sort = 'desc,name';
   private $access = 'admin';
 }
-
+<<__EntryPoint>> function main(): void {
 $obj = new stdClass;
 $obj->name = 'homepage';
 $obj->page = 1;
@@ -19,4 +19,4 @@ $obj->sort = 'desc,name';
 
 echo http_build_query($obj) . PHP_EOL;
 echo http_build_query(new UrlBuilder());
-?>
+}

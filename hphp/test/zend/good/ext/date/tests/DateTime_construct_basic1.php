@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : DateTime::__construct  ([ string $time="now"  [, DateTimeZone $timezone=NULL  ]] )
  * Description: Returns new DateTime object
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-//Set the default time zone 
+//Set the default time zone
+<<__EntryPoint>> function main(): void {
 date_default_timezone_set("Europe/London");
-
 echo "*** Testing new DateTime() : basic functionality ***\n";
 
 var_dump( new DateTime('') );
@@ -16,5 +16,5 @@ var_dump( new DateTime("GMT") );
 var_dump( new DateTime("2005-07-14 22:30:41") );
 var_dump( new DateTime("2005-07-14 22:30:41 GMT") );
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

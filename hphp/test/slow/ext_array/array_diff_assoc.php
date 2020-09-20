@@ -1,28 +1,32 @@
-<?php
+<?hh
 
 function a() {
-  $array1 = array(
+  $array1 = darray[
     "a" => "green",
     "b" => "brown",
     "c" => "blue",
-    "red"
-  );
-  $array2 = array(
+    0 => "red"
+  ];
+  $array2 = darray[
     "a" => "green",
-    "yellow",
-    "red"
-  );
+    0 => "yellow",
+    1 => "red"
+  ];
 
   $result = array_diff_assoc($array1, $array2);
   var_dump($result);
 }
 
 function b() {
-  $array1 = array(0, 1, 2);
-  $array2 = array("00", "01", "2");
+  $array1 = varray[0, 1, 2];
+  $array2 = varray["00", "01", "2"];
   $result = array_diff_assoc($array1, $array2);
   var_dump($result);
 }
 
+
+<<__EntryPoint>>
+function main_array_diff_assoc() {
 a();
 b();
+}

@@ -2,11 +2,9 @@
 
 -- Testing quoted_printable_decode() function with no arguments --
 
-Warning: %s
-NULL
+Warning: quoted_printable_decode() expects exactly 1 parameter, 0 given in %s/quoted_printable_decode_error.php on line 10
 
 -- Testing quoted_printable_decode() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: quoted_printable_decode() expects exactly 1 parameter, 2 given in %s/quoted_printable_decode_error.php on line 19
 ===DONE===

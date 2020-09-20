@@ -1,0 +1,50 @@
+---- class C ----
+-- at constructor entry --
+object(C) (1) {
+  ["ci"]=>
+  int(0)
+}
+-- after constructor completes --
+object(C) (1) {
+  ["ci"]=>
+  int(1)
+}
+Cannot modify const property ci of class C after construction
+-- at the end --
+object(C) (1) {
+  ["ci"]=>
+  int(1)
+}
+---- class D ----
+-- at constructor entry --
+object(D) (1) {
+  ["ci"]=>
+  int(0)
+}
+-- after constructor completes --
+object(D) (1) {
+  ["ci"]=>
+  int(1)
+}
+Cannot modify const property ci of class D after construction
+-- at the end --
+object(D) (1) {
+  ["ci"]=>
+  int(1)
+}
+---- class E ----
+-- at constructor entry --
+object(E) (1) {
+  ["ci"]=>
+  int(0)
+}
+-- after constructor completes --
+object(E) (1) {
+  ["ci"]=>
+  int(1)
+}
+-- at the end --
+object(E) (1) {
+  ["ci"]=>
+  int(2)
+}

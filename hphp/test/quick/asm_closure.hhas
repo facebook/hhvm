@@ -1,28 +1,30 @@
 # Test making closures
 
-.main {
+.class [no_override unique] ClosureTest extends Closure {
+  .property [private] x = uninit;
+  .method [public static] __invoke() isClosureBody {
+    .declvars $x;
+    CGetL $x
+    RetC
+  }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
   Int 20
   SetL $x
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
+
   CUGetL $x
   CreateCl 1 0
 
-  FPushFunc 0
-  FCall 0
-  UnboxR
+  FCallFunc <> 0 1 "" - ""
   Print
   PopC
 
   Int 1
   RetC
-}
-
-.class [no_override unique] ClosureTest extends Closure {
-  .property [private] x = uninit;
-  .method [public static] __invoke() isClosureBody {
-    .declvars $0Closure $x;
-    CGetL $x
-    RetC
-  }
 }

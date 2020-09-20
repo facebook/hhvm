@@ -1,7 +1,8 @@
 <?hh
 namespace HH {
-  if (false) {
-    class String {}
-  }
-  echo "Done\n";
+
+class String {}
+<<__EntryPoint>> function main(): void {
+echo "Done\n";
+}
 }

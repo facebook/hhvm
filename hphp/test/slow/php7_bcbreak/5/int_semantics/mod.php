@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function always_true() {
   return mt_rand(1, 2) < 10;
@@ -17,16 +17,19 @@ function exn($e) {
 }
 
 function run_tests() {
-  try { 1 % 0; } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { 1 % 0.0; } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { 1 % noinline(0); } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { 1 % noinline(0.0); } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { noinline(1) % 0; } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { noinline(1) % 0.0; } catch (\__SystemLib\Throwable $e) { exn($e); }
+  try { 1 % 0; } catch (\Throwable $e) { exn($e); }
+  try { 1 % 0.0; } catch (\Throwable $e) { exn($e); }
+  try { 1 % noinline(0); } catch (\Throwable $e) { exn($e); }
+  try { 1 % noinline(0.0); } catch (\Throwable $e) { exn($e); }
+  try { noinline(1) % 0; } catch (\Throwable $e) { exn($e); }
+  try { noinline(1) % 0.0; } catch (\Throwable $e) { exn($e); }
   try { noinline(1) % noinline(0); }
-    catch (\__SystemLib\Throwable $e) { exn($e); }
+    catch (\Throwable $e) { exn($e); }
   try { noinline(1) % noinline(0.0); }
-    catch (\__SystemLib\Throwable $e) { exn($e); }
+    catch (\Throwable $e) { exn($e); }
 }
+<<__EntryPoint>>
+function entrypoint_mod(): void {
 
-run_tests();
+  run_tests();
+}

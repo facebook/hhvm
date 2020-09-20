@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_ftruncate() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -14,3 +17,4 @@ $f = fopen($tempfile, "r");
 var_dump(fread($f, 20));
 
 unlink($tempfile);
+}

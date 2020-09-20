@@ -1,0 +1,6 @@
+File "cast.php", line 4, characters 19-22:
+Encountered unexpected token `$obj`. (Parsing[1002])
+File "cast.php", line 4, characters 9-17:
+Unbound name: `TNotFound` (a global constant) (Naming[2049])
+File "cast.php", line 4, characters 9-17:
+Unbound global constant (Typing) (Typing[4106])

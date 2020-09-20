@@ -3,7 +3,7 @@
 class someJunk { public function __construct(private $blah) {} }
 
 class Foo {
-  private static $foo;
+  private static $foo = varray[];
   protected static function createInstance() { return new stdclass; }
   public static function get($x) {
     self::$foo[] = new someJunk(static::createInstance($x));
@@ -19,6 +19,10 @@ class Baz extends Foo {
   protected static function createInstance() { return new Baz(); }
 }
 
+
+<<__EntryPoint>>
+function main_fcalld_lsb_001() {
 var_dump(Bar::get(1));
 var_dump(Bar::get(1));
 var_dump(Baz::get(2));
+}

@@ -1,0 +1,6 @@
+File "nullable_tparam.php", line 6, characters 10-11:
+Invalid argument (Typing[4110])
+File "nullable_tparam.php", line 3, characters 27-28:
+Expected `null or something of type int`
+File "nullable_tparam.php", line 5, characters 19-19:
+But got `T`

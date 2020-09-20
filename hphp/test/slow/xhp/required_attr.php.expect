@@ -1,0 +1,23 @@
+darray(3) {
+  ["a"]=>
+  varray(4) {
+    int(1)
+    NULL
+    NULL
+    int(1)
+  }
+  ["b"]=>
+  varray(4) {
+    int(1)
+    NULL
+    NULL
+    int(1)
+  }
+  ["c"]=>
+  varray(4) {
+    int(1)
+    NULL
+    NULL
+    int(0)
+  }
+}

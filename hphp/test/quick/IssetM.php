@@ -1,21 +1,19 @@
 <?hh
 
-print "Test begin\n";
-
 function r($r) {
   print ($r ? " true" : "false")."\n";
 }
 
 function build() {
-  $a = array("A0" => 0,
-             "A1" => "a1");
-  $b = array("A" => $a,
+  $a = darray["A0" => 0,
+             "A1" => "a1"];
+  $b = darray["A" => $a,
              "B0" => 0,
-             "B1" => "b1");
-  $c = array("A" => $a,
+             "B1" => "b1"];
+  $c = darray["A" => $a,
              "B" => $b,
              "C0" => 0,
-             "C1" => "c1");
+             "C1" => "c1"];
 
   return $c;
 }
@@ -31,6 +29,10 @@ function main() {
   r(isset($arr["X"]["X"]));
   r(isset($arr["X"]["X"]["X"]));
 }
+<<__EntryPoint>> function main_entry(): void {
+print "Test begin\n";
+
 main();
 
 print "Test end\n";
+}

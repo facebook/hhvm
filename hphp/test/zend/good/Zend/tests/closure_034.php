@@ -1,7 +1,10 @@
-<?php
+<?hh
 
-$a = function () use(&$a) {};
-var_dump($a);
+class C { public $a; }
+<<__EntryPoint>> function main(): void {
+$c = new C();
+$c->a = function () use($c) {};
+var_dump($c->a);
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

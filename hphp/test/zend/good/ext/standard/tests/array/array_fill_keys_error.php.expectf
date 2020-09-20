@@ -2,16 +2,13 @@
 
 -- Testing array_fill_keys() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_fill_keys() expects exactly 2 parameters, 3 given in %s/array_fill_keys_error.php on line 15
 
 -- Testing array_fill_keys() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: array_fill_keys() expects exactly 2 parameters, 1 given in %s/array_fill_keys_error.php on line 18
 
 -- Testing array_fill_keys() function with no arguments --
 
-Warning: %s
-NULL
+Warning: array_fill_keys() expects exactly 2 parameters, 0 given in %s/array_fill_keys_error.php on line 21
 Done

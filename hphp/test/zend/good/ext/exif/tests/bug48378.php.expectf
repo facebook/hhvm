@@ -1,6 +1,6 @@
 
-Warning: %s
+Warning: Invalid IFD start in %s/bug48378.php on line 5
 
-Warning: %s
+Warning: Error reading from file: got=x08B4(=2228) != itemlen-2=x1FFE(=8190) in %s/bug48378.php on line 5
 
-Warning: %s
+Warning: Invalid JPEG file in %s/bug48378.php on line 5

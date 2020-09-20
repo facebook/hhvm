@@ -1,0 +1,6 @@
+=============== positive tests =====================
+
+Notice: 'A' constructed dynamically in %s on line 151
+=============== negative tests =====================
+=============== positive tests (exceptions) ========
+Exception: 'A' constructed dynamically

@@ -1,7 +1,11 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_reset_server_list() {
 $mem = new Memcached();
 $mem->addServer("localhost", 1234);
 var_dump(count($mem->getServerList()));
 $mem->resetServerList();
 var_dump($mem->getServerList());
+}

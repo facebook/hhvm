@@ -1,0 +1,38 @@
+vec(2) {
+  string(1) "D"
+  string(5) "func1"
+}
+int(1)
+vec(2) {
+  string(1) "D"
+  string(5) "func1"
+}
+bool(true)
+bool(true)
+bool(true)
+string(8) "D::func1"
+bool(true)
+string(8) "D::func1"
+bool(true)
+string(8) "D::func1"
+bool(true)
+string(8) "D::func1"
+classMeth{
+    class(D)
+    function(func1)
+}
+int(1)
+classMeth{
+    class(D)
+    function(func1)
+}
+bool(true)
+bool(true)
+bool(true)
+string(8) "D::func1"
+bool(true)
+string(8) "D::func1"
+bool(true)
+string(8) "D::func1"
+bool(true)
+string(8) "D::func1"

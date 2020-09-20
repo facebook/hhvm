@@ -1,0 +1,46 @@
+Typing[4341] The method f has the wrong type [1]
+-> Expected string [2]
+-> But got int [3]
+
+long_directory_name.php--child.php:3:19
+      1 | <?hh // strict
+      2 | class Child extends Foo {
+[1,2] 3 |   public function f(string $x): void {}
+      4 | }
+      5 | 
+
+long_directory_name.php--long/directory/name/class_def.php:3:21
+      1 | <?hh // strict
+      2 | class Foo {
+[3]   3 |   public function f(int $x): void {}
+      4 | }
+      5 | 
+
+Typing[4340] Class TBothTraits does not correctly implement all required members  [1]
+-> Some members are incompatible with those declared in type TReqExtChild [2]
+-> The method f has the wrong type [3]
+-> Expected int [4]
+-> But got string [5]
+
+long_directory_name.php--long/directory/name/again/tboth_traits.php:2:7
+      1 | <?hh // strict
+[1]   2 | trait TBothTraits {
+[2]   3 |   use TReqExtChild;
+      4 |   use TReqExtFoo;
+      5 | }
+
+long_directory_name.php--long/directory/name/class_def.php:3:19
+      1 | <?hh // strict
+      2 | class Foo {
+[3,4] 3 |   public function f(int $x): void {}
+      4 | }
+      5 | 
+
+long_directory_name.php--child.php:3:21
+      1 | <?hh // strict
+      2 | class Child extends Foo {
+[5]   3 |   public function f(string $x): void {}
+      4 | }
+      5 | 
+
+2 errors found.

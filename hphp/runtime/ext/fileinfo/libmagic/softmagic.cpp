@@ -2031,12 +2031,12 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
     if (matches.isArray() && retval.isInteger() && retval.toInt64Val() > 0) {
       auto subpats = matches.toArray();
-      auto global = subpats.lvalAt(0).unboxed();
+      auto global = subpats.lval(0);
 
       for (HPHP::ArrayIter iter(global.tv()); iter; ++iter) {
         auto pair = iter.second().toArray();
-        auto pattern_match = pair.lvalAt(0).unboxed();
-        auto pattern_offset = pair.lvalAt(1).unboxed();
+        auto pattern_match = pair.lval(0);
+        auto pattern_offset = pair.lval(1);
 
         if (!isNullType(pattern_match.type()) &&
             !isNullType(pattern_offset.type())) {

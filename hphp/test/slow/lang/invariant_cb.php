@@ -1,6 +1,7 @@
 <?hh
-
-invariant_callback_register(function() {
-  var_dump(func_get_args());
+<<__EntryPoint>> function main(): void {
+invariant_callback_register(function(...$args) {
+  var_dump($args);
 });
 invariant(false, "a", "b");
+}

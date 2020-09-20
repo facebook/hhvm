@@ -9,7 +9,7 @@
 find_path(LZ4_INCLUDE_DIR NAMES lz4.h)
 find_library(LZ4_LIBRARY NAMES lz4)
 
-# We require LZ4_compress_default() which was added in v1.7.0
+# fb-mysql requires LZ4F_resetDecompressionContext() which was added in v1.8.0
 if (LZ4_LIBRARY)
   include(CheckCSourceRuns)
   set(CMAKE_REQUIRED_INCLUDES ${LZ4_INCLUDE_DIR})
@@ -18,7 +18,7 @@ if (LZ4_LIBRARY)
 #include <lz4.h>
 int main() {
   int good = (LZ4_VERSION_MAJOR > 1) ||
-    ((LZ4_VERSION_MAJOR == 1) && (LZ4_VERSION_MINOR >= 7));
+    ((LZ4_VERSION_MAJOR == 1) && (LZ4_VERSION_MINOR >= 8));
 return !good;
 }" LZ4_GOOD_VERSION)
   set(CMAKE_REQUIRED_INCLUDES)

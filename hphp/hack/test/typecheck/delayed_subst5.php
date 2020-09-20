@@ -12,8 +12,7 @@ trait ATrait {
 }
 
 class Base<+T> {
-
   public function get(): T {
-    // UNSAFE
+    throw new Exception();
   }
 }

@@ -6,4 +6,8 @@ function test(): void {
   return;
 }
 
-var_dump(test());
+
+<<__EntryPoint>>
+function main_namespace_void() {
+\var_dump(test());
+}

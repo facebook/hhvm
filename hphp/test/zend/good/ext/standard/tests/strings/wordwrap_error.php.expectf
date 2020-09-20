@@ -2,20 +2,18 @@
 
 -- Testing wordwrap() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects at least 1 parameter, 0 given in %s/wordwrap_error.php on line 11
 
 -- Testing wordwrap() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: wordwrap() expects at most 4 parameters, 5 given in %s/wordwrap_error.php on line 21
 
 -- Testing wordwrap() function with negative/zero value for width argument --
 -- width = 0 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = 0 & cut = true --
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_error.php on line 35
 bool(false)
 -- width = -10 & cut = false --
 string(39) "testing<br />\nwordwrap<br />\nfunction"

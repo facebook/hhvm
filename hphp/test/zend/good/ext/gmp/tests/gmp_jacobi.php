@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 for ($i = -1; $i < 10; $i++) {
 	var_dump(gmp_strval(gmp_jacobi(($i*$i)-1, 3)));
 }
@@ -15,13 +15,13 @@ var_dump(gmp_strval(gmp_jacobi($n, $n1)));
 var_dump(gmp_strval(gmp_jacobi($n, 3)));
 var_dump(gmp_strval(gmp_jacobi(3, $n1)));
 
-var_dump(gmp_jacobi(3, array()));
-var_dump(gmp_jacobi(array(), 3));
-var_dump(gmp_jacobi(array(), array()));
+var_dump(gmp_jacobi(3, varray[]));
+var_dump(gmp_jacobi(varray[], 3));
+var_dump(gmp_jacobi(varray[], varray[]));
 
-var_dump(gmp_jacobi(array(), array(), 1));
-var_dump(gmp_jacobi(array()));
-var_dump(gmp_jacobi());
+try { var_dump(gmp_jacobi(varray[], varray[], 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_jacobi(varray[])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump(gmp_jacobi()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
-?>
+}

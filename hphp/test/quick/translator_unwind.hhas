@@ -1,53 +1,15 @@
 # Tests unwinding with dirty callee-saved registers that are mapped to
 # execution stack locations.
 
-.main {
-  FPushFuncD 1 "set_error_handler"
-    String "thrower"
-    FPassC 0 Any
-  FCall 1
-  PopR
-
-  # If get_undefined_var is inlined then the context passed to handler will
-  # contain the locals from test_unwind_dirty_stack_regs in an array which will
-  # be stored along wtih other arguments inside the exception unless we pass
-  # ignore args. If this happens the exception will keep the DtorPrinter objects
-  # alive past the end of test_unwind_dirty_stack_regs.
-  FPushClsMethodD 1 "setTraceOptions" "Exception"
-    Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-    FPassCE 0 Any
-  FCall 1
-  PopR
-
-  .try {
-    FPushFuncD 0 "test_unwind_dirty_stack_regs"
-    FCall 0
-    UnboxR
-    RetC
-  } .catch {
-    SetL _1
-    PopC
-    String "Received exception:  "
-    PushL _1
-    FPushObjMethodD 0 "getMessage" NullThrows
-    FCall 0
-    UnboxR
-    Concat
-    String "\n"
-    Concat
-    Print
-    PopC
-    Int 1
-    RetC
-  }
-}
-
 .function thrower() {
-  FPushCtorD 1 "Exception"
+  NewObjD "Exception"
+  Dup
+  NullUninit
+  NullUninit
     String "hi"
-    FPassC 0 Any
-  FCall 1
-  PopR
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
   Throw
 }
 
@@ -63,22 +25,10 @@
 
     This
     CGetL $id
-    BaseC 1
+    BaseC 1 Define
     SetM 1 PT:"x"
     PopC
     Int 1
-    RetC
-  }
-
-  .method [public] __destruct() {
-    String "dtor: "
-    This
-    BaseC 0
-    QueryM 1 CGet PT:"x"
-    Concat
-    String "\n"
-    Concat
-    Print
     RetC
   }
 
@@ -86,10 +36,14 @@
 }
 
 .function make_obj($id) {
-  FPushCtorD 1 "DtorPrinter"
-    FPassL 0 $id Any
-  FCall 1
-  PopR
+  NewObjD "DtorPrinter"
+  Dup
+  NullUninit
+  NullUninit
+    CGetL $id
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
   RetC
 }
 
@@ -109,109 +63,109 @@
 # stack.
 
 .function test_unwind_dirty_stack_regs() {
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 0
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_0
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 1
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_1
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 2
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_2
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 3
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_3
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 4
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_4
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 5
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_5
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 6
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_6
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 7
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_7
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 8
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_8
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 9
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_9
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 10
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_10
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 11
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_11
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 12
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_12
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 13
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_13
   PopC
-  FPushFuncD 1 "make_obj"
+  NullUninit
+  NullUninit
+  NullUninit
     Int 14
-    FPassC 0 Any
-  FCall 1
-  UnboxR
+  FCallFuncD <> 1 1 "" - "" "make_obj"
   SetL $k_14
   PopC
 
@@ -231,9 +185,11 @@
   CGetL $k_13
   CGetL $k_14
 
-  FPushFuncD 0 "get_undefined_var"
-  FCall 0
-  PopR
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "get_undefined_var"
+  PopC
 
   # This code isn't reached---but let's Pop this junk just so
   # theoretically we could pass verification some day.
@@ -257,4 +213,48 @@
 
   Int 1
   RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+    String "thrower"
+  FCallFuncD <> 1 1 "" - "" "set_error_handler"
+  PopC
+
+  # If get_undefined_var is inlined then the context passed to handler will
+  # contain the locals from test_unwind_dirty_stack_regs in an array which will
+  # be stored along wtih other arguments inside the exception unless we pass
+  # ignore args. If this happens the exception will keep the DtorPrinter objects
+  # alive past the end of test_unwind_dirty_stack_regs.
+  NullUninit
+  NullUninit
+  NullUninit
+    CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
+  FCallClsMethodD <> 1 1 "" - "" "" "Exception" "setTraceOptions"
+  PopC
+
+  .try {
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallFuncD <> 0 1 "" - "" "test_unwind_dirty_stack_regs"
+    RetC
+  } .catch {
+    SetL _1
+    PopC
+    String "Received exception:  "
+    PushL _1
+    NullUninit
+    NullUninit
+    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+    Int 1
+    RetC
+  } 
 }

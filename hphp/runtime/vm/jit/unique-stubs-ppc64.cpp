@@ -63,21 +63,17 @@ static void alignJmpTarget(CodeBlock& cb) {
  * Helper for the freeLocalsHelpers which does the actual work of decrementing
  * a value's refcount or releasing it.
  *
- * This helper is reached via call from the various freeLocalHelpers.  It
- * expects `tv' to be the address of a TypedValue with refcounted type `type'
- * (though it may be static, and we will do nothing in that case).
+ * This helper is reached via call from the various freeLocalHelpers.
+ * It expects `dataVal' to be a Value, and `typeVal' to be the the
+ * associated DataType (with refcounted type) (though it may be
+ * static, and we will do nothing in that case).
  *
  * The `live' registers must be preserved across any native calls (and
  * generally left untouched).
  */
 static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                            PhysReg tv, PhysReg type, RegSet live) {
+                            PhysReg dataVal, PhysReg typeVal, RegSet live) {
   return vwrap(cb, data, fixups, [&] (Vout& v) {
-    // We use the first argument register for the TV data because we might pass
-    // it to the native release call.  It's not live when we enter the helper.
-    auto const data = rarg(0);
-    v << load{tv[TVOFF(m_data)], data};
-
     auto destroy = [&](Vout& v) {
       PhysRegSaver prs{v, live};
 
@@ -90,7 +86,8 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 
       // The refcount is exactly 1; release the value.
       // Avoid 'this' pointer overwriting by reserving it as an argument.
-      v << callm{lookupDestructor(v, type), arg_regs(1)};
+      assertx(dataVal == rarg(0));
+      v << callm{lookupDestructor(v, typeVal, true), arg_regs(1)};
 
       // Between where r1 is now and the saved RIP of the call into the
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
@@ -105,7 +102,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       v << mtlr{rfuncln()};
     };
 
-    auto const sf = emitCmpRefCount(v, OneReference, data);
+    auto const sf = emitCmpRefCount(v, OneReference, dataVal);
 
     if (one_bit_refcount) {
       ifThen(v, CC_E, sf, destroy);
@@ -115,7 +112,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
         // either decref or release.
         ifThen(v, CC_NE, sf, [&] (Vout& v) {
           // The refcount is greater than 1; decref it.
-          emitDecRefCount(v, data);
+          emitDecRefCount(v, dataVal);
           v << ret{live};
         });
 
@@ -129,27 +126,36 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 }
 
 TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
-  // The address of the first local is passed in the second argument register.
-  // We use the third and fourth as scratch registers.
-  auto const local = rarg(1);
-  auto const last = rarg(2);
-  auto const type = rarg(3);
+  // The address of the first local's type is passed in the second
+  // argument register. The address of the first local's value is
+  // passed in the third argument register. We use the first to store
+  // the loaded value (so its already in the right place when calling
+  // the release function).  We use the fourth as a scratch register
+  // for loading the type and the fifth as a scratch register for
+  // storing the end pointer.
+  auto const dataVal = rarg(0);
+  auto const typePtr = rarg(1);
+  auto const dataPtr = rarg(2);
+  auto const typeVal = rarg(3);
+  auto const end = rarg(4);
   CGMeta fixups;
 
   // This stub is very hot; keep it cache-aligned.
   align(cb, &fixups, Alignment::CacheLine, AlignContext::Dead);
-  auto const release =
-    emitDecRefHelper(cb, data, fixups, local, type, local | last);
+  auto const release = emitDecRefHelper(
+    cb, data, fixups, dataVal, typeVal,
+    dataPtr | typePtr | end
+  );
 
-  auto const decref_local = [&] (Vout& v) {
+  auto const decref_local = [&] (Vout& v, Vptr d, Vptr t) {
     auto const sf = v.makeReg();
 
     // We can't do a byte load here---we have to sign-extend since we use
-    // `type' as a 32-bit array index to the destructor table.
-    v << loadzbl{local[TVOFF(m_type)], type};
-    emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+    // `type' as a 64-bit array index to the destructor table.
+    v << loadsbq{t, typeVal};
+    auto const cc = emitIsTVTypeRefCounted(v, sf, typeVal);
 
-    ifThen(v, CC_G, sf, [&] (Vout& v) {
+    ifThen(v, cc, sf, [&] (Vout& v) {
       auto const dword_size = sizeof(int64_t);
 
       // saving return value on the stack, but keeping it 16-byte aligned
@@ -157,7 +163,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       v << lea {rsp()[-2 * dword_size], rsp()};
       v << store{rfuncln(), rsp()[0]};
 
-      v << call{release, local | type};
+      v << call{release, dataVal | typeVal};
 
       // restore the return value from the stack
       v << load{rsp()[0], rfuncln()};
@@ -166,32 +172,25 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     });
   };
 
-  auto const next_local = [&] (Vout& v) {
-    v << addqi{static_cast<int>(sizeof(TypedValue)),
-               local, local, v.makeReg()};
-  };
-
   alignJmpTarget(cb);
 
   us.freeManyLocalsHelper = vwrap(cb, data, fixups, [&] (Vout& v) {
     // We always unroll the final `kNumFreeLocalsHelpers' decrefs, so only loop
     // until we hit that point.
-    v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
-
-    doWhile(v, CC_NZ, {}, [&](const VregList& /*in*/, const VregList& /*out*/) {
+    v << lea{ptrToLocalType(rvmfp(), kNumFreeLocalsHelpers - 1), end};
+    doWhile(v, CC_NZ, {}, [&](const VregList&, const VregList&) {
+      decref_local(v, *dataPtr, *typePtr);
       auto const sf = v.makeReg();
-
-      decref_local(v);
-      next_local(v);
-      v << cmpq{ local, last, sf };
+      prevLocal(v, typePtr, dataPtr, typePtr, dataPtr);
+      v << cmpq{typePtr, end, sf};
       return sf;
     });
   });
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
-      decref_local(v);
-      if (i != 0) next_local(v);
+      decref_local(v, ptrToLocalData(rvmfp(), i), ptrToLocalType(rvmfp(), i));
+      if (i != 0) v << fallthru{};
     });
   }
 
@@ -238,7 +237,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& /*us*/) {
       // Not doing it directly as rret(0) == rarg(0) on ppc64
       Vreg ret_addr = v.makeReg();
 
-      // exittc address pushed on calltc/resumetc.
+      // exittc address pushed on resumetc.
       v << copy{rsp(), ret_addr};
 
       // We need to spill the return registers around the assert call.
@@ -253,7 +252,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& /*us*/) {
     });
   }
 
-  // Discard the exittc address pushed on calltc/resumetc for balancing the
+  // Discard the exittc address pushed on resumetc for balancing the
   // stack next.
   a.addi(rsp(), rsp(), 8);
 

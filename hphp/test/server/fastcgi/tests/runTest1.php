@@ -1,10 +1,12 @@
-<?php
+<?hh
 
-require_once('test_base.inc');
-
-requestAll(array(
-    "test_get.php?name=Foo",
-    "test_get.php?name=Bar",
-    "subdoc//subdir/test.php",
-    "subdoc/subdir/test.php",
-));
+<<__EntryPoint>> function main(): void {
+    require_once('test_base.inc');
+    init();
+    requestAll(varray[
+        "test_get.php?name=Foo",
+        "test_get.php?name=Bar",
+        "subdoc//subdir/test.php",
+        "subdoc/subdir/test.php",
+    ]);
+}

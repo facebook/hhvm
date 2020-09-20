@@ -1,0 +1,1 @@
+Fatal error: Leading markup and `<?hh` are not permitted in `.hackpartial` files, which are always `partial`. in %s/shebang_with_header.hackpartial on line 2

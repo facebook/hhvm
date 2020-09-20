@@ -9,7 +9,7 @@ class C {
 
   protected function bar() {
     echo 'in C::bar: ';
-    echo 'get_called_class(): ' . get_called_class() . ', ';
+    echo 'static::class: ' . static::class . ', ';
     echo 'get_class($this): ' . get_class($this) . "\n\n";
     $this->foo();
   }
@@ -23,22 +23,14 @@ class D extends C {
 
   protected function direct() {
     echo "\ndirect:\n\n";
-    array_map($x ==> parent::bar(), [1]); // capture $this
+    array_map($x ==> parent::bar(), varray[1]); // capture $this
   }
 
   protected function nestedCapture() {
     echo "\nnestedCapture:\n\n";
     array_map($x ==> { // capture, because of inner capture
       (() ==> parent::bar())(); // capture
-    }, [1]);
-  }
-
-  protected function nestedNoCapture() {
-    echo "\nnestedNoCapture:\n\n";
-    array_map($x ==> { // captures $this
-      parent::bar();
-      (() ==> static::bar())(); // doesn't capture $this
-    }, [1]);
+    }, varray[1]);
   }
 
   protected function reflectionInfo() {
@@ -59,11 +51,13 @@ class D extends C {
   public static function test() {
     (new D())->direct();
     (new D())->nestedCapture();
-    (new D())->nestedNoCapture();
     (new D())->reflectionInfo();
   }
 }
 
+
+<<__EntryPoint>>
+function main_lambda_implicit_this() {
 D::test();
 
 echo "\nouter:\n\n";
@@ -71,3 +65,4 @@ echo "\nouter:\n\n";
 $l4 = () ==> var_dump(2);
 $r4 = new ReflectionFunction($l4);
 var_dump($r4->getClosureThis());
+}

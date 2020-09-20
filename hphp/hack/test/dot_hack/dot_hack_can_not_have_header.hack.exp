@@ -1,0 +1,2 @@
+File "dot_hack_can_not_have_header.hack", line 1, characters 1-4:
+Leading markup and `<?hh` are not permitted in `.hack` files, which are always `strict`. (Parsing[1002])

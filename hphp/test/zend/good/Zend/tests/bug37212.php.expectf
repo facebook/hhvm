@@ -1,12 +1,12 @@
-object(B)#%d (1) {
+object(B) (1) {
   ["value":protected]=>
   string(1) "B"
 }
-object(C)#%d (1) {
+object(C) (1) {
   ["value":protected]=>
   string(1) "C"
 }
-object(B)#%d (1) {
+object(B) (1) {
   ["value":protected]=>
   string(1) "C"
 }

@@ -1,12 +1,6 @@
-<?php
+<?hh
 
-class Dtor {
-  function __destruct() {
-    echo "Dtor::__destruct\n";
-  }
-}
-
-function main() {
+<<__EntryPoint>> function main(): void {
   $e = dict[];
   $one = dict[1 => "bar"];
   $two = dict[1 => "apple", "1" => "orange"];
@@ -20,11 +14,4 @@ function main() {
   unset($two["1"]);
   unset($three['not-there']);
   var_dump($e, $one, $two, $three);
-
-  echo "====================================================\n";
-  $four = dict[1 => 'a', '2' => new Dtor, 3 => false];
-  unset($four['2']);
-  var_dump($four);
 }
-
-main();

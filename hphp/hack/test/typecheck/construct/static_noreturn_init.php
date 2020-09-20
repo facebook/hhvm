@@ -4,7 +4,7 @@ class C {
   private int $x;
 
   private static function invariant_violation(): noreturn {
-    // UNSAFE
+    throw new Exception();
   }
 
   public function __construct(bool $cond) {

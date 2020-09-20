@@ -1,0 +1,6 @@
+Warning: [Suppressed] Value 2147483648 is out of range in field 1 of TestStruct in %s/slow/thrift/range_check_attr_warn.php on line 74
+
+Warning: [Suppressed] Value 32768 is out of range in field 2 of TestStruct in %s/slow/thrift/range_check_attr_warn.php on line 74
+
+Warning: [Suppressed] Value 32768 is out of range in field 3 of TestStruct in %s/slow/thrift/range_check_attr_warn.php on line 74
+

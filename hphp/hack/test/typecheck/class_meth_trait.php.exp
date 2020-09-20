@@ -1,0 +1,4 @@
+File "class_meth_trait.php--file2.php", line 7, characters 29-37:
+You cannot use this method with `class_meth` (whether you are in the same class hierarchy or not). (Typing[4081])
+File "class_meth_trait.php--file1.php", line 5, characters 41-47:
+It is declared as `protected` here

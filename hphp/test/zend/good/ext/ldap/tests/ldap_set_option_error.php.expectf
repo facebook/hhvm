@@ -1,24 +1,20 @@
 
-Warning: %s
-NULL
+Warning: ldap_set_option() expects exactly 3 parameters, 0 given in %s/ldap_set_option_error.php on line 20
 
-Warning: %s
-NULL
+Warning: ldap_set_option() expects exactly 3 parameters, 1 given in %s/ldap_set_option_error.php on line 21
 
-Warning: %s
-NULL
+Warning: ldap_set_option() expects exactly 3 parameters, 2 given in %s/ldap_set_option_error.php on line 22
 
-Warning: %s
-NULL
+Warning: ldap_set_option() expects exactly 3 parameters, 4 given in %s/ldap_set_option_error.php on line 25
 bool(false)
 
-Warning: %s
+Warning: Control must have an oid key in %s/ldap_set_option_error.php on line 30
 bool(false)
 
-Warning: %s
+Warning: The array value must contain only arrays, where each array is a control in %s/ldap_set_option_error.php on line 30
 bool(false)
 
-Warning: %s
+Warning: Expected non-empty array value for this option in %s/ldap_set_option_error.php on line 30
 bool(false)
 bool(false)
 ===DONE===

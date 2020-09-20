@@ -1,8 +1,8 @@
-<?php
-function foo () {
+<?hh
+<<__EntryPoint>> function foo (): void {
     try {
 label:
-        echo "label"; 
+        echo "label";
         try {
         } finally {
             goto label;
@@ -12,6 +12,3 @@ label:
     } finally {
     }
 }
-
-foo();
-?>

@@ -1,7 +1,7 @@
 <?hh //strict
 
 function test(): void {
-  $a = array(4, 'aaa');
+  $a = varray[4, 'aaa'];
 
   take_int($a[0]);
   take_string($a[1]);

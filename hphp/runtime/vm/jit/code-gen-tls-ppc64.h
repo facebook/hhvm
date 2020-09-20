@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_TLS_PPC64_H_
-#define incl_HPHP_VM_CODE_GEN_TLS_PPC64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -40,6 +39,12 @@ Vptr emitTLSAddr(Vout& /*v*/, TLSDatum<T> datum) {
   return rthreadptr()[vaddr];
 }
 
+template<typename T>
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
+  auto const b = v.makeReg();
+  v << lea{detail::emitTLSAddr(v, datum) + offset, b};
+  return b;
+}
+
 }}}}
 
-#endif

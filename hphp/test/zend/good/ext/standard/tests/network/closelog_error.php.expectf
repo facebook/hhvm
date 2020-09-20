@@ -2,6 +2,5 @@
 
 -- Testing closelog() function with one argument --
 
-Warning: %s
-NULL
+Warning: closelog() expects exactly 0 parameters, 1 given in %s/closelog_error.php on line 13
 ===DONE===

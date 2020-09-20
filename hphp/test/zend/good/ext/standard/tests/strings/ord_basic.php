@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 /* Prototype  : int ord  ( string $string  )
  * Description: Return ASCII value of character
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ord() : basic functionality ***\n";
 
 var_dump(ord("a"));
@@ -21,10 +21,10 @@ var_dump(ord("Hello"));
 
 // Make sure all valid ascii chars round trip
 for ($i = 0; $i < 255; $i++) {
-	if (ord(chr($i)) != $i) {
-		exit("TEST FAILED: $i does not round trip\n");
-	} 	
+    if (ord(chr($i)) != $i) {
+        exit("TEST FAILED: $i does not round trip\n");
+    }
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

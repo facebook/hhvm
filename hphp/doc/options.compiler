@@ -158,24 +158,9 @@ Default is 1. Similar to scalar arrays, we have literal strings pre-generated
 in files. This option specifies how many of these files are generated for
 faster compilation.
 
-= EnableHipHopSyntax
-
-Default is false. Enables new syntax, including yield, new type names for
-function parameter, function return and class variable type hints (string,
-int, boolean, etc..), new array types (vector, map, set).
-
-= EnableHipHopExperimentalSyntax
-
-Default is false. Enables experimental syntax, including type hints for local
-variables and global variables.
-
 = EnableShortTags
 
 Default is true. Is &lt;? allowed with PHP code?
-
-= EnableAspTags
-
-Default is false. Is &lt;% %&gt; allowed with PHP code?
 
 = EnableXHP
 
@@ -193,11 +178,6 @@ How many threads to use when parsing PHP files. By default, it's 2x CPU count.
 = FlibDirectory
 
 Facebook specific. Ignore.
-
-= GenerateDocComments
-
-Default is true. Whether to store doc comments in class map, so they can be
-queried from reflection.
 
 = PregenerateCPP
 
@@ -240,16 +220,6 @@ AllDynamics.
 Deprecating. These are options for specifying which methods may be called
 dynamically. This turned out to be hard to configure, and it's replaced by
 AllDynamics.
-
-= DynamicInvokeFunctions
-
-This is a list of functions which we should assume can be used with
-fb_rename_function or fb_intercept in RepoAuthoritative mode.  (Note
-that they can be used with fb_rename_function even if
-EvalJitEnableRenameFunction is false at runtime.)
-
-We should probably rename this option to something like
-InterceptableFunctions, but we haven't yet.
 
 = ConstantFunctions
 

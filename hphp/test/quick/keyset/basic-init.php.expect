@@ -61,6 +61,4 @@ Exception: Invalid keyset key: expected a key of type int or string, keyset give
 Exception: Invalid keyset key: expected a key of type int or string, stdClass given
 Exception: Invalid keyset key: expected a key of type int or string, HH\Vector given
 Exception: Invalid keyset key: expected a key of type int or string, ToString given
-2 Noisy::__destruct()
-1 Noisy::__destruct()
 Exception: Invalid keyset key: expected a key of type int or string, Noisy given

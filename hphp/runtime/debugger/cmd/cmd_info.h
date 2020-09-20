@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_
+#pragma once
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
@@ -75,18 +74,19 @@ private:
                           const std::string &subsymbol);
   static bool TryProperty(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);
-  static bool TryMethod(DebuggerClient &client, StringBuffer &sb,
+  static bool TryMethod(DebuggerClient* client, StringBuffer &sb,
                         const Array& info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, const Array& info);
-  static void PrintInfo(DebuggerClient &client, StringBuffer &sb,
+  static void PrintHeader(DebuggerClient* client, StringBuffer &sb,
+                          const Array& info);
+
+public:
+  static void PrintInfo(DebuggerClient* client, StringBuffer &sb,
                         const Array& info,
                         const std::string &subsymbol);
-  static void PrintHeader(DebuggerClient &client, StringBuffer &sb,
-                          const Array& info);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_INFO_H_

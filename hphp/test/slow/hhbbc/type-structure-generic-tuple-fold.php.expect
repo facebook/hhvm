@@ -1,0 +1,52 @@
+darray(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  varray(3) {
+    darray(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+      ["generic_types"]=>
+      varray(1) {
+        darray(2) {
+          ["kind"]=>
+          int(15)
+          ["classname"]=>
+          string(1) "B"
+        }
+      }
+    }
+    darray(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+      ["generic_types"]=>
+      varray(1) {
+        darray(2) {
+          ["kind"]=>
+          int(15)
+          ["classname"]=>
+          string(1) "B"
+        }
+      }
+    }
+    darray(3) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+      ["generic_types"]=>
+      varray(1) {
+        darray(2) {
+          ["kind"]=>
+          int(15)
+          ["classname"]=>
+          string(1) "B"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+Linearization for class \A:
+[\A(PAT)]
+Linearization for class \B:
+[\B(PAT), \A<bool,T1>(PAT)]
+Linearization for class \C:
+[\C(PAT), \A<string,T1>(PAT)]
+Linearization for class \D:
+[\D(PAT), \B<float>(PAT), \A<bool,float>(PAT), \C<int>(PAT), \A<string,int>(PAT)]

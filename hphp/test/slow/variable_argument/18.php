@@ -1,11 +1,16 @@
-<?php
+<?hh
 
 class A {
- public function test($a) {
-  var_dump(func_num_args());
-  var_dump(func_get_args());
+  public function test($a, ...$more_args) {
+    $args = array_merge(varray[$a], $more_args);
+    var_dump(count($args));
+    var_dump($args);
+  }
 }
-}
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_18() {
+$obj = new A();
  $obj->test('test');
  $obj->test(1, 2, 3);
+}

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_FURC_H_
-#define incl_HPHP_EXT_HASH_FURC_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -24,10 +23,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t furc_hash_internal(const char* const key, const size_t len, const uint32_t m);
+uint32_t furc_maximum_pool_size();
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-#endif // incl_HPHP_EXT_HASH_FURC_H_
-
 

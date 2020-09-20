@@ -31,7 +31,7 @@ function foo2h($x) {
 function foo3h($x) {
   return $x === 123456;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo20(0));
 var_dump(foo20(1));
 var_dump(foo20(-1));
@@ -79,4 +79,4 @@ var_dump(foo3h(1));
 var_dump(foo3h(-1));
 var_dump(foo3h(123456));
 var_dump(foo3h(2));
-
+}

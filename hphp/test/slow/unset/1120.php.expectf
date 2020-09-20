@@ -2,14 +2,8 @@
 Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 6
 NULL
 
-Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 10
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 11
 NULL
 
-Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 10
-NULL
-
-Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 15
-NULL
-
-Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 24
+Notice: Undefined variable: this in %s/test/slow/unset/1120.php on line 18
 NULL

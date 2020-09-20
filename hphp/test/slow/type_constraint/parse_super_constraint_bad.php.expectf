@@ -1,0 +1,1 @@
+Fatal error: A left brace `{` is expected here. in %s/test/slow/type_constraint/parse_super_constraint_bad.php on line 3

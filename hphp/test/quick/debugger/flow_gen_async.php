@@ -29,4 +29,6 @@ function test($a) {
   foo($a);
 }
 
+<<__EntryPoint>> function main() {
 error_log('flow_gen_async.php loaded');
+}

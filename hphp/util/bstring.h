@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BSTRING_H_
-#define incl_HPHP_BSTRING_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -90,4 +89,3 @@ char* bstrrstr(const char* haystack, size_t haystackSize,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_BSTRING_H_

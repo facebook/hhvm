@@ -1,5 +1,8 @@
 #include "hphp/runtime/ext/icu/ext_icu_break_iterator.h"
 
+using icu::BreakIterator;
+using icu::RuleBasedBreakIterator;
+
 namespace HPHP { namespace Intl {
 
 const StaticString
@@ -23,7 +26,7 @@ inline Object ibi_create(const char *funcname,
                                                      UErrorCode&),
                          const String& locale) {
   UErrorCode error = U_ZERO_ERROR;
-  auto bi = func(Locale::createFromName(locale.c_str()), error);
+  auto bi = func(icu::Locale::createFromName(locale.c_str()), error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "%s: error creating BreakIterator", funcname);
     return Object();
@@ -255,6 +258,12 @@ static void HHVM_METHOD(IntlRuleBasedBreakIterator, __construct,
   if (compiled) {
 #if U_ICU_VERSION_MAJOR_NUM * 100 + U_ICU_VERSION_MINOR_NUM >= 408
     UErrorCode error = U_ZERO_ERROR;
+
+    // NB: Ownership of the storage containing the compiled rules remains with
+    // the caller of this function. The compiled rules must not be modified or
+    // deleted during the life of the break iterator.
+    data->m_compiledRules = rules;
+
     auto bi = new RuleBasedBreakIterator((uint8_t*)rules.c_str(), rules.size(),
                                          error);
     if (U_FAILURE(error)) {
@@ -327,7 +336,7 @@ static Variant HHVM_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec) {
                           "obtaining the status values");
     return false;
   }
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for (int32_t i = 0; i < count; ++i) {
     ret.append((int64_t)rules[i]);
   }

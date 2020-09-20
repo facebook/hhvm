@@ -1,19 +1,4 @@
-<?php
-
-echo "===Array===\n";
-
-$a = array('zero' => 0, 'one' => 1, 'two' => 2);
-$it = new ArrayIterator($a);
-
-var_dump($it->count());
-foreach($it as $key => $val)
-{
-	echo "$key=>$val\n";
-	var_dump($it->count());
-}
-var_dump($it->count());
-
-echo "===Object===\n";
+<?hh
 
 class test
 {
@@ -23,18 +8,28 @@ class test
 	private $pri;
 	public $two = 2;
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-$o = new test;
-$it = new ArrayIterator($o);
+  echo "===Array===\n";
 
-var_dump($it->count());
-foreach($it as $key => $val)
-{
-	echo "$key=>$val\n";
-	var_dump($it->count());
+  $a = darray['zero' => 0, 'one' => 1, 'two' => 2];
+  $it = new ArrayIterator($a);
+
+  foreach($it as $key => $val)
+  {
+  	echo "$key=>$val\n";
+  }
+
+  echo "===Object===\n";
+
+  $o = new test;
+  $it = new ArrayIterator($o);
+
+  foreach($it as $key => $val)
+  {
+  	echo "$key=>$val\n";
+  }
+
+  echo "===DONE===\n";
 }
-var_dump($it->count());
-
-?>
-===DONE===
-<?php exit(0); ?>

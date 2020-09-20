@@ -1,4 +1,6 @@
 <?hh
+
+<<__EntryPoint>>
 function main() {
   $containers = Vector {
     ImmVector {Vector {}, Vector {}},
@@ -13,9 +15,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(Vector {}), array(Vector {})},
-    ImmMap {0 => array(Vector {}), 1 => array(Vector {})},
-    Pair {array(Vector {}), array(Vector {})}
+    ImmVector {varray[Vector {}], varray[Vector {}]},
+    ImmMap {0 => varray[Vector {}], 1 => varray[Vector {}]},
+    Pair {varray[Vector {}], varray[Vector {}]}
   };
   foreach ($containers as $x) {
     $y = $x[0][0];
@@ -27,9 +29,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(Vector {}), array(Vector {})},
-    ImmMap {0 => array(Vector {}), 1 => array(Vector {})},
-    Pair {array(Vector {}), array(Vector {})}
+    ImmVector {varray[Vector {}], varray[Vector {}]},
+    ImmMap {0 => varray[Vector {}], 1 => varray[Vector {}]},
+    Pair {varray[Vector {}], varray[Vector {}]}
   };
   foreach ($containers as $x) {
     try {
@@ -91,9 +93,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(), array()},
-    ImmMap {0 => array(), 1 => array()},
-    Pair {array(), array()}
+    ImmVector {varray[], varray[]},
+    ImmMap {0 => varray[], 1 => varray[]},
+    Pair {varray[], varray[]}
   };
   foreach ($containers as $x) {
     try {
@@ -123,9 +125,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(4, 5, 6), array(7, 8, 9)},
-    ImmMap {0 => array(4, 5, 6), 1 => array(7, 8, 9)},
-    Pair {array(4, 5, 6), array(7, 8, 9)}
+    ImmVector {varray[4, 5, 6], varray[7, 8, 9]},
+    ImmMap {0 => varray[4, 5, 6], 1 => varray[7, 8, 9]},
+    Pair {varray[4, 5, 6], varray[7, 8, 9]}
   };
   foreach ($containers as $x) {
     try {
@@ -139,9 +141,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(4, 5, 6), array(7, 8, 9)},
-    ImmMap {0 => array(4, 5, 6), 1 => array(7, 8, 9)},
-    Pair {array(4, 5, 6), array(7, 8, 9)}
+    ImmVector {varray[4, 5, 6], varray[7, 8, 9]},
+    ImmMap {0 => varray[4, 5, 6], 1 => varray[7, 8, 9]},
+    Pair {varray[4, 5, 6], varray[7, 8, 9]}
   };
   foreach ($containers as $x) {
     try {
@@ -155,9 +157,9 @@ function main() {
   echo "\n";
 
   $containers = Vector {
-    ImmVector {array(), array()},
-    ImmMap {0 => array(), 1 => array()},
-    Pair {array(), array()}
+    ImmVector {varray[], varray[]},
+    ImmMap {0 => varray[], 1 => varray[]},
+    Pair {varray[], varray[]}
   };
   foreach ($containers as $x) {
     try {
@@ -170,15 +172,5 @@ function main() {
   }
   echo "\n";
 
-  $x = Pair {array(1), array(2)};
-
-  try {
-    $y =& $x[0][0];
-  } catch (InvalidOperationException $e) {
-    echo "Caught exception: " . $e->getMessage() . "\n";
-  }
-  $y = 2;
-  var_dump($x);
 }
 
-main();

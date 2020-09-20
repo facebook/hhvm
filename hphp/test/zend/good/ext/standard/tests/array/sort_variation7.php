@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
  * Description: This function sorts an array. 
                 Elements will be arranged from lowest to highest when this function has completed.
@@ -10,31 +10,31 @@
  * flag  value as defualt
  * SORT_REGULAR - compare items normally
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sort() : usage variations ***\n";
 
 // bool value array
-$bool_values = array (true, false, TRUE, FALSE);
+$bool_values = varray [true, false, TRUE, FALSE];
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is defualt --\n";
 $temp_array = $bool_values;
-var_dump(sort($temp_array) );
+var_dump(sort(inout $temp_array) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is SORT_REGULAR --\n";
 $temp_array = $bool_values;
-var_dump(sort($temp_array, SORT_REGULAR) );
+var_dump(sort(inout $temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is SORT_NUMERIC  --\n";
 $temp_array = $bool_values;
-var_dump(sort($temp_array, SORT_NUMERIC) );
+var_dump(sort(inout $temp_array, SORT_NUMERIC) );
 var_dump($temp_array);
 
 echo "\n-- Testing sort() by supplying bool value array, 'flag' value is SORT_STRING --\n";
 $temp_array = $bool_values;
-var_dump(sort($temp_array, SORT_STRING) );
+var_dump(sort(inout $temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done\n";
-?>
+}

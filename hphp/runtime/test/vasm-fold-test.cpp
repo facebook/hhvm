@@ -99,7 +99,7 @@ TEST(Vasm, FoldImms) {
   // add
   //
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "addqi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -108,7 +108,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<addq>(0, 0u) // addq 0,r
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "addqi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -117,7 +117,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<addq>(1, 0u) // addq r,0
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "addqi 1, %128 => %129, %131\n"
     "incq %128 => %130, %132\n"
@@ -126,7 +126,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<addq>(0, 1u) // addq 1,r
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "addqi 1, %128 => %129, %131\n"
     "incq %128 => %130, %132\n"
@@ -139,7 +139,7 @@ TEST(Vasm, FoldImms) {
   // sub
   //
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "subqi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -149,7 +149,7 @@ TEST(Vasm, FoldImms) {
   );
 
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "neg %128 => %129, %131\n"
     "neg %128 => %130, %132\n"
@@ -159,7 +159,7 @@ TEST(Vasm, FoldImms) {
   );
 
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "subqi 1, %128 => %129, %131\n"
     "decq %128 => %130, %132\n"
@@ -172,7 +172,7 @@ TEST(Vasm, FoldImms) {
   // xorb
   //
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorbi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -181,7 +181,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<xorb>(0, 0u) // xorb 0,r
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorbi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -190,7 +190,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<xorb>(1, 0u) // xorb r,0
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorbi -1, %128 => %129, %131\n"
     "notb %128 => %130\n"
@@ -199,7 +199,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<xorb>(0, -1) // xorb -1,r
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorbi -1, %128 => %129, %131\n"
     "notb %128 => %130\n"
@@ -212,7 +212,7 @@ TEST(Vasm, FoldImms) {
   // xor
   //
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorqi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -221,7 +221,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<xorq>(0, 0u) // xorq 0,r
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorqi 0, %128 => %129, %131\n"
     "copy %128 => %130\n"
@@ -230,7 +230,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<xorq>(1, 0u) // xorq r,0
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorqi -1, %128 => %129, %131\n"
     "not %128 => %130\n"
@@ -239,7 +239,7 @@ TEST(Vasm, FoldImms) {
     genTestCode<xorq>(0, -1) // xorq -1,r
   );
   EXPECT_EQ(
-    "B0 main\n"
+    "B0 main (1)\n"
     "movl %133(42l) => %128\n"
     "xorqi -1, %128 => %129, %131\n"
     "not %128 => %130\n"

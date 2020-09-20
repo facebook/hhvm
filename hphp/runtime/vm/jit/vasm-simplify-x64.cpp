@@ -177,6 +177,80 @@ bool simplify(Env& env, const cmpqi& inst, Vlabel b, size_t i) {
     ? cmp_zero_impl<testq>(env, inst, inst.s1, b, i) : false;
 }
 
+// extract the bottom size bits of value as an int64_t, treating bit
+// (size-1) as the sign bit, and avoiding undefined/unspecified
+// behavior.
+static int64_t extract_signed_value(uint64_t value, int size) {
+  assertx(size && size <= std::numeric_limits<uint64_t>::digits);
+
+  auto const value_mask = (int64_t{1} << (size - 1)) - 1;
+  auto const sign_bit = -(int64_t{1} << (size - 1));
+  int64_t val = value & value_mask;
+  int64_t sgn = (value >> (size - 1)) & 1 ? sign_bit : 0;
+  return val + sgn;
+}
+
+template<typename testi, typename Arg0, typename Arg1>
+bool simplify_test_imm(Env& env, Arg0 r0, Arg1 r1, Vreg sf,
+                       Vlabel b, size_t i) {
+  auto const size = static_cast<int>(width(r0));
+  assertx(1 <= size && size <= 8 && !(size & (size - 1)));
+  auto const it = env.unit.regToConst.find(r0);
+  if (it == env.unit.regToConst.end() ||
+      it->second.isUndef ||
+      it->second.kind == Vconst::Double) {
+    return false;
+  }
+  // andqi/testqi only accepts 32-bit immediates, and will do sign extension.
+  if (size == sz::qword && !deltaFits(it->second.val, sz::dword)) {
+    return false;
+  }
+  const int val = extract_signed_value(it->second.val,
+                                       size < sz::qword ? size * 8 : 32);
+  return simplify_impl(env, b, i, testi{ val, r1, sf });
+}
+
+template<typename testi, typename test>
+bool simplify_test_imm(Env& env, const test& vtest, Vlabel b, size_t i) {
+  return
+    simplify_test_imm<testi>(
+      env, vtest.s0, vtest.s1, vtest.sf, b, i) ||
+    simplify_test_imm<testi>(
+      env, vtest.s1, vtest.s0, vtest.sf, b, i);
+}
+
+bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testqi>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testli>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testw& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testwi>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testb& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testbi>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testqm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testqim>(env, test.s0, test.s1, test.sf , b, i);
+}
+
+bool simplify(Env& env, const testlm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testlim>(env, test.s0, test.s1, test.sf, b, i);
+}
+
+bool simplify(Env& env, const testwm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testwim>(env, test.s0, test.s1, test.sf, b, i);
+}
+
+bool simplify(Env& env, const testbm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testbim>(env, test.s0, test.s1, test.sf, b, i);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

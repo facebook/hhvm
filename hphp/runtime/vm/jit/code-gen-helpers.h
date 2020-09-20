@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_HELPERS_H_
-#define incl_HPHP_VM_CODE_GEN_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -76,20 +75,29 @@ Vreg zeroExtendIfBool(Vout& v, Type type, Vreg reg);
 // TypedValue manipulations.
 
 /*
+ * Return a pointer to the type or value field of the pointee of `ptr', whether
+ * it is a TPtrToCell or a TLvalToCell.
+ */
+Vptr memTVTypePtr(SSATmp* ptr, Vloc loc);
+Vptr memTVValPtr(SSATmp* ptr, Vloc loc);
+
+/*
  * Test or compare `s0' against the live type `s1', setting the result in `sf'.
  */
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
-void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
-void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
-
-Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1);
-Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1);
+void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vptr s1);
+void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1);
 
 /*
  * Store `loc', the registers representing `src', to `dst'.
  */
-void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src);
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src,
+             Type ty = TBottom);
+void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr dataPtr);
+
+void storeTVWithAux(Vout& v, Vptr dst, Vloc srcLoc,
+                    const SSATmp* src, AuxUnion aux);
 
 /*
  * Load `src' into `loc', the registers representing `dst'.
@@ -98,6 +106,8 @@ void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src);
  * into the type reg.  This should only happen when loading a return value.
  */
 void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
+            bool aux = false);
+void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
             bool aux = false);
 
 /*
@@ -111,7 +121,12 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type dstType);
  *
  * Note that this will also clobber the Aux area of a TypedValueAux.
  */
-void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte);
+void trashFullTV(Vout& v, Vptr ptr, char byte);
+
+/*
+ * Fill the type and value of a TypedValue with trash.
+ */
+void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte);
 
 /*
  * Compare an object's reference count with an immediate value, return the
@@ -148,6 +163,7 @@ Vreg emitDecRef(Vout& v, Vreg data, Reason reason);
  * emitIncRefWork performs type check and calls incRef if appropriate.
  */
 void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason);
+void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason);
 
 /*
  * Check the refcount of `data'.  If it's negative (and hence, a sentinel
@@ -185,7 +201,15 @@ void emitCall(Vout& v, CallSpec call, RegSet args);
 /*
  * Return a Vptr to the native destructor function for values of type `type'.
  */
-Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong = false);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad = false);
+
+///////////////////////////////////////////////////////////////////////////////
+// Record metadata
+
+/*
+ * Load the Record type of `val' into `d', then return `d'.
+ */
+Vreg emitLdRecDesc(Vout& v, Vreg val, Vreg d);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class metadata.
@@ -194,14 +218,6 @@ Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsLong = false);
  * Load the Class* for `obj' into `d', then return `d'.
  */
 Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d);
-
-/*
- * Load the Class* underlying the Cctx `src' into `d', then return `d'.
- *
- * (This just unmasks the lowest-order bit, which designates `src' as a Cctx
- * rather than a This.)
- */
-Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg d);
 
 /*
  * Internal helpers for LowPtr comparisons.
@@ -253,12 +269,9 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
 /*
- * Increment the counter for `stat' by `n'.
- *
- * If `force' is set, do so even if stats aren't enabled.
+ * Increment the counter for `stat'.
  */
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
-                 bool force = false);
+void emitIncStat(Vout& v, Stats::StatCounter stat);
 
 ///////////////////////////////////////////////////////////////////////////////
 // RDS manipulation.
@@ -270,6 +283,7 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
  * @requires: rds::isNormalHandle(ch)
  */
 Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
+Vreg checkRDSHandleInitialized(Vout& v, Vreg ch);
 
 /*
  * Update the generation number for `ch' to the current generation.
@@ -277,9 +291,59 @@ Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
  * @requires: rds::isNormalHandle(ch)
  */
 void markRDSHandleInitialized(Vout& v, rds::Handle ch);
+void markRDSHandleInitialized(Vout& v, Vreg ch);
+
+///////////////////////////////////////////////////////////////////////////////
+// Locals
+
+/*
+ * Obtain offsets of a local's type or value from the frame pointer.
+ */
+int offsetToLocalType(int id);
+int offsetToLocalData(int id);
+
+/*
+ * Obtain a pointer to a local's type or value. Since the local's
+ * index is statically known, this will never emit any code.
+ */
+Vptr ptrToLocalType(Vreg fp, int id);
+Vptr ptrToLocalData(Vreg fp, int id);
+
+/*
+ * Given (valid) pointers to a local's type and value `typeIn' and
+ * `dataIn', modify the pointers to point at the next local (by
+ * increasing indx) and set `typeOUt' and `dataOut' to the new
+ * pointers. It is up to the caller to detect when the pointers have
+ * reached the end of the frame.
+ */
+void nextLocal(Vout& v,
+               Vreg typeIn,
+               Vreg dataIn,
+               Vreg typeOut,
+               Vreg dataOut);
+
+/*
+ * Given (valid) pointers to a local's type and value `typeIn' and
+ * `dataIn', modify the pointers to point at the previous local (by
+ * decreasing index) and set `typeOut' and `dataOut' to the new
+ * pointers. It is up to the caller to detect when the pointers have
+ * reached the end of the frame.
+ */
+void prevLocal(Vout& v,
+               Vreg typeIn,
+               Vreg dataIn,
+               Vreg typeOut,
+               Vreg dataOut);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return a mask for an aux value suitable for ORing into the lower 64-bits of a
+ * TypedValue.
+ */
+uint64_t auxToMask(AuxUnion);
 
 }}
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-inl.h"
 
-#endif

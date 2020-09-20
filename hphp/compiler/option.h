@@ -14,14 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_OPTION_H_
-#define incl_HPHP_OPTION_H_
+#pragma once
 
 #include <map>
 #include <set>
 #include <vector>
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/string-bag.h"
 
 namespace HPHP {
@@ -75,18 +74,6 @@ struct Option {
    */
   static bool CachePHPFile;
 
-  /**
-   * Legal root directory expressions in an include expression. For example,
-   *
-   *   include_once $PHP_ROOT . '/lib.php';
-   *
-   * Here, "$PHP_ROOT" is a legal include root. Stores what it resolves to.
-   *
-   *   Option::IncludeRoots["$PHP_ROOT"] = "";
-   *   Option::IncludeRoots["$LIB_ROOT"] = "lib";
-   */
-  static std::map<std::string, std::string> IncludeRoots;
-  static std::map<std::string, std::string> AutoloadRoots;
   static std::vector<std::string> IncludeSearchPaths;
 
   /**
@@ -95,14 +82,6 @@ struct Option {
    */
   static hphp_string_imap<std::string> ConstantFunctions;
 
-  /**
-   * CodeGenerator options for PHP.
-   */
-  static bool GeneratePickledPHP;
-  static bool GenerateInlinedPHP;
-  static bool GenerateTrimmedPHP;
-  static std::string ProgramPrologue;
-  static std::string TrimmedPrologue;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
   static std::map<std::string,std::string, stdltistr> AutoloadFuncMap;
@@ -116,14 +95,8 @@ struct Option {
   static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
   static std::string RepoCentralPath;
-  static bool RepoDebugInfo;
 
   static std::vector<std::string> APCProfile;
-
-  /**
-   * Names of hot and cold functions to be marked in sources.
-   */
-  static std::map<std::string, std::string> FunctionSections;
 
   /**
    * A somewhat unique prefix for system identifiers.
@@ -143,12 +116,6 @@ struct Option {
   static bool KeepStatementsWithNoEffect;
 
   /**
-   * Whether or not name matches AUTOLOAD files. If not, returns empty. If
-   * yes, returns root directory for the file.
-   */
-  static std::string GetAutoloadRoot(const std::string &name);
-
-  /**
    * Turning a file name into an identifier. When id is false, preserve
    * "/" in file paths.
    */
@@ -156,10 +123,7 @@ struct Option {
 
   static std::string ProgramName;
 
-  static bool ParseTimeOpts;
-  static bool EnableHipHopExperimentalSyntax;
   static bool EnableShortTags;
-  static bool EnableAspTags;
   static int ParserThreadCount;
 
   static int GetScannerType();
@@ -172,8 +136,6 @@ struct Option {
   /**
    * Output options
    */
-  static bool GenerateDocComments;
-  static bool DumpAst;
   static bool WholeProgram;
   static bool RecordErrors;
 
@@ -187,4 +149,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_OPTION_H_

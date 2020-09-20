@@ -8,6 +8,9 @@ class B extends ReflectionClass {}
 
 function c() {}
 
+
+<<__EntryPoint>>
+function main_is_hack_002() {
 $a = new ReflectionClass('A');
 $b = new ReflectionClass('B');
 $c = new ReflectionFunction('c');
@@ -20,3 +23,4 @@ var_dump($b->isHack());
 var_dump($c->isHack());
 var_dump($d->isHack());
 var_dump($rc->isHack());
+}

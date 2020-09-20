@@ -3,9 +3,9 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
@@ -36,11 +36,11 @@ class BirthdayStoryPreparable extends Preparable {
             $this->viewerContext,
             $this->userIDs,
             $this->users,
-            array(
+            varray[
               Ent::load('BasicInfo'),
               Ent::load('Birthday'),
               Ent::load('ProfilePic', PicSizeConst::SQUARE),
-            ),
+            ],
           ),
         );
 
@@ -54,3 +54,22 @@ class BirthdayStoryPreparable extends Preparable {
   }
 }
 
+const MUST_PREPARE = null;
+
+function must_prepare($_) {}
+function DT($_, $_) {}
+
+class Preparable {
+  public function waitFor($_) {}
+}
+class ViewerContext {}
+class Ent {
+  public static function load(...$_) {}
+  public static function createEnforcingLoaderDynamic(...$_) {}
+}
+enum PicSizeConst : string {
+  SQUARE = 'SQUARE';
+}
+class IDAssert {
+  public static function allUid($_) {}
+}

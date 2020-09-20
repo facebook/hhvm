@@ -1,2 +1,4 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!getenv('MYSQL_TEST_HOST')) echo 'skip';
+}

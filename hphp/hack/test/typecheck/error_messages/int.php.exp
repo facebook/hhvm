@@ -1,0 +1,6 @@
+File "int.php", line 9, characters 10-15:
+Invalid return type (Typing[4110])
+File "int.php", line 3, characters 17-22:
+Expected `string`
+File "int.php", line 9, characters 10-15:
+But got `int` because this is the result of an integer arithmetic operation

@@ -2,16 +2,14 @@
 
 -- Testing unpack() function with no arguments --
 
-Warning: %s
-NULL
+Warning: unpack() expects exactly 2 parameters, 0 given in %s/unpack_error.php on line 11
 
 -- Testing unpack() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: unpack() expects exactly 2 parameters, 3 given in %s/unpack_error.php on line 15
 
 -- Testing unpack() function with invalid format character --
 
-Warning: %s
+Warning: Invalid argument: Invalid format type G in %s/unpack_error.php on line 19
 bool(false)
 ===DONE===

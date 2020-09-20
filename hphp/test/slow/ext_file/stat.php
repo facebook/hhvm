@@ -1,4 +1,6 @@
-<?php
-var_dump(stat(null));
-var_dump(stat(false));
+<?hh
+
+<<__EntryPoint>>
+function main_stat() {
 var_dump(stat(""));
+}

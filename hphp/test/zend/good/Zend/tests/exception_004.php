@@ -1,13 +1,12 @@
-<?php 
-
-error_reporting(E_ALL|E_STRICT);
+<?hh
 
 class Foo { }
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL|E_STRICT);
 
 try {
-	throw new Foo();
+    throw new Foo();
 } catch (Foo $e) {
-	var_dump($e);
+    var_dump($e);
 }
-
-?>
+}

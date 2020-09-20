@@ -1,49 +1,64 @@
 *** Testing mkdir() : usage variation ***
 
 --int 0--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --int 1--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --int 12345--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --int -12345--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --float 10.5--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --float -10.5--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --float 12.3456789000e10--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --float -12.3456789000e10--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --float .5--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, double given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --empty array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --int indexed array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --associative array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --nested arrays--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --uppercase NULL--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, null given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --lowercase null--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, null given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --lowercase true--
 Directory created
@@ -58,32 +73,42 @@ Directory created
 Directory created
 
 --empty string DQ--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --empty string SQ--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --string DQ--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --string SQ--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --mixed case string--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --heredoc--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, string given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --instance of classWithToString--
-Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, object given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --instance of classWithoutToString--
-Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+
+Warning: mkdir() expects parameter 3 to be boolean, object given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --undefined var--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, null given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --unset var--
-Directory created
+
+Warning: mkdir() expects parameter 3 to be boolean, null given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 ===DONE===

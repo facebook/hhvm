@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 for( $i=1; $i<=64; $i = $i*2 ){
   echo 'Input: '. $i . PHP_EOL;
   $random = mcrypt_create_iv( $i, MCRYPT_DEV_URANDOM );
@@ -6,4 +6,4 @@ for( $i=1; $i<=64; $i = $i*2 ){
   echo ' Hex: '. bin2hex( $random ) . PHP_EOL;
   echo PHP_EOL;
 }
-?>
+}

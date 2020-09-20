@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RINGBUFFER_H_
-#define incl_HPHP_RINGBUFFER_H_
+#pragma once
 
 #include <cstdlib>
 #include <cstdarg>
@@ -108,4 +107,3 @@ void ringbufferGeneric(const char* name, const void* data);
 }
 }
 
-#endif

@@ -1,51 +1,49 @@
 
-Warning: %s
-NULL
+Warning: gmp_div_q() expects at least 2 parameters, 0 given in %s/gmp_div_q.php on line 3
 
-Warning: %s
-NULL
-object(GMP)#%d (1) {
+Warning: gmp_div_q() expects at least 2 parameters, 1 given in %s/gmp_div_q.php on line 4
+object(GMP) (1) {
   ["num"]=>
   string(1) "0"
 }
 
-Warning: %s
+Warning: gmp_div_q(): Zero operand not allowed in %s/gmp_div_q.php on line 7
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(1) "0"
 }
 
-Warning: %s
+Warning: gmp_div_q(): Invalid rounding mode in %s/gmp_div_q.php on line 9
 bool(false)
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(4) "9131"
 }
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(4) "9132"
 }
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(4) "9131"
 }
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(4) "9131"
 }
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(4) "9132"
 }
-object(GMP)#%d (1) {
+object(GMP) (1) {
   ["num"]=>
   string(4) "9131"
 }
 
-Warning: %s
+Warning: gmp_div_q(): Unable to convert variable to GMP - wrong type in %s/gmp_div_q.php on line 19
 bool(false)
 
-Warning: %s
+Warning: gmp_div_q(): Unable to convert variable to GMP - wrong type in %s/gmp_div_q.php on line 20
 bool(false)
 Done

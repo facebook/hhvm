@@ -8,89 +8,91 @@ int(8)
 
 -- Iteration 3 --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 bool(false)
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 bool(false)
 
 -- Iteration 5 --
-bool(false)
+
+Warning: mb_stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 6 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 7 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 8 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 9 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 10 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 11 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 12 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 13 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 14 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 15 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 16 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 17 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 18 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 19 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 20 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 21 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, object given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 22 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 23 --
-int(8)
+
+Warning: mb_stripos() expects parameter 3 to be integer, null given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 
 -- Iteration 24 --
 
-Warning: %s
-bool(false)
+Warning: mb_stripos() expects parameter 3 to be integer, resource given in %s/zend/good/ext/mbstring/tests/mb_stripos_variation3.php on line 91
 Done

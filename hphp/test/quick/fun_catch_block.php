@@ -9,7 +9,7 @@ class FunCatchBlock {
                       $jumbo_shrimp,
                       Thing::SMS_MUTE,
                       $is_add);
-      $tagger->setThreadIds(array($robot_car));
+      $tagger->setThreadIds(varray[$robot_car]);
       prep($tagger);
     } catch (GoodException $e) {
       // Some control flow within a catch block.  A case for the
@@ -39,3 +39,5 @@ class FunFunclet {
     return null;
   }
 }
+
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

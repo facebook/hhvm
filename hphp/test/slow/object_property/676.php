@@ -1,10 +1,13 @@
-<?php
+<?hh
 
 class A {
   public $a = 'apple';
   public $b = 'banana';
 }
 
+
+<<__EntryPoint>>
+function main_676() {
 $old = new A;
 unset($old->a);
 var_dump($old);
@@ -18,3 +21,4 @@ foreach ($new as $property => $value) {
 }
 var_dump($old->a);
 var_dump($old->b);
+}

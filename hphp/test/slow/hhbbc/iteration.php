@@ -5,13 +5,13 @@ function get_int() {
   return (int)__hhvm_intrinsics\launder_value(1);
 }
 
-function get_sarr() { return [1, 2, 3]; }
-function get_arrn() { return [get_int(), get_int(), get_int()]; }
-function get_arre() { return []; }
-function get_single_arr() { return [10]; }
+function get_sarr() { return varray[1, 2, 3]; }
+function get_arrn() { return varray[get_int(), get_int(), get_int()]; }
+function get_arre() { return varray[]; }
+function get_single_arr() { return varray[10]; }
 
 function get_packedn() {
-  $a = [1];
+  $a = varray[1];
   for ($i = 0; $i < __hhvm_intrinsics\launder_value(3); $i++) {
     $a[] = get_int();
   }
@@ -19,11 +19,11 @@ function get_packedn() {
 }
 
 function get_map() {
-  return ['a' => get_int(), 'b' => get_int(), 'c' => get_int()];
+  return darray['a' => get_int(), 'b' => get_int(), 'c' => get_int()];
 }
 
 function get_mapn() {
-  $a = [
+  $a = darray[
     __hhvm_intrinsics\launder_value('a') => get_int(),
     __hhvm_intrinsics\launder_value('b') => get_int(),
     __hhvm_intrinsics\launder_value('c') => get_int()
@@ -47,7 +47,7 @@ function get_empty_single_arr() {
 function get_null() { return null; }
 function get_obj() { return new stdclass; }
 
-function get_anything() { return __hhvm_intrinsics\launder_value([1, 2, 3]); }
+function get_anything() { return __hhvm_intrinsics\launder_value(varray[1, 2, 3]); }
 
 function fun1() {
   $sum = 0;
@@ -161,6 +161,9 @@ function fun14() {
   return $sum;
 }
 
+
+<<__EntryPoint>>
+function main_iteration() {
 var_dump(fun1());
 var_dump(fun2());
 var_dump(fun3());
@@ -175,3 +178,4 @@ var_dump(fun11());
 var_dump(fun12());
 var_dump(fun13());
 var_dump(fun14());
+}

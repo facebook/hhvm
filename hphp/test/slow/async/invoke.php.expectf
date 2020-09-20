@@ -1,0 +1,1 @@
+Fatal error: Cannot declare constructors and magic methods like `__invoke` as `async` in %s/invoke.php on line 4

@@ -1,0 +1,4 @@
+File "trait_instanceof.php", line 10, characters 16-16:
+`X` is uninstantiable (Typing[4002])
+File "trait_instanceof.php", line 3, characters 7-7:
+Declaration is here

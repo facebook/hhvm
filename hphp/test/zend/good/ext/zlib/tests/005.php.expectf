@@ -1,8 +1,7 @@
 
-Warning: %s
-NULL
+Warning: gzcompress() expects at least 1 parameter, 0 given in %s/005.php on line 3
 
-Warning: %s
+Warning: compression level (1000) must be within -1..9 in %s/005.php on line 4
 bool(false)
 string(%d) "%a"
 string(%d) "%a"
@@ -10,19 +9,18 @@ string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
 
-Warning: %s
-NULL
+Warning: gzuncompress() expects at least 1 parameter, 0 given in %s/005.php on line 17
 
-Warning: %s
+Warning: data error in %s/005.php on line 18
 bool(false)
 
-Warning: %s
+Warning: data error in %s/005.php on line 19
 bool(false)
 
-Warning: %s
+Warning: data error in %s/005.php on line 21
 bool(false)
 
-Warning: %s
+Warning: data error in %s/005.php on line 22
 bool(false)
 string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
@@ -31,6 +29,6 @@ string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony"
 
-Warning: %s
+Warning: data error in %s/005.php on line 27
 bool(false)
 Done

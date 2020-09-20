@@ -1,0 +1,6 @@
+File "tconst_on_generics7.php", line 71, characters 28-36:
+Invalid argument (Typing[4110])
+File "tconst_on_generics7.php", line 79, characters 35-45:
+This is an object of type ArraykeyBox
+File "tconst_on_generics7.php", line 69, characters 13-21:
+It is incompatible with an object of type StringBox

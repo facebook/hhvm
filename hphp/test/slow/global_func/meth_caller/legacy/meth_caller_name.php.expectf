@@ -1,0 +1,81 @@
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(1) "A"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "B"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(1) "B"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(1) "C"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "D"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(1) "D"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\A"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(5) "Ans\A"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\B"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(5) "Ans\B"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\C"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(5) "Ans\C"
+string(1) "f"
+object(__SystemLib\MethCallerHelper) (2) {
+  ["class":"__SystemLib\MethCallerHelper":private]=>
+  string(5) "Ans\D"
+  ["method":"__SystemLib\MethCallerHelper":private]=>
+  string(1) "f"
+}
+bool(true)
+string(5) "Ans\D"
+string(1) "f"
+bool(false)
+
+Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 108
+
+Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 108
+string(8) "Ans\Acls"
+string(5) "bfunc"
+
+Fatal error: Argument 1 passed to meth_caller_get_method() must be a MethCaller in %s/meth_caller_name.php on line 121

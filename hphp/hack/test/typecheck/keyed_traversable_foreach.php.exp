@@ -1,1 +1,6 @@
-No errors
+File "keyed_traversable_foreach.php", line 41, characters 8-11:
+Invalid argument (Typing[4110])
+File "keyed_traversable_foreach.php", line 27, characters 32-34:
+Expected `int`
+File "keyed_traversable_foreach.php", line 39, characters 15-19:
+This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)

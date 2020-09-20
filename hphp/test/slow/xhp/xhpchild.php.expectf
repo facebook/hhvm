@@ -1,22 +1,14 @@
-1, array(4) {
-  [0]=>
+1, varray(4) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
   int(4)
 }
 
-1, array(4) {
-  [0]=>
+1, varray(4) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
   int(4)
 }
 
@@ -36,10 +28,10 @@
 
 1, float(-4.2)
 
-1, object(xhp_div)#1 (0) {
+1, object(xhp_div) (0) {
 }
 
-1, object(xhp_div)#1 (0) {
+1, object(xhp_div) (0) {
 }
 
 0, NULL

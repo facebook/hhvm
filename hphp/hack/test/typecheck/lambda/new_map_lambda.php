@@ -10,7 +10,7 @@ class MyMap<Tk, Tv> {
   public function mapWithKey<Tu>(
     (function(Tk, Tv): Tu) $callback,
   ): MyMap<Tk, Tu> {
-    //UNSAFE
+    throw new Exception();
   }
 }
 class C {

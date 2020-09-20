@@ -1,5 +1,5 @@
-<?php
+<?hh
 
-unset($x)
-
-?>
+function unset_() {
+  \HH\global_unset('x');
+}

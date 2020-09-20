@@ -1,4 +1,4 @@
-<?php
+<?hh
 include dirname(__FILE__) . "/cfg.inc";
 
 function d($msg) {
@@ -14,11 +14,11 @@ if (!$socket) {
     exit(1);
 }
 
-$descriptorspec = array(
-    0 => array("pipe", "r+"),
-    1 => array("pipe", "w"),
-    2 => array("file", "/tmp/error-output.txt", "a"),
-);
+$descriptorspec = darray[
+    0 => varray["pipe", "r+"],
+    1 => varray["pipe", "w"],
+    2 => varray["file", "/tmp/error-output.txt", "a"],
+];
 
 if (!file_exists($SHELL)) {
     throw new Exception("I cannot find '$SHELL', did you set the \$SHELL varaible correctly?");
@@ -43,7 +43,7 @@ fflush($IO[0]);
 $c = 0;
 do {
     $w = $e = null;
-    $r = array($IO[1]);
+    $r = varray[$IO[1]];
     if (!stream_select($r, $w, $e, 10)) {
         echo "Can't read the hello world from the shell.. timed out\n";
         exit(3);
@@ -68,7 +68,7 @@ do {
     while ($conn = @stream_socket_accept($socket)) {
         d("Accepted a connection..");
         /* Empty any data we have from the shell, if any, its unrelated */
-        $r = array($IO[1]);
+        $r = varray[$IO[1]];
         $w = $e = null;
         if (stream_select($r, $w, $e, 0, 1000)) {
             d("Discarding stuff from shell");
@@ -85,7 +85,7 @@ do {
         }
         $badread = 0;
         do {
-            $r = array($IO[1], $conn);
+            $r = varray[$IO[1], $conn];
             $w = $e = null;
             if (stream_select($r, $w, $e, 1)) {
                 if ($r) {
@@ -151,7 +151,7 @@ fflush($IO[0]);
 $c = 0;
 do {
     $w = $e = null;
-    $r = array($IO[1]);
+    $r = varray[$IO[1]];
     if (!stream_select($r, $w, $e, 10)) {
         echo "Can't read the hello world from the shell.. timed out\n";
         exit(3);

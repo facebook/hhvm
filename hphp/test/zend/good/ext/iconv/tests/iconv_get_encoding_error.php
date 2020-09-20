@@ -1,18 +1,12 @@
-<?php
+<?hh
 /* Prototype  : mixed iconv_get_encoding([string type])
- * Description: Get internal encoding and output encoding for ob_iconv_handler() 
- * Source code: ext/iconv/iconv.c 
+ * Description: Get internal encoding and output encoding for ob_iconv_handler()
+ * Source code: ext/iconv/iconv.c
  */
 
 /*
  * Test Error functionality of iconv_get_encoding
  */
-
-echo "*** Testing iconv_get_encoding() : error functionality ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -21,6 +15,12 @@ class classA
     return "UTF-8";
   }
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing iconv_get_encoding() : error functionality ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -31,7 +31,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $encoding argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -55,7 +55,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -64,7 +64,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -76,17 +76,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behavior of mb_regex_encoding()
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( iconv_get_encoding($input) );
+  try { var_dump( iconv_get_encoding($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
-?>
+}

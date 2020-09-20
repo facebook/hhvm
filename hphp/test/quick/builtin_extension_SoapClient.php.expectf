@@ -1,41 +1,28 @@
 SoapClient
-object(SoapClient)#1 (0) {
+object(SoapClient) (0) {
 }
 
 Warning: Attempted to serialize unserializable builtin class SoapClient in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(13) {
-  [0]=>
+varray(13) {
   string(11) "__construct"
-  [1]=>
-  string(6) "__call"
-  [2]=>
+  string(6) "call__"
   string(10) "__soapcall"
-  [3]=>
   string(16) "__getlastrequest"
-  [4]=>
   string(17) "__getlastresponse"
-  [5]=>
   string(23) "__getlastrequestheaders"
-  [6]=>
   string(24) "__getlastresponseheaders"
-  [7]=>
   string(14) "__getfunctions"
-  [8]=>
   string(10) "__gettypes"
-  [9]=>
   string(11) "__dorequest"
-  [10]=>
   string(11) "__setcookie"
-  [11]=>
   string(13) "__setlocation"
-  [12]=>
   string(16) "__setsoapheaders"
 }
 ================
 A_SoapClient
-object(A_SoapClient)#2 (1) {
+object(A_SoapClient) (1) {
   ["___x"]=>
   NULL
 }
@@ -43,31 +30,18 @@ object(A_SoapClient)#2 (1) {
 Warning: Attempted to serialize unserializable builtin class A_SoapClient in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(13) {
-  [0]=>
+varray(13) {
   string(11) "__construct"
-  [1]=>
-  string(6) "__call"
-  [2]=>
+  string(6) "call__"
   string(10) "__soapcall"
-  [3]=>
   string(16) "__getlastrequest"
-  [4]=>
   string(17) "__getlastresponse"
-  [5]=>
   string(23) "__getlastrequestheaders"
-  [6]=>
   string(24) "__getlastresponseheaders"
-  [7]=>
   string(14) "__getfunctions"
-  [8]=>
   string(10) "__gettypes"
-  [9]=>
   string(11) "__dorequest"
-  [10]=>
   string(11) "__setcookie"
-  [11]=>
   string(13) "__setlocation"
-  [12]=>
   string(16) "__setsoapheaders"
 }

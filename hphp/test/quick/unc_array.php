@@ -6,9 +6,7 @@ class Foo {
 
 function what($k) {}
 
-function a() {
-  $x = Foo::blah() ? array(1,2,3) : null;
+<<__EntryPoint>> function a(): void {
+  $x = Foo::blah() ? varray[1,2,3] : null;
   what($x);
 }
-
-a();

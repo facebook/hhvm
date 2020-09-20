@@ -1,0 +1,4 @@
+File "if_func_call.php", line 7, characters 9-10:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "if_func_call.php", line 9, characters 9-10:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

@@ -1,5 +1,5 @@
 //// decl.php
-<?hh // decl
+<?hh // partial
 
 async function f_asyncgen() {
   yield 10;
@@ -18,7 +18,7 @@ function f_sync() {
 }
 
 //// partial.php
-<?hh
+<?hh // partial
 
 function test() {
   hh_show(f_asyncgen());

@@ -1,6 +1,6 @@
-<?php
+<?hh
 
-
+<<__EntryPoint>> function main(): void {
 echo "*** Test substituting argument 1 with string values ***\n";
 
 
@@ -9,15 +9,15 @@ $heredoc = <<<EOT
 hello world
 EOT;
 
-$variation_array = array(
+$variation_array = darray[
   'string DQ' => "string",
   'string SQ' => 'string',
   'mixed case string' => "sTrInG",
   'heredoc' => $heredoc,
-  );
+  ];
 
 
 foreach ( $variation_array as $var ) {
-  var_dump(posix_setgid( $var  ) );
+  try { var_dump(posix_setgid( $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
-?>
+}

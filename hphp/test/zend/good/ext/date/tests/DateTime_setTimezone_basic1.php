@@ -1,10 +1,10 @@
-<?php
+<?hh
 /* Prototype  : public DateTime DateTime::setTimezone  ( DateTimeZone $timezone  )
  * Description: Sets the time zone for the DateTime object
  * Source code: ext/date/php_date.c
  * Alias to functions: date_timezone_set
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing DateTime::setTimezone() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -17,5 +17,5 @@ $la_time = new DateTimezone("America/Los_Angeles");
 $datetime->setTimezone($la_time);
 echo "New timezone: " . date_timezone_get($datetime)->getName() . "\n";
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

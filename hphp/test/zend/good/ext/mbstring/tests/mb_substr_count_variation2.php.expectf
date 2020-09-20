@@ -1,66 +1,73 @@
 *** Testing mb_substr_count() : usage variations ***
 
 -- Iteration 1 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 2 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 3 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 4 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, integer given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 5 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 6 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 7 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 8 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 9 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, double given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 10 --
 
-Warning: %s
-bool(false)
+Warning: mb_substr_count() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 11 --
 
-Warning: %s
-bool(false)
+Warning: mb_substr_count() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 12 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 13 --
 
-Warning: %s
-bool(false)
+Warning: mb_substr_count() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 14 --
-int(0)
+
+Warning: mb_substr_count() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 15 --
 
-Warning: %s
-bool(false)
+Warning: mb_substr_count() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: Empty substring. in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: Empty substring. in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 18 --
@@ -73,20 +80,18 @@ int(1)
 int(1)
 
 -- Iteration 21 --
-int(1)
+
+Warning: mb_substr_count() expects parameter 2 to be string, object given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 22 --
 
-Warning: %s
-bool(false)
+Warning: mb_substr_count() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 23 --
 
-Warning: %s
-bool(false)
+Warning: mb_substr_count() expects parameter 2 to be string, null given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 
 -- Iteration 24 --
 
-Warning: %s
-NULL
+Warning: mb_substr_count() expects parameter 2 to be string, resource given in %s/zend/good/ext/mbstring/tests/mb_substr_count_variation2.php on line 88
 Done

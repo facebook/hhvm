@@ -1,26 +1,26 @@
-<?php
+<?hh
 abstract class Singleton
 {
-	static private $instances = array();
-	static private $nextInstanceId = 0;
-	private $instanceId = NULL;
-	static final public function getInstance()
-	{
-		$caller = get_called_class();
-		if (!isset(self::$instances[$caller])) {
-			self::$instances[$caller] = new $caller;
-			self::$instances[$caller]->instanceId = self::$nextInstanceId++;
-		}
-		return self::$instances[$caller];
-	}
-	public final function getInstanceId()
-	{
-		return $this->instanceId;
-	}
-	public final function identify()
-	{
-		var_dump($this);
-	}
+    static private $instances = darray[];
+    static private $nextInstanceId = 0;
+    private $instanceId = NULL;
+    static final public function getInstance()
+    {
+        $caller = static::class;
+        if (!isset(self::$instances[$caller])) {
+            self::$instances[$caller] = new $caller;
+            self::$instances[$caller]->instanceId = self::$nextInstanceId++;
+        }
+        return self::$instances[$caller];
+    }
+    public final function getInstanceId()
+    {
+        return $this->instanceId;
+    }
+    public final function identify()
+    {
+        var_dump($this);
+    }
 }
 
 class Foo extends Singleton {
@@ -31,7 +31,7 @@ class Bar extends Singleton {
 
 class Baz extends Bar {
 }
-
+<<__EntryPoint>> function main(): void {
 $u = Foo::getInstance();
 $v = Bar::getInstance();
 $w = Baz::getInstance();
@@ -50,5 +50,5 @@ $w->identify();
 $x->identify();
 $y->identify();
 $z->identify();
-?>
-===DONE===
+echo "===DONE===\n";
+}

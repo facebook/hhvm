@@ -1,6 +1,4 @@
-<?php
-
-error_reporting(-1);
+<?hh
 
 function lol() { return STDIN; }
 function foo() {
@@ -9,4 +7,10 @@ function foo() {
   return $x;
 }
 
+
+<<__EntryPoint>>
+function main_elemu() {
+error_reporting(-1);
+
 var_dump(foo());
+}

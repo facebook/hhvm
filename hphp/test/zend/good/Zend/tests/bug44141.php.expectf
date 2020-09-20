@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to private method X::__construct() from context 'Y' in %s/bug44141.php on line 15

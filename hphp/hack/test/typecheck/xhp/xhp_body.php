@@ -12,8 +12,7 @@ class A {
 
 function test(): void {
   <foo />;
-  <foo>
-  </foo>;
+  <foo></foo>;
   <foo>
     <bar />
   </foo>;
@@ -28,6 +27,6 @@ function test(): void {
     {new A()}
   </foo>;
   <bar>
-    <foo>{array(vec[<bar />])}</foo>
+    <foo>{varray[vec[<bar />]]}</foo>
   </bar>;
 }

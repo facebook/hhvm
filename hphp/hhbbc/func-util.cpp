@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2013 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/runtime/vm/func.h"
 
@@ -24,140 +25,88 @@ namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_http_response_header("http_response_header");
-const StaticString s_php_errormsg("php_errormsg");
-const StaticString s_86metadata("86metadata");
+const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 //////////////////////////////////////////////////////////////////////
 
-uint32_t closure_num_use_vars(borrowed_ptr<const php::Func> f) {
-  // Properties on the closure object are either use vars, or storage
-  // for static locals.  The first N are the use vars.
-  return f->cls->properties.size() - f->staticLocals.size();
+uint32_t closure_num_use_vars(const php::Func* f) {
+  // Properties on the closure object are use vars.
+  return f->cls->properties.size();
 }
 
-bool is_pseudomain(borrowed_ptr<const php::Func> f) {
-  return borrow(f->unit->pseudomain) == f;
-}
-
-bool is_volatile_local(borrowed_ptr<const php::Func> func,
-                       LocalId lid) {
-  if (is_pseudomain(func)) return true;
-  // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
-  // changed through $GLOBALS), but for now we don't bother.
+bool is_volatile_local(const php::Func* func, LocalId lid) {
   auto const& l = func->locals[lid];
   if (!l.name) return false;
-  return l.name->same(s_http_response_header.get()) ||
-         l.name->same(s_php_errormsg.get()) ||
+
+  return (RuntimeOption::EnableArgsInBacktraces &&
+          l.name->same(s_reified_generics_var.get())) ||
          l.name->same(s_86metadata.get());
 }
 
-SString memoize_impl_name(borrowed_ptr<const php::Func> func) {
+SString memoize_impl_name(const php::Func* func) {
   always_assert(func->isMemoizeWrapper);
   return Func::genMemoizeImplName(func->name);
 }
 
-bool check_nargs_in_range(borrowed_ptr<const php::Func> func, uint32_t nArgs) {
+bool check_nargs_in_range(const php::Func* func, uint32_t nArgs) {
   while (nArgs < func->dvEntries.size()) {
     if (func->dvEntries[nArgs++] == NoBlockId) return false;
   }
+
+  auto& params = func->params;
+  auto size = params.size();
+  if (nArgs > size) {
+    return size > 0 && params[size - 1].isVariadic;
+  }
   return true;
+}
+
+int dyn_call_error_level(const php::Func* func)  {
+  auto const def = [&] {
+    if (!(func->attrs & AttrDynamicallyCallable) ||
+        RuntimeOption::EvalForbidDynamicCallsWithAttr) {
+      if (func->cls) {
+        if (func->attrs & AttrStatic) {
+          return RuntimeOption::EvalForbidDynamicCallsToClsMeth;
+        }
+        return RuntimeOption::EvalForbidDynamicCallsToInstMeth;
+      }
+      return RuntimeOption::EvalForbidDynamicCallsToFunc;
+    }
+    return 0;
+  }();
+
+  if (def > 0 && func->sampleDynamicCalls) return 1;
+  return def;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
 
-using ExnNode = php::ExnNode;
+void copy_into(php::WideFunc& dst, const php::WideFunc& src) {
+  assertx(!src.blocks().empty());
+  assertx(!dst.blocks().empty());
+  always_assert(src->exnNodes.empty() || dst->exnNodes.empty());
 
-std::unique_ptr<ExnNode> cloneExnTree(
-  borrowed_ptr<ExnNode> in,
-  BlockId delta,
-  std::unordered_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>>& processed) {
-
-  auto clone = std::make_unique<ExnNode>();
-  always_assert(!processed.count(in));
-  processed[in] = borrow(clone);
-
-  clone->id = in->id;
-  clone->depth = in->depth;
-  clone->parent = in->parent ? processed[in->parent] : nullptr;
-  clone->info = in->info;
-  for (auto& child : in->children) {
-    clone->children.push_back(cloneExnTree(borrow(child), delta, processed));
+  auto const delta = dst.blocks().size();
+  dst->exnNodes.reserve(dst->exnNodes.size() + src->exnNodes.size());
+  for (auto en : src->exnNodes) {
+    en.region.catchEntry += delta;
+    dst->exnNodes.push_back(std::move(en));
   }
-  if (delta) {
-    match<void>(clone->info,
-                [&](php::FaultRegion& fr) {
-                  fr.faultEntry += delta;
-                },
-                [&](php::CatchRegion& cr) {
-                  cr.catchEntry += delta;
-                });
-  }
-  return clone;
-}
-
-void fixupSwitch(SwitchTab& s, BlockId delta) {
-  for (auto& id : s) id += delta;
-}
-
-void fixupSwitch(SSwitchTab& s, BlockId delta) {
-  for (auto& ent : s) ent.second += delta;
-}
-
-// generic do-nothing function, thats an inexact match
-template<typename Opcode>
-void fixupBlockIds(const Opcode& op, bool) {}
-
-// exact match if there's a targets field with matching fixupSwitch
-template<typename Opcode>
-auto fixupBlockIds(Opcode& op, BlockId delta) ->
-  decltype(fixupSwitch(op.targets, delta)) {
-  return fixupSwitch(op.targets, delta);
-}
-
-// exact match if there's a target field
-template<typename Opcode>
-auto fixupBlockIds(Opcode& op, BlockId delta) -> decltype(op.target, void()) {
-  op.target += delta;
-}
-
-void fixupBlockIds(Bytecode& bc, BlockId delta) {
-#define O(opcode, ...) case Op::opcode: return fixupBlockIds(bc.opcode, delta);
-  switch (bc.op) { OPCODES }
-#undef O
-}
-
-void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
-  std::unordered_map<borrowed_ptr<ExnNode>, borrowed_ptr<ExnNode>> processed;
-
-  BlockId delta = dst->blocks.size();
-  for (auto& theirs : other.exnNodes) {
-    auto ours = cloneExnTree(borrow(theirs), delta, processed);
-    dst->exnNodes.push_back(std::move(ours));
-  }
-
-  for (auto& theirs : other.blocks) {
-    auto ours = std::make_unique<php::Block>(*theirs);
-    if (theirs->exnNode) {
-      ours->exnNode = processed[theirs->exnNode];
-      assertx(ours->exnNode);
+  for (auto src_block : src.blocks()) {
+    auto const dst_block = src_block.mutate();
+    if (dst_block->fallthrough != NoBlockId) dst_block->fallthrough += delta;
+    if (dst_block->throwExit != NoBlockId)   dst_block->throwExit += delta;
+    for (auto& bc : dst_block->hhbcs) {
+      // When merging functions (used for 86xints) we have to drop the srcLoc,
+      // because it might reference a different unit. Since these functions
+      // are generated, the srcLoc isn't that meaningful anyway.
+      bc.srcLoc = -1;
+      bc.forEachTarget([&] (BlockId& b) { b += delta; });
     }
-    if (delta) {
-      ours->id += delta;
-      if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
-      for (auto &id : ours->factoredExits) id += delta;
-      for (auto& bc : ours->hhbcs) {
-        // When merging functions (used for 86xints) we have to drop
-        // the src info, because it might reference a different unit
-        // (and as a generated function, the src info isn't very
-        // meaningful anyway).
-        bc.srcLoc = -1;
-        fixupBlockIds(bc, delta);
-      }
-    }
-    dst->blocks.push_back(std::move(ours));
+    dst.blocks().push_back(std::move(src_block));
   }
 }
 
@@ -171,22 +120,37 @@ bool append_func(php::Func* dst, const php::Func& src) {
   if (src.numIters || src.locals.size()) return false;
   if (src.exnNodes.size() && dst->exnNodes.size()) return false;
 
+  auto const src_func = php::WideFunc::cns(&src);
+  auto dst_func = php::WideFunc::mut(dst);
+
   bool ok = false;
-  for (auto& b : dst->blocks) {
-    if (b->hhbcs.back().op != Op::RetC) continue;
-    b->hhbcs.back() = bc::PopC {};
-    b->fallthrough = dst->blocks.size();
+  for (auto const bid : dst_func.blockRange()) {
+    auto const& cblk = dst_func.blocks()[bid];
+    if (cblk->hhbcs.back().op != Op::RetC) continue;
+    auto const blk = dst_func.blocks()[bid].mutate();
+    blk->hhbcs.back() = bc::PopC {};
+    blk->fallthrough = dst_func.blocks().size();
     ok = true;
   }
   if (!ok) return false;
-  copy_into(dst, src);
+  copy_into(dst_func, src_func);
   return true;
 }
 
-php::FuncBase::FuncBase(const FuncBase& other) {
-  copy_into(this, other);
+BlockId make_block(php::WideFunc& func, const php::Block* srcBlk) {
+  auto newBlk    = copy_ptr<php::Block>{php::Block{}};
+  auto const blk = newBlk.mutate();
+  blk->exnNodeId = srcBlk->exnNodeId;
+  blk->throwExit = srcBlk->throwExit;
+  auto const bid = func.blocks().size();
+  func.blocks().push_back(std::move(newBlk));
+  return bid;
+}
 
-  assertx(!other.nativeInfo);
+php::FuncBase::FuncBase(const FuncBase& other) {
+  always_assert(!other.nativeInfo);
+  exnNodes = other.exnNodes;
+  rawBlocks = other.rawBlocks;
 }
 
 //////////////////////////////////////////////////////////////////////

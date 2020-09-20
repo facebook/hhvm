@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_RECORD_H_
-#define incl_HPHP_JIT_TC_RECORD_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -39,16 +38,9 @@ struct TransEnv;
 namespace tc {
 
 /*
- * If live code relocation is enabled, record metadata for the current
- * translation.
- */
-void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
-                              CGMeta& fixups);
-
-/*
  * Record translation for gdb debugging of the tc.
  */
-void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
+void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
                           const TCA start, const TCA end, bool exit,
                           bool inPrologue);
 
@@ -58,14 +50,17 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
 void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 
 /*
- * Report jit warmup statistics to scribe via StructuredLog.
+ * Update JIT warmup stats and related counters.
  */
 void reportJitMaturity();
 
 /*
- * Get a code size counter for the named code block ("main", "cold", etc.)
+ * Update the jit.code.*.used ServiceData counters to reflect the
+ * current usage of the TC. Call this whenever a new translation is
+ * emitted into the TC. The code lock must be already held.
  */
-ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name);
+void updateCodeSizeCounters();
+
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */
@@ -82,8 +77,7 @@ void logFrames(const Vunit& unit);
  * need to be erased before a translation with a call to a Proflogue is
  * reclaimed.
  */
-void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      ProfTransRec* rec);
+void recordFuncCaller(const Func* func, TCA toSmash, ProfTransRec* rec);
 
 /*
  * When a function is treadmilled its bytecode may no longer be available,
@@ -111,4 +105,3 @@ std::string warmupStatusString();
 
 }}}
 
-#endif

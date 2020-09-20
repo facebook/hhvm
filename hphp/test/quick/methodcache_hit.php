@@ -9,11 +9,10 @@ class doer {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = new doer;
   $o = new one;
   $x->junk($o);
   $x->junk($o);
   $x->junk($o);
 }
-main();

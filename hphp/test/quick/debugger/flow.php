@@ -63,4 +63,6 @@ function test($x) {
   error_log("test done ".$x);
 }
 
-error_log('flow_t.php loaded');
+<<__EntryPoint>> function main() {
+  error_log('flow_t.php loaded');
+}

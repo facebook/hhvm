@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 class IntlChar {
   const string UNICODE_VERSION = '';
@@ -661,7 +661,7 @@ class IntlChar {
   static public function digit($cp, int $radix = 10) { }
   static public function forDigit(int $digit, int $radix = 10): int { return 0; }
   static public function charAge($cp) { }
-  static public function getUnicodeVersion(): array { return array(); }
+  <<__PHPStdLib>> static public function getUnicodeVersion(): darray<arraykey, mixed> { return darray[]; }
   static public function getFC_NFKC_Closure($cp) { }
   static public function isUAlphabetic($cp) { }
   static public function isULowercase($cp) { }

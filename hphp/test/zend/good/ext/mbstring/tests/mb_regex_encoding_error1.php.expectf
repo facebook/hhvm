@@ -2,6 +2,5 @@
 
 -- Testing mb_regex_encoding() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: mb_regex_encoding() expects at most 1 parameter, 2 given in %s/mb_regex_encoding_error1.php on line 17
 Done

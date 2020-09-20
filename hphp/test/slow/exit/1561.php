@@ -1,6 +1,10 @@
-<?php
+<?hh
 
 function foo() {
  return false;
  }
-foo() or exit("foobar");
+
+<<__EntryPoint>>
+function main_1561() {
+foo() || exit("foobar");
+}

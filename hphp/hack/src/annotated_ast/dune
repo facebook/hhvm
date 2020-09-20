@@ -1,0 +1,25 @@
+(library
+  (name annotated_ast)
+  (modules
+    aast
+    aast_defs
+    aast_defs_visitors_ancestors
+    doc_comment)
+  (wrapped false)
+  (libraries
+    ast
+    namespace_env)
+  (preprocess (pps visitors.ppx ppx_deriving.std)))
+
+(library
+  (name namespace_env)
+  (wrapped false)
+  (modules
+    namespace_env)
+  (libraries
+    collections
+    core_kernel
+    hh_autoimport
+    parser_options)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std))) ; See T41851208

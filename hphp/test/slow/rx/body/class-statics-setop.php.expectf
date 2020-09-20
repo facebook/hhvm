@@ -1,0 +1,3 @@
+Verification Error (unit %s/rx/body/class-statics-setop.php func test): statics are forbidden in Rx functions: SetOpS
+
+Verification failed for unit %s/rx/body/class-statics-setop.php. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

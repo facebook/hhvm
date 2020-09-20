@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 // Successor of maximum signed
 $b1 = 0b1000000000000000000000000000000000000000000000000000000000000000;
 // Maximum unsigned
@@ -26,3 +26,4 @@ if ($b2!==$o2) echo "b2!==o2\n";
 if ($b3!==$o3) echo "b3!==o3\n";
 if ($b3!==$d3) echo "b3!==d3\n";
 echo "Finished\n";
+}

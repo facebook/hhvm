@@ -1,36 +1,36 @@
 string(7) "xhp_foo"
-array(1) {
+darray(1) {
   ["age"]=>
   int(3)
 }
 string(7) "xhp_foo"
-array(1) {
+darray(1) {
   ["age"]=>
   int(1)
 }
 string(7) "xhp_foo"
-array(2) {
+darray(2) {
   ["...$0"]=>
-  object(xhp_foo)#5 (0) {
+  object(xhp_foo) (0) {
   }
   ["age"]=>
   int(2)
 }
 string(7) "xhp_foo"
-array(3) {
+darray(3) {
   ["...$0"]=>
-  object(xhp_foo)#3 (0) {
+  object(xhp_foo) (0) {
   }
   ["...$1"]=>
-  object(xhp_foo)#4 (0) {
+  object(xhp_foo) (0) {
   }
   ["age"]=>
   int(4)
 }
 string(7) "xhp_foo"
-array(2) {
+darray(2) {
   ["...$0"]=>
-  object(xhp_foo)#2 (0) {
+  object(xhp_foo) (0) {
   }
   ["age"]=>
   int(5)

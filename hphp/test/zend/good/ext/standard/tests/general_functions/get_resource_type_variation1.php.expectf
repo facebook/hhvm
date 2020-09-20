@@ -2,36 +2,29 @@
 
 -- bool --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, boolean given in %s/get_resource_type_variation1.php on line 29
 
 -- int 10 --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, integer given in %s/get_resource_type_variation1.php on line 29
 
 -- float 10.5 --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, double given in %s/get_resource_type_variation1.php on line 29
 
 -- string --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, string given in %s/get_resource_type_variation1.php on line 29
 
 -- array --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, %rv?%rarray given in %s/get_resource_type_variation1.php on line 29
 
 -- NULL --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, null given in %s/get_resource_type_variation1.php on line 29
 
 -- Object --
 
-Warning: %s
-NULL
+Warning: get_resource_type() expects parameter 1 to be resource, object given in %s/get_resource_type_variation1.php on line 29
 ===DONE===

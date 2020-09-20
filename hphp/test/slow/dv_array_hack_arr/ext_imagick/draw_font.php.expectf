@@ -1,0 +1,7 @@
+bool(true)
+string(7) "setFont"
+float(12)
+bool(true)
+bool(true)
+int(500)
+string(34) "Font weight valid range is 100-900"

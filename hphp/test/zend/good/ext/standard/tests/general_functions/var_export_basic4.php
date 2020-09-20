@@ -1,14 +1,14 @@
-<?php
+<?hh
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing var_export() with valid strings ***\n";
-// different valid  string 
-$valid_strings = array(
+// different valid  string
+$valid_strings = darray[
             "\"\"" => "",
             "\" \"" => " ",
             "''" => '',
@@ -25,19 +25,19 @@ $valid_strings = array(
             "'\\0'" => '\0',
             "'\\060'" => '\060',
             "\"\\070\"" => "\070"
-);
+];
 
 /* Loop to check for above strings with var_export() */
 echo "\n*** Output for strings ***\n";
 foreach($valid_strings as $key => $str) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $str );
-	echo "\n";
-	var_export( $str, FALSE);
-	echo "\n";
-	var_dump( var_export( $str, TRUE) );
-	echo "\n";
+    echo "\n-- Iteration: $key --\n";
+    var_export( $str );
+    echo "\n";
+    var_export( $str, FALSE);
+    echo "\n";
+    var_dump( var_export( $str, TRUE) );
+    echo "\n";
 }
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

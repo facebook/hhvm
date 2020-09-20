@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: gmp_scan0(): Starting index must be greater than or equal to zero in %s/gmp_scan0.php on line 3
 bool(false)
 int(2)
 int(0)
@@ -7,12 +7,10 @@ int(5)
 int(200)
 int(13)
 
-Warning: %s
+Warning: gmp_scan0(): Unable to convert variable to GMP - wrong type in %s/gmp_scan0.php on line 12
 bool(false)
 
-Warning: %s
-NULL
+Warning: gmp_scan0() expects exactly 2 parameters, 1 given in %s/gmp_scan0.php on line 13
 
-Warning: %s
-NULL
+Warning: gmp_scan0() expects exactly 2 parameters, 0 given in %s/gmp_scan0.php on line 14
 Done

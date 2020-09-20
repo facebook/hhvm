@@ -1,10 +1,8 @@
 *** Testing str_split() : error conditions ***
 -- Testing str_split() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: str_split() expects at least 1 parameter, 0 given in %s/str_split_error.php on line 14
 -- Testing str_split() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: str_split() expects at most 2 parameters, 3 given in %s/str_split_error.php on line 21
 Done

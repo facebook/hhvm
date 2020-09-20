@@ -4,7 +4,7 @@ static_assert(kMaxBuiltinArgs == 32,"Regenerate native-func-caller.h for updated
 
 static_assert(kNumSIMDRegs == 8,"Regenerate native-func-caller.h for updated kNumSIMDRegs");
 
-double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+double callFuncDoubleImpl(NativeFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {
@@ -736,7 +736,7 @@ double callFuncDoubleImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
-int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+int64_t callFuncInt64Impl(NativeFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {
@@ -1468,7 +1468,7 @@ int64_t callFuncInt64Impl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
   }
 }
 
-TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+TypedValue callFuncTVImpl(NativeFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {
@@ -2201,7 +2201,7 @@ TypedValue callFuncTVImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* 
 }
 
 template<class IndirectRet>
-IndirectRet callFuncIndirectImpl(BuiltinFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
+IndirectRet callFuncIndirectImpl(NativeFunction f, int64_t* GP, int GP_count, double* SIMD, int SIMD_count) {
   switch (GP_count) {
     case 0:
       switch (SIMD_count) {

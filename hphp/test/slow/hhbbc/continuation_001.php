@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   yield 1;
@@ -11,4 +11,8 @@ function bar() {
   foreach ($x as $k) { echo $k; echo "\n"; }
 }
 
+
+<<__EntryPoint>>
+function main_continuation_001() {
 bar();
+}

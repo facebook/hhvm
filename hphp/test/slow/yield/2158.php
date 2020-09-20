@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($t) {
   $x = function() use ($t) {
@@ -10,4 +10,8 @@ function foo($t) {
     var_dump($y);
   }
 }
+
+<<__EntryPoint>>
+function main_2158() {
 foo(42);
+}

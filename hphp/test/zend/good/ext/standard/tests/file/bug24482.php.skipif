@@ -1,5 +1,6 @@
-<?php
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!function_exists("glob")) {
     die('skip glob() not available');
 }
-?>
+}

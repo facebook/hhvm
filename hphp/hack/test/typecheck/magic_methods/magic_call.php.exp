@@ -1,0 +1,2 @@
+File "magic_call.php", line 4, characters 3-31:
+Magic `__call` methods are no longer supported (Parsing[1002])

@@ -1,0 +1,17 @@
+darray(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  darray(2) {
+    ["a"]=>
+    darray(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["b"]=>
+    darray(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}

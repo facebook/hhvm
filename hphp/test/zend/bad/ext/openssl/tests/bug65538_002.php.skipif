@@ -1,3 +1,0 @@
-<?php
-if (!extension_loaded('openssl')) die('skip, openssl required');
-if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");

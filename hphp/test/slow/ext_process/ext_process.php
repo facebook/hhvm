@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -7,13 +7,18 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x !== false, true); }
 
+
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_process() {
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(123);
 }
-pcntl_wait($status);
+$status = null;
+pcntl_wait(inout $status);
 
 $pri = pcntl_getpriority();
 VERIFY($pri);
@@ -28,55 +33,55 @@ $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_wait($status);
+pcntl_wait(inout $status);
 VS($status, 0x1200);
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VS($status, 0x1200);
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x80);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VS(pcntl_wexitstatus($status), 0x80);
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VERIFY(pcntl_wifexited($status));
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VERIFY(!pcntl_wifsignaled($status));
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VERIFY(!pcntl_wifstopped($status));
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VS(pcntl_wstopsig($status), 0x12);
 
 $pid = pcntl_fork();
 if ($pid == 0) {
   exit(0x12);
 }
-pcntl_waitpid(0, $status);
+pcntl_waitpid(0, inout $status);
 VS(pcntl_wtermsig($status), 0);
-
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   yield 1;
@@ -9,7 +9,11 @@ function foo() {
   yield 6;
 }
 
+
+<<__EntryPoint>>
+function main_2230() {
 foreach(foo() as $k => $v) {
   var_dump($k);
   var_dump($v);
+}
 }

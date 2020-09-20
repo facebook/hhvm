@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 echo "test rewind before doing anything\n";
@@ -12,5 +12,5 @@ echo "first 10 characters=".gzread($h, 10)."\n";
 gzrewind($h);
 echo "first 20 characters=".gzread($h, 20)."\n";
 gzclose($h);
-?>
-===DONE===
+echo "===DONE===\n";
+}

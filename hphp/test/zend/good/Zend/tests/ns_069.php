@@ -1,16 +1,17 @@
-<?php
+<?hh
 
 namespace foo;
 
 class Test {
   static function f() {
-    var_dump((binary)__NAMESPACE__);
+    \var_dump((string)__NAMESPACE__);
     include __DIR__ . '/ns_069.inc';
-    var_dump((binary)__NAMESPACE__);
+    \foo();
+    \var_dump((string)__NAMESPACE__);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 Test::f();
 
-?>
-===DONE===
+echo "===DONE===\n";
+}

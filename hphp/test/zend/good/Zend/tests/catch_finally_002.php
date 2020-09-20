@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
    try {
      echo "try\n";
@@ -9,6 +9,6 @@ function foo () {
    }
    return 2;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo());
-?>
+}

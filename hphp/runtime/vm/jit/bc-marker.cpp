@@ -38,23 +38,21 @@ std::string BCMarker::show() const {
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
     m_spOff.offset,
     m_sk.func()->fullName(),
-    m_profTransID != kInvalidTransID
-      ? folly::format(" [profTrans={}]", m_profTransID).str()
-      : std::string{}
+    m_profTransIDs.empty()
+      ? ""
+      : folly::sformat(" [profTrans={}]", folly::join(',', m_profTransIDs))
   ).str();
 }
 
 bool BCMarker::valid() const {
   if (isDummy()) return true;
+  // Note, we can't check stack bounds here because of inlining, and
+  // instructions like idx, which can create php-level calls.
   return
     m_sk.valid() &&
     m_sk.offset() >= m_sk.func()->base() &&
     m_sk.offset() < m_sk.func()->past() &&
-    // When inlining is on, we may modify markers to weird values in
-    // case reentry happens.
-    (RuntimeOption::EvalHHIREnableGenTimeInlining ||
-     m_spOff.offset <= m_sk.func()->numSlotsInFrame() +
-        m_sk.func()->maxStackCells());
+    m_profTransIDs.find(kInvalidTransID) == m_profTransIDs.end();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   var_dump($x ?? 3);
@@ -8,4 +8,8 @@ function test() {
   var_dump('' ?? 3);
 }
 
+
+<<__EntryPoint>>
+function main_coalesce_falsey() {
 test();
+}

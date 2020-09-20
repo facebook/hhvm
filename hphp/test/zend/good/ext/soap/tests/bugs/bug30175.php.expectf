@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   ["name"]=>
   string(25) "blah blah some name field"
   ["shortDescription"]=>

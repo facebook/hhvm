@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument;
 
 $node = $doc->createElement("para");
@@ -16,5 +16,4 @@ catch (DOMException $e)
 {
     echo 'Test failed!', PHP_EOL;
 }
-
-?>
+}

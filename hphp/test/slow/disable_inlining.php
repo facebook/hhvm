@@ -1,21 +1,22 @@
-<?
+<?hh
 
+<<__NEVER_INLINE>>
 function foo() {
   return 4;
 }
 
+<<__NEVER_INLINE>>
 function bar($x) {
   echo var_dump($x[3]);
 }
 
 function main() {
-  $a = array(1, 2, 3, foo());
+  $a = varray[1, 2, 3, foo()];
   bar($a);
 }
 
-if (is_callable('__hhvm_intrinsics\disable_inlining')) {
-  __hhvm_intrinsics\disable_inlining('foo');
-  __hhvm_intrinsics\disable_inlining('bar');
-}
 
+<<__EntryPoint>>
+function main_disable_inlining() {
 main();
+}

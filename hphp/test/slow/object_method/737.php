@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class B {
   public function foo() {
@@ -13,5 +13,9 @@ class C extends B {
     var_dump('in C::bar!');
   }
 }
+
+<<__EntryPoint>>
+function main_737() {
 $obj = new C;
 $obj->foo();
+}

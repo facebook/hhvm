@@ -1,14 +1,13 @@
 <?hh
 
-function run() {
-  $a = 5;
-  $b =& $a;
-
+function run(inout $a, inout $b) {
   $a = 1;
   $a = true;
   $b = 3;
 
   return $a;
 }
-
-var_dump(run());
+<<__EntryPoint>> function main(): void {
+$a = 5;
+var_dump(run(inout $a, inout $a));
+}

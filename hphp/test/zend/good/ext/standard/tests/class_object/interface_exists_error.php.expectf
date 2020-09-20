@@ -2,11 +2,9 @@
 
 -- Testing interface_exists() function with Zero arguments --
 
-Warning: %s
-NULL
+Warning: interface_exists() expects at least 1 parameter, 0 given in %s/interface_exists_error.php on line 12
 
 -- Testing interface_exists() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: interface_exists() expects at most 2 parameters, 3 given in %s/interface_exists_error.php on line 19
 ===DONE===

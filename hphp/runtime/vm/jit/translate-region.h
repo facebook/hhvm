@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TRANSLATE_REGION_H_
-#define incl_HPHP_TRANSLATE_REGION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -39,8 +38,13 @@ struct TransContext;
  */
 std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     const TransContext& context,
-                                    PostConditions& pconds,
-                                    Annotations& annotations) noexcept;
+                                    PostConditions& pconds) noexcept;
+
+/*
+ * Try to inline a FCall.
+ */
+bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
+                         const FCallArgs& fca, SSATmp* ctx, bool dynamicCall);
 
 /*
  * Generate an IRUnit which simulates the inlining of region. This unit should
@@ -56,4 +60,3 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
 }}
 
-#endif

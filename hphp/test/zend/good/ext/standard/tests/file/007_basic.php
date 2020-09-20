@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  Prototype: resource fopen(string $filename, string $mode 
                             [, bool $use_include_path [, resource $context]] );
@@ -10,9 +10,9 @@
  Prototype: bool feof ( resource $handle );
  Description: Tests for end-of-file on a file pointer
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing basic operations of fopen() and fclose() functions ***\n";
-$modes = array(
+$modes = varray[
   "w",
   "wb",
   "wt",
@@ -33,12 +33,12 @@ $modes = array(
   "a+",
   "a+t",
   "a+b"
-);
+];
 
 for( $i=0; $i<count($modes); $i++ ) {
   echo "\n-- Iteration with mode '$modes[$i]' --\n";
 
-  $filename = dirname(__FILE__)."/007_basic.tmp";
+  $filename = __SystemLib\hphp_test_tmppath('007_basic.tmp');
   // check fopen()
   $handle = fopen($filename, $modes[$i]);
   var_dump($handle );
@@ -56,14 +56,14 @@ for( $i=0; $i<count($modes); $i++ ) {
 // remove the temp file
 unlink($filename);
 
-$x_modes = array(
+$x_modes = varray[
   "x",
   "xb",
   "xt",
   "x+",
   "x+b",
   "x+t"
-);
+];
 
 for( $i=0; $i<count($x_modes); $i++ ) {
   echo "\n-- Iteration with mode '$x_modes[$i]' --\n";
@@ -85,3 +85,4 @@ for( $i=0; $i<count($x_modes); $i++ ) {
 }
 
 echo "\n*** Done ***\n";
+}

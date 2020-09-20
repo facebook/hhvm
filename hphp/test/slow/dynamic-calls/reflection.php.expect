@@ -1,0 +1,5 @@
+=========================== positive tests ===================
+Exception: 'func1' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func2' called dynamically but is not __DynamicallyCallable
+Exception: 'A::func3' called dynamically but is not __DynamicallyCallable
+=========================== negative tests ===================

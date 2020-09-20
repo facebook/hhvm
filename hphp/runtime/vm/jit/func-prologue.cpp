@@ -19,9 +19,9 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irlower.h"
@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -54,13 +54,16 @@ namespace {
 TransContext prologue_context(TransID transID,
                               TransKind kind,
                               const Func* func,
+                              int initSpOffset,
                               Offset entry) {
   return TransContext(
-    transID,
+    transID == kInvalidTransID ? TransIDSet{} : TransIDSet{transID},
     kind,
     TransFlags{},
     SrcKey{func, entry, SrcKey::PrologueTag{}},
-    FPInvOffset{func->numSlotsInFrame()}
+    FPInvOffset{func->numSlotsInFrame()},
+    0,
+    nullptr
   );
 }
 
@@ -70,64 +73,46 @@ TransContext prologue_context(TransID transID,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
-                    CodeCache::View code, CGMeta& fixups) {
-  auto context = prologue_context(transID, kind, func,
+std::tuple<TransLoc, TCA, CodeCache::View>
+genFuncPrologue(TransID transID, TransKind kind,
+                Func* func, int argc, CodeCache& code, CGMeta& fixups,
+                tc::CodeMetaLock* locker) {
+  auto context = prologue_context(transID, kind, func, argc,
                                   func->getEntryForNumArgs(argc));
-  IRUnit unit{context};
-  irgen::IRGS env{unit, nullptr};
 
-  irgen::emitFuncPrologue(env, argc, transID);
+  tracing::Block _{
+    "gen-prologue",
+    [&] { return traceProps(context).add("argc", argc); }
+  };
+
+  IRUnit unit{context, std::make_unique<AnnotationData>()};
+  irgen::IRGS env{unit, nullptr, 0, nullptr, true};
+
+  irgen::emitFuncPrologue(env, func, argc, transID);
   irgen::sealUnit(env);
 
   printUnit(2, unit, "After initial prologue generation");
 
-  auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
-  emitVunit(*vunit, env.unit, code, fixups);
+  auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
 
-  // In order to find the start of the (post guard) prologue after
-  // possibly relocating the code, we add a watchpoint that points to
-  // &unit.prologueStart. In some situations (eg tc-relocate) we will
-  // relocate the code again - but at that point, unit has gone (and
-  // tc-relocate tracks the start of the prologue for itself). So we
-  // need to remove it here, to prevent wild writes to dead stack
-  // locations.
-  auto it = std::find_if(fixups.watchpoints.begin(), fixups.watchpoints.end(),
-                         [&] (TCA* p) { return p == &unit.prologueStart; });
-  assertx(it != fixups.watchpoints.end());
-  fixups.watchpoints.erase(it);
+  if (locker) locker->lock();
+  SCOPE_EXIT { if (locker) locker->unlock(); };
+  tc::assertOwnsCodeLock();
+  tc::assertOwnsMetadataLock();
 
-  return unit.prologueStart;
-}
+  auto codeView = code.view(kind);
+  TCA mainOrig = codeView.main().frontier();
 
-TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                        CodeCache::View code) {
-  auto context = prologue_context(kInvalidTransID, TransKind::Live,
-                                  func, func->base());
-  IRUnit unit{context};
-  irgen::IRGS env{unit, nullptr};
+  // If we're close to a cache line boundary, just burn some space to
+  // try to keep the func and its body on fewer total lines.
+  align(codeView.main(), &fixups, Alignment::CacheLineRoundUp,
+        AlignContext::Dead);
 
-  irgen::emitFuncBodyDispatch(env, dvs);
-  irgen::sealUnit(env);
+  tc::TransLocMaker maker(codeView);
+  maker.markStart();
 
-  CGMeta fixups;
-  auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
-
-  auto& main = code.main();
-  auto const start = main.frontier();
-
-  emitVunit(*vunit, env.unit, code, fixups);
-
-  if (RuntimeOption::EvalPerfRelocate) {
-    GrowableVector<IncomingBranch> ibs;
-    auto& frozen = code.frozen();
-    tc::recordPerfRelocMap(start, main.frontier(),
-                           frozen.frontier(), frozen.frontier(),
-                           context.srcKey(), 0, ibs, fixups);
-  }
-  fixups.process(nullptr);
-
-  return start;
+  emitVunit(*vunit, env.unit, codeView, fixups);
+  return std::make_tuple(maker.markEnd().loc(), mainOrig, codeView);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

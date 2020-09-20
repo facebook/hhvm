@@ -19,4 +19,8 @@ function test() {
       } age={4} />
   } age={5} />;
 }
+
+<<__EntryPoint>>
+function main_xhp_spread_nested() {
 test();
+}

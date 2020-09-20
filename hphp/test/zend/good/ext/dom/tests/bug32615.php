@@ -1,4 +1,4 @@
-<?php
+<?hh <<__EntryPoint>> function main(): void {
 $dom = new DomDocument;
 $frag = $dom->createDocumentFragment();
 $frag->appendChild(new DOMElement('root'));
@@ -64,5 +64,4 @@ $root = $dom->documentElement;
 $root->replaceChild($frag, $root->firstChild);
 
 echo $dom->saveXML();
-
-?>
+}

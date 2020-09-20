@@ -1,20 +1,20 @@
-<?php
+<?hh
 
-
+<<__EntryPoint>> function main(): void {
 echo "*** Test substituting argument 1 with float values ***\n";
 
 
 
-$variation_array = array(
+$variation_array = darray[
   'float 10.5' => 10.5,
   'float -10.5' => -10.5,
   'float 12.3456789000e10' => 12.3456789000e10,
   'float -12.3456789000e10' => -12.3456789000e10,
   'float .5' => .5,
-  );
+  ];
 
 
 foreach ( $variation_array as $var ) {
   var_dump(posix_ttyname( $var  ) );
 }
-?>
+}

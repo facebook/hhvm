@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
  * Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
@@ -8,21 +8,6 @@
  * Test array_map() by passing non array values in place of $arr1
  */
 
-echo "*** Testing array_map() : unexpected values for 'arr1' ***\n";
-
-function callback($a)
-{
-  return $a;
-}
-
-//get an unset array variable
-$unset_var1 = array(1, 2);
-unset ($unset_var1);
-
-// get an unset variable
-$unset_var2 = 10;
-unset ($unset_var2);
-
 // get a class
 class classA
 {
@@ -30,6 +15,21 @@ class classA
     return "Class A object";
   }
 }
+
+function callback($a)
+{
+  return $a;
+}
+<<__EntryPoint>> function main(): void {
+echo "*** Testing array_map() : unexpected values for 'arr1' ***\n";
+
+//get an unset array variable
+$unset_var1 = varray[1, 2];
+unset ($unset_var1);
+
+// get an unset variable
+$unset_var2 = 10;
+unset ($unset_var2);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -40,7 +40,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // different scalar/non-scalar values for array input
-$unexpected_inputs = array(
+$unexpected_inputs = varray[
 
        // int data
 /*1*/  0,
@@ -64,7 +64,7 @@ $unexpected_inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +73,7 @@ $unexpected_inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -86,14 +86,14 @@ $unexpected_inputs = array(
 
        // resource variable
 /*25*/ $fp
-);
+];
 
 // loop through each element of $unexpected_inputs to check the behavior of array_map
 for($count = 0; $count < count($unexpected_inputs); $count++) {
   echo "-- Iteration ".($count + 1)." --\n";
-  var_dump( array_map('callback', $unexpected_inputs[$count]));
+  var_dump( array_map(fun('callback'), $unexpected_inputs[$count]));
 };
 
 fclose($fp);
 echo "Done";
-?>
+}

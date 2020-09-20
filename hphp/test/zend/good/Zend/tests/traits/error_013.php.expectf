@@ -1,2 +1,1 @@
-
-Fatal error: %s
+Fatal error: Trait use aliases cannot be declared `static` in %s/error_013.php on line 8

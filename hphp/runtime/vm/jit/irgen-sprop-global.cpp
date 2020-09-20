@@ -19,6 +19,8 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
+#include "hphp/runtime/vm/jit/irgen-types.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -34,6 +36,7 @@ void bindMem(IRGS& env, SSATmp* ptr, SSATmp* src) {
 }
 
 void destroyName(IRGS& env, SSATmp* name) {
+  if (env.irb->inUnreachableState()) return;
   assertx(name == topC(env));
   popDecRef(env);
 }
@@ -44,24 +47,80 @@ void destroyName(IRGS& env, SSATmp* name) {
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* ldClsPropAddrKnown(IRGS& env,
-                           const Class* cls,
-                           const StringData* name) {
+ClsPropLookup ldClsPropAddrKnown(IRGS& env,
+                                 const Class* cls,
+                                 const StringData* name,
+                                 bool ignoreLateInit) {
   initSProps(env, cls); // calls init; must be above sPropHandle()
   auto const slot = cls->lookupSProp(name);
   auto const handle = cls->sPropHandle(slot);
   assertx(!rds::isNormalHandle(handle));
-  auto const repoTy =
-    !RuntimeOption::RepoAuthoritative
-      ? RepoAuthType{}
-      : cls->staticPropRepoAuthType(slot);
-  auto const ptrTy = typeFromRAT(repoTy, curClass(env)).ptr(Ptr::SProp);
-  return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
+
+  auto const ctx = curClass(env);
+  auto const& prop = cls->staticProperties()[slot];
+
+  auto knownType = TCell;
+  if (RuntimeOption::EvalCheckPropTypeHints >= 3 &&
+      (!prop.typeConstraint.isUpperBound() ||
+       RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+    knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
+    if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
+  }
+  knownType &= typeFromRAT(prop.repoAuthType, ctx);
+  // Repo-auth-type doesn't include uninit for AttrLateInit props, so we need
+  // to add it after intersecting with it.
+  if (prop.attrs & AttrLateInit) {
+    // If we're ignoring AttrLateInit, the prop might be uninit, but if we're
+    // validating it, we'll never see uninit, so remove it.
+    if (ignoreLateInit) {
+      knownType |= TUninit;
+    } else {
+      knownType -= TUninit;
+    }
+  }
+
+  auto const ptrTy = knownType.ptr(Ptr::SProp);
+
+  auto const addr = [&]{
+    if (!(prop.attrs & AttrLateInit) || ignoreLateInit) {
+      return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
+    }
+
+    return cond(
+      env,
+      [&] (Block* taken) {
+        return gen(env, LdInitRDSAddr, RDSHandleData { handle }, taken, ptrTy);
+      },
+      [&] (SSATmp* addr) { return addr; },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(
+          env,
+          ThrowLateInitPropError,
+          cns(env, prop.cls.get()),
+          cns(env, name),
+          cns(env, true)
+        );
+        return cns(env, TBottom);
+      }
+    );
+  }();
+
+  return {
+    addr,
+    &prop.typeConstraint,
+    &prop.ubs,
+    slot,
+  };
+
   static_assert(sizeof(StaticPropData) == sizeof(TypedValue),
                 "StaticPropData expected to only wrap TypedValue");
 }
 
-SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
+ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
+                            SSATmp* ssaName, bool raise,
+                            bool ignoreLateInit,
+                            bool disallowConst) {
   assertx(ssaCls->isA(TCls));
   assertx(ssaName->isA(TStr));
 
@@ -78,164 +137,204 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
     auto const cls = ssaCls->clsVal();
 
     auto const lookup = cls->findSProp(curClass(env), propName);
-    return lookup.prop != kInvalidSlot && lookup.accessible;
+
+    if (lookup.slot == kInvalidSlot) return false;
+    if (!lookup.accessible) return false;
+    if (disallowConst && lookup.constant) return false;
+    return true;
   }();
 
   if (sPropKnown) {
-    return ldClsPropAddrKnown(env, ssaCls->clsVal(), ssaName->strVal());
+    auto const lookup = ldClsPropAddrKnown(
+      env,
+      ssaCls->clsVal(),
+      ssaName->strVal(),
+      ignoreLateInit
+    );
+    if (lookup.propPtr) return lookup;
   }
 
-  return gen(
+  auto const ctxClass = curClass(env);
+  auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
+  auto const propAddr = gen(
     env,
     raise ? LdClsPropAddrOrRaise : LdClsPropAddrOrNull,
     ssaCls,
     ssaName,
-    cns(env, curClass(env))
+    ctxTmp,
+    cns(env, ignoreLateInit),
+    cns(env, disallowConst)
   );
+  return { propAddr, nullptr, nullptr, kInvalidSlot };
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
+void emitCGetS(IRGS& env) {
+  auto const ssaCls      = topC(env);
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(CGetS-PropNameNotString);
-  }
+  if (!ssaPropName->isA(TStr)) PUNT(CGetS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(CGetS-NotClass);
 
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-  auto const unboxed  = gen(env, UnboxPtr, propAddr);
-  auto const ldMem    = gen(env, LdMem, unboxed->type().deref(), unboxed);
+  auto const propAddr  =
+    ldClsPropAddr(env, ssaCls, ssaPropName, true, false, false).propPtr;
+  auto const ldMem     = gen(env, LdMem, propAddr->type().deref(), propAddr);
 
+  discard(env);
   destroyName(env, ssaPropName);
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(IRGS& env, uint32_t slot) {
+void emitSetS(IRGS& env) {
+  auto const ssaCls      = topC(env, BCSPRelOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{2});
+
+  if (!ssaPropName->isA(TStr)) PUNT(SetS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(SetS-NotClass);
+
+  auto value  = popC(env, DataTypeCountness);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, true, true);
+
+  if (lookup.tc) {
+    verifyPropType(
+      env,
+      ssaCls,
+      lookup.tc,
+      lookup.ubs,
+      lookup.slot,
+      value,
+      ssaPropName,
+      true,
+      &value
+    );
+  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
+    value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value, cns(env, true));
+  }
+
+  discard(env);
+  destroyName(env, ssaPropName);
+  bindMem(env, lookup.propPtr, value);
+}
+
+void emitSetOpS(IRGS& env, SetOpOp op) {
+  auto const ssaCls      = topC(env, BCSPRelOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{2});
+
+  if (!ssaPropName->isA(TStr)) PUNT(SetOpS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(SetOpS-NotClass);
+
+  auto const rhs = popC(env);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, false,
+                                    true);
+
+  auto const lhs = gen(env, LdMem, lookup.propPtr->type().deref(),
+                       lookup.propPtr);
+
+  auto const finish = [&] (SSATmp* value) {
+    if (lookup.tc) {
+      verifyPropType(
+        env,
+        ssaCls,
+        lookup.tc,
+        lookup.ubs,
+        lookup.slot,
+        value,
+        ssaPropName,
+        true,
+        &value
+      );
+    } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+      auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
+      value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value,
+                  cns(env, true));
+    }
+
+    discard(env);
+    destroyName(env, ssaPropName);
+    pushIncRef(env, value);
+    gen(env, StMem, lookup.propPtr, value);
+    decRef(env, lhs);
+    decRef(env, rhs);
+  };
+
+  if (auto value = inlineSetOp(env, op, lhs, rhs)) {
+    finish(value);
+  } else {
+    // Handle cases not performed inline.
+    finish(gen(env, OutlineSetOp, SetOpData{op}, lhs, rhs));
+  }
+}
+
+void emitIssetS(IRGS& env) {
+  auto const ssaCls      = topC(env);
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(SetS-PropNameNotString);
-  }
-
-  auto const value    = popC(env, DataTypeCountness);
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-  auto const ptr      = gen(env, UnboxPtr, propAddr);
-
-  destroyName(env, ssaPropName);
-  bindMem(env, ptr, value);
-}
-
-void emitVGetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(VGetS-PropNameNotString);
-  }
-
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-
-  destroyName(env, ssaPropName);
-  auto const val = gen(
-    env,
-    LdMem,
-    TBoxedInitCell,
-    gen(env, BoxPtr, propAddr)
-  );
-  pushIncRef(env, val);
-}
-
-void emitBindS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
-
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(BindS-PropNameNotString);
-  }
-
-  auto const value    = popV(env);
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-
-  destroyName(env, ssaPropName);
-  bindMem(env, propAddr, value);
-}
-
-void emitIssetS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(IssetS-PropNameNotString);
-  }
-  auto const ssaCls = takeClsRef(env, slot);
+  if (!ssaPropName->isA(TStr)) PUNT(IssetS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(IssetS-NotClass);
 
   auto const ret = cond(
     env,
     [&] (Block* taken) {
-      auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
+      auto const propAddr =
+        ldClsPropAddr(env, ssaCls, ssaPropName, false, true, false).propPtr;
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
-      return gen(env, IsNTypeMem, TNull, gen(env, UnboxPtr, ptr));
+      return gen(env, IsNTypeMem, TNull, ptr);
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(env, false);
     }
   );
 
+  discard(env);
   destroyName(env, ssaPropName);
   push(env, ret);
 }
 
-void emitEmptyS(IRGS& env, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(EmptyS-PropNameNotString);
-  }
+void emitIncDecS(IRGS& env, IncDecOp subop) {
+  auto const ssaCls      = topC(env);
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
-  auto const ssaCls = takeClsRef(env, slot);
-  auto const ret = cond(
-    env,
-    [&] (Block* taken) {
-      auto propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, false);
-      return gen(env, CheckNonNull, taken, propAddr);
-    },
-    [&] (SSATmp* ptr) {
-      auto const unbox = gen(env, UnboxPtr, ptr);
-      auto const val   = gen(env, LdMem, unbox->type().deref(), unbox);
-      return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
-    },
-    [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
-      return cns(env, true);
-    });
+  if (!ssaPropName->isA(TStr)) PUNT(IncDecS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(IncDecS-NotClass);
 
-  destroyName(env, ssaPropName);
-  push(env, ret);
-}
-
-void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
-  auto const ssaPropName = topC(env);
-
-  if (!ssaPropName->isA(TStr)) {
-    PUNT(IncDecS-PropNameNotString);
-  }
-
-  auto const ssaCls   = takeClsRef(env, slot);
-  auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
-  auto const unboxed  = gen(env, UnboxPtr, propAddr);
-  auto const oldVal   = gen(env, LdMem, unboxed->type().deref(), unboxed);
+  auto const lookup  =
+    ldClsPropAddr(env, ssaCls, ssaPropName, true, false, true);
+  auto const oldVal =
+    gen(env, LdMem, lookup.propPtr->type().deref(), lookup.propPtr);
 
   auto const result = incDec(env, subop, oldVal);
   if (!result) PUNT(IncDecS);
+  assertx(result->isA(TUncounted));
+  assertx(!result->type().maybe(TClsMeth));
 
+  if (lookup.tc) {
+    verifyPropType(
+      env,
+      ssaCls,
+      lookup.tc,
+      lookup.ubs,
+      lookup.slot,
+      result,
+      ssaPropName,
+      true
+    );
+  } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+    auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
+    gen(env, VerifyPropAll, ssaCls, slot, result, cns(env, true));
+  }
+
+  discard(env);
   destroyName(env, ssaPropName);
   pushIncRef(env, isPre(subop) ? result : oldVal);
 
   // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
   updateMarker(env);
 
-  gen(env, StMem, unboxed, result);
+  gen(env, StMem, lookup.propPtr, result);
   gen(env, IncRef, result);
   decRef(env, oldVal);
 }
@@ -243,26 +342,17 @@ void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCGetG(IRGS& env) {
-  auto const exit = makeExitSlow(env);
   auto const name = topC(env);
   if (!name->isA(TStr)) PUNT(CGetG-NonStrName);
-  auto const ptr = gen(env, LdGblAddr, exit, name);
-  destroyName(env, name);
-  pushIncRef(
-    env,
-    gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr))
-  );
-}
-
-void emitCGetQuietG(IRGS& env) {
-  auto const name = topC(env);
-  if (!name->isA(TStr)) PUNT(CGetQuietG-NonStrName);
 
   auto ret = cond(
     env,
-    [&] (Block* taken) { return gen(env, LdGblAddr, taken, name); },
+    [&] (Block* taken) {
+      auto const ptr = gen(env, LdGblAddr, name);
+      return gen(env, CheckNonNull, taken, ptr);
+    },
     [&] (SSATmp* ptr) {
-      auto tmp = gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr));
+      auto tmp = gen(env, LdMem, TCell, ptr);
       gen(env, IncRef, tmp);
       return tmp;
     },
@@ -275,33 +365,13 @@ void emitCGetQuietG(IRGS& env) {
   push(env, ret);
 }
 
-void emitVGetG(IRGS& env) {
-  auto const name = topC(env);
-  if (!name->isA(TStr)) PUNT(VGetG-NonStrName);
-  auto const ptr = gen(env, LdGblAddrDef, name);
-  destroyName(env, name);
-  pushIncRef(
-    env,
-    gen(env, LdMem, TBoxedInitCell, gen(env, BoxPtr, ptr))
-  );
-}
-
-void emitBindG(IRGS& env) {
-  auto const name = topC(env, BCSPRelOffset{1});
-  if (!name->isA(TStr)) PUNT(BindG-NameNotStr);
-  auto const box = popV(env);
-  auto const ptr = gen(env, LdGblAddrDef, name);
-  destroyName(env, name);
-  bindMem(env, ptr, box);
-}
-
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
   auto const value   = popC(env, DataTypeCountness);
-  auto const unboxed = gen(env, UnboxPtr, gen(env, LdGblAddrDef, name));
+  auto const ptr = gen(env, LdGblAddrDef, name);
   destroyName(env, name);
-  bindMem(env, unboxed, value);
+  bindMem(env, ptr, value);
 }
 
 void emitIssetG(IRGS& env) {
@@ -311,10 +381,11 @@ void emitIssetG(IRGS& env) {
   auto const ret = cond(
     env,
     [&] (Block* taken) {
-      return gen(env, LdGblAddr, taken, name);
+      auto const ptr = gen(env, LdGblAddr, name);
+      return gen(env, CheckNonNull, taken, ptr);
     },
     [&] (SSATmp* ptr) { // Next: global exists
-      return gen(env, IsNTypeMem, TNull, gen(env, UnboxPtr, ptr));
+      return gen(env, IsNTypeMem, TNull, ptr);
     },
     [&] { // Taken: global doesn't exist
       return cns(env, false);
@@ -324,55 +395,52 @@ void emitIssetG(IRGS& env) {
   push(env, ret);
 }
 
-void emitEmptyG(IRGS& env) {
-  auto const name = topC(env);
-  if (!name->isA(TStr)) PUNT(EmptyG-NameNotStr);
-
-  auto const ret = cond(
-    env,
-    [&] (Block* taken) {
-      return gen(env, LdGblAddr, taken, name);
-    },
-    [&] (SSATmp* ptr) { // Next: global exists
-      auto const unboxed = gen(env, UnboxPtr, ptr);
-      auto const val     = gen(env, LdMem, TCell, unboxed);
-      return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
-    },
-    [&] { // Taken: global doesn't exist
-      return cns(env, true);
-    });
-  destroyName(env, name);
-  push(env, ret);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitCheckProp(IRGS& env, const StringData* propName) {
-  auto const cctx = gen(env, LdCctx, fp(env));
-  auto const cls = gen(env, LdClsCtx, cctx);
+  auto const cls = ldCtxCls(env);
   auto const propInitVec = gen(env, LdClsInitData, cls);
 
   auto const ctx = curClass(env);
-  auto const idx = ctx->lookupDeclProp(propName);
+  auto const slot = ctx->lookupDeclProp(propName);
+  auto const idx = ctx->propSlotToIndex(slot);
 
-  auto const curVal = gen(env, LdElem, propInitVec,
-    cns(env, idx * sizeof(TypedValue)));
+  auto const curVal = gen(env, LdClsInitElem, IndexData{idx}, propInitVec);
   push(env, gen(env, IsNType, TUninit, curVal));
 }
 
 void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
-  auto const val = popC(env);
+  auto val = popC(env);
   auto const ctx = curClass(env);
 
   SSATmp* base;
-  Slot idx = 0;
+  uint32_t idx = 0;
   switch (op) {
   case InitPropOp::Static:
     {
       // For sinit, the context class is always the same as the late-bound
       // class, so we can just use curClass().
-      auto const handle = ctx->sPropHandle(ctx->lookupSProp(propName));
+      auto const slot = ctx->lookupSProp(propName);
+      assertx(slot != kInvalidSlot);
+      auto const handle = ctx->sPropHandle(slot);
       assertx(!rds::isNormalHandle(handle));
+
+      auto const& prop = ctx->staticProperties()[slot];
+      assertx(!(prop.attrs & AttrSystemInitialValue));
+      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+        verifyPropType(
+          env,
+          cns(env, ctx),
+          &prop.typeConstraint,
+          &prop.ubs,
+          slot,
+          val,
+          cns(env, propName),
+          true,
+          &val
+        );
+      }
+
       base = gen(
         env,
         LdRDSAddr,
@@ -380,21 +448,40 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         TPtrToSPropCell
       );
     }
+
+    gen(env, StMem, base + idx * sizeof(TypedValue), val);
+
     break;
 
   case InitPropOp::NonStatic:
     {
       // The above is not the case for pinit, so we need to load.
-      auto const cctx = gen(env, LdCctx, fp(env));
-      auto const cls = gen(env, LdClsCtx, cctx);
+      auto const cls = ldCtxCls(env);
+
+      const auto slot = ctx->lookupDeclProp(propName);
+      idx = ctx->propSlotToIndex(slot);
+      auto const& prop = ctx->declProperties()[slot];
+      assertx(!(prop.attrs & AttrSystemInitialValue));
+      if (!(prop.attrs & AttrInitialSatisfiesTC)) {
+        verifyPropType(
+          env,
+          cls,
+          &prop.typeConstraint,
+          &prop.ubs,
+          slot,
+          val,
+          cns(env, propName),
+          false,
+          &val
+        );
+      }
 
       base = gen(env, LdClsInitData, cls);
-      idx = ctx->lookupDeclProp(propName);
+
+      gen(env, StClsInitElem, IndexData{idx}, base, val);
     }
     break;
   }
-
-  gen(env, StElem, base, cns(env, idx * sizeof(TypedValue)), val);
 }
 
 //////////////////////////////////////////////////////////////////////

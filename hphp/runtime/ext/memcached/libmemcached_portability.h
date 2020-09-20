@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_
-#define incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_
+#pragma once
 
 #include <libmemcached/memcached.h>
 
@@ -60,4 +59,3 @@
 
 #endif
 
-#endif // incl_HPHP_EXT_LIBMEMCACHED_PORTABILITY_H_

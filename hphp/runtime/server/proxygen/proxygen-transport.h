@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROXYGEN_SERVER_TRANSPORT_H_
-#define incl_HPHP_PROXYGEN_SERVER_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 #include <algorithm>
@@ -24,11 +23,11 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
-#include <thrift/lib/cpp/async/TAsyncTransport.h>
 #include <folly/IntrusiveList.h>
 #include <folly/IPAddress.h>
 
 namespace HPHP {
+struct HPHPWorkerThread;
 struct ProxygenServer;
 struct ProxygenTransport;
 
@@ -101,7 +100,7 @@ struct ProxygenTransport final
   , std::enable_shared_from_this<ProxygenTransport>
   , Synchronizable
 {
-  explicit ProxygenTransport(ProxygenServer *server);
+  explicit ProxygenTransport(ProxygenServer *server, HPHPWorkerThread *worker);
   ~ProxygenTransport() override;
 
   ///////////////////////////////////////////////////////////////////////////
@@ -155,7 +154,7 @@ struct ProxygenTransport final
    * Get request header(s).
    */
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap &headers) override;
+  const HeaderMap& getHeaders() override;
 
   /**
    * Get a description of the type of transport.
@@ -301,12 +300,29 @@ struct ProxygenTransport final
 
   void setShouldRepost(bool shouldRepost) { m_shouldRepost = shouldRepost; }
 
- private:
-  bool bufferRequest() const;
+  void trySetMaxThreadCount(int max) override;
+
+  void setMaxPost(int64_t maxPost, int64_t maxBuffer) {
+    m_maxPost = maxPost;
+    m_bodyLengthPastLimit = maxBuffer;
+  }
+
+  folly::SocketAddress getClientAddress() {
+    return m_clientAddress;
+  }
+
+
+  // Pending transport list methods.
+  bool is_linked() const {
+    return m_listHook.is_linked();
+  }
 
   void unlink() {
     m_listHook.unlink();
   }
+
+ private:
+  bool bufferRequest() const;
 
   void sendErrorResponse(uint32_t code) noexcept;
 
@@ -316,17 +332,21 @@ struct ProxygenTransport final
     notify();
   }
 
+  bool handlePOST(const proxygen::HTTPHeaders& headers);
+
   proxygen::HTTPTransaction* getTransaction(
     uint64_t id, proxygen::HTTPMessage **msg, bool newPushOk);
 
   // Tracks HTTPTransaction's reference to this object
   std::shared_ptr<ProxygenTransport> m_transactionReference;
   ProxygenServer *m_server;
+  HPHPWorkerThread *m_worker;
   proxygen::HTTPTransaction *m_clientTxn{nullptr}; // locked
   folly::SocketAddress m_clientAddress;
   std::string m_addressStr;
   std::unique_ptr<proxygen::HTTPMessage> m_request;
   size_t m_requestBodyLength{0};
+  int64_t m_bodyLengthPastLimit{128 * 1024};
 
   // There are two modes of operation for reading POST bodies.  When
   // RequestBodyReadLimit is set, the request is enqueued for a worker thread
@@ -359,6 +379,7 @@ struct ProxygenTransport final
   int64_t m_nextPushId{1};
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   bool m_egressError{false};
+  int64_t m_maxPost{-1};
 
  public:
   // List of ProxygenTransport not yet handed to the server will sit
@@ -381,4 +402,3 @@ using ProxygenTransportList =
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

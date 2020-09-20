@@ -1,0 +1,6 @@
+File "namespace_aliasing4.php", line 18, characters 16-26:
+Invalid argument (Typing[4110])
+File "namespace_aliasing4.php", line 21, characters 23-25:
+Expected `int`
+File "namespace_aliasing4.php", line 4, characters 19-24:
+But got `string`

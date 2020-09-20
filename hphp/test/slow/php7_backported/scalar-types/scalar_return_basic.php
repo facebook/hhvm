@@ -1,21 +1,15 @@
-<?php
-
-require 'fix_exceptions.inc';
-
-$functions = [
+<?hh
+class Stringable { public function __toString() { return "foobar"; } }
+<<__EntryPoint>> function main(): void {
+require 'fix_exceptions.inc'; fix_exceptions();
+$functions = darray[
     'int' => function ($i): int { return $i; },
     'float' => function ($f): float { return $f; },
     'string' => function ($s): string { return $s; },
     'bool' => function ($b): bool { return $b; }
 ];
 
-class Stringable {
-    public function __toString() {
-        return "foobar";
-    }
-}
-
-$values = [
+$values = varray[
     1,
     "1",
     1.0,
@@ -28,7 +22,7 @@ $values = [
     TRUE,
     FALSE,
     NULL,
-    [],
+    varray[],
     new StdClass,
     new Stringable,
     fopen("data:text/plain,foobar", "r")
@@ -48,4 +42,4 @@ foreach ($functions as $type => $function) {
 }
 
 echo PHP_EOL . "Done";
-?>
+}

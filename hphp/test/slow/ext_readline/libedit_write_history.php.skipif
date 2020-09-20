@@ -1,5 +1,6 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 if (READLINE_LIB !== "libedit") {
   die("skip");
+}
 }

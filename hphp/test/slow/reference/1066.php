@@ -1,11 +1,16 @@
-<?php
+<?hh
 
-$a = 1;
- $b = &$a;
- $c = 2;
- $d = &$c;
- $b = $d;
- var_dump($a);
- var_dump($b);
- var_dump($c);
- var_dump($d);
+function run(inout $a, inout $b, inout $c, inout $d) {
+  $b = $d;
+  var_dump($a);
+  var_dump($b);
+  var_dump($c);
+  var_dump($d);
+}
+
+<<__EntryPoint>>
+function main() {
+  $a = 1;
+  $c = 2;
+  run(inout $a, inout $a, inout $c, inout $c);
+}

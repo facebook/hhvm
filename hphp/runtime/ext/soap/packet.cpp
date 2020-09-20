@@ -15,12 +15,12 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/soap/packet.h"
-
-#include <memory>
 #include "hphp/runtime/ext/soap/ext_soap.h"
-#include "hphp/util/hash-map-typedefs.h"
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/system/systemlib.h"
+#include <memory>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   int soap_version = SOAP_1_1;
   sdlSoapBindingFunctionHeaderMap *hdrs = nullptr;
 
-  assert(return_value.asTypedValue()->m_type == KindOfUninit);
+  assertx(return_value.asTypedValue()->m_type == KindOfUninit);
   return_value.asTypedValue()->m_type = KindOfNull;
 
   /* Response for one-way opearation */
@@ -270,7 +270,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   }
 
   /* Parse content of <Body> element */
-  return_value = Array::Create();
+  return_value = Array::CreateDArray();
   resp = body->children;
   while (resp != nullptr && resp->type != XML_ELEMENT_NODE) {
     resp = resp->next;
@@ -352,7 +352,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
               tmp = master_to_zval(encodePtr(), val);
             }
           }
-          return_value.toArrRef().set(String(param->paramName), tmp);
+          return_value.asArrRef().set(String(param->paramName), tmp);
           param_count++;
         }
       }
@@ -369,24 +369,23 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
             Variant tmp = master_to_zval(encodePtr(), val);
             if (val->name) {
               String key((char*)val->name, CopyString);
-              if (return_value.toCArrRef().exists(key)) {
-                auto const lval = return_value.toArrRef().lvalAt(key).unboxed();
+              if (return_value.asCArrRef().exists(key)) {
+                auto const lval = return_value.asArrRef().lval(key);
                 if (!isArrayLikeType(lval.type())) {
-                  auto const tv = make_tv<KindOfArray>(
+                  auto const tv = make_array_like_tv(
                     tvCastToArrayLikeData(lval.tv())
                   );
-                  cellMove(tv, lval);
+                  tvMove(tv, lval);
                 }
                 asArrRef(lval).append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {
-                Array arr = Array::Create();
-                arr.append(tmp);
-                return_value.toArrRef().set(key, arr);
+                Array arr = make_varray(tmp);
+                return_value.asArrRef().set(key, arr);
               } else {
-                return_value.toArrRef().set(key, tmp);
+                return_value.asArrRef().set(key, tmp);
               }
             } else {
-              return_value.toArrRef().append(tmp);
+              return_value.asArrRef().append(tmp);
             }
             ++param_count;
           }

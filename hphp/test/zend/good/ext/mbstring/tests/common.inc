@@ -1,13 +1,13 @@
-<?php
+<?hh
 /*
  * Common definition and Settings
  */
 
 // Custom Error Hanlder for testing
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	global $debug;
+
 	
-	$err_type = array (
+	$err_type = darray [
 				1	=> "Error",			// E_ERROR
 				2	=> "Warning",			// E_WARINING
 				4	=> "Parsing Error",	// E_PARSE
@@ -21,9 +21,9 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 				1024=> "User Notice",		// E_USER_NOTICE
 				2048=> "Strict Notice",      // E_STRICT
 				4096=> "Catchable fatal error",      // E_RECOVERABLE_ERROR
-				);
+				];
 	
-	if (!empty($debug)) {
+	if (ZendGoodExtMbstringTestsCommonInc::$debug) {
 		printf("%s: %s (%d)\n", $err_type[$err_no], $err_msg, $linenum);
 	}
 	else {
@@ -31,18 +31,21 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	}
 }
 
-set_error_handler('test_error_handler');
-
+function set_custom_error_handler() {
+	set_error_handler('test_error_handler');
+}
 
 // Var def for testing
-$t_ary = array(
-		's1' => 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó',
+function t_ary() {
+	return darray[
+		's1' => 'ï¿½ï¿½ï¿½Ü¸ï¿½EUC-JPï¿½ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½',
 		's2' => 'English Text'
-		);
+		];
+}
 
 class tc
 {
-	public $s1 = 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó';
+	public $s1 = 'ï¿½ï¿½ï¿½Ü¸ï¿½EUC-JPï¿½ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½';
 	public $s2 = 'English Text';
 
 	function tc() 
@@ -50,6 +53,10 @@ class tc
 	}
 }
 
-$t_obj = new tc;
+function t_obj() {
+	return new tc;
+}
 
-?>
+abstract final class ZendGoodExtMbstringTestsCommonInc {
+  public static $debug;
+}

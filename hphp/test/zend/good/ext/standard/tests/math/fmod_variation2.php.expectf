@@ -1,96 +1,106 @@
 *** Testing fmod() : usage variations ***
 
 -- Iteration 1 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 2 --
-float(0)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 3 --
-float(6)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 4 --
-float(1516)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 5 --
-float(123456)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 6 --
-float(7.5)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 7 --
-float(7.5)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 8 --
-float(123456)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 9 --
-float(2.3605615109341E-10)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 10 --
-float(0)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 11 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 12 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 13 --
-float(0)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 14 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 15 --
-float(0)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 16 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 17 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 18 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 19 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 20 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 21 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 22 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 23 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 24 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 25 --
-float(NAN)
+
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 
 -- Iteration 26 --
 
-Warning: %s
-NULL
+Warning: fmod() expects parameter 1 to be double, integer given in %s/zend/good/ext/standard/tests/math/fmod_variation2.php on line 79
 ===Done===

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ASM_INFO_H_
-#define incl_HPHP_JIT_ASM_INFO_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -327,4 +326,3 @@ struct AsmInfo {
 
 }}
 
-#endif

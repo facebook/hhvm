@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 $doc = new DOMDocument;
 
 $node = $doc->createElement("para");
@@ -10,5 +10,4 @@ $test_attribute = $doc->createAttribute("hahaha");
 $node->appendChild($test_attribute);
 
 echo $doc->saveXML();
-
-?>
+}

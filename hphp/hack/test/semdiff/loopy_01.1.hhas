@@ -1,7 +1,0 @@
-# looping test
-# this one is expected to fail, even though it's an equivalence
-# since we mess with the stack on one side and not the other
-.main {
-  L0:
-  Jmp L0
-}

@@ -1,12 +1,9 @@
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(2)
-  [1]=>
   int(3)
 }

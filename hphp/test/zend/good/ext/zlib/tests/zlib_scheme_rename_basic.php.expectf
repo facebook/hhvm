@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: Can't rename a file on different streams in %s/zlib_scheme_rename_basic.php on line 4
 bool(true)
 ===DONE===

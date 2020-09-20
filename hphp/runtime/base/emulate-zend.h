@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EMULATE_ZEND_H_
-#define incl_HPHP_EMULATE_ZEND_H_
+#pragma once
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,4 +23,3 @@ int emulate_zend(int argc, char **argv);
 
 }
 
-#endif // incl_HPHP_PROGRAM_FUNCTIONS_H_

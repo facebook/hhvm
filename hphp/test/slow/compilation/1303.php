@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function checker($x) {
   $msg = foo();
@@ -9,3 +9,5 @@ function checker($x) {
   $x = @$x['b'];
   return $a - $b + $x;
 }
+
+<<__EntryPoint>> function main(): void { echo "Done.\n"; }

@@ -1,10 +1,18 @@
-<?php
+<?hh
 /* Prototype  : proto array mb_split(string pattern, string string [, int limit])
- * Description: split multibyte string into array by regular expression 
+ * Description: split multibyte string into array by regular expression
  * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "UTF-8";
+  }
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing mb_split() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -15,14 +23,6 @@ $string = 'string_val';
 $unset_var = 10;
 unset ($unset_var);
 
-// get a class
-class classA
-{
-  public function __toString() {
-    return "UTF-8";
-  }
-}
-
 // heredoc string
 $heredoc = <<<EOT
 UTF-8
@@ -32,7 +32,7 @@ EOT;
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $encoding argument
-$inputs = array(
+$inputs = varray[
 
        // int data
 /*1*/  0,
@@ -56,7 +56,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -65,7 +65,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -77,17 +77,17 @@ $inputs = array(
 
        // resource variable
 /*24*/ $fp
-);
+];
 
 // loop through each element of the array for pattern
 
 $iterator = 1;
 foreach($inputs as $input) {
       echo "\n-- Iteration $iterator --\n";
-      var_dump( mb_split($pattern, $string, $input) );
+      try { var_dump( mb_split($pattern, $string, $input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       $iterator++;
 };
 
 fclose($fp);
 echo "Done";
-?>
+}

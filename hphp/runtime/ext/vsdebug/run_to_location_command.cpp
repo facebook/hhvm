@@ -31,9 +31,8 @@ RunToLocationCommand::RunToLocationCommand(
 RunToLocationCommand::~RunToLocationCommand() {
 }
 
-bool RunToLocationCommand::executeImpl(
-  DebuggerSession* session,
-  folly::dynamic* responseMsg
+bool RunToLocationCommand::executeImpl(DebuggerSession* session,
+                                       folly::dynamic* /*responseMsg*/
 ) {
   folly::dynamic& message = getMessage();
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
@@ -63,7 +62,7 @@ bool RunToLocationCommand::executeImpl(
   }
 
   // See if there's already a breakpoint at this file + line.
-  const auto bpIds = bpMgr->getBreakpointIdsByFile(path);
+  const auto bpIds = bpMgr->getBreakpointIdsForPath(path);
   for (auto it = bpIds.begin(); it != bpIds.end(); it++) {
     Breakpoint* bp = bpMgr->getBreakpointById(*it);
     if (bp->m_line == line) {
@@ -75,7 +74,8 @@ bool RunToLocationCommand::executeImpl(
 
   // Find a compilation unit to place a temp bp in.
   HPHP::String unitPath(path.c_str());
-  const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr);
+  const auto compilationUnit = lookupUnit(unitPath.get(), "", nullptr,
+                                          Native::s_noNativeFuncs, false);
   if (compilationUnit == nullptr) {
     throw DebuggerCommandException(
       "Could not find a loaded compilation unit to run to location in!"
@@ -97,7 +97,7 @@ bool RunToLocationCommand::executeImpl(
     );
   }
 
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
   ri->m_runToLocationInfo.path = path;
   ri->m_runToLocationInfo.line = line;
 

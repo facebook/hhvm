@@ -5,3 +5,4 @@
 
 1
 2345
+Warning: unlink() expects parameter 1 to be string, resource given in %s/bug46426.php on line 21

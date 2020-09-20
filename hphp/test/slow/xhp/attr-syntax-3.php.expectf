@@ -1,0 +1,1 @@
+Fatal error: `->:` operator is not allowed in write context in %s/test/slow/xhp/attr-syntax-3.php on line 11

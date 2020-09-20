@@ -1,12 +1,11 @@
+
 *** Testing error conditions ***
 
 -- Testing is_callable() function with less than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: is_callable() expects at least 1 parameter, 0 given in %s/is_callable_error.php on line 10
 
 -- Testing is_callable() function with more than expected no. of arguments --
 
-Warning: %s
-NULL
+Warning: is_callable_with_name() expects exactly 3 parameters, 4 given in %s/is_callable_error.php on line 14
 ===DONE===

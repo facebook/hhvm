@@ -1,0 +1,32 @@
+File "explicit_generics.php", line 7, characters 3-11:
+Generic type parameter `T` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 4, characters 35-35:
+Definition is here
+File "explicit_generics.php", line 8, characters 3-11:
+Generic type parameter `T2` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 5, characters 39-40:
+Definition is here
+File "explicit_generics.php", line 10, characters 16-16:
+Generic type parameter `T2` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 5, characters 39-40:
+Definition is here
+File "explicit_generics.php", line 28, characters 13-13:
+Generic type parameter `T` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 24, characters 25-25:
+Definition is here
+File "explicit_generics.php", line 29, characters 15-15:
+Generic type parameter `T` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 24, characters 25-25:
+Definition is here
+File "explicit_generics.php", line 17, characters 12-16:
+Generic type parameter `T` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 14, characters 41-41:
+Definition is here
+File "explicit_generics.php", line 18, characters 12-16:
+Generic type parameter `T2` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 15, characters 44-45:
+Definition is here
+File "explicit_generics.php", line 20, characters 21-21:
+Generic type parameter `T2` must be specified explicitly (Typing[4347])
+File "explicit_generics.php", line 15, characters 44-45:
+Definition is here

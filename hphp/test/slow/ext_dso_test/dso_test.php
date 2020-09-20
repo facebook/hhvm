@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 var_dump(17);
 var_dump(dso_test_world());
 
@@ -21,3 +21,4 @@ ini_set("dso_test.direction", 0);
 var_dump(dso_test_long());
 var_dump(dso_test_long());
 var_dump(dso_test_long());
+}

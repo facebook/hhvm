@@ -8,4 +8,8 @@ function f<T>(T $x, bool $b): int {
   return 1;
 }
 
+
+<<__EntryPoint>>
+function main_generic_1() {
 f(1, true);
+}

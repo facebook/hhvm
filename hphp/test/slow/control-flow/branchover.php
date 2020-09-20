@@ -13,7 +13,11 @@ function f($x) {
   return $x;
 }
 
+
+<<__EntryPoint>>
+function main_branchover() {
 for ($i = 0; $i < 20; $i++) {
   $y = f($i);
   var_dump($y);
+}
 }

@@ -9,5 +9,5 @@ int(0)
 bool(true)
 %unicode|string%(7) "Unknown"
 
-Warning: %s
+Warning: File exists in %s/007_variation7.php on line 36
 *** Done ***

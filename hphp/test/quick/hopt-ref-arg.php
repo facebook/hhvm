@@ -1,12 +1,15 @@
 <?hh
 
-function run(&$a) {
-  $b =& $a;
-
+function set(inout $b) {
   $b = 3;
-  return $a;
 }
 
+function run(inout $a) {
+  set(inout $a);
+  return $a;
+}
+<<__EntryPoint>> function main(): void {
 $a = 5;
-run($a);
+run(inout $a);
 var_dump($a);
+}

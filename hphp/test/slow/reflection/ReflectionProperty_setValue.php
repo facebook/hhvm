@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 class cls {
   static public $foo = 24;
   public $bar = 42;
 }
-
+<<__EntryPoint>> function main(): void {
 $obj = new cls;
 
 // Static property $foo
@@ -29,4 +29,4 @@ var_dump($barRef->getValue($obj));
 var_dump($barRef->getValue()); //fail
 var_dump($barRef->getValue("foo")); //fail
 var_dump($barRef->getValue(1, 2)); //fail
-
+}

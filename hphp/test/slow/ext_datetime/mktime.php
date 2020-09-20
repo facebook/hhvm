@@ -1,12 +1,15 @@
-<?php
-
-$lastday = mktime(0, 0, 0, 3, 0, 2000);
-var_dump(strftime("Last day in Feb 2000 is: %d", $lastday));
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; }
 }
+
+
+<<__EntryPoint>>
+function main_mktime() {
+$lastday = mktime(0, 0, 0, 3, 0, 2000);
+var_dump(strftime("Last day in Feb 2000 is: %d", $lastday));
 
 /**
  * We are not supporting negative parameters
@@ -24,3 +27,4 @@ VS(date("M-d-Y", mktime(0, 0, 0, 1, 1, 2100)),   "Jan-01-2100");
 VS(date("M-d-Y", mktime(0, 0, 0, 1, 1, 110)),    "Jan-01-0110");
 
 VS(date("h", mktime(9)), "09");
+}

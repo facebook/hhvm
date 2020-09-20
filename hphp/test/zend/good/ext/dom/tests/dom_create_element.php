@@ -1,5 +1,5 @@
-<?php
-
+<?hh
+<<__EntryPoint>> function main(): void {
 print " 1 DOMDocument::createElement('valid')\n";
 try {
     $dom = new domDocument;
@@ -312,7 +312,4 @@ try {
 } catch (Exception $e) {
     print $e->getMessage() . "\n";
 }
-
-
-
-?>
+}

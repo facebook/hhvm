@@ -1,25 +1,22 @@
 ====================================================
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -29,11 +26,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -41,7 +38,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -51,11 +48,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -63,7 +60,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -73,21 +70,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(0) {
+varray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -95,31 +97,23 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
+bool(true)
+bool(false)
+bool(true)
+====================================================
+darray(0) {
+}
+darray(0) {
+}
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
-====================================================
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
 bool(true)
-bool(false)
-bool(false)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -127,7 +121,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -137,11 +131,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -149,7 +143,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -159,26 +153,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 vec(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -188,19 +182,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 dict(3) {
   [10]=>
@@ -210,7 +204,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -220,9 +214,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 dict(3) {
   ["a"]=>
@@ -232,7 +226,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -242,19 +236,16 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -264,25 +255,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -298,17 +283,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -316,7 +298,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -332,17 +314,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -350,7 +329,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -366,19 +345,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -388,25 +364,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -422,19 +392,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -444,17 +411,14 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -462,7 +426,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -478,17 +442,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -496,7 +457,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -512,19 +473,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -534,14 +492,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 vec(3) {
@@ -549,7 +504,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -565,19 +520,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -587,14 +539,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 dict(3) {
@@ -605,7 +554,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -621,14 +570,11 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 dict(3) {
@@ -639,7 +585,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -655,9 +601,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -665,9 +611,9 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -677,9 +623,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -687,15 +633,12 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -711,9 +654,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -721,7 +664,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -729,7 +672,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -745,9 +688,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -755,7 +698,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -763,7 +706,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -779,9 +722,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -789,9 +732,9 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -801,9 +744,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -811,15 +754,12 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -835,9 +775,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -845,9 +785,9 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -857,9 +797,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -867,7 +807,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -875,7 +815,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -891,9 +831,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -901,7 +841,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -909,7 +849,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -925,9 +865,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -937,7 +877,7 @@ array(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -947,9 +887,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -962,7 +902,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -978,9 +918,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -990,7 +930,7 @@ array(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1000,9 +940,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1018,7 +958,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1034,9 +974,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1052,7 +992,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1068,9 +1008,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1078,9 +1018,9 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1090,9 +1030,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1100,15 +1040,12 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1124,9 +1061,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1134,7 +1071,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1142,7 +1079,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1158,9 +1095,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1168,7 +1105,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1176,7 +1113,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1186,9 +1123,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1196,9 +1133,9 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1208,9 +1145,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1218,7 +1155,18 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(6) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
   [0]=>
   string(1) "a"
   [1]=>
@@ -1226,25 +1174,11 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(6) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1252,9 +1186,9 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1264,9 +1198,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1274,7 +1208,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1282,7 +1216,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1298,9 +1232,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1308,7 +1242,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1316,7 +1250,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1326,9 +1260,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1338,7 +1272,7 @@ array(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1348,9 +1282,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1363,7 +1297,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1379,9 +1313,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1391,7 +1325,7 @@ array(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1401,43 +1335,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
-====================================================
-array(3) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-}
-dict(3) {
-  [10]=>
-  string(1) "a"
-  [20]=>
-  string(1) "b"
-  [30]=>
-  string(1) "c"
-}
-array(6) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
-bool(false)
-bool(false)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1446,60 +1346,6 @@ array(3) {
   int(789)
 }
 dict(3) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-}
-array(3) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-array(0) {
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-array(0) {
-}
-array(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1507,7 +1353,13 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(6) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
   [0]=>
   string(1) "a"
   [1]=>
@@ -1517,11 +1369,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
-}
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1529,7 +1379,15 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+dict(3) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
+}
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1539,21 +1397,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1561,31 +1424,13 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
 bool(false)
-bool(false)
-====================================================
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
 bool(true)
-bool(false)
-bool(false)
 ====================================================
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1593,7 +1438,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1603,11 +1448,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1615,7 +1460,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1625,26 +1470,109 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
+}
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(3) {
+  [10]=>
+  string(1) "a"
+  [20]=>
+  string(1) "b"
+  [30]=>
+  string(1) "c"
+}
+darray(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(3) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
+}
+darray(3) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
 }
 vec(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1654,19 +1582,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
 dict(3) {
   [10]=>
@@ -1676,7 +1604,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1686,9 +1614,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
 dict(3) {
   ["a"]=>
@@ -1698,7 +1626,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1708,19 +1636,16 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1730,25 +1655,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1764,17 +1683,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1782,7 +1698,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1798,17 +1714,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1816,7 +1729,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1832,19 +1745,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1854,25 +1764,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1888,19 +1792,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1910,17 +1811,14 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -1928,7 +1826,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1944,17 +1842,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -1962,7 +1857,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -1978,19 +1873,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2000,14 +1892,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 vec(3) {
@@ -2015,7 +1904,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2031,19 +1920,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2053,14 +1939,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 dict(3) {
@@ -2071,7 +1954,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2087,14 +1970,11 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 dict(3) {
@@ -2105,7 +1985,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2121,29 +2001,26 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2153,11 +2030,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2165,7 +2042,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2175,11 +2052,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2187,7 +2064,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2197,21 +2074,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(0) {
+varray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2219,31 +2101,23 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
+bool(true)
+bool(false)
+bool(true)
+====================================================
+darray(0) {
+}
+darray(0) {
+}
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
-====================================================
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
 bool(true)
-bool(false)
-bool(false)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2251,7 +2125,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2261,11 +2135,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2273,7 +2147,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2283,26 +2157,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 vec(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2312,19 +2186,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 dict(3) {
   [10]=>
@@ -2334,7 +2208,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2344,9 +2218,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(0) {
+darray(0) {
 }
 dict(3) {
   ["a"]=>
@@ -2356,7 +2230,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2366,9 +2240,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2376,9 +2250,9 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2388,9 +2262,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2398,15 +2272,12 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2422,9 +2293,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2432,7 +2303,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2440,7 +2311,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2456,9 +2327,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2466,7 +2337,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2474,7 +2345,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2490,9 +2361,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2500,9 +2371,9 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2512,9 +2383,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2522,15 +2393,12 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2546,9 +2414,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2556,9 +2424,9 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2568,9 +2436,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2578,7 +2446,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2586,7 +2454,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2602,9 +2470,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2612,7 +2480,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2620,7 +2488,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2636,9 +2504,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2648,7 +2516,7 @@ array(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2658,9 +2526,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2673,7 +2541,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2689,9 +2557,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2701,7 +2569,7 @@ array(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2711,9 +2579,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2729,7 +2597,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2745,9 +2613,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2763,7 +2631,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -2779,9 +2647,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2789,9 +2657,9 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2801,9 +2669,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2811,15 +2679,12 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2835,9 +2700,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2845,7 +2710,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2853,7 +2718,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2869,9 +2734,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2879,7 +2744,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2887,7 +2752,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2897,9 +2762,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2907,9 +2772,9 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2919,9 +2784,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2929,7 +2794,18 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(6) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
   [0]=>
   string(1) "a"
   [1]=>
@@ -2937,25 +2813,11 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(6) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2963,9 +2825,9 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2975,9 +2837,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -2985,7 +2847,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -2993,7 +2855,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3009,9 +2871,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3019,7 +2881,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3027,7 +2889,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3037,9 +2899,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3049,7 +2911,7 @@ array(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3059,9 +2921,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3074,7 +2936,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3090,9 +2952,9 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3102,7 +2964,7 @@ array(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3112,43 +2974,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
-====================================================
-array(3) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-}
-dict(3) {
-  [10]=>
-  string(1) "a"
-  [20]=>
-  string(1) "b"
-  [30]=>
-  string(1) "c"
-}
-array(6) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
-bool(false)
-bool(false)
 ====================================================
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3157,60 +2985,6 @@ array(3) {
   int(789)
 }
 dict(3) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-}
-array(3) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-vec(0) {
-}
-array(0) {
-}
-array(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-vec(0) {
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-vec(0) {
-}
-array(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -3218,7 +2992,13 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(6) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
   [0]=>
   string(1) "a"
   [1]=>
@@ -3228,11 +3008,9 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
-vec(0) {
-}
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3240,7 +3018,15 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+dict(3) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
+}
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3250,21 +3036,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3272,31 +3063,13 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
-array(0) {
-}
-array(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-====================================================
-vec(0) {
-}
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -3304,7 +3077,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3314,11 +3087,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3326,7 +3099,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3336,17 +3109,100 @@ array(3) {
 }
 bool(true)
 bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
 bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+darray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+darray(3) {
+  [10]=>
+  string(1) "a"
+  [20]=>
+  string(1) "b"
+  [30]=>
+  string(1) "c"
+}
+darray(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(true)
+====================================================
+vec(0) {
+}
+darray(3) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
+}
+darray(3) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
+}
+bool(true)
+bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
 vec(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
@@ -3355,7 +3211,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3365,17 +3221,17 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
@@ -3387,7 +3243,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3397,7 +3253,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(0) {
 }
@@ -3409,7 +3265,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3419,16 +3275,16 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3438,22 +3294,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3469,14 +3322,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -3484,7 +3337,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3500,14 +3353,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3515,7 +3368,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3531,16 +3384,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3550,22 +3403,19 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3581,16 +3431,16 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3600,14 +3450,14 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -3615,7 +3465,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3631,14 +3481,14 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3646,7 +3496,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3662,7 +3512,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
@@ -3671,7 +3521,7 @@ vec(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3681,7 +3531,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
@@ -3693,7 +3543,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3709,7 +3559,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
@@ -3718,7 +3568,7 @@ vec(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3728,7 +3578,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
@@ -3743,7 +3593,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3759,7 +3609,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 vec(3) {
   string(1) "a"
@@ -3774,7 +3624,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3790,29 +3640,26 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3822,11 +3669,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -3834,7 +3681,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3844,11 +3691,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3856,7 +3703,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3866,21 +3713,26 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(0) {
+varray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3888,31 +3740,23 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -3920,7 +3764,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3930,11 +3774,11 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3942,7 +3786,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -3952,17 +3796,17 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
 vec(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
@@ -3971,7 +3815,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -3981,17 +3825,17 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
 dict(0) {
 }
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
@@ -4003,7 +3847,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4013,7 +3857,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(0) {
 }
@@ -4025,7 +3869,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4035,7 +3879,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4045,9 +3889,9 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4057,7 +3901,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4067,15 +3911,12 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4091,7 +3932,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4101,7 +3942,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -4109,7 +3950,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4125,7 +3966,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4135,7 +3976,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4143,7 +3984,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4159,7 +4000,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4169,9 +4010,9 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4181,7 +4022,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4191,15 +4032,12 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4215,7 +4053,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4225,9 +4063,9 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4237,7 +4075,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4247,7 +4085,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -4255,7 +4093,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4271,7 +4109,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4281,7 +4119,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4289,7 +4127,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4305,7 +4143,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4317,7 +4155,7 @@ dict(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4327,7 +4165,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4342,7 +4180,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4358,7 +4196,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4370,7 +4208,7 @@ dict(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4380,7 +4218,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4398,7 +4236,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4414,7 +4252,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   [10]=>
@@ -4432,7 +4270,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(6) {
+darray(6) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -4448,7 +4286,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4458,9 +4296,9 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4470,7 +4308,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4480,15 +4318,12 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4504,7 +4339,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4514,7 +4349,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -4522,7 +4357,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4538,7 +4373,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4548,7 +4383,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4556,7 +4391,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4566,7 +4401,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4576,9 +4411,9 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+varray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4588,7 +4423,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4598,7 +4433,18 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+varray(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+darray(6) {
+  ["a"]=>
+  int(123)
+  ["b"]=>
+  int(456)
+  ["c"]=>
+  int(789)
   [0]=>
   string(1) "a"
   [1]=>
@@ -4606,23 +4452,9 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-array(6) {
-  ["a"]=>
-  int(123)
-  ["b"]=>
-  int(456)
-  ["c"]=>
-  int(789)
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4632,9 +4464,9 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4644,7 +4476,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4654,7 +4486,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   [10]=>
   string(1) "a"
   [20]=>
@@ -4662,7 +4494,7 @@ array(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4678,7 +4510,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4688,7 +4520,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4696,7 +4528,7 @@ array(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4706,7 +4538,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4718,7 +4550,7 @@ dict(3) {
 }
 vec(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4728,7 +4560,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4743,7 +4575,7 @@ vec(3) {
   string(1) "b"
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4759,7 +4591,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4771,7 +4603,7 @@ dict(3) {
 }
 dict(0) {
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4781,7 +4613,7 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4799,7 +4631,7 @@ dict(3) {
   [30]=>
   string(1) "c"
 }
-array(6) {
+darray(6) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4815,7 +4647,7 @@ array(6) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)
 ====================================================
 dict(3) {
   ["a"]=>
@@ -4833,7 +4665,7 @@ dict(3) {
   ["c"]=>
   int(789)
 }
-array(3) {
+darray(3) {
   ["a"]=>
   int(123)
   ["b"]=>
@@ -4843,4 +4675,4 @@ array(3) {
 }
 bool(true)
 bool(false)
-bool(false)
+bool(true)

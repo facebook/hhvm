@@ -1,0 +1,2 @@
+(11,3)-(11,8) Interface methods cannot be declared `final`
+(12,10)-(12,15) Interface methods cannot be declared `final`

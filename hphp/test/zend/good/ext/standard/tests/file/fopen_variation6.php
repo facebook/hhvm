@@ -1,12 +1,13 @@
-<?php
+<?hh
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
  * Description: Open a file or a URL and return a file pointer 
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing fopen() : variation ***\n";
-$absfile = __FILE__.'.tmp';
+chdir(__SystemLib\hphp_test_tmproot());
+$absfile = __SystemLib\hphp_test_tmppath('fopen_variation6.php.tmp');
 $relfile = "fopen_variation6.tmp";
 
 $h = fopen($absfile, "w");
@@ -30,5 +31,5 @@ echo "\n";
 
 unlink($absfile);
 unlink($relfile);
-?>
-===DONE===
+echo "===DONE===\n";
+}

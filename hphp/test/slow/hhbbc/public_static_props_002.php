@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class B {
   static $x = 2;
@@ -19,4 +19,8 @@ function go() {
   var_dump(is_int($y));
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_002() {
 go();
+}

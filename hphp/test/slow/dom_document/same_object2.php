@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   $a = new DOMDocument;
@@ -17,4 +17,8 @@ function main() {
   $hash2 = spl_object_hash($o2);
   var_dump($hash1 !== $hash2);
 }
+
+<<__EntryPoint>>
+function main_same_object2() {
 main();
+}

@@ -1,0 +1,1 @@
+Fatal error: Record B may not inherit from non-abstract record A in %s/record-final-inherit.php on line 6

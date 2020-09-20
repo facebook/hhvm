@@ -1,0 +1,95 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {};
+  funs =
+  { "\\no_hint_async" ->
+    { fe_pos = [3:16-29];
+      fe_type =
+      (Rwitness (root|ret_from_kind.php line 3, characters 16-28),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|ret_from_kind.php line 3, characters 16-28),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rret_fun_kind (root|ret_from_kind.php line 3, characters 16-28),
+               (Tapply (([3:16-29], "\\HH\\Awaitable"),
+                  [(Rwitness (root|ret_from_kind.php line 3, characters 16-28),
+                    Tany)]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\no_hint_async_generator" ->
+    { fe_pos = [9:16-39];
+      fe_type =
+      (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|ret_from_kind.php line 9, characters 16-38),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rret_fun_kind (root|ret_from_kind.php line 9, characters 16-38),
+               (Tapply (([9:16-39], "\\HH\\AsyncGenerator"),
+                  [(Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+                    Tany);
+                    (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+                     Tany);
+                    (Rwitness (root|ret_from_kind.php line 9, characters 16-38),
+                     Tany)
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags async generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  };
+    "\\no_hint_generator" ->
+    { fe_pos = [5:10-27];
+      fe_type =
+      (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|ret_from_kind.php line 5, characters 10-26),
+               (Tunion []))
+              };
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rret_fun_kind (root|ret_from_kind.php line 5, characters 10-26),
+               (Tapply (([5:10-27], "\\Generator"),
+                  [(Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+                    Tany);
+                    (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+                     Tany);
+                    (Rwitness (root|ret_from_kind.php line 5, characters 10-26),
+                     Tany)
+                    ]
+                  )))
+              };
+            ft_flags =
+            (make_ft_flags generator none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs = {}; consts = {} }
+
+They matched!

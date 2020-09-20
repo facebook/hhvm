@@ -2,4 +2,8 @@
 function t(X $a) {
  echo 1;
  }
- t(42);
+
+ <<__EntryPoint>>
+function main_2205() {
+t(42);
+}

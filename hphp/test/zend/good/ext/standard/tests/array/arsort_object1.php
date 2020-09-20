@@ -1,17 +1,15 @@
-<?php
+<?hh
 /* Prototype  : bool arsort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.  
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from highest to lowest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
 /*
- * testing arsort() by providing integer/string object arrays with following flag values 
+ * testing arsort() by providing integer/string object arrays with following flag values
  * 1. Defualt flag value
  * 2. SORT_REGULAR - compare items normally
 */
-
-echo "*** Testing arsort() : object functionality ***\n";
 
 // class declaration for integer objects
 class for_integer_arsort
@@ -31,7 +29,7 @@ class for_string_arsort
   // initializing object member value
   function __construct($value){
     $this->class_value = $value;
-   }
+  }
 
   // return string value
   function __tostring() {
@@ -39,21 +37,23 @@ class for_string_arsort
   }
 
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing arsort() : object functionality ***\n";
 
 // array of integer objects
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = darray [
   1 => new for_integer_arsort(11), 2 =>  new for_integer_asort(66),
   3 => new for_integer_arsort(23), 4 => new for_integer_asort(-5),
   5 => new for_integer_arsort(0.001), 6 => new for_integer_asort(0)
-);
+];
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = darray [
   "a" => new for_string_arsort("axx"), "b" => new for_string_asort("t"),
   "c" => new for_string_arsort("w"), "d" => new for_string_asort("py"),
   "e" => new for_string_arsort("apple"), "f" => new for_string_asort("Orange"),
   "g" => new for_string_arsort("Lemon"), "h" => new for_string_asort("aPPle")
-);
+];
 
 
 echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is defualt --\n";
@@ -80,4 +80,4 @@ var_dump(arsort($temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done\n";
-?>
+}

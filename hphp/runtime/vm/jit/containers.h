@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CONTAINERS_H_
-#define incl_HPHP_VM_CONTAINERS_H_
+#pragma once
 
 #include <array>
 #include <deque>
@@ -25,14 +24,14 @@
 #include <queue>
 #include <set>
 #include <stack>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include <boost/container/flat_set.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/version.hpp>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 
 #include "hphp/util/sparse-id-containers.h"
 
@@ -93,20 +92,20 @@ using priority_queue = std::priority_queue<T,vector<T>,Compare>;
 template<class T>
 using list = std::list<T>;
 
-// subclass and pass 0 to the constructor to override the default
-// (large) buckets size.
-template<class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
-struct hash_map: std::unordered_map<T,U,V,W> {
-  hash_map() : std::unordered_map<T,U,V,W>(0) {}
-};
+// fast_map/set maps to F14{Value,Vector}Map/Set depending on K+V size.
+// Entries are moved (if possible) or copied (if necessary) on rehash & erase.
+template<class K, class V, class H=std::hash<K>, class C=std::equal_to<K>>
+using fast_map = folly::F14FastMap<K,V,H,C>;
+template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
+using fast_set = folly::F14FastSet<T,H,C>;
 
-template<class T, class V = std::hash<T>, class W = std::equal_to<T>>
-struct hash_set: std::unordered_set<T,V,W> {
-  hash_set() : std::unordered_set<T,V,W>(0) {}
-};
-
-template<class T, class C = std::less<T>>
-using set = std::set<T, C>;
+// hash_map/set allocate K+V separately like std::unordered_map; K+V don't
+// move during rehash. Saves memory compared to fast_map/set when when K+V
+// is large.
+template<class K, class V, class H=std::hash<K>, class C=std::equal_to<K>>
+using hash_map = folly::F14NodeMap<K,V,H,C>;
+template<class T, class H=std::hash<T>, class C=std::equal_to<T>>
+using hash_set = folly::F14NodeSet<T,H,C>;
 
 template<class T>
 using unique_ptr = std::unique_ptr<T>;
@@ -116,10 +115,7 @@ template<class K, class Pred = std::less<K>>
 // There's some leak in boost's flat_set that caused serious memory problems to
 // be reported externally: https://github.com/facebook/hhvm/issues/4268. The
 // bug looks to be https://svn.boost.org/trac/boost/ticket/9166 but it's not
-// totally clear. There were a ton of leaks fixed in 1.55 -- but FB is using
-// 1.51 internally and we aren't hitting the leak. So also unclear where it was
-// *introduced*. So for now just picking those two bounds; they may need to be
-// adjusted with future reports.
+// totally clear. There were a ton of leaks fixed in 1.55.
 //
 // It sounds like the leak might affect other boost containers as well, but we
 // only definitively observed it mattering for flat_set.
@@ -151,4 +147,3 @@ template<class T> void destroy(T* t) {
 
 }}
 
-#endif

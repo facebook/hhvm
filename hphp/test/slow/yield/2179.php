@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 trait DY {
-  private $drc = array();
+  private $drc = darray[];
   public function dty($key) {
     $this->drc[$key] = true;
     yield (true);
@@ -17,8 +17,12 @@ class C {
  }
 class D extends C {
  }
+
+<<__EntryPoint>>
+function main_2179() {
 $obj = new D;
 foreach($obj->dty('foo') as $var) {
   var_dump($var);
 }
 $obj->edd('foo');
+}

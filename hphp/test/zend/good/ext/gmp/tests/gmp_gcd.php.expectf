@@ -10,12 +10,9 @@ string(1) "1"
 string(10) "8127346234"
 string(10) "8127346234"
 
-Warning: %s
-NULL
+Warning: gmp_gcd() expects exactly 2 parameters, 3 given in %s/gmp_gcd.php on line 19
 
-Warning: %s
-NULL
+Warning: gmp_gcd() expects exactly 2 parameters, 3 given in %s/gmp_gcd.php on line 20
 
-Warning: %s
-NULL
+Warning: gmp_gcd() expects exactly 2 parameters, 3 given in %s/gmp_gcd.php on line 21
 Done

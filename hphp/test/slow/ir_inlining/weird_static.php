@@ -1,14 +1,14 @@
-<?php
+<?hh
 
 final class Constants {
-  public function gen() {
+  public static function gen() {
     yield 'foo';
   }
 }
 
+<<__EntryPoint>>
 function main() {
   $g = Constants::gen();
+  $g->next();
   var_dump($g->current());
 }
-
-main();

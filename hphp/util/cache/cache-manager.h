@@ -26,8 +26,7 @@
 // This is the only class which should be accessed by callers outside
 // of hphp/util/cache.
 
-#ifndef incl_HPHP_CACHE_MANAGER_H_
-#define incl_HPHP_CACHE_MANAGER_H_
+#pragma once
 
 #include <cstdint>
 #include <map>
@@ -142,4 +141,3 @@ struct CacheManager {
 
 }  // namespace HPHP
 
-#endif  // incl_HPHP_CACHE_MANAGER_H_

@@ -16,9 +16,11 @@ namespace N {
 
   class D extends C { }
 
+<<__EntryPoint>> function main(): void {
   $c = new C;
 
   M\call('N\sayHi');
-  M\call(array('N\C', 'sm'));
-  M\call(array($c, 'm'));
+  M\call(varray['N\C', 'sm']);
+  M\call(varray[$c, 'm']);
+}
 }

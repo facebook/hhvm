@@ -1,5 +1,6 @@
-<?php
-	if (!function_exists('money_format')) {
-		die("SKIP money_format - not supported\n");
-	}
-?>
+<?hh
+<<__EntryPoint>> function main(): void {
+if (!function_exists('money_format')) {
+  die("SKIP money_format - not supported\n");
+}
+}

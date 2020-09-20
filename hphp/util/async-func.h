@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
-#define incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
+#pragma once
 
 #include <pthread.h>
 
@@ -105,8 +104,12 @@ struct AsyncFuncImpl {
 
   /**
    * Called by AsyncFunc<T> so we can call func(obj) back on thread running.
+   *
+   * The NUMA node, the size of stack on huge pages, and the size of an
+   * additional thread-local space collocated with the stack can be specified.
    */
-  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func, bool hugify);
+  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func,
+                int numaNode, unsigned hugeStackKb, unsigned tlExtraKb);
   ~AsyncFuncImpl();
 
   /**
@@ -125,6 +128,10 @@ struct AsyncFuncImpl {
 
   /**
    * Waits until this thread finishes running.
+   *
+   * If `seconds' is positive, we wait that many seconds.  If `seconds' is
+   * zero, we wait without a timeout.  If `seconds' is negative, we don't wait
+   * at all, and return false if we aren't already stopped.
    */
   bool waitForEnd(int seconds = 0);
 
@@ -160,6 +167,8 @@ struct AsyncFuncImpl {
 
   void setNoInitFini() { m_noInitFini = true; }
 
+  void setThreadName();
+
   static uint32_t count() { return s_count; }
 private:
   Synchronizable m_stopMonitor;
@@ -171,19 +180,20 @@ private:
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
   static std::atomic<uint32_t> s_count;
-  static std::atomic_int s_curr_numa_node; // for round robin NUMA binding
 
   char* m_threadStack{nullptr};
   size_t m_stackAllocSize{0};
-  MemBlock m_firstSlab{nullptr, 0};
+  int m_node{0};
+  unsigned m_hugeStackKb{0};
+  char* m_tlExtraBase{nullptr};
+  unsigned m_tlExtraKb{0};
+  MemBlock m_hugePages{nullptr, 0};
   pthread_attr_t m_attr;
   pthread_t m_threadId{0};
   // exception was thrown and thread was terminated
   Exception* m_exception{nullptr};
-  int m_node{0};
   bool m_stopped{false};
   bool m_noInitFini{false};
-  bool m_hugeStack{false};
   /**
    * Called by ThreadFunc() to delegate the work.
    */
@@ -200,10 +210,11 @@ private:
  */
 template<class T>
 struct AsyncFunc : AsyncFuncImpl {
-  AsyncFunc(T *obj, void (T::*member_func)(), bool hugify = false)
-    : AsyncFuncImpl((void*)this, run_, hugify),
-      m_obj(obj), m_memberFunc(member_func) {
-  }
+  AsyncFunc(T *obj, void (T::*member_func)(),
+            int numaNode = -1, unsigned hugeStackKb = 0, unsigned tlExtraKb = 0)
+    : AsyncFuncImpl((void*)this, run_, numaNode, hugeStackKb, tlExtraKb)
+    , m_obj(obj)
+    , m_memberFunc(member_func) {}
 
   static void run_(void *obj) {
     AsyncFunc<T> *p = (AsyncFunc<T>*)obj;
@@ -218,4 +229,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_

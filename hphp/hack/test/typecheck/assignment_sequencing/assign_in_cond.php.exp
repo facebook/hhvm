@@ -1,0 +1,8 @@
+File "assign_in_cond.php", line 4, characters 7-8:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_cond.php", line 10, characters 7-8:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_cond.php", line 17, characters 8-9:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "assign_in_cond.php", line 23, characters 8-9:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

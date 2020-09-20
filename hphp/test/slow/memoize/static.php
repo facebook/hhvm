@@ -1,11 +1,19 @@
 <?hh
 class A {
-  public static function testNotMemoized() { static $i = 100; return $i++; }
+
+  private static $testNotMemoizedI = 100;
+  public static function testNotMemoized() { return self::$testNotMemoizedI++; }
+
+  private static $testStaticI = 110;
   <<__Memoize>>
-  public static function testStatic() { static $i = 110; return $i++; }
+  public static function testStatic() { return self::$testStaticI++; }
 }
 
+
+<<__EntryPoint>>
+function main_static() {
 echo A::testNotMemoized().' ';
 echo A::testNotMemoized().' ';
 echo A::testStatic().' ';
 echo A::testStatic()."\n";
+}

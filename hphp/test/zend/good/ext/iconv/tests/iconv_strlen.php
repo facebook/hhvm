@@ -1,9 +1,11 @@
-<?php
+<?hh
 function foo($str, $charset) {
 	var_dump(strlen($str));
 	var_dump(iconv_strlen($str, $charset));
 }
+<<__EntryPoint>>
+function main_entry(): void {
 
-foo("abc", "ASCII");
-foo("日本語 EUC-JP", "EUC-JP");
-?>
+  foo("abc", "ASCII");
+  foo("日本語 EUC-JP", "EUC-JP");
+}

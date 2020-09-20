@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_ext_ctype() {
 var_dump(ctype_alnum("abc123"));
 var_dump(!ctype_alnum("!@#$^"));
 
@@ -32,3 +35,4 @@ var_dump(!ctype_upper("abcdef"));
 
 var_dump(ctype_xdigit("ABCDEF"));
 var_dump(!ctype_xdigit("GHIJKL"));
+}

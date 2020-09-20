@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SERVICE_DATA_H_
-#define incl_HPHP_SERVICE_DATA_H_
+#pragma once
 
 #include <atomic>
 #include <chrono>
@@ -266,6 +265,8 @@ struct ExportedTimeSeries {
   int64_t getSum();
   int64_t getRateByDuration(std::chrono::seconds duration);
 
+  folly::Optional<int64_t> getCounter(StatsType type, int seconds);
+
   void exportAll(const std::string& prefix,
                  std::map<std::string, int64_t>& statsMap);
 
@@ -302,4 +303,3 @@ struct ExportedHistogram {
 
 #include "hphp/util/service-data-inl.h"
 
-#endif // incl_HPHP_SERVICE_DATA_H_

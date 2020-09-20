@@ -1,2 +1,3 @@
-<?php
-password_hash('foo', array());
+<?hh <<__EntryPoint>> function main(): void {
+password_hash('foo', varray[]);
+}

@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_spl_doubly_linked_list_add() {
 $dll = new SplDoublyLinkedList();
 
 $dll->push('Never');
@@ -28,3 +31,4 @@ foreach($dll as $key=>$val) {
 echo "count(): " . $dll->count(), PHP_EOL;
 echo "top(): " . $dll->top(), PHP_EOL;
 echo "bottom(): " . $dll->bottom(), PHP_EOL;
+}

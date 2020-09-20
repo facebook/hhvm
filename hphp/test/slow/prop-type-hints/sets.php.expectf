@@ -1,0 +1,11 @@
+Warning: Property 'A::p1' declared as type int, string assigned in %s/sets.php on line 18
+
+Warning: Property 'A::p2' declared as type string, int assigned in %s/sets.php on line 19
+
+Warning: Property 'A::p3' declared as type string, int assigned in %s/sets.php on line 20
+
+Warning: Static property 'A::s1' declared as type int, string assigned in %s/sets.php on line 23
+
+Warning: Static property 'A::s2' declared as type string, int assigned in %s/sets.php on line 24
+
+Warning: Static property 'A::s3' declared as type string, int assigned in %s/sets.php on line 25

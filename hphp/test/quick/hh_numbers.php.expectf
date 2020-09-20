@@ -1,2 +1,2 @@
 
-Fatal error: %s number is too big: 100000000000000000000000000000000 %a
+Fatal error: Decimal number is too big: `100000000000000000000000000000000` in %s/hh_numbers.php on line 2

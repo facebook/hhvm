@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
    try {
       echo "1";
@@ -12,6 +12,6 @@ function foo () {
       echo "4";
    }
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
-?>
+}

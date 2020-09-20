@@ -1,13 +1,10 @@
-object(PDOStatement)#%d (1) {
+object(PDOStatement) (1) {
   ["queryString"]=>
-  %string|unicode%(17) "SELECT * FROM foo"
+  string(17) "SELECT * FROM foo"
 }
-array(3) {
-  [0]=>
-  %string|unicode%(5) "00000"
-  [1]=>
+varray(3) {
+  string(5) "00000"
   NULL
-  [2]=>
   NULL
 }
-%string|unicode%(1) "2"
+string(1) "2"

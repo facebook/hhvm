@@ -1,11 +1,12 @@
-<?php
+<?hh
 /* Prototype:  string tempnam ( string $dir, string $prefix );
    Description: Create file with unique file name.
 */
 
 /* Trying to create unique files by passing previously created unique file name as prefix */
-
-$file_path = dirname(__FILE__);
+<<__EntryPoint>> function main(): void {
+$file_path = __SystemLib\hphp_test_tmppath('sandbox');
+mkdir($file_path);
 
 echo "\n*** Test tempnam(): by passing previously created filenames ***\n";
 $file_name = "tempnam_variation6.tmp";
@@ -36,4 +37,6 @@ for($i=1; $i<=3; $i++) {
 }
 
 echo "\n*** Done ***\n";
-?>
+
+rmdir($file_path);
+}

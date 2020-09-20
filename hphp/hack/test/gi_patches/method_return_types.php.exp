@@ -1,0 +1,7 @@
+<?hh //partial
+
+class C {
+  public function foo(int $x) : <<__Soft>> int {
+    return 1;
+  }
+}

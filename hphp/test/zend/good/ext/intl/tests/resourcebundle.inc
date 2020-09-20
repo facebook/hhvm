@@ -1,5 +1,8 @@
-<?php
-define('BUNDLE', dirname(__FILE__)."/_files/resourcebundle");
+<?hh
+
+function bundle() {
+	return dirname(__FILE__)."/_files/resourcebundle";
+}
 
 function debug( $res ) {
 	if (is_null( $res )) {
@@ -10,4 +13,3 @@ function debug( $res ) {
 	}
 	return $ret . sprintf( "%5d: %s\n", intl_get_error_code(), intl_get_error_message() );
 }
-

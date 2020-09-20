@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Source php weakref extension
 class Foo {
   private $ptr = null;
@@ -35,8 +35,8 @@ function factorial($n) {
   return $n * factorial($n-1);
 }
 // Test if unreachable.
+<<__EntryPoint>> function main(): void {
 $wr = leaker(false);
-
 // Test if only reachable throuh WR.
 $wr2 = leaker(true);
 
@@ -70,3 +70,4 @@ var_dump($wr4->valid(), $wr4->get());  // NULL
 var_dump($wr5->valid(), $wr5->get());  // NULL
 var_dump($wr6->valid(), $wr6->get());  // NULL
 var_dump($wr7->valid(), $wr7->get());  // !NULL
+}

@@ -5,11 +5,11 @@ function test_chunk($input, $chunk_size) {
   var_dump($input);
   $chunked_without_keys = array_chunk($input, $chunk_size);
   var_dump($chunked_without_keys);
-  var_dump($chunked_without_keys === array_chunk((array) $input, $chunk_size));
+  var_dump($chunked_without_keys === array_chunk(darray($input), $chunk_size));
   $chunked_with_keys = array_chunk($input, $chunk_size, true);
   var_dump($chunked_with_keys);
   var_dump($chunked_with_keys
-           === array_chunk((array) $input, $chunk_size, true));
+           === array_chunk(darray($input), $chunk_size, true));
 }
 
 function main() {
@@ -22,4 +22,8 @@ function main() {
     2
   );
 }
+
+<<__EntryPoint>>
+function main_array_chunk() {
 main();
+}

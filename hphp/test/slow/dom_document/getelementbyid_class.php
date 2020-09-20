@@ -1,5 +1,8 @@
-<?php
+<?hh
 
+
+<<__EntryPoint>>
+function main_getelementbyid_class() {
 $xml =
 '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE books [
@@ -33,3 +36,4 @@ $doc = new DOMDocument();
 $doc->validateOnParse = true;
 $doc->loadXML($xml);
 var_dump(get_class($doc->getElementById('php-basics')));
+}

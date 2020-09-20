@@ -7,4 +7,8 @@ function main() {
   $fs->addAll(Vector {1, 2, 3});
 }
 
+
+<<__EntryPoint>>
+function main_immutability3() {
 main();
+}

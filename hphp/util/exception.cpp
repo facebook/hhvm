@@ -29,7 +29,7 @@ Exception::Exception(const std::string& msg)
   : m_msg(msg) {
 }
 
-Exception::Exception(const Exception &e)
+Exception::Exception(const Exception& e)
   : m_msg(e.m_msg), m_what(e.m_what)
 {}
 

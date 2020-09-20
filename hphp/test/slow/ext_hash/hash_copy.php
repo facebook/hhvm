@@ -1,5 +1,9 @@
-<?php
+<?hh
 
+
+
+<<__EntryPoint>>
+function main_hash_copy() {
 $c = hash_init("crc32");
 hash_update($c, "Hello");
 $d = hash_copy($c);
@@ -9,4 +13,4 @@ var_dump(hash_final($c));
 var_dump(hash("crc32", "HelloWorld"));
 var_dump(hash_final($d));
 var_dump(hash("crc32", "HelloGoodbye"));
-
+}

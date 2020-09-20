@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface ITest {
   const ITestConst = 42;
@@ -11,10 +11,14 @@ class Test implements ITest {
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_1619() {
 $t = new Test();
 $t->foo();
 $rc = new ReflectionClass('Test');
 $method = $rc->getMethod('foo');
 foreach ($method->getParameters() as $param) {
   var_dump($param->getDefaultValue());
+}
 }

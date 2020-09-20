@@ -1,27 +1,34 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-$gmt = new DateTimeZone('GMT');
 
 class XDate extends DateTime
 {
   public function myFormat()
   {
-    global $gmt;
+
     $return = parent::format("Y-m-d H:i:s");
-    parent::setTimezone($gmt);
+    parent::setTimezone(GvnCrash13368505Php::$gmt);
   }
 }
 
 function main() {
-  global $gmt;
 
-  $date = new XDate('now', $gmt);
+
+  $date = new XDate('now', GvnCrash13368505Php::$gmt);
   $date->myFormat();
 
-  $date = new XDate('now', $gmt);
+  $date = new XDate('now', GvnCrash13368505Php::$gmt);
   $date->myFormat();
 }
 
-main();
-echo "DONE\n";
+abstract final class GvnCrash13368505Php {
+  public static $gmt;
+}
+<<__EntryPoint>>
+function entrypoint_gvncrash13368505(): void {
+  // Copyright 2004-present Facebook. All Rights Reserved.
+
+  GvnCrash13368505Php::$gmt = new DateTimeZone('GMT');
+
+  main();
+  echo "DONE\n";
+}

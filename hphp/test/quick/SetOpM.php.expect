@@ -1,25 +1,15 @@
 Test begin
-array(5) {
-  [0]=>
+varray(1) {
   int(23)
-  [1]=>
-  int(47)
-  [2]=>
-  string(1) "1"
-  [3]=>
-  int(1)
-  [4]=>
-  int(-1)
 }
-object(T)#1 (2) {
+object(T) (2) {
   ["str"]=>
   string(9) "eine:zwei"
   ["int"]=>
   int(3)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(6)
 }
-int(44)
+OutOfBoundsException: Out of bounds varray access: invalid index 17
 Test end

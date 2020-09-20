@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_ABI_CXX_H_
-#define incl_HPHP_UTIL_ABI_CXX_H_
+#pragma once
 
 #include <inttypes.h>
 #include <string>
@@ -66,4 +65,3 @@ constexpr void* getMethodPtr(MethodPtr meth) {
 }
 
 
-#endif

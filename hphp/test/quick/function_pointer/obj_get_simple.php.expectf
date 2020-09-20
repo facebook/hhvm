@@ -1,0 +1,1 @@
+Fatal error: Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. Use lambdas `(...) ==> {...}` for other cases. in %s on line 11

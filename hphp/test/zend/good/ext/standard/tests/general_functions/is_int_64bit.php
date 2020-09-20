@@ -1,11 +1,11 @@
-<?php
+<?hh
 /* Prototype: bool is_int ( mixed $var );
  * Description: Finds whether the given variable is an integer  
  */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
 // different valid  integer vlaues 
-$valid_ints = array(
+$valid_ints = varray[
   0,
   1,
   -1,
@@ -24,7 +24,7 @@ $valid_ints = array(
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
   017777777777,  // max positive integer as octal
-);
+];
 /* loop to check that is_int() recognizes different 
    integer values, expected output: bool(true) */
 $loop_counter = 1;
@@ -46,7 +46,7 @@ $unset_var = 10;
 unset ($unset_var);
 
 // other types in a array 
-$not_int_types = array (
+$not_int_types = varray [
   /* float values */
   -2147483649, // float value
   2147483648,  // float value
@@ -72,18 +72,18 @@ $not_int_types = array (
   $dfp,
   
   /* arrays */
-  array(),
-  array(0),
-  array(1),
-  array(NULL),
-  array(null),
-  array("string"),
-  array(true),
-  array(TRUE),
-  array(false),
-  array(FALSE),
-  array(1,2,3,4),
-  array(1 => "One", "two" => 2),
+  varray[],
+  varray[0],
+  varray[1],
+  varray[NULL],
+  varray[null],
+  varray["string"],
+  varray[true],
+  varray[TRUE],
+  varray[false],
+  varray[FALSE],
+  varray[1,2,3,4],
+  darray[1 => "One", "two" => 2],
   
   /* strings */
   "",
@@ -114,7 +114,7 @@ $not_int_types = array (
   /* undefined and unset vars */
   @$unset_var, 
   @$undefined_var
-);
+];
 /* loop through the $not_int_types to see working of 
    is_int() on non integer types, expected output: bool(false) */
 $loop_counter = 1;
@@ -127,14 +127,14 @@ foreach ($not_int_types as $type ) {
 
 echo "\n*** Testing error conditions ***\n";
 //Zero argument
-var_dump( is_int() );
-var_dump( is_integer() );
-var_dump( is_long() );
+try { var_dump( is_int() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_integer() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_long() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 //arguments more than expected 
-var_dump( is_int(TRUE, FALSE) );
-var_dump( is_integer(TRUE, FALSE) );
-var_dump( is_long(TRUE, FALSE) );
+try { var_dump( is_int(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_integer(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( is_long(TRUE, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
  
 echo "Done\n";
-?>
+}

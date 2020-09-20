@@ -1,9 +1,0 @@
-string(4) "test"
-array(1) {
-  [0]=>
-  array(1) {
-    ["enabled"]=>
-    bool(true)
-  }
-}
-===DONE===

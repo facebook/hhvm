@@ -64,7 +64,7 @@ struct ResolverInit {
     return m_res;
   }
 
-  static THREAD_LOCAL(ResolverInit, s_res);
+  static RDS_LOCAL(ResolverInit, s_res);
 private:
   void initRes(void) {
     if (m_res) {
@@ -78,7 +78,7 @@ private:
 
   struct __res_state *m_res;
 };
-THREAD_LOCAL(ResolverInit, ResolverInit::s_res);
+RDS_LOCAL(ResolverInit, ResolverInit::s_res);
 
 /* just a hack to free resources allocated by glibc in __res_nsend()
  * See also:
@@ -196,6 +196,10 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   GETLONG(ttl, cp);
   GETSHORT(dlen, cp);
   CHECKCP(dlen);
+  if (dlen == 0) {
+    /* No data in the response - nothing to do */
+    return nullptr;
+  }
   if (type_to_fetch != T_ANY && type != type_to_fetch) {
     cp += dlen;
     return cp;
@@ -480,9 +484,9 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   return cp;
 }
 
-Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
-                      VRefParam authnsRef /* = null */,
-                      VRefParam addtlRef /* = null */) {
+Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
+                      Variant& authnsRef,
+                      Variant& addtlRef) {
   IOStatusHelper io("dns_get_record", hostname.data(), type);
   if (type < 0) type = PHP_DNS_ALL;
   if (type & ~PHP_DNS_ALL && type != PHP_DNS_ANY) {
@@ -503,7 +507,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
    * - In case of PHP_DNS_ANY we use the directly fetch DNS_T_ANY.
    *   (step NUMTYPES+1 )
    */
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   bool first_query = true;
   bool store_results = true;
   for (int t = (type == PHP_DNS_ANY ? (PHP_DNS_NUM_TYPES + 1) : 0);
@@ -601,14 +605,14 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type /*= -1*/,
     }
   }
 
-  authnsRef.assignIfRef(authns);
-  addtlRef.assignIfRef(addtl);
+  authnsRef = authns;
+  addtlRef = addtl;
   return ret;
 }
 
 bool HHVM_FUNCTION(getmxrr, const String& hostname,
-                            VRefParam mxhostsRef,
-                            VRefParam weightsRef /* = null */) {
+                            Variant& mxhostsRef,
+                            Variant& weightsRef) {
   IOStatusHelper io("dns_get_mx", hostname.data());
   int count, qdc;
   unsigned short type, weight;
@@ -619,8 +623,8 @@ bool HHVM_FUNCTION(getmxrr, const String& hostname,
   Array mxhosts;
   Array weights;
   SCOPE_EXIT {
-    mxhostsRef.assignIfRef(mxhosts);
-    weightsRef.assignIfRef(weights);
+    mxhostsRef = mxhosts;
+    weightsRef = weights;
   };
 
   /* Go! */

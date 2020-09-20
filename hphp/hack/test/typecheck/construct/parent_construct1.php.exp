@@ -1,4 +1,6 @@
-File "parent_construct1.php", line 36, characters 9-37:
-Too few arguments (Typing[4104])
+File "parent_construct1.php", line 36, characters 32-36:
+Invalid argument (Typing[4359])
+File "parent_construct1.php", line 36, characters 32-36:
+An array cannot be unpacked into the required arguments of a function
 File "parent_construct1.php", line 15, characters 19-29:
 Definition is here

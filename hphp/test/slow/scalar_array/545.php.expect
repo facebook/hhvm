@@ -1,110 +1,85 @@
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   NULL
 }
-array(1) {
-  [0]=>
+varray(1) {
   bool(true)
 }
-array(1) {
-  [0]=>
+varray(1) {
   bool(false)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(0)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   float(1)
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "1.0"
 }
-array(1) {
-  [0]=>
+varray(1) {
   float(1.23456789E+34)
 }
-array(1) {
-  [0]=>
+varray(1) {
   float(INF)
 }
-array(1) {
-  [0]=>
+varray(1) {
   float(NAN)
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(4) "a bc"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(4) "Á bc"
 }
-array(13) {
-  [0]=>
+varray(13) {
   NULL
-  [1]=>
   bool(true)
-  [2]=>
   bool(false)
-  [3]=>
   int(0)
-  [4]=>
   int(1)
-  [5]=>
   float(1)
-  [6]=>
   string(3) "1.0"
-  [7]=>
   float(1.23456789E+34)
-  [8]=>
   float(1.7976931348623E+308)
-  [9]=>
   float(INF)
-  [10]=>
   float(NAN)
-  [11]=>
   string(4) "a bc"
-  [12]=>
   string(4) "Á bc"
 }
-array(6) {
+darray(6) {
   [""]=>
   bool(true)
-  [0]=>
-  float(INF)
   [1]=>
   float(1)
   ["1.0"]=>
   float(1.23456789E+34)
+  [0]=>
+  float(INF)
   [-9223372036854775808]=>
   string(4) "a bc"
   [2]=>
   string(4) "Á bc"
 }
-array(7) {
+darray(7) {
   [""]=>
   bool(true)
-  [0]=>
-  float(INF)
   [1]=>
   float(1)
   ["1.0"]=>
   float(1.23456789E+34)
+  [0]=>
+  float(INF)
   [-9223372036854775808]=>
   string(4) "a bc"
   [2]=>
   string(4) "Á bc"
   [3]=>
-  array(6) {
+  darray(6) {
     [""]=>
     bool(true)
     [0]=>

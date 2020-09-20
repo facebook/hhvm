@@ -1,2 +1,1 @@
-  
-Fatal error: Declaration of C::foo() must be compatible with that of A::foo() in %s on line 5
+OK

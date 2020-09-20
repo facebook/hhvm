@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing sprintf() : scientific formats with string values ***\n";
 
 // array of string values 
-$string_values = array(
+$string_values = varray[
   "",
   '',
   "0",
@@ -27,15 +27,15 @@ $string_values = array(
   "NULL",
   'null',
   "333333333333333333333333333333"
-);
+];
 
 // array of scientific formats
-$scientific_formats = array(
+$scientific_formats = varray[
   "%e", "%he", "%le",
   "%Le", " %e", "%e ",
   "\t%e", "\n%e", "%4e",
   "%30e", "%[0-1]", "%*e"
-);
+];
 
 
 $count = 1;
@@ -49,4 +49,4 @@ foreach($string_values as $string_value) {
 };
 
 echo "Done";
-?>
+}

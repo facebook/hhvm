@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f() {
 $someVar = 456;
@@ -8,6 +8,10 @@ echo $param . ' ' . $someVar . "\n";
 ;
 return $closure;
 }
+
+<<__EntryPoint>>
+function main_1932() {
 $x = f();
 $x(2);
 call_user_func($x, 2);
+}

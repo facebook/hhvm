@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLASSNAME_IS_H
-#define incl_HPHP_CLASSNAME_IS_H
+#pragma once
 
 namespace HPHP {
 
@@ -28,28 +27,29 @@ namespace HPHP {
  * function that will be called for construction (init). One copy of
  * static data is generated per T/init.
  */
-template <class T, class TInit, TInit init()>
+template <typename T, typename TInit, TInit init()>
 struct InstantStatic {
   static T value;
 };
 
-template <class T, class TInit, TInit init()>
+template <typename T, typename TInit, TInit init()>
 T InstantStatic<T, TInit, init>::value(init());
 
 #define CLASSNAME_IS(str)                                               \
-  static const char *GetClassName() { return str; }                     \
+  static const auto& GetClassName() { return str; }                     \
   static const StaticString& classnameof() {                            \
-    return InstantStatic<const StaticString, const char*, GetClassName> \
-      ::value;                                                          \
+    return InstantStatic<const StaticString,                            \
+                         decltype(GetClassName()),                      \
+                         GetClassName>::value;                          \
   }
 
 #define RESOURCENAME_IS(str)                                            \
-  static const char *GetResourceName() { return str; }                  \
+  static const auto& GetResourceName() { return str; }                  \
   static const StaticString& resourcenameof() {                         \
-    return InstantStatic<const StaticString, const char*, GetResourceName> \
-      ::value;                                                          \
+    return InstantStatic<const StaticString,                            \
+                         decltype(GetResourceName()),                   \
+                         GetResourceName>::value;                       \
   }
 
 }
 
-#endif

@@ -10,4 +10,8 @@ async function foo() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_foreach_await_as_fail() {
 HH\Asio\join(foo());
+}

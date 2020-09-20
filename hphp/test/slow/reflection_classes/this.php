@@ -8,20 +8,20 @@ function printFunc($rf) {
 }
 function printClass($rc) {
   $rms = $rc->getMethods();
-  $meths = array();
+  $meths = darray[];
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
-  ksort($meths);
+  ksort(inout $meths);
   foreach($meths as $meth) {
     printFunc($meth);
   }
   $rps = $rc->getProperties();
-  $props = array();
+  $props = darray[];
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
-  ksort($props);
+  ksort(inout $props);
   foreach($props as $prop) {
     var_dump($prop->getTypeText());
   }
@@ -31,5 +31,9 @@ class C {
   public function m() : this { return $this; }
 }
 
+
+<<__EntryPoint>>
+function main_this() {
 $rc = new ReflectionClass('C');
 printClass($rc);
+}

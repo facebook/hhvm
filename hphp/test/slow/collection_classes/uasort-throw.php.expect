@@ -1,0 +1,11 @@
+in callback
+in callback
+caught lol
+object(HH\Map) (3) {
+  [2]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
+  [3]=>
+  string(1) "a"
+}

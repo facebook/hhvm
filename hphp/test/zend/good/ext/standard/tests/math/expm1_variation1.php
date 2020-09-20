@@ -1,11 +1,16 @@
-<?php
+<?hh
 
 /* Prototype  : float expm1  ( float $arg  )
- * Description: Returns exp(number) - 1, computed in a way that is accurate even 
+ * Description: Returns exp(number) - 1, computed in a way that is accurate even
  *              when the value of number is close to zero.
  * Source code: ext/standard/math.c
  */
 
+// get a class
+class classA
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing expm1() : usage variations ***\n";
 
 //get an unset variable
@@ -18,21 +23,16 @@ abc
 xyz
 EOT;
 
-// get a class
-class classA
-{
-}
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // unexpected values to be passed to $arg argument
-$inputs = array(
+$inputs = varray[
        // int data
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
 
        // float data
 /*5*/  10.5,
@@ -50,24 +50,24 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
-       array(),
+       varray[],
 
        // string data
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // array data
-       array(),
-       array(1,2,4),
-       
+       varray[],
+       varray[1,2,4],
+
        // object data
-/*24*/ new classA(),       
-       
+/*24*/ new classA(),
+
        // undefined data
 /*25*/ @$undefined_var,
 
@@ -76,15 +76,15 @@ $inputs = array(
 
        // resource variable
 /*27*/ $fp
-);
+];
 
 // loop through each element of $inputs to check the behaviour of expm1()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(expm1($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try { var_dump(expm1($input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+    $iterator++;
 };
 fclose($fp);
-?>
-===Done===
+echo "===Done===";
+}

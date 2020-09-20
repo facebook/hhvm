@@ -1,8 +1,6 @@
 <?hh
-
-var_dump(array_map('get_class', array(null)));
-var_dump(array_map('get_parent_class', array(null)));
-var_dump(array_map('get_called_class', array(null)));
-var_dump(array_map('func_get_arg', array(null)));
-var_dump(array_map('func_get_args', array(null)));
-var_dump(array_map('func_num_args', array(null)));
+<<__EntryPoint>>
+function main(): void {
+  var_dump(array_map(fun('get_class'), varray[null]));
+  var_dump(array_map(fun('get_parent_class'), varray[null]));
+}

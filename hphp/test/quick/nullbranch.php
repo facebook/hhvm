@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main(): void {
 error_reporting(0);
 $a = null;
 if ($a) {
@@ -10,4 +10,5 @@ if ($b) {
   echo "b evaluates to true\n";
 } else {
   echo "b evaluates to false\n";
+}
 }

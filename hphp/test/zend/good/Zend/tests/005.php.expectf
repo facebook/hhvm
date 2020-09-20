@@ -1,6 +1,5 @@
 
-Warning: %s
-NULL
+Warning: strcasecmp() expects exactly 2 parameters, 1 given in %s/005.php on line 3
 int(0)
 int(-3)
 int(-1)

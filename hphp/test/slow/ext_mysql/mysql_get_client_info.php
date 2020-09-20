@@ -1,3 +1,7 @@
-<?php
+<?hh
 
-var_dump(!empty(mysql_get_client_info()));
+
+<<__EntryPoint>>
+function main_mysql_get_client_info() {
+var_dump((bool)(mysql_get_client_info() ?? false));
+}

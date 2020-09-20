@@ -1,13 +1,13 @@
-<?php
+<?hh
 /* Prototype: mixed pathinfo ( string $path [, int $options] );
    Description: Returns information about a file path
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing basic functions of pathinfo() ***\n";
 
 $file_path = dirname(__FILE__);
 
-$paths = array (
+$paths = varray [
   /* Testing basic file notation */
   "$file_path/foo/symlink.link",
   "www.example.co.in",
@@ -46,7 +46,7 @@ $paths = array (
   /* Testing normal directory notation */
   "/home/example/test/",
   "http://httpd.apache.org/core.html#acceptpathinfo"
-);
+];
 
 $counter = 1;
 /* loop through $paths to test each $path in the above array */
@@ -61,4 +61,4 @@ foreach($paths as $path) {
 }
 
 echo "Done\n";
-?>
+}

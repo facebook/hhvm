@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'BadMethodCallException' with message 'Class C requires 1 generics but 0 given' in %s:9
+Stack trace:
+%A

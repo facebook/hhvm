@@ -1,1 +1,0 @@
-((Fatal error\: syntax error, unexpected T_SUPER, expecting '{' in [^\r\n]+ on line 3)|(Fatal error\: A left brace is expected here\. in [^\r\n]+\/type_constraint\/parse_super_constraint_bad\.php on line 3))

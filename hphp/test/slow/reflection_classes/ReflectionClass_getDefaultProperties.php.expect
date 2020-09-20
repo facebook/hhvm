@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   ["foo"]=>
   NULL
   ["bar"]=>
@@ -6,7 +6,7 @@ array(3) {
   ["baz"]=>
   int(10)
 }
-array(5) {
+darray(5) {
   ["qux"]=>
   int(10)
   ["val"]=>
@@ -18,7 +18,7 @@ array(5) {
   ["baz"]=>
   int(10)
 }
-array(1) {
+darray(1) {
   ["data"]=>
   int(1)
 }

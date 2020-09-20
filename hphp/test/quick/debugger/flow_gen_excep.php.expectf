@@ -10,10 +10,10 @@ Breakpoint 1 set upon entering foo()
 next
 Program %s/flow_gen_excep.php loaded. Type '[r]un' or '[c]ontinue' to go.
 next
-Break on line 40 of %s/flow_gen_excep.php
-  39 
-  40*main(1);
-  41 
+Break at entrypoint_flow_gen_excep() on line 43 of %s/flow_gen_excep.php
+  42 
+  43*  main(1);
+  44 }
 
 next
 Breakpoint 1 reached at foo() on line 23 of %s/flow_gen_excep.php
@@ -120,6 +120,12 @@ Break at foo() on line 25 of %s/flow_gen_excep.php
   24   $gen1->rewind();
   25*  while ($gen1->valid()) {
   26     $val = $gen1->current();
+
+next
+Break at foo() on line 34 of %s/flow_gen_excep.php
+  33   }
+  34*}
+  35 
 
 break clear all
 All breakpoints are cleared.

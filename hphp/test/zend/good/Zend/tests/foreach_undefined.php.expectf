@@ -1,5 +1,5 @@
 
-Notice: %s
+Notice: Undefined variable: a in %s/foreach_undefined.php on line 3
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/foreach_undefined.php on line 3
 Done

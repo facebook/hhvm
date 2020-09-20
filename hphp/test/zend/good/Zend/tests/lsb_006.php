@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 class Foo extends static {
 }
-
-?>
-==DONE==
+<<__EntryPoint>> function main(): void {
+echo "==DONE==";
+}

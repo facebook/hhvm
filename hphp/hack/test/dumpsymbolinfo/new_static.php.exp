@@ -1,0 +1,28 @@
+{
+  "function_calls":[
+    {
+      "name":"A::__construct",
+      "type":"Constructor",
+      "pos":{"filename":"new_static.php","line":8,"char_start":10,"char_end":21},
+      "caller":"A::bar"
+    },
+    {
+      "name":"A::foo",
+      "type":"Method",
+      "pos":{"filename":"new_static.php","line":9,"char_start":9,"char_end":11},
+      "caller":"A::bar"
+    }
+  ],
+  "symbol_types":[
+    {
+      "pos":{"filename":"new_static.php","line":8,"char_start":5,"char_end":6},
+      "type":"this",
+      "ident":0
+    },
+    {
+      "pos":{"filename":"new_static.php","line":9,"char_start":5,"char_end":6},
+      "type":"this",
+      "ident":0
+    }
+  ]
+}

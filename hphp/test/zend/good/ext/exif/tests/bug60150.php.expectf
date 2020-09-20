@@ -1,8 +1,8 @@
 
-Warning: %s
+Warning: Process tag(x9003=DateTimeOri): Illegal pointer offset(xF20008BC + xE000067 = x100000923 > x1586) in %s/bug60150.php on line 3
 
-Warning: %s
+Warning: Error reading from file: got=x9DE7(=40423) != itemlen-2=xCDFD(=52733) in %s/bug60150.php on line 3
 
-Warning: %s
+Warning: Invalid JPEG file in %s/bug60150.php on line 3
 bool(false)
 ===DONE===

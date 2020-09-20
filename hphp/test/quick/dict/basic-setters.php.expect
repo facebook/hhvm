@@ -15,15 +15,12 @@ dict(11) {
   [4]=>
   NULL
   [5]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   [6]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(300)
-    [1]=>
     int(200)
-    [2]=>
     int(100)
   }
   [7]=>
@@ -201,15 +198,12 @@ dict(15) {
   [8]=>
   NULL
   [9]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   [10]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(300)
-    [1]=>
     int(200)
-    [2]=>
     int(100)
   }
   [11]=>
@@ -487,15 +481,12 @@ dict(17) {
   [4]=>
   NULL
   [5]=>
-  object(stdClass)#1 (0) {
+  object(stdClass) (0) {
   }
   [6]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(300)
-    [1]=>
     int(200)
-    [2]=>
     int(100)
   }
   [7]=>

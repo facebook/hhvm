@@ -1,5 +1,7 @@
 <?hh // strict
 
+// TODO(T30806984): this test is broken
+
 namespace Foo\Bar\Baz {
   function f1(): void {}
   function f2(): void {}
@@ -14,7 +16,7 @@ namespace X {
   function f(): void {
     new CL();
     f1();
-    var_dump(CN);
+    \var_dump(CN);
     new CL2();
   }
 }

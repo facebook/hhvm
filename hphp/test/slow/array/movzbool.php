@@ -1,8 +1,8 @@
-<?php
+<?hh
 
 function foo() {
-  if (mt_rand() == 0) return array();
-  $z = array(true, mt_rand() ? true : false);
+  if (mt_rand() == 0) return varray[];
+  $z = varray[true, mt_rand() ? true : false];
   return $z;
 }
 
@@ -13,7 +13,11 @@ function bar() {
   return $y;
 }
 
+
+<<__EntryPoint>>
+function main_movzbool() {
 for ($i = 0; $i < 100; ++$i) {
   bar();
 }
 echo "Done\n";
+}

@@ -1,0 +1,6 @@
+File "constructor_true_generic.php", line 27, characters 11-11:
+No method `f` in `A` (Typing[4053])
+File "constructor_true_generic.php", line 25, characters 37-37:
+This is why I think it is an object of type A
+File "constructor_true_generic.php", line 5, characters 7-7:
+Declaration of `A` is here

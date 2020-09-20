@@ -1,0 +1,7 @@
+<?hh
+class WithLateInit {
+  <<__LateInit>> private int $count;
+  public function getCount(): int {
+    return $this->count;
+  }
+}

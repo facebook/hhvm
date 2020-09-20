@@ -1,7 +1,4 @@
 bool(true)
 bool(true)
 bool(true)
-
-Notice: %s
-
-Fatal error: %s
+Out of bounds varray access: invalid index 2

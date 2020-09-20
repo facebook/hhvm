@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A {
   public function say() {
@@ -13,7 +13,7 @@ trait B {
 class Talker {
   use B;
 }
+<<__EntryPoint>> function main(): void {
 $talker = new Talker();
 $talker->fala();
-?>
-
+}

@@ -15,10 +15,10 @@ function g() {
   var_dump($v);
 }
 function h() {
-  $arr1 = array(11, 22, 33);
+  $arr1 = varray[11, 22, 33];
   var_dump(new Vector($arr1));
   var_dump(new Map($arr1));
-  $arr2 = array('a' => 1, 2 => 'b');
+  $arr2 = darray['a' => 1, 2 => 'b'];
   var_dump(new Vector($arr2));
   var_dump(new Map($arr2));
 }
@@ -30,7 +30,11 @@ function j() {
   $v = new Vector(gen());
   var_dump($v);
 }
+
+<<__EntryPoint>>
+function main_822() {
 f();
 g();
 h();
 j();
+}

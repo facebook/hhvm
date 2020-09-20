@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class IteratorClass implements Iterator {
   public function __construct() { }
@@ -16,9 +16,13 @@ function dump_iterateable($class) {
   var_dump($reflection->isIterateable());
 }
 
-$classes = array("ArrayObject", "IteratorClass", "DerivedClass", "NonIterator");
+
+<<__EntryPoint>>
+function main_reflection_class_is_iterateable() {
+$classes = varray["IteratorClass", "DerivedClass", "NonIterator"];
 
 foreach ($classes as $class) {
   echo "Is $class iterateable? ";
   dump_iterateable($class);
+}
 }

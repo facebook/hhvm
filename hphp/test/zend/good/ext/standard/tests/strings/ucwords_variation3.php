@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string ucwords ( string $str )
  * Description: Uppercase the first character of each word in a string
  * Source code: ext/standard/string.c
@@ -7,11 +7,11 @@
 /*
  * test ucwords() with different string prepared using single quote
 */
-
+<<__EntryPoint>> function main(): void {
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // different strings containing regular chars and special chars
-$str_array = array(
+$str_array = varray[
   // multiple spaces
   'testing    ucwords',
   't e s t i n g   u c w o r d s ',
@@ -41,7 +41,7 @@ $str_array = array(
   
   //only special chars
   '!@#$%^&*()_+=-`~'
-);
+];
 
 // loop through the $str_array array to test ucwords on each element
 $iteration = 1;
@@ -52,4 +52,4 @@ for($index = 0; $index < count($str_array); $index++) {
 }
 
 echo "Done\n";
-?>
+}

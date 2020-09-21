@@ -1831,10 +1831,14 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   }
 
   Unit* unit = compileEvalString(code.get());
+  // This exception will be caught by the caller and proper error message
+  // will be emitted
+  if (unit->getFatalInfo()) throw Exception("Parse error");
   assertx(unit != nullptr);
   unit->setInterpretOnly();
 
   // The evaluate_default_argument function should be the last one
+  assertx(unit->funcs().size() >= 1);
   auto func = *(unit->funcs().end() - 1);
   assertx(func->name()->equal(funcName.get()) &&
           "We expecting the evaluate_default_argument func");

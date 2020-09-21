@@ -6699,24 +6699,72 @@ void hoist_spills_in_loop(State& state,
     // the spill out of the loop, we won't need any spills within the
     // loop, so it's a gain since we can get rid of them.
     for (size_t i = 0; i < unit.blocks[b].code.size(); ++i) {
-      auto const& inst = unit.blocks[b].code[i];
+      auto& inst = unit.blocks[b].code[i];
 
-      auto const process = [&] (Vreg r1, Vreg r2, bool reload) {
+      auto const process = [&] (Vreg r1, Vreg r2, bool spill, bool reload) {
         auto const c1 = canonicalize(r1);
         auto const c2 = canonicalize(r2);
         if (c1 != c2) return;
         if (!candidates[c1]) return;
-        credit(
-          c1, b,
-          !!is_trivial_remat(state, r1, b, i),
-          reload
-        );
+
+        if (r1 != r2 && live_in_at(state, r1, b, i+1)) {
+          // If the instruction writes to a different Vreg than it
+          // reads from, but the src is live across the instruction,
+          // assess a penalty instead of a credit. The instruction
+          // will be turned into a copy, where both the src and dst
+          // are spilled. Since src interferes with dst, the (mem to
+          // mem) copy cannot be coalesced away. Instead it will be
+          // lowered into a load/store pair. This is actually more
+          // expensive than the previous spill/reload/copy/
+          penalty(c1, b, false, false);
+        } else if (spill || reload) {
+          // Otherwise the copy will either be trivial (same src and
+          // dst), or we optimistically assume it will be coalesced
+          // away. In that case, we're removing the instruction
+          // entirely, so its a credit. This is only applicable to
+          // spills or reloads.
+          credit(
+            c1, b,
+            !!is_trivial_remat(state, r1, b, i),
+            reload
+          );
+        }
       };
 
-      if (inst.op == Vinstr::spill) {
-        process(inst.spill_.s, inst.spill_.d, false);
-      } else if (inst.op == Vinstr::reload) {
-        process(inst.reload_.s, inst.reload_.d, true);
+      switch (inst.op) {
+        case Vinstr::spill:
+          process(inst.spill_.s, inst.spill_.d, true, false);
+          break;
+        case Vinstr::reload:
+          process(inst.reload_.s, inst.reload_.d, false, true);
+          break;
+        case Vinstr::copy:
+          process(inst.copy_.s, inst.copy_.d, false, false);
+          break;
+        case Vinstr::copyargs: {
+          auto const& srcs = unit.tuples[inst.copyargs_.s];
+          auto const& dsts = unit.tuples[inst.copyargs_.d];
+          assertx(srcs.size() == dsts.size());
+          for (size_t i = 0; i < srcs.size(); ++i) {
+            process(srcs[i], dsts[i], false, false);
+          }
+          break;
+        }
+        case Vinstr::ssaalias:
+        case Vinstr::phidef:
+        case Vinstr::phijmp:
+          // These will not be removed
+          break;
+        default: {
+          // Pure instructions which def a candidate will be removed,
+          // so provide the proper credit.
+          if (!isPure(inst)) break;
+          auto const& defs = defs_set_cached(state, inst);
+          if (defs.size() != 1) break;
+          auto const canon = canonicalize(*defs.begin());
+          if (candidates[canon]) credit(canon, b, true, true);
+          break;
+        }
       }
     }
 

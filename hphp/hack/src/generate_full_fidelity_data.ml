@@ -1065,7 +1065,7 @@ impl MinimalSmartConstructors {
     }
 }
 
-impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
+impl<'src> SyntaxSmartConstructors<MinimalSyntax, NoState>
     for MinimalSmartConstructors
 {}
 
@@ -1082,15 +1082,15 @@ impl<'src> SmartConstructors<NoState> for MinimalSmartConstructors {
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_missing(self, offset)
+        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, offset: Self::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_token(self, offset)
+        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_token(self, offset)
     }
 
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_list(self, lst, offset)
+        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_list(self, lst, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1115,7 +1115,7 @@ module GenerateFFRustPositionedSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, S, State>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<S, State>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1132,29 +1132,29 @@ use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]
-pub struct PositionedSmartConstructors<'src, S, State: StateType<'src, S>> {
+pub struct PositionedSmartConstructors<S, State: StateType<S>> {
     pub state: State,
-    phantom_s: std::marker::PhantomData<&'src S>,
+    phantom_s: std::marker::PhantomData<S>,
 }
 
-impl<'src, S, State: StateType<'src, S>> PositionedSmartConstructors<'src, S, State> {
+impl<S, State: StateType<S>> PositionedSmartConstructors<S, State> {
     pub fn new(state: State) -> Self {
         Self { state, phantom_s: std::marker::PhantomData }
     }
 }
 
-impl<'src, S, State> SyntaxSmartConstructors<'src, S, State> for PositionedSmartConstructors<'src, S, State>
+impl<S, State> SyntaxSmartConstructors<S, State> for PositionedSmartConstructors<S, State>
 where
-    State: StateType<'src, S>,
+    State: StateType<S>,
     S: SyntaxType<State> + Clone,
     S::Token: LexableToken,
 {}
 
-impl<'src, S, State> SmartConstructors<State> for PositionedSmartConstructors<'src, S, State>
+impl<S, State> SmartConstructors<State> for PositionedSmartConstructors<S, State>
 where
     S::Token: LexableToken,
     S: SyntaxType<State> + Clone,
-    State: StateType<'src, S>,
+    State: StateType<S>,
 {
     type Token = S::Token;
     type R = S;
@@ -1168,15 +1168,15 @@ where
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(self, offset)
+        <Self as SyntaxSmartConstructors<S, State>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, offset: Self::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, S, State>>::make_token(self, offset)
+        <Self as SyntaxSmartConstructors<S, State>>::make_token(self, offset)
     }
 
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, S, State>>::make_list(self, lst, offset)
+        <Self as SyntaxSmartConstructors<S, State>>::make_list(self, lst, offset)
     }
 CONSTRUCTOR_METHODS}
 "
@@ -1201,7 +1201,7 @@ module GenerateFFRustVerifySmartConstructors = struct
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
         let args = arg_kinds!(%s);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_%s(self, %s);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, State>>::make_%s(self, %s);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r
@@ -1244,13 +1244,13 @@ impl<'src> SmartConstructors<State> for VerifySmartConstructors
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(self, offset);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, State>>::make_missing(self, offset);
         self.state_mut().push(r.kind());
         r
     }
 
     fn make_token(&mut self, offset: Self::Token) -> Self::R {
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_token(self, offset);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax, State>>::make_token(self, offset);
         self.state_mut().push(r.kind());
         r
     }
@@ -1258,7 +1258,7 @@ impl<'src> SmartConstructors<State> for VerifySmartConstructors
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
         if !lst.is_empty() {
             let args: Vec<_> = (&lst).iter().map(|s| s.kind()).collect();
-            let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_list(self, lst, offset);
+            let r = <Self as SyntaxSmartConstructors<PositionedSyntax, State>>::make_list(self, lst, offset);
             self.state_mut().verify(&args);
             self.state_mut().push(r.kind());
             r
@@ -1394,10 +1394,10 @@ use parser_core_types::syntax::*;
 use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
-pub trait SyntaxSmartConstructors<'src, S: SyntaxType<State>, State = NoState>:
+pub trait SyntaxSmartConstructors<S: SyntaxType<State>, State = NoState>:
     SmartConstructors<State, R=S, Token=S::Token>
 where
-    State: StateType<'src, S>,
+    State: StateType<S>,
 {
     fn make_missing(&mut self, offset: usize) -> Self::R {
         let r = Self::R::make_missing(self.state_mut(), offset);
@@ -1413,7 +1413,7 @@ where
 
     fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
         if items.is_empty() {
-            <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(self, offset)
+            <Self as SyntaxSmartConstructors<S, State>>::make_missing(self, offset)
         } else {
             let item_refs: Vec<_> = items.iter().collect();
             self.state_mut().next(&item_refs);
@@ -1507,7 +1507,7 @@ module GenerateFFRustDeclModeSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1547,15 +1547,15 @@ where
     }
 
     fn make_missing(&mut self, o: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_missing(self, o)
+        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_missing(self, o)
     }
 
     fn make_token(&mut self, token: Self::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_token(self, token)
+        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_token(self, token)
     }
 
     fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_list(self, items, offset)
+        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_list(self, items, offset)
     }
 
 CONSTRUCTOR_METHODS}

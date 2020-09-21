@@ -12,9 +12,8 @@ use positioned_smart_constructors::*;
 use stack_limit::StackLimit;
 use syntax_smart_constructors::StateType;
 
-pub type SmartConstructors<'src> = WithKind<
-    PositionedSmartConstructors<'src, OcamlSyntax<PositionedValue>, OcamlContextState<'src>>,
->;
+pub type SmartConstructors<'src> =
+    WithKind<PositionedSmartConstructors<OcamlSyntax<PositionedValue>, OcamlContextState<'src>>>;
 
 pub type ScState<'src> = OcamlContextState<'src>;
 
@@ -28,7 +27,7 @@ pub fn parse_script<'src>(
     ScState<'src>,
 ) {
     let sc = WithKind::new(PositionedSmartConstructors::new(
-        <OcamlContextState as StateType<OcamlSyntax<PositionedValue>>>::initial(&env, source),
+        OcamlContextState::initial(source),
     ));
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);

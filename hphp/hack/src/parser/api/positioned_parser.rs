@@ -26,8 +26,7 @@ use parser::{
 use positioned_smart_constructors::*;
 use stack_limit::StackLimit;
 
-pub type SmartConstructors<'src> =
-    WithKind<PositionedSmartConstructors<'src, PositionedSyntax, NoState>>;
+pub type SmartConstructors = WithKind<PositionedSmartConstructors<PositionedSyntax, NoState>>;
 
 pub type ScState = NoState;
 

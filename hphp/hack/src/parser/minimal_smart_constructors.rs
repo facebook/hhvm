@@ -34,7 +34,7 @@ impl MinimalSmartConstructors {
     }
 }
 
-impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
+impl<'src> SyntaxSmartConstructors<MinimalSyntax, NoState>
     for MinimalSmartConstructors
 {}
 
@@ -51,15 +51,15 @@ impl<'src> SmartConstructors<NoState> for MinimalSmartConstructors {
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_missing(self, offset)
+        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, offset: Self::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_token(self, offset)
+        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_token(self, offset)
     }
 
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_list(self, lst, offset)
+        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_list(self, lst, offset)
     }
 
     fn make_end_of_file(&mut self, arg0: Self::R) -> Self::R {

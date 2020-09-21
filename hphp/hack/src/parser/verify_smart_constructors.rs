@@ -56,11 +56,7 @@ impl State {
     }
 }
 
-impl<'src> StateType<'src, PositionedSyntax> for State {
-    fn initial(_env0: &ParserEnv, _src: &SourceText<'src>) -> Self {
-        Self::new()
-    }
-
+impl StateType<PositionedSyntax> for State {
     fn next(&mut self, _inputs: &[&PositionedSyntax]) {}
 }
 
@@ -79,7 +75,7 @@ impl VerifySmartConstructors {
     }
 }
 
-impl<'src> SyntaxSmartConstructors<'src, PositionedSyntax, State> for VerifySmartConstructors {}
+impl SyntaxSmartConstructors<PositionedSyntax, State> for VerifySmartConstructors {}
 
 impl ToOcaml for State {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

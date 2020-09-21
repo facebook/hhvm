@@ -19,14 +19,8 @@ pub struct OcamlContextState<'src> {
     context: Rc<SerializationContext>,
 }
 
-impl<'src> Context for OcamlContextState<'src> {
-    fn serialization_context(&self) -> &SerializationContext {
-        self.context.as_ref()
-    }
-}
-
-impl<'src, S: Clone> StateType<'src, S> for OcamlContextState<'src> {
-    fn initial(_: &ParserEnv, src: &SourceText<'src>) -> Self {
+impl<'src> OcamlContextState<'src> {
+    pub fn initial(src: &SourceText<'src>) -> Self {
         Self {
             source: src.clone(),
             context: Rc::new(SerializationContext::new(
@@ -34,11 +28,19 @@ impl<'src, S: Clone> StateType<'src, S> for OcamlContextState<'src> {
             )),
         }
     }
+}
 
+impl Context for OcamlContextState<'_> {
+    fn serialization_context(&self) -> &SerializationContext {
+        self.context.as_ref()
+    }
+}
+
+impl<S: Clone> StateType<S> for OcamlContextState<'_> {
     fn next(&mut self, _inputs: &[&S]) {}
 }
 
-impl<'src> ToOcaml for OcamlContextState<'src> {
+impl ToOcaml for OcamlContextState<'_> {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
         NoState.to_ocaml(context)
     }

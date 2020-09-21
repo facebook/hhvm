@@ -8,7 +8,7 @@ use smart_constructors;
 
 rust_parser_ffi::parse!(
     parse_positioned,
-    SmartConstructors<'a>,
+    SmartConstructors,
     ScState,
     positioned_parser::parse_script
 );

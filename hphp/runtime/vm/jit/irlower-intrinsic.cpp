@@ -70,7 +70,7 @@ void cgDefFrameRelSP(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const sp = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  v << lea{fp[-cellsToBytes(inst->extra<DefFrameRelSP>()->irSPOff.offset)], sp};
+  v << copy{fp, sp};
 }
 
 void cgDefRegSP(IRLS& env, const IRInstruction* inst) {

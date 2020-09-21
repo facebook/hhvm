@@ -1843,21 +1843,25 @@ To string conversions:
 
   Creates a temporary D representing the current vm frame pointer.
 
-| DefFrameRelSP<stackOff>, D(StkPtr), S(FramePtr), NF
+| DefFrameRelSP<irSPOff, bcSPOff>, D(StkPtr), S(FramePtr), NF
 
-  Creates a temporary D representing the current VM stack pointer as an offset
-  `stackOff' from the frame pointer S0.
+| DefRegSP<irSPOff, bcSPOff>, D(StkPtr), NA, NF
 
-  This instruction is used at the beginning of translations of non-resumed
+  Defines a stack positioned relative to the frame or the rvmsp register.
+  
+  Creates a temporary D representing the current VM stack pointer:
+  - DefFrameRelSP: D points to the same location as the frame pointer S0
+  - DefRegSP: D is the memory address given by the rvmsp register
+
+  The logical stack starts at the stack base and its position and size is
+  defined by these values:
+  - `irSPOff' is the offset from the stack base to D
+  - `bcSPOff' is the offset from the stack base to the top of the stack
+
+  DefFrameRelSP is used at the beginning of translations of non-resumed
   functions to represent the state of the stack on entry.
 
-| DefRegSP<stackOff>, D(StkPtr), NA, NF
-
-  Creates a temporary D representing the current VM stack pointer given by
-  the rvmsp register. The `stackOff' is a logical offset from a stack base,
-  which is a stack pointer to the empty logical stack within the translation.
-
-  This instruction is used at the beginning of translations of prologues and
+  DegRegSP is used at the beginning of translations of prologues and
   resumed functions to represent the state of the stack on entry.
 
   In prologues, the stack base represents a stack without any func arguments,

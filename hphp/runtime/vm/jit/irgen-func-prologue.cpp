@@ -312,7 +312,7 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
 
   gen(env, DefFuncEntryFP, FuncData { callee },
       fp(env), sp(env), callFlags, cns(env, arNumArgs), ctx);
-  auto const irSPOff = FPInvOffset { callee->numSlotsInFrame() };
+  auto const irSPOff = FPInvOffset { 0 };
   auto const bcSPOff = FPInvOffset { callee->numSlotsInFrame() };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
 }

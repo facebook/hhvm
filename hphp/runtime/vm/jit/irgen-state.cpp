@@ -52,11 +52,12 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
   updateMarker(*this);
 
   // Define SP.
-  auto const irSPOff = context.initSpOffset;
   auto const bcSPOff = context.initSpOffset;
   if (resumeMode(*this) == ResumeMode::None && !prologueSetup) {
+    auto const irSPOff = FPInvOffset { 0 };
     gen(*this, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, frame);
   } else {
+    auto const irSPOff = context.initSpOffset;
     gen(*this, DefRegSP, DefStackData { irSPOff, bcSPOff });
   }
 

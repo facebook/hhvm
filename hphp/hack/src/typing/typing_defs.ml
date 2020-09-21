@@ -858,12 +858,13 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tmixed, Tmixed) -> true
   | (Tnonnull, Tnonnull) -> true
   | (Tdynamic, Tdynamic) -> true
-  | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
-    Aast.equal_sid id1 id2 && equal_decl_tyl tyl1 tyl2
+  | (Tapply ((_, s1), tyl1), Tapply ((_, s2), tyl2)) ->
+    String.equal s1 s2 && equal_decl_tyl tyl1 tyl2
   | (Tgeneric (s1, argl1), Tgeneric (s2, argl2)) ->
     String.equal s1 s2 && equal_decl_tyl argl1 argl2
   | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
-    equal_decl_ty ty1 ty2 && List.equal ~equal:Aast.equal_sid idl1 idl2
+    equal_decl_ty ty1 ty2
+    && List.equal ~equal:(fun (_, s1) (_, s2) -> String.equal s1 s2) idl1 idl2
   | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->
     Option.equal equal_decl_ty tk1 tk2 && Option.equal equal_decl_ty tv1 tv2
   | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
@@ -886,8 +887,8 @@ let rec equal_decl_ty_ ty_1 ty_2 =
            Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
          (Nast.ShapeMap.elements fields1)
          (Nast.ShapeMap.elements fields2)
-  | (Tpu_access (ty1, id1), Tpu_access (ty2, id2)) ->
-    equal_decl_ty ty1 ty2 && Aast.equal_sid id1 id2
+  | (Tpu_access (ty1, (_, s1)), Tpu_access (ty2, (_, s2))) ->
+    equal_decl_ty ty1 ty2 && String.equal s1 s2
   | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
   | (Tany _, _)
   | (Terr, _)

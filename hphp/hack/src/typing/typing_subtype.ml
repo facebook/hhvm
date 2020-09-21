@@ -901,7 +901,7 @@ and simplify_subtype_i
                 let targ_equal (_, (_, hint1)) (_, (_, hint2)) =
                   Aast_defs.equal_hint_ hint1 hint2
                 in
-                Nast.equal_sid name_sub name
+                String.equal (snd name_sub) (snd name)
                 && class_id_equal cid_sub class_id
                 && Option.equal
                      (List.equal ~equal:targ_equal)

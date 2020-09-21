@@ -47,6 +47,7 @@ where
     sc: S,
     precedence: usize,
     allow_as_expressions: bool,
+    in_expression_tree: bool,
     _phantom: PhantomData<S>,
 }
 
@@ -65,6 +66,7 @@ where
             precedence: self.precedence,
             _phantom: self._phantom,
             allow_as_expressions: self.allow_as_expressions,
+            in_expression_tree: self.in_expression_tree,
         }
     }
 }
@@ -89,6 +91,7 @@ where
             errors,
             sc,
             allow_as_expressions: true,
+            in_expression_tree: false,
             _phantom: PhantomData,
         }
     }
@@ -159,6 +162,10 @@ where
 {
     fn allow_as_expressions(&self) -> bool {
         self.allow_as_expressions
+    }
+
+    fn in_expression_tree(&self) -> bool {
+        self.in_expression_tree
     }
 
     pub fn with_as_expressions<F, U>(&mut self, enabled: bool, f: F) -> U
@@ -398,10 +405,12 @@ where
                         str_maybe, StringLiteralKind::LiteralDoubleQuoted);
                         S!(make_prefixed_string_expression, self, qualified_name, str_)
                     }
-                    | TokenKind::Backtick => {
+                    | TokenKind::Backtick if !self.in_expression_tree() => {
                         let prefix = S!(make_simple_type_specifier, self, qualified_name);
                         let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+                        self.in_expression_tree = true;
                         let expr = self.parse_expression_with_reset_precedence();
+                        self.in_expression_tree = false;
                         let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
                         S!(make_prefixed_code_expression, self, prefix, left_backtick, expr, right_backtick)
                     }

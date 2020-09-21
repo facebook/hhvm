@@ -5622,6 +5622,14 @@ where
 
                 self.fold_child_nodes(node)
             }
+            FunctionCallExpression(x)
+                if self.text(&x.function_call_receiver) == sn::special_functions::SPLICE =>
+            {
+                let previous_state = self.env.context.active_expression_tree;
+                self.env.context.active_expression_tree = false;
+                self.fold_child_nodes(node);
+                self.env.context.active_expression_tree = previous_state;
+            }
             _ => self.fold_child_nodes(node),
         }
 

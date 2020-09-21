@@ -271,6 +271,7 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
     ENABLE_FIRST_CLASS_FUNCTION_POINTERS,
+    ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY_CAST,
     DISABLE_ARRAY_TYPEHINT,
@@ -743,6 +744,9 @@ mod tests {
   "hhvm.hack.lang.enable_coroutines": {
     "global_value": true
   },
+  "hhvm.hack.lang.enable_enum_classes": {
+    "global_value": false
+  },
   "hhvm.hack.lang.enable_first_class_function_pointers": {
     "global_value": false
   },
@@ -1179,7 +1183,7 @@ bitflags! {
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
         const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;
-        // No longer using bit 48.
+        const ENABLE_ENUM_CLASSES = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
         const RUST_EMITTER = 1 << 51;

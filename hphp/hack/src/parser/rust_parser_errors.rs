@@ -1719,6 +1719,17 @@ where
         }
     }
 
+    fn is_in_enum_class(&self) -> bool {
+        let active_classish = match self.env.context.active_classish {
+            Some(x) => x,
+            _ => return false,
+        };
+        if let ClassishDeclaration(cd) = &active_classish.syntax {
+            return self.attr_spec_contains_enum_class(&cd.classish_attribute);
+        }
+        return false;
+    }
+
     fn is_in_reified_class(&self) -> bool {
         let active_classish = match self.env.context.active_classish {
             Some(x) => x,
@@ -3877,6 +3888,10 @@ where
         self.attribute_specification_contains(node, sn::user_attributes::SEALED)
     }
 
+    fn attr_spec_contains_enum_class(&self, node: &'a Syntax<Token, Value>) -> bool {
+        self.attribute_specification_contains(node, sn::user_attributes::ENUM_CLASS)
+    }
+
     fn attr_spec_contains_const(&self, node: &'a Syntax<Token, Value>) -> bool {
         self.attribute_specification_contains(node, sn::user_attributes::CONST)
     }
@@ -4659,6 +4674,12 @@ where
                 // Bans the equivalent of inst_meth as well as class_meth and fun
                 if self.env.parser_options.po_disallow_func_ptrs_in_constants {
                     default(self)
+                }
+            }
+            ObjectCreationExpression(_) => {
+                // We allow "enum class" constants to be initialized via new.
+                if !(self.env.parser_options.po_enable_enum_classes && self.is_in_enum_class()) {
+                    default(self);
                 }
             }
             _ => default(self),

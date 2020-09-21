@@ -97,6 +97,10 @@ fn is_native(attr: &HhasAttribute) -> bool {
     is("__Native", attr)
 }
 
+fn is_enum_class(attr: &HhasAttribute) -> bool {
+    is("__EnumClass", attr)
+}
+
 fn is_memoize(attr: &HhasAttribute) -> bool {
     &attr.name == ua::MEMOIZE || &attr.name == ua::MEMOIZE_LSB
 }
@@ -107,6 +111,10 @@ fn is_memoize_lsb(attr: &HhasAttribute) -> bool {
 
 pub fn has_native(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_native)
+}
+
+pub fn has_enum_class(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_enum_class)
 }
 
 pub fn has_dynamically_constructible(attrs: &[HhasAttribute]) -> bool {

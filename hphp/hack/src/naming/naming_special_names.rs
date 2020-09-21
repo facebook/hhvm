@@ -287,6 +287,8 @@ pub mod user_attributes {
 
     pub const ENABLE_UNSTABLE_FEATURES: &str = "__EnableUnstableFeatures";
 
+    pub const ENUM_CLASS: &str = "__EnumClass";
+
     lazy_static! {
         static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,

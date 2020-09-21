@@ -118,6 +118,11 @@ let enable_first_class_function_pointers =
 let with_enable_first_class_function_pointers po b =
   { po with GlobalOptions.po_enable_first_class_function_pointers = b }
 
+let enable_enum_classes = GlobalOptions.po_enable_enum_classes
+
+let with_enable_enum_classes po b =
+  { po with GlobalOptions.po_enable_enum_classes = b }
+
 let disable_modes = GlobalOptions.po_disable_modes
 
 let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error
@@ -148,6 +153,7 @@ let make
     ~allow_unstable_features
     ~disable_xhp_children_declarations
     ~enable_first_class_function_pointers
+    ~enable_enum_classes
     ~disable_modes
     ~disable_hh_ignore_error
     ~disable_array
@@ -177,6 +183,7 @@ let make
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
       po_enable_first_class_function_pointers =
         enable_first_class_function_pointers;
+      po_enable_enum_classes = enable_enum_classes;
       po_disable_modes = disable_modes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_disable_array = disable_array;
@@ -186,6 +193,7 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -220,6 +228,7 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_xhp_element_mangling po,
     disable_xhp_children_declarations po,
     enable_first_class_function_pointers po,
+    enable_enum_classes po,
     disable_modes po,
     disable_array po,
     const_default_lambda_args po,

@@ -697,6 +697,9 @@ fn print_class_special_attributes<W: Write>(
     if hhas_attribute::has_foldable(user_attrs) {
         special_attributes.push("foldable")
     }
+    if hhas_attribute::has_enum_class(user_attrs) {
+        special_attributes.push("enum_class")
+    }
     if is_system_lib {
         special_attributes.extend(&["persistent", "builtin", "unique"])
     }

@@ -1458,7 +1458,7 @@ void append_inline_returns(Global& genv, Block* b, SSATmp* start, SSATmp* end) {
 
       // The IRSPRelOffset of `next` relative to `sp` is the same as the
       // FPInvOffset of `sp` relative to `next`.
-      auto const off = sp->inst()->extra<FPInvOffsetData>()->offset;
+      auto const off = sp->inst()->extra<DefStackData>()->irSPOff;
       return IRSPRelOffset{off.offset};
     }().offset;
 
@@ -1512,7 +1512,7 @@ void adjust_inline_marker(IRInstruction& inst, SSATmp* fp) {
     }
     assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
     auto const defSP = curFp->inst()->src(0)->inst();
-    return defSP->extra<FPInvOffsetData>()->offset.offset;
+    return defSP->extra<DefStackData>()->irSPOff.offset;
   }();
 
   // Compute the difference in spoffset between the current and the previous

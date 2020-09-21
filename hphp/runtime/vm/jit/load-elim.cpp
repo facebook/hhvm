@@ -651,7 +651,7 @@ int32_t findSPOffset(const IRUnit& unit, const SSATmp* fp,
   }
   assertx(inst->is(DefFP, DefFuncEntryFP));
   assertx(defSP->is(DefFrameRelSP, DefRegSP));
-  return defSP->extra<FPInvOffsetData>()->offset.offset;
+  return defSP->extra<DefStackData>()->irSPOff.offset;
 }
 
 Flags handle_end_catch(Local& env, const IRInstruction& inst) {
@@ -716,7 +716,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
     auto const fpReg = inst.src(0);
     auto const defSP = inst.src(1)->inst();
     auto const spOff = findSPOffset(env.global.unit, fpReg, defSP);
-    auto const defSPOff = defSP->extra<FPInvOffsetData>()->offset.offset;
+    auto const defSPOff = defSP->extra<DefStackData>()->irSPOff.offset;
     assertx(!fpReg->inst()->is(DefFP, DefFuncEntryFP) || defSPOff == spOff);
     return spOff - defSPOff;
   }();

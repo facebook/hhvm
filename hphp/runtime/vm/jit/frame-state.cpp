@@ -198,43 +198,6 @@ bool merge_into(jit::vector<FrameState>& dst, const jit::vector<FrameState>& src
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool check_invariants(const FrameState& state) {
-  for (auto id = uint32_t{0}; id < state.locals.size(); ++id) {
-    auto const& local = state.locals[id];
-
-    always_assert_flog(
-      local.predictedType <= local.type,
-      "local {} failed prediction invariants; pred = {}, type = {}\n",
-      id,
-      local.predictedType,
-      local.type
-    );
-
-    always_assert_flog(
-      local.value == nullptr || local.value->type() == local.type,
-      "local {} had type {}, but value {}\n",
-      id,
-      local.type,
-      local.value->toString()
-    );
-
-  }
-
-  // We require the memory stack is always at least as big as the irSPOff,
-  // unless irSPOff went negative (because we're returning and have freed the
-  // ActRec).  Note that there are some "wasted" slots where locals/iterators
-  // would be in the vector right now.
-  always_assert_flog(
-    state.irSPOff < FPInvOffset{0} ||
-    state.stack.size() >= state.irSPOff.offset,
-    "stack was smaller than possible"
-  );
-
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Recompute a predicted type for when the proven type changes (or when a new
  * prediction is made and we want to discard the old one).
@@ -259,14 +222,14 @@ Type refinePrediction(Type oldPredicted, Type newPredicted, Type proven) {
 
 }
 
-FrameStateMgr::FrameStateMgr(const BCMarker& marker) {
-  m_stack.push_back(FrameState{});
-  cur().curFunc = marker.func();
-  cur().irSPOff = marker.spOff();
-  cur().bcSPOff = marker.spOff();
-  cur().locals.resize(marker.func()->numLocals());
-  cur().stack.resize(marker.spOff().offset);
-}
+FrameState::FrameState(const Func* func)
+  : curFunc(func)
+  , locals(func->numLocals())
+{}
+
+FrameStateMgr::FrameStateMgr(const Func* func)
+  : m_stack{FrameState(func)}
+{}
 
 void FrameStateMgr::update(const IRInstruction* inst) {
   ITRACE(3, "FrameStateMgr::update processing {}\n", *inst);
@@ -371,15 +334,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case RetCtrl:
-    cur().spValue = nullptr;
+    uninitStack();
     cur().fpValue = nullptr;
     break;
 
   case DefFrameRelSP:
-  case DefRegSP:
-    cur().spValue = inst->dst();
-    cur().irSPOff = inst->extra<FPInvOffsetData>()->offset;
+  case DefRegSP: {
+    auto const data = inst->extra<DefStackData>();
+    initStack(inst->dst(), data->irSPOff, data->bcSPOff);
     break;
+  }
 
   case LdMem:
     if (inst->src(0) == cur().mbr.ptr) {
@@ -1002,6 +966,22 @@ void FrameStateMgr::clearForUnprocessedPred() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void FrameStateMgr::initStack(SSATmp* sp, FPInvOffset irSPOff,
+                              FPInvOffset bcSPOff) {
+  cur().spValue = sp;
+  cur().irSPOff = irSPOff;
+  cur().bcSPOff = bcSPOff;
+  cur().stack.clear();
+  cur().stack.resize(bcSPOff.offset);
+}
+
+void FrameStateMgr::uninitStack() {
+  cur().spValue = nullptr;
+  cur().irSPOff = FPInvOffset{0};
+  cur().bcSPOff = FPInvOffset{0};
+  cur().stack.clear();
+}
+
 void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
   assertx(inst->src(0)->inst()->is(BeginInlining));
   auto const extra      = inst->extra<InlineCall>();
@@ -1019,18 +999,15 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
     setValue(stk(extra->spOffset + i), nullptr);
   }
   cur().bcSPOff = savedSPOff;
-  auto stateCopy = m_stack.back();
-  m_stack.emplace_back(std::move(stateCopy));
+
+  m_stack.emplace_back(FrameState{target});
+
+  // Set up the callee's frame.
+  cur().fpValue = calleeFP;
 
   /*
-   * Set up the callee state.
-   */
-  cur().fpValue          = calleeFP;
-  cur().ctx              = nullptr;
-  cur().curFunc          = target;
-  cur().bcSPOff          = FPInvOffset{target->numSlotsInFrame()};
-
-  /*
+   * Set up the callee's stack.
+   *
    * To set up irSPOff, we want the FPInvOffset for the new fpValue and
    * spValue.  We're not changing spValue while we inline, but we're changing
    * fpValue, so this needs to change.  We know where the new fpValue is
@@ -1042,25 +1019,25 @@ void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
    * So,
    *    spValue = fpValue - extra->spOffset (an FPInvOffset)
    */
-  cur().irSPOff = FPInvOffset{extra->spOffset.offset};
-  FTRACE(6, "InlineCall setting irSPOff: {}\n", cur().irSPOff.offset);
+  auto const irSPOff = FPInvOffset{extra->spOffset.offset};
+  auto const bcSPOff = FPInvOffset{target->numSlotsInFrame()};
+  initStack(caller().spValue, irSPOff, bcSPOff);
+  FTRACE(6, "InlineCall setting irSPOff: {}\n", irSPOff.offset);
 
-  /*
-   * Initialize tracked memory state for locals and stack slots to empty
-   * values.
-   */
-  cur().locals.clear();
-  cur().locals.resize(target->numLocals());
-  cur().stack.clear();
-  cur().stack.resize(std::max(cur().bcSPOff.offset,
-                              cur().irSPOff.offset));
+  // Copy the type predictions.
+  cur().predictedTypes = caller().predictedTypes;
 }
 
 void FrameStateMgr::trackInlineReturn() {
-  DEBUG_ONLY auto const cur_SP = cur().spValue;
+  // Inlining may not change spValue
+  assertx(caller().spValue == cur().spValue);
+
+  // Copy back the type predictions, as we may have refined types further.
+  caller().predictedTypes = std::move(cur().predictedTypes);
+
+  // Pop the inlined frame.
   m_stack.pop_back();
   assertx(!m_stack.empty());
-  assertx(cur_SP == cur().spValue); // inlining may not change spValue
 }
 
 /*
@@ -1080,9 +1057,41 @@ void FrameStateMgr::trackCall() {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+bool FrameState::checkInvariants() const {
+  for (auto id = uint32_t{0}; id < locals.size(); ++id) {
+    auto const& local = locals[id];
+
+    always_assert_flog(
+      local.predictedType <= local.type,
+      "local {} failed prediction invariants; pred = {}, type = {}\n",
+      id,
+      local.predictedType,
+      local.type
+    );
+
+    always_assert_flog(
+      local.value == nullptr || local.value->type() == local.type,
+      "local {} had type {}, but value {}\n",
+      id,
+      local.type,
+      local.value->toString()
+    );
+  }
+
+  // Make sure the stack is either initialized or read-only empty.
+  always_assert_flog(
+    spValue != nullptr || (irSPOff.offset == 0 && bcSPOff.offset == 0),
+    "incorrectly initialized stack"
+  );
+
+  return true;
+}
+
 bool FrameStateMgr::checkInvariants() const {
   for (auto& state : m_stack) {
-    always_assert(check_invariants(state));
+    always_assert(state.checkInvariants());
   }
   return true;
 }
@@ -1395,13 +1404,14 @@ void FrameStateMgr::setMemberBase(SSATmp* base,
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string FrameStateMgr::show() const {
-  auto func = cur().curFunc;
-  auto funcName = func ? func->fullName() : makeStaticString("null");
+  auto const funcName = cur().curFunc->fullName();
+  if (sp() == nullptr) {
+    return folly::sformat("func: {}, stack uninit", funcName);
+  }
 
   return folly::sformat(
-    "func: {}, spOff: {}",
-    funcName,
-    irSPOff().offset
+    "func: {}, irSPOff: {}, bcSPOff: {}",
+    funcName, irSPOff().offset, bcSPOff().offset
   );
 }
 

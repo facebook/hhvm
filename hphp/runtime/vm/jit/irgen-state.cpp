@@ -52,11 +52,16 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
   updateMarker(*this);
 
   // Define SP.
+  auto const irSPOff = context.initSpOffset;
+  auto const bcSPOff = context.initSpOffset;
   if (resumeMode(*this) == ResumeMode::None && !prologueSetup) {
-    gen(*this, DefFrameRelSP, FPInvOffsetData { context.initSpOffset }, frame);
+    gen(*this, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, frame);
   } else {
-    gen(*this, DefRegSP, FPInvOffsetData { context.initSpOffset });
+    gen(*this, DefRegSP, DefStackData { irSPOff, bcSPOff });
   }
+
+  // Now that the stack is initialized, update the BC marker again.
+  updateMarker(*this);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts && !prologueSetup) {
     // Assert that we're in the correct function.

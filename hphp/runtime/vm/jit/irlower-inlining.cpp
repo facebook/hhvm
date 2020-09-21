@@ -86,7 +86,7 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
         auto const extra = be->src(1)->inst()->extra<BeginInlining>();
         return FPInvOffset{extra->spOffset.offset};
       }
-      return defsp->extra<FPInvOffsetData>()->offset;
+      return defsp->extra<DefStackData>()->irSPOff;
     }();
     auto const spoff = inst->src(0)->inst()->extra<BeginInlining>()->spOffset;
     return spoff.to<FPInvOffset>(parentToSp).offset;

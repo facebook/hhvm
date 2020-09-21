@@ -55,7 +55,9 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
   // make some instructions.
   auto const mainFP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefFrameRelSP, bcctx, FPInvOffsetData { FPInvOffset { 10 } }, mainFP
+    DefFrameRelSP, bcctx,
+    DefStackData { FPInvOffset { 10 }, FPInvOffset { 10 } },
+    mainFP
   )->dst();
 
   return {
@@ -227,7 +229,10 @@ TEST(AliasClass, StackBasics) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefFrameRelSP, bcctx, FPInvOffsetData { FPInvOffset { 5 } }, FP)->dst();
+    DefFrameRelSP, bcctx,
+    DefStackData { FPInvOffset { 5 }, FPInvOffset { 5 } },
+    FP
+  )->dst();
 
   // Some basic canonicalization and maybe.
   {
@@ -347,7 +352,10 @@ TEST(AliasClass, StackUnions) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto const FP = unit.gen(DefFP, bcctx)->dst();
   auto const SP = unit.gen(
-    DefFrameRelSP, bcctx, FPInvOffsetData { FPInvOffset { 1 } }, FP)->dst();
+    DefFrameRelSP, bcctx,
+    DefStackData { FPInvOffset { 1 }, FPInvOffset { 1 } },
+    FP
+  )->dst();
 
   {
     AliasClass const stk1  = AStack { FP, FPRelOffset { -3 }, 1 };

@@ -578,17 +578,31 @@ struct FPRelOffsetData : IRExtraData {
 /*
  * Stack pointer offset.
  */
-struct FPInvOffsetData : IRExtraData {
-  explicit FPInvOffsetData(FPInvOffset offset) : offset(offset) {}
+struct DefStackData : IRExtraData {
+  explicit DefStackData(FPInvOffset irSPOff, FPInvOffset bcSPOff)
+    : irSPOff(irSPOff)
+    , bcSPOff(bcSPOff)
+  {}
 
   std::string show() const {
-    return folly::to<std::string>("FPInvOff ", offset.offset);
+    return folly::to<std::string>(
+      "irSPOff={}, bcSPOff={}",
+      irSPOff.offset, bcSPOff.offset
+    );
   }
 
-  bool equals(FPInvOffsetData o) const { return offset == o.offset; }
-  size_t hash() const { return std::hash<int32_t>()(offset.offset); }
+  bool equals(DefStackData o) const {
+    return irSPOff == o.irSPOff && bcSPOff == o.bcSPOff;
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(
+      std::hash<int32_t>()(irSPOff.offset),
+      std::hash<int32_t>()(bcSPOff.offset)
+    );
+  }
 
-  FPInvOffset offset;
+  FPInvOffset irSPOff;  // offset from stack base to vmsp()
+  FPInvOffset bcSPOff;  // offset from stack base to top of the stack
 };
 
 /*
@@ -1669,8 +1683,8 @@ X(StStk,                        IRSPRelOffsetData);
 X(StOutValue,                   IndexData);
 X(LdOutAddr,                    IndexData);
 X(AssertStk,                    IRSPRelOffsetData);
-X(DefFrameRelSP,                FPInvOffsetData);
-X(DefRegSP,                     FPInvOffsetData);
+X(DefFrameRelSP,                DefStackData);
+X(DefRegSP,                     DefStackData);
 X(LdStk,                        IRSPRelOffsetData);
 X(LdStkAddr,                    IRSPRelOffsetData);
 X(InlineCall,                   InlineCallData);

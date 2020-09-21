@@ -79,7 +79,7 @@ IRBuilder::IRBuilder(IRUnit& unit, const BCMarker& initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
   , m_curBCContext{initMarker, 0}
-  , m_state(initMarker)
+  , m_state(initMarker.func())
   , m_curBlock(m_unit.entry())
 {
   if (RuntimeOption::EvalHHIRGenOpts) {

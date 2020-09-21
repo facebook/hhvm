@@ -314,7 +314,7 @@ void visitGuards(IRUnit& unit, F func) {
 
           auto const defSP = inst.src(0)->inst();
           assertx(defSP->is(DefFrameRelSP, DefRegSP));
-          auto const irSPOff = defSP->extra<FPInvOffsetData>()->offset;
+          auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
 
           func(&inst,
                Location::Stack{irSPRel.to<FPInvOffset>(irSPOff)},

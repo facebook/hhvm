@@ -124,29 +124,20 @@ void prepareArg(const ArgDesc& arg,
 
 Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   assertx(marker.valid());
+  // We can get here if we are memory profiling, since we override the
+  // normal sync settings and sync anyway.
+  always_assert(
+    sync == SyncOptions::Sync ||
+    RuntimeOption::EvalJitForceVMRegSync ||
+    RuntimeOption::HHProfEnabled
+  );
 
   // Stublogue code operates on behalf of the caller, so it needs an indirect
   // fixup to obtain the real savedRip from the native frame.
-  if (sync == SyncOptions::SyncStublogue) return makeIndirectFixup(0);
-
-  auto const stackOff = [&] {
-    switch (sync) {
-      case SyncOptions::None:
-        // We can get here if we are memory profiling, since we override the
-        // normal sync settings and sync anyway.
-        always_assert(RuntimeOption::EvalJitForceVMRegSync ||
-                      RuntimeOption::HHProfEnabled);
-        // fallthru
-      case SyncOptions::Sync:
-        return marker.spOff();
-
-      case SyncOptions::SyncStublogue:
-        not_reached();
-    }
-    not_reached();
-  }();
+  if (marker.stublogue()) return makeIndirectFixup(0);
 
   auto const bcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
+  auto const stackOff = marker.spOff();
   return Fixup{bcOff, stackOff.offset};
 }
 

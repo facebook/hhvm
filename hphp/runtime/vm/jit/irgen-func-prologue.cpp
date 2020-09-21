@@ -285,6 +285,9 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc) {
 
   gen(env, EnterPrologue);
 
+  // Update marker with the stublogue bit.
+  updateMarker(env);
+
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(callee, argc) == StackCheck::Early) {
     env.irb->exceptionStackBoundary();

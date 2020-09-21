@@ -126,7 +126,7 @@ void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
 
   unlikelyIfThen(v, vcold(env), CC_L, sf, [&] (Vout& v) {
     cgCallHelper(v, env, CallSpec::direct(throw_stack_overflow), kVoidDest,
-                 SyncOptions::SyncStublogue, argGroup(env, inst));
+                 SyncOptions::Sync, argGroup(env, inst));
   });
 }
 

@@ -902,7 +902,8 @@ and branch :
   (env, tbr1, tbr2)
 
 and finally_cont fb env ctx =
-  let env = LEnv.replace_cont env C.Next (Some ctx) in
+  (* The only locals in scope are the ones from the current continuation *)
+  let env = Env.env_with_locals env @@ CMap.singleton C.Next ctx in
   let (env, _tfb) = block env fb in
   (env, LEnv.get_all_locals env)
 
@@ -933,7 +934,7 @@ and finally env fb =
     let (env, locals_map) =
       Errors.ignore_ (fun () -> CMap.map_env finally_cont env parent_locals)
     in
-    let (env, locals) = Try.finally_merge env locals_map in
+    let (env, locals) = Try.finally_merge env locals_map all_conts in
     (Env.env_with_locals env locals, tfb)
 
 and try_catch env tb cl fb =
@@ -953,6 +954,7 @@ and try_catch env tb cl fb =
         (env, (ttb, tcb)))
   in
   let (env, tfb) = finally env fb in
+  let env = LEnv.update_next_from_conts env [C.Finally] in
   let env = LEnv.drop_cont env C.Finally in
   let env =
     LEnv.restore_and_merge_conts_from

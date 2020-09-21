@@ -47,3 +47,47 @@ function finally_typing2(): string {
 // }
 
 function do_something(): void {}
+
+function finally_typing3(bool $c): int {
+  try {
+    try {
+      if ($c) {
+        $a = "string";
+        throw new Exception();
+      }
+      $a = 0;
+    } finally {
+      // $a has different types depending on the continuation
+      $b = $a;
+    }
+  } catch (Exception $_) {
+    // $b should be a string here
+    return str_to_int($b);
+  }
+  return $b;
+}
+
+function str_to_int(string $s): int {
+  return 0;
+}
+
+function finally_typing4(int $x): void {
+  $a = 0;
+  try {
+    try {
+      if ($x < 0) {
+        throw new Exception();
+      }
+    } finally {
+      if ($x < 1) {
+        $a = "string";
+        throw new Exception();
+      }
+      $a = 1;
+    }
+  } catch (Exception $_) {
+    hh_show($a);
+    return;
+  }
+  hh_show($a);
+}

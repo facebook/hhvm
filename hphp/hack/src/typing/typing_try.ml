@@ -29,18 +29,14 @@ let get_cont_cont cont_cont_map cont1 cont2 =
   | Some cont_map -> CMap.find_opt cont2 cont_map
 
 let make_new_cont locals_map env cont =
-  match cont with
-  | C.Next -> (env, get_cont_cont locals_map C.Finally C.Next)
-  | _ ->
-    let ctx_cont_cont = get_cont_cont locals_map cont cont in
-    let ctxs_x_cont = CMap.map (CMap.find_opt cont) locals_map in
-    let union env _key = LEnv.union_contextopts env in
-    CMap.fold_env env union ctxs_x_cont ctx_cont_cont
+  let ctx_cont_next = get_cont_cont locals_map cont C.Next in
+  let ctxs_x_cont = CMap.map (CMap.find_opt cont) locals_map in
+  let union env _key = LEnv.union_contextopts env in
+  CMap.fold_env env union ctxs_x_cont ctx_cont_next
 
-let finally_merge env locals_map =
+let finally_merge env locals_map all_conts =
   let make_and_add_new_cont env locals cont =
     let (env, ctxopt) = make_new_cont locals_map env cont in
     (env, LEnvC.replace_cont cont ctxopt locals)
   in
-  Env.all_continuations env
-  |> List.fold_left_env env ~f:make_and_add_new_cont ~init:CMap.empty
+  List.fold_left_env env ~f:make_and_add_new_cont ~init:CMap.empty all_conts

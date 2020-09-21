@@ -1,1 +1,5 @@
+File "finally_typing.php", line 89, characters 5-15:
+  (int | string)
+File "finally_typing.php", line 92, characters 3-13:
+  int
 No errors

@@ -39,34 +39,23 @@ void getBaseType(Opcode rawOp, bool predict,
   always_assert(baseType <= TCell);
   auto const op = canonicalOp(rawOp);
 
-  // Deal with possible promotion to stdClass or array
   if ((op == SetElem || op == SetProp) &&
       baseType.maybe(TNull | TBool | TStr)) {
-    auto newBase = op == SetProp ? TObj : TArr;
-
-    if (predict) {
+    if (predict && baseType.maybe(TStr)) {
       /* If the output type will be used as a prediction and not as fact, we
        * can be optimistic here. Assume no promotion for string bases and
-       * promotion in other cases. */
-      baseType = baseType <= TStr ? TStr : newBase;
-    } else if (baseType <= TStr && rawOp == SetElem) {
-      /* If the base is known to be a string and the operation is exactly
-       * SetElem, we're guaranteed that either the base will end as a
-       * StaticStr or the instruction will throw an exception and side
-       * exit. */
-      baseType = TStaticStr;
+       * an exception otherwise */
+      baseType = TStr;
     } else if (baseType <= TStr && rawOp == SetNewElem) {
-      /* If the string base is empty, it will be promoted to an
-       * array. Otherwise the base will be left alone and we'll fatal. */
-      baseType = TArr;
-    } else {
-      /* Regardless of whether or not promotion happens, we know the base
-       * cannot be Null after the operation. If the base was a subtype of Null
-       * this will give newBase. */
-      baseType = (baseType - TNull) | newBase;
+      /* new-elem to string will always raise, empty or not */
+      baseType = TBottom;
+    } else if (baseType.maybe(TNull | TBool)) {
+      /* we used to promote falsey things to array or an instance of stdClass,
+       * now these always raise, except a base of `true` gets coerced to null */
+      baseType -= TNull;
     }
 
-    baseValChanged = true;
+    if (baseType != TBottom) baseValChanged = true;
   }
 
   if ((op == SetElem || op == SetRange || op == UnsetElem) &&
@@ -123,7 +112,7 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
 
   baseType = is_ptr ? baseType.lval(basePtr) : baseType;
   baseTypeChanged = baseType != origBase;
-  baseValChanged = baseValChanged || baseTypeChanged;
+  baseValChanged = baseValChanged || (baseTypeChanged && baseType != TBottom);
 }
 
 //////////////////////////////////////////////////////////////////////

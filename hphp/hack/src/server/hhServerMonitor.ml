@@ -85,9 +85,10 @@ let monitor_daemon_main
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;
 
-  if ServerArgs.check_mode options then
+  if ServerArgs.check_mode options then (
+    Hh_logger.log "%s" "Will run once in check mode then exit.";
     ServerMain.run_once options config local_config
-  else
+  ) else
     let current_version = ServerConfig.version config in
     let waiting_client = ServerArgs.waiting_client options in
     let ServerLocalConfig.Watchman.
@@ -172,9 +173,12 @@ let start () =
       | Error e -> [e]
     in
     let options = ServerArgs.parse_options () in
-    if ServerArgs.should_detach options then
+    if ServerArgs.should_detach options then (
+      Hh_logger.(log "%s" "Running in daemon mode.");
       Exit.exit (start_daemon options ~proc_stack)
-    else
+    ) else (
+      Hh_logger.(log "%s" "Running without daemon mode.");
       monitor_daemon_main options ~proc_stack
+    )
   with SharedMem.Out_of_shared_memory ->
     Exit.exit Exit_status.Out_of_shared_memory

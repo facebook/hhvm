@@ -626,6 +626,7 @@ pub enum Node<'a> {
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>),
+    ConstInitializer(&'a (Node<'a>, Node<'a>)), // Name, initializer expression
     FunParam(&'a FunParamDecl<'a>),
     Attribute(&'a UserAttributeNode<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
@@ -2739,52 +2740,52 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_const_declaration(
         &mut self,
         modifiers: Self::R,
-        _arg1: Self::R,
+        _const_keyword: Self::R,
         hint: Self::R,
         decls: Self::R,
-        _arg4: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
-        // None of the Node::Ignoreds should happen in a well-formed file, but
-        // they could happen in a malformed one. We also bubble up the const
-        // declaration instead of inserting it immediately because consts can
-        // appear in classes or directly in namespaces.
         match decls {
-            Node::List([Node::List([name, initializer])]) => {
-                let id = unwrap_or_return!(
-                    self.get_name(
-                        if self
-                            .state
-                            .classish_name_builder
-                            .get_current_classish_name()
-                            .is_some()
-                        {
-                            ""
-                        } else {
-                            self.state.namespace_builder.current_namespace()
-                        },
-                        *name,
-                    )
-                );
-                let ty = self
-                    .node_to_ty(hint)
-                    .or_else(|| self.infer_const(*name, *initializer))
-                    .unwrap_or_else(|| tany());
-                let modifiers = read_member_modifiers(modifiers.iter());
+            // Class consts.
+            Node::List(consts)
                 if self
                     .state
                     .classish_name_builder
                     .get_current_classish_name()
-                    .is_some()
-                {
-                    Node::Const(self.alloc(shallow_decl_defs::ShallowClassConst {
-                        abstract_: modifiers.is_abstract,
-                        name: id,
-                        type_: ty,
-                    }))
-                } else {
-                    self.add_const(id.1, ty);
-                    Node::Ignored
-                }
+                    .is_some() =>
+            {
+                let ty = self.node_to_ty(hint);
+                Node::List(self.alloc(self.slice_from_iter(consts.iter().filter_map(
+                    |cst| match cst {
+                        Node::ConstInitializer(&(name, initializer)) => {
+                            let id = self.get_name("", name)?;
+                            let ty = ty
+                                .or_else(|| self.infer_const(name, initializer))
+                                .unwrap_or_else(|| tany());
+                            let modifiers = read_member_modifiers(modifiers.iter());
+                            Some(Node::Const(self.alloc(
+                                shallow_decl_defs::ShallowClassConst {
+                                    abstract_: modifiers.is_abstract,
+                                    name: id,
+                                    type_: ty,
+                                },
+                            )))
+                        }
+                        _ => None,
+                    },
+                ))))
+            }
+            // Global consts.
+            Node::List([Node::ConstInitializer(&(name, initializer))]) => {
+                let id = unwrap_or_return!(
+                    self.get_name(self.state.namespace_builder.current_namespace(), name)
+                );
+                let ty = self
+                    .node_to_ty(hint)
+                    .or_else(|| self.infer_const(name, initializer))
+                    .unwrap_or_else(|| tany());
+                self.add_const(id.1, ty);
+                Node::Ignored
             }
             _ => Node::Ignored,
         }
@@ -2794,9 +2795,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         if name.is_ignored() {
             Node::Ignored
         } else {
-            Node::List(
-                self.alloc(bumpalo::vec![in self.state.arena; name, initializer].into_bump_slice()),
-            )
+            Node::ConstInitializer(self.alloc((name, initializer)))
         }
     }
 
@@ -2986,7 +2985,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node::Token(TokenKind::Implements) => req_implements_len += 1,
                     _ => {}
                 },
-                Node::Const(..) => consts_len += 1,
+                Node::List(consts @ [Node::Const(..), ..]) => consts_len += consts.len(),
                 Node::Property(&PropertyNode { decls, is_static }) => {
                     if is_static {
                         sprops_len += decls.len()
@@ -3061,7 +3060,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     }
                     _ => {}
                 },
-                Node::Const(const_decl) => consts.push(const_decl.clone()),
+                Node::List(&const_nodes @ [Node::Const(..), ..]) => {
+                    for node in const_nodes {
+                        if let Node::Const(decl) = node {
+                            consts.push((*decl).clone())
+                        }
+                    }
+                }
                 Node::Property(&PropertyNode { decls, is_static }) => {
                     for property in decls {
                         if is_static {

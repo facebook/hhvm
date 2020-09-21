@@ -1086,7 +1086,7 @@ function hphp_cmd($options, $test, $program): string {
     '--nofork=1 -thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
     "--program $program.hhbc \"$test\"",
-    "-vRuntime.Repo.Local.Mode=rw -vRuntime.Repo.Local.Path=".verify_hhbc(),
+    "-vRuntime.Repo.Local.Mode=-- -vRuntime.Repo.Central.Path=".verify_hhbc(),
     $extra_args,
     $compiler_args,
     read_opts_file("$test.hphp_opts"),

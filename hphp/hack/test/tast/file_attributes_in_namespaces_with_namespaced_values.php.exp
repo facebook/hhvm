@@ -33,7 +33,7 @@ Errors:
             param_callconv = None; param_user_attributes = [];
             param_visibility = (Some Public) }
            ];
-         m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body =
          { fb_ast =
            [([5:47-58],

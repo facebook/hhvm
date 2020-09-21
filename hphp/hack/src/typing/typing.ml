@@ -6112,6 +6112,33 @@ and call
               (env, (e, one_result) :: rl, paraml)
             | [] -> (env, [], paraml)
           in
+          (* Same as above, but checks the types of the implicit arguments, which are
+           * read from the context *)
+          let check_implicit_args env =
+            let { capability } = ft.ft_implicit_params in
+            if not (TypecheckerOptions.coeffects (Env.get_tcopt env)) then
+              env
+            else
+              let env_capability =
+                Env.get_local_check_defined
+                  env
+                  (pos, Local_id.make_unscoped SN.Coeffects.capability)
+              in
+              Type.sub_type
+                pos
+                Reason.URnone
+                env
+                env_capability
+                capability
+                (fun ?code:_c _subtype_error_list ->
+                  Errors.call_coeffect_error
+                    pos
+                    (Typing_defs.get_pos env_capability)
+                    (Typing_print.coeffects env env_capability)
+                    (Typing_defs.get_pos capability)
+                    (Typing_print.coeffects env capability))
+          in
+
           (* First check the non-lambda arguments. For generic functions, this
            * is likely to resolve type variables to concrete types *)
           let rl = List.map el (fun e -> (e, None)) in
@@ -6128,6 +6155,7 @@ and call
             let l = List.map rl (fun (_, opt) -> get_param opt) in
             List.unzip l
           in
+          let env = check_implicit_args env in
           let env = TR.check_call env method_call_info pos r2 ft tys in
           let (env, typed_unpack_element, arity, did_unpack) =
             match unpacked_element with

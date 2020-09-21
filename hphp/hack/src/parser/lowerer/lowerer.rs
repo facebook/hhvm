@@ -4192,6 +4192,8 @@ where
                 let is_abstract = kinds.has(modifier::ABSTRACT);
                 let is_external = !is_abstract && c.methodish_function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.methodish_attribute, env)?;
+                let cap = ast::TypeHint((), hdr.capability);
+                let unsafe_cap = ast::TypeHint((), hdr.unsafe_capability);
                 let method = ast::Method_ {
                     span: Self::p_fun_pos(node, env),
                     annotation: (),
@@ -4204,8 +4206,8 @@ where
                     where_constraints: hdr.constrs,
                     variadic: Self::determine_variadicity(&hdr.parameters),
                     params: hdr.parameters,
-                    cap: ast::TypeHint((), None), // TODO(T70095684)
-                    unsafe_cap: ast::TypeHint((), None), // TODO(T70095684)
+                    cap,
+                    unsafe_cap,
                     body: ast::FuncBody {
                         annotation: (),
                         ast: body,

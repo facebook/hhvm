@@ -810,3 +810,9 @@ end
 module UnstableFeatures = struct
   let coeffects_provisional = "coeffects_provisional"
 end
+
+module Coeffects = struct
+  let capability = "$#capability"
+
+  let local_capability = "$#local_capability"
+end

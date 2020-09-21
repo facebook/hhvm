@@ -26,7 +26,7 @@
             param_callconv = None; param_user_attributes = [];
             param_visibility = (Some Public) }
            ];
-         m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body =
          { fb_ast =
            [([4:38-40],
@@ -87,7 +87,7 @@
               (([10:3-18], A),
                (Binop ((Eq None), (([10:3-7], A), (Lvar ([10:3-7], $obj))),
                   (([10:10-18], A),
-                   (New ((([10:14-15], A), (CI ([10:14-15], "\\A"))),
+                   (New ((([10:14-15], A), (CI ([10:14-15], "\\A"))), 
                       [], [(([10:16-17], int), (Int "1"))], None,
                       ([10:14-15], (function(int $x=_): void)))))
                   )))));

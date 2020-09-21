@@ -1017,7 +1017,17 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
       let in_rx_scope = env_local_reactive env in
       let lid = LID.to_string x in
       let suggest_most_similar lid =
-        let all_locals = LID.Map.elements ctx.LEnvC.local_types in
+        (* Ignore fake locals *)
+        let all_locals =
+          LID.Map.fold
+            (fun k v acc ->
+              if String.is_prefix ~prefix:"$#" (LID.to_string k) then
+                acc
+              else
+                (k, v) :: acc)
+            ctx.LEnvC.local_types
+            []
+        in
         let var_name (k, _) = LID.to_string k in
         match most_similar lid all_locals var_name with
         | Some (k, (_, pos, _)) -> Some (LID.to_string k, pos)

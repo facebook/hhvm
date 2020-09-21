@@ -28,7 +28,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([15:19-30], "__construct"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body =
          { fb_ast =
            [([16:5-26],
@@ -58,7 +58,7 @@
              param_name = "$x"; param_expr = None; param_callconv = None;
              param_user_attributes = []; param_visibility = None }
             ];
-          m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+          m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
           m_body =
           { fb_ast =
             [([20:5-21],
@@ -89,7 +89,7 @@
              param_name = "$x"; param_expr = None; param_callconv = None;
              param_user_attributes = []; param_visibility = None }
             ];
-          m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+          m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
           m_body =
           { fb_ast =
             [([24:5-24],

@@ -15,7 +15,8 @@
       { fb_ast =
         [([4:3-6:4],
           (While ((([4:10-15], bool), (Lvar ([4:10-15], $cond))),
-             [([4:3-6:4], (AssertEnv (Join, {$cond})));
+             [([4:3-6:4],
+               (AssertEnv (Join, {$#capability $#local_capability $cond})));
                ([5:5-40],
                 (Throw
                    (([5:11-39], Exception),

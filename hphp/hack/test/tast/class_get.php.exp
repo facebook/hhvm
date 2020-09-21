@@ -22,7 +22,7 @@
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([15:26-29], "get"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = ((mixed), None); m_unsafe_cap = ((mixed), None);
+         m_cap = ((nothing), None); m_unsafe_cap = ((mixed), None);
          m_body =
          { fb_ast =
            [([16:5-20:6],

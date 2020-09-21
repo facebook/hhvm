@@ -20,7 +20,8 @@
       { fb_ast =
         [([4:3-7:4],
           (While ((([4:10-12], bool), (Lvar ([4:10-12], $b))),
-             [([4:3-7:4], (AssertEnv (Join, {$a $b})));
+             [([4:3-7:4],
+               (AssertEnv (Join, {$#capability $#local_capability $a $b})));
                ([5:5-8],
                 (Expr (([5:5-7], (int | string)), (Lvar ([5:5-7], $a)))));
                ([6:5-13],

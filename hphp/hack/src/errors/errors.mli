@@ -1429,3 +1429,5 @@ val incompatible_enum_inclusion_base : Pos.t -> string -> string -> unit
 val incompatible_enum_inclusion_constraint : Pos.t -> string -> string -> unit
 
 val enum_inclusion_not_enum : Pos.t -> string -> string -> unit
+
+val call_coeffect_error : Pos.t -> Pos.t -> string -> Pos.t -> string -> unit

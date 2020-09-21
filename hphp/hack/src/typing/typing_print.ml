@@ -1847,3 +1847,10 @@ let subtype_prop env prop =
   in
   let p_str = subtype_prop prop in
   p_str
+
+let coeffects env ty =
+  Full.to_string
+    ~ty:Full.locl_ty
+    (fun s -> Doc.text (Utils.strip_all_ns s))
+    env
+    ty

@@ -61,6 +61,8 @@ val class_kind : Ast_defs.class_kind -> bool -> string
 
 val subtype_prop : env -> Typing_logic.subtype_prop -> string
 
+val coeffects : env -> Typing_defs.locl_ty -> string
+
 (* Convert a type to a structured JSON value, as follows:
  * <prim> ::= "int" | "bool" | "float" | "string" | "num" | "arraykey"
  *         | "mixed" | "resource" | "void" | "noreturn"

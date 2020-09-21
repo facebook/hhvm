@@ -5518,6 +5518,22 @@ let enum_inclusion_not_enum
         ^ " which is not an enum" );
     ]
 
+let call_coeffect_error
+    call_pos pos_env_capability env_capability pos_capability capability =
+  add_list
+    (Typing.err_code Typing.CallCoeffects)
+    [
+      ( call_pos,
+        "This call is not allowed because its coeffects are incompatible with the context"
+      );
+      ( pos_env_capability,
+        "From this declaration, the context of this function body provides the capabilities: "
+        ^ env_capability );
+      ( pos_capability,
+        "But the function being called requires the capabilities: " ^ capability
+      );
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

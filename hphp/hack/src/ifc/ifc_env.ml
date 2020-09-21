@@ -85,9 +85,12 @@ let merge_lenv ~union env lenv1 lenv2 =
    local env only in one of the arguments it will be kept as
    is in the result. This is because lack of a continuation
    means that some code was, up to now, dead code. *)
-let merge_and_set_cenv ~union env cenv1 cenv2 =
+let merge_cenvs ~union env cenv1 cenv2 =
   let combine = Utils.mk_combine true (merge_lenv ~union) in
-  let (env, cenv) = KMap.merge_env env cenv1 cenv2 ~combine in
+  KMap.merge_env env cenv1 cenv2 ~combine
+
+let merge_and_set_cenv ~union env cenv1 cenv2 =
+  let (env, cenv) = merge_cenvs ~union env cenv1 cenv2 in
   set_cenv env cenv
 
 let get_lenv_opt env k = KMap.find_opt k (get_cenv env)
@@ -186,3 +189,9 @@ let freshen_cenv ~freshen renv env lids =
   in
   let (env, cenv) = KMap.map_env freshen_lenv env env.e_cont in
   { env with e_cont = cenv }
+
+let with_fresh_conts ~union env ks f =
+  let base_cenv = get_cenv env in
+  let env = drop_conts env ks in
+  let env = f env in
+  merge_conts_from ~union env base_cenv ks

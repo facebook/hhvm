@@ -22,6 +22,7 @@ module T = Typing_defs
 module L = Logic.Infix
 module K = Typing_cont_key
 module TClass = Decl_provider.Class
+module Try = Typing_try
 
 exception FlowInference of string
 
@@ -699,45 +700,88 @@ and stmt renv env ((pos, s) : Tast.stmt) =
   | A.Throw e ->
     let (env, exn_ty) = expr ~pos env e in
     throw ~pos renv env exn_ty
-  | A.Try (try_blk, [((_, exn), (_, exn_var), catch_blk)], []) ->
-    (* NOTE: for now we only support try with a single catch block and no finally
-     * block. Only \Exception is allowed to be caught
-     *)
-    let base_cenv = Env.get_cenv env in
+  | A.Try (try_blk, cs, finally) ->
+    (* List of continuations that get masked by finally *)
+    let masked_conts = [K.Break; K.Continue; K.Exit; K.Catch; K.Finally] in
+    Env.with_fresh_conts ~union env masked_conts @@ fun env ->
     let base_pc = Env.get_lpc env K.Next in
-    let env = Env.drop_conts env [K.Catch] in
 
     (* Create a fresh exception for the try block since none of the outer
      * exceptions are catchable inside the block
      *)
-    let try_renv =
-      let fresh_exn = Lift.class_ty renv Decl.exception_id in
-      { renv with re_exn = fresh_exn }
-    in
+    let fresh_exn = Lift.class_ty renv Decl.exception_id in
+    let try_renv = { renv with re_exn = fresh_exn } in
     let env = block try_renv env try_blk in
-    let after_try = Env.get_cenv env in
+    let env = Env.move_conts_into ~union env [K.Next] K.Finally in
 
-    if not @@ String.equal exn Decl.exception_id then
-      fail "catch is only supported for \\Exception, got '%s'" exn;
     (* The catch block should begin with the catch continuation replacing Next *)
-    let env = Env.drop_conts env [K.Next] in
-    let env = Env.move_conts_into ~union env [K.Catch] K.Next in
-    let env = Env.set_local_type env exn_var try_renv.re_exn in
-    let env = block renv env catch_blk in
+    let catch_cenv =
+      Env.move_conts_into ~union env [K.Catch] K.Next |> Env.get_cenv
+    in
 
-    let env = Env.merge_conts_from ~union env base_cenv [K.Catch] in
-    let env = Env.merge_conts_from ~union env after_try [K.Next] in
-    Env.set_lpc env K.Next base_pc
+    (* In case there is no catch all, then the exceptions still linger *)
+    let has_catch_all =
+      let f ((_, exn), _, _) = String.equal exn Decl.exception_id in
+      List.exists ~f cs
+    in
+    let env =
+      if has_catch_all then
+        Env.drop_conts env [K.Catch]
+      else
+        Env.acc env @@ subtype ~pos fresh_exn renv.re_exn
+    in
+    let finally_base = Env.get_cenv env in
+
+    let catch env (_, (_, exn_var), blk) =
+      let env = Env.set_cenv env catch_cenv in
+      let env = Env.set_local_type env exn_var fresh_exn in
+      let env = block renv env blk in
+      let env = Env.move_conts_into ~union env [K.Next] K.Finally in
+      (env, Env.get_cenv env)
+    in
+
+    (* Finally runs with the merged conts from try and all the catch blocks, but
+     it gets the base pc because it runs regardless of whether an exception was
+     thrown *)
+    let (env, cenvs) = List.map_env ~f:catch env cs in
+    let (env, merged_cenv) =
+      let f (env, cenv1) cenv2 = Env.merge_cenvs ~union env cenv1 cenv2 in
+      List.fold ~f ~init:(env, finally_base) cenvs
+    in
+    let env = Env.set_cenv env merged_cenv in
+
+    (* Analyze finally against each of the continuations in order to get more
+       precise flow information. *)
+    let (env, cenvs) =
+      let f env key lenv =
+        let env = Env.set_cenv env @@ KMap.singleton K.Next lenv in
+        let pc = Env.get_lpc env K.Next in
+        let env = Env.set_lpc env K.Next base_pc in
+        let env = block renv env finally in
+        let env =
+          match key with
+          | K.Finally -> env
+          | _ -> Env.set_lpc env K.Next pc
+        in
+        (env, Env.get_cenv env)
+      in
+      KMap.map_env f env @@ Env.get_cenv env
+    in
+    let (env, cenv) =
+      let union = Utils.mk_combine true (Env.merge_lenv ~union) in
+      Try.finally_merge union env cenvs masked_conts
+    in
+    let env = Env.set_cenv env cenv in
+    Env.move_conts_into ~union env [K.Finally] K.Next
   | A.Noop -> env
   | _ ->
     Errors.unknown_information_flow pos "statement";
     env
 
 and block renv env (blk : Tast.block) =
-  let seq env s =
-    let env = stmt renv env s in
-    Env.merge_pcs_into env [K.Exit; K.Catch] K.Next
-  in
+  let merge_pcs env = Env.merge_pcs_into env [K.Exit; K.Catch] K.Next in
+  let seq env s = stmt renv env s |> merge_pcs in
+  let env = merge_pcs env in
   List.fold_left ~f:seq ~init:env blk
 
 (* Returns the list of free policy variables in a policied type *)

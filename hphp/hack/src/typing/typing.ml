@@ -934,7 +934,8 @@ and finally env fb =
     let (env, locals_map) =
       Errors.ignore_ (fun () -> CMap.map_env finally_cont env parent_locals)
     in
-    let (env, locals) = Try.finally_merge env locals_map all_conts in
+    let union env _key = LEnv.union_contextopts env in
+    let (env, locals) = Try.finally_merge union env locals_map all_conts in
     (Env.env_with_locals env locals, tfb)
 
 and try_catch env tb cl fb =

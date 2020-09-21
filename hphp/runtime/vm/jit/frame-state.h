@@ -130,10 +130,15 @@ struct MBRState {
  */
 struct FrameState {
   /*
-   * Current Func, VM stack pointer, VM frame pointer, offset between sp and
-   * fp, and bytecode position.
+   * Function, instructions are emitted on behalf of. This may be different from
+   * the function of the `fpValue` frame, e.g. stublogues run in the context of
+   * the caller, but the code is emitted on behalf of the callee.
    */
   const Func* curFunc;
+
+  /*
+   * VM frame pointer.
+   */
   SSATmp* fpValue{nullptr};
 
   /*
@@ -299,7 +304,6 @@ struct FrameStateMgr final {
    * In the presence of inlining, these return state for the most-inlined
    * frame.
    */
-  const Func* func()              const { return cur().curFunc; }
   SSATmp*     fp()                const { return cur().fpValue; }
   SSATmp*     sp()                const { return cur().spValue; }
   SSATmp*     ctx()               const { return cur().ctx; }
@@ -367,6 +371,11 @@ struct FrameStateMgr final {
    */
   void refinePredictedType(Location l, Type type);
 
+  /*
+   * Debug stringification.
+   */
+  std::string show() const;
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -404,7 +413,7 @@ private:
    * Per-block state helpers.
    */
   bool save(Block* b, Block* pred = nullptr);
-  void collectPostConds(Block* exitBlock);
+  PostConditions collectPostConds();
 
   /*
    * LocationState update helpers.
@@ -464,13 +473,6 @@ private:
    */
   jit::hash_map<Block*,PostConditions> m_exitPostConds;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Debug stringification.
- */
-std::string show(const FrameStateMgr&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

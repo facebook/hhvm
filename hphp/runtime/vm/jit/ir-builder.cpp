@@ -781,7 +781,7 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   always_assert(m_state.fp() != nullptr);
 
   FTRACE(2, "IRBuilder switching to block B{}: {}\n", block->id(),
-         show(m_state));
+         m_state.show());
   return true;
 }
 

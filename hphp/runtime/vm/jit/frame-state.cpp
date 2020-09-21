@@ -806,50 +806,36 @@ void FrameStateMgr::syncPrediction(LocationState<tag>& state) {
 /*
  * Collects the post-conditions associated with the current state, which is
  * essentially a list of local/stack locations and their known types at the end
- * of `block'.
+ * of a block.
  */
-void FrameStateMgr::collectPostConds(Block* block) {
-  assertx(block->isExitNoThrow());
-  PostConditions& pConds = m_exitPostConds[block];
-  pConds.changed.clear();
-  pConds.refined.clear();
+PostConditions FrameStateMgr::collectPostConds() {
+  PostConditions postConds;
 
   if (sp() != nullptr) {
-    auto const& lastInst = block->back();
-    auto const bcSPOff = lastInst.marker().spOff();
-    auto const resumed = lastInst.marker().resumeMode() != ResumeMode::None;
-    auto const skipCells = FPInvOffset{resumed ? 0 : func()->numSlotsInFrame()};
-    auto const evalStkCells = bcSPOff - skipCells;
-
-    for (int32_t i = 0; i < evalStkCells; i++) {
-      auto const bcSPRel = BCSPRelOffset{i};
-      auto const irSPRel = bcSPRel
-        .to<FPInvOffset>(bcSPOff)
-        .to<IRSPRelOffset>(irSPOff());
-
-      auto const type    = stack(irSPRel).type;
-      auto const changed = stack(irSPRel).maybeChanged;
+    for (int32_t i = 0; i < cur().stack.size(); i++) {
+      auto const fpRel = FPInvOffset{i + 1};
+      auto const type = stack(fpRel).type;
+      auto const changed = stack(fpRel).maybeChanged;
 
       if (changed || type < TCell) {
-        auto const fpRel = bcSPRel.to<FPInvOffset>(bcSPOff);
-
-        FTRACE(1, "Stack({}, {}): {} ({})\n", bcSPRel.offset, fpRel.offset,
+        FTRACE(1, "Stack({}, {}): {} ({})\n",
+               fpRel.to<BCSPRelOffset>(bcSPOff()).offset, fpRel.offset,
                type, changed ? "changed" : "refined");
-        auto& vec = changed ? pConds.changed : pConds.refined;
+        auto& vec = changed ? postConds.changed : postConds.refined;
         vec.push_back({ Location::Stack{fpRel}, type });
       }
     }
   }
 
   if (fp() != nullptr) {
-    for (unsigned i = 0; i < func()->numLocals(); i++) {
-      auto const t = local(i).type;
+    for (unsigned i = 0; i < cur().locals.size(); i++) {
+      auto const type = local(i).type;
       auto const changed = local(i).maybeChanged;
-      if (changed || t < TCell) {
-        FTRACE(1, "Local {}: {} ({})\n", i, t.toString(),
+      if (changed || type < TCell) {
+        FTRACE(1, "Local {}: {} ({})\n", i, type.toString(),
                changed ? "changed" : "refined");
-        auto& vec = changed ? pConds.changed : pConds.refined;
-        vec.push_back({ Location::Local{i}, t });
+        auto& vec = changed ? postConds.changed : postConds.refined;
+        vec.push_back({ Location::Local{i}, type });
       }
     }
   }
@@ -858,9 +844,11 @@ void FrameStateMgr::collectPostConds(Block* block) {
   auto const changed = mbase().maybeChanged;
   if (changed || ty < TCell) {
     FTRACE(1, "MBase{{}}: {} ({})\n", ty, changed ? "changed" : "refined");
-    auto& vec = changed ? pConds.changed : pConds.refined;
+    auto& vec = changed ? postConds.changed : postConds.refined;
     vec.push_back({ Location::MBase{}, ty });
   }
+
+  return postConds;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -880,7 +868,7 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
       block->empty(),
       "tried to startBlock a non-empty block while building\n"
     );
-    ITRACE(4, "Loading state for B{}: {}\n", block->id(), show(*this));
+    ITRACE(4, "Loading state for B{}: {}\n", block->id(), show());
     m_stack = it->second.in;
     if (m_stack.empty()) {
       always_assert_flog(0, "invalid startBlock for B{}", block->id());
@@ -903,9 +891,9 @@ bool FrameStateMgr::finishBlock(Block* block) {
   assertx(block->back().isTerminal() == !block->next());
 
   if (block->isExitNoThrow()) {
-    collectPostConds(block);
+    m_exitPostConds[block] = collectPostConds();
     FTRACE(2, "PostConditions for exit Block {}:\n{}\n",
-           block->id(), show(m_exitPostConds[block]));
+           block->id(), jit::show(m_exitPostConds[block]));
   }
 
   assertx(hasStateFor(block));
@@ -951,7 +939,7 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
       for (DEBUG_ONLY auto& r : pconds.refined) {
         assert_flog(c.location != r.location,
                     "Location {} in both changed and refined sets",
-                    show(c.location));
+                    jit::show(c.location));
       }
     }
   }
@@ -966,14 +954,14 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
  * one.  Otherwise merge the current state into the existing snapshot.
  */
 bool FrameStateMgr::save(Block* block, Block* pred) {
-  ITRACE(4, "Saving current state to B{}: {}\n", block->id(), show(*this));
+  ITRACE(4, "Saving current state to B{}: {}\n", block->id(), show());
 
   auto const it = m_states.find(block);
   auto changed = true;
 
   if (it != m_states.end()) {
     changed = merge_into(it->second.in, m_stack);
-    ITRACE(4, "Merged state: {}\n", show(*this));
+    ITRACE(4, "Merged state: {}\n", show());
   } else {
     if (pred) {
       assertx(hasStateFor(pred));
@@ -1194,7 +1182,7 @@ void FrameStateMgr::setValueImpl(Location l,
                                  LocationState<tag>& state,
                                  SSATmp* value,
                                  folly::Optional<Type> predicted) {
-  FTRACE(2, "{} := {}\n", show(l), value ? value->toString() : "<>");
+  FTRACE(2, "{} := {}\n", jit::show(l), value ? value->toString() : "<>");
   state.value = value;
   state.type = value ? value->type() : LocationState<tag>::default_type();
   state.maybeChanged = true;
@@ -1232,7 +1220,7 @@ void FrameStateMgr::setValue(Location l, SSATmp* value) {
 
 template<LTag tag>
 static void setTypeImpl(Location l, LocationState<tag>& state, Type type) {
-  FTRACE(2, "{} :: {} -> {}\n", show(l), state.type, type);
+  FTRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, type);
   state.value = nullptr;
   state.type = type;
   state.predictedType = type;
@@ -1262,7 +1250,7 @@ void FrameStateMgr::setType(Location l, Type type) {
 
 template<LTag tag>
 static void widenTypeImpl(Location l, LocationState<tag>& state, Type type) {
-  FTRACE(2, "{} :: {} -> {}\n", show(l), state.type, type);
+  FTRACE(2, "{} :: {} -> {}\n", jit::show(l), state.type, type);
   state.value = nullptr;
   state.type = type;
   state.predictedType = type;
@@ -1293,7 +1281,8 @@ template<LTag tag>
 static void refineTypeImpl(Location l, LocationState<tag>& state,
                            Type type, TypeSource typeSrc) {
   auto const refined = state.type & type;
-  FTRACE(2, "{} :: {} -> {} (via {})\n", show(l), state.type, refined, type);
+  FTRACE(2, "{} :: {} -> {} (via {})\n",
+         jit::show(l), state.type, refined, type);
 
   // If the type gets more refined, we need to forget the old value, or else we
   // may end up using a value with a more general type than is known about the
@@ -1405,14 +1394,14 @@ void FrameStateMgr::setMemberBase(SSATmp* base,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string show(const FrameStateMgr& state) {
-  auto func = state.func();
+std::string FrameStateMgr::show() const {
+  auto func = cur().curFunc;
   auto funcName = func ? func->fullName() : makeStaticString("null");
 
   return folly::sformat(
     "func: {}, spOff: {}",
     funcName,
-    state.irSPOff().offset
+    irSPOff().offset
   );
 }
 

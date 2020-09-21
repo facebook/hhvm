@@ -5,6 +5,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+(** Provides decls from the configured backend, e.g. shared memory, local memory, service, etc. *)
+
 type fun_key = string
 
 type class_key = string

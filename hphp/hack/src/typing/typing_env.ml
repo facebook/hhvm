@@ -634,7 +634,7 @@ let error_if_reactive_context env f =
   then
     f ()
 
-let add_wclass env x =
+let make_depend_on_class env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   ()
@@ -651,7 +651,7 @@ let print_size _kind _name obj =
     obj
 
 let get_typedef env x =
-  add_wclass env x;
+  make_depend_on_class env x;
   print_size "type" x (Decl_provider.get_typedef (get_ctx env) x)
 
 let is_typedef env x =
@@ -659,9 +659,9 @@ let is_typedef env x =
   | Some Naming_types.TTypedef -> true
   | _ -> false
 
-let get_class env x =
-  add_wclass env x;
-  print_size "class" x (Decl_provider.get_class (get_ctx env) x)
+let get_class (env : env) (name : string) : Cls.t option =
+  make_depend_on_class env name;
+  print_size "class" name (Decl_provider.get_class (get_ctx env) name)
 
 let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;
@@ -687,7 +687,7 @@ let env_with_mut env local_mutability =
 let get_env_mutability env = env.lenv.local_mutability
 
 let get_enum env x =
-  add_wclass env x;
+  make_depend_on_class env x;
   match Decl_provider.get_class (get_ctx env) x with
   | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
@@ -695,20 +695,20 @@ let get_enum env x =
 let is_enum env x = Option.is_some (get_enum env x)
 
 let get_typeconst env class_ mid =
-  add_wclass env (Cls.name class_);
+  make_depend_on_class env (Cls.name class_);
   let dep = Dep.Const (Cls.name class_, mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   Cls.get_typeconst class_ mid
 
 let get_pu_enum env class_ mid =
-  add_wclass env (Cls.name class_);
+  make_depend_on_class env (Cls.name class_);
   let dep = Dep.Const (Cls.name class_, mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   Cls.get_pu_enum class_ mid
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
-  add_wclass env (Cls.name class_);
+  make_depend_on_class env (Cls.name class_);
   let dep = Dep.Const (Cls.name class_, mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   Cls.get_const class_ mid
@@ -722,7 +722,7 @@ let get_gconst env cst_name =
   Decl_provider.get_gconst (get_ctx env) cst_name
 
 let get_static_member is_method env class_ mid =
-  add_wclass env (Cls.name class_);
+  make_depend_on_class env (Cls.name class_);
   let add_dep x =
     let dep =
       if is_method then
@@ -780,7 +780,7 @@ let suggest_static_member is_method class_ mid =
   suggest_member members mid
 
 let get_member is_method env class_ mid =
-  add_wclass env (Cls.name class_);
+  make_depend_on_class env (Cls.name class_);
   let add_dep x =
     let dep =
       if is_method then
@@ -816,7 +816,7 @@ let suggest_member is_method class_ mid =
   suggest_member members mid
 
 let get_construct env class_ =
-  add_wclass env (Cls.name class_);
+  make_depend_on_class env (Cls.name class_);
   let add_dep x =
     let dep = Dep.Cstr x in
     Option.iter env.decl_env.Decl_env.droot (fun root ->

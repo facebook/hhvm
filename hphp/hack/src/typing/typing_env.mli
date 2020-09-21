@@ -73,33 +73,44 @@ val is_enum : env -> class_key -> bool
 
 val get_enum_constraint : env -> class_key -> decl_ty option
 
-val add_wclass : env -> string -> unit
+(** Add a dependency on specified class of the declaration being checked in the dependency graph. *)
+val make_depend_on_class : env -> string -> unit
 
+(** Get class declaration from the appropriate backend and add dependency. *)
 val get_class : env -> class_key -> class_decl option
 
 val get_class_dep : env -> class_key -> class_decl option
 
+(** Get function declaration from the appropriate backend and add dependency. *)
 val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 
+(** Get type alias declaration from the appropriate backend and add dependency. *)
 val get_typedef : env -> typedef_key -> typedef_decl option
 
+(** Get class constant declaration from the appropriate backend and add dependency. *)
 val get_const : env -> class_decl -> string -> class_const option
 
+(** Get type constant declaration from the appropriate backend and add dependency. *)
 val get_typeconst : env -> class_decl -> string -> typeconst_type option
 
+(** Get PU enum declaration from the appropriate backend and add dependency. *)
 val get_pu_enum : env -> class_decl -> string -> pu_enum_type option
 
+(** Get global constant declaration from the appropriate backend and add dependency. *)
 val get_gconst : env -> gconst_key -> gconst_decl option
 
+(** Get static member declaration of a class from the appropriate backend and add dependency. *)
 val get_static_member : bool -> env -> class_decl -> string -> class_elt option
 
 val suggest_static_member :
   bool -> class_decl -> string -> (Pos.t * string) option
 
+(** Get class member declaration from the appropriate backend and add dependency. *)
 val get_member : bool -> env -> class_decl -> string -> class_elt option
 
 val suggest_member : bool -> class_decl -> string -> (Pos.t * string) option
 
+(** Get class constructor declaration from the appropriate backend and add dependency. *)
 val get_construct : env -> class_decl -> class_elt option * consistent_kind
 
 val get_return : env -> Typing_env_return_info.t

@@ -340,7 +340,7 @@ and simplify_union_ env ty1 ty2 r =
        * the dep) anyways.
        *)
       let add env = function
-        | Tclass ((_, cid), _, _) -> Env.add_wclass env cid
+        | Tclass ((_, cid), _, _) -> Env.make_depend_on_class env cid
         | _ -> ()
       in
       add env ty1_;

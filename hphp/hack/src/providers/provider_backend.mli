@@ -163,11 +163,14 @@ type local_memory = {
 
 type t =
   | Shared_memory
+      (** Used by hh_server and hh_single_type_check *)
   | Local_memory of local_memory
+      (** Used by serverless IDE *)
   | Decl_service of {
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;
     }
+      (** Used by the hh_server rearchitecture (hh_decl/hh_worker) *)
 
 val t_to_string : t -> string
 

@@ -527,6 +527,19 @@ impl OwnedSlab {
         unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
     }
 
+    pub fn as_slice(&self) -> &[usize] {
+        unsafe { std::slice::from_raw_parts(self.0.as_ptr().cast(), self.0.len()) }
+    }
+
+    pub unsafe fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
+        let mut slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
+        if !slab.is_initialized() {
+            return Err(SlabIntegrityError::NotInitialized);
+        }
+        slab.rebase_to(slab.current_address());
+        Ok(Self(slab))
+    }
+
     pub fn leak(self) -> Value<'static> {
         // The contents of our boxed slice cannot be moved, so we should never
         // need to rebase.

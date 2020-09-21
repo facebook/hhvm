@@ -588,6 +588,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckArrayCOW:
   case ProfileDictAccess:
   case CheckDictOffset:
+  case CheckDictOffsetLA:
   case ProfileKeysetAccess:
   case CheckKeysetOffset:
   case ElemMixedArrayK:
@@ -630,6 +631,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileMethod:
   case ProfileSubClsCns:
   case CheckVecBounds:
+  case CheckVecBoundsLA:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:

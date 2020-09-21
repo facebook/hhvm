@@ -36,7 +36,7 @@ void optimizePredictions(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);
 void optimizeStores(IRUnit&);
-void optimizeLoopInvariantCode(IRUnit&);
+void optimizeVanillaChecks(IRUnit&);
 void cleanCfg(IRUnit&);
 bool optimizePhis(IRUnit&);
 

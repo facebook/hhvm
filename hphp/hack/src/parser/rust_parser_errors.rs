@@ -737,6 +737,16 @@ where
         }
     }
 
+    fn has_this(&self) -> bool {
+        if !self.is_in_active_class_scope() {
+            return false;
+        }
+        match self.env.context.active_methodish {
+            Some(x) if Self::has_modifier_static(x) => false,
+            _ => true,
+        }
+    }
+
     fn is_clone(&self, label: &'a Syntax<Token, Value>) -> bool {
         self.text(label).eq_ignore_ascii_case(sn::members::__CLONE)
     }
@@ -2622,12 +2632,25 @@ where
 
     fn check_disallowed_variables(&mut self, node: &'a Syntax<Token, Value>) {
         match &node.syntax {
-            VariableExpression(x)
+            VariableExpression(x) => {
                 // TODO(T75820862): Allow $GLOBALS to be used as a variable name
-                if self.text(&x.variable_expression) == sn::superglobals::GLOBALS =>
-            {
-                self.errors
-                    .push(Self::make_error_from_node(node, errors::globals_disallowed))
+                if self.text(&x.variable_expression) == sn::superglobals::GLOBALS {
+                    self.errors
+                        .push(Self::make_error_from_node(node, errors::globals_disallowed))
+                } else if self.text(&x.variable_expression) == sn::special_idents::THIS
+                    && !self.has_this()
+                {
+                    // If we are in the special top level debugger function, lets not check for $this since
+                    // it will be properly lifted in closure convert
+                    if self
+                        .first_parent_function_name()
+                        .map_or(true, |s| s == "include")
+                    {
+                        return {};
+                    }
+                    self.errors
+                        .push(Self::make_error_from_node(node, errors::invalid_this))
+                }
             }
             _ => {}
         }

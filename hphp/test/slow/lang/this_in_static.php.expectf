@@ -1,1 +1,1 @@
-Fatal error: Don't use `$this` in a static method, use `static::` instead in %s on line 6
+Fatal error: `$this` cannot be used in functions and static methods in %s on line 6

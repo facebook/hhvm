@@ -47,38 +47,19 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-///////////////////////////////////////////////////////////////////////////////
-
-TransContext prologue_context(TransID transID,
-                              TransKind kind,
-                              const Func* func,
-                              int initSpOffset,
-                              Offset entry) {
-  return TransContext(
-    transID == kInvalidTransID ? TransIDSet{} : TransIDSet{transID},
-    kind,
-    TransFlags{},
-    SrcKey{func, entry, SrcKey::PrologueTag{}},
-    FPInvOffset{func->numSlotsInFrame()},
-    0,
-    nullptr
-  );
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 std::tuple<TransLoc, TCA, CodeCache::View>
 genFuncPrologue(TransID transID, TransKind kind,
                 Func* func, int argc, CodeCache& code, CGMeta& fixups,
                 tc::CodeMetaLock* locker) {
-  auto context = prologue_context(transID, kind, func, argc,
-                                  func->getEntryForNumArgs(argc));
+  auto const context = TransContext{
+    transID == kInvalidTransID ? TransIDSet{} : TransIDSet{transID},
+    kind,
+    TransFlags{},
+    SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},
+    FPInvOffset{argc},  // argc TVs on top of prologue stack base rvmsp()
+    0,
+    nullptr
+  };
 
   tracing::Block _{
     "gen-prologue",

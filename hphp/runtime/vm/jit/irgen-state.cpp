@@ -53,16 +53,24 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
 
   // Define SP.
   auto const bcSPOff = context.initSpOffset;
-  if (resumeMode(*this) == ResumeMode::None && !prologueSetup) {
+  if (prologueSetup) {
+    // rvmsp() points to the "no inputs" location on the stack in prologues
     auto const irSPOff = FPInvOffset { 0 };
-    gen(*this, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, frame);
-  } else {
+    gen(*this, DefRegSP, DefStackData { irSPOff, bcSPOff });
+  } else if (resumeMode(*this) != ResumeMode::None) {
+    // rvmsp() points to the top of the stack in resumables
     auto const irSPOff = context.initSpOffset;
     gen(*this, DefRegSP, DefStackData { irSPOff, bcSPOff });
+  } else {
+    // stack starts at the FP in regular functions
+    auto const irSPOff = FPInvOffset { 0 };
+    gen(*this, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, frame);
   }
 
-  // Now that the stack is initialized, update the BC marker again.
+  // Now that the stack is initialized, update the BC marker again and perform
+  // initial sync of the exception stack boundary.
   updateMarker(*this);
+  irb->exceptionStackBoundary();
 
   if (RuntimeOption::EvalHHIRGenerateAsserts && !prologueSetup) {
     // Assert that we're in the correct function.

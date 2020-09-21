@@ -315,6 +315,10 @@ void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
   auto const irSPOff = FPInvOffset { 0 };
   auto const bcSPOff = FPInvOffset { callee->numSlotsInFrame() };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
+
+  // Stack was reconfigured, so update the marker and exception stack boundary.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 }
 
 void emitPrologueBody(IRGS& env, const Func* callee, uint32_t argc,

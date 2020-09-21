@@ -81,6 +81,13 @@ impl<'ast> Visitor<'ast> for Checker {
                 c.in_expression_tree = false;
                 return res;
             }
+            ETSplice(e) => {
+                let previous_state = c.in_expression_tree;
+                c.in_expression_tree = false;
+                let res = e.accept(c, self);
+                c.in_expression_tree = previous_state;
+                return res;
+            }
             _ => {
                 // If we're not in a backtick, all syntax is allowed.
                 if !c.in_expression_tree {

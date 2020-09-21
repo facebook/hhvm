@@ -7,8 +7,6 @@ object(Weird2) (0) {
 This is Weird3
 object(Weird3) (0) {
 }
-closure
-%ANULL
 About to fail:
 
 Fatal error: Function name must be a string in %s on line 26

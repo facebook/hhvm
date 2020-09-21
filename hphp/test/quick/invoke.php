@@ -29,10 +29,6 @@ function invoke_it($x) { $x(); }
   invoke_it(new Normal);
   invoke_it(new Weird2);
   invoke_it(new Weird3);
-  invoke_it(function() {
-    echo "closure\n";
-    var_dump($this);
-  });
   echo "About to fail:\n";
   invoke_it(new InvokeFailure);
 }

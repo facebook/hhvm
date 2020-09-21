@@ -1,1 +1,0 @@
-Fatal error: Don't use `$this` in a static method, use `static::` instead in %s/1301.php on line 8

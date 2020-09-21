@@ -71,6 +71,8 @@ struct Env<'a> {
     in_using: bool,
     /// Global compiler/hack options
     options: &'a Options,
+    /// For debugger eval
+    for_debugger_eval: bool,
 }
 
 #[derive(Default, Clone)]
@@ -87,6 +89,7 @@ impl<'a> Env<'a> {
         function_count: usize,
         defs: &Program,
         options: &'a Options,
+        for_debugger_eval: bool,
     ) -> Result<Self> {
         let scope = Scope::toplevel();
         let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs))?;
@@ -103,6 +106,7 @@ impl<'a> Env<'a> {
             defined_function_count: function_count,
             in_using: false,
             options,
+            for_debugger_eval,
         })
     }
 
@@ -1133,7 +1137,15 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         *e = match e_owned {
             Expr_::Efun(x) => convert_lambda(env, self, x.0, Some(x.1))?,
             Expr_::Lfun(x) => convert_lambda(env, self, x.0, None)?,
-            Expr_::Lvar(id) => {
+            Expr_::Lvar(id_orig) => {
+                let id = if env.for_debugger_eval
+                    && local_id::get_name(&id_orig.1) == special_idents::THIS
+                    && env.scope.is_in_debugger_eval_fun()
+                {
+                    Box::new(Lid(id_orig.0, (0, "$__debugger$this".to_string())))
+                } else {
+                    id_orig
+                };
                 add_var(env, &mut self.state, local_id::get_name(&id.1));
                 Expr_::Lvar(id)
             }
@@ -1417,7 +1429,14 @@ fn extract_debugger_main(
     vars.push("$__debugger_exn$output".into());
     let params: Vec<_> = vars
         .iter()
-        .map(|var| make_fn_param(p(), &local_id::make_unscoped(var), false, true))
+        .map(|var| {
+            let name = if var == special_idents::THIS {
+                "$__debugger$this"
+            } else {
+                var
+            };
+            make_fn_param(p(), &local_id::make_unscoped(name), false, true)
+        })
         .collect();
     let exnvar = Lid(p(), local_id::make_unscoped("$__debugger_exn$output"));
     let catch = Stmt(
@@ -1485,6 +1504,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<()> 
         1,
         defs,
         e.options(),
+        e.for_debugger_eval,
     )?;
     *defs = flatten_ns(defs);
     let ns = RcOc::new(empty_namespace);

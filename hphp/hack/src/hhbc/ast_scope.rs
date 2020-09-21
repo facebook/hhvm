@@ -257,4 +257,16 @@ impl<'a> Scope<'a> {
             _ => panic!("closure scope should be lambda -> method -> class"),
         }
     }
+
+
+    pub fn is_in_debugger_eval_fun(&self) -> bool {
+        for x in self.iter() {
+            match x {
+                ScopeItem::LongLambda(_) | ScopeItem::Lambda(_) => continue,
+                ScopeItem::Function(f) => return f.get_name().1 == "include",
+                _ => return false,
+            }
+        }
+        true
+    }
 }

@@ -1949,6 +1949,7 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
 
 const StaticString
   s_DebuggerMainAttr("__DebuggerMain"),
+  s_debuggerThis("__debugger$this"),
   s_uninitClsName("__uninitSentinel");
 
 ExecutionContext::EvaluationResult
@@ -2047,6 +2048,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     for (Id id = 0; id < f->numParams() - 1; id++) {
       assertx(id < f->numNamedLocals());
       assertx(f->params()[id].isInOut());
+      if (f->localVarName(id)->equal(s_debuggerThis.get()) &&
+          ctx && fp->hasThis()) {
+        args.append(make_tv<KindOfObject>(fp->getThis()));
+        continue;
+      }
       if (fp) {
         auto const idx = fp->func()->lookupVarId(f->localVarName(id));
         if (idx != kInvalidId) {

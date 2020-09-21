@@ -57,26 +57,6 @@ class C
     public static $sprop = -5;
 }
 
-class D
-{
-    public function f()
-    {
-        echo "Inside ". __METHOD__ . "\n";
-
-        var_dump(isset($this));
-        unset($this);
-        var_dump(isset($this));
-
-        $this->g();     // use $this to call sibling instance method
-    }
-
-    private function g()
-    {
-        echo "Inside ". __METHOD__ . "\n";
-
-        var_dump(isset($this));
-    }
-}
 <<__EntryPoint>>
 function entrypoint_intrinsics_unset(): void {
   error_reporting(-1);
@@ -157,11 +137,6 @@ function entrypoint_intrinsics_unset(): void {
   $c2 = new C;
   var_dump($c2);
   var_dump(isset($c2->prop));
-
-  echo "---------- unsetting \$this ------------\n";
-
-  $d = new D;
-  $d->f();
 
   echo "---------- unsetting array elements ------------\n";
 

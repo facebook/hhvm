@@ -2656,6 +2656,26 @@ where
         }
     }
 
+    fn unset_errors(&mut self, node: &'a Syntax<Token, Value>) {
+        match &node.syntax {
+            UnsetStatement(x) => {
+                for expr in Self::syntax_to_list_no_separators(&x.unset_variables) {
+                    match &expr.syntax {
+                        VariableExpression(x)
+                            if self.text(&x.variable_expression) == sn::special_idents::THIS =>
+                        {
+                            self.errors
+                                .push(Self::make_error_from_node(node, errors::cannot_unset_this))
+                        }
+                        _ => {}
+                    }
+                }
+                {}
+            }
+            _ => {}
+        }
+    }
+
     fn function_call_argument_errors(
         &mut self,
         in_constructor_call: bool,
@@ -5576,6 +5596,7 @@ where
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             FunctionPointerExpression(_) => self.disabled_function_pointer_expression_error(node),
             QualifiedName(_) => self.check_qualified_name(node),
+            UnsetStatement(_) => self.unset_errors(node),
             _ => {}
         }
         self.lval_errors(node);

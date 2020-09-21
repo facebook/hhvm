@@ -2,10 +2,6 @@
 
 final class quickUnset {
   public static $y;
-
-  public function foo() {
-    unset($this);
-  }
 }
 
 <<__EntryPoint>>
@@ -36,7 +32,4 @@ function f() {
   print ":".isset($x).":\n";
   print ":".isset($y).":\n";
   print ":".isset(quickUnset::$y).":\n";
-
-  $obj = new quickUnset;
-  $obj->foo();
 }

@@ -426,7 +426,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       ClientTypeAtPos.go ty args.output_json;
       Lwt.return (Exit_status.No_error, telemetry)
-    | MODE_TYPE_AT_POS_BATCH positions ->
+    | MODE_TYPE_AT_POS_BATCH (experimental, positions) ->
       let positions =
         List.map positions (fun pos ->
             try
@@ -449,7 +449,8 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
               raise Exit_status.(Exit_with Input_error))
       in
       let%lwt (responses, telemetry) =
-        rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view)
+        rpc args
+        @@ Rpc.INFER_TYPE_BATCH (experimental, positions, args.dynamic_view)
       in
       List.iter responses print_endline;
       Lwt.return (Exit_status.No_error, telemetry)

@@ -248,7 +248,7 @@ type _ t =
       -> (Pos.absolute Errors.error_ list * int) t
   | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
-      (string * int * int * (int * int) option) list * bool
+      bool * (string * int * int * (int * int) option) list * bool
       -> string list t
   | IDE_HOVER : string * int * int -> HoverService.result t
   | DOCBLOCK_AT :

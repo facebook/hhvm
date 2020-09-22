@@ -99,10 +99,11 @@ let parallel_helper workers env pos_list =
 (* Entry Point *)
 let go :
     MultiWorker.worker list option ->
+    bool ->
     (string * int * int * (int * int) option) list ->
     ServerEnv.env ->
     string list =
- fun workers pos_list env ->
+ fun workers _experimental pos_list env ->
   let pos_list =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be

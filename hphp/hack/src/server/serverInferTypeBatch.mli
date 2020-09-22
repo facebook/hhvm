@@ -8,6 +8,7 @@
 
 val go :
   MultiWorker.worker list option ->
+  bool ->
   (string * int * int * (int * int) option) list ->
   ServerEnv.env ->
   string list

@@ -664,12 +664,25 @@ let parse_check_args cmd =
             fun position ->
             mode :=
               match !mode with
-              | None -> Some (MODE_TYPE_AT_POS_BATCH [position])
-              | Some (MODE_TYPE_AT_POS_BATCH positions) ->
-                Some (MODE_TYPE_AT_POS_BATCH (position :: positions))
+              | None -> Some (MODE_TYPE_AT_POS_BATCH (false, [position]))
+              | Some (MODE_TYPE_AT_POS_BATCH (_, positions)) ->
+                Some (MODE_TYPE_AT_POS_BATCH (false, position :: positions))
               | _ -> raise (Arg.Bad "only a single mode should be specified")
           end,
         " (mode) show types at multiple positions [file:line:character list]" );
+      ( "--type-at-pos-batch-ex",
+        Arg.Rest
+          begin
+            fun position ->
+            mode :=
+              match !mode with
+              | None -> Some (MODE_TYPE_AT_POS_BATCH (true, [position]))
+              | Some (MODE_TYPE_AT_POS_BATCH (_, positions)) ->
+                Some (MODE_TYPE_AT_POS_BATCH (true, position :: positions))
+              | _ -> raise (Arg.Bad "only a single mode should be specified")
+          end,
+        " (mode) show types at multiple positions [file:line:character list] -- experimental"
+      );
       ( "--verbose-on",
         Arg.Unit (fun () -> set_mode (MODE_VERBOSE true) ()),
         " (mode) turn on verbose server log" );

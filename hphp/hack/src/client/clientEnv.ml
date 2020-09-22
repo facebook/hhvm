@@ -61,7 +61,7 @@ type client_mode =
   | MODE_STATUS
   | MODE_STATUS_SINGLE of string (* filename *)
   | MODE_TYPE_AT_POS of string
-  | MODE_TYPE_AT_POS_BATCH of string list
+  | MODE_TYPE_AT_POS_BATCH of bool * string list (* bool is 'experimental mode' *)
   | MODE_FUN_DEPS_AT_POS_BATCH of string list
   | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH of string list
   | MODE_FILE_DEPENDENTS

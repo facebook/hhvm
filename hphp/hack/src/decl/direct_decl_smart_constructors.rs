@@ -1808,6 +1808,11 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
 }
 
 impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors<'a> {
+    /* Note: this function discards many tokens and returns Node::Ignored. A common idiom in this
+     * parser for getting positions is `unwrap_or_return!(x.get_pos(...))`. If your token kind is
+     * Node::Ignored, the position calculation will exit early and make the calling function return
+     * Ignored as well.
+     * TODO(T75983459) Make this less of a land mine */
     fn make_token(&mut self, token: Self::Token) -> Self::R {
         let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));
         let token_pos = |this: &Self| {
@@ -1957,6 +1962,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Construct => Node::Construct(token_pos(self)),
             TokenKind::LeftParen
             | TokenKind::RightParen
+            | TokenKind::LeftBracket
             | TokenKind::RightBracket
             | TokenKind::Shape
             | TokenKind::Question => Node::Pos(token_pos(self)),
@@ -2009,7 +2015,120 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Trait
             | TokenKind::Lateinit
             | TokenKind::Required => Node::Token(kind),
-            _ => Node::Ignored,
+            TokenKind::EndOfFile
+            | TokenKind::Attribute
+            | TokenKind::Await
+            | TokenKind::Binary
+            | TokenKind::Break
+            | TokenKind::Case
+            | TokenKind::Catch
+            | TokenKind::Category
+            | TokenKind::Children
+            | TokenKind::Clone
+            | TokenKind::Const
+            | TokenKind::Continue
+            | TokenKind::Default
+            | TokenKind::Define
+            | TokenKind::Do
+            | TokenKind::Echo
+            | TokenKind::Else
+            | TokenKind::Elseif
+            | TokenKind::Empty
+            | TokenKind::Endfor
+            | TokenKind::Endforeach
+            | TokenKind::Endif
+            | TokenKind::Endswitch
+            | TokenKind::Endwhile
+            | TokenKind::Enum
+            | TokenKind::Eval
+            | TokenKind::Fallthrough
+            | TokenKind::File
+            | TokenKind::Finally
+            | TokenKind::For
+            | TokenKind::Foreach
+            | TokenKind::From
+            | TokenKind::Function
+            | TokenKind::Global
+            | TokenKind::Concurrent
+            | TokenKind::Goto
+            | TokenKind::If
+            | TokenKind::Include
+            | TokenKind::Includes
+            | TokenKind::Include_once
+            | TokenKind::Instanceof
+            | TokenKind::Insteadof
+            | TokenKind::Integer
+            | TokenKind::Is
+            | TokenKind::Isset
+            | TokenKind::List
+            | TokenKind::Namespace
+            | TokenKind::New
+            | TokenKind::Object
+            | TokenKind::Parent
+            | TokenKind::Print
+            | TokenKind::Real
+            | TokenKind::Record
+            | TokenKind::RecordDec
+            | TokenKind::Require
+            | TokenKind::Require_once
+            | TokenKind::Return
+            | TokenKind::Suspend
+            | TokenKind::Switch
+            | TokenKind::Throw
+            | TokenKind::Try
+            | TokenKind::Unset
+            | TokenKind::Use
+            | TokenKind::Using
+            | TokenKind::Var
+            | TokenKind::Where
+            | TokenKind::While
+            | TokenKind::LeftBrace
+            | TokenKind::RightBrace
+            | TokenKind::MinusGreaterThan
+            | TokenKind::Dollar
+            | TokenKind::LessThanEqualGreaterThan
+            | TokenKind::ExclamationEqual
+            | TokenKind::ExclamationEqualEqual
+            | TokenKind::Carat
+            | TokenKind::QuestionAs
+            | TokenKind::QuestionColon
+            | TokenKind::QuestionQuestionEqual
+            | TokenKind::Colon
+            | TokenKind::StarStarEqual
+            | TokenKind::StarEqual
+            | TokenKind::SlashEqual
+            | TokenKind::PercentEqual
+            | TokenKind::PlusEqual
+            | TokenKind::MinusEqual
+            | TokenKind::DotEqual
+            | TokenKind::LessThanLessThanEqual
+            | TokenKind::GreaterThanGreaterThanEqual
+            | TokenKind::AmpersandEqual
+            | TokenKind::CaratEqual
+            | TokenKind::BarEqual
+            | TokenKind::Comma
+            | TokenKind::ColonColon
+            | TokenKind::EqualGreaterThan
+            | TokenKind::EqualEqualGreaterThan
+            | TokenKind::QuestionMinusGreaterThan
+            | TokenKind::DollarDollar
+            | TokenKind::BarGreaterThan
+            | TokenKind::SlashGreaterThan
+            | TokenKind::LessThanSlash
+            | TokenKind::LessThanQuestion
+            | TokenKind::ColonAt
+            | TokenKind::Backtick
+            | TokenKind::ErrorToken
+            | TokenKind::DoubleQuotedStringLiteralHead
+            | TokenKind::StringLiteralBody
+            | TokenKind::DoubleQuotedStringLiteralTail
+            | TokenKind::HeredocStringLiteralHead
+            | TokenKind::HeredocStringLiteralTail
+            | TokenKind::XHPCategoryName
+            | TokenKind::XHPStringLiteral
+            | TokenKind::XHPBody
+            | TokenKind::XHPComment
+            | TokenKind::Markup => Node::Ignored,
         };
         self.state.previous_token_kind = kind;
         result

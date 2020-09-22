@@ -91,11 +91,11 @@ function strtok(string $str, $token = null);
  */
 <<__PHPStdLib>>
 function str_getcsv(string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): varray<?string>;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure>>
 function str_replace($search, $replace, $subject);
 <<__PHPStdLib>>
 function str_replace_with_count($search, $replace, $subject, inout $count);
-<<__PHPStdLib>>
+<<__PHPStdLib>> // not pure: uses global locale for capitalization
 function str_ireplace($search, $replace, $subject);
 <<__PHPStdLib>>
 function str_ireplace_with_count($search, $replace, $subject, inout $count);

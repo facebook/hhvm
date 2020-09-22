@@ -37,7 +37,7 @@ function preg_match_with_error(
   int $flags = 0,
   int $offset = 0,
 ): int;
-<<__PHPStdLib>>
+<<__PHPStdLib>> // not pure: puts error code in a global variable
 function preg_match_with_matches(string $pattern, string $subject, inout $matches,
                                  int $flags = 0, int $offset = 0): int;
 <<__PHPStdLib, __Pure>>

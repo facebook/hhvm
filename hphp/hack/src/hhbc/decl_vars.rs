@@ -25,19 +25,6 @@ bitflags! {
     }
 }
 
-#[derive(PartialEq, Copy, Clone)]
-enum BareThisUsage {
-    // $this appear as expression
-    BareThis,
-    // bare $this appear as possible targetfor assignment
-    // - $this as function argument
-    // - $this as target of & operator
-    // - $this as reference in catch clause *)
-    BareThisAsRef,
-}
-
-use BareThisUsage::*;
-
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a env::SSet>,
     is_in_static_method: bool,
@@ -48,7 +35,7 @@ struct DeclvarVisitor<'a> {
     // set of locals used inside the functions
     locals: UniqueList<String>,
     // does function uses bare form of $this
-    bare_this: Option<BareThisUsage>,
+    bare_this: bool,
     context: DeclvarVisitorContext<'a>,
 }
 
@@ -56,7 +43,7 @@ impl<'a> DeclvarVisitor<'a> {
     fn new(explicit_use_set_opt: Option<&'a env::SSet>, flags: Flags) -> Self {
         Self {
             locals: UniqueList::new(),
-            bare_this: None,
+            bare_this: false,
             context: DeclvarVisitorContext {
                 explicit_use_set_opt,
                 is_in_static_method: flags.contains(Flags::IS_IN_STATIC_METHOD),
@@ -65,24 +52,19 @@ impl<'a> DeclvarVisitor<'a> {
         }
     }
 
-    fn with_this(&mut self, barethis: BareThisUsage) {
-        let new_bare_this = match (self.bare_this, barethis) {
-            (_, BareThisAsRef) => Some(BareThisAsRef),
-            (None, BareThis) => Some(BareThis),
-            (u, _) => u,
-        };
-        if self.bare_this != new_bare_this {
-            self.bare_this = new_bare_this;
+    fn with_this(&mut self) {
+        if !self.bare_this {
+            self.bare_this = true;
             self.locals.add(special_idents::THIS.into())
         }
     }
 
-    fn add_local<S: Into<String> + AsRef<str>>(&mut self, barethis: BareThisUsage, name: S) {
+    fn add_local<S: Into<String> + AsRef<str>>(&mut self, name: S) {
         let name_ref = name.as_ref();
         if name_ref == special_idents::DOLLAR_DOLLAR || special_idents::is_tmp_var(name_ref) {
             ()
         } else if name_ref == special_idents::THIS {
-            self.with_this(barethis)
+            self.with_this()
         } else {
             self.locals.add(name.into())
         }
@@ -107,7 +89,7 @@ impl<'a> DeclvarVisitor<'a> {
                         // TODO(thomasjiang): For this to match correctly, we need to adjust ast_to_nast
                         // because it does not make a distinction between ID and Lvar, which is needed here
                         if is_call_target {
-                            self.add_local(BareThis, &pstr.1)
+                            self.add_local(&pstr.1)
                         }
                         Ok(())
                     }
@@ -131,7 +113,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 let (body, catch_list, finally) = (&x.0, &x.1, &x.2);
                 visit(self, env, body)?;
                 for Catch(_, id, catch_body) in catch_list {
-                    self.add_local(BareThisAsRef, id.name());
+                    self.add_local(id.name());
                     visit(self, env, catch_body)?;
                 }
                 visit(self, env, finally)
@@ -155,7 +137,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     _ => receiver_e.recurse(env, self.object())?,
                 }
                 match &prop_e.1 {
-                    Lvar(id) => self.add_local(BareThis, id.name()),
+                    Lvar(id) => self.add_local(id.name()),
                     _ => prop_e.recurse(env, self.object())?,
                 }
                 Ok(())
@@ -174,7 +156,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
             }
 
-            Lvar(x) => Ok(self.add_local(BareThis, x.name())),
+            Lvar(x) => Ok(self.add_local(x.name())),
             ClassGet(x) => self.on_class_get(&x.0, &x.1, false),
             // For an Lfun, we don't want to recurse, because it's a separate scope.
             Lfun(_) => Ok(()),
@@ -202,7 +184,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     .unwrap_or(false);
                 if has_use_list {
                     for id in use_list {
-                        self.add_local(BareThis, id.name())
+                        self.add_local(id.name())
                     }
                 }
                 Ok(())
@@ -212,21 +194,24 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 if let Id(x) = &func_e.1 {
                     let call_name = &x.1;
                     if call_name == emitter_special_functions::SET_FRAME_METADATA {
-                        self.add_local(BareThis, "$86metadata");
+                        self.add_local("$86metadata");
                     }
                 }
                 let barethis = match &func_e.1 {
                     Id(name)
                         if &name.1 == pseudo_functions::ISSET
-                            || &name.1 == pseudo_functions::ECHO_NO_NS =>
-                    {
-                        BareThis
-                    }
-                    _ => BareThisAsRef,
+                            || &name.1 == pseudo_functions::ECHO_NO_NS => true,
+                    _ => false,
                 };
                 let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.1 {
                     // Only add $this to locals if it's bare
-                    Lvar(id) if &(id.1).1 == "$this" => Ok(self_.with_this(barethis)),
+                    Lvar(id) if &(id.1).1 == "$this" => {
+                        if barethis {
+                            Ok(self_.with_this())
+                        } else {
+                            Ok(())
+                        }
+                    }
                     _ => self_.visit_expr(env, x),
                 };
                 match &func_e.1 {
@@ -248,7 +233,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 let (exprs1, expr2) = (&x.2, &x.3);
 
                 let add_bare_expr = |self_: &mut Self, env: &mut (), expr: &Expr| match &expr.1 {
-                    Lvar(x) if &(x.1).1 == "$this" => Ok(self_.with_this(BareThisAsRef)),
+                    Lvar(x) if &(x.1).1 == "$this" => Ok(()),
                     _ => self_.visit_expr(env, expr),
                 };
                 for expr in exprs1 {
@@ -291,8 +276,7 @@ where
         }
     }
     visit(&mut visitor, &mut (), b)?;
-    let needs_local_this =
-        visitor.bare_this == Some(BareThisAsRef) || flags.contains(Flags::IS_IN_STATIC_METHOD);
+    let needs_local_this = flags.contains(Flags::IS_IN_STATIC_METHOD);
     for param in params {
         visitor.locals.remove(get_param_name(param))
     }

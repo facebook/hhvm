@@ -740,6 +740,17 @@ and pp_class_const : Format.formatter -> class_const -> unit =
 and show_class_const : class_const -> string =
  (fun x -> Format.asprintf "%a" pp_class_const x)
 
+and pp_const_decl : Format.formatter -> const_decl -> unit =
+ fun fmt x ->
+  Format.fprintf fmt "(@[";
+  Pos.pp fmt x.cd_pos;
+  Format.fprintf fmt ",@ ";
+  pp_ty fmt x.cd_type;
+  Format.fprintf fmt "@])"
+
+and show_const_elt : const_decl -> string =
+ (fun x -> Format.asprintf "%a" pp_const_decl x)
+
 and pp_requirement : Format.formatter -> requirement -> unit =
  fun fmt (a0, a1) ->
   Format.fprintf fmt "(@[";

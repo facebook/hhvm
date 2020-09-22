@@ -113,7 +113,8 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Const name in
-    let gconst_ty_opt = pointer_to_option ptr in
+    let gconst_ty_opt: Typing_defs.const_decl option = pointer_to_option ptr in
+    let gconst_ty_opt = Option.map gconst_ty_opt (fun c -> c.Typing_defs.cd_type)  in
     String.Table.add_exn t.gconst_cache name gconst_ty_opt;
     let path_opt =
       Option.map gconst_ty_opt ~f:(fun ty ->

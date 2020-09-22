@@ -126,6 +126,11 @@ type pu_origin = {
   pu_enum: string;
 }
 
+type const_decl = {
+  cd_pos: Pos.t;
+  cd_type: decl_ty;
+}
+
 type class_elt = {
   ce_visibility: visibility;
   ce_type: decl_ty Lazy.t;
@@ -1026,6 +1031,9 @@ let equal_fun_elt fe1 fe2 =
   Option.equal String.equal fe1.fe_deprecated fe2.fe_deprecated
   && equal_decl_ty fe1.fe_type fe2.fe_type
   && Pos.equal fe1.fe_pos fe2.fe_pos
+
+let equal_const_decl cd1 cd2 =
+  Pos.equal cd1.cd_pos cd2.cd_pos && equal_decl_ty cd1.cd_type cd2.cd_type
 
 let get_ce_abstract ce = is_set ce_flags_abstract ce.ce_flags
 

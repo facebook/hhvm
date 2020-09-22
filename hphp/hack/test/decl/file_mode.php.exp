@@ -44,8 +44,9 @@ Parsed decls:
       } };
   consts =
   { "\\MY_PARTIAL_CONST" ->
-    (Rhint (root|file_mode.php line 9, characters 7-19),
-     (Tapply (([9:7-20], "\\MyPartialType"), []))) }
+    ([9:21-37],
+     (Rhint (root|file_mode.php line 9, characters 7-19),
+      (Tapply (([9:7-20], "\\MyPartialType"), [])))) }
   }
 
 They matched!

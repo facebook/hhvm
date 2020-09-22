@@ -90,8 +90,9 @@ Parsed decls:
       } };
   consts =
   { "\\MyNamespace\\hello" ->
-    (Rhint (root|nested_namespaces.php line 24, characters 9-32),
-     (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), []))) }
+    ([24:34-39],
+     (Rhint (root|nested_namespaces.php line 24, characters 9-32),
+      (Tapply (([24:9-33], "\\MyNamespace\\MyVeryInnerNamespaceType"), [])))) }
   }
 
 They matched!

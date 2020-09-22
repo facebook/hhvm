@@ -181,7 +181,7 @@ let compare_decl ctx verbosity fn =
         (fun ctx a b -> Decl.declare_const_in_file ~write_shmem:true ctx a b)
         Typing_defs.equal_decl_ty
         Pp_type.show_decl_ty
-        decls.consts;
+        (SMap.map (fun cd -> cd.Typing_defs.cd_type) decls.consts);
       compare
         "function(s)"
         (Decl.declare_fun_in_file ~write_shmem:true)

@@ -12,8 +12,8 @@ type decls = {
       [@printer (fun fmt -> SMap.pp Pp_type.pp_fun_elt fmt)]
   typedefs: Typing_defs.typedef_type SMap.t;
       [@printer (fun fmt -> SMap.pp Pp_type.pp_typedef_type fmt)]
-  consts: Typing_defs.decl_ty SMap.t;
-      [@printer (fun fmt -> SMap.pp Pp_type.pp_decl_ty fmt)]
+  consts: Typing_defs.const_decl SMap.t;
+      [@printer (fun fmt -> SMap.pp Pp_type.pp_const_decl fmt)]
 }
 [@@deriving show]
 
@@ -41,14 +41,13 @@ let decls_to_fileinfo (decls : decls) : FileInfo.t =
    fun get_pos items ->
     SMap.fold (fun k v acc -> (FileInfo.Full (get_pos v), k) :: acc) items []
   in
-  let { classes; funs; typedefs; _ } = decls in
+  let { classes; funs; typedefs; consts; _ } = decls in
   {
     FileInfo.hash;
     classes = get_ids (fun c -> fst c.Shallow_decl_defs.sc_name) classes;
     funs = get_ids (fun f -> f.Typing_defs.fe_pos) funs;
     typedefs = get_ids (fun t -> t.Typing_defs.td_pos) typedefs;
-    (* TODO: check how to get pos from decl_ty *)
-    consts = [];
+    consts = get_ids (fun c -> c.Typing_defs.cd_pos) consts;
     (* TODO: get file mode*)
     file_mode = None;
     (* TODO: parse_decls_ffi needs to return record *)

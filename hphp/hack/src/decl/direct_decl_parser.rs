@@ -31,8 +31,8 @@ pub fn parse_decls<'a>(filename: RelativePath, text: &'a [u8], arena: &'a Bump) 
         typedefs.insert(*name, decl.clone());
     }
     let mut consts = AssocListMut::new_in(arena);
-    for &(name, decl) in decls.consts {
-        consts.insert(name, decl);
+    for (name, decl) in decls.consts {
+        consts.insert(*name, decl.clone());
     }
 
     Decls {

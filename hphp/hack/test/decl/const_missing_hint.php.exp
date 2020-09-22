@@ -35,23 +35,30 @@ Parsed decls:
   funs = {}; typedefs = {};
   consts =
   { "\\CBool" ->
-    (Rwitness (root|const_missing_hint.php line 4, characters 15-18),
-     (Tprim Tbool));
+    ([4:7-12],
+     (Rwitness (root|const_missing_hint.php line 4, characters 15-18),
+      (Tprim Tbool)));
     "\\CInt" ->
-    (Rwitness (root|const_missing_hint.php line 3, characters 14-14),
-     (Tprim Tint));
+    ([3:7-11],
+     (Rwitness (root|const_missing_hint.php line 3, characters 14-14),
+      (Tprim Tint)));
     "\\FromConst" ->
-    (Rwitness (root|const_missing_hint.php line 11, characters 7-15), Tany);
+    ([11:7-16],
+     (Rwitness (root|const_missing_hint.php line 11, characters 7-15), Tany));
     "\\Uminus" ->
-    (Rwitness (root|const_missing_hint.php line 9, characters 16-17),
-     (Tprim Tint));
+    ([9:7-13],
+     (Rwitness (root|const_missing_hint.php line 9, characters 16-17),
+      (Tprim Tint)));
     "\\Unot" ->
-    (Rwitness (root|const_missing_hint.php line 7, characters 7-10), Tany);
+    ([7:7-11],
+     (Rwitness (root|const_missing_hint.php line 7, characters 7-10), Tany));
     "\\Uplus" ->
-    (Rwitness (root|const_missing_hint.php line 8, characters 15-16),
-     (Tprim Tint));
+    ([8:7-12],
+     (Rwitness (root|const_missing_hint.php line 8, characters 15-16),
+      (Tprim Tint)));
     "\\Utild" ->
-    (Rwitness (root|const_missing_hint.php line 6, characters 7-11), Tany) }
+    ([6:7-12],
+     (Rwitness (root|const_missing_hint.php line 6, characters 7-11), Tany)) }
   }
 
 They matched!

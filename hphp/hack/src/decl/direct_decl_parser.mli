@@ -10,7 +10,7 @@ type decls = {
   classes: Shallow_decl_defs.shallow_class SMap.t;
   funs: Typing_defs.fun_elt SMap.t;
   typedefs: Typing_defs.typedef_type SMap.t;
-  consts: Typing_defs.decl_ty SMap.t;
+  consts: Typing_defs.const_decl SMap.t;
 }
 [@@deriving show]
 

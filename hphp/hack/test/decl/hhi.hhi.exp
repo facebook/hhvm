@@ -90,6 +90,8 @@ Parsed decls:
       td_type = (Rhint (root|hhi.hhi line 3, characters 10-12), (Tprim Tint))
       } };
   consts =
-  { "\\Y" -> (Rhint (root|hhi.hhi line 5, characters 7-9), (Tprim Tint)) } }
+  { "\\Y" ->
+    ([5:11-12], (Rhint (root|hhi.hhi line 5, characters 7-9), (Tprim Tint))) }
+  }
 
 They matched!

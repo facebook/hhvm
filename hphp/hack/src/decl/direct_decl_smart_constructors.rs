@@ -31,9 +31,9 @@ use oxidized_by_ref::{
     shape_map::ShapeField,
     typing_defs,
     typing_defs::{
-        EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType, ParamMode,
-        ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty,
-        Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
+        ConstDecl, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
+        ParamMode, ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind,
+        Tparam, Ty, Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -197,7 +197,7 @@ pub struct InProgressDecls<'a> {
     pub classes: List<'a, (&'a str, shallow_decl_defs::ShallowClass<'a>)>,
     pub funs: List<'a, (&'a str, typing_defs::FunElt<'a>)>,
     pub typedefs: List<'a, (&'a str, typing_defs::TypedefType<'a>)>,
-    pub consts: List<'a, (&'a str, typing_defs::Ty<'a>)>,
+    pub consts: List<'a, (&'a str, typing_defs::ConstDecl<'a>)>,
 }
 
 pub fn empty_decls() -> InProgressDecls<'static> {
@@ -992,7 +992,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.state.decls.typedefs =
             List::cons((name, decl), self.state.decls.typedefs, self.state.arena);
     }
-    fn add_const(&mut self, name: &'a str, decl: typing_defs::Ty<'a>) {
+    fn add_const(&mut self, name: &'a str, decl: typing_defs::ConstDecl<'a>) {
         self.state.decls.consts =
             List::cons((name, decl), self.state.decls.consts, self.state.arena);
     }
@@ -2903,7 +2903,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     .node_to_ty(hint)
                     .or_else(|| self.infer_const(name, initializer))
                     .unwrap_or_else(|| tany());
-                self.add_const(id.1, ty);
+                self.add_const(
+                    id.1,
+                    ConstDecl {
+                        pos: id.0,
+                        type_: ty,
+                    },
+                );
                 Node::Ignored
             }
             _ => Node::Ignored,

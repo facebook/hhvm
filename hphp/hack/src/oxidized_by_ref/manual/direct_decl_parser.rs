@@ -27,6 +27,6 @@ pub struct Decls<'a> {
     pub classes: SMap<'a, shallow_decl_defs::ShallowClass<'a>>,
     pub funs: SMap<'a, typing_defs::FunElt<'a>>,
     pub typedefs: SMap<'a, typing_defs::TypedefType<'a>>,
-    pub consts: SMap<'a, typing_defs::Ty<'a>>,
+    pub consts: SMap<'a, typing_defs::ConstDecl<'a>>,
 }
 impl<'a> TrivialDrop for Decls<'a> {}

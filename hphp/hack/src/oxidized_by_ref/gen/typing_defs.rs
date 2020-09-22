@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<703af153b8ee7a7aab040319af94cdcf>>
+// @generated SignedSource<<31a3dcae055af51d154b225345f3e083>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -38,6 +38,24 @@ pub struct PuOrigin<'a> {
     pub enum_: &'a str,
 }
 impl<'a> TrivialDrop for PuOrigin<'a> {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct ConstDecl<'a> {
+    pub pos: &'a pos::Pos<'a>,
+    pub type_: Ty<'a>,
+}
+impl<'a> TrivialDrop for ConstDecl<'a> {}
 
 #[derive(
     Clone,

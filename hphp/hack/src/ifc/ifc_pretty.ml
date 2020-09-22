@@ -56,6 +56,8 @@ let rec ptype fmt ty =
   | Tclass { c_name; c_self; c_lump } ->
     fprintf fmt "%s<@[<hov2>%a,@ %a@]>" c_name policy c_self policy c_lump
   | Tfun fn -> fun_ fmt fn
+  | Tcow_array { a_key; a_value } ->
+    fprintf fmt "CoW<%a => %a>" ptype a_key ptype a_value
 
 (* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)
 and fun_ fmt fn =

@@ -76,6 +76,8 @@ let rec subtype ~pos t1 t2 acc =
     (* Covariant in return type and exceptions *)
     |> subtype f1.f_ret f2.f_ret
     |> subtype f1.f_exn f2.f_exn
+  | (Tcow_array arr1, Tcow_array arr2) ->
+    acc |> subtype arr1.a_key arr2.a_key |> subtype arr1.a_value arr2.a_value
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (_, Tinter tl) ->
@@ -323,6 +325,10 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
       let (env, f_ret) = freshen_cov env fun_.f_ret in
       let (env, f_exn) = freshen_cov env fun_.f_exn in
       (env, Tfun { f_pc; f_self; f_args; f_ret; f_exn })
+    | Tcow_array arr ->
+      let (env, a_key) = freshen_cov env arr.a_key in
+      let (env, a_value) = freshen_cov env arr.a_value in
+      (env, Tcow_array { a_key; a_value })
   in
   freshen adjustment env ty
 
@@ -339,6 +345,8 @@ let rec object_policy = function
   | Ttuple tl ->
     let f set t = PSet.union (object_policy t) set in
     List.fold tl ~init:PSet.empty ~f
+  | Tcow_array { a_key; a_value } ->
+    PSet.union (object_policy a_key) (object_policy a_value)
 
 let add_dependencies ~pos pl t acc =
   L.(pl <* PSet.elements (object_policy t)) ~pos acc
@@ -506,26 +514,20 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   let env = throw ~pos renv env callee_exn in
   (env, ret_pty)
 
-(* Lifts the element locl type found in vec_ty using the lump
-   policy of the vec_pty policied type (must be a \Vec class) *)
-let vec_element_pty renv vec_ty vec_pty =
-  let lump =
-    match vec_pty with
-    | Tclass cls when String.equal cls.c_name Decl.vec_id -> cls.c_lump
-    | _ -> fail "expected a vector"
+let cow_array ~pos renv ty =
+  let rec f = function
+    | Tcow_array arry -> Some arry
+    | Tinter tys -> List.find_map tys f
+    | _ -> None
   in
-  let rec element_pty vec_ty =
-    match T.get_node vec_ty with
-    | T.Tclass ((_, c_name), _, [element_ty])
-      when String.equal c_name Decl.vec_id ->
-      Lift.ty ~lump renv element_ty
-    | T.Tvar id -> element_pty @@ Lift.expand_var renv id
-    | _ ->
-      fail
-        "expected one type parameter from a vector object, but got %s"
-        (Pp_type.show_ty () vec_ty)
-  in
-  element_pty vec_ty
+  match f ty with
+  | Some arry -> arry
+  | None ->
+    Errors.unknown_information_flow pos "Hack array";
+    {
+      a_key = Tprim (Env.new_policy_var renv "fake_key");
+      a_value = Tprim (Env.new_policy_var renv "fake_value");
+    }
 
 (* Deals with a true assignment to either a local variable
    or an object property *)
@@ -563,7 +565,7 @@ let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
    the object $x instead.  *)
 let rec asn_top ~expr ~pos renv env lhs rhs_pty =
   match snd lhs with
-  | A.Array_get ((((_, vec_ty), _) as vec), ix_opt) ->
+  | A.Array_get (arry, ix_opt) ->
     (* TODO(T68269878): track flows due to length changes *)
     let (env, _ix_ty_opt) =
       match ix_opt with
@@ -574,18 +576,18 @@ let rec asn_top ~expr ~pos renv env lhs rhs_pty =
     in
     (* we now compute the type of the new array resulting
        from the insertion/update *)
-    let (env, vec_pty) =
-      let (env, old_vec_pty) = expr env vec in
-      let (env, vec_pty) =
-        adjust_ptype ~pos ~adjustment:Aweaken renv env old_vec_pty
+    let (env, arry_pty) =
+      let (env, old_arry_pty) = expr env arry in
+      let (env, arry_pty) =
+        adjust_ptype ~pos ~adjustment:Aweaken renv env old_arry_pty
       in
       (* the rhs flows into the element type *)
-      let elem_pty = vec_element_pty renv vec_ty vec_pty in
-      let env = Env.acc env (subtype ~pos rhs_pty elem_pty) in
-      (env, vec_pty)
+      let value_pty = (cow_array ~pos renv arry_pty).a_value in
+      let env = Env.acc env (subtype ~pos rhs_pty value_pty) in
+      (env, arry_pty)
     in
     (* assign the vector itself *)
-    asn_top ~expr ~pos renv env vec vec_pty
+    asn_top ~expr ~pos renv env arry arry_pty
   | _ -> asn ~expr ~pos renv env lhs rhs_pty
 
 let rec assign ~pos renv env op lhs_exp rhs_exp =
@@ -697,17 +699,17 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
         call env (Clocal fty) None
     end
   | A.ValCollection (A.Vec, _, exprs) ->
-    (* We require each collection element to be a subtype of the vector
-     * element parameter. *)
+    (* Each element of the vector is a subtype of the vector's value
+       parameter. *)
     let vec_pty = Lift.ty ~prefix:"vec" renv ety in
-    let element_pty = vec_element_pty renv ety vec_pty in
+    let element_pty = (cow_array ~pos renv vec_pty).a_value in
     let mk_element_subtype env exp =
       let (env, pty) = expr env exp in
       Env.acc env (subtype ~pos pty element_pty)
     in
     let env = List.fold ~f:mk_element_subtype ~init:env exprs in
     (env, vec_pty)
-  | A.Array_get ((((_, vec_ty), _) as vec), ix_opt) ->
+  | A.Array_get (arry, ix_opt) ->
     (* Return the type parameter corresponding to the vector element type. *)
     let env =
       (* Evaluate the index in case it has side-effects. *)
@@ -715,9 +717,9 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
       | Some ix -> fst @@ expr env ix
       | None -> fail "cannot have an empty index when reading"
     in
-    let (env, vec_pty) = expr env vec in
-    let element_pty = vec_element_pty renv vec_ty vec_pty in
-    (env, element_pty)
+    let (env, arry_pty) = expr env arry in
+    let value_pty = (cow_array ~pos renv arry_pty).a_value in
+    (env, value_pty)
   (* TODO(T70139741): support variadic functions and constructors
    * TODO(T70139893): support classes with type parameters
    *)

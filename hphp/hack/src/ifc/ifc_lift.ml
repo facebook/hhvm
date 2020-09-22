@@ -65,6 +65,18 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Ttuple tyl -> Ttuple (List.map ~f:ty tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
+  | T.Tclass ((_, name), _, targs) when String.equal name Decl.vec_id ->
+    begin
+      match targs with
+      | [element_ty] ->
+        Tcow_array
+          {
+            (* Inventing a policy type for indices out of thin air *)
+            a_key = Tprim (get_policy ~prefix:"key" lump renv);
+            a_value = ty element_ty;
+          }
+      | _ -> fail "vector needs a single type parameter"
+    end
   | T.Tclass ((_, name), _, _) -> class_ty ?lump renv name
   | T.Tvar id -> ty (expand_var renv id)
   | T.Tfun fun_ty ->

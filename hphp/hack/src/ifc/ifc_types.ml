@@ -75,6 +75,14 @@ type ptype =
   | Tinter of ptype list
   | Tclass of class_
   | Tfun of fun_
+  | Tcow_array of cow_array
+
+(* Copy-on-write indexed collection used for Hack arrays i.e. vec, dict, and
+   keyset *)
+and cow_array = {
+  a_key: ptype;
+  a_value: ptype;
+}
 
 and fun_ = {
   (* The PC guards a function's effects *)

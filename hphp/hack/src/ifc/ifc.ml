@@ -55,19 +55,12 @@ let rec subtype ~pos t1 t2 acc =
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
     | None -> err "incompatible tuple types")
   | (Tclass cl1, Tclass cl2) ->
-    (* Nominal subtyping records flows in properties (through the lump policy)
-     * common to both classes. The typechecker ensures that the subtyping
-     * relation holds, so we do not need safety checks.
-     *
-     * We do not need constraints for policied properties as their policies are
-     * known statically. Hence, the only flow constraint we have can have due
-     * to subtyping of these is the trivial one of the form A < A.
-     *)
-    acc
-    (* Invariant in lump policy *)
-    |> L.(cl1.c_lump = cl2.c_lump) ~pos
-    (* Covariant in class policy *)
-    |> L.(cl1.c_self < cl2.c_self) ~pos
+    (* We do not attempt to replicate the work Hack did and instead
+       only act on policies. A bit of precision could be gained when
+       dealing with disjunctive subtyping queries if we realize that,
+       for example, cl1 and cl2 are incompatible; but let's keep it
+       simple for now. *)
+    L.(cl1.c_lump = cl2.c_lump && cl1.c_self < cl2.c_self) ~pos acc
   | (Tfun f1, Tfun f2) ->
     let zipped_args =
       match List.zip f1.f_args f2.f_args with
@@ -110,6 +103,174 @@ let (subtype, equivalent) =
       fail "subtype: %s (%a <: %a)" msg Pp.ptype tsub Pp.ptype tsup
   in
   (wrap subtype, wrap equivalent)
+
+(* Returns the policies appearing in a type split in three sets
+   of occurrences (covariant, invariant, contravariant) *)
+let rec policy_occurrences pty =
+  let emp = PSet.empty in
+  let pol = PSet.singleton in
+  let on_list =
+    List.fold ~init:(emp, emp, emp) ~f:(fun (s1, s2, s3) (t1, t2, t3) ->
+        (PSet.union s1 t1, PSet.union s2 t2, PSet.union s3 t3))
+  in
+  match pty with
+  | Tprim p -> (pol p, emp, emp)
+  | Tgeneric p -> (pol p, emp, emp)
+  | Tinter tl
+  | Tunion tl
+  | Ttuple tl ->
+    on_list (List.map ~f:policy_occurrences tl)
+  | Tclass cls -> (pol cls.c_self, pol cls.c_lump, emp)
+  | Tfun { f_pc; f_self; f_args; f_ret; f_exn } ->
+    let swap_policy_occurrences t =
+      let (cov, inv, cnt) = policy_occurrences t in
+      (cnt, inv, cov)
+    in
+    on_list
+      ( (pol f_self, emp, pol f_pc)
+      :: policy_occurrences f_ret
+      :: policy_occurrences f_exn
+      :: List.map ~f:swap_policy_occurrences f_args )
+
+(* Returns the list of free policy variables in a type *)
+let free_pvars pty =
+  let (cov, inv, cnt) = policy_occurrences pty in
+  let all_vars =
+    PSet.fold (fun pol vset ->
+        match pol with
+        | Pfree_var (v, s) -> VarSet.add (v, s) vset
+        | _ -> vset)
+  in
+  VarSet.empty |> all_vars cov |> all_vars inv |> all_vars cnt
+
+(* Type refinements happen when the typechecker realizes that a dynamic
+   check ensures a code path is taken only when a local has a given type.
+   The refined type Tref is in a subtyping relation with the original
+   type Tori (Tref <: Tori).
+
+   Refinement gets tricky when the reference type and original type
+   are parameterized (either with type parameters, or with policy
+   parameters). In plain Hack, type parameters are not constrained by
+   dynamic checks (e.g., one can only say ($x is vec<_>)), so we have
+   to ensure that the code type-checked under a refinement is valid
+   regardless of the parameter's value. In practice, the Hack
+   typechecker introduces a generic type on the spot (i.e., a rigid
+   type variable); it is however improperly scoped, and that leads
+   to soundness bugs.
+
+   In Hack IFC, we will not bother too much with type parameters until
+   Hack is fixed. However, we will properly handle policy variables.
+   Doing so requires generating universally quantified policy variables
+   in the constraint. Let's consider an example.
+
+     $x: mixed<=pm>
+     if ($x is A<+pcls, =pfld>) {
+        /* some code */
+     }
+
+   The variances were marked with + and = for covariant and invariant,
+   respectively. Inside the if statement, the type for $x is refined
+   (from mixed). Hack IFC mints a new type A<pcls, pfld> for $x then
+   generates the constraint Cif for the body of the conditional, the
+   complete constraint is then assembled as such:
+
+     (forall pcls pfld. (A<pcls, pfld> <: mixed<pm>) ==> Cif)
+
+   which, expanding the action of subtyping, is the same as
+
+     (forall pcls pfld. (pcls < pm && pfld = pm) ==> Cif)
+
+   Note how pcls and pfld are local to the part of the constraint
+   that deals with the body of the if conditional. This is how Hack
+   IFC controls the (potentially unsound) escaping of the fresh
+   parameters induced by refinements.
+
+   It is clear that we can get rid of pfld, and replace it with pm
+   everywhere it appears in Cif. But what about pcls? The key to
+   eliminating it early is that pcls appears covariantly in the
+   type of a live value accessible via $x. Consequently, all the
+   constraints in Cif involving pcls must be of the form (pcls < X).
+   Because of this observation, it is sound (and complete) to replace
+   pcls in Cif by pm. In contrast, if there had been constraints of
+   the form (X < pcls) in Cif, we'd have had to replace pcls with bot
+   in those.
+*)
+let refine renv tyori (pos, ltyref) =
+  let ref_scope = Scope.alloc () in
+  let tyref = Lift.ty { renv with re_scope = ref_scope } ltyref in
+  let acc = subtype ~pos tyref tyori [] in
+  (* we know the three sets are disjoint, because Lift.ty above
+     will not reuse the same variable multiple times *)
+  let (cov, _inv, cnt) = policy_occurrences tyref in
+  (* analyze the result of the subtyping call; we build a map
+     that associates a bound to each policy variable in tyref.
+     Depending on whether the refined variable is in cov/inv/cnt
+     the bound is to be interpreted as an upper bound, an
+     equality, or a lower bound.
+  *)
+  let rec collect vmap acc =
+    let set_bound pref pori vmap =
+      (* only store bounds that apply to the refined type and
+         are from the origin type *)
+      match pref with
+      | Pfree_var (var, s) when Scope.equal s ref_scope ->
+        begin
+          match pori with
+          | Pfree_var (_, s) when Scope.equal s ref_scope -> vmap
+          | _ -> SMap.add var pori vmap
+        end
+      | _ -> vmap
+    in
+    match acc with
+    | [] -> vmap
+    | Ctrue :: acc -> collect vmap acc
+    | Cconj (Cflow (_, p1, p2), Cflow (_, p3, p4)) :: acc
+      when equal_policy p1 p4 && equal_policy p2 p3 ->
+      collect (set_bound p1 p2 @@ set_bound p2 p1 @@ vmap) acc
+    | Cflow (_, p1, p2) :: acc when PSet.mem p1 cov ->
+      collect (set_bound p1 p2 vmap) acc
+    | Cflow (_, p1, p2) :: acc when PSet.mem p2 cnt ->
+      collect (set_bound p2 p1 vmap) acc
+    | c :: acc ->
+      (* soundness is not compromised by ignoring the constraint,
+         however, for debugging purposes it is good to know this
+         happened *)
+      Format.eprintf "Duh?! unhandled subtype constraint: %a" Pp.prop c;
+      collect vmap acc
+  in
+  let vmap = collect SMap.empty acc in
+  (* replace policy variables in tyref with their bounds *)
+  let rec replace_vars ty =
+    let on_policy = function
+      | Pfree_var (var, s) ->
+        (* sanity check *)
+        assert (Scope.equal s ref_scope);
+        begin
+          match SMap.find_opt var vmap with
+          | None ->
+            (* this is what happens when the refined type has a
+               policy variable that is not related to anything in
+               the original type; it happens, for instance, if the
+               refined type is a class C<...> and the original
+               type is a policy-free empty intersection (Tinter[])
+
+               in this case, we cannot get rid of the universal
+               quantification; for now we simply fail *)
+            fail "univ refinement (%a ~> %a)" Pp.ptype tyori Pp.ptype tyref
+          | Some bnd -> bnd
+        end
+      | pol -> pol
+    in
+    Ifc_mapper.ptype replace_vars on_policy ty
+  in
+  (* finally, we have the refined type!
+     some examples of refine's behavior in common cases:
+       original             refined locl     result
+       (int<pi>|C<pc,pl>)   int          --> int<pi>
+       (int<pi>|I<pc,pl>)   C            --> C<pc,pl>  (C implements I)
+       mixed<pm>            C            --> C<pm,pm>  (policied mixed is TODO)
+  *)
+  replace_vars tyref
 
 (* Generates a fresh sub/super policy of the argument polic *)
 let adjust_policy ?(prefix = "weak") ~pos ~adjustment renv env policy =
@@ -206,24 +367,26 @@ let union env t1 t2 =
   else
     (env, Tunion [t1; t2])
 
+let get_local_type ~pos env lid =
+  match Env.get_local_type env lid with
+  | None ->
+    let msg = "local " ^ Local_id.get_name lid ^ " missing from env" in
+    Errors.unknown_information_flow pos msg;
+    None
+  | pty_opt -> pty_opt
+
 (* Uses a Hack-inferred type to update the flow type of a local
    variable *)
-let refresh_lvar_type ~pos renv env lid (ety : T.locl_ty) =
-  (* TODO(T68306543): make this faster when ety is the skeleton
-     of the type we already have for lid *)
+let refresh_local_type ~pos renv env lid lty =
   let is_simple pty =
     match pty with
     | Tunion _ -> false
     | _ -> true
   in
   let pty =
-    match Env.get_local_type env lid with
-    | None ->
-      Errors.unknown_information_flow
-        pos
-        ("variable `" ^ Local_id.get_name lid ^ "`");
-      Lift.ty renv ety
+    match get_local_type ~pos env lid with
     | Some pty -> pty
+    | None -> Lift.ty renv lty
   in
   if is_simple pty then
     (* if the type is already simple, do not refresh it with
@@ -231,7 +394,7 @@ let refresh_lvar_type ~pos renv env lid (ety : T.locl_ty) =
     (env, pty)
   else
     let prefix = Local_id.to_string lid in
-    let new_pty = Lift.ty renv ety ~prefix in
+    let new_pty = Lift.ty renv lty ~prefix in
     let env = Env.acc env (subtype ~pos pty new_pty) in
     let env = Env.set_local_type env lid new_pty in
     (env, new_pty)
@@ -440,7 +603,7 @@ let rec assign ~pos renv env op lhs_exp rhs_exp =
   (env, rhs_pty)
 
 (* Generate flow constraints for an expression *)
-and expr ~pos renv env (((_epos, ety), e) : Tast.expr) =
+and expr ~pos renv env (((_, ety), e) : Tast.expr) =
   let expr = expr ~pos renv in
   match e with
   | A.Null
@@ -456,7 +619,7 @@ and expr ~pos renv env (((_epos, ety), e) : Tast.expr) =
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
     binop ~pos renv env ty1 ty2
-  | A.Lvar (_pos, lid) -> refresh_lvar_type ~pos renv env lid ety
+  | A.Lvar (_pos, lid) -> refresh_local_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr env obj in
     let prop_pty = property_ptype renv obj_ptype property ety in
@@ -662,6 +825,19 @@ and expr ~pos renv env (((_epos, ety), e) : Tast.expr) =
 and stmt renv env ((pos, s) : Tast.stmt) =
   let expr = expr renv in
   match s with
+  | A.AssertEnv (A.Refinement, tymap) ->
+    (* The typechecker refined the type of some locals due
+       to a runtime check, update ifc types to match the
+       refined types *)
+    Local_id.Map.fold
+      (fun var hint env ->
+        match get_local_type ~pos env var with
+        | None -> env
+        | Some pty ->
+          let new_pty = refine renv pty hint in
+          Env.set_local_type env var new_pty)
+      tymap
+      env
   | A.Expr e ->
     let (env, _ty) = expr ~pos env e in
     env
@@ -783,21 +959,6 @@ and block renv env (blk : Tast.block) =
   let seq env s = stmt renv env s |> merge_pcs in
   let env = merge_pcs env in
   List.fold_left ~f:seq ~init:env blk
-
-(* Returns the list of free policy variables in a policied type *)
-let free_pvars =
-  let on_policy acc p =
-    match p with
-    | Pfree_var (v, s) ->
-      acc := VarSet.add (v, s) !acc;
-      p
-    | _ -> p
-  in
-  let rec iter acc p = Ifc_mapper.ptype (iter acc) (on_policy acc) p in
-  fun pty ->
-    let acc = ref VarSet.empty in
-    let _ = iter acc pty in
-    !acc
 
 (* Checks that two type schemes are in a subtyping relationship. The
  * skeletons of the two input type schemes are expected to be same.

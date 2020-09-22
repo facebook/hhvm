@@ -568,7 +568,7 @@ Variant HHVM_FUNCTION(posix_uname) {
     , s_release,    String(u.release,    CopyString)
     , s_version,    String(u.version,    CopyString)
     , s_machine,    String(u.machine,    CopyString)
-#if defined(_GNU_SOURCE)
+#if defined(_GNU_SOURCE) && defined(__linux__)
     , s_domainname, String(u.domainname, CopyString)
 #endif
   );

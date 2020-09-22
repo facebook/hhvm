@@ -1443,12 +1443,6 @@ void dce(Env& env, const bc::PopL& op) {
   }
 }
 
-void dce(Env& env, const bc::InitThisLoc& op) {
-  if (!isLocLive(env, op.loc1)) {
-    return markDead(env);
-  }
-}
-
 void dce(Env& env, const bc::SetL& op) {
   if (!isLocLive(env, op.loc1) && !isLocVolatile(env, op.loc1)) {
     return markDead(env);

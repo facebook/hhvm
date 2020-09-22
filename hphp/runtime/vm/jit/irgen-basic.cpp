@@ -203,19 +203,6 @@ void emitSetL(IRGS& env, int32_t id) {
   pushStLoc(env, id, nullptr, src);
 }
 
-void emitInitThisLoc(IRGS& env, int32_t id) {
-  if (!hasThis(env)) {
-    // Do nothing if this is null
-    return;
-  }
-  auto const ldExit = makeExit(env);
-  auto const oldLoc = ldLoc(env, id, ldExit, DataTypeCountness);
-  auto const this_  = ldThis(env);
-  gen(env, IncRef, this_);
-  stLocRaw(env, id, fp(env), this_);
-  decRef(env, oldLoc);
-}
-
 void emitPrint(IRGS& env) {
   auto const type = topC(env)->type();
   if (!type.subtypeOfAny(TInt, TBool, TNull, TStr)) {

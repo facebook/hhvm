@@ -310,8 +310,6 @@ static const struct {
   { OpThis,        {None,             Stack1,       OutThisObject   }},
   { OpBareThis,    {None,             Stack1,       OutUnknown      }},
   { OpCheckThis,   {This,             None,         OutNone         }},
-  { OpInitThisLoc,
-                   {None,             Local,        OutUnknown      }},
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
@@ -947,7 +945,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FuncCred:
   case Op::GetMemoKeyL:
   case Op::Idx:
-  case Op::InitThisLoc:
   case Op::InstanceOf:
   case Op::InstanceOfD:
   case Op::IsLateBoundCls:

@@ -1590,7 +1590,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
     case Op::This:
     case Op::BareThis:
     case Op::CheckThis:
-    case Op::InitThisLoc:
       return true;
 
     // classes and related

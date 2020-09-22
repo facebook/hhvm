@@ -224,10 +224,6 @@ interpOutputLocals(IRGS& env,
       break;
     }
 
-    case OpInitThisLoc:
-      setImmLocType(0, TCell);
-      break;
-
     case OpSetL:
     case OpPopL: {
       auto stackType = topType(env, BCSPRelOffset{0});

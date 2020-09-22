@@ -542,7 +542,6 @@ pub enum InstructMisc {
     This,
     BareThis(BareThisOp),
     CheckThis,
-    InitThisLoc(local::Type),
     FuncNumArgs,
     ChainFaults,
     OODeclExists(ClassKind),

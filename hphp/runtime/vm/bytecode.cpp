@@ -4790,17 +4790,6 @@ OPTBLD_INLINE void iopCheckThis() {
   checkThis(vmfp());
 }
 
-OPTBLD_INLINE void iopInitThisLoc(tv_lval thisLoc) {
-  tvDecRefGen(thisLoc);
-  if (vmfp()->func()->cls() && vmfp()->hasThis()) {
-    val(thisLoc).pobj = vmfp()->getThis();
-    type(thisLoc) = KindOfObject;
-    tvIncRefCountable(*thisLoc);
-  } else {
-    tvWriteUninit(thisLoc);
-  }
-}
-
 OPTBLD_INLINE void iopChainFaults() {
   auto const current = *vmStack().indC(1);
   auto const prev = *vmStack().indC(0);

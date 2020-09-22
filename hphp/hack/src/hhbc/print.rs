@@ -1858,10 +1858,6 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::MemoSetEager(None) => w.write("MemoSetEager L:0+0"),
         M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local")),
 
-        M::InitThisLoc(id) => {
-            w.write("InitThisLoc ")?;
-            print_local(w, id)
-        }
         M::OODeclExists(k) => concat_str_by(
             w,
             " ",

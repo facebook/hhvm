@@ -4764,13 +4764,6 @@ void in(ISS& env, const bc::BareThis& op) {
   push(env, ty, StackThisId);
 }
 
-void in(ISS& env, const bc::InitThisLoc& op) {
-  if (!is_volatile_local(env.ctx.func, op.loc1)) {
-    setLocRaw(env, op.loc1, TCell);
-    env.state.thisLoc = op.loc1;
-  }
-}
-
 /*
  * Amongst other things, we use this to mark units non-persistent.
  */

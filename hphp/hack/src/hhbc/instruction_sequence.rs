@@ -452,10 +452,6 @@ pub mod instr {
         instr(Instruct::IMisc(InstructMisc::This))
     }
 
-    pub fn initthisloc(id: local::Type) -> InstrSeq {
-        instr(Instruct::IMisc(InstructMisc::InitThisLoc(id)))
-    }
-
     pub fn istypec(op: IstypeOp) -> InstrSeq {
         instr(Instruct::IIsset(InstructIsset::IsTypeC(op)))
     }

@@ -282,7 +282,7 @@ fn make_memoize_method_with_params_code(
     param_count += add_refied;
     Ok(InstrSeq::gather(vec![
         begin_label,
-        emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[], false)?,
+        emit_body::emit_method_prolog(emitter, env, pos, hhas_params, args.params, &[])?,
         deprecation_body,
         if args.method.static_ {
             instr::empty()
@@ -427,7 +427,6 @@ fn make_wrapper<'a>(
     // TODO(hrust): Just clone env
     let env_copy = emit_body::make_env(
         RcOc::clone(&env.namespace),
-        env.flags.contains(env::Flags::NEEDS_LOCAL_THIS),
         env.scope.clone(),
         None,
         env.flags.contains(env::Flags::IN_RX_BODY),

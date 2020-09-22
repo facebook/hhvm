@@ -144,7 +144,7 @@ pub fn emit_body<'a, 'b>(
         args.flags.contains(Flags::SKIP_AWAITABLE),
     );
     let shadowed_tparams = emit_shadowed_tparams(args.immediate_tparams, args.class_tparam_names);
-    let (need_local_this, decl_vars) = make_decl_vars(
+    let decl_vars = make_decl_vars(
         emitter,
         &scope,
         args.immediate_tparams,
@@ -154,7 +154,6 @@ pub fn emit_body<'a, 'b>(
     )?;
     let mut env = make_env(
         namespace,
-        need_local_this,
         scope,
         args.call_context,
         args.flags.contains(Flags::RX_BODY),
@@ -186,7 +185,6 @@ pub fn emit_body<'a, 'b>(
         &tparams,
         &decl_vars,
         body,
-        need_local_this,
         is_generator,
         args.deprecation_info.clone(),
         &args.pos,
@@ -219,7 +217,6 @@ fn make_body_instrs(
     tparams: &[tast::Tparam],
     decl_vars: &[String],
     body: AstBody,
-    need_local_this: bool,
     is_generator: bool,
     deprecation_info: Option<&[TypedValue]>,
     pos: &Pos,
@@ -246,7 +243,6 @@ fn make_body_instrs(
         params,
         tparams,
         decl_vars,
-        need_local_this,
         is_generator,
         deprecation_info,
         pos,
@@ -275,8 +271,7 @@ fn make_header_content(
     env: &mut Env,
     params: &[HhasParam],
     tparams: &[tast::Tparam],
-    decl_vars: &[String],
-    need_local_this: bool,
+    _decl_vars: &[String],
     is_generator: bool,
     deprecation_info: Option<&[TypedValue]>,
     pos: &Pos,
@@ -286,18 +281,7 @@ fn make_header_content(
     let method_prolog = if flags.contains(Flags::NATIVE) {
         instr::empty()
     } else {
-        let should_emit_init_this = !env.scope.is_in_static_method()
-            && (need_local_this
-                || (env.scope.is_toplevel() && decl_vars.contains(&THIS.to_string())));
-        emit_method_prolog(
-            emitter,
-            env,
-            pos,
-            params,
-            ast_params,
-            tparams,
-            should_emit_init_this,
-        )?
+        emit_method_prolog(emitter, env, pos, params, ast_params, tparams)?
     };
 
     let deprecation_warning =
@@ -323,23 +307,11 @@ fn make_decl_vars(
     params: &[HhasParam],
     body: &AstBody,
     arg_flags: Flags,
-) -> Result<(bool, Vec<String>)> {
-    let mut flags = decl_vars::Flags::empty();
-    flags.set(decl_vars::Flags::HAS_THIS, scope.has_this());
-    flags.set(decl_vars::Flags::IS_TOPLEVEL, scope.is_toplevel());
-    flags.set(
-        decl_vars::Flags::IS_IN_STATIC_METHOD,
-        scope.is_in_static_method(),
-    );
-    flags.set(
-        decl_vars::Flags::IS_CLOSURE_BODY,
-        arg_flags.contains(Flags::CLOSURE_BODY),
-    );
-
+) -> Result<Vec<String>> {
     let explicit_use_set = &emitter.emit_state().explicit_use_set;
 
-    let (need_local_this, mut decl_vars) =
-        decl_vars::from_ast(params, body, flags, explicit_use_set).map_err(unrecoverable)?;
+    let mut decl_vars =
+        decl_vars::from_ast(params, body, explicit_use_set).map_err(unrecoverable)?;
 
     let mut decl_vars = if arg_flags.contains(Flags::CLOSURE_BODY) {
         let mut captured_vars = scope.get_captured_vars();
@@ -362,7 +334,7 @@ fn make_decl_vars(
     {
         decl_vars.insert(0, string_utils::reified::GENERICS_LOCAL_NAME.into());
     }
-    Ok((need_local_this, decl_vars))
+    Ok(decl_vars)
 }
 
 pub fn emit_return_type_info(
@@ -402,7 +374,6 @@ fn make_return_type_info(
 
 pub fn make_env<'a>(
     namespace: RcOc<namespace_env::Env>,
-    need_local_this: bool,
     scope: Scope<'a>,
     call_context: Option<String>,
     is_rx_body: bool,
@@ -410,7 +381,6 @@ pub fn make_env<'a>(
     let mut env = Env::default(namespace);
     env.call_context = call_context;
     env.scope = scope;
-    env.with_need_local_this(need_local_this);
     env.with_rx_body(is_rx_body);
     env
 }
@@ -556,7 +526,6 @@ pub fn emit_method_prolog(
     params: &[HhasParam],
     ast_params: &[tast::FunParam],
     tparams: &[tast::Tparam],
-    should_emit_init_this: bool,
 ) -> Result {
     let mut make_param_instr =
         |(param, ast_param): (&HhasParam, &tast::FunParam)| -> Result<Option<InstrSeq>> {
@@ -610,9 +579,6 @@ pub fn emit_method_prolog(
         .collect::<Result<Vec<_>>>()?;
 
     let mut instrs = vec![emit_pos(pos)];
-    if should_emit_init_this {
-        instrs.push(instr::initthisloc(local::Type::Named(THIS.into())))
-    }
     instrs.extend_from_slice(param_instrs.as_slice());
     Ok(InstrSeq::gather(instrs))
 }

@@ -92,7 +92,7 @@ impl<'a> Env<'a> {
         for_debugger_eval: bool,
     ) -> Result<Self> {
         let scope = Scope::toplevel();
-        let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs))?;
+        let all_vars = get_vars(&vec![], Either::Left(&defs))?;
 
         Ok(Self {
             pos: Pos::make_none(),
@@ -113,14 +113,14 @@ impl<'a> Env<'a> {
     fn with_function_like_(
         &mut self,
         e: ScopeItem<'a>,
-        is_closure_body: bool,
+        _is_closure_body: bool,
         params: &[FunParam],
         pos: Pos,
         body: &Block,
     ) -> Result<()> {
         self.pos = pos;
         self.scope.push_item(e);
-        let all_vars = get_vars(&self.scope, is_closure_body, params, Either::Right(body))?;
+        let all_vars = get_vars(params, Either::Right(body))?;
         Ok(self.variable_scopes.push(Variables {
             parameter_names: get_parameter_names(params),
             all_vars,
@@ -385,20 +385,8 @@ fn add_generic(env: &mut Env, st: &mut State, var: &str) {
     }
 }
 
-fn get_vars(
-    scope: &Scope,
-    is_closure_body: bool,
-    params: &[FunParam],
-    body: ast_body::AstBody,
-) -> Result<HashSet<String>> {
-    use decl_vars::{vars_from_ast, Flags};
-    let mut flags = Flags::empty();
-    flags.set(Flags::HAS_THIS, scope.has_this());
-    flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
-    flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
-    flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
-    let res = vars_from_ast(params, &body, flags).map_err(unrecoverable);
-    res
+fn get_vars(params: &[FunParam], body: ast_body::AstBody) -> Result<HashSet<String>> {
+    return decl_vars::vars_from_ast(params, &body).map_err(unrecoverable);
 }
 
 fn get_parameter_names(params: &[FunParam]) -> HashSet<String> {
@@ -1354,7 +1342,7 @@ fn extract_debugger_main(
     all_defs: &mut Program,
 ) -> std::result::Result<(), String> {
     let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
-    let mut vars = decl_vars::vars_from_ast(&[], &Either::Left(&stmts), decl_vars::Flags::empty())?
+    let mut vars = decl_vars::vars_from_ast(&[], &Either::Left(&stmts))?
         .into_iter()
         .collect::<Vec<_>>();
     // TODO(hrust) sort is only required when comparing Rust/Ocaml, remove sort after emitter shipped
@@ -1426,17 +1414,11 @@ fn extract_debugger_main(
             Stmt(p(), Stmt_::mk_if(isuninit, vec![set], vec![]))
         })
         .collect();
+    vars.push("$__debugger$this".into());
     vars.push("$__debugger_exn$output".into());
     let params: Vec<_> = vars
         .iter()
-        .map(|var| {
-            let name = if var == special_idents::THIS {
-                "$__debugger$this"
-            } else {
-                var
-            };
-            make_fn_param(p(), &local_id::make_unscoped(name), false, true)
-        })
+        .map(|var| make_fn_param(p(), &local_id::make_unscoped(var), false, true))
         .collect();
     let exnvar = Lid(p(), local_id::make_unscoped("$__debugger_exn$output"));
     let catch = Stmt(

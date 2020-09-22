@@ -202,4 +202,8 @@ $this = cls Object
 (
 )
 
+$__debugger$this = cls Object
+(
+)
+
 quit

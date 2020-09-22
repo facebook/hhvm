@@ -5,66 +5,43 @@
 
 use ast_body::AstBody;
 use hhas_param_rust::HhasParam;
-use naming_special_names_rust::{emitter_special_functions, pseudo_functions, special_idents};
+use naming_special_names_rust::{emitter_special_functions, special_idents};
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast::*,
 };
 
-use bitflags::bitflags;
 use std::{collections::HashSet, iter::Iterator};
 use unique_list_rust::UniqueList;
 
-bitflags! {
-    pub struct Flags: u8 {
-        const IS_CLOSURE_BODY = 1 << 1;
-        const HAS_THIS = 1 << 2;
-        const IS_TOPLEVEL = 1 << 3;
-        const IS_IN_STATIC_METHOD = 1 << 4;
-    }
-}
-
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a env::SSet>,
-    is_in_static_method: bool,
-    is_closure_body: bool,
 }
 
 struct DeclvarVisitor<'a> {
     // set of locals used inside the functions
     locals: UniqueList<String>,
-    // does function uses bare form of $this
-    bare_this: bool,
     context: DeclvarVisitorContext<'a>,
 }
 
 impl<'a> DeclvarVisitor<'a> {
-    fn new(explicit_use_set_opt: Option<&'a env::SSet>, flags: Flags) -> Self {
+    fn new(explicit_use_set_opt: Option<&'a env::SSet>) -> Self {
         Self {
             locals: UniqueList::new(),
-            bare_this: false,
             context: DeclvarVisitorContext {
                 explicit_use_set_opt,
-                is_in_static_method: flags.contains(Flags::IS_IN_STATIC_METHOD),
-                is_closure_body: flags.contains(Flags::IS_CLOSURE_BODY),
             },
-        }
-    }
-
-    fn with_this(&mut self) {
-        if !self.bare_this {
-            self.bare_this = true;
-            self.locals.add(special_idents::THIS.into())
         }
     }
 
     fn add_local<S: Into<String> + AsRef<str>>(&mut self, name: S) {
         let name_ref = name.as_ref();
-        if name_ref == special_idents::DOLLAR_DOLLAR || special_idents::is_tmp_var(name_ref) {
+        if name_ref == special_idents::DOLLAR_DOLLAR
+            || special_idents::is_tmp_var(name_ref)
+            || name_ref == special_idents::THIS
+        {
             ()
-        } else if name_ref == special_idents::THIS {
-            self.with_this()
         } else {
             self.locals.add(name.into())
         }
@@ -128,12 +105,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
             ObjGet(x) => {
                 let (receiver_e, prop_e) = (&x.0, &x.1);
                 match &receiver_e.1 {
-                    Lvar(id) if id.name() == "$this" => {
-                        if self.context.is_in_static_method && !self.context.is_closure_body {
-                        } else {
-                            self.locals.add(id.name().into())
-                        }
-                    }
+                    Lvar(id) if id.name() == "$this" => {}
                     _ => receiver_e.recurse(env, self.object())?,
                 }
                 match &prop_e.1 {
@@ -197,21 +169,9 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                         self.add_local("$86metadata");
                     }
                 }
-                let barethis = match &func_e.1 {
-                    Id(name)
-                        if &name.1 == pseudo_functions::ISSET
-                            || &name.1 == pseudo_functions::ECHO_NO_NS => true,
-                    _ => false,
-                };
                 let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.1 {
                     // Only add $this to locals if it's bare
-                    Lvar(id) if &(id.1).1 == "$this" => {
-                        if barethis {
-                            Ok(self_.with_this())
-                        } else {
-                            Ok(())
-                        }
-                    }
+                    Lvar(id) if &(id.1).1 == "$this" => Ok(()),
                     _ => self_.visit_expr(env, x),
                 };
                 match &func_e.1 {
@@ -262,13 +222,12 @@ fn uls_from_ast<P, F1, F2>(
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&env::SSet>,
     b: &AstBody,
-    flags: Flags,
-) -> Result<(bool, impl Iterator<Item = String>), String>
+) -> Result<impl Iterator<Item = String>, String>
 where
     F1: Fn(&P) -> &str,
     F2: Fn(&P) -> Option<&Expr>,
 {
-    let mut visitor = DeclvarVisitor::new(explicit_use_set_opt, flags);
+    let mut visitor = DeclvarVisitor::new(explicit_use_set_opt);
 
     for p in params {
         if let Some(e) = get_param_default_value(p) {
@@ -276,52 +235,34 @@ where
         }
     }
     visit(&mut visitor, &mut (), b)?;
-    let needs_local_this = flags.contains(Flags::IS_IN_STATIC_METHOD);
     for param in params {
         visitor.locals.remove(get_param_name(param))
     }
-    if !(needs_local_this
-        || flags.contains(Flags::IS_CLOSURE_BODY)
-        || !flags.contains(Flags::HAS_THIS)
-        || flags.contains(Flags::IS_TOPLEVEL))
-    {
-        visitor.locals.remove("$this")
-    }
-    Ok((
-        needs_local_this && flags.contains(Flags::HAS_THIS),
-        visitor.locals.into_iter(),
-    ))
+    Ok(visitor.locals.into_iter())
 }
 
 pub fn from_ast(
     params: &[HhasParam],
     body: &AstBody,
-    flags: Flags,
     explicit_use_set: &env::SSet,
-) -> Result<(bool, Vec<String>), String> {
-    let (needs_local_this, decl_vars) = uls_from_ast(
+) -> Result<Vec<String>, String> {
+    let decl_vars = uls_from_ast(
         params,
         |p| &p.name,
         |p| p.default_value.as_ref().map(|x| &x.1),
         Some(explicit_use_set),
         body,
-        flags,
     )?;
-    Ok((needs_local_this, decl_vars.collect()))
+    Ok(decl_vars.collect())
 }
 
-pub fn vars_from_ast(
-    params: &[FunParam],
-    b: &AstBody,
-    flags: Flags,
-) -> Result<HashSet<String>, String> {
-    let (_, decl_vars) = uls_from_ast(
+pub fn vars_from_ast(params: &[FunParam], b: &AstBody) -> Result<HashSet<String>, String> {
+    let decl_vars = uls_from_ast(
         params,
         |p| &p.name,         // get_param_name
         |p| p.expr.as_ref(), // get_param_default_value
         None,                // explicit_use_set_opt
         b,
-        flags,
     )?;
     Ok(decl_vars.collect())
 }

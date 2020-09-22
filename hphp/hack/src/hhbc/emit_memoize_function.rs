@@ -190,7 +190,7 @@ fn make_memoize_function_with_params_code(
     let param_count = (param_count + add_refied) as isize;
     Ok(InstrSeq::gather(vec![
         begin_label,
-        emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[], false)?,
+        emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
         deprecation_body,
         emit_memoize_helpers::param_code_sets(hhas_params, param_count as usize),
         reified_memokeym,

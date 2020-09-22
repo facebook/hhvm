@@ -904,8 +904,7 @@ pub const globals_disallowed: Error =
     Cow::Borrowed("`$GLOBALS` variable is removed from the language. Use HH\\global functions");
 pub const invalid_this: Error =
     Cow::Borrowed("`$this` cannot be used in functions and static methods");
-pub const cannot_unset_this: Error =
-    Cow::Borrowed("`$this` cannot be unset");
+pub const cannot_unset_this: Error = Cow::Borrowed("`$this` cannot be unset");
 pub const invalid_await_position_pipe: Error =
     Cow::Borrowed("`await` cannot be used as an expression right of a pipe operator.");
 pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {

@@ -75,7 +75,6 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/experimental/io/IoUringBackend.cpp
   ${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
   ${FOLLY_DIR}/experimental/io/PollIoBackend.cpp
-  ${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
   ${FOLLY_DIR}/init/Init.cpp
   ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.cpp
@@ -97,7 +96,6 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/experimental/io/IoUring.h
   ${FOLLY_DIR}/experimental/io/IoUringBackend.h
   ${FOLLY_DIR}/experimental/io/PollIoBackend.h
-  ${FOLLY_DIR}/experimental/symbolizer/StackTrace.h
   ${FOLLY_DIR}/experimental/symbolizer/ElfCache.h
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.h
   ${FOLLY_DIR}/init/Init.h
@@ -191,13 +189,21 @@ file(WRITE ${FOLLY_DIR}/folly-config.h "")
 # add_definitions as needed
 target_compile_definitions(folly PUBLIC "FOLLY_NO_CONFIG=1")
 target_compile_definitions(folly PUBLIC "FOLLY_HAVE_PTHREAD=1")
-target_compile_definitions(folly PUBLIC "FOLLY_HAVE_LIBUNWIND=1")
 if (LINUX)
   target_compile_definitions(folly PUBLIC "FOLLY_HAVE_RECVMMSG=1")
   target_compile_definitions(folly PUBLIC "FOLLY_HAVE_ELF=1")
   target_compile_definitions(folly PUBLIC "FOLLY_HAVE_DWARF=1")
 else()
   target_compile_definitions(folly PUBLIC "FOLLY_HAVE_RECVMMSG=0")
+endif()
+
+find_package(LibUnwind)
+if (${LIBUNWIND_FOUND})
+  target_compile_definitions(folly PUBLIC "FOLLY_HAVE_LIBUNWIND=1")
+  target_include_directories(folly PUBLIC ${LIBUNWIND_INCLUDE_DIR})
+  target_link_libraries(folly ${LIBUNWIND_LIBRARIES})
+else()
+  target_compile_definitions(folly PUBLIC "FOLLY_HAVE_LIBUNWIND=0")
 endif()
 
 # Check for the function FNNAME and set RETURN_VALUE based on the result.  Also

@@ -20,8 +20,7 @@
   (modules
     decl
     decl_inherit
-    decl_requirements
-    direct_decl_parser)
+    decl_requirements)
   (libraries
     affectedDeps
     classDiff
@@ -43,6 +42,17 @@
     shallow_classes_provider
     shallow_decl_defs
     typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name direct_decl_parser)
+  (modules direct_decl_parser)
+  (libraries
+    ast_provider
+    shallow_decl_defs
+    procs_procs
+    typing_defs
+    decl_rust_ffi)
   (preprocess (pps ppx_deriving.std)))
 
 (library

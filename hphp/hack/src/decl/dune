@@ -14,20 +14,20 @@ let rust =
 ; contains "external" function definition in .ml and
 ; the symbol is provided by the ocaml-rs Rust package via caml! macro
 (library
-  (name rust_decl_ffi)
+  (name decl_rust_ffi)
   (modules)
   (wrapped false)
   (preprocess (pps ppx_deriving.std)) ; See T41851208
-  (self_build_stubs_archive (rust_decl_ffi))
+  (self_build_stubs_archive (decl_rust_ffi))
 )
 (rule
-  (targets librust_decl_ffi_stubs.a)
+  (targets libdecl_rust_ffi_stubs.a)
   (deps (source_tree %{workspace_root}/src))
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      hack_decl_ffi
-      rust_decl_ffi
+      decl_rust_ffi
+      decl_rust_ffi
     )
   )
 )

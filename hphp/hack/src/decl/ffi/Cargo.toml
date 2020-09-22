@@ -7,6 +7,7 @@ include = ["../rust_decl_ffi.rs"]
 
 [lib]
 path = "../rust_decl_ffi.rs"
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 decl_rust = { path = "../decl_rust" }

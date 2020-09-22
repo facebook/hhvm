@@ -281,11 +281,7 @@ HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectTimeout, int64_t timeout) {
 static void
 HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectTcpTimeout, int64_t timeout) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
-  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
-  // Squangle 2020-09-17
-  #ifdef FACEBOOK
   data->m_conn_opts.setConnectTcpTimeout(am::Duration(timeout));
-  #endif
 }
 
 static void
@@ -425,11 +421,7 @@ Object HHVM_STATIC_METHOD(
   }
   // If tcp_timeout_micros is <= 0, skip setting the timeout
   if (tcp_timeout_micros > 0) {
-    // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
-    // Squangle 2020-09-17
-    #ifdef FACEBOOK
     op->setTcpTimeout(am::Duration(tcp_timeout_micros));
-    #endif
   }
 
   return newAsyncMysqlConnectEvent(std::move(op), getClient());
@@ -694,11 +686,7 @@ static Object HHVM_METHOD(
   }
   // If tcp_timeout_micros is <= 0, skip setting the timeout
   if (tcp_timeout_micros > 0) {
-    // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
-    // Squangle 2020-09-17
-    #ifdef FACEBOOK
     op->setTcpTimeout(am::Duration(tcp_timeout_micros));
-    #endif
   }
 
   return newAsyncMysqlConnectEvent(

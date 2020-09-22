@@ -1034,13 +1034,11 @@ public:
    * Look up the actual value of a class constant.  Perform dynamic
    * initialization if necessary.
    *
-   * Return a TypedValue containing KindOfUninit if this class has no such constant.
-   *
-   * The returned TypedValue is guaranteed not to hold a reference counted object (it
-   * may, however, be KindOfString for a static string).
+   * Return a TypedValue containing KindOfUninit if this class has no
+   * such constant.
    */
   TypedValue clsCnsGet(const StringData* clsCnsName,
-                 ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
+                       ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require dynamic
@@ -1055,15 +1053,8 @@ public:
    * need to run 86cinit code to determine their value at runtime.
    */
   const TypedValue* cnsNameToTV(const StringData* clsCnsName,
-                          Slot& clsCnsInd,
-                          ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
-
-  /*
-   * Provide the current runtime type of this class constant.
-   *
-   * This has predictive value for the translator.
-   */
-  DataType clsCnsType(const StringData* clsCnsName) const;
+                                Slot& clsCnsInd,
+                                ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
 
   /*
    * Get the slot for a constant with name, which can optionally be abstract and
@@ -1908,4 +1899,3 @@ const StringData* classToStringHelper(const Class* cls);
 #define incl_HPHP_VM_CLASS_INL_H_
 #include "hphp/runtime/vm/class-inl.h"
 #undef incl_HPHP_VM_CLASS_INL_H_
-

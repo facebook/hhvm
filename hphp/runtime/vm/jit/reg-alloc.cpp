@@ -66,7 +66,8 @@ bool loadsCell(const IRInstruction& inst) {
   case LdStk:
   case LdLoc:
   case LdContField:
-  case InitClsCns:
+  case LdClsCns:
+  case LdSubClsCns:
   case CGetProp:
   case DictGet:
   case DictGetQuiet:

@@ -256,6 +256,13 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
       return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
     }
 
+    if (type == TInitCell) {
+      auto const rtype = emitGetTVType(v, typeSrc);
+      static_assert(KindOfUninit == static_cast<DataType>(0));
+      v << testb{rtype, rtype, sf};
+      return CC_NZ;
+    }
+
     // All other valid types must not be unions.
     always_assert_flog(type.isKnownDataType(), "Unknown DataType: {}", type);
     always_assert_flog(!type.isUnion(), "Union type: {}", type);

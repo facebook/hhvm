@@ -611,9 +611,12 @@ public:
   static Type cns(std::nullptr_t);
 
   /*
-   * Return a const type for `tv'.
+   * Return a const type for `tv'. `cns' will assert if given a type
+   * which isn't allowed to have constants, while `tryCns' will return
+   * folly::none.
    */
-  static Type cns(const TypedValue& tv);
+  static Type cns(TypedValue tv);
+  static folly::Optional<Type> tryCns(TypedValue tv);
 
   /*
    * If this represents a constant value, return the most specific strict

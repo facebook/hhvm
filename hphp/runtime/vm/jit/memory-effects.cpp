@@ -1568,7 +1568,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
-  case ProfileSubClsCns:
   case FuncHasAttr:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
@@ -1851,6 +1850,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdRecDescCached:    // autoload
   case LdSwitchObjIndex:  // decrefs arg
   case InitClsCns:      // autoload
+  case InitSubClsCns: // May run 86cinit
+  case ProfileSubClsCns: // May run 86cinit
   case LookupClsMethodCache:  // autoload
   case LookupClsMethodFCache: // autoload
   case LookupCnsE:

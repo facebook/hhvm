@@ -540,7 +540,6 @@ using TypeNames::TCA;
 #define DDArr
 #define DStaticDArr
 #define DCol
-#define DCns
 #define DMemoKey
 #define DLvalOfPtr
 #define DPtrIter
@@ -600,7 +599,6 @@ using TypeNames::TCA;
 #undef DDArr
 #undef DStaticDArr
 #undef DCol
-#undef DCns
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr

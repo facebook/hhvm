@@ -594,9 +594,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DCall           return callReturn(inst);
 #define DGenIter        return genIterReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
-#define DCns            return TUninit | TInitNull | TBool | \
-                               TInt | TDbl | TStr | TArr | \
-                               TVec | TDict | TKeyset | TRes;
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 #define DMemoKey        return memoKeyReturn(inst);
 #define DLvalOfPtr      return ptrToLvalReturn(inst);
@@ -645,7 +642,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DCall
 #undef DGenIter
 #undef DSubtract
-#undef DCns
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr

@@ -25,88 +25,45 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-// Return a constant SSATmp representing a static value held in a TypedValue.
-// The TypedValue may be a non-scalar, but it must have a static value.
-SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
-  switch (tv->m_type) {
-    case KindOfNull:          return cns(env, TInitNull);
-    case KindOfBoolean:       return cns(env, !!tv->m_data.num);
-    case KindOfInt64:         return cns(env, tv->m_data.num);
-    case KindOfDouble:        return cns(env, tv->m_data.dbl);
-    case KindOfPersistentString:
-    case KindOfString:        return cns(env, tv->m_data.pstr);
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:        return cns(env, tv->m_data.parr);
-    case KindOfLazyClass:     return cns(env, tv->m_data.plazyclass);
-
-    case KindOfUninit:
-    case KindOfObject:
-    case KindOfResource:
-    case KindOfRFunc:
-    // TODO (T29639296)
-    case KindOfFunc:
-    case KindOfClass:
-    case KindOfClsMeth:
-    case KindOfRClsMeth:
-    case KindOfRecord: // TODO(arnabde)
-      break;
-  }
-  always_assert(false);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-} // namespace
+///////////////////////////////////////////////////////////////////////////////
 
 void emitCnsE(IRGS& env, const StringData* name) {
-  auto const cnsNameTmp = cns(env, name);
-  auto const tv = Unit::lookupPersistentCns(name);
-  SSATmp* result = nullptr;
-
-  if (tv) {
+  if (auto const tv = Unit::lookupPersistentCns(name)) {
     if (tv->m_type == KindOfUninit) {
       // KindOfUninit is a dynamic system constant. always a slow
       // lookup.
-      result = gen(env, LookupCnsE, cnsNameTmp);
-    } else {
-      result = staticTVCns(env, tv);
+      push(env, gen(env, LookupCnsE, cns(env, name)));
+      return;
     }
-  } else {
-    result = cond(
-      env,
-      [&] (Block* taken) { // branch
-        return gen(env, LdCns, taken, cnsNameTmp);
-      },
-      [&] (SSATmp* cns) { // Next: LdCns hit in TC
-        gen(env, IncRef, cns);
-        return cns;
-      },
-      [&] { // Taken: miss in TC, do lookup & init
-        hint(env, Block::Hint::Unlikely);
-        return gen(env, LookupCnsE, cnsNameTmp);
-      }
-    );
+
+    if (auto const val = Type::tryCns(*tv)) {
+      push(env, cns(env, *val));
+      return;
+    }
   }
-  push(env, result);
+
+  auto const v = cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, LdCns, taken, cns(env, name));
+    },
+    [&] (SSATmp* v) {
+      gen(env, IncRef, v);
+      return v;
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      return gen(env, LookupCnsE, cns(env, name));
+    }
+  );
+  push(env, v);
 }
 
 namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void implClsCns(IRGS& env,
+void exactClsCns(IRGS& env,
                 const Class* cls,
                 const StringData* cnsNameStr,
                 const StringData* clsNameStr) {
@@ -115,50 +72,36 @@ void implClsCns(IRGS& env,
   // If the class is already defined in this request, the class is persistent
   // or a parent of the current context, and this constant is a scalar
   // constant, we can just compile it to a literal.
-  if (cls) {
+  auto cnsType = TInitCell;
+  if (classIsPersistentOrCtxParent(env, cls)) {
     Slot ignore;
-    auto const tv = cls->cnsNameToTV(cnsNameStr, ignore);
-    if (tv && !(tv->m_type == KindOfUninit || tv->m_type == KindOfObject) &&
-        classIsPersistentOrCtxParent(env, cls)) {
-      push(env, staticTVCns(env, tv));
-      return;
+    if (auto const tv = cls->cnsNameToTV(cnsNameStr, ignore)) {
+      if (type(tv) != KindOfUninit) {
+        if (auto const val = Type::tryCns(*tv)) {
+          push(env, cns(env, *val));
+          return;
+        }
+        cnsType = typeFromTV(tv, curClass(env));
+      }
     }
   }
 
   // Otherwise, load the constant out of RDS.
-  cond(
+  auto const cns = cond(
     env,
     [&] (Block* taken) {
-      auto const prds = gen(env, LdClsCns, clsCnsName, taken);
-      gen(env, CheckInitMem, TInitCell, taken, prds);
-      return prds;
+      return gen(env, LdClsCns, cnsType, clsCnsName, taken);
     },
-    [&] (SSATmp* prds) {
-      auto const val = gen(env, LdMem, TInitCell, prds);
-      pushIncRef(env, val);
-      return nullptr;
-    },
-    [&] () -> SSATmp* {
-      // Make progress through this instruction before side-exiting to the next
-      // instruction, by doing a slower lookup.
+    [&] (SSATmp* cns) { return cns; },
+    [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const val = gen(env, InitClsCns, clsCnsName);
-      pushIncRef(env, val);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
-      return nullptr;
+      return gen(env, InitClsCns, cnsType, clsCnsName);
     }
   );
+  pushIncRef(env, cns);
 }
 
 StaticString clsCnsProfileKey { "ClsCnsProfile" };
-
-void clsCnsHelper(IRGS& env, SSATmp* ptv, Block* exit = nullptr) {
-  if (!exit) exit = makeExitSlow(env);
-  gen(env, CheckTypeMem, TUncountedInit, exit, ptv);
-  discard(env);
-  auto const val = gen(env, LdMem, TUncountedInit, ptv);
-  push(env, val);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -167,7 +110,7 @@ void clsCnsHelper(IRGS& env, SSATmp* ptv, Block* exit = nullptr) {
 void emitClsCnsD(IRGS& env,
                  const StringData* cnsNameStr,
                  const StringData* clsNameStr) {
-  implClsCns(env, Class::lookup(clsNameStr), cnsNameStr, clsNameStr);
+  exactClsCns(env, Class::lookup(clsNameStr), cnsNameStr, clsNameStr);
 }
 
 void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
@@ -176,48 +119,69 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
 
   if (!(clsTy <= TCls)) PUNT(ClsCns-NotClass);
 
-  if (!clsTy.clsSpec() || !isNormalClass(clsTy.clsSpec().cls())) {
-    if (RuntimeOption::RepoAuthoritative) {
-      TargetProfile<ClsCnsProfile> profile(env.context, env.irb->curMarker(),
-                                           clsCnsProfileKey.get());
-      if (profile.profiling()) {
-        auto const data = ProfileSubClsCnsData { cnsNameStr, profile.handle() };
-        clsCnsHelper(env, gen(env, ProfileSubClsCns, data, clsTmp));
-        return;
+  auto const loadSlot = [&] (Slot slot) {
+    auto const data = LdSubClsCnsData { cnsNameStr, slot };
+    auto const cns = cond(
+      env,
+      [&] (Block* taken) {
+        auto const slotVal = gen(env, LdSubClsCns, data, clsTmp);
+        return gen(env, CheckType, TUncountedInit, taken, slotVal);
+      },
+      [&] (SSATmp* val) { return val; },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const cns = gen(env, InitSubClsCns, data, clsTmp);
+        // The value may be ref-counted if we take the slow path
+        gen(env, IncRef, cns);
+        return cns;
       }
-      if (profile.optimizing()) {
-        auto const slot = profile.data().getSlot();
-        if (slot != kInvalidSlot) {
-          auto const exit = makeExitSlow(env);
-          auto const len = gen(env, LdClsCnsVecLen, clsTmp);
-          auto const cmp = gen(env, LteInt, len, cns(env, slot));
-          gen(env, JmpNZero, exit, cmp);
-          auto const data = LdSubClsCnsData { cnsNameStr, slot };
-          gen(env, CheckSubClsCns, data, exit, clsTmp);
-          clsCnsHelper(env, gen(env, LdSubClsCns, data, clsTmp), exit);
-          return;
-        }
+    );
+    discard(env);
+    push(env, cns);
+  };
+
+  if (!clsTy.clsSpec() || !isNormalClass(clsTy.clsSpec().cls())) {
+    TargetProfile<ClsCnsProfile> profile(env.context,
+                                         env.irb->curMarker(),
+                                         clsCnsProfileKey.get());
+    if (profile.profiling()) {
+      auto const data = ProfileSubClsCnsData { cnsNameStr, profile.handle() };
+      auto const cns = gen(
+        env,
+        CheckType,
+        TInitCell,
+        makeExitSlow(env),
+        gen(env, ProfileSubClsCns, data, clsTmp)
+      );
+      discard(env);
+      pushIncRef(env, cns);
+      return;
+    }
+
+    if (profile.optimizing()) {
+      auto const slot = profile.data().getSlot();
+      if (slot != kInvalidSlot) {
+        auto const exit = makeExitSlow(env);
+        auto const len = gen(env, LdClsCnsVecLen, clsTmp);
+        auto const cmp = gen(env, LteInt, len, cns(env, slot));
+        gen(env, JmpNZero, exit, cmp);
+        auto const data = LdSubClsCnsData { cnsNameStr, slot };
+        gen(env, CheckSubClsCns, data, exit, clsTmp);
+        return loadSlot(slot);
       }
     }
-    interpOne(env);
-    return;
+
+    return interpOne(env);
   }
+
   auto const cls = clsTy.clsSpec().cls();
   if (clsTy.clsSpec().exact()) {
     discard(env);
-    implClsCns(env, cls, cnsNameStr, cls->name());
+    exactClsCns(env, cls, cnsNameStr, cls->name());
   } else {
-    Slot cnsSlot;
-    auto const tv = cls->cnsNameToTV(cnsNameStr, cnsSlot,
-                                     ClsCnsLookup::IncludeTypes);
-    if (cnsSlot != kInvalidSlot &&
-        (!tv ||
-         !static_cast<const TypedValueAux*>(tv)->constModifiers().isType())) {
-      auto const data = LdSubClsCnsData { cnsNameStr, cnsSlot };
-      clsCnsHelper(env, gen(env, LdSubClsCns, data, clsTmp));
-      return;
-    }
-    interpOne(env);
+    auto const slot = cls->clsCnsSlot(cnsNameStr, false, true);
+    if (slot == kInvalidSlot) return interpOne(env);
+    loadSlot(slot);
   }
 }
 

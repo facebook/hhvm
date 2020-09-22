@@ -1069,27 +1069,32 @@ To string conversions:
   Lookup the cached-class RDS handle for a given class name. Dereference that
   handle and return the associated Class, or null if not present.
 
-| LdCns, DCns, CStr, B
+| LdCns, D(InitCell), CStr, B
 
   Load the constant named S0, branching to B if isn't present.
 
-| LookupCnsE<T,constName>,  DCns, CStr, PRc
+| LookupCnsE<T,constName>,  D(InitCell), CStr, PRc
 
   Load a constant via the RDS. Raises a fatal error if it cannot define the
   constant.  This should only be executed if LdCns on the same constant has
   failed.
 
-| LdClsCns<className,constantName>, D(PtrToCell), NA, B
+| LdClsCns<className,constantName>, DParam(InitCell), NA, B
 
-  Load the address of the constant 'constantName' for the class 'className' in
-  RDS. If not initialized, branch to B.
+  Load the constant 'constantName' for the class 'className'. If not
+  initialized, branch to B.
 
-| LdSubClsCns<constantName,slot>, D(PtrToCell), S(Cls), NF
+| LdSubClsCns<constantName,slot>, D(Uncounted), S(Cls), NF
 
-  Load the address of the constant 'constantName' for the class S0. The
-  constant is known to be in the given slot. If the returned TypedValue is not
-  UncountedInit, its value should not be used, and a fallback method should be
-  called.
+  Load the constant 'constantName' for the class S0. The constant is known to
+  be in the given slot. If the returned value is Uninit, the constant is not
+  initialized and it must be loaded using InitSubClsCns. Counted constants will
+  never have their slot be initialized and thus always take the slow path.
+
+| InitSubClsCns<constantName,slot>, D(Cell), S(Cls), NF
+
+  Slow path for LdSubClsCns. Used when LdSubClsCns indicates the slot is
+  uninitialized.
 
 | LdSubClsCnsClsName<constantName,slot>, D(StaticStr|Nullptr), S(Cls), NF
 
@@ -1122,11 +1127,11 @@ To string conversions:
   raises an error if no such constant could be found, or if S0::S1 is not a
   type constant.
 
-| ProfileSubClsCns<constantName,handle>, D(PtrToCell), S(Cls), NF
+| ProfileSubClsCns<constantName,handle>, D(Cell), S(Cls), NF
 
-  Load the address of the constant 'constantName' for the class S0, profiling
-  the observed slots. If the returned TypedValue is not UncountedInit, its
-  value should not be used, and a fallback method should be called.
+  Load the constant 'constantName' for the class S0, profiling the observed
+  slots. If the returned value is Uninit, the constant does not exist or is
+  abstract or is a type-constant.
 
 | LdClsMethodFCacheFunc<clsName,methodName>, D(Func), NA, B
 
@@ -2157,7 +2162,7 @@ To string conversions:
   reified generics). If this opcode returned false, further checks implemented
   by CheckFunReifiedGenericMismatch are needed.
 
-| InitClsCns<className,constName>, DCns, NA, PRc
+| InitClsCns<className,constName>, DParam(InitCell), NA, NF
 
   Initialize the RDS entry for a constant for a class, invoking autoload if it
   is not defined. The initialized value is returned. This instruction may raise

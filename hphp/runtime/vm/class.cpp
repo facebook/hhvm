@@ -1380,7 +1380,8 @@ Slot Class::propIndexToSlot(uint16_t index) const {
 
 const StaticString s_classname("classname");
 
-TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
+TypedValue Class::clsCnsGet(const StringData* clsCnsName,
+                            ClsCnsLookup what) const {
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, what);
   if (!cnsVal) return make_tv<KindOfUninit>();
@@ -1473,9 +1474,17 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
   auto marker = make_array_like_tv(s_sentinelVec);
   clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
 
+  SCOPE_FAIL {
+    auto const v = clsCnsData.lookup(StrNR{clsCnsName});
+    if (tvIsVec(v) && val(v).parr == s_sentinelVec) {
+      clsCnsData.remove(StrNR{clsCnsName});
+    }
+  };
+
   if (cns.isType()) {
     // Resolve type constant, if needed
     if (what == ClsCnsLookup::IncludeTypesPartial) {
+      clsCnsData.remove(StrNR{clsCnsName});
       return make_tv<KindOfUninit>();
     }
     Array resolvedTS;
@@ -1505,6 +1514,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
         cns_nc.setPointedClsName(classname_field.val().pstr);
       }
       cns_nc.val.m_data.parr = taggedData;
+      clsCnsData.remove(StrNR{clsCnsName});
       return make_persistent_array_like_tv(ad);
     }
 
@@ -1552,8 +1562,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
 }
 
 const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
-                               Slot& clsCnsInd,
-                               ClsCnsLookup what) const {
+                                     Slot& clsCnsInd,
+                                     ClsCnsLookup what) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
@@ -1576,15 +1586,6 @@ Slot Class::clsCnsSlot(
   if (slot == kInvalidSlot) return slot;
   if (!allowAbstract && m_constants[slot].isAbstract()) return kInvalidSlot;
   return m_constants[slot].isType() == wantTypeCns ? slot : kInvalidSlot;
-}
-
-DataType Class::clsCnsType(const StringData* cnsName) const {
-  Slot slot;
-  auto const cns = cnsNameToTV(cnsName, slot);
-  // TODO(#2913342): lookup the constant in RDS in case it's dynamic
-  // and already initialized.
-  if (!cns) return KindOfUninit;
-  return cns->m_type;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

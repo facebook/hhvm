@@ -50,7 +50,7 @@ struct ClsCnsProfile {
   /*
    * Register a use of a class constant
    */
-  const TypedValue* reportClsCns(const Class* cls, const StringData* cns);
+  TypedValue reportClsCns(const Class* cls, const StringData* cns);
 
   /*
    * Aggregate two ClsCnsProfiles.
@@ -66,4 +66,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-

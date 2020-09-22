@@ -1713,6 +1713,7 @@ X(LookupClsMethodFCache,        ClsMethodData);
 X(LdIfaceMethod,                IfaceMethodData);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
+X(InitSubClsCns,                LdSubClsCnsData);
 X(LdSubClsCns,                  LdSubClsCnsData);
 X(LdSubClsCnsClsName,           LdSubClsCnsData);
 X(CheckSubClsCns,               LdSubClsCnsData);

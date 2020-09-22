@@ -41,20 +41,14 @@ Slot updateSlot(Slot curSlot, Slot newSlot) {
 
 }
 
-const TypedValue* ClsCnsProfile::reportClsCns(const Class* cls,
-                                              const StringData* cns) {
-  Slot cnsSlot;
-  auto const tv = cls->cnsNameToTV(cns, cnsSlot, ClsCnsLookup::IncludeTypes);
-  if (cnsSlot == kInvalidSlot ||
-      (tv &&
-       (static_cast<const TypedValueAux*>(tv)->constModifiers().isType() ||
-        isRefcountedType(tv->m_type) || tv->m_type == KindOfUninit))) {
-    // The constant we found isn't suitable - so we ignore it. This is
-    // fine, because we'll be guarding the actual uses anyway.
-    return uninit_variant.asTypedValue();
-  }
-  m_curSlot = updateSlot(m_curSlot, cnsSlot);
-  return tv ? tv : uninit_variant.asTypedValue();
+TypedValue ClsCnsProfile::reportClsCns(const Class* cls,
+                                       const StringData* cnsName) {
+  Slot slot;
+  auto const tv = cls->cnsNameToTV(cnsName, slot, ClsCnsLookup::NoTypes);
+  if (slot == kInvalidSlot) return make_tv<KindOfUninit>();
+  m_curSlot = updateSlot(m_curSlot, slot);
+  if (!tv) return make_tv<KindOfUninit>();
+  return tv->m_type != KindOfUninit ? *tv : cls->clsCnsGet(cnsName);
 }
 
 void ClsCnsProfile::reduce(ClsCnsProfile& a, const ClsCnsProfile& b) {

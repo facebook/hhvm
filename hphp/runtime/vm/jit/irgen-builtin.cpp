@@ -536,12 +536,17 @@ SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
 
   auto const data = LdSubClsCnsData { cnsName, cnsSlot };
   if (!getName) {
-    auto const ptr = gen(env, LdSubClsCns, data, clsTmp);
     return cond(
       env,
       [&] (Block* taken) {
-        gen(env, CheckTypeMem, TUncountedInit, taken, ptr);
-        return gen(env, LdTypeCns, taken, gen(env, LdMem, TUncountedInit, ptr));
+        auto const val = gen(
+          env,
+          CheckType,
+          TUncountedInit,
+          taken,
+          gen(env, LdSubClsCns, data, clsTmp)
+        );
+        return gen(env, LdTypeCns, taken, val);
       },
       [&] (SSATmp* cns) { return cns; },
       [&] /* taken */ {

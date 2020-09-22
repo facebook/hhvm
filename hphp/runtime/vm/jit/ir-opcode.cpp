@@ -78,7 +78,6 @@ TRACE_SET_MOD(hhir);
 #define DCall          HasDest
 #define DGenIter       HasDest
 #define DSubtract(n,t) HasDest
-#define DCns           HasDest
 #define DUnion(...)    HasDest
 #define DMemoKey       HasDest
 #define DLvalOfPtr     HasDest
@@ -154,7 +153,6 @@ OpInfo g_opInfo[] = {
 #undef DCall
 #undef DGenIter
 #undef DSubtract
-#undef DCns
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
@@ -350,6 +348,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InitClsCns:
   case InitProps:
   case InitSProps:
+  case InitSubClsCns:
   case InterpOne:
   case IssetElem:
   case IssetProp:
@@ -396,6 +395,7 @@ bool opcodeMayRaise(Opcode opc) {
   case PrintBool:
   case PrintInt:
   case PrintStr:
+  case ProfileSubClsCns:
   case PropDX:
   case PropQ:
   case PropTypeRedefineCheck:
@@ -853,7 +853,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileKeysetAccess:
   case ProfileMethod:
   case ProfileProp:
-  case ProfileSubClsCns:
   case ProfileSwitchDest:
   case ProfileType:
   case RBTraceEntry:

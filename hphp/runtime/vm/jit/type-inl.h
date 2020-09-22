@@ -294,11 +294,18 @@ inline Type Type::cns(std::nullptr_t) {
   return TNullptr;
 }
 
-inline Type Type::cns(const TypedValue& tv) {
+inline Type Type::cns(TypedValue tv) {
+  if (auto const t = tryCns(tv)) return *t;
+  always_assert(false && "Invalid KindOf for constant TypedValue");
+}
+
+inline folly::Optional<Type> Type::tryCns(TypedValue tv) {
+  assertx(tvIsPlausible(tv));
+
   if (tv.m_type == KindOfUninit) return TUninit;
   if (tv.m_type == KindOfNull)   return TInitNull;
 
-  auto ret = [&] {
+  auto ret = [&] () -> folly::Optional<Type> {
     switch (tv.m_type) {
       case KindOfUninit:
       case KindOfNull:
@@ -315,27 +322,14 @@ inline Type Type::cns(const TypedValue& tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        assertx(val(tv).parr->isVecType());
-        return type_detail::for_const(tv.m_data.parr);
-
       case KindOfPersistentDict:
       case KindOfDict:
-        assertx(val(tv).parr->isDictType());
-        return type_detail::for_const(tv.m_data.parr);
-
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        assertx(val(tv).parr->isKeysetType());
-        return type_detail::for_const(tv.m_data.parr);
-
       case KindOfPersistentDArray:
       case KindOfDArray:
-        assertx(val(tv).parr->isDArray());
-        return type_detail::for_const(tv.m_data.parr);
-
       case KindOfPersistentVArray:
       case KindOfVArray:
-        assertx(val(tv).parr->isVArray());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfLazyClass:
@@ -350,12 +344,14 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:
-        always_assert(false && "Invalid KindOf for constant TypedValue");
+        return folly::none;
     }
     not_reached();
   }();
-  ret.m_hasConstVal = true;
-  ret.m_extra = tv.m_data.num;
+  if (ret) {
+    ret->m_hasConstVal = true;
+    ret->m_extra = tv.m_data.num;
+  }
   return ret;
 }
 

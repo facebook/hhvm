@@ -182,6 +182,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodCacheCls:
   case LdFuncVecLen:
   case LdClsMethod:
+  case LdSubClsCns:
   case LdIfaceMethod:
   case LdPropAddr:
   case LdObjClass:
@@ -406,7 +407,7 @@ bool canDCE(IRInstruction* inst) {
   case LookupCnsE:
   case LdClsCns:
   case InitClsCns:
-  case LdSubClsCns:
+  case InitSubClsCns:
   case LdSubClsCnsClsName:
   case LdTypeCns:
   case CheckSubClsCns:

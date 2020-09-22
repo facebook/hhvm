@@ -73,20 +73,21 @@ struct ConstModifiers {
   uint32_t rawData;
 
   static uint32_t constexpr kMask = (uint32_t)-1UL << 2;
+  static uint32_t constexpr kTypeMask = 1;
 
   StringData* getPointedClsName() const {
     assertx(use_lowptr);
     return (StringData*)(uintptr_t)(rawData & kMask);
   }
   bool isAbstract()      const { return rawData & 2; }
-  bool isType()          const { return rawData & 1; }
+  bool isType()          const { return rawData & kTypeMask; }
 
   void setPointedClsName (StringData* clsName) {
     assertx(use_lowptr);
     rawData = (uintptr_t)clsName | (rawData & ~kMask);
   }
   void setIsAbstract(bool isAbstract) { rawData |= (isAbstract ? 2 : 0); }
-  void setIsType    (bool isType)     { rawData |= (isType ? 1 : 0); }
+  void setIsType    (bool isType)     { rawData |= (isType ? kTypeMask : 0); }
 };
 
 /*
@@ -359,4 +360,3 @@ extern const TypedValue immutable_uninit_base;
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

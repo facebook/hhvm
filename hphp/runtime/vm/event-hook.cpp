@@ -234,7 +234,7 @@ ActRec* getParentFrame(const ActRec* ar) {
   return g_context->getPrevVMStateSkipFrame(ar);
 }
 
-void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
+void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileFramePointers) == 0) {
     return;
   }
@@ -242,7 +242,7 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
     frameinfo = Array::CreateDArray();
   }
 
-  if (isEnter) {
+  if (isCall) {
     auto this_ = ar->func()->cls() && ar->hasThis() ?
       ar->getThis() : nullptr;
     frameinfo.set(s_this_ptr, Variant(intptr_t(this_)));
@@ -272,13 +272,17 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
-  auto frameinfo = make_darray_tagged(ARRPROV_HERE(),
-                                      s_args,
-                                      hhvm_get_frame_args(ar));
-  addFramePointers(ar, frameinfo, true);
+  auto frameinfo = Array::attach(ArrayData::CreateDArray(ARRPROV_HERE()));
 
-  if ((RO::EnableArgsInBacktraces || !isResume) &&
-      ar->func()->hasReifiedGenerics()) {
+  if (!isResume) {
+    // Add arguments only if this is a function call.
+    frameinfo.set(s_args, hhvm_get_frame_args(ar));
+  }
+
+  addFramePointers(ar, frameinfo, !isResume);
+
+  if (!isResume && ar->func()->hasReifiedGenerics()) {
+    // Add reified generics only if this is a function call.
     frameinfo.set(s_reified_classes, getReifiedClasses(ar));
   }
 

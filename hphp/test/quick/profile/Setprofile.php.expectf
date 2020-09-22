@@ -187,10 +187,7 @@ varray(3) {
 varray(3) {
   string(5) "enter"
   string(3) "gen"
-  darray(1) {
-    ["args"]=>
-    varray(0) {
-    }
+  darray(0) {
   }
 }
 varray(3) {
@@ -252,10 +249,7 @@ varray(3) {
 varray(3) {
   string(5) "enter"
   string(3) "gen"
-  darray(1) {
-    ["args"]=>
-    varray(0) {
-    }
+  darray(0) {
   }
 }
 varray(3) {
@@ -317,10 +311,7 @@ varray(3) {
 varray(3) {
   string(5) "enter"
   string(3) "gen"
-  darray(1) {
-    ["args"]=>
-    varray(0) {
-    }
+  darray(0) {
   }
 }
 varray(3) {

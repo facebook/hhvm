@@ -23,6 +23,7 @@
 #include <squangle/mysql_client/AsyncHelpers.h>
 #include <squangle/mysql_client/ClientPool.h>
 
+#include "squangle/mysql_client/Connection.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -278,6 +279,16 @@ HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectTimeout, int64_t timeout) {
 }
 
 static void
+HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectTcpTimeout, int64_t timeout) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+  // Squangle 2020-09-17
+  #ifdef FACEBOOK
+  data->m_conn_opts.setConnectTcpTimeout(am::Duration(timeout));
+  #endif
+}
+
+static void
 HHVM_METHOD(AsyncMysqlConnectionOptions, setConnectAttempts, int32_t attempts) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
   data->m_conn_opts.setConnectAttempts(attempts);
@@ -391,7 +402,8 @@ Object HHVM_STATIC_METHOD(
     const String& user,
     const String& password,
     int64_t timeout_micros /* = -1 */,
-    const Variant& sslContextProvider /* = null */) {
+    const Variant& sslContextProvider /* = null */,
+    int64_t tcp_timeout_micros /* = 0 */) {
   am::ConnectionKey key(
       static_cast<std::string>(host),
       port,
@@ -410,6 +422,14 @@ Object HHVM_STATIC_METHOD(
   }
   if (timeout_micros > 0) {
     op->setTimeout(am::Duration(timeout_micros));
+  }
+  // If tcp_timeout_micros is <= 0, skip setting the timeout
+  if (tcp_timeout_micros > 0) {
+    // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+    // Squangle 2020-09-17
+    #ifdef FACEBOOK
+    op->setTcpTimeout(am::Duration(tcp_timeout_micros));
+    #endif
   }
 
   return newAsyncMysqlConnectEvent(std::move(op), getClient());
@@ -656,7 +676,8 @@ static Object HHVM_METHOD(
     const String& user,
     const String& password,
     int64_t timeout_micros,
-    const String& extra_key) {
+    const String& extra_key,
+    int64_t tcp_timeout_micros) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   auto op = data->m_async_pool->beginConnection(
       static_cast<std::string>(host),
@@ -670,6 +691,14 @@ static Object HHVM_METHOD(
   }
   if (timeout_micros > 0) {
     op->setTimeout(am::Duration(timeout_micros));
+  }
+  // If tcp_timeout_micros is <= 0, skip setting the timeout
+  if (tcp_timeout_micros > 0) {
+    // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+    // Squangle 2020-09-17
+    #ifdef FACEBOOK
+    op->setTcpTimeout(am::Duration(tcp_timeout_micros));
+    #endif
   }
 
   return newAsyncMysqlConnectEvent(
@@ -1812,7 +1841,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "1.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "2.0") {}
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -1989,6 +2018,7 @@ static struct AsyncMysqlExtension final : Extension {
         AsyncMysqlRowIterator::s_className.get(), DISABLE_COPY_AND_SWEEP);
 
     HHVM_ME(AsyncMysqlConnectionOptions, setConnectTimeout);
+    HHVM_ME(AsyncMysqlConnectionOptions, setConnectTcpTimeout);
     HHVM_ME(AsyncMysqlConnectionOptions, setConnectAttempts);
     HHVM_ME(AsyncMysqlConnectionOptions, setTotalTimeout);
     HHVM_ME(AsyncMysqlConnectionOptions, setQueryTimeout);

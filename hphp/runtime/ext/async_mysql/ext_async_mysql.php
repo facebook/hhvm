@@ -88,6 +88,8 @@ final class AsyncMysqlClient {
    * @param $timeout_micros - Timeout, in microseconds, for the connect; -1 for
    *                          default, 0 for no timeout.
    * @param $ssl_context - Optionally allow the connection to tunnel via SSL.
+   * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
+   *                          connect operation; Default: 0 for no timeout.
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -100,6 +102,7 @@ final class AsyncMysqlClient {
                                  string $password,
                                  int $timeout_micros = -1,
                                  ?MySSLContextProvider $ssl_context = null,
+                                 int $tcp_timeout_micros = 0,
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
@@ -291,6 +294,8 @@ class AsyncMysqlConnectionPool {
    * @param $extra_key - An extra parameter to help the internal connection
    *                     pool infrastructure separate connections even better.
    *                     Usually, the default `""` is fine.
+   * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
+   *                          connect operation; Default: 0 for no timeout.
    *
    */
   <<__HipHopSpecific, __Native>>
@@ -300,7 +305,8 @@ class AsyncMysqlConnectionPool {
                           string $user,
                           string $password,
                           int $timeout_micros = -1,
-                          string $extra_key = ""
+                          string $extra_key = "",
+                          int $tcp_timeout_micros = 0
                          ): Awaitable<AsyncMysqlConnection>;
 
   <<__HipHopSpecific, __Native>>
@@ -650,6 +656,11 @@ class AsyncMysqlConnectionOptions {
   // Sets the Connect Timeout for each connection attempt
   <<__HipHopSpecific, __Native>>
   public function setConnectTimeout(int $timeout): void;
+
+  // Sets the Connect Tcp Timeout for each connection attempt
+  // This timeout is for only tcp handshake phase of the connect op
+  <<__HipHopSpecific, __Native>>
+  public function setConnectTcpTimeout(int $timeout): void;
 
   // Sets the number of attempts this operation will retry connecting
   <<__HipHopSpecific, __Native>>

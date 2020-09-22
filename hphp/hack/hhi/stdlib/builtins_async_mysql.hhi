@@ -61,7 +61,8 @@ class AsyncMysqlClient {
       string $user,
       string $password,
       int $timeout_micros = -1,
-      ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
+      ?MySSLContextProvider $ssl_provider = null,
+      int $tcp_timeout_micros = 0): Awaitable<AsyncMysqlConnection> { }
 
     static public function connectWithOpts(
       string $host,
@@ -87,7 +88,15 @@ class AsyncMysqlClient {
 
 class AsyncMysqlConnectionPool {
   public function __construct(darray $options) { }
-  public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = ""): Awaitable<AsyncMysqlConnection> { }
+  public function connect(
+    string $host,
+    int $port,
+    string $dbname,
+    string $user,
+    string $password,
+    int $timeout_micros = -1,
+    string $caller = "",
+    int $tcp_timeout_micros = 0): Awaitable<AsyncMysqlConnection> { }
   public function connectWithOpts(
     string $host,
     int $port,
@@ -107,6 +116,7 @@ class MySSLContextProvider {
 
 class AsyncMysqlConnectionOptions {
   public function setConnectTimeout(int $timeout): void { }
+  public function setConnectTcpTimeout(int $timeout): void { }
   public function setConnectAttempts(int $attempts): void { }
   public function setTotalTimeout(int $timeout): void { }
   public function setQueryTimeout(int $timeout): void { }

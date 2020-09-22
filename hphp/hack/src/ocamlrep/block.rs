@@ -16,6 +16,7 @@ use crate::{Allocator, OpaqueValue, Value};
 pub const NO_SCAN_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
+pub const CUSTOM_TAG: u8 = 255;
 
 /// A recently-allocated, not-yet-finalized Block.
 ///

@@ -29,6 +29,7 @@ pub enum FromError {
     IntOutOfRange(TryFromIntError),
     NullaryVariantTagOutOfRange { max: usize, actual: isize },
     WrongBlockSize { expected: usize, actual: usize },
+    UnexpectedCustomOps { expected: usize, actual: usize },
 }
 
 impl std::convert::From<TryFromIntError> for FromError {
@@ -80,6 +81,11 @@ impl fmt::Display for FromError {
                 "Expected block of size {}, but got size {}",
                 expected, actual
             ),
+            UnexpectedCustomOps { expected, actual } => write!(
+                f,
+                "Expected custom operations struct address 0x{:x}, but got address 0x{:x}",
+                expected, actual
+            ),
         }
     }
 }
@@ -100,7 +106,8 @@ impl Error for FromError {
             | ExpectedUnit(..)
             | ExpectedZeroTag(..)
             | NullaryVariantTagOutOfRange { .. }
-            | WrongBlockSize { .. } => None,
+            | WrongBlockSize { .. }
+            | UnexpectedCustomOps { .. } => None,
         }
     }
 }

@@ -56,8 +56,7 @@ let result_to_string result (fn, line, char, range_end) =
     in
     json_to_string obj)
 
-let helper env acc pos_list =
-  let ctx = Provider_utils.ctx_from_server_env env in
+let helper ctx acc pos_list =
   let (ctx, paths_and_tasts) = recheck_typing ctx pos_list in
   let tasts =
     List.fold
@@ -91,10 +90,10 @@ let helper env acc pos_list =
 (** This parallel_helper divides pos_list amongst all the workers.
 It might end up with several workers all working on positions
 for the same file. *)
-let parallel_helper workers env pos_list =
+let parallel_helper workers ctx pos_list =
   MultiWorker.call
     workers
-    ~job:(helper env)
+    ~job:(helper ctx)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers pos_list)
@@ -103,7 +102,7 @@ let parallel_helper workers env pos_list =
 No file is handled by more than one worker. *)
 let parallel_helper_ex
     (workers : MultiWorker.worker list option)
-    (env : ServerEnv.env)
+    (ctx : Provider_context.t)
     (pos_list : pos list) : string list =
   let add_pos_to_map map pos =
     let (path, _, _, _) = pos in
@@ -123,7 +122,7 @@ let parallel_helper_ex
   This is so that a given file is only ever processed by a single worker. *)
   MultiWorker.call
     workers
-    ~job:(fun acc pos_by_file -> helper env acc (List.concat pos_by_file))
+    ~job:(fun acc pos_by_file -> helper ctx acc (List.concat pos_by_file))
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers pos_by_file)
@@ -154,14 +153,15 @@ let go :
     |> Relative_path.Set.cardinal
   in
   let num_positions = List.length pos_list in
+  let ctx = Provider_utils.ctx_from_server_env env in
   let start_time = Unix.gettimeofday () in
   let results =
     if num_positions < 10 then
-      helper env [] pos_list
+      helper ctx [] pos_list
     else if experimental then
-      parallel_helper_ex workers env pos_list
+      parallel_helper_ex workers ctx pos_list
     else
-      parallel_helper workers env pos_list
+      parallel_helper workers ctx pos_list
   in
   HackEventLogger.type_at_pos_batch
     ~start_time

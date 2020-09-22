@@ -133,6 +133,8 @@ let rec policy_occurrences pty =
       :: policy_occurrences f_ret
       :: policy_occurrences f_exn
       :: List.map ~f:swap_policy_occurrences f_args )
+  | Tcow_array { a_key; a_value } ->
+    on_list [policy_occurrences a_key; policy_occurrences a_value]
 
 (* Returns the list of free policy variables in a type *)
 let free_pvars pty =

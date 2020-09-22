@@ -1,0 +1,8 @@
+File "trait_reuse_indirect_additional.php", line 18, characters 7-17:
+Traits with final methods cannot be reused, and `ReusedTrait` is already used by `MyBase`. (Typing[4186])
+File "trait_reuse_indirect_additional.php", line 11, characters 7-12:
+`MyBase` is defined here
+File "trait_reuse_indirect_additional.php", line 12, characters 7-17:
+`MyBase` uses `ReusedTrait`
+File "trait_reuse_indirect_additional.php", line 7, characters 25-27:
+`ReusedTrait` has a final method `bar`

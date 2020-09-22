@@ -1,0 +1,12 @@
+File "reuse_inside_traits.php", line 11, characters 7-8:
+Traits with final methods cannot be reused, and `T1` is already used by `T3`. (Typing[4186])
+File "reuse_inside_traits.php", line 7, characters 7-8:
+`T2` uses `T1`
+File "reuse_inside_traits.php", line 9, characters 7-8:
+`T3` is defined here
+File "reuse_inside_traits.php", line 11, characters 7-8:
+`T3` uses `T2`
+File "reuse_inside_traits.php", line 7, characters 7-8:
+`T2` uses `T1`
+File "reuse_inside_traits.php", line 4, characters 25-25:
+`T1` has a final method `f`

@@ -4397,6 +4397,15 @@ let cyclic_record_def names pos =
        "Record inheritance cycle: %s"
        (String.concat ~sep:" " names))
 
+let trait_reuse_with_final_method use_pos trait_name parent_cls_name trace =
+  let msg =
+    Printf.sprintf
+      "Traits with final methods cannot be reused, and `%s` is already used by `%s`."
+      (strip_ns trait_name)
+      (strip_ns parent_cls_name)
+  in
+  add_list (Typing.err_code Typing.TraitReuse) ((use_pos, msg) :: trace)
+
 let trait_reuse p_pos p_name class_name trait =
   let (c_pos, c_name) = class_name in
   let c_name = strip_ns c_name |> Markdown_lite.md_codify in

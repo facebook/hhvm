@@ -642,6 +642,9 @@ val cyclic_class_def : SSet.t -> Pos.t -> unit
 
 val cyclic_record_def : string list -> Pos.t -> unit
 
+val trait_reuse_with_final_method :
+  Pos.t -> string -> string -> (Pos.t * string) list -> unit
+
 val trait_reuse : Pos.t -> string -> Pos.t * string -> string -> unit
 
 val trait_reuse_inside_class : Pos.t * string -> string -> Pos.t list -> unit

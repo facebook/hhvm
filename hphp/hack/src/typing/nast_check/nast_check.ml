@@ -31,6 +31,7 @@ let visitor =
       Php_lambda_check.handler;
       Duplicate_xhp_attribute_check.handler;
       Attribute_arity_check.handler;
+      Trait_reuse_check.handler;
     ]
 
 let stateful_visitor ctx =

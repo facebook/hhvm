@@ -103,7 +103,7 @@ let go :
     (string * int * int * (int * int) option) list ->
     ServerEnv.env ->
     string list =
- fun workers _experimental pos_list env ->
+ fun workers experimental pos_list env ->
   let pos_list =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
@@ -115,10 +115,23 @@ let go :
            let fn = Relative_path.create_detect_prefix fn in
            (fn, line, char, range_end))
   in
+  let num_files =
+    pos_list
+    |> List.map ~f:(fun (path, _, _, _) -> path)
+    |> Relative_path.Set.of_list
+    |> Relative_path.Set.cardinal
+  in
+  let num_positions = List.length pos_list in
+  let start_time = Unix.gettimeofday () in
   let results =
-    if List.length pos_list < 10 then
+    if num_positions < 10 then
       helper env [] pos_list
     else
       parallel_helper workers env pos_list
   in
+  HackEventLogger.type_at_pos_batch
+    ~start_time
+    ~num_files
+    ~num_positions
+    ~experimental;
   results

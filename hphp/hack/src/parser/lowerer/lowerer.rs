@@ -921,7 +921,10 @@ where
                         if args.len() == 1 {
                             let eq = |s| name.1.eq_ignore_ascii_case(s);
                             if (args[0].1.is_hfun()
-                                && (eq(rx::RX) || eq(rx::RX_LOCAL) || eq(rx::RX_SHALLOW)))
+                                && (eq(rx::RX)
+                                    || eq(rx::RX_LOCAL)
+                                    || eq(rx::RX_SHALLOW)
+                                    || eq(rx::PURE)))
                                 || (args[0].1.is_happly()
                                     && (eq(rx::MUTABLE)
                                         || eq(rx::MAYBE_MUTABLE)

@@ -356,7 +356,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
     fn visit_hint_(&mut self, env: &mut Env, hint: &mut Hint_) -> Result<(), ()> {
         fn is_rx(x: &str) -> bool {
-            x == sn::rx::RX || x == sn::rx::RX_LOCAL || x == sn::rx::RX_SHALLOW
+            x == sn::rx::RX || x == sn::rx::RX_LOCAL || x == sn::rx::RX_SHALLOW || x == sn::rx::PURE
         }
         fn is_xhp_screwup(x: &str) -> bool {
             x == "Xhp" || x == ":Xhp" || x == "XHP"

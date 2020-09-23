@@ -8,8 +8,8 @@ mod decl_mode_smart_constructors_generated;
 
 use ocaml::core::mlvalues::Value;
 use parser_core_types::{
-    lexable_token::LexableToken, lexable_trivia::LexableTrivia, parser_env::ParserEnv,
-    source_text::SourceText, syntax::*, token_kind::TokenKind,
+    lexable_token::LexableToken, lexable_trivia::LexableTrivia, source_text::SourceText, syntax::*,
+    token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};

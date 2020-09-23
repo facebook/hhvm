@@ -10,7 +10,6 @@ use parser::{
 };
 use positioned_smart_constructors::*;
 use stack_limit::StackLimit;
-use syntax_smart_constructors::StateType;
 
 pub type SmartConstructors<'src> =
     WithKind<PositionedSmartConstructors<OcamlSyntax<PositionedValue>, OcamlContextState<'src>>>;

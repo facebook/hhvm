@@ -5,10 +5,7 @@
 
 mod verify_smart_constructors_generated;
 
-use parser_core_types::{
-    parser_env::ParserEnv, positioned_syntax::PositionedSyntax, source_text::SourceText,
-    syntax_kind::SyntaxKind,
-};
+use parser_core_types::{positioned_syntax::PositionedSyntax, syntax_kind::SyntaxKind};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 use ocaml::core::mlvalues::Value;

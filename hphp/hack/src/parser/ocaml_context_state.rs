@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use crate::Context;
 use ocaml::core::mlvalues::Value;
-use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
+use parser_core_types::source_text::SourceText;
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use smart_constructors::NoState;
 use syntax_smart_constructors::StateType;

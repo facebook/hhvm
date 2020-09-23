@@ -13,4 +13,3 @@ ocaml_syntax = { path = "../../../cargo/ocaml_syntax" }
 parser = { path = "../../../core" }
 positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-syntax_smart_constructors = { path = "../../../cargo/syntax_smart_constructors" }

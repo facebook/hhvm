@@ -132,6 +132,8 @@ let intersection r tyl =
 
 let unenforced ty = { et_type = ty; et_enforced = false }
 
+let enforced ty = { et_type = ty; et_enforced = true }
+
 let has_member r ~name ~ty ~class_id ~explicit_targs =
   ConstraintType
     (mk_constraint_type

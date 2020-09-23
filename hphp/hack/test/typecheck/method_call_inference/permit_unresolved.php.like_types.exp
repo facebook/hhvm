@@ -1,0 +1,6 @@
+File "permit_unresolved.php", line 12, characters 3-20:
+Typing error (Typing[4110])
+File "permit_unresolved.php", line 12, characters 3-20:
+Expected `(function(): [unresolved])` because a type could not be determined here
+File "permit_unresolved.php", line 12, characters 16-18:
+But got `dynamic`, the result of accessing a property of a dynamic type

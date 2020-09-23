@@ -513,12 +513,15 @@ and obj_get_
     on_error =
   let (env, ety1) =
     if is_method then
-      Typing_solver.expand_type_and_solve
-        env
-        ~description_of_expected:"an object"
-        obj_pos
-        ty1
-        Errors.unify_error
+      if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
+        Env.expand_type env ty1
+      else
+        Typing_solver.expand_type_and_solve
+          env
+          ~description_of_expected:"an object"
+          obj_pos
+          ty1
+          Errors.unify_error
     else
       Typing_solver.expand_type_and_narrow
         env

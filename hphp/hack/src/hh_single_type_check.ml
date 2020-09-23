@@ -594,7 +594,8 @@ let parse_options () =
         "List of fixmes that are allowed in declarations." );
       ( "--method-call-inference",
         Arg.Set method_call_inference,
-        " Infer constraints for method calls." );
+        " Infer constraints for method calls. NB: incompatible with like types."
+      );
       ( "--report-pos-from-reason",
         Arg.Set report_pos_from_reason,
         " Flag errors whose position is derived from reason information in types."

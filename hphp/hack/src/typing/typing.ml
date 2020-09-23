@@ -5915,12 +5915,15 @@ and call
   let resl =
     TUtils.try_over_concrete_supertypes env fty (fun env fty ->
         let (env, efty) =
-          Typing_solver.expand_type_and_solve
-            ~description_of_expected:"a function value"
-            env
-            pos
-            fty
-            Errors.unify_error
+          if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
+            Env.expand_type env fty
+          else
+            Typing_solver.expand_type_and_solve
+              ~description_of_expected:"a function value"
+              env
+              pos
+              fty
+              Errors.unify_error
         in
         match deref efty with
         | (r, ((Tprim Tnull | Tdynamic | Terr | Tany _ | Tunion []) as ty))
@@ -6244,6 +6247,80 @@ and call
             TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
           in
           (env, (tel, typed_unpack_element, ret_ty))
+        | (r, Tvar _)
+          when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
+          (*
+            Typecheck calls with unresolved function type by constructing a
+            suitable function type from the arguments and invoking subtyping.
+          *)
+          let (env, typed_el, type_of_el) =
+            exprs ~accept_using_var:true env el
+          in
+          let (env, typed_unpacked_element, type_of_unpacked_element) =
+            match unpacked_element with
+            | Some unpacked ->
+              let (env, typed_unpacked, type_of_unpacked) =
+                expr ~accept_using_var:true env unpacked
+              in
+              (env, Some typed_unpacked, Some type_of_unpacked)
+            | None -> (env, None, None)
+          in
+          let mk_function_supertype
+              env pos (type_of_el, type_of_unpacked_element) =
+            let mk_fun_param ty =
+              let flags = 0 in
+              {
+                fp_pos = pos (* TODO *);
+                fp_name = None (* TODO? *);
+                fp_type = MakeType.enforced ty;
+                fp_rx_annotation = None (* TODO *);
+                fp_flags = flags (* TODO *);
+              }
+            in
+            let ft_arity =
+              match type_of_unpacked_element with
+              | Some type_of_unpacked ->
+                let fun_param = mk_fun_param type_of_unpacked in
+                Fvariadic fun_param
+              | None -> Fstandard
+            in
+            let ft_tparams = [] (* TODO *) in
+            let ft_where_constraints = [] (* TODO *) in
+            let ft_params = List.map ~f:mk_fun_param type_of_el in
+            let ft_implicit_params =
+              let capability =
+                Typing_make_type.default_capability Reason.Rnone
+              in
+              { capability }
+            in
+            let (env, return_ty) = Env.fresh_type env pos in
+            let ft_ret = MakeType.enforced return_ty in
+            (* A non-reactive supertype is most permissive: *)
+            let ft_reactive = Nonreactive in
+            let ft_flags = 0 (* TODO *) in
+            let fun_locl_type =
+              {
+                ft_arity;
+                ft_tparams;
+                ft_where_constraints;
+                ft_params;
+                ft_implicit_params;
+                ft_ret;
+                ft_reactive;
+                ft_flags;
+              }
+            in
+            let fun_type = mk (r, Tfun fun_locl_type) in
+            let env = Env.set_tyvar_variance env fun_type in
+            (env, fun_type, return_ty)
+          in
+          let (env, fun_type, return_ty) =
+            mk_function_supertype env pos (type_of_el, type_of_unpacked_element)
+          in
+          let env =
+            Type.sub_type pos Reason.URnone env efty fun_type Errors.unify_error
+          in
+          (env, (typed_el, typed_unpacked_element, return_ty))
         | _ ->
           bad_call env pos efty;
           let env = call_untyped_unpack env (get_pos efty) unpacked_element in

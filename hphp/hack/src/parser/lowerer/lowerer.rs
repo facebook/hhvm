@@ -73,18 +73,11 @@ pub enum ExprLocation {
     TopLevel,
     MemberSelect,
     InDoubleQuotedString,
-    InBacktickedString,
     AsStatement,
     RightOfAssignment,
     RightOfAssignmentInUsingStatement,
     RightOfReturn,
     UsingStatement,
-}
-
-impl ExprLocation {
-    fn in_string(self) -> bool {
-        self == ExprLocation::InDoubleQuotedString || self == ExprLocation::InBacktickedString
-    }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -1399,9 +1392,6 @@ where
                     (ExprLocation::InDoubleQuotedString, _) if env.codegen() => {
                         Ok(E_::String(Self::mk_str(expr, env, Self::unesc_dbl, s)))
                     }
-                    (ExprLocation::InBacktickedString, _) if env.codegen() => {
-                        Ok(E_::String(Self::mk_str(expr, env, unescape_backtick, s)))
-                    }
                     (_, Some(TK::OctalLiteral))
                         if env.is_typechecker() && !Self::is_num_octal_lit(s) =>
                     {
@@ -1824,14 +1814,13 @@ where
                     }
                 }
             }
-            QualifiedName(_) => {
-                if location.in_string() {
+            QualifiedName(_) => match location {
+                ExprLocation::InDoubleQuotedString => {
                     let ast::Id(_, n) = Self::pos_qualified_name(node, env)?;
                     Ok(E_::String(n.into()))
-                } else {
-                    Ok(E_::mk_id(Self::pos_qualified_name(node, env)?))
                 }
-            }
+                _ => Ok(E_::mk_id(Self::pos_qualified_name(node, env)?)),
+            },
             VariableExpression(c) => Ok(E_::mk_lvar(Self::lid_from_pos_name(
                 pos,
                 &c.variable_expression,
@@ -1998,10 +1987,6 @@ where
                     )),
                     (InDoubleQuotedString, _) => Ok(E_::String(Self::wrap_unescaper(
                         Self::unesc_dbl,
-                        Self::text_str(node, env),
-                    )?)),
-                    (InBacktickedString, _) => Ok(E_::String(Self::wrap_unescaper(
-                        unescape_backtick,
                         Self::text_str(node, env),
                     )?)),
                     (MemberSelect, _)

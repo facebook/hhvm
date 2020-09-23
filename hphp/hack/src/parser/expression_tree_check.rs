@@ -98,10 +98,10 @@ impl<'ast> Visitor<'ast> for Checker {
 
         if c.in_expression_tree {
             let valid_syntax = match &e.1 {
-                // Allow integer, string and boolean literals.
+                // Allow integer, string, boolean and null literals.
                 Int(_) => true,
                 String(_) => true,
-                True | False => true,
+                True | False | Null => true,
                 // Allow local variables $foo.
                 Lvar(_) => true,
                 Binop(bop) => match **bop {

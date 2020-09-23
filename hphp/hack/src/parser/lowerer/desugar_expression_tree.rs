@@ -70,6 +70,8 @@ fn rewrite_expr(e: &Expr) -> Expr {
         // Convert `true` to `$v->boolLiteral(true)`.
         True => meth_call("boolLiteral", vec![e.clone()], &e.0),
         False => meth_call("boolLiteral", vec![e.clone()], &e.0),
+        // Convert `null` to `$v->nullLiteral()`.
+        Null => meth_call("nullLiteral", vec![], &e.0),
         // Convert `$x` to `$v->localVar("$x")` (note the quoting).
         Lvar(lid) => meth_call("localVar", vec![string_literal(&((lid.1).1))], &e.0),
         Binop(bop) => match &**bop {

@@ -3294,12 +3294,6 @@ let read_before_write (pos, v) =
          " before initialization";
        ])
 
-let final_property pos =
-  add
-    (Typing.err_code Typing.FinalProperty)
-    pos
-    "Properties cannot be declared final"
-
 let implement_abstract ~is_final pos1 pos2 kind x =
   let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
   let msg1 =

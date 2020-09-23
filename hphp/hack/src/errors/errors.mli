@@ -884,8 +884,6 @@ val eq_incompatible_types :
 val comparison_invalid_types :
   Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 
-val final_property : Pos.t -> unit
-
 val invalid_new_disposable : Pos.t -> unit
 
 val invalid_disposable_hint : Pos.t -> string -> unit

@@ -1,4 +1,2 @@
 File "visibility.php", line 13, characters 3-7:
 Properties cannot be declared `final` (Parsing[1002])
-File "visibility.php", line 13, characters 13-14:
-Properties cannot be declared final (Typing[4164])

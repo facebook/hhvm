@@ -90,6 +90,14 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
     return ad;
   }
 
+  // Don't profile static arrays used for TypeStruct tests. Rather than using
+  // these arrays, we almost always just do a DataType check on the value.
+  if ((sk.op() == Op::Array || sk.op() == Op::Dict) &&
+      sk.advanced().op() == Op::IsTypeStructC) {
+    FTRACE(5, "Skipping static array used for TypeStruct test.\n");
+    return ad;
+  }
+
   auto const profile = getLoggingProfile(sk, ad);
   if (!profile) return ad;
 

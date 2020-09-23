@@ -637,8 +637,6 @@ void exportProfiles() {
   }
 
   s_exportProfilesThread = std::thread([] {
-    hphp_thread_init();
-
     auto const sources = sortProfileData();
     auto const file = fopen(RO::EvalExportLoggingArrayDataPath.c_str(), "w");
     if (!file) return;

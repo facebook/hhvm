@@ -258,6 +258,13 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
   if (env.context.kind != TransKind::Profile) return;
   if (!isArrLikeConstructorOp(sk.op())) return;
 
+  // These SrcKeys are always skipped in maybeMakeLoggingArray. If we make
+  // this logic more complicated, we should expose a helper to share the code.
+  if ((sk.op() == Op::Array || sk.op() == Op::Dict) &&
+      sk.advanced().op() == Op::IsTypeStructC) {
+    return;
+  }
+
   auto const vanilla = topC(env);
   auto const logging = gen(env, NewLoggingArray, vanilla);
   discard(env);

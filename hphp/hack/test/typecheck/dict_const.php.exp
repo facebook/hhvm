@@ -1,2 +1,4 @@
 File "dict_const.php", line 12, characters 46-53:
 Invalid expression in constant initializer (Parsing[1002])
+File "dict_const.php", line 12, characters 46-53:
+Illegal constant value (Naming[2023])

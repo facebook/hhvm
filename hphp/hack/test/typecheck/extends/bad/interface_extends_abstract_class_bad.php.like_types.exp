@@ -1,4 +1,0 @@
-File "interface_extends_abstract_class_bad.php", line 13, characters 11-11:
-Interfaces can only extend other interfaces. (Typing[4115])
-File "interface_extends_abstract_class_bad.php", line 13, characters 21-21:
-This is an abstract class.

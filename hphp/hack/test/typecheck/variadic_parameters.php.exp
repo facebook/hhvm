@@ -1,2 +1,6 @@
 File "variadic_parameters.php", line 8, characters 3-42:
 Attributes on variadic parameters are not allowed (Parsing[1002])
+File "variadic_parameters.php", line 8, characters 5-23:
+The `AttributeForTesting` attribute cannot be used on a parameter. (Typing[4231])
+File "variadic_parameters.php", line 3, characters 7-25:
+The attribute's class is defined here. To be available for use on a parameter, the `AttributeForTesting` class must implement `HH\ParameterAttribute`.

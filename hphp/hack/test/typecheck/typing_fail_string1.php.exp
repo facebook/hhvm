@@ -6,3 +6,5 @@ File "typing_fail_string1.php", line 13, characters 8-13:
 This can only be indexed with integers
 File "typing_fail_string1.php", line 14, characters 6-10:
 But got `string`
+File "typing_fail_string1.php", line 12, characters 10-13:
+Was expecting a return type hint (Typing[4030])

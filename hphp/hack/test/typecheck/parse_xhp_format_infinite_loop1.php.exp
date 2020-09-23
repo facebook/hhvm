@@ -1,2 +1,5 @@
 File "parse_xhp_format_infinite_loop1.php", line 4, characters 17-19:
 This string literal is not terminated. (Parsing[1002])
+File "parse_xhp_format_infinite_loop1.php", line 4, characters 17-19:
+Encountered unexpected text `"}
+`, was expecting a type hint. (Parsing[1002])

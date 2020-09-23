@@ -1,2 +1,6 @@
 File "this_tparam_static.php", line 13, characters 19-22:
 The type `this` cannot be used as a constraint on a class generic, or as the type of a static member variable (Naming[2043])
+File "this_tparam_static.php", line 18, characters 23-28:
+Can't use `new static()` for `BadClass`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
+File "this_tparam_static.php", line 12, characters 7-14:
+This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute

@@ -1,2 +1,4 @@
 File "namespace_global_function3.php--local.php", line 5, characters 5-8:
 Unbound name: `N\NN\f` (a global function) (Naming[2049])
+File "namespace_global_function3.php--local.php", line 5, characters 5-8:
+Unbound name (typing): `N\NN\f` (Typing[4107])

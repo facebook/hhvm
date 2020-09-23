@@ -1,2 +1,4 @@
 File "eif_define_var.php", line 17, characters 11-12:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "eif_define_var.php", line 22, characters 11-12:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

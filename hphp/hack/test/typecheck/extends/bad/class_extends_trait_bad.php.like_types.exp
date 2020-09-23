@@ -1,4 +1,0 @@
-File "class_extends_trait_bad.php", line 13, characters 7-7:
-Classes can only extend other classes. Did you mean to add `use A;` within the body of `B`? (Typing[4115])
-File "class_extends_trait_bad.php", line 13, characters 17-17:
-This is a trait.

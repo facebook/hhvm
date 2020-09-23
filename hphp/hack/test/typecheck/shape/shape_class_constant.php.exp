@@ -2,3 +2,15 @@ File "shape_class_constant.php", line 13, characters 7-11:
 Shape uses literal string as field name (Typing[4050])
 File "shape_class_constant.php", line 9, characters 7-134:
 But expected a class constant
+File "shape_class_constant.php", line 14, characters 7-11:
+Shape uses literal string as field name (Typing[4050])
+File "shape_class_constant.php", line 9, characters 7-134:
+But expected a class constant
+File "shape_class_constant.php", line 20, characters 22-26:
+The field `baz` is undefined (Typing[4108])
+File "shape_class_constant.php", line 11, characters 9-16:
+Definition is here
+File "shape_class_constant.php", line 6, characters 3-12:
+Shape uses class constant as field name (Typing[4049])
+File "shape_class_constant.php", line 4, characters 3-7:
+But expected a literal string

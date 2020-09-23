@@ -1,2 +1,4 @@
 File "bad_function_hint.php", line 12, characters 15-22:
 A type specifier is expected here. (Parsing[1002])
+File "bad_function_hint.php", line 12, characters 15-22:
+Encountered unexpected text `function`, was expecting a type hint. (Parsing[1002])

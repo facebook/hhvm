@@ -1,2 +1,4 @@
 File "no_function_fallback.php", line 19, characters 5-7:
 Unbound name: `NS\foo` (a global function) (Naming[2049])
+File "no_function_fallback.php", line 19, characters 5-7:
+Unbound name (typing): `NS\foo` (Typing[4107])

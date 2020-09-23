@@ -1,2 +1,6 @@
 File "goto_label_mid_statement.php", line 4, characters 14-14:
 A semicolon `;` is expected here. (Parsing[1002])
+File "goto_label_mid_statement.php", line 4, characters 12-13:
+Unbound name: `L0` (a global constant) (Naming[2049])
+File "goto_label_mid_statement.php", line 4, characters 14-14:
+Unbound name: `:` (a global constant) (Naming[2049])

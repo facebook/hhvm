@@ -1,2 +1,4 @@
 File "lsb_nonstatic_disallowed.php", line 4, characters 5-9:
 `__LSB` attribute may only be used on static properties (Naming[2094])
+File "lsb_nonstatic_disallowed.php", line 4, characters 5-9:
+The `__LSB` attribute cannot be used on an instance property. (Typing[4231])

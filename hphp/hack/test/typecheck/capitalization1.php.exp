@@ -2,3 +2,19 @@ File "capitalization1.php", line 11, characters 17-25:
 Could not find `camelcase`. (Naming[2006])
 File "capitalization1.php", line 3, characters 7-15:
 Did you mean `~~C~~amel~~C~~ase` instead (which only differs by case)?
+File "capitalization1.php", line 12, characters 14-22:
+Could not find `cAMELcASE`. (Naming[2006])
+File "capitalization1.php", line 3, characters 7-15:
+Did you mean `~~CamelCase~~` instead (which only differs by case)?
+File "capitalization1.php", line 15, characters 31-34:
+Unbound name: `:xhp` (Naming[2049])
+File "capitalization1.php", line 15, characters 14-22:
+Could not find `cAmelCase`. (Naming[2006])
+File "capitalization1.php", line 3, characters 7-15:
+Did you mean `~~Ca~~melCase` instead (which only differs by case)?
+File "capitalization1.php", line 19, characters 14-17:
+Unbound name: `:xhp` (an object type) (Naming[2049])
+File "capitalization1.php", line 7, characters 21-29:
+Could not find `CAMELCASE`. (Naming[2006])
+File "capitalization1.php", line 3, characters 7-15:
+Did you mean `C~~amel~~C~~ase~~` instead (which only differs by case)?

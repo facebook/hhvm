@@ -1,2 +1,8 @@
 File "test_array15.php", line 20, characters 26-26:
 Encountered unexpected token `&`. (Parsing[1002])
+File "test_array15.php", line 13, characters 21-33:
+Wrong type hint (Typing[4339])
+File "test_array15.php", line 13, characters 10-19:
+Expected `varray<int>`
+File "test_array15.php", line 13, characters 26-33:
+But got `darray<nothing, nothing>`

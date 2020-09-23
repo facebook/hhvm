@@ -6,3 +6,11 @@ File "test_erling.php", line 12, characters 21-21:
 Considering that this type argument is invariant with respect to `Vector`
 File "test_erling.php", line 14, characters 21-22:
 But got `?A`
+File "test_erling.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "test_erling.php", line 14, characters 37-37:
+Expected `A`
+File "test_erling.php", line 14, characters 37-37:
+Considering that this type argument is invariant with respect to `Vector`
+File "test_erling.php", line 14, characters 21-22:
+But got `?A`

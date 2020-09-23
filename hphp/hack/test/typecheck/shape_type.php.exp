@@ -1,2 +1,4 @@
 File "shape_type.php", line 3, characters 21-21:
 A left parenthesis `(` is expected here. (Parsing[1002])
+File "shape_type.php", line 3, characters 21-21:
+Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])

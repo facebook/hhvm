@@ -1,2 +1,6 @@
 File "unset_cast.php", line 13, characters 16-16:
 An expression is expected here. (Parsing[1002])
+File "unset_cast.php", line 13, characters 11-15:
+Unbound name: `unset` (a global constant) (Naming[2049])
+File "unset_cast.php", line 13, characters 11-15:
+Unbound global constant (Typing) (Typing[4106])

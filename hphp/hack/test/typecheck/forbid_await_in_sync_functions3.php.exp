@@ -1,2 +1,4 @@
 File "forbid_await_in_sync_functions3.php", line 14, characters 5-21:
 `await` can only be used inside `async` functions (NastCheck[3003])
+File "forbid_await_in_sync_functions3.php", line 12, characters 10-12:
+Was expecting a return type hint (Typing[4030])

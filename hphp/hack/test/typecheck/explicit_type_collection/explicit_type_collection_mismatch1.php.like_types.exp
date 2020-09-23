@@ -1,6 +1,0 @@
-File "explicit_type_collection_mismatch1.php", line 4, characters 8-22:
-Some elements in this collection are incompatible (Typing[4110])
-File "explicit_type_collection_mismatch1.php", line 4, characters 12-14:
-Expected `int`
-File "explicit_type_collection_mismatch1.php", line 4, characters 17-21:
-But got `string`

@@ -1,2 +1,4 @@
 File "entry_point_multiple.php", line 6, characters 1-38:
 Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_multiple.php:3) (Parsing[1002])
+File "entry_point_multiple.php", line 9, characters 1-38:
+Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in entry_point_multiple.php:6) (Parsing[1002])

@@ -1,2 +1,4 @@
 File "void_cast.php", line 13, characters 9-12:
 Unbound name: `void` (a global constant) (Naming[2049])
+File "void_cast.php", line 13, characters 9-12:
+Unbound global constant (Typing) (Typing[4106])

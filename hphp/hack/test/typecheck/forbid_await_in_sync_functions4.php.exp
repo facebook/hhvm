@@ -1,2 +1,8 @@
 File "forbid_await_in_sync_functions4.php", line 16, characters 10-23:
 `await` can only be used inside `async` functions (NastCheck[3003])
+File "forbid_await_in_sync_functions4.php", line 16, characters 10-23:
+Invalid return type (Typing[4110])
+File "forbid_await_in_sync_functions4.php", line 15, characters 4-17:
+Expected `Awaitable<int>`
+File "forbid_await_in_sync_functions4.php", line 13, characters 13-15:
+But got `int`

@@ -1,2 +1,12 @@
 File "type_const_in_type_alias.php", line 3, characters 13-16:
 Type aliases to type constants are not supported (Parsing[1002])
+File "type_const_in_type_alias.php", line 4, characters 11-14:
+Type aliases to type constants are not supported (Parsing[1002])
+File "type_const_in_type_alias.php", line 3, characters 13-13:
+Unbound name: `C` (Naming[2049])
+File "type_const_in_type_alias.php", line 3, characters 13-13:
+Unbound name `C` in type constant access (Typing[4384])
+File "type_const_in_type_alias.php", line 4, characters 11-11:
+Unbound name: `C` (Naming[2049])
+File "type_const_in_type_alias.php", line 4, characters 11-11:
+Unbound name `C` in type constant access (Typing[4384])

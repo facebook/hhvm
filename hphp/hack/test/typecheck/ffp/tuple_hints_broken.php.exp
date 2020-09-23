@@ -1,2 +1,6 @@
 File "tuple_hints_broken.php", line 3, characters 26-26:
 An opening angle bracket `<` is expected here. (Parsing[1002])
+File "tuple_hints_broken.php", line 3, characters 21-25:
+Unbound name: `tuple` (Naming[2049])
+File "tuple_hints_broken.php", line 3, characters 21-25:
+Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>` (Typing[4100])

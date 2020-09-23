@@ -1,2 +1,6 @@
 File "trait_extends_bad.php", line 5, characters 11-17:
 Only interfaces and classes may extend other interfaces and classes. (Parsing[1002])
+File "trait_extends_bad.php", line 5, characters 7-9:
+A trait cannot use `extends`. This is a parser error. (Typing[4115])
+File "trait_extends_bad.php", line 5, characters 19-21:
+This is a class.

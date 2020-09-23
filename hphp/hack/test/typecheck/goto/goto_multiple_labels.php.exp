@@ -1,2 +1,4 @@
 File "goto_multiple_labels.php", line 4, characters 11-12:
 Encountered unexpected token `L1`. (Parsing[1002])
+File "goto_multiple_labels.php", line 4, characters 8-9:
+Undefined goto label: `L0` (Naming[2073])

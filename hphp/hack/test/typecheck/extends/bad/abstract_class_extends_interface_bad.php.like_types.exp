@@ -1,4 +1,0 @@
-File "abstract_class_extends_interface_bad.php", line 13, characters 16-16:
-Classes can only extend other classes. Did you mean `implements A`? (Typing[4115])
-File "abstract_class_extends_interface_bad.php", line 13, characters 26-26:
-This is an interface.

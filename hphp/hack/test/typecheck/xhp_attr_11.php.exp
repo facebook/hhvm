@@ -1,2 +1,4 @@
 File "xhp_attr_11.php", line 4, characters 14-14:
 A name is expected here. (Parsing[1002])
+File "xhp_attr_11.php", line 4, characters 13-13:
+Unbound name: `x` (Naming[2049])

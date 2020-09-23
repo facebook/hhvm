@@ -1,2 +1,4 @@
 File "enum_attribute.php", line 4, characters 3-14:
 Unbound name: `DoesNotExist` (an object type) (Naming[2049])
+File "enum_attribute.php", line 4, characters 3-14:
+Unrecognized user attribute: `DoesNotExist` does not have a class. Please declare a class for the attribute. (Naming[2049])

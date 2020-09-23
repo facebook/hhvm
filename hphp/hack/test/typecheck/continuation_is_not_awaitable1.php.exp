@@ -4,3 +4,5 @@ File "continuation_is_not_awaitable1.php", line 12, characters 23-47:
 Expected `Generator<int, int, void>`
 File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
 But got `int`
+File "continuation_is_not_awaitable1.php", line 12, characters 16-18:
+Was expecting an `Awaitable` return type hint (Typing[4174])

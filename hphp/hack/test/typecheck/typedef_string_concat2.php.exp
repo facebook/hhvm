@@ -6,3 +6,5 @@ File "typedef_string_concat2.php", line 13, characters 5-9:
 This is why I think it is an object of type C
 File "typedef_string_concat2.php", line 5, characters 7-7:
 Declaration of `C` is here
+File "typedef_string_concat2.php", line 8, characters 19-19:
+Was expecting a return type hint (Typing[4030])

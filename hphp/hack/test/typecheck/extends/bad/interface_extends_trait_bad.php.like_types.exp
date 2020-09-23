@@ -1,4 +1,0 @@
-File "interface_extends_trait_bad.php", line 13, characters 11-11:
-Interfaces can only extend other interfaces. Did you mean to add `use A;` within the body of `B`? (Typing[4115])
-File "interface_extends_trait_bad.php", line 13, characters 21-21:
-This is a trait.

@@ -4,3 +4,9 @@ File "chained_arrows2.php", line 17, characters 18-21:
 Expected `bool`
 File "chained_arrows2.php", line 14, characters 10-12:
 But got `int`
+File "chained_arrows2.php", line 12, characters 7-7:
+Class `A` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "chained_arrows2.php", line 14, characters 14-17:
+`$this->bar` is not initialized.
+File "chained_arrows2.php", line 13, characters 12-15:
+`$this->foo` is not initialized.

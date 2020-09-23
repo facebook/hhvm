@@ -1,6 +1,0 @@
-File "enforceable2.php", line 10, characters 23-23:
-Invalid type (Typing[4302])
-File "enforceable2.php", line 5, characters 5-17:
-Type constant `T` was declared `__Enforceable` here
-File "enforceable2.php", line 10, characters 44-51:
-This type is not enforceable because it has a type with an erased generic type argument

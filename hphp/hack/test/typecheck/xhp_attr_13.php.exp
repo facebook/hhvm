@@ -4,3 +4,7 @@ File "xhp_attr_13.php", line 11, characters 23-28:
 Expected `string`
 File "xhp_attr_13.php", line 4, characters 13-15:
 But got `int`
+File "xhp_attr_13.php", line 19, characters 7-10:
+This class must be declared `abstract`, or provide an implementation for the abstract type constant `TInner` (Typing[4047])
+File "xhp_attr_13.php", line 20, characters 23-28:
+Declaration is here

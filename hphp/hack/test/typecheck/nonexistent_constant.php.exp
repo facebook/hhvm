@@ -1,2 +1,4 @@
 File "nonexistent_constant.php", line 4, characters 10-23:
 Unbound name: `NoSuchConstant` (a global constant) (Naming[2049])
+File "nonexistent_constant.php", line 4, characters 10-23:
+Unbound global constant (Typing) (Typing[4106])

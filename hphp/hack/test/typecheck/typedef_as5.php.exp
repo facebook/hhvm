@@ -4,3 +4,9 @@ File "typedef_as5.php--file1.php", line 15, characters 24-24:
 Expected `Y`
 File "typedef_as5.php--file1.php", line 15, characters 28-31:
 But got `Duck`
+File "typedef_as5.php--file2.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+File "typedef_as5.php--file2.php", line 3, characters 32-35:
+Expected `Duck`
+File "typedef_as5.php--file1.php", line 15, characters 24-24:
+But got `Y`

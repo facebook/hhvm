@@ -6,3 +6,11 @@ File "constraint_gen_fail3.php", line 23, characters 9-9:
 But got `T`
 File "constraint_gen_fail3.php", line 24, characters 27-27:
   via this generic `T`
+File "constraint_gen_fail3.php", line 24, characters 38-50:
+Invalid return type (Typing[4110])
+File "constraint_gen_fail3.php", line 24, characters 27-27:
+Expected `T`
+File "constraint_gen_fail3.php", line 23, characters 22-22:
+But got `A`
+File "constraint_gen_fail3.php", line 20, characters 27-27:
+  via this generic `T`

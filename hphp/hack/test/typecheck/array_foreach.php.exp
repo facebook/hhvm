@@ -2,3 +2,27 @@ File "array_foreach.php", line 16, characters 3-16:
 a varray_or_darray does not allow array append (Typing[4006])
 File "array_foreach.php", line 12, characters 15-19:
 Definition is here
+File "array_foreach.php", line 20, characters 8-11:
+Invalid argument (Typing[4110])
+File "array_foreach.php", line 31, characters 15-27:
+Expected `varray<string>`
+File "array_foreach.php", line 12, characters 15-19:
+But got `varray_or_darray<arraykey, (_ | string)>`
+File "array_foreach.php", line 21, characters 8-11:
+Invalid argument (Typing[4110])
+File "array_foreach.php", line 50, characters 15-32:
+Expected `darray<int, string>`
+File "array_foreach.php", line 12, characters 15-19:
+But got `varray_or_darray<arraykey, (_ | string)>`
+File "array_foreach.php", line 26, characters 8-9:
+Invalid argument (Typing[4110])
+File "array_foreach.php", line 67, characters 13-15:
+Expected `int`
+File "array_foreach.php", line 24, characters 15-19:
+This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)
+File "array_foreach.php", line 40, characters 8-11:
+Invalid argument (Typing[4110])
+File "array_foreach.php", line 50, characters 15-32:
+Expected `darray<int, string>`
+File "array_foreach.php", line 31, characters 15-27:
+But got `varray<string>`

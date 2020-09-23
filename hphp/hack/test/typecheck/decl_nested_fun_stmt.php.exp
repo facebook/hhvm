@@ -1,2 +1,4 @@
 File "decl_nested_fun_stmt.php", line 13, characters 21-21:
 Inline function definitions are not supported in Hack (Parsing[1002])
+File "decl_nested_fun_stmt.php", line 13, characters 3-20:
+Encountered unexpected text `function g($a) { }`, was expecting a statement. (Parsing[1002])

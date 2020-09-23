@@ -1,2 +1,4 @@
 File "no_constant_fallback.php", line 18, characters 15-17:
 Unbound name: `NS\FOO` (a global constant) (Naming[2049])
+File "no_constant_fallback.php", line 18, characters 15-17:
+Unbound global constant (Typing) (Typing[4106])

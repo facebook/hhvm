@@ -1,6 +1,0 @@
-File "enforceable_type_consts.php", line 15, characters 14-20:
-Invalid type (Typing[4302])
-File "enforceable_type_consts.php", line 10, characters 5-17:
-Type constant `TVassil` was declared `__Enforceable` here
-File "enforceable_type_consts.php", line 15, characters 24-41:
-This type is not enforceable because it has a type with an erased generic type argument

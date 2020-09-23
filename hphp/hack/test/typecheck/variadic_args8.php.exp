@@ -4,3 +4,15 @@ File "variadic_args8.php", line 3, characters 23-28:
 Expected `string`
 File "variadic_args8.php", line 5, characters 19-23:
 But got `int` (variadic argument)
+File "variadic_args8.php", line 12, characters 5-9:
+Invalid argument (Typing[4110])
+File "variadic_args8.php", line 5, characters 19-23:
+Expected `int` (variadic argument)
+File "variadic_args8.php", line 12, characters 5-9:
+But got `string`
+File "variadic_args8.php", line 12, characters 12-16:
+Invalid argument (Typing[4110])
+File "variadic_args8.php", line 5, characters 19-23:
+Expected `int` (variadic argument)
+File "variadic_args8.php", line 12, characters 12-16:
+But got `string`

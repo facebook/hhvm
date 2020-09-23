@@ -1,2 +1,4 @@
 File "const_visibility.php", line 4, characters 3-9:
 Constants cannot be declared `private` (Parsing[1002])
+File "const_visibility.php", line 5, characters 3-9:
+Constants cannot be declared `private` (Parsing[1002])

@@ -4,3 +4,9 @@ File "test_array4.php", line 12, characters 15-30:
 This container is a darray
 File "test_array4.php", line 13, characters 13-16:
 A bool cannot be used as a key for a darray
+File "test_array4.php", line 13, characters 10-17:
+Invalid return type (Typing[4110])
+File "test_array4.php", line 12, characters 37-40:
+Expected `bool`
+File "test_array4.php", line 12, characters 27-29:
+But got `int`

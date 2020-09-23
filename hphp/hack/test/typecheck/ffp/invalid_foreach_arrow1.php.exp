@@ -1,2 +1,8 @@
 File "invalid_foreach_arrow1.php", line 4, characters 21-21:
 An arrow `=>` or right parenthesis `)` is expected here. (Parsing[1002])
+File "invalid_foreach_arrow1.php", line 6, characters 19-20:
+Invalid argument (Typing[4110])
+File "invalid_foreach_arrow1.php", line 11, characters 24-26:
+Expected `int`
+File "invalid_foreach_arrow1.php", line 3, characters 34-39:
+But got `string`

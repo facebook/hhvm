@@ -1,2 +1,6 @@
 File "typedef14.php", line 15, characters 17-17:
 Encountered unexpected token `0`. (Parsing[1002])
+File "typedef14.php", line 15, characters 11-15:
+Unbound name: `myint` (a global constant) (Naming[2049])
+File "typedef14.php", line 15, characters 11-15:
+Unbound global constant (Typing) (Typing[4106])

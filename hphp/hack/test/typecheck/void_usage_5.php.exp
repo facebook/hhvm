@@ -4,3 +4,7 @@ File "void_usage_5.php", line 5, characters 5-61:
 Expected `void` because this function does not always return a value
 File "void_usage_5.php", line 10, characters 12-17:
 But got `string`
+File "void_usage_5.php", line 13, characters 9-10:
+You are using the return value of a `void` function (Typing[4119])
+File "void_usage_5.php", line 5, characters 5-61:
+A `void` function doesn't return a value. because this function does not always return a value

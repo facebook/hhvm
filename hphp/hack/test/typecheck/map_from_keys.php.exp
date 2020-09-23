@@ -4,3 +4,31 @@ File "map_from_keys.php--file1.php", line 3, characters 10-17:
 Expected `void` because this function does not always return a value
 File "map_from_keys.php--file1.php", line 3, characters 22-26:
 But got `varray_or_darray<arraykey, _>`
+File "map_from_keys.php--file1.php", line 3, characters 10-17:
+Invalid return type (Typing[4336])
+File "map_from_keys.php--file1.php", line 3, characters 22-26:
+Expected `varray_or_darray<arraykey, _>`
+File "map_from_keys.php--file1.php", line 3, characters 10-17:
+But got `void` because this function does not always return a value
+File "map_from_keys.php--file1.php", line 7, characters 10-20:
+Invalid return type (Typing[4336])
+File "map_from_keys.php--file1.php", line 7, characters 10-20:
+Expected `void` because this function does not always return a value
+File "map_from_keys.php--file1.php", line 10, characters 4-14:
+But got `Map<Tk, Tv>`
+File "map_from_keys.php--file1.php", line 7, characters 10-20:
+Invalid return type (Typing[4336])
+File "map_from_keys.php--file1.php", line 10, characters 4-14:
+Expected `Map<Tk, Tv>`
+File "map_from_keys.php--file1.php", line 7, characters 10-20:
+But got `void` because this function does not always return a value
+File "map_from_keys.php--file2.php", line 5, characters 43-44:
+Invalid return type (Typing[4110])
+File "map_from_keys.php--file2.php", line 4, characters 54-65:
+Expected `classname<C>`
+File "map_from_keys.php--file2.php", line 4, characters 54-65:
+Considering that this type argument is invariant with respect to `Map`
+File "map_from_keys.php--file2.php", line 4, characters 46-51:
+But got `string`
+File "map_from_keys.php--file2.php", line 4, characters 46-51:
+Considering that this type argument is invariant with respect to `Map`

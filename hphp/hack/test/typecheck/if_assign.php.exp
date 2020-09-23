@@ -1,2 +1,8 @@
 File "if_assign.php", line 13, characters 7-8:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+File "if_assign.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+File "if_assign.php", line 12, characters 19-21:
+Expected `int`
+File "if_assign.php", line 13, characters 12-13:
+But got `string`

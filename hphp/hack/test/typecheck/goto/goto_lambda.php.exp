@@ -1,2 +1,12 @@
 File "goto_lambda.php", line 4, characters 8-13:
 Undefined goto label: `LAMBDA` (Naming[2073])
+File "goto_lambda.php", line 10, characters 10-14:
+Invalid return type (Typing[4110])
+File "goto_lambda.php", line 3, characters 18-21:
+Expected `void`
+File "goto_lambda.php", line 10, characters 10-14:
+But got `bool`
+File "goto_lambda.php", line 10, characters 3-15:
+You cannot return a value (Typing[4084])
+File "goto_lambda.php", line 3, characters 18-21:
+This is a `void` function

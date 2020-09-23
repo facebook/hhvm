@@ -1,2 +1,12 @@
 File "try_catch_bad3.php", line 13, characters 3-29:
 A `try` statement requires a `catch` or a `finally` clause. (Parsing[1002])
+File "try_catch_bad3.php", line 16, characters 10-13:
+Invalid return type (Typing[4110])
+File "try_catch_bad3.php", line 12, characters 17-20:
+Expected `void`
+File "try_catch_bad3.php", line 14, characters 12-16:
+But got `string`
+File "try_catch_bad3.php", line 16, characters 3-14:
+You cannot return a value (Typing[4084])
+File "try_catch_bad3.php", line 12, characters 17-20:
+This is a `void` function

@@ -1,2 +1,4 @@
 File "inline_function.php", line 4, characters 22-22:
 Inline function definitions are not supported in Hack (Parsing[1002])
+File "inline_function.php", line 4, characters 5-21:
+Encountered unexpected text `function bar() {}`, was expecting a statement. (Parsing[1002])

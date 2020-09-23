@@ -4,3 +4,15 @@ File "shape_modified5.php", line 18, characters 8-22:
 The field `y` is missing
 File "shape_modified5.php", line 17, characters 27-34:
 The field `y` is defined
+File "shape_modified5.php", line 17, characters 10-12:
+Invalid return type (Typing[4336])
+File "shape_modified5.php", line 17, characters 10-12:
+Expected `void` because this function does not always return a value
+File "shape_modified5.php", line 17, characters 27-34:
+But got `shape('x' => int, 'y' => bool)`
+File "shape_modified5.php", line 17, characters 10-12:
+Invalid return type (Typing[4336])
+File "shape_modified5.php", line 17, characters 27-34:
+Expected `shape('x' => int, 'y' => bool)`
+File "shape_modified5.php", line 17, characters 10-12:
+But got `void` because this function does not always return a value

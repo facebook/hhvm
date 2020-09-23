@@ -1,2 +1,4 @@
 File "misspell_dict.php", line 4, characters 8-11:
 Unbound name: `Dict` (a record type) (Naming[2049])
+File "misspell_dict.php", line 4, characters 8-11:
+Expected a record type, but got `Dict`. (Typing[4364])

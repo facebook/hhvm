@@ -1,2 +1,4 @@
 File "namespace_global_const1.php", line 9, characters 12-18:
 Unbound name: `N\MYCONST` (a global constant) (Naming[2049])
+File "namespace_global_const1.php", line 9, characters 12-18:
+Unbound global constant (Typing) (Typing[4106])

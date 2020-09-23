@@ -4,3 +4,11 @@ File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
 Expected `Awaitable<void>` because this function does not always return a value
 File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
 But got `void`
+File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
+Invalid return type (Typing[4336])
+File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
+Expected `void`
+File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
+But got `Awaitable<void>` because this function does not always return a value
+File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
+Was expecting an `Awaitable` return type hint (Typing[4174])

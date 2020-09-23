@@ -2,3 +2,5 @@ File "duplicate_class_attributes.php", line 3, characters 22-33:
 You cannot reuse the attribute `__Deprecated` (Naming[2062])
 File "duplicate_class_attributes.php", line 3, characters 3-14:
 `__Deprecated` was already used here
+File "duplicate_class_attributes.php", line 3, characters 3-14:
+The `__Deprecated` attribute cannot be used on a class. (Typing[4231])

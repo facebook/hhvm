@@ -6,3 +6,9 @@ File "iface_require_extends2.php", line 22, characters 19-25:
 This is why I think it is an object of type IMarked
 File "iface_require_extends2.php", line 16, characters 11-17:
 Declaration of `IMarked` is here
+File "iface_require_extends2.php", line 24, characters 11-15:
+Invalid argument (Typing[4110])
+File "iface_require_extends2.php", line 29, characters 18-22:
+Expected `Super`
+File "iface_require_extends2.php", line 22, characters 19-25:
+But got `IMarked`

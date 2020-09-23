@@ -1,2 +1,16 @@
 File "function_protected_bad.php", line 4, characters 7-15:
 Top-level functions cannot be declared `protected` (Parsing[1002])
+File "function_protected_bad.php", line 4, characters 26-28:
+Invalid return type (Typing[4336])
+File "function_protected_bad.php", line 4, characters 26-28:
+Expected `Awaitable<void>` because this function does not always return a value
+File "function_protected_bad.php", line 4, characters 33-36:
+But got `void`
+File "function_protected_bad.php", line 4, characters 26-28:
+Invalid return type (Typing[4336])
+File "function_protected_bad.php", line 4, characters 33-36:
+Expected `void`
+File "function_protected_bad.php", line 4, characters 26-28:
+But got `Awaitable<void>` because this function does not always return a value
+File "function_protected_bad.php", line 4, characters 26-28:
+Was expecting an `Awaitable` return type hint (Typing[4174])

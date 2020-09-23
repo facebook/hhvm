@@ -1,2 +1,0 @@
-File "memoize_abstract_method.php", line 5, characters 28-28:
-Abstract methods cannot be memoized. (NastCheck[3087])

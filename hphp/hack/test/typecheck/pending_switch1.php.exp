@@ -1,2 +1,4 @@
 File "pending_switch1.php", line 15, characters 10-11:
 Variable `$x` is undefined, or not always defined. (Naming[2050])
+File "pending_switch1.php", line 18, characters 10-11:
+Variable `$x` is undefined, or not always defined. (Naming[2050])

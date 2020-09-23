@@ -1,2 +1,4 @@
 File "array_ref_var.php", line 13, characters 16-16:
 An expression is expected here. (Parsing[1002])
+File "array_ref_var.php", line 13, characters 15-15:
+Unbound name: `&` (a global constant) (Naming[2049])

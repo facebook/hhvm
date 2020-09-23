@@ -77,6 +77,13 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
           }
       | _ -> fail "vector needs a single type parameter"
     end
+  | T.Tclass ((_, name), _, targs) when String.equal name Decl.dict_id ->
+    begin
+      match targs with
+      | [key_ty; value_ty] ->
+        Tcow_array { a_key = ty key_ty; a_value = ty value_ty }
+      | _ -> fail "dict needs two type parameters"
+    end
   | T.Tclass ((_, name), _, _) -> class_ty ?lump renv name
   | T.Tvar id -> ty (expand_var renv id)
   | T.Tfun fun_ty ->

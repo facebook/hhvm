@@ -33,6 +33,8 @@ let exception_id = "\\Exception"
 
 let vec_id = "\\HH\\vec"
 
+let dict_id = "\\HH\\dict"
+
 let governed_id = "\\Governed"
 
 let construct_id = "__construct"

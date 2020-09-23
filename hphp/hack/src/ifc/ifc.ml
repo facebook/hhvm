@@ -711,6 +711,20 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
     in
     let env = List.fold ~f:mk_element_subtype ~init:env exprs in
     (env, vec_pty)
+  | A.KeyValCollection (A.Dict, _, fields) ->
+    (* Each field's key and value are subtypes of the array key and value
+       policy types. *)
+    let dict_pty = Lift.ty ~prefix:"dict" renv ety in
+    let arr = cow_array ~pos renv dict_pty in
+    let mk_element_subtype env (key, value) =
+      let subtype = subtype ~pos in
+      let (env, key_pty) = expr env key in
+      let (env, value_pty) = expr env value in
+      Env.acc env @@ fun acc ->
+      acc |> subtype key_pty arr.a_key |> subtype value_pty arr.a_value
+    in
+    let env = List.fold ~f:mk_element_subtype ~init:env fields in
+    (env, dict_pty)
   | A.Array_get (arry, ix_opt) ->
     (* Return the type parameter corresponding to the vector element type. *)
     let env =

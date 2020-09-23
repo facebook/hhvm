@@ -166,7 +166,7 @@ struct BitSet {
    * Return a 64-bit hash code.
    */
   constexpr size_t hash() const {
-    if (M == 1) {
+    if constexpr (M == 1) {
       return hash_int64(m_data[0]);
     }
 

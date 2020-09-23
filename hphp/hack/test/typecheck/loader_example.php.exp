@@ -1,3 +1,5 @@
+File "loader_example.php", line 6, characters 19-21:
+Was expecting a return type hint (Typing[4030])
 File "loader_example.php", line 43, characters 11-12:
 Invalid argument (Typing[4110])
 File "loader_example.php", line 17, characters 27-30:
@@ -14,5 +16,3 @@ File "loader_example.php", line 38, characters 16-22:
 Since `ALoader` is not final
 File "loader_example.php", line 31, characters 49-55:
 this might not be a `ALoader`
-File "loader_example.php", line 6, characters 19-21:
-Was expecting a return type hint (Typing[4030])

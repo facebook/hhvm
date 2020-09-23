@@ -1,9 +1,9 @@
 File "primitive_casing.php", line 3, characters 12-16:
 Keyword `Array` must be written in lowercase (Parsing[1002])
-File "primitive_casing.php", line 3, characters 25-30:
-Unbound name: `String` (Naming[2049])
 File "primitive_casing.php", line 3, characters 12-16:
 Unbound name: `Array` (Naming[2049])
+File "primitive_casing.php", line 3, characters 25-30:
+Unbound name: `String` (Naming[2049])
 File "primitive_casing.php", line 4, characters 10-12:
 Invalid return type (Typing[4110])
 File "primitive_casing.php", line 3, characters 25-30:

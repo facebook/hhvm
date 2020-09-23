@@ -1,3 +1,13 @@
+File "unmagic_stringish2.php", line 33, characters 12-25:
+Cannot cast a value of type `this` to string.
+Only primitives may be used in a `(string)` cast.
+If you are trying to cast a Stringish type, please use `stringish_cast`.
+This functionality is being removed from HHVM. (Typing[4281])
+File "unmagic_stringish2.php", line 45, characters 12-25:
+Cannot cast a value of type `this` to string.
+Only primitives may be used in a `(string)` cast.
+If you are trying to cast a Stringish type, please use `stringish_cast`.
+This functionality is being removed from HHVM. (Typing[4281])
 File "unmagic_stringish2.php", line 66, characters 4-8:
 You cannot use this object as a string (Typing[4067])
 File "unmagic_stringish2.php", line 58, characters 15-27:
@@ -36,13 +46,3 @@ Implicit conversions of Stringish objects to string are deprecated. (Typing[4067
 File "unmagic_stringish2.php", line 82, characters 6-14:
 You cannot use this object as a string
 Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
-File "unmagic_stringish2.php", line 33, characters 12-25:
-Cannot cast a value of type `this` to string.
-Only primitives may be used in a `(string)` cast.
-If you are trying to cast a Stringish type, please use `stringish_cast`.
-This functionality is being removed from HHVM. (Typing[4281])
-File "unmagic_stringish2.php", line 45, characters 12-25:
-Cannot cast a value of type `this` to string.
-Only primitives may be used in a `(string)` cast.
-If you are trying to cast a Stringish type, please use `stringish_cast`.
-This functionality is being removed from HHVM. (Typing[4281])

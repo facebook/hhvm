@@ -1,8 +1,8 @@
-File "shape_typeconst3.php", line 7, characters 8-20:
-No class constant `MISSING_CONST` in `C` (Typing[4090])
-File "shape_typeconst3.php", line 3, characters 7-7:
-Declaration of `C` is here
 File "shape_typeconst3.php", line 7, characters 5-20:
 A shape field name must be an `int` or `string` (Typing[4052])
 File "", line 0, characters 0-0:
 Not a type error
+File "shape_typeconst3.php", line 7, characters 8-20:
+No class constant `MISSING_CONST` in `C` (Typing[4090])
+File "shape_typeconst3.php", line 3, characters 7-7:
+Declaration of `C` is here

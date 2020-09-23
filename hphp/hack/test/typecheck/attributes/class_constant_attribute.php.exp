@@ -2,7 +2,7 @@ File "class_constant_attribute.php", line 3, characters 19-38:
 Attribute arguments must be literals (Parsing[1002])
 File "class_constant_attribute.php", line 3, characters 3-13:
 Unbound name: `MyAttribute` (an object type) (Naming[2049])
-File "class_constant_attribute.php", line 3, characters 19-25:
-Unbound name: `MyClass` (an object type) (Naming[2049])
 File "class_constant_attribute.php", line 3, characters 3-13:
 Unrecognized user attribute: `MyAttribute` does not have a class. Please declare a class for the attribute. (Naming[2049])
+File "class_constant_attribute.php", line 3, characters 19-25:
+Unbound name: `MyClass` (an object type) (Naming[2049])

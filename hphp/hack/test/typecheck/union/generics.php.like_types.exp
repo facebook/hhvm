@@ -68,14 +68,6 @@ File "generics.php--file2.php", line 28, characters 5-15:
   ~int
 File "generics.php--file2.php", line 31, characters 5-15:
   ~?int
-File "generics.php--file2.php", line 102, characters 32-33:
-Invalid argument (Typing[4110])
-File "generics.php--file2.php", line 100, characters 20-22:
-Expected `int`
-File "generics.php--file2.php", line 16, characters 36-36:
-  via this generic `T`
-File "generics.php--file2.php", line 102, characters 32-33:
-But got `string`
 File "generics.php--file2.php", line 20, characters 47-50:
 An abstract type constant is not allowed in this position. (Typing[4352])
 File "generics.php--file2.php", line 4, characters 23-26:
@@ -84,3 +76,11 @@ File "generics.php--file2.php", line 20, characters 62-66:
 An abstract type constant is not allowed in this position. (Typing[4352])
 File "generics.php--file2.php", line 5, characters 23-27:
 `Tcstr` is abstract here.
+File "generics.php--file2.php", line 102, characters 32-33:
+Invalid argument (Typing[4110])
+File "generics.php--file2.php", line 100, characters 20-22:
+Expected `int`
+File "generics.php--file2.php", line 16, characters 36-36:
+  via this generic `T`
+File "generics.php--file2.php", line 102, characters 32-33:
+But got `string`

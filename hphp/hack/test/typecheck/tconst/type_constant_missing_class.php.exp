@@ -1,5 +1,27 @@
+File "type_constant_missing_class.php", line 2, characters 15-19:
+Unbound name: `Bogus` (Naming[2049])
+File "type_constant_missing_class.php", line 4, characters 19-23:
+Unbound name: `Bogus` (Naming[2049])
+File "type_constant_missing_class.php", line 7, characters 19-23:
+Unbound name: `Bogus` (Naming[2049])
 File "type_constant_missing_class.php", line 16, characters 17-21:
 Unbound name: `Bogus` (Naming[2049])
+File "type_constant_missing_class.php", line 10, characters 31-32:
+Unbound name `Bogus` in type constant access (Typing[4384])
+File "type_constant_missing_class.php", line 7, characters 19-23:
+Unbound name is here
+File "type_constant_missing_class.php", line 11, characters 31-33:
+Unbound name `Bogus` in type constant access (Typing[4384])
+File "type_constant_missing_class.php", line 2, characters 15-19:
+Unbound name is here
+File "type_constant_missing_class.php", line 12, characters 31-32:
+Unbound name `Bogus` in type constant access (Typing[4384])
+File "type_constant_missing_class.php", line 7, characters 19-23:
+Unbound name is here
+File "type_constant_missing_class.php", line 13, characters 36-37:
+Unbound name `Bogus` in type constant access (Typing[4384])
+File "type_constant_missing_class.php", line 4, characters 19-23:
+Unbound name is here
 File "type_constant_missing_class.php", line 16, characters 17-21:
 Unbound name `Bogus` in type constant access (Typing[4384])
 File "type_constant_missing_class.php", line 17, characters 15-20:
@@ -22,25 +44,3 @@ File "type_constant_missing_class.php", line 21, characters 23-24:
 Unbound name `Bogus` in type constant access (Typing[4384])
 File "type_constant_missing_class.php", line 4, characters 19-23:
 Unbound name is here
-File "type_constant_missing_class.php", line 4, characters 19-23:
-Unbound name: `Bogus` (Naming[2049])
-File "type_constant_missing_class.php", line 7, characters 19-23:
-Unbound name: `Bogus` (Naming[2049])
-File "type_constant_missing_class.php", line 10, characters 31-32:
-Unbound name `Bogus` in type constant access (Typing[4384])
-File "type_constant_missing_class.php", line 7, characters 19-23:
-Unbound name is here
-File "type_constant_missing_class.php", line 11, characters 31-33:
-Unbound name `Bogus` in type constant access (Typing[4384])
-File "type_constant_missing_class.php", line 2, characters 15-19:
-Unbound name is here
-File "type_constant_missing_class.php", line 12, characters 31-32:
-Unbound name `Bogus` in type constant access (Typing[4384])
-File "type_constant_missing_class.php", line 7, characters 19-23:
-Unbound name is here
-File "type_constant_missing_class.php", line 13, characters 36-37:
-Unbound name `Bogus` in type constant access (Typing[4384])
-File "type_constant_missing_class.php", line 4, characters 19-23:
-Unbound name is here
-File "type_constant_missing_class.php", line 2, characters 15-19:
-Unbound name: `Bogus` (Naming[2049])

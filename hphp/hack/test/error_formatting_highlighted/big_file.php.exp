@@ -1,3 +1,12 @@
+Typing[4030] Was expecting a return type hint [1]
+
+big_file.php:1008:10
+    1006 | */
+    1007 | 
+[1] 1008 | function bar() {
+    1009 |   foo(1);
+    1010 | }
+
 Typing[4105] Too many arguments (expected 0 but got 1) [1]
 -> Definition is here [2]
 
@@ -11,15 +20,6 @@ big_file.php:1009:3
     1007 | 
     1008 | function bar() {
 [1] 1009 |   foo(1);
-    1010 | }
-
-Typing[4030] Was expecting a return type hint [1]
-
-big_file.php:1008:10
-    1006 | */
-    1007 | 
-[1] 1008 | function bar() {
-    1009 |   foo(1);
     1010 | }
 
 2 errors found.

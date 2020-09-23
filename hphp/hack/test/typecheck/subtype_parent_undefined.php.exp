@@ -1,8 +1,8 @@
+File "subtype_parent_undefined.php", line 7, characters 17-17:
+Unbound name: `B` (an object type) (Naming[2049])
 File "subtype_parent_undefined.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
 File "subtype_parent_undefined.php", line 9, characters 21-21:
 Expected `I`
 File "subtype_parent_undefined.php", line 9, characters 14-14:
 But got `C`
-File "subtype_parent_undefined.php", line 7, characters 17-17:
-Unbound name: `B` (an object type) (Naming[2049])

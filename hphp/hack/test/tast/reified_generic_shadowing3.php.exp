@@ -1,7 +1,7 @@
 Errors:
-  [5:7-8] Erased generics can only be used in type hints because they do not exist at runtime.
   [6:7-8] Unbound name: `U` (an object type)
   [5:3-10] `T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute
+  [5:7-8] Erased generics can only be used in type hints because they do not exist at runtime.
 [(Fun
     { f_span = [4:1-7:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([4:18-22], (Hprim Tvoid))));

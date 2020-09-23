@@ -1,16 +1,16 @@
 File "test_rx_enabled6.php", line 5, characters 7-22:
 `\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
+File "test_rx_enabled6.php", line 14, characters 7-22:
+`\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
 File "test_rx_enabled6.php", line 15, characters 5-9:
 Pure functions can only call other pure functions. (Typing[4387])
 File "test_rx_enabled6.php", line 13, characters 34-51:
-This function is normal.
-File "test_rx_enabled6.php", line 14, characters 7-22:
-`\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
-File "test_rx_enabled6.php", line 31, characters 7-11:
-Pure functions can only call other pure functions. (Typing[4387])
-File "test_rx_enabled6.php", line 29, characters 43-60:
 This function is normal.
 File "test_rx_enabled6.php", line 25, characters 9-24:
 `\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
 File "test_rx_enabled6.php", line 30, characters 9-24:
 `\HH\Rx\IS_ENABLED` can only be used in reactive functions. (Typing[4220])
+File "test_rx_enabled6.php", line 31, characters 7-11:
+Pure functions can only call other pure functions. (Typing[4387])
+File "test_rx_enabled6.php", line 29, characters 43-60:
+This function is normal.

@@ -2,9 +2,9 @@ File "global_constant_attribute.php", line 3, characters 19-30:
 Attribute arguments must be literals (Parsing[1002])
 File "global_constant_attribute.php", line 3, characters 3-13:
 Unbound name: `MyAttribute` (an object type) (Naming[2049])
-File "global_constant_attribute.php", line 3, characters 19-30:
-Unbound name: `GLOBAL_CONST` (a global constant) (Naming[2049])
 File "global_constant_attribute.php", line 3, characters 3-13:
 Unrecognized user attribute: `MyAttribute` does not have a class. Please declare a class for the attribute. (Naming[2049])
+File "global_constant_attribute.php", line 3, characters 19-30:
+Unbound name: `GLOBAL_CONST` (a global constant) (Naming[2049])
 File "global_constant_attribute.php", line 3, characters 19-30:
 Unbound global constant (Typing) (Typing[4106])

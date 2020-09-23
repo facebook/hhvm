@@ -1,10 +1,10 @@
+File "fake_members13.php", line 8, characters 19-29:
+Class `Test` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "fake_members13.php", line 7, characters 12-13:
+`$this->c` is not initialized.
 File "fake_members13.php", line 14, characters 17-21:
 Invalid argument (Typing[4110])
 File "fake_members13.php", line 18, characters 22-27:
 Expected `string`
 File "fake_members13.php", line 13, characters 16-16:
 But got `D`
-File "fake_members13.php", line 8, characters 19-29:
-Class `Test` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
-File "fake_members13.php", line 7, characters 12-13:
-`$this->c` is not initialized.

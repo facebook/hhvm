@@ -1,4 +1,4 @@
 File "this_tparam_error1.php", line 12, characters 14-17:
-The type parameter `this` is reserved (Naming[2046])
-File "this_tparam_error1.php", line 12, characters 14-17:
 Please make your type parameter start with the letter `T` (capital) (Naming[2042])
+File "this_tparam_error1.php", line 12, characters 14-17:
+The type parameter `this` is reserved (Naming[2046])

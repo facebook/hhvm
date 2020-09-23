@@ -86,6 +86,12 @@ File "arrays.php", line 180, characters 3-13:
   ~darray<int, bool>
 File "arrays.php", line 181, characters 3-16:
   ~bool
+File "arrays.php", line 4, characters 16-16:
+Wrong type hint (Typing[4338])
+File "arrays.php", line 4, characters 9-14:
+Expected `string`
+File "arrays.php", line 4, characters 20-20:
+But got `int`
 File "arrays.php", line 14, characters 3-7:
 You cannot have an array without generics in strict mode (Typing[4045])
 File "arrays.php", line 15, characters 3-7:
@@ -131,10 +137,4 @@ Invalid argument (Typing[4110])
 File "arrays.php", line 186, characters 36-41:
 Expected `string`
 File "arrays.php", line 112, characters 17-17:
-But got `int`
-File "arrays.php", line 4, characters 16-16:
-Wrong type hint (Typing[4338])
-File "arrays.php", line 4, characters 9-14:
-Expected `string`
-File "arrays.php", line 4, characters 20-20:
 But got `int`

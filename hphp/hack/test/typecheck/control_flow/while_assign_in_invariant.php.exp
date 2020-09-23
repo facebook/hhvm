@@ -2,18 +2,6 @@ File "while_assign_in_invariant.php", line 55, characters 3-13:
   (exact A | exact B | exact C | exact D)
 File "while_assign_in_invariant.php", line 62, characters 6-7:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "while_assign_in_invariant.php", line 38, characters 48-49:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 31, characters 58-59:
-Expected `BD`
-File "while_assign_in_invariant.php", line 36, characters 12-12:
-But got `A`
-File "while_assign_in_invariant.php", line 43, characters 15-16:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 26, characters 20-21:
-Expected `BD`
-File "while_assign_in_invariant.php", line 36, characters 12-12:
-But got `A`
 File "while_assign_in_invariant.php", line 38, characters 40-41:
 Invalid argument (Typing[4110])
 File "while_assign_in_invariant.php", line 31, characters 44-45:
@@ -50,36 +38,6 @@ File "while_assign_in_invariant.php", line 26, characters 20-21:
 Expected `BD`
 File "while_assign_in_invariant.php", line 36, characters 12-12:
 But got `A`
-File "while_assign_in_invariant.php", line 38, characters 40-41:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 31, characters 44-45:
-Expected `AB`
-File "while_assign_in_invariant.php", line 52, characters 14-14:
-But got `D`
-File "while_assign_in_invariant.php", line 38, characters 44-45:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 31, characters 51-52:
-Expected `AD`
-File "while_assign_in_invariant.php", line 44, characters 14-14:
-But got `B`
-File "while_assign_in_invariant.php", line 38, characters 48-49:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 31, characters 58-59:
-Expected `BD`
-File "while_assign_in_invariant.php", line 36, characters 12-12:
-But got `A`
-File "while_assign_in_invariant.php", line 62, characters 50-51:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 28, characters 59-60:
-Expected `BD`
-File "while_assign_in_invariant.php", line 59, characters 12-12:
-But got `A`
-File "while_assign_in_invariant.php", line 66, characters 14-15:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 21, characters 19-19:
-Expected `E`
-File "while_assign_in_invariant.php", line 28, characters 67-68:
-But got `null`
 File "while_assign_in_invariant.php", line 62, characters 42-43:
 Invalid argument (Typing[4110])
 File "while_assign_in_invariant.php", line 28, characters 45-46:
@@ -104,24 +62,6 @@ File "while_assign_in_invariant.php", line 21, characters 19-19:
 Expected `E`
 File "while_assign_in_invariant.php", line 28, characters 67-68:
 But got `null`
-File "while_assign_in_invariant.php", line 62, characters 42-43:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 28, characters 45-46:
-Expected `AB`
-File "while_assign_in_invariant.php", line 75, characters 14-14:
-But got `D`
-File "while_assign_in_invariant.php", line 62, characters 46-47:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 28, characters 52-53:
-Expected `AD`
-File "while_assign_in_invariant.php", line 67, characters 14-14:
-But got `B`
-File "while_assign_in_invariant.php", line 62, characters 50-51:
-Invalid argument (Typing[4110])
-File "while_assign_in_invariant.php", line 28, characters 59-60:
-Expected `BD`
-File "while_assign_in_invariant.php", line 59, characters 12-12:
-But got `A`
 File "while_assign_in_invariant.php", line 79, characters 12-13:
 Invalid argument (Typing[4110])
 File "while_assign_in_invariant.php", line 20, characters 19-19:

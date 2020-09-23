@@ -1,6 +1,6 @@
-File "string_expressions8.php", line 14, characters 21-29:
-This string literal is not terminated. (Parsing[1002])
 File "string_expressions8.php", line 14, characters 11-18:
 Malformed String2 SyntaxList (Parsing[1002])
 File "string_expressions8.php", line 14, characters 20-29:
 The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])
+File "string_expressions8.php", line 14, characters 21-29:
+This string literal is not terminated. (Parsing[1002])

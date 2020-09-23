@@ -154,7 +154,7 @@ let print_error_list format errors max_errors =
     Printf.printf "No errors\n"
 
 let print_errors format (errors : Errors.t) max_errors : unit =
-  print_error_list format (Errors.get_error_list errors) max_errors
+  print_error_list format (Errors.get_sorted_error_list errors) max_errors
 
 let print_errors_if_present (errors : Errors.error list) =
   if not (List.is_empty errors) then (
@@ -871,7 +871,7 @@ let check_file ctx ~verbosity errors files_info error_format max_errors =
           let (new_tasts, new_genvs, new_errors) =
             Typing_check_utils.type_file_with_global_tvenvs ctx fn fileinfo
           in
-          ( errors @ Errors.get_error_list new_errors,
+          ( errors @ Errors.get_sorted_error_list new_errors,
             new_tasts @ tasts,
             Lazy.force new_genvs @ genvs )
         end
@@ -1215,7 +1215,7 @@ let typecheck_tasts tasts tcopt (filename : Relative_path.t) =
   let env = Typing_env.empty tcopt filename ~droot:None in
   let tasts = Relative_path.Map.values tasts in
   let typecheck_tast tast =
-    Errors.get_error_list (Tast_typecheck.check env tast)
+    Errors.get_sorted_error_list (Tast_typecheck.check env tast)
   in
   List.concat_map tasts ~f:typecheck_tast
 
@@ -1581,7 +1581,7 @@ let handle_mode
     let (errors, tasts, _gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents
     in
-    print_errors_if_present (parse_errors @ Errors.get_error_list errors);
+    print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
     print_tasts tasts ctx
   | Check_tast ->
     iter_over_files (fun filename ->
@@ -1615,7 +1615,7 @@ let handle_mode
     let (errors, _tasts, gi_solved) =
       compute_tasts_expand_types ctx ~verbosity files_info files_contents
     in
-    print_errors_if_present (parse_errors @ Errors.get_error_list errors);
+    print_errors_if_present (parse_errors @ Errors.get_sorted_error_list errors);
     (match gi_solved with
     | None ->
       prerr_endline
@@ -1750,7 +1750,7 @@ let handle_mode
                 check_file
                   ctx
                   ~verbosity
-                  (Errors.get_error_list parse_errors)
+                  (Errors.get_sorted_error_list parse_errors)
                   individual_file_info
                   error_format
                   max_errors
@@ -1995,7 +1995,7 @@ let decl_and_run_mode
     builtins
     files_contents
     files_info
-    (Errors.get_error_list errors)
+    (Errors.get_sorted_error_list errors)
     max_errors
     error_format
     batch_mode

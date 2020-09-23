@@ -1,14 +1,4 @@
 File "async_lambda.php", line 6, characters 11-25:
-Typing error (Typing[4323])
-File "collections/Set.hhi", line 208, characters 29-36:
-Some type constraint(s) are violated here
-File "collections/Set.hhi", line 208, characters 23-24:
-`Tu` is a constrained type parameter
-File "collections/Set.hhi", line 208, characters 29-36:
-Expected `arraykey`
-File "async_lambda.php", line 6, characters 11-25:
-But got `Awaitable<[unresolved]>` (result of an `async` function)
-File "async_lambda.php", line 6, characters 11-25:
 Invalid argument (Typing[4323])
 File "collections/Set.hhi", line 208, characters 29-36:
 Some type constraint(s) are violated here
@@ -18,3 +8,13 @@ File "collections/Set.hhi", line 208, characters 29-36:
 Expected `arraykey`
 File "async_lambda.php", line 6, characters 11-25:
 But got `Awaitable<int>` (result of an `async` function)
+File "async_lambda.php", line 6, characters 11-25:
+Typing error (Typing[4323])
+File "collections/Set.hhi", line 208, characters 29-36:
+Some type constraint(s) are violated here
+File "collections/Set.hhi", line 208, characters 23-24:
+`Tu` is a constrained type parameter
+File "collections/Set.hhi", line 208, characters 29-36:
+Expected `arraykey`
+File "async_lambda.php", line 6, characters 11-25:
+But got `Awaitable<[unresolved]>` (result of an `async` function)

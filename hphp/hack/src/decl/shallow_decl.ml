@@ -21,9 +21,7 @@ let class_const env c cc =
   let { cc_id = name; cc_type = h; cc_expr = e; cc_doc_comment = _ } = cc in
   let pos = fst name in
   match c.c_kind with
-  | Ast_defs.Ctrait ->
-    Errors.cannot_declare_constant `trait pos c.c_name;
-    None
+  | Ast_defs.Ctrait -> None
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract
   | Ast_defs.Cinterface
@@ -60,13 +58,6 @@ let typeconst env c tc =
   match c.c_kind with
   | Ast_defs.Ctrait
   | Ast_defs.Cenum ->
-    let kind =
-      match c.c_kind with
-      | Ast_defs.Ctrait -> `trait
-      | Ast_defs.Cenum -> `enum
-      | _ -> assert false
-    in
-    Errors.cannot_declare_constant kind (fst tc.c_tconst_name) c.c_name;
     None
   | Ast_defs.Cinterface
   | Ast_defs.Cabstract

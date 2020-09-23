@@ -1059,7 +1059,7 @@ and class_def_ env c tc =
     List.filter_map methods (method_def env tc) |> List.unzip
   in
   let (env, typed_typeconsts) =
-    List.map_env env c.c_typeconsts (typeconst_def (snd c.c_name))
+    List.map_env env c.c_typeconsts (typeconst_def c)
   in
   let (env, consts) = List.map_env env c.c_consts (class_const_def c) in
   let (typed_consts, const_types) = List.unzip consts in
@@ -1216,7 +1216,7 @@ and get_decl_prop_ty env cls ~is_static prop_id =
     None
 
 and typeconst_def
-    class_name
+    cls
     env
     {
       c_tconst_abstract;
@@ -1227,6 +1227,19 @@ and typeconst_def
       c_tconst_span;
       c_tconst_doc_comment;
     } =
+  begin
+    match cls.c_kind with
+    | Ast_defs.Ctrait
+    | Ast_defs.Cenum ->
+      let kind =
+        match cls.c_kind with
+        | Ast_defs.Ctrait -> `trait
+        | Ast_defs.Cenum -> `enum
+        | _ -> assert false
+      in
+      Errors.cannot_declare_constant kind pos cls.c_name
+    | _ -> ()
+  end;
   let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
   let (env, ty) =
     match hint with
@@ -1234,7 +1247,7 @@ and typeconst_def
     | Some hint ->
       let ty = Decl_hint.hint env.decl_env hint in
       (* We want to report cycles through the definition *)
-      let name = class_name ^ "::" ^ snd id in
+      let name = snd cls.c_name ^ "::" ^ snd id in
       let (env, ty) =
         Phase.localize_with_self env ~pos ~report_cycle:(pos, name) ty
       in
@@ -1462,6 +1475,11 @@ and is_literal_expr e =
 
 and class_const_def c env cc =
   let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
+  begin
+    match c.c_kind with
+    | Ast_defs.Ctrait -> Errors.cannot_declare_constant `trait (fst id) c.c_name
+    | _ -> ()
+  end;
   let (env, ty, opt_expected) =
     match h with
     | None ->

@@ -33,7 +33,7 @@ public function call(string $name, vec<mixed> $args): string {
 
 <<__EntryPoint>>
 function test(): void {
-  $et = Code`1 + foo("bar")`;
+  $et = MyVisitor`1 + foo("bar")`;
 
   $visitor = new MyVisitor();
 

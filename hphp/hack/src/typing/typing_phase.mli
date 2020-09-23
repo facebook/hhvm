@@ -66,6 +66,7 @@ val localize_targs :
   def_pos:Pos.t ->
   use_pos:Pos.t ->
   use_name:string ->
+  ?check_explicit_targs:bool ->
   env ->
   decl_tparam list ->
   Aast.hint list ->
@@ -78,6 +79,7 @@ val localize_targs_with_kinds :
   def_pos:Pos.t ->
   use_pos:Pos.t ->
   use_name:string ->
+  ?check_explicit_targs:bool ->
   ?tparaml:decl_tparam list ->
   env ->
   Typing_kinding_defs.Simple.named_kind list ->
@@ -115,6 +117,7 @@ val localize_targs_and_check_constraints :
   check_constraints:bool ->
   def_pos:Pos.t ->
   use_pos:Pos.t ->
+  ?check_explicit_targs:bool ->
   env ->
   Ast_defs.id ->
   Nast.class_id_ ->

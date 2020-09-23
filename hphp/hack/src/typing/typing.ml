@@ -5577,6 +5577,7 @@ and this_for_method env cid default_ty =
 and static_class_id
     ?(check_targs_well_kinded = false)
     ?(exact = Nonexact)
+    ?(check_explicit_targs = false)
     ~(check_constraints : bool)
     (p : pos)
     (env : env)
@@ -5679,6 +5680,7 @@ and static_class_id
             ~def_pos
             ~use_pos:p
             ~use_name:(strip_ns (snd c))
+            ~check_explicit_targs
             env
             param_nkinds
             (List.map ~f:snd tal)
@@ -5701,6 +5703,7 @@ and static_class_id
                  ~check_constraints
                  ~def_pos:(Cls.pos class_)
                  ~use_pos:p
+                 ~check_explicit_targs
                  env
                  c
                  e1
@@ -5763,7 +5766,13 @@ and call_construct p env class_ (explicit_targs, params) el unpacked_element cid
       cid
   in
   let (env, _tal, _tcid, cid_ty) =
-    static_class_id ~check_constraints:false p env explicit_targs cid
+    static_class_id
+      ~check_constraints:false
+      ~check_explicit_targs:true
+      p
+      env
+      explicit_targs
+      cid
   in
   let ety_env =
     {

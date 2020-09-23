@@ -626,6 +626,7 @@ and localize_targs_with_kinds
     ~def_pos
     ~use_pos
     ~use_name
+    ?(check_explicit_targs = true)
     ?(tparaml = [])
     env
     named_kinds
@@ -706,16 +707,24 @@ and localize_targs_with_kinds
     then
       Errors.require_generic_explicit tparam.tp_name (fst hint)
   in
-  List.iter2
-    tparaml
-    (explicit_targs @ implicit_targs)
-    ~f:check_for_explicit_user_attribute
-  |> ignore;
+  if check_explicit_targs then
+    List.iter2
+      tparaml
+      (explicit_targs @ implicit_targs)
+      ~f:check_for_explicit_user_attribute
+    |> ignore;
   (env, explicit_targs @ implicit_targs)
 
 and localize_targs
-    ~check_well_kinded ~is_method ~def_pos ~use_pos ~use_name env tparaml targl
-    =
+    ~check_well_kinded
+    ~is_method
+    ~def_pos
+    ~use_pos
+    ~use_name
+    ?(check_explicit_targs = true)
+    env
+    tparaml
+    targl =
   let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparaml in
   localize_targs_with_kinds
     ~check_well_kinded
@@ -724,6 +733,7 @@ and localize_targs
     ~use_pos
     ~use_name
     ~tparaml
+    ~check_explicit_targs
     env
     nkinds
     targl
@@ -1023,6 +1033,7 @@ and localize_targs_and_check_constraints
     ~check_constraints
     ~def_pos
     ~use_pos
+    ?(check_explicit_targs = true)
     env
     class_id
     from_class
@@ -1035,6 +1046,7 @@ and localize_targs_and_check_constraints
       ~def_pos
       ~use_pos
       ~use_name:(Utils.strip_ns (snd class_id))
+      ~check_explicit_targs
       env
       tparaml
       hintl

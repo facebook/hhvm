@@ -1,6 +1,5 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::typehints;
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast, ast,
@@ -10,28 +9,20 @@ use oxidized::{
     pos::Pos,
 };
 
-/// Convert an expression tree body to `(dynamic $v) ==> { return $v->...; }`.
-pub fn desugar(e: &Expr, env: &Env) -> Expr {
+/// Convert an expression tree body to `(NameOfVisitor $v) ==> { return $v->...; }`.
+pub fn desugar(hint: &aast::Hint, e: &Expr, env: &Env) -> Expr {
     let visitor_expr = rewrite_expr(&e);
 
     let body = ast::FuncBody {
-        ast: vec![wrap_return(visitor_expr)],
+        ast: vec![wrap_return(visitor_expr, &e.0)],
         annotation: (),
     };
 
     let param = ast::FunParam {
-        annotation: Pos::make_none(),
-        type_hint: ast::TypeHint(
-            (),
-            Some(aast::Hint(
-                Pos::make_none(),
-                // We can't use Hdynamic here, because naming expects
-                // to convert an Happly to an Hdynamic later.
-                Box::new(aast::Hint_::Happly(make_id(typehints::DYNAMIC), vec![])),
-            )),
-        ),
+        annotation: hint.0.clone(),
+        type_hint: ast::TypeHint((), Some(hint.clone())),
         is_variadic: false,
-        pos: Pos::make_none(),
+        pos: hint.0.clone(),
         name: "$v".into(),
         expr: None,
         callconv: None,
@@ -60,13 +51,12 @@ pub fn desugar(e: &Expr, env: &Env) -> Expr {
         static_: false,
     };
     let visitor_lambda = Expr_::mk_lfun(visitor_fun, vec![]);
-    let pos = Pos::make_none();
-    Expr::new(pos, visitor_lambda)
+    Expr::new(e.0.clone(), visitor_lambda)
 }
 
 /// Convert `foo` to `return foo;`.
-fn wrap_return(e: Expr) -> Stmt {
-    Stmt::new(Pos::make_none(), Stmt_::Return(Box::new(Some(e))))
+fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
+    Stmt::new(pos.clone(), Stmt_::Return(Box::new(Some(e))))
 }
 
 /// Convert expression tree expressions to method calls.
@@ -74,26 +64,27 @@ fn rewrite_expr(e: &Expr) -> Expr {
     use aast::Expr_::*;
     match &e.1 {
         // Convert `1` to `$v->intLiteral(1)`.
-        Int(_) => meth_call("intLiteral", vec![e.clone()]),
+        Int(_) => meth_call("intLiteral", vec![e.clone()], &e.0),
         // Convert `"foo"` to `$v->stringLiteral("foo")`.
-        String(_) => meth_call("stringLiteral", vec![e.clone()]),
+        String(_) => meth_call("stringLiteral", vec![e.clone()], &e.0),
         // Convert `true` to `$v->boolLiteral(true)`.
-        True => meth_call("boolLiteral", vec![e.clone()]),
-        False => meth_call("boolLiteral", vec![e.clone()]),
+        True => meth_call("boolLiteral", vec![e.clone()], &e.0),
+        False => meth_call("boolLiteral", vec![e.clone()], &e.0),
         // Convert `$x` to `$v->localVar("$x")` (note the quoting).
-        Lvar(lid) => meth_call("localVar", vec![string_literal(&((lid.1).1))]),
+        Lvar(lid) => meth_call("localVar", vec![string_literal(&((lid.1).1))], &e.0),
         Binop(bop) => match &**bop {
             // Convert `... + ...` to `$v->plus($v->..., $v->...)`.
             (Bop::Plus, lhs, rhs) => {
-                meth_call("plus", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)])
+                meth_call("plus", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)], &e.0)
             }
             // Convert `... = ...` to `$v->assign($v->..., $v->...)`.
             (Bop::Eq(None), lhs, rhs) => {
-                meth_call("assign", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)])
+                meth_call("assign", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)], &e.0)
             }
             _ => meth_call(
                 "unsupportedSyntax",
                 vec![string_literal("bad binary operator")],
+                &e.0,
             ),
         },
         // Convert `foo(...)` to `$v->call('foo', vec[...])`.
@@ -105,11 +96,12 @@ fn rewrite_expr(e: &Expr) -> Expr {
                         fn_name,
                         vec_literal(args.iter().map(rewrite_expr).collect()),
                     ];
-                    meth_call("call", desugared_args)
+                    meth_call("call", desugared_args, &e.0)
                 }
                 _ => meth_call(
                     "unsupportedSyntax",
                     vec![string_literal("invalid function call")],
+                    &e.0,
                 ),
             },
         },
@@ -126,6 +118,7 @@ fn rewrite_expr(e: &Expr) -> Expr {
             meth_call(
                 "lambdaLiteral",
                 vec![vec_literal(param_names), vec_literal(body_stmts)],
+                &e.0,
             )
         }
         // Convert anything else to $v->unsupportedSyntax().
@@ -133,6 +126,7 @@ fn rewrite_expr(e: &Expr) -> Expr {
         _ => meth_call(
             "unsupportedSyntax",
             vec![string_literal(&format!("{:#?}", &e.1))],
+            &e.0,
         ),
     }
 }
@@ -149,9 +143,9 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         Expr(e) => Some(rewrite_expr(&e)),
         Return(e) => match &**e {
             // Convert `return ...;` to `$v->returnStatement($v->...)`.
-            Some(e) => Some(meth_call("returnStatement", vec![rewrite_expr(&e)])),
+            Some(e) => Some(meth_call("returnStatement", vec![rewrite_expr(&e)], &s.0)),
             // Convert `return;` to `$v->returnStatement(null)`.
-            None => Some(meth_call("returnStatement", vec![null_literal()])),
+            None => Some(meth_call("returnStatement", vec![null_literal()], &s.0)),
         },
         // Convert `if (...) {...} else {...}` to `$v-ifStatement($v->..., vec[...], vec[...])`.
         If(if_stmt) => match &**if_stmt {
@@ -166,6 +160,7 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
                         vec_literal(then_stmts),
                         vec_literal(else_stmts),
                     ],
+                    &s.0,
                 ))
             }
         },
@@ -177,6 +172,7 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
                 Some(meth_call(
                     "whileStatement",
                     vec![rewrite_expr(&e), vec_literal(body_stmts)],
+                    &s.0,
                 ))
             }
         },
@@ -186,6 +182,7 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
         _ => Some(meth_call(
             "unsupportedSyntax",
             vec![string_literal(&format!("{:#?}", &s.1))],
+            &s.0,
         )),
     }
 }
@@ -199,9 +196,11 @@ fn string_literal(s: &str) -> Expr {
 }
 
 fn vec_literal(items: Vec<Expr>) -> Expr {
+    let positions: Vec<_> = items.iter().map(|x| &x.0).collect();
+    let position = merge_positions(&positions);
     let fields: Vec<_> = items.into_iter().map(|e| ast::Afield::AFvalue(e)).collect();
     Expr::new(
-        Pos::make_none(),
+        position,
         Expr_::Collection(Box::new((make_id("vec"), None, fields))),
     )
 }
@@ -211,18 +210,32 @@ fn make_id(name: &str) -> ast::Id {
 }
 
 /// Build `$v->meth_name(args)`.
-fn meth_call(meth_name: &str, args: Vec<Expr>) -> Expr {
-    let receiver = Expr::mk_lvar(&Pos::make_none(), "$v");
-    let meth = Expr::new(Pos::make_none(), Expr_::Id(Box::new(make_id(meth_name))));
+fn meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
+    let receiver = Expr::mk_lvar(pos, "$v");
+    let meth = Expr::new(
+        pos.clone(),
+        Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
+    );
 
     let c = Expr_::Call(Box::new((
         Expr::new(
-            Pos::make_none(),
+            pos.clone(),
             Expr_::ObjGet(Box::new((receiver, meth, OgNullFlavor::OGNullthrows))),
         ),
         vec![],
         args,
         None,
     )));
-    Expr::new(Pos::make_none(), c)
+    Expr::new(pos.clone(), c)
+}
+
+/// Join a slice of positions together into a single, larger position.
+fn merge_positions(positions: &[&Pos]) -> Pos {
+    positions
+        .iter()
+        .fold(None, |acc, pos| match acc {
+            Some(res) => Some(Pos::merge(&res, pos).expect("Positions should be in the same file")),
+            None => Some((*pos).clone()),
+        })
+        .unwrap_or(Pos::make_none())
 }

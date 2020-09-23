@@ -18,7 +18,7 @@
                      ([4:17-31],
                       (ET_Splice ([4:28-30], (Lvar ([4:28-30], $x)))))
                      ))),
-                 (Some ([Pos.none],
+                 (Some ([4:8-31],
                         (Lfun (
                            { f_span = [4:8-31]; f_annotation = ();
                              f_mode = Mstrict; f_ret = ((), None);
@@ -26,11 +26,13 @@
                              f_tparams = []; f_where_constraints = [];
                              f_variadic = FVnonVariadic;
                              f_params =
-                             [{ param_annotation = [Pos.none];
+                             [{ param_annotation = [4:3-7];
                                 param_type_hint =
-                                ((), (Some ([Pos.none], Hdynamic)));
+                                ((),
+                                 (Some ([4:3-7],
+                                        (Happly (([4:3-7], "\\Code"), [])))));
                                 param_is_variadic = false;
-                                param_pos = [Pos.none]; param_name = "$v";
+                                param_pos = [4:3-7]; param_name = "$v";
                                 param_expr = None; param_callconv = None;
                                 param_user_attributes = [];
                                 param_visibility = None }
@@ -38,59 +40,56 @@
                              f_cap = ((), None); f_unsafe_cap = ((), None);
                              f_body =
                              { fb_ast =
-                               [([Pos.none],
+                               [([4:8-31],
                                  (Return
-                                    (Some ([Pos.none],
+                                    (Some ([4:8-31],
                                            (Call (
-                                              ([Pos.none],
+                                              ([4:8-31],
                                                (Obj_get (
-                                                  ([Pos.none],
-                                                   (Lvar ([Pos.none], $v))),
-                                                  ([Pos.none],
-                                                   (Id ([Pos.none], "plus"))),
+                                                  ([4:8-31],
+                                                   (Lvar ([4:8-31], $v))),
+                                                  ([4:8-31],
+                                                   (Id ([4:8-31], "plus"))),
                                                   OG_nullthrows))),
                                               [],
-                                              [([Pos.none],
+                                              [([4:8-14],
                                                 (Call (
-                                                   ([Pos.none],
+                                                   ([4:8-14],
                                                     (Obj_get (
-                                                       ([Pos.none],
-                                                        (Lvar
-                                                           ([Pos.none], $v))),
-                                                       ([Pos.none],
+                                                       ([4:8-14],
+                                                        (Lvar ([4:8-14], $v))),
+                                                       ([4:8-14],
                                                         (Id
-                                                           ([Pos.none],
-                                                            "plus"))),
+                                                           ([4:8-14], "plus"))),
                                                        OG_nullthrows))),
                                                    [],
-                                                   [([Pos.none],
+                                                   [([4:8-9],
                                                      (Call (
-                                                        ([Pos.none],
+                                                        ([4:8-9],
                                                          (Obj_get (
-                                                            ([Pos.none],
+                                                            ([4:8-9],
                                                              (Lvar
-                                                                ([Pos.none],
-                                                                 $v))),
-                                                            ([Pos.none],
+                                                                ([4:8-9], $v))),
+                                                            ([4:8-9],
                                                              (Id
-                                                                ([Pos.none],
+                                                                ([4:8-9],
                                                                  "intLiteral"))),
                                                             OG_nullthrows))),
                                                         [],
                                                         [([4:8-9], (Int "4"))
                                                           ],
                                                         None)));
-                                                     ([Pos.none],
+                                                     ([4:12-14],
                                                       (Call (
-                                                         ([Pos.none],
+                                                         ([4:12-14],
                                                           (Obj_get (
-                                                             ([Pos.none],
+                                                             ([4:12-14],
                                                               (Lvar
-                                                                 ([Pos.none],
+                                                                 ([4:12-14],
                                                                   $v))),
-                                                             ([Pos.none],
+                                                             ([4:12-14],
                                                               (Id
-                                                                 ([Pos.none],
+                                                                 ([4:12-14],
                                                                   "intLiteral"))),
                                                              OG_nullthrows))),
                                                          [],
@@ -99,16 +98,16 @@
                                                          None)))
                                                      ],
                                                    None)));
-                                                ([Pos.none],
+                                                ([4:17-31],
                                                  (Call (
-                                                    ([Pos.none],
+                                                    ([4:17-31],
                                                      (Obj_get (
-                                                        ([Pos.none],
+                                                        ([4:17-31],
                                                          (Lvar
-                                                            ([Pos.none], $v))),
-                                                        ([Pos.none],
+                                                            ([4:17-31], $v))),
+                                                        ([4:17-31],
                                                          (Id
-                                                            ([Pos.none],
+                                                            ([4:17-31],
                                                              "unsupportedSyntax"))),
                                                         OG_nullthrows))),
                                                     [],

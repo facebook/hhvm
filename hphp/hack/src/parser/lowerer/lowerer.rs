@@ -2094,12 +2094,9 @@ where
             )),
             PrefixedCodeExpression(c) => {
                 let e = Self::p_expr(&c.prefixed_code_expression, env)?;
-                let desugared_e = desugar(&e, &env);
-                Ok(E_::mk_expression_tree(
-                    Self::p_hint(&c.prefixed_code_prefix, env)?,
-                    e,
-                    Some(desugared_e),
-                ))
+                let hint = Self::p_hint(&c.prefixed_code_prefix, env)?;
+                let desugared_e = desugar(&hint, &e, &env);
+                Ok(E_::mk_expression_tree(hint, e, Some(desugared_e)))
             }
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.conditional_alternative, env)?;

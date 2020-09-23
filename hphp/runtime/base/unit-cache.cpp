@@ -1479,6 +1479,8 @@ void prefetchUnit(StringData* requestedPath,
       if (cachedUnit.try_lock_for_update()) {
         if (cachedUnit.get().get() != cuptr) {
           updateAndUnlock(cachedUnit, std::move(cuptr));
+        } else {
+          cachedUnit.unlock();
         }
       }
     },

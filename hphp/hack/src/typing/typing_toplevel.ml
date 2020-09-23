@@ -1544,12 +1544,14 @@ and class_implements_type env c1 ctype2 =
 
 (* Type-check a property declaration, with optional initializer *)
 and class_var_def ~is_static cls env cv =
+  let (cv_pos, cv_name) = cv.cv_id in
+  if cv.cv_final then Errors.final_property cv_pos;
   (* First pick up and localize the hint if it exists *)
   let decl_cty =
     merge_hint_with_decl_hint
       env
       (hint_of_type_hint cv.cv_type)
-      (get_decl_prop_ty env cls ~is_static (snd cv.cv_id))
+      (get_decl_prop_ty env cls ~is_static cv_name)
   in
   let (env, expected) =
     match decl_cty with
@@ -1587,6 +1589,7 @@ and class_var_def ~is_static cls env cv =
       in
       (env, Some te)
   in
+
   let env =
     if is_static then
       Typing.attributes_check_def

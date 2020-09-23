@@ -131,9 +131,6 @@ let prop env cv =
   in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
-  if cv.cv_final then Errors.final_property cv_pos;
-  if lateinit && Option.is_some cv.cv_expr then
-    Errors.lateinit_with_default cv_pos;
   {
     sp_const = const;
     sp_xhp_attr = make_xhp_attr cv;

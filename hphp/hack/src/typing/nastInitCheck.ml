@@ -249,93 +249,88 @@ let class_prop_pos class_name prop_name ctx : Pos.t =
         fst cv.cv_id))
 
 let rec class_ tenv c =
-  if FileInfo.(equal_mode c.c_mode Mdecl) then
-    ()
-  else
-    let () =
-      List.iter c.c_vars ~f:(fun cv ->
-          if cv.cv_is_static then
-            match cv.cv_expr with
-            | Some _ ->
-              if is_lateinit cv then Errors.lateinit_with_default (fst cv.cv_id)
-            | None ->
-              let ty_opt =
-                Option.map
-                  ~f:(Decl_hint.hint tenv.Typing_env_types.decl_env)
-                  (hint_of_type_hint cv.cv_type)
-              in
-              if
-                is_lateinit cv
-                || cv.cv_abstract
-                || type_does_not_require_init tenv ty_opt
-              then
-                ()
-              else
-                Errors.missing_assign (fst cv.cv_id))
-    in
-    let (c_constructor, _, _) = split_methods c in
-    match c_constructor with
-    | _ when Ast_defs.(equal_class_kind c.c_kind Cinterface) -> ()
-    | Some { m_body = { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } ->
-      ()
-    | _ ->
-      let p =
-        match c_constructor with
-        | Some m -> fst m.m_name
-        | None -> fst c.c_name
-      in
-      let env = Env.make tenv c in
-      let inits = constructor env c_constructor in
-      let check_inits inits =
-        let uninit_props =
-          SMap.filter (fun k _ -> not (SSet.mem k inits)) env.props
-        in
-        if not (SMap.is_empty uninit_props) then
-          if SMap.mem DeferredMembers.parent_init_prop uninit_props then
-            Errors.no_construct_parent p
+  if not FileInfo.(equal_mode c.c_mode Mdecl) then
+    List.iter c.c_vars ~f:(fun cv ->
+        match cv.cv_expr with
+        | Some _ when is_lateinit cv ->
+          Errors.lateinit_with_default (fst cv.cv_id)
+        | None when cv.cv_is_static ->
+          let ty_opt =
+            Option.map
+              ~f:(Decl_hint.hint tenv.Typing_env_types.decl_env)
+              (hint_of_type_hint cv.cv_type)
+          in
+          if
+            is_lateinit cv
+            || cv.cv_abstract
+            || type_does_not_require_init tenv ty_opt
+          then
+            ()
           else
-            let class_uninit_props =
-              SMap.filter
-                (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
-                uninit_props
-            in
-            if not (SMap.is_empty class_uninit_props) then
-              Errors.not_initialized
-                (p, snd c.c_name)
-                ( SMap.bindings class_uninit_props
-                |> List.map ~f:(fun (name, _) ->
-                       let pos =
-                         class_prop_pos
-                           (snd c.c_name)
-                           name
-                           (Typing_env.get_ctx tenv)
-                       in
-                       (pos, name)) )
+            Errors.missing_assign (fst cv.cv_id)
+        | _ -> ());
+  let (c_constructor, _, _) = split_methods c in
+  match c_constructor with
+  | _ when Ast_defs.(equal_class_kind c.c_kind Cinterface) -> ()
+  | Some { m_body = { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } -> ()
+  | _ ->
+    let p =
+      match c_constructor with
+      | Some m -> fst m.m_name
+      | None -> fst c.c_name
+    in
+    let env = Env.make tenv c in
+    let inits = constructor env c_constructor in
+    let check_inits inits =
+      let uninit_props =
+        SMap.filter (fun k _ -> not (SSet.mem k inits)) env.props
       in
-      let check_throws_or_init_all inits =
-        match inits with
-        | S.Top ->
-          (* Constructor always throw, so checking that all properties are
-           * initialized is irrelevant. *)
-          ()
-        | S.Set inits -> check_inits inits
-      in
-      if
-        Ast_defs.(equal_class_kind c.c_kind Ctrait)
-        || Ast_defs.(equal_class_kind c.c_kind Cabstract)
-      then
-        let has_constructor =
-          match c_constructor with
-          | None -> false
-          | Some m when m.m_abstract -> false
-          | Some _ -> true
-        in
-        if has_constructor then
-          check_throws_or_init_all inits
+      if not (SMap.is_empty uninit_props) then
+        if SMap.mem DeferredMembers.parent_init_prop uninit_props then
+          Errors.no_construct_parent p
         else
-          ()
-      else
+          let class_uninit_props =
+            SMap.filter
+              (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
+              uninit_props
+          in
+          if not (SMap.is_empty class_uninit_props) then
+            Errors.not_initialized
+              (p, snd c.c_name)
+              ( SMap.bindings class_uninit_props
+              |> List.map ~f:(fun (name, _) ->
+                     let pos =
+                       class_prop_pos
+                         (snd c.c_name)
+                         name
+                         (Typing_env.get_ctx tenv)
+                     in
+                     (pos, name)) )
+    in
+    let check_throws_or_init_all inits =
+      match inits with
+      | S.Top ->
+        (* Constructor always throw, so checking that all properties are
+         * initialized is irrelevant. *)
+        ()
+      | S.Set inits -> check_inits inits
+    in
+    if
+      Ast_defs.(equal_class_kind c.c_kind Ctrait)
+      || Ast_defs.(equal_class_kind c.c_kind Cabstract)
+    then
+      let has_constructor =
+        match c_constructor with
+        | None -> false
+        | Some m when m.m_abstract -> false
+        | Some _ -> true
+      in
+      if has_constructor then
         check_throws_or_init_all inits
+      else
+        ()
+    else
+      check_throws_or_init_all inits
 
 (**
  * Returns the set of properties initialized by the constructor.

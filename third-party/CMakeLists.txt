@@ -51,6 +51,8 @@ list(APPEND EXTRA_INCLUDE_PATHS
 list(APPEND THIRD_PARTY_MODULES forks/timelib)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/timelib")
 
+add_subdirectory(zstd) # Required by folly
+
 list(APPEND THIRD_PARTY_MODULES folly)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/folly/src")
 
@@ -81,7 +83,6 @@ if (NOT MSVC)
 endif()
 
 add_subdirectory(lz4)
-add_subdirectory(zstd)
 
 # fb-mysql must go after lz4 and zstd because it needs to know its <INSTALL_DIR>
 add_subdirectory(fb-mysql)

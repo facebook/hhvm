@@ -57,7 +57,6 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/Benchmark.cpp
   ${FOLLY_DIR}/SingletonStackTrace.cpp
   ${FOLLY_DIR}/build/GenerateFingerprintTables.cpp
-  ${FOLLY_DIR}/compression/CompressionContextPoolSingletons.cpp
   ${FOLLY_DIR}/experimental/DynamicParser.cpp
   ${FOLLY_DIR}/experimental/JSONSchemaTester.cpp
   ${FOLLY_DIR}/experimental/RCUUtils.cpp
@@ -79,15 +78,11 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
   ${FOLLY_DIR}/init/Init.cpp
-  # io/Compression requires snappy library
-  # Don't add dep until we need it
-  ${FOLLY_DIR}/io/Compression.cpp
   ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.cpp
   ${FOLLY_DIR}/python/GILAwareManualExecutor.cpp
 )
 list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/Benchmark.h
-  ${FOLLY_DIR}/compression/CompressionContextPoolSingletons.h
   ${FOLLY_DIR}/experimental/DynamicParser.h
   ${FOLLY_DIR}/experimental/DynamicParser-inl.h
   ${FOLLY_DIR}/experimental/RCUUtils.h
@@ -106,9 +101,6 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/experimental/symbolizer/ElfCache.h
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.h
   ${FOLLY_DIR}/init/Init.h
-  # io/Compression requires snappy library
-  # Don't add dep until we need it
-  ${FOLLY_DIR}/io/Compression.h
   ${FOLLY_DIR}/logging/BridgeFromGoogleLogging.h
   ${FOLLY_DIR}/python/AsyncioExecutor.h
   ${FOLLY_DIR}/python/GILAwareManualExecutor.h
@@ -191,6 +183,8 @@ endif()
 # For some reason we aren't making a folly-config.h and this is in there.
 # Please fix properly!
 add_definitions("-DFOLLY_VERSION=\"0.1\"")
+# cmake supports TOUCH in versions more recent than ours.
+file(WRITE ${FOLLY_DIR}/folly-config.h "")
 
 # folly-config.h is a generated file from autotools
 # We need to do the equivalent checks here and use
@@ -301,6 +295,11 @@ target_include_directories(folly PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 find_package(OpenSSL REQUIRED)
 target_include_directories(folly PUBLIC "${OPENSSL_INCLUDE_DIR}")
+
+add_dependencies(folly zstd)
+target_include_directories(folly PUBLIC zstd)
+target_link_libraries(folly PUBLIC zstd)
+target_compile_definitions(folly PUBLIC "FOLLY_HAVE_LIBZSTD=1")
 
 if (APPLE)
   # Just assume we have sched.h

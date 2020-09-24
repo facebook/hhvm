@@ -8,18 +8,26 @@
 use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
 use fnv::FnvHasher;
 use im_rc::OrdSet;
-use ocamlrep::Value;
+use ocamlrep::{from, Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use std::cell::RefCell;
 use std::collections::BTreeSet;
-use std::convert::TryInto;
 use std::ffi::OsString;
 use std::hash::Hasher;
 use std::panic;
 
 extern "C" {
     fn assert_master();
+}
+
+fn _static_assert() {
+    // The use of 64-bit (actually 63-bit) dependency hashes requires that we
+    // are compiling for a 64-bit architecture. Let's assert that at compile time.
+    //
+    // OCaml only supports unboxed integers of WORD SIZE - 1 bits. We don't want to
+    // be boxing dependency hashes, so we require a 64-bit word size.
+    let _ = [(); 0 - (!(8 == std::mem::size_of::<usize>()) as usize)];
 }
 
 static mut UNSAFE_DEPGRAPH: Option<Box<UnsafeDepGraph>> = None;
@@ -81,6 +89,13 @@ impl UnsafeDepGraph {
         let g: &UnsafeDepGraph = unsafe { UNSAFE_DEPGRAPH.as_ref().unwrap() };
         f(g.depgraph())
     }
+
+    /// Return whether the global custom dependency graph is initialized.
+    #[inline(always)]
+    pub fn is_initialized() -> bool {
+        // Safety: just comparing pointers: UNSAFE_DEPGRAPH != NULL
+        unsafe { UNSAFE_DEPGRAPH.is_some() }
+    }
 }
 
 /// Variant types used in the naming table.
@@ -133,8 +148,8 @@ fn make_hasher() -> FnvHasher {
     Default::default()
 }
 
-fn postprocess_hash(dep_type: DepType, hash: u64) -> i32 {
-    let hash = match dep_type {
+fn postprocess_hash(dep_type: DepType, hash: u64) -> u64 {
+    let hash: u64 = match dep_type {
         DepType::Class => {
             // For class dependencies, set the lowest bit to 1. For extends
             // dependencies, the lowest bit will be 0 (in the case below), so we'll
@@ -150,10 +165,17 @@ fn postprocess_hash(dep_type: DepType, hash: u64) -> i32 {
         }
     };
 
-    // The shared-memory dependency graph stores edges as pairs of vertices.
-    // Each vertex has 31 bits of actual content and 1 bit of bookkeeping. Thus,
-    // we truncate the hash to 31 bits.
-    (hash as i32) & 0b01111111_11111111_11111111_11111111
+    if !UnsafeDepGraph::is_initialized() {
+        // We are in the legacy dependency graph system:
+        //
+        // The shared-memory dependency graph stores edges as pairs of vertices.
+        // Each vertex has 31 bits of actual content and 1 bit of OCaml bookkeeping.
+        // Thus, we truncate the hash to 31 bits.
+        hash & ((1 << 31) - 1)
+    } else {
+        // One bit is used for OCaml bookkeeping!
+        hash & !(1 << 63)
+    }
 }
 
 fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
@@ -168,7 +190,7 @@ fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
 }
 
 /// Hash a one-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash1(dep_type: DepType, name1: &[u8]) -> i32 {
+pub fn hash1(dep_type: DepType, name1: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
@@ -199,9 +221,13 @@ unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
         let name1 = name1
             .as_byte_string()
             .expect("name1 could not be converted to byte string");
-        let result: isize = hash1(dep_type, name1)
-            .try_into()
-            .expect("hash could not be converted to isize");
+
+        let result: u64 = hash1(dep_type, name1);
+
+        // In Rust, a numeric cast between two integers of the same size
+        // is a no-op. We require a 64-bit word size.
+        let result = result as isize;
+
         Value::int(result)
     }
 
@@ -212,7 +238,7 @@ unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
 }
 
 /// Hash a two-argument `Typing_deps.Dep.variant`'s fields.
-pub fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> i32 {
+pub fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> u64 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
@@ -247,9 +273,13 @@ unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize
         let name2 = name2
             .as_byte_string()
             .expect("name2 could not be converted to byte string");
-        let result: isize = hash2(dep_type, name1, name2)
-            .try_into()
-            .expect("hash could not be converted to isize");
+
+        let result: u64 = hash2(dep_type, name1, name2);
+
+        // In Rust, a numeric cast between two integers of the same size
+        // is a no-op. We require a 64-bit word size.
+        let result = result as isize;
+
         Value::int(result)
     }
 
@@ -261,10 +291,48 @@ unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize
 }
 
 /// Rust implementation of `Typing_deps.NamingHash.combine_hashes`.
-pub fn combine_hashes(dep_hash: i32, naming_hash: i64) -> i64 {
+pub fn combine_hashes(dep_hash: u64, naming_hash: i64) -> i64 {
+    let dep_hash = dep_hash & ((1 << 31) - 1);
     let upper_31_bits = (dep_hash as i64) << 31;
     let lower_31_bits = naming_hash & 0b01111111_11111111_11111111_11111111;
     upper_31_bits | lower_31_bits
+}
+
+// A wrapper around isize, an OCaml int, representing a dependency, with
+// conversion support to and from `Dep`.
+#[derive(Debug, Copy, Clone)]
+struct OcamlDep(isize);
+
+impl From<Dep> for OcamlDep {
+    fn from(dep: Dep) -> OcamlDep {
+        let dep: u64 = dep.into();
+        // In Rust, a numeric cast between two integers of the same size
+        // is a no-op. We require a 64-bit word size.
+        OcamlDep(dep as isize)
+    }
+}
+
+impl Into<Dep> for OcamlDep {
+    fn into(self) -> Dep {
+        let dep: isize = self.0;
+        // In Rust, a numeric cast between two integers of the same size
+        // is a no-op. We require a 64-bit word size.
+        Dep::new(dep as u64)
+    }
+}
+
+impl FromOcamlRep for OcamlDep {
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        let x = from::expect_int(value)?;
+        Ok(OcamlDep(x))
+    }
+}
+
+impl ToOcamlRep for OcamlDep {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        let dep = self.0;
+        OpaqueValue::int(dep)
+    }
 }
 
 // Functions to load the dep graph
@@ -334,9 +402,9 @@ impl CamlSerialize for VisitedSet {
 
 // Functions to query the dependency graph
 ocaml_ffi! {
-    fn hh_custom_dep_graph_get_ideps_from_hash(dep: u64) -> Custom<DepSet> {
+    fn hh_custom_dep_graph_get_ideps_from_hash(dep: OcamlDep) -> Custom<DepSet> {
         let set_opt = UnsafeDepGraph::with(move |g| {
-            let list = g.hash_list_for(Dep::new(dep))?;
+            let list = g.hash_list_for(dep.into())?;
             let hashes: OrdSet<Dep> = g.hash_list_hashes(list).collect();
             Some(hashes)
         });
@@ -366,13 +434,13 @@ ocaml_ffi! {
 
     fn hh_custom_dep_graph_get_extend_deps(
         visited: Custom<VisitedSet>,
-        source_class: u64,
+        source_class: OcamlDep,
         acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
         let mut visited = visited.borrow_mut();
         let mut acc = acc.clone();
         let acc = UnsafeDepGraph::with(move |g| {
-            g.add_extend_deps(&mut acc, Dep::new(source_class), &mut visited);
+            g.add_extend_deps(&mut acc, source_class.into(), &mut visited);
             acc
         });
         Custom::from(acc.into())
@@ -389,15 +457,15 @@ ocaml_ffi! {
         Custom::from(OrdSet::new().into())
     }
 
-    fn hh_dep_set_singleton(dep: u64) -> Custom<DepSet> {
+    fn hh_dep_set_singleton(dep: OcamlDep) -> Custom<DepSet> {
         let mut s = OrdSet::new();
-        s.insert(Dep::new(dep));
+        s.insert(dep.into());
         Custom::from(s.into())
     }
 
-    fn hh_dep_set_add(s: Custom<DepSet>, dep: u64) -> Custom<DepSet> {
+    fn hh_dep_set_add(s: Custom<DepSet>, dep: OcamlDep) -> Custom<DepSet> {
         let mut s = s.clone();
-        s.insert(Dep::new(dep));
+        s.insert(dep.into());
         Custom::from(s.into())
     }
 
@@ -419,12 +487,12 @@ ocaml_ffi! {
         Custom::from(s1.difference(s2).into())
     }
 
-    fn hh_dep_set_mem(s: Custom<DepSet>, dep: u64) -> bool {
-        s.contains(&Dep::new(dep))
+    fn hh_dep_set_mem(s: Custom<DepSet>, dep: OcamlDep) -> bool {
+        s.contains(&dep.into())
     }
 
-    fn hh_dep_set_elements(s: Custom<DepSet>) -> Vec<u64> {
-        s.iter().copied().map(|x| x.into()).collect()
+    fn hh_dep_set_elements(s: Custom<DepSet>) -> Vec<OcamlDep> {
+        s.iter().copied().map(OcamlDep::from).collect()
     }
 
      fn hh_dep_set_cardinal(s: Custom<DepSet>) -> usize {

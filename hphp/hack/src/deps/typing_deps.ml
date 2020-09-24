@@ -336,7 +336,13 @@ module NamingHash = struct
     debugging, we limit the hash size to 63 bits, so that we can convert it
     to an OCaml integer. Then we set the top bit to 0 to ensure that it's
     positive, leaving 62 bits. The dependency hash is 31 bits, so we can add
-    an additional 31 bits from the naming hash. *)
+    an additional 31 bits from the naming hash.
+
+    We make sure we only have have 31 bits to begin with (this is not the case
+    when in the new 64-bit hash world) *)
+    let dep_hash =
+      Int64.logand dep_hash 0b01111111_11111111_11111111_11111111L
+    in
     let upper_31_bits = Int64.shift_left dep_hash 31 in
     let lower_31_bits =
       Int64.logand naming_hash 0b01111111_11111111_11111111_11111111L
@@ -648,12 +654,12 @@ let allow_dependency_table_reads flag =
 let add_idep dependent dependency =
   match !mode with
   | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
-  | CustomMode -> failwith "add_idep not implemented"
+  | CustomMode -> (* TODO(hverr): implement *) ()
 
 let add_idep_directly_to_graph ~dependent ~dependency =
   match !mode with
   | SQLiteMode -> SQLiteGraph.add_idep_directly_to_graph ~dependent ~dependency
-  | CustomMode -> failwith "add_idep not implemented"
+  | CustomMode -> (* TODO(hverr): implement, only used in hh_fanout *) ()
 
 let get_ideps_from_hash hash =
   let open DepSet in

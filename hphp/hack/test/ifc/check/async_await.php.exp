@@ -1,0 +1,18 @@
+File "async_await.php", line 17, characters 3-31:
+Data with policy `A` appears in context `B`. (Typing[4379])
+File "async_await.php", line 6, characters 14-19:
+This may be the data source with policy `A`
+File "async_await.php", line 9, characters 14-19:
+This may be the data sink with policy `B`
+File "async_await.php", line 13, characters 3-17:
+Another program point contributing to the illegal flow
+File "async_await.php", line 24, characters 3-18:
+Data with policy `A` appears in context `B`. (Typing[4379])
+File "async_await.php", line 6, characters 14-19:
+This may be the data source with policy `A`
+File "async_await.php", line 9, characters 14-19:
+This may be the data sink with policy `B`
+File "async_await.php", line 21, characters 3-42:
+Another program point contributing to the illegal flow
+File "async_await.php", line 22, characters 5-15:
+Another program point contributing to the illegal flow

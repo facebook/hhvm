@@ -35,6 +35,8 @@ let vec_id = "\\HH\\vec"
 
 let dict_id = "\\HH\\dict"
 
+let awaitable_id = "\\HH\\Awaitable"
+
 let governed_id = "\\Governed"
 
 let construct_id = "__construct"

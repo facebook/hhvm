@@ -793,6 +793,7 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
       Tfun { f_pc = pc; f_self = self; f_args = ptys; f_ret = ret; f_exn = exn }
     in
     (env, ty)
+  | A.Await e -> expr env e
   (* --- expressions below are not yet supported *)
   | A.Darray (_, _)
   | A.Varray (_, _)
@@ -811,7 +812,6 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
   | A.PrefixedString (_, _)
   | A.Yield _
   | A.Yield_break
-  | A.Await _
   | A.Suspend _
   | A.List _
   | A.Expr_list _

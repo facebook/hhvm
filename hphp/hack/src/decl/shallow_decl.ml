@@ -223,11 +223,9 @@ let method_type env m =
         ~returns_void_to_rx;
   }
 
-let method_ env c m =
+let method_ env m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
-  let (pos, id) = m.m_name in
-  if Aast.equal_visibility m.m_visibility Private && override then
-    Errors.private_override pos (snd c.c_name) id;
+  let (pos, _) = m.m_name in
   let has_memoizelsb =
     Attrs.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes
   in
@@ -347,9 +345,9 @@ let class_ env c =
     sc_pu_enums = List.map c.c_pu_enums (pu_enum env);
     sc_props = List.map ~f:(prop env) vars;
     sc_sprops = List.map ~f:(static_prop env) static_vars;
-    sc_constructor = Option.map ~f:(method_ env c) constructor;
-    sc_static_methods = List.map ~f:(method_ env c) statics;
-    sc_methods = List.map ~f:(method_ env c) rest;
+    sc_constructor = Option.map ~f:(method_ env) constructor;
+    sc_static_methods = List.map ~f:(method_ env) statics;
+    sc_methods = List.map ~f:(method_ env) rest;
     sc_user_attributes =
       List.map
         c.c_user_attributes

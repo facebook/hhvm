@@ -3864,7 +3864,12 @@ where
         }
         use ScanState::*;
         // `parse` mixes loop and recursion to use less stack space.
-        fn parse(str: &str, start: usize, state: ScanState, idx: usize) -> Option<String> {
+        fn parse(
+            str: &str,
+            start: usize,
+            state: ScanState,
+            idx: usize,
+        ) -> Option<(usize, usize, String)> {
             let is_whitespace = |c| c == ' ' || c == '\t' || c == '\n' || c == '\r';
             let mut s = (start, state, idx);
             let chars = str.as_bytes();
@@ -3881,7 +3886,7 @@ where
                         let r = parse(str, next, Free, next);
                         match r {
                             d @ Some(_) => break d,
-                            None => break Some(String::from(&str[s.0..s.2 + 1])),
+                            None => break Some((s.0, s.2 + 1, String::from(&str[s.0..s.2 + 1]))),
                         }
                     }
                     /* PHP has line comments delimited by a # */
@@ -3914,8 +3919,12 @@ where
             }
         }
         let str = node.leading_text(env.indexed_source_text.source_text());
-        parse(str, 0, Free, 0).map(|txt| {
-            let ps = (Self::p_pos(node, env), txt);
+        parse(str, 0, Free, 0).map(|(start, end, txt)| {
+            let anchor = node.leading_start_offset();
+            let pos = env
+                .indexed_source_text
+                .relative_pos(anchor + start, anchor + end);
+            let ps = (pos, txt);
             oxidized::doc_comment::DocComment::new(ps)
         })
     }

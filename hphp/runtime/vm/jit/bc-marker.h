@@ -69,6 +69,7 @@ struct BCMarker {
   bool operator==(const BCMarker& b) const {
     return b.m_sk == m_sk &&
            b.m_spOff == m_spOff &&
+           b.m_stublogue == m_stublogue &&
            b.m_profTransIDs == m_profTransIDs &&
            b.m_fp == m_fp;
   }
@@ -133,6 +134,7 @@ struct BCMarker {
   void reset() {
     m_sk = SrcKey();
     m_spOff = FPInvOffset{0};
+    m_stublogue = false;
     TransIDSet emptyTransIDSet;
     m_profTransIDs.swap(emptyTransIDSet);
     m_fp = nullptr;

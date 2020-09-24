@@ -141,14 +141,14 @@ let go (genv : ServerEnv.genv) (env : ServerEnv.env) (prefixes : string list) =
     | Some FileInfo.{ classes; _ } ->
       let classes =
         List.fold_left
-          ~init:DepSet.empty
+          ~init:(DepSet.make ())
           ~f:(fun acc (_, class_id) ->
             DepSet.add acc (Dep.make (Dep.Class class_id)))
           classes
       in
       let deps =
         Typing_deps.add_extend_deps classes
-        |> Typing_deps.get_files
+        |> Typing_deps.Files.get_files
         |> Relative_path.Set.filter ~f:path_filter
       in
       Relative_path.Set.remove deps path

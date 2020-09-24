@@ -76,7 +76,7 @@ let update_files
     t
   else (
     Hh_logger.log "Updating file dependencies...";
-    Naming_table.iter naming_table Typing_deps.update_file;
+    Naming_table.iter naming_table Typing_deps.Files.update_file;
     HackEventLogger.updating_deps_end t;
     Hh_logger.log_duration "Updated file dependencies" t
   )

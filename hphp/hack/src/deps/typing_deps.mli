@@ -84,10 +84,41 @@ module Dep : sig
 end
 
 module DepSet : sig
-  include module type of
-      Reordered_argument_collections.Reordered_argument_set (Set.Make (Dep))
+  type t
+
+  type elt = Dep.t
+
+  val make : unit -> t
+
+  val singleton : elt -> t
+
+  val add : t -> elt -> t
+
+  val union : t -> t -> t
+
+  val inter : t -> t -> t
+
+  val diff : t -> t -> t
+
+  val iter : t -> f:(elt -> unit) -> unit
+
+  val fold : t -> init:'a -> f:(elt -> 'a -> 'a) -> 'a
+
+  val mem : t -> elt -> bool
+
+  val elements : t -> elt list
+
+  val cardinal : t -> int
+
+  val is_empty : t -> bool
 
   val pp : Format.formatter -> t -> unit
+end
+
+module VisitedSet : sig
+  type t
+
+  val make : unit -> t
 end
 
 module NamingHash : sig
@@ -122,6 +153,14 @@ module NamingHash : sig
   val to_int64 : t -> int64
 end
 
+module Files : sig
+  val get_files : DepSet.t -> Relative_path.Set.t
+
+  val deps_of_file_info : FileInfo.t -> DepSet.t
+
+  val update_file : Relative_path.t -> FileInfo.t -> unit
+end
+
 val load_custom_dep_graph : string -> (unit, string) result
 
 val trace : bool ref
@@ -142,18 +181,12 @@ val get_ideps_from_hash : Dep.t -> DepSet.t
 
 val get_ideps : Dep.dependency Dep.variant -> DepSet.t
 
-val get_files : DepSet.t -> Relative_path.Set.t
-
-val deps_of_file_info : FileInfo.t -> DepSet.t
-
-val update_file : Relative_path.t -> FileInfo.t -> unit
-
 (* Add to accumulator all extend dependencies of source_class. Visited is used
  * to avoid processing nodes reachable in multiple ways more than once. In other
  * words: use DFS to find all nodes reachable by "extends" edges starting from
  * source class *)
 val get_extend_deps :
-  visited:DepSet.t ref -> source_class:Dep.t -> acc:DepSet.t -> DepSet.t
+  visited:VisitedSet.t -> source_class:Dep.t -> acc:DepSet.t -> DepSet.t
 
 (* Grow input set by adding all its extend dependencies (including recursive) *)
 val add_extend_deps : DepSet.t -> DepSet.t

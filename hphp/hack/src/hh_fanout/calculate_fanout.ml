@@ -117,7 +117,7 @@ let file_info_to_dep_set
     (file_info : FileInfo.t) : Typing_deps.DepSet.t * changed_symbol list =
   List.fold
     (get_symbol_edges_for_file_info file_info)
-    ~init:(Typing_deps.DepSet.empty, [])
+    ~init:(Typing_deps.(DepSet.make ()), [])
     ~f:(fun (dep_set, changed_symbols) symbol_edge ->
       let symbol_dep = Typing_deps.Dep.make symbol_edge.symbol_dep in
       let dep_set = Typing_deps.DepSet.add dep_set symbol_dep in
@@ -156,13 +156,13 @@ let calculate_dep_set_for_path
   let (old_deps, old_symbols) =
     Naming_table.get_file_info old_naming_table path
     |> Option.map ~f:(file_info_to_dep_set ~detail_level old_naming_table)
-    |> Option.value ~default:(Typing_deps.DepSet.empty, [])
+    |> Option.value ~default:(Typing_deps.(DepSet.make ()), [])
   in
   let (new_deps, new_symbols) =
     match delta with
     | Naming_sqlite.Modified new_file_info ->
       file_info_to_dep_set ~detail_level new_naming_table new_file_info
-    | Naming_sqlite.Deleted -> (Typing_deps.DepSet.empty, [])
+    | Naming_sqlite.Deleted -> (Typing_deps.(DepSet.make ()), [])
   in
 
   (* NB: could be optimized by constructing sets or by not using polymorphic
@@ -193,7 +193,7 @@ let go
   let (fanout_dependencies, explanations) =
     Relative_path.Set.fold
       input_files
-      ~init:(Typing_deps.DepSet.empty, Relative_path.Map.empty)
+      ~init:(Typing_deps.(DepSet.make ()), Relative_path.Map.empty)
       ~f:(fun path (fanout_dependencies, explanations) ->
         let delta =
           match Relative_path.Map.find_opt file_deltas path with

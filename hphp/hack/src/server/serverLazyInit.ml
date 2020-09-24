@@ -414,7 +414,7 @@ let names_to_deps (names : FileInfo.names) : DepSet.t =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
   in
-  let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs DepSet.empty in
+  let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make ()) in
   let deps = add_deps_of_sset (fun n -> Dep.FunName n) n_funs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Class n) n_classes deps in
   let deps = add_deps_of_sset (fun n -> Dep.RecordDef n) n_record_defs deps in
@@ -481,7 +481,7 @@ let get_files_to_recheck
   Decl_redecl_service.remove_old_defs ctx ~bucket_size genv.workers dirty_names;
   let deps = Typing_deps.add_all_deps to_redecl in
   let deps = Typing_deps.DepSet.union deps to_recheck in
-  Typing_deps.get_files deps
+  Typing_deps.Files.get_files deps
 
 (* We start off with a list of files that have changed since the state was
  * saved (dirty_files), and two maps of the class / function declarations
@@ -564,7 +564,7 @@ let type_check_dirty
           get_files_to_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps local_deps in
-          Typing_deps.get_files deps
+          Typing_deps.Files.get_files deps
       in
       ( ServerPrecheckedFiles.set
           env
@@ -573,7 +573,7 @@ let type_check_dirty
                rechecked_files = Relative_path.Set.empty;
                dirty_local_deps = local_deps;
                dirty_master_deps = master_deps;
-               clean_local_deps = Typing_deps.DepSet.empty;
+               clean_local_deps = Typing_deps.(DepSet.make ());
              }),
         to_recheck )
     else
@@ -584,7 +584,7 @@ let type_check_dirty
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps deps in
-          Typing_deps.get_files deps
+          Typing_deps.Files.get_files deps
       in
       (env, to_recheck)
   in

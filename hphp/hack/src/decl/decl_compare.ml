@@ -53,7 +53,7 @@ module ClassDiff = struct
     SSet.fold (add_inverted_dep build_obj) xset acc
 
   let compare cid class1 class2 =
-    let acc = DepSet.empty in
+    let acc = DepSet.make () in
     let is_unchanged = true in
     (* compare class constants *)
     let consts_diff = smap class1.dc_consts class2.dc_consts in
@@ -232,11 +232,11 @@ module ClassEltDiff = struct
         let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
         let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
         if Poly.( = ) fe1 fe2 then
-          (DepSet.empty, `Unchanged)
+          (DepSet.make (), `Unchanged)
         else
           (Typing_deps.get_ideps (Dep.Cstr cid), `Changed)
     else
-      (DepSet.empty, `Unchanged)
+      (DepSet.make (), `Unchanged)
 
   let compare class1 class2 =
     compare_cstrs class1 class2
@@ -334,7 +334,7 @@ and get_all_dependencies
   (add_changed changed dep, to_redecl, to_recheck)
 
 let get_extend_deps cid_hash to_redecl =
-  Typing_deps.get_extend_deps (ref DepSet.empty) cid_hash to_redecl
+  Typing_deps.get_extend_deps (VisitedSet.make ()) cid_hash to_redecl
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -381,7 +381,7 @@ let get_funs_deps ~conservative_redecl old_funs funs =
   SSet.fold
     (get_fun_deps ~conservative_redecl old_funs)
     funs
-    (DepSet.empty, DepSet.empty, DepSet.empty)
+    (DepSet.make (), DepSet.make (), DepSet.make ())
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -408,7 +408,7 @@ let get_type_deps old_types tid (changed, to_recheck) =
       (add_changed changed dep, to_recheck)
 
 let get_types_deps old_types types =
-  SSet.fold (get_type_deps old_types) types (DepSet.empty, DepSet.empty)
+  SSet.fold (get_type_deps old_types) types (DepSet.make (), DepSet.make ())
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the constant
@@ -447,7 +447,7 @@ let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
   SSet.fold
     (get_gconst_deps ~conservative_redecl old_gconsts)
     gconsts
-    (DepSet.empty, DepSet.empty, DepSet.empty)
+    (DepSet.make (), DepSet.make (), DepSet.make ())
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
@@ -556,9 +556,9 @@ let get_classes_deps ctx ~conservative_redecl old_classes new_classes classes =
        ~conservative_redecl
        old_classes
        new_classes
-       (ref DepSet.empty))
+       (VisitedSet.make ()))
     classes
-    (DepSet.empty, DepSet.empty, DepSet.empty)
+    (DepSet.make (), DepSet.make (), DepSet.make ())
 
 (*****************************************************************************)
 (* Determine which top level definitions have to be rechecked if the record
@@ -588,4 +588,4 @@ let get_record_defs_deps ~conservative_redecl old_record_defs record_defs =
   SSet.fold
     (get_record_def_deps ~conservative_redecl old_record_defs)
     record_defs
-    (DepSet.empty, DepSet.empty, DepSet.empty)
+    (DepSet.make (), DepSet.make (), DepSet.make ())

@@ -10,6 +10,8 @@ use std::collections::{BTreeSet, VecDeque};
 use std::convert::TryInto;
 use std::ops::Deref;
 
+use im_rc::OrdSet;
+
 /// Use a `DepGraphOpener` to initialize a dependency graph from a file.
 ///
 /// # Example
@@ -149,27 +151,52 @@ impl<'bytes> DepGraph<'bytes> {
     /// It is expected that the dependency argument is a class-dependency.
     ///
     /// The argument will always be in the result.
-    pub fn query_extend_deps(&self, query_hash: Dep) -> Vec<Dep> {
+    pub fn add_extend_deps(
+        &self,
+        acc: &mut OrdSet<Dep>,
+        query_hash: Dep,
+        visited: &mut BTreeSet<Dep>,
+    ) {
         let mut queue: VecDeque<Dep> = VecDeque::new();
-        let mut visited: BTreeSet<Dep> = BTreeSet::new();
-        queue.push_back(query_hash);
+
+        // Only class edges are added to the queue
+        if query_hash.is_class() {
+            queue.push_back(query_hash);
+        }
+
         while let Some(query_hash) = queue.pop_front() {
             visited.insert(query_hash);
+            acc.insert(query_hash);
 
-            match query_hash.class_to_extends() {
-                Some(extends_hash) => {
-                    if let Some(dept_hash_list) = self.hash_list_for(extends_hash) {
-                        for dept in self.hash_list_hashes(dept_hash_list) {
-                            if !visited.contains(&dept) {
-                                queue.push_back(dept);
-                            }
+            if let Some(extends_hash) = query_hash.class_to_extends() {
+                if let Some(dept_hash_list) = self.hash_list_for(extends_hash) {
+                    for dept in self.hash_list_hashes(dept_hash_list) {
+                        // Only class edges are added to the queue
+                        if dept.is_class() && !visited.contains(&dept) {
+                            queue.push_back(dept);
                         }
                     }
                 }
-                _ => {}
             }
         }
-        visited.into_iter().collect()
+    }
+
+    /// Add the direct typing dependencies for one dependency.
+    pub fn add_typing_deps_for_dep(&self, acc: &mut OrdSet<Dep>, dep: Dep) {
+        if let Some(dept_hash_list) = self.hash_list_for(dep) {
+            for dept in self.hash_list_hashes(dept_hash_list) {
+                acc.insert(dept);
+            }
+        }
+    }
+
+    /// Query the direct typing dependencies for the given set of dependencies.
+    pub fn query_typing_deps_multi(&self, deps: &OrdSet<Dep>) -> OrdSet<Dep> {
+        let mut acc = deps.clone();
+        for dep in deps {
+            self.add_typing_deps_for_dep(&mut acc, *dep);
+        }
+        acc
     }
 }
 

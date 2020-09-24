@@ -63,13 +63,15 @@ let rec search
 let go ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) : result =
   search
     ~dep_path_acc:[]
-    ~seen_acc:Typing_deps.DepSet.empty
+    ~seen_acc:Typing_deps.(DepSet.make ())
     ~current:source
     ~dest
   |> Option.map ~f:(fun dep_path ->
          List.rev_map dep_path ~f:(fun dep ->
              let paths =
-               dep |> Typing_deps.DepSet.singleton |> Typing_deps.get_files
+               dep
+               |> Typing_deps.DepSet.singleton
+               |> Typing_deps.Files.get_files
              in
              { dep; paths }))
 

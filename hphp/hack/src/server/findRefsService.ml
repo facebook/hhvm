@@ -162,7 +162,7 @@ let get_child_classes_files ctx class_name =
         cid_hash
         (Typing_deps.DepSet.singleton cid_hash)
     in
-    Typing_deps.get_files extend_deps
+    Typing_deps.Files.get_files extend_deps
   | _ -> Relative_path.Set.empty
 
 let get_deps_set ctx classes =
@@ -176,7 +176,7 @@ let get_deps_set ctx classes =
         | Some fn ->
           let dep = Typing_deps.Dep.Class class_name in
           let ideps = Typing_deps.get_ideps dep in
-          let files = Typing_deps.get_files ideps in
+          let files = Typing_deps.Files.get_files ideps in
           let files = Relative_path.Set.add files fn in
           Relative_path.Set.union files acc
       end
@@ -187,7 +187,7 @@ let get_deps_set_function ctx f_name =
   | Some fn ->
     let dep = Typing_deps.Dep.Fun f_name in
     let ideps = Typing_deps.get_ideps dep in
-    let files = Typing_deps.get_files ideps in
+    let files = Typing_deps.Files.get_files ideps in
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty
 
@@ -196,7 +196,7 @@ let get_deps_set_gconst ctx cst_name =
   | Some fn ->
     let dep = Typing_deps.Dep.GConst cst_name in
     let ideps = Typing_deps.get_ideps dep in
-    let files = Typing_deps.get_files ideps in
+    let files = Typing_deps.Files.get_files ideps in
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty
 

@@ -1504,7 +1504,7 @@ let handle_mode
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table Typing_deps.update_file;
+    Naming_table.iter naming_table Typing_deps.Files.update_file;
     Naming_table.iter naming_table (fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then
           ()
@@ -1650,7 +1650,7 @@ let handle_mode
   | Find_refs (line, column) ->
     let path = expect_single_file () in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table Typing_deps.update_file;
+    Naming_table.iter naming_table Typing_deps.Files.update_file;
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =
@@ -1686,7 +1686,7 @@ let handle_mode
   | Go_to_impl (line, column) ->
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
-    Naming_table.iter naming_table Typing_deps.update_file;
+    Naming_table.iter naming_table Typing_deps.Files.update_file;
     let genv = ServerEnvBuild.default_genv in
     let init_id = Random_id.short_string () in
     let env =

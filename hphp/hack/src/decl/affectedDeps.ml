@@ -16,11 +16,8 @@ type t = {
 }
 
 let empty =
-  {
-    changed = DepSet.empty;
-    mro_invalidated = DepSet.empty;
-    needs_recheck = DepSet.empty;
-  }
+  let empty = DepSet.make () in
+  { changed = empty; mro_invalidated = empty; needs_recheck = empty }
 
 let mark_changed (deps : t) (changed : DepSet.t) : t =
   { deps with changed = DepSet.union deps.changed changed }

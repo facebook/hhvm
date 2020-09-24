@@ -378,7 +378,7 @@ let parsing genv env to_check ~stop_at_errors =
 (*****************************************************************************)
 
 let update_naming_table env fast_parsed =
-  Relative_path.Map.iter fast_parsed Typing_deps.update_file;
+  Relative_path.Map.iter fast_parsed Typing_deps.Files.update_file;
   let naming_table = Naming_table.update_many env.naming_table fast_parsed in
   naming_table
 
@@ -620,7 +620,7 @@ module LazyCheckKind : CheckKindType = struct
       extend_fast genv decl_defs naming_table to_redecl_phase2_later )
 
   let get_related_files dep =
-    Typing_deps.get_ideps_from_hash dep |> Typing_deps.get_files
+    Typing_deps.(add_typing_deps (DepSet.singleton dep) |> Files.get_files)
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the
@@ -842,7 +842,7 @@ functor
       let oldified_defs =
         snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl
       in
-      let to_recheck1 = Typing_deps.get_files to_recheck1 in
+      let to_recheck1 = Typing_deps.Files.get_files to_recheck1 in
       { changed; oldified_defs; to_recheck1; to_redecl_phase2_deps }
 
     type redecl_phase2_result = {
@@ -899,7 +899,7 @@ functor
           (* Redeclarations completed now. *)
           fast_redecl_phase2_now
       in
-      let to_recheck2 = Typing_deps.get_files to_recheck2 in
+      let to_recheck2 = Typing_deps.Files.get_files to_recheck2 in
       let to_recheck2 =
         Relative_path.Set.union
           to_recheck2
@@ -1211,7 +1211,9 @@ functor
       let { changed; oldified_defs; to_recheck1; to_redecl_phase2_deps } =
         do_redecl_phase1 genv env ~fast ~naming_table ~oldified_defs
       in
-      let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
+      let to_redecl_phase2 =
+        Typing_deps.Files.get_files to_redecl_phase2_deps
+      in
       let hs = SharedMem.heap_size () in
       HackEventLogger.first_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in

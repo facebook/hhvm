@@ -27,7 +27,7 @@ let go ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) : result =
   |> Typing_deps.DepSet.elements
   |> List.map ~f:(fun hash ->
          let paths =
-           Typing_deps.get_files (Typing_deps.DepSet.singleton hash)
+           Typing_deps.Files.get_files (Typing_deps.DepSet.singleton hash)
          in
          { hash; paths })
 

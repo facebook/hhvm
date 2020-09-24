@@ -5,10 +5,14 @@
 
 #![cfg_attr(use_unstable_features, feature(test))]
 
-use depgraph::reader::{DepGraph, DepGraphOpener};
+use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
 use fnv::FnvHasher;
+use im_rc::OrdSet;
 use ocamlrep::Value;
+use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
+use std::cell::RefCell;
+use std::collections::BTreeSet;
 use std::convert::TryInto;
 use std::ffi::OsString;
 use std::hash::Hasher;
@@ -61,6 +65,21 @@ impl UnsafeDepGraph {
     #[allow(clippy::needless_lifetimes)]
     pub fn depgraph<'a>(&'a self) -> &'a DepGraph<'a> {
         &self._do_not_reference_depgraph
+    }
+
+    /// Run the closure with the loaded dep graph.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the graph is not loaded
+    pub fn with<F, R>(f: F) -> R
+    where
+        for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
+    {
+        // Safety: We only load the dependency graph once.
+        // The dependency graph, if loaded will not be deallocated.
+        let g: &UnsafeDepGraph = unsafe { UNSAFE_DEPGRAPH.as_ref().unwrap() };
+        f(g.depgraph())
     }
 }
 
@@ -248,6 +267,7 @@ pub fn combine_hashes(dep_hash: i32, naming_hash: i64) -> i64 {
     upper_31_bits | lower_31_bits
 }
 
+// Functions to load the dep graph
 ocaml_ffi! {
     fn hh_load_custom_dep_graph(depgraph_fn: OsString) -> Result<(), String> {
         unsafe {
@@ -265,6 +285,155 @@ ocaml_ffi! {
 
         Ok(())
     }
+}
+
+/// Rust set of dependencies that can be transferred from
+/// OCaml to Rust memory.
+#[derive(Debug)]
+pub struct DepSet(OrdSet<Dep>);
+
+impl std::ops::Deref for DepSet {
+    type Target = OrdSet<Dep>;
+
+    fn deref(&self) -> &OrdSet<Dep> {
+        &self.0
+    }
+}
+
+impl From<OrdSet<Dep>> for DepSet {
+    fn from(x: OrdSet<Dep>) -> Self {
+        Self(x)
+    }
+}
+
+impl CamlSerialize for DepSet {
+    caml_serialize_default_impls!();
+}
+
+/// Rust set of visited hashes
+#[derive(Debug)]
+pub struct VisitedSet(RefCell<BTreeSet<Dep>>);
+
+impl std::ops::Deref for VisitedSet {
+    type Target = RefCell<BTreeSet<Dep>>;
+
+    fn deref(&self) -> &RefCell<BTreeSet<Dep>> {
+        &self.0
+    }
+}
+
+impl From<RefCell<BTreeSet<Dep>>> for VisitedSet {
+    fn from(x: RefCell<BTreeSet<Dep>>) -> Self {
+        Self(x)
+    }
+}
+
+impl CamlSerialize for VisitedSet {
+    caml_serialize_default_impls!();
+}
+
+// Functions to query the dependency graph
+ocaml_ffi! {
+    fn hh_custom_dep_graph_get_ideps_from_hash(dep: u64) -> Custom<DepSet> {
+        let set_opt = UnsafeDepGraph::with(move |g| {
+            let list = g.hash_list_for(Dep::new(dep))?;
+            let hashes: OrdSet<Dep> = g.hash_list_hashes(list).collect();
+            Some(hashes)
+        });
+        Custom::from(set_opt.unwrap_or_else(OrdSet::new).into())
+    }
+
+    fn hh_custom_dep_graph_add_typing_deps(s: Custom<DepSet>) -> Custom<DepSet> {
+        UnsafeDepGraph::with(move |g| {
+            Custom::from(g.query_typing_deps_multi(&s).into())
+        })
+    }
+
+    fn hh_custom_dep_graph_add_extend_deps(s: Custom<DepSet>) -> Custom<DepSet> {
+        let mut visited = BTreeSet::new();
+        let s = s.clone();
+        let mut acc = s.clone();
+        let acc = UnsafeDepGraph::with(move |g| {
+            for dep in s {
+                if dep.is_class() {
+                    g.add_extend_deps(&mut acc, dep, &mut visited);
+                }
+            }
+            acc
+        });
+        Custom::from(acc.into())
+    }
+
+    fn hh_custom_dep_graph_get_extend_deps(
+        visited: Custom<VisitedSet>,
+        source_class: u64,
+        acc: Custom<DepSet>,
+    ) -> Custom<DepSet> {
+        let mut visited = visited.borrow_mut();
+        let mut acc = acc.clone();
+        let acc = UnsafeDepGraph::with(move |g| {
+            g.add_extend_deps(&mut acc, Dep::new(source_class), &mut visited);
+            acc
+        });
+        Custom::from(acc.into())
+    }
+}
+
+// Auxiliary functions for Typing_deps.DepSet/Typing_deps.VisitedSet
+ocaml_ffi! {
+    fn hh_visited_set_make() -> Custom<VisitedSet> {
+        Custom::from(RefCell::new(BTreeSet::new()).into())
+    }
+
+    fn hh_dep_set_make() -> Custom<DepSet> {
+        Custom::from(OrdSet::new().into())
+    }
+
+    fn hh_dep_set_singleton(dep: u64) -> Custom<DepSet> {
+        let mut s = OrdSet::new();
+        s.insert(Dep::new(dep));
+        Custom::from(s.into())
+    }
+
+    fn hh_dep_set_add(s: Custom<DepSet>, dep: u64) -> Custom<DepSet> {
+        let mut s = s.clone();
+        s.insert(Dep::new(dep));
+        Custom::from(s.into())
+    }
+
+    fn hh_dep_set_union(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
+        let s1 = s1.clone();
+        let s2 = s2.clone();
+        Custom::from(s1.union(s2).into())
+    }
+
+    fn hh_dep_set_inter(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
+        let s1 = s1.clone();
+        let s2 = s2.clone();
+        Custom::from(s1.intersection(s2).into())
+    }
+
+    fn hh_dep_set_diff(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
+        let s1 = s1.clone();
+        let s2 = s2.clone();
+        Custom::from(s1.difference(s2).into())
+    }
+
+    fn hh_dep_set_mem(s: Custom<DepSet>, dep: u64) -> bool {
+        s.contains(&Dep::new(dep))
+    }
+
+    fn hh_dep_set_elements(s: Custom<DepSet>) -> Vec<u64> {
+        s.iter().copied().map(|x| x.into()).collect()
+    }
+
+     fn hh_dep_set_cardinal(s: Custom<DepSet>) -> usize {
+         s.len()
+     }
+
+     fn hh_dep_set_is_empty(s: Custom<DepSet>) -> bool {
+         s.is_empty()
+     }
 }
 
 #[cfg(all(test, use_unstable_features))]

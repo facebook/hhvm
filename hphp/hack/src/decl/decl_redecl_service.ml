@@ -36,7 +36,9 @@ let shallow_decl_enabled (ctx : Provider_context.t) =
 (*****************************************************************************)
 let on_the_fly_neutral = Errors.empty
 
-let compute_deps_neutral = (DepSet.empty, DepSet.empty, DepSet.empty)
+let compute_deps_neutral =
+  let empty = DepSet.make () in
+  (empty, empty, empty)
 
 (*****************************************************************************)
 (* This is the place where we are going to put everything necessary for
@@ -177,7 +179,8 @@ let compute_deps ctx ~conservative_redecl fast (filel : Relative_path.t list) =
   let { FileInfo.n_classes; n_record_defs; n_funs; n_types; n_consts } =
     names
   in
-  let acc = (DepSet.empty, DepSet.empty, DepSet.empty) in
+  let empty = DepSet.make () in
+  let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
   let acc = compute_funs_deps ~conservative_redecl old_funs acc n_funs in
@@ -412,11 +415,14 @@ let get_maybe_dependent_classes
   |> SSet.elements
 
 let get_dependent_classes_files (classes : SSet.t) : Relative_path.Set.t =
-  let visited = ref Typing_deps.DepSet.empty in
-  SSet.fold classes ~init:Typing_deps.DepSet.empty ~f:(fun c acc ->
+  let visited = VisitedSet.make () in
+  SSet.fold
+    classes
+    ~init:Typing_deps.(DepSet.make ())
+    ~f:(fun c acc ->
       let source_class = Dep.make (Dep.Class c) in
       Typing_deps.get_extend_deps ~visited ~source_class ~acc)
-  |> Typing_deps.get_files
+  |> Typing_deps.Files.get_files
 
 let filter_dependent_classes
     (ctx : Provider_context.t)
@@ -615,7 +621,7 @@ let redo_type_decl
       let to_recheck = DepSet.union to_recheck needs_recheck in
       let mro_invalidated =
         mro_invalidated
-        |> Typing_deps.get_files
+        |> Typing_deps.Files.get_files
         |> Relative_path.Set.fold ~init:SSet.empty ~f:(fun path acc ->
                SSet.union acc (get_classes path))
       in

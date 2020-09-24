@@ -31,7 +31,7 @@ let intersect_with_master_deps
     Typing_deps.DepSet.diff dirty_master_deps common_deps
   in
   (* Translate the dependencies to files that need to be rechecked. *)
-  let needs_recheck = Typing_deps.get_files more_deps in
+  let needs_recheck = Typing_deps.Files.get_files more_deps in
   let needs_recheck = Relative_path.Set.diff needs_recheck rechecked_files in
   let size = Relative_path.Set.cardinal needs_recheck in
   let env =
@@ -123,7 +123,7 @@ let update_after_recheck genv env rechecked ~start_time =
         { env with init_env; full_check }
     in
     let clean_local_deps = dirty_local_deps in
-    let dirty_local_deps = Typing_deps.DepSet.empty in
+    let dirty_local_deps = Typing_deps.DepSet.make () in
     HackEventLogger.prechecked_evaluate_init t size;
     let telemetry =
       telemetry
@@ -230,7 +230,7 @@ let expand_all env =
   | Initial_typechecking dirty_deps
   | Prechecked_files_ready dirty_deps ->
     let deps = Typing_deps.add_all_deps dirty_deps.dirty_master_deps in
-    let needs_recheck = Typing_deps.get_files deps in
+    let needs_recheck = Typing_deps.Files.get_files deps in
     let needs_recheck =
       Relative_path.Set.diff needs_recheck dirty_deps.rechecked_files
     in
@@ -250,4 +250,4 @@ let expand_all env =
     set
       env
       (Prechecked_files_ready
-         { dirty_deps with dirty_master_deps = Typing_deps.DepSet.empty })
+         { dirty_deps with dirty_master_deps = Typing_deps.DepSet.make () })

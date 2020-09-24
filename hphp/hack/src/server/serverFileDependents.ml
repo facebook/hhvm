@@ -19,8 +19,8 @@ let deps_of_paths workers naming_table relative_paths =
       List.filter_map ~f:(Naming_table.get_file_info naming_table) paths
     in
     let initial_deps =
-      List.fold_left fileinfos ~init:DepSet.empty ~f:(fun acc fileinfo ->
-          DepSet.union acc (Typing_deps.deps_of_file_info fileinfo))
+      List.fold_left fileinfos ~init:(DepSet.make ()) ~f:(fun acc fileinfo ->
+          DepSet.union acc (Typing_deps.Files.deps_of_file_info fileinfo))
     in
     DepSet.union acc (Typing_deps.add_all_deps initial_deps)
   in
@@ -28,11 +28,11 @@ let deps_of_paths workers naming_table relative_paths =
     MultiWorker.call
       workers
       ~job:find_dependencies
-      ~neutral:DepSet.empty
+      ~neutral:(DepSet.make ())
       ~merge:DepSet.union
       ~next:(MultiWorker.next workers relative_paths)
   in
-  all_deps |> Typing_deps.get_files |> Relative_path.Set.elements
+  all_deps |> Typing_deps.Files.get_files |> Relative_path.Set.elements
 
 let go (genv : ServerEnv.genv) (env : ServerEnv.env) (filenames : string list) =
   let workers = genv.ServerEnv.workers in

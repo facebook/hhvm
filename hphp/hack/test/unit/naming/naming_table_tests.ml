@@ -601,7 +601,7 @@ let test_naming_table_query_by_dep_hash () =
           Relative_path.from_root "baz.php";
           Relative_path.from_root "qux.php";
         ]
-        ( Typing_deps.DepSet.empty
+        ( Typing_deps.DepSet.make ()
         |> Typing_deps.DepSet.union
              ( Typing_deps.Dep.GConst "\\Qux"
              |> Typing_deps.Dep.make

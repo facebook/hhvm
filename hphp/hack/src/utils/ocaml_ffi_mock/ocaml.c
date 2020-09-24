@@ -50,5 +50,11 @@ void caml_raise_zero_divide(void) {}
 void caml_named_value(void) {}
 void caml_callbackN(void) {}
 void caml_raise_with_string(void) {}
+void caml_register_custom_operations() {}
+void caml_serialize_block_1() {}
+void caml_serialize_int_8() {}
+void caml_deserialize_sint_8() {}
+void caml_deserialize_block_1() {}
+
 
 int ocamlpool_generation = 0;

@@ -10,9 +10,19 @@ open Hh_core
 open Reordered_argument_collections
 open Utils
 
-(**********************************)
-(* Handling dependencies *)
-(**********************************)
+(***********************************************)
+(* Which dependency graph format are we using? *)
+(***********************************************)
+type mode =
+  | SQLiteMode  (** Legacy mode, with SQLite saved-state dependency graph *)
+  | CustomMode  (** Custom mode, with the new custom dependency graph format *)
+
+(** Which mode is active? *)
+let mode = ref SQLiteMode
+
+(******************************************)
+(* Handling dependencies and their hashes *)
+(******************************************)
 module Dep = struct
   type dependent
 
@@ -138,10 +148,164 @@ module Dep = struct
     prefix ^ " " ^ extract_name dep
 end
 
-module DepSet = struct
+(***********************************************)
+(* Dependency tracing                          *)
+(***********************************************)
+
+(** Whether or not to trace new dependency edges *)
+let trace = ref true
+
+(** List of callbacks, called when discovering dependency edges *)
+let dependency_callbacks = Caml.Hashtbl.create 0
+
+let add_dependency_callback cb_name cb =
+  Caml.Hashtbl.replace dependency_callbacks cb_name cb
+
+(** Set of dependencies as used in the legacy SQLite system. *)
+module SQLiteDepSet = struct
   include Reordered_argument_set (Set.Make (Dep))
 
+  let make () = empty
+
   let pp = make_pp (fun fmt -> Format.fprintf fmt "%d")
+end
+
+(** Set of dependencies used for the custom system
+
+    The type `t` is an abstract type managed by `typing_deps.rs`.
+    It is a pointer to an `OrdSet<Dep>`, a persistent Rust map *)
+module CustomDepSet = struct
+  type t (* Abstract type *)
+
+  type elt = Dep.t
+
+  external make : unit -> t = "hh_dep_set_make"
+
+  external singleton : elt -> t = "hh_dep_set_singleton"
+
+  external add : t -> elt -> t = "hh_dep_set_add"
+
+  external union : t -> t -> t = "hh_dep_set_union"
+
+  external inter : t -> t -> t = "hh_dep_set_inter"
+
+  external diff : t -> t -> t = "hh_dep_set_diff"
+
+  external mem : t -> elt -> bool = "hh_dep_set_mem"
+
+  external elements : t -> elt list = "hh_dep_set_elements"
+
+  external cardinal : t -> int = "hh_dep_set_cardinal"
+
+  external is_empty : t -> bool = "hh_dep_set_is_empty"
+
+  let iter s ~f = List.iter (elements s) ~f
+
+  let fold : 'a. t -> init:'a -> f:(elt -> 'a -> 'a) -> 'a =
+   fun s ~init ~f ->
+    let l = elements s in
+    List.fold l ~init ~f:(fun x acc -> f acc x)
+end
+
+(** Unified interface for `SQLiteDepSet` and `CustomDepSet`
+
+    The actual representation dependends on the value in `mode`. *)
+module DepSet = struct
+  type t =
+    | SQLiteDepSet of SQLiteDepSet.t
+    | CustomDepSet of CustomDepSet.t
+
+  type elt = Dep.t
+
+  let make () =
+    match !mode with
+    | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.make ())
+    | CustomMode -> CustomDepSet (CustomDepSet.make ())
+
+  let singleton elt =
+    match !mode with
+    | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.singleton elt)
+    | CustomMode -> CustomDepSet (CustomDepSet.singleton elt)
+
+  let add s x =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet (SQLiteDepSet.add s x)
+    | CustomDepSet s -> CustomDepSet (CustomDepSet.add s x)
+
+  let union s1 s2 =
+    match (s1, s2) with
+    | (SQLiteDepSet s1, SQLiteDepSet s2) ->
+      SQLiteDepSet (SQLiteDepSet.union s1 s2)
+    | (CustomDepSet s1, CustomDepSet s2) ->
+      CustomDepSet (CustomDepSet.union s1 s2)
+    | _ -> failwith "incompatible dependency sets"
+
+  let inter s1 s2 =
+    match (s1, s2) with
+    | (SQLiteDepSet s1, SQLiteDepSet s2) ->
+      SQLiteDepSet (SQLiteDepSet.inter s1 s2)
+    | (CustomDepSet s1, CustomDepSet s2) ->
+      CustomDepSet (CustomDepSet.inter s1 s2)
+    | _ -> failwith "incompatible dependency sets"
+
+  let diff s1 s2 =
+    match (s1, s2) with
+    | (SQLiteDepSet s1, SQLiteDepSet s2) ->
+      SQLiteDepSet (SQLiteDepSet.diff s1 s2)
+    | (CustomDepSet s1, CustomDepSet s2) ->
+      CustomDepSet (CustomDepSet.diff s1 s2)
+    | _ -> failwith "incompatible dependency sets"
+
+  let iter s ~f =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.iter s ~f
+    | CustomDepSet s -> CustomDepSet.iter s ~f
+
+  let fold : 'a. t -> init:'a -> f:(elt -> 'a -> 'a) -> 'a =
+   fun s ~init ~f ->
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.fold s ~init ~f
+    | CustomDepSet s -> CustomDepSet.fold s ~init ~f
+
+  let mem s elt =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.mem s elt
+    | CustomDepSet s -> CustomDepSet.mem s elt
+
+  let elements s =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.elements s
+    | CustomDepSet s -> CustomDepSet.elements s
+
+  let cardinal s =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.cardinal s
+    | CustomDepSet s -> CustomDepSet.cardinal s
+
+  let is_empty s =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.is_empty s
+    | CustomDepSet s -> CustomDepSet.is_empty s
+
+  let pp fmt s =
+    match s with
+    | SQLiteDepSet s -> SQLiteDepSet.pp fmt s
+    | CustomDepSet _s -> failwith ""
+end
+
+module VisitedSet = struct
+  type custom_t (* abstract type managed by Rust, RefCell<BTreeSet<Dep>> *)
+
+  external hh_visited_set_make : unit -> custom_t = "hh_visited_set_make"
+
+  type t =
+    | SQLiteVisitedSet of SQLiteDepSet.t ref
+    | CustomVisitedSet of custom_t
+
+  let make () : t =
+    match !mode with
+    | SQLiteMode -> SQLiteVisitedSet (ref (SQLiteDepSet.make ()))
+    | CustomMode -> CustomVisitedSet (hh_visited_set_make ())
 end
 
 module NamingHash = struct
@@ -229,21 +393,22 @@ module NamingHash = struct
   let to_int64 (t : t) : int64 = t
 end
 
-(****************************************************************************)
-(* Module for a compact graph. *)
-(* Please consult hh_shared.c for the underlying representation. *)
-(****************************************************************************)
-module Graph = struct
+(** Graph management in the legacy SQLite system.
+
+    Consult hh_shared.c for the underlying representation. *)
+module SQLiteGraph = struct
+  module DepSet = SQLiteDepSet
+
   external hh_add_dep : int -> unit = "hh_add_dep"
 
   external hh_get_dep : int -> int list = "hh_get_dep"
 
   external hh_get_dep_sqlite : int -> int list = "hh_get_dep_sqlite"
 
-  external hh_allow_dependency_table_reads : bool -> bool
+  external allow_dependency_table_reads : bool -> bool
     = "hh_allow_dependency_table_reads"
 
-  external hh_assert_allow_dependency_table_reads : unit -> unit
+  external assert_allow_dependency_table_reads : unit -> unit
     = "hh_assert_allow_dependency_table_reads"
 
   let hh_add_dep x = WorkerCancel.with_worker_exit (fun () -> hh_add_dep x)
@@ -253,187 +418,277 @@ module Graph = struct
   let add x y = hh_add_dep ((x lsl 31) lor y)
 
   let get x =
-    hh_assert_allow_dependency_table_reads ();
-    let deps = DepSet.empty in
+    assert_allow_dependency_table_reads ();
+    let deps = DepSet.make () in
     let deps = List.fold_left ~init:deps ~f:DepSet.add (hh_get_dep x) in
     let deps = List.fold_left ~init:deps ~f:DepSet.add (hh_get_dep_sqlite x) in
     deps
-end
 
-(*****************************************************************************)
-(* Module keeping track of what object depends on what. *)
-(*****************************************************************************)
-
-external load_custom_dep_graph : string -> (unit, string) result
-  = "hh_load_custom_dep_graph"
-
-let allow_dependency_table_reads = Graph.hh_allow_dependency_table_reads
-
-let get_ideps_from_hash x =
-  (* FIXME: It shouldn't be necessary to add x to the result set here. We do so
+  let get_ideps_from_hash x =
+    (* FIXME: It shouldn't be necessary to add x to the result set here. We do so
      because historically, we added self-referential edges to the dependency
      graph (e.g., Class "\Foo" -> Class "\Foo"). We no longer do this in order
      to save memory, but we aren't yet confident that these edges were not
      relied upon anywhere. *)
-  DepSet.add (Graph.get x) x
+    SQLiteDepSet.add (get x) x
 
-let get_ideps x = get_ideps_from_hash (Dep.make x)
+  let add_idep_directly_to_graph ~(dependent : Dep.t) ~(dependency : Dep.t) :
+      unit =
+    add dependency dependent
 
-let trace = ref true
+  let add_idep
+      (dependent : Dep.dependent Dep.variant)
+      (dependency : Dep.dependency Dep.variant) =
+    if Dep.variant_equals dependent dependency then
+      ()
+    else (
+      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+      if !trace then
+        add_idep_directly_to_graph
+          ~dependent:(Dep.make dependent)
+          ~dependency:(Dep.make dependency)
+    )
 
-let dependency_callbacks = Caml.Hashtbl.create 0
+  let rec get_extend_deps ~visited ~source_class ~acc =
+    if DepSet.mem !visited source_class then
+      acc
+    else (
+      visited := DepSet.add !visited source_class;
+      let cid_hash = Dep.extends_of_class source_class in
+      let ideps = get_ideps_from_hash cid_hash in
+      DepSet.fold
+        ~f:
+          begin
+            fun obj acc ->
+            if Dep.is_class obj then
+              let acc = DepSet.add acc obj in
+              get_extend_deps visited obj acc
+            else
+              acc
+          end
+        ideps
+        ~init:acc
+    )
 
-let add_dependency_callback cb_name cb =
-  Caml.Hashtbl.replace dependency_callbacks cb_name cb
+  let add_extend_deps deps =
+    let trace = ref (DepSet.make ()) in
+    DepSet.fold deps ~init:deps ~f:(fun dep acc ->
+        if not @@ Dep.is_class dep then
+          acc
+        else
+          get_extend_deps trace dep acc)
 
-let add_idep_directly_to_graph ~(dependent : Dep.t) ~(dependency : Dep.t) : unit
-    =
-  Graph.add dependency dependent
+  let add_typing_deps deps =
+    DepSet.fold deps ~init:deps ~f:(fun dep acc ->
+        DepSet.union (get_ideps_from_hash dep) acc)
 
-let add_idep
-    (dependent : Dep.dependent Dep.variant)
-    (dependency : Dep.dependency Dep.variant) =
-  if Dep.variant_equals dependent dependency then
-    ()
-  else (
-    Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
-    if !trace then
-      add_idep_directly_to_graph
-        ~dependent:(Dep.make dependent)
-        ~dependency:(Dep.make dependency)
-  )
+  let add_all_deps x = x |> add_extend_deps |> add_typing_deps
+end
+
+(** Graph management in the new system with custom file format. *)
+module CustomGraph = struct
+  module DepSet = CustomDepSet
+
+  external assert_master : unit -> unit = "assert_master"
+
+  let allow_reads_ref = ref false
+
+  let allow_dependency_table_reads flag =
+    assert_master ();
+    let prev = !allow_reads_ref in
+    allow_reads_ref := flag;
+    prev
+
+  external get_ideps_from_hash : Dep.t -> DepSet.t
+    = "hh_custom_dep_graph_get_ideps_from_hash"
+
+  external add_typing_deps : DepSet.t -> DepSet.t
+    = "hh_custom_dep_graph_add_typing_deps"
+
+  external add_extend_deps : DepSet.t -> DepSet.t
+    = "hh_custom_dep_graph_add_extend_deps"
+
+  external get_extend_deps :
+    VisitedSet.custom_t -> Dep.t -> DepSet.t -> DepSet.t
+    = "hh_custom_dep_graph_get_extend_deps"
+
+  let add_all_deps x = x |> add_extend_deps |> add_typing_deps
+end
+
+external hh_load_custom_dep_graph : string -> (unit, string) result
+  = "hh_load_custom_dep_graph"
+
+let load_custom_dep_graph : string -> (unit, string) result =
+ fun fn ->
+  let result = hh_load_custom_dep_graph fn in
+  mode := CustomMode;
+  result
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)
 (*****************************************************************************)
 
-let (ifiles : (Dep.t, Relative_path.Set.t) Hashtbl.t ref) =
-  ref (Hashtbl.create 23)
+module Files = struct
+  let ifiles : (Dep.t, Relative_path.Set.t) Hashtbl.t ref =
+    ref (Hashtbl.create 23)
 
-let get_files deps =
-  DepSet.fold
-    ~f:
-      begin
-        fun dep acc ->
-        try
-          let files = Hashtbl.find !ifiles dep in
-          Relative_path.Set.union files acc
-        with Not_found -> acc
-      end
-    deps
-    ~init:Relative_path.Set.empty
-
-let deps_of_file_info (file_info : FileInfo.t) : DepSet.t =
-  let {
-    FileInfo.funs;
-    classes;
-    record_defs;
-    typedefs;
-    consts;
-    comments = _;
-    file_mode = _;
-    hash = _;
-  } =
-    file_info
-  in
-  let consts =
-    List.fold_left
-      consts
-      ~f:
-        begin
-          fun acc (_, const_id) ->
-          DepSet.add acc (Dep.make (Dep.GConst const_id))
-        end
-      ~init:DepSet.empty
-  in
-  let funs =
-    List.fold_left
-      funs
-      ~f:
-        begin
-          fun acc (_, fun_id) ->
-          DepSet.add acc (Dep.make (Dep.Fun fun_id))
-        end
-      ~init:DepSet.empty
-  in
-  let classes =
-    List.fold_left
-      classes
-      ~f:
-        begin
-          fun acc (_, class_id) ->
-          DepSet.add acc (Dep.make (Dep.Class class_id))
-        end
-      ~init:DepSet.empty
-  in
-  let classes =
-    List.fold_left
-      record_defs
-      ~f:
-        begin
-          fun acc (_, type_id) ->
-          DepSet.add acc (Dep.make (Dep.Class type_id))
-        end
-      ~init:classes
-  in
-  let classes =
-    List.fold_left
-      typedefs
-      ~f:
-        begin
-          fun acc (_, type_id) ->
-          DepSet.add acc (Dep.make (Dep.Class type_id))
-        end
-      ~init:classes
-  in
-  let defs = DepSet.union funs classes in
-  let defs = DepSet.union defs consts in
-  defs
-
-let update_file filename info =
-  DepSet.iter (deps_of_file_info info) ~f:(fun def ->
-      let previous =
-        try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
-      in
-      Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
-
-let rec get_extend_deps ~visited ~source_class ~acc =
-  if DepSet.mem !visited source_class then
-    acc
-  else (
-    visited := DepSet.add !visited source_class;
-    let cid_hash = Dep.extends_of_class source_class in
-    let ideps = get_ideps_from_hash cid_hash in
+  let get_files deps =
     DepSet.fold
       ~f:
         begin
-          fun obj acc ->
-          if Dep.is_class obj then
-            let acc = DepSet.add acc obj in
-            get_extend_deps visited obj acc
-          else
-            acc
+          fun dep acc ->
+          try
+            let files = Hashtbl.find !ifiles dep in
+            Relative_path.Set.union files acc
+          with Not_found -> acc
         end
-      ideps
-      ~init:acc
-  )
+      deps
+      ~init:Relative_path.Set.empty
 
-let add_extend_deps deps =
-  let trace = ref DepSet.empty in
-  DepSet.fold deps ~init:deps ~f:(fun dep acc ->
-      if not @@ Dep.is_class dep then
-        acc
-      else
-        get_extend_deps trace dep acc)
+  let deps_of_file_info (file_info : FileInfo.t) : DepSet.t =
+    let {
+      FileInfo.funs;
+      classes;
+      record_defs;
+      typedefs;
+      consts;
+      comments = _;
+      file_mode = _;
+      hash = _;
+    } =
+      file_info
+    in
+    let empty = DepSet.make () in
+    let consts =
+      List.fold_left
+        consts
+        ~f:
+          begin
+            fun acc (_, const_id) ->
+            DepSet.add acc (Dep.make (Dep.GConst const_id))
+          end
+        ~init:empty
+    in
+    let funs =
+      List.fold_left
+        funs
+        ~f:
+          begin
+            fun acc (_, fun_id) ->
+            DepSet.add acc (Dep.make (Dep.Fun fun_id))
+          end
+        ~init:empty
+    in
+    let classes =
+      List.fold_left
+        classes
+        ~f:
+          begin
+            fun acc (_, class_id) ->
+            DepSet.add acc (Dep.make (Dep.Class class_id))
+          end
+        ~init:empty
+    in
+    let classes =
+      List.fold_left
+        record_defs
+        ~f:
+          begin
+            fun acc (_, type_id) ->
+            DepSet.add acc (Dep.make (Dep.Class type_id))
+          end
+        ~init:classes
+    in
+    let classes =
+      List.fold_left
+        typedefs
+        ~f:
+          begin
+            fun acc (_, type_id) ->
+            DepSet.add acc (Dep.make (Dep.Class type_id))
+          end
+        ~init:classes
+    in
+    let defs = DepSet.union funs classes in
+    let defs = DepSet.union defs consts in
+    defs
 
-let add_typing_deps deps =
-  DepSet.fold deps ~init:deps ~f:(fun dep acc ->
-      DepSet.union (get_ideps_from_hash dep) acc)
-
-let add_all_deps x = x |> add_extend_deps |> add_typing_deps
+  let update_file filename info =
+    DepSet.iter (deps_of_file_info info) ~f:(fun def ->
+        let previous =
+          try Hashtbl.find !ifiles def
+          with Not_found -> Relative_path.Set.empty
+        in
+        Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
+end
 
 module ForTest = struct
   let compute_dep_hash = Dep.make
 
   let combine_hashes = NamingHash.combine_hashes
 end
+
+(** As part of few optimizations (prechecked files, interruptible typechecking), we
+    allow the dependency table to get out of date (in order to be able to prioritize
+    other work, like reporting errors in currently open file). This flag is there
+    to avoid accidental reads of this stale data - anyone attempting to do so would
+    either acknowledge that they don't care about accuracy (by setting this flag
+    themselves), or plug in to a hh_server mechanic that will delay executing such
+    command until dependency table is back up to date.
+
+    TODO: For SQLiteMode, this flag lives in shared memory. Yet, I think dependencies
+    are only read from the master thread (proof: g_db in hh_shared.c is NOT in
+    shared memory!). In any case this mechanism should be cleaned up.
+    *)
+let allow_dependency_table_reads flag =
+  match !mode with
+  | SQLiteMode -> SQLiteGraph.allow_dependency_table_reads flag
+  | CustomMode -> CustomGraph.allow_dependency_table_reads flag
+
+let add_idep dependent dependency =
+  match !mode with
+  | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
+  | CustomMode -> failwith "add_idep not implemented"
+
+let add_idep_directly_to_graph ~dependent ~dependency =
+  match !mode with
+  | SQLiteMode -> SQLiteGraph.add_idep_directly_to_graph ~dependent ~dependency
+  | CustomMode -> failwith "add_idep not implemented"
+
+let get_ideps_from_hash hash =
+  let open DepSet in
+  match !mode with
+  | SQLiteMode -> SQLiteDepSet (SQLiteGraph.get_ideps_from_hash hash)
+  | CustomMode -> CustomDepSet (CustomGraph.get_ideps_from_hash hash)
+
+let get_ideps dependency = get_ideps_from_hash (Dep.make dependency)
+
+let get_extend_deps ~visited ~source_class ~acc =
+  let open DepSet in
+  let open VisitedSet in
+  match (visited, acc) with
+  | (SQLiteVisitedSet visited, SQLiteDepSet acc) ->
+    let acc = SQLiteGraph.get_extend_deps ~visited ~source_class ~acc in
+    SQLiteDepSet acc
+  | (CustomVisitedSet visited, CustomDepSet acc) ->
+    let acc = CustomGraph.get_extend_deps visited source_class acc in
+    CustomDepSet acc
+  | _ -> failwith "incompatible dep set types"
+
+let add_extend_deps acc =
+  let open DepSet in
+  match acc with
+  | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_extend_deps acc)
+  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_extend_deps acc)
+
+let add_typing_deps acc =
+  let open DepSet in
+  match acc with
+  | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_typing_deps acc)
+  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_typing_deps acc)
+
+let add_all_deps acc =
+  let open DepSet in
+  match acc with
+  | SQLiteDepSet acc -> SQLiteDepSet (SQLiteGraph.add_all_deps acc)
+  | CustomDepSet acc -> CustomDepSet (CustomGraph.add_all_deps acc)

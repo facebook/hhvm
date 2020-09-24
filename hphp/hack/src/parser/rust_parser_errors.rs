@@ -1518,6 +1518,7 @@ where
             || name == sn::user_attributes::PURE
             || name == sn::user_attributes::CIPP
             || name == sn::user_attributes::CIPP_LOCAL
+            || name == sn::user_attributes::CIPP_GLOBAL
     }
 
     fn is_some_reactivity_attribute(&self, node: &'a Syntax<Token, Value>) -> bool {

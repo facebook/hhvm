@@ -1,0 +1,2 @@
+File "parse_multiple9.php", line 3, characters 1-16:
+Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`, `__CippGlobal`. (Parsing[1002])

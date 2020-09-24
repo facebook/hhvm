@@ -1877,7 +1877,25 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Tuple
             | TokenKind::Classname
             | TokenKind::SelfToken => Node::Name(self.alloc((token_text(self), token_pos(self)))),
-            TokenKind::XHPClassName | TokenKind::XHP | TokenKind::XHPElementName => {
+            TokenKind::XHPClassName => {
+                let name = token_text(self);
+                let pos = token_pos(self);
+                if self.state.previous_token_kind == TokenKind::Class
+                    || self.state.previous_token_kind == TokenKind::Trait
+                    || self.state.previous_token_kind == TokenKind::Interface
+                {
+                    self.state
+                        .classish_name_builder
+                        .lexed_name_after_classish_keyword(
+                            self.state.arena,
+                            name,
+                            pos,
+                            self.state.previous_token_kind,
+                        );
+                }
+                Node::XhpName(self.alloc((name, pos)))
+            }
+            TokenKind::XHP | TokenKind::XHPElementName => {
                 Node::XhpName(self.alloc((token_text(self), token_pos(self))))
             }
             TokenKind::SingleQuotedStringLiteral => Node::StringLiteral(

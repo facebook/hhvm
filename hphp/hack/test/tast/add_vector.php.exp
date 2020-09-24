@@ -117,7 +117,8 @@
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_pu_enums = [];
       c_doc_comment =
-      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
+      (Some ([12:1-26:2],
+             "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"));
       c_emit_id = None });
   (Class
      { c_span = [28:1-11]; c_annotation = (); c_mode = Mstrict;

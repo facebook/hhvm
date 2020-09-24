@@ -5,6 +5,7 @@
 
 use serde::Serialize;
 
+use crate::gen::ast_defs::Pstring;
 use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
@@ -20,12 +21,12 @@ use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
     Serialize,
     ToOcamlRep
 )]
-pub struct DocComment<'a>(pub &'a str);
+pub struct DocComment<'a>(pub &'a Pstring<'a>);
 
 impl arena_trait::TrivialDrop for DocComment<'_> {}
 
 impl<'a> DocComment<'a> {
-    pub fn new(s: &'a str) -> Self {
-        Self(s)
+    pub fn new(ps: &'a Pstring) -> Self {
+        Self(ps)
     }
 }

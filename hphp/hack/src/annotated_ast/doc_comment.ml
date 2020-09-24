@@ -6,4 +6,4 @@
  *
  *)
 
-type t = string [@@deriving eq, show, ord]
+type t = Ast_defs.pstring [@@deriving eq, show, ord]

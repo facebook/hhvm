@@ -23,7 +23,7 @@ encountering symbols of a given type. *)
 let process_doc_comment comment decl_pos decl_ref_json prog =
   match comment with
   | None -> prog
-  | Some doc ->
+  | Some (_, doc) ->
     if phys_equal (String.length doc) 0 then
       prog
     else

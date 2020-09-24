@@ -473,7 +473,7 @@ fn print_type_constant<W: Write>(
 
 fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty) -> Result<(), W::Error> {
     if let Some(s) = p.doc_comment.as_ref() {
-        w.write(triple_quote_string(&s.0))?;
+        w.write(triple_quote_string(&(s.0).1))?;
         w.write(" ")?;
     }
     Ok(())
@@ -590,7 +590,7 @@ fn print_doc_comment<W: Write>(
 ) -> Result<(), W::Error> {
     if let Some(cmt) = doc_comment {
         ctx.newline(w)?;
-        write!(w, ".doc {};", triple_quote_string(&cmt.0))?;
+        write!(w, ".doc {};", triple_quote_string(&(cmt.0).1))?;
     }
     Ok(())
 }

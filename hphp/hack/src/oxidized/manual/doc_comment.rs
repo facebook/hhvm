@@ -5,6 +5,7 @@
 
 use std::rc::Rc;
 
+use crate::gen::ast_defs::Pstring;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
@@ -21,10 +22,10 @@ use serde::{Deserialize, Serialize};
     PartialOrd,
     Serialize
 )]
-pub struct DocComment(pub Rc<String>);
+pub struct DocComment(pub Rc<Pstring>);
 
 impl DocComment {
-    pub fn new(s: String) -> Self {
-        Self(Rc::new(s))
+    pub fn new(ps: Pstring) -> Self {
+        Self(Rc::new(ps))
     }
 }

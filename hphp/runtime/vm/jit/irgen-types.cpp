@@ -1493,9 +1493,10 @@ void verifyPropType(IRGS& env,
       [&] {
         // Unlike the other type-hint checks, we don't punt here. We instead do
         // the check using a runtime helper. This gives us the freedom to call
-        // verifyPropType without us worrying about it punting the entire
-        // operation.
-        if (coerce && (tc->isArray() || (tc->isObject() && !tc->isResolved()))) {
+        // verifyPropType without us worrying about it punting the whole set op.
+        // This check is fragile - which type constraints coerce?
+        if (coerce && (tc->isArray() || tc->isString() ||
+                       (tc->isObject() && !tc->isResolved()))) {
           *coerce = gen(
             env,
             VerifyPropCoerce,

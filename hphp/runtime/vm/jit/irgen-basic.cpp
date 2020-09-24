@@ -122,12 +122,7 @@ void emitClassGetTS(IRGS& env) {
 }
 
 void emitCGetL(IRGS& env, NamedLocal loc) {
-  auto const value = ldLocWarn(
-    env,
-    loc,
-    nullptr,
-    DataTypeCountnessInit
-  );
+  auto const value = ldLocWarn(env, loc, nullptr, DataTypeCountnessInit);
   pushIncRef(env, value);
 }
 
@@ -135,12 +130,7 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
   pushIncRef(
     env,
     [&] {
-      auto const loc = ldLoc(
-        env,
-        id,
-        nullptr,
-        DataTypeCountness
-      );
+      auto const loc = ldLoc(env, id, nullptr, DataTypeCountnessInit);
 
       if (loc->type() <= TUninit) {
         return cns(env, TInitNull);
@@ -179,18 +169,13 @@ void emitPushL(IRGS& env, int32_t id) {
 
 void emitCGetL2(IRGS& env, NamedLocal loc) {
   auto const oldTop = pop(env, DataTypeGeneric);
-  auto const val = ldLocWarn(
-    env,
-    loc,
-    nullptr,
-    DataTypeCountnessInit
-  );
+  auto const val = ldLocWarn(env, loc, nullptr, DataTypeCountnessInit);
   pushIncRef(env, val);
   push(env, oldTop);
 }
 
 void emitUnsetL(IRGS& env, int32_t id) {
-  auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
+  auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountnessInit);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
   decRef(env, prev);
 }

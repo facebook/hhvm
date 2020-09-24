@@ -538,7 +538,7 @@ void emitAddNewElemC(IRGS& env) {
   if (!arrType.subtypeOfAny(TKeyset, TVec, TVArr)) {
     return interpOne(env);
   }
-  auto const val = popC(env, DataTypeCountness);
+  auto const val = popC(env, DataTypeGeneric);
   auto const arr = popC(env);
   push(
     env,

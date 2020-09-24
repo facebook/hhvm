@@ -480,7 +480,6 @@ void iterIfThen(IRGS& env, Branch branch, Taken taken) {
 // iterators in pseudo-mains, we can use LdLoc here without a problem.
 void iterClear(IRGS& env, uint32_t local) {
   assertx(local != kInvalidId);
-  env.irb->constrainLocal(local, DataTypeCountness, "iterClear");
   decRef(env, gen(env, LdLoc, TCell, LocalId(local), fp(env)), local);
 }
 

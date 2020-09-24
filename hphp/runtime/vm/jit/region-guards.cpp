@@ -118,9 +118,7 @@ LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
 /*
  * We consider relaxation profitable if there's not a single dominating type
  * that accounts for RuntimeOption::EvalJitPGORelaxPercent or more of the time
- * during profiling.  Besides that, if `guardCategory' is DataTypeCountness, we
- * also consider relaxing all the way to Cell, in which case `guardCategory' is
- * updated to DataTypeGeneric.
+ * during profiling.
  */
 bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
                        Type                               guardType,
@@ -144,40 +142,13 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
     if (relaxType(type, guardCategory) == relaxedType) relaxWgt += weight;
   }
 
-  // Consider relaxing Countness to Cell, which we do if the sum of the weights
-  // of all the blocks that would pass the relaxed guard would be less than a
-  // certain threshold.  We use different thresholds for counted versus
-  // uncounted types, because incref/decref are much more expensive for Cell
-  // than for uncounted (where it's a no-op).  For counted types, the difference
-  // between generic and specialized incref/decrefs is much smaller, so we're
-  // willing to relax to Cell more often for counted types.
-  bool profitable = false;
-  auto newCategory = guardCategory;
-  if (guardCategory == DataTypeCountness) {
-    const auto cntPct = RuntimeOption::EvalJitPGORelaxCountedToGenPercent;
-    const auto uncPct = RuntimeOption::EvalJitPGORelaxUncountedToGenPercent;
-    if ((guardType.maybe(TCounted)  && relaxWgt * 100 < cntPct * totalWgt) ||
-        (!guardType.maybe(TCounted) && relaxWgt * 100 < uncPct * totalWgt)) {
-      newCategory = DataTypeGeneric;
-      profitable = true;
-    }
-  }
-
-  // If we didn't relax to Cell, consider relaxing to the input guardCategory.
-  if (!profitable) {
-    if (noRelaxWgt * 100 < relaxWgt * RuntimeOption::EvalJitPGORelaxPercent) {
-      profitable = true;
-    }
-  }
-
+  // Consider relaxing to the input guardCategory.
+  auto const profitable =
+    (noRelaxWgt * 100 < relaxWgt * RuntimeOption::EvalJitPGORelaxPercent);
   FTRACE(3,
          "relaxIsProfitable({}, {}): noRelaxWgt={} ; relaxWgt={} ; totalWgt={} "
-         "=> ({}, {})\n",
-         guardType, guardCategory, noRelaxWgt, relaxWgt, totalWgt,
-         profitable, newCategory
-        );
-
-  guardCategory = newCategory;
+         "=> {}\n",
+         guardType, guardCategory, noRelaxWgt, relaxWgt, totalWgt, profitable);
   return profitable;
 }
 

@@ -407,7 +407,6 @@ inline bool fits(Type t, GuardConstraint gc) {
 
 TEST(Type, GuardConstraints) {
   EXPECT_TRUE(fits(TCell, DataTypeGeneric));
-  EXPECT_FALSE(fits(TCell, DataTypeCountness));
   EXPECT_FALSE(fits(TCell, DataTypeCountnessInit));
   EXPECT_FALSE(fits(TCell, DataTypeSpecific));
 
@@ -442,8 +441,6 @@ TEST(Type, RelaxType) {
 TEST(Type, RelaxConstraint) {
   EXPECT_EQ(GuardConstraint(DataTypeCountnessInit),
             relaxConstraint(GuardConstraint{DataTypeSpecific}, TCell, TDict));
-  EXPECT_EQ(GuardConstraint(DataTypeGeneric),
-            relaxConstraint(GuardConstraint{DataTypeCountness}, TDict, TCell));
 }
 
 TEST(Type, Specialized) {

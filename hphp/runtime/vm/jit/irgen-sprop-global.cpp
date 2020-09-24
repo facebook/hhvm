@@ -193,7 +193,7 @@ void emitSetS(IRGS& env) {
   if (!ssaPropName->isA(TStr)) PUNT(SetS-PropNameNotString);
   if (!ssaCls->isA(TCls))      PUNT(SetS-NotClass);
 
-  auto value  = popC(env, DataTypeCountness);
+  auto value  = popC(env, DataTypeGeneric);
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, true, true);
 
   if (lookup.tc) {
@@ -368,7 +368,7 @@ void emitCGetG(IRGS& env) {
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
-  auto const value   = popC(env, DataTypeCountness);
+  auto const value   = popC(env, DataTypeGeneric);
   auto const ptr = gen(env, LdGblAddrDef, name);
   destroyName(env, name);
   bindMem(env, ptr, value);

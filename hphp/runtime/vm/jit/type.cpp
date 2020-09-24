@@ -1261,9 +1261,6 @@ Type relaxType(Type t, DataTypeCategory cat) {
     case DataTypeGeneric:
       return TCell;
 
-    case DataTypeCountness:
-      return !t.maybe(TCounted) ? TUncounted : t.unspecialize();
-
     case DataTypeCountnessInit:
       if (t <= TUninit) return TUninit;
       return (!t.maybe(TCounted) && !t.maybe(TUninit))

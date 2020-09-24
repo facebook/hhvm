@@ -52,13 +52,8 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
     case DataTypeGeneric:
       return true;
 
-    case DataTypeCountness:
-      // When we use this constraint, we expect the type to either be relaxed
-      // to Uncounted or left alone, so if counted, it must have a DataType.
-      return t.isKnownDataType() || !t.maybe(TCounted);
-
     case DataTypeCountnessInit:
-      return typeFitsConstraint(t, DataTypeCountness) &&
+      return (t.isKnownDataType() || !t.maybe(TCounted)) &&
              (t <= TUninit || !t.maybe(TUninit));
 
     case DataTypeSpecific:
@@ -116,15 +111,6 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
     ITRACE(5, "newDstType = {}, newGc = {}; incrementing constraint\n",
            newDstType, newGc);
     incCategory(newGc.category);
-  }
-  // DataTypeCountness can be relaxed to DataTypeGeneric in
-  // optimizeProfiledGuards, so we can't rely on this category to give type
-  // information through guards.  Since relaxConstraint is used to relax the
-  // DataTypeCategory for guards, we cannot return DataTypeCountness unless we
-  // already had it to start with.  Instead, we return DataTypeCountnessInit,
-  // which won't be further relaxed by optimizeProfiledGuards.
-  if (newGc.category == DataTypeCountness && origGc != DataTypeCountness) {
-    newGc.category = DataTypeCountnessInit;
   }
   ITRACE(4, "Returning {}\n", newGc);
   // newGc shouldn't be any more specific than origGc.

@@ -177,7 +177,6 @@ MaybeDataType get_datatype(
 // even in the absence of type information.
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
-  func(Countness)                               \
   func(CountnessInit)                           \
   func(Specific)                                \
   func(Specialized)

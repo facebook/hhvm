@@ -2769,7 +2769,7 @@ void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
         MemoSetInstanceValue,
         MemoValueInstanceData { memoInfo.first, func, asyncEager, false },
         this_,
-        ldVal(DataTypeCountness)
+        ldVal(DataTypeGeneric)
       );
       return;
     }
@@ -2812,7 +2812,7 @@ void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
       env,
       MemoSetLSBValue,
       MemoValueStaticData { func, asyncEager, false },
-      ldVal(DataTypeCountness),
+      ldVal(DataTypeGeneric),
       lsbCls
     );
     return;
@@ -2833,7 +2833,7 @@ void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
     env,
     MemoSetStaticValue,
     MemoValueStaticData { func, asyncEager, false },
-    ldVal(DataTypeCountness)
+    ldVal(DataTypeGeneric)
   );
 }
 

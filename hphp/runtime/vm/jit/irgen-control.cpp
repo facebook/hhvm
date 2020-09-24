@@ -323,11 +323,11 @@ void emitSelect(IRGS& env) {
     env,
     [&] (Block* taken) { gen(env, JmpZero, taken, boolSrc); },
     [&] { // True case
-      auto const val = popC(env, DataTypeCountness);
-      popDecRef(env, DataTypeCountness);
+      auto const val = popC(env, DataTypeGeneric);
+      popDecRef(env, DataTypeGeneric);
       push(env, val);
     },
-    [&] { popDecRef(env, DataTypeCountness); } // False case
+    [&] { popDecRef(env, DataTypeGeneric); } // False case
   );
 }
 

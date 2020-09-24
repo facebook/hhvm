@@ -1042,6 +1042,27 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         str_from_utf8(self.state.arena, slice)
     }
 
+    fn merge(
+        &self,
+        pos1: impl Into<Option<&'a Pos<'a>>>,
+        pos2: impl Into<Option<&'a Pos<'a>>>,
+    ) -> &'a Pos<'a> {
+        match (pos1.into(), pos2.into()) {
+            (None, None) => Pos::none(),
+            (Some(pos), None) | (None, Some(pos)) => pos,
+            (Some(pos1), Some(pos2)) => Pos::merge(self.state.arena, pos1, pos2)
+                .ok()
+                .unwrap_or(Pos::none()),
+        }
+    }
+
+    fn merge_positions(&self, node1: Node<'a>, node2: Node<'a>) -> &'a Pos<'a> {
+        self.merge(
+            node1.get_pos(self.state.arena),
+            node2.get_pos(self.state.arena),
+        )
+    }
+
     fn node_to_expr(&self, node: Node<'a>) -> Option<nast::Expr<'a>> {
         let expr_ = match node {
             Node::Expr(&expr) => return Some(expr),
@@ -1562,7 +1583,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             _ => Ty_::Tapply(self.alloc((base_ty, type_arguments))),
         };
         let pos = match pos_to_merge {
-            Some(p) => unwrap_or_return!(Pos::merge(self.state.arena, base_ty.0, p).ok()),
+            Some(p) => self.merge(base_ty.0, p),
             None => base_ty.0,
         };
         self.hint_ty(pos, ty_)
@@ -2268,12 +2289,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             n => panic!("Expected a ListItem but was {:?}", n),
         }));
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(darray.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_bracket.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(darray, right_bracket),
             nast::Expr_::Darray(self.alloc((None, fields))),
         )))
     }
@@ -2295,12 +2311,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             n => panic!("Expected a ListItem but was {:?}", n),
         }));
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(dict.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_bracket.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(dict, right_bracket),
             nast::Expr_::KeyValCollection(self.alloc((aast_defs::KvcKind::Dict, None, fields))),
         )))
     }
@@ -2315,12 +2326,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = unwrap_or_return!(self.map_to_slice(fields, |node| self.node_to_expr(node)));
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(keyset.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_bracket.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(keyset, right_bracket),
             nast::Expr_::ValCollection(self.alloc((aast_defs::VcKind::Keyset, None, fields))),
         )))
     }
@@ -2335,12 +2341,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = unwrap_or_return!(self.map_to_slice(fields, |node| self.node_to_expr(node)));
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(varray.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_bracket.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(varray, right_bracket),
             nast::Expr_::Varray(self.alloc((None, fields))),
         )))
     }
@@ -2355,12 +2356,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = unwrap_or_return!(self.map_to_slice(fields, |node| self.node_to_expr(node)));
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(vec.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_bracket.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(vec, right_bracket),
             nast::Expr_::ValCollection(self.alloc((aast_defs::VcKind::Vec, None, fields))),
         )))
     }
@@ -2375,14 +2371,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(op.get_pos(self.state.arena)),
-                unwrap_or_return!(value.get_pos(self.state.arena))
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(op, value);
         let op = match &op {
             Node::Operator(&(_, op)) => match op {
                 TokenKind::Tilde => Uop::Utild,
@@ -2403,14 +2392,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(value.get_pos(self.state.arena)),
-                unwrap_or_return!(op.get_pos(self.state.arena))
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(value, op);
         let op = match &op {
             Node::Operator(&(_, op)) => match op {
                 TokenKind::PlusPlus => Uop::Upincr,
@@ -2459,20 +2441,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => {}
         }
 
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(
-                    Pos::merge(
-                        self.state.arena,
-                        unwrap_or_return!(lhs.get_pos(self.state.arena)),
-                        unwrap_or_return!(op_node.get_pos(self.state.arena))
-                    )
-                    .ok()
-                ),
-                unwrap_or_return!(rhs.get_pos(self.state.arena)),
-            )
-            .ok()
+        let pos = self.merge(
+            self.merge_positions(lhs, op_node),
+            rhs.get_pos(self.state.arena),
         );
 
         Node::Expr(self.alloc(aast::Expr(
@@ -2491,15 +2462,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         expr: Self::R,
         rparen: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(lparen.get_pos(self.state.arena));
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                pos,
-                unwrap_or_return!(rparen.get_pos(self.state.arena))
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(lparen, rparen);
         Node::Expr(self.alloc(aast::Expr(
             pos,
             unwrap_or_return!(self.node_to_expr(expr)).1,
@@ -2535,14 +2498,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let unqualified_id = unwrap_or_return!(self.get_name("", class_type));
         if unqualified_id.1.trim_start_matches("\\") == "varray_or_darray" {
-            let pos = unwrap_or_return!(
-                Pos::merge(
-                    self.state.arena,
-                    unqualified_id.0,
-                    unwrap_or_return!(type_arguments.get_pos(self.state.arena)),
-                )
-                .ok()
-            );
+            let pos = self.merge(unqualified_id.0, type_arguments.get_pos(self.state.arena));
             let type_arguments = type_arguments.as_slice(self.state.arena);
             let ty_ = match type_arguments {
                 [tk, tv] => Ty_::TvarrayOrDarray(self.alloc((
@@ -3650,14 +3606,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(left_paren, right_paren);
         let tys = unwrap_or_return!(
             self.maybe_slice_from_iter(tys.iter().map(|&node| self.node_to_ty(node)))
         );
@@ -3670,14 +3619,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tys: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(left_paren, right_paren);
         let tys = unwrap_or_return!(
             self.maybe_slice_from_iter(
                 tys.iter()
@@ -3697,14 +3639,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tys: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(left_paren, right_paren);
         let tys = unwrap_or_return!(
             self.maybe_slice_from_iter(
                 tys.iter()
@@ -3741,14 +3676,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node::Token(TokenKind::DotDotDot) => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
         };
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(shape.get_pos(self.state.arena)),
-                unwrap_or_return!(rparen.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(shape, rparen);
         self.hint_ty(pos, Ty_::Tshape(self.alloc((kind, fields.into()))))
     }
 
@@ -3771,12 +3699,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }))
             );
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(shape.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(shape, right_paren),
             nast::Expr_::Shape(fields),
         )))
     }
@@ -3792,12 +3715,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.maybe_slice_from_iter(fields.iter().map(|&field| self.node_to_expr(field)))
         );
         Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(tuple.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-                )
-                .ok()),
+            self.merge_positions(tuple, right_paren),
             nast::Expr_::List(fields),
         )))
     }
@@ -3817,14 +3735,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.make_apply(
                 Id(id.0, self.state.namespace_builder.rename_import(id.1)),
                 targ,
-                Some(unwrap_or_return!(
-                    Pos::merge(
-                        self.state.arena,
-                        unwrap_or_return!(classname.get_pos(self.state.arena)),
-                        unwrap_or_return!(gt.get_pos(self.state.arena)),
-                    )
-                    .ok()
-                )),
+                Some(self.merge_positions(classname, gt)),
             )
         }
     }
@@ -3835,14 +3746,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg1: Self::R,
         value: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(class_name.get_pos(self.state.arena)),
-                unwrap_or_return!(value.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(class_name, value);
         let Id(class_name_pos, class_name_str) = unwrap_or_return!(
             self.get_name(self.state.namespace_builder.current_namespace(), class_name)
         );
@@ -3890,14 +3794,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(varray.get_pos(self.state.arena));
-        let pos = if let Some(gt_pos) = greater_than.get_pos(self.state.arena) {
-            unwrap_or_return!(Pos::merge(self.state.arena, pos, gt_pos).ok())
-        } else {
-            pos
-        };
         self.hint_ty(
-            pos,
+            self.merge_positions(varray, greater_than),
             Ty_::Tvarray(unwrap_or_return!(self.node_to_ty(tparam))),
         )
     }
@@ -3909,12 +3807,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tparam: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(array.get_pos(self.state.arena));
-        let pos = if let Some(gt_pos) = greater_than.get_pos(self.state.arena) {
-            unwrap_or_return!(Pos::merge(self.state.arena, pos, gt_pos).ok())
-        } else {
-            pos
-        };
+        let pos = self.merge_positions(array, greater_than);
         let key_type = self.node_to_ty(tparam);
         self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, None))))
     }
@@ -3929,12 +3822,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg5: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(darray.get_pos(self.state.arena));
-        let pos = if let Some(gt_pos) = greater_than.get_pos(self.state.arena) {
-            unwrap_or_return!(Pos::merge(self.state.arena, pos, gt_pos).ok())
-        } else {
-            pos
-        };
+        let pos = self.merge_positions(darray, greater_than);
         let key_type = self.node_to_ty(key_type).unwrap_or(TANY);
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
         self.hint_ty(pos, Ty_::Tdarray(self.alloc((key_type, value_type))))
@@ -3949,14 +3837,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         value_type: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(array.get_pos(self.state.arena)),
-                unwrap_or_return!(greater_than.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(array, greater_than);
         let key_type = self.node_to_ty(key_type);
         let value_type = self.node_to_ty(value_type);
         self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, value_type))))
@@ -4052,29 +3933,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_nullable_type_specifier(&mut self, question_mark: Self::R, hint: Self::R) -> Self::R {
-        let hint_pos = unwrap_or_return!(hint.get_pos(self.state.arena));
         self.hint_ty(
-            unwrap_or_return!(
-                Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(question_mark.get_pos(self.state.arena)),
-                    hint_pos,
-                )
-                .ok()
-            ),
+            self.merge_positions(question_mark, hint),
             Ty_::Toption(unwrap_or_return!(self.node_to_ty(hint))),
         )
     }
 
     fn make_like_type_specifier(&mut self, tilde: Self::R, type_: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(tilde.get_pos(self.state.arena)),
-                unwrap_or_return!(type_.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(tilde, type_);
         self.hint_ty(pos, Ty_::Tlike(unwrap_or_return!(self.node_to_ty(type_))))
     }
 
@@ -4131,14 +3997,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         let (hint, mutability) = Self::unwrap_mutability(ret_hint);
         let ret = unwrap_or_return!(self.node_to_ty(hint));
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(left_paren, right_paren);
         let implicit_params = self.as_fun_implicit_params(Node::Ignored, pos);
 
         let mut flags = FunTypeFlags::empty();
@@ -4251,14 +4110,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         constant_name: Self::R,
     ) -> Self::R {
         let id = unwrap_or_return!(self.get_name("", constant_name));
-        let pos = unwrap_or_return!(
-            Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(ty.get_pos(self.state.arena)),
-                unwrap_or_return!(constant_name.get_pos(self.state.arena)),
-            )
-            .ok()
-        );
+        let pos = self.merge_positions(ty, constant_name);
         match ty {
             Node::TypeconstAccess(innards) => {
                 innards.0.set(pos);
@@ -4301,22 +4153,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {
-        let hint_pos = unwrap_or_return!(hint.get_pos(self.state.arena));
+        let pos = self.merge_positions(at_token, hint);
         let hint = unwrap_or_return!(self.node_to_ty(hint));
         // Use the type of the hint as-is (i.e., throw away the knowledge that
         // we had a soft type specifier here--the typechecker does not use it).
         // Replace its Reason with one including the position of the `@` token.
-        self.hint_ty(
-            unwrap_or_return!(
-                Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(at_token.get_pos(self.state.arena)),
-                    hint_pos,
-                )
-                .ok()
-            ),
-            *hint.1,
-        )
+        self.hint_ty(pos, *hint.1)
     }
 
     // A type specifier preceded by an attribute list. At the time of writing,
@@ -4331,18 +4173,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 })],
                 gtgt_pos,
             )) => {
-                let attributes_pos =
-                    unwrap_or_return!(Pos::merge(self.state.arena, *ltlt_pos, *gtgt_pos).ok());
-                let hint_pos = unwrap_or_return!(hint.get_pos(self.state.arena));
+                let attributes_pos = self.merge(*ltlt_pos, *gtgt_pos);
+                let hint_pos = hint.get_pos(self.state.arena);
                 // Use the type of the hint as-is (i.e., throw away the
                 // knowledge that we had a soft type specifier here--the
                 // typechecker does not use it). Replace its Reason with one
                 // including the position of the attribute list.
                 let hint = unwrap_or_return!(self.node_to_ty(hint));
-                self.hint_ty(
-                    unwrap_or_return!(Pos::merge(self.state.arena, attributes_pos, hint_pos).ok()),
-                    *hint.1,
-                )
+                self.hint_ty(self.merge(attributes_pos, hint_pos), *hint.1)
             }
             _ => hint,
         }

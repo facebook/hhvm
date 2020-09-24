@@ -380,14 +380,17 @@ let union env t1 t2 =
 let get_local_type ~pos env lid =
   match Env.get_local_type env lid with
   | None ->
-    let msg = "local " ^ Local_id.get_name lid ^ " missing from env" in
-    Errors.unknown_information_flow pos msg;
+    let name = Local_id.get_name lid in
+    (* FIXME: deal with co-effect thingies *)
+    ( if not (String.equal (String.sub name ~pos:0 ~len:2) "$#") then
+      let msg = "local " ^ name ^ " missing from env" in
+      Errors.unknown_information_flow pos msg );
     None
   | pty_opt -> pty_opt
 
 (* Uses a Hack-inferred type to update the flow type of a local
    variable *)
-let refresh_local_type ~pos renv env lid lty =
+let refresh_local_type ?(force = false) ~pos renv env lid lty =
   let is_simple pty =
     match pty with
     | Tunion _ -> false
@@ -398,7 +401,7 @@ let refresh_local_type ~pos renv env lid lty =
     | Some pty -> pty
     | None -> Lift.ty renv lty
   in
-  if is_simple pty then
+  if (not force) && is_simple pty then
     (* if the type is already simple, do not refresh it with
        what Hack found *)
     (env, pty)
@@ -859,13 +862,13 @@ and stmt renv env ((pos, s) : Tast.stmt) =
   | A.Expr e ->
     let (env, _ty) = expr ~pos env e in
     env
-  | A.If ((((pos, _), _) as e), b1, b2) ->
-    let (env, ety) = expr ~pos env e in
+  | A.If ((((pos, _), _) as cond), b1, b2) ->
+    let (env, cty) = expr ~pos env cond in
     (* stash the PC so it can be restored after the if *)
     let pc = Env.get_lpc env K.Next in
     (* use object_policy to account for both booleans
        and null checks *)
-    let env = Env.push_pcs env K.Next (object_policy ety) in
+    let env = Env.push_pcs env K.Next (object_policy cty) in
     let cenv = Env.get_cenv env in
     let env = block renv (Env.set_cenv env cenv) b1 in
     let cenv1 = Env.get_cenv env in
@@ -874,6 +877,49 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     let env = Env.merge_and_set_cenv ~union env cenv1 cenv2 in
     (* Restore the program counter from before the IF *)
     Env.set_lpc env K.Next pc
+  | A.While (cond, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
+    let pos = fst (fst cond) in
+    (* build the environment with the invariant types we will
+       use to check the loop body *)
+    let env =
+      Local_id.Map.fold
+        (fun var (_, lty) env ->
+          let (env, _pty) =
+            refresh_local_type ~force:true ~pos renv env var lty
+          in
+          env)
+        tymap
+        env
+    in
+    Env.with_stashed_conts env [K.Break; K.Continue] (fun env ->
+        let beg_env = env in
+        let beg_pc = Env.get_lpc beg_env K.Next in
+        let (env, cty) = expr ~pos env cond in
+        let env = Env.push_pcs env K.Next (object_policy cty) in
+        let env = block renv env blk in
+        let env = Env.move_conts_into ~union env [K.Continue] K.Next in
+        (* issue a subtype call between the type of locals at the end of
+           the loop and their type at the beginning of the loop *)
+        let env =
+          Env.acc env
+          @@ Env.fold_locals beg_env (fun var ty_beg ->
+                 match Env.get_local_type env var with
+                 | Some ty_end -> subtype ~pos ty_end ty_beg
+                 | None -> Utils.identity)
+        in
+        (* use the locals' type from beg_env *)
+        let env =
+          Env.fold_locals
+            (* iterates over beg_env *) beg_env
+            (fun var ty_beg env -> Env.set_local_type env var ty_beg)
+            (* modifies env *) env
+        in
+        (* the break continuation is merged and the pc restored before
+           returning the env for what happens after the while() loop *)
+        let env = Env.move_conts_into ~union env [K.Break] K.Next in
+        Env.set_lpc env K.Next beg_pc)
+  | A.Break -> Env.merge_conts_into ~union env [K.Next] K.Break
+  | A.Continue -> Env.merge_conts_into ~union env [K.Next] K.Continue
   | A.Return e ->
     let env = Env.merge_conts_into ~union env [K.Next] K.Exit in
     begin
@@ -973,7 +1019,9 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     env
 
 and block renv env (blk : Tast.block) =
-  let merge_pcs env = Env.merge_pcs_into env [K.Exit; K.Catch] K.Next in
+  let merge_pcs env =
+    Env.merge_pcs_into env [K.Exit; K.Catch; K.Break; K.Continue] K.Next
+  in
   let seq env s = stmt renv env s |> merge_pcs in
   let env = merge_pcs env in
   List.fold_left ~f:seq ~init:env blk

@@ -1,0 +1,42 @@
+File "while.php", line 36, characters 3-15:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+  File "while.php", line 5, characters 17-25:
+  This may be the data source with policy `PRIVATE`
+  File "while.php", line 14, characters 19-27:
+  This may be the data sink with policy `PUBLIC`
+  File "while.php", line 30, characters 5-17:
+  Another program point contributing to the illegal flow
+File "while.php", line 48, characters 3-15:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+  File "while.php", line 5, characters 17-25:
+  This may be the data source with policy `PRIVATE`
+  File "while.php", line 14, characters 19-27:
+  This may be the data sink with policy `PUBLIC`
+  File "while.php", line 41, characters 10-11:
+  Another program point contributing to the illegal flow
+  File "while.php", line 42, characters 5-17:
+  Another program point contributing to the illegal flow
+File "while.php", line 71, characters 5-17:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+  File "while.php", line 5, characters 17-25:
+  This may be the data source with policy `PRIVATE`
+  File "while.php", line 14, characters 19-27:
+  This may be the data sink with policy `PUBLIC`
+  File "while.php", line 67, characters 10-11:
+  Another program point contributing to the illegal flow
+  File "while.php", line 68, characters 5-17:
+  Another program point contributing to the illegal flow
+  File "while.php", line 69, characters 5-12:
+  Another program point contributing to the illegal flow
+  File "while.php", line 70, characters 5-12:
+  Another program point contributing to the illegal flow
+File "while.php", line 59, characters 3-15:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+  File "while.php", line 8, characters 15-26:
+  This may be the data source with policy `PRIVATE`
+  File "while.php", line 14, characters 19-27:
+  This may be the data sink with policy `PUBLIC`
+  File "while.php", line 53, characters 10-17:
+  Another program point contributing to the illegal flow
+  File "while.php", line 54, characters 5-11:
+  Another program point contributing to the illegal flow

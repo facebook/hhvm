@@ -26,7 +26,12 @@ module Infix = struct
       ~init:acc
       ~f:(fun acc (a, b) -> op ~pos a b acc)
 
-  let ( < ) ~pos a b acc = Cflow (PosSet.singleton pos, a, b) :: acc
+  let ( < ) ~pos a b acc =
+    match (a, b) with
+    | (Pbot _, _) -> acc
+    | (_, Ptop _) -> acc
+    | _ when equal_policy a b -> acc
+    | _ -> Cflow (PosSet.singleton pos, a, b) :: acc
 
   let ( <* ) ~pos al bl = on_lists ~pos al bl ~op:( < )
 

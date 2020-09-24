@@ -108,6 +108,11 @@ let get_local_type env lid =
   Option.(
     get_lenv_opt env K.Next >>= fun lenv -> LMap.find_opt lid lenv.le_vars)
 
+let fold_locals env fn =
+  match get_lenv_opt env K.Next with
+  | None -> (fun acc -> acc)
+  | Some lenv -> LMap.fold fn lenv.le_vars
+
 let get_lpc env k =
   match get_lenv_opt env k with
   | None -> PSet.empty
@@ -162,7 +167,22 @@ let filter_conts env pred =
   set_cenv env @@ KMap.filter pred env.e_cont
 
 let drop_conts env ks =
-  filter_conts env @@ fun k -> not @@ List.mem ~equal:K.equal ks k
+  filter_conts env (fun k -> not @@ List.mem ~equal:K.equal ks k)
+
+(* Saves the continuations in ks and runs fn with these slots
+   cleared, restores the saved continuations once fn is done;
+   handy to analyze loops, for example *)
+let with_stashed_conts env ks fn =
+  let stashed = List.map ~f:(fun k -> (k, KMap.find_opt k env.e_cont)) ks in
+  let env = drop_conts env ks in
+  let env = fn env in
+  let env =
+    List.fold stashed ~init:env ~f:(fun env (k, ke) ->
+        match ke with
+        | None -> set_cenv env @@ KMap.remove k env.e_cont
+        | Some ke -> set_cenv env @@ KMap.add k ke env.e_cont)
+  in
+  env
 
 (* Merge conts and then clear them *)
 let move_conts_into ~union env ks k_to =

@@ -107,7 +107,7 @@ let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
     | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
-    | Errors.Raw -> (fun e -> Errors.to_string ~indent:false e)
+    | Errors.Raw -> (fun e -> Errors.to_string e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in
   Out_channel.output_string oc (formatter (Errors.to_absolute_for_test l))

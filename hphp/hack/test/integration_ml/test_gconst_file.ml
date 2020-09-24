@@ -61,9 +61,9 @@ let test () =
   let expected_error =
     "File \"/bar.php\", line 2, characters 9-11:\n"
     ^ "Wrong type hint (Typing[4110])\n"
-    ^ "File \"/bar.php\", line 2, characters 9-11:\n"
-    ^ "Expected `int`\n"
-    ^ "File \"/foo.php\", line 2, characters 9-14:\n"
-    ^ "But got `string`"
+    ^ "  File \"/bar.php\", line 2, characters 9-11:\n"
+    ^ "  Expected `int`\n"
+    ^ "  File \"/foo.php\", line 2, characters 9-14:\n"
+    ^ "  But got `string`"
   in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl)

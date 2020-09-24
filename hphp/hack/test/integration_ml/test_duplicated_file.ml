@@ -40,7 +40,7 @@ let test () =
   let expected_result =
     "File \"/foo.php\", line 2, characters 11-13:\n"
     ^ "Name already bound: `Foo` (Naming[2012])\n"
-    ^ "File \"/bar.php\", line 2, characters 11-13:\n"
-    ^ "Previous definition is here\n"
+    ^ "  File \"/bar.php\", line 2, characters 11-13:\n"
+    ^ "  Previous definition is here\n"
   in
   Test.assertSingleError expected_result (Errors.get_error_list env.errorl)

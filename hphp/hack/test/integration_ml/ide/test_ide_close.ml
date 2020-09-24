@@ -27,10 +27,10 @@ let foo_disk_errors =
   "
 File \"/foo.php\", line 6, characters 7-7:
 Invalid argument (Typing[4110])
-File \"/foo.php\", line 3, characters 14-19:
-Expected `string`
-File \"/foo.php\", line 6, characters 7-7:
-But got `int`
+  File \"/foo.php\", line 3, characters 14-19:
+  Expected `string`
+  File \"/foo.php\", line 6, characters 7-7:
+  But got `int`
 "
 
 let foo_disk_diagnostics =
@@ -38,10 +38,10 @@ let foo_disk_diagnostics =
 /foo.php:
 File \"/foo.php\", line 6, characters 7-7:
 Invalid argument (Typing[4110])
-File \"/foo.php\", line 3, characters 14-19:
-Expected `string`
-File \"/foo.php\", line 6, characters 7-7:
-But got `int`
+  File \"/foo.php\", line 3, characters 14-19:
+  Expected `string`
+  File \"/foo.php\", line 6, characters 7-7:
+  But got `int`
 "
 
 let foo_ide_contents = "<?hh // partial

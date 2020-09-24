@@ -63,10 +63,10 @@ let foo_returns_string_diagnostics =
 /bar_expects_int.php:
 File \"/bar_expects_int.php\", line 4, characters 10-14:
 Invalid return type (Typing[4110])
-File \"/bar_expects_int.php\", line 3, characters 21-23:
-Expected `int`
-File \"/foo_returns_string_name.php\", line 3, characters 18-23:
-But got `string`
+  File \"/bar_expects_int.php\", line 3, characters 21-23:
+  Expected `int`
+  File \"/foo_returns_string_name.php\", line 3, characters 18-23:
+  But got `string`
 
 /bar_expects_string.php:
 "
@@ -76,8 +76,8 @@ let foo_duplicate_diagnostics =
 /foo_returns_int.php:
 File \"/foo_returns_int.php\", line 3, characters 10-12:
 Name already bound: `foo` (Naming[2012])
-File \"/foo_returns_string_name.php\", line 3, characters 10-12:
-Previous definition is here
+  File \"/foo_returns_string_name.php\", line 3, characters 10-12:
+  Previous definition is here
 "
 
 let foo_returns_int_diagnostics =
@@ -86,10 +86,10 @@ let foo_returns_int_diagnostics =
 /bar_expects_string.php:
 File \"/bar_expects_string.php\", line 4, characters 10-14:
 Invalid return type (Typing[4110])
-File \"/bar_expects_string.php\", line 3, characters 24-29:
-Expected `string`
-File \"/foo_returns_int.php\", line 3, characters 18-20:
-But got `int`
+  File \"/bar_expects_string.php\", line 3, characters 24-29:
+  Expected `string`
+  File \"/foo_returns_int.php\", line 3, characters 18-20:
+  But got `int`
 
 /foo_returns_int.php:
 

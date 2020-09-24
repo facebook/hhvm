@@ -68,10 +68,10 @@ let bar_107_diagnostics =
 /bar107.php:
 File "/bar107.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
-File "/bar107.php", line 3, characters 21-23:
-Expected `int`
-File "/foo.php", line 3, characters 17-22:
-But got `string`
+  File "/bar107.php", line 3, characters 21-23:
+  Expected `int`
+  File "/foo.php", line 3, characters 17-22:
+  But got `string`
 |}
 
 let root = "/"

@@ -23,10 +23,10 @@ let expected_errors =
   {|
 File "/bar2.php", line 4, characters 10-14:
 Invalid return type (Typing[4110])
-File "/bar2.php", line 3, characters 19-21:
-Expected `int`
-File "/foo.php", line 3, characters 18-23:
-But got `string`
+  File "/bar2.php", line 3, characters 19-21:
+  Expected `int`
+  File "/foo.php", line 3, characters 18-23:
+  But got `string`
 |}
 
 let root = "/"

@@ -45,10 +45,10 @@ let f123_diagnostics =
   {|/foo123.php:
 File "/foo123.php", line 3, characters 37-37:
 Invalid return type (Typing[4110])
-File "/foo123.php", line 3, characters 21-26:
-Expected `string`
-File "/foo123.php", line 3, characters 37-37:
-But got `int`
+  File "/foo123.php", line 3, characters 21-26:
+  Expected `string`
+  File "/foo123.php", line 3, characters 37-37:
+  But got `int`
 |}
 
 let test () =

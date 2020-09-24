@@ -45,34 +45,34 @@ let test_do () =
 let expected_unsorted =
   {|File "/FileWithErrors.php", line 1, characters 4-7:
 This value is not a valid key type for this container (Typing[4298])
-File "/C2", line 0, characters 0-0:
-This container is C2_Type
-File "/K2", line 0, characters 0-0:
-K2_Type cannot be used as a key for C2_Type
+  File "/C2", line 0, characters 0-0:
+  This container is C2_Type
+  File "/K2", line 0, characters 0-0:
+  K2_Type cannot be used as a key for C2_Type
 
 File "/FileWithErrors.php", line 1, characters 4-7:
 This value is not a valid key type for this container (Typing[4298])
-File "/C1", line 0, characters 0-0:
-This container is C1_Type
-File "/K1", line 0, characters 0-0:
-K1_Type cannot be used as a key for C1_Type
+  File "/C1", line 0, characters 0-0:
+  This container is C1_Type
+  File "/K1", line 0, characters 0-0:
+  K1_Type cannot be used as a key for C1_Type
 
 File "/FileWithErrors.php", line 0, characters 0-0:
  (Parsing[1002])
 
 File "/FileWithErrors.php", line 1, characters 4-7:
 This value is not a valid key type for this container (Typing[4298])
-File "/C2", line 0, characters 0-0:
-This container is C2_Type
-File "/K2", line 0, characters 0-0:
-K2_Type cannot be used as a key for C2_Type
+  File "/C2", line 0, characters 0-0:
+  This container is C2_Type
+  File "/K2", line 0, characters 0-0:
+  K2_Type cannot be used as a key for C2_Type
 
 File "/FileWithErrors.php", line 1, characters 4-7:
 This value is not a valid key type for this container (Typing[4298])
-File "/C1", line 0, characters 0-0:
-This container is C1_Type
-File "/K1", line 0, characters 0-0:
-K1_Type cannot be used as a key for C1_Type
+  File "/C1", line 0, characters 0-0:
+  This container is C1_Type
+  File "/K1", line 0, characters 0-0:
+  K1_Type cannot be used as a key for C1_Type
 
 |}
 
@@ -82,17 +82,17 @@ let expected_sorted =
 
 File "/FileWithErrors.php", line 1, characters 4-7:
 This value is not a valid key type for this container (Typing[4298])
-File "/C1", line 0, characters 0-0:
-This container is C1_Type
-File "/K1", line 0, characters 0-0:
-K1_Type cannot be used as a key for C1_Type
+  File "/C1", line 0, characters 0-0:
+  This container is C1_Type
+  File "/K1", line 0, characters 0-0:
+  K1_Type cannot be used as a key for C1_Type
 
 File "/FileWithErrors.php", line 1, characters 4-7:
 This value is not a valid key type for this container (Typing[4298])
-File "/C2", line 0, characters 0-0:
-This container is C2_Type
-File "/K2", line 0, characters 0-0:
-K2_Type cannot be used as a key for C2_Type
+  File "/C2", line 0, characters 0-0:
+  This container is C2_Type
+  File "/K2", line 0, characters 0-0:
+  K2_Type cannot be used as a key for C2_Type
 
 |}
 

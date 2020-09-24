@@ -901,7 +901,7 @@ val convert_errors_to_string :
 
 val combining_sort : 'a list -> f:('a -> string) -> 'a list
 
-val to_string : ?indent:bool -> Pos.absolute error_ -> string
+val to_string : Pos.absolute error_ -> string
 
 val format_summary :
   format -> 'a error_ list -> int -> int option -> string option

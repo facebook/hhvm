@@ -487,8 +487,7 @@ let to_absolute_for_test { code; claim; reasons } =
 
 let report_pos_from_reason = ref false
 
-let to_string ?(indent = false) ({ code; claim; reasons } : Pos.absolute error_)
-    : string =
+let to_string ({ code; claim; reasons } : Pos.absolute error_) : string =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string
@@ -508,16 +507,8 @@ let to_string ?(indent = false) ({ code; claim; reasons } : Pos.absolute error_)
         error_code
         reason_msg
     end;
-  let indentstr =
-    if indent then
-      "  "
-    else
-      ""
-  in
   List.iter reasons (fun (p, w) ->
-      let msg =
-        Printf.sprintf "%s%s\n%s%s\n" indentstr (Pos.string p) indentstr w
-      in
+      let msg = Printf.sprintf "  %s\n  %s\n" (Pos.string p) w in
       Buffer.add_string buf msg);
   Buffer.contents buf
 

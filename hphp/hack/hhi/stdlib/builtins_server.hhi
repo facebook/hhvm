@@ -31,10 +31,6 @@ function pagelet_server_task_result(resource $task, inout $headers, inout $code,
 function pagelet_server_tasks_started(): int;
 
 <<__PHPStdLib>>
-function xbox_send_message(string $msg, inout $ret, int $timeout_ms, string $host = "localhost"): bool;
-<<__PHPStdLib>>
-function xbox_post_message(string $msg, string $host = "localhost"): bool;
-<<__PHPStdLib>>
 function xbox_task_start(string $message): resource;
 <<__PHPStdLib>>
 function xbox_task_status(resource $task): bool;
@@ -42,14 +38,6 @@ function xbox_task_status(resource $task): bool;
 function xbox_task_result(resource $task, int $timeout_ms, inout $ret): int;
 <<__PHPStdLib>>
 function xbox_process_call_message(string $msg): mixed;
-<<__PHPStdLib>>
-function xbox_get_thread_timeout(): int;
-<<__PHPStdLib>>
-function xbox_set_thread_timeout(int $timeout): void;
-<<__PHPStdLib>>
-function xbox_schedule_thread_reset(): void;
-<<__PHPStdLib>>
-function xbox_get_thread_time(): int;
 }
 
 namespace HH {

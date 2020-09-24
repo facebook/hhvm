@@ -105,11 +105,6 @@ HHVM's JIT. No larger than a basic block.
 Virtual assembly, our low-level intermediate representation. Positioned between
 HHIR and machine code.
 
-### Xbox
-
-[Cross-box server](../server.xbox_server) (not the video game console). A form
-of HHVM-specific IPC.
-
 ### XLS
 
 Extended linear scan, the algorithm used by our [register

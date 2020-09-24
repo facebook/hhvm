@@ -684,9 +684,6 @@ bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
 
 int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
-int RuntimeOption::XboxServerPort = 0;
-int RuntimeOption::XboxDefaultLocalTimeoutMilliSeconds = 500;
-int RuntimeOption::XboxDefaultRemoteTimeoutSeconds = 5;
 int RuntimeOption::XboxServerInfoMaxRequest = 500;
 int RuntimeOption::XboxServerInfoDuration = 120;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
@@ -2398,11 +2395,6 @@ void RuntimeOption::Load(
     Config::Bind(XboxServerMaxQueueLength, ini, config,
                  "Xbox.ServerInfo.MaxQueueLength", INT_MAX);
     if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
-    Config::Bind(XboxServerPort, ini, config, "Xbox.ServerInfo.Port", 0);
-    Config::Bind(XboxDefaultLocalTimeoutMilliSeconds, ini, config,
-                 "Xbox.DefaultLocalTimeoutMilliSeconds", 500);
-    Config::Bind(XboxDefaultRemoteTimeoutSeconds, ini, config,
-                 "Xbox.DefaultRemoteTimeoutSeconds", 5);
     Config::Bind(XboxServerInfoMaxRequest, ini, config,
                  "Xbox.ServerInfo.MaxRequest", 500);
     Config::Bind(XboxServerInfoDuration, ini, config,

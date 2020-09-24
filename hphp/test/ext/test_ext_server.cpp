@@ -45,8 +45,6 @@ bool TestExtServer::RunTests(const std::string &which) {
   RUN_TEST(test_pagelet_server_task_start);
   RUN_TEST(test_pagelet_server_task_status);
   RUN_TEST(test_pagelet_server_task_result);
-  RUN_TEST(test_xbox_send_message);
-  RUN_TEST(test_xbox_post_message);
   RUN_TEST(test_xbox_task_start);
   RUN_TEST(test_xbox_task_status);
   RUN_TEST(test_xbox_task_result);
@@ -132,22 +130,6 @@ bool TestExtServer::test_pagelet_server_task_result() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-bool TestExtServer::test_xbox_send_message() {
-  static const StaticString
-    s_code("code"),
-    s_response("response");
-  Array ret;
-  VERIFY(HHVM_FN(xbox_send_message)("hello", ret, 5000));
-  VS(ret[s_code], 200);
-  VS(ret[s_response], "olleh");
-  return Count(true);
-}
-
-bool TestExtServer::test_xbox_post_message() {
-  VERIFY(HHVM_FN(xbox_post_message)("hello"));
-  return Count(true);
-}
 
 bool TestExtServer::test_xbox_task_start() {
   // tested in test_xbox_task_result()

@@ -40,8 +40,6 @@ testing and some alternative PHP implementation.
 - pagelet_server_task_result
 - pagelet_server_flush
 
-- xbox_send_message
-- xbox_post_message
 - xbox_task_start
 - xbox_task_status
 - xbox_task_result

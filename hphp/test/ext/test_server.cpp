@@ -859,7 +859,6 @@ bool TestServer::TestXboxServer() {
         "    if ($msg == '1') return xbox_get_thread_timeout();\n"
         "    else if ($msg == '2') xbox_set_thread_timeout(5);\n"
         "    else if ($msg == '3') return xbox_get_thread_time();\n"
-        "    else xbox_schedule_thread_reset();\n"
         "  }\n"
         "}\n",
         "int(10)\n"

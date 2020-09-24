@@ -27,8 +27,6 @@ struct TestExtServer final : TestCppExt {
   bool test_pagelet_server_task_start();
   bool test_pagelet_server_task_status();
   bool test_pagelet_server_task_result();
-  bool test_xbox_send_message();
-  bool test_xbox_post_message();
   bool test_xbox_task_start();
   bool test_xbox_task_status();
   bool test_xbox_task_result();

@@ -48,14 +48,6 @@ String HHVM_FUNCTION(pagelet_server_task_result,
 int64_t HHVM_FUNCTION(pagelet_server_tasks_started);
 void HHVM_FUNCTION(pagelet_server_flush);
 bool HHVM_FUNCTION(pagelet_server_is_done);
-bool HHVM_FUNCTION(xbox_send_message,
-                   const String& msg,
-                   Array& ret,
-                   int64_t timeout_ms,
-                   const String& host = "localhost");
-bool HHVM_FUNCTION(xbox_post_message,
-                   const String& msg,
-                   const String& host = "localhost");
 Resource HHVM_FUNCTION(xbox_task_start,
                        const String& message);
 bool HHVM_FUNCTION(xbox_task_status,
@@ -66,11 +58,6 @@ int64_t HHVM_FUNCTION(xbox_task_result,
                       Variant& ret);
 Variant HHVM_FUNCTION(xbox_process_call_message,
                       const String& msg);
-int64_t HHVM_FUNCTION(xbox_get_thread_timeout);
-void HHVM_FUNCTION(xbox_set_thread_timeout,
-                   int timeout);
-void HHVM_FUNCTION(xbox_schedule_thread_reset);
-int64_t HHVM_FUNCTION(xbox_get_thread_time);
 bool HHVM_FUNCTION(server_is_stopping);
 bool HHVM_FUNCTION(server_is_prepared_to_stop);
 int64_t HHVM_FUNCTION(server_health_level);
@@ -79,4 +66,3 @@ int64_t HHVM_FUNCTION(server_process_start_time);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

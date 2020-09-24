@@ -413,9 +413,6 @@ struct RuntimeOption {
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;
-  static int XboxServerPort;
-  static int XboxDefaultLocalTimeoutMilliSeconds;
-  static int XboxDefaultRemoteTimeoutSeconds;
   static int XboxServerInfoMaxRequest;
   static int XboxServerInfoDuration;
   static std::string XboxServerInfoReqInitFunc;
@@ -1438,4 +1435,3 @@ inline bool unitPrefetchingEnabled() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

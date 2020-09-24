@@ -178,14 +178,6 @@ HttpServer::HttpServer() {
     }
   }
 
-  if (RuntimeOption::XboxServerPort != 0) {
-    auto xboxInfo = std::make_shared<XboxServerInfo>();
-    auto satellite = SatelliteServer::Create(xboxInfo);
-    if (satellite) {
-      m_satellites.push_back(std::move(satellite));
-    }
-  }
-
   StaticContentCache::TheCache.load();
 
   m_counterCallback.init(

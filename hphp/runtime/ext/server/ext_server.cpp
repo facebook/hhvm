@@ -47,16 +47,10 @@ static struct ServerExtension final : Extension {
     HHVM_FE(pagelet_server_tasks_started);
     HHVM_FE(pagelet_server_flush);
     HHVM_FE(pagelet_server_is_done);
-    HHVM_FE(xbox_send_message);
-    HHVM_FE(xbox_post_message);
     HHVM_FE(xbox_task_start);
     HHVM_FE(xbox_task_status);
     HHVM_FE(xbox_task_result);
     HHVM_FE(xbox_process_call_message);
-    HHVM_FE(xbox_get_thread_timeout);
-    HHVM_FE(xbox_set_thread_timeout);
-    HHVM_FE(xbox_schedule_thread_reset);
-    HHVM_FE(xbox_get_thread_time);
     HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
     HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
     HHVM_FALIAS(HH\\server_health_level, server_health_level);
@@ -159,21 +153,6 @@ bool HHVM_FUNCTION(pagelet_server_is_done) {
 ///////////////////////////////////////////////////////////////////////////////
 // xbox
 
-bool HHVM_FUNCTION(xbox_send_message,
-                   const String& msg,
-                   Array& ret,
-                   int64_t timeout_ms,
-                   const String& host /* = "localhost" */) {
-  auto b = XboxServer::SendMessage(msg, ret, timeout_ms, host);
-  return b;
-}
-
-bool HHVM_FUNCTION(xbox_post_message,
-                   const String& msg,
-                   const String& host /* = "localhost" */) {
-  return XboxServer::PostMessage(msg, host);
-}
-
 Resource HHVM_FUNCTION(xbox_task_start,
                        const String& message) {
   return XboxServer::TaskStart(message);
@@ -217,45 +196,6 @@ Variant HHVM_FUNCTION(xbox_process_call_message,
     raise_error("Error decoding xbox call message");
   }
   return vm_call_user_func(fn, args.toArray(), false, true);
-}
-
-int64_t HHVM_FUNCTION(xbox_get_thread_timeout) {
-  auto server_info = XboxServer::GetServerInfo();
-  if (server_info) {
-    return server_info->getMaxDuration();
-  }
-  throw Exception("Not an xbox worker!");
-}
-
-void HHVM_FUNCTION(xbox_set_thread_timeout,
-                   int timeout) {
-  if (timeout < 0) {
-    raise_warning("Cannot set timeout/duration to a negative number.");
-    return;
-  }
-  auto server_info = XboxServer::GetServerInfo();
-  if (server_info) {
-    server_info->setMaxDuration(timeout);
-  } else {
-    throw Exception("Not an xbox worker!");
-  }
-}
-
-void HHVM_FUNCTION(xbox_schedule_thread_reset) {
-  RPCRequestHandler *handler = XboxServer::GetRequestHandler();
-  if (handler) {
-    handler->setReset();
-  } else {
-    throw Exception("Not an xbox worker!");
-  }
-}
-
-int64_t HHVM_FUNCTION(xbox_get_thread_time) {
-  RPCRequestHandler *handler = XboxServer::GetRequestHandler();
-  if (handler) {
-    return time(nullptr) - handler->getLastResetTime();
-  }
-  throw Exception("Not an xbox worker!");
 }
 
 bool HHVM_FUNCTION(server_is_stopping) {

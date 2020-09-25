@@ -1,1 +1,4 @@
-No errors
+File "shapes_cc_11.php--use.php", line 4, characters 3-10:
+A shape field name must be an `int` or `string` (Typing[4052])
+File "shapes_cc_11.php--def.php", line 5, characters 9-13:
+Not a value of type blah2

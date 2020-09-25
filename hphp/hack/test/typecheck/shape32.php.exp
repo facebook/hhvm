@@ -1,8 +1,4 @@
 File "shape32.php", line 9, characters 16-18:
 Expected a `class` but got a type alias. (Naming[2052])
-File "shape32.php", line 7, characters 6-8:
-Alias definition is here.
-File "shape32.php", line 9, characters 16-21:
-A shape field name must be an `int` or `string` (Typing[4052])
-File "shape32.php", line 9, characters 16-18:
-Not an untyped value
+  File "shape32.php", line 7, characters 6-8:
+  Alias definition is here.

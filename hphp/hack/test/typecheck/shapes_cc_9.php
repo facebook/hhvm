@@ -18,5 +18,5 @@ class C2 {
 //// use.php
 <?hh // strict
 
-// Should be fine.
+// Reject: type of keys is opaque
 type myshape = shape(C2::FOO => int);

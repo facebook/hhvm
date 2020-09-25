@@ -7,18 +7,10 @@ Unbound name: `C` (Naming[2049])
 File "shape_type_key_types.php", line 7, characters 3-3:
 Unbound name: `C` (an object type) (Naming[2049])
 File "shape_type_key_types.php", line 6, characters 3-10:
-A shape field name must be an `int` or `string` (Typing[4052])
-File "shape_type_key_types.php", line 6, characters 3-3:
-Not an untyped value
-File "shape_type_key_types.php", line 6, characters 3-10:
 Shape uses class constant as field name (Typing[4049])
-File "shape_type_key_types.php", line 4, characters 3-3:
-But expected a literal string
-File "shape_type_key_types.php", line 7, characters 3-8:
-A shape field name must be an `int` or `string` (Typing[4052])
-File "shape_type_key_types.php", line 7, characters 3-3:
-Not an untyped value
+  File "shape_type_key_types.php", line 4, characters 3-3:
+  But expected a literal string
 File "shape_type_key_types.php", line 7, characters 3-8:
 Shape uses class constant as field name (Typing[4049])
-File "shape_type_key_types.php", line 4, characters 3-3:
-But expected a literal string
+  File "shape_type_key_types.php", line 4, characters 3-3:
+  But expected a literal string

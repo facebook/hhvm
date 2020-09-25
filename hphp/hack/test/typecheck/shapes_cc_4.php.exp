@@ -1,8 +1,4 @@
-File "shapes_cc_4.php", line 25, characters 41-45:
-A shape field name must be an `int` or `string` (Typing[4052])
-File "", line 0, characters 0-0:
-Not a type error
 File "shapes_cc_4.php", line 25, characters 44-45:
 No class constant `X3` in `X` (Typing[4090])
-File "shapes_cc_4.php", line 14, characters 7-7:
-Declaration of `X` is here
+  File "shapes_cc_4.php", line 14, characters 7-7:
+  Declaration of `X` is here

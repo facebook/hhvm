@@ -10,5 +10,5 @@ class X {
 //// use.php
 <?hh // strict
 
-// Should be fine.
+// Reject: type of keys is opaque
 type myshape = shape(X::X1 => int, X::X2 => bool);

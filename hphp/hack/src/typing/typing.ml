@@ -3687,13 +3687,20 @@ and check_shape_keys_validity env pos keys =
       (env, key_pos, None)
     | Ast_defs.SFclass_const (((p, cls) as x), y) ->
       let (env, _te, ty) = class_const env pos ((p, CI x), y) in
+      let r = Reason.Rwitness key_pos in
       let env =
-        Typing_enum.check_valid_array_key_type
-          Errors.invalid_shape_field_type
-          ~allow_any:false
-          env
+        Type.sub_type
           key_pos
+          Reason.URnone
+          env
           ty
+          (MakeType.arraykey r)
+          (fun ?code:_ _ ->
+            Errors.invalid_shape_field_type
+              key_pos
+              (get_pos ty)
+              (Typing_print.error env ty)
+              [])
       in
       (env, key_pos, Some (cls, ty))
   in

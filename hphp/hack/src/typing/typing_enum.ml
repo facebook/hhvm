@@ -52,61 +52,6 @@ let member_type env member_ce =
           ty))
     | _ -> default_result
 
-(* Check that a type is something that can be used as an array index
- * (int or string), blowing through typedefs to do it. Takes a function
- * to call to report the error if it isn't. *)
-let check_valid_array_key_type f_fail ~allow_any env p t =
-  let rec check_valid_array_key_type env t =
-    let ety_env = Phase.env_with_self env in
-    let (env, t, trail) = Typing_tdef.force_expand_typedef ~ety_env env t in
-    match get_node t with
-    | Tprim (Tint | Tstring) -> (env, None)
-    (* Enums have to be valid array keys *)
-    | Tnewtype (id, _, _) when Typing_env.is_enum env id -> (env, None)
-    | Terr
-    | Tany _
-      when allow_any ->
-      (env, None)
-    | Tintersection tyl ->
-      (* Ok if at least one element of the intersection is ok. *)
-      let (env, errors) =
-        List.fold_map tyl ~init:env ~f:check_valid_array_key_type
-      in
-      if List.exists errors ~f:Option.is_none then
-        (env, None)
-      else
-        (env, Option.value ~default:None (List.find errors ~f:Option.is_some))
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Terr
-    | Tany _
-    | Tnonnull
-    | Tvarray _
-    | Tdarray _
-    | Tvarray_or_darray _
-    | Tprim _
-    | Toption _
-    | Tdynamic
-    | Tvar _
-    | Tgeneric _
-    | Tnewtype _
-    | Tdependent _
-    | Tclass _
-    | Ttuple _
-    | Tfun _
-    | Tunion _
-    | Tobject
-    | Tshape _
-    | Tpu _
-    | Tpu_type_access _ ->
-      ( env,
-        Some (fun () -> f_fail p (get_pos t) (Typing_print.error env t) trail)
-      )
-  in
-  let (env, err) = check_valid_array_key_type env t in
-  Option.iter err (fun f -> f ());
-  env
-
 let enum_check_const ty_exp env cc t =
   let p = fst cc.cc_id in
   Typing_ops.sub_type

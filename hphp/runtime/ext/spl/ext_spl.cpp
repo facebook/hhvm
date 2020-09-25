@@ -62,22 +62,21 @@ void throw_spl_exception(const char *fmt, ...) {
   SystemLib::throwExceptionObject(Variant(msg));
 }
 
-static bool s_inited = false;
 static uint64_t s_hash_mask_handle = 0;
-static Mutex s_mutex;
+static std::once_flag s_hash_mask_handle_inited;
 
 String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
-  if (!s_inited) {
-    Lock lock(s_mutex);
-    if (!s_inited) {
-      HHVM_FN(mt_srand)();
-      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= HHVM_FN(mt_rand)(); s_hash_mask_handle <<= 16;
-      s_hash_mask_handle |= HHVM_FN(mt_rand)();
-      s_inited = true;
-    }
-  }
+  std::call_once(s_hash_mask_handle_inited, [] {
+    HHVM_FN(mt_srand)();
+
+    uint64_t mask = 0;
+    mask ^= HHVM_FN(mt_rand)(); mask <<= 16;
+    mask ^= HHVM_FN(mt_rand)(); mask <<= 16;
+    mask ^= HHVM_FN(mt_rand)(); mask <<= 16;
+    mask ^= HHVM_FN(mt_rand)();
+
+    s_hash_mask_handle = mask;
+  });
 
   char buf[33];
   // Using the object address here would interfere with a moving GC algorithm.

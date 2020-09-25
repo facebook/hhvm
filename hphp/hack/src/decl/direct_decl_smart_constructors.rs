@@ -678,13 +678,9 @@ impl<'a> smart_constructors::NodeType for Node<'a> {
 impl<'a> Node<'a> {
     fn as_slice(self, b: &'a Bump) -> &'a [Self] {
         match self {
-            Node::List(items) => items,
-            Node::BracketedList(innards) => {
-                let (_, items, _) = *innards;
-                items
-            }
+            Node::List(&items) | Node::BracketedList(&(_, items, _)) => items,
             n if n.is_ignored() => &[],
-            n => bumpalo::vec![in b; n].into_bump_slice(),
+            n => std::slice::from_ref(b.alloc(n)),
         }
     }
 

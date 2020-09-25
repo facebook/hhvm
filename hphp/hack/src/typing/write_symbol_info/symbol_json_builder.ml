@@ -20,15 +20,12 @@ open SymbolOccurrence
 (* These functions define the process to go through when
 encountering symbols of a given type. *)
 
-let process_doc_comment comment decl_pos decl_ref_json prog =
+let process_doc_comment comment decl_ref_json prog =
   match comment with
   | None -> prog
-  | Some (_, doc) ->
-    if phys_equal (String.length doc) 0 then
-      prog
-    else
-      let (_, prog) = add_decl_comment_fact doc decl_pos decl_ref_json prog in
-      prog
+  | Some (pos, doc) ->
+    let (_, prog) = add_decl_comment_fact doc pos decl_ref_json prog in
+    prog
 
 let process_decl_loc
     decl_fun defn_fun decl_ref_fun pos span id elem doc progress =
@@ -36,7 +33,7 @@ let process_decl_loc
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
-  let prog = process_doc_comment doc pos ref_json prog in
+  let prog = process_doc_comment doc ref_json prog in
   let prog =
     match span with
     | None -> prog
@@ -133,7 +130,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
   let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
   let (_, prog) = add_decl_span_fact con.c_span ref_json prog in
   let all_decls = all_decls @ [ref_json] @ members in
-  let prog = process_doc_comment con.c_doc_comment con_pos ref_json prog in
+  let prog = process_doc_comment con.c_doc_comment ref_json prog in
   (all_decls, prog)
 
 let process_xref
@@ -173,14 +170,14 @@ let process_enum_decl ctx source_map enm (all_decls, progress) =
         let ref_json = build_enumerator_decl_json_ref decl_id in
         let (_, prog) = add_decl_loc_fact pos ref_json prog in
         let prog =
-          process_doc_comment enumerator.cc_doc_comment pos ref_json prog
+          process_doc_comment enumerator.cc_doc_comment ref_json prog
         in
         (build_id_json decl_id :: decls, ref_json :: refs, prog))
   in
   let (_, prog) =
     add_enum_defn_fact ctx source_map enm enum_id enumerators prog
   in
-  let prog = process_doc_comment enm.c_doc_comment pos enum_decl_ref prog in
+  let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
   (all_decls @ (enum_decl_ref :: decl_refs), prog)
 
 let process_enum_xref symbol_def pos (xrefs, progress) =

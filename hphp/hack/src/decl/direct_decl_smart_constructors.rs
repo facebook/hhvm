@@ -2105,9 +2105,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
-    fn make_qualified_name(&mut self, arg0: Self::R) -> Self::R {
-        let pos = self.get_pos(arg0);
-        match arg0 {
+    fn make_qualified_name(&mut self, parts: Self::R) -> Self::R {
+        let pos = self.get_pos(parts);
+        match parts {
             Node::List(nodes) => Node::QualifiedName(self.alloc((nodes, pos))),
             node if node.is_ignored() => Node::Ignored(SK::QualifiedName),
             node => Node::QualifiedName(self.alloc((
@@ -2117,14 +2117,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
-    fn make_simple_type_specifier(&mut self, arg0: Self::R) -> Self::R {
+    fn make_simple_type_specifier(&mut self, specifier: Self::R) -> Self::R {
         // Return this explicitly because flatten filters out zero nodes, and
         // we treat most non-error nodes as zeroes.
-        arg0
+        specifier
     }
 
-    fn make_literal_expression(&mut self, arg0: Self::R) -> Self::R {
-        arg0
+    fn make_literal_expression(&mut self, expression: Self::R) -> Self::R {
+        expression
     }
 
     fn make_simple_initializer(&mut self, equals: Self::R, expr: Self::R) -> Self::R {
@@ -2137,17 +2137,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_anonymous_function(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-        _arg3: Self::R,
-        _arg4: Self::R,
-        _arg5: Self::R,
-        _arg6: Self::R,
-        _arg7: Self::R,
-        _arg8: Self::R,
-        _arg9: Self::R,
-        _arg10: Self::R,
+        _attribute_spec: Self::R,
+        _static_keyword: Self::R,
+        _async_keyword: Self::R,
+        _function_keyword: Self::R,
+        _left_paren: Self::R,
+        _parameters: Self::R,
+        _right_paren: Self::R,
+        _colon: Self::R,
+        _type_: Self::R,
+        _use_: Self::R,
+        _body: Self::R,
     ) -> Self::R {
         // do not allow Yield to bubble up
         Node::Ignored(SK::AnonymousFunction)
@@ -2155,11 +2155,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_lambda_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-        _arg3: Self::R,
-        _arg4: Self::R,
+        _attribute_spec: Self::R,
+        _async_: Self::R,
+        _signature: Self::R,
+        _arrow: Self::R,
+        _body: Self::R,
     ) -> Self::R {
         // do not allow Yield to bubble up
         Node::Ignored(SK::LambdaExpression)
@@ -2167,9 +2167,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_awaitable_creation_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _attribute_spec: Self::R,
+        _async_: Self::R,
+        _compound_statement: Self::R,
     ) -> Self::R {
         // do not allow Yield to bubble up
         Node::Ignored(SK::AwaitableCreationExpression)
@@ -2178,8 +2178,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_darray_intrinsic_expression(
         &mut self,
         darray: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
@@ -2200,8 +2200,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_dictionary_intrinsic_expression(
         &mut self,
         dict: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
@@ -2222,8 +2222,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_keyset_intrinsic_expression(
         &mut self,
         keyset: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
@@ -2237,8 +2237,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_varray_intrinsic_expression(
         &mut self,
         varray: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
@@ -2252,8 +2252,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_vector_intrinsic_expression(
         &mut self,
         vec: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _explicit_type: Self::R,
+        _left_bracket: Self::R,
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
@@ -2267,7 +2267,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_element_initializer(
         &mut self,
         key: Self::R,
-        _arg1: Self::R,
+        _arrow: Self::R,
         value: Self::R,
     ) -> Self::R {
         Node::ListItem(self.alloc((key, value)))
@@ -2749,7 +2749,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }))
     }
 
-    fn make_yield_expression(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
+    fn make_yield_expression(&mut self, _keyword: Self::R, _operand: Self::R) -> Self::R {
         Node::Token(TokenKind::Yield)
     }
 
@@ -2839,24 +2839,29 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Node::Ignored(SK::NamespaceDeclarationHeader)
     }
 
-    fn make_namespace_body(&mut self, _arg0: Self::R, _body: Self::R, _arg2: Self::R) -> Self::R {
+    fn make_namespace_body(
+        &mut self,
+        _left_brace: Self::R,
+        _declarations: Self::R,
+        _right_brace: Self::R,
+    ) -> Self::R {
         Node::Ignored(SK::NamespaceBody)
     }
 
-    fn make_namespace_empty_body(&mut self, _arg0: Self::R) -> Self::R {
+    fn make_namespace_empty_body(&mut self, _semicolon: Self::R) -> Self::R {
         Rc::make_mut(&mut self.state.namespace_builder).pop_previous_namespace();
         Node::Ignored(SK::NamespaceEmptyBody)
     }
 
     fn make_namespace_use_declaration(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        imports: Self::R,
-        _arg3: Self::R,
+        _keyword: Self::R,
+        _kind: Self::R,
+        clauses: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
-        for import in imports.iter() {
-            if let Node::NamespaceUseClause(nuc) = import {
+        for clause in clauses.iter() {
+            if let Node::NamespaceUseClause(nuc) = clause {
                 Rc::make_mut(&mut self.state.namespace_builder).add_import(nuc.id.1, nuc.as_);
             }
         }
@@ -2865,20 +2870,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_namespace_group_use_declaration(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
+        _keyword: Self::R,
+        _kind: Self::R,
         prefix: Self::R,
-        _arg3: Self::R,
-        imports: Self::R,
-        _arg5: Self::R,
-        _arg6: Self::R,
+        _left_brace: Self::R,
+        clauses: Self::R,
+        _right_brace: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
         let Id(_, prefix) = match self.get_name("", prefix) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceGroupUseDeclaration),
         };
-        for import in imports.iter() {
-            if let Node::NamespaceUseClause(nuc) = import {
+        for clause in clauses.iter() {
+            if let Node::NamespaceUseClause(nuc) = clause {
                 let mut id = String::new_in(self.state.arena);
                 id.push_str(prefix);
                 id.push_str(nuc.id.1);
@@ -2891,7 +2896,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_namespace_use_clause(
         &mut self,
-        _arg0: Self::R,
+        _clause_kind: Self::R,
         name: Self::R,
         as_: Self::R,
         aliased_name: Self::R,
@@ -2941,9 +2946,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         class_keyword: Self::R,
         name: Self::R,
         tparams: Self::R,
-        _arg5: Self::R,
+        _extends_keyword: Self::R,
         extends: Self::R,
-        _arg7: Self::R,
+        _implements_keyword: Self::R,
         implements: Self::R,
         where_clause: Self::R,
         body: Self::R,
@@ -3199,7 +3204,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         modifiers: Self::R,
         hint: Self::R,
         declarators: Self::R,
-        _arg4: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
         let (attrs, modifiers, hint) = (attrs, modifiers, hint);
         let modifiers = read_member_modifiers(modifiers.iter());
@@ -3237,9 +3242,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_xhp_class_attribute_declaration(
         &mut self,
-        _arg0: Self::R,
+        _keyword: Self::R,
         attributes: Self::R,
-        _arg2: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
         let xhp_attr_decls = self.slice(attributes.iter().filter_map(|node| {
             let node = match node {
@@ -3287,10 +3292,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_xhp_enum_type(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
+        _keyword: Self::R,
+        _left_brace: Self::R,
         xhp_enum_values: Self::R,
-        _arg3: Self::R,
+        _right_brace: Self::R,
     ) -> Self::R {
         Node::XhpEnumType(self.alloc(xhp_enum_values))
     }
@@ -3414,23 +3419,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
-    fn make_classish_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
-        Node::ClassishBody(self.alloc(body.as_slice(self.state.arena)))
+    fn make_classish_body(
+        &mut self,
+        _left_brace: Self::R,
+        elements: Self::R,
+        _right_brace: Self::R,
+    ) -> Self::R {
+        Node::ClassishBody(self.alloc(elements.as_slice(self.state.arena)))
     }
 
     fn make_enum_declaration(
         &mut self,
         attributes: Self::R,
-        _arg1: Self::R,
+        _keyword: Self::R,
         name: Self::R,
-        _arg3: Self::R,
+        _colon: Self::R,
         extends: Self::R,
         constraint: Self::R,
-        _arg6: Self::R,
+        _includes_keyword: Self::R,
         includes: Self::R,
-        _arg8: Self::R,
+        _left_brace: Self::R,
         cases: Self::R,
-        _arg10: Self::R,
+        _right_brace: Self::R,
     ) -> Self::R {
         let id = match self.get_name(self.state.namespace_builder.current_namespace(), name) {
             Some(id) => id,
@@ -3522,9 +3532,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_enumerator(
         &mut self,
         name: Self::R,
-        _arg1: Self::R,
+        _equal: Self::R,
         value: Self::R,
-        _arg3: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
         Node::ListItem(self.alloc((name, value)))
     }
@@ -3573,7 +3583,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_shape_type_specifier(
         &mut self,
         shape: Self::R,
-        _arg1: Self::R,
+        _lparen: Self::R,
         fields: Self::R,
         open: Self::R,
         rparen: Self::R,
@@ -3637,7 +3647,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         classname: Self::R,
         _lt: Self::R,
         targ: Self::R,
-        _arg3: Self::R,
+        _trailing_comma: Self::R,
         gt: Self::R,
     ) -> Self::R {
         let id = match self.get_name("", classname) {
@@ -3658,7 +3668,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_scope_resolution_expression(
         &mut self,
         class_name: Self::R,
-        _arg1: Self::R,
+        _operator: Self::R,
         value: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(class_name, value);
@@ -3688,7 +3698,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         question_token: Self::R,
         name: Self::R,
-        _arg2: Self::R,
+        _arrow: Self::R,
         type_: Self::R,
     ) -> Self::R {
         let optional = question_token.is_present();
@@ -3706,7 +3716,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }))
     }
 
-    fn make_field_initializer(&mut self, key: Self::R, _arg1: Self::R, value: Self::R) -> Self::R {
+    fn make_field_initializer(&mut self, key: Self::R, _arrow: Self::R, value: Self::R) -> Self::R {
         Node::ListItem(self.alloc((key, value)))
     }
 
@@ -3715,7 +3725,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         varray: Self::R,
         _less_than: Self::R,
         tparam: Self::R,
-        _arg3: Self::R,
+        _trailing_comma: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
         let tparam = match self.node_to_ty(tparam) {
@@ -3747,7 +3757,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         key_type: Self::R,
         _comma: Self::R,
         value_type: Self::R,
-        _arg5: Self::R,
+        _trailing_comma: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(darray, greater_than);
@@ -3791,9 +3801,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_constructor_call(
         &mut self,
         name: Self::R,
-        _arg1: Self::R,
+        _left_paren: Self::R,
         args: Self::R,
-        _arg3: Self::R,
+        _right_paren: Self::R,
     ) -> Self::R {
         let unqualified_name = match self.get_name("", name) {
             Some(name) => name,
@@ -3850,16 +3860,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }))
     }
 
-    fn make_trait_use(&mut self, _arg0: Self::R, used: Self::R, _arg2: Self::R) -> Self::R {
-        Node::TraitUse(self.alloc(used))
+    fn make_trait_use(
+        &mut self,
+        _keyword: Self::R,
+        names: Self::R,
+        _semicolon: Self::R,
+    ) -> Self::R {
+        Node::TraitUse(self.alloc(names))
     }
 
     fn make_require_clause(
         &mut self,
-        _arg0: Self::R,
+        _keyword: Self::R,
         require_type: Self::R,
         name: Self::R,
-        _arg3: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
         Node::RequireClause(self.alloc(RequireClause { require_type, name }))
     }
@@ -3884,14 +3899,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_closure_type_specifier(
         &mut self,
-        left_paren: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-        args: Self::R,
-        _arg4: Self::R,
-        _arg5: Self::R,
-        ret_hint: Self::R,
-        right_paren: Self::R,
+        outer_left_paren: Self::R,
+        _function_keyword: Self::R,
+        _inner_left_paren: Self::R,
+        parameter_list: Self::R,
+        _inner_right_paren: Self::R,
+        _colon: Self::R,
+        return_type: Self::R,
+        outer_right_paren: Self::R,
     ) -> Self::R {
         let make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
@@ -3917,7 +3932,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             })
         };
 
-        let arity = args
+        let arity = parameter_list
             .iter()
             .find_map(|&node| match node {
                 Node::FunParam(fp) if fp.variadic => Some(FunArity::Fvariadic(make_param(fp))),
@@ -3925,17 +3940,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             })
             .unwrap_or(FunArity::Fstandard);
 
-        let params = self.slice(args.iter().filter_map(|&node| match node {
+        let params = self.slice(parameter_list.iter().filter_map(|&node| match node {
             Node::FunParam(fp) if !fp.variadic => Some(make_param(fp)),
             _ => None,
         }));
 
-        let (hint, mutability) = Self::unwrap_mutability(ret_hint);
+        let (hint, mutability) = Self::unwrap_mutability(return_type);
         let ret = match self.node_to_ty(hint) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::ClosureTypeSpecifier),
         };
-        let pos = self.merge_positions(left_paren, right_paren);
+        let pos = self.merge_positions(outer_left_paren, outer_right_paren);
         let implicit_params = self.as_fun_implicit_params(None, pos);
 
         let mut flags = FunTypeFlags::empty();
@@ -3981,12 +3996,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         attributes: Self::R,
         modifiers: Self::R,
-        _arg2: Self::R,
-        _arg3: Self::R,
+        _const_keyword: Self::R,
+        _type_keyword: Self::R,
         name: Self::R,
-        _arg5: Self::R,
+        _type_parameters: Self::R,
         constraint: Self::R,
-        _arg7: Self::R,
+        _equal: Self::R,
         type_: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
@@ -4139,103 +4154,107 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_vector_type_specifier(
         &mut self,
         vec: Self::R,
-        _arg1: Self::R,
+        _left_angle: Self::R,
         hint: Self::R,
-        _arg3: Self::R,
-        greater_than: Self::R,
+        _trailing_comma: Self::R,
+        right_angle: Self::R,
     ) -> Self::R {
         let id = match self.get_name("", vec) {
             Some(id) => id,
             None => return Node::Ignored(SK::VectorTypeSpecifier),
         };
         let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
-        self.make_apply(id, hint, self.get_pos(greater_than))
+        self.make_apply(id, hint, self.get_pos(right_angle))
     }
 
     fn make_dictionary_type_specifier(
         &mut self,
         dict: Self::R,
-        _arg1: Self::R,
-        hint: Self::R,
-        greater_than: Self::R,
+        _left_angle: Self::R,
+        type_arguments: Self::R,
+        right_angle: Self::R,
     ) -> Self::R {
         let id = match self.get_name("", dict) {
             Some(id) => id,
             None => return Node::Ignored(SK::DictionaryTypeSpecifier),
         };
         let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
-        self.make_apply(id, hint, self.get_pos(greater_than))
+        self.make_apply(id, type_arguments, self.get_pos(right_angle))
     }
 
     fn make_keyset_type_specifier(
         &mut self,
         keyset: Self::R,
-        _arg1: Self::R,
+        _left_angle: Self::R,
         hint: Self::R,
-        _arg3: Self::R,
-        greater_than: Self::R,
+        _trailing_comma: Self::R,
+        right_angle: Self::R,
     ) -> Self::R {
         let id = match self.get_name("", keyset) {
             Some(id) => id,
             None => return Node::Ignored(SK::KeysetTypeSpecifier),
         };
         let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
-        self.make_apply(id, hint, self.get_pos(greater_than))
+        self.make_apply(id, hint, self.get_pos(right_angle))
     }
 
-    fn make_variable_expression(&mut self, _arg0: Self::R) -> Self::R {
+    fn make_variable_expression(&mut self, _expression: Self::R) -> Self::R {
         Node::Ignored(SK::VariableExpression)
     }
 
     fn make_subscript_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-        _arg3: Self::R,
+        _receiver: Self::R,
+        _left_bracket: Self::R,
+        _index: Self::R,
+        _right_bracket: Self::R,
     ) -> Self::R {
         Node::Ignored(SK::SubscriptExpression)
     }
 
     fn make_member_selection_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _object: Self::R,
+        _operator: Self::R,
+        _name: Self::R,
     ) -> Self::R {
         Node::Ignored(SK::MemberSelectionExpression)
     }
 
-    fn make_object_creation_expression(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
+    fn make_object_creation_expression(
+        &mut self,
+        _new_keyword: Self::R,
+        _object: Self::R,
+    ) -> Self::R {
         Node::Ignored(SK::ObjectCreationExpression)
     }
 
     fn make_safe_member_selection_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
+        _object: Self::R,
+        _operator: Self::R,
+        _name: Self::R,
     ) -> Self::R {
         Node::Ignored(SK::SafeMemberSelectionExpression)
     }
 
     fn make_function_call_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-        _arg3: Self::R,
-        _arg4: Self::R,
+        _receiver: Self::R,
+        _type_args: Self::R,
+        _left_paren: Self::R,
+        _argument_list: Self::R,
+        _right_paren: Self::R,
     ) -> Self::R {
         Node::Ignored(SK::FunctionCallExpression)
     }
 
     fn make_list_expression(
         &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-        _arg3: Self::R,
+        _keyword: Self::R,
+        _left_paren: Self::R,
+        _members: Self::R,
+        _right_paren: Self::R,
     ) -> Self::R {
         Node::Ignored(SK::ListExpression)
     }

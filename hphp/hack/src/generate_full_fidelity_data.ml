@@ -14,6 +14,14 @@ open Full_fidelity_schema
 
 let full_fidelity_path_prefix = "hphp/hack/src/parser/"
 
+let rust_keywords =
+  [ "as"; "break"; "const"; "continue"; "crate"; "else"; "enum"; "extern";
+    "false"; "fn"; "for"; "if"; "impl"; "in"; "let"; "loop"; "match"; "mod";
+    "move"; "mut"; "pub"; "ref"; "return"; "self"; "Self"; "static"; "struct";
+    "super"; "trait"; "true"; "type"; "unsafe"; "use"; "where"; "while";
+    "async"; "await"; "dyn" ]
+  [@@ocamlformat "disable"]
+
 type comment_style =
   | CStyle
   | MLStyle
@@ -1713,9 +1721,18 @@ end
 
 module GenerateRustDirectDeclSmartConstructors = struct
   let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
+    let as_local_var field_name =
+      if List.mem rust_keywords field_name ~equal:String.equal then
+        sprintf "%s_" field_name
+      else
+        field_name
+    in
+    let args =
+      List.map x.fields ~f:(fun (name, _) ->
+          sprintf "%s: Self::R" (as_local_var name))
+    in
     let args = String.concat ~sep:", " args in
-    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let fwd_args = List.map x.fields ~f:(fun (name, _) -> as_local_var name) in
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {

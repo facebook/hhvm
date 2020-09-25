@@ -5548,8 +5548,8 @@ and static_class_id
   let make_result env tal te ty = (env, tal, ((p, ty), te), ty) in
   function
   | CIparent ->
-    (match get_node (Env.get_self env) with
-    | Tclass ((_, self), _, _) ->
+    (match get_class_type (Env.get_self env) with
+    | Some ((_, self), _, _) ->
       (match Env.get_class env self with
       | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
         (match trait_most_concrete_req_class trait env with
@@ -5579,29 +5579,7 @@ and static_class_id
           []
           Aast.CIparent
           (mk (r, TUtils.this_of (mk (r, get_node parent)))))
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Terr
-    | Tany _
-    | Tnonnull
-    | Tvarray _
-    | Tdarray _
-    | Tvarray_or_darray _
-    | Toption _
-    | Tprim _
-    | Tfun _
-    | Ttuple _
-    | Tshape _
-    | Tvar _
-    | Tdynamic
-    | Tunion _
-    | Tintersection _
-    | Tgeneric _
-    | Tnewtype _
-    | Tdependent (_, _)
-    | Tobject
-    | Tpu _
-    | Tpu_type_access _ ->
+    | None ->
       let parent =
         match Env.get_parent_ty env with
         | None ->

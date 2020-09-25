@@ -58,22 +58,27 @@ let make_lazy_class_type ctx class_name =
          })
 
 let make_eager_class_type ctx class_name =
-  match Naming_provider.get_type_path_and_kind ctx class_name with
-  | Some (_, Naming_types.TTypedef)
-  | Some (_, Naming_types.TRecordDef)
+  match Decl_heap.Classes.get class_name with
+  | Some decl -> Some (Eager (Decl_class.to_class_type decl))
   | None ->
-    None
-  | Some (file, Naming_types.TClass) ->
-    Deferred_decl.raise_if_should_defer ~d:file;
-    let class_type =
-      Errors.run_in_decl_mode file (fun () ->
-          Decl.declare_class_in_file ~sh:SharedMem.Uses ctx file class_name)
-    in
-    Deferred_decl.increment_counter ();
-    (match class_type with
-    | Some class_type -> Some (Eager (Decl_class.to_class_type class_type))
-    | None ->
-      failwith ("No class returned for get_eager_class_type on " ^ class_name))
+    begin
+      match Naming_provider.get_type_path_and_kind ctx class_name with
+      | Some (_, Naming_types.TTypedef)
+      | Some (_, Naming_types.TRecordDef)
+      | None ->
+        None
+      | Some (file, Naming_types.TClass) ->
+        Deferred_decl.raise_if_should_defer ~d:file;
+        (* declare_class_in_file actual reads from Decl_heap.Classes.get
+        like what we do above, which makes our test redundant but cleaner.
+        It also writes into Decl_heap.Classes and other Decl_heaps. *)
+        let decl =
+          Errors.run_in_decl_mode file (fun () ->
+              Decl.declare_class_in_file ~sh:SharedMem.Uses ctx file class_name)
+        in
+        Deferred_decl.increment_counter ();
+        Some (Eager (Decl_class.to_class_type (Option.value_exn decl)))
+    end
 
 module Classes = struct
   (** This module is an abstraction layer over shallow vs folded decl,
@@ -111,39 +116,19 @@ module Classes = struct
 
   (** Fetches either the [Lazy] class (if shallow decls are enabled)
   or the [Eager] class (otherwise).
-  Note: Eager will always write to shmem Decl_heap.Classes if it needs to
-  fetch a decl, but it will only read from that heap depending on the parameter.
-  As for Lazy, it has no direct access to shmem, and instead always goes through
-  a ctx provider.
-  *)
-  let compute_class_decl
-      ~(allow_eager_to_read_from_decl_shmem : bool)
-      (ctx : Provider_context.t)
-      (class_name : string) : t option =
-    let use_lazy =
-      TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-    in
+  Note: Eager will always read+write to shmem Decl_heaps. Lazy
+  will solely go through the ctx provider. *)
+  let compute_class_decl (ctx : Provider_context.t) (class_name : string) :
+      t option =
     try
-      if use_lazy then
+      if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+      then
         make_lazy_class_type ctx class_name
       else
-        let cached =
-          if allow_eager_to_read_from_decl_shmem then
-            Decl_heap.Classes.get class_name
-          else
-            None
-        in
-        match cached with
-        | Some cached -> Some (Eager (Decl_class.to_class_type cached))
-        | None ->
-          (* Note: make_eager_class_type will write to Decl_heap.Classes shmem *)
-          make_eager_class_type ctx class_name
-      (* If we raise Exit, then the class does not exist. *)
-    with
-    | Deferred_decl.Defer d ->
+        make_eager_class_type ctx class_name
+    with Deferred_decl.Defer d ->
       Deferred_decl.add_deferment ~d;
       None
-    | Exit -> None
 
   (** This gets a class_type variant, via the local-memory [Cache]. *)
   let get ctx class_name =
@@ -152,12 +137,7 @@ module Classes = struct
     | Some t -> Some t
     | None ->
       begin
-        match
-          compute_class_decl
-            ~allow_eager_to_read_from_decl_shmem:true
-            ctx
-            class_name
-        with
+        match compute_class_decl ctx class_name with
         | None -> None
         | Some class_type_variant ->
           Cache.add class_name class_type_variant;
@@ -595,5 +575,4 @@ module Api = struct
     | Eager _ -> failwith "shallow_class_decl is disabled"
 end
 
-let compute_class_decl_no_cache =
-  Classes.compute_class_decl ~allow_eager_to_read_from_decl_shmem:false
+let compute_class_decl_no_cache = Classes.compute_class_decl

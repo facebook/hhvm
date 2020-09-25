@@ -1710,7 +1710,7 @@ impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
 impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     type S = Node<'a>;
 
-    fn flatten(&self, lst: std::vec::Vec<Self::S>) -> Self::S {
+    fn flatten(&self, kind: SyntaxKind, lst: std::vec::Vec<Self::S>) -> Self::S {
         let size = lst
             .iter()
             .map(|s| match s {
@@ -1736,14 +1736,14 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
             }
         }
         match r.into_bump_slice() {
-            [] => Node::Ignored,
+            [] => Node::IgnoredSyntaxKind(kind),
             [node] => *node,
             slice => Node::List(self.alloc(slice)),
         }
     }
 
-    fn zero() -> Self::S {
-        Node::Ignored
+    fn zero(kind: SyntaxKind) -> Self::S {
+        Node::IgnoredSyntaxKind(kind)
     }
 
     fn is_zero(s: &Self::S) -> bool {

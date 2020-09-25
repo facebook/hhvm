@@ -11,7 +11,8 @@ mod facts_smart_constructors_generated;
 use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use parser_core_types::{
-    lexable_token::LexableToken, source_text::SourceText, token_kind::TokenKind,
+    lexable_token::LexableToken, source_text::SourceText, syntax_kind::SyntaxKind,
+    token_kind::TokenKind,
 };
 
 pub use crate::facts_smart_constructors_generated::*;
@@ -117,7 +118,7 @@ pub struct TypeAliasDeclChildren {
 impl<'a> FlattenOp for FactsSmartConstructors<'_> {
     type S = Node;
 
-    fn flatten(&self, lst: Vec<Self::S>) -> Self::S {
+    fn flatten(&self, _kind: SyntaxKind, lst: Vec<Self::S>) -> Self::S {
         let mut r = lst
             .into_iter()
             .map(|s| match s {
@@ -139,7 +140,7 @@ impl<'a> FlattenOp for FactsSmartConstructors<'_> {
         }
     }
 
-    fn zero() -> Self::S {
+    fn zero(_kind: SyntaxKind) -> Self::S {
         Node::Ignored
     }
 

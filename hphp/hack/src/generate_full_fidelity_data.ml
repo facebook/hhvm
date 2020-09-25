@@ -1586,41 +1586,47 @@ module GenerateRustFlattenSmartConstructors = struct
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
         if %s {
-          Self::zero()
+          Self::zero(SyntaxKind::%s)
         } else {
-          self.flatten(vec!(%s))
+          self.flatten(SyntaxKind::%s, vec!(%s))
         }
     }\n\n"
       x.type_name
       args
       if_cond
+      x.kind_name
+      x.kind_name
       flatten_args
 
   let flatten_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
 use smart_constructors::SmartConstructors;
+use parser_core_types::{
+  lexable_token::LexableToken,
+  syntax_kind::SyntaxKind,
+};
 
 pub trait FlattenOp {
     type S;
     fn is_zero(s: &Self::S) -> bool;
-    fn zero() -> Self::S;
-    fn flatten(&self, lst: Vec<Self::S>) -> Self::S;
+    fn zero(kind: SyntaxKind) -> Self::S;
+    fn flatten(&self, kind: SyntaxKind, lst: Vec<Self::S>) -> Self::S;
 }
 
 pub trait FlattenSmartConstructors<'src, State>
 : SmartConstructors<State> + FlattenOp<S=<Self as SmartConstructors<State>>::R>
 {
     fn make_missing(&mut self, _: usize) -> Self::R {
-       Self::zero()
+       Self::zero(SyntaxKind::Missing)
     }
 
-    fn make_token(&mut self, _: Self::Token) -> Self::R {
-        Self::zero()
+    fn make_token(&mut self, token: Self::Token) -> Self::R {
+        Self::zero(SyntaxKind::Token(token.kind()))
     }
 
     fn make_list(&mut self, _: Vec<Self::R>, _: usize) -> Self::R {
-        Self::zero()
+        Self::zero(SyntaxKind::SyntaxList)
     }
 
 CONSTRUCTOR_METHODS}

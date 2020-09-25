@@ -479,6 +479,7 @@ let rec reactivity_to_string env r =
     | None -> ""
     | Some s -> "(" ^ s ^ ")")
   | CippGlobal -> "cipp_global"
+  | CippRx -> "cipp_rx"
 
 let lenv_as_value env lenv =
   let { per_cont_env; local_using_vars; local_reactive; local_mutability } =

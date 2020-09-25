@@ -536,6 +536,8 @@ let get_reactivity_from_user_attributes user_attributes =
         Some (CippLocal (get_params ua_params))
       else if String.equal n UA.uaCippGlobal then
         Some CippGlobal
+      else if String.equal n UA.uaCippRx then
+        Some CippRx
       else
         go tl
   in
@@ -563,7 +565,8 @@ let check =
       match ctx.reactivity with
       | Nonreactive
       | Cipp _
-      | CippLocal _ ->
+      | CippLocal _
+      | CippGlobal ->
         List.iter b.fb_ast (check_non_rx#on_stmt env)
       | _ ->
         begin

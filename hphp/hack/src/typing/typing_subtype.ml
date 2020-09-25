@@ -2366,17 +2366,16 @@ and simplify_subtype_reactivity
     when is_call_site ->
     valid env
   (* Anything can call CippGlobal*)
+  (* CippRx is the same as CippGlobal, but with reactivity constraints *)
   (* Nonreactive is covered from above*)
-  | ( CippGlobal,
+  | ( (CippGlobal | CippRx),
       ( Reactive _ | Local _ | Shallow _ | MaybeReactive _ | Cipp _
-      | CippLocal _ | CippGlobal | Pure _ ) )
-    when is_call_site ->
+      | CippLocal _ | CippGlobal | CippRx | Pure _ ) ) ->
     valid env
-  (* CippGlobal can call anything (unsafe direction) *)
-  | ( ( Nonreactive | Pure _ | Reactive _ | Local _ | Shallow _
-      | MaybeReactive _ | Cipp _ | CippLocal _ | CippGlobal ),
-      CippGlobal ) ->
-    valid env
+  (* CippGlobal can (safely) call anything the following *)
+  | ( ( Pure _ | Cipp _ | CippLocal _ ), CippGlobal ) -> valid env
+  (* CippGlobal can call anything (unsafe) *)
+  | (_, CippGlobal) when is_call_site -> valid env
   | _ -> check_condition_type_has_matching_reactive_method env
 
 and should_check_fun_params_reactivity (ft_super : locl_fun_type) =

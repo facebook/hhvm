@@ -58,6 +58,8 @@ let fun_reactivity_opt env user_attributes =
         Some (CippLocal (get_cipp_param ua_params))
       else if String.equal n UA.uaCippGlobal then
         Some CippGlobal
+      else if String.equal n UA.uaCippRx then
+        Some CippRx
       else
         go tl
   in

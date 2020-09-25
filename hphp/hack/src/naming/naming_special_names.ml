@@ -244,6 +244,8 @@ module UserAttributes = struct
 
   let uaCippGlobal = "__CippGlobal"
 
+  let uaCippRx = "__CippRx"
+
   let uaReactive = "__Rx"
 
   let uaLocalReactive = "__RxLocal"
@@ -331,6 +333,7 @@ module UserAttributes = struct
           (uaCipp, [fn; mthd]);
           (uaCippLocal, [fn; mthd]);
           (uaCippGlobal, [fn; mthd]);
+          (uaCippRx, [fn; mthd]);
           (uaReactive, [fn; mthd]);
           (uaLocalReactive, [fn; mthd]);
           (uaMutable, [mthd; parameter]);

@@ -114,12 +114,12 @@ module Classes = struct
 
   type t = class_type_variant
 
-  (** Fetches either the [Lazy] class (if shallow decls are enabled)
-  or the [Eager] class (otherwise).
-  Note: Eager will always read+write to shmem Decl_heaps. Lazy
-  will solely go through the ctx provider. *)
-  let compute_class_decl (ctx : Provider_context.t) (class_name : string) :
+  let get_no_local_cache (ctx : Provider_context.t) (class_name : string) :
       t option =
+    (* Fetches either the [Lazy] class (if shallow decls are enabled)
+    or the [Eager] class (otherwise).
+    Note: Eager will always read+write to shmem Decl_heaps.
+    Lazy will solely go through the ctx provider. *)
     try
       if TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
       then
@@ -130,14 +130,13 @@ module Classes = struct
       Deferred_decl.add_deferment ~d;
       None
 
-  (** This gets a class_type variant, via the local-memory [Cache]. *)
   let get ctx class_name =
     Counters.count_decl_accessor @@ fun () ->
     match Cache.get class_name with
     | Some t -> Some t
     | None ->
       begin
-        match compute_class_decl ctx class_name with
+        match get_no_local_cache ctx class_name with
         | None -> None
         | Some class_type_variant ->
           Cache.add class_name class_type_variant;
@@ -574,5 +573,3 @@ module Api = struct
     | Lazy lc -> lc.sc
     | Eager _ -> failwith "shallow_class_decl is disabled"
 end
-
-let compute_class_decl_no_cache = Classes.compute_class_decl

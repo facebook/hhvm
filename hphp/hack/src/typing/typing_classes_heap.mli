@@ -15,6 +15,11 @@ module Classes : sig
 
   type t
 
+  (** Implementation detail, do not use. For use in [Decl_provider] only. *)
+  val get_no_local_cache : Provider_context.t -> key -> t option
+
+  (** This is the preferred entry-point. It gets the class, and uses
+  a local-memory cache. *)
   val get : Provider_context.t -> key -> t option
 
   val mem : Provider_context.t -> key -> bool
@@ -153,7 +158,3 @@ module Api : sig
       Raises [Failure] if used when shallow_class_decl is not enabled. *)
   val shallow_decl : t -> Shallow_decl_defs.shallow_class
 end
-
-(** Implementation detail, do not use. For use in [Decl_provider] only. *)
-val compute_class_decl_no_cache :
-  Provider_context.t -> string -> Classes.t option

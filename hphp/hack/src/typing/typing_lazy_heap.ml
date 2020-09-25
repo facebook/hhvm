@@ -18,6 +18,8 @@ let get_type_id_filename ctx x expected_kind =
 
 let get_class = Typing_classes_heap.Classes.get
 
+let get_class_no_local_cache = Typing_classes_heap.Classes.get_no_local_cache
+
 let get_fun ~(sh : SharedMem.uses) ctx x =
   Counters.count_decl_accessor @@ fun () ->
   let SharedMem.Uses = sh in

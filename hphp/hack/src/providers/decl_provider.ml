@@ -64,7 +64,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
         ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
         ~default:(fun () ->
           let result : class_decl option =
-            Typing_classes_heap.compute_class_decl_no_cache ctx class_name
+            Typing_lazy_heap.get_class_no_local_cache ctx class_name
           in
           Option.map result ~f:Obj.repr)
     in

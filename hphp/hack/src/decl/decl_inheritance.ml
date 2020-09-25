@@ -392,6 +392,8 @@ let make_pu_enum_cache lin =
   LSTable.make
     lin
     ~is_canonical:(fun _ -> false)
+      (* TODO(shallow): once we support canonical, i.e. stopping early,
+      then update typing_classes_heap to mark this as a Lazy api. *)
     ~merge:
       begin
         fun ~earlier:descendant_pu ~later:_ ->

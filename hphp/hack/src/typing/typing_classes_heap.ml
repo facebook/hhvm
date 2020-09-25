@@ -29,28 +29,51 @@ type class_type_variant =
   | Lazy of lazy_class_type
   | Eager of class_type
 
-let make_lazy_class_type ctx class_name sc =
-  let Decl_ancestors.
-        {
-          ancestors;
-          parents_and_traits;
-          members_fully_known;
-          req_ancestor_names;
-          all_requirements;
-        } =
-    Decl_ancestors.make ctx class_name
-  in
-  let get_ancestor = LSTable.get ancestors in
-  let inherited_members = Decl_inheritance.make ctx class_name get_ancestor in
-  {
-    sc;
-    ih = inherited_members;
-    ancestors;
-    parents_and_traits;
-    members_fully_known;
-    req_ancestor_names;
-    all_requirements;
-  }
+let make_lazy_class_type ctx class_name =
+  match Shallow_classes_provider.get ctx class_name with
+  | None -> None
+  | Some sc ->
+    let Decl_ancestors.
+          {
+            ancestors;
+            parents_and_traits;
+            members_fully_known;
+            req_ancestor_names;
+            all_requirements;
+          } =
+      Decl_ancestors.make ctx class_name
+    in
+    let get_ancestor = LSTable.get ancestors in
+    let inherited_members = Decl_inheritance.make ctx class_name get_ancestor in
+    Some
+      (Lazy
+         {
+           sc;
+           ih = inherited_members;
+           ancestors;
+           parents_and_traits;
+           members_fully_known;
+           req_ancestor_names;
+           all_requirements;
+         })
+
+let make_eager_class_type ctx class_name =
+  match Naming_provider.get_type_path_and_kind ctx class_name with
+  | Some (_, Naming_types.TTypedef)
+  | Some (_, Naming_types.TRecordDef)
+  | None ->
+    None
+  | Some (file, Naming_types.TClass) ->
+    Deferred_decl.raise_if_should_defer ~d:file;
+    let class_type =
+      Errors.run_in_decl_mode file (fun () ->
+          Decl.declare_class_in_file ~sh:SharedMem.Uses ctx file class_name)
+    in
+    Deferred_decl.increment_counter ();
+    (match class_type with
+    | Some class_type -> Some (Eager (Decl_class.to_class_type class_type))
+    | None ->
+      failwith ("No class returned for get_eager_class_type on " ^ class_name))
 
 module Classes = struct
   (** This module is an abstraction layer over shallow vs folded decl,
@@ -86,63 +109,35 @@ module Classes = struct
 
   type t = class_type_variant
 
+  (** Fetches either the [Lazy] class (if shallow decls are enabled)
+  or the [Eager] class (otherwise).
+  Note: Eager will always write to shmem Decl_heap.Classes if it needs to
+  fetch a decl, but it will only read from that heap depending on the parameter.
+  As for Lazy, it has no direct access to shmem, and instead always goes through
+  a ctx provider.
+  *)
   let compute_class_decl
-      ~(use_cache : bool) (ctx : Provider_context.t) (class_name : string) :
-      t option =
+      ~(allow_eager_to_read_from_decl_shmem : bool)
+      (ctx : Provider_context.t)
+      (class_name : string) : t option =
+    let use_lazy =
+      TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
+    in
     try
-      let get_eager_class_type class_name =
-        Decl_class.to_class_type
-        @@
+      if use_lazy then
+        make_lazy_class_type ctx class_name
+      else
         let cached =
-          if use_cache then
+          if allow_eager_to_read_from_decl_shmem then
             Decl_heap.Classes.get class_name
           else
             None
         in
         match cached with
-        | Some dc -> dc
+        | Some cached -> Some (Eager (Decl_class.to_class_type cached))
         | None ->
-          (match Naming_provider.get_type_path_and_kind ctx class_name with
-          | Some (_, Naming_types.TTypedef)
-          | Some (_, Naming_types.TRecordDef)
-          | None ->
-            raise Exit
-          | Some (file, Naming_types.TClass) ->
-            Deferred_decl.raise_if_should_defer ~d:file;
-            let class_type =
-              Errors.run_in_decl_mode file (fun () ->
-                  Decl.declare_class_in_file
-                    ~sh:SharedMem.Uses
-                    ctx
-                    file
-                    class_name)
-            in
-            Deferred_decl.increment_counter ();
-            (match class_type with
-            | Some class_type -> class_type
-            | None ->
-              failwith
-                ("No class returned for get_eager_class_type on " ^ class_name)))
-      in
-      (* We don't want to fetch the shallow_class if shallow_class_decl is not
-         enabled--this would frequently involve a re-parse, which would result
-         in a huge perf penalty. We also want to avoid computing the folded
-         decl of the class and all its ancestors when shallow_class_decl is
-         enabled. We maintain these invariants in this module by only ever
-         constructing [Eager] or [Lazy] classes, depending on whether
-         shallow_class_decl is enabled. *)
-      let class_type_variant =
-        if
-          TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
-        then
-          match Shallow_classes_provider.get ctx class_name with
-          | None -> raise Exit
-          | Some sc -> Lazy (make_lazy_class_type ctx class_name sc)
-        else
-          Eager (get_eager_class_type class_name)
-      in
-      if use_cache then Cache.add class_name class_type_variant;
-      Some class_type_variant
+          (* Note: make_eager_class_type will write to Decl_heap.Classes shmem *)
+          make_eager_class_type ctx class_name
       (* If we raise Exit, then the class does not exist. *)
     with
     | Deferred_decl.Defer d ->
@@ -150,11 +145,24 @@ module Classes = struct
       None
     | Exit -> None
 
+  (** This gets a class_type variant, via the local-memory [Cache]. *)
   let get ctx class_name =
     Counters.count_decl_accessor @@ fun () ->
     match Cache.get class_name with
     | Some t -> Some t
-    | None -> compute_class_decl ~use_cache:true ctx class_name
+    | None ->
+      begin
+        match
+          compute_class_decl
+            ~allow_eager_to_read_from_decl_shmem:true
+            ctx
+            class_name
+        with
+        | None -> None
+        | Some class_type_variant ->
+          Cache.add class_name class_type_variant;
+          Some class_type_variant
+      end
 
   let find_unsafe ctx key =
     match get ctx key with
@@ -587,4 +595,5 @@ module Api = struct
     | Eager _ -> failwith "shallow_class_decl is disabled"
 end
 
-let compute_class_decl_no_cache = Classes.compute_class_decl ~use_cache:false
+let compute_class_decl_no_cache =
+  Classes.compute_class_decl ~allow_eager_to_read_from_decl_shmem:false

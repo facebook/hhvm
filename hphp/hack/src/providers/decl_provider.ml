@@ -80,7 +80,13 @@ let convert_class_elt_to_fun_decl class_elt_opt : fun_decl option =
   Typing_defs.(
     match class_elt_opt with
     | Some { ce_type = (lazy ty); ce_deprecated; ce_pos = (lazy pos); _ } ->
-      Some { fe_pos = pos; fe_type = ty; fe_deprecated = ce_deprecated }
+      Some
+        {
+          fe_pos = pos;
+          fe_type = ty;
+          fe_deprecated = ce_deprecated;
+          fe_php_std_lib = false;
+        }
     | _ -> None)
 
 let get_class_constructor (ctx : Provider_context.t) (class_name : class_key) :

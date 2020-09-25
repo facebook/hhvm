@@ -321,6 +321,9 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
       f.f_name
       f.f_user_attributes
   in
+  let fe_php_std_lib =
+    Naming_attributes.mem SN.UserAttributes.uaPHPStdLib f.f_user_attributes
+  in
   let fe_type =
     mk
       ( Reason.Rwitness (fst f.f_name),
@@ -343,7 +346,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 ~returns_void_to_rx;
           } )
   in
-  { fe_pos = fst f.f_name; fe_type; fe_deprecated }
+  { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_php_std_lib }
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -829,6 +832,7 @@ and build_constructor
       fe_pos = pos;
       fe_deprecated = method_.sm_deprecated;
       fe_type = method_.sm_type;
+      fe_php_std_lib = false;
     }
   in
   if write_shmem then Decl_heap.Constructors.add class_name fe;
@@ -1073,7 +1077,14 @@ and method_decl_acc
       elt_deprecated = m.sm_deprecated;
     }
   in
-  let fe = { fe_pos = pos; fe_deprecated = None; fe_type = m.sm_type } in
+  let fe =
+    {
+      fe_pos = pos;
+      fe_deprecated = None;
+      fe_type = m.sm_type;
+      fe_php_std_lib = false;
+    }
+  in
   if write_shmem then
     if is_static then
       Decl_heap.StaticMethods.add (elt.elt_origin, id) fe

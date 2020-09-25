@@ -796,6 +796,7 @@ impl<'a> Node<'a> {
             accept_disposable: false,
             dynamically_callable: false,
             returns_disposable: false,
+            php_std_lib: false,
         };
 
         let mut reactivity_condition_type = None;
@@ -885,6 +886,9 @@ impl<'a> Node<'a> {
                     "__ReturnDisposable" => {
                         attributes.returns_disposable = true;
                     }
+                    "__PHPStdLib" => {
+                        attributes.php_std_lib = true;
+                    }
                     _ => {}
                 }
             } else {
@@ -921,6 +925,7 @@ struct Attributes<'a> {
     accept_disposable: bool,
     dynamically_callable: bool,
     returns_disposable: bool,
+    php_std_lib: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -2748,6 +2753,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     deprecated,
                     type_,
                     pos,
+                    php_std_lib: parsed_attributes.php_std_lib,
                 };
                 self.add_fun(name, fun_elt);
                 Node::Ignored

@@ -144,6 +144,7 @@ and fun_elt = {
   fe_deprecated: string option;
   fe_type: decl_ty;
   fe_pos: Pos.t;
+  fe_php_std_lib: bool;
 }
 
 and class_const = {

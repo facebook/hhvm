@@ -34,7 +34,34 @@ let parse_decls ?contents relative_path =
          "Could not load file contents for %s"
          (Relative_path.to_absolute relative_path))
 
-let decls_to_fileinfo (decls : decls) : FileInfo.t =
+let decls_to_fileinfo
+    (popt : ParserOptions.t) (fn : Relative_path.t) (decls : decls) : FileInfo.t
+    =
+  let is_php_stdlib =
+    Relative_path.(is_hhi (Relative_path.prefix fn))
+    && ParserOptions.deregister_php_stdlib popt
+  in
+  let fun_filter funs =
+    if is_php_stdlib then
+      SMap.filter (fun _ f -> not f.Typing_defs.fe_php_std_lib) funs
+    else
+      funs
+  in
+  let class_filter classes =
+    if is_php_stdlib then
+      SMap.filter
+        (fun _ c ->
+          List.exists
+            (fun a ->
+              String.equal
+                Naming_special_names.UserAttributes.uaPHPStdLib
+                (snd a.Typing_defs_core.ua_name))
+            c.Shallow_decl_defs.sc_user_attributes
+          |> not)
+        classes
+    else
+      classes
+  in
   (* TODO: Nast.generate_ast_decl_hash ignores pos, match it! *)
   let hash = Some (Marshal.to_string decls [] |> OpaqueDigest.string) in
   let get_ids : 'a. ('a -> Pos.t) -> 'a SMap.t -> FileInfo.id list =
@@ -44,8 +71,9 @@ let decls_to_fileinfo (decls : decls) : FileInfo.t =
   let { classes; funs; typedefs; consts; _ } = decls in
   {
     FileInfo.hash;
-    classes = get_ids (fun c -> fst c.Shallow_decl_defs.sc_name) classes;
-    funs = get_ids (fun f -> f.Typing_defs.fe_pos) funs;
+    classes =
+      class_filter classes |> get_ids (fun c -> fst c.Shallow_decl_defs.sc_name);
+    funs = fun_filter funs |> get_ids (fun f -> f.Typing_defs.fe_pos);
     typedefs = get_ids (fun t -> t.Typing_defs.td_pos) typedefs;
     consts = get_ids (fun c -> c.Typing_defs.cd_pos) consts;
     (* TODO: get file mode*)
@@ -56,13 +84,13 @@ let decls_to_fileinfo (decls : decls) : FileInfo.t =
   }
 
 let parse
-    (_popt : ParserOptions.t)
+    (popt : ParserOptions.t)
     (acc : FileInfo.t Relative_path.Map.t)
     (fn : Relative_path.t) : FileInfo.t Relative_path.Map.t =
   if not (FindUtils.path_filter fn) then
     acc
   else
-    parse_decls fn |> decls_to_fileinfo |> fun file_info ->
+    parse_decls fn |> decls_to_fileinfo popt fn |> fun file_info ->
     Relative_path.Map.add acc ~key:fn ~data:file_info
 
 let parse_batch

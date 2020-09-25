@@ -15,6 +15,6 @@ trait YTwo { use YOne; }
 // should display the longer route (via YOne), because it's the least
 // obvious to the reader.
 class MyParent {
+  use YTwo;
   use XOne;
-  use YOne;
 }

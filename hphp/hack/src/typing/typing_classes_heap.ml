@@ -433,12 +433,6 @@ module ApiLazy = struct
 end
 
 module ApiEager = struct
-  let sort_by_key seq =
-    (* No tally on this helper; all its callers do tally themselves. *)
-    seq
-    |> Sequence.to_list_rev
-    |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
-
   (** Internal helper, for all the accessors that return sequences,
   so we properly tally up the time spent iterating over those sequences. *)
   let tally_sequence (seq : 'a Sequence.t) : 'a Sequence.t =
@@ -467,7 +461,7 @@ module ApiEager = struct
   let all_ancestors t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ancestors |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_ancestors
 
   let all_ancestor_names t =
@@ -510,43 +504,43 @@ module ApiEager = struct
   let consts t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.consts |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.consts |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_consts
 
   let typeconsts t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_typeconsts
 
   let pu_enums t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.pu_enums |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.pu_enums |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_pu_enums
 
   let props t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.props |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.props |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_props
 
   let sprops t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.sprops |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.sprops |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_sprops
 
   let methods t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.methods |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.methods |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_methods
 
   let smethods t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> LSTable.to_seq lc.ih.smethods |> sort_by_key
+    | Lazy lc -> LSTable.to_seq lc.ih.smethods |> Sequence.to_list_rev
     | Eager c -> SMap.bindings c.tc_smethods
 
   let all_inherited_methods t id =

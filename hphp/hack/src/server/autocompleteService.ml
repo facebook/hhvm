@@ -214,22 +214,31 @@ let autocomplete_member ~is_static env class_ cid id =
     let add kind (name, ty) =
       add_partial_result name (Phase.decl ty) kind (Some class_)
     in
+    let sort : 'a. (string * 'a) list -> (string * 'a) list =
+     fun list ->
+      List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b) list
+    in
+    (* There's no reason for us to sort -- we can expect our client to do its
+    own sorting of our results -- but having a sorted list here makes our tests
+    more stable. *)
     if is_static || match_both_static_and_instance then (
       List.iter
-        (get_class_elt_types env class_ cid (Cls.smethods class_))
+        (get_class_elt_types env class_ cid (Cls.smethods class_ |> sort))
         ~f:(add SearchUtils.SI_ClassMethod);
       List.iter
-        (get_class_elt_types env class_ cid (Cls.sprops class_))
+        (get_class_elt_types env class_ cid (Cls.sprops class_ |> sort))
         ~f:(add SearchUtils.SI_Property);
-      List.iter (Cls.consts class_) ~f:(fun (name, cc) ->
+      List.iter
+        (Cls.consts class_ |> sort)
+        ~f:(fun (name, cc) ->
           add SearchUtils.SI_ClassConstant (name, cc.cc_type))
     );
     if (not is_static) || match_both_static_and_instance then (
       List.iter
-        (get_class_elt_types env class_ cid (Cls.methods class_))
+        (get_class_elt_types env class_ cid (Cls.methods class_ |> sort))
         ~f:(add SearchUtils.SI_ClassMethod);
       List.iter
-        (get_class_elt_types env class_ cid (Cls.props class_))
+        (get_class_elt_types env class_ cid (Cls.props class_ |> sort))
         ~f:(add SearchUtils.SI_Property)
     )
   )

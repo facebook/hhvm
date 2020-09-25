@@ -35,7 +35,7 @@ function f4(I1 $p1)
 
     var_dump($p1);
 }
-
+<<__DynamicallyCallable>>
 function hello()
 {
     echo "Hello!\n";

@@ -1,49 +1,49 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-<<__Memoize>>
+<<__DynamicallyCallable, __Memoize>>
 function alwaysThrows1() {
   throw new Exception("Always throws");
 }
 
-<<__Memoize>>
+<<__DynamicallyCallable, __Memoize>>
 function alwaysThrows2($a) {
   throw new Exception("Always throws");
 }
 
 class Cls1 {
-  <<__Memoize>>
+  <<__DynamicallyCallable, __Memoize>>
   public static function alwaysThrows1() {
     throw new Exception("Always throws");
   }
 
-  <<__Memoize>>
+  <<__DynamicallyCallable, __Memoize>>
   public static function alwaysThrows2($a) {
     throw new Exception("Always throws");
   }
 }
 
 class Cls2 {
-  <<__Memoize>>
+  <<__DynamicallyCallable, __Memoize>>
   public function alwaysThrows1() {
     throw new Exception("Always throws");
   }
 
-  <<__Memoize>>
+  <<__DynamicallyCallable, __Memoize>>
   public function alwaysThrows2($a) {
     throw new Exception("Always throws");
   }
 }
 
 class Cls3 {
-  <<__Memoize>>
+  <<__DynamicallyCallable, __Memoize>>
   public function alwaysThrows() {
     throw new Exception("Always throws");
   }
 }
 
 class Cls4 {
-  <<__Memoize>>
+  <<__DynamicallyCallable, __Memoize>>
   public function alwaysThrows($a) {
     throw new Exception("Always throws");
   }

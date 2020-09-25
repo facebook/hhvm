@@ -1,6 +1,6 @@
 <?hh
 namespace test;
-
+<<__DynamicallyCallable>>
 function foo() {
     return __FUNCTION__;
 }

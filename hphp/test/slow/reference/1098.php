@@ -1,10 +1,12 @@
 <?hh
+<<__DynamicallyCallable>>
 function ref(inout $a, $b) {
- echo "$a $b";
- }
+  echo "$a $b";
+}
+<<__DynamicallyCallable>>
 function val($a, $b)  {
- echo "$a $b";
- }
+  echo "$a $b";
+}
 
 
 <<__EntryPoint>>

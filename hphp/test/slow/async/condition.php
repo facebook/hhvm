@@ -27,33 +27,33 @@ async function block_then_fail(Ref $condition) {
   echo "block exit\n";
   $condition->value->fail(new Exception('horrible failure'));
 }
-
+<<__DynamicallyCallable>>
 async function condition_noblock() {
   $condition = ConditionWaitHandle::create(noblock());
   echo "not reached\n";
 }
-
+<<__DynamicallyCallable>>
 async function condition_block() {
   $condition = ConditionWaitHandle::create(block());
   echo "constructed ConditionWaitHandle\n";
   await $condition;
   echo "not reached\n";
 }
-
+<<__DynamicallyCallable>>
 async function condition_block_ugly_succeed() {
   $condition = ConditionWaitHandle::create(block());
   echo "constructed ConditionWaitHandle\n";
   $condition->succeed(42);
   return await $condition;
 }
-
+<<__DynamicallyCallable>>
 async function condition_block_ugly_fail() {
   $condition = ConditionWaitHandle::create(block());
   echo "constructed ConditionWaitHandle\n";
   $condition->fail(new Exception('horrible failure'));
   return await $condition;
 }
-
+<<__DynamicallyCallable>>
 async function condition_block_nice_succeed() {
   $condition = new Ref(null);
   $condition->value = ConditionWaitHandle::create(
@@ -62,7 +62,7 @@ async function condition_block_nice_succeed() {
   echo "constructed ConditionWaitHandle\n";
   return await $condition->value;
 }
-
+<<__DynamicallyCallable>>
 async function condition_block_nice_fail() {
   $condition = new Ref(null);
   $condition->value = ConditionWaitHandle::create(block_then_fail($condition));

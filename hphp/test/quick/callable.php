@@ -9,6 +9,7 @@ function typehint(callable $a) {
   var_dump('worked');
 }
 
+<<__DynamicallyCallable>>
 function id() {}
 
 <<__EntryPoint>> function main(): void {

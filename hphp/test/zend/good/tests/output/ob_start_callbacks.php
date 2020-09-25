@@ -1,13 +1,14 @@
 <?hh
 
 class foo {
-    static function out($foo) {
-        return strtoupper($foo);
-    }
-}
-
-function my_strtoupper($foo, $bar) {
+  <<__DynamicallyCallable>>
+  static function out($foo) {
     return strtoupper($foo);
+  }
+}
+<<__DynamicallyCallable>>
+function my_strtoupper($foo, $bar) {
+  return strtoupper($foo);
 }
 
 // Closure in variable

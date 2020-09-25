@@ -1,26 +1,27 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function x($a, $b, $c, $d) {
 }
 function p($x) {
- echo $x . "
+  echo $x . "
 ";
- return $x;
- }
+  return $x;
+}
 class c {
   function __construct($a, $b, $c, $d) {
-}
+  }
   function f($a, $b, $c, $d) {
-}
+  }
+  <<__DynamicallyCallable>>
   static function g($a, $b, $c, $d) {
-}
+  }
 }
 function rt(inout $a, $v) {
   $a = $v;
 }
 function id($x) {
- return $x;
- }
+  return $x;
+}
 function dump($a, $b) {
   var_dump($a, $b);
 }

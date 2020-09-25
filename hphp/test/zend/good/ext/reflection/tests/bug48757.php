@@ -1,8 +1,9 @@
 <?hh
+<<__DynamicallyCallable>>
 function test() {
     echo "Hello World\n";
 }
-
+<<__DynamicallyCallable>>
 function another_test($parameter) {
     var_dump($parameter);
 }

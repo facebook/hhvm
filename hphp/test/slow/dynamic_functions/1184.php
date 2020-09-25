@@ -3,7 +3,7 @@
 abstract final class DynamicFunctions1184 {
   public static $a;
 }
-
+<<__DynamicallyCallable>>
 function test() {
  return DynamicFunctions1184::$a;
 }

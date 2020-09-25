@@ -1,5 +1,5 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function test(inout $a, $b) {
  $a = 'ok';
 }

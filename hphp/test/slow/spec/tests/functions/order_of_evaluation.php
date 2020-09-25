@@ -1,18 +1,18 @@
 <?hh
 
 // check order of evaluation of arguments in a function call w.r.t side effects
-
+<<__DynamicallyCallable>>
 function f($p1, $p2, $p3, $p4, $p5)
 {
     echo "f: \$p1 = $p1, \$p2 = $p2, \$p3 = $p3, \$p4 = $p4, \$p5 = $p5\n";
 }
 // f: $p1 = 0, $p2 = 1, $p3 = 1, $p4 = 12, $p5 = 11
-
+<<__DynamicallyCallable>>
 function g($p1, $p2, $p3, $p4, $p5)
 {
     echo "g: \$p1 = $p1, \$p2 = $p2, \$p3 = $p3, \$p4 = $p4, \$p5 = $p5\n";
 }
-
+<<__DynamicallyCallable>>
 function h($p1, $p2, $p3, $p4, $p5)
 {
     echo "h: \$p1 = $p1, \$p2 = $p2, \$p3 = $p3, \$p4 = $p4, \$p5 = $p5\n";

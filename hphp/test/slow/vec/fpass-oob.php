@@ -1,8 +1,8 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function ref(inout $x, $i, $j) { echo ++$x[$i][$j], "\n"; }
+<<__DynamicallyCallable>>
 function non($x) { echo $x, "\n"; }
-
 function foo($f, $ref) {
   $x = vec[0, vec[1]];
   $ref ? $f(inout $x, 1, 0) : $f($x[1][0]);

@@ -2,15 +2,18 @@
 
 namespace ShutdownTest;
 
+<<__DynamicallyCallable>>
 function test() {
   \var_dump('function');
 }
 
 class Test {
+  <<__DynamicallyCallable>>
   function handleInstance() {
     \var_dump('Method - instance');
   }
 
+  <<__DynamicallyCallable>>
   static function handleStatic() {
     \var_dump('Method - static');
   }

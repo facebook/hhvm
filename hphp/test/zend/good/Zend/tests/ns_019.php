@@ -1,4 +1,5 @@
 <?hh
+<<__DynamicallyCallable>>
 function foo() {
     return __FUNCTION__;
 }

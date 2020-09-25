@@ -1,10 +1,12 @@
 <?hh
 class Test {
+  <<__DynamicallyCallable>>
     static function foo() {
         echo __CLASS__,"::",__FUNCTION__,"\n";
     }
 }
 
+<<__DynamicallyCallable>>
 function foo() {
     echo __FUNCTION__,"\n";
 }

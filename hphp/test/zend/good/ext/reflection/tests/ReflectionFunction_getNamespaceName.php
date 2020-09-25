@@ -1,5 +1,6 @@
 <?hh
 namespace A\B;
+<<__DynamicallyCallable>>
 function foo() {}
 <<__EntryPoint>> function main(): void {
 $function = new \ReflectionFunction('sort');

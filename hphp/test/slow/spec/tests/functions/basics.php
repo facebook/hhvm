@@ -14,7 +14,7 @@
 
 
 // function having no declared parameters
-
+<<__DynamicallyCallable>>
 function f1(...$argList)
 {
     echo "f1: # arguments passed is ".count($argList)."\n";
@@ -36,6 +36,7 @@ function f2($p1, $p2)
         ", \$p2 = ".($p2 == NULL ? "NULL" : $p2)."\n";
 }
 
+<<__DynamicallyCallable>>
 function square($v) { return $v * $v; }
 
 <<__EntryPoint>> function main(): void {

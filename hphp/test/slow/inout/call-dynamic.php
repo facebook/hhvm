@@ -1,14 +1,14 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function foo(inout $x) {
   $x = 42;
 }
-
+<<__DynamicallyCallable>>
 function bar(inout $a, inout $b) {
   list($a, $b) = varray[$b, $a];
   return $a + $b;
 }
-
+<<__DynamicallyCallable>>
 function baz(inout $q) {
   $q = debug_backtrace()[0]['function'];
   return 12;

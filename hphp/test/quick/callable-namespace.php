@@ -6,11 +6,13 @@ namespace M {
 
 namespace N {
   use M;
-
+  <<__DynamicallyCallable>>
   function sayHi() { echo "Hi\n"; }
 
   class C {
+    <<__DynamicallyCallable>>
     public static function sm() { echo "Hello\n"; }
+    <<__DynamicallyCallable>>
     public function m() { echo "Salutations\n"; }
   }
 

@@ -4,10 +4,11 @@
  * proto bool function_exists(string function_name)
  * Function is implemented in Zend/zend_builtin_functions.c
  */
-
+<<__DynamicallyCallable>>
 function f() {}
 class C {
-	static function f() {}
+  <<__DynamicallyCallable>>
+  static function f() {}
 }
 <<__EntryPoint>>
 function main_entry(): void {

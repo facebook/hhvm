@@ -1,6 +1,6 @@
 <?hh
 namespace test\ns1;
-
+<<__DynamicallyCallable>>
 function strlen($x) {
     return __FUNCTION__;
 }

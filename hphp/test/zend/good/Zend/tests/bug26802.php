@@ -1,5 +1,5 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function global_func()
 {
     echo __METHOD__ . "\n";
@@ -8,7 +8,7 @@ function global_func()
 class foo
 {
     static $method = 'global_func';
-
+    <<__DynamicallyCallable>>
     static public function foo_func()
     {
         echo __METHOD__ . "\n";

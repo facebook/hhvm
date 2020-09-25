@@ -5,13 +5,16 @@ class Bar {
     $this->base = $base;
   }
 
+  <<__DynamicallyCallable>>
   public function baz($a) {
     return $a + $this->base;
   }
+  <<__DynamicallyCallable>>
   public static function foo($a) {
     return $a + 1;
   }
 }
+<<__DynamicallyCallable>>
 function foo($a) {
   return $a + 2;
 }

@@ -9,7 +9,7 @@ abstract final class FStatics {
 
 #===============================================================================
 # ReflectionFunction.
-
+<<__DynamicallyCallable>>
 function f($a, inout $b, $c=null) {
   print "In f()\n";
   FStatics::$staticX++;
@@ -18,10 +18,10 @@ function f($a, inout $b, $c=null) {
 }
 
 class Test {
+  <<__DynamicallyCallable>>
   public function test() {
   }
 }
-
 
 
 <<__EntryPoint>>

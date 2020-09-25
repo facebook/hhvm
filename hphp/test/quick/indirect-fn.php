@@ -1,4 +1,5 @@
 <?hh
+<<__DynamicallyCallable>>
 function f($a) {
   echo $a;
   echo "\n";

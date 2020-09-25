@@ -50,9 +50,9 @@ var_dump(array_intersect_ukey($b_f, $c_f,  $d_f, fun("comp_func")));// -20
 
 echo "----- Now testing array_intersect() ------- \n";
 var_dump(array_intersect($a, $b_f));
-var_dump(array_uintersect($a, $b, "comp_func"));
+var_dump(array_uintersect($a, $b, fun("comp_func")));
 var_dump(array_intersect($a, $b, $c));
-var_dump(array_uintersect($a, $b, $c, "comp_func"));
+var_dump(array_uintersect($a, $b, $c, fun("comp_func")));
 var_dump(array_intersect($a, $b, $c, $d));
-var_dump(array_uintersect($a, $b, $c, $d, "comp_func"));
+var_dump(array_uintersect($a, $b, $c, $d, fun("comp_func")));
 }

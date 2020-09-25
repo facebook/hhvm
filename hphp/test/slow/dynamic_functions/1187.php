@@ -1,6 +1,7 @@
 <?hh
 function foo() {
 }
+<<__DynamicallyCallable>>
 function goo(inout $p) {
 }
 function bar() {

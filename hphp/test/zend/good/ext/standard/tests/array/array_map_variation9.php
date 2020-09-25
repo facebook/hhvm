@@ -7,11 +7,11 @@
 /*
  * Test array_map() by passing array having binary values for $arr1 argument
  */
-
 function callback1($a)
 {
   return ($a);
 }
+<<__DynamicallyCallable>>
 function callback2($a, $b)
 {
   return darray[$a => $b];

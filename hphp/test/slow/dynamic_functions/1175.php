@@ -1,5 +1,5 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function t($a, $b = 'k') {
  print $a.$b;
 }

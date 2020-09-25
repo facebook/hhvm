@@ -3,6 +3,7 @@
 
 
 // tests FCallFuncD
+<<__DynamicallyCallable>>
 function hello() {
   echo "hello";
   return 1;

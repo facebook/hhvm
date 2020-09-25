@@ -1,5 +1,5 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function testfunc ($var) {
     echo "testfunc $var\n";
 }

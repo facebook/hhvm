@@ -1,5 +1,5 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function test($a) {
  print $a;
 }

@@ -1,5 +1,5 @@
 <?hh
-
+<<__DynamicallyCallable>>
 function bar() {
   echo 'bar called';
 }

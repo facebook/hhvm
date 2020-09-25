@@ -128,7 +128,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn slice_from_iter<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
+    fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
         let mut result = match iter.size_hint().1 {
             Some(upper_bound) => Vec::with_capacity_in(upper_bound, self.state.arena),
             None => Vec::new_in(self.state.arena),
@@ -1041,7 +1041,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Ty(&ty) => Some(ty),
             Node::TypeconstAccess((pos, ty, names)) => {
                 let pos = pos.get();
-                let names = self.slice_from_iter(names.borrow().iter().copied());
+                let names = self.slice(names.borrow().iter().copied());
                 Some(Ty(
                     self.alloc(Reason::hint(pos)),
                     self.alloc(Ty_::Taccess(
@@ -1501,7 +1501,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         type_arguments: Node<'a>,
         pos_to_merge: &'a Pos<'a>,
     ) -> Node<'a> {
-        let type_arguments = self.slice_from_iter(
+        let type_arguments = self.slice(
             type_arguments
                 .iter()
                 .filter_map(|&node| self.node_to_ty(node)),
@@ -1563,7 +1563,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn convert_tapply_to_tgeneric(&self, ty: Ty<'a>) -> Ty<'a> {
         let ty_ = match *ty.1 {
             Ty_::Tapply(&(id, targs)) => {
-                let converted_targs = self.slice_from_iter(
+                let converted_targs = self.slice(
                     targs
                         .iter()
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
@@ -1597,8 +1597,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     FunArity::Fstandard => FunArity::Fstandard,
                     FunArity::Fvariadic(param) => FunArity::Fvariadic(convert_param(param)),
                 };
-                let params =
-                    self.slice_from_iter(fun_type.params.iter().cloned().map(convert_param));
+                let params = self.slice(fun_type.params.iter().cloned().map(convert_param));
                 let implicit_params = fun_type.implicit_params.clone();
                 let ret = PossiblyEnforcedTy {
                     enforced: fun_type.ret.enforced,
@@ -1637,7 +1636,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.convert_tapply_to_tgeneric(tv),
             ))),
             Ty_::Ttuple(tys) => Ty_::Ttuple(
-                self.slice_from_iter(
+                self.slice(
                     tys.iter()
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
                 ),
@@ -1680,7 +1679,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     ) -> shallow_decl_defs::UserAttribute<'a> {
         shallow_decl_defs::UserAttribute {
             name: attr.name,
-            classname_params: self.slice_from_iter(attr.classname_params.iter().map(|Id(_, s)| *s)),
+            classname_params: self.slice(attr.classname_params.iter().map(|Id(_, s)| *s)),
         }
     }
 }
@@ -2228,7 +2227,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields = self.slice_from_iter(fields.iter().filter_map(|node| match node {
+        let fields = self.slice(fields.iter().filter_map(|node| match node {
             Node::ListItem(&(key, value)) => {
                 let key = self.node_to_expr(key)?;
                 let value = self.node_to_expr(value)?;
@@ -2250,7 +2249,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields = self.slice_from_iter(fields.iter().filter_map(|node| match node {
+        let fields = self.slice(fields.iter().filter_map(|node| match node {
             Node::ListItem(&(key, value)) => {
                 let key = self.node_to_expr(key)?;
                 let value = self.node_to_expr(value)?;
@@ -2272,8 +2271,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields =
-            self.slice_from_iter(fields.iter().filter_map(|&node| self.node_to_expr(node)));
+        let fields = self.slice(fields.iter().filter_map(|&node| self.node_to_expr(node)));
         Node::Expr(self.alloc(aast::Expr(
             self.merge_positions(keyset, right_bracket),
             nast::Expr_::ValCollection(self.alloc((aast_defs::VcKind::Keyset, None, fields))),
@@ -2288,8 +2286,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields =
-            self.slice_from_iter(fields.iter().filter_map(|&node| self.node_to_expr(node)));
+        let fields = self.slice(fields.iter().filter_map(|&node| self.node_to_expr(node)));
         Node::Expr(self.alloc(aast::Expr(
             self.merge_positions(varray, right_bracket),
             nast::Expr_::Varray(self.alloc((None, fields))),
@@ -2304,8 +2301,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields =
-            self.slice_from_iter(fields.iter().filter_map(|&node| self.node_to_expr(node)));
+        let fields = self.slice(fields.iter().filter_map(|&node| self.node_to_expr(node)));
         Node::Expr(self.alloc(aast::Expr(
             self.merge_positions(vec, right_bracket),
             nast::Expr_::ValCollection(self.alloc((aast_defs::VcKind::Vec, None, fields))),
@@ -2464,7 +2460,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             let Id(pos, class_type) = unwrap_or_return!(self.get_name("", class_type));
             match class_type.rsplit('\\').next() {
                 Some(name) if self.is_type_param_in_scope(name) => {
-                    let type_arguments = self.slice_from_iter(
+                    let type_arguments = self.slice(
                         type_arguments
                             .iter()
                             .filter_map(|&node| self.node_to_ty(node)),
@@ -2553,7 +2549,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let user_attributes = match user_attributes {
             Node::BracketedList((_, attributes, _)) => {
-                self.slice_from_iter(attributes.into_iter().filter_map(|x| match x {
+                self.slice(attributes.into_iter().filter_map(|x| match x {
                     Node::Attribute(a) => Some(*a),
                     _ => None,
                 }))
@@ -2561,7 +2557,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => &[][..],
         };
 
-        let constraints = self.slice_from_iter(constraints.iter().filter_map(|node| match node {
+        let constraints = self.slice(constraints.iter().filter_map(|node| match node {
             Node::TypeConstraint(&constraint) => Some(constraint),
             n if n.is_ignored() => None,
             n => panic!("Expected a type constraint, but was {:?}", n),
@@ -2623,14 +2619,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 tparam_params,
                 user_attributes,
             } = decl;
-            let constraints = self.slice_from_iter(constraints.iter().filter_map(|constraint| {
+            let constraints = self.slice(constraints.iter().filter_map(|constraint| {
                 let &(kind, ty) = constraint;
                 let ty = self.node_to_ty(ty)?;
                 let ty = self.convert_tapply_to_tgeneric(ty);
                 Some((kind, ty))
             }));
 
-            let user_attributes = self.slice_from_iter(
+            let user_attributes = self.slice(
                 user_attributes
                     .iter()
                     .rev()
@@ -2791,8 +2787,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     .is_some() =>
             {
                 let ty = self.node_to_ty(hint);
-                Node::List(self.alloc(self.slice_from_iter(consts.iter().filter_map(
-                    |cst| match cst {
+                Node::List(
+                    self.alloc(self.slice(consts.iter().filter_map(|cst| match cst {
                         Node::ConstInitializer(&(name, initializer)) => {
                             let id = self.get_name("", name)?;
                             let ty = ty
@@ -2808,8 +2804,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             )))
                         }
                         _ => None,
-                    },
-                ))))
+                    }))),
+                )
             }
             // Global consts.
             Node::List([Node::ConstInitializer(&(name, initializer))]) => {
@@ -2981,11 +2977,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
 
-        let where_constraints =
-            self.slice_from_iter(where_clause.iter().copied().filter_map(|x| match x {
-                Node::WhereConstraint(x) => Some(shallow_decl_defs::WhereConstraint(x.0, x.1, x.2)),
-                _ => None,
-            }));
+        let where_constraints = self.slice(where_clause.iter().filter_map(|&x| match x {
+            Node::WhereConstraint(x) => Some(shallow_decl_defs::WhereConstraint(x.0, x.1, x.2)),
+            _ => None,
+        }));
 
         let body = match body {
             Node::ClassishBody(body) => body,
@@ -3149,11 +3144,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let methods = methods.into_bump_slice();
         let user_attributes = user_attributes.into_bump_slice();
 
-        let extends =
-            self.slice_from_iter(extends.iter().filter_map(|&node| self.node_to_ty(node)));
+        let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
 
-        let implements =
-            self.slice_from_iter(implements.iter().filter_map(|&node| self.node_to_ty(node)));
+        let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
@@ -3213,35 +3206,32 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let (attrs, modifiers, hint) = (attrs, modifiers, hint);
         let modifiers = read_member_modifiers(modifiers.iter());
-        let declarators =
-            self.slice_from_iter(
-                declarators
-                    .iter()
-                    .filter_map(|declarator| match declarator {
-                        Node::ListItem(&(name, initializer)) => {
-                            let attributes = attrs.as_attributes(self.state.arena)?;
-                            let Id(pos, name) = self.get_name("", name)?;
-                            let name = if modifiers.is_static {
-                                name
-                            } else {
-                                strip_dollar_prefix(name)
-                            };
-                            let ty = self.node_to_ty(hint);
-                            Some(ShallowProp {
-                                const_: attributes.const_,
-                                xhp_attr: None,
-                                lateinit: attributes.late_init,
-                                lsb: attributes.lsb,
-                                name: Id(pos, name),
-                                needs_init: initializer.is_ignored(),
-                                type_: ty,
-                                abstract_: modifiers.is_abstract,
-                                visibility: modifiers.visibility,
-                            })
-                        }
-                        n => panic!("Expected a ListItem, but was {:?}", n),
-                    }),
-            );
+        let declarators = self.slice(declarators.iter().filter_map(
+            |declarator| match declarator {
+                Node::ListItem(&(name, initializer)) => {
+                    let attributes = attrs.as_attributes(self.state.arena)?;
+                    let Id(pos, name) = self.get_name("", name)?;
+                    let name = if modifiers.is_static {
+                        name
+                    } else {
+                        strip_dollar_prefix(name)
+                    };
+                    let ty = self.node_to_ty(hint);
+                    Some(ShallowProp {
+                        const_: attributes.const_,
+                        xhp_attr: None,
+                        lateinit: attributes.late_init,
+                        lsb: attributes.lsb,
+                        name: Id(pos, name),
+                        needs_init: initializer.is_ignored(),
+                        type_: ty,
+                        abstract_: modifiers.is_abstract,
+                        visibility: modifiers.visibility,
+                    })
+                }
+                n => panic!("Expected a ListItem, but was {:?}", n),
+            },
+        ));
         Node::Property(self.alloc(PropertyNode {
             decls: declarators,
             is_static: modifiers.is_static,
@@ -3254,7 +3244,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         attributes: Self::R,
         _arg2: Self::R,
     ) -> Self::R {
-        let xhp_attr_decls = self.slice_from_iter(attributes.iter().filter_map(|node| {
+        let xhp_attr_decls = self.slice(attributes.iter().filter_map(|node| {
             let node = match node {
                 Node::XhpClassAttribute(x) => x,
                 _ => return None,
@@ -3287,15 +3277,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             })
         }));
 
-        let xhp_attr_uses_decls = self.slice_from_iter(
-            attributes
-                .iter()
-                .filter_map(|x| match x {
-                    Node::XhpAttributeUse(name) => Some(name.clone()),
-                    _ => None,
-                })
-                .copied(),
-        );
+        let xhp_attr_uses_decls = self.slice(attributes.iter().filter_map(|x| match x {
+            Node::XhpAttributeUse(&name) => Some(name),
+            _ => None,
+        }));
 
         Node::XhpClassAttributeDeclaration(self.alloc(XhpClassAttributeDeclarationNode {
             xhp_attr_decls,
@@ -3456,7 +3441,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Pos::none(),
         )));
         let key = id.1;
-        let consts = self.slice_from_iter(cases.iter().filter_map(|node| match node {
+        let consts = self.slice(cases.iter().filter_map(|node| match node {
             Node::ListItem(&(name, value)) => Some(shallow_decl_defs::ShallowClassConst {
                 abstract_: false,
                 name: self.get_name("", name)?,
@@ -3483,8 +3468,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => None,
         };
 
-        let includes =
-            self.slice_from_iter(includes.iter().filter_map(|&node| self.node_to_ty(node)));
+        let includes = self.slice(includes.iter().filter_map(|&node| self.node_to_ty(node)));
 
         let cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
@@ -3546,7 +3530,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
         let pos = self.merge_positions(left_paren, right_paren);
-        let tys = self.slice_from_iter(tys.iter().filter_map(|&node| self.node_to_ty(node)));
+        let tys = self.slice(tys.iter().filter_map(|&node| self.node_to_ty(node)));
         self.hint_ty(pos, Ty_::Ttuple(tys))
     }
 
@@ -3557,7 +3541,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         right_paren: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(left_paren, right_paren);
-        let tys = self.slice_from_iter(tys.iter().filter_map(|x| match x {
+        let tys = self.slice(tys.iter().filter_map(|x| match x {
             Node::ListItem(&(ty, _ampersand)) => self.node_to_ty(ty),
             &x => self.node_to_ty(x),
         }));
@@ -3571,7 +3555,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         right_paren: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(left_paren, right_paren);
-        let tys = self.slice_from_iter(tys.iter().filter_map(|x| match x {
+        let tys = self.slice(tys.iter().filter_map(|x| match x {
             Node::ListItem(&(ty, _bar)) => self.node_to_ty(ty),
             &x => self.node_to_ty(x),
         }));
@@ -3612,7 +3596,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let fields = self.slice_from_iter(fields.iter().filter_map(|node| match node {
+        let fields = self.slice(fields.iter().filter_map(|node| match node {
             Node::ListItem(&(key, value)) => {
                 let key = self.make_shape_field_name(key)?;
                 let value = self.node_to_expr(value)?;
@@ -3633,8 +3617,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let fields =
-            self.slice_from_iter(fields.iter().filter_map(|&field| self.node_to_expr(field)));
+        let fields = self.slice(fields.iter().filter_map(|&field| self.node_to_expr(field)));
         Node::Expr(self.alloc(aast::Expr(
             self.merge_positions(tuple, right_paren),
             nast::Expr_::List(fields),
@@ -3794,7 +3777,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         } else {
             unwrap_or_return!(self.get_name(self.state.namespace_builder.current_namespace(), name))
         };
-        let classname_params = self.slice_from_iter(args.iter().filter_map(|node| match node {
+        let classname_params = self.slice(args.iter().filter_map(|node| match node {
             Node::Expr(aast::Expr(
                 _,
                 aast::Expr_::ClassConst(&(
@@ -3817,7 +3800,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }
             }
 
-            self.slice_from_iter(args.iter().filter_map(|expr| match expr {
+            self.slice(args.iter().filter_map(|expr| match expr {
                 Node::StringLiteral((x, _)) => Some(*x),
                 Node::Expr(e @ aast::Expr(_, aast::Expr_::Binop(_))) => {
                     let mut acc = Vec::new_in(self.state.arena);
@@ -3906,7 +3889,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             })
             .unwrap_or(FunArity::Fstandard);
 
-        let params = self.slice_from_iter(args.iter().filter_map(|&node| match node {
+        let params = self.slice(args.iter().filter_map(|&node| match node {
             Node::FunParam(fp) if !fp.variadic => Some(make_param(fp)),
             _ => None,
         }));

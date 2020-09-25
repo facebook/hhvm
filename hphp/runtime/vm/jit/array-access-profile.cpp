@@ -134,10 +134,7 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
 bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
   if (!m_init) init();
 
-  if (!validPos(pos)) {
-    m_untracked += count;
-    return false;
-  }
+  if (!validPos(pos)) return false;
 
   for (auto i = 0; i < kNumTrackedSamples; ++i) {
     auto& line = m_hits[i];
@@ -153,7 +150,6 @@ bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
     }
   }
 
-  m_untracked += count;
   return false;
 }
 
@@ -165,7 +161,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
     isMixedOrDictKind(ad) ? MixedArray::asMixed(ad)->find(i, h) :
     ad->isKeysetKind() ? SetArray::asSet(ad)->find(i, h) :
     -1;
-  update(pos, 1);
+  if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;
   if (ad->size() == 0) m_empty++;
 }
@@ -180,7 +176,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
     isMixedOrDictKind(ad) ? findStringKey(MixedArray::asMixed(ad), sd) :
     ad->isKeysetKind() ? findStringKey(SetArray::asSet(ad), sd) :
     -1;
-  update(pos, 1);
+  if (!update(pos, 1)) m_untracked++;
   if (isSmallStaticArray(ad)) m_small++;
   if (ad->size() == 0) m_empty++;
   if (ad->hasStrKeyTable() && !ad->missingKeySideTable().mayContain(sd)) {
@@ -200,7 +196,10 @@ void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
     auto const& rline = r.m_hits[i];
     if (!validPos(rline.pos)) break;
 
-    // Update `l'.  If `l' can't record the update, save it to scratch.
+    // Update `l'.  If `l' can't record the update, save it to scratch.  If
+    // `update' fails to record, we don't increment m_untracked here. The
+    // entries that cannot be kept in the final tracked set due to capacity will
+    // be included in l.m_untracked below.
     if (!l.update(rline.pos, rline.count)) {
       scratch[n++] = rline;
     }
@@ -218,7 +217,7 @@ void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
               kNumTrackedSamples * sizeof(Line));
   std::sort(&scratch[0], &scratch[n + kNumTrackedSamples],
             [] (Line a, Line b) { return a.count > b.count; });
-  std::memcpy(l.m_hits, scratch, kNumTrackedSamples);
+  std::memcpy(l.m_hits, scratch, kNumTrackedSamples * sizeof(Line));
 
   // Add the hits in the discarded tail to m_untracked.
   for (auto i = kNumTrackedSamples; i < n + kNumTrackedSamples; ++i) {

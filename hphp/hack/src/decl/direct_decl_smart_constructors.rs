@@ -741,127 +741,6 @@ impl<'a> Node<'a> {
         }
     }
 
-    fn as_attributes(self, arena: &'a Bump) -> Option<Attributes<'a>> {
-        let mut attributes = Attributes {
-            reactivity: Reactivity::Nonreactive,
-            param_mutability: None,
-            deprecated: None,
-            reifiable: None,
-            returns_mutable: false,
-            late_init: false,
-            const_: false,
-            lsb: false,
-            memoizelsb: false,
-            override_: false,
-            at_most_rx_as_func: false,
-            enforceable: None,
-            returns_void_to_rx: false,
-            accept_disposable: false,
-            dynamically_callable: false,
-            returns_disposable: false,
-            php_std_lib: false,
-        };
-
-        let mut reactivity_condition_type = None;
-        for attribute in self.iter() {
-            match attribute {
-                // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
-                // `reactivity_condition_type` to `Foo`.
-                Node::Attribute(UserAttributeNode {
-                    name: Id(_, "__OnlyRxIfImpl"),
-                    classname_params: &[class_name],
-                    ..
-                }) => {
-                    reactivity_condition_type = Some(Ty(
-                        arena.alloc(Reason::hint(class_name.0)),
-                        arena.alloc(Ty_::Tapply(arena.alloc((class_name, &[][..])))),
-                    ));
-                }
-                _ => {}
-            }
-        }
-
-        for attribute in self.iter() {
-            if let Node::Attribute(attribute) = attribute {
-                match attribute.name.1.as_ref() {
-                    // NB: It is an error to specify more than one of __Rx,
-                    // __RxShallow, and __RxLocal, so to avoid cloning the
-                    // condition type, we use Option::take here.
-                    "__Rx" => {
-                        attributes.reactivity =
-                            Reactivity::Reactive(reactivity_condition_type.take())
-                    }
-                    "__RxShallow" => {
-                        attributes.reactivity =
-                            Reactivity::Shallow(reactivity_condition_type.take())
-                    }
-                    "__RxLocal" => {
-                        attributes.reactivity = Reactivity::Local(reactivity_condition_type.take())
-                    }
-                    "__Pure" => {
-                        attributes.reactivity = Reactivity::Pure(reactivity_condition_type.take());
-                    }
-                    "__Mutable" => {
-                        attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
-                    }
-                    "__MaybeMutable" => {
-                        attributes.param_mutability = Some(ParamMutability::ParamMaybeMutable)
-                    }
-                    "__OwnedMutable" => {
-                        attributes.param_mutability = Some(ParamMutability::ParamOwnedMutable)
-                    }
-                    "__MutableReturn" => attributes.returns_mutable = true,
-                    "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
-                    "__Deprecated" => {
-                        attributes.deprecated = attribute
-                            .string_literal_params
-                            .first()
-                            .map(|&x| str_from_utf8(arena, x));
-                    }
-                    "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
-                    "__LateInit" => {
-                        attributes.late_init = true;
-                    }
-                    "__Const" => {
-                        attributes.const_ = true;
-                    }
-                    "__LSB" => {
-                        attributes.lsb = true;
-                    }
-                    "__MemoizeLSB" => {
-                        attributes.memoizelsb = true;
-                    }
-                    "__Override" => {
-                        attributes.override_ = true;
-                    }
-                    "__AtMostRxAsFunc" => {
-                        attributes.at_most_rx_as_func = true;
-                    }
-                    "__Enforceable" => {
-                        attributes.enforceable = Some(attribute.name.0);
-                    }
-                    "__AcceptDisposable" => {
-                        attributes.accept_disposable = true;
-                    }
-                    "__DynamicallyCallable" => {
-                        attributes.dynamically_callable = true;
-                    }
-                    "__ReturnDisposable" => {
-                        attributes.returns_disposable = true;
-                    }
-                    "__PHPStdLib" => {
-                        attributes.php_std_lib = true;
-                    }
-                    _ => {}
-                }
-            } else {
-                panic!("Expected an attribute, but was {:?}", self);
-            }
-        }
-
-        Some(attributes)
-    }
-
     fn is_ignored(&self) -> bool {
         matches!(self, Node::Ignored | Node::IgnoredSyntaxKind(..))
     }
@@ -1145,6 +1024,122 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn to_attributes(&self, node: Node<'a>) -> Attributes<'a> {
+        let mut attributes = Attributes {
+            reactivity: Reactivity::Nonreactive,
+            param_mutability: None,
+            deprecated: None,
+            reifiable: None,
+            returns_mutable: false,
+            late_init: false,
+            const_: false,
+            lsb: false,
+            memoizelsb: false,
+            override_: false,
+            at_most_rx_as_func: false,
+            enforceable: None,
+            returns_void_to_rx: false,
+            accept_disposable: false,
+            dynamically_callable: false,
+            returns_disposable: false,
+            php_std_lib: false,
+        };
+
+        // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
+        // `reactivity_condition_type` to `Foo`.
+        let mut reactivity_condition_type = node.iter().find_map(|attr| match attr {
+            Node::Attribute(UserAttributeNode {
+                name: Id(_, "__OnlyRxIfImpl"),
+                classname_params: &[class_name],
+                ..
+            }) => Some(Ty(
+                self.alloc(Reason::hint(class_name.0)),
+                self.alloc(Ty_::Tapply(self.alloc((class_name, &[][..])))),
+            )),
+            _ => None,
+        });
+
+        for attribute in node.iter() {
+            if let Node::Attribute(attribute) = attribute {
+                match attribute.name.1.as_ref() {
+                    // NB: It is an error to specify more than one of __Rx,
+                    // __RxShallow, and __RxLocal, so to avoid cloning the
+                    // condition type, we use Option::take here.
+                    "__Rx" => {
+                        attributes.reactivity =
+                            Reactivity::Reactive(reactivity_condition_type.take())
+                    }
+                    "__RxShallow" => {
+                        attributes.reactivity =
+                            Reactivity::Shallow(reactivity_condition_type.take())
+                    }
+                    "__RxLocal" => {
+                        attributes.reactivity = Reactivity::Local(reactivity_condition_type.take())
+                    }
+                    "__Pure" => {
+                        attributes.reactivity = Reactivity::Pure(reactivity_condition_type.take());
+                    }
+                    "__Mutable" => {
+                        attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
+                    }
+                    "__MaybeMutable" => {
+                        attributes.param_mutability = Some(ParamMutability::ParamMaybeMutable)
+                    }
+                    "__OwnedMutable" => {
+                        attributes.param_mutability = Some(ParamMutability::ParamOwnedMutable)
+                    }
+                    "__MutableReturn" => attributes.returns_mutable = true,
+                    "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
+                    "__Deprecated" => {
+                        attributes.deprecated = attribute
+                            .string_literal_params
+                            .first()
+                            .map(|&x| self.str_from_utf8(x));
+                    }
+                    "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
+                    "__LateInit" => {
+                        attributes.late_init = true;
+                    }
+                    "__Const" => {
+                        attributes.const_ = true;
+                    }
+                    "__LSB" => {
+                        attributes.lsb = true;
+                    }
+                    "__MemoizeLSB" => {
+                        attributes.memoizelsb = true;
+                    }
+                    "__Override" => {
+                        attributes.override_ = true;
+                    }
+                    "__AtMostRxAsFunc" => {
+                        attributes.at_most_rx_as_func = true;
+                    }
+                    "__Enforceable" => {
+                        attributes.enforceable = Some(attribute.name.0);
+                    }
+                    "__AcceptDisposable" => {
+                        attributes.accept_disposable = true;
+                    }
+                    "__DynamicallyCallable" => {
+                        attributes.dynamically_callable = true;
+                    }
+                    "__ReturnDisposable" => {
+                        attributes.returns_disposable = true;
+                    }
+                    "__PHPStdLib" => {
+                        attributes.php_std_lib = true;
+                    }
+                    _ => {}
+                }
+            } else {
+                panic!("Expected an attribute, but was {:?}", node);
+            }
+        }
+
+        attributes
+    }
+
     // Limited version of node_to_ty that matches behavior of Decl_utils.infer_const
     fn infer_const(&self, name: Node<'a>, node: Node<'a>) -> Option<Ty<'a>> {
         match node {
@@ -1288,7 +1283,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         } else {
             type_
         };
-        let attributes = attributes.as_attributes(self.state.arena)?;
+        let attributes = self.to_attributes(attributes);
         // TODO(hrust) Put this in a helper. Possibly do this for all flags.
         let mut flags = match fun_kind {
             FunKind::FSync => FunTypeFlags::empty(),
@@ -1361,7 +1356,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             variadic,
                             initializer,
                         }) => {
-                            let attributes = attributes.as_attributes(self.state.arena)?;
+                            let attributes = self.to_attributes(attributes);
 
                             if let Some(visibility) = visibility.as_visibility() {
                                 let Id(pos, name) = id;
@@ -2696,7 +2691,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         header: Self::R,
         body: Self::R,
     ) -> Self::R {
-        let parsed_attributes = unwrap_or_return!(attributes.as_attributes(self.state.arena));
+        let parsed_attributes = self.to_attributes(attributes);
         match header {
             Node::FunctionHeader(header) => {
                 let (Id(pos, name), type_, _) = unwrap_or_return!(self.function_into_ty(
@@ -3209,7 +3204,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let declarators = self.slice(declarators.iter().filter_map(
             |declarator| match declarator {
                 Node::ListItem(&(name, initializer)) => {
-                    let attributes = attrs.as_attributes(self.state.arena)?;
+                    let attributes = self.to_attributes(attrs);
                     let Id(pos, name) = self.get_name("", name)?;
                     let name = if modifiers.is_static {
                         name
@@ -3353,7 +3348,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let (id, ty, properties) =
             unwrap_or_return!(self.function_into_ty("", attributes, header, body));
-        let attributes = unwrap_or_return!(attributes.as_attributes(self.state.arena));
+        let attributes = self.to_attributes(attributes);
         let deprecated = attributes.deprecated.map(|msg| {
             let mut s = String::new_in(self.state.arena);
             s.push_str("The method ");
@@ -3951,7 +3946,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        let attributes = unwrap_or_return!(attributes.as_attributes(self.state.arena));
+        let attributes = self.to_attributes(attributes);
         let has_abstract_keyword = modifiers.iter().fold(false, |abstract_, node| match node {
             Node::Token(TokenKind::Abstract) => true,
             _ => abstract_,

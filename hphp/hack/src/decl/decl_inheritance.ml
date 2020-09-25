@@ -201,6 +201,13 @@ let is_elt_canonical child_class_name elt =
   | _ ->
     String.equal child_class_name elt.ce_origin || not (get_ce_abstract elt)
 
+let make_inheritance_cache seq =
+  let is_canonical _ = false in
+  let merge ~earlier ~later = later @ earlier in
+  seq
+  |> Sequence.map ~f:(fun (id, x) -> (id, [x]))
+  |> LSTable.make ~is_canonical ~merge
+
 let make_elt_cache class_name seq =
   LSTable.make
     seq
@@ -463,17 +470,6 @@ let make ctx class_name get_ancestor =
   in
   let all_methods = get_all_methods class_name lin ~static:false in
   let all_smethods = get_all_methods class_name lin ~static:true in
-  let methods = make_elt_cache class_name all_methods in
-  let smethods = make_elt_cache class_name all_smethods in
-  let make_inheritance_cache seq =
-    let is_canonical _ = false in
-    let merge ~earlier ~later = later @ earlier in
-    seq
-    |> Sequence.map ~f:(fun (id, x) -> (id, [x]))
-    |> LSTable.make ~is_canonical ~merge
-  in
-  let all_inherited_methods = make_inheritance_cache all_methods in
-  let all_inherited_smethods = make_inheritance_cache all_smethods in
   let typeconsts = typeconsts_cache class_name lin in
   {
     consts =
@@ -482,9 +478,9 @@ let make ctx class_name get_ancestor =
     pu_enums = pu_enums_cache lin;
     props = props_cache class_name lin ~static:false;
     sprops = props_cache class_name lin ~static:true;
-    methods;
-    smethods;
-    all_inherited_methods;
-    all_inherited_smethods;
+    methods = make_elt_cache class_name all_methods;
+    smethods = make_elt_cache class_name all_smethods;
+    all_inherited_methods = make_inheritance_cache all_methods;
+    all_inherited_smethods = make_inheritance_cache all_smethods;
     construct = construct class_name lin;
   }

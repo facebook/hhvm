@@ -46,6 +46,11 @@ struct AutoloadMap {
     TypeAlias,
   };
 
+  AutoloadMap() = default;
+  AutoloadMap(const AutoloadMap&) = default;
+  AutoloadMap(AutoloadMap&&) noexcept = default;
+  AutoloadMap& operator=(const AutoloadMap&) = default;
+  AutoloadMap& operator=(AutoloadMap&&) = default;
   virtual ~AutoloadMap() = default;
 
   /**
@@ -139,7 +144,12 @@ struct AutoloadMap {
  */
 struct FactsStore : public AutoloadMap {
 
-  virtual ~FactsStore() = default;
+  FactsStore() = default;
+  FactsStore(const FactsStore&) = default;
+  FactsStore(FactsStore&&) = default;
+  FactsStore& operator=(const FactsStore&) = default;
+  FactsStore& operator=(FactsStore&&) noexcept = default;
+  ~FactsStore() override = default;
 
   /**
    * Return the correctly-capitalized name of `type`.

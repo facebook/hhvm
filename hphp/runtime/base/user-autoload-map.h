@@ -53,6 +53,10 @@ struct UserAutoloadMap : AutoloadMap {
         m_typeAliasFile{std::move(typeAliasFile)},
         m_failFunc(std::move(failFunc)) {}
 
+  UserAutoloadMap(const UserAutoloadMap&) = default;
+  UserAutoloadMap(UserAutoloadMap&&) noexcept = default;
+  UserAutoloadMap& operator=(const UserAutoloadMap&) = default;
+  UserAutoloadMap& operator=(UserAutoloadMap&&) = default;
   ~UserAutoloadMap() override {
     m_root.detach();
     m_typeFile.detach();
@@ -69,36 +73,32 @@ struct UserAutoloadMap : AutoloadMap {
    * This map is not native because it gets data when userspace calls the
    * builtin function `autoload_set_paths()`.
    */
-  virtual bool isNative() const noexcept override {
+  bool isNative() const noexcept override {
     return false;
   }
 
-  virtual Array getAllFiles() const override;
+  Array getAllFiles() const override;
 
-  virtual std::optional<String> getTypeFile(
-      const String& typeName) override;
-  virtual std::optional<String> getFunctionFile(
-      const String& functionName) override;
-  virtual std::optional<String> getConstantFile(
-      const String& constantName) override;
-  virtual std::optional<String> getTypeAliasFile(
-      const String& typeAliasName) override;
+  std::optional<String> getTypeFile(const String& typeName) override;
+  std::optional<String> getFunctionFile(const String& functionName) override;
+  std::optional<String> getConstantFile(const String& constantName) override;
+  std::optional<String> getTypeAliasFile(const String& typeAliasName) override;
 
-  virtual Array getFileTypes(const String& path) override;
-  virtual Array getFileFunctions(const String& path) override;
-  virtual Array getFileConstants(const String& path) override;
-  virtual Array getFileTypeAliases(const String& path) override;
+  Array getFileTypes(const String& path) override;
+  Array getFileFunctions(const String& path) override;
+  Array getFileConstants(const String& path) override;
+  Array getFileTypeAliases(const String& path) override;
 
-  virtual bool canHandleFailure() const override {
+  bool canHandleFailure() const override {
     return !m_failFunc.isNull();
   }
-  virtual AutoloadMap::Result handleFailure(KindOf kind,
-                                            const String& className,
-                                            const Variant& err) const override;
+  AutoloadMap::Result handleFailure(KindOf kind,
+                                    const String& className,
+                                    const Variant& err) const override;
 
  private:
   std::optional<String> getFileFromMap(const Array& map,
-                                         const String& key) const;
+                                       const String& key) const;
 };
 
 //////////////////////////////////////////////////////////////////////

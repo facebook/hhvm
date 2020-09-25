@@ -40,9 +40,12 @@ struct AutoloadMapFactory;
 
 struct AutoloadHandler final : RequestEventHandler {
 
-  AutoloadHandler() { }
-
-  ~AutoloadHandler() { }
+  AutoloadHandler() = default;
+  AutoloadHandler(const AutoloadHandler&) = delete;
+  AutoloadHandler(AutoloadHandler&&) = delete;
+  AutoloadHandler& operator=(const AutoloadHandler&) = delete;
+  AutoloadHandler& operator=(AutoloadHandler&&) noexcept = delete;
+  ~AutoloadHandler() = default;
 
   void requestInit() override;
   void requestShutdown() override;
@@ -172,6 +175,11 @@ struct FactsFactory {
   static FactsFactory* getInstance();
   static void setInstance(FactsFactory* instance);
 
+  FactsFactory() = default;
+  FactsFactory(const FactsFactory&) = default;
+  FactsFactory(FactsFactory&&) noexcept = default;
+  FactsFactory& operator=(const FactsFactory&) = default;
+  FactsFactory& operator=(FactsFactory&&) noexcept = default;
   virtual ~FactsFactory() = default;
 
   /**
@@ -182,4 +190,3 @@ struct FactsFactory {
 };
 
 }
-

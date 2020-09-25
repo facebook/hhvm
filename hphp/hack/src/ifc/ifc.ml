@@ -629,8 +629,10 @@ let rec asn_top ~expr ~pos renv env lhs rhs_pty =
     let (env, ix_pty_opt) =
       match ix_opt with
       | Some ix ->
-        let (env, ty) = expr env ix in
-        (env, Some ty)
+        let (env, ix_pty) = expr env ix in
+        (* The index flows to they key of the array *)
+        let env = Env.acc env (subtype ~pos ix_pty arry.a_key) in
+        (env, Some ix_pty)
       | None -> (env, None)
     in
 
@@ -795,6 +797,9 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
       | Some ix -> expr env ix
       | None -> fail "cannot have an empty index when reading"
     in
+
+    (* The index flows into the array key which flows into the array value *)
+    let env = Env.acc env @@ subtype ~pos ix_pty arry.a_key in
 
     let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
 

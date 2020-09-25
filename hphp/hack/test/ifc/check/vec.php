@@ -14,6 +14,10 @@ class Basic {
     $this->v[0] += $this->i;
   }
 
+  public function mutationKeyLeak(): void {
+    $this->v[$this->i] = 42; // I leaks to V through the key
+  }
+
   public function nested(vec<vec<int>> $vv): void {
     $vv[42][] = $this->v[0];
 

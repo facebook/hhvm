@@ -18,6 +18,14 @@ class Basic {
     // S flows into D through dictionary key
     $this->dict = dict[$this->string => $this->bool];
   }
+
+  public function mutationKeyLeak(): void {
+    $this->dict[$this->string] = false; // S leaks to D through the key
+  }
+
+  public function accessKeyLeak(dict<string, bool> $dict): void {
+    $this->bool = $dict[$this->string]; // S leaks to B
+  }
 }
 
 class COW {

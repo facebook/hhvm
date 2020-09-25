@@ -54,6 +54,6 @@ Analyzing \retElem:
     lvars: { $vec -> vec<<key> => <$vec>; |len|> }
     pc: len, lit
 Constraints:
-  [lump'1 = lump, \OutOfBoundsException < \Exception, len < \Exception,
-   lit < \Exception, len < ret, lit < ret, $vec < ret]
+  [lit < key, lump'1 = lump, \OutOfBoundsException < \Exception,
+   len < \Exception, lit < \Exception, len < ret, lit < ret, $vec < ret]
 

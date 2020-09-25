@@ -3466,10 +3466,10 @@ and new_object
         c_ty;
     let (env, obj_ty_, params) =
       let (env, c_ty) = Env.expand_type env c_ty in
-      match (cid, tal, get_node c_ty) with
+      match (cid, tal, get_class_type c_ty) with
       (* Explicit type arguments *)
-      | (CI _, _ :: _, Tclass (_, _, tyl)) -> (env, get_node c_ty, tyl)
-      | _ ->
+      | (CI _, _ :: _, Some (_, _, tyl)) -> (env, get_node c_ty, tyl)
+      | (_, _, class_type_opt) ->
         let (env, params) =
           List.map_env env (Cls.tparams class_info) (fun env tparam ->
               let (env, tvar) =
@@ -3482,8 +3482,8 @@ and new_object
               (env, tvar))
         in
         begin
-          match get_node c_ty with
-          | Tclass (_, Exact, _) -> (env, Tclass (cname, Exact, params), params)
+          match class_type_opt with
+          | Some (_, Exact, _) -> (env, Tclass (cname, Exact, params), params)
           | _ -> (env, Tclass (cname, Nonexact, params), params)
         end
     in
@@ -4007,8 +4007,8 @@ and check_class_get env p def_pos cid mid ce e =
   match e with
   | CIself when get_ce_abstract ce ->
     begin
-      match get_node (Env.get_self env) with
-      | Tclass ((_, self), _, _) ->
+      match get_class_type (Env.get_self env) with
+      | Some ((_, self), _, _) ->
         (* at runtime, self:: in a trait is a call to whatever
          * self:: is in the context of the non-trait "use"-ing
          * the trait's code *)
@@ -4031,7 +4031,7 @@ and check_class_get env p def_pos cid mid ce e =
              *  always error. *)
             Errors.self_abstract_call mid p def_pos
         end
-      | _ -> ()
+      | None -> ()
     end
   | CIparent when get_ce_abstract ce ->
     Errors.parent_abstract_call mid p def_pos
@@ -4048,8 +4048,8 @@ and call_parent_construct pos env el unpacked_element =
     (* continue here *)
     let ty = Typing_utils.mk_tany env pos in
     let default = (env, [], None, ty, ty, ty) in
-    (match get_node (Env.get_self env) with
-    | Tclass ((_, self), _, _) ->
+    (match get_class_type (Env.get_self env) with
+    | Some ((_, self), _, _) ->
       (match Env.get_class env self with
       | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
         (match trait_most_concrete_req_class trait env with
@@ -4066,29 +4066,7 @@ and call_parent_construct pos env el unpacked_element =
           Errors.undefined_parent pos;
         default
       | None -> assert false)
-    | Tunapplied_alias _ ->
-      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-    | Terr
-    | Tany _
-    | Tnonnull
-    | Tvarray _
-    | Tdarray _
-    | Tvarray_or_darray _
-    | Toption _
-    | Tprim _
-    | Tfun _
-    | Ttuple _
-    | Tshape _
-    | Tvar _
-    | Tdynamic
-    | Tgeneric _
-    | Tnewtype _
-    | Tdependent (_, _)
-    | Tunion _
-    | Tintersection _
-    | Tobject
-    | Tpu _
-    | Tpu_type_access _ ->
+    | None ->
       Errors.parent_outside_class pos;
       let ty = err_witness env pos in
       (env, [], None, ty, ty, ty))
@@ -5108,13 +5086,13 @@ and fun_type_of_id env x tal el =
  *)
 and class_contains_smethod env cty (_pos, mid) =
   let lookup_member ty =
-    match get_node ty with
-    | Tclass ((_, c), _, _) ->
+    match get_class_type ty with
+    | Some ((_, c), _, _) ->
       (match Env.get_class env c with
       | None -> false
       | Some class_ ->
         Option.is_some @@ Env.get_static_member true env class_ mid)
-    | _ -> false
+    | None -> false
   in
   let (_env, tyl) = TUtils.get_concrete_supertypes env cty in
   List.exists tyl ~f:lookup_member
@@ -5466,8 +5444,8 @@ and class_id_for_new
         (* Instantiation on an abstract class (e.g. from classname<T>) is
          * via the base type (to check constructor args), but the actual
          * type `ty` must be preserved. *)
-        (match get_node (TUtils.get_base_type env ty) with
-        | Tclass (sid, _, _) ->
+        (match get_class_type (TUtils.get_base_type env ty) with
+        | Some (sid, _, _) ->
           let class_ = Env.get_class env (snd sid) in
           (match class_ with
           | None -> get_info res tyl
@@ -5484,30 +5462,7 @@ and class_id_for_new
               else
                 get_info res tyl
             | _ -> get_info ((sid, class_info, ty) :: res) tyl))
-        | Tunapplied_alias _ ->
-          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
-        | Tany _
-        | Terr
-        | Tnonnull
-        | Tvarray _
-        | Tdarray _
-        | Tvarray_or_darray _
-        | Toption _
-        | Tprim _
-        | Tvar _
-        | Tfun _
-        | Tgeneric _
-        | Tnewtype _
-        | Tdependent (_, _)
-        | Ttuple _
-        | Tunion _
-        | Tintersection _
-        | Tobject
-        | Tshape _
-        | Tdynamic
-        | Tpu _
-        | Tpu_type_access _ ->
-          get_info res tyl))
+        | None -> get_info res tyl))
   in
   get_info [] [cid_ty]
 

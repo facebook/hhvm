@@ -319,6 +319,11 @@ let get_var t =
   | Tvar v -> Some v
   | _ -> None
 
+let get_class_type t =
+  match get_node t with
+  | Tclass (id, exact, tyl) -> Some (id, exact, tyl)
+  | _ -> None
+
 let get_var_i t =
   match t with
   | LoclType t -> get_var t

@@ -22,7 +22,7 @@ type lazy_class_type = {
   parents_and_traits: unit LSTable.t;
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos.t * decl_ty) list Lazy.t;
+  all_requirements: (Pos.t * decl_ty) Sequence.t;
 }
 
 type class_type_variant =
@@ -442,6 +442,8 @@ module ApiEager = struct
 
   let all_ancestor_req_names t =
     Counters.count_decl_accessor @@ fun () ->
+    (* The two below will traverse ancestors in different orders.
+    But if the typechecker discovers errors in different order, no matter. *)
     match t with
     | Lazy lc ->
       LSTable.to_seq lc.req_ancestor_names
@@ -473,7 +475,7 @@ module ApiEager = struct
   let all_ancestor_reqs t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> Caml.Lazy.force lc.all_requirements
+    | Lazy lc -> lc.all_requirements |> Sequence.to_list
     | Eager c -> c.tc_req_ancestors
 
   let upper_bounds_on_this t =

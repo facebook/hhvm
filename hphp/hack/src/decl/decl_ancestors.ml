@@ -19,7 +19,7 @@ type ancestor_caches = {
   parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
-  all_requirements: (Pos.t * decl_ty) list Lazy.t;
+  all_requirements: (Pos.t * decl_ty) Sequence.t;
 }
 
 let type_of_mro_element mro =
@@ -47,15 +47,12 @@ let req_ancestor_names lin_members =
   |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
 
 let all_requirements lin_members =
-  lazy
-    ( lin_members
-    |> Sequence.filter ~f:(fun mro ->
-           not (is_set mro_xhp_attrs_only mro.mro_flags))
-    |> Sequence.filter_map ~f:(fun mro ->
-           Option.map mro.mro_required_at (fun pos ->
-               (pos, type_of_mro_element mro)))
-    (* To behave a bit more like legacy decl, reverse the list. *)
-    |> Sequence.to_list_rev )
+  lin_members
+  |> Sequence.filter ~f:(fun mro ->
+         not (is_set mro_xhp_attrs_only mro.mro_flags))
+  |> Sequence.filter_map ~f:(fun mro ->
+         Option.map mro.mro_required_at (fun pos ->
+             (pos, type_of_mro_element mro)))
 
 let is_canonical _ = true
 

@@ -71,9 +71,11 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
       | [element_ty] ->
         Tcow_array
           {
+            a_kind = Avec;
             (* Inventing a policy type for indices out of thin air *)
             a_key = Tprim (get_policy ~prefix:"key" lump renv);
             a_value = ty element_ty;
+            a_length = get_policy ~prefix:"len" lump renv;
           }
       | _ -> fail "vector needs a single type parameter"
     end
@@ -81,7 +83,13 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
     begin
       match targs with
       | [key_ty; value_ty] ->
-        Tcow_array { a_key = ty key_ty; a_value = ty value_ty }
+        Tcow_array
+          {
+            a_kind = Adict;
+            a_key = ty key_ty;
+            a_value = ty value_ty;
+            a_length = get_policy ~prefix:"len" lump renv;
+          }
       | _ -> fail "dict needs two type parameters"
     end
   | T.Tclass ((_, name), _, targs) when String.equal name Decl.awaitable_id ->

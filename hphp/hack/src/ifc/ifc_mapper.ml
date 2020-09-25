@@ -26,8 +26,14 @@ let rec ptype fty fpol = function
         c_lump = fpol cls.c_lump;
       }
   | Tfun f -> Tfun (fun_ fty fpol f)
-  | Tcow_array { a_key; a_value } ->
-    Tcow_array { a_key = fty a_key; a_value = fty a_value }
+  | Tcow_array { a_kind; a_key; a_value; a_length } ->
+    Tcow_array
+      {
+        a_kind;
+        a_key = fty a_key;
+        a_value = fty a_value;
+        a_length = fpol a_length;
+      }
 
 and fun_ fty fpol f =
   let ptype = ptype fty fpol in

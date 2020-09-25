@@ -40,6 +40,10 @@ let show_policy = function
 
 let policy fmt p = fprintf fmt "%s" (show_policy p)
 
+let array_kind fmt = function
+  | Avec -> fprintf fmt "vec"
+  | Adict -> fprintf fmt "dict"
+
 let rec ptype fmt ty =
   let list' sep l =
     let pp_sep fmt () = fprintf fmt "%s@ " sep in
@@ -56,8 +60,9 @@ let rec ptype fmt ty =
   | Tclass { c_name; c_self; c_lump } ->
     fprintf fmt "%s<@[<hov2>%a,@ %a@]>" c_name policy c_self policy c_lump
   | Tfun fn -> fun_ fmt fn
-  | Tcow_array { a_key; a_value } ->
-    fprintf fmt "CoW<%a => %a>" ptype a_key ptype a_value
+  | Tcow_array { a_key; a_value; a_length; a_kind } ->
+    fprintf fmt "%a" array_kind a_kind;
+    fprintf fmt "<%a => %a; |%a|>" ptype a_key ptype a_value policy a_length
 
 (* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)
 and fun_ fmt fn =

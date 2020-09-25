@@ -66,6 +66,11 @@ type class_ = {
   c_lump: policy;
 }
 
+type array_kind =
+  | Avec
+  | Adict
+[@@deriving eq]
+
 (* Types with policies *)
 type ptype =
   | Tprim of policy
@@ -80,8 +85,10 @@ type ptype =
 (* Copy-on-write indexed collection used for Hack arrays i.e. vec, dict, and
    keyset *)
 and cow_array = {
+  a_kind: array_kind;
   a_key: ptype;
   a_value: ptype;
+  a_length: policy;
 }
 
 and fun_ = {

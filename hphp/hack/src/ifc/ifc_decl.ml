@@ -31,6 +31,8 @@ let infer_flows_id = "\\InferFlows"
 
 let exception_id = "\\Exception"
 
+let out_of_bounds_exception_id = "\\OutOfBoundsException"
+
 let vec_id = "\\HH\\vec"
 
 let dict_id = "\\HH\\dict"

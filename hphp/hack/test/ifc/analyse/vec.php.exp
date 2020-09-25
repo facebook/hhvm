@@ -1,7 +1,7 @@
 Analyzing \empty:
 * pc: pc
 * This: None
-* Return: CoW<<key> => <ret>>
+* Return: vec<<key> => <ret>; |len|>
 * Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
@@ -10,12 +10,12 @@ Analyzing \empty:
   Locals:
     lvars: {}
 Constraints:
-  [key'1 < key, vec < ret]
+  [key'1 < key, vec < ret, len'1 < len]
 
 Analyzing \collection:
 * pc: pc
 * This: None
-* Return: CoW<<key> => <ret>>
+* Return: vec<<key> => <ret>; |len|>
 * Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
@@ -24,7 +24,7 @@ Analyzing \collection:
   Locals:
     lvars: {}
 Constraints:
-  [lit < vec, lit'1 < vec, key'1 < key, vec < ret]
+  [lit < vec, lit'1 < vec, key'1 < key, vec < ret, len'1 < len]
 
 Analyzing \add:
 * pc: pc
@@ -32,13 +32,14 @@ Analyzing \add:
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $vec -> CoW<<key> => <$vec>> }
+  lvars: { $vec -> vec<<key> => <$vec>; |len|> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> CoW<<key'1> => <$vec'1>> }
+    lvars: { $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
 Constraints:
-  [key < weak, $vec < weak'1, lit < weak'1, weak < key'1, weak'1 < $vec'1]
+  [key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
+   weak'1 < $vec'1, weak'2 < len'1]
 
 Analyzing \retElem:
 * pc: pc
@@ -46,11 +47,13 @@ Analyzing \retElem:
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $vec -> CoW<<key> => <$vec>> }
+  lvars: { $vec -> vec<<key> => <$vec>; |len|> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> CoW<<key> => <$vec>> }
+    lvars: { $vec -> vec<<key> => <$vec>; |len|> }
+    pc: len, lit
 Constraints:
-  $vec < ret
+  [lump'1 = lump, \OutOfBoundsException < \Exception, len < \Exception,
+   lit < \Exception, len < ret, lit < ret, $vec < ret]
 

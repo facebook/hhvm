@@ -77,7 +77,10 @@ let rec subtype ~pos t1 t2 acc =
     |> subtype f1.f_ret f2.f_ret
     |> subtype f1.f_exn f2.f_exn
   | (Tcow_array arr1, Tcow_array arr2) ->
-    acc |> subtype arr1.a_key arr2.a_key |> subtype arr1.a_value arr2.a_value
+    acc
+    |> subtype arr1.a_key arr2.a_key
+    |> subtype arr1.a_value arr2.a_value
+    |> L.(arr1.a_length < arr2.a_length) ~pos
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (_, Tinter tl) ->
@@ -133,8 +136,13 @@ let rec policy_occurrences pty =
       :: policy_occurrences f_ret
       :: policy_occurrences f_exn
       :: List.map ~f:swap_policy_occurrences f_args )
-  | Tcow_array { a_key; a_value } ->
-    on_list [policy_occurrences a_key; policy_occurrences a_value]
+  | Tcow_array { a_key; a_value; a_length; _ } ->
+    on_list
+      [
+        (pol a_length, emp, emp);
+        policy_occurrences a_key;
+        policy_occurrences a_value;
+      ]
 
 (* Returns the list of free policy variables in a type *)
 let free_pvars pty =
@@ -330,7 +338,8 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
     | Tcow_array arr ->
       let (env, a_key) = freshen_cov env arr.a_key in
       let (env, a_value) = freshen_cov env arr.a_value in
-      (env, Tcow_array { a_key; a_value })
+      let (env, a_length) = freshen_pol_cov env arr.a_length in
+      (env, Tcow_array { a_kind = arr.a_kind; a_key; a_value; a_length })
   in
   freshen adjustment env ty
 
@@ -347,8 +356,9 @@ let rec object_policy = function
   | Ttuple tl ->
     let f set t = PSet.union (object_policy t) set in
     List.fold tl ~init:PSet.empty ~f
-  | Tcow_array { a_key; a_value } ->
+  | Tcow_array { a_key; a_value; a_length; _ } ->
     PSet.union (object_policy a_key) (object_policy a_value)
+    |> PSet.add a_length
 
 let add_dependencies ~pos pl t acc =
   L.(pl <* PSet.elements (object_policy t)) ~pos acc
@@ -529,9 +539,12 @@ let cow_array ~pos renv ty =
   | Some arry -> arry
   | None ->
     Errors.unknown_information_flow pos "Hack array";
+    (* The following CoW array is completely arbitrary. *)
     {
+      a_kind = Adict;
       a_key = Tprim (Env.new_policy_var renv "fake_key");
       a_value = Tprim (Env.new_policy_var renv "fake_value");
+      a_length = Env.new_policy_var renv "fake_length";
     }
 
 (* Deals with a true assignment to either a local variable
@@ -560,6 +573,33 @@ let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
     Errors.unknown_information_flow pos "lvalue";
     env
 
+(*
+  If {} is used for primitive indexing, the following is the morally
+  equivalent code array mutation/access represents and that we generate
+  constraints for:
+
+  ```
+  $arry = array expression
+  $ix = indexing expression
+  if ($ix < $arry->length) {
+    $arry{$ix} or $arry{$ix} = value expression
+  } else {
+    throw new OutOfBoundsException();
+  }
+  ```
+*)
+let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
+  (* Flow from the pc due to the conditional exception behaviour. Both the
+     index and the length of the array flow. *)
+  let checked_policies = PSet.add arry.a_length (object_policy ix_pty) in
+  let env = Env.push_pcs env K.Next checked_policies in
+
+  (* Invalid indexing causes an `OutOfBoundsException`. *)
+  let exn = Lift.class_ty renv Decl.out_of_bounds_exception_id in
+  let env = throw ~pos renv env exn in
+
+  env
+
 (* A wrapper for asn that deals with Hack arrays' syntactic
    sugar; it is important to get it right to account for the
    CoW semantics of Hack arrays:
@@ -570,29 +610,45 @@ let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
    the object $x instead.  *)
 let rec asn_top ~expr ~pos renv env lhs rhs_pty =
   match snd lhs with
-  | A.Array_get (arry, ix_opt) ->
+  | A.Array_get (arry_exp, ix_opt) ->
+    (* Evaluate the array *)
+    let (env, arry_pty, arry) =
+      let (env, old_arry_pty) = expr env arry_exp in
+      (* Here weakening achieves copy-on-write because any new flow we
+         register won't share the same flow destination as the earlier
+         assignments. *)
+      let (env, arry_pty) =
+        adjust_ptype ~pos ~adjustment:Aweaken renv env old_arry_pty
+      in
+      let arry = cow_array ~pos renv arry_pty in
+      (env, arry_pty, arry)
+    in
+
     (* TODO(T68269878): track flows due to length changes *)
-    let (env, _ix_ty_opt) =
+    (* Evaluate the index *)
+    let (env, ix_pty_opt) =
       match ix_opt with
       | Some ix ->
         let (env, ty) = expr env ix in
         (env, Some ty)
       | None -> (env, None)
     in
-    (* we now compute the type of the new array resulting
-       from the insertion/update *)
-    let (env, arry_pty) =
-      let (env, old_arry_pty) = expr env arry in
-      let (env, arry_pty) =
-        adjust_ptype ~pos ~adjustment:Aweaken renv env old_arry_pty
-      in
-      (* the rhs flows into the element type *)
-      let value_pty = (cow_array ~pos renv arry_pty).a_value in
-      let env = Env.acc env (subtype ~pos rhs_pty value_pty) in
-      (env, arry_pty)
+
+    (* Potentially raise `OutOfBoundsException` *)
+    let env =
+      match ix_pty_opt with
+      (* When there is no index, we add a new element, hence no exception. *)
+      | None -> env
+      (* Dictionaries don't throw on assignment, they register a new key. *)
+      | Some _ when equal_array_kind arry.a_kind Adict -> env
+      | Some ix_pty -> may_throw_out_of_bounds_exn ~pos renv env arry ix_pty
     in
+
+    (* Do the assignment *)
+    let env = Env.acc env (subtype ~pos rhs_pty arry.a_value) in
+
     (* assign the vector itself *)
-    asn_top ~expr ~pos renv env arry arry_pty
+    asn_top ~expr ~pos renv env arry_exp arry_pty
   | _ -> asn ~expr ~pos renv env lhs rhs_pty
 
 let rec assign ~pos renv env op lhs_exp rhs_exp =
@@ -729,20 +785,24 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
     let env = List.fold ~f:mk_element_subtype ~init:env fields in
     (env, dict_pty)
   | A.Array_get (arry, ix_opt) ->
-    (* Return the type parameter corresponding to the vector element type. *)
-    let env =
-      (* Evaluate the index in case it has side-effects. *)
+    (* Evaluate the array *)
+    let (env, arry_pty) = expr env arry in
+    let arry = cow_array ~pos renv arry_pty in
+
+    (* Evaluate the index, it might have side-effects! *)
+    let (env, ix_pty) =
       match ix_opt with
-      | Some ix -> fst @@ expr env ix
+      | Some ix -> expr env ix
       | None -> fail "cannot have an empty index when reading"
     in
-    let (env, arry_pty) = expr env arry in
-    let value_pty = (cow_array ~pos renv arry_pty).a_value in
-    (env, value_pty)
-  (* TODO(T70139741): support variadic functions and constructors
-   * TODO(T70139893): support classes with type parameters
-   *)
+
+    let env = may_throw_out_of_bounds_exn ~pos renv env arry ix_pty in
+
+    (env, arry.a_value)
   | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
+    (* TODO(T70139741): support variadic functions and constructors
+     * TODO(T70139893): support classes with type parameters
+     *)
     let (env, args_pty) = List.map_env ~f:expr env args in
     let env =
       match cid with

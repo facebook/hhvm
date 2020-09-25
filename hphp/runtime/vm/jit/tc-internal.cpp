@@ -136,7 +136,7 @@ bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
     s_func_counters.ensureSize(funcId + 1);
     s_func_counters[funcId].fetch_add(1, std::memory_order_relaxed);
     uint32_t skCount = 1;
-    {
+    if (RuntimeOption::EvalJitSrcKeyThreshold > 1) {
       SrcKeyCounters::accessor acc;
       if (!s_sk_counters.insert(acc, SrcKeyCounters::value_type(sk, 1))) {
         skCount = ++acc->second;

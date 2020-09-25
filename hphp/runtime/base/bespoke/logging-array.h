@@ -50,6 +50,7 @@ struct LoggingArray : BespokeArray {
 
 struct LoggingLayout : public Layout {
   std::string describe() const final;
+  static const LoggingLayout* layout();
 
   size_t heapSize(const ArrayData* ad) const final;
   size_t align(const ArrayData* ad) const final;

@@ -130,6 +130,7 @@ void emitLoggingDiamond(IRGS& env, SrcKey sk, Location loc, Block* nextBlock) {
       env.irb->resetGuardFailBlock();
     },
     [&] {
+      hint(env, Block::Hint::Unlikely);
       // Note that nextBlock is null iff opcodeChangesPC (which, for
       // layout-sensitive bytecodes, implies that opcodeBreaksBB and we are at
       // the end of the tracelet). Therefore we don't need to worry about

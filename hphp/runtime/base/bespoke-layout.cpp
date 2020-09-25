@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/bespoke-layout.h"
 
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/bespoke-array.h"
 
 namespace HPHP {
@@ -32,6 +33,10 @@ std::string BespokeLayout::describe() const {
 
 uint16_t BespokeLayout::index() const {
   return m_layout->index();
+}
+
+BespokeLayout BespokeLayout::loggingLayout() {
+  return BespokeLayout{bespoke::LoggingLayout::layout()};
 }
 
 }

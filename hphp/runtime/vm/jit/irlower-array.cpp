@@ -534,9 +534,12 @@ void cgNewRecord(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 void arrayReach(ArrayData* ad, TransID tid, size_t guardIdx) {
-  if (ad->isVanilla()) return;
+  assertx(!ad->isVanilla());
 
-  auto const lad = bespoke::LoggingArray::asLogging(ad);
+  auto const bad = BespokeArray::asBespoke(ad);
+  if (bad->layout() != BespokeLayout::loggingLayout()) return;
+
+  auto const lad = bespoke::LoggingArray::asLogging(bad);
   lad->logReachEvent(tid, guardIdx);
 }
 }

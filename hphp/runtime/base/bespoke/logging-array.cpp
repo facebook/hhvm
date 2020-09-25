@@ -49,7 +49,7 @@ static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
-Layout* s_layout = new LoggingLayout();
+LoggingLayout* s_layout = new LoggingLayout();
 std::atomic<bool> g_emitLoggingArrays;
 
 // The bespoke kind for a vanilla kind.
@@ -137,6 +137,10 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+const LoggingLayout* LoggingLayout::layout() {
+  return s_layout;
+}
 
 LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
                                  EntryTypes ms) {

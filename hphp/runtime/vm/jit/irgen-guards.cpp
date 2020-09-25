@@ -154,7 +154,17 @@ void genLogArrayReach(IRGS& env, const Location& loc, Type type, size_t idx) {
     }
     not_reached();
   }();
-  gen(env, LogArrayReach, TransGuardData(transID, idx), array);
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto const vanillaType = type.unspecialize().narrowToVanilla();
+      gen(env, CheckType, vanillaType, taken, array);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, LogArrayReach, TransGuardData(transID, idx), array);
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

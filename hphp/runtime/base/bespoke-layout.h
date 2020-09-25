@@ -46,6 +46,8 @@ struct BespokeLayout {
   /* get the index of this layout */
   uint16_t index() const;
 
+  static BespokeLayout loggingLayout();
+
   /* retrieve a layout by index */
   static BespokeLayout LayoutFromIndex(uint16_t idx);
 

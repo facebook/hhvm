@@ -1,3 +1,3 @@
-Fatal error: Uncaught exception 'RuntimeException' with message 'idx() expects parameter 1 to be %rd?%rarray, integer given' in %s/hphp/test/slow/shapes/idx_arr_type_error.php:5
+Fatal error: Uncaught exception 'RuntimeException' with message 'idx() expects parameter 1 to be %rd?%rarray, integer given' in %s/test/slow/shapes/idx_arr_type_error.php:5
 Stack trace:
 %A

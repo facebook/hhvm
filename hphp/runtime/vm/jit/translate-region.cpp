@@ -210,7 +210,7 @@ namespace {
 struct ArrayReachInfo {
   Location loc;
   Type type;
-  size_t guardIndex;
+  uint32_t guardIdx;
 };
 
 }
@@ -237,7 +237,7 @@ void emitGuards(irgen::IRGS& irgs,
   if (irgs.context.kind == TransKind::Profile) {
     // If we're in a profiling tracelet, weaken vanilla guards so that
     // logging arrays can flow through tracelets.
-    for (size_t i = 0; i < typePreConditions.size(); i++) {
+    for (uint32_t i = 0; i < typePreConditions.size(); i++) {
       auto const& preCond = typePreConditions[i];
       auto const origType = preCond.type;
       auto const isVanillaGuard = origType.arrSpec().vanilla();
@@ -270,11 +270,6 @@ void emitGuards(irgen::IRGS& irgs,
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
 
-    for (auto const& reachLoc : arrayReachLocs) {
-      irgen::genLogArrayReach(irgs, reachLoc.loc, reachLoc.type,
-                              reachLoc.guardIndex);
-    }
-
     if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
       irgen::checkCoverage(irgs);
     }
@@ -293,6 +288,11 @@ void emitGuards(irgen::IRGS& irgs,
     // In the entry block, hhbc-translator gets a chance to emit some code
     // immediately after the initial checks on the first instruction.
     irgen::prepareEntry(irgs);
+
+    for (auto const& reachLoc : arrayReachLocs) {
+      irgen::genLogArrayReach(irgs, reachLoc.loc, reachLoc.type,
+                              reachLoc.guardIdx);
+    }
   }
 }
 

@@ -35,9 +35,5 @@ uint16_t BespokeLayout::index() const {
   return m_layout->index();
 }
 
-BespokeLayout BespokeLayout::loggingLayout() {
-  return BespokeLayout{bespoke::LoggingLayout::layout()};
-}
-
 }
 

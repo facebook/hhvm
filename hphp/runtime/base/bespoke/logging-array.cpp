@@ -207,8 +207,8 @@ void LoggingArray::updateKindAndSize() {
   assertx(checkInvariants());
 }
 
-void LoggingArray::logReachEvent(TransID tid, size_t guardIdx) {
-  profile->logReach(tid, guardIdx);
+void LoggingArray::logReachEvent(TransID transId, uint32_t guardIdx) {
+  profile->logReach(transId, guardIdx);
 }
 
 std::string LoggingLayout::describe() const {

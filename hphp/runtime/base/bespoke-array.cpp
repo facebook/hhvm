@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -58,6 +59,11 @@ void BespokeArray::scan(type_scan::Scanner& scan) const {
 
 ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
   return BespokeArray::asBespoke(ad)->layoutRaw()->escalateToVanilla(ad, reason);
+}
+
+void BespokeArray::logReachEvent(TransID transId, uint32_t guardIdx) {
+  if (layoutRaw() != bespoke::LoggingLayout::layout()) return;
+  bespoke::LoggingArray::asLogging(this)->logReachEvent(transId, guardIdx);
 }
 
 bool BespokeArray::checkInvariants() const {

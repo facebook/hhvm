@@ -133,7 +133,8 @@ void predictType(IRGS& env, const Location& loc, Type type) {
   env.irb->fs().refinePredictedType(loc, type);
 }
 
-void genLogArrayReach(IRGS& env, const Location& loc, Type type, size_t idx) {
+void genLogArrayReach(IRGS& env, const Location& loc, Type type,
+                      uint32_t guardIdx) {
   assertx(type <= TArrLike);
   assertx(env.context.transIDs.size() == 1);
   assertx(env.context.kind == TransKind::Profile);
@@ -154,17 +155,7 @@ void genLogArrayReach(IRGS& env, const Location& loc, Type type, size_t idx) {
     }
     not_reached();
   }();
-  ifThen(
-    env,
-    [&](Block* taken) {
-      auto const vanillaType = type.unspecialize().narrowToVanilla();
-      gen(env, CheckType, vanillaType, taken, array);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, LogArrayReach, TransGuardData(transID, idx), array);
-    }
-  );
+  gen(env, LogArrayReach, TransGuardData(transID, guardIdx), array);
 }
 
 //////////////////////////////////////////////////////////////////////

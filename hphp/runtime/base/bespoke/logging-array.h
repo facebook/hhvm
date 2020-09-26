@@ -38,8 +38,9 @@ struct LoggingArray : BespokeArray {
 
   // Update m_kind and m_size after doing a mutation on the wrapped array.
   void updateKindAndSize();
-  // Record that the logging array reached a given tracelet
-  void logReachEvent(TransID tid, size_t guardIdx);
+
+  // Record that this array reached a given profiling tracelet.
+  void logReachEvent(TransID transId, uint32_t guardIdx);
 
   bool checkInvariants() const;
 

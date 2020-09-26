@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/bespoke/logging-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
@@ -533,14 +532,9 @@ void cgNewRecord(IRLS& env, const IRInstruction* inst) {
 }
 
 namespace {
-void arrayReach(ArrayData* ad, TransID tid, size_t guardIdx) {
-  assertx(!ad->isVanilla());
-
-  auto const bad = BespokeArray::asBespoke(ad);
-  if (bad->layout() != BespokeLayout::loggingLayout()) return;
-
-  auto const lad = bespoke::LoggingArray::asLogging(bad);
-  lad->logReachEvent(tid, guardIdx);
+void arrayReach(ArrayData* ad, TransID transId, uint32_t guardIdx) {
+  if (LIKELY(ad->isVanilla())) return;
+  BespokeArray::asBespoke(ad)->logReachEvent(transId, guardIdx);
 }
 }
 
@@ -548,7 +542,8 @@ void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
   auto data = inst->extra<LogArrayReach>();
 
   auto& v = vmain(env);
-  auto const args = argGroup(env, inst).ssa(0).imm(data->transId).imm(data->guardIdx);
+  auto const args = argGroup(env, inst)
+    .ssa(0).imm(data->transId).imm(data->guardIdx);
 
   auto const target = CallSpec::direct(arrayReach);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);

@@ -545,17 +545,17 @@ struct TransIDData : IRExtraData {
  * were constrained to DataTypeSpecialized.
  */
 struct TransGuardData : IRExtraData {
-  explicit TransGuardData(TransID transId, size_t guardIdx)
+  explicit TransGuardData(TransID transId, uint32_t guardIdx)
     : transId(transId)
     , guardIdx(guardIdx)
   {}
 
   std::string show() const {
-    return folly::sformat("tid={}, guardIdx={}", transId, guardIdx);
+    return folly::sformat("transId={}, guardIdx={}", transId, guardIdx);
   }
 
   TransID transId;
-  size_t guardIdx;
+  uint32_t guardIdx;
 };
 
 

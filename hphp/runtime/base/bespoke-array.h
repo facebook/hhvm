@@ -88,6 +88,9 @@ public:
                                   DataWalker::PointerMap* seen);
   static void ReleaseUncounted(ArrayData*);
 
+  // Log that a bespoke array made it to a particular profiling translation.
+  void logReachEvent(TransID transId, uint32_t guardIdx);
+
 private:
   template <typename T, typename ... Args>
   [[noreturn]] static inline T UnsupportedOp(Args ... args) {

@@ -209,21 +209,22 @@ double LoggingProfile::getProfileWeight() const {
   return getTotalEvents() * getSampleCountMultiplier();
 }
 
-void LoggingProfile::logReach(TransID tid, size_t guardIdx) {
+void LoggingProfile::logReach(TransID transId, uint32_t guardIdx) {
   // Hold the read mutex for the duration of the mutation so that export cannot
   // begin until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
   if (s_exportStarted.load(std::memory_order_relaxed)) return;
 
   ReachMap::accessor it;
-  if (reachedTracelets.insert(it, {tid, guardIdx})) {
+  if (reachedTracelets.insert(it, {transId, guardIdx})) {
     it->second = 1;
   } else {
     it->second++;
   }
-  FTRACE(6, "{} reached {}, guard {} [count={}]\n", source.getSymbol(), tid,
-         guardIdx, it->second);
+  FTRACE(6, "{} reached {}, guard {} [count={}]\n", source.getSymbol(),
+         transId, guardIdx, it->second);
 }
+
 void LoggingProfile::logEvent(ArrayOp op) {
   logEventImpl(EventKey(op));
 }

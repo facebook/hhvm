@@ -95,9 +95,10 @@ struct LoggingProfile {
 
   // ReachLocations are a pair of a TransID and the index of the
   // weakened DataTypeSpecialized guard the logging array reached
-  using ReachLocation = std::pair<TransID, size_t>;
-  using ReachMapHasher = pairHashCompare<
-    TransID, size_t, integralHashCompare<TransID>, integralHashCompare<size_t>>;
+  using ReachLocation = std::pair<TransID, uint32_t>;
+  using ReachMapHasher = pairHashCompare<TransID, uint32_t,
+                                         integralHashCompare<TransID>,
+                                         integralHashCompare<uint32_t>>;
   using ReachMap = tbb::concurrent_hash_map<ReachLocation, size_t,
                                             ReachMapHasher>;
 
@@ -116,9 +117,10 @@ struct LoggingProfile {
   uint64_t getTotalEvents() const;
   double getProfileWeight() const;
 
+  void logReach(TransID transId, uint32_t guardIdx);
+
   // We take specific inputs rather than templated inputs because we're going
   // to follow up soon with limitations on the number of arguments we can log.
-  void logReach(TransID tid, size_t guardIdx);
   void logEvent(ArrayOp op);
   void logEvent(ArrayOp op, int64_t k);
   void logEvent(ArrayOp op, const StringData* k);

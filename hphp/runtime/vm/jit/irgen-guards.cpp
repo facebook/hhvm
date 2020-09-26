@@ -133,24 +133,22 @@ void predictType(IRGS& env, const Location& loc, Type type) {
   env.irb->fs().refinePredictedType(loc, type);
 }
 
-void genLogArrayReach(IRGS& env, const Location& loc, Type type,
-                      uint32_t guardIdx) {
-  assertx(type <= TArrLike);
+void genLogArrayReach(IRGS& env, const Location& loc, uint32_t guardIdx) {
   assertx(env.context.transIDs.size() == 1);
   assertx(env.context.kind == TransKind::Profile);
   auto const transID = *env.context.transIDs.begin();
   auto const array = [&] {
     switch (loc.tag()) {
+      case LTag::Local:
+        return gen(env, LdLoc, TCell, LocalId(loc.localId()), fp(env));
       case LTag::Stack: {
         auto const soff = IRSPRelOffsetData {
           offsetFromIRSP(env, loc.stackIdx()) };
-        return gen(env, LdStk, type, soff, sp(env));
+        return gen(env, LdStk, TCell, soff, sp(env));
       }
-      case LTag::Local:
-        return gen(env, LdLoc, type, LocalId(loc.localId()), fp(env));
       case LTag::MBase: {
         auto const mbr = gen(env, LdMBase, TLvalToCell);
-        return gen(env, LdMem, type, mbr);
+        return gen(env, LdMem, mbr->type().deref(), mbr);
       }
     }
     not_reached();

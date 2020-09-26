@@ -511,8 +511,7 @@ using TypeNames::TCA;
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
                       requireTypeParam(Top);
-#define DParamMayRelax(t) requireTypeParam(t);
-#define DParam(t)         requireTypeParam(t);
+#define DParam(t)      requireTypeParam(t);
 #define DUnion(...)    forEachSrcIdx(                                          \
                          [&](uint32_t idx) {                                   \
                            checkDst(idx < inst->numSrcs(), "invalid src num"); \
@@ -576,7 +575,6 @@ using TypeNames::TCA;
 #undef DSetElem
 #undef DofS
 #undef DRefineS
-#undef DParamMayRelax
 #undef DParam
 #undef DLdObjCls
 #undef DAllocObj

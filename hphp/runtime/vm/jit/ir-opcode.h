@@ -53,7 +53,6 @@ struct SSATmp;
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
  *     DParam(t)    single dst has type of the instruction's type parameter,
  *                    which must be a subtype of t
- *     DParamMayRelax(t) like DParam, except type may relax
  *     DAllocObj    single dst has a type of a newly allocated object; may be a
  *                    specialized object type if the class is known
  *     DVArr        single dst is either a packed array type or vec, depending

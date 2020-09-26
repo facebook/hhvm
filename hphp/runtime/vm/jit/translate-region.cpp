@@ -209,7 +209,6 @@ namespace {
 
 struct ArrayReachInfo {
   Location loc;
-  Type type;
   uint32_t guardIdx;
 };
 
@@ -235,29 +234,24 @@ void emitGuards(irgen::IRGS& irgs,
   // Emit type guards/preconditions.
   std::vector<ArrayReachInfo> arrayReachLocs;
   if (irgs.context.kind == TransKind::Profile) {
-    // If we're in a profiling tracelet, weaken vanilla guards so that
-    // logging arrays can flow through tracelets.
+    // If we're in a profiling tracelet, weaken vanilla guards so that bespoke
+    // LoggingArrays can flow through tracelets. Track information so that we
+    // can log when a LoggingArray passes a weakened guard.
     for (uint32_t i = 0; i < typePreConditions.size(); i++) {
       auto const& preCond = typePreConditions[i];
       auto const origType = preCond.type;
       auto const isVanillaGuard = origType.arrSpec().vanilla();
-      auto type = isVanillaGuard ? origType.unspecialize() : origType;
-      auto loc  = preCond.location;
-      assertx(type <= TCell);
+      auto const type = isVanillaGuard ? origType.unspecialize() : origType;
+      auto const loc  = preCond.location;
       irgen::checkType(irgs, loc, type, bcOff);
       if (isVanillaGuard) {
-        // We are passing through what would be a vanilla guard, had this not
-        // been a profiling tracelet. Record that the array entered this
-        // tracelet, so we know to specialize it when we do bespoke tracelet
-        // generation.
-        arrayReachLocs.push_back(ArrayReachInfo {loc, type, i});
+        arrayReachLocs.push_back(ArrayReachInfo {loc, i});
       }
     }
   } else {
     for (auto const& preCond : typePreConditions) {
-      auto type = preCond.type;
-      auto loc  = preCond.location;
-      assertx(type <= TCell);
+      auto const type = preCond.type;
+      auto const loc  = preCond.location;
       irgen::checkType(irgs, loc, type, bcOff);
     }
   }
@@ -276,7 +270,7 @@ void emitGuards(irgen::IRGS& irgs,
 
     if (irgs.context.kind == TransKind::Profile) {
       assertx(irgs.context.transIDs.size() == 1);
-      auto transID = *irgs.context.transIDs.begin();
+      auto const transID = *irgs.context.transIDs.begin();
       if (block.func()->isEntry(bcOff) && !mcgen::retranslateAllEnabled()) {
         irgen::checkCold(irgs, transID);
       } else {
@@ -290,8 +284,7 @@ void emitGuards(irgen::IRGS& irgs,
     irgen::prepareEntry(irgs);
 
     for (auto const& reachLoc : arrayReachLocs) {
-      irgen::genLogArrayReach(irgs, reachLoc.loc, reachLoc.type,
-                              reachLoc.guardIdx);
+      irgen::genLogArrayReach(irgs, reachLoc.loc, reachLoc.guardIdx);
     }
   }
 }

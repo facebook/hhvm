@@ -268,14 +268,9 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
 
 /*
  * Load or store the member base pointer.
- *
- * Note that LdMBase may get preOptimize'd or load-elim-ed away. By tracking
- * the type of the lval's target with a separate AssertType instruction, we can
- * apply this knowledge both to LdMBase and to any tmps it gets replaced with.
  */
 SSATmp* ldMBase(IRGS& env) {
-  auto const type = env.irb->fs().mbase().type.lval(Ptr::Ptr);
-  return gen(env, AssertType, type, gen(env, LdMBase));
+  return gen(env, LdMBase, TLvalToCell);
 }
 void stMBase(IRGS& env, SSATmp* base) {
   if (base->isA(TPtrToCell)) base = gen(env, ConvPtrToLval, base);

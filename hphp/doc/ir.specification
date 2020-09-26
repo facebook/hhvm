@@ -917,11 +917,11 @@ To string conversions:
 
 6. Loads
 
-| LdStk<T,offset>, DParamMayRelax(Cell), S(StkPtr), NF
+| LdStk<T,offset>, DParam(Cell), S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
-| LdLoc<T,localId>, DParamMayRelax(Cell), S(FramePtr), NF
+| LdLoc<T,localId>, DParam(Cell), S(FramePtr), NF
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
@@ -1853,7 +1853,7 @@ To string conversions:
 | DefRegSP<irSPOff, bcSPOff>, D(StkPtr), NA, NF
 
   Defines a stack positioned relative to the frame or the rvmsp register.
-  
+
   Creates a temporary D representing the current VM stack pointer:
   - DefFrameRelSP: D points to the same location as the frame pointer S0
   - DefRegSP: D is the memory address given by the rvmsp register
@@ -2667,7 +2667,7 @@ To string conversions:
   Load an MInstrState address. Returns a pointer to offset S0 within the
   current MInstrState.
 
-| LdMBase, D(LvalToCell), NA, NF
+| LdMBase, DParam(LvalToCell), NA, NF
 
   Load the current value of the member base register.
 

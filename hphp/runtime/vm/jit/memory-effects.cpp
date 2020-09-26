@@ -1085,9 +1085,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case NewLoggingArray:
-  case LogArrayReach:
     // May read any data referenced by the input array, but not locals/stack.
-    return may_load_store(AHeapAny, AHeapAny);
+    return may_load_store(AHeapAny, AEmpty);
 
   case NewKeysetArray:
     {
@@ -1757,6 +1756,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgAssertFunc:
   case ProfileCall:
   case ProfileMethod:
+  case LogArrayReach:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:

@@ -367,10 +367,10 @@ struct FrameStateMgr final {
   const MBaseState& mbase() const { return cur().mbase; }
 
   /*
-   * Set the value, type, and (optionally) predicted type for mbase().
+   * Set the value and type for mbase() or mbr().
    */
-  void setMemberBase(SSATmp* base,
-                     folly::Optional<Type> predicted = folly::none);
+  void setMemberBase(SSATmp* base);
+  void setMBR(SSATmp* base);
 
   /*
    * Update the predicted type for `l'.

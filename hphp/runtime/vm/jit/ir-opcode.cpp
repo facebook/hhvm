@@ -48,7 +48,6 @@ TRACE_SET_MOD(hhir);
 #define D(n)           HasDest
 #define DofS(n)        HasDest
 #define DRefineS(n)    HasDest
-#define DParamMayRelax(t) HasDest
 #define DParam(t)      HasDest
 #define DLdObjCls      HasDest
 #define DAllocObj      HasDest
@@ -123,7 +122,6 @@ OpInfo g_opInfo[] = {
 #undef D
 #undef DofS
 #undef DRefineS
-#undef DParamMayRelax
 #undef DParam
 #undef DLdObjCls
 #undef DVecElem

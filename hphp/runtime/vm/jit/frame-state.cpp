@@ -387,7 +387,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto& state : frame.stack) {
         refineValue(state, inst->src(0), inst->dst());
       }
-      refineValue(frame.mbase, inst->src(0), inst->dst());
+    }
+    // MInstrState can only be live for the current frame.
+    refineValue(cur().mbase, inst->src(0), inst->dst());
+    if (inst->src(0) == cur().mbr.ptr) {
+      setMBR(inst->dst());
     }
     break;
 
@@ -518,18 +522,13 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case LdMBase: {
-    auto const mbr = inst->dst();
-    cur().mbr.ptr = mbr;
-    cur().mbr.pointee = pointee(mbr);
-    cur().mbr.ptrType = mbr->type();
-  } break;
+  case LdMBase:
+    setMBR(inst->dst());
+    break;
 
   case StMBase: {
     auto const mbr = inst->src(0);
-    cur().mbr.ptr = mbr;
-    cur().mbr.pointee = pointee(mbr);
-    cur().mbr.ptrType = mbr->type();
+    setMBR(mbr);
     setValue(Location::MBase{}, nullptr);
     setType(Location::MBase{}, mbr->type().deref());
   } break;
@@ -1396,9 +1395,14 @@ void FrameStateMgr::clearLocals() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FrameStateMgr::setMemberBase(SSATmp* base,
-                                  folly::Optional<Type> predicted) {
-  setValueImpl(Location::MBase{}, cur().mbase, base, predicted);
+void FrameStateMgr::setMemberBase(SSATmp* base) {
+  setValueImpl(Location::MBase{}, cur().mbase, base, folly::none);
+}
+
+void FrameStateMgr::setMBR(SSATmp* mbr) {
+  cur().mbr.ptr = mbr;
+  cur().mbr.pointee = pointee(mbr);
+  cur().mbr.ptrType = mbr->type();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -296,8 +296,19 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
+SSATmp* IRBuilder::preOptimizeLdMem(IRInstruction* inst) {
+  auto const mbr = isMBaseLoad(inst) || inst->src(0) == m_state.mbr().ptr;
+  return mbr ? preOptimizeLdLocation(inst, Location::MBase{}) : nullptr;
+}
+
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
-  if (auto ptr = m_state.mbr().ptr) return ptr;
+  auto const type = m_state.mbase().type.lval(Ptr::Ptr);
+  inst->setTypeParam(inst->typeParam() & type);
+
+  if (auto const ptr = m_state.mbr().ptr) {
+    if (ptr->isA(inst->typeParam())) return ptr;
+    return gen(AssertType, inst->typeParam(), ptr);
+  }
   return nullptr;
 }
 
@@ -369,6 +380,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
+  X(LdMem)
   X(LdMBase)
   X(LdClosureCls)
   X(LdClosureThis)

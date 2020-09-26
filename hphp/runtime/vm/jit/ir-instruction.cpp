@@ -558,7 +558,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define D(type)         return checkLayoutFlags(type);
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
-#define DParamMayRelax(t) return inst->typeParam();
 #define DParam(t)       return inst->typeParam();
 #define DLdObjCls {                                                \
   if (auto spec = inst->src(0)->type().clsSpec()) {                \
@@ -613,7 +612,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef D
 #undef DofS
 #undef DRefineS
-#undef DParamMayRelax
 #undef DParam
 #undef DLdObjCls
 #undef DAllocObj

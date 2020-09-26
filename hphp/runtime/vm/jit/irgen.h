@@ -114,7 +114,7 @@ void checkType(IRGS&, const Location&, Type, Offset dest);
 void assertTypeStack(IRGS&, BCSPRelOffset, Type);
 void assertTypeLocal(IRGS&, uint32_t id, Type);
 void assertTypeLocation(IRGS&, const Location&, Type);
-void genLogArrayReach(IRGS&, const Location&, Type, uint32_t guardIdx);
+void genLogArrayReach(IRGS&, const Location&, uint32_t guardIdx);
 
 /*
  * Type predictions.

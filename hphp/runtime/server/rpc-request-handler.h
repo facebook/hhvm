@@ -33,6 +33,7 @@ struct RPCRequestHandler : RequestHandler {
   enum class ReturnEncodeType {
     Json      = 1,
     Serialize = 2,
+    Internal  = 3,
   };
 
   RPCRequestHandler(int timeout, bool info);
@@ -85,4 +86,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

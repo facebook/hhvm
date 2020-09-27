@@ -379,12 +379,18 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
       String response;
       switch (output) {
         case 0: {
-          assertx(returnEncodeType == ReturnEncodeType::Json ||
-                 returnEncodeType == ReturnEncodeType::Serialize);
           try {
-            response = (returnEncodeType == ReturnEncodeType::Json)
-              ? Variant::attach(HHVM_FN(json_encode)(funcRet)).toString()
-              : f_serialize(funcRet);
+            switch (returnEncodeType) {
+              case ReturnEncodeType::Json:
+                response = Variant::attach(HHVM_FN(json_encode)(funcRet)).toString();
+                break;
+              case ReturnEncodeType::Serialize:
+                response = f_serialize(funcRet);
+                break;
+              case ReturnEncodeType::Internal:
+                response = internal_serialize(funcRet);
+                break;
+            }
           } catch (...) {
             serializeFailed = true;
           }

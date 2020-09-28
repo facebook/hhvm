@@ -21,6 +21,8 @@ namespace HPHP { namespace thrift {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const int64_t k_THRIFT_MARK_LEGACY_ARRAYS = 1LL << 0;
+
 Class* RpcOptions::c_RpcOptions = nullptr;
 
 Object HHVM_METHOD(RpcOptions, setChunkBufferSize, int64_t chunk_buffer_size) {
@@ -94,6 +96,8 @@ String HHVM_METHOD(RpcOptions, __toString) {
 static struct ThriftExtension final : Extension {
   ThriftExtension() : Extension("thrift_protocol", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
+    HHVM_RC_INT(THRIFT_MARK_LEGACY_ARRAYS, k_THRIFT_MARK_LEGACY_ARRAYS);
+
     HHVM_FE(thrift_protocol_write_binary);
     HHVM_FE(thrift_protocol_read_binary);
     HHVM_FE(thrift_protocol_read_binary_struct);

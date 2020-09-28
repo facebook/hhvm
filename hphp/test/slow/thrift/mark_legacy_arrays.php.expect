@@ -1,0 +1,44 @@
+== thrift_protocol_read_binary ==
+original struct
+  varray: false
+  varray[0]: false
+  darray: false
+  darray['foo']: false
+  darraySet: false
+  structVarray[0]->varray: false
+deserialized
+  varray: false
+  varray[0]: false
+  darray: false
+  darray['foo']: false
+  darraySet: false
+  structVarray[0]->varray: false
+deserialized w/ flag
+  varray: true
+  varray[0]: true
+  darray: true
+  darray['foo']: true
+  darraySet: true
+  structVarray[0]->varray: true
+== thrift_protocol_read_compact ==
+original struct
+  varray: false
+  varray[0]: false
+  darray: false
+  darray['foo']: false
+  darraySet: false
+  structVarray[0]->varray: false
+deserialized
+  varray: false
+  varray[0]: false
+  darray: false
+  darray['foo']: false
+  darraySet: false
+  structVarray[0]->varray: false
+deserialized w/ flag
+  varray: true
+  varray[0]: true
+  darray: true
+  darray['foo']: true
+  darraySet: true
+  structVarray[0]->varray: true

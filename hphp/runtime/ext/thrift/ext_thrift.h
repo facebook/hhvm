@@ -24,6 +24,8 @@
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64_t k_THRIFT_MARK_LEGACY_ARRAYS;
+
 void HHVM_FUNCTION(thrift_protocol_write_binary,
                    const Object& transportobj,
                    const String& method_name,
@@ -36,11 +38,13 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
 Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const Object& transportobj,
                      const String& obj_typename,
-                     bool strict_read);
+                     bool strict_read,
+                     int options);
 
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
-                      const String& obj_typename);
+                      const String& obj_typename,
+                      int options);
 
 int64_t HHVM_FUNCTION(thrift_protocol_set_compact_version,
                       int version);
@@ -55,11 +59,13 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
-                      const String& obj_typename);
+                      const String& obj_typename,
+                      int options);
 
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
-                     const String& obj_typename);
+                     const String& obj_typename,
+                     int options);
 
 ///////////////////////////////////////////////////////////////////////////////
 

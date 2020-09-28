@@ -514,6 +514,11 @@ struct VArrayInit {
     return append(*v.asTypedValue());
   }
 
+  VArrayInit& setLegacyArray(bool legacy) {
+    m_arr->setLegacyArray(legacy);
+    return *this;
+  }
+
   Variant toVariant() {
     assertx(m_arr->hasExactlyOneRef());
     assertx(m_arr->isHAMSafeVArray());
@@ -705,6 +710,11 @@ struct DArrayInit {
   DArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
     auto const k = name.toKey<IC>(m_arr).tv();
     if (LIKELY(!isNullType(k.m_type))) set(k, v.asInitTVTmp());
+    return *this;
+  }
+
+  DArrayInit& setLegacyArray(bool legacy) {
+    m_arr->setLegacyArray(legacy);
     return *this;
   }
 
@@ -1014,4 +1024,3 @@ MixedPHPArrayInitBase<TArray>::MixedPHPArrayInitBase(size_t n,
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

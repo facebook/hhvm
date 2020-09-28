@@ -613,8 +613,9 @@ struct CompactWriter {
 };
 
 struct CompactReader {
-    explicit CompactReader(const Object& _transportobj) :
+    explicit CompactReader(const Object& _transportobj, int options) :
       transport(_transportobj),
+      options(options),
       version(VERSION),
       state(STATE_CLEAR),
       lastFieldNum(0),
@@ -740,6 +741,7 @@ struct CompactReader {
 
   private:
     PHPInputTransport transport;
+    int options;
     uint8_t version;
     CState state;
     uint16_t lastFieldNum;
@@ -1030,6 +1032,9 @@ struct CompactReader {
         return Variant(std::move(ret));
       } else {
         DArrayInit arr(size);
+        if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
+          arr.setLegacyArray(true);
+        }
         for (uint32_t i = 0; i < size; i++) {
           auto key = readField(keySpec, keyType);
           auto value = readField(valueSpec, valueType);
@@ -1071,6 +1076,9 @@ struct CompactReader {
         return Variant(std::move(vec));
       } else {
         VArrayInit vai(size);
+        if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
+          vai.setLegacyArray(true);
+        }
         for (auto i = uint32_t{0}; i < size; ++i) {
           vai.append(readField(valueSpec, valueType));
         }
@@ -1105,6 +1113,9 @@ struct CompactReader {
         return Variant(std::move(set_ret));
       } else {
         DArrayInit ainit(size);
+        if (options & k_THRIFT_MARK_LEGACY_ARRAYS) {
+          ainit.setLegacyArray(true);
+        }
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
           set_with_intish_key_cast(ainit, value, true);
@@ -1236,17 +1247,19 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
-                      const String& obj_typename) {
+                      const String& obj_typename,
+                      int options) {
   EagerVMRegAnchor _;
-  CompactReader reader(transportobj);
+  CompactReader reader(transportobj, options);
   return reader.read(obj_typename);
 }
 
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
-                     const String& obj_typename) {
+                     const String& obj_typename,
+                     int options) {
   EagerVMRegAnchor _;
-  CompactReader reader(transportobj);
+  CompactReader reader(transportobj, options);
   Object ret = create_object(obj_typename, Array());
   Array spec(get_tspec(ret->getVMClass()));
   reader.readStruct(ret, spec);

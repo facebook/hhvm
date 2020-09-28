@@ -152,7 +152,7 @@ struct ReadOnlyArena : TaggedSlabList {
   void* addChunk(size_t size) {
     ReadOnlyChunk* chunk = nullptr;
     if (m_pool) {
-      if (auto const tPtr = m_pool->try_local_pop()) {
+      if (auto const tPtr = m_pool->try_shared_pop()) {
         chunk = ReadOnlyChunk::fromTPtr(tPtr);
         if (auto ret = chunk->tryAlloc(size, Alignment)) {
           // Add the partial chunk to local list.

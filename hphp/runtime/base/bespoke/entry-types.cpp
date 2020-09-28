@@ -101,27 +101,12 @@ bool EntryTypes::checkInvariants() const {
 }
 
 EntryTypes EntryTypes::ForArray(ArrayData* ad) {
-  auto state = EntryTypes(KeyTypes::Empty, ValueTypes::Empty,
-                          kInvalidDataType);
-
-  IterateKV(
-    ad,
-    [&](TypedValue k, TypedValue v) {
-      state = state.withKV(k, v);
-      return true;
-    }
-  );
-
+  auto state = EntryTypes(KeyTypes::Empty, ValueTypes::Empty, kInvalidDataType);
+  IterateKVNoInc(ad, [&](auto k, auto v) { state = state.with(k, v); });
   return state;
 }
 
-EntryTypes EntryTypes::withV(TypedValue v) const {
-  auto const valuePair = valueTypesForValue(v, valueTypes, valueDatatype);
-
-  return EntryTypes(keyTypes, valuePair.first, valuePair.second);
-}
-
-EntryTypes EntryTypes::withKV(TypedValue k, TypedValue v) const {
+EntryTypes EntryTypes::with(TypedValue k, TypedValue v) const {
   auto const newKeyTypes = keyTypesForKey(k, keyTypes);
   auto const valuePair = valueTypesForValue(v, valueTypes, valueDatatype);
 
@@ -129,8 +114,7 @@ EntryTypes EntryTypes::withKV(TypedValue k, TypedValue v) const {
 }
 
 EntryTypes EntryTypes::pessimizeValueTypes() const {
-  return EntryTypes(keyTypes, ValueTypes::Any,
-                    kInvalidDataType);
+  return EntryTypes(keyTypes, ValueTypes::Any, kInvalidDataType);
 }
 
 std::string EntryTypes::toString() const {

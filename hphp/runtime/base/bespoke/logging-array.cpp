@@ -347,20 +347,20 @@ arr_lval LoggingLayout::lvalStr(ArrayData* ad, StringData* k) const {
   // code can change the value types arbitrarily with the lval
   auto const ms = LoggingArray::asLogging(ad)->entryTypes.pessimizeValueTypes();
   auto const val = getStr(ad, k);
-  logEvent(ad, ms, ArrayOp::LvalInt, k, val);
+  logEvent(ad, ms, ArrayOp::LvalStr, k, val);
   return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
 ArrayData* LoggingLayout::setInt(ArrayData* ad, int64_t k, TypedValue v) const {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = LoggingArray::asLogging(ad)->
-    entryTypes.withKV(make_tv<KindOfInt64>(k), v);
+    entryTypes.with(make_tv<KindOfInt64>(k), v);
   logEvent(ad, ms, ArrayOp::SetInt, k, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
 ArrayData* LoggingLayout::setStr(ArrayData* ad, StringData* k, TypedValue v) const {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = LoggingArray::asLogging(ad)->
-    entryTypes.withKV(make_tv<KindOfString>(k), v);
+    entryTypes.with(make_tv<KindOfString>(k), v);
   logEvent(ad, ms, ArrayOp::SetStr, k, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
@@ -396,13 +396,19 @@ ssize_t LoggingLayout::iterRewind(const ArrayData* ad, ssize_t prev) const {
 
 ArrayData* LoggingLayout::append(ArrayData* ad, TypedValue v) const {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = LoggingArray::asLogging(ad)->entryTypes.withV(v);
+  auto const lad = LoggingArray::asLogging(ad);
+  // NOTE: This key isn't always correct, but it's close enough for profiling.
+  auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
+  auto const ms = lad->entryTypes.with(k, v);
   logEvent(ad, ms, ArrayOp::Append, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->append(v); });
 }
 ArrayData* LoggingLayout::prepend(ArrayData* ad, TypedValue v) const {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = LoggingArray::asLogging(ad)->entryTypes.withV(v);
+  auto const lad = LoggingArray::asLogging(ad);
+  // NOTE: This key isn't always correct, but it's close enough for profiling.
+  auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
+  auto const ms = lad->entryTypes.with(k, v);
   logEvent(ad, ms, ArrayOp::Prepend, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->prepend(v); });
 }

@@ -395,6 +395,7 @@ struct SourceOutputData {
   {
     std::sort(sinks.begin(), sinks.end());
     std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
+    std::sort(monotypeUses.begin(), monotypeUses.end());
     std::sort(operations.begin(), operations.end());
     std::sort(traceletReach.begin(), traceletReach.end());
 

@@ -60,8 +60,7 @@ struct EntryTypes {
    , valueDatatype(static_cast<DataType>(static_cast<int8_t>(val & 0xFF)))
   { assertx(checkInvariants()); }
 
-  EntryTypes withKV(TypedValue k, TypedValue v) const;
-  EntryTypes withV(TypedValue v) const;
+  EntryTypes with(TypedValue k, TypedValue v) const;
   EntryTypes pessimizeValueTypes() const;
   std::string toString() const;
 

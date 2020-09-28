@@ -310,31 +310,6 @@ let wrap_union_inter_ty_in_var env r ty =
   else
     (env, ty)
 
-(* Grab all supertypes of a given type, recursively *)
-let get_all_supertypes env ty =
-  let rec iter seen env acc tyl =
-    match tyl with
-    | [] -> (env, acc)
-    | ty :: tyl ->
-      let (env, ty) = Env.expand_type env ty in
-      (match get_node ty with
-      | Tnewtype (_, _, ty)
-      | Tdependent (_, ty) ->
-        iter seen env (TySet.add ty acc) tyl
-      | Tgeneric (n, targs) ->
-        if SSet.mem n seen then
-          iter seen env acc tyl
-        else
-          iter
-            (SSet.add n seen)
-            env
-            acc
-            (TySet.elements (Env.get_upper_bounds env n targs) @ tyl)
-      | _ -> iter seen env (TySet.add ty acc) tyl)
-  in
-  let (env, resl) = iter SSet.empty env TySet.empty [ty] in
-  (env, TySet.elements resl)
-
 (*****************************************************************************
  * Get the "as" constraints from an abstract type or generic parameter, or
  * return the type itself if there is no "as" constraint.
@@ -502,34 +477,6 @@ let rec get_base_type env ty =
   | _ -> ty
 
 (*****************************************************************************)
-(* Given some class type or unresolved union of class types, return the
- * identifiers of all classes the type may represent.
- *
- * Intended for uses like constructing call graphs and finding references, where
- * we have the statically known class type of some runtime value or class ID and
- * we would like the name of that class. *)
-(*****************************************************************************)
-let get_class_ids env ty =
-  let rec aux seen acc ty =
-    match get_node ty with
-    | Tclass ((_, cid), _, _) -> cid :: acc
-    | Toption ty
-    | Tdependent (_, ty)
-    | Tnewtype (_, _, ty) ->
-      aux seen acc ty
-    | Tunion tys
-    | Tintersection tys ->
-      List.fold tys ~init:acc ~f:(aux seen)
-    | Tgeneric (name, targs) when not (List.mem ~equal:String.equal seen name)
-      ->
-      let seen = name :: seen in
-      let upper_bounds = Env.get_upper_bounds env name targs in
-      TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
-    | _ -> acc
-  in
-  List.rev (aux [] [] (Typing_expand.fully_expand env ty))
-
-(*****************************************************************************)
 (* Reactivity *)
 (*****************************************************************************)
 
@@ -682,25 +629,6 @@ let terr env r =
     MakeType.dynamic r
   else
     MakeType.err r
-
-(* Hacked version of Typing_subtype.try_intersect for collecting function types *)
-let add_function_type env fty logged =
-  let (untyped_ftys, ftys) = logged in
-  let rec try_intersect env ty tyl =
-    match tyl with
-    | [] -> [ty]
-    | ty' :: tyl' ->
-      if is_sub_type_for_union env ty ty' && not (HasTany.check ty) then
-        try_intersect env ty tyl'
-      else if is_sub_type_for_union env ty' ty && not (HasTany.check ty') then
-        try_intersect env ty' tyl'
-      else
-        ty' :: try_intersect env ty tyl'
-  in
-  if HasTany.check fty then
-    (try_intersect env fty untyped_ftys, ftys)
-  else
-    (untyped_ftys, try_intersect env fty ftys)
 
 let rec class_get_pu_ env cty name =
   let (env, ety) = Env.expand_type env cty in

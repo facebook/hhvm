@@ -89,7 +89,34 @@ let get_file = Typing_env.get_file
 
 let fully_expand = Typing_expand.fully_expand
 
-let get_class_ids = Typing_utils.get_class_ids
+(*****************************************************************************)
+(* Given some class type or unresolved union of class types, return the
+ * identifiers of all classes the type may represent.
+ *
+ * Intended for uses like constructing call graphs and finding references, where
+ * we have the statically known class type of some runtime value or class ID and
+ * we would like the name of that class. *)
+(*****************************************************************************)
+let get_class_ids env ty =
+  let open Typing_defs in
+  let rec aux seen acc ty =
+    match get_node ty with
+    | Tclass ((_, cid), _, _) -> cid :: acc
+    | Toption ty
+    | Tdependent (_, ty)
+    | Tnewtype (_, _, ty) ->
+      aux seen acc ty
+    | Tunion tys
+    | Tintersection tys ->
+      List.fold tys ~init:acc ~f:(aux seen)
+    | Tgeneric (name, targs) when not (List.mem ~equal:String.equal seen name)
+      ->
+      let seen = name :: seen in
+      let upper_bounds = Typing_env.get_upper_bounds env name targs in
+      Typing_set.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
+    | _ -> acc
+  in
+  List.rev (aux [] [] (Typing_expand.fully_expand env ty))
 
 let non_null = Typing_solver.non_null
 

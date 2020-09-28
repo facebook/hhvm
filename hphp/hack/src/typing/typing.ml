@@ -2118,17 +2118,7 @@ and expr_
       else
         env
     in
-    (* If we are assigning a local variable to another local variable then
-     * the expression ID associated with e2 is transferred to e1
-     *)
-    (match (e1, e2) with
-    | ((_, Lvar (_, x1)), (_, Lvar (_, x2))) ->
-      let eid2 = Env.get_local_expr_id env x2 in
-      let env =
-        Option.value_map eid2 ~default:env ~f:(Env.set_local_expr_id env x1)
-      in
-      make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty
-    | _ -> make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty)
+    make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty
   | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
     let c = Ast_defs.(equal_bop bop Ampamp) in
     let (env, te1, _) = expr env e1 in

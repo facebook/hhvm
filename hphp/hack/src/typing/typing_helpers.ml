@@ -34,7 +34,6 @@ module TVis = Typing_visibility
 module Phase = Typing_phase
 module TOG = Typing_object_get
 module Subst = Decl_subst
-module ExprDepTy = Typing_dependent_type.ExprDepTy
 module TCO = TypecheckerOptions
 module EnvFromDef = Typing_env_from_def
 module C = Typing_continuations

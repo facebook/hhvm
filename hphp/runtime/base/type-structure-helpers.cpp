@@ -698,9 +698,9 @@ bool checkTypeStructureMatchesTVImpl(
         return result && (isArrayType(type) || RO::EvalHackArrDVArrs);
       };
 
-      if (!isOrAsOp) return maybe_raise_notice(!isKeysetType(type));
-
       if (!ad->isVArray() && !ad->isVecType()) return false;
+
+      if (!isOrAsOp) return maybe_raise_notice(true);
 
       assertx(ts.exists(s_elem_types));
       auto const ts_arr = ts[s_elem_types].getArrayData();
@@ -783,9 +783,9 @@ bool checkTypeStructureMatchesTVImpl(
         return result && (isArrayType(type) || RO::EvalHackArrDVArrs);
       };
 
-      if (!isOrAsOp) return maybe_raise_notice(!isKeysetType(type));
-
       if (!ad->isDArray() && !ad->isDictType()) return false;
+
+      if (!isOrAsOp) return maybe_raise_notice(true);
 
       assertx(ts.exists(s_fields));
       auto const ts_arr = ts[s_fields].getArrayData();

@@ -1,0 +1,3 @@
+varray: []
+darray: 
+Catchable fatal error: Value returned from function check() must be of type (int, int), darray given in %s/reified_tuple.php on line 10

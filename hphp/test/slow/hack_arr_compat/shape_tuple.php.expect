@@ -1,15 +1,5 @@
 
 ===================================
-Testing reified tuple:
-varray: []
-darray: (Notice: Hack Array Compat: darray is tuple) []
-
-===================================
-Testing reified shape:
-varray: (Notice: Hack Array Compat: varray is shape) []
-darray: []
-
-===================================
 Testing tuple:
 
 Using empty tuple:

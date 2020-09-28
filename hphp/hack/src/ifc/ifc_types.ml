@@ -69,6 +69,7 @@ type class_ = {
 type array_kind =
   | Avec
   | Adict
+  | Akeyset
 [@@deriving eq]
 
 (* Types with policies *)

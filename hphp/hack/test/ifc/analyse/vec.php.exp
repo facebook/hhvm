@@ -10,7 +10,7 @@ Analyzing \empty:
   Locals:
     lvars: {}
 Constraints:
-  [key'1 < key, vec < ret, len'1 < len]
+  [key'1 < key, Vec < ret, len'1 < len]
 
 Analyzing \collection:
 * pc: pc
@@ -24,7 +24,7 @@ Analyzing \collection:
   Locals:
     lvars: {}
 Constraints:
-  [lit < vec, lit'1 < vec, key'1 < key, vec < ret, len'1 < len]
+  [lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len]
 
 Analyzing \add:
 * pc: pc

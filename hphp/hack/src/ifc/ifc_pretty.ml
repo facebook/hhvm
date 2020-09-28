@@ -43,6 +43,7 @@ let policy fmt p = fprintf fmt "%s" (show_policy p)
 let array_kind fmt = function
   | Avec -> fprintf fmt "vec"
   | Adict -> fprintf fmt "dict"
+  | Akeyset -> fprintf fmt "keyset"
 
 let rec ptype fmt ty =
   let list' sep l =

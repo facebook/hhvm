@@ -37,6 +37,8 @@ let vec_id = "\\HH\\vec"
 
 let dict_id = "\\HH\\dict"
 
+let keyset_id = "\\HH\\keyset"
+
 let awaitable_id = "\\HH\\Awaitable"
 
 let governed_id = "\\Governed"

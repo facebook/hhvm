@@ -92,6 +92,22 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
           }
       | _ -> fail "dict needs two type parameters"
     end
+  | T.Tclass ((_, name), _, targs) when String.equal name Decl.keyset_id ->
+    begin
+      match targs with
+      | [value_ty] ->
+        let element_pty = ty value_ty in
+        Tcow_array
+          {
+            a_kind = Akeyset;
+            (* Keysets have identical keys and values with identity
+               $keyset[$ix] === $ix (as bizarre as it is) *)
+            a_key = element_pty;
+            a_value = element_pty;
+            a_length = get_policy ~prefix:"len" lump renv;
+          }
+      | _ -> fail "keyset needs one type parameter"
+    end
   | T.Tclass ((_, name), _, targs) when String.equal name Decl.awaitable_id ->
     begin
       match targs with

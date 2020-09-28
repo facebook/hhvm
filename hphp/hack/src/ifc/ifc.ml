@@ -761,17 +761,16 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
         in
         call env (Clocal fty) None
     end
-  | A.ValCollection (A.Vec, _, exprs) ->
-    (* Each element of the vector is a subtype of the vector's value
-       parameter. *)
-    let vec_pty = Lift.ty ~prefix:"vec" renv ety in
-    let element_pty = (cow_array ~pos renv vec_pty).a_value in
+  | A.ValCollection (((A.Vec | A.Keyset) as kind), _, exprs) ->
+    (* Each element of the array is a subtype of the array's value parameter. *)
+    let arry_pty = Lift.ty ~prefix:(A.show_vc_kind kind) renv ety in
+    let element_pty = (cow_array ~pos renv arry_pty).a_value in
     let mk_element_subtype env exp =
       let (env, pty) = expr env exp in
       Env.acc env (subtype ~pos pty element_pty)
     in
     let env = List.fold ~f:mk_element_subtype ~init:env exprs in
-    (env, vec_pty)
+    (env, arry_pty)
   | A.KeyValCollection (A.Dict, _, fields) ->
     (* Each field's key and value are subtypes of the array key and value
        policy types. *)

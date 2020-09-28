@@ -34,7 +34,7 @@ type t = {
           to filename (exposed via Typing_deps.get_files). *)
 }
 
-val empty : t
+val empty : unit -> t
 
 val mark_changed : t -> DepSet.t -> t
 

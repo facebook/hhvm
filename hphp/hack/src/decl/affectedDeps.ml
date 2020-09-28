@@ -15,7 +15,7 @@ type t = {
   needs_recheck: DepSet.t;
 }
 
-let empty =
+let empty () =
   let empty = DepSet.make () in
   { changed = empty; mro_invalidated = empty; needs_recheck = empty }
 

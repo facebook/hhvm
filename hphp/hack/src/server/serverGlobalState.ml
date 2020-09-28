@@ -13,6 +13,7 @@ type t = {
   saved_tmp: Path.t;
   saved_gi_tmp: string;
   trace: bool;
+  deps_mode: Typing_deps.mode;
   allowed_fixme_codes_strict: ISet.t;
   allowed_fixme_codes_partial: ISet.t;
   codes_not_raised_partial: ISet.t;
@@ -29,6 +30,7 @@ let save ~logging_init =
     saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
     saved_gi_tmp = Typing_global_inference.get_path ();
     trace = !Typing_deps.trace;
+    deps_mode = Typing_deps.get_mode ();
     allowed_fixme_codes_strict = !Errors.allowed_fixme_codes_strict;
     allowed_fixme_codes_partial = !Errors.allowed_fixme_codes_partial;
     codes_not_raised_partial = !Errors.codes_not_raised_partial;
@@ -51,6 +53,7 @@ let restore
       saved_tmp;
       saved_gi_tmp;
       trace;
+      deps_mode;
       allowed_fixme_codes_strict;
       allowed_fixme_codes_partial;
       codes_not_raised_partial;
@@ -66,6 +69,7 @@ let restore
   Relative_path.(set_path_prefix Tmp saved_tmp);
   Typing_global_inference.restore_path saved_gi_tmp;
   Typing_deps.trace := trace;
+  Typing_deps.(set_mode deps_mode);
   Errors.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
   Errors.allowed_fixme_codes_partial := allowed_fixme_codes_partial;
   Errors.codes_not_raised_partial := codes_not_raised_partial;
@@ -82,6 +86,7 @@ let to_string
       saved_tmp;
       saved_gi_tmp;
       trace;
+      deps_mode;
       allowed_fixme_codes_strict = _;
       allowed_fixme_codes_partial = _;
       codes_not_raised_partial = _;
@@ -99,6 +104,7 @@ let to_string
     else
       "false"
   in
+  let deps_mode = Typing_deps.show_mode deps_mode in
   let strict_codes = ISet.to_string strict_codes in
   (* OCaml regexps cannot be re-serialized to strings *)
   let paths_to_ignore = "(...)" in
@@ -108,6 +114,7 @@ let to_string
     ("saved_tmp", saved_tmp);
     ("saved_gi_tmp", saved_gi_tmp);
     ("trace", trace);
+    ("deps_mode", deps_mode);
     ("strict_codes", strict_codes);
     ("paths_to_ignore", paths_to_ignore);
   ]

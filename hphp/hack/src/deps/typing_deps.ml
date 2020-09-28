@@ -15,7 +15,10 @@ open Utils
 (***********************************************)
 type mode =
   | SQLiteMode  (** Legacy mode, with SQLite saved-state dependency graph *)
-  | CustomMode  (** Custom mode, with the new custom dependency graph format *)
+  | CustomMode of string
+      (** Custom mode, with the new custom dependency graph format.
+        * The parameter is the path to the database. *)
+[@@deriving show]
 
 (** Which mode is active? *)
 let mode = ref SQLiteMode
@@ -220,12 +223,12 @@ module DepSet = struct
   let make () =
     match !mode with
     | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.make ())
-    | CustomMode -> CustomDepSet (CustomDepSet.make ())
+    | CustomMode _ -> CustomDepSet (CustomDepSet.make ())
 
   let singleton elt =
     match !mode with
     | SQLiteMode -> SQLiteDepSet (SQLiteDepSet.singleton elt)
-    | CustomMode -> CustomDepSet (CustomDepSet.singleton elt)
+    | CustomMode _ -> CustomDepSet (CustomDepSet.singleton elt)
 
   let add s x =
     match s with
@@ -305,7 +308,7 @@ module VisitedSet = struct
   let make () : t =
     match !mode with
     | SQLiteMode -> SQLiteVisitedSet (ref (SQLiteDepSet.make ()))
-    | CustomMode -> CustomVisitedSet (hh_visited_set_make ())
+    | CustomMode _ -> CustomVisitedSet (hh_visited_set_make ())
 end
 
 module NamingHash = struct
@@ -495,7 +498,16 @@ end
 module CustomGraph = struct
   module DepSet = CustomDepSet
 
+  external hh_custom_dep_graph_register_custom_types : unit -> unit
+    = "hh_custom_dep_graph_register_custom_types"
+
   external assert_master : unit -> unit = "assert_master"
+
+  external hh_custom_dep_graph_register : string -> unit
+    = "hh_custom_dep_graph_register"
+
+  external hh_custom_dep_graph_force_load : unit -> (unit, string) result
+    = "hh_custom_dep_graph_force_load"
 
   let allow_reads_ref = ref false
 
@@ -521,14 +533,29 @@ module CustomGraph = struct
   let add_all_deps x = x |> add_extend_deps |> add_typing_deps
 end
 
-external hh_load_custom_dep_graph : string -> (unit, string) result
-  = "hh_load_custom_dep_graph"
+(** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
+let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
-let load_custom_dep_graph : string -> (unit, string) result =
- fun fn ->
-  let result = hh_load_custom_dep_graph fn in
-  mode := CustomMode;
-  result
+let get_mode () = !mode
+
+let set_mode m =
+  (* This function has been explicitly kept light-weight, because
+   * it will be called upon every worker's initialization! Whether
+   * the worker will be used for type checking or not! *)
+  match m with
+  | SQLiteMode -> mode := SQLiteMode
+  | CustomMode fn ->
+    mode := m;
+    CustomGraph.hh_custom_dep_graph_register fn
+
+let force_load_custom_dep_graph : unit -> (unit, string) result =
+ fun () ->
+  let () =
+    match !mode with
+    | CustomMode _ -> ()
+    | _ -> failwith "programmer error: mode not set upon server initialization"
+  in
+  CustomGraph.hh_custom_dep_graph_force_load ()
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)
@@ -649,23 +676,25 @@ end
 let allow_dependency_table_reads flag =
   match !mode with
   | SQLiteMode -> SQLiteGraph.allow_dependency_table_reads flag
-  | CustomMode -> CustomGraph.allow_dependency_table_reads flag
+  | CustomMode _ -> CustomGraph.allow_dependency_table_reads flag
 
 let add_idep dependent dependency =
   match !mode with
   | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
-  | CustomMode -> (* TODO(hverr): implement *) ()
+  | CustomMode _ -> (* TODO(hverr): implement *) ()
 
 let add_idep_directly_to_graph ~dependent ~dependency =
   match !mode with
   | SQLiteMode -> SQLiteGraph.add_idep_directly_to_graph ~dependent ~dependency
-  | CustomMode -> (* TODO(hverr): implement, only used in hh_fanout *) ()
+  | CustomMode _ ->
+    (* TODO(hverr): implement, only used in hh_fanout *)
+    failwith "unimplemented"
 
 let get_ideps_from_hash hash =
   let open DepSet in
   match !mode with
   | SQLiteMode -> SQLiteDepSet (SQLiteGraph.get_ideps_from_hash hash)
-  | CustomMode -> CustomDepSet (CustomGraph.get_ideps_from_hash hash)
+  | CustomMode _ -> CustomDepSet (CustomGraph.get_ideps_from_hash hash)
 
 let get_ideps dependency = get_ideps_from_hash (Dep.make dependency)
 

@@ -136,5 +136,5 @@ let fanout_of_changes
     (changes : (string * ClassDiff.t) list) : AffectedDeps.t =
   List.fold
     changes
-    ~init:AffectedDeps.empty
+    ~init:(AffectedDeps.empty ())
     ~f:(add_fanout ~get_classes_in_file)

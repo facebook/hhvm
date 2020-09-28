@@ -36,7 +36,7 @@ let shallow_decl_enabled (ctx : Provider_context.t) =
 (*****************************************************************************)
 let on_the_fly_neutral = Errors.empty
 
-let compute_deps_neutral =
+let compute_deps_neutral () =
   let empty = DepSet.make () in
   (empty, empty, empty)
 
@@ -319,7 +319,7 @@ let parallel_on_the_fly_decl
       MultiWorker.call
         workers
         ~job:(load_and_compute_deps ctx ~conservative_redecl)
-        ~neutral:compute_deps_neutral
+        ~neutral:(compute_deps_neutral ())
         ~merge:(merge_compute_deps files_initial_count files_computed_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in

@@ -71,7 +71,10 @@ let lock_and_load_deptable
     end
   | CustomDeptable fn ->
     Hh_logger.log "Loading custom dependency graph from %s" fn;
-    (match Typing_deps.load_custom_dep_graph fn with
+    (* We force load the dependency graph here early, because we
+     * want to catch loading errors early, and "properly" handle them *)
+    Typing_deps.(set_mode @@ CustomMode fn);
+    (match Typing_deps.force_load_custom_dep_graph () with
     | Ok () -> ()
     | Error msg -> failwith msg)
 

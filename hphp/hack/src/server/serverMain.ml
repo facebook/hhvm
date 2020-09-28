@@ -1266,6 +1266,14 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let root = ServerArgs.root options in
   ServerDynamicView.toggle := ServerArgs.dynamic_view options;
 
+  (* We must set the dependency graph mode here, BEFORE we launch the workers
+   * that will involve saving and restoring the dependency graph mode. *)
+  let () =
+    match ServerArgs.with_dep_graph_v2 options with
+    | Some fn -> Typing_deps.(set_mode @@ CustomMode fn)
+    | None -> Typing_deps.(set_mode @@ SQLiteMode)
+  in
+
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)
   let gc_control = Caml.Gc.get () in

@@ -11,15 +11,14 @@ use im_rc::OrdSet;
 use ocamlrep::{from, Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
+use once_cell::sync::OnceCell;
 use std::cell::RefCell;
 use std::collections::BTreeSet;
+use std::convert::TryInto;
 use std::ffi::OsString;
 use std::hash::Hasher;
+use std::io::Write;
 use std::panic;
-
-extern "C" {
-    fn assert_master();
-}
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -30,7 +29,14 @@ fn _static_assert() {
     let _ = [(); 0 - (!(8 == std::mem::size_of::<usize>()) as usize)];
 }
 
-static mut UNSAFE_DEPGRAPH: Option<Box<UnsafeDepGraph>> = None;
+/// We record the dep graph filename in every worker. If a worker
+/// tries to read from it, we lazily open the graph.
+static DEPGRAPH_FILENAME: OnceCell<OsString> = OnceCell::new();
+
+/// A structure wrapping the memory-mapped dependency graph.
+/// Each worker will itself lazily (or eagerly upon request)
+/// open a memory-mapping to the dependency graph.
+static DEPGRAPH: OnceCell<UnsafeDepGraph> = OnceCell::new();
 
 /// We wrap the dependency graph in an unsafe structure.
 ///
@@ -75,26 +81,71 @@ impl UnsafeDepGraph {
         &self._do_not_reference_depgraph
     }
 
+    /// Register the dep graph filename.
+    ///
+    /// # Panics
+    ///
+    /// If a previous file name was already registered.
+    pub fn register(depgraph_fn: OsString) {
+        let current_fn = DEPGRAPH_FILENAME.get_or_init(|| depgraph_fn.clone());
+
+        if current_fn != &depgraph_fn {
+            panic!("programming error: dep graph filename already registered");
+        }
+    }
+
+    /// Load the graph using `DEPGRAPH_FILENAME`
+    ///
+    /// A no-op if the graph is already loaded.
+    ///
+    /// # Panics
+    ///
+    /// If this function is called before first registering
+    /// the file path using `register`.
+    pub fn load() -> Result<(), String> {
+        let _depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
+            let depgraph_fn: Option<&OsString> = DEPGRAPH_FILENAME.get();
+            let depgraph_fn = depgraph_fn.unwrap_or_else(|| {
+                panic!("programming error: cannot call load before registering path")
+            });
+
+            let opener = DepGraphOpener::from_path(&depgraph_fn)
+                .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
+            let depgraph = UnsafeDepGraph::new(opener)?;
+            Ok(depgraph)
+        })?;
+
+        Ok(())
+    }
+
     /// Run the closure with the loaded dep graph.
     ///
     /// # Panics
     ///
-    /// Panics if the graph is not loaded
+    /// Panics if the graph is not loaded, and a graph
+    /// file name is not registered.
+    ///
+    /// Panics if the graph is not yet loaded, and opening
+    /// the graph results in an error.
     pub fn with<F, R>(f: F) -> R
     where
         for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
     {
-        // Safety: We only load the dependency graph once.
-        // The dependency graph, if loaded will not be deallocated.
-        let g: &UnsafeDepGraph = unsafe { UNSAFE_DEPGRAPH.as_ref().unwrap() };
+        if !Self::is_initialized() {
+            Self::load().unwrap();
+        }
+
+        let g = DEPGRAPH.get().unwrap();
         f(g.depgraph())
     }
 
     /// Return whether the global custom dependency graph is initialized.
     #[inline(always)]
     pub fn is_initialized() -> bool {
-        // Safety: just comparing pointers: UNSAFE_DEPGRAPH != NULL
-        unsafe { UNSAFE_DEPGRAPH.is_some() }
+        // This should be really fast on x86, as the `get` call
+        // just does an atomic load with acquire semantics, which doesn't
+        // require any memory fences on x86.
+        DEPGRAPH.get().is_some()
     }
 }
 
@@ -337,27 +388,18 @@ impl ToOcamlRep for OcamlDep {
 
 // Functions to load the dep graph
 ocaml_ffi! {
-    fn hh_load_custom_dep_graph(depgraph_fn: OsString) -> Result<(), String> {
-        unsafe {
-            assert_master();
-        }
+    fn hh_custom_dep_graph_register(depgraph_fn: OsString) {
+        UnsafeDepGraph::register(depgraph_fn);
+    }
 
-        let opener = DepGraphOpener::from_path(&depgraph_fn).map_err(
-            |err| format!("could not open dep graph file: {:?}", err)
-        )?;
-        let unsafe_depgraph = UnsafeDepGraph::new(opener)?;
-
-        unsafe {
-            UNSAFE_DEPGRAPH = Some(Box::new(unsafe_depgraph));
-        }
-
-        Ok(())
+    fn hh_custom_dep_graph_force_load() -> Result<(), String> {
+        UnsafeDepGraph::load()
     }
 }
 
 /// Rust set of dependencies that can be transferred from
 /// OCaml to Rust memory.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct DepSet(OrdSet<Dep>);
 
 impl std::ops::Deref for DepSet {
@@ -376,6 +418,31 @@ impl From<OrdSet<Dep>> for DepSet {
 
 impl CamlSerialize for DepSet {
     caml_serialize_default_impls!();
+
+    fn serialize(&self) -> Vec<u8> {
+        let num_elems = self.len();
+        let mut buf = Vec::with_capacity(std::mem::size_of::<u64>() * num_elems);
+        for &x in self.iter() {
+            let x: u64 = x.into();
+            buf.write_all(&x.to_le_bytes()).unwrap();
+        }
+        buf
+    }
+
+    fn deserialize(data: &[u8]) -> Self {
+        const U64_SIZE: usize = std::mem::size_of::<u64>();
+
+        let num_elems = data.len() / U64_SIZE;
+        let max_index = num_elems * U64_SIZE;
+        let mut s: OrdSet<Dep> = OrdSet::new();
+        let mut index = 0;
+        while index < max_index {
+            let x = u64::from_le_bytes(data[index..index + U64_SIZE].try_into().unwrap());
+            s.insert(Dep::new(x));
+            index += U64_SIZE;
+        }
+        s.into()
+    }
 }
 
 /// Rust set of visited hashes
@@ -398,6 +465,18 @@ impl From<RefCell<BTreeSet<Dep>>> for VisitedSet {
 
 impl CamlSerialize for VisitedSet {
     caml_serialize_default_impls!();
+}
+
+// Functions to register custom Rust types with the OCaml runtime
+ocaml_ffi! {
+    fn hh_custom_dep_graph_register_custom_types() {
+        // Safety: The OCaml runtime is currently interrupted by a call into
+        // this function, so it's safe to interact with it.
+        unsafe {
+            DepSet::register();
+            VisitedSet::register();
+        }
+    }
 }
 
 // Functions to query the dependency graph
@@ -508,6 +587,7 @@ ocaml_ffi! {
 mod tests {
     extern crate test;
 
+    use super::*;
     use ocamlrep::{Arena, Value};
     use test::Bencher;
 
@@ -569,5 +649,18 @@ mod tests {
                 name2.to_bits(),
             )
         });
+    }
+
+    #[test]
+    fn test_dep_set_serialize() {
+        let mut x: OrdSet<Dep> = OrdSet::new();
+        x.insert(Dep::new(1));
+        x.insert(Dep::new(2));
+        let x: DepSet = x.into();
+
+        let buf = x.serialize();
+        let y = DepSet::deserialize(&buf);
+
+        assert_eq!(x, y);
     }
 }

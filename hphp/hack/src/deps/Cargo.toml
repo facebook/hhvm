@@ -16,3 +16,4 @@ ocamlrep_custom = { path = "../ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
 fnv = "1.0"
 im-rc = { version = "14.2", features = ["serde"] }
+once_cell = "1.4"

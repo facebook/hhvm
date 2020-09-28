@@ -161,7 +161,16 @@ module Files : sig
   val update_file : Relative_path.t -> FileInfo.t -> unit
 end
 
-val load_custom_dep_graph : string -> (unit, string) result
+type mode =
+  | SQLiteMode
+  | CustomMode of string
+[@@deriving show]
+
+val get_mode : unit -> mode
+
+val set_mode : mode -> unit
+
+val force_load_custom_dep_graph : unit -> (unit, string) result
 
 val trace : bool ref
 

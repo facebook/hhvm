@@ -4775,8 +4775,8 @@ void in(ISS& env, const bc::OODeclExists& op) {
       auto const v = tv(name);
       if (!v) return TBool;
       auto rcls = env.index.resolve_class(env.ctx, v->m_data.pstr);
-      if (!rcls || !rcls->cls()) return TBool;
-      auto const mayExist = [&] () -> bool {
+      if (!rcls || !rcls->cls()) return TFalse;
+      auto const exist = [&] () -> bool {
         switch (op.subop1) {
           case OODeclExistsOp::Class:
             return !(rcls->cls()->attrs & (AttrInterface | AttrTrait));
@@ -4787,24 +4787,8 @@ void in(ISS& env, const bc::OODeclExists& op) {
         }
         not_reached();
       }();
-      auto unit = rcls->cls()->unit;
-      auto canConstProp = [&] {
-        // Its generally not safe to constprop this, because of
-        // autoload. We're safe if its part of systemlib, or a
-        // superclass of the current context.
-        if (is_systemlib_part(*unit)) return true;
-        if (!env.ctx.cls) return false;
-        auto thisClass = env.index.resolve_class(env.ctx.cls);
-        return thisClass.mustBeSubtypeOf(*rcls);
-      };
-      if (canConstProp()) {
-        constprop(env);
-        return mayExist ? TTrue : TFalse;
-      }
-      // At this point, if it mayExist, we still don't know that it
-      // *does* exist, but if not we know that it either doesn't
-      // exist, or it doesn't have the right type.
-      return mayExist ? TBool : TFalse;
+      constprop(env);
+      return exist ? TTrue : TFalse;
     } ());
 }
 

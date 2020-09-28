@@ -1,0 +1,9 @@
+*** Testing interface_exists() : autoloaded interface ***
+
+-- no autoloading --
+bool(true)
+
+-- with autoloading --
+bool(true)
+
+DONE

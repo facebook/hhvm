@@ -1329,7 +1329,7 @@ static Object HHVM_STATIC_METHOD(
     if (m->isGenerated()) return;
     if (!visitedMethods.insert(m->nameStr()).second) return;
     if (m->attrs() & mask) {
-      st->add(HHVM_FN(strtolower)(m->nameStr()).get());
+      st->add(m->nameStr().get());
     }
   };
 

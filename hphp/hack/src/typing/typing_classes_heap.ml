@@ -225,12 +225,6 @@ module ApiShallow = struct
     | Lazy lc -> lc.sc.sc_where_constraints
     | Eager c -> c.tc_where_constraints
 
-  let construct t =
-    Counters.count_decl_accessor @@ fun () ->
-    match t with
-    | Lazy lc -> Lazy.force lc.ih.construct
-    | Eager c -> c.tc_construct
-
   let enum_type t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
@@ -254,17 +248,6 @@ module ApiShallow = struct
     match t with
     | Lazy lc -> Some lc.sc.sc_decl_errors
     | Eager c -> c.tc_decl_errors
-
-  let need_init t =
-    Counters.count_decl_accessor @@ fun () ->
-    match t with
-    | Lazy _ ->
-      begin
-        match fst (construct t) with
-        | None -> false
-        | Some ce -> not (get_ce_abstract ce)
-      end
-    | Eager c -> c.tc_need_init
 
   let all_where_constraints_on_this t =
     (* tally is already done by where_constraints *)
@@ -320,11 +303,22 @@ module ApiShallow = struct
 end
 
 module ApiLazy = struct
-  let members_fully_known t =
+  let construct t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> Caml.Lazy.force lc.members_fully_known
-    | Eager c -> c.tc_members_fully_known
+    | Lazy lc -> Lazy.force lc.ih.construct
+    | Eager c -> c.tc_construct
+
+  let need_init t =
+    Counters.count_decl_accessor @@ fun () ->
+    match t with
+    | Lazy _ ->
+      begin
+        match fst (construct t) with
+        | None -> false
+        | Some ce -> not (get_ce_abstract ce)
+      end
+    | Eager c -> c.tc_need_init
 
   let get_ancestor t ancestor =
     Counters.count_decl_accessor @@ fun () ->
@@ -425,7 +419,7 @@ module ApiLazy = struct
   let get_any_method ~is_static cls id =
     (* tally is already done inside the following three methods *)
     if String.equal id SN.Members.__construct then
-      fst (ApiShallow.construct cls)
+      fst (construct cls)
     else if is_static then
       get_smethod cls id
     else
@@ -433,6 +427,12 @@ module ApiLazy = struct
 end
 
 module ApiEager = struct
+  let members_fully_known t =
+    Counters.count_decl_accessor @@ fun () ->
+    match t with
+    | Lazy lc -> Lazy.force lc.members_fully_known
+    | Eager c -> c.tc_members_fully_known
+
   let all_ancestor_req_names t =
     Counters.count_decl_accessor @@ fun () ->
     (* The two below will traverse ancestors in different orders.

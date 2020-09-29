@@ -2,56 +2,56 @@ Analyzing \binop:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $x -> <$x>; $y -> <$y> }
+  { $x -> <$x>; $y -> <$y> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [$x < bop, lit < bop, bop < ret]
   Locals:
-    lvars: { $x -> <$x>; $y -> <$y> }
-Constraints:
-  [$x < bop, lit < bop, bop < ret]
+    { $x -> <$x>; $y -> <$y> }
 
 Analyzing \assign0:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $arg -> <$arg> }
+  { $arg -> <$arg> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [$arg < $x, lit < $x'1, $x'1 < ret]
   Locals:
-    lvars: { $arg -> <$arg>; $x -> <$x'1> }
-Constraints:
-  [$arg < $x, lit < $x'1, $x'1 < ret]
+    { $arg -> <$arg>; $x -> <$x'1> }
 
 Analyzing \assign1:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $arg -> <$arg> }
+  { $arg -> <$arg> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [$arg < $x, $x < bop, lit < bop, bop < $x'1, $x'1 < ret]
   Locals:
-    lvars: { $arg -> <$arg>; $x -> <$x'1> }
-Constraints:
-  [$arg < $x, $x < bop, lit < bop, bop < $x'1, $x'1 < ret]
+    { $arg -> <$arg>; $x -> <$x'1> }
 
 Analyzing \condition:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
+  { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [$a2 < bop, lit < bop, bop < $x, $a0 < $x, bop < $x'1, $a1 < $x'1,
+     $x < $x'2, $x'1 < $x'2, $x'2 < ret]
   Locals:
-    lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
-Constraints:
-  [$a2 < bop, lit < bop, bop < $x, $a0 < $x, bop < $x'1, $a1 < $x'1,
-   $x < $x'2, $x'1 < $x'2, $x'2 < ret]
+    { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
 

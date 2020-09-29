@@ -16,18 +16,16 @@ let rec funpow n ~f ~init =
   else
     funpow (n - 1) ~f ~init:(f init)
 
-let mk_combine keep_some combine env _ x y =
+let combine_opts keep_some combine x y =
   match (x, y) with
   | (Some z, None)
   | (None, Some z) ->
     if keep_some then
-      (env, Some z)
+      Some z
     else
-      (env, None)
-  | (Some x, Some y) ->
-    let (env, z) = combine env x y in
-    (env, Some z)
-  | (None, None) -> (env, None)
+      None
+  | (Some x, Some y) -> Some (combine x y)
+  | (None, None) -> None
 
 let rec fold3 ~f ~init xs ys zs =
   List.Or_unequal_lengths.(

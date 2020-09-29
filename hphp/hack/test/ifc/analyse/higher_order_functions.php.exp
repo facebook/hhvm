@@ -2,19 +2,20 @@ Analyzing \apply:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars:
-    { $f -> <pc'1, $f'2>(<$f'1>): <$f> [\Exception<\Exception'1, lump'1>] }
+  { $f -> <pc'1, $f'2>(<$f'1>): <$f> [\Exception<Exception, Exception_lump>] }
 * Final environment:
   Deps: {}
+  Constraints:
+    [anonymous_self < anonymous_ret, anonymous_exn_lump = exn_lump,
+     anonymous_exn < exn, anonymous_exn < exn, anonymous_self < pcjoin,
+     anonymous_exn < pcjoin, pcjoin < pcjoin'1, pc < pcjoin'1, lit < $f'1,
+     pcjoin'1 < pc'1, $f'2 < anonymous_self, $f < anonymous_ret,
+     Exception_lump = anonymous_exn_lump, Exception < anonymous_exn,
+     anonymous_ret < ret, anonymous_exn < ret]
   Locals:
-    lvars:
-      { $f -> <pc'1, $f'2>(<$f'1>): <$f> [\Exception<\Exception'1, lump'1>] }
-    pc: exn
-Constraints:
-  [anonymous < pcjoin, pc < pcjoin, lit < $f'1, pcjoin < pc'1,
-   $f'2 < anonymous, $f < anonymous_ret, lump'1 = exn, \Exception'1 < exn,
-   anonymous < anonymous_ret, exn = lump, exn < \Exception, exn < \Exception,
-   exn < ret, anonymous_ret < ret]
+    { $f -> <pc'1, $f'2>(<$f'1>):
+      <$f> [\Exception<Exception, Exception_lump>] }
+    pc: anonymous_exn
 

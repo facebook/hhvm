@@ -2,58 +2,59 @@ Analyzing \empty:
 * pc: pc
 * This: None
 * Return: vec<<key> => <ret>; |len|>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: {}
+  {}
 * Final environment:
   Deps: {}
+  Constraints:
+    [key'1 < key, Vec < ret, len'1 < len]
   Locals:
-    lvars: {}
-Constraints:
-  [key'1 < key, Vec < ret, len'1 < len]
+    {}
 
 Analyzing \collection:
 * pc: pc
 * This: None
 * Return: vec<<key> => <ret>; |len|>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: {}
+  {}
 * Final environment:
   Deps: {}
+  Constraints:
+    [lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len]
   Locals:
-    lvars: {}
-Constraints:
-  [lit < Vec, lit'1 < Vec, key'1 < key, Vec < ret, len'1 < len]
+    {}
 
 Analyzing \add:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $vec -> vec<<key> => <$vec>; |len|> }
+  { $vec -> vec<<key> => <$vec>; |len|> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
+     weak'1 < $vec'1, weak'2 < len'1]
   Locals:
-    lvars: { $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
-Constraints:
-  [key < weak, $vec < weak'1, len < weak'2, lit < weak'1, weak < key'1,
-   weak'1 < $vec'1, weak'2 < len'1]
+    { $vec -> vec<<key'1> => <$vec'1>; |len'1|> }
 
 Analyzing \retElem:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $vec -> vec<<key> => <$vec>; |len|> }
+  { $vec -> vec<<key> => <$vec>; |len|> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [lit < key, OutOfBoundsException_lump = exn_lump,
+     OutOfBoundsException < exn, len < exn, lit < exn, $vec < ret, len < ret,
+     lit < ret]
   Locals:
-    lvars: { $vec -> vec<<key> => <$vec>; |len|> }
+    { $vec -> vec<<key> => <$vec>; |len|> }
     pc: len, lit
-Constraints:
-  [lit < key, lump'1 = lump, \OutOfBoundsException < \Exception,
-   len < \Exception, lit < \Exception, len < ret, lit < ret, $vec < ret]
 

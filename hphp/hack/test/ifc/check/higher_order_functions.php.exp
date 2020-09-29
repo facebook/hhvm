@@ -3,45 +3,37 @@ Analyzing __construct:
 
 File "higher_order_functions.php", line 44, characters 3-20:
 Context-implicit policy leaks into `PUBLIC` via `pc`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
+  File "higher_order_functions.php", line 9, characters 14-23:
+  Leakage sink
 File "higher_order_functions.php", line 44, characters 3-20:
-Context-implicit policy leaks into `PUBLIC` via `lump'1`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
+Context-implicit policy leaks into `PUBLIC` via `Exception`. (Typing[4380])
+  File "higher_order_functions.php", line 9, characters 14-23:
+  Leakage sink
 File "higher_order_functions.php", line 44, characters 3-20:
-Context-implicit policy leaks into `PUBLIC` via `lump`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
-File "higher_order_functions.php", line 44, characters 3-20:
-Context-implicit policy leaks into `PUBLIC` via `\Exception'1`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
-File "higher_order_functions.php", line 44, characters 3-20:
-Context-implicit policy leaks into `PUBLIC` via `\C`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
+Context-implicit policy leaks into `PUBLIC` via `C`. (Typing[4380])
+  File "higher_order_functions.php", line 9, characters 14-23:
+  Leakage sink
 File "higher_order_functions.php", line 44, characters 3-20:
 Context-implicit policy leaks into `PUBLIC` via `$f'2`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
+  File "higher_order_functions.php", line 9, characters 14-23:
+  Leakage sink
 File "higher_order_functions.php", line 44, characters 3-20:
 Context-implicit policy leaks into `PUBLIC` via `$f`. (Typing[4380])
-File "higher_order_functions.php", line 9, characters 14-23:
-Leakage sink
+  File "higher_order_functions.php", line 9, characters 14-23:
+  Leakage sink
 File "higher_order_functions.php", line 50, characters 5-9:
 Context-implicit policy leaks into `pc'1` via `FOO`. (Typing[4380])
-File "higher_order_functions.php", line 49, characters 7-13:
-Another program point contributing to the leakage
-File "higher_order_functions.php", line 12, characters 15-26:
-Leakage source
+  File "higher_order_functions.php", line 49, characters 7-13:
+  Another program point contributing to the leakage
+  File "higher_order_functions.php", line 12, characters 15-26:
+  Leakage source
 File "higher_order_functions.php", line 50, characters 5-9:
-Context-implicit policy leaks into `\Exception` via `FOO`. (Typing[4380])
-File "higher_order_functions.php", line 49, characters 7-13:
-Another program point contributing to the leakage
-File "higher_order_functions.php", line 12, characters 15-26:
-Leakage source
+Context-implicit policy leaks into `exn` via `FOO`. (Typing[4380])
+  File "higher_order_functions.php", line 49, characters 7-13:
+  Another program point contributing to the leakage
+  File "higher_order_functions.php", line 12, characters 15-26:
+  Leakage source
 File "higher_order_functions.php", line 57, characters 3-12:
-Context-implicit policy leaks into `PUBLIC` via `lump'2`. (Typing[4380])
-File "higher_order_functions.php", line 15, characters 12-13:
-Leakage sink
+Context-implicit policy leaks into `PUBLIC` via `A_lump`. (Typing[4380])
+  File "higher_order_functions.php", line 15, characters 12-13:
+  Leakage sink

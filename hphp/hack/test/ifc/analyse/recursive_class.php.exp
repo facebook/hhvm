@@ -1,45 +1,45 @@
 Analyzing __construct:
 * pc: pc
-* This: \R<\R, lump'1>
+* This: \R<R, R_lump>
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $prop -> <$prop>; $r -> \R<\R'1, lump'2> }
+  { $prop -> <$prop>; $r -> \R<R'1, R_lump'1> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [R < R_lump, pc < R_lump, $prop < R_lump, R < R_lump, pc < R_lump,
+     R_lump'1 = R_lump, R'1 < R_lump]
   Locals:
-    lvars: { $prop -> <$prop>; $r -> \R<\R'1, lump'2> }
-Constraints:
-  [\R < lump'1, pc < lump'1, $prop < lump'1, \R < lump'1, pc < lump'1,
-   lump'2 = lump'1, \R'1 < lump'1]
+    { $prop -> <$prop>; $r -> \R<R'1, R_lump'1> }
 
 Analyzing recursiveGet:
 * pc: pc
-* This: \R<\R, lump'1>
+* This: \R<R, R_lump>
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: {}
+  {}
 * Final environment:
   Deps: {}
+  Constraints:
+    [R_lump < .r, R < .r, R_lump < .r'1, .r < .r'1, R_lump < .r'2,
+     .r'1 < .r'2, R_lump < .prop, .r'2 < .prop, .prop < ret]
   Locals:
-    lvars: {}
-Constraints:
-  [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
-   .r'1 < .r'2, lump'1 < .prop, .r'2 < .prop, .prop < ret]
+    {}
 
 Analyzing recursiveWrite:
 * pc: pc
-* This: \R<\R, lump'1>
+* This: \R<R, R_lump>
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: {}
+  {}
 * Final environment:
   Deps: {}
+  Constraints:
+    [R_lump < .r, R < .r, R_lump < .r'1, .r < .r'1, R_lump < .r'2,
+     .r'1 < .r'2, .r'2 < R_lump, pc < R_lump, lit < R_lump]
   Locals:
-    lvars: {}
-Constraints:
-  [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
-   .r'1 < .r'2, .r'2 < lump'1, pc < lump'1, lit < lump'1]
+    {}
 

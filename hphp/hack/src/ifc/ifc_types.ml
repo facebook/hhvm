@@ -154,27 +154,16 @@ end
 
 module VarSet = Set.Make (Var)
 
-type var_set = VarSet.t
-
-type local_env = {
-  le_vars: ptype LMap.t;
+(* A cont represents the typing environment for one
+   outcome (fallthrough, break, throw, ...) of a
+   statement *)
+type cont = {
+  k_vars: ptype LMap.t;
   (* Policy tracking the dependencies of the current
-     code path. NB: only dependencies *local* to the
+     outcome. NB: only dependencies *local* to the
      function are tracked here (i.e., the function's
      pc policy is not included) *)
-  le_pc: PSet.t;
-}
-
-(* The environment is mutable data that
-   has to be threaded through *)
-type env = {
-  (* Constraints accumulator. *)
-  e_acc: prop list;
-  (* Maps storing the type of local variables; one
-     per continuation, for flow-sensitive typing.  *)
-  e_cont: local_env KMap.t;
-  (* Callable on which the current function depends. *)
-  e_deps: SSet.t;
+  k_pc: PSet.t;
 }
 
 type policied_property = {

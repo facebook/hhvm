@@ -45,12 +45,13 @@ let get_policy ?prefix lump renv =
     let prefix = Option.value prefix ~default:"v" in
     Env.new_policy_var renv prefix
 
-let class_ty ?lump renv name =
+let class_ty ?prefix ?lump renv name =
+  let prefix = Option.value ~default:name prefix in
   Tclass
     {
       c_name = name;
-      c_self = get_policy lump renv ~prefix:name;
-      c_lump = get_policy lump renv ~prefix:"lump";
+      c_self = get_policy lump renv ~prefix;
+      c_lump = get_policy lump renv ~prefix:(prefix ^ "_lump");
     }
 
 (* Turns a locl_ty into a type with policy annotations;

@@ -21,8 +21,8 @@ module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
 module K = Typing_cont_key
+module LSet = Local_id.Set
 module TClass = Decl_provider.Class
-module Try = Typing_try
 
 exception FlowInference of string
 
@@ -360,9 +360,9 @@ let rec object_policy = function
     PSet.union (object_policy a_key) (object_policy a_value)
     |> PSet.add a_length
 
-let add_dependencies ~pos pl t acc =
-  L.(pl <* PSet.elements (object_policy t)) ~pos acc
+let add_dependencies pl t = L.(pl <* PSet.elements (object_policy t))
 
+(* TODO: make a list version of it *)
 let policy_join ?(prefix = "join") renv p1 p2 =
   let id ~pos:_ acc = acc in
   match Logic.policy_join p1 p2 with
@@ -376,22 +376,11 @@ let policy_join_env ?prefix ~pos renv env p1 p2 =
   let (facc, p) = policy_join ?prefix renv p1 p2 in
   (Env.acc env (facc ~pos), p)
 
-(* This function only needs to be sound: true is returned
-   only if the two types are equal for sure, but false
-   could be returned when the two types are same *)
-let sound_equal_ptype (pty1 : ptype) pty2 = phys_equal pty1 pty2
-
-let union env t1 t2 =
-  if sound_equal_ptype t1 t2 then
-    (env, t1)
-  else
-    (env, Tunion [t1; t2])
-
 let get_local_type ~pos env lid =
   match Env.get_local_type env lid with
   | None ->
     let name = Local_id.get_name lid in
-    (* FIXME: deal with co-effect thingies *)
+    (* TODO: deal with co-effect thingies *)
     ( if not (String.equal (String.sub name ~pos:0 ~len:2) "$#") then
       let msg = "local " ^ name ^ " missing from env" in
       Errors.unknown_information_flow pos msg );
@@ -422,15 +411,17 @@ let refresh_local_type ?(force = false) ~pos renv env lid lty =
     let env = Env.set_local_type env lid new_pty in
     (env, new_pty)
 
-let add_params renv =
-  let add_param env p =
+let lift_params renv =
+  let lift_param p =
     let prefix = p.A.param_name in
     let pty = Lift.ty ~prefix renv (fst p.A.param_type_hint) in
     let lid = Local_id.make_unscoped p.A.param_name in
-    let env = Env.set_local_type env lid pty in
-    (env, pty)
+    (lid, pty)
   in
-  List.map_env ~f:add_param
+  List.map ~f:lift_param
+
+let set_local_types env =
+  List.fold ~init:env ~f:(fun env (lid, pty) -> Env.set_local_type env lid pty)
 
 let binop ~pos renv env ty1 ty2 =
   match (ty1, ty2) with
@@ -455,30 +446,30 @@ let property_ptype renv obj_ptype property property_ty =
   in
   Lift.ty ~prefix:property ~lump:prop_pol renv property_ty
 
-let throw ~pos renv env exn_ty =
-  let env = Env.merge_conts_into ~union env [K.Next] K.Catch in
-  let lpc = Env.get_lpc env K.Next in
-  Env.acc
-    env
-    (L.(
-       subtype exn_ty renv.re_exn
-       && add_dependencies (PSet.elements lpc) renv.re_exn)
-       ~pos)
+(* may_throw registers that the expression being checked may
+   throw an exception of type exn_ty; the throwing is conditioned
+   on data whose policy is in pc_deps.
+   If pc_deps is empty an exception is unconditionally thrown *)
+let may_throw ~pos renv env pc_deps exn_ty =
+  let env = Env.throw env pc_deps in
+  let deps = PSet.elements (Env.get_lpc env) in
+  let env = Env.acc env (subtype exn_ty renv.re_exn ~pos) in
+  let env = Env.acc env (add_dependencies deps renv.re_exn ~pos) in
+  env
 
 let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
-  let (callee, ret_pty) =
-    let name =
-      match call_type with
-      | Cglobal callable_name -> callable_name
-      | Clocal _ -> "anonymous"
-    in
-    let ret_pty = Lift.ty ~prefix:(name ^ "_ret") renv ret_ty in
-    let callee = Env.new_policy_var renv name in
-    (callee, ret_pty)
+  let name =
+    match call_type with
+    | Cglobal callable_name -> callable_name
+    | Clocal _ -> "anonymous"
   in
-  let callee_exn_policy = Env.new_policy_var renv "exn" in
-  let callee_exn =
-    Lift.class_ty ~lump:callee_exn_policy renv Decl.exception_id
+  let callee = Env.new_policy_var renv (name ^ "_self") in
+  let ret_pty = Lift.ty ~prefix:(name ^ "_ret") renv ret_ty in
+  let env = Env.acc env (add_dependencies ~pos [callee] ret_pty) in
+  let (env, callee_exn) =
+    let exn = Lift.class_ty ~prefix:(name ^ "_exn") renv Decl.exception_id in
+    let env = may_throw ~pos renv env (object_policy exn) exn in
+    (env, exn)
   in
   (* The PC of the function being called depends on the join of the current
    * PC dependencies, as well as the function's own self policy *)
@@ -486,7 +477,7 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
     let join pc' (env, pc) =
       policy_join_env ~pos renv env ~prefix:"pcjoin" pc pc'
     in
-    PSet.fold join (Env.get_pc renv env K.Next) (env, callee)
+    PSet.fold join (Env.get_gpc renv env) (env, callee)
   in
   let hole_ty =
     {
@@ -497,37 +488,31 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
       f_exn = callee_exn;
     }
   in
-  let env =
-    match call_type with
-    | Clocal fty -> Env.acc env @@ subtype ~pos (Tfun fty) (Tfun hole_ty)
-    | Cglobal callable_name ->
-      let fp =
-        { fp_name = callable_name; fp_this = that_pty_opt; fp_type = hole_ty }
-      in
-      let (env, call_constraint) =
-        match SMap.find_opt callable_name renv.re_decl.de_fun with
-        | Some { fd_kind = FDGovernedBy policy; fd_args } ->
-          let scheme = Decl.make_callable_scheme renv policy fp fd_args in
-          let prop =
-            (* because cipp_scheme is created after fp they cannot
-               mismatch and call_constraint will not fail *)
-            Option.value_exn (Solver.call_constraint ~subtype ~pos fp scheme)
-          in
-          (env, prop)
-        | Some { fd_kind = FDInferFlows; _ } ->
-          let env = Env.add_dep env callable_name in
-          (env, Chole (pos, fp))
-        | None -> fail "unknown function '%s'" callable_name
-      in
-      Env.acc env (fun acc -> call_constraint :: acc)
-  in
-  let env = Env.acc env @@ add_dependencies ~pos [callee] ret_pty in
-  (* Any function call may throw, so we need to update the current PC and
-   * exception dependencies based on the callee's exception policy
-   *)
-  let env = Env.push_pcs env K.Next (PSet.singleton callee_exn_policy) in
-  let env = throw ~pos renv env callee_exn in
-  (env, ret_pty)
+  match call_type with
+  | Clocal fty ->
+    let env = Env.acc env @@ subtype ~pos (Tfun fty) (Tfun hole_ty) in
+    (env, ret_pty)
+  | Cglobal callable_name ->
+    let fp =
+      { fp_name = callable_name; fp_this = that_pty_opt; fp_type = hole_ty }
+    in
+    let (env, call_constraint) =
+      match SMap.find_opt callable_name renv.re_decl.de_fun with
+      | Some { fd_kind = FDGovernedBy policy; fd_args } ->
+        let scheme = Decl.make_callable_scheme renv policy fp fd_args in
+        let prop =
+          (* because cipp_scheme is created after fp they cannot
+             mismatch and call_constraint will not fail *)
+          Option.value_exn (Solver.call_constraint ~subtype ~pos fp scheme)
+        in
+        (env, prop)
+      | Some { fd_kind = FDInferFlows; _ } ->
+        let env = Env.add_dep env callable_name in
+        (env, Chole (pos, fp))
+      | None -> fail "unknown function '%s'" callable_name
+    in
+    let env = Env.acc env (fun acc -> call_constraint :: acc) in
+    (env, ret_pty)
 
 let cow_array ~pos renv ty =
   let rec f = function
@@ -557,7 +542,7 @@ let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
     (* set asn to true to mark the local as assigned in the
        current code branch *)
     let env = Env.set_local_type env lid lhs_pty in
-    let deps = PSet.elements (Env.get_lpc env K.Next) in
+    let deps = PSet.elements (Env.get_lpc env) in
     let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
@@ -565,7 +550,7 @@ let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
     let (env, obj_pty) = expr env obj in
     let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
     let lhs_pty = property_ptype renv obj_pty property lhs_ty in
-    let deps = obj_pol :: PSet.elements (Env.get_pc renv env K.Next) in
+    let deps = obj_pol :: PSet.elements (Env.get_gpc renv env) in
     let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
     let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
     env
@@ -573,32 +558,17 @@ let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
     Errors.unknown_information_flow pos "lvalue";
     env
 
-(*
-  If {} is used for primitive indexing, the following is the morally
-  equivalent code array mutation/access represents and that we generate
-  constraints for:
-
-  ```
-  $arry = array expression
-  $ix = indexing expression
-  if ($ix < $arry->length) {
-    $arry{$ix} or $arry{$ix} = value expression
-  } else {
-    throw new OutOfBoundsException();
-  }
-  ```
-*)
+(* Hack array accesses and mutations may throw when the indexed
+   element is not in the array. may_throw_out_of_bounds_exn is
+   used to register this fact. *)
 let may_throw_out_of_bounds_exn ~pos renv env arry ix_pty =
-  (* Flow from the pc due to the conditional exception behaviour. Both the
-     index and the length of the array flow. *)
-  let checked_policies = PSet.add arry.a_length (object_policy ix_pty) in
-  let env = Env.push_pcs env K.Next checked_policies in
-
-  (* Invalid indexing causes an `OutOfBoundsException`. *)
-  let exn = Lift.class_ty renv Decl.out_of_bounds_exception_id in
-  let env = throw ~pos renv env exn in
-
-  env
+  let exn_ty = Lift.class_ty renv Decl.out_of_bounds_exception_id in
+  (* both the indexing expression and the array length influence
+     whether an exception is thrown or not; indeed, the check
+     performed by the indexing is of the form:
+       if ($ix >= $arry->length) { throw ...; } *)
+  let pc_deps = PSet.add arry.a_length (object_policy ix_pty) in
+  may_throw ~pos renv env pc_deps exn_ty
 
 (* A wrapper for asn that deals with Hack arrays' syntactic
    sugar; it is important to get it right to account for the
@@ -668,7 +638,7 @@ let rec assign ~pos renv env op lhs_exp rhs_exp =
   (env, rhs_pty)
 
 (* Generate flow constraints for an expression *)
-and expr ~pos renv env (((_, ety), e) : Tast.expr) =
+and expr ~pos renv (env : Env.expr_env) (((_, ety), e) : Tast.expr) =
   let expr = expr ~pos renv in
   match e with
   | A.Null
@@ -832,32 +802,36 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
     end
   | A.Efun (fun_, captured_ids)
   | A.Lfun (fun_, captured_ids) ->
-    (* Stash the cenv so it can be restored later *)
-    let pre_cenv = Env.get_cenv env in
-    (* Drop all conts except for Next and drop the local PC because we are
-     * entering a new scope of execution. Freshen all the local variables since
-     * their changes are not visible outside of the lambda's scope
-     *)
-    let env = Env.filter_conts env (K.equal K.Next) in
-    let env = Env.set_lpc env K.Next PSet.empty in
-    let env =
-      let freshen = adjust_ptype ~pos ~adjustment:Aweaken in
-      Env.freshen_cenv ~freshen renv env captured_ids
+    (* weaken all the captured local variables and reset the local
+       pc to create the initial continuation we'll use to check the
+       lambda literal *)
+    let (env, start_cont) =
+      let (env, k_vars) =
+        let lids = List.map ~f:snd captured_ids |> LSet.of_list in
+        Env.get_locals env
+        |> LMap.filter (fun lid _ -> LSet.mem lid lids)
+        |> LMap.map_env
+             (fun env _ -> adjust_ptype ~pos ~adjustment:Aweaken renv env)
+             env
+      in
+      (env, { k_pc = PSet.empty; k_vars })
     in
-
     let pc = Env.new_policy_var renv "pc" in
     let self = Env.new_policy_var renv "lambda" in
-    let (env, ptys) = add_params renv env fun_.A.f_params in
     let exn = Lift.class_ty renv Decl.exception_id in
     let ret = Lift.ty ~prefix:"ret" renv (fst fun_.A.f_ret) in
-    let renv = { renv with re_ret = ret; re_exn = exn; re_gpc = pc } in
-
-    let env = block renv env fun_.A.f_body.A.fb_ast in
-
-    (* Restore conts now that we exit the lambda's scope *)
-    let env = Env.set_cenv env pre_cenv in
+    let ptys = lift_params renv fun_.A.f_params in
+    let args = List.map ~f:snd ptys in
+    let env =
+      Env.analyze_lambda_body env @@ fun env ->
+      let env = Env.prep_stmt env start_cont in
+      let env = set_local_types env ptys in
+      let renv = { renv with re_ret = ret; re_exn = exn; re_gpc = pc } in
+      let (env, _out) = block renv env fun_.A.f_body.A.fb_ast in
+      env
+    in
     let ty =
-      Tfun { f_pc = pc; f_self = self; f_args = ptys; f_ret = ret; f_exn = exn }
+      Tfun { f_pc = pc; f_self = self; f_args = args; f_ret = ret; f_exn = exn }
     in
     (env, ty)
   | A.Await e -> expr env e
@@ -907,40 +881,56 @@ and expr ~pos renv env (((_, ety), e) : Tast.expr) =
     Errors.unknown_information_flow pos "expression";
     (env, Lift.ty renv ety)
 
-and stmt renv env ((pos, s) : Tast.stmt) =
-  let expr = expr renv in
+and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
+  let expr_ = expr
+  and expr ?(pos = pos) renv env e =
+    let (env, ety) = expr ~pos renv (Env.prep_expr env) e in
+    let (env, ethrow) = Env.close_expr env in
+    (env, ety, ethrow)
+  in
+  let untainted_pc = Env.get_lpc env in
+  let clear_pc_deps out =
+    (* if the outcome of a statement is unconditional, the
+       outcome control flow has exactly the same dependencies
+       as the statement itself *)
+    if KMap.cardinal out = 1 then
+      KMap.map (fun k -> { k with k_pc = untainted_pc }) out
+    else
+      out
+  in
   match s with
   | A.AssertEnv (A.Refinement, tymap) ->
     (* The typechecker refined the type of some locals due
        to a runtime check, update ifc types to match the
        refined types *)
-    Local_id.Map.fold
-      (fun var hint env ->
-        match get_local_type ~pos env var with
-        | None -> env
-        | Some pty ->
-          let new_pty = refine renv pty hint in
-          Env.set_local_type env var new_pty)
-      tymap
-      env
+    let env =
+      Local_id.Map.fold
+        (fun var hint env ->
+          match get_local_type ~pos env var with
+          | None -> env
+          | Some pty ->
+            let new_pty = refine renv pty hint in
+            Env.set_local_type env var new_pty)
+        tymap
+        env
+    in
+    Env.close_stmt env K.Next
   | A.Expr e ->
-    let (env, _ty) = expr ~pos env e in
-    env
-  | A.If ((((pos, _), _) as cond), b1, b2) ->
-    let (env, cty) = expr ~pos env cond in
-    (* stash the PC so it can be restored after the if *)
-    let pc = Env.get_lpc env K.Next in
+    let (env, _ety, ethrow) = expr renv env e in
+    Env.close_stmt ~merge:ethrow env K.Next
+  | A.If (cond, b1, b2) ->
+    let pos = fst (fst cond) in
+    let (env, cty, cthrow) = expr ~pos renv env cond in
     (* use object_policy to account for both booleans
        and null checks *)
-    let env = Env.push_pcs env K.Next (object_policy cty) in
-    let cenv = Env.get_cenv env in
-    let env = block renv (Env.set_cenv env cenv) b1 in
-    let cenv1 = Env.get_cenv env in
-    let env = block renv (Env.set_cenv env cenv) b2 in
-    let cenv2 = Env.get_cenv env in
-    let env = Env.merge_and_set_cenv ~union env cenv1 cenv2 in
-    (* Restore the program counter from before the IF *)
-    Env.set_lpc env K.Next pc
+    Env.with_pc_deps env (object_policy cty) @@ fun env ->
+    let beg_cont = Env.get_next env in
+    let (env, out1) = block renv env b1 in
+    let (env, out2) = block renv (Env.prep_stmt env beg_cont) b2 in
+    let out = Env.merge_out out1 out2 in
+    let out = Env.merge_out out cthrow in
+    let out = clear_pc_deps out in
+    (env, out)
   | A.While (cond, (_, A.AssertEnv (A.Join, tymap)) :: blk) ->
     let pos = fst (fst cond) in
     (* build the environment with the invariant types we will
@@ -948,147 +938,156 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     let env =
       Local_id.Map.fold
         (fun var (_, lty) env ->
-          let (env, _pty) =
-            refresh_local_type ~force:true ~pos renv env var lty
-          in
-          env)
+          fst (refresh_local_type ~force:true ~pos renv env var lty))
         tymap
         env
     in
-    Env.with_stashed_conts env [K.Break; K.Continue] (fun env ->
-        let beg_env = env in
-        let beg_pc = Env.get_lpc beg_env K.Next in
-        let (env, cty) = expr ~pos env cond in
-        let env = Env.push_pcs env K.Next (object_policy cty) in
-        let env = block renv env blk in
-        let env = Env.move_conts_into ~union env [K.Continue] K.Next in
-        (* issue a subtype call between the type of locals at the end of
-           the loop and their type at the beginning of the loop *)
-        let env =
-          Env.acc env
-          @@ Env.fold_locals beg_env (fun var ty_beg ->
-                 match Env.get_local_type env var with
-                 | Some ty_end -> subtype ~pos ty_end ty_beg
-                 | None -> Utils.identity)
-        in
-        (* use the locals' type from beg_env *)
-        let env =
-          Env.fold_locals
-            (* iterates over beg_env *) beg_env
-            (fun var ty_beg env -> Env.set_local_type env var ty_beg)
-            (* modifies env *) env
-        in
-        (* the break continuation is merged and the pc restored before
-           returning the env for what happens after the while() loop *)
-        let env = Env.move_conts_into ~union env [K.Break] K.Next in
-        Env.set_lpc env K.Next beg_pc)
-  | A.Break -> Env.merge_conts_into ~union env [K.Next] K.Break
-  | A.Continue -> Env.merge_conts_into ~union env [K.Next] K.Continue
-  | A.Return e ->
-    let env = Env.merge_conts_into ~union env [K.Next] K.Exit in
-    begin
-      match e with
-      | None -> env
-      | Some e ->
-        let (env, te) = expr ~pos env e in
-        (* to account for enclosing conditionals, make the return
-          type depend on the local pc *)
-        let lpc = Env.get_lpc env K.Next in
-        Env.acc
-          env
-          (L.(
-             add_dependencies (PSet.elements lpc) renv.re_ret
-             && subtype te renv.re_ret)
-             ~pos)
-    end
-  | A.Throw e ->
-    let (env, exn_ty) = expr ~pos env e in
-    throw ~pos renv env exn_ty
-  | A.Try (try_blk, cs, finally) ->
-    (* List of continuations that get masked by finally *)
-    let masked_conts = [K.Break; K.Continue; K.Exit; K.Catch; K.Finally] in
-    Env.with_fresh_conts ~union env masked_conts @@ fun env ->
-    let base_pc = Env.get_lpc env K.Next in
-
-    (* Create a fresh exception for the try block since none of the outer
-     * exceptions are catchable inside the block
-     *)
-    let fresh_exn = Lift.class_ty renv Decl.exception_id in
-    let try_renv = { renv with re_exn = fresh_exn } in
-    let env = block try_renv env try_blk in
-    let env = Env.move_conts_into ~union env [K.Next] K.Finally in
-
-    (* The catch block should begin with the catch continuation replacing Next *)
-    let catch_cenv =
-      Env.move_conts_into ~union env [K.Catch] K.Next |> Env.get_cenv
-    in
-
-    (* In case there is no catch all, then the exceptions still linger *)
-    let has_catch_all =
-      let f ((_, exn), _, _) = String.equal exn Decl.exception_id in
-      List.exists ~f cs
-    in
+    let beg_locals = Env.get_locals env in
+    let (env, cty, cthrow) = expr ~pos renv env cond in
+    (* TODO: constrain pc with cty *)
+    Env.with_pc_deps env (object_policy cty) @@ fun env ->
+    let tainted_lpc = Env.get_lpc env in
+    let (env, out_blk) = block renv env blk in
+    let out_blk = Env.merge_out out_blk cthrow in
+    let out_blk = Env.merge_in_next out_blk K.Continue in
     let env =
-      if has_catch_all then
-        Env.drop_conts env [K.Catch]
-      else
-        Env.acc env @@ subtype ~pos fresh_exn renv.re_exn
+      (* issue a subtype call between the type of the locals at
+         the end of loop and their invariant type; this constrains
+         their IFC type to indeed be invariant and spares us from
+         running a more classic fixpoint computation *)
+      Env.acc env
+      @@
+      match KMap.find_opt K.Next out_blk with
+      | None -> Utils.identity
+      | Some { k_vars = end_locals; _ } ->
+        LMap.fold
+          (fun lid end_type ->
+            match LMap.find_opt lid beg_locals with
+            | None -> Utils.identity
+            | Some beg_type -> subtype ~pos end_type beg_type)
+          end_locals
     in
-    let finally_base = Env.get_cenv env in
-
-    let catch env (_, (_, exn_var), blk) =
-      let env = Env.set_cenv env catch_cenv in
-      let env = Env.set_local_type env exn_var fresh_exn in
-      let env = block renv env blk in
-      let env = Env.move_conts_into ~union env [K.Next] K.Finally in
-      (env, Env.get_cenv env)
+    let out =
+      (* overwrite the Next outcome to use the type for local
+         variables as they are at the beginning of the loop,
+         then merge the Break outcome in Next *)
+      let next = { k_pc = tainted_lpc; k_vars = beg_locals } in
+      Env.merge_in_next (KMap.add K.Next next out_blk) K.Break
     in
-
-    (* Finally runs with the merged conts from try and all the catch blocks, but
-     it gets the base pc because it runs regardless of whether an exception was
-     thrown *)
-    let (env, cenvs) = List.map_env ~f:catch env cs in
-    let (env, merged_cenv) =
-      let f (env, cenv1) cenv2 = Env.merge_cenvs ~union env cenv1 cenv2 in
-      List.fold ~f ~init:(env, finally_base) cenvs
+    let out = clear_pc_deps out in
+    (env, out)
+  | A.Break -> Env.close_stmt env K.Break
+  | A.Continue -> Env.close_stmt env K.Continue
+  | A.Return e ->
+    let (env, ethrow) =
+      match e with
+      | None -> (env, KMap.empty)
+      | Some e ->
+        let (env, ety, ethrow) = expr renv env e in
+        let deps = PSet.elements (Env.get_lpc env) in
+        let env = Env.acc env (subtype ety renv.re_ret ~pos) in
+        let env = Env.acc env (add_dependencies deps renv.re_ret ~pos) in
+        (env, ethrow)
     in
-    let env = Env.set_cenv env merged_cenv in
-
-    (* Analyze finally against each of the continuations in order to get more
-       precise flow information. *)
-    let (env, cenvs) =
-      let f env key lenv =
-        let env = Env.set_cenv env @@ KMap.singleton K.Next lenv in
-        let pc = Env.get_lpc env K.Next in
-        let env = Env.set_lpc env K.Next base_pc in
-        let env = block renv env finally in
-        let env =
-          match key with
-          | K.Finally -> env
-          | _ -> Env.set_lpc env K.Next pc
+    Env.close_stmt ~merge:ethrow env K.Exit
+  | A.Throw e ->
+    let (env, ety) = expr_ ~pos renv (Env.prep_expr env) e in
+    let env = may_throw ~pos renv env PSet.empty ety in
+    let (env, ethrow) = Env.close_expr env in
+    Env.close_stmt ~merge:ethrow env K.Catch
+  | A.Try (try_blk, cs, finally) ->
+    (* Note: unlike the Hack typechecker which accumulates the environments
+       for exceptional outcomes in 'env' itself we have a more explicit
+       handling of outcomes (stmt *returns* the outcome map). This explicit
+       style makes it much easier to process the difficult semantics of
+       finally blocks; in particular, we have no use of the K.Finally
+       cont key that was used as some kind of temporary variable by the
+       Hack typechecker. *)
+    (* use a fresh exception type to check the try block so that we
+       do not influence the current exception type in case there is
+       a catch-all block (`catch (Exception ...) { ... }`) *)
+    let fresh_exn = Lift.class_ty renv Decl.exception_id in
+    let (env, out_try) =
+      let renv = { renv with re_exn = fresh_exn } in
+      block renv env try_blk
+    in
+    (* strip out_try from its Catch continuation; it will be used
+       at the beginning of catch blocks *)
+    let (out_try, catch_cont) = Env.strip_cont out_try K.Catch in
+    (* in case there is no catch all, the exception still lingers *)
+    let (env, out_try) =
+      let is_Exception ((_, exn), _, _) = String.equal exn Decl.exception_id in
+      match catch_cont with
+      | Some catch_cont when not (List.exists ~f:is_Exception cs) ->
+        let out_try = KMap.add K.Catch catch_cont out_try in
+        let env = Env.acc env (subtype ~pos fresh_exn renv.re_exn) in
+        (env, out_try)
+      | _ -> (env, out_try)
+    in
+    (* merge the outcome of all the catch blocks started from the Catch
+       outcome of the try block *)
+    let (env, out_catch) =
+      match catch_cont with
+      | None ->
+        (* the try block does not throw, we can just return an empty
+           outcome for the catch blocks since they will never run *)
+        (env, KMap.empty)
+      | Some catch_cont ->
+        let catch (env, out) (_, (_, exn_var), blk) =
+          let env = Env.prep_stmt env catch_cont in
+          let env = Env.set_local_type env exn_var fresh_exn in
+          let (env, out_blk) = block renv env blk in
+          (env, Env.merge_out out out_blk)
         in
-        (env, Env.get_cenv env)
-      in
-      KMap.map_env f env @@ Env.get_cenv env
+        List.fold ~f:catch ~init:(env, KMap.empty) cs
     in
-    let (env, cenv) =
-      let union = Utils.mk_combine true (Env.merge_lenv ~union) in
-      Try.finally_merge union env cenvs masked_conts
-    in
-    let env = Env.set_cenv env cenv in
-    Env.move_conts_into ~union env [K.Finally] K.Next
-  | A.Noop -> env
+    (* now we simply merge the outcomes of all the catch blocks with the
+       one of the try block *)
+    let out_try_catch = Env.merge_out out_try out_catch in
+    let out_try_catch = clear_pc_deps out_try_catch in
+    (* for each continuation in out_try_catch we will perform an
+       analysis of the finally block; this improves precision of
+       the analysis a bit and mimicks what Hack does *)
+    KMap.fold
+      (fun k cont (env, out_finally) ->
+        (* analyze the finally block for the outcome k *)
+        let env = Env.prep_stmt env cont in
+        (* we use the untainted pc when processing the finally
+           block because it will run exactly as often as the
+           Try statement itself *)
+        Env.with_pc env untainted_pc @@ fun env ->
+        let (env, out) = block renv env finally in
+        let out = Env.merge_next_in out k in
+        (* restore all the pc dependencies for the outcomes
+           of the finally block *)
+        let out =
+          let add_deps pc = PSet.union pc cont.k_pc in
+          KMap.map (fun c -> { c with k_pc = add_deps c.k_pc }) out
+        in
+        (env, Env.merge_out out_finally out))
+      out_try_catch
+      (env, KMap.empty)
+  | A.Noop -> Env.close_stmt env K.Next
   | _ ->
     Errors.unknown_information_flow pos "statement";
-    env
+    Env.close_stmt env K.Next
 
 and block renv env (blk : Tast.block) =
-  let merge_pcs env =
-    Env.merge_pcs_into env [K.Exit; K.Catch; K.Break; K.Continue] K.Next
+  let seq (env, out) s =
+    let (out, next_opt) = Env.strip_cont out K.Next in
+    match next_opt with
+    | None ->
+      (* we are looking at dead code; skip the statement *)
+      (env, out)
+    | Some cont ->
+      let env = Env.prep_stmt env cont in
+      let (env, out_pst) = stmt renv env s in
+      (* we have to merge the exceptional outcomes from
+         before 's' with the ones after 's' *)
+      (env, Env.merge_out out_pst out)
   in
-  let seq env s = stmt renv env s |> merge_pcs in
-  let env = merge_pcs env in
-  List.fold_left ~f:seq ~init:env blk
+  let init = Env.close_stmt env K.Next in
+  List.fold_left ~f:seq ~init blk
 
 (* Checks that two type schemes are in a subtyping relationship. The
  * skeletons of the two input type schemes are expected to be same.
@@ -1155,7 +1154,7 @@ let analyse_callable
     let renv = Env.new_renv scope decl_env saved_env in
 
     let global_pc = Env.new_policy_var renv "pc" in
-    let exn = Lift.class_ty renv Decl.exception_id in
+    let exn = Lift.class_ty ~prefix:"exn" renv Decl.exception_id in
 
     (* Here, we ignore the type parameters of this because at the moment we
      * lack Tgeneric policy type. This will be fixed (T68414656) in the future.
@@ -1166,23 +1165,30 @@ let analyse_callable
       | _ -> None
     in
     let ret_ty = Lift.ty ~prefix:"ret" renv return in
-    let renv = Env.prep_renv renv this_ty ret_ty global_pc exn in
+    let renv = Env.prep_renv renv this_ty ret_ty exn global_pc in
 
     (* Initialise the mutable environment *)
-    let env = Env.new_env in
-    let (env, param_tys) = add_params renv env params in
+    let env = Env.prep_stmt Env.empty_env Env.empty_cont in
+    let params = lift_params renv params in
+    let env = set_local_types env params in
 
     (* Run the analysis *)
     let beg_env = env in
-    let env = block renv env body.A.fb_ast in
+    let (env, out_blk) = block renv env body.A.fb_ast in
+    let out_blk = Env.merge_next_in out_blk K.Exit in
     let end_env = env in
 
     (* Display the analysis results *)
     if should_print opts.opt_mode Manalyse then begin
       Format.printf "Analyzing %s:@." name;
       Format.printf "%a@." Pp.renv renv;
-      Format.printf "* Params:@,  %a@." Pp.locals beg_env;
+      Format.printf "* Params:@,  %a@." Pp.cont (Env.get_next beg_env);
       Format.printf "* Final environment:@,  %a@." Pp.env end_env;
+      begin
+        match KMap.find_opt K.Exit out_blk with
+        | Some cont -> Format.printf "  Locals:@,    %a@." Pp.cont cont
+        | None -> ()
+      end;
       Format.printf "@."
     end;
 
@@ -1197,7 +1203,7 @@ let analyse_callable
           {
             f_pc = global_pc;
             f_self;
-            f_args = param_tys;
+            f_args = List.map ~f:snd params;
             f_ret = ret_ty;
             f_exn = exn;
           };
@@ -1220,8 +1226,8 @@ let analyse_callable
         res_span = pos;
         res_proto = proto;
         res_scope = scope;
-        res_constraint = Logic.conjoin env.e_acc;
-        res_deps = env.e_deps;
+        res_constraint = Logic.conjoin (Env.get_constraints env);
+        res_deps = Env.get_deps env;
         res_entailment = entailment;
       }
     in

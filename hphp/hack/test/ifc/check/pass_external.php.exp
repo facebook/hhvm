@@ -1,32 +1,32 @@
 File "pass_external.php", line 37, characters 3-8:
-Context-implicit policy leaks into `lump'1` via `A`. (Typing[4380])
-File "pass_external.php", line 24, characters 12-14:
-Leakage source
+Context-implicit policy leaks into `A_lump` via `A`. (Typing[4380])
+  File "pass_external.php", line 24, characters 12-14:
+  Leakage source
 File "pass_external.php", line 67, characters 3-8:
 Context-implicit policy leaks into `A` via `pc`. (Typing[4380])
-File "pass_external.php", line 21, characters 12-14:
-Leakage sink
+  File "pass_external.php", line 21, characters 12-14:
+  Leakage sink
 File "pass_external.php", line 67, characters 3-8:
-Context-implicit policy leaks into `A` via `lump`. (Typing[4380])
-File "pass_external.php", line 21, characters 12-14:
-Leakage sink
+Context-implicit policy leaks into `A` via `exn_lump`. (Typing[4380])
+  File "pass_external.php", line 21, characters 12-14:
+  Leakage sink
 File "pass_external.php", line 67, characters 3-8:
-Context-implicit policy leaks into `A` via `lump'1`. (Typing[4380])
-File "pass_external.php", line 22, characters 14-21:
-Another program point contributing to the leakage
-File "pass_external.php", line 21, characters 12-14:
-Leakage sink
+Context-implicit policy leaks into `A` via `A_lump`. (Typing[4380])
+  File "pass_external.php", line 22, characters 14-21:
+  Another program point contributing to the leakage
+  File "pass_external.php", line 21, characters 12-14:
+  Leakage sink
 File "pass_external.php", line 67, characters 3-8:
-Context-implicit policy leaks into `A` via `\A`. (Typing[4380])
-File "pass_external.php", line 22, characters 14-21:
-Another program point contributing to the leakage
-File "pass_external.php", line 21, characters 12-14:
-Leakage sink
+Context-implicit policy leaks into `A` via `A`. (Typing[4380])
+  File "pass_external.php", line 22, characters 14-21:
+  Another program point contributing to the leakage
+  File "pass_external.php", line 21, characters 12-14:
+  Leakage sink
 File "pass_external.php", line 59, characters 3-14:
 Data with policy `PRIVATE` appears in context `A`. (Typing[4379])
-File "pass_external.php", line 13, characters 12-16:
-This may be the data source with policy `PRIVATE`
-File "pass_external.php", line 21, characters 12-14:
-This may be the data sink with policy `A`
-File "pass_external.php", line 22, characters 14-21:
-Another program point contributing to the illegal flow
+  File "pass_external.php", line 13, characters 12-16:
+  This may be the data source with policy `PRIVATE`
+  File "pass_external.php", line 21, characters 12-14:
+  This may be the data sink with policy `A`
+  File "pass_external.php", line 22, characters 14-21:
+  Another program point contributing to the illegal flow

@@ -1,120 +1,119 @@
 Analyzing __construct:
 * pc: pc
-* This: \My<\My, lump'1>
+* This: \My<My, My_lump>
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars:
-    { $mBool -> <$mBool>;
-      $mInt -> <$mInt>;
-      $other -> \Other<\Other, lump'2> }
+  { $mBool -> <$mBool>;
+    $mInt -> <$mInt>;
+    $other -> \Other<Other, Other_lump> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [My < MINT, pc < MINT, $mInt < MINT, My < OTHER, pc < OTHER,
+     Other_lump = OTHER, Other < OTHER, My < My_lump, pc < My_lump,
+     $mBool < My_lump]
   Locals:
-    lvars:
-      { $mBool -> <$mBool>;
-        $mInt -> <$mInt>;
-        $other -> \Other<\Other, lump'2> }
-Constraints:
-  [\My < MINT, pc < MINT, $mInt < MINT, \My < OTHER, pc < OTHER,
-   lump'2 = OTHER, \Other < OTHER, \My < lump'1, pc < lump'1, $mBool < lump'1]
+    { $mBool -> <$mBool>;
+      $mInt -> <$mInt>;
+      $other -> \Other<Other, Other_lump> }
 
 Analyzing getMInt:
 * pc: pc
-* This: \My<\My, lump'1>
+* This: \My<My, My_lump>
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: {}
+  {}
 * Final environment:
   Deps: {}
+  Constraints:
+    [MINT < .mInt, My < .mInt, .mInt < ret]
   Locals:
-    lvars: {}
-Constraints:
-  [MINT < .mInt, \My < .mInt, .mInt < ret]
+    {}
 
 Analyzing setMInt:
 * pc: pc
-* This: \My<\My, lump'1>
+* This: \My<My, My_lump>
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $candidate -> <$candidate> }
+  { $candidate -> <$candidate> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [My < MINT, pc < MINT, $candidate < MINT]
   Locals:
-    lvars: { $candidate -> <$candidate> }
-Constraints:
-  [\My < MINT, pc < MINT, $candidate < MINT]
+    { $candidate -> <$candidate> }
 
 Analyzing \tlGetMyInt:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $obj -> \My<\My, lump'1> }
+  { $obj -> \My<My, My_lump> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [MINT < .mInt, My < .mInt, .mInt < ret]
   Locals:
-    lvars: { $obj -> \My<\My, lump'1> }
-Constraints:
-  [MINT < .mInt, \My < .mInt, .mInt < ret]
+    { $obj -> \My<My, My_lump> }
 
 Analyzing \tlSetMyInt:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $obj -> \My<\My, lump'1>; $val -> <$val> }
+  { $obj -> \My<My, My_lump>; $val -> <$val> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [My < MINT, pc < MINT, $val < MINT]
   Locals:
-    lvars: { $obj -> \My<\My, lump'1>; $val -> <$val> }
-Constraints:
-  [\My < MINT, pc < MINT, $val < MINT]
+    { $obj -> \My<My, My_lump>; $val -> <$val> }
 
 Analyzing \tlGetOther:
 * pc: pc
 * This: None
-* Return: \Other<\Other, lump'1>
-* Exception: \Exception<\Exception, lump>
+* Return: \Other<Other, Other_lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $obj -> \My<\My, lump'2> }
+  { $obj -> \My<My, My_lump> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [OTHER < .other, My < .other, OTHER = Other_lump, .other < Other]
   Locals:
-    lvars: { $obj -> \My<\My, lump'2> }
-Constraints:
-  [OTHER < .other, \My < .other, OTHER = lump'1, .other < \Other]
+    { $obj -> \My<My, My_lump> }
 
 Analyzing \tlGetOtherBool:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $obj -> \My<\My, lump'1> }
+  { $obj -> \My<My, My_lump> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [OTHER < .other, My < .other, OBOOL < .oBool, .other < .oBool,
+     .oBool < ret]
   Locals:
-    lvars: { $obj -> \My<\My, lump'1> }
-Constraints:
-  [OTHER < .other, \My < .other, OBOOL < .oBool, .other < .oBool,
-   .oBool < ret]
+    { $obj -> \My<My, My_lump> }
 
 Analyzing \tlSetOtherBool:
 * pc: pc
 * This: None
 * Return: <ret>
-* Exception: \Exception<\Exception, lump>
+* Exception: \Exception<exn, exn_lump>
 * Params:
-  lvars: { $bool -> <$bool>; $obj -> \My<\My, lump'1> }
+  { $bool -> <$bool>; $obj -> \My<My, My_lump> }
 * Final environment:
   Deps: {}
+  Constraints:
+    [OTHER < .other, My < .other, .other < OBOOL, pc < OBOOL, $bool < OBOOL]
   Locals:
-    lvars: { $bool -> <$bool>; $obj -> \My<\My, lump'1> }
-Constraints:
-  [OTHER < .other, \My < .other, .other < OBOOL, pc < OBOOL, $bool < OBOOL]
+    { $bool -> <$bool>; $obj -> \My<My, My_lump> }
 

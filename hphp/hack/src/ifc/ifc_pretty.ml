@@ -129,32 +129,13 @@ let prop =
   in
   (fun fmt c -> aux 0 fmt (conjuncts c))
 
-let pp_lenv fmt lenv =
+let cont fmt k =
   pp_open_vbox fmt 0;
-  fprintf
-    fmt
-    "@[<hov2>lvars:@ %a@]"
-    (LMap.make_pp Local_id.pp ptype)
-    lenv.le_vars;
+  fprintf fmt "@[<hov2>%a@]" (LMap.make_pp Local_id.pp ptype) k.k_vars;
   let policy_set fmt s = list comma_sep policy fmt (PSet.elements s) in
-  if not (PSet.is_empty lenv.le_pc) then
-    fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set lenv.le_pc;
+  if not (PSet.is_empty k.k_pc) then
+    fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set k.k_pc;
   pp_close_box fmt ()
-
-let locals fmt env =
-  let pp_lenv_opt fmt = function
-    | Some lenv -> pp_lenv fmt lenv
-    | None -> fprintf fmt "<empty>"
-  in
-  pp_lenv_opt fmt (Env.get_lenv_opt env Typing_cont_key.Next)
-
-let all_locals fmt env =
-  let pp k lenv =
-    let cont = Typing_continuations.to_string k in
-    fprintf fmt "@,@[<hov2>%s: @[<hov>%a@]@]" cont pp_lenv lenv
-  in
-  fprintf fmt "Locals:";
-  KMap.iter pp env.e_cont
 
 let renv fmt renv =
   pp_open_vbox fmt 0;
@@ -166,9 +147,8 @@ let renv fmt renv =
 
 let env fmt env =
   pp_open_vbox fmt 0;
-  fprintf fmt "@[<hov2>Deps:@ %a@]" SSet.pp env.e_deps;
-  fprintf fmt "@,Locals:@,  %a@." locals env;
-  let p = Logic.conjoin env.e_acc in
+  fprintf fmt "@[<hov2>Deps:@ %a@]" SSet.pp (Env.get_deps env);
+  let p = Logic.conjoin (Env.get_constraints env) in
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   pp_close_box fmt ()
 

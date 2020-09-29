@@ -14,6 +14,8 @@ type decls = {
 }
 [@@deriving show]
 
+val empty_decls : decls
+
 type decl_lists = {
   dl_classes: (string * Shallow_decl_defs.shallow_class) list;
   dl_funs: (string * Typing_defs.fun_elt) list;

@@ -45,6 +45,7 @@
     core_kernel
     decl_ipc_ffi_externs
     direct_decl_parser
+    heap_shared_mem
     marshal_tools
     naming_types
     relative_path

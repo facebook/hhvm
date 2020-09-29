@@ -66,7 +66,7 @@ type name_type =
   | RecordDef [@value 2]
   | Typedef [@value 3]
   | Const [@value 4]
-[@@deriving eq, show, enum]
+[@@deriving eq, show, enum, ord]
 
 (** We define two types of positions establishing the location of a given name:
  * a Full position contains the exact position of a name in a file, and a

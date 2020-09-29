@@ -17,6 +17,14 @@ type decls = {
 }
 [@@deriving show]
 
+let empty_decls =
+  {
+    classes = SMap.empty;
+    funs = SMap.empty;
+    typedefs = SMap.empty;
+    consts = SMap.empty;
+  }
+
 type decl_lists = {
   dl_classes: (string * Shallow_decl_defs.shallow_class) list;
   dl_funs: (string * Typing_defs.fun_elt) list;

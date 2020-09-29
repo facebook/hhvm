@@ -45,7 +45,7 @@ type name_type =
   | RecordDef [@value 2]
   | Typedef [@value 3]
   | Const [@value 4]
-[@@deriving eq, show, enum]
+[@@deriving eq, show, enum, ord]
 
 type pos =
   | Full of Pos.t

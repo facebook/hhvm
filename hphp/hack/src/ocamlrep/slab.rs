@@ -85,6 +85,7 @@ trait SlabTrait {
     fn needs_rebase(&self) -> bool;
     fn value(&self) -> Option<Value>;
     unsafe fn rebase_to(&mut self, new_base: usize);
+    fn check_initialized(&self) -> Result<(), SlabIntegrityError>;
     fn check_integrity(&self) -> Result<(), SlabIntegrityError>;
 }
 
@@ -177,29 +178,11 @@ impl<'a> SlabTrait for Slab<'a> {
     /// (i.e., `self.check_integrity()` would return `Err`).
     unsafe fn rebase_to(&mut self, new_base: usize) {
         let diff = new_base as isize - self.base() as isize;
-        let ptr = self.as_mut_ptr();
-        let end = ptr.add(self.len());
-        let mut ptr = ptr.add(SLAB_METADATA_WORDS);
-        while ptr < end {
-            let header = (*ptr).as_header();
-            let size = header.size();
-            if header.tag() >= NO_SCAN_TAG {
-                // Skip binary blocks--they can't contain pointers
-                ptr = ptr.add(size + 1);
-            } else {
-                // Skip header, then rebase pointer fields
-                ptr = ptr.add(1);
-                assert!(ptr.add(size) <= end);
-                for _ in 0..size {
-                    (*ptr).add_ptr_offset(diff);
-                    ptr = ptr.add(1);
-                }
-            }
-        }
+        rebase_slab_value(&mut self[SLAB_METADATA_WORDS..], diff);
         self.set_base(new_base);
     }
 
-    fn check_integrity(&self) -> Result<(), SlabIntegrityError> {
+    fn check_initialized(&self) -> Result<(), SlabIntegrityError> {
         use SlabIntegrityError::*;
         let len = self.len();
 
@@ -223,6 +206,18 @@ impl<'a> SlabTrait for Slab<'a> {
         if base % WORD_SIZE != 0 {
             return Err(InvalidBasePointer(base));
         }
+
+        Ok(())
+    }
+
+    fn check_integrity(&self) -> Result<(), SlabIntegrityError> {
+        use SlabIntegrityError::*;
+
+        self.check_initialized()?;
+
+        let len = self.len();
+        let base = self.base();
+        let root_offset = self.root_value_offset();
 
         // The set of offsets to valid blocks, according to the header data.
         let mut value_offsets = HashSet::new();
@@ -269,6 +264,31 @@ impl<'a> SlabTrait for Slab<'a> {
         }
 
         Ok(())
+    }
+}
+
+/// # Safety
+///
+/// `slab_without_metadata` must be a valid slab (i.e., if the metadata words
+/// were included, `slab.check_integrity()` would return `Ok(())`).
+unsafe fn rebase_slab_value(slab_without_metadata: &mut [OpaqueValue<'_>], diff: isize) {
+    let mut ptr = slab_without_metadata.as_mut_ptr();
+    let end = ptr.add(slab_without_metadata.len());
+    while ptr < end {
+        let header = (*ptr).as_header();
+        let size = header.size();
+        if header.tag() >= NO_SCAN_TAG {
+            // Skip binary blocks--they can't contain pointers
+            ptr = ptr.add(size + 1);
+        } else {
+            // Skip header, then rebase pointer fields
+            ptr = ptr.add(1);
+            assert!(ptr.add(size) <= end);
+            for _ in 0..size {
+                (*ptr).add_ptr_offset(diff);
+                ptr = ptr.add(1);
+            }
+        }
     }
 }
 
@@ -484,9 +504,7 @@ pub fn copy_slab(
     let src_slab = Slab::from_bytes(src);
     let dest_slab = Slab::from_uninit_bytes_mut(dest);
 
-    if !src_slab.is_initialized() {
-        return Err(SlabIntegrityError::NotInitialized);
-    }
+    src_slab.check_initialized()?;
 
     // memcpy `src_slab` into `dest_slab`. Panic if they differ in length.
     dest_slab.copy_from_slice(src_slab);
@@ -498,6 +516,50 @@ pub fn copy_slab(
     }
 
     Ok(())
+}
+
+/// Copy the slab stored in `src` into `dest`, then fix up the slab's internal
+/// pointers in `dest`. Return a `Value` referencing the slab root value in
+/// `dest`.
+///
+/// Returns `Err` if `src` does not contain a valid slab.
+///
+/// # Panics
+///
+/// This function will panic unless `dest` has length
+/// `src.value_size_in_words()`.
+pub fn copy_and_rebase_value<'a>(src: SlabReader<'_>, dest: &'a mut [usize]) -> Value<'a> {
+    let src_slab = Slab::from_bytes(src.0);
+
+    // Safety: OpaqueValue has the same size and alignment as usize
+    let dest_slab = unsafe {
+        std::slice::from_raw_parts_mut(dest.as_mut_ptr() as *mut OpaqueValue<'a>, dest.len())
+    };
+
+    // memcpy `src_slab` into `dest_slab`. Panic if they differ in length.
+    dest_slab.copy_from_slice(&src_slab[SLAB_METADATA_WORDS..]);
+
+    // Safety: we checked that `src_slab` is a valid slab, and slabs remain
+    // valid after a memcpy (i.e., slabs needing a rebase are still valid).
+    unsafe {
+        let diff = dest_slab.as_ptr() as isize
+            - src_slab.base() as isize
+            - (SLAB_METADATA_WORDS * WORD_SIZE) as isize;
+        rebase_slab_value(dest_slab, diff);
+    }
+
+    // Safety: We just rebased dest_slab to its current address, so its root
+    // value is a valid Value. We didn't copy the metadata, so there's no
+    // root_value_offset for us to read--we need to use the one in `src_slab`.
+    // The Value will mutably borrow `dest`, so it won't be possible for the
+    // caller to mutate `dest`'s contents while our Value exists.
+    unsafe {
+        Value::from_bits(
+            dest_slab
+                .as_ptr()
+                .add(src_slab.root_value_offset() - SLAB_METADATA_WORDS) as usize,
+        )
+    }
 }
 
 /// A contiguous memory region containing a tree of OCaml values.
@@ -533,9 +595,7 @@ impl OwnedSlab {
 
     pub unsafe fn from_slice(slice: &[usize]) -> Result<Self, SlabIntegrityError> {
         let mut slab = std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(slice.into());
-        if !slab.is_initialized() {
-            return Err(SlabIntegrityError::NotInitialized);
-        }
+        slab.check_initialized()?;
         slab.rebase_to(slab.current_address());
         Ok(Self(slab))
     }
@@ -554,6 +614,7 @@ impl Debug for OwnedSlab {
 }
 
 /// A contiguous memory region containing a tree of OCaml values.
+#[derive(Copy, Clone)]
 pub struct SlabReader<'a>(&'a [u8]);
 
 impl<'a> SlabReader<'a> {
@@ -565,10 +626,41 @@ impl<'a> SlabReader<'a> {
     /// initialized by slab APIs (e.g., `OwnedSlab::as_bytes`, `copy_slab`).
     pub unsafe fn from_bytes(bytes: &'a [u8]) -> Result<Self, SlabIntegrityError> {
         let slab = Slab::from_bytes(bytes);
-        if !slab.is_initialized() {
-            return Err(SlabIntegrityError::NotInitialized);
-        }
+        slab.check_initialized()?;
         Ok(SlabReader(bytes))
+    }
+
+    /// Return a SlabReader for the given slice.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only invoke this function on slices which were
+    /// initialized by slab APIs (e.g., `OwnedSlab::as_slice`).
+    pub unsafe fn from_words(words: &'a [usize]) -> Result<Self, SlabIntegrityError> {
+        let slab =
+            std::slice::from_raw_parts(words.as_ptr() as *const OpaqueValue<'a>, words.len());
+        slab.check_initialized()?;
+        Ok(SlabReader(std::slice::from_raw_parts(
+            words.as_ptr() as *const u8,
+            words.len() * WORD_SIZE,
+        )))
+    }
+
+    pub fn size_in_words(&self) -> usize {
+        Slab::from_bytes(self.0).len()
+    }
+
+    pub fn size_in_bytes(&self) -> usize {
+        self.size_in_words() * WORD_SIZE
+    }
+
+    pub fn value_size_in_words(&self) -> usize {
+        Slab::from_bytes(self.0).len() - SLAB_METADATA_WORDS
+    }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        let ptr = Slab::from_bytes(self.0).as_ptr() as *const u8;
+        unsafe { std::slice::from_raw_parts(ptr, self.size_in_bytes()) }
     }
 
     pub fn value(&self) -> Option<Value> {
@@ -587,11 +679,10 @@ impl Debug for SlabReader<'_> {
 }
 
 #[cfg(test)]
-mod test_integrity_check {
+mod test {
     use super::*;
-    use SlabIntegrityError::*;
 
-    const MIN_SIZE_IN_BYTES: usize = (SLAB_METADATA_WORDS + 2) * WORD_SIZE;
+    pub const MIN_SIZE_IN_BYTES: usize = (SLAB_METADATA_WORDS + 2) * WORD_SIZE;
 
     // Some test cases use a slab containing the tuple (42, "a").
     // When rebased to 0x00, the slab we write for this value has this layout:
@@ -607,10 +698,10 @@ mod test_integrity_check {
     // | 0x30    | Header { size: 1, tag: 252 }, | STRING_TAG = 252           |
     // | 0x38    | 0x0600000000000061,           | "a" (0x06 = padding byte)  |
 
-    const TUPLE_42_A_SIZE_IN_WORDS: usize = SLAB_METADATA_WORDS + 5;
-    const TUPLE_42_A_SIZE_IN_BYTES: usize = TUPLE_42_A_SIZE_IN_WORDS * WORD_SIZE;
+    pub const TUPLE_42_A_SIZE_IN_WORDS: usize = SLAB_METADATA_WORDS + 5;
+    pub const TUPLE_42_A_SIZE_IN_BYTES: usize = TUPLE_42_A_SIZE_IN_WORDS * WORD_SIZE;
 
-    fn write_tuple_42_a(slab: &mut Slab) {
+    pub fn write_tuple_42_a(slab: &mut Slab) {
         let tuple_slab = to_slab(&(42, "a".to_string())).unwrap();
         // Copy everything except the last word, which is an empty padding word
         // which provides space for the slab to be realigned when embedded in a
@@ -620,6 +711,32 @@ mod test_integrity_check {
             slab.rebase_to(slab.current_address())
         };
     }
+
+    #[test]
+    fn copy_and_rebase_val() {
+        let mut tuple_slab = vec![0usize; TUPLE_42_A_SIZE_IN_WORDS];
+        let mut tuple_val = vec![0usize; TUPLE_42_A_SIZE_IN_WORDS - SLAB_METADATA_WORDS];
+        let value = unsafe {
+            write_tuple_42_a(std::slice::from_raw_parts_mut(
+                tuple_slab.as_mut_ptr() as *mut _,
+                tuple_slab.len(),
+            ));
+            let tuple_slab = SlabReader::from_words(tuple_slab.as_slice()).unwrap();
+            copy_and_rebase_value(tuple_slab, tuple_val.as_mut_slice())
+        };
+        use crate::FromOcamlRep;
+        assert_eq!(
+            <(isize, String)>::from_ocamlrep(value),
+            Ok((42, "a".to_string()))
+        );
+    }
+}
+
+#[cfg(test)]
+mod test_integrity_check {
+    use super::test::*;
+    use super::*;
+    use SlabIntegrityError::*;
 
     #[test]
     fn bad_size() {

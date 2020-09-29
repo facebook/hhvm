@@ -3367,8 +3367,8 @@ let expected_tparam
         "Expected "
         ^
         match n with
-        | 0 -> "no type parameter"
-        | 1 -> "a type parameter"
+        | 0 -> "no type parameters"
+        | 1 -> "exactly one type parameter"
         | n -> string_of_int n ^ " type parameters" );
       (definition_pos, "Definition is here");
     ]

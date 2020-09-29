@@ -90,9 +90,9 @@ CodeCache::CodeCache()
   m_tcSize = m_totalSize - kABytecodeSize - kGDataSize;
   m_codeSize = m_totalSize - kGDataSize;
 
-  if ((kASize < (10 << 20)) ||
-      (kAColdSize < (4 << 20)) ||
-      (kAFrozenSize < (6 << 20)) ||
+  if ((kASize < (2 << 20)) ||
+      (kAColdSize < (2 << 20)) ||
+      (kAFrozenSize < (2 << 20)) ||
       (kGDataSize < (2 << 20))) {
     fprintf(stderr, "Allocation sizes ASize, AColdSize, AFrozenSize and "
                     "GlobalDataSize are too small.\n");

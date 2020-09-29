@@ -1,0 +1,9 @@
+varray(1) {
+  int(10)
+}
+bool(true)
+varray(2) {
+  int(10)
+  int(42)
+}
+bool(true)

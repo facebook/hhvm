@@ -653,6 +653,12 @@ enum class ThrowMode {
   BadOperation,
 };
 
+enum class LegacyMark {
+  Marked, // definitely marked
+  Unmarked, // definitely unmarked
+  Unknown // either
+};
+
 //////////////////////////////////////////////////////////////////////
 
 struct Type {
@@ -781,10 +787,10 @@ private:
   friend Type exactRecord(res::Record);
   friend Type subRecord(res::Record);
   friend Type rname(SString);
-  friend Type packed_impl(trep, std::vector<Type>, ProvTag);
+  friend Type packed_impl(trep, std::vector<Type>, ProvTag, LegacyMark);
   friend Type packedn_impl(trep, Type);
-  friend Type map_impl(trep, MapElems, Type, Type, ProvTag);
-  friend Type mapn_impl(trep bits, Type k, Type v, ProvTag);
+  friend Type map_impl(trep, MapElems, Type, Type, ProvTag, LegacyMark);
+  friend Type mapn_impl(trep bits, Type k, Type v, ProvTag, LegacyMark);
   friend Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag);
   friend DObj dobj_of(const Type&);
   friend DRecord drec_of(const Type&);
@@ -906,6 +912,7 @@ private:
   bool couldBeData(const Type&) const;
   bool checkInvariants() const;
   ProvTag getProvTag() const;
+  LegacyMark getMark() const;
 
 private:
   uint64_t m_bits : kTRepBitsStored;
@@ -934,27 +941,33 @@ struct ArrKey {
 };
 
 struct DArrLikePacked {
-  explicit DArrLikePacked(std::vector<Type> elems, ProvTag tag)
+  explicit DArrLikePacked(std::vector<Type> elems,
+                          ProvTag tag, LegacyMark mark)
     : elems(std::move(elems))
     , provenance(tag)
+    , mark(mark)
   {}
 
   std::vector<Type> elems;
   ProvTag provenance;
+  LegacyMark mark;
 };
 
 struct DArrLikePackedN {
-  explicit DArrLikePackedN(Type t) : type(std::move(t)) {}
+  explicit DArrLikePackedN(Type t) : type(std::move(t))
+  {}
   Type type;
 };
 
 struct DArrLikeMap {
   DArrLikeMap() {}
-  explicit DArrLikeMap(MapElems map, Type optKey, Type optVal, ProvTag tag)
+  explicit DArrLikeMap(MapElems map, Type optKey, Type optVal,
+                       ProvTag tag, LegacyMark mark)
     : map(std::move(map))
     , optKey(std::move(optKey))
     , optVal(std::move(optVal))
     , provenance(tag)
+    , mark(mark)
   {}
   bool hasOptElements() const { return !optKey.subtypeOf(BBottom); }
   // The array always starts with these known keys
@@ -964,8 +977,11 @@ struct DArrLikeMap {
   Type optKey;
   Type optVal;
   ProvTag provenance;
+  LegacyMark mark;
 };
 
+// DArrLikePackedN and DArrLikeMapN do not need the LegacyMark because they
+// cannot be converted to a TypedValue
 struct DArrLikeMapN {
   explicit DArrLikeMapN(Type key, Type val)
     : key(std::move(key))
@@ -1314,7 +1330,8 @@ Type ckeyset_n(Type);
  * Keyset from MapElems
  */
 inline Type keyset_map(MapElems m) {
-  return map_impl(BKeysetN, std::move(m), TBottom, TBottom, ProvTag::Top);
+  return map_impl(BKeysetN, std::move(m), TBottom, TBottom,
+                  ProvTag::Top, LegacyMark::Unmarked);
 }
 
 /*

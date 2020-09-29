@@ -634,6 +634,19 @@ bool couldBeProvTag(ProvTag p1, ProvTag p2) {
     p1 == p2;
 }
 
+LegacyMark intersectLegacyMark(LegacyMark a, LegacyMark b) {
+  if (a == LegacyMark::Unknown) return b;
+  if (b == LegacyMark::Unknown) return a;
+  if (a == b) return a;
+  // We pessimize the "none" case to Unknown
+  return LegacyMark::Unknown;
+}
+
+LegacyMark unionLegacyMark(LegacyMark a, LegacyMark b) {
+  if (a != b) return LegacyMark::Unknown;
+  return a;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template <typename T, typename... Args>
@@ -675,7 +688,8 @@ folly::Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
 
   return DArrLikePacked {
     std::move(elems),
-    ProvTag::FromSArrOrTop(ar)
+    ProvTag::FromSArrOrTop(ar),
+    ar->isLegacyArray() ? LegacyMark::Marked : LegacyMark::Unmarked
   };
 }
 
@@ -713,7 +727,8 @@ folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
     std::move(map),
     TBottom,
     TBottom,
-    ProvTag::FromSArrOrTop(ar)
+    ProvTag::FromSArrOrTop(ar),
+    ar->isLegacyArray() ? LegacyMark::Marked : LegacyMark::Unmarked
   };
 }
 
@@ -1135,12 +1150,13 @@ struct DualDispatchIntersectionImpl {
   Type operator()() const { not_reached(); }
 
   template <typename F>
-  Type intersect_packed(std::vector<Type> elems, F next, ProvTag tag) const {
+  Type intersect_packed(std::vector<Type> elems, F next,
+                        ProvTag tag, LegacyMark mark) const {
     for (auto& e : elems) {
       e &= next();
       if (e == TBottom) return TBottom;
     }
-    return packed_impl(bits, std::move(elems), tag);
+    return packed_impl(bits, std::move(elems), tag, mark);
   }
 
   // The SArray is known to not be a subtype, so the intersection must be empty
@@ -1167,15 +1183,18 @@ struct DualDispatchIntersectionImpl {
     return intersect_packed(
       a.elems,
       [&] { return b.elems[i++]; },
-      intersectProvTag(a.provenance, b.provenance)
+      intersectProvTag(a.provenance, b.provenance),
+      intersectLegacyMark(a.mark, b.mark)
     );
   }
   Type operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
-    return intersect_packed(a.elems, [&] { return b.type; }, a.provenance);
+    return intersect_packed(a.elems, [&] { return b.type; },
+                            a.provenance, a.mark);
   }
   Type operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
     if (b.key.couldBe(BInt)) {
-      return intersect_packed(a.elems, [&] { return b.val; }, a.provenance);
+      return intersect_packed(a.elems, [&] { return b.val; },
+                              a.provenance, a.mark);
     }
     return TBottom;
   }
@@ -1205,7 +1224,7 @@ struct DualDispatchIntersectionImpl {
     auto k = intersection_of(a.key, b.key);
     auto v = intersection_of(a.val, b.val);
     if (k == TBottom || v == TBottom) return TBottom;
-    return mapn_impl(bits, k, v, ProvTag::Top);
+    return mapn_impl(bits, k, v, ProvTag::Top, LegacyMark::Unknown);
   }
   Type operator()(const DArrLikeMapN& a, const DArrLikeMap& b) const {
     auto map = MapElems{};
@@ -1233,7 +1252,8 @@ struct DualDispatchIntersectionImpl {
       std::move(map),
       std::move(optKey),
       std::move(optVal),
-      b.provenance
+      b.provenance,
+      b.mark
     );
   }
 
@@ -1296,7 +1316,8 @@ struct DualDispatchIntersectionImpl {
       std::move(map),
       std::move(optKey),
       std::move(optVal),
-      intersectProvTag(a.provenance, b.provenance)
+      intersectProvTag(a.provenance, b.provenance),
+      intersectLegacyMark(a.mark, b.mark)
     );
   }
 
@@ -1326,7 +1347,8 @@ struct DualDispatchUnionImpl {
     return packed_impl(
       bits,
       std::move(ret),
-      unionProvTag(a.provenance, b.provenance)
+      unionProvTag(a.provenance, b.provenance),
+      unionLegacyMark(a.mark, b.mark)
     );
   }
 
@@ -1384,7 +1406,8 @@ struct DualDispatchUnionImpl {
       std::move(map),
       std::move(optKey),
       std::move(optVal),
-      unionProvTag(a.provenance, b.provenance)
+      unionProvTag(a.provenance, b.provenance),
+      unionLegacyMark(a.mark, b.mark)
     );
   }
 
@@ -1430,7 +1453,8 @@ struct DualDispatchUnionImpl {
       bits,
       union_of(a.key, b.key),
       union_of(a.val, b.val),
-      ProvTag::Top
+      ProvTag::Top,
+      LegacyMark::Unknown
     );
   }
 
@@ -1478,7 +1502,8 @@ struct DualDispatchUnionImpl {
     return mapn_impl(
       bits, union_of(b.key, TInt),
       union_of(packed_values(a), b.val),
-      ProvTag::Top
+      ProvTag::Top,
+      LegacyMark::Unknown
     );
   }
 
@@ -1497,7 +1522,8 @@ struct DualDispatchUnionImpl {
       bits,
       union_of(TInt, b.key),
       union_of(a.type, b.val),
-      ProvTag::Top
+      ProvTag::Top,
+      LegacyMark::Unknown
     );
   }
 
@@ -1673,8 +1699,9 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 
 template<typename AInit, bool force_static>
 folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
-                                  ProvTag tag) {
+                                  ProvTag tag, LegacyMark mark) {
   ARRPROV_USE_RUNTIME_LOCATION();
+  if (mark == LegacyMark::Unknown) return folly::none;
   AInit ai(elems.size());
   for (auto const& t : elems) {
     auto const v = tv(t);
@@ -1682,6 +1709,7 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
     ai.append(tvAsCVarRef(&*v));
   }
   auto var = ai.toVariant();
+  var.asArrRef().setLegacyArray(mark == LegacyMark::Marked);
   if (tag.valid()) {
     assertx(RuntimeOption::EvalArrayProvenance);
     arrprov::setTag(var.asArrRef().get(), tag.get());
@@ -1690,7 +1718,9 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
   return tvReturn(std::move(var));
 }
 
-bool checkTypeVec(const std::vector<Type> &elems, ProvTag /*tag*/) {
+bool checkTypeVec(const std::vector<Type> &elems,
+                  ProvTag /*tag*/, LegacyMark mark) {
+  if (mark == LegacyMark::Unknown) return false;
   for (auto const& t : elems) {
     if (!is_scalar(t)) return false;
   }
@@ -1714,9 +1744,10 @@ void add(KeysetInit& ai, const Variant& key, const Variant& value) {
 
 template<typename AInit, bool force_static, typename Key>
 folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
-                                  ProvTag tag) {
+                                  ProvTag tag, LegacyMark mark) {
   ARRPROV_USE_RUNTIME_LOCATION();
   auto val = eval_cell_value([&] () -> TypedValue {
+    if (mark == LegacyMark::Unknown) return make_tv<KindOfUninit>();
     AInit ai(elems.size());
     for (auto const& elm : elems) {
       auto const v = tv(elm.second);
@@ -1724,6 +1755,7 @@ folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
       add(ai, keyHelper(elm.first), tvAsCVarRef(&*v));
     }
     auto var = ai.toVariant();
+    var.asArrRef().setLegacyArray(mark == LegacyMark::Marked);
     if (tag.valid()) {
       assertx(RuntimeOption::EvalArrayProvenance);
       assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));
@@ -1737,7 +1769,9 @@ folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
 }
 
 template<typename Key>
-bool checkTypeMap(const ArrayLikeMap<Key> &elems, ProvTag /*tag*/) {
+bool checkTypeMap(const ArrayLikeMap<Key> &elems,
+                  ProvTag /*tag*/, LegacyMark mark) {
+  if (mark == LegacyMark::Unknown) return false;
   for (auto const& elm : elems) {
     if (!is_scalar(elm.second)) return false;
   }
@@ -2807,6 +2841,29 @@ ProvTag Type::getProvTag() const {
   always_assert(false);
 }
 
+LegacyMark Type::getMark() const {
+  switch (m_dataTag) {
+  case DataTag::None:
+  case DataTag::Str:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Obj:
+  case DataTag::Cls:
+  case DataTag::Record:
+  case DataTag::ArrLikePackedN:
+  case DataTag::ArrLikeMapN:
+    return LegacyMark::Unknown;
+  case DataTag::ArrLikeVal:
+    return m_data.aval->isLegacyArray() ?
+      LegacyMark::Marked : LegacyMark::Unmarked;
+  case DataTag::ArrLikePacked:
+    return m_data.packed->mark;
+  case DataTag::ArrLikeMap:
+    return m_data.map->mark;
+  }
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 Type wait_handle(const Index& index, Type inner) {
@@ -2941,11 +2998,12 @@ Type packedn_impl(trep bits, Type t) {
   return r;
 }
 
-Type packed_impl(trep bits, std::vector<Type> elems, ProvTag prov) {
+Type packed_impl(trep bits, std::vector<Type> elems, ProvTag prov,
+                 LegacyMark mark) {
   assert(!elems.empty());
   auto r = Type { bits };
   auto const tag = (bits & kProvBits) ? prov : ProvTag::Top;
-  construct_inner(r.m_data.packed, std::move(elems), tag);
+  construct_inner(r.m_data.packed, std::move(elems), tag, mark);
   r.m_dataTag = DataTag::ArrLikePacked;
   return r;
 }
@@ -2959,11 +3017,13 @@ Type svec_n(Type ty) {
 }
 
 Type vec(std::vector<Type> elems) {
-  return packed_impl(BVecN, std::move(elems), ProvTag::Top);
+  return packed_impl(BVecN, std::move(elems), ProvTag::Top,
+                     LegacyMark::Unmarked);
 }
 
 Type svec(std::vector<Type> elems) {
-  return packed_impl(BSVecN, std::move(elems), ProvTag::Top);
+  return packed_impl(BSVecN, std::move(elems), ProvTag::Top,
+                     LegacyMark::Unmarked);
 }
 
 Type dict_val(SArray val) {
@@ -2996,7 +3056,8 @@ Type dict_map(MapElems m, Type optKey, Type optVal) {
     std::move(m),
     std::move(optKey),
     std::move(optVal),
-    ProvTag::Top
+    ProvTag::Top,
+    LegacyMark::Unmarked
   );
 }
 
@@ -3006,24 +3067,27 @@ Type sdict_map(MapElems m, Type optKey, Type optVal) {
     std::move(m),
     std::move(optKey),
     std::move(optVal),
-    ProvTag::Top
+    ProvTag::Top,
+    LegacyMark::Unmarked
   );
 }
 
 Type dict_n(Type k, Type v) {
-  return mapn_impl(BDictN, std::move(k), std::move(v), ProvTag::Top);
+  return mapn_impl(BDictN, std::move(k), std::move(v),
+                   ProvTag::Top, LegacyMark::Unmarked);
 }
 
 Type sdict_n(Type k, Type v) {
-  return mapn_impl(BSDictN, std::move(k), std::move(v), ProvTag::Top);
+  return mapn_impl(BSDictN, std::move(k), std::move(v),
+                   ProvTag::Top, LegacyMark::Unmarked);
 }
 
 Type dict_packed(std::vector<Type> v) {
-  return packed_impl(BDictN, std::move(v), ProvTag::Top);
+  return packed_impl(BDictN, std::move(v), ProvTag::Top, LegacyMark::Unmarked);
 }
 
 Type sdict_packed(std::vector<Type> v) {
-  return packed_impl(BSDictN, std::move(v), ProvTag::Top);
+  return packed_impl(BSDictN, std::move(v), ProvTag::Top, LegacyMark::Unmarked);
 }
 
 Type dict_packedn(Type t) {
@@ -3050,13 +3114,15 @@ Type some_keyset_empty()    { return Type { BKeysetE }; }
 Type keyset_n(Type kv) {
   assert(kv.subtypeOf(BArrKey));
   auto v = kv;
-  return mapn_impl(BKeysetN, std::move(kv), std::move(v), ProvTag::Top);
+  return mapn_impl(BKeysetN, std::move(kv), std::move(v),
+                   ProvTag::Top, LegacyMark::Unmarked);
 }
 
 Type skeyset_n(Type kv) {
   assert(kv.subtypeOf(BUncArrKey));
   auto v = kv;
-  return mapn_impl(BSKeysetN, std::move(kv), std::move(v), ProvTag::Top);
+  return mapn_impl(BSKeysetN, std::move(kv), std::move(v),
+                   ProvTag::Top, LegacyMark::Unmarked);
 }
 
 Type exactRecord(res::Record val) {
@@ -3155,7 +3221,8 @@ Type set_trep(Type& a, trep bits) {
       a = loosen_values(a);
     } else {
       if (auto p = toDArrLikePacked(a.m_data.aval)) {
-        return packed_impl(bits, std::move(p->elems), p->provenance);
+        return packed_impl(bits, std::move(p->elems),
+                           p->provenance, p->mark);
       }
       auto d = toDArrLikeMap(a.m_data.aval);
       return map_impl(
@@ -3163,7 +3230,8 @@ Type set_trep(Type& a, trep bits) {
         std::move(d->map),
         std::move(d->optKey),
         std::move(d->optVal),
-        d->provenance
+        d->provenance,
+        d->mark
       );
     }
   }
@@ -3204,10 +3272,11 @@ Type spec_array_like_union(Type& spec_a,
 
 Type arr_packed_varray(std::vector<Type> elems, ProvTag tag) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return packed_impl(BVArrN, std::move(elems), tag);
+  return packed_impl(BVArrN, std::move(elems), tag, LegacyMark::Unmarked);
 }
 
-Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
+Type map_impl(trep bits, MapElems m, Type optKey, Type optVal,
+              ProvTag prov, LegacyMark mark) {
   assert(!m.empty());
   assertx((optKey == TBottom) == (optVal == TBottom));
 
@@ -3228,7 +3297,7 @@ Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
     if (optKey == TBottom) {
       std::vector<Type> elems;
       for (auto& p : m) elems.emplace_back(p.second);
-      return packed_impl(bits, std::move(elems), prov);
+      return packed_impl(bits, std::move(elems), prov, mark);
     }
 
     // There are optional elements. We cannot represent optionals in
@@ -3248,7 +3317,8 @@ Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
     // Not known to be packed including the optional elements, so use
     // MapN, which is most general (it can contain packed and
     // non-packed types).
-    return mapn_impl(bits, union_of(TInt, optKey), std::move(vals), prov);
+    return mapn_impl(bits, union_of(TInt, optKey), std::move(vals),
+                     prov, mark);
   }
 
   auto r = Type { bits };
@@ -3258,7 +3328,8 @@ Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
     std::move(m),
     std::move(optKey),
     std::move(optVal),
-    tag
+    tag,
+    mark
   );
   r.m_dataTag = DataTag::ArrLikeMap;
   return r;
@@ -3266,10 +3337,13 @@ Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
 
 Type arr_map_darray(MapElems m, ProvTag tag) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return map_impl(BDArrN, std::move(m), TBottom, TBottom, tag);
+  return map_impl(BDArrN, std::move(m), TBottom, TBottom,
+                  tag, LegacyMark::Unmarked);
 }
 
-Type mapn_impl(trep bits, Type k, Type v, ProvTag tag) {
+// Although DArrLikeMapN does not have a LegacyMark, mapn_impl needs one as
+// it calls map_impl if k has a constant value.
+Type mapn_impl(trep bits, Type k, Type v, ProvTag tag, LegacyMark mark) {
   assert(k.subtypeOf(BArrKeyCompat));
 
   // A MapN cannot have a constant key (because that can actually make it be a
@@ -3277,7 +3351,7 @@ Type mapn_impl(trep bits, Type k, Type v, ProvTag tag) {
   if (auto val = tv(k)) {
     MapElems m;
     m.emplace_back(*val, std::move(v));
-    return map_impl(bits, std::move(m), TBottom, TBottom, tag);
+    return map_impl(bits, std::move(m), TBottom, TBottom, tag, mark);
   }
 
   auto r = Type { bits };
@@ -3303,7 +3377,7 @@ Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag tag) {
     // it's up to the caller to ensure `k == v` up-to-staticness.
     k = loosen_staticness(k);
   }
-  return mapn_impl(bits, std::move(k), std::move(v), tag);
+  return mapn_impl(bits, std::move(k), std::move(v), tag, LegacyMark::Unmarked);
 }
 
 Type opt(Type t) {
@@ -3611,26 +3685,36 @@ R tvImpl(const Type& t) {
     if (t.m_dataTag == DataTag::ArrLikeVal) {
       return H::makePersistentArray(const_cast<ArrayData*>(t.m_data.aval));
     }
-    return H::makePersistentArray(staticEmptyVArray());
+    if (t.getMark() == LegacyMark::Unknown) return R {};
+    return H::makePersistentArray(t.getMark() == LegacyMark::Marked ?
+        staticEmptyMarkedVArray() : staticEmptyVArray());
   case BDArrE:
   case BSDArrE:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     if (t.m_dataTag == DataTag::ArrLikeVal) {
       return H::makePersistentArray(const_cast<ArrayData*>(t.m_data.aval));
     }
-    return H::makePersistentArray(staticEmptyDArray());
+    if (t.getMark() == LegacyMark::Unknown) return R {};
+    return H::makePersistentArray(t.getMark() == LegacyMark::Marked ?
+        staticEmptyMarkedDArray() : staticEmptyDArray());
   case BVecE:
   case BSVecE:
     if (t.m_dataTag == DataTag::ArrLikeVal) {
       return H::template make<KindOfPersistentVec>(t.m_data.aval);
     }
-    return H::template make<KindOfPersistentVec>(staticEmptyVec());
+    if (t.getMark() == LegacyMark::Unknown) return R {};
+    return H::template make<KindOfPersistentVec>(
+        t.getMark()  == LegacyMark::Marked ?
+        staticEmptyMarkedVec() : staticEmptyVec());
   case BDictE:
   case BSDictE:
     if (t.m_dataTag == DataTag::ArrLikeVal) {
       return H::template make<KindOfPersistentDict>(t.m_data.aval);
     }
-    return H::template make<KindOfPersistentDict>(staticEmptyDictArray());
+    if (t.getMark() == LegacyMark::Unknown) return R {};
+    return H::template make<KindOfPersistentDict>(
+        t.getMark() == LegacyMark::Marked ?
+        staticEmptyMarkedDictArray() : staticEmptyDictArray());
   case BKeysetE:
   case BSKeysetE:
     return H::template make<KindOfPersistentKeyset>(staticEmptyKeysetArray());
@@ -3697,34 +3781,42 @@ R tvImpl(const Type& t) {
       if (t.m_data.map->hasOptElements()) break;
       if (t.subtypeOf(BDictN)) {
         return H::template fromMap<DictInit>(t.m_data.map->map,
-                                             t.m_data.map->provenance);
+                                             t.m_data.map->provenance,
+                                             t.m_data.map->mark);
       } else if (t.subtypeOf(BKeysetN)) {
         return H::template fromMap<KeysetInit>(t.m_data.map->map,
-                                               ProvTag::Top);
+                                               ProvTag::Top,
+                                               t.m_data.map->mark);
       } else if (t.subtypeOf(BDArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromMap<DArrayInit>(t.m_data.map->map,
-                                               t.m_data.map->provenance);
+                                               t.m_data.map->provenance,
+                                               t.m_data.map->mark);
       }
       break;
     case DataTag::ArrLikePacked:
       if (t.subtypeOf(BVecN)) {
         return H::template fromVec<VecInit>(t.m_data.packed->elems,
-                                            t.m_data.packed->provenance);
+                                            t.m_data.packed->provenance,
+                                            t.m_data.packed->mark);
       } else if (t.subtypeOf(BDictN)) {
         return H::template fromVec<DictInit>(t.m_data.packed->elems,
-                                             t.m_data.packed->provenance);
+                                             t.m_data.packed->provenance,
+                                             t.m_data.packed->mark);
       } else if (t.subtypeOf(BKeysetN)) {
         return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems,
-                                                     ProvTag::Top);
+                                                     ProvTag::Top,
+                                                     t.m_data.packed->mark);
       } else if (t.subtypeOf(BVArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<VArrayInit>(t.m_data.packed->elems,
-                                               t.m_data.packed->provenance);
+                                               t.m_data.packed->provenance,
+                                               t.m_data.packed->mark);
       } else if (t.subtypeOf(BDArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<DArrayInit>(t.m_data.packed->elems,
-                                               t.m_data.packed->provenance);
+                                               t.m_data.packed->provenance,
+                                               t.m_data.packed->mark);
       }
       break;
     case DataTag::ArrLikePackedN:
@@ -4775,7 +4867,8 @@ Type loosen_dvarrayness(Type t) {
     if (t.m_data.aval->empty()) {
       t = loosen_values(t);
     } else if (auto p = toDArrLikePacked(t.m_data.aval)) {
-      t = packed_impl(t.bits(), std::move(p->elems), p->provenance);
+      t = packed_impl(t.bits(), std::move(p->elems),
+                      p->provenance, p->mark);
     } else {
       auto d = toDArrLikeMap(t.m_data.aval);
       t = map_impl(
@@ -4783,7 +4876,8 @@ Type loosen_dvarrayness(Type t) {
         std::move(d->map),
         std::move(d->optKey),
         std::move(d->optVal),
-        d->provenance
+        d->provenance,
+        d->mark
       );
     }
   }
@@ -5381,7 +5475,8 @@ bool arr_packedn_set(Type& pack,
       pack.bits(),
       union_of(TInt, key.type),
       std::move(ty),
-      ProvTag::Top
+      ProvTag::Top,
+      pack.getMark()
     );
   }
   return false;
@@ -5530,12 +5625,14 @@ bool arr_packed_set(Type& pack,
         elems.emplace_back(make_tv<KindOfInt64>(idx++), t);
       }
       elems.emplace_back(*v, val);
-      pack = map_impl(pack.bits(), std::move(elems), TBottom, TBottom, tag);
+      pack = map_impl(pack.bits(), std::move(elems), TBottom, TBottom,
+                      tag, pack.getMark());
       return true;
     }
 
     auto ty = union_of(packed_values(*pack.m_data.packed), val);
-    pack = mapn_impl(pack.bits(), union_of(TInt, key.type), std::move(ty), tag);
+    pack = mapn_impl(pack.bits(), union_of(TInt, key.type), std::move(ty),
+                     tag, pack.getMark());
     return false;
   }
 
@@ -5717,13 +5814,15 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     if (vecish) return { TBottom, ThrowMode::BadOperation };
     if (fixedKey.i) {
       if (!*fixedKey.i) {
-        return { packed_impl(bits, { val }, tag), throwMode };
+        return { packed_impl(bits, { val }, tag, arr.getMark()), throwMode };
       }
     }
     if (auto const k = fixedKey.tv()) {
       MapElems m;
       m.emplace_back(*k, val);
-      return { map_impl(bits, std::move(m), TBottom, TBottom, tag), throwMode };
+      return { map_impl(bits, std::move(m), TBottom, TBottom,
+                        tag, arr.getMark()),
+               throwMode };
     }
     return { mapn_impl_from_map(bits, fixedKey.type, val, tag), throwMode };
   }
@@ -5762,7 +5861,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
         return array_like_set(
-          packed_impl(bits, std::move(d->elems), d->provenance),
+          packed_impl(bits, std::move(d->elems), d->provenance, d->mark),
           key, valIn, src
         );
       }
@@ -5776,7 +5875,8 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
           std::move(d->map),
           std::move(d->optKey),
           std::move(d->optVal),
-          d->provenance
+          d->provenance,
+          d->mark
         ),
         key, valIn, src
       );
@@ -5860,13 +5960,15 @@ std::pair<Type,Type> array_like_newelem(Type arr,
 
   if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
-    return { packed_impl(bits, { val }, arr_like_update_prov_tag(arr, src)),
+    return { packed_impl(bits, { val },
+                         arr_like_update_prov_tag(arr, src), arr.getMark()),
              ival(0) };
   }
 
 
   auto emptyHelper = [&] (const Type& inKey,
-                          const Type& inVal) -> std::pair<Type,Type> {
+                          const Type& inVal,
+                          LegacyMark mark) -> std::pair<Type,Type> {
     if (isVector || isVArray) {
       assert(inKey.subtypeOf(BInt));
       return { packedn_impl(bits, union_of(inVal, val)), TInt };
@@ -5899,11 +6001,12 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   case DataTag::ArrLikeVal:
     if (maybeEmpty) {
       auto kv = val_key_values(arr.m_data.aval);
-      return emptyHelper(kv.first, kv.second);
+      return emptyHelper(kv.first, kv.second, arr.getMark());
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
         return array_like_newelem(
-          packed_impl(bits, std::move(d->elems), d->provenance), val, src);
+          packed_impl(bits, std::move(d->elems), d->provenance, d->mark),
+          val, src);
       }
       assert(!isVector);
       assert(!isVArray);
@@ -5915,7 +6018,8 @@ std::pair<Type,Type> array_like_newelem(Type arr,
           std::move(d->map),
           std::move(d->optKey),
           std::move(d->optVal),
-          d->provenance
+          d->provenance,
+          d->mark
         ),
         val, src
       );
@@ -5923,7 +6027,8 @@ std::pair<Type,Type> array_like_newelem(Type arr,
 
   case DataTag::ArrLikePacked:
     if (maybeEmpty) {
-      return emptyHelper(TInt, packed_values(*arr.m_data.packed));
+      return emptyHelper(TInt, packed_values(*arr.m_data.packed),
+                         arr.getMark());
     } else {
       arr.m_bits = bits;
       auto len = arr.m_data.packed->elems.size();
@@ -5935,7 +6040,7 @@ std::pair<Type,Type> array_like_newelem(Type arr,
 
   case DataTag::ArrLikePackedN:
     if (maybeEmpty) {
-      return emptyHelper(TInt, arr.m_data.packedn->type);
+      return emptyHelper(TInt, arr.m_data.packedn->type, arr.getMark());
     } else {
       arr.m_bits = bits;
       auto packedn = arr.m_data.packedn.mutate();
@@ -5948,7 +6053,7 @@ std::pair<Type,Type> array_like_newelem(Type arr,
     assert(!isVArray);
     if (maybeEmpty) {
       auto mkv = map_key_values(*arr.m_data.map);
-      return emptyHelper(mkv.first, mkv.second);
+      return emptyHelper(mkv.first, mkv.second, arr.getMark());
     } else {
       arr.m_bits = bits;
       auto const idx = arr_map_newelem(arr, val, src);
@@ -5959,7 +6064,8 @@ std::pair<Type,Type> array_like_newelem(Type arr,
     assert(!isVector);
     assert(!isVArray);
     if (maybeEmpty) {
-      return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
+      return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val,
+                         arr.getMark());
     }
     return {
       mapn_impl_from_map(

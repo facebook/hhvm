@@ -1,4 +1,2 @@
-File "reassign_in_foreach5.php", line 11, characters 12-13:
-Cannot traverse over non-reactive traversable in reactive code. (Typing[4267])
 File "reassign_in_foreach5.php", line 11, characters 24-25:
 Cannot assign immutable value to mutably-owned local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

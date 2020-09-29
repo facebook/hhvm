@@ -40,6 +40,10 @@ let check_foreach_collection env p ty =
         let (env, ty) = Env.expand_type env ty in
         match get_node ty with
         | Tunion l -> List.for_all l ~f:check
+        | Tdynamic ->
+          (* If it's a dynamic, we have no way of knowing whether or not it's
+              valid. Let it fail at runtime *)
+          true
         | _ ->
           (* collection type should be subtype or conditioned to Rx\Traversable *)
           if

@@ -2349,7 +2349,7 @@ and simplify_subtype_reactivity
   (* local can call into non-reactive, but not for inheritance *)
   | (Nonreactive, Local _) when is_call_site -> valid env
   (* Cipp(Local) can call pure *)
-  | (Pure _, (Cipp _ | CippLocal _)) -> valid env
+  | (Pure _, (Cipp _ | CippLocal _ | CippRx)) -> valid env
   (* Cipp can call Cipp(Local) if the params match *)
   | (Cipp x, Cipp y) when Option.is_none x || Option.equal String.equal x y ->
     valid env

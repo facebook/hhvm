@@ -1483,10 +1483,6 @@ module PrintClass = struct
     let contents = SSet.fold (fun x acc -> x ^ " " ^ acc) s "" in
     Printf.sprintf "Set( %s)" contents
 
-  let sseq s =
-    let contents = Sequence.fold s ~init:"" ~f:(fun acc x -> x ^ " " ^ acc) in
-    Printf.sprintf "Seq( %s)" contents
-
   let pos p =
     let (line, start, end_) = Pos.info_pos p in
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
@@ -1690,8 +1686,10 @@ module PrintClass = struct
     let tc_construct = constructor ctx (Cls.construct c) in
     let tc_ancestors = ancestors ctx (Cls.all_ancestors c) in
     let tc_req_ancestors = req_ancestors ctx (Cls.all_ancestor_reqs c) in
-    let tc_req_ancestors_extends = sseq (Cls.all_ancestor_req_names c) in
-    let tc_extends = sseq (Cls.all_extends_ancestors c) in
+    let tc_req_ancestors_extends =
+      String.concat ~sep:" " (Cls.all_ancestor_req_names c)
+    in
+    let tc_extends = String.concat ~sep:" " (Cls.all_extends_ancestors c) in
     "tc_need_init: "
     ^ tc_need_init
     ^ "\n"

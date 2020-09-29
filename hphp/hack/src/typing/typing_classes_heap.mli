@@ -7,7 +7,6 @@
  *
  *)
 
-open Hh_prelude
 open Typing_defs
 
 module Classes : sig
@@ -94,9 +93,9 @@ module Api : sig
 
   val all_ancestor_reqs : t -> requirement list
 
-  val all_ancestor_req_names : t -> string Sequence.t
+  val all_ancestor_req_names : t -> string list
 
-  val all_extends_ancestors : t -> string Sequence.t
+  val all_extends_ancestors : t -> string list
 
   val get_const : t -> string -> class_const option
 

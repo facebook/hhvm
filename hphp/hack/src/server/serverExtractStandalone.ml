@@ -1359,7 +1359,7 @@ let get_implementation_dependencies ctx env cls_name =
       List.fold ~init:[] ~f:add_impls (Class.all_ancestor_names cls)
     in
     let result =
-      Sequence.fold ~init:result ~f:add_impls (Class.all_ancestor_req_names cls)
+      List.fold ~init:result ~f:add_impls (Class.all_ancestor_req_names cls)
     in
     result
 

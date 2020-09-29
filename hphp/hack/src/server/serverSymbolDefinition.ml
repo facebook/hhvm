@@ -118,8 +118,10 @@ let go ctx ast result =
                Cls.get_method )
                cls
                method_name)
-      (* Take the earliest method in the linearization, if any. *)
-      |> List.rev
+      (* It'd be nice to take the "earliest" method in the linearization,
+      whatever that is. But alas order of all_ancestor_names isn't
+      specified (in practice is alphabetical). So we'll just pick an
+      arbitrary one. *)
       |> List.hd
     in
     (match matching_method with

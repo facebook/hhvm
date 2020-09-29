@@ -88,12 +88,11 @@ let rec mem t id =
     | Yield _ ->
       mem t id
 
-let rec to_seq t =
+let rec to_list t =
   match advance t with
   | Skipped
   | Yield _ ->
-    to_seq t
+    to_list t
   | Complete ->
-    Hashtbl.to_alist t.tbl
-    |> Sequence.of_list
-    |> Sequence.map ~f:(Tuple.T2.map_snd ~f:fst)
+    Hashtbl.fold t.tbl ~init:[] ~f:(fun ~key ~data acc ->
+        (key, fst data) :: acc)

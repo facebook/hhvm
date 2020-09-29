@@ -75,6 +75,5 @@ val get : 'a t -> string -> 'a option
     emitted any value for the given key. *)
 val mem : 'a t -> string -> bool
 
-(** Eagerly exhaust the input sequence, then return a sequence iterating over
-    all values stored in the cache, in undefined order. *)
-val to_seq : 'a t -> (string * 'a) Sequence.t
+(** Eagerly exhaust the input sequence, then return all values, in undefined order. *)
+val to_list : 'a t -> (string * 'a) list

@@ -32,3 +32,5 @@ val rpc_get_type_path_and_kind :
 val rpc_get_fun_canon_name : t -> string -> string option
 
 val rpc_get_type_canon_name : t -> string -> string option
+
+val parse_and_cache_decls_in : t -> Relative_path.t -> string -> unit

@@ -113,8 +113,10 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Const name in
-    let gconst_ty_opt: Typing_defs.const_decl option = pointer_to_option ptr in
-    let gconst_ty_opt = Option.map gconst_ty_opt (fun c -> c.Typing_defs.cd_type)  in
+    let gconst_ty_opt : Typing_defs.const_decl option = pointer_to_option ptr in
+    let gconst_ty_opt =
+      Option.map gconst_ty_opt (fun c -> c.Typing_defs.cd_type)
+    in
     String.Table.add_exn t.gconst_cache name gconst_ty_opt;
     let path_opt =
       Option.map gconst_ty_opt ~f:(fun ty ->
@@ -163,3 +165,36 @@ let rpc_get_fun_canon_name (t : t) (name : string) : string option =
 
 let rpc_get_type_canon_name (t : t) (name : string) : string option =
   Decl_ipc_ffi_externs.get_type_canon_name t.client name
+
+let parse_and_cache_decls_in
+    (t : t) (filename : Relative_path.t) (contents : string) : unit =
+  let decls = Direct_decl_parser.parse_decls_ffi filename contents in
+  let open Direct_decl_parser in
+  decls.classes
+  |> SMap.iter (fun name decl ->
+         add_to_cache t.class_cache name (Some decl);
+         let path_and_kind_opt =
+           Some
+             ( Pos.filename (fst decl.Shallow_decl_defs.sc_name),
+               Naming_types.TClass )
+         in
+         add_to_cache t.type_path_and_kind_cache name path_and_kind_opt);
+  decls.funs
+  |> SMap.iter (fun name decl ->
+         add_to_cache t.fun_cache name (Some decl);
+         let path_opt = Some (Pos.filename decl.Typing_defs.fe_pos) in
+         add_to_cache t.fun_path_cache name path_opt);
+  decls.typedefs
+  |> SMap.iter (fun name decl ->
+         add_to_cache t.typedef_cache name (Some decl);
+         let path_and_kind_opt =
+           Some (Pos.filename decl.Typing_defs.td_pos, Naming_types.TTypedef)
+         in
+         add_to_cache t.type_path_and_kind_cache name path_and_kind_opt);
+  decls.consts
+  |> SMap.iter (fun name decl ->
+         let decl = decl.Typing_defs.cd_type in
+         add_to_cache t.gconst_cache name (Some decl);
+         let path_opt = Some (Pos.filename (Typing_defs.get_pos decl)) in
+         add_to_cache t.gconst_path_cache name path_opt);
+  ()

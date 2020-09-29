@@ -57,7 +57,7 @@ let compute_tast_and_errors_unquarantined_internal
     let t = Unix.gettimeofday () in
 
     (* do the work *)
-    let ({ Parser_return.ast; _ }, ast_errors) =
+    let ({ Parser_return.ast; content; _ }, ast_errors) =
       Ast_provider.compute_parser_return_and_ast_errors
         ~popt:(Provider_context.get_popt ctx)
         ~entry
@@ -92,6 +92,12 @@ let compute_tast_and_errors_unquarantined_internal
                 Naming.program ctx ast)
           in
           (Errors.merge nast_errors reverse_naming_table_errors, nast))
+    in
+    let () =
+      Decl_provider.prepare_for_typecheck
+        ctx
+        entry.Provider_context.path
+        content
     in
     let (typing_errors, tast) =
       let do_tast_checks =

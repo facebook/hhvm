@@ -48,9 +48,7 @@
   (name direct_decl_parser)
   (modules direct_decl_parser)
   (libraries
-    ast_provider
     shallow_decl_defs
-    procs_procs
     typing_defs
     decl_rust_ffi)
   (preprocess (pps ppx_deriving.std)))

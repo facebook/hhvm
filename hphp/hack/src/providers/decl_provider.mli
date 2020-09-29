@@ -32,6 +32,9 @@ type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.decl_ty
 
+val prepare_for_typecheck :
+  Provider_context.t -> Relative_path.t -> string -> unit
+
 val get_fun : Provider_context.t -> fun_key -> fun_decl option
 
 val get_class : Provider_context.t -> class_key -> class_decl option

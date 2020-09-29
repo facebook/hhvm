@@ -41,8 +41,10 @@
   (name decl_service_client)
   (modules decl_service_client)
   (libraries
+    collections
     core_kernel
     decl_ipc_ffi_externs
+    direct_decl_parser
     marshal_tools
     naming_types
     relative_path
@@ -165,6 +167,7 @@
   (name tast_provider)
   (modules tast_provider)
   (libraries
+    decl_provider
     provider_utils
     tast
     typing)

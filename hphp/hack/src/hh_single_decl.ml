@@ -67,7 +67,7 @@ let compare_decl ctx verbosity fn =
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
   let decls =
-    time verbosity "Parsed decls" (fun () -> parse_decls ~contents:text fn)
+    time verbosity "Parsed decls" (fun () -> parse_decls_ffi fn text)
   in
   let facts =
     Option.value_exn

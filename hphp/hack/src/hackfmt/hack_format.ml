@@ -1519,7 +1519,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                 t env false_expr );
             ] )
     | Syntax.FunctionCallExpression _ -> handle_possible_chaining env node
-    | Syntax.FunctionPointerExpression _ -> handle_possible_chaining env node
+    | Syntax.FunctionPointerExpression _ -> transform_simple env node
     | Syntax.EvalExpression
         {
           eval_keyword = kw;
@@ -2706,6 +2706,19 @@ and handle_possible_chaining env node =
         } ->
       handle_member_selection acc (obj, arrow, member, None) None
     | _ -> (node, [])
+  in
+  (* It's easy to end up with an infinite loop by passing an unexpected node
+     kind here, so confirm that we have an expected kind in hand. *)
+  let () =
+    match Syntax.kind node with
+    | SyntaxKind.FunctionCallExpression
+    | SyntaxKind.MemberSelectionExpression
+    | SyntaxKind.SafeMemberSelectionExpression ->
+      ()
+    | kind ->
+      failwith
+        ( "Unexpected SyntaxKind in handle_possible_chaining: "
+        ^ SyntaxKind.show kind )
   in
   (* Flatten nested member selection expressions into the first receiver and a
      list of member selections.

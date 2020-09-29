@@ -6,6 +6,7 @@ export OCAML_VARIANT=+fp
 export HACK_OPAM_DEPS=(
   base.v0.11.1
   base64.2.2.0
+  cmdliner.1.0.4
   core.v0.11.3
   core_kernel.v0.11.1
   dtoa.0.3.1

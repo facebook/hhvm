@@ -1123,7 +1123,7 @@ function nl_langinfo(int $item): mixed;
  *   values. The optional parameters must be passed by reference.
  *
  */
-<<__Native>>
+<<__Native, __Pure>>
 function sscanf(string $str, string $format): mixed;
 
 /**

@@ -497,7 +497,7 @@ pub const functions_cannot_implement_reactive: Error =
     Cow::Borrowed("`__OnlyRxIfImpl` annotations are only valid on class methods.");
 pub const missing_reactivity_for_condition: Error = Cow::Borrowed(concat!(
     "`__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot ",
-    "be used without `__Rx`, `__RxShallow`, or `__RxLocal`.",
+    "be used without `__Pure`, `__Rx`, `__RxShallow`, or `__RxLocal`.",
 ));
 pub const conflicting_mutable_and_owned_mutable_attributes: Error =
     Cow::Borrowed("Parameter cannot have both `__Mutable` and `__OwnedMutable` annotations.");

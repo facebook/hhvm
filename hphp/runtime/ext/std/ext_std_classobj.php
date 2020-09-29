@@ -23,7 +23,7 @@ function class_exists(string $class_name,
  *
  * @return array - Returns an associative array of constants with their values.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __Pure>>
 function get_class_constants(string $class_name): darray<string, mixed>;
 
 /**
@@ -34,7 +34,7 @@ function get_class_constants(string $class_name): darray<string, mixed>;
  * @return array - Returns an array of method names defined for the class
  *   specified by class_name. In case of an error, it returns NULL.
  */
-<<__Native>>
+<<__Native, __Pure>>
 function get_class_methods(mixed $class_name): ?varray;
 
 /**
@@ -42,10 +42,11 @@ function get_class_methods(mixed $class_name): ?varray;
  *
  * @param string $class_name - The class name
  *
- * @return array - Returns an associative array of declared properties
- *   visible from the current scope, with their default value. The
- *   resulting array elements are in the form of varname => value. In case
- *   of an error, it returns FALSE.
+ * @return array - Returns an associative array of the declared properties
+ *   visible from the current scope to their appropriate values. Values for
+ *   instance property keys are their default value, and values for static
+ *   properties are their current values. The resulting array elements are in
+ *   the form of varname => value. In case of an error, it returns FALSE.
  */
 <<__Native>>
 function get_class_vars(string $class_name): mixed;

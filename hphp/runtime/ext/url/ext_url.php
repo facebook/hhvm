@@ -78,7 +78,7 @@ function get_meta_tags(string $filename,
  *
  * @return string - Returns a URL-encoded string.
  */
-<<__Native, __IsFoldable>>
+<<__Native, __IsFoldable, __Pure>>
 function http_build_query(
   mixed $query_data,
   ?string $numeric_prefix = "",

@@ -20,54 +20,54 @@ namespace {
 function array_key_exists(mixed $key, <<__MaybeMutable>> ?KeyedContainer<arraykey, mixed> $search): bool;
 
 <<__PHPStdLib, __Pure>>
-function array_sum/*<T>*/(/*Container<T>*/ $input)/*: num*/;
+function array_sum/*<T>*/(<<__MaybeMutable>> /*Container<T>*/ $input)/*: num*/;
 <<__PHPStdLib, __Pure>>
-function array_product/*<T>*/(/*Container<T>*/ $input)/*: num*/;
+function array_product/*<T>*/(<<__MaybeMutable>> /*Container<T>*/ $input)/*: num*/;
 
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function sort<T as Container<mixed>>(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
+  inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function rsort<T as Container<mixed>>(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
+  inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function asort<Tk as arraykey, Tv>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
+  inout KeyedContainer<Tk, Tv> $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function arsort<Tk as arraykey, Tv>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
+  inout KeyedContainer<Tk, Tv> $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function ksort<T as KeyedContainer<arraykey, mixed>>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout T $arg,
+  inout T $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function krsort<Tk as arraykey, Tv>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
+  inout KeyedContainer<Tk, Tv> $arg,
   int $sort_flags = SORT_REGULAR,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function usort<Tv, T as Container<Tv>>(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
-  <<__AtMostRxAsFunc>> (function(Tv, Tv): num) $c,
+  inout T $arg,
+  (function(Tv, Tv): num) $c,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function uasort<Tk as arraykey, Tv>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
-  <<__AtMostRxAsFunc>> (function(Tv, Tv): num) $c,
+  inout KeyedContainer<Tk, Tv> $arg,
+  (function(Tv, Tv): num) $c,
 ): bool;
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+<<__PHPStdLib>>
 function uksort<Tk as arraykey, Tv>(
-  <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
-  <<__AtMostRxAsFunc>> (function(Tk, Tk): num) $c,
+  inout KeyedContainer<Tk, Tv> $arg,
+  (function(Tk, Tk): num) $c,
 ): bool;
 
 }

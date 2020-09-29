@@ -65,7 +65,7 @@ function strval($v): string;
 <<__PHPStdLib, __Pure>>
 function boolval($v): bool;
 
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure>>
 function get_class_constants(string $class_name): darray<string, mixed>;
 
 // the return value is an instance with class $class

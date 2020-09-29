@@ -53,21 +53,21 @@ const int UCOL_NUMERIC_COLLATION = 0;
 const int TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS = 0;
 
 <<__PHPStdLib, __Pure>>
-function array_change_key_case<Tv>(KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER): darray<arraykey, Tv>;
+function array_change_key_case<Tv>(<<__MaybeMutable>> KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER): darray<arraykey, Tv>;
 /** inner container will be a varray or darray depending on $preserve_keys */
 <<__PHPStdLib, __Pure>>
-function array_chunk<Tv>(Container<Tv> $input, int $size, bool $preserve_keys = false): varray<Container<int>>;
+function array_chunk<Tv>(<<__MaybeMutable>> Container<Tv> $input, int $size, bool $preserve_keys = false): varray<Container<int>>;
 <<__PHPStdLib, __Pure>>
-function array_combine<Tv1 as arraykey, Tv2>(Container<Tv1> $keys, Container<Tv2> $values): darray<Tv1, Tv2>;
+function array_combine<Tv1 as arraykey, Tv2>(<<__MaybeMutable>> Container<Tv1> $keys, <<__MaybeMutable>> Container<Tv2> $values): darray<Tv1, Tv2>;
 <<__PHPStdLib, __Pure>>
 function array_count_values<Tv as arraykey>(Container<Tv> $input): darray<Tv, int>;
 <<__PHPStdLib, __Pure>>
 function array_column<Tv>(
-  Container<KeyedContainer<arraykey, Tv>> $array,
+  <<__MaybeMutable>> Container<KeyedContainer<arraykey, Tv>> $array,
   ?arraykey $column_key,
 ): varray_or_darray<Tv>;
 <<__PHPStdLib, __Pure>>
-function array_fill_keys($keys, $value);
+function array_fill_keys(<<__MaybeMutable>> $keys, $value);
 /*
  * Calls to array_filter are rewritten depending on the type
  * of argument to have one of the following signatures:
@@ -84,12 +84,12 @@ function array_fill_keys($keys, $value);
 <<__PHPStdLib>>
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
 <<__PHPStdLib, __Pure>>
-function array_flip($trans);
+function array_flip(<<__MaybeMutable>> $trans);
 <<__PHPStdLib, __Pure>>
-function key_exists($key, $search);
+function key_exists($key, <<__MaybeMutable>> $search);
 <<__PHPStdLib, __Pure>>
 function array_keys<Tk as arraykey>(
-  KeyedContainer<Tk, mixed> $input,
+  <<__MaybeMutable>> KeyedContainer<Tk, mixed> $input,
 ): varray<Tk>;
 /**
  * array_map signature is rewritten based on the arity of the call:
@@ -197,7 +197,7 @@ function array_multisort9(
   inout mixed $arg9,
 );
 <<__PHPStdLib, __Pure>>
-function array_pad($input, int $pad_size, $pad_value);
+function array_pad(<<__MaybeMutable>> $input, int $pad_size, $pad_value);
 <<__PHPStdLib>>
 function array_pop(inout $array);
 <<__PHPStdLib>>
@@ -207,35 +207,35 @@ function array_rand($input, int $num_req = 1);
 <<__PHPStdLib>>
 function array_reduce($input, $callback, $initial = null);
 <<__PHPStdLib, __Pure>>
-function array_reverse($array, bool $preserve_keys = false);
+function array_reverse(<<__MaybeMutable>> $array, bool $preserve_keys = false);
 <<__PHPStdLib, __Pure>>
-function array_search($needle, $haystack, bool $strict = false);
+function array_search($needle, <<__MaybeMutable>> $haystack, bool $strict = false);
 <<__PHPStdLib>>
 function array_shift(inout $array);
 <<__PHPStdLib, __Pure>>
-function array_slice($array, int $offset, $length = null, bool $preserve_keys = false);
-<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
+function array_slice(<<__MaybeMutable>> $array, int $offset, $length = null, bool $preserve_keys = false);
+<<__PHPStdLib>>
 function array_splice(
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $input,
+  inout mixed $input,
   int $offset,
   mixed $length = null,
-  <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
+  mixed $replacement = null,
 );
 <<__PHPStdLib, __Pure>>
-function array_unique($array, int $sort_flags = 2);
+function array_unique(<<__MaybeMutable>> $array, int $sort_flags = 2);
 <<__PHPStdLib>>
 function array_unshift(inout $array, $var, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_values<Tv>(Container<Tv> $input): varray<Tv>;
+function array_values<Tv>(<<__MaybeMutable>> Container<Tv> $input): varray<Tv>;
 <<__PHPStdLib>>
 function shuffle(inout $array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Pure>>
-function sizeof($var);
+function sizeof(<<__MaybeMutable>> $var);
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable);
 <<__PHPStdLib, __Pure>>
-function in_array($needle, $haystack, bool $strict = false);
+function in_array($needle, <<__MaybeMutable>> $haystack, bool $strict = false);
 <<__PHPStdLib, __Pure>>
 function range($low, $high, $step = 1);
 <<__PHPStdLib, __Pure>>

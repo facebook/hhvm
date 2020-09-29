@@ -1,1 +1,1 @@
-Fatal error: `__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Rx`, `__RxShallow`, or `__RxLocal`. in %s/test/slow/rx/missing_reactivity5.php on line 3
+Fatal error: `__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Pure`, `__Rx`, `__RxShallow`, or `__RxLocal`. in %s/test/slow/rx/missing_reactivity5.php on line 3

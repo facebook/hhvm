@@ -15,7 +15,7 @@
  *                  returned.
  *                  On error, FALSE is returned.
  */
-<<__Native,__IsFoldable, __Pure>>
+<<__Native>>
 function hash(string $algo, string $data,
               bool $raw_output = false): mixed;
 
@@ -25,7 +25,7 @@ function hash(string $algo, string $data,
  * @return array - A numerically indexed array containing the list of
  *                  supported hashing algorithms.
  */
-<<__Native,__IsFoldable, __Pure>>
+<<__Native, __IsFoldable, __Pure>>
 function hash_algos(): varray<string>;
 
 /**
@@ -79,7 +79,6 @@ function hash_final(resource $context, bool $raw_output = false): mixed;
  *                  returned.
  *                  On error, FALSE is returned.
  */
-<<__IsFoldable>>
 function hash_hmac(string $algo,
                    mixed $data,
                    string $key,
@@ -253,7 +252,6 @@ function hash_copy(resource $context): mixed;
  *                  unless raw_output is set to TRUE in which case the raw
  *                  binary representation of the derived key is returned.
  */
-<<__IsFoldable>>
 function hash_pbkdf2(string $algo, string $password, string $salt,
                      int $iterations, int $length = 0,
                      bool $raw_output = false): mixed {
@@ -321,10 +319,10 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
  *
  * @return bool - Whether $known == $user
  */
-// While this function could be marked __IsFoldable, __Pure, doing so would defeat
+// While this function could be marked __IsFoldable, doing so would defeat
 // the purpose of having a comparison function which takes a fixed amount
 // of time.
-<<__Native>>
+<<__Native, __Pure>>
 function hash_equals(mixed $known, mixed $user): bool;
 
 /**

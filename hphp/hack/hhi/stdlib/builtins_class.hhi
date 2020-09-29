@@ -23,7 +23,7 @@ function class_exists(string $class_name, bool $autoload = true): bool;
 function interface_exists(string $interface_name, bool $autoload = true): bool;
 <<__PHPStdLib, __Pure>>
 function trait_exists(string $trait_name, bool $autoload = true): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Pure>>
 function get_class_methods($class_or_object): ?varray_or_darray<string>;
 <<__PHPStdLib>>
 function get_class_vars(string $class_name);

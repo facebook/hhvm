@@ -207,7 +207,7 @@ class Foo {
 
 <<__EntryPoint>>
 function main_object_methods() {
-echo Bar::forEach();
+echo Bar::foreach();
 $foo = new Foo();
 echo $foo->callable();
 echo $foo->class();

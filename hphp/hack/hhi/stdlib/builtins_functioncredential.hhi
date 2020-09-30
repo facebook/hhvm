@@ -19,7 +19,7 @@ final class FunctionCredential {
 
   public final function getFunctionName(): string;
 
-  public final function getFileName(): string;
+  public final function getFilename(): string;
 
   public final function __getDebugInfo(): darray;
 }

@@ -135,7 +135,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   c_WaitableWaitHandle* getChild();
   void exitContext(context_idx_t ctx_idx);
   bool isRunning() { return getState() == STATE_RUNNING; }
-  String getFileName();
+  String getFilename();
   Offset getNextExecutionOffset();
 
   Resumable* resumable() const {

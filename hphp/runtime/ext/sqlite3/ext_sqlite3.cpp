@@ -303,7 +303,7 @@ String HHVM_METHOD(SQLite3, lasterrormsg) {
   return String((char*)sqlite3_errmsg(data->m_raw_db), CopyString);
 }
 
-bool HHVM_METHOD(SQLite3, loadextension,
+bool HHVM_METHOD(SQLite3, loadExtension,
                  const String& extension) {
   auto *data = Native::data<SQLite3>(this_);
   data->validate();
@@ -782,7 +782,7 @@ static struct SQLite3Extension final : Extension {
     HHVM_ME(SQLite3, lastinsertrowid);
     HHVM_ME(SQLite3, lasterrorcode);
     HHVM_ME(SQLite3, lasterrormsg);
-    HHVM_ME(SQLite3, loadextension);
+    HHVM_ME(SQLite3, loadExtension);
     HHVM_ME(SQLite3, changes);
     HHVM_ME(SQLite3, prepare);
     HHVM_ME(SQLite3, query);

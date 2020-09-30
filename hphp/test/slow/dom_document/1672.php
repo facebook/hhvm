@@ -143,12 +143,12 @@ echo "--------- Find element by tagname
 ";
 echo "    Using dom
 ";
-$children = $dom->getElementsByTagname("Silly");
+$children = $dom->getElementsByTagName("Silly");
 print_node_list($children);
 
 echo "    Using elem
 ";
-$children = $rootnode->getElementsByTagname("Silly");
+$children = $rootnode->getElementsByTagName("Silly");
 print_node_list($children);
 
 echo "--------- Unlink Node

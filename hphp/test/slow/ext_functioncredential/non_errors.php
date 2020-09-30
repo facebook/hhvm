@@ -14,7 +14,7 @@ function run_test(
 
   $class_name = $cred->getClassName();
   $function_name = $cred->getFunctionName();
-  $file_name_pieces = $cred->getFileName()
+  $file_name_pieces = $cred->getFilename()
     |> explode('/', $$);
   $file_name_stripped = $file_name_pieces[count($file_name_pieces) - 1];
 

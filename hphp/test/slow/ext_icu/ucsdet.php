@@ -14,14 +14,14 @@ function getunicode($x) { return json_decode("\"" . $x . "\""); }
 
 function detect_and_convert_to_utf8($bytes, $utf8) {
   $detector = new EncodingDetector();
-  $detector->settext($bytes);
+  $detector->setText($bytes);
   $match = $detector->detect();
-  if (!$match->isvalid()) {
+  if (!$match->isValid()) {
     return false;
   }
-  // echo "Got: " . $match->getutf8() . "\n";
+  // echo "Got: " . $match->getUTF8() . "\n";
   // echo "Want: " . $utf8 . "\n";
-  return $match->getutf8() == $utf8;
+  return $match->getUTF8() == $utf8;
 }
 
 function test_basics() {
@@ -30,33 +30,33 @@ function test_basics() {
 
   $detector = new EncodingDetector();
 
-  $detector->settext($utf8_snowman_with_bom);
+  $detector->setText($utf8_snowman_with_bom);
   $match = $detector->detect();
-  VERIFY($match->isvalid() == true);
-  VERIFY($match->getencoding() == "UTF-8");
-  VERIFY($match->getconfidence() == 100);
-  VERIFY($match->getutf8() == $utf8_snowman_with_bom);
+  VERIFY($match->isValid() == true);
+  VERIFY($match->getEncoding() == "UTF-8");
+  VERIFY($match->getConfidence() == 100);
+  VERIFY($match->getUTF8() == $utf8_snowman_with_bom);
 }
 
 function test_cannot_detect() {
   $detector = new EncodingDetector();
 
   // The detector has no idea what to do with this.
-  $detector->settext("\x74\x68\xa1");
+  $detector->setText("\x74\x68\xa1");
   $match = $detector->detect();
-  VERIFY($match->isvalid() == false);
+  VERIFY($match->isValid() == false);
 }
 
 function test_declared_encoding() {
   // Right now (ICU 4.6), this API doesn't actually do anything, but
   // let's at least verify it doesn't crash.
   $detector = new EncodingDetector();
-  $detector->settext("Yo!");
-  $detector->setdeclaredencoding("windows-1251");
+  $detector->setText("Yo!");
+  $detector->setDeclaredEncoding("windows-1251");
 
   $match = $detector->detect();
-  VERIFY($match->isvalid() == true);
-  VERIFY($match->getutf8() == "Yo!");
+  VERIFY($match->isValid() == true);
+  VERIFY($match->getUTF8() == "Yo!");
 }
 
 function test_hello_world() {

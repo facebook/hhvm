@@ -6,5 +6,5 @@ function main_systemlib() {
 $rc = new ReflectionMethod('FilesystemIterator', 'setFlags');
 $flags = $rc->getParameters()[0];
 var_dump($flags->getClass());
-var_dump($flags->getTypeHintText());
+var_dump($flags->getTypehintText());
 }

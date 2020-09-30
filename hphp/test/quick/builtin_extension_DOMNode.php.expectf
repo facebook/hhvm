@@ -21,8 +21,8 @@ varray(19) {
   string(9) "normalize"
   string(11) "removeChild"
   string(12) "replaceChild"
-  string(4) "c14n"
-  string(8) "c14nfile"
+  string(4) "C14N"
+  string(8) "C14Nfile"
   string(11) "getNodePath"
   string(11) "__debugInfo"
 }
@@ -52,8 +52,8 @@ varray(19) {
   string(9) "normalize"
   string(11) "removeChild"
   string(12) "replaceChild"
-  string(4) "c14n"
-  string(8) "c14nfile"
+  string(4) "C14N"
+  string(8) "C14Nfile"
   string(11) "getNodePath"
   string(11) "__debugInfo"
 }

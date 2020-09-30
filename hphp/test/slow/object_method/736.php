@@ -130,9 +130,9 @@ echo "1 1 13 34 12 == ",$g->f(1)," ", $g->f1(1),"  ",
      $g->f2(1)," ",$g->flongerthan8(10,11,12,13,14,15,16),
      " ",$g->f4(0),"\n";
 // check case insensitive
-echo "1 1 13 34 12 == ",$g->F(1)," ", $g->F1(1),"  ",
-     $g->F2(1)," ",$g->Flongerthan8(10,11,12,13,14,15,16),
-     " ",$g->F4(0),"\n";
+echo "1 1 13 34 12 == ",$g->f(1)," ", $g->f1(1),"  ",
+     $g->f2(1)," ",$g->flongerthan8(10,11,12,13,14,15,16),
+     " ",$g->f4(0),"\n";
 
 // check SimpleFunctionCall::outputCPPParamOrderControlled
 $prev_handler=set_error_handler(fun("error_handler"));

@@ -172,13 +172,13 @@ class DOMNode {
   public function replaceChild(DOMNode $newchildobj, DOMNode $oldchildobj): mixed;
 
   <<__Native>>
-  public function c14n(bool $exclusive = false,
+  public function C14N(bool $exclusive = false,
                 bool $with_comments = false,
                 mixed $xpath = null,
                 mixed $ns_prefixes = null): mixed;
 
   <<__Native>>
-  public function c14nfile(string $uri,
+  public function C14Nfile(string $uri,
                     bool $exclusive = false,
                     bool $with_comments = false,
                     mixed $xpath = null,

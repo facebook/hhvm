@@ -342,7 +342,7 @@ class ZipArchive {
    * @return bool - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  public function setCompressionNAme(string $name, int $comp_method,
+  public function setCompressionName(string $name, int $comp_method,
                               int $comp_flags = 0): bool;
 
   /**

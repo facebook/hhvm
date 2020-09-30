@@ -428,7 +428,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     $ret .= $this->getName() . " ] {\n";
 
     if ($this->getStartLine() > 0) {
-      $ret .= "  @@ {$this->getFilename()} " .
+      $ret .= "  @@ {$this->getFileName()} " .
               "{$this->getStartLine()} - {$this->getEndLine()}\n";
     }
 
@@ -1148,7 +1148,7 @@ class ReflectionClass implements Reflector {
     }
     $ret .= " ] {\n";
     if ($this->getStartLine() > 0) {
-      $ret .= "  @@ {$this->getFilename()} " .
+      $ret .= "  @@ {$this->getFileName()} " .
               "{$this->getStartLine()}-{$this->getEndLine()}\n";
     }
 

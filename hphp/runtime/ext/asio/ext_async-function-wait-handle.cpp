@@ -350,7 +350,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 }
 
 // Get the filename in which execution will proceed when execution resumes.
-String c_AsyncFunctionWaitHandle::getFileName() {
+String c_AsyncFunctionWaitHandle::getFilename() {
   if (actRec()->func()->originalFilename()) {
     return actRec()->func()->originalFilename()->data();
   } else {

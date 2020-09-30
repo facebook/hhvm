@@ -16,13 +16,13 @@ final class FunctionCredential {
   public final function getFunctionName(): string;
 
   <<__Native>>
-  public final function getFileName(): string;
+  public final function getFilename(): string;
 
   public final function __debugInfo(): darray {
     return darray[
       'class_name' => $this->getClassName(),
       'function_name' => $this->getFunctionName(),
-      'file_name' => $this->getFileName(),
+      'file_name' => $this->getFilename(),
     ];
   }
 }

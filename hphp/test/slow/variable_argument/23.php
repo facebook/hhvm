@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  public static function Add($x, $y) {
+  public static function add($x, $y) {
 }
 }
 

@@ -119,7 +119,7 @@ function test_function_reflector() {
   \var_dump($foo__bar_reflector->getName());
 
   $baz3 = new Baz3();
-  $baz3_reflector = new ReflectionFunction($baz3->createCLosure());
+  $baz3_reflector = new ReflectionFunction($baz3->createClosure());
   \var_dump($baz3_reflector->getName());
 
   $closure = function() {};

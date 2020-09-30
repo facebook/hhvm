@@ -40,13 +40,13 @@ VERIFY($xml->fullEndElement());
 VERIFY($xml->endElement());
 
 VERIFY($xml->startElement("node"));
-VERIFY($xml->startCdata());
+VERIFY($xml->startCData());
 VERIFY($xml->text("Raw text"));
-VERIFY($xml->endCdata());
+VERIFY($xml->endCData());
 VERIFY($xml->endElement());
 
 VERIFY($xml->startElement("node"));
-VERIFY($xml->writeCdata("More CDATA"));
+VERIFY($xml->writeCData("More CDATA"));
 VERIFY($xml->endElement());
 
 VERIFY($xml->startComment());
@@ -55,9 +55,9 @@ VERIFY($xml->endComment());
 
 VERIFY($xml->writeComment("More comments"));
 
-VERIFY($xml->startPi("lol"));
-VERIFY($xml->endPi());
-VERIFY($xml->writePi("hh", "print 'Hello world!';"));
+VERIFY($xml->startPI("lol"));
+VERIFY($xml->endPI());
+VERIFY($xml->writePI("hh", "print 'Hello world!';"));
 
 VERIFY($xml->writeRaw("<node>Raw XML</node>"));
 

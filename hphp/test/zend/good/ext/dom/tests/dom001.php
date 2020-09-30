@@ -75,7 +75,7 @@ function main_entry(): void {
 
   echo "--------- Find element by tagname\n";
   echo "    Using dom\n";
-  $children = $dom->getElementsByTagname("Silly");
+  $children = $dom->getElementsByTagName("Silly");
   print_node_list($children);
 
   echo "    Using elem\n";

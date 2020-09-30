@@ -30,7 +30,7 @@ class SQLite3 {
   public function lastinsertrowid();
   public function lasterrorcode();
   public function lasterrormsg();
-  public function loadextension(string $extension);
+  public function loadExtension(string $extension);
   public function changes();
   public static function escapestring(string $sql);
   public function prepare(string $sql);

@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_2140() {
-var_dump(UConverter::getMIMEName('latin1'));
-var_dump(UConverter::getMIMEName('blergh'));
+var_dump(UConverter::getMimeName('latin1'));
+var_dump(UConverter::getMimeName('blergh'));
 }

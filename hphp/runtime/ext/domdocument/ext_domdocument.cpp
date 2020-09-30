@@ -2592,7 +2592,7 @@ Variant HHVM_METHOD(DOMNode, replaceChild,
   return false;
 }
 
-Variant HHVM_METHOD(DOMNode, c14n,
+Variant HHVM_METHOD(DOMNode, C14N,
                     bool exclusive /* = false */,
                     bool with_comments /* = false */,
                     const Variant& xpath /* = null */,
@@ -2606,7 +2606,7 @@ Variant HHVM_METHOD(DOMNode, c14n,
                               xpath, ns_prefixes, 0);
 }
 
-Variant HHVM_METHOD(DOMNode, c14nfile,
+Variant HHVM_METHOD(DOMNode, C14Nfile,
                     const String& uri,
                     bool exclusive /* = false */,
                     bool with_comments /* = false */,
@@ -5858,8 +5858,8 @@ struct DOMDocumentExtension final : Extension {
     HHVM_ME(DOMNode, normalize);
     HHVM_ME(DOMNode, removeChild);
     HHVM_ME(DOMNode, replaceChild);
-    HHVM_ME(DOMNode, c14n);
-    HHVM_ME(DOMNode, c14nfile);
+    HHVM_ME(DOMNode, C14N);
+    HHVM_ME(DOMNode, C14Nfile);
     HHVM_ME(DOMNode, getNodePath);
     HHVM_ME(DOMNode, __debugInfo);
     Native::registerNativeDataInfo<DOMNode>(s_DOMNode.get(),

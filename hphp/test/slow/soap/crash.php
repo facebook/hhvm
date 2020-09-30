@@ -3,9 +3,9 @@
 <<__EntryPoint>> function main(): void {
 $server = new SoapServer(NULL, darray['uri'=>"http://testuri.org"]);
 
-var_dump($server->getFunctions());
+var_dump($server->getfunctions());
 
-$server->setClass("NotExistingClass");
+$server->setclass("NotExistingClass");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

@@ -130,7 +130,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  public function loadextension(string $extension): bool;
+  public function loadExtension(string $extension): bool;
 
   /**
    * Returns the number of database rows that were changed (or inserted or

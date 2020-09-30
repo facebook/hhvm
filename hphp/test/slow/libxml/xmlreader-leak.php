@@ -4,7 +4,7 @@
 function foo() {
   for ($i=0; $i<100; $i++) {
     $reader = new XMLReader();
-    $reader->xml('<?xml version="1.0" encoding="utf-8"?><id>1234567890</id>');
+    $reader->XML('<?xml version="1.0" encoding="utf-8"?><id>1234567890</id>');
     while ($reader->read()) {
       $reader->expand();
     }

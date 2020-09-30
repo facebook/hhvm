@@ -111,7 +111,7 @@ function test_SpoofChecker_setchecks() {
 
   // Go to lower-case only mode (assumes all strings have been
   // case-folded).
-  $checker->setchecks(
+  $checker->setChecks(
     SpoofChecker::MIXED_SCRIPT_CONFUSABLE |
     SpoofChecker::WHOLE_SCRIPT_CONFUSABLE |
     SpoofChecker::SINGLE_SCRIPT_CONFUSABLE
@@ -130,7 +130,7 @@ function test_SpoofChecker_setchecks() {
   // }
 }
 
-function test_SpoofChecker_setallowedlocales() {
+function test_SpoofChecker_setAllowedLocales() {
   $issues = null;
   $checker = new SpoofChecker();
 
@@ -143,7 +143,7 @@ function test_SpoofChecker_setallowedlocales() {
       '\u0432\u0435\u0301\u0447\u0435\u0440');
   $snowman = u('\u2603');
 
-  $checker->setallowedlocales("en_US");
+  $checker->setAllowedLocales("en_US");
   VS($checker->isSuspicious($common, inout $issues), false);
   VS($checker->isSuspicious($japanese_kanji_hiragana, inout $issues), true);
   VS($checker->isSuspicious($russian_cyrillic, inout $issues), true);
@@ -151,7 +151,7 @@ function test_SpoofChecker_setallowedlocales() {
   VS($checker->isSuspicious($korean, inout $issues), true);
   VS($checker->isSuspicious($snowman, inout $issues), false);
 
-  $checker->setallowedlocales("en_US, ja_JP");
+  $checker->setAllowedLocales("en_US, ja_JP");
   VS($checker->isSuspicious($common, inout $issues), false);
   VS($checker->isSuspicious($japanese_kanji_hiragana, inout $issues), false);
   VS($checker->isSuspicious($russian_cyrillic, inout $issues), true);
@@ -159,7 +159,7 @@ function test_SpoofChecker_setallowedlocales() {
   VS($checker->isSuspicious($korean, inout $issues), true);
   VS($checker->isSuspicious($snowman, inout $issues), false);
 
-  $checker->setallowedlocales("en_US, ko_KR");
+  $checker->setAllowedLocales("en_US, ko_KR");
   VS($checker->isSuspicious($common, inout $issues), false);
   VS($checker->isSuspicious($japanese_kanji_hiragana, inout $issues), true);
   VS($checker->isSuspicious($russian_cyrillic, inout $issues), true);
@@ -167,7 +167,7 @@ function test_SpoofChecker_setallowedlocales() {
   VS($checker->isSuspicious($korean, inout $issues), false);
   VS($checker->isSuspicious($snowman, inout $issues), false);
 
-  $checker->setallowedlocales("en_US, ar_AR");
+  $checker->setAllowedLocales("en_US, ar_AR");
   VS($checker->isSuspicious($common, inout $issues), false);
   VS($checker->isSuspicious($japanese_kanji_hiragana, inout $issues), true);
   VS($checker->isSuspicious($russian_cyrillic, inout $issues), true);
@@ -175,7 +175,7 @@ function test_SpoofChecker_setallowedlocales() {
   VS($checker->isSuspicious($korean, inout $issues), true);
   VS($checker->isSuspicious($snowman, inout $issues), false);
 
-  $checker->setallowedlocales("en_US, ru_RU");
+  $checker->setAllowedLocales("en_US, ru_RU");
   VS($checker->isSuspicious($common, inout $issues), false);
   VS($checker->isSuspicious($japanese_kanji_hiragana, inout $issues), true);
   VS($checker->isSuspicious($russian_cyrillic, inout $issues), false);
@@ -191,5 +191,5 @@ test_SpoofChecker_issuspicious();
 test_SpoofChecker_areconfusable();
 test_SpoofChecker_issuesfound();
 test_SpoofChecker_setchecks();
-test_SpoofChecker_setallowedlocales();
+test_SpoofChecker_setAllowedLocales();
 }

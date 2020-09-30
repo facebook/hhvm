@@ -68,7 +68,7 @@ static String HHVM_METHOD(FunctionCredential, getFunctionName) {
   return String{makeStaticString(data->func()->name())};
 }
 
-static String HHVM_METHOD(FunctionCredential, getFileName) {
+static String HHVM_METHOD(FunctionCredential, getFilename) {
   auto data = FunctionCredential::fromObject(this_);
   return String{makeStaticString(data->func()->filename())};
 }
@@ -80,7 +80,7 @@ struct FunctionCredentialExtension final : Extension {
   void moduleInit() override {
     HHVM_ME(FunctionCredential, getClassName);
     HHVM_ME(FunctionCredential, getFunctionName);
-    HHVM_ME(FunctionCredential, getFileName);
+    HHVM_ME(FunctionCredential, getFilename);
 
     Native::registerNativeDataInfo<FunctionCredential>(
         s_FunctionCredential.get());

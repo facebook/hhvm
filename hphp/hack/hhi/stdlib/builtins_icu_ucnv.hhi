@@ -71,5 +71,5 @@ class UConverter {
   static public function getAliases(string $encoding);
   static public function getStandards();
   static public function getStandardName(string $name, string $standard);
-  static public function getMIMEName(string $name);
+  static public function getMimeName(string $name);
 }

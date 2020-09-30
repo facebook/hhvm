@@ -473,7 +473,6 @@ and class_naming_and_decl
         class_parents_decl ~sh class_env shallow_class;
         class_decl ~sh class_env.ctx shallow_class)
   in
-  let errors = Errors.merge shallow_class.sc_decl_errors errors in
   let name = snd shallow_class.sc_name in
   record_class name;
   let class_ = { tc with dc_decl_errors = Some errors } in

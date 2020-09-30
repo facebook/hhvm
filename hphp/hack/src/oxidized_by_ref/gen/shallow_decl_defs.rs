@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb3feccf72f8fad5c11fbbe381dc0ba1>>
+// @generated SignedSource<<7589218eea29ffa49901c30fe9b541f6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -187,6 +187,5 @@ pub struct ShallowClass<'a> {
     pub methods: &'a [ShallowMethod<'a>],
     pub user_attributes: &'a [UserAttribute<'a>],
     pub enum_type: Option<EnumType<'a>>,
-    pub decl_errors: errors::Errors<'a>,
 }
 impl<'a> TrivialDrop for ShallowClass<'a> {}

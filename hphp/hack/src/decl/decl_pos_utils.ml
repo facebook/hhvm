@@ -346,7 +346,6 @@ struct
       sc_methods = List.map sc.sc_methods shallow_method;
       sc_user_attributes = List.map sc.sc_user_attributes user_attribute;
       sc_enum_type = Option.map sc.sc_enum_type enum_type;
-      sc_decl_errors = Errors.empty;
     }
 
   and shallow_class_const scc =

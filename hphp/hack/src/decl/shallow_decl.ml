@@ -284,7 +284,10 @@ let method_ env m =
     sm_deprecated;
   }
 
-let class_ env c =
+let class_ ctx c =
+  let (_, cls_name) = c.c_name in
+  let class_dep = Dep.Class cls_name in
+  let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
   let hint = Decl_hint.hint env in
   let (req_extends, req_implements) = split_reqs c in
   let (static_vars, vars) = split_vars c in
@@ -353,15 +356,4 @@ let class_ env c =
         c.c_user_attributes
         ~f:Decl_hint.aast_user_attribute_to_decl_user_attribute;
     sc_enum_type = Option.map c.c_enum (enum_type hint);
-    sc_decl_errors = Errors.empty;
   }
-
-let class_ ctx c =
-  let (cls_pos, cls_name) = c.c_name in
-  let class_dep = Dep.Class cls_name in
-  let env = { Decl_env.mode = c.c_mode; droot = Some class_dep; ctx } in
-  let (errors, sc) =
-    Errors.run_in_context (Pos.filename cls_pos) Errors.Decl (fun () ->
-        Errors.do_ (fun () -> class_ env c))
-  in
-  { sc with sc_decl_errors = errors }

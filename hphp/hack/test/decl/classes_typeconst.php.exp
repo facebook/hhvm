@@ -82,8 +82,7 @@ Parsed decls:
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\C2" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
@@ -147,8 +146,7 @@ Parsed decls:
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
+      sc_user_attributes = []; sc_enum_type = None } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

@@ -61,8 +61,7 @@ Parsed decls:
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\B" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -126,8 +125,7 @@ Parsed decls:
                 ft_reactive = Nonreactive }));
           sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\C" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
@@ -164,8 +162,7 @@ Parsed decls:
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\D" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
@@ -205,8 +202,7 @@ Parsed decls:
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\E" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -245,8 +241,7 @@ Parsed decls:
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\F" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -289,8 +284,7 @@ Parsed decls:
                ft_reactive = Nonreactive }));
          sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
+      sc_user_attributes = []; sc_enum_type = None } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

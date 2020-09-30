@@ -16,7 +16,7 @@ Parsed decls:
         { Typing_defs_core.ua_name = ([10:5-8], "\\X\\Foo");
           ua_classname_params = [] }
         ];
-      sc_enum_type = None; sc_decl_errors = <opaque> };
+      sc_enum_type = None };
     "\\X\\Foo" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -28,8 +28,7 @@ Parsed decls:
         (Tapply (([4:24-42], "\\HH\\ClassAttribute"), [])))];
       sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-      sc_decl_errors = <opaque> };
+      sc_methods = []; sc_user_attributes = []; sc_enum_type = None };
     "\\X\\Y\\Bar" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -41,8 +40,7 @@ Parsed decls:
         (Tapply (([7:26-44], "\\HH\\ClassAttribute"), [])))];
       sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-      sc_decl_errors = <opaque> } };
+      sc_methods = []; sc_user_attributes = []; sc_enum_type = None } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

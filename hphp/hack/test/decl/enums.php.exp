@@ -34,8 +34,8 @@ Parsed decls:
       sc_enum_type =
       (Some { te_base =
               (Rhint (root|enums.php line 3, characters 11-13), (Tprim Tint));
-              te_constraint = None });
-      sc_decl_errors = <opaque> } };
+              te_constraint = None })
+      } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

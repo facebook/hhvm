@@ -30,8 +30,8 @@ Parsed decls:
       (Some { te_base =
               (Rhint (root|const_missing_hint.php line 13, characters 10-12),
                (Tprim Tint));
-              te_constraint = None });
-      sc_decl_errors = <opaque> } };
+              te_constraint = None })
+      } };
   funs = {}; typedefs = {};
   consts =
   { "\\CBool" ->

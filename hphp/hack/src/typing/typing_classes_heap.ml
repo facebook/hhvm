@@ -246,7 +246,7 @@ module ApiShallow = struct
   let decl_errors t =
     Counters.count_decl_accessor @@ fun () ->
     match t with
-    | Lazy lc -> Some lc.sc.sc_decl_errors
+    | Lazy _ -> None
     | Eager c -> c.tc_decl_errors
 
   let all_where_constraints_on_this t =

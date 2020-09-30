@@ -18,8 +18,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\ArrayConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -68,8 +67,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\BinopConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -105,8 +103,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\ClassnameConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -136,8 +133,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\DictConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -197,8 +193,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\ShapeConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -229,8 +224,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\TupleConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -260,8 +254,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\VecConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -295,8 +288,7 @@ Parsed decls:
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
+      sc_user_attributes = []; sc_enum_type = None } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

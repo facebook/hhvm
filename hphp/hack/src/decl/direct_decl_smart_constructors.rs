@@ -22,7 +22,6 @@ use oxidized_by_ref::{
     aast, aast_defs,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
     decl_defs::MethodReactivity,
-    errors::Errors,
     file_info::Mode,
     nast,
     pos::Pos,
@@ -3190,10 +3189,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             methods,
             user_attributes,
             enum_type: None,
-            // NB: We have no intention of populating this field. Any errors
-            // historically emitted during shallow decl should be migrated to a
-            // NAST check.
-            decl_errors: Errors::empty(),
         };
         self.add_class(name, cls);
 
@@ -3526,10 +3521,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 constraint,
                 includes,
             }),
-            // NB: We have no intention of populating this field. Any errors
-            // historically emitted during shallow decl should be migrated to a
-            // NAST check.
-            decl_errors: Errors::empty(),
         };
         self.add_class(key, cls);
         Node::Ignored(SK::EnumDeclaration)

@@ -95,6 +95,5 @@ type shallow_class = {
   sc_methods: shallow_method list;
   sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
-  sc_decl_errors: Errors.t; [@opaque]
 }
 [@@deriving eq, show]

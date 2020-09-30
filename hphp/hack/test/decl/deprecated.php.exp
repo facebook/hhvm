@@ -116,8 +116,7 @@ Parsed decls:
           sm_deprecated =
           (Some "The method foo2 is deprecated: use bar2() instead") }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
+      sc_user_attributes = []; sc_enum_type = None } };
   funs =
   { "\\bar" ->
     { fe_pos = [21:10-13];

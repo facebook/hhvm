@@ -10,7 +10,7 @@ Parsed decls:
       sc_implements = []; sc_consts = []; sc_typeconsts = [];
       sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-      sc_enum_type = None; sc_decl_errors = <opaque> };
+      sc_enum_type = None };
     "\\MyClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -378,8 +378,7 @@ Parsed decls:
                 ft_reactive = Reactive {} }));
           sm_visibility = Public; sm_deprecated = None }
         ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      };
+      sc_user_attributes = []; sc_enum_type = None };
     "\\MyConstructorPropertiesClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -496,7 +495,7 @@ Parsed decls:
                     ft_reactive = Nonreactive }));
               sm_visibility = Public; sm_deprecated = None });
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-      sc_enum_type = None; sc_decl_errors = <opaque> };
+      sc_enum_type = None };
     "\\MyFinalClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -506,7 +505,7 @@ Parsed decls:
       sc_implements = []; sc_consts = []; sc_typeconsts = [];
       sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-      sc_enum_type = None; sc_decl_errors = <opaque> };
+      sc_enum_type = None };
     "\\MyStaticClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
@@ -516,7 +515,7 @@ Parsed decls:
       sc_implements = []; sc_consts = []; sc_typeconsts = [];
       sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-      sc_enum_type = None; sc_decl_errors = <opaque> } };
+      sc_enum_type = None } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

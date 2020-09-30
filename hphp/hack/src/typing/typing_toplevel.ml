@@ -901,8 +901,7 @@ let rec class_def ctx c =
   let env = EnvFromDef.class_env ctx c in
   let tc = Env.get_class env (snd c.c_name) in
   let env = Env.set_env_pessimize env in
-  Typing_helpers.add_decl_errors
-    Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc)));
+  Typing_helpers.add_decl_errors (Option.bind tc Cls.decl_errors);
   Typing_check_decls.class_ env c;
   NastInitCheck.class_ env c;
   match tc with

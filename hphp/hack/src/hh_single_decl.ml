@@ -196,7 +196,7 @@ let compare_decl ctx verbosity fn =
           let class_ =
             Shallow_classes_provider.decl ctx ~use_cache:true class_
           in
-          { class_ with Shallow_decl_defs.sc_decl_errors = Errors.empty })
+          class_)
         Shallow_decl_defs.equal_shallow_class
         Shallow_decl_defs.show_shallow_class
         decls.classes;

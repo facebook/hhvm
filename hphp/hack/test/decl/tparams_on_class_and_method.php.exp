@@ -120,8 +120,8 @@ Parsed decls:
       (make_ft_flags sync none ~return_disposable:false
         ~returns_mutable:false ~returns_void_to_rx:false);
       ft_reactive = Nonreactive })); sm_visibility = Public;
-sm_deprecated = None }]; sc_user_attributes = []; sc_enum_type = None;
-sc_decl_errors = <opaque> } }; funs = {}; typedefs = {}; consts = {}
+sm_deprecated = None }]; sc_user_attributes = []; sc_enum_type = None } };
+funs = {}; typedefs = {}; consts = {}
 }
 
 They matched!

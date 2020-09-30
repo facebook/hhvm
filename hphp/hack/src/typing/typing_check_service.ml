@@ -373,28 +373,34 @@ let process_files
       let (errors, deferred) =
         match fn with
         | Check file ->
-          let start_counters = read_counters () in
-          let result = process_file dynamic_view_files ctx errors file in
-          let end_counters = read_counters () in
-          let second_run_end_counters =
-            if check_info.profile_type_check_twice then
-              (* we're running this routine solely for the side effect *)
-              (* of seeing how long it takes to run. *)
-              let (_ignored : process_file_results) =
-                process_file dynamic_view_files ctx errors file
-              in
-              Some (read_counters ())
-            else
-              None
+          let process_file () =
+            process_file dynamic_view_files ctx errors file
           in
-          if check_info.profile_log then
-            profile_log
-              ~check_info
-              ~start_counters
-              ~end_counters
-              ~second_run_end_counters
-              ~file
-              ~result;
+          let result =
+            if check_info.profile_log then (
+              let start_counters = read_counters () in
+              let result = process_file () in
+              let end_counters = read_counters () in
+              let second_run_end_counters =
+                if check_info.profile_type_check_twice then
+                  (* we're running this routine solely for the side effect *)
+                  (* of seeing how long it takes to run. *)
+                  let _ignored = process_file () in
+                  Some (read_counters ())
+                else
+                  None
+              in
+              profile_log
+                ~check_info
+                ~start_counters
+                ~end_counters
+                ~second_run_end_counters
+                ~file
+                ~result;
+              result
+            ) else
+              process_file ()
+          in
           (result.errors, result.computation)
         | Declare path ->
           let errors = Decl_service.decl_file ctx errors path in

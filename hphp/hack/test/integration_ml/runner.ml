@@ -56,6 +56,7 @@ let tests =
       run Test_function_arg_rx_if_implements1.test );
     ( "function_arg_rx_if_implements2",
       run Test_function_arg_rx_if_implements2.test );
+    ("funptr", run Test_funptr.test);
     ("gconst_file", run Test_gconst_file.test);
     ("get_dependent_classes", run Test_get_dependent_classes.test);
     ("getfundeps", run Test_getfundeps.test);

@@ -195,6 +195,10 @@ let visitor =
         | Aast.Fun_id id ->
           process_fun_id (pos, SN.AutoimportedFunctions.fun_)
           + process_fun_id (remove_apostrophes_from_function_eval id)
+        | Aast.FunctionPointer (Aast.FP_id id, _targs) -> process_fun_id id
+        | Aast.FunctionPointer
+            (Aast.FP_class_const (((_pos, ty), _cid), mid), _targs) ->
+          typed_method env ty mid
         | Aast.Method_id (((_, ty), _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)

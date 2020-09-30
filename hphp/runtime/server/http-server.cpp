@@ -204,6 +204,10 @@ HttpServer::HttpServer() {
 
 // Synchronously stop satellites
 void HttpServer::onServerShutdown() {
+  // Avoid running this multiple times
+  static std::atomic_flag flag = ATOMIC_FLAG_INIT;
+  if (flag.test_and_set()) return;
+
   InitFiniNode::ServerFini();
 
   Eval::Debugger::Stop();

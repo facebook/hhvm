@@ -98,7 +98,7 @@ class SoapServer {
   public function __construct($wsdl, $options = null);
   public function setclass(string $name, ...$args);
   public function setobject($obj);
-  public function addfunction($func);
+  public function addFunction($func);
   public function getfunctions();
   public function handle($request = null);
   public function setpersistence(int $mode);

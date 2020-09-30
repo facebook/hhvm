@@ -667,8 +667,8 @@ class IntlDateFormatter {
   public function getLocale();
   public function getPattern();
   public function getTimeType();
-  public function getTimeZone();
-  public function getTimeZoneId();
+  public function getTimezone();
+  public function getTimezoneId();
   public function isLenient();
   public function localtime(string $string, inout $position);
   public function parse(string $string);
@@ -676,8 +676,8 @@ class IntlDateFormatter {
   public function setCalendar($which);
   public function setLenient(bool $lenient);
   public function setPattern(string $pattern);
-  public function setTimeZone($zone);
-  public function setTimeZoneId(string $zone);
+  public function setTimezone($zone);
+  public function setTimezoneId(string $zone);
 }
 
 class ResourceBundle<T> implements Traversable<T> {
@@ -797,7 +797,7 @@ class IntlCalendar {
   public function getRepeatedWallTimeOption();
   public function getSkippedWallTimeOption();
   public function getTime();
-  public function getTimeZone();
+  public function getTimezone();
   public function getType();
   public function getWeekendTransition(int $dayOfWeek);
   public function inDaylightTime();
@@ -813,7 +813,7 @@ class IntlCalendar {
   public function setRepeatedWallTimeOption(int $wallTimeOption);
   public function setSkippedWallTimeOption(int $wallTimeOption);
   public function setTime($date);
-  public function setTimeZone($timeZone);
+  public function setTimezone($timeZone);
   public function toDateTime();
   public function call__($fname, $args): mixed;
 }

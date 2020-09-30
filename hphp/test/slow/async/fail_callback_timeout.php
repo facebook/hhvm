@@ -5,7 +5,7 @@ function a() {
 }
 
 async function heh() {
-  await RescheduleWaitHandle::Create(0, 0);
+  await RescheduleWaitHandle::create(0, 0);
   throw new exception('x');
 }
 <<__EntryPoint>> function main(): void {

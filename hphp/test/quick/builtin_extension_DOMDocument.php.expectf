@@ -77,7 +77,7 @@ string(2) "N;"
 NULL
 varray(49) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(15) "createAttribute"
   string(17) "createAttributeNS"
   string(18) "createCDATASection"
@@ -208,7 +208,7 @@ string(2) "N;"
 NULL
 varray(49) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(15) "createAttribute"
   string(17) "createAttributeNS"
   string(18) "createCDATASection"

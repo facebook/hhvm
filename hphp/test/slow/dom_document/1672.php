@@ -57,7 +57,7 @@ $xmlstr = "<?xml version='1.0' standalone='yes'?>
 echo "Test 1: accessing single nodes from php
 ";
 $dom = new domDocument;
-$dom->loadxml($xmlstr);
+$dom->loadXML($xmlstr);
 if(!$dom) {
   echo "Error while parsing the document
 ";
@@ -148,7 +148,7 @@ print_node_list($children);
 
 echo "    Using elem
 ";
-$children = $rootnode->getElementsByTagName("Silly");
+$children = $rootnode->getElementsByTagname("Silly");
 print_node_list($children);
 
 echo "--------- Unlink Node
@@ -156,5 +156,5 @@ echo "--------- Unlink Node
 print_node($children->item(0));
 $rootnode->removeChild($children->item(0));
 print_node_list($rootnode->childNodes);
-print $dom->savexml();
+print $dom->saveXML();
 }

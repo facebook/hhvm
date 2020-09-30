@@ -43,7 +43,7 @@ string(2) "N;"
 NULL
 varray(24) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(10) "appendData"
   string(10) "deleteData"
   string(10) "insertData"
@@ -115,7 +115,7 @@ string(2) "N;"
 NULL
 varray(24) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(10) "appendData"
   string(10) "deleteData"
   string(10) "insertData"

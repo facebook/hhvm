@@ -299,8 +299,8 @@ public:
   void unsetenv(const String& name);
   Array getEnvs() const;
 
-  String getTimeZone() const;
-  void setTimeZone(const String&);
+  String getTimezone() const;
+  void setTimezone(const String&);
 
   bool getThrowAllErrors() const;
 

@@ -4,9 +4,9 @@ function formatted_time($datetime_str = 'now', $timestamp_format = NULL, $timezo
 {
     $tz   = new DateTimeZone($timezone ? $timezone : date_default_timezone_get());
     $time = new DateTime($datetime_str, $tz);
-    if ($time->getTimeZone()->getName() !== $tz->getName())
+    if ($time->getTimezone()->getName() !== $tz->getName())
     {
-        $time->setTimeZone($tz);
+        $time->setTimezone($tz);
     }
     return $time->format($timestamp_format);
 }

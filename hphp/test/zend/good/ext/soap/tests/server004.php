@@ -7,7 +7,7 @@ function Sub($x,$y) {
 }
 <<__EntryPoint>> function main(): void {
 $server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
-$server->addfunction(varray["Sub","Add"]);
+$server->addFunction(varray["Sub","Add"]);
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

@@ -8,8 +8,8 @@ if (!$info->isFile()) {
   echo $info->getRealPath();
 }
 $info = new SplFileInfo(__DIR__.'/../../sample_dir/file');
-var_dump($info->getbaseName());
-var_dump($info->getbaseName('.cpp'));
+var_dump($info->getBaseName());
+var_dump($info->getBaseName('.cpp'));
 $info->getCTime();
 $info->getGroup();
 $info->getInode();

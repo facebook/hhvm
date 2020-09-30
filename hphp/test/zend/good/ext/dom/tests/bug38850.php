@@ -9,5 +9,5 @@ $doc->loadXML($xml);
 
 $root = $doc->documentElement;
 
-print $root->lookupNamespaceURI(NULL);
+print $root->lookupNamespaceUri(NULL);
 }

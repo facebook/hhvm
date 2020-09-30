@@ -42,7 +42,7 @@ object(DOMElement) (0) {
 }
 varray(37) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(12) "getAttribute"
   string(16) "getAttributeNode"
   string(18) "getAttributeNodeNS"
@@ -128,7 +128,7 @@ object(A_DOMElement) (1) {
 }
 varray(37) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(12) "getAttribute"
   string(16) "getAttributeNode"
   string(18) "getAttributeNodeNS"

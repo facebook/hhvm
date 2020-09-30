@@ -8,10 +8,6 @@ class a extends one {
   protected function foo() { echo "a\n"; }
 }
 
-class b extends one {
-  protected function FoO() { echo "b\n"; }
-}
-
 class c extends one {
   protected function foo() { echo "c\n"; }
 
@@ -22,12 +18,10 @@ class c extends one {
 
 <<__EntryPoint>> function main(): void {
   $a = new a;
-  $b = new b;
   $c = new c;
   $c->go($a);  // fill
   $c->go($a);  // hit
-  $c->go($b);  // would call with not AttrPublic
-  $c->go($c);  // again
+  $c->go($c);  // would call with not AttrPublic
   $c->go($c);  // hit
   $c->go($a);  // would call, not attr public
 }

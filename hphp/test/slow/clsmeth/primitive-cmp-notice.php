@@ -17,7 +17,7 @@ function handle_error($_errno, $msg, ...) {
 class Foo { static function bar() {} static function baz() {} }
 class StrObj {
   public function __construct(private string $s) {}
-  public function __tostring(): string { return $this->s; }
+  public function __toString(): string { return $this->s; }
 }
 class Wrapper { public function __construct(private mixed $w) {} }
 

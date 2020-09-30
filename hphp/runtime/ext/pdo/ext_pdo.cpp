@@ -1205,7 +1205,7 @@ bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
   return false;
 }
 
-Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
+Variant HHVM_METHOD(PDO, getAttribute, int64_t attribute) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -3021,7 +3021,7 @@ static Variant HHVM_METHOD(PDOStatement, setattribute, int64_t attribute,
   return false;
 }
 
-static Variant HHVM_METHOD(PDOStatement, getattribute, int64_t attribute) {
+static Variant HHVM_METHOD(PDOStatement, getAttribute, int64_t attribute) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -3302,7 +3302,7 @@ static struct PDOExtension final : Extension {
     HHVM_ME(PDO, intransaction);
     HHVM_ME(PDO, rollback);
     HHVM_ME(PDO, setattribute);
-    HHVM_ME(PDO, getattribute);
+    HHVM_ME(PDO, getAttribute);
     HHVM_ME(PDO, exec);
     HHVM_ME(PDO, lastinsertid);
     HHVM_ME(PDO, errorcode);
@@ -3324,7 +3324,7 @@ static struct PDOExtension final : Extension {
     HHVM_ME(PDOStatement, errorcode);
     HHVM_ME(PDOStatement, errorinfo);
     HHVM_ME(PDOStatement, setattribute);
-    HHVM_ME(PDOStatement, getattribute);
+    HHVM_ME(PDOStatement, getAttribute);
     HHVM_ME(PDOStatement, columncount);
     HHVM_ME(PDOStatement, getcolumnmeta);
     HHVM_ME(PDOStatement, setfetchmode);

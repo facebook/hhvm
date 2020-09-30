@@ -12,7 +12,7 @@ class TestSoap extends SoapClient {
 		$this->server->addFunction("checkAuth");
 	}
 
-	function __doRequest($request, $location, $action, $version, $one_way = 0) {
+	function __dorequest($request, $location, $action, $version, $one_way = 0) {
 		ob_start();
 		$this->server->handle($request);
 		$response = ob_get_contents();

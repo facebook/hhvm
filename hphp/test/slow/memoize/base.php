@@ -25,7 +25,7 @@ class A {
 
   <<__Memoize>>
   public async function testAsync() {
-    await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+    await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
     return self::$testAsyncI++;
   }
 

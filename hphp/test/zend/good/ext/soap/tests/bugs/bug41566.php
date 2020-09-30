@@ -18,7 +18,7 @@ class User {
 }
 <<__EntryPoint>> function main(): void {
 $server = new soapserver(null,darray['uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2]);
-$server->addfunction("test");
+$server->addFunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

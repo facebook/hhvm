@@ -6,7 +6,7 @@ function main_entry(): void {
 
   echo "Test 1: accessing single nodes from php\n";
   $dom = new domDocument;
-  $dom->loadxml($xmlstr);
+  $dom->loadXML($xmlstr);
   if(!$dom) {
     echo "Error while parsing the document\n";
     exit;

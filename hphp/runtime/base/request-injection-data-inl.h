@@ -221,11 +221,11 @@ inline void RequestInjectionData::setUserAgent(const std::string& agent) {
   m_userAgent = agent;
 }
 
-inline const std::string& RequestInjectionData::getTimeZone() const {
+inline const std::string& RequestInjectionData::getTimezone() const {
   return m_timezone;
 }
 
-inline void RequestInjectionData::setTimeZone(const std::string& tz) {
+inline void RequestInjectionData::setTimezone(const std::string& tz) {
   m_timezone = tz;
 }
 

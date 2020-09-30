@@ -115,7 +115,7 @@ class IntlCalendar {
     if (!($locale ?? false)) {
       $locale = ini_get("intl.default_locale");
     }
-    $cal = IntlCalendar::createInstance($dateTime->getTimeZone(), $locale);
+    $cal = IntlCalendar::createInstance($dateTime->getTimezone(), $locale);
     $cal->setTime($dateTime->getTimeStamp() * 1000);
     return $cal;
   }
@@ -322,7 +322,7 @@ class IntlCalendar {
    *   one used internally in this object.
    */
   <<__Native>>
-  public function getTimeZone(): IntlTimeZone;
+  public function getTimezone(): IntlTimeZone;
 
   /**
    * Get the calendar type
@@ -511,7 +511,7 @@ class IntlCalendar {
    * @return bool - Returns TRUE on success and FALSE on failure.
    */
   <<__Native>>
-  public function setTimeZone(mixed $timeZone): bool;
+  public function setTimezone(mixed $timeZone): bool;
 
   /**
    * Convert an IntlCalendar into a DateTime object
@@ -522,9 +522,9 @@ class IntlCalendar {
    *   millisecond). Returns FALSE on failure.
    */
   public function toDateTime(): DateTime {
-    $dtz = $this->getTimeZone()->toDateTimeZone();
+    $dtz = $this->getTimezone()->toDateTimeZone();
     $dt  = new DateTime('@'.(int)($this->getTime()/1000), $dtz);
-    $dt->setTimeZone($dtz);
+    $dt->setTimezone($dtz);
     return $dt;
   }
 }
@@ -904,7 +904,7 @@ function intlcal_get_time(IntlCalendar $cal): mixed {
  *   used internally in this object.
  */
 function intlcal_get_time_zone(IntlCalendar $cal): IntlTimeZone {
-  return $cal->getTimeZone();
+  return $cal->getTimezone();
 }
 
 /**
@@ -1135,7 +1135,7 @@ function intlcal_set_time(IntlCalendar $cal,
  */
 function intlcal_set_time_zone(IntlCalendar $cal,
                                mixed $timeZone): bool {
-  return $cal->setTimeZone($timeZone);
+  return $cal->setTimezone($timeZone);
 }
 
 /**

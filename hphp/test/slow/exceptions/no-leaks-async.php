@@ -10,7 +10,7 @@ class FooException extends Exception {
 }
 
 async function f() {
-  await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
+  await RescheduleWaitHandle::create(0, 0); // simulate blocking I/O
   throw new FooException();
 }
 

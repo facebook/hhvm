@@ -43,7 +43,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  public function addfunction(mixed $func): void;
+  public function addFunction(mixed $func): void;
 
   /**
    * Returns a list of the defined functions in the SoapServer object. This

@@ -6,7 +6,7 @@ Warning: Attempted to serialize unserializable builtin class DOMNotation in %s/t
 string(2) "N;"
 NULL
 varray(19) {
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(11) "__construct"
   string(11) "appendChild"
   string(9) "cloneNode"
@@ -37,7 +37,7 @@ Warning: Attempted to serialize unserializable builtin class A_DOMNotation in %s
 string(2) "N;"
 NULL
 varray(19) {
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(11) "__construct"
   string(11) "appendChild"
   string(9) "cloneNode"

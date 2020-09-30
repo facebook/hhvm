@@ -1,7 +1,7 @@
 <?hh
 
 class Exception1 extends Exception {
-  public function __Construct() {
+  public function __construct() {
     parent::__construct();
   }
 }

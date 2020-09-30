@@ -338,8 +338,8 @@ struct RequestInjectionData {
   const std::string& getUserAgent() const;
   void setUserAgent(const std::string&);
 
-  const std::string& getTimeZone() const;
-  void setTimeZone(const std::string&);
+  const std::string& getTimezone() const;
+  void setTimezone(const std::string&);
 
   bool setAllowedDirectories(const std::string& value);
 

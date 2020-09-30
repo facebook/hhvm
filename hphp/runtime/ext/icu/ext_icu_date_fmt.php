@@ -68,7 +68,7 @@ class IntlDateFormatter {
    *   object is passed, its timezone is not considered. The object will be
    *   formatted using the formater's configured timezone. If one wants to
    *   use the timezone of the object to be formatted,
-   *   IntlDateFormatter::setTimeZone() must be called before with the
+   *   IntlDateFormatter::setTimezone() must be called before with the
    *   object's timezone. Alternatively, the static function
    *   IntlDateFormatter::formatObject() may be used instead.
    *
@@ -159,7 +159,7 @@ class IntlDateFormatter {
    *   formatter.
    */
   <<__Native>>
-  public function getTimeZoneId(): string;
+  public function getTimezoneId(): string;
 
   /**
    * Get copy of formatter's calendar object
@@ -176,7 +176,7 @@ class IntlDateFormatter {
    * @return IntlTimeZone - The associated IntlTimeZone object.
    */
   <<__Native>>
-  public function getTimeZone(): object;
+  public function getTimezone(): object;
 
   /**
    * Get the lenient used for the IntlDateFormatter
@@ -276,11 +276,11 @@ class IntlDateFormatter {
    *
    * @return bool -
    */
-  public function setTimeZoneId(string $zone): bool {
+  public function setTimezoneId(string $zone): bool {
     trigger_error("Use datefmt_set_timezone() instead, which also accepts ".
                   "a plain time zone identifier and for which this function ".
                   "is now an alias", E_DEPRECATED);
-    return $this->setTimeZone($zone);
+    return $this->setTimezone($zone);
   }
 
   /**
@@ -291,7 +291,7 @@ class IntlDateFormatter {
    * @return bool - Returns TRUE on success and FALSE on failure.
    */
   <<__Native>>
-  public function setTimeZone(mixed $zone): bool;
+  public function setTimezone(mixed $zone): bool;
 
 }
 
@@ -348,7 +348,7 @@ function datefmt_create($locale,
  *   passed, its timezone is not considered. The object will be formatted
  *   using the formater's configured timezone. If one wants to use the
  *   timezone of the object to be formatted,
- *   IntlDateFormatter::setTimeZone() must be called before with the
+ *   IntlDateFormatter::setTimezone() must be called before with the
  *   object's timezone. Alternatively, the static function
  *   IntlDateFormatter::formatObject() may be used instead.
  *
@@ -463,7 +463,7 @@ function datefmt_get_timetype(IntlDateFormatter $fmt): int {
  * @return string - ID string for the time zone used by this formatter.
  */
 function datefmt_get_timezone_id(IntlDateFormatter $fmt): string {
-  return $fmt->getTimeZoneId();
+  return $fmt->getTimezoneId();
 }
 
 /**
@@ -482,7 +482,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $fmt): Object {
  * @return IntlTimeZone - The associated IntlTimeZone object.
  */
 function datefmt_get_timezone(IntlDateFormatter $fmt): Object {
-  return $fmt->getTimeZone();
+  return $fmt->getTimezone();
 }
 
 /**
@@ -600,7 +600,7 @@ function datefmt_set_pattern(IntlDateFormatter $fmt,
  */
 function datefmt_set_timezone_id(IntlDateFormatter $fmt,
                                  $zone): bool {
-  return $fmt->setTimeZoneId($zone);
+  return $fmt->setTimezoneId($zone);
 }
 
 /**
@@ -611,5 +611,5 @@ function datefmt_set_timezone_id(IntlDateFormatter $fmt,
  * @return bool - Returns TRUE on success and FALSE on failure.
  */
 function datefmt_set_timezone(IntlDateFormatter $fmt, $zone): bool {
-  return $fmt->setTimeZone($zone);
+  return $fmt->setTimezone($zone);
 }

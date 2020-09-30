@@ -13,7 +13,7 @@ varray(6) {
   string(5) "query"
   string(17) "registerNamespace"
   string(20) "registerPHPFunctions"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
 }
 ================
 A_DOMXPath
@@ -33,5 +33,5 @@ varray(6) {
   string(5) "query"
   string(17) "registerNamespace"
   string(20) "registerPHPFunctions"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
 }

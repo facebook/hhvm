@@ -1,7 +1,7 @@
 <?hh
 
 class MySoapClient extends SoapClient {
-  public function __doRequest(
+  public function __dorequest(
     $request,
     $location,
     $action,

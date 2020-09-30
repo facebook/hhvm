@@ -2,7 +2,7 @@
 
 final class ScopeGuardAsyncDispose {
   final public async function __disposeAsync(): Awaitable<void> {
-    await RescheduleWaitHandle::Create(0, 0);
+    await RescheduleWaitHandle::create(0, 0);
   }
 }
 

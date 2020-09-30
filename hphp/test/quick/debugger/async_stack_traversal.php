@@ -3,13 +3,13 @@
 
 async function gen1($a) {
   $v1 = "v1-gen1";
-  await RescheduleWaitHandle::Create(0, 0);
+  await RescheduleWaitHandle::create(0, 0);
   return $a + 1;
 }
 
 async function gen2($a) {
   $v1 = "v1-gen2";
-  await RescheduleWaitHandle::Create(0, $a);
+  await RescheduleWaitHandle::create(0, $a);
   $x = HH\Asio\join(gen1($a));
   return $x;
 }

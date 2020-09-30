@@ -8,17 +8,17 @@ Breakpoint 1 set on line 8 of flow_gen_async.php
 Breakpoint 1 reached at genBar() on line 8 of %s/flow_gen_async.php
    7 async function genBar($a) {
    8*  var_dump($a);
-   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
 
 next
 Break at genBar() on line 9 of %s/flow_gen_async.php
    8   var_dump($a);
-   9*  await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9*  await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
   10   error_log('Finished in genBar');
 
 next
 Break at genBar() on line 10 of %s/flow_gen_async.php
-   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
   10*  error_log('Finished in genBar');
   11   return $a + 2;
 
@@ -70,7 +70,7 @@ int(4)
 Breakpoint 1 reached at genBar() on line 8 of %s/flow_gen_async.php
    7 async function genBar($a) {
    8*  var_dump($a);
-   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
 
 out
 Break at genFoo() on line 17 of %s/flow_gen_async.php
@@ -98,7 +98,7 @@ break flow_gen_async.php:10
 Breakpoint 1 set on line 10 of flow_gen_async.php
 @test(3)
 Breakpoint 1 reached at genBar() on line 10 of %s/flow_gen_async.php
-   9   await RescheduleWaitHandle::Create(1, 1); // simulate blocking I/O
+   9   await RescheduleWaitHandle::create(1, 1); // simulate blocking I/O
   10*  error_log('Finished in genBar');
   11   return $a + 2;
 

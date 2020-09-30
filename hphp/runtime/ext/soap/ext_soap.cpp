@@ -520,7 +520,7 @@ static bool do_request(ObjectData* obj_client, xmlDoc *request,
   if (!response.isString()) {
     if (client->m_soap_fault.isNull()) {
       client->m_soap_fault =
-        create_soap_fault("Client", "SoapClient::__doRequest() "
+        create_soap_fault("Client", "SoapClient::__dorequest() "
                           "returned non string value");
     }
   } else if (client->m_trace) {
@@ -2051,7 +2051,7 @@ void HHVM_METHOD(SoapServer, setobject,
   data->m_soap_object = obj.toObject();
 }
 
-void HHVM_METHOD(SoapServer, addfunction,
+void HHVM_METHOD(SoapServer, addFunction,
                  const Variant& func) {
   auto* data = Native::data<SoapServer>(this_);
   SoapServerScope ss(this_);
@@ -3108,7 +3108,7 @@ static struct SoapExtension final : Extension {
     HHVM_ME(SoapServer, __construct);
     HHVM_ME(SoapServer, setclass);
     HHVM_ME(SoapServer, setobject);
-    HHVM_ME(SoapServer, addfunction);
+    HHVM_ME(SoapServer, addFunction);
     HHVM_ME(SoapServer, getfunctions);
     HHVM_ME(SoapServer, handle);
     HHVM_ME(SoapServer, setpersistence);

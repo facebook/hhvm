@@ -153,7 +153,7 @@ bool TimeZone::IsValid(const char* name) {
 
 String TimeZone::CurrentName() {
   /* Checking configure timezone */
-  auto& tz = RID().getTimeZone();
+  auto& tz = RID().getTimezone();
   if (!tz.empty()) {
     return String(tz);
   }
@@ -192,7 +192,7 @@ bool TimeZone::SetCurrent(const char* name) {
     raise_notice("Timezone ID '%s' is invalid", name);
     return false;
   }
-  RID().setTimeZone(name);
+  RID().setTimezone(name);
   return true;
 }
 

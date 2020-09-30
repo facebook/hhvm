@@ -136,11 +136,11 @@ inline Array ExecutionContext::getEnvs() const {
   return m_envs;
 }
 
-inline String ExecutionContext::getTimeZone() const {
+inline String ExecutionContext::getTimezone() const {
   return m_timezone;
 }
 
-inline void ExecutionContext::setTimeZone(const String& timezone) {
+inline void ExecutionContext::setTimezone(const String& timezone) {
   m_timezone = timezone;
 }
 

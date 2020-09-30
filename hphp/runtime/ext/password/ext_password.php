@@ -80,7 +80,7 @@ function password_hash(?string $password,
         $salt = (string) $options['salt'];
         break;
       case 'object':
-        if (method_exists($options['salt'], '__tostring')) {
+        if (method_exists($options['salt'], '__toString')) {
           $salt = (string) $options['salt'];
           break;
         }

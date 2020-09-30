@@ -26,7 +26,7 @@ function main() {
   call_user_func($c, 888);
   var_dump($c);
   var_dump($use_by_val);
-  $debuginfo = $c->__debuginfo();
+  $debuginfo = $c->__debugInfo();
   var_dump(is_darray($debuginfo));
   var_dump(is_darray($debuginfo['static']));
   var_dump(is_darray($debuginfo['parameter']));

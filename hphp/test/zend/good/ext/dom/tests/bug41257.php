@@ -5,8 +5,8 @@ $doc->load(dirname(__FILE__)."/nsdoc.xml");
 
 $root = $doc->documentElement;
 
-$duri = $doc->lookupNamespaceURI("ns2")."\n";
-$euri = $root->lookupNamespaceURI("ns2")."\n";
+$duri = $doc->lookupNamespaceUri("ns2")."\n";
+$euri = $root->lookupNamespaceUri("ns2")."\n";
 
 var_dump($duri == $euri);
 

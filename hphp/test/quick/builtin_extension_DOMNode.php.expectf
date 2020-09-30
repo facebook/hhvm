@@ -24,7 +24,7 @@ varray(19) {
   string(4) "c14n"
   string(8) "c14nfile"
   string(11) "getNodePath"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
 }
 ================
 A_DOMNode
@@ -55,5 +55,5 @@ varray(19) {
   string(4) "c14n"
   string(8) "c14nfile"
   string(11) "getNodePath"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
 }

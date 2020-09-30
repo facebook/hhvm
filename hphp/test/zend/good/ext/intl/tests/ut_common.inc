@@ -343,11 +343,11 @@ function ut_datefmt_set_calendar( $fmt ,$calendar )
 }
 function ut_datefmt_get_timezone_id( $fmt )
 {
-    return \HH\global_get('oo-mode') ? $fmt->getTimeZoneId( ) : datefmt_get_timezone_id( $fmt );
+    return \HH\global_get('oo-mode') ? $fmt->getTimezoneId( ) : datefmt_get_timezone_id( $fmt );
 }
 function ut_datefmt_set_timezone_id( $fmt ,$timezone_id )
 {
-    return \HH\global_get('oo-mode') ? $fmt->setTimeZoneId( $timezone_id ) : datefmt_set_timezone_id( $fmt ,$timezone_id);
+    return \HH\global_get('oo-mode') ? $fmt->setTimezoneId( $timezone_id ) : datefmt_set_timezone_id( $fmt ,$timezone_id);
 }
 function ut_datefmt_get_pattern( $fmt )
 {

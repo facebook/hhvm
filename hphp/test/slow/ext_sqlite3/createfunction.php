@@ -13,6 +13,6 @@ $db->exec("INSERT INTO test_table VALUES('text2');");
 $q = "SELECT * FROM test_table WHERE LENGTH(test_field) < 75";
 $sth = $db->prepare($q);
 $r = $sth->execute();
-$rows = $sth->fetchall();
+$rows = $sth->fetchAll();
 var_dump($rows);
 }

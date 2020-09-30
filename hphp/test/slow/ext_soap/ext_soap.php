@@ -102,13 +102,13 @@ function entrypoint_ext_soap(): void {
         break;
     }
 
-   ExtSoapExtSoapPhp::$server->addfunction("hello");
+   ExtSoapExtSoapPhp::$server->addFunction("hello");
 
     VSOAP("<ns1:hello xmlns:ns1=\"http://testuri.org\" />",
   	"<ns1:helloResponse><return xsi:type=\"xsd:string\">Hello World".
   	"</return></ns1:helloResponse>");
 
-    ExtSoapExtSoapPhp::$server->addfunction(SOAP_FUNCTIONS_ALL);
+    ExtSoapExtSoapPhp::$server->addFunction(SOAP_FUNCTIONS_ALL);
 
     VSOAP("<ns1:strlen xmlns:ns1=\"http://testuri.org\">".
   	"<x xsi:type=\"xsd:string\">Hello World</x>".
@@ -117,7 +117,7 @@ function entrypoint_ext_soap(): void {
   	"</return></ns1:strlenResponse>");
 
     $funcs = varray["Sub", "Add"];
-    ExtSoapExtSoapPhp::$server->addfunction($funcs);
+    ExtSoapExtSoapPhp::$server->addFunction($funcs);
 
     VSOAP("<ns1:Add xmlns:ns1=\"http://testuri.org\">".
   	"<x xsi:type=\"xsd:int\">22</x>".
@@ -126,7 +126,7 @@ function entrypoint_ext_soap(): void {
   	"<ns1:AddResponse><return xsi:type=\"xsd:int\">55".
   	"</return></ns1:AddResponse>");
 
-    ExtSoapExtSoapPhp::$server->addfunction("Sum");
+    ExtSoapExtSoapPhp::$server->addFunction("Sum");
 
     VSOAP("<ns1:sum xmlns:ns1=\"http://testuri.org\">".
   	"<param0 SOAP-ENC:arrayType=\"xsd:int[2]\"".
@@ -143,7 +143,7 @@ function entrypoint_ext_soap(): void {
     ExtSoapExtSoapPhp::$server = new SoapServer(__DIR__."/1809.wsdl",
   			  darray["uri" => "http://testuri.org"]);
 
-    ExtSoapExtSoapPhp::$server->addfunction("Fault");
+    ExtSoapExtSoapPhp::$server->addFunction("Fault");
 
     // TODO(#2512715): this doesn't work.
     if (false) {

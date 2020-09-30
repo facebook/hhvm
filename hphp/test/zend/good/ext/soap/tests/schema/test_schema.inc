@@ -57,7 +57,7 @@ EOF;
   ini_set("soap.wsdl_cache_enabled",0);
   $x = new SoapClient($fname, darray["trace"=>1,"exceptions"=>0,"features"=>$features]);
   $y = new SoapServer($fname, darray["features"=>$features]);
-	$y->addfunction("test");
+	$y->addFunction("test");
   unlink($fname);
 
   $x->__soapcall('test', varray[$param]);

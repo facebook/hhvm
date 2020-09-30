@@ -45,7 +45,7 @@ string(2) "N;"
 NULL
 varray(27) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(28) "isWhitespaceInElementContent"
   string(26) "isElementContentWhitespace"
   string(9) "splitText"
@@ -122,7 +122,7 @@ string(2) "N;"
 NULL
 varray(27) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(28) "isWhitespaceInElementContent"
   string(26) "isElementContentWhitespace"
   string(9) "splitText"

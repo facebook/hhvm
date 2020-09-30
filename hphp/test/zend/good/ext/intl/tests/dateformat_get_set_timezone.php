@@ -9,24 +9,24 @@ function d(IntlDateFormatter $df) {
 
 echo $df->format(ZendGoodExtIntlTestsDateformatGetSetTimezone::$ts), "\n";
 var_dump(
-$df->getTimeZoneID(),
-$df->getTimeZone()->getID());
+$df->getTimezoneID(),
+$df->getTimezone()->getID());
 echo "\n";
 }
 
 $df = new IntlDateFormatter('pt_PT', 0, 0, 'Europe/Minsk');
 d($df);
 
-$df->setTimeZone(NULL);
+$df->setTimezone(NULL);
 d($df);
 
-$df->setTimeZone('Europe/Madrid');
+$df->setTimezone('Europe/Madrid');
 d($df);
 
-$df->setTimeZone(IntlTimeZone::createTimeZone('Europe/Paris'));
+$df->setTimezone(IntlTimeZone::createTimeZone('Europe/Paris'));
 d($df);
 
-$df->setTimeZone(new DateTimeZone('Europe/Amsterdam'));
+$df->setTimezone(new DateTimeZone('Europe/Amsterdam'));
 d($df);
 
 abstract final class ZendGoodExtIntlTestsDateformatGetSetTimezone {

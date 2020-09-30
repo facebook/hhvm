@@ -6,7 +6,7 @@ Warning: Attempted to serialize unserializable builtin class DOMCharacterData in
 string(2) "N;"
 NULL
 varray(24) {
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(10) "appendData"
   string(10) "deleteData"
   string(10) "insertData"
@@ -42,7 +42,7 @@ Warning: Attempted to serialize unserializable builtin class A_DOMCharacterData 
 string(2) "N;"
 NULL
 varray(24) {
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(10) "appendData"
   string(10) "deleteData"
   string(10) "insertData"

@@ -349,7 +349,7 @@ void HHVM_METHOD(DateTime, __wakeup) {
   this_->unsetProp(cls, s_timezone.get());
 }
 
-Array HHVM_METHOD(DateTime, __debuginfo) {
+Array HHVM_METHOD(DateTime, __debugInfo) {
   auto const data = getDateTimeData(this_);
   return data->getDebugInfo();
 }
@@ -537,7 +537,7 @@ req::ptr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
 
 IMPLEMENT_GET_CLASS(DateTimeZoneData)
 
-Array HHVM_METHOD(DateTimeZone, __debuginfo) {
+Array HHVM_METHOD(DateTimeZone, __debugInfo) {
   auto const data = getDateTimeZoneData(this_);
   return data->getDebugInfo();
 }
@@ -954,7 +954,7 @@ static struct DateTimeExtension final : Extension {
     HHVM_ME(DateTime, sub);
     HHVM_ME(DateTime, __sleep);
     HHVM_ME(DateTime, __wakeup);
-    HHVM_ME(DateTime, __debuginfo);
+    HHVM_ME(DateTime, __debugInfo);
     HHVM_STATIC_ME(DateTime, createFromFormat);
     HHVM_STATIC_ME(DateTime, getLastErrors);
 
@@ -1000,7 +1000,7 @@ static struct DateTimeExtension final : Extension {
     HHVM_RCC_INT(DateTimeZone, PER_COUNTRY, DateTimeZoneData::PER_COUNTRY);
 
     HHVM_ME(DateTimeZone, __construct);
-    HHVM_ME(DateTimeZone, __debuginfo);
+    HHVM_ME(DateTimeZone, __debugInfo);
     HHVM_ME(DateTimeZone, getLocation);
     HHVM_ME(DateTimeZone, getName);
     HHVM_ME(DateTimeZone, getOffset);
@@ -1096,7 +1096,7 @@ private:
   }
 
   static std::string dateTimezoneIniGet() {
-    return RID().getTimeZone();
+    return RID().getTimezone();
   }
 } s_date_extension;
 

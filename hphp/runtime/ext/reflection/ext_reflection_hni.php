@@ -754,7 +754,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   }
 
   <<__Pure, __MaybeMutable>>
-  public function __debuginfo() {
+  public function __debugInfo() {
     return darray['name' => $this->name, 'class' => $this->class];
   }
 

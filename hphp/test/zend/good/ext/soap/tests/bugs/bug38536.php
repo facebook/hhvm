@@ -1,6 +1,6 @@
 <?hh
 class LocalSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __dorequest($request, $location, $action, $version, $one_way = 0) {
     return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope

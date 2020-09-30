@@ -51,7 +51,7 @@ string(2) "N;"
 NULL
 varray(20) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(4) "isId"
   string(11) "appendChild"
   string(9) "cloneNode"
@@ -127,7 +127,7 @@ string(2) "N;"
 NULL
 varray(20) {
   string(11) "__construct"
-  string(11) "__debuginfo"
+  string(11) "__debugInfo"
   string(4) "isId"
   string(11) "appendChild"
   string(9) "cloneNode"

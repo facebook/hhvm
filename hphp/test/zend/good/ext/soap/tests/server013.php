@@ -10,7 +10,7 @@ function Sum($a) {
 }
 <<__EntryPoint>> function main(): void {
 $server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
-$server->addfunction("Sum");
+$server->addFunction("Sum");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>

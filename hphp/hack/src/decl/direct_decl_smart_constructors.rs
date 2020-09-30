@@ -479,7 +479,7 @@ pub struct FunctionHeader<'a> {
     modifiers: Node<'a>,
     type_params: Node<'a>,
     param_list: Node<'a>,
-    capability_provisional: Node<'a>,
+    capability: Node<'a>,
     ret_hint: Node<'a>,
 }
 
@@ -1200,15 +1200,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn as_fun_implicit_params(
         &mut self,
-        capability_provisional: Option<Node<'a>>,
+        capability: Node<'a>,
         default_pos: &'a Pos<'a>,
     ) -> FunImplicitParams<'a> {
-        let capability = capability_provisional
-            .and_then(|node| self.node_to_ty(node))
-            .unwrap_or(default_capability(
-                self.state.arena,
-                Reason::hint(default_pos),
-            ));
+        let capability = self.node_to_ty(capability).unwrap_or(default_capability(
+            self.state.arena,
+            Reason::hint(default_pos),
+        ));
         FunImplicitParams { capability }
     }
 
@@ -1222,8 +1220,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let id = self.get_name(namespace, header.name)?;
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
         let f_pos = self.get_pos(header.name);
-        let implicit_params =
-            self.as_fun_implicit_params(Some(header.capability_provisional), f_pos);
+        let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
 
         let type_ = match header.name {
             Node::Construct(pos) => Ty(
@@ -2706,6 +2703,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
+    fn make_capability(&mut self, lb: Self::R, tys: Self::R, rb: Self::R) -> Self::R {
+        Rc::make_mut(&mut self.state.namespace_builder).push_namespace(Some("HH\\Contexts"));
+        let cap = self.make_intersection_type_specifier(lb, tys, rb);
+        Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
+        cap
+    }
+
     fn make_capability_provisional(
         &mut self,
         _at: Self::R,
@@ -2727,6 +2731,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _left_parens: Self::R,
         param_list: Self::R,
         _right_parens: Self::R,
+        capability: Self::R,
         capability_provisional: Self::R,
         _colon: Self::R,
         ret_hint: Self::R,
@@ -2735,12 +2740,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         if name.is_ignored() {
             return Node::Ignored(SK::FunctionDeclarationHeader);
         }
+        let capability = if let Node::Ignored(_) = capability {
+            capability_provisional
+        } else {
+            capability
+        };
         Node::FunctionHeader(self.alloc(FunctionHeader {
             name,
             modifiers,
             type_params,
             param_list,
-            capability_provisional,
+            capability,
             ret_hint,
         }))
     }
@@ -3947,7 +3957,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None => return Node::Ignored(SK::ClosureTypeSpecifier),
         };
         let pos = self.merge_positions(outer_left_paren, outer_right_paren);
-        let implicit_params = self.as_fun_implicit_params(None, pos);
+        let implicit_params = self.as_fun_implicit_params(Node::Ignored(SK::Capability), pos);
 
         let mut flags = FunTypeFlags::empty();
         if mutability.is_some() {

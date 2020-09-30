@@ -90,6 +90,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_left_paren                                : t
     ; function_parameter_list                            : t
     ; function_right_paren                               : t
+    ; function_capability                                : t
     ; function_capability_provisional                    : t
     ; function_colon                                     : t
     ; function_type                                      : t
@@ -287,10 +288,16 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_left_paren                                : t
     ; function_parameter_list                            : t
     ; function_right_paren                               : t
+    ; function_capability                                : t
     ; function_capability_provisional                    : t
     ; function_colon                                     : t
     ; function_type                                      : t
     ; function_where_clause                              : t
+    }
+  | Capability                        of
+    { capability_left_bracket                            : t
+    ; capability_types                                   : t
+    ; capability_right_bracket                           : t
     }
   | CapabilityProvisional             of
     { capability_provisional_at                          : t
@@ -1254,6 +1261,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprPocketIdentifier             of pocket_identifier_expression
   and specifier =
   | SpecSimple            of simple_type_specifier
+  | SpecCapability        of capability
   | SpecVariadicParameter of variadic_parameter
   | SpecLambdaSignature   of lambda_signature
   | SpecXHPEnumType       of xhp_enum_type
@@ -1584,10 +1592,16 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_left_paren: Token.t value
     ; function_parameter_list: parameter listesque value
     ; function_right_paren: Token.t value
+    ; function_capability: capability option value
     ; function_capability_provisional: capability_provisional option value
     ; function_colon: Token.t option value
     ; function_type: attributized_specifier option value
     ; function_where_clause: where_clause option value
+    }
+  and capability =
+    { capability_left_bracket: Token.t value
+    ; capability_types: specifier listesque value
+    ; capability_right_bracket: Token.t value
     }
   and capability_provisional =
     { capability_provisional_at: Token.t value

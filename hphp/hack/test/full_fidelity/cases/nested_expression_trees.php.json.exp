@@ -258,6 +258,7 @@
                 "line_number":5
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",

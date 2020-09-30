@@ -251,6 +251,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -478,6 +479,7 @@
                 "line_number":5
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -760,6 +762,7 @@
                 "line_number":7
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -1042,6 +1045,7 @@
                 "line_number":9
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -1220,6 +1224,7 @@
                 "line_number":11
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -1545,6 +1550,7 @@
                 "line_number":13
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -1785,6 +1791,7 @@
                 "line_number":15
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -2333,6 +2340,7 @@
                         "line_number":20
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2738,6 +2746,7 @@
                 "line_number":27
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -3583,6 +3592,7 @@
                 "line_number":37
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -4025,5 +4035,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f(int $x, inout mixed ...$ys): void {} // ERROR\n\nfunction g1(inout string $s = 'g1'): void {} // ERROR\n\nfunction g2(string $s = 'g2', inout int $i): void {} // ERROR\n\nfunction g3(inout int $i, string $s = 'g3'): void {} // no error\n\nfunction q(inout $x): void {} // ERROR\n\nfunction v((function(inout mixed ...): void) $f): void {} // ERROR\n\nfunction z(inout vec<int> $v): void {\n  $v[] = 42;\n} // no error\n\nclass C {\n  public static function x((function(): bool) $p, inout ?C $c): void {\n    if ($p()) {\n      $c = new self();\n    }\n  } // no error\n}\n\nfunction test(): void {\n  $i = 999;\n  g3(inout $i, 'ok'); // no error\n\n  $v = vec[];\n\n  $c = async function(inout $v) {}; // ERROR\n  $c = async (inout $v) ==> 42; // ERROR\n}\n\nasync function gen_test(): void {\n  $c = function(inout $f) {}; // no error\n  $c = (inout $v) ==> 42; // no error\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

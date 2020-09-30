@@ -163,6 +163,7 @@
                 "line_number":2
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -384,6 +385,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -605,6 +607,7 @@
                 "line_number":4
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -865,6 +868,7 @@
                 "line_number":5
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -1690,5 +1694,5 @@
     }
   },
   "program_text":"<?hh\nfunction f (...$a) : int {} // no error\nfunction f (...$a, $b) : int {} // ERROR\nfunction f ($a, ...$b) : int {} // no error\nfunction f ($a, ...$b, $c) : int {} // ERROR\nf ($a, ...$b); //no error\nf (...$a); // no error\nf (...$a, $b); // ERROR\nf ($a, ...$b, $c); // ERROR\nf ($a, ...$b, ); // no error\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

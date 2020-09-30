@@ -151,6 +151,7 @@
                 "line_number":4
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -239,5 +240,5 @@
     }
   },
   "program_text":"<?hh\n\n@TestAttribute\nfunction f(): void {}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

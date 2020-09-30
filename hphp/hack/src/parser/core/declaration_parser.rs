@@ -1572,7 +1572,7 @@ where
         }
     }
 
-    fn parse_capability_opt(&mut self) -> S::R {
+    fn parse_capability_provisional_opt(&mut self) -> S::R {
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::At {
             let token = self.next_token();
@@ -1884,7 +1884,9 @@ where
             p.parse_generic_type_parameter_list_opt()
         });
         let (left_paren_token, parameter_list, right_paren_token) = self.parse_parameter_list_opt();
-        let capability = self.parse_capability_opt();
+        let capability =
+            self.with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_capability_opt());
+        let capability_provisional = self.parse_capability_provisional_opt();
         let (colon_token, return_type) = self.parse_return_type_hint_opt();
         let where_clause = self.parse_where_clause_opt();
         S!(
@@ -1898,6 +1900,7 @@ where
             parameter_list,
             right_paren_token,
             capability,
+            capability_provisional,
             colon_token,
             return_type,
             where_clause,

@@ -86,6 +86,7 @@ module WithToken(Token: TokenType) = struct
       | NamespaceUseClause                _ -> SyntaxKind.NamespaceUseClause
       | FunctionDeclaration               _ -> SyntaxKind.FunctionDeclaration
       | FunctionDeclarationHeader         _ -> SyntaxKind.FunctionDeclarationHeader
+      | Capability                        _ -> SyntaxKind.Capability
       | CapabilityProvisional             _ -> SyntaxKind.CapabilityProvisional
       | WhereClause                       _ -> SyntaxKind.WhereClause
       | WhereConstraint                   _ -> SyntaxKind.WhereConstraint
@@ -279,6 +280,7 @@ module WithToken(Token: TokenType) = struct
     let is_namespace_use_clause                 = has_kind SyntaxKind.NamespaceUseClause
     let is_function_declaration                 = has_kind SyntaxKind.FunctionDeclaration
     let is_function_declaration_header          = has_kind SyntaxKind.FunctionDeclarationHeader
+    let is_capability                           = has_kind SyntaxKind.Capability
     let is_capability_provisional               = has_kind SyntaxKind.CapabilityProvisional
     let is_where_clause                         = has_kind SyntaxKind.WhereClause
     let is_where_constraint                     = has_kind SyntaxKind.WhereConstraint
@@ -763,6 +765,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
+        function_capability;
         function_capability_provisional;
         function_colon;
         function_type;
@@ -775,10 +778,20 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc function_left_paren in
          let acc = f acc function_parameter_list in
          let acc = f acc function_right_paren in
+         let acc = f acc function_capability in
          let acc = f acc function_capability_provisional in
          let acc = f acc function_colon in
          let acc = f acc function_type in
          let acc = f acc function_where_clause in
+         acc
+      | Capability {
+        capability_left_bracket;
+        capability_types;
+        capability_right_bracket;
+      } ->
+         let acc = f acc capability_left_bracket in
+         let acc = f acc capability_types in
+         let acc = f acc capability_right_bracket in
          acc
       | CapabilityProvisional {
         capability_provisional_at;
@@ -2623,6 +2636,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
+        function_capability;
         function_capability_provisional;
         function_colon;
         function_type;
@@ -2635,10 +2649,20 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
+        function_capability;
         function_capability_provisional;
         function_colon;
         function_type;
         function_where_clause;
+      ]
+      | Capability {
+        capability_left_bracket;
+        capability_types;
+        capability_right_bracket;
+      } -> [
+        capability_left_bracket;
+        capability_types;
+        capability_right_bracket;
       ]
       | CapabilityProvisional {
         capability_provisional_at;
@@ -4484,6 +4508,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren;
         function_parameter_list;
         function_right_paren;
+        function_capability;
         function_capability_provisional;
         function_colon;
         function_type;
@@ -4496,10 +4521,20 @@ module WithToken(Token: TokenType) = struct
         "function_left_paren";
         "function_parameter_list";
         "function_right_paren";
+        "function_capability";
         "function_capability_provisional";
         "function_colon";
         "function_type";
         "function_where_clause";
+      ]
+      | Capability {
+        capability_left_bracket;
+        capability_types;
+        capability_right_bracket;
+      } -> [
+        "capability_left_bracket";
+        "capability_types";
+        "capability_right_bracket";
       ]
       | CapabilityProvisional {
         capability_provisional_at;
@@ -6425,6 +6460,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;
@@ -6438,10 +6474,21 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;
           function_where_clause;
+        }
+      | (SyntaxKind.Capability, [
+          capability_left_bracket;
+          capability_types;
+          capability_right_bracket;
+        ]) ->
+        Capability {
+          capability_left_bracket;
+          capability_types;
+          capability_right_bracket;
         }
       | (SyntaxKind.CapabilityProvisional, [
           capability_provisional_at;
@@ -8575,6 +8622,7 @@ module WithToken(Token: TokenType) = struct
         function_left_paren
         function_parameter_list
         function_right_paren
+        function_capability
         function_capability_provisional
         function_colon
         function_type
@@ -8588,10 +8636,24 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;
           function_where_clause;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_capability
+        capability_left_bracket
+        capability_types
+        capability_right_bracket
+      =
+        let syntax = Capability {
+          capability_left_bracket;
+          capability_types;
+          capability_right_bracket;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
@@ -10788,6 +10850,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;
@@ -10800,6 +10863,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;
@@ -10910,6 +10974,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;
@@ -10922,6 +10987,7 @@ module WithToken(Token: TokenType) = struct
           function_left_paren;
           function_parameter_list;
           function_right_paren;
+          function_capability;
           function_capability_provisional;
           function_colon;
           function_type;

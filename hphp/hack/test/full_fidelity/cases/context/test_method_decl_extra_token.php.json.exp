@@ -206,6 +206,7 @@
                         "line_number":6
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -360,6 +361,7 @@
                         "line_number":10
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -547,6 +549,7 @@
                         "line_number":14
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -733,6 +736,7 @@
                         "line_number":18
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -982,6 +986,7 @@
                         "line_number":27
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1258,6 +1263,7 @@
                         "line_number":36
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1345,5 +1351,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n\n  // parsed as a method containing an extra, invalid word: error1056\n  public sta function f() {\n  }\n\n  // parsed as a method containing an extra, invalid word: error1056\n  public static meaninglessword function f() {\n  }\n\n  // the below case isn't fixed yet; it retains its old behavior.\n  public meaninglessword static function f() {\n  }\n\n  // the below case isn't fixed yet; it retains its old behavior.\n  public meaninglessword1 meaninglessword2 function f() {\n  }\n\n}\n\nclass C {\n\n  public sta // parsed as property declaration\n\n  function f() { // parsed as method\n  }\n\n}\n\nclass C {\n\n  public sta // parsed as property declaration\n\n  public function f() { // parsed as method\n  }\n\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

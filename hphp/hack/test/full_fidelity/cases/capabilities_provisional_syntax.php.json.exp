@@ -258,6 +258,7 @@
                 "line_number":5
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -389,6 +390,7 @@
                 "line_number":7
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{
               "kind":"capability_provisional",
               "capability_provisional_at":{
@@ -583,6 +585,7 @@
                 "line_number":9
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{
               "kind":"capability_provisional",
               "capability_provisional_at":{
@@ -763,5 +766,5 @@
     }
   },
   "program_text":"<?hh\n\n<<file: __EnableUnstableFeatures('coeffects_provisional')>>\n\nfunction a(): void {}\n\nfunction b()@{ mixed }: void {}\n\nfunction c()@{ int + string }: void {}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

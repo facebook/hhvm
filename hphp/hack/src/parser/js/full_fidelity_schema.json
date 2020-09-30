@@ -689,10 +689,20 @@
         { "field_name" : "left_paren" },
         { "field_name" : "parameter_list" },
         { "field_name" : "right_paren" },
+        { "field_name" : "capability" },
         { "field_name" : "capability_provisional" },
         { "field_name" : "colon" },
         { "field_name" : "type" },
         { "field_name" : "where_clause" }
+      ] },
+    { "kind_name" : "Capability",
+      "type_name" : "capability",
+      "description" : "capability",
+      "prefix" : "capability",
+      "fields" : [
+        { "field_name" : "left_bracket" },
+        { "field_name" : "types" },
+        { "field_name" : "right_bracket" }
       ] },
     { "kind_name" : "CapabilityProvisional",
       "type_name" : "capability_provisional",

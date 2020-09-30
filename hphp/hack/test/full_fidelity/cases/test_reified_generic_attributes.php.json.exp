@@ -253,6 +253,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -488,6 +489,7 @@
                 "line_number":4
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -664,6 +666,7 @@
                 "line_number":5
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1189,6 +1192,7 @@
                         "line_number":9
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1443,6 +1447,7 @@
                         "line_number":10
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1638,6 +1643,7 @@
                         "line_number":11
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -2670,5 +2676,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f<<<__Attr>> reify T>() {}\nfunction g< <<__Attr>> reify U>() {}\nfunction h<reify V>() {}\n\nclass C {\n  const type TyC<<<Attr>> T> = int;\n  public function ff<<<__Attr>> reify Tt>() {}\n  public function gg< <<__Attr>> reify Uu>() {}\n  public function hh<reify Vv>() {}\n}\n\nclass CC<<<__Attr>> reify Tt>{}\nclass DD< <<__Attr>> reify Tt>{}\nclass EE<reify Tt>{}\n\ntype Ty<<<Attr>> T> = int;\nnewtype Ty2<<<Attr>> T> = int;\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

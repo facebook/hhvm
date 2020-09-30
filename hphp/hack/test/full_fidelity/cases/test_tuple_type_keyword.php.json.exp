@@ -196,6 +196,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -531,5 +532,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass Foo {\n  public function bar(): tuple<int,string> {\n    return tuple(1, 'baz');\n  }\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

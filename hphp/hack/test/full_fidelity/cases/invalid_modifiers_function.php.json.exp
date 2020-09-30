@@ -227,6 +227,7 @@
                 "line_number":4
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -361,6 +362,7 @@
                 "line_number":6
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -420,5 +422,5 @@
     }
   },
   "program_text":"<?hh\n\n// async needs to be first so that we parse this as a function declaration\nasync abstract final static private protected public function f() {}\n\nasync async function g() {}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

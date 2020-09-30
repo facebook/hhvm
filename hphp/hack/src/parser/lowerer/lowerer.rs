@@ -3499,7 +3499,31 @@ where
         }
     }
 
-    fn p_cap(node: &Syntax<T, V>, env: &mut Env) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
+    fn p_capability(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
+        match &node.syntax {
+            Missing => Ok((None, None)),
+            Capability(c) => {
+                let hint_ = ast::Hint_::Hintersection(Self::could_map(
+                    &Self::p_hint,
+                    &c.capability_types,
+                    env,
+                )?);
+                let pos = Self::p_pos(node, env);
+                let hint = ast::Hint::new(pos, hint_);
+                let unsafe_hint = hint.clone();
+                Ok((Some(hint), Some(unsafe_hint)))
+            }
+            _ => Self::missing_syntax("capability", node, env),
+        }
+    }
+
+    fn p_capability_provisional(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
         match &node.syntax {
             Missing => Ok((None, None)),
             CapabilityProvisional(c) => {
@@ -3508,7 +3532,28 @@ where
                     Self::mp_optional(Self::p_hint, &c.capability_provisional_unsafe_type, env)?;
                 Ok((Some(cap), unsafe_cap))
             }
-            _ => Self::missing_syntax("type parameter", node, env),
+            _ => Self::missing_syntax("capability_provisional", node, env),
+        }
+    }
+
+    /* Just temporary to handle both syntaxes. This will be removed when p_capability_provisional is removed */
+    fn p_cap(
+        capability: &Syntax<T, V>,
+        capability_provisional: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
+        if !capability.is_missing() && !capability_provisional.is_missing() {
+            Self::raise_parsing_error(
+                capability_provisional,
+                env,
+                "Cannot use both the [ and @{ syntax for coeffects",
+            );
+            /* Not exactly missing, but this is the standard function used to get an Err result in the lowerer */
+            Self::missing_syntax("capability", capability, env)
+        } else if !capability.is_missing() {
+            Self::p_capability(capability, env)
+        } else {
+            Self::p_capability_provisional(capability_provisional, env)
         }
     }
 
@@ -3527,8 +3572,11 @@ where
                 let kinds = Self::p_kinds(function_modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
                 let parameters = Self::could_map(Self::p_fun_param, function_parameter_list, env)?;
-                let (capability, unsafe_capability) =
-                    Self::p_cap(&c.function_capability_provisional, env)?;
+                let (capability, unsafe_capability) = Self::p_cap(
+                    &c.function_capability,
+                    &c.function_capability_provisional,
+                    env,
+                )?;
                 let return_type = Self::mp_optional(Self::p_hint, function_type, env)?;
                 let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(function_name, env)?;

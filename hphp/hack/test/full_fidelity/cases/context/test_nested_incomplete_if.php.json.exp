@@ -192,6 +192,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -369,6 +370,7 @@
                         "line_number":7
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -566,6 +568,7 @@
                         "line_number":12
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -743,6 +746,7 @@
                         "line_number":15
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -940,6 +944,7 @@
                         "line_number":20
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1117,6 +1122,7 @@
                         "line_number":23
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1218,5 +1224,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public function f() {\n    if ($x // ERROR RECOVERY: report missing right paren and right brace here\n\n  public function g() {\n  }\n}\n\nclass C {\n  public function f() {\n    if ($x // ERROR RECOVERY: report missing right paren and right brace here\n\n  private function g() {\n  }\n}\n\nclass C {\n  public function f() {\n    if ($x // ERROR RECOVERY: report missing right paren and right brace here\n\n  protected function g() {\n  }\n}\n\n// there are three of basically the same case just to make sure that\n// 'public', 'private', and 'protected' are all treated the same in\n// with respect to error recovery.\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

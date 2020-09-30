@@ -201,6 +201,7 @@
                         "line_number":5
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -562,5 +563,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass EmptyStdClassProp {\n  public function foo():void{\n    $o = new stdClass();\n    $o->{''} = true;\n  }\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

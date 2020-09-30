@@ -116,6 +116,7 @@
                 "line_number":2
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1131,5 +1132,5 @@
     }
   },
   "program_text":"<?hh\nfunction f () {\n  $a = async {};\n  $a = async {} + 1;\n  $a = 1 + async {};\n  $a = async {} + async {};\n  $a = async {\n    $a = 1;\n  };\n  $a = async {\n    $b = async {} + 1;\n  };\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

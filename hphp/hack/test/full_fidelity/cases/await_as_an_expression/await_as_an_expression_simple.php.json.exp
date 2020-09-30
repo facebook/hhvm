@@ -134,6 +134,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -18826,6 +18827,7 @@
                 "line_number":94
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -19018,5 +19020,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo(): Awaitable<void> {\n  $x = (await genx()) ? 1 : 2;\n  $x = (await genx())->foo(await geny());\n  $x = (await genx())?->foo(42);\n  $x = (int)(await genx());\n  $x = (await genx())->foo;\n  $x = Foo::FOO;\n  $x = Foo::foo(await geny());\n  $x = (await genx()) is int;\n  $x = (await genx()) as int;\n  $x = (await genx()) ?as int;\n  $x = isset(varray[][await genx()]);\n  $x = Map { (await genx()) => (await geny()) };\n  $x = Vector { (await genx()) };\n  $x = Set { (await genx()) };\n  $x = new (await genx())(await geny());\n  $x = shape('key' => (await genx()));\n  $x = tuple((await genx()), (await geny()));\n  $x = darray[0 => (await genx()), (await geny()) => (await genz())];\n  $x = darray[(await genx()) => (await geny())];\n  $x = varray[(await genx()), (await geny())];\n  $x = dict[(await genx()) => (await geny())];\n  $x = vec[(await genx()), (await geny())];\n  $x = keyset[(await genx()), (await geny())];\n  $x = (await genx())[(await geny())];\n  $x = (await genx()) && true;\n  $x = (await genx()) || true;\n  $x = (await genx()) ?: 42;\n  $x = (await genx()) ?? 42;\n  $x += (await genx());\n  $x -= (await genx());\n  $x *= (await genx());\n  $x /= (await genx());\n  $x **= (await genx());\n  $x .= (await genx());\n  $x %= (await genx());\n  $x ^= (await genx());\n  $x |= (await genx());\n  $x &= (await genx());\n  $x <<= (await genx());\n  $x >>= (await genx());\n\n  $x = (await genx()) + (await geny());\n  $x = (await genx()) - (await geny());\n  $x = (await genx()) * (await geny());\n  $x = (await genx()) / (await geny());\n  $x = (await genx()) ** (await geny());\n  $x = (await genx()) === (await geny());\n  $x = (await genx()) == (await geny());\n  $x = (await genx()) <= (await geny());\n  $x = (await genx()) >= (await geny());\n  $x = (await genx()) < (await geny());\n  $x = (await genx()) > (await geny());\n  $x = (await genx()) <=> (await geny());\n  $x = (await genx()) != (await geny());\n  $x = (await genx()) !== (await geny());\n  $x = (await genx()) & (await geny());\n  $x = (await genx()) | (await geny());\n  $x = (await genx()) << (await geny());\n  $x = (await genx()) >> (await geny());\n  $x = (await genx()) % (await geny());\n  $x = (await genx()) ^ (await geny());\n  $x = (await genx()) |> f($$);\n\n  <div attr={await genx()} {...(await genx())}/>;\n  <div attr={await genx()} {...(await genx())}>{await genx()}</div>;\n\n  +(await genx());\n  -(await genx());\n  !(await genx());\n  ~(await genx());\n  @foo(await genx());\n  clone (await genx());\n  print (await genx());\n\n  await genx();\n  return await genx();\n  unset(varray[][await genx()]);\n  if (await genx()) {}\n  throw (await genx());\n  switch (await genx()) { default: break; }\n  foreach ((await genx()) as $k => $v) {}\n  foreach ((await genx()) await as $k => $v) {}\n  for ((await genx()); 42; 43) {}\n  try { await genx(); } catch (Exception $_) {} finally {}\n  try {} catch (Exception $_) { await geny(); } finally {}\n  try {} catch (Exception $_) {} finally { await genz(); }\n  echo (await genx());\n  do { await genx(); } while (false);\n}\n\nasync function bar() {\n  yield (await genx());\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

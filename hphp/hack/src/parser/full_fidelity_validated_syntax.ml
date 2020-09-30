@@ -285,6 +285,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_specifier : specifier validator = fun x ->
     match Syntax.syntax x with
     | Syntax.SimpleTypeSpecifier _ -> tag validate_simple_type_specifier (fun x -> SpecSimple x) x
+    | Syntax.Capability _ -> tag validate_capability (fun x -> SpecCapability x) x
     | Syntax.VariadicParameter _ -> tag validate_variadic_parameter (fun x -> SpecVariadicParameter x) x
     | Syntax.LambdaSignature _ -> tag validate_lambda_signature (fun x -> SpecLambdaSignature x) x
     | Syntax.XHPEnumType _ -> tag validate_xhp_enum_type (fun x -> SpecXHPEnumType x) x
@@ -312,6 +313,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and invalidate_specifier : specifier invalidator = fun (value, thing) ->
     match thing with
     | SpecSimple            thing -> invalidate_simple_type_specifier          (value, thing)
+    | SpecCapability        thing -> invalidate_capability                     (value, thing)
     | SpecVariadicParameter thing -> invalidate_variadic_parameter             (value, thing)
     | SpecLambdaSignature   thing -> invalidate_lambda_signature               (value, thing)
     | SpecXHPEnumType       thing -> invalidate_xhp_enum_type                  (value, thing)
@@ -1129,6 +1131,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_type = validate_option_with (validate_attributized_specifier) x.function_type
     ; function_colon = validate_option_with (validate_token) x.function_colon
     ; function_capability_provisional = validate_option_with (validate_capability_provisional) x.function_capability_provisional
+    ; function_capability = validate_option_with (validate_capability) x.function_capability
     ; function_right_paren = validate_token x.function_right_paren
     ; function_parameter_list = validate_list_with (validate_parameter) x.function_parameter_list
     ; function_left_paren = validate_token x.function_left_paren
@@ -1148,10 +1151,27 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; function_left_paren = invalidate_token x.function_left_paren
       ; function_parameter_list = invalidate_list_with (invalidate_parameter) x.function_parameter_list
       ; function_right_paren = invalidate_token x.function_right_paren
+      ; function_capability = invalidate_option_with (invalidate_capability) x.function_capability
       ; function_capability_provisional = invalidate_option_with (invalidate_capability_provisional) x.function_capability_provisional
       ; function_colon = invalidate_option_with (invalidate_token) x.function_colon
       ; function_type = invalidate_option_with (invalidate_attributized_specifier) x.function_type
       ; function_where_clause = invalidate_option_with (invalidate_where_clause) x.function_where_clause
+      }
+    ; Syntax.value = v
+    }
+  and validate_capability : capability validator = function
+  | { Syntax.syntax = Syntax.Capability x; value = v } -> v,
+    { capability_right_bracket = validate_token x.capability_right_bracket
+    ; capability_types = validate_list_with (validate_specifier) x.capability_types
+    ; capability_left_bracket = validate_token x.capability_left_bracket
+    }
+  | s -> validation_fail (Some SyntaxKind.Capability) s
+  and invalidate_capability : capability invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.Capability
+      { capability_left_bracket = invalidate_token x.capability_left_bracket
+      ; capability_types = invalidate_list_with (invalidate_specifier) x.capability_types
+      ; capability_right_bracket = invalidate_token x.capability_right_bracket
       }
     ; Syntax.value = v
     }

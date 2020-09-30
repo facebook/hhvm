@@ -116,6 +116,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -218,6 +219,7 @@
                 "line_number":4
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -320,6 +322,7 @@
                 "line_number":5
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -422,6 +425,7 @@
                 "line_number":6
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -524,6 +528,7 @@
                 "line_number":7
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -626,6 +631,7 @@
                 "line_number":8
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -728,6 +734,7 @@
                 "line_number":9
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -830,6 +837,7 @@
                 "line_number":10
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -932,6 +940,7 @@
                 "line_number":11
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1034,6 +1043,7 @@
                 "line_number":12
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1136,6 +1146,7 @@
                 "line_number":13
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1238,6 +1249,7 @@
                 "line_number":14
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1340,6 +1352,7 @@
                 "line_number":15
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1442,6 +1455,7 @@
                 "line_number":16
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1544,6 +1558,7 @@
                 "line_number":17
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1646,6 +1661,7 @@
                 "line_number":18
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1748,6 +1764,7 @@
                 "line_number":19
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1850,6 +1867,7 @@
                 "line_number":20
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -1952,6 +1970,7 @@
                 "line_number":21
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2054,6 +2073,7 @@
                 "line_number":22
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2156,6 +2176,7 @@
                 "line_number":23
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2258,6 +2279,7 @@
                 "line_number":24
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2360,6 +2382,7 @@
                 "line_number":25
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2462,6 +2485,7 @@
                 "line_number":26
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2564,6 +2588,7 @@
                 "line_number":27
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2666,6 +2691,7 @@
                 "line_number":28
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2768,6 +2794,7 @@
                 "line_number":29
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2870,6 +2897,7 @@
                 "line_number":30
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -2972,6 +3000,7 @@
                 "line_number":31
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3074,6 +3103,7 @@
                 "line_number":32
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3176,6 +3206,7 @@
                 "line_number":33
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3278,6 +3309,7 @@
                 "line_number":34
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3380,6 +3412,7 @@
                 "line_number":35
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3482,6 +3515,7 @@
                 "line_number":36
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3584,6 +3618,7 @@
                 "line_number":37
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3686,6 +3721,7 @@
                 "line_number":38
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3788,6 +3824,7 @@
                 "line_number":39
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3890,6 +3927,7 @@
                 "line_number":40
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -3992,6 +4030,7 @@
                 "line_number":41
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -4094,6 +4133,7 @@
                 "line_number":42
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -4196,6 +4236,7 @@
                 "line_number":43
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -4298,6 +4339,7 @@
                 "line_number":44
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -4400,6 +4442,7 @@
                 "line_number":45
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -4502,6 +4545,7 @@
                 "line_number":46
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -7403,5 +7447,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction arraykey() {}\nfunction attribute() {}\nfunction binary() {}\nfunction bool() {}\nfunction boolean() {}\nfunction category() {}\nfunction children() {}\nfunction classname() {}\nfunction darray() {}\nfunction define() {}\nfunction dict() {}\nfunction double() {}\nfunction empty() {}\nfunction enum() {}\nfunction fallthrough() {}\nfunction false() {}\nfunction float() {}\nfunction from() {}\nfunction int() {}\nfunction integer() {}\nfunction is() {}\nfunction isset() {}\nfunction keyset() {}\nfunction let() {}\nfunction mixed() {}\nfunction newtype() {}\nfunction noreturn() {}\nfunction null() {}\nfunction num() {}\nfunction object() {}\nfunction parent() {}\nfunction real() {}\nfunction resource() {}\nfunction self() {}\nfunction string() {}\nfunction super() {}\nfunction this() {}\nfunction true() {}\nfunction type() {}\nfunction unset() {}\nfunction varray() {}\nfunction vec() {}\nfunction void() {}\nfunction where() {}\n\narraykey();\nattribute();\nbinary();\nbool();\nboolean();\ncategory();\nchildren();\nclassname();\ndarray();\ndefine();\ndict();\ndouble();\nempty();\nenum();\nfallthrough();\nfalse();\nfloat();\nfrom();\nint();\ninteger();\nis();\nisset();\nkeyset();\nlet();\nmixed();\nnewtype();\nnoreturn();\nnull();\nnum();\nobject();\nparent();\nreal();\nresource();\nself();\nstring();\nsuper();\nthis();\ntrue();\ntype();\nunset();\nvarray();\nvec();\nvoid();\nwhere();\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

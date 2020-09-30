@@ -128,6 +128,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -411,5 +412,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\nfunction foo(): void {\n  $n = Map<arraykey,bool>{};\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

@@ -116,6 +116,7 @@
                 "line_number":2
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
@@ -972,5 +973,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo() {\n  if ($a)\n    if ($b)\n      switch ($c) {\n        case 123: fallthrough; // fallthrough parsed but not yet supported\n        default: break;\n      }\n    else\n      return $d;\n  elseif($e)\n    do {\n      while($f)\n        throw $g;\n      continue;\n    } while ($h);\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

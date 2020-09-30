@@ -389,10 +389,25 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("parameter_list", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
+          ("capability", ZeroOrOne (Just "Capability"));
           ("capability_provisional", ZeroOrOne (Just "CapabilityProvisional"));
           ("colon", ZeroOrOne Token);
           ("type", ZeroOrOne (Just "AttributizedSpecifier"));
           ("where_clause", ZeroOrOne (Just "WhereClause"));
+        ];
+    };
+    {
+      kind_name = "Capability";
+      type_name = "capability";
+      func_name = "capability";
+      description = "capability";
+      prefix = "capability";
+      aggregates = [Specifier];
+      fields =
+        [
+          ("left_bracket", Token);
+          ("types", ZeroOrMore (Aggregate Specifier));
+          ("right_bracket", Token);
         ];
     };
     {

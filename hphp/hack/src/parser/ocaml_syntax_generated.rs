@@ -552,7 +552,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
+    fn make_function_declaration_header(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -564,7 +564,8 @@ where
           &arg7.value, 
           &arg8.value, 
           &arg9.value, 
-          &arg10.value
+          &arg10.value, 
+          &arg11.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -582,7 +583,28 @@ where
               arg7.syntax, 
               arg8.syntax, 
               arg9.syntax, 
-              arg10.syntax
+              arg10.syntax, 
+              arg11.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
+    fn make_capability(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
+      let children = [
+          &arg0.value, 
+          &arg1.value, 
+          &arg2.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::Capability,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax
           ],
       );
       Self { syntax, value }

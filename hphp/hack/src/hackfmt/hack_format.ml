@@ -520,7 +520,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           function_left_paren = leftp;
           function_parameter_list = params;
           function_right_paren = rightp;
-          function_capability_provisional = cap;
+          function_capability = cap;
+          function_capability_provisional = cap_provisional;
           function_colon = colon;
           function_type = ret_type;
           function_where_clause = where;
@@ -530,6 +531,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Span (transform_fn_decl_name env modifiers kw name type_params leftp);
           transform_fn_decl_args env params rightp;
           t env cap;
+          t env cap_provisional;
           t env colon;
           when_present colon space;
           t env ret_type;
@@ -552,6 +554,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           where_constraint_right_type = right;
         } ->
       Concat [t env left; Space; t env op; Space; t env right]
+    | Syntax.Capability
+        {
+          capability_left_bracket = lb;
+          capability_types = tys;
+          capability_right_bracket = rb;
+        } ->
+      Concat [t env lb; t env tys; t env rb]
     | Syntax.CapabilityProvisional
         {
           capability_provisional_at = at;
@@ -562,7 +571,18 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           capability_provisional_right_brace = rb;
         } ->
       Concat
-        [t env at; t env lb; t env cap; t env plus; t env unsafe_cap; t env rb]
+        [
+          t env at;
+          t env lb;
+          Space;
+          t env cap;
+          Space;
+          t env plus;
+          Space;
+          t env unsafe_cap;
+          Space;
+          t env rb;
+        ]
     | Syntax.MethodishDeclaration
         {
           methodish_attribute = attr;

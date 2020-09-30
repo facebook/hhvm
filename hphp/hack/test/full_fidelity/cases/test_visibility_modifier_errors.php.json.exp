@@ -178,6 +178,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -314,6 +315,7 @@
                         "line_number":5
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -450,6 +452,7 @@
                         "line_number":6
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -586,6 +589,7 @@
                         "line_number":7
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -736,6 +740,7 @@
                         "line_number":8
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -900,6 +905,7 @@
                         "line_number":9
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -1064,6 +1070,7 @@
                         "line_number":10
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -1228,6 +1235,7 @@
                         "line_number":11
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -1321,5 +1329,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I1 {\n  function i1(): void; // legal\n  public function i2(): void; // legal\n  private function i3(): void; // error2047\n  protected function i4(): void; // error2047\n  static final function i1(): void; // legal\n  static final public function i2(): void; // legal\n  static final private function i3(): void; // error2047\n  static final protected function i4(): void; // error2047\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

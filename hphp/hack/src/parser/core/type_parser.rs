@@ -846,6 +846,18 @@ where
         }
     }
 
+    pub fn parse_capability_opt(&mut self) -> S::R {
+        if self.peek_token_kind() == TokenKind::LeftBracket {
+            let (left_bracket, types, right_bracket) = self
+                .parse_bracketted_comma_list_opt_allow_trailing(|x: &mut Self| {
+                    x.parse_type_specifier(false, false)
+                });
+            S!(make_capability, self, left_bracket, types, right_bracket)
+        } else {
+            S!(make_missing, self, self.pos())
+        }
+    }
+
     fn parse_closure_type_specifier(&mut self) -> S::R {
         // SPEC
         //

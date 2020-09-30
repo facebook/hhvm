@@ -210,6 +210,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -374,6 +375,7 @@
                         "line_number":5
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -552,6 +554,7 @@
                         "line_number":6
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -698,6 +701,7 @@
                         "line_number":7
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -858,6 +862,7 @@
                         "line_number":8
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -1036,6 +1041,7 @@
                         "line_number":9
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -1168,6 +1174,7 @@
                         "line_number":10
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -1314,6 +1321,7 @@
                         "line_number":11
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1494,6 +1502,7 @@
                         "line_number":12
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1629,6 +1638,7 @@
                         "line_number":13
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1746,6 +1756,7 @@
                         "line_number":14
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
@@ -1926,6 +1937,7 @@
                         "line_number":15
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2076,6 +2088,7 @@
                         "line_number":16
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2226,6 +2239,7 @@
                         "line_number":17
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2403,6 +2417,7 @@
                         "line_number":18
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2597,6 +2612,7 @@
                         "line_number":19
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2838,6 +2854,7 @@
                         "line_number":20
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -2954,5 +2971,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass E {\n  public private function f () : void {}\n  final final function f () : void {}\n  public abstract final function f () : void ;\n  private abstract function f () : void ;\n  public abstract static function f () : void {}\n  public abstract static function f () : void ;\n  public function f () : void ;\n  public static function __construct () {}\n  public function __construct (public int $k) {}\n  public abstract function __construct () ;\n  public abstract function __construct () {}\n  public function f (public int $k) : void {}\n  public function __construct () : int {}\n  public function __construct () : void {}\n  public function f (...) : void {} // no errors\n  public function f (...,) : void {} // error; trailing comma illegal\n  public function f (..., int $x) : void {} // error; ... must be at end\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

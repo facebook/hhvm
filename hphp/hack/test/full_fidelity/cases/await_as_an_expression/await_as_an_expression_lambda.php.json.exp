@@ -134,6 +134,7 @@
                 "line_number":3
               }
             },
+            "function_capability":{"kind":"missing"},
             "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
@@ -2171,5 +2172,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo(): Awaitable<void> {\n  $x = async { await genx(); };\n  $x = async { f(await genx()); };\n  $x = async () ==> await genx();\n  $x = async () ==> f(await genx());\n  $x = async () ==> { await genx(); };\n  $x = async () ==> { f(await genx()); };\n  $x = async function () { await genx(); };\n  $x = async function () { f(await genx()); };\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

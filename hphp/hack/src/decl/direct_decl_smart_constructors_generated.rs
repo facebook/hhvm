@@ -150,8 +150,12 @@ impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> 
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_declaration(self, attribute_spec, declaration_header, body)
     }
 
-    fn make_function_declaration_header(&mut self, modifiers: Self::R, keyword: Self::R, name: Self::R, type_parameter_list: Self::R, left_paren: Self::R, parameter_list: Self::R, right_paren: Self::R, capability_provisional: Self::R, colon: Self::R, type_: Self::R, where_clause: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_declaration_header(self, modifiers, keyword, name, type_parameter_list, left_paren, parameter_list, right_paren, capability_provisional, colon, type_, where_clause)
+    fn make_function_declaration_header(&mut self, modifiers: Self::R, keyword: Self::R, name: Self::R, type_parameter_list: Self::R, left_paren: Self::R, parameter_list: Self::R, right_paren: Self::R, capability: Self::R, capability_provisional: Self::R, colon: Self::R, type_: Self::R, where_clause: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_declaration_header(self, modifiers, keyword, name, type_parameter_list, left_paren, parameter_list, right_paren, capability, capability_provisional, colon, type_, where_clause)
+    }
+
+    fn make_capability(&mut self, left_bracket: Self::R, types: Self::R, right_bracket: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_capability(self, left_bracket, types, right_bracket)
     }
 
     fn make_capability_provisional(&mut self, at: Self::R, left_brace: Self::R, type_: Self::R, unsafe_plus: Self::R, unsafe_type: Self::R, right_brace: Self::R) -> Self::R {

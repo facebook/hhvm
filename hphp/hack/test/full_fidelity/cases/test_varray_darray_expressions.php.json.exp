@@ -219,6 +219,7 @@
                         "line_number":5
                       }
                     },
+                    "function_capability":{"kind":"missing"},
                     "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
@@ -712,5 +713,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass TestVarrayDarrayExpression {\n  private static function foo(): void {\n    darray['bar' => 0, 'baz' => 1, 'qux' => 2];\n    varray[false, true];\n  }\n}\n",
-  "version":"2020-08-17-0000"
+  "version":"2020-09-14-0000"
 }

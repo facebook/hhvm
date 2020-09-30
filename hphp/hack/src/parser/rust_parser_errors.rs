@@ -3845,6 +3845,9 @@ where
 
     fn capability_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let FunctionDeclarationHeader(x) = &node.syntax {
+            if !&x.function_capability.is_missing() {
+                self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional);
+            }
             if !&x.function_capability_provisional.is_missing() {
                 self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional);
             }

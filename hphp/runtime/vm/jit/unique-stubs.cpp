@@ -1096,11 +1096,19 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   return teardownEnter;
 }
 
-TCA emitEndCatchStublogueHelper(CodeBlock& cb, DataBlock& data,
-                                UniqueStubs& us) {
+TCA emitEndCatchStublogueHelpers(CodeBlock& cb, DataBlock& data,
+                                 UniqueStubs& us) {
   alignJmpTarget(cb);
 
-  return vwrap(cb, data, [&] (Vout& v) {
+  us.endCatchStubloguePrologueHelper = vwrap(cb, data, [&] (Vout& v) {
+    for (auto i = 0; i < kNumActRecCells; ++i) {
+      auto const offset = cellsToBytes(i) + TVOFF(m_type);
+      v << storebi{static_cast<int8_t>(KindOfUninit), rvmsp()[offset]};
+    }
+    v << fallthru{vm_regs_no_sp()};
+  });
+
+  us.endCatchStublogueHelper = vwrap(cb, data, [&] (Vout& v) {
     // End catch situation in stublogue context: pop the native frame and
     // pass the curent rvmfp() and saved RIP from the native frame to
     // tc_unwind_resume_stublogue(),which returns the catch trace (or null)
@@ -1119,6 +1127,9 @@ TCA emitEndCatchStublogueHelper(CodeBlock& cb, DataBlock& data,
 
     v << jmpr{rret(0), vm_regs_no_sp()};
   });
+
+  // Unused.
+  return nullptr;
 }
 
 TCA emitUnwinderAsyncRet(CodeBlock& cb, DataBlock& data) {
@@ -1214,9 +1225,11 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, hotView(), emitHandleSRHelper(hot(), data));
   ADD(endCatchHelper, hotView(), emitEndCatchHelper(hot(), data, *this));
-  ADD(endCatchStublogueHelper,
-      hotView(),
-      emitEndCatchStublogueHelper(hot(), data, *this));
+  EMIT(
+    "endCatchStublogueHelpers",
+    hotView(),
+    [&] { return emitEndCatchStublogueHelpers(hot(), data, *this); }
+  );
   ADD(unwinderAsyncRet, hotView(), emitUnwinderAsyncRet(hot(), data));
   ADD(unwinderAsyncNullRet, hotView(), emitUnwinderAsyncNullRet(hot(), data));
   ADD(throwExceptionWhileUnwinding,

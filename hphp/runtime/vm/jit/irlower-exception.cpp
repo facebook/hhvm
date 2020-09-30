@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -54,6 +55,28 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const data = inst->extra<EndCatch>();
+  if (data->stublogue == EndCatchData::FrameMode::Stublogue) {
+    assertx(data->teardown == EndCatchData::Teardown::NA);
+    assertx(inst->marker().prologue());
+
+    // The caller is allowed to optimize away writes to the space reserved for
+    // ActRec and inouts. In order to unwind the stack, we need to initialize
+    // it to uninits. Do it in the catch blocks for inouts (which are uncommon)
+    // and initialize the ActRec space in the helper (to reduce the code size).
+    auto const spReg = srcLoc(env, inst, 1).reg();
+    auto const defStackData = inst->src(1)->inst()->extra<DefStackData>();
+    auto const numUninit = defStackData->irSPOff.offset;
+    assertx(numUninit >= kNumActRecCells);
+    for (auto i = kNumActRecCells; i < numUninit; ++i) {
+      auto const offset = cellsToBytes(i) + TVOFF(m_type);
+      v << storebi{static_cast<int8_t>(KindOfUninit), spReg[offset]};
+    }
+
+    v << syncvmsp{spReg};
+    v << jmpi{tc::ustubs().endCatchStubloguePrologueHelper, vm_regs_with_sp()};
+    return;
+  }
+
   if (data->teardown == EndCatchData::Teardown::None ||
       data->teardown == EndCatchData::Teardown::OnlyThis) {
     auto const vmsp = v.makeReg();
@@ -64,10 +87,6 @@ void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   }
 
   auto const helper = [&]() -> TCA {
-    if (data->stublogue == EndCatchData::FrameMode::Stublogue) {
-      assertx(data->teardown == EndCatchData::Teardown::NA);
-      return tc::ustubs().endCatchStublogueHelper;
-    }
     switch (data->teardown) {
       case EndCatchData::Teardown::None:
         return tc::ustubs().endCatchSkipTeardownHelper;

@@ -19,7 +19,9 @@ let _ = show_key_value_pair
 let compare (left : key_value_pair) (right : key_value_pair) : int =
   String.compare (fst left) (fst right)
 
-let create () : t = []
+let empty = []
+
+let create () : t = empty
 
 let to_json (telemetry : t) : Hh_json.json =
   Hh_json.JSON_Object (List.rev telemetry)

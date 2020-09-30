@@ -266,72 +266,38 @@ let get_mem_telemetry () : Telemetry.t option =
   else
     None
 
-let diff_mem_telemetry
-    (start : Telemetry.t option)
-    (second_start : Telemetry.t option)
-    (end_ : Telemetry.t option) : Telemetry.t =
-  match (start, second_start, end_) with
-  | (Some t1, Some t2, Some t3) ->
-    Telemetry.create ()
-    |> Telemetry.object_
-         ~key:"decl_and_typecheck"
-         ~value:(Telemetry.diff ~all:false t2 ~prev:t1)
-    |> Telemetry.object_
-         ~key:"second_typecheck"
-         ~value:(Telemetry.diff ~all:false t3 ~prev:t2)
-  | (Some t1, None, Some t3) ->
-    Telemetry.create ()
-    |> Telemetry.object_
-         ~key:"decl_and_typecheck"
-         ~value:(Telemetry.diff ~all:false t3 ~prev:t1)
-  | _ -> Telemetry.create ()
-
-let diff_counters_telemetry
-    (counters : Telemetry.t) (second_counters : Telemetry.t option) :
-    Telemetry.t =
-  let telemetry =
-    Telemetry.create ()
-    |> Telemetry.object_ ~key:"decl_and_typecheck" ~value:counters
-  in
-  match second_counters with
-  | None -> telemetry
-  | Some second_counters ->
-    Telemetry.object_
-      telemetry
-      ~key:"second_typecheck"
-      ~value:(Telemetry.diff ~all:false second_counters ~prev:counters)
+type unix_time = float
 
 let profile_log
     ~(check_info : check_info)
-    ~(start_time : float)
-    ~(counters : Telemetry.t)
-    ~(start_telemetry : Telemetry.t option)
-    ~(second_start_time : float option)
-    ~(second_counters : Telemetry.t option)
-    ~(second_start_telemetry : Telemetry.t option)
+    ~(start_counters : unix_time * Telemetry.t)
+    ~(end_counters : unix_time * Telemetry.t)
+    ~(second_run_end_counters : (unix_time * Telemetry.t) option)
     ~(file : check_file_computation)
     ~(result : process_file_results) : unit =
+  let (start_time, start_counters) = start_counters in
+  let (end_time, end_counters) = end_counters in
+  let duration = end_time -. start_time in
+  let profile = Telemetry.diff ~all:false ~prev:start_counters end_counters in
+  let (duration_second_run, profile_second_run) =
+    match second_run_end_counters with
+    | Some (time, counters) ->
+      let duration = time -. end_time in
+      let profile = Telemetry.diff ~all:false ~prev:end_counters counters in
+      (Some duration, Some profile)
+    | None -> (None, None)
+  in
   let { computation; _ } = result in
-  let end_time = Unix.gettimeofday () in
   let times_checked = file.deferred_count + 1 in
-  let end_telemetry_opt = get_mem_telemetry () in
   let files_to_declare =
     List.count computation ~f:(fun f ->
         match f with
         | Declare _ -> true
         | _ -> false)
   in
-  let (time_decl_and_typecheck, time_typecheck_opt) =
-    match second_start_time with
-    | None -> (end_time -. start_time, None)
-    | Some second_start_time ->
-      (second_start_time -. start_time, Some (end_time -. second_start_time))
-  in
   (* "deciding_time" is what we compare against the threshold, *)
   (* to see if we should log. *)
-  let deciding_time =
-    Option.value time_typecheck_opt ~default:time_decl_and_typecheck
-  in
+  let deciding_time = Option.value duration_second_run ~default:duration in
   let should_log =
     Float.(deciding_time >= check_info.profile_type_check_duration_threshold)
     || times_checked > 1
@@ -349,22 +315,16 @@ let profile_log
     in
     let telemetry =
       Telemetry.create ()
-      |> Telemetry.float_
-           ~key:"duration_decl_and_typecheck"
-           ~value:time_decl_and_typecheck
-      |> Telemetry.float_opt ~key:"duration_typecheck" ~value:time_typecheck_opt
       |> Telemetry.int_opt ~key:"filesize" ~value:filesize_opt
       |> Telemetry.object_ ~key:"deferment" ~value:deferment_telemetry
-      |> Telemetry.object_
-           ~key:"counters"
-           ~value:(diff_counters_telemetry counters second_counters)
-      |> Telemetry.object_
-           ~key:"mem"
-           ~value:
-             (diff_mem_telemetry
-                start_telemetry
-                second_start_telemetry
-                end_telemetry_opt)
+      |> Telemetry.object_ ~key:"profile" ~value:profile
+    in
+    let telemetry =
+      Option.fold
+        ~init:telemetry
+        profile_second_run
+        ~f:(fun telemetry profile ->
+          Telemetry.object_ telemetry ~key:"profile_second_run" ~value:profile)
     in
     HackEventLogger.ProfileTypeCheck.process_file
       ~recheck_id:check_info.recheck_id
@@ -384,6 +344,16 @@ let profile_log
         "" )
   )
 
+let read_counters () : unix_time * Telemetry.t =
+  let time = Unix.gettimeofday () in
+  let mem_telemetry = get_mem_telemetry () in
+  let operations_counters = Counters.get_counters () in
+  ( time,
+    Telemetry.create ()
+    |> Telemetry.float_ ~key:"time" ~value:time
+    |> Telemetry.object_opt ~key:"memory" ~value:mem_telemetry
+    |> Telemetry.object_ ~key:"operations" ~value:operations_counters )
+
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -395,41 +365,34 @@ let process_files
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
+  let _prev_counters_state = Counters.reset ~enable:check_info.profile_log in
+
   let rec process_or_exit errors progress =
     match progress.remaining with
     | fn :: fns ->
       let (errors, deferred) =
         match fn with
         | Check file ->
-          let start_time = Unix.gettimeofday () in
-          let start_telemetry = get_mem_telemetry () in
-          let prev_counters_state =
-            Counters.reset ~enable:check_info.profile_log
-          in
+          let start_counters = read_counters () in
           let result = process_file dynamic_view_files ctx errors file in
-          let counters = Counters.get_counters () in
-          let (second_start_time, second_start_telemetry, second_counters) =
+          let end_counters = read_counters () in
+          let second_run_end_counters =
             if check_info.profile_type_check_twice then
-              let t = Unix.gettimeofday () in
               (* we're running this routine solely for the side effect *)
               (* of seeing how long it takes to run. *)
               let (_ignored : process_file_results) =
                 process_file dynamic_view_files ctx errors file
               in
-              (Some t, get_mem_telemetry (), Some (Counters.get_counters ()))
+              Some (read_counters ())
             else
-              (None, None, None)
+              None
           in
-          Counters.restore_state prev_counters_state;
           if check_info.profile_log then
             profile_log
               ~check_info
-              ~start_time
-              ~counters
-              ~start_telemetry
-              ~second_start_time
-              ~second_counters
-              ~second_start_telemetry
+              ~start_counters
+              ~end_counters
+              ~second_run_end_counters
               ~file
               ~result;
           (result.errors, result.computation)

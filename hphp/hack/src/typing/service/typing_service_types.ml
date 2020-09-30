@@ -25,7 +25,12 @@ type computation_progress = {
 }
 [@@deriving show]
 
-type delegate_job_sig = unit -> Errors.t * computation_progress
+type typing_result = {
+  errors: Errors.t;
+  dep_edges: Typing_deps.dep_edges;
+}
+
+type delegate_job_sig = unit -> typing_result * computation_progress
 
 type progress_kind =
   | Progress

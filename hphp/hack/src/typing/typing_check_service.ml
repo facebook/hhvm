@@ -77,7 +77,8 @@ module Delegate = Typing_service_delegate
 
 type progress = job_progress
 
-let neutral = Errors.empty
+let neutral : unit -> typing_result =
+ (fun () -> { errors = Errors.empty; dep_edges = Typing_deps.dep_edges_make () })
 
 (*****************************************************************************)
 (* The job that will be run on the workers *)
@@ -357,10 +358,10 @@ let read_counters () : unix_time * Telemetry.t =
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
-    (errors : Errors.t)
+    (typing_result : typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * computation_progress =
+    ~(check_info : check_info) : typing_result * computation_progress =
   SharedMem.invalidate_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
@@ -422,25 +423,35 @@ let process_files
         process_or_exit errors progress
     | [] -> (errors, progress)
   in
-  let result = process_or_exit errors progress in
+  let (errors, progress) = process_or_exit typing_result.errors progress in
+  let dep_edges = Typing_deps.flush_ideps_batch () in
+  let dep_edges =
+    Typing_deps.merge_dep_edges typing_result.dep_edges dep_edges
+  in
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  result
+  ({ errors; dep_edges }, progress)
 
 let load_and_process_files
     (ctx : Provider_context.t)
     (dynamic_view_files : Relative_path.Set.t)
-    (errors : Errors.t)
+    (typing_result : typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * computation_progress =
+    ~(check_info : check_info) : typing_result * computation_progress =
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
   Sys_utils.set_signal
     Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
-  process_files dynamic_view_files ctx errors progress ~memory_cap ~check_info
+  process_files
+    dynamic_view_files
+    ctx
+    typing_result
+    progress
+    ~memory_cap
+    ~check_info
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -458,8 +469,8 @@ let merge
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
-    ((errors : Errors.t), (results : progress))
-    (acc : Errors.t) : Errors.t =
+    ({ errors; dep_edges }, (results : progress))
+    (typing_result : typing_result) : typing_result =
   let () =
     match results.kind with
     | Progress -> ()
@@ -530,7 +541,11 @@ let merge
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:delegate_progress;
-  Errors.merge errors acc
+  let dep_edges =
+    Typing_deps.merge_dep_edges typing_result.dep_edges dep_edges
+  in
+  let errors = Errors.merge errors typing_result.errors in
+  { errors; dep_edges }
 
 let next
     (workers : MultiWorker.worker list option)
@@ -644,7 +659,7 @@ let process_in_parallel
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) :
-    Errors.t * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
+    typing_result * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
   let delegate_state = ref delegate_state in
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
@@ -669,19 +684,19 @@ let process_in_parallel
   let job =
     load_and_process_files ctx dynamic_view_files ~memory_cap ~check_info
   in
-  let job (errors : Errors.t) (progress : progress) =
-    let (errors, computation_progress) =
+  let job (typing_result : typing_result) (progress : progress) =
+    let (typing_result, computation_progress) =
       match progress.kind with
-      | Progress -> job errors progress.progress
+      | Progress -> job typing_result progress.progress
       | DelegateProgress job -> Delegate.process job
     in
-    (errors, { progress with progress = computation_progress })
+    (typing_result, { progress with progress = computation_progress })
   in
-  let (errors, env, cancelled_results) =
+  let (typing_result, env, cancelled_results) =
     MultiWorker.call_with_interrupt
       workers
       ~job
-      ~neutral
+      ~neutral:(neutral ())
       ~merge:
         (merge
            ~should_prefetch_deferred_files
@@ -709,7 +724,7 @@ let process_in_parallel
     in
     List.concat (List.map cancelled_results ~f:paths_of)
   in
-  (errors, !delegate_state, telemetry, env, paths_of cancelled_results)
+  (typing_result, !delegate_state, telemetry, env, paths_of cancelled_results)
 
 type ('a, 'b, 'c, 'd) job_result = 'a * 'b * 'c * 'd * Relative_path.t list
 
@@ -805,20 +820,24 @@ let go_with_interrupt
   in
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
-  let result =
+  let (typing_result, delegate_state, telemetry, env, cancelled_fnl) =
     if should_process_sequentially opts fnl then begin
       Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
-      let (errors, _) =
+      let (typing_result, _) =
         process_files
           dynamic_view_files
           ctx
-          neutral
+          (neutral ())
           progress
           ~memory_cap:None
           ~check_info
       in
-      (errors, delegate_state, telemetry, interrupt.MultiThreadedCall.env, [])
+      ( typing_result,
+        delegate_state,
+        telemetry,
+        interrupt.MultiThreadedCall.env,
+        [] )
     end else begin
       Hh_logger.log "Type checking service will process files in parallel";
       let workers =
@@ -848,7 +867,7 @@ let go_with_interrupt
       (HackEventLogger.ProfileTypeCheck.get_telemetry_url
          ~init_id:check_info.init_id
          ~recheck_id:check_info.recheck_id);
-  result
+  (typing_result.errors, delegate_state, telemetry, env, cancelled_fnl)
 
 let go
     (ctx : Provider_context.t)

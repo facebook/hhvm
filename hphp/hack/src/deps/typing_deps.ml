@@ -757,6 +757,8 @@ let add_idep_directly_to_graph ~dependent ~dependency =
     (* TODO(hverr): implement, only used in hh_fanout *)
     failwith "unimplemented"
 
+let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
+
 let flush_ideps_batch () : dep_edges =
   match !mode with
   | SQLiteMode ->
@@ -769,6 +771,11 @@ let flush_ideps_batch () : dep_edges =
     let old_batch = !CustomGraph.filtered_deps_batch in
     CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
     Some old_batch
+
+let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
+  match (x, y) with
+  | (Some x, Some y) -> Some (CustomGraph.DepEdgeSet.union x y)
+  | _ -> None
 
 let get_ideps_from_hash hash =
   let open DepSet in

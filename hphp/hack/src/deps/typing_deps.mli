@@ -190,7 +190,11 @@ val add_idep : Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
 val add_idep_directly_to_graph : dependent:Dep.t -> dependency:Dep.t -> unit
 
+val dep_edges_make : unit -> dep_edges
+
 val flush_ideps_batch : unit -> dep_edges
+
+val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
 val get_ideps_from_hash : Dep.t -> DepSet.t
 

@@ -256,6 +256,7 @@
     counters
     typing
     typing_defs
+    typing_deps
     typing_service_api
     typing_service_api_stubs
     vfs)

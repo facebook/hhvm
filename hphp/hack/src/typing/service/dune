@@ -13,5 +13,6 @@
     job_runner_stubs
     relative_path
     typechecker_options
+    typing_deps
   )
   (preprocess (pps ppx_deriving.std)))

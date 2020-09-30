@@ -31,8 +31,8 @@ abstract final class DvArrayExtSoapBug38055 {
 function main_entry(): void {
 
   $client = new TestSoapClient(dirname(__FILE__).'/bug38055.wsdl');
-  var_dump($client->__getfunctions());
-  var_dump($client->__gettypes());
+  var_dump($client->__getFunctions());
+  var_dump($client->__getTypes());
   $boolA = 1;
   $boolB = '1';
   $res = $client->__soapcall(

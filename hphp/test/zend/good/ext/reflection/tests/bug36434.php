@@ -20,7 +20,7 @@ public $bar = "1";
 function main_entry(): void {
 
   $r = new ReflectionClass('foo');
-  foreach ($r->GetProperties() as $p)
+  foreach ($r->getProperties() as $p)
   {
   	echo $p->getName(). " ". $p->getDeclaringClass()->getName()."\n";
   }

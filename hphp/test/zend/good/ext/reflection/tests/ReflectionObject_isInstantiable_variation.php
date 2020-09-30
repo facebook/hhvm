@@ -39,6 +39,6 @@ function main() {
   foreach ($reflectionObjects as $reflectionObject) {
     $name = $reflectionObject->getName();
     echo "Is $name instantiable? ";
-    var_dump($reflectionObject->IsInstantiable());
+    var_dump($reflectionObject->isInstantiable());
   }
 }

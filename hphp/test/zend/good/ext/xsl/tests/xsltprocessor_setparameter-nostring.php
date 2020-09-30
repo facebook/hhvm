@@ -5,5 +5,5 @@ function entrypoint_xsltprocessor_setparameternostring(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet(XSLTPrepare::getXSL());
   var_dump($proc->setParameter('', varray[4, 'abc']));
-  $proc->transformToXml(XSLTPrepare::getDom());
+  $proc->transformToXML(XSLTPrepare::getDOM());
 }

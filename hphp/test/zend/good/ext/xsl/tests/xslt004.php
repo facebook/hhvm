@@ -12,7 +12,7 @@ $res->item(0)->value = "utf-8";
 $proc = XSLTPrepare::getProc();
 $proc->importStylesheet($xsl);
 print "\n";
-print $proc->transformToXml(XSLTPrepare::getDOM());
+print $proc->transformToXML(XSLTPrepare::getDOM());
 print "\n";
 
 

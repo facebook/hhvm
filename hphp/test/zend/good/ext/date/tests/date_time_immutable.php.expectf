@@ -49,7 +49,7 @@ orig:    0005-07-19 16:24:08 Europe/London
 copy:    0005-07-19 16:24:08 Europe/London
 changed: 0005-07-19 16:24:08 Europe/London
 
-setIsoDate():
+setISODate():
 orig:    2012-12-27 16:24:08 Europe/London
 copy:    2012-12-27 16:24:08 Europe/London
 changed: 2012-01-14 16:24:08 Europe/London

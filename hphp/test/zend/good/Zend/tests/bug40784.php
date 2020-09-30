@@ -7,7 +7,7 @@ class A {
 class B extends A {
   function __construct() {
     parent::__construct();
-    parent::__constrUct();
+    parent::__construct();
   }
 }
 

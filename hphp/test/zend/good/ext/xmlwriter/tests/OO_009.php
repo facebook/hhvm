@@ -15,12 +15,12 @@ function main_entry(): void {
   $xw->writeAttribute('attr1', 'first');
   $xw->writeComment('start PI');
   $xw->startElement('pi');
-  $xw->writePi('hh', 'echo "hello world"; ');
+  $xw->writePI('hh', 'echo "hello world"; ');
   $xw->endElement();
   $xw->startElement('cdata');
-  $xw->startCdata();
+  $xw->startCData();
   $xw->text('<>&"');
-  $xw->endCdata();
+  $xw->endCData();
   $xw->endElement();
   $xw->endElement();
   $xw->endElement();

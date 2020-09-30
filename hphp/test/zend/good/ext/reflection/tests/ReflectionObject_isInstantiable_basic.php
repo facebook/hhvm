@@ -24,6 +24,6 @@ $classes = varray["C", "ifaceImpl", "D"];
 foreach($classes  as $class ) {
     $ro = new ReflectionObject(new $class);
     echo "Is $class instantiable?  ";
-    var_dump($ro->IsInstantiable());
+    var_dump($ro->isInstantiable());
 }
 }

@@ -18,7 +18,7 @@ if(!$proc) {
 }
 
 $proc->importStylesheet($xsl);
-print $proc->transformToXml($dom);
+print $proc->transformToXML($dom);
 
 //this segfaulted before
 print $dom->documentElement->firstChild->nextSibling->nodeName;

@@ -9,6 +9,6 @@ function main_entry(): void {
   $proc->importStylesheet(XSLTPrepare::getXSL());
   $proc->setParameter( "", "foo","hello world");
   print "\n";
-  print $proc->transformToXml(XSLTPrepare::getDOM());
+  print $proc->transformToXML(XSLTPrepare::getDOM());
   print "\n";
 }

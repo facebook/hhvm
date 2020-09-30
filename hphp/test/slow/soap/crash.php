@@ -5,7 +5,7 @@ $server = new SoapServer(NULL, darray['uri'=>"http://testuri.org"]);
 
 var_dump($server->getfunctions());
 
-$server->setclass("NotExistingClass");
+$server->setClass("NotExistingClass");
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>

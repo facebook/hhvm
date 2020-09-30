@@ -9,7 +9,7 @@ $xsl = new DOMDocument();
 $xsl->load($base . DIRECTORY_SEPARATOR . 'collection.xsl');
 
 $proc = new XSLTProcessor;
-$proc->importStyleSheet($xsl);
+$proc->importStylesheet($xsl);
 
 echo $proc->transformToXML($xml);
 }

@@ -10,7 +10,7 @@ $db->commit();
 $db->beginTransaction();
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
-$db->rollback();
+$db->rollBack();
 
 $r = $db->query('SELECT COUNT(*) FROM foobar');
 var_dump($r->rowCount());

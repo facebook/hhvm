@@ -18,7 +18,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  public function setclass(string $name, ...$argv): void;
+  public function setClass(string $name, ...$argv): void;
 
   /**
    * This sets a specific object as the handler for SOAP requests, rather than
@@ -112,7 +112,7 @@ class SoapServer {
    *
    */
   <<__Native>>
-  public function addsoapheader(mixed $fault): void;
+  public function addSoapHeader(mixed $fault): void;
 }
 
 <<__NativeData("SoapClient")>>
@@ -200,10 +200,10 @@ class SoapClient {
   public function __getlastresponseheaders(): mixed;
 
   <<__Native>>
-  public function __getfunctions(): mixed;
+  public function __getFunctions(): mixed;
 
   <<__Native>>
-  public function __gettypes(): mixed;
+  public function __getTypes(): mixed;
 
   <<__Native>>
   public function __dorequest(string $buf,

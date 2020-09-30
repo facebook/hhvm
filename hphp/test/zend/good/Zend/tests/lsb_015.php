@@ -60,8 +60,8 @@ class B extends A {
 }
 <<__EntryPoint>> function main(): void {
 echo "via A:\n";
-A::myCatch();
+A::mycatch();
 echo "via B:\n";
-B::myCatch();
+B::mycatch();
 echo "==DONE==";
 }

@@ -13,7 +13,7 @@ $dom = new domDocument();
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/xslt011.xml");
   $proc->registerPHPFunctions();
-  print $proc->transformToXml($xml);
+  print $proc->transformToXML($xml);
 
   function foobar($id, $secondArg = "" ) {
     if (is_array($id)) {

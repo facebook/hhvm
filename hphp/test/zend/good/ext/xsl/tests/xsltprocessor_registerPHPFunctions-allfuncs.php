@@ -1,7 +1,7 @@
 <?hh
 
 //var_dump($proc->registerPHPFunctions(array()));
-//var_dump($proc->transformToXml($dom));
+//var_dump($proc->transformToXML($dom));
 
 <<__EntryPoint>>
 function main_entry(): void {
@@ -15,5 +15,5 @@ function main_entry(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($phpfuncxsl);
   var_dump($proc->registerPHPFunctions());
-  var_dump($proc->transformToXml(XSLTPrepare::getDOM()));
+  var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

@@ -13,7 +13,7 @@ $res->item(0)->value = "html";
 $proc = XSLTPrepare::getProc();
 $proc->importStylesheet($xsl);
 print "\n";
-print $proc->transformToXml(XSLTPrepare::getDOM());
+print $proc->transformToXML(XSLTPrepare::getDOM());
 print "\n";
 
 

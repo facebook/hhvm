@@ -8,6 +8,6 @@ function main_entry(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet(XSLTPrepare::getXSL());
   print "\n";
-  print $proc->transformToXml(XSLTPrepare::getDOM());
+  print $proc->transformToXML(XSLTPrepare::getDOM());
   print "\n";
 }

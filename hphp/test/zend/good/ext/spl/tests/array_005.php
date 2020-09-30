@@ -16,7 +16,7 @@ class Student
         return $this->id . ', ' . $this->name;
     }
 
-    public function getId()
+    public function getID()
     {
         return $this->id;
     }
@@ -42,7 +42,7 @@ class StudentList implements IteratorAggregate
     {
         foreach ($this->students as $s)
         {
-            if ($s->getId() == $student->getId()) {
+            if ($s->getID() == $student->getID()) {
                 return true;
             }
         }

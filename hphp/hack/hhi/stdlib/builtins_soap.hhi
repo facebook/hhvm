@@ -96,14 +96,14 @@ function _soap_active_version();
 
 class SoapServer {
   public function __construct($wsdl, $options = null);
-  public function setclass(string $name, ...$args);
+  public function setClass(string $name, ...$args);
   public function setobject($obj);
   public function addFunction($func);
   public function getfunctions();
   public function handle($request = null);
   public function setpersistence(int $mode);
   public function fault($code, string $fault, $actor = null, $detail = null, $name = null);
-  public function addsoapheader($fault);
+  public function addSoapHeader($fault);
 }
 
 class SoapClient {
@@ -114,8 +114,8 @@ class SoapClient {
   public function __getlastresponse();
   public function __getlastrequestheaders();
   public function __getlastresponseheaders();
-  public function __getfunctions();
-  public function __gettypes();
+  public function __getFunctions();
+  public function __getTypes();
   public function __dorequest(string $buf, string $location, string $action, int $version, bool $oneway = false);
   public function __setcookie(string $name, $value = null);
   public function __setlocation($new_location = null);

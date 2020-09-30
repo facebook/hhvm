@@ -7,14 +7,14 @@ string(2) "N;"
 NULL
 varray(9) {
   string(11) "__construct"
-  string(8) "setclass"
+  string(8) "setClass"
   string(9) "setobject"
   string(11) "addFunction"
   string(12) "getfunctions"
   string(6) "handle"
   string(14) "setpersistence"
   string(5) "fault"
-  string(13) "addsoapheader"
+  string(13) "addSoapHeader"
 }
 ================
 A_SoapServer
@@ -28,12 +28,12 @@ string(2) "N;"
 NULL
 varray(9) {
   string(11) "__construct"
-  string(8) "setclass"
+  string(8) "setClass"
   string(9) "setobject"
   string(11) "addFunction"
   string(12) "getfunctions"
   string(6) "handle"
   string(14) "setpersistence"
   string(5) "fault"
-  string(13) "addsoapheader"
+  string(13) "addSoapHeader"
 }

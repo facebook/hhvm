@@ -32,6 +32,6 @@ $parameters = darray[
 $proc->setParameter( "", $parameters);
 
 print "\n";
-print $proc->transformToXml($dom);
+print $proc->transformToXML($dom);
 print "\n";
 }

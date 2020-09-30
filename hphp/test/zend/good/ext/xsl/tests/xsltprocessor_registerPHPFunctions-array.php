@@ -11,5 +11,5 @@ function main_entry(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($phpfuncxsl);
   var_dump($proc->registerPHPFunctions(varray['ucwords']));
-  var_dump($proc->transformToXml(XSLTPrepare::getDOM()));
+  var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

@@ -12,5 +12,5 @@ function main_entry(): void {
   $proc->importStylesheet($phpfuncxsl);
   var_dump($proc->registerPHPFunctions('ucwords'));
   var_dump($proc->registerPHPFunctions('strpos'));
-  var_dump($proc->transformToXml(XSLTPrepare::getDOM()));
+  var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

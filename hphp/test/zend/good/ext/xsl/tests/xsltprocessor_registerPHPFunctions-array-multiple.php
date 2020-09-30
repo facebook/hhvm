@@ -13,5 +13,5 @@ function main_entry(): void {
   var_dump($proc->registerPHPFunctions(varray['strpos', 'ucwords']));
   var_dump($proc->registerPHPFunctions(varray['strrev', 'array_key_exists']));
   var_dump($proc->registerPHPFunctions(varray[]));
-  var_dump($proc->transformToXml(XSLTPrepare::getDOM()));
+  var_dump($proc->transformToXML(XSLTPrepare::getDOM()));
 }

@@ -514,7 +514,7 @@ function datefmt_is_lenient(IntlDateFormatter $fmt): bool {
 function datefmt_localtime(IntlDateFormatter $fmt,
                            $value,
                            inout $position): mixed {
-  $result = $fmt->localTime($value, inout $position);
+  $result = $fmt->localtime($value, inout $position);
   return $result;
 }
 

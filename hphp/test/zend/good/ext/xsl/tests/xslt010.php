@@ -9,5 +9,5 @@ $dom = new domDocument();
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/exslt.xml");
 
-  print $proc->transformToXml($xml);
+  print $proc->transformToXML($xml);
 }

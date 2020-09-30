@@ -5,5 +5,5 @@ function entrypoint_xsltprocessor_setparametererrorquote(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet(XSLTPrepare::getXSL());
   $proc->setParameter('', '', '"\'');
-  $proc->transformToXml(XSLTPrepare::getDOM());
+  $proc->transformToXML(XSLTPrepare::getDOM());
 }

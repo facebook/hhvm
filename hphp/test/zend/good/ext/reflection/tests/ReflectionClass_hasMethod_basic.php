@@ -40,7 +40,4 @@ function main_entry(): void {
 
   //C should not have method bar
   var_dump($rc->hasMethod('bar'));
-
-  //Method names are case insensitive
-  var_dump($rc->hasMethod('PUBLICfOO'));
 }

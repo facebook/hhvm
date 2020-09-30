@@ -5,5 +5,5 @@ function entrypoint_bug48221(): void {
   $proc = XSLTPrepare::getProc();
   $proc->importStylesheet(XSLTPrepare::getXSL());
   $proc->setParameter('', '', '"\'');
-  $proc->transformToXml(XSLTPrepare::getDOM());
+  $proc->transformToXML(XSLTPrepare::getDOM());
 }

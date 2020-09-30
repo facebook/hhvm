@@ -75,14 +75,14 @@ function main_entry(): void {
   $x = $z->setDate(5, 7, 19);
   dump($v, $z, $x);
 
-  echo "\nsetIsoDate():\n";
+  echo "\nsetISODate():\n";
   $v = date_create_immutable($current);
   $z = $v;
-  $x = $z->setIsoDate(2012, 2, 6);
+  $x = $z->setISODate(2012, 2, 6);
   dump($v, $z, $x);
   $v = date_create($current);
   $z = $v;
-  $x = $z->setIsoDate(2012, 2, 6);
+  $x = $z->setISODate(2012, 2, 6);
   dump($v, $z, $x);
 
   echo "\nsetTimestamp():\n";

@@ -30,7 +30,7 @@ foreach($classes as $class) {
     echo "  --> Check for s(): ";
     var_dump($rc->hasMethod("s"));
     echo "  --> Check for F(): ";
-    var_dump($rc->hasMethod("F"));
+    var_dump($rc->hasMethod("f"));
     echo "  --> Check for doesntExist(): ";
     var_dump($rc->hasMethod("doesntExist"));
 }

@@ -64,7 +64,7 @@ struct ExnStackState {
  *      copy propagation and strength reduction.  (See simplify.h.)
  */
 struct IRBuilder {
-  IRBuilder(IRUnit&, const BCMarker&);
+  IRBuilder(IRUnit&, const Func*);
 
   /*
    * Accessors.
@@ -349,7 +349,6 @@ private:
 
 private:
   IRUnit& m_unit;
-  BCMarker m_initialMarker;
   BCContext m_curBCContext;
   FrameStateMgr m_state;
 

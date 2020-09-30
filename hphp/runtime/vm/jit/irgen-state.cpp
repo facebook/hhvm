@@ -24,24 +24,13 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-BCMarker initial_marker(const TransContext& ctx) {
-  return BCMarker {
-    ctx.initSrcKey, ctx.initSpOffset, false, ctx.transIDs, nullptr };
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
            TranslateRetryContext* retryContext, bool prologueSetup)
   : context(unit.context())
   , transFlags(unit.context().flags)
   , region(region)
   , unit(unit)
-  , irb(new IRBuilder(unit, initial_marker(context)))
+  , irb(new IRBuilder(unit, context.initSrcKey.func()))
   , bcState(context.initSrcKey)
   , budgetBCInstrs(budgetBCInstrs)
   , retryContext(retryContext)

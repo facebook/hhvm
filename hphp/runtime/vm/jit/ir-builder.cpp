@@ -75,11 +75,10 @@ bool isMBaseLoad(const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IRBuilder::IRBuilder(IRUnit& unit, const BCMarker& initMarker)
+IRBuilder::IRBuilder(IRUnit& unit, const Func* func)
   : m_unit(unit)
-  , m_initialMarker(initMarker)
-  , m_curBCContext{initMarker, 0}
-  , m_state(initMarker.func())
+  , m_curBCContext{BCMarker{}, 0}
+  , m_state(func)
   , m_curBlock(m_unit.entry())
 {
   if (RuntimeOption::EvalHHIRGenOpts) {

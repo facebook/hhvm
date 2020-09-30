@@ -1646,7 +1646,11 @@ folly::Optional<int> run_client(const char* sock_path,
     cli_write(fd, 0, args, env_vec);
     return cli_process_command_loop(fd);
   } catch (const Exception& ex) {
-    Logger::Error("Problem communicating with CLI server: %s", ex.what());
+    Logger::Error(
+      "Problem communicating with CLI server: %s\n"
+      "It likely crashed. Check the HHVM error log and look for coredumps",
+      ex.what()
+    );
     exit(255);
   }
 }

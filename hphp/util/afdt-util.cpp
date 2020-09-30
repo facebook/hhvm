@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
+#include <system_error>
 
 #include "hphp/util/assertions.h"
 
@@ -64,7 +65,9 @@ void send(int afdt_fd, std::vector<iovec>& iov) {
   msg.msg_iov = &iov[0];
   msg.msg_iovlen = iov.size();
   ssize_t nwritten = sendmsg(afdt_fd, &msg, MSG_WAITALL);
-  if (nwritten < 0) throw std::runtime_error("send failed");
+  if (nwritten < 0) {
+    throw std::system_error(errno, std::generic_category(), "send failed");
+  }
   for (auto& io : iov) {
     nwritten -= io.iov_len;
   }
@@ -79,7 +82,9 @@ void recv(int afdt_fd, std::vector<iovec>& iov) {
   msg.msg_iov = &iov[0];
   msg.msg_iovlen = iov.size();
   ssize_t nread = recvmsg(afdt_fd, &msg, MSG_WAITALL);
-  if (nread <= 0) throw std::runtime_error("recv failed");
+  if (nread <= 0) {
+    throw std::system_error(errno, std::generic_category(), "recv failed");
+  }
   for (auto& io : iov) {
     nread -= io.iov_len;
   }

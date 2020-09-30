@@ -517,6 +517,10 @@ module CustomGraph = struct
     allow_reads_ref := flag;
     prev
 
+  external hh_custom_dep_graph_has_edge : Dep.t -> Dep.t -> bool
+    = "hh_custom_dep_graph_has_edge"
+    [@@noalloc]
+
   external get_ideps_from_hash : Dep.t -> DepSet.t
     = "hh_custom_dep_graph_get_ideps_from_hash"
 
@@ -531,6 +535,65 @@ module CustomGraph = struct
     = "hh_custom_dep_graph_get_extend_deps"
 
   let add_all_deps x = x |> add_extend_deps |> add_typing_deps
+
+  type dep_edge = {
+    idependent: Dep.t;
+    idependency: Dep.t;
+  }
+
+  module DepEdgeSet = Caml.Set.Make (struct
+    type t = dep_edge
+
+    let compare x y =
+      let d1 = x.idependent - y.idependent in
+      if d1 = 0 then
+        x.idependency - y.idependency
+      else
+        d1
+  end)
+
+  (* A batch of discovered dependency edges, of which some might
+   * already be in the dependency graph!
+   *
+   * There isn't really any reason why I choose Hashtbl over Set here. *)
+  let discovered_deps_batch : (dep_edge, unit) Hashtbl.t = Hashtbl.create 1000
+
+  (* A batch of dependency edges that are not yet in the dependency graph.
+   * We use a Set, because a Hashtbl is way too expensive to serialize/
+   * deserialize in OCaml. *)
+  let filtered_deps_batch : DepEdgeSet.t ref = ref DepEdgeSet.empty
+
+  let filter_discovered_deps_batch () =
+    (* Empty discovered_deps_bach by checking for each edge whether it's already
+     * in the dependency graph. If it is not, add it to the filtered deps batch. *)
+    let s = !filtered_deps_batch in
+    let s =
+      Hashtbl.fold
+        begin
+          fun ({ idependent; idependency } as edge) () s ->
+          if not (hh_custom_dep_graph_has_edge idependent idependency) then
+            DepEdgeSet.add edge s
+          else
+            s
+        end
+        discovered_deps_batch
+        s
+    in
+    filtered_deps_batch := s;
+    Hashtbl.clear discovered_deps_batch
+
+  let add_idep dependent dependency =
+    let idependent = Dep.make dependent in
+    let idependency = Dep.make dependency in
+    if idependent = idependency then
+      ()
+    else
+      Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+    if !trace then begin
+      Hashtbl.replace discovered_deps_batch { idependent; idependency } ();
+      if Hashtbl.length discovered_deps_batch >= 1000 then
+        filter_discovered_deps_batch ()
+    end
 end
 
 (** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
@@ -661,6 +724,10 @@ module ForTest = struct
   let combine_hashes = NamingHash.combine_hashes
 end
 
+type dep_edge = CustomGraph.dep_edge
+
+type dep_edges = CustomGraph.DepEdgeSet.t option
+
 (** As part of few optimizations (prechecked files, interruptible typechecking), we
     allow the dependency table to get out of date (in order to be able to prioritize
     other work, like reporting errors in currently open file). This flag is there
@@ -681,7 +748,7 @@ let allow_dependency_table_reads flag =
 let add_idep dependent dependency =
   match !mode with
   | SQLiteMode -> SQLiteGraph.add_idep dependent dependency
-  | CustomMode _ -> (* TODO(hverr): implement *) ()
+  | CustomMode _ -> CustomGraph.add_idep dependent dependency
 
 let add_idep_directly_to_graph ~dependent ~dependency =
   match !mode with
@@ -689,6 +756,19 @@ let add_idep_directly_to_graph ~dependent ~dependency =
   | CustomMode _ ->
     (* TODO(hverr): implement, only used in hh_fanout *)
     failwith "unimplemented"
+
+let flush_ideps_batch () : dep_edges =
+  match !mode with
+  | SQLiteMode ->
+    (* In SQLite mode, the dependency edges are immediately
+     * added to shared memory. *)
+    None
+  | CustomMode _ ->
+    (* Make sure we don't miss any dependencies! *)
+    CustomGraph.filter_discovered_deps_batch ();
+    let old_batch = !CustomGraph.filtered_deps_batch in
+    CustomGraph.filtered_deps_batch := CustomGraph.DepEdgeSet.empty;
+    Some old_batch
 
 let get_ideps_from_hash hash =
   let open DepSet in

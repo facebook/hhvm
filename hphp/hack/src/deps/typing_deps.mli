@@ -161,6 +161,10 @@ module Files : sig
   val update_file : Relative_path.t -> FileInfo.t -> unit
 end
 
+type dep_edge
+
+type dep_edges
+
 type mode =
   | SQLiteMode
   | CustomMode of string
@@ -185,6 +189,8 @@ val allow_dependency_table_reads : bool -> bool
 val add_idep : Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
 val add_idep_directly_to_graph : dependent:Dep.t -> dependency:Dep.t -> unit
+
+val flush_ideps_batch : unit -> dep_edges
 
 val get_ideps_from_hash : Dep.t -> DepSet.t
 

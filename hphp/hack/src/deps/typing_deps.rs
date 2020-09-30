@@ -481,6 +481,15 @@ ocaml_ffi! {
 
 // Functions to query the dependency graph
 ocaml_ffi! {
+    fn hh_custom_dep_graph_has_edge(dependent: OcamlDep, dependency: OcamlDep) -> bool {
+        UnsafeDepGraph::with(move |g| {
+            match g.hash_list_for(dependent.into()) {
+                Some(hash_list) => g.hash_list_contains(hash_list, dependency.into()),
+                None => false,
+            }
+        })
+    }
+
     fn hh_custom_dep_graph_get_ideps_from_hash(dep: OcamlDep) -> Custom<DepSet> {
         let set_opt = UnsafeDepGraph::with(move |g| {
             let list = g.hash_list_for(dep.into())?;

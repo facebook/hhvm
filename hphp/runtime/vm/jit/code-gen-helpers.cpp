@@ -394,7 +394,8 @@ void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason) {
       // Put fn inside vcall{} triggers a compiler internal error (gcc 4.4.7)
       auto const cls = emitLdObjClass(v, obj, v.makeReg());
       auto const fn = CallSpec::objDestruct(cls);
-      v << vcall{fn, v.makeVcallArgs({{obj, cls}}), v.makeTuple({})};
+      v << vcall{fn, v.makeVcallArgs({{obj, cls}}), v.makeTuple({}),
+                 Fixup::none()};
     },
     [&] (Vout& v) {
       emitDecRef(v, obj, reason);
@@ -551,7 +552,8 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) return;
   v << vcall{CallSpec::direct(Trace::ringbufferMsg),
              v.makeVcallArgs({{v.cns(msg), v.cns(strlen(msg)), v.cns(t)}}),
-             v.makeTuple({})};
+             v.makeTuple({}),
+             Fixup::none()};
 }
 
 void emitIncStat(Vout& v, Stats::StatCounter stat) {

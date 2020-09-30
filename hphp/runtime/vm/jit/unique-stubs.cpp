@@ -145,7 +145,7 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
     CallSpec::direct(helper, nullptr),
     v.makeVcallArgs({{arg}}),
     v.makeTuple({d}),
-    Fixup{},
+    Fixup::none(),
     DestType::SSA
   };
 }
@@ -319,7 +319,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
         CallSpec::direct(static_cast<ArrayData* (*)(uint32_t, TypedValue*)>(helper)),
         v.makeVcallArgs({{numToPack, stackTopPtr}}),
         v.makeTuple({packedArr}),
-        Fixup{},
+        Fixup::none(),
         DestType::SSA
       };
     }
@@ -388,7 +388,7 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
         v.makeVcallArgs({{flags, func, numArgs, savedRip}}),
         v.makeTuple({numNewArgs}),
         {done, ctch},
-        Fixup{makeIndirectFixup(prs.qwordsPushed())},
+        Fixup::indirect(prs.qwordsPushed()),
         DestType::SSA
       };
 
@@ -441,7 +441,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
         CallSpec::direct(mcgen::getFuncPrologue),
         v.makeVcallArgs({{func, numArgs}}),
         v.makeTuple({target}),
-        Fixup{},
+        Fixup::none(),
         DestType::SSA
       };
     }
@@ -472,7 +472,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
       v.makeVcallArgs({{flags, func, numArgs, ctx, savedRip}}),
       v.makeTuple({notIntercepted}),
       {done, ctch},
-      Fixup{},
+      Fixup::none(),
       DestType::SSA
     };
 
@@ -548,7 +548,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       v.makeVcallArgs({{ar, v.cns(EventHook::NormalFunc)}}),
       v.makeTuple({should_continue}),
       {done, ctch},
-      Fixup{},
+      Fixup::none(),
       DestType::SSA
     };
 
@@ -615,7 +615,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
 
     v << vinvoke{CallSpec::direct(handlePossibleStackOverflow),
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
-                 {done, ctch}};
+                 {done, ctch}, Fixup::none()};
     vc = ctch;
     emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
 
@@ -702,7 +702,7 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
         CallSpec::direct(svcreq::handleBindCall),
         v.makeVcallArgs({{toSmash, func, numArgs}}),
         v.makeTuple({target}),
-        Fixup{},
+        Fixup::none(),
         DestType::SSA
       };
     }
@@ -876,7 +876,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       if (!fullFrame) {
         // The stub frame's saved RIP is at %rsp[8] before we saved the
         // caller-saved registers.
-        v << syncpoint{makeIndirectFixup(prs.qwordsPushed())};
+        v << syncpoint{Fixup::indirect(prs.qwordsPushed())};
       }
     };
 
@@ -1004,7 +1004,7 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
       CallSpec::direct(svcreq::handleServiceRequest),
       v.makeVcallArgs({{sp}}),
       v.makeTuple({ret}),
-      Fixup{},
+      Fixup::none(),
       DestType::SSA
     };
 

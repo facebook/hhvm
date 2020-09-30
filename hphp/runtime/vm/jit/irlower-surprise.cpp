@@ -136,7 +136,7 @@ void cgCheckSurpriseFlagsEnter(IRLS& env, const IRInstruction* inst) {
   auto const func = extra->func;
 
   auto const off = func->getEntryForNumArgs(extra->argc) - func->base();
-  auto const fixup = Fixup(off, func->numSlotsInFrame());
+  auto const fixup = Fixup::direct(off, FPInvOffset{func->numSlotsInFrame()});
 
   auto const catchBlock = label(env, inst->taken());
   emitCheckSurpriseFlagsEnter(vmain(env), vcold(env), fp, fixup, catchBlock);
@@ -148,7 +148,7 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
   auto const func = extra->func;
 
   auto const off = func->getEntryForNumArgs(extra->argc) - func->base();
-  auto const fixup = Fixup(off, func->numSlotsInFrame());
+  auto const fixup = Fixup::direct(off, FPInvOffset{func->numSlotsInFrame()});
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();

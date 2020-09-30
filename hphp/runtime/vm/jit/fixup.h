@@ -17,10 +17,11 @@
 #pragma once
 
 #include <vector>
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/data-block.h"
 
@@ -46,27 +47,28 @@ namespace HPHP { namespace jit {
  * the translation cache)---if so, it finds the fixup information in one of two
  * ways:
  *
- *   - Fixup: the normal case.
+ *   - a direct Fixup: the normal case.
  *
  *     The Fixup record just stores an offset relative to the ActRec* for vmsp,
  *     and an offset from the start of the func for pc.  In the case of
  *     resumable frames the sp offset is relative to Stack::resumableStackBase.
  *
- *   - IndirectFixup:
+ *   - an indirect Fixup:
  *
- *     This can be used for some shared stubs in the TC, to avoid
- *     setting up a full frame, on architectures where the calee's
- *     frame is stored immediately under the caller's sp (currently
- *     true of x64 but not arm or ppc).
+ *     This is used when invoking C++ methods in stublogue mode, i.e. a TC code
+ *     that was called, but did not set up a full frame, as it is operating on
+ *     behalf of the caller. This mode is used in prologues and some shared
+ *     stubs on architectures, where the callee's frame is stored immediately
+ *     under the caller's sp (currently true on x64, but not arm or ppc).
  *
  *     In this case, some JIT'd code associated with the ActRec* we found made
- *     a call to a shared stub, and then that stub called C++.  The
- *     IndirectFixup record stores an offset to the saved frame pointer *two*
+ *     a call to a shared stub or prologue, and then that code called C++. The
+ *     indirect Fixup record stores an offset to the saved frame pointer *two*
  *     levels deeper in C++, that says where the return IP for the call to the
  *     shared stub can be found.  I.e., we're trying to chase back two return
  *     ips into the TC.
  *
- *     Note that this means IndirectFixups will not work for C++ code
+ *     Note that this means indirect Fixups will not work for C++ code
  *     paths that need to do a fixup without making at least one other
  *     C++ call (because of -momit-leaf-frame-pointers), but for the
  *     current use case this is fine.
@@ -103,7 +105,7 @@ namespace HPHP { namespace jit {
  *        |..............................|
  *        |..............................|
  *
- *     The offset in IndirectFixup is how to get to the "RetIP to caller of
+ *     The offset in indirect Fixup is how to get to the "RetIP to caller of
  *     dtor stub", relative to the value in the starred stack slot shown.  We
  *     then look that IP up in the fixup map again to find a normal
  *     (non-indirect) Fixup record.
@@ -113,33 +115,46 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct Fixup {
-  Fixup(int32_t pcOff, int32_t spOff) : pcOffset{pcOff}, spOffset{spOff} {
+  static Fixup direct(int32_t pcOffset, FPInvOffset spOffset) {
     assertx(pcOffset >= 0);
-    assertx(spOffset >= 0);
+    assertx(spOffset.offset >= 0);
+    return Fixup{pcOffset, spOffset};
   }
 
-  Fixup() {}
+  static Fixup indirect(uint32_t qwordsPushed) {
+    auto const ripOffset =
+      kNativeFrameSize + AROFF(m_savedRip) + qwordsPushed * sizeof(uintptr_t);
+    assertx(ripOffset > 0);
+    return Fixup{-safe_cast<int32_t>(ripOffset), FPInvOffset{0}};
+  }
 
-  bool isValid() const { return spOffset >= 0; }
+  static Fixup none() {
+    return Fixup{0, FPInvOffset::invalid()};
+  }
+
+  bool isValid() const { return m_spOffset.isValid(); }
+  bool isIndirect() const { assertx(isValid()); return m_pcOrRipOffset < 0; }
+  uint32_t pcOffset() const { assertx(!isIndirect()); return m_pcOrRipOffset; }
+  uint32_t ripOffset() const { assertx(isIndirect()); return -m_pcOrRipOffset; }
+  FPInvOffset spOffset() const { assertx(isValid()); return m_spOffset; }
+  std::string show() const;
 
   bool operator==(const Fixup& o) const {
-    return pcOffset == o.pcOffset && spOffset == o.spOffset;
+    return m_pcOrRipOffset == o.m_pcOrRipOffset && m_spOffset == o.m_spOffset;
   }
   bool operator!=(const Fixup& o) const {
-    return pcOffset != o.pcOffset || spOffset != o.spOffset;
+    return m_pcOrRipOffset != o.m_pcOrRipOffset || m_spOffset != o.m_spOffset;
   }
 
-  int32_t pcOffset{-1};
-  int32_t spOffset{-1};
-};
+private:
+  Fixup(int32_t pcOrRipOffset, FPInvOffset spOffset)
+    : m_pcOrRipOffset{pcOrRipOffset}
+    , m_spOffset{spOffset}
+  {}
 
-inline Fixup makeIndirectFixup(int qwordsPushed) {
-  Fixup fix;
-  fix.spOffset = kNativeFrameSize +
-                 AROFF(m_savedRip) +
-                 qwordsPushed * sizeof(uintptr_t);
-  return fix;
-}
+  int32_t m_pcOrRipOffset;
+  FPInvOffset m_spOffset;
+};
 
 namespace FixupMap {
 /*

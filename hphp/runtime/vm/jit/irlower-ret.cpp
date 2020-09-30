@@ -153,7 +153,8 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
     v << vcall{
       CallSpec::direct(traceRet),
       v.makeVcallArgs({{prev_fp, sync_sp, rip}}),
-      v.makeTuple({})
+      v.makeTuple({}),
+      Fixup::none()
     };
   }
 
@@ -210,10 +211,8 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
   v << lea{ptrToLocalType(fp, numLocals - 1), startType};
   v << lea{ptrToLocalData(fp, numLocals - 1), startData};
 
-  auto const fix = Fixup{
-    marker.bcOff() - marker.func()->base(),
-    marker.spOff().offset
-  };
+  auto const fixupBcOff = marker.bcOff() - marker.func()->base();
+  auto const fix = Fixup::direct(fixupBcOff, marker.spOff());
   // The stub uses arg reg 0 as scratch and to pass arguments to
   // destructors, so it expects the starting pointers in arg reg 1 and
   // 2.

@@ -144,7 +144,8 @@ void unblockParents(Vout& v, Vreg firstBl) {
   ifThen(v, CC_NZ, sf, [&] (Vout& v) {
     v << vcall{CallSpec::direct(AsioBlockableChain::UnblockJitHelper),
                v.makeVcallArgs({{rvmfp(), rvmsp(), firstBl}}),
-               v.makeTuple({})};
+               v.makeTuple({}),
+               Fixup::none()};
   });
 }
 
@@ -164,7 +165,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
       CallSpec::direct(getFastRunnableAFWH),
       v.makeVcallArgs({{}}),
       v.makeTuple({afwh}),
-      Fixup{},
+      Fixup::none(),
       DestType::SSA
     };
 
@@ -291,6 +292,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
         CallSpec::direct(freeAFWH),
         v.makeVcallArgs({{wh}}),
         v.makeTuple({}),
+        Fixup::none()
       };
     },
     [&] (Vout& v) {  // Someone else still has a ref, do the work.

@@ -143,11 +143,6 @@ inline void interp_set_regs(ActRec* ar, TypedValue* sp, Offset pcOff) {
   vmJitReturnAddr() = nullptr; // We never elide frames around an interpOne
 }
 
-/*
- * Return the first VM frame that is a parent of this function's call frame.
- */
-ActRec* callerFrameHelper();
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

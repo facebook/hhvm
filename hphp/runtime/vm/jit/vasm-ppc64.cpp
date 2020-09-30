@@ -626,8 +626,7 @@ void Vgen::emit(const contenter& i) {
 void Vgen::emit(const syncpoint& i) {
   // skip the "ld 2,24(1)" or "nop" emitted by "Assembler::call" at the end
   TCA saved_pc = a.frontier() - call_skip_bytes_for_ret;
-  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", saved_pc,
-         i.fix.pcOffset, i.fix.spOffset);
+  FTRACE(5, "IR recordSyncPoint: {} {}\n", saved_pc, i.fix.show());
   env.meta.fixups.emplace_back(saved_pc, i.fix);
   env.record_inline_stack(saved_pc);
 }

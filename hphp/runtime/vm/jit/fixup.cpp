@@ -27,6 +27,8 @@
 
 #include "hphp/util/data-block.h"
 
+TRACE_SET_MOD(fixup);
+
 namespace HPHP {
 
 bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
@@ -42,22 +44,23 @@ bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
   return ret;
 }
 
-ActRec* callerFrameHelper() {
-  DECLARE_FRAME_POINTER(frame);
+//////////////////////////////////////////////////////////////////////
 
-  auto rbp = frame->m_sfp;
-  while (true) {
-    assertx(rbp && rbp != rbp->m_sfp && "Missing fixup for native call");
-    if (isVMFrame(rbp)) {
-      return rbp;
-    }
-    rbp = rbp->m_sfp;
+namespace jit {
+
+std::string Fixup::show() const {
+  if (!isValid()) return "invalid";
+  if (isIndirect()) {
+    return folly::sformat("indirect ripOff={}", ripOffset());
+  } else {
+    return folly::sformat("direct pcOff={} spOff={}",
+                          pcOffset(), spOffset().offset);
   }
 }
 
-namespace jit { namespace FixupMap { namespace {
+//////////////////////////////////////////////////////////////////////
 
-TRACE_SET_MOD(fixup);
+namespace FixupMap { namespace {
 
 constexpr unsigned kInitCapac = 128;
 
@@ -68,61 +71,29 @@ struct VMRegs {
   TCA retAddr;
 };
 
-struct IndirectFixup {
-  explicit IndirectFixup(int retIpDisp) : returnIpDisp{retIpDisp} {}
-
-  /* FixupEntry uses magic to differentiate between IndirectFixup and Fixup. */
-  int32_t magic{-1};
-  int32_t returnIpDisp;
-};
-
-union FixupEntry {
-  explicit FixupEntry(Fixup f) : fixup(f) {}
-
-  /* Depends on the magic field in an IndirectFixup being -1. */
-  bool isIndirect() {
-    static_assert(
-      offsetof(IndirectFixup, magic) == offsetof(FixupEntry, firstElem),
-      "Differentiates between Fixup and IndirectFixup by looking at magic."
-    );
-
-    return firstElem < 0;
-  }
-
-  int32_t firstElem;
-  Fixup fixup;
-  IndirectFixup indirect;
-};
-
 struct FixupHash {
   size_t operator()(uint32_t k) const {
     return hash_int64(k);
   }
 };
 
-TreadHashMap<uint32_t,FixupEntry,FixupHash> s_fixups{kInitCapac};
-
-PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
-  assertx(f);
-  return f->entry() + fixup.pcOffset;
-}
+TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     VMRegs* outRegs) {
+  assertx(!fixup.isIndirect());
   const Func* f = ar->func();
   assertx(f);
-  TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
-        (void*)tca, fixup.pcOffset, fixup.spOffset);
-  assertx(fixup.spOffset >= 0);
-  outRegs->pc = pc(ar, f, fixup);
+  TRACE(3, "regsFromActRec: tca %p -> %s\n", tca, fixup.show().c_str());
+  outRegs->pc = f->entry() + fixup.pcOffset();
   outRegs->fp = ar;
   outRegs->retAddr = tca;
 
   if (UNLIKELY(isResumed(ar))) {
     TypedValue* stackBase = Stack::resumableStackBase(ar);
-    outRegs->sp = stackBase - fixup.spOffset;
+    outRegs->sp = stackBase - fixup.spOffset().offset;
   } else {
-    outRegs->sp = (TypedValue*)ar - fixup.spOffset;
+    outRegs->sp = (TypedValue*)ar - fixup.spOffset().offset;
   }
 }
 
@@ -131,18 +102,15 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
 bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   TCA tca = (TCA)ar->m_savedRip;
 
-  auto ent = s_fixups.find(tc::addrToOffset(tca));
-  if (!ent) return false;
+  auto fixup = s_fixups.find(tc::addrToOffset(tca));
+  if (!fixup) return false;
 
-  // Note: If indirect fixups happen frequently enough, we could just compare
-  // savedRip to be less than some threshold where stubs in a.code stop.
-  if (ent->isIndirect()) {
-    auto savedRIPAddr = reinterpret_cast<uintptr_t>(ar) +
-                        ent->indirect.returnIpDisp;
-    tca = *reinterpret_cast<TCA*>(savedRIPAddr);
-    ent = s_fixups.find(tc::addrToOffset(tca));
-    assertx(ent && "Missing fixup for indirect fixup");
-    assertx(!ent->isIndirect() && "Invalid doubly indirect fixup");
+  if (fixup->isIndirect()) {
+    auto const ripAddr = reinterpret_cast<uintptr_t>(ar) + fixup->ripOffset();
+    tca = *reinterpret_cast<TCA*>(ripAddr);
+    fixup = s_fixups.find(tc::addrToOffset(tca));
+    assertx(fixup && "Missing fixup for indirect fixup");
+    assertx(!fixup->isIndirect() && "Invalid doubly indirect fixup");
   }
 
   // Non-obvious off-by-one fun: if the *return address* points into the TC,
@@ -150,7 +118,7 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   // frame.
   ar = ar->m_sfp;
 
-  regsFromActRec(tca, ar, ent->fixup, outVMRegs);
+  regsFromActRec(tca, ar, *fixup, outVMRegs);
   return true;
 }
 
@@ -158,21 +126,20 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
 }
 
 void recordFixup(CTCA tca, const Fixup& fixup) {
-  TRACE(3, "FixupMapImpl::recordFixup: tca %p -> (pcOff %d, spOff %d)\n",
-        tca, fixup.pcOffset, fixup.spOffset);
+  TRACE(3, "recordFixup: tca %p -> %s\n", tca, fixup.show().c_str());
 
+  assertx(fixup.isValid());
   auto const offset = tc::addrToOffset(tca);
   if (auto pos = s_fixups.find(offset)) {
-    *pos = FixupEntry(fixup);
+    *pos = fixup;
   } else {
-    s_fixups.insert(offset, FixupEntry(fixup));
+    s_fixups.insert(offset, fixup);
   }
 }
 
 const Fixup* findFixup(CTCA tca) {
-  auto ent = s_fixups.find(tc::addrToOffset(tca));
-  if (!ent) return nullptr;
-  return &ent->fixup;
+  auto const fixup = s_fixups.find(tc::addrToOffset(tca));
+  return fixup ? &*fixup : nullptr;
 }
 
 size_t size() { return s_fixups.size(); }

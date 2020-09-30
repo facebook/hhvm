@@ -271,7 +271,8 @@ void implodingIFTE(Vout& v, Vout& vc, Branch do_branch,
     vc << vcall{
       CallSpec::direct(smashMovq),
       vc.makeVcallArgs({{mov_addr, updated}}),
-      vc.makeTuple({})
+      vc.makeTuple({}),
+      Fixup::none()
     };
     do_side(vc);
     vc << phijmp{after, vc.makeTuple({updated})};
@@ -307,7 +308,8 @@ void implodingIFTE(Vout& v, Vout& vc, Branch do_branch,
   v << vcall{
     CallSpec::direct(smashJmp),
     vc.makeVcallArgs({{jmp_addr, end_addr}}),
-    vc.makeTuple({})
+    vc.makeTuple({}),
+    Fixup::none()
   };
   v << jmp{end};
 

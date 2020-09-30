@@ -134,11 +134,10 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
 
   // Stublogue code operates on behalf of the caller, so it needs an indirect
   // fixup to obtain the real savedRip from the native frame.
-  if (marker.stublogue()) return makeIndirectFixup(0);
+  if (marker.stublogue()) return Fixup::indirect(0);
 
   auto const bcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
-  auto const stackOff = marker.spOff();
-  return Fixup{bcOff, stackOff.offset};
+  return Fixup::direct(bcOff, marker.spOff());
 }
 
 void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
@@ -169,7 +168,7 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
       // to be correct during allocations no matter what.
       return makeFixup(inst->marker(), sync);
     }
-    return Fixup{};
+    return Fixup::none();
   }();
 
   Vlabel targets[2];

@@ -73,7 +73,7 @@ void sync_regstate(TCA rip, _Unwind_Context* context) {
   Stats::inc(Stats::TC_SyncUnwind);
 
   // `fp` points to the native frame immediately called from the TC. The address
-  // of this frame is needed by fixupWork() to properly process IndirectFixups.
+  // of this frame is needed by fixupWork() to properly process indirect Fixups.
   auto const fp = reinterpret_cast<ActRec*>(
     _Unwind_GetCFA(context) - kNativeFrameSize);
   assertx(reinterpret_cast<TCA>(fp->m_savedRip) == rip);

@@ -119,7 +119,7 @@ struct FormatVisitor {
   void imm(RingBufferType t) { str << sep() << ringbufferName(t); }
   void imm(SrcKey k) { str << sep() << showShort(k); }
   void imm(Fixup fix) {
-    str << sep() << "pc:" << fix.pcOffset << " sp:" << fix.spOffset;
+    str << sep() << fix.show();
   }
   void imm(Stats::StatCounter c) { str << sep() << Stats::g_counterNames[c]; }
   void imm(Vlabel b) { str << sep() << "B" << size_t(b); }

@@ -79,7 +79,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data,
       // Between where %rsp is now and the saved RIP of the call into the
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
       // saved RIP of the call from the stub to this helper.
-      v << syncpoint{makeIndirectFixup(prs.qwordsPushed())};
+      v << syncpoint{Fixup::indirect(prs.qwordsPushed())};
     };
 
     auto const sf = emitCmpRefCount(v, OneReference, dataVal);

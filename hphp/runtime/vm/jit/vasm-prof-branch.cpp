@@ -387,7 +387,8 @@ void sample_branch(Vout& v, Env& /*env*/, const BranchID& branch,
   v << vcall{
     CallSpec::direct(record_branch_hit),
     v.makeVcallArgs({{rbranch, rfunc, rfp}}),
-    v.makeTuple({})
+    v.makeTuple({}),
+    Fixup::none()
   };
 
   v << lea{rsp()[6 * sizeof(uint64_t)], rsp()};

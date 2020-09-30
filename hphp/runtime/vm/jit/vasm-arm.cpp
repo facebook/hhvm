@@ -854,8 +854,7 @@ void Vgen::emit(const nothrow& /*i*/) {
 }
 
 void Vgen::emit(const syncpoint& i) {
-  FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a->frontier(),
-         i.fix.pcOffset, i.fix.spOffset);
+  FTRACE(5, "IR recordSyncPoint: {} {}\n", a->frontier(), i.fix.show());
   env.meta.fixups.emplace_back(a->frontier(), i.fix);
   env.record_inline_stack(a->frontier());
 }

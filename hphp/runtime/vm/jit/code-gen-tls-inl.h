@@ -79,7 +79,7 @@ emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d) {
     CallSpec::direct(pthread_getspecific),
     v.makeVcallArgs({{v.cns(datum.tls->m_key)}}),
     v.makeTuple({d}),
-    Fixup{},
+    Fixup::none(),
     DestType::SSA
   };
 }

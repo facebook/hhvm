@@ -10,14 +10,14 @@ string(87) "Calling fb_enable_code_coverage without adding 'enable_code_coverage
 Requesting 'test_code_coverage.php?enable_code_coverage=true'
 string(%d) "Code coverage: true
 I'm FOOO
-array(2) {
+darray(2) {
   ["/:systemlib.phpfb"]=>
-  array(1) {
+  darray(1) {
     [%d]=>
     int(1)
   }
   [%s]=>
-  array(5) {
+  darray(5) {
     [4]=>
     int(1)
     [5]=>
@@ -33,14 +33,14 @@ array(2) {
 Enable Code Coverage = 2
 Requesting 'test_code_coverage.php'
 string(%d) "I'm FOOO
-array(2) {
+darray(2) {
   ["/:systemlib.phpfb"]=>
-  array(1) {
+  darray(1) {
     [%d]=>
     int(1)
   }
   [%s]=>
-  array(5) {
+  darray(5) {
     [4]=>
     int(1)
     [5]=>

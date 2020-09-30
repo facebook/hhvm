@@ -1,32 +1,25 @@
 Requesting 'test_get_headers_secure.php'
-string(%d) "array(5) {
+string(%d) "darray(5) {
   ["accept"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(3) "*/*"
   }
   ["host"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(%d) "%s"
   }
   ["user-agent"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(%d) "%s"
   }
   ["xxxxx"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(2) "45"
   }
   ["xyzzy"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(2) "42"
-    [1]=>
     string(2) "43"
-    [2]=>
     string(2) "44"
   }
 }"

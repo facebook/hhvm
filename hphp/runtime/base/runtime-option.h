@@ -1100,7 +1100,7 @@ struct RuntimeOption {
   /* When this flag is on, d/varray constructions are marked. */        \
   F(bool, HackArrDVArrMark, false)                                      \
   /* When this flag is on, var_dump outputs d/varrays. */               \
-  F(bool, HackArrDVArrVarDump, false)                                   \
+  F(bool, HackArrDVArrVarDump, true)                                    \
   /* This is the flag for "unification", meaning that darrays are       \
    * replaced by dicts and varrays by vecs. */                          \
   F(bool, HackArrDVArrs, false)                                         \

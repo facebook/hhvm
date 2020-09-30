@@ -892,5 +892,11 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth);
  * class type helpers.
  */
 SSATmp* convertClassKey(IRGS& env, SSATmp* key);
+
+/*
+ * Define sp(env).
+ */
+void defineStack(IRGS& env, FPInvOffset bcSPOff);
+
 }}}
 

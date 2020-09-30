@@ -23,8 +23,8 @@ namespace HPHP { namespace jit {
 
 // A TransContext for use in tests.
 const auto test_context =
-  TransContext { TransIDSet{}, TransKind::Live, TransFlags{},
-                 SrcKey{}, FPInvOffset{0}, 0, nullptr };
+  TransContext { TransIDSet{}, 0, TransKind::Live, TransFlags{},
+                 SrcKey{}, nullptr };
 
 //////////////////////////////////////////////////////////////////////
 

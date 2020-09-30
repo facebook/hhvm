@@ -257,6 +257,18 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void definePrologueStack(IRGS& env, uint32_t argc) {
+  // argc TVs on top of prologue stack base rvmsp()
+  auto const irSPOff = FPInvOffset { 0 };
+  auto const bcSPOff = FPInvOffset { safe_cast<int32_t>(argc) };
+  gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
+
+  // Now that the stack is initialized, update the BC marker and perform
+  // initial sync of the exception stack boundary.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+}
+
 Type prologueCtxType(const Func* func) {
   assertx(func->isClosureBody() || func->cls());
   if (func->isClosureBody()) return Type::ExactObj(func->implCls());
@@ -418,6 +430,8 @@ void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
 void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
                       TransID transID) {
   assertx(argc <= callee->numNonVariadicParams() + 1);
+
+  definePrologueStack(env, argc);
 
   // Define register inputs before doing anything else that may clobber them.
   auto const callFlags = gen(env, DefCallFlags);

@@ -107,10 +107,6 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  * need access to this.
  */
 struct TransContext {
-  TransContext(const TransIDSet& transIDs, TransKind kind, TransFlags flags,
-               SrcKey sk, FPInvOffset spOff, int optIndex,
-               const RegionDesc* region);
-
   /*
    * Data members.
    *
@@ -120,7 +116,6 @@ struct TransContext {
   int optIndex;
   TransKind kind{TransKind::Invalid};
   TransFlags flags;
-  FPInvOffset initSpOffset;
   SrcKey initSrcKey;
   const RegionDesc* region{nullptr};
 };

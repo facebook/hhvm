@@ -52,4 +52,28 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
   }
   return key;
 }
+
+void defineStack(IRGS& env, FPInvOffset bcSPOff) {
+  // Define SP.
+  if (resumeMode(env) != ResumeMode::None) {
+    // rvmsp() points to the top of the stack in resumables
+    auto const irSPOff = bcSPOff;
+    gen(env, DefRegSP, DefStackData { irSPOff, bcSPOff });
+  } else {
+    // stack starts at the FP in regular functions
+    auto const irSPOff = FPInvOffset { 0 };
+    gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
+  }
+
+  // Now that the stack is initialized, update the BC marker and perform
+  // initial sync of the exception stack boundary.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    // Assert that we're in the correct function.
+    gen(env, DbgAssertFunc, fp(env));
+  }
+}
+
 }}}

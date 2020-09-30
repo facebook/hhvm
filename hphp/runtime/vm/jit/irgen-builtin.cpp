@@ -1912,7 +1912,7 @@ SSATmp* builtinCall(IRGS& env,
   // so there's nothing for FrameState to do.
   auto const retOff = [&] () -> folly::Optional<IRSPRelOffset> {
     if (params.forNativeImpl && !catchMaker.inlining()) {
-      assertx(env.irb->fs().bcSPOff() == env.context.initSpOffset);
+      assertx(spOffBCFromFP(env) == FPInvOffset{callee->numSlotsInFrame()});
       return folly::none;
     }
     return offsetFromIRSP(

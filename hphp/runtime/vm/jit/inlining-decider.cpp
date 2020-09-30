@@ -312,13 +312,10 @@ Vcost computeTranslationCostSlow(SrcKey at,
                                  AnnotationData* annotationData) {
   TransContext ctx {
     TransIDSet{},
+    0,  // optIndex
     TransKind::Optimize,
     TransFlags{},
     at,
-    // We can pretend the stack is empty, but we at least need to account for
-    // the locals, iters, and slots, etc.
-    FPInvOffset{at.func()->numSlotsInFrame()},
-    0,
     &region
   };
 

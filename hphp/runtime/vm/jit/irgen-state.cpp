@@ -25,7 +25,7 @@ namespace HPHP { namespace jit { namespace irgen {
 //////////////////////////////////////////////////////////////////////
 
 IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
-           TranslateRetryContext* retryContext, bool prologueSetup)
+           TranslateRetryContext* retryContext)
   : context(unit.context())
   , transFlags(unit.context().flags)
   , region(region)
@@ -36,36 +36,10 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
   , retryContext(retryContext)
 {
   updateMarker(*this);
-  auto const frame = gen(*this, DefFP);
 
-  // Now that we've defined the FP, update the BC marker appropriately.
+  // Define frame and update the BC marker appropriately.
+  gen(*this, DefFP);
   updateMarker(*this);
-
-  // Define SP.
-  auto const bcSPOff = context.initSpOffset;
-  if (prologueSetup) {
-    // rvmsp() points to the "no inputs" location on the stack in prologues
-    auto const irSPOff = FPInvOffset { 0 };
-    gen(*this, DefRegSP, DefStackData { irSPOff, bcSPOff });
-  } else if (resumeMode(*this) != ResumeMode::None) {
-    // rvmsp() points to the top of the stack in resumables
-    auto const irSPOff = context.initSpOffset;
-    gen(*this, DefRegSP, DefStackData { irSPOff, bcSPOff });
-  } else {
-    // stack starts at the FP in regular functions
-    auto const irSPOff = FPInvOffset { 0 };
-    gen(*this, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, frame);
-  }
-
-  // Now that the stack is initialized, update the BC marker again and perform
-  // initial sync of the exception stack boundary.
-  updateMarker(*this);
-  irb->exceptionStackBoundary();
-
-  if (RuntimeOption::EvalHHIRGenerateAsserts && !prologueSetup) {
-    // Assert that we're in the correct function.
-    gen(*this, DbgAssertFunc, frame);
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

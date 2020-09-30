@@ -21,21 +21,6 @@
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
-// TransContext.
-
-inline TransContext::TransContext(
-  const TransIDSet& ids, TransKind kind, TransFlags flags,
-  SrcKey sk, FPInvOffset spOff, int optIndex, const RegionDesc* region)
-  : transIDs(ids)
-  , optIndex(optIndex)
-  , kind(kind)
-  , flags(flags)
-  , initSpOffset(spOff)
-  , initSrcKey(sk)
-  , region(region)
-{}
-
-///////////////////////////////////////////////////////////////////////////////
 // Control flow information.
 
 inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {

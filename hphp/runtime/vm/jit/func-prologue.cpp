@@ -53,11 +53,10 @@ genFuncPrologue(TransID transID, TransKind kind,
                 tc::CodeMetaLock* locker) {
   auto const context = TransContext{
     transID == kInvalidTransID ? TransIDSet{} : TransIDSet{transID},
+    0,  // optIndex
     kind,
     TransFlags{},
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}},
-    FPInvOffset{argc},  // argc TVs on top of prologue stack base rvmsp()
-    0,
     nullptr
   };
 
@@ -67,7 +66,7 @@ genFuncPrologue(TransID transID, TransKind kind,
   };
 
   IRUnit unit{context, std::make_unique<AnnotationData>()};
-  irgen::IRGS env{unit, nullptr, 0, nullptr, true};
+  irgen::IRGS env{unit, nullptr, 0, nullptr};
 
   irgen::emitFuncPrologue(env, func, argc, transID);
   irgen::sealUnit(env);

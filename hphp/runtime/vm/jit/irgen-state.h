@@ -53,8 +53,7 @@ namespace irgen {
  */
 struct IRGS {
   explicit IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
-                TranslateRetryContext* retryContext,
-                bool prologueSetup = false);
+                TranslateRetryContext* retryContext);
 
   TransContext context;
   TransFlags transFlags;

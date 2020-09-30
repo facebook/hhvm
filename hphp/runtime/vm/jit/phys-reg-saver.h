@@ -45,7 +45,7 @@ struct PhysRegSaver {
   PhysRegSaver& operator=(const PhysRegSaver&) = delete;
   PhysRegSaver& operator=(PhysRegSaver&&) = default;
 
-  size_t dwordsPushed() const;
+  size_t qwordsPushed() const;
 
 private:
   Vout& m_v;

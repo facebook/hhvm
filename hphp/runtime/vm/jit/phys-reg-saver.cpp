@@ -75,7 +75,7 @@ PhysRegSaver::~PhysRegSaver() {
   }
 }
 
-size_t PhysRegSaver::dwordsPushed() const {
+size_t PhysRegSaver::qwordsPushed() const {
   auto const gpr = m_regs & abi().gp();
   auto const xmm = m_regs & abi().simd();
   return 2 * xmm.size() + gpr.size() + (gpr.size() & 0x1);

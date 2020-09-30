@@ -133,11 +133,11 @@ struct Fixup {
   int32_t spOffset{-1};
 };
 
-inline Fixup makeIndirectFixup(int dwordsPushed) {
+inline Fixup makeIndirectFixup(int qwordsPushed) {
   Fixup fix;
   fix.spOffset = kNativeFrameSize +
                  AROFF(m_savedRip) +
-                 dwordsPushed * sizeof(uintptr_t);
+                 qwordsPushed * sizeof(uintptr_t);
   return fix;
 }
 

@@ -26,11 +26,9 @@ let unwrap_class_type ty =
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | (r, Tgeneric _) ->
     let p = Typing_reason.to_pos r in
-    Errors.expected_class ~suffix:" or interface but got a generic" p;
     (r, (p, ""), [])
   | (r, _) ->
     let p = Typing_reason.to_pos r in
-    Errors.expected_class ~suffix:" or interface" p;
     (r, (p, ""), [])
 
 (* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part

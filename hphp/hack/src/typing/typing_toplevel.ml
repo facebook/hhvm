@@ -784,6 +784,17 @@ and check_implements_or_extends_unique impl =
       check_implements_or_extends_unique rest
     | _ -> check_implements_or_extends_unique rest)
 
+and check_cstr_dep deps =
+  List.iter deps (fun dep ->
+      match deref dep with
+      | (_, Tapply _) -> ()
+      | (r, Tgeneric _) ->
+        let p = Typing_reason.to_pos r in
+        Errors.expected_class ~suffix:" or interface but got a generic" p
+      | (r, _) ->
+        let p = Typing_reason.to_pos r in
+        Errors.expected_class ~suffix:" or interface" p)
+
 and check_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with
@@ -965,11 +976,33 @@ and class_def_ env c tc =
   );
   check_enum_includes env c;
   let (pc, _) = c.c_name in
+  let (req_extends, req_implements) = split_reqs c in
   let extends = List.map c.c_extends (Decl_hint.hint env.decl_env) in
   let implements = List.map c.c_implements (Decl_hint.hint env.decl_env) in
   let uses = List.map c.c_uses (Decl_hint.hint env.decl_env) in
+  let req_extends = List.map req_extends (Decl_hint.hint env.decl_env) in
+  let req_implements = List.map req_implements (Decl_hint.hint env.decl_env) in
+  let additional_parents =
+    (* In an abstract class or a trait, we assume the interfaces
+       will be implemented in the future, so we take them as
+       part of the class (as requested by dependency injection implementers) *)
+    match c.c_kind with
+    | Ast_defs.Cabstract -> implements
+    | Ast_defs.Ctrait -> implements @ req_implements
+    | _ -> []
+  in
   check_implements_or_extends_unique implements;
   check_implements_or_extends_unique extends;
+  check_cstr_dep extends;
+  check_cstr_dep uses;
+  check_cstr_dep req_extends;
+  check_cstr_dep additional_parents;
+  begin
+    match c.c_enum with
+    | Some e ->
+      check_cstr_dep (List.map e.e_includes (Decl_hint.hint env.decl_env))
+    | _ -> ()
+  end;
   let impl = extends @ implements @ uses in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints

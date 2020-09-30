@@ -533,6 +533,8 @@ version = "0.0.0"
 dependencies = [
  "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "direct_decl_smart_constructors 0.0.0",
+ "mode_parser 0.0.0",
+ "oxidized_by_ref 0.0.0",
  "parser 0.0.0",
  "parser_core_types 0.0.0",
  "stack_limit 0.0.0",

@@ -17,7 +17,6 @@ use naming_special_names_rust as naming_special_names;
 
 use arena_collections::{AssocListMut, List, MultiSetMut};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
-use minimal_parser::RescanTrivia;
 use oxidized_by_ref::{
     aast, aast_defs,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
@@ -39,7 +38,7 @@ use oxidized_by_ref::{
 };
 use parser_core_types::{
     compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
-    syntax_kind::SyntaxKind, token_kind::TokenKind, trivia_kind::TriviaKind,
+    syntax_kind::SyntaxKind, token_kind::TokenKind,
 };
 
 mod direct_decl_smart_constructors_generated;
@@ -51,9 +50,9 @@ type SK = SyntaxKind;
 type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 impl<'a> DirectDeclSmartConstructors<'a> {
-    pub fn new(src: &SourceText<'a>, arena: &'a Bump) -> Self {
+    pub fn new(src: &SourceText<'a>, file_mode: Mode, arena: &'a Bump) -> Self {
         Self {
-            state: State::new(IndexedSourceText::new(src.clone()), arena),
+            state: State::new(IndexedSourceText::new(src.clone()), file_mode, arena),
         }
     }
 
@@ -408,37 +407,21 @@ impl<'a> ClassishNameBuilder<'a> {
 }
 
 #[derive(Clone, Debug)]
-enum FileModeBuilder {
-    // We haven't seen any tokens yet.
-    None,
-
-    // We've seen <? and we're waiting for the next token, which has the trivia
-    // with the mode.
-    Pending,
-
-    // We either saw a <?, then `hh`, then a mode, or we didn't see that
-    // sequence and we're defaulting to Mstrict.
-    Set(Mode),
-}
-
-#[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub arena: &'a bumpalo::Bump,
     pub decls: InProgressDecls<'a>,
     filename: &'a RelativePath<'a>,
+    file_mode: Mode,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<'a, SSet<'a>>>,
-
-    // We don't need to wrap this in a Cow because it's very small.
-    file_mode_builder: FileModeBuilder,
 
     previous_token_kind: TokenKind,
 }
 
 impl<'a> State<'a> {
-    pub fn new(source_text: IndexedSourceText<'a>, arena: &'a Bump) -> State<'a> {
+    pub fn new(source_text: IndexedSourceText<'a>, file_mode: Mode, arena: &'a Bump) -> State<'a> {
         let path = source_text.source_text().file_path();
         let prefix = path.prefix();
         let path = String::from_str_in(path.path_str(), arena).into_bump_str();
@@ -447,11 +430,11 @@ impl<'a> State<'a> {
             source_text,
             arena,
             filename: arena.alloc(filename),
+            file_mode,
             decls: empty_decls(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(arena)),
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new_in(arena)),
-            file_mode_builder: FileModeBuilder::None,
             // EndOfFile is used here as a None value (signifying "beginning of
             // file") to save space. There is no legitimate circumstance where
             // we would parse a token and the previous token kind would be
@@ -759,32 +742,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn add_const(&mut self, name: &'a str, decl: typing_defs::ConstDecl<'a>) {
         self.state.decls.consts =
             List::cons((name, decl), self.state.decls.consts, self.state.arena);
-    }
-
-    fn set_mode(&mut self, token: &CompactToken) {
-        let mut offset = token.trailing_start_offset();
-        for trivium in token.scan_trailing(self.state.source_text.source_text()) {
-            if trivium.kind == TriviaKind::SingleLineComment {
-                if let Ok(text) = std::str::from_utf8(
-                    self.state
-                        .source_text
-                        .source_text()
-                        .sub(offset, trivium.width),
-                ) {
-                    match text.trim_start_matches('/').trim() {
-                        "decl" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mdecl),
-                        "partial" => {
-                            self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mpartial)
-                        }
-                        "strict" => {
-                            self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict)
-                        }
-                        _ => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict),
-                    }
-                }
-            }
-            offset += trivium.width;
-        }
     }
 
     #[inline(always)]
@@ -1757,27 +1714,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Pos::from_lnum_bol_cnum(this.state.arena, this.state.filename, start, end)
         };
         let kind = token.kind();
-
-        // We only want to check the mode if <? is the very first token we see.
-        match (&self.state.file_mode_builder, &kind) {
-            (FileModeBuilder::None, TokenKind::Markup) => {}
-            (FileModeBuilder::None, TokenKind::LessThanQuestion) => {
-                self.state.file_mode_builder = FileModeBuilder::Pending
-            }
-            (FileModeBuilder::Pending, TokenKind::Name) if token_text(self) == "hh" => {
-                self.set_mode(&token);
-            }
-            (FileModeBuilder::None, _) | (FileModeBuilder::Pending, _) => {
-                self.state.file_mode_builder =
-                    FileModeBuilder::Set(if self.state.filename.has_extension("hhi") {
-                        Mode::Mdecl
-                    } else {
-                        Mode::Mstrict
-                    });
-            }
-            (_, _) => {}
-        }
-
         let result = match kind {
             TokenKind::Name => {
                 let name = token_text(self);
@@ -3159,10 +3095,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let tparams = self.pop_type_params(tparams);
 
         let cls: shallow_decl_defs::ShallowClass<'a> = shallow_decl_defs::ShallowClass {
-            mode: match self.state.file_mode_builder {
-                FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
-                FileModeBuilder::Set(mode) => mode,
-            },
+            mode: self.state.file_mode,
             final_,
             is_xhp,
             has_xhp_keyword: match xhp_keyword {
@@ -3490,10 +3423,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let includes = self.slice(includes.iter().filter_map(|&node| self.node_to_ty(node)));
 
         let cls = shallow_decl_defs::ShallowClass {
-            mode: match self.state.file_mode_builder {
-                FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
-                FileModeBuilder::Set(mode) => mode,
-            },
+            mode: self.state.file_mode,
             final_: false,
             is_xhp: false,
             has_xhp_keyword: false,

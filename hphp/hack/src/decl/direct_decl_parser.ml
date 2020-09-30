@@ -35,5 +35,6 @@ type decl_lists = {
 external parse_decls_ffi : Relative_path.t -> string -> decls
   = "parse_decls_ffi"
 
-external parse_decl_lists_ffi : Relative_path.t -> string -> decl_lists
+external parse_decl_lists_ffi :
+  Relative_path.t -> string -> decl_lists * FileInfo.mode option
   = "parse_decl_lists_ffi"

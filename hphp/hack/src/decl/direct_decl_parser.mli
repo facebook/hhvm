@@ -25,4 +25,5 @@ type decl_lists = {
 
 val parse_decls_ffi : Relative_path.t -> string -> decls
 
-val parse_decl_lists_ffi : Relative_path.t -> string -> decl_lists
+val parse_decl_lists_ffi :
+  Relative_path.t -> string -> decl_lists * FileInfo.mode option

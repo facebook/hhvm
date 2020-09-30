@@ -647,12 +647,6 @@ ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
-ArrayData* SetArray::Merge(ArrayData*, const ArrayData*) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (merge)"
-  );
-}
-
 ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   auto a = asSet(ad);
   if (a->cowCheck()) a = a->copySet();
@@ -718,12 +712,6 @@ ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
   assertx(!elms[0].isInvalid());
   a->compact(); // Rebuild the hash table.
   return a;
-}
-
-ArrayData* SetArray::Renumber(ArrayData*) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (renumbering)"
-  );
 }
 
 void SetArray::OnSetEvalScalar(ArrayData* ad) {

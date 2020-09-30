@@ -555,14 +555,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Append)
 
   /*
-   * ArrayData* Merge(ArrayData*, const ArrayData* elems)
-   *
-   *   Perform part of the semantics of the php function array_merge.
-   *   (Renumbering keys is not done by this routine currently.)
-   */
-  DISPATCH(Merge)
-
-  /*
    * ArrayData* Pop(ArrayData*, Variant& value);
    *
    *   Remove the last element from the array and assign it to `value'.  This
@@ -588,14 +580,6 @@ const ArrayFunctions g_array_funcs = {
    *   not be KindOfUninit.
    */
   DISPATCH(Prepend)
-
-  /*
-   * ArrayData* Renumber(ArrayData*)
-   *
-   *   Renumber integer keys on the array. This method will operate in place
-   *   if possible, but it returns a new array if we need copy / escalation.
-   */
-  DISPATCH(Renumber)
 
   /*
    * void OnSetEvalScalar(ArrayData*)

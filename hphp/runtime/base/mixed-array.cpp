@@ -1329,12 +1329,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   PackedArray::IterateVNoInc(elems, [&](TypedValue tv) {
     ret->nextInsert(tv);
   });
-
   return tagArrProv(ret);
-
-  // Note: currently caller is responsible for calling renumber after
-  // this.  Should refactor so we handle it (we already know things
-  // about the array).
 }
 
 ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {

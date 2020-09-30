@@ -264,19 +264,6 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
   return ret;
 }
 
-Array& Array::merge(const Array& arr) {
-  return mergeImpl(arr.get());
-}
-
-Array& Array::mergeImpl(ArrayData *data) {
-  if (m_arr == nullptr || data == nullptr) {
-    throw_bad_array_merge();
-  }
-  auto const escalated = data->empty() ? m_arr->renumber() : m_arr->merge(data);
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  return *this;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Type conversions.
 

@@ -766,14 +766,6 @@ ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, TypedValue v) {
   return AppendImpl(adIn, v, false);
 }
 
-ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
-  assertx(checkInvariants(adIn));
-  auto const neededSize = adIn->m_size + elems->size();
-  auto const ret = ToMixedCopyReserve(adIn, neededSize);
-  ret->m_kind = RO::EvalHackArrDVArrs ? HeaderKind::Dict : HeaderKind::Mixed;
-  return MixedArray::ArrayMergeGeneric(ret, elems);
-}
-
 ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   assertx(checkInvariants(adIn));
 

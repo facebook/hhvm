@@ -2600,7 +2600,9 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
     return init_null();
   }
   if (!data->m_default_headers.isNull()) {
-    soap_headers.merge(data->m_default_headers.toArray());
+    IterateVNoInc(data->m_default_headers.toArray().get(), [&](auto val) {
+      soap_headers.append(val);
+    });
   }
 
   Array output_headers;

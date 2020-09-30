@@ -423,10 +423,6 @@ ArrayData* LoggingLayout::prepend(ArrayData* ad, TypedValue v) const {
   logEvent(ad, ms, ArrayOp::Prepend, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->prepend(v); });
 }
-ArrayData* LoggingLayout::merge(ArrayData* ad, const ArrayData* arr) const {
-  logEvent(ad, ArrayOp::Merge);
-  return mutate(ad, [&](ArrayData* w) { return w->merge(arr); });
-}
 ArrayData* LoggingLayout::pop(ArrayData* ad, Variant& ret) const {
   logEvent(ad, ArrayOp::Pop);
   return mutate(ad, [&](ArrayData* w) { return w->pop(ret); });
@@ -434,10 +430,6 @@ ArrayData* LoggingLayout::pop(ArrayData* ad, Variant& ret) const {
 ArrayData* LoggingLayout::dequeue(ArrayData* ad, Variant& ret) const {
   logEvent(ad, ArrayOp::Dequeue);
   return mutate(ad, [&](ArrayData* w) { return w->dequeue(ret); });
-}
-ArrayData* LoggingLayout::renumber(ArrayData* ad) const {
-  logEvent(ad, ArrayOp::Renumber);
-  return mutate(ad, [&](ArrayData* w) { return w->renumber(); });
 }
 
 //////////////////////////////////////////////////////////////////////////////

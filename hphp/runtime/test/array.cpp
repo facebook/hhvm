@@ -495,27 +495,9 @@ TEST(ARRAY, Membership) {
     EXPECT_FALSE(arr.exists(1));
     EXPECT_FALSE(arr.exists(Variant("key")));
   }
-
 }
 
-
-TEST(ARRAY, Merge) {
-  {
-    Array arr = make_varray(0).merge(make_varray(1));
-    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1).toDArray()));
-    arr = arr.merge(make_varray(0, 1));
-    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1, 0, 1).toDArray()));
-
-    arr = make_varray("s0").merge(make_varray("s1"));
-    EXPECT_TRUE(same_arrays(arr, make_varray("s0", "s1").toDArray()));
-
-    arr = make_map_array("n0", "s0").merge(make_map_array("n1", "s1"));
-    EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s0", "n1", "s1")));
-    Array arrX = make_map_array("n0", "s2", "n1", "s3");
-    arr = arr.merge(arrX);
-    EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s2", "n1", "s3")));
-  }
-
+TEST(ARRAY, IsVectorData) {
   {
     Array arr = make_map_array(0, "a", 1, "b");
     EXPECT_TRUE(arr->isVectorData());

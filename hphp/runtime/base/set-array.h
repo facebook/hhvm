@@ -402,11 +402,9 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue);
-  static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
   static ArrayData* Prepend(ArrayData*, TypedValue);
-  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToVec = &ArrayCommon::ToVec;

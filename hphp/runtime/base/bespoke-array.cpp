@@ -225,17 +225,11 @@ ArrayData* BespokeArray::Append(ArrayData* ad, TypedValue v) {
 ArrayData* BespokeArray::Prepend(ArrayData* ad, TypedValue v) {
   return asBespoke(ad)->layoutRaw()->prepend(ad, v);
 }
-ArrayData* BespokeArray::Merge(ArrayData* ad, const ArrayData* elems) {
-  return asBespoke(ad)->layoutRaw()->merge(ad, elems);
-}
 ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
   return asBespoke(ad)->layoutRaw()->pop(ad, out);
 }
 ArrayData* BespokeArray::Dequeue(ArrayData* ad, Variant& out) {
   return asBespoke(ad)->layoutRaw()->dequeue(ad, out);
-}
-ArrayData* BespokeArray::Renumber(ArrayData* ad) {
-  return asBespoke(ad)->layoutRaw()->renumber(ad);
 }
 void BespokeArray::OnSetEvalScalar(ArrayData*) {
   always_assert(false);

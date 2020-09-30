@@ -34,30 +34,6 @@ ssize_t ArrayCommon::ReturnInvalidIndex(const ArrayData*) {
   return 0;
 }
 
-ArrayData* ArrayCommon::Pop(ArrayData* a, Variant &value) {
-  if (!a->empty()) {
-    auto const pos = a->iter_last();
-    value = a->getValue(pos);
-    return a->remove(a->getKey(pos));
-  }
-  value = uninit_null();
-  return a;
-}
-
-ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
-  if (!a->empty()) {
-    auto const pos = a->iter_begin();
-    value = a->getValue(pos);
-    auto const result = a->remove(a->getKey(pos));
-    // In PHP, array_shift() will cause all numerically key-ed values re-keyed
-    auto const escalated = result->renumber();
-    if (escalated != result) decRefArr(result);
-    return escalated;
-  }
-  value = uninit_null();
-  return a;
-}
-
 ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return ArrayData::CreateVec();

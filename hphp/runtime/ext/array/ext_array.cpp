@@ -403,7 +403,15 @@ TypedValue HHVM_FUNCTION(array_keys,
   return make_array_like_tv(ai.create());
 }
 
-static void php_array_merge_recursive(Array &arr1, const Array& arr2) {
+namespace {
+
+void php_array_merge(Array& arr1, const Array& arr2) {
+  assertx(arr1->hasVanillaMixedLayout());
+  arr1.reset(!arr2.empty() ? MixedArray::Merge(arr1.get(), arr2.get())
+                           : MixedArray::Renumber(arr1.get()));
+}
+
+void php_array_merge_recursive(Array& arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key(iter.first());
     if (key.isNumeric()) {
@@ -426,6 +434,8 @@ static void php_array_merge_recursive(Array &arr1, const Array& arr2) {
       arr1.set(key, iter.secondVal(), true);
     }
   }
+}
+
 }
 
 TypedValue HHVM_FUNCTION(array_map,
@@ -517,7 +527,7 @@ TypedValue HHVM_FUNCTION(array_merge,
                          const Array& arrays /* = null array */) {
   getCheckedContainer(array1);
   Array ret = Array::CreateDArray();
-  ret.merge(arr_array1);
+  php_array_merge(ret, arr_array1);
 
   bool success = true;
   IterateV(
@@ -529,7 +539,7 @@ TypedValue HHVM_FUNCTION(array_merge,
         return true;
       }
 
-      ret.merge(asCArrRef(&v));
+      php_array_merge(ret, asCArrRef(&v));
       return false;
     }
   );

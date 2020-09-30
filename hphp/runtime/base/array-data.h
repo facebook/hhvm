@@ -464,11 +464,6 @@ public:
   bool uasort(const Variant& cmp_function);
 
   /*
-   * PHP array_merge() implementations.
-   */
-  ArrayData* merge(const ArrayData* elems);
-
-  /*
    * Remove the first or last element of the array, and assign it to `value'.
    *
    * These implement:
@@ -550,12 +545,6 @@ public:
    * intish value of `key'.
    */
   bool intishCastKey(const StringData* key, int64_t& i) const;
-
-  /*
-   * Re-index all numeric keys to start from 0. This operation may require
-   * escalation on the array, so it returns the new result.
-   */
-  ArrayData* renumber();
 
   /*
    * Get the string name for the array kind `kind'.
@@ -789,11 +778,9 @@ struct ArrayFunctions {
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, TypedValue v);
-  ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
   ArrayData* (*prepend[NK])(ArrayData*, TypedValue v);
-  ArrayData* (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);

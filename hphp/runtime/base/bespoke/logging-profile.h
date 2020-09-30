@@ -62,10 +62,8 @@ struct EntryTypes;
   X(IterRewind,         true)  \
   X(Append,             false) \
   X(Prepend,            false) \
-  X(Merge,              true)  \
   X(Pop,                false) \
   X(Dequeue,            false) \
-  X(Renumber,           false) \
   X(Copy,               true)  \
   X(ToVArray,           true)  \
   X(ToDArray,           true)  \

@@ -90,10 +90,8 @@ struct LoggingLayout : public Layout {
 
   ArrayData* append(ArrayData*, TypedValue v) const final;
   ArrayData* prepend(ArrayData*, TypedValue v) const final;
-  ArrayData* merge(ArrayData*, const ArrayData*) const final;
   ArrayData* pop(ArrayData*, Variant&) const final;
   ArrayData* dequeue(ArrayData*, Variant&) const final;
-  ArrayData* renumber(ArrayData*) const final;
 
   ArrayData* copy(const ArrayData*) const final;
   ArrayData* toVArray(ArrayData*, bool copy) const final;

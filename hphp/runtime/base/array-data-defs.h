@@ -228,12 +228,6 @@ inline bool ArrayData::uasort(const Variant& compare) {
   return g_array_funcs.uasort[kind()](this, compare);
 }
 
-inline ArrayData* ArrayData::merge(const ArrayData* elms) {
-  auto ret = g_array_funcs.merge[kind()](this, elms);
-  assertx(ret->isHAMSafeDArray());
-  return ret;
-}
-
 inline ArrayData* ArrayData::pop(Variant& value) {
   return g_array_funcs.pop[kind()](this, value);
 }
@@ -249,10 +243,6 @@ inline ArrayData* ArrayData::prepend(TypedValue v) {
 
 inline void ArrayData::onSetEvalScalar() {
   return g_array_funcs.onSetEvalScalar[kind()](this);
-}
-
-inline ArrayData* ArrayData::renumber() {
-  return g_array_funcs.renumber[kind()](this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

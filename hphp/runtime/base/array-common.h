@@ -42,15 +42,11 @@ struct ArrayCommon {
   static ssize_t ReturnInvalidIndex(const ArrayData*);
 
   /*
-   * Generic Pop and Dequeue implementations in terms of other functions.
+   * Generic conversion implementations in terms of other functions.
    */
-  static ArrayData* Pop(ArrayData*, Variant&);
-  static ArrayData* Dequeue(ArrayData*, Variant&);
-
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
-
   static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDArray(ArrayData*, bool);
 };

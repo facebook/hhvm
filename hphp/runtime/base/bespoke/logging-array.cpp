@@ -211,6 +211,17 @@ void LoggingArray::logReachEvent(TransID transId, uint32_t guardIdx) {
   profile->logReach(transId, guardIdx);
 }
 
+void LoggingArray::setLegacyArrayInPlace(bool legacy) {
+  assert(hasExactlyOneRef());
+  if (wrapped->cowCheck()) {
+    wrapped->decRefCount();
+    wrapped = wrapped->copy();
+  }
+  wrapped->setLegacyArray(legacy);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 std::string LoggingLayout::describe() const {
   return "Logging";
 }
@@ -499,17 +510,6 @@ ArrayData* LoggingLayout::toDict(ArrayData* ad, bool copy) const {
 ArrayData* LoggingLayout::toKeyset(ArrayData* ad, bool copy) const {
   logEvent(ad, ArrayOp::ToKeyset);
   return convert(ad, [=](ArrayData* w) { return w->toKeyset(copy); });
-}
-
-void LoggingLayout::setLegacyArrayInPlace(ArrayData* ad, bool legacy) const {
-  assert(ad->hasExactlyOneRef());
-  auto const lad = LoggingArray::asLogging(ad);
-  if (lad->wrapped->cowCheck()) {
-    auto const nad = lad->wrapped->copy();
-    lad->wrapped->decRefCount();
-    lad->wrapped = nad;
-  }
-  lad->wrapped->setLegacyArray(legacy);
 }
 
 }}

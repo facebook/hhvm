@@ -268,9 +268,10 @@ ArrayData* BespokeArray::ToKeyset(ArrayData* ad, bool copy) {
 void BespokeArray::SetLegacyArrayInPlace(ArrayData* ad, bool legacy) {
   assertx(ad->hasExactlyOneRef());
   auto const bad = asBespoke(ad);
-  bad->layoutRaw()->setLegacyArrayInPlace(ad, legacy);
-  bad->m_aux16 = (bad->m_aux16 & ~kLegacyArray)
-                 | (legacy ? kLegacyArray : 0);
+  if (bad->layoutRaw() == bespoke::LoggingLayout::layout()) {
+    bespoke::LoggingArray::asLogging(ad)->setLegacyArrayInPlace(legacy);
+  }
+  bad->m_aux16 = (bad->m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////

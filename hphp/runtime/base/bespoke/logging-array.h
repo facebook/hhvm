@@ -42,6 +42,9 @@ struct LoggingArray : BespokeArray {
   // Record that this array reached a given profiling tracelet.
   void logReachEvent(TransID transId, uint32_t guardIdx);
 
+  // LoggingArray must keep the legacy bit for the wrapped array in sync.
+  void setLegacyArrayInPlace(bool legacy);
+
   bool checkInvariants() const;
 
   ArrayData* wrapped;
@@ -98,8 +101,6 @@ struct LoggingLayout : public Layout {
   ArrayData* toVec(ArrayData*, bool copy) const final;
   ArrayData* toDict(ArrayData*, bool copy) const final;
   ArrayData* toKeyset(ArrayData*, bool copy) const final;
-
-  void setLegacyArrayInPlace(ArrayData*, bool legacy) const final;
 };
 
 }}

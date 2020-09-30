@@ -86,8 +86,6 @@ struct Layout {
   virtual ArrayData* toDict(ArrayData*, bool copy) const = 0;
   virtual ArrayData* toKeyset(ArrayData*, bool copy) const = 0;
 
-  virtual void setLegacyArrayInPlace(ArrayData*, bool legacy) const = 0;
-
 private:
   uint16_t m_index;
 };

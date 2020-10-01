@@ -171,12 +171,25 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
 
   DEBUG_ONLY auto const arrSpec = type.arrSpec();
   assertx(allowBespokeArrayLikes());
-  assertx(arrSpec.vanilla());
   assertx(!arrSpec.type());
 
   auto const r = materialize(v, dataSrc);
-  v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
-  doJcc(CC_Z, sf);
+  if (arrSpec.vanilla()) {
+    v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
+    doJcc(CC_Z, sf);
+  } else if (auto const layout = arrSpec.bespokeLayout()){
+    assertx(RO::EvalAllowBespokesInLiveTypes);
+    v << cmpwim{
+      safe_cast<int16_t>((1 << 15) | layout->index()),
+      r[ArrayData::offsetOfBespokeIndex()],
+      sf
+    };
+    doJcc(CC_Z, sf);
+
+  } else {
+    always_assert(false);
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

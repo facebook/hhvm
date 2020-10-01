@@ -72,7 +72,7 @@ struct GuardConstraint {
   /////////////////////////////////////////////////////////////////////////////
   // Specialization.
 
-  static constexpr uint8_t kWantVanillaArray = 0x1;
+  static constexpr uint8_t kWantArrayLayout = 0x1;
   static constexpr uint8_t kWantRecord = 0x2;
   static_assert(alignof(Class*) > kWantRecord,
                 "Spec bits must fit in lower bits of pointers");
@@ -87,8 +87,8 @@ struct GuardConstraint {
    *
    * @requires: isSpecialized()
    */
-  GuardConstraint& setWantVanillaArray();
-  bool wantVanillaArray() const;
+  GuardConstraint& setArrayLayoutSensitive();
+  bool isArrayLayoutSensitive() const;
 
   /*
    * Set, check, or return the specialized Class.

@@ -93,17 +93,18 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   always_assert(false);
 }
 
-void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
+void guardToLayout(IRGS& env, SrcKey sk, Location loc) {
   assertx(env.formingRegion || env.context.kind != TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
   auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
   if (!(type.isKnownDataType() && type <= TArrLike)) return;
 
-  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: guard input {} to vanilla: {}\n",
+  FTRACE_MOD(Trace::hhir, 2,
+             "At {}: {}: guard input {} to layout specific: {}\n",
              sk.offset(), opcodeToName(sk.op()), show(loc), type);
-  auto const gc = GuardConstraint(DataTypeSpecialized).setWantVanillaArray();
+  auto const gc = GuardConstraint(DataTypeSpecialized).setArrayLayoutSensitive();
   env.irb->constrainLocation(loc, gc);
-  if (type.arrSpec().vanilla()) return;
+  if (typeFitsConstraint(type, gc)) return;
 
   auto const target_type = type.unspecialize().narrowToVanilla();
   env.irb->setGuardFailBlock(makeExit(env));
@@ -217,7 +218,12 @@ bool checkBespokeInputs(IRGS& env, SrcKey sk) {
 
   if (auto const loc = getVanillaLocation(env, sk)) {
     auto const& type = env.irb->fs().typeOf(*loc);
-    if (!type.maybe(TArrLike) || type.arrSpec().vanilla()) return true;
+    if (!type.maybe(TArrLike) ||
+        type.arrSpec().vanilla() ||
+        (UNLIKELY(RO::EvalAllowBespokesInLiveTypes) &&
+         type.arrSpec().bespokeLayout())) {
+      return true;
+    }
     FTRACE_MOD(Trace::region, 2, "At {}: {}: input {} may be bespoke: {}\n",
                sk.offset(), opcodeToName(sk.op()), show(*loc), type);
     return false;
@@ -242,7 +248,7 @@ void handleBespokeInputs(IRGS& env, SrcKey sk,
 
   if (env.formingRegion || env.context.kind != TransKind::Profile) {
     // We're forming a region or not in a profiling tracelet, irgen as normal
-    guardToVanilla(env, sk, *loc);
+    guardToLayout(env, sk, *loc);
     emitVanilla(env);
     return;
   }

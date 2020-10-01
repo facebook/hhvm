@@ -2770,6 +2770,12 @@ void RuntimeOption::Load(
 
   // Bespoke array-likes
 
+  // AllowBespokesInLiveTypes implies BespokeArrayLikeMode > 0--bump it to 1 if
+  // not already
+  if (RO::EvalAllowBespokesInLiveTypes && RO::EvalBespokeArrayLikeMode == 0) {
+    RO::EvalBespokeArrayLikeMode = 1;
+  }
+
   // We don't support provenance for bespoke array-likes, so don't construct
   // any at runtime if we're logging provenance instrumentation results.
   if (RO::EvalBespokeArrayLikeMode > 0 &&

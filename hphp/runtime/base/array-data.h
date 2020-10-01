@@ -580,6 +580,10 @@ public:
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
 
+  static constexpr size_t offsetOfBespokeIndex() {
+    return offsetof(ArrayData, m_extra_hi16);
+  }
+
   const StrKeyTable& missingKeySideTable() const {
     assertx(this->hasStrKeyTable());
     auto const pointer = reinterpret_cast<const char*>(this)

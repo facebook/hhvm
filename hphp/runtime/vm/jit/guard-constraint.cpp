@@ -30,8 +30,8 @@ std::string GuardConstraint::toString() const {
   std::string ret = "<" + typeCategoryName(category);
 
   if (category == DataTypeSpecialized) {
-    if (wantVanillaArray()) {
-      ret += ",VanillaArray";
+    if (isArrayLayoutSensitive()) {
+      ret += ",ArrayLayout";
     } else if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }
@@ -62,7 +62,7 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
     case DataTypeSpecialized:
       // Type::isSpecialized() returns true for types like {Arr<Packed>|Int},
       // so we need to check both for specialization and isKnownDataType.
-      assertx(gc.wantClass() + gc.wantVanillaArray() + gc.wantRecord() == 1);
+      assertx(gc.wantClass() + gc.isArrayLayoutSensitive() + gc.wantRecord() == 1);
       if (!t.isKnownDataType()) return false;
       if (gc.wantClass()) {
         auto const clsSpec = t.clsSpec();
@@ -70,8 +70,12 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
       } else if (gc.wantRecord()) {
         auto const recSpec = t.recSpec();
         return recSpec && recSpec.rec()->recordDescOf(gc.desiredRecord());
-      } else {
-        if (gc.wantVanillaArray()) return t.arrSpec().vanilla();
+      } else if (gc.isArrayLayoutSensitive()) {
+        if (LIKELY(!RO::EvalAllowBespokesInLiveTypes)) {
+          return t.arrSpec().vanilla();
+        } else{
+          return t.arrSpec().vanilla() || t.arrSpec().bespokeLayout();
+        }
       }
       return false;
   }
@@ -101,7 +105,7 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
 
   while (true) {
     if (newGc.isSpecialized()) {
-      if (origGc.wantVanillaArray()) newGc.setWantVanillaArray();
+      if (origGc.isArrayLayoutSensitive()) newGc.setArrayLayoutSensitive();
       if (origGc.wantClass()) newGc.setDesiredClass(origGc.desiredClass());
       if (origGc.wantRecord()) newGc.setDesiredRecord(origGc.desiredRecord());
     }
@@ -122,7 +126,7 @@ GuardConstraint applyConstraint(GuardConstraint gc,
                                 GuardConstraint newGc) {
   gc.category = std::max(newGc.category, gc.category);
 
-  if (newGc.wantVanillaArray()) gc.setWantVanillaArray();
+  if (newGc.isArrayLayoutSensitive()) gc.setArrayLayoutSensitive();
 
   if (newGc.wantClass()) {
     if (gc.wantClass()) {

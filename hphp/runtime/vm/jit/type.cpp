@@ -1282,12 +1282,12 @@ Type relaxToConstraint(Type t, const GuardConstraint& gc) {
   if (!gc.isSpecialized()) return relaxType(t, gc.category);
 
   assertx(t.isSpecialized());
-  assertx(gc.wantClass() + gc.wantVanillaArray() + gc.wantRecord() == 1);
+  assertx(gc.wantClass() + gc.isArrayLayoutSensitive() + gc.wantRecord() == 1);
 
   // NOTE: This second check here causes us to guard to specific classes where
   // we could guard to superclasses and unify multiple regions. Rethink it.
   if (gc.wantClass()) return t;
-  assertx(gc.wantVanillaArray());
+  assertx(gc.isArrayLayoutSensitive());
   assertx(allowBespokeArrayLikes());
   return t.arrSpec().vanilla() ? t.unspecialize().narrowToVanilla() : t;
 }

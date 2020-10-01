@@ -64,15 +64,15 @@ inline bool GuardConstraint::isSpecialized() const {
   return category == DataTypeSpecialized;
 }
 
-inline GuardConstraint& GuardConstraint::setWantVanillaArray() {
+inline GuardConstraint& GuardConstraint::setArrayLayoutSensitive() {
   assertx(!wantClass());
   assertx(isSpecialized());
-  m_specialized |= kWantVanillaArray;
+  m_specialized |= kWantArrayLayout;
   return *this;
 }
 
-inline bool GuardConstraint::wantVanillaArray() const {
-  return m_specialized & kWantVanillaArray;
+inline bool GuardConstraint::isArrayLayoutSensitive() const {
+  return m_specialized & kWantArrayLayout;
 }
 
 inline GuardConstraint& GuardConstraint::setDesiredClass(const Class* cls) {
@@ -85,7 +85,7 @@ inline GuardConstraint& GuardConstraint::setDesiredClass(const Class* cls) {
 }
 
 inline bool GuardConstraint::wantClass() const {
-  return m_specialized && !wantVanillaArray() && !wantRecord();
+  return m_specialized && !isArrayLayoutSensitive() && !wantRecord();
 }
 
 inline const Class* GuardConstraint::desiredClass() const {

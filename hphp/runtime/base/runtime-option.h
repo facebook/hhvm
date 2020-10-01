@@ -1077,6 +1077,11 @@ struct RuntimeOption {
   F(int32_t, BespokeArrayLikeMode, 0)                                   \
   F(uint64_t, EmitLoggingArraySampleRate, 0)                            \
   F(string, ExportLoggingArrayDataPath, "")                             \
+  /* Allows the tracelet selector to emit guards to specific bespoke    \
+   * types if the live types invovle a bespoke. Implies                 \
+   * BespokeArrayLikeMode to be nonzero, and in particular will set it  \
+   * to 1 if it is 0 */                                                 \
+  F(bool, AllowBespokesInLiveTypes, false)                              \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \

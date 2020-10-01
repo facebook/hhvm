@@ -413,7 +413,7 @@ TEST(Type, GuardConstraints) {
   EXPECT_TRUE(fits(TCell, {DataTypeGeneric}));
 
   auto const vanillaConstraint =
-    GuardConstraint(DataTypeSpecialized).setWantVanillaArray();
+    GuardConstraint(DataTypeSpecialized).setArrayLayoutSensitive();
   EXPECT_FALSE(fits(TCell, vanillaConstraint));
   EXPECT_FALSE(fits(TArr, vanillaConstraint));
   EXPECT_FALSE(fits(TVec, vanillaConstraint));

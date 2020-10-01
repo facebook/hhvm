@@ -43,18 +43,36 @@ struct Wrapper {
                               const String& mode,
                               int options,
                               const req::ptr<StreamContext>& context) = 0;
-  virtual int access(const String& /*path*/, int /*mode*/) { return -1; }
-  virtual int lstat(const String& /*path*/, struct stat* /*buf*/) { return -1; }
-  virtual int stat(const String& /*path*/, struct stat* /*buf*/) { return -1; }
-  virtual int unlink(const String& /*path*/) { return -1; }
+  virtual int access(const String& /*path*/, int /*mode*/) {
+    errno = ENOSYS;
+    return -1;
+  }
+  virtual int lstat(const String& /*path*/, struct stat* /*buf*/) {
+    errno = ENOSYS;
+    return -1;
+  }
+  virtual int stat(const String& /*path*/, struct stat* /*buf*/) {
+    errno = ENOSYS;
+    return -1;
+  }
+  virtual int unlink(const String& /*path*/) {
+    errno = ENOSYS;
+    return -1;
+  }
   virtual int rename(const String& /*oldname*/, const String& /*newname*/) {
+    errno = ENOSYS;
     return -1;
   }
   virtual int mkdir(const String& /*path*/, int /*mode*/, int /*options*/) {
+    errno = ENOSYS;
     return -1;
   }
-  virtual int rmdir(const String& /*path*/, int /*options*/) { return -1; }
+  virtual int rmdir(const String& /*path*/, int /*options*/) {
+    errno = ENOSYS;
+    return -1;
+  }
   virtual req::ptr<Directory> opendir(const String& /*path*/) {
+    errno = ENOSYS;
     return nullptr;
   }
   virtual String realpath(const String& /*path*/) { return null_string; }

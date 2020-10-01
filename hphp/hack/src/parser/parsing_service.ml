@@ -15,20 +15,6 @@ open Hh_prelude
 
 let neutral = (Relative_path.Map.empty, Errors.empty, Relative_path.Set.empty)
 
-let empty_file_info : FileInfo.t =
-  {
-    hash = None;
-    file_mode = None;
-    FileInfo.funs = [];
-    classes = [];
-    record_defs = [];
-    typedefs = [];
-    consts = [];
-    comments = Some [];
-  }
-
-let legacy_php_file_info = ref (fun _fn -> empty_file_info)
-
 (* Parsing a file without failing
  * acc is a file_info
  * errorl is a list of errors
@@ -99,11 +85,10 @@ let process_parse_result
     (acc, errorl, error_files)
   ) else (
     File_provider.provide_file_hint fn content;
-    let info = (try !legacy_php_file_info fn with _ -> empty_file_info) in
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build
      *)
-    let acc = Relative_path.Map.add acc ~key:fn ~data:info in
+    let acc = Relative_path.Map.add acc ~key:fn ~data:FileInfo.empty_t in
     (acc, errorl, error_files)
   )
 

@@ -121,11 +121,12 @@ struct Fixup {
     return Fixup{pcOffset, spOffset};
   }
 
-  static Fixup indirect(uint32_t qwordsPushed) {
+  static Fixup indirect(uint32_t qwordsPushed, FPInvOffset extraSpOffset) {
     auto const ripOffset =
       kNativeFrameSize + AROFF(m_savedRip) + qwordsPushed * sizeof(uintptr_t);
     assertx(ripOffset > 0);
-    return Fixup{-safe_cast<int32_t>(ripOffset), FPInvOffset{0}};
+    assertx(extraSpOffset.offset >= 0);
+    return Fixup{-safe_cast<int32_t>(ripOffset), extraSpOffset};
   }
 
   static Fixup none() {

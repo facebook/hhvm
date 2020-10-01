@@ -133,8 +133,10 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   );
 
   // Stublogue code operates on behalf of the caller, so it needs an indirect
-  // fixup to obtain the real savedRip from the native frame.
-  if (marker.stublogue()) return Fixup::indirect(0);
+  // fixup to obtain the real savedRip from the native frame. The stack base
+  // of stublogues start at the fixup offset of their callers, so the SP offset
+  // of the marker represents the additional SP offset that needs to be added.
+  if (marker.stublogue()) return Fixup::indirect(0, marker.spOff());
 
   auto const bcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
   return Fixup::direct(bcOff, marker.spOff());

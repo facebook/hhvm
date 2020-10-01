@@ -93,7 +93,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
       // stack size reserved for the LR saved right above and the LR offset in
       // the frame.
-      v << syncpoint{Fixup::indirect(prs.qwordsPushed())};
+      v << syncpoint{Fixup::indirect(prs.qwordsPushed(), FPInvOffset{0})};
       // fallthru
 
       // restore the return value from the stack

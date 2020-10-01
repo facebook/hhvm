@@ -388,7 +388,7 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
         v.makeVcallArgs({{flags, func, numArgs, savedRip}}),
         v.makeTuple({numNewArgs}),
         {done, ctch},
-        Fixup::indirect(prs.qwordsPushed()),
+        Fixup::indirect(prs.qwordsPushed(), FPInvOffset{0}),
         DestType::SSA
       };
 
@@ -876,7 +876,7 @@ TCA emitDecRefGeneric(CodeBlock& cb, DataBlock& data) {
       if (!fullFrame) {
         // The stub frame's saved RIP is at %rsp[8] before we saved the
         // caller-saved registers.
-        v << syncpoint{Fixup::indirect(prs.qwordsPushed())};
+        v << syncpoint{Fixup::indirect(prs.qwordsPushed(), FPInvOffset{0})};
       }
     };
 

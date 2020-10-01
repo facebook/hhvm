@@ -51,7 +51,8 @@ namespace jit {
 std::string Fixup::show() const {
   if (!isValid()) return "invalid";
   if (isIndirect()) {
-    return folly::sformat("indirect ripOff={}", ripOffset());
+    return folly::sformat("indirect ripOff={} extraSpOff={}",
+                          ripOffset(), spOffset().offset);
   } else {
     return folly::sformat("direct pcOff={} spOff={}",
                           pcOffset(), spOffset().offset);
@@ -80,7 +81,7 @@ struct FixupHash {
 TreadHashMap<uint32_t,Fixup,FixupHash> s_fixups{kInitCapac};
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
-                    VMRegs* outRegs) {
+                    FPInvOffset extraSpOffset, VMRegs* outRegs) {
   assertx(!fixup.isIndirect());
   const Func* f = ar->func();
   assertx(f);
@@ -89,25 +90,24 @@ void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
   outRegs->fp = ar;
   outRegs->retAddr = tca;
 
-  if (UNLIKELY(isResumed(ar))) {
-    TypedValue* stackBase = Stack::resumableStackBase(ar);
-    outRegs->sp = stackBase - fixup.spOffset().offset;
-  } else {
-    outRegs->sp = (TypedValue*)ar - fixup.spOffset().offset;
-  }
+  auto const stackBase = UNLIKELY(isResumed(ar))
+    ? Stack::resumableStackBase(ar)
+    : (TypedValue*)ar;
+  outRegs->sp = stackBase - fixup.spOffset().offset - extraSpOffset.offset;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
-  TCA tca = (TCA)ar->m_savedRip;
-
+  auto tca = (TCA)ar->m_savedRip;
   auto fixup = s_fixups.find(tc::addrToOffset(tca));
   if (!fixup) return false;
 
+  auto extraSpOffset = FPInvOffset{0};
   if (fixup->isIndirect()) {
     auto const ripAddr = reinterpret_cast<uintptr_t>(ar) + fixup->ripOffset();
     tca = *reinterpret_cast<TCA*>(ripAddr);
+    extraSpOffset = fixup->spOffset();
     fixup = s_fixups.find(tc::addrToOffset(tca));
     assertx(fixup && "Missing fixup for indirect fixup");
     assertx(!fixup->isIndirect() && "Invalid doubly indirect fixup");
@@ -118,7 +118,7 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
   // frame.
   ar = ar->m_sfp;
 
-  regsFromActRec(tca, ar, *fixup, outVMRegs);
+  regsFromActRec(tca, ar, *fixup, extraSpOffset, outVMRegs);
   return true;
 }
 

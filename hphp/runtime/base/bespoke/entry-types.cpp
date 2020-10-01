@@ -29,6 +29,11 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////////////
 
+DataType mergeEquivTypes(DataType a, DataType b) {
+  assertx(equivDataTypes(a, b));
+  return a == b ? a : dt_with_rc(a);
+}
+
 KeyTypes keyTypesForKey(TypedValue k, KeyTypes b) {
   auto const a = [&] {
     if (isStringType(k.type())) {
@@ -63,7 +68,7 @@ std::pair<ValueTypes, DataType> valueTypesForValue(TypedValue v,
 
     case ValueTypes::Monotype:
       if (equivDataTypes(type, v.type())) {
-        return {ValueTypes::Monotype, type};
+        return {ValueTypes::Monotype, mergeEquivTypes(type, v.type())};
       } else if (isNullType(v.type())) {
         return {ValueTypes::MonotypeNullable, type};
       } else if (isNullType(type)) {
@@ -73,7 +78,9 @@ std::pair<ValueTypes, DataType> valueTypesForValue(TypedValue v,
       }
 
     case ValueTypes::MonotypeNullable:
-      if (isNullType(v.type()) || equivDataTypes(type, v.type())) {
+      if (equivDataTypes(type, v.type())) {
+        return {ValueTypes::MonotypeNullable, mergeEquivTypes(type, v.type())};
+      } else if (isNullType(v.type())) {
         return {ValueTypes::MonotypeNullable, type};
       } else {
         return {ValueTypes::Any, kInvalidDataType};

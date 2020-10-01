@@ -118,8 +118,21 @@ public:
   static bool ExistsStr(const ArrayData* ad, const StringData* key);
 
   // RW access
+  //
+  // The "Elem" methods are variants on the "Lval" methods that allow us to
+  // avoid unnecessary escalation. A caller may only call an "Elem" if it
+  // satisfies the following condition:
+  //
+  //  * If the "Elem" result's type() is KindOfInt64, KindOfObject, or one of
+  //    the countable array-like types, the caller must not change the type.
+  //
+  // Now that we've eliminated (most) minstr escalation from Hack, all of the
+  // Dim "intermediate" member ops satisfy this condition, as does the IncDec
+  // final op. SetOp does NOT satisfy it; it may coerce (e.g.) ints to strings.
   static arr_lval LvalInt(ArrayData* ad, int64_t key);
   static arr_lval LvalStr(ArrayData* ad, StringData* key);
+  static arr_lval ElemInt(ArrayData* ad, int64_t key);
+  static arr_lval ElemStr(ArrayData* ad, StringData* key);
 
   // insertion
   static ArrayData* SetInt(ArrayData* ad, int64_t key, TypedValue v);

@@ -170,6 +170,12 @@ arr_lval BespokeArray::LvalInt(ArrayData* ad, int64_t key) {
 arr_lval BespokeArray::LvalStr(ArrayData* ad, StringData* key) {
   return asBespoke(ad)->vtable()->lvalStr(ad, key);
 }
+arr_lval BespokeArray::ElemInt(ArrayData* ad, int64_t key) {
+  return asBespoke(ad)->vtable()->elemInt(ad, key);
+}
+arr_lval BespokeArray::ElemStr(ArrayData* ad, StringData* key) {
+  return asBespoke(ad)->vtable()->elemStr(ad, key);
+}
 
 // insertion
 ArrayData* BespokeArray::SetInt(ArrayData* ad, int64_t key, TypedValue v) {

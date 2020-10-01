@@ -313,6 +313,11 @@ ssize_t LoggingArray::getStrPos(const ArrayData* ad, const StringData* k) {
 // Mutations
 
 namespace {
+TypedValue countedValue(TypedValue val) {
+  type(val) = dt_modulo_persistence(type(val));
+  return val;
+}
+
 ArrayData* escalate(LoggingArray* lad, ArrayData* result) {
   lad->updateSize();
   if (result == lad->wrapped) return lad;
@@ -355,22 +360,44 @@ decltype(auto) mutate(ArrayData* ad, EntryTypes ms, F&& f) {
 }
 }
 
+// Lvals cannot insert new keys, so KeyTypes are unchanged. We must pessimize
+// value types on doing an lval operation, but we can be more precise with our
+// logging of the constrained "elem" operation.
 arr_lval LoggingArray::lvalInt(ArrayData* ad, int64_t k) {
-  // Lvals cannot insert new keys, so the KeyTypes are unchanged, but outside
-  // code can change the value types arbitrarily with the lval
-  auto const ms = asLogging(ad)->entryTypes.pessimizeValueTypes();
-  auto const val = getInt(ad, k);
+  auto const lad = asLogging(ad);
+  auto const val = lad->wrapped->get(k);
+  auto const ms = val.is_init() ? lad->entryTypes.pessimizeValueTypes()
+                                : lad->entryTypes;
   logEvent(ad, ms, ArrayOp::LvalInt, k, val);
   return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
 arr_lval LoggingArray::lvalStr(ArrayData* ad, StringData* k) {
-  // Lvals cannot insert new keys, so the KeyTypes are unchanged, but outside
-  // code can change the value types arbitrarily with the lval
-  auto const ms = asLogging(ad)->entryTypes.pessimizeValueTypes();
-  auto const val = getStr(ad, k);
+  auto const lad = asLogging(ad);
+  auto const val = lad->wrapped->get(k);
+  auto const ms = val.is_init() ? lad->entryTypes.pessimizeValueTypes()
+                                : lad->entryTypes;
   logEvent(ad, ms, ArrayOp::LvalStr, k, val);
   return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
+arr_lval LoggingArray::elemInt(ArrayData* ad, int64_t k) {
+  auto const lad = asLogging(ad);
+  auto const val = lad->wrapped->get(k);
+  auto const key = make_tv<KindOfInt64>(k);
+  auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
+                                : lad->entryTypes;
+  logEvent(ad, ms, ArrayOp::ElemInt, k, val);
+  return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
+}
+arr_lval LoggingArray::elemStr(ArrayData* ad, StringData* k) {
+  auto const lad = asLogging(ad);
+  auto const val = lad->wrapped->get(k);
+  auto const key = make_tv<KindOfString>(k);
+  auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
+                                : lad->entryTypes;
+  logEvent(ad, ms, ArrayOp::ElemStr, k, val);
+  return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
+}
+
 ArrayData* LoggingArray::setInt(ArrayData* ad, int64_t k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
   auto const ms = asLogging(ad)->entryTypes.with(make_tv<KindOfInt64>(k), v);

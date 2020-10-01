@@ -49,6 +49,8 @@ struct EntryTypes;
   X(GetStrPos,          true)  \
   X(LvalInt,            false) \
   X(LvalStr,            false) \
+  X(ElemInt,            false) \
+  X(ElemStr,            false) \
   X(SetInt,             false) \
   X(SetStr,             false) \
   X(ConstructInt,       false) \

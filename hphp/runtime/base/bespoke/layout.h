@@ -53,6 +53,8 @@ namespace bespoke {
   X(ssize_t, getStrPos, const ArrayData*, const StringData*) \
   X(arr_lval, lvalInt, ArrayData* ad, int64_t k) \
   X(arr_lval, lvalStr, ArrayData* ad, StringData* k) \
+  X(arr_lval, elemInt, ArrayData* ad, int64_t k) \
+  X(arr_lval, elemStr, ArrayData* ad, StringData* k) \
   X(ArrayData*, setInt, ArrayData*, int64_t k, TypedValue v) \
   X(ArrayData*, setStr, ArrayData*, StringData* k, TypedValue v)\
   X(ArrayData*, removeInt, ArrayData*, int64_t) \

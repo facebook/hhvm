@@ -84,6 +84,7 @@ void setLoggingEnabled(bool val) {
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
+  assertx(ad->isVanilla());
   if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
   auto const sk = getSrcKey();
   if (!sk.valid()) {
@@ -91,15 +92,21 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
     return ad;
   }
 
+  auto const op = sk.op();
+  auto const useStatic = op == Op::Array || op == Op::Vec ||
+                         op == Op::Dict || op == Op::Keyset;
+  assertx(IMPLIES(useStatic, ad->isStatic()));
+  assertx(IMPLIES(ad->isStatic(), useStatic || isArrLikeCastOp(op)));
+
   // Don't profile static arrays used for TypeStruct tests. Rather than using
   // these arrays, we almost always just do a DataType check on the value.
-  if ((sk.op() == Op::Array || sk.op() == Op::Dict) &&
+  if ((op == Op::Array || op == Op::Dict) &&
       sk.advanced().op() == Op::IsTypeStructC) {
     FTRACE(5, "Skipping static array used for TypeStruct test.\n");
     return ad;
   }
 
-  auto const profile = getLoggingProfile(sk, ad);
+  auto const profile = getLoggingProfile(sk, useStatic ? ad : nullptr);
   if (!profile) return ad;
 
   auto const shouldEmitBespoke = [&] {
@@ -122,7 +129,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
 
   FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
   profile->loggingArraysEmitted++;
-  if (ad->isStatic()) return profile->staticArray;
+  if (useStatic) return profile->staticArray;
 
   // Non-static array constructors are basically a sequence of sets or appends.
   // We already log these events at the correct granularity; re-use that logic.

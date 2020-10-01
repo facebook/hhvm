@@ -139,9 +139,9 @@ public:
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
-// exists, a new one is created. *StaticLoggingArray helpers are used to
-// construct the shared LoggingArray if the ArrayData is static. May return
-// null if no profile exists and the the profile export has begun.
+// exists, a new one is created. `ad` may be null; if provided, it must be a
+// static array, and we will use *StaticLoggingArray to construct a matching
+// static LoggingArray. May return null after exportProfiles begins.
 LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData* ad);
 
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.

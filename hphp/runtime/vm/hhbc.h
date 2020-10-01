@@ -1037,6 +1037,15 @@ constexpr bool isArrLikeConstructorOp(Op opcode) {
     opcode == Op::NewDArray;
 }
 
+constexpr bool isArrLikeCastOp(Op opcode) {
+  return
+    opcode == Op::CastVArray ||
+    opcode == Op::CastDArray ||
+    opcode == Op::CastVec ||
+    opcode == Op::CastDict ||
+    opcode == Op::CastKeyset;
+}
+
 constexpr bool isComparisonOp(Op opcode) {
   return
     opcode == Op::Cmp ||

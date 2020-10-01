@@ -524,6 +524,18 @@ Type loggingArrLikeReturn(const IRInstruction* inst) {
   return arr.unspecialize();
 }
 
+// Is this instruction an array cast that always results in a layout change?
+// Such casts are guaranteed to return vanilla arrays.
+bool isNontrivialArrayCast(const IRInstruction* inst) {
+  auto const& type = inst->src(0)->type();
+  if (inst->is(ConvArrLikeToVec))    return !type.maybe(TVec|TVArr);
+  if (inst->is(ConvArrLikeToVArr))   return !type.maybe(TVec|TVArr);
+  if (inst->is(ConvArrLikeToDict))   return !type.maybe(TDict|TDArr);
+  if (inst->is(ConvArrLikeToDArr))   return !type.maybe(TDict|TDArr);
+  if (inst->is(ConvArrLikeToKeyset)) return !type.maybe(TKeyset);
+  return false;
+}
+
 template <uint32_t...> struct IdxSeq {};
 
 inline Type unionReturn(const IRInstruction* /*inst*/, IdxSeq<>) {
@@ -545,7 +557,9 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
     if (!allowBespokeArrayLikes()) return t;
     if (inst->isLayoutPreserving()) {
       assertx(inst->src(0)->type() <= TArrLike);
-      return inst->src(0)->type().arrSpec().vanilla() ? t.narrowToVanilla() : t;
+      auto const vanilla = inst->src(0)->type().arrSpec().vanilla() ||
+                           isNontrivialArrayCast(inst);
+      return vanilla ? t.narrowToVanilla() : t;
     } else if (inst->isLayoutAgnostic()) {
       return t;
     } else {

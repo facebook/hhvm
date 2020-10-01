@@ -212,7 +212,8 @@ namespace {
 
 NEVER_INLINE
 const Func* lookup(const Class* cls, const StringData* name, const Class* ctx) {
-  auto const func = lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, true);
+  auto const func = lookupMethodCtx(cls, name, ctx, CallType::ObjMethod,
+                                    MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   if (UNLIKELY(func->isStaticInPrologue())) {
     throw_has_this_need_static(func);
@@ -458,7 +459,7 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                                               // this, but we can just fall
                                               // through in that case.
                                      ctx,
-                                     false /*raise*/);
+                                     MethodLookupErrorOptions::None);
   if (LIKELY(res == LookupResult::MethodFoundNoThis &&
              !f->isAbstract() &&
              f->isStatic())) {
@@ -490,7 +491,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr,
                                      ctx,
-                                     false /*raise*/);
+                                     MethodLookupErrorOptions::None);
   assertx(res != LookupResult::MethodFoundWithThis); // Not possible: no this.
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {
     // We called lookupClsMethod with a NULL this and got back a method that

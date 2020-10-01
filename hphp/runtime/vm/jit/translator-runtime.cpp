@@ -661,7 +661,8 @@ const Func* loadClassCtor(Class* cls, Class* ctx) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
     UNUSED auto func =
-      lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
+      lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod,
+                      MethodLookupErrorOptions::RaiseOnNotFound);
     assertx(func == f);
   }
   return f;
@@ -670,7 +671,8 @@ const Func* loadClassCtor(Class* cls, Class* ctx) {
 const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
                                   ObjectData* obj, const Class* ctx) {
   const Func* f;
-  auto const res = lookupClsMethod(f, cls, methName, obj, ctx, true);
+  auto const res = lookupClsMethod(f, cls, methName, obj, ctx,
+                                   MethodLookupErrorOptions::RaiseOnNotFound);
 
   if (res == LookupResult::MethodFoundWithThis) {
     // Handled by interpreter.

@@ -36,17 +36,22 @@ enum class LookupResult {
   MethodNotFound,
 };
 
+enum class MethodLookupErrorOptions {
+  None                       = 0,
+  RaiseOnNotFound            = (1u << 0),
+};
+
 const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
                             const Class* pctx,
                             CallType lookupType,
-                            bool raise = false);
+                            MethodLookupErrorOptions raise);
 
 LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              const Class* ctx,
-                             bool raise = false);
+                             MethodLookupErrorOptions raise);
 
 /*
  * This routine attempts to find the Func* that will be called for an object
@@ -89,7 +94,7 @@ LookupResult lookupClsMethod(const Func*& f,
                              const StringData* methodName,
                              ObjectData* this_,
                              const Class* ctx,
-                             bool raise = false);
+                             MethodLookupErrorOptions raise);
 
 /*
  * This routine attempts to find the Func* that will be statically called for
@@ -115,7 +120,7 @@ const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
                               const Class* ctx,
-                              bool raise = false);
+                              MethodLookupErrorOptions raise);
 
 /*
  * If possible find the constructor for cls that would be run from the

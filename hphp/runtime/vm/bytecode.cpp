@@ -4014,7 +4014,8 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
     return Class::load(fca.context);
   }();
   // if lookup throws, obj will be decref'd via stack
-  res = lookupObjMethod(func, cls, methName, ctx, true);
+  res = lookupObjMethod(func, cls, methName, ctx,
+                        MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   decRefStr(methName);
   if (res == LookupResult::MethodFoundNoThis) {
@@ -4185,7 +4186,8 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
 const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   const Func* func;
   auto const res = lookupClsMethod(func, cls, methName, nullptr,
-                                   arGetContextClass(vmfp()), false);
+                                   arGetContextClass(vmfp()),
+                                   MethodLookupErrorOptions::None);
   if (res == LookupResult::MethodNotFound) {
     raise_error("Failure to resolve method name \'%s::%s\'",
                 cls->name()->data(), methName->data());
@@ -4294,7 +4296,8 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
   }();
   auto obj = liveClass() && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
-  auto const res = lookupClsMethod(func, cls, methName, obj, ctx, true);
+  auto const res = lookupClsMethod(func, cls, methName, obj, ctx,
+                                   MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(func);
   decRefStr(methName);
 
@@ -4495,7 +4498,8 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
 
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());
-  auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
+  auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx,
+                            MethodLookupErrorOptions::RaiseOnNotFound);
   assertx(res == LookupResult::MethodFoundWithThis);
 
   // fcallImpl() will do further checks before spilling the ActRec. If any

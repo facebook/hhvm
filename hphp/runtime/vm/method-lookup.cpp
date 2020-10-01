@@ -31,6 +31,10 @@ namespace HPHP {
 
 namespace {
 
+inline bool shouldRaise(MethodLookupErrorOptions raise) {
+  return int(raise) & int(MethodLookupErrorOptions::RaiseOnNotFound);
+}
+
 /*
  * Looks for a Func named methodName in any of the interfaces cls implements,
  * including cls if it is an interface. Returns nullptr if none was found,
@@ -84,7 +88,7 @@ const Func* lookupMethodCtx(const Class* cls,
                             const StringData* methodName,
                             const Class* ctx,
                             CallType callType,
-                            bool raise) {
+                            MethodLookupErrorOptions raise) {
   const Func* method;
   if (callType == CallType::CtorMethod) {
     assertx(methodName == nullptr);
@@ -96,7 +100,7 @@ const Func* lookupMethodCtx(const Class* cls,
     if (!method) {
       // We didn't find any methods with the specified name in cls's method
       // table, handle the failure as appropriate.
-      if (raise) {
+      if (shouldRaise(raise)) {
         raise_call_to_undefined(methodName, cls);
       }
       return nullptr;
@@ -118,7 +122,7 @@ const Func* lookupMethodCtx(const Class* cls,
     // The invalid context cannot access protected or private methods,
     // so we can fail fast here.
     if (ctx == nullptr) {
-      if (raise) {
+      if (shouldRaise(raise)) {
         raise_error("Call to %s %s::%s() from invalid context",
                     (method->attrs() & AttrPrivate) ? "private" : "protected",
                     cls->name()->data(),
@@ -147,7 +151,7 @@ const Func* lookupMethodCtx(const Class* cls,
         // we know that ctx not the same or an ancestor of cls, and therefore
         // we don't need to check if ctx declares a private method with this
         // name, so we can fail fast here.
-        if (raise) {
+        if (shouldRaise(raise)) {
           raise_error("Call to protected method %s::%s() from context '%s'",
                       cls->name()->data(),
                       method->name()->data(),
@@ -180,7 +184,7 @@ const Func* lookupMethodCtx(const Class* cls,
   }
   // If we reach here it means we've found an inaccessible private method
   // in cls's method table, handle the failure as appropriate.
-  if (raise) {
+  if (shouldRaise(raise)) {
     raise_error("Call to private method %s::%s() from %s'%s'",
                 method->baseCls()->name()->data(),
                 method->name()->data(),
@@ -194,15 +198,9 @@ LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              const Class* ctx,
-                             bool raise) {
-  f = lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, false);
-  if (!f) {
-    if (raise) {
-      // Throw a fatal error
-      lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, true);
-    }
-    return LookupResult::MethodNotFound;
-  }
+                             MethodLookupErrorOptions raise) {
+  f = lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, raise);
+  if (!f) return LookupResult::MethodNotFound;
   if (f->isStaticInPrologue()) {
     return LookupResult::MethodFoundNoThis;
   }
@@ -227,7 +225,8 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
   }
 
   const Func* func;
-  LookupResult res = lookupObjMethod(func, cls, name, ctx, false);
+  LookupResult res = lookupObjMethod(func, cls, name, ctx,
+                                     MethodLookupErrorOptions::None);
   if (res == LookupResult::MethodNotFound) {
     if (exactClass) return notFound;
     if (auto const func = lookupIfaceMethod(cls, name)) {
@@ -253,10 +252,10 @@ LookupResult lookupClsMethod(const Func*& f,
                              const StringData* methodName,
                              ObjectData* obj,
                              const Class* ctx,
-                             bool raise) {
+                             MethodLookupErrorOptions raise) {
   f = lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, raise);
   if (!f) {
-    assertx(!raise);
+    assertx(!shouldRaise(raise));
     return LookupResult::MethodNotFound;
   }
   if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
@@ -270,7 +269,8 @@ const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   const Func* func;
-  LookupResult res = lookupClsMethod(func, cls, name, nullptr, ctx, false);
+  LookupResult res = lookupClsMethod(func, cls, name, nullptr, ctx,
+                                     MethodLookupErrorOptions::None);
   if (res == LookupResult::MethodNotFound) return nullptr;
   if (func->isAbstract() && exactClass) return nullptr;
 
@@ -282,14 +282,14 @@ const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
                               const Class* ctx,
-                              bool raise) {
+                              MethodLookupErrorOptions raise) {
   f = cls->getCtor();
   if (!(f->attrs() & AttrPublic)) {
     f = lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, raise);
     if (!f) {
       // If raise was true than lookupMethodCtx should have thrown,
       // so we should only be able to get here if raise was false
-      assertx(!raise);
+      assertx(!shouldRaise(raise));
       return LookupResult::MethodNotFound;
     }
   }

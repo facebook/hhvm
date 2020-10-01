@@ -7,16 +7,16 @@
  *)
 
 (** state is a global mutable variable, accumulating all counts *)
-type state
+type t
 
 (** reset will zero all counters, adjust the global mutable state,
-and return the previous state. You should 'restore_state' when done,
-in case your caller had been doing their own count.
-If 'enable' is false then no counting will happen. *)
-val reset : enable:bool -> state
+    and return the previous state. You should 'restore_state' when done,
+    in case your caller had been doing their own count.
+    If 'enable' is false then no counting will happen. *)
+val reset : enable:bool -> t
 
 (** restores global mutable state to what it was before you called 'reset' *)
-val restore_state : state -> unit
+val restore_state : t -> unit
 
 val count_decl_accessor : (unit -> 'a) -> 'a
 

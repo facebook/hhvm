@@ -551,7 +551,6 @@ dependencies = [
  "escaper 0.0.0",
  "flatten_smart_constructors 0.0.0",
  "hh_autoimport_rust 0.0.0",
- "minimal_parser 0.0.0",
  "naming_special_names_rust 0.0.0",
  "oxidized_by_ref 0.0.0",
  "parser_core_types 0.0.0",

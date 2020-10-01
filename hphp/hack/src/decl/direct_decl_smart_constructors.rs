@@ -1173,7 +1173,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         header: &'a FunctionHeader<'a>,
         body: Node,
     ) -> Option<(Id<'a>, Ty<'a>, &'a [ShallowProp<'a>])> {
-        let id = self.get_name(namespace, header.name)?;
+        let id = self
+            .get_name(namespace, header.name)
+            .unwrap_or(Id(self.get_pos(header.name), ""));
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
         let f_pos = self.get_pos(header.name);
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
@@ -2663,19 +2665,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _keyword: Self::R,
         name: Self::R,
         type_params: Self::R,
-        _left_parens: Self::R,
+        left_paren: Self::R,
         param_list: Self::R,
-        _right_parens: Self::R,
+        _right_paren: Self::R,
         capability: Self::R,
         capability_provisional: Self::R,
         _colon: Self::R,
         ret_hint: Self::R,
         _where: Self::R,
     ) -> Self::R {
-        if name.is_ignored() {
-            return Node::Ignored(SK::FunctionDeclarationHeader);
-        }
-        let capability = if let Node::Ignored(_) = capability {
+        // Use the position of the left paren if the name is missing.
+        let name = if name.is_ignored() { left_paren } else { name };
+        let capability = if capability.is_ignored() {
             capability_provisional
         } else {
             capability

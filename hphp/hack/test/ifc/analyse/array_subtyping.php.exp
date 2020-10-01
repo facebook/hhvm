@@ -1,0 +1,114 @@
+Analyzing \dictToDictPrim:
+* pc: pc
+* This: None
+* Return: dict<<ret'1> => <ret>; |len|>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $dict -> dict<<$dict'1> => <$dict>; |len'1|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [$dict'1 < ret'1, $dict < ret, len'1 < len]
+  Locals:
+    { $dict -> dict<<$dict'1> => <$dict>; |len'1|> }
+
+Analyzing \dictToDictClass:
+* pc: pc
+* This: None
+* Return: dict<<ret> => \C<C, C_lump>; |len|>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $dict -> dict<<$dict> => \C<C'1, C_lump'1>; |len'1|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [$dict < ret, C_lump'1 = C_lump, C'1 < C, len'1 < len]
+  Locals:
+    { $dict -> dict<<$dict> => \C<C'1, C_lump'1>; |len'1|> }
+
+Analyzing \dictToKTClass:
+* pc: pc
+* This: None
+* Return: \HH\KeyedTraversable<HH\KeyedTraversable, HH\KeyedTraversable_lump>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $dict -> dict<<$dict> => \C<C, C_lump>; |len|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [$dict < HH\KeyedTraversable, C < HH\KeyedTraversable,
+     len < HH\KeyedTraversable, C_lump = HH\KeyedTraversable_lump]
+  Locals:
+    { $dict -> dict<<$dict> => \C<C, C_lump>; |len|> }
+
+Analyzing \vecToVecPrim:
+* pc: pc
+* This: None
+* Return: vec<<key> => <ret>; |len|>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $vec -> vec<<key'1> => <$vec>; |len'1|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [key'1 < key, $vec < ret, len'1 < len]
+  Locals:
+    { $vec -> vec<<key'1> => <$vec>; |len'1|> }
+
+Analyzing \vecToVecClass:
+* pc: pc
+* This: None
+* Return: vec<<key> => \C<C, C_lump>; |len|>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $vec -> vec<<key'1> => \C<C'1, C_lump'1>; |len'1|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [key'1 < key, C_lump'1 = C_lump, C'1 < C, len'1 < len]
+  Locals:
+    { $vec -> vec<<key'1> => \C<C'1, C_lump'1>; |len'1|> }
+
+Analyzing \vecToKTClass:
+* pc: pc
+* This: None
+* Return: \HH\KeyedTraversable<HH\KeyedTraversable, HH\KeyedTraversable_lump>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $vec -> vec<<key> => \C<C, C_lump>; |len|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [C < HH\KeyedTraversable, key < HH\KeyedTraversable,
+     len < HH\KeyedTraversable, C_lump = HH\KeyedTraversable_lump]
+  Locals:
+    { $vec -> vec<<key> => \C<C, C_lump>; |len|> }
+
+Analyzing \keysetToKeysetPrim:
+* pc: pc
+* This: None
+* Return: keyset<<ret> => <ret>; |len|>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $keyset -> keyset<<$keyset> => <$keyset>; |len'1|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [$keyset < ret, $keyset < ret, len'1 < len]
+  Locals:
+    { $keyset -> keyset<<$keyset> => <$keyset>; |len'1|> }
+
+Analyzing \keysetToKTPrim:
+* pc: pc
+* This: None
+* Return: \HH\KeyedTraversable<HH\KeyedTraversable, HH\KeyedTraversable_lump>
+* Exception: \Exception<exn, exn_lump>
+* Params:
+  { $keyset -> keyset<<$keyset> => <$keyset>; |len|> }
+* Final environment:
+  Deps: {}
+  Constraints:
+    [$keyset < HH\KeyedTraversable, len < HH\KeyedTraversable]
+  Locals:
+    { $keyset -> keyset<<$keyset> => <$keyset>; |len|> }
+

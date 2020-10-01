@@ -31,6 +31,41 @@ let should_print ~user_mode ~phase =
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
+(* Returns the policies appearing in a type split in three sets
+   of occurrences (covariant, invariant, contravariant) *)
+let rec policy_occurrences pty =
+  let emp = PSet.empty in
+  let pol = PSet.singleton in
+  let on_list =
+    List.fold ~init:(emp, emp, emp) ~f:(fun (s1, s2, s3) (t1, t2, t3) ->
+        (PSet.union s1 t1, PSet.union s2 t2, PSet.union s3 t3))
+  in
+  match pty with
+  | Tprim p -> (pol p, emp, emp)
+  | Tgeneric p -> (pol p, emp, emp)
+  | Tinter tl
+  | Tunion tl
+  | Ttuple tl ->
+    on_list (List.map ~f:policy_occurrences tl)
+  | Tclass cls -> (pol cls.c_self, pol cls.c_lump, emp)
+  | Tfun { f_pc; f_self; f_args; f_ret; f_exn } ->
+    let swap_policy_occurrences t =
+      let (cov, inv, cnt) = policy_occurrences t in
+      (cnt, inv, cov)
+    in
+    on_list
+      ( (pol f_self, emp, pol f_pc)
+      :: policy_occurrences f_ret
+      :: policy_occurrences f_exn
+      :: List.map ~f:swap_policy_occurrences f_args )
+  | Tcow_array { a_key; a_value; a_length; _ } ->
+    on_list
+      [
+        (pol a_length, emp, emp);
+        policy_occurrences a_key;
+        policy_occurrences a_value;
+      ]
+
 exception SubtypeFailure of string * ptype * ptype
 
 (* A constraint accumulator that registers a subtyping
@@ -81,6 +116,11 @@ let rec subtype ~pos t1 t2 acc =
     |> subtype arr1.a_key arr2.a_key
     |> subtype arr1.a_value arr2.a_value
     |> L.(arr1.a_length < arr2.a_length) ~pos
+  | (Tcow_array _, Tclass cl) ->
+    let (cov, inv, _con) = policy_occurrences t1 in
+    acc
+    |> L.(PSet.elements cov <* [cl.c_self]) ~pos
+    |> L.(PSet.elements inv =* [cl.c_lump]) ~pos
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (_, Tinter tl) ->
@@ -108,41 +148,6 @@ let (subtype, equivalent) =
       fail "subtype: %s (%a <: %a)" msg Pp.ptype tsub Pp.ptype tsup
   in
   (wrap subtype, wrap equivalent)
-
-(* Returns the policies appearing in a type split in three sets
-   of occurrences (covariant, invariant, contravariant) *)
-let rec policy_occurrences pty =
-  let emp = PSet.empty in
-  let pol = PSet.singleton in
-  let on_list =
-    List.fold ~init:(emp, emp, emp) ~f:(fun (s1, s2, s3) (t1, t2, t3) ->
-        (PSet.union s1 t1, PSet.union s2 t2, PSet.union s3 t3))
-  in
-  match pty with
-  | Tprim p -> (pol p, emp, emp)
-  | Tgeneric p -> (pol p, emp, emp)
-  | Tinter tl
-  | Tunion tl
-  | Ttuple tl ->
-    on_list (List.map ~f:policy_occurrences tl)
-  | Tclass cls -> (pol cls.c_self, pol cls.c_lump, emp)
-  | Tfun { f_pc; f_self; f_args; f_ret; f_exn } ->
-    let swap_policy_occurrences t =
-      let (cov, inv, cnt) = policy_occurrences t in
-      (cnt, inv, cov)
-    in
-    on_list
-      ( (pol f_self, emp, pol f_pc)
-      :: policy_occurrences f_ret
-      :: policy_occurrences f_exn
-      :: List.map ~f:swap_policy_occurrences f_args )
-  | Tcow_array { a_key; a_value; a_length; _ } ->
-    on_list
-      [
-        (pol a_length, emp, emp);
-        policy_occurrences a_key;
-        policy_occurrences a_value;
-      ]
 
 (* Returns the list of free policy variables in a type *)
 let free_pvars pty =

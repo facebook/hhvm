@@ -1910,34 +1910,6 @@ void ExecutionContext::manageAPCHandle() {
   }
 }
 
-// Evaled units have a footprint in the TC and translation metadata. The
-// applications we care about tend to have few, short, stereotyped evals,
-// where the same code keeps getting eval'ed over and over again; so we
-// keep around units for each eval'ed string, so that the TC space isn't
-// wasted on each eval.
-typedef RankedCHM<StringData*, HPHP::Unit*,
-        StringDataHashCompare,
-        RankEvaledUnits> EvaledUnitsMap;
-static EvaledUnitsMap s_evaledUnits;
-Unit* ExecutionContext::compileEvalString(
-    StringData* code,
-    const char* evalFilename /* = nullptr */) {
-  EvaledUnitsMap::accessor acc;
-  // Promote this to a static string; otherwise it may get swept
-  // across requests.
-  code = makeStaticString(code);
-  if (s_evaledUnits.insert(acc, code)) {
-    acc->second = compile_string(
-      code->data(),
-      code->size(),
-      evalFilename,
-      Native::s_noNativeFuncs,
-      getRepoOptionsForCurrentFrame()
-    );
-  }
-  return acc->second;
-}
-
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?hh" prepended already

@@ -4737,7 +4737,7 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
     vm->getLine(),
     string_md5(code.slice()).c_str()
   );
-  Unit* unit = vm->compileEvalString(prefixedCode.get(), evalFilename.c_str());
+  auto unit = compileEvalString(prefixedCode.get(), evalFilename.c_str());
   if (!RuntimeOption::EvalJitEvaledCode) {
     unit->setInterpretOnly();
   }

@@ -640,6 +640,9 @@ public:
     return true;
   }
 
+  // Total number of currently allocated Units
+  static size_t liveUnitCount() { return s_liveUnits; }
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -707,6 +710,8 @@ private:
   std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
+
+  static std::atomic<size_t> s_liveUnits;
 };
 
 struct UnitExtended : Unit {
@@ -729,4 +734,3 @@ struct UnitExtended : Unit {
 #define incl_HPHP_VM_UNIT_INL_H_
 #include "hphp/runtime/vm/unit-inl.h"
 #undef incl_HPHP_VM_UNIT_INL_H_
-

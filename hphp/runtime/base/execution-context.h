@@ -392,8 +392,6 @@ public:
   StringData* getContainingFileName();
   int getLine();
   TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
-  Unit* compileEvalString(StringData* code,
-                                const char* evalFilename = nullptr);
 
   struct EvaluationResult {
     bool failed;
@@ -649,4 +647,3 @@ extern rds::local::AliasedRDSLocal<ExecutionContext,
 }
 
 #include "hphp/runtime/base/execution-context-inl.h"
-

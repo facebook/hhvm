@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,7 @@ struct TestCppExt : TestCppBase {
 
 inline void evalCodeForCppExt(const String& code_str) {
   String prefixedCode = concat("<?hh ", code_str);
-  Unit* unit = g_context->compileEvalString(prefixedCode.get());
+  Unit* unit = compileEvalString(prefixedCode.get());
   tvDecRefGen(g_context->invokeUnit(unit));
 }
 

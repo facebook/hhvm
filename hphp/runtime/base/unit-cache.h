@@ -170,7 +170,13 @@ void prefetchUnit(StringData* path,
  */
 void drainUnitPrefetcher();
 
+/*
+ * Compile a string into an Unit for the purposes of eval
+ * execution. Units may be cached.
+ */
+Unit* compileEvalString(const StringData* code,
+                        const char* evalFilename = nullptr);
+
 //////////////////////////////////////////////////////////////////////
 
 }
-

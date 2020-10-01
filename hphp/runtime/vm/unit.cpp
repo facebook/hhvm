@@ -111,6 +111,8 @@ const StaticString s_stderr("STDERR");
 
 }
 
+std::atomic<size_t> Unit::s_liveUnits{0};
+
 ///////////////////////////////////////////////////////////////////////////////
 // MergeInfo.
 
@@ -132,7 +134,9 @@ Unit::Unit()
   , m_extended(false)
   , m_serialized(false)
   , m_ICE(false)
-{}
+{
+  ++s_liveUnits;
+}
 
 Unit::~Unit() {
   if (RuntimeOption::EvalEnableReverseDataMap &&
@@ -182,6 +186,8 @@ Unit::~Unit() {
   }
 
   free(mi);
+
+  --s_liveUnits;
 }
 
 void* Unit::operator new(size_t sz) {

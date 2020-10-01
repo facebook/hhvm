@@ -20,9 +20,20 @@
 #include <cstdint>
 #include <string>
 
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
+
+namespace jit {
+
+struct Block;
+struct SSATmp;
+struct IRInstruction;
+
+namespace irgen { struct IRGS; }
+
+} // namespace jit
 
 namespace bespoke { struct Layout; }
 
@@ -51,6 +62,21 @@ struct BespokeLayout {
 
   /* get a human-readable string describing the layout */
   std::string describe() const ;
+
+  /****************************************************************************
+   * access to arraydata methods
+   ****************************************************************************/
+
+
+  using SSATmp = jit::SSATmp;
+  using Block = jit::Block;
+  using IRInstruction = jit::IRInstruction;
+  using IRGS = jit::irgen::IRGS;
+
+  SSATmp* emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const;
+  SSATmp* emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const;
+  SSATmp* emitGet(IRGS& env, SSATmp* base, SSATmp* key, Block* taken) const;
+  SSATmp* emitIsset(IRGS& env, SSATmp* base, SSATmp* key) const;
 
 private:
   const bespoke::Layout* m_layout{nullptr};

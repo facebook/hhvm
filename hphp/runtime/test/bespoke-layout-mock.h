@@ -18,6 +18,7 @@
 #define HPHP_RUNTIME_TEST_BESPOKE_LAYOUT_MOCK_H_
 
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 
 #include <folly/portability/GMock.h>
 

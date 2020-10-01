@@ -16,10 +16,16 @@
 
 #include "hphp/runtime/base/bespoke/layout.h"
 
+#include "hphp/runtime/vm/jit/irgen.h"
+#include "hphp/runtime/vm/jit/punt.h"
+
 #include <atomic>
 #include <array>
 
 namespace HPHP { namespace bespoke {
+
+using namespace jit;
+using namespace jit::irgen;
 
 namespace {
 std::array<Layout*, Layout::kMaxIndex + 1> s_layoutTable;
@@ -38,6 +44,22 @@ const Layout* layoutForIndex(uint16_t index) {
   auto const layout = s_layoutTable[index];
   assertx(layout->index() == index);
   return layout;
+}
+
+SSATmp* Layout::emitSet(IRGS& env, SSATmp* base, SSATmp* key, SSATmp* val) const {
+  PUNT(unimpl_bespoke_emitSet);
+}
+
+SSATmp* Layout::emitAppend(IRGS& env, SSATmp* base, SSATmp* val) const {
+  PUNT(unimpl_bespoke_emitAppend);
+}
+
+SSATmp* Layout::emitGet(IRGS& env, SSATmp* base, SSATmp* key, Block* taken) const {
+  PUNT(unimpl_bespoke_emitGet);
+}
+
+SSATmp* Layout::emitIsset(IRGS& env, SSATmp* base, SSATmp* key) const {
+  PUNT(unimpl_bespoke_emitIsset);
 }
 
 }}

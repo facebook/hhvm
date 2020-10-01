@@ -20,9 +20,21 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/type-scan.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP {
+
+namespace jit {
+
+struct SSATmp;
+struct Block;
+
+namespace irgen { struct IRGS; }
+
+} // namespace jit
+
+namespace bespoke {
 
 #define BESPOKE_LAYOUT_FUNCTIONS \
   X(size_t, heapSize, const ArrayData* ad) \
@@ -93,6 +105,72 @@ struct Layout {
   uint16_t index() const { return m_index; }
   const std::string& describe() const { return m_description; }
   const LayoutFunctions* vtable() const { return m_vtable; }
+
+  //////////////////////////////////////////////////////////////////////
+  // JIT support
+  //////////////////////////////////////////////////////////////////////
+
+  using SSATmp = jit::SSATmp;
+  using Block = jit::Block;
+  using IRGS = jit::irgen::IRGS;
+
+  /*
+   * Generate a new bespoke array by setting key to value in `base`, CoWing or
+   * escalating as necessary.
+   *
+   * `base` is guaranteed to be bespoke, use the recipient's layout, and support
+   * SetElem (i.e. is not a keyset)
+   *
+   * `key` is guaranteed to be valid for `base`'s array kind.
+   */
+  virtual SSATmp* emitSet(
+    IRGS& env,
+    SSATmp* base,
+    SSATmp* key,
+    SSATmp* val
+  ) const;
+
+  /*
+   * Generate a new bespoke array by appending `val` (CoWing or escalating as
+   * necessary.)
+   *
+   * `base` is guaranteed to be bespoke and use the recipient's layout
+   *
+   * `val` is guaranteed to be valid for `base`'s array kind.
+   */
+  virtual SSATmp* emitAppend(
+    IRGS& env,
+    SSATmp* base,
+    SSATmp* val
+  ) const;
+
+  /*
+   * Return the value at `key` in `base`, branching to `missing` if the key is
+   * not present in the array.
+   *
+   * `base` is guaranteed to be bespoke and use the recipient's layout.
+   *
+   * `key` is guaranteed to be valid for `base`'s array kind.
+   */
+  virtual SSATmp* emitGet(
+    IRGS& env,
+    SSATmp* base,
+    SSATmp* key,
+    Block* taken
+  ) const;
+
+  /*
+   * Return `true` iff the key `key` is present in `base`.
+   *
+   * `base` is guaranteed to be bespoke and use the recipient's layout
+   *
+   * `key` is guaranteed to an arraykey (i.e. Str or Int)
+   */
+  virtual SSATmp* emitIsset(
+    IRGS& env,
+    SSATmp* base,
+    SSATmp* key
+  ) const;
 
 private:
   uint16_t m_index;

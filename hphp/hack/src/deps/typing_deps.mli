@@ -196,6 +196,8 @@ val flush_ideps_batch : unit -> dep_edges
 
 val merge_dep_edges : dep_edges -> dep_edges -> dep_edges
 
+val register_discovered_dep_edges : dep_edges -> unit
+
 val get_ideps_from_hash : Dep.t -> DepSet.t
 
 val get_ideps : Dep.dependency Dep.variant -> DepSet.t

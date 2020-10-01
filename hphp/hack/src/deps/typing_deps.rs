@@ -13,12 +13,13 @@ use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use once_cell::sync::OnceCell;
 use std::cell::RefCell;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::convert::TryInto;
 use std::ffi::OsString;
 use std::hash::Hasher;
 use std::io::Write;
 use std::panic;
+use std::sync::Mutex;
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -37,6 +38,12 @@ static DEPGRAPH_FILENAME: OnceCell<OsString> = OnceCell::new();
 /// Each worker will itself lazily (or eagerly upon request)
 /// open a memory-mapping to the dependency graph.
 static DEPGRAPH: OnceCell<UnsafeDepGraph> = OnceCell::new();
+
+/// The dependency graph delta.
+///
+/// Even though this is only used in a single-threaded context (from OCaml)
+/// we wrap it in a `Mutex` to ensure safety.
+static DEPGRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
 
 /// We wrap the dependency graph in an unsafe structure.
 ///
@@ -146,6 +153,57 @@ impl UnsafeDepGraph {
         // just does an atomic load with acquire semantics, which doesn't
         // require any memory fences on x86.
         DEPGRAPH.get().is_some()
+    }
+}
+
+pub struct DepGraphDelta(BTreeMap<Dep, BTreeSet<Dep>>);
+
+impl DepGraphDelta {
+    pub fn new() -> Self {
+        DepGraphDelta(BTreeMap::new())
+    }
+
+    pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
+        self.0
+            .entry(dependency)
+            .and_modify(|depts| {
+                depts.insert(dependent);
+            })
+            .or_insert_with(|| {
+                let mut s = BTreeSet::new();
+                s.insert(dependent);
+                s
+            });
+    }
+
+    pub fn get(&self, dependency: Dep) -> Option<&BTreeSet<Dep>> {
+        self.0.get(&dependency)
+    }
+
+    pub fn with_cell<R>(f: impl FnOnce(&Mutex<Self>) -> R) -> R {
+        let cell = DEPGRAPH_DELTA.get_or_init(|| Mutex::new(Self::new()));
+        f(cell)
+    }
+
+    /// Run the closure with the dep graph delta.
+    ///
+    /// # Panics
+    ///
+    /// When another reference to delta is still active, but that
+    /// isn't likely,given that we only have one thread, and the
+    /// `with`/`with_mut` auxiliary functions disallow the reference
+    /// to escape.
+    pub fn with<R>(f: impl FnOnce(&Self) -> R) -> R {
+        Self::with_cell(|cell| f(&cell.lock().unwrap()))
+    }
+
+    /// Run the closure with the mutable dep graph delta.
+    ///
+    /// # Panics
+    ///
+    /// See `with`
+    pub fn with_mut<R>(f: impl FnOnce(&mut Self) -> R) -> R {
+        Self::with_cell(|cell| f(&mut cell.lock().unwrap()))
     }
 }
 
@@ -532,6 +590,15 @@ ocaml_ffi! {
             acc
         });
         Custom::from(acc.into())
+    }
+
+    fn hh_custom_dep_graph_register_discovered_dep_edge(
+        dependent: OcamlDep,
+        dependency: OcamlDep,
+    ) {
+        DepGraphDelta::with_mut(move |s| {
+            s.insert(dependent.into(), dependency.into());
+        });
     }
 }
 

@@ -861,6 +861,7 @@ let go_with_interrupt
         ~check_info
     end
   in
+  Typing_deps.register_discovered_dep_edges typing_result.dep_edges;
   if check_info.profile_log then
     Hh_logger.log
       "Typecheck perf: %s"

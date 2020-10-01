@@ -534,6 +534,10 @@ module CustomGraph = struct
     VisitedSet.custom_t -> Dep.t -> DepSet.t -> DepSet.t
     = "hh_custom_dep_graph_get_extend_deps"
 
+  external register_discovered_dep_edge : Dep.t -> Dep.t -> unit
+    = "hh_custom_dep_graph_register_discovered_dep_edge"
+    [@@noalloc]
+
   let add_all_deps x = x |> add_extend_deps |> add_typing_deps
 
   type dep_edge = {
@@ -581,6 +585,16 @@ module CustomGraph = struct
     in
     filtered_deps_batch := s;
     Hashtbl.clear discovered_deps_batch
+
+  let register_discovered_dep_edges : DepEdgeSet.t -> unit =
+   fun s ->
+    assert_master ();
+    DepEdgeSet.iter
+      begin
+        fun { idependent; idependency } ->
+        register_discovered_dep_edge idependent idependency
+      end
+      s
 
   let add_idep dependent dependency =
     let idependent = Dep.make dependent in
@@ -776,6 +790,15 @@ let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   match (x, y) with
   | (Some x, Some y) -> Some (CustomGraph.DepEdgeSet.union x y)
   | _ -> None
+
+let register_discovered_dep_edges : dep_edges -> unit = function
+  | None ->
+    Hh_logger.log "No discovered dependency edges to register in 32-bit mode"
+  | Some batch ->
+    Hh_logger.log
+      "Registering %d discovered 64-bit dependency edges"
+      (CustomGraph.DepEdgeSet.cardinal batch);
+    CustomGraph.register_discovered_dep_edges batch
 
 let get_ideps_from_hash hash =
   let open DepSet in

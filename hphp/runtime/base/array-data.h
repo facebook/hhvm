@@ -704,7 +704,13 @@ static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec), "");
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr size_t kEmptyMixedArraySize = 120;
+// The size of the StrKeyTable, which is stored in front of the array, needs to
+// rounded up to a multiple of 16, so that we can enforce the base array pointer
+// is 16-byte aligned.
+constexpr size_t kEmptyMixedArrayStrKeyTableSize =
+  ((sizeof(StrKeyTable) - 1) / 16 + 1) * 16;
+
+constexpr size_t kEmptyMixedArraySize = 120 + kEmptyMixedArrayStrKeyTableSize;
 constexpr size_t kEmptySetArraySize = 96;
 
 /*
@@ -712,14 +718,18 @@ constexpr size_t kEmptySetArraySize = 96;
  */
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
-extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
-extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVArray;
-extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
-extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDictArray;
+
+/*
+ * Pointers to canonical empty Dicts/DArrays.
+ */
+extern ArrayData* s_theEmptyDictArrayPtr;
+extern ArrayData* s_theEmptyDArrayPtr;
+extern ArrayData* s_theEmptyMarkedDArrayPtr;
+extern ArrayData* s_theEmptyMarkedDictArrayPtr;
 
 /*
  * Return the static empty array, for PHP and Hack arrays.
@@ -856,4 +866,3 @@ ArrayData* tagArrProv(ArrayData* ad, const APCArray* src);
 }
 
 #include "hphp/runtime/base/array-data-inl.h"
-

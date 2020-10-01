@@ -32,11 +32,10 @@ public:
   // Returns true if the given sd is not static
   bool mayContain(const StringData* sd) const;
   void add(const StringData* sd);
-
+  void reset();
 private:
   std::bitset<kStrKeyTableSize> m_table;
 
 };
 
 } // namespace HPHP
-

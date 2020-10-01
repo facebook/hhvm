@@ -29,4 +29,8 @@ void StrKeyTable::add(const StringData* sd) {
   m_table.set(sd->hash() & kStrKeyTableMask);
 }
 
+void StrKeyTable::reset() {
+  m_table.reset();
+}
+
 } // namespace HPHP

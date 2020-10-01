@@ -55,23 +55,45 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-static_assert(MixedArray::computeAllocBytes(MixedArray::SmallScale) ==
-              kEmptyMixedArraySize, "");
+static_assert(
+  MixedArray::computeAllocBytes(MixedArray::SmallScale) +
+  kEmptyMixedArrayStrKeyTableSize ==
+  kEmptyMixedArraySize, ""
+);
 
-std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
-std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
-std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDictArray;
-std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDArray;
+namespace {
+using EmptyArrayType = std::aligned_storage<kEmptyMixedArraySize, 16>::type;
+EmptyArrayType s_theEmptyDictArrayMem;
+EmptyArrayType s_theEmptyDArrayMem;
+EmptyArrayType s_theEmptyMarkedDictArrayMem;
+EmptyArrayType s_theEmptyMarkedDArrayMem;
+}
+
+#define ArrayMemToPtr(mem) ((ArrayData*)(((char*)&mem) +                \
+                                         kEmptyMixedArrayStrKeyTableSize))
+
+
+ArrayData*      s_theEmptyDictArrayPtr =
+  ArrayMemToPtr(s_theEmptyDictArrayMem);
+ArrayData*      s_theEmptyDArrayPtr =
+  ArrayMemToPtr(s_theEmptyDArrayMem);
+ArrayData*      s_theEmptyMarkedDictArrayPtr =
+  ArrayMemToPtr(s_theEmptyMarkedDictArrayMem);
+ArrayData*      s_theEmptyMarkedDArrayPtr =
+  ArrayMemToPtr(s_theEmptyMarkedDArrayMem);
+
+#undef ArrayMemToPtr
 
 struct MixedArray::DictInitializer {
   DictInitializer() {
-    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
+    auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyDictArrayPtr);
     ad->initHash(1);
     ad->m_size  = 0;
     ad->m_extra = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
-    ad->initHeader(HeaderKind::Dict, StaticValue);
+    ad->initHeader_16(HeaderKind::Dict, StaticValue, kHasStrKeyTable);
+    ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
   }
 };
@@ -79,13 +101,14 @@ MixedArray::DictInitializer MixedArray::s_dict_initializer;
 
 struct MixedArray::DArrayInitializer {
   DArrayInitializer() {
-    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDArray);
+    auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyDArrayPtr);
     ad->initHash(1);
     ad->m_size = 0;
     ad->m_extra = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
-    ad->initHeader(HeaderKind::Mixed, StaticValue);
+    ad->initHeader_16(HeaderKind::Mixed, StaticValue, kHasStrKeyTable);
+    ad->mutableStrKeyTable()->reset();
     assertx(RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
   }
 };
@@ -93,13 +116,15 @@ MixedArray::DArrayInitializer MixedArray::s_darr_initializer;
 
 struct MixedArray::MarkedDictArrayInitializer {
   MarkedDictArrayInitializer() {
-    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyMarkedDictArray);
+    auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyMarkedDictArrayPtr);
     ad->initHash(1);
     ad->m_size = 0;
     ad->m_extra = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
-    ad->initHeader_16(HeaderKind::Dict, StaticValue, ArrayData::kLegacyArray);
+    ad->initHeader_16(HeaderKind::Dict, StaticValue,
+                      kLegacyArray | kHasStrKeyTable);
+    ad->mutableStrKeyTable()->reset();
     assertx(!RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
   }
 };
@@ -107,13 +132,15 @@ MixedArray::MarkedDictArrayInitializer MixedArray::s_marked_dict_initializer;
 
 struct MixedArray::MarkedDArrayInitializer {
   MarkedDArrayInitializer() {
-    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyMarkedDArray);
+    auto const ad = reinterpret_cast<MixedArray*>(s_theEmptyMarkedDArrayPtr);
     ad->initHash(1);
     ad->m_size = 0;
     ad->m_extra = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
-    ad->initHeader_16(HeaderKind::Mixed, StaticValue, ArrayData::kLegacyArray);
+    ad->initHeader_16(HeaderKind::Mixed, StaticValue,
+                      kLegacyArray | kHasStrKeyTable);
+    ad->mutableStrKeyTable()->reset();
     assertx(RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
   }
 };

@@ -51,9 +51,9 @@ ALWAYS_INLINE ArrayData* staticEmptyMarkedVec() {
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDArray() {
-  void* vp1 = &s_theEmptyDArray;
-  void* vp2 = &s_theEmptyDictArray;
-  void* vp3 = &s_theEmptyMarkedDictArray;
+  void* vp1 = s_theEmptyDArrayPtr;
+  void* vp2 = s_theEmptyDictArrayPtr;
+  void* vp3 = s_theEmptyMarkedDictArrayPtr;
   return static_cast<ArrayData*>(
     RuntimeOption::EvalHackArrDVArrs ?
     RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
@@ -62,18 +62,18 @@ ALWAYS_INLINE ArrayData* staticEmptyDArray() {
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyMarkedDArray() {
-  void* vp1 = &s_theEmptyMarkedDArray;
-  void* vp2 = &s_theEmptyMarkedDictArray;
+  void* vp1 = s_theEmptyMarkedDArrayPtr;
+  void* vp2 = s_theEmptyMarkedDictArrayPtr;
   return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
-  void* vp = &s_theEmptyDictArray;
+  void* vp = s_theEmptyDictArrayPtr;
   return static_cast<ArrayData*>(vp);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyMarkedDictArray() {
-  void* vp = &s_theEmptyMarkedDictArray;
+  void* vp = s_theEmptyMarkedDictArrayPtr;
   return static_cast<ArrayData*>(vp);
 }
 

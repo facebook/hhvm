@@ -8,12 +8,12 @@
 use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
 use fnv::FnvHasher;
 use im_rc::OrdSet;
-use ocamlrep::{from, Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
+use ocamlrep::Value;
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use once_cell::sync::OnceCell;
 use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::convert::TryInto;
 use std::ffi::OsString;
 use std::hash::Hasher;
@@ -27,6 +27,9 @@ fn _static_assert() {
     //
     // OCaml only supports unboxed integers of WORD SIZE - 1 bits. We don't want to
     // be boxing dependency hashes, so we require a 64-bit word size.
+    //
+    // If this check fails, it would be impossible to correctly convert back and
+    // forth between OCaml's native integer type and Rust's u64.
     let _ = [(); 0 - (!(8 == std::mem::size_of::<usize>()) as usize)];
 }
 
@@ -407,43 +410,6 @@ pub fn combine_hashes(dep_hash: u64, naming_hash: i64) -> i64 {
     upper_31_bits | lower_31_bits
 }
 
-// A wrapper around isize, an OCaml int, representing a dependency, with
-// conversion support to and from `Dep`.
-#[derive(Debug, Copy, Clone)]
-struct OcamlDep(isize);
-
-impl From<Dep> for OcamlDep {
-    fn from(dep: Dep) -> OcamlDep {
-        let dep: u64 = dep.into();
-        // In Rust, a numeric cast between two integers of the same size
-        // is a no-op. We require a 64-bit word size.
-        OcamlDep(dep as isize)
-    }
-}
-
-impl Into<Dep> for OcamlDep {
-    fn into(self) -> Dep {
-        let dep: isize = self.0;
-        // In Rust, a numeric cast between two integers of the same size
-        // is a no-op. We require a 64-bit word size.
-        Dep::new(dep as u64)
-    }
-}
-
-impl FromOcamlRep for OcamlDep {
-    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        let x = from::expect_int(value)?;
-        Ok(OcamlDep(x))
-    }
-}
-
-impl ToOcamlRep for OcamlDep {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
-        let dep = self.0;
-        OpaqueValue::int(dep)
-    }
-}
-
 // Functions to load the dep graph
 ocaml_ffi! {
     fn hh_custom_dep_graph_register(depgraph_fn: OsString) {
@@ -539,67 +505,113 @@ ocaml_ffi! {
 
 // Functions to query the dependency graph
 ocaml_ffi! {
-    fn hh_custom_dep_graph_has_edge(dependent: OcamlDep, dependency: OcamlDep) -> bool {
+    fn hh_custom_dep_graph_has_edge(dependent: Dep, dependency: Dep) -> bool {
         UnsafeDepGraph::with(move |g| {
-            match g.hash_list_for(dependent.into()) {
-                Some(hash_list) => g.hash_list_contains(hash_list, dependency.into()),
+            match g.hash_list_for(dependency) {
+                Some(hash_list) => g.hash_list_contains(hash_list, dependent),
                 None => false,
             }
         })
     }
 
-    fn hh_custom_dep_graph_get_ideps_from_hash(dep: OcamlDep) -> Custom<DepSet> {
-        let set_opt = UnsafeDepGraph::with(move |g| {
-            let list = g.hash_list_for(dep.into())?;
-            let hashes: OrdSet<Dep> = g.hash_list_hashes(list).collect();
-            Some(hashes)
+    fn hh_custom_dep_graph_get_ideps_from_hash(dep: Dep) -> Custom<DepSet> {
+
+        let mut deps = OrdSet::new();
+        DepGraphDelta::with(|delta| {
+            if let Some(delta_deps) = delta.get(dep) {
+                deps.extend(delta_deps.iter().copied());
+            }
         });
-        Custom::from(set_opt.unwrap_or_else(OrdSet::new).into())
+        UnsafeDepGraph::with(|g| {
+            if let Some(hash_list) = g.hash_list_for(dep) {
+                deps.extend(g.hash_list_hashes(hash_list));
+            }
+        });
+
+        Custom::from(DepSet(deps))
     }
 
-    fn hh_custom_dep_graph_add_typing_deps(s: Custom<DepSet>) -> Custom<DepSet> {
-        UnsafeDepGraph::with(move |g| {
-            Custom::from(g.query_typing_deps_multi(&s).into())
-        })
-    }
-
-    fn hh_custom_dep_graph_add_extend_deps(s: Custom<DepSet>) -> Custom<DepSet> {
-        let mut visited = BTreeSet::new();
-        let s = s.clone();
-        let mut acc = s.clone();
-        let acc = UnsafeDepGraph::with(move |g| {
-            for dep in s {
-                if dep.is_class() {
-                    g.add_extend_deps(&mut acc, dep, &mut visited);
+    fn hh_custom_dep_graph_add_typing_deps(query: Custom<DepSet>) -> Custom<DepSet> {
+        let mut s = UnsafeDepGraph::with(|g| g.query_typing_deps_multi(&query));
+        DepGraphDelta::with(|delta| {
+            for dep in query.iter() {
+                if let Some(depies) = delta.get(*dep) {
+                    s.extend(depies.iter().copied());
                 }
             }
-            acc
         });
+        Custom::from(DepSet(s))
+    }
+
+    fn hh_custom_dep_graph_add_extend_deps(query: Custom<DepSet>) -> Custom<DepSet> {
+        let mut visited = BTreeSet::new();
+        let mut queue = VecDeque::new();
+        let mut acc = query.clone();
+        for source_class in query.iter() {
+            get_extend_deps_visit(&mut visited, &mut queue, *source_class, &mut acc);
+        }
+        while let Some(source_class) = queue.pop_front() {
+            get_extend_deps_visit(&mut visited, &mut queue, source_class, &mut acc);
+        }
         Custom::from(acc.into())
     }
 
     fn hh_custom_dep_graph_get_extend_deps(
         visited: Custom<VisitedSet>,
-        source_class: OcamlDep,
+        source_class: Dep,
         acc: Custom<DepSet>,
     ) -> Custom<DepSet> {
         let mut visited = visited.borrow_mut();
+        let mut queue = VecDeque::new();
         let mut acc = acc.clone();
-        let acc = UnsafeDepGraph::with(move |g| {
-            g.add_extend_deps(&mut acc, source_class.into(), &mut visited);
-            acc
-        });
+        get_extend_deps_visit(&mut visited, &mut queue, source_class, &mut acc);
+        while let Some(source_class) = queue.pop_front() {
+            get_extend_deps_visit(&mut visited, &mut queue, source_class, &mut acc);
+        }
         Custom::from(acc.into())
     }
 
     fn hh_custom_dep_graph_register_discovered_dep_edge(
-        dependent: OcamlDep,
-        dependency: OcamlDep,
+        dependent: Dep,
+        dependency: Dep,
     ) {
         DepGraphDelta::with_mut(move |s| {
-            s.insert(dependent.into(), dependency.into());
+            s.insert(dependent, dependency);
         });
     }
+}
+
+fn get_extend_deps_visit(
+    visited: &mut BTreeSet<Dep>,
+    queue: &mut VecDeque<Dep>,
+    source_class: Dep,
+    acc: &mut OrdSet<Dep>,
+) {
+    if !visited.insert(source_class) {
+        return;
+    }
+    let extends_hash = match source_class.class_to_extends() {
+        None => return,
+        Some(hash) => hash,
+    };
+    let mut handle_extends_dep = |dep: Dep| {
+        if dep.is_class() {
+            if acc.insert(dep).is_none() {
+                queue.push_back(dep);
+            }
+        }
+    };
+    DepGraphDelta::with(|delta| {
+        if let Some(delta_deps) = delta.get(extends_hash) {
+            delta_deps.iter().copied().for_each(&mut handle_extends_dep);
+        }
+    });
+    UnsafeDepGraph::with(|g| {
+        if let Some(hash_list) = g.hash_list_for(extends_hash) {
+            g.hash_list_hashes(hash_list)
+                .for_each(&mut handle_extends_dep);
+        }
+    })
 }
 
 // Auxiliary functions for Typing_deps.DepSet/Typing_deps.VisitedSet
@@ -612,15 +624,15 @@ ocaml_ffi! {
         Custom::from(OrdSet::new().into())
     }
 
-    fn hh_dep_set_singleton(dep: OcamlDep) -> Custom<DepSet> {
+    fn hh_dep_set_singleton(dep: Dep) -> Custom<DepSet> {
         let mut s = OrdSet::new();
-        s.insert(dep.into());
+        s.insert(dep);
         Custom::from(s.into())
     }
 
-    fn hh_dep_set_add(s: Custom<DepSet>, dep: OcamlDep) -> Custom<DepSet> {
+    fn hh_dep_set_add(s: Custom<DepSet>, dep: Dep) -> Custom<DepSet> {
         let mut s = s.clone();
-        s.insert(dep.into());
+        s.insert(dep);
         Custom::from(s.into())
     }
 
@@ -642,12 +654,12 @@ ocaml_ffi! {
         Custom::from(s1.difference(s2).into())
     }
 
-    fn hh_dep_set_mem(s: Custom<DepSet>, dep: OcamlDep) -> bool {
-        s.contains(&dep.into())
+    fn hh_dep_set_mem(s: Custom<DepSet>, dep: Dep) -> bool {
+        s.contains(&dep)
     }
 
-    fn hh_dep_set_elements(s: Custom<DepSet>) -> Vec<OcamlDep> {
-        s.iter().copied().map(OcamlDep::from).collect()
+    fn hh_dep_set_elements(s: Custom<DepSet>) -> Vec<Dep> {
+        s.iter().copied().map(Dep::from).collect()
     }
 
      fn hh_dep_set_cardinal(s: Custom<DepSet>) -> usize {

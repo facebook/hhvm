@@ -499,6 +499,7 @@ version = "0.0.0"
 dependencies = [
  "im-rc 14.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "memmap 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocamlrep 0.0.0",
 ]
 
 [[package]]

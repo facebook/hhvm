@@ -6,7 +6,6 @@
 use crate::byteutils;
 pub use crate::dep::Dep;
 
-use std::collections::{BTreeSet, VecDeque};
 use std::convert::TryInto;
 use std::ops::Deref;
 
@@ -143,41 +142,6 @@ impl<'bytes> DepGraph<'bytes> {
             indexer: self.indexer,
             current: 0,
             indices: hash_list.indices,
-        }
-    }
-
-    /// Transitively query the `extend` dependants of a given dependency.
-    ///
-    /// It is expected that the dependency argument is a class-dependency.
-    ///
-    /// The argument will always be in the result.
-    pub fn add_extend_deps(
-        &self,
-        acc: &mut OrdSet<Dep>,
-        query_hash: Dep,
-        visited: &mut BTreeSet<Dep>,
-    ) {
-        let mut queue: VecDeque<Dep> = VecDeque::new();
-
-        // Only class edges are added to the queue
-        if query_hash.is_class() {
-            queue.push_back(query_hash);
-        }
-
-        while let Some(query_hash) = queue.pop_front() {
-            visited.insert(query_hash);
-            acc.insert(query_hash);
-
-            if let Some(extends_hash) = query_hash.class_to_extends() {
-                if let Some(dept_hash_list) = self.hash_list_for(extends_hash) {
-                    for dept in self.hash_list_hashes(dept_hash_list) {
-                        // Only class edges are added to the queue
-                        if dept.is_class() && !visited.contains(&dept) {
-                            queue.push_back(dept);
-                        }
-                    }
-                }
-            }
         }
     }
 

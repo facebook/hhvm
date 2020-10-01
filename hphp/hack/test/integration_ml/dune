@@ -44,6 +44,7 @@
     test_failed_naming
     test_function_arg_rx_if_implements1
     test_function_arg_rx_if_implements2
+    test_funptr
     test_gconst_file
     test_get_dependent_classes
     test_getfundeps

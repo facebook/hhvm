@@ -34,14 +34,18 @@ inline bool shouldTestBespokeArrayLikes() {
 }
 
 namespace bespoke {
+
 // Hide Layout and its implementations to the rest of the codebase.
 struct Layout;
+struct LayoutFunctions;
+
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
 const ArrayData* maybeMakeLoggingArray(const ArrayData*);
 void setLoggingEnabled(bool);
 void exportProfiles();
 void waitOnExportProfiles();
+
 }
 
 /*
@@ -70,6 +74,7 @@ struct BespokeArray : ArrayData {
 
 protected:
   const bespoke::Layout* layoutRaw() const;
+  const bespoke::LayoutFunctions* vtable() const;
   void setLayoutRaw(const bespoke::Layout*);
 
 public:

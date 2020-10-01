@@ -49,7 +49,8 @@ static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
-LoggingLayout* s_layout = new LoggingLayout();
+auto const s_vtable = fromArray<LoggingArray>();
+Layout* s_layout = new Layout("LoggingLayout", &s_vtable);
 std::atomic<bool> g_emitLoggingArrays;
 
 // The bespoke kind for a vanilla kind.
@@ -138,7 +139,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-const LoggingLayout* LoggingLayout::layout() {
+const Layout* LoggingArray::layout() {
   return s_layout;
 }
 
@@ -222,80 +223,76 @@ void LoggingArray::setLegacyArrayInPlace(bool legacy) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-std::string LoggingLayout::describe() const {
-  return "Logging";
-}
-
-size_t LoggingLayout::heapSize(const ArrayData*) const {
+size_t LoggingArray::heapSize(const ArrayData*) {
   return sizeof(LoggingArray);
 }
 
-size_t LoggingLayout::align(const ArrayData*) const {
+size_t LoggingArray::align(const ArrayData*) {
   return alignof(LoggingArray);
 }
 
-void LoggingLayout::scan(const ArrayData* ad, type_scan::Scanner& scan) const {
+void LoggingArray::scan(const ArrayData* ad, type_scan::Scanner& scanner) {
   logEvent(ad, ArrayOp::Scan);
-  scan.scan(LoggingArray::asLogging(ad)->wrapped);
+  scanner.scan(asLogging(ad)->wrapped);
 }
 
-ArrayData* LoggingLayout::escalateToVanilla(
-    const ArrayData* ad, const char* reason) const {
+ArrayData* LoggingArray::escalateToVanilla(
+    const ArrayData* ad, const char* reason) {
   logEvent(ad, ArrayOp::EscalateToVanilla, makeStaticString(reason));
-  auto wrapped = LoggingArray::asLogging(ad)->wrapped;
+  auto const wrapped = asLogging(ad)->wrapped;
   wrapped->incRefCount();
   return wrapped;
 }
 
-void LoggingLayout::convertToUncounted(
-    ArrayData* ad, DataWalker::PointerMap* seen) const {
+void LoggingArray::convertToUncounted(
+    ArrayData* ad, DataWalker::PointerMap* seen) {
   logEvent(ad, ArrayOp::ConvertToUncounted);
-  auto lad = LoggingArray::asLogging(ad);
+  auto const lad = asLogging(ad);
   auto tv = make_array_like_tv(lad->wrapped);
   ConvertTvToUncounted(&tv, seen);
   lad->wrapped = val(tv).parr;
 }
 
-void LoggingLayout::releaseUncounted(ArrayData* ad) const {
+void LoggingArray::releaseUncounted(ArrayData* ad) {
   logEvent(ad, ArrayOp::ReleaseUncounted);
-  auto tv = make_array_like_tv(LoggingArray::asLogging(ad)->wrapped);
+  auto tv = make_array_like_tv(asLogging(ad)->wrapped);
   ReleaseUncountedTv(&tv);
 }
 
-void LoggingLayout::release(ArrayData* ad) const {
+void LoggingArray::release(ArrayData* ad) {
   logEvent(ad, ArrayOp::Release);
-  LoggingArray::asLogging(ad)->wrapped->decRefAndRelease();
+  asLogging(ad)->wrapped->decRefAndRelease();
   tl_heap->objFreeIndex(ad, kSizeIndex);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Accessors
 
-bool LoggingLayout::isVectorData(const ArrayData* ad) const {
+bool LoggingArray::isVectorData(const ArrayData* ad) {
   logEvent(ad, ArrayOp::IsVectorData);
-  return LoggingArray::asLogging(ad)->wrapped->isVectorData();
+  return asLogging(ad)->wrapped->isVectorData();
 }
-TypedValue LoggingLayout::getInt(const ArrayData* ad, int64_t k) const {
+TypedValue LoggingArray::getInt(const ArrayData* ad, int64_t k) {
   logEvent(ad, ArrayOp::GetInt, k);
-  return LoggingArray::asLogging(ad)->wrapped->get(k);
+  return asLogging(ad)->wrapped->get(k);
 }
-TypedValue LoggingLayout::getStr(const ArrayData* ad, const StringData* k) const {
+TypedValue LoggingArray::getStr(const ArrayData* ad, const StringData* k) {
   logEvent(ad, ArrayOp::GetStr, k);
-  return LoggingArray::asLogging(ad)->wrapped->get(k);
+  return asLogging(ad)->wrapped->get(k);
 }
-TypedValue LoggingLayout::getKey(const ArrayData* ad, ssize_t pos) const {
-  return LoggingArray::asLogging(ad)->wrapped->nvGetKey(pos);
+TypedValue LoggingArray::getKey(const ArrayData* ad, ssize_t pos) {
+  return asLogging(ad)->wrapped->nvGetKey(pos);
 }
-TypedValue LoggingLayout::getVal(const ArrayData* ad, ssize_t pos) const {
-  return LoggingArray::asLogging(ad)->wrapped->nvGetVal(pos);
+TypedValue LoggingArray::getVal(const ArrayData* ad, ssize_t pos) {
+  return asLogging(ad)->wrapped->nvGetVal(pos);
 }
-ssize_t LoggingLayout::getIntPos(const ArrayData* ad, int64_t k) const {
+ssize_t LoggingArray::getIntPos(const ArrayData* ad, int64_t k) {
   logEvent(ad, ArrayOp::GetIntPos, k);
-  return LoggingArray::asLogging(ad)->wrapped->nvGetIntPos(k);
+  return asLogging(ad)->wrapped->nvGetIntPos(k);
 }
-ssize_t LoggingLayout::getStrPos(const ArrayData* ad, const StringData* k) const {
+ssize_t LoggingArray::getStrPos(const ArrayData* ad, const StringData* k) {
   logEvent(ad, ArrayOp::GetStrPos, k);
-  return LoggingArray::asLogging(ad)->wrapped->nvGetStrPos(k);
+  return asLogging(ad)->wrapped->nvGetStrPos(k);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -314,7 +311,6 @@ ArrayData* escalate(LoggingArray* lad, ArrayData* result, EntryTypes ms) {
     lad->entryTypes = ms;
     return lad;
   }
-
   return LoggingArray::Make(result, lad->profile, ms);
 }
 
@@ -328,7 +324,7 @@ arr_lval escalate(LoggingArray* lad, arr_lval result, EntryTypes ms) {
 
 template <typename F>
 decltype(auto) mutate(ArrayData* ad, F&& f) {
-  auto lad = LoggingArray::asLogging(ad);
+  auto const lad = LoggingArray::asLogging(ad);
   auto const cow = lad->cowCheck();
   if (cow) lad->wrapped->incRefCount();
   SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
@@ -337,7 +333,7 @@ decltype(auto) mutate(ArrayData* ad, F&& f) {
 
 template <typename F>
 decltype(auto) mutate(ArrayData* ad, EntryTypes ms, F&& f) {
-  auto lad = LoggingArray::asLogging(ad);
+  auto const lad = LoggingArray::asLogging(ad);
   auto const cow = lad->cowCheck();
   if (cow) lad->wrapped->incRefCount();
   SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
@@ -345,89 +341,87 @@ decltype(auto) mutate(ArrayData* ad, EntryTypes ms, F&& f) {
 }
 }
 
-arr_lval LoggingLayout::lvalInt(ArrayData* ad, int64_t k) const {
+arr_lval LoggingArray::lvalInt(ArrayData* ad, int64_t k) {
   // Lvals cannot insert new keys, so the KeyTypes are unchanged, but outside
   // code can change the value types arbitrarily with the lval
-  auto const ms = LoggingArray::asLogging(ad)->entryTypes.pessimizeValueTypes();
+  auto const ms = asLogging(ad)->entryTypes.pessimizeValueTypes();
   auto const val = getInt(ad, k);
   logEvent(ad, ms, ArrayOp::LvalInt, k, val);
   return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
-arr_lval LoggingLayout::lvalStr(ArrayData* ad, StringData* k) const {
+arr_lval LoggingArray::lvalStr(ArrayData* ad, StringData* k) {
   // Lvals cannot insert new keys, so the KeyTypes are unchanged, but outside
   // code can change the value types arbitrarily with the lval
-  auto const ms = LoggingArray::asLogging(ad)->entryTypes.pessimizeValueTypes();
+  auto const ms = asLogging(ad)->entryTypes.pessimizeValueTypes();
   auto const val = getStr(ad, k);
   logEvent(ad, ms, ArrayOp::LvalStr, k, val);
   return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
-ArrayData* LoggingLayout::setInt(ArrayData* ad, int64_t k, TypedValue v) const {
+ArrayData* LoggingArray::setInt(ArrayData* ad, int64_t k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = LoggingArray::asLogging(ad)->
-    entryTypes.with(make_tv<KindOfInt64>(k), v);
+  auto const ms = asLogging(ad)->entryTypes.with(make_tv<KindOfInt64>(k), v);
   logEvent(ad, ms, ArrayOp::SetInt, k, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
-ArrayData* LoggingLayout::setStr(ArrayData* ad, StringData* k, TypedValue v) const {
+ArrayData* LoggingArray::setStr(ArrayData* ad, StringData* k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = LoggingArray::asLogging(ad)->
-    entryTypes.with(make_tv<KindOfString>(k), v);
+  auto const ms = asLogging(ad)->entryTypes.with(make_tv<KindOfString>(k), v);
   logEvent(ad, ms, ArrayOp::SetStr, k, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
-ArrayData* LoggingLayout::removeInt(ArrayData* ad, int64_t k) const {
+ArrayData* LoggingArray::removeInt(ArrayData* ad, int64_t k) {
   logEvent(ad, ArrayOp::RemoveInt, k);
   return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
 }
-ArrayData* LoggingLayout::removeStr(ArrayData* ad, const StringData* k) const {
+ArrayData* LoggingArray::removeStr(ArrayData* ad, const StringData* k) {
   logEvent(ad, ArrayOp::RemoveStr, k);
   return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
 }
 
-ssize_t LoggingLayout::iterBegin(const ArrayData* ad) const {
+ssize_t LoggingArray::iterBegin(const ArrayData* ad) {
   logEvent(ad, ArrayOp::IterBegin);
-  return LoggingArray::asLogging(ad)->wrapped->iter_begin();
+  return asLogging(ad)->wrapped->iter_begin();
 }
-ssize_t LoggingLayout::iterLast(const ArrayData* ad) const {
+ssize_t LoggingArray::iterLast(const ArrayData* ad) {
   logEvent(ad, ArrayOp::IterLast);
-  return LoggingArray::asLogging(ad)->wrapped->iter_last();
+  return asLogging(ad)->wrapped->iter_last();
 }
-ssize_t LoggingLayout::iterEnd(const ArrayData* ad) const {
+ssize_t LoggingArray::iterEnd(const ArrayData* ad) {
   logEvent(ad, ArrayOp::IterEnd);
-  return LoggingArray::asLogging(ad)->wrapped->iter_end();
+  return asLogging(ad)->wrapped->iter_end();
 }
-ssize_t LoggingLayout::iterAdvance(const ArrayData* ad, ssize_t prev) const {
+ssize_t LoggingArray::iterAdvance(const ArrayData* ad, ssize_t prev) {
   logEvent(ad, ArrayOp::IterAdvance);
-  return LoggingArray::asLogging(ad)->wrapped->iter_advance(prev);
+  return asLogging(ad)->wrapped->iter_advance(prev);
 }
-ssize_t LoggingLayout::iterRewind(const ArrayData* ad, ssize_t prev) const {
+ssize_t LoggingArray::iterRewind(const ArrayData* ad, ssize_t prev) {
   logEvent(ad, ArrayOp::IterRewind);
-  return LoggingArray::asLogging(ad)->wrapped->iter_rewind(prev);
+  return asLogging(ad)->wrapped->iter_rewind(prev);
 }
 
-ArrayData* LoggingLayout::append(ArrayData* ad, TypedValue v) const {
+ArrayData* LoggingArray::append(ArrayData* ad, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const lad = LoggingArray::asLogging(ad);
+  auto const lad = asLogging(ad);
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);
   logEvent(ad, ms, ArrayOp::Append, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->append(v); });
 }
-ArrayData* LoggingLayout::prepend(ArrayData* ad, TypedValue v) const {
+ArrayData* LoggingArray::prepend(ArrayData* ad, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const lad = LoggingArray::asLogging(ad);
+  auto const lad = asLogging(ad);
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);
   logEvent(ad, ms, ArrayOp::Prepend, v);
   return mutate(ad, ms, [&](ArrayData* w) { return w->prepend(v); });
 }
-ArrayData* LoggingLayout::pop(ArrayData* ad, Variant& ret) const {
+ArrayData* LoggingArray::pop(ArrayData* ad, Variant& ret) {
   logEvent(ad, ArrayOp::Pop);
   return mutate(ad, [&](ArrayData* w) { return w->pop(ret); });
 }
-ArrayData* LoggingLayout::dequeue(ArrayData* ad, Variant& ret) const {
+ArrayData* LoggingArray::dequeue(ArrayData* ad, Variant& ret) {
   logEvent(ad, ArrayOp::Dequeue);
   return mutate(ad, [&](ArrayData* w) { return w->dequeue(ret); });
 }
@@ -477,31 +471,32 @@ ArrayData* convert(ArrayData* ad, F&& f) {
 }
 }
 
-ArrayData* LoggingLayout::copy(const ArrayData* ad) const {
+ArrayData* LoggingArray::copy(const ArrayData* ad) {
   logEvent(ad, ArrayOp::Copy);
-  auto const lad = LoggingArray::asLogging(ad);
-  return LoggingArray::Make(lad->wrapped->copy(), lad->profile,
-                            lad->entryTypes);
+  auto const lad = asLogging(ad);
+  return Make(lad->wrapped->copy(), lad->profile, lad->entryTypes);
 }
-ArrayData* LoggingLayout::toVArray(ArrayData* ad, bool copy) const {
+ArrayData* LoggingArray::toVArray(ArrayData* ad, bool copy) {
   logEvent(ad, ArrayOp::ToVArray);
   return convert(ad, [=](ArrayData* w) { return w->toVArray(copy); });
 }
-ArrayData* LoggingLayout::toDArray(ArrayData* ad, bool copy) const {
+ArrayData* LoggingArray::toDArray(ArrayData* ad, bool copy) {
   logEvent(ad, ArrayOp::ToDArray);
   return convert(ad, [=](ArrayData* w) { return w->toDArray(copy); });
 }
-ArrayData* LoggingLayout::toVec(ArrayData* ad, bool copy) const {
+ArrayData* LoggingArray::toVec(ArrayData* ad, bool copy) {
   logEvent(ad, ArrayOp::ToVec);
   return convert(ad, [=](ArrayData* w) { return w->toVec(copy); });
 }
-ArrayData* LoggingLayout::toDict(ArrayData* ad, bool copy) const {
+ArrayData* LoggingArray::toDict(ArrayData* ad, bool copy) {
   logEvent(ad, ArrayOp::ToDict);
   return convert(ad, [=](ArrayData* w) { return w->toDict(copy); });
 }
-ArrayData* LoggingLayout::toKeyset(ArrayData* ad, bool copy) const {
+ArrayData* LoggingArray::toKeyset(ArrayData* ad, bool copy) {
   logEvent(ad, ArrayOp::ToKeyset);
   return convert(ad, [=](ArrayData* w) { return w->toKeyset(copy); });
 }
+
+//////////////////////////////////////////////////////////////////////////////
 
 }}

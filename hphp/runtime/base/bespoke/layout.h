@@ -24,8 +24,68 @@
 
 namespace HPHP { namespace bespoke {
 
+#define BESPOKE_LAYOUT_FUNCTIONS \
+  X(size_t, heapSize, const ArrayData* ad) \
+  X(size_t, align, const ArrayData* ad) \
+  X(void, scan, const ArrayData* ad, type_scan::Scanner& scanner) \
+  X(ArrayData*, escalateToVanilla, const ArrayData*, const char* reason) \
+  X(void, convertToUncounted, ArrayData*, DataWalker::PointerMap* seen) \
+  X(void, releaseUncounted, ArrayData*) \
+  X(void, release, ArrayData*) \
+  X(bool, isVectorData, const ArrayData*) \
+  X(TypedValue, getInt, const ArrayData*, int64_t) \
+  X(TypedValue, getStr, const ArrayData*, const StringData*) \
+  X(TypedValue, getKey, const ArrayData*, ssize_t pos) \
+  X(TypedValue, getVal, const ArrayData*, ssize_t pos) \
+  X(ssize_t, getIntPos, const ArrayData*, int64_t) \
+  X(ssize_t, getStrPos, const ArrayData*, const StringData*) \
+  X(arr_lval, lvalInt, ArrayData* ad, int64_t k) \
+  X(arr_lval, lvalStr, ArrayData* ad, StringData* k) \
+  X(ArrayData*, setInt, ArrayData*, int64_t k, TypedValue v) \
+  X(ArrayData*, setStr, ArrayData*, StringData* k, TypedValue v)\
+  X(ArrayData*, removeInt, ArrayData*, int64_t) \
+  X(ArrayData*, removeStr, ArrayData*, const StringData*) \
+  X(ssize_t, iterBegin, const ArrayData*) \
+  X(ssize_t, iterLast, const ArrayData*) \
+  X(ssize_t, iterEnd, const ArrayData*) \
+  X(ssize_t, iterAdvance, const ArrayData*, ssize_t) \
+  X(ssize_t, iterRewind, const ArrayData*, ssize_t) \
+  X(ArrayData*, append, ArrayData*, TypedValue v) \
+  X(ArrayData*, prepend, ArrayData*, TypedValue v) \
+  X(ArrayData*, pop, ArrayData*, Variant&) \
+  X(ArrayData*, dequeue, ArrayData*, Variant&) \
+  X(ArrayData*, copy, const ArrayData*) \
+  X(ArrayData*, toVArray, ArrayData*, bool copy) \
+  X(ArrayData*, toDArray, ArrayData*, bool copy) \
+  X(ArrayData*, toVec, ArrayData*, bool copy) \
+  X(ArrayData*, toDict, ArrayData*, bool copy) \
+  X(ArrayData*, toKeyset, ArrayData*, bool copy)
+
+struct LayoutFunctions {
+#define X(Return, Name, Args...) Return (*Name)(Args);
+  BESPOKE_LAYOUT_FUNCTIONS
+#undef X
+};
+
+template <typename Array>
+constexpr LayoutFunctions fromArray() {
+  LayoutFunctions result;
+#define X(Return, Name, Args...) result.Name = Array::Name;
+  BESPOKE_LAYOUT_FUNCTIONS
+#undef X
+  return result;
+}
+
+/*
+ * A bespoke::Layout can represent either both the concrete layout of a given
+ * BespokeArray or some abstract type that's a union of concrete layouts.
+ *
+ * vtable() will be nullptr for an abstract layout. BespokeArray only admits
+ * a concrete layout, but we may JIT code for abstract layouts.
+ */
 struct Layout {
-  Layout();
+  Layout(const std::string& description,
+         const LayoutFunctions* vtable = nullptr);
   virtual ~Layout() {}
 
   /* bespoke indexes are 15 bits wide--when we store them in m_extra of
@@ -34,58 +94,13 @@ struct Layout {
   static uint16_t constexpr kMaxIndex = (1 << 15) - 1;
 
   uint16_t index() const { return m_index; }
-
-  virtual std::string describe() const = 0;
-
-  virtual size_t heapSize(const ArrayData* ad) const = 0;
-  virtual size_t align(const ArrayData* ad) const = 0;
-  virtual void scan(const ArrayData* ad, type_scan::Scanner& scan) const = 0;
-  virtual ArrayData* escalateToVanilla(
-    const ArrayData*, const char* reason) const = 0;
-
-  // convertToUncounted only has to convert the array's values in place;
-  // the array has already been copied bitwise into an uncounted allocation.
-  // By the same token, releaseUncounted only has to free the array's values.
-  virtual void convertToUncounted(
-    ArrayData*, DataWalker::PointerMap* seen) const = 0;
-  virtual void releaseUncounted(ArrayData*) const = 0;
-  virtual void release(ArrayData*) const = 0;
-
-  virtual bool isVectorData(const ArrayData*) const = 0;
-  virtual TypedValue getInt(const ArrayData*, int64_t) const = 0;
-  virtual TypedValue getStr(const ArrayData*, const StringData*) const = 0;
-  virtual TypedValue getKey(const ArrayData*, ssize_t pos) const = 0;
-  virtual TypedValue getVal(const ArrayData*, ssize_t pos) const = 0;
-  virtual ssize_t getIntPos(const ArrayData*, int64_t) const = 0;
-  virtual ssize_t getStrPos(const ArrayData*, const StringData*) const = 0;
-
-  virtual arr_lval lvalInt(ArrayData* ad, int64_t k) const = 0;
-  virtual arr_lval lvalStr(ArrayData* ad, StringData* k) const = 0;
-  virtual ArrayData* setInt(ArrayData*, int64_t k, TypedValue v) const = 0;
-  virtual ArrayData* setStr(ArrayData*, StringData* k, TypedValue v) const = 0;
-  virtual ArrayData* removeInt(ArrayData*, int64_t) const = 0;
-  virtual ArrayData* removeStr(ArrayData*, const StringData*) const = 0;
-
-  virtual ssize_t iterBegin(const ArrayData*) const = 0;
-  virtual ssize_t iterLast(const ArrayData*) const = 0;
-  virtual ssize_t iterEnd(const ArrayData*) const = 0;
-  virtual ssize_t iterAdvance(const ArrayData*, ssize_t) const = 0;
-  virtual ssize_t iterRewind(const ArrayData*, ssize_t) const = 0;
-
-  virtual ArrayData* append(ArrayData*, TypedValue v) const = 0;
-  virtual ArrayData* prepend(ArrayData*, TypedValue v)  const = 0;
-  virtual ArrayData* pop(ArrayData*, Variant&)  const = 0;
-  virtual ArrayData* dequeue(ArrayData*, Variant&)  const = 0;
-
-  virtual ArrayData* copy(const ArrayData*) const = 0;
-  virtual ArrayData* toVArray(ArrayData*, bool copy) const = 0;
-  virtual ArrayData* toDArray(ArrayData*, bool copy) const = 0;
-  virtual ArrayData* toVec(ArrayData*, bool copy) const = 0;
-  virtual ArrayData* toDict(ArrayData*, bool copy) const = 0;
-  virtual ArrayData* toKeyset(ArrayData*, bool copy) const = 0;
+  const std::string& describe() const { return m_description; }
+  const LayoutFunctions* vtable() const { return m_vtable; }
 
 private:
   uint16_t m_index;
+  std::string m_description;
+  const LayoutFunctions* m_vtable;
 };
 
 const Layout* layoutForIndex(uint16_t index);

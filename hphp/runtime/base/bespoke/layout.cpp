@@ -25,7 +25,9 @@ namespace {
 std::array<Layout*, Layout::kMaxIndex + 1> s_layoutTable;
 }
 
-Layout::Layout() {
+Layout::Layout(const std::string& description,
+               const LayoutFunctions* vtable)
+    : m_description(description), m_vtable(vtable) {
   static std::atomic<uint64_t> s_layoutTableIndex;
   m_index = s_layoutTableIndex++;
   always_assert(m_index < kMaxIndex);

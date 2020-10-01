@@ -35,6 +35,7 @@ struct LoggingArray : BespokeArray {
                             EntryTypes ms);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
   static void FreeStatic(LoggingArray* lad);
+  static const Layout* layout();
 
   // Update m_kind and m_size after doing a mutation on the wrapped array.
   void updateKindAndSize();
@@ -47,58 +48,13 @@ struct LoggingArray : BespokeArray {
 
   bool checkInvariants() const;
 
+#define X(Return, Name, Args...) static Return Name(Args);
+  BESPOKE_LAYOUT_FUNCTIONS
+#undef X
+
   ArrayData* wrapped;
   LoggingProfile* profile;
   EntryTypes entryTypes;
-};
-
-struct LoggingLayout : public Layout {
-  std::string describe() const final;
-  static const LoggingLayout* layout();
-
-  size_t heapSize(const ArrayData* ad) const final;
-  size_t align(const ArrayData* ad) const final;
-  void scan(const ArrayData* ad, type_scan::Scanner& scan) const final;
-  ArrayData* escalateToVanilla(
-    const ArrayData*, const char* reason) const final;
-
-  void convertToUncounted(
-    ArrayData*, DataWalker::PointerMap* seen) const final;
-  void releaseUncounted(ArrayData*) const final;
-  void release(ArrayData*) const final;
-
-  bool isVectorData(const ArrayData*) const final;
-  TypedValue getInt(const ArrayData*, int64_t) const final;
-  TypedValue getStr(const ArrayData*, const StringData*) const final;
-  TypedValue getKey(const ArrayData*, ssize_t pos) const final;
-  TypedValue getVal(const ArrayData*, ssize_t pos) const final;
-  ssize_t getIntPos(const ArrayData*, int64_t) const final;
-  ssize_t getStrPos(const ArrayData*, const StringData*) const final;
-
-  arr_lval lvalInt(ArrayData*, int64_t) const final;
-  arr_lval lvalStr(ArrayData*, StringData*) const final;
-  ArrayData* setInt(ArrayData*, int64_t k, TypedValue v) const final;
-  ArrayData* setStr(ArrayData*, StringData* k, TypedValue v) const final;
-  ArrayData* removeInt(ArrayData*, int64_t) const final;
-  ArrayData* removeStr(ArrayData*, const StringData*) const final;
-
-  ssize_t iterBegin(const ArrayData*) const final;
-  ssize_t iterLast(const ArrayData*) const final;
-  ssize_t iterEnd(const ArrayData*) const final;
-  ssize_t iterAdvance(const ArrayData*, ssize_t) const final;
-  ssize_t iterRewind(const ArrayData*, ssize_t) const final;
-
-  ArrayData* append(ArrayData*, TypedValue v) const final;
-  ArrayData* prepend(ArrayData*, TypedValue v) const final;
-  ArrayData* pop(ArrayData*, Variant&) const final;
-  ArrayData* dequeue(ArrayData*, Variant&) const final;
-
-  ArrayData* copy(const ArrayData*) const final;
-  ArrayData* toVArray(ArrayData*, bool copy) const final;
-  ArrayData* toDArray(ArrayData*, bool copy) const final;
-  ArrayData* toVec(ArrayData*, bool copy) const final;
-  ArrayData* toDict(ArrayData*, bool copy) const final;
-  ArrayData* toKeyset(ArrayData*, bool copy) const final;
 };
 
 }}

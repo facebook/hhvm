@@ -248,20 +248,11 @@ ArrayData* BespokeArray::Copy(const ArrayData* ad) {
 ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
   always_assert(false);
 }
-ArrayData* BespokeArray::ToVArray(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->toVArray(ad, copy);
+ArrayData* BespokeArray::ToDVArray(ArrayData* ad, bool copy) {
+  return asBespoke(ad)->vtable()->toDVArray(ad, copy);
 }
-ArrayData* BespokeArray::ToDArray(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->toDArray(ad, copy);
-}
-ArrayData* BespokeArray::ToVec(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->toVec(ad, copy);
-}
-ArrayData* BespokeArray::ToDict(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->toDict(ad, copy);
-}
-ArrayData* BespokeArray::ToKeyset(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->vtable()->toKeyset(ad, copy);
+ArrayData* BespokeArray::ToHackArr(ArrayData* ad, bool copy) {
+  return asBespoke(ad)->vtable()->toHackArr(ad, copy);
 }
 
 // flags

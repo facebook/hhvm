@@ -55,11 +55,8 @@ namespace HPHP { namespace bespoke {
   X(ArrayData*, pop, ArrayData*, Variant&) \
   X(ArrayData*, dequeue, ArrayData*, Variant&) \
   X(ArrayData*, copy, const ArrayData*) \
-  X(ArrayData*, toVArray, ArrayData*, bool copy) \
-  X(ArrayData*, toDArray, ArrayData*, bool copy) \
-  X(ArrayData*, toVec, ArrayData*, bool copy) \
-  X(ArrayData*, toDict, ArrayData*, bool copy) \
-  X(ArrayData*, toKeyset, ArrayData*, bool copy)
+  X(ArrayData*, toDVArray, ArrayData*, bool copy) \
+  X(ArrayData*, toHackArr, ArrayData*, bool copy)
 
 struct LayoutFunctions {
 #define X(Return, Name, Args...) Return (*Name)(Args);

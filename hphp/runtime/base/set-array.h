@@ -405,12 +405,9 @@ public:
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
   static ArrayData* Prepend(ArrayData*, TypedValue);
+  static ArrayData* ToDVArray(ArrayData*, bool copy);
+  static ArrayData* ToHackArr(ArrayData*, bool copy);
   static void OnSetEvalScalar(ArrayData*);
-  static constexpr auto ToDict = &ArrayCommon::ToDict;
-  static constexpr auto ToVec = &ArrayCommon::ToVec;
-  static ArrayData* ToKeyset(ArrayData*, bool);
-  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
-  static ArrayData* ToDArray(ArrayData*, bool);
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
   static bool Same(const ArrayData*, const ArrayData*);

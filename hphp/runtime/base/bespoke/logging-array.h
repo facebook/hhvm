@@ -37,8 +37,9 @@ struct LoggingArray : BespokeArray {
   static void FreeStatic(LoggingArray* lad);
   static const Layout* layout();
 
-  // Update m_kind and m_size after doing a mutation on the wrapped array.
-  void updateKindAndSize();
+  // Update synced fields after doing a mutation on the wrapped array.
+  void updateKindAndLegacy();
+  void updateSize();
 
   // Record that this array reached a given profiling tracelet.
   void logReachEvent(TransID transId, uint32_t guardIdx);

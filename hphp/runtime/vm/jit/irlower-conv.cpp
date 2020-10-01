@@ -274,16 +274,6 @@ IMPL_OPCODE_CALL(ConvTVToDbl);
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToVArray
 
-static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isPHPArrayType());
-  auto a = adIn->toVArray(adIn->cowCheck());
-  assertx(a->isPackedKind());
-  assertx(a->isVArray());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
 static ArrayData* convObjToVArrImpl(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto a = castObjToVArray(obj);
@@ -316,48 +306,6 @@ void cgConvObjToVArr(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToDArray
-
-static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isPHPArrayType());
-  auto a = adIn->toDArray(adIn->cowCheck());
-  assertx(a->isMixedKind());
-  assertx(a->isDArray());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isVecKind());
-  auto a = PackedArray::ToDArray(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  assertx(a->isMixedKind());
-  assertx(a->isDArray());
-  decRefArr(adIn);
-  return a;
-}
-
-static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isDictKind());
-  auto a = MixedArray::ToDArray(adIn, adIn->cowCheck());
-  assertx(a->isMixedKind());
-  assertx(a->isDArray());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-static ArrayData* convKeysetToDArrImpl(ArrayData* adIn) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isKeysetKind());
-  auto a = SetArray::ToDArray(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  assertx(a->isMixedKind());
-  assertx(a->isDArray());
-  decRefArr(adIn);
-  return a;
-}
 
 static ArrayData* convObjToDArrImpl(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);

@@ -185,10 +185,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     }
     return ad;
   }
-  auto ret = ad->isVecKind()
-    // TODO(T39123862)
-    ? PackedArray::ToDict(ad, ad->cowCheck())
-    : ToMixedCopy(ad);
+  auto const ret = ToMixedCopy(ad);
   assertx(ret->empty() || ret->hasExactlyOneRef());
   return ret;
 }

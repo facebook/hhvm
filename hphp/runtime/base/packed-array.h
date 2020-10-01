@@ -98,12 +98,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
-  static ArrayData* ToVArray(ArrayData*, bool);
-  static ArrayData* ToDArray(ArrayData*, bool);
-  static ArrayData* ToDict(ArrayData*, bool);
-  static ArrayData* ToVec(ArrayData*, bool);
+  static ArrayData* ToDVArray(ArrayData*, bool copy);
+  static ArrayData* ToHackArr(ArrayData*, bool copy);
   static void OnSetEvalScalar(ArrayData*);
-  static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
   //////////////////////////////////////////////////////////////////////
 

@@ -200,9 +200,16 @@ const LoggingArray* LoggingArray::asLogging(const ArrayData* ad) {
   return asLogging(const_cast<ArrayData*>(ad));
 }
 
-void LoggingArray::updateKindAndSize() {
+void LoggingArray::updateKindAndLegacy() {
+  assertx(hasExactlyOneRef());
+  auto const legacy = wrapped->isLegacyArray();
+  m_kind = getBespokeKind(wrapped->kind());
+  m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
+  assertx(checkInvariants());
+}
+
+void LoggingArray::updateSize() {
   if (hasExactlyOneRef()) {
-    m_kind = getBespokeKind(wrapped->kind());
     m_size = wrapped->size();
   }
   assertx(checkInvariants());
@@ -300,13 +307,13 @@ ssize_t LoggingArray::getStrPos(const ArrayData* ad, const StringData* k) {
 
 namespace {
 ArrayData* escalate(LoggingArray* lad, ArrayData* result) {
-  lad->updateKindAndSize();
+  lad->updateSize();
   if (result == lad->wrapped) return lad;
   return LoggingArray::Make(result, lad->profile, lad->entryTypes);
 }
 
 ArrayData* escalate(LoggingArray* lad, ArrayData* result, EntryTypes ms) {
-  lad->updateKindAndSize();
+  lad->updateSize();
   if (result == lad->wrapped) {
     lad->entryTypes = ms;
     return lad;
@@ -429,45 +436,12 @@ ArrayData* LoggingArray::dequeue(ArrayData* ad, Variant& ret) {
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
-template <typename F>
-ArrayData* convert(ArrayData* ad, F&& f) {
-  auto const lad = LoggingArray::asLogging(ad);
-  auto const wrapped = lad->wrapped;
-  auto const result = f(wrapped);
-  lad->updateKindAndSize();
-
-  // Reuse existing profile for in-place conversions.
-  if (result == wrapped) return lad;
-
-  // Reuse existing profile for conversions that don't change array layout.
-  if ((wrapped->hasVanillaMixedLayout() && result->hasVanillaMixedLayout()) ||
-      (wrapped->hasVanillaPackedLayout() && result->hasVanillaPackedLayout()) ||
-      (wrapped->isKeysetKind() && result->isKeysetKind())) {
+ArrayData* convert(LoggingArray* lad, ArrayData* result) {
+  if (result != lad->wrapped) {
     return LoggingArray::Make(result, lad->profile, lad->entryTypes);
   }
-
-  // If the layout has changed, make a fresh profile at the new creation site.
-  auto const sk = getSrcKey();
-  if (!sk.valid()) {
-    FTRACE(5, "VMRegAnchor failed for convert operation.\n");
-    return result;
-  }
-
-  auto const profile = getLoggingProfile(sk, result);
-  if (!profile) return result;
-
-  // We expect 1 / SampleRate LoggingArrays to make it here. Bump sampleCount
-  // for the cast site accordingly. Since we sample the second array created
-  // at each site, we start the count here at 2, not SampleRate.
-  //
-  // TODO(kshaunak): Treat this site like a constructor and log pseudo-ops.
-  uint64_t expected = 0;
-  if (!profile->sampleCount.compare_exchange_strong(expected, 2)) {
-    profile->sampleCount += RO::EvalEmitLoggingArraySampleRate;
-  }
-  profile->loggingArraysEmitted++;
-
-  return LoggingArray::Make(result, profile, lad->entryTypes);
+  lad->updateKindAndLegacy();
+  return lad;
 }
 }
 
@@ -476,25 +450,15 @@ ArrayData* LoggingArray::copy(const ArrayData* ad) {
   auto const lad = asLogging(ad);
   return Make(lad->wrapped->copy(), lad->profile, lad->entryTypes);
 }
-ArrayData* LoggingArray::toVArray(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToVArray);
-  return convert(ad, [=](ArrayData* w) { return w->toVArray(copy); });
+ArrayData* LoggingArray::toDVArray(ArrayData* ad, bool copy) {
+  logEvent(ad, ArrayOp::ToDVArray);
+  auto const lad = asLogging(ad);
+  return convert(lad, lad->wrapped->toDVArray(copy));
 }
-ArrayData* LoggingArray::toDArray(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToDArray);
-  return convert(ad, [=](ArrayData* w) { return w->toDArray(copy); });
-}
-ArrayData* LoggingArray::toVec(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToVec);
-  return convert(ad, [=](ArrayData* w) { return w->toVec(copy); });
-}
-ArrayData* LoggingArray::toDict(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToDict);
-  return convert(ad, [=](ArrayData* w) { return w->toDict(copy); });
-}
-ArrayData* LoggingArray::toKeyset(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToKeyset);
-  return convert(ad, [=](ArrayData* w) { return w->toKeyset(copy); });
+ArrayData* LoggingArray::toHackArr(ArrayData* ad, bool copy) {
+  logEvent(ad, ArrayOp::ToHackArr);
+  auto const lad = asLogging(ad);
+  return convert(lad, lad->wrapped->toHackArr(copy));
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -330,11 +330,8 @@ public:
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
-  static ArrayData* ToDict(ArrayData*, bool);
-  static constexpr auto ToVec = &ArrayCommon::ToVec;
-  static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
-  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
-  static ArrayData* ToDArray(ArrayData*, bool);
+  static ArrayData* ToDVArray(ArrayData*, bool copy);
+  static ArrayData* ToHackArr(ArrayData*, bool copy);
 
   static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);

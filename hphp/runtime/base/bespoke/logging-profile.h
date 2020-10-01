@@ -65,11 +65,8 @@ struct EntryTypes;
   X(Pop,                false) \
   X(Dequeue,            false) \
   X(Copy,               true)  \
-  X(ToVArray,           true)  \
-  X(ToDArray,           true)  \
-  X(ToVec,              true)  \
-  X(ToDict,             true)  \
-  X(ToKeyset,           true)
+  X(ToDVArray,          true)  \
+  X(ToHackArr,          true)
 
 enum class ArrayOp : uint8_t {
 #define X(name, read) name,

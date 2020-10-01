@@ -66,24 +66,12 @@ inline ArrayData* ArrayData::toPHPArray(bool copy) {
   return toDArray(copy);
 }
 
-inline ArrayData* ArrayData::toDict(bool copy) {
-  return g_array_funcs.toDict[kind()](this, copy);
+inline ArrayData* ArrayData::toDVArray(bool copy) {
+  return g_array_funcs.toDVArray[kind()](this, copy);
 }
 
-inline ArrayData* ArrayData::toVec(bool copy) {
-  return g_array_funcs.toVec[kind()](this, copy);
-}
-
-inline ArrayData* ArrayData::toKeyset(bool copy) {
-  return g_array_funcs.toKeyset[kind()](this, copy);
-}
-
-inline ArrayData* ArrayData::toVArray(bool copy) {
-  return g_array_funcs.toVArray[kind()](this, copy);
-}
-
-inline ArrayData* ArrayData::toDArray(bool copy) {
-  return g_array_funcs.toDArray[kind()](this, copy);
+inline ArrayData* ArrayData::toHackArr(bool copy) {
+  return g_array_funcs.toHackArr[kind()](this, copy);
 }
 
 inline bool ArrayData::isVectorData() const {

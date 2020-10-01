@@ -1403,66 +1403,25 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, TypedValue v) {
   return a;
 }
 
-ArrayData* MixedArray::ToDArrayImpl(const MixedArray* ad) {
-  auto const size = ad->size();
-  auto const elms = ad->data();
-  auto const used = ad->m_used;
-
-  auto out = asMixed(MakeReserveDArray(size));
-  for (uint32_t i = 0; i < used; ++i) {
-    auto const& e = elms[i];
-    if (e.isTombstone()) continue;
-    if (e.hasIntKey()) {
-      out->update(e.ikey, e.data);
-    } else {
-      out->update(e.skey, e.data);
-    }
-  }
-
-  assertx(out->isPHPArrayType());
-  assertx(out->checkInvariants());
-  assertx(out->hasExactlyOneRef());
-  return out;
+ArrayData* MixedArray::ToDVArray(ArrayData* adIn, bool copy) {
+  assertx(MixedArray::asMixed(adIn));
+  if (adIn->empty()) return ArrayData::CreateDArray();
+  auto const ad = copy ? Copy(adIn) : adIn;
+  ad->m_kind = HeaderKind::Mixed;
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
+  assertx(MixedArray::asMixed(ad));
+  return ad;
 }
 
-ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
-  if (in->isDArray()) return in;
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    if (RuntimeOption::EvalHackArrDVArrMark && !in->isLegacyArray()) {
-      if (copy) in = CopyMixed(*asMixed(in), AllocMode::Request);
-      in->setLegacyArray(true);
-    }
-    return in;
-  }
-
-  if (in->empty()) return ArrayData::CreateDArray();
-
-  auto const a = asMixed(in);
-  if (copy) return ToDArrayImpl(a);
-
-  a->m_kind = HeaderKind::Mixed;
-  if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
-  assertx(a->checkInvariants());
-  return a;
-}
-
-ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
-  assertx(asMixed(ad)->checkInvariants());
-  if (ad->isDictKind()) return ad;
-
-  if (ad->isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
-    raise_hack_arr_compat_cast_marked_array_notice(ad);
-  }
-  auto a = asMixed(ad);
-  if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
-
-  if (copy) a = CopyMixed(*a, AllocMode::Request);
-
-  if (RO::EvalArrayProvenance) arrprov::clearTag(a);
-  a->m_kind = HeaderKind::Dict;
-  a->setLegacyArray(false);
-  assertx(a->checkInvariants());
-  return a;
+ArrayData* MixedArray::ToHackArr(ArrayData* adIn, bool copy) {
+  assertx(MixedArray::asMixed(adIn));
+  if (adIn->empty()) return ArrayData::CreateDict();
+  auto const ad = copy ? Copy(adIn) : adIn;
+  ad->m_kind = HeaderKind::Dict;
+  ad->setLegacyArray(false);
+  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
+  assertx(MixedArray::asMixed(ad));
+  return ad;
 }
 
 ArrayData* MixedArray::Renumber(ArrayData* adIn) {

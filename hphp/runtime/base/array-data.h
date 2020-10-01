@@ -46,6 +46,7 @@ struct VariableSerializer;
 struct Variant;
 
 namespace arrprov { struct Tag; }
+namespace bespoke { struct LoggingArray; }
 
 /*
  * arr_lval is a tv_lval augmented with an ArrayData*, and is used to return an
@@ -128,6 +129,26 @@ protected:
    * We can't `= delete` this because we subclass ArrayData.
    */
   ~ArrayData() { always_assert(false); }
+
+  /*
+   * Part of the implementation of conversion methods.
+   *
+   * If you call ToDVArray on a {vec, dict}, you'll get a {varray, darray}.
+   * We only ever call it on vecs and dicts. Similarly, toDVArr converts in
+   * the opposite direction, and we only ever call it on dvarrays.
+   *
+   * It's important that we implement these conversions efficiently, but these
+   * casts also come with critical logging behavior. As a result, we extract
+   * the (per-layout) conversion helper for performance, and then add logging
+   * and HAM behavior in the generic helpers.
+   *
+   * All other conversions can be implemented generically with no performance
+   * penalty (since they require a change of layout).
+   */
+  ArrayData* toDVArrayWithLogging(bool copy);
+  ArrayData* toHackArrWithLogging(bool copy);
+  ArrayData* toDVArray(bool copy);
+  ArrayData* toHackArr(bool copy);
 
 public:
   /*
@@ -643,6 +664,7 @@ protected:
   friend struct c_Map;
   friend struct c_ImmMap;
   friend struct arrprov::Tag;
+  friend struct bespoke::LoggingArray;
 
   uint32_t m_size;
   /*
@@ -781,12 +803,9 @@ struct ArrayFunctions {
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
   ArrayData* (*prepend[NK])(ArrayData*, TypedValue v);
+  ArrayData* (*toDVArray[NK])(ArrayData*, bool copy);
+  ArrayData* (*toHackArr[NK])(ArrayData*, bool copy);
   void (*onSetEvalScalar[NK])(ArrayData*);
-  ArrayData* (*toDict[NK])(ArrayData*, bool);
-  ArrayData* (*toVec[NK])(ArrayData*, bool);
-  ArrayData* (*toKeyset[NK])(ArrayData*, bool);
-  ArrayData* (*toVArray[NK])(ArrayData*, bool);
-  ArrayData* (*toDArray[NK])(ArrayData*, bool);
 };
 
 extern const ArrayFunctions g_array_funcs;

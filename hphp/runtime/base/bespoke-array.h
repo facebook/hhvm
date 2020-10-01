@@ -157,11 +157,8 @@ public:
   // copies and conversions
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData* ad);
-  static ArrayData* ToVArray(ArrayData* ad, bool copy);
-  static ArrayData* ToDArray(ArrayData* ad, bool copy);
-  static ArrayData* ToVec(ArrayData* ad, bool copy);
-  static ArrayData* ToDict(ArrayData* ad, bool copy);
-  static ArrayData* ToKeyset(ArrayData* ad, bool copy);
+  static ArrayData* ToDVArray(ArrayData* ad, bool copy);
+  static ArrayData* ToHackArr(ArrayData* ad, bool copy);
 
   // flags
   static void SetLegacyArrayInPlace(ArrayData* ad, bool legacy);

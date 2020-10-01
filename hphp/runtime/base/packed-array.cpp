@@ -815,76 +815,23 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
   return ad;
 }
 
-ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
+ArrayData* PackedArray::ToDVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  if (adIn->isVArray()) return adIn;
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    if (RuntimeOption::EvalHackArrDVArrMark && !adIn->isLegacyArray()) {
-      auto const ad = copy ? Copy(adIn) : adIn;
-      ad->setLegacyArray(true);
-      return ad;
-    }
-    return adIn;
-  }
-
   if (adIn->empty()) return ArrayData::CreateVArray();
   auto const ad = copy ? Copy(adIn) : adIn;
-
   ad->m_kind = HeaderKind::Packed;
   if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
   assertx(checkInvariants(ad));
   return ad;
 }
 
-ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
+ArrayData* PackedArray::ToHackArr(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  auto const size = adIn->size();
-  if (size == 0) return ArrayData::CreateDArray();
-  DArrayInit init{size};
-  for (int64_t i = 0; i < size; ++i) init.add(i, GetPosVal(adIn, i));
-  return init.create();
-}
-
-ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
-  assertx(checkInvariants(ad));
-  if (ad->empty()) return ArrayData::CreateDict();
-  auto const mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
-  if (RO::EvalArrayProvenance) arrprov::clearTag(mixed);
-  mixed->m_kind = HeaderKind::Dict;
-  assertx(mixed->checkInvariants());
-  return mixed;
-}
-
-ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
-  assertx(checkInvariants(adIn));
-  if (adIn->isVecKind()) return adIn;
-
-  if (adIn->isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
-    raise_hack_arr_compat_cast_marked_array_notice(adIn);
-  }
   if (adIn->empty()) return ArrayData::CreateVec();
-
-  ArrayData* ad;
-  if (copy) {
-    // CopyPackedHelper will copy the header and m_size. All we have to do
-    // afterwards is fix the kind and refcount in the copy; it's easiest to do
-    // that by reinitializing the whole header.
-    ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeClass(adIn)));
-    CopyPackedHelper(adIn, ad);
-    auto const aux = packSizeIndexAndAuxBits(sizeClass(adIn), 0);
-    if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
-    ad->initHeader_16(HeaderKind::Vec, OneReference, aux);
-  } else {
-    if (RO::EvalArrayProvenance) arrprov::clearTag(adIn);
-    adIn->m_kind = HeaderKind::Vec;
-    adIn->setLegacyArray(false);
-    ad = adIn;
-  }
-
-  assertx(ad->isVecKind());
-  assertx(capacity(ad) == capacity(adIn));
-  assertx(ad->m_size == adIn->m_size);
-  assertx(ad->hasExactlyOneRef());
+  auto const ad = copy ? Copy(adIn) : adIn;
+  ad->m_kind = HeaderKind::Vec;
+  ad->setLegacyArray(false);
+  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   assertx(checkInvariants(ad));
   return ad;
 }

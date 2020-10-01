@@ -582,64 +582,28 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Prepend)
 
   /*
+   * ArrayData* ToDVArray(ArrayData*, bool copy)
+   *
+   *   Convert the given {vec, dict} to a {varray, darray}. If copy is false,
+   *   this conversion may be done in place.
+   */
+  DISPATCH(ToDVArray)
+
+  /*
+   * ArrayData* ToHackArr(ArrayData*, bool copy)
+   *
+   *   Convert the given {varray, darray} to a {vec, dict}. If copy is false,
+   *   this conversion may be done in place.
+   */
+  DISPATCH(ToHackArr)
+
+  /*
    * void OnSetEvalScalar(ArrayData*)
    *
    *   Go through an array and call Variant::setEvalScalar on each
    *   value, and make all string keys into static strings.
    */
   DISPATCH(OnSetEvalScalar)
-
-   /*
-   * ArrayData* ToDict(ArrayData*, bool)
-   *
-   *   Convert to a dict. If already a dict, it will be returned unchange
-   *   (without copying). If copy is false, it may be converted in place. If the
-   *   input array contains references, an exception will be thrown.
-   */
-  DISPATCH(ToDict)
-
-  /*
-   * ArrayData* ToVec(ArrayData*, bool)
-   *
-   *   Convert to a vec. Keys will be discarded and the vec will contain the
-   *   values in iteration order. If already a vec, it will be returned
-   *   unchanged (without copying). If copy is false, it may be converted in
-   *   place. If the input array contains references, an exception will be
-   *   thrown.
-   */
-  DISPATCH(ToVec)
-
-   /*
-   * ArrayData* ToKeyset(ArrayData*, bool)
-   *
-   *   Convert to a keyset. Keys will be discarded and the keyset will contain
-   *   just the values in iteration order. If already a keyset, it will be
-   *   returned unchange (without copying). If copy is false, it may be
-   *   converted in place. If the input array contains references, or if the
-   *   input contains values that are neither integers or strings, an exception
-   *   will be thrown.
-   */
-  DISPATCH(ToKeyset)
-
-  /*
-   * ArrayData* ToVArray(ArrayData*, bool)
-   *
-   * Convert to a varray (vector-like array). The array will be converted to a
-   * packed array, discarding keys. If already a packed array, it will be
-   * returned with the elements unchanged, but with the DVArray flag updated. If
-   * copy is false, it may be converted in place.
-   */
-  DISPATCH(ToVArray)
-
-  /*
-   * ArrayData* ToDArray(ArrayData*, bool)
-   *
-   * Convert to a darray (dict-like array). The array will be converted to a
-   * mixed array. If already a mixed array, it will be returned with the
-   * elements unchanged, but with the DVArray flag updated. If copy is false, it
-   * may be converted in place.
-   */
-  DISPATCH(ToDArray)
 };
 
 #undef DISPATCH
@@ -1129,24 +1093,82 @@ bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
 
 void ArrayData::setLegacyArray(bool legacy) {
   assertx(hasExactlyOneRef());
-  assertx(!legacy
-          || isDictType()
-          || isVecType()
-          || (!RO::EvalHackArrDVArrs && isDVArray()));
-  /* TODO(jgriego) we should be asserting that the
-   * mark-ee should have provenance here but it's not
-   * safe and sane yet */
-  if (legacy &&
-      !isLegacyArray() &&
-      RO::EvalArrayProvenance &&
-      arrprov::getTag(this).valid()) {
-    arrprov::clearTag(this);
-  }
+  assertx(isDVArray() || isDictType() || isVecType());
   if (isVanilla()) {
     m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
+    if (legacy && RO::EvalArrayProvenance) arrprov::clearTag(this);
   } else {
     BespokeArray::SetLegacyArrayInPlace(this, legacy);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ArrayData* ArrayData::toDVArrayWithLogging(bool copy) {
+  if (RO::EvalHackArrDVArrs) {
+    if (RO::EvalHackArrDVArrMark && !isLegacyArray()) {
+      auto const result = copy ? this->copy() : this;
+      result->setLegacyArray(true);
+      return result;
+    }
+    return this;
+  }
+  return toDVArray(copy);
+}
+
+ArrayData* ArrayData::toHackArrWithLogging(bool copy) {
+  if (isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
+    raise_hack_arr_compat_cast_marked_array_notice(this);
+  }
+  return toHackArr(copy);
+}
+
+ArrayData* ArrayData::toVArray(bool copy) {
+  if (isVArray()) return this;
+  if (isVecType()) return toDVArrayWithLogging(copy);
+
+  if (empty()) return ArrayData::CreateVArray();
+  VArrayInit init{size()};
+  IterateVNoInc(this, [&](auto v) { init.append(v); });
+  return init.create();
+}
+
+ArrayData* ArrayData::toDArray(bool copy) {
+  if (isDArray()) return this;
+  if (isDictType()) return toDVArrayWithLogging(copy);
+
+  if (empty()) return ArrayData::CreateDArray();
+  DArrayInit init{size()};
+  IterateKVNoInc(this, [&](auto k, auto v) { init.setValidKey(k, v); });
+  return init.create();
+}
+
+ArrayData* ArrayData::toVec(bool copy) {
+  if (isVecType()) return this;
+  if (isVArray()) return toHackArrWithLogging(copy);
+
+  if (empty()) return ArrayData::CreateVec();
+  VecInit init{size()};
+  IterateVNoInc(this, [&](auto v) { init.append(v); });
+  return init.create();
+}
+
+ArrayData* ArrayData::toDict(bool copy) {
+  if (isDictType()) return this;
+  if (isDArray()) return toHackArrWithLogging(copy);
+
+  if (empty()) return ArrayData::CreateDict();
+  DictInit init{size()};
+  IterateKVNoInc(this, [&](auto k, auto v) { init.setValidKey(k, v); });
+  return init.create();
+}
+
+ArrayData* ArrayData::toKeyset(bool copy) {
+  if (isKeysetType()) return this;
+  if (empty()) return ArrayData::CreateKeyset();
+  KeysetInit init{size()};
+  IterateVNoInc(this, [&](auto v) { init.add(v); });
+  return init.create();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

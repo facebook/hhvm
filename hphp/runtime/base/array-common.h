@@ -23,33 +23,6 @@ namespace HPHP {
 
 struct ArrayData;
 struct ObjectData;
-struct Variant;
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * This contains shared stubs used for multiple purposes in the
- * ArrayData vtable.  Most of the functions used by more than one
- * kind, or for more than one purpose should be collected here.
- *
- * Note: if you have entry points on an array kind that should never
- * be called, it's generaelly preferable to give them their own unique
- * functions so it will be obvious which kind was involved in core
- * files.  We only try to consolidate the common array functions that
- * should actually be called.
- */
-struct ArrayCommon {
-  static ssize_t ReturnInvalidIndex(const ArrayData*);
-
-  /*
-   * Generic conversion implementations in terms of other functions.
-   */
-  static ArrayData* ToVec(ArrayData*, bool);
-  static ArrayData* ToDict(ArrayData*, bool);
-  static ArrayData* ToKeyset(ArrayData*, bool);
-  static ArrayData* ToVArray(ArrayData*, bool);
-  static ArrayData* ToDArray(ArrayData*, bool);
-};
 
 //////////////////////////////////////////////////////////////////////
 

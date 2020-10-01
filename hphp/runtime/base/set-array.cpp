@@ -714,6 +714,14 @@ ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
   return a;
 }
 
+ArrayData* SetArray::ToDVArray(ArrayData* ad, bool copy) {
+  always_assert(false);
+}
+
+ArrayData* SetArray::ToHackArr(ArrayData* ad, bool copy) {
+  always_assert(false);
+}
+
 void SetArray::OnSetEvalScalar(ArrayData* ad) {
   auto a = asSet(ad);
   auto const used = a->m_used;
@@ -724,47 +732,6 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
     assertx(!elm.isEmpty());
     tvAsVariant(&elm.tv).setEvalScalar();
   }
-}
-
-ArrayData* SetArray::ToDArrayImpl(const SetArray* ad) {
-  auto const size = ad->size();
-  if (!size) return ArrayData::CreateDArray();
-  DArrayInit init{size};
-
-  auto const elms = ad->data();
-  auto const used = ad->m_used;
-  for (uint32_t i = 0; i < used; ++i) {
-    auto const& elm = elms[i];
-    if (UNLIKELY(elm.isTombstone())) continue;
-    if (elm.hasIntKey()) {
-      init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
-    } else {
-      init.set(elm.strKey(), tvAsCVarRef(&elm.tv));
-    }
-  }
-
-  auto const out = init.create();
-  assertx(MixedArray::asMixed(out));
-  return out;
-}
-
-ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    auto out = ToDict(ad, copy);
-    if (RuntimeOption::EvalHackArrDVArrMark) {
-      if (out->cowCheck()) out = out->copy();
-      out->setLegacyArray(true);
-    }
-    return out;
-  }
-  auto out = ToDArrayImpl(SetArray::asSet(ad));
-  assertx(out->isDArray());
-  return out;
-}
-
-ArrayData* SetArray::ToKeyset(ArrayData* ad, bool /*copy*/) {
-  assertx(asSet(ad)->checkInvariants());
-  return ad;
 }
 
 ALWAYS_INLINE

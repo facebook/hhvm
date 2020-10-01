@@ -335,18 +335,22 @@ void setTag(AsioExternalThreadEvent* ev, Tag tag) {
 }
 
 void clearTag(ArrayData* ad) {
+  assertx(RO::EvalArrayProvenance);
   Tag::set(ad, {});
 }
 
 void clearTag(APCArray* a) {
+  assertx(RO::EvalArrayProvenance);
   Tag::set(a, {});
 }
 
 void clearTag(AsioExternalThreadEvent* ev) {
+  assertx(RO::EvalArrayProvenance);
   Tag::set(ev, {});
 }
 
 void reassignTag(ArrayData* ad) {
+  assertx(RO::EvalArrayProvenance);
   if (arrayWantsTag(ad)) {
     if (auto const tag = tagFromPC()) {
       setTag(ad, tag);

@@ -30,6 +30,7 @@ type env = {
   in_try: bool;
   in_case: bool;
   inside_constructor: bool;
+  et_spliced_types: (Tast.expr * Typing_defs.locl_ty) IMap.t option;
   (* A set of constraints that are global to a given method *)
   global_tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;

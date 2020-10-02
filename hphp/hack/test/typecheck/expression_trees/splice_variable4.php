@@ -54,11 +54,26 @@ class Code {
   ): this::TAst {
     throw new Exception();
   }
+
+  public function splice(
+    mixed $_,
+  ): this::TAst {
+    throw new Exception();
+  }
+
+  // TODO: it would be better to discard unsupported syntax nodes during lowering.
+  public function unsupportedSyntax(string $msg): this::TAst {
+    throw new Exception($msg);
+  }
 }
 
 function test(): void {
   $x = 1;
 
-  // Expression Trees do not inherit local variables from the outer scope
-  $_ = Code`$x + 1`;
+  $_ = Code`() ==> {
+    __splice__($x + 1);
+    // Make sure that typing environment doesn't escape past splice
+    $x + 1;
+    return;
+  }`;
 }

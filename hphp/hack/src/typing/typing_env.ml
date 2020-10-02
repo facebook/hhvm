@@ -565,6 +565,7 @@ let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_try = false;
     in_case = false;
     inside_constructor = false;
+    et_spliced_types = None;
     decl_env = { mode; droot; ctx };
     genv =
       {

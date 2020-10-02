@@ -2,6 +2,13 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
+class Foo {
+  public ?int $x;
+  public function reset(): int {
+    return 1;
+  }
+}
+
 // Placeholder definition so we don't get naming/typing errors.
 class Code {
   const type TAst = mixed;
@@ -54,11 +61,29 @@ class Code {
   ): this::TAst {
     throw new Exception();
   }
+
+  public function splice(
+    mixed $_,
+  ): this::TAst {
+    throw new Exception();
+  }
+
+  // TODO: it would be better to discard unsupported syntax nodes during lowering.
+  public function unsupportedSyntax(string $msg): this::TAst {
+    throw new Exception($msg);
+  }
 }
 
 function test(): void {
-  $x = 1;
+  $x = new Foo();
 
-  // Expression Trees do not inherit local variables from the outer scope
-  $_ = Code`$x + 1`;
+  if ($x->x !== null) {
+    $_ = Code`() ==> {
+      __splice__($x->reset());
+      return;
+    }`;
+
+    // We should think that $x->x could be null
+    $x->x + 1;
+  }
 }

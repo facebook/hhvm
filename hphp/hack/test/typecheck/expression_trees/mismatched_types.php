@@ -55,6 +55,7 @@ class Code {
     throw new Exception();
   }
 }
+
 function test(): void {
   $_ = Code`() ==> {
     $x = "hello";

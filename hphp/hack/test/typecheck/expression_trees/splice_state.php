@@ -2,6 +2,13 @@
 
 <<file:__EnableUnstableFeatures('expression_trees')>>
 
+class Foo {
+  public ?int $x;
+  public function reset(): int {
+    return 1;
+  }
+}
+
 // Placeholder definition so we don't get naming/typing errors.
 class Code {
   const type TAst = mixed;
@@ -54,11 +61,30 @@ class Code {
   ): this::TAst {
     throw new Exception();
   }
+
+  public function splice(
+    mixed $_,
+  ): this::TAst {
+    throw new Exception();
+  }
+
+  // TODO: it would be better to discard unsupported syntax nodes during lowering.
+  public function unsupportedSyntax(string $msg): this::TAst {
+    throw new Exception($msg);
+  }
 }
 
+// This technically shouldn't throw an error.
+// It currently is due to typechecking the current desugaring
+// So, for the moment, allow this error to be thrown and fix the desugaring
 function test(): void {
-  $x = 1;
+  $x = new Foo();
 
-  // Expression Trees do not inherit local variables from the outer scope
-  $_ = Code`$x + 1`;
+  if ($x->x !== null) {
+    $_ = Code`() ==> {
+      // We know that $x->x is not null
+      __splice__($x->x + 1);
+      return;
+    }`;
+  }
 }

@@ -3360,12 +3360,25 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
 (* Expression trees *)
 (*****************************************************************************)
 and expression_tree env p visitor_class e desugared_expr =
+  let (spliced_expressions, new_et) =
+    Typing_expression_trees.extract_spliced_expressions e
+  in
+  let (env, spliced_expression_map) =
+    List.fold
+      ~f:(fun (env, map) (id, e) ->
+        let (env, te, ty) = expr env e in
+        (env, IMap.add id (te, ty) map))
+      ~init:(env, IMap.empty)
+      spliced_expressions
+  in
+  let env = { env with et_spliced_types = Some spliced_expression_map } in
   let (env, (te, ty)) =
     Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
         let env = Env.reinitialize_locals env in
-        let (env, te, ty) = expr env e in
+        let (env, te, ty) = expr env new_et in
         (env, (te, ty)))
   in
+  let env = { env with et_spliced_types = None } in
   match desugared_expr with
   | Some desugared_expr ->
     let (env, te2, _ty2) = expr env desugared_expr in
@@ -3373,8 +3386,19 @@ and expression_tree env p visitor_class e desugared_expr =
   | None -> make_result env p (Aast.ExpressionTree (visitor_class, te, None)) ty
 
 and et_splice env p e =
-  let (env, te, ty) = expr env e in
-  make_result env p (Aast.ET_Splice te) ty
+  let error = expr_error env Reason.Rnone e in
+  match snd e with
+  | Id (_, id) ->
+    let id = int_of_string id in
+    let v =
+      IMap.find_opt id (Option.value env.et_spliced_types ~default:IMap.empty)
+    in
+    begin
+      match v with
+      | None -> error
+      | Some (te, ty) -> make_result env p (Aast.ET_Splice te) ty
+    end
+  | _ -> error
 
 (*****************************************************************************)
 (* End expression trees *)

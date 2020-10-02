@@ -557,6 +557,7 @@ let env_as_value env =
     in_try;
     in_case;
     inside_constructor;
+    et_spliced_types = _;
     global_tpenv;
     log_levels = _;
     allow_wildcards;

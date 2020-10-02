@@ -28,6 +28,7 @@ type computation_progress = {
 type typing_result = {
   errors: Errors.t;
   dep_edges: Typing_deps.dep_edges;
+  telemetry: Telemetry.t;
 }
 
 let accumulate_job_output
@@ -39,6 +40,8 @@ let accumulate_job_output
       Typing_deps.merge_dep_edges
         produced_by_job.dep_edges
         accumulated_so_far.dep_edges;
+    telemetry =
+      Telemetry.add produced_by_job.telemetry accumulated_so_far.telemetry;
   }
 
 type delegate_job_sig = unit -> typing_result * computation_progress

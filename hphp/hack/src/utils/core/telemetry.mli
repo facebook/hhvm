@@ -22,6 +22,8 @@ It works with nested telemetry objects. In places where the structure differs,
 only `current` is kept. *)
 val diff : all:bool -> t -> prev:t -> t
 
+val add : t -> t -> t
+
 val string_ : ?truncate:int -> key:string -> value:string -> t -> t
 
 val string_opt : ?truncate:int -> key:string -> value:string option -> t -> t

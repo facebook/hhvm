@@ -78,7 +78,12 @@ module Delegate = Typing_service_delegate
 type progress = job_progress
 
 let neutral : unit -> typing_result =
- (fun () -> { errors = Errors.empty; dep_edges = Typing_deps.dep_edges_make () })
+ fun () ->
+  {
+    errors = Errors.empty;
+    dep_edges = Typing_deps.dep_edges_make ();
+    telemetry = Telemetry.create ();
+  }
 
 (*****************************************************************************)
 (* The job that will be run on the workers *)
@@ -355,7 +360,7 @@ let read_counters () : Counters.time_in_sec * Telemetry.t =
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
-    (typing_result : typing_result)
+    ({ errors; dep_edges; telemetry } : typing_result)
     (progress : computation_progress)
     ~(memory_cap : int option)
     ~(check_info : check_info) : typing_result * computation_progress =
@@ -421,20 +426,22 @@ let process_files
         process_or_exit errors progress
     | [] -> (errors, progress)
   in
-  let (errors, progress) = process_or_exit typing_result.errors progress in
+  let (errors, progress) = process_or_exit errors progress in
 
   let (_end_time, end_counters) = read_counters () in
-  let _profiling_info =
-    Telemetry.diff ~all:false end_counters ~prev:start_counters
+  let telemetry =
+    Telemetry.add
+      telemetry
+      (Telemetry.diff ~all:false end_counters ~prev:start_counters)
   in
-  let dep_edges = Typing_deps.flush_ideps_batch () in
-  let dep_edges =
-    Typing_deps.merge_dep_edges typing_result.dep_edges dep_edges
-  in
+
+  let new_dep_edges = Typing_deps.flush_ideps_batch () in
+  let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
+
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  ({ errors; dep_edges }, progress)
+  ({ errors; dep_edges; telemetry }, progress)
 
 let load_and_process_files
     (ctx : Provider_context.t)
@@ -824,7 +831,7 @@ let go_with_interrupt
     if should_process_sequentially opts fnl then begin
       Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
-      let (typing_result, _) =
+      let (typing_result, _progress) =
         process_files
           dynamic_view_files
           ctx
@@ -868,6 +875,12 @@ let go_with_interrupt
       (HackEventLogger.ProfileTypeCheck.get_telemetry_url
          ~init_id:check_info.init_id
          ~recheck_id:check_info.recheck_id);
+  let telemetry =
+    Telemetry.object_
+      telemetry
+      ~key:"profiling_info"
+      ~value:typing_result.telemetry
+  in
   (typing_result.errors, delegate_state, telemetry, env, cancelled_fnl)
 
 let go

@@ -226,3 +226,66 @@ and diff_both
         end
     end
   | (_, _) -> (key, val_c) :: (key ^ "__prev", val_p) :: acc
+
+let rec add (telemetry1 : t) (telemetry2 : t) : t =
+  let telemetry1 = List.sort telemetry1 ~compare in
+  let telemetry2 = List.sort telemetry2 ~compare in
+  add_already_sorted telemetry1 telemetry2 []
+
+and add_already_sorted (telemetry1 : t) (telemetry2 : t) (acc : t) : t =
+  match (telemetry1, telemetry2) with
+  | ([], []) -> acc
+  | (t :: telemetry, [])
+  | ([], t :: telemetry) ->
+    let acc = add_single t acc in
+    add_already_sorted telemetry [] acc
+  | (t1 :: telemetry1, t2 :: _) when compare t1 t2 < 0 ->
+    let acc = add_single t1 acc in
+    add_already_sorted telemetry1 telemetry2 acc
+  | (t1 :: _, t2 :: telemetry2) when compare t1 t2 > 0 ->
+    let acc = add_single t2 acc in
+    add_already_sorted telemetry1 telemetry2 acc
+  | (t1 :: telemetry1, t2 :: telemetry2) ->
+    let acc = add_elems t1 t2 acc in
+    add_already_sorted telemetry1 telemetry2 acc
+
+and add_single ((key, value) : key_value_pair) (acc : t) : t =
+  let open Hh_json in
+  match value with
+  | JSON_Number _ -> (key, value) :: acc
+  | JSON_Object elems ->
+    let elems = add elems [] in
+    if not (List.is_empty elems) then
+      (key, JSON_Object elems) :: acc
+    else
+      acc
+  | JSON_Array _
+  | JSON_Bool _
+  | JSON_Null
+  | JSON_String _ ->
+    acc
+
+and add_elems
+    ((key, val1) : key_value_pair) ((_key, val2) : key_value_pair) (acc : t) : t
+    =
+  let open Hh_json in
+  match (val1, val2) with
+  | (JSON_Number n1, JSON_Number n2) ->
+    (try
+       let n1 = int_of_string n1 in
+       let n2 = int_of_string n2 in
+       (key, int_ (n1 + n2)) :: acc
+     with _ ->
+       let n1 = float_of_string n1 in
+       let n2 = float_of_string n2 in
+       (key, float_ (n1 +. n2)) :: acc)
+  | (JSON_Object elems1, JSON_Object elems2) ->
+    let elems = add elems1 elems2 in
+    if not @@ List.is_empty elems then
+      (key, JSON_Object elems) :: acc
+    else
+      acc
+  | ( ( JSON_Number _ | JSON_Object _ | JSON_Array _ | JSON_Bool _ | JSON_Null
+      | JSON_String _ ),
+      _ ) ->
+    acc

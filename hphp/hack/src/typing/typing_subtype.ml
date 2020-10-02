@@ -399,6 +399,221 @@ and get_enum_includes env enum_name =
     | None -> []
     | Some enum -> enum.te_includes)
 
+and default_subtype
+    ~subtype_env ~(this_ty : locl_ty option) ~fail env ty_sub ty_super =
+  let default env = (env, TL.IsSubtype (ty_sub, ty_super)) in
+  let ( ||| ) = ( ||| ) ~fail in
+  let (env, ty_super) = Env.expand_internal_type env ty_super in
+  let (env, ty_sub) = Env.expand_internal_type env ty_sub in
+  let default_subtype_inner env ty_sub ty_super =
+    (* This inner function contains typing rules that are based solely on the subtype
+     * if you need to pattern match on the super type it should NOT be included
+     * here
+     *)
+    match ty_sub with
+    | ConstraintType cty_sub ->
+      begin
+        match deref_constraint_type cty_sub with
+        | (_, TCunion (lty_sub, cty_sub)) ->
+          env
+          |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
+          &&& simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
+        | (_, TCintersection (lty_sub, cty_sub)) ->
+          env
+          |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
+          ||| simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
+        | _ -> invalid ~fail env
+      end
+    | LoclType lty_sub ->
+      (*
+       * t1 | ... | tn <: t
+       *   if and only if
+       * t1 <: t /\ ... /\ tn <: t
+       * We want this even if t is a type variable e.g. consider
+       *   int | v <: v
+       *)
+      begin
+        match deref lty_sub with
+        | (_, Tunion tyl) ->
+          List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
+              res &&& simplify_subtype_i ~subtype_env (LoclType ty_sub) ty_super)
+        | (_, Terr) ->
+          if subtype_env.no_top_bottom then
+            default env
+          else
+            valid env
+        | (_, Tvar _) -> default env
+        | (r_sub, Tintersection tyl) ->
+          (* A & B <: C iif A <: C | !B *)
+          (match find_type_with_exact_negation env tyl with
+          | (env, Some non_ty, tyl) ->
+            let (env, ty_super) =
+              TUtils.union_i env (get_reason non_ty) ty_super non_ty
+            in
+            let ty_sub = MakeType.intersection r_sub tyl in
+            simplify_subtype_i ~subtype_env (LoclType ty_sub) ty_super env
+          | _ ->
+            (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+             * not complete.
+             *)
+            List.fold_left
+              tyl
+              ~init:(env, TL.invalid ~fail)
+              ~f:(fun res ty_sub ->
+                let ty_sub = LoclType ty_sub in
+                res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super))
+        | (_, Tgeneric (name_sub, tyargs)) ->
+          (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
+             Env.get_upper_bounds *)
+          (match subtype_env.seen_generic_params with
+          | None -> default env
+          | Some seen ->
+            (* If we've seen this type parameter before then we must have gone
+             * round a cycle so we fail
+             *)
+            if SSet.mem name_sub seen then
+              invalid ~fail env
+            else
+              (* If the generic is actually an expression dependent type,
+                we need to update this_ty
+              *)
+              let this_ty =
+                if
+                  DependentKind.is_generic_dep_ty name_sub
+                  && Option.is_none this_ty
+                then
+                  Some lty_sub
+                else
+                  this_ty
+              in
+              let subtype_env = add_seen_generic subtype_env name_sub in
+              (* Otherwise, we collect all the upper bounds ("as" constraints) on
+                the generic parameter, and check each of these in turn against
+                ty_super until one of them succeeds
+              *)
+              let rec try_bounds tyl env =
+                match tyl with
+                | [] ->
+                  (* Try an implicit mixed = ?nonnull bound before giving up.
+                    This can be useful when checking T <: t, where type t is
+                    equivalent to but syntactically different from ?nonnull.
+                    E.g., if t is a generic type parameter T with nonnull as
+                    a lower bound.
+                  *)
+                  let r =
+                    Reason.Rimplicit_upper_bound (get_pos lty_sub, "?nonnull")
+                  in
+                  let tmixed = LoclType (MakeType.mixed r) in
+                  env
+                  |> simplify_subtype_i ~subtype_env ~this_ty tmixed ty_super
+                | [ty] ->
+                  simplify_subtype_i
+                    ~subtype_env
+                    ~this_ty
+                    (LoclType ty)
+                    ty_super
+                    env
+                | ty :: tyl ->
+                  env
+                  |> try_bounds tyl
+                  ||| simplify_subtype_i
+                        ~subtype_env
+                        ~this_ty
+                        (LoclType ty)
+                        ty_super
+              in
+              env
+              |> try_bounds
+                   (Typing_set.elements
+                      (Env.get_upper_bounds env name_sub tyargs)))
+          |> (* Turn error into a generic error about the type parameter *)
+          if_unsat (invalid ~fail)
+        | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid env
+        | (_, Tpu_type_access ((_pm, msub), (_pn, nsub))) ->
+          (* If member is actually an expression dependent type,
+           * we need to update this_ty
+           *)
+          let this_ty =
+            if DependentKind.is_generic_dep_ty msub && Option.is_none this_ty
+            then
+              Some lty_sub
+            else
+              this_ty
+          in
+          (*
+           * We are checking if msub:@nsub is a subtype of ty_super.
+           * Since msub is a generic parameter, we are scanning all of its
+           * upper bounds and look for all C:@E.
+           * We then scan the PU definition of these C:@E to gather the 'as'
+           * constraints on the type `case type nsub`.
+           *
+           * Finally, we attempt to use those in recursive subtype calls
+           * to check if they are <: ty_super.
+           *)
+          let (env, upper_bounds) =
+            get_tpu_type_param_upper_bounds env msub nsub
+          in
+          let rec try_bounds tyl env =
+            match tyl with
+            | [] -> invalid ~fail env
+            | [ty] ->
+              simplify_subtype_i
+                ~subtype_env
+                ~this_ty
+                (LoclType ty)
+                ty_super
+                env
+            | ty :: tyl ->
+              env
+              |> try_bounds tyl
+              ||| simplify_subtype_i
+                    ~subtype_env
+                    ~this_ty
+                    (LoclType ty)
+                    ty_super
+          in
+          env |> try_bounds upper_bounds |> if_unsat (invalid ~fail)
+        | _ -> invalid ~fail env
+      end
+  in
+  (* We further refine the default subtype case for rules that apply to all
+   * LoclTypes but not to ConstraintTypes
+   *)
+  match ty_super with
+  | LoclType lty_super ->
+    (match ty_sub with
+    | ConstraintType _ -> default_subtype_inner env ty_sub ty_super
+    | LoclType lty_sub ->
+      begin
+        match deref lty_sub with
+        | (_, Tvar _) when subtype_env.treat_dynamic_as_bottom ->
+          (env, TL.Coerce (lty_sub, lty_super))
+        | (_, Tnewtype (_, _, ty)) ->
+          simplify_subtype ~subtype_env ~this_ty ty lty_super env
+        | (_, Tdependent (_, ty)) ->
+          let this_ty = Option.first_some this_ty (Some lty_sub) in
+          simplify_subtype ~subtype_env ~this_ty ty lty_super env
+        | (r_sub, Tany _) ->
+          if subtype_env.no_top_bottom then
+            default env
+          else
+            let ty_sub = anyfy env r_sub lty_super in
+            simplify_subtype ~subtype_env ~this_ty ty_sub lty_super env
+        | (r_sub, Tprim Nast.Tvoid) ->
+          let r =
+            Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull")
+          in
+          simplify_subtype
+            ~subtype_env
+            ~this_ty
+            (MakeType.mixed r)
+            lty_super
+            env
+          |> if_unsat (invalid ~fail)
+        | _ -> default_subtype_inner env ty_sub ty_super
+      end)
+  | ConstraintType _ -> default_subtype_inner env ty_sub ty_super
+
 (* Attempt to "solve" a subtype assertion ty_sub <: ty_super.
  * Return a proposition that is equivalent, but simpler, than
  * the original assertion. Fail with Unsat error_function if
@@ -458,219 +673,8 @@ and simplify_subtype_i
   let invalid_env_with env f = invalid ~fail:f env in
   (* We don't know whether the assertion is valid or not *)
   let default env = (env, TL.IsSubtype (ety_sub, ety_super)) in
-  (* This function contains typing rules that are based solely on the subtype
-   * if you need to pattern match on the super type it should NOT be included
-   * here
-   *)
   let default_subtype env =
-    let ty_sub = ety_sub in
-    let ty_super = ety_super in
-    match ty_sub with
-    | ConstraintType cty_sub ->
-      begin
-        match deref_constraint_type cty_sub with
-        | (_, TCunion (lty_sub, cty_sub)) ->
-          env
-          |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
-          &&& simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
-        | (_, TCintersection (lty_sub, cty_sub)) ->
-          env
-          |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
-          ||| simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
-        | _ -> invalid_env env
-      end
-    | LoclType ty_sub ->
-      (*
-       * t1 | ... | tn <: t
-       *   if and only if
-       * t1 <: t /\ ... /\ tn <: t
-       * We want this even if t is a type variable e.g. consider
-       *   int | v <: v
-       *)
-      begin
-        match deref ty_sub with
-        | (_, Tunion tyl) ->
-          List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
-              res &&& simplify_subtype_i ~subtype_env (LoclType ty_sub) ty_super)
-        | (_, Terr) ->
-          if subtype_env.no_top_bottom then
-            default env
-          else
-            valid env
-        | (_, Tvar _) -> default env
-        | (r_sub, Tintersection tyl) ->
-          (* A & B <: C iif A <: C | !B *)
-          (match find_type_with_exact_negation env tyl with
-          | (env, Some non_ty, tyl) ->
-            let (env, ty_super) =
-              TUtils.union_i env (get_reason non_ty) ty_super non_ty
-            in
-            let ty_sub = MakeType.intersection r_sub tyl in
-            simplify_subtype_i ~subtype_env (LoclType ty_sub) ty_super env
-          | _ ->
-            (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-             * not complete.
-             *)
-            List.fold_left
-              tyl
-              ~init:(env, TL.invalid ~fail)
-              ~f:(fun res ty_sub ->
-                let ty_sub = LoclType ty_sub in
-                res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super))
-        | (_, Tgeneric (name_sub, tyargs)) ->
-          (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
-             Env.get_upper_bounds *)
-          (match subtype_env.seen_generic_params with
-          | None -> default env
-          | Some seen ->
-            (* If we've seen this type parameter before then we must have gone
-             * round a cycle so we fail
-             *)
-            if SSet.mem name_sub seen then
-              invalid_env env
-            else
-              (* If the generic is actually an expression dependent type,
-             we need to update this_ty
-           *)
-              let this_ty =
-                if
-                  DependentKind.is_generic_dep_ty name_sub
-                  && Option.is_none this_ty
-                then
-                  Some ty_sub
-                else
-                  this_ty
-              in
-              let subtype_env = add_seen_generic subtype_env name_sub in
-              (* Otherwise, we collect all the upper bounds ("as" constraints) on
-         the generic parameter, and check each of these in turn against
-         ty_super until one of them succeeds
-       *)
-              let rec try_bounds tyl env =
-                match tyl with
-                | [] ->
-                  (* Try an implicit mixed = ?nonnull bound before giving up.
-             This can be useful when checking T <: t, where type t is
-             equivalent to but syntactically different from ?nonnull.
-             E.g., if t is a generic type parameter T with nonnull as
-             a lower bound.
-           *)
-                  let r =
-                    Reason.Rimplicit_upper_bound (get_pos ty_sub, "?nonnull")
-                  in
-                  let tmixed = LoclType (MakeType.mixed r) in
-                  env
-                  |> simplify_subtype_i ~subtype_env ~this_ty tmixed ty_super
-                | [ty] ->
-                  simplify_subtype_i
-                    ~subtype_env
-                    ~this_ty
-                    (LoclType ty)
-                    ty_super
-                    env
-                | ty :: tyl ->
-                  env
-                  |> try_bounds tyl
-                  ||| simplify_subtype_i
-                        ~subtype_env
-                        ~this_ty
-                        (LoclType ty)
-                        ty_super
-              in
-              env
-              |> try_bounds
-                   (Typing_set.elements
-                      (Env.get_upper_bounds env name_sub tyargs)))
-          |> (* Turn error into a generic error about the type parameter *)
-          if_unsat invalid_env
-        | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid env
-        | (_, Tpu_type_access ((_pm, msub), (_pn, nsub))) ->
-          (* If member is actually an expression dependent type,
-           * we need to update this_ty
-           *)
-          let this_ty =
-            if DependentKind.is_generic_dep_ty msub && Option.is_none this_ty
-            then
-              Some ty_sub
-            else
-              this_ty
-          in
-          (*
-           * We are checking if msub:@nsub is a subtype of ty_super.
-           * Since msub is a generic parameter, we are scanning all of its
-           * upper bounds and look for all C:@E.
-           * We then scan the PU definition of these C:@E to gather the 'as'
-           * constraints on the type `case type nsub`.
-           *
-           * Finally, we attempt to use those in recursive subtype calls
-           * to check if they are <: ty_super.
-           *)
-          let (env, upper_bounds) =
-            get_tpu_type_param_upper_bounds env msub nsub
-          in
-          let rec try_bounds tyl env =
-            match tyl with
-            | [] -> invalid_env env
-            | [ty] ->
-              simplify_subtype_i
-                ~subtype_env
-                ~this_ty
-                (LoclType ty)
-                ty_super
-                env
-            | ty :: tyl ->
-              env
-              |> try_bounds tyl
-              ||| simplify_subtype_i
-                    ~subtype_env
-                    ~this_ty
-                    (LoclType ty)
-                    ty_super
-          in
-          env |> try_bounds upper_bounds |> if_unsat invalid_env
-        | _ -> invalid_env env
-      end
-  in
-  (* We further refine the default subtype case for rules that apply to all
-   * LoclTypes but not to ConstraintTypes
-   *)
-  let default_subtype env =
-    let ty_sub = ety_sub in
-    let ty_super = ety_super in
-    match ty_super with
-    | LoclType ty_super ->
-      (match ty_sub with
-      | ConstraintType _ -> default_subtype env
-      | LoclType ty_sub ->
-        begin
-          match deref ty_sub with
-          | (_, Tvar _) when subtype_env.treat_dynamic_as_bottom ->
-            (env, TL.Coerce (ty_sub, ty_super))
-          | (_, Tnewtype (_, _, ty)) ->
-            simplify_subtype ~subtype_env ~this_ty ty ty_super env
-          | (_, Tdependent (_, ty)) ->
-            let this_ty = Option.first_some this_ty (Some ty_sub) in
-            simplify_subtype ~subtype_env ~this_ty ty ty_super env
-          | (r_sub, Tany _) ->
-            if subtype_env.no_top_bottom then
-              default env
-            else
-              let ty_sub = anyfy env r_sub ty_super in
-              simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-          | (r_sub, Tprim Nast.Tvoid) ->
-            let r =
-              Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull")
-            in
-            simplify_subtype
-              ~subtype_env
-              ~this_ty
-              (MakeType.mixed r)
-              ty_super
-              env
-            |> if_unsat invalid_env
-          | _ -> default_subtype env
-        end)
-    | ConstraintType _ -> default_subtype env
+    default_subtype ~subtype_env ~this_ty ~fail env ety_sub ety_super
   in
   match ety_super with
   (* First deal with internal constraint types *)
@@ -2373,7 +2377,7 @@ and simplify_subtype_reactivity
       | CippLocal _ | CippGlobal | CippRx | Pure _ ) ) ->
     valid env
   (* CippGlobal can (safely) call anything the following *)
-  | ( ( Pure _ | Cipp _ | CippLocal _ ), CippGlobal ) -> valid env
+  | ((Pure _ | Cipp _ | CippLocal _), CippGlobal) -> valid env
   (* CippGlobal can call anything (unsafe) *)
   | (_, CippGlobal) when is_call_site -> valid env
   | _ -> check_condition_type_has_matching_reactive_method env

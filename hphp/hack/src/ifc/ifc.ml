@@ -42,7 +42,7 @@ let rec policy_occurrences pty =
   in
   match pty with
   | Tprim p -> (pol p, emp, emp)
-  | Tgeneric p -> (pol p, emp, emp)
+  | Tgeneric p -> (emp, pol p, emp)
   | Tinter tl
   | Tunion tl
   | Ttuple tl ->
@@ -81,9 +81,23 @@ let rec subtype ~pos t1 t2 acc =
       end
   in
   match (t1, t2) with
-  | (Tprim p1, Tprim p2)
-  | (Tgeneric p1, Tgeneric p2) ->
-    L.(p1 < p2) ~pos acc
+  | (Tprim p1, Tprim p2) -> L.(p1 < p2) ~pos acc
+  | (Tgeneric p1, _) ->
+    let (cv, inv, cn) = policy_occurrences t2 in
+    L.(
+      [p1] <* PSet.elements cv
+      && PSet.elements cn <* [p1]
+      && [p1] =* PSet.elements inv)
+      ~pos
+      acc
+  | (_, Tgeneric p2) ->
+    let (cv, inv, cn) = policy_occurrences t1 in
+    L.(
+      PSet.elements cv <* [p2]
+      && [p2] <* PSet.elements cn
+      && [p2] =* PSet.elements inv)
+      ~pos
+      acc
   | (Ttuple tl1, Ttuple tl2) ->
     (match List.zip tl1 tl2 with
     | Some zip ->

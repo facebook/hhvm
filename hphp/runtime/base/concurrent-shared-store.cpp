@@ -711,6 +711,17 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
         svar = handle;
       } else {
         /*
+         * When primed entries are loaded, the increase in APC memory is
+         * attributed to the request. However, we don't want to fatal the
+         * request if its memory usage during deserialization is too high. As
+         * long as the total usage (including the amount added to APC) falls
+         * below the threshold, we let it survive.
+         *
+         * Note that primed entries are not free, and they are still counted
+         * toward request usage, if the request triggers loading of a new entry.
+         */
+        MemoryManager::SuppressOOM so(*tl_heap);
+        /*
          * Note that unserialize can run arbitrary php code via a __wakeup
          * routine, which could try to access this same key, and we're
          * holding various locks here.  This is only for promoting primed

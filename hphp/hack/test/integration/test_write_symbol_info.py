@@ -132,7 +132,7 @@ max_workers = 2
             "hack.ClassDefinition.{}".format(ver): ClassDefinition,
             "hack.DeclarationComment.{}".format(ver): DeclarationComment,
             "hack.DeclarationLocation.{}".format(ver): DeclarationLocation,
-            "hack.DeclarationSpan.{}".format(ver): DeclarationLocation,
+            "hack.DeclarationSpan.{}".format(ver): DeclarationSpan,
             "hack.EnumDeclaration.{}".format(ver): EnumDeclaration,
             "hack.EnumDefinition.{}".format(ver): EnumDefinition,
             "hack.Enumerator.{}".format(ver): Enumerator,

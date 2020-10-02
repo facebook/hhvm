@@ -9,14 +9,14 @@
  *
  */
 
-function get_arr(): array<string, bool> {
+function get_arr(): darray<string, bool> {
   return darray[
     'foo' => true,
     'bar' => false,
   ];
 }
 
-function use_arr(array<mixed, int> $arr): void {
+function use_arr(darray<mixed, int> $arr): void {
 }
 
 function test(): void {

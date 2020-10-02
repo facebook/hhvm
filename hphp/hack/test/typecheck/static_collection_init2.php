@@ -10,6 +10,6 @@
  */
 
 class CacheConsistencyRequestLog {
-  private static Vector<array> $taoRequestLog = Vector {};
+  private static Vector<varray> $taoRequestLog = Vector {};
   private static Vector<Map<string, mixed>> $memcacheRequestLog = Vector {};
 }

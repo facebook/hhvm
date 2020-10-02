@@ -4,7 +4,7 @@
  * Test AKempty promotion affecting an array inside a collection with
  * intermediate assignment
  */
-function test(): ConstVector<array<string, string>> {
+function test(): ConstVector<darray<string, string>> {
   $v = Vector { darray[] };
   $a = $v[0];
   $a['aaa'] = 4;

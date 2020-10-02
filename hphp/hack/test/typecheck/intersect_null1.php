@@ -9,7 +9,7 @@
  *
  */
 
-function get_arr(): array<int> { return varray[1]; }
+function get_arr(): varray<int> { return varray[1]; }
 function foo(int $x) {}
 
 function test() {

@@ -27,7 +27,7 @@ type T2 = ?string;
 newtype T3 as int = int;
 
 <<SingleAttributeWithTwoParams(1,2)>>
-type T4 = array<int>;
+type T4 = varray<int>;
 
 <<Multiple(1), Attributes(2,3), Foo>>
 type T5 = (function(int): bool);

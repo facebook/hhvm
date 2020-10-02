@@ -9,6 +9,6 @@
  *
  */
 
-function test(array<bool> $x): int {
+function test(varray<bool> $x): int {
   return $x[0];
 }

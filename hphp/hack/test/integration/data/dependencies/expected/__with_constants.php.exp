@@ -1,5 +1,5 @@
 <?hh
-const array<string, int> ARR = darray[];
+const darray<string, int> ARR = darray[];
 const varray<string> MAP_INDEX = varray[];
 const (int, ?(string, float)) OPTION = tuple(0, null);
 const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];

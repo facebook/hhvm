@@ -9,7 +9,7 @@
  *
  */
 
-function get_arr(): array<?int> {
+function get_arr(): varray<?int> {
   return varray[1, null, 2];
 }
 

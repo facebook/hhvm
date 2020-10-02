@@ -9,6 +9,6 @@
  *
  */
 
-function test(array<int> $v): void {
+function test(varray<int> $v): void {
   $v[1] = 1;
 }

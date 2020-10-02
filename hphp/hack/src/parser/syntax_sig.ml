@@ -852,12 +852,6 @@ module type Syntax_S = sig
     ; varray_trailing_comma                              : t
     ; varray_right_angle                                 : t
     }
-  | VectorArrayTypeSpecifier          of
-    { vector_array_keyword                               : t
-    ; vector_array_left_angle                            : t
-    ; vector_array_type                                  : t
-    ; vector_array_right_angle                           : t
-    }
   | TypeParameter                     of
     { type_attribute_spec                                : t
     ; type_reified                                       : t
@@ -878,14 +872,6 @@ module type Syntax_S = sig
     ; darray_value                                       : t
     ; darray_trailing_comma                              : t
     ; darray_right_angle                                 : t
-    }
-  | MapArrayTypeSpecifier             of
-    { map_array_keyword                                  : t
-    ; map_array_left_angle                               : t
-    ; map_array_key                                      : t
-    ; map_array_comma                                    : t
-    ; map_array_value                                    : t
-    ; map_array_right_angle                              : t
     }
   | DictionaryTypeSpecifier           of
     { dictionary_type_keyword                            : t
@@ -1231,11 +1217,9 @@ module type Syntax_S = sig
   val make_keyset_type_specifier : t -> t -> t -> t -> t -> t
   val make_tuple_type_explicit_specifier : t -> t -> t -> t -> t
   val make_varray_type_specifier : t -> t -> t -> t -> t -> t
-  val make_vector_array_type_specifier : t -> t -> t -> t -> t
   val make_type_parameter : t -> t -> t -> t -> t -> t -> t
   val make_type_constraint : t -> t -> t
   val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
-  val make_map_array_type_specifier : t -> t -> t -> t -> t -> t -> t
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
   val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_closure_parameter_type_specifier : t -> t -> t
@@ -1413,11 +1397,9 @@ module type Syntax_S = sig
   val is_keyset_type_specifier : t -> bool
   val is_tuple_type_explicit_specifier : t -> bool
   val is_varray_type_specifier : t -> bool
-  val is_vector_array_type_specifier : t -> bool
   val is_type_parameter : t -> bool
   val is_type_constraint : t -> bool
   val is_darray_type_specifier : t -> bool
-  val is_map_array_type_specifier : t -> bool
   val is_dictionary_type_specifier : t -> bool
   val is_closure_type_specifier : t -> bool
   val is_closure_parameter_type_specifier : t -> bool
@@ -1466,7 +1448,6 @@ module type Syntax_S = sig
   val is_left_brace     : t -> bool
   val is_ellipsis       : t -> bool
   val is_comma          : t -> bool
-  val is_array          : t -> bool
   val is_ampersand      : t -> bool
   val is_inout          : t -> bool
 

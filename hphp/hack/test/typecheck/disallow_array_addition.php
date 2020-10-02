@@ -1,5 +1,5 @@
 <?hh // strict
 
-function foo(array<int> $a, array<int> $b): mixed {
+function foo(varray<int> $a, varray<int> $b): mixed {
   return $a + $b;
 }

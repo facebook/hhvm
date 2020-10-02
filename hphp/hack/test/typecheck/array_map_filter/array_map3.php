@@ -1,6 +1,6 @@
 <?hh // partial
 
-function take_ints(array<int> $x) {}
+function take_ints(varray<int> $x) {}
 
 function test(
   (function(int, string): bool) $f,

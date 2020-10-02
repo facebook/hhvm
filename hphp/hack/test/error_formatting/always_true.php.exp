@@ -1,7 +1,7 @@
 Typing[4151] This expression is always `true`
    --> always_true.php
-  3 | function foo(array<int> $arg): void {
-    |              ^^^^^^^^^^ This is a varray and cannot be null
+  3 | function foo(varray<int> $arg): void {
+    |              ^^^^^^^^^^^ This is a varray and cannot be null
   4 |   if (null !== $arg) {
     |       ^^^^^^^^^^^^^
 

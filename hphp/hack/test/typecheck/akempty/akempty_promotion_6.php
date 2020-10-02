@@ -12,5 +12,5 @@ function test(): void {
   g($a);
 }
 
-function f(array<int> $_): void {}
-function g(array<string, string> $_): void {}
+function f(varray<int> $_): void {}
+function g(darray<string, string> $_): void {}

@@ -9,7 +9,7 @@
  *
  */
 
-function test3(array<float> $x): int {
+function test3(varray<float> $x): int {
   list($x, $y) = $x;
   return $x;
 }

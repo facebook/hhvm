@@ -1,6 +1,6 @@
 File "array_get_newtype.php--file2.php", line 4, characters 10-11:
 Invalid return type (Typing[4110])
-File "array_get_newtype.php--file2.php", line 2, characters 25-31:
-Expected `MyArray`
-File "array_get_newtype.php--file1.php", line 3, characters 20-38:
-But got `darray<mixed, mixed>`
+  File "array_get_newtype.php--file2.php", line 2, characters 25-31:
+  Expected `MyArray`
+  File "array_get_newtype.php--file1.php", line 3, characters 20-39:
+  But got `darray<mixed, mixed>`

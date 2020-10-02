@@ -2,8 +2,8 @@
 
 class Foo {
   <<__Memoize>>
-  public function someMethod(array $arg): void {}
+  public function someMethod(varray $arg): void {}
 }
 
 <<__Memoize>>
-function some_function(array $arg): void {}
+function some_function(varray $arg): void {}

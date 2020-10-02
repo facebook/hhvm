@@ -9,14 +9,10 @@
  *
  */
 
-function f(): array {
+function g(): varray<int> {
   return varray[1];
 }
 
-function g(): array<int> {
-  return varray[1];
-}
-
-function h(): array<string, int> {
+function h(): darray<string, int> {
   return darray["one" => 1];
 }

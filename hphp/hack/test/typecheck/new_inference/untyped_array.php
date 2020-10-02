@@ -1,6 +1,6 @@
 <?hh // partial
 
-function foo(array $m):void {
+function foo(varray $m):void {
    $x = new Vector($m);
    $x[0]->foo();
    $y = new Map($m);

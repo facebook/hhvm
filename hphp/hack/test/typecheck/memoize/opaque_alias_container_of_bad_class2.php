@@ -4,7 +4,7 @@
 class BarImpl {
 }
 
-newtype Bar = array<BarImpl>;
+newtype Bar = varray<BarImpl>;
 
 //// file2.php
 <?hh // partial

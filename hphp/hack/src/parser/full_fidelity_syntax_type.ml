@@ -964,12 +964,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; varray_trailing_comma                              : t
     ; varray_right_angle                                 : t
     }
-  | VectorArrayTypeSpecifier          of
-    { vector_array_keyword                               : t
-    ; vector_array_left_angle                            : t
-    ; vector_array_type                                  : t
-    ; vector_array_right_angle                           : t
-    }
   | TypeParameter                     of
     { type_attribute_spec                                : t
     ; type_reified                                       : t
@@ -990,14 +984,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; darray_value                                       : t
     ; darray_trailing_comma                              : t
     ; darray_right_angle                                 : t
-    }
-  | MapArrayTypeSpecifier             of
-    { map_array_keyword                                  : t
-    ; map_array_left_angle                               : t
-    ; map_array_key                                      : t
-    ; map_array_comma                                    : t
-    ; map_array_value                                    : t
-    ; map_array_right_angle                              : t
     }
   | DictionaryTypeSpecifier           of
     { dictionary_type_keyword                            : t
@@ -1269,9 +1255,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SpecKeyset            of keyset_type_specifier
   | SpecTupleTypeExplicit of tuple_type_explicit_specifier
   | SpecVarray            of varray_type_specifier
-  | SpecVectorArray       of vector_array_type_specifier
   | SpecDarray            of darray_type_specifier
-  | SpecMapArray          of map_array_type_specifier
   | SpecDictionary        of dictionary_type_specifier
   | SpecClosure           of closure_type_specifier
   | SpecClosureParameter  of closure_parameter_type_specifier
@@ -2268,12 +2252,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; varray_trailing_comma: Token.t option value
     ; varray_right_angle: Token.t value
     }
-  and vector_array_type_specifier =
-    { vector_array_keyword: Token.t value
-    ; vector_array_left_angle: Token.t value
-    ; vector_array_type: specifier value
-    ; vector_array_right_angle: Token.t value
-    }
   and type_parameter =
     { type_attribute_spec: attribute_specification option value
     ; type_reified: Token.t option value
@@ -2294,14 +2272,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; darray_value: simple_type_specifier value
     ; darray_trailing_comma: Token.t option value
     ; darray_right_angle: Token.t value
-    }
-  and map_array_type_specifier =
-    { map_array_keyword: Token.t value
-    ; map_array_left_angle: Token.t value
-    ; map_array_key: specifier value
-    ; map_array_comma: Token.t value
-    ; map_array_value: specifier value
-    ; map_array_right_angle: Token.t value
     }
   and dictionary_type_specifier =
     { dictionary_type_keyword: Token.t value

@@ -9,9 +9,8 @@ function g(string $_, string $__): bool {
 }
 
 function test(
-  array $array,
-  array<string> $vector_array,
-  array<X, string> $hashtable_array,
+  varray<string> $vector_array,
+  darray<X, string> $hashtable_array,
   $untyped,
   KeyedContainer<arraykey, string> $keyed_container,
   Container<string> $container,
@@ -21,7 +20,6 @@ function test(
   $g = fun('g');
   $intersection = true ? $vector_array : $keyed_container;
 
-  hh_show(array_map($f, $array));
   take_bool_array(array_map($f, $vector_array));
   take_X_bool_array(array_map($f, $hashtable_array));
   hh_show(array_map($f, $untyped));
@@ -31,9 +29,9 @@ function test(
   take_bool_array(array_map($g, $intersection, $vector_array));
 }
 
-function take_bool_array(array<bool> $_): void {}
-function take_X_bool_array(array<X, bool> $_): void {}
-function take_arraykey_bool_array(array<arraykey, bool> $_): void {}
-function take_mixed_bool_array(array<mixed, bool> $_): void {}
+function take_bool_array(varray<bool> $_): void {}
+function take_X_bool_array(darray<X, bool> $_): void {}
+function take_arraykey_bool_array(darray<arraykey, bool> $_): void {}
+function take_mixed_bool_array(darray<mixed, bool> $_): void {}
 
 type X = arraykey;

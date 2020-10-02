@@ -1,6 +1,6 @@
 <?hh // partial
 
 // Testing function
-async function wrong_hint(): array<int> {
+async function wrong_hint(): varray<int> {
   throw new Exception();
 }

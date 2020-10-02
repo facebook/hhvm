@@ -8,8 +8,6 @@ class SomeClass {
 }
 class :foo {
   attribute
-    // Using array without type parameters is okay for now
-    array bar-baz = varray[],
     // Using GenericClass without type parameters is disallowed in strict mode
     /* HH_FIXME[4101] */
     GenericClass yo @required,

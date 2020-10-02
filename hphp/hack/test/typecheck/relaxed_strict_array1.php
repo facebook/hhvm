@@ -2,7 +2,7 @@
 <?hh // partial
 
 class Foo {
-  public static function bar(): array {
+  public static function bar(): varray {
     return varray[];
   }
 

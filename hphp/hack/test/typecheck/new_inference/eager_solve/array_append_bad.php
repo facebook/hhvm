@@ -19,7 +19,7 @@ class Inv<T> {
 function test_array_append_on_tvar(
   bool $b,
   // Vector-like stuff
-  array<int> $a,
+  varray<int> $a,
   vec<int> $v,
   Vector<num> $vector,
   keyset<string> $ks,

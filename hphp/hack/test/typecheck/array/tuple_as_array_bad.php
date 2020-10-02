@@ -9,6 +9,6 @@
  *
  */
 
-function as_array((int, string) $x): array {
+function as_array((int, string) $x): varray_or_darray {
   return $x;
 }

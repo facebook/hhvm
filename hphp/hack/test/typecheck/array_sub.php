@@ -9,7 +9,7 @@
  *
  */
 
-function get_keys<T1, T2>(array<T1, T2> $x): array<T1> {
+function get_keys<T1, T2>(darray<T1, T2> $x): varray<T1> {
   $result = varray[];
   foreach ($x as $k => $v) {
     $result[] = $k;
@@ -17,6 +17,6 @@ function get_keys<T1, T2>(array<T1, T2> $x): array<T1> {
   return $result;
 }
 
-function test(array<int> $a): void {
+function test(varray<int> $a): void {
   get_keys($a);
 }

@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function foo(
-  array<string,bool> $a,
+  darray<string,bool> $a,
   dict<int,bool> $d,
   darray<int,bool> $da,
   dict<mixed,bool> $dm,

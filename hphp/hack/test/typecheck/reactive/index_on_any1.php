@@ -2,7 +2,7 @@
 
 
 <<__Rx>>
-function g(array $a) {
+function g(varray $a) {
   $c = $a[0];
   $c[0] = 5;
 }

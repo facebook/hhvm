@@ -11,8 +11,8 @@ function test(bool $b): void {
   } else {
     $a[0] = 'aaa';
   }
-  // no error - both vector and map like arrays match the array<int, string>
+  // no error - both vector and map like arrays match the darray<int, string>
   f($a);
 }
 
-function f(array<int, string> $_): void {}
+function f(darray<int, string> $_): void {}

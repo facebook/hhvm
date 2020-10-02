@@ -9,7 +9,7 @@
  *
  */
 
-function foo(array<int> $arr): void {
+function foo(varray<int> $arr): void {
   foreach ($arr as $a) {
     if ($a == 1) {
       $b = 1;

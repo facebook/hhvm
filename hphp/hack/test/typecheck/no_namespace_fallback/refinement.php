@@ -18,8 +18,7 @@ function returns_int(mixed $in): ?int {
   return null;
 }
 
-/* HH_IGNORE_ERROR[4045] array without generics */
-function returns_array(mixed $in): ?array {
+function returns_array(mixed $in): ?varray_or_darray<mixed> {
   if (\HH\is_php_array($in)) {
     return $in;
   }

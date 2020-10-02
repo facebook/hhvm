@@ -14,7 +14,7 @@ function test(): void {
   take_keyed_container($a);
 }
 
-function take_array<Tk, Tv>(array<Tk, Tv> $a): void {}
+function take_array<Tk, Tv>(darray<Tk, Tv> $a): void {}
 function take_traversable<Tv>(Traversable<Tv> $a): void {}
 function take_container<Tv>(Container<Tv> $a): void {}
 function take_keyed_traversable<Tk, Tv>(KeyedTraversable<Tk, Tv> $a): void {}

@@ -10,4 +10,4 @@ function test(): void {
   f($a);
 }
 
-function f(array<int> $_): void {}
+function f(varray<int> $_): void {}

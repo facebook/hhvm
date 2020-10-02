@@ -201,11 +201,9 @@ module WithToken(Token: TokenType) = struct
       | KeysetTypeSpecifier               _ -> SyntaxKind.KeysetTypeSpecifier
       | TupleTypeExplicitSpecifier        _ -> SyntaxKind.TupleTypeExplicitSpecifier
       | VarrayTypeSpecifier               _ -> SyntaxKind.VarrayTypeSpecifier
-      | VectorArrayTypeSpecifier          _ -> SyntaxKind.VectorArrayTypeSpecifier
       | TypeParameter                     _ -> SyntaxKind.TypeParameter
       | TypeConstraint                    _ -> SyntaxKind.TypeConstraint
       | DarrayTypeSpecifier               _ -> SyntaxKind.DarrayTypeSpecifier
-      | MapArrayTypeSpecifier             _ -> SyntaxKind.MapArrayTypeSpecifier
       | DictionaryTypeSpecifier           _ -> SyntaxKind.DictionaryTypeSpecifier
       | ClosureTypeSpecifier              _ -> SyntaxKind.ClosureTypeSpecifier
       | ClosureParameterTypeSpecifier     _ -> SyntaxKind.ClosureParameterTypeSpecifier
@@ -395,11 +393,9 @@ module WithToken(Token: TokenType) = struct
     let is_keyset_type_specifier                = has_kind SyntaxKind.KeysetTypeSpecifier
     let is_tuple_type_explicit_specifier        = has_kind SyntaxKind.TupleTypeExplicitSpecifier
     let is_varray_type_specifier                = has_kind SyntaxKind.VarrayTypeSpecifier
-    let is_vector_array_type_specifier          = has_kind SyntaxKind.VectorArrayTypeSpecifier
     let is_type_parameter                       = has_kind SyntaxKind.TypeParameter
     let is_type_constraint                      = has_kind SyntaxKind.TypeConstraint
     let is_darray_type_specifier                = has_kind SyntaxKind.DarrayTypeSpecifier
-    let is_map_array_type_specifier             = has_kind SyntaxKind.MapArrayTypeSpecifier
     let is_dictionary_type_specifier            = has_kind SyntaxKind.DictionaryTypeSpecifier
     let is_closure_type_specifier               = has_kind SyntaxKind.ClosureTypeSpecifier
     let is_closure_parameter_type_specifier     = has_kind SyntaxKind.ClosureParameterTypeSpecifier
@@ -485,7 +481,6 @@ module WithToken(Token: TokenType) = struct
     let is_left_brace = is_specific_token TokenKind.LeftBrace
     let is_ellipsis   = is_specific_token TokenKind.DotDotDot
     let is_comma      = is_specific_token TokenKind.Comma
-    let is_array      = is_specific_token TokenKind.Array
     let is_ampersand  = is_specific_token TokenKind.Ampersand
     let is_inout      = is_specific_token TokenKind.Inout
 
@@ -2009,17 +2004,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc varray_trailing_comma in
          let acc = f acc varray_right_angle in
          acc
-      | VectorArrayTypeSpecifier {
-        vector_array_keyword;
-        vector_array_left_angle;
-        vector_array_type;
-        vector_array_right_angle;
-      } ->
-         let acc = f acc vector_array_keyword in
-         let acc = f acc vector_array_left_angle in
-         let acc = f acc vector_array_type in
-         let acc = f acc vector_array_right_angle in
-         acc
       | TypeParameter {
         type_attribute_spec;
         type_reified;
@@ -2058,21 +2042,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc darray_value in
          let acc = f acc darray_trailing_comma in
          let acc = f acc darray_right_angle in
-         acc
-      | MapArrayTypeSpecifier {
-        map_array_keyword;
-        map_array_left_angle;
-        map_array_key;
-        map_array_comma;
-        map_array_value;
-        map_array_right_angle;
-      } ->
-         let acc = f acc map_array_keyword in
-         let acc = f acc map_array_left_angle in
-         let acc = f acc map_array_key in
-         let acc = f acc map_array_comma in
-         let acc = f acc map_array_value in
-         let acc = f acc map_array_right_angle in
          acc
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
@@ -3880,17 +3849,6 @@ module WithToken(Token: TokenType) = struct
         varray_trailing_comma;
         varray_right_angle;
       ]
-      | VectorArrayTypeSpecifier {
-        vector_array_keyword;
-        vector_array_left_angle;
-        vector_array_type;
-        vector_array_right_angle;
-      } -> [
-        vector_array_keyword;
-        vector_array_left_angle;
-        vector_array_type;
-        vector_array_right_angle;
-      ]
       | TypeParameter {
         type_attribute_spec;
         type_reified;
@@ -3929,21 +3887,6 @@ module WithToken(Token: TokenType) = struct
         darray_value;
         darray_trailing_comma;
         darray_right_angle;
-      ]
-      | MapArrayTypeSpecifier {
-        map_array_keyword;
-        map_array_left_angle;
-        map_array_key;
-        map_array_comma;
-        map_array_value;
-        map_array_right_angle;
-      } -> [
-        map_array_keyword;
-        map_array_left_angle;
-        map_array_key;
-        map_array_comma;
-        map_array_value;
-        map_array_right_angle;
       ]
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
@@ -5752,17 +5695,6 @@ module WithToken(Token: TokenType) = struct
         "varray_trailing_comma";
         "varray_right_angle";
       ]
-      | VectorArrayTypeSpecifier {
-        vector_array_keyword;
-        vector_array_left_angle;
-        vector_array_type;
-        vector_array_right_angle;
-      } -> [
-        "vector_array_keyword";
-        "vector_array_left_angle";
-        "vector_array_type";
-        "vector_array_right_angle";
-      ]
       | TypeParameter {
         type_attribute_spec;
         type_reified;
@@ -5801,21 +5733,6 @@ module WithToken(Token: TokenType) = struct
         "darray_value";
         "darray_trailing_comma";
         "darray_right_angle";
-      ]
-      | MapArrayTypeSpecifier {
-        map_array_keyword;
-        map_array_left_angle;
-        map_array_key;
-        map_array_comma;
-        map_array_value;
-        map_array_right_angle;
-      } -> [
-        "map_array_keyword";
-        "map_array_left_angle";
-        "map_array_key";
-        "map_array_comma";
-        "map_array_value";
-        "map_array_right_angle";
       ]
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
@@ -7820,18 +7737,6 @@ module WithToken(Token: TokenType) = struct
           varray_trailing_comma;
           varray_right_angle;
         }
-      | (SyntaxKind.VectorArrayTypeSpecifier, [
-          vector_array_keyword;
-          vector_array_left_angle;
-          vector_array_type;
-          vector_array_right_angle;
-        ]) ->
-        VectorArrayTypeSpecifier {
-          vector_array_keyword;
-          vector_array_left_angle;
-          vector_array_type;
-          vector_array_right_angle;
-        }
       | (SyntaxKind.TypeParameter, [
           type_attribute_spec;
           type_reified;
@@ -7873,22 +7778,6 @@ module WithToken(Token: TokenType) = struct
           darray_value;
           darray_trailing_comma;
           darray_right_angle;
-        }
-      | (SyntaxKind.MapArrayTypeSpecifier, [
-          map_array_keyword;
-          map_array_left_angle;
-          map_array_key;
-          map_array_comma;
-          map_array_value;
-          map_array_right_angle;
-        ]) ->
-        MapArrayTypeSpecifier {
-          map_array_keyword;
-          map_array_left_angle;
-          map_array_key;
-          map_array_comma;
-          map_array_value;
-          map_array_right_angle;
         }
       | (SyntaxKind.DictionaryTypeSpecifier, [
           dictionary_type_keyword;
@@ -10330,21 +10219,6 @@ module WithToken(Token: TokenType) = struct
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value
 
-      let make_vector_array_type_specifier
-        vector_array_keyword
-        vector_array_left_angle
-        vector_array_type
-        vector_array_right_angle
-      =
-        let syntax = VectorArrayTypeSpecifier {
-          vector_array_keyword;
-          vector_array_left_angle;
-          vector_array_type;
-          vector_array_right_angle;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
       let make_type_parameter
         type_attribute_spec
         type_reified
@@ -10392,25 +10266,6 @@ module WithToken(Token: TokenType) = struct
           darray_value;
           darray_trailing_comma;
           darray_right_angle;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_map_array_type_specifier
-        map_array_keyword
-        map_array_left_angle
-        map_array_key
-        map_array_comma
-        map_array_value
-        map_array_right_angle
-      =
-        let syntax = MapArrayTypeSpecifier {
-          map_array_keyword;
-          map_array_left_angle;
-          map_array_key;
-          map_array_comma;
-          map_array_value;
-          map_array_right_angle;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

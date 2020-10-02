@@ -1,14 +1,10 @@
 <?hh // partial
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function akany(~array $a): array {
-  return $a; // ok
-}
-
-function akvec(~array<int> $a): array<int> {
+function akvec(~varray<int> $a): varray<int> {
   return $a; // error
 }
 
-function akmap(~array<int, string> $a): array<int, string> {
+function akmap(~darray<int, string> $a): darray<int, string> {
   return $a; // error
 }

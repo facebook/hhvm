@@ -25,7 +25,7 @@ function make_int_args(): Container<int> {
   return vec[];
 }
 
-function make_mixed_args(): array<mixed> {
+function make_mixed_args(): varray<mixed> {
   return varray[];
 }
 

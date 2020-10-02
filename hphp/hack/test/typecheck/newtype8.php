@@ -2,7 +2,7 @@
 <?hh // strict
 newtype FooInt as int = int;
 newtype FooString as string = string;
-newtype FooArray<T> as array<T> = array<T>;
+newtype FooArray<T> as varray<T> = varray<T>;
 newtype FooMap<Tk, Tv> as Map<Tk, Tv> = Map<Tk, Tv>;
 
 //// test.php

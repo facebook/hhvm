@@ -9,7 +9,7 @@
  *
  */
 
-function f(array<string, bool> $arr): void {
+function f(darray<string, bool> $arr): void {
   switch (1) {
     case 1:
       if ($arr['foo']) {

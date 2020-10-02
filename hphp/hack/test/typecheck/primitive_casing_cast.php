@@ -1,5 +1,5 @@
 <?hh // partial
 
-function f(array $arr): string {
+function f(varray $arr): string {
   return (strING)$arr;
 }

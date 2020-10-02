@@ -18,4 +18,4 @@ function test(string $bar, string $baz): void {
   hh_show($arr_nested_routing);
 }
 
-function expect_array_of_string(array<string> $arr):void {}
+function expect_array_of_string(varray<string> $arr):void {}

@@ -1,6 +1,6 @@
 <?hh // strict
 <<__RxLocal>>
-function test_function1(array<string, mixed> $arr): void {
+function test_function1(darray<string, mixed> $arr): void {
   // OK
   $arr['herp'] = 7;
 }

@@ -614,10 +614,6 @@ impl<'src> SmartConstructors<HasScriptContent<'src>> for FactsSmartConstructors<
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_varray_type_specifier(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_vector_array_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_vector_array_type_specifier(self, arg0, arg1, arg2, arg3)
-    }
-
     fn make_type_parameter(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_type_parameter(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
@@ -628,10 +624,6 @@ impl<'src> SmartConstructors<HasScriptContent<'src>> for FactsSmartConstructors<
 
     fn make_darray_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_darray_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_map_array_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_map_array_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_dictionary_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {

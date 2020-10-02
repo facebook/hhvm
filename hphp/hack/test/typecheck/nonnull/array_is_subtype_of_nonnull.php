@@ -1,9 +1,5 @@
 <?hh // partial
 
-function cast_array(array $x): nonnull {
-  return $x;
-}
-
 function cast_varray<Tv>(varray<Tv> $x): nonnull {
   return $x;
 }
@@ -12,11 +8,11 @@ function cast_darray<Tk, Tv>(darray<Tk, Tv> $x): nonnull {
   return $x;
 }
 
-function cast_array1<Tv>(array<Tv> $x): nonnull {
+function cast_array1<Tv>(varray<Tv> $x): nonnull {
   return $x;
 }
 
-function cast_array2<Tk, Tv>(array<Tk, Tv> $x): nonnull {
+function cast_array2<Tk, Tv>(darray<Tk, Tv> $x): nonnull {
   return $x;
 }
 

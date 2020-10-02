@@ -1927,9 +1927,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     fn as_case_insensitive_keyword(&self, text: &str) -> Option<String> {
         let lower = text.to_ascii_lowercase();
         match lower.as_ref() {
-            "abstract" | "and" | "array" | "as" | "bool" | "boolean" | "break" | "callable"
-            | "case" | "catch" | "class" | "clone" | "const" | "continue" | "default" | "die"
-            | "do" | "echo" | "else" | "elseif" | "empty" | "endfor" | "endforeach" | "endif"
+            "abstract" | "and" | "as" | "bool" | "boolean" | "break" | "callable" | "case"
+            | "catch" | "class" | "clone" | "const" | "continue" | "default" | "die" | "do"
+            | "echo" | "else" | "elseif" | "empty" | "endfor" | "endforeach" | "endif"
             | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false" | "final"
             | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
             | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof"

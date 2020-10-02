@@ -15,7 +15,7 @@ function expectSetOfInt(Set<int> $s):void { }
 // Let's just check that ground subtyping against KeyedContainer works as expected
 function test_KeyedContainer_subtype(
   // Vector-like stuff
-  array<int> $a,
+  varray<int> $a,
   vec<int> $v,
   Vector<num> $vector,
   keyset<string> $ks,
@@ -35,7 +35,7 @@ class Inv<T> {
 function test_array_append_on_tvar(
   bool $b,
   // Vector-like stuff
-  array<int> $a,
+  varray<int> $a,
   vec<int> $v,
   Vector<num> $vector,
   keyset<string> $ks,

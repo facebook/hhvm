@@ -7,7 +7,7 @@ class BarImpl implements IMemoizeParam {
   }
 }
 
-newtype Bar = array<array<BarImpl>>;
+newtype Bar = varray<varray<BarImpl>>;
 
 //// file2.php
 <?hh // partial

@@ -15,7 +15,7 @@ function get_untyped_val() {
   return varray[1, 2];
 }
 
-function f(array $x): void {
+function f(varray $x): void {
   list($x, $y) = get_untyped_val();
   g($x);
   g($y);

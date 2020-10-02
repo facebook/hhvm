@@ -9,11 +9,11 @@
  *
  */
 
-function foo<T>(mixed $x): array<T> {
+function foo<T>(mixed $x): varray<T> {
   return varray[];
 }
 
-function a<T>(): array<T> {
+function a<T>(): varray<T> {
   return varray[];
 }
 

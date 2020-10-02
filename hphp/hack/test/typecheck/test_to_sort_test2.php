@@ -14,7 +14,7 @@ class AddressBook extends AddressBookContactCollection {
   private $ownerId;
   private $fbContacts = null;
 
-  public function __construct($owner_id, array $contacts) {
+  public function __construct($owner_id, varray $contacts) {
     $this->ownerId = $owner_id;
     parent::__construct($contacts);
   }

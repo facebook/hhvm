@@ -859,10 +859,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     )),
                 ))
             }
-            Node::Array(pos) => Some(Ty(
-                self.alloc(Reason::hint(pos)),
-                self.alloc(Ty_::Tarray(self.alloc((None, None)))),
-            )),
             Node::Varray(pos) => Some(Ty(
                 self.alloc(Reason::hint(pos)),
                 self.alloc(Ty_::Tvarray(tany())),
@@ -1499,10 +1495,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     None => Ty_::Tapply(self.alloc((id, converted_targs))),
                 }
             }
-            Ty_::Tarray(&(tk, tv)) => Ty_::Tarray(self.alloc((
-                tk.map(|tk| self.convert_tapply_to_tgeneric(tk)),
-                tv.map(|tv| self.convert_tapply_to_tgeneric(tv)),
-            ))),
             Ty_::Tlike(ty) => Ty_::Tlike(self.convert_tapply_to_tgeneric(ty)),
             Ty_::TpuAccess(&(ty, id)) => {
                 Ty_::TpuAccess(self.alloc((self.convert_tapply_to_tgeneric(ty), id)))
@@ -1827,7 +1819,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
             TokenKind::Resource => self.prim_ty(aast::Tprim::Tresource, token_pos(self)),
-            TokenKind::Array => Node::Array(token_pos(self)),
             TokenKind::Darray => Node::Darray(token_pos(self)),
             TokenKind::Varray => Node::Varray(token_pos(self)),
             TokenKind::Backslash => Node::Backslash(token_pos(self)),
@@ -3666,18 +3657,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         )
     }
 
-    fn make_vector_array_type_specifier(
-        &mut self,
-        array: Self::R,
-        _less_than: Self::R,
-        tparam: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
-        let pos = self.merge_positions(array, greater_than);
-        let key_type = self.node_to_ty(tparam);
-        self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, None))))
-    }
-
     fn make_darray_type_specifier(
         &mut self,
         darray: Self::R,
@@ -3692,21 +3671,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let key_type = self.node_to_ty(key_type).unwrap_or(TANY);
         let value_type = self.node_to_ty(value_type).unwrap_or(TANY);
         self.hint_ty(pos, Ty_::Tdarray(self.alloc((key_type, value_type))))
-    }
-
-    fn make_map_array_type_specifier(
-        &mut self,
-        array: Self::R,
-        _less_than: Self::R,
-        key_type: Self::R,
-        _comma: Self::R,
-        value_type: Self::R,
-        greater_than: Self::R,
-    ) -> Self::R {
-        let pos = self.merge_positions(array, greater_than);
-        let key_type = self.node_to_ty(key_type);
-        let value_type = self.node_to_ty(value_type);
-        self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, value_type))))
     }
 
     fn make_old_attribute_specification(

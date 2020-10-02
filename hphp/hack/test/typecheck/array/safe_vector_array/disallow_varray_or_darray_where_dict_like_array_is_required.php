@@ -1,6 +1,6 @@
 <?hh // strict
 
-function consumeArrayOfArraykeyToInt(array<arraykey, int> $arg): void {}
+function consumeArrayOfArraykeyToInt(darray<arraykey, int> $arg): void {}
 
 function provideDarrayOrVarrayOfInt(): varray_or_darray<int> {
   return darray["a" => 0];

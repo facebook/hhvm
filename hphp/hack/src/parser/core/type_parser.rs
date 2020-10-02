@@ -223,7 +223,6 @@ where
             | TokenKind::Category
             | TokenKind::XHP
             | TokenKind::XHPClassName => self.parse_simple_type_or_type_constant_or_generic(),
-            | TokenKind::Array => self.parse_array_type_specifier(),
             | TokenKind::Darray => self.parse_darray_type_specifier(),
             | TokenKind::Varray => self.parse_varray_type_specifier(),
             | TokenKind::Vec => self.parse_vec_type_specifier(),
@@ -591,68 +590,6 @@ where
                 let missing = S!(make_missing, self, self.pos());
                 let result = S!(make_type_arguments, self, open_angle, args, missing);
                 (result, no_arg_is_missing)
-            }
-        }
-    }
-
-    fn parse_array_type_specifier(&mut self) -> S::R {
-        // We allow
-        // array
-        // array<type>
-        // array<type, type>
-        // TODO: Put a proper reference to the specification in here.
-        // TODO: in HHVM trailing comma is permitted only in the case with one
-        // type argument: array<type, >
-        // so now it is not really comma-separated list
-        let array_token = self.assert_token(TokenKind::Array);
-        if self.peek_token_kind_with_possible_attributized_type_list() != TokenKind::LessThan {
-            S!(make_simple_type_specifier, self, array_token)
-        } else {
-            let left_angle = self.assert_left_angle_in_type_list_with_possible_attribute();
-            // ERROR RECOVERY: We could improve error recovery by detecting
-            // array<,  and marking the key type as missing.
-            let key_type = self.parse_type_specifier(false, true);
-            let kind = self.peek_token_kind();
-            if kind == TokenKind::GreaterThan {
-                let right_angle = self.fetch_token();
-                S!(
-                    make_vector_array_type_specifier,
-                    self,
-                    array_token,
-                    left_angle,
-                    key_type,
-                    right_angle
-                )
-            } else if kind == TokenKind::Comma {
-                let comma = self.fetch_token();
-                let next_token_kind = self.peek_token_kind();
-                let value_type = if next_token_kind == TokenKind::GreaterThan {
-                    S!(make_missing, self, self.pos())
-                } else {
-                    self.parse_type_specifier(false, true)
-                };
-                let right_angle = self.require_right_angle();
-                S!(
-                    make_map_array_type_specifier,
-                    self,
-                    array_token,
-                    left_angle,
-                    key_type,
-                    comma,
-                    value_type,
-                    right_angle,
-                )
-            } else {
-                // ERROR RECOVERY: TokenKind::Assume that the > is missing and keep going.
-                let right_angle = S!(make_missing, self, self.pos());
-                S!(
-                    make_vector_array_type_specifier,
-                    self,
-                    array_token,
-                    left_angle,
-                    key_type,
-                    right_angle
-                )
             }
         }
     }

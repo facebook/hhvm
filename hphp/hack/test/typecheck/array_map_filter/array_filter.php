@@ -1,9 +1,8 @@
 <?hh // partial
 
 function test_array_filter(
-  array $untyped_array,
-  array<?string> $vector_array,
-  array<int, ?string> $hashtable_array,
+  varray<?string> $vector_array,
+  darray<int, ?string> $hashtable_array,
   Container<?string> $container,
   KeyedContainer<int, ?string> $keyed_container,
   int $int,
@@ -12,7 +11,6 @@ function test_array_filter(
   $f = $x ==> true;
   $intersection_type = $int ? $container : $keyed_container;
 
-  hh_show(array_filter($untyped_array));
   take_string_array(array_filter($vector_array));
   take_int_string_array(array_filter($hashtable_array));
   hh_show(array_filter($container));
@@ -20,7 +18,6 @@ function test_array_filter(
   hh_show(array_filter($untyped));
   take_arraykey_string_array(array_filter($intersection_type));
 
-  hh_show(array_filter($untyped_array, $f));
   hh_show(array_filter($vector_array, $f));
   take_int_nullable_string_nullabarray(array_filter($hashtable_array, $f));
   take_arraykey_nullable_string_array(array_filter($container, $f));
@@ -29,9 +26,9 @@ function test_array_filter(
   take_arraykey_nullable_string_array(array_filter($intersection_type, $f));
 }
 
-function take_string_array(array<string> $_):void {}
-function take_int_string_array(array<int, string> $_) {}
-function take_arraykey_string_array(array<arraykey, string> $_) {}
+function take_string_array(varray<string> $_):void {}
+function take_int_string_array(darray<int, string> $_) {}
+function take_arraykey_string_array(darray<arraykey, string> $_) {}
 
-function take_int_nullable_string_nullabarray(array<int, ?string> $_) {}
-function take_arraykey_nullable_string_array(array<arraykey, ?string> $_) {}
+function take_int_nullable_string_nullabarray(darray<int, ?string> $_) {}
+function take_arraykey_nullable_string_array(darray<arraykey, ?string> $_) {}

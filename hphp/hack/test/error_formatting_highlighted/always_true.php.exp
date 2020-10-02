@@ -4,7 +4,7 @@ Typing[4151] This expression is always true [1]
 always_true.php:4:7
     1 | <?hh // strict
     2 | 
-[2] 3 | function foo(array<int> $arg): void {
+[2] 3 | function foo(varray<int> $arg): void {
 [1] 4 |   if (null !== $arg) {
     5 |   }
     6 | }

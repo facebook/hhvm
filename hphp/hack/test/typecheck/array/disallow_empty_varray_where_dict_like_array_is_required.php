@@ -1,5 +1,5 @@
 <?hh // partial
 
-function test(): array<string, string> {
+function test(): darray<string, string> {
   return varray[];
 }

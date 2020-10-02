@@ -9,11 +9,11 @@
  *
  */
 
-function get_arr(): array<int> {
+function get_arr(): varray<int> {
   return varray[1, 2, 3];
 }
 
-function use_arr(array<bool> $arr): void {}
+function use_arr(varray<bool> $arr): void {}
 
 function test(): void {
   $a = get_arr();

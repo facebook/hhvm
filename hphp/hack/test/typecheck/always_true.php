@@ -1,6 +1,6 @@
 <?hh //strict
 
-function foo(array<int> $arg): void {
+function foo(varray<int> $arg): void {
   if (null !== $arg) {
   }
 }

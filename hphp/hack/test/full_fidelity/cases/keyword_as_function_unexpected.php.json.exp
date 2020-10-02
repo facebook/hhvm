@@ -188,20 +188,17 @@
               }
             },
             "function_name":{
-              "kind":"error",
-              "error_error":{
-                "kind":"token",
-                "token":{
-                  "kind":"array",
-                  "text":"array",
-                  "offset":66,
-                  "leading_width":0,
-                  "width":5,
-                  "trailing_width":0,
-                  "leading":[],
-                  "trailing":[],
-                  "line_number":5
-                }
+              "kind":"token",
+              "token":{
+                "kind":"name",
+                "text":"array",
+                "offset":66,
+                "leading_width":0,
+                "width":5,
+                "trailing_width":0,
+                "leading":[],
+                "trailing":[],
+                "line_number":5
               }
             },
             "function_type_parameter_list":{"kind":"missing"},
@@ -6428,7 +6425,7 @@
             "function_call_receiver":{
               "kind":"token",
               "token":{
-                "kind":"array",
+                "kind":"name",
                 "text":"array",
                 "offset":1291,
                 "leading_width":155,

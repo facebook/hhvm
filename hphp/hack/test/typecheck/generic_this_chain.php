@@ -40,7 +40,7 @@ final class Another<T> {
     $this->data = $data;
     return $this;
   }
-  public function magicGetter(array ...$args): ?T {
+  public function magicGetter(varray ...$args): ?T {
     return $this->data ? $this->data->data : null;
   }
   public static function make(Gen<T> $data): this {

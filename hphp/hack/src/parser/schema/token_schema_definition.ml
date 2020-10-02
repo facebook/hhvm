@@ -77,7 +77,6 @@ let no_text_tokens = [make_token_node "EndOfFile" "end_of_file" ()]
 let given_text_tokens =
   [
     make_token_node "Abstract" "abstract" ();
-    make_token_node "Array" "array" ();
     make_token_node "Arraykey" "arraykey" ~allowed_as_identifier:true ();
     make_token_node "As" "as" ();
     make_token_node "Async" "async" ();

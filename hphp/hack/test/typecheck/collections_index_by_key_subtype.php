@@ -12,11 +12,11 @@ interface I {}
 
 abstract class IDerived implements I {}
 
-function arrayTest(array<I> $arr, IntSubtype $key): void {
+function arrayTest(varray<I> $arr, IntSubtype $key): void {
   echo $arr[$key];
 }
 
-function dictTest(array<int, I> $dict, IntSubtype $key): void {
+function dictTest(darray<int, I> $dict, IntSubtype $key): void {
   echo $dict[$key];
 }
 

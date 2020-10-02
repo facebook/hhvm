@@ -293,9 +293,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.KeysetTypeSpecifier _ -> tag validate_keyset_type_specifier (fun x -> SpecKeyset x) x
     | Syntax.TupleTypeExplicitSpecifier _ -> tag validate_tuple_type_explicit_specifier (fun x -> SpecTupleTypeExplicit x) x
     | Syntax.VarrayTypeSpecifier _ -> tag validate_varray_type_specifier (fun x -> SpecVarray x) x
-    | Syntax.VectorArrayTypeSpecifier _ -> tag validate_vector_array_type_specifier (fun x -> SpecVectorArray x) x
     | Syntax.DarrayTypeSpecifier _ -> tag validate_darray_type_specifier (fun x -> SpecDarray x) x
-    | Syntax.MapArrayTypeSpecifier _ -> tag validate_map_array_type_specifier (fun x -> SpecMapArray x) x
     | Syntax.DictionaryTypeSpecifier _ -> tag validate_dictionary_type_specifier (fun x -> SpecDictionary x) x
     | Syntax.ClosureTypeSpecifier _ -> tag validate_closure_type_specifier (fun x -> SpecClosure x) x
     | Syntax.ClosureParameterTypeSpecifier _ -> tag validate_closure_parameter_type_specifier (fun x -> SpecClosureParameter x) x
@@ -321,9 +319,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | SpecKeyset            thing -> invalidate_keyset_type_specifier          (value, thing)
     | SpecTupleTypeExplicit thing -> invalidate_tuple_type_explicit_specifier  (value, thing)
     | SpecVarray            thing -> invalidate_varray_type_specifier          (value, thing)
-    | SpecVectorArray       thing -> invalidate_vector_array_type_specifier    (value, thing)
     | SpecDarray            thing -> invalidate_darray_type_specifier          (value, thing)
-    | SpecMapArray          thing -> invalidate_map_array_type_specifier       (value, thing)
     | SpecDictionary        thing -> invalidate_dictionary_type_specifier      (value, thing)
     | SpecClosure           thing -> invalidate_closure_type_specifier         (value, thing)
     | SpecClosureParameter  thing -> invalidate_closure_parameter_type_specifier (value, thing)
@@ -3189,24 +3185,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
-  and validate_vector_array_type_specifier : vector_array_type_specifier validator = function
-  | { Syntax.syntax = Syntax.VectorArrayTypeSpecifier x; value = v } -> v,
-    { vector_array_right_angle = validate_token x.vector_array_right_angle
-    ; vector_array_type = validate_specifier x.vector_array_type
-    ; vector_array_left_angle = validate_token x.vector_array_left_angle
-    ; vector_array_keyword = validate_token x.vector_array_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.VectorArrayTypeSpecifier) s
-  and invalidate_vector_array_type_specifier : vector_array_type_specifier invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.VectorArrayTypeSpecifier
-      { vector_array_keyword = invalidate_token x.vector_array_keyword
-      ; vector_array_left_angle = invalidate_token x.vector_array_left_angle
-      ; vector_array_type = invalidate_specifier x.vector_array_type
-      ; vector_array_right_angle = invalidate_token x.vector_array_right_angle
-      }
-    ; Syntax.value = v
-    }
   and validate_type_parameter : type_parameter validator = function
   | { Syntax.syntax = Syntax.TypeParameter x; value = v } -> v,
     { type_constraints = validate_list_with (validate_type_constraint) x.type_constraints
@@ -3264,28 +3242,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; darray_value = invalidate_simple_type_specifier x.darray_value
       ; darray_trailing_comma = invalidate_option_with (invalidate_token) x.darray_trailing_comma
       ; darray_right_angle = invalidate_token x.darray_right_angle
-      }
-    ; Syntax.value = v
-    }
-  and validate_map_array_type_specifier : map_array_type_specifier validator = function
-  | { Syntax.syntax = Syntax.MapArrayTypeSpecifier x; value = v } -> v,
-    { map_array_right_angle = validate_token x.map_array_right_angle
-    ; map_array_value = validate_specifier x.map_array_value
-    ; map_array_comma = validate_token x.map_array_comma
-    ; map_array_key = validate_specifier x.map_array_key
-    ; map_array_left_angle = validate_token x.map_array_left_angle
-    ; map_array_keyword = validate_token x.map_array_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.MapArrayTypeSpecifier) s
-  and invalidate_map_array_type_specifier : map_array_type_specifier invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.MapArrayTypeSpecifier
-      { map_array_keyword = invalidate_token x.map_array_keyword
-      ; map_array_left_angle = invalidate_token x.map_array_left_angle
-      ; map_array_key = invalidate_specifier x.map_array_key
-      ; map_array_comma = invalidate_token x.map_array_comma
-      ; map_array_value = invalidate_specifier x.map_array_value
-      ; map_array_right_angle = invalidate_token x.map_array_right_angle
       }
     ; Syntax.value = v
     }

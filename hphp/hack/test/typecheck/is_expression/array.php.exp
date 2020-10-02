@@ -1,36 +1,30 @@
 File "array.php", line 5, characters 5-15:
-  varray_or_darray<arraykey, _>
+  varray<_>
 File "array.php", line 7, characters 5-15:
-  varray<_>
+  darray<_, _>
 File "array.php", line 9, characters 5-15:
-  darray<_, _>
-File "array.php", line 11, characters 5-15:
   varray<_>
-File "array.php", line 13, characters 5-15:
+File "array.php", line 11, characters 5-15:
   darray<_, _>
-File "array.php", line 15, characters 5-15:
+File "array.php", line 13, characters 5-15:
   varray_or_darray<arraykey, _>
-File "array.php", line 4, characters 13-17:
+File "array.php", line 4, characters 13-21:
 Invalid `is` expression hint (Typing[4195])
-File "array.php", line 4, characters 13-17:
-The `is` operator cannot be used with an array type
-File "array.php", line 6, characters 20-27:
+  File "array.php", line 4, characters 13-21:
+  The `is` operator cannot be used with an array type
+File "array.php", line 6, characters 20-31:
 Invalid `is` expression hint (Typing[4195])
-File "array.php", line 6, characters 20-27:
-The `is` operator cannot be used with an array type
-File "array.php", line 8, characters 20-30:
+  File "array.php", line 6, characters 20-31:
+  The `is` operator cannot be used with an array type
+File "array.php", line 8, characters 20-28:
 Invalid `is` expression hint (Typing[4195])
-File "array.php", line 8, characters 20-30:
-The `is` operator cannot be used with an array type
-File "array.php", line 10, characters 20-28:
+  File "array.php", line 8, characters 20-28:
+  The `is` operator cannot be used with an array type
+File "array.php", line 10, characters 20-31:
 Invalid `is` expression hint (Typing[4195])
-File "array.php", line 10, characters 20-28:
-The `is` operator cannot be used with an array type
-File "array.php", line 12, characters 20-31:
+  File "array.php", line 10, characters 20-31:
+  The `is` operator cannot be used with an array type
+File "array.php", line 12, characters 20-38:
 Invalid `is` expression hint (Typing[4195])
-File "array.php", line 12, characters 20-31:
-The `is` operator cannot be used with an array type
-File "array.php", line 14, characters 20-38:
-Invalid `is` expression hint (Typing[4195])
-File "array.php", line 14, characters 20-38:
-The `is` operator cannot be used with an array type
+  File "array.php", line 12, characters 20-38:
+  The `is` operator cannot be used with an array type

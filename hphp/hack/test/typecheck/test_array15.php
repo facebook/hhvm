@@ -10,13 +10,13 @@
  */
 
 class X {
-  public array<int> $v = darray[];
+  public varray<int> $v = darray[];
 
   public function set(int $x): void {
     $this->v[0] = $x;
   }
 }
 
-function test(array<int> &$x): void {
+function test(varray<int> &$x): void {
   $x[0] = 33;
 }

@@ -6,7 +6,7 @@ File "primitive_casing_cast.php", line 4, characters 11-16:
 Unbound name: `strING` (Naming[2049])
 File "primitive_casing_cast.php", line 4, characters 10-21:
 Invalid return type (Typing[4110])
-File "primitive_casing_cast.php", line 3, characters 25-30:
-Expected `string`
-File "primitive_casing_cast.php", line 4, characters 11-16:
-But got `strING`
+  File "primitive_casing_cast.php", line 3, characters 26-31:
+  Expected `string`
+  File "primitive_casing_cast.php", line 4, characters 11-16:
+  But got `strING`

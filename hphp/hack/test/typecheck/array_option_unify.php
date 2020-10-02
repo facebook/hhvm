@@ -9,6 +9,6 @@
  *
  */
 
-async function foo(): Awaitable<array> {
+async function foo(): Awaitable<varray> {
   return null;
 }

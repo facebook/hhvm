@@ -11,12 +11,10 @@ class A {
  */
 function test1(
   bool $b,
-  array $array,
-  array $array2,
-  array<int> $arrayint,
-  array<int> $arrayint2,
-  array<int, bool> $arrayIntBool,
-  array<int, bool> $arrayIntBool2,
+  varray<int> $arrayint,
+  varray<int> $arrayint2,
+  darray<int, bool> $arrayIntBool,
+  darray<int, bool> $arrayIntBool2,
   varray<int> $va1,
   varray<int> $va2,
   varray_or_darray<int> $varraydarray,
@@ -38,34 +36,6 @@ function test1(
     $x = varray[]; // AKvarray
   } else {
     $x = varray[1]; // AKvarray
-  }
-  hh_show($x);
-  hh_show($x[0]);
-  expect_int_array($x);
-
-  if ($b) {
-    $x = $array; // AKany
-  } else {
-    $x = $array2; // AKany
-  }
-  hh_show($x);
-  hh_show($x[0]);
-  expect_array($x);
-
-  if ($b) {
-    $x = varray[1]; // AKvarray
-  } else {
-    $x = $array; // AKany
-  }
-  hh_show($x);
-  hh_show($x[0]);
-  // no safe array mode, so this unions as AKvarray
-  expect_int_array($x);
-
-  if ($b) {
-    $x = $arrayint; // AKvarray
-  } else {
-    $x = $array; // AKany
   }
   hh_show($x);
   hh_show($x[0]);
@@ -181,11 +151,11 @@ function test1(
   hh_show($x[0]);
 }
 
-function expect_array<T>(array<T> $x): void {}
-function expect_int_array(array<int> $x): void {}
-function expect_string_array(array<string> $x): void {}
-function expect_arraykey_array(array<arraykey> $x): void {}
+function expect_array<T>(varray<T> $x): void {}
+function expect_int_array(varray<int> $x): void {}
+function expect_string_array(varray<string> $x): void {}
+function expect_arraykey_array(varray<arraykey> $x): void {}
 function expect_arraykey_varray(varray<arraykey> $x): void {}
-function expect_arraykey_arraykey_array(array<arraykey, arraykey> $x): void {}
+function expect_arraykey_arraykey_array(darray<arraykey, arraykey> $x): void {}
 function expect_arraykey_arraykey_darray(darray<arraykey, arraykey> $x): void {}
 function expect_varray_array<T>(varray_or_darray<T> $x): void {}

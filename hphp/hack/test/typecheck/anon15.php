@@ -9,7 +9,7 @@
  *
  */
 
-$foo = function(array<string, mixed> $rel): array<string, mixed> {
+$foo = function(darray<string, mixed> $rel): darray<string, mixed> {
   return darray[
     'id'       => $rel['id'],
     'relation' => $rel['relation_type'],

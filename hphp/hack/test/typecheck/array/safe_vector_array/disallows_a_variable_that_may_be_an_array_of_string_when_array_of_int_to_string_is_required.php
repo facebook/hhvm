@@ -1,6 +1,6 @@
 <?hh // strict
 
-function consumeArrayOfIntToString(array<int, string> $_): void {}
+function consumeArrayOfIntToString(darray<int, string> $_): void {}
 
 /**
  * Test confilicting AKempty promotions - in one branch it's promoted to

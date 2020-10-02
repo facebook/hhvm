@@ -1,8 +1,8 @@
 <?hh // partial
 
 function test_array_filter(
-  array $untyped_array,
-  array<?string> $vector_array,
+  varray_or_darray $untyped_array,
+  varray<?string> $vector_array,
   Container<?string> $container,
   KeyedContainer<int, ?string> $keyed_container,
   $untyped,

@@ -4,7 +4,7 @@
  * Regression test: newlines in strings used to mess up line numbers in error
  * messages.
  */
-function test(?array<int> $a) {
+function test(?varray<int> $a) {
   $x = "
     ";
   $x = "

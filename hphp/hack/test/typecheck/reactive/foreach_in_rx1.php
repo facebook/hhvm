@@ -1,7 +1,7 @@
 <?hh // strict
 
 <<__Rx>>
-function f1(array<int> $a): void {
+function f1(varray<int> $a): void {
   // OK
   foreach ($a as $c) {
   }
@@ -52,7 +52,7 @@ function f7<T as \HH\Rx\Traversable<int>>(T $a): void {
 }
 
 <<__Rx>>
-function toArray(Iterable<int> $a): array<int> {
+function toArray(Iterable<int> $a): varray<int> {
   throw new Exception();
 }
 

@@ -1,6 +1,6 @@
 <?hh // partial
 
-function bar(): array<int, ?int> {
+function bar(): darray<int, ?int> {
   return darray[123 => null, 456 => 789];
 }
 

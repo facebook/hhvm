@@ -2077,14 +2077,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             trailing_comma
             right_a;
         ]
-    | Syntax.VectorArrayTypeSpecifier
-        {
-          vector_array_keyword = kw;
-          vector_array_left_angle = left_a;
-          vector_array_type = vec_type;
-          vector_array_right_angle = right_a;
-        } ->
-      Concat [t env kw; transform_braced_item env left_a vec_type right_a]
     | Syntax.VectorTypeSpecifier
         {
           vector_type_keyword = kw;
@@ -2164,23 +2156,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat
         [
           t env kw; transform_argish env ~allow_trailing:true left_a args right_a;
-        ]
-    | Syntax.MapArrayTypeSpecifier
-        {
-          map_array_keyword = kw;
-          map_array_left_angle = left_a;
-          map_array_key = key;
-          map_array_comma = comma_kw;
-          map_array_value = value;
-          map_array_right_angle = right_a;
-        } ->
-      Concat
-        [
-          t env kw;
-          (let key_list_item = Syntax.make_list_item key comma_kw in
-           let val_list_item = Syntax.make_list_item value (make_missing ()) in
-           let args = make_list [key_list_item; val_list_item] in
-           transform_argish env ~allow_trailing:false left_a args right_a);
         ]
     | Syntax.DictionaryTypeSpecifier
         {

@@ -400,7 +400,7 @@
                               "simple_type_specifier":{
                                 "kind":"token",
                                 "token":{
-                                  "kind":"array",
+                                  "kind":"name",
                                   "text":"array",
                                   "offset":215,
                                   "leading_width":0,

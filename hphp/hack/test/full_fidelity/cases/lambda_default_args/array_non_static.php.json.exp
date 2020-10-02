@@ -424,11 +424,11 @@
                                 "parameter_visibility":{"kind":"missing"},
                                 "parameter_call_convention":{"kind":"missing"},
                                 "parameter_type":{
-                                  "kind":"vector_array_type_specifier",
-                                  "vector_array_keyword":{
+                                  "kind":"generic_type_specifier",
+                                  "generic_class_type":{
                                     "kind":"token",
                                     "token":{
-                                      "kind":"array",
+                                      "kind":"name",
                                       "text":"array",
                                       "offset":85,
                                       "leading_width":0,
@@ -439,49 +439,61 @@
                                       "line_number":8
                                     }
                                   },
-                                  "vector_array_left_angle":{
-                                    "kind":"token",
-                                    "token":{
-                                      "kind":"<",
-                                      "text":"<",
-                                      "offset":90,
-                                      "leading_width":0,
-                                      "width":1,
-                                      "trailing_width":0,
-                                      "leading":[],
-                                      "trailing":[],
-                                      "line_number":8
-                                    }
-                                  },
-                                  "vector_array_type":{
-                                    "kind":"simple_type_specifier",
-                                    "simple_type_specifier":{
+                                  "generic_argument_list":{
+                                    "kind":"type_arguments",
+                                    "type_arguments_left_angle":{
                                       "kind":"token",
                                       "token":{
-                                        "kind":"int",
-                                        "text":"int",
-                                        "offset":91,
+                                        "kind":"<",
+                                        "text":"<",
+                                        "offset":90,
                                         "leading_width":0,
-                                        "width":3,
+                                        "width":1,
                                         "trailing_width":0,
                                         "leading":[],
                                         "trailing":[],
                                         "line_number":8
                                       }
-                                    }
-                                  },
-                                  "vector_array_right_angle":{
-                                    "kind":"token",
-                                    "token":{
-                                      "kind":">",
-                                      "text":">",
-                                      "offset":94,
-                                      "leading_width":0,
-                                      "width":1,
-                                      "trailing_width":1,
-                                      "leading":[],
-                                      "trailing":[{"kind":"whitespace","text":" ","offset":95,"width":1}],
-                                      "line_number":8
+                                    },
+                                    "type_arguments_types":{
+                                      "kind":"list",
+                                      "elements":[
+                                        {
+                                          "kind":"list_item",
+                                          "list_item":{
+                                            "kind":"simple_type_specifier",
+                                            "simple_type_specifier":{
+                                              "kind":"token",
+                                              "token":{
+                                                "kind":"int",
+                                                "text":"int",
+                                                "offset":91,
+                                                "leading_width":0,
+                                                "width":3,
+                                                "trailing_width":0,
+                                                "leading":[],
+                                                "trailing":[],
+                                                "line_number":8
+                                              }
+                                            }
+                                          },
+                                          "list_separator":{"kind":"missing"}
+                                        }
+                                      ]
+                                    },
+                                    "type_arguments_right_angle":{
+                                      "kind":"token",
+                                      "token":{
+                                        "kind":">",
+                                        "text":">",
+                                        "offset":94,
+                                        "leading_width":0,
+                                        "width":1,
+                                        "trailing_width":1,
+                                        "leading":[],
+                                        "trailing":[{"kind":"whitespace","text":" ","offset":95,"width":1}],
+                                        "line_number":8
+                                      }
                                     }
                                   }
                                 },

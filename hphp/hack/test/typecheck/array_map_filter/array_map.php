@@ -1,6 +1,6 @@
 <?hh // partial
 
-function expect_array_bool(array<bool> $a): void {}
+function expect_array_bool(varray<bool> $a): void {}
 function test(
   (function(int, string): bool) $f,
   Container<int> $x,

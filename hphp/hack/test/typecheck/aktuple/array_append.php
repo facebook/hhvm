@@ -5,7 +5,7 @@
 
 enum E : int { A = 2; };
 
-function expectArrayAK(array<arraykey> $a):void { }
+function expectArrayAK(varray<arraykey> $a):void { }
 
 function test(): void {
   $a = varray[4, 'aaa'];

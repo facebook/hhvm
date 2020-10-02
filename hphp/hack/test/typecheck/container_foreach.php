@@ -36,15 +36,11 @@ function foo4(KeyedContainer<int, string> $p) {
   }
 }
 
-function arr1(array $arr) {
-// foo1($arr);
-  foo3($arr);
-}
-function arr2(array<string> $arr) {
+function arr2(varray<string> $arr) {
 //  foo1($arr);
   foo3($arr);
 }
-function arr3(array<int, string> $arr) {
+function arr3(darray<int, string> $arr) {
 //  foo1($arr);
   foo3($arr);
 }

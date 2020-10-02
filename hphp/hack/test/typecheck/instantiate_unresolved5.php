@@ -12,7 +12,7 @@
 function any() {
 }
 
-function arr<T>(array<T> $x): array<array<T>> {
+function arr<T>(varray<T> $x): varray<varray<T>> {
   return varray[$x];
 }
 

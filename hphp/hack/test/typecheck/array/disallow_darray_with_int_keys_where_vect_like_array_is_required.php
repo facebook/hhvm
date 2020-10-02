@@ -3,15 +3,15 @@
 /**
  * Be aware that:
  *
- *   array<int, string> <: array<string>
+ *   darray<int, string> <: varray<string>
  *
  * But:
  *
- *   array<string> !<: array<int, string>
+ *   varray<string> !<: darray<int, string>
  *
  * This test is the analog of the above, but with darray.
  */
 
-function test(): array<string> {
+function test(): varray<string> {
   return darray[0 => "tingley"];
 }

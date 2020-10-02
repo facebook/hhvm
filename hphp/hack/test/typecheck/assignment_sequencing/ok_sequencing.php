@@ -13,16 +13,16 @@ class A {
 }
 
 
-function test1(array<int> $a): int {
+function test1(varray<int> $a): int {
   list($x, $y, $z) = $a;
   return $x;
 }
-function test2(array<array<int>> $a): int {
+function test2(varray<varray<int>> $a): int {
   list($x, $y, list($z, $w)) = $a;
   return $z;
 }
 
-function test3(array<array<int>> $a): int {
+function test3(varray<varray<int>> $a): int {
   $x = 0;
   list($x, $y, $z) = $a[$x];
   return $x;

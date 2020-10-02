@@ -6,7 +6,7 @@ function f($a) {
 }
 
 // partially typed array
-function g(array $a) {
+function g(varray_or_darray $a) {
   <unchecked>echo</unchecked> <partial>$a</partial>;
 }
 

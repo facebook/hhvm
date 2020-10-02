@@ -19,7 +19,7 @@ class MyClassClosureRunner {
 }
 
 function expectsMyClosureRunnerMyClass(
-  array<string, MyClosureRunner<MyClass>> $p,
+  darray<string, MyClosureRunner<MyClass>> $p,
 ): MyClosureRunner<MyClass> {
   $r = $p['a'];
   return $r;

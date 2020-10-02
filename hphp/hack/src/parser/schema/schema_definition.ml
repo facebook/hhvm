@@ -1988,21 +1988,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "VectorArrayTypeSpecifier";
-      type_name = "vector_array_type_specifier";
-      func_name = "vector_array_type_specifier";
-      description = "vector_array_type_specifier";
-      prefix = "vector_array";
-      aggregates = [Specifier];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_angle", Token);
-          ("type", Aggregate Specifier);
-          ("right_angle", Token);
-        ];
-    };
-    {
       kind_name = "TypeParameter";
       type_name = "type_parameter";
       func_name = "type_parameter";
@@ -2043,23 +2028,6 @@ let schema : schema_node list =
           ("comma", Token);
           ("value", Just "SimpleTypeSpecifier");
           ("trailing_comma", ZeroOrOne Token);
-          ("right_angle", Token);
-        ];
-    };
-    {
-      kind_name = "MapArrayTypeSpecifier";
-      type_name = "map_array_type_specifier";
-      func_name = "map_array_type_specifier";
-      description = "map_array_type_specifier";
-      prefix = "map_array";
-      aggregates = [Specifier];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_angle", Token);
-          ("key", Aggregate Specifier);
-          ("comma", Token);
-          ("value", Aggregate Specifier);
           ("right_angle", Token);
         ];
     };

@@ -23,4 +23,4 @@ function f() {
   yield wait_forvar($arr);
 }
 
-function wait_forvar(array<int, int> $arr) {}
+function wait_forvar(darray<int, int> $arr) {}

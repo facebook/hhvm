@@ -5,5 +5,5 @@ abstract final class Foo {
 }
 
 function takes_complex_foo(
-  Vector<array<Awaitable<Foo>>> $foo
+  Vector<varray<Awaitable<Foo>>> $foo
 ) {}

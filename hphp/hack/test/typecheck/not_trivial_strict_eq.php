@@ -11,7 +11,7 @@
 
 function f() {}
 
-function getArr(): array<int> { return varray[]; }
+function getArr(): varray<int> { return varray[]; }
 
 function g(): void {
   $a = getArr();

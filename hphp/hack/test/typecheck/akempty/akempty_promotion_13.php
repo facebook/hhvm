@@ -5,7 +5,7 @@
  * assignment
  */
 
-function test(): ConstVector<ConstVector<array<string, string>>> {
+function test(): ConstVector<ConstVector<darray<string, string>>> {
   $v1 = Vector { Vector { darray[] } };
   $v2 = $v1[0];
   $v3 = $v2[0];

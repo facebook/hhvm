@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function omg(): (?string, array<int>) {
+function omg(): (?string, varray<int>) {
   $x = varray[];
   return $x;
 }

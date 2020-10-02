@@ -54,7 +54,7 @@ const shape(WithConst::CSTRING => int) SHAPE2 =
 const shape('a' => int, 'b' => string, ...) SHAPE3 =
   shape('a' => 42, 'b' => 'foo', 'c' => 3.14);
 const (int, ?(string, float)) OPTION = tuple(7, null);
-const array<string, int> ARR = darray['a' => 1, 'b' => 2];
+const darray<string, int> ARR = darray['a' => 1, 'b' => 2];
 const darray<string, int> AGE_RANGE = darray['min' => 21];
 const varray<string> MAP_INDEX = varray['MAP_1', 'MAP_2'];
 const classname<WithConst> CLASSNAME = WithConst::class;

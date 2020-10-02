@@ -12,13 +12,13 @@ function expectString(string $s):void { }
 // Let's just check that ground subtyping against KeyedContainer works as expected
 function test_KeyedContainer_subtype(
   // Vector-like stuff
-  array<bool> $a1,
+  varray<bool> $a1,
   vec<bool> $v,
   Vector<bool> $vector,
   ConstVector<bool> $cvector,
   ImmVector<bool> $ivector,
   // Map-like stuff
-  array<string,float> $a2,
+  darray<string,float> $a2,
   dict<string,float> $d,
   Map<string,float> $map,
   ImmMap<string,float> $imap,
@@ -44,13 +44,13 @@ class Inv<T> {
 
 function test_array_get_on_tvar(
   // Vector-like stuff
-  array<bool> $a1,
+  varray<bool> $a1,
   vec<bool> $v,
   Vector<bool> $vector,
   ConstVector<bool> $cvector,
   ImmVector<bool> $ivector,
   // Map-like stuff
-  array<string,float> $a2,
+  darray<string,float> $a2,
   dict<string,float> $d,
   Map<string,float> $map,
   ImmMap<string,float> $imap,

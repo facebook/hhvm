@@ -1,7 +1,7 @@
 ////file1.php
 <?hh // partial
 /* HH_FIXME[4110] */
-function getArray(): array {
+function getArray(): varray {
 }
 
 /* HH_FIXME[4110] */
@@ -15,6 +15,6 @@ function mapFromKeys<Tk as arraykey, Tv>(
 <?hh // strict
 
 class C { }
-  function foo(array<classname<C>> $a) : Map<string, classname<C>> {
+  function foo(varray<classname<C>> $a) : Map<string, classname<C>> {
     return mapFromKeys(getArray(), $t ==> $t);
 }

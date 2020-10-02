@@ -1,7 +1,7 @@
 //// file1.php
 <?hh // partial
 
-newtype Bar = array<int>;
+newtype Bar = varray<int>;
 
 //// file2.php
 <?hh // partial

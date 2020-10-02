@@ -9,7 +9,7 @@
  *
  */
 
-function get_keys<T2>(array<bool, T2> $x): array<bool> {
+function get_keys<T2>(darray<bool, T2> $x): varray<bool> {
   $result = varray[];
   foreach ($x as $k => $v) {
     $result[] = $k;
@@ -17,6 +17,6 @@ function get_keys<T2>(array<bool, T2> $x): array<bool> {
   return $result;
 }
 
-function test(array<int> $a): void {
+function test(varray<int> $a): void {
   get_keys($a);
 }

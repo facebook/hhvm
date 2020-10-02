@@ -18,11 +18,12 @@ Parsed decls:
             { et_enforced = false;
               et_type =
               (Rhint (root|array_typehints.php line 3, characters 16-33),
-               (Tarray (
-                  (Some (Rhint (root|array_typehints.php line 3, characters 22-24),
-                         (Tprim Tint))),
-                  (Some (Rhint (root|array_typehints.php line 3, characters 27-32),
-                         (Tprim Tstring)))
+               (Tapply (([3:16-21], "\\array"),
+                  [(Rhint (root|array_typehints.php line 3, characters 22-24),
+                    (Tprim Tint));
+                    (Rhint (root|array_typehints.php line 3, characters 27-32),
+                     (Tprim Tstring))
+                    ]
                   )))
               };
             ft_flags =

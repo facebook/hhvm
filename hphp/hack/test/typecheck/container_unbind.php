@@ -5,8 +5,8 @@ class MyContainer<Tv> {
   public function setTuple((string, Tv) $_): void {}
   public function setVector(Vector<Tv> $_): void {}
   public function setMap(Map<string, Tv> $_): void {}
-  public function setMapArray(array<string, Tv> $_): void {}
-  public function setVectorArray(array<Tv> $_): void {}
+  public function setMapArray(darray<string, Tv> $_): void {}
+  public function setVectorArray(varray<Tv> $_): void {}
   public function setShape(shape('x' => Tv) $_): void {}
 }
 

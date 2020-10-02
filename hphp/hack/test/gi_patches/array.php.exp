@@ -1,6 +1,6 @@
 <?hh // partial
 
-function f(array $v) : <<__Soft>> string {
+function f(varray_or_darray $v) : <<__Soft>> string {
   $v[3] = "foo";
   return $v[34897];
 }

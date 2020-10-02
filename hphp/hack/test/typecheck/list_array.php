@@ -14,12 +14,7 @@ function test(): int {
   return $x;
 }
 
-function test2(array $x): int {
-  list($x, $y) = $x;
-  return $x;
-}
-
-function test3(array<int> $x): int {
+function test3(varray<int> $x): int {
   list($x, $y) = $x;
   return $x;
 }

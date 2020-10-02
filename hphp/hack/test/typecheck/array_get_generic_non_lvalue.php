@@ -8,6 +8,6 @@ function f<Tv as KeyedContainer<string, mixed>>(Tv $a): Tv {
   return $a;
 }
 
-function test(array<string, string> $a): array<string, string> {
+function test(darray<string, string> $a): darray<string, string> {
   return f($a);
 }

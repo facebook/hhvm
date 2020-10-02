@@ -2,9 +2,9 @@ File "array_literal_bad.php", line 10, characters 3-15:
   darray<string, classname<(exact C1 | exact C2 | exact D)>>
 File "array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
-File "array_literal_bad.php", line 8, characters 52-52:
-Expected `I`
-File "array_literal_bad.php", line 9, characters 47-47:
-But got `D`
-File "array_literal_bad.php", line 9, characters 47-47:
-  where the class `D` was referenced here
+  File "array_literal_bad.php", line 8, characters 53-53:
+  Expected `I`
+  File "array_literal_bad.php", line 9, characters 47-47:
+  But got `D`
+  File "array_literal_bad.php", line 9, characters 47-47:
+    where the class `D` was referenced here

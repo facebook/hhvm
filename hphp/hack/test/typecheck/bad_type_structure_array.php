@@ -1,6 +1,6 @@
 <?hh // strict
 
-function concrete(TypeStructure<array<int>> $ts): void {
+function concrete(TypeStructure<varray<int>> $ts): void {
   hh_show($ts['kind']);
   hh_show($ts['alias']);
   hh_show($ts['name']);
@@ -18,7 +18,7 @@ function concrete(TypeStructure<array<int>> $ts): void {
   hh_show($ts['kind']);
 }
 
-function generic<T as array<int>>(TypeStructure<T> $ts): void {
+function generic<T as varray<int>>(TypeStructure<T> $ts): void {
   hh_show($ts['kind']);
   hh_show($ts['alias']);
   hh_show($ts['name']);

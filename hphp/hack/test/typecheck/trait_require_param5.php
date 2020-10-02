@@ -5,12 +5,12 @@
 
 abstract class Super<Tk, Tv> {}
 
-abstract class SuperChild<Tv> extends Super<array<mixed>, Tv> {}
+abstract class SuperChild<Tv> extends Super<varray<mixed>, Tv> {}
 
 trait TReq<Tk, Tv> {
   require extends Super<Tk, Awaitable<Tv>>;
 }
 
 class C1 extends SuperChild<Awaitable<bool>> {
-  use TReq<array<mixed>, bool>;
+  use TReq<varray<mixed>, bool>;
 }

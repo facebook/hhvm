@@ -172,7 +172,7 @@ function f(
 
 function getArray(): array<
   string, // strings
-  string // strings
+  string, // strings
 > {
   return darray["foo" => "bar"];
 }
@@ -180,7 +180,7 @@ function getArray(): array<
 function getArray(): array<
   string // strings
   ,
-  string // strings
+  string, // strings
 > {
   return darray["foo" => "bar"];
 }

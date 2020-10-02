@@ -792,15 +792,6 @@ where
                 Self::map_flatten_(&Self::p_hint, ty, env, vec![key])?,
             ))
         };
-        let ban_arrays = |node: &Syntax<T, V>, env: &mut Env| {
-            if env.parser_options.po_disable_array_typehint {
-                Self::raise_parsing_error(
-                    node,
-                    env,
-                    &"Array typehints are no longer legal; use varray or darray instead",
-                );
-            }
-        };
 
         match &node.syntax {
             /* Dirty hack; CastExpression can have type represented by token */
@@ -821,8 +812,6 @@ where
                     suggest(&name, special_typehints::FLOAT);
                 } else if "real".eq_ignore_ascii_case(&name) {
                     suggest(&name, special_typehints::FLOAT);
-                } else if "array".eq_ignore_ascii_case(&name) {
-                    ban_arrays(node, env);
                 }
                 Ok(Happly(ast::Id(pos, name), vec![]))
             }
@@ -881,21 +870,8 @@ where
             ClassnameTypeSpecifier(c) => unary(&c.classname_keyword, &c.classname_type, env),
             TupleTypeExplicitSpecifier(c) => unary(&c.tuple_type_keyword, &c.tuple_type_types, env),
             VarrayTypeSpecifier(c) => unary(&c.varray_keyword, &c.varray_type, env),
-            VectorArrayTypeSpecifier(c) => {
-                ban_arrays(node, env);
-                unary(&c.vector_array_keyword, &c.vector_array_type, env)
-            }
             DarrayTypeSpecifier(c) => {
                 binary(&c.darray_keyword, &c.darray_key, &c.darray_value, env)
-            }
-            MapArrayTypeSpecifier(c) => {
-                ban_arrays(node, env);
-                binary(
-                    &c.map_array_keyword,
-                    &c.map_array_key,
-                    &c.map_array_value,
-                    env,
-                )
             }
             DictionaryTypeSpecifier(c) => {
                 unary(&c.dictionary_type_keyword, &c.dictionary_type_members, env)

@@ -936,7 +936,6 @@ TYPE_TESTS
   val is_left_brace     : t -> bool
   val is_ellipsis       : t -> bool
   val is_comma          : t -> bool
-  val is_array          : t -> bool
   val is_ampersand      : t -> bool
   val is_inout          : t -> bool
 
@@ -2182,7 +2181,6 @@ TYPE_TESTS
     let is_left_brace = is_specific_token TokenKind.LeftBrace
     let is_ellipsis   = is_specific_token TokenKind.DotDotDot
     let is_comma      = is_specific_token TokenKind.Comma
-    let is_array      = is_specific_token TokenKind.Array
     let is_ampersand  = is_specific_token TokenKind.Ampersand
     let is_inout      = is_specific_token TokenKind.Inout
 

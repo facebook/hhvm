@@ -614,10 +614,6 @@ impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> 
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_varray_type_specifier(self, keyword, left_angle, type_, trailing_comma, right_angle)
     }
 
-    fn make_vector_array_type_specifier(&mut self, keyword: Self::R, left_angle: Self::R, type_: Self::R, right_angle: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_vector_array_type_specifier(self, keyword, left_angle, type_, right_angle)
-    }
-
     fn make_type_parameter(&mut self, attribute_spec: Self::R, reified: Self::R, variance: Self::R, name: Self::R, param_params: Self::R, constraints: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_type_parameter(self, attribute_spec, reified, variance, name, param_params, constraints)
     }
@@ -628,10 +624,6 @@ impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> 
 
     fn make_darray_type_specifier(&mut self, keyword: Self::R, left_angle: Self::R, key: Self::R, comma: Self::R, value: Self::R, trailing_comma: Self::R, right_angle: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_darray_type_specifier(self, keyword, left_angle, key, comma, value, trailing_comma, right_angle)
-    }
-
-    fn make_map_array_type_specifier(&mut self, keyword: Self::R, left_angle: Self::R, key: Self::R, comma: Self::R, value: Self::R, right_angle: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_map_array_type_specifier(self, keyword, left_angle, key, comma, value, right_angle)
     }
 
     fn make_dictionary_type_specifier(&mut self, keyword: Self::R, left_angle: Self::R, members: Self::R, right_angle: Self::R) -> Self::R {

@@ -1,7 +1,7 @@
 //// file1.php
 <?hh // partial
 
-newtype MyArray as array<mixed, mixed> = array<string, string>;
+newtype MyArray as darray<mixed, mixed> = darray<string, string>;
 
 //// file2.php
 <?hh // partial

@@ -4,22 +4,21 @@
       f_name = ([3:10-27], "\\test_array_filter"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
-      [{ param_annotation = ([4:9-23], varray_or_darray<arraykey, _>);
+      [{ param_annotation = ([4:20-34], varray_or_darray<arraykey, _>);
          param_type_hint =
          ((varray_or_darray<arraykey, _>),
-          (Some ([4:3-8], (Harray (None, None)))));
-         param_is_variadic = false; param_pos = [4:9-23];
+          (Some ([4:3-19], (Hvarray_or_darray (None, ([4:3-19], Hany))))));
+         param_is_variadic = false; param_pos = [4:20-34];
          param_name = "$untyped_array"; param_expr = None;
          param_callconv = None; param_user_attributes = [];
          param_visibility = None };
-        { param_annotation = ([5:18-31], varray<?string>);
+        { param_annotation = ([5:19-32], varray<?string>);
           param_type_hint =
           ((varray<?string>),
-           (Some ([5:3-17],
-                  (Harray (
-                     (Some ([5:9-16], (Hoption ([5:10-16], (Hprim Tstring))))),
-                     None)))));
-          param_is_variadic = false; param_pos = [5:18-31];
+           (Some ([5:3-18],
+                  (Hvarray
+                     ([5:10-17], (Hoption ([5:11-17], (Hprim Tstring))))))));
+          param_is_variadic = false; param_pos = [5:19-32];
           param_name = "$vector_array"; param_expr = None;
           param_callconv = None; param_user_attributes = [];
           param_visibility = None };

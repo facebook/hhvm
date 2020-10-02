@@ -9,4 +9,4 @@ function test(): void {
   take_int_indexed_array($a);
 }
 
-function take_int_indexed_array<Tv>(array<string, Tv> $a): void {}
+function take_int_indexed_array<Tv>(darray<string, Tv> $a): void {}

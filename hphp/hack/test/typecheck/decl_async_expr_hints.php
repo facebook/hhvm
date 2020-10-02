@@ -10,7 +10,7 @@
  */
 
 function f(): void {
-  return async function(array<int> $a): Awaitable<array<int>> {
+  return async function(varray<int> $a): Awaitable<varray<int>> {
     // This statement will not parse in Hack, but we should not raise an error
     // in decl mode.
     break 100;

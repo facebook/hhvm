@@ -142,7 +142,20 @@
               "line_number":5
             }
           },
-          "classish_name":{"kind":"missing"},
+          "classish_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"array",
+              "offset":58,
+              "leading_width":0,
+              "width":5,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":63,"width":1}],
+              "line_number":5
+            }
+          },
           "classish_type_parameters":{"kind":"missing"},
           "classish_extends_keyword":{"kind":"missing"},
           "classish_extends_list":{"kind":"missing"},
@@ -160,10 +173,7 @@
                 "leading_width":0,
                 "width":1,
                 "trailing_width":0,
-                "leading":[
-                  {"kind":"extra_token_error","text":"}\ncla","offset":65,"width":5},
-                  {"kind":"whitespace","text":" ","offset":63,"width":1}
-                ],
+                "leading":[],
                 "trailing":[],
                 "line_number":5
               }
@@ -3982,17 +3992,20 @@
             "object_creation_object":{
               "kind":"constructor_call",
               "constructor_call_type":{
-                "kind":"token",
-                "token":{
-                  "kind":"array",
-                  "text":"array",
-                  "offset":1027,
-                  "leading_width":0,
-                  "width":5,
-                  "trailing_width":0,
-                  "leading":[],
-                  "trailing":[],
-                  "line_number":67
+                "kind":"simple_type_specifier",
+                "simple_type_specifier":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"name",
+                    "text":"array",
+                    "offset":1027,
+                    "leading_width":0,
+                    "width":5,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":67
+                  }
                 }
               },
               "constructor_call_left_paren":{
@@ -8847,5 +8860,5 @@
     }
   },
   "program_text":"<?hh\n\n// Raise \"Unexpected token\"\nclass abstract {}\nclass array {}\nclass as {}\nclass break {}\nclass case {}\nclass catch {}\nclass class {}\nclass clone {}\nclass const {}\nclass continue {}\nclass default {}\nclass do {}\nclass echo {}\nclass else {}\nclass elseif {}\nclass empty {}\nclass endfor {}\nclass endforeach {}\nclass endif {}\nclass endswitch {}\nclass endwhile {}\nclass eval {}\nclass extends {}\nclass final {}\nclass finally {}\nclass for {}\nclass foreach {}\nclass function {}\nclass global {}\nclass goto {}\nclass if {}\nclass implements {}\nclass include {}\nclass include_once {}\nclass inout {}\nclass instanceof {}\nclass insteadof {}\nclass interface {}\nclass isset {}\nclass list {}\nclass namespace {}\nclass new {}\nclass print {}\nclass private {}\nclass protected {}\nclass public {}\nclass require {}\nclass require_once {}\nclass return {}\nclass shape {}\nclass static {}\nclass switch {}\nclass throw {}\nclass trait {}\nclass try {}\nclass unset {}\nclass use {}\nclass using {}\nclass var {}\nclass while {}\nclass yield {}\n\nnew abstract();\nnew array();\nnew as();\nnew break();\nnew case();\nnew catch();\n// new class(); // can't test this; error recovery makes us stop parsing the new expression when we see the class token; then we start parsing from the class token as if we have a classish declaration, and the entire rest of the test is seen as a classish body\nnew clone();\nnew const();\nnew continue();\nnew declare();\nnew default();\nnew do();\nnew echo();\nnew else();\nnew elseif();\nnew empty();\nnew endfor();\nnew endforeach();\nnew enddeclare();\nnew endif();\nnew endswitch();\nnew endwhile();\nnew eval();\nnew extends();\nnew final();\nnew finally();\nnew for();\nnew foreach();\nnew function();\nnew global();\nnew goto();\nnew if();\nnew implements();\nnew include();\nnew include_once();\nnew inout();\nnew instanceof();\nnew insteadof();\n// new interface(); // can't test this; error recovery makes us stop parsing the new expression when we see the interface token; then we start parsing from the interface token as if we have a classish declaration, and the entire rest of the test is seen as a classish body\nnew isset();\nnew list();\nnew namespace();\nnew new();\nnew print();\nnew private();\nnew protected();\nnew public();\nnew require();\nnew require_once();\nnew return();\nnew shape();\nnew static();\nnew switch();\nnew throw();\n// new trait(); // can't test this; error recovery makes us stop parsing the new expression when we see the trait token; then we start parsing from the trait token as if we have a classish declaration, and the entire rest of the test is seen as a classish body\nnew try();\nnew unset();\nnew use();\nnew using();\nnew var();\nnew while();\nnew yield();\n",
-  "version":"2020-08-13-0000"
+  "version":"2020-09-14-0000"
 }

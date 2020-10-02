@@ -1,7 +1,5 @@
 (4,7)-(4,7) A name is expected here.
 (4,7)-(4,15) Encountered unexpected token `abstract`.
-(5,7)-(5,7) A name is expected here.
-(5,7)-(5,12) Encountered unexpected token `array`.
 (6,7)-(6,7) A name is expected here.
 (6,7)-(6,9) Encountered unexpected token `as`.
 (7,7)-(7,7) A name is expected here.
@@ -122,8 +120,6 @@
 (64,7)-(64,12) Encountered unexpected token `yield`.
 (66,5)-(66,13) Unexpected node on right hand side of `new` or `instanceof`: `token`
 (66,13)-(66,13) An expression is expected here.
-(67,5)-(67,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
-(67,10)-(67,10) An expression is expected here.
 (68,5)-(68,7) Unexpected node on right hand side of `new` or `instanceof`: `token`
 (68,7)-(68,7) An expression is expected here.
 (69,5)-(69,10) Unexpected node on right hand side of `new` or `instanceof`: `token`

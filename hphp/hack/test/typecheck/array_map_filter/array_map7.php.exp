@@ -1,16 +1,14 @@
-File "array_map7.php", line 24, characters 3-32:
-  darray<arraykey, bool>
-File "array_map7.php", line 27, characters 3-34:
+File "array_map7.php", line 25, characters 3-34:
   _
-File "array_map7.php", line 29, characters 25-52:
+File "array_map7.php", line 27, characters 25-52:
 Invalid argument (Typing[4110])
-File "array_map7.php", line 37, characters 32-49:
-Expected `darray<mixed, bool>`
-File "array_map7.php", line 13, characters 3-15:
-But got `varray<[unresolved]>`
-File "array_map7.php", line 29, characters 25-52:
+  File "array_map7.php", line 35, characters 32-50:
+  Expected `darray<mixed, bool>`
+  File "array_map7.php", line 12, characters 3-16:
+  But got `varray<[unresolved]>`
+File "array_map7.php", line 27, characters 25-52:
 Invalid argument (Typing[4110])
-File "array_map7.php", line 37, characters 32-49:
-Expected `darray<mixed, bool>`
-File "array_map7.php", line 13, characters 3-15:
-But got `varray<bool>`
+  File "array_map7.php", line 35, characters 32-50:
+  Expected `darray<mixed, bool>`
+  File "array_map7.php", line 12, characters 3-16:
+  But got `varray<bool>`

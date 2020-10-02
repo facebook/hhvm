@@ -3,14 +3,10 @@
 
 function dyn(): dynamic { return 4; }
 
-function akany(): array {
-  return dyn(); // ok
-}
-
-function akvec(): array<int> {
+function akvec(): varray<int> {
   return dyn(); // error
 }
 
-function akmap(): array<int, string> {
+function akmap(): darray<int, string> {
   return dyn(); // error
 }

@@ -6,8 +6,8 @@ type my_shapeB = shape(?'x' => int);
 function test(
   my_shapeA $s1,
   my_shapeB $s2,
-  array<string, arraykey> $a1,
-  array<string, int> $a2,
+  darray<string, arraykey> $a1,
+  darray<string, int> $a2,
   arraykey $a,
   int $b,
 ): int {

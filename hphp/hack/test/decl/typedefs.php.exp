@@ -7,7 +7,7 @@ Parsed decls:
       td_constraint = None;
       td_type =
       (Rhint (root|typedefs.php line 10, characters 16-20),
-       (Tarray (None, None)))
+       (Tapply (([10:16-21], "\\array"), [])))
       };
     "\\MyArray1" ->
     { td_pos = [11:6-14]; td_vis = Transparent;
@@ -15,10 +15,11 @@ Parsed decls:
       td_constraint = None;
       td_type =
       (Rhint (root|typedefs.php line 11, characters 20-27),
-       (Tarray (
-          (Some (Rhint (root|typedefs.php line 11, characters 26-26),
-                 (Tgeneric ("T", [])))),
-       None)))
+       (Tapply (([11:20-25], "\\array"),
+          [(Rhint (root|typedefs.php line 11, characters 26-26),
+            (Tgeneric ("T", [])))
+          ]
+       )))
     };
   "\\MyArray2" ->
   { td_pos = [12:6-14]; td_vis = Transparent;
@@ -28,11 +29,12 @@ Parsed decls:
     td_constraint = None;
     td_type =
     (Rhint (root|typedefs.php line 12, characters 25-37),
-     (Tarray (
-        (Some (Rhint (root|typedefs.php line 12, characters 31-32),
-               (Tgeneric ("TK", [])))),
-     (Some (Rhint (root|typedefs.php line 12, characters 35-36),
-            (Tgeneric ("TV", []))))
+     (Tapply (([12:25-30], "\\array"),
+        [(Rhint (root|typedefs.php line 12, characters 31-32),
+          (Tgeneric ("TK", [])));
+        (Rhint (root|typedefs.php line 12, characters 35-36),
+         (Tgeneric ("TV", [])))
+     ]
     )))
   };
 "\\MyArrayKey" ->

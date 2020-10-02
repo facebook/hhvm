@@ -21,6 +21,6 @@ function test_good(my_shape $s): void {
   hh_show(Shapes::toDict($s));
 }
 
-function test_bad(): array<string, num> {
+function test_bad(): darray<string, num> {
   return Shapes::toDict(shape('x' => 42, 'y' => 3.14));
 }

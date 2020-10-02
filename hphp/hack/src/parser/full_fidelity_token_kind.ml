@@ -22,7 +22,6 @@ type t =
   | EndOfFile
   (* Given text tokens *)
   | Abstract
-  | Array
   | Arraykey
   | As
   | Async
@@ -238,7 +237,6 @@ let from_string keyword ~only_reserved =
   | "true"            when not only_reserved -> Some BooleanLiteral
   | "false"           when not only_reserved -> Some BooleanLiteral
   | "abstract"                            -> Some Abstract
-  | "array"                               -> Some Array
   | "arraykey"     when not only_reserved -> Some Arraykey
   | "as"                                  -> Some As
   | "async"                               -> Some Async
@@ -428,7 +426,6 @@ let to_string kind =
   | EndOfFile                     -> "end_of_file"
   (* Given text tokens *)
   | Abstract                      -> "abstract"
-  | Array                         -> "array"
   | Arraykey                      -> "arraykey"
   | As                            -> "as"
   | Async                         -> "async"

@@ -4531,10 +4531,10 @@ where
                     Name | Trait | Extends | Implements | Static | Abstract | Final | Private
                     | Protected | Public | Global | Goto | Instanceof | Insteadof | Interface
                     | Namespace | New | Try | Use | Var | List | Clone | Include | Include_once
-                    | Throw | Array | Tuple | Print | Echo | Require | Require_once | Return
-                    | Else | Elseif | Default | Break | Continue | Switch | Yield | Function
-                    | If | Finally | For | Foreach | Case | Do | While | As | Catch | Empty
-                    | Using | Class | NullLiteral | Super | Where => true,
+                    | Throw | Tuple | Print | Echo | Require | Require_once | Return | Else
+                    | Elseif | Default | Break | Continue | Switch | Yield | Function | If
+                    | Finally | For | Foreach | Case | Do | While | As | Catch | Empty | Using
+                    | Class | NullLiteral | Super | Where => true,
                     _ => false,
                 }
             }

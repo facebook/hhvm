@@ -15,4 +15,4 @@ function test(bool $b): void {
   f($a);
 }
 
-function f(array<string> $_): void {}
+function f(varray<string> $_): void {}

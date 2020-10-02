@@ -1172,14 +1172,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_vector_array_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::VectorArrayTypeSpecifier)
-        } else {
-          self.flatten(SyntaxKind::VectorArrayTypeSpecifier, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
     fn make_type_parameter(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero(SyntaxKind::TypeParameter)
@@ -1201,14 +1193,6 @@ pub trait FlattenSmartConstructors<'src, State>
           Self::zero(SyntaxKind::DarrayTypeSpecifier)
         } else {
           self.flatten(SyntaxKind::DarrayTypeSpecifier, vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
-        }
-    }
-
-    fn make_map_array_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
-          Self::zero(SyntaxKind::MapArrayTypeSpecifier)
-        } else {
-          self.flatten(SyntaxKind::MapArrayTypeSpecifier, vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 

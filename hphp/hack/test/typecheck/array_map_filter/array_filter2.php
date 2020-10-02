@@ -8,7 +8,7 @@ function test(Container<?X> $x) {
 
 function take_int(int $x): void {}
 
-function key_type<Tk, Tv>(array<Tk, Tv> $x): Tk {
+function key_type<Tk, Tv>(darray<Tk, Tv> $x): Tk {
   //UNSAFE
 }
 

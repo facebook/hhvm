@@ -1,5 +1,5 @@
 <?hh // partial
 
-function foo(): array<int> {
+function foo(): varray<int> {
   return $$$;
 }

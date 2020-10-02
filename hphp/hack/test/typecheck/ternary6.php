@@ -9,7 +9,7 @@ function g(): ?string {
 
 class Foo {
   /* HH_FIXME[4110] */
-  public function h(): array<string> {
+  public function h(): varray<string> {
 
   }
 }

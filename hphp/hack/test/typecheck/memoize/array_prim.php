@@ -2,8 +2,8 @@
 
 class Foo {
   <<__Memoize>>
-  public function someMethod(array<int> $i): void {}
+  public function someMethod(varray<int> $i): void {}
 }
 
 <<__Memoize>>
-function some_function(array<int> $i): void {}
+function some_function(varray<int> $i): void {}

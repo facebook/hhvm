@@ -1,5 +1,5 @@
 <?hh // partial
 
-function test(): array<string> {
+function test(): varray<string> {
   return varray["tingley"];
 }

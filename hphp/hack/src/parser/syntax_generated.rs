@@ -1551,17 +1551,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_vector_array_type_specifier(_: &C, vector_array_keyword: Self, vector_array_left_angle: Self, vector_array_type: Self, vector_array_right_angle: Self) -> Self {
-        let syntax = SyntaxVariant::VectorArrayTypeSpecifier(Box::new(VectorArrayTypeSpecifierChildren {
-            vector_array_keyword,
-            vector_array_left_angle,
-            vector_array_type,
-            vector_array_right_angle,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_type_parameter(_: &C, type_attribute_spec: Self, type_reified: Self, type_variance: Self, type_name: Self, type_param_params: Self, type_constraints: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
             type_attribute_spec,
@@ -1593,19 +1582,6 @@ where
             darray_value,
             darray_trailing_comma,
             darray_right_angle,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
-    fn make_map_array_type_specifier(_: &C, map_array_keyword: Self, map_array_left_angle: Self, map_array_key: Self, map_array_comma: Self, map_array_value: Self, map_array_right_angle: Self) -> Self {
-        let syntax = SyntaxVariant::MapArrayTypeSpecifier(Box::new(MapArrayTypeSpecifierChildren {
-            map_array_keyword,
-            map_array_left_angle,
-            map_array_key,
-            map_array_comma,
-            map_array_value,
-            map_array_right_angle,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -3048,14 +3024,6 @@ where
                 let acc = f(varray_right_angle, acc);
                 acc
             },
-            SyntaxVariant::VectorArrayTypeSpecifier(x) => {
-                let VectorArrayTypeSpecifierChildren { vector_array_keyword, vector_array_left_angle, vector_array_type, vector_array_right_angle } = *x;
-                let acc = f(vector_array_keyword, acc);
-                let acc = f(vector_array_left_angle, acc);
-                let acc = f(vector_array_type, acc);
-                let acc = f(vector_array_right_angle, acc);
-                acc
-            },
             SyntaxVariant::TypeParameter(x) => {
                 let TypeParameterChildren { type_attribute_spec, type_reified, type_variance, type_name, type_param_params, type_constraints } = *x;
                 let acc = f(type_attribute_spec, acc);
@@ -3081,16 +3049,6 @@ where
                 let acc = f(darray_value, acc);
                 let acc = f(darray_trailing_comma, acc);
                 let acc = f(darray_right_angle, acc);
-                acc
-            },
-            SyntaxVariant::MapArrayTypeSpecifier(x) => {
-                let MapArrayTypeSpecifierChildren { map_array_keyword, map_array_left_angle, map_array_key, map_array_comma, map_array_value, map_array_right_angle } = *x;
-                let acc = f(map_array_keyword, acc);
-                let acc = f(map_array_left_angle, acc);
-                let acc = f(map_array_key, acc);
-                let acc = f(map_array_comma, acc);
-                let acc = f(map_array_value, acc);
-                let acc = f(map_array_right_angle, acc);
                 acc
             },
             SyntaxVariant::DictionaryTypeSpecifier(x) => {
@@ -3466,11 +3424,9 @@ where
             SyntaxVariant::KeysetTypeSpecifier {..} => SyntaxKind::KeysetTypeSpecifier,
             SyntaxVariant::TupleTypeExplicitSpecifier {..} => SyntaxKind::TupleTypeExplicitSpecifier,
             SyntaxVariant::VarrayTypeSpecifier {..} => SyntaxKind::VarrayTypeSpecifier,
-            SyntaxVariant::VectorArrayTypeSpecifier {..} => SyntaxKind::VectorArrayTypeSpecifier,
             SyntaxVariant::TypeParameter {..} => SyntaxKind::TypeParameter,
             SyntaxVariant::TypeConstraint {..} => SyntaxKind::TypeConstraint,
             SyntaxVariant::DarrayTypeSpecifier {..} => SyntaxKind::DarrayTypeSpecifier,
-            SyntaxVariant::MapArrayTypeSpecifier {..} => SyntaxKind::MapArrayTypeSpecifier,
             SyntaxVariant::DictionaryTypeSpecifier {..} => SyntaxKind::DictionaryTypeSpecifier,
             SyntaxVariant::ClosureTypeSpecifier {..} => SyntaxKind::ClosureTypeSpecifier,
             SyntaxVariant::ClosureParameterTypeSpecifier {..} => SyntaxKind::ClosureParameterTypeSpecifier,
@@ -4470,13 +4426,6 @@ where
                  varray_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::VectorArrayTypeSpecifier, 4) => SyntaxVariant::VectorArrayTypeSpecifier(Box::new(VectorArrayTypeSpecifierChildren {
-                 vector_array_right_angle: ts.pop().unwrap(),
-                 vector_array_type: ts.pop().unwrap(),
-                 vector_array_left_angle: ts.pop().unwrap(),
-                 vector_array_keyword: ts.pop().unwrap(),
-                 
-             })),
              (SyntaxKind::TypeParameter, 6) => SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
                  type_constraints: ts.pop().unwrap(),
                  type_param_params: ts.pop().unwrap(),
@@ -4499,15 +4448,6 @@ where
                  darray_key: ts.pop().unwrap(),
                  darray_left_angle: ts.pop().unwrap(),
                  darray_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::MapArrayTypeSpecifier, 6) => SyntaxVariant::MapArrayTypeSpecifier(Box::new(MapArrayTypeSpecifierChildren {
-                 map_array_right_angle: ts.pop().unwrap(),
-                 map_array_value: ts.pop().unwrap(),
-                 map_array_comma: ts.pop().unwrap(),
-                 map_array_key: ts.pop().unwrap(),
-                 map_array_left_angle: ts.pop().unwrap(),
-                 map_array_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::DictionaryTypeSpecifier, 4) => SyntaxVariant::DictionaryTypeSpecifier(Box::new(DictionaryTypeSpecifierChildren {
@@ -5812,14 +5752,6 @@ pub struct VarrayTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct VectorArrayTypeSpecifierChildren<T, V> {
-    pub vector_array_keyword: Syntax<T, V>,
-    pub vector_array_left_angle: Syntax<T, V>,
-    pub vector_array_type: Syntax<T, V>,
-    pub vector_array_right_angle: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct TypeParameterChildren<T, V> {
     pub type_attribute_spec: Syntax<T, V>,
     pub type_reified: Syntax<T, V>,
@@ -5844,16 +5776,6 @@ pub struct DarrayTypeSpecifierChildren<T, V> {
     pub darray_value: Syntax<T, V>,
     pub darray_trailing_comma: Syntax<T, V>,
     pub darray_right_angle: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct MapArrayTypeSpecifierChildren<T, V> {
-    pub map_array_keyword: Syntax<T, V>,
-    pub map_array_left_angle: Syntax<T, V>,
-    pub map_array_key: Syntax<T, V>,
-    pub map_array_comma: Syntax<T, V>,
-    pub map_array_value: Syntax<T, V>,
-    pub map_array_right_angle: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6226,11 +6148,9 @@ pub enum SyntaxVariant<T, V> {
     KeysetTypeSpecifier(Box<KeysetTypeSpecifierChildren<T, V>>),
     TupleTypeExplicitSpecifier(Box<TupleTypeExplicitSpecifierChildren<T, V>>),
     VarrayTypeSpecifier(Box<VarrayTypeSpecifierChildren<T, V>>),
-    VectorArrayTypeSpecifier(Box<VectorArrayTypeSpecifierChildren<T, V>>),
     TypeParameter(Box<TypeParameterChildren<T, V>>),
     TypeConstraint(Box<TypeConstraintChildren<T, V>>),
     DarrayTypeSpecifier(Box<DarrayTypeSpecifierChildren<T, V>>),
-    MapArrayTypeSpecifier(Box<MapArrayTypeSpecifierChildren<T, V>>),
     DictionaryTypeSpecifier(Box<DictionaryTypeSpecifierChildren<T, V>>),
     ClosureTypeSpecifier(Box<ClosureTypeSpecifierChildren<T, V>>),
     ClosureParameterTypeSpecifier(Box<ClosureParameterTypeSpecifierChildren<T, V>>),
@@ -7668,16 +7588,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            VectorArrayTypeSpecifier(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.vector_array_keyword),
-                    1 => Some(&x.vector_array_left_angle),
-                    2 => Some(&x.vector_array_type),
-                    3 => Some(&x.vector_array_right_angle),
-                        _ => None,
-                    }
-                })
-            },
             TypeParameter(x) => {
                 get_index(6).and_then(|index| { match index {
                         0 => Some(&x.type_attribute_spec),
@@ -7707,18 +7617,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.darray_value),
                     5 => Some(&x.darray_trailing_comma),
                     6 => Some(&x.darray_right_angle),
-                        _ => None,
-                    }
-                })
-            },
-            MapArrayTypeSpecifier(x) => {
-                get_index(6).and_then(|index| { match index {
-                        0 => Some(&x.map_array_keyword),
-                    1 => Some(&x.map_array_left_angle),
-                    2 => Some(&x.map_array_key),
-                    3 => Some(&x.map_array_comma),
-                    4 => Some(&x.map_array_value),
-                    5 => Some(&x.map_array_right_angle),
                         _ => None,
                     }
                 })

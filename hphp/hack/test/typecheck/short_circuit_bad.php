@@ -1,6 +1,6 @@
 <?hh // partial
 
-function h(): ?array {
+function h(): ?varray {
   throw new Exception('');
 }
 

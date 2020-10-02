@@ -626,10 +626,6 @@ impl<'src> SmartConstructors<NoState> for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_varray_type_specifier(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_vector_array_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_vector_array_type_specifier(self, arg0, arg1, arg2, arg3)
-    }
-
     fn make_type_parameter(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_type_parameter(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
@@ -640,10 +636,6 @@ impl<'src> SmartConstructors<NoState> for MinimalSmartConstructors {
 
     fn make_darray_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_darray_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6)
-    }
-
-    fn make_map_array_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<MinimalSyntax, NoState>>::make_map_array_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_dictionary_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {

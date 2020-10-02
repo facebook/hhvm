@@ -1731,10 +1731,10 @@ where
         // cast-expression:
         //   (  cast-type  ) unary-expression
         // cast-type:
-        //   array, bool, double, float, real, int, integer, object, string, binary
+        //   bool, double, float, real, int, integer, object, string, binary
         //
         // TODO: This implies that a cast "(name)" can only be a simple name, but
-        // I would expect that (\Foo\Bar), (:foo), (array<int>), and the like
+        // I would expect that (\Foo\Bar), (:foo), and the like
         // should also be legal casts. If we implement that then we will need
         // a sophisticated heuristic to determine whether this is a cast or a
         // parenthesized expression.
@@ -1752,8 +1752,7 @@ where
         let right_paren = self.next_token();
         let is_cast = right_paren.kind() == TokenKind::RightParen
             && match type_token_kind {
-                TokenKind::Array
-                | TokenKind::Bool
+                TokenKind::Bool
                 | TokenKind::Boolean
                 | TokenKind::Double
                 | TokenKind::Float

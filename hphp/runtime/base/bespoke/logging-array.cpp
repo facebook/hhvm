@@ -358,6 +358,11 @@ decltype(auto) mutate(ArrayData* ad, EntryTypes ms, F&& f) {
   SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
   return escalate(lad, f(lad->wrapped), ms);
 }
+
+arr_lval elem(arr_lval lval) {
+  lval.type() = dt_modulo_persistence(lval.type());
+  return lval;
+}
 }
 
 // Lvals cannot insert new keys, so KeyTypes are unchanged. We must pessimize
@@ -386,7 +391,7 @@ arr_lval LoggingArray::elemInt(ArrayData* ad, int64_t k) {
   auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
                                 : lad->entryTypes;
   logEvent(ad, ms, ArrayOp::ElemInt, k, val);
-  return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
+  return elem(mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 arr_lval LoggingArray::elemStr(ArrayData* ad, StringData* k) {
   auto const lad = asLogging(ad);
@@ -395,7 +400,7 @@ arr_lval LoggingArray::elemStr(ArrayData* ad, StringData* k) {
   auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
                                 : lad->entryTypes;
   logEvent(ad, ms, ArrayOp::ElemStr, k, val);
-  return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
+  return elem(mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 
 ArrayData* LoggingArray::setInt(ArrayData* ad, int64_t k, TypedValue v) {

@@ -526,34 +526,30 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
 /**
  * ElemD when base is a bespoke array-like
  */
-template <bool Elem>
 inline arr_lval ElemDBespokePre(tv_lval base, int64_t key) {
-  return Elem ? BespokeArray::ElemInt(base.val().parr, key)
-              : BespokeArray::LvalInt(base.val().parr, key);
+  return BespokeArray::ElemInt(base.val().parr, key);
 }
 
-template <bool Elem>
 inline arr_lval ElemDBespokePre(tv_lval base, StringData* key) {
-  return Elem ? BespokeArray::ElemStr(base.val().parr, key)
-              : BespokeArray::LvalStr(base.val().parr, key);
+  return BespokeArray::ElemStr(base.val().parr, key);
 }
 
-template <bool Elem>
 inline arr_lval ElemDBespokePre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return ElemDBespokePre<Elem>(base, key.m_data.num);
-  if (isStringType(dt)) return ElemDBespokePre<Elem>(base, key.m_data.pstr);
+  if (isIntType(dt))    return ElemDBespokePre(base, key.m_data.num);
+  if (isStringType(dt)) return ElemDBespokePre(base, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <bool Elem, KeyType keyType>
+template <KeyType keyType>
 inline tv_lval ElemDBespoke(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArrayLike(base));
   assertx(tvIsPlausible(*base));
 
   auto const oldArr = base.val().parr;
   assertx(!oldArr->isVanilla());
-  auto const result = ElemDBespokePre<Elem>(base, key);
+  auto const result = ElemDBespokePre(base, key);
+  assertx(result.type() == dt_modulo_persistence(result.type()));
   if (result.arr != oldArr) {
     type(base) = dt_with_rc(type(base));
     val(base).parr = result.arr;
@@ -774,8 +770,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
   assertx(type(immutable_null_base) == KindOfNull);
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
-    auto constexpr Elem = true;
-    return ElemDBespoke<Elem, keyType>(base, key);
+    return ElemDBespoke<keyType>(base, key);
   }
 
   switch (base.type()) {
@@ -1718,6 +1713,25 @@ inline TypedValue SetOpElemScalar() {
   return make_tv<KindOfNull>();
 }
 
+/*
+ * Perform the operation `update` on a given BespokeArray safely, and with
+ * minimum vanilla escalation. To do so, we call Elem, and store the value
+ * in a tmp TypedValue, and update it; if its type is unchanged, we write
+ * the value back directly, but if the type is changed, we do a full set.
+ */
+template <typename Update>
+TypedValue UpdateBespoke(tv_lval base, TypedValue key, Update update) {
+  auto const val = ElemDBespoke<KeyType::Any>(base, key);
+  TypedValue tmp = *val;
+  auto const result = update(&tmp);
+  if (val.type() == tmp.type()) {
+    val.val() = tmp.val();
+  } else {
+    SetElemBespoke<KeyType::Any>(base, key, &tmp);
+  }
+  return result;
+}
+
 /**
  * $result = ($base[$x] <op>= $y)
  */
@@ -1727,10 +1741,10 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
     if (base.val().parr->isKeysetType()) throwInvalidKeysetOperation();
-    auto constexpr Elem = false;
-    auto const result = ElemDBespoke<Elem, KeyType::Any>(base, key);
-    setopBody(result, op, rhs);
-    return *result;
+    return UpdateBespoke(base, key, [&](auto lval) {
+      setopBody(lval, op, rhs);
+      return *lval;
+    });
   }
 
   auto const handleVec = [&] {
@@ -1914,15 +1928,10 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
   assertx(tvIsPlausible(*base));
 
   if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
-    auto constexpr Elem = true;
-    auto const result = ElemDBespoke<Elem, KeyType::Any>(base, key);
-    return IncDecBody(op, tvAssertPlausible(result));
+    return UpdateBespoke(base, key, [&](auto lval) {
+      return IncDecBody(op, lval);
+    });
   }
-
-  auto const handleVec = [&] {
-    auto const result = ElemDVec<KeyType::Any>(base, key);
-    return IncDecBody(op, tvAssertPlausible(result));
-  };
 
   switch (type(base)) {
     case KindOfUninit:
@@ -1957,16 +1966,14 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentDArray:
-    case KindOfDArray: {
-      auto const result = ElemDDict<KeyType::Any>(base, key);
-      return IncDecBody(op, tvAssertPlausible(result));
-    }
+    case KindOfDArray:
+      return IncDecBody(op, ElemDDict<KeyType::Any>(base, key));
 
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      return handleVec();
+      return IncDecBody(op, ElemDVec<KeyType::Any>(base, key));
 
     case KindOfObject: {
       tv_lval result;
@@ -1983,12 +1990,10 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
 
     case KindOfClsMeth:
       detail::promoteClsMeth(base);
-      return handleVec();
+      return IncDecBody(op, ElemDVec<KeyType::Any>(base, key));
 
-    case KindOfRecord: {
-      auto result = ElemDRecord<KeyType::Any>(base, key);
-      return IncDecBody(op, tvAssertPlausible(result));
-    }
+    case KindOfRecord:
+      return IncDecBody(op, ElemDRecord<KeyType::Any>(base, key));
   }
   unknownBaseType(type(base));
 }

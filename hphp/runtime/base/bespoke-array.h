@@ -120,15 +120,15 @@ public:
   // RW access
   //
   // The "Elem" methods are variants on the "Lval" methods that allow us to
-  // avoid unnecessary escalation. A caller may only call an "Elem" if it
-  // satisfies the following condition:
+  // avoid unnecessary escalation. It restricts both the callee and caller:
   //
-  //  * If the "Elem" result's type() is KindOfInt64, KindOfObject, or one of
-  //    the countable array-like types, the caller must not change the type.
+  //  * The callee implementing the method may *never* return a DataType*
+  //    pointing to a persistent counterpart of a maybe-countable DataType
+  //    (i.e. KindOfPersistentString, or any of the persistent array-likes).
   //
-  // Now that we've eliminated (most) minstr escalation from Hack, all of the
-  // Dim "intermediate" member ops satisfy this condition, as does the IncDec
-  // final op. SetOp does NOT satisfy it; it may coerce (e.g.) ints to strings.
+  //  * The caller using this method may *never* change the value of the type
+  //    the resulting lval points to. (It may store to it with the same type.)
+  //
   static arr_lval LvalInt(ArrayData* ad, int64_t key);
   static arr_lval LvalStr(ArrayData* ad, StringData* key);
   static arr_lval ElemInt(ArrayData* ad, int64_t key);

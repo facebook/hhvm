@@ -144,6 +144,10 @@ inline TypedValue tvClassToString(TypedValue key) {
     auto const keyStr = classToStringHelper(val(key).pclass);
     return make_tv<KindOfPersistentString>(keyStr);
   }
+  if (isLazyClassType(type(key))) {
+    auto const keyStr = lazyClassToStringHelper(val(key).plazyclass);
+    return make_tv<KindOfPersistentString>(keyStr);
+  }
   return key;
 }
 

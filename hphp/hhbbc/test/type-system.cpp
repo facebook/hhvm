@@ -1262,6 +1262,21 @@ TEST(Type, IndexBased) {
   EXPECT_TRUE(TRecord.couldBe(exactRecTy));
   EXPECT_TRUE(TRecord.couldBe(subRecTy));
 
+  // These checks are relevant for class to key conversions
+  EXPECT_TRUE(clsExactTy.subtypeOf(BOptCls | BOptLazyCls));
+  EXPECT_TRUE(subClsTy.subtypeOf(BOptCls | BOptLazyCls));
+  EXPECT_TRUE(TCls.subtypeOf(BOptCls | BOptLazyCls));
+  EXPECT_TRUE(TLazyCls.subtypeOf(BOptCls | BOptLazyCls));
+  EXPECT_TRUE(clsExactTy.couldBe(BOptCls | BOptLazyCls));
+  EXPECT_TRUE(subClsTy.couldBe(BOptCls | BOptLazyCls));
+  auto keyTy1 = union_of(clsExactTy, sval(s_TestClass.get()));
+  EXPECT_TRUE(keyTy1.couldBe(BOptCls | BOptLazyCls));
+  auto keyTy2 = union_of(TLazyCls, sval(s_TestClass.get()));
+  EXPECT_TRUE(keyTy2.couldBe(BOptCls | BOptLazyCls));
+  EXPECT_FALSE(TSStr.couldBe(BOptCls | BOptLazyCls));
+  EXPECT_FALSE(TStr.couldBe(BOptCls | BOptLazyCls));
+
+
   // Obj= and Obj<= both couldBe ?Obj, and vice versa.
   EXPECT_TRUE(objExactTy.couldBe(BOptObj));
   EXPECT_TRUE(subObjTy.couldBe(BOptObj));

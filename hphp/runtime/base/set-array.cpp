@@ -107,7 +107,8 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
     auto& tv = values[i];
     if (!isIntType(tv.m_type) &&
         !isStringType(tv.m_type) &&
-        !isClassType(tv.m_type))  {
+        !isClassType(tv.m_type) &&
+        !isLazyClassType(tv.m_type))  {
       throwInvalidArrayKeyException(&tv, ArrayData::CreateKeyset());
     }
   }
@@ -123,10 +124,14 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
     } else if (isStringType(tv.m_type)) {
       ad->insert(tv.m_data.pstr);
       decRefStr(tv.m_data.pstr); // FIXME
-    } else {
-      assertx(isClassType(tv.m_type));
+    } else if (isClassType(tv.m_type)) {
       auto const keyStr =
         const_cast<StringData*>(classToStringHelper(tv.m_data.pclass));
+      ad->insert(keyStr);
+    } else {
+      assertx(isLazyClassType(tv.m_type));
+      auto const keyStr =
+        const_cast<StringData*>(lazyClassToStringHelper(tv.m_data.plazyclass));
       ad->insert(keyStr);
     }
   }

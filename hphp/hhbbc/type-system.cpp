@@ -5191,8 +5191,8 @@ folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
   if (keyTy.subtypeOf(TNull)) return {};
 
   auto ret = ArrKey{};
-
-  if (keyTy.subtypeOf(BOptCls)) {
+  // TODO: T70712990: Specialize HHBBC types for lazy classes
+  if (keyTy.subtypeOf(BOptCls | BOptLazyCls)) {
     ret.mayThrow = true;
     if (keyTy.subtypeOf(BCls)) {
       if (keyTy.strictSubtypeOf(TCls)) {
@@ -5206,7 +5206,7 @@ folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
     }
     ret.type = TUncArrKey;
     return ret;
-  } else if (keyTy.couldBe(BOptCls)) {
+  } else if (keyTy.couldBe(BOptCls | BOptLazyCls)) {
     ret.mayThrow = true;
     if (strict) ret.type = keyTy.couldBe(BCStr) ? TArrKey : TUncArrKey;
     else        ret.type = TInitCell;

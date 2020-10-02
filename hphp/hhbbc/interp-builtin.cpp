@@ -225,6 +225,8 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
       retTy |= TStr;
     }
   }
+  // TODO: T70712990: Specialize lazy class types
+  if (ty.couldBe(BLazyCls)) retTy |= TStr;
   if (ty.couldBe(BStr)) {
     retTy |= [&] {
       if (ty.subtypeOf(BSStr)) {

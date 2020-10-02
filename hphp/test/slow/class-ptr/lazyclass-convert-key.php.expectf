@@ -65,31 +65,25 @@ bool(false)
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 30
 int(42)
-===vec:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 65
-vec(3) {
+===vec:===vec(3) {
   class(Foo)
-  string(4) "Fizz"
+  class(Fizz)
   class(Baz)
 }
 class(Foo)
-string(4) "Fizz"
+class(Fizz)
 class(Baz)
-===Vector:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 36
-object(HH\Vector) (3) {
+===Vector:===object(HH\Vector) (3) {
   [0]=>
   class(Baz)
   [1]=>
-  string(4) "Fizz"
+  class(Fizz)
   [2]=>
   class(Foo)
 }
-===dvarray:===
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 77
-varray(2) {
+===dvarray:===varray(2) {
   class(Baz)
-  string(4) "Fizz"
+  class(Fizz)
 }
 varray(2) {
   int(0)
@@ -97,8 +91,6 @@ varray(2) {
 }
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 80
-
-Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 81
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/class-key-convert.inc on line 81
 varray(2) {

@@ -515,7 +515,7 @@ void emitAddElemC(IRGS& env) {
 
   if (!at.subtypeOfAny(TArr, TDict)) {
     PUNT(AddElemC-BadArr);
-  } else if (!kt.subtypeOfAny(TInt, TStr, TCls)) {
+  } else if (!kt.subtypeOfAny(TInt, TStr, TCls, TLazyCls)) {
     auto const type = (at <= TArr) ? TArr : TDict;
     interpOne(env, type, 3);
     return;

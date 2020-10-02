@@ -50,6 +50,12 @@ SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
     }
     return gen(env, LdClsName, key);
   }
+  if (key->isA(TLazyCls)) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    return gen(env, LdLazyClsName, key);
+  }
   return key;
 }
 

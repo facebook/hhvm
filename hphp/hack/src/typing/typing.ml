@@ -2508,13 +2508,7 @@ and expr_
     in
     let (env, ty) = Phase.localize_hint_with_self env hint in
     make_result env p (Aast.Cast (hint, te)) ty
-  | ExpressionTree (hint, e, e2) ->
-    let (env, te, ty) = expr env e in
-    (match e2 with
-    | Some e2 ->
-      let (env, te2, _ty2) = expr env e2 in
-      make_result env p (Aast.ExpressionTree (hint, te, Some te2)) ty
-    | None -> make_result env p (Aast.ExpressionTree (hint, te, None)) ty)
+  | ExpressionTree (hint, e, e2) -> expression_tree env p hint e e2
   | Is (e, hint) ->
     Typing_kinding.Simple.check_well_kinded_hint env hint;
     let (env, te, _) = expr env e in
@@ -2947,9 +2941,7 @@ and expr_
     let s = enum ^ ":@" ^ atom in
     Errors.pu_typing p "identifier" s;
     expr_error env (Reason.Rwitness p) outer
-  | ET_Splice e ->
-    let (env, te, ty) = expr env e in
-    make_result env p (Aast.ET_Splice te) ty
+  | ET_Splice e -> et_splice env p e
 
 (* let ty = err_witness env cst_pos in *)
 and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
@@ -3362,6 +3354,30 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
 
 (*****************************************************************************)
 (* End of anonymous functions. *)
+(*****************************************************************************)
+
+(*****************************************************************************)
+(* Expression trees *)
+(*****************************************************************************)
+and expression_tree env p visitor_class e desugared_expr =
+  let (env, (te, ty)) =
+    Typing_lenv.stash_and_do env (Env.all_continuations env) (fun env ->
+        let env = Env.reinitialize_locals env in
+        let (env, te, ty) = expr env e in
+        (env, (te, ty)))
+  in
+  match desugared_expr with
+  | Some desugared_expr ->
+    let (env, te2, _ty2) = expr env desugared_expr in
+    make_result env p (Aast.ExpressionTree (visitor_class, te, Some te2)) ty
+  | None -> make_result env p (Aast.ExpressionTree (visitor_class, te, None)) ty
+
+and et_splice env p e =
+  let (env, te, ty) = expr env e in
+  make_result env p (Aast.ET_Splice te) ty
+
+(*****************************************************************************)
+(* End expression trees *)
 (*****************************************************************************)
 and requires_consistent_construct = function
   | CIstatic -> true

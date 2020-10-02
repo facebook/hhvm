@@ -1,0 +1,6 @@
+File "mismatched_types.php", line 61, characters 5-10:
+Typing error (Typing[4110])
+  File "mismatched_types.php", line 61, characters 5-6:
+  Expected `num` because this is used in an arithmetic operation
+  File "mismatched_types.php", line 60, characters 10-16:
+  But got `string`

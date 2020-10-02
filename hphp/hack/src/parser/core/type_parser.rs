@@ -824,6 +824,7 @@ where
             let irp = self.require_right_paren();
             (pts, irp)
         };
+        let capability = self.parse_capability_opt();
         let col = self.require_colon();
         let ret = self.parse_type_specifier(false, true);
         let orp = self.require_right_paren();
@@ -835,6 +836,7 @@ where
             ilp,
             pts,
             irp,
+            capability,
             col,
             ret,
             orp

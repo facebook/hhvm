@@ -2060,6 +2060,7 @@ let schema : schema_node list =
           ("inner_left_paren", Token);
           ("parameter_list", ZeroOrMore (Just "ClosureParameterTypeSpecifier"));
           ("inner_right_paren", Token);
+          ("capability", ZeroOrOne (Just "Capability"));
           ("colon", Token);
           ("return_type", Aggregate Specifier);
           ("outer_right_paren", Token);

@@ -2172,6 +2172,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           closure_inner_left_paren = inner_left_p;
           closure_parameter_list = param_list;
           closure_inner_right_paren = inner_right_p;
+          closure_capability = cap;
           closure_colon = colon;
           closure_return_type = ret_type;
           closure_outer_right_paren = outer_right_p;
@@ -2180,13 +2181,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         [
           t env outer_left_p;
           t env kw;
-          transform_argish_with_return_type
-            env
-            inner_left_p
-            param_list
-            inner_right_p
-            colon
-            ret_type;
+          t env inner_left_p;
+          when_present param_list split;
+          transform_fn_decl_args env param_list inner_right_p;
+          t env cap;
+          t env colon;
+          when_present colon space;
+          t env ret_type;
           t env outer_right_p;
         ]
     | Syntax.ClosureParameterTypeSpecifier

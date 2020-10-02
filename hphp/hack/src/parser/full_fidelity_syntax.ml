@@ -2060,6 +2060,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
+        closure_capability;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -2069,6 +2070,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc closure_inner_left_paren in
          let acc = f acc closure_parameter_list in
          let acc = f acc closure_inner_right_paren in
+         let acc = f acc closure_capability in
          let acc = f acc closure_colon in
          let acc = f acc closure_return_type in
          let acc = f acc closure_outer_right_paren in
@@ -3905,6 +3907,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
+        closure_capability;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -3914,6 +3917,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
+        closure_capability;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -5751,6 +5755,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren;
         closure_parameter_list;
         closure_inner_right_paren;
+        closure_capability;
         closure_colon;
         closure_return_type;
         closure_outer_right_paren;
@@ -5760,6 +5765,7 @@ module WithToken(Token: TokenType) = struct
         "closure_inner_left_paren";
         "closure_parameter_list";
         "closure_inner_right_paren";
+        "closure_capability";
         "closure_colon";
         "closure_return_type";
         "closure_outer_right_paren";
@@ -7797,6 +7803,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -7807,6 +7814,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10291,6 +10299,7 @@ module WithToken(Token: TokenType) = struct
         closure_inner_left_paren
         closure_parameter_list
         closure_inner_right_paren
+        closure_capability
         closure_colon
         closure_return_type
         closure_outer_right_paren
@@ -10301,6 +10310,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10792,6 +10802,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10801,6 +10812,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10931,6 +10943,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;
@@ -10940,6 +10953,7 @@ module WithToken(Token: TokenType) = struct
           closure_inner_left_paren;
           closure_parameter_list;
           closure_inner_right_paren;
+          closure_capability;
           closure_colon;
           closure_return_type;
           closure_outer_right_paren;

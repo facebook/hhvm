@@ -1470,6 +1470,7 @@
                           "line_number":13
                         }
                       },
+                      "closure_capability":{"kind":"missing"},
                       "closure_colon":{
                         "kind":"token",
                         "token":{
@@ -2175,6 +2176,7 @@
                                   "line_number":20
                                 }
                               },
+                              "closure_capability":{"kind":"missing"},
                               "closure_colon":{
                                 "kind":"token",
                                 "token":{

@@ -135,6 +135,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
     ; closure_inner_right_paren                          : t
+    ; closure_capability                                 : t
     ; closure_colon                                      : t
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
@@ -997,6 +998,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
     ; closure_inner_right_paren                          : t
+    ; closure_capability                                 : t
     ; closure_colon                                      : t
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
@@ -2285,6 +2287,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_inner_left_paren: Token.t value
     ; closure_parameter_list: closure_parameter_type_specifier listesque value
     ; closure_inner_right_paren: Token.t value
+    ; closure_capability: capability option value
     ; closure_colon: Token.t value
     ; closure_return_type: specifier value
     ; closure_outer_right_paren: Token.t value

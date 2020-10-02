@@ -630,8 +630,8 @@ impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> 
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_dictionary_type_specifier(self, keyword, left_angle, members, right_angle)
     }
 
-    fn make_closure_type_specifier(&mut self, outer_left_paren: Self::R, function_keyword: Self::R, inner_left_paren: Self::R, parameter_list: Self::R, inner_right_paren: Self::R, colon: Self::R, return_type: Self::R, outer_right_paren: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_closure_type_specifier(self, outer_left_paren, function_keyword, inner_left_paren, parameter_list, inner_right_paren, colon, return_type, outer_right_paren)
+    fn make_closure_type_specifier(&mut self, outer_left_paren: Self::R, function_keyword: Self::R, inner_left_paren: Self::R, parameter_list: Self::R, inner_right_paren: Self::R, capability: Self::R, colon: Self::R, return_type: Self::R, outer_right_paren: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_closure_type_specifier(self, outer_left_paren, function_keyword, inner_left_paren, parameter_list, inner_right_paren, capability, colon, return_type, outer_right_paren)
     }
 
     fn make_closure_parameter_type_specifier(&mut self, call_convention: Self::R, type_: Self::R) -> Self::R {

@@ -949,12 +949,14 @@ where
                         variadic_hints.len().to_string()
                     ));
                 }
+                let (cap, _) = Self::p_capability(&c.closure_capability, env)?;
                 Ok(Hfun(ast::HintFun {
                     reactive_kind: ast::FuncReactive::FNonreactive,
                     param_tys: type_hints,
                     param_kinds: kinds,
                     param_mutability: vec![],
                     variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
+                    cap,
                     return_ty: Self::p_hint(&c.closure_return_type, env)?,
                     is_mutable_return: true,
                 }))

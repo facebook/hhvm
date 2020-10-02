@@ -80,6 +80,7 @@ and hint_ p env = function
         hf_param_kinds = kl;
         hf_param_mutability = muts;
         hf_variadic_ty = vh;
+        hf_cap = cap_opt;
         hf_return_ty = h;
         hf_is_mutable_return = mut_ret;
       } ->
@@ -106,7 +107,13 @@ and hint_ p env = function
     in
     let paraml = List.map3_exn hl kl muts ~f:make_param in
     let implicit_params =
-      { capability = Typing_make_type.default_capability (Reason.Rhint p) }
+      let capability =
+        Option.value_map
+          cap_opt
+          ~default:(Typing_make_type.default_capability (Reason.Rhint p))
+          ~f:(hint env)
+      in
+      { capability }
     in
     let ret = possibly_enforced_hint env h in
     let arity =

@@ -2137,6 +2137,13 @@ and simplify_subtype_params_with_variadic
     |> simplify_subtype_possibly_enforced sub variadic_ty
     &&& simplify_subtype_params_with_variadic subl variadic_ty
 
+and simplify_subtype_implicit_params
+    ~subtype_env { capability = sub_cap } { capability = super_cap } env =
+  if TypecheckerOptions.coeffects (Env.get_tcopt env) then
+    simplify_subtype ~subtype_env sub_cap super_cap env
+  else
+    valid env
+
 and simplify_supertype_params_with_variadic
     ~(subtype_env : subtype_env)
     (superl : locl_fun_param list)
@@ -2796,6 +2803,9 @@ and simplify_subtype_funs
   in
   let simplify_subtype_params = simplify_subtype_params ~subtype_env in
   (* First apply checks on attributes and variadic arity *)
+  let simplify_subtype_implicit_params =
+    simplify_subtype_implicit_params ~subtype_env
+  in
   env
   |> simplify_subtype_funs_attributes
        ~subtype_env
@@ -2831,6 +2841,9 @@ and simplify_subtype_funs
           variadic_subtype
           variadic_supertype
       end
+  &&& simplify_subtype_implicit_params
+        ft_super.ft_implicit_params
+        ft_sub.ft_implicit_params
   &&&
   (* Finally do covariant subtryping on return type *)
   if check_return then

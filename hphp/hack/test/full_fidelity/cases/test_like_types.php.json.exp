@@ -594,6 +594,7 @@
                           "line_number":7
                         }
                       },
+                      "closure_capability":{"kind":"missing"},
                       "closure_colon":{
                         "kind":"token",
                         "token":{

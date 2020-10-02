@@ -112,12 +112,14 @@ and hint_ env p h_ =
         hf_param_kinds = _;
         hf_param_mutability = _;
         hf_variadic_ty = variadic_hint;
+        hf_cap = cap_opt;
         hf_return_ty = h;
         hf_is_mutable_return = _;
       } ->
     List.iter hl (hint env);
     hint env h;
-    Option.iter variadic_hint (hint env)
+    Option.iter variadic_hint (hint env);
+    maybe hint env cap_opt
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     Errors.tuple_syntax p

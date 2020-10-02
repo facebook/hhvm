@@ -95,6 +95,7 @@ let rec check_hint env (pos, hint) =
           hf_param_mutability = _;
           (* TODO: shouldn't we be checking this hint as well? *)
           hf_variadic_ty = _;
+          hf_cap = _;
           hf_return_ty = h;
           hf_is_mutable_return = _;
         } ->

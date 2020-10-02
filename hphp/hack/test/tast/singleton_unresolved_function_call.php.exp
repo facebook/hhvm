@@ -17,7 +17,7 @@
                      { hf_reactive_kind = FNonreactive;
                        hf_param_tys = [([3:35-38], (Hprim Tint))];
                        hf_param_kinds = [None]; hf_param_mutability = [None];
-                       hf_variadic_ty = None;
+                       hf_variadic_ty = None; hf_cap = None;
                        hf_return_ty = ([3:41-44], (Hprim Tint));
                        hf_is_mutable_return = false }))));
           param_is_variadic = false; param_pos = [3:46-48];

@@ -1847,8 +1847,9 @@ let subtype_prop env prop =
   p_str
 
 let coeffects env ty =
-  Full.to_string
-    ~ty:Full.locl_ty
-    (fun s -> Doc.text (Utils.strip_all_ns s))
-    env
-    ty
+  with_blank_tyvars (fun () ->
+      Full.to_string
+        ~ty:Full.locl_ty
+        (fun s -> Doc.text (Utils.strip_all_ns s))
+        env
+        ty)

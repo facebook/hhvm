@@ -3796,6 +3796,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _inner_left_paren: Self::R,
         parameter_list: Self::R,
         _inner_right_paren: Self::R,
+        capability: Self::R,
         _colon: Self::R,
         return_type: Self::R,
         outer_right_paren: Self::R,
@@ -3843,7 +3844,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None => return Node::Ignored(SK::ClosureTypeSpecifier),
         };
         let pos = self.merge_positions(outer_left_paren, outer_right_paren);
-        let implicit_params = self.as_fun_implicit_params(Node::Ignored(SK::Capability), pos);
+        let implicit_params = self.as_fun_implicit_params(capability, pos);
 
         let mut flags = FunTypeFlags::empty();
         if mutability.is_some() {

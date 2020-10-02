@@ -330,6 +330,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         Happly (x, List.map hl ~f:(self#on_hint env))
       | _ -> super#on_hint_ env h
 
+    method! on_hint_fun env hf =
+      let open Namespace_env in
+      let namespace =
+        { empty_with_default with ns_name = Some "HH\\Contexts" }
+      in
+      let cap_env = { env with namespace } in
+      let hf_cap = Option.map ~f:(self#on_hint cap_env) hf.hf_cap in
+      let hf = super#on_hint_fun env hf in
+      { hf with hf_cap }
+
     method! on_shape_field_name env sfn =
       match sfn with
       | SFclass_const (x, (pos, y)) ->

@@ -885,6 +885,7 @@ module type Syntax_S = sig
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
     ; closure_inner_right_paren                          : t
+    ; closure_capability                                 : t
     ; closure_colon                                      : t
     ; closure_return_type                                : t
     ; closure_outer_right_paren                          : t
@@ -1221,7 +1222,7 @@ module type Syntax_S = sig
   val make_type_constraint : t -> t -> t
   val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
-  val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_closure_parameter_type_specifier : t -> t -> t
   val make_classname_type_specifier : t -> t -> t -> t -> t -> t
   val make_field_specifier : t -> t -> t -> t -> t

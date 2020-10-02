@@ -3843,17 +3843,6 @@ where
         }
     }
 
-    fn capability_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let FunctionDeclarationHeader(x) = &node.syntax {
-            if !&x.function_capability.is_missing() {
-                self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional);
-            }
-            if !&x.function_capability_provisional.is_missing() {
-                self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional);
-            }
-        }
-    }
-
     fn is_method_declaration(node: &'a Syntax<Token, Value>) -> bool {
         if let MethodishDeclaration(_) = &node.syntax {
             true
@@ -5513,7 +5502,6 @@ where
                 self.redeclaration_errors(node);
                 self.multiple_entrypoint_attribute_errors(node);
                 self.methodish_errors(node);
-                self.capability_errors(node);
             }
 
             LiteralExpression(_)
@@ -5706,6 +5694,9 @@ where
         match &node.syntax {
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
+            }
+            Capability(_) | CapabilityProvisional(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::CoeffectsProvisional)
             }
             PocketAtomExpression(_)
             | PocketIdentifierExpression(_)

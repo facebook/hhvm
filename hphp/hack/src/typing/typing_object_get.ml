@@ -92,58 +92,96 @@ let member_not_found pos ~is_method class_ member_name r on_error =
     ()
   | (None, None) -> error `no_hint
 
-(* Look up the type of the property or method id in the type ty1 of the
- * receiver and use the function k to postprocess the result.
- * Return any fresh type variables that were substituted for generic type
- * parameters in the type of the property or method.
+let widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
+  match deref ty with
+  | (_, Tprim Tnull) ->
+    if Option.is_some nullsafe then
+      (env, Some ty)
+    else
+      (env, None)
+  | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
+    let default () =
+      let ty = mk (r2, Tclass (class_id, Nonexact, tyl)) in
+      (env, Some ty)
+    in
+    begin
+      match Env.get_class env class_name with
+      | None -> default ()
+      | Some class_info ->
+        (match Env.get_member is_method env class_info member_name with
+        | Some { ce_origin; _ } ->
+          (* If this member was inherited then we obtain the type from which
+           * it is inherited as our wider type *)
+          if String.equal ce_origin class_name then
+            default ()
+          else (
+            match Cls.get_ancestor class_info ce_origin with
+            | None -> default ()
+            | Some basety ->
+              let ety_env =
+                {
+                  type_expansions = [];
+                  substs = Subst.make_locl (Cls.tparams class_info) tyl;
+                  this_ty = ty;
+                  from_class = None;
+                  quiet = true;
+                  on_error;
+                }
+              in
+              let (env, basety) = Phase.localize ~ety_env env basety in
+              (env, Some basety)
+          )
+        | None -> (env, None))
+    end
+  | _ -> (env, None)
+
+(* `ty` is expected to be the type for a property or method that has been
+ * accessed using the nullsafe operatore e.g. $x?->prop or $x?->foo(...).
  *
- * Essentially, if ty1 is a concrete type, e.g., class C, then k is applied
- * to the type of the property id in C; and if ty1 is an unresolved type,
- * e.g., a union of classes (C1 | ... | Cn), then k is applied to the type
- * of the property id in each Ci and the results are collected into an
- * unresolved type.
- *
- * The extra flexibility offered by the functional argument k is used in two
- * places:
- *
- *   (1) when type-checking method calls: if the receiver has an unresolved
- *   type, then we need to type-check the method call with each possible
- *   receiver type and collect the results into an unresolved type;
- *
- *   (2) when type-checking assignments to properties: if the receiver has
- *   an unresolved type, then we need to check that the right hand side
- *   value can be assigned to the property id for each of the possible types
- *   of the receiver.
+ * For properties, just make the type nullable.
+ * For methods, we expect a function type, and make the return type nullable.
+ * But in the case that we have type dynamic, or err, or any, or nothing, we
+ * just use the type `null`. The `call` helper will deal appropriately
+ * with it.
  *)
-let rec obj_get
-    ~obj_pos
-    ~is_method
-    ~nullsafe
-    ~coerce_from_ty
-    ~explicit_targs
-    env
-    ty1
-    cid
-    id
-    on_error =
-  obj_get_
-    ~inst_meth:false
-    ~is_method
-    ~nullsafe
-    ~obj_pos
-    ~explicit_targs
-    ~coerce_from_ty
-    ~is_nonnull:false
-    env
-    ty1
-    cid
-    id
-    (fun x -> x)
-    on_error
+let rec make_nullable_member_type env ~is_method id_pos pos ty =
+  if is_method then
+    let (env, ty) = Env.expand_type env ty in
+    match deref ty with
+    | (r, Tfun tf) ->
+      let (env, ty) =
+        make_nullable_member_type
+          ~is_method:false
+          env
+          id_pos
+          pos
+          tf.ft_ret.et_type
+      in
+      (env, mk (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
+    | (r, Tunion (_ :: _ as tyl)) ->
+      let (env, tyl) =
+        List.map_env env tyl (fun env ty ->
+            make_nullable_member_type ~is_method env id_pos pos ty)
+      in
+      Union.union_list env r tyl
+    | (r, Tintersection tyl) ->
+      let (env, tyl) =
+        List.map_env env tyl (fun env ty ->
+            make_nullable_member_type ~is_method env id_pos pos ty)
+      in
+      Inter.intersect_list env r tyl
+    | (_, (Terr | Tdynamic | Tany _)) -> (env, ty)
+    | (_, Tunion []) -> (env, MakeType.null (Reason.Rnullsafe_op pos))
+    | _ ->
+      (* Shouldn't happen *)
+      make_nullable_member_type ~is_method:false env id_pos pos ty
+  else
+    let (env, ty) = Typing_solver.non_null env id_pos ty in
+    (env, MakeType.nullable_locl (Reason.Rnullsafe_op pos) ty)
 
 (* We know that the receiver is a concrete class: not a generic with
  * bounds, or a Tunion. *)
-and obj_get_concrete_ty
+let rec obj_get_concrete_ty
     ~inst_meth
     ~is_method
     ~coerce_from_ty
@@ -409,92 +447,84 @@ and obj_get_concrete_ty
       on_error;
     default ()
 
-and widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
-  match deref ty with
-  | (_, Tprim Tnull) ->
-    if Option.is_some nullsafe then
-      (env, Some ty)
-    else
-      (env, None)
-  | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
-    let default () =
-      let ty = mk (r2, Tclass (class_id, Nonexact, tyl)) in
-      (env, Some ty)
+and nullable_obj_get
+    ~inst_meth
+    ~obj_pos
+    ~is_method
+    ~nullsafe
+    ~explicit_targs
+    ~coerce_from_ty
+    ~is_nonnull
+    env
+    ety1
+    cid
+    ((id_pos, id_str) as id)
+    k_lhs
+    on_error
+    ~read_context
+    ty =
+  match nullsafe with
+  | Some r_null ->
+    let (env, (method_, tal)) =
+      obj_get_
+        ~inst_meth
+        ~obj_pos
+        ~is_method
+        ~nullsafe
+        ~explicit_targs
+        ~coerce_from_ty
+        ~is_nonnull
+        env
+        ty
+        cid
+        id
+        k_lhs
+        on_error
     in
-    begin
-      match Env.get_class env class_name with
-      | None -> default ()
-      | Some class_info ->
-        (match Env.get_member is_method env class_info member_name with
-        | Some { ce_origin; _ } ->
-          (* If this member was inherited then we obtain the type from which
-           * it is inherited as our wider type *)
-          if String.equal ce_origin class_name then
-            default ()
-          else (
-            match Cls.get_ancestor class_info ce_origin with
-            | None -> default ()
-            | Some basety ->
-              let ety_env =
-                {
-                  type_expansions = [];
-                  substs = Subst.make_locl (Cls.tparams class_info) tyl;
-                  this_ty = ty;
-                  from_class = None;
-                  quiet = true;
-                  on_error;
-                }
-              in
-              let (env, basety) = Phase.localize ~ety_env env basety in
-              (env, Some basety)
-          )
-        | None -> (env, None))
-    end
-  | _ -> (env, None)
-
-(* `ty` is expected to be the type for a property or method that has been
- * accessed using the nullsafe operatore e.g. $x?->prop or $x?->foo(...).
- *
- * For properties, just make the type nullable.
- * For methods, we expect a function type, and make the return type nullable.
- * But in the case that we have type dynamic, or err, or any, or nothing, we
- * just use the type `null`. The `call` helper will deal appropriately
- * with it.
- *)
-and make_nullable_member_type env ~is_method id_pos pos ty =
-  if is_method then
-    let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (r, Tfun tf) ->
-      let (env, ty) =
-        make_nullable_member_type
-          ~is_method:false
-          env
-          id_pos
-          pos
-          tf.ft_ret.et_type
+    let (env, ty) =
+      match r_null with
+      | Typing_reason.Rnullsafe_op p1 ->
+        make_nullable_member_type ~is_method env id_pos p1 method_
+      | _ -> (env, method_)
+    in
+    (env, (ty, tal))
+  | None ->
+    (match deref ety1 with
+    | (r, Toption opt_ty) ->
+      begin
+        match get_node opt_ty with
+        | Tnonnull ->
+          let err =
+            if read_context then
+              Errors.top_member_read
+            else
+              Errors.top_member_write
+          in
+          err
+            ~is_method
+            ~is_nullable:true
+            id_str
+            id_pos
+            (Typing_print.error env ety1)
+            (Reason.to_pos r)
+        | _ ->
+          let err =
+            if read_context then
+              Errors.null_member_read
+            else
+              Errors.null_member_write
+          in
+          err ~is_method id_str id_pos (Reason.to_string "This can be null" r)
+      end
+    | (r, _) ->
+      let err =
+        if read_context then
+          Errors.null_member_read
+        else
+          Errors.null_member_write
       in
-      (env, mk (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
-    | (r, Tunion (_ :: _ as tyl)) ->
-      let (env, tyl) =
-        List.map_env env tyl (fun env ty ->
-            make_nullable_member_type ~is_method env id_pos pos ty)
-      in
-      Union.union_list env r tyl
-    | (r, Tintersection tyl) ->
-      let (env, tyl) =
-        List.map_env env tyl (fun env ty ->
-            make_nullable_member_type ~is_method env id_pos pos ty)
-      in
-      Inter.intersect_list env r tyl
-    | (_, (Terr | Tdynamic | Tany _)) -> (env, ty)
-    | (_, Tunion []) -> (env, MakeType.null (Reason.Rnullsafe_op pos))
-    | _ ->
-      (* Shouldn't happen *)
-      make_nullable_member_type ~is_method:false env id_pos pos ty
-  else
-    let (env, ty) = Typing_solver.non_null env id_pos ty in
-    (env, MakeType.nullable_locl (Reason.Rnullsafe_op pos) ty)
+      err ~is_method id_str id_pos (Reason.to_string "This can be null" r));
+    (env, (TUtils.terr env (get_reason ety1), []))
 
 (* k_lhs takes the type of the object receiver *)
 and obj_get_
@@ -532,65 +562,22 @@ and obj_get_
         Errors.unify_error
   in
   let nullable_obj_get ~read_context ty =
-    match nullsafe with
-    | Some p1 ->
-      let (env, (method_, tal)) =
-        obj_get_
-          ~inst_meth
-          ~obj_pos
-          ~is_method
-          ~nullsafe
-          ~explicit_targs
-          ~coerce_from_ty
-          ~is_nonnull
-          env
-          ty
-          cid
-          id
-          k_lhs
-          on_error
-      in
-      let (env, ty) =
-        make_nullable_member_type ~is_method env id_pos p1 method_
-      in
-      (env, (ty, tal))
-    | None ->
-      (match deref ety1 with
-      | (r, Toption opt_ty) ->
-        begin
-          match get_node opt_ty with
-          | Tnonnull ->
-            let err =
-              if read_context then
-                Errors.top_member_read
-              else
-                Errors.top_member_write
-            in
-            err
-              ~is_method
-              ~is_nullable:true
-              id_str
-              id_pos
-              (Typing_print.error env ety1)
-              (Reason.to_pos r)
-          | _ ->
-            let err =
-              if read_context then
-                Errors.null_member_read
-              else
-                Errors.null_member_write
-            in
-            err ~is_method id_str id_pos (Reason.to_string "This can be null" r)
-        end
-      | (r, _) ->
-        let err =
-          if read_context then
-            Errors.null_member_read
-          else
-            Errors.null_member_write
-        in
-        err ~is_method id_str id_pos (Reason.to_string "This can be null" r));
-      (env, (TUtils.terr env (get_reason ety1), []))
+    nullable_obj_get
+      ~inst_meth
+      ~obj_pos
+      ~is_method
+      ~nullsafe
+      ~explicit_targs
+      ~coerce_from_ty
+      ~is_nonnull
+      env
+      ety1
+      cid
+      id
+      k_lhs
+      on_error
+      ~read_context
+      ty
   in
   (* coerce_from_ty is used to store the source type for an assignment, so it
    * is a useful marker for whether we're reading or writing *)
@@ -754,3 +741,52 @@ and obj_get_
       id
       k_lhs
       on_error
+
+(* Look up the type of the property or method id in the type ty1 of the
+ * receiver and use the function k to postprocess the result.
+ * Return any fresh type variables that were substituted for generic type
+ * parameters in the type of the property or method.
+ *
+ * Essentially, if ty1 is a concrete type, e.g., class C, then k is applied
+ * to the type of the property id in C; and if ty1 is an unresolved type,
+ * e.g., a union of classes (C1 | ... | Cn), then k is applied to the type
+ * of the property id in each Ci and the results are collected into an
+ * unresolved type.
+ *
+ * The extra flexibility offered by the functional argument k is used in two
+ * places:
+ *
+ *   (1) when type-checking method calls: if the receiver has an unresolved
+ *   type, then we need to type-check the method call with each possible
+ *   receiver type and collect the results into an unresolved type;
+ *
+ *   (2) when type-checking assignments to properties: if the receiver has
+ *   an unresolved type, then we need to check that the right hand side
+ *   value can be assigned to the property id for each of the possible types
+ *   of the receiver.
+ *)
+let obj_get
+    ~obj_pos
+    ~is_method
+    ~nullsafe
+    ~coerce_from_ty
+    ~explicit_targs
+    env
+    ty1
+    cid
+    id
+    on_error =
+  obj_get_
+    ~inst_meth:false
+    ~is_method
+    ~nullsafe
+    ~obj_pos
+    ~explicit_targs
+    ~coerce_from_ty
+    ~is_nonnull:false
+    env
+    ty1
+    cid
+    id
+    (fun x -> x)
+    on_error

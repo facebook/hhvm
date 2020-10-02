@@ -3795,7 +3795,7 @@ and assign_ p ur env e1 ty2 =
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
-      | OG_nullsafe -> Some pobj
+      | OG_nullsafe -> Some (Reason.Rnullsafe_op pobj)
     in
     let (env, tobj, obj_ty) = expr ~accept_using_var:true env obj in
     let env = might_throw env in
@@ -4627,7 +4627,7 @@ and dispatch_call
       TOG.obj_get
         ~obj_pos:(fst e1)
         ~is_method:true
-        ~nullsafe
+        ~nullsafe:(Option.map ~f:(fun p -> Reason.Rnullsafe_op p) nullsafe)
         ~coerce_from_ty:None
         ~explicit_targs
         env

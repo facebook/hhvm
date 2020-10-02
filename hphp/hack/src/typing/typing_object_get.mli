@@ -10,7 +10,7 @@
 val obj_get :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
-  nullsafe:Ast_defs.pos option ->
+  nullsafe:Typing_reason.t option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
   explicit_targs:Nast.targ list ->
@@ -24,7 +24,7 @@ val obj_get :
 val obj_get_ :
   inst_meth:bool ->
   is_method:bool ->
-  nullsafe:Ast_defs.pos option ->
+  nullsafe:Typing_reason.t option ->
   obj_pos:Ast_defs.pos ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->

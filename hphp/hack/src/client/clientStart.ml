@@ -154,6 +154,12 @@ let start_server (env : env) =
           [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]);
       ]
   in
+  if not silent then
+    Printf.eprintf
+      "Server launched with the following command:\n\t%s\n%!"
+      (String.concat
+         ~sep:" "
+         (Array.to_list (Array.map ~f:Filename.quote hh_server_args)));
   let (stdin, stdout, stderr) =
     if silent then
       let nfd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in

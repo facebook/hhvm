@@ -588,10 +588,16 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_num:
       return isIntType(type) || isDoubleType(type);
     case TypeStructure::Kind::T_arraykey:
+      if (isClassType(type) || isLazyClassType(type)) {
+        if (RO::EvalClassIsStringNotices) {
+          raise_notice("Class used in is_arraykey");
+        }
+        return true;
+      }
       return isIntType(type) || isStringType(type);
 
     case TypeStructure::Kind::T_string:
-      if (isClassType(type)) {
+      if (isClassType(type) || isLazyClassType(type)) {
         if (RO::EvalClassIsStringNotices) {
           raise_notice("Class used in is_string");
         }

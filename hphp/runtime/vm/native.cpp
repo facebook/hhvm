@@ -375,8 +375,10 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
       continue;
     }
 
-    if (tvIsClass(tv) && isStringType(*targetType)) {
-      val(tv).pstr = const_cast<StringData*>(val(tv).pclass->name());
+    if ((tvIsClass(tv) || tvIsLazyClass(tv)) && isStringType(*targetType)) {
+      val(tv).pstr = tvIsClass(tv) ?
+        const_cast<StringData*>(val(tv).pclass->name()) :
+        const_cast<StringData*>(val(tv).plazyclass.name());
       type(tv) = KindOfPersistentString;
       if (RuntimeOption::EvalClassStringHintNotices) {
         raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);

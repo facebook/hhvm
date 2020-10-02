@@ -959,6 +959,7 @@ void Class::checkPropInitialValues() const {
     }
 
     // No coercion for statically initialized properties.
+    // Coercing property values here is not thread-safe.
     assertx(type(tv) == type(rval));
     assertx(val(tv).num == val(rval).num);
   }
@@ -2997,7 +2998,6 @@ template<typename XProp>
 void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
   auto const& tv = preProp->val();
   auto const& tc = preProp->typeConstraint();
-
   assertx(
     !(preProp->attrs() & AttrSystemInitialValue) ||
     tv.m_type != KindOfNull ||

@@ -1823,7 +1823,7 @@ private:
    * Indexed by the _physical_ index of the property within an object, not its
    * logical Slot.
    */
-  PropInitVec m_declPropInit;
+  mutable PropInitVec m_declPropInit;
 
   MaybeDataType m_enumBaseTy;
   /*

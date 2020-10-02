@@ -468,6 +468,8 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         break;
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
+      case AnnotAction::WarnLazyClass:
+      case AnnotAction::ConvertLazyClass:
         return false; // verifyFail will deal with the conversion/warning
       case AnnotAction::ClsMethCheck:
         return false;
@@ -689,6 +691,8 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
+    case AnnotAction::WarnLazyClass:
+    case AnnotAction::ConvertLazyClass:
       return false; // verifyFail will handle the conversion/warning
     case AnnotAction::ClsMethCheck:
       return false;
@@ -743,6 +747,8 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
         return false;
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
+      case AnnotAction::WarnLazyClass:
+      case AnnotAction::ConvertLazyClass:
       case AnnotAction::ClsMethCheck:
       case AnnotAction::RecordCheck:
         // Can't get these with objects
@@ -791,6 +797,8 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::ObjectCheck:
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
+    case AnnotAction::WarnLazyClass:
+    case AnnotAction::ConvertLazyClass:
     case AnnotAction::ClsMethCheck:
     case AnnotAction::RecordCheck:
       return false;
@@ -920,12 +928,14 @@ std::string describe_actual_type(tv_rval val) {
 }
 
 bool TypeConstraint::checkStringCompatible() const {
-  if (isString() || (isObject() && interface_supports_string(m_typeName))) {
+  if (isString() || isArrayKey() ||
+      (isObject() && interface_supports_string(m_typeName))) {
     return true;
   }
   if (!isObject()) return false;
   if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
-    return alias->type == AnnotType::String;
+    return alias->type == AnnotType::String ||
+           alias->type == AnnotType::ArrayKey;
   }
   return false;
 }
@@ -965,11 +975,14 @@ void castClsMeth(tv_lval c, F make) {
 void TypeConstraint::verifyOutParamFail(const Func* func,
                                         TypedValue* c,
                                         int paramNum) const {
-  if (isClassType(c->m_type) && checkStringCompatible()) {
+  if ((isClassType(c->m_type) || isLazyClassType(c->m_type)) &&
+      checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
-    c->m_data.pstr = const_cast<StringData*>(c->m_data.pclass->name());
+    c->m_data.pstr = isClassType(c->m_type) ?
+      const_cast<StringData*>(c->m_data.pclass->name()) :
+      const_cast<StringData*>(c->m_data.plazyclass.name());
     c->m_type = KindOfPersistentString;
     return;
   }
@@ -1036,11 +1049,14 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
     }
   }
 
-  if (isClassType(val.type()) && checkStringCompatible()) {
+  if ((isClassType(val.type()) || isLazyClassType(val.type())) &&
+      checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
-    val.val().pstr = const_cast<StringData*>(val.val().pclass->name());
+    val.val().pstr = isClassType(val.type()) ?
+      const_cast<StringData*>(val.val().pclass->name()) :
+      const_cast<StringData*>(val.val().plazyclass.name());
     val.type() = KindOfPersistentString;
     return;
   }
@@ -1091,12 +1107,14 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
     }
   }
 
-  if (isClassType(c.type()) && checkStringCompatible()) {
+  if ((isClassType(c.type()) || isLazyClassType(c.type())) &&
+      checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
-    val(c).pstr =
-      const_cast<StringData*>(val(c).pclass->name()); // TODO (T61651936)
+    val(c).pstr = isClassType(c.type()) ?
+      const_cast<StringData*>(val(c).pclass->name()) : // TODO (T61651936)
+      const_cast<StringData*>(val(c).plazyclass.name());
     c.type() = KindOfPersistentString;
     return;
   }

@@ -1598,7 +1598,7 @@ SSATmp* maybeCoerceValue(
 
   auto bail = [&] { fail(); return cns(env, TBottom); };
   if (target <= TStr) {
-    if (!val->type().maybe(TCls)) return bail();
+    if (!val->type().maybe(TLazyCls | TCls)) return bail();
 
     auto castW = [&] (SSATmp* val){
       if (RuntimeOption::EvalClassStringHintNotices) {
@@ -1611,15 +1611,17 @@ SSATmp* maybeCoerceValue(
       return update(val);
     };
 
-    return cond(
-      env,
-      [&] (Block* f) { return gen(env, CheckType, TCls, f, val); },
-      [&] (SSATmp* cval) { return castW(gen(env, LdClsName, cval)); },
-      [&] {
-        hint(env, Block::Hint::Unlikely);
-        return bail();
-      }
-    );
+    MultiCond mc{env};
+    mc.ifTypeThen(val, TLazyCls, [&](SSATmp* lcval) {
+      return castW(gen(env, LdLazyClsName, lcval));
+    });
+    mc.ifTypeThen(val, TCls, [&](SSATmp* cval) {
+      return castW(gen(env, LdClsName, cval));
+    });
+    return mc.elseDo([&] {
+      hint(env, Block::Hint::Unlikely);
+      return bail();
+    });
   }
 
   if (target <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {

@@ -105,7 +105,7 @@ pub fn from_ast<'a>(
                 Some(c) if (c.0).1 == "Map" || (c.0).1 == "ImmMap" => true,
                 _ => false,
             };
-            let deep_init = !args.is_static && expr_requires_deep_init(e);
+            let deep_init = !args.is_static && expr_requires_deep_init(e, emitter.options().emit_class_pointers() > 0);
             match ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, e) {
                 Ok(tv) if !(deep_init || is_collection_map) => {
                     (Some(tv), None, HhasPropertyFlags::empty())
@@ -189,12 +189,16 @@ fn valid_for_prop(tc: &constraint::Type) -> bool {
     }
 }
 
-fn expr_requires_deep_init(expr: &tast::Expr) -> bool {
+fn expr_requires_deep_init_(expr: &tast::Expr) -> bool {
+    return expr_requires_deep_init(expr, false);
+}
+
+fn expr_requires_deep_init(expr: &tast::Expr, force_class_init: bool) -> bool {
     use ast_defs::Uop::*;
     use tast::Expr_;
     match &expr.1 {
-        Expr_::Unop(e) if e.0 == Uplus || e.0 == Uminus => expr_requires_deep_init(&e.1),
-        Expr_::Binop(e) => expr_requires_deep_init(&e.1) || expr_requires_deep_init(&e.2),
+        Expr_::Unop(e) if e.0 == Uplus || e.0 == Uminus => expr_requires_deep_init_(&e.1),
+        Expr_::Binop(e) => expr_requires_deep_init_(&e.1) || expr_requires_deep_init_(&e.2),
         Expr_::Lvar(_)
         | Expr_::Null
         | Expr_::False
@@ -205,11 +209,11 @@ fn expr_requires_deep_init(expr: &tast::Expr) -> bool {
         Expr_::Collection(e) if (e.0).1 == "keyset" || (e.0).1 == "dict" || (e.0).1 == "vec" => {
             (e.2).iter().any(af_expr_requires_deep_init)
         }
-        Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init),
+        Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init_),
         Expr_::Darray(e) => (e.1).iter().any(expr_pair_requires_deep_init),
         Expr_::Id(e) if e.1 == pseudo_consts::G__FILE__ || e.1 == pseudo_consts::G__DIR__ => false,
         Expr_::Shape(sfs) => sfs.iter().any(shape_field_requires_deep_init),
-        Expr_::ClassConst(e) => match e.0.as_ciexpr() {
+        Expr_::ClassConst(e) if (!force_class_init) => match e.0.as_ciexpr() {
             Some(ci_expr) => match (ci_expr.1).as_id() {
                 Some(ast_defs::Id(_, s)) => {
                     class_const_requires_deep_init(&s.as_str(), &(e.1).1.as_str())
@@ -224,21 +228,21 @@ fn expr_requires_deep_init(expr: &tast::Expr) -> bool {
 
 fn af_expr_requires_deep_init(af: &tast::Afield) -> bool {
     match af {
-        tast::Afield::AFvalue(e) => expr_requires_deep_init(e),
+        tast::Afield::AFvalue(e) => expr_requires_deep_init_(e),
         tast::Afield::AFkvalue(e1, e2) => {
-            expr_requires_deep_init(e1) || expr_requires_deep_init(e2)
+            expr_requires_deep_init_(e1) || expr_requires_deep_init_(e2)
         }
     }
 }
 
 fn expr_pair_requires_deep_init((e1, e2): &(tast::Expr, tast::Expr)) -> bool {
-    expr_requires_deep_init(e1) || expr_requires_deep_init(e2)
+    expr_requires_deep_init_(e1) || expr_requires_deep_init_(e2)
 }
 
 fn shape_field_requires_deep_init((name, expr): &(ast_defs::ShapeFieldName, tast::Expr)) -> bool {
     match name {
         ast_defs::ShapeFieldName::SFlitInt(_) | ast_defs::ShapeFieldName::SFlitStr(_) => {
-            expr_requires_deep_init(expr)
+            expr_requires_deep_init_(expr)
         }
         ast_defs::ShapeFieldName::SFclassConst(ast_defs::Id(_, s), (_, p)) => {
             class_const_requires_deep_init(s, p)

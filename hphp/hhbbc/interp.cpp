@@ -4926,7 +4926,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     // does that we can't reduce even when we know it succeeds.
     // VerifyRetType will convert a TCls to a TStr implicitly
     // (and possibly warn)
-    if (tcT.couldBe(BStr) && stackT.couldBe(BCls)) {
+    if (tcT.couldBe(BStr) && stackT.couldBe(BCls | BLazyCls)) {
       stackT |= TStr;
       dont_reduce = true;
     }

@@ -133,7 +133,7 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   if (prop.type() == KindOfUninit && (propDecl.attrs & AttrLateInit)) {
     return true;
   }
-  assertATypeHint(propDecl.typeConstraint, prop);
+  if (!assertATypeHint(propDecl.typeConstraint, prop)) return false;
   if (RuntimeOption::EvalEnforceGenericsUB <= 2) return true;
   for (auto const& ub : propDecl.ubs) {
     if (!assertATypeHint(ub, prop)) return false;

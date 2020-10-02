@@ -322,7 +322,7 @@ static const struct {
   { OpVerifyRetNonNullC,
                    {Stack1,           Stack1,       OutSameAsInput1  }},
   { OpVerifyOutType,
-                   {Stack1,           Stack1,       OutSameAsInput1  }},
+                   {Stack1,           Stack1,       OutUnknown      }},
   { OpOODeclExists,
                    {StackTop2,        Stack1,       OutBoolean      }},
   { OpSelf,        {None,             Stack1,       OutClass        }},

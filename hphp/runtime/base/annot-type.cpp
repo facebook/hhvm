@@ -233,6 +233,14 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       return (isIntType(dt) || isDoubleType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::ArrayKey:
+      if (isClassType(dt)) {
+        return RuntimeOption::EvalClassStringHintNotices
+          ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+      }
+      if (isLazyClassType(dt)) {
+        return RuntimeOption::EvalClassStringHintNotices
+          ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+      }
       return (isIntType(dt) || isStringType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Self:
@@ -279,6 +287,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   if (at == AnnotType::String && dt == KindOfClass) {
     return RuntimeOption::EvalClassStringHintNotices
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+  }
+  if (at == AnnotType::String && dt == KindOfLazyClass) {
+    return RuntimeOption::EvalClassStringHintNotices
+      ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
   }
   if (isClsMethType(dt)) {
     auto const resolve = [] (bool okay) {
@@ -333,6 +345,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
             ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
         }
         return AnnotAction::Fail;
+      case KindOfLazyClass:
+        if (interface_supports_string(annotClsName)) {
+          return RuntimeOption::EvalClassStringHintNotices
+            ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+        }
+        return AnnotAction::Fail;
       case KindOfClsMeth:
         return interface_supports_arrlike(annotClsName) ?
           AnnotAction::ClsMethCheck : AnnotAction::Fail;
@@ -344,7 +362,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfBoolean:
       case KindOfResource:
       case KindOfRecord:
-      case KindOfLazyClass: // TODO (T68823113)
         return AnnotAction::Fail;
       case KindOfObject:
         not_reached();

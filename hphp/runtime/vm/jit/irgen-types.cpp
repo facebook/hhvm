@@ -189,6 +189,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
 template <typename GetVal,
           typename FuncToStr,
           typename ClassToStr,
+          typename LazyClassToStr,
           typename ClsMethToVec,
           typename Fail,
           typename Callable,
@@ -202,6 +203,7 @@ void verifyTypeImpl(IRGS& env,
                     GetVal getVal,
                     FuncToStr funcToStr,
                     ClassToStr classToStr,
+                    LazyClassToStr lazyClassToStr,
                     ClsMethToVec clsMethToVec,
                     Fail fail,
                     Callable callable,
@@ -260,6 +262,23 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::ConvertClass:
       assertx(valType <= TCls);
       if (!classToStr(val)) return genFail();
+      return;
+    case AnnotAction::WarnLazyClass:
+      assertx(valType <= TLazyCls);
+      if (!lazyClassToStr(val)) return genFail();
+      gen(
+        env,
+        RaiseNotice,
+        cns(
+          env,
+          makeStaticString(Strings::CLASS_TO_STRING_IMPLICIT)
+        )
+      );
+      return;
+
+    case AnnotAction::ConvertLazyClass:
+      assertx(valType <= TLazyCls);
+      if (!lazyClassToStr(val)) return genFail();
       return;
     case AnnotAction::ClsMethCheck:
       assertx(valType <= TClsMeth);
@@ -1215,6 +1234,13 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         env.irb->exceptionStackBoundary();
         return true;
       },
+      [&] (SSATmp* val) { // lazy class to string conversions
+        auto const str = gen(env, LdLazyClsName, val);
+        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+        env.irb->exceptionStackBoundary();
+        return true;
+      },
       [&] (SSATmp* val) { // clsmeth to varray/vec conversions
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
@@ -1313,6 +1339,11 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       },
       [&] (SSATmp* val) { // class to string conversions
         auto const str = gen(env, LdClsName, val);
+        stLocRaw(env, id, fp(env), str);
+        return true;
+      },
+      [&] (SSATmp* val) { // lazy class to string conversions
+        auto const str = gen(env, LdLazyClsName, val);
         stLocRaw(env, id, fp(env), str);
         return true;
       },
@@ -1418,6 +1449,12 @@ void verifyPropType(IRGS& env,
         if (!coerce) return false;
         if (RO::EvalCheckPropTypeHints < 3) return false;
         *coerce = gen(env, LdClsName, val);
+        return true;
+      },
+      [&] (SSATmp*) {  // lazy class to string automatic conversions
+        if (!coerce) return false;
+        if (RO::EvalCheckPropTypeHints < 3) return false;
+        *coerce = gen(env, LdLazyClsName, val);
         return true;
       },
       [&] (SSATmp* val) {

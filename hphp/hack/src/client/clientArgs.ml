@@ -103,6 +103,7 @@ let parse_check_args cmd =
   let hot_classes_threshold = ref 0 in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
+  let save_64bit = ref None in
   let saved_state_ignore_hhconfig = ref false in
   let log_inference_constraints = ref false in
   let max_errors = ref None in
@@ -614,6 +615,9 @@ let parse_check_args cmd =
         Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
         " (mode) Save a saved state to the given file."
         ^ " Returns number of edges dumped from memory to the database." );
+      ( "--save-64bit",
+        Arg.String (fun x -> save_64bit := Some x),
+        " save discovered 64-bit to the given directory" );
       ( "--saved-state-ignore-hhconfig",
         Arg.Set saved_state_ignore_hhconfig,
         " ignore hhconfig hash when loading saved states (default: false)" );
@@ -777,6 +781,7 @@ let parse_check_args cmd =
         match mode with
         | MODE_REMOVE_DEAD_FIXMES _ -> true
         | _ -> false );
+      save_64bit = !save_64bit;
       output_json = !output_json;
       prechecked = !prechecked;
       profile_log = !profile_log;
@@ -864,6 +869,7 @@ let parse_start_env command =
     from = !from;
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
+    save_64bit = None;
     log_inference_constraints = !log_inference_constraints;
     no_load = !no_load;
     prechecked = !prechecked;

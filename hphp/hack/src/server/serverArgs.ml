@@ -40,6 +40,7 @@ type options = {
   replace_state_after_saving: bool;
   root: Path.t;
   save_filename: string option;
+  save_64bit: string option;
   save_naming_filename: string option;
   save_with_spec: save_state_spec_info option;
   should_detach: bool;
@@ -122,6 +123,8 @@ module Messages = struct
   let save_with_spec =
     " save server state given a JSON spec:\n" ^ save_state_spec_json_descr
 
+  let save_64bit = " save discovered 64-bit to the given directory"
+
   let waiting_client =
     " send message to fd/handle when server has begun"
     ^ " starting and again when it's done starting"
@@ -174,6 +177,7 @@ let parse_options () : options =
   let replace_state_after_saving = ref false in
   let save = ref None in
   let save_with_spec = ref None in
+  let save_64bit = ref None in
   let save_naming = ref None in
   let should_detach = ref false in
   let version = ref false in
@@ -244,6 +248,9 @@ let parse_options () : options =
       ( "--save-state-with-spec",
         Arg.String set_save_with_spec,
         Messages.save_with_spec );
+      ( "--save-64bit",
+        Arg.String (fun s -> save_64bit := Some s),
+        Messages.save_64bit );
       ( "--saved-state-ignore-hhconfig",
         Arg.Set saved_state_ignore_hhconfig,
         Messages.saved_state_ignore_hhconfig );
@@ -346,6 +353,7 @@ let parse_options () : options =
     replace_state_after_saving = !replace_state_after_saving;
     root = root_path;
     save_filename = !save;
+    save_64bit = !save_64bit;
     save_with_spec;
     save_naming_filename = !save_naming;
     should_detach = !should_detach;
@@ -382,6 +390,7 @@ let default_options ~root =
     root = Path.make root;
     save_filename = None;
     save_with_spec = None;
+    save_64bit = None;
     save_naming_filename = None;
     should_detach = false;
     waiting_client = None;
@@ -444,6 +453,8 @@ let root options = options.root
 let save_filename options = options.save_filename
 
 let save_with_spec options = options.save_with_spec
+
+let save_64bit options = options.save_64bit
 
 let save_naming_filename options = options.save_naming_filename
 
@@ -514,6 +525,7 @@ let to_string
       root;
       save_filename;
       save_with_spec;
+      save_64bit;
       save_naming_filename;
       should_detach;
       waiting_client;
@@ -552,6 +564,11 @@ let to_string
     match save_with_spec with
     | None -> "<>"
     | Some _ -> "SaveStateSpec(...)"
+  in
+  let save_64bit_str =
+    match save_64bit with
+    | None -> "<>"
+    | Some path -> path
   in
   let save_naming_filename_str =
     match save_naming_filename with
@@ -651,6 +668,9 @@ let to_string
     ", ";
     "save_with_spec: ";
     save_with_spec_str;
+    ", ";
+    "save_64bit: ";
+    save_64bit_str;
     ", ";
     "save_naming_filename: ";
     save_naming_filename_str;

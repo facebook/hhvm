@@ -33,6 +33,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         do_post_handoff_handshake = true;
         ignore_hh_version = false;
         saved_state_ignore_hhconfig = false;
+        save_64bit = None;
         use_priority_pipe = false;
         prechecked = None;
         config = [];

@@ -37,6 +37,7 @@ type env = {
   ai_mode: string option;
   debug_port: Unix.file_descr option;
   ignore_hh_version: bool;
+  save_64bit: string option;
   saved_state_ignore_hhconfig: bool;
   dynamic_view: bool;
   prechecked: bool option;
@@ -58,6 +59,7 @@ let start_server (env : env) =
     ai_mode;
     debug_port;
     ignore_hh_version;
+    save_64bit;
     saved_state_ignore_hhconfig;
     dynamic_view;
     prechecked;
@@ -125,6 +127,9 @@ let start_server (env : env) =
           [| "--saved-state-ignore-hhconfig" |]
         else
           [||] );
+        (match save_64bit with
+        | None -> [||]
+        | Some dest -> [| "--save-64bit"; dest |]);
         ( if dynamic_view then
           [| "--dynamic-view" |]
         else

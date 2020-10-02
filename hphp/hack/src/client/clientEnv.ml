@@ -86,6 +86,7 @@ type client_check_env = {
   max_errors: int option;
   mode: client_mode;
   no_load: bool;
+  save_64bit: string option;
   output_json: bool;
   prechecked: bool option;
   profile_log: bool;

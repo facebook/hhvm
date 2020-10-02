@@ -16,8 +16,6 @@ module Category = struct
     | Typecheck
   [@@deriving ord]
 
-  let all = [Decl_accessors; Disk_cat; Get_ast]
-
   let to_string (category : t) : string =
     match category with
     | Decl_accessors -> "decl_accessors"
@@ -27,6 +25,7 @@ module Category = struct
 end
 
 module CategoryMap = WrappedMap.Make (Category)
+module CategorySet = Caml.Set.Make (Category)
 module C = Category
 module M = CategoryMap
 
@@ -37,36 +36,36 @@ type counter = {
   time: time_in_sec;  (** cumulative duration of all calls to 'count' *)
   is_counting: bool;
       (** to avoid double-counting when a method calls 'count' and so does a nested one *)
+  enabled: bool;  (** 'enabled' controls whether any counting is done at all *)
 }
 
-let empty = { is_counting = false; count = 0; time = 0. }
+let empty ~enabled = { is_counting = false; count = 0; time = 0.; enabled }
 
-type t = {
-  enable: bool;  (** 'enable' controls whether any counting is done at all *)
-  counters: counter CategoryMap.t;  (** here we store each individual counter. *)
-}
+(** here we store each individual counter. *)
+type t = counter CategoryMap.t
 
-let state : t ref = ref { enable = false; counters = CategoryMap.empty }
+let counters : t ref = ref CategoryMap.empty
 
-let restore_state (new_state : t) : unit = state := new_state
+let restore_state (new_state : t) : unit = counters := new_state
 
-let reset ~(enable : bool) : t =
-  let old_state = !state in
-  let counters =
-    CategoryMap.of_function Category.all (fun _category -> empty)
-  in
-  state := { enable; counters };
-  old_state
+let reset ~(enabled_categories : CategorySet.t) : t =
+  let old_counters = !counters in
+  counters :=
+    CategorySet.fold
+      (fun category counters -> M.add category (empty ~enabled:true) counters)
+      enabled_categories
+      CategoryMap.empty;
+  old_counters
 
 let get_counter (category : Category.t) : counter =
-  M.find_opt category !state.counters |> Option.value ~default:empty
+  M.find_opt category !counters |> Option.value ~default:(empty ~enabled:false)
 
 let set_counter (category : Category.t) (counts : counter) : unit =
-  state := { !state with counters = M.add category counts !state.counters }
+  counters := M.add category counts !counters
 
 let count (category : Category.t) (f : unit -> 'a) : 'a =
   let tally = get_counter category in
-  if (not !state.enable) || tally.is_counting then
+  if (not tally.enabled) || tally.is_counting then
     (* is_counting is to avoid double-counting, in the case that a method calls 'count'
     and then a nested method itself also calls 'count'. *)
     f ()
@@ -80,6 +79,7 @@ let count (category : Category.t) (f : unit -> 'a) : 'a =
             is_counting = false;
             count = tally.count + 1;
             time = tally.time +. Unix.gettimeofday () -. start_time;
+            enabled = tally.enabled;
           })
   end
 
@@ -110,7 +110,7 @@ let get_counters () : Telemetry.t =
             ~value:(telemetry_of_counter counter)
         in
         telemetry)
-      !state.counters
+      !counters
       (Telemetry.create ())
   in
   telemetry

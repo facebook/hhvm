@@ -368,7 +368,18 @@ let process_files
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
-  let _prev_counters_state = Counters.reset ~enable:check_info.profile_log in
+  let _prev_counters_state =
+    Counters.(
+      Category.(
+        let categories = [] in
+        let categories =
+          if check_info.profile_log then
+            Decl_accessors :: Get_ast :: Disk_cat :: Typecheck :: categories
+          else
+            categories
+        in
+        reset ~enabled_categories:(CategorySet.of_list categories)))
+  in
   let (_start_time, start_counters) = read_counters () in
 
   let rec process_or_exit errors progress =

@@ -14,6 +14,8 @@ module Category : sig
     | Typecheck
 end
 
+module CategorySet : Set.S with type elt = Category.t
+
 type time_in_sec = float
 
 (** state is a global mutable variable, accumulating all counts *)
@@ -22,8 +24,9 @@ type t
 (** reset will zero all counters, adjust the global mutable state,
     and return the previous state. You should 'restore_state' when done,
     in case your caller had been doing their own count.
-    If 'enable' is false then no counting will happen. *)
-val reset : enable:bool -> t
+    Categories from [enabled_categories] will be enabled
+    and all others will be disabled. *)
+val reset : enabled_categories:CategorySet.t -> t
 
 (** restores global mutable state to what it was before you called 'reset' *)
 val restore_state : t -> unit

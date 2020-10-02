@@ -119,7 +119,12 @@ let test_process_file_deferring () =
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
-  let prev_counter_state = Counters.reset ~enable:true in
+  let prev_counter_state =
+    Counters.(
+      reset
+        ~enabled_categories:
+          (CategorySet.of_list Category.[Decl_accessors; Disk_cat; Get_ast]))
+  in
   let { Typing_check_service.computation; _ } =
     Typing_check_service.process_file dynamic_view_files ctx errors file
   in

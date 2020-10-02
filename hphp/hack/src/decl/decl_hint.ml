@@ -139,11 +139,6 @@ and hint_ p env = function
             ~returns_mutable:mut_ret;
         ft_reactive = reactivity;
       }
-  | Harray (h1, h2) ->
-    let h1 = Option.map h1 (hint env) in
-    let h2 = Option.map h2 (hint env) in
-    let argl = List.filter_map [h1; h2] ~f:(fun x -> x) in
-    Tapply ((p, "\\array"), argl)
   | Happly (((_p, c) as id), argl) ->
     Decl_env.add_wclass env c;
     let argl = List.map argl (hint env) in

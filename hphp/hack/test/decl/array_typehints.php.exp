@@ -17,13 +17,12 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|array_typehints.php line 3, characters 16-33),
-               (Tapply (([3:16-21], "\\array"),
-                  [(Rhint (root|array_typehints.php line 3, characters 22-24),
-                    (Tprim Tint));
-                    (Rhint (root|array_typehints.php line 3, characters 27-32),
-                     (Tprim Tstring))
-                    ]
+              (Rhint (root|array_typehints.php line 3, characters 16-34),
+               (Tdarray (
+                  (Rhint (root|array_typehints.php line 3, characters 23-25),
+                   (Tprim Tint)),
+                  (Rhint (root|array_typehints.php line 3, characters 28-33),
+                   (Tprim Tstring))
                   )))
               };
             ft_flags =

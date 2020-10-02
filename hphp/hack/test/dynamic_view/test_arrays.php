@@ -2,7 +2,7 @@
 function foo() {
   return 5;
 }
-function test() : array<int> {
+function test() : varray<int> {
   $x = foo();
   /* HH_IGNORE_ERROR[2049] */ hh_show($x);
   $y = varray[];

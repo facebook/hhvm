@@ -7,9 +7,9 @@ namespace MyNamespace {
   type MyString = string;
 }
 
-type MyArray = array;
-type MyArray1<T> = array<T>;
-type MyArray2<TK, TV> = array<TK, TV>;
+type MyArray = varray_or_darray;
+type MyArray1<T> = varray<T>;
+type MyArray2<TK, TV> = darray<TK, TV>;
 type MyDarray<TK, TV> = darray<TK, TV>;
 type MyVarray<T> = varray<T>;
 type MyVarrayOrDarray<TK, TV> = varray_or_darray<TK, TV>;

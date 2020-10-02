@@ -1,6 +1,6 @@
 <?hh // partial
 
-function a2(): array<int, string> {
+function a2(): darray<int, string> {
   throw new Exception();
 }
 

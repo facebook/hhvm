@@ -2487,11 +2487,6 @@ and expr_
     | None -> Errors.type_not_record id pos);
 
     expr_error env (Reason.Rwitness p) outer
-  | Cast ((_, Harray (None, None)), _)
-    when Partial.should_check_error (Env.get_mode env) 4007
-         || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
-    Errors.array_cast p;
-    expr_error env (Reason.Rwitness p) outer
   | Cast (hint, e) ->
     let (env, te, ty2) = expr env e in
     let env = might_throw env in

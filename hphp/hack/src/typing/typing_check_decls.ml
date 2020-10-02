@@ -90,14 +90,6 @@ and hint_ env p h_ =
   | Hoption (_, Hprim Tnoreturn) ->
     Errors.option_return_only_typehint p `noreturn
   | Hoption (_, Hmixed) -> Errors.option_mixed p
-  | Harray (ty1, ty2) ->
-    if
-      Partial.should_check_error (Env.get_mode env.tenv) 4045
-      && Option.is_none ty1
-    then
-      Errors.generic_array_strict p;
-    maybe hint env ty1;
-    maybe hint env ty2
   | Hdarray (ty1, ty2) ->
     hint env ty1;
     hint env ty2

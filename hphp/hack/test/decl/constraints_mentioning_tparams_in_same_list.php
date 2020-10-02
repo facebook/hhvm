@@ -8,7 +8,7 @@ interface I<
   Tc as Td,
   Td as E<Ta, Tf>,
   Tf,
-  Tarr as array<Ta>,
+  Tarr as varray<Ta>,
   Tlike as ~Ta,
   Topt as ?Ta,
   Tfun as (function(Ta): Tb),

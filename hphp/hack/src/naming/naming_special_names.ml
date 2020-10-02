@@ -534,8 +534,6 @@ module Typehints = struct
 
   let string = "string"
 
-  let array = "array"
-
   let darray = "darray"
 
   let varray = "varray"
@@ -565,7 +563,6 @@ module Typehints = struct
           bool;
           float;
           string;
-          array;
           darray;
           varray;
           varray_or_darray;
@@ -576,8 +573,7 @@ module Typehints = struct
     (fun x -> HashSet.mem reserved_typehints x)
 
   let is_reserved_global_name x =
-    String.equal x array
-    || String.equal x callable
+    String.equal x callable
     || String.equal x Classes.cSelf
     || String.equal x Classes.cParent
 
@@ -591,7 +587,6 @@ module Typehints = struct
     || String.equal x string
     || String.equal x resource
     || String.equal x mixed
-    || String.equal x array
     || String.equal x arraykey
     || String.equal x dynamic
     || String.equal x wildcard

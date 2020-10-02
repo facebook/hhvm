@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7c05235740e15397bd62765891d1a1e4>>
+// @generated SignedSource<<1df3c9291e742bf388bb4873c8c9c85c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -302,9 +302,6 @@ impl Hint_ {
     pub fn mk_habstr(p0: String, p1: Vec<Hint>) -> Self {
         Hint_::Habstr(p0, p1)
     }
-    pub fn mk_harray(p0: Option<Hint>, p1: Option<Hint>) -> Self {
-        Hint_::Harray(p0, p1)
-    }
     pub fn mk_hdarray(p0: Hint, p1: Hint) -> Self {
         Hint_::Hdarray(p0, p1)
     }
@@ -410,12 +407,6 @@ impl Hint_ {
     pub fn is_habstr(&self) -> bool {
         match self {
             Hint_::Habstr(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_harray(&self) -> bool {
-        match self {
-            Hint_::Harray(..) => true,
             _ => false,
         }
     }
@@ -533,12 +524,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_harray(&self) -> Option<(&Option<Hint>, &Option<Hint>)> {
-        match self {
-            Hint_::Harray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
     pub fn as_hdarray(&self) -> Option<(&Hint, &Hint)> {
         match self {
             Hint_::Hdarray(p0, p1) => Some((p0, p1)),
@@ -635,12 +620,6 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_harray_mut(&mut self) -> Option<(&mut Option<Hint>, &mut Option<Hint>)> {
-        match self {
-            Hint_::Harray(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
     pub fn as_hdarray_mut(&mut self) -> Option<(&mut Hint, &mut Hint)> {
         match self {
             Hint_::Hdarray(p0, p1) => Some((p0, p1)),
@@ -734,12 +713,6 @@ impl Hint_ {
     pub fn as_habstr_into(self) -> Option<(String, Vec<Hint>)> {
         match self {
             Hint_::Habstr(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_harray_into(self) -> Option<(Option<Hint>, Option<Hint>)> {
-        match self {
-            Hint_::Harray(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

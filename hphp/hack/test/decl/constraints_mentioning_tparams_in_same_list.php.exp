@@ -52,12 +52,10 @@ Parsed decls:
     (Invariant, ([10:3-5], "Tf"), [], Erased);
     (Invariant, ([11:3-7], "Tarr"),
      [(Constraint_as,
-       (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 11-19),
-        (Tapply (([11:11-16], "\\array"),
-           [(Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 17-18),
-             (Tgeneric ("Ta", [])))
-           ]
-        ))))
+       (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 11-20),
+        (Tvarray
+           (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 18-19),
+            (Tgeneric ("Ta", []))))))
      ],
     Erased);
   (Invariant, ([12:3-8], "Tlike"),

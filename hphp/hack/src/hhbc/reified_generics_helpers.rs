@@ -73,7 +73,6 @@ pub(crate) fn has_reified_type_constraint(env: &Env, h: &aast::Hint) -> Reificat
         Hint_::Hprim(_)
         | Hint_::Hmixed
         | Hint_::Hnonnull
-        | Hint_::Harray(_, _)
         | Hint_::Hdarray(_, _)
         | Hint_::Hvarray(_)
         | Hint_::HvarrayOrDarray(_, _)
@@ -120,7 +119,6 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Hmixed
         | Hint_::Hnonnull
         | Hint_::Habstr(_, _)
-        | Hint_::Harray(_, _)
         | Hint_::Hdarray(_, _)
         | Hint_::Hvarray(_)
         | Hint_::HvarrayOrDarray(_, _)
@@ -213,7 +211,6 @@ pub(crate) fn remove_erased_generics(env: &Env, h: aast::Hint) -> aast::Hint {
             | Hint_::Hmixed
             | Hint_::Hnonnull
             | Hint_::Habstr(_, _)
-            | Hint_::Harray(_, _)
             | Hint_::Hdarray(_, _)
             | Hint_::Hvarray(_)
             | Hint_::HvarrayOrDarray(_, _)

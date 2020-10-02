@@ -117,7 +117,6 @@ and hint_ =
   | Hmixed
   | Hnonnull
   | Habstr of string * hint list
-  | Harray of hint option * hint option
   | Hdarray of hint * hint
   | Hvarray of hint
   | Hvarray_or_darray of hint option * hint

@@ -581,8 +581,6 @@ pub mod typehints {
 
     pub const STRING: &str = "string";
 
-    pub const ARRAY: &str = "array";
-
     pub const DARRAY: &str = "darray";
 
     pub const VARRAY: &str = "varray";
@@ -613,7 +611,6 @@ pub mod typehints {
                 BOOL,
                 FLOAT,
                 STRING,
-                ARRAY,
                 DARRAY,
                 VARRAY,
                 VARRAY_OR_DARRAY,
@@ -628,14 +625,10 @@ pub mod typehints {
     }
 
     lazy_static! {
-        static ref RESERVED_GLOBAL_NAMES: HashSet<&'static str> = vec![
-            ARRAY,
-            CALLABLE,
-            crate::classes::SELF,
-            crate::classes::PARENT
-        ]
-        .into_iter()
-        .collect();
+        static ref RESERVED_GLOBAL_NAMES: HashSet<&'static str> =
+            vec![CALLABLE, crate::classes::SELF, crate::classes::PARENT]
+                .into_iter()
+                .collect();
     }
 
     pub fn is_reserved_global_name(x: &str) -> bool {
@@ -644,8 +637,8 @@ pub mod typehints {
 
     lazy_static! {
         static ref RESERVED_HH_NAMES: HashSet<&'static str> = vec![
-            VOID, NORETURN, INT, BOOL, FLOAT, NUM, STRING, RESOURCE, MIXED, ARRAY, ARRAYKEY,
-            DYNAMIC, WILDCARD, NULL, NONNULL, NOTHING, THIS
+            VOID, NORETURN, INT, BOOL, FLOAT, NUM, STRING, RESOURCE, MIXED, ARRAYKEY, DYNAMIC,
+            WILDCARD, NULL, NONNULL, NOTHING, THIS
         ]
         .into_iter()
         .collect();

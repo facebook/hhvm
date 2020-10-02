@@ -640,7 +640,6 @@ and hint_
   | Aast.Hmixed
   | Aast.Hnonnull
   | Aast.Habstr _
-  | Aast.Harray _
   | Aast.Hdarray _
   | Aast.Hvarray _
   | Aast.Hvarray_or_darray _
@@ -687,7 +686,6 @@ and hint_id
              || String.equal x ("\\" ^ SN.Typehints.resource)
              || String.equal x ("\\" ^ SN.Typehints.mixed)
              || String.equal x ("\\" ^ SN.Typehints.nonnull)
-             || String.equal x ("\\" ^ SN.Typehints.array)
              || String.equal x ("\\" ^ SN.Typehints.arraykey) ->
         Errors.primitive_toplevel p;
         N.Herr
@@ -783,20 +781,6 @@ and try_castable_hint
     | nm when String.equal nm SN.Typehints.bool -> Some (N.Hprim N.Tbool)
     | nm when String.equal nm SN.Typehints.float -> Some (N.Hprim N.Tfloat)
     | nm when String.equal nm SN.Typehints.string -> Some (N.Hprim N.Tstring)
-    | nm when String.equal nm SN.Typehints.array ->
-      let tcopt = Provider_context.get_tcopt (fst env).ctx in
-      let array_typehints_disallowed =
-        TypecheckerOptions.disallow_array_typehint tcopt
-      in
-      if array_typehints_disallowed then Errors.array_typehints_disallowed p;
-      Some
-        (match hl with
-        | [] -> N.Harray (None, None)
-        | [val_] -> N.Harray (Some (hint env val_), None)
-        | [key_; val_] -> N.Harray (Some (hint env key_), Some (hint env val_))
-        | _ ->
-          Errors.too_many_type_arguments p;
-          N.Herr)
     | nm when String.equal nm SN.Typehints.darray ->
       Some
         (match hl with

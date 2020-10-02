@@ -31,7 +31,6 @@ let validate_classname (pos, hint) =
   | Aast.Htuple _
   | Aast.Hunion _
   | Aast.Hintersection _
-  | Aast.Harray _
   | Aast.Hdarray _
   | Aast.Hvarray _
   | Aast.Hvarray_or_darray _
@@ -64,9 +63,6 @@ let rec check_hint env (pos, hint) =
       Option.iter (List.hd tal) validate_classname
     else
       List.iter tal (check_hint env)
-  | Aast.Harray (hopt1, hopt2) ->
-    Option.iter hopt1 (check_hint env);
-    Option.iter hopt2 (check_hint env)
   | Aast.Hdarray (h1, h2) ->
     check_hint env h1;
     check_hint env h2

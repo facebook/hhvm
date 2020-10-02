@@ -143,7 +143,6 @@ fn hint_to_string<'a>(h: &'a Hint_) -> Cow<'a, str> {
         Hprim(p) => prim_to_string(p),
         Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED.into(),
         Hnonnull => typehints::NONNULL.into(),
-        Harray(_, _) => typehints::ARRAY.into(),
         Hdarray(_, _) => typehints::DARRAY.into(),
         Hvarray(_) => typehints::VARRAY.into(),
         HvarrayOrDarray(_, _) => typehints::VARRAY_OR_DARRAY.into(),
@@ -364,7 +363,6 @@ fn param_hint_to_type_info(
         | Hdynamic
         | Hnonnull
         | Hmixed
-        | Harray(Some(_), Some(_))
         | Hdarray(_, _) => false,
         Happly(Id(_, s), hs) => {
             if !hs.is_empty() {

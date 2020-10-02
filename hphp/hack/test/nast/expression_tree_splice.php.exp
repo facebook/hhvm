@@ -98,22 +98,21 @@
                                                          None)))
                                                      ],
                                                    None)));
-                                                ([4:17-31],
+                                                ([4:28-30],
                                                  (Call (
-                                                    ([4:17-31],
+                                                    ([4:28-30],
                                                      (Obj_get (
-                                                        ([4:17-31],
+                                                        ([4:28-30],
                                                          (Lvar
-                                                            ([4:17-31], $v))),
-                                                        ([4:17-31],
+                                                            ([4:28-30], $v))),
+                                                        ([4:28-30],
                                                          (Id
-                                                            ([4:17-31],
-                                                             "unsupportedSyntax"))),
+                                                            ([4:28-30],
+                                                             "splice"))),
                                                         OG_nullthrows))),
                                                     [],
-                                                    [([Pos.none],
-                                                      (String
-                                                         "ETSplice(\n    Expr(\n        Pos(\n            Small {\n                file: RelativePath {\n                    prefix: Dummy,\n                    path: \"expression_tree_splice.php\",\n                },\n                start: FilePosSmall {\n                    bol: 30,\n                    line: 4,\n                    column: 27,\n                },\n                end: FilePosSmall {\n                    bol: 30,\n                    line: 4,\n                    column: 29,\n                },\n            },\n        ),\n        Lvar(\n            Lid(\n                Pos(\n                    Small {\n                        file: RelativePath {\n                            prefix: Dummy,\n                            path: \"expression_tree_splice.php\",\n                        },\n                        start: FilePosSmall {\n                            bol: 30,\n                            line: 4,\n                            column: 27,\n                        },\n                        end: FilePosSmall {\n                            bol: 30,\n                            line: 4,\n                            column: 29,\n                        },\n                    },\n                ),\n                (\n                    0,\n                    \"$x\",\n                ),\n            ),\n        ),\n    ),\n)"))
+                                                    [([4:28-30],
+                                                      (Lvar ([4:28-30], $x)))
                                                       ],
                                                     None)))
                                                 ],
@@ -131,7 +130,7 @@
                                ns_auto_ns_map = []; ns_is_codegen = false;
                                ns_disable_xhp_element_mangling = false };
                              f_doc_comment = None; f_static = false },
-                           []))))
+                           [([4:28-30], $x)]))))
                  )))))
           ];
         fb_annotation = Named };

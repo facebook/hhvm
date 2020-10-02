@@ -123,6 +123,8 @@ fn rewrite_expr(e: &Expr) -> Expr {
                 &e.0,
             )
         }
+        // Convert `{ expr }` to `$v->splice( expr )`
+        ETSplice(e) => meth_call("splice", vec![*e.clone()], &e.0),
         // Convert anything else to $v->unsupportedSyntax().
         // Type checking should prevent us hitting these cases.
         _ => meth_call(

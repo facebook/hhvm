@@ -9,9 +9,8 @@ final class Code {
     throw new Exception();
   }
 
-  // TODO: it would be better to discard unsupported syntax nodes during lowering.
-  public function unsupportedSyntax(string $msg): this::TAst {
-    throw new Exception($msg);
+  public function splice(mixed $_): this::TAst {
+    throw new Exception();
   }
 }
 

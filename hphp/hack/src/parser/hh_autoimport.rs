@@ -14,6 +14,7 @@ lazy_static! {
 }
 
 static TYPES: &'static [&'static str] = &[
+    "Array",
     "arraylike",
     "AsyncFunctionWaitHandle",
     "AsyncGenerator",

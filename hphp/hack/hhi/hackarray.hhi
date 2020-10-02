@@ -14,4 +14,7 @@ abstract final class dict<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv
 abstract final class keyset<+T as arraykey> implements KeyedContainer<T, T>, \XHPChild {}
 abstract final class vec<+T> implements KeyedContainer<int, T>, \XHPChild {}
 
+// just as a placeholder so nobody accidentally uses it
+abstract final class Array {}
+
 } // namespace HH

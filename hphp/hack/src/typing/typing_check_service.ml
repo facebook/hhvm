@@ -267,13 +267,11 @@ let get_mem_telemetry () : Telemetry.t option =
   else
     None
 
-type unix_time = float
-
 let profile_log
     ~(check_info : check_info)
-    ~(start_counters : unix_time * Telemetry.t)
-    ~(end_counters : unix_time * Telemetry.t)
-    ~(second_run_end_counters : (unix_time * Telemetry.t) option)
+    ~(start_counters : Counters.time_in_sec * Telemetry.t)
+    ~(end_counters : Counters.time_in_sec * Telemetry.t)
+    ~(second_run_end_counters : (Counters.time_in_sec * Telemetry.t) option)
     ~(file : check_file_computation)
     ~(result : process_file_results) : unit =
   let (start_time, start_counters) = start_counters in
@@ -345,13 +343,12 @@ let profile_log
         "" )
   )
 
-let read_counters () : unix_time * Telemetry.t =
-  let time = Unix.gettimeofday () in
+let read_counters () : Counters.time_in_sec * Telemetry.t =
+  let typecheck_time = Counters.read_time Counters.Category.Typecheck in
   let mem_telemetry = get_mem_telemetry () in
   let operations_counters = Counters.get_counters () in
-  ( time,
+  ( typecheck_time,
     Telemetry.create ()
-    |> Telemetry.float_ ~key:"time" ~value:time
     |> Telemetry.object_opt ~key:"memory" ~value:mem_telemetry
     |> Telemetry.object_ ~key:"operations" ~value:operations_counters )
 
@@ -367,6 +364,7 @@ let process_files
   Ast_provider.local_changes_push_sharedmem_stack ();
 
   let _prev_counters_state = Counters.reset ~enable:check_info.profile_log in
+  let (_start_time, start_counters) = read_counters () in
 
   let rec process_or_exit errors progress =
     match progress.remaining with
@@ -424,6 +422,11 @@ let process_files
     | [] -> (errors, progress)
   in
   let (errors, progress) = process_or_exit typing_result.errors progress in
+
+  let (_end_time, end_counters) = read_counters () in
+  let _profiling_info =
+    Telemetry.diff ~all:false end_counters ~prev:start_counters
+  in
   let dep_edges = Typing_deps.flush_ideps_batch () in
   let dep_edges =
     Typing_deps.merge_dep_edges typing_result.dep_edges dep_edges

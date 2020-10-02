@@ -13,6 +13,7 @@ module Category = struct
     | Decl_accessors
     | Disk_cat
     | Get_ast
+    | Typecheck
   [@@deriving ord]
 
   let all = [Decl_accessors; Disk_cat; Get_ast]
@@ -22,6 +23,7 @@ module Category = struct
     | Decl_accessors -> "decl_accessors"
     | Disk_cat -> "disk_cat"
     | Get_ast -> "get_ast"
+    | Typecheck -> "typecheck"
 end
 
 module CategoryMap = WrappedMap.Make (Category)
@@ -86,6 +88,11 @@ let count_decl_accessor (f : unit -> 'a) : 'a = count C.Decl_accessors f
 let count_disk_cat (f : unit -> 'a) : 'a = count C.Disk_cat f
 
 let count_get_ast (f : unit -> 'a) : 'a = count C.Get_ast f
+
+let count_typecheck (f : unit -> 'a) : 'a = count C.Typecheck f
+
+let read_time (category : Category.t) : time_in_sec =
+  (get_counter category).time
 
 let get_counters () : Telemetry.t =
   let telemetry_of_counter counter =

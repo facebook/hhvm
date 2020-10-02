@@ -617,7 +617,10 @@ where
         // ERROR RECOVERY: If the right brace is missing, treat the remainder as
         // string text.
 
-        let is_assignment_op = |token| Operator::trailing_from_token(token).is_assignment();
+        let is_assignment_op = |token| {
+            Operator::is_trailing_operator_token(token)
+                && Operator::trailing_from_token(token).is_assignment()
+        };
 
         let left_brace_trailing_is_empty = left_brace.trailing_is_empty();
         let left_brace = S!(make_token, self, left_brace);

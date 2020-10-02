@@ -1,0 +1,2 @@
+File "str_interp_backslash.php", line 4, characters 10-30:
+The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])

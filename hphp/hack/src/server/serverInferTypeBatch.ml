@@ -155,6 +155,13 @@ let go :
   let num_positions = List.length pos_list in
   let ctx = Provider_utils.ctx_from_server_env env in
   let start_time = Unix.gettimeofday () in
+  (* Just for now, as a rollout telemetry defense against crashes, we'll log at the start *)
+  HackEventLogger.type_at_pos_batch
+    ~start_time
+    ~num_files
+    ~num_positions
+    ~experimental
+    ~results:None;
   let results =
     if num_positions < 10 then
       helper ctx [] pos_list
@@ -167,5 +174,6 @@ let go :
     ~start_time
     ~num_files
     ~num_positions
-    ~experimental;
+    ~experimental
+    ~results:(Some (List.length results));
   results

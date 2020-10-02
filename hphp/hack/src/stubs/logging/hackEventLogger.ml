@@ -290,7 +290,7 @@ let check_mergebase_failed _ _ = ()
 let check_mergebase_success _ = ()
 
 let type_at_pos_batch
-    ~start_time:_ ~num_files:_ ~num_positions:_ ~experimental:_ =
+    ~start_time:_ ~num_files:_ ~num_positions:_ ~experimental:_ ~results:_ =
   ()
 
 let with_id ~stage:_ _ f = f ()

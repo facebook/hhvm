@@ -472,26 +472,27 @@ let merge
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
-    ({ errors; dep_edges }, (results : progress))
-    (typing_result : typing_result) : typing_result =
+    ((produced_by_job : typing_result), (progress : progress))
+    (acc : typing_result) : typing_result =
   let () =
-    match results.kind with
+    match progress.kind with
     | Progress -> ()
     | DelegateProgress _ ->
-      delegate_state := Delegate.merge !delegate_state errors results.progress
+      delegate_state :=
+        Delegate.merge !delegate_state produced_by_job.errors progress.progress
   in
-  let results = results.progress in
+  let progress = progress.progress in
 
-  files_to_process := results.remaining @ !files_to_process;
+  files_to_process := progress.remaining @ !files_to_process;
 
   (* Let's also prepend the deferred files! *)
-  files_to_process := results.deferred @ !files_to_process;
+  files_to_process := progress.deferred @ !files_to_process;
 
   (* Prefetch the deferred files, if necessary *)
   files_to_process :=
-    if should_prefetch_deferred_files && List.length results.deferred > 10 then
+    if should_prefetch_deferred_files && List.length progress.deferred > 10 then
       let files_to_prefetch =
-        List.fold results.deferred ~init:[] ~f:(fun acc computation ->
+        List.fold progress.deferred ~init:[] ~f:(fun acc computation ->
             match computation with
             | Declare path -> path :: acc
             | _ -> acc)
@@ -519,7 +520,7 @@ let merge
             | _ -> acc
           end
         | _ -> acc)
-      results.completed
+      progress.completed
   in
 
   (* Deferred type check computations should be subtracted from completed
@@ -531,7 +532,7 @@ let merge
     | Check _ -> true
     | _ -> false
   in
-  let deferred_check_count = List.count ~f:is_check results.deferred in
+  let deferred_check_count = List.count ~f:is_check progress.deferred in
   let completed_check_count = completed_check_count - deferred_check_count in
 
   files_checked_count := !files_checked_count + completed_check_count;
@@ -544,11 +545,7 @@ let merge
     ~total_count:files_initial_count
     ~unit:"files"
     ~extra:delegate_progress;
-  let dep_edges =
-    Typing_deps.merge_dep_edges typing_result.dep_edges dep_edges
-  in
-  let errors = Errors.merge errors typing_result.errors in
-  { errors; dep_edges }
+  accumulate_job_output produced_by_job acc
 
 let next
     (workers : MultiWorker.worker list option)

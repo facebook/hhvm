@@ -30,6 +30,17 @@ type typing_result = {
   dep_edges: Typing_deps.dep_edges;
 }
 
+let accumulate_job_output
+    (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
+    typing_result =
+  {
+    errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
+    dep_edges =
+      Typing_deps.merge_dep_edges
+        produced_by_job.dep_edges
+        accumulated_so_far.dep_edges;
+  }
+
 type delegate_job_sig = unit -> typing_result * computation_progress
 
 type progress_kind =

@@ -165,6 +165,9 @@
     typing_toplevel
     typing_try)
   (libraries
+    decl_enum
+    decl_init_check
+    decl_nast
     logging
     naming_special_names
     pcre

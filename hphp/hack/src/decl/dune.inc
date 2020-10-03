@@ -18,12 +18,54 @@
 (library
   (name decl)
   (modules
-    decl
-    decl_inherit
-    decl_requirements)
+    decl)
   (libraries
     affectedDeps
     classDiff
+    ast_provider
+    decl_class
+    decl_class_elements
+    decl_env
+    decl_fun_utils
+    decl_folded_class
+    decl_heap
+    decl_nast
+    decl_pos_utils
+    full_fidelity
+    naming
+    naming_heap
+    procs_procs
+    shallow_class_diff
+    shallow_classes_provider
+    shallow_decl_defs
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name decl_nast)
+  (modules
+    decl_nast)
+  (libraries
+    decl_env
+    decl_fun_utils
+    decl_heap
+    decl_init_check
+    decl_pos_utils
+    decl_utils
+    full_fidelity
+    naming
+    naming_attributes
+    naming_attributes_deprecated
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name decl_folded_class)
+  (modules
+    decl_folded_class
+    decl_inherit
+    decl_requirements)
+  (libraries
     ast_provider
     decl_class
     decl_class_elements
@@ -34,11 +76,8 @@
     decl_init_check
     decl_pos_utils
     decl_to_typing
-    full_fidelity
     naming
-    naming_heap
     procs_procs
-    shallow_class_diff
     shallow_classes_provider
     shallow_decl_defs
     typing_defs)

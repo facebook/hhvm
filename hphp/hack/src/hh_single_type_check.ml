@@ -957,12 +957,9 @@ let parse_and_name ctx files_contents =
 let parse_name_and_decl ctx files_contents =
   Errors.do_ (fun () ->
       let (parsed_files, files_info) = parse_and_name ctx files_contents in
-      Relative_path.Map.iter parsed_files (fun fn parsed_file ->
+      Relative_path.Map.iter parsed_files (fun fn _ ->
           Errors.run_in_context fn Errors.Decl (fun () ->
-              Decl.name_and_declare_types_program
-                ~sh:SharedMem.Uses
-                ctx
-                parsed_file.Parser_return.ast));
+              Decl.make_env ~sh:SharedMem.Uses ctx fn));
 
       files_info)
 

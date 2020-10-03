@@ -50,9 +50,9 @@ type OptionInfoMap = Map<string,OptionInfo>;
 type OptionMap     = Map<string,mixed>;
 
 function parse_options(OptionInfoMap $optmap): OptionMap {
-  $argv = new Vector($GLOBALS['argv']);
+  $argv = new Vector(HH\global_get('argv'));
   $result = parse_options_impl($optmap, $argv);
-  $GLOBALS['argv'] = varray($argv);
+  HH\global_set('argv', varray($argv));
   return $result;
 }
 

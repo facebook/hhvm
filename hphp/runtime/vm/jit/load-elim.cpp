@@ -1197,7 +1197,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
              redundantFlags.knownType.toString(),
              resolved->toString());
 
-      if (resolved->type() <= TCell) {
+      if (resolved->type().subtypeOfAny(TCell, TMemToCell)) {
         env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);

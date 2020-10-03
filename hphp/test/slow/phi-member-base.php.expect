@@ -1,0 +1,15 @@
+vec(2) {
+  vec(1) {
+    object(C) (0) {
+    }
+  }
+  bool(true)
+}
+vec(2) {
+  dict(1) {
+    [17]=>
+    object(C) (0) {
+    }
+  }
+  bool(true)
+}

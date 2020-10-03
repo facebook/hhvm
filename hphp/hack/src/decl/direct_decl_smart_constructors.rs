@@ -61,39 +61,54 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         self.state.arena.alloc(val)
     }
 
-    pub fn get_name(&self, namespace: &'a str, name: Node<'a>) -> Option<Id<'a>> {
-        fn qualified_name_from_parts<'a>(
-            this: &DirectDeclSmartConstructors<'a>,
-            namespace: &'a str,
-            parts: &'a [Node<'a>],
-            pos: &'a Pos<'a>,
-        ) -> Option<Id<'a>> {
-            let mut qualified_name =
-                String::with_capacity_in(namespace.len() + parts.len() * 10, this.state.arena);
-            match parts.first() {
-                Some(Node::Backslash(_)) => {} // Already fully-qualified
-                _ => qualified_name.push_str(namespace),
+    fn qualified_name_from_parts(
+        &self,
+        namespace: &'a str,
+        parts: &'a [Node<'a>],
+        pos: &'a Pos<'a>,
+    ) -> Id<'a> {
+        // If the name is already fully qualified, don't prepend a namespace.
+        let fully_qualified = matches!(parts.first(), Some(Node::Backslash(_)));
+        let namespace = if fully_qualified { "" } else { namespace };
+        // Count the length of the qualified name, so that we can allocate
+        // exactly the right amount of space for it in our arena.
+        let mut len = namespace.len();
+        for part in parts {
+            match part {
+                Node::Name(&(name, _)) => len += name.len(),
+                Node::Backslash(_) => len += 1,
+                Node::ListItem(&(Node::Name(&(name, _)), Node::Backslash(_))) => {
+                    len += name.len() + 1
+                }
+                _ => {}
             }
-            for part in parts {
-                match part {
-                    Node::Name(&(name, _pos)) => qualified_name.push_str(&name),
-                    Node::Backslash(_) => qualified_name.push('\\'),
-                    Node::ListItem(listitem) => {
-                        if let (Node::Name(&(name, _)), Node::Backslash(_)) = &**listitem {
-                            qualified_name.push_str(&name);
-                            qualified_name.push_str("\\");
-                        } else {
-                            panic!("Expected a name or backslash, but got {:?}", listitem);
-                        }
-                    }
-                    n => {
-                        panic!("Expected a name, backslash, or list item, but got {:?}", n);
+        }
+        // Allocate `len` bytes and fill them with the fully qualified name.
+        let mut qualified_name = String::with_capacity_in(len, self.state.arena);
+        qualified_name.push_str(namespace);
+        for part in parts {
+            match part {
+                Node::Name(&(name, _pos)) => qualified_name.push_str(&name),
+                Node::Backslash(_) => qualified_name.push('\\'),
+                Node::ListItem(listitem) => {
+                    if let (Node::Name(&(name, _)), Node::Backslash(_)) = &**listitem {
+                        qualified_name.push_str(&name);
+                        qualified_name.push_str("\\");
+                    } else {
+                        panic!("Expected a name or backslash, but got {:?}", listitem);
                     }
                 }
+                n => {
+                    panic!("Expected a name, backslash, or list item, but got {:?}", n);
+                }
             }
-            Some(Id(pos, qualified_name.into_bump_str()))
         }
+        debug_assert_eq!(len, qualified_name.len());
+        debug_assert_eq!(len, qualified_name.capacity());
+        Id(pos, qualified_name.into_bump_str())
+    }
 
+    pub fn get_name(&self, namespace: &'a str, name: Node<'a>) -> Option<Id<'a>> {
         match name {
             Node::Name(&(name, pos)) => {
                 // always a simple name
@@ -108,7 +123,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Some(Id(pos, name))
             }
             Node::QualifiedName(&(parts, pos)) => {
-                qualified_name_from_parts(self, namespace, parts, pos)
+                Some(self.qualified_name_from_parts(namespace, parts, pos))
             }
             Node::Construct(pos) => Some(Id(pos, naming_special_names::members::__CONSTRUCT)),
             _ => None,

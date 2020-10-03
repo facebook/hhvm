@@ -698,6 +698,14 @@ impl<'a> Node<'a> {
         }
     }
 
+    // If this node is a simple unqualified identifier, return its position and text.
+    fn as_id(&self) -> Option<Id<'a>> {
+        match self {
+            Node::Name(&(name, pos)) | Node::XhpName(&(name, pos)) => Some(Id(pos, name)),
+            _ => None,
+        }
+    }
+
     fn is_ignored(&self) -> bool {
         matches!(self, Node::Ignored(..))
     }
@@ -2491,7 +2499,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         for node in tparams.iter() {
             match node {
                 &Node::TypeParameter(decl) => {
-                    let name = match self.get_name("", decl.name) {
+                    let name = match decl.name.as_id() {
                         Some(name) => name,
                         None => return Node::Ignored(SK::TypeParameters),
                     };
@@ -2547,18 +2555,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         initializer: Self::R,
     ) -> Self::R {
         let (variadic, id) = match name {
-            Node::ListItem(innards) => {
-                let id = match self.get_name("", innards.1) {
+            Node::ListItem(&(ellipsis, id)) => {
+                let id = match id.as_id() {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
-                match innards.0 {
+                match ellipsis {
                     Node::Token(TokenKind::DotDotDot) => (true, id),
                     _ => (false, id),
                 }
             }
             name => {
-                let name = match self.get_name("", name) {
+                let name = match name.as_id() {
                     Some(name) => name,
                     None => return Node::Ignored(SK::ParameterDeclaration),
                 };
@@ -2707,7 +2715,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node::List(
                     self.alloc(self.slice(consts.iter().filter_map(|cst| match cst {
                         Node::ConstInitializer(&(name, initializer)) => {
-                            let id = self.get_name("", name)?;
+                            let id = name.as_id()?;
                             let ty = ty
                                 .or_else(|| self.infer_const(name, initializer))
                                 .unwrap_or_else(|| tany());
@@ -2839,7 +2847,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None => return Node::Ignored(SK::NamespaceUseClause),
         };
         let as_ = if let Node::Token(TokenKind::As) = as_ {
-            match self.get_name("", aliased_name) {
+            match aliased_name.as_id() {
                 Some(name) => Some(name.1),
                 None => return Node::Ignored(SK::NamespaceUseClause),
             }
@@ -3138,7 +3146,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             |declarator| match declarator {
                 Node::ListItem(&(name, initializer)) => {
                     let attributes = self.to_attributes(attrs);
-                    let Id(pos, name) = self.get_name("", name)?;
+                    let Id(pos, name) = name.as_id()?;
                     let name = if modifiers.is_static {
                         name
                     } else {
@@ -3233,7 +3241,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         initializer: Self::R,
         tag: Self::R,
     ) -> Self::R {
-        let name = match self.get_name("", name) {
+        let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::XHPClassAttribute),
         };
@@ -3388,7 +3396,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let consts = self.slice(cases.iter().filter_map(|node| match node {
             Node::ListItem(&(name, value)) => Some(shallow_decl_defs::ShallowClassConst {
                 abstract_: false,
-                name: self.get_name("", name)?,
+                name: name.as_id()?,
                 type_: self.infer_const(name, value).unwrap_or_else(|| tany()),
             }),
             n => panic!("Expected an enum case, got {:?}", n),
@@ -3569,7 +3577,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _trailing_comma: Self::R,
         gt: Self::R,
     ) -> Self::R {
-        let id = match self.get_name("", classname) {
+        let id = match classname.as_id() {
             Some(id) => id,
             None => return Node::Ignored(SK::ClassnameTypeSpecifier),
         };
@@ -3931,7 +3939,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             //     abstract const Type TFoo as OtherType = SomeType;
             (true, _, true) => (None, TypeconstAbstractKind::TCAbstract(type_)),
         };
-        let name = match self.get_name("", name) {
+        let name = match name.as_id() {
             Some(name) => name,
             None => return Node::Ignored(SK::TypeConstDeclaration),
         };

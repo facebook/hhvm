@@ -108,24 +108,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         Id(pos, qualified_name.into_bump_str())
     }
 
-    pub fn get_name(&self, namespace: &'a str, name: Node<'a>) -> Option<Id<'a>> {
+    /// If the given node is a name (i.e., an identifier or a qualified name),
+    /// elaborate it in the current namespace and return Some.
+    fn elaborate_name(&self, name: Node<'a>) -> Option<Id<'a>> {
         match name {
-            Node::Name(&(name, pos)) => {
-                // always a simple name
-                let mut fully_qualified =
-                    String::with_capacity_in(namespace.len() + name.len(), self.state.arena);
-                fully_qualified.push_str(namespace);
-                fully_qualified.push_str(name);
-                Some(Id(pos, fully_qualified.into_bump_str()))
-            }
-            Node::XhpName(&(name, pos)) => {
-                // xhp names are always unqualified
-                Some(Id(pos, name))
-            }
+            Node::Name(&(name, pos)) => Some(Id(pos, self.prefix_ns(name))),
+            Node::XhpName(&(name, pos)) => Some(Id(pos, name)),
             Node::QualifiedName(&(parts, pos)) => {
+                let namespace = self.state.namespace_builder.current_namespace();
                 Some(self.qualified_name_from_parts(namespace, parts, pos))
             }
-            Node::Construct(pos) => Some(Id(pos, naming_special_names::members::__CONSTRUCT)),
             _ => None,
         }
     }
@@ -875,9 +867,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 }
             }
             Node::Null(_) => aast::Expr_::Null,
-            Node::Name(..) | Node::QualifiedName(..) => aast::Expr_::Id(
-                self.alloc(self.get_name(self.state.namespace_builder.current_namespace(), node)?),
-            ),
+            Node::Name(..) | Node::QualifiedName(..) => {
+                aast::Expr_::Id(self.alloc(self.elaborate_name(node)?))
+            }
             _ => return None,
         };
         let pos = self.get_pos(node);
@@ -1200,16 +1192,21 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         FunImplicitParams { capability }
     }
 
-    fn function_into_ty(
+    fn function_to_ty(
         &mut self,
-        namespace: &'a str,
+        is_method: bool,
         attributes: Node<'a>,
         header: &'a FunctionHeader<'a>,
         body: Node,
     ) -> Option<(Id<'a>, Ty<'a>, &'a [ShallowProp<'a>])> {
-        let id = self
-            .get_name(namespace, header.name)
-            .unwrap_or(Id(self.get_pos(header.name), ""));
+        let id_opt = match (is_method, header.name) {
+            (true, Node::Construct(pos)) => {
+                Some(Id(pos, naming_special_names::members::__CONSTRUCT))
+            }
+            (true, _) => self.expect_name(header.name),
+            (false, _) => self.elaborate_name(header.name),
+        };
+        let id = id_opt.unwrap_or(Id(self.get_pos(header.name), ""));
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
         let f_pos = self.get_pos(header.name);
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
@@ -2425,11 +2422,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         if name.is_ignored() {
             return Node::Ignored(SK::AliasDeclaration);
         }
-        let Id(pos, name) =
-            match self.get_name(self.state.namespace_builder.current_namespace(), name) {
-                Some(id) => id,
-                None => return Node::Ignored(SK::AliasDeclaration),
-            };
+        let Id(pos, name) = match self.elaborate_name(name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::AliasDeclaration),
+        };
         let ty = match self.node_to_ty(aliased_type) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::AliasDeclaration),
@@ -2639,15 +2635,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let parsed_attributes = self.to_attributes(attributes);
         match header {
             Node::FunctionHeader(header) => {
-                let (Id(pos, name), type_, _) = match self.function_into_ty(
-                    self.state.namespace_builder.current_namespace(),
-                    attributes,
-                    header,
-                    body,
-                ) {
-                    Some(x) => x,
-                    None => return Node::Ignored(SK::FunctionDeclaration),
-                };
+                let is_method = false;
+                let (Id(pos, name), type_, _) =
+                    match self.function_to_ty(is_method, attributes, header, body) {
+                        Some(x) => x,
+                        None => return Node::Ignored(SK::FunctionDeclaration),
+                    };
                 let deprecated = parsed_attributes.deprecated.map(|msg| {
                     let mut s = String::new_in(self.state.arena);
                     s.push_str("The function ");
@@ -2764,8 +2757,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             // Global consts.
             Node::List([Node::ConstInitializer(&(name, initializer))]) => {
-                let id = match self.get_name(self.state.namespace_builder.current_namespace(), name)
-                {
+                let id = match self.elaborate_name(name) {
                     Some(id) => id,
                     None => return Node::Ignored(SK::ConstDeclaration),
                 };
@@ -2924,11 +2916,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         where_clause: Self::R,
         body: Self::R,
     ) -> Self::R {
-        let Id(pos, name) =
-            match self.get_name(self.state.namespace_builder.current_namespace(), name) {
-                Some(id) => id,
-                None => return Node::Ignored(SK::ClassishDeclaration),
-            };
+        let Id(pos, name) = match self.elaborate_name(name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::ClassishDeclaration),
+        };
         let (is_xhp, name) = if name.starts_with(":") {
             (true, prefix_slash(self.state.arena, name))
         } else {
@@ -3319,7 +3310,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node::Construct(_) => true,
             _ => false,
         };
-        let (id, ty, properties) = match self.function_into_ty("", attributes, header, body) {
+        let is_method = true;
+        let (id, ty, properties) = match self.function_to_ty(is_method, attributes, header, body) {
             Some(tuple) => tuple,
             None => return Node::Ignored(SK::MethodishDeclaration),
         };
@@ -3406,7 +3398,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         cases: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
-        let id = match self.get_name(self.state.namespace_builder.current_namespace(), name) {
+        let id = match self.elaborate_name(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
@@ -3629,11 +3621,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         value: Self::R,
     ) -> Self::R {
         let pos = self.merge_positions(class_name, value);
-        let Id(class_name_pos, class_name_str) =
-            match self.get_name(self.state.namespace_builder.current_namespace(), class_name) {
-                Some(id) => id,
-                None => return Node::Ignored(SK::ScopeResolutionExpression),
-            };
+        let Id(class_name_pos, class_name_str) = match self.elaborate_name(class_name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::ScopeResolutionExpression),
+        };
         let class_id = aast::ClassId(
             class_name_pos,
             match class_name_str.to_ascii_lowercase().as_ref() {
@@ -3742,7 +3733,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let name = if unqualified_name.1.starts_with("__") {
             unqualified_name
         } else {
-            match self.get_name(self.state.namespace_builder.current_namespace(), name) {
+            match self.elaborate_name(name) {
                 Some(name) => name,
                 None => return Node::Ignored(SK::ConstructorCall),
             }

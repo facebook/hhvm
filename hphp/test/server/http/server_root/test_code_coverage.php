@@ -15,6 +15,6 @@ function main_test_code_coverage() {
     foo();
     var_dump(fb_disable_code_coverage());
   } catch (Exception $e) {
-    var_dump($e->getmessage());
+    var_dump($e->getMessage());
   }
 }

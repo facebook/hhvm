@@ -130,6 +130,21 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    /// If the given node is a name (i.e., an identifier or a qualified name),
+    /// return Some. No namespace elaboration is performed.
+    fn expect_name(&self, name: Node<'a>) -> Option<Id<'a>> {
+        // If it's a simple identifier, return it.
+        if let id @ Some(_) = name.as_id() {
+            return id;
+        }
+        match name {
+            Node::QualifiedName(&(parts, pos)) => {
+                Some(self.qualified_name_from_parts("", parts, pos))
+            }
+            _ => None,
+        }
+    }
+
     fn slice<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
         let mut result = match iter.size_hint().1 {
             Some(upper_bound) => Vec::with_capacity_in(upper_bound, self.state.arena),
@@ -949,7 +964,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 enum_values.iter().next().map(|x| self.node_to_ty(*x))?
             }
             node => {
-                let Id(pos, name) = self.get_name("", node)?;
+                let Id(pos, name) = self.expect_name(node)?;
                 let reason = self.alloc(Reason::hint(pos));
                 let ty_ = if self.is_type_param_in_scope(name) {
                     // TODO (T69662957) must fill type args of Tgeneric
@@ -2348,7 +2363,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         class_type: Self::R,
         type_arguments: Self::R,
     ) -> Self::R {
-        let class_id = match self.get_name("", class_type) {
+        let class_id = match self.expect_name(class_type) {
             Some(id) => id,
             None => return Node::Ignored(SK::GenericTypeSpecifier),
         };
@@ -2787,7 +2802,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_namespace_declaration_header(&mut self, _keyword: Self::R, name: Self::R) -> Self::R {
-        let name = self.get_name("", name).map(|Id(_, name)| name);
+        let name = self.expect_name(name).map(|Id(_, name)| name);
         // if this is header of semicolon-style (one with NamespaceEmptyBody) namespace, we should pop
         // the previous namespace first, but we don't have the body yet. We'll fix it retroactively in
         // make_namespace_empty_body
@@ -2834,7 +2849,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _right_brace: Self::R,
         _semicolon: Self::R,
     ) -> Self::R {
-        let Id(_, prefix) = match self.get_name("", prefix) {
+        let Id(_, prefix) = match self.expect_name(prefix) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceGroupUseDeclaration),
         };
@@ -2857,7 +2872,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         as_: Self::R,
         aliased_name: Self::R,
     ) -> Self::R {
-        let id = match self.get_name("", name) {
+        let id = match self.expect_name(name) {
             Some(id) => id,
             None => return Node::Ignored(SK::NamespaceUseClause),
         };
@@ -3626,7 +3641,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => aast::ClassId_::CI(Id(class_name_pos, class_name_str)),
             },
         );
-        let value_id = match self.get_name("", value) {
+        let value_id = match self.expect_name(value) {
             Some(id) => id,
             None => return Node::Ignored(SK::ScopeResolutionExpression),
         };
@@ -3720,7 +3735,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         args: Self::R,
         _right_paren: Self::R,
     ) -> Self::R {
-        let unqualified_name = match self.get_name("", name) {
+        let unqualified_name = match self.expect_name(name) {
             Some(name) => name,
             None => return Node::Ignored(SK::ConstructorCall),
         };
@@ -3981,7 +3996,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _coloncolon: Self::R,
         constant_name: Self::R,
     ) -> Self::R {
-        let id = match self.get_name("", constant_name) {
+        let id = match self.expect_name(constant_name) {
             Some(id) => id,
             None => return Node::Ignored(SK::TypeConstant),
         };
@@ -4075,7 +4090,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _trailing_comma: Self::R,
         right_angle: Self::R,
     ) -> Self::R {
-        let id = match self.get_name("", vec) {
+        let id = match self.expect_name(vec) {
             Some(id) => id,
             None => return Node::Ignored(SK::VectorTypeSpecifier),
         };
@@ -4090,7 +4105,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_arguments: Self::R,
         right_angle: Self::R,
     ) -> Self::R {
-        let id = match self.get_name("", dict) {
+        let id = match self.expect_name(dict) {
             Some(id) => id,
             None => return Node::Ignored(SK::DictionaryTypeSpecifier),
         };
@@ -4106,7 +4121,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _trailing_comma: Self::R,
         right_angle: Self::R,
     ) -> Self::R {
-        let id = match self.get_name("", keyset) {
+        let id = match self.expect_name(keyset) {
             Some(id) => id,
             None => return Node::Ignored(SK::KeysetTypeSpecifier),
         };

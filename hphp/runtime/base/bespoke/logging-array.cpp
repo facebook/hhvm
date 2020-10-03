@@ -200,7 +200,7 @@ bool LoggingArray::checkInvariants() const {
 
 LoggingArray* LoggingArray::asLogging(ArrayData* ad) {
   auto const result = reinterpret_cast<LoggingArray*>(ad);
-  result->checkInvariants();
+  assertx(result->checkInvariants());
   return result;
 }
 const LoggingArray* LoggingArray::asLogging(const ArrayData* ad) {

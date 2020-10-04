@@ -847,7 +847,6 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwVecUnsetException();
 
 void raiseHackArrCompatArrHackArrCmp();
-void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*, bool);
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 

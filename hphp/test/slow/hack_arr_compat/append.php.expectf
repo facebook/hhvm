@@ -1,0 +1,21 @@
+
+Notice: Hack Array Compat: append to dict at index < count in %s/append.php on line 10
+
+Notice: Hack Array Compat: append to dict at index > count in %s/append.php on line 12
+dict(5) {
+  [0]=>
+  object(C) (0) {
+  }
+  ["a"]=>
+  object(C) (0) {
+  }
+  [1]=>
+  object(C) (0) {
+  }
+  [17]=>
+  object(C) (0) {
+  }
+  [18]=>
+  object(C) (0) {
+  }
+}

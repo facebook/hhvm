@@ -997,23 +997,6 @@ void raiseHackArrCompatArrHackArrCmp() {
   raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);
 }
 
-void raiseHackArrCompatDVArrCmp(const ArrayData* ad1,
-                                const ArrayData* ad2,
-                                bool is_relational) {
-  if (UNLIKELY(RID().getSuppressHACCompareNotices())) return;
-  auto const type = [](const ArrayData* a) {
-    if (a->isVArray()) return "varray";
-    if (a->isDArray()) return "darray";
-    return "array";
-  };
-  raise_hackarr_compat_notice(
-    folly::sformat("Comparing {} and {}{}",
-                   type(ad1),
-                   type(ad2),
-                   is_relational ? " relationally" : "")
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace arrprov_detail {

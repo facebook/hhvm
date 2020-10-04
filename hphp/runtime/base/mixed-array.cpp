@@ -1225,6 +1225,16 @@ ArrayData* MixedArray::Copy(const ArrayData* ad) {
 ArrayData* MixedArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
   assertx(copy || ad->notCyclic(v));
   auto a = asMixed(ad);
+
+  if (a->m_nextKI != a->m_size && RO::EvalHackArrCompatNotices) {
+    // Try to eliminate the internal index used for "append", replacing it
+    // with a simple set of the key equal to the array's size. If we can make
+    // this change now, we can drop appends completely as a follow-up.
+    auto const dt = getDataTypeString(a->toDataType());
+    raise_notice("Hack Array Compat: append to %s at index %s count",
+                 dt.data(), a->m_nextKI < a->m_size ? "<" : ">");
+  }
+
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");

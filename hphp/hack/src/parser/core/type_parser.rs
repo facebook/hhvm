@@ -86,10 +86,7 @@ where
         &mut self.lexer
     }
 
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P)
-    where
-        T: Clone,
-    {
+    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P) {
         let (mut lexer, context, errors, sc) = other.into_parts();
         lexer.set_in_type(true);
         self.lexer = lexer;

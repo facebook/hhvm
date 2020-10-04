@@ -134,9 +134,7 @@ where
     );
     fn lexer(&self) -> &Lexer<'a, S::Token>;
     fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token>;
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, _: P)
-    where
-        T: Clone;
+    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, _: P);
 
     fn env(&self) -> &ParserEnv;
 

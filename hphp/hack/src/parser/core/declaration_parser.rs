@@ -85,10 +85,7 @@ where
         &mut self.lexer
     }
 
-    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P)
-    where
-        T: Clone,
-    {
+    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P) {
         let (lexer, context, errors, sc) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
@@ -132,7 +129,6 @@ where
 {
     fn with_type_parser<F, U>(&mut self, f: F) -> U
     where
-        T: Clone,
         F: Fn(&mut TypeParser<'a, S, T>) -> U,
     {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(
@@ -155,7 +151,6 @@ where
 
     fn with_statement_parser<F, U>(&mut self, f: F) -> U
     where
-        T: Clone,
         F: Fn(&mut StatementParser<'a, S, T>) -> U,
     {
         let mut statement_parser: StatementParser<S, T> = StatementParser::make(
@@ -180,7 +175,6 @@ where
 
     fn with_expression_parser<F, U>(&mut self, f: F) -> U
     where
-        T: Clone,
         F: Fn(&mut ExpressionParser<'a, S, T>) -> U,
     {
         let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(

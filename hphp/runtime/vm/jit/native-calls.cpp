@@ -472,9 +472,6 @@ static CallMap s_callMap {
     /* count($mixed) */
     {Count, &countHelper, DSSA, SSync, {{TV, 0}}},
 
-    /* method_exists($obj, $meth) */
-    {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
-
     /* microtime(true) */
     {GetTime, TimeStamp::CurrentSecond, DSSA, SNone, {}},
     /* clock_gettime_ns($clk_id) */

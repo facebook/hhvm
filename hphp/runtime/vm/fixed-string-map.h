@@ -41,7 +41,7 @@ struct FixedStringMap {
   void clear();
   void init(int num, uint32_t numExtraBytes = 0);
   void add(const StringData* s, const V& v);
-  V* find(const StringData* s) const;
+  V* find(const StringData* s, bool raise = true) const;
 
   void* extraData() { return m_table; }
   const void* extraData() const { return m_table; }

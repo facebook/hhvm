@@ -707,8 +707,12 @@ public:
    * Look up a method by name.
    *
    * Return null if no such method exists.
+   *
+   * If the method name lookup matches case insensitively but not case
+   * sensitively, if raise flag is set, we raise a notice.
+   * Otherwise, we return nullptr as if it didn't match.
    */
-  Func* lookupMethod(const StringData* methName) const;
+  Func* lookupMethod(const StringData* methName, bool raise = true) const;
 
   /*
    * public because its used by importTraitMethod.

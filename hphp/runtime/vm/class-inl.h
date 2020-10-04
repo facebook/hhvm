@@ -345,8 +345,8 @@ inline void Class::setMethod(Slot idx, Func* func) {
   funcVec[-((int32_t)idx + 1)] = func;
 }
 
-inline Func* Class::lookupMethod(const StringData* methName) const {
-  Slot* idx = m_methods.find(methName);
+inline Func* Class::lookupMethod(const StringData* methName, bool raise) const {
+  Slot* idx = m_methods.find(methName, raise);
   if (!idx) return nullptr;
   return getMethod(*idx);
 }

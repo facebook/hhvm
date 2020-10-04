@@ -35,6 +35,10 @@ inline bool shouldRaise(MethodLookupErrorOptions raise) {
   return int(raise) & int(MethodLookupErrorOptions::RaiseOnNotFound);
 }
 
+inline bool shouldDisallowCaseInsensitive(MethodLookupErrorOptions raise) {
+  return int(raise) & int(MethodLookupErrorOptions::DisallowCaseInsensitive);
+}
+
 /*
  * Looks for a Func named methodName in any of the interfaces cls implements,
  * including cls if it is an interface. Returns nullptr if none was found,
@@ -96,7 +100,8 @@ const Func* lookupMethodCtx(const Class* cls,
   } else {
     assertx(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
     assertx(methodName != nullptr);
-    method = cls->lookupMethod(methodName);
+    method = cls->lookupMethod(methodName,
+                               !shouldDisallowCaseInsensitive(raise));
     if (!method) {
       // We didn't find any methods with the specified name in cls's method
       // table, handle the failure as appropriate.
@@ -226,7 +231,7 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   LookupResult res = lookupObjMethod(func, cls, name, ctx,
-                                     MethodLookupErrorOptions::None);
+                       MethodLookupErrorOptions::DisallowCaseInsensitive);
   if (res == LookupResult::MethodNotFound) {
     if (exactClass) return notFound;
     if (auto const func = lookupIfaceMethod(cls, name)) {

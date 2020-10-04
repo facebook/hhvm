@@ -722,6 +722,7 @@ struct RuntimeOption {
   F(bool, HHBBCTestCompression,        false)                           \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
+  F(bool, RaiseOnCaseInsensitiveLookup,false)                           \
   /* ThrowOnNonExhaustiveSwitch
    * Generates warnings when switch statements are non exhaustive.
    *  0 - Nothing

@@ -812,7 +812,6 @@ bool opcodeMayRaise(Opcode opc) {
   case MemoSetStaticValue:
   case MemoSetLSBCache:
   case MemoSetLSBValue:
-  case MethodExists:
   case Mod:
   case Mov:
   case MulDbl:
@@ -906,6 +905,8 @@ bool opcodeMayRaise(Opcode opc) {
   case XorInt:
   case ZeroErrorLevel:
     return false;
+  case MethodExists:
+    return RO::EvalRaiseOnCaseInsensitiveLookup;
   }
   not_reached();
 }

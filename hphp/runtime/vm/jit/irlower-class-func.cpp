@@ -62,7 +62,14 @@ void cgLdLazyClsName(IRLS& env, const IRInstruction* inst) {
   v << copy{lazyClsData, dst};
 }
 
-IMPL_OPCODE_CALL(MethodExists)
+void cgMethodExists(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  auto const sync = RO::EvalRaiseOnCaseInsensitiveLookup
+                      ? SyncOptions::Sync : SyncOptions::None;
+
+  cgCallHelper(vmain(env), env, CallSpec::direct(methodExistsHelper),
+               callDest(env, inst), sync, args);
+}
 
 void cgLdClsMethod(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();

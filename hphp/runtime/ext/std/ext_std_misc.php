@@ -47,6 +47,12 @@ function array_mark_legacy(mixed $v, bool $recursive = false): mixed;
 function array_unmark_legacy(mixed $v, bool $recursive = false): mixed;
 
 <<__Pure, __Native, __IsFoldable>>
+function array_mark_legacy_recursive(mixed $v): mixed;
+
+<<__Pure, __Native, __IsFoldable>>
+function array_unmark_legacy_recursive(mixed $v): mixed;
+
+<<__Pure, __Native, __IsFoldable>>
 function is_array_marked_legacy(mixed $v): bool;
 
 

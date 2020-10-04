@@ -17,6 +17,10 @@ function array_mark_legacy<T>(T $in, bool $recursive = false): T;
 <<__Pure>>
 function array_unmark_legacy<T>(T $in, bool $recursive = false): T;
 <<__Pure>>
+function array_mark_legacy_recursive<T>(T $in): T;
+<<__Pure>>
+function array_unmark_legacy_recursive<T>(T $in): T;
+<<__Pure>>
 function is_array_marked_legacy(mixed $in): bool;
 }
 namespace {

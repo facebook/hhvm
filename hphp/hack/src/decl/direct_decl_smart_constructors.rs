@@ -1752,7 +1752,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let kind = token.kind();
         let result = match kind {
-            TokenKind::Name => {
+            TokenKind::Name | TokenKind::XHPClassName => {
                 let name = token_text(self);
                 let pos = token_pos(self);
                 if self.state.previous_token_kind == TokenKind::Class
@@ -1768,7 +1768,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             self.state.previous_token_kind,
                         );
                 }
-                Node::Name(self.alloc((name, pos)))
+                if kind == TokenKind::XHPClassName {
+                    Node::XhpName(self.alloc((name, pos)))
+                } else {
+                    Node::Name(self.alloc((name, pos)))
+                }
             }
             TokenKind::Class => Node::Name(self.alloc((token_text(self), token_pos(self)))),
             // There are a few types whose string representations we have to
@@ -1780,24 +1784,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Tuple
             | TokenKind::Classname
             | TokenKind::SelfToken => Node::Name(self.alloc((token_text(self), token_pos(self)))),
-            TokenKind::XHPClassName => {
-                let name = token_text(self);
-                let pos = token_pos(self);
-                if self.state.previous_token_kind == TokenKind::Class
-                    || self.state.previous_token_kind == TokenKind::Trait
-                    || self.state.previous_token_kind == TokenKind::Interface
-                {
-                    self.state
-                        .classish_name_builder
-                        .lexed_name_after_classish_keyword(
-                            self.state.arena,
-                            name,
-                            pos,
-                            self.state.previous_token_kind,
-                        );
-                }
-                Node::XhpName(self.alloc((name, pos)))
-            }
             TokenKind::XHP | TokenKind::XHPElementName => {
                 Node::XhpName(self.alloc((token_text(self), token_pos(self))))
             }

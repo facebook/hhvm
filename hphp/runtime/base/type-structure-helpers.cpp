@@ -341,7 +341,6 @@ bool typeStructureIsType(
         ? typeStructureIsType(inputV, typeV, warn, strict)
         : inputV == typeV;
     }
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -609,7 +608,6 @@ bool checkTypeStructureMatchesTVImpl(
       return isResourceType(type) &&
              !reinterpret_cast<const Resource*>(&data.pres)->isInvalid();
 
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -993,7 +991,6 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
                                                      true);
       }
       return false;
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -1031,7 +1028,6 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_fun:
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:

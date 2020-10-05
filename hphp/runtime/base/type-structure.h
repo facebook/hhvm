@@ -45,7 +45,6 @@ enum class Kind : uint8_t {
   T_mixed = 9,
   T_tuple = 10,
   T_fun = 11,
-  T_array = 12,
   T_typevar = 13, // corresponds to user OF_GENERIC
   T_shape = 14,
 
@@ -153,4 +152,3 @@ Array resolvePartial(const Array& ts,
 }
 
 }
-

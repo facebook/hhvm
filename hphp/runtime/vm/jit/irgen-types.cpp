@@ -1025,7 +1025,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_fun:
     case TypeStructure::Kind::T_trait:
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:

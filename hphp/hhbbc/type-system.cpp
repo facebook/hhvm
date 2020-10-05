@@ -4073,7 +4073,6 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:

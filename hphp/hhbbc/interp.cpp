@@ -749,7 +749,6 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
       }
       return finish(result);
     }
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -3132,7 +3131,6 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
       // TODO(T29232862): implement
       return result(TBool);
     case TypeStructure::Kind::T_typeaccess:
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -3201,7 +3199,6 @@ bool canReduceToDontResolve(SArray ts, bool checkArrays) {
     // Following cannot be used in is/as expressions, we need to error on them
     // Currently erroring happens as a part of the resolving phase,
     // so keep resolving them
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:

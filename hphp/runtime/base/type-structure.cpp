@@ -122,7 +122,6 @@ const std::string
   s_mixed("mixed"),
   s_dynamic("dynamic"),
   s_nonnull("nonnull"),
-  s_array("array"),
   s_darray("HH\\darray"),
   s_varray("HH\\varray"),
   s_varray_or_darray("HH\\varray_or_darray"),
@@ -354,12 +353,6 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       break;
     case TypeStructure::Kind::T_fun:
       functionTypeName(arr, name, type);
-      break;
-    case TypeStructure::Kind::T_array:
-      name += s_array;
-      if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, type);
-      }
       break;
     case TypeStructure::Kind::T_darray:
       name += s_darray;
@@ -680,7 +673,6 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
 
       break;
     }
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
@@ -689,8 +681,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike: {
-      if (kind == TypeStructure::Kind::T_array ||
-        kind == TypeStructure::Kind::T_darray ||
+      if (kind == TypeStructure::Kind::T_darray ||
         kind == TypeStructure::Kind::T_varray ||
         kind == TypeStructure::Kind::T_varray_or_darray
       ) {
@@ -1024,7 +1015,6 @@ bool coerceToTypeStructure(Array& arr) {
   }
   auto const kind = static_cast<TypeStructure::Kind>(kindfield.val().num);
   switch (kind) {
-    case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:

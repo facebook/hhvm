@@ -175,7 +175,6 @@ TEST(ARRAY, Iteration) {
 }
 
 TEST(ARRAY, Conversions) {
-  const String s_Array("Array");
   const String s_Vec("Vec");
   const String s_Dict("Dict");
   const String s_Keyset("Keyset");

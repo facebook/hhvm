@@ -1904,13 +1904,14 @@ where
       Self { syntax, value }
     }
 
-    fn make_lambda_signature(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
+    fn make_lambda_signature(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
           &arg2.value, 
           &arg3.value, 
-          &arg4.value
+          &arg4.value, 
+          &arg5.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -1922,7 +1923,8 @@ where
               arg1.syntax, 
               arg2.syntax, 
               arg3.syntax, 
-              arg4.syntax
+              arg4.syntax, 
+              arg5.syntax
           ],
       );
       Self { syntax, value }

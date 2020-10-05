@@ -1863,6 +1863,8 @@ where
             S!(make_token, self, token)
         } else {
             let (left, params, right) = self.parse_parameter_list_opt();
+            let capability =
+                self.with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_capability_opt());
             let (colon, return_type) = self.parse_optional_return();
             S!(
                 make_lambda_signature,
@@ -1870,6 +1872,7 @@ where
                 left,
                 params,
                 right,
+                capability,
                 colon,
                 return_type
             )

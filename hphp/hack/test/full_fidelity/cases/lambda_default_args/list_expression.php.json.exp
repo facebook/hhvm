@@ -1070,6 +1070,7 @@
                                     "line_number":10
                                   }
                                 },
+                                "lambda_capability":{"kind":"missing"},
                                 "lambda_colon":{
                                   "kind":"token",
                                   "token":{

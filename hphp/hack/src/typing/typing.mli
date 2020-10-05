@@ -58,3 +58,10 @@ val check_shape_keys_validity :
   Pos.t ->
   Ast_defs.shape_field_name list ->
   Typing_env_types.env
+
+val type_capability :
+  Typing_env_types.env ->
+  Nast.type_hint ->
+  Nast.type_hint ->
+  Pos.t ->
+  Typing_env_types.env * Tast.type_hint * Tast.type_hint

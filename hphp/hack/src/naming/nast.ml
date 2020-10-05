@@ -100,6 +100,8 @@ type record_hint = Aast.record_hint
 
 type xhp_attr_hint = Aast.xhp_attr_hint
 
+type type_hint = unit Aast.type_hint
+
 module ShapeMap = Ast_defs.ShapeMap
 
 (* Expecting that Naming.func_body / Naming.class_meth_bodies has been
@@ -606,7 +608,7 @@ module Visitor_DEPRECATED = struct
 
       method on_hint : 'a -> hint -> 'a
 
-      method on_type_hint : 'a -> unit type_hint -> 'a
+      method on_type_hint : 'a -> type_hint -> 'a
 
       method on_targ : 'a -> targ -> 'a
 

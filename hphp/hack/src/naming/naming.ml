@@ -2292,6 +2292,10 @@ and expr_lambda env f =
    * environment *)
   let body_nast = f_body env f.Aast.f_body in
   let annotation = Nast.Named in
+  let f_cap = Aast.type_hint_option_map ~f:(hint env) f.Aast.f_cap in
+  let f_unsafe_cap =
+    Aast.type_hint_option_map ~f:(hint env) f.Aast.f_unsafe_cap
+  in
   (* These could all be probably be replaced with a {... where ...} *)
   let body = { N.fb_ast = body_nast; fb_annotation = annotation } in
   {
@@ -2302,9 +2306,8 @@ and expr_lambda env f =
     f_name = f.Aast.f_name;
     f_params = paraml;
     f_tparams = [];
-    (* TODO(T70095684) double-check f_cap *)
-    f_cap = f.Aast.f_cap;
-    f_unsafe_cap = f.Aast.f_unsafe_cap;
+    f_cap;
+    f_unsafe_cap;
     f_where_constraints = [];
     f_body = body;
     f_fun_kind = f.Aast.f_fun_kind;

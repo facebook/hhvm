@@ -2237,6 +2237,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.LambdaSignature x; value = v } -> v,
     { lambda_type = validate_option_with (validate_specifier) x.lambda_type
     ; lambda_colon = validate_option_with (validate_token) x.lambda_colon
+    ; lambda_capability = validate_option_with (validate_capability) x.lambda_capability
     ; lambda_right_paren = validate_token x.lambda_right_paren
     ; lambda_parameters = validate_list_with (validate_parameter) x.lambda_parameters
     ; lambda_left_paren = validate_token x.lambda_left_paren
@@ -2248,6 +2249,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { lambda_left_paren = invalidate_token x.lambda_left_paren
       ; lambda_parameters = invalidate_list_with (invalidate_parameter) x.lambda_parameters
       ; lambda_right_paren = invalidate_token x.lambda_right_paren
+      ; lambda_capability = invalidate_option_with (invalidate_capability) x.lambda_capability
       ; lambda_colon = invalidate_option_with (invalidate_token) x.lambda_colon
       ; lambda_type = invalidate_option_with (invalidate_specifier) x.lambda_type
       }

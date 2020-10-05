@@ -322,6 +322,7 @@
                             "line_number":5
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },
@@ -585,6 +586,7 @@
                                   "line_number":9
                                 }
                               },
+                              "lambda_capability":{"kind":"missing"},
                               "lambda_colon":{"kind":"missing"},
                               "lambda_type":{"kind":"missing"}
                             },

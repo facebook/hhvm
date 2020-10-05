@@ -755,6 +755,7 @@
                             "line_number":6
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },
@@ -936,6 +937,7 @@
                             "line_number":7
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },
@@ -1172,6 +1174,7 @@
                             "line_number":8
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },
@@ -1406,6 +1409,7 @@
                             "line_number":9
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },

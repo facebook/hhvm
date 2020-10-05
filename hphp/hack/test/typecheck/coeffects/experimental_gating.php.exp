@@ -1,0 +1,10 @@
+File "experimental_gating.php", line 4, characters 20-25:
+Cannot use unstable feature: `coeffects_provisional` (Parsing[1002])
+File "experimental_gating.php", line 5, characters 2-6:
+Cannot use unstable feature: `coeffects_provisional` (Parsing[1002])
+File "experimental_gating.php", line 5, characters 7-17:
+Cannot use both the [ and @{ syntax for coeffects (Parsing[1002])
+File "experimental_gating.php", line 5, characters 7-17:
+Cannot use unstable feature: `coeffects_provisional` (Parsing[1002])
+File "experimental_gating.php", line 6, characters 12-21:
+Cannot use unstable feature: `coeffects_provisional` (Parsing[1002])

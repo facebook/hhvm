@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<49bbea40915c80639802a1a3fc8be14a>>
+// @generated SignedSource<<eff46afd521f85db4705338c6d443353>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -102,6 +102,8 @@ pub type PuEnum = aast::PuEnum<pos::Pos, FuncBodyAnn, (), ()>;
 pub type PuMember = aast::PuMember<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type Targ = aast::Targ<()>;
+
+pub type TypeHint = aast::TypeHint<()>;
 
 #[derive(
     Clone,

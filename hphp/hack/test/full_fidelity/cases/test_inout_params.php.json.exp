@@ -5062,6 +5062,7 @@
                             "line_number":58
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{"kind":"missing"},
                         "lambda_type":{"kind":"missing"}
                       },

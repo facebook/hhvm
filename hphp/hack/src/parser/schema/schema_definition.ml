@@ -1228,6 +1228,7 @@ let schema : schema_node list =
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
+          ("capability", ZeroOrOne (Just "Capability"));
           ("colon", ZeroOrOne Token);
           ("type", ZeroOrOne (Aggregate Specifier));
         ];

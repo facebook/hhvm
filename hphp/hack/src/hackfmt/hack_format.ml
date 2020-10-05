@@ -1442,10 +1442,20 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           lambda_left_paren = lp;
           lambda_parameters = params;
           lambda_right_paren = rp;
+          lambda_capability = cap;
           lambda_colon = colon;
           lambda_type = ret_type;
         } ->
-      transform_argish_with_return_type env lp params rp colon ret_type
+      Concat
+        [
+          t env lp;
+          when_present params split;
+          transform_fn_decl_args env params rp;
+          t env cap;
+          t env colon;
+          when_present colon space;
+          t env ret_type;
+        ]
     | Syntax.CastExpression _ -> Span (List.map (Syntax.children node) (t env))
     | Syntax.MemberSelectionExpression _
     | Syntax.SafeMemberSelectionExpression _ ->

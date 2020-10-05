@@ -963,11 +963,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_signature(_: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_colon: Self, lambda_type: Self) -> Self {
+    fn make_lambda_signature(_: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_capability: Self, lambda_colon: Self, lambda_type: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
             lambda_left_paren,
             lambda_parameters,
             lambda_right_paren,
+            lambda_capability,
             lambda_colon,
             lambda_type,
         }));
@@ -2606,10 +2607,11 @@ where
                 acc
             },
             SyntaxVariant::LambdaSignature(x) => {
-                let LambdaSignatureChildren { lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_colon, lambda_type } = *x;
+                let LambdaSignatureChildren { lambda_left_paren, lambda_parameters, lambda_right_paren, lambda_capability, lambda_colon, lambda_type } = *x;
                 let acc = f(lambda_left_paren, acc);
                 let acc = f(lambda_parameters, acc);
                 let acc = f(lambda_right_paren, acc);
+                let acc = f(lambda_capability, acc);
                 let acc = f(lambda_colon, acc);
                 let acc = f(lambda_type, acc);
                 acc
@@ -4064,9 +4066,10 @@ where
                  lambda_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::LambdaSignature, 5) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
+             (SyntaxKind::LambdaSignature, 6) => SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
                  lambda_type: ts.pop().unwrap(),
                  lambda_colon: ts.pop().unwrap(),
+                 lambda_capability: ts.pop().unwrap(),
                  lambda_right_paren: ts.pop().unwrap(),
                  lambda_parameters: ts.pop().unwrap(),
                  lambda_left_paren: ts.pop().unwrap(),
@@ -5339,6 +5342,7 @@ pub struct LambdaSignatureChildren<T, V> {
     pub lambda_left_paren: Syntax<T, V>,
     pub lambda_parameters: Syntax<T, V>,
     pub lambda_right_paren: Syntax<T, V>,
+    pub lambda_capability: Syntax<T, V>,
     pub lambda_colon: Syntax<T, V>,
     pub lambda_type: Syntax<T, V>,
 }
@@ -7061,12 +7065,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             LambdaSignature(x) => {
-                get_index(5).and_then(|index| { match index {
+                get_index(6).and_then(|index| { match index {
                         0 => Some(&x.lambda_left_paren),
                     1 => Some(&x.lambda_parameters),
                     2 => Some(&x.lambda_right_paren),
-                    3 => Some(&x.lambda_colon),
-                    4 => Some(&x.lambda_type),
+                    3 => Some(&x.lambda_capability),
+                    4 => Some(&x.lambda_colon),
+                    5 => Some(&x.lambda_type),
                         _ => None,
                     }
                 })

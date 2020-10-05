@@ -152,6 +152,7 @@
                     "line_number":3
                   }
                 },
+                "lambda_capability":{"kind":"missing"},
                 "lambda_colon":{"kind":"missing"},
                 "lambda_type":{"kind":"missing"}
               },
@@ -535,5 +536,5 @@
     }
   },
   "program_text":"<?hh\n\n$f = ($o) ==> unset($o->foo); // Bad\n\n$x = $f->foo();\nunset($x); // Good\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-09-14-0000"
 }

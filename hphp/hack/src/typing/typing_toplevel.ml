@@ -332,14 +332,7 @@ let check_pu_in_locl_ty env lty =
   in
   check_pu_visitor#on_type env lty
 
-let register_capabilities env cap unsafe_cap default_pos =
-  let cap_hint_opt = hint_of_type_hint cap in
-  let (env, cap_ty) =
-    Option.value_map
-      cap_hint_opt
-      ~default:(env, MakeType.default_capability (Reason.Rhint default_pos))
-      ~f:(Phase.localize_hint_with_self env)
-  in
+let register_capabilities env cap_ty unsafe_cap_ty =
   let cap_pos = Typing_defs.get_pos cap_ty in
   (* Represents the capability for local operations inside a function body, excluding calls. *)
   let env =
@@ -349,29 +342,15 @@ let register_capabilities env cap unsafe_cap default_pos =
       cap_ty
       cap_pos
   in
-  let unsafe_cap_hint_opt = hint_of_type_hint unsafe_cap in
-  let (env, unsafe_cap_ty) =
-    Option.value_map
-      unsafe_cap_hint_opt (* default is no unsafe capabilities *)
-      ~default:(env, MakeType.mixed (Reason.Rhint default_pos))
-      ~f:(Phase.localize_hint_with_self env)
-  in
-  let env =
-    let (env, ty) =
-      Typing_intersection.intersect
-        env
-        ~r:(Reason.Rhint cap_pos)
-        cap_ty
-        unsafe_cap_ty
-    in
-    (* The implicit argument for ft_implicit_params.capability *)
-    Env.set_local
+  let (env, ty) =
+    Typing_intersection.intersect
       env
-      (Local_id.make_unscoped SN.Coeffects.capability)
-      ty
-      cap_pos
+      ~r:(Reason.Rhint cap_pos)
+      cap_ty
+      unsafe_cap_ty
   in
-  (env, (cap_ty, cap_hint_opt), (unsafe_cap_ty, unsafe_cap_hint_opt))
+  (* The implicit argument for ft_implicit_params.capability *)
+  Env.set_local env (Local_id.make_unscoped SN.Coeffects.capability) ty cap_pos
 
 let rec fun_def ctx f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
@@ -470,8 +449,9 @@ let rec fun_def ctx f :
           f.f_user_attributes
       in
       let (env, f_cap, f_unsafe_cap) =
-        register_capabilities env f.f_cap f.f_unsafe_cap (fst f.f_name)
+        Typing.type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
       in
+      let env = register_capabilities env (fst f_cap) (fst f_unsafe_cap) in
       let (env, tb) =
         Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
       in
@@ -652,8 +632,9 @@ and method_def env cls m =
           m.m_user_attributes
       in
       let (env, m_cap, m_unsafe_cap) =
-        register_capabilities env m.m_cap m.m_unsafe_cap (fst m.m_name)
+        Typing.type_capability env m.m_cap m.m_unsafe_cap (fst m.m_name)
       in
+      let env = register_capabilities env (fst m_cap) (fst m_unsafe_cap) in
       let (env, tb) =
         Typing.fun_
           ~abstract:m.m_abstract

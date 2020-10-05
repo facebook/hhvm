@@ -738,6 +738,7 @@
                             "line_number":9
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{
                           "kind":"token",
                           "token":{
@@ -1416,6 +1417,7 @@
                                     "line_number":14
                                   }
                                 },
+                                "lambda_capability":{"kind":"missing"},
                                 "lambda_colon":{
                                   "kind":"token",
                                   "token":{

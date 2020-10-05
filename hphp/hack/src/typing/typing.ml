@@ -3311,6 +3311,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           let (env, user_attributes) =
             List.map_env env f.f_user_attributes user_attribute
           in
+          let (env, f_cap, f_unsafe_cap) =
+            type_capability env f.f_cap f.f_unsafe_cap (fst f.f_name)
+          in
           let tfun_ =
             {
               Aast.f_annotation = Env.save local_tpenv env;
@@ -3325,10 +3328,8 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_user_attributes = user_attributes;
               Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
               (* TODO(T70095684) definitely fix f_cap *)
-              Aast.f_cap =
-                (MakeType.nothing Reason.none, hint_of_type_hint f.f_cap);
-              Aast.f_unsafe_cap =
-                (MakeType.mixed Reason.none, hint_of_type_hint f.f_unsafe_cap);
+              Aast.f_cap;
+              Aast.f_unsafe_cap;
               Aast.f_params = t_params;
               Aast.f_variadic = t_variadic;
               (* TODO TAST: Variadic efuns *)
@@ -3405,6 +3406,25 @@ and et_splice env p e =
 (*****************************************************************************)
 (* End expression trees *)
 (*****************************************************************************)
+
+(* Goes from Nast.f_cap to Tast.f_cap (same for unsafe_cap) *)
+and type_capability env cap unsafe_cap default_pos =
+  let cap_hint_opt = hint_of_type_hint cap in
+  let (env, cap_ty) =
+    Option.value_map
+      cap_hint_opt
+      ~default:(env, MakeType.default_capability (Reason.Rhint default_pos))
+      ~f:(Phase.localize_hint_with_self env)
+  in
+  let unsafe_cap_hint_opt = hint_of_type_hint unsafe_cap in
+  let (env, unsafe_cap_ty) =
+    Option.value_map
+      unsafe_cap_hint_opt (* default is no unsafe capabilities *)
+      ~default:(env, MakeType.mixed (Reason.Rhint default_pos))
+      ~f:(Phase.localize_hint_with_self env)
+  in
+  (env, (cap_ty, cap_hint_opt), (unsafe_cap_ty, unsafe_cap_hint_opt))
+
 and requires_consistent_construct = function
   | CIstatic -> true
   | CIexpr _ -> true

@@ -126,6 +126,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { lambda_left_paren                                  : t
     ; lambda_parameters                                  : t
     ; lambda_right_paren                                 : t
+    ; lambda_capability                                  : t
     ; lambda_colon                                       : t
     ; lambda_type                                        : t
     }
@@ -661,6 +662,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { lambda_left_paren                                  : t
     ; lambda_parameters                                  : t
     ; lambda_right_paren                                 : t
+    ; lambda_capability                                  : t
     ; lambda_colon                                       : t
     ; lambda_type                                        : t
     }
@@ -1950,6 +1952,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { lambda_left_paren: Token.t value
     ; lambda_parameters: parameter listesque value
     ; lambda_right_paren: Token.t value
+    ; lambda_capability: capability option value
     ; lambda_colon: Token.t option value
     ; lambda_type: specifier option value
     }

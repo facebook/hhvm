@@ -390,8 +390,8 @@ impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> 
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_lambda_expression(self, attribute_spec, async_, signature, arrow, body)
     }
 
-    fn make_lambda_signature(&mut self, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, colon: Self::R, type_: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_lambda_signature(self, left_paren, parameters, right_paren, colon, type_)
+    fn make_lambda_signature(&mut self, left_paren: Self::R, parameters: Self::R, right_paren: Self::R, capability: Self::R, colon: Self::R, type_: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_lambda_signature(self, left_paren, parameters, right_paren, capability, colon, type_)
     }
 
     fn make_cast_expression(&mut self, left_paren: Self::R, type_: Self::R, right_paren: Self::R, operand: Self::R) -> Self::R {

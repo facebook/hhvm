@@ -387,6 +387,7 @@
                             "line_number":5
                           }
                         },
+                        "lambda_capability":{"kind":"missing"},
                         "lambda_colon":{
                           "kind":"token",
                           "token":{

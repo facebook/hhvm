@@ -1,5 +1,5 @@
 [(Fun
-    { f_span = [5:1-30]; f_annotation = (); f_mode = Mstrict;
+    { f_span = [5:1-7:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([5:23-27], (Hprim Tvoid))));
       f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
       f_variadic = FVnonVariadic; f_params = [];
@@ -17,7 +17,63 @@
                    (Happly (([5:14-20], "\\HH\\Contexts\\Unsafe\\non_rx"), 
                       [])))
                    ]))));
-      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
+      f_body =
+      { fb_ast =
+        [([6:3-24],
+          (Expr
+             (([6:3-23], (function(mixed $i): void)),
+              (Binop ((Eq None),
+                 (([6:3-5], (function(mixed $i): void)), (Lvar ([6:3-5], $x))),
+                 (([6:8-23], (function(mixed $i): void)),
+                  (Lfun (
+                     { f_span = [6:8-23]; f_annotation = ();
+                       f_mode = Mstrict; f_ret = ((void), None);
+                       f_name = ([6:8-23], ";anonymous"); f_tparams = [];
+                       f_where_constraints = []; f_variadic = FVnonVariadic;
+                       f_params =
+                       [{ param_annotation = ([6:9-11], mixed);
+                          param_type_hint = ((mixed), None);
+                          param_is_variadic = false; param_pos = [6:9-11];
+                          param_name = "$i"; param_expr = None;
+                          param_callconv = None; param_user_attributes = [];
+                          param_visibility = None }
+                         ];
+                       f_cap =
+                       (((HH\Capabilities\Rx)),
+                        (Some ([6:12-16],
+                               (Hintersection
+                                  [([6:13-15],
+                                    (Happly (
+                                       ([6:13-15], "\\HH\\Contexts\\rx"), 
+                                       [])))
+                                    ]))));
+                       f_unsafe_cap =
+                       (((mixed)),
+                        (Some ([6:12-16],
+                               (Hintersection
+                                  [([6:13-15],
+                                    (Happly (
+                                       ([6:13-15],
+                                        "\\HH\\Contexts\\Unsafe\\rx"),
+                                       [])))
+                                    ]))));
+                       f_body =
+                       { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
+                       f_fun_kind = FSync; f_user_attributes = [];
+                       f_file_attributes = []; f_external = false;
+                       f_namespace =
+                       { Namespace_env.ns_ns_uses = <opaque>;
+                         ns_class_uses = <opaque>;
+                         ns_record_def_uses = <opaque>;
+                         ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
+                         ns_name = None; ns_auto_ns_map = [];
+                         ns_is_codegen = false;
+                         ns_disable_xhp_element_mangling = false };
+                       f_doc_comment = None; f_static = false },
+                     [])))
+                 )))))
+          ];
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = [];
       f_file_attributes =
       [{ fa_user_attributes =

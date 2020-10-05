@@ -548,6 +548,7 @@ module type Syntax_S = sig
     { lambda_left_paren                                  : t
     ; lambda_parameters                                  : t
     ; lambda_right_paren                                 : t
+    ; lambda_capability                                  : t
     ; lambda_colon                                       : t
     ; lambda_type                                        : t
     }
@@ -1162,7 +1163,7 @@ module type Syntax_S = sig
   val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
   val make_lambda_expression : t -> t -> t -> t -> t -> t
-  val make_lambda_signature : t -> t -> t -> t -> t -> t
+  val make_lambda_signature : t -> t -> t -> t -> t -> t -> t
   val make_cast_expression : t -> t -> t -> t -> t
   val make_scope_resolution_expression : t -> t -> t -> t
   val make_member_selection_expression : t -> t -> t -> t

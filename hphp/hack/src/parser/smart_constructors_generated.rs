@@ -115,7 +115,7 @@ pub trait SmartConstructors<State>: Clone {
     fn make_anonymous_function(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R) -> Self::R;
     fn make_anonymous_function_use_clause(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
     fn make_lambda_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
-    fn make_lambda_signature(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
+    fn make_lambda_signature(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R;
     fn make_cast_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
     fn make_scope_resolution_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_member_selection_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;

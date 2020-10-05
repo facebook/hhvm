@@ -1448,12 +1448,14 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
+        lambda_capability;
         lambda_colon;
         lambda_type;
       } ->
          let acc = f acc lambda_left_paren in
          let acc = f acc lambda_parameters in
          let acc = f acc lambda_right_paren in
+         let acc = f acc lambda_capability in
          let acc = f acc lambda_colon in
          let acc = f acc lambda_type in
          acc
@@ -3295,12 +3297,14 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
+        lambda_capability;
         lambda_colon;
         lambda_type;
       } -> [
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
+        lambda_capability;
         lambda_colon;
         lambda_type;
       ]
@@ -5143,12 +5147,14 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren;
         lambda_parameters;
         lambda_right_paren;
+        lambda_capability;
         lambda_colon;
         lambda_type;
       } -> [
         "lambda_left_paren";
         "lambda_parameters";
         "lambda_right_paren";
+        "lambda_capability";
         "lambda_colon";
         "lambda_type";
       ]
@@ -7131,6 +7137,7 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
         ]) ->
@@ -7138,6 +7145,7 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
         }
@@ -9447,6 +9455,7 @@ module WithToken(Token: TokenType) = struct
         lambda_left_paren
         lambda_parameters
         lambda_right_paren
+        lambda_capability
         lambda_colon
         lambda_type
       =
@@ -9454,6 +9463,7 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
         } in
@@ -10787,12 +10797,14 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
        } = LambdaSignature {
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
        }
@@ -10925,12 +10937,14 @@ module WithToken(Token: TokenType) = struct
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
             } -> {
           lambda_left_paren;
           lambda_parameters;
           lambda_right_paren;
+          lambda_capability;
           lambda_colon;
           lambda_type;
            }

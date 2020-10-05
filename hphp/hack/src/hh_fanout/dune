@@ -5,7 +5,7 @@
   (libraries
     batch_init
     client_ide_service
-    core
+    cmdliner
     default_injector_config
     hhi
     lwt

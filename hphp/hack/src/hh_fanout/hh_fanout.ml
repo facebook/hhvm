@@ -6,8 +6,7 @@
  *
  *)
 
-module Hh_daemon = Daemon
-open Core
+open Hh_prelude
 
 type env = {
   from: string;
@@ -75,6 +74,15 @@ let set_up_global_environment (env : env) : setup_result =
   in
   { workers; ctx }
 
+(* TODO(T76615473) use Core_kernel once we updated past 1.12 *)
+let split_extension path =
+  let ext = Caml.Filename.extension path in
+  if String.is_empty ext then
+    (path, None)
+  else
+    let ext = String.sub ext ~pos:1 ~len:(String.length ext - 1) in
+    (Caml.Filename.remove_extension path, Some ext)
+
 let load_saved_state ~(env : env) ~(setup_result : setup_result) :
     saved_state_result Lwt.t =
   let%lwt (naming_table_path, naming_table_changed_files) =
@@ -106,7 +114,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       let errors_path =
         dep_table_path
         |> Path.to_string
-        |> Filename.split_extension
+        |> split_extension
         |> fst
         |> SaveStateService.get_errors_filename
         |> Path.make
@@ -401,91 +409,29 @@ let mode_calculate_errors
   Lwt.return_unit
 
 let detail_level_arg =
-  Command.Arg_type.create (fun x ->
-      match x with
-      | "low" -> Calculate_fanout.Detail_level.Low
-      | "high" -> Calculate_fanout.Detail_level.High
-      | other ->
-        Printf.eprintf
-          "Invalid detail level: %s (valid values are 'low', 'high')"
-          other;
-        exit 1)
+  Cmdliner.Arg.enum
+    [
+      ("low", Calculate_fanout.Detail_level.Low);
+      ("high", Calculate_fanout.Detail_level.High);
+    ]
 
-let dep_hash_arg = Command.Arg_type.create Typing_deps.Dep.of_debug_string
-
-let path_arg = Command.Arg_type.create Path.make
-
-let parse_env () =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  let%map from =
-    flag
-      "--from"
-      (required string)
-      ~doc:"FROM A descriptive string indicating the caller of this program."
-  and client_id =
-    flag
-      "--client-id"
-      (optional string)
-      ~doc:
-        ( "CLIENT-ID A string identifying the caller of this program. "
-        ^ "Use the same string across multiple callers to reuse hh_fanout cursors and intermediate results. "
-        ^ "If not provided, defaults to the value for 'from'." )
-  and root =
-    flag
-      "--root"
-      (optional string)
-      ~doc:
-        "DIR The root directory to run in. If not set, will attempt to locate one by searching upwards for an `.hhconfig` file."
-  and detail_level =
-    flag
-      "--detail-level"
-      (optional_with_default Calculate_fanout.Detail_level.Low detail_level_arg)
-      ~doc:
-        "VERBOSITY How much debugging output to include in the result. May slow down the query."
-  and ignore_hh_version =
-    flag
-      "--ignore-hh-version"
-      no_arg
-      ~doc:
-        "Skip the consistency check for the version that this program was built with versus the version of the server that built the saved-state."
-  and naming_table_path =
-    flag
-      "--naming-table-path"
-      (optional path_arg)
-      ~doc:"PATH The path to the naming table SQLite saved-state."
-  and dep_table_path =
-    flag
-      "--dep-table-path"
-      (optional path_arg)
-      ~doc:"PATH The path to the dependency table saved-state."
-  and watchman_sockname =
-    flag
-      "--watchman-sockname"
-      (optional path_arg)
-      ~doc:"PATH The path to the Watchman socket to use."
-  and changed_files =
-    flag
-      "--changed-file"
-      (listed string)
-      ~doc:
-        ( "PATH A file which has changed since last time `hh_fanout` was invoked. "
-        ^ "May be specified multiple times. "
-        ^ "Not necessary for the caller to pass unless Watchman is unavailable."
-        )
-  and state_path =
-    flag
-      "--state-path"
-      (optional path_arg)
-      ~doc:
-        ( "PATH The path to the persistent state on disk. "
-        ^ "If not provided, will use the default path for the repository." )
-  in
+let env
+    from
+    client_id
+    root
+    detail_level
+    ignore_hh_version
+    naming_table_path
+    dep_table_path
+    watchman_sockname
+    changed_files
+    state_path =
   let root =
     match root with
     | Some root -> Path.make root
     | None -> Wwwroot.get None
   in
+
   (* Interpret relative paths with respect to the root from here on. That way,
       we can write `hh_fanout --root ~/www foo/bar.php` and it will work regardless
       of the directory that we invoked this executable from. *)
@@ -510,10 +456,13 @@ let parse_env () =
     example of reuse might occur when the IDE service wants to take advantage
     of any work that the bulk typechecker has already done with regards to
     updating the dependency graph. *)
-    match client_id with
-    | Some client_id -> client_id
-    | None -> from
+    Option.value client_id ~default:from
   in
+
+  let naming_table_path = Option.map ~f:Path.make naming_table_path in
+  let dep_table_path = Option.map ~f:Path.make dep_table_path in
+  let watchman_sockname = Option.map ~f:Path.make watchman_sockname in
+  let state_path = Option.map ~f:Path.make state_path in
 
   {
     from;
@@ -528,66 +477,174 @@ let parse_env () =
     state_path;
   }
 
+let env_t =
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let from =
+    let doc = "A descriptive string indicating the caller of this program." in
+    required & opt (some string) None & info ["from"] ~doc ~docv:"FROM"
+  in
+  let client_id =
+    let doc =
+      String.strip
+        {|
+A string identifying the caller of this program.
+Use the same string across multiple callers to reuse hh_fanout cursors and intermediate results.
+If not provided, defaults to the value for 'from'.
+|}
+    in
+    let docv = "CLIENT-ID" in
+    value & opt (some string) None & info ["client-id"] ~doc ~docv
+  in
+  let root =
+    let doc =
+      "The root directory to run in. If not set, will attempt to locate one by searching upwards for an `.hhconfig` file."
+    in
+    let docv = "DIR" in
+    value & opt (some string) None & info ["root"] ~doc ~docv
+  in
+  let detail_level =
+    let doc =
+      "How much debugging output to include in the result. May slow down the query. The values are `low` or `high`."
+    in
+    let docv = "VERBOSITY" in
+    value
+    & opt detail_level_arg Calculate_fanout.Detail_level.Low
+    & info ["detail-level"] ~doc ~docv
+  in
+  let ignore_hh_version =
+    let doc =
+      "Skip the consistency check for the version that this program was built with versus the version of the server that built the saved-state."
+    in
+    value & flag & info ["ignore-hh-version"] ~doc
+  in
+  let naming_table_path =
+    let doc = "The path to the naming table SQLite saved-state." in
+    let docv = "PATH" in
+    value & opt (some string) None & info ["naming-table-path"] ~doc ~docv
+  in
+  let dep_table_path =
+    let doc = "The path to the dependency table saved-state." in
+    let docv = "PATH" in
+    value & opt (some string) None & info ["dep-table-path"] ~doc ~docv
+  in
+  let watchman_sockname =
+    let doc = "The path to the Watchman socket to use." in
+    let docv = "PATH" in
+    value & opt (some string) None & info ["watchman-sockname"] ~doc ~docv
+  in
+  let changed_files =
+    let doc =
+      String.strip
+        {|
+A file which has changed since last time `hh_fanout` was invoked.
+May be specified multiple times.
+Not necessary for the caller to pass unless Watchman is unavailable.
+|}
+    in
+    let docv = "PATH" in
+    (* Note: I think the following can be `file` as opposed to `string`, but
+       I'm staying faithful to the original CLI. *)
+    value & opt_all string [] & info ["changed-file"] ~doc ~docv
+  in
+  let state_path =
+    let doc =
+      String.strip
+        {|
+The path to the persistent state on disk.
+If not provided, will use the default path for the repository.
+|}
+    in
+    let docv = "PATH" in
+    value & opt (some string) None & info ["state-path"] ~doc ~docv
+  in
+  Term.(
+    const env
+    $ from
+    $ client_id
+    $ root
+    $ detail_level
+    $ ignore_hh_version
+    $ naming_table_path
+    $ dep_table_path
+    $ watchman_sockname
+    $ changed_files
+    $ state_path)
+
 let clean_subcommand =
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:"Delete any state files which hh_fanout uses from disk."
-    (let%map env = parse_env () in
-     fun () ->
-       let state_path = get_state_path env in
-       Hh_logger.log "Deleting %s" (Path.to_string state_path);
-       Sys_utils.rm_dir_tree (Path.to_string state_path))
+  let open Cmdliner in
+  let doc = "Delete any state files which hh_fanout uses from disk." in
+  let exits = Term.default_exits in
+
+  let run env =
+    let state_path = get_state_path env in
+    Hh_logger.log "Deleting %s" (Path.to_string state_path);
+    Sys_utils.rm_dir_tree (Path.to_string state_path)
+  in
+
+  Term.
+    (const run $ env_t, info "clean" ~doc ~sdocs:Manpage.s_common_options ~exits)
 
 let calculate_subcommand =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:"Determines which files must be rechecked after a change"
-    (let%map env = parse_env ()
-     and input_files = anon (sequence ("filename" %: string))
-     and cursor_id =
-       flag
-         "--cursor"
-         (optional string)
-         ~doc:"CURSOR The cursor that the previous request returned."
-     in
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc = "Determines which files must be rechecked after a change." in
+  let exits = Term.default_exits in
 
-     let input_files =
-       input_files
-       |> Sys_utils.parse_path_list
-       |> List.filter ~f:FindUtils.file_filter
-       |> List.map ~f:Path.make
-       |> Path.Set.of_list
-     in
-     if Path.Set.is_empty input_files then
-       Hh_logger.warn "Warning: list of input files is empty.";
+  let input_files = value & pos_all string [] & info [] ~docv:"FILENAME" in
+  let cursor_id =
+    let doc = "The cursor that the previous request returned." in
+    value & opt (some string) None & info ["cursor"] ~doc ~docv:"CURSOR"
+  in
 
-     (fun () -> Lwt_main.run (mode_calculate ~env ~input_files ~cursor_id)))
+  let run env input_files cursor_id =
+    let input_files =
+      input_files
+      |> Sys_utils.parse_path_list
+      |> List.filter ~f:FindUtils.file_filter
+      |> List.map ~f:Path.make
+      |> Path.Set.of_list
+    in
+    if Path.Set.is_empty input_files then
+      Hh_logger.warn "Warning: list of input files is empty.";
+
+    Lwt_main.run @@ mode_calculate ~env ~input_files ~cursor_id
+  in
+
+  Term.
+    ( const run $ env_t $ input_files $ cursor_id,
+      info "calculate" ~doc ~sdocs:Manpage.s_common_options ~exits )
 
 let calculate_errors_subcommand =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:"Produce typechecking errors for the codebase"
-    (let%map env = parse_env ()
-     and cursor_id =
-       flag
-         "--cursor"
-         (optional string)
-         ~doc:
-           ( "CURSOR The cursor returned by a previous request to `calculate`. "
-           ^ "If not provided, uses the cursor corresponding to the saved-state."
-           )
-     and pretty_print =
-       flag
-         "--pretty-print"
-         no_arg
-         ~doc:
-           "Pretty-print the errors to stdout, rather than returning a JSON object."
-     in
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc = "Produce typechecking errors for the codebase." in
+  let exits = Term.default_exits in
 
-     fun () ->
-       Lwt_main.run (mode_calculate_errors ~env ~cursor_id ~pretty_print))
+  let cursor_id =
+    let doc =
+      String.strip
+        {|
+The cursor returned by a previous request to `calculate`.
+If not provided, uses the cursor corresponding to the saved-state.
+|}
+    in
+    value & opt (some string) None & info ["cursor"] ~doc ~docv:"CURSOR"
+  in
+  let pretty_print =
+    let doc =
+      "Pretty-print the errors to stdout, rather than returning a JSON object."
+    in
+    value & flag & info ["pretty-print"] ~doc
+  in
+
+  let run env cursor_id pretty_print =
+    Lwt_main.run @@ mode_calculate_errors ~env ~cursor_id ~pretty_print
+  in
+
+  Term.
+    ( const run $ env_t $ cursor_id $ pretty_print,
+      info "calculate-errors" ~doc ~sdocs:Manpage.s_common_options ~exits )
 
 let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
     unit Lwt.t =
@@ -646,20 +703,27 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   Lwt.return_unit
 
 let debug_subcommand =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:"Produces debugging information about the fanout of a certain file"
-    (let%map env = parse_env ()
-     and path = anon ("FILE" %: string)
-     and cursor_id =
-       flag
-         "--cursor"
-         (optional string)
-         ~doc:"CURSOR The cursor that the previous request returned."
-     in
-     let path = Path.make path in
-     (fun () -> Lwt_main.run (mode_debug ~env ~path ~cursor_id)))
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc =
+    "Produces debugging information about the fanout of a certain file."
+  in
+  let exits = Term.default_exits in
+
+  let path = required & pos 0 (some string) None & info [] ~docv:"PATH" in
+  let cursor_id =
+    let doc = "The cursor that the previous request returned." in
+    value & opt (some string) None & info ["cursor"] ~doc ~docv:"CURSOR"
+  in
+
+  let run env path cursor_id =
+    let path = Path.make path in
+    Lwt_main.run @@ mode_debug ~env ~path ~cursor_id
+  in
+
+  Term.
+    ( const run $ env_t $ path $ cursor_id,
+      info "debug" ~doc ~sdocs:Manpage.s_common_options ~exits )
 
 let mode_status ~(env : env) ~(cursor_id : string) : unit Lwt.t =
   let incremental_state = make_incremental_state ~env in
@@ -674,19 +738,23 @@ let mode_status ~(env : env) ~(cursor_id : string) : unit Lwt.t =
   Lwt.return_unit
 
 let status_subcommand =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:
-      "EXPERIMENTAL: Shows details about the files that need to be re-typechecked on the next `calculate-errors` call"
-    (let%map env = parse_env ()
-     and cursor_id =
-       flag
-         "--cursor"
-         (required string)
-         ~doc:"CURSOR The cursor that the previous request returned"
-     in
-     (fun () -> Lwt_main.run (mode_status ~env ~cursor_id)))
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc =
+    "EXPERIMENTAL: Shows details about the files that need to be re-typechecked on the next `calculate-errors` call."
+  in
+  let exits = Term.default_exits in
+
+  let cursor_id =
+    let doc = "The cursor that the previous request returned." in
+    required & opt (some string) None & info ["cursor"] ~doc ~docv:"CURSOR"
+  in
+
+  let run env cursor_id = Lwt_main.run @@ mode_status ~env ~cursor_id in
+
+  Term.
+    ( const run $ env_t $ cursor_id,
+      info "status" ~doc ~sdocs:Manpage.s_common_options ~exits )
 
 let mode_query
     ~(env : env) ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) :
@@ -703,19 +771,27 @@ let mode_query
   Lwt.return_unit
 
 let query_subcommand =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:"Get the edges for which the given input node is a dependency"
-    (let%map env = parse_env ()
-     and include_extends =
-       flag
-         "--include-extends"
-         no_arg
-         ~doc:
-           "Traverse the extends dependencies for this node and include them in the output as well"
-     and dep_hash = anon ("HASH" %: dep_hash_arg) in
-     (fun () -> Lwt_main.run (mode_query ~env ~dep_hash ~include_extends)))
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc = "Get the edges for which the given input node is a dependency." in
+  let exits = Term.default_exits in
+
+  let include_extends =
+    let doc =
+      "Traverse the extends dependencies for this node and include them in the output as well."
+    in
+    value & flag & info ["include-extends"] ~doc
+  in
+  let dep_hash = required & pos 0 (some string) None & info [] ~docv:"HASH" in
+
+  let run env include_extends dep_hash =
+    let dep_hash = Typing_deps.Dep.of_debug_string dep_hash in
+    Lwt_main.run @@ mode_query ~env ~dep_hash ~include_extends
+  in
+
+  Term.
+    ( const run $ env_t $ include_extends $ dep_hash,
+      info "query" ~doc ~sdocs:Manpage.s_common_options ~exits )
 
 let mode_query_path
     ~(env : env) ~(source : Typing_deps.Dep.t) ~(dest : Typing_deps.Dep.t) :
@@ -730,36 +806,59 @@ let mode_query_path
   Lwt.return_unit
 
 let query_path_subcommand =
-  let open Command.Param in
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:
-      "Find a path of dependencies edges leading from one node to another"
-    ~readme:(fun () ->
-      String.strip
-        {|
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc =
+    "Find a path of dependencies edges leading from one node to another."
+  in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        (String.strip
+           {|
 Produces a list of nodes in the dependency graph connected by typing- or
 extends-dependency edges. This is a list of n nodes, where the leading pairs
 are connected by extends-dependency edges, and the last pair is connected by
 a typing-dependency edge.
-|})
-    (let%map env = parse_env ()
-     and source = anon ("SOURCE-HASH" %: dep_hash_arg)
-     and dest = anon ("DEST-HASH" %: dep_hash_arg) in
-     (fun () -> Lwt_main.run (mode_query_path ~env ~source ~dest)))
+|});
+    ]
+  in
+  let exits = Term.default_exits in
+
+  let source =
+    required & pos 0 (some string) None & info [] ~docv:"SOURCE-HASH"
+  in
+  let dest = required & pos 1 (some string) None & info [] ~docv:"DEST-HASH" in
+
+  let run env source dest =
+    let source = Typing_deps.Dep.of_debug_string source in
+    let dest = Typing_deps.Dep.of_debug_string dest in
+    Lwt_main.run @@ mode_query_path ~env ~source ~dest
+  in
+
+  Term.
+    ( const run $ env_t $ source $ dest,
+      info "query-path" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
+
+let default_subcommand =
+  let open Cmdliner in
+  let sdocs = Manpage.s_common_options in
+  let exits = Term.default_exits in
+  Term.(ret (const (`Help (`Pager, None))), info "hh_fanout" ~sdocs ~exits)
 
 let () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
-  Hh_daemon.check_entry_point ();
-  Command.run
-  @@ Command.group
-       ~summary:"Provides access to Hack's dependency graph"
-       [
-         ("clean", clean_subcommand);
-         ("calculate", calculate_subcommand);
-         ("calculate-errors", calculate_errors_subcommand);
-         ("debug", debug_subcommand);
-         ("status", status_subcommand);
-         ("query", query_subcommand);
-         ("query-path", query_path_subcommand);
-       ]
+  Daemon.check_entry_point ();
+  let cmds =
+    [
+      calculate_subcommand;
+      calculate_errors_subcommand;
+      clean_subcommand;
+      debug_subcommand;
+      query_subcommand;
+      query_path_subcommand;
+      status_subcommand;
+    ]
+  in
+  Cmdliner.Term.(exit @@ eval_choice default_subcommand cmds)

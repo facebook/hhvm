@@ -6,7 +6,7 @@
  *
  *)
 
-open Common
+open Hh_prelude
 
 type t = {
   tyvar_occurrences: ISet.t IMap.t;
@@ -123,7 +123,7 @@ let unbind_tyvar x v =
 let occurs_in x occuring_tv ~in_:containing_tv =
   let occurs = ISet.mem containing_tv (get_tyvar_occurrences x occuring_tv) in
   let contains = ISet.mem occuring_tv (get_tyvars_in_tyvar x containing_tv) in
-  assert (occurs = contains);
+  assert (Bool.equal occurs contains);
   occurs
 
 let remove_var x v =

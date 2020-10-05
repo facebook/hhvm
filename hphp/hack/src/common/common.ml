@@ -85,27 +85,3 @@ module List = struct
            (Printf.sprintf "List.replicate was called with %d argument" n)
     | _ -> x :: replicate ~num:(num - 1) x
 end
-
-module Option = struct
-  include Core_kernel.Option
-
-  let pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
-      =
-   fun pp_x fmt x_opt ->
-    match x_opt with
-    | None -> Format.pp_print_string fmt "None"
-    | Some x ->
-      Format.pp_print_string fmt "(Some ";
-      pp_x fmt x;
-      Format.pp_print_string fmt ")"
-
-  let show : (Format.formatter -> 'a -> unit) -> 'a t -> string =
-   (fun pp_x x_opt -> Format.asprintf "%a" (pp pp_x) x_opt)
-
-  let if_none x_opt ~f =
-    match x_opt with
-    | Some x -> Some x
-    | None -> f ()
-
-  let ( >>! ) = if_none
-end

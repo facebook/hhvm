@@ -20,16 +20,9 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
     in
     union combine x y
 
-  let rec fold_left_env env l ~init ~f =
-    match l with
-    | [] -> (env, init)
-    | x :: xs ->
-      let (env, init) = f env init x in
-      fold_left_env env xs ~init ~f
-
   let merge_env env s1 s2 ~combine =
     let (env, map) =
-      fold_left_env
+      Common.List.fold_left_env
         env
         ~init:empty
         ~f:(fun env map (key, v2) ->
@@ -43,7 +36,7 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
           (env, map))
         (bindings s2)
     in
-    fold_left_env
+    Common.List.fold_left_env
       env
       ~init:map
       ~f:(fun env map (key, v1) ->

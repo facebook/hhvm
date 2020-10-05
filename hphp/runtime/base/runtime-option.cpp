@@ -243,10 +243,19 @@ RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 }
 
 const RepoOptions& RepoOptions::forFile(const char* path) {
+  tracing::BlockNoTrace _{"repo-options"};
+
   if (!RuntimeOption::EvalEnablePerRepoOptions) return defaults();
 
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
+
+  auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
+    return boost::starts_with(
+      boost::filesystem::path{p2},
+      boost::filesystem::path{p1}.parent_path()
+    );
+  };
 
   // Fast path: we have an active request and it has cached a RepoOptions
   // which has not been modified. This only works when the runtime option
@@ -259,7 +268,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
       // negatively cached the existance of a .hhvmconfig.hdf for this request.
       if (opts->path().empty()) return *opts;
 
-      if (boost::starts_with(fpath, opts->path())) {
+      if (isParentOf(opts->path(), fpath)) {
         struct stat st;
         if (lstat(opts->path().data(), &st) == 0) {
           if (!CachedRepoOptions::isChanged(opts, st)) return *opts;
@@ -304,7 +313,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   //          optimization.
   if (RuntimeOption::EvalCachePerRepoOptionsPath) {
     if (!s_lastSeenRepoConfig->empty() &&
-        boost::starts_with(fpath, *s_lastSeenRepoConfig)) {
+        isParentOf(*s_lastSeenRepoConfig, fpath)) {
       if (auto const r = test(*s_lastSeenRepoConfig)) return *r;
       s_lastSeenRepoConfig->clear();
     }

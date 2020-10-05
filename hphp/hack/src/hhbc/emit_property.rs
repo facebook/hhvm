@@ -105,7 +105,8 @@ pub fn from_ast<'a>(
                 Some(c) if (c.0).1 == "Map" || (c.0).1 == "ImmMap" => true,
                 _ => false,
             };
-            let deep_init = !args.is_static && expr_requires_deep_init(e, emitter.options().emit_class_pointers() > 0);
+            let deep_init = !args.is_static
+                && expr_requires_deep_init(e, emitter.options().emit_class_pointers() > 0);
             match ast_constant_folder::expr_to_typed_value(emitter, &env.namespace, e) {
                 Ok(tv) if !(deep_init || is_collection_map) => {
                     (Some(tv), None, HhasPropertyFlags::empty())

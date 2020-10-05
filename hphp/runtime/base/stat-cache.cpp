@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/hooks.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/tracing.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -934,6 +935,7 @@ std::string StatCache::readlink(const std::string& path) {
 }
 
 std::string StatCache::realpath(const char* path) {
+  tracing::BlockNoTrace _{"realpath"};
   if (!RuntimeOption::ServerStatCache) return realpathLibc(path);
   return s_sc.realpathImpl(path);
 }

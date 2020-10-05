@@ -377,44 +377,50 @@ CachedUnitWithFreePtr createUnitFromFile(const StringData* const path,
 // When running via the CLI server special access checks may need to be
 // performed, and in the event that the server is unable to load the file an
 // alternative per client cache may be used.
+NonRepoUnitCache& getNonRepoCache(uid_t uid, const StringData* rpath) {
+  auto const unit_check_quarantine = [&] () -> NonRepoUnitCache& {
+    if (!RuntimeOption::EvalUnixServerQuarantineUnits) {
+      return s_nonRepoUnitCache;
+    }
+    auto iter = s_perUserUnitCaches.find(uid);
+    if (iter != s_perUserUnitCaches.end()) return *iter->second;
+    auto cache = new NonRepoUnitCache;
+    auto res = s_perUserUnitCaches.insert(uid, cache);
+    if (!res.second) delete cache;
+    return *res.first->second;
+  };
+
+  // If the server cannot access rpath attempt to open the unit on the
+  // client. When UnixServerQuarantineUnits is set store units opened by
+  // clients in per UID caches which are never accessible by server web
+  // requests.
+  if (access(rpath->data(), R_OK) == -1) return unit_check_quarantine();
+
+  // When UnixServerVerifyExeAccess is set clients may not execute units if
+  // they cannot read them, even when the server has access. To verify that
+  // clients have access they are asked to open the file for read access,
+  // and using fstat the server verifies that the file it sees is identical
+  // to the unit opened by the client.
+  if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
+    struct stat local, remote;
+    auto const fd = open(rpath->data(), O_RDONLY);
+    SCOPE_EXIT { close(fd); };
+    if (fd < 0 ||
+        fcntl(fd, F_GETFL) != O_RDONLY ||
+        fstat(fd, &remote) != 0 ||
+        stat(rpath->data(), &local) != 0 ||
+        remote.st_dev != local.st_dev ||
+        remote.st_ino != local.st_ino) {
+      return unit_check_quarantine();
+    }
+  }
+
+  return s_nonRepoUnitCache;
+}
+
 NonRepoUnitCache& getNonRepoCache(const StringData* rpath) {
   if (auto const uc = get_cli_ucred()) {
-    auto const unit_check_quarantine = [&] () -> NonRepoUnitCache& {
-      if (!RuntimeOption::EvalUnixServerQuarantineUnits) {
-        return s_nonRepoUnitCache;
-      }
-      auto iter = s_perUserUnitCaches.find(uc->uid);
-      if (iter != s_perUserUnitCaches.end()) return *iter->second;
-      auto cache = new NonRepoUnitCache;
-      auto res = s_perUserUnitCaches.insert(uc->uid, cache);
-      if (!res.second) delete cache;
-      return *res.first->second;
-    };
-
-    // If the server cannot access rpath attempt to open the unit on the
-    // client. When UnixServerQuarantineUnits is set store units opened by
-    // clients in per UID caches which are never accessible by server web
-    // requests.
-    if (access(rpath->data(), R_OK) == -1) return unit_check_quarantine();
-
-    // When UnixServerVerifyExeAccess is set clients may not execute units if
-    // they cannot read them, even when the server has access. To verify that
-    // clients have access they are asked to open the file for read access,
-    // and using fstat the server verifies that the file it sees is identical
-    // to the unit opened by the client.
-    if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
-      struct stat local, remote;
-      auto const fd = open(rpath->data(), O_RDONLY);
-      SCOPE_EXIT { close(fd); };
-      if (fd < 0 ||
-          fcntl(fd, F_GETFL) != O_RDONLY ||
-          fstat(fd, &remote) != 0 ||
-          stat(rpath->data(), &local) != 0 ||
-          remote.st_dev != local.st_dev ||
-          remote.st_ino != local.st_ino) {
-        return unit_check_quarantine();
-      }
-    }
+    return getNonRepoCache(uc->uid, rpath);
   }
   return s_nonRepoUnitCache;
 }
@@ -470,26 +476,24 @@ struct StaticStringCompare {
 };
 
 // To avoid enqueueing multiple identical prefetch requests, we
-// maintain a global "prefetch version". This is incremented anytime
-// we detect a changed file for an already loaded unit. We also keep a
-// map of paths which we've enqueued a prefetch request for, to the
-// global prefetch version when the enqueue happened. We'll only
-// enqueue a new prefetch request for that path if the global prefetch
-// version has advanced past the version in the map. If it has not,
-// then the unit already prefetched cannot have possibly changed, so
-// the request is redundant.
+// maintain a global table of the timestamp of the last prefetch
+// request for each path. We'll only enqueue a new prefetch request
+// for that path if more than some amount has passed since the last
+// attempt. Note that we store paths (without normalization), and a
+// given unit might be referred to by multiple paths. This is fine
+// because it just means we'll do a bit of extra work.
 //
 // Note that even if the request goes through, we'd still realize the
 // prefetch is unnecessary and drop it eventually, but this avoids a
-// lot of extra work to get to that point.
-
-std::atomic<uint64_t> s_prefetchVersion;
+// lot of extra work to get to that point. The downside is we might we
+// miss an opportunity to prefetch a unit that changed shortly after
+// the last attempt, but this should be uncommon.
 
 tbb::concurrent_hash_map<
   const StringData*,
-  uint64_t,
+  std::chrono::steady_clock::time_point,
   StaticStringCompare
-> s_prefetchVersionMap;
+> s_prefetchTimestamps;
 
 folly::CPUThreadPoolExecutor& getPrefetchExecutor() {
   assertx(!RO::RepoAuthoritative);
@@ -654,8 +658,6 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
         flags = FileLoadFlags::kHitMem;
         if (ent) ent->setStr("type", "cache_hit_readlock");
         return tmp;
-      } else if (tmp->cu.unit) {
-        ++s_prefetchVersion;
       }
     }
 
@@ -671,8 +673,6 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
           flags = FileLoadFlags::kWaited;
           if (ent) ent->setStr("type", "cache_hit_writelock");
           return tmp;
-        } else if (tmp->cu.unit) {
-          ++s_prefetchVersion;
         }
         if (ent) ent->setStr("type", "cache_stale");
       } else {
@@ -754,8 +754,6 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
             flags = FileLoadFlags::kHitMem;
             return cu;
           }
-        } else if (cachedUnit && cachedUnit->cu.unit) {
-          ++s_prefetchVersion;
         }
       }
     }
@@ -1035,17 +1033,16 @@ void invalidateUnit(StringData* path) {
   erase(s_nonRepoUnitCache);
   for (auto const& p : s_perUserUnitCaches) erase(*p.second);
 
-  s_prefetchVersionMap.erase(path);
   Repo::get().forgetUnit(path->data());
 }
 
-String resolveVmInclude(StringData* path,
+String resolveVmInclude(const StringData* path,
                         const char* currentDir,
                         struct stat* s,
                         const Native::FuncTable& nativeFuncs,
                         bool allow_dir /* = false */) {
   ResolveIncludeContext ctx{s, allow_dir, nativeFuncs};
-  resolve_include(String{path}, currentDir, findFileWrapper, &ctx);
+  resolve_include(StrNR{path}, currentDir, findFileWrapper, &ctx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }
@@ -1163,30 +1160,31 @@ void prefetchUnit(StringData* requestedPath,
   // loaded (without normalization), we can just skip this.
   if (loadingUnit && requestedPath == loadingUnit->filepath()) return;
 
-  // Otherwise check if we've prefetched this path already for the
-  // current prefetching version. This is just an optimization.
+  tracing::BlockNoTrace _{"prefetch-unit"};
+
+  // Otherwise check if we've prefetched this path already
+  // lately. This is just an optimization.
   auto const prefetchedAlready = [&] {
     // Assume that if we have a gate, this is an explicit request
     // for prefetching (not done from the Unit loader), so skip this
     // optimization.
     if (gate) return false;
 
-    // Grab the current global version. This can advance anytime after
-    // we grab it here, but that's fine.
-    auto const version = s_prefetchVersion.load();
-
-    // Grab the version for the last prefetch from the map. If none
+    // Grab the timestamp for the last prefetch from the map. If none
     // exists, we'll atomically insert it. In that case, the path has
     // never been prefetched.
-    decltype(s_prefetchVersionMap)::accessor acc;
-    if (s_prefetchVersionMap.insert(acc, {requestedPath, version})) {
+    auto const now = std::chrono::steady_clock::now();
+    decltype(s_prefetchTimestamps)::accessor acc;
+    if (s_prefetchTimestamps.insert(acc, {requestedPath, now})) {
       return false;
     }
-    // The path has been prefetched before. We need to check the
-    // version if its greater than or equal to the global
-    // version.
-    if (acc->second < version) {
-      acc->second = version;
+    // The path has been prefetched before. We need to check if the
+    // last prefetch was more than 15 seconds in the past. If so,
+    // we'll try again (and update the timestamp). Otherwise, we'll
+    // forgo this attempt. The 15 second constant was chosen somewhat
+    // arbitrarily.
+    if (now >= acc->second + std::chrono::seconds{15}) {
+      acc->second = now;
       return false;
     }
     return true;
@@ -1197,52 +1195,69 @@ void prefetchUnit(StringData* requestedPath,
   // threads aren't a request, so this must be done here before it
   // gets queued into the worker pool:
 
-  tracing::BlockNoTrace _{"prefetch-unit"};
+  // Normally we need to run resolveVmInclude() in a request context,
+  // as it might access per-request state. However this is relatively
+  // expensive. If the below criteria are true, then
+  // resolveVmInclude() will not require any request state and it can
+  // be deferred to the worker thread.
+  auto const deferResolveVmInclude =
+    FileUtil::isAbsolutePath(requestedPath->slice()) &&
+    !RID().hasSafeFileAccess() &&
+    (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath);
 
-  // Resolve the path (first step) and stat the file
-  struct stat fileStat;
-  auto const spath = resolveVmInclude(
-    requestedPath,
-    "",
-    &fileStat,
-    Native::s_noNativeFuncs
-  );
-  // File doesn't exist. Nothing to do.
-  if (spath.isNull()) return;
+  folly::Optional<struct stat> fileStat;
+  const StringData* path = nullptr;
+  if (!deferResolveVmInclude) {
+    // We can't safely defer resolveVmInclude(). Do it now.
+    fileStat.emplace();
+    auto const spath = resolveVmInclude(
+      requestedPath,
+      "",
+      fileStat.get_pointer(),
+      Native::s_noNativeFuncs
+    );
+    // File doesn't exist. Nothing to do.
+    if (spath.isNull()) return;
 
-  auto options = RepoOptions::forFile(spath.get()->data());
-
-  // Do the second round of path normalization
-  auto const [path, rpath] = resolveRequestedPath(spath.get(), false);
-  assertx(path->isStatic());
-  assertx(rpath->isStatic());
-
-  // Now that the paths are normalized, compare them against any
-  // loading unit, to see if we can short-circuit.
-  if (loadingUnit &&
-      (rpath == loadingUnit->filepath() || path == loadingUnit->filepath())) {
-    return;
+    // Do the second round of path normalization. Resolving symlinks
+    // is relatively expensive, but always can be deferred until the
+    // work thread. Lie and say realpath has already been done to get
+    // only the path canonicalization without symlink resolution.
+    auto const [p1, p2] = resolveRequestedPath(spath.get(), true);
+    assertx(p1 == p2);
+    assertx(p1->isStatic());
+    path = p1;
+  } else {
+    // Keep the path as is. We'll do all the normalization in the
+    // worker thread.
+    path = requestedPath;
   }
 
-  // Look up the appropriate cache for the path (this can be a
-  // per-user cache if configurated).
-  auto& cache = getNonRepoCache(rpath);
+  // Now that the paths might be normalized, compare them again
+  // against any loading unit, to see if we can short-circuit.
+  if (loadingUnit && path == loadingUnit->filepath()) return;
+
+  // Looking up any per-use caches requires the canonicalized path,
+  // but might not have it yet. Grab any cli uid now so we can do the
+  // lookup in the worker thread.
+  folly::Optional<uid_t> uid;
+  if (auto const uc = get_cli_ucred()) uid = uc->uid;
 
   // We're definitely going to enqueue this request. Bump the gate if
   // provided.
   if (gate) gate->fetch_add(1);
+
+  tracing::BlockNoTrace _2{"prefetch-unit-enqueue"};
 
   // The rest of the work can be done in the worker thread. Enqueue
   // it.
   getPrefetchExecutor().addWithPriority(
     // NB: This lambda is executed at some later point in another
     // thread, so you need to be careful about the lifetime of what
-    // you capture here. cache is guarantee to stay alive for the
-    // process lifetime, so its safe to grab it by ref here. rpath and
-    // path are static strings.
-    [rpath = rpath, path = path, fileStat, &cache,
-     gate = std::move(gate),
-     options = std::move(options)] {
+    // you capture here.
+    [path, fileStat, uid,
+     loadingUnitPath = loadingUnit ? loadingUnit->filepath() : nullptr,
+     gate = std::move(gate)] () mutable {
       SCOPE_EXIT {
         // Decrement the gate whenever we're done. If the gate hits
         // zero, do a notification to wake up any thread waiting on
@@ -1279,7 +1294,40 @@ void prefetchUnit(StringData* requestedPath,
         }
       };
 
-      auto ptr = [&] () -> CachedUnitWithFreePtr {
+      // If we deferred resolveVmInclude(), do it now.
+      if (!fileStat) {
+        fileStat.emplace();
+        auto const spath = resolveVmInclude(
+          path,
+          "",
+          fileStat.get_pointer(),
+          Native::s_noNativeFuncs
+        );
+        // File doesn't exist. Nothing to do.
+        if (spath.isNull()) return;
+
+        // We don't need resolveRequestedPath() here as the conditions
+        // for deferring resolveVmInclude() mean it would be a nop.
+        assertx(FileUtil::isAbsolutePath(spath.get()->slice()));
+        path = makeStaticString(spath.get());
+      }
+
+      // Now do any required symlink resolution:
+      auto const [sameAsPath, rpath] = resolveRequestedPath(path, false);
+      assertx(sameAsPath == path);
+      assertx(rpath->isStatic());
+
+      // Now that the paths are fully normalized, compare them against
+      // any loading unit path, to see if we can return without doing
+      // anything.
+      if (rpath == loadingUnitPath) return;
+
+      auto const& options = RepoOptions::forFile(path->data());
+
+      // Lookup any per-use cache with the stored uid (if any).
+      auto& cache = uid ? getNonRepoCache(*uid, rpath) : s_nonRepoUnitCache;
+
+      auto ptr = [&, rpath = rpath] () -> CachedUnitWithFreePtr {
         NonRepoUnitCache::const_accessor rpathAcc;
 
         cache.insert(rpathAcc, rpath);
@@ -1310,7 +1358,7 @@ void prefetchUnit(StringData* requestedPath,
         // already, and if so, has the file has changed since that
         // Unit was created. If not, there's nothing to do.
         if (auto const tmp = cachedUnit.copy()) {
-          if (!isChanged(tmp, &fileStat, options)) {
+          if (!isChanged(tmp, fileStat.get_pointer(), options)) {
             cachedUnit.unlock();
             return {};
           }
@@ -1327,7 +1375,7 @@ void prefetchUnit(StringData* requestedPath,
           return createUnitFromFile(rpath, &releaseUnit, optLog,
                                     Native::s_noNativeFuncs,
                                     options, flags,
-                                    &fileStat, std::move(orig));
+                                    fileStat.get_pointer(), std::move(orig));
         }();
 
         // We don't want to prefetch ICE units (they can be

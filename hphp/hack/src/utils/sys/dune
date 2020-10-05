@@ -1,6 +1,7 @@
 (library
   (name sys_utils)
   (wrapped false)
+  (flags (:standard -safe-string))
   (libraries
     collections
     disk

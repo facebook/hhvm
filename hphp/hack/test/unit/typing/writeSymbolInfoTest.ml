@@ -36,7 +36,7 @@ let test_add_fact _test_ctxt =
     (List.length progress.resultJson.classDeclaration)
     "One class decl fact added to JSON";
   let fact_json = List.nth progress.resultJson.classDeclaration 0 in
-  let fact_id = Jget.int_d (Some fact_json) "id" (-1) in
+  let fact_id = Jget.int_d fact_json "id" ~default:(-1) in
   Int_asserter.assert_equals res_id fact_id "Id returned is JSON id of new fact";
   let (res_id2, progress) = add_fact ClassDeclaration json_key progress in
   Int_asserter.assert_equals
@@ -64,8 +64,8 @@ let test_add_decl_fact _test_ctxt =
     1
     (List.length prog.resultJson.globalConstDeclaration)
     "One gconst fact added";
-  let fact_json = List.nth prog.resultJson.globalConstDeclaration 0 in
-  let fact_id = Jget.int_d (Some fact_json) "id" (-1) in
+  let fact_json = List.nth_exn prog.resultJson.globalConstDeclaration 0 in
+  let fact_id = Jget.int_d (Some fact_json) "id" ~default:(-1) in
   let decl_name =
     return fact_json
     >>= get_obj "key"
@@ -119,7 +119,7 @@ let test_build_xrefs _test_ctxt =
   let file_map : (Hh_json.json * Pos.t list) IMap.t =
     SMap.find (Relative_path.to_absolute file) xrefs
   in
-  let result = List.nth (get_array_exn (build_xrefs_json file_map)) 0 in
+  let result = List.nth_exn (get_array_exn (build_xrefs_json file_map)) 0 in
   let target_decl =
     return result >>= get_obj "target" >>= get_string "declaration"
   in
@@ -134,7 +134,7 @@ let test_build_xrefs _test_ctxt =
       2
       (List.length ranges)
       "Duplicate references removed";
-    let offset = return (List.nth ranges 1) >>= get_number_int "offset" in
+    let offset = return (List.nth_exn ranges 1) >>= get_number_int "offset" in
     (match offset with
     | Ok (offset2, _) ->
       Int_asserter.assert_equals

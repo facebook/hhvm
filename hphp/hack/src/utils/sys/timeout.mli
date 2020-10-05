@@ -62,9 +62,9 @@ val select :
   float ->
   Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
 
-val input : ?timeout:t -> in_channel -> bytes -> int -> int -> int
+val input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> int
 
-val really_input : ?timeout:t -> in_channel -> bytes -> int -> int -> unit
+val really_input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> unit
 
 val input_char : ?timeout:t -> in_channel -> char
 

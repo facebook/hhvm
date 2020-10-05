@@ -1,5 +1,6 @@
 (* A few helpful wrappers around LSP *)
 
+module Option = Base.Option
 open Lsp
 open Lsp_fmt
 

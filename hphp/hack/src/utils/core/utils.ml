@@ -7,7 +7,9 @@
  *
  *)
 
+open Core_kernel
 open Hh_core
+module Printexc = Stdlib.Printexc
 
 (** Callstack is simply a typed way to indicate that a string is a callstack *)
 type callstack = Callstack of string [@@deriving show]
@@ -18,9 +20,9 @@ module Map = struct end
 
 let spf = Printf.sprintf
 
-let print_endlinef fmt = Printf.ksprintf print_endline fmt
+let print_endlinef fmt = Printf.ksprintf Stdio.print_endline fmt
 
-let prerr_endlinef fmt = Printf.ksprintf prerr_endline fmt
+let prerr_endlinef fmt = Printf.ksprintf Stdio.prerr_endline fmt
 
 let timestring (time : float) : string =
   let tm = Unix.localtime time in
@@ -32,7 +34,7 @@ let timestring (time : float) : string =
     tm.Unix.tm_hour
     tm.Unix.tm_min
     tm.Unix.tm_sec
-    (int_of_float (time *. 1000.) mod 1000)
+    (Int.of_float (time *. 1000.) % 1000)
 
 let opt f env = function
   | None -> (env, None)
@@ -118,13 +120,13 @@ let is_prefix_dir dir fn =
   && String.sub fn 0 (String.length prefix) = prefix
 
 let try_with_channel
-    (oc : out_channel) (f1 : out_channel -> 'a) (f2 : exn -> 'a) : 'a =
+    (oc : Out_channel.t) (f1 : Out_channel.t -> 'a) (f2 : exn -> 'a) : 'a =
   try
     let result = f1 oc in
-    close_out oc;
+    Out_channel.close oc;
     result
   with e ->
-    close_out oc;
+    Out_channel.close oc;
     f2 e
 
 let try_with_stack (f : unit -> 'a) : ('a, exn * callstack) result =
@@ -140,13 +142,13 @@ let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
 
 (* \A\B\C -> A\B\C *)
 let strip_ns s =
-  if String.length s == 0 || s.[0] <> '\\' then
+  if String.length s = 0 || not (Char.equal s.[0] '\\') then
     s
   else
     String.sub s 1 (String.length s - 1)
 
 let strip_xhp_ns s =
-  if String.length s == 0 || s.[0] <> ':' then
+  if String.length s = 0 || not (Char.equal s.[0] ':') then
     s
   else
     String.sub s 1 (String.length s - 1)
@@ -155,35 +157,37 @@ let strip_both_ns s = s |> strip_ns |> strip_xhp_ns
 
 (* A\B\C -> \A\B\C *)
 let add_ns s =
-  if String.length s = 0 || s.[0] <> '\\' then
+  if String.length s = 0 || not (Char.equal s.[0] '\\') then
     "\\" ^ s
   else
     s
 
 (* A:B:C -> :A:B:C *)
 let add_xhp_ns s =
-  if String.length s = 0 || s.[0] <> ':' then
+  if String.length s = 0 || not (Char.equal s.[0] ':') then
     ":" ^ s
   else
     s
 
 (* \A\B\C -> C *)
 let strip_all_ns s =
-  try
-    let base_name_start = String.rindex s '\\' + 1 in
+  match String.rindex s '\\' with
+  | Some pos ->
+    let base_name_start = pos + 1 in
     String.sub s base_name_start (String.length s - base_name_start)
-  with Not_found -> s
+  | None -> s
 
 (* "\\A\\B\\C" -> ("\\A\\B\\" * "C") *)
 let split_ns_from_name (s : string) : string * string =
-  try
-    let base_name_start = String.rindex s '\\' + 1 in
+  match String.rindex s '\\' with
+  | Some pos ->
+    let base_name_start = pos + 1 in
     let name_part =
       String.sub s base_name_start (String.length s - base_name_start)
     in
     let namespace_part = String.sub s 0 base_name_start in
     (namespace_part, name_part)
-  with Not_found -> ("\\", s)
+  | None -> ("\\", s)
 
 let double_colon = Str.regexp_string "::"
 

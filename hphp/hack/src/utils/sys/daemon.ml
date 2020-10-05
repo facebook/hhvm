@@ -7,6 +7,8 @@
  *
  *)
 
+module Option = Base.Option
+
 type 'a in_channel = Timeout.in_channel
 
 type 'a out_channel = Stdlib.out_channel

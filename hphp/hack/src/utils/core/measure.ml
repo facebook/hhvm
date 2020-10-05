@@ -78,12 +78,13 @@
  * sent across pipes.
  *)
 
+open Base
 module List = Hh_core.List
 
 module FloatMap = WrappedMap.Make (struct
   type t = float
 
-  let compare = compare
+  let compare = Float.compare
 end)
 
 type distribution = {
@@ -127,8 +128,8 @@ let new_entry =
     count = 0.0;
     mean = 0.0;
     variance_sum = 0.0;
-    max = min_float;
-    min = max_float;
+    max = Float.min_value;
+    min = Float.max_value;
     distribution = None;
   }
 
@@ -158,7 +159,8 @@ let track_distribution ?record name ~bucket_size =
   let entry = { entry with distribution = new_distribution ~bucket_size } in
   record := SMap.add name entry !record
 
-let round_down ~bucket_size value = bucket_size *. floor (value /. bucket_size)
+let round_down ~bucket_size value =
+  bucket_size *. Float.round_down (value /. bucket_size)
 
 let update_distribution ~weight value = function
   | None -> None
@@ -208,8 +210,8 @@ let merge_entries name from into =
   match (from, into) with
   | (None, into) -> into
   | (from, None) -> from
-  | (Some from, into) when from.count = 0. -> into
-  | (from, Some into) when into.count = 0. -> from
+  | (Some from, into) when Float.equal from.count 0. -> into
+  | (from, Some into) when Float.equal into.count 0. -> from
   | (Some from, Some into) ->
     let count = from.count +. into.count in
     (* Using this algorithm to combine the variance sums
@@ -232,8 +234,8 @@ let merge_entries name from into =
       | (None, into) -> into
       | (from, None) -> from
       | (Some { bucket_size = from; _ }, Some { bucket_size = into; _ })
-        when from <> into ->
-        Printf.kprintf
+        when not (Float.equal from into) ->
+        Stdlib.Printf.kprintf
           failwith
           "Merging buckets for %s failed: bucket sizes %f, %f"
           name
@@ -284,19 +286,19 @@ let get_count = get_helper (fun { count; _ } -> count)
 let get_max = get_helper (fun { max; _ } -> max)
 
 let pretty_num f =
-  if f > 1000000000.0 then
+  if Float.(f > 1000000000.0) then
     Printf.sprintf "%.3fG" (f /. 1000000000.0)
-  else if f > 1000000.0 then
+  else if Float.(f > 1000000.0) then
     Printf.sprintf "%.3fM" (f /. 1000000.0)
-  else if f > 1000.0 then
+  else if Float.(f > 1000.0) then
     Printf.sprintf "%.3fK" (f /. 1000.0)
-  else if f = floor f then
-    Printf.sprintf "%d" (int_of_float f)
+  else if Float.(f = Float.round_down f) then
+    Printf.sprintf "%d" (Int.of_float f)
   else
     Printf.sprintf "%f" f
 
 let print_entry_stats ?record ?print_raw name =
-  let print_raw = Option.value print_raw ~default:prerr_endline in
+  let print_raw = Option.value print_raw ~default:Stdio.prerr_endline in
   let record = get_record record in
   let prefix = Printf.sprintf "%s stats --" name in
   match SMap.find_opt name !record with
@@ -305,7 +307,7 @@ let print_entry_stats ?record ?print_raw name =
     Printf.ksprintf print_raw "%s NO DATA" prefix
   | Some { count; mean; variance_sum; max; min; distribution = _ } ->
     let total = count *. mean in
-    let std_dev = sqrt (variance_sum /. count) in
+    let std_dev = Float.sqrt (variance_sum /. count) in
     Printf.ksprintf
       print_raw
       "%s samples: %s, total: %s, avg: %s, stddev: %s, max: %s, min: %s)"
@@ -322,31 +324,31 @@ let print_stats ?record ?print_raw () =
   SMap.iter (fun name _ -> print_entry_stats ~record ?print_raw name) !record
 
 let rec print_buckets ~low ~high ~bucket_size buckets =
-  if low <= high then (
+  if Float.(low <= high) then (
     let count =
       match FloatMap.find_opt low buckets with
       | None -> 0.0
       | Some count -> count
     in
-    Printf.eprintf "[%s: %s]  " (pretty_num low) (pretty_num count);
+    Stdlib.Printf.eprintf "[%s: %s]  " (pretty_num low) (pretty_num count);
     let low = low +. bucket_size in
     print_buckets ~low ~high ~bucket_size buckets
   )
 
 let print_entry_distribution ?record name =
   let record = get_record record in
-  Printf.eprintf "%s distribution -- " name;
+  Stdlib.Printf.eprintf "%s distribution -- " name;
   match SMap.find_opt name !record with
   | None
   | Some { count = 0.0; _ } ->
-    prerr_endline "NO DATA"
+    Stdio.prerr_endline "NO DATA"
   | Some { distribution = None; _ } ->
-    prerr_endline "NO DATA (did you forget to call track_distribution?)"
+    Stdio.prerr_endline "NO DATA (did you forget to call track_distribution?)"
   | Some { max; min; distribution = Some { bucket_size; buckets }; _ } ->
     let low = round_down ~bucket_size min in
     let high = round_down ~bucket_size max in
     print_buckets ~low ~high ~bucket_size buckets;
-    prerr_newline ()
+    Stdio.prerr_endline ""
 
 let print_distributions ?record () =
   let record = get_record record in

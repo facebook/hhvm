@@ -2,6 +2,7 @@
   (name typeSimplifierTest)
   (flags (:standard -w @a-4-27-44-48))
   (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
+  (modules typeSimplifierTest)
   (libraries
     collections
     core_kernel
@@ -15,3 +16,20 @@
     typing_ast
     typing_defs
     utils_core))
+
+(test
+  (name writeSymbolInfoTest)
+  (flags (:standard -w @a-4-27-44-48))
+  (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
+  (modules writeSymbolInfoTest)
+  (libraries
+    asserter
+    collections
+    default_injector_config
+    hh_json
+    ounit2
+    pos
+    relative_path
+    utils_core
+    write_symbol_info))
+

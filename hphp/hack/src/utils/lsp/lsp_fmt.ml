@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+module Fn = Base.Fn
 open Lsp
 open Hh_json
 open Hh_json_helpers

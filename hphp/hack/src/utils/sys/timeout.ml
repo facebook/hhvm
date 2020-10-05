@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 type timings = {
   start_time: float;
   deadline_time: float;  (** caller-supplied deadline *)
@@ -71,10 +73,10 @@ module Alarm_timeout = struct
       let ret =
         try do_ id
         with exn ->
-          let stack = Printexc.get_raw_backtrace () in
+          let stack = Stdlib.Printexc.get_raw_backtrace () in
           (* Any uncaught exception will cancel the timeout *)
           Timer.cancel_timer timer;
-          Printexc.raise_with_backtrace exn stack
+          Stdlib.Printexc.raise_with_backtrace exn stack
       in
       Timer.cancel_timer timer;
       ret
@@ -176,7 +178,7 @@ module Alarm_timeout = struct
         try reader timeout ic oc
         with exn ->
           close_in ic;
-          close_out oc;
+          Out_channel.close oc;
           raise exn)
 
   let open_connection ?timeout:_ sockaddr =
@@ -312,8 +314,8 @@ module Select_timeout = struct
 
   let unsafe_input ?timeout tic s ofs len =
     let n =
-      if len > max_int then
-        max_int
+      if len > Int.max_value then
+        Int.max_value
       else
         len
     in
@@ -513,7 +515,7 @@ module Select_timeout = struct
           Option.iter ~f:Sys_utils.terminate_process tic.pid;
           tic.pid <- None;
           close_in tic;
-          close_out oc;
+          Out_channel.close oc;
           raise exn)
 
   (** Socket *)
@@ -593,9 +595,9 @@ module type S = sig
     float ->
     Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
 
-  val input : ?timeout:t -> in_channel -> bytes -> int -> int -> int
+  val input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> int
 
-  val really_input : ?timeout:t -> in_channel -> bytes -> int -> int -> unit
+  val really_input : ?timeout:t -> in_channel -> Bytes.t -> int -> int -> unit
 
   val input_char : ?timeout:t -> in_channel -> char
 
@@ -603,7 +605,8 @@ module type S = sig
 
   val input_value : ?timeout:t -> in_channel -> 'a
 
-  val open_process : Exec_command.t -> string array -> in_channel * out_channel
+  val open_process :
+    Exec_command.t -> string array -> in_channel * Out_channel.t
 
   val open_process_in : Exec_command.t -> string array -> in_channel
 
@@ -612,12 +615,13 @@ module type S = sig
   val read_process :
     timeout:int ->
     on_timeout:(timings -> 'a) ->
-    reader:(t -> in_channel -> out_channel -> 'a) ->
+    reader:(t -> in_channel -> Out_channel.t -> 'a) ->
     Exec_command.t ->
     string array ->
     'a
 
-  val open_connection : ?timeout:t -> Unix.sockaddr -> in_channel * out_channel
+  val open_connection :
+    ?timeout:t -> Unix.sockaddr -> in_channel * Out_channel.t
 
   val shutdown_connection : in_channel -> unit
 
@@ -638,5 +642,5 @@ let read_connection ~timeout ~on_timeout ~reader sockaddr =
       let (tic, oc) = open_connection ~timeout sockaddr in
       try reader timeout tic oc
       with exn ->
-        close_out oc;
+        Out_channel.close oc;
         raise exn)

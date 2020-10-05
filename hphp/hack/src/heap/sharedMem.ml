@@ -7,6 +7,7 @@
  *
  *)
 
+module Option = Base.Option
 open Hh_core
 
 (** This is just a sentinel for self-documenting purposes which some

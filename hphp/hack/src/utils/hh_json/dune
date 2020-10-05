@@ -3,4 +3,4 @@
   (wrapped false)
   (libraries
     collections
-    imported_core))
+    core_kernel))

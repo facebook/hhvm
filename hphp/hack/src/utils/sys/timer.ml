@@ -27,6 +27,9 @@
  * 4. When the Unix timer fires, we execute the current timer's callback and schedule the next timer
  *)
 
+open Base
+module Sys = Stdlib.Sys
+
 type t = int
 
 type timer = {
@@ -38,7 +41,7 @@ type timer = {
 module TimerKey = struct
   type t = timer
 
-  let compare a b = compare a.target_time b.target_time
+  let compare a b = Float.compare a.target_time b.target_time
 end
 
 (* Mutable priority queue with O(log(n)) pushes and pops *)
@@ -63,7 +66,7 @@ let rec get_next_timer ~exns =
       get_next_timer ~exns
     else
       let interval = timer.target_time -. Unix.gettimeofday () in
-      if interval <= 0.0 then
+      if Float.(interval <= 0.0) then
         let exns =
           try
             timer.callback ();
@@ -124,10 +127,10 @@ and schedule ?(exns = []) () =
 let set_timer ~interval ~callback =
   let target_time = Unix.gettimeofday () +. interval in
   let id = !next_id in
-  incr next_id;
+  Int.incr next_id;
   TimerQueue.push queue { target_time; callback; id };
   (match !current_timer with
-  | Some current_timer when target_time >= current_timer.target_time ->
+  | Some current_timer when Float.(target_time >= current_timer.target_time) ->
     (* There's currently a timer and the new timer will fire after it. As an optimization we can
        skip scheduling *)
     ()

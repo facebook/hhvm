@@ -6,6 +6,8 @@
  *
  *)
 
+module Option = Base.Option
+
 type finale_data = {
   exit_status: Exit_status.t;
   msg: string option;

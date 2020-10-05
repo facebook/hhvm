@@ -8,6 +8,7 @@
  *)
 
 open Hh_core
+module Option = Base.Option
 
 external realpath : string -> string option = "hh_realpath"
 

@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <folly/compression/Zstd.h>
 #include <folly/DynamicConverter.h>
 #include <folly/json.h>
 #include <folly/FileUtil.h>
@@ -115,17 +116,24 @@ folly::Optional<std::string> hackcExtractPath() {
     return folly::none;
   }
   auto const binary = [&]() -> std::string {
-    auto const gz_binary = read_embedded_data(desc);
+    auto const cbinary = read_embedded_data(desc);
+    auto const bin_size = cbinary.size();
     tracing::Block _{
       "compile-unit-uncompress",
       [&] {
         return tracing::Props{}
-          .add("binary_size", gz_binary.size());
+          .add("binary_size", bin_size);
       }
     };
+    auto const codec = folly::io::zstd::getCodec(folly::io::zstd::Options{1});
+    try {
+      return codec->uncompress(cbinary);
+    } catch (std::runtime_error&) {
+      Logger::Error("Embedded hackc binary could not be zstd decompressed");
+    }
     FTRACE(3, "attempting gzip uncompress\n");
-    auto len = safe_cast<int>(gz_binary.size());
-    auto const bin_str = gzdecode(gz_binary.data(), len);
+    auto len = safe_cast<int>(cbinary.size());
+    auto const bin_str = gzdecode(cbinary.data(), len);
     SCOPE_EXIT { if (bin_str) free(bin_str); };
     if (!bin_str || !len) {
       Logger::Error("Embedded hackc binary could not be gz decompressed");

@@ -117,6 +117,13 @@ public:
   static bool ExistsInt(const ArrayData* ad, int64_t key);
   static bool ExistsStr(const ArrayData* ad, const StringData* key);
 
+  // iteration
+  static ssize_t IterBegin(const ArrayData* ad);
+  static ssize_t IterLast(const ArrayData* ad);
+  static ssize_t IterEnd(const ArrayData* ad);
+  static ssize_t IterAdvance(const ArrayData* ad, ssize_t pos);
+  static ssize_t IterRewind(const ArrayData* ad, ssize_t pos);
+
   // RW access
   //
   // The "Elem" methods are variants on the "Lval" methods that allow us to
@@ -143,13 +150,6 @@ public:
   // deletion
   static ArrayData* RemoveInt(ArrayData* ad, int64_t key);
   static ArrayData* RemoveStr(ArrayData* ad, const StringData* key);
-
-  // iteration
-  static ssize_t IterBegin(const ArrayData* ad);
-  static ssize_t IterLast(const ArrayData* ad);
-  static ssize_t IterEnd(const ArrayData* ad);
-  static ssize_t IterAdvance(const ArrayData* ad, ssize_t pos);
-  static ssize_t IterRewind(const ArrayData* ad, ssize_t pos);
 
   // sorting
   static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);

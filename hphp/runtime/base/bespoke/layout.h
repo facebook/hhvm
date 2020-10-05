@@ -51,6 +51,11 @@ namespace bespoke {
   X(TypedValue, getVal, const ArrayData*, ssize_t pos) \
   X(ssize_t, getIntPos, const ArrayData*, int64_t) \
   X(ssize_t, getStrPos, const ArrayData*, const StringData*) \
+  X(ssize_t, iterBegin, const ArrayData*) \
+  X(ssize_t, iterLast, const ArrayData*) \
+  X(ssize_t, iterEnd, const ArrayData*) \
+  X(ssize_t, iterAdvance, const ArrayData*, ssize_t) \
+  X(ssize_t, iterRewind, const ArrayData*, ssize_t) \
   X(arr_lval, lvalInt, ArrayData* ad, int64_t k) \
   X(arr_lval, lvalStr, ArrayData* ad, StringData* k) \
   X(arr_lval, elemInt, ArrayData* ad, int64_t k) \
@@ -59,11 +64,6 @@ namespace bespoke {
   X(ArrayData*, setStr, ArrayData*, StringData* k, TypedValue v)\
   X(ArrayData*, removeInt, ArrayData*, int64_t) \
   X(ArrayData*, removeStr, ArrayData*, const StringData*) \
-  X(ssize_t, iterBegin, const ArrayData*) \
-  X(ssize_t, iterLast, const ArrayData*) \
-  X(ssize_t, iterEnd, const ArrayData*) \
-  X(ssize_t, iterAdvance, const ArrayData*, ssize_t) \
-  X(ssize_t, iterRewind, const ArrayData*, ssize_t) \
   X(ArrayData*, append, ArrayData*, TypedValue v) \
   X(ArrayData*, prepend, ArrayData*, TypedValue v) \
   X(ArrayData*, pop, ArrayData*, Variant&) \

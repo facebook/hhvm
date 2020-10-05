@@ -163,6 +163,23 @@ bool BespokeArray::ExistsStr(const ArrayData* ad, const StringData* key) {
   return NvGetStr(ad, key).is_init();
 }
 
+// iteration
+ssize_t BespokeArray::IterBegin(const ArrayData* ad) {
+  return asBespoke(ad)->vtable()->iterBegin(ad);
+}
+ssize_t BespokeArray::IterLast(const ArrayData* ad) {
+  return asBespoke(ad)->vtable()->iterLast(ad);
+}
+ssize_t BespokeArray::IterEnd(const ArrayData* ad) {
+  return asBespoke(ad)->vtable()->iterEnd(ad);
+}
+ssize_t BespokeArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
+  return asBespoke(ad)->vtable()->iterAdvance(ad, pos);
+}
+ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
+  return asBespoke(ad)->vtable()->iterRewind(ad, pos);
+}
+
 // RW access
 arr_lval BespokeArray::LvalInt(ArrayData* ad, int64_t key) {
   return asBespoke(ad)->vtable()->lvalInt(ad, key);
@@ -203,23 +220,6 @@ ArrayData* BespokeArray::RemoveInt(ArrayData* ad, int64_t key) {
 }
 ArrayData* BespokeArray::RemoveStr(ArrayData* ad, const StringData* key) {
   return asBespoke(ad)->vtable()->removeStr(ad, key);
-}
-
-// iteration
-ssize_t BespokeArray::IterBegin(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->iterBegin(ad);
-}
-ssize_t BespokeArray::IterLast(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->iterLast(ad);
-}
-ssize_t BespokeArray::IterEnd(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->iterEnd(ad);
-}
-ssize_t BespokeArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->iterAdvance(ad, pos);
-}
-ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
-  return asBespoke(ad)->vtable()->iterRewind(ad, pos);
 }
 
 // sorting

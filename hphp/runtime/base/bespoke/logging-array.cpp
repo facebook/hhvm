@@ -309,6 +309,27 @@ ssize_t LoggingArray::getStrPos(const ArrayData* ad, const StringData* k) {
   return asLogging(ad)->wrapped->nvGetStrPos(k);
 }
 
+ssize_t LoggingArray::iterBegin(const ArrayData* ad) {
+  logEvent(ad, ArrayOp::IterBegin);
+  return asLogging(ad)->wrapped->iter_begin();
+}
+ssize_t LoggingArray::iterLast(const ArrayData* ad) {
+  logEvent(ad, ArrayOp::IterLast);
+  return asLogging(ad)->wrapped->iter_last();
+}
+ssize_t LoggingArray::iterEnd(const ArrayData* ad) {
+  logEvent(ad, ArrayOp::IterEnd);
+  return asLogging(ad)->wrapped->iter_end();
+}
+ssize_t LoggingArray::iterAdvance(const ArrayData* ad, ssize_t prev) {
+  logEvent(ad, ArrayOp::IterAdvance);
+  return asLogging(ad)->wrapped->iter_advance(prev);
+}
+ssize_t LoggingArray::iterRewind(const ArrayData* ad, ssize_t prev) {
+  logEvent(ad, ArrayOp::IterRewind);
+  return asLogging(ad)->wrapped->iter_rewind(prev);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Mutations
 
@@ -422,27 +443,6 @@ ArrayData* LoggingArray::removeInt(ArrayData* ad, int64_t k) {
 ArrayData* LoggingArray::removeStr(ArrayData* ad, const StringData* k) {
   logEvent(ad, ArrayOp::RemoveStr, k);
   return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
-}
-
-ssize_t LoggingArray::iterBegin(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IterBegin);
-  return asLogging(ad)->wrapped->iter_begin();
-}
-ssize_t LoggingArray::iterLast(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IterLast);
-  return asLogging(ad)->wrapped->iter_last();
-}
-ssize_t LoggingArray::iterEnd(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IterEnd);
-  return asLogging(ad)->wrapped->iter_end();
-}
-ssize_t LoggingArray::iterAdvance(const ArrayData* ad, ssize_t prev) {
-  logEvent(ad, ArrayOp::IterAdvance);
-  return asLogging(ad)->wrapped->iter_advance(prev);
-}
-ssize_t LoggingArray::iterRewind(const ArrayData* ad, ssize_t prev) {
-  logEvent(ad, ArrayOp::IterRewind);
-  return asLogging(ad)->wrapped->iter_rewind(prev);
 }
 
 ArrayData* LoggingArray::append(ArrayData* ad, TypedValue v) {

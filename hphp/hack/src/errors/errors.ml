@@ -5521,11 +5521,9 @@ let call_coeffect_error
         "This call is not allowed because its coeffects are incompatible with the context"
       );
       ( pos_env_capability,
-        "From this declaration, the context of this function body provides the capabilities: "
+        "From this declaration, the context of this function body provides "
         ^ env_capability );
-      ( pos_capability,
-        "But the function being called requires the capabilities: " ^ capability
-      );
+      (pos_capability, "But the function being called requires " ^ capability);
     ]
 
 (*****************************************************************************)

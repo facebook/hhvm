@@ -1,0 +1,12 @@
+File "rx_no_unsafe.php", line 12, characters 3-13:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "rx_no_unsafe.php", line 10, characters 17-20:
+  From this declaration, the context of this function body provides the capability set {Rx}
+  File "rx_no_unsafe.php", line 6, characters 21-28:
+  But the function being called requires the capability set {NonDet, RxLocal, Throwing<mixed>}
+File "rx_no_unsafe.php", line 16, characters 3-9:
+This call is not allowed because its coeffects are incompatible with the context (Typing[4390])
+  File "rx_no_unsafe.php", line 15, characters 19-24:
+  From this declaration, the context of this function body provides the capability set {}
+  File "rx_no_unsafe.php", line 10, characters 17-20:
+  But the function being called requires the capability set {Rx}

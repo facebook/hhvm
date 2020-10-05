@@ -1847,9 +1847,37 @@ let subtype_prop env prop =
   p_str
 
 let coeffects env ty =
-  with_blank_tyvars (fun () ->
-      Full.to_string
-        ~ty:Full.locl_ty
-        (fun s -> Doc.text (Utils.strip_all_ns s))
-        env
-        ty)
+  let to_string ty =
+    with_blank_tyvars (fun () ->
+        Full.to_string
+          ~ty:Full.locl_ty
+          (fun s -> Doc.text (Utils.strip_all_ns s))
+          env
+          ty)
+  in
+  let exception UndesugarableCoeffect of locl_ty in
+  let rec desugar_simple_intersection (ty : locl_ty) : string list =
+    match snd @@ deref ty with
+    | Tintersection tyl -> List.concat_map ~f:desugar_simple_intersection tyl
+    | Tunion [ty] -> desugar_simple_intersection ty
+    | Tunion _
+    | Tnonnull
+    | Tdynamic ->
+      raise (UndesugarableCoeffect ty)
+    | Toption ty' ->
+      begin
+        match deref ty' with
+        | (_, Tnonnull) -> [] (* another special case of `mixed` *)
+        | _ -> raise (UndesugarableCoeffect ty)
+      end
+    | _ -> [to_string ty]
+  in
+  "the capability "
+  ^
+  try
+    "set {"
+    ^ ( desugar_simple_intersection ty
+      |> List.sort ~compare:String.compare
+      |> String.concat ~sep:", " )
+    ^ "}"
+  with UndesugarableCoeffect _ -> to_string ty

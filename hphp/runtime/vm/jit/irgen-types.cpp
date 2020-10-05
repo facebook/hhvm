@@ -1357,7 +1357,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       },
       [&] (Type valType, bool hard) { // Check failure
         auto const failHard = hard &&
-          !(tc.isArray() && valType.maybe(TObj));
+          !(tc.isPHPArray() && valType.maybe(TObj));
         gen(
           env,
           failHard ? VerifyParamFailHard : VerifyParamFail,
@@ -1531,7 +1531,11 @@ void verifyPropType(IRGS& env,
         // the check using a runtime helper. This gives us the freedom to call
         // verifyPropType without us worrying about it punting the whole set op.
         // This check is fragile - which type constraints coerce?
-        if (coerce && (tc->isArray() || tc->isString() ||
+
+        // WARNING: Post HADVAs, VArray typehints (which are now vec typehints)
+        // will also coerce. It must be included in the isArray check, or else
+        // we have a bug.
+        if (coerce && (tc->isPHPArray() || tc->isString() ||
                        (tc->isObject() && !tc->isResolved()))) {
           *coerce = gen(
             env,
@@ -1695,7 +1699,7 @@ void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
 
 SSATmp* doDVArrChecks(IRGS& env, SSATmp* arr, Block* taken,
                       const TypeConstraint& tc) {
-  assertx(tc.isArray());
+  assertx(tc.isPHPArray());
   auto const type = [&]{
     if (tc.isVArray()) return TVArr;
     if (tc.isDArray()) return TDArr;

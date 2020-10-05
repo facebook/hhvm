@@ -252,7 +252,7 @@ struct TypeConstraint {
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
   bool isArrayLike() const { return m_type == Type::ArrayLike; }
 
-  bool isArray() const {
+  bool isPHPArray() const {
     return isVArray() || isDArray() || isVArrayOrDArray();
   }
   bool isDict() const {
@@ -550,4 +550,3 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
 // Add all flags in tc (except TypeVar) to ub
 void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc);
 }
-

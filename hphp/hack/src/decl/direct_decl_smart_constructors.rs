@@ -83,6 +83,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 _ => {}
             }
         }
+        // If the name is fully qualified, and there's no internal trivia, then
+        // we can just reference the fully qualified name in the original source
+        // text instead of copying it.
+        let source_len = pos.end_cnum() - pos.start_cnum();
+        if fully_qualified && source_len == len {
+            let qualified_name = self.str_from_utf8(self.source_text_at_pos(pos));
+            return Id(pos, qualified_name);
+        }
         // Allocate `len` bytes and fill them with the fully qualified name.
         let mut qualified_name = String::with_capacity_in(len, self.state.arena);
         qualified_name.push_str(namespace);

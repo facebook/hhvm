@@ -939,12 +939,6 @@ void throwFalseyPromoteException(const char* type) {
   );
 }
 
-void throwMissingElementException(const char* op) {
-  SystemLib::throwOutOfBoundsExceptionObject(
-    folly::sformat("{} on missing array element", op)
-  );
-}
-
 void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
   SystemLib::throwOutOfBoundsExceptionObject(
     folly::sformat(

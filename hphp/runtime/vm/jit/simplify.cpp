@@ -1388,15 +1388,6 @@ SSATmp* simplifyEqCls(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyEqRecDesc(State& env, const IRInstruction* inst) {
-  auto const left = inst->src(0);
-  auto const right = inst->src(1);
-  if (left->hasConstVal() && right->hasConstVal()) {
-    return cns(env, left->recVal() == right->recVal());
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyEqStrPtr(State& env, const IRInstruction* inst) {
   auto const left = inst->src(0);
   auto const right = inst->src(1);
@@ -2684,17 +2675,6 @@ SSATmp* simplifyReserveVecNewElem(State& env, const IRInstruction* inst) {
     return cns(env, TBottom);
   }
   return nullptr;
-}
-
-SSATmp* arrKeyImpl(State& env, const IRInstruction* inst) {
-  auto const arr = inst->src(0);
-  auto const key = inst->src(1);
-  assertx(arr->hasConstVal(TArr));
-  assertx(key->hasConstVal(TInt|TStr));
-  assertx(arr->arrVal()->isPHPArrayType());
-  auto const tv = key->isA(TInt) ? arr->arrVal()->get(key->intVal())
-                                 : arr->arrVal()->get(key->strVal());
-  return tv.is_init() ? cns(env, tv) : nullptr;
 }
 
 namespace {

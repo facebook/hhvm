@@ -114,10 +114,6 @@ void raise_error_sd(const StringData* sd);
 void raiseClsMethPropConvertNotice(
   const TypeConstraint*, bool, const Class*, const StringData*);
 
-TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
-TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
-TypedValue arrayIdxScan(ArrayData*, StringData*, TypedValue);
-
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue dictIdxScan(ArrayData*, StringData*, TypedValue);
@@ -200,11 +196,6 @@ uint64_t vectorIsset(c_Vector*, int64_t);
 TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op);
 tv_lval elemVecIU(tv_lval base, int64_t key);
 }
-
-/*
- * Just calls tlsBase, but not inlined, so it can be called from the TC.
- */
-uintptr_t tlsBaseNoInline();
 
 //////////////////////////////////////////////////////////////////////
 

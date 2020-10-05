@@ -428,12 +428,6 @@ TypedValue getDefaultIfMissing(TypedValue tv, TypedValue def) {
   return tv.is_init() ? tv : def;
 }
 
-NEVER_INLINE
-TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isPHPArrayType());
-  return getDefaultIfMissing(a->get(key), def);
-}
-
 ALWAYS_INLINE
 TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
   assertx(key->isStatic());
@@ -447,23 +441,6 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
   return def;
 }
 
-}
-
-TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isPHPArrayType());
-  return getDefaultIfMissing(a->get(key), def);
-}
-
-TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isPHPArrayType());
-  if (!a->isMixedKind()) return arrayIdxSSlow(a, key, def);
-  return dictIdxS(a, key, def);
-}
-
-TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isPHPArrayType());
-  if (!a->isMixedKind()) return arrayIdxSSlow(a, key, def);
-  return dictIdxScan(a, key, def);
 }
 
 // This helper may also be used when we know we have a MixedArray in the JIT.
@@ -864,12 +841,6 @@ tv_lval elemVecIU(tv_lval base, int64_t key) {
   return ElemUVec<KeyType::Int>(base, key);
 }
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
-uintptr_t tlsBaseNoInline() {
-  return tlsBase();
 }
 
 //////////////////////////////////////////////////////////////////////

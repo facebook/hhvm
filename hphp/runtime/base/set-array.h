@@ -273,8 +273,6 @@ private:
   void insert(StringData* k, strhash_t h);
   void insert(StringData* k);
 
-  ssize_t findElm(const Elm& e) const;
-
   void erase(RemovePos);
 
   /*

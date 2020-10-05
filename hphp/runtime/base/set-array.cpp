@@ -321,13 +321,6 @@ void SetArray::ReleaseUncounted(ArrayData* in) {
 
 //////////////////////////////////////////////////////////////////////
 
-ssize_t SetArray::findElm(const Elm& e) const {
-  assertx(!e.isInvalid());
-  return e.hasIntKey()
-    ? find(e.intKey(), e.hash())
-    : find(e.strKey(), e.hash());
-}
-
 void SetArray::insert(int64_t k, inthash_t h) {
   assertx(!isFull());
   auto const loc = findForInsert(k, h);

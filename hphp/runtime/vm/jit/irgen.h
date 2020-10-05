@@ -117,11 +117,6 @@ void assertTypeLocation(IRGS&, const Location&, Type);
 void genLogArrayReach(IRGS&, const Location&, uint32_t guardIdx);
 
 /*
- * Type predictions.
- */
-void predictType(IRGS&, const Location&, Type);
-
-/*
  * After all initial guards instructions have been emitted, the client of this
  * module calls the following function to allow some "region header" code to be
  * emitted.

@@ -127,12 +127,6 @@ void checkType(IRGS& env, const Location& loc, Type type, Offset dest) {
   }
 }
 
-void predictType(IRGS& env, const Location& loc, Type type) {
-  FTRACE(1, "predictType {}: {}\n", show(loc), type);
-  assertx(type <= TCell);
-  env.irb->fs().refinePredictedType(loc, type);
-}
-
 void genLogArrayReach(IRGS& env, const Location& loc, uint32_t guardIdx) {
   assertx(env.context.transIDs.size() == 1);
   assertx(env.context.kind == TransKind::Profile);

@@ -47,12 +47,6 @@ namespace {
   StaticString s_awaitAll("<await-all>");
 
   [[noreturn]] NEVER_INLINE
-  void failArray() {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected dependencies to be an array");
-  }
-
-  [[noreturn]] NEVER_INLINE
   void failMap() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected dependencies to be a Map");

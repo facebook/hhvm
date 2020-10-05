@@ -840,7 +840,6 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwOOBArrayKeyException(const StringData* key,
                                             const ArrayData* ad);
 [[noreturn]] void throwFalseyPromoteException(const char* type);
-[[noreturn]] void throwMissingElementException(const char* op);
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
 [[noreturn]] void throwVarrayUnsetException();

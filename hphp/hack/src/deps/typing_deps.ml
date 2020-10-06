@@ -74,24 +74,24 @@ module Dep = struct
   let variant_equals : type a b. a variant -> b variant -> bool =
    fun lhs rhs ->
     match (lhs, rhs) with
-    | (GConst lhs, GConst rhs) -> Poly.(lhs = rhs)
-    | (Class lhs, Class rhs) -> Poly.(lhs = rhs)
-    | (RecordDef lhs, RecordDef rhs) -> Poly.(lhs = rhs)
-    | (Fun lhs, Fun rhs) -> Poly.(lhs = rhs)
+    | (GConst lhs, GConst rhs) -> String.(lhs = rhs)
+    | (Class lhs, Class rhs) -> String.(lhs = rhs)
+    | (RecordDef lhs, RecordDef rhs) -> String.(lhs = rhs)
+    | (Fun lhs, Fun rhs) -> String.(lhs = rhs)
     | (Const (lhs1, lhs2), Const (rhs1, rhs2)) ->
-      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
     | (Prop (lhs1, lhs2), Prop (rhs1, rhs2)) ->
-      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
     | (SProp (lhs1, lhs2), SProp (rhs1, rhs2)) ->
-      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
     | (Method (lhs1, lhs2), Method (rhs1, rhs2)) ->
-      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
     | (SMethod (lhs1, lhs2), SMethod (rhs1, rhs2)) ->
-      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
-    | (GConstName lhs, GConstName rhs) -> Poly.(lhs = rhs)
-    | (FunName lhs, FunName rhs) -> Poly.(lhs = rhs)
-    | (AllMembers lhs, AllMembers rhs) -> Poly.(lhs = rhs)
-    | (Extends lhs, Extends rhs) -> Poly.(lhs = rhs)
+      String.(lhs1 = rhs1) && String.(lhs2 = rhs2)
+    | (GConstName lhs, GConstName rhs) -> String.(lhs = rhs)
+    | (FunName lhs, FunName rhs) -> String.(lhs = rhs)
+    | (AllMembers lhs, AllMembers rhs) -> String.(lhs = rhs)
+    | (Extends lhs, Extends rhs) -> String.(lhs = rhs)
     | (GConst _, _) -> false
     | (Class _, _) -> false
     | (RecordDef _, _) -> false

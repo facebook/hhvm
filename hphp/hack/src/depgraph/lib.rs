@@ -5,5 +5,6 @@
 
 pub mod dep;
 pub mod reader;
+pub mod writer;
 
 mod byteutils;

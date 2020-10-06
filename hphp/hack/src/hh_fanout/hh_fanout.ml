@@ -841,6 +841,43 @@ a typing-dependency edge.
     ( const run $ env_t $ source $ dest,
       info "query-path" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
 
+let mode_build = Build.go
+
+let build_subcommand =
+  let open Cmdliner in
+  let open Cmdliner.Arg in
+  let doc = "Build the 64-bit graph from a collection of edges" in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        (String.strip
+           {|
+Produces the 64-bit dependency graph from a collection of edges stored in a
+set of binary files. The files containing the dependency graph edges are meant
+to be produced by hh_server
+|});
+    ]
+  in
+  let exits = Term.default_exits in
+
+  let edges_dir =
+    let doc =
+      "A directory containing the .bin files with all the edges."
+      ^ " The files should just contain a sequence of pairs of big-endian"
+      ^ " encoded 64-bit hashes."
+    in
+    required & opt (some string) None & info ["edges-dir"] ~doc ~docv:"CURSOR"
+  in
+  let output =
+    let doc = "Where to put the 64-bit dependency graph." in
+    required & opt (some string) None & info ["output"] ~doc ~docv:"OUTPUT"
+  in
+  let run edges_dir output = Lwt_main.run (mode_build ~edges_dir ~output) in
+  Term.
+    ( const run $ edges_dir $ output,
+      info "build" ~doc ~sdocs:Manpage.s_common_options ~man ~exits )
+
 let default_subcommand =
   let open Cmdliner in
   let sdocs = Manpage.s_common_options in
@@ -852,6 +889,7 @@ let () =
   Daemon.check_entry_point ();
   let cmds =
     [
+      build_subcommand;
       calculate_subcommand;
       calculate_errors_subcommand;
       clean_subcommand;

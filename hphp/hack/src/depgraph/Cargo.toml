@@ -3,7 +3,7 @@
 name = "depgraph"
 edition = "2018"
 version = "0.0.0"
-include = ["byteutils.rs", "dep.rs", "lib.rs", "reader.rs"]
+include = ["byteutils.rs", "dep.rs", "lib.rs", "reader.rs", "writer.rs"]
 
 [lib]
 path = "lib.rs"
@@ -13,3 +13,6 @@ crate-type = ["lib", "staticlib"]
 ocamlrep = { path = "../ocamlrep" }
 im-rc = { version = "14.2", features = ["serde"] }
 memmap = "0.7"
+
+[dev-dependencies]
+tempfile = "3.1"

@@ -39,7 +39,7 @@ struct CurlMultiResource : SweepableResourceData {
   CURLM *m_multi;
   // CURLM is a typedef to void
   TYPE_SCAN_IGNORE_FIELD(m_multi);
-  Array m_easyh;
+  Array m_easyh = Array::CreateVec();
 };
 
 /////////////////////////////////////////////////////////////////////////////

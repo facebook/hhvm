@@ -65,12 +65,22 @@ bool CurlMultiResource::setOption(int option, const Variant& value) {
 }
 
 void CurlMultiResource::remove(req::ptr<CurlResource> curle) {
+  assertx(m_easyh.isVec());
+  auto index_to_remove = -1;
   for (ArrayIter iter(m_easyh); iter; ++iter) {
-    if (cast<CurlResource>(iter.second())->get(true) ==
-        curle->get()) {
-      m_easyh.remove(iter.first());
-      return;
+    if (cast<CurlResource>(iter.second())->get(true) == curle->get()) {
+      assertx(tvIsInt(iter.nvFirst()));
+      index_to_remove = val(iter.nvFirst()).num;
+      break;
     }
+  }
+  if (index_to_remove >= 0) {
+    assertx(m_easyh.size() > 0);
+    auto const last = safe_cast<int64_t>(m_easyh.size() - 1);
+    if (index_to_remove != last) {
+      m_easyh.set(index_to_remove, m_easyh[last]);
+    }
+    m_easyh.pop();
   }
 }
 

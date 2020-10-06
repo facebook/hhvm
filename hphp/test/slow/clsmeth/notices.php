@@ -21,7 +21,7 @@ function is_functions_static() {
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
   echo 'HH\is_vec_or_varray($m):'       ;C(HH\is_vec_or_varray($m));
   echo 'HH\is_dict_or_darray($m):'       ;C(HH\is_dict_or_darray($m));
-  echo '$m is arraylike:'     ;C($m is arraylike);
+  echo '$m is AnyArray:'     ;C($m is AnyArray);
   echo '$m is shape(...):'    ;C($m is shape(...));
   echo '$m is shape(str,str):';C($m is shape(K::A=>string, K::B=>string));
 
@@ -52,7 +52,7 @@ function is_functions_dynamic() {
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
   echo 'HH\is_vec_or_varray($m):'       ;C(HH\is_vec_or_varray($m));
   echo 'HH\is_dict_or_darray($m):'       ;C(HH\is_dict_or_darray($m));
-  echo '$m is arraylike:'     ;C($m is arraylike);
+  echo '$m is AnyArray:'     ;C($m is AnyArray);
   echo '$m is shape(...):'    ;C($m is shape(...));
   echo '$m is shape(str,str):';C($m is shape(K::A=>string, K::B=>string));
 

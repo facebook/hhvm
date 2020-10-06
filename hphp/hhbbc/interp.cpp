@@ -633,7 +633,7 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike: {
+    case TypeStructure::Kind::T_any_array: {
       if (!ts->exists(s_generic_types)) return finish(ts);
       auto const generics = get_ts_generic_types(ts);
       auto rgenerics =
@@ -3127,7 +3127,7 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_resource:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
       // TODO(T29232862): implement
       return result(TBool);
     case TypeStructure::Kind::T_typeaccess:
@@ -3174,7 +3174,7 @@ bool canReduceToDontResolve(SArray ts, bool checkArrays) {
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
       return !checkArrays || checkGenerics(ts);
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:

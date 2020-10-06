@@ -79,7 +79,7 @@ TypedValue HHVM_FUNCTION(dummy_arraylike_builtin, const Variant& var) {
 
 TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
   if (!var.isArray()) {
-    SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
+    SystemLib::throwInvalidOperationExceptionObject("must pass AnyArray");
   }
   auto const& arr = var.asCArrRef();
   if (arr->isPHPArrayType() && arr->isNotDVArray()) {
@@ -90,7 +90,7 @@ TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
 
 TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Variant& var) {
   if (!var.isArray()) {
-    SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
+    SystemLib::throwInvalidOperationExceptionObject("must pass AnyArray");
   }
   auto const& arr = var.asCArrRef();
   if (arr->isDArray()) return tvReturn(arr.get());
@@ -99,7 +99,7 @@ TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Variant& var) {
 
 TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Variant& var) {
   if (!var.isArray()) {
-    SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
+    SystemLib::throwInvalidOperationExceptionObject("must pass AnyArray");
   }
   auto const& arr = var.asCArrRef();
   if (arr->isVArray()) return tvReturn(arr.get());

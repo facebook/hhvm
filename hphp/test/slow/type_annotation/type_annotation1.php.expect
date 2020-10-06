@@ -87,7 +87,7 @@ darray(3) {
   varray(0) {
   }
 }
-string(48) "(function (HH\mixed, HH\resource): HH\arraylike)"
+string(47) "(function (HH\mixed, HH\resource): HH\AnyArray)"
 darray(3) {
   ["kind"]=>
   int(11)

@@ -940,7 +940,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
       return success();
     case TypeStructure::Kind::T_num:         return unionOf(TInt, TDbl);
     case TypeStructure::Kind::T_arraykey:    return unionOf(TInt, TStr);
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
       if (t->type().maybe(TClsMeth)) {
         if (t->isA(TClsMeth)) {
           if (RuntimeOption::EvalIsVecNotices) {

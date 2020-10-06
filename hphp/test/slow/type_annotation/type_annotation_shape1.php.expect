@@ -94,7 +94,7 @@ darray(2) {
     }
   }
 }
-string(61) "HH\Map<HH\int, HH\shape('foo'=>HH\arraylike, 'bar'=>HH\bool)>"
+string(60) "HH\Map<HH\int, HH\shape('foo'=>HH\AnyArray, 'bar'=>HH\bool)>"
 darray(3) {
   ["kind"]=>
   int(15)

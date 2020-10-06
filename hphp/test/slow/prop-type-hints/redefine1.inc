@@ -17,4 +17,4 @@ const CONDCONST6 = varray[1, 2, 3];
 
 type VAlias = varray;
 type DAlias = darray;
-type AAlias = arraylike;
+type AAlias = AnyArray;

@@ -12,7 +12,7 @@ class ArrayIterator implements \HH\Iterator<mixed> {
   // $keys will be null; otherwise, it will contain the original array's keys.
   // (This optimization saves memory when iterating over varrays or vecs.)
   private ?vec<arraykey> $keys = null;
-  private arraylike $vals;
+  private AnyArray $vals;
   private int $index = 0;
   private int $flags;
 

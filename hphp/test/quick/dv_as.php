@@ -1,5 +1,4 @@
 <?hh
 class A {
-  public function a(arraylike $a1 = "abc") {}
+  public function a(AnyArray $a1 = "abc") {}
 }
-

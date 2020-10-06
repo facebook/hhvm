@@ -1,7 +1,7 @@
 <?hh
 
 class test {
-    function foo(arraylike $a = "s") {
+    function foo(AnyArray $a = "s") {
     }
 }
 <<__EntryPoint>> function main(): void {

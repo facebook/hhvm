@@ -4,7 +4,7 @@ HH\is_varray($m): (error: is_varray() called on clsmeth) True
 HH\is_darray($m): False
 HH\is_vec_or_varray($m): (error: is_vec_or_varray() called on clsmeth) True
 HH\is_dict_or_darray($m): False
-$m is arraylike: (error: is_any_array() called on clsmeth) True
+$m is AnyArray: (error: is_any_array() called on clsmeth) True
 $m is shape(...): (error: is_shape() called on clsmeth) False
 $m is shape(str,str): (error: is_shape() called on clsmeth) False
 $m is HH\Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
@@ -27,7 +27,7 @@ HH\is_varray($m): (error: is_varray() called on clsmeth) True
 HH\is_darray($m): False
 HH\is_vec_or_varray($m): (error: is_vec_or_varray() called on clsmeth) True
 HH\is_dict_or_darray($m): False
-$m is arraylike: (error: is_any_array() called on clsmeth) True
+$m is AnyArray: (error: is_any_array() called on clsmeth) True
 $m is shape(...): (error: is_shape() called on clsmeth) False
 $m is shape(str,str): (error: is_shape() called on clsmeth) False
 $m is HH\Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True

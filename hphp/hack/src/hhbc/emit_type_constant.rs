@@ -72,7 +72,7 @@ fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {
         "hh\\darray" => 24,
         "hh\\varray" => 25,
         "hh\\varray_or_darray" => 26,
-        "hh\\arraylike" => 27,
+        "hh\\anyarray" => 27,
         "hh\\null" => 28,
         "hh\\nothing" => 29,
         "hh\\dynamic" => 30,
@@ -107,7 +107,7 @@ fn is_resolved_classname(s: &str) -> bool {
         | "HH\\dict"
         | "HH\\keyset"
         | "HH\\vec_or_dict"
-        | "HH\\arraylike" => true,
+        | "HH\\AnyArray" => true,
         _ => false,
     }
 }

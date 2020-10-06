@@ -7,7 +7,7 @@ class A {
 }
 
 /*
- * These builtins are NOT compatible with arraylike and will raise Warning.
+ * These builtins are NOT compatible with AnyArray and will raise Warning.
  */
 function test_warning($c, $f, $cmp) {
   $x = CM($c, $f); var_dump(shuffle(inout $x));

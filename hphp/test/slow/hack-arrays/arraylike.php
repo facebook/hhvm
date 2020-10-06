@@ -1,25 +1,25 @@
 <?hh
 
-function takes_arraylike(arraylike<arraykey, mixed> $a) {
+function takes_arraylike(AnyArray<arraykey, mixed> $a) {
   var_dump($a);
 }
 
-function ret_array(): arraylike<arraykey, mixed> {
+function ret_array(): AnyArray<arraykey, mixed> {
   return __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[42 => 'lol']);
 }
-function ret_varray(): arraylike<arraykey, mixed> {
+function ret_varray(): AnyArray<arraykey, mixed> {
   return varray['lol'];
 }
-function ret_darray(): arraylike<arraykey, mixed> {
+function ret_darray(): AnyArray<arraykey, mixed> {
   return darray[42 => 'lol'];
 }
-function ret_vec(): arraylike<arraykey, mixed> {
+function ret_vec(): AnyArray<arraykey, mixed> {
   return vec['lol'];
 }
-function ret_dict(): arraylike<arraykey, mixed> {
+function ret_dict(): AnyArray<arraykey, mixed> {
   return dict[42 => 'lol'];
 }
-function ret_keyset(): arraylike<arraykey, mixed> {
+function ret_keyset(): AnyArray<arraykey, mixed> {
   return keyset['lol'];
 }
 

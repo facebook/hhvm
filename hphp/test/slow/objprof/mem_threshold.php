@@ -1,6 +1,6 @@
 <?hh
 class MyClass {
-  public static arraylike $a = varray[];
+  public static AnyArray $a = varray[];
   public function doSomethin($str) {
     for ($j = 0; $j < 200; $j++) {
       self::$a[] = $str.$j;

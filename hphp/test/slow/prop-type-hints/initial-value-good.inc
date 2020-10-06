@@ -35,10 +35,10 @@ class A {
   public keyset $p13 = keyset['a', 'b', 'c'];
   public vec_or_dict $p14 = vec['a', 'b',' c'];
   public vec_or_dict $p15 = dict['a' => 100, 'b' => 200];
-  public arraylike $p16 = varray[100, 200];
-  public arraylike $p17 = vec[100, 200];
-  public arraylike $p18 = dict[1 => 100, 2 => 200];
-  public arraylike $p19 = keyset[100, 200];
+  public AnyArray $p16 = varray[100, 200];
+  public AnyArray $p17 = vec[100, 200];
+  public AnyArray $p18 = dict[1 => 100, 2 => 200];
+  public AnyArray $p19 = keyset[100, 200];
   public varray $p20 = varray['val1', 'val2'];
   public darray $p21 = darray['a' => 100, 'b' => 200];
   public darray $p22 = darray['a' => 100, 'b' => 200];
@@ -136,7 +136,7 @@ class A {
   public ?string $opt2 = null;
   public ?bool $opt3 = null;
   public ?float $opt4 = null;
-  public ?arraylike $opt5 = null;
+  public ?AnyArray $opt5 = null;
   public ?resource $opt6 = null;
   public ?nonnull $opt7 = null;
   public ?num $opt8 = null;
@@ -145,7 +145,7 @@ class A {
   public ?dict $opt12 = null;
   public ?keyset $opt13 = null;
   public ?vec_or_dict $opt14 = null;
-  public ?arraylike $opt16 = null;
+  public ?AnyArray $opt16 = null;
   public ?varray $opt20 = null;
   public ?darray $opt22 = null;
   public ?varray_or_darray $opt24 = null;
@@ -187,10 +187,10 @@ class A {
   public static keyset $s13 = keyset['a', 'b', 'c'];
   public static vec_or_dict $s14 = vec['a', 'b',' c'];
   public static vec_or_dict $s15 = dict['a' => 100, 'b' => 200];
-  public static arraylike $s16 = varray[100, 200];
-  public static arraylike $s17 = vec[100, 200];
-  public static arraylike $s18 = dict[1 => 100, 2 => 200];
-  public static arraylike $s19 = keyset[100, 200];
+  public static AnyArray $s16 = varray[100, 200];
+  public static AnyArray $s17 = vec[100, 200];
+  public static AnyArray $s18 = dict[1 => 100, 2 => 200];
+  public static AnyArray $s19 = keyset[100, 200];
   public static varray $s20 = varray['val1', 'val2'];
   public static darray $s21 = darray['a' => 100, 'b' => 200];
   public static darray $s22 = darray['a' => 100, 'b' => 200];
@@ -288,7 +288,7 @@ class A {
   public static ?string $sopt2 = null;
   public static ?bool $sopt3 = null;
   public static ?float $sopt4 = null;
-  public static ?arraylike $sopt5 = null;
+  public static ?AnyArray $sopt5 = null;
   public static ?resource $sopt6 = null;
   public static ?nonnull $sopt7 = null;
   public static ?num $sopt8 = null;
@@ -297,7 +297,7 @@ class A {
   public static ?dict $sopt12 = null;
   public static ?keyset $sopt13 = null;
   public static ?vec_or_dict $sopt14 = null;
-  public static ?arraylike $sopt16 = null;
+  public static ?AnyArray $sopt16 = null;
   public static ?varray $sopt20 = null;
   public static ?darray $sopt22 = null;
   public static ?varray_or_darray $sopt24 = null;

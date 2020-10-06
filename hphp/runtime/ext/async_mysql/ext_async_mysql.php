@@ -162,7 +162,7 @@ final class AsyncMysqlClient {
    */
   <<__HipHopSpecific, __Native>>
     public static function connectAndQuery(
-                                        arraylike<arraykey, string> $queries,
+                                        AnyArray<arraykey, string> $queries,
                                         string $host,
                                         int $port,
                                         string $dbname,
@@ -445,7 +445,7 @@ final class AsyncMysqlConnection {
    *           `AsyncMysqlQueryResult` objects.
    */
   <<__HipHopSpecific, __Native>>
-  public function multiQuery(arraylike<arraykey, mixed> $queries,
+  public function multiQuery(AnyArray<arraykey, mixed> $queries,
                       int $timeout_micros = -1,
                       dict<string, string> $query_attributes = dict[],
                       ): Awaitable<Vector<AsyncMysqlQueryResult>>;

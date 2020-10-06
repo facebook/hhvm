@@ -304,7 +304,7 @@ MaybeDataType get_datatype(
     }
     if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
     if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
-    if (!strcasecmp(name.c_str(), "HH\\arraylike")) return folly::none;
+    if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return folly::none;
     return KindOfObject;
   }
   if (is_nullable || is_soft) {
@@ -332,7 +332,7 @@ MaybeDataType get_datatype(
   }
   if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
-  if (!strcasecmp(name.c_str(), "HH\\arraylike")) return folly::none;
+  if (!strcasecmp(name.c_str(), "HH\\AnyArray")) return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(name.c_str(), "HH\\mixed"))    return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\nonnull"))  return folly::none;

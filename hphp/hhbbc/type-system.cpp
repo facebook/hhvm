@@ -4056,7 +4056,7 @@ folly::Optional<Type> type_of_type_structure(const Index& index,
       // return is_nullable ?
       //   union_of(TOptVec, TOptDict) : union_of(TVec, TDict);
       return folly::none;
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
       // Similar to the above, we can't (yet) do this.
       //
       // return is_nullable

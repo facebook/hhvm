@@ -99,7 +99,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
         RO::EvalHackArrDVArrs ? AnnotType::VecOrDict : AnnotType::VArrOrDArr
       },
       { "HH\\vec_or_dict", AnnotType::VecOrDict },
-      { "HH\\arraylike", AnnotType::ArrayLike },
+      { "HH\\AnyArray", AnnotType::ArrayLike },
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;

@@ -209,7 +209,7 @@ Array getReifiedClasses(const ActRec* ar) {
     case K::T_darray:
     case K::T_varray:
     case K::T_varray_or_darray:
-    case K::T_arraylike:
+    case K::T_any_array:
     case K::T_null:
     case K::T_nothing:
     case K::T_dynamic:

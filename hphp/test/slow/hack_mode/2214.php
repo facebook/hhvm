@@ -2,8 +2,8 @@
 function f() {
   $x = new Foo<Bar>();
   $x = new Foo<Blah<Bar>>();
-  $y = new Foo<arraylike,int>();
-  $z = new Foo<Blah<arraylike>,Blah<int>>();
+  $y = new Foo<AnyArray,int>();
+  $z = new Foo<Blah<AnyArray>,Blah<int>>();
   yo<int>();
   yo<Blah<int>>();
   yo<string,:my:xhp:class>();
@@ -18,20 +18,20 @@ function f() {
   Foo<Blah<Bar>>::biz<Blah<string>>();
   Foo<Bar>::biz<bool,:my:xhp:class>();
   Foo<Blah<Bar>>::biz<Blah<bool>,Blah<:my:xhp:class>>();
-  Foo<arraylike,int>::biz();
-  Foo<Blah<arraylike>,Blah<int>>::biz();
-  Foo<arraylike,int>::biz<string>();
-  Foo<Blah<arraylike>,Blah<int>>::biz<Blah<string>>();
-  Foo<arraylike,int>::biz<bool,:my:xhp:class>();
-  Foo<Blah<arraylike>,Blah<int>>::biz<Blah<bool>,Blah<:my:xhp:class>>();
+  Foo<AnyArray,int>::biz();
+  Foo<Blah<AnyArray>,Blah<int>>::biz();
+  Foo<AnyArray,int>::biz<string>();
+  Foo<Blah<AnyArray>,Blah<int>>::biz<Blah<string>>();
+  Foo<AnyArray,int>::biz<bool,:my:xhp:class>();
+  Foo<Blah<AnyArray>,Blah<int>>::biz<Blah<bool>,Blah<:my:xhp:class>>();
   var_dump(Foo<Bar>::SOME_CONST);
   var_dump(Foo<Blah<Bar>>::SOME_CONST);
-  var_dump(Foo<arraylike,int>::SOME_CONST);
-  var_dump(Foo<Blah<arraylike>,Blah<int>>::SOME_CONST);
+  var_dump(Foo<AnyArray,int>::SOME_CONST);
+  var_dump(Foo<Blah<AnyArray>,Blah<int>>::SOME_CONST);
   var_dump(Foo<Bar>::$staticProp);
   var_dump(Foo<Blah<Bar>>::$staticProp);
-  var_dump(Foo<arraylike,int>::$staticProp);
-  var_dump(Foo<Blah<arraylike>,Blah<int>>::$staticProp);
+  var_dump(Foo<AnyArray,int>::$staticProp);
+  var_dump(Foo<Blah<AnyArray>,Blah<int>>::$staticProp);
 }
 
 <<__EntryPoint>>

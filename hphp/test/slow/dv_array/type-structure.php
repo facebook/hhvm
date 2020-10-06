@@ -1,8 +1,8 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-type T1 = (bool, int, string, arraylike);
-type T2 = shape('a' => bool, 'c' => int, 'd' => arraylike);
+type T1 = (bool, int, string, AnyArray);
+type T2 = shape('a' => bool, 'c' => int, 'd' => AnyArray);
 type T3 = varray;
 type T4 = darray;
 type T5 = varray_or_darray;
@@ -12,7 +12,7 @@ class C {
   const type U = Map<arraykey, Vector<varray<int>>>;
   const type V = (int, ?float, bool);
   const type W = (function (): void);
-  const type X = (function (mixed, resource): arraylike);
+  const type X = (function (mixed, resource): AnyArray);
 }
 
 newtype MyAlias<T> = Set<T>;

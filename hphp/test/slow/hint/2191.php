@@ -7,7 +7,7 @@ $y = (string) $x;
  var_dump($y);
  return $y;
  }
-function f2(arraylike $x = null) {
+function f2(AnyArray $x = null) {
  $y = $x !== null ? darray($x) : darray[];
  var_dump($y);
  return $y;

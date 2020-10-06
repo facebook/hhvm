@@ -49,7 +49,7 @@ class R<reify Tarr, reify Tvar, reify Ttrav, reify Tcont> {
 }
 
 function test_static() {
-  $R = new R<arraylike, varray, Traversable, Container>();
+  $R = new R<AnyArray, varray, Traversable, Container>();
 
   $R->args(
     class_meth(Foo::class, 'bar'),
@@ -81,7 +81,7 @@ function test_static() {
 }
 
 function test_dynamic() {
-  $R = new R<arraylike, varray, Traversable, Container>();
+  $R = new R<AnyArray, varray, Traversable, Container>();
 
   $R->args(
     LV(class_meth(Foo::class, 'bar')),

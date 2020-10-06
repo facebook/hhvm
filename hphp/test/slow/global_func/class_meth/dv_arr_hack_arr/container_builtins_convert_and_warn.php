@@ -7,7 +7,7 @@ class A {
 }
 
 /*
- * These builtins are compatible with arraylike type and will raise Notice.
+ * These builtins are compatible with AnyArray type and will raise Notice.
  */
 function test_compact_builtins($c, $f) {
   var_dump(HH\Lib\_Private\Native\first_key(CM($c, $f)));

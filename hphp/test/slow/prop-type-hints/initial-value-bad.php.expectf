@@ -22,7 +22,7 @@ Warning: Property 'A::p12' declared as type HH\keyset, HH\vec assigned in %s/ini
 
 Warning: Property 'A::p13' declared as type HH\vec_or_dict, %rv?%rarray assigned in %s/initial-value-bad.inc on line 204
 
-Warning: Property 'A::p14' declared as type HH\arraylike, null assigned in %s/initial-value-bad.inc on line 204
+Warning: Property 'A::p14' declared as type HH\AnyArray, null assigned in %s/initial-value-bad.inc on line 204
 
 Warning: Property 'A::p15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
@@ -190,7 +190,7 @@ Warning: Static property 'A::s12' declared as type HH\keyset, HH\vec assigned in
 
 Warning: Static property 'A::s13' declared as type HH\vec_or_dict, %rv?%rarray assigned in %s/initial-value-bad.inc on line 204
 
-Warning: Static property 'A::s14' declared as type HH\arraylike, null assigned in %s/initial-value-bad.inc on line 204
+Warning: Static property 'A::s14' declared as type HH\AnyArray, null assigned in %s/initial-value-bad.inc on line 204
 
 Warning: Static property 'A::s15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad.inc on line 204
 

@@ -14,21 +14,21 @@ Warning: Type-hint of 'C::p8' must be num (as in class A), not int in %s/redefin
 
 Warning: Type-hint of 'C::p9' must be arraykey (as in class A), not string in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p10' must be HH\vec (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p10' must be HH\vec (as in class A), not HH\AnyArray in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p11' must be HH\dict (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p11' must be HH\dict (as in class A), not HH\AnyArray in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p12' must be HH\keyset (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p12' must be HH\keyset (as in class A), not HH\AnyArray in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p13' must be HH\vec_or_dict (as in class A), not HH\vec in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p14' must be HH\arraylike (as in class A), not HH\vec in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p14' must be HH\AnyArray (as in class A), not HH\vec in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p15' must be HH\varray (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p15' must be HH\varray (as in class A), not HH\AnyArray in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p16' must be HH\darray (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p16' must be HH\darray (as in class A), not HH\AnyArray in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p17' must be HH\varray_or_darray (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
+Warning: Type-hint of 'C::p17' must be HH\varray_or_darray (as in class A), not HH\AnyArray in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p18' must be this (as in class A), not C in %s/redefine-bad.php on line 553
 

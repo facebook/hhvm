@@ -151,7 +151,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::DArray:   str = "darray"; break;
       case AnnotType::VArrOrDArr: str = "varray_or_darray"; break;
       case AnnotType::VecOrDict: str = "vec_or_dict"; break;
-      case AnnotType::ArrayLike: str = "arraylike"; break;
+      case AnnotType::ArrayLike: str = "AnyArray"; break;
       case AnnotType::Nonnull:  str = "nonnull"; break;
       case AnnotType::Record:    str = "record"; break;
       case AnnotType::Self:

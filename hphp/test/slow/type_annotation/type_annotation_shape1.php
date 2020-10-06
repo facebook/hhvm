@@ -8,7 +8,7 @@ class C {
                                       'HH\\num'=>num),
                        'HH\\int'=>int,
                       );
-  const type X = Map<int, shape('foo'=>arraylike, 'bar'=>bool)>;
+  const type X = Map<int, shape('foo'=>AnyArray, 'bar'=>bool)>;
 }
 
 

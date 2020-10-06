@@ -31,7 +31,7 @@ class A {
   public string $p2;
   public bool $p3;
   public float $p4;
-  public arraylike $p5;
+  public AnyArray $p5;
   public resource $p6;
   public nonnull $p7;
   public num $p8;
@@ -40,7 +40,7 @@ class A {
   public dict $p11;
   public keyset $p12;
   public vec_or_dict $p13;
-  public arraylike $p14;
+  public AnyArray $p14;
   public varray $p15;
   public darray $p16;
   public varray_or_darray $p17;
@@ -63,7 +63,7 @@ class A {
   public ?string $opt2;
   public ?bool $opt3;
   public ?float $opt4;
-  public ?arraylike $opt5;
+  public ?AnyArray $opt5;
   public ?resource $opt6;
   public ?nonnull $opt7;
   public ?num $opt8;
@@ -72,7 +72,7 @@ class A {
   public ?dict $opt11;
   public ?keyset $opt12;
   public ?vec_or_dict $opt13;
-  public ?arraylike $opt14;
+  public ?AnyArray $opt14;
   public ?varray $opt15;
   public ?darray $opt16;
   public ?varray_or_darray $opt17;
@@ -95,7 +95,7 @@ class A {
   public static string $s2;
   public static bool $s3;
   public static float $s4;
-  public static arraylike $s5;
+  public static AnyArray $s5;
   public static resource $s6;
   public static nonnull $s7;
   public static num $s8;
@@ -104,7 +104,7 @@ class A {
   public static dict $s11;
   public static keyset $s12;
   public static vec_or_dict $s13;
-  public static arraylike $s14;
+  public static AnyArray $s14;
   public static varray $s15;
   public static darray $s16;
   public static varray_or_darray $s17;
@@ -127,7 +127,7 @@ class A {
   public static ?string $sopt2;
   public static ?bool $sopt3;
   public static ?float $sopt4;
-  public static ?arraylike $sopt5;
+  public static ?AnyArray $sopt5;
   public static ?resource $sopt6;
   public static ?nonnull $sopt7;
   public static ?num $sopt8;
@@ -136,7 +136,7 @@ class A {
   public static ?dict $sopt11;
   public static ?keyset $sopt12;
   public static ?vec_or_dict $sopt13;
-  public static ?arraylike $sopt14;
+  public static ?AnyArray $sopt14;
   public static ?varray $sopt15;
   public static ?darray $sopt16;
   public static ?varray_or_darray $sopt17;

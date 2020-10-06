@@ -11,8 +11,7 @@ open Hh_prelude
 
 let types =
   [
-    "Array";
-    "arraylike";
+    "AnyArray";
     "AsyncFunctionWaitHandle";
     "AsyncGenerator";
     "AsyncGeneratorWaitHandle";

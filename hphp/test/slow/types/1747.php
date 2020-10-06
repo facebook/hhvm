@@ -1,6 +1,6 @@
 <?hh
 
-function p(arraylike $i = null) {
+function p(AnyArray $i = null) {
   var_dump($i);
   $i = varray[];
 }

@@ -1,8 +1,8 @@
 <?hh
-function foo(stdClass $a, arraylike $b, callable $c, stdClass $d = null,
+function foo(stdClass $a, AnyArray $b, callable $c, stdClass $d = null,
              $e = null, string $f, bool $g, int $h, float $i,
              NotExisting $j) { }
-function nfoo(?stdClass $a, ?arraylike $b, ?callable $c, ?stdClass $d = null,
+function nfoo(?stdClass $a, ?AnyArray $b, ?callable $c, ?stdClass $d = null,
             $e = null, ?string $f, ?bool $g, ?int $h, ?float $i,
             ?NotExisting $j) { }
 function bar(): stdClass { return new stdClass; }

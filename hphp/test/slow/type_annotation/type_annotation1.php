@@ -4,7 +4,7 @@ class C {
   const type U = Map<arraykey, Vector<varray<int>>>;
   const type V = (int, ?float, bool);
   const type W = (function (): void);
-  const type X = (function (mixed, resource): arraylike);
+  const type X = (function (mixed, resource): AnyArray);
 }
 
 

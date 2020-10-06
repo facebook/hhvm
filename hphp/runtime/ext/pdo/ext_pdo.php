@@ -340,7 +340,7 @@ class PDOStatement implements Iterator {
    * @return mixed - Returns TRUE on success or FALSE on failure.
    */
   <<__Native>>
-  public function execute(?arraylike $params = NULL): mixed;
+  public function execute(?AnyArray $params = NULL): mixed;
 
   /* Fetches a row from a result set associated with a PDOStatement object. The
    * fetch_style parameter determines how PDO returns the row.

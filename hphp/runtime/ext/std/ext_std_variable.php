@@ -228,7 +228,7 @@ namespace HH {
    * from 0 to N-1, in that order.
    */
   <<__Native, __IsFoldable, __Pure>>
-  function is_list_like(<<__MaybeMutable>> arraylike $var): bool;
+  function is_list_like(<<__MaybeMutable>> AnyArray $var): bool;
 
   <<__Native, __IsFoldable, __Pure>>
   function is_meth_caller(<<__MaybeMutable>> mixed $var): bool;

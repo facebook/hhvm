@@ -530,7 +530,7 @@ function delete_links($file_path,
 
  Retuns: true when all of them match, false otherwise
 */
-function compare_self_stat( arraylike $stat )
+function compare_self_stat( AnyArray $stat )
 {
   //return value
   $return_value = true;

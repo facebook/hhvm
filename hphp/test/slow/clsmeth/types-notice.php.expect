@@ -1,5 +1,5 @@
 handle_error(): [8]: is_any_array() called on clsmeth
-$m is arraylike: True
+$m is AnyArray: True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): False
 handle_error(): [8]: is_shape() called on clsmeth
@@ -32,7 +32,7 @@ varray(2) {
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
-$m is arraylike: True
+$m is AnyArray: True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): False
 handle_error(): [8]: is_shape() called on clsmeth
@@ -65,7 +65,7 @@ varray(2) {
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
-$m is arraylike: True
+$m is AnyArray: True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): False
 handle_error(): [8]: is_shape() called on clsmeth
@@ -98,7 +98,7 @@ varray(2) {
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
-$m is arraylike: True
+$m is AnyArray: True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): False
 handle_error(): [8]: is_shape() called on clsmeth
@@ -131,7 +131,7 @@ varray(2) {
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
-$m is arraylike: True
+$m is AnyArray: True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): False
 handle_error(): [8]: is_shape() called on clsmeth
@@ -164,7 +164,7 @@ varray(2) {
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
-$m is arraylike: True
+$m is AnyArray: True
 handle_error(): [8]: is_shape() called on clsmeth
 $m is shape(str,str): False
 handle_error(): [8]: is_shape() called on clsmeth
@@ -223,18 +223,18 @@ handle_error(): [8]: Implicit clsmeth to varray conversion
 $m === varray($m): True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
-$m === ($m as arraylike): True
+$m === ($m as AnyArray): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 $m === varray($m): True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
-$m === ($m as arraylike): True
+$m === ($m as AnyArray): True
 handle_error(): [8]: is_array() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 $m === varray($m): True
 handle_error(): [8]: is_any_array() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to HH\Traversable conversion
-$m === ($m as arraylike): True
+$m === ($m as AnyArray): True

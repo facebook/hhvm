@@ -217,7 +217,7 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike: {
+    case TypeStructure::Kind::T_any_array: {
       if (is_ts_nullable(type)) {
         auto const inputT = get_ts_kind(input);
         return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
@@ -625,7 +625,7 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_keyset:
       return is_keyset(&c1);
 
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
       if (isClsMethType(type)) {
         if (RuntimeOption::EvalIsVecNotices) {
           raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
@@ -970,7 +970,7 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_nothing:
@@ -1039,7 +1039,7 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_reifiedtype:
       return true;

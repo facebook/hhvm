@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test(arraylike $a) { return varray($a); }
+function test(AnyArray $a) { return varray($a); }
 
 
 <<__EntryPoint>>

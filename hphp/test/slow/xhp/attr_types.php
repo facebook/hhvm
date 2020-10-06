@@ -14,7 +14,7 @@ class :testclass extends :base {
     var some_var,
     mixed some_mixed,
     Object some_object,
-    arraylike some_array,
+    AnyArray some_array,
     int some_int,
     bool some_bool,
     string some_string;

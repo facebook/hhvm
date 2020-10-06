@@ -8,7 +8,7 @@ string(8) "stdClass"
 bool(true)
 bool(false)
 bool(false)
-string(12) "HH\arraylike"
+string(11) "HH\AnyArray"
 ** Function 0 - Parameter 2
 bool(true)
 bool(false)
@@ -55,7 +55,7 @@ string(9) "?stdClass"
 bool(true)
 bool(true)
 bool(false)
-string(13) "?HH\arraylike"
+string(12) "?HH\AnyArray"
 ** Function 1 - Parameter 2
 bool(true)
 bool(true)

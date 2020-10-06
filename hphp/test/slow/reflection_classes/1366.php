@@ -105,7 +105,7 @@ class TC {
   use T;
 }
 function ff(Vector<int> $i, ?string $s, <<__Soft>> C $c,
-            arraylike $a, arraykey $k, this $t) {
+            AnyArray $a, arraykey $k, this $t) {
 }
 
 <<__EntryPoint>>

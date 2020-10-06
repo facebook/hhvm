@@ -47,7 +47,7 @@ class A {
   public string $p2;
   public bool $p3;
   public float $p4;
-  public arraylike $p5;
+  public AnyArray $p5;
   public resource $p6;
   public nonnull $p7;
   public num $p8;
@@ -56,7 +56,7 @@ class A {
   public dict $p11;
   public keyset $p12;
   public vec_or_dict $p13;
-  public arraylike $p14;
+  public AnyArray $p14;
   public varray $p15;
   public darray $p16;
   public varray_or_darray $p17;
@@ -81,8 +81,8 @@ class A {
   public Alias9 $p36;
   public Enum4 $p37;
   public varray_or_darray $p38;
-  public arraylike $p39;
-  public arraylike $p40;
+  public AnyArray $p39;
+  public AnyArray $p40;
   public mixed $p41;
   public ?mixed $p42;
   public Alias10 $p43;
@@ -133,7 +133,7 @@ class A {
   public static string $s2;
   public static bool $s3;
   public static float $s4;
-  public static arraylike $s5;
+  public static AnyArray $s5;
   public static resource $s6;
   public static nonnull $s7;
   public static num $s8;
@@ -142,7 +142,7 @@ class A {
   public static dict $s11;
   public static keyset $s12;
   public static vec_or_dict $s13;
-  public static arraylike $s14;
+  public static AnyArray $s14;
   public static varray $s15;
   public static darray $s16;
   public static varray_or_darray $s17;
@@ -170,7 +170,7 @@ class A {
   private string $pp2;
   private bool $pp3;
   private float $pp4;
-  private arraylike $pp5;
+  private AnyArray $pp5;
   private resource $pp6;
   private nonnull $pp7;
   private num $pp8;
@@ -179,7 +179,7 @@ class A {
   private dict $pp11;
   private keyset $pp12;
   private vec_or_dict $pp13;
-  private arraylike $pp14;
+  private AnyArray $pp14;
   private varray $pp15;
   private darray $pp16;
   private varray_or_darray $pp17;
@@ -212,7 +212,7 @@ class C extends B {
   public string $p2;
   public bool $p3;
   public float $p4;
-  public arraylike $p5;
+  public AnyArray $p5;
   public resource $p6;
   public nonnull $p7;
   public num $p8;
@@ -221,7 +221,7 @@ class C extends B {
   public dict $p11;
   public keyset $p12;
   public vec_or_dict $p13;
-  public arraylike $p14;
+  public AnyArray $p14;
   public varray $p15;
   public darray $p16;
   public varray_or_darray $p17;
@@ -246,8 +246,8 @@ class C extends B {
   public Alias9 $p36;
   public Enum4 $p37;
   public varray_or_darray $p38;
-  public arraylike $p39;
-  public arraylike $p40;
+  public AnyArray $p39;
+  public AnyArray $p40;
   public ?int $p49;
   public ?Alias12 $p52;
   <<__Soft>> public int $p78;
@@ -265,7 +265,7 @@ class D extends C {}
 class E extends D {
   public Enum2 $p1;
   public Enum1 $p2;
-  public arraylike $p5;
+  public AnyArray $p5;
   public varray $p15;
   public darray $p16;
   public varray_or_darray $p17;
@@ -288,8 +288,8 @@ class E extends D {
   public Enum4 $p36;
   public Alias9 $p37;
   public varray_or_darray $p38;
-  public arraylike $p39;
-  public arraylike $p40;
+  public AnyArray $p39;
+  public AnyArray $p40;
   public ?mixed $p41;
   public mixed $p42;
   public ?Alias10 $p43;
@@ -344,9 +344,9 @@ class E extends D {
   public static bool $s8;
   public static vec $s9;
   public static keyset $s10;
-  public static arraylike $s11;
+  public static AnyArray $s11;
   public static vec $s12;
-  public static arraylike $s13;
+  public static AnyArray $s13;
   public static int $s14;
   public static vec $s15;
   public static dict $s16;
@@ -381,9 +381,9 @@ class E extends D {
   private bool $pp8;
   private vec $pp9;
   private keyset $pp10;
-  private arraylike $pp11;
+  private AnyArray $pp11;
   private vec $pp12;
-  private arraylike $pp13;
+  private AnyArray $pp13;
   private int $pp14;
   private vec $pp15;
   private dict $pp16;
@@ -415,13 +415,13 @@ class F extends E {
 class G extends F {
   public Alias1 $p1;
   public Enum3 $p2;
-  public arraylike $p5;
+  public AnyArray $p5;
   public varray $p15;
   public darray $p16;
   public Alias6 $p23;
   public $p29;
-  public arraylike $p39;
-  public arraylike $p40;
+  public AnyArray $p39;
+  public AnyArray $p40;
   public mixed $p43;
   public ?mixed $p44;
   public mixed $p45;

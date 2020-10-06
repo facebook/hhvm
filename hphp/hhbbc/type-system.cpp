@@ -4905,7 +4905,11 @@ Type loosen_provenance(Type t) {
 
     case DataTag::ArrLikeVal:
       if (arrprov::getTag(t.m_data.aval)) {
-        auto ad = t.m_data.aval->copy();
+        auto ad = [&]{
+          auto const old = t.m_data.aval;
+          auto const packed = old->hasVanillaPackedLayout();
+          return packed ? PackedArray::Copy(old) : MixedArray::Copy(old);
+        }();
         ArrayData::GetScalarArray(&ad);
         t.m_data.aval = ad;
       }

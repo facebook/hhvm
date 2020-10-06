@@ -191,7 +191,6 @@ public:
    * Like the underlying ArrayData::copy operation, the returned Array may
    * point to the same underlying array as the original, or a new one.
    */
-  Array copy() const { COPY_BODY(copy(), Array{}) }
   Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }

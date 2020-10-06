@@ -52,10 +52,6 @@ inline bool ArrayData::notCyclic(TypedValue v) const {
   return !tvIsArrayLike(v) || v.m_data.parr != this;
 }
 
-inline ArrayData* ArrayData::copy() const {
-  return g_array_funcs.copy[kind()](this);
-}
-
 inline ArrayData* ArrayData::copyStatic() const {
   auto ret = g_array_funcs.copyStatic[kind()](this);
   assertx(ret != this && ret->isStatic());

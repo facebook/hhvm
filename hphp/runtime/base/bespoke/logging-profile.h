@@ -66,9 +66,9 @@ struct EntryTypes;
   X(Prepend,            false) \
   X(Pop,                false) \
   X(Dequeue,            false) \
-  X(Copy,               true)  \
   X(ToDVArray,          true)  \
-  X(ToHackArr,          true)
+  X(ToHackArr,          true)  \
+  X(SetLegacyArray,     true)
 
 enum class ArrayOp : uint8_t {
 #define X(name, read) name,

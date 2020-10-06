@@ -60,8 +60,8 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
 }
 
 template <typename... Ts>
-void logEvent(const LoggingArray* lad, EntryTypes newTypes, ArrayOp op,
-              Ts&&... args) {
+void logEvent(const LoggingArray* lad, EntryTypes newTypes,
+              ArrayOp op, Ts&&... args) {
   lad->profile->logEntryTypes(lad->entryTypes, newTypes);
   lad->profile->logEvent(op, std::forward<Ts>(args)...);
 }
@@ -463,10 +463,6 @@ ArrayData* convert(LoggingArray* lad, ArrayData* result) {
 }
 }
 
-ArrayData* LoggingArray::Copy(const LoggingArray* lad) {
-  logEvent(lad, ArrayOp::Copy);
-  return Make(lad->wrapped->copy(), lad->profile, lad->entryTypes);
-}
 ArrayData* LoggingArray::ToDVArray(LoggingArray* lad, bool copy) {
   logEvent(lad, ArrayOp::ToDVArray);
   auto const cow = copy || lad->wrapped->cowCheck();
@@ -479,6 +475,7 @@ ArrayData* LoggingArray::ToHackArr(LoggingArray* lad, bool copy) {
 }
 ArrayData* LoggingArray::SetLegacyArray(
     LoggingArray* lad, bool copy, bool legacy) {
+  logEvent(lad, ArrayOp::SetLegacyArray);
   auto const cow = copy || lad->wrapped->cowCheck();
   return convert(lad, lad->wrapped->setLegacyArray(cow, legacy));
 }

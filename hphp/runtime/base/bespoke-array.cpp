@@ -248,9 +248,6 @@ void BespokeArray::OnSetEvalScalar(ArrayData*) {
 }
 
 // copies and conversions
-ArrayData* BespokeArray::Copy(const ArrayData* ad) {
-  return asBespoke(ad)->vtable()->fnCopy(ad);
-}
 ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
   always_assert(false);
 }

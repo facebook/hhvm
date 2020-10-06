@@ -167,7 +167,6 @@ public:
   static void OnSetEvalScalar(ArrayData* ad);
 
   // copies and conversions
-  static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData* ad);
   static ArrayData* ToDVArray(ArrayData* ad, bool copy);
   static ArrayData* ToHackArr(ArrayData* ad, bool copy);

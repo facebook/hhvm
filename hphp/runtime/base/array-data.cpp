@@ -528,14 +528,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Uasort)
 
   /*
-   * ArrayData* Copy(const ArrayData*)
-   *
-   *   Explicitly request that an array be copied.  This API does
-   *   /not/ actually guarantee a copy occurs.
-   */
-  DISPATCH(Copy)
-
-  /*
    * ArrayData* CopyStatic(const ArrayData*)
    *
    *   Copy an array, allocating the new array with malloc() instead

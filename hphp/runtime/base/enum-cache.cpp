@@ -235,10 +235,12 @@ void EnumCache::deleteEnumValues(intptr_t key) {
 }
 
 Array EnumCache::tagEnumWithProvenance(Array input) {
+  assertx(RO::EvalArrayProvenance);
   assertx(IMPLIES(arrprov::arrayWantsTag(input.get()),
                   arrprov::getTag(input.get())));
   if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
-  auto const ad = input->copy();
+  assertx(input->hasVanillaMixedLayout());
+  auto const ad = MixedArray::Copy(input.get());
   arrprov::setTag(ad, arrprov::tagFromPC());
   return Array::attach(ad);
 }

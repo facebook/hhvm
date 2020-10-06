@@ -68,7 +68,6 @@ namespace bespoke {
   X(ArrayData*, Prepend, T*, TypedValue v) \
   X(ArrayData*, Pop, T*, Variant&) \
   X(ArrayData*, Dequeue, T*, Variant&) \
-  X(ArrayData*, Copy, const T*) \
   X(ArrayData*, ToDVArray, T*, bool copy) \
   X(ArrayData*, ToHackArr, T*, bool copy) \
   X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy)
@@ -190,9 +189,6 @@ struct LayoutFunctionDispatcher {
   }
   static ArrayData* Dequeue(ArrayData* ad, Variant& v) {
     return Array::Dequeue(Cast(ad), v);
-  }
-  static ArrayData* Copy(const ArrayData* ad) {
-    return Array::Copy(Cast(ad));
   }
   static ArrayData* ToDVArray(ArrayData* ad, bool copy) {
     return Array::ToDVArray(Cast(ad), copy);

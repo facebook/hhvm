@@ -180,15 +180,6 @@ public:
   static ArrayData* Create(const Variant& name, const Variant& value);
 
   /*
-   * Make a copy of the array.
-   *
-   * copy() makes a normal request-allocated ArrayData, whereas copyStatic()
-   * makes a static ArrayData.
-   */
-  ArrayData* copy() const;
-  ArrayData* copyStatic() const;
-
-  /*
    * Convert between array kinds.
    */
   ArrayData* toPHPArray(bool copy);
@@ -318,11 +309,6 @@ public:
    * For non-hasPackedLayout() arrays, this is generally an O(N) operation.
    */
   bool isVectorData() const;
-
-  /*
-   * Return true for array kinds that don't have COW semantics.
-   */
-  bool noCopyOnWrite() const;
 
   /*
    * ensure a circular self-reference is not being created
@@ -659,6 +645,12 @@ private:
   static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t CompareHelper(const ArrayData*, const ArrayData*);
 
+  /*
+   * Make a copy of the array. Only for internal use. To make a static array,
+   * we convert its contents static values, then copy it to static memory.
+   */
+  ArrayData* copyStatic() const;
+
   /////////////////////////////////////////////////////////////////////////////
 
 protected:
@@ -816,7 +808,6 @@ struct ArrayFunctions {
   bool (*uksort[NK])(ArrayData* ad, const Variant& cmp_function);
   bool (*usort[NK])(ArrayData* ad, const Variant& cmp_function);
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
-  ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, TypedValue v);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);

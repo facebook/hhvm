@@ -18,6 +18,7 @@ type override_info = {
   method_name: string;
   is_static: bool;
 }
+[@@deriving eq]
 
 type kind =
   | Class
@@ -30,6 +31,7 @@ type kind =
   | Typeconst of string * string
   | GConst
   | Attribute of override_info option
+[@@deriving eq]
 
 type 'a t = {
   name: string;

@@ -7,8 +7,6 @@
  *
  *)
 
-open Hh_core
-
 (* These severity levels are based on those provided by Arcanist. "Advice"
  * means notify the user of the lint without requiring confirmation if the lint
  * is benign; "Warning" will raise a confirmation prompt if the lint applies to

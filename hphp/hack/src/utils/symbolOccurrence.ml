@@ -12,7 +12,7 @@ type override_info = {
   method_name: string;
   is_static: bool;
 }
-[@@deriving ord]
+[@@deriving ord, eq]
 
 type kind =
   | Class
@@ -26,7 +26,7 @@ type kind =
   | GConst
   (* For __Override occurrences, we track the associated method and class. *)
   | Attribute of override_info option
-[@@deriving ord]
+[@@deriving ord, eq]
 
 type 'a t = {
   name: string;

@@ -11,7 +11,7 @@
 (* Code relative to the client/server communication *)
 (*****************************************************************************)
 
-open Hh_core
+open Hh_prelude
 open DfindEnv
 
 type msg =
@@ -36,7 +36,9 @@ let (process_fsnotify_event : DfindEnv.t -> SSet.t -> Fsnotify.event -> SSet.t)
       SSet.union dirty (SMap.find path env.dirs)
     else
       let dir_content =
-        (try SMap.find wpath env.dirs with Not_found -> SSet.empty)
+        match SMap.find_opt wpath env.dirs with
+        | Some content -> content
+        | None -> SSet.empty
       in
       env.dirs <- SMap.add wpath (SSet.add path dir_content) env.dirs;
       dirty

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 (* Forking duplicates data in all buffers, so we flush them beforehand to avoid
  * writing the same thing twice.
@@ -16,7 +16,7 @@ open Hh_core
  * If your process has its own buffers in the program state, those must be
  * cleared by registering a callback with `on_fork` below to reliably avoid
  * writing those buffers twice as well. *)
-let pre_fork_callbacks : (unit -> unit) list ref = ref [flush_all]
+let pre_fork_callbacks : (unit -> unit) list ref = ref [Stdlib.flush_all]
 
 (** Sometimes it is more convenient to clear buffers in the children (to
  * avoid the double writing of data) instead of the parent on a successful

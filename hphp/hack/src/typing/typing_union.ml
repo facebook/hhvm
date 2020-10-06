@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open Hh_core
+open Common
 open Typing_defs
 module Env = Typing_env
 module Reason = Typing_reason

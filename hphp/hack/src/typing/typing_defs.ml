@@ -500,14 +500,14 @@ module ShapeFieldMap = struct
 end
 
 module ShapeFieldList = struct
-  include Hh_core.List
+  include Common.List
 
   let map_env env xs ~f =
     let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
       let (env, sft_ty) = f env sft_ty in
       (env, { shape_field_type with sft_ty })
     in
-    Hh_core.List.map_env env xs ~f:f_over_shape_field_type
+    Common.List.map_env env xs ~f:f_over_shape_field_type
 end
 
 (*****************************************************************************)

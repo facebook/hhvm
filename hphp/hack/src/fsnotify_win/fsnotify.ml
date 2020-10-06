@@ -22,7 +22,7 @@
 
 *)
 
-open Hh_core
+module List = Core_kernel.List
 
 (* Abstract data type for notifier context. *)
 type fsenv

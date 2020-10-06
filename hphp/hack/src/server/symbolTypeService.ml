@@ -7,7 +7,8 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
+module Set = Stdlib.Set
 open Aast
 open ServerCommandTypes.Symbol_type
 

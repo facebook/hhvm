@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+module List = Core_kernel.List
 
 exception Error of string * Unix.error
 

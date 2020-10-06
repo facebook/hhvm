@@ -9,7 +9,6 @@
 module Hack_bucket = Bucket
 open Hh_prelude
 module Bucket = Hack_bucket
-open Hh_core
 open ServerEnv
 
 let no_incremental_check (options : ServerArgs.options) : bool =

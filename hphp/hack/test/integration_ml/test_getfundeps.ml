@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 module Test = Integration_test_base
 
 let f1 =
@@ -225,12 +225,12 @@ let test () =
     let ctx = Provider_utils.ctx_from_server_env env in
     let pos_list = [(Relative_path.from_root ~suffix:file, line, col)] in
     let result = ServerRxApiShared.helper h ctx [] pos_list in
-    if result <> [expected] then
+    if not (List.equal result [expected] String.equal) then
       let msg =
         "Unexpected test result\nExpected:\n"
         ^ expected
         ^ "\nBut got:\n"
-        ^ String.concat "\n" result
+        ^ String.concat ~sep:"\n" result
       in
       Test.fail msg
   in

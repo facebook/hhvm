@@ -8,7 +8,9 @@
  *)
 
 open Config_file.Getters
-open Hh_core
+module Hack_bucket = Bucket
+open Hh_prelude
+module Bucket = Hack_bucket
 
 module Watchman = struct
   type t = {
@@ -181,7 +183,7 @@ module RemoteTypeCheck = struct
         ~f:(fun phase ->
           not
             (List.exists enabled_on_errors ~f:(fun enabled_phase ->
-                 enabled_phase = phase)))
+                 Errors.equal_phase enabled_phase phase)))
     in
     let heartbeat_period =
       int_ "heartbeat_period" ~prefix ~default:default.heartbeat_period config
@@ -231,7 +233,7 @@ module RemoteTypeCheck = struct
     let worker_min_log_level =
       match
         Hh_logger.Level.of_enum_string
-          (String.lowercase_ascii
+          (String.lowercase
              (string_
                 ~prefix
                 "worker_min_log_level"
@@ -692,7 +694,7 @@ let load_ fn ~silent ~current_version overrides =
   let min_log_level =
     match
       Hh_logger.Level.of_enum_string
-        (String.lowercase_ascii
+        (String.lowercase
            (string_
               "min_log_level"
               ~default:(Hh_logger.Level.to_enum_string default.min_log_level)

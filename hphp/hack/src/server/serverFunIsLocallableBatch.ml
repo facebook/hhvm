@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 open Typing_defs
 module T = Aast
 module S = ServerRxApiShared

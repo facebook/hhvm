@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 (* Utility functions *)
 
@@ -17,7 +17,7 @@ let common_prefix (s1 : string) (s2 : string) : int =
   let i = ref 0 in
   let l1 = String.length s1 in
   let l2 = String.length s2 in
-  while !i < l1 && !i < l2 && s1.[!i] = s2.[!i] do
+  while !i < l1 && !i < l2 && Char.equal s1.[!i] s2.[!i] do
     i := !i + 1
   done;
   !i
@@ -72,7 +72,7 @@ let trie_assoc_partial (trie : 'a t) (w : string) : (int * string * 'a t) option
       !(get_node trie)
       |> SMap.iter (fun key elt ->
              let c = common_prefix key w in
-             if (not (c = 0)) || (key = "" && w = "") then
+             if (not (c = 0)) || (String.equal key "" && String.equal w "") then
                e.return (Some (c, key, elt)));
       None)
 
@@ -83,7 +83,7 @@ let rec mem (trie : 'a t) (w : string) : bool =
         | Some x -> x
         | None -> e.return false
       in
-      if key = "" then e.return true;
+      if String.equal key "" then e.return true;
 
       if String.length key = i then e.return (mem child (drop w i));
 
@@ -129,7 +129,7 @@ let rec add
         | Some x -> x
         | None -> e.return (add_leaf trie w (transform v))
       in
-      if String.length key = c && w = "" then
+      if String.length key = c && String.equal w "" then
         (* leaf exists; use if_exists callback *)
         e.return (if_exist (get_leaf child) v);
 
@@ -192,10 +192,10 @@ let find_impl
       in
       find_impl_aux trie pre)
 
-let find (trie : 'a t) (s : string) : 'a =
+let find (trie : 'a t) (s : string) : 'a option =
   match find_impl true trie s make_pair with
-  | (_s, v) :: _tl -> v
-  | _ -> raise Not_found
+  | (_s, v) :: _tl -> Some v
+  | _ -> None
 
 let find_prefix (trie : 'a t) (s : string) (vmap : string -> 'a -> 'b) : 'b list
     =

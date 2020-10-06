@@ -7,7 +7,7 @@
  *
  *)
 
-module Fn = Base.Fn
+open Hh_prelude
 open Lsp
 open Hh_json
 open Hh_json_helpers
@@ -103,7 +103,7 @@ let parse_location (j : json option) : Location.t =
     }
 
 let parse_range_opt (json : json option) : range option =
-  if json = None then
+  if Option.is_none json then
     None
   else
     Some (parse_range_exn json)
@@ -711,7 +711,7 @@ let print_completionItem (item : Completion.completionItem) : json =
                   ("kind", JSON_String "markdown");
                   ( "value",
                     JSON_String
-                      (String.trim
+                      (String.strip
                          (List.fold doc ~init:"" ~f:string_of_markedString)) );
                 ]) );
         ("sortText", Option.map item.sortText string_);

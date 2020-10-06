@@ -7,8 +7,10 @@
  *
  *)
 
-module Option = Base.Option
-open Hh_core
+open Hh_prelude
+module Hashtbl = Stdlib.Hashtbl
+module Queue = Stdlib.Queue
+module Set = Stdlib.Set
 
 (** This is just a sentinel for self-documenting purposes which some
 parts of the codebase use. They take a parameter "uses_sharedmem : SharedMem.uses"
@@ -139,7 +141,7 @@ let get_telemetry () : Telemetry.t =
   (* This function gets called by compute_tast, even in places which
   deliberately don't initialize shared memory. In these places, no-op,
   since otherwise reading from hh_log_level would segfault. *)
-  if !ref_has_done_init = false then
+  if not !ref_has_done_init then
     Telemetry.create ()
   else
     let start_time = Unix.gettimeofday () in
@@ -190,7 +192,7 @@ let rec shm_dir_init config ~num_workers = function
         shm_dir_init config ~num_workers shm_dirs
       | Unix.Unix_error (e, fn, arg) ->
         let fn_string =
-          if fn = "" then
+          if String.equal fn "" then
             ""
           else
             Utils.spf " thrown by %s(%s)" fn arg
@@ -277,14 +279,14 @@ external update_dep_table_sqlite_c : string -> string -> bool -> int
   = "hh_update_dep_table_sqlite"
 
 let save_dep_table_sqlite fn build_revision ~replace_state_after_saving =
-  if loaded_dep_table_filename () <> None then
+  if Option.is_some (loaded_dep_table_filename ()) then
     failwith
       "save_dep_table_sqlite not supported when server is loaded from a saved state; use update_dep_table_sqlite";
   Hh_logger.log "Dumping a saved state deptable into a SQLite DB.";
   save_dep_table_sqlite_c fn build_revision replace_state_after_saving
 
 let save_dep_table_blob fn build_revision ~reset_state_after_saving =
-  if loaded_dep_table_filename () <> None then
+  if Option.is_some (loaded_dep_table_filename ()) then
     failwith
       "save_dep_table_blob not supported when the server is loaded from a saved state; use update_dep_table_sqlite";
   Hh_logger.log "Dumping a saved state deptable as a blob.";
@@ -395,7 +397,7 @@ let should_collect (effort : [ `gentle | `aggressive | `always_TEST ]) =
   let used = heap_size () in
   let wasted = wasted_heap_size () in
   let reachable = used - wasted in
-  used >= truncate (float reachable *. overhead)
+  used >= Float.iround_towards_zero_exn (float reachable *. overhead)
 
 let collect (effort : [ `gentle | `aggressive | `always_TEST ]) =
   let old_size = heap_size () in
@@ -494,9 +496,9 @@ end) : Key with type userkey = UserKeyType.t = struct
     let module S = String in
     S.sub x (S.length old_prefix) (S.length x - S.length old_prefix)
 
-  let md5 : t -> md5 = Digest.string
+  let md5 : t -> md5 = Stdlib.Digest.string
 
-  let md5_old : old -> md5 = Digest.string
+  let md5_old : old -> md5 = Stdlib.Digest.string
 
   let string_of_md5 : md5 -> string = (fun x -> x)
 end
@@ -1049,7 +1051,7 @@ functor
 
     let find_unsafe key =
       match get key with
-      | None -> raise Not_found
+      | None -> raise Caml.Not_found
       | Some x -> x
 
     let remove key =
@@ -1421,7 +1423,7 @@ struct
     match Hashtbl.find_opt cache x with
     | Some (freq, y') ->
       incr freq;
-      if y' == y then
+      if phys_equal y' y then
         ()
       else
         Hashtbl.replace cache x (freq, y)
@@ -1674,7 +1676,7 @@ struct
 
   let find_unsafe x =
     match get x with
-    | None -> raise Not_found
+    | None -> raise Caml.Not_found
     | Some x -> x
 
   let mem x =

@@ -8,7 +8,7 @@
  *)
 
 open Hh_prelude
-open Hh_core
+open Common
 open Ifc_types
 module Decl = Ifc_decl
 module Env = Ifc_env

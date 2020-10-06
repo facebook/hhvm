@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 (*****************************************************************************)
 (* Section building a list of intervals per file for a given diff.
@@ -67,9 +67,11 @@ and header env line =
   let filename = String.sub line 4 (String.length line - 4) in
   (* Getting rid of the prefix b/ *)
   let filename =
-    if filename = Sys_utils.null_path then
+    if String.equal filename Sys_utils.null_path then
       None
-    else if String.length filename >= 2 && String.sub filename 0 2 = "b/" then
+    else if
+      String.length filename >= 2 && String.equal (String.sub filename 0 2) "b/"
+    then
       Some (String.sub filename 2 (String.length filename - 2))
     else
       Some filename
@@ -80,22 +82,26 @@ and header env line =
 (* Parses the lines *)
 and modified env nbr = function
   | [] -> add_file env
-  | line :: lines when String.length line > 4 && String.sub line 0 3 = "+++" ->
+  | line :: lines
+    when String.length line > 4 && String.equal (String.sub line 0 3) "+++" ->
     header env line;
     modified env 0 lines
-  | line :: lines when String.length line > 2 && String.sub line 0 2 = "@@" ->
+  | line :: lines
+    when String.length line > 2 && String.equal (String.sub line 0 2) "@@" ->
     (* Find the position right after '+' in '@@ -line,len +line, len@@' *)
     let _ = Str.search_forward (Str.regexp "[+][0-9]+") line 0 in
     let matched = Str.matched_string line in
     let matched = String.sub matched 1 (String.length matched - 1) in
     let nbr = int_of_string matched in
     modified env nbr lines
-  | line :: lines when String.length line >= 1 && String.sub line 0 1 = "+" ->
+  | line :: lines
+    when String.length line >= 1 && String.equal (String.sub line 0 1) "+" ->
     (* Adds the line to the list of modified lines *)
     env.line <- env.line + 1;
     env.modified <- nbr :: env.modified;
     modified env (nbr + 1) lines
-  | line :: lines when String.length line >= 1 && String.sub line 0 1 = "-" ->
+  | line :: lines
+    when String.length line >= 1 && String.equal (String.sub line 0 1) "-" ->
     (* Skips the line (we don't care about removed code) *)
     modified env nbr lines
   | _ :: lines -> modified env (nbr + 1) lines

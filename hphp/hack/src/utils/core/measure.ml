@@ -79,7 +79,6 @@
  *)
 
 open Base
-module List = Hh_core.List
 
 module FloatMap = WrappedMap.Make (struct
   type t = float

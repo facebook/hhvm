@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 open ServerCommandTypes.Symbol_info_service
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)

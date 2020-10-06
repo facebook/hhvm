@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 module Test = Integration_test_base
 
 let id =

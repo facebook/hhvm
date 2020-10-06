@@ -7,8 +7,8 @@
  *
  *)
 
-open Hh_core
-module Option = Base.Option
+open Hh_prelude
+module Printexc = Stdlib.Printexc
 
 external realpath : string -> string option = "hh_realpath"
 
@@ -16,7 +16,7 @@ external is_nfs : string -> bool = "hh_is_nfs"
 
 external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
-let get_env name = (try Some (Sys.getenv name) with Not_found -> None)
+let get_env name = (try Some (Sys.getenv name) with Caml.Not_found -> None)
 
 let getenv_user () =
   let user_var =
@@ -68,42 +68,50 @@ let getenv_path () =
   get_env path_var
 
 let open_in_no_fail fn =
-  try open_in fn
+  try In_channel.create fn
   with e ->
     let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_in: '%s' (%s)\n" fn e;
+    Printf.fprintf stderr "Could not In_channel.create: '%s' (%s)\n" fn e;
     exit 3
 
 let open_in_bin_no_fail fn =
-  try open_in_bin fn
+  try In_channel.create ~binary:true fn
   with e ->
     let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_in_bin: '%s' (%s)\n" fn e;
+    Printf.fprintf
+      stderr
+      "Could not In_channel.create ~binary:true: '%s' (%s)\n"
+      fn
+      e;
     exit 3
 
 let close_in_no_fail fn ic =
-  try close_in ic
+  try In_channel.close ic
   with e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
     exit 3
 
 let open_out_no_fail fn =
-  try open_out fn
+  try Out_channel.create fn
   with e ->
     let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_out: '%s' (%s)\n" fn e;
+    Printf.fprintf stderr "Could not Out_channel.create: '%s' (%s)\n" fn e;
     exit 3
 
 let open_out_bin_no_fail fn =
-  try open_out_bin fn
+  try Out_channel.create ~binary:true fn
   with e ->
     let e = Printexc.to_string e in
-    Printf.fprintf stderr "Could not open_out_bin: '%s' (%s)\n" fn e;
+    Printf.fprintf
+      stderr
+      "Could not Out_channel.create ~binary:true: '%s' (%s)\n"
+      fn
+      e;
     exit 3
 
 let close_out_no_fail fn oc =
-  try close_out oc
+  try Out_channel.close oc
   with e ->
     let e = Printexc.to_string e in
     Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
@@ -121,7 +129,8 @@ let cat_or_failed file =
 
 let cat_no_fail filename =
   let ic = open_in_bin_no_fail filename in
-  let len = in_channel_length ic in
+  let len = Int64.to_int @@ In_channel.length ic in
+  let len = Option.value_exn len in
   let buf = Buffer.create len in
   Buffer.add_channel buf ic len;
   let content = Buffer.contents buf in
@@ -135,12 +144,12 @@ let split_lines = Str.split nl_regexp
 let string_contains str substring =
   (* regexp_string matches only this string and nothing else. *)
   let re = Str.regexp_string substring in
-  (try Str.search_forward re str 0 >= 0 with Not_found -> false)
+  (try Str.search_forward re str 0 >= 0 with Caml.Not_found -> false)
 
 let exec_read cmd =
   let ic = Unix.open_process_in cmd in
-  let result = input_line ic in
-  assert (Unix.close_process_in ic = Unix.WEXITED 0);
+  let result = In_channel.input_line ic in
+  assert (Poly.(Unix.close_process_in ic = Unix.WEXITED 0));
   result
 
 let exec_read_lines ?(reverse = false) cmd =
@@ -148,10 +157,12 @@ let exec_read_lines ?(reverse = false) cmd =
   let result = ref [] in
   (try
      while true do
-       result := input_line ic :: !result
+       match In_channel.input_line ic with
+       | Some line -> result := line :: !result
+       | None -> raise End_of_file
      done
    with End_of_file -> ());
-  assert (Unix.close_process_in ic = Unix.WEXITED 0);
+  assert (Poly.(Unix.close_process_in ic = Unix.WEXITED 0));
   if not reverse then
     List.rev !result
   else
@@ -197,7 +208,7 @@ let logname_impl () =
          in this file, but this is the only place we need it for now. *)
     let exec_try_read cmd =
       let ic = Unix.open_process_in cmd in
-      let out = (try Some (input_line ic) with End_of_file -> None) in
+      let out = In_channel.input_line ic in
       let status = Unix.close_process_in ic in
       match (out, status) with
       | (Some _, Unix.WEXITED 0) -> out
@@ -219,7 +230,7 @@ let get_primary_owner () =
     logged_in_user
   else
     let lines = Core_kernel.String.split_lines (Disk.cat owners_file) in
-    if List.mem lines logged_in_user ~equal:( = ) then
+    if List.mem lines logged_in_user ~equal:String.( = ) then
       logged_in_user
     else
       lines |> List.last |> Option.value ~default:logged_in_user
@@ -243,8 +254,11 @@ let read_stdin_to_string () =
   let buf = Buffer.create 4096 in
   try
     while true do
-      Buffer.add_string buf (input_line stdin);
-      Buffer.add_char buf '\n'
+      match In_channel.input_line In_channel.stdin with
+      | Some line ->
+        Buffer.add_string buf line;
+        Buffer.add_char buf '\n'
+      | None -> raise End_of_file
     done;
     assert false
   with End_of_file -> Buffer.contents buf
@@ -254,7 +268,7 @@ let read_all ?(buf_size = 4096) ic =
   (try
      while true do
        let data = Bytes.create buf_size in
-       let bytes_read = input ic data 0 buf_size in
+       let bytes_read = In_channel.input ic data 0 buf_size in
        if bytes_read = 0 then raise Exit;
        Buffer.add_subbytes buf data 0 bytes_read
      done
@@ -275,7 +289,7 @@ let expanduser path =
         end
       | unixname ->
         (try (Unix.getpwnam unixname).Unix.pw_dir
-         with Not_found -> Str.matched_string s)
+         with Caml.Not_found -> Str.matched_string s)
     end
     path
 
@@ -322,41 +336,42 @@ let executable_path : unit -> string =
 
 let lines_of_in_channel ic =
   let rec loop accum =
-    match (try Some (input_line ic) with _ -> None) with
+    match In_channel.input_line ic with
     | None -> List.rev accum
     | Some line -> loop (line :: accum)
   in
   loop []
 
 let lines_of_file filename =
-  let ic = open_in filename in
+  let ic = In_channel.create filename in
   try
     let result = lines_of_in_channel ic in
-    let _ = close_in ic in
+    let () = In_channel.close ic in
     result
   with _ ->
-    close_in ic;
+    In_channel.close ic;
     []
 
 let read_file file =
-  let ic = open_in_bin file in
-  let size = in_channel_length ic in
+  let ic = In_channel.create ~binary:true file in
+  let size = Int64.to_int @@ In_channel.length ic in
+  let size = Option.value_exn size in
   let buf = Bytes.create size in
-  really_input ic buf 0 size;
-  close_in ic;
+  Option.value_exn (In_channel.really_input ic buf 0 size);
+  In_channel.close ic;
   buf
 
 let write_file ~file s = Disk.write_file ~file ~contents:s
 
 let append_file ~file s =
-  let chan = open_out_gen [Open_wronly; Open_append; Open_creat] 0o666 file in
-  output_string chan s;
-  close_out chan
+  let chan = Out_channel.create ~append:true ~perm:0o666 file in
+  Out_channel.output_string chan s;
+  Out_channel.close chan
 
 let write_strings_to_file ~file (ss : string list) =
-  let chan = open_out_gen [Open_wronly; Open_creat] 0o666 file in
-  List.iter ~f:(output_string chan) ss;
-  close_out chan
+  let chan = Out_channel.create ~perm:0o666 file in
+  List.iter ~f:(Out_channel.output_string chan) ss;
+  Out_channel.close chan
 
 (* could be in control section too *)
 
@@ -402,12 +417,9 @@ let touch mode file =
     with_umask 0o000 (fun () ->
         if mkdir_if_new then mkdir_no_fail (Filename.dirname file);
         let oc =
-          open_out_gen
-            [Open_wronly; Open_append; Open_creat; Open_binary]
-            perm_if_new
-            file
+          Out_channel.create ~append:true ~binary:true ~perm:perm_if_new file
         in
-        close_out oc)
+        Out_channel.close oc)
 
 let try_touch mode file = (try touch mode file with _ -> ())
 
@@ -522,8 +534,8 @@ let lstat path =
 
 let normalize_filename_dir_sep =
   let dir_sep_char = Filename.dir_sep.[0] in
-  String.map (fun c ->
-      if c = dir_sep_char then
+  String.map ~f:(fun c ->
+      if Char.equal c dir_sep_char then
         '/'
       else
         c)
@@ -600,7 +612,7 @@ let find_oom_in_dmesg_output pid name lines =
         ignore @@ Str.search_forward re line 0;
         let pid_s = Str.matched_group 1 line in
         int_of_string pid_s = pid
-      with Not_found -> false)
+      with Caml.Not_found -> false)
 
 let check_dmesg_for_oom pid name =
   let dmesg = exec_read_lines ~reverse:true "dmesg" in

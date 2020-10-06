@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 (* This is a lightweight library for reading and writing messages in the HTTP
    format, with headers and body. So far it only supports the small set of
@@ -40,7 +40,7 @@ let parse_headers_to_lowercase_map (headers : string list) : string SMap.t =
       begin
         match Str.bounded_split (Str.regexp ":") line 2 with
         | [k; v] ->
-          let (k', v') = (String.lowercase_ascii k, String.trim v) in
+          let (k', v') = (String.lowercase k, String.strip v) in
           parse_internal (SMap.add k' v' acc) rest
         | _ -> parse_internal acc rest
       end
@@ -56,7 +56,8 @@ let parse_charset (header_value : string) : string option =
   (* charset_value: if given a param string "charset=b" then it returns Some b *)
   let charset_value param =
     match Str.bounded_split (Str.regexp "=") param 2 with
-    | [k; v] when String.trim k = "charset" -> Some (String.trim v)
+    | [k; v] when String.equal (String.strip k) "charset" ->
+      Some (String.strip v)
     | _ -> None
   in
   match Str.split (Str.regexp ";") header_value with
@@ -81,16 +82,18 @@ let read_message_utf8 (reader : Buffered_line_reader.t) : string =
     (try SMap.find "content-type" headers |> parse_charset with _ -> None)
   in
   let body = Buffered_line_reader.get_next_bytes reader len in
-  if charset <> Some "utf-8" && charset <> None then
-    raise (Malformed "Charset not utf-8");
+  (match charset with
+  | Some s when String.equal s "utf-8" -> ()
+  | None -> ()
+  | Some _ -> raise (Malformed "Charset not utf-8"));
   body
 
 (** write_message: writes "Content-Length:...body" *)
-let write_message (outchan : out_channel) (body : string) : unit =
+let write_message (outchan : Out_channel.t) (body : string) : unit =
   (* Without this, Windows will change the \r\n to \r\r\n *)
   Stdlib.set_binary_mode_out outchan true;
 
   Printf.fprintf outchan "Content-Length: %n\r\n" (String.length body);
   Printf.fprintf outchan "\r\n";
   Printf.fprintf outchan "%s" body;
-  flush outchan
+  Out_channel.flush outchan

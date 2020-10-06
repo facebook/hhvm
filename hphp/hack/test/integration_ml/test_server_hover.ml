@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 open HoverService
 module Test = Integration_test_base
 
@@ -1066,7 +1066,7 @@ let test () =
         in
         let expected = list_to_string expectedHover in
         let actual = list_to_string hover in
-        if expected <> actual then
+        if not (String.equal expected actual) then
           Some (expected, actual)
         else
           None)
@@ -1077,4 +1077,4 @@ let test () =
     let display_case (expected, actual) =
       Printf.sprintf "Expected:\n%s\nGot:\n%s" expected actual
     in
-    Test.fail @@ String.concat "\n\n" (List.map ~f:display_case cases)
+    Test.fail @@ String.concat ~sep:"\n\n" (List.map ~f:display_case cases)

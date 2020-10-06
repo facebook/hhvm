@@ -7,7 +7,6 @@
  *)
 
 open Hh_prelude
-open Hh_core
 open Typing_defs
 module Map = Type_mapper_generic
 

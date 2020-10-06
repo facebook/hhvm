@@ -1,4 +1,4 @@
-open Hh_core
+open Hh_prelude
 open Reordered_argument_collections
 module DS = Diagnostic_subscription
 

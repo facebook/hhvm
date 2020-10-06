@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 (*****************************************************************************)
 (* Recheck loop types. *)
@@ -76,7 +76,7 @@ type genv = {
   (* If daemons are spawned as part of the init process, wait for them here
    * e.g. wait until dfindlib is ready (in the case that watchman is absent) *)
   wait_until_ready: unit -> unit;
-  mutable debug_channels: (Timeout.in_channel * out_channel) option;
+  mutable debug_channels: (Timeout.in_channel * Out_channel.t) option;
 }
 
 (*****************************************************************************)

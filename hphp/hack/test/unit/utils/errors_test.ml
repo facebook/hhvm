@@ -6,7 +6,7 @@
  * significant or not.
  **)
 
-open Hh_core
+open Hh_prelude
 
 let error_list_to_string_buffer buf x =
   List.iter x ~f:(fun error ->
@@ -410,7 +410,7 @@ let test_performance () =
       aux (Errors.merge errors acc) (n - 1)
   in
   let errors = aux Errors.empty n in
-  List.length (Errors.get_error_list errors) == n
+  List.length (Errors.get_error_list errors) = n
 
 let tests =
   [

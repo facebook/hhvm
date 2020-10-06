@@ -56,11 +56,11 @@ val split_lines : string -> string list
 (** Returns true if substring occurs somewhere inside str. *)
 val string_contains : string -> string -> bool
 
-val exec_read : string -> string
+val exec_read : string -> string option
 
-val exec_read_lines : ?reverse:bool -> string -> string Hh_core.List.t
+val exec_read_lines : ?reverse:bool -> string -> string list
 
-val collect_paths : (string -> bool) -> string -> string Hh_core.List.t
+val collect_paths : (string -> bool) -> string -> string list
 
 (**
  * Sometimes the user wants to pass a list of paths on the command-line.
@@ -109,9 +109,9 @@ using the `_` env var set by bash, or /proc/self/exe on Linux, but they are
 not portable. *)
 val executable_path : unit -> string
 
-val lines_of_in_channel : in_channel -> string Hh_core.List.t
+val lines_of_in_channel : in_channel -> string list
 
-val lines_of_file : string -> string Hh_core.List.t
+val lines_of_file : string -> string list
 
 val read_file : string -> bytes
 
@@ -249,5 +249,5 @@ external start_gc_profiling : unit -> unit = "hh_start_gc_profiling" [@@noalloc]
 external get_gc_time : unit -> float * float = "hh_get_gc_time"
 
 module For_test : sig
-  val find_oom_in_dmesg_output : int -> string -> string Hh_core.List.t -> bool
+  val find_oom_in_dmesg_output : int -> string -> string list -> bool
 end

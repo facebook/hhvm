@@ -1,4 +1,4 @@
-open Hh_core
+open Hh_prelude
 module SourceText = Full_fidelity_source_text
 module TokenKind = Full_fidelity_token_kind
 module ParserEnv = Full_fidelity_parser_env

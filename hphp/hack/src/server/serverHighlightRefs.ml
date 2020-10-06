@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 let get_target symbol =
   SymbolOccurrence.(
@@ -33,7 +33,10 @@ let highlight_symbol ctx entry line char symbol =
     | Some target ->
       let results = FindRefsService.find_refs_ctx ~ctx ~entry ~target in
       List.rev (List.map results snd)
-    | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
+    | None
+      when SymbolOccurrence.equal_kind
+             symbol.SymbolOccurrence.type_
+             SymbolOccurrence.LocalVar ->
       ServerFindLocals.go ~ctx ~entry ~line ~char
     | None -> []
   in

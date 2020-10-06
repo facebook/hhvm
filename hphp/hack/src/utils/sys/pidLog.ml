@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Hh_core
 
 let log_oc = ref None
 

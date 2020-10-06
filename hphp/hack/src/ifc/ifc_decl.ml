@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-open Hh_core
+open Common
 open Ifc_types
 module Env = Ifc_env
 module Logic = Ifc_logic

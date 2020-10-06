@@ -17,7 +17,7 @@
  *)
 (*****************************************************************************)
 
-open Hh_core
+open Hh_prelude
 open Prim_defs
 
 (*****************************************************************************)
@@ -252,7 +252,7 @@ let print_names name =
   Printf.printf "Consts:\n";
   SSet.iter (Printf.printf "\t%s\n") name.n_consts;
   Printf.printf "\n";
-  flush stdout;
+  Out_channel.flush stdout;
   ()
 
 let to_string fast =
@@ -264,5 +264,8 @@ let to_string fast =
   ]
   |> List.filter ~f:(fun (_, l) -> not @@ List.is_empty l)
   |> List.map ~f:(fun (kind, l) ->
-         Printf.sprintf "%s: %s" kind (List.map l ~f:snd |> String.concat ","))
-  |> String.concat ";"
+         Printf.sprintf
+           "%s: %s"
+           kind
+           (List.map l ~f:snd |> String.concat ~sep:","))
+  |> String.concat ~sep:";"

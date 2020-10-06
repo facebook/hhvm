@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 module Test = Integration_test_base
 
 let f1 =
@@ -171,7 +171,9 @@ let files : (string * string) list =
   [f1; f2; f3; f4; f5; f6; f7; f8; f9; f10; f11]
 
 let normalize s =
-  String.split_on_char '\n' s |> List.map ~f:String.trim |> String.concat ""
+  String.split_on_chars ~on:['\n'] s
+  |> List.map ~f:String.strip
+  |> String.concat ~sep:""
 
 let tests : ((string * int * int) * string) list =
   [
@@ -284,12 +286,12 @@ let test () =
     let ctx = Provider_utils.ctx_from_server_env env in
     let pos_list = [(Relative_path.from_root ~suffix:file, line, col)] in
     let result = ServerRxApiShared.helper h ctx [] pos_list in
-    if result <> [expected] then
+    if not (List.equal result [expected] String.equal) then
       let msg =
         "Unexpected test result\nExpected:\n"
         ^ expected
         ^ "\nBut got:\n"
-        ^ String.concat "\n" result
+        ^ String.concat ~sep:"\n" result
       in
       Test.fail msg
   in

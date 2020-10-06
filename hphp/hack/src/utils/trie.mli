@@ -63,7 +63,7 @@ val to_list :
 val find_impl :
   ?limit:int option -> bool -> 'a t -> string -> (string -> 'a -> 'c) -> 'c list
 
-val find : 'a t -> string -> 'a
+val find : 'a t -> string -> 'a option
 
 val find_prefix : 'a t -> string -> (string -> 'a -> 'b) -> 'b list
 

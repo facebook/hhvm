@@ -7,9 +7,7 @@
  *
  *)
 
-open Base
-open Hh_core
-module Sys = Stdlib.Sys
+open Hh_prelude
 
 type raw_color =
   | Default
@@ -172,7 +170,7 @@ let clear_line_seq = "\r\x1b[0K"
 
 let print_clear_line chan =
   if Unix.isatty (Unix.descr_of_out_channel chan) then
-    Stdlib.Printf.fprintf chan "%s%!" clear_line_seq
+    Printf.fprintf chan "%s%!" clear_line_seq
   else
     ()
 
@@ -210,9 +208,9 @@ let read_choice message choices =
 
 let eprintf fmt =
   if Unix.(isatty stderr) then
-    Stdio.eprintf fmt
+    Printf.eprintf fmt
   else
-    Printf.ifprintf Stdio.stderr fmt
+    Printf.ifprintf stderr fmt
 
 (* Gets the number of columns in the current terminal window through
  * [`tput cols`][1]. If the command fails in any way then `None` will
@@ -227,4 +225,4 @@ let get_term_cols () =
   if (not Sys.unix) || not (supports_color ()) then
     None
   else
-    try Some (Int.of_string (Sys_utils.exec_read "tput cols")) with _ -> None
+    Option.map ~f:int_of_string (Sys_utils.exec_read "tput cols")

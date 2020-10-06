@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Hh_core
+open Hh_prelude
 open ServerCommandTypes
 
 let go file_input ctx =

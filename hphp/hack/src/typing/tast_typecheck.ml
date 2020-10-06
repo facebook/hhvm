@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 open Delta
 open Typing_defs
 open Typing_env_types

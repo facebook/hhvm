@@ -7,8 +7,7 @@
  *
  *)
 
-open Core_kernel
-open Hh_core
+open Hh_prelude
 module Printexc = Stdlib.Printexc
 
 (** Callstack is simply a typed way to indicate that a string is a callstack *)
@@ -117,7 +116,7 @@ let rec list_last f1 f2 = function
 let is_prefix_dir dir fn =
   let prefix = dir ^ Filename.dir_sep in
   String.length fn > String.length prefix
-  && String.sub fn 0 (String.length prefix) = prefix
+  && String.equal (String.sub fn 0 (String.length prefix)) prefix
 
 let try_with_channel
     (oc : Out_channel.t) (f1 : Out_channel.t -> 'a) (f2 : exn -> 'a) : 'a =
@@ -206,7 +205,7 @@ let expand_namespace (ns_map : (string * string) list) (s : string) : string =
   let matching_alias =
     List.find ns_map (fun (alias, _) ->
         let fixup = add_ns alias ^ "\\" in
-        fixup = ns)
+        String.equal fixup ns)
   in
   match matching_alias with
   | None -> add_ns s
@@ -224,7 +223,7 @@ let split_class_from_method (s : string) : (string * string) option =
     Printf.printf "Class part is [%s]\n" class_part;
     let meth_part = String.sub s (i + 2) (len - i - 2) in
     Printf.printf "Meth part is [%s]\n" meth_part;
-    if class_part = "" || meth_part = "" then
+    if String.equal class_part "" || String.equal meth_part "" then
       None
     else
       Some (class_part, meth_part)

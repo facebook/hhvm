@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 
 let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   let open ServerRageTypes in
@@ -40,7 +40,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       | ServerEnv.Resumed -> "hh --resume")
       ( Relative_path.Set.elements env.ServerEnv.disk_needs_parsing
       |> List.map ~f:Relative_path.to_absolute
-      |> String.concat "\n" )
+      |> String.concat ~sep:"\n" )
   in
 
   (* include current state of diagnostics on client, as we know it *)
@@ -63,7 +63,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
         (Errors.count env.errorl)
         count
         is_truncated
-        (errors |> SMap.keys |> String.concat ",")
+        (errors |> SMap.keys |> String.concat ~sep:",")
   in
 
   (* that's it! *)
@@ -73,6 +73,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       pids_data
       paused_data
       subscription_data
-      (List.map unsaved_items ~f:(fun item -> item.title) |> String.concat "\n")
+      ( List.map unsaved_items ~f:(fun item -> item.title)
+      |> String.concat ~sep:"\n" )
   in
   { title = "status"; data } :: unsaved_items

@@ -6,7 +6,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Hh_core
+
+open Hh_prelude
+module Set = Stdlib.Set
+module Format = Stdlib.Format
+module Hashtbl = Stdlib.Hashtbl
 open Reordered_argument_collections
 open Utils
 
@@ -43,6 +47,8 @@ module Dep = struct
 
   type dependency
 
+  (* Consider writing by hand a `equal_variant` *)
+
   (** NOTE: keep in sync with `typing_deps.rs`. *)
   type _ variant =
     | GConst : string -> 'a variant
@@ -68,19 +74,24 @@ module Dep = struct
   let variant_equals : type a b. a variant -> b variant -> bool =
    fun lhs rhs ->
     match (lhs, rhs) with
-    | (GConst lhs, GConst rhs) -> lhs = rhs
-    | (Class lhs, Class rhs) -> lhs = rhs
-    | (RecordDef lhs, RecordDef rhs) -> lhs = rhs
-    | (Fun lhs, Fun rhs) -> lhs = rhs
-    | (Const (lhs1, lhs2), Const (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
-    | (Prop (lhs1, lhs2), Prop (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
-    | (SProp (lhs1, lhs2), SProp (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
-    | (Method (lhs1, lhs2), Method (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
-    | (SMethod (lhs1, lhs2), SMethod (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
-    | (GConstName lhs, GConstName rhs) -> lhs = rhs
-    | (FunName lhs, FunName rhs) -> lhs = rhs
-    | (AllMembers lhs, AllMembers rhs) -> lhs = rhs
-    | (Extends lhs, Extends rhs) -> lhs = rhs
+    | (GConst lhs, GConst rhs) -> Poly.(lhs = rhs)
+    | (Class lhs, Class rhs) -> Poly.(lhs = rhs)
+    | (RecordDef lhs, RecordDef rhs) -> Poly.(lhs = rhs)
+    | (Fun lhs, Fun rhs) -> Poly.(lhs = rhs)
+    | (Const (lhs1, lhs2), Const (rhs1, rhs2)) ->
+      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+    | (Prop (lhs1, lhs2), Prop (rhs1, rhs2)) ->
+      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+    | (SProp (lhs1, lhs2), SProp (rhs1, rhs2)) ->
+      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+    | (Method (lhs1, lhs2), Method (rhs1, rhs2)) ->
+      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+    | (SMethod (lhs1, lhs2), SMethod (rhs1, rhs2)) ->
+      Poly.(lhs1 = rhs1) && Poly.(lhs2 = rhs2)
+    | (GConstName lhs, GConstName rhs) -> Poly.(lhs = rhs)
+    | (FunName lhs, FunName rhs) -> Poly.(lhs = rhs)
+    | (AllMembers lhs, AllMembers rhs) -> Poly.(lhs = rhs)
+    | (Extends lhs, Extends rhs) -> Poly.(lhs = rhs)
     | (GConst _, _) -> false
     | (Class _, _) -> false
     | (RecordDef _, _) -> false
@@ -370,13 +381,13 @@ module NamingHash = struct
     We make sure we only have have 31 bits to begin with (this is not the case
     when in the new 64-bit hash world) *)
     let dep_hash =
-      Int64.logand dep_hash 0b01111111_11111111_11111111_11111111L
+      Int64.bit_and dep_hash 0b01111111_11111111_11111111_11111111L
     in
     let upper_31_bits = Int64.shift_left dep_hash 31 in
     let lower_31_bits =
-      Int64.logand naming_hash 0b01111111_11111111_11111111_11111111L
+      Int64.bit_and naming_hash 0b01111111_11111111_11111111_11111111L
     in
-    Int64.logor upper_31_bits lower_31_bits
+    Int64.bit_or upper_31_bits lower_31_bits
 
   let unsupported (variant : 'a Dep.variant) =
     failwith
@@ -415,7 +426,7 @@ module NamingHash = struct
 
   let make_lower_bound (hash : Dep.t) : t =
     let hash = hash lsl 31 |> Int64.of_int in
-    Int64.logand hash naming_table_hash_lower_bound_mask
+    Int64.bit_and hash naming_table_hash_lower_bound_mask
 
   let naming_table_hash_upper_bound_mask =
     let lower_31_bits_set_to_1 = (1 lsl 31) - 1 in
@@ -423,7 +434,7 @@ module NamingHash = struct
 
   let make_upper_bound (hash : Dep.t) : t =
     let upper_31_bits = hash lsl 31 |> Int64.of_int in
-    Int64.logor upper_31_bits naming_table_hash_upper_bound_mask
+    Int64.bit_or upper_31_bits naming_table_hash_upper_bound_mask
 
   let to_int64 (t : t) : int64 = t
 end
@@ -641,7 +652,7 @@ module SaveCustomGraph = struct
   let discovered_deps_batch : (CustomGraph.dep_edge, unit) Hashtbl.t =
     Hashtbl.create 1000
 
-  let destination_file_handle_ref : out_channel option ref = ref None
+  let destination_file_handle_ref : Out_channel.t option ref = ref None
 
   let destination_file_handle () =
     match !destination_file_handle_ref with
@@ -657,10 +668,7 @@ module SaveCustomGraph = struct
         | _ -> failwith "programming error: wrong mode"
       in
       let handle =
-        open_out_gen
-          [Open_creat; Open_wronly; Open_append; Open_binary]
-          0o600
-          filepath
+        Out_channel.create ~binary:true ~append:true ~perm:0o600 filepath
       in
       destination_file_handle_ref := Some handle;
       handle
@@ -674,10 +682,10 @@ module SaveCustomGraph = struct
           let handle = destination_file_handle () in
           (* output_binary_int outputs the lower 4-bytes only, regardless
            * of architecture. It outputs in big-endian format.*)
-          output_binary_int handle (idependent lsr 32);
-          output_binary_int handle idependent;
-          output_binary_int handle (idependency lsr 32);
-          output_binary_int handle idependency
+          Out_channel.output_binary_int handle (idependent lsr 32);
+          Out_channel.output_binary_int handle idependent;
+          Out_channel.output_binary_int handle (idependency lsr 32);
+          Out_channel.output_binary_int handle idependency
         end
       end
       discovered_deps_batch;
@@ -738,10 +746,9 @@ module Files = struct
       ~f:
         begin
           fun dep acc ->
-          try
-            let files = Hashtbl.find !ifiles dep in
-            Relative_path.Set.union files acc
-          with Not_found -> acc
+          match Hashtbl.find_opt !ifiles dep with
+          | Some files -> Relative_path.Set.union files acc
+          | None -> acc
         end
       deps
       ~init:Relative_path.Set.empty
@@ -817,8 +824,9 @@ module Files = struct
   let update_file filename info =
     DepSet.iter (deps_of_file_info info) ~f:(fun def ->
         let previous =
-          try Hashtbl.find !ifiles def
-          with Not_found -> Relative_path.Set.empty
+          match Hashtbl.find_opt !ifiles def with
+          | Some files -> files
+          | None -> Relative_path.Set.empty
         in
         Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
 end

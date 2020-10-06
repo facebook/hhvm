@@ -11,7 +11,7 @@
 (* Prelude *)
 (*****************************************************************************)
 
-open Hh_core
+open Hh_prelude
 
 let lstat_kind file =
   Unix.(
@@ -66,9 +66,9 @@ let fold_files
       else
         acc
     in
-    if max_depth = Some depth then
-      acc
-    else
+    match max_depth with
+    | Some d when d = depth -> acc
+    | _ ->
       let files = hh_readdir dir in
       List.fold_left
         ~f:(fun acc (file, kind) ->
@@ -90,7 +90,7 @@ let find ?max_depth ?filter ?file_only paths =
   List.rev @@ fold_files ?max_depth ?filter ?file_only paths List.cons []
 
 let find_with_name ?max_depth ?file_only paths name =
-  find ?max_depth ?file_only ~filter:(fun x -> x = name) paths
+  find ?max_depth ?file_only ~filter:(fun x -> String.equal x name) paths
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -112,7 +112,7 @@ let make_next_files ?name:_ ?(filter = (fun _ -> true)) ?(others = []) root =
       | [] -> process_stack sz acc stack
       | (name, kind) :: files ->
         let name =
-          if dir = "" then
+          if String.equal dir "" then
             name
           else
             Filename.concat dir name

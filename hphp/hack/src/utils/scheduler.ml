@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Hh_core
+open Hh_prelude
 
 module Make (EnvType : sig
   type t
@@ -61,7 +61,7 @@ struct
   let stop_waiting_for_channel fd =
     let waiting_jobs =
       List.filter !env.waiting_jobs (function
-          | Channel (x, _) -> x <> fd
+          | Channel (x, _) -> Poly.(x <> fd)
           | _ -> true)
     in
     env := { !env with waiting_jobs }
@@ -80,7 +80,7 @@ struct
             `Snd (Fun (is_ready, job)))
     in
     let wait_time =
-      if ready_funs = [] && !env.ready_jobs = [] then
+      if List.is_empty ready_funs && List.is_empty !env.ready_jobs then
         1.0
       else
         0.0
@@ -89,7 +89,7 @@ struct
     let (readable, _, _) = Unix.select fds [] [] wait_time in
     let (ready_channels, waiting_channels) =
       List.partition_map channels ~f:(fun (fd, job) ->
-          if List.exists readable ~f:(fun x -> x = fd) then
+          if List.exists readable ~f:(fun x -> Poly.(x = fd)) then
             `Fst job
           else
             `Snd (Channel (fd, job)))

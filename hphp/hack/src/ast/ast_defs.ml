@@ -139,6 +139,14 @@ and uop =
 (* Helpers *)
 (*****************************************************************************)
 
+let is_c_normal = function
+  | Cnormal -> true
+  | Cenum
+  | Cabstract
+  | Ctrait
+  | Cinterface ->
+    false
+
 let is_c_enum = function
   | Cenum -> true
   | Cabstract

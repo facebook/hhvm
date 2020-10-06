@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Hh_prelude
 module Test = Integration_test_base
 
 let files =
@@ -68,5 +68,11 @@ let test () =
   in
   List.iter (SSet.elements dependent_classes) ~f:print_endline;
 
-  if SSet.elements dependent_classes <> expected_dependent_classes then
+  if
+    not
+      (List.equal
+         (SSet.elements dependent_classes)
+         expected_dependent_classes
+         String.equal)
+  then
     Test.fail "Missing dependent classes"

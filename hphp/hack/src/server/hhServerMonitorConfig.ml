@@ -116,9 +116,11 @@ let check_log_for_lazy_incremental monitor_config =
   in
   try
     match Sys_utils.exec_read cmd with
-    | "0" -> ()
-    | "1" -> HackEventLogger.set_lazy_incremental ()
-    | x -> Hh_logger.log "Unexpected output of command '%s': %s" cmd x
+    | Some "0" -> ()
+    | Some "1" -> HackEventLogger.set_lazy_incremental ()
+    | Some x -> Hh_logger.log "Unexpected output of command '%s': %s" cmd x
+    | None ->
+      Hh_logger.log "Unexpected output of command '%s': truncated input" cmd
   with e ->
     Hh_logger.log
       "Exception while running command '%s': %s"

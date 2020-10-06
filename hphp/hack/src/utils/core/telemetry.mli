@@ -20,7 +20,7 @@ then we only see the current element, but if they're different then we see both.
 (If you pass ~all:true then it hides elements that have remained the same.)
 It works with nested telemetry objects. In places where the structure differs,
 only `current` is kept. *)
-val diff : all:bool -> t -> prev:t -> t
+val diff : all:bool -> ?suffix_keys:bool -> t -> prev:t -> t
 
 val add : t -> t -> t
 

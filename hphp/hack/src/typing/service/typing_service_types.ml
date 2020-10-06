@@ -59,6 +59,7 @@ type check_info = {
   init_id: string;
   recheck_id: string option;
   profile_log: bool;
+  profile_total_typecheck_duration: bool;
   profile_type_check_twice: bool;
   profile_type_check_duration_threshold: float;
 }

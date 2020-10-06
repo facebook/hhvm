@@ -203,6 +203,7 @@ let make_remote_server_api
             init_id;
             recheck_id = Some check_id;
             profile_log = true;
+            profile_total_typecheck_duration = false;
             profile_type_check_twice = false;
             profile_type_check_duration_threshold = 0.0;
           }

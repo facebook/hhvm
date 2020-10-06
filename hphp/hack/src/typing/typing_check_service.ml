@@ -378,6 +378,12 @@ let process_files
           else
             categories
         in
+        let categories =
+          if check_info.profile_total_typecheck_duration then
+            Decl_accessors :: Typecheck :: categories
+          else
+            categories
+        in
         reset ~enabled_categories:(CategorySet.of_list categories)))
   in
   let (_start_time, start_counters) = read_counters () in
@@ -443,7 +449,11 @@ let process_files
   let telemetry =
     Telemetry.add
       telemetry
-      (Telemetry.diff ~all:false end_counters ~prev:start_counters)
+      (Telemetry.diff
+         ~all:false
+         ~suffix_keys:false
+         end_counters
+         ~prev:start_counters)
   in
 
   let new_dep_edges = Typing_deps.flush_ideps_batch () in

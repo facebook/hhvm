@@ -180,7 +180,7 @@ let type_check
     in
     let (_new_t : float) = Hh_logger.log_duration logstring t in
     let count = List.length files_to_check in
-    let logstring = Printf.sprintf "Type-check %d files" count in
+    let logstring = Printf.sprintf "type-check %d files" count in
     Hh_logger.log "Begin %s" logstring;
     let ( (errorl : Errors.t),
           (delegate_state : Typing_service_delegate.state),

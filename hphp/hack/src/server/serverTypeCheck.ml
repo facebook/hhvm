@@ -1445,7 +1445,7 @@ functor
         ~include_in_logs:false
         "typechecking %d files"
         to_recheck_count;
-      let logstring = Printf.sprintf "Typechecking %d files" in
+      let logstring = Printf.sprintf "typechecking %d files" in
       Hh_logger.log "Begin %s" (logstring to_recheck_count);
 
       debug_print_path_set genv "to_recheck" files_to_check;

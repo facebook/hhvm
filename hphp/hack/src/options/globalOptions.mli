@@ -145,6 +145,9 @@ type t = {
   (* Two more profile options, used solely to send to logging backend. These allow
       the person who launches hack, to provide unique identifying keys that get
       sent to logging, so they can correlate/sort/filter their logs as they want. *)
+  profile_total_typecheck_duration: bool;
+      (** accumulate total duration of typechecking phase across workers.
+          This is user time, not wall clock time. *)
   profile_owner: string option;
   profile_desc: string;
   (* Enables like type hints *)
@@ -319,6 +322,7 @@ val make :
   ?po_rust_parser_errors:bool ->
   ?profile_type_check_duration_threshold:float ->
   ?profile_type_check_twice:bool ->
+  ?profile_total_typecheck_duration:bool ->
   ?profile_owner:string ->
   ?profile_desc:string ->
   ?tco_like_type_hints:bool ->
@@ -488,6 +492,8 @@ val po_rust_parser_errors : t -> bool
 val profile_type_check_duration_threshold : t -> float
 
 val profile_type_check_twice : t -> bool
+
+val profile_total_typecheck_duration : t -> bool
 
 val profile_owner : t -> string option
 

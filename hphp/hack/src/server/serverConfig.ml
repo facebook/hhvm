@@ -243,7 +243,7 @@ let prepare_error_codes_treated_strictly config =
 let prepare_allowed_decl_fixme_codes config =
   prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
 
-let load ~silent config_filename options =
+let load ~silent config_filename options : t * ServerLocalConfig.t =
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
   let (config_hash, config) =
     Config_file.parse_hhconfig
@@ -354,6 +354,8 @@ let load ~silent config_filename options =
         local_config.ServerLocalConfig.profile_type_check_duration_threshold
       ~profile_type_check_twice:
         local_config.ServerLocalConfig.profile_type_check_twice
+      ?profile_total_typecheck_duration:
+        (bool_opt "profile_total_typecheck_duration" config)
       ?profile_owner:local_config.ServerLocalConfig.profile_owner
       ~profile_desc:local_config.ServerLocalConfig.profile_desc
       ?tco_like_type_hints:(bool_opt "like_type_hints" config)

@@ -296,7 +296,7 @@ bool Package::parse(bool check, std::thread& unit_emitter_thread) {
   auto syslib_ues = m_ar->getHhasFiles();
   if (RuntimeOption::RepoCommit &&
       RuntimeOption::RepoLocalPath.size() &&
-      RuntimeOption::RepoLocalMode == "rw") {
+      RuntimeOption::RepoLocalMode == RepoMode::ReadWrite) {
     m_ueq.emplace();
     // Since we'll modify the repo RuntimeOptions after creating this
     // thread, we need to block until the thread initialize its repo.
@@ -344,7 +344,7 @@ bool Package::parse(bool check, std::thread& unit_emitter_thread) {
   }
 
   if (RuntimeOption::RepoLocalPath.size() &&
-      RuntimeOption::RepoLocalMode != "--") {
+      RuntimeOption::RepoLocalMode != RepoMode::Closed) {
     auto units = Repo::get().enumerateUnits(RepoIdLocal, false);
     for (auto& elm : units) {
       m_locally_cached_bytecode.insert(elm.first);
@@ -536,7 +536,7 @@ bool Package::parseImpl(const std::string* fileName) {
                                         *fileName,
                                         options)};
   if (RuntimeOption::RepoLocalPath.size() &&
-      RuntimeOption::RepoLocalMode != "--" &&
+      RuntimeOption::RepoLocalMode != RepoMode::Closed &&
       m_locally_cached_bytecode.count(*fileName)) {
     // Try the repo; if it's not already there, invoke the compiler.
     if (auto ue = Repo::get().urp().loadEmitter(

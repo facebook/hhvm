@@ -1100,8 +1100,9 @@ hphp_string_imap<TypedValue> RuntimeOption::ConstantFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 
-std::string RuntimeOption::RepoLocalMode;
+RepoMode RuntimeOption::RepoLocalMode = RepoMode::ReadOnly;
 std::string RuntimeOption::RepoLocalPath;
+RepoMode RuntimeOption::RepoCentralMode = RepoMode::ReadWrite;
 std::string RuntimeOption::RepoCentralPath;
 int32_t RuntimeOption::RepoCentralFileMode;
 std::string RuntimeOption::RepoCentralFileUser;
@@ -1702,22 +1703,44 @@ void RuntimeOption::Load(
   }
   {
     // Repo
-    // Local Repo
-    Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode", RepoLocalMode);
-    if (RepoLocalMode.empty()) {
-      const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
-      if (HHVM_REPO_LOCAL_MODE != nullptr) {
-        RepoLocalMode = HHVM_REPO_LOCAL_MODE;
+    auto repoModeToStr = [](RepoMode mode) {
+      switch (mode) {
+        case RepoMode::Closed:
+          return "--";
+        case RepoMode::ReadOnly:
+          return "r-";
+        case RepoMode::ReadWrite:
+          return "rw";
       }
-      RepoLocalMode = "r-";
-    }
-    if (RepoLocalMode.compare("rw")
-        && RepoLocalMode.compare("r-")
-        && RepoLocalMode.compare("--")) {
-      Logger::Error("Bad config setting: Repo.Local.Mode=%s",
-                    RepoLocalMode.c_str());
-      RepoLocalMode = "rw";
-    }
+
+      always_assert(false);
+      return "";
+    };
+
+    auto parseRepoMode = [&](const std::string& repoModeStr, const char* type, RepoMode defaultMode) {
+      if (repoModeStr.empty()) {
+        return defaultMode;
+      }
+      if (repoModeStr == "--") {
+        return RepoMode::Closed;
+      }
+      if (repoModeStr == "r-") {
+        return RepoMode::ReadOnly;
+      }
+      if (repoModeStr == "rw") {
+        return RepoMode::ReadWrite;
+      }
+
+      Logger::Error("Bad config setting: Repo.%s.Mode=%s",
+                    type, repoModeStr.c_str());
+      return RepoMode::ReadWrite;
+    };
+
+    // Local Repo
+    static std::string repoLocalMode;
+    Config::Bind(repoLocalMode, ini, config, "Repo.Local.Mode", repoModeToStr(RepoLocalMode));
+    RepoLocalMode = parseRepoMode(repoLocalMode, "Local", RepoMode::ReadOnly);
+
     // Repo.Local.Path
     Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
     if (RepoLocalPath.empty()) {
@@ -1728,6 +1751,11 @@ void RuntimeOption::Load(
     }
 
     // Central Repo
+    static std::string repoCentralMode;
+    Config::Bind(repoCentralMode, ini, config, "Repo.Central.Mode", repoModeToStr(RepoCentralMode));
+    RepoCentralMode = parseRepoMode(repoCentralMode, "Central", RepoMode::ReadWrite);
+
+    // Repo.Central.Path
     Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
     Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
     Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");

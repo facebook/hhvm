@@ -85,7 +85,13 @@ struct Repo : RepoProxy {
   int repoIdForNewUnit(UnitOrigin unitOrigin) const {
     switch (unitOrigin) {
     case UnitOrigin::File:
-      return m_localWritable ? RepoIdLocal : RepoIdCentral;
+      if (m_localWritable) {
+        return RepoIdLocal;
+      }
+      if (m_centralWritable) {
+        return RepoIdCentral;
+      }
+      return RepoIdInvalid;
     case UnitOrigin::Eval:
       return RepoIdInvalid;
     default:
@@ -239,7 +245,7 @@ struct Repo : RepoProxy {
 
   void connect();
   void disconnect() noexcept;
-  void initCentral();
+  bool initCentral();
   RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
   bool initLocal();
   bool attachLocal(const char* repoPath, bool isWritable);
@@ -262,8 +268,8 @@ private:
   std::string m_localRepo;
   std::string m_centralRepo;
   sqlite3* m_dbc; // Database connection, shared by multiple attached databases.
-  bool m_localReadable;
   bool m_localWritable;
+  bool m_centralWritable;
   unsigned m_txDepth; // Transaction nesting depth.
   bool m_rollback; // If true, rollback rather than commit.
   RepoStmt m_beginStmt;

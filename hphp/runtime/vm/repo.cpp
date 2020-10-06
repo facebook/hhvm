@@ -115,7 +115,7 @@ Repo::Repo()
                      RemoveFileHashStmt(*this, 1)},
     m_getUnitPath{GetUnitPathStmt(*this, 0), GetUnitPathStmt(*this, 1)},
     m_getUnit{GetUnitStmt(*this, 0), GetUnitStmt(*this, 1)},
-    m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
+    m_dbc(nullptr), m_localWritable(false), m_centralWritable(false),
     m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_rrp(*this), m_frp(*this), m_lsrp(*this), m_numOpenRepos(0) {
@@ -773,11 +773,12 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
 }
 
 void Repo::connect() {
-  initCentral();
+  m_numOpenRepos = 0;
+  if (initCentral()) {
+    m_numOpenRepos++;
+  }
   if (initLocal()) {
-    m_numOpenRepos = 2;
-  } else {
-    m_numOpenRepos = 1;
+    m_numOpenRepos++;
   }
 }
 
@@ -785,14 +786,19 @@ void Repo::disconnect() noexcept {
   if (m_dbc != nullptr) {
     sqlite3_close_v2(m_dbc);
     m_dbc = nullptr;
-    m_localReadable = false;
     m_localWritable = false;
+    m_centralWritable = false;
   }
   m_numOpenRepos = 0;
 }
 
-void Repo::initCentral() {
+bool Repo::initCentral() {
   std::string error;
+
+  if (RuntimeOption::RepoCentralMode == RepoMode::Closed &&
+      RuntimeOption::RepoLocalMode == RepoMode::Closed) {
+    return false;
+  }
 
   assertx(m_dbc == nullptr);
   auto tryPath = [this, &error](const char* path) {
@@ -818,14 +824,14 @@ void Repo::initCentral() {
   // Try Repo.Central.Path
   if (!RuntimeOption::RepoCentralPath.empty() &&
       tryPath(RuntimeOption::RepoCentralPath.c_str())) {
-    return;
+    return true;
   }
 
   // Try HHVM_REPO_CENTRAL_PATH
   const char* HHVM_REPO_CENTRAL_PATH = getenv("HHVM_REPO_CENTRAL_PATH");
   if (HHVM_REPO_CENTRAL_PATH != nullptr &&
       tryPath(HHVM_REPO_CENTRAL_PATH)) {
-    return;
+    return true;
   }
 
   if (!RuntimeOption::RepoAllowFallbackPath) fail_no_repo();
@@ -836,7 +842,7 @@ void Repo::initCentral() {
     std::string centralPath = HOME;
     centralPath += "/.hhvm.hhbc";
     if (tryPath(centralPath.c_str())) {
-      return;
+      return true;
     }
   }
 
@@ -852,7 +858,7 @@ void Repo::initCentral() {
       std::string centralPath = pw->pw_dir;
       centralPath += "/.hhvm.hhbc";
       if (tryPath(centralPath.c_str())) {
-        return;
+        return true;
       }
     }
   }
@@ -866,12 +872,13 @@ void Repo::initCentral() {
       centralPath += HOMEPATH;
       centralPath += "\\.hhvm.hhbc";
       if (tryPath(centralPath.c_str()))
-        return;
+        return true;
     }
   }
 #endif
 
   fail_no_repo();
+  return false;
 }
 
 namespace {
@@ -987,10 +994,20 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
   // that no mutexes are used to protect the database connection from other
   // threads.  However, multiple connections can still be used concurrently,
   // because SQLite as a whole is thread-safe.
-  if (int err = sqlite3_open_v2(repoPath.c_str(), &m_dbc,
-                                SQLITE_OPEN_NOMUTEX |
-                                SQLITE_OPEN_READWRITE |
-                                SQLITE_OPEN_CREATE, nullptr)) {
+  // Because we attach the local repo to the central one if either of them
+  // is readwrite we need to open the central one with readwrite.
+  int flags = SQLITE_OPEN_NOMUTEX;
+  if (RuntimeOption::RepoCentralMode == RepoMode::ReadWrite ||
+      RuntimeOption::RepoLocalMode == RepoMode::ReadWrite) {
+    flags |= SQLITE_OPEN_READWRITE;
+    if (RuntimeOption::RepoCentralMode == RepoMode::ReadWrite) {
+      flags |= SQLITE_OPEN_CREATE;
+    }
+  } else {
+    flags |= SQLITE_OPEN_READONLY;
+  }
+
+  if (int err = sqlite3_open_v2(repoPath.c_str(), &m_dbc, flags, nullptr)) {
     TRACE(1, "Repo::%s() failed to open candidate central repo '%s'\n",
              __func__, repoPath.c_str());
     errorMsg = folly::format("Failed to open {}: {} - {}",
@@ -1017,9 +1034,10 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
   // sqlite3_open_v2() will silently open in read-only mode if file permissions
   // prevent writing.  Therefore, tell initSchema() to verify that the database
   // is writable.
-  bool centralWritable = true;
+  bool shouldBeWritable = RuntimeOption::RepoCentralMode == RepoMode::ReadWrite;
+  bool centralWritable = shouldBeWritable;
   if (initSchema(RepoIdCentral, centralWritable, errorMsg) == RepoStatus::error
-      || !centralWritable) {
+      || (!centralWritable && shouldBeWritable)) {
     TRACE(1, "Repo::initSchema() failed for candidate central repo '%s'\n",
              repoPath.c_str());
     struct stat repoStat;
@@ -1037,18 +1055,19 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
     return RepoStatus::error;
   }
   m_centralRepo = repoPath;
+  m_centralWritable = centralWritable;
   setCentralRepoFileMode(repoPath);
   TRACE(1, "Central repo: '%s'\n", m_centralRepo.c_str());
   return RepoStatus::success;
 }
 
 bool Repo::initLocal() {
-  if (RuntimeOption::RepoLocalMode.compare("--")) {
+  if (RuntimeOption::RepoLocalMode != RepoMode::Closed) {
     bool isWritable;
-    if (!RuntimeOption::RepoLocalMode.compare("rw")) {
+    if (RuntimeOption::RepoLocalMode == RepoMode::ReadWrite) {
       isWritable = true;
     } else {
-      assertx(!RuntimeOption::RepoLocalMode.compare("r-"));
+      assertx(RuntimeOption::RepoLocalMode == RepoMode::ReadOnly);
       isWritable = false;
     }
 
@@ -1110,7 +1129,6 @@ bool Repo::attachLocal(const char* path, bool isWritable) {
     return false;
   }
   m_localRepo = repoPath;
-  m_localReadable = true;
   TRACE(1, "Local repo: '%s' (read%s)\n",
            m_localRepo.c_str(), m_localWritable ? "-write" : "-only");
   return true;

@@ -470,7 +470,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // Default RepoLocalMode to off so we build systemlib from source.
   // This can be overridden when running lots of repo builds (eg
   // test/run) for better performance.
-  RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoLocalMode = RepoMode::Closed;
   RuntimeOption::RepoJournal = "memory";
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
@@ -479,7 +479,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // If RepoLocalMode gets set to rw, we'll read a cache of previously
   // parsed units, and attempt to update it with any newly parsed
   // units. If that repo is invalid, we want to delete it up front.
-  Repo::s_deleteLocalOnFailure = RuntimeOption::RepoLocalMode=="rw";
+  Repo::s_deleteLocalOnFailure = RuntimeOption::RepoLocalMode == RepoMode::ReadWrite;
 
   initialize_repo();
 
@@ -706,7 +706,7 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   }
   unlink(RuntimeOption::RepoCentralPath.c_str());
 
-  if (RuntimeOption::RepoLocalMode != "rw") {
+  if (RuntimeOption::RepoLocalMode != RepoMode::ReadWrite) {
     // No point writing to the central repo, because we're going to
     // remove it before writing the final repo.
     RuntimeOption::RepoCommit = false;
@@ -745,7 +745,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   }
 
   Repo::shutdown();
-  RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoLocalMode = RepoMode::Closed;
   unlink(RuntimeOption::RepoCentralPath.c_str());
   /* without this, emitClass allows classes with interfaces to be
      hoistable */

@@ -512,7 +512,7 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoAuthoritative = true;
 
   LitstrTable::init();
-  RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoLocalMode = RepoMode::Closed;
   open_repo(input_repo);
   Repo::get().loadGlobalData(false);
   LitstrTable::fini();
@@ -534,7 +534,7 @@ int main(int argc, char** argv) try {
   RuntimeOption::Load(ini, config);
   RuntimeOption::RepoLocalPath       = "/tmp/hhbbc.repo";
   RuntimeOption::RepoCentralPath     = input_repo;
-  RuntimeOption::RepoLocalMode       = "--";
+  RuntimeOption::RepoLocalMode       = RepoMode::Closed;
   RuntimeOption::RepoJournal         = "memory";
   RuntimeOption::RepoCommit          = false;
   RuntimeOption::EvalJit             = false;

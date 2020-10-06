@@ -997,7 +997,10 @@ function hhvm_cmd(
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
     $hhbbc_repo = '"' . test_repo($options, $test) . "/$program.$repo_suffix\"";
-    $cmd .= ' -vRepo.Authoritative=true -vRepo.Commit=0';
+    $cmd .= ' -vRepo.Authoritative=true';
+    $cmd .= ' -vRepo.Commit=0';
+    $cmd .= ' -vRepo.Local.Mode=--';
+    $cmd .= ' -vRepo.Central.Mode=r-';
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
 

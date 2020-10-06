@@ -65,6 +65,12 @@ enum class JitSerdesMode {
   DeserializeAndExit    = 0x12,         // 10010
 };
 
+enum class RepoMode {
+  Closed    = 0,
+  ReadOnly  = 1,
+  ReadWrite = 2,
+};
+
 struct RepoOptions {
   RepoOptions(const RepoOptions&) = default;
   RepoOptions(RepoOptions&&) = default;
@@ -1327,8 +1333,9 @@ public:
   static std::string CodeCoverageOutputFile;
 
   // Repo (hhvm bytecode repository) options
-  static std::string RepoLocalMode;
+  static RepoMode RepoLocalMode;
   static std::string RepoLocalPath;
+  static RepoMode RepoCentralMode;
   static std::string RepoCentralPath;
   static int32_t RepoCentralFileMode;
   static std::string RepoCentralFileUser;

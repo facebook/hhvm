@@ -366,7 +366,7 @@ static bool php_ldap_do_modify(const Resource& link, const String& dn, const Arr
   /* end additional , gerrit thomson */
 
   bool ret = false;
-  Array stringHolder;
+  Array stringHolder = Array::CreateVec();
   for (int i = 0; i < num_attribs; i++) {
     ldap_mods[i] = (LDAPMod*)malloc(sizeof(LDAPMod));
     ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
@@ -502,7 +502,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
   int num_attribs = arr_attributes.size();
   int old_sizelimit = -1, old_timelimit = -1, old_deref = -1;
   auto ldap_attrs = std::unique_ptr<char*[]>{new char*[num_attribs+1]};
-  Array stringHolder;
+  Array stringHolder = Array::CreateVec();
   char *ldap_base_dn = nullptr;
   char *ldap_filter = nullptr;
 
@@ -709,8 +709,8 @@ static void get_attributes(Array &ret, LDAP *ldap,
     Array tmp;
     tmp.set(s_count, num_values);
     for (int i = 0; i < num_values; i++) {
-      tmp.append(String(ldap_value[i]->bv_val, ldap_value[i]->bv_len,
-                        CopyString));
+      auto const val = ldap_value[i];
+      tmp.set(i, String(val->bv_val, val->bv_len, CopyString));
     }
     ldap_value_free_len(ldap_value);
 
@@ -784,7 +784,7 @@ Variant HHVM_FUNCTION(ldap_explode_dn,
   Array ret;
   ret.set(s_count, count);
   for (i = 0; i < count; i++) {
-    ret.append(String(ldap_value[i], CopyString));
+    ret.set(i, String(ldap_value[i], CopyString));
   }
 
   ldap_value_free(ldap_value);
@@ -1438,7 +1438,7 @@ bool HHVM_FUNCTION(ldap_set_option,
       ctrls = (LDAPControl**)malloc((1 + ncontrols) * sizeof(*ctrls));
       *ctrls = nullptr;
       ctrlp = ctrls;
-      Array stringHolder;
+      Array stringHolder = Array::CreateVec();
       for (ArrayIter iter(newval.toArray()); iter; ++iter) {
         Variant vctrlval = iter.second();
         if (!vctrlval.isArray()) {
@@ -1972,8 +1972,8 @@ Variant HHVM_FUNCTION(ldap_get_values_len,
   int num_values = ldap_count_values_len(ldap_value_len);
   Array ret;
   for (int i = 0; i < num_values; i++) {
-    ret.append(String(ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len,
-                      CopyString));
+    auto const val = ldap_value_len[i];
+    ret.set(i, String(val->bv_val, val->bv_len, CopyString));
   }
   ret.set(s_count, num_values);
   ldap_value_free_len(ldap_value_len);

@@ -168,11 +168,17 @@ type dep_edges
 type mode =
   | SQLiteMode
   | CustomMode of string
+  | SaveCustomMode of {
+      graph: string option;
+      new_edges_dir: string;
+    }
 [@@deriving show]
 
 val get_mode : unit -> mode
 
 val set_mode : mode -> unit
+
+val worker_id : int option ref
 
 val force_load_custom_dep_graph : unit -> (unit, string) result
 

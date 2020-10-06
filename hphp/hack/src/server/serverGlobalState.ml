@@ -69,7 +69,8 @@ let restore
   Relative_path.(set_path_prefix Tmp saved_tmp);
   Typing_global_inference.restore_path saved_gi_tmp;
   Typing_deps.trace := trace;
-  Typing_deps.(set_mode deps_mode);
+  Typing_deps.set_mode deps_mode;
+  Typing_deps.worker_id := Some worker_id;
   Errors.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
   Errors.allowed_fixme_codes_partial := allowed_fixme_codes_partial;
   Errors.codes_not_raised_partial := codes_not_raised_partial;

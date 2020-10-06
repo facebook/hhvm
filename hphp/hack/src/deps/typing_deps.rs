@@ -33,14 +33,23 @@ fn _static_assert() {
     let _ = [(); 0 - (!(8 == std::mem::size_of::<usize>()) as usize)];
 }
 
-/// We record the dep graph filename in every worker. If a worker
-/// tries to read from it, we lazily open the graph.
-static DEPGRAPH_FILENAME: OnceCell<OsString> = OnceCell::new();
+/// Custom node, we'll be generating 64-bit hashes.
+///
+/// The optional string points to an existing dep graph, if available.
+/// This file name will be set in every worker, and when trying to read
+/// from it, will be lazily opened.
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct DepGraphMode(Option<OsString>);
+
+static DEPGRAPH_MODE: OnceCell<DepGraphMode> = OnceCell::new();
 
 /// A structure wrapping the memory-mapped dependency graph.
 /// Each worker will itself lazily (or eagerly upon request)
 /// open a memory-mapping to the dependency graph.
-static DEPGRAPH: OnceCell<UnsafeDepGraph> = OnceCell::new();
+///
+/// It's an option, because custom mode might be enabled without
+/// an existing saved-state.
+static DEPGRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
 
 /// The dependency graph delta.
 ///
@@ -91,38 +100,44 @@ impl UnsafeDepGraph {
         &self._do_not_reference_depgraph
     }
 
-    /// Register the dep graph filename.
+    /// Enable the custom dep graph, either with or without existing
+    /// saved-state.
     ///
     /// # Panics
     ///
-    /// If a previous file name was already registered.
-    pub fn register(depgraph_fn: OsString) {
-        let current_fn = DEPGRAPH_FILENAME.get_or_init(|| depgraph_fn.clone());
+    /// If previously called with a different argument.
+    pub fn enable(depgraph_fn: Option<OsString>) {
+        let new_mode = DepGraphMode(depgraph_fn);
+        let current_mode = DEPGRAPH_MODE.get_or_init(|| new_mode.clone());
 
-        if current_fn != &depgraph_fn {
-            panic!("programming error: dep graph filename already registered");
+        if current_mode != &new_mode {
+            panic!("programming error: dep graph mode already enabled");
         }
     }
 
-    /// Load the graph using `DEPGRAPH_FILENAME`
+    /// Load the graph using `DEPGRAPH_MODE`
     ///
     /// A no-op if the graph is already loaded.
     ///
     /// # Panics
     ///
-    /// If this function is called before first registering
-    /// the file path using `register`.
+    /// If this function is called before enabling custom mode
+    /// using `enable`.
     pub fn load() -> Result<(), String> {
         let _depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
-            let depgraph_fn: Option<&OsString> = DEPGRAPH_FILENAME.get();
-            let depgraph_fn = depgraph_fn.unwrap_or_else(|| {
-                panic!("programming error: cannot call load before registering path")
-            });
-
-            let opener = DepGraphOpener::from_path(&depgraph_fn)
-                .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
-            let depgraph = UnsafeDepGraph::new(opener)?;
-            Ok(depgraph)
+            match DEPGRAPH_MODE.get() {
+                None => panic!("programming error: cannot call load before enabling mode"),
+                Some(DepGraphMode(None)) => {
+                    // Enabled, but we don't have a saved-state, so we can't open it
+                    Ok(None)
+                }
+                Some(DepGraphMode(Some(depgraph_fn))) => {
+                    let opener = DepGraphOpener::from_path(&depgraph_fn)
+                        .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
+                    let depgraph = UnsafeDepGraph::new(opener)?;
+                    Ok(Some(depgraph))
+                }
+            }
         })?;
 
         Ok(())
@@ -132,8 +147,8 @@ impl UnsafeDepGraph {
     ///
     /// # Panics
     ///
-    /// Panics if the graph is not loaded, and a graph
-    /// file name is not registered.
+    /// Panics if the graph is not loaded, and custom mode is not enabled
+    /// or custom mode is enabled, but without a saved-state.
     ///
     /// Panics if the graph is not yet loaded, and opening
     /// the graph results in an error.
@@ -146,7 +161,34 @@ impl UnsafeDepGraph {
         }
 
         let g = DEPGRAPH.get().unwrap();
-        f(g.depgraph())
+        f(g.as_ref()
+            .expect("no saved-state dep graph available")
+            .depgraph())
+    }
+
+    /// Run the closure with the loaded dep graph. If the custom dep graph
+    /// mode was enabled without a saved-state, return the passed default
+    /// value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the graph is not loaded, and custom mode was not enabled.
+    ///
+    /// Panics if the graph is not yet loaded, and opening
+    /// the graph results in an error.
+    pub fn with_default<F, R>(default: R, f: F) -> R
+    where
+        for<'a> F: FnOnce(&'a DepGraph<'a>) -> R,
+    {
+        if !Self::is_initialized() {
+            Self::load().unwrap();
+        }
+
+        let g = DEPGRAPH.get().unwrap();
+        match g.as_ref() {
+            None => default,
+            Some(g) => f(g.depgraph()),
+        }
     }
 
     /// Return whether the global custom dependency graph is initialized.
@@ -156,6 +198,18 @@ impl UnsafeDepGraph {
         // just does an atomic load with acquire semantics, which doesn't
         // require any memory fences on x86.
         DEPGRAPH.get().is_some()
+    }
+
+    /// Return whether the custom dependency graph is enabled.
+    ///
+    /// For example, used to determine whether 64-bit or 32-bit hashes
+    /// should be generated.
+    #[inline(always)]
+    pub fn is_enabled() -> bool {
+        // This should be really fast on x86, as the `get` call
+        // just does an atomic load with acquire semantics, which doesn't
+        // require any memory fences on x86.
+        DEPGRAPH_MODE.get().is_some()
     }
 }
 
@@ -277,7 +331,7 @@ fn postprocess_hash(dep_type: DepType, hash: u64) -> u64 {
         }
     };
 
-    if !UnsafeDepGraph::is_initialized() {
+    if !UnsafeDepGraph::is_enabled() {
         // We are in the legacy dependency graph system:
         //
         // The shared-memory dependency graph stores edges as pairs of vertices.
@@ -412,8 +466,8 @@ pub fn combine_hashes(dep_hash: u64, naming_hash: i64) -> i64 {
 
 // Functions to load the dep graph
 ocaml_ffi! {
-    fn hh_custom_dep_graph_register(depgraph_fn: OsString) {
-        UnsafeDepGraph::register(depgraph_fn);
+    fn hh_custom_dep_graph_enable(depgraph_fn: Option<OsString>) {
+        UnsafeDepGraph::enable(depgraph_fn);
     }
 
     fn hh_custom_dep_graph_force_load() -> Result<(), String> {
@@ -506,7 +560,7 @@ ocaml_ffi! {
 // Functions to query the dependency graph
 ocaml_ffi! {
     fn hh_custom_dep_graph_has_edge(dependent: Dep, dependency: Dep) -> bool {
-        UnsafeDepGraph::with(move |g| {
+        UnsafeDepGraph::with_default(false, move |g| {
             match g.hash_list_for(dependency) {
                 Some(hash_list) => g.hash_list_contains(hash_list, dependent),
                 None => false,

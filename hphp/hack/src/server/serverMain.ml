@@ -1269,9 +1269,16 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   (* We must set the dependency graph mode here, BEFORE we launch the workers
    * that will involve saving and restoring the dependency graph mode. *)
   let () =
-    match ServerArgs.with_dep_graph_v2 options with
-    | Some fn -> Typing_deps.(set_mode @@ CustomMode fn)
-    | None -> Typing_deps.(set_mode @@ SQLiteMode)
+    let open Typing_deps in
+    match
+      (ServerArgs.with_dep_graph_v2 options, ServerArgs.save_64bit options)
+    with
+    | (Some graph, Some new_edges_dir) ->
+      set_mode @@ SaveCustomMode { graph = Some graph; new_edges_dir }
+    | (Some graph, None) -> Typing_deps.(set_mode @@ CustomMode graph)
+    | (None, Some new_edges_dir) ->
+      set_mode @@ SaveCustomMode { graph = None; new_edges_dir }
+    | (None, None) -> set_mode SQLiteMode
   in
 
   (* The OCaml default is 500, but we care about minimizing the memory

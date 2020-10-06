@@ -44,9 +44,6 @@ struct LoggingArray : BespokeArray {
   // Record that this array reached a given profiling tracelet.
   void logReachEvent(TransID transId, uint32_t guardIdx);
 
-  // LoggingArray must keep the legacy bit for the wrapped array in sync.
-  void setLegacyArrayInPlace(bool legacy);
-
   bool checkInvariants() const;
 
 #define X(Return, Name, Args...) static Return Name(Args);

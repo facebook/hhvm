@@ -280,11 +280,16 @@ public:
   bool hasApcTv() const;
 
   /*
-   * Whether the array has legacy behaviors enabled (this bit can only be set
-   * for vecs and dicts).
+   * Whether the array has legacy behaviors enabled. This method can only be
+   * called for dvarrays, vecs and dicts.
+   *
+   * The default setter has the normal copy/escalation behavior. If it returns
+   * a new ArrayData, the caller must dec-ref the old one. The in-place setter
+   * may only be called if the array is known to have exactly one ref.
    */
   bool isLegacyArray() const;
-  void setLegacyArray(bool legacy);
+  ArrayData* setLegacyArray(bool copy, bool legacy);
+  void setLegacyArrayInPlace(bool legacy);
 
   bool hasStrKeyTable() const;
 

@@ -1709,7 +1709,9 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
     ai.append(tvAsCVarRef(&*v));
   }
   auto var = ai.toVariant();
-  var.asArrRef().setLegacyArray(mark == LegacyMark::Marked);
+  if (mark == LegacyMark::Marked) {
+    var.asArrRef().setLegacyArray(true);
+  }
   if (tag.valid()) {
     assertx(RuntimeOption::EvalArrayProvenance);
     arrprov::setTag(var.asArrRef().get(), tag.get());
@@ -1755,7 +1757,9 @@ folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
       add(ai, keyHelper(elm.first), tvAsCVarRef(&*v));
     }
     auto var = ai.toVariant();
-    var.asArrRef().setLegacyArray(mark == LegacyMark::Marked);
+    if (mark == LegacyMark::Marked) {
+      var.asArrRef().setLegacyArray(true);
+    }
     if (tag.valid()) {
       assertx(RuntimeOption::EvalArrayProvenance);
       assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));

@@ -80,7 +80,6 @@ protected:
 public:
   size_t heapSize() const;
   void scan(type_scan::Scanner& scan) const;
-  void setLegacyArrayBit(bool legacy);
 
   bool checkInvariants() const;
 
@@ -172,9 +171,7 @@ public:
   static ArrayData* CopyStatic(const ArrayData* ad);
   static ArrayData* ToDVArray(ArrayData* ad, bool copy);
   static ArrayData* ToHackArr(ArrayData* ad, bool copy);
-
-  // flags
-  static void SetLegacyArrayInPlace(ArrayData* ad, bool legacy);
+  static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy);
 };
 
 } // namespace HPHP

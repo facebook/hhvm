@@ -1068,25 +1068,41 @@ bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
   return false;
 }
 
-void ArrayData::setLegacyArray(bool legacy) {
+ArrayData* ArrayData::setLegacyArray(bool copy, bool legacy) {
+  assertx(IMPLIES(cowCheck(), copy));
+  assertx(IMPLIES(!RO::EvalHackArrDVArrs, isDVArray()));
+  assertx(IMPLIES(RO::EvalHackArrDVArrs, isDictType() || isVecType()));
+
+  if (legacy == isLegacyArray()) return this;
+
+  if (!isVanilla()) return BespokeArray::SetLegacyArray(this, copy, legacy);
+
+  auto const ad = [&]{
+    if (!copy) return this;
+    auto const packed = hasVanillaPackedLayout();
+    return packed ? PackedArray::Copy(this) : MixedArray::Copy(this);
+  }();
+  ad->setLegacyArrayInPlace(legacy);
+  return ad;
+}
+
+void ArrayData::setLegacyArrayInPlace(bool legacy) {
   assertx(hasExactlyOneRef());
-  assertx(isDVArray() || isDictType() || isVecType());
-  if (isVanilla()) {
-    m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
-    if (legacy && RO::EvalArrayProvenance) arrprov::clearTag(this);
+  if (legacy) {
+    m_aux16 |= kLegacyArray;
+    if (RO::EvalArrayProvenance && isVanilla()) arrprov::clearTag(this);
   } else {
-    BespokeArray::SetLegacyArrayInPlace(this, legacy);
+    m_aux16 &= ~kLegacyArray;
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayData* ArrayData::toDVArrayWithLogging(bool copy) {
+  assertx(isVecType() || isDictType());
   if (RO::EvalHackArrDVArrs) {
-    if (RO::EvalHackArrDVArrMark && !isLegacyArray()) {
-      auto const result = copy ? this->copy() : this;
-      result->setLegacyArray(true);
-      return result;
+    if (RO::EvalHackArrDVArrMark) {
+      return setLegacyArray(copy, /*legacy=*/true);
     }
     return this;
   }
@@ -1094,6 +1110,7 @@ ArrayData* ArrayData::toDVArrayWithLogging(bool copy) {
 }
 
 ArrayData* ArrayData::toHackArrWithLogging(bool copy) {
+  assertx(isDVArray());
   if (isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
     raise_hack_arr_compat_cast_marked_array_notice(this);
   }
@@ -1101,6 +1118,7 @@ ArrayData* ArrayData::toHackArrWithLogging(bool copy) {
 }
 
 ArrayData* ArrayData::toVArray(bool copy) {
+  assertx(IMPLIES(cowCheck(), copy));
   if (isVArray()) return this;
   if (isVecType()) return toDVArrayWithLogging(copy);
 
@@ -1111,6 +1129,7 @@ ArrayData* ArrayData::toVArray(bool copy) {
 }
 
 ArrayData* ArrayData::toDArray(bool copy) {
+  assertx(IMPLIES(cowCheck(), copy));
   if (isDArray()) return this;
   if (isDictType()) return toDVArrayWithLogging(copy);
 
@@ -1121,6 +1140,7 @@ ArrayData* ArrayData::toDArray(bool copy) {
 }
 
 ArrayData* ArrayData::toVec(bool copy) {
+  assertx(IMPLIES(cowCheck(), copy));
   if (isVecType()) return this;
   if (isVArray()) return toHackArrWithLogging(copy);
 
@@ -1131,6 +1151,7 @@ ArrayData* ArrayData::toVec(bool copy) {
 }
 
 ArrayData* ArrayData::toDict(bool copy) {
+  assertx(IMPLIES(cowCheck(), copy));
   if (isDictType()) return this;
   if (isDArray()) return toHackArrWithLogging(copy);
 
@@ -1141,6 +1162,7 @@ ArrayData* ArrayData::toDict(bool copy) {
 }
 
 ArrayData* ArrayData::toKeyset(bool copy) {
+  assertx(IMPLIES(cowCheck(), copy));
   if (isKeysetType()) return this;
   if (empty()) return ArrayData::CreateKeyset();
   KeysetInit init{size()};

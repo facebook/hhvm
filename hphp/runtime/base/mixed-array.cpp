@@ -183,7 +183,7 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
 ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad = MakeReserveDict(size);
-    ad->setLegacyArray(RO::EvalHackArrDVArrMark);
+    ad->setLegacyArrayInPlace(RO::EvalHackArrDVArrMark);
     return ad;
   }
 
@@ -372,7 +372,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad = MakeDict(size, kvs);
-    ad->setLegacyArray(RO::EvalHackArrDVArrMark);
+    ad->setLegacyArrayInPlace(RO::EvalHackArrDVArrMark);
     return ad;
   }
 
@@ -625,7 +625,7 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
     init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
-  ad->setLegacyArray(isLegacy);
+  ad->setLegacyArrayInPlace(isLegacy);
   return ad;
 }
 
@@ -638,7 +638,7 @@ ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc, bool isMarked) {
     init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
-  ad->setLegacyArray(isMarked);
+  ad->setLegacyArrayInPlace(isMarked);
   return tagArrProv(ad, apc);
 }
 
@@ -1455,7 +1455,7 @@ ArrayData* MixedArray::ToHackArr(ArrayData* adIn, bool copy) {
   if (adIn->empty()) return ArrayData::CreateDict();
   auto const ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Dict;
-  ad->setLegacyArray(false);
+  ad->setLegacyArrayInPlace(false);
   if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   assertx(MixedArray::asMixed(ad));
   return ad;

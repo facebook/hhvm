@@ -295,12 +295,8 @@ String Array::toString() const {
 
 void Array::setLegacyArray(bool isLegacy) {
   auto const ad = get();
-  if (isLegacy == ad->isLegacyArray()) return;
-
-  if (ad->cowCheck()) {
-    m_arr = Ptr::attach(ad->copy());
-  }
-  m_arr->setLegacyArray(isLegacy);
+  auto const result = ad->setLegacyArray(ad->cowCheck(), isLegacy);
+  if (result != ad) m_arr = Ptr::attach(result);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

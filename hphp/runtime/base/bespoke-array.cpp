@@ -260,15 +260,8 @@ ArrayData* BespokeArray::ToDVArray(ArrayData* ad, bool copy) {
 ArrayData* BespokeArray::ToHackArr(ArrayData* ad, bool copy) {
   return asBespoke(ad)->vtable()->fnToHackArr(ad, copy);
 }
-
-// flags
-void BespokeArray::SetLegacyArrayInPlace(ArrayData* ad, bool legacy) {
-  assertx(ad->hasExactlyOneRef());
-  auto const bad = asBespoke(ad);
-  if (bad->layoutRaw() == bespoke::LoggingArray::layout()) {
-    bespoke::LoggingArray::As(ad)->setLegacyArrayInPlace(legacy);
-  }
-  bad->m_aux16 = (bad->m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
+ArrayData* BespokeArray::SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
+  return asBespoke(ad)->vtable()->fnSetLegacyArray(ad, copy, legacy);
 }
 
 //////////////////////////////////////////////////////////////////////////////

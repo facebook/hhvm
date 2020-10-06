@@ -515,7 +515,7 @@ struct VArrayInit {
   }
 
   VArrayInit& setLegacyArray(bool legacy) {
-    m_arr->setLegacyArray(legacy);
+    m_arr->setLegacyArrayInPlace(legacy);
     return *this;
   }
 
@@ -714,7 +714,7 @@ struct DArrayInit {
   }
 
   DArrayInit& setLegacyArray(bool legacy) {
-    m_arr->setLegacyArray(legacy);
+    m_arr->setLegacyArrayInPlace(legacy);
     return *this;
   }
 

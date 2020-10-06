@@ -70,7 +70,8 @@ namespace bespoke {
   X(ArrayData*, Dequeue, T*, Variant&) \
   X(ArrayData*, Copy, const T*) \
   X(ArrayData*, ToDVArray, T*, bool copy) \
-  X(ArrayData*, ToHackArr, T*, bool copy)
+  X(ArrayData*, ToHackArr, T*, bool copy) \
+  X(ArrayData*, SetLegacyArray, T*, bool copy, bool legacy)
 
 struct LayoutFunctions {
 #define X(Return, Name, Args...) Return (*fn##Name)(Args);
@@ -198,6 +199,9 @@ struct LayoutFunctionDispatcher {
   }
   static ArrayData* ToHackArr(ArrayData* ad, bool copy) {
     return Array::ToHackArr(Cast(ad), copy);
+  }
+  static ArrayData* SetLegacyArray(ArrayData* ad, bool copy, bool legacy) {
+    return Array::SetLegacyArray(Cast(ad), copy, legacy);
   }
 };
 

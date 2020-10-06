@@ -40,15 +40,8 @@ ArrayData* castObjToArrayLikeImpl(ObjectData* obj,
                                 A add,
                                 const char* msg) {
   if (LIKELY(obj->isCollection())) {
-    if (auto ad = collections::asArray(obj)) {
-      auto out = cast(ArrNR{ad}.asArray()).detach();
-      if (out->isRefCounted() && !out->hasExactlyOneRef()) {
-        decRefArr(out);
-        out = out->copy();
-      }
-      return RuntimeOption::EvalArrayProvenance && arrprov::arrayWantsTag(out)
-        ? tagArrProv(out)
-        : out;
+    if (auto const ad = collections::asArray(obj)) {
+      return cast(ArrNR{ad}.asArray()).detach();
     }
     return cast(collections::toArray(obj)).detach();
   }
@@ -78,7 +71,7 @@ ArrayData* castObjToVec(ObjectData* obj) {
   return castObjToArrayLikeImpl(
     obj,
     Array::CreateVec,
-    [](Array arr) { arr.setLegacyArray(false); return arr.toVec(); },
+    [](Array arr) { return arr.toVec(); },
     [](Array& arr, ArrayIter& iter) { arr.append(iter.second()); },
     "Non-iterable object to vec conversion"
   );
@@ -88,7 +81,7 @@ ArrayData* castObjToDict(ObjectData* obj) {
   return castObjToArrayLikeImpl(
     obj,
     Array::CreateDict,
-    [](Array arr) { arr.setLegacyArray(false); return arr.toDict(); },
+    [](Array arr) { return arr.toDict(); },
     [](Array& arr, ArrayIter& iter) { arr.set(iter.first(), iter.second()); },
     "Non-iterable object to dict conversion"
   );

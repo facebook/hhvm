@@ -571,13 +571,8 @@ TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
       return nullptr;
     }
 
-    if (!RO::EvalHackArrDVArrs) assertx(ad->isDVArray());
-    if (RO::EvalHackArrDVArrs) assertx(ad->isVecType() || ad->isDictType());
-    if (ad->isLegacyArray()) return nullptr;
-
-    auto result = copy_if_needed(ad, cow);
-    result->setLegacyArray(true);
-    return cow ? result : nullptr;
+    auto const result = ad->setLegacyArray(cow, true);
+    return result == ad ? nullptr : result;
   };
 
   // Unmark legacy vecs/dicts to silence logging,
@@ -587,11 +582,9 @@ TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
       return nullptr;
     }
     if (!RO::EvalHackArrDVArrs && !ad->isDVArray()) return nullptr;
-    if (!ad->isLegacyArray()) return nullptr;
 
-    auto result = copy_if_needed(ad, cow);
-    result->setLegacyArray(false);
-    return cow ? result : nullptr;
+    auto const result = ad->setLegacyArray(cow, false);
+    return result == ad ? nullptr : result;
   };
 
   auto const ad = [&] {

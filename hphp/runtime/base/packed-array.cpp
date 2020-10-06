@@ -382,7 +382,7 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
 ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad =  MakeReserveVec(capacity);
-    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
     return ad;
   }
 
@@ -441,7 +441,7 @@ ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
   // grows down.
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad = MakeVec(size, values);
-    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
     return ad;
   }
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
@@ -461,7 +461,7 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
 ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* values) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad = MakeVecNatural(size, values);
-    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
     return ad;
   }
 
@@ -480,7 +480,7 @@ ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) 
 ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     auto const ad = MakeUninitializedVec(size);
-    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    ad->setLegacyArrayInPlace(RuntimeOption::EvalHackArrDVArrMark);
     return ad;
   }
   auto ad = MakeReserveImpl(size, HeaderKind::Packed);
@@ -511,7 +511,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
     init.append(apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
-  ad->setLegacyArray(isLegacy);
+  ad->setLegacyArrayInPlace(isLegacy);
   return ad;
 }
 
@@ -524,7 +524,7 @@ ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc, bool isMarked) {
     init.append(apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
-  ad->setLegacyArray(isMarked);
+  ad->setLegacyArrayInPlace(isMarked);
   return tagArrProv(ad, apc);
 }
 
@@ -830,7 +830,7 @@ ArrayData* PackedArray::ToHackArr(ArrayData* adIn, bool copy) {
   if (adIn->empty()) return ArrayData::CreateVec();
   auto const ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Vec;
-  ad->setLegacyArray(false);
+  ad->setLegacyArrayInPlace(false);
   if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   assertx(checkInvariants(ad));
   return ad;

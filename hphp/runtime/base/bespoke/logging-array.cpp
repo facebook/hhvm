@@ -207,9 +207,8 @@ const LoggingArray* LoggingArray::As(const ArrayData* ad) {
 
 void LoggingArray::updateKindAndLegacy() {
   assertx(hasExactlyOneRef());
-  auto const legacy = wrapped->isLegacyArray();
   m_kind = getBespokeKind(wrapped->kind());
-  m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
+  setLegacyArrayInPlace(wrapped->isLegacyArray());
   assertx(checkInvariants());
 }
 
@@ -222,15 +221,6 @@ void LoggingArray::updateSize() {
 
 void LoggingArray::logReachEvent(TransID transId, uint32_t guardIdx) {
   profile->logReach(transId, guardIdx);
-}
-
-void LoggingArray::setLegacyArrayInPlace(bool legacy) {
-  assert(hasExactlyOneRef());
-  if (wrapped->cowCheck()) {
-    wrapped->decRefCount();
-    wrapped = wrapped->copy();
-  }
-  wrapped->setLegacyArray(legacy);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -479,11 +469,18 @@ ArrayData* LoggingArray::Copy(const LoggingArray* lad) {
 }
 ArrayData* LoggingArray::ToDVArray(LoggingArray* lad, bool copy) {
   logEvent(lad, ArrayOp::ToDVArray);
-  return convert(lad, lad->wrapped->toDVArray(copy));
+  auto const cow = copy || lad->wrapped->cowCheck();
+  return convert(lad, lad->wrapped->toDVArray(cow));
 }
 ArrayData* LoggingArray::ToHackArr(LoggingArray* lad, bool copy) {
   logEvent(lad, ArrayOp::ToHackArr);
-  return convert(lad, lad->wrapped->toHackArr(copy));
+  auto const cow = copy || lad->wrapped->cowCheck();
+  return convert(lad, lad->wrapped->toHackArr(cow));
+}
+ArrayData* LoggingArray::SetLegacyArray(
+    LoggingArray* lad, bool copy, bool legacy) {
+  auto const cow = copy || lad->wrapped->cowCheck();
+  return convert(lad, lad->wrapped->setLegacyArray(cow, legacy));
 }
 
 //////////////////////////////////////////////////////////////////////////////

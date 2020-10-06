@@ -102,27 +102,17 @@ void cgCheckVecBoundsLA(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-ArrayData* setLegacyHelper(ArrayData* arr, bool set) {
-  if (arr->cowCheck()) {
-    auto ad = arr->copy();
-    arr->decRefCount();
-    ad->setLegacyArray(set);
-    return ad;
-  } else {
-    arr->setLegacyArray(set);
-    return arr;
-  }
+ArrayData* setLegacyHelper(ArrayData* ad, bool legacy) {
+  auto const result = ad->setLegacyArray(ad->cowCheck(), legacy);
+  if (result != ad) decRefArr(ad);
+  return result;
 }
 
 void setLegacyImpl(IRLS& env, const IRInstruction* inst, bool set) {
   auto const args = argGroup(env, inst).ssa(0).imm(set);
-
-  cgCallHelper(vmain(env),
-               env,
-               CallSpec::direct(setLegacyHelper),
-               callDest(env, inst),
-               SyncOptions::None,
-               args);
+  auto const target = CallSpec::direct(setLegacyHelper);
+  cgCallHelper(vmain(env), env, target, callDest(env, inst),
+               SyncOptions::None, args);
 }
 
 }

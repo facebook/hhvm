@@ -506,15 +506,16 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
 }
 
 void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy) {
-  if (RuntimeOption::EvalHackArrDVArrs &&
-      !isVecType(type(tv)) && !isDictType(type(tv))) return;
-  if (!RuntimeOption::EvalHackArrDVArrs && !isPHPArrayType(type(tv))) return;
+  if (!RO::EvalHackArrDVArrs && !isPHPArrayType(type(tv))) return;
+  if (RO::EvalHackArrDVArrs && !tvIsVec(tv) && !tvIsDict(tv)) return;
+
   auto const adIn = val(tv).parr;
-  if (adIn->isLegacyArray() == isLegacy) return;
-  auto const ad = adIn->cowCheck() ? adIn->copy() : adIn;
-  if (ad != adIn) decRefArr(adIn);
-  ad->setLegacyArray(isLegacy);
+  auto const ad = adIn->setLegacyArray(adIn->cowCheck(), isLegacy);
+  if (ad == adIn) return;
+
+  decRefArr(adIn);
   val(tv).parr = ad;
+  type(tv) = dt_with_rc(type(tv));
   assertx(tvIsPlausible(*tv));
 }
 

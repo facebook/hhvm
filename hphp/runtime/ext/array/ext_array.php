@@ -312,8 +312,10 @@ function array_pad(
  *   not an array), NULL will be returned.
  *
  */
-<<__Native>>
-function array_pop(inout mixed $array): mixed;
+<<__Native, __Pure, __AtMostRxAsArgs>>
+function array_pop(
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array
+): mixed;
 
 /**
  * array_product() returns the product of values in an array.
@@ -344,8 +346,12 @@ function array_product(
  * @return mixed - Returns the new number of elements in the container.
  *
  */
-<<__Native>>
-function array_push(inout mixed $array, mixed $var, ...$args): mixed;
+<<__Native, __Pure, __AtMostRxAsArgs>>
+function array_push(
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
+  mixed $var,
+  ...$args
+): mixed;
 
 /**
  * Picks one ore more random entries out of an array, and returns the key (or
@@ -439,8 +445,10 @@ function array_search(
  *   not an array.
  *
  */
-<<__Native>>
-function array_shift(inout mixed $array): mixed;
+<<__Native, __Pure, __AtMostRxAsArgs>>
+function array_shift(
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array
+): mixed;
 
 /**
  * array_slice() returns the sequence of elements from the array array as
@@ -560,8 +568,12 @@ function array_unique(
  * @return mixed - Returns the new number of elements in the array.
  *
  */
-<<__Native>>
-function array_unshift(inout mixed $array, mixed $var, ...$argv): mixed;
+<<__Native, __Pure, __AtMostRxAsArgs>>
+function array_unshift(
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
+  mixed $var,
+  ...$argv
+): mixed;
 
 /**
  * array_values() returns all the values from the input array and indexes
@@ -1026,9 +1038,9 @@ function array_intersect_ukey(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function sort(
-  inout mixed $array,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1042,9 +1054,9 @@ function sort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function rsort(
-  inout mixed $array,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1061,9 +1073,9 @@ function rsort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function asort(
-  inout mixed $array,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1080,9 +1092,9 @@ function asort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function arsort(
-  inout mixed $array,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1097,9 +1109,9 @@ function arsort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function ksort(
-  inout mixed $array,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1114,9 +1126,9 @@ function ksort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function krsort(
-  inout mixed $array,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
   int $sort_flags = 0,
 ): bool;
 
@@ -1138,10 +1150,10 @@ function krsort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function usort(
-  inout mixed $array,
-  mixed $cmp_function,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
 ): bool;
 
 /**
@@ -1157,10 +1169,10 @@ function usort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function uasort(
-  inout mixed $array,
-  mixed $cmp_function,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
 ): bool;
 
 /**
@@ -1178,10 +1190,10 @@ function uasort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
+<<__Native, __Pure, __AtMostRxAsArgs>>
 function uksort(
-  inout mixed $array,
-  mixed $cmp_function,
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array,
+  <<__AtMostRxAsFunc>> mixed $cmp_function,
 ): bool;
 
 /**
@@ -1196,8 +1208,8 @@ function uksort(
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function natsort(inout mixed $array): bool;
+<<__Native, __Pure, __AtMostRxAsArgs>>
+function natsort(<<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array): bool;
 
 /**
  * natcasesort() is a case insensitive version of natsort(). This function
@@ -1210,8 +1222,10 @@ function natsort(inout mixed $array): bool;
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native>>
-function natcasesort(inout mixed $array): bool;
+<<__Native, __Pure, __AtMostRxAsArgs>>
+function natcasesort(
+  <<__OnlyRxIfImpl(AnyArray::class)>> inout mixed $array
+): bool;
 
 <<__Native>>
 function i18n_loc_get_default(): string;

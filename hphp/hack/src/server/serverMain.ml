@@ -637,7 +637,7 @@ let has_pending_disk_changes genv =
   | Some reader when Buffered_line_reader.is_readable reader -> true
   | _ -> false
 
-let serve_one_iteration genv env client_provider =
+let generate_and_update_recheck_id env =
   let recheck_id = new_serve_iteration_id () in
   let env =
     {
@@ -646,14 +646,17 @@ let serve_one_iteration genv env client_provider =
         { env.ServerEnv.init_env with ServerEnv.recheck_id = Some recheck_id };
     }
   in
+  (env, recheck_id)
+
+let serve_one_iteration genv env client_provider =
+  let (env, recheck_id) = generate_and_update_recheck_id env in
   ServerMonitorUtils.exit_if_parent_dead ();
   ServerProgress.send_to_monitor (MonitorRpc.PROGRESS "ready");
-  let has_default_client_pending =
-    Option.is_some env.default_client_pending_command_needs_full_check
-  in
-  let can_accept_clients = not @@ ServerRevisionTracker.is_hg_updating () in
-  let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
   let client_kind =
+    let has_default_client_pending =
+      Option.is_some env.default_client_pending_command_needs_full_check
+    in
+    let can_accept_clients = not @@ ServerRevisionTracker.is_hg_updating () in
     match (can_accept_clients, has_default_client_pending) with
     (* If we are already blocked on some client, do not accept more of them.
      * Other clients (that connect through priority pipe, or persistent clients)
@@ -672,7 +675,7 @@ let serve_one_iteration genv env client_provider =
         client_provider
         env.persistent_client
         ~ide_idle:env.ide_idle
-        ~idle_gc_slice
+        ~idle_gc_slice:genv.local_config.ServerLocalConfig.idle_gc_slice
         client_kind
   in
   let env =

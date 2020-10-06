@@ -649,10 +649,9 @@ let check_constructors
     env
   )
 
-(* Checks if a child is compatible with the type constant of its parent.
- * This requires the child's constraint and assigned type to be a subtype of
- * the parent's type constant.
- *)
+(** Checks if a child is compatible with the type constant of its parent.
+    This requires the child's constraint and assigned type to be a subtype of
+    the parent's type constant. *)
 let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     =
   let (pos, name) = child_typeconst.ttc_name in

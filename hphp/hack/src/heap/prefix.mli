@@ -8,13 +8,13 @@
  *)
 
 (*****************************************************************************)
-(* The prefix is used to guarantee that we are not mixing different kind of 
+(* The prefix is used to guarantee that we are not mixing different kind of
  * keys in the heap.
  * It just creates a new prefix every time its called.
  *)
 (*****************************************************************************)
 
-type t (* Better make the type abstract *)
+type t
 
 val make : unit -> t
 

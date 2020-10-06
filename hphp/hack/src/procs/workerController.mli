@@ -50,7 +50,7 @@ type worker
  * the result of the job when the task is done (cf multiWorker.ml).
  *)
 (*****************************************************************************)
-type ('a, 'b) handle
+type ('job, 'result) handle
 
 (* An empty type *)
 type void

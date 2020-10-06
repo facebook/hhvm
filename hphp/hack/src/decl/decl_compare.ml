@@ -518,7 +518,7 @@ let get_class_deps
     in
     (* This adds additional files to recheck if the type signature of a class
      * element has changed. We do not require adding any additional redecls
-     * because the type is not folded in anyway so it won't affect any other
+     * because the type is not folded in any way so it won't affect any other
      * classes.
      *)
     let (deps, is_changed) = ClassEltDiff.compare class1 class2 in

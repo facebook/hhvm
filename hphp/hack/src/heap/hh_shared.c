@@ -1935,7 +1935,7 @@ static void raise_hash_table_full(void) {
  * check the perf before modifying.
  *
  * Returns the number of bytes allocated into the shared heap, or a negative
- * number if nothing no new memory was allocated.
+ * number if no new memory was allocated.
  */
 /*****************************************************************************/
 value hh_add(value key, value data) {
@@ -1948,6 +1948,7 @@ value hh_add(value key, value data) {
     uint64_t slot_hash = hashtbl[slot].hash;
 
     if(slot_hash == hash) {
+      // overwrite previous value for this hash
       CAMLreturn(write_at(slot, data));
     }
 

@@ -480,22 +480,25 @@ end) : Key with type userkey = UserKeyType.t = struct
    *)
   let old_prefix = "old_"
 
-  let make prefix x = Prefix.make_key prefix (UserKeyType.to_string x)
+  let make : Prefix.t -> userkey -> t =
+   (fun prefix x -> Prefix.make_key prefix (UserKeyType.to_string x))
 
-  let make_old prefix x =
+  let make_old : Prefix.t -> userkey -> old =
+   fun prefix x ->
     old_prefix ^ Prefix.make_key prefix (UserKeyType.to_string x)
 
-  let to_old x = old_prefix ^ x
+  let to_old : t -> old = (fun x -> old_prefix ^ x)
 
-  let new_from_old x =
+  let new_from_old : old -> t =
+   fun x ->
     let module S = String in
     S.sub x (S.length old_prefix) (S.length x - S.length old_prefix)
 
-  let md5 = Digest.string
+  let md5 : t -> md5 = Digest.string
 
-  let md5_old = Digest.string
+  let md5_old : old -> md5 = Digest.string
 
-  let string_of_md5 x = x
+  let string_of_md5 : md5 -> string = (fun x -> x)
 end
 
 module type Raw = functor (Key : Key) (Value : Value.Type) -> sig
@@ -770,20 +773,20 @@ functor
     module Raw = Raw (Key) (Value)
 
     (**
-   * Represents a set of local changes to the view of the shared memory heap
-   * WITHOUT materializing to the changes in the actual heap. This allows us to
-   * make speculative changes to the view of the world that can be reverted
-   * quickly and correctly.
-   *
-   * A LocalChanges maintains the same invariants as the shared heap. Except
-   * add are allowed to overwrite filled keys. This is for convenience so we
-   * do not need to remove filled keys upfront.
-   *
-   * LocalChanges can be committed. This will apply the changes to the previous
-   * stack, or directly to shared memory if there are no other active stacks.
-   * Since changes are kept local to the process, this is NOT compatible with
-   * the parallelism provided by MultiWorker.ml
-   *)
+      Represents a set of local changes to the view of the shared memory heap
+      WITHOUT materializing to the changes in the actual heap. This allows us to
+      make speculative changes to the view of the world that can be reverted
+      quickly and correctly.
+
+      A LocalChanges maintains the same invariants as the shared heap. Except
+      add are allowed to overwrite filled keys. This is for convenience so we
+      do not need to remove filled keys upfront.
+
+      LocalChanges can be committed. This will apply the changes to the previous
+      stack, or directly to shared memory if there are no other active stacks.
+      Since changes are kept local to the process, this is NOT compatible with
+      the parallelism provided by MultiWorker.ml
+      *)
     module LocalChanges = struct
       type action =
         (* The value does not exist in the current stack. When committed this

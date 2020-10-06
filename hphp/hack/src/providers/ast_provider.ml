@@ -322,14 +322,15 @@ let get_ast ?(full = false) ctx path =
     Relative_path.Map.find_opt (Provider_context.get_entries ctx) path
   in
   match (entry_opt, Provider_context.get_backend ctx) with
-  | (Some entry, _) -> compute_ast (Provider_context.get_popt ctx) entry
-  (* See documentation on `entry` for its invariants.
-    The compute_ast function will use the cached (full) AST if present,
-    and otherwise will compute a full AST and cache it and return it.
-    It's okay for get_ast to return a full AST even if only asked for
-    a partial one. Our principle is that an ctx entry always indicates that
-    the file is open in the IDE, and so will benefit from a full AST at
-    some time, so we might as well get it now. *)
+  | (Some entry, _) ->
+    (* See documentation on `entry` for its invariants.
+      The compute_ast function will use the cached (full) AST if present,
+      and otherwise will compute a full AST and cache it and return it.
+      It's okay for get_ast to return a full AST even if only asked for
+      a partial one. Our principle is that an ctx entry always indicates that
+      the file is open in the IDE, and so will benefit from a full AST at
+      some time, so we might as well get it now. *)
+    compute_ast (Provider_context.get_popt ctx) entry
   | (_, Provider_backend.Shared_memory) ->
     begin
       (* Note that we might be looking up the shared ParserHeap directly, *)

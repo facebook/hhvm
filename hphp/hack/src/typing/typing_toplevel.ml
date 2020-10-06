@@ -696,6 +696,7 @@ and method_def env cls m =
       let _env = Env.log_env_change "method_def" initial_env env in
       (method_def, (pos, global_inference_env)))
 
+(** Checks that extending this parent is legal - e.g. it is not final and not const. *)
 and check_parent env class_def class_type =
   match Env.get_parent_class env with
   | Some parent_type ->
@@ -1150,6 +1151,7 @@ and class_def_ env c tc =
     @ static_vars_global_inference_envs
     @ vars_global_inference_envs )
 
+(** Checks that a dynamic element is also dynamic in the parents. *)
 and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
   (* The non-static properties that we get passed do not start with '$', but the
      static properties we want to look up do, so add it. *)
@@ -1168,6 +1170,7 @@ and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
       element_name
       ~elt_type
 
+(** Checks that a static element is also static in the parents. *)
 and check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
   (* The static properties that we get passed in start with '$', but the
      non-static properties we're matching against don't, so we need to detect
@@ -1183,6 +1186,8 @@ and check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
       element_name
       ~elt_type
 
+(** Error if there are abstract methods that this class is supposed to provide
+    implementation for. *)
 and check_extend_abstract_meth ~is_final p seq =
   List.iter seq (fun (x, ce) ->
       match ce.ce_type with
@@ -1557,7 +1562,7 @@ and class_implements_type env c1 ctype2 =
   let ctype1 = mk (r, Tapply (c1.c_name, params)) in
   Typing_extends.check_implements env ctype2 ctype1
 
-(* Type-check a property declaration, with optional initializer *)
+(** Type-check a property declaration, with optional initializer *)
 and class_var_def ~is_static cls env cv =
   (* First pick up and localize the hint if it exists *)
   let decl_cty =

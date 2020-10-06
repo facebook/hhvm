@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -463,16 +464,62 @@ struct MutationState {
   bool raised_stack_notice = false;
 };
 
-// Returns a copy of the given array that the caller may mutate in place.
-// Iterator positions in the original array are also valid for the new one.
-ArrayData* copy_if_needed(ArrayData* in, bool cow) {
-  TRACE(3, "%s %d-element rc %d %s array\n",
-        cow ? "Copying" : "Reusing", safe_cast<int32_t>(in->size()),
-        in->count(), ArrayData::kindToString(in->kind()));
-  auto const result = cow ? in->copy() : in;
-  assertx(result->hasExactlyOneRef());
-  assertx(result->iter_end() == in->iter_end());
-  return result;
+template <typename State>
+ArrayData* apply_mutation(TypedValue tv, State& state,
+                          bool cow = false, uint32_t depth = 0);
+
+template <typename Array>
+tv_lval LvalAtIterPos(ArrayData* ad, ssize_t pos) {
+  if constexpr (std::is_same<Array, PackedArray>::value) {
+    return PackedArray::LvalUncheckedInt(ad, pos);
+  } else {
+    static_assert(std::is_same<Array, MixedArray>::value);
+    return &MixedArray::asMixed(ad)->data()[pos].data;
+  }
+}
+
+template <typename Array, typename State>
+ArrayData* apply_mutation_fast(ArrayData* in, ArrayData* result,
+                               State& state, bool cow, uint32_t depth) {
+  auto const end = Array::IterEnd(in);
+  for (auto pos = Array::IterBegin(in); pos != end;
+       pos = Array::IterAdvance(in, pos)) {
+    auto const prev = *LvalAtIterPos<Array>(in, pos);
+    auto const ad = apply_mutation(prev, state, cow, depth + 1);
+    if (!ad) continue;
+
+    auto const next = make_array_like_tv(ad);
+    result = result ? result : cow ? Array::Copy(in) : in;
+    assertx(result->hasExactlyOneRef());
+    assertx(Array::IterEnd(result) == Array::IterEnd(in));
+    tvMove(next, LvalAtIterPos<Array>(result, pos));
+  }
+  return result == in ? nullptr : result;
+}
+
+template <typename State>
+ArrayData* apply_mutation_slow(ArrayData* in, ArrayData* result,
+                               State& state, bool cow, uint32_t depth) {
+  IterateKVNoInc(in, [&](auto key, auto prev) {
+    auto const ad = apply_mutation(prev, state, cow, depth + 1);
+    if (!ad) return;
+
+    auto const next = make_array_like_tv(ad);
+    if (result || !cow) {
+      result = result ? result : in;
+      auto const escalated = result->set(key, next);
+      assertx(escalated->hasExactlyOneRef());
+      if (escalated == result) return;
+      if (result != in) result->release();
+      result = escalated;
+    } else {
+      in->incRefCount();
+      SCOPE_EXIT { in->decRefCount(); };
+      result = in->set(key, next);
+      assertx(result->hasExactlyOneRef());
+    }
+  });
+  return result == in ? nullptr : result;
 }
 
 // This function applies `state.mutation` to `tv` to get a modified array-like.
@@ -494,7 +541,7 @@ ArrayData* copy_if_needed(ArrayData* in, bool cow) {
 // an object, we'll log (up to one) notice including `state.function_name`.
 template <typename State>
 ArrayData* apply_mutation(TypedValue tv, State& state,
-                          bool cow = false, uint32_t depth = 0) {
+                          bool cow, uint32_t depth) {
   if (depth == kMaxMutationStackDepth) {
     if (!state.raised_stack_notice) {
       raise_notice("%s stack depth exceeded!", state.function_name);
@@ -513,32 +560,14 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
   auto result = state.mutation(in, cow);
   if (!state.recursive) return result;
 
-  // Recursively apply the mutation to the array's contents.
-  auto const end = in->iter_end();
-  for (auto pos = in->iter_begin(); pos != end; pos = in->iter_advance(pos)) {
-    auto const prev = in->nvGetVal(pos);
-    auto const ad = apply_mutation(prev, state, cow, depth + 1);
-    if (!ad) continue;
-    auto const next = make_array_like_tv(ad);
-    result = result ? result : copy_if_needed(in, cow);
-
-    assertx(!result->cowCheck());
-    if (in->hasVanillaPackedLayout()) {
-      tvMove(next, PackedArray::LvalUncheckedInt(result, pos));
-    } else if (in->hasVanillaMixedLayout()) {
-      tvMove(next, &MixedArray::asMixed(result)->data()[pos].data);
-    } else {
-      auto const key = in->nvGetKey(pos);
-      auto const escalated = isStringType(type(key))
-        ? result->set(val(key).pstr, make_array_like_tv(ad))
-        : result->set(val(key).num, make_array_like_tv(ad));
-      assertx(escalated->size() == in->size());
-      if (escalated == result) continue;
-      if (result != in) result->release();
-      result = escalated;
-    }
+  // Recursively apply the mutation to the array's contents. For efficiency,
+  // we do the layout check outside of the iteration loop.
+  if (in->hasVanillaPackedLayout()) {
+    return apply_mutation_fast<PackedArray>(in, result, state, cow, depth);
+  } else if (in->hasVanillaMixedLayout()) {
+    return apply_mutation_fast<MixedArray>(in, result, state, cow, depth);
   }
-  return result == in ? nullptr : result;
+  return apply_mutation_slow(in, result, state, cow, depth);
 }
 
 TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
@@ -610,7 +639,11 @@ TypedValue tagTvImpl(TypedValue in, int64_t flags) {
     if (!arrprov::arrayWantsTag(ad)) return nullptr;
     if (!tag) tag = arrprov::tagFromPC();
     if (!tag->valid()) return nullptr;
-    auto result = copy_if_needed(ad, cow);
+    auto const result = [&]{
+      if (!cow) return ad;
+      auto const packed = ad->hasVanillaPackedLayout();
+      return packed ? PackedArray::Copy(ad) : MixedArray::Copy(ad);
+    }();
     arrprov::setTag(result, *tag);
     return cow ? result : nullptr;
   };

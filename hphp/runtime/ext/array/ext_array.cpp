@@ -138,6 +138,7 @@ TypedValue HHVM_FUNCTION(array_column,
     return make_tv<KindOfBoolean>(false);
   }
   ArrayInit ret(arr_input.size(), ArrayInit::Map{});
+  int64_t nextKI = 0; // for appends
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
     if (UNLIKELY(RuntimeOption::PHP7_Builtins && it.second().isObject())) {
@@ -161,16 +162,23 @@ TypedValue HHVM_FUNCTION(array_column,
       }
     }
     if (idx.isNull()) {
-      ret.append(elem);
+      ret.set(nextKI++, elem);
     } else {
       auto const idx_key = sub.convertKey<IntishCast::Cast>(idx);
       if (!sub.exists(idx_key)) {
-        ret.append(elem);
-      } else if (sub[idx_key].isObject()) {
-        ret.setUnknownKey<IntishCast::Cast>(sub[idx_key].toString(),
-                                                    elem);
+        // nextKI may wrap around due to overflow if we intish-cast a string
+        // key to std::numeric_limits<int64_t>::max() in the case below...
+        if (nextKI >= 0) ret.set(nextKI++, elem);
       } else {
-        ret.setUnknownKey<IntishCast::Cast>(sub[idx_key], elem);
+        auto const sub_idx = [&]{
+          auto const result = sub[idx_key];
+          return result.isObject() ? result.toString() : result;
+        }();
+        auto const converted = sub.convertKey<IntishCast::Cast>(sub_idx);
+        if (tvIsInt(converted) && converted.val().num >= nextKI) {
+          nextKI = int64_t(size_t(converted.val().num) + 1);
+        }
+        ret.setUnknownKey(tvAsCVarRef(converted), elem);
       }
     }
   }
@@ -283,8 +291,9 @@ TypedValue HHVM_FUNCTION(array_fill,
   } else {
     DArrayInit ret(num, CheckAllocation{});
     ret.set(start_index, value);
-    for (int i = num - 1; i > 0; i--) {
-      ret.append(value);
+    auto const base = std::max(start_index + 1, 0);
+    for (auto i = 1; i < num; i++) {
+      ret.set(base + i - 1, value);
     }
     return make_array_like_tv(ret.create());
   }
@@ -424,10 +433,8 @@ void php_array_merge_recursive(Array& arr1, const Array& arr2) {
       auto const lval = arr1.lval(arrkey, AccessFlags::Key);
       auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv());
       subarr1 = subarr1.toDArray();
-      php_array_merge_recursive(
-        subarr1,
-        tvCastToArrayLike<IntishCast::Cast>(iter.secondVal())
-      );
+      auto subarr2 = tvCastToArrayLike<IntishCast::Cast>(iter.secondVal());
+      php_array_merge_recursive(subarr1, subarr2);
       tvUnset(lval); // avoid contamination of the value that was strongly bound
       tvSet(make_array_like_tv(subarr1.get()), lval);
     } else {
@@ -964,6 +971,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   // preserved even when preserve_keys is false
   bool is_php_array = isArrayType(cell_input.m_type);
   Array ret = Array::attach(MixedArray::MakeReserveDArray(len));
+  auto nextKI = 0; // for appends
   for (; pos < (offset + len) && iter; ++pos, ++iter) {
     Variant key(iter.first());
     if (!is_php_array && key.isString()) {
@@ -971,7 +979,7 @@ TypedValue HHVM_FUNCTION(array_slice,
       if (key.asCStrRef().get()->isStrictlyInteger(n)) key = n;
     }
     if (!preserve_keys && key.isInteger()) {
-      ret.append(iter.secondValPlus());
+      ret.set(nextKI++, iter.secondValPlus());
     } else {
       ret.set(key, iter.secondValPlus(), true);
     }

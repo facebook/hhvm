@@ -1432,3 +1432,5 @@ val incompatible_enum_inclusion_constraint : Pos.t -> string -> string -> unit
 val enum_inclusion_not_enum : Pos.t -> string -> string -> unit
 
 val call_coeffect_error : Pos.t -> Pos.t -> string -> Pos.t -> string -> unit
+
+val abstract_function_pointer : string -> string -> Pos.t -> Pos.t -> unit

@@ -1781,6 +1781,7 @@ and expr_
         ~incl_tc:false (* What is this? *)
         ~coerce_from_ty:None (* What is this? *)
         ~explicit_targs:targs
+        ~function_pointer:true
         env
         cty
         meth
@@ -4050,7 +4051,7 @@ and check_parent_construct pos env el unpacked_element env_parent =
     parent,
     fty )
 
-and check_class_get env p def_pos cid mid ce e =
+and check_class_get env p def_pos cid mid ce e function_pointer =
   match e with
   | CIself when get_ce_abstract ce ->
     begin
@@ -4082,6 +4083,8 @@ and check_class_get env p def_pos cid mid ce e =
     end
   | CIparent when get_ce_abstract ce ->
     Errors.parent_abstract_call mid p def_pos
+  | CI _ when get_ce_abstract ce && function_pointer ->
+    Errors.abstract_function_pointer cid mid p def_pos
   | CI _ when get_ce_abstract ce ->
     Errors.classname_abstract_call cid mid p def_pos
   | CI (_, classname) when get_ce_synthesized ce ->
@@ -5150,6 +5153,7 @@ and class_get
     ~coerce_from_ty
     ?(explicit_targs = [])
     ?(incl_tc = false)
+    ?(function_pointer = false)
     env
     cty
     (p, mid)
@@ -5167,6 +5171,7 @@ and class_get
     ~explicit_targs
     ~incl_tc
     ~coerce_from_ty
+    ~function_pointer
     env
     cid
     cty
@@ -5179,6 +5184,7 @@ and class_get_
     ~coerce_from_ty
     ?(explicit_targs = [])
     ?(incl_tc = false)
+    ?(function_pointer = false)
     env
     cid
     cty
@@ -5378,7 +5384,7 @@ and class_get_
             cid
             class_;
           TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
-          check_class_get env p def_pos c mid ce cid;
+          check_class_get env p def_pos c mid ce cid function_pointer;
           let (env, member_ty, et_enforced, tal) =
             match deref member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)

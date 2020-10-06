@@ -5526,6 +5526,18 @@ let call_coeffect_error
       (pos_capability, "But the function being called requires " ^ capability);
     ]
 
+let abstract_function_pointer cname meth_name call_pos decl_pos =
+  let cname = strip_ns cname in
+  add_list
+    (Typing.err_code Typing.AbstractFunctionPointer)
+    [
+      ( call_pos,
+        "Cannot create a function pointer to "
+        ^ Markdown_lite.md_codify (cname ^ "::" ^ meth_name)
+        ^ "; it is abstract" );
+      (decl_pos, "Declaration is here");
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

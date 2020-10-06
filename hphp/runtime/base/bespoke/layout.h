@@ -36,54 +36,186 @@ namespace irgen { struct IRGS; }
 
 namespace bespoke {
 
-#define BESPOKE_LAYOUT_FUNCTIONS \
-  X(size_t, heapSize, const ArrayData* ad) \
-  X(size_t, align, const ArrayData* ad) \
-  X(void, scan, const ArrayData* ad, type_scan::Scanner& scanner) \
-  X(ArrayData*, escalateToVanilla, const ArrayData*, const char* reason) \
-  X(void, convertToUncounted, ArrayData*, DataWalker::PointerMap* seen) \
-  X(void, releaseUncounted, ArrayData*) \
-  X(void, release, ArrayData*) \
-  X(bool, isVectorData, const ArrayData*) \
-  X(TypedValue, getInt, const ArrayData*, int64_t) \
-  X(TypedValue, getStr, const ArrayData*, const StringData*) \
-  X(TypedValue, getKey, const ArrayData*, ssize_t pos) \
-  X(TypedValue, getVal, const ArrayData*, ssize_t pos) \
-  X(ssize_t, getIntPos, const ArrayData*, int64_t) \
-  X(ssize_t, getStrPos, const ArrayData*, const StringData*) \
-  X(ssize_t, iterBegin, const ArrayData*) \
-  X(ssize_t, iterLast, const ArrayData*) \
-  X(ssize_t, iterEnd, const ArrayData*) \
-  X(ssize_t, iterAdvance, const ArrayData*, ssize_t) \
-  X(ssize_t, iterRewind, const ArrayData*, ssize_t) \
-  X(arr_lval, lvalInt, ArrayData* ad, int64_t k) \
-  X(arr_lval, lvalStr, ArrayData* ad, StringData* k) \
-  X(arr_lval, elemInt, ArrayData* ad, int64_t k) \
-  X(arr_lval, elemStr, ArrayData* ad, StringData* k) \
-  X(ArrayData*, setInt, ArrayData*, int64_t k, TypedValue v) \
-  X(ArrayData*, setStr, ArrayData*, StringData* k, TypedValue v)\
-  X(ArrayData*, removeInt, ArrayData*, int64_t) \
-  X(ArrayData*, removeStr, ArrayData*, const StringData*) \
-  X(ArrayData*, append, ArrayData*, TypedValue v) \
-  X(ArrayData*, prepend, ArrayData*, TypedValue v) \
-  X(ArrayData*, pop, ArrayData*, Variant&) \
-  X(ArrayData*, dequeue, ArrayData*, Variant&) \
-  X(ArrayData*, copy, const ArrayData*) \
-  X(ArrayData*, toDVArray, ArrayData*, bool copy) \
-  X(ArrayData*, toHackArr, ArrayData*, bool copy)
+#define BESPOKE_LAYOUT_FUNCTIONS(T) \
+  X(size_t, HeapSize, const T* ad) \
+  X(size_t, Align, const T* ad) \
+  X(void, Scan, const T* ad, type_scan::Scanner& scanner) \
+  X(ArrayData*, EscalateToVanilla, const T*, const char* reason) \
+  X(void, ConvertToUncounted, T*, DataWalker::PointerMap* seen) \
+  X(void, ReleaseUncounted, T*) \
+  X(void, Release, T*) \
+  X(bool, IsVectorData, const T*) \
+  X(TypedValue, GetInt, const T*, int64_t) \
+  X(TypedValue, GetStr, const T*, const StringData*) \
+  X(TypedValue, GetKey, const T*, ssize_t pos) \
+  X(TypedValue, GetVal, const T*, ssize_t pos) \
+  X(ssize_t, GetIntPos, const T*, int64_t) \
+  X(ssize_t, GetStrPos, const T*, const StringData*) \
+  X(ssize_t, IterBegin, const T*) \
+  X(ssize_t, IterLast, const T*) \
+  X(ssize_t, IterEnd, const T*) \
+  X(ssize_t, IterAdvance, const T*, ssize_t) \
+  X(ssize_t, IterRewind, const T*, ssize_t) \
+  X(arr_lval, LvalInt, T* ad, int64_t k) \
+  X(arr_lval, LvalStr, T* ad, StringData* k) \
+  X(arr_lval, ElemInt, T* ad, int64_t k) \
+  X(arr_lval, ElemStr, T* ad, StringData* k) \
+  X(ArrayData*, SetInt, T*, int64_t k, TypedValue v) \
+  X(ArrayData*, SetStr, T*, StringData* k, TypedValue v)\
+  X(ArrayData*, RemoveInt, T*, int64_t) \
+  X(ArrayData*, RemoveStr, T*, const StringData*) \
+  X(ArrayData*, Append, T*, TypedValue v) \
+  X(ArrayData*, Prepend, T*, TypedValue v) \
+  X(ArrayData*, Pop, T*, Variant&) \
+  X(ArrayData*, Dequeue, T*, Variant&) \
+  X(ArrayData*, Copy, const T*) \
+  X(ArrayData*, ToDVArray, T*, bool copy) \
+  X(ArrayData*, ToHackArr, T*, bool copy)
 
 struct LayoutFunctions {
-#define X(Return, Name, Args...) Return (*Name)(Args);
-  BESPOKE_LAYOUT_FUNCTIONS
+#define X(Return, Name, Args...) Return (*fn##Name)(Args);
+  BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
 };
+
+/**
+ * Provides an interface between LayoutFunctions, which exposes methods
+ * accepting ArrayData*, and the bespoke array implementations, which expose
+ * methods accepting their array types. In a debug build, it uses the bespoke
+ * array's static As() function to convert from ArrayData* to the specific
+ * bespoke array type. This As() function should perform any invariant
+ * checking. In a non-debug build, a reinterpret_cast is used to avoid any
+ * overhead from this wrapper.
+ */
+template <typename Array>
+struct LayoutFunctionDispatcher {
+  ALWAYS_INLINE static Array* Cast(ArrayData* ad) {
+    return Array::As(ad);
+  }
+
+  ALWAYS_INLINE static const Array* Cast(const ArrayData* ad) {
+    return Array::As(ad);
+  }
+
+  static size_t HeapSize(const ArrayData* ad) {
+    return Array::HeapSize(Cast(ad));
+  }
+  static size_t Align(const ArrayData* ad) {
+    return Array::Align(Cast(ad));
+  }
+  static void Scan(const ArrayData* ad, type_scan::Scanner& scanner) {
+    return Array::Scan(Cast(ad), scanner);
+  }
+  static ArrayData* EscalateToVanilla(const ArrayData* ad, const char* reason) {
+    return Array::EscalateToVanilla(Cast(ad), reason);
+  }
+  static void ConvertToUncounted(ArrayData* ad, DataWalker::PointerMap* seen) {
+    return Array::ConvertToUncounted(Cast(ad), seen);
+  }
+  static void ReleaseUncounted(ArrayData* ad) {
+    return Array::ReleaseUncounted(Cast(ad));
+  }
+  static void Release(ArrayData* ad) {
+    return Array::Release(Cast(ad));
+  }
+  static bool IsVectorData(const ArrayData* ad) {
+    return Array::IsVectorData(Cast(ad));
+  }
+  static TypedValue GetInt(const ArrayData* ad, int64_t k) {
+    return Array::GetInt(Cast(ad), k);
+  }
+  static TypedValue GetStr(const ArrayData* ad, const StringData* k) {
+    return Array::GetStr(Cast(ad), k);
+  }
+  static TypedValue GetKey(const ArrayData* ad, ssize_t pos) {
+    return Array::GetKey(Cast(ad), pos);
+  }
+  static TypedValue GetVal(const ArrayData* ad, ssize_t pos) {
+    return Array::GetVal(Cast(ad), pos);
+  }
+  static ssize_t GetIntPos(const ArrayData* ad, int64_t k) {
+    return Array::GetIntPos(Cast(ad), k);
+  }
+  static ssize_t GetStrPos(const ArrayData* ad, const StringData* k) {
+    return Array::GetStrPos(Cast(ad), k);
+  }
+  static arr_lval LvalInt(ArrayData* ad, int64_t k) {
+    return Array::LvalInt(Cast(ad), k);
+  }
+  static arr_lval LvalStr(ArrayData* ad, StringData* k) {
+    return Array::LvalStr(Cast(ad), k);
+  }
+  static arr_lval ElemInt(ArrayData* ad, int64_t k) {
+    return Array::ElemInt(Cast(ad), k);
+  }
+  static arr_lval ElemStr(ArrayData* ad, StringData* k) {
+    return Array::ElemStr(Cast(ad), k);
+  }
+  static ArrayData* SetInt(ArrayData* ad, int64_t k, TypedValue v) {
+    return Array::SetInt(Cast(ad), k, v);
+  }
+  static ArrayData* SetStr(ArrayData* ad, StringData* k, TypedValue v){
+    return Array::SetStr(Cast(ad), k, v);
+  }
+  static ArrayData* RemoveInt(ArrayData* ad, int64_t k) {
+    return Array::RemoveInt(Cast(ad), k);
+  }
+  static ArrayData* RemoveStr(ArrayData* ad, const StringData* k) {
+    return Array::RemoveStr(Cast(ad), k);
+  }
+  static ssize_t IterBegin(const ArrayData* ad) {
+    return Array::IterBegin(Cast(ad));
+  }
+  static ssize_t IterLast(const ArrayData* ad) {
+    return Array::IterLast(Cast(ad));
+  }
+  static ssize_t IterEnd(const ArrayData* ad) {
+    return Array::IterEnd(Cast(ad));
+  }
+  static ssize_t IterAdvance(const ArrayData* ad, ssize_t pos) {
+    return Array::IterAdvance(Cast(ad), pos);
+  }
+  static ssize_t IterRewind(const ArrayData* ad, ssize_t pos) {
+    return Array::IterRewind(Cast(ad), pos);
+  }
+  static ArrayData* Append(ArrayData* ad, TypedValue v) {
+    return Array::Append(Cast(ad), v);
+  }
+  static ArrayData* Prepend(ArrayData* ad, TypedValue v) {
+    return Array::Prepend(Cast(ad), v);
+  }
+  static ArrayData* Pop(ArrayData* ad, Variant& v) {
+    return Array::Pop(Cast(ad), v);
+  }
+  static ArrayData* Dequeue(ArrayData* ad, Variant& v) {
+    return Array::Dequeue(Cast(ad), v);
+  }
+  static ArrayData* Copy(const ArrayData* ad) {
+    return Array::Copy(Cast(ad));
+  }
+  static ArrayData* ToDVArray(ArrayData* ad, bool copy) {
+    return Array::ToDVArray(Cast(ad), copy);
+  }
+  static ArrayData* ToHackArr(ArrayData* ad, bool copy) {
+    return Array::ToHackArr(Cast(ad), copy);
+  }
+};
+
 
 template <typename Array>
 constexpr LayoutFunctions fromArray() {
   LayoutFunctions result;
-#define X(Return, Name, Args...) result.Name = Array::Name;
-  BESPOKE_LAYOUT_FUNCTIONS
+  if constexpr (debug) {
+#define X(Return, Name, Args...) \
+  result.fn##Name = LayoutFunctionDispatcher<Array>::Name;
+  BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
 #undef X
+  } else {
+#define X(Return, Name, Args...) \
+  result.fn##Name = reinterpret_cast<Return(*)(Args)>(Array::Name);
+  BESPOKE_LAYOUT_FUNCTIONS(ArrayData)
+#undef X
+  }
   return result;
 }
 

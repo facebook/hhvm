@@ -60,17 +60,15 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
 }
 
 template <typename... Ts>
-void logEvent(const ArrayData* ad, EntryTypes newTypes, ArrayOp op,
+void logEvent(const LoggingArray* lad, EntryTypes newTypes, ArrayOp op,
               Ts&&... args) {
-  auto const lad = LoggingArray::asLogging(ad);
   lad->profile->logEntryTypes(lad->entryTypes, newTypes);
   lad->profile->logEvent(op, std::forward<Ts>(args)...);
 }
 
 template <typename... Ts>
-void logEvent(const ArrayData* ad, ArrayOp op, Ts&&... args) {
-  auto const lad = LoggingArray::asLogging(ad);
-  logEvent(ad, lad->entryTypes, op, std::forward<Ts>(args)...);
+void logEvent(const LoggingArray* lad, ArrayOp op, Ts&&... args) {
+  logEvent(lad, lad->entryTypes, op, std::forward<Ts>(args)...);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -198,13 +196,13 @@ bool LoggingArray::checkInvariants() const {
   return true;
 }
 
-LoggingArray* LoggingArray::asLogging(ArrayData* ad) {
+LoggingArray* LoggingArray::As(ArrayData* ad) {
   auto const result = reinterpret_cast<LoggingArray*>(ad);
   assertx(result->checkInvariants());
   return result;
 }
-const LoggingArray* LoggingArray::asLogging(const ArrayData* ad) {
-  return asLogging(const_cast<ArrayData*>(ad));
+const LoggingArray* LoggingArray::As(const ArrayData* ad) {
+  return LoggingArray::As(const_cast<ArrayData*>(ad));
 }
 
 void LoggingArray::updateKindAndLegacy() {
@@ -237,97 +235,96 @@ void LoggingArray::setLegacyArrayInPlace(bool legacy) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-size_t LoggingArray::heapSize(const ArrayData*) {
+size_t LoggingArray::HeapSize(const LoggingArray*) {
   return sizeof(LoggingArray);
 }
 
-size_t LoggingArray::align(const ArrayData*) {
+size_t LoggingArray::Align(const LoggingArray*) {
   return alignof(LoggingArray);
 }
 
-void LoggingArray::scan(const ArrayData* ad, type_scan::Scanner& scanner) {
-  logEvent(ad, ArrayOp::Scan);
-  scanner.scan(asLogging(ad)->wrapped);
+void LoggingArray::Scan(const LoggingArray* lad, type_scan::Scanner& scanner) {
+  logEvent(lad, ArrayOp::Scan);
+  scanner.scan(lad->wrapped);
 }
 
-ArrayData* LoggingArray::escalateToVanilla(
-    const ArrayData* ad, const char* reason) {
-  logEvent(ad, ArrayOp::EscalateToVanilla, makeStaticString(reason));
-  auto const wrapped = asLogging(ad)->wrapped;
+ArrayData* LoggingArray::EscalateToVanilla(
+    const LoggingArray* lad, const char* reason) {
+  logEvent(lad, ArrayOp::EscalateToVanilla, makeStaticString(reason));
+  auto const wrapped = lad->wrapped;
   wrapped->incRefCount();
   return wrapped;
 }
 
-void LoggingArray::convertToUncounted(
-    ArrayData* ad, DataWalker::PointerMap* seen) {
-  logEvent(ad, ArrayOp::ConvertToUncounted);
-  auto const lad = asLogging(ad);
+void LoggingArray::ConvertToUncounted(
+    LoggingArray* lad, DataWalker::PointerMap* seen) {
+  logEvent(lad, ArrayOp::ConvertToUncounted);
   auto tv = make_array_like_tv(lad->wrapped);
   ConvertTvToUncounted(&tv, seen);
   lad->wrapped = val(tv).parr;
 }
 
-void LoggingArray::releaseUncounted(ArrayData* ad) {
-  logEvent(ad, ArrayOp::ReleaseUncounted);
-  auto tv = make_array_like_tv(asLogging(ad)->wrapped);
+void LoggingArray::ReleaseUncounted(LoggingArray* lad) {
+  logEvent(lad, ArrayOp::ReleaseUncounted);
+  auto tv = make_array_like_tv(lad->wrapped);
   ReleaseUncountedTv(&tv);
 }
 
-void LoggingArray::release(ArrayData* ad) {
-  logEvent(ad, ArrayOp::Release);
-  asLogging(ad)->wrapped->decRefAndRelease();
-  tl_heap->objFreeIndex(ad, kSizeIndex);
+void LoggingArray::Release(LoggingArray* lad) {
+  logEvent(lad, ArrayOp::Release);
+  lad->wrapped->decRefAndRelease();
+  tl_heap->objFreeIndex(lad, kSizeIndex);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Accessors
 
-bool LoggingArray::isVectorData(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IsVectorData);
-  return asLogging(ad)->wrapped->isVectorData();
+bool LoggingArray::IsVectorData(const LoggingArray* lad) {
+  logEvent(lad, ArrayOp::IsVectorData);
+  return lad->wrapped->isVectorData();
 }
-TypedValue LoggingArray::getInt(const ArrayData* ad, int64_t k) {
-  logEvent(ad, ArrayOp::GetInt, k);
-  return asLogging(ad)->wrapped->get(k);
+TypedValue LoggingArray::GetInt(const LoggingArray* lad, int64_t k) {
+  logEvent(lad, ArrayOp::GetInt, k);
+  return lad->wrapped->get(k);
 }
-TypedValue LoggingArray::getStr(const ArrayData* ad, const StringData* k) {
-  logEvent(ad, ArrayOp::GetStr, k);
-  return asLogging(ad)->wrapped->get(k);
+TypedValue LoggingArray::GetStr(const LoggingArray* lad, const StringData* k) {
+  logEvent(lad, ArrayOp::GetStr, k);
+  return lad->wrapped->get(k);
 }
-TypedValue LoggingArray::getKey(const ArrayData* ad, ssize_t pos) {
-  return asLogging(ad)->wrapped->nvGetKey(pos);
+TypedValue LoggingArray::GetKey(const LoggingArray* lad, ssize_t pos) {
+  return lad->wrapped->nvGetKey(pos);
 }
-TypedValue LoggingArray::getVal(const ArrayData* ad, ssize_t pos) {
-  return asLogging(ad)->wrapped->nvGetVal(pos);
+TypedValue LoggingArray::GetVal(const LoggingArray* lad, ssize_t pos) {
+  return lad->wrapped->nvGetVal(pos);
 }
-ssize_t LoggingArray::getIntPos(const ArrayData* ad, int64_t k) {
-  logEvent(ad, ArrayOp::GetIntPos, k);
-  return asLogging(ad)->wrapped->nvGetIntPos(k);
+ssize_t LoggingArray::GetIntPos(const LoggingArray* lad, int64_t k) {
+  logEvent(lad, ArrayOp::GetIntPos, k);
+  return lad->wrapped->nvGetIntPos(k);
 }
-ssize_t LoggingArray::getStrPos(const ArrayData* ad, const StringData* k) {
-  logEvent(ad, ArrayOp::GetStrPos, k);
-  return asLogging(ad)->wrapped->nvGetStrPos(k);
+ssize_t LoggingArray::GetStrPos(const LoggingArray* lad, const StringData* k) {
+  logEvent(lad, ArrayOp::GetStrPos, k);
+  return lad->wrapped->nvGetStrPos(k);
 }
 
-ssize_t LoggingArray::iterBegin(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IterBegin);
-  return asLogging(ad)->wrapped->iter_begin();
+ssize_t LoggingArray::IterBegin(const LoggingArray* lad) {
+  logEvent(lad, ArrayOp::IterBegin);
+  return lad->wrapped->iter_begin();
 }
-ssize_t LoggingArray::iterLast(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IterLast);
-  return asLogging(ad)->wrapped->iter_last();
+ssize_t LoggingArray::IterLast(const LoggingArray* lad) {
+  logEvent(lad, ArrayOp::IterLast);
+  return lad->wrapped->iter_last();
 }
-ssize_t LoggingArray::iterEnd(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::IterEnd);
-  return asLogging(ad)->wrapped->iter_end();
+ssize_t LoggingArray::IterEnd(const LoggingArray* lad) {
+  logEvent(lad, ArrayOp::IterEnd);
+  return lad->wrapped->iter_end();
 }
-ssize_t LoggingArray::iterAdvance(const ArrayData* ad, ssize_t prev) {
-  logEvent(ad, ArrayOp::IterAdvance);
-  return asLogging(ad)->wrapped->iter_advance(prev);
+ssize_t LoggingArray::IterAdvance(const LoggingArray* lad, ssize_t prev) {
+  logEvent(lad, ArrayOp::IterAdvance);
+  return lad->wrapped->iter_advance(prev);
 }
-ssize_t LoggingArray::iterRewind(const ArrayData* ad, ssize_t prev) {
-  logEvent(ad, ArrayOp::IterRewind);
-  return asLogging(ad)->wrapped->iter_rewind(prev);
+ssize_t LoggingArray::IterRewind(const LoggingArray* lad, ssize_t prev) {
+  logEvent(lad, ArrayOp::IterRewind);
+  return lad->wrapped->iter_rewind(prev);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -363,8 +360,7 @@ arr_lval escalate(LoggingArray* lad, arr_lval result, EntryTypes ms) {
 }
 
 template <typename F>
-decltype(auto) mutate(ArrayData* ad, F&& f) {
-  auto const lad = LoggingArray::asLogging(ad);
+decltype(auto) mutate(LoggingArray* lad, F&& f) {
   auto const cow = lad->cowCheck();
   if (cow) lad->wrapped->incRefCount();
   SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
@@ -372,8 +368,7 @@ decltype(auto) mutate(ArrayData* ad, F&& f) {
 }
 
 template <typename F>
-decltype(auto) mutate(ArrayData* ad, EntryTypes ms, F&& f) {
-  auto const lad = LoggingArray::asLogging(ad);
+decltype(auto) mutate(LoggingArray* lad, EntryTypes ms, F&& f) {
   auto const cow = lad->cowCheck();
   if (cow) lad->wrapped->incRefCount();
   SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
@@ -389,87 +384,81 @@ arr_lval elem(arr_lval lval) {
 // Lvals cannot insert new keys, so KeyTypes are unchanged. We must pessimize
 // value types on doing an lval operation, but we can be more precise with our
 // logging of the constrained "elem" operation.
-arr_lval LoggingArray::lvalInt(ArrayData* ad, int64_t k) {
-  auto const lad = asLogging(ad);
+arr_lval LoggingArray::LvalInt(LoggingArray* lad, int64_t k) {
   auto const val = lad->wrapped->get(k);
   auto const ms = val.is_init() ? lad->entryTypes.pessimizeValueTypes()
                                 : lad->entryTypes;
-  logEvent(ad, ms, ArrayOp::LvalInt, k, val);
-  return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
+  logEvent(lad, ms, ArrayOp::LvalInt, k, val);
+  return mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
-arr_lval LoggingArray::lvalStr(ArrayData* ad, StringData* k) {
-  auto const lad = asLogging(ad);
+arr_lval LoggingArray::LvalStr(LoggingArray* lad, StringData* k) {
   auto const val = lad->wrapped->get(k);
   auto const ms = val.is_init() ? lad->entryTypes.pessimizeValueTypes()
                                 : lad->entryTypes;
-  logEvent(ad, ms, ArrayOp::LvalStr, k, val);
-  return mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); });
+  logEvent(lad, ms, ArrayOp::LvalStr, k, val);
+  return mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); });
 }
-arr_lval LoggingArray::elemInt(ArrayData* ad, int64_t k) {
-  auto const lad = asLogging(ad);
+arr_lval LoggingArray::ElemInt(LoggingArray* lad, int64_t k) {
   auto const val = lad->wrapped->get(k);
   auto const key = make_tv<KindOfInt64>(k);
   auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
                                 : lad->entryTypes;
-  logEvent(ad, ms, ArrayOp::ElemInt, k, val);
-  return elem(mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
+  logEvent(lad, ms, ArrayOp::ElemInt, k, val);
+  return elem(mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
-arr_lval LoggingArray::elemStr(ArrayData* ad, StringData* k) {
-  auto const lad = asLogging(ad);
+arr_lval LoggingArray::ElemStr(LoggingArray* lad, StringData* k) {
   auto const val = lad->wrapped->get(k);
   auto const key = make_tv<KindOfString>(k);
   auto const ms = val.is_init() ? lad->entryTypes.with(key, countedValue(val))
                                 : lad->entryTypes;
-  logEvent(ad, ms, ArrayOp::ElemStr, k, val);
-  return elem(mutate(ad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
+  logEvent(lad, ms, ArrayOp::ElemStr, k, val);
+  return elem(mutate(lad, ms, [&](ArrayData* arr) { return arr->lval(k); }));
 }
 
-ArrayData* LoggingArray::setInt(ArrayData* ad, int64_t k, TypedValue v) {
+ArrayData* LoggingArray::SetInt(LoggingArray* lad, int64_t k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = asLogging(ad)->entryTypes.with(make_tv<KindOfInt64>(k), v);
-  logEvent(ad, ms, ArrayOp::SetInt, k, v);
-  return mutate(ad, ms, [&](ArrayData* w) { return w->set(k, v); });
+  auto const ms = lad->entryTypes.with(make_tv<KindOfInt64>(k), v);
+  logEvent(lad, ms, ArrayOp::SetInt, k, v);
+  return mutate(lad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
-ArrayData* LoggingArray::setStr(ArrayData* ad, StringData* k, TypedValue v) {
+ArrayData* LoggingArray::SetStr(LoggingArray* lad, StringData* k, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const ms = asLogging(ad)->entryTypes.with(make_tv<KindOfString>(k), v);
-  logEvent(ad, ms, ArrayOp::SetStr, k, v);
-  return mutate(ad, ms, [&](ArrayData* w) { return w->set(k, v); });
+  auto const ms = lad->entryTypes.with(make_tv<KindOfString>(k), v);
+  logEvent(lad, ms, ArrayOp::SetStr, k, v);
+  return mutate(lad, ms, [&](ArrayData* w) { return w->set(k, v); });
 }
-ArrayData* LoggingArray::removeInt(ArrayData* ad, int64_t k) {
-  logEvent(ad, ArrayOp::RemoveInt, k);
-  return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
+ArrayData* LoggingArray::RemoveInt(LoggingArray* lad, int64_t k) {
+  logEvent(lad, ArrayOp::RemoveInt, k);
+  return mutate(lad, [&](ArrayData* w) { return w->remove(k); });
 }
-ArrayData* LoggingArray::removeStr(ArrayData* ad, const StringData* k) {
-  logEvent(ad, ArrayOp::RemoveStr, k);
-  return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
+ArrayData* LoggingArray::RemoveStr(LoggingArray* lad, const StringData* k) {
+  logEvent(lad, ArrayOp::RemoveStr, k);
+  return mutate(lad, [&](ArrayData* w) { return w->remove(k); });
 }
 
-ArrayData* LoggingArray::append(ArrayData* ad, TypedValue v) {
+ArrayData* LoggingArray::Append(LoggingArray* lad, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const lad = asLogging(ad);
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);
-  logEvent(ad, ms, ArrayOp::Append, v);
-  return mutate(ad, ms, [&](ArrayData* w) { return w->append(v); });
+  logEvent(lad, ms, ArrayOp::Append, v);
+  return mutate(lad, ms, [&](ArrayData* w) { return w->append(v); });
 }
-ArrayData* LoggingArray::prepend(ArrayData* ad, TypedValue v) {
+ArrayData* LoggingArray::Prepend(LoggingArray* lad, TypedValue v) {
   if (type(v) == KindOfUninit) type(v) = KindOfNull;
-  auto const lad = asLogging(ad);
   // NOTE: This key isn't always correct, but it's close enough for profiling.
   auto const k = make_tv<KindOfInt64>(lad->wrapped->size());
   auto const ms = lad->entryTypes.with(k, v);
-  logEvent(ad, ms, ArrayOp::Prepend, v);
-  return mutate(ad, ms, [&](ArrayData* w) { return w->prepend(v); });
+  logEvent(lad, ms, ArrayOp::Prepend, v);
+  return mutate(lad, ms, [&](ArrayData* w) { return w->prepend(v); });
 }
-ArrayData* LoggingArray::pop(ArrayData* ad, Variant& ret) {
-  logEvent(ad, ArrayOp::Pop);
-  return mutate(ad, [&](ArrayData* w) { return w->pop(ret); });
+ArrayData* LoggingArray::Pop(LoggingArray* lad, Variant& ret) {
+  logEvent(lad, ArrayOp::Pop);
+  return mutate(lad, [&](ArrayData* w) { return w->pop(ret); });
 }
-ArrayData* LoggingArray::dequeue(ArrayData* ad, Variant& ret) {
-  logEvent(ad, ArrayOp::Dequeue);
-  return mutate(ad, [&](ArrayData* w) { return w->dequeue(ret); });
+ArrayData* LoggingArray::Dequeue(LoggingArray* lad, Variant& ret) {
+  logEvent(lad, ArrayOp::Dequeue);
+  return mutate(lad, [&](ArrayData* w) { return w->dequeue(ret); });
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -484,19 +473,16 @@ ArrayData* convert(LoggingArray* lad, ArrayData* result) {
 }
 }
 
-ArrayData* LoggingArray::copy(const ArrayData* ad) {
-  logEvent(ad, ArrayOp::Copy);
-  auto const lad = asLogging(ad);
+ArrayData* LoggingArray::Copy(const LoggingArray* lad) {
+  logEvent(lad, ArrayOp::Copy);
   return Make(lad->wrapped->copy(), lad->profile, lad->entryTypes);
 }
-ArrayData* LoggingArray::toDVArray(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToDVArray);
-  auto const lad = asLogging(ad);
+ArrayData* LoggingArray::ToDVArray(LoggingArray* lad, bool copy) {
+  logEvent(lad, ArrayOp::ToDVArray);
   return convert(lad, lad->wrapped->toDVArray(copy));
 }
-ArrayData* LoggingArray::toHackArr(ArrayData* ad, bool copy) {
-  logEvent(ad, ArrayOp::ToHackArr);
-  auto const lad = asLogging(ad);
+ArrayData* LoggingArray::ToHackArr(LoggingArray* lad, bool copy) {
+  logEvent(lad, ArrayOp::ToHackArr);
   return convert(lad, lad->wrapped->toHackArr(copy));
 }
 

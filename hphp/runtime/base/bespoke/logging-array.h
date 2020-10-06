@@ -29,8 +29,8 @@ namespace HPHP { namespace bespoke {
 struct LoggingProfile;
 
 struct LoggingArray : BespokeArray {
-  static LoggingArray* asLogging(ArrayData* ad);
-  static const LoggingArray* asLogging(const ArrayData* ad);
+  static LoggingArray* As(ArrayData* ad);
+  static const LoggingArray* As(const ArrayData* ad);
   static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
                             EntryTypes ms);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
@@ -50,7 +50,7 @@ struct LoggingArray : BespokeArray {
   bool checkInvariants() const;
 
 #define X(Return, Name, Args...) static Return Name(Args);
-  BESPOKE_LAYOUT_FUNCTIONS
+  BESPOKE_LAYOUT_FUNCTIONS(LoggingArray)
 #undef X
 
   ArrayData* wrapped;

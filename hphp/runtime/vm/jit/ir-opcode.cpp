@@ -848,7 +848,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileInstanceCheck:
   case ProfileIsTypeStruct:
   case ProfileKeysetAccess:
-  case ProfileMethod:
   case ProfileProp:
   case ProfileSwitchDest:
   case ProfileType:
@@ -906,6 +905,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ZeroErrorLevel:
     return false;
   case MethodExists:
+  case ProfileMethod:
     return RO::EvalRaiseOnCaseInsensitiveLookup;
   }
   not_reached();

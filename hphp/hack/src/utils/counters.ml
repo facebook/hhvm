@@ -63,7 +63,17 @@ let get_counter (category : Category.t) : counter =
 let set_counter (category : Category.t) (counts : counter) : unit =
   counters := M.add category counts !counters
 
+let get_time (category : Category.t) : unit -> time_in_sec =
+  Category.(
+    match category with
+    | Disk_cat -> (* Wall-clock time *) Unix.gettimeofday
+    | Typecheck
+    | Decl_accessors
+    | Get_ast ->
+      (* CPU time, excluding I/O *) Sys.time)
+
 let count (category : Category.t) (f : unit -> 'a) : 'a =
+  let get_time = get_time category in
   let tally = get_counter category in
   if (not tally.enabled) || tally.is_counting then
     (* is_counting is to avoid double-counting, in the case that a method calls 'count'
@@ -71,14 +81,14 @@ let count (category : Category.t) (f : unit -> 'a) : 'a =
     f ()
   else begin
     set_counter category { tally with is_counting = true };
-    let start_time = Unix.gettimeofday () in
+    let start_time = get_time () in
     Utils.try_finally ~f ~finally:(fun () ->
         set_counter
           category
           {
             is_counting = false;
             count = tally.count + 1;
-            time = tally.time +. Unix.gettimeofday () -. start_time;
+            time = tally.time +. get_time () -. start_time;
             enabled = tally.enabled;
           })
   end

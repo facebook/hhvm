@@ -103,7 +103,6 @@ and ('ex, 'fb, 'en, 'hi) using_stmt = {
 and ('ex, 'fb, 'en, 'hi) as_expr =
   | As_v of ('ex, 'fb, 'en, 'hi) expr
   | As_kv of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
-  (* This is not in AST *)
   | Await_as_v of pos * ('ex, 'fb, 'en, 'hi) expr
   | Await_as_kv of pos * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
 

@@ -41,6 +41,7 @@ type env = {
   saved_state_ignore_hhconfig: bool;
   dynamic_view: bool;
   prechecked: bool option;
+  mini_state: string option;
   config: (string * string) list;
   custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
@@ -63,6 +64,7 @@ let start_server (env : env) =
     saved_state_ignore_hhconfig;
     dynamic_view;
     prechecked;
+    mini_state;
     config;
     custom_telemetry_data;
     allow_non_opt_build;
@@ -95,6 +97,9 @@ let start_server (env : env) =
           [||]
         else
           [| "--from"; from |] );
+        (match mini_state with
+        | None -> [||]
+        | Some state -> [| "--with-mini-state"; state |]);
         ( if no_load then
           [| "--no-load" |]
         else

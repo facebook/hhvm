@@ -36,6 +36,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         save_64bit = None;
         use_priority_pipe = false;
         prechecked = None;
+        mini_state = None;
         config = [];
         custom_telemetry_data = [];
         allow_non_opt_build = false;

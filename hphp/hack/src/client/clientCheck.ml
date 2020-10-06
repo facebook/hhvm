@@ -110,6 +110,7 @@ let connect ?(use_priority_pipe = false) args =
     save_64bit;
     saved_state_ignore_hhconfig;
     prechecked;
+    mini_state;
     config;
     allow_non_opt_build;
     custom_telemetry_data;
@@ -148,6 +149,7 @@ let connect ?(use_priority_pipe = false) args =
         saved_state_ignore_hhconfig;
         use_priority_pipe;
         prechecked;
+        mini_state;
         config;
         custom_telemetry_data;
         allow_non_opt_build;

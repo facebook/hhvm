@@ -89,6 +89,7 @@ type client_check_env = {
   save_64bit: string option;
   output_json: bool;
   prechecked: bool option;
+  mini_state: string option;
   profile_log: bool;
   remote: bool;
   replace_state_after_saving: bool;

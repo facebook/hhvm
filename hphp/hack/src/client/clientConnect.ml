@@ -39,6 +39,7 @@ type env = {
   ignore_hh_version: bool;
   save_64bit: string option;
   saved_state_ignore_hhconfig: bool;
+  mini_state: string option;
   use_priority_pipe: bool;
   prechecked: bool option;
   config: (string * string) list;
@@ -380,6 +381,7 @@ let rec connect
           saved_state_ignore_hhconfig;
           use_priority_pipe = _;
           prechecked;
+          mini_state;
           config;
           custom_telemetry_data;
           allow_non_opt_build;
@@ -404,6 +406,7 @@ let rec connect
               saved_state_ignore_hhconfig;
               dynamic_view = false;
               prechecked;
+              mini_state;
               config;
               custom_telemetry_data;
               allow_non_opt_build;

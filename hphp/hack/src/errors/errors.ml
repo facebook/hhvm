@@ -1810,6 +1810,12 @@ let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
         sprintf "But this method is %s" (Markdown_lite.md_codify visibility) );
     ]
 
+let dynamically_callable_reified attr_pos =
+  add
+    (NastCheck.err_code NastCheck.DynamicallyCallableReified)
+    attr_pos
+    "`__DynamicallyCallable` cannot be used on reified functions or methods"
+
 let parent_in_function_pointer pos parento meth_name =
   let suggestion =
     match parento with

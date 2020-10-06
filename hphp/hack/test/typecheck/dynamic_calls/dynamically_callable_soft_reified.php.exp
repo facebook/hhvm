@@ -1,0 +1,2 @@
+File "dynamically_callable_soft_reified.php", line 3, characters 3-23:
+`__DynamicallyCallable` cannot be used on reified functions or methods (NastCheck[3089])

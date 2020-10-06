@@ -1163,6 +1163,8 @@ val pu_not_in_class : Pos.t -> string -> string -> unit
 
 val illegal_use_of_dynamically_callable : Pos.t -> Pos.t -> string -> unit
 
+val dynamically_callable_reified : Pos.t -> unit
+
 val parent_in_function_pointer : Pos.t -> string option -> string -> unit
 
 val self_in_non_final_function_pointer :

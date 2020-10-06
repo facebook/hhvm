@@ -261,7 +261,8 @@ module NastCheck = struct
     | EntryPointArguments [@value 3085]
     | VariadicMemoize [@value 3086]
     | AbstractMethodMemoize [@value 3087]
-    | InstancePropertyInAbstractFinalClass [@value 3088] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | InstancePropertyInAbstractFinalClass [@value 3088]
+    | DynamicallyCallableReified [@value 3089] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

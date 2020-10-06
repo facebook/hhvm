@@ -960,6 +960,7 @@ struct RuntimeOption {
   F(bool,     DumpCallTargets,         false)                           \
   F(bool,     DumpLayoutCFG,           false)                           \
   F(bool,     DumpVBC,                 false)                           \
+  F(bool,     DumpArrAccProf,          false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \

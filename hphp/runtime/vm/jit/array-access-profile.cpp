@@ -60,14 +60,41 @@ bool isSmallStaticArray(const ArrayData* ad) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static std::string actionString(ArrayAccessProfile::Action action) {
+  switch(action) {
+    case ArrayAccessProfile::Action::None : return "None";
+    case ArrayAccessProfile::Action::Cold : return "Cold";
+    case ArrayAccessProfile::Action::Exit : return "Exit";
+  }
+  not_reached();
+}
+
+std::string ArrayAccessProfile::Result::toString() const {
+  return folly::sformat("offset={}({}) empty={} missing={}",
+                        actionString(offset.first), offset.second,
+                        actionString(empty),
+                        actionString(missing));
+}
+
 std::string ArrayAccessProfile::toString() const {
   if (!m_init) return std::string("uninitialized");
+  uint64_t total = m_untracked;
+  for (auto const& line : m_hits) {
+    if (line.pos != -1) total += line.count;
+  }
+  if (total == 0) total = 1; // avoid div by 0
+  auto pct = [&] (uint32_t value) { return 100.0 * value / total; };
   std::ostringstream out;
   for (auto const& line : m_hits) {
-    out << folly::format("{}:{},", line.pos, line.count);
+    out << folly::format("{}:{}({:.1f}%),",
+                         line.pos, line.count, pct(line.count));
   }
-  out << folly::format("untracked:{},small:{},empty:{},missing:{}",
-                       m_untracked, m_small, m_empty, m_missing);
+  out << folly::format(
+    "untracked:{}({:.1f}%),small:{}({:.1f}%),"
+    "empty:{}({:.1f}%),missing:{}({:.1f}%)",
+    m_untracked, pct(m_untracked), m_small, pct(m_small),
+    m_empty, pct(m_empty), m_missing, pct(m_missing)
+  );
   return out.str();
 }
 

@@ -1937,6 +1937,22 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   StructuredLog::log("hhvm_array_accesses", entry);
 }
 
+void annotArrayAccessProfile(IRGS& env,
+                             SSATmp* arr,
+                             SSATmp* key,
+                             const ArrayAccessProfile& profile,
+                             const ArrayAccessProfile::Result& result) {
+  if (!RuntimeOption::EvalDumpArrAccProf) return;
+
+  auto const fnName = curFunc(env)->fullName()->data();
+
+  env.unit.annotationData->add(
+    "ArrAccProf",
+    folly::sformat("BC={} FN={}: {}: {}: {}: {}\n",
+                   bcOff(env), fnName, *arr, *key, profile, result)
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

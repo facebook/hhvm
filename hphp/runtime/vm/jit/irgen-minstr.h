@@ -49,7 +49,11 @@ bool propertyMayBeCountable(const Class::Prop& prop);
 void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
                            MOpMode mode, const ArrayAccessProfile& profile);
 
-
+void annotArrayAccessProfile(IRGS& env,
+                             SSATmp* arr,
+                             SSATmp* key,
+                             const ArrayAccessProfile& profile,
+                             const ArrayAccessProfile::Result& result);
 
 /*
  * If the op and operand types are a supported combination, return the modified
@@ -118,6 +122,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   auto const data = profile.data();
   auto const result = data.choose();
   logArrayAccessProfile(env, arr, key, mode, data);
+  annotArrayAccessProfile(env, arr, key, data, result);
 
   FTRACE_MOD(Trace::idx, 1, "{}\nArrayAccessProfile: {}\n",
              env.irb->curMarker().show(), data.toString());

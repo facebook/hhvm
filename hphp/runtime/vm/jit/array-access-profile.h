@@ -60,6 +60,7 @@ struct ArrayAccessProfile {
     SizeHintData size_hint;
     Action empty;
     Action missing;
+    std::string toString() const;
   };
 
   /*

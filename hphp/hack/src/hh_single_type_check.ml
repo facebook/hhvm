@@ -240,7 +240,6 @@ let parse_options () =
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
   let verbosity = ref 0 in
-  let enable_first_class_function_pointers = ref false in
   let disable_modes = ref false in
   let disable_hh_ignore_error = ref false in
   let enable_systemlib_annotations = ref false in
@@ -544,9 +543,6 @@ let parse_options () =
       ( "--verbose",
         Arg.Int (fun v -> verbosity := v),
         "Verbosity as an integer." );
-      ( "--enable-first-class-function-pointers",
-        Arg.Set enable_first_class_function_pointers,
-        "Enable first class funciton pointers using <> syntax" );
       ("--disable-modes", Arg.Set disable_modes, "Treat partial as strict");
       ( "--disable-hh-ignore-error",
         Arg.Set disable_hh_ignore_error,
@@ -669,8 +665,6 @@ let parse_options () =
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
-      ~po_enable_first_class_function_pointers:
-        !enable_first_class_function_pointers
       ~po_disable_modes:!disable_modes
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations

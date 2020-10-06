@@ -70,7 +70,6 @@ module FullFidelityParseArgs = struct
     disallow_func_ptrs_in_constants: bool;
     error_php_lambdas: bool;
     disallow_discarded_nullable_awaitables: bool;
-    enable_first_class_function_pointers: bool;
     disable_xhp_element_mangling: bool;
     allow_unstable_features: bool;
     enable_xhp_class_modifier: bool;
@@ -110,7 +109,6 @@ module FullFidelityParseArgs = struct
       disallow_func_ptrs_in_constants
       error_php_lambdas
       disallow_discarded_nullable_awaitables
-      enable_first_class_function_pointers
       disable_xhp_element_mangling
       allow_unstable_features
       enable_xhp_class_modifier =
@@ -148,7 +146,6 @@ module FullFidelityParseArgs = struct
       disallow_func_ptrs_in_constants;
       error_php_lambdas;
       disallow_discarded_nullable_awaitables;
-      enable_first_class_function_pointers;
       disable_xhp_element_mangling;
       allow_unstable_features;
       enable_xhp_class_modifier;
@@ -203,7 +200,6 @@ module FullFidelityParseArgs = struct
     let disallow_func_ptrs_in_constants = ref false in
     let error_php_lambdas = ref false in
     let disallow_discarded_nullable_awaitables = ref false in
-    let enable_first_class_function_pointers = ref false in
     let disable_xhp_element_mangling = ref false in
     let allow_unstable_features = ref false in
     let enable_xhp_class_modifier = ref false in
@@ -340,8 +336,8 @@ No errors are filtered out."
           Arg.Set disallow_discarded_nullable_awaitables,
           "Error on using discarded nullable awaitables" );
         ( "--enable-first-class-function-pointers",
-          Arg.Set enable_first_class_function_pointers,
-          "Enables parsing of first class function pointers" );
+          Arg.Unit (fun () -> ()),
+          "Deprecated - delete in coordination with HackAST" );
         ( "--enable-xhp-class-modifier",
           Arg.Set enable_xhp_class_modifier,
           "Enables the 'xhp class foo' syntax" );
@@ -405,7 +401,6 @@ No errors are filtered out."
       !disallow_func_ptrs_in_constants
       !error_php_lambdas
       !disallow_discarded_nullable_awaitables
-      !enable_first_class_function_pointers
       !disable_xhp_element_mangling
       !allow_unstable_features
       !enable_xhp_class_modifier
@@ -482,11 +477,6 @@ let handle_existing_file args filename =
     ParserOptions.with_disallow_func_ptrs_in_constants
       popt
       args.disallow_func_ptrs_in_constants
-  in
-  let popt =
-    ParserOptions.with_enable_first_class_function_pointers
-      popt
-      args.enable_first_class_function_pointers
   in
   let popt =
     ParserOptions.with_disable_xhp_element_mangling

@@ -92,7 +92,7 @@ struct RepoOptions {
   H(bool,           DisableArray,                     true)           \
   H(bool,           DisableArrayCast,                 true)           \
   H(bool,           DisableArrayTypehint,             true)           \
-  H(bool,           EnableFirstClassFunctionPointers, false)          \
+  H(bool,           EnableFirstClassFunctionPointers, true)           \
   H(bool,           EnableEnumClasses,                false)          \
   /**/
 

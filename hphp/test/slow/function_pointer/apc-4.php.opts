@@ -1,1 +1,1 @@
---count=2 -vServer.APC.AllowObject=true -vHack.Lang.EnableFirstClassFunctionPointers=1
+--count=2 -vServer.APC.AllowObject=true

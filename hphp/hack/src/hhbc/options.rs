@@ -280,7 +280,9 @@ prefixed_flags!(
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
+        LangFlags::ENABLE_COROUTINES
+            | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
+            | LangFlags::ENABLE_FIRST_CLASS_FUNCTION_POINTERS
     }
 }
 
@@ -748,7 +750,7 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.enable_first_class_function_pointers": {
-    "global_value": false
+    "global_value": true
   },
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false

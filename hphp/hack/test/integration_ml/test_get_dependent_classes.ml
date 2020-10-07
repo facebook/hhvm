@@ -73,6 +73,6 @@ let test () =
       (List.equal
          (SSet.elements dependent_classes)
          expected_dependent_classes
-         String.equal)
+         ~equal:String.equal)
   then
     Test.fail "Missing dependent classes"

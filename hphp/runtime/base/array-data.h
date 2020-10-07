@@ -46,7 +46,10 @@ struct VariableSerializer;
 struct Variant;
 
 namespace arrprov { struct Tag; }
-namespace bespoke { struct LoggingArray; }
+namespace bespoke {
+  struct LoggingArray;
+  struct MonotypeVec;
+}
 
 /*
  * arr_lval is a tv_lval augmented with an ArrayData*, and is used to return an
@@ -654,6 +657,7 @@ private:
   /////////////////////////////////////////////////////////////////////////////
 
 protected:
+  friend struct BespokeArray;
   friend struct PackedArray;
   friend struct EmptyArray;
   friend struct MixedArray;
@@ -666,6 +670,7 @@ protected:
   friend struct c_ImmMap;
   friend struct arrprov::Tag;
   friend struct bespoke::LoggingArray;
+  friend struct bespoke::MonotypeVec;
 
   uint32_t m_size;
   /*

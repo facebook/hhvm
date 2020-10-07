@@ -106,7 +106,7 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
   auto const result = reinterpret_cast<ArrayData*>(mem + extra);
   memcpy8(reinterpret_cast<char*>(result),
           reinterpret_cast<char*>(ad), bytes);
-  auto const aux = ad->auxBits() | (hasApcTv ? ArrayData::kHasApcTv : 0);
+  auto const aux = ad->m_aux16 | (hasApcTv ? ArrayData::kHasApcTv : 0);
   result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
   assertx(BespokeArray::asBespoke(result)->layoutRaw() == layout);
 

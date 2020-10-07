@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d7d31e2b54de498a8297284a4bd9a40>>
+// @generated SignedSource<<16f77b3de8195ac9cd8dd99e6b0ba425>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -35,12 +35,12 @@ pub type TparamBounds<'a> = ty_set::TySet<'a>;
     ToOcamlRep
 )]
 pub struct Kind<'a> {
-    pub lower_bounds: TparamBounds<'a>,
-    pub upper_bounds: TparamBounds<'a>,
+    pub lower_bounds: &'a TparamBounds<'a>,
+    pub upper_bounds: &'a TparamBounds<'a>,
     pub reified: oxidized::aast::ReifyKind,
     pub enforceable: bool,
     pub newable: bool,
-    pub parameters: &'a [NamedKind<'a>],
+    pub parameters: &'a [&'a NamedKind<'a>],
 }
 impl<'a> TrivialDrop for Kind<'a> {}
 
@@ -56,5 +56,5 @@ impl<'a> TrivialDrop for Kind<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct NamedKind<'a>(pub aast::Sid<'a>, pub Kind<'a>);
+pub struct NamedKind<'a>(pub aast::Sid<'a>, pub &'a Kind<'a>);
 impl<'a> TrivialDrop for NamedKind<'a> {}

@@ -32,6 +32,11 @@ type t = {
           need a lifetime parameter (so that hh_oxidize need not use global
           knowledge of all types being converted to track which do and do not
           need lifetime parameters). *)
+  copy_types: SSet.t option;
+      (** The owned_types setting allows specifying a set of types which
+          implement Copy, and should not be put behind a reference (so that
+          hh_oxidize need not use global knowledge of all types being converted
+          to track which do and do not implement Copy). *)
 }
 
 val default : t
@@ -51,3 +56,8 @@ val extern_type : string -> string option
 (** If the given type name does not need a lifetime parameter, return true.
     Raises an exception if invoked before [set]. *)
 val owned_type : string -> bool
+
+(** If the given type name implements (or should implement) Copy, return
+    [`Known true]. If no list of copy types was provided, return [`Unknown].
+    Raises an exception if invoked before [set]. *)
+val copy_type : string -> [ `Known of bool | `Unknown ]

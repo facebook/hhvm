@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8153b3da948789927a026f1eeb31600a>>
+// @generated SignedSource<<ca4b40d7bc8169db7541e5dc34e46ad8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -53,8 +53,8 @@ pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
 )]
 pub struct Error_<'a, A> {
     pub code: oxidized::errors::ErrorCode,
-    pub claim: Message<'a, A>,
-    pub reasons: &'a [Message<'a, A>],
+    pub claim: &'a Message<'a, A>,
+    pub reasons: &'a [&'a Message<'a, A>],
 }
 impl<'a, A: TrivialDrop> TrivialDrop for Error_<'a, A> {}
 
@@ -62,6 +62,7 @@ pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>>;
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -86,5 +87,8 @@ impl<'a> TrivialDrop for AppliedFixme<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct Errors<'a>(pub FilesT<'a, Error<'a>>, pub FilesT<'a, AppliedFixme<'a>>);
+pub struct Errors<'a>(
+    pub FilesT<'a, &'a Error<'a>>,
+    pub FilesT<'a, AppliedFixme<'a>>,
+);
 impl<'a> TrivialDrop for Errors<'a> {}

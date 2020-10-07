@@ -25,10 +25,10 @@ type SMap<'a, T> = arena_collections::SortedAssocList<'a, &'a str, T>;
     ToOcamlRep
 )]
 pub struct Decls<'a> {
-    pub classes: SMap<'a, shallow_decl_defs::ShallowClass<'a>>,
-    pub funs: SMap<'a, typing_defs::FunElt<'a>>,
-    pub typedefs: SMap<'a, typing_defs::TypedefType<'a>>,
-    pub consts: SMap<'a, typing_defs::ConstDecl<'a>>,
+    pub classes: SMap<'a, &'a shallow_decl_defs::ShallowClass<'a>>,
+    pub funs: SMap<'a, &'a typing_defs::FunElt<'a>>,
+    pub typedefs: SMap<'a, &'a typing_defs::TypedefType<'a>>,
+    pub consts: SMap<'a, &'a typing_defs::ConstDecl<'a>>,
 }
 impl<'a> TrivialDrop for Decls<'a> {}
 
@@ -44,9 +44,9 @@ impl<'a> TrivialDrop for Decls<'a> {}
     ToOcamlRep
 )]
 pub struct DeclLists<'a> {
-    pub classes: List<'a, (&'a str, shallow_decl_defs::ShallowClass<'a>)>,
-    pub funs: List<'a, (&'a str, typing_defs::FunElt<'a>)>,
-    pub typedefs: List<'a, (&'a str, typing_defs::TypedefType<'a>)>,
-    pub consts: List<'a, (&'a str, typing_defs::ConstDecl<'a>)>,
+    pub classes: List<'a, (&'a str, &'a shallow_decl_defs::ShallowClass<'a>)>,
+    pub funs: List<'a, (&'a str, &'a typing_defs::FunElt<'a>)>,
+    pub typedefs: List<'a, (&'a str, &'a typing_defs::TypedefType<'a>)>,
+    pub consts: List<'a, (&'a str, &'a typing_defs::ConstDecl<'a>)>,
 }
 impl<'a> TrivialDrop for DeclLists<'a> {}

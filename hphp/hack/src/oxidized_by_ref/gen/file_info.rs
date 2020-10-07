@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<181b8c4df1699e56f21875dd2b88e303>>
+// @generated SignedSource<<37a50d44a8a421f346041fb024a607db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -28,6 +28,7 @@ pub use oxidized::file_info::NameType;
 /// allowing us to lazily retrieve the name's exact location if necessary.
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -41,8 +42,10 @@ pub use oxidized::file_info::NameType;
 pub enum Pos<'a> {
     Full(&'a pos::Pos<'a>),
     File(
-        oxidized::file_info::NameType,
-        relative_path::RelativePath<'a>,
+        &'a (
+            oxidized::file_info::NameType,
+            &'a relative_path::RelativePath<'a>,
+        ),
     ),
 }
 impl<'a> TrivialDrop for Pos<'a> {}
@@ -59,13 +62,13 @@ impl<'a> TrivialDrop for Pos<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct Id<'a>(pub &'a Pos<'a>, pub &'a str);
+pub struct Id<'a>(pub Pos<'a>, pub &'a str);
 impl<'a> TrivialDrop for Id<'a> {}
 
 /// The hash value of a decl AST.
 /// We use this to see if two versions of a file are "similar", i.e. their
 /// declarations only differ by position information.
-pub type HashType<'a> = Option<opaque_digest::OpaqueDigest<'a>>;
+pub type HashType<'a> = Option<&'a opaque_digest::OpaqueDigest<'a>>;
 
 /// The record produced by the parsing phase.
 #[derive(
@@ -81,13 +84,13 @@ pub type HashType<'a> = Option<opaque_digest::OpaqueDigest<'a>>;
     ToOcamlRep
 )]
 pub struct FileInfo<'a> {
-    pub hash: HashType<'a>,
+    pub hash: &'a HashType<'a>,
     pub file_mode: Option<oxidized::file_info::Mode>,
-    pub funs: &'a [Id<'a>],
-    pub classes: &'a [Id<'a>],
-    pub record_defs: &'a [Id<'a>],
-    pub typedefs: &'a [Id<'a>],
-    pub consts: &'a [Id<'a>],
+    pub funs: &'a [&'a Id<'a>],
+    pub classes: &'a [&'a Id<'a>],
+    pub record_defs: &'a [&'a Id<'a>],
+    pub typedefs: &'a [&'a Id<'a>],
+    pub consts: &'a [&'a Id<'a>],
     /// None if loaded from saved state
     pub comments: Option<&'a [(&'a pos::Pos<'a>, Comment<'a>)]>,
 }

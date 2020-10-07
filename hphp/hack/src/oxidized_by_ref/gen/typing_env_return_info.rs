@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a139c44aacbc5d73b3abe61f1f35cdf7>>
+// @generated SignedSource<<90790ab933b31b8ec5c63bd1acd2a6f2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -29,7 +29,7 @@ use crate::*;
     ToOcamlRep
 )]
 pub struct TypingEnvReturnInfo<'a> {
-    pub type_: typing_defs::PossiblyEnforcedTy<'a>,
+    pub type_: &'a typing_defs::PossiblyEnforcedTy<'a>,
     pub disposable: bool,
     pub mutable: bool,
     pub explicit: bool,

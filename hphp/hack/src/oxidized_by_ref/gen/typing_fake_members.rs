@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<952c6fa5267ad40e7a6c1eccff9b9163>>
+// @generated SignedSource<<e81207095c4eef9ab1b5ed0aeafe8552>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -31,7 +31,7 @@ pub use crate::typing_reason as reason;
     ToOcamlRep
 )]
 pub struct TypingFakeMembers<'a> {
-    pub valid: blame_set::BlameSet<'a>,
-    pub invalid: blame_set::BlameSet<'a>,
+    pub valid: &'a blame_set::BlameSet<'a>,
+    pub invalid: &'a blame_set::BlameSet<'a>,
 }
 impl<'a> TrivialDrop for TypingFakeMembers<'a> {}

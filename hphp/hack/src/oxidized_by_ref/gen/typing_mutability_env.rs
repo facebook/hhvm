@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd279c349d2fcefa486ba95d8cfed368>>
+// @generated SignedSource<<3368970d1ec533002b35d710bcf807ae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -56,4 +56,4 @@ impl TrivialDrop for MutType {}
 pub struct Mutability<'a>(pub &'a pos::Pos<'a>, pub MutType);
 impl<'a> TrivialDrop for Mutability<'a> {}
 
-pub type MutabilityEnv<'a> = local_id::map::Map<'a, Mutability<'a>>;
+pub type MutabilityEnv<'a> = local_id::map::Map<'a, &'a Mutability<'a>>;

@@ -133,14 +133,6 @@ let parse_types_file filename =
 let parse_extern_types_file filename =
   parse_types_file filename
   |> List.fold ~init:SMap.empty ~f:(fun map name ->
-         (* Ignore comments beginning with '#' *)
-         let name =
-           match String.index name '#' with
-           | Some idx -> String.sub name ~pos:0 ~len:idx
-           | None -> name
-         in
-         (* Strip whitespace *)
-         let name = String.strip name in
          try
            (* Map the name with the crate prefix stripped (since we do not expect to see
            the crate name in our OCaml source) to the fully-qualified name. *)
@@ -161,6 +153,8 @@ let parse_extern_types_file filename =
            map)
 
 let parse_owned_types_file filename = SSet.of_list (parse_types_file filename)
+
+let parse_copy_types_file filename = SSet.of_list (parse_types_file filename)
 
 let usage =
   "Usage: buck run hphp/hack/src/hh_oxidize -- [out_directory] [target_files]
@@ -187,6 +181,7 @@ let parse_args () =
   let mode = ref Configuration.ByBox in
   let extern_types_file = ref None in
   let owned_types_file = ref None in
+  let copy_types_file = ref None in
   let options =
     [
       ( "--out-dir",
@@ -209,6 +204,10 @@ let parse_args () =
         Arg.String (fun s -> owned_types_file := Some s),
         " Do not add a lifetime parameter to the types listend in this file"
         ^ " (when --by-ref is enabled)" );
+      ( "--copy-types-file",
+        Arg.String (fun s -> copy_types_file := Some s),
+        " Do not use references for the types listed in this file"
+        ^ " (when --by-ref is enabled)" );
     ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
@@ -222,7 +221,9 @@ let parse_args () =
     | None -> Configuration.(default.owned_types)
     | Some filename -> parse_owned_types_file filename
   in
-  Configuration.set { Configuration.mode = !mode; extern_types; owned_types };
+  let copy_types = Option.map !copy_types_file ~f:parse_copy_types_file in
+  Configuration.set
+    { Configuration.mode = !mode; extern_types; owned_types; copy_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   match !files with
   | [] ->

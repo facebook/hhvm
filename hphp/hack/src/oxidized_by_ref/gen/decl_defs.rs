@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7f881af082a368524bb13c4f72480455>>
+// @generated SignedSource<<6416e973d10f8f60b055a6606a3ba473>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -120,6 +120,7 @@ pub type ConditionTypeName<'a> = Option<&'a str>;
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -163,26 +164,26 @@ pub struct DeclClassType<'a> {
     pub has_xhp_keyword: bool,
     pub name: &'a str,
     pub pos: &'a pos::Pos<'a>,
-    pub tparams: &'a [Tparam<'a>],
-    pub where_constraints: &'a [WhereConstraint<'a>],
+    pub tparams: &'a [&'a Tparam<'a>],
+    pub where_constraints: &'a [&'a WhereConstraint<'a>],
     /// class name to the subst_context that must be applied to that class
-    pub substs: s_map::SMap<'a, SubstContext<'a>>,
-    pub consts: s_map::SMap<'a, ClassConst<'a>>,
-    pub typeconsts: s_map::SMap<'a, TypeconstType<'a>>,
-    pub pu_enums: s_map::SMap<'a, PuEnumType<'a>>,
-    pub props: s_map::SMap<'a, Element<'a>>,
-    pub sprops: s_map::SMap<'a, Element<'a>>,
-    pub methods: s_map::SMap<'a, Element<'a>>,
-    pub smethods: s_map::SMap<'a, Element<'a>>,
-    pub construct: (Option<Element<'a>>, ConsistentKind),
+    pub substs: s_map::SMap<'a, &'a SubstContext<'a>>,
+    pub consts: s_map::SMap<'a, &'a ClassConst<'a>>,
+    pub typeconsts: s_map::SMap<'a, &'a TypeconstType<'a>>,
+    pub pu_enums: s_map::SMap<'a, &'a PuEnumType<'a>>,
+    pub props: s_map::SMap<'a, &'a Element<'a>>,
+    pub sprops: s_map::SMap<'a, &'a Element<'a>>,
+    pub methods: s_map::SMap<'a, &'a Element<'a>>,
+    pub smethods: s_map::SMap<'a, &'a Element<'a>>,
+    pub construct: (Option<&'a Element<'a>>, ConsistentKind),
     pub ancestors: s_map::SMap<'a, Ty<'a>>,
-    pub req_ancestors: &'a [Requirement<'a>],
+    pub req_ancestors: &'a [&'a Requirement<'a>],
     pub req_ancestors_extends: s_set::SSet<'a>,
     pub extends: s_set::SSet<'a>,
     pub sealed_whitelist: Option<s_set::SSet<'a>>,
     pub xhp_attr_deps: s_set::SSet<'a>,
-    pub enum_type: Option<EnumType<'a>>,
-    pub decl_errors: Option<errors::Errors<'a>>,
+    pub enum_type: Option<&'a EnumType<'a>>,
+    pub decl_errors: Option<&'a errors::Errors<'a>>,
     /// this field is used to prevent condition types being filtered
     /// in Decl_redecl_service.is_dependent_class_of_any
     pub condition_types: s_set::SSet<'a>,
@@ -205,7 +206,7 @@ pub struct Element<'a> {
     pub flags: isize,
     pub reactivity: Option<MethodReactivity<'a>>,
     pub origin: &'a str,
-    pub visibility: Visibility<'a>,
+    pub visibility: &'a Visibility<'a>,
     pub deprecated: Option<&'a str>,
 }
 impl<'a> TrivialDrop for Element<'a> {}

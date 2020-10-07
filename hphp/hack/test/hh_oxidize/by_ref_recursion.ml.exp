@@ -13,19 +13,19 @@ use serde::Serialize;
 use crate::*;
 
 #[derive(
-    Clone, Debug, Eq, FromOcamlRepIn, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep,
+    Clone, Copy, Debug, Eq, FromOcamlRepIn, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep,
 )]
 pub enum IntList<'a> {
     Nil,
-    Cons(isize, &'a IntList<'a>),
+    Cons(&'a (isize, &'a IntList<'a>)),
 }
 impl<'a> TrivialDrop for IntList<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, FromOcamlRepIn, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep,
+    Clone, Copy, Debug, Eq, FromOcamlRepIn, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep,
 )]
 pub enum NAryTree<'a, A> {
-    Leaf(A),
-    Children(&'a [NAryTree<'a, A>]),
+    Leaf(&'a A),
+    Children(&'a [&'a NAryTree<'a, A>]),
 }
 impl<'a, A: TrivialDrop> TrivialDrop for NAryTree<'a, A> {}

@@ -41,26 +41,7 @@ let default_derives () =
       (Some "serde", "Serialize");
     ]
 
-let derive_copy ty =
-  (* By default, we will derive Copy only for enums whose variants all have no
-     arguments. But there are some other small types for which implementing Copy is
-     convenient. We whitelist them here. *)
-  match Configuration.mode () with
-  | Configuration.ByRef ->
-    (match ty with
-    | "aast::Expr"
-    | "aast::Expr_"
-    | "aast::UserAttribute"
-    | "ast_defs::Id"
-    | "nast::FuncBodyAnn"
-    | "typing_cont_key::TypingContKey"
-    | "typing_defs_core::ConstraintType"
-    | "typing_defs_core::InternalType"
-    | "typing_defs_core::Ty"
-    | "typing_defs_core::Ty_" ->
-      true
-    | _ -> false)
-  | Configuration.ByBox -> false
+let derive_copy ty = Convert_type.is_copy ty ""
 
 let additional_derives ty : (string option * string) list =
   ( if derive_copy ty then
@@ -69,10 +50,6 @@ let additional_derives ty : (string option * string) list =
     [] )
   @
   match ty with
-  | "typing_tyvar_occurrences::TypingTyvarOccurrences" -> [(None, "Default")]
-  | "tast::SavedEnv" -> [(None, "Default")]
-  | "type_parameter_env::TypeParameterEnv" -> [(None, "Default")]
-  | "typing_inference_env::TypingInferenceEnv" -> [(None, "Default")]
   | "aast::EmitId" when Configuration.(mode () = ByBox) ->
     [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
   | "aast::XhpAttrInfo" when Configuration.(mode () = ByBox) ->
@@ -178,10 +155,24 @@ let unbox_field ty =
   || String.is_prefix ty ~prefix:"Vec<"
   || String.is_prefix ty ~prefix:"Block<"
   || String.is_prefix ty ~prefix:"&'a "
+  || String.is_prefix ty ~prefix:"Option<&'a "
+  || String.is_prefix ty ~prefix:"std::cell::Cell<&'a "
+  || String.is_prefix ty ~prefix:"std::cell::RefCell<&'a "
   ||
   match Configuration.mode () with
   | Configuration.ByRef ->
-    ty = "tany_sentinel::TanySentinel" || ty = "ident::Ident" || ty = "Ty<'a>"
+    ty = "tany_sentinel::TanySentinel"
+    || ty = "ident::Ident"
+    || ty = "Ty<'a>"
+    || ty = "Option<Ty<'a>>"
+    || ty = "ConditionTypeName<'a>"
+    || ty = "ConstraintType<'a>"
+    || (String.is_prefix ty ~prefix:"Option<" && Convert_type.is_ty_copy ty)
+    || String.is_prefix ty ~prefix:"std::cell::Cell<"
+       && Convert_type.is_ty_copy ty
+    || String.is_prefix ty ~prefix:"std::cell::RefCell<"
+       && Convert_type.is_ty_copy ty
+    || Convert_type.is_primitive ty
   | Configuration.ByBox -> false
 
 let add_rcoc = [("aast", "Nsenv")]
@@ -338,7 +329,9 @@ let constructor_arguments ?(box_fields = false) = function
         )
       | _ ->
         (match Configuration.mode () with
-        | Configuration.ByRef -> sprintf "(&'a %s)" (tuple types)
+        | Configuration.ByRef ->
+          let tys = tuple ~seen_indirection:true types in
+          sprintf "(&'a %s)" tys
         | Configuration.ByBox -> sprintf "(Box<%s>)" (tuple types))
     )
   | Pcstr_record labels -> record_declaration labels
@@ -381,7 +374,13 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
 
 let type_declaration name td =
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
-  let attrs_and_vis ~force_derive_copy =
+  let attrs_and_vis ~all_nullary ~force_derive_copy =
+    if force_derive_copy && Configuration.copy_type name = `Known false then
+      failwith
+        (Printf.sprintf
+           "Type %s::%s can implement Copy but is not specified in the copy_types file. Please add it."
+           (curr_module_name ())
+           name);
     let additional_derives =
       if force_derive_copy then
         [(None, "Copy")]
@@ -391,10 +390,14 @@ let type_declaration name td =
     let derive_attr =
       let traits = derived_traits name @ additional_derives in
       let traits =
+        if all_nullary then
+          (Some "ocamlrep_derive", "FromOcamlRep") :: traits
+        else
+          traits
+      in
+      let traits =
         if force_derive_copy then
-          (Some "ocamlrep_derive", "FromOcamlRep")
-          :: (Some "ocamlrep_derive", "FromOcamlRepIn")
-          :: traits
+          (Some "ocamlrep_derive", "FromOcamlRepIn") :: traits
         else
           traits
       in
@@ -503,10 +506,13 @@ let type_declaration name td =
             tparams
             ty
         else
+          let ty = Option.value (String.chop_prefix ty "&'a ") ~default:ty in
           sprintf "%spub type %s%s = %s;" doc name tparams ty
     | _ ->
       if should_use_alias_instead_of_tuple_struct name then
-        sprintf "%spub type %s%s = %s;" doc name tparams (core_type ty)
+        let ty = core_type ty in
+        let ty = Option.value (String.chop_prefix ty "&'a ") ~default:ty in
+        sprintf "%spub type %s%s = %s;" doc name tparams ty
       else
         let ty =
           match ty.ptyp_desc with
@@ -515,7 +521,7 @@ let type_declaration name td =
         in
         sprintf
           "%s struct %s%s %s;%s"
-          (attrs_and_vis ~force_derive_copy:false)
+          (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
           name
           tparams
           ty
@@ -525,25 +531,34 @@ let type_declaration name td =
     let all_nullary =
       List.for_all ctors (fun c -> 0 = ctor_arg_len c.pcd_args)
     in
-    let should_box_variant = should_box_variant name in
+    let force_derive_copy =
+      if Configuration.(mode () = ByRef) then
+        true
+      else
+        all_nullary
+    in
+    let box_fields =
+      if Configuration.(mode () = ByRef) then
+        true
+      else
+        should_box_variant name
+    in
     let ctors =
-      map_and_concat
-        ctors
-        (variant_constructor_declaration ~box_fields:should_box_variant)
+      map_and_concat ctors (variant_constructor_declaration ~box_fields)
     in
     sprintf
       "%s enum %s%s {\n%s}%s"
-      (attrs_and_vis ~force_derive_copy:all_nullary)
+      (attrs_and_vis ~all_nullary ~force_derive_copy)
       name
       tparams
       ctors
-      (implements ~force_derive_copy:all_nullary)
+      (implements ~force_derive_copy)
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = record_declaration labels ~pub:true in
     sprintf
       "%s struct %s%s %s%s"
-      (attrs_and_vis ~force_derive_copy:false)
+      (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
       name
       tparams
       labels

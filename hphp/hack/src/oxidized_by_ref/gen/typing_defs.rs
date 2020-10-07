@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<15c9d82b5f94f05f85f555acf2ac7b18>>
+// @generated SignedSource<<33ba4ca932ff40d657b650e5215555a3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -70,12 +70,12 @@ impl<'a> TrivialDrop for ConstDecl<'a> {}
     ToOcamlRep
 )]
 pub struct ClassElt<'a> {
-    pub visibility: Visibility<'a>,
-    pub type_: lazy::Lazy<Ty<'a>>,
+    pub visibility: &'a Visibility<'a>,
+    pub type_: &'a lazy::Lazy<Ty<'a>>,
     /// identifies the class from which this elt originates
     pub origin: &'a str,
     pub deprecated: Option<&'a str>,
-    pub pos: lazy::Lazy<&'a pos::Pos<'a>>,
+    pub pos: &'a lazy::Lazy<&'a pos::Pos<'a>>,
     pub flags: isize,
 }
 impl<'a> TrivialDrop for ClassElt<'a> {}
@@ -179,32 +179,33 @@ pub struct ClassType<'a> {
     pub is_disposable: bool,
     pub name: &'a str,
     pub pos: &'a pos::Pos<'a>,
-    pub tparams: &'a [Tparam<'a>],
-    pub where_constraints: &'a [WhereConstraint<'a>],
-    pub consts: s_map::SMap<'a, ClassConst<'a>>,
-    pub typeconsts: s_map::SMap<'a, TypeconstType<'a>>,
-    pub pu_enums: s_map::SMap<'a, PuEnumType<'a>>,
-    pub props: s_map::SMap<'a, ClassElt<'a>>,
-    pub sprops: s_map::SMap<'a, ClassElt<'a>>,
-    pub methods: s_map::SMap<'a, ClassElt<'a>>,
-    pub smethods: s_map::SMap<'a, ClassElt<'a>>,
+    pub tparams: &'a [&'a Tparam<'a>],
+    pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    pub consts: s_map::SMap<'a, &'a ClassConst<'a>>,
+    pub typeconsts: s_map::SMap<'a, &'a TypeconstType<'a>>,
+    pub pu_enums: s_map::SMap<'a, &'a PuEnumType<'a>>,
+    pub props: s_map::SMap<'a, &'a ClassElt<'a>>,
+    pub sprops: s_map::SMap<'a, &'a ClassElt<'a>>,
+    pub methods: s_map::SMap<'a, &'a ClassElt<'a>>,
+    pub smethods: s_map::SMap<'a, &'a ClassElt<'a>>,
     /// the consistent_kind represents final constructor or __ConsistentConstruct
-    pub construct: (Option<ClassElt<'a>>, ConsistentKind),
+    pub construct: (Option<&'a ClassElt<'a>>, ConsistentKind),
     /// This includes all the classes, interfaces and traits this class is
     /// using.
     pub ancestors: s_map::SMap<'a, Ty<'a>>,
-    pub req_ancestors: &'a [Requirement<'a>],
+    pub req_ancestors: &'a [&'a Requirement<'a>],
     /// the extends of req_ancestors
     pub req_ancestors_extends: s_set::SSet<'a>,
     pub extends: s_set::SSet<'a>,
-    pub enum_type: Option<EnumType<'a>>,
+    pub enum_type: Option<&'a EnumType<'a>>,
     pub sealed_whitelist: Option<s_set::SSet<'a>>,
-    pub decl_errors: Option<errors::Errors<'a>>,
+    pub decl_errors: Option<&'a errors::Errors<'a>>,
 }
 impl<'a> TrivialDrop for ClassType<'a> {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -260,9 +261,9 @@ impl<'a> TrivialDrop for TypeconstType<'a> {}
 pub struct PuEnumType<'a> {
     pub name: nast::Sid<'a>,
     pub is_final: bool,
-    pub case_types: s_map::SMap<'a, (PuOrigin<'a>, Tparam<'a>)>,
-    pub case_values: s_map::SMap<'a, (PuOrigin<'a>, nast::Sid<'a>, Ty<'a>)>,
-    pub members: s_map::SMap<'a, PuMemberType<'a>>,
+    pub case_types: s_map::SMap<'a, (&'a PuOrigin<'a>, &'a Tparam<'a>)>,
+    pub case_values: s_map::SMap<'a, (&'a PuOrigin<'a>, nast::Sid<'a>, Ty<'a>)>,
+    pub members: s_map::SMap<'a, &'a PuMemberType<'a>>,
 }
 impl<'a> TrivialDrop for PuEnumType<'a> {}
 
@@ -280,9 +281,9 @@ impl<'a> TrivialDrop for PuEnumType<'a> {}
 )]
 pub struct PuMemberType<'a> {
     pub atom: nast::Sid<'a>,
-    pub origin: PuOrigin<'a>,
-    pub types: s_map::SMap<'a, (PuOrigin<'a>, nast::Sid<'a>, Ty<'a>)>,
-    pub exprs: s_map::SMap<'a, (PuOrigin<'a>, nast::Sid<'a>)>,
+    pub origin: &'a PuOrigin<'a>,
+    pub types: s_map::SMap<'a, (&'a PuOrigin<'a>, nast::Sid<'a>, Ty<'a>)>,
+    pub exprs: s_map::SMap<'a, (&'a PuOrigin<'a>, nast::Sid<'a>)>,
 }
 impl<'a> TrivialDrop for PuMemberType<'a> {}
 
@@ -361,7 +362,7 @@ impl<'a> TrivialDrop for RecordDefType<'a> {}
 pub struct TypedefType<'a> {
     pub pos: &'a pos::Pos<'a>,
     pub vis: oxidized::aast::TypedefVisibility,
-    pub tparams: &'a [Tparam<'a>],
+    pub tparams: &'a [&'a Tparam<'a>],
     pub constraint: Option<Ty<'a>>,
     pub type_: Ty<'a>,
 }
@@ -369,6 +370,7 @@ impl<'a> TrivialDrop for TypedefType<'a> {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,

@@ -86,11 +86,13 @@ impl<'a, K: Ord> Set<'a, K> {
     }
 }
 
-impl<'a, K: Ord> Set<'a, K> {
-    pub fn empty() -> Self {
+impl<'a, K> Set<'a, K> {
+    pub const fn empty() -> Self {
         Set(Map::empty())
     }
+}
 
+impl<'a, K: Ord> Set<'a, K> {
     pub fn is_empty(self) -> bool {
         self.0.is_empty()
     }

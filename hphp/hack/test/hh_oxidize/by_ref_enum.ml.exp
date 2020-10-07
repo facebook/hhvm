@@ -13,14 +13,14 @@ use serde::Serialize;
 use crate::*;
 
 #[derive(
-    Clone, Debug, Eq, FromOcamlRepIn, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep,
+    Clone, Copy, Debug, Eq, FromOcamlRepIn, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep,
 )]
 pub enum X<'a> {
     A(Option<isize>),
     B(bool),
     C(f64),
-    D(std::cell::RefCell<isize>),
+    D(std::cell::Cell<isize>),
     E(&'a str),
-    F(&'a str, &'a str),
+    F(&'a (&'a str, &'a str)),
 }
 impl<'a> TrivialDrop for X<'a> {}

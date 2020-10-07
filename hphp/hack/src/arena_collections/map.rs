@@ -168,15 +168,17 @@ impl<'a, K: Ord, V> Map<'a, K, V> {
     }
 }
 
-impl<'a, K: Ord, V> Map<'a, K, V> {
+impl<'a, K, V> Map<'a, K, V> {
     /// Create a new empty map.
     ///
     /// Note that this does not require heap allocation,
     /// as it is equivalent to a 1 word null pointer.
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Map(None)
     }
+}
 
+impl<'a, K: Ord, V> Map<'a, K, V> {
     /// Check whether the map is empty.
     pub fn is_empty(self) -> bool {
         match self {

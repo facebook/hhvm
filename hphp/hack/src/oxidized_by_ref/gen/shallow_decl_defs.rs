@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7589218eea29ffa49901c30fe9b541f6>>
+// @generated SignedSource<<5c9e38818bda491ac73f9b27d3f6a836>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -93,9 +93,9 @@ impl<'a> TrivialDrop for ShallowPuMember<'a> {}
 pub struct ShallowPuEnum<'a> {
     pub name: aast::Sid<'a>,
     pub is_final: bool,
-    pub case_types: &'a [Tparam<'a>],
+    pub case_types: &'a [&'a Tparam<'a>],
     pub case_values: &'a [(aast::Sid<'a>, Ty<'a>)],
-    pub members: &'a [ShallowPuMember<'a>],
+    pub members: &'a [&'a ShallowPuMember<'a>],
 }
 impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
 
@@ -169,23 +169,23 @@ pub struct ShallowClass<'a> {
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassKind,
     pub name: aast::Sid<'a>,
-    pub tparams: &'a [Tparam<'a>],
-    pub where_constraints: &'a [WhereConstraint<'a>],
+    pub tparams: &'a [&'a Tparam<'a>],
+    pub where_constraints: &'a [&'a WhereConstraint<'a>],
     pub extends: &'a [Ty<'a>],
     pub uses: &'a [Ty<'a>],
     pub xhp_attr_uses: &'a [Ty<'a>],
     pub req_extends: &'a [Ty<'a>],
     pub req_implements: &'a [Ty<'a>],
     pub implements: &'a [Ty<'a>],
-    pub consts: &'a [ShallowClassConst<'a>],
-    pub typeconsts: &'a [ShallowTypeconst<'a>],
-    pub pu_enums: &'a [ShallowPuEnum<'a>],
-    pub props: &'a [ShallowProp<'a>],
-    pub sprops: &'a [ShallowProp<'a>],
-    pub constructor: Option<ShallowMethod<'a>>,
-    pub static_methods: &'a [ShallowMethod<'a>],
-    pub methods: &'a [ShallowMethod<'a>],
-    pub user_attributes: &'a [UserAttribute<'a>],
-    pub enum_type: Option<EnumType<'a>>,
+    pub consts: &'a [&'a ShallowClassConst<'a>],
+    pub typeconsts: &'a [&'a ShallowTypeconst<'a>],
+    pub pu_enums: &'a [&'a ShallowPuEnum<'a>],
+    pub props: &'a [&'a ShallowProp<'a>],
+    pub sprops: &'a [&'a ShallowProp<'a>],
+    pub constructor: Option<&'a ShallowMethod<'a>>,
+    pub static_methods: &'a [&'a ShallowMethod<'a>],
+    pub methods: &'a [&'a ShallowMethod<'a>],
+    pub user_attributes: &'a [&'a UserAttribute<'a>],
+    pub enum_type: Option<&'a EnumType<'a>>,
 }
 impl<'a> TrivialDrop for ShallowClass<'a> {}

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1d70572b6d24bfd7753b6c194cd7a591>>
+// @generated SignedSource<<b7a520741845cf1befac01d221c85af3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -41,8 +41,8 @@ pub struct TyvarConstraints<'a> {
     /// If it appears in an invariant position then both will be true; if it doesn't
     /// appear at all then both will be false.
     pub appears_contravariantly: bool,
-    pub lower_bounds: i_ty_set::ITySet<'a>,
-    pub upper_bounds: i_ty_set::ITySet<'a>,
+    pub lower_bounds: &'a i_ty_set::ITySet<'a>,
+    pub upper_bounds: &'a i_ty_set::ITySet<'a>,
     /// Map associating a type to each type constant id of this variable.
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
@@ -59,6 +59,7 @@ impl<'a> TrivialDrop for TyvarConstraints<'a> {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -73,7 +74,7 @@ pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
     TVIType(Ty<'a>),
     /// when the type variable is still unsolved
-    TVIConstraints(TyvarConstraints<'a>),
+    TVIConstraints(&'a TyvarConstraints<'a>),
 }
 impl<'a> TrivialDrop for SolvingInfo<'a> {}
 
@@ -99,12 +100,11 @@ pub struct TyvarInfo<'a> {
 }
 impl<'a> TrivialDrop for TyvarInfo<'a> {}
 
-pub type Tvenv<'a> = i_map::IMap<'a, TyvarInfo<'a>>;
+pub type Tvenv<'a> = i_map::IMap<'a, &'a TyvarInfo<'a>>;
 
 #[derive(
     Clone,
     Debug,
-    Default,
     Eq,
     FromOcamlRepIn,
     Hash,
@@ -117,8 +117,8 @@ pub type Tvenv<'a> = i_map::IMap<'a, TyvarInfo<'a>>;
 pub struct TypingInferenceEnv<'a> {
     pub tvenv: Tvenv<'a>,
     pub tyvars_stack: &'a [(&'a pos::Pos<'a>, &'a [ident::Ident])],
-    pub subtype_prop: t_l::SubtypeProp<'a>,
-    pub tyvar_occurrences: typing_tyvar_occurrences::TypingTyvarOccurrences<'a>,
+    pub subtype_prop: &'a t_l::SubtypeProp<'a>,
+    pub tyvar_occurrences: &'a typing_tyvar_occurrences::TypingTyvarOccurrences<'a>,
     pub allow_solve_globals: bool,
 }
 impl<'a> TrivialDrop for TypingInferenceEnv<'a> {}
@@ -141,7 +141,7 @@ pub struct GlobalTyvarInfo<'a> {
 }
 impl<'a> TrivialDrop for GlobalTyvarInfo<'a> {}
 
-pub type GlobalTvenv<'a> = i_map::IMap<'a, GlobalTyvarInfo<'a>>;
+pub type GlobalTvenv<'a> = i_map::IMap<'a, &'a GlobalTyvarInfo<'a>>;
 
 pub type TGlobal<'a> = GlobalTvenv<'a>;
 
@@ -157,5 +157,5 @@ pub type TGlobal<'a> = GlobalTvenv<'a>;
     Serialize,
     ToOcamlRep
 )]
-pub struct TGlobalWithPos<'a>(pub &'a pos::Pos<'a>, pub TGlobal<'a>);
+pub struct TGlobalWithPos<'a>(pub &'a pos::Pos<'a>, pub &'a TGlobal<'a>);
 impl<'a> TrivialDrop for TGlobalWithPos<'a> {}

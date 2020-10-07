@@ -11,8 +11,8 @@ use crate::pos::Pos;
 impl<'a> Error_<'a, Pos<'a>> {
     pub fn new(
         code: ErrorCode,
-        claim: Message<'a, Pos<'a>>,
-        reasons: &'a [Message<'a, Pos<'a>>],
+        claim: &'a Message<'a, Pos<'a>>,
+        reasons: &'a [&'a Message<'a, Pos<'a>>],
     ) -> Self {
         Error_ {
             code,
@@ -125,7 +125,7 @@ impl std::fmt::Display for DisplayErrorCode {
     }
 }
 
-const EMPTY_ERRORS_BY_FILE: FilesT<'_, Error<'_>> = FilesT::from_slice(&[]);
+const EMPTY_ERRORS_BY_FILE: FilesT<'_, &Error<'_>> = FilesT::from_slice(&[]);
 const EMPTY_FIXMES_BY_FILE: FilesT<'_, AppliedFixme<'_>> = FilesT::from_slice(&[]);
 const EMPTY_ERRORS: Errors<'_> = Errors(EMPTY_ERRORS_BY_FILE, EMPTY_FIXMES_BY_FILE);
 
@@ -146,7 +146,8 @@ impl<'a> Errors<'a> {
             .flat_map(|(_filename, errs_by_phase)| {
                 errs_by_phase
                     .iter()
-                    .flat_map(|(_phase, errs)| errs.into_iter())
+                    .flat_map(|(_phase, errs)| errs.iter())
+                    .copied()
             })
             .collect()
     }

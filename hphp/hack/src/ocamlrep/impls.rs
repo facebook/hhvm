@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::{Borrow, Cow};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
 use std::convert::TryInto;
 use std::ffi::{OsStr, OsString};
@@ -251,6 +251,30 @@ impl<T: ToOcamlRep> ToOcamlRep for RefCell<T> {
         let mut block = alloc.block_with_size(1);
         alloc.set_field(&mut block, 0, alloc.add(&*self.borrow()));
         block.build()
+    }
+}
+
+impl<T: Copy + ToOcamlRep> ToOcamlRep for Cell<T> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        let mut block = alloc.block_with_size(1);
+        alloc.set_field(&mut block, 0, alloc.add(&self.get()));
+        block.build()
+    }
+}
+
+impl<T: FromOcamlRep> FromOcamlRep for Cell<T> {
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        let block = from::expect_tuple(value, 1)?;
+        let value: T = from::field(block, 0)?;
+        Ok(Cell::new(value))
+    }
+}
+
+impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for Cell<T> {
+    fn from_ocamlrep_in(value: Value<'_>, alloc: &'a Bump) -> Result<Self, FromError> {
+        let block = from::expect_tuple(value, 1)?;
+        let value: T = from::field_in(block, 0, alloc)?;
+        Ok(Cell::new(value))
     }
 }
 

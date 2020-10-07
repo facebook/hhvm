@@ -19,7 +19,7 @@ pub struct X<'a> {
     pub a: Option<isize>,
     pub b: bool,
     pub c: f64,
-    pub d: std::cell::RefCell<isize>,
+    pub d: std::cell::Cell<isize>,
     pub e: &'a str,
 }
 impl<'a> TrivialDrop for X<'a> {}

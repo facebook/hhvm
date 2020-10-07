@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3031b1e922ad444047956f985f143c4f>>
+// @generated SignedSource<<4015d15449464911dd80220d1db0f433>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -21,6 +21,7 @@ pub use crate::typing_reason as reason;
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -190,6 +191,7 @@ impl TrivialDrop for XhpAttrTag {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -236,6 +238,7 @@ impl TrivialDrop for ConsistentKind {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -306,10 +309,10 @@ impl<'a> TrivialDrop for UserAttribute<'a> {}
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
     pub name: ast_defs::Id<'a>,
-    pub tparams: &'a [Tparam<'a>],
+    pub tparams: &'a [&'a Tparam<'a>],
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, Ty<'a>)],
     pub reified: oxidized::aast::ReifyKind,
-    pub user_attributes: &'a [UserAttribute<'a>],
+    pub user_attributes: &'a [&'a UserAttribute<'a>],
 }
 impl<'a> TrivialDrop for Tparam<'a> {}
 
@@ -449,7 +452,12 @@ pub enum Ty_<'a> {
     Ttuple(&'a [Ty<'a>]),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
-    Tshape(&'a (ShapeKind, nast::shape_map::ShapeMap<'a, ShapeFieldType<'a>>)),
+    Tshape(
+        &'a (
+            ShapeKind,
+            nast::shape_map::ShapeMap<'a, &'a ShapeFieldType<'a>>,
+        ),
+    ),
     Tvar(ident::Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
@@ -519,6 +527,7 @@ impl<'a> TrivialDrop for Ty_<'a> {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -530,11 +539,11 @@ impl<'a> TrivialDrop for Ty_<'a> {}
     ToOcamlRep
 )]
 pub enum ConstraintType_<'a> {
-    ThasMember(HasMember<'a>),
+    ThasMember(&'a HasMember<'a>),
     /// The type of container destructuring via list() or splat `...`
-    Tdestructure(Destructure<'a>),
-    TCunion(Ty<'a>, ConstraintType<'a>),
-    TCintersection(Ty<'a>, ConstraintType<'a>),
+    Tdestructure(&'a Destructure<'a>),
+    TCunion(&'a (Ty<'a>, ConstraintType<'a>)),
+    TCintersection(&'a (Ty<'a>, ConstraintType<'a>)),
 }
 impl<'a> TrivialDrop for ConstraintType_<'a> {}
 
@@ -556,8 +565,8 @@ pub struct HasMember<'a> {
     /// This is required to check ambiguous object access, where sometimes
     /// HHVM would access the private member of a parent class instead of the
     /// one from the current class.
-    pub class_id: nast::ClassId_<'a>,
-    pub explicit_targs: Option<&'a [nast::Targ<'a>]>,
+    pub class_id: &'a nast::ClassId_<'a>,
+    pub explicit_targs: Option<&'a [&'a nast::Targ<'a>]>,
 }
 impl<'a> TrivialDrop for HasMember<'a> {}
 
@@ -651,6 +660,7 @@ impl<'a> TrivialDrop for TaccessType<'a> {}
 /// call to function f will be treated as reactive only if $g is reactive
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -711,12 +721,12 @@ impl<'a> TrivialDrop for FunImplicitParams<'a> {}
 )]
 pub struct FunType<'a> {
     pub arity: FunArity<'a>,
-    pub tparams: &'a [Tparam<'a>],
-    pub where_constraints: &'a [WhereConstraint<'a>],
-    pub params: FunParams<'a>,
-    pub implicit_params: FunImplicitParams<'a>,
+    pub tparams: &'a [&'a Tparam<'a>],
+    pub where_constraints: &'a [&'a WhereConstraint<'a>],
+    pub params: &'a FunParams<'a>,
+    pub implicit_params: &'a FunImplicitParams<'a>,
     /// Carries through the sync/async information from the aast
-    pub ret: PossiblyEnforcedTy<'a>,
+    pub ret: &'a PossiblyEnforcedTy<'a>,
     pub reactive: Reactivity<'a>,
     pub flags: typing_defs_flags::FunTypeFlags,
 }
@@ -727,6 +737,7 @@ impl<'a> TrivialDrop for FunType<'a> {}
 /// standard, non-variadic functions or the type of variadic argument taken
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -747,6 +758,7 @@ impl<'a> TrivialDrop for FunArity<'a> {}
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Eq,
     FromOcamlRepIn,
@@ -797,10 +809,10 @@ impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
 pub struct FunParam<'a> {
     pub pos: &'a pos::Pos<'a>,
     pub name: Option<&'a str>,
-    pub type_: PossiblyEnforcedTy<'a>,
+    pub type_: &'a PossiblyEnforcedTy<'a>,
     pub rx_annotation: Option<ParamRxAnnotation<'a>>,
     pub flags: typing_defs_flags::FunParamFlags,
 }
 impl<'a> TrivialDrop for FunParam<'a> {}
 
-pub type FunParams<'a> = &'a [&'a FunParam<'a>];
+pub type FunParams<'a> = [&'a FunParam<'a>];

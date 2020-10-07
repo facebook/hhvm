@@ -354,11 +354,11 @@ impl<'a> TypeBuilder<'a> {
     }
     pub fn funparam(&'a self, type_: Ty<'a>) -> &'a FunParam<'a> {
         self.alloc(FunParam {
-            type_: PossiblyEnforcedTy {
+            type_: self.alloc(PossiblyEnforcedTy {
                 type_,
                 // TODO: set this correctly
                 enforced: false,
-            },
+            }),
             // TODO: set the following fields correctly
             flags: FunParamFlags::empty(),
             name: None,
@@ -369,15 +369,15 @@ impl<'a> TypeBuilder<'a> {
     pub fn funtype(
         &'a self,
         params: &'a [&'a FunParam<'a>],
-        implicit_params: FunImplicitParams<'a>,
+        implicit_params: &'a FunImplicitParams<'a>,
         ret: Ty<'a>,
     ) -> &'a FunType<'a> {
         self.alloc(FunType {
-            ret: PossiblyEnforcedTy {
+            ret: self.alloc(PossiblyEnforcedTy {
                 type_: ret,
                 // TODO: set this correctly
                 enforced: false,
-            },
+            }),
             params,
             implicit_params,
             // TODO: set the following fields correctly
@@ -422,7 +422,7 @@ impl<'a> TypeBuilder<'a> {
         name: &'a str,
         r1: &'a Reason<'a>,
     ) -> &'a Reason<'a> {
-        self.alloc(Reason::Rinstantiate(r0, name, r1))
+        self.alloc(Reason::Rinstantiate(self.alloc((*r0, name, *r1))))
     }
 
     pub fn mk_rtype_variable_generics(
@@ -431,7 +431,9 @@ impl<'a> TypeBuilder<'a> {
         param_name: &'a str,
         fn_name: &'a str,
     ) -> &'a Reason<'a> {
-        self.alloc(Reason::RtypeVariableGenerics(pos, param_name, fn_name))
+        self.alloc(Reason::RtypeVariableGenerics(
+            self.alloc((pos, param_name, fn_name)),
+        ))
     }
 
     pub fn mk_rwitness(&'a self, pos: &'a Pos) -> &'a Reason<'a> {

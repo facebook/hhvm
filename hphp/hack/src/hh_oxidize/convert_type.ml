@@ -15,6 +15,31 @@ open Reordered_argument_collections
 open Utils
 open State
 
+let primitives =
+  [ "()"; "isize"; "usize"; "i64"; "u64"; "i32"; "u32"; "i16"; "u16"; "i8";
+    "u8"; "f32"; "f64"; "char"; "bool" ]
+  [@@ocamlformat "disable"]
+
+let is_primitive ty = List.mem primitives ty ~equal:String.equal
+
+let rec is_copy ty targs =
+  Configuration.copy_type ty = `Known true
+  || String.is_prefix ty ~prefix:"&"
+  || is_primitive ty
+  || (ty = "Option" || ty = "std::cell::Cell" || ty = "std::cell::RefCell")
+     && is_single_targ_copy targs
+
+and is_single_targ_copy targ =
+  (* Remove outer angle brackets *)
+  let targ = String.sub targ 1 (String.length targ - 2) in
+  is_ty_copy targ
+
+and is_ty_copy ty =
+  (* Split on first inner angle bracket (if present) *)
+  match String.lsplit2 ty ~on:'<' with
+  | None -> is_copy ty ""
+  | Some (ty, targs) -> is_copy ty ("<" ^ targs)
+
 (* A list of (<module>, <ty1>, <ty2>) tuples where we need to add indirection.
    In the definition of <module>::<ty1>, instances of <ty2> need to be boxed
    (for instances of mutual recursion where we would otherwise define types of
@@ -25,12 +50,37 @@ let add_indirection_between () =
     ("typing_defs_core", "Ty", "Ty_");
     ("aast_defs", "Hint", "Hint_");
   ]
+  @
+  match Configuration.mode () with
+  | Configuration.ByBox -> []
+  | Configuration.ByRef ->
+    [
+      ("aast", "Expr_", "Expr");
+      ("aast", "Expr_", "Afield");
+      ("aast", "Expr_", "AssertExpr");
+    ]
 
-let should_add_indirection ty =
-  List.mem
-    (add_indirection_between ())
-    (curr_module_name (), self (), ty)
-    ~equal:( = )
+let should_add_indirection ~seen_indirection ty targs =
+  match Configuration.mode () with
+  | Configuration.ByRef ->
+    if not (is_copy ty targs) then
+      true
+    else if seen_indirection then
+      false
+    else if self () = ty then
+      true
+    else
+      List.mem
+        (add_indirection_between ())
+        (curr_module_name (), self (), ty)
+        ~equal:( = )
+  | Configuration.ByBox ->
+    (not seen_indirection)
+    && ( self () = ty
+       || List.mem
+            (add_indirection_between ())
+            (curr_module_name (), self (), ty)
+            ~equal:( = ) )
 
 let add_rcoc_between = [("file_info", "Pos", "relative_path::RelativePath")]
 
@@ -40,22 +90,13 @@ let should_add_rcoc ty =
   | Configuration.ByBox ->
     List.mem add_rcoc_between (curr_module_name (), self (), ty) ~equal:( = )
 
-let should_add_reference ty =
-  let tyl =
-    match Configuration.mode () with
-    | Configuration.ByRef ->
-      ["Pos"; "pos::Pos"; "reason::Reason"; "FunParam"; "FunType"]
-    | Configuration.ByBox -> []
-  in
-  List.mem tyl ty ~equal:String.equal
-
 (* These types inherently add an indirection, so we don't need to box instances
    of recursion in their type arguments. *)
 let indirection_types = SSet.of_list ["Vec"]
 
 (* When oxidizing by-reference, do not add a lifetime parameter to these builtins. *)
 let owned_builtins =
-  SSet.of_list ["()"; "Option"; "isize"; "bool"; "f64"; "std::cell::RefCell"]
+  SSet.of_list (["Option"; "std::cell::RefCell"; "std::cell::Cell"] @ primitives)
 
 let is_owned_builtin = SSet.mem owned_builtins
 
@@ -92,7 +133,11 @@ let rec core_type ?(seen_indirection = false) ct =
       | Lident "bool" -> "bool"
       | Lident "float" -> "f64"
       | Lident "list" -> "Vec"
-      | Lident "ref" -> "std::cell::RefCell"
+      | Lident "ref" ->
+        if Configuration.(mode () = ByRef) then
+          "std::cell::Cell"
+        else
+          "std::cell::RefCell"
       | Ldot (Lident "Path", "t") ->
         if is_by_ref then
           "&'a std::path::Path"
@@ -128,15 +173,17 @@ let rec core_type ?(seen_indirection = false) ct =
       && not (Configuration.owned_type id)
     in
     let args = type_args ~seen_indirection ~add_lifetime args in
-    if should_add_reference id then
-      sprintf "&'a %s%s" id args
-    else if should_add_rcoc id then
+    if should_add_rcoc id then
       sprintf "ocamlrep::rc::RcOc<%s%s>" id args
     (* Direct or indirect recursion *)
-    else if (not seen_indirection) && (self () = id || should_add_indirection id)
-    then
+    else if should_add_indirection ~seen_indirection id args then
       match Configuration.mode () with
-      | Configuration.ByRef -> sprintf "&'a %s%s" id args
+      | Configuration.ByRef ->
+        if id = "Option" then
+          let args = String.sub args 1 (String.length args - 1) in
+          sprintf "Option<&'a %s" args
+        else
+          sprintf "&'a %s%s" id args
       | Configuration.ByBox -> sprintf "Box<%s%s>" id args
     else
       id ^ args

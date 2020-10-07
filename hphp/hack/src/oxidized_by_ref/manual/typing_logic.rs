@@ -33,8 +33,16 @@ pub enum SubtypeProp<'a> {
 
 impl arena_trait::TrivialDrop for SubtypeProp<'_> {}
 
-impl Default for SubtypeProp<'_> {
+const DEFAULT: SubtypeProp<'_> = SubtypeProp::Disj(&[]);
+
+impl SubtypeProp<'_> {
+    pub const fn default_ref() -> &'static Self {
+        &DEFAULT
+    }
+}
+
+impl Default for &SubtypeProp<'_> {
     fn default() -> Self {
-        SubtypeProp::Disj(&[])
+        SubtypeProp::default_ref()
     }
 }

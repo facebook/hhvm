@@ -22,20 +22,20 @@ pub fn parse_decls<'a>(filename: RelativePath, text: &'a [u8], arena: &'a Bump) 
     let decls = state.decls;
 
     let mut classes = AssocListMut::new_in(arena);
-    for (name, decl) in decls.classes {
-        classes.insert(*name, decl.clone());
+    for &(name, decl) in decls.classes {
+        classes.insert(name, decl);
     }
     let mut funs = AssocListMut::new_in(arena);
-    for (name, decl) in decls.funs {
-        funs.insert(*name, decl.clone());
+    for &(name, decl) in decls.funs {
+        funs.insert(name, decl);
     }
     let mut typedefs = AssocListMut::new_in(arena);
-    for (name, decl) in decls.typedefs {
-        typedefs.insert(*name, decl.clone());
+    for &(name, decl) in decls.typedefs {
+        typedefs.insert(name, decl);
     }
     let mut consts = AssocListMut::new_in(arena);
-    for (name, decl) in decls.consts {
-        consts.insert(*name, decl.clone());
+    for &(name, decl) in decls.consts {
+        consts.insert(name, decl);
     }
 
     Decls {

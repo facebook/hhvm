@@ -6,6 +6,4 @@
  *
  *)
 
-let start_typing_delegate _ env = env
-
-let should_do_remote _ _ ~file_count:_ _ = false
+let start_delegate_if_needed env _genv _file_count _errors = env

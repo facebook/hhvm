@@ -1411,18 +1411,12 @@ functor
       let (files_to_check, lazy_check_later) =
         CheckKind.get_defs_to_recheck files_to_parse fast to_recheck env
       in
-      let should_start_delegate =
-        ServerCheckUtils.should_do_remote
-          genv
-          env.tcopt
-          ~file_count:(Relative_path.Set.cardinal files_to_check)
-          errors
-      in
       let env =
-        if should_start_delegate then
-          start_typing_delegate genv env
-        else
+        start_delegate_if_needed
           env
+          genv
+          (Relative_path.Set.cardinal files_to_check)
+          errors
       in
       let files_to_check =
         remove_failed_parsing_set
@@ -1605,9 +1599,9 @@ functor
           env with
           typing_service =
             {
-              env.typing_service with
               delegate_state =
                 Typing_service_delegate.stop env.typing_service.delegate_state;
+              enabled = false;
             };
         }
       in

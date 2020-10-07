@@ -855,17 +855,7 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   let fnl = Relative_path.Map.keys fast in
   let env =
     if is_check_mode then
-      let should_start_delegate =
-        ServerCheckUtils.should_do_remote
-          genv
-          env.tcopt
-          ~file_count:(List.length fnl)
-          env.errorl
-      in
-      if should_start_delegate then
-        start_typing_delegate genv env
-      else
-        env
+      start_delegate_if_needed env genv (List.length fnl) env.errorl
     else
       env
   in

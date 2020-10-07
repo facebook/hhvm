@@ -1404,32 +1404,11 @@ void fix_inlined_call(Global& genv, IRInstruction* call, SSATmp* fp) {
   // Nothing to do if the frame hasn't changed.
   if (fp == call->src(1)) return;
 
-  auto const origFp = call->src(1);
-  auto const extra = call->extra<Call>();
-  auto const callOffset = extra->callOffset;
-  assertx(origFp->inst()->is(BeginInlining));
-
   // Adjust the fp and callOffset to reflect the caller frame for this call.
+  assertx(call->src(1)->inst()->is(BeginInlining));
   auto const sk = call->marker().fixupSk();
-  extra->callOffset = sk.offset() - sk.func()->base();
+  call->extra<Call>()->callOffset = sk.offset() - sk.func()->base();
   call->setSrc(1, fp);
-
-  // If we've already inserted a SyncReturnBC instruction there's no need
-  // to insert any more.
-  if (extra->hasInlFixup) return;
-  extra->hasInlFixup = true;
-
-  auto const catchBlock = call->taken();
-  auto it = catchBlock->skipHeader();
-
-  auto syncInst = genv.unit.gen(
-    SyncReturnBC,
-    it->bcctx(),
-    SyncReturnBCData{callOffset, extra->spOffset + extra->numInputs()},
-    call->src(0),
-    origFp
-  );
-  catchBlock->insert(it, syncInst);
 }
 
 struct FPState {

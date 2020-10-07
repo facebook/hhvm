@@ -798,19 +798,6 @@ struct StFrameMetaData : IRExtraData {
   bool asyncEagerReturn;
 };
 
-struct SyncReturnBCData : IRExtraData {
-  SyncReturnBCData(Offset callBCOff, IRSPRelOffset spOff)
-    : callBCOffset(callBCOff)
-    , spOffset(spOff)
-  {}
-  std::string show() const {
-    return folly::to<std::string>(callBCOffset, ",", spOffset.offset);
-  }
-
-  Offset callBCOffset;
-  IRSPRelOffset spOffset;
-};
-
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            folly::Optional<IRSPRelOffset> retSpOffset,
@@ -891,10 +878,6 @@ struct CallData : IRExtraData {
   bool dynamicCall;
   bool asyncEagerReturn;
   bool formingRegion;
-
-  // Set if the catch trace for this call has a SyncReturnBC instruction because
-  // an inline frame was elided around it.
-  bool hasInlFixup{false};
 };
 
 struct RetCtrlData : IRExtraData {
@@ -1690,7 +1673,6 @@ X(LdStkAddr,                    IRSPRelOffsetData);
 X(InlineCall,                   InlineCallData);
 X(StFrameMeta,                  StFrameMetaData);
 X(BeginInlining,                BeginInliningData);
-X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturn,                 FPRelOffsetData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);

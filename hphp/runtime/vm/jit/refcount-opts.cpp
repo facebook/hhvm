@@ -1380,8 +1380,7 @@ bool irrelevant_inst(const IRInstruction& inst) {
       if (inst.is(BeginInlining,
                   EndInlining,
                   InlineCall,
-                  InlineReturn,
-                  SyncReturnBC
+                  InlineReturn
                  )) {
         return true;
       }
@@ -2090,8 +2089,7 @@ void analyze_mem_effects(Env& env,
       // refcounts, so we don't need to reduce lower bounds.
       auto const may_decref = !inst.is(BeginInlining,
                                        EndInlining,
-                                       InlineReturn,
-                                       SyncReturnBC
+                                       InlineReturn
                                       );
       if (may_decref && x.stores != AEmpty) {
         observe_unbalanced_decrefs(env, state, add_node);

@@ -655,12 +655,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // the removal of its associated InlineCall.
     return PureInlineReturn { AFBasePtr, inst.src(0), inst.src(1) };
 
-  case SyncReturnBC: {
-    auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;
-    auto const arStack = actrec(inst.src(0), spOffset);
-    return may_load_store(AEmpty, arStack);
-  }
-
   case InterpOne:
     return interp_one_effects(inst);
   case InterpOneCF:

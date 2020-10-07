@@ -149,25 +149,6 @@ void cgEndInlining(IRLS& env, const IRInstruction* inst) {
   v << inlineend{};
 }
 
-void cgSyncReturnBC(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<SyncReturnBC>();
-  auto const coaf = extra->callBCOffset << ActRec::CallOffsetStart;
-  auto const spOffset = cellsToBytes(extra->spOffset.offset);
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const mask = (1 << ActRec::CallOffsetStart) - 1;
-
-  auto& v = vmain(env);
-  auto const oldCoaf = v.makeReg();
-  auto const newCoaf = v.makeReg();
-  auto const flags = v.makeReg();
-  v << loadl{sp[spOffset + AROFF(m_callOffAndFlags)], oldCoaf};
-  v << andli{mask, oldCoaf, flags, v.makeReg()};
-  v << orli{coaf, flags, newCoaf, v.makeReg()};
-  v << storel{newCoaf, sp[spOffset + AROFF(m_callOffAndFlags)]};
-  v << store{fp, sp[spOffset + AROFF(m_sfp)]};
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgConjure(IRLS& env, const IRInstruction* inst) {

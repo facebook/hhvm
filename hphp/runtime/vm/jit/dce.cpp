@@ -661,7 +661,6 @@ bool canDCE(IRInstruction* inst) {
   case FinishMemberOp:
   case BeginInlining:
   case EndInlining:
-  case SyncReturnBC:
   case SetOpTV:
   case OutlineSetOp:
   case ConjureUse:

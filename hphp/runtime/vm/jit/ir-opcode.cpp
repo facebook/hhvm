@@ -894,7 +894,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SubDbl:
   case SubInt:
   case SubIntO:
-  case SyncReturnBC:
   case Unreachable:
   case UnwindCheckSideExit:
   case VecFirst:

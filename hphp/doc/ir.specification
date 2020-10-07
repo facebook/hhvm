@@ -1593,11 +1593,6 @@ To string conversions:
   S3: number of passed arguments
   S4: call context
 
-| SyncReturnBC<spOffset,callBCOffset>, ND, S(StkPtr) S(FramePtr), NF
-
-  Stores callBCOffset into the frame at spOffset from S0 as the call bytecode
-  address and the frame S1 as the return frame.
-
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
 |   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),

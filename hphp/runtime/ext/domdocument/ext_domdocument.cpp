@@ -5452,8 +5452,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
     return;
   }
 
-  Array args;
-  /* Reverse order to pop values off ctxt stack */
+  Array args_vec = Array::CreateVec();
   for (int i = nargs - 2; i >= 0; i--) {
     Variant arg;
     obj = valuePop(ctxt);
@@ -5506,7 +5505,13 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
       arg = String((char *)xmlXPathCastToString(obj), CopyString);
     }
     xmlXPathFreeObject(obj);
-    args.prepend(arg);
+    args_vec.append(arg);
+  }
+
+  /* Reverse order to pop values off ctxt stack */
+  Array args;
+  for (auto i = args_vec.size(); i > 0; i--) {
+    args.append(args_vec.lookup(safe_cast<int64_t>(i - 1)));
   }
 
   obj = valuePop(ctxt);

@@ -471,12 +471,10 @@ public:
 #undef C
 
   /*
-   * Append or prepend an element, with semantics like set().
+   * Append an element, with semantics like set().
    */
   void append(TypedValue v);
   void append(const Variant& v);
-  void prepend(TypedValue v);
-  void prepend(const Variant& v);
 
   /*
    * Remove all elements.
@@ -484,10 +482,9 @@ public:
   void clear() { operator=(Create()); }
 
   /*
-   * Stack/queue-like functions.
+   * Stack-like function - the inverse of append().
    */
   Variant pop();
-  Variant dequeue();
 
 #undef FOR_EACH_KEY_TYPE
 

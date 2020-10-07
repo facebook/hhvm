@@ -1524,9 +1524,6 @@ inline Variant Array::operator[](const Variant& key) const {
 inline void Array::append(const Variant& v) {
   append(*v.asTypedValue());
 }
-inline void Array::prepend(const Variant& v) {
-  prepend(*v.asTypedValue());
-}
 
 ALWAYS_INLINE Variant uninit_null() {
   return Variant();

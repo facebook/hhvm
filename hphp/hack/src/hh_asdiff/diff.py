@@ -81,6 +81,6 @@ class UnifiedDiffRanker:
 
     def __iter__(self) -> Iterator[Entry]:
         # By induction, the heap holds (up to) `limit` smallest diffs
-        for e in sorted(self._heap, key=lambda e: (-e[0][0], e[0][1])):
+        for e in sorted(self._heap, key=lambda e: (-(e[0][0]), e[0][1])):
             (neg_diff_size, path), lines1, lines2 = e
             yield (-neg_diff_size, path), lines1, lines2
